@@ -423,7 +423,7 @@ CSS = '''
   .crn-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
     min-height:48px;margin-bottom:var(--s3)}
   .crn-brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:40px;
+    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:48px;
     background:#fff;border:var(--bd);border-radius:999px;padding:0 var(--s3);box-shadow:3px 3px 0 #111}
   .crn-install-wrap{text-align:right}
 
@@ -433,7 +433,7 @@ CSS = '''
     color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
     margin:0 0 var(--s2)}
   /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
-  .crn-head{display:flex;flex-direction:column;align-items:center;gap:var(--s1);margin-bottom:var(--s4)}
+  .crn-head{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:var(--s3)}
   .crn-head .crn-title{margin:0}
   .crn-title{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
     color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
@@ -443,14 +443,17 @@ CSS = '''
 
   .crn-status{--zc:#16a34a;--zbg:#dcfce7;--zink:#14532d;
     background:var(--zbg);color:var(--zink);border:4px solid #111;border-radius:18px;
-    padding:var(--s3) var(--s3) var(--s4);box-shadow:8px 8px 0 #111;
+    padding:var(--s2) var(--s3) var(--s3);box-shadow:8px 8px 0 #111;
     transition:background-color .4s,border-color .4s,color .4s}
-  .crn-gauge{width:100%;max-width:460px;display:block;margin:0 auto}
+  /* Telefon: merilnik, ikona in maskota so namenoma manjši -- status,
+     "posodobljeno", temperatura in sneg morajo biti vidni brez drsenja
+     (3-sekundni test iz UX audita, 24. 9. 2026). */
+  .crn-gauge{width:100%;max-width:290px;display:block;margin:0 auto}
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
   @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
   .crn-status-icon{display:flex;justify-content:center;margin:-4px 0 var(--s1)}
-  .crn-status-icon .crn-zicon{width:48px;height:48px}
-  .crn-status-title{font-size:32px;font-weight:800;line-height:1.1;letter-spacing:.01em;
+  .crn-status-icon .crn-zicon{width:36px;height:36px}
+  .crn-status-title{font-size:34px;font-weight:800;line-height:1.1;letter-spacing:.01em;
     text-transform:uppercase;margin:0}
   .crn-status-desc{font-size:16px;font-weight:600;margin:var(--s1) auto 0;max-width:34ch}
   .crn-status-index{display:inline-block;font-size:13px;font-weight:700;margin-top:var(--s2);
@@ -462,14 +465,15 @@ CSS = '''
   .crn-card-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);margin:0 0 var(--s1);display:flex;align-items:center;gap:6px}
   .crn-card-h svg{width:16px;height:16px;flex:0 0 auto}
-  .crn-big{font-size:36px;font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:0;
+  .crn-big{font-size:28px;font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:0;
     font-variant-numeric:tabular-nums}
   .crn-card-sub{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
   .crn-card-sub b{color:var(--ink2)}
+  .crn-card-h2{margin-top:var(--s2);padding-top:var(--s2);border-top:2px dashed #d6d0c2}
+  .crn-mid{font-size:20px;font-weight:800;margin:0;font-variant-numeric:tabular-nums}
   .crn-na{font-size:15px;font-weight:600;color:var(--muted)}
 
-  .crn-updated{display:inline-block;font-size:13px;font-weight:700;color:var(--ink2);margin:var(--s4) 0 0;
-    background:#fdf6e3;padding:2px var(--s1);border-radius:6px}
+  .crn-updated{font-size:13px;font-weight:700;margin:var(--s2) 0 0;opacity:.85}
   .crn-fresh{font-size:13px;font-weight:700;margin:var(--s1) 0 0}
   .crn-btn{font:inherit;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;
     align-items:center;justify-content:center;gap:var(--s1);min-height:48px;padding:0 var(--s4);
@@ -522,6 +526,7 @@ CSS = '''
   .crn-cam-fallback{position:absolute;inset:0;margin:0;display:flex;flex-direction:column;gap:var(--s1);
     align-items:center;justify-content:center;padding:var(--s3);text-align:center;color:#fff;font-size:15px;font-weight:600}
   .crn-cam-fallback a{color:#93c5fd}
+  .crn-cam-time{font-size:14px;font-weight:700;color:var(--ink);margin:var(--s2) 0 0}
   .crn-cam-meta{font-size:13px;color:var(--muted);margin:var(--s2) 0 0}
 
   /* Poročanje */
@@ -580,7 +585,7 @@ CSS = '''
   .crn-tip .crn-quote.crn-quote-rare p{color:#854d0e}
   .crn-quote-pop{animation:crnQuoteReroll .3s ease}
   @keyframes crnQuoteReroll{from{opacity:.3}to{opacity:1}}
-  .crn-icon{width:84px;height:auto;flex:0 0 auto;cursor:pointer}
+  .crn-icon{width:64px;height:auto;flex:0 0 auto;cursor:pointer}
   .crn-icon:hover{animation:crnWobble .5s ease}
   @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
   .crn-mascot-msg{display:inline-block;font-size:14px;font-weight:700;color:#111;background:#fef08a;
@@ -625,10 +630,11 @@ CSS = '''
     .crn-title{font-size:52px}
     .crn-icon{width:140px}
     .crn-gauge{max-width:560px}
+    .crn-status-icon .crn-zicon{width:48px;height:48px}
     .crn-status{padding:var(--s5) var(--s4)}
-    .crn-status-title{font-size:40px}
+    .crn-status-title{font-size:48px}
     .crn-status-icon .crn-zicon{width:64px;height:64px}
-    .crn-big{font-size:44px}
+    .crn-big{font-size:36px}
     .crn-panel{padding:var(--s4)}
     .crn-zones{grid-template-columns:repeat(4,1fr)}
   }
@@ -676,6 +682,37 @@ SHARE_JS_TEMPLATE = '''
   var API = "https://weatherireica1.filip-eremita.workers.dev";
   var CAM_URL = __CAM_URL_JSON__;
 
+  // Relativni čas ("pred 8 min") -- rabita ga "Posodobljeno" v statusni
+  // kartici in seznam zadnjih poročil. Absolutni čas ostane v title.
+  // Na vrhu IIFE (ne v bloku poročanja), ker je v "use strict" deklaracija
+  // funkcije znotraj if-bloka vidna samo v tem bloku.
+  function relCas(iso){
+    var s = (Date.now() - Date.parse(iso)) / 1000;
+    if (isNaN(s)) return "";
+    if (s < 60) return "pravkar";
+    var m = Math.round(s / 60);
+    if (m < 60) return "pred " + m + " min";
+    var h = Math.round(m / 60);
+    if (h < 24) return "pred " + h + " h";
+    var d = Math.round(h / 24);
+    return d === 1 ? "včeraj" : d === 2 ? "pred 2 dnevoma" : "pred " + d + " dnevi";
+  }
+
+  // "Posodobljeno pred X min" tik pod statusom -- uporabnik mora takoj
+  // vedeti, ali je ocena sveža. data-ts je čas izračuna (strežnik ob
+  // generiranju, JS ob uspešnem živem preračunu); besedilo se vsako minuto
+  // samo preračuna, brez omrežnega klica.
+  var updEl = document.getElementById("crn-updated");
+  function izpisiPosodobljeno(){
+    if (!updEl || !updEl.dataset.ts) return;
+    var rc = relCas(updEl.dataset.ts);
+    if (!rc) return;
+    updEl.textContent = "Posodobljeno " + rc + " · ocena iz vremenskega modela";
+    updEl.title = new Date(updEl.dataset.ts).toLocaleString("sl");
+  }
+  izpisiPosodobljeno();
+  setInterval(izpisiPosodobljeno, 60 * 1000);
+
   // Živa kamera s prelaza (glej opombo na vrhu generate_crnivec_page.py) --
   // neposreden hotlink, brez našega workerja. Prvi prikaz je iz statičnega
   // <img src> (deluje tudi brez JS), JS doda samo periodično osvežitev in
@@ -715,6 +752,13 @@ SHARE_JS_TEMPLATE = '''
       if (camFrame && camFrame.classList) {
         camFrame.classList.remove("is-loading");
         camFrame.classList.toggle("is-offline", !ok);
+      }
+      // Svežina slike: DRSI časa posnetka ne izpostavi (brez CORS/glav), zato
+      // pošteno "naložena", ne "posneta".
+      var camTime = document.getElementById("crn-cam-time");
+      if (camTime) {
+        camTime.hidden = !ok;
+        if (ok) camTime.textContent = "Slika naložena ob " + uraSl(new Date());
       }
     }
     camImg.addEventListener("error", function(){ camIzid(false); });
@@ -985,8 +1029,7 @@ SHARE_JS_TEMPLATE = '''
         'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"');
     }
 
-    var updEl = document.getElementById("crn-updated");
-    if (updEl) updEl.textContent = "Posodobljeno ob " + uraSl(new Date()) + " · ocena iz vremenskega modela";
+    if (updEl) { updEl.dataset.ts = new Date().toISOString(); izpisiPosodobljeno(); }
     var freshEl = document.getElementById("crn-fresh");
     if (freshEl) freshEl.hidden = true;
   }
@@ -1216,20 +1259,6 @@ SHARE_JS_TEMPLATE = '''
       repStatus.hidden = !msg;
       repStatus.textContent = msg || "";
       repStatus.classList.toggle("ok", !!ok);
-    }
-
-    // Relativni čas ("pred 8 min") -- dolg časovni žig v seznamu samo
-    // zamegli, kako sveže je poročilo, a ostane v title za radovedne.
-    function relCas(iso){
-      var s = (Date.now() - Date.parse(iso)) / 1000;
-      if (isNaN(s)) return "";
-      if (s < 60) return "pravkar";
-      var m = Math.round(s / 60);
-      if (m < 60) return "pred " + m + " min";
-      var h = Math.round(m / 60);
-      if (h < 24) return "pred " + h + " h";
-      var d = Math.round(h / 24);
-      return d === 1 ? "včeraj" : d === 2 ? "pred 2 dnevoma" : "pred " + d + " dnevi";
     }
 
     function renderFeed(porocila){
@@ -1841,6 +1870,8 @@ def build_body(data):
         <div class="crn-status-icon" id="crn-status-icon">{ZONE_ICONS[zone['id']]}</div>
         <p class="crn-status-title" id="crn-status-title">{st['status']}</p>
         <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
+        <p class="crn-updated" id="crn-updated" data-ts="{generated_at}">{updated_txt} · ocena iz vremenskega modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
       </div>
 
@@ -1854,16 +1885,14 @@ def build_body(data):
         </div>
         <div class="crn-card">
           <span class="crn-card-art">{CARD_ART['snow']}</span>
-          <p class="crn-card-h">{UI_ICONS['snow']}Sneg</p>
+          <p class="crn-card-h">{UI_ICONS['snow']}Snežna odeja</p>
           {snowpack_html}
-          <p class="crn-card-sub">snežna odeja (ocena)</p>
-          <p class="crn-card-sub">Napoved 24 h: <b id="crn-snow-new">{snow_new_txt}</b> snega ·
-          <b id="crn-precip">{precip_txt}</b> padavin</p>
+          <p class="crn-card-sub">ocena modela, ~900 m</p>
+          <p class="crn-card-h crn-card-h2">Nov sneg · napoved 24 h</p>
+          <p class="crn-mid" id="crn-snow-new">{snow_new_txt}</p>
+          <p class="crn-card-sub">padavine <b id="crn-precip">{precip_txt}</b></p>
         </div>
       </div>
-
-      <p class="crn-updated" id="crn-updated">{updated_txt} · ocena iz vremenskega modela</p>
-      <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
 
       <a class="crn-btn crn-btn-primary" href="#kamera">{UI_ICONS['cam']}Poglej kamero</a>
       </div>
@@ -1882,6 +1911,7 @@ def build_body(data):
           <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
           <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej na promet.si</a></p>
         </div>
+        <p class="crn-cam-time" id="crn-cam-time" hidden></p>
         <p class="crn-cam-meta">Poglej trenutno stanje prelaza. Vir: <a href="https://www.promet.si" target="_blank"
         rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
       </section>
@@ -1928,7 +1958,7 @@ def build_body(data):
             placeholder="Vzdevek za lestvico (neobvezno)" aria-label="Vzdevek">
           <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
             style="position:absolute;left:-9999px" aria-hidden="true">
-          <button type="button" id="crn-report-submit" class="crn-btn crn-btn-primary">Pošlji poročilo</button>
+          <button type="button" id="crn-report-submit" class="crn-btn">Pošlji poročilo</button>
         </div>
         <p id="crn-report-status" class="crn-status-msg" role="status" aria-live="polite" hidden></p>
         <div id="crn-report-badge" class="crn-badge" hidden></div>
