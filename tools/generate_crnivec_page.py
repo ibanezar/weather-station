@@ -9,13 +9,13 @@ Ta stran to zafrkava, NAMENOMA ločeno od resne /zima/prevoznost-prelazov/
 (ki ostane edina resna referenca — glej cross-link na dnu obeh strani).
 
 Od prenove 24. 9. 2026 je stran HITER MOBILNI DASHBOARD za stanje prelaza
-(prej stripovski plakat z merilnikom): v prvem zaslonu status ceste (STATUS),
+(prej plakat z merilnikom na vrhu): v prvem zaslonu status ceste (STATUS),
 temperatura, sneg, čas posodobitve in gumb do kamere; nato kamera | poročanje,
 šele potem humor, glasovanje, lestvica in (v accordionih) razlaga indeksa in
 značka. Šaljiva nalepka cone ostane kot "Meteorec indeks: …" pod glavnim
-statusom, merilnik pa samo na deljeni sliki in OG kartici. Svetla paleta
-namesto temne Meteorec teme; glavo/nogo/spodnji meni skrije isti CSS-trik kot
-igra/igra.css. Brez zunanje pisave: obstoječi samostoječi Inter.
+statusom, nad njim pa merilnik. Stripovski slog (debel obris, zamaknjena
+senca, pikčasto ozadje) namesto temne Meteorec teme; glavo/nogo/spodnji
+meni skrije isti CSS-trik kot igra/igra.css. Brez zunanje pisave: obstoječi samostoječi Inter.
 
 Kazalec na merilniku JE resničen (iz istega passes["crnivec"]["weather"], ki
 ga računa tools/winter_engine.py — isti lapse-rate/snow_fraction kot na
@@ -230,16 +230,18 @@ def arc_point(cx, cy, r, deg):
     return cx + r * math.cos(rad), cy - r * math.sin(rad)
 
 
-def gauge_svg(zone):
-    """Merilnik za sliko "Deli kot sliko" (glej SHARE_JS_TEMPLATE) --
-    samostojen SVG z eksplicitno width/height (canvas Image potrebuje znano
-    velikost) in kazalcem, zapečenim kot transform atribut.
+def gauge_svg(zone, static=False):
+    """Merilnik "Črnivski indeks". static=True: samostojna različica za
+    "Deli kot sliko" (glej SHARE_JS_TEMPLATE) -- eksplicitna width/height
+    (canvas Image potrebuje znano velikost) in kazalec zapečen kot SVG
+    transform atribut namesto CSS --rot spremenljivke (canvas slika nima
+    dostopa do CSS strani/animacije).
 
-    Od prenove 24. 9. 2026 merilnik NA STRANI ni več prikazan: junak strani je
-    statusna kartica (glej STATUS spodaj), ne pol kroga z nalepkami. Ostal je
-    le na deljeni sliki in na OG kartici, kjer je prepoznaven znak strani.
-    Klientski živi preračun zasuka kazalec v tej kopiji z regexom na
-    edinem rotate() -- ne dodajaj drugega transform="rotate(…)" v SVG."""
+    Na strani stoji na vrhu statusne kartice, nad glavnim statusom (prenova
+    24. 9. 2026: merilnik je bil za en dan odstranjen in vrnjen na Filipovo
+    željo -- je prepoznaven znak strani). Klientski živi preračun v statični
+    kopiji zasuka kazalec z regexom na edinem rotate() -- ne dodajaj drugega
+    transform="rotate(…)" v SVG."""
     cx, cy, r = 190, 175, 105
     bounds = [180, 135, 90, 45, 0]
     sw = 30  # stroke-width loka -- debelejši pas kot prej (26) za bolj čvrst videz
@@ -279,7 +281,14 @@ def gauge_svg(zone):
                      f'<circle cx="{cx}" cy="{cy}" r="14" fill="#171717"/>'
                      f'<circle cx="{cx}" cy="{cy}" r="14" fill="none" stroke="#fff" stroke-width="3"/>'
                      f'<circle cx="{cx}" cy="{cy}" r="4.5" fill="#fff"/>')
-    needle = f'<g filter="url(#crnGaugeShadow)" transform="rotate({rot:.1f} {cx} {cy})">{needle_shape}</g>'
+    if static:
+        needle = f'<g filter="url(#crnGaugeShadow)" transform="rotate({rot:.1f} {cx} {cy})">{needle_shape}</g>'
+    else:
+        # Brez transform="rotate(...)" atributa -- CSS animacija (crnNeedleSettle)
+        # rotacijo prevzame prek --rot spremenljivke, XML atribut bi jo tiho
+        # prepisal/mešal z njo (SVG CSS transform ima prednost pred atributom).
+        needle = (f'<g class="crn-needle" filter="url(#crnGaugeShadow)" '
+                  f'style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">{needle_shape}</g>')
 
     # text-anchor="middle" centrira napis simetrično okoli sidrne točke -- za
     # skrajni levi/desni coni (mid blizu 180°/0°, torej vodoravno ob loku) to
@@ -300,7 +309,7 @@ def gauge_svg(zone):
     # viewBox je širši od izrisa (-20..410 namesto 0..380): skrajni levi/desni
     # napis (text-anchor end/start, glej zgoraj) raste samo stran od loka in
     # pri preozkem viewBoxu se obreže čez rob (izmerjeno z getBBox()).
-    size_attrs = ' width="430" height="230"'
+    size_attrs = ' width="430" height="230"' if static else ''
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 430 230"{size_attrs} '
             f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
             + defs + arc + "".join(labels) + needle + "</svg>")
@@ -309,7 +318,7 @@ def gauge_svg(zone):
 def icon_svg_static(zone_id):
     """ZONE_ICONS ima viewBox brez width/height/xmlns (velikost pride iz CSS
     .crn-zicon, xmlns je za inline uporabo odveč) — za canvas Image
-    potrebujemo oboje, isto načelo kot pri gauge_svg()."""
+    potrebujemo oboje, isto načelo kot pri gauge_svg(static=True)."""
     svg = ZONE_ICONS[zone_id].replace('viewBox="0 0 60 60"',
                                        'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"', 1)
     return svg
@@ -351,20 +360,23 @@ ZONE_ICONS = {
 CSS = '''
 <style>
   /* Prenova 24. 9. 2026: stran je hiter mobilni DASHBOARD za stanje prelaza,
-     ne stripovski plakat. Hierarhija: status ceste > kamera > meritve > vse
+     oblečen v prvotni stripovski slog (debel črn obris, zamaknjena senca,
+     pikčasto ozadje, rdeč naslov z obrisom). Hierarhija: status ceste > kamera > meritve > vse
      ostalo (humor, lestvica, značka, drobni tisk). Mobile-first: osnovna
      pravila so za telefon, @media (min-width:…) jih samo razširijo.
      Razmiki so iz lestvice 8/12/16/24/32/48/64 px (--s1…--s7), zaobljenost
-     12–16 px, tanek rob in komaj opazna senca. Statusna kartica je edina
+     12–18 px. Statusna kartica je edina
      vizualno "glasna" -- njeno barvo nosi data-zone (glej STATUS spodaj),
      barva pa NIKOLI ni edini nosilec pomena (vedno tudi besedilo). */
   .site-head,#bg,.site-foot,.app-bottomnav{display:none!important}
   /* Brez site-foot/app-bottomnav ni nič, kar bi zapolnilo sitewide
      body{min-height:100vh} (style.css) -- telo naj se skrči na vsebino. */
-  body{background:#f6f4ef!important;background-image:none!important;min-height:0!important}
+  body{background:#fdf6e3!important;background-image:radial-gradient(#111 1px,transparent 1.4px)!important;
+    background-size:16px 16px!important;background-position:-4px -4px!important;min-height:0!important}
   .wrap{max-width:1140px}
   .crn{--s1:8px;--s2:12px;--s3:16px;--s4:24px;--s5:32px;--s6:48px;--s7:64px;
-    --ink:#111827;--ink2:#374151;--muted:#4b5563;--line:#e5e1d8;--card:#fff;--link:#1d4ed8;
+    --ink:#111;--ink2:#374151;--muted:#4b5563;--line:#111;--card:#fff;--link:#1d4ed8;
+    --bd:3px solid #111;--sh:5px 5px 0 #111;
     font-family:Inter,system-ui,sans-serif;color:var(--ink);font-size:16px;line-height:1.5;
     padding:var(--s3) 0 var(--s6)}
   .crn a{color:var(--link)}
@@ -374,32 +386,38 @@ CSS = '''
   .crn-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
     min-height:48px;margin-bottom:var(--s3)}
   .crn-brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:48px}
+    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:40px;
+    background:#fff;border:var(--bd);border-radius:999px;padding:0 var(--s3);box-shadow:3px 3px 0 #111}
   .crn-install-wrap{text-align:right}
 
   /* ── HERO ───────────────────────────────────────────────────── */
   .crn-hero{max-width:760px;margin:0 auto var(--s5);text-align:center}
-  .crn-eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--muted);margin:0 0 var(--s1)}
-  .crn-title{font-size:28px;font-weight:800;line-height:1.15;letter-spacing:-.01em;margin:0 0 var(--s3)}
-  .crn-strike{font-size:15px;font-weight:700;color:#7f1d1d;background:#fee2e2;border:1px solid #fca5a5;
-    border-radius:12px;padding:var(--s2) var(--s3);margin:0 0 var(--s3);text-align:left}
+  .crn-eyebrow{display:inline-block;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
+    margin:0 0 var(--s2)}
+  .crn-title{font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+    color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
+    text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
+  .crn-strike{font-size:15px;font-weight:800;color:#fff;background:#dc2626;border:var(--bd);
+    box-shadow:var(--sh);border-radius:12px;padding:var(--s2) var(--s3);margin:0 0 var(--s3);text-align:left}
 
   .crn-status{--zc:#16a34a;--zbg:#dcfce7;--zink:#14532d;
-    background:var(--zbg);color:var(--zink);border:2px solid var(--zc);border-radius:16px;
-    padding:var(--s4) var(--s3);box-shadow:0 1px 2px rgba(17,24,39,.06);
+    background:var(--zbg);color:var(--zink);border:4px solid #111;border-radius:18px;
+    padding:var(--s3) var(--s3) var(--s4);box-shadow:8px 8px 0 #111;
     transition:background-color .4s,border-color .4s,color .4s}
-  .crn-status-icon{display:flex;justify-content:center;margin-bottom:var(--s1)}
-  .crn-status-icon .crn-zicon{width:56px;height:56px}
+  .crn-gauge{width:100%;max-width:460px;display:block;margin:0 auto}
+  .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
+  @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
+  .crn-status-icon{display:flex;justify-content:center;margin:-4px 0 var(--s1)}
+  .crn-status-icon .crn-zicon{width:48px;height:48px}
   .crn-status-title{font-size:32px;font-weight:800;line-height:1.1;letter-spacing:.01em;
     text-transform:uppercase;margin:0}
   .crn-status-desc{font-size:16px;font-weight:600;margin:var(--s1) auto 0;max-width:34ch}
   .crn-status-index{display:inline-block;font-size:13px;font-weight:700;margin-top:var(--s2);
-    background:rgba(255,255,255,.7);border:1px solid var(--zc);border-radius:999px;padding:4px var(--s2)}
+    background:#fff;color:var(--ink);border:2px solid #111;border-radius:999px;padding:4px var(--s2)}
 
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
-  .crn-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-    box-shadow:0 1px 2px rgba(17,24,39,.05);padding:var(--s3)}
+  .crn-card{background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
   .crn-card-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);margin:0 0 var(--s1);display:flex;align-items:center;gap:6px}
   .crn-card-h svg{width:16px;height:16px;flex:0 0 auto}
@@ -409,25 +427,26 @@ CSS = '''
   .crn-card-sub b{color:var(--ink2)}
   .crn-na{font-size:15px;font-weight:600;color:var(--muted)}
 
-  .crn-updated{font-size:13px;font-weight:600;color:var(--muted);margin:var(--s3) 0 0}
+  .crn-updated{display:inline-block;font-size:13px;font-weight:700;color:var(--ink2);margin:var(--s4) 0 0;
+    background:#fdf6e3;padding:2px var(--s1);border-radius:6px}
   .crn-fresh{font-size:13px;font-weight:700;margin:var(--s1) 0 0}
   .crn-btn{font:inherit;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;
     align-items:center;justify-content:center;gap:var(--s1);min-height:48px;padding:0 var(--s4);
-    border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)!important;
-    text-decoration:none;transition:background-color .15s,border-color .15s,transform .1s}
-  .crn-btn:hover{border-color:#bdb6a6}
-  .crn-btn:active{transform:translateY(1px)}
+    border-radius:999px;border:var(--bd);background:var(--card);color:var(--ink)!important;
+    box-shadow:4px 4px 0 #111;text-decoration:none;transition:background-color .15s,transform .1s}
+  .crn-btn:hover{background:#fef9c3}
+  .crn-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
   .crn-btn:disabled{opacity:.6;cursor:default}
   .crn-btn:focus-visible,.crn-zbtn:focus-visible,.crn summary:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
-  .crn-btn-primary{background:var(--ink);border-color:var(--ink);color:#fff!important;
+  .crn-btn-primary{background:#dc2626;color:#fff!important;
     text-transform:uppercase;letter-spacing:.04em;width:100%;max-width:420px;margin-top:var(--s3)}
-  .crn-btn-primary:hover{background:#000;border-color:#000}
+  .crn-btn-primary:hover{background:#b91c1c}
   .crn-btn svg{width:20px;height:20px}
 
   /* ── Sekcije pod herojem ────────────────────────────────────── */
   .crn-grid{display:grid;grid-template-columns:1fr;gap:var(--s4)}
-  .crn-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
-    box-shadow:0 1px 2px rgba(17,24,39,.05);padding:var(--s4) var(--s3)}
+  .crn-panel{background:var(--card);border:4px solid #111;border-radius:18px;
+    box-shadow:8px 8px 0 #111;padding:var(--s4) var(--s3)}
   .crn-h2{font-size:20px;font-weight:800;line-height:1.25;margin:0}
   .crn-lead{font-size:15px;color:var(--muted);margin:4px 0 var(--s3)}
   .crn-h3{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
@@ -435,7 +454,7 @@ CSS = '''
   .crn-stack{display:flex;flex-direction:column;gap:var(--s4);margin-top:var(--s4)}
 
   /* Kamera */
-  .crn-cam-frame{position:relative;border-radius:12px;overflow:hidden;background:#1f2937;
+  .crn-cam-frame{position:relative;border-radius:12px;overflow:hidden;background:#1f2937;border:var(--bd);
     aspect-ratio:4/3;margin-top:var(--s3)}
   .crn-cam-frame img{display:block;width:100%;height:100%;object-fit:cover}
   .crn-cam-badge{position:absolute;top:var(--s2);left:var(--s2);display:inline-flex;align-items:center;gap:6px;
@@ -461,19 +480,20 @@ CSS = '''
   .crn-zones{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1)}
   .crn-zbtn{--zc:#16a34a;--zbg:#dcfce7;font:inherit;font-size:14px;font-weight:800;letter-spacing:.03em;
     text-transform:uppercase;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:var(--s1);
-    padding:var(--s1) var(--s2);background:var(--card);color:var(--ink);border:1px solid var(--line);
-    border-left:6px solid var(--zc);border-radius:12px;text-align:left;transition:background-color .15s}
+    padding:var(--s1) var(--s2);background:var(--card);color:var(--ink);border:var(--bd);
+    border-left:8px solid var(--zc);border-radius:12px;box-shadow:3px 3px 0 #111;text-align:left;
+    transition:background-color .15s}
   .crn-zbtn:hover{background:#faf9f6}
-  .crn-zbtn.sel{background:var(--zbg);border-color:var(--zc)}
+  .crn-zbtn.sel{background:var(--zbg);border-left-color:var(--zc)}
   .crn-zbtn:disabled{cursor:default;opacity:.7}
   .crn-zbtn .crn-zicon{width:24px;height:24px;flex:0 0 auto}
   .crn-form{margin-top:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
-  .crn-input{width:100%;box-sizing:border-box;border:1px solid #cfc8b8;border-radius:12px;background:#fff;
+  .crn-input{width:100%;box-sizing:border-box;border:var(--bd);border-radius:12px;background:#fff;
     padding:var(--s2);font:inherit;font-size:16px;color:var(--ink)}
   textarea.crn-input{resize:vertical;min-height:72px}
   .crn-status-msg{font-size:15px;font-weight:600;color:var(--ink2);margin:var(--s2) 0 0}
   .crn-status-msg.ok{color:#166534}
-  .crn-badge{margin-top:var(--s3);background:#fefce8;border:1px solid #fde68a;border-radius:12px;
+  .crn-badge{margin-top:var(--s3);background:#fef08a;border:var(--bd);box-shadow:var(--sh);border-radius:12px;
     padding:var(--s3);text-align:center}
   .crn-badge-title{font-weight:800;font-size:17px;margin:0 0 4px}
   .crn-badge-desc{font-size:14px;color:var(--ink2);margin:0}
@@ -500,21 +520,23 @@ CSS = '''
   .crn-vote-q{font-size:15px;font-weight:700;margin:0;flex:1 1 220px}
   .crn-vote-btns{display:flex;gap:var(--s1)}
   .crn-vote-btns .crn-btn{padding:0 var(--s3);font-size:14px}
-  .crn-vote-bar{height:8px;border-radius:999px;overflow:hidden;background:#fecaca;margin-top:var(--s2)}
+  .crn-vote-bar{height:14px;border:2px solid #111;border-radius:999px;overflow:hidden;background:#fecaca;margin-top:var(--s2)}
   .crn-vote-bar span{display:block;height:100%;width:50%;background:#16a34a;transition:width .5s ease}
   .crn-vote-count{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
 
-  .crn-tip{position:relative;background:#fefce8;border:1px solid #fde68a;border-radius:16px;
-    padding:var(--s4) var(--s3)}
-  .crn-tip-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#854d0e;
+  .crn-tip{position:relative;background:#fef08a;border:4px solid #111;border-radius:18px;
+    box-shadow:8px 8px 0 #111;padding:var(--s4) var(--s3);transform:rotate(-.3deg)}
+  .crn-tip-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#111;
     margin:0 0 var(--s1);padding-right:56px}
-  .crn-tip .crn-quote p{font-size:17px;font-weight:600;line-height:1.45;margin:0;padding-right:40px}
+  .crn-tip .crn-quote p{font-size:17px;font-weight:700;line-height:1.45;margin:0;padding-right:40px}
   .crn-tip .crn-quote.crn-quote-rare p{color:#854d0e}
   .crn-quote-pop{animation:crnQuoteReroll .3s ease}
   @keyframes crnQuoteReroll{from{opacity:.3}to{opacity:1}}
-  .crn-icon{position:absolute;top:var(--s2);right:var(--s2);width:48px;height:auto;cursor:pointer}
-  .crn-mascot-msg{font-size:14px;font-weight:600;color:#854d0e;margin:var(--s1) 0 0}
-  .crn-visits{font-size:13px;color:#854d0e;margin:var(--s1) 0 0}
+  .crn-icon{position:absolute;top:var(--s2);right:var(--s2);width:56px;height:auto;cursor:pointer}
+  .crn-icon:hover{animation:crnWobble .5s ease}
+  @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+  .crn-mascot-msg{font-size:14px;font-weight:700;color:#111;margin:var(--s1) 0 0}
+  .crn-visits{font-size:13px;color:#374151;margin:var(--s1) 0 0}
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
   .crn-share-status{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
@@ -530,7 +552,7 @@ CSS = '''
   .crn-accuracy-note{font-size:14px;color:var(--muted);margin:4px 0 0}
 
   /* Accordioni (razlaga indeksa, značka) */
-  .crn-acc{background:var(--card);border:1px solid var(--line);border-radius:16px}
+  .crn-acc{background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh)}
   .crn-acc summary{cursor:pointer;list-style:none;min-height:48px;display:flex;align-items:center;
     gap:var(--s1);padding:0 var(--s3);font-weight:700;font-size:15px}
   .crn-acc summary::-webkit-details-marker{display:none}
@@ -544,14 +566,15 @@ CSS = '''
     padding:var(--s1) var(--s2);font-family:ui-monospace,Consolas,monospace;font-size:12px;
     overflow-x:auto;white-space:nowrap;color:var(--ink)}
 
-  .crn-official{font-size:14px;color:var(--ink2);border-top:1px solid var(--line);
-    padding-top:var(--s3);margin-top:var(--s5)}
+  .crn-official{font-size:14px;color:var(--ink2);background:#fdf6e3;border-top:2px dotted #111;
+    padding:var(--s3) var(--s1) 0;margin-top:var(--s5)}
   .crn-official p{margin:0 0 var(--s1)}
   .crn-back{margin-top:var(--s3)}
 
   /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
-    .crn-title{font-size:36px}
+    .crn-title{font-size:40px}
+    .crn-gauge{max-width:560px}
     .crn-status{padding:var(--s5) var(--s4)}
     .crn-status-title{font-size:40px}
     .crn-status-icon .crn-zicon{width:64px;height:64px}
@@ -561,7 +584,7 @@ CSS = '''
   }
   @media (min-width:1024px){
     .crn{padding-top:var(--s4)}
-    .crn-title{font-size:44px}
+    .crn-title{font-size:48px}
     /* Po heroju: kamera (široka) | poročanje. Poročilni stolpec je ožji,
        zato gumbi tam ostanejo 2 × 2. */
     .crn-grid{grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
@@ -570,7 +593,8 @@ CSS = '''
     .crn-lower .crn-stack{margin-top:0}
   }
   @media (prefers-reduced-motion:reduce){
-    .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop{animation:none}
+    .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop,.crn-icon:hover{animation:none}
+    .crn-needle{animation:none;transform:rotate(var(--rot))}
     .crn-status,.crn-btn,.crn-vote-bar span{transition:none}
   }
 </style>
@@ -872,10 +896,19 @@ SHARE_JS_TEMPLATE = '''
     if (idx) idx.textContent = "Meteorec indeks: " + zone.label;
     if (iconWrap) iconWrap.innerHTML = zone.icon;
 
+    // Kazalec: iz CSS animacije (prvi izris) na neposreden SVG transform
+    // atribut -- isti mehanizem kot static=True veja gauge_svg().
+    var needle = document.querySelector(".crn-status .crn-needle");
+    var gaugeSvg = document.querySelector(".crn-status .crn-gauge");
+    if (needle) {
+      needle.removeAttribute("style");
+      needle.setAttribute("transform", "rotate(" + (90 - zone.mid).toFixed(1) + " 190 175)");
+    }
+    if (gaugeSvg) gaugeSvg.setAttribute("aria-label", "Črnivski indeks: " + zone.label);
+
     // "Deli kot sliko" naj deli TRENUTNO (živo) stanje, ne tisto, spečeno ob
-    // generiranju strani. Merilnik na strani ni več prikazan (glej opombo pri
-    // gauge_svg), zato se kazalec v statični SVG kopiji zasuka neposredno --
-    // share.gauge ima en sam rotate(), tisti na kazalcu.
+    // generiranju strani. Kazalec v statični SVG kopiji se zasuka
+    // neposredno -- share.gauge ima en sam rotate(), tisti na kazalcu.
     if (share) {
       share.verdict = zone.label;
       share.color = zone.color;
@@ -1664,7 +1697,7 @@ def build_body(data):
         "temp": temp_txt,
         "snow": snow_txt,
         "streak": f"suh niz v dolini: {streak_val}",
-        "gauge": gauge_svg(zone),
+        "gauge": gauge_svg(zone, static=True),
         "icon": icon_svg_static(zone["id"]),
     }
     # Gumbi za poročanje uporabijo ISTE cone/ikone kot izračun (glej
@@ -1729,6 +1762,7 @@ def build_body(data):
 
       <div class="crn-status" id="crn-status" data-zone="{zone['id']}"
         style="--zc:{zone['color']};--zbg:{st['bg']};--zink:{st['ink']}" role="status" aria-live="polite">
+        {gauge_svg(zone)}
         <div class="crn-status-icon" id="crn-status-icon">{ZONE_ICONS[zone['id']]}</div>
         <p class="crn-status-title" id="crn-status-title">{st['status']}</p>
         <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
