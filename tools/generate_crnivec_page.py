@@ -576,28 +576,148 @@ SHARE_JS_TEMPLATE = '''
     } catch (_) {}
   }
 
-  // Podatki za merilnik pridejo iz enkrat-dnevnega crona (zima-forecast.yml),
-  // ki lahko (isto kot ostali GitHub cron na tej strani) zamuja za ure --
-  // brez tega bi stran tiho kazala včerajšnje stanje kot današnje. Isti
-  // pragovi kot povsod na strani (MeteoGasilec/Agrometeo): 🟡 26-50h, 🔴 nad
-  // 50h; pod tem ostane element skrit, staro vrednost pa nikoli ne skrijemo,
-  // samo označimo.
-  var freshEl = document.getElementById("crn-fresh");
-  if (freshEl && freshEl.dataset.generated) {
+  // Merilnik je zdaj ŽIV: namesto da samo prikaže enkrat-dnevni strežniški
+  // izračun (winter_engine.py, ki lahko -- kot ostali GitHub cron na strani
+  // -- zamuja za ure), klientski JS ob vsakem obisku pokliče Open-Meteo
+  // neposredno in temperaturo/sneg za prelaz preračuna sam. NAMERNA
+  // PODVOJITEV formule iz winter_engine.py (compute_pass_weather/
+  // snow_fraction) -- worker/klient ne more uvoziti Python kode, isto
+  // načelo kot lokalni FWI na /meteogasilec/intervencija/ (gasilec.js) ali
+  // _smerBesedilo/_ltgDecode drugod v repozitoriju. Če spremeniš
+  // LAPSE_RATE_C_PER_100M/SNOW_* konstante ali formulo v winter_engine.py,
+  // spremeni tudi tu.
+  var LIVE_LAPSE_RATE = 0.65, LIVE_STATION_ELEV = 366, LIVE_PASS_ELEV = 902;
+  var LIVE_SNOW_OFFSET = 250, LIVE_SNOW_HALFWIDTH = 100;
+  var ZONE_DATA = __ZONE_DATA_JSON__;
+
+  function numSlLive(x, d){
+    if (x == null || isNaN(x)) return "–";
+    return x.toFixed(d == null ? 1 : d).replace(".", ",");
+  }
+  function snowFractionLive(elevM, flM){
+    if (flM == null) return 0;
+    var eff = flM - LIVE_SNOW_OFFSET;
+    var lo = eff - LIVE_SNOW_HALFWIDTH, hi = eff + LIVE_SNOW_HALFWIDTH;
+    if (elevM <= lo) return 0;
+    if (elevM >= hi) return 1;
+    return (elevM - lo) / (hi - lo);
+  }
+  function pickZoneLive(tempC, snowCm){
+    if (snowCm >= 2) return ZONE_DATA[2];        // verige
+    if (tempC != null && tempC <= 0) return ZONE_DATA[3];  // spolzko
+    if (tempC != null && tempC > 5) return ZONE_DATA[0];   // sonce
+    return ZONE_DATA[1];                          // nekaj vmes
+  }
+
+  // Ob zamujenem cronu (glej opombo zgoraj) ali neuspelem živem klicu ostane
+  // strežniško spečena vrednost prikazana -- ne skrijemo je, samo označimo,
+  // isti prag kot MeteoGasilec/Agrometeo (🟡 26-50h, 🔴 nad 50h).
+  function pokaziZastarelostOpozorila(){
+    var freshEl = document.getElementById("crn-fresh");
+    if (!freshEl || !freshEl.dataset.generated) return;
     var genThen = new Date(freshEl.dataset.generated).getTime();
-    if (!isNaN(genThen)) {
-      var ageH = (Date.now() - genThen) / 3600000;
-      if (ageH >= 26) {
-        var rdece = ageH >= 50;
-        var gd = new Date(genThen);
-        var datum = gd.toLocaleDateString("sl", { day: "2-digit", month: "2-digit", year: "numeric" });
-        var ura = gd.toLocaleTimeString("sl", { hour: "2-digit", minute: "2-digit" });
-        freshEl.textContent = (rdece ? "🔴 " : "🟡 ") + "Podatki niso sveži — zadnja posodobitev " + datum + " ob " + ura + ".";
-        freshEl.style.color = rdece ? "#dc2626" : "#b45309";
-        freshEl.hidden = false;
+    if (isNaN(genThen)) return;
+    var ageH = (Date.now() - genThen) / 3600000;
+    if (ageH < 26) return;
+    var rdece = ageH >= 50;
+    var gd = new Date(genThen);
+    var datum = gd.toLocaleDateString("sl", { day: "2-digit", month: "2-digit", year: "numeric" });
+    var ura = gd.toLocaleTimeString("sl", { hour: "2-digit", minute: "2-digit" });
+    freshEl.textContent = (rdece ? "🔴 " : "🟡 ") + "Prikazujem zadnji uspešno izračunan podatek — " + datum + " ob " + ura + ".";
+    freshEl.style.color = rdece ? "#dc2626" : "#b45309";
+    freshEl.hidden = false;
+  }
+
+  function primeniZivoStanje(tempC, snowCm){
+    var zone = pickZoneLive(tempC, snowCm);
+    var tempTxt = (tempC == null ? "–" : numSlLive(tempC, 1)) + " °C";
+    var snowTxt = numSlLive(snowCm, 1) + " cm";
+
+    var tEl = document.querySelector("#crn-stat-temp .crn-stat-val");
+    var sEl = document.querySelector("#crn-stat-snow .crn-stat-val");
+    if (tEl) tEl.textContent = tempTxt;
+    if (sEl) sEl.textContent = snowTxt;
+
+    var verdict = document.getElementById("crn-verdict");
+    var label = document.getElementById("crn-verdict-label");
+    var desc = document.getElementById("crn-verdict-desc");
+    var iconWrap = document.getElementById("crn-verdict-icon");
+    var starPoly = document.querySelector("#crn-verdict .crn-verdict-star polygon");
+    if (verdict) verdict.style.color = zone.color;
+    if (label) label.textContent = zone.label;
+    if (desc) desc.textContent = zone.desc;
+    if (iconWrap) iconWrap.innerHTML = zone.icon;
+    if (starPoly) starPoly.setAttribute("fill", zone.color);
+
+    // Kazalec: preklopimo iz CSS animacije (ki jo je ob prvem izrisu že
+    // pognala) na neposreden SVG transform atribut -- isti mehanizem kot
+    // static=True veja gauge_svg() v generate_crnivec_page.py, ker mora biti
+    // samozadosten tudi kasneje za "Deli kot sliko" spodaj.
+    var needle = document.querySelector(".crn-needle");
+    var gaugeSvg = document.querySelector(".crn-gauge");
+    if (needle) {
+      var rot = 90 - zone.mid;
+      needle.removeAttribute("style");
+      needle.setAttribute("transform", "rotate(" + rot.toFixed(1) + " 190 175)");
+    }
+    if (gaugeSvg) gaugeSvg.setAttribute("aria-label", "Črnivski indeks: " + zone.label);
+
+    // "Deli kot sliko" naj deli TRENUTNO (živo) stanje, ne tisto, spečeno ob
+    // generiranju strani.
+    if (share) {
+      share.verdict = zone.label;
+      share.color = zone.color;
+      share.temp = tempTxt;
+      share.snow = snowTxt + " snega v 24 h";
+      if (gaugeSvg) {
+        var gClone = gaugeSvg.cloneNode(true);
+        gClone.setAttribute("width", "430");
+        gClone.setAttribute("height", "230");
+        share.gauge = new XMLSerializer().serializeToString(gClone);
+      }
+      var iconSvgLive = iconWrap && iconWrap.querySelector("svg");
+      if (iconSvgLive) {
+        var iClone = iconSvgLive.cloneNode(true);
+        iClone.setAttribute("width", "60");
+        iClone.setAttribute("height", "60");
+        share.icon = new XMLSerializer().serializeToString(iClone);
       }
     }
+
+    var freshEl = document.getElementById("crn-fresh");
+    if (freshEl) {
+      freshEl.textContent = "🟢 Živi podatki — izračunano zdaj iz Open-Meteo.";
+      freshEl.style.color = "#15803d";
+      freshEl.hidden = false;
+    }
   }
+
+  function osveziZivoVreme(){
+    if (!window.fetch) { pokaziZastarelostOpozorila(); return; }
+    var url = "https://api.open-meteo.com/v1/forecast?latitude=46.325779&longitude=14.921137"
+      + "&hourly=temperature_2m,precipitation,freezing_level_height&timezone=Europe%2FLjubljana&forecast_days=2";
+    fetch(url).then(function(r){ return r.json(); }).then(function(d){
+      var times = (d.hourly && d.hourly.time) || [];
+      var temps = (d.hourly && d.hourly.temperature_2m) || [];
+      if (!times.length || !temps.length) { pokaziZastarelostOpozorila(); return; }
+      var t0 = Date.parse(times[0] + ":00Z");
+      var nowShifted = Date.now() + (d.utc_offset_seconds || 0) * 1000;
+      var idx = Math.max(0, Math.min(Math.round((nowShifted - t0) / 3600000), times.length - 1));
+      var tNow = temps[idx];
+      if (tNow == null) { pokaziZastarelostOpozorila(); return; }
+      var tempC = tNow - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100;
+
+      var precip = d.hourly.precipitation || [];
+      var fl = d.hourly.freezing_level_height || [];
+      var snowCm = 0;
+      for (var i = idx; i < Math.min(idx + 24, times.length); i++) {
+        snowCm += (precip[i] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[i]);
+      }
+      primeniZivoStanje(tempC, Math.round(snowCm * 10) / 10);
+    }).catch(function(){ pokaziZastarelostOpozorila(); });
+  }
+  osveziZivoVreme();
+  setInterval(osveziZivoVreme, 5 * 60 * 1000);
 
   var rerollBtn = document.getElementById("crn-reroll");
   var quoteP = document.querySelector(".crn-quote p");
@@ -1275,15 +1395,27 @@ def build_body(data):
         for z in ZONES
     )
 
+    # Klientski živi preračun (glej __ZONE_DATA_JSON__ v SHARE_JS_TEMPLATE)
+    # rabi isti ZONES podatek + ikone -- v istem vrstnem redu kot pick_zone()
+    # vrača (sonce/nekaj/verige/spolzko), da JS lahko indeksira ZONE_DATA[0..3]
+    # brez iskanja po id-ju.
+    zone_data = [
+        {"id": z["id"], "label": z["label"], "desc": z["desc"], "color": z["color"],
+         "mid": z["mid"], "icon": ZONE_ICONS[z["id"]]}
+        for z in ZONES
+    ]
+
     quotes_json = json.dumps(QUOTES, ensure_ascii=False).replace("</", "<\\/")
     rare_quote_json = json.dumps(RARE_QUOTE, ensure_ascii=False).replace("</", "<\\/")
     share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
     cam_url_json = json.dumps(CAM_URL, ensure_ascii=False).replace("</", "<\\/")
+    zone_data_json = json.dumps(zone_data, ensure_ascii=False).replace("</", "<\\/")
     share_js = (SHARE_JS_TEMPLATE
                 .replace("__QUOTES_JSON__", quotes_json)
                 .replace("__RARE_QUOTE_JSON__", rare_quote_json)
                 .replace("__SHARE_JSON__", share_json)
                 .replace("__CAM_URL_JSON__", cam_url_json)
+                .replace("__ZONE_DATA_JSON__", zone_data_json)
                 .replace("__TODAY_ISO__", today_iso))
 
     body = f'''{CSS}
@@ -1304,12 +1436,12 @@ def build_body(data):
 
     <div class="crn-panel tilt">
       {gauge_svg(zone)}
-      <div class="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}{ZONE_ICONS[zone['id']]}<span>{zone['label']}</span>
-      <p class="crn-verdict-desc">{zone['desc']}</p></div>
+      <div class="crn-verdict" id="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}<div id="crn-verdict-icon" style="display:contents">{ZONE_ICONS[zone['id']]}</div><span id="crn-verdict-label">{zone['label']}</span>
+      <p class="crn-verdict-desc" id="crn-verdict-desc">{zone['desc']}</p></div>
       <div class="crn-stats">
-        <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">🌡️</span>
+        <div class="crn-stat" id="crn-stat-temp"><span class="crn-stat-emoji" aria-hidden="true">🌡️</span>
           <span class="crn-stat-val">{temp_txt}</span><span class="crn-stat-lbl">na prelazu</span></div>
-        <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">❄️</span>
+        <div class="crn-stat" id="crn-stat-snow"><span class="crn-stat-emoji" aria-hidden="true">❄️</span>
           <span class="crn-stat-val">{snow_val}</span><span class="crn-stat-lbl">snega v 24 h</span></div>
         <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">🌂</span>
           <span class="crn-stat-val">{streak_val}</span><span class="crn-stat-lbl">suh niz v dolini</span></div>
