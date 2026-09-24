@@ -444,7 +444,14 @@ CSS = '''
   .crn-btn svg{width:20px;height:20px}
 
   /* ── Sekcije pod herojem ────────────────────────────────────── */
-  .crn-grid{display:grid;grid-template-columns:1fr;gap:var(--s4)}
+  /* Telefon: stolpca ne obstajata (display:contents), vrstni red je iz
+     .crn-o1…7 -- kamera, poročanje, nasvet, glasovanje, poštenost, lestvica,
+     razlaga indeksa + značka. */
+  .crn-cols{display:flex;flex-direction:column;gap:var(--s4)}
+  .crn-col{display:contents}
+  .crn-o1{order:1}.crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
+  .crn-o7{order:7}
+  .crn-cols .crn-o7{margin-top:0}
   .crn-panel{background:var(--card);border:4px solid #111;border-radius:18px;
     box-shadow:8px 8px 0 #111;padding:var(--s4) var(--s3)}
   .crn-h2{font-size:20px;font-weight:800;line-height:1.25;margin:0}
@@ -585,12 +592,21 @@ CSS = '''
   @media (min-width:1024px){
     .crn{padding-top:var(--s4)}
     .crn-title{font-size:48px}
-    /* Po heroju: kamera (široka) | poročanje. Poročilni stolpec je ožji,
-       zato gumbi tam ostanejo 2 × 2. */
-    .crn-grid{grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
-    .crn-grid .crn-zones{grid-template-columns:1fr 1fr}
-    .crn-lower{margin-top:var(--s4);display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:var(--s4);align-items:start}
-    .crn-lower .crn-stack{margin-top:0}
+    /* Namizje: celotna širina (1140 px) je izkoriščena -- v heroju merilnik
+       levo, meritve + gumb desno; spodaj dva stolpca, vsak svoj sklad, da
+       se ne poravnavata po vrsticah (brez lukenj ob krajši kartici). */
+    .crn-hero{max-width:none}
+    .crn-hero-main{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:var(--s4);
+      align-items:stretch;text-align:left}
+    .crn-hero-main .crn-status{text-align:center;display:flex;flex-direction:column;justify-content:center}
+    .crn-hero-main .crn-status-index{align-self:center}
+    .crn-hero-side{display:flex;flex-direction:column}
+    .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
+    .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center}
+    .crn-hero-side .crn-btn-primary{max-width:none}
+    .crn-cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
+    .crn-col{display:flex;flex-direction:column;gap:var(--s4)}
+    .crn-col .crn-zones{grid-template-columns:1fr 1fr}
   }
   @media (prefers-reduced-motion:reduce){
     .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop,.crn-icon:hover{animation:none}
@@ -1743,7 +1759,10 @@ def build_body(data):
 
     # Vrstni red je hierarhija (mobile-first, glej opombo pri CSS): status →
     # meritve → čas → kamera → poročanje → zadnja poročila → vse ostalo.
-    # Na namizju gresta kamera in poročanje v dva stolpca (.crn-grid).
+    # Na namizju: v heroju merilnik levo, meritve desno (.crn-hero-main); pod
+    # njim dva stolpca (.crn-cols) -- kamera, nasvet, glasovanje | poročanje,
+    # poštenost, lestvica, razlaga + značka. Na telefonu sta stolpca
+    # display:contents in vrstni red nosijo razredi .crn-o1…7 (glej CSS).
     body = f'''{CSS}
   <div class="crn">
     <div class="crn-top">
@@ -1760,6 +1779,7 @@ def build_body(data):
 
       <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
 
+      <div class="crn-hero-main">
       <div class="crn-status" id="crn-status" data-zone="{zone['id']}"
         style="--zc:{zone['color']};--zbg:{st['bg']};--zink:{st['ink']}" role="status" aria-live="polite">
         {gauge_svg(zone)}
@@ -1769,6 +1789,7 @@ def build_body(data):
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
       </div>
 
+      <div class="crn-hero-side">
       <div class="crn-cards">
         <div class="crn-card">
           <p class="crn-card-h">{UI_ICONS['temp']}Temperatura</p>
@@ -1788,10 +1809,13 @@ def build_body(data):
       <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
 
       <a class="crn-btn crn-btn-primary" href="#kamera">{UI_ICONS['cam']}Poglej kamero</a>
+      </div>
+      </div>
     </section>
 
-    <div class="crn-grid">
-      <section class="crn-panel" id="kamera" aria-labelledby="crn-cam-h">
+    <div class="crn-cols">
+      <div class="crn-col">
+      <section class="crn-panel crn-o1" id="kamera" aria-labelledby="crn-cam-h">
         <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
         <div class="crn-cam-frame is-loading">
           <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
@@ -1805,7 +1829,38 @@ def build_body(data):
         rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
       </section>
 
-      <section class="crn-panel crn-report" id="crn-report" aria-labelledby="crn-rep-h" hidden>
+      <section class="crn-tip crn-o3" aria-labelledby="crn-tip-h">
+        {mountain_icon_svg()}
+        <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
+        <div class="crn-quote"><p>{quote}</p></div>
+        <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
+        <p id="crn-visits" class="crn-visits" hidden></p>
+        <div class="crn-actions">
+          <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
+          <button type="button" id="crn-listen" class="crn-btn" hidden>Poslušaj</button>
+          <button type="button" id="crn-share" class="crn-btn" hidden>Deli kot sliko</button>
+        </div>
+        <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      </section>
+
+      <section class="crn-panel crn-vote crn-o4" id="crn-vote" hidden>
+        <div class="crn-vote-row">
+          <p class="crn-vote-q">Se ti zdi trenutna ocena pravilna?</p>
+          <div class="crn-vote-btns">
+            <button type="button" id="crn-vote-gre" class="crn-btn">👍 Gre</button>
+            <button type="button" id="crn-vote-ne" class="crn-btn">👎 Ne gre</button>
+          </div>
+        </div>
+        <div class="crn-vote-result" id="crn-vote-result" hidden>
+          <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
+          <p class="crn-vote-count" id="crn-vote-count"></p>
+        </div>
+      </section>
+      </div>
+
+      <div class="crn-col">
+
+      <section class="crn-panel crn-report crn-o2" id="crn-report" aria-labelledby="crn-rep-h" hidden>
         <h2 class="crn-h2" id="crn-rep-h">Kako je bilo tebi?</h2>
         <p class="crn-lead">Povej naslednjemu vozniku.</p>
         <div class="crn-zones" id="crn-report-zones">
@@ -1830,78 +1885,44 @@ def build_body(data):
         </ul>
         <p id="crn-report-week" class="crn-week" hidden></p>
       </section>
-    </div>
+      <div class="crn-o5">{accuracy_html}</div>
 
-    <div class="crn-lower">
-      <div class="crn-stack">
-        <section class="crn-tip" aria-labelledby="crn-tip-h">
-          {mountain_icon_svg()}
-          <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
-          <div class="crn-quote"><p>{quote}</p></div>
-          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
-          <p id="crn-visits" class="crn-visits" hidden></p>
-          <div class="crn-actions">
-            <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
-            <button type="button" id="crn-listen" class="crn-btn" hidden>Poslušaj</button>
-            <button type="button" id="crn-share" class="crn-btn" hidden>Deli kot sliko</button>
+      <section class="crn-panel crn-board crn-o6" id="crn-board" aria-labelledby="crn-board-h" hidden>
+        <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
+        <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
+      </section>
+
+      <div class="crn-stack crn-o7">
+        <details class="crn-acc">
+          <summary>ⓘ Kako nastane Meteorec indeks?</summary>
+          <div class="crn-acc-body">
+            <p>Indeks ni meritev na cesti. Iz napovedi Open-Meteo za dolino in višinske razlike do
+            prelaza (902 m) izračunamo temperaturo na vrhu in koliko snega lahko pade v naslednjih
+            24 urah — isti izračun kot na <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost
+            prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
+            spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
+            za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
+            <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
+            indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
+            Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
           </div>
-          <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-        </section>
+        </details>
 
-        <section class="crn-panel crn-vote" id="crn-vote" hidden>
-          <div class="crn-vote-row">
-            <p class="crn-vote-q">Se ti zdi trenutna ocena pravilna?</p>
-            <div class="crn-vote-btns">
-              <button type="button" id="crn-vote-gre" class="crn-btn">👍 Gre</button>
-              <button type="button" id="crn-vote-ne" class="crn-btn">👎 Ne gre</button>
+        <details class="crn-acc crn-embed">
+          <summary>Vstavi značko na svojo stran</summary>
+          <div class="crn-acc-body">
+            <img class="crn-embed-preview" src="{WORKER_BASE}/crnivec/znacka.svg"
+              alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
+            <div class="crn-embed-row">
+              <code id="crn-embed-code" class="crn-embed-code">{embed_snippet}</code>
+              <button type="button" id="crn-embed-copy" class="crn-btn">Kopiraj</button>
             </div>
+            <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+            <p class="crn-share-status">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
           </div>
-          <div class="crn-vote-result" id="crn-vote-result" hidden>
-            <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
-            <p class="crn-vote-count" id="crn-vote-count"></p>
-          </div>
-        </section>
+        </details>
       </div>
-
-      <div class="crn-stack">
-        {accuracy_html}
-
-        <section class="crn-panel crn-board" id="crn-board" aria-labelledby="crn-board-h" hidden>
-          <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
-          <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
-        </section>
       </div>
-    </div>
-
-    <div class="crn-stack">
-      <details class="crn-acc">
-        <summary>ⓘ Kako nastane Meteorec indeks?</summary>
-        <div class="crn-acc-body">
-          <p>Indeks ni meritev na cesti. Iz napovedi Open-Meteo za dolino in višinske razlike do
-          prelaza (902 m) izračunamo temperaturo na vrhu in koliko snega lahko pade v naslednjih
-          24 urah — isti izračun kot na <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost
-          prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
-          spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
-          za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
-          <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
-          indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
-          Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
-        </div>
-      </details>
-
-      <details class="crn-acc crn-embed">
-        <summary>Vstavi značko na svojo stran</summary>
-        <div class="crn-acc-body">
-          <img class="crn-embed-preview" src="{WORKER_BASE}/crnivec/znacka.svg"
-            alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
-          <div class="crn-embed-row">
-            <code id="crn-embed-code" class="crn-embed-code">{embed_snippet}</code>
-            <button type="button" id="crn-embed-copy" class="crn-btn">Kopiraj</button>
-          </div>
-          <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-          <p class="crn-share-status">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
-        </div>
-      </details>
     </div>
 
     <footer class="crn-official">
