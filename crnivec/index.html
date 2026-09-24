@@ -117,7 +117,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      "posodobljeno", temperatura in sneg morajo biti vidni brez drsenja
      (3-sekundni test iz UX audita, 24. 9. 2026). */
   .crn-gauge{width:100%;max-width:290px;display:block;margin:0 auto}
-  .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
+  .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards;
+    transition:transform .6s cubic-bezier(.34,1.56,.64,1)}
   @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
   .crn-status-icon{display:flex;justify-content:center;margin:-4px 0 var(--s1)}
   .crn-status-icon .crn-zicon{width:36px;height:36px}
@@ -333,7 +334,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   @media (prefers-reduced-motion:reduce){
     .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop,.crn-icon:hover{animation:none}
-    .crn-needle{animation:none;transform:rotate(var(--rot))}
+    .crn-needle{animation:none;transition:none;transform:rotate(var(--rot))}
     .crn-status,.crn-btn,.crn-vote-bar span{transition:none}
   }
 </style>
@@ -919,13 +920,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (idx) idx.textContent = "Meteorec indeks: " + zone.label;
     if (iconWrap) iconWrap.innerHTML = zone.icon;
 
-    // Kazalec: iz CSS animacije (prvi izris) na neposreden SVG transform
-    // atribut -- isti mehanizem kot static=True veja gauge_svg().
+    // Kazalec: zasuk prek CSS (isti mehanizem kot prvi izris), animacija
+    // crnNeedleSettle pa se izklopi. NE brisati style in pisati SVG
+    // transform atributa: animacija s fill-mode forwards bi ostala aktivna,
+    // njen CSS transform ima prednost pred atributom, --rot pa bi bil
+    // pobrisan -- kazalec je tako obstal naravnost gor (med TAK-TAK in
+    // VZEMI VERIGE), čeprav je status kazal "Cesta je suha" (24. 9. 2026).
+    // transform-origin ostane v style iz strežniškega izrisa.
     var needle = document.querySelector(".crn-status .crn-needle");
     var gaugeSvg = document.querySelector(".crn-status .crn-gauge");
     if (needle) {
-      needle.removeAttribute("style");
-      needle.setAttribute("transform", "rotate(" + (90 - zone.mid).toFixed(1) + " 190 175)");
+      var rotLive = (90 - zone.mid).toFixed(1) + "deg";
+      needle.style.setProperty("--rot", rotLive);
+      needle.style.animation = "none";
+      needle.style.transform = "rotate(" + rotLive + ")";
     }
     if (gaugeSvg) gaugeSvg.setAttribute("aria-label", "Črnivski indeks: " + zone.label);
 
