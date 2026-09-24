@@ -100,7 +100,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-eyebrow{display:inline-block;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
     color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
     margin:0 0 var(--s2)}
-  .crn-title{font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+  /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
+  .crn-head{display:flex;flex-direction:column;align-items:center;gap:var(--s1);margin-bottom:var(--s4)}
+  .crn-head .crn-title{margin:0}
+  .crn-title{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
     color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
     text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
   .crn-strike{font-size:15px;font-weight:800;color:#fff;background:#dc2626;border:var(--bd);
@@ -240,15 +243,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-tip{position:relative;background:#fef08a;border:4px solid #111;border-radius:18px;
     box-shadow:8px 8px 0 #111;padding:var(--s4) var(--s3);transform:rotate(-.3deg)}
   .crn-tip-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#111;
-    margin:0 0 var(--s1);padding-right:56px}
-  .crn-tip .crn-quote p{font-size:17px;font-weight:700;line-height:1.45;margin:0;padding-right:40px}
+    margin:0 0 var(--s1)}
+  .crn-tip .crn-quote p{font-size:17px;font-weight:700;line-height:1.45;margin:0}
   .crn-tip .crn-quote.crn-quote-rare p{color:#854d0e}
   .crn-quote-pop{animation:crnQuoteReroll .3s ease}
   @keyframes crnQuoteReroll{from{opacity:.3}to{opacity:1}}
-  .crn-icon{position:absolute;top:var(--s2);right:var(--s2);width:56px;height:auto;cursor:pointer}
+  .crn-icon{width:84px;height:auto;flex:0 0 auto;cursor:pointer}
   .crn-icon:hover{animation:crnWobble .5s ease}
   @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
-  .crn-mascot-msg{font-size:14px;font-weight:700;color:#111;margin:var(--s1) 0 0}
+  .crn-mascot-msg{display:inline-block;font-size:14px;font-weight:700;color:#111;background:#fef08a;
+    border:2px solid #111;border-radius:10px;padding:4px var(--s2);margin:var(--s2) 0 0}
   .crn-visits{font-size:13px;color:#374151;margin:var(--s1) 0 0}
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
@@ -286,7 +290,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
-    .crn-title{font-size:40px}
+    .crn-title{font-size:52px}
+    .crn-icon{width:140px}
     .crn-gauge{max-width:560px}
     .crn-status{padding:var(--s5) var(--s4)}
     .crn-status-title{font-size:40px}
@@ -297,7 +302,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   @media (min-width:1024px){
     .crn{padding-top:var(--s4)}
-    .crn-title{font-size:48px}
+    .crn-title{font-size:68px}
+    .crn-head{flex-direction:row;justify-content:center;gap:var(--s4)}
+    .crn-head-txt{text-align:left}
+    .crn-icon{width:170px}
     /* Namizje: celotna širina (1140 px) je izkoriščena -- v heroju merilnik
        levo, meritve + gumb desno; spodaj dva stolpca, vsak svoj sklad, da
        se ne poravnavata po vrsticah (brez lukenj ob krajši kartici). */
@@ -334,15 +342,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <section class="crn-hero" aria-labelledby="crn-h1">
-      <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
-      <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
+      <div class="crn-head">
+        <svg viewBox="0 0 200 180" class="crn-icon" id="crn-mascot" role="button"
+       tabindex="0" aria-label="Gorska maskota — klikni za presenečenje">
+    <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(38,150) rotate(-8)">
+      <path d="M0 -20 L18 14 L-18 14 Z" fill="#fef08a" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+      <text x="0" y="10" text-anchor="middle" font-size="16" font-weight="800" fill="#111">!</text>
+    </g>
+  </svg>
+        <div class="crn-head-txt">
+          <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
+          <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
+          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
+        </div>
+      </div>
 
       <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
 
       <div class="crn-hero-main">
       <div class="crn-status" id="crn-status" data-zone="sonce"
         style="--zc:#16a34a;--zbg:#dcfce7;--zink:#14532d" role="status" aria-live="polite">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 430 230" class="crn-gauge" role="img" aria-label="Črnivski indeks: SUHO K POPR"><defs><linearGradient id="crnGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#16a34a"/><stop offset="33%" stop-color="#eab308"/><stop offset="67%" stop-color="#ea580c"/><stop offset="100%" stop-color="#dc2626"/></linearGradient><filter id="crnGaugeShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000" flood-opacity=".16"/></filter></defs><g filter="url(#crnGaugeShadow)"><path d="M 85.0 175.0 A 105 105 0 0 1 295.0 175.0" fill="none" stroke="url(#crnGrad)" stroke-width="30" stroke-linecap="round"/><line x1="126.4" y1="111.4" x2="105.1" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="190.0" y1="85.0" x2="190.0" y2="55.0" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="253.6" y1="111.4" x2="274.9" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/></g><text x="54.2" y="118.7" text-anchor="end" font-size="11" font-weight="800" fill="#171717">SUHO K POPR</text><text x="133.7" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">TAK-TAK</text><text x="246.3" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">VZEMI VERIGE</text><text x="325.8" y="118.7" text-anchor="start" font-size="11" font-weight="800" fill="#171717">SPOLZKO, PAZI</text><g class="crn-needle" filter="url(#crnGaugeShadow)" style="--rot:-67.5deg;transform-origin:190px 175px"><line x1="190" y1="175" x2="190" y2="99.4" stroke="#171717" stroke-width="6" stroke-linecap="round"/><circle cx="190" cy="175" r="14" fill="#171717"/><circle cx="190" cy="175" r="14" fill="none" stroke="#fff" stroke-width="3"/><circle cx="190" cy="175" r="4.5" fill="#fff"/></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-34 0 458 230" class="crn-gauge" role="img" aria-label="Črnivski indeks: SUHO K POPR"><defs><linearGradient id="crnGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#16a34a"/><stop offset="33%" stop-color="#eab308"/><stop offset="67%" stop-color="#ea580c"/><stop offset="100%" stop-color="#dc2626"/></linearGradient><filter id="crnGaugeShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000" flood-opacity=".16"/></filter></defs><g filter="url(#crnGaugeShadow)"><path d="M 85.0 175.0 A 105 105 0 0 1 295.0 175.0" fill="none" stroke="url(#crnGrad)" stroke-width="30" stroke-linecap="round"/><line x1="126.4" y1="111.4" x2="105.1" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="190.0" y1="85.0" x2="190.0" y2="55.0" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="253.6" y1="111.4" x2="274.9" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/></g><text x="54.2" y="118.7" text-anchor="end" font-size="11" font-weight="800" fill="#171717">SUHO K POPR</text><text x="133.7" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">TAK-TAK</text><text x="246.3" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">VZEMI VERIGE</text><text x="325.8" y="118.7" text-anchor="start" font-size="11" font-weight="800" fill="#171717">SPOLZKO, PAZI</text><g class="crn-needle" filter="url(#crnGaugeShadow)" style="--rot:-67.5deg;transform-origin:190px 175px"><line x1="190" y1="175" x2="190" y2="99.4" stroke="#171717" stroke-width="6" stroke-linecap="round"/><circle cx="190" cy="175" r="14" fill="#171717"/><circle cx="190" cy="175" r="14" fill="none" stroke="#fff" stroke-width="3"/><circle cx="190" cy="175" r="4.5" fill="#fff"/></g></svg>
         <div class="crn-status-icon" id="crn-status-icon"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
       <g stroke="#111" stroke-width="4" stroke-linecap="round">
         <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
@@ -425,23 +452,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </section>
 
       <section class="crn-tip crn-o3" aria-labelledby="crn-tip-h">
-        <svg viewBox="0 0 200 180" class="crn-icon" id="crn-mascot" role="button"
-       tabindex="0" aria-label="Gorska maskota — klikni za presenečenje">
-    <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
-          fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
-          fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round" stroke-linejoin="round"/>
-    <g transform="translate(38,150) rotate(-8)">
-      <path d="M0 -20 L18 14 L-18 14 Z" fill="#fef08a" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
-      <text x="0" y="10" text-anchor="middle" font-size="16" font-weight="800" fill="#111">!</text>
-    </g>
-  </svg>
         <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
         <div class="crn-quote"><p>Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.</p></div>
-        <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
         <p id="crn-visits" class="crn-visits" hidden></p>
         <div class="crn-actions">
           <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>

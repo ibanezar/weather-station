@@ -342,8 +342,12 @@ def gauge_svg(zone, static=False):
     # viewBox je širši od izrisa (-20..410 namesto 0..380): skrajni levi/desni
     # napis (text-anchor end/start, glej zgoraj) raste samo stran od loka in
     # pri preozkem viewBoxu se obreže čez rob (izmerjeno z getBBox()).
+    # Na strani (ne static) je viewBox še malo širši: na ozkem telefonu se
+    # pisava merilnika pomanjša in zaokroževanje je skrajni napis
+    # ("SPOLZKO, PAZI") pri 360 px odrezalo.
     size_attrs = ' width="430" height="230"' if static else ''
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 430 230"{size_attrs} '
+    view_box = "-20 0 430 230" if static else "-34 0 458 230"
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}"{size_attrs} '
             f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
             + defs + arc + "".join(labels) + needle + "</svg>")
 
@@ -428,7 +432,10 @@ CSS = '''
   .crn-eyebrow{display:inline-block;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
     color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
     margin:0 0 var(--s2)}
-  .crn-title{font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+  /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
+  .crn-head{display:flex;flex-direction:column;align-items:center;gap:var(--s1);margin-bottom:var(--s4)}
+  .crn-head .crn-title{margin:0}
+  .crn-title{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
     color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
     text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
   .crn-strike{font-size:15px;font-weight:800;color:#fff;background:#dc2626;border:var(--bd);
@@ -568,15 +575,16 @@ CSS = '''
   .crn-tip{position:relative;background:#fef08a;border:4px solid #111;border-radius:18px;
     box-shadow:8px 8px 0 #111;padding:var(--s4) var(--s3);transform:rotate(-.3deg)}
   .crn-tip-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#111;
-    margin:0 0 var(--s1);padding-right:56px}
-  .crn-tip .crn-quote p{font-size:17px;font-weight:700;line-height:1.45;margin:0;padding-right:40px}
+    margin:0 0 var(--s1)}
+  .crn-tip .crn-quote p{font-size:17px;font-weight:700;line-height:1.45;margin:0}
   .crn-tip .crn-quote.crn-quote-rare p{color:#854d0e}
   .crn-quote-pop{animation:crnQuoteReroll .3s ease}
   @keyframes crnQuoteReroll{from{opacity:.3}to{opacity:1}}
-  .crn-icon{position:absolute;top:var(--s2);right:var(--s2);width:56px;height:auto;cursor:pointer}
+  .crn-icon{width:84px;height:auto;flex:0 0 auto;cursor:pointer}
   .crn-icon:hover{animation:crnWobble .5s ease}
   @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
-  .crn-mascot-msg{font-size:14px;font-weight:700;color:#111;margin:var(--s1) 0 0}
+  .crn-mascot-msg{display:inline-block;font-size:14px;font-weight:700;color:#111;background:#fef08a;
+    border:2px solid #111;border-radius:10px;padding:4px var(--s2);margin:var(--s2) 0 0}
   .crn-visits{font-size:13px;color:#374151;margin:var(--s1) 0 0}
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
@@ -614,7 +622,8 @@ CSS = '''
 
   /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
-    .crn-title{font-size:40px}
+    .crn-title{font-size:52px}
+    .crn-icon{width:140px}
     .crn-gauge{max-width:560px}
     .crn-status{padding:var(--s5) var(--s4)}
     .crn-status-title{font-size:40px}
@@ -625,7 +634,10 @@ CSS = '''
   }
   @media (min-width:1024px){
     .crn{padding-top:var(--s4)}
-    .crn-title{font-size:48px}
+    .crn-title{font-size:68px}
+    .crn-head{flex-direction:row;justify-content:center;gap:var(--s4)}
+    .crn-head-txt{text-align:left}
+    .crn-icon{width:170px}
     /* Namizje: celotna širina (1140 px) je izkoriščena -- v heroju merilnik
        levo, meritve + gumb desno; spodaj dva stolpca, vsak svoj sklad, da
        se ne poravnavata po vrsticah (brez lukenj ob krajši kartici). */
@@ -1811,8 +1823,14 @@ def build_body(data):
     </div>
 
     <section class="crn-hero" aria-labelledby="crn-h1">
-      <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
-      <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
+      <div class="crn-head">
+        {mountain_icon_svg()}
+        <div class="crn-head-txt">
+          <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
+          <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
+          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
+        </div>
+      </div>
 
       <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
 
@@ -1869,10 +1887,8 @@ def build_body(data):
       </section>
 
       <section class="crn-tip crn-o3" aria-labelledby="crn-tip-h">
-        {mountain_icon_svg()}
         <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
         <div class="crn-quote"><p>{quote}</p></div>
-        <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
         <p id="crn-visits" class="crn-visits" hidden></p>
         <div class="crn-actions">
           <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
