@@ -169,9 +169,13 @@ def compute_pass_weather(hourly, idx_now, elevation_m):
     window = range(idx_now, min(idx_now + 24, n)) if idx_now is not None else range(0)
     snow_cm = sum((precip[i] or 0) * snow_fraction(elevation_m, fl[i] if i < len(fl) else None) * SNOW_RATIO_CM_PER_MM
                    for i in window if i < len(precip))
+    # Vse padavine (dež + sneg) v istem oknu -- /crnivec/ jih na kartici "Sneg"
+    # pokaže ločeno od novega snega (dva različna podatka, ne eno število).
+    precip_mm = sum((precip[i] or 0) for i in window if i < len(precip))
     return {
         "temp_c": round(temp_c, 1) if temp_c is not None else None,
         "expected_snow_cm_24h": round(snow_cm, 1),
+        "precip_mm_24h": round(precip_mm, 1),
     }
 
 # Višinski pasovi za meja sneženja — dno doline (postajna višina) do planinske

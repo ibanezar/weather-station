@@ -8,12 +8,14 @@ nasprotujejo/so neuporabni, (2) ljudje raje vprašajo, kot da bi pogledali sami.
 Ta stran to zafrkava, NAMENOMA ločeno od resne /zima/prevoznost-prelazov/
 (ki ostane edina resna referenca — glej cross-link na dnu obeh strani).
 
-Grafično je stran NAMENOMA popolnoma drugačna od preostale strani: stripovska,
-udarna, svetla paleta namesto temne Meteorec teme. Glavo/nogo/spodnji meni
-skrije isti CSS-trik kot igra/igra.css (glej CLAUDE.md — "Termika" stran) —
-uvožen vzorec, ne nov mehanizem. Brez zunanje pisave (Google Fonts): težo
-naredi obstoječi samostoječi Inter 800 (najtežji vključen rez, glej
-fonts/fonts.css) + CSS text-shadow "obris" trik, ne nov zunanji vir.
+Od prenove 24. 9. 2026 je stran HITER MOBILNI DASHBOARD za stanje prelaza
+(prej stripovski plakat z merilnikom): v prvem zaslonu status ceste (STATUS),
+temperatura, sneg, čas posodobitve in gumb do kamere; nato kamera | poročanje,
+šele potem humor, glasovanje, lestvica in (v accordionih) razlaga indeksa in
+značka. Šaljiva nalepka cone ostane kot "Meteorec indeks: …" pod glavnim
+statusom, merilnik pa samo na deljeni sliki in OG kartici. Svetla paleta
+namesto temne Meteorec teme; glavo/nogo/spodnji meni skrije isti CSS-trik kot
+igra/igra.css. Brez zunanje pisave: obstoječi samostoječi Inter.
 
 Kazalec na merilniku JE resničen (iz istega passes["crnivec"]["weather"], ki
 ga računa tools/winter_engine.py — isti lapse-rate/snow_fraction kot na
@@ -56,6 +58,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
@@ -81,6 +84,35 @@ WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
 # ZONES["label"] (npr. "SPOLZKO, PAZI") je glasen naslov za merilnik, v
 # štirih ozkih gumbih v vrsti pa ne bi bil čitljiv.
 ZONE_SHORT = {"sonce": "Suho", "nekaj": "Nekaj je", "verige": "Verige", "spolzko": "Spolzko"}
+
+# Glavni status na strani (prenova 24. 9. 2026). Šaljiva nalepka cone
+# (ZONES["label"], npr. "SUHO K POPR") je razumljiva le tistemu, ki stran že
+# pozna, zato gre v drugo vrsto kot "Meteorec indeks: …"; naslov kartice mora
+# biti jasen vsakomur. Ista uvrstitev (pick_zone), samo drugačno besedilo --
+# ZONES ostane nespremenjen, ker ga bereta tudi OG kartica in tema zgodbe.
+# bg/ink sta svetla podlaga in temno besedilo v barvi cone: kontrast besedila
+# je ≥ 7:1 na vseh štirih, česar polna barva cone (rumena!) z belim ne doseže.
+STATUS = {
+    "sonce":   {"status": "Cesta je suha",   "desc": "Cesta je normalno prevozna.",
+                "bg": "#dcfce7", "ink": "#14532d"},
+    "nekaj":   {"status": "Pozor",           "desc": "Okoli ničle — ponekod je lahko sneg ali led. Vozi previdno.",
+                "bg": "#fef9c3", "ink": "#713f12"},
+    "verige":  {"status": "Zimske razmere",  "desc": "V naslednjih 24 urah je pričakovan sneg. Brez zimske opreme ne hodi.",
+                "bg": "#ffedd5", "ink": "#7c2d12"},
+    "spolzko": {"status": "Zelo spolzko",    "desc": "Pod ničlo — nevarnost poledice. Vozi zelo previdno.",
+                "bg": "#fee2e2", "ink": "#7f1d1d"},
+}
+
+# Enotne obrisne ikone za UI (24×24, currentColor) -- emoji ostanejo samo v
+# sproščenih, šaljivih delih strani, ne v osnovni ikonografiji.
+UI_ICONS = {
+    "temp": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+            'stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg>',
+    "snow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+            'aria-hidden="true"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5 4.9 17.5M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>',
+    "cam":  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+            'stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3Z"/><circle cx="12" cy="13" r="4"/></svg>',
+}
 
 # Izvirni citati v duhu šale (glej opombo zgoraj) — NISO navedki resničnih
 # objav, ker jih nimamo preverjenih; namenoma zvenijo kot tipičen odgovor v
@@ -177,16 +209,16 @@ def accuracy_section_html(history):
     if n < 7:
         note = (f"Šele začenjam zbirati podatke iz glasovanja (imam {n} od 7 dni, "
                 "ki jih rabim za prvo številko) — vrni se čez teden dni.")
-        return (f'<div class="crn-panel crn-accuracy">'
-                f'<p class="crn-accuracy-q">📊 Kako pošten je indeks?</p>'
-                f'<p class="crn-accuracy-note">{note}</p></div>')
+        return (f'<section class="crn-panel crn-accuracy">'
+                f'<h2 class="crn-h2">Kako pošten je indeks?</h2>'
+                f'<p class="crn-accuracy-note">{note}</p></section>')
     fair_days = sum(1 for e in history if e.get("gre", 0) >= e.get("ne", 0))
     pct = round(100 * fair_days / n)
-    return (f'<div class="crn-panel crn-accuracy">'
-            f'<p class="crn-accuracy-q">📊 Kako pošten je indeks?</p>'
+    return (f'<section class="crn-panel crn-accuracy">'
+            f'<h2 class="crn-h2">Kako pošten je indeks?</h2>'
             f'<p class="crn-accuracy-big">{pct} %</p>'
             f'<p class="crn-accuracy-note">dni ({fair_days} od {n} zabeleženih), ko je večina '
-            f'glasovalcev rekla, da je bila ocena tistega dne poštena.</p></div>')
+            f'glasovalcev rekla, da je bila ocena tistega dne poštena.</p></section>')
 
 
 def needle_angle(zone):
@@ -198,19 +230,16 @@ def arc_point(cx, cy, r, deg):
     return cx + r * math.cos(rad), cy - r * math.sin(rad)
 
 
-def gauge_svg(zone, static=False):
-    """static=True: samostojna različica za "Deli kot sliko" (glej
-    build_body/SHARE_JS) — eksplicitna width/height (canvas Image potrebuje
-    znano velikost) in kazalec zapečen kot SVG transform atribut namesto
-    CSS --rot spremenljivke (canvas slika nima dostopa do strani CSS/animacije,
-    zato mora biti statična kopija samozadostna).
+def gauge_svg(zone):
+    """Merilnik za sliko "Deli kot sliko" (glej SHARE_JS_TEMPLATE) --
+    samostojen SVG z eksplicitno width/height (canvas Image potrebuje znano
+    velikost) in kazalcem, zapečenim kot transform atribut.
 
-    "Premium" prenova 22. 9. 2026: en sam lok z gladkim prelivom (namesto 4
-    ločenih barvnih segmentov -- brez trdih šivov med conami), tanke bele
-    ločnice na mejah conov (da so cone kljub prelivu še vedno razločne), rahla
-    senca (feDropShadow) za globino in dvoslojni kazalec/os za bolj "urni"
-    videz. Geometrija (cx/cy/r) ostane enaka kot prej -- velikost na strani
-    uravnava CSS (.crn-gauge max-width), ne viewBox."""
+    Od prenove 24. 9. 2026 merilnik NA STRANI ni več prikazan: junak strani je
+    statusna kartica (glej STATUS spodaj), ne pol kroga z nalepkami. Ostal je
+    le na deljeni sliki in na OG kartici, kjer je prepoznaven znak strani.
+    Klientski živi preračun zasuka kazalec v tej kopiji z regexom na
+    edinem rotate() -- ne dodajaj drugega transform="rotate(…)" v SVG."""
     cx, cy, r = 190, 175, 105
     bounds = [180, 135, 90, 45, 0]
     sw = 30  # stroke-width loka -- debelejši pas kot prej (26) za bolj čvrst videz
@@ -250,14 +279,7 @@ def gauge_svg(zone, static=False):
                      f'<circle cx="{cx}" cy="{cy}" r="14" fill="#171717"/>'
                      f'<circle cx="{cx}" cy="{cy}" r="14" fill="none" stroke="#fff" stroke-width="3"/>'
                      f'<circle cx="{cx}" cy="{cy}" r="4.5" fill="#fff"/>')
-    if static:
-        needle = f'<g filter="url(#crnGaugeShadow)" transform="rotate({rot:.1f} {cx} {cy})">{needle_shape}</g>'
-    else:
-        # Brez transform="rotate(...)" atributa -- CSS animacija (crn-needle-settle
-        # spodaj) rotacijo prevzame prek --rot spremenljivke, XML atribut bi jo
-        # tiho prepisal/mešal z njo (SVG CSS transform ima prednost pred atributom).
-        needle = (f'<g class="crn-needle" filter="url(#crnGaugeShadow)" '
-                   f'style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">{needle_shape}</g>')
+    needle = f'<g filter="url(#crnGaugeShadow)" transform="rotate({rot:.1f} {cx} {cy})">{needle_shape}</g>'
 
     # text-anchor="middle" centrira napis simetrično okoli sidrne točke -- za
     # skrajni levi/desni coni (mid blizu 180°/0°, torej vodoravno ob loku) to
@@ -274,11 +296,11 @@ def gauge_svg(zone, static=False):
 
     # xmlns je za inline SVG v HTML odveč (brskalnik ga uvrsti v SVG imenski
     # prostor sam), a data:image/svg+xml ga bere kot samostojen XML dokument
-    # in ga brez xmlns molče zavrže -- zato je tu vedno, ne le pri static=True.
+    # in ga brez xmlns molče zavrže -- zato je tu vedno.
     # viewBox je širši od izrisa (-20..410 namesto 0..380): skrajni levi/desni
     # napis (text-anchor end/start, glej zgoraj) raste samo stran od loka in
     # pri preozkem viewBoxu se obreže čez rob (izmerjeno z getBBox()).
-    size_attrs = ' width="430" height="230"' if static else ''
+    size_attrs = ' width="430" height="230"'
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 430 230"{size_attrs} '
             f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
             + defs + arc + "".join(labels) + needle + "</svg>")
@@ -287,7 +309,7 @@ def gauge_svg(zone, static=False):
 def icon_svg_static(zone_id):
     """ZONE_ICONS ima viewBox brez width/height/xmlns (velikost pride iz CSS
     .crn-zicon, xmlns je za inline uporabo odveč) — za canvas Image
-    potrebujemo oboje, isto načelo kot pri gauge_svg(static=True)."""
+    potrebujemo oboje, isto načelo kot pri gauge_svg()."""
     svg = ZONE_ICONS[zone_id].replace('viewBox="0 0 60 60"',
                                        'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"', 1)
     return svg
@@ -326,294 +348,230 @@ ZONE_ICONS = {
 }
 
 
-def avatar_svg():
-    """Generičen "nekdo iz skupine" avatar za ob citatu — brez obraza/imena
-    (nihče konkreten), samo silhueta, isti debel-obris slog kot vse ostalo."""
-    return '''<svg viewBox="0 0 44 44" class="crn-avatar-icon" aria-hidden="true">
-      <circle cx="22" cy="22" r="20" fill="#e5e7eb" stroke="#111" stroke-width="3.5"/>
-      <circle cx="22" cy="17" r="7.5" fill="#fff" stroke="#111" stroke-width="3"/>
-      <path d="M7 40 a15 13 0 0 1 30 0 Z" fill="#fff" stroke="#111" stroke-width="3"/>
-    </svg>'''
-
-
-def starburst_svg(color, points=14):
-    """Klasična stripovska "pok" zvezda za ozadje izida — čisto okrasje, glej
-    .crn-verdict-star (aria-hidden)."""
-    cx = cy = 100
-    r_out, r_in = 98, 62
-    pts = []
-    for i in range(points * 2):
-        r = r_out if i % 2 == 0 else r_in
-        deg = i * (360 / (points * 2))
-        x, y = arc_point(cx, cy, r, deg)
-        pts.append(f"{x:.1f},{y:.1f}")
-    return (f'<svg viewBox="0 0 200 200" class="crn-verdict-star" aria-hidden="true">'
-            f'<polygon points="{" ".join(pts)}" fill="{color}" opacity=".35"/></svg>')
-
-
 CSS = '''
 <style>
+  /* Prenova 24. 9. 2026: stran je hiter mobilni DASHBOARD za stanje prelaza,
+     ne stripovski plakat. Hierarhija: status ceste > kamera > meritve > vse
+     ostalo (humor, lestvica, značka, drobni tisk). Mobile-first: osnovna
+     pravila so za telefon, @media (min-width:…) jih samo razširijo.
+     Razmiki so iz lestvice 8/12/16/24/32/48/64 px (--s1…--s7), zaobljenost
+     12–16 px, tanek rob in komaj opazna senca. Statusna kartica je edina
+     vizualno "glasna" -- njeno barvo nosi data-zone (glej STATUS spodaj),
+     barva pa NIKOLI ni edini nosilec pomena (vedno tudi besedilo). */
   .site-head,#bg,.site-foot,.app-bottomnav{display:none!important}
   /* Brez site-foot/app-bottomnav ni nič, kar bi zapolnilo sitewide
-     body{min-height:100vh} (style.css) na širših zaslonih/krajši vsebini --
-     ostal je prazen pikčast prostor pod "Nazaj na meteorec.si". Ta stran
-     nima lepljive noge, zato naj se telo skrči na dejansko vsebino. */
-  body{background:#fdf6e3!important;background-image:radial-gradient(#111 1px,transparent 1.4px)!important;
-    background-size:16px 16px!important;background-position:-4px -4px!important;min-height:0!important}
-  .wrap{max-width:720px}
-  .crn-wrap{font-family:Inter,system-ui,sans-serif;color:#111;padding:1.2rem 0 3rem}
-  .crn-hero{display:flex;align-items:center;gap:1rem;margin-top:.4rem}
-  .crn-icon{width:170px;height:auto;flex-shrink:0;transition:transform .25s;cursor:pointer}
-  .crn-icon:hover{animation:crnWobble .5s ease}
-  @keyframes crnWobble{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
-  .crn-mascot-msg{font-size:.85rem;font-weight:700;color:#111;background:#fef08a;
-    border:2px solid #111;border-radius:10px;display:inline-block;padding:.4rem .8rem;
-    margin:.7rem 0 0;animation:crnQuoteIn .3s ease-out}
-  .crn-strike-banner{font-size:.92rem;font-weight:800;text-align:center;color:#fff;
-    background:#dc2626;border:3px solid #111;border-radius:12px;box-shadow:4px 4px 0 #111;
-    padding:.7rem 1rem;margin:0 0 1.4rem;animation:crnStrikePulse 1.6s ease-in-out infinite}
-  @keyframes crnStrikePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
-  @media (max-width:520px){.crn-hero{flex-direction:column}
-    .crn-icon{width:150px}}
-  .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards}
-  @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
-  .crn-panel.tilt{animation:crnPanelPop .6s cubic-bezier(.34,1.56,.64,1) .15s backwards}
-  @keyframes crnPanelPop{0%{opacity:0;transform:scale(.86) rotate(-2deg)}
-    60%{opacity:1;transform:scale(1.02) rotate(.5deg)}100%{opacity:1;transform:scale(1) rotate(.2deg)}}
-  .crn-verdict-star{animation:crnStarPulse 2.6s ease-in-out .8s infinite backwards}
-  @keyframes crnStarPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5}
-    50%{transform:translate(-50%,-50%) scale(1.08);opacity:.65}}
-  .crn-quote{animation:crnQuoteIn .5s ease-out .65s backwards}
-  @keyframes crnQuoteIn{0%{opacity:0;transform:translateY(14px) rotate(0deg)}
-    100%{opacity:1;transform:translateY(0) rotate(-.3deg)}}
-  .crn-avatar{animation:crnAvatarIn .45s ease-out .8s backwards}
-  @keyframes crnAvatarIn{0%{opacity:0;transform:translateY(10px) scale(.85)}100%{opacity:1;transform:translateY(0) scale(1)}}
-  .crn-zicon-sonce{animation:crnSunSpin 9s linear infinite}
-  @keyframes crnSunSpin{to{transform:rotate(360deg)}}
-  .crn-zicon-nekaj{animation:crnCloudFloat 3s ease-in-out infinite}
-  @keyframes crnCloudFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-  .crn-zicon-verige{animation:crnChainShake 2.4s ease-in-out infinite}
-  @keyframes crnChainShake{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
-  .crn-zicon-spolzko{animation:crnIceGlint 1.8s ease-in-out infinite}
-  @keyframes crnIceGlint{0%,100%{opacity:1}50%{opacity:.55}}
-  @media (prefers-reduced-motion:reduce){.crn-icon:hover{animation:none}
-    .crn-strike-banner{animation:none}
-    .crn-needle{animation:none;transform:rotate(var(--rot))}
-    .crn-panel.tilt,.crn-verdict-star,.crn-quote,.crn-avatar,.crn-stats,
-    .crn-zicon-sonce,.crn-zicon-nekaj,.crn-zicon-verige,.crn-zicon-spolzko{animation:none}
-    .crn-panel.tilt{opacity:1;transform:rotate(.2deg)}
-    .crn-verdict-star{opacity:.5;transform:translate(-50%,-50%) scale(1)}
-    .crn-quote{opacity:1;transform:rotate(-.3deg)}
-    .crn-avatar{opacity:1;transform:none}}
-  .crn-title{font-size:2.6rem;font-weight:800;line-height:1.05;letter-spacing:-.01em;
-    color:#dc2626;text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111;
-    transform:rotate(-.6deg);margin:0 0 .3rem;text-transform:uppercase}
-  .crn-sub{font-size:1.05rem;font-weight:600;color:#111;margin:0 0 1.6rem;max-width:44ch;
-    background:#fdf6e3;display:inline-block;padding:.1rem .3rem}
-  .crn-panel{background:#fff;border:4px solid #111;border-radius:18px;padding:1.4rem 1.2rem;
-    box-shadow:8px 8px 0 #111;margin-bottom:1.6rem;position:relative}
-  .crn-panel.tilt{transform:rotate(.2deg)}
-  /* max-width je namenoma velikodušen (ne ozek "mobilni" strop): width:100%
-     ga na ozkih telefonih itak strne na širino .crn-panel, na širših
-     telefonih/tablicah pa merilnik zdaj dejansko zapolni prostor, ki ga ima
-     -- prej je pri 340px na 500-600px zaslonu ostajal velik prazen pas. */
-  .crn-gauge{width:100%;max-width:480px;display:block;margin:0 auto}
-  /* min-height + flex-center: brez tega .crn-verdict rezervira samo prostor
-     za ikono+napis (~90px), zvezda (210px, sredinjena nanj) pa je absolutno
-     pozicionirana in seže čez spodnji rob -- v .crn-data škatlo pod njo
-     (obe sta znotraj istega .crn-panel). Rezervirana višina ujame zvezdo v
-     celoti, centriranje pa badge postavi točno v njeno sredino namesto na vrh. */
-  .crn-verdict{text-align:center;position:relative;margin-top:.4rem;min-height:210px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .crn-verdict-star{position:absolute;left:50%;top:50%;width:210px;height:210px;
-    transform:translate(-50%,-50%);z-index:0;opacity:.5}
-  .crn-zicon{position:relative;z-index:1;width:52px;height:52px;display:block;margin:0 auto .2rem}
-  .crn-verdict span{position:relative;z-index:1;display:inline-block;font-size:1.9rem;
-    font-weight:800;text-transform:uppercase;letter-spacing:.01em;background:#fff;
-    border:3px solid currentColor;border-radius:12px;padding:.3rem 1rem;margin-top:.15rem}
-  .crn-verdict-desc{position:relative;z-index:1;font-size:.92rem;font-weight:600;
-    color:#374151;margin-top:.6rem;max-width:32ch}
-  .crn-quote-row{display:flex;align-items:flex-end;gap:.7rem;flex-wrap:wrap;margin-top:.2rem}
-  .crn-quote{background:#fef08a;border:3px solid #111;border-radius:14px;padding:1rem 1.2rem;
-    font-weight:700;font-size:1.05rem;position:relative;transform:rotate(-.3deg);flex:1 1 240px}
-  .crn-quote::before{content:"\\201C";font-size:2.4rem;color:#111;line-height:0;
-    position:absolute;left:.5rem;top:1.6rem}
-  .crn-quote::after{content:"";position:absolute;left:2rem;bottom:-15px;width:0;height:0;
-    border-left:15px solid transparent;border-right:15px solid transparent;border-top:16px solid #111;
-    transform:rotate(-6deg)}
-  .crn-quote-tail{position:absolute;left:2.15rem;bottom:-9.5px;width:0;height:0;
-    border-left:12px solid transparent;border-right:12px solid transparent;border-top:13px solid #fef08a;
-    transform:rotate(-6deg);z-index:1}
-  .crn-quote p{margin:0 0 0 1.6rem}
-  .crn-avatar{display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:0 0 auto}
-  .crn-avatar-icon{width:44px;height:44px}
-  /* Brez neprosojnega ozadja pikčasto ozadje strani (glej body zgoraj)
-     sveti skozi ta drobni napis in ga navidez "prečrta" -- isti trik kot
-     .crn-sub zgoraj (background v barvi strani + padding). */
-  .crn-avatar span{font-size:.68rem;font-weight:700;color:#4b5563;text-align:center;max-width:70px;
-    background:#fdf6e3;padding:.15rem .3rem;border-radius:4px}
-  .crn-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1.1rem;
-    animation:crnStatIn .4s ease-out .3s backwards}
-  @keyframes crnStatIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
-  .crn-stat{background:#fff;border:3px solid #111;border-radius:14px;box-shadow:5px 5px 0 #111;
-    padding:.7rem .5rem;text-align:center}
-  .crn-stat-emoji{font-size:1.25rem;line-height:1;display:block;margin-bottom:.15rem}
-  .crn-stat-val{font-weight:800;font-size:1.1rem;display:block;color:#111}
-  .crn-stat-lbl{font-size:.64rem;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.02em}
-  /* Citat, ki ga (redko) nariše "Vprašaj še enkrat" namesto navadnega
-     reroll-a (glej RARE_QUOTE/crn-reroll) -- zlat rob namesto črnega, da je
-     jasno, da gre za nekaj izjemnega, ne le drugačno besedilo. */
-  .crn-quote.crn-quote-rare{border-color:#ca8a04;background:#fffbeb;box-shadow:0 0 0 3px #fde68a}
-  .crn-quote.crn-quote-rare::after{border-top-color:#ca8a04}
-  .crn-quote.crn-quote-rare .crn-quote-tail{border-top-color:#fffbeb}
-  .crn-visits{display:inline-block;font-size:.76rem;font-weight:700;color:#111;
-    background:#fef08a;border:2px solid #111;border-radius:8px;padding:.25rem .6rem;
-    margin:0 0 1rem}
-  /* Isti razlog kot pri .crn-cam-loading[hidden] spodaj: brez tega bi
-     display:inline-block tiho povozil UA-jev [hidden]{display:none}. Tu je
-     posledica trenutno neopazna (element je do izpisa besedila prazen), a
-     napačna je vseeno -- popravljeno ob isti priložnosti. */
-  .crn-visits[hidden]{display:none}
-  .crn-vote{margin-top:0}
-  .crn-vote-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
-  .crn-vote-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
-  .crn-vote-btn{font:inherit;font-weight:800;font-size:1rem;cursor:pointer;
-    background:#fff;border:3px solid #111;border-radius:999px;padding:.6rem 1.5rem;
-    box-shadow:4px 4px 0 #111;transition:transform .1s}
-  .crn-vote-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
-  .crn-vote-btn:disabled{opacity:.6;cursor:default}
-  .crn-vote-btn-gre{background:#bbf7d0}
-  .crn-vote-btn-ne{background:#fecaca}
-  .crn-vote-bar{height:22px;border:3px solid #111;border-radius:999px;overflow:hidden;
-    background:#fecaca}
-  .crn-vote-bar span{display:block;height:100%;width:50%;background:#16a34a;
-    transition:width .5s ease}
-  .crn-vote-count{text-align:center;font-weight:700;font-size:.88rem;margin:.7rem 0 0;
-    color:#374151}
-  .crn-cam{margin-top:0}
-  .crn-cam-label{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
-  .crn-cam-frame{border:3px solid #111;border-radius:14px;overflow:hidden;
-    box-shadow:5px 5px 0 #111;background:#111;aspect-ratio:640/480;position:relative}
+     body{min-height:100vh} (style.css) -- telo naj se skrči na vsebino. */
+  body{background:#f6f4ef!important;background-image:none!important;min-height:0!important}
+  .wrap{max-width:1140px}
+  .crn{--s1:8px;--s2:12px;--s3:16px;--s4:24px;--s5:32px;--s6:48px;--s7:64px;
+    --ink:#111827;--ink2:#374151;--muted:#4b5563;--line:#e5e1d8;--card:#fff;--link:#1d4ed8;
+    font-family:Inter,system-ui,sans-serif;color:var(--ink);font-size:16px;line-height:1.5;
+    padding:var(--s3) 0 var(--s6)}
+  .crn a{color:var(--link)}
+  .crn [hidden]{display:none!important}
+
+  /* ── Vrhnja vrstica ─────────────────────────────────────────── */
+  .crn-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
+    min-height:48px;margin-bottom:var(--s3)}
+  .crn-brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:48px}
+  .crn-install-wrap{text-align:right}
+
+  /* ── HERO ───────────────────────────────────────────────────── */
+  .crn-hero{max-width:760px;margin:0 auto var(--s5);text-align:center}
+  .crn-eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 var(--s1)}
+  .crn-title{font-size:28px;font-weight:800;line-height:1.15;letter-spacing:-.01em;margin:0 0 var(--s3)}
+  .crn-strike{font-size:15px;font-weight:700;color:#7f1d1d;background:#fee2e2;border:1px solid #fca5a5;
+    border-radius:12px;padding:var(--s2) var(--s3);margin:0 0 var(--s3);text-align:left}
+
+  .crn-status{--zc:#16a34a;--zbg:#dcfce7;--zink:#14532d;
+    background:var(--zbg);color:var(--zink);border:2px solid var(--zc);border-radius:16px;
+    padding:var(--s4) var(--s3);box-shadow:0 1px 2px rgba(17,24,39,.06);
+    transition:background-color .4s,border-color .4s,color .4s}
+  .crn-status-icon{display:flex;justify-content:center;margin-bottom:var(--s1)}
+  .crn-status-icon .crn-zicon{width:56px;height:56px}
+  .crn-status-title{font-size:32px;font-weight:800;line-height:1.1;letter-spacing:.01em;
+    text-transform:uppercase;margin:0}
+  .crn-status-desc{font-size:16px;font-weight:600;margin:var(--s1) auto 0;max-width:34ch}
+  .crn-status-index{display:inline-block;font-size:13px;font-weight:700;margin-top:var(--s2);
+    background:rgba(255,255,255,.7);border:1px solid var(--zc);border-radius:999px;padding:4px var(--s2)}
+
+  .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
+  .crn-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 1px 2px rgba(17,24,39,.05);padding:var(--s3)}
+  .crn-card-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 var(--s1);display:flex;align-items:center;gap:6px}
+  .crn-card-h svg{width:16px;height:16px;flex:0 0 auto}
+  .crn-big{font-size:36px;font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:0;
+    font-variant-numeric:tabular-nums}
+  .crn-card-sub{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
+  .crn-card-sub b{color:var(--ink2)}
+  .crn-na{font-size:15px;font-weight:600;color:var(--muted)}
+
+  .crn-updated{font-size:13px;font-weight:600;color:var(--muted);margin:var(--s3) 0 0}
+  .crn-fresh{font-size:13px;font-weight:700;margin:var(--s1) 0 0}
+  .crn-btn{font:inherit;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;
+    align-items:center;justify-content:center;gap:var(--s1);min-height:48px;padding:0 var(--s4);
+    border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)!important;
+    text-decoration:none;transition:background-color .15s,border-color .15s,transform .1s}
+  .crn-btn:hover{border-color:#bdb6a6}
+  .crn-btn:active{transform:translateY(1px)}
+  .crn-btn:disabled{opacity:.6;cursor:default}
+  .crn-btn:focus-visible,.crn-zbtn:focus-visible,.crn summary:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+  .crn-btn-primary{background:var(--ink);border-color:var(--ink);color:#fff!important;
+    text-transform:uppercase;letter-spacing:.04em;width:100%;max-width:420px;margin-top:var(--s3)}
+  .crn-btn-primary:hover{background:#000;border-color:#000}
+  .crn-btn svg{width:20px;height:20px}
+
+  /* ── Sekcije pod herojem ────────────────────────────────────── */
+  .crn-grid{display:grid;grid-template-columns:1fr;gap:var(--s4)}
+  .crn-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 1px 2px rgba(17,24,39,.05);padding:var(--s4) var(--s3)}
+  .crn-h2{font-size:20px;font-weight:800;line-height:1.25;margin:0}
+  .crn-lead{font-size:15px;color:var(--muted);margin:4px 0 var(--s3)}
+  .crn-h3{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);margin:var(--s4) 0 var(--s2)}
+  .crn-stack{display:flex;flex-direction:column;gap:var(--s4);margin-top:var(--s4)}
+
+  /* Kamera */
+  .crn-cam-frame{position:relative;border-radius:12px;overflow:hidden;background:#1f2937;
+    aspect-ratio:4/3;margin-top:var(--s3)}
   .crn-cam-frame img{display:block;width:100%;height:100%;object-fit:cover}
-  .crn-cam-loading{position:absolute;inset:0;margin:0;display:flex;align-items:center;
-    justify-content:center;padding:1.4rem;text-align:center;color:#9ca3af;
-    font-weight:600;font-size:.88rem}
-  /* [hidden] iz UA sloga nastavi display:none, a ima enako specifičnost kot
-     zgornje pravilo -- avtorski slog (torej ta datoteka) po vrstnem redu
-     izvora vedno zmaga nad UA slogom, zato bi brez tega JS-ov hidden=true
-     tiho ne naredil ničesar in bi "nalagam …" obvisel čez sliko za vedno. */
-  .crn-cam-loading[hidden]{display:none}
-  .crn-cam-fallback{margin:0;padding:1.6rem 1rem;text-align:center;color:#fff;
-    font-weight:600;font-size:.92rem}
+  .crn-cam-badge{position:absolute;top:var(--s2);left:var(--s2);display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:800;letter-spacing:.06em;color:#fff;background:rgba(17,24,39,.72);
+    border-radius:999px;padding:4px 10px}
+  .crn-cam-badge i{width:8px;height:8px;border-radius:50%;background:#ef4444;display:block;
+    animation:crnLive 2s ease-in-out infinite}
+  @keyframes crnLive{0%,100%{opacity:1}50%{opacity:.35}}
+  .crn-cam-place{position:absolute;left:var(--s2);bottom:var(--s2);font-size:12px;font-weight:800;
+    letter-spacing:.06em;color:#fff;background:rgba(17,24,39,.72);border-radius:8px;padding:4px 10px}
+  .crn-cam-frame.is-offline .crn-cam-badge,.crn-cam-frame.is-offline .crn-cam-place,
+  .crn-cam-frame.is-loading .crn-cam-badge{display:none}
+  .crn-cam-loading{position:absolute;inset:0;margin:0;display:flex;align-items:center;justify-content:center;
+    padding:var(--s3);text-align:center;color:#d1d5db;font-size:14px;font-weight:600;
+    background:linear-gradient(100deg,#1f2937 30%,#2b3544 50%,#1f2937 70%);background-size:200% 100%;
+    animation:crnShimmer 1.4s linear infinite}
+  .crn-cam-fallback{position:absolute;inset:0;margin:0;display:flex;flex-direction:column;gap:var(--s1);
+    align-items:center;justify-content:center;padding:var(--s3);text-align:center;color:#fff;font-size:15px;font-weight:600}
   .crn-cam-fallback a{color:#93c5fd}
-  .crn-cam-meta{font-size:.78rem;color:#4b5563;text-align:center;margin:.7rem 0 0}
-  .crn-cam-meta a{color:#1d4ed8;font-weight:700}
-  .crn-report{margin-top:0}
-  .crn-report-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
-  .crn-report-zones{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
-  .crn-report-zbtn{font:inherit;font-weight:700;font-size:.76rem;cursor:pointer;
-    background:#fff;border:3px solid #111;border-radius:12px;padding:.6rem .2rem;
-    box-shadow:3px 3px 0 #111;transition:transform .1s;text-align:center}
-  .crn-report-zbtn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 #111}
-  .crn-report-zbtn.sel{background:var(--zc);color:#111}
-  .crn-report-zbtn .crn-zicon{width:26px;height:26px;margin:0 auto .25rem;display:block}
-  .crn-report-zbtn span{display:block}
-  #crn-report-form{margin-top:1rem}
-  .crn-report-note{width:100%;box-sizing:border-box;border:3px solid #111;border-radius:12px;
-    padding:.6rem .8rem;font:inherit;font-size:.92rem;resize:vertical;min-height:3rem;
-    margin:0 0 .7rem}
-  .crn-report-ime{width:100%;box-sizing:border-box;border:3px solid #111;border-radius:12px;
-    padding:.5rem .8rem;font:inherit;font-size:.88rem;margin:0 0 .7rem}
-  .crn-report-week{font-size:.82rem;color:#374151;text-align:center;font-weight:600;margin:1rem 0 0}
-  .crn-board{margin-top:0}
-  .crn-board-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
-  .crn-board-list{display:flex;flex-direction:column;gap:.3rem}
-  .crn-board-row{display:flex;justify-content:space-between;align-items:center;gap:.6rem;
-    font-size:.88rem;border-bottom:1px dashed #d1d5db;padding:.35rem 0;margin:0}
-  .crn-board-row:last-child{border-bottom:none}
-  .crn-board-rank{font-weight:800;color:#111;width:1.6rem;flex:0 0 auto}
-  .crn-board-name{flex:1;color:#111;font-weight:700;overflow:hidden;text-overflow:ellipsis;
-    white-space:nowrap}
-  .crn-board-badge{color:#6b7280;font-size:.78rem;flex:0 0 auto;text-align:right}
-  .crn-board-empty{font-size:.82rem;color:#6b7280;text-align:center;margin:0}
-  .crn-report-badge{margin-top:1rem;text-align:center;background:#fef08a;border:3px solid #111;
-    border-radius:14px;padding:.9rem 1rem;box-shadow:5px 5px 0 #111}
-  .crn-report-badge-title{font-weight:800;font-size:1.15rem;margin:0 0 .2rem}
-  .crn-report-badge-desc{font-size:.85rem;color:#374151;margin:0}
-  .crn-report-badge-count{font-size:.75rem;color:#6b7280;margin:.4rem 0 0}
-  .crn-report-feed{margin-top:1rem;display:flex;flex-direction:column;gap:.5rem}
-  .crn-report-feed-item{font-size:.82rem;border-left:3px solid #111;padding:.15rem .7rem;
-    color:#374151;margin:0}
-  .crn-report-feed-item b{color:#111}
-  .crn-report-feed-empty{font-size:.82rem;color:#6b7280;text-align:center;margin:0}
-  .crn-data{font-size:.92rem;color:#374151;background:#f3f4f6;border:2px dashed #9ca3af;
-    border-radius:10px;padding:.8rem 1rem;margin-top:1rem}
-  .crn-fresh{font-size:.82rem;font-weight:700;text-align:center;margin:.7rem 0 0}
-  .crn-embed{margin-top:0}
-  .crn-embed-q{font-weight:800;font-size:1.05rem;margin:0 0 .9rem;text-align:center}
-  .crn-embed-preview{display:block;margin:0 auto 1rem}
-  .crn-embed-code-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
-  .crn-embed-code{flex:1 1 200px;background:#f3f4f6;border:2px dashed #9ca3af;border-radius:8px;
-    padding:.5rem .7rem;font-family:ui-monospace,Consolas,monospace;font-size:.76rem;
-    overflow-x:auto;white-space:nowrap;color:#111}
-  .crn-embed-note{font-size:.78rem;color:#6b7280;text-align:center;margin:.8rem 0 0}
-  .crn-accuracy{margin-top:0;text-align:center}
-  .crn-accuracy-q{font-weight:800;font-size:1.05rem;margin:0 0 .6rem}
-  .crn-accuracy-big{font-weight:800;font-size:2.4rem;color:#111;margin:0}
-  .crn-accuracy-note{font-size:.85rem;color:#374151;margin:.4rem 0 0}
-  .crn-fine{font-size:.78rem;color:#6b7280;line-height:1.6;border-top:2px dotted #9ca3af;
-    padding-top:1rem;margin-top:1.8rem}
-  .crn-links{margin-top:.6rem;font-size:.85rem}
-  .crn-links a{color:#1d4ed8;font-weight:700}
-  .crn-back{display:inline-block;margin-top:1.6rem;font-weight:700;color:#111;
-    background:#fff;border:3px solid #111;border-radius:999px;padding:.5rem 1.1rem;
-    text-decoration:none;box-shadow:4px 4px 0 #111}
-  .crn-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
-  .crn-action-btn{font:inherit;font-weight:700;font-size:.92rem;color:#111;cursor:pointer;
-    background:#fff;border:3px solid #111;border-radius:999px;padding:.5rem 1.1rem;
-    box-shadow:4px 4px 0 #111;transition:transform .1s}
-  .crn-action-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #111}
-  .crn-share-status{font-size:.82rem;font-weight:600;color:#374151;margin-top:.5rem}
-  /* Zelena podlaga loči namestitveni gumb od nevtralnih reroll/deli gumbov
-     zgoraj -- edini na tej vrsti, ki vodi ven s strani (na domači zaslon),
-     zato sme izstopati. */
-  .crn-install-btn{background:#bbf7d0}
-  /* Namestitveni CTA je čisto na vrhu, nad junaškim naslovom, na sredini --
-     prej skrite drobtine ("Meteorec › Kako je čez Črnivec?") so tu odstranjene,
-     ta prostor prevzame gumb (JSON-LD BreadcrumbList v <head> ostaja, samo
-     vidni napis je bil odveč na strani, ki nima drugih podstrani). */
-  .crn-install-top{text-align:center;margin-bottom:.6rem}
-  .crn-quote-pop{animation:crnQuoteReroll .35s ease}
-  @keyframes crnQuoteReroll{0%{transform:rotate(-0.8deg) scale(.96)}60%{transform:rotate(-0.8deg) scale(1.03)}
-    100%{transform:rotate(-0.8deg) scale(1)}}
-  @media (max-width:480px){.crn-title{font-size:2rem}}
-  /* Mobilno: cel sklop poravnan na sredino namesto ob levi rob. Ta blok mora
-     priti PO osnovnih pravilih zgoraj (.crn-quote-row/.crn-back/...), ker so
-     ta deklarirana kasneje v datoteki in bi sicer pri enaki specifičnosti
-     povozila zgornjo (prejšnjo) medijsko poizvedbo -- glej git zgodovino. */
-  @media (max-width:520px){.crn-hero{align-items:center;text-align:center}
-    .crn-hero>div{width:100%}
-    .crn-quote-row{flex-direction:column;align-items:center}
-    .crn-quote{width:100%}
-    .crn-actions{justify-content:center}
-    .crn-fine{text-align:center}
-    .crn-back{display:table;margin:1.6rem auto 0}}
-  @media (prefers-reduced-motion:reduce){.crn-quote-pop{animation:none}}
-  /* Nad ~600px je .crn-panel (do 720px, glej .wrap zgoraj) veliko širši od
-     merilnika -- brez tega ostane velik prazen pas na obeh straneh. 640px
-     je skoraj polna notranja širina panela (720 - 2×(1.2rem padding + 4px
-     border) ≈ 674px), tako da merilnik zares zapolni prostor, ki ga ima, s
-     še vedno vidnim zračnim robom. Izid (zvezda+ikona+napis) tu zato skupaj
-     zraste namesto da bi samo osamljeno stal sredi bele površine. */
+  .crn-cam-meta{font-size:13px;color:var(--muted);margin:var(--s2) 0 0}
+
+  /* Poročanje */
+  .crn-zones{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1)}
+  .crn-zbtn{--zc:#16a34a;--zbg:#dcfce7;font:inherit;font-size:14px;font-weight:800;letter-spacing:.03em;
+    text-transform:uppercase;cursor:pointer;min-height:52px;display:flex;align-items:center;gap:var(--s1);
+    padding:var(--s1) var(--s2);background:var(--card);color:var(--ink);border:1px solid var(--line);
+    border-left:6px solid var(--zc);border-radius:12px;text-align:left;transition:background-color .15s}
+  .crn-zbtn:hover{background:#faf9f6}
+  .crn-zbtn.sel{background:var(--zbg);border-color:var(--zc)}
+  .crn-zbtn:disabled{cursor:default;opacity:.7}
+  .crn-zbtn .crn-zicon{width:24px;height:24px;flex:0 0 auto}
+  .crn-form{margin-top:var(--s3);display:flex;flex-direction:column;gap:var(--s1)}
+  .crn-input{width:100%;box-sizing:border-box;border:1px solid #cfc8b8;border-radius:12px;background:#fff;
+    padding:var(--s2);font:inherit;font-size:16px;color:var(--ink)}
+  textarea.crn-input{resize:vertical;min-height:72px}
+  .crn-status-msg{font-size:15px;font-weight:600;color:var(--ink2);margin:var(--s2) 0 0}
+  .crn-status-msg.ok{color:#166534}
+  .crn-badge{margin-top:var(--s3);background:#fefce8;border:1px solid #fde68a;border-radius:12px;
+    padding:var(--s3);text-align:center}
+  .crn-badge-title{font-weight:800;font-size:17px;margin:0 0 4px}
+  .crn-badge-desc{font-size:14px;color:var(--ink2);margin:0}
+  .crn-badge-count{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
+
+  /* Zadnja poročila */
+  .crn-feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+  .crn-feed-item{display:flex;gap:var(--s2);align-items:flex-start;padding:var(--s2) 0;
+    border-top:1px solid #efece5;margin:0}
+  .crn-feed-item:first-child{border-top:0;padding-top:0}
+  .crn-dot{width:12px;height:12px;border-radius:50%;flex:0 0 auto;margin-top:6px}
+  .crn-feed-zone{font-weight:700}
+  .crn-feed-time{font-size:13px;color:var(--muted);margin-left:6px}
+  .crn-feed-note{font-size:14px;color:var(--ink2);margin:2px 0 0;overflow-wrap:anywhere}
+  .crn-feed-empty{font-size:14px;color:var(--muted);margin:0}
+  .crn-week{font-size:13px;color:var(--muted);margin:var(--s2) 0 0}
+  .crn-skel{display:block;height:14px;border-radius:6px;margin:6px 0;
+    background:linear-gradient(100deg,#eeeae1 30%,#f7f5f0 50%,#eeeae1 70%);background-size:200% 100%;
+    animation:crnShimmer 1.4s linear infinite}
+  @keyframes crnShimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+
+  /* Sekundarno: glasovanje, nasvet, lestvica, poštenost */
+  .crn-vote-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s1) var(--s2)}
+  .crn-vote-q{font-size:15px;font-weight:700;margin:0;flex:1 1 220px}
+  .crn-vote-btns{display:flex;gap:var(--s1)}
+  .crn-vote-btns .crn-btn{padding:0 var(--s3);font-size:14px}
+  .crn-vote-bar{height:8px;border-radius:999px;overflow:hidden;background:#fecaca;margin-top:var(--s2)}
+  .crn-vote-bar span{display:block;height:100%;width:50%;background:#16a34a;transition:width .5s ease}
+  .crn-vote-count{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
+
+  .crn-tip{position:relative;background:#fefce8;border:1px solid #fde68a;border-radius:16px;
+    padding:var(--s4) var(--s3)}
+  .crn-tip-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#854d0e;
+    margin:0 0 var(--s1);padding-right:56px}
+  .crn-tip .crn-quote p{font-size:17px;font-weight:600;line-height:1.45;margin:0;padding-right:40px}
+  .crn-tip .crn-quote.crn-quote-rare p{color:#854d0e}
+  .crn-quote-pop{animation:crnQuoteReroll .3s ease}
+  @keyframes crnQuoteReroll{from{opacity:.3}to{opacity:1}}
+  .crn-icon{position:absolute;top:var(--s2);right:var(--s2);width:48px;height:auto;cursor:pointer}
+  .crn-mascot-msg{font-size:14px;font-weight:600;color:#854d0e;margin:var(--s1) 0 0}
+  .crn-visits{font-size:13px;color:#854d0e;margin:var(--s1) 0 0}
+  .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
+  .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
+  .crn-share-status{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
+
+  .crn-board-list{display:flex;flex-direction:column}
+  .crn-board-row{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);
+    font-size:14px;padding:var(--s1) 0;border-top:1px solid #efece5;margin:0}
+  .crn-board-row:first-child{border-top:0}
+  .crn-board-rank{font-weight:800;width:1.6rem;flex:0 0 auto;color:var(--muted)}
+  .crn-board-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crn-board-badge{color:var(--muted);font-size:13px;flex:0 0 auto;text-align:right}
+  .crn-accuracy-big{font-size:32px;font-weight:800;margin:var(--s1) 0 0}
+  .crn-accuracy-note{font-size:14px;color:var(--muted);margin:4px 0 0}
+
+  /* Accordioni (razlaga indeksa, značka) */
+  .crn-acc{background:var(--card);border:1px solid var(--line);border-radius:16px}
+  .crn-acc summary{cursor:pointer;list-style:none;min-height:48px;display:flex;align-items:center;
+    gap:var(--s1);padding:0 var(--s3);font-weight:700;font-size:15px}
+  .crn-acc summary::-webkit-details-marker{display:none}
+  .crn-acc summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:600;color:var(--muted)}
+  .crn-acc[open] summary::after{content:"–"}
+  .crn-acc-body{padding:0 var(--s3) var(--s3);font-size:15px;color:var(--ink2)}
+  .crn-acc-body p{margin:0 0 var(--s2)}
+  .crn-embed-preview{display:block;margin:0 0 var(--s2)}
+  .crn-embed-row{display:flex;gap:var(--s1);align-items:center;flex-wrap:wrap}
+  .crn-embed-code{flex:1 1 200px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;
+    padding:var(--s1) var(--s2);font-family:ui-monospace,Consolas,monospace;font-size:12px;
+    overflow-x:auto;white-space:nowrap;color:var(--ink)}
+
+  .crn-official{font-size:14px;color:var(--ink2);border-top:1px solid var(--line);
+    padding-top:var(--s3);margin-top:var(--s5)}
+  .crn-official p{margin:0 0 var(--s1)}
+  .crn-back{margin-top:var(--s3)}
+
+  /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
-    .crn-gauge{max-width:640px}
-    .crn-verdict{min-height:280px}
-    .crn-verdict-star{width:280px;height:280px}
-    .crn-zicon{width:66px;height:66px}
-    .crn-verdict span{font-size:2.4rem;padding:.4rem 1.3rem}
-    .crn-data{font-size:1rem;padding:1rem 1.3rem}
-    .crn-stats{max-width:560px;margin-left:auto;margin-right:auto;gap:1rem}
-    .crn-stat-val{font-size:1.25rem}
+    .crn-title{font-size:36px}
+    .crn-status{padding:var(--s5) var(--s4)}
+    .crn-status-title{font-size:40px}
+    .crn-status-icon .crn-zicon{width:64px;height:64px}
+    .crn-big{font-size:44px}
+    .crn-panel{padding:var(--s4)}
+    .crn-zones{grid-template-columns:repeat(4,1fr)}
+  }
+  @media (min-width:1024px){
+    .crn{padding-top:var(--s4)}
+    .crn-title{font-size:44px}
+    /* Po heroju: kamera (široka) | poročanje. Poročilni stolpec je ožji,
+       zato gumbi tam ostanejo 2 × 2. */
+    .crn-grid{grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
+    .crn-grid .crn-zones{grid-template-columns:1fr 1fr}
+    .crn-lower{margin-top:var(--s4);display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:var(--s4);align-items:start}
+    .crn-lower .crn-stack{margin-top:0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop{animation:none}
+    .crn-status,.crn-btn,.crn-vote-bar span{transition:none}
   }
 </style>
 '''
@@ -657,10 +615,18 @@ SHARE_JS_TEMPLATE = '''
     // Sporočilo "nalagam" izgine po PRVEM izidu (uspeh ali neuspeh) in se ne
     // vrača ob periodičnih osvežitvah spodaj -- takrat stara slika ostane
     // vidna, dokler nova ne prispe, prekrivanje ni potrebno.
+    // Oznaka "V ŽIVO" (.crn-cam-badge) se pokaže šele ob uspešni sliki --
+    // na pokvarjeni ali še nenaloženi sliki bi bila laž (is-loading/is-offline
+    // na okvirju, glej CSS).
+    var camFrame = camImg.parentNode;
     function camIzid(ok){
       camImg.hidden = !ok;
       if (camFallback) camFallback.hidden = ok;
       if (camLoading) camLoading.hidden = true;
+      if (camFrame && camFrame.classList) {
+        camFrame.classList.remove("is-loading");
+        camFrame.classList.toggle("is-offline", !ok);
+      }
     }
     camImg.addEventListener("error", function(){ camIzid(false); });
     camImg.addEventListener("load", function(){ camIzid(true); });
@@ -688,7 +654,7 @@ SHARE_JS_TEMPLATE = '''
       var obiski = (parseInt(localStorage.getItem("crn-obiski"), 10) || 0) + 1;
       localStorage.setItem("crn-obiski", String(obiski));
       if (obiski > 1) {
-        visitsEl.textContent = "To je tvoj " + obiski + ". obisk te strani. Očitno tudi ti raje vprašaš, kot pogledaš sam.";
+        visitsEl.textContent = "P. S. To je tvoj " + obiski + ". obisk te strani. Očitno tudi ti raje vprašaš, kot pogledaš sam.";
         visitsEl.hidden = false;
       }
     } catch (_) {}
@@ -766,14 +732,17 @@ SHARE_JS_TEMPLATE = '''
     listenBtn.hidden = false;
     listenBtn.addEventListener("click", function(){
       if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
-      var labelEl = document.getElementById("crn-verdict-label");
-      var descEl = document.getElementById("crn-verdict-desc");
+      var labelEl = document.getElementById("crn-status-title");
+      var descEl = document.getElementById("crn-status-desc");
+      var tempEl = document.getElementById("crn-temp-val");
       var quoteEl = document.querySelector(".crn-quote p");
-      var label = labelEl ? labelEl.textContent : "";
+      var label = labelEl ? labelEl.textContent.toLowerCase() : "";
       var desc = descEl ? descEl.textContent : "";
+      var temp = tempEl ? tempEl.textContent.replace("°C", "stopinj") : "";
       var quote = quoteEl ? quoteEl.textContent : "";
       var besedilo = "Kako je čez Črnivec? " + label + ". " + desc +
-        (quote ? (" Nekdo iz skupine pravi: " + quote) : "");
+        (temp ? (" Na prelazu je " + temp + ".") : "") +
+        (quote ? (" Meteorec nasvet: " + quote) : "");
       var u = new SpeechSynthesisUtterance(besedilo);
       u.lang = "sl-SI";
       u.rate = 0.95;
@@ -853,6 +822,10 @@ SHARE_JS_TEMPLATE = '''
     return ZONE_DATA[1];                          // nekaj vmes
   }
 
+  function uraSl(d){
+    return d.toLocaleTimeString("sl", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Ljubljana" });
+  }
+
   // Ob zamujenem cronu (glej opombo zgoraj) ali neuspelem živem klicu ostane
   // strežniško spečena vrednost prikazana -- ne skrijemo je, samo označimo,
   // isti prag kot MeteoGasilec/Agrometeo (🟡 26-50h, 🔴 nad 50h).
@@ -866,74 +839,58 @@ SHARE_JS_TEMPLATE = '''
     var rdece = ageH >= 50;
     var gd = new Date(genThen);
     var datum = gd.toLocaleDateString("sl", { day: "2-digit", month: "2-digit", year: "numeric" });
-    var ura = gd.toLocaleTimeString("sl", { hour: "2-digit", minute: "2-digit" });
-    freshEl.textContent = (rdece ? "🔴 " : "🟡 ") + "Prikazujem zadnji uspešno izračunan podatek — " + datum + " ob " + ura + ".";
-    freshEl.style.color = rdece ? "#dc2626" : "#b45309";
+    freshEl.textContent = (rdece ? "🔴 " : "🟡 ") + "Prikazujem zadnji uspešno izračunan podatek — " + datum + " ob " + uraSl(gd) + ".";
+    freshEl.style.color = rdece ? "#b91c1c" : "#92400e";
     freshEl.hidden = false;
   }
 
-  function primeniZivoStanje(tempC, snowCm){
+  function primeniZivoStanje(tempC, snowCm, precipMm){
     var zone = pickZoneLive(tempC, snowCm);
     var tempTxt = (tempC == null ? "–" : numSlLive(tempC, 1)) + " °C";
     var snowTxt = numSlLive(snowCm, 1) + " cm";
 
-    var tEl = document.querySelector("#crn-stat-temp .crn-stat-val");
-    var sEl = document.querySelector("#crn-stat-snow .crn-stat-val");
-    if (tEl) tEl.textContent = tempTxt;
-    if (sEl) sEl.textContent = snowTxt;
+    var tEl = document.getElementById("crn-temp-val");
+    var sEl = document.getElementById("crn-snow-new");
+    var pEl = document.getElementById("crn-precip");
+    if (tEl && tempC != null) { tEl.textContent = tempTxt; tEl.className = "crn-big"; }
+    if (sEl) sEl.textContent = "+" + snowTxt;
+    if (pEl && precipMm != null) pEl.textContent = numSlLive(precipMm, 1) + " mm";
 
-    var verdict = document.getElementById("crn-verdict");
-    var label = document.getElementById("crn-verdict-label");
-    var desc = document.getElementById("crn-verdict-desc");
-    var iconWrap = document.getElementById("crn-verdict-icon");
-    var starPoly = document.querySelector("#crn-verdict .crn-verdict-star polygon");
-    if (verdict) verdict.style.color = zone.color;
-    if (label) label.textContent = zone.label;
-    if (desc) desc.textContent = zone.desc;
-    if (iconWrap) iconWrap.innerHTML = zone.icon;
-    if (starPoly) starPoly.setAttribute("fill", zone.color);
-
-    // Kazalec: preklopimo iz CSS animacije (ki jo je ob prvem izrisu že
-    // pognala) na neposreden SVG transform atribut -- isti mehanizem kot
-    // static=True veja gauge_svg() v generate_crnivec_page.py, ker mora biti
-    // samozadosten tudi kasneje za "Deli kot sliko" spodaj.
-    var needle = document.querySelector(".crn-needle");
-    var gaugeSvg = document.querySelector(".crn-gauge");
-    if (needle) {
-      var rot = 90 - zone.mid;
-      needle.removeAttribute("style");
-      needle.setAttribute("transform", "rotate(" + rot.toFixed(1) + " 190 175)");
+    var card = document.getElementById("crn-status");
+    var title = document.getElementById("crn-status-title");
+    var desc = document.getElementById("crn-status-desc");
+    var idx = document.getElementById("crn-status-index");
+    var iconWrap = document.getElementById("crn-status-icon");
+    if (card) {
+      card.setAttribute("data-zone", zone.id);
+      card.style.setProperty("--zc", zone.color);
+      card.style.setProperty("--zbg", zone.bg);
+      card.style.setProperty("--zink", zone.ink);
     }
-    if (gaugeSvg) gaugeSvg.setAttribute("aria-label", "Črnivski indeks: " + zone.label);
+    if (title) title.textContent = zone.status;
+    if (desc) desc.textContent = zone.statusDesc;
+    if (idx) idx.textContent = "Meteorec indeks: " + zone.label;
+    if (iconWrap) iconWrap.innerHTML = zone.icon;
 
     // "Deli kot sliko" naj deli TRENUTNO (živo) stanje, ne tisto, spečeno ob
-    // generiranju strani.
+    // generiranju strani. Merilnik na strani ni več prikazan (glej opombo pri
+    // gauge_svg), zato se kazalec v statični SVG kopiji zasuka neposredno --
+    // share.gauge ima en sam rotate(), tisti na kazalcu.
     if (share) {
       share.verdict = zone.label;
       share.color = zone.color;
       share.temp = tempTxt;
       share.snow = snowTxt + " snega v 24 h";
-      if (gaugeSvg) {
-        var gClone = gaugeSvg.cloneNode(true);
-        gClone.setAttribute("width", "430");
-        gClone.setAttribute("height", "230");
-        share.gauge = new XMLSerializer().serializeToString(gClone);
-      }
-      var iconSvgLive = iconWrap && iconWrap.querySelector("svg");
-      if (iconSvgLive) {
-        var iClone = iconSvgLive.cloneNode(true);
-        iClone.setAttribute("width", "60");
-        iClone.setAttribute("height", "60");
-        share.icon = new XMLSerializer().serializeToString(iClone);
-      }
+      share.gauge = share.gauge.replace(/rotate\\([^)]*\\)/, "rotate(" + (90 - zone.mid).toFixed(1) + " 190 175)")
+        .replace(/aria-label="[^"]*"/, 'aria-label="Črnivski indeks: ' + zone.label + '"');
+      share.icon = zone.icon.replace('viewBox="0 0 60 60"',
+        'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"');
     }
 
+    var updEl = document.getElementById("crn-updated");
+    if (updEl) updEl.textContent = "Posodobljeno ob " + uraSl(new Date()) + " · ocena iz vremenskega modela";
     var freshEl = document.getElementById("crn-fresh");
-    if (freshEl) {
-      freshEl.textContent = "🟢 Živi podatki — izračunano zdaj iz Open-Meteo.";
-      freshEl.style.color = "#15803d";
-      freshEl.hidden = false;
-    }
+    if (freshEl) freshEl.hidden = true;
   }
 
   function osveziZivoVreme(){
@@ -953,11 +910,12 @@ SHARE_JS_TEMPLATE = '''
 
       var precip = d.hourly.precipitation || [];
       var fl = d.hourly.freezing_level_height || [];
-      var snowCm = 0;
+      var snowCm = 0, precipMm = 0;
       for (var i = idx; i < Math.min(idx + 24, times.length); i++) {
         snowCm += (precip[i] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[i]);
+        precipMm += (precip[i] || 0);
       }
-      primeniZivoStanje(tempC, Math.round(snowCm * 10) / 10);
+      primeniZivoStanje(tempC, Math.round(snowCm * 10) / 10, Math.round(precipMm * 10) / 10);
     }).catch(function(){ pokaziZastarelostOpozorila(); });
   }
   osveziZivoVreme();
@@ -1061,6 +1019,15 @@ SHARE_JS_TEMPLATE = '''
     voteBox.hidden = false;
     var VOTE_KEY = "crn-glas-__TODAY_ISO__";
 
+    // Slovenska dvojina/množina gre po zadnjih dveh števkah (101 = ednina).
+    function glasovalcev(n){
+      var m = n % 100;
+      if (m === 1) return n + " uporabnik je danes glasoval";
+      if (m === 2) return n + " uporabnika sta danes glasovala";
+      if (m === 3 || m === 4) return n + " uporabniki so danes glasovali";
+      return n + " uporabnikov je danes glasovalo";
+    }
+
     function showVoteResult(counts){
       var gre = (counts && counts.gre) || 0, ne = (counts && counts.ne) || 0;
       var total = gre + ne;
@@ -1068,9 +1035,10 @@ SHARE_JS_TEMPLATE = '''
       if (voteBar) voteBar.style.width = pct + "%";
       if (voteCount) {
         voteCount.textContent = total ?
-          (pct + " % pravi, da gre (" + total + (total === 1 ? " glas" : " glasov") + " danes)") :
-          "Bodi prvi, ki danes glasuje.";
+          (pct + " % pravi, da gre · " + glasovalcev(total)) :
+          "Danes še nihče ni glasoval.";
       }
+      if (voteBar && voteBar.parentNode) voteBar.parentNode.hidden = !total;
       voteBtnGre.hidden = true;
       voteBtnNe.hidden = true;
       voteResult.hidden = false;
@@ -1110,7 +1078,7 @@ SHARE_JS_TEMPLATE = '''
   var repBox = document.getElementById("crn-report");
   if (repBox && window.fetch) {
     repBox.hidden = false;
-    var repZones = Array.prototype.slice.call(repBox.querySelectorAll(".crn-report-zbtn"));
+    var repZones = Array.prototype.slice.call(repBox.querySelectorAll(".crn-zbtn"));
     var repForm = document.getElementById("crn-report-form");
     var repNote = document.getElementById("crn-report-note");
     var repHp = document.getElementById("crn-report-hp");
@@ -1121,7 +1089,9 @@ SHARE_JS_TEMPLATE = '''
     var repFeed = document.getElementById("crn-report-feed");
     var repIme = document.getElementById("crn-report-ime");
     var izbranaCona = null;
-    var ZONE_LABELS = { sonce: "suho", nekaj: "nekaj je", verige: "verige", spolzko: "spolzko" };
+    var ZONE_LABELS = { sonce: "Suho", nekaj: "Nekaj je", verige: "Verige", spolzko: "Spolzko" };
+    var ZONE_COLORS = {};
+    ZONE_DATA.forEach(function(z){ ZONE_COLORS[z.id] = z.color; });
 
     function porocevalecId(){
       var re = /^[a-zA-Z0-9_-]{8,40}$/;
@@ -1143,28 +1113,60 @@ SHARE_JS_TEMPLATE = '''
       try { repIme.value = localStorage.getItem("crn-porocevalec-ime") || ""; } catch (_) {}
     }
 
-    function setStatusRep(msg){
+    function setStatusRep(msg, ok){
       if (!repStatus) return;
       repStatus.hidden = !msg;
       repStatus.textContent = msg || "";
+      repStatus.classList.toggle("ok", !!ok);
+    }
+
+    // Relativni čas ("pred 8 min") -- dolg časovni žig v seznamu samo
+    // zamegli, kako sveže je poročilo, a ostane v title za radovedne.
+    function relCas(iso){
+      var s = (Date.now() - Date.parse(iso)) / 1000;
+      if (isNaN(s)) return "";
+      if (s < 60) return "pravkar";
+      var m = Math.round(s / 60);
+      if (m < 60) return "pred " + m + " min";
+      var h = Math.round(m / 60);
+      if (h < 24) return "pred " + h + " h";
+      var d = Math.round(h / 24);
+      return d === 1 ? "včeraj" : d === 2 ? "pred 2 dnevoma" : "pred " + d + " dnevi";
     }
 
     function renderFeed(porocila){
       if (!repFeed) return;
       if (!porocila || !porocila.length) {
-        repFeed.innerHTML = '<p class="crn-report-feed-empty">Še nihče ni poročal danes. Bodi prvi.</p>';
+        repFeed.innerHTML = '<li class="crn-feed-empty">Ta teden še nihče ni poročal. Bodi prvi zgoraj.</li>';
         return;
       }
       repFeed.innerHTML = "";
       porocila.slice(0, 6).forEach(function(p){
-        var el = document.createElement("p");
-        el.className = "crn-report-feed-item";
-        var b = document.createElement("b");
+        var el = document.createElement("li");
+        el.className = "crn-feed-item";
+        var dot = document.createElement("span");
+        dot.className = "crn-dot";
+        dot.style.background = ZONE_COLORS[p.zona] || "#9ca3af";
+        var txt = document.createElement("div");
+        var b = document.createElement("span");
+        b.className = "crn-feed-zone";
         b.textContent = ZONE_LABELS[p.zona] || p.zona;
-        el.appendChild(b);
+        var t = document.createElement("span");
+        t.className = "crn-feed-time";
+        t.textContent = relCas(p.ts);
+        t.title = new Date(p.ts).toLocaleString("sl");
+        txt.appendChild(b);
+        txt.appendChild(t);
         // textContent, ne innerHTML -- opomba je prosto uporabniško besedilo
         // (isto pravilo kot pri gobarskih opažanjih).
-        el.appendChild(document.createTextNode(p.opomba ? (" — " + p.opomba) : ""));
+        if (p.opomba) {
+          var n = document.createElement("p");
+          n.className = "crn-feed-note";
+          n.textContent = p.opomba;
+          txt.appendChild(n);
+        }
+        el.appendChild(dot);
+        el.appendChild(txt);
         repFeed.appendChild(el);
       });
     }
@@ -1180,9 +1182,9 @@ SHARE_JS_TEMPLATE = '''
       Object.keys(stevec).forEach(function(z){
         if (stevec[z] > najvec) { najvec = stevec[z]; najpogostejsa = z; }
       });
-      repWeek.textContent = "🗓️ Ta teden: " + porocila.length +
+      repWeek.textContent = "Ta teden: " + porocila.length +
         (porocila.length === 1 ? " poročilo" : " poročil") +
-        (najpogostejsa ? " · največkrat: " + (ZONE_LABELS[najpogostejsa] || najpogostejsa) : "");
+        (najpogostejsa ? " · največkrat: " + (ZONE_LABELS[najpogostejsa] || najpogostejsa).toLowerCase() : "");
       repWeek.hidden = false;
     }
 
@@ -1192,7 +1194,12 @@ SHARE_JS_TEMPLATE = '''
           renderFeed(d && d.porocila);
           renderWeekStats(d && d.porocila);
         })
-        .catch(function(){});
+        .catch(function(){
+          // Napaka enega vira ne sme pustiti večnega skeletona.
+          if (repFeed && !repFeed.querySelector(".crn-feed-zone")) {
+            repFeed.innerHTML = '<li class="crn-feed-empty">Poročil trenutno ni mogoče naložiti.</li>';
+          }
+        });
     }
 
     repZones.forEach(function(btn){
@@ -1262,9 +1269,9 @@ SHARE_JS_TEMPLATE = '''
       if (!repBadge || !window.HTMLCanvasElement) return;
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "crn-action-btn";
-      btn.textContent = "📤 Deli značko";
-      btn.style.marginTop = ".8rem";
+      btn.className = "crn-btn";
+      btn.textContent = "Deli značko";
+      btn.style.marginTop = "12px";
       btn.addEventListener("click", function(){
         var canvas = drawBadgeCanvas(znacka, stevilo);
         canvas.toBlob(function(blob){
@@ -1309,17 +1316,17 @@ SHARE_JS_TEMPLATE = '''
               repSubmit.disabled = false;
               return;
             }
-            setStatusRep("Hvala za poročilo!");
+            setStatusRep("Hvala! Tvoje poročilo je dodano.", true);
             if (repBadge && res.data.znacka) {
               repBadge.hidden = false;
               var t = document.createElement("p");
-              t.className = "crn-report-badge-title";
+              t.className = "crn-badge-title";
               t.textContent = res.data.znacka.naziv;
               var d2 = document.createElement("p");
-              d2.className = "crn-report-badge-desc";
+              d2.className = "crn-badge-desc";
               d2.textContent = res.data.znacka.opis;
               var c = document.createElement("p");
-              c.className = "crn-report-badge-count";
+              c.className = "crn-badge-count";
               c.textContent = "Poročil doslej: " + res.data.stevilo;
               repBadge.innerHTML = "";
               repBadge.appendChild(t);
@@ -1348,14 +1355,12 @@ SHARE_JS_TEMPLATE = '''
   var boardList = document.getElementById("crn-board-list");
   function loadBoard(){
     if (!boardBox || !boardList || !window.fetch) return;
-    boardBox.hidden = false;
     fetch(API + "/crnivec/lestvica").then(function(r){ return r.json(); })
       .then(function(d){
         var lestvica = (d && d.lestvica) || [];
-        if (!lestvica.length) {
-          boardList.innerHTML = '<p class="crn-board-empty">Še ni dovolj poročil za lestvico. Bodi prvi zgoraj.</p>';
-          return;
-        }
+        // Prazna lestvica ne zasede prostora (P3 vsebina, glej opombo pri CSS).
+        if (!lestvica.length) { boardBox.hidden = true; return; }
+        boardBox.hidden = false;
         boardList.innerHTML = "";
         lestvica.forEach(function(r, i){
           var row = document.createElement("div");
@@ -1603,15 +1608,37 @@ def build_body(data):
     hist = seo.load_history()
     streak = dry_streak(hist, seo.TODAY - datetime.timedelta(days=1))
 
-    temp_txt = f'{seo.num(weather.get("temp_c"), 1)} °C' if weather.get("temp_c") is not None else "– °C"
-    snow_txt = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm snega v 24 h'
-                if weather.get("expected_snow_cm_24h") is not None else "– cm snega v 24 h")
-    # Kratki različici samo za crn-stat kartice (glej build_body spodaj) --
-    # temp_txt/snow_txt (polna poved) grosta naprej v share_payload za "Deli
-    # kot sliko", da tam ni treba podvajati logike.
-    snow_val = (f'{seo.num(weather.get("expected_snow_cm_24h"), 1)} cm'
-                if weather.get("expected_snow_cm_24h") is not None else "– cm")
+    temp_c = weather.get("temp_c")
+    snow_new = weather.get("expected_snow_cm_24h")
+    precip = weather.get("precip_mm_24h")
+    temp_txt = f'{seo.num(temp_c, 1)} °C' if temp_c is not None else "– °C"
+    snow_txt = (f'{seo.num(snow_new, 1)} cm snega v 24 h'
+                if snow_new is not None else "– cm snega v 24 h")
     streak_val = f"{streak} dni"
+
+    # Snežna odeja: tekoča ocena winter_engine.py za pas 900 m (glej
+    # compute_snowpack tam) -- najbližji pas višini prelaza (902 m). Ločena od
+    # NOVEGA snega (napoved 24 h), ker sta to dva različna podatka: odeja je
+    # to, kar že leži, nov sneg to, kar lahko pade. Ne zlivaj ju v eno število.
+    snowpack_cm = ((data.get("snowpack") or {}).get("depth_cm") or {}).get("900")
+
+    na = '<span class="crn-na">Podatek trenutno ni na voljo.</span>'
+    temp_html = (f'<p class="crn-big" id="crn-temp-val">{temp_txt}</p>' if temp_c is not None
+                 else f'<p id="crn-temp-val">{na}</p>')
+    snowpack_html = (f'<p class="crn-big">{seo.num(snowpack_cm, 0)} cm</p>' if snowpack_cm is not None
+                     else f'<p>{na}</p>')
+    snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
+    precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
+
+    # "Posodobljeno ob …" -- čas izračuna v našem pasu. Živi preračun v JS ga
+    # ob uspehu prepiše s trenutnim časom (glej primeniZivoStanje).
+    updated_txt = "Posodobljeno: čas izračuna ni znan"
+    try:
+        gen = datetime.datetime.fromisoformat(generated_at).astimezone(ZoneInfo("Europe/Ljubljana"))
+        updated_txt = (f"Posodobljeno ob {gen:%H:%M}" if gen.date() == seo.TODAY
+                       else f"Posodobljeno {gen.day}. {gen.month}. ob {gen:%H:%M}")
+    except (ValueError, TypeError):
+        pass
 
     # Dnevna OG kartica: isti vzorec kot generate_igra_og.py, poklican iz
     # generate_igra_page.py -- riše se tu (ne v svojem koraku delavnega toka),
@@ -1626,10 +1653,10 @@ def build_body(data):
     except Exception as e:  # noqa: BLE001 — namenoma široko, glej opombo zgoraj
         print(f"! OG kartica ni nastala ({e}) — ostane splošna og-image.jpg", file=sys.stderr)
 
-    # "Deli kot sliko" bere ta paket, ne živega animiranega DOM-a (glej
-    # gauge_svg(static=True)/icon_svg_static) — vsi podatki za canvas so tu
-    # že pripravljeni, JS jih samo nariše. "Vprašaj še enkrat" dobi cel
-    # QUOTES seznam za klientski reroll (server izbere samo dnevni privzetek).
+    # "Deli kot sliko" bere ta paket, ne DOM-a (glej gauge_svg/icon_svg_static)
+    # — vsi podatki za canvas so tu že pripravljeni, JS jih samo nariše.
+    # "Vprašaj še enkrat" dobi cel QUOTES seznam za klientski reroll (server
+    # izbere samo dnevni privzetek).
     share_payload = {
         "verdict": zone["label"],
         "color": zone["color"],
@@ -1637,28 +1664,31 @@ def build_body(data):
         "temp": temp_txt,
         "snow": snow_txt,
         "streak": f"suh niz v dolini: {streak_val}",
-        "gauge": gauge_svg(zone, static=True),
+        "gauge": gauge_svg(zone),
         "icon": icon_svg_static(zone["id"]),
     }
-    # Gumbi za poročanje uporabijo ISTE cone/ikone kot merilnik zgoraj (glej
+    # Gumbi za poročanje uporabijo ISTE cone/ikone kot izračun (glej
     # ZONE_ICONS), samo s krajšo oznako (ZONE_SHORT) -- da poročevalec izbira
     # med istimi štirimi možnostmi, ki jih izračuna prikazuje, in je
     # razkorak med njima (bistvo strani) dejansko primerljiv.
     report_zone_buttons = "".join(
-        f'<button type="button" class="crn-report-zbtn" data-zona="{z["id"]}" '
-        f'style="--zc:{z["color"]}">{ZONE_ICONS[z["id"]]}<span>{ZONE_SHORT[z["id"]]}</span></button>'
+        f'<button type="button" class="crn-zbtn" data-zona="{z["id"]}" '
+        f'style="--zc:{z["color"]};--zbg:{STATUS[z["id"]]["bg"]}">{ZONE_ICONS[z["id"]]}'
+        f'<span>{ZONE_SHORT[z["id"]]}</span></button>'
         for z in ZONES
     )
 
     # Klientski živi preračun (glej __ZONE_DATA_JSON__ v SHARE_JS_TEMPLATE)
-    # rabi isti ZONES podatek + ikone -- v istem vrstnem redu kot pick_zone()
-    # vrača (sonce/nekaj/verige/spolzko), da JS lahko indeksira ZONE_DATA[0..3]
-    # brez iskanja po id-ju.
+    # rabi isti ZONES podatek + STATUS + ikone -- v istem vrstnem redu kot
+    # pick_zone() vrača (sonce/nekaj/verige/spolzko), da JS lahko indeksira
+    # ZONE_DATA[0..3] brez iskanja po id-ju.
     zone_data = [
-        {"id": z["id"], "label": z["label"], "desc": z["desc"], "color": z["color"],
-         "mid": z["mid"], "icon": ZONE_ICONS[z["id"]]}
+        {"id": z["id"], "label": z["label"], "color": z["color"], "mid": z["mid"],
+         "status": STATUS[z["id"]]["status"], "statusDesc": STATUS[z["id"]]["desc"],
+         "bg": STATUS[z["id"]]["bg"], "ink": STATUS[z["id"]]["ink"], "icon": ZONE_ICONS[z["id"]]}
         for z in ZONES
     ]
+    st = STATUS[zone["id"]]
 
     # Koda za "Vstavi značko" (crn-embed spodaj) -- ročno pobegel niz (ne
     # html.escape, ta modul tu ni uvožen), ker gre za en sam znan literal, ne
@@ -1678,124 +1708,176 @@ def build_body(data):
                 .replace("__ZONE_DATA_JSON__", zone_data_json)
                 .replace("__TODAY_ISO__", today_iso))
 
+    # Vrstni red je hierarhija (mobile-first, glej opombo pri CSS): status →
+    # meritve → čas → kamera → poročanje → zadnja poročila → vse ostalo.
+    # Na namizju gresta kamera in poročanje v dva stolpca (.crn-grid).
     body = f'''{CSS}
-  <div class="crn-wrap">
-    <div class="crn-install-top">
-      <button type="button" id="crn-install" class="crn-action-btn crn-install-btn" hidden>📲 Namesti na zaslon</button>
-      <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-    </div>
-    <div class="crn-hero">
-      {mountain_icon_svg()}
-      <div>
-        <h1 class="crn-title">Kako je čez Črnivec?</h1>
-        <p class="crn-sub">Vprašanje, ki ga v dolini postavijo vsak dan. Uradnega odgovora
-        ni – tale indeks pa (skoraj) enako zanesljivo kaže razmere.</p>
-        <p id="crn-visits" class="crn-visits" hidden></p>
-        <p id="crn-mascot-msg" class="crn-mascot-msg" hidden></p>
+  <div class="crn">
+    <div class="crn-top">
+      <a class="crn-brand" href="/">Meteorec</a>
+      <div class="crn-install-wrap">
+        <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
+        <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
       </div>
     </div>
 
-    <p id="crn-strike-banner" class="crn-strike-banner" hidden></p>
+    <section class="crn-hero" aria-labelledby="crn-h1">
+      <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
+      <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
 
-    <div class="crn-panel tilt">
-      {gauge_svg(zone)}
-      <div class="crn-verdict" id="crn-verdict" style="color:{zone['color']}">{starburst_svg(zone['color'])}<div id="crn-verdict-icon" style="display:contents">{ZONE_ICONS[zone['id']]}</div><span id="crn-verdict-label">{zone['label']}</span>
-      <p class="crn-verdict-desc" id="crn-verdict-desc">{zone['desc']}</p></div>
-      <div class="crn-stats">
-        <div class="crn-stat" id="crn-stat-temp"><span class="crn-stat-emoji" aria-hidden="true">🌡️</span>
-          <span class="crn-stat-val">{temp_txt}</span><span class="crn-stat-lbl">na prelazu</span></div>
-        <div class="crn-stat" id="crn-stat-snow"><span class="crn-stat-emoji" aria-hidden="true">❄️</span>
-          <span class="crn-stat-val">{snow_val}</span><span class="crn-stat-lbl">sneg&nbsp;/&nbsp;24h</span></div>
-        <div class="crn-stat"><span class="crn-stat-emoji" aria-hidden="true">🌂</span>
-          <span class="crn-stat-val">{streak_val}</span><span class="crn-stat-lbl">suh niz v dolini</span></div>
+      <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
+
+      <div class="crn-status" id="crn-status" data-zone="{zone['id']}"
+        style="--zc:{zone['color']};--zbg:{st['bg']};--zink:{st['ink']}" role="status" aria-live="polite">
+        <div class="crn-status-icon" id="crn-status-icon">{ZONE_ICONS[zone['id']]}</div>
+        <p class="crn-status-title" id="crn-status-title">{st['status']}</p>
+        <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
+        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
       </div>
-      <div class="crn-data">Isti izračun kot na <a href="/zima/prevoznost-prelazov/">resni strani</a>
-      – tukaj so nalepke con samo za hec.</div>
+
+      <div class="crn-cards">
+        <div class="crn-card">
+          <p class="crn-card-h">{UI_ICONS['temp']}Temperatura</p>
+          {temp_html}
+          <p class="crn-card-sub">na prelazu</p>
+        </div>
+        <div class="crn-card">
+          <p class="crn-card-h">{UI_ICONS['snow']}Sneg</p>
+          {snowpack_html}
+          <p class="crn-card-sub">snežna odeja (ocena)</p>
+          <p class="crn-card-sub">Napoved 24 h: <b id="crn-snow-new">{snow_new_txt}</b> snega ·
+          <b id="crn-precip">{precip_txt}</b> padavin</p>
+        </div>
+      </div>
+
+      <p class="crn-updated" id="crn-updated">{updated_txt} · ocena iz vremenskega modela</p>
       <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
+
+      <a class="crn-btn crn-btn-primary" href="#kamera">{UI_ICONS['cam']}Poglej kamero</a>
+    </section>
+
+    <div class="crn-grid">
+      <section class="crn-panel" id="kamera" aria-labelledby="crn-cam-h">
+        <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
+        <div class="crn-cam-frame is-loading">
+          <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
+          <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
+          <span class="crn-cam-badge" aria-hidden="true"><i></i>V živo</span>
+          <span class="crn-cam-place" aria-hidden="true">Črnivec · 902 m</span>
+          <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
+          <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej na promet.si</a></p>
+        </div>
+        <p class="crn-cam-meta">Poglej trenutno stanje prelaza. Vir: <a href="https://www.promet.si" target="_blank"
+        rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
+      </section>
+
+      <section class="crn-panel crn-report" id="crn-report" aria-labelledby="crn-rep-h" hidden>
+        <h2 class="crn-h2" id="crn-rep-h">Kako je bilo tebi?</h2>
+        <p class="crn-lead">Povej naslednjemu vozniku.</p>
+        <div class="crn-zones" id="crn-report-zones">
+          {report_zone_buttons}
+        </div>
+        <div id="crn-report-form" class="crn-form" hidden>
+          <textarea id="crn-report-note" class="crn-input" maxlength="140"
+            placeholder="Neobvezna opomba (npr. »samo do polovice«) …" aria-label="Opomba"></textarea>
+          <input type="text" id="crn-report-ime" class="crn-input" maxlength="24"
+            placeholder="Vzdevek za lestvico (neobvezno)" aria-label="Vzdevek">
+          <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
+            style="position:absolute;left:-9999px" aria-hidden="true">
+          <button type="button" id="crn-report-submit" class="crn-btn crn-btn-primary">Pošlji poročilo</button>
+        </div>
+        <p id="crn-report-status" class="crn-status-msg" role="status" aria-live="polite" hidden></p>
+        <div id="crn-report-badge" class="crn-badge" hidden></div>
+
+        <h3 class="crn-h3">Zadnja poročila</h3>
+        <ul id="crn-report-feed" class="crn-feed" aria-live="polite">
+          <li class="crn-feed-item" aria-hidden="true"><span class="crn-skel" style="width:40%"></span></li>
+          <li class="crn-feed-item" aria-hidden="true"><span class="crn-skel" style="width:55%"></span></li>
+        </ul>
+        <p id="crn-report-week" class="crn-week" hidden></p>
+      </section>
     </div>
 
-    <div class="crn-panel crn-report" id="crn-report" hidden>
-      <p class="crn-report-q">📋 Poročaj, kako je bilo, ko si šel čez</p>
-      <div class="crn-report-zones" id="crn-report-zones">
-        {report_zone_buttons}
+    <div class="crn-lower">
+      <div class="crn-stack">
+        <section class="crn-tip" aria-labelledby="crn-tip-h">
+          {mountain_icon_svg()}
+          <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
+          <div class="crn-quote"><p>{quote}</p></div>
+          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
+          <p id="crn-visits" class="crn-visits" hidden></p>
+          <div class="crn-actions">
+            <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
+            <button type="button" id="crn-listen" class="crn-btn" hidden>Poslušaj</button>
+            <button type="button" id="crn-share" class="crn-btn" hidden>Deli kot sliko</button>
+          </div>
+          <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+        </section>
+
+        <section class="crn-panel crn-vote" id="crn-vote" hidden>
+          <div class="crn-vote-row">
+            <p class="crn-vote-q">Se ti zdi trenutna ocena pravilna?</p>
+            <div class="crn-vote-btns">
+              <button type="button" id="crn-vote-gre" class="crn-btn">👍 Gre</button>
+              <button type="button" id="crn-vote-ne" class="crn-btn">👎 Ne gre</button>
+            </div>
+          </div>
+          <div class="crn-vote-result" id="crn-vote-result" hidden>
+            <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
+            <p class="crn-vote-count" id="crn-vote-count"></p>
+          </div>
+        </section>
       </div>
-      <div id="crn-report-form" hidden>
-        <textarea id="crn-report-note" class="crn-report-note" maxlength="140"
-          placeholder="Neobvezna opomba (npr. »samo do polovice«) …"></textarea>
-        <input type="text" id="crn-report-ime" class="crn-report-ime" maxlength="24"
-          placeholder="Vzdevek za lestvico (neobvezno)">
-        <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
-          style="position:absolute;left:-9999px" aria-hidden="true">
-        <button type="button" id="crn-report-submit" class="crn-action-btn">Pošlji poročilo</button>
-      </div>
-      <p id="crn-report-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-      <div id="crn-report-badge" class="crn-report-badge" hidden></div>
-      <p id="crn-report-week" class="crn-report-week" hidden></p>
-      <div id="crn-report-feed" class="crn-report-feed"></div>
-    </div>
 
-    <div class="crn-panel crn-board" id="crn-board" hidden>
-      <p class="crn-board-q">🏆 Lestvica poročevalcev</p>
-      <div id="crn-board-list" class="crn-board-list"></div>
-    </div>
+      <div class="crn-stack">
+        {accuracy_html}
 
-    <div class="crn-panel crn-cam">
-      <p class="crn-cam-label">📷 Namesto da vprašaš — poglej. Živa kamera s prelaza:</p>
-      <div class="crn-cam-frame">
-        <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
-        <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
-        <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
-        <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej neposredno na promet.si</a>.</p>
-      </div>
-      <p class="crn-cam-meta">Vir: <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
-      (Direkcija RS za infrastrukturo) — samodejno se osveži vsakih nekaj minut.</p>
-    </div>
-
-    <div class="crn-quote-row">
-      <div class="crn-quote"><p>{quote}</p><div class="crn-quote-tail"></div></div>
-      <div class="crn-avatar">{avatar_svg()}<span>nekdo iz skupine</span></div>
-    </div>
-
-    <div class="crn-panel crn-vote" id="crn-vote" hidden>
-      <p class="crn-vote-q">Se ti zdi ta ocena danes poštena?</p>
-      <div class="crn-vote-btns">
-        <button type="button" id="crn-vote-gre" class="crn-vote-btn crn-vote-btn-gre">🟢 Gre</button>
-        <button type="button" id="crn-vote-ne" class="crn-vote-btn crn-vote-btn-ne">🔴 Ne gre</button>
-      </div>
-      <div class="crn-vote-result" id="crn-vote-result" hidden>
-        <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
-        <p class="crn-vote-count" id="crn-vote-count"></p>
+        <section class="crn-panel crn-board" id="crn-board" aria-labelledby="crn-board-h" hidden>
+          <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
+          <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
+        </section>
       </div>
     </div>
 
-    {accuracy_html}
+    <div class="crn-stack">
+      <details class="crn-acc">
+        <summary>ⓘ Kako nastane Meteorec indeks?</summary>
+        <div class="crn-acc-body">
+          <p>Indeks ni meritev na cesti. Iz napovedi Open-Meteo za dolino in višinske razlike do
+          prelaza (902 m) izračunamo temperaturo na vrhu in koliko snega lahko pade v naslednjih
+          24 urah — isti izračun kot na <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost
+          prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
+          spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
+          za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
+          <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
+          indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
+          Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
+        </div>
+      </details>
 
-    <div class="crn-actions">
-      <button type="button" id="crn-reroll" class="crn-action-btn" hidden>🔁 Vprašaj še enkrat</button>
-      <button type="button" id="crn-listen" class="crn-action-btn" hidden>🔊 Poslušaj namesto beri</button>
-      <button type="button" id="crn-share" class="crn-action-btn" hidden>📤 Deli kot sliko</button>
+      <details class="crn-acc crn-embed">
+        <summary>Vstavi značko na svojo stran</summary>
+        <div class="crn-acc-body">
+          <img class="crn-embed-preview" src="{WORKER_BASE}/crnivec/znacka.svg"
+            alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
+          <div class="crn-embed-row">
+            <code id="crn-embed-code" class="crn-embed-code">{embed_snippet}</code>
+            <button type="button" id="crn-embed-copy" class="crn-btn">Kopiraj</button>
+          </div>
+          <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+          <p class="crn-share-status">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
+        </div>
+      </details>
     </div>
-    <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
 
-    <div class="crn-panel crn-embed">
-      <p class="crn-embed-q">🔗 Vstavi značko na svojo stran</p>
-      <img class="crn-embed-preview" src="{WORKER_BASE}/crnivec/znacka.svg"
-        alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
-      <div class="crn-embed-code-row">
-        <code id="crn-embed-code" class="crn-embed-code">{embed_snippet}</code>
-        <button type="button" id="crn-embed-copy" class="crn-action-btn">📋 Kopiraj</button>
-      </div>
-      <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-      <p class="crn-embed-note">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
-    </div>
-
-    <p class="crn-fine"><strong>Drobni tisk:</strong> ta indeks je znanstveno pomešan z ugibanjem,
-    klepetom v čakalnici in kakšnim komentarjem iz FB. Meteorec ne odgovarja, če je bilo v
-    resnici drugače – kar je, mimogrede, tudi bistvo te strani.
-    <span class="crn-links">Za resnično stanje ceste glej <a href="/zima/prevoznost-prelazov/">MeteoZima:
-    prevoznost prelazov</a> ali uradne vire: promet.si, AMZS, DARS.</span></p>
-
-    <a class="crn-back" href="/">← Nazaj na meteorec.si</a>
+    <footer class="crn-official">
+      <p><strong>Meteorec indeks je neuradna informacija.</strong> Za uradno stanje cest glej
+      <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
+      (Prometno-informacijski center), AMZS ali DARS.</p>
+      <p>Podrobnejša vremenska ocena za vse prelaze: <a href="/zima/prevoznost-prelazov/">MeteoZima:
+      prevoznost prelazov</a>.</p>
+      <a class="crn-btn crn-back" href="/">← Nazaj na meteorec.si</a>
+    </footer>
   </div>
 {share_js}'''
     return body, og_slika
