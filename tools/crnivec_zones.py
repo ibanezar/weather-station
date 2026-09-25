@@ -40,21 +40,37 @@ DRSI_URL = "https://weatherireica1.filip-eremita.workers.dev/crnivec-drsi"
 DRSI_MAX_AGE_MIN = 40
 
 
-def fetch_drsi_crnivec():
-    """Sveža meritev s prelaza (slovar iz /crnivec-drsi) ali None."""
+# Višini postaj DRSI iz DEM (Open-Meteo Elevation API za njuni koordinati,
+# preverjeno 25. 9. 2026) -- ne ugibani. Razlika 475 m je osnova za
+# "Črnivec proti dolini" (valley_compare v generate_crnivec_page.py).
+DRSI_ELEV_M = {"crnivec": 903, "gornji_grad": 428}
+
+
+def _fresh(st):
+    try:
+        ts = datetime.datetime.fromisoformat(st["ts"].replace("Z", "+00:00"))
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return False
+    return (datetime.datetime.now(datetime.timezone.utc) - ts).total_seconds() / 60 <= DRSI_MAX_AGE_MIN
+
+
+def fetch_drsi_postaje():
+    """Sveže meritve vseh postaj iz /crnivec-drsi ({"crnivec": {...},
+    "gornji_grad": {...}}); postaja s staro meritvijo manjka. {} ob napaki."""
     try:
         req = urllib.request.Request(DRSI_URL, headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-Crnivec/1.0)"})
         with urllib.request.urlopen(req, timeout=10) as r:
             data = json.loads(r.read().decode("utf-8"))
-        st = ((data or {}).get("postaje") or {}).get("crnivec")
-        if not st or not st.get("ts"):
-            return None
-        ts = datetime.datetime.fromisoformat(st["ts"].replace("Z", "+00:00"))
-        age_min = (datetime.datetime.now(datetime.timezone.utc) - ts).total_seconds() / 60
-        return st if age_min <= DRSI_MAX_AGE_MIN else None
+        postaje = (data or {}).get("postaje") or {}
+        return {k: v for k, v in postaje.items() if v and _fresh(v)}
     except (urllib.error.URLError, TimeoutError, ValueError, OSError, AttributeError) as e:
-        print(f"⚠ DRSI meritev s Črnivca ni na voljo: {e}", file=sys.stderr)
-        return None
+        print(f"⚠ DRSI meritve niso na voljo: {e}", file=sys.stderr)
+        return {}
+
+
+def fetch_drsi_crnivec():
+    """Sveža meritev s prelaza ali None."""
+    return fetch_drsi_postaje().get("crnivec")
 
 
 def with_measurement(weather, drsi):
