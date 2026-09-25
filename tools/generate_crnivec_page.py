@@ -530,6 +530,41 @@ def commute_html(days):
     return "".join(rows)
 
 
+# »Vreme na Črnivcu za 7 dni« (weather["daily"] iz compute_pass_daily v
+# winter_engine.py). Samo strežniški izris iz jutranjega teka, brez JS kopije:
+# dnevni povzetek se čez dan malo spremeni, druga kopija formule pa bi bila še
+# ena podvojitev za vzdrževanje. Ključna beseda »vreme črnivec 7 dni«.
+POLEDICA_DAN = {"nizko": ("ok", "malo verjetna"), "srednje": ("warn", "možna"),
+                "visoko": ("stop", "verjetna")}
+
+
+def week_html(days, today):
+    if not days:
+        return ""
+    rows = []
+    for d in days:
+        label = day_label(d["date"], today)
+        if d["date"] == today.isoformat() and d.get("hours", 24) < 24:
+            label += '<span class="crn-t-sub">do polnoči</span>'
+        t = (f'{num1(d["tmin_c"])} / {num1(d["tmax_c"])} °C'
+             if d.get("tmin_c") is not None else "–")
+        pp = d.get("precip_prob_pct")
+        pr = ("suho" if (d.get("precip_mm") or 0) < 0.1 else f'{num1(d["precip_mm"])} mm')
+        if pp:
+            pr += f'<span class="crn-t-sub">verjetnost do {pp:.0f} %</span>'
+        sn = f'+{num1(d["snow_cm"])} cm' if (d.get("snow_cm") or 0) >= 0.1 else "–"
+        lvl, word = POLEDICA_DAN.get(d.get("black_ice"), ("na", "ni ocene"))
+        rows.append(
+            f'<tr><th scope="row">{label}</th><td data-l="Min / max">{t}</td>'
+            f'<td data-l="Padavine">{pr}</td><td data-l="Nov sneg">{sn}</td>'
+            f'<td class="crn-wk-bi" data-l="Poledica" data-lvl="{lvl}"><span class="crn-ck-i" aria-hidden="true"></span>'
+            f'<span>{word}</span></td></tr>')
+    return ('<table class="crn-t crn-wk"><thead><tr><th scope="col">Dan</th>'
+            '<th scope="col">Najnižja / najvišja</th><th scope="col">Padavine</th>'
+            '<th scope="col">Nov sneg</th><th scope="col">Poledica</th></tr></thead>'
+            f'<tbody>{"".join(rows)}</tbody></table>')
+
+
 def forecast_sentence(rows_now, hours):
     """En stavek: bo slabše, bolje ali podobno? Primerja isto merilo kot
     ure (temperatura + vozišče), ne megle in vetra, ki ju napoved za prelaz
@@ -1250,6 +1285,28 @@ CSS = '''
   .crn-special{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
     padding:var(--s3);margin-top:var(--s4);text-align:left}
   .crn-sp-list{list-style:none;margin:0;padding:0}
+  .crn-week{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
+    padding:var(--s3);margin-top:var(--s4);text-align:left}
+  .crn-wk-scroll{overflow-x:auto}
+  .crn-wk td,.crn-wk th{white-space:nowrap}
+  .crn-wk-bi{display:flex;align-items:center;gap:6px}
+  /* Telefon: vsak dan je svoja mala mreža z oznako nad vrednostjo, namesto
+     tabele s petimi stolpci, ki bi jo bilo treba drsati vstran. */
+  @media (max-width:560px){
+    .crn-t.crn-wk thead{display:none}
+    .crn-t.crn-wk,.crn-t.crn-wk tbody{display:block}
+    .crn-t.crn-wk tr{display:grid;grid-template-columns:1.5fr .9fr .8fr 1.1fr;gap:2px var(--s1);
+      padding:var(--s1) 0;border-top:1px solid #efece5;font-size:13px}
+    .crn-t.crn-wk tr:first-child{border-top:0}
+    .crn-t.crn-wk th,.crn-t.crn-wk td{border:0;padding:0;white-space:normal}
+    .crn-t.crn-wk th{grid-column:1/-1;font-size:14px}
+    .crn-t.crn-wk th .crn-t-sub{display:inline;margin-left:6px}
+    .crn-t.crn-wk td::before{content:attr(data-l);display:block;font-size:10px;font-weight:700;color:var(--muted)}
+    .crn-t.crn-wk td .crn-t-sub{font-size:11px}
+    .crn-t.crn-wk td[data-l="Min / max"]{white-space:nowrap}
+    .crn-wk-bi{display:block}
+    .crn-wk-bi .crn-ck-i{display:none}
+  }
   .crn-sp{display:grid;grid-template-columns:24px 1fr;gap:var(--s1);padding:var(--s1) 0;
     border-top:1px solid #efece5;margin:0}
   .crn-sp:first-child{border-top:0}
@@ -1494,6 +1551,7 @@ CSS = '''
     .crn-hero-main .crn-next{grid-column:1/-1;grid-row:3;margin-top:0}
     .crn-hero-main .crn-commute{grid-column:1/-1;grid-row:4;margin-top:0}
     .crn-hero-main .crn-special{grid-column:1/-1;grid-row:5;margin-top:0}
+    .crn-hero-main .crn-week{grid-column:1/-1;grid-row:6;margin-top:0}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
     .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
     .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
@@ -3238,6 +3296,7 @@ def build_body(data):
 
     snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
     faq = faq_items(snowpack_cm, snow_new)
+    week = week_html(weather.get("daily"), seo.TODAY)
     precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
 
     temp_src_txt = "na prelazu · ocena modela"
@@ -3431,6 +3490,12 @@ def build_body(data):
         <h2 class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</h2>
         {sp_html}
         <p class="crn-check-note">{sp_note}</p>
+      </section>
+
+      <section class="crn-week" id="napoved-7-dni" aria-labelledby="crn-wk-h"{'' if week else ' hidden'}>
+        <h2 class="crn-now-h" id="crn-wk-h">Vreme na Črnivcu za 7 dni</h2>
+        <div class="crn-wk-scroll">{week}</div>
+        <p class="crn-check-note">{sp_note} Temperatura je preračunana na 902 m. Dlje v prihodnost je napoved manj zanesljiva.</p>
       </section>
 
       <div class="crn-hero-side">
@@ -3655,7 +3720,7 @@ LLMS_TXT = f"""# Kako je čez Črnivec? (crnivec.si)
 
 ## Stran
 
-- [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
+- [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, vreme za 7 dni (najnižja in najvišja temperatura, padavine, nov sneg, poledica po dnevih), termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
 - [Pogosta vprašanja]({CRN_SITE}/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
 - [Zapore in stanje ceste]({CRN_SITE}/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
 

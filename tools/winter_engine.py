@@ -264,7 +264,51 @@ def compute_pass_weather(hourly, idx_now, elevation_m, calib=None):
                        if (temp_c is not None and idx_now is not None) else None),
         "calib": calib,
         "special": compute_pass_special(hourly, idx_now, elevation_m, calib),
+        "daily": compute_pass_daily(hourly, idx_now, elevation_m, calib),
     }
+
+
+def compute_pass_daily(hourly, idx_now, elevation_m, calib=None):
+    """»Vreme na Črnivcu za 7 dni« (crnivec.si): dnevni povzetek NA VIŠINI
+    prelaza za DAILY_FORECAST_DAYS dni -- najnižja in najvišja temperatura
+    (gradient + ista umeritev DRSI po uri dneva kot next_hours), padavine,
+    najvišja verjetnost padavin, nov sneg (snow_fraction, kot povsod tu) in
+    najslabša ocena poledice (black_ice_category_for_hour, ne nova formula).
+    Dan 0 je samo preostanek današnjega dne (group_by_day). Modelska napoved,
+    ne stanje ceste; umeritev je naučena na zadnjih 10 dneh, zato je za dneve
+    daleč naprej le groba."""
+    if idx_now is None:
+        return []
+    times = hourly.get("time") or []
+    fl = hourly.get("freezing_level_height") or []
+    out = []
+    for date, idxs in group_by_day(times, idx_now, DAILY_FORECAST_DAYS):
+        temps, precip, snow, probs, worst = [], 0.0, 0.0, [], -1
+        for i in idxs:
+            t = hval(hourly, "temperature_2m", i)
+            if t is not None:
+                temps.append(t - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100
+                             + _calib_at(calib, times[i]))
+            p = hval(hourly, "precipitation", i) or 0
+            precip += p
+            snow += p * snow_fraction(elevation_m, fl[i] if i < len(fl) else None) * SNOW_RATIO_CM_PER_MM
+            pp = hval(hourly, "precipitation_probability", i)
+            if pp is not None:
+                probs.append(pp)
+            bi = black_ice_category_for_hour(hourly, i, elevation_m, _calib_at(calib, times[i]))
+            if bi:
+                worst = max(worst, RANK_ORDER.index(bi[0]))
+        out.append({
+            "date": date,
+            "hours": len(idxs),
+            "tmin_c": round(min(temps), 1) if temps else None,
+            "tmax_c": round(max(temps), 1) if temps else None,
+            "precip_mm": round(precip, 1),
+            "precip_prob_pct": max(probs) if probs else None,
+            "snow_cm": round(snow, 1),
+            "black_ice": RANK_ORDER[worst] if worst >= 0 else None,
+        })
+    return out
 
 
 def compute_pass_special(hourly, idx_now, elevation_m, calib=None):
