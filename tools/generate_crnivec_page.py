@@ -3562,6 +3562,11 @@ def build_body(data):
           <p class="crn-vote-count" id="crn-vote-count"></p>
         </div>
       </section>
+      <!-- Poštenost in zime sta v levem (širšem) stolpcu, da je na namizju
+           uravnotežen z desnim (poročila, lestvica, razlaga). Na telefonu
+           vrstni red še vedno nosi .crn-o5. -->
+      <div class="crn-o5">{accuracy_html}</div>
+      <div class="crn-o5">{arso_html}</div>
       </div>
 
       <div class="crn-col">
@@ -3591,8 +3596,6 @@ def build_body(data):
         </ul>
         <p id="crn-report-week" class="crn-week" hidden></p>
       </section>
-      <div class="crn-o5">{accuracy_html}</div>
-      <div class="crn-o5">{arso_html}</div>
 
       <section class="crn-panel crn-board crn-o6" id="crn-board" aria-labelledby="crn-board-h" hidden>
         <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
