@@ -72,7 +72,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
 from generate_story_card import dry_streak  # noqa: E402 — isti izračun kot na zgodbah, ne podvojen tu
 from crnivec_zones import (  # noqa: E402 — deljeno z generate_story_card.py (tema CRNIVEC)
-    DRSI_MAX_AGE_MIN, ZONES, fetch_drsi_crnivec, pick_zone, with_measurement)
+    DRSI_ELEV_M, DRSI_MAX_AGE_MIN, ZONES, fetch_drsi_postaje, pick_zone, with_measurement)
 from winter_engine import black_ice_category  # noqa: E402 — ista formula poledice kot na /zima/, ne podvojena
 
 ROOT = seo.ROOT
@@ -507,6 +507,48 @@ def special_html(items):
     return f'<ul class="crn-sp-list">{"".join(out)}</ul>'
 
 
+# ── "Črnivec proti dolini" ──────────────────────────────────────────────
+# Obe številki sta MERITVI (postaji DRSI na prelazu in v Gornjem Gradu, isti
+# /crnivec-drsi), zato razlika ni konstanta gradienta, ampak pove, kaj se
+# res dogaja: ob inverziji je na prelazu topleje kot v dolini. Klientska
+# kopija: primerjavaDoline() v SHARE_JS_TEMPLATE.
+VALLEY_LAPSE_C_PER_100M = 0.65   # isti standardni gradient kot LAPSE_RATE_C_PER_100M
+VALLEY_BAND_C = 1.5              # ± okoli pričakovane razlike še šteje za "običajno"
+VALLEY_MAX_SKEW_MIN = 30         # meritvi morata biti iz približno istega časa
+
+
+def valley_compare(p, v):
+    if not p or not v or p.get("temp_c") is None or v.get("temp_c") is None:
+        return None
+    try:
+        tp = datetime.datetime.fromisoformat(p["ts"].replace("Z", "+00:00"))
+        tv = datetime.datetime.fromisoformat(v["ts"].replace("Z", "+00:00"))
+        if abs((tp - tv).total_seconds()) / 60 > VALLEY_MAX_SKEW_MIN:
+            return None
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None
+    dh = DRSI_ELEV_M["crnivec"] - DRSI_ELEV_M["gornji_grad"]
+    diff = round(p["temp_c"] - v["temp_c"], 1)
+    expected = -VALLEY_LAPSE_C_PER_100M * dh / 100
+    if diff >= 0.5:
+        say = "Inverzija: na prelazu je topleje kot v dolini. Hladen zrak leži na dnu."
+    elif diff > expected + VALLEY_BAND_C:
+        say = "Razlika je manjša kot običajno. V dolini se zadržuje hladen zrak."
+    elif diff < expected - VALLEY_BAND_C:
+        say = f"Na prelazu je hladneje, kot bi pričakovali za {dh} m višine."
+    else:
+        say = f"Običajna razlika za {dh} m višine."
+    mins = None
+    if p.get("tmin_c") is not None and v.get("tmin_c") is not None:
+        mins = f'Najnižja danes: Črnivec {num1(p["tmin_c"])} °C · Gornji Grad {num1(v["tmin_c"])} °C'
+    return {"tp": p["temp_c"], "tv": v["temp_c"], "diff": diff, "dh": dh, "say": say, "mins": mins, "ts": p["ts"]}
+
+
+def signed(x):
+    """"+1,2" / "−3,4" s pravim minusom -- predznak je tu bistvo številke."""
+    return ("+" if x > 0 else "−" if x < 0 else "±") + num1(abs(x))
+
+
 def check_note(drsi):
     """Vrstica pod seznamom: od kod so meritve in kdaj so bile narejene."""
     if drsi and drsi.get("ts"):
@@ -876,6 +918,20 @@ CSS = '''
   .crn-sp-lines{margin:2px 0 0;padding-left:1.1em;font-size:14px;color:var(--ink2)}
   .crn-sp-lines li{margin:0}
   .crn-sp-none{font-size:15px;font-weight:600;margin:0}
+
+  /* "Črnivec proti dolini" (valley_compare) -- dve meritvi, velika razlika. */
+  .crn-duel{background:#fff;border:var(--bd);border-radius:14px;box-shadow:var(--sh);
+    padding:var(--s3);margin-top:var(--s2);text-align:left}
+  .crn-duel-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2)}
+  .crn-duel-rows{flex:1 1 200px;min-width:0}
+  .crn-duel-row span{white-space:nowrap}
+  .crn-duel-row{display:flex;justify-content:space-between;gap:var(--s1);font-size:14px;margin:0;
+    padding:4px 0;border-top:1px solid #efece5}
+  .crn-duel-row:first-child{border-top:0}
+  .crn-duel-row b{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .crn-duel-diff{font-size:34px;font-weight:800;line-height:1;margin:0;white-space:nowrap;
+    font-variant-numeric:tabular-nums;background:#fef08a;border:3px solid #111;border-radius:12px;padding:6px 10px}
+  .crn-duel-say{font-size:15px;font-weight:700;margin:var(--s1) 0 0}
 
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
   .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
@@ -1697,12 +1753,51 @@ SHARE_JS_TEMPLATE = '''
         : "Meritev s prelaza trenutno ni na voljo — prikazana je ocena modela. Vozišče je ocena, ne meritev.";
     }
   }
+  // "Črnivec proti dolini" -- NAMERNA PODVOJITEV valley_compare()/signed()
+  // iz generate_crnivec_page.py (isti pragovi).
+  var DUEL_ELEV = __DUEL_ELEV_JSON__, DUEL_LAPSE = 0.65, DUEL_BAND = 1.5, DUEL_SKEW_MIN = 30;
+  function predznak(x){ return (x > 0 ? "+" : x < 0 ? "−" : "±") + numSlLive(Math.abs(x), 1); }
+  function primerjavaDoline(p, v){
+    if (!p || !v || p.temp_c == null || v.temp_c == null) return null;
+    var a = Date.parse(p.ts), b = Date.parse(v.ts);
+    if (isNaN(a) || isNaN(b) || Math.abs(a - b) / 60000 > DUEL_SKEW_MIN) return null;
+    var dh = DUEL_ELEV.crnivec - DUEL_ELEV.gornji_grad;
+    var diff = Math.round((p.temp_c - v.temp_c) * 10) / 10, exp = -DUEL_LAPSE * dh / 100, say;
+    if (diff >= 0.5) say = "Inverzija: na prelazu je topleje kot v dolini. Hladen zrak leži na dnu.";
+    else if (diff > exp + DUEL_BAND) say = "Razlika je manjša kot običajno. V dolini se zadržuje hladen zrak.";
+    else if (diff < exp - DUEL_BAND) say = "Na prelazu je hladneje, kot bi pričakovali za " + dh + " m višine.";
+    else say = "Običajna razlika za " + dh + " m višine.";
+    var mins = (p.tmin_c != null && v.tmin_c != null)
+      ? "Najnižja danes: Črnivec " + numSlLive(p.tmin_c, 1) + " °C · Gornji Grad " + numSlLive(v.tmin_c, 1) + " °C" : "";
+    return { tp: p.temp_c, tv: v.temp_c, diff: diff, say: say, mins: mins, ts: p.ts };
+  }
+  function izrisiDolino(postaje){
+    var sec = document.getElementById("crn-duel");
+    if (!sec) return;
+    var st = function(x){
+      var t = x && x.ts ? Date.parse(x.ts) : NaN;
+      return (!isNaN(t) && (Date.now() - t) / 60000 <= DRSI_MAX_AGE_MIN) ? x : null;
+    };
+    var r = primerjavaDoline(st(postaje.crnivec), st(postaje.gornji_grad));
+    if (!r) { sec.hidden = true; return; }
+    var set = function(id, txt){ var e = document.getElementById(id); if (e) e.textContent = txt; };
+    set("crn-duel-p", numSlLive(r.tp, 1) + " °C");
+    set("crn-duel-v", numSlLive(r.tv, 1) + " °C");
+    set("crn-duel-diff", predznak(r.diff) + " °C");
+    set("crn-duel-say", r.say);
+    var minEl = document.getElementById("crn-duel-min");
+    if (minEl) { minEl.textContent = r.mins; minEl.hidden = !r.mins; }
+    set("crn-duel-note", "Obe številki sta meritvi postaj DRSI ob " + uraSl(new Date(r.ts)) + ".");
+    sec.hidden = false;
+  }
+
   function osveziDrsi(){
     if (!window.fetch) return;
     fetch(API + "/crnivec-drsi").then(function(r){ return r.json(); }).then(function(d){
       var st = d && d.postaje && d.postaje.crnivec;
       var ts = st && st.ts ? Date.parse(st.ts) : NaN;
       zivDrsi = (!isNaN(ts) && (Date.now() - ts) / 60000 <= DRSI_MAX_AGE_MIN) ? st : null;
+      izrisiDolino((d && d.postaje) || {});
       uporabiStanje();
     }).catch(function(){ zivDrsi = null; uporabiStanje(); });
   }
@@ -2420,7 +2515,8 @@ def build_body(data):
     # vidi merilnik, temperaturna kartica, OG kartica in deljena slika.
     # Seznam spodaj dobi ločeno model (weather) in meritev (drsi), ker vsaki
     # vrstici posebej pove vir.
-    drsi = fetch_drsi_crnivec()
+    drsi_vse = fetch_drsi_postaje()
+    drsi = drsi_vse.get("crnivec")
     weather_idx = with_measurement(weather, drsi)
     zone = pick_zone(weather_idx)
     # zima-forecast.yml teče enkrat na dan in lahko (kot ostali GitHub cron
@@ -2477,6 +2573,14 @@ def build_body(data):
     next_say = forecast_sentence(rows, next_hours)
     next_note = forecast_note(next_corrected, weather.get("calib"))
     sp_html = special_html(special_items(weather, data.get("fog"), seo.TODAY))
+    duel = valley_compare(drsi, drsi_vse.get("gornji_grad"))
+    duel_time = ""
+    if duel:
+        try:
+            duel_time = datetime.datetime.fromisoformat(duel["ts"].replace("Z", "+00:00")).astimezone(
+                ZoneInfo("Europe/Ljubljana")).strftime("%H:%M")
+        except ValueError:
+            pass
     _cal = " in umerjeno z meritvami DRSI" if weather.get("calib") else ""
     sp_note = f"Modelna napoved (Open-Meteo, preračunano na 902 m{_cal}), ne uradno stanje ceste."
     try:
@@ -2586,6 +2690,7 @@ def build_body(data):
                 .replace("__ZONE_DATA_JSON__", zone_data_json)
                 .replace("__CHECK_MODEL_JSON__", check_model_json)
                 .replace("__CALIB_JSON__", json.dumps(weather.get("calib")))
+                .replace("__DUEL_ELEV_JSON__", json.dumps(DRSI_ELEV_M))
                 .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
                 .replace("__TODAY_ISO__", today_iso))
 
@@ -2666,6 +2771,20 @@ def build_body(data):
           <p class="crn-card-sub">padavine <b id="crn-precip">{precip_txt}</b></p>
         </div>
       </div>
+
+      <section class="crn-duel" id="crn-duel" aria-labelledby="crn-duel-h"{'' if duel else ' hidden'}>
+        <p class="crn-now-h" id="crn-duel-h">Črnivec proti dolini</p>
+        <div class="crn-duel-grid">
+          <div class="crn-duel-rows">
+            <p class="crn-duel-row"><span>Črnivec · {DRSI_ELEV_M['crnivec']} m</span><b id="crn-duel-p">{num1(duel['tp']) if duel else '–'} °C</b></p>
+            <p class="crn-duel-row"><span>Gornji Grad · {DRSI_ELEV_M['gornji_grad']} m</span><b id="crn-duel-v">{num1(duel['tv']) if duel else '–'} °C</b></p>
+          </div>
+          <p class="crn-duel-diff" id="crn-duel-diff">{signed(duel['diff']) if duel else '–'} °C</p>
+        </div>
+        <p class="crn-duel-say" id="crn-duel-say">{duel['say'] if duel else ''}</p>
+        <p class="crn-check-note" id="crn-duel-min"{'' if duel and duel['mins'] else ' hidden'}>{(duel or {}).get('mins') or ''}</p>
+        <p class="crn-check-note" id="crn-duel-note">Obe številki sta meritvi postaj DRSI{f' ob {duel_time}' if duel_time else ''}.</p>
+      </section>
 
       <a class="crn-btn crn-btn-primary" href="#kamera">{UI_ICONS['cam']}Poglej kamero</a>
       </div>

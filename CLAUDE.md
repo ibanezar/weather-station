@@ -526,12 +526,20 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   z umeritvijo) in megla (regionalni `data["fog"]`: prelaz nad, na robu ±100 m
   ali pod oceno zgornje meje jutranje megle). Samo strežniški izris iz
   jutranjega teka, čas izračuna je izpisan. Brez posebnosti je ena vrstica.
+- **»Črnivec proti dolini«** (`valley_compare()`, 25. 9. 2026): meritev DRSI
+  na prelazu proti meritvi DRSI v Gornjem Gradu, obe iz `/crnivec-drsi`.
+  Višini postaj (903 m in 428 m) sta iz DEM, v `DRSI_ELEV_M` v
+  `crnivec_zones.py`. Razlika se primerja s pričakovano za 475 m (−3,1 °C,
+  ±1,5 °C): inverzija, manjša razlika, običajna ali večja. Obe meritvi morata
+  biti sveži (40 min) in narejeni v razmiku največ 30 minut, sicer se kartica
+  skrije. **Primerjava prelaza s preračunanim modelom je prepovedana**: to bi
+  bila konstanta gradienta (−3,5 °C vsak dan), ne podatek.
 - `black_ice_category()` omeji rosišče na temperaturo zraka: za višje kraje
   je rosišče iz doline, temperatura pa preračunana, zato je bilo rosišče
   lahko nad temperaturo.
 - Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
   `cestaVrstica()`, `blackIceLive()`, `napovedUr()`, `stavekNapovedi()`,
-  `calibAt()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
+  `calibAt()`, `primerjavaDoline()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
   drugo.**
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
