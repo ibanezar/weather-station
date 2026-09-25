@@ -65,6 +65,7 @@ import math
 import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from zoneinfo import ZoneInfo
 
@@ -665,6 +666,137 @@ def load_json(path, default=None):
 
 HISTORY_JSON_PATH = os.path.join(ROOT, "data", "crnivec-history.json")
 
+# ── "Zime na Črnivcu" -- meritve ARSO ────────────────────────────────────
+# ARSO ima na Črnivcu padavinsko postajo (id 3391, 848 m; seznam postaj
+# arhiva, type=1), ki ob 7h meri višino snežne odeje in novega snega. Arhiv
+# (meteo.arso.gov.si/webmet/archive) zaostaja 3-4 tedne, zato NI vir za
+# trenutno stanje -- samo za zgodovino po sezonah. Postaja meri od 2021.
+# Predpomnilnik v data/crnivec-arso.json: ob izpadu ARSO ostane zadnji.
+# Navedba vira (ARSO) je obvezna (15. člen ZDMHS, isto kot drugod).
+ARSO_STATION_ID = 3391
+ARSO_STATION_ELEV = 848
+ARSO_CACHE_PATH = os.path.join(ROOT, "data", "crnivec-arso.json")
+ARSO_ARCHIVE_URL = "https://meteo.arso.gov.si/webmet/archive/data.xml"
+ARSO_FIRST_DATE = "2020-07-01"
+
+
+def _arso_parse(text):
+    """Arhiv vrača JS objekt v CDATA; ključi točk so minute od 1. 1. 1800,
+    p0/p1/p2 so v vrstnem redu zahtevanih spremenljivk (85, 88, 89)."""
+    import re
+    order = re.search(r'o:\[([^\]]*)\]', text)
+    names = re.findall(r'(p\d):\{ pid:"(\d+)"', text)
+    pid_of = {pk: pid for pk, pid in names}
+    body = text.split("points:{", 1)[1] if "points:{" in text else ""
+    base = datetime.datetime(1800, 1, 1)
+    days = []
+    for key, vals in re.findall(r'_(\d+):\{([^{}]*)\}', body):
+        v = dict(re.findall(r'(p\d):"([^"]*)"', vals))
+        if not v:
+            continue
+        d = (base + datetime.timedelta(minutes=int(key))).date().isoformat()
+
+        def f(pid):
+            for pk, pp in pid_of.items():
+                if pp == pid and v.get(pk) not in (None, ""):
+                    try:
+                        return float(v[pk])
+                    except ValueError:
+                        return None
+            return None
+        days.append([d, f("88"), f("89"), f("85")])
+    if not order:
+        return []
+    return days
+
+
+def update_arso_cache():
+    """Enkrat na dan prenese celoten dnevni arhiv postaje (nekaj deset kB) in
+    ga zapiše v predpomnilnik. Ob napaki vrne zadnji predpomnilnik."""
+    cache = load_json(ARSO_CACHE_PATH, default=None) or {}
+    today = seo.TODAY.isoformat()
+    if cache.get("fetched") == today:
+        return cache
+    try:
+        params = urllib.parse.urlencode({
+            "lang": "si", "vars": "85,88,89", "group": "dailyData0", "type": "daily",
+            "id": ARSO_STATION_ID, "d1": ARSO_FIRST_DATE, "d2": today})
+        req = urllib.request.Request(f"{ARSO_ARCHIVE_URL}?{params}",
+                                     headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-Crnivec/1.0)"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            days = _arso_parse(r.read().decode("utf-8"))
+        if len(days) < 30:
+            raise ValueError(f"premalo dni ({len(days)})")
+        cache = {"fetched": today, "station": ARSO_STATION_ID, "elevation_m": ARSO_STATION_ELEV,
+                 "fields": ["date", "snow_depth_cm", "new_snow_cm", "precip_mm"], "days": days}
+        with open(ARSO_CACHE_PATH, "w", encoding="utf-8") as fh:
+            json.dump(cache, fh, ensure_ascii=False, separators=(",", ":"))
+            fh.write("\n")
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError, IndexError) as e:
+        print(f"⚠ ARSO arhiv za Črnivec ni dosegljiv ({e}) — ostane predpomnilnik", file=sys.stderr)
+    return cache
+
+
+def arso_seasons(days):
+    """Sezona je od 1. 7. do 30. 6. (zima gre čez novo leto). Vrne seznam
+    sezon od najnovejše: max odeja + datum, dni s snežno odejo, dni z novim
+    snegom, vsota novega snega in delež dni z meritvijo (nepopolna sezona
+    je označena)."""
+    by = {}
+    for d, depth, new, _p in days:
+        y, m = int(d[:4]), int(d[5:7])
+        start = y if m >= 7 else y - 1
+        s = by.setdefault(start, {"max": None, "max_date": None, "cover": 0, "snowfall": 0,
+                                  "new_sum": 0.0, "n": 0, "last": d})
+        s["n"] += 1
+        s["last"] = max(s["last"], d)
+        if depth is not None:
+            if depth > 0:
+                s["cover"] += 1
+            if s["max"] is None or depth > s["max"]:
+                s["max"], s["max_date"] = depth, d
+        if new:
+            s["snowfall"] += 1
+            s["new_sum"] += new
+    out = []
+    for start in sorted(by, reverse=True):
+        s = by[start]
+        out.append({"label": f"{start}/{str(start + 1)[2:]}", **s,
+                    "partial": s["n"] < 330})
+    return out
+
+
+def arso_section_html(cache):
+    days = (cache or {}).get("days") or []
+    # Nepopolna sezona brez snega je tekoča sezona pred zimo (samo poletne
+    # ničle) -- vrstica z ničlami bi bila videti kot "letos ni bilo snega".
+    seasons = [s for s in arso_seasons(days) if s["max"] is not None and not (s["partial"] and not s["max"])]
+    if not seasons:
+        return ""
+    last = max(d[0] for d in days)
+    ld = datetime.date.fromisoformat(last)
+    rows = []
+    for s in seasons:
+        if s["max"]:
+            md = datetime.date.fromisoformat(s["max_date"])
+            mx = f'{s["max"]:.0f} cm <span class="crn-t-sub">({md.day}. {md.month}.)</span>'
+        else:
+            mx = "0 cm"
+        note = ' <span class="crn-t-sub">(delno)</span>' if s["partial"] else ""
+        rows.append(f'<tr><th scope="row">{s["label"]}{note}</th><td>{mx}</td><td>{s["cover"]}</td>'
+                    f'<td>{s["snowfall"]}</td><td>{s["new_sum"]:.0f} cm</td></tr>')
+    return (f'<section class="crn-panel crn-arso" aria-labelledby="crn-arso-h">'
+            f'<h2 class="crn-h2" id="crn-arso-h">Zime na Črnivcu</h2>'
+            f'<p class="crn-lead">Meritve padavinske postaje ARSO Črnivec ({ARSO_STATION_ELEV} m), vsak dan ob 7. uri.</p>'
+            f'<div class="crn-t-wrap"><table class="crn-t"><thead><tr><th scope="col">Zima</th>'
+            f'<th scope="col">Največ snega</th><th scope="col">Dni z odejo</th>'
+            f'<th scope="col">Dni sneženja</th><th scope="col">Novi sneg skupaj</th></tr></thead>'
+            f'<tbody>{"".join(rows)}</tbody></table></div>'
+            f'<p class="crn-check-note">Vir: Agencija RS za okolje (ARSO), arhiv meritev; podatki do '
+            f'{ld.day}. {ld.month}. {ld.year}. Arhiv zaostaja nekaj tednov, zato to ni trenutno stanje. '
+            f'Dni z odejo: dnevi, ko je ob 7. uri na tleh ležal sneg. Dni sneženja: dnevi z novim snegom. '
+            f'»Delno« pomeni, da za del sezone meritev ni.</p></section>')
+
 
 def archive_yesterday_vote():
     """Enkrat na dan arhivira VČERAJŠNJI (že zaključen) izid dnevnega
@@ -1160,6 +1292,13 @@ CSS = '''
   .crn-board-rank{font-weight:800;width:1.6rem;flex:0 0 auto;color:var(--muted)}
   .crn-board-name{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .crn-board-badge{color:var(--muted);font-size:13px;flex:0 0 auto;text-align:right}
+  .crn-t-wrap{overflow-x:auto;margin-top:var(--s1)}
+  .crn-t{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+  .crn-t th,.crn-t td{text-align:left;padding:6px 4px;border-top:1px solid #efece5;vertical-align:top}
+  .crn-t thead th{font-size:12px;font-weight:700;color:var(--muted);border-top:0;line-height:1.25}
+  .crn-t tbody th{font-weight:800;white-space:nowrap}
+  .crn-t-sub{font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap}
+  .crn-t tbody th .crn-t-sub{display:block}
   .crn-accuracy-big{font-size:32px;font-weight:800;margin:var(--s1) 0 0}
   .crn-accuracy-note{font-size:14px;color:var(--muted);margin:4px 0 0}
 
@@ -2676,6 +2815,7 @@ def build_body(data):
     # razdelek — samostojen podatek, ne odvisen od živega JS spodaj.
     vote_history = archive_yesterday_vote()
     accuracy_html = accuracy_section_html(vote_history)
+    arso_html = arso_section_html(update_arso_cache())
 
     today_iso = seo.TODAY.isoformat()
     quote = QUOTES[int(hashlib.sha256(f"{today_iso}|crnivec-quote".encode()).hexdigest(), 16) % len(QUOTES)]
@@ -3017,6 +3157,7 @@ def build_body(data):
         <p id="crn-report-week" class="crn-week" hidden></p>
       </section>
       <div class="crn-o5">{accuracy_html}</div>
+      <div class="crn-o5">{arso_html}</div>
 
       <section class="crn-panel crn-board crn-o6" id="crn-board" aria-labelledby="crn-board-h" hidden>
         <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
