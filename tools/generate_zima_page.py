@@ -742,8 +742,12 @@ def build_hub_body(data):
         w = p.get("weather") or {}
         weather_txt = (f'{num(w.get("temp_c"), 1)} °C · do {num(w.get("expected_snow_cm_24h"), 1)} cm snega/24h'
                        if w.get("temp_c") is not None else "vreme na tej višini ni na voljo")
+        # Črnivec ima svojo stran s kamero in meritvami DRSI (crnivec.si) --
+        # povezava s huba je tudi notranja povezava za SEO nove domene.
+        name_html = (f'<a href="https://crnivec.si/">{p["name"]} ({p["elevation_m"]} m)</a>'
+                     if p["id"] == "crnivec" else f'{p["name"]} ({p["elevation_m"]} m)')
         pass_rows.append(f'''    <div class="zima-pass-row">
-      <div><div class="zima-pass-name">{p["name"]} ({p["elevation_m"]} m)</div>
+      <div><div class="zima-pass-name">{name_html}</div>
       <div class="zima-pass-meta">{p["connects"]} · {weather_txt}</div></div>
       {pass_status_chip(p)}
     </div>''')
