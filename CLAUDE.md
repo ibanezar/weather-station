@@ -534,12 +534,18 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   biti sveži (40 min) in narejeni v razmiku največ 30 minut, sicer se kartica
   skrije. **Primerjava prelaza s preračunanim modelom je prepovedana**: to bi
   bila konstanta gradienta (−3,5 °C vsak dan), ne podatek.
+- **»Črnivec pravi …«** (`CRNIVEC_SAYS`, 25. 9. 2026): stavek prelaza v
+  prvi osebi v oblačku pod opisom statusa. Vezan je na stanje: cona indeksa
+  ali »megla«, kadar je megla verjetna in je cona suho/okoli ničle. Izbere se
+  s FNV-1a nad `datum|stanje` (ASCII), ne s sha256, ker mora JS
+  (`izberiRek()`) sinhrono dati isti indeks. To je ločeno od »Meteorec
+  nasveta« (`QUOTES`), ki so šale, neodvisne od vremena.
 - `black_ice_category()` omeji rosišče na temperaturo zraka: za višje kraje
   je rosišče iz doline, temperatura pa preračunana, zato je bilo rosišče
   lahko nad temperaturo.
 - Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
   `cestaVrstica()`, `blackIceLive()`, `napovedUr()`, `stavekNapovedi()`,
-  `calibAt()`, `primerjavaDoline()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
+  `calibAt()`, `primerjavaDoline()`, `izberiRek()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
   drugo.**
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
