@@ -1285,11 +1285,12 @@ CSS = '''
 
   /* ── Sekcije pod herojem ────────────────────────────────────── */
   /* Telefon: stolpca ne obstajata (display:contents), vrstni red je iz
-     .crn-o1…7 -- kamera, poročanje, nasvet, glasovanje, poštenost, lestvica,
+     .crn-o2…7 -- poročanje, nasvet, glasovanje, poštenost, lestvica,
      razlaga indeksa + značka. */
   .crn-cols{display:flex;flex-direction:column;gap:var(--s4)}
   .crn-col{display:contents}
-  .crn-o1{order:1}.crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
+  .crn-cam{margin-top:var(--s4);text-align:left}
+  .crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
   .crn-o7{order:7}
   .crn-cols .crn-o7{margin-top:0}
   .crn-panel{background:var(--card);border:4px solid #111;border-radius:18px;
@@ -1456,16 +1457,19 @@ CSS = '''
       align-items:stretch;text-align:left}
     .crn-hero-main .crn-status{text-align:center;display:flex;flex-direction:column;justify-content:center}
     .crn-hero-main .crn-status-index{align-self:center}
-    .crn-hero-side{display:flex;flex-direction:column}
-    .crn-hero-main .crn-next{grid-column:1/-1;grid-row:2;margin-top:0}
-    .crn-hero-main .crn-commute{grid-column:1/-1;grid-row:3;margin-top:0}
-    .crn-hero-main .crn-special{grid-column:1/-1;grid-row:4;margin-top:0}
+    /* Kamera je v DOM takoj za statusom (telefon: tik pod njim); na namizju
+       gre v desni stolpec pod meritve, status pa se raztegne čez obe vrstici. */
+    .crn-hero-main .crn-status{grid-column:1;grid-row:1/3}
+    .crn-hero-side{display:flex;flex-direction:column;grid-column:2;grid-row:1}
+    .crn-hero-main .crn-cam{grid-column:2;grid-row:2;margin-top:0;align-self:start}
+    .crn-hero-main .crn-next{grid-column:1/-1;grid-row:3;margin-top:0}
+    .crn-hero-main .crn-commute{grid-column:1/-1;grid-row:4;margin-top:0}
+    .crn-hero-main .crn-special{grid-column:1/-1;grid-row:5;margin-top:0}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
     .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
     .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
       width:96px;height:96px;transform:translateY(-50%) rotate(4deg)}
     .crn-hero-side .crn-card-art svg{width:100%;height:100%;display:block}
-    .crn-hero-side .crn-btn-primary{max-width:none}
     .crn-cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
     .crn-col{display:flex;flex-direction:column;gap:var(--s4)}
     .crn-col .crn-zones{grid-template-columns:1fr 1fr}
@@ -3180,9 +3184,9 @@ def build_body(data):
                 .replace("__TODAY_ISO__", today_iso))
 
     # Vrstni red je hierarhija (mobile-first, glej opombo pri CSS): status →
-    # meritve → čas → kamera → poročanje → zadnja poročila → vse ostalo.
-    # Na namizju: v heroju merilnik levo, meritve desno (.crn-hero-main); pod
-    # njim dva stolpca (.crn-cols) -- kamera, nasvet, glasovanje | poročanje,
+    # kamera (takoj za glavno kartico) → napoved → meritve → poročanje → vse ostalo.
+    # Na namizju: v heroju merilnik levo, meritve in kamera desno
+    # (.crn-hero-main); pod njim dva stolpca (.crn-cols) -- nasvet, glasovanje | poročanje,
     # poštenost, lestvica, razlaga + značka. Na telefonu sta stolpca
     # display:contents in vrstni red nosijo razredi .crn-o1…7 (glej CSS).
     body = f'''{CSS}
@@ -3231,6 +3235,21 @@ def build_body(data):
         <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
       </div>
+
+      <section class="crn-panel crn-cam" id="kamera" aria-labelledby="crn-cam-h">
+        <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
+        <div class="crn-cam-frame is-loading">
+          <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
+          <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
+          <span class="crn-cam-badge" aria-hidden="true"><i></i>V živo</span>
+          <span class="crn-cam-place" aria-hidden="true">Črnivec · 902 m</span>
+          <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
+          <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej na promet.si</a></p>
+        </div>
+        <p class="crn-cam-time" id="crn-cam-time" hidden></p>
+        <p class="crn-cam-meta">Poglej trenutno stanje prelaza. Vir: <a href="https://www.promet.si" target="_blank"
+        rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
+      </section>
 
       <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h"{'' if next_cells else ' hidden'}>
         <p class="crn-now-h" id="crn-next-h">Naslednjih 6 ur</p>
@@ -3285,28 +3304,12 @@ def build_body(data):
         <p class="crn-check-note" id="crn-duel-note">Obe številki sta meritvi postaj DRSI{f' ob {duel_time}' if duel_time else ''}.</p>
       </section>
 
-      <a class="crn-btn crn-btn-primary" href="#kamera">{UI_ICONS['cam']}Poglej kamero</a>
       </div>
       </div>
     </section>
 
     <div class="crn-cols">
       <div class="crn-col">
-      <section class="crn-panel crn-o1" id="kamera" aria-labelledby="crn-cam-h">
-        <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
-        <div class="crn-cam-frame is-loading">
-          <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
-          <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
-          <span class="crn-cam-badge" aria-hidden="true"><i></i>V živo</span>
-          <span class="crn-cam-place" aria-hidden="true">Črnivec · 902 m</span>
-          <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
-          <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej na promet.si</a></p>
-        </div>
-        <p class="crn-cam-time" id="crn-cam-time" hidden></p>
-        <p class="crn-cam-meta">Poglej trenutno stanje prelaza. Vir: <a href="https://www.promet.si" target="_blank"
-        rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
-      </section>
-
       <section class="crn-tip crn-o3" aria-labelledby="crn-tip-h">
         <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
         <div class="crn-quote"><p>{quote}</p></div>
