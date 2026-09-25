@@ -191,6 +191,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-sp-lines li{margin:0}
   .crn-sp-none{font-size:15px;font-weight:600;margin:0}
 
+  /* "Črnivec proti dolini" (valley_compare) -- dve meritvi, velika razlika. */
+  .crn-duel{background:#fff;border:var(--bd);border-radius:14px;box-shadow:var(--sh);
+    padding:var(--s3);margin-top:var(--s2);text-align:left}
+  .crn-duel-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2)}
+  .crn-duel-rows{flex:1 1 200px;min-width:0}
+  .crn-duel-row span{white-space:nowrap}
+  .crn-duel-row{display:flex;justify-content:space-between;gap:var(--s1);font-size:14px;margin:0;
+    padding:4px 0;border-top:1px solid #efece5}
+  .crn-duel-row:first-child{border-top:0}
+  .crn-duel-row b{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .crn-duel-diff{font-size:34px;font-weight:800;line-height:1;margin:0;white-space:nowrap;
+    font-variant-numeric:tabular-nums;background:#fef08a;border:3px solid #111;border-radius:12px;padding:6px 10px}
+  .crn-duel-say{font-size:15px;font-weight:700;margin:var(--s1) 0 0}
+
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
   .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
   .crn-card-art{display:none}
@@ -461,8 +475,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p class="crn-check-warn" id="crn-check-warn" hidden></p>
           <p class="crn-check-note" id="crn-check-note">Izmerjeno na prelazu ob 12:37 · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev.</p>
         </div>
-        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:37:55.883987+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:37 · temperatura izmerjena (DRSI), sneg iz modela</p>
-        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:37:55.883987+00:00" hidden></p>
+        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:41:39.522050+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:41 · temperatura izmerjena (DRSI), sneg iz modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:41:39.522050+00:00" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
       </div>
 
@@ -476,7 +490,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
         <p class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</p>
         <ul class="crn-sp-list"><li class="crn-sp" data-lvl="warn"><span class="crn-ck-i" aria-hidden="true"></span><div><p class="crn-sp-h"><b>Megla</b><span class="crn-sr">: Pozor,</span> · prelaz je na robu</p><ul class="crn-sp-lines"><li>Ocenjena zgornja meja megle jutri zjutraj je ~870 m, prelaz je na 902 m — lahko je v megli ali tik nad njo.</li></ul></div></li></ul>
-        <p class="crn-check-note">Modelna napoved iz izračuna ob 12:37 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 12:41 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
       </section>
 
       <div class="crn-hero-side">
@@ -522,6 +536,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p class="crn-card-sub">padavine <b id="crn-precip">0,0 mm</b></p>
         </div>
       </div>
+
+      <section class="crn-duel" id="crn-duel" aria-labelledby="crn-duel-h">
+        <p class="crn-now-h" id="crn-duel-h">Črnivec proti dolini</p>
+        <div class="crn-duel-grid">
+          <div class="crn-duel-rows">
+            <p class="crn-duel-row"><span>Črnivec · 903 m</span><b id="crn-duel-p">11,7 °C</b></p>
+            <p class="crn-duel-row"><span>Gornji Grad · 428 m</span><b id="crn-duel-v">16,2 °C</b></p>
+          </div>
+          <p class="crn-duel-diff" id="crn-duel-diff">−4,5 °C</p>
+        </div>
+        <p class="crn-duel-say" id="crn-duel-say">Običajna razlika za 475 m višine.</p>
+        <p class="crn-check-note" id="crn-duel-min">Najnižja danes: Črnivec 4,2 °C · Gornji Grad 5,2 °C</p>
+        <p class="crn-check-note" id="crn-duel-note">Obe številki sta meritvi postaj DRSI ob 12:37.</p>
+      </section>
 
       <a class="crn-btn crn-btn-primary" href="#kamera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3Z"/><circle cx="12" cy="13" r="4"/></svg>Poglej kamero</a>
       </div>
@@ -1133,7 +1161,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var NEXT_BIAS_HOURS = 6, NEXT_SHOW_H = [1, 3, 6];
   // Popravek modela po uri dneva iz meritev DRSI (compute_pass_calibration
   // v winter_engine.py, izračunan ob jutranjem teku) ali null.
-  var CALIB = {"source": "DRSI", "station": 201, "days": 10, "hours": 253, "bias_by_hour": [2.58, 2.62, 2.67, 2.68, 2.75, 2.82, 3.2, 3.68, 3.68, 2.84, 1.55, 0.41, -0.45, -1.02, -1.26, -1.23, -1.24, -1.31, -1.15, -0.51, 0.45, 1.3, 1.94, 2.32], "mae_raw_c": 2.07, "mae_cal_c": 0.94};
+  var CALIB = {"source": "DRSI", "station": 201, "days": 10, "hours": 253, "bias_by_hour": [2.58, 2.62, 2.67, 2.68, 2.75, 2.82, 3.2, 3.68, 3.68, 2.83, 1.55, 0.41, -0.45, -1.02, -1.26, -1.23, -1.24, -1.31, -1.15, -0.51, 0.45, 1.3, 1.94, 2.32], "mae_raw_c": 2.07, "mae_cal_c": 0.94};
   function calibAt(timeStr){
     if (!CALIB || !CALIB.bias_by_hour) return 0;
     var hh = parseInt(String(timeStr).slice(11, 13), 10);
@@ -1290,12 +1318,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         : "Meritev s prelaza trenutno ni na voljo — prikazana je ocena modela. Vozišče je ocena, ne meritev.";
     }
   }
+  // "Črnivec proti dolini" -- NAMERNA PODVOJITEV valley_compare()/signed()
+  // iz generate_crnivec_page.py (isti pragovi).
+  var DUEL_ELEV = {"crnivec": 903, "gornji_grad": 428}, DUEL_LAPSE = 0.65, DUEL_BAND = 1.5, DUEL_SKEW_MIN = 30;
+  function predznak(x){ return (x > 0 ? "+" : x < 0 ? "−" : "±") + numSlLive(Math.abs(x), 1); }
+  function primerjavaDoline(p, v){
+    if (!p || !v || p.temp_c == null || v.temp_c == null) return null;
+    var a = Date.parse(p.ts), b = Date.parse(v.ts);
+    if (isNaN(a) || isNaN(b) || Math.abs(a - b) / 60000 > DUEL_SKEW_MIN) return null;
+    var dh = DUEL_ELEV.crnivec - DUEL_ELEV.gornji_grad;
+    var diff = Math.round((p.temp_c - v.temp_c) * 10) / 10, exp = -DUEL_LAPSE * dh / 100, say;
+    if (diff >= 0.5) say = "Inverzija: na prelazu je topleje kot v dolini. Hladen zrak leži na dnu.";
+    else if (diff > exp + DUEL_BAND) say = "Razlika je manjša kot običajno. V dolini se zadržuje hladen zrak.";
+    else if (diff < exp - DUEL_BAND) say = "Na prelazu je hladneje, kot bi pričakovali za " + dh + " m višine.";
+    else say = "Običajna razlika za " + dh + " m višine.";
+    var mins = (p.tmin_c != null && v.tmin_c != null)
+      ? "Najnižja danes: Črnivec " + numSlLive(p.tmin_c, 1) + " °C · Gornji Grad " + numSlLive(v.tmin_c, 1) + " °C" : "";
+    return { tp: p.temp_c, tv: v.temp_c, diff: diff, say: say, mins: mins, ts: p.ts };
+  }
+  function izrisiDolino(postaje){
+    var sec = document.getElementById("crn-duel");
+    if (!sec) return;
+    var st = function(x){
+      var t = x && x.ts ? Date.parse(x.ts) : NaN;
+      return (!isNaN(t) && (Date.now() - t) / 60000 <= DRSI_MAX_AGE_MIN) ? x : null;
+    };
+    var r = primerjavaDoline(st(postaje.crnivec), st(postaje.gornji_grad));
+    if (!r) { sec.hidden = true; return; }
+    var set = function(id, txt){ var e = document.getElementById(id); if (e) e.textContent = txt; };
+    set("crn-duel-p", numSlLive(r.tp, 1) + " °C");
+    set("crn-duel-v", numSlLive(r.tv, 1) + " °C");
+    set("crn-duel-diff", predznak(r.diff) + " °C");
+    set("crn-duel-say", r.say);
+    var minEl = document.getElementById("crn-duel-min");
+    if (minEl) { minEl.textContent = r.mins; minEl.hidden = !r.mins; }
+    set("crn-duel-note", "Obe številki sta meritvi postaj DRSI ob " + uraSl(new Date(r.ts)) + ".");
+    sec.hidden = false;
+  }
+
   function osveziDrsi(){
     if (!window.fetch) return;
     fetch(API + "/crnivec-drsi").then(function(r){ return r.json(); }).then(function(d){
       var st = d && d.postaje && d.postaje.crnivec;
       var ts = st && st.ts ? Date.parse(st.ts) : NaN;
       zivDrsi = (!isNaN(ts) && (Date.now() - ts) / 60000 <= DRSI_MAX_AGE_MIN) ? st : null;
+      izrisiDolino((d && d.postaje) || {});
       uporabiStanje();
     }).catch(function(){ zivDrsi = null; uporabiStanje(); });
   }
