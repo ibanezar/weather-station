@@ -1098,11 +1098,14 @@ CSS = '''
 
   /* ── Vrhnja vrstica ─────────────────────────────────────────── */
   .crn-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
-    min-height:48px;margin-bottom:var(--s3)}
-  .crn-brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:48px;
-    background:#fff;border:var(--bd);border-radius:999px;padding:0 var(--s3);box-shadow:3px 3px 0 #111}
+    min-height:40px;margin-bottom:var(--s3)}
+  /* Vrhnja gumba sta navigacija, ne dejanje -- na telefonu kompaktna, da ne
+     prevpijeta naslova (min. 40 px še vedno zadošča za dotik). */
+  .crn-brand{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:40px;
+    background:#fff;border:var(--bd);border-radius:999px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
   .crn-install-wrap{text-align:right}
+  .crn-top .crn-btn{min-height:40px;font-size:13px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
 
   /* ── HERO ───────────────────────────────────────────────────── */
   .crn-hero{max-width:760px;margin:0 auto var(--s5);text-align:center}
@@ -1112,7 +1115,7 @@ CSS = '''
   /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
   .crn-head{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:var(--s3)}
   .crn-head .crn-title{margin:0}
-  .crn-title{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+  .crn-title{font-size:clamp(38px,11.5vw,52px);font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
     color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
     text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
   .crn-strike{font-size:15px;font-weight:800;color:#fff;background:#dc2626;border:var(--bd);
