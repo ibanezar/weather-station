@@ -214,42 +214,58 @@ def chip(x, y, text, fonts, fs, fill, ink=INK, padx=26, h=None, shadow=6):
 
 def fb_cover():
     """Naslovnica 1640×624 (FB: namizje 820×312 pri 2×, telefon obreže
-    stranice na ~1110×624 v sredini). Vse bistveno je zato v sredinskem pasu
-    x 265–1375; levi spodnji kot na namizju prekrije profilna slika."""
+    stranice na ~1110×624 v sredini, zato je vse bistveno v pasu x 265–1375).
+
+    V novem videzu strani FB profilno sliko postavi NA SREDINO, čez spodnji
+    rob naslovnice. Spodnja sredina (x ~520–1120, y > ~330) mora zato ostati
+    prazna: besedilo je zgoraj na sredini, gori pa levo in desno, tako da
+    profilna sede v sedlo med njima."""
     W, H = 1640, 624
+    CX = W / 2
     defs = halftone("ht", INK, step=18, r=1.5, opacity=0.9)
     parts = [f'<rect width="{W}" height="{H}" fill="{CREAM}"/>',
              f'<rect width="{W}" height="{H}" fill="url(#ht)" opacity=".16"/>']
-    # Sonce + velika gora desno (sega čez spodnji rob)
-    parts.append(f'<circle cx="1505" cy="250" r="62" fill="{YELLOW}" stroke="{INK}" stroke-width="7"/>')
-    parts.append(f'<g transform="translate(905,58) scale(3.4)">{mountain(True, sign=False)}</g>')
-    # »902 m« zastavica na desnem vrhu
-    fx, fy = 1360, 108
-    parts.append(f'<path d="M{fx} {fy} L{fx} {fy - 70}" stroke="{INK}" stroke-width="7" stroke-linecap="round"/>')
-    parts.append(f'<path d="M{fx} {fy - 70} L{fx + 96} {fy - 56} L{fx} {fy - 40} Z" fill="{RED}" stroke="{INK}" '
+
+    # Sonce za desno goro, gori levo in desno (desna zrcaljena), segata čez spodnji rob
+    parts.append(f'<circle cx="1405" cy="300" r="56" fill="{YELLOW}" stroke="{INK}" stroke-width="7"/>')
+    parts.append(f'<g transform="translate(118,258) scale(2.2)">{mountain(True, sign=True)}</g>')
+    parts.append(f'<g transform="translate(1522,258) scale(-2.2,2.2)">{mountain(True)}</g>')
+    # zastavica na višjem (desnem) vrhu leve gore
+    fx, fy = 118 + 134 * 2.2, 258 + 18 * 2.2
+    parts.append(f'<path d="M{fx} {fy} L{fx} {fy - 64}" stroke="{INK}" stroke-width="6" stroke-linecap="round"/>')
+    parts.append(f'<path d="M{fx} {fy - 64} L{fx + 80} {fy - 52} L{fx} {fy - 38} Z" fill="{RED}" stroke="{INK}" '
                  f'stroke-width="5" stroke-linejoin="round"/>')
-    # Besedilo levo-sredinsko (od x=300)
-    x0 = 300
-    eyebrow, _ = chip(x0, 86, "PRELAZ ČRNIVEC · 902 m", INTER_800, 30, YELLOW)
-    parts.append(eyebrow)
-    fs = 128
-    parts.append(tp("Kako je čez", GROTESK, fs, x0 + 5, 290 + 5, INK, tracking=-fs * 0.025))
-    parts.append(tp("Kako je čez", GROTESK, fs, x0, 290, INK, tracking=-fs * 0.025))
-    # »Črnivec?« rdeče z obrisom in trdo senco
-    d, _ = text_path("Črnivec?", GROTESK, fs, x0, 410, tracking=-fs * 0.025)
-    d2, _ = text_path("Črnivec?", GROTESK, fs, x0 + 7, 417, tracking=-fs * 0.025)
+
+    def chip_c(y, text, fonts, fs, fill, padx=26):
+        w = tw(text, fonts, fs) + 2 * padx
+        return chip(CX - w / 2, y, text, fonts, fs, fill, padx=padx)[0]
+
+    parts.append(chip_c(38, "PRELAZ ČRNIVEC · 902 m", INTER_800, 28, YELLOW))
+
+    # »Kako je čez Črnivec?« v eni vrstici, sredinsko; »Črnivec?« rdeče z obrisom
+    fs, tr, base = 100, -100 * 0.025, 200
+    w1 = tw("Kako je čez ", GROTESK, fs, tr)
+    w2 = tw("Črnivec?", GROTESK, fs, tr)
+    x0 = CX - (w1 + w2) / 2
+    parts.append(tp("Kako je čez", GROTESK, fs, x0 + 5, base + 5, INK, tracking=tr))
+    parts.append(tp("Kako je čez", GROTESK, fs, x0, base, INK, tracking=tr))
+    d, _ = text_path("Črnivec?", GROTESK, fs, x0 + w1, base, tracking=tr)
+    d2, _ = text_path("Črnivec?", GROTESK, fs, x0 + w1 + 6, base + 6, tracking=tr)
     parts.append(f'<path d="{d2}" fill="{INK}"/>')
-    parts.append(f'<path d="{d}" fill="{RED}" stroke="{INK}" stroke-width="5" stroke-linejoin="round" paint-order="stroke"/>')
-    # Čipi
-    cx = x0
-    for t in ("Kamera", "Vreme", "Stanje ceste"):
-        c, w = chip(cx, 462, t, INTER_800, 30, WHITE)
-        parts.append(c)
-        cx += w + 18
-    # crnivec.si spodaj desno od čipov
-    fsu = 44
-    parts.append(tp("crnivec", GROTESK, fsu, x0 + 2, 580, INK, tracking=-1))
-    parts.append(tp(".si", GROTESK, fsu, x0 + 2 + tw("crnivec", GROTESK, fsu, -1) - 1, 580, RED, tracking=-1))
+    parts.append(f'<path d="{d}" fill="{RED}" stroke="{INK}" stroke-width="5" stroke-linejoin="round" '
+                 f'paint-order="stroke"/>')
+
+    # Čipi v vrsti pod naslovom
+    labels = ("Kamera", "Vreme", "Stanje ceste")
+    fsc, gap = 28, 16
+    widths = [tw(t, INTER_800, fsc) + 52 for t in labels]
+    cx = CX - (sum(widths) + gap * (len(labels) - 1)) / 2
+    for t, w in zip(labels, widths):
+        parts.append(chip(cx, 238, t, INTER_800, fsc, WHITE)[0])
+        cx += w + gap
+
+    # crnivec.si na tabli ob desni gori (v pasu, ki ga telefon še pokaže)
+    parts.append(chip(1112, 540, "crnivec.si", GROTESK, 40, WHITE, padx=28)[0])
     return svg(W, H, "".join(parts), defs)
 
 
