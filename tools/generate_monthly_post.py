@@ -32,6 +32,10 @@ PLACE_SAMEAS = {
     "Rečica ob Savinji": ["https://www.wikidata.org/wiki/Q969326",
                           "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],
     "Zgornja Savinjska dolina": ["https://sl.wikipedia.org/wiki/Zgornja_Savinjska_dolina"],
+    # Preverjeno na Wikidati 25. 9. 2026 (Q8079815, sitelinks slwiki/enwiki).
+    "Črnivec (prelaz)": ["https://www.wikidata.org/wiki/Q8079815",
+                         "https://sl.wikipedia.org/wiki/%C4%8Crnivec_(prelaz)",
+                         "https://en.wikipedia.org/wiki/%C4%8Crnivec_Pass"],
 }
 RECICA_SAMEAS_JSON = json.dumps(PLACE_SAMEAS["Rečica ob Savinji"], ensure_ascii=False)
 VALLEY_SAMEAS_JSON = json.dumps(PLACE_SAMEAS["Zgornja Savinjska dolina"], ensure_ascii=False)
