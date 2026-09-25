@@ -534,6 +534,13 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   biti sveži (40 min) in narejeni v razmiku največ 30 minut, sicer se kartica
   skrije. **Primerjava prelaza s preračunanim modelom je prepovedana**: to bi
   bila konstanta gradienta (−3,5 °C vsak dan), ne podatek.
+- **»V zadnjih 60 minutah«** (25. 9. 2026): sprememba temperature, vlage,
+  vetra in padavine v zadnji uri. Izračuna jo `_drsiTrend()` v `worker.js` iz
+  zgodovine postaje DRSI (`vremenski_podatki`, 10-minutni zapisi) in jo doda
+  v odgovor `/crnivec-drsi` kot `trend`. Konca okna sta zaokrožena na 5
+  minut, da je URL stabilen in ga `cacheTtl` ujame. Padavine upoštevajo
+  polnočno ponastavitev `dailyRainMm`. Besedilo izriše samo JS
+  (`izrisiTrend()`), statične različice ni, ker bi bila vedno stara.
 - **»Črnivec pravi …«** (`CRNIVEC_SAYS`, 25. 9. 2026): stavek prelaza v
   prvi osebi v oblačku pod opisom statusa. Vezan je na stanje: cona indeksa
   ali »megla«, kadar je megla verjetna in je cona suho/okoli ničle. Izbere se
