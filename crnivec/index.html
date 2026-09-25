@@ -141,14 +141,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-ck:first-child{border-top:0}
   .crn-ck-i{width:22px;height:22px;border-radius:50%;border:2px solid #111;display:flex;
     align-items:center;justify-content:center;font-size:13px;font-weight:900;line-height:1;color:#fff}
-  .crn-ck[data-lvl="ok"] .crn-ck-i{background:#16a34a}
-  .crn-ck[data-lvl="ok"] .crn-ck-i::before{content:"✓"}
-  .crn-ck[data-lvl="warn"] .crn-ck-i{background:#facc15;color:#111}
-  .crn-ck[data-lvl="warn"] .crn-ck-i::before{content:"!"}
-  .crn-ck[data-lvl="stop"] .crn-ck-i{background:#dc2626}
-  .crn-ck[data-lvl="stop"] .crn-ck-i::before{content:"✕"}
-  .crn-ck[data-lvl="na"] .crn-ck-i{background:#e5e7eb;color:#4b5563}
-  .crn-ck[data-lvl="na"] .crn-ck-i::before{content:"–"}
+  [data-lvl="ok"] > .crn-ck-i{background:#16a34a}
+  [data-lvl="ok"] > .crn-ck-i::before{content:"✓"}
+  [data-lvl="warn"] > .crn-ck-i{background:#facc15;color:#111}
+  [data-lvl="warn"] > .crn-ck-i::before{content:"!"}
+  [data-lvl="stop"] > .crn-ck-i{background:#dc2626}
+  [data-lvl="stop"] > .crn-ck-i::before{content:"✕"}
+  [data-lvl="na"] > .crn-ck-i{background:#e5e7eb;color:#4b5563}
+  [data-lvl="na"] > .crn-ck-i::before{content:"–"}
   .crn-ck-l{font-weight:700}
   .crn-ck-v{font-weight:600;overflow-wrap:anywhere}
   .crn-ck[data-lvl="na"] .crn-ck-v{color:var(--muted);font-weight:500}
@@ -158,6 +158,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-check-warn{font-size:14px;font-weight:800;color:#7f1d1d;background:#fee2e2;border:2px solid #111;
     border-radius:10px;padding:4px var(--s2);margin:var(--s1) 0 0}
   .crn-check-note{font-size:12px;color:var(--muted);margin:var(--s1) 0 0}
+
+  /* "Naslednjih 6 ur" (forecast_hours) -- trak pod herojem, tri ure. Robna
+     črta celice nosi najslabšo raven ure; besedilo vozišča jo pove z besedo. */
+  .crn-next{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
+    padding:var(--s3) var(--s2);margin-top:var(--s4);text-align:left}
+  .crn-next-say{font-size:17px;font-weight:800;line-height:1.35;margin:0 0 var(--s2)}
+  .crn-next-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s1)}
+  .crn-nh{text-align:left;border:3px solid #111;border-top:8px solid #16a34a;border-radius:12px;padding:var(--s1);
+    background:#faf9f6;min-width:0}
+  .crn-nh[data-lvl="warn"]{border-top-color:#facc15}
+  .crn-nh[data-lvl="stop"]{border-top-color:#dc2626}
+  .crn-nh[data-lvl="na"]{border-top-color:#e5e7eb}
+  .crn-nh p{margin:0}
+  .crn-nh-t{font-size:13px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+  .crn-nh-temp{font-size:20px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .crn-nh-p{font-size:13px;font-weight:600;color:var(--ink2)}
+  .crn-nh-road{display:flex;align-items:flex-start;gap:4px;font-size:13px;font-weight:700;margin-top:4px!important;
+    overflow-wrap:anywhere}
+  .crn-nh-road .crn-ck-i{width:18px;height:18px;font-size:11px;flex:0 0 auto}
 
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
   .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
@@ -337,6 +356,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     .crn-big{font-size:36px}
     .crn-panel{padding:var(--s4)}
     .crn-zones{grid-template-columns:repeat(4,1fr)}
+    .crn-nh{padding:var(--s2)}
+    .crn-nh-temp{font-size:28px}
   }
   @media (min-width:1024px){
     .crn{padding-top:var(--s4)}
@@ -353,6 +374,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     .crn-hero-main .crn-status{text-align:center;display:flex;flex-direction:column;justify-content:center}
     .crn-hero-main .crn-status-index{align-self:center}
     .crn-hero-side{display:flex;flex-direction:column}
+    .crn-hero-main .crn-next{grid-column:1/-1;grid-row:2;margin-top:0}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
     .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
     .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
@@ -421,14 +443,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="crn-status-desc" id="crn-status-desc">Cesta je normalno prevozna.</p>
         <div class="crn-now" aria-labelledby="crn-now-h">
           <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
-          <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">11,3 °C<span class="crn-ck-src">izmerjeno</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan<span class="crn-ck-src">napoved 24 h</span></span></li><li class="crn-ck" data-lvl="ok" data-id="fog"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Megla<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni znakov megle<span class="crn-ck-src">iz izmerjene vlage</span></span></li><li class="crn-ck" data-lvl="ok" data-id="wind"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Veter<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">šibak · 12 km/h, sunki 16<span class="crn-ck-src">izmerjeno</span></span></li></ul>
+          <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">12,1 °C<span class="crn-ck-src">izmerjeno</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan<span class="crn-ck-src">napoved 24 h</span></span></li><li class="crn-ck" data-lvl="ok" data-id="fog"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Megla<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni znakov megle<span class="crn-ck-src">iz izmerjene vlage</span></span></li><li class="crn-ck" data-lvl="ok" data-id="wind"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Veter<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">šibak · 11 km/h, sunki 15<span class="crn-ck-src">izmerjeno</span></span></li></ul>
           <p class="crn-check-warn" id="crn-check-warn" hidden></p>
-          <p class="crn-check-note" id="crn-check-note">Izmerjeno na prelazu ob 12:07 · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev.</p>
+          <p class="crn-check-note" id="crn-check-note">Izmerjeno na prelazu ob 12:17 · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev.</p>
         </div>
-        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:12:53.681307+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:12 · temperatura izmerjena (DRSI), sneg iz modela</p>
-        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:12:53.681307+00:00" hidden></p>
+        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:27:16.547214+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:27 · temperatura izmerjena (DRSI), sneg iz modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:27:16.547214+00:00" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
       </div>
+
+      <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h">
+        <p class="crn-now-h" id="crn-next-h">Naslednjih 6 ur</p>
+        <p class="crn-next-say" id="crn-next-say">Razmere naj bi ostale podobne.</p>
+        <div class="crn-next-grid" id="crn-next-grid"><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">13:00</p><p class="crn-nh-temp">12,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">15:00</p><p class="crn-nh-temp">13,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">18:00</p><p class="crn-nh-temp">11,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div>
+        <p class="crn-check-note" id="crn-next-note">Napoved Open-Meteo za dolino, preračunana na 902 m, temperatura popravljena z zadnjo meritvijo. Vozišče je ocena.</p>
+      </section>
 
       <div class="crn-hero-side">
       <div class="crn-cards">
@@ -444,8 +473,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <circle cx="33" cy="88" r="5" fill="#fff" opacity=".7"/>
     </svg></span>
           <p class="crn-card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg>Temperatura</p>
-          <p class="crn-big" id="crn-temp-val">11,3 °C</p>
-          <p class="crn-card-sub" id="crn-temp-src">izmerjeno na prelazu ob 12:07 (DRSI)</p>
+          <p class="crn-big" id="crn-temp-val">12,1 °C</p>
+          <p class="crn-card-sub" id="crn-temp-src">izmerjeno na prelazu ob 12:17 (DRSI)</p>
         </div>
         <div class="crn-card">
           <span class="crn-card-art"><svg viewBox="0 0 120 120" aria-hidden="true">
@@ -599,6 +628,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             tam nihče ne meri. Vozišče je vedno <strong>ocena</strong>: iz padavin zadnjih treh ur in
             temperature ocenimo, ali je cesta mokra ali bi lahko bila poledenela. Temperature cestišča
             DRSI ne objavlja.</p>
+            <p>»Naslednjih 6 ur« je napoved Open-Meteo za dolino, preračunana na višino prelaza. Kadar je
+            meritev s prelaza na voljo, napoved začne pri izmerjeni temperaturi in se v šestih urah postopoma
+            vrne k modelu. Stavek nad urami primerja temperaturo in oceno vozišča z najhujšo uro v tem času.</p>
             <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
             indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
             Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
@@ -637,7 +669,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   "use strict";
   var quotes = ["Teta pravi, da je suho. Sosed pravi, da je katastrofa. Nekdo se moti.", "Grem pogledat in sporočim. Če se vrnem.", "Odvisno, kdaj vprašaš. In predvsem – koga.", "Kamera kaže sonce. Komentarji pod njo kažejo zimo.", "Ko sem jaz šel čez, je bilo čisto suho. Resda pred dvema letoma.", "Pol skupine pravi, da rabiš zimske. Druga polovica, da ne. Vzemi oboje.", "Vprašaj raje v skupini. Tam imajo vedno tri različne odgovore.", "Nekdo je pravkar vprašal isto. Odgovori so že drugačni kot včeraj.", "Tehnično prevozno. Praktično pa … saj veš, kako je s Črnivcem.", "Indeks pravi eno, dedek drugo. Za zdaj ima dedek boljši rekord.", "Če sprašuješ, ali je prevozno, je odgovor verjetno: previdno.", "Na kameri je videti dobro. Kar je vedno dober začetek.", "Črnivec je prevozen. Vprašanje je samo, za koga.", "Cesta pravi »pojdi«. Vreme pravi »premisli«.", "Snega ni veliko. Ampak tisti, ki je, je očitno dovolj.", "Danes brez težav. Jutri? Vprašaj jutri.", "Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.", "V dolini suho, na vrhu pa … dobrodošel na Črnivcu.", "Črnivec danes: bolj vprašanje kot odgovor.", "Stanje se spreminja. Mnenja še hitreje.", "Ni panike. Razen če je.", "Zaenkrat gre. Slab znak je, da sem dodal »zaenkrat«.", "Lahko greš čez. Ali pa najprej preveriš, kako zelo ti je všeč tvoj avto.", "Po podatkih je v redu. Po pripovedovanju soseda pa nikakor.", "Črnivec: kraj, kjer »samo malo snega« pomeni štiri različne stvari.", "Če greš čez, poročaj. Če ne greš, tudi.", "Včeraj je bilo prevozno. Danes je danes.", "Stanje na cesti: odvisno od tega, kako samozavestno ga gledaš.", "Ni še za paniko. Ampak verige imajo danes lep dan.", "Čez gre. Vprašanje je, ali želiš biti tisti, ki to preveri."];
   var rareQuote = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj.";
-  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Ni še za paniko. Ampak verige imajo danes lep dan.", "temp": "11,3 °C", "snow": "0,0 cm snega v 24 h", "streak": "suh niz v dolini: 0 dni", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><defs><linearGradient id=\"crnGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0%\" stop-color=\"#16a34a\"/><stop offset=\"33%\" stop-color=\"#eab308\"/><stop offset=\"67%\" stop-color=\"#ea580c\"/><stop offset=\"100%\" stop-color=\"#dc2626\"/><\/linearGradient><filter id=\"crnGaugeShadow\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feDropShadow dx=\"0\" dy=\"3\" stdDeviation=\"3.5\" flood-color=\"#000\" flood-opacity=\".16\"/><\/filter><\/defs><g filter=\"url(#crnGaugeShadow)\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"url(#crnGrad)\" stroke-width=\"30\" stroke-linecap=\"round\"/><line x1=\"126.4\" y1=\"111.4\" x2=\"105.1\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"190.0\" y1=\"85.0\" x2=\"190.0\" y2=\"55.0\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"253.6\" y1=\"111.4\" x2=\"274.9\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><\/g><text x=\"54.2\" y=\"118.7\" text-anchor=\"end\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SUHO K POPR<\/text><text x=\"133.7\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">TAK-TAK<\/text><text x=\"246.3\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">VZEMI VERIGE<\/text><text x=\"325.8\" y=\"118.7\" text-anchor=\"start\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SPOLZKO, PAZI<\/text><g filter=\"url(#crnGaugeShadow)\" transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"99.4\" stroke=\"#171717\" stroke-width=\"6\" stroke-linecap=\"round\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"#171717\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"190\" cy=\"175\" r=\"4.5\" fill=\"#fff\"/><\/g><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
+  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Ni še za paniko. Ampak verige imajo danes lep dan.", "temp": "12,1 °C", "snow": "0,0 cm snega v 24 h", "streak": "suh niz v dolini: 0 dni", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><defs><linearGradient id=\"crnGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0%\" stop-color=\"#16a34a\"/><stop offset=\"33%\" stop-color=\"#eab308\"/><stop offset=\"67%\" stop-color=\"#ea580c\"/><stop offset=\"100%\" stop-color=\"#dc2626\"/><\/linearGradient><filter id=\"crnGaugeShadow\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feDropShadow dx=\"0\" dy=\"3\" stdDeviation=\"3.5\" flood-color=\"#000\" flood-opacity=\".16\"/><\/filter><\/defs><g filter=\"url(#crnGaugeShadow)\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"url(#crnGrad)\" stroke-width=\"30\" stroke-linecap=\"round\"/><line x1=\"126.4\" y1=\"111.4\" x2=\"105.1\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"190.0\" y1=\"85.0\" x2=\"190.0\" y2=\"55.0\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"253.6\" y1=\"111.4\" x2=\"274.9\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><\/g><text x=\"54.2\" y=\"118.7\" text-anchor=\"end\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SUHO K POPR<\/text><text x=\"133.7\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">TAK-TAK<\/text><text x=\"246.3\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">VZEMI VERIGE<\/text><text x=\"325.8\" y=\"118.7\" text-anchor=\"start\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SPOLZKO, PAZI<\/text><g filter=\"url(#crnGaugeShadow)\" transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"99.4\" stroke=\"#171717\" stroke-width=\"6\" stroke-linecap=\"round\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"#171717\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"190\" cy=\"175\" r=\"4.5\" fill=\"#fff\"/><\/g><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
   var API = "https://weatherireica1.filip-eremita.workers.dev";
   var CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg";
 
@@ -1059,6 +1091,94 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (g <= 1.5 && dew != null && dew >= g - 1.0) return "srednje";
     return "nizko";
   }
+  function cestaVrstica(bi, p3, s3, t){
+    var road = { id: "road", label: "Vozišče", src: "ocena" };
+    if (bi == null && p3 == null) { road.level = "na"; road.value = "ni podatka"; }
+    else if ((s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
+    else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
+    else if (bi === "srednje") { road.level = "warn"; road.value = "ponekod je lahko led"; }
+    else if ((p3 || 0) >= 0.2) { road.level = (t != null && t <= 3) ? "warn" : "ok"; road.value = "verjetno mokro"; }
+    else { road.level = "ok"; road.value = "verjetno suho"; }
+    return road;
+  }
+
+  // "Naslednjih 6 ur" -- NAMERNA PODVOJITEV forecast_hours()/
+  // forecast_sentence() iz generate_crnivec_page.py (isti pragovi, isto
+  // izzvenevanje popravka z meritvijo v NEXT_BIAS_HOURS urah).
+  var NEXT_BIAS_HOURS = 6, NEXT_SHOW_H = [1, 3, 6];
+  var LEVEL_RANK = { na: 0, ok: 1, warn: 2, stop: 3 };
+  function tempNivo(t){ return t == null ? "na" : t <= 0 ? "stop" : t <= 5 ? "warn" : "ok"; }
+  function padavineBesedilo(p, frac){
+    if (p == null) return "–";
+    if (p < 0.1) return "suho";
+    var kind = (frac || 0) >= 0.7 ? "sneg" : (frac || 0) <= 0.3 ? "dež" : "dež in sneg";
+    return kind + " " + numSlLive(p, 1) + "\u00a0mm";
+  }
+  function napovedUr(m, d){
+    var tMeas = d && d.temp_c != null ? d.temp_c : null;
+    var bias = (tMeas != null && m.temp != null) ? tMeas - m.temp : 0;
+    return (m.next || []).map(function(e){
+      var t = e.temp == null ? null : Math.round((e.temp + bias * Math.max(0, 1 - e.h / NEXT_BIAS_HOURS)) * 10) / 10;
+      var bi = t == null ? null : blackIceLive(t, e.cloud, e.wind, e.dew, e.p, e.pPrev);
+      var road = cestaVrstica(bi, e.p3, e.s3, t);
+      var tl = tempNivo(t);
+      return { h: e.h, time: e.time, temp: t, p: e.p, frac: e.frac, road: road, tempLevel: tl,
+        level: LEVEL_RANK[road.level] > LEVEL_RANK[tl] ? road.level : tl };
+    });
+  }
+  function stavekNapovedi(rowsNow, ure){
+    if (!ure.length) return "";
+    var nowRank = 0;
+    rowsNow.forEach(function(r){ if ((r.id === "temp" || r.id === "road") && LEVEL_RANK[r.level] > nowRank) nowRank = LEVEL_RANK[r.level]; });
+    var peak = 0, worse = null;
+    ure.forEach(function(x){ if (LEVEL_RANK[x.level] > peak) peak = LEVEL_RANK[x.level]; });
+    if (peak > nowRank) { for (var i = 0; i < ure.length; i++) { if (LEVEL_RANK[ure[i].level] === peak) { worse = ure[i]; break; } } }
+    var say;
+    if (worse) {
+      var reason = (LEVEL_RANK[worse.road.level] >= LEVEL_RANK[worse.tempLevel] && worse.road.level !== "ok")
+        ? worse.road.value : "temperatura okoli " + numSlLive(worse.temp, 1) + " °C";
+      say = "Okoli " + worse.time + " bo predvidoma slabše kot zdaj: " + reason + ".";
+    } else if (nowRank && LEVEL_RANK[ure[ure.length - 1].level] < nowRank) {
+      say = "Razmere se bodo predvidoma izboljšale.";
+    } else {
+      say = "Razmere naj bi ostale podobne.";
+    }
+    var roadNow = rowsNow.filter(function(r){ return r.id === "road"; })[0] || {};
+    var dryNow = roadNow.value === "verjetno suho" || roadNow.value === "ni podatka";
+    var wet = null;
+    for (var j = 0; j < ure.length; j++) { if ((ure[j].p || 0) >= 0.1) { wet = ure[j]; break; } }
+    if (dryNow && wet && !worse) say += " Okoli " + wet.time + " lahko začne " + ((wet.frac || 0) >= 0.7 ? "snežiti" : "deževati") + ".";
+    return say;
+  }
+  function izrisiNapoved(rowsNow){
+    var sec = document.getElementById("crn-next"), grid = document.getElementById("crn-next-grid");
+    if (!sec || !grid || !zivModelLive) return;
+    var ure = napovedUr(zivModel, zivDrsi);
+    if (!ure.length) return;
+    grid.textContent = "";
+    ure.forEach(function(x){
+      if (NEXT_SHOW_H.indexOf(x.h) < 0) return;
+      var c = document.createElement("div"); c.className = "crn-nh"; c.setAttribute("data-lvl", x.level);
+      function p(cls, txt){ var e = document.createElement("p"); e.className = cls; e.textContent = txt; c.appendChild(e); return e; }
+      p("crn-nh-t", x.time);
+      p("crn-nh-temp", numSlLive(x.temp, 1) + " °C");
+      p("crn-nh-p", padavineBesedilo(x.p, x.frac));
+      var r = p("crn-nh-road", ""); r.setAttribute("data-lvl", x.road.level);
+      var ic = document.createElement("span"); ic.className = "crn-ck-i"; ic.setAttribute("aria-hidden", "true");
+      var tx = document.createElement("span");
+      var sr = document.createElement("span"); sr.className = "crn-sr"; sr.textContent = "Vozišče: " + CHECK_LEVEL_WORD[x.road.level] + ", ";
+      tx.appendChild(sr); tx.appendChild(document.createTextNode(x.road.value));
+      r.appendChild(ic); r.appendChild(tx);
+      grid.appendChild(c);
+    });
+    var sayEl = document.getElementById("crn-next-say");
+    if (sayEl) sayEl.textContent = stavekNapovedi(rowsNow, ure);
+    var noteEl = document.getElementById("crn-next-note");
+    if (noteEl) noteEl.textContent = "Napoved Open-Meteo za dolino, preračunana na 902 m" +
+      (zivDrsi && zivDrsi.temp_c != null ? ", temperatura popravljena z zadnjo meritvijo" : "") + ". Vozišče je ocena.";
+    sec.hidden = false;
+  }
+
   function vrsticeSeznama(m, d){
     m = m || {}; d = d || {};
     var rows = [];
@@ -1070,14 +1190,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var bi = t == null ? null : blackIceLive(t, m.cloud,
       d.veter_kmh != null ? d.veter_kmh : m.windValley,
       d.rosisce_c != null ? d.rosisce_c : m.dewValley, m.pNow, m.pPrev);
-    var road = { id: "road", label: "Vozišče", src: "ocena" };
-    if (bi == null && m.p3 == null) { road.level = "na"; road.value = "ni podatka"; }
-    else if ((m.s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
-    else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
-    else if (bi === "srednje") { road.level = "warn"; road.value = "ponekod je lahko led"; }
-    else if ((m.p3 || 0) >= 0.2) { road.level = (t != null && t <= 3) ? "warn" : "ok"; road.value = "verjetno mokro"; }
-    else { road.level = "ok"; road.value = "verjetno suho"; }
-    rows.push(road);
+    rows.push(cestaVrstica(bi, m.p3, m.s3, t));
 
     var cm = m.snow24, snow = { id: "snow", label: "Sneg", src: "napoved 24 h" };
     if (cm == null) { snow.level = "na"; snow.value = "ni podatka"; }
@@ -1109,6 +1222,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var ul = document.getElementById("crn-check");
     if (!ul || (!zivModel && !zivDrsi)) return;
     var rows = vrsticeSeznama(zivModel, zivDrsi);
+    izrisiNapoved(rows);
     ul.textContent = "";
     rows.forEach(function(r){
       var li = document.createElement("li");
@@ -1186,7 +1300,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       zivModelLive = true;
       zivModel = { temp: tempC, snow24: snowCm, precip24: Math.round(precipMm * 10) / 10, p3: p3, s3: s3,
         pNow: hv("precipitation", idx), pPrev: hv("precipitation", idx - 1),
-        cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx) };
+        cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx),
+        next: [] };
+      // Ure +1..+6 -- isto kot next_hours v compute_pass_weather (winter_engine.py).
+      for (var h = 1; h <= 6 && idx + h < times.length; h++) {
+        var k = idx + h, tk = hv("temperature_2m", k), pk3 = 0, sk3 = 0;
+        for (var q = k - 2; q <= k; q++) {
+          if (q < 0) continue;
+          pk3 += (precip[q] || 0);
+          sk3 += (precip[q] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[q]);
+        }
+        zivModel.next.push({ h: h, time: String(times[k]).slice(11, 16),
+          temp: tk == null ? null : Math.round((tk - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100) * 10) / 10,
+          p: hv("precipitation", k), frac: snowFractionLive(LIVE_PASS_ELEV, fl[k]), p3: pk3, s3: sk3,
+          pPrev: hv("precipitation", k - 1), cloud: hv("cloud_cover", k),
+          wind: hv("wind_speed_10m", k), dew: hv("dew_point_2m", k) });
+      }
       uporabiStanje();
     }).catch(function(){ pokaziZastarelostOpozorila(); });
   }
