@@ -574,6 +574,13 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   `calibAt()`, `primerjavaDoline()`, `izberiRek()`, `oceniUro()`,
   `povzemiOkno()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
   drugo.**
+- **Domena `crnivec.si` je samo preusmeritev** (registrirana 25. 9. 2026 pri
+  Neoservu, DNS na Cloudflare): `crnivec.si` in `www.crnivec.si` vrneta 301 na
+  `https://meteorec.si/crnivec/`. Preusmeritev je Redirect Rule v nadzorni
+  plošči Cloudflare (cona `crnivec.si`), ne koda v tem repozitoriju. Stran
+  ostane ena sama, s canonical, sitemapom in povezavami na `meteorec.si`.
+  **Ne streži je še enkrat na `crnivec.si`**, ker bi s tem nastala podvojena
+  vsebina. GitHub Pages ima tako ali tako eno domeno na repozitorij (`CNAME`).
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 
