@@ -178,6 +178,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     overflow-wrap:anywhere}
   .crn-nh-road .crn-ck-i{width:18px;height:18px;font-size:11px;flex:0 0 auto}
 
+  /* "Posebne razmere" (special_items) -- sneg, poledica, megla za 48 ur. */
+  .crn-special{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
+    padding:var(--s3);margin-top:var(--s4);text-align:left}
+  .crn-sp-list{list-style:none;margin:0;padding:0}
+  .crn-sp{display:grid;grid-template-columns:24px 1fr;gap:var(--s1);padding:var(--s1) 0;
+    border-top:1px solid #efece5;margin:0}
+  .crn-sp:first-child{border-top:0}
+  .crn-sp > .crn-ck-i{margin-top:2px}
+  .crn-sp-h{font-size:16px;font-weight:600;margin:0}
+  .crn-sp-lines{margin:2px 0 0;padding-left:1.1em;font-size:14px;color:var(--ink2)}
+  .crn-sp-lines li{margin:0}
+  .crn-sp-none{font-size:15px;font-weight:600;margin:0}
+
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
   .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
   .crn-card-art{display:none}
@@ -375,6 +388,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     .crn-hero-main .crn-status-index{align-self:center}
     .crn-hero-side{display:flex;flex-direction:column}
     .crn-hero-main .crn-next{grid-column:1/-1;grid-row:2;margin-top:0}
+    .crn-hero-main .crn-special{grid-column:1/-1;grid-row:3;margin-top:0}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
     .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
     .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
@@ -443,20 +457,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="crn-status-desc" id="crn-status-desc">Cesta je normalno prevozna.</p>
         <div class="crn-now" aria-labelledby="crn-now-h">
           <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
-          <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">11,5 °C<span class="crn-ck-src">izmerjeno</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan<span class="crn-ck-src">napoved 24 h</span></span></li><li class="crn-ck" data-lvl="ok" data-id="fog"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Megla<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni znakov megle<span class="crn-ck-src">iz izmerjene vlage</span></span></li><li class="crn-ck" data-lvl="ok" data-id="wind"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Veter<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">šibak · 4 km/h, sunki 15<span class="crn-ck-src">izmerjeno</span></span></li></ul>
+          <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">11,7 °C<span class="crn-ck-src">izmerjeno</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan<span class="crn-ck-src">napoved 24 h</span></span></li><li class="crn-ck" data-lvl="ok" data-id="fog"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Megla<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni znakov megle<span class="crn-ck-src">iz izmerjene vlage</span></span></li><li class="crn-ck" data-lvl="ok" data-id="wind"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Veter<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">šibak · 7 km/h, sunki 10<span class="crn-ck-src">izmerjeno</span></span></li></ul>
           <p class="crn-check-warn" id="crn-check-warn" hidden></p>
-          <p class="crn-check-note" id="crn-check-note">Izmerjeno na prelazu ob 12:27 · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev.</p>
+          <p class="crn-check-note" id="crn-check-note">Izmerjeno na prelazu ob 12:37 · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev.</p>
         </div>
-        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:35:28.901233+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:35 · temperatura izmerjena (DRSI), sneg iz modela</p>
-        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:35:28.901233+00:00" hidden></p>
+        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:37:55.883987+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:37 · temperatura izmerjena (DRSI), sneg iz modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:37:55.883987+00:00" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
       </div>
 
       <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h">
         <p class="crn-now-h" id="crn-next-h">Naslednjih 6 ur</p>
         <p class="crn-next-say" id="crn-next-say">Razmere naj bi ostale podobne.</p>
-        <div class="crn-next-grid" id="crn-next-grid"><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">13:00</p><p class="crn-nh-temp">12,5 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">15:00</p><p class="crn-nh-temp">13,6 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">18:00</p><p class="crn-nh-temp">12,0 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div>
-        <p class="crn-check-note" id="crn-next-note">Napoved Open-Meteo za dolino, preračunana na 902 m, temperatura popravljena z zadnjo meritvijo. Vozišče je ocena.</p>
+        <div class="crn-next-grid" id="crn-next-grid"><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">13:00</p><p class="crn-nh-temp">12,0 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">15:00</p><p class="crn-nh-temp">12,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">18:00</p><p class="crn-nh-temp">10,9 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div>
+        <p class="crn-check-note" id="crn-next-note">Napoved Open-Meteo za dolino, preračunana na 902 m in umerjena z meritvami postaje DRSI zadnjih 10 dni. Vozišče je ocena.</p>
+      </section>
+
+      <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
+        <p class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</p>
+        <ul class="crn-sp-list"><li class="crn-sp" data-lvl="warn"><span class="crn-ck-i" aria-hidden="true"></span><div><p class="crn-sp-h"><b>Megla</b><span class="crn-sr">: Pozor,</span> · prelaz je na robu</p><ul class="crn-sp-lines"><li>Ocenjena zgornja meja megle jutri zjutraj je ~870 m, prelaz je na 902 m — lahko je v megli ali tik nad njo.</li></ul></div></li></ul>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 12:37 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
       </section>
 
       <div class="crn-hero-side">
@@ -473,8 +493,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <circle cx="33" cy="88" r="5" fill="#fff" opacity=".7"/>
     </svg></span>
           <p class="crn-card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg>Temperatura</p>
-          <p class="crn-big" id="crn-temp-val">11,5 °C</p>
-          <p class="crn-card-sub" id="crn-temp-src">izmerjeno na prelazu ob 12:27 (DRSI)</p>
+          <p class="crn-big" id="crn-temp-val">11,7 °C</p>
+          <p class="crn-card-sub" id="crn-temp-src">izmerjeno na prelazu ob 12:37 (DRSI)</p>
         </div>
         <div class="crn-card">
           <span class="crn-card-art"><svg viewBox="0 0 120 120" aria-hidden="true">
@@ -631,6 +651,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p>»Naslednjih 6 ur« je napoved Open-Meteo za dolino, preračunana na višino prelaza. Kadar je
             meritev s prelaza na voljo, napoved začne pri izmerjeni temperaturi in se v šestih urah postopoma
             vrne k modelu. Stavek nad urami primerja temperaturo in oceno vozišča z najhujšo uro v tem času.</p>
+            <p>Napoved za prelaz vsak dan umerimo z meritvami postaje DRSI zadnjih 10 dni. Preračun iz doline ne
+            vidi nočne inverzije: hladen zrak se ponoči nabira na dnu doline, prelaz pa je nad njim. Brez
+            popravka je bil model ponoči za okoli 3 °C prehladen in je napovedoval poledico, ko je bilo na
+            prelazu 5 °C.</p>
             <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
             indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
             Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
@@ -669,7 +693,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   "use strict";
   var quotes = ["Teta pravi, da je suho. Sosed pravi, da je katastrofa. Nekdo se moti.", "Grem pogledat in sporočim. Če se vrnem.", "Odvisno, kdaj vprašaš. In predvsem – koga.", "Kamera kaže sonce. Komentarji pod njo kažejo zimo.", "Ko sem jaz šel čez, je bilo čisto suho. Resda pred dvema letoma.", "Pol skupine pravi, da rabiš zimske. Druga polovica, da ne. Vzemi oboje.", "Vprašaj raje v skupini. Tam imajo vedno tri različne odgovore.", "Nekdo je pravkar vprašal isto. Odgovori so že drugačni kot včeraj.", "Tehnično prevozno. Praktično pa … saj veš, kako je s Črnivcem.", "Indeks pravi eno, dedek drugo. Za zdaj ima dedek boljši rekord.", "Če sprašuješ, ali je prevozno, je odgovor verjetno: previdno.", "Na kameri je videti dobro. Kar je vedno dober začetek.", "Črnivec je prevozen. Vprašanje je samo, za koga.", "Cesta pravi »pojdi«. Vreme pravi »premisli«.", "Snega ni veliko. Ampak tisti, ki je, je očitno dovolj.", "Danes brez težav. Jutri? Vprašaj jutri.", "Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.", "V dolini suho, na vrhu pa … dobrodošel na Črnivcu.", "Črnivec danes: bolj vprašanje kot odgovor.", "Stanje se spreminja. Mnenja še hitreje.", "Ni panike. Razen če je.", "Zaenkrat gre. Slab znak je, da sem dodal »zaenkrat«.", "Lahko greš čez. Ali pa najprej preveriš, kako zelo ti je všeč tvoj avto.", "Po podatkih je v redu. Po pripovedovanju soseda pa nikakor.", "Črnivec: kraj, kjer »samo malo snega« pomeni štiri različne stvari.", "Če greš čez, poročaj. Če ne greš, tudi.", "Včeraj je bilo prevozno. Danes je danes.", "Stanje na cesti: odvisno od tega, kako samozavestno ga gledaš.", "Ni še za paniko. Ampak verige imajo danes lep dan.", "Čez gre. Vprašanje je, ali želiš biti tisti, ki to preveri."];
   var rareQuote = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj.";
-  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Ni še za paniko. Ampak verige imajo danes lep dan.", "temp": "11,5 °C", "snow": "0,0 cm snega v 24 h", "streak": "suh niz v dolini: 0 dni", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><defs><linearGradient id=\"crnGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0%\" stop-color=\"#16a34a\"/><stop offset=\"33%\" stop-color=\"#eab308\"/><stop offset=\"67%\" stop-color=\"#ea580c\"/><stop offset=\"100%\" stop-color=\"#dc2626\"/><\/linearGradient><filter id=\"crnGaugeShadow\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feDropShadow dx=\"0\" dy=\"3\" stdDeviation=\"3.5\" flood-color=\"#000\" flood-opacity=\".16\"/><\/filter><\/defs><g filter=\"url(#crnGaugeShadow)\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"url(#crnGrad)\" stroke-width=\"30\" stroke-linecap=\"round\"/><line x1=\"126.4\" y1=\"111.4\" x2=\"105.1\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"190.0\" y1=\"85.0\" x2=\"190.0\" y2=\"55.0\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"253.6\" y1=\"111.4\" x2=\"274.9\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><\/g><text x=\"54.2\" y=\"118.7\" text-anchor=\"end\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SUHO K POPR<\/text><text x=\"133.7\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">TAK-TAK<\/text><text x=\"246.3\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">VZEMI VERIGE<\/text><text x=\"325.8\" y=\"118.7\" text-anchor=\"start\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SPOLZKO, PAZI<\/text><g filter=\"url(#crnGaugeShadow)\" transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"99.4\" stroke=\"#171717\" stroke-width=\"6\" stroke-linecap=\"round\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"#171717\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"190\" cy=\"175\" r=\"4.5\" fill=\"#fff\"/><\/g><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
+  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Ni še za paniko. Ampak verige imajo danes lep dan.", "temp": "11,7 °C", "snow": "0,0 cm snega v 24 h", "streak": "suh niz v dolini: 0 dni", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><defs><linearGradient id=\"crnGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0%\" stop-color=\"#16a34a\"/><stop offset=\"33%\" stop-color=\"#eab308\"/><stop offset=\"67%\" stop-color=\"#ea580c\"/><stop offset=\"100%\" stop-color=\"#dc2626\"/><\/linearGradient><filter id=\"crnGaugeShadow\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feDropShadow dx=\"0\" dy=\"3\" stdDeviation=\"3.5\" flood-color=\"#000\" flood-opacity=\".16\"/><\/filter><\/defs><g filter=\"url(#crnGaugeShadow)\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"url(#crnGrad)\" stroke-width=\"30\" stroke-linecap=\"round\"/><line x1=\"126.4\" y1=\"111.4\" x2=\"105.1\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"190.0\" y1=\"85.0\" x2=\"190.0\" y2=\"55.0\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"253.6\" y1=\"111.4\" x2=\"274.9\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><\/g><text x=\"54.2\" y=\"118.7\" text-anchor=\"end\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SUHO K POPR<\/text><text x=\"133.7\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">TAK-TAK<\/text><text x=\"246.3\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">VZEMI VERIGE<\/text><text x=\"325.8\" y=\"118.7\" text-anchor=\"start\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SPOLZKO, PAZI<\/text><g filter=\"url(#crnGaugeShadow)\" transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"99.4\" stroke=\"#171717\" stroke-width=\"6\" stroke-linecap=\"round\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"#171717\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"190\" cy=\"175\" r=\"4.5\" fill=\"#fff\"/><\/g><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
   var API = "https://weatherireica1.filip-eremita.workers.dev";
   var CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg";
 
@@ -1083,6 +1107,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function blackIceLive(tAir, cloud, wind, dew, pNow, pPrev){
     var g = groundTempLive(tAir, cloud, wind);
     if (g == null) return null;
+    if (dew != null && dew > tAir) dew = tAir;  // isto kot v black_ice_category()
     if (g <= 0.5) {
       var sat = dew != null && dew >= g - 1.0;
       var wet = (pNow || 0) > 0.1 || (pPrev || 0) > 0.1;
@@ -1106,6 +1131,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // forecast_sentence() iz generate_crnivec_page.py (isti pragovi, isto
   // izzvenevanje popravka z meritvijo v NEXT_BIAS_HOURS urah).
   var NEXT_BIAS_HOURS = 6, NEXT_SHOW_H = [1, 3, 6];
+  // Popravek modela po uri dneva iz meritev DRSI (compute_pass_calibration
+  // v winter_engine.py, izračunan ob jutranjem teku) ali null.
+  var CALIB = {"source": "DRSI", "station": 201, "days": 10, "hours": 253, "bias_by_hour": [2.58, 2.62, 2.67, 2.68, 2.75, 2.82, 3.2, 3.68, 3.68, 2.84, 1.55, 0.41, -0.45, -1.02, -1.26, -1.23, -1.24, -1.31, -1.15, -0.51, 0.45, 1.3, 1.94, 2.32], "mae_raw_c": 2.07, "mae_cal_c": 0.94};
+  function calibAt(timeStr){
+    if (!CALIB || !CALIB.bias_by_hour) return 0;
+    var hh = parseInt(String(timeStr).slice(11, 13), 10);
+    return isNaN(hh) ? 0 : (CALIB.bias_by_hour[hh] || 0);
+  }
   var LEVEL_RANK = { na: 0, ok: 1, warn: 2, stop: 3 };
   function tempNivo(t){ return t == null ? "na" : t <= 0 ? "stop" : t <= 5 ? "warn" : "ok"; }
   function padavineBesedilo(p, frac){
@@ -1116,7 +1149,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   function napovedUr(m, d){
     var tMeas = d && d.temp_c != null ? d.temp_c : null;
-    var bias = (tMeas != null && m.temp != null) ? tMeas - m.temp : 0;
+    var base = m.tempCal != null ? m.tempCal : m.temp;
+    var bias = (tMeas != null && base != null) ? tMeas - base : 0;
     return (m.next || []).map(function(e){
       var t = e.temp == null ? null : Math.round((e.temp + bias * Math.max(0, 1 - e.h / NEXT_BIAS_HOURS)) * 10) / 10;
       var bi = t == null ? null : blackIceLive(t, e.cloud, e.wind, e.dew, e.p, e.pPrev);
@@ -1175,7 +1209,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (sayEl) sayEl.textContent = stavekNapovedi(rowsNow, ure);
     var noteEl = document.getElementById("crn-next-note");
     if (noteEl) noteEl.textContent = "Napoved Open-Meteo za dolino, preračunana na 902 m" +
-      (zivDrsi && zivDrsi.temp_c != null ? ", temperatura popravljena z zadnjo meritvijo" : "") + ". Vozišče je ocena.";
+      (CALIB ? " in umerjena z meritvami postaje DRSI zadnjih " + CALIB.days + " dni" : "") +
+      (zivDrsi && zivDrsi.temp_c != null ? ", začne pri zadnji meritvi" : "") + ". Vozišče je ocena.";
     sec.hidden = false;
   }
 
@@ -1301,6 +1336,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       zivModel = { temp: tempC, snow24: snowCm, precip24: Math.round(precipMm * 10) / 10, p3: p3, s3: s3,
         pNow: hv("precipitation", idx), pPrev: hv("precipitation", idx - 1),
         cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx),
+        tempCal: tempC == null ? null : Math.round((tempC + calibAt(times[idx])) * 10) / 10,
         next: [] };
       // Ure +1..+6 -- isto kot next_hours v compute_pass_weather (winter_engine.py).
       for (var h = 1; h <= 6 && idx + h < times.length; h++) {
@@ -1311,7 +1347,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           sk3 += (precip[q] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[q]);
         }
         zivModel.next.push({ h: h, time: String(times[k]).slice(11, 16),
-          temp: tk == null ? null : Math.round((tk - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100) * 10) / 10,
+          temp: tk == null ? null : Math.round((tk - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100
+            + calibAt(times[k])) * 10) / 10,
           p: hv("precipitation", k), frac: snowFractionLive(LIVE_PASS_ELEV, fl[k]), p3: pk3, s3: sk3,
           pPrev: hv("precipitation", k - 1), cloud: hv("cloud_cover", k),
           wind: hv("wind_speed_10m", k), dew: hv("dew_point_2m", k) });
