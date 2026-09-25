@@ -1,4 +1,9 @@
 {
+  "indijansko-poletje-suh-soncen-teden-0925": [
+    "naslednji-teden-konec-poletja-0904",
+    "tedenska-napoved-11-17-avgust-2026",
+    "tedenska-napoved-24-28-avgust-2026"
+  ],
   "kelvin-helmholtzovi-valovi-nad-crnivcem-0924": [
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
     "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916",
@@ -61,8 +66,8 @@
   ],
   "pileus-nad-recico-kapa-nad-nevihtnim-stolpom-0831": [
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
-    "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916",
-    "hodograf-krivulja-vetra-nevihte"
+    "kelvin-helmholtzovi-valovi-nad-crnivcem-0924",
+    "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916"
   ],
   "invazivka-tedenski-pregled-20260830": [
     "invazivka-tedenski-pregled-20260815",
@@ -316,8 +321,8 @@
   ],
   "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720": [
     "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804",
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
-    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
+    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
   ],
   "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719": [
     "zakaj-je-zjutraj-tako-toplo-v-recici-ob-savinji-0828",
@@ -490,8 +495,8 @@
     "junij-2026-dvoglavi-mesec"
   ],
   "najhladnejsa-julijska-jutra-recica": [
-    "julij-skozi-zgodovino-recica-savinji",
     "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
+    "julij-skozi-zgodovino-recica-savinji",
     "prva-tropska-noc-recica-julij-2026"
   ],
   "anatomija-poletne-nevihte-recica-savinji": [

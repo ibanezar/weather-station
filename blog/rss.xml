@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 24 Sep 2026 12:29:42 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 25 Sep 2026 17:17:03 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Indijansko poletje: pred nami suh in sončen teden</title>
+      <link>https://meteorec.si/blog/indijansko-poletje-suh-soncen-teden-0925.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/indijansko-poletje-suh-soncen-teden-0925.html</guid>
+      <pubDate>Fri, 25 Sep 2026 08:00:00 +0000</pubDate>
+      <description>Od sobote do vsaj četrtka suho in sončno, popoldne okoli 20 °C, jutra hladna. Kaj je indijansko poletje, kaj kažejo ARSO, Open-Meteo in MTR ter kdaj se bo verjetno končalo.</description>
+      <category>napoved</category>
+      <category>razlaga</category>
+      <category>inverzija</category>
+      <category>MTR</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Kelvin-Helmholtzovi valovi nad Črnivcem ob zori</title>
       <link>https://meteorec.si/blog/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.html</link>
