@@ -41,6 +41,81 @@ function _stripRainTestOffset(precipTotal) {
 // 5 minut — pogostejše poizvedovanje ne vrne ničesar novega.
 const VARPOLJE_URL = "https://varpolje.si/station.json";
 
+// Cestne vremenske postaje DRSI (Direkcija RS za infrastrukturo) — isti
+// seznam, ki ga bere javna stran ceste.si/vreme. Postaja 201 je na prelazu
+// Črnivec (meri na 10 minut: temperatura, vlaga, rosišče, veter, sunki,
+// dnevne padavine; temperature cestišča ne objavlja), 262 v Gornjem Gradu.
+// Endpoint ni dokumentiran API, zato ga beremo vljudno: /crnivec-drsi ga
+// predpomni na robu 5 minut, torej DRSI dobi največ en klic na 5 minut ne
+// glede na število obiskovalcev.
+const DRSI_POSTAJE_URL = "https://www.ceste.si/Vremenske/Vreme/KamereInVreme";
+const DRSI_POSTAJE = { crnivec: 201, gornji_grad: 262 };
+
+// DRSI piše čas meritve kot lokalni čas brez pasu ("2026-09-25T11:47:14") —
+// pretvori v ISO/UTC, da ga odjemalec lahko primerja z Date.now().
+function _drsiCas(s) {
+  const kotUtc = Date.parse(String(s || "").trim().replace(" ", "T") + "Z");
+  if (isNaN(kotUtc)) return null;
+  let odmikMin = 60;
+  try {
+    const tz = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Ljubljana", timeZoneName: "shortOffset" })
+      .formatToParts(new Date(kotUtc)).find(p => p.type === "timeZoneName")?.value || "";
+    const m = /GMT([+-]\d{1,2})(?::(\d{2}))?/.exec(tz);
+    if (m) odmikMin = Number(m[1]) * 60 + Math.sign(Number(m[1])) * Number(m[2] || 0);
+  } catch (_) { /* ostane +1 h */ }
+  return new Date(kotUtc - odmikMin * 60000).toISOString();
+}
+
+// Seznam DRSI postaj, predpomnjen na robu 5 minut (glej zgoraj) — skupen
+// za /crnivec-drsi in /crnivec/znacka.svg, da oba bereta isti posnetek.
+async function _drsiSeznam() {
+  const dRes = await fetch(DRSI_POSTAJE_URL, {
+    headers: { "Accept": "application/json" },
+    cf: { cacheTtl: 300, cacheEverything: true },
+  });
+  if (!dRes.ok) throw new Error("HTTP " + dRes.status);
+  const seznam = await dRes.json();
+  const postaje = {};
+  for (const [kljuc, id] of Object.entries(DRSI_POSTAJE)) {
+    const p = Array.isArray(seznam) ? seznam.find(s => s && s.stationId === id) : null;
+    postaje[kljuc] = _drsiPostaja(p);
+  }
+  return postaje;
+}
+
+// Sveža meritev s Črnivca ali null — isti prag 40 min kot DRSI_MAX_AGE_MIN
+// v tools/crnivec_zones.py (namerna podvojitev, worker ne bere Pythona).
+async function _drsiCrnivec() {
+  try {
+    const st = (await _drsiSeznam()).crnivec;
+    const ts = st && st.ts ? Date.parse(st.ts) : NaN;
+    return (!isNaN(ts) && (Date.now() - ts) / 60000 <= 40) ? st : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function _drsiPostaja(p) {
+  const w = p && p.weather;
+  if (!w) return null;
+  const num = v => (v === null || v === undefined || v === "" || isNaN(Number(v))) ? null : Number(v);
+  // Vlaga 0 % je okvarjen senzor (npr. Pijava Gorica), ne suh zrak.
+  const rh = num(w.humidityPercentage);
+  return {
+    ime: p.name,
+    ts: _drsiCas(w.timestamp),
+    temp_c: num(w.outdoorTemperatureC),
+    vlaga_pct: rh && rh > 0 ? rh : null,
+    rosisce_c: num(w.dewPointC),
+    veter_kmh: num(w.windSpeedKmh),
+    sunki_kmh: num(w.windGustKmh),
+    smer: w.windDirection ? String(w.windDirection).trim() : null,
+    padavine_danes_mm: num(w.dailyRainMm),
+    tmin_c: num(w.minOutdoorTemperatureC),
+    tmax_c: num(w.maxOutdoorTemperatureC),
+  };
+}
+
 // Bbox Zgornje Savinjske doline za MeteoHmeljar zemljevid — isto območje kot
 // fetch_hydrants.py (Solčava–Luče–Ljubno–Rečica–Mozirje–Nazarje–Gornji Grad).
 // esriGeometryEnvelope pričakuje xmin,ymin,xmax,ymax (lon,lat,lon,lat).
@@ -3264,7 +3339,11 @@ export default {
             const tNow = temps[idx];
             const LAPSE = 0.65, STATION_ELEV = 366, PASS_ELEV = 902;
             const SNOW_OFFSET = 250, SNOW_HALFWIDTH = 100;
-            const tempC = tNow == null ? null : (tNow - LAPSE * (PASS_ELEV - STATION_ELEV) / 100);
+            // Temperatura: izmerjena na prelazu (DRSI), kadar je sveža — isto
+            // kot with_measurement() v tools/crnivec_zones.py; sicer model.
+            const drsi = await _drsiCrnivec();
+            const tempC = (drsi && drsi.temp_c != null) ? drsi.temp_c
+              : (tNow == null ? null : (tNow - LAPSE * (PASS_ELEV - STATION_ELEV) / 100));
             const precip = om.hourly.precipitation || [];
             const fl = om.hourly.freezing_level_height || [];
             let snowCm = 0;
@@ -3608,6 +3687,26 @@ export default {
         } catch (e) {
           return new Response(
             JSON.stringify({ ok: false, error: "varpolje_unreachable", detail: String(e) }),
+            { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      // ── /crnivec-drsi ─────────────────────────────────────
+      // Izmerjeno stanje s cestnih vremenskih postaj DRSI na Črnivcu in v
+      // Gornjem Gradu za seznam "Čez Črnivec zdaj" na /crnivec/ (glej
+      // DRSI_POSTAJE_URL zgoraj). ceste.si ne pošilja glave CORS, zato gre
+      // prek nas (isto načelo kot /varpolje-current). Navedba vira (DRSI) je
+      // na strani obvezna — pogoji promet.si za razvijalce.
+      if (path === "/crnivec-drsi") {
+        try {
+          const postaje = await _drsiSeznam();
+          return new Response(JSON.stringify({ ok: true, vir: "DRSI (ceste.si)", postaje }), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=120" }
+          });
+        } catch (e) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "drsi_unreachable", detail: String(e) }),
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
           );
         }

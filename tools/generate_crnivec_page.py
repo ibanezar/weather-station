@@ -35,6 +35,14 @@ povsod na strani — glej CLAUDE.md, "noben klic pogosteje kot na 5 minut" —
 tu še toliko bolj, ker gre klic na tuj strežnik, ne na naš worker). Attribucija
 vira (promet.si) je obvezna po njihovih pogojih uporabe za razvijalce.
 
+Seznam "Čez Črnivec zdaj" (#crn-check, check_rows spodaj; dodan 25. 9. 2026)
+pod statusom kaže temperaturo, vozišče, sneg, meglo in veter. Temperatura,
+vlaga in veter so IZMERJENI na cestni vremenski postaji DRSI na prelazu
+(postaja 201, prek /crnivec-drsi v worker.js), kadar je meritev sveža; sicer
+vrstica pade na model ali pošteno reče "ni meritve". Vozišče je vedno ocena
+(black_ice_category iz winter_engine.py z izmerjenimi vhodi), ker DRSI
+temperature cestišča ne objavlja. Indeks (pick_zone) seznam NE spreminja.
+
 Poročanje (#crn-report) je bogatejše od dnevnega glasovanja (#crn-vote):
 obiskovalec izbere ISTO cono kot merilnik (ne novo lestvico) + neobvezno
 opombo, javno, brez prijave — /crnivec/porocilo in /crnivec/porocila v
@@ -63,7 +71,9 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
 from generate_story_card import dry_streak  # noqa: E402 — isti izračun kot na zgodbah, ne podvojen tu
-from crnivec_zones import ZONES, pick_zone  # noqa: E402 — deljeno z generate_story_card.py (tema CRNIVEC)
+from crnivec_zones import (  # noqa: E402 — deljeno z generate_story_card.py (tema CRNIVEC)
+    DRSI_MAX_AGE_MIN, ZONES, fetch_drsi_crnivec, pick_zone, with_measurement)
+from winter_engine import black_ice_category  # noqa: E402 — ista formula poledice kot na /zima/, ne podvojena
 
 ROOT = seo.ROOT
 DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
@@ -189,6 +199,154 @@ QUOTES = [
 # še en enakovreden citat. Ni deterministična po datumu, ker bi sicer
 # "redka" izguba smisel — mora biti presenečenje ob kliku, ne stalnica dneva.
 RARE_QUOTE = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj."
+
+
+# ── Seznam "Čez Črnivec zdaj" ────────────────────────────────────────────
+# Pet vrstic pod statusom: temperatura, vozišče, sneg, megla, veter. Vsaka
+# ima raven (ok/warn/stop/na), besedilo in VIR ("izmerjeno" / "ocena" /
+# "napoved 24 h") -- izmerjeno s postaje DRSI na prelazu in modelska ocena
+# se ne zlivata v eno število (isto načelo kot padavinska ploščica in
+# vodostaj, glej CLAUDE.md). Meteorec indeks (pick_zone, merilnik) ostane
+# NESPREMENJEN: deli ga z OG kartico, zgodbo in značko v worker.js, zato
+# seznam indeksa ne povozi, samo pove, kadar je kaj slabše, kot kaže.
+#
+# Klientska kopija pravil je v SHARE_JS_TEMPLATE (vrsticeSeznama() in
+# sosednje funkcije) -- namerna podvojitev, isto kot pickZoneLive; če tu
+# spremeniš prag ali besedilo, ga spremeni tudi tam.
+CHECK_LEVEL_WORD = {"ok": "V redu", "warn": "Pozor", "stop": "Nevarno", "na": "Ni podatka"}
+
+
+def num1(x, d=1):
+    return seo.num(x, d) if x is not None else "–"
+
+
+def check_rows(weather, drsi):
+    """Vrstice seznama iz modela (weather = passes["crnivec"]["weather"]) in
+    meritve DRSI (ali None). Vrne seznam slovarjev {id, label, level, value,
+    src}."""
+    now = weather.get("now") or {}
+    rows = []
+
+    t_meas = (drsi or {}).get("temp_c")
+    t = t_meas if t_meas is not None else weather.get("temp_c")
+    if t is None:
+        rows.append({"id": "temp", "label": "Temperatura", "level": "na", "value": "ni podatka", "src": ""})
+    else:
+        # Isti pragovi kot pick_zone (≤ 0 °C spolzko, do 5 °C pozor), da
+        # vrstica in merilnik ne govorita dveh različnih stvari.
+        lvl = "stop" if t <= 0 else "warn" if t <= 5 else "ok"
+        rows.append({"id": "temp", "label": "Temperatura", "level": lvl, "value": f"{num1(t)} °C",
+                     "src": "izmerjeno" if t_meas is not None else "ocena"})
+
+    # Vozišče: vedno OCENA (DRSI temperature cestišča ne objavlja). Kjer je
+    # meritev, gre v formulo poledice izmerjena temperatura/rosišče/veter.
+    bi = None
+    if t is not None:
+        res = black_ice_category(
+            t, now.get("cloud_pct"),
+            (drsi or {}).get("veter_kmh") if (drsi or {}).get("veter_kmh") is not None else now.get("wind_kmh_valley"),
+            (drsi or {}).get("rosisce_c") if (drsi or {}).get("rosisce_c") is not None else now.get("dew_c_valley"),
+            now.get("precip_mm_now"), now.get("precip_mm_prev"))
+        bi = res[0] if res else None
+    rows.append(road_row(bi, now.get("precip_mm_3h"), now.get("snow_cm_3h"), t))
+    rows.append(snow_row(weather.get("expected_snow_cm_24h")))
+    rows.append(fog_row((drsi or {}).get("vlaga_pct")))
+    rows.append(wind_row((drsi or {}).get("veter_kmh"), (drsi or {}).get("sunki_kmh")))
+    return rows
+
+
+def road_row(black_ice, precip_3h, snow_3h, t):
+    r = {"id": "road", "label": "Vozišče", "src": "ocena"}
+    if black_ice is None and precip_3h is None:
+        return {**r, "level": "na", "value": "ni podatka"}
+    if (snow_3h or 0) >= 0.5:
+        return {**r, "level": "stop", "value": "možen sneg na cesti"}
+    if black_ice == "visoko":
+        return {**r, "level": "stop", "value": "nevarnost poledice"}
+    if black_ice == "srednje":
+        return {**r, "level": "warn", "value": "ponekod je lahko led"}
+    if (precip_3h or 0) >= 0.2:
+        return {**r, "level": "warn" if (t is not None and t <= 3) else "ok", "value": "verjetno mokro"}
+    return {**r, "level": "ok", "value": "verjetno suho"}
+
+
+def snow_row(cm):
+    r = {"id": "snow", "label": "Sneg", "src": "napoved 24 h"}
+    if cm is None:
+        return {**r, "level": "na", "value": "ni podatka"}
+    if cm < 0.1:
+        return {**r, "level": "ok", "value": "ni pričakovan"}
+    if cm < 2:
+        return {**r, "level": "warn", "value": f"do {num1(cm)} cm"}
+    return {**r, "level": "stop", "value": f"{num1(cm)} cm"}
+
+
+def fog_row(rh):
+    """Megla iz IZMERJENE relativne vlage na prelazu. Vidljivosti nihče ne
+    meri, modelska (Open-Meteo) pa je za Rečico -- megla na dnu doline ni
+    megla na 902 m, zato brez meritve vrstica pošteno reče "ni meritve"."""
+    r = {"id": "fog", "label": "Megla", "src": "iz izmerjene vlage"}
+    if rh is None:
+        return {**r, "level": "na", "value": "ni meritve", "src": ""}
+    if rh >= 97:
+        return {**r, "level": "stop", "value": f"verjetna ({rh:.0f} % vlage)"}
+    if rh >= 90:
+        return {**r, "level": "warn", "value": f"možna ({rh:.0f} % vlage)"}
+    return {**r, "level": "ok", "value": "ni znakov megle"}
+
+
+def wind_row(speed, gust):
+    """Veter samo iz meritve: modelski veter je za Rečico na dnu doline in za
+    prelaz ne pove ničesar uporabnega."""
+    r = {"id": "wind", "label": "Veter", "src": "izmerjeno"}
+    if speed is None and gust is None:
+        return {**r, "level": "na", "value": "ni meritve", "src": ""}
+    g = gust if gust is not None else speed
+    s = speed if speed is not None else gust
+    word = "šibak" if s < 20 else "zmeren" if s < 40 else "močan" if s < 60 else "zelo močan"
+    if g >= 40 and s < 40:
+        word = "sunkovit"  # šibak povprečen veter ob močnih sunkih ni "šibak"
+    lvl = "stop" if g >= 60 else "warn" if g >= 40 else "ok"
+    txt = f"{word} · {s:.0f} km/h" + (f", sunki {gust:.0f}" if gust is not None else "")
+    return {**r, "level": lvl, "value": txt}
+
+
+def check_note(drsi):
+    """Vrstica pod seznamom: od kod so meritve in kdaj so bile narejene."""
+    if drsi and drsi.get("ts"):
+        try:
+            ts = datetime.datetime.fromisoformat(drsi["ts"].replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/Ljubljana"))
+            return f"Izmerjeno na prelazu ob {ts:%H:%M} · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev."
+        except ValueError:
+            pass
+    return "Meritev s prelaza trenutno ni na voljo — prikazana je ocena modela. Vozišče je ocena, ne meritev."
+
+
+def check_list_html(rows):
+    items = []
+    for r in rows:
+        src = f'<span class="crn-ck-src">{r["src"]}</span>' if r.get("src") else ""
+        items.append(
+            f'<li class="crn-ck" data-lvl="{r["level"]}" data-id="{r["id"]}">'
+            f'<span class="crn-ck-i" aria-hidden="true"></span>'
+            f'<span class="crn-ck-l">{r["label"]}<span class="crn-sr">: {CHECK_LEVEL_WORD[r["level"]]},</span></span>'
+            f'<span class="crn-ck-v">{r["value"]}{src}</span></li>')
+    return "".join(items)
+
+
+def check_warn_text(rows, zone_id):
+    """Indeks gleda samo temperaturo in sneg. Če kakšna druga vrstica kaže
+    nevarno, merilnik pa zeleno/rumeno, to povej izrecno -- sicer bi si
+    status in seznam tiho nasprotovala."""
+    if zone_id not in ("sonce", "nekaj"):
+        return ""
+    # Temperatura šteje samo, kadar je IZMERJENA: modelska je ista kot v
+    # indeksu, izmerjena pa lahko pade pod ničlo, ko model še kaže suho.
+    bad = [r["label"].lower() for r in rows if r["level"] == "stop" and r["id"] != "snow"
+           and (r["id"] != "temp" or r["src"] == "izmerjeno")]
+    if not bad:
+        return ""
+    return "Pozor: na prelazu je slabše, kot kaže indeks — " + ", ".join(bad) + "."
 
 
 def load_json(path, default=None):
@@ -460,6 +618,37 @@ CSS = '''
   .crn-status-index{display:inline-block;font-size:13px;font-weight:700;margin-top:var(--s2);
     background:#fff;color:var(--ink);border:2px solid #111;border-radius:999px;padding:4px var(--s2)}
 
+  /* Seznam "Čez Črnivec zdaj" (glej check_rows). Bela podlaga znotraj
+     obarvane statusne kartice, da barva cone ne zmede barv posameznih vrstic.
+     Raven nosi ikona IN besedilo (skrit "V redu/Pozor/Nevarno" za bralnike
+     zaslona + vrednost sama) -- barva ni edini nosilec pomena. */
+  .crn-now{background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;
+    box-shadow:4px 4px 0 #111;padding:var(--s2) var(--s3);margin:var(--s3) auto 0;max-width:480px;text-align:left}
+  .crn-now-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
+  .crn-check{list-style:none;margin:0;padding:0}
+  .crn-ck{display:grid;grid-template-columns:24px 6.5em 1fr;align-items:center;gap:var(--s1);
+    padding:6px 0;border-top:1px solid #efece5;margin:0;font-size:15px}
+  .crn-ck:first-child{border-top:0}
+  .crn-ck-i{width:22px;height:22px;border-radius:50%;border:2px solid #111;display:flex;
+    align-items:center;justify-content:center;font-size:13px;font-weight:900;line-height:1;color:#fff}
+  .crn-ck[data-lvl="ok"] .crn-ck-i{background:#16a34a}
+  .crn-ck[data-lvl="ok"] .crn-ck-i::before{content:"✓"}
+  .crn-ck[data-lvl="warn"] .crn-ck-i{background:#facc15;color:#111}
+  .crn-ck[data-lvl="warn"] .crn-ck-i::before{content:"!"}
+  .crn-ck[data-lvl="stop"] .crn-ck-i{background:#dc2626}
+  .crn-ck[data-lvl="stop"] .crn-ck-i::before{content:"✕"}
+  .crn-ck[data-lvl="na"] .crn-ck-i{background:#e5e7eb;color:#4b5563}
+  .crn-ck[data-lvl="na"] .crn-ck-i::before{content:"–"}
+  .crn-ck-l{font-weight:700}
+  .crn-ck-v{font-weight:600;overflow-wrap:anywhere}
+  .crn-ck[data-lvl="na"] .crn-ck-v{color:var(--muted);font-weight:500}
+  .crn-ck-src{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--muted);
+    border:1px solid #d6d0c2;border-radius:999px;padding:0 6px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+  .crn-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .crn-check-warn{font-size:14px;font-weight:800;color:#7f1d1d;background:#fee2e2;border:2px solid #111;
+    border-radius:10px;padding:4px var(--s2);margin:var(--s1) 0 0}
+  .crn-check-note{font-size:12px;color:var(--muted);margin:var(--s1) 0 0}
+
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
   .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
   .crn-card-art{display:none}
@@ -708,7 +897,7 @@ SHARE_JS_TEMPLATE = '''
     if (!updEl || !updEl.dataset.ts) return;
     var rc = relCas(updEl.dataset.ts);
     if (!rc) return;
-    updEl.textContent = "Posodobljeno " + rc + " · ocena iz vremenskega modela";
+    updEl.textContent = "Posodobljeno " + rc + " · " + (updEl.dataset.sfx || "ocena iz vremenskega modela");
     updEl.title = new Date(updEl.dataset.ts).toLocaleString("sl");
   }
   izpisiPosodobljeno();
@@ -978,8 +1167,9 @@ SHARE_JS_TEMPLATE = '''
     freshEl.hidden = false;
   }
 
-  function primeniZivoStanje(tempC, snowCm, precipMm){
-    var zone = pickZoneLive(tempC, snowCm);
+  function primeniZivoStanje(tempC, snowCm, precipMm, info){
+    info = info || {};
+    var zone = pickZoneLive(tempC, snowCm || 0);
     var tempTxt = (tempC == null ? "–" : numSlLive(tempC, 1)) + " °C";
     var snowTxt = numSlLive(snowCm, 1) + " cm";
 
@@ -987,7 +1177,12 @@ SHARE_JS_TEMPLATE = '''
     var sEl = document.getElementById("crn-snow-new");
     var pEl = document.getElementById("crn-precip");
     if (tEl && tempC != null) { tEl.textContent = tempTxt; tEl.className = "crn-big"; }
-    if (sEl) sEl.textContent = "+" + snowTxt;
+    if (sEl && snowCm != null) sEl.textContent = "+" + snowTxt;
+    var srcEl = document.getElementById("crn-temp-src");
+    if (srcEl) srcEl.textContent = info.meas
+      ? "izmerjeno na prelazu ob " + uraSl(new Date(info.ts)) + " (DRSI)"
+      : "na prelazu · ocena modela";
+    if (updEl) updEl.dataset.sfx = info.meas ? "temperatura izmerjena (DRSI), sneg iz modela" : "ocena iz vremenskega modela";
     if (pEl && precipMm != null) pEl.textContent = numSlLive(precipMm, 1) + " mm";
 
     var card = document.getElementById("crn-status");
@@ -1037,15 +1232,161 @@ SHARE_JS_TEMPLATE = '''
         'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"');
     }
 
-    if (updEl) { updEl.dataset.ts = new Date().toISOString(); izpisiPosodobljeno(); }
-    var freshEl = document.getElementById("crn-fresh");
-    if (freshEl) freshEl.hidden = true;
+    // "Posodobljeno" in skrita oznaka zastarelosti samo ob sveži napovedi --
+    // sama meritev (brez žive napovedi) snega ne osveži.
+    if (info.sveze) {
+      if (updEl) updEl.dataset.ts = new Date().toISOString();
+      var freshEl = document.getElementById("crn-fresh");
+      if (freshEl) freshEl.hidden = true;
+    }
+    izpisiPosodobljeno();
+  }
+
+  // ── Seznam "Čez Črnivec zdaj" ──────────────────────────────────────────
+  // NAMERNA PODVOJITEV check_rows()/road_row()/snow_row()/fog_row()/
+  // wind_row() iz generate_crnivec_page.py in black_ice_category()/
+  // ground_temp_c() iz winter_engine.py -- brskalnik ne more uvoziti
+  // Pythona. Če spremeniš prag ali besedilo tam, ga spremeni tudi tu.
+  // Model (Open-Meteo, spodaj) in meritev DRSI (/crnivec-drsi) prideta
+  // ločeno; seznam se preriše, ko prispe katerikoli od njiju.
+  var DRSI_MAX_AGE_MIN = __DRSI_MAX_AGE__;
+  var CHECK_LEVEL_WORD = { ok: "V redu", warn: "Pozor", stop: "Nevarno", na: "Ni podatka" };
+  // Začetni modelski vhodi so strežniški (isti, iz katerih je spečen
+  // statični seznam) -- če meritev DRSI prispe pred Open-Meteo, vrstice
+  // Vozišče/Sneg ne smejo za trenutek pasti na "ni podatka".
+  var zivModel = __CHECK_MODEL_JSON__, zivDrsi = null, zivZoneId = null, zivModelLive = false;
+
+  // Indeks poganja IZMERJENA temperatura s prelaza, kadar je sveža (isto kot
+  // with_measurement() v crnivec_zones.py); sneg je vedno iz modela.
+  // Preračuna se, ko prispe katerikoli od obeh virov. Brez žive
+  // napovedi IN brez meritve ostane strežniški izris (ta je že upošteval
+  // meritev ob generiranju) -- ne prepišemo ga s starim semenom.
+  function uporabiStanje(){
+    var m = zivModel || {};
+    var meas = !!(zivDrsi && zivDrsi.temp_c != null);
+    if (!zivModelLive && !meas) { osveziSeznam(); return; }
+    var t = meas ? zivDrsi.temp_c : m.temp;
+    primeniZivoStanje(t, m.snow24, m.precip24, { meas: meas, ts: meas ? zivDrsi.ts : null, sveze: zivModelLive });
+    zivZoneId = pickZoneLive(t, m.snow24 || 0).id;
+    osveziSeznam();
+  }
+
+  function groundTempLive(tAir, cloud, wind){
+    if (tAir == null) return null;
+    var off = 3.0;
+    function lin(x, x0, y0, x1, y1){ return Math.max(0, Math.min(1, y0 + (y1 - y0) * (x - x0) / (x1 - x0))); }
+    if (cloud != null) off *= lin(cloud, 20, 1.0, 80, 0.0);
+    if (wind != null) off *= lin(wind, 5, 1.0, 20, 0.15);
+    return tAir - off;
+  }
+  function blackIceLive(tAir, cloud, wind, dew, pNow, pPrev){
+    var g = groundTempLive(tAir, cloud, wind);
+    if (g == null) return null;
+    if (g <= 0.5) {
+      var sat = dew != null && dew >= g - 1.0;
+      var wet = (pNow || 0) > 0.1 || (pPrev || 0) > 0.1;
+      return (sat || wet) ? "visoko" : "srednje";
+    }
+    if (g <= 1.5 && dew != null && dew >= g - 1.0) return "srednje";
+    return "nizko";
+  }
+  function vrsticeSeznama(m, d){
+    m = m || {}; d = d || {};
+    var rows = [];
+    var tMeas = d.temp_c, t = tMeas != null ? tMeas : m.temp;
+    if (t == null) rows.push({ id: "temp", label: "Temperatura", level: "na", value: "ni podatka", src: "" });
+    else rows.push({ id: "temp", label: "Temperatura", level: t <= 0 ? "stop" : t <= 5 ? "warn" : "ok",
+      value: numSlLive(t, 1) + " °C", src: tMeas != null ? "izmerjeno" : "ocena" });
+
+    var bi = t == null ? null : blackIceLive(t, m.cloud,
+      d.veter_kmh != null ? d.veter_kmh : m.windValley,
+      d.rosisce_c != null ? d.rosisce_c : m.dewValley, m.pNow, m.pPrev);
+    var road = { id: "road", label: "Vozišče", src: "ocena" };
+    if (bi == null && m.p3 == null) { road.level = "na"; road.value = "ni podatka"; }
+    else if ((m.s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
+    else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
+    else if (bi === "srednje") { road.level = "warn"; road.value = "ponekod je lahko led"; }
+    else if ((m.p3 || 0) >= 0.2) { road.level = (t != null && t <= 3) ? "warn" : "ok"; road.value = "verjetno mokro"; }
+    else { road.level = "ok"; road.value = "verjetno suho"; }
+    rows.push(road);
+
+    var cm = m.snow24, snow = { id: "snow", label: "Sneg", src: "napoved 24 h" };
+    if (cm == null) { snow.level = "na"; snow.value = "ni podatka"; }
+    else if (cm < 0.1) { snow.level = "ok"; snow.value = "ni pričakovan"; }
+    else if (cm < 2) { snow.level = "warn"; snow.value = "do " + numSlLive(cm, 1) + " cm"; }
+    else { snow.level = "stop"; snow.value = numSlLive(cm, 1) + " cm"; }
+    rows.push(snow);
+
+    var rh = d.vlaga_pct, fog = { id: "fog", label: "Megla", src: "iz izmerjene vlage" };
+    if (rh == null) { fog.level = "na"; fog.value = "ni meritve"; fog.src = ""; }
+    else if (rh >= 97) { fog.level = "stop"; fog.value = "verjetna (" + Math.round(rh) + " % vlage)"; }
+    else if (rh >= 90) { fog.level = "warn"; fog.value = "možna (" + Math.round(rh) + " % vlage)"; }
+    else { fog.level = "ok"; fog.value = "ni znakov megle"; }
+    rows.push(fog);
+
+    var sp = d.veter_kmh, gu = d.sunki_kmh, wind = { id: "wind", label: "Veter", src: "izmerjeno" };
+    if (sp == null && gu == null) { wind.level = "na"; wind.value = "ni meritve"; wind.src = ""; }
+    else {
+      var g = gu != null ? gu : sp, s = sp != null ? sp : gu;
+      var word = s < 20 ? "šibak" : s < 40 ? "zmeren" : s < 60 ? "močan" : "zelo močan";
+      if (g >= 40 && s < 40) word = "sunkovit";
+      wind.level = g >= 60 ? "stop" : g >= 40 ? "warn" : "ok";
+      wind.value = word + " · " + Math.round(s) + " km/h" + (gu != null ? ", sunki " + Math.round(gu) : "");
+    }
+    rows.push(wind);
+    return rows;
+  }
+  function osveziSeznam(){
+    var ul = document.getElementById("crn-check");
+    if (!ul || (!zivModel && !zivDrsi)) return;
+    var rows = vrsticeSeznama(zivModel, zivDrsi);
+    ul.textContent = "";
+    rows.forEach(function(r){
+      var li = document.createElement("li");
+      li.className = "crn-ck";
+      li.setAttribute("data-lvl", r.level);
+      li.setAttribute("data-id", r.id);
+      var ic = document.createElement("span"); ic.className = "crn-ck-i"; ic.setAttribute("aria-hidden", "true");
+      var l = document.createElement("span"); l.className = "crn-ck-l"; l.textContent = r.label;
+      var sr = document.createElement("span"); sr.className = "crn-sr"; sr.textContent = ": " + CHECK_LEVEL_WORD[r.level] + ",";
+      l.appendChild(sr);
+      var v = document.createElement("span"); v.className = "crn-ck-v"; v.textContent = r.value;
+      if (r.src) { var s = document.createElement("span"); s.className = "crn-ck-src"; s.textContent = r.src; v.appendChild(s); }
+      li.appendChild(ic); li.appendChild(l); li.appendChild(v);
+      ul.appendChild(li);
+    });
+    var warnEl = document.getElementById("crn-check-warn");
+    if (warnEl) {
+      var bad = rows.filter(function(r){ return r.level === "stop" && r.id !== "snow" && (r.id !== "temp" || r.src === "izmerjeno"); })
+        .map(function(r){ return r.label.toLowerCase(); });
+      var statusEl = document.getElementById("crn-status");
+      var zid = zivZoneId || (statusEl ? statusEl.getAttribute("data-zone") : null);
+      var show = bad.length && (zid === "sonce" || zid === "nekaj");
+      warnEl.textContent = show ? "Pozor: na prelazu je slabše, kot kaže indeks — " + bad.join(", ") + "." : "";
+      warnEl.hidden = !show;
+    }
+    var noteEl = document.getElementById("crn-check-note");
+    if (noteEl) {
+      noteEl.textContent = zivDrsi
+        ? "Izmerjeno na prelazu ob " + uraSl(new Date(zivDrsi.ts)) + " · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev."
+        : "Meritev s prelaza trenutno ni na voljo — prikazana je ocena modela. Vozišče je ocena, ne meritev.";
+    }
+  }
+  function osveziDrsi(){
+    if (!window.fetch) return;
+    fetch(API + "/crnivec-drsi").then(function(r){ return r.json(); }).then(function(d){
+      var st = d && d.postaje && d.postaje.crnivec;
+      var ts = st && st.ts ? Date.parse(st.ts) : NaN;
+      zivDrsi = (!isNaN(ts) && (Date.now() - ts) / 60000 <= DRSI_MAX_AGE_MIN) ? st : null;
+      uporabiStanje();
+    }).catch(function(){ zivDrsi = null; uporabiStanje(); });
   }
 
   function osveziZivoVreme(){
     if (!window.fetch) { pokaziZastarelostOpozorila(); return; }
     var url = "https://api.open-meteo.com/v1/forecast?latitude=46.325779&longitude=14.921137"
-      + "&hourly=temperature_2m,precipitation,freezing_level_height&timezone=Europe%2FLjubljana&forecast_days=2";
+      + "&hourly=temperature_2m,precipitation,freezing_level_height,cloud_cover,dew_point_2m,wind_speed_10m"
+      + "&timezone=Europe%2FLjubljana&past_days=1&forecast_days=2";
     fetch(url).then(function(r){ return r.json(); }).then(function(d){
       var times = (d.hourly && d.hourly.time) || [];
       var temps = (d.hourly && d.hourly.temperature_2m) || [];
@@ -1064,11 +1405,26 @@ SHARE_JS_TEMPLATE = '''
         snowCm += (precip[i] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[i]);
         precipMm += (precip[i] || 0);
       }
-      primeniZivoStanje(tempC, Math.round(snowCm * 10) / 10, Math.round(precipMm * 10) / 10);
+      snowCm = Math.round(snowCm * 10) / 10;
+
+      // Vhodi za seznam -- isto kot "now" v compute_pass_weather (winter_engine.py).
+      var p3 = 0, s3 = 0;
+      for (var j = Math.max(0, idx - 2); j <= idx; j++) {
+        p3 += (precip[j] || 0);
+        s3 += (precip[j] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[j]);
+      }
+      var hv = function(k, i2){ var a = d.hourly[k] || []; return i2 >= 0 && i2 < a.length ? a[i2] : null; };
+      zivModelLive = true;
+      zivModel = { temp: tempC, snow24: snowCm, precip24: Math.round(precipMm * 10) / 10, p3: p3, s3: s3,
+        pNow: hv("precipitation", idx), pPrev: hv("precipitation", idx - 1),
+        cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx) };
+      uporabiStanje();
     }).catch(function(){ pokaziZastarelostOpozorila(); });
   }
   osveziZivoVreme();
   setInterval(osveziZivoVreme, 5 * 60 * 1000);
+  osveziDrsi();
+  setInterval(osveziDrsi, 5 * 60 * 1000);
 
   var rerollBtn = document.getElementById("crn-reroll");
   var quoteP = document.querySelector(".crn-quote p");
@@ -1717,7 +2073,14 @@ def build_body(data):
     passes = data.get("passes") or []
     crnivec = next((p for p in passes if p["id"] == "crnivec"), None)
     weather = (crnivec or {}).get("weather") or {}
-    zone = pick_zone(weather)
+    # Indeks poganja IZMERJENA temperatura s postaje DRSI, kadar je sveža
+    # (glej with_measurement v crnivec_zones.py); weather_idx je tisto, kar
+    # vidi merilnik, temperaturna kartica, OG kartica in deljena slika.
+    # Seznam spodaj dobi ločeno model (weather) in meritev (drsi), ker vsaki
+    # vrstici posebej pove vir.
+    drsi = fetch_drsi_crnivec()
+    weather_idx = with_measurement(weather, drsi)
+    zone = pick_zone(weather_idx)
     # zima-forecast.yml teče enkrat na dan in lahko (kot ostali GitHub cron
     # na tej strani) zamuja za ure — brez tega bi stran tiho kazala včerajšnje
     # stanje kot današnje. Isto načelo kot MeteoGasilec/Agrometeo
@@ -1743,7 +2106,8 @@ def build_body(data):
     hist = seo.load_history()
     streak = dry_streak(hist, seo.TODAY - datetime.timedelta(days=1))
 
-    temp_c = weather.get("temp_c")
+    temp_c = weather_idx.get("temp_c")
+    temp_meas = weather_idx.get("temp_src") == "izmerjeno"
     snow_new = weather.get("expected_snow_cm_24h")
     precip = weather.get("precip_mm_24h")
     temp_txt = f'{seo.num(temp_c, 1)} °C' if temp_c is not None else "– °C"
@@ -1762,8 +2126,23 @@ def build_body(data):
                  else f'<p id="crn-temp-val">{na}</p>')
     snowpack_html = (f'<p class="crn-big">{seo.num(snowpack_cm, 0)} cm</p>' if snowpack_cm is not None
                      else f'<p>{na}</p>')
+    rows = check_rows(weather, drsi)
+    check_html = check_list_html(rows)
+    check_note_txt = check_note(drsi)
+    check_warn_txt = check_warn_text(rows, zone["id"])
+
     snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
     precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
+
+    temp_src_txt = "na prelazu · ocena modela"
+    upd_suffix = "ocena iz vremenskega modela"
+    if temp_meas:
+        try:
+            mt = datetime.datetime.fromisoformat(weather_idx["temp_measured_at"].replace("Z", "+00:00"))
+            temp_src_txt = f"izmerjeno na prelazu ob {mt.astimezone(ZoneInfo('Europe/Ljubljana')):%H:%M} (DRSI)"
+        except (ValueError, TypeError, AttributeError):
+            temp_src_txt = "izmerjeno na prelazu (DRSI)"
+        upd_suffix = "temperatura izmerjena (DRSI), sneg iz modela"
 
     # "Posodobljeno ob …" -- čas izračuna v našem pasu. Živi preračun v JS ga
     # ob uspehu prepiše s trenutnim časom (glej primeniZivoStanje).
@@ -1784,7 +2163,7 @@ def build_body(data):
     og_slika = None
     try:
         import generate_crnivec_og  # noqa: PLC0415 — lokalno, da manjkajoč Pillow ne podre teka
-        og_slika = generate_crnivec_og.zapisi(zone, weather, quote, streak)
+        og_slika = generate_crnivec_og.zapisi(zone, weather_idx, quote, streak)
     except Exception as e:  # noqa: BLE001 — namenoma široko, glej opombo zgoraj
         print(f"! OG kartica ni nastala ({e}) — ostane splošna og-image.jpg", file=sys.stderr)
 
@@ -1835,12 +2214,23 @@ def build_body(data):
     share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
     cam_url_json = json.dumps(CAM_URL, ensure_ascii=False).replace("</", "<\\/")
     zone_data_json = json.dumps(zone_data, ensure_ascii=False).replace("</", "<\\/")
+    now_in = weather.get("now") or {}
+    check_model_json = json.dumps({
+        "temp": weather.get("temp_c"), "snow24": weather.get("expected_snow_cm_24h"),
+        "precip24": weather.get("precip_mm_24h"),
+        "p3": now_in.get("precip_mm_3h"), "s3": now_in.get("snow_cm_3h"),
+        "pNow": now_in.get("precip_mm_now"), "pPrev": now_in.get("precip_mm_prev"),
+        "cloud": now_in.get("cloud_pct"), "windValley": now_in.get("wind_kmh_valley"),
+        "dewValley": now_in.get("dew_c_valley"),
+    })
     share_js = (SHARE_JS_TEMPLATE
                 .replace("__QUOTES_JSON__", quotes_json)
                 .replace("__RARE_QUOTE_JSON__", rare_quote_json)
                 .replace("__SHARE_JSON__", share_json)
                 .replace("__CAM_URL_JSON__", cam_url_json)
                 .replace("__ZONE_DATA_JSON__", zone_data_json)
+                .replace("__CHECK_MODEL_JSON__", check_model_json)
+                .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
                 .replace("__TODAY_ISO__", today_iso))
 
     # Vrstni red je hierarhija (mobile-first, glej opombo pri CSS): status →
@@ -1878,7 +2268,13 @@ def build_body(data):
         <div class="crn-status-icon" id="crn-status-icon">{ZONE_ICONS[zone['id']]}</div>
         <p class="crn-status-title" id="crn-status-title">{st['status']}</p>
         <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
-        <p class="crn-updated" id="crn-updated" data-ts="{generated_at}">{updated_txt} · ocena iz vremenskega modela</p>
+        <div class="crn-now" aria-labelledby="crn-now-h">
+          <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
+          <ul class="crn-check" id="crn-check">{check_html}</ul>
+          <p class="crn-check-warn" id="crn-check-warn"{'' if check_warn_txt else ' hidden'}>{check_warn_txt}</p>
+          <p class="crn-check-note" id="crn-check-note">{check_note_txt}</p>
+        </div>
+        <p class="crn-updated" id="crn-updated" data-ts="{generated_at}" data-sfx="{upd_suffix}">{updated_txt} · {upd_suffix}</p>
         <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
       </div>
@@ -1889,7 +2285,7 @@ def build_body(data):
           <span class="crn-card-art">{CARD_ART['temp']}</span>
           <p class="crn-card-h">{UI_ICONS['temp']}Temperatura</p>
           {temp_html}
-          <p class="crn-card-sub">na prelazu</p>
+          <p class="crn-card-sub" id="crn-temp-src">{temp_src_txt}</p>
         </div>
         <div class="crn-card">
           <span class="crn-card-art">{CARD_ART['snow']}</span>
@@ -1989,12 +2385,19 @@ def build_body(data):
         <details class="crn-acc">
           <summary>ⓘ Kako nastane Meteorec indeks?</summary>
           <div class="crn-acc-body">
-            <p>Indeks ni meritev na cesti. Iz napovedi Open-Meteo za dolino in višinske razlike do
-            prelaza (902 m) izračunamo temperaturo na vrhu in koliko snega lahko pade v naslednjih
-            24 urah — isti izračun kot na <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost
-            prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
+            <p>Indeks ni meritev stanja ceste. Temperaturo na vrhu vzame s cestne vremenske postaje
+            Direkcije RS za infrastrukturo (DRSI) na prelazu, kadar je meritev mlajša od 40 minut; sicer jo
+            izračuna iz napovedi Open-Meteo za dolino in višinske razlike do prelaza (902 m). Koliko snega
+            lahko pade v naslednjih 24 urah, je vedno napoved — isti izračun kot na
+            <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
             spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
             za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
+            <p>Seznam »Čez Črnivec zdaj« je ločen od indeksa. Temperatura, veter in vlaga so, kadar so na
+            voljo, <strong>izmerjeni</strong> na cestni vremenski postaji Direkcije RS za infrastrukturo
+            (DRSI) na prelazu; vir je pri vsaki vrstici. Megla je ocenjena iz izmerjene vlage, saj vidljivosti
+            tam nihče ne meri. Vozišče je vedno <strong>ocena</strong>: iz padavin zadnjih treh ur in
+            temperature ocenimo, ali je cesta mokra ali bi lahko bila poledenela. Temperature cestišča
+            DRSI ne objavlja.</p>
             <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
             indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
             Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>

@@ -172,10 +172,35 @@ def compute_pass_weather(hourly, idx_now, elevation_m):
     # Vse padavine (dež + sneg) v istem oknu -- /crnivec/ jih na kartici "Sneg"
     # pokaže ločeno od novega snega (dva različna podatka, ne eno število).
     precip_mm = sum((precip[i] or 0) for i in window if i < len(precip))
+
+    # Vhodi za seznam "Čez Črnivec zdaj" na /crnivec/ (generate_crnivec_page.py):
+    # padavine ZADNJIH treh ur (vključno s tekočo — "je cesta mokra" je
+    # vprašanje o tem, kar je že padlo, ne o napovedi) in surovi vhodi za
+    # black_ice_category() za tekočo uro, da jih stran lahko zamenja z
+    # izmerjenimi s postaje DRSI. Veter in rosišče sta DOLINSKA (model za
+    # Rečico) -- stran ju uporabi samo, kadar meritve s prelaza ni.
+    now = None
+    if idx_now is not None:
+        past = [i for i in range(idx_now - 2, idx_now + 1) if 0 <= i < len(precip)]
+        p3 = sum((precip[i] or 0) for i in past)
+        s3 = sum((precip[i] or 0) * snow_fraction(elevation_m, fl[i] if i < len(fl) else None)
+                 * SNOW_RATIO_CM_PER_MM for i in past)
+        bi = black_ice_category_for_hour(hourly, idx_now, elevation_m)
+        now = {
+            "precip_mm_3h": round(p3, 1),
+            "snow_cm_3h": round(s3, 1),
+            "precip_mm_now": hval(hourly, "precipitation", idx_now),
+            "precip_mm_prev": hval(hourly, "precipitation", idx_now - 1) if idx_now > 0 else 0,
+            "cloud_pct": hval(hourly, "cloud_cover", idx_now),
+            "wind_kmh_valley": hval(hourly, "wind_speed_10m", idx_now),
+            "dew_c_valley": hval(hourly, "dew_point_2m", idx_now),
+            "black_ice": bi[0] if bi else None,
+        }
     return {
         "temp_c": round(temp_c, 1) if temp_c is not None else None,
         "expected_snow_cm_24h": round(snow_cm, 1),
         "precip_mm_24h": round(precip_mm, 1),
+        "now": now,
     }
 
 # Višinski pasovi za meja sneženja — dno doline (postajna višina) do planinske
@@ -475,6 +500,28 @@ def ground_temp_c(air_temp_c, cloud_pct, wind_kmh):
     return air_temp_c - offset
 
 
+def black_ice_category(t_air_c, cloud_pct, wind_kmh, dew_c, p_now_mm, p_prev_mm):
+    """Čisto jedro ocene poledice iz ene ure vhodov, brez hourly niza.
+    Ločeno od black_ice_category_for_hour() zato, da ga /crnivec/
+    (generate_crnivec_page.py) lahko pokliče z IZMERJENO temperaturo, rosiščem
+    in vetrom s postaje DRSI na prelazu namesto modelskih — ista formula, ne
+    druga. Klientska kopija je blackIceLive() v generate_crnivec_page.py
+    (namerna podvojitev, brskalnik ne more uvoziti Pythona); če spremeniš
+    pragove tu, jih spremeni tudi tam."""
+    g = ground_temp_c(t_air_c, cloud_pct, wind_kmh)
+    if g is None:
+        return None
+    d = dew_c
+    cat = "nizko"
+    if g <= 0.5:
+        near_saturated = d is not None and d >= g - 1.0
+        wet_then_freezing = (p_now_mm or 0) > 0.1 or (p_prev_mm or 0) > 0.1
+        cat = "visoko" if (near_saturated or wet_then_freezing) else "srednje"
+    elif g <= 1.5 and d is not None and d >= g - 1.0:
+        cat = "srednje"
+    return cat, g
+
+
 def black_ice_category_for_hour(hourly, i, elevation_m):
     """Kategorija poledice za en kraj/eno uro — jedro tako za 36h pogled po
     krajih (compute_black_ice_for_location) kot za dnevni povzetek
@@ -485,23 +532,18 @@ def black_ice_category_for_hour(hourly, i, elevation_m):
     elev_diff = elevation_m - ELEV
     # Isti gradient kot gen_nearby_town_pages v generate_seo_pages.py — uvožen, ne podvojen.
     t_air_loc = t_air - seo.LAPSE_RATE_C_PER_100M * elev_diff / 100
-    c = hval(hourly, "cloud_cover", i)
-    w = hval(hourly, "wind_speed_10m", i)
     d = hval(hourly, "dew_point_2m", i)
-    p_now = hval(hourly, "precipitation", i) or 0
-    p_prev = (hval(hourly, "precipitation", i - 1) or 0) if i > 0 else 0
-
-    g = ground_temp_c(t_air_loc, c, w)
-    if g is None:
+    result = black_ice_category(
+        t_air_loc,
+        hval(hourly, "cloud_cover", i),
+        hval(hourly, "wind_speed_10m", i),
+        d,
+        hval(hourly, "precipitation", i),
+        hval(hourly, "precipitation", i - 1) if i > 0 else 0,
+    )
+    if result is None:
         return None
-
-    cat = "nizko"
-    if g <= 0.5:
-        near_saturated = d is not None and d >= g - 1.0
-        wet_then_freezing = p_now > 0.1 or p_prev > 0.1
-        cat = "visoko" if (near_saturated or wet_then_freezing) else "srednje"
-    elif g <= 1.5 and d is not None and d >= g - 1.0:
-        cat = "srednje"
+    cat, g = result
     return cat, g, d
 
 

@@ -60,7 +60,7 @@ from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from crnivec_zones import pick_zone  # noqa: E402 — deljeno z generate_crnivec_page.py, glej opombo tam
+from crnivec_zones import fetch_drsi_crnivec, pick_zone, with_measurement  # noqa: E402 — deljeno z generate_crnivec_page.py, glej opombo tam
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(ROOT, "og", "story")
@@ -281,7 +281,9 @@ def load_crnivec_weather():
         if age_h > 20:
             return None
         crnivec = next((p for p in data.get("passes", []) if p.get("id") == "crnivec"), None)
-        return (crnivec or {}).get("weather")
+        weather = (crnivec or {}).get("weather")
+        # Isti indeks kot na strani: izmerjena temperatura DRSI, kadar je sveža.
+        return with_measurement(weather, fetch_drsi_crnivec()) if weather else None
     except Exception as e:
         print(f"⚠ vreme za Črnivec ni dosegljivo: {e}", file=sys.stderr)
         return None
@@ -934,7 +936,9 @@ def t_crnivec(ctx):
     ]
     headline, big_sub = pick(ctx, "CRNIVEC", variants)
     return card(ctx, "CRNIVEC", headline, zone["label"], big_sub,
-                [("Temperatura", f"{num_sl(weather.get('temp_c'), 1)} °C"),
+                # Zgodbe nimajo podpisa -- vir številke mora biti na sliki.
+                [("Izmerjeno (DRSI)" if weather.get("temp_src") == "izmerjeno" else "Temperatura",
+                  f"{num_sl(weather.get('temp_c'), 1)} °C"),
                  ("Sneg / 24 h", f"{num_sl(weather.get('expected_snow_cm_24h'), 1)} cm"),
                  ("Neuradna ocena", "meteorec.si/crnivec")],
                 C_CYAN, "misty-valley")

@@ -171,7 +171,8 @@ def render(zone, weather, quote, streak, now=None):
                 if weather.get("temp_c") is not None else "–")
     snow_txt = (f"{num_sl(weather.get('expected_snow_cm_24h'), 1)} cm"
                 if weather.get("expected_snow_cm_24h") is not None else "–")
-    stats = [("NA PRELAZU", temp_txt), ("SNEG / 24H", snow_txt),
+    temp_lab = "IZMERJENO (DRSI)" if weather.get("temp_src") == "izmerjeno" else "NA PRELAZU"
+    stats = [(temp_lab, temp_txt), ("SNEG / 24H", snow_txt),
              ("SUH NIZ (DOLINA)", f"{streak} dni")]
     x = PAD
     for lab, val in stats:
