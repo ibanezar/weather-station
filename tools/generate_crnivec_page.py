@@ -100,7 +100,11 @@ OLD_PATH = "/crnivec/"
 # Te poti so na crnivec.si lastne (manifest, ikone, robots, sitemap) — vse
 # ostale korensko-relativne povezave (glava, noga, CSS, pisave, logotip) kažejo
 # nazaj na meteorec.si, od koder se tudi strežejo (pisave imajo CORS *).
-CRN_LOCAL = {"/manifest.json", "/icon-192.png", "/icon-512.png"}
+# Ikone in logotip so znamka crnivec.si (crnivec-brand/, glej
+# tools/build_crnivec_brand.py), ne Meteorecove.
+BRAND_FILES = ("favicon.ico", "favicon.svg", "apple-touch-icon.png", "icon-192.png",
+               "icon-512.png", "icon-maskable-512.png", "logo-crnivec.svg", "logo-crnivec.png")
+CRN_LOCAL = {"/manifest.json"} | {f"/{f}" for f in BRAND_FILES}
 # Isti ključ kot za meteorec.si (seo_smart_routine.INDEXNOW_KEY) -- IndexNow
 # zahteva, da je ključ na istem gostitelju, zato ga write_site_files() zapiše
 # tudi na crnivec.si. Ping pošlje zima-forecast.yml po objavi.
@@ -1155,9 +1159,8 @@ CSS = '''
     min-height:40px;margin-bottom:var(--s3)}
   /* Vrhnja gumba sta navigacija, ne dejanje -- na telefonu kompaktna, da ne
      prevpijeta naslova (min. 40 px še vedno zadošča za dotik). */
-  .crn-brand{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--ink)!important;text-decoration:none;display:inline-flex;align-items:center;min-height:40px;
-    background:#fff;border:var(--bd);border-radius:999px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
+  .crn-brand{display:inline-flex;align-items:center;min-height:40px;text-decoration:none}
+  .crn-brand img{display:block;height:36px;width:auto}
   .crn-install-wrap{text-align:right}
   .crn-top .crn-btn{min-height:40px;font-size:13px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
 
@@ -3413,7 +3416,7 @@ def build_body(data):
     body = f'''{CSS}
   <div class="crn">
     <div class="crn-top">
-      <a class="crn-brand" href="/">Meteorec</a>
+      <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
       <div class="crn-install-wrap">
         <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
         <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
@@ -3689,7 +3692,7 @@ def site_schema(title, desc, image, faq=()):
     data = [
         {"@context": "https://schema.org", "@type": "WebSite", "@id": f"{CRN_SITE}/#website",
          "name": "Kako je čez Črnivec?", "alternateName": "crnivec.si", "url": f"{CRN_SITE}/",
-         "inLanguage": "sl",
+         "inLanguage": "sl", "image": f"{CRN_SITE}/logo-crnivec.png",
          "publisher": {"@type": "Organization", "name": "Meteorec", "url": f"{seo.SITE}/"}},
         {"@context": "https://schema.org", "@type": "WebPage", "@id": f"{CRN_SITE}/",
          "name": title, "description": desc, "url": f"{CRN_SITE}/",
@@ -3747,32 +3750,37 @@ NOT_FOUND_HTML = f"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Stran ne obstaja | crnivec.si</title>
-<link rel="icon" href="/icon-192.png" type="image/png">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#fdf6e3;
 font-family:system-ui,sans-serif;color:#111;text-align:center;padding:16px}}
 a{{display:inline-block;margin-top:16px;padding:12px 20px;border:3px solid #111;border-radius:999px;
 background:#fff;color:#111;font-weight:800;text-decoration:none;box-shadow:3px 3px 0 #111}}</style>
 </head>
-<body><main><h1>Te strani ni.</h1><p>Črnivec pa je še vedno tam.</p>
+<body><main><img src="/logo-crnivec.svg" alt="crnivec.si" width="240" height="52">
+<h1>Te strani ni.</h1><p>Črnivec pa je še vedno tam.</p>
 <a href="/">Kako je čez Črnivec?</a></main></body>
 </html>
 """
 
 
 def write_site_files():
-    """Datoteke, ki morajo biti na izvoru crnivec.si: manifest in ikone (PWA),
-    robots.txt in sitemap.xml (ena sama stran)."""
+    """Datoteke, ki morajo biti na izvoru crnivec.si: manifest, ikone in
+    logotip (iz crnivec-brand/), robots.txt in sitemap.xml (ena sama stran)."""
     out = os.path.join(ROOT, CRN_DIR)
     os.makedirs(out, exist_ok=True)
-    for ikona in ("icon-192.png", "icon-512.png"):
-        shutil.copyfile(os.path.join(ROOT, ikona), os.path.join(out, ikona))
+    for ime in BRAND_FILES:
+        shutil.copyfile(os.path.join(ROOT, "crnivec-brand", ime), os.path.join(out, ime))
     manifest = {
         "name": "Kako je čez Črnivec?", "short_name": "Črnivec",
         "description": "Stanje na prelazu Črnivec (902 m): temperatura, vozišče, sneg in kamera.",
         "start_url": "/", "scope": "/", "display": "standalone", "lang": "sl",
         "background_color": "#fdf6e3", "theme_color": "#dc2626",
         "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-                  {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}],
+                  {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+                  {"src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png",
+                   "purpose": "maskable"},
+                  {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}],
     }
     with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
@@ -3841,8 +3849,9 @@ def main():
         '<meta name="apple-mobile-web-app-capable" content="yes">\n'
         '<meta name="apple-mobile-web-app-title" content="Črnivec">\n'
         '<link rel="manifest" href="/manifest.json">\n'
-        '<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">\n'
-        '<link rel="apple-touch-icon" href="/icon-192.png">'
+        '<link rel="icon" href="/favicon.ico" sizes="32x32">\n'
+        '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n'
+        '<link rel="apple-touch-icon" href="/apple-touch-icon.png">'
     )
     schema = "\n".join([pwa_head, site_schema(title, desc, og_slika, faq)])
     html = seo.page_shell(title, desc, OLD_PATH, schema, body, og_image=og_slika)

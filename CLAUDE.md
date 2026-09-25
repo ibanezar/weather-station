@@ -603,6 +603,16 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
     Pravi 301 da Redirect Rule v coni `meteorec.si`. Stran **ni** v `CORE`
     v `seo_audit.py` — ne vračaj je tja, ima svoj sitemap na crnivec.si.
   - `www.crnivec.si` → 301 na `crnivec.si` (Redirect Rule v coni `crnivec.si`).
+  - **Znamka** (logotip, favicon, ikone PWA, FB naslovnica in profilna) je v
+    `crnivec-brand/` (25. 9. 2026). Znak je ista gora kot maskota na strani
+    (`mountain_icon_svg()`), na rdeči podlagi `#dc2626`. SVG-je piše
+    `tools/build_crnivec_brand.py` (besedilo obrisano v poti iz `fonts/`),
+    PNG/ICO pa `tools/render_crnivec_brand.mjs` (Chromium), ki jih tudi
+    skopira v `crnivec-site/`. Oboje je ročno; generator strani samo kopira
+    `BRAND_FILES` iz `crnivec-brand/`. Logotip na domeni je
+    `/logo-crnivec.svg`, **ne** `/logo.svg` — to ime ima Meteorecova glava.
+    Favicon (`favicon.svg`/`.ico`) je poenostavljen znak brez snega in obrisa
+    gore, sicer se pri 16 px zlije.
   - Povezave z meteorec.si (hitre povezave na naslovni strani, vrstica
     Črnivec na `/zima/`, `/zima/prevoznost-prelazov/`, blog, `llms.txt`) in
     besedilo na slikah (OG, zgodba, deljena slika) kažejo na `crnivec.si`.
