@@ -311,6 +311,106 @@ def wind_row(speed, gust):
     return {**r, "level": lvl, "value": txt}
 
 
+# ── "Naslednjih 6 ur" ────────────────────────────────────────────────────
+# Napoved je ista modelska serija kot indeks (Open-Meteo za dolino,
+# preračunana na 902 m -- next_hours v winter_engine.py). Kadar je meritev
+# DRSI, se trenutna razlika meritev-model prenese v napoved in linearno
+# izzveni v 6 urah (NEXT_BIAS_HOURS): sicer bi stran zdaj kazala 11 °C
+# izmerjeno in čez uro 12 °C iz modela, kar je skok, ki ga ni. Klientska
+# kopija: napovedUr()/stavekNapovedi() v SHARE_JS_TEMPLATE.
+NEXT_BIAS_HOURS = 6
+NEXT_SHOW_H = (1, 3, 6)
+LEVEL_RANK = {"na": 0, "ok": 1, "warn": 2, "stop": 3}
+
+
+def temp_level(t):
+    return "na" if t is None else "stop" if t <= 0 else "warn" if t <= 5 else "ok"
+
+
+def precip_text(p, frac):
+    if p is None:
+        return "–"
+    if p < 0.1:
+        return "suho"
+    kind = "sneg" if (frac or 0) >= 0.7 else "dež" if (frac or 0) <= 0.3 else "dež in sneg"
+    return f"{kind} {num1(p)}\u00a0mm"  # nedeljiv presledek: številka in enota ostaneta skupaj
+
+
+def forecast_hours(weather, drsi):
+    """Ure +1..+6 z oceno vozišča; vsaka {h, time, temp, precip_txt,
+    road (vrstica kot road_row), level}."""
+    t_model = weather.get("temp_c")
+    t_meas = (drsi or {}).get("temp_c")
+    bias = (t_meas - t_model) if (t_meas is not None and t_model is not None) else 0.0
+    out = []
+    for e in weather.get("next_hours") or []:
+        t = e.get("temp_c")
+        if t is not None:
+            t = round(t + bias * max(0.0, 1 - e["h"] / NEXT_BIAS_HOURS), 1)
+        res = black_ice_category(t, e.get("cloud_pct"), e.get("wind_kmh_valley"), e.get("dew_c_valley"),
+                                 e.get("precip_mm"), e.get("precip_mm_prev")) if t is not None else None
+        road = road_row(res[0] if res else None, e.get("precip_mm_3h"), e.get("snow_cm_3h"), t)
+        tl = temp_level(t)
+        out.append({"h": e["h"], "time": (e.get("time") or "")[11:16], "temp": t,
+                    "precip_mm": e.get("precip_mm"), "snow_frac": e.get("snow_frac"),
+                    "precip_txt": precip_text(e.get("precip_mm"), e.get("snow_frac")),
+                    "road": road, "temp_level": tl,
+                    "level": max((tl, road["level"]), key=LEVEL_RANK.get)})
+    return out, bias != 0.0
+
+
+def forecast_sentence(rows_now, hours):
+    """En stavek: bo slabše, bolje ali podobno? Primerja isto merilo kot
+    ure (temperatura + vozišče), ne megle in vetra, ki ju napoved za prelaz
+    nima (model je za dno doline)."""
+    if not hours:
+        return ""
+    now_rank = max((LEVEL_RANK[r["level"]] for r in rows_now if r["id"] in ("temp", "road")), default=0)
+    say = ""
+    # Najhujša ura (prva, ki doseže najvišjo raven), ne prva slabša: sicer
+    # bi stavek omenil "4 °C ob 14:00" in zamolčal led ob 18:00.
+    peak = max(LEVEL_RANK[x["level"]] for x in hours)
+    worse = next((x for x in hours if LEVEL_RANK[x["level"]] == peak), None) if peak > now_rank else None
+    if worse:
+        if LEVEL_RANK[worse["road"]["level"]] >= LEVEL_RANK[worse["temp_level"]] and worse["road"]["level"] != "ok":
+            reason = worse["road"]["value"]
+        else:
+            reason = f"temperatura okoli {num1(worse['temp'])} °C"
+        say = f"Okoli {worse['time']} bo predvidoma slabše kot zdaj: {reason}."
+    elif now_rank and LEVEL_RANK[hours[-1]["level"]] < now_rank:
+        say = "Razmere se bodo predvidoma izboljšale."
+    else:
+        say = "Razmere naj bi ostale podobne."
+    road_now = next((r for r in rows_now if r["id"] == "road"), {})
+    dry_now = road_now.get("value") in ("verjetno suho", "ni podatka")
+    wet = next((x for x in hours if (x["precip_mm"] or 0) >= 0.1), None)
+    if dry_now and wet and not worse:
+        verb = "snežiti" if (wet["snow_frac"] or 0) >= 0.7 else "deževati"
+        say += f" Okoli {wet['time']} lahko začne {verb}."
+    return say
+
+
+def forecast_note(corrected):
+    fix = ", temperatura popravljena z zadnjo meritvijo" if corrected else ""
+    return f"Napoved Open-Meteo za dolino, preračunana na 902 m{fix}. Vozišče je ocena."
+
+
+def forecast_cells_html(hours):
+    cells = []
+    for x in hours:
+        if x["h"] not in NEXT_SHOW_H:
+            continue
+        r = x["road"]
+        cells.append(
+            f'<div class="crn-nh" data-lvl="{x["level"]}">'
+            f'<p class="crn-nh-t">{x["time"]}</p>'
+            f'<p class="crn-nh-temp">{num1(x["temp"])} °C</p>'
+            f'<p class="crn-nh-p">{x["precip_txt"]}</p>'
+            f'<p class="crn-nh-road" data-lvl="{r["level"]}"><span class="crn-ck-i" aria-hidden="true"></span>'
+            f'<span><span class="crn-sr">Vozišče: {CHECK_LEVEL_WORD[r["level"]]}, </span>{r["value"]}</span></p></div>')
+    return "".join(cells)
+
+
 def check_note(drsi):
     """Vrstica pod seznamom: od kod so meritve in kdaj so bile narejene."""
     if drsi and drsi.get("ts"):
@@ -631,14 +731,14 @@ CSS = '''
   .crn-ck:first-child{border-top:0}
   .crn-ck-i{width:22px;height:22px;border-radius:50%;border:2px solid #111;display:flex;
     align-items:center;justify-content:center;font-size:13px;font-weight:900;line-height:1;color:#fff}
-  .crn-ck[data-lvl="ok"] .crn-ck-i{background:#16a34a}
-  .crn-ck[data-lvl="ok"] .crn-ck-i::before{content:"✓"}
-  .crn-ck[data-lvl="warn"] .crn-ck-i{background:#facc15;color:#111}
-  .crn-ck[data-lvl="warn"] .crn-ck-i::before{content:"!"}
-  .crn-ck[data-lvl="stop"] .crn-ck-i{background:#dc2626}
-  .crn-ck[data-lvl="stop"] .crn-ck-i::before{content:"✕"}
-  .crn-ck[data-lvl="na"] .crn-ck-i{background:#e5e7eb;color:#4b5563}
-  .crn-ck[data-lvl="na"] .crn-ck-i::before{content:"–"}
+  [data-lvl="ok"] > .crn-ck-i{background:#16a34a}
+  [data-lvl="ok"] > .crn-ck-i::before{content:"✓"}
+  [data-lvl="warn"] > .crn-ck-i{background:#facc15;color:#111}
+  [data-lvl="warn"] > .crn-ck-i::before{content:"!"}
+  [data-lvl="stop"] > .crn-ck-i{background:#dc2626}
+  [data-lvl="stop"] > .crn-ck-i::before{content:"✕"}
+  [data-lvl="na"] > .crn-ck-i{background:#e5e7eb;color:#4b5563}
+  [data-lvl="na"] > .crn-ck-i::before{content:"–"}
   .crn-ck-l{font-weight:700}
   .crn-ck-v{font-weight:600;overflow-wrap:anywhere}
   .crn-ck[data-lvl="na"] .crn-ck-v{color:var(--muted);font-weight:500}
@@ -648,6 +748,25 @@ CSS = '''
   .crn-check-warn{font-size:14px;font-weight:800;color:#7f1d1d;background:#fee2e2;border:2px solid #111;
     border-radius:10px;padding:4px var(--s2);margin:var(--s1) 0 0}
   .crn-check-note{font-size:12px;color:var(--muted);margin:var(--s1) 0 0}
+
+  /* "Naslednjih 6 ur" (forecast_hours) -- trak pod herojem, tri ure. Robna
+     črta celice nosi najslabšo raven ure; besedilo vozišča jo pove z besedo. */
+  .crn-next{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
+    padding:var(--s3) var(--s2);margin-top:var(--s4);text-align:left}
+  .crn-next-say{font-size:17px;font-weight:800;line-height:1.35;margin:0 0 var(--s2)}
+  .crn-next-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s1)}
+  .crn-nh{text-align:left;border:3px solid #111;border-top:8px solid #16a34a;border-radius:12px;padding:var(--s1);
+    background:#faf9f6;min-width:0}
+  .crn-nh[data-lvl="warn"]{border-top-color:#facc15}
+  .crn-nh[data-lvl="stop"]{border-top-color:#dc2626}
+  .crn-nh[data-lvl="na"]{border-top-color:#e5e7eb}
+  .crn-nh p{margin:0}
+  .crn-nh-t{font-size:13px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+  .crn-nh-temp{font-size:20px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .crn-nh-p{font-size:13px;font-weight:600;color:var(--ink2)}
+  .crn-nh-road{display:flex;align-items:flex-start;gap:4px;font-size:13px;font-weight:700;margin-top:4px!important;
+    overflow-wrap:anywhere}
+  .crn-nh-road .crn-ck-i{width:18px;height:18px;font-size:11px;flex:0 0 auto}
 
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
   .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
@@ -827,6 +946,8 @@ CSS = '''
     .crn-big{font-size:36px}
     .crn-panel{padding:var(--s4)}
     .crn-zones{grid-template-columns:repeat(4,1fr)}
+    .crn-nh{padding:var(--s2)}
+    .crn-nh-temp{font-size:28px}
   }
   @media (min-width:1024px){
     .crn{padding-top:var(--s4)}
@@ -843,6 +964,7 @@ CSS = '''
     .crn-hero-main .crn-status{text-align:center;display:flex;flex-direction:column;justify-content:center}
     .crn-hero-main .crn-status-index{align-self:center}
     .crn-hero-side{display:flex;flex-direction:column}
+    .crn-hero-main .crn-next{grid-column:1/-1;grid-row:2;margin-top:0}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
     .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
     .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
@@ -1290,6 +1412,94 @@ SHARE_JS_TEMPLATE = '''
     if (g <= 1.5 && dew != null && dew >= g - 1.0) return "srednje";
     return "nizko";
   }
+  function cestaVrstica(bi, p3, s3, t){
+    var road = { id: "road", label: "Vozišče", src: "ocena" };
+    if (bi == null && p3 == null) { road.level = "na"; road.value = "ni podatka"; }
+    else if ((s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
+    else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
+    else if (bi === "srednje") { road.level = "warn"; road.value = "ponekod je lahko led"; }
+    else if ((p3 || 0) >= 0.2) { road.level = (t != null && t <= 3) ? "warn" : "ok"; road.value = "verjetno mokro"; }
+    else { road.level = "ok"; road.value = "verjetno suho"; }
+    return road;
+  }
+
+  // "Naslednjih 6 ur" -- NAMERNA PODVOJITEV forecast_hours()/
+  // forecast_sentence() iz generate_crnivec_page.py (isti pragovi, isto
+  // izzvenevanje popravka z meritvijo v NEXT_BIAS_HOURS urah).
+  var NEXT_BIAS_HOURS = 6, NEXT_SHOW_H = [1, 3, 6];
+  var LEVEL_RANK = { na: 0, ok: 1, warn: 2, stop: 3 };
+  function tempNivo(t){ return t == null ? "na" : t <= 0 ? "stop" : t <= 5 ? "warn" : "ok"; }
+  function padavineBesedilo(p, frac){
+    if (p == null) return "–";
+    if (p < 0.1) return "suho";
+    var kind = (frac || 0) >= 0.7 ? "sneg" : (frac || 0) <= 0.3 ? "dež" : "dež in sneg";
+    return kind + " " + numSlLive(p, 1) + "\\u00a0mm";
+  }
+  function napovedUr(m, d){
+    var tMeas = d && d.temp_c != null ? d.temp_c : null;
+    var bias = (tMeas != null && m.temp != null) ? tMeas - m.temp : 0;
+    return (m.next || []).map(function(e){
+      var t = e.temp == null ? null : Math.round((e.temp + bias * Math.max(0, 1 - e.h / NEXT_BIAS_HOURS)) * 10) / 10;
+      var bi = t == null ? null : blackIceLive(t, e.cloud, e.wind, e.dew, e.p, e.pPrev);
+      var road = cestaVrstica(bi, e.p3, e.s3, t);
+      var tl = tempNivo(t);
+      return { h: e.h, time: e.time, temp: t, p: e.p, frac: e.frac, road: road, tempLevel: tl,
+        level: LEVEL_RANK[road.level] > LEVEL_RANK[tl] ? road.level : tl };
+    });
+  }
+  function stavekNapovedi(rowsNow, ure){
+    if (!ure.length) return "";
+    var nowRank = 0;
+    rowsNow.forEach(function(r){ if ((r.id === "temp" || r.id === "road") && LEVEL_RANK[r.level] > nowRank) nowRank = LEVEL_RANK[r.level]; });
+    var peak = 0, worse = null;
+    ure.forEach(function(x){ if (LEVEL_RANK[x.level] > peak) peak = LEVEL_RANK[x.level]; });
+    if (peak > nowRank) { for (var i = 0; i < ure.length; i++) { if (LEVEL_RANK[ure[i].level] === peak) { worse = ure[i]; break; } } }
+    var say;
+    if (worse) {
+      var reason = (LEVEL_RANK[worse.road.level] >= LEVEL_RANK[worse.tempLevel] && worse.road.level !== "ok")
+        ? worse.road.value : "temperatura okoli " + numSlLive(worse.temp, 1) + " °C";
+      say = "Okoli " + worse.time + " bo predvidoma slabše kot zdaj: " + reason + ".";
+    } else if (nowRank && LEVEL_RANK[ure[ure.length - 1].level] < nowRank) {
+      say = "Razmere se bodo predvidoma izboljšale.";
+    } else {
+      say = "Razmere naj bi ostale podobne.";
+    }
+    var roadNow = rowsNow.filter(function(r){ return r.id === "road"; })[0] || {};
+    var dryNow = roadNow.value === "verjetno suho" || roadNow.value === "ni podatka";
+    var wet = null;
+    for (var j = 0; j < ure.length; j++) { if ((ure[j].p || 0) >= 0.1) { wet = ure[j]; break; } }
+    if (dryNow && wet && !worse) say += " Okoli " + wet.time + " lahko začne " + ((wet.frac || 0) >= 0.7 ? "snežiti" : "deževati") + ".";
+    return say;
+  }
+  function izrisiNapoved(rowsNow){
+    var sec = document.getElementById("crn-next"), grid = document.getElementById("crn-next-grid");
+    if (!sec || !grid || !zivModelLive) return;
+    var ure = napovedUr(zivModel, zivDrsi);
+    if (!ure.length) return;
+    grid.textContent = "";
+    ure.forEach(function(x){
+      if (NEXT_SHOW_H.indexOf(x.h) < 0) return;
+      var c = document.createElement("div"); c.className = "crn-nh"; c.setAttribute("data-lvl", x.level);
+      function p(cls, txt){ var e = document.createElement("p"); e.className = cls; e.textContent = txt; c.appendChild(e); return e; }
+      p("crn-nh-t", x.time);
+      p("crn-nh-temp", numSlLive(x.temp, 1) + " °C");
+      p("crn-nh-p", padavineBesedilo(x.p, x.frac));
+      var r = p("crn-nh-road", ""); r.setAttribute("data-lvl", x.road.level);
+      var ic = document.createElement("span"); ic.className = "crn-ck-i"; ic.setAttribute("aria-hidden", "true");
+      var tx = document.createElement("span");
+      var sr = document.createElement("span"); sr.className = "crn-sr"; sr.textContent = "Vozišče: " + CHECK_LEVEL_WORD[x.road.level] + ", ";
+      tx.appendChild(sr); tx.appendChild(document.createTextNode(x.road.value));
+      r.appendChild(ic); r.appendChild(tx);
+      grid.appendChild(c);
+    });
+    var sayEl = document.getElementById("crn-next-say");
+    if (sayEl) sayEl.textContent = stavekNapovedi(rowsNow, ure);
+    var noteEl = document.getElementById("crn-next-note");
+    if (noteEl) noteEl.textContent = "Napoved Open-Meteo za dolino, preračunana na 902 m" +
+      (zivDrsi && zivDrsi.temp_c != null ? ", temperatura popravljena z zadnjo meritvijo" : "") + ". Vozišče je ocena.";
+    sec.hidden = false;
+  }
+
   function vrsticeSeznama(m, d){
     m = m || {}; d = d || {};
     var rows = [];
@@ -1301,14 +1511,7 @@ SHARE_JS_TEMPLATE = '''
     var bi = t == null ? null : blackIceLive(t, m.cloud,
       d.veter_kmh != null ? d.veter_kmh : m.windValley,
       d.rosisce_c != null ? d.rosisce_c : m.dewValley, m.pNow, m.pPrev);
-    var road = { id: "road", label: "Vozišče", src: "ocena" };
-    if (bi == null && m.p3 == null) { road.level = "na"; road.value = "ni podatka"; }
-    else if ((m.s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
-    else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
-    else if (bi === "srednje") { road.level = "warn"; road.value = "ponekod je lahko led"; }
-    else if ((m.p3 || 0) >= 0.2) { road.level = (t != null && t <= 3) ? "warn" : "ok"; road.value = "verjetno mokro"; }
-    else { road.level = "ok"; road.value = "verjetno suho"; }
-    rows.push(road);
+    rows.push(cestaVrstica(bi, m.p3, m.s3, t));
 
     var cm = m.snow24, snow = { id: "snow", label: "Sneg", src: "napoved 24 h" };
     if (cm == null) { snow.level = "na"; snow.value = "ni podatka"; }
@@ -1340,6 +1543,7 @@ SHARE_JS_TEMPLATE = '''
     var ul = document.getElementById("crn-check");
     if (!ul || (!zivModel && !zivDrsi)) return;
     var rows = vrsticeSeznama(zivModel, zivDrsi);
+    izrisiNapoved(rows);
     ul.textContent = "";
     rows.forEach(function(r){
       var li = document.createElement("li");
@@ -1417,7 +1621,22 @@ SHARE_JS_TEMPLATE = '''
       zivModelLive = true;
       zivModel = { temp: tempC, snow24: snowCm, precip24: Math.round(precipMm * 10) / 10, p3: p3, s3: s3,
         pNow: hv("precipitation", idx), pPrev: hv("precipitation", idx - 1),
-        cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx) };
+        cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx),
+        next: [] };
+      // Ure +1..+6 -- isto kot next_hours v compute_pass_weather (winter_engine.py).
+      for (var h = 1; h <= 6 && idx + h < times.length; h++) {
+        var k = idx + h, tk = hv("temperature_2m", k), pk3 = 0, sk3 = 0;
+        for (var q = k - 2; q <= k; q++) {
+          if (q < 0) continue;
+          pk3 += (precip[q] || 0);
+          sk3 += (precip[q] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[q]);
+        }
+        zivModel.next.push({ h: h, time: String(times[k]).slice(11, 16),
+          temp: tk == null ? null : Math.round((tk - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100) * 10) / 10,
+          p: hv("precipitation", k), frac: snowFractionLive(LIVE_PASS_ELEV, fl[k]), p3: pk3, s3: sk3,
+          pPrev: hv("precipitation", k - 1), cloud: hv("cloud_cover", k),
+          wind: hv("wind_speed_10m", k), dew: hv("dew_point_2m", k) });
+      }
       uporabiStanje();
     }).catch(function(){ pokaziZastarelostOpozorila(); });
   }
@@ -2130,6 +2349,10 @@ def build_body(data):
     check_html = check_list_html(rows)
     check_note_txt = check_note(drsi)
     check_warn_txt = check_warn_text(rows, zone["id"])
+    next_hours, next_corrected = forecast_hours(weather, drsi)
+    next_cells = forecast_cells_html(next_hours)
+    next_say = forecast_sentence(rows, next_hours)
+    next_note = forecast_note(next_corrected)
 
     snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
     precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
@@ -2279,6 +2502,13 @@ def build_body(data):
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
       </div>
 
+      <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h"{'' if next_cells else ' hidden'}>
+        <p class="crn-now-h" id="crn-next-h">Naslednjih 6 ur</p>
+        <p class="crn-next-say" id="crn-next-say">{next_say}</p>
+        <div class="crn-next-grid" id="crn-next-grid">{next_cells}</div>
+        <p class="crn-check-note" id="crn-next-note">{next_note}</p>
+      </section>
+
       <div class="crn-hero-side">
       <div class="crn-cards">
         <div class="crn-card">
@@ -2398,6 +2628,9 @@ def build_body(data):
             tam nihče ne meri. Vozišče je vedno <strong>ocena</strong>: iz padavin zadnjih treh ur in
             temperature ocenimo, ali je cesta mokra ali bi lahko bila poledenela. Temperature cestišča
             DRSI ne objavlja.</p>
+            <p>»Naslednjih 6 ur« je napoved Open-Meteo za dolino, preračunana na višino prelaza. Kadar je
+            meritev s prelaza na voljo, napoved začne pri izmerjeni temperaturi in se v šestih urah postopoma
+            vrne k modelu. Stavek nad urami primerja temperaturo in oceno vozišča z najhujšo uro v tem času.</p>
             <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
             indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
             Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
