@@ -196,11 +196,38 @@ def compute_pass_weather(hourly, idx_now, elevation_m):
             "dew_c_valley": hval(hourly, "dew_point_2m", idx_now),
             "black_ice": bi[0] if bi else None,
         }
+    # Surovi urni vhodi za "Naslednjih 6 ur" na /crnivec/ -- stran iz njih
+    # sama sestavi vozišče (black_ice_category) s temperaturo, popravljeno z
+    # meritvijo DRSI, zato tu ni ocene, samo podatki. precip_3h/snow_3h sta
+    # okno treh ur DO vključno te ure (isto kot "now" zgoraj).
+    nxt = []
+    if idx_now is not None:
+        for h in range(1, 7):
+            i = idx_now + h
+            if i >= n:
+                break
+            t_i = hval(hourly, "temperature_2m", i)
+            past = [j for j in range(i - 2, i + 1) if 0 <= j < len(precip)]
+            nxt.append({
+                "h": h,
+                "time": times[i],
+                "temp_c": round(t_i - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100, 1) if t_i is not None else None,
+                "precip_mm": hval(hourly, "precipitation", i),
+                "snow_frac": round(snow_fraction(elevation_m, fl[i] if i < len(fl) else None), 2),
+                "precip_mm_3h": round(sum((precip[j] or 0) for j in past), 1),
+                "snow_cm_3h": round(sum((precip[j] or 0) * snow_fraction(elevation_m, fl[j] if j < len(fl) else None)
+                                        * SNOW_RATIO_CM_PER_MM for j in past), 1),
+                "precip_mm_prev": hval(hourly, "precipitation", i - 1),
+                "cloud_pct": hval(hourly, "cloud_cover", i),
+                "wind_kmh_valley": hval(hourly, "wind_speed_10m", i),
+                "dew_c_valley": hval(hourly, "dew_point_2m", i),
+            })
     return {
         "temp_c": round(temp_c, 1) if temp_c is not None else None,
         "expected_snow_cm_24h": round(snow_cm, 1),
         "precip_mm_24h": round(precip_mm, 1),
         "now": now,
+        "next_hours": nxt,
     }
 
 # Višinski pasovi za meja sneženja — dno doline (postajna višina) do planinske

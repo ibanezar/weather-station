@@ -498,9 +498,19 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   Kjer je temperatura izmerjena, je tako tudi označena (kartica, »Posodobljeno«,
   OG slika, zgodba). Kadar je kakšna druga vrstica »nevarno«, indeks pa
   zelen/rumen, se izpiše `check_warn_text()`.
+- **»Naslednjih 6 ur«** (`forecast_hours()`/`forecast_sentence()`, dodano
+  25. 9. 2026) pod statusom kaže ure +1, +3 in +6: temperaturo, padavine in
+  oceno vozišča. Vhodi so `next_hours` iz `compute_pass_weather`. Razlika
+  meritev−model se prenese v napoved in **linearno izzveni v 6 urah**
+  (`NEXT_BIAS_HOURS`), sicer bi temperatura med »zdaj« in »čez uro« skočila.
+  Stavek primerja temperaturo + vozišče zdaj z **najhujšo** uro (prvo, ki
+  doseže najvišjo raven), ne s prvo slabšo — sicer bi omenil »4 °C ob 14:00«
+  in zamolčal sneg ob 18:00. Megle in vetra napoved nima (model je za dno
+  doline). Statični izris je iz jutranjega teka, JS ga ob živi napovedi
+  prepiše.
 - Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
-  `blackIceLive()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
-  drugo.**
+  `cestaVrstica()`, `blackIceLive()`, `napovedUr()`, `stavekNapovedi()`), kar
+  je namerna podvojitev. **Če spremeniš eno, spremeni drugo.**
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 
