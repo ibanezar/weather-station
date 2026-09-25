@@ -101,6 +101,10 @@ OLD_PATH = "/crnivec/"
 # ostale korensko-relativne povezave (glava, noga, CSS, pisave, logotip) kažejo
 # nazaj na meteorec.si, od koder se tudi strežejo (pisave imajo CORS *).
 CRN_LOCAL = {"/manifest.json", "/icon-192.png", "/icon-512.png"}
+# Isti ključ kot za meteorec.si (seo_smart_routine.INDEXNOW_KEY) -- IndexNow
+# zahteva, da je ključ na istem gostitelju, zato ga write_site_files() zapiše
+# tudi na crnivec.si. Ping pošlje zima-forecast.yml po objavi.
+INDEXNOW_KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
 
 # ZONES/pick_zone sta v skupnem crnivec_zones.py (uvožena spodaj) — tudi
 # generate_story_card.py (tema CRNIVEC) ju rabi, glej opombo tam o krožnem
@@ -1169,7 +1173,7 @@ CSS = '''
     border-style:solid;border-width:0 9px 11px;border-color:transparent transparent #111}
   .crn-now{background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;
     box-shadow:4px 4px 0 #111;padding:var(--s2) var(--s3);margin:var(--s3) auto 0;max-width:480px;text-align:left}
-  .crn-now-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
+  .crn-now-h{font-family:inherit;line-height:1.3;color:inherit;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
   .crn-check{list-style:none;margin:0;padding:0}
   .crn-ck{display:grid;grid-template-columns:24px 6.5em 1fr;align-items:center;gap:var(--s1);
     padding:6px 0;border-top:1px solid #efece5;margin:0;font-size:15px}
@@ -1424,6 +1428,16 @@ CSS = '''
   .crn-accuracy-note{font-size:14px;color:var(--muted);margin:4px 0 0}
 
   /* Accordioni (razlaga indeksa, značka) */
+  .crn-info{margin-top:var(--s3)}
+  .crn-info p{margin:var(--s2) 0 0;font-size:15px;color:var(--ink2)}
+  .crn-faq{display:grid;gap:var(--s2);margin-top:40px}
+  .crn-faq-q{font:inherit;margin:0}
+  .crn-zapore{margin-top:var(--s2);padding:var(--s2) var(--s3);border:var(--bd);border-radius:12px;background:#fff}
+  .crn-zapore-say{margin:0!important;font-weight:700;color:var(--ink)!important}
+  .crn-zapore-list{margin:var(--s1) 0 0;padding-left:1.2em;font-size:15px;color:var(--ink2)}
+  .crn-zapore-list li{margin:4px 0}
+  .crn-zapore-t{color:var(--muted);font-size:13px}
+  .crn-info a{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:2px}
   .crn-acc{background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh)}
   .crn-acc summary{cursor:pointer;list-style:none;min-height:48px;display:flex;align-items:center;
     gap:var(--s1);padding:0 var(--s3);font-weight:700;font-size:15px}
@@ -3006,6 +3020,135 @@ def mountain_icon_svg():
   </svg>'''
 
 
+# ── O prelazu, zapore, pogosta vprašanja (SEO/GEO, 25. 9. 2026) ─────────────
+# Ključne besede iz raziskave (Googlovo samodokončevanje, sl/SI): kamera,
+# vreme, cesta/zapore, sneg, višina, lokacija. Stran je bila močna pri meritvah,
+# a o samem prelazu, cesti in zaporah ni povedala nič. Odgovori v FAQ so
+# navadno besedilo, ker gredo dobesedno tudi v FAQPage shemo (site_schema) --
+# geo_audit zahteva, da se shema ujema z vidno vsebino.
+def faq_items(snowpack_cm, snow_new):
+    if snowpack_cm is None:
+        sneg = ("Snega na prelazu ne meri nobena postaja. Ocena snežne odeje trenutno ni na voljo; "
+                "najzanesljivejši pogled je spletna kamera na vrhu strani.")
+    else:
+        novi = (f", v naslednjih 24 urah pa je napovedanih {seo.num(snow_new, 1)} cm novega snega"
+                if snow_new is not None else "")
+        sneg = (f"Snega na prelazu ne meri nobena postaja. Po oceni modela je na višini prelaza zdaj "
+                f"{seo.num(snowpack_cm, 0)} cm snežne odeje{novi}. Najzanesljivejši pogled je spletna "
+                f"kamera na vrhu strani.")
+    return [
+        ("Koliko je visok prelaz Črnivec?",
+         "Prelaz Črnivec je 902 metra nad morjem. Cestna vremenska postaja DRSI na prelazu stoji na "
+         "približno 903 m, Gornji Grad pod njim pa na 428 m."),
+        ("Kje je Črnivec?",
+         "Črnivec je cestni prelaz med Stahovico pri Kamniku in Gornjim Gradom, na meji med Gorenjsko "
+         "in Štajersko. Čezenj pelje državna cesta R1-225, ki Kamnik povezuje z Zgornjo Savinjsko dolino."),
+        ("Ali je na Črnivcu sneg?", sneg),
+        ("Kdaj je na Črnivcu obvezna zimska oprema?",
+         "Od 15. novembra do 15. marca in tudi zunaj tega obdobja, kadar so na cesti zimske razmere, "
+         "mora imeti osebni avto zimske pnevmatike ali letne pnevmatike in snežne verige v vozilu. "
+         "Tako določa Zakon o pravilih cestnega prometa."),
+        ("Kje je spletna kamera na Črnivcu?",
+         "Kamera Direkcije RS za infrastrukturo (DRSI) stoji na prelazu in gleda na cesto. Slika se "
+         "osveži vsakih nekaj minut. Na tej strani je na vrhu, vse kamere DRSI pa so tudi na promet.si."),
+        ("Od kod so podatki na tej strani?",
+         "Temperatura, vlaga in veter so izmerjeni na cestni vremenski postaji DRSI na prelazu. "
+         "Napoved je iz modela Open-Meteo, preračunana na višino prelaza in umerjena z meritvami DRSI. "
+         "Zgodovina zim je iz padavinske postaje ARSO Črnivec. Vozišče je ocena, ne meritev, "
+         "Meteorec indeks pa ni uradna informacija o stanju ceste."),
+    ]
+
+
+# Žive zapore na R1-225 (worker /crnivec-zapore, vir PIC prek NAP). Samo JS:
+# zapora je stanje, ne novica -- statični zapis iz jutranjega teka bi bil
+# ves dan star (isto načelo kot WX-ARSO in »V zadnjih 60 minutah«). Če vir ni
+# dosegljiv ali dostop še ni urejen, blok ostane skrit in velja statično
+# besedilo s povezavami. Besedilo iz vira gre prek textContent.
+ZAPORE_JS = """<script>
+(function () {
+  var box = document.getElementById("crn-zapore");
+  if (!box || !window.fetch) return;
+  function ura(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Ljubljana" });
+  }
+  function dan(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleDateString("sl-SI", { day: "numeric", month: "numeric", timeZone: "Europe/Ljubljana" });
+  }
+  fetch("__API__/crnivec-zapore").then(function (r) { return r.json(); }).then(function (z) {
+    if (!z || !z.ok || !Array.isArray(z.dogodki)) return;
+    var say = document.getElementById("crn-zapore-say");
+    var list = document.getElementById("crn-zapore-list");
+    var ob = ura(z.ts);
+    if (!z.dogodki.length) {
+      say.textContent = "Po podatkih Prometno-informacijskega centra na cesti čez Črnivec trenutno ni zapor, del ali drugih dogodkov" + (ob ? " (preverjeno ob " + ob + ")." : ".");
+    } else {
+      say.textContent = "Trenutno na cesti čez Črnivec (Prometno-informacijski center" + (ob ? ", preverjeno ob " + ob : "") + "):";
+      z.dogodki.forEach(function (d) {
+        var li = document.createElement("li");
+        var b = document.createElement("b");
+        b.textContent = (d.vzrok || (d.tip === "delo" ? "Delo na cesti" : "Dogodek")) + ": ";
+        li.appendChild(b);
+        li.appendChild(document.createTextNode(d.opis + (d.pojasnilo ? " " + d.pojasnilo : "")));
+        if (d.posodobljeno) {
+          var s = document.createElement("span");
+          s.className = "crn-zapore-t";
+          s.textContent = " · posodobljeno " + dan(d.posodobljeno) + " ob " + ura(d.posodobljeno);
+          li.appendChild(s);
+        }
+        list.appendChild(li);
+      });
+    }
+    box.hidden = false;
+  }).catch(function () {});
+})();
+</script>"""
+
+
+def info_html(faq):
+    """Stalni razdelki pod dashboardom: o prelazu, zapore, pogosta vprašanja."""
+    vprasanja = "\n".join(
+        f'''        <details class="crn-acc">
+          <summary><h3 class="crn-faq-q">{q}</h3></summary>
+          <div class="crn-acc-body"><p>{a}</p></div>
+        </details>''' for q, a in faq)
+    return f'''
+    <section class="crn-panel crn-info" id="o-prelazu" aria-labelledby="crn-about-h">
+      <h2 class="crn-h2" id="crn-about-h">O prelazu Črnivec</h2>
+      <p>Črnivec (902 m) je cestni prelaz med Stahovico pri Kamniku in Gornjim Gradom, na meji med
+      Gorenjsko in Štajersko. Čezenj pelje državna cesta R1-225, ki Kamnik povezuje z Zgornjo Savinjsko
+      dolino. Prelaz je skoraj 500 m višje od Gornjega Grada, zato so razmere na njem, posebej pozimi in
+      zjutraj, pogosto drugačne kot v dolini.</p>
+      <p>Na tej strani so zbrani spletna kamera DRSI na prelazu, temperatura, vlaga in veter z
+      bližnje cestne vremenske postaje, ocena stanja vozišča in vreme po urah, preračunano na višino
+      prelaza. Stran govori o prelazu nad Kamnikom, ne o kraju Črnivec pri Brezjah.</p>
+    </section>
+
+    <section class="crn-panel crn-info" id="zapore" aria-labelledby="crn-closures-h">
+      <h2 class="crn-h2" id="crn-closures-h">Zapore in stanje ceste čez Črnivec</h2>
+      <p>Uradne informacije o zaporah, nesrečah in delih na cesti Stahovica–Črnivec–Radmirje (R1-225)
+      objavlja Prometno-informacijski center na
+      <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>. Zapore na
+      območju občine objavlja tudi <a href="https://www.gornji-grad.si/objave/274" target="_blank"
+      rel="noopener">Občina Gornji Grad</a>, pregled stanja na vseh cestah pa
+      <a href="https://www.amzs.si/na-poti/stanje-na-slovenskih-cestah" target="_blank" rel="noopener">AMZS</a>.</p>
+      <div class="crn-zapore" id="crn-zapore" aria-live="polite" hidden>
+        <p class="crn-zapore-say" id="crn-zapore-say"></p>
+        <ul class="crn-zapore-list" id="crn-zapore-list"></ul>
+      </div>
+      <p>Meteorec indeks je vremenska ocena: pove, ali je cesta verjetno suha, mokra ali poledenela,
+      ne pa, ali je zaprta.</p>
+    </section>
+{ZAPORE_JS.replace("__API__", WORKER_BASE)}
+
+    <section class="crn-info crn-faq" id="vprasanja" aria-labelledby="crn-faq-h">
+      <h2 class="crn-h2" id="crn-faq-h">Pogosta vprašanja o Črnivcu</h2>
+{vprasanja}
+    </section>
+'''
+
+
 def build_body(data):
     passes = data.get("passes") or []
     crnivec = next((p for p in passes if p["id"] == "crnivec"), None)
@@ -3094,6 +3237,7 @@ def build_body(data):
         pass
 
     snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
+    faq = faq_items(snowpack_cm, snow_new)
     precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
 
     temp_src_txt = "na prelazu · ocena modela"
@@ -3239,7 +3383,7 @@ def build_body(data):
         <p class="crn-says" id="crn-says"><span class="crn-says-h">Črnivec pravi:</span>
           <span id="crn-says-txt">{says_txt}</span></p>
         <div class="crn-now" aria-labelledby="crn-now-h">
-          <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
+          <h2 class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</h2>
           <ul class="crn-check" id="crn-check">{check_html}</ul>
           <p class="crn-check-warn" id="crn-check-warn"{'' if check_warn_txt else ' hidden'}>{check_warn_txt}</p>
           <p class="crn-check-note" id="crn-check-note">{check_note_txt}</p>
@@ -3255,10 +3399,10 @@ def build_body(data):
       </div>
 
       <section class="crn-panel crn-cam" id="kamera" aria-labelledby="crn-cam-h">
-        <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
+        <h2 class="crn-h2" id="crn-cam-h">Spletna kamera Črnivec v živo</h2>
         <div class="crn-cam-frame is-loading">
           <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
-          <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
+          <img id="crn-cam-img" src="{CAM_URL}" alt="Spletna kamera DRSI na prelazu Črnivec (902 m), cesta Stahovica–Gornji Grad" width="640" height="480">
           <span class="crn-cam-badge" aria-hidden="true"><i></i>V živo</span>
           <span class="crn-cam-place" aria-hidden="true">Črnivec · 902 m</span>
           <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
@@ -3270,21 +3414,21 @@ def build_body(data):
       </section>
 
       <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h"{'' if next_cells else ' hidden'}>
-        <p class="crn-now-h" id="crn-next-h">Naslednjih 6 ur</p>
+        <h2 class="crn-now-h" id="crn-next-h">Vreme na Črnivcu po urah · naslednjih 6 ur</h2>
         <p class="crn-next-say" id="crn-next-say">{next_say}</p>
         <div class="crn-next-grid" id="crn-next-grid">{next_cells}</div>
         <p class="crn-check-note" id="crn-next-note">{next_note}</p>
       </section>
 
       <section class="crn-commute" id="crn-commute" aria-labelledby="crn-commute-h"{'' if commute_rows else ' hidden'}>
-        <p class="crn-now-h" id="crn-commute-h">Na poti v službo in domov</p>
+        <h2 class="crn-now-h" id="crn-commute-h">Na poti v službo in domov</h2>
         <p class="crn-lead crn-commute-lead">Najnižja temperatura, padavine in vozišče na prelazu v jutranjem in popoldanskem terminu.</p>
         <div class="crn-commute-grid" id="crn-commute-grid">{commute_rows}</div>
         <p class="crn-check-note">Napoved Open-Meteo, preračunana na 902 m in umerjena z meritvami DRSI. Dlje v prihodnost je manj zanesljiva. Vozišče je ocena.</p>
       </section>
 
       <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
-        <p class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</p>
+        <h2 class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</h2>
         {sp_html}
         <p class="crn-check-note">{sp_note}</p>
       </section>
@@ -3309,7 +3453,7 @@ def build_body(data):
       </div>
 
       <section class="crn-duel" id="crn-duel" aria-labelledby="crn-duel-h"{'' if duel else ' hidden'}>
-        <p class="crn-now-h" id="crn-duel-h">Črnivec proti dolini</p>
+        <h2 class="crn-now-h" id="crn-duel-h">Črnivec proti dolini</h2>
         <div class="crn-duel-grid">
           <div class="crn-duel-rows">
             <p class="crn-duel-row"><span>Črnivec · {DRSI_ELEV_M['crnivec']} m</span><b id="crn-duel-p">{num1(duel['tp']) if duel else '–'} °C</b></p>
@@ -3437,6 +3581,7 @@ def build_body(data):
       </div>
     </div>
 
+{info_html(faq)}
     <footer class="crn-official">
       <p><strong>Meteorec indeks je neuradna informacija.</strong> Za uradno stanje cest glej
       <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
@@ -3447,7 +3592,7 @@ def build_body(data):
     </footer>
   </div>
 {share_js}'''
-    return body, og_slika
+    return body, og_slika, faq
 
 
 def to_crnivec_site(html):
@@ -3464,26 +3609,86 @@ def to_crnivec_site(html):
     return re.sub(r'\b(href|src)="(/(?!/)[^"]*)"', absolut, html)
 
 
-def site_schema(title, desc, image):
-    """WebSite + WebPage za crnivec.si. Avtor je ista oseba kot na meteorec.si
-    (isti @id), da iskalnik obe domeni pripiše istemu avtorju."""
+def site_schema(title, desc, image, faq=()):
+    """WebSite + WebPage (+ FAQPage) za crnivec.si. Avtor je ista oseba kot na
+    meteorec.si (isti @id), da iskalnik obe domeni pripiše istemu avtorju.
+    Prelaz je povezan z Wikidato prek skupnega registra PLACE_SAMEAS."""
+    prelaz = {"@type": "Place", "@id": f"{CRN_SITE}/#prelaz", "name": "Črnivec",
+              "alternateName": ["Prelaz Črnivec", "Črnivec Pass"],
+              "description": "Cestni prelaz (902 m) med Stahovico pri Kamniku in Gornjim Gradom, cesta R1-225.",
+              "sameAs": seo.PLACE_SAMEAS["Črnivec (prelaz)"],
+              "containedInPlace": {"@type": "Country", "name": "Slovenija"}}
     data = [
         {"@context": "https://schema.org", "@type": "WebSite", "@id": f"{CRN_SITE}/#website",
-         "name": "Kako je čez Črnivec?", "url": f"{CRN_SITE}/", "inLanguage": "sl",
+         "name": "Kako je čez Črnivec?", "alternateName": "crnivec.si", "url": f"{CRN_SITE}/",
+         "inLanguage": "sl",
          "publisher": {"@type": "Organization", "name": "Meteorec", "url": f"{seo.SITE}/"}},
         {"@context": "https://schema.org", "@type": "WebPage", "@id": f"{CRN_SITE}/",
          "name": title, "description": desc, "url": f"{CRN_SITE}/",
          "image": image or f"{seo.SITE}/og-image.jpg", "inLanguage": "sl",
          "isPartOf": {"@id": f"{CRN_SITE}/#website"},
          "author": {"@id": f"{seo.SITE}/#person"},
-         "about": {"@type": "Place", "name": "Črnivec (preval)",
-                   "sameAs": "https://sl.wikipedia.org/wiki/%C4%8Crnivec_(preval)"},
+         "about": prelaz,
+         "speakable": {"@type": "SpeakableSpecification",
+                       "cssSelector": ["#crn-status-title", "#crn-status-desc", "#crn-next-say"]},
          "datePublished": "2026-09-20",
          "dateModified": datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).isoformat(timespec="seconds")},
     ]
+    if faq:
+        data.append({"@context": "https://schema.org", "@type": "FAQPage", "@id": f"{CRN_SITE}/#vprasanja",
+                     "mainEntity": [{"@type": "Question", "name": q,
+                                     "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]})
     return "\n".join(
         f'<script type="application/ld+json">\n{json.dumps(d, ensure_ascii=False, separators=(",", ":"))}\n</script>'
         for d in data)
+
+
+# llms.txt za crnivec.si -- kratek, dejstven opis za AI asistente (GEO). Isto
+# načelo kot llms.txt na meteorec.si: kaj stran je, od kod so podatki in česa
+# NI (uradne informacije o stanju ceste).
+LLMS_TXT = f"""# Kako je čez Črnivec? (crnivec.si)
+
+> Stanje na prelazu Črnivec (902 m) med Stahovico pri Kamniku in Gornjim Gradom,
+> na državni cesti R1-225, ki Kamnik povezuje z Zgornjo Savinjsko dolino.
+> Spletna kamera, izmerjena temperatura, vlaga in veter, ocena vozišča in vreme
+> po urah na eni strani. Ni uradna informacija o stanju ceste.
+
+## Stran
+
+- [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
+- [Pogosta vprašanja]({CRN_SITE}/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
+- [Zapore in stanje ceste]({CRN_SITE}/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
+
+## Viri podatkov
+
+- Temperatura, vlaga, rosišče in veter: cestna vremenska postaja Direkcije RS za infrastrukturo (DRSI) na prelazu, meritve na 10 minut.
+- Kamera: DRSI, prek promet.si.
+- Napoved: Open-Meteo, preračunana na 902 m in vsak dan umerjena z meritvami DRSI zadnjih 10 dni.
+- Zgodovina zim: padavinska postaja ARSO Črnivec (848 m).
+- Stanje vozišča je ocena iz temperature in padavin, ne meritev. Temperature cestišča DRSI ne objavlja.
+
+## Avtor
+
+- Meteorec, Filip Eremita: {seo.SITE}/ (vremenska postaja IREICA1, Rečica ob Savinji).
+"""
+
+NOT_FOUND_HTML = f"""<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Stran ne obstaja | crnivec.si</title>
+<link rel="icon" href="/icon-192.png" type="image/png">
+<style>body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#fdf6e3;
+font-family:system-ui,sans-serif;color:#111;text-align:center;padding:16px}}
+a{{display:inline-block;margin-top:16px;padding:12px 20px;border:3px solid #111;border-radius:999px;
+background:#fff;color:#111;font-weight:800;text-decoration:none;box-shadow:3px 3px 0 #111}}</style>
+</head>
+<body><main><h1>Te strani ni.</h1><p>Črnivec pa je še vedno tam.</p>
+<a href="/">Kako je čez Črnivec?</a></main></body>
+</html>
+"""
 
 
 def write_site_files():
@@ -3505,6 +3710,12 @@ def write_site_files():
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\n\nSitemap: {CRN_SITE}/sitemap.xml\n")
+    with open(os.path.join(out, f"{INDEXNOW_KEY}.txt"), "w", encoding="utf-8") as f:
+        f.write(INDEXNOW_KEY)
+    with open(os.path.join(out, "llms.txt"), "w", encoding="utf-8") as f:
+        f.write(LLMS_TXT)
+    with open(os.path.join(out, "404.html"), "w", encoding="utf-8") as f:
+        f.write(NOT_FOUND_HTML)
     danes = datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).date().isoformat()
     with open(os.path.join(out, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -3543,9 +3754,13 @@ def main():
         print("✗ data/winter-data.json manjka -- najprej poženi tools/winter_engine.py.", file=sys.stderr)
         return 1
 
-    body, og_slika = build_body(data)
-    title = "Kako je čez Črnivec? – (ne)uradni indeks"
-    desc = "Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza."
+    body, og_slika, faq = build_body(data)
+    # Naslov po keyword researchu (25. 9. 2026): »kako je čez črnivec« v Googlu
+    # ni poizvedba (ljudje to vprašajo v FB skupinah), »črnivec kamera/vreme/
+    # cesta« pa so. H1 na strani ostane »Kako je čez Črnivec?«.
+    title = "Prelaz Črnivec: kamera, vreme in stanje ceste"
+    desc = ("Spletna kamera s prelaza Črnivec (902 m) v živo, izmerjena temperatura, sneg, poledica "
+            "in vreme po urah za cesto Kamnik–Gornji Grad.")
     # manifest.json ima relativne poti ("./") -- te se po specifikaciji Web App
     # Manifest razrešijo proti URL-ju SAME manifest.json (koren strani), ne
     # proti tej podstrani, zato je varno linkati isti manifest tudi od tu brez
@@ -3558,9 +3773,10 @@ def main():
         '<meta name="apple-mobile-web-app-capable" content="yes">\n'
         '<meta name="apple-mobile-web-app-title" content="Črnivec">\n'
         '<link rel="manifest" href="/manifest.json">\n'
+        '<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">\n'
         '<link rel="apple-touch-icon" href="/icon-192.png">'
     )
-    schema = "\n".join([pwa_head, site_schema(title, desc, og_slika)])
+    schema = "\n".join([pwa_head, site_schema(title, desc, og_slika, faq)])
     html = seo.page_shell(title, desc, OLD_PATH, schema, body, og_image=og_slika)
     seo.write_page(f"{CRN_DIR}/index.html", to_crnivec_site(html), force=True)
     write_site_files()

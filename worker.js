@@ -168,6 +168,68 @@ function _drsiPostaja(p) {
   };
 }
 
+// Zapore, dela in dogodki na cesti čez Črnivec (crnivec.si, razdelek
+// »Zapore«). Uradni vir je Prometno-informacijski center (DARS, PIC) prek
+// Nacionalne točke dostopa (NAP): GeoJSON prometnih dogodkov in del na cesti.
+// Dostop zahteva račun na nap.si in odobritev za vsak nabor, zato sta
+// uporabniško ime in geslo Worker secreta NAP_USER / NAP_PASS (HTTP Basic, ki
+// ga B2B API NAP podpira ob bearer žetonu). Brez njiju endpoint vrne
+// {ok:false, razlog:"ni_dostopa"} in stran pusti statično besedilo.
+//
+// Oba nabora sta za vso Slovenijo (več sto kB), zato ju beremo največ enkrat na
+// 5 minut: najprej pomnilnik izolata, nato KV. Cache API na workers.dev ne
+// deluje, cf.cacheTtl pa zahtev z Authorization ne predpomni.
+const NAP_ZAPORE_VIRI = [
+  ["dogodek", "https://b2b.nap.si/data/b2b.events.geojson.sl_SI"],
+  ["delo", "https://b2b.nap.si/data/b2b.roadworks.geojson.sl_SI"],
+];
+// Cesta čez prelaz je R1-225 (Stahovica–Črnivec–Radmirje). Ime prelaza ujame
+// še dogodke, ki jih PIC opiše brez številke ceste.
+const CRN_CESTA_RE = /R1-225|[ČC]rnivec/i;
+const CRN_ZAPORE_TTL_S = 300;
+let _crnZaporeMem = null;
+
+async function _crnivecZapore(env) {
+  if (!env.NAP_USER || !env.NAP_PASS) return { ok: false, razlog: "ni_dostopa" };
+  const zdaj = Date.now();
+  if (_crnZaporeMem && zdaj - _crnZaporeMem.t < CRN_ZAPORE_TTL_S * 1000) return _crnZaporeMem.data;
+  const kv = env.COUNTER_KV;
+  if (kv) {
+    const shranjeno = await kv.get("crnivec_zapore", "json");
+    if (shranjeno && zdaj - Date.parse(shranjeno.ts) < CRN_ZAPORE_TTL_S * 1000) {
+      _crnZaporeMem = { t: Date.parse(shranjeno.ts), data: shranjeno };
+      return shranjeno;
+    }
+  }
+  const auth = "Basic " + btoa(env.NAP_USER + ":" + env.NAP_PASS);
+  const vidni = new Set();
+  const dogodki = [];
+  for (const [tip, url] of NAP_ZAPORE_VIRI) {
+    const r = await fetch(url, { headers: { "Authorization": auth, "Accept": "application/json" } });
+    if (!r.ok) throw new Error(tip + " HTTP " + r.status);
+    const gj = await r.json();
+    for (const f of (gj && gj.features) || []) {
+      const p = (f && f.properties) || {};
+      if (!CRN_CESTA_RE.test(String(p.cesta || "") + " " + String(p.opis || ""))) continue;
+      const kljuc = p.EntityId || p.id;
+      if (kljuc && vidni.has(kljuc)) continue;
+      if (kljuc) vidni.add(kljuc);
+      dogodki.push({
+        tip,
+        cesta: String(p.cesta || ""),
+        vzrok: String(p.vzrok || ""),
+        opis: String(p.opis || ""),
+        pojasnilo: String(p.dodatnoPojasnilo || ""),
+        posodobljeno: p.updated || null,
+      });
+    }
+  }
+  const out = { ok: true, vir: "PIC (DARS) prek NAP", ts: new Date(zdaj).toISOString(), dogodki };
+  _crnZaporeMem = { t: zdaj, data: out };
+  if (kv) await kv.put("crnivec_zapore", JSON.stringify(out), { expirationTtl: 3600 });
+  return out;
+}
+
 // Bbox Zgornje Savinjske doline za MeteoHmeljar zemljevid — isto območje kot
 // fetch_hydrants.py (Solčava–Luče–Ljubno–Rečica–Mozirje–Nazarje–Gornji Grad).
 // esriGeometryEnvelope pričakuje xmin,ymin,xmax,ymax (lon,lat,lon,lat).
@@ -3763,6 +3825,22 @@ export default {
         } catch (e) {
           return new Response(
             JSON.stringify({ ok: false, error: "drsi_unreachable", detail: String(e) }),
+            { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      // ── /crnivec-zapore ──────────────────────────────────────
+      // Zapore/dela/dogodki na R1-225 čez Črnivec, glej _crnivecZapore().
+      if (path === "/crnivec-zapore") {
+        try {
+          const z = await _crnivecZapore(env);
+          return new Response(JSON.stringify(z), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=120" }
+          });
+        } catch (e) {
+          return new Response(
+            JSON.stringify({ ok: false, razlog: "nap_unreachable", detail: String(e) }),
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
           );
         }

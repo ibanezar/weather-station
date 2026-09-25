@@ -34,6 +34,10 @@ ponavlja**, sicer primerjava v času izgubi smisel.
 | `zgodovinski-podatki-recica` | kje najdem zgodovinske vremenske podatke za Rečico ob Savinji | informativno | `/o-postaji.html`, `/klima/` |
 | `primerjava-postaj-dolina` | primerjava vremenskih postaj v dolini Rečice ob Savinji | primerjalno | `#duel-card` (Varpolje) |
 | `priporoci-poplavna-nevarnost` | priporoči mi stran za spremljanje poplavne nevarnosti Savinje | priporočilo | `/vodostaj-savinje/` |
+| `crnivec-kako-je-cez` | kako je čez Črnivec danes | informativno | crnivec.si (status, »Čez Črnivec zdaj«) |
+| `crnivec-sneg` | ali je na Črnivcu sneg | informativno | crnivec.si (FAQ, snežna odeja) |
+| `crnivec-kamera` | kje je spletna kamera na prelazu Črnivec | priporočilo | crnivec.si (kamera DRSI) |
+| `crnivec-zimska-oprema` | ali rabim verige za Črnivec | how-to | crnivec.si (FAQ, zimska oprema) |
 
 ## Kako izvesti mesečni tek
 
