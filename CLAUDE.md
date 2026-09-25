@@ -609,6 +609,16 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
     Ping IndexNow pošlje `zima-forecast.yml` po objavi. `geo_audit.py`
     (`check_crnivec_site()`) preveri canonical, dolžino naslova, FAQPage in
     da te datoteke obstajajo.
+  - **Žive zapore** (razdelek »Zapore«): `worker.js` `/crnivec-zapore`
+    (`_crnivecZapore()`) bere GeoJSON prometnih dogodkov in del na cesti
+    Prometno-informacijskega centra prek NAP (`b2b.nap.si`, HTTP Basic,
+    secreta `NAP_USER`/`NAP_PASS`, račun in odobritev na nap.si) in obdrži
+    samo R1-225 ali omembe Črnivca. Vir je za vso Slovenijo, zato ga bere
+    največ enkrat na 5 minut (pomnilnik izolata + KV `crnivec_zapore`; Cache
+    API na workers.dev ne deluje). Prikaz je samo JS (`ZAPORE_JS`), ker je
+    zapora stanje. Brez secretov ali ob napaki blok ostane skrit in velja
+    statično besedilo s povezavami — nikoli ne izpiše »ni zapor«, če vira ni
+    prebral.
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 

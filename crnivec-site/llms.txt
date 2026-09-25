@@ -9,7 +9,7 @@
 
 - [Kako je čez Črnivec?](https://crnivec.si/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
 - [Pogosta vprašanja](https://crnivec.si/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
-- [Zapore in stanje ceste](https://crnivec.si/#zapore): kje so uradne informacije o zaporah (promet.si, Občina Gornji Grad, AMZS).
+- [Zapore in stanje ceste](https://crnivec.si/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
 
 ## Viri podatkov
 

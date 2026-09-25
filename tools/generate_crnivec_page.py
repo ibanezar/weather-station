@@ -1430,8 +1430,13 @@ CSS = '''
   /* Accordioni (razlaga indeksa, značka) */
   .crn-info{margin-top:var(--s3)}
   .crn-info p{margin:var(--s2) 0 0;font-size:15px;color:var(--ink2)}
-  .crn-faq{display:grid;gap:var(--s2);margin-top:28px}
+  .crn-faq{display:grid;gap:var(--s2);margin-top:40px}
   .crn-faq-q{font:inherit;margin:0}
+  .crn-zapore{margin-top:var(--s2);padding:var(--s2) var(--s3);border:var(--bd);border-radius:12px;background:#fff}
+  .crn-zapore-say{margin:0!important;font-weight:700;color:var(--ink)!important}
+  .crn-zapore-list{margin:var(--s1) 0 0;padding-left:1.2em;font-size:15px;color:var(--ink2)}
+  .crn-zapore-list li{margin:4px 0}
+  .crn-zapore-t{color:var(--muted);font-size:13px}
   .crn-info a{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:2px}
   .crn-acc{background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh)}
   .crn-acc summary{cursor:pointer;list-style:none;min-height:48px;display:flex;align-items:center;
@@ -3054,6 +3059,53 @@ def faq_items(snowpack_cm, snow_new):
     ]
 
 
+# Žive zapore na R1-225 (worker /crnivec-zapore, vir PIC prek NAP). Samo JS:
+# zapora je stanje, ne novica -- statični zapis iz jutranjega teka bi bil
+# ves dan star (isto načelo kot WX-ARSO in »V zadnjih 60 minutah«). Če vir ni
+# dosegljiv ali dostop še ni urejen, blok ostane skrit in velja statično
+# besedilo s povezavami. Besedilo iz vira gre prek textContent.
+ZAPORE_JS = """<script>
+(function () {
+  var box = document.getElementById("crn-zapore");
+  if (!box || !window.fetch) return;
+  function ura(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Ljubljana" });
+  }
+  function dan(iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleDateString("sl-SI", { day: "numeric", month: "numeric", timeZone: "Europe/Ljubljana" });
+  }
+  fetch("__API__/crnivec-zapore").then(function (r) { return r.json(); }).then(function (z) {
+    if (!z || !z.ok || !Array.isArray(z.dogodki)) return;
+    var say = document.getElementById("crn-zapore-say");
+    var list = document.getElementById("crn-zapore-list");
+    var ob = ura(z.ts);
+    if (!z.dogodki.length) {
+      say.textContent = "Po podatkih Prometno-informacijskega centra na cesti čez Črnivec trenutno ni zapor, del ali drugih dogodkov" + (ob ? " (preverjeno ob " + ob + ")." : ".");
+    } else {
+      say.textContent = "Trenutno na cesti čez Črnivec (Prometno-informacijski center" + (ob ? ", preverjeno ob " + ob : "") + "):";
+      z.dogodki.forEach(function (d) {
+        var li = document.createElement("li");
+        var b = document.createElement("b");
+        b.textContent = (d.vzrok || (d.tip === "delo" ? "Delo na cesti" : "Dogodek")) + ": ";
+        li.appendChild(b);
+        li.appendChild(document.createTextNode(d.opis + (d.pojasnilo ? " " + d.pojasnilo : "")));
+        if (d.posodobljeno) {
+          var s = document.createElement("span");
+          s.className = "crn-zapore-t";
+          s.textContent = " · posodobljeno " + dan(d.posodobljeno) + " ob " + ura(d.posodobljeno);
+          li.appendChild(s);
+        }
+        list.appendChild(li);
+      });
+    }
+    box.hidden = false;
+  }).catch(function () {});
+})();
+</script>"""
+
+
 def info_html(faq):
     """Stalni razdelki pod dashboardom: o prelazu, zapore, pogosta vprašanja."""
     vprasanja = "\n".join(
@@ -3081,9 +3133,14 @@ def info_html(faq):
       območju občine objavlja tudi <a href="https://www.gornji-grad.si/objave/274" target="_blank"
       rel="noopener">Občina Gornji Grad</a>, pregled stanja na vseh cestah pa
       <a href="https://www.amzs.si/na-poti/stanje-na-slovenskih-cestah" target="_blank" rel="noopener">AMZS</a>.</p>
+      <div class="crn-zapore" id="crn-zapore" aria-live="polite" hidden>
+        <p class="crn-zapore-say" id="crn-zapore-say"></p>
+        <ul class="crn-zapore-list" id="crn-zapore-list"></ul>
+      </div>
       <p>Meteorec indeks je vremenska ocena: pove, ali je cesta verjetno suha, mokra ali poledenela,
       ne pa, ali je zaprta.</p>
     </section>
+{ZAPORE_JS.replace("__API__", WORKER_BASE)}
 
     <section class="crn-info crn-faq" id="vprasanja" aria-labelledby="crn-faq-h">
       <h2 class="crn-h2" id="crn-faq-h">Pogosta vprašanja o Črnivcu</h2>
@@ -3600,7 +3657,7 @@ LLMS_TXT = f"""# Kako je čez Črnivec? (crnivec.si)
 
 - [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
 - [Pogosta vprašanja]({CRN_SITE}/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
-- [Zapore in stanje ceste]({CRN_SITE}/#zapore): kje so uradne informacije o zaporah (promet.si, Občina Gornji Grad, AMZS).
+- [Zapore in stanje ceste]({CRN_SITE}/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
 
 ## Viri podatkov
 
