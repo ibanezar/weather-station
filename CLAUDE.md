@@ -541,6 +541,15 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   minut, da je URL stabilen in ga `cacheTtl` ujame. Padavine upoštevajo
   polnočno ponastavitev `dailyRainMm`. Besedilo izriše samo JS
   (`izrisiTrend()`), statične različice ni, ker bi bila vedno stara.
+- **»Zime na Črnivcu«** (`arso_section_html()`, 25. 9. 2026): meritve
+  padavinske postaje **ARSO Črnivec** (id 3391, 848 m, od 2021) po sezonah
+  (1. 7.–30. 6.): največja snežna odeja z datumom, dni z odejo, dni sneženja
+  in skupni novi sneg. Vir je arhiv `meteo.arso.gov.si/webmet/archive/data.xml`
+  (`group=dailyData0`, spremenljivke 85/88/89; ključi točk so minute od
+  1. 1. 1800). Enkrat na dan se ves arhiv prenese v `data/crnivec-arso.json`
+  (predpomnilnik, v `git add` koraku `zima-forecast.yml`). **Arhiv zaostaja
+  3–4 tedne**, zato ni vir za trenutno stanje ali indeks, samo za zgodovino.
+  Padavine so v predpomnilniku za poznejše umerjanje snežnega modela.
 - **»Črnivec pravi …«** (`CRNIVEC_SAYS`, 25. 9. 2026): stavek prelaza v
   prvi osebi v oblačku pod opisom statusa. Vezan je na stanje: cona indeksa
   ali »megla«, kadar je megla verjetna in je cona suho/okoli ničle. Izbere se
