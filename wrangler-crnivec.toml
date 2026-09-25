@@ -1,0 +1,26 @@
+# crnivec.si — samostojna stran "Kako je čez Črnivec?" (od 25. 9. 2026).
+#
+# Worker brez kode, samo statične datoteke iz crnivec-site/, ki jih vsak dan
+# zapiše tools/generate_crnivec_page.py (zima-forecast.yml) — isti generator in
+# isti podatki kot prej za meteorec.si/crnivec/, samo z drugo domeno. Klici za
+# žive podatke (/crnivec-drsi, /crnivec/glas …) gredo še naprej na glavni
+# worker (wrangler.toml), ki ima crnivec.si v ALLOWED_ORIGINS.
+#
+# Deploy: `wrangler deploy -c wrangler-crnivec.toml` — iz zima-forecast.yml
+# takoj po commitu in iz deploy-crnivec.yml ob ročni spremembi na main.
+# Zahteve za statične datoteke so na Workers Paid brezplačne in ne štejejo v
+# kvoto zahtev glavnega workerja.
+name = "crnivec-si"
+compatibility_date = "2026-09-01"
+
+# Cona crnivec.si je v istem Cloudflare računu kot meteorec.si. Zapisa DNS
+# (A @ in CNAME www, oba Proxied) ostaneta; zahtevo prestreže ta route.
+# www.crnivec.si ostane preusmeritev na crnivec.si (Redirect Rule v coni).
+routes = [
+  { pattern = "crnivec.si/*", zone_name = "crnivec.si" },
+]
+
+[assets]
+directory = "./crnivec-site"
+html_handling = "auto-trailing-slash"
+not_found_handling = "none"

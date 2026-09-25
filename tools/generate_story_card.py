@@ -940,7 +940,7 @@ def t_crnivec(ctx):
                 [("Izmerjeno (DRSI)" if weather.get("temp_src") == "izmerjeno" else "Temperatura",
                   f"{num_sl(weather.get('temp_c'), 1)} °C"),
                  ("Sneg / 24 h", f"{num_sl(weather.get('expected_snow_cm_24h'), 1)} cm"),
-                 ("Neuradna ocena", "meteorec.si/crnivec")],
+                 ("Neuradna ocena", "crnivec.si")],
                 C_CYAN, "misty-valley")
 
 

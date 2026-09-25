@@ -1,0 +1,29 @@
+name: Deploy crnivec.si
+
+# Objavi crnivec-site/ (stran "Kako je čez Črnivec?") na Cloudflare, glej
+# wrangler-crnivec.toml. Dnevno objavo naredi zima-forecast.yml sam (push z
+# GITHUB_TOKEN tega workflowa ne sproži); ta je za ročne spremembe na main.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - crnivec-site/**
+      - wrangler-crnivec.toml
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy na Cloudflare (crnivec.si)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy -c wrangler-crnivec.toml

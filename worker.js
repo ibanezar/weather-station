@@ -177,6 +177,10 @@ const ALLOWED_ORIGINS = [
   "https://ibanezar.github.io",
   "https://meteorec.si",
   "https://www.meteorec.si",
+  // Stran "Kako je čez Črnivec?" živi od 25. 9. 2026 na svoji domeni
+  // (wrangler-crnivec.toml) in kliče ta worker za /crnivec-drsi, /crnivec/glas …
+  "https://crnivec.si",
+  "https://www.crnivec.si",
   "http://localhost",
   "http://127.0.0.1",
 ];

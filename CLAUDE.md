@@ -574,6 +574,29 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   `calibAt()`, `primerjavaDoline()`, `izberiRek()`, `oceniUro()`,
   `povzemiOkno()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
   drugo.**
+- **Stran živi na svoji domeni `crnivec.si`** (od 25. 9. 2026, domena pri
+  Neoservu, DNS na Cloudflare). Filip je izrecno želel ločeno stran z ločeno
+  domeno, ne preusmeritve na `meteorec.si/crnivec/`.
+  - Generator piše `crnivec-site/` (stran + `manifest.json`, ikone,
+    `robots.txt`, `sitemap.xml`). Stran gradi isti `page_shell()`, nato jo
+    `to_crnivec_site()` prestavi: canonical/og:url na `https://crnivec.si/`,
+    korensko-relativne povezave (glava, noga, CSS, pisave) absolutno na
+    `meteorec.si`. Izjeme so v `CRN_LOCAL`. Shema je svoja (`site_schema()`):
+    WebSite crnivec.si, avtor je isti `@id` kot na meteorec.si.
+  - Streže jo worker `crnivec-si` brez kode, samo s statičnimi datotekami
+    (`wrangler-crnivec.toml`, route `crnivec.si/*`). Objavi ga
+    `zima-forecast.yml` takoj po commitu (push z `GITHUB_TOKEN` ne sproži
+    drugih workflowov) in `deploy-crnivec.yml` ob ročni spremembi na `main`.
+    GitHub Pages ima eno domeno na repozitorij (`CNAME`), zato ne Pages.
+  - Živi podatki gredo še naprej na glavni worker; `crnivec.si` je zato v
+    `ALLOWED_ORIGINS` v `worker.js`. Brez tega na strani ne dela nič živega.
+  - `meteorec.si/crnivec/` je samo preusmeritev (`redirect_stub()`: noindex +
+    canonical + takojšnja preusmeritev), isti vzorec kot stare ARSO objave.
+    Pravi 301 da Redirect Rule v coni `meteorec.si`. Stran **ni** v `CORE`
+    v `seo_audit.py` — ne vračaj je tja, ima svoj sitemap na crnivec.si.
+  - `www.crnivec.si` → 301 na `crnivec.si` (Redirect Rule v coni `crnivec.si`).
+  - Povezave z meteorec.si (`/zima/prevoznost-prelazov/`, blog) in besedilo
+    na slikah (OG, zgodba, deljena slika) kažejo na `crnivec.si`.
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 
