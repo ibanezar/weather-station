@@ -486,10 +486,18 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
 - **Vozišče je vedno ocena**: `black_ice_category()` iz `winter_engine.py`
   (ista formula kot na `/zima/`, uvožena), z izmerjenimi vhodi, kjer so, in
   padavine zadnjih treh ur (`weather["now"]` iz `compute_pass_weather`).
-- **Meteorec indeks (`pick_zone`, merilnik) seznam NE spremeni.** Indeks
-  uporabljajo še OG kartica, tema zgodbe in značka v `worker.js`. Kadar je
-  kakšna vrstica »nevarno«, indeks pa zelen/rumen, se izpiše
-  `check_warn_text()`.
+- **Indeks poganja izmerjena temperatura** (od 25. 9. 2026), kadar je
+  meritev sveža. Prej je šel iz modela za Rečico z gradientom in je lahko
+  kazal »Cesta je suha«, ko je bilo na prelazu že pod ničlo. Sneg ostaja iz
+  modela, ker ga DRSI ne meri. Na vseh **štirih** mestih velja isto pravilo:
+  - `with_measurement()` + `fetch_drsi_crnivec()` v `tools/crnivec_zones.py`
+    (stran, OG kartica in tema zgodbe `CRNIVEC`);
+  - `uporabiStanje()` v JS strani;
+  - `_drsiCrnivec()` v znački `/crnivec/znacka.svg` v `worker.js`.
+
+  Kjer je temperatura izmerjena, je tako tudi označena (kartica, »Posodobljeno«,
+  OG slika, zgodba). Kadar je kakšna druga vrstica »nevarno«, indeks pa
+  zelen/rumen, se izpiše `check_warn_text()`.
 - Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
   `blackIceLive()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
   drugo.**
