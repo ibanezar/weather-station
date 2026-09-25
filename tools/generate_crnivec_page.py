@@ -963,6 +963,13 @@ CSS = '''
   .crn-check-warn{font-size:14px;font-weight:800;color:#7f1d1d;background:#fee2e2;border:2px solid #111;
     border-radius:10px;padding:4px var(--s2);margin:var(--s1) 0 0}
   .crn-check-note{font-size:12px;color:var(--muted);margin:var(--s1) 0 0}
+  /* "V zadnjih 60 minutah" -- samo JS (trend izračuna /crnivec-drsi). */
+  .crn-trend{margin-top:var(--s2);padding-top:var(--s2);border-top:2px dashed #d6d0c2}
+  .crn-trend-say{font-size:16px;font-weight:800;margin:0 0 6px}
+  .crn-trend-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .crn-trend-list li{margin:0;font-size:13px;background:#faf9f6;border:2px solid #111;border-radius:10px;
+    padding:4px 8px;display:flex;justify-content:space-between;gap:6px}
+  .crn-trend-list b{font-variant-numeric:tabular-nums;white-space:nowrap}
 
   /* "Naslednjih 6 ur" (forecast_hours) -- trak pod herojem, tri ure. Robna
      črta celice nosi najslabšo raven ure; besedilo vozišča jo pove z besedo. */
@@ -1894,6 +1901,40 @@ SHARE_JS_TEMPLATE = '''
     return pool[fnv1a(danes + "|" + state) % pool.length];
   }
 
+  // "V zadnjih 60 minutah" -- številke izračuna worker (_drsiTrend v
+  // worker.js iz zgodovine postaje DRSI), tu je samo besedilo. Ena kopija,
+  // brez Pythona: statičen trend bi bil vedno star.
+  function izrisiTrend(tr){
+    var box = document.getElementById("crn-trend");
+    if (!box) return;
+    if (!tr || tr.d_temp_c == null || !zivDrsi) { box.hidden = true; return; }
+    var dt = tr.d_temp_c, t = zivDrsi.temp_c, say;
+    if (t != null && t <= 2 && dt <= -0.4) say = "Črnivec se ohlaja proti ničli. Pozor na led.";
+    else if (dt <= -1.0) say = "Črnivec se hitro ohlaja.";
+    else if (dt <= -0.4) say = "Črnivec se ohlaja.";
+    else if (dt >= 1.0) say = "Črnivec se hitro ogreva.";
+    else if (dt >= 0.4) say = "Črnivec se ogreva.";
+    else say = "Temperatura se ne spreminja.";
+    if (tr.d_vlaga_pct != null && tr.d_vlaga_pct >= 10 && zivDrsi.vlaga_pct != null && zivDrsi.vlaga_pct >= 90)
+      say += " Vlaga hitro narašča, možna je megla.";
+    if (tr.padavine_mm) say += " V zadnji uri je padlo " + numSlLive(tr.padavine_mm, 1) + "\u00a0mm.";
+    var h = document.getElementById("crn-trend-h");
+    if (h) h.textContent = "V zadnjih " + tr.minut + " minutah";
+    document.getElementById("crn-trend-say").textContent = say;
+    var ul = document.getElementById("crn-trend-list");
+    ul.textContent = "";
+    [["Temperatura", predznak(dt) + " °C"],
+     ["Vlaga", tr.d_vlaga_pct == null ? "–" : predznak(tr.d_vlaga_pct).replace(",0", "") + " %"],
+     ["Veter", tr.d_veter_kmh == null ? "–" : predznak(tr.d_veter_kmh).replace(",0", "") + " km/h"],
+     ["Padavine", tr.padavine_mm == null ? "–" : numSlLive(tr.padavine_mm, 1) + " mm"]].forEach(function(x){
+      var li = document.createElement("li");
+      var a = document.createElement("span"); a.textContent = x[0];
+      var b = document.createElement("b"); b.textContent = x[1];
+      li.appendChild(a); li.appendChild(b); ul.appendChild(li);
+    });
+    box.hidden = false;
+  }
+
   function osveziDrsi(){
     if (!window.fetch) return;
     fetch(API + "/crnivec-drsi").then(function(r){ return r.json(); }).then(function(d){
@@ -1901,6 +1942,7 @@ SHARE_JS_TEMPLATE = '''
       var ts = st && st.ts ? Date.parse(st.ts) : NaN;
       zivDrsi = (!isNaN(ts) && (Date.now() - ts) / 60000 <= DRSI_MAX_AGE_MIN) ? st : null;
       izrisiDolino((d && d.postaje) || {});
+      izrisiTrend(d && d.trend);
       uporabiStanje();
     }).catch(function(){ zivDrsi = null; uporabiStanje(); });
   }
@@ -2841,6 +2883,11 @@ def build_body(data):
           <ul class="crn-check" id="crn-check">{check_html}</ul>
           <p class="crn-check-warn" id="crn-check-warn"{'' if check_warn_txt else ' hidden'}>{check_warn_txt}</p>
           <p class="crn-check-note" id="crn-check-note">{check_note_txt}</p>
+          <div class="crn-trend" id="crn-trend" hidden>
+            <p class="crn-now-h" id="crn-trend-h">V zadnjih 60 minutah</p>
+            <p class="crn-trend-say" id="crn-trend-say"></p>
+            <ul class="crn-trend-list" id="crn-trend-list"></ul>
+          </div>
         </div>
         <p class="crn-updated" id="crn-updated" data-ts="{generated_at}" data-sfx="{upd_suffix}">{updated_txt} · {upd_suffix}</p>
         <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>

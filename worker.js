@@ -83,6 +83,58 @@ async function _drsiSeznam() {
   return postaje;
 }
 
+// "V zadnjih 60 minutah" na /crnivec/: sprememba temperature, vlage, vetra
+// in padavine v zadnji uri, iz zgodovine postaje (meri na 10 minut). DRSI
+// pričakuje lokalni čas brez pasu; oba konca sta zaokrožena na 5 minut, da
+// je URL v 5-minutnem oknu enak in ga robni predpomnilnik (cacheTtl) res
+// ujame -- sicer bi vsak obisk pomenil svoj klic na DRSI.
+const DRSI_ZGODOVINA_URL = "https://www.ceste.si/Vremenske/Vreme/vremenski_podatki";
+
+function _ljLokalno(ms) {
+  // "2026-09-25 12:35:00" v Europe/Ljubljana (sv-SE da ISO-podoben zapis)
+  return new Date(ms).toLocaleString("sv-SE", { timeZone: "Europe/Ljubljana" }).replace(" ", "T");
+}
+
+async function _drsiTrend(stationId) {
+  try {
+    const korak = 5 * 60000;
+    const doMs = Math.floor(Date.now() / korak) * korak;
+    const odMs = doMs - 80 * 60000;
+    const url = `${DRSI_ZGODOVINA_URL}?weatherStationID=${stationId}` +
+      `&fromDate=${encodeURIComponent(_ljLokalno(odMs))}&toDate=${encodeURIComponent(_ljLokalno(doMs))}&queryCount=20`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" }, cf: { cacheTtl: 300, cacheEverything: true } });
+    if (!res.ok) return null;
+    const vrste = (await res.json() || [])
+      .map(r => ({ ts: _drsiCas(r.timestamp), t: r.outdoorTemperatureC, rh: r.humidityPercentage,
+                   v: r.windSpeedKmh, p: r.dailyRainMm }))
+      .filter(r => r.ts && r.t != null)
+      .sort((a, b) => Date.parse(a.ts) - Date.parse(b.ts));
+    if (vrste.length < 2) return null;
+    const zad = vrste[vrste.length - 1];
+    const cilj = Date.parse(zad.ts) - 60 * 60000;
+    let prej = null;
+    for (const r of vrste) {
+      if (!prej || Math.abs(Date.parse(r.ts) - cilj) < Math.abs(Date.parse(prej.ts) - cilj)) prej = r;
+    }
+    const min = Math.round((Date.parse(zad.ts) - Date.parse(prej.ts)) / 60000);
+    if (min < 45 || min > 75) return null;
+    const r1 = x => Math.round(x * 10) / 10;
+    // dailyRainMm se ob polnoči ponastavi -- negativna razlika pomeni, da je
+    // vmes bila polnoč, in takrat je vse, kar kaže zadnja meritev, iz te ure.
+    let pad = null;
+    if (zad.p != null && prej.p != null) pad = zad.p >= prej.p ? r1(zad.p - prej.p) : r1(zad.p);
+    return {
+      od: prej.ts, do: zad.ts, minut: min,
+      d_temp_c: r1(zad.t - prej.t),
+      d_vlaga_pct: (zad.rh > 0 && prej.rh > 0) ? Math.round(zad.rh - prej.rh) : null,
+      d_veter_kmh: (zad.v != null && prej.v != null) ? Math.round(zad.v - prej.v) : null,
+      padavine_mm: pad,
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
 // Sveža meritev s Črnivca ali null — isti prag 40 min kot DRSI_MAX_AGE_MIN
 // v tools/crnivec_zones.py (namerna podvojitev, worker ne bere Pythona).
 async function _drsiCrnivec() {
@@ -3700,8 +3752,8 @@ export default {
       // na strani obvezna — pogoji promet.si za razvijalce.
       if (path === "/crnivec-drsi") {
         try {
-          const postaje = await _drsiSeznam();
-          return new Response(JSON.stringify({ ok: true, vir: "DRSI (ceste.si)", postaje }), {
+          const [postaje, trend] = await Promise.all([_drsiSeznam(), _drsiTrend(DRSI_POSTAJE.crnivec)]);
+          return new Response(JSON.stringify({ ok: true, vir: "DRSI (ceste.si)", postaje, trend }), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=120" }
           });
         } catch (e) {
