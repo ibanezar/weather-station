@@ -466,6 +466,34 @@ Kako je narejeno:
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
 
+## Črnivec (`/crnivec/`) — izmerjeno s postaje DRSI, vozišče je ocena
+
+Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
+**»Čez Črnivec zdaj«** (temperatura, vozišče, sneg, megla, veter —
+`check_rows()` v `tools/generate_crnivec_page.py`).
+
+- **Na prelazu je prava vremenska postaja DRSI** (Direkcija RS za
+  infrastrukturo, postaja 201; 262 je Gornji Grad). Meri na 10 minut:
+  temperatura, vlaga, rosišče, veter, sunki in dnevne padavine. **Temperature
+  cestišča ne objavlja.** Vir je seznam, ki ga bere javna stran ceste.si/vreme.
+  Ta ni dokumentiran API, zato ga `worker.js` `/crnivec-drsi` bere z robnim
+  predpomnilnikom 5 minut (`cf.cacheTtl`), tako da DRSI dobi največ en klic
+  na 5 minut ne glede na obisk. Navedba vira (DRSI) je obvezna.
+- **Meritev je stara največ 40 minut** (`DRSI_MAX_AGE_MIN`), sicer vrstica
+  pade na model ali reče »ni meritve«. Megla in veter **nimata modelske
+  rezerve**: model je za Rečico na dnu doline, megla ali veter tam pa nista
+  megla ali veter na 902 m.
+- **Vozišče je vedno ocena**: `black_ice_category()` iz `winter_engine.py`
+  (ista formula kot na `/zima/`, uvožena), z izmerjenimi vhodi, kjer so, in
+  padavine zadnjih treh ur (`weather["now"]` iz `compute_pass_weather`).
+- **Meteorec indeks (`pick_zone`, merilnik) seznam NE spremeni.** Indeks
+  uporabljajo še OG kartica, tema zgodbe in značka v `worker.js`. Kadar je
+  kakšna vrstica »nevarno«, indeks pa zelen/rumen, se izpiše
+  `check_warn_text()`.
+- Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
+  `blackIceLive()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
+  drugo.**
+
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 
 Prijatelj iz Varpolja (občina Rečica ob Savinji, ~1,6 km jugozahodno, isto dno
