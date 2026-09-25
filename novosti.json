@@ -1,5 +1,15 @@
 [
   {
+    "type": "susa",
+    "date": "2026-09-18",
+    "end_date": "2026-09-24",
+    "value": 7.0,
+    "param": "precipTotal",
+    "label": "Sušno obdobje (7 dni)",
+    "slug": "susa-2026-09-18",
+    "duration": 7
+  },
+  {
     "type": "rekord-dneva-vrocina",
     "date": "2026-09-16",
     "value": 28.0,
