@@ -38,5 +38,13 @@
     "heating_level": "visoko",
     "black_ice_level": "nizko",
     "fog_top_m": 848
+  },
+  {
+    "date": "2026-09-25",
+    "snow_line_m": 2250,
+    "snow_cm_at_station": 0.0,
+    "heating_level": "visoko",
+    "black_ice_level": "nizko",
+    "fog_top_m": 860
   }
 ]
