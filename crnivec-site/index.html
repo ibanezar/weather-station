@@ -1,1092 +1,68 @@
-#!/usr/bin/env python3
-"""
-tools/generate_crnivec_page.py — /crnivec/, humorna stran "Kako je čez Črnivec?"
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-N2B38HHG');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LE8PJ1HR8B');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kako je čez Črnivec? – (ne)uradni indeks | Meteorec</title>
+<link rel="canonical" href="https://crnivec.si/">
+<link rel="alternate" hreflang="sl" href="https://crnivec.si/">
+<link rel="alternate" hreflang="x-default" href="https://crnivec.si/">
+<meta name="description" content="Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://crnivec.si/">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="Kako je čez Črnivec? – (ne)uradni indeks">
+<meta property="og:description" content="Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza.">
+<meta property="og:image" content="https://meteorec.si/og/crnivec/2026-09-25.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="sl_SI">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kako je čez Črnivec? – (ne)uradni indeks">
+<meta name="twitter:description" content="Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza.">
+<meta name="twitter:image" content="https://meteorec.si/og/crnivec/2026-09-25.jpg">
+<meta name="theme-color" content="#dc2626">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Črnivec">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","@id":"https://crnivec.si/#website","name":"Kako je čez Črnivec?","url":"https://crnivec.si/","inLanguage":"sl","publisher":{"@type":"Organization","name":"Meteorec","url":"https://meteorec.si/"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://crnivec.si/","name":"Kako je čez Črnivec? – (ne)uradni indeks","description":"Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza.","url":"https://crnivec.si/","image":"https://meteorec.si/og/crnivec/2026-09-25.jpg","inLanguage":"sl","isPartOf":{"@id":"https://crnivec.si/#website"},"author":{"@id":"https://meteorec.si/#person"},"about":{"@type":"Place","name":"Črnivec (preval)","sameAs":"https://sl.wikipedia.org/wiki/%C4%8Crnivec_(preval)"},"datePublished":"2026-09-20","dateModified":"2026-09-25T17:41:52+02:00"}
+</script>
+<link rel="stylesheet" href="https://meteorec.si/fonts/fonts.css?v=01c90e73">
+<link rel="stylesheet" href="https://meteorec.si/blog/blog.css?v=602ed072">
+<link rel="stylesheet" href="https://meteorec.si/vreme/vreme.css?v=2caede4a">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N2B38HHG"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="https://meteorec.si/">
+      <img class="brand-logo" src="https://meteorec.si/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav">
+      <a href="https://meteorec.si/">Vreme v živo</a>
+      <a href="https://meteorec.si/blog/">Blog</a>
+      <a href="https://meteorec.si/vreme/">Arhiv</a>
+    </nav>
+  </header>
 
-"Kako je čez Črnivec?" je (po Filipovih besedah) eno najpogostejših vprašanj v
-lokalnih FB skupinah — mešanica dveh stvari: (1) odgovori si skoraj vedno
-nasprotujejo/so neuporabni, (2) ljudje raje vprašajo, kot da bi pogledali sami.
-Ta stran to zafrkava, NAMENOMA ločeno od resne /zima/prevoznost-prelazov/
-(ki ostane edina resna referenca — glej cross-link na dnu obeh strani).
-
-Od prenove 24. 9. 2026 je stran HITER MOBILNI DASHBOARD za stanje prelaza
-(prej plakat z merilnikom na vrhu): v prvem zaslonu status ceste (STATUS),
-temperatura, sneg, čas posodobitve in gumb do kamere; nato kamera | poročanje,
-šele potem humor, glasovanje, lestvica in (v accordionih) razlaga indeksa in
-značka. Šaljiva nalepka cone ostane kot "Meteorec indeks: …" pod glavnim
-statusom, nad njim pa merilnik. Stripovski slog (debel obris, zamaknjena
-senca, pikčasto ozadje) namesto temne Meteorec teme; glavo/nogo/spodnji
-meni skrije isti CSS-trik kot igra/igra.css. Brez zunanje pisave: obstoječi samostoječi Inter.
-
-Kazalec na merilniku JE resničen (iz istega passes["crnivec"]["weather"], ki
-ga računa tools/winter_engine.py — isti lapse-rate/snow_fraction kot na
-resni strani) — humor je v NALEPKAH conov in v dnevnem citatu, ne v
-izmišljenih podatkih. Citat dneva je deterministično izbran po datumu (isti
-vzorec kot izbira teme/različice v generate_story_card.py:
-hashlib.sha256(datum|niz)), da je ista cel dan za vse, drug dan pa drugačna.
-
-Živa kamera s prelaza (CAM_URL spodaj) je neposreden hotlink na uradno
-kamero DRSI/promet.si (Direkcija RS za infrastrukturo, Prometno-informacijski
-center) — ista slika, ki jo že leta hotlinkajo hribi.net, svethribov.si in
-podobne strani (preverjeno pred vgradnjo, ni ugibana pot). Vgrajena je
-namenoma neposredno kot <img>, brez Worker proxyja: za prikaz slike (za
-razliko od /varpolje-current) CORS ni ovira, samo za branje njenih pikslov
-prek JS bi bil. Klientski JS jo osveži vsakih 5 minut (isto pravilo kot
-povsod na strani — glej CLAUDE.md, "noben klic pogosteje kot na 5 minut" —
-tu še toliko bolj, ker gre klic na tuj strežnik, ne na naš worker). Attribucija
-vira (promet.si) je obvezna po njihovih pogojih uporabe za razvijalce.
-
-Seznam "Čez Črnivec zdaj" (#crn-check, check_rows spodaj; dodan 25. 9. 2026)
-pod statusom kaže temperaturo, vozišče, sneg, meglo in veter. Temperatura,
-vlaga in veter so IZMERJENI na cestni vremenski postaji DRSI na prelazu
-(postaja 201, prek /crnivec-drsi v worker.js), kadar je meritev sveža; sicer
-vrstica pade na model ali pošteno reče "ni meritve". Vozišče je vedno ocena
-(black_ice_category iz winter_engine.py z izmerjenimi vhodi), ker DRSI
-temperature cestišča ne objavlja. Indeks (pick_zone) seznam NE spreminja.
-
-Poročanje (#crn-report) je bogatejše od dnevnega glasovanja (#crn-vote):
-obiskovalec izbere ISTO cono kot merilnik (ne novo lestvico) + neobvezno
-opombo, javno, brez prijave — /crnivec/porocilo in /crnivec/porocila v
-worker.js, isti R2/feedback vzorec kot /gobe/opazovanje. Šaljive značke
-(CRN_BADGES v worker.js) nagradijo ŠTEVILO oddanih poročil enega anonimnega
-(localStorage) porocevalca — hec, ne resna lestvica; brisanje localStorage
-šteje nazaj na nič in to je v redu.
-
-Piše: crnivec-site/index.html (+ manifest, ikone, robots, sitemap) za crnivec.si
-      in crnivec/index.html (samo preusmeritev na crnivec.si)
-Wired into: .github/workflows/zima-forecast.yml (po generate_zima_page.py —
-potrebuje isti data/winter-data.json)
-
-Usage:
-  python3 tools/generate_crnivec_page.py
-"""
-import datetime
-import hashlib
-import json
-import math
-import os
-import re
-import shutil
-import sys
-import urllib.error
-import urllib.parse
-import urllib.request
-from zoneinfo import ZoneInfo
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import generate_seo_pages as seo  # noqa: E402 — shared template helpers
-from generate_story_card import dry_streak  # noqa: E402 — isti izračun kot na zgodbah, ne podvojen tu
-from crnivec_zones import (  # noqa: E402 — deljeno z generate_story_card.py (tema CRNIVEC)
-    DRSI_ELEV_M, DRSI_MAX_AGE_MIN, ZONES, fetch_drsi_postaje, pick_zone, with_measurement)
-from winter_engine import black_ice_category  # noqa: E402 — ista formula poledice kot na /zima/, ne podvojena
-
-ROOT = seo.ROOT
-DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
-
-# Uradna kamera DRSI na prelazu (glej opombo na vrhu datoteke) — spremeni
-# samo tu, JS jo bere iz istega niza (glej CAM_URL v build_body spodaj).
-CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
-
-# Isti worker, ki streže /crnivec/porocilo, /crnivec/glas ipd. — tudi
-# /crnivec/znacka.svg (vstavljiva značka, glej opombo pri crn-embed spodaj).
-WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
-
-# Od 25. 9. 2026 stran živi na svoji domeni crnivec.si (ločen Cloudflare
-# Worker s statičnimi datotekami, glej wrangler-crnivec.toml). Na meteorec.si
-# ostane samo preusmeritev (OLD_PATH, glej redirect_stub()), da indeksirani
-# URL ne pade v 404 — isto kot stare ARSO objave.
-CRN_SITE = "https://crnivec.si"
-CRN_DIR = "crnivec-site"
-OLD_PATH = "/crnivec/"
-# Te poti so na crnivec.si lastne (manifest, ikone, robots, sitemap) — vse
-# ostale korensko-relativne povezave (glava, noga, CSS, pisave, logotip) kažejo
-# nazaj na meteorec.si, od koder se tudi strežejo (pisave imajo CORS *).
-CRN_LOCAL = {"/manifest.json", "/icon-192.png", "/icon-512.png"}
-
-# ZONES/pick_zone sta v skupnem crnivec_zones.py (uvožena spodaj) — tudi
-# generate_story_card.py (tema CRNIVEC) ju rabi, glej opombo tam o krožnem
-# uvozu.
-
-# Kratke oznake ISTIH con za gumbe poročanja (glej crn-report spodaj) — polni
-# ZONES["label"] (npr. "SPOLZKO, PAZI") je glasen naslov za merilnik, v
-# štirih ozkih gumbih v vrsti pa ne bi bil čitljiv.
-ZONE_SHORT = {"sonce": "Suho", "nekaj": "Nekaj je", "verige": "Verige", "spolzko": "Spolzko"}
-
-# Glavni status na strani (prenova 24. 9. 2026). Šaljiva nalepka cone
-# (ZONES["label"], npr. "SUHO K POPR") je razumljiva le tistemu, ki stran že
-# pozna, zato gre v drugo vrsto kot "Meteorec indeks: …"; naslov kartice mora
-# biti jasen vsakomur. Ista uvrstitev (pick_zone), samo drugačno besedilo --
-# ZONES ostane nespremenjen, ker ga bereta tudi OG kartica in tema zgodbe.
-# bg/ink sta svetla podlaga in temno besedilo v barvi cone: kontrast besedila
-# je ≥ 7:1 na vseh štirih, česar polna barva cone (rumena!) z belim ne doseže.
-STATUS = {
-    "sonce":   {"status": "Cesta je suha",   "desc": "Cesta je normalno prevozna.",
-                "bg": "#dcfce7", "ink": "#14532d"},
-    "nekaj":   {"status": "Pozor",           "desc": "Okoli ničle — ponekod je lahko sneg ali led. Vozi previdno.",
-                "bg": "#fef9c3", "ink": "#713f12"},
-    "verige":  {"status": "Zimske razmere",  "desc": "V naslednjih 24 urah je pričakovan sneg. Brez zimske opreme ne hodi.",
-                "bg": "#ffedd5", "ink": "#7c2d12"},
-    "spolzko": {"status": "Zelo spolzko",    "desc": "Pod ničlo — nevarnost poledice. Vozi zelo previdno.",
-                "bg": "#fee2e2", "ink": "#7f1d1d"},
-}
-
-# Velike stripovske ilustracije za kartici Temperatura/Sneg (samo na namizju,
-# kjer je v desnem stolpcu heroja prostor -- glej .crn-card-art). Isti slog
-# kot ZONE_ICONS: debel črn obris, ploskovite barve. Čisti okras (aria-hidden).
-CARD_ART = {
-    "temp": '''<svg viewBox="0 0 80 120" aria-hidden="true">
-      <rect x="28" y="6" width="24" height="80" rx="12" fill="#fff" stroke="#111" stroke-width="5"/>
-      <circle cx="40" cy="94" r="20" fill="#dc2626" stroke="#111" stroke-width="5"/>
-      <rect x="35" y="40" width="10" height="50" rx="5" fill="#dc2626"/>
-      <g stroke="#111" stroke-width="4" stroke-linecap="round">
-        <line x1="52" y1="24" x2="62" y2="24"/><line x1="52" y1="40" x2="62" y2="40"/>
-        <line x1="52" y1="56" x2="62" y2="56"/><line x1="52" y1="72" x2="62" y2="72"/>
-      </g>
-      <circle cx="33" cy="88" r="5" fill="#fff" opacity=".7"/>
-    </svg>''',
-    "snow": '''<svg viewBox="0 0 120 120" aria-hidden="true">
-      <circle cx="60" cy="60" r="54" fill="#e0f2fe" stroke="#111" stroke-width="5"/>
-      <g stroke="#111" stroke-width="7" stroke-linecap="round">
-        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
-        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
-      </g>
-      <g stroke="#0284c7" stroke-width="4" stroke-linecap="round">
-        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
-        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
-      </g>
-      <g fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M50 26 60 36 70 26"/><path d="M50 94 60 84 70 94"/>
-        <path d="M26 52 38 50 34 38"/><path d="M94 68 82 70 86 82"/>
-        <path d="M26 68 38 70 34 82"/><path d="M94 52 82 50 86 38"/>
-      </g>
-      <circle cx="60" cy="60" r="7" fill="#fff" stroke="#111" stroke-width="4"/>
-    </svg>''',
-}
-
-# Enotne obrisne ikone za UI (24×24, currentColor) -- emoji ostanejo samo v
-# sproščenih, šaljivih delih strani, ne v osnovni ikonografiji.
-UI_ICONS = {
-    "temp": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-            'stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg>',
-    "snow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-            'aria-hidden="true"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5 4.9 17.5M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>',
-    "cam":  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-            'stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3Z"/><circle cx="12" cy="13" r="4"/></svg>',
-}
-
-# Izvirni citati v duhu šale (glej opombo zgoraj) — NISO navedki resničnih
-# objav, ker jih nimamo preverjenih; namenoma zvenijo kot tipičen odgovor v
-# FB skupini. Če imaš prave, jih zamenjaj tu.
-QUOTES = [
-    "Teta pravi, da je suho. Sosed pravi, da je katastrofa. Nekdo se moti.",
-    "Grem pogledat in sporočim. Če se vrnem.",
-    "Odvisno, kdaj vprašaš. In predvsem – koga.",
-    "Kamera kaže sonce. Komentarji pod njo kažejo zimo.",
-    "Ko sem jaz šel čez, je bilo čisto suho. Resda pred dvema letoma.",
-    "Pol skupine pravi, da rabiš zimske. Druga polovica, da ne. Vzemi oboje.",
-    "Vprašaj raje v skupini. Tam imajo vedno tri različne odgovore.",
-    "Nekdo je pravkar vprašal isto. Odgovori so že drugačni kot včeraj.",
-    "Tehnično prevozno. Praktično pa … saj veš, kako je s Črnivcem.",
-    "Indeks pravi eno, dedek drugo. Za zdaj ima dedek boljši rekord.",
-    "Če sprašuješ, ali je prevozno, je odgovor verjetno: previdno.",
-    "Na kameri je videti dobro. Kar je vedno dober začetek.",
-    "Črnivec je prevozen. Vprašanje je samo, za koga.",
-    "Cesta pravi »pojdi«. Vreme pravi »premisli«.",
-    "Snega ni veliko. Ampak tisti, ki je, je očitno dovolj.",
-    "Danes brez težav. Jutri? Vprašaj jutri.",
-    "Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.",
-    "V dolini suho, na vrhu pa … dobrodošel na Črnivcu.",
-    "Črnivec danes: bolj vprašanje kot odgovor.",
-    "Stanje se spreminja. Mnenja še hitreje.",
-    "Ni panike. Razen če je.",
-    "Zaenkrat gre. Slab znak je, da sem dodal »zaenkrat«.",
-    "Lahko greš čez. Ali pa najprej preveriš, kako zelo ti je všeč tvoj avto.",
-    "Po podatkih je v redu. Po pripovedovanju soseda pa nikakor.",
-    "Črnivec: kraj, kjer »samo malo snega« pomeni štiri različne stvari.",
-    "Če greš čez, poročaj. Če ne greš, tudi.",
-    "Včeraj je bilo prevozno. Danes je danes.",
-    "Stanje na cesti: odvisno od tega, kako samozavestno ga gledaš.",
-    "Ni še za paniko. Ampak verige imajo danes lep dan.",
-    "Čez gre. Vprašanje je, ali želiš biti tisti, ki to preveri.",
-]
-
-# Izven dnevnega izbora (glej pick spodaj) in izven navadnega kroga za gumb
-# "Vprašaj še enkrat" — RARE_QUOTE se v rerollu prikaže samo z majhno
-# verjetnostjo (glej crn-reroll v SHARE_JS_TEMPLATE), kot easter egg, ne kot
-# še en enakovreden citat. Ni deterministična po datumu, ker bi sicer
-# "redka" izguba smisel — mora biti presenečenje ob kliku, ne stalnica dneva.
-# "Črnivec pravi …" -- prelaz govori v prvi osebi, VEZANO NA STANJE (za
-# razliko od QUOTES zgoraj, ki so šale iz FB skupine ne glede na vreme).
-# Stanje je cona indeksa (pick_zone) ali "megla", kadar vrstica Megla v
-# seznamu kaže "verjetna" in je cona suho/okoli ničle -- indeks megle ne
-# vidi; ob ledu ali snegu pa ostane stavek o njiju.
-# Izbira: FNV-1a nad "datum|stanje" (samo ASCII), da je isti dan za isto
-# stanje vedno isti stavek; JS kopija je izberiRek() v SHARE_JS_TEMPLATE in
-# mora dati ISTI indeks -- zato ne sha256 (v brskalniku je asinhron).
-CRNIVEC_SAYS = {
-    "sonce": [
-        "Danes me lahko prečkaš brez drame.",
-        "Lahko greš. Jaz danes nisem problem.",
-        "Suh sem kot poper. Pelji lepo.",
-        "Danes sem samo lep ovinek z razgledom.",
-        "Nič posebnega pri meni. Za spremembo.",
-    ],
-    "nekaj": [
-        "Okoli ničle sem. V senci ne bodi preveč pogumen.",
-        "Večinoma sem v redu. Poudarek je na »večinoma«.",
-        "Nekje v senci imam morda presenečenje. Počasi.",
-        "Nisem hud, sem pa muhast. Pelji mirno.",
-        "Mogoče je led, mogoče ni. Ne preverjaj s hitrostjo.",
-    ],
-    "verige": [
-        "Če nimaš zimskih gum, se bova še pogovorila.",
-        "Sneži. Verige imej pri roki, ne v garaži.",
-        "Danes sem bel. Za poletne gume nisem razpoložen.",
-        "Pridi opremljen ali pa pridi jutri.",
-        "Plug ima danes delo, ti pa potrpljenje.",
-    ],
-    "spolzko": [
-        "Pod ničlo sem. Drsim bolje kot ti.",
-        "Danes sem drsališče z razgledom.",
-        "Zavore uporabljaj nežno. Jaz ne odpuščam.",
-        "Ti leda ne vidiš, jaz pa vem, kje je.",
-        "Počasi. Zares počasi.",
-    ],
-    "megla": [
-        "V megli sem. Luči prižgi, hitrost zmanjšaj.",
-        "Danes me ne boš videl, dokler ne boš na meni.",
-        "Oblak je sedel name. Drži se črt.",
-        "Vidim en ovinek naprej. Ti tudi.",
-        "Megla je gosta. Prehitevanje danes ni dobra ideja.",
-    ],
-}
-
-
-def fnv1a(text):
-    h = 0x811C9DC5
-    for ch in text.encode("ascii", "ignore"):
-        h ^= ch
-        h = (h * 0x01000193) & 0xFFFFFFFF
-    return h
-
-
-def says_state(zone_id, rows):
-    # Megla prevlada samo nad mirnima conama -- ob ledu ali snegu je ta
-    # nevarnost večja in stavek naj govori o njej.
-    fog = next((r for r in rows if r["id"] == "fog"), None)
-    if fog and fog["level"] == "stop" and zone_id in ("sonce", "nekaj"):
-        return "megla"
-    return zone_id
-
-
-def crnivec_says(state, date_iso):
-    pool = CRNIVEC_SAYS.get(state) or CRNIVEC_SAYS["nekaj"]
-    return pool[fnv1a(f"{date_iso}|{state}") % len(pool)]
-
-
-RARE_QUOTE = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj."
-
-
-# ── Seznam "Čez Črnivec zdaj" ────────────────────────────────────────────
-# Pet vrstic pod statusom: temperatura, vozišče, sneg, megla, veter. Vsaka
-# ima raven (ok/warn/stop/na), besedilo in VIR ("izmerjeno" / "ocena" /
-# "napoved 24 h") -- izmerjeno s postaje DRSI na prelazu in modelska ocena
-# se ne zlivata v eno število (isto načelo kot padavinska ploščica in
-# vodostaj, glej CLAUDE.md). Meteorec indeks (pick_zone, merilnik) ostane
-# NESPREMENJEN: deli ga z OG kartico, zgodbo in značko v worker.js, zato
-# seznam indeksa ne povozi, samo pove, kadar je kaj slabše, kot kaže.
-#
-# Klientska kopija pravil je v SHARE_JS_TEMPLATE (vrsticeSeznama() in
-# sosednje funkcije) -- namerna podvojitev, isto kot pickZoneLive; če tu
-# spremeniš prag ali besedilo, ga spremeni tudi tam.
-CHECK_LEVEL_WORD = {"ok": "V redu", "warn": "Pozor", "stop": "Nevarno", "na": "Ni podatka"}
-
-
-def num1(x, d=1):
-    return seo.num(x, d) if x is not None else "–"
-
-
-def check_rows(weather, drsi):
-    """Vrstice seznama iz modela (weather = passes["crnivec"]["weather"]) in
-    meritve DRSI (ali None). Vrne seznam slovarjev {id, label, level, value,
-    src}."""
-    now = weather.get("now") or {}
-    rows = []
-
-    t_meas = (drsi or {}).get("temp_c")
-    t = t_meas if t_meas is not None else weather.get("temp_c")
-    if t is None:
-        rows.append({"id": "temp", "label": "Temperatura", "level": "na", "value": "ni podatka", "src": ""})
-    else:
-        # Isti pragovi kot pick_zone (≤ 0 °C spolzko, do 5 °C pozor), da
-        # vrstica in merilnik ne govorita dveh različnih stvari.
-        lvl = "stop" if t <= 0 else "warn" if t <= 5 else "ok"
-        rows.append({"id": "temp", "label": "Temperatura", "level": lvl, "value": f"{num1(t)} °C",
-                     "src": "izmerjeno" if t_meas is not None else "ocena"})
-
-    # Vozišče: vedno OCENA (DRSI temperature cestišča ne objavlja). Kjer je
-    # meritev, gre v formulo poledice izmerjena temperatura/rosišče/veter.
-    bi = None
-    if t is not None:
-        res = black_ice_category(
-            t, now.get("cloud_pct"),
-            (drsi or {}).get("veter_kmh") if (drsi or {}).get("veter_kmh") is not None else now.get("wind_kmh_valley"),
-            (drsi or {}).get("rosisce_c") if (drsi or {}).get("rosisce_c") is not None else now.get("dew_c_valley"),
-            now.get("precip_mm_now"), now.get("precip_mm_prev"))
-        bi = res[0] if res else None
-    rows.append(road_row(bi, now.get("precip_mm_3h"), now.get("snow_cm_3h"), t))
-    rows.append(snow_row(weather.get("expected_snow_cm_24h")))
-    rows.append(fog_row((drsi or {}).get("vlaga_pct")))
-    rows.append(wind_row((drsi or {}).get("veter_kmh"), (drsi or {}).get("sunki_kmh")))
-    return rows
-
-
-def road_row(black_ice, precip_3h, snow_3h, t):
-    r = {"id": "road", "label": "Vozišče", "src": "ocena"}
-    if black_ice is None and precip_3h is None:
-        return {**r, "level": "na", "value": "ni podatka"}
-    if (snow_3h or 0) >= 0.5:
-        return {**r, "level": "stop", "value": "možen sneg na cesti"}
-    if black_ice == "visoko":
-        return {**r, "level": "stop", "value": "nevarnost poledice"}
-    if black_ice == "srednje":
-        return {**r, "level": "warn", "value": "ponekod je lahko led"}
-    if (precip_3h or 0) >= 0.2:
-        return {**r, "level": "warn" if (t is not None and t <= 3) else "ok", "value": "verjetno mokro"}
-    return {**r, "level": "ok", "value": "verjetno suho"}
-
-
-def snow_row(cm):
-    r = {"id": "snow", "label": "Sneg", "src": "napoved 24 h"}
-    if cm is None:
-        return {**r, "level": "na", "value": "ni podatka"}
-    if cm < 0.1:
-        return {**r, "level": "ok", "value": "ni pričakovan"}
-    if cm < 2:
-        return {**r, "level": "warn", "value": f"do {num1(cm)} cm"}
-    return {**r, "level": "stop", "value": f"{num1(cm)} cm"}
-
-
-def fog_row(rh):
-    """Megla iz IZMERJENE relativne vlage na prelazu. Vidljivosti nihče ne
-    meri, modelska (Open-Meteo) pa je za Rečico -- megla na dnu doline ni
-    megla na 902 m, zato brez meritve vrstica pošteno reče "ni meritve"."""
-    r = {"id": "fog", "label": "Megla", "src": "iz izmerjene vlage"}
-    if rh is None:
-        return {**r, "level": "na", "value": "ni meritve", "src": ""}
-    if rh >= 97:
-        return {**r, "level": "stop", "value": f"verjetna ({rh:.0f} % vlage)"}
-    if rh >= 90:
-        return {**r, "level": "warn", "value": f"možna ({rh:.0f} % vlage)"}
-    return {**r, "level": "ok", "value": "ni znakov megle"}
-
-
-def wind_row(speed, gust):
-    """Veter samo iz meritve: modelski veter je za Rečico na dnu doline in za
-    prelaz ne pove ničesar uporabnega."""
-    r = {"id": "wind", "label": "Veter", "src": "izmerjeno"}
-    if speed is None and gust is None:
-        return {**r, "level": "na", "value": "ni meritve", "src": ""}
-    g = gust if gust is not None else speed
-    s = speed if speed is not None else gust
-    word = "šibak" if s < 20 else "zmeren" if s < 40 else "močan" if s < 60 else "zelo močan"
-    if g >= 40 and s < 40:
-        word = "sunkovit"  # šibak povprečen veter ob močnih sunkih ni "šibak"
-    lvl = "stop" if g >= 60 else "warn" if g >= 40 else "ok"
-    txt = f"{word} · {s:.0f} km/h" + (f", sunki {gust:.0f}" if gust is not None else "")
-    return {**r, "level": lvl, "value": txt}
-
-
-# ── "Naslednjih 6 ur" ────────────────────────────────────────────────────
-# Napoved je ista modelska serija kot indeks (Open-Meteo za dolino,
-# preračunana na 902 m -- next_hours v winter_engine.py). Kadar je meritev
-# DRSI, se trenutna razlika meritev-model prenese v napoved in linearno
-# izzveni v 6 urah (NEXT_BIAS_HOURS): sicer bi stran zdaj kazala 11 °C
-# izmerjeno in čez uro 12 °C iz modela, kar je skok, ki ga ni. Klientska
-# kopija: napovedUr()/stavekNapovedi() v SHARE_JS_TEMPLATE.
-NEXT_BIAS_HOURS = 6
-NEXT_SHOW_H = (1, 3, 6)
-LEVEL_RANK = {"na": 0, "ok": 1, "warn": 2, "stop": 3}
-
-
-def temp_level(t):
-    return "na" if t is None else "stop" if t <= 0 else "warn" if t <= 5 else "ok"
-
-
-def precip_text(p, frac):
-    if p is None:
-        return "–"
-    if p < 0.1:
-        return "suho"
-    kind = "sneg" if (frac or 0) >= 0.7 else "dež" if (frac or 0) <= 0.3 else "dež in sneg"
-    return f"{kind} {num1(p)}\u00a0mm"  # nedeljiv presledek: številka in enota ostaneta skupaj
-
-
-def forecast_hours(weather, drsi):
-    """Ure +1..+6 z oceno vozišča; vsaka {h, time, temp, precip_txt,
-    road (vrstica kot road_row), level}."""
-    # temp_cal_c/next_hours so že umerjeni z meritvami DRSI zadnjih dni
-    # (compute_pass_calibration v winter_engine.py), kadar je umeritev.
-    t_model = weather.get("temp_cal_c") if weather.get("temp_cal_c") is not None else weather.get("temp_c")
-    t_meas = (drsi or {}).get("temp_c")
-    bias = (t_meas - t_model) if (t_meas is not None and t_model is not None) else 0.0
-    out = [eval_hour(e, bias) for e in weather.get("next_hours") or []]
-    return out, bias != 0.0
-
-
-def measured_bias(weather, drsi):
-    t_model = weather.get("temp_cal_c") if weather.get("temp_cal_c") is not None else weather.get("temp_c")
-    t_meas = (drsi or {}).get("temp_c")
-    return (t_meas - t_model) if (t_meas is not None and t_model is not None) else 0.0
-
-
-def eval_hour(e, bias):
-    """Ena ura napovedi (vnos iz next_hours/commute_hours) z oceno vozišča.
-    Razlika meritev-model izzveni v NEXT_BIAS_HOURS urah."""
-    t = e.get("temp_c")
-    if t is not None:
-        t = round(t + bias * max(0.0, 1 - e["h"] / NEXT_BIAS_HOURS), 1)
-    res = black_ice_category(t, e.get("cloud_pct"), e.get("wind_kmh_valley"), e.get("dew_c_valley"),
-                             e.get("precip_mm"), e.get("precip_mm_prev")) if t is not None else None
-    road = road_row(res[0] if res else None, e.get("precip_mm_3h"), e.get("snow_cm_3h"), t)
-    tl = temp_level(t)
-    return {"h": e["h"], "time": (e.get("time") or "")[11:16], "date": (e.get("time") or "")[:10], "temp": t,
-            "precip_mm": e.get("precip_mm"), "snow_frac": e.get("snow_frac"),
-            "precip_txt": precip_text(e.get("precip_mm"), e.get("snow_frac")),
-            "road": road, "temp_level": tl,
-            "level": max((tl, road["level"]), key=LEVEL_RANK.get)}
-
-
-# ── "Na poti v službo in domov" ──────────────────────────────────────────
-# Termina 6:00-8:00 in 14:00-16:00 za danes in 3 dni (COMMUTE_HOURS v
-# winter_engine.py). Vsak termin je povzetek svojih ur: najslabša raven,
-# najnižja temperatura, najslabše vozišče in padavine V terminu (ura 6:00
-# nosi padavine od 5 do 6, zato se prva ura termina v vsoto ne šteje).
-# Klientska kopija: oknaVozenj() v SHARE_JS_TEMPLATE.
-COMMUTE_WINDOWS = (("jutro", "6:00–8:00", (6, 7, 8)), ("popoldne", "14:00–16:00", (14, 15, 16)))
-DNI_V_TEDNU = ("ponedeljek", "torek", "sreda", "četrtek", "petek", "sobota", "nedelja")
-
-
-def day_label(date_iso, today):
-    d = datetime.date.fromisoformat(date_iso)
-    delta = (d - today).days
-    if delta == 0:
-        return "Danes"
-    if delta == 1:
-        return "Jutri"
-    return f"{DNI_V_TEDNU[d.weekday()].capitalize()}, {d.day}. {d.month}."
-
-
-def summarize_window(hours):
-    if not hours:
-        return None
-    lvl = max((x["level"] for x in hours), key=LEVEL_RANK.get)
-    temps = [x["temp"] for x in hours if x["temp"] is not None]
-    road = max((x["road"] for x in hours), key=lambda r: LEVEL_RANK[r["level"]])
-    rain_hours = hours[1:] if len(hours) > 1 and hours[0]["time"][:2].lstrip("0") in ("6", "14") else hours
-    p_sum = sum((x["precip_mm"] or 0) for x in rain_hours)
-    wet = [x for x in rain_hours if (x["precip_mm"] or 0) >= 0.1]
-    frac = max((x["snow_frac"] or 0) for x in wet) if wet else 0
-    return {"level": lvl, "tmin": min(temps) if temps else None, "road": road,
-            "precip_txt": precip_text(round(p_sum, 1), frac)}
-
-
-def commute_windows(weather, drsi, today):
-    bias = measured_bias(weather, drsi)
-    hours = [eval_hour(e, bias) for e in weather.get("commute_hours") or []]
-    days = []
-    for date in sorted({x["date"] for x in hours if x["date"]}):
-        wins = []
-        for key, label, hs in COMMUTE_WINDOWS:
-            sel = [x for x in hours if x["date"] == date and int(x["time"][:2]) in hs]
-            wins.append({"key": key, "label": label, "sum": summarize_window(sel)})
-        if any(w["sum"] for w in wins):
-            days.append({"date": date, "label": day_label(date, today), "windows": wins})
-    return days
-
-
-def commute_html(days):
-    if not days:
-        return ""
-    rows = []
-    for d in days:
-        cells = []
-        for w in d["windows"]:
-            sm = w["sum"]
-            if not sm:
-                cells.append(f'<div class="crn-cw crn-cw-past"><p class="crn-cw-h">{w["label"]}</p>'
-                             f'<p class="crn-nh-p">že mimo</p></div>')
-                continue
-            r = sm["road"]
-            cells.append(
-                f'<div class="crn-cw" data-lvl="{sm["level"]}"><p class="crn-cw-h">{w["label"]}</p>'
-                f'<p class="crn-cw-t">{num1(sm["tmin"])} °C</p><p class="crn-nh-p">{sm["precip_txt"]}</p>'
-                f'<p class="crn-nh-road" data-lvl="{r["level"]}"><span class="crn-ck-i" aria-hidden="true"></span>'
-                f'<span><span class="crn-sr">Vozišče: {CHECK_LEVEL_WORD[r["level"]]}, </span>{r["value"]}</span></p></div>')
-        rows.append(f'<div class="crn-cd"><p class="crn-cd-h">{d["label"]}</p>{"".join(cells)}</div>')
-    return "".join(rows)
-
-
-def forecast_sentence(rows_now, hours):
-    """En stavek: bo slabše, bolje ali podobno? Primerja isto merilo kot
-    ure (temperatura + vozišče), ne megle in vetra, ki ju napoved za prelaz
-    nima (model je za dno doline)."""
-    if not hours:
-        return ""
-    now_rank = max((LEVEL_RANK[r["level"]] for r in rows_now if r["id"] in ("temp", "road")), default=0)
-    say = ""
-    # Najhujša ura (prva, ki doseže najvišjo raven), ne prva slabša: sicer
-    # bi stavek omenil "4 °C ob 14:00" in zamolčal led ob 18:00.
-    peak = max(LEVEL_RANK[x["level"]] for x in hours)
-    worse = next((x for x in hours if LEVEL_RANK[x["level"]] == peak), None) if peak > now_rank else None
-    if worse:
-        if LEVEL_RANK[worse["road"]["level"]] >= LEVEL_RANK[worse["temp_level"]] and worse["road"]["level"] != "ok":
-            reason = worse["road"]["value"]
-        else:
-            reason = f"temperatura okoli {num1(worse['temp'])} °C"
-        say = f"Okoli {worse['time']} bo predvidoma slabše kot zdaj: {reason}."
-    elif now_rank and LEVEL_RANK[hours[-1]["level"]] < now_rank:
-        say = "Razmere se bodo predvidoma izboljšale."
-    else:
-        say = "Razmere naj bi ostale podobne."
-    road_now = next((r for r in rows_now if r["id"] == "road"), {})
-    dry_now = road_now.get("value") in ("verjetno suho", "ni podatka")
-    wet = next((x for x in hours if (x["precip_mm"] or 0) >= 0.1), None)
-    if dry_now and wet and not worse:
-        verb = "snežiti" if (wet["snow_frac"] or 0) >= 0.7 else "deževati"
-        say += f" Okoli {wet['time']} lahko začne {verb}."
-    return say
-
-
-def forecast_note(corrected, calib=None):
-    cal = (f" in umerjena z meritvami postaje DRSI zadnjih {calib.get('days')} dni" if calib else "")
-    fix = ", začne pri zadnji meritvi" if corrected else ""
-    return f"Napoved Open-Meteo za dolino, preračunana na 902 m{cal}{fix}. Vozišče je ocena."
-
-
-def forecast_cells_html(hours):
-    cells = []
-    for x in hours:
-        if x["h"] not in NEXT_SHOW_H:
-            continue
-        r = x["road"]
-        cells.append(
-            f'<div class="crn-nh" data-lvl="{x["level"]}">'
-            f'<p class="crn-nh-t">{x["time"]}</p>'
-            f'<p class="crn-nh-temp">{num1(x["temp"])} °C</p>'
-            f'<p class="crn-nh-p">{x["precip_txt"]}</p>'
-            f'<p class="crn-nh-road" data-lvl="{r["level"]}"><span class="crn-ck-i" aria-hidden="true"></span>'
-            f'<span><span class="crn-sr">Vozišče: {CHECK_LEVEL_WORD[r["level"]]}, </span>{r["value"]}</span></p></div>')
-    return "".join(cells)
-
-
-# ── "Posebne razmere" (48 ur) ────────────────────────────────────────────
-# Sneg, poledica in megla -- samo kadar je kaj povedati (sicer ena vrstica).
-# Vir je weather["special"] (compute_pass_special v winter_engine.py) in
-# regionalni data["fog"] (compute_fog). Samo strežniški izris iz jutranjega
-# teka: sneg jutri in jutranja megla se čez dan ne spreminjata dovolj, da bi
-# upravičila še eno JS kopijo pravil -- čas izračuna je izpisan pod blokom.
-FOG_EDGE_M = 100  # ocena meje inverzije je groba; ±100 m okoli 902 m je "na robu"
-
-
-def rel_day(date_iso, today):
-    try:
-        d = datetime.date.fromisoformat(date_iso[:10])
-    except (TypeError, ValueError):
-        return ""
-    delta = (d - today).days
-    return {0: "danes", 1: "jutri", 2: "pojutrišnjem"}.get(delta, f"{d.day}. {d.month}.")
-
-
-def hour_span(hours, today):
-    """"ponoči 00:00–03:00" / "jutri 07:00–09:00" iz seznama ISO ur."""
-    if not hours:
-        return ""
-    first, last = hours[0], hours[-1]
-    day = rel_day(first, today)
-    if day == "jutri" and int(first[11:13]) < 6:
-        day = "ponoči"
-    span = first[11:16] if first == last else f"{first[11:16]}–{last[11:16]}"
-    return f"{day} {span}"
-
-
-def special_items(weather, fog, today):
-    sp = weather.get("special") or {}
-    items = []
-
-    days = sp.get("snow_cm_by_day") or []
-    top_cm = max((d["cm"] for d in days), default=0)
-    if top_cm >= 0.5 or sp.get("snow_start"):
-        lines = [" · ".join(f'{rel_day(d["date"], today).capitalize()}: {num1(d["cm"])} cm' for d in days)]
-        if sp.get("snow_start"):
-            lines.append(f'Začetek: okoli {sp["snow_start"][11:16]} ({rel_day(sp["snow_start"], today)})')
-        if sp.get("snow_level_m"):
-            lines.append(f'Meja sneženja: ~{sp["snow_level_m"]:.0f} m')
-        if sp.get("snow_prob_pct") is not None:
-            lines.append(f'Verjetnost padavin v urah, ko bi snežilo: {sp["snow_prob_pct"]:.0f} %')
-        lvl = "stop" if top_cm >= 2 else "warn"
-        items.append({"id": "snow", "label": "Sneg", "level": lvl,
-                      "value": f"do {num1(top_cm)} cm" if top_cm >= 0.5 else "rahlo sneženje možno",
-                      "lines": lines})
-
-    bi = sp.get("black_ice") or {}
-    if bi.get("risk_level") in ("srednje", "visoko"):
-        lines = []
-        if bi.get("risk_hours"):
-            lines.append(f'Najbolj tvegano: {hour_span(bi["risk_hours"], today)}')
-        if bi.get("ground_temp_c") is not None:
-            lines.append(f'Ocenjena temperatura cestišča do približno {num1(bi["ground_temp_c"])} °C — '
-                         f'cestišče se ob jasnem in mirnem vremenu ohladi pod temperaturo zraka.')
-        lines.append("Najprej na mostovih in v senčnih odsekih.")
-        items.append({"id": "ice", "label": "Poledica",
-                      "level": "stop" if bi["risk_level"] == "visoko" else "warn",
-                      "value": "pogoji so povečani" if bi["risk_level"] == "visoko" else "pogoji so možni",
-                      "lines": lines})
-
-    if fog and fog.get("has_inversion") and fog.get("top_m"):
-        top = fog["top_m"]
-        when = f'{rel_day(fog.get("morning_date") or "", today)} zjutraj'
-        if top < 902 - FOG_EDGE_M:
-            items.append({"id": "fog", "label": "Megla", "level": "ok", "value": "prelaz bo nad njo",
-                          "lines": [f"Če bo {when} v dolini megla, bo segala do ~{top} m — prelaz (902 m) je nad njo."]})
-        elif top <= 902 + FOG_EDGE_M:
-            items.append({"id": "fog", "label": "Megla", "level": "warn", "value": "prelaz je na robu",
-                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m, prelaz je na 902 m — "
-                                    f"lahko je v megli ali tik nad njo."]})
-        else:
-            items.append({"id": "fog", "label": "Megla", "level": "warn", "value": "možna megla ali nizka oblačnost",
-                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m — prelaz (902 m) je pod njo."]})
-    return items
-
-
-def special_html(items):
-    if not items:
-        return ('<p class="crn-sp-none">Posebnih razmer ni: v naslednjih 48 urah na višini prelaza ni '
-                'pričakovati snega, poledice ali megle.</p>')
-    out = []
-    for it in items:
-        lines = "".join(f"<li>{ln}</li>" for ln in it["lines"])
-        out.append(
-            f'<li class="crn-sp" data-lvl="{it["level"]}"><span class="crn-ck-i" aria-hidden="true"></span>'
-            f'<div><p class="crn-sp-h"><b>{it["label"]}</b><span class="crn-sr">: {CHECK_LEVEL_WORD[it["level"]]},</span> '
-            f'· {it["value"]}</p><ul class="crn-sp-lines">{lines}</ul></div></li>')
-    return f'<ul class="crn-sp-list">{"".join(out)}</ul>'
-
-
-# ── "Črnivec proti dolini" ──────────────────────────────────────────────
-# Obe številki sta MERITVI (postaji DRSI na prelazu in v Gornjem Gradu, isti
-# /crnivec-drsi), zato razlika ni konstanta gradienta, ampak pove, kaj se
-# res dogaja: ob inverziji je na prelazu topleje kot v dolini. Klientska
-# kopija: primerjavaDoline() v SHARE_JS_TEMPLATE.
-VALLEY_LAPSE_C_PER_100M = 0.65   # isti standardni gradient kot LAPSE_RATE_C_PER_100M
-VALLEY_BAND_C = 1.5              # ± okoli pričakovane razlike še šteje za "običajno"
-VALLEY_MAX_SKEW_MIN = 30         # meritvi morata biti iz približno istega časa
-
-
-def valley_compare(p, v):
-    if not p or not v or p.get("temp_c") is None or v.get("temp_c") is None:
-        return None
-    try:
-        tp = datetime.datetime.fromisoformat(p["ts"].replace("Z", "+00:00"))
-        tv = datetime.datetime.fromisoformat(v["ts"].replace("Z", "+00:00"))
-        if abs((tp - tv).total_seconds()) / 60 > VALLEY_MAX_SKEW_MIN:
-            return None
-    except (KeyError, TypeError, ValueError, AttributeError):
-        return None
-    dh = DRSI_ELEV_M["crnivec"] - DRSI_ELEV_M["gornji_grad"]
-    diff = round(p["temp_c"] - v["temp_c"], 1)
-    expected = -VALLEY_LAPSE_C_PER_100M * dh / 100
-    if diff >= 0.5:
-        say = "Inverzija: na prelazu je topleje kot v dolini. Hladen zrak leži na dnu."
-    elif diff > expected + VALLEY_BAND_C:
-        say = "Razlika je manjša kot običajno. V dolini se zadržuje hladen zrak."
-    elif diff < expected - VALLEY_BAND_C:
-        say = f"Na prelazu je hladneje, kot bi pričakovali za {dh} m višine."
-    else:
-        say = f"Običajna razlika za {dh} m višine."
-    mins = None
-    if p.get("tmin_c") is not None and v.get("tmin_c") is not None:
-        mins = f'Najnižja danes: Črnivec {num1(p["tmin_c"])} °C · Gornji Grad {num1(v["tmin_c"])} °C'
-    return {"tp": p["temp_c"], "tv": v["temp_c"], "diff": diff, "dh": dh, "say": say, "mins": mins, "ts": p["ts"]}
-
-
-def signed(x):
-    """"+1,2" / "−3,4" s pravim minusom -- predznak je tu bistvo številke."""
-    return ("+" if x > 0 else "−" if x < 0 else "±") + num1(abs(x))
-
-
-def check_note(drsi):
-    """Vrstica pod seznamom: od kod so meritve in kdaj so bile narejene."""
-    if drsi and drsi.get("ts"):
-        try:
-            ts = datetime.datetime.fromisoformat(drsi["ts"].replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/Ljubljana"))
-            return f"Izmerjeno na prelazu ob {ts:%H:%M} · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev."
-        except ValueError:
-            pass
-    return "Meritev s prelaza trenutno ni na voljo — prikazana je ocena modela. Vozišče je ocena, ne meritev."
-
-
-def check_list_html(rows):
-    items = []
-    for r in rows:
-        src = f'<span class="crn-ck-src">{r["src"]}</span>' if r.get("src") else ""
-        items.append(
-            f'<li class="crn-ck" data-lvl="{r["level"]}" data-id="{r["id"]}">'
-            f'<span class="crn-ck-i" aria-hidden="true"></span>'
-            f'<span class="crn-ck-l">{r["label"]}<span class="crn-sr">: {CHECK_LEVEL_WORD[r["level"]]},</span></span>'
-            f'<span class="crn-ck-v">{r["value"]}{src}</span></li>')
-    return "".join(items)
-
-
-def check_warn_text(rows, zone_id):
-    """Indeks gleda samo temperaturo in sneg. Če kakšna druga vrstica kaže
-    nevarno, merilnik pa zeleno/rumeno, to povej izrecno -- sicer bi si
-    status in seznam tiho nasprotovala."""
-    if zone_id not in ("sonce", "nekaj"):
-        return ""
-    # Temperatura šteje samo, kadar je IZMERJENA: modelska je ista kot v
-    # indeksu, izmerjena pa lahko pade pod ničlo, ko model še kaže suho.
-    bad = [r["label"].lower() for r in rows if r["level"] == "stop" and r["id"] != "snow"
-           and (r["id"] != "temp" or r["src"] == "izmerjeno")]
-    if not bad:
-        return ""
-    return "Pozor: na prelazu je slabše, kot kaže indeks — " + ", ".join(bad) + "."
-
-
-def load_json(path, default=None):
-    try:
-        return json.load(open(path, encoding="utf-8"))
-    except Exception:
-        return default
-
-
-HISTORY_JSON_PATH = os.path.join(ROOT, "data", "crnivec-history.json")
-
-# ── "Zime na Črnivcu" -- meritve ARSO ────────────────────────────────────
-# ARSO ima na Črnivcu padavinsko postajo (id 3391, 848 m; seznam postaj
-# arhiva, type=1), ki ob 7h meri višino snežne odeje in novega snega. Arhiv
-# (meteo.arso.gov.si/webmet/archive) zaostaja 3-4 tedne, zato NI vir za
-# trenutno stanje -- samo za zgodovino po sezonah. Postaja meri od 2021.
-# Predpomnilnik v data/crnivec-arso.json: ob izpadu ARSO ostane zadnji.
-# Navedba vira (ARSO) je obvezna (15. člen ZDMHS, isto kot drugod).
-ARSO_STATION_ID = 3391
-ARSO_STATION_ELEV = 848
-ARSO_CACHE_PATH = os.path.join(ROOT, "data", "crnivec-arso.json")
-ARSO_ARCHIVE_URL = "https://meteo.arso.gov.si/webmet/archive/data.xml"
-ARSO_FIRST_DATE = "2020-07-01"
-
-
-def _arso_parse(text):
-    """Arhiv vrača JS objekt v CDATA; ključi točk so minute od 1. 1. 1800,
-    p0/p1/p2 so v vrstnem redu zahtevanih spremenljivk (85, 88, 89)."""
-    import re
-    order = re.search(r'o:\[([^\]]*)\]', text)
-    names = re.findall(r'(p\d):\{ pid:"(\d+)"', text)
-    pid_of = {pk: pid for pk, pid in names}
-    body = text.split("points:{", 1)[1] if "points:{" in text else ""
-    base = datetime.datetime(1800, 1, 1)
-    days = []
-    for key, vals in re.findall(r'_(\d+):\{([^{}]*)\}', body):
-        v = dict(re.findall(r'(p\d):"([^"]*)"', vals))
-        if not v:
-            continue
-        d = (base + datetime.timedelta(minutes=int(key))).date().isoformat()
-
-        def f(pid):
-            for pk, pp in pid_of.items():
-                if pp == pid and v.get(pk) not in (None, ""):
-                    try:
-                        return float(v[pk])
-                    except ValueError:
-                        return None
-            return None
-        days.append([d, f("88"), f("89"), f("85")])
-    if not order:
-        return []
-    return days
-
-
-def update_arso_cache():
-    """Enkrat na dan prenese celoten dnevni arhiv postaje (nekaj deset kB) in
-    ga zapiše v predpomnilnik. Ob napaki vrne zadnji predpomnilnik."""
-    cache = load_json(ARSO_CACHE_PATH, default=None) or {}
-    today = seo.TODAY.isoformat()
-    if cache.get("fetched") == today:
-        return cache
-    try:
-        params = urllib.parse.urlencode({
-            "lang": "si", "vars": "85,88,89", "group": "dailyData0", "type": "daily",
-            "id": ARSO_STATION_ID, "d1": ARSO_FIRST_DATE, "d2": today})
-        req = urllib.request.Request(f"{ARSO_ARCHIVE_URL}?{params}",
-                                     headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-Crnivec/1.0)"})
-        with urllib.request.urlopen(req, timeout=60) as r:
-            days = _arso_parse(r.read().decode("utf-8"))
-        if len(days) < 30:
-            raise ValueError(f"premalo dni ({len(days)})")
-        cache = {"fetched": today, "station": ARSO_STATION_ID, "elevation_m": ARSO_STATION_ELEV,
-                 "fields": ["date", "snow_depth_cm", "new_snow_cm", "precip_mm"], "days": days}
-        with open(ARSO_CACHE_PATH, "w", encoding="utf-8") as fh:
-            json.dump(cache, fh, ensure_ascii=False, separators=(",", ":"))
-            fh.write("\n")
-    except (urllib.error.URLError, TimeoutError, ValueError, OSError, IndexError) as e:
-        print(f"⚠ ARSO arhiv za Črnivec ni dosegljiv ({e}) — ostane predpomnilnik", file=sys.stderr)
-    return cache
-
-
-def arso_seasons(days):
-    """Sezona je od 1. 7. do 30. 6. (zima gre čez novo leto). Vrne seznam
-    sezon od najnovejše: max odeja + datum, dni s snežno odejo, dni z novim
-    snegom, vsota novega snega in delež dni z meritvijo (nepopolna sezona
-    je označena)."""
-    by = {}
-    for d, depth, new, _p in days:
-        y, m = int(d[:4]), int(d[5:7])
-        start = y if m >= 7 else y - 1
-        s = by.setdefault(start, {"max": None, "max_date": None, "cover": 0, "snowfall": 0,
-                                  "new_sum": 0.0, "n": 0, "last": d})
-        s["n"] += 1
-        s["last"] = max(s["last"], d)
-        if depth is not None:
-            if depth > 0:
-                s["cover"] += 1
-            if s["max"] is None or depth > s["max"]:
-                s["max"], s["max_date"] = depth, d
-        if new:
-            s["snowfall"] += 1
-            s["new_sum"] += new
-    out = []
-    for start in sorted(by, reverse=True):
-        s = by[start]
-        out.append({"label": f"{start}/{str(start + 1)[2:]}", **s,
-                    "partial": s["n"] < 330})
-    return out
-
-
-def arso_section_html(cache):
-    days = (cache or {}).get("days") or []
-    # Nepopolna sezona brez snega je tekoča sezona pred zimo (samo poletne
-    # ničle) -- vrstica z ničlami bi bila videti kot "letos ni bilo snega".
-    seasons = [s for s in arso_seasons(days) if s["max"] is not None and not (s["partial"] and not s["max"])]
-    if not seasons:
-        return ""
-    last = max(d[0] for d in days)
-    ld = datetime.date.fromisoformat(last)
-    rows = []
-    for s in seasons:
-        if s["max"]:
-            md = datetime.date.fromisoformat(s["max_date"])
-            mx = f'{s["max"]:.0f} cm <span class="crn-t-sub">({md.day}. {md.month}.)</span>'
-        else:
-            mx = "0 cm"
-        note = ' <span class="crn-t-sub">(delno)</span>' if s["partial"] else ""
-        rows.append(f'<tr><th scope="row">{s["label"]}{note}</th><td>{mx}</td><td>{s["cover"]}</td>'
-                    f'<td>{s["snowfall"]}</td><td>{s["new_sum"]:.0f} cm</td></tr>')
-    return (f'<section class="crn-panel crn-arso" aria-labelledby="crn-arso-h">'
-            f'<h2 class="crn-h2" id="crn-arso-h">Zime na Črnivcu</h2>'
-            f'<p class="crn-lead">Meritve padavinske postaje ARSO Črnivec ({ARSO_STATION_ELEV} m), vsak dan ob 7. uri.</p>'
-            f'<div class="crn-t-wrap"><table class="crn-t"><thead><tr><th scope="col">Zima</th>'
-            f'<th scope="col">Največ snega</th><th scope="col">Dni z odejo</th>'
-            f'<th scope="col">Dni sneženja</th><th scope="col">Novi sneg skupaj</th></tr></thead>'
-            f'<tbody>{"".join(rows)}</tbody></table></div>'
-            f'<p class="crn-check-note">Vir: Agencija RS za okolje (ARSO), arhiv meritev; podatki do '
-            f'{ld.day}. {ld.month}. {ld.year}. Arhiv zaostaja nekaj tednov, zato to ni trenutno stanje. '
-            f'Dni z odejo: dnevi, ko je ob 7. uri na tleh ležal sneg. Dni sneženja: dnevi z novim snegom. '
-            f'»Delno« pomeni, da za del sezone meritev ni.</p></section>')
-
-
-def archive_yesterday_vote():
-    """Enkrat na dan arhivira VČERAJŠNJI (že zaključen) izid dnevnega
-    glasovanja (/crnivec/glas v worker.js) v data/crnivec-history.json --
-    brez tega bi crnivec_glas:<datum> v KV po 400 dneh (glej opombo tam)
-    izginil, ne da bi kdaj postal del dolgoročne statistike na strani (glej
-    accuracy_section_html spodaj). Idempotentno (če je včerajšnji dan že
-    zapisan, ne kliče znova) in tiho odpove ob mrežni napaki ali izpadu
-    workerja -- en manjkajoč dan ne sme podreti generiranja strani."""
-    hist = load_json(HISTORY_JSON_PATH, default=[]) or []
-    yesterday = (seo.TODAY - datetime.timedelta(days=1)).isoformat()
-    if any(e.get("datum") == yesterday for e in hist):
-        return hist
-    try:
-        url = f"{WORKER_BASE}/crnivec/glas?datum={yesterday}"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; Meteorec-Crnivec/1.0)"})
-        with urllib.request.urlopen(req, timeout=10) as r:
-            data = json.loads(r.read().decode("utf-8"))
-        counts = data.get("counts") or {}
-        gre, ne = int(counts.get("gre") or 0), int(counts.get("ne") or 0)
-        if gre + ne == 0:
-            return hist  # nihče ni glasoval -- ni kaj arhivirati, poskusi spet jutri
-        hist.append({"datum": yesterday, "gre": gre, "ne": ne})
-        hist = hist[-365:]
-        with open(HISTORY_JSON_PATH, "w", encoding="utf-8") as f:
-            json.dump(hist, f, ensure_ascii=False, indent=2)
-            f.write("\n")
-    except (urllib.error.URLError, TimeoutError, ValueError, OSError) as e:
-        print(f"⚠ crnivec-history.json ni bil posodobljen: {e}", file=sys.stderr)
-    return hist
-
-
-def accuracy_section_html(history):
-    """Poštenost merilnika, izmerjena z GLASOVANJEM skupnosti (isti vzorec
-    kot samo glasovanje -- ravno razkorak med izračunom in tem, kar
-    pravijo ljudje, je bistvo strani), ne s primerjavo con/poročil: to bi
-    zahtevalo dodatno arhiviranje računanega stanja vsak dan, glasovanje pa
-    že samo neposredno odgovarja na vprašanje "je ocena poštena?"."""
-    n = len(history)
-    if n < 7:
-        note = (f"Šele začenjam zbirati podatke iz glasovanja (imam {n} od 7 dni, "
-                "ki jih rabim za prvo številko) — vrni se čez teden dni.")
-        return (f'<section class="crn-panel crn-accuracy">'
-                f'<h2 class="crn-h2">Kako pošten je indeks?</h2>'
-                f'<p class="crn-accuracy-note">{note}</p></section>')
-    fair_days = sum(1 for e in history if e.get("gre", 0) >= e.get("ne", 0))
-    pct = round(100 * fair_days / n)
-    return (f'<section class="crn-panel crn-accuracy">'
-            f'<h2 class="crn-h2">Kako pošten je indeks?</h2>'
-            f'<p class="crn-accuracy-big">{pct} %</p>'
-            f'<p class="crn-accuracy-note">dni ({fair_days} od {n} zabeleženih), ko je večina '
-            f'glasovalcev rekla, da je bila ocena tistega dne poštena.</p></section>')
-
-
-def needle_angle(zone):
-    return zone["mid"]
-
-
-def arc_point(cx, cy, r, deg):
-    rad = math.radians(deg)
-    return cx + r * math.cos(rad), cy - r * math.sin(rad)
-
-
-def gauge_svg(zone, static=False):
-    """Merilnik "Črnivski indeks". static=True: samostojna različica za
-    "Deli kot sliko" (glej SHARE_JS_TEMPLATE) -- eksplicitna width/height
-    (canvas Image potrebuje znano velikost) in kazalec zapečen kot SVG
-    transform atribut namesto CSS --rot spremenljivke (canvas slika nima
-    dostopa do CSS strani/animacije).
-
-    Na strani stoji na vrhu statusne kartice, nad glavnim statusom (prenova
-    24. 9. 2026: merilnik je bil za en dan odstranjen in vrnjen na Filipovo
-    željo -- je prepoznaven znak strani). Klientski živi preračun v statični
-    kopiji zasuka kazalec z regexom na edinem rotate() -- ne dodajaj drugega
-    transform="rotate(…)" v SVG."""
-    cx, cy, r = 190, 175, 105
-    bounds = [180, 135, 90, 45, 0]
-    sw = 30  # stroke-width loka -- debelejši pas kot prej (26) za bolj čvrst videz
-
-    x1, y1 = arc_point(cx, cy, r, 180)
-    x2, y2 = arc_point(cx, cy, r, 0)
-    arc_path = f'M {x1:.1f} {y1:.1f} A {r} {r} 0 0 1 {x2:.1f} {y2:.1f}'
-    grad_stops = "".join(
-        f'<stop offset="{i / (len(ZONES) - 1) * 100:.0f}%" stop-color="{z["color"]}"/>'
-        for i, z in enumerate(ZONES)
-    )
-    defs = (
-        '<defs>'
-        f'<linearGradient id="crnGrad" x1="0" y1="0" x2="1" y2="0">{grad_stops}</linearGradient>'
-        '<filter id="crnGaugeShadow" x="-30%" y="-30%" width="160%" height="160%">'
-        '<feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000" flood-opacity=".16"/>'
-        '</filter>'
-        '</defs>'
-    )
-    # Tanka svetla ločnica na vsaki notranji meji conov (135°/90°/45°), čez
-    # celo širino pasu -- brez nje bi gladek preliv zabrisal, kje se cona
-    # dejansko konča (glej pick_zone/ZONES bounds).
-    ticks = []
-    for b in bounds[1:-1]:
-        ix1, iy1 = arc_point(cx, cy, r - sw / 2, b)
-        ix2, iy2 = arc_point(cx, cy, r + sw / 2, b)
-        ticks.append(f'<line x1="{ix1:.1f}" y1="{iy1:.1f}" x2="{ix2:.1f}" y2="{iy2:.1f}" '
-                      f'stroke="#fff" stroke-width="2" opacity=".8"/>')
-    arc = (f'<g filter="url(#crnGaugeShadow)">'
-           f'<path d="{arc_path}" fill="none" stroke="url(#crnGrad)" stroke-width="{sw}" '
-           f'stroke-linecap="round"/>{"".join(ticks)}</g>')
-
-    rot = 90 - needle_angle(zone)
-    nx, ny = cx, cy - r * 0.72
-    needle_shape = (f'<line x1="{cx}" y1="{cy}" x2="{nx}" y2="{ny}" stroke="#171717" stroke-width="6" '
-                     f'stroke-linecap="round"/>'
-                     f'<circle cx="{cx}" cy="{cy}" r="14" fill="#171717"/>'
-                     f'<circle cx="{cx}" cy="{cy}" r="14" fill="none" stroke="#fff" stroke-width="3"/>'
-                     f'<circle cx="{cx}" cy="{cy}" r="4.5" fill="#fff"/>')
-    if static:
-        needle = f'<g filter="url(#crnGaugeShadow)" transform="rotate({rot:.1f} {cx} {cy})">{needle_shape}</g>'
-    else:
-        # Brez transform="rotate(...)" atributa -- CSS animacija (crnNeedleSettle)
-        # rotacijo prevzame prek --rot spremenljivke, XML atribut bi jo tiho
-        # prepisal/mešal z njo (SVG CSS transform ima prednost pred atributom).
-        needle = (f'<g class="crn-needle" filter="url(#crnGaugeShadow)" '
-                  f'style="--rot:{rot:.1f}deg;transform-origin:{cx}px {cy}px">{needle_shape}</g>')
-
-    # text-anchor="middle" centrira napis simetrično okoli sidrne točke -- za
-    # skrajni levi/desni coni (mid blizu 180°/0°, torej vodoravno ob loku) to
-    # pomeni, da polovica napisa raste NAZAJ proti loku namesto stran od
-    # njega, zato se je dotikala barvnega pasu. Za ti dve coni napis raste
-    # samo stran od središča (end=levo, start=desno); zgornji dve coni (mid
-    # blizu 90°) sta že dovolj visoko nad lokom in ostaneta na "middle".
-    labels = []
-    for z in ZONES:
-        lx, ly = arc_point(cx, cy, r + 42, z["mid"])
-        anchor = "end" if z["mid"] > 135 else "start" if z["mid"] < 45 else "middle"
-        labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="11" '
-                       f'font-weight="800" fill="#171717">{z["label"]}</text>')
-
-    # xmlns je za inline SVG v HTML odveč (brskalnik ga uvrsti v SVG imenski
-    # prostor sam), a data:image/svg+xml ga bere kot samostojen XML dokument
-    # in ga brez xmlns molče zavrže -- zato je tu vedno.
-    # viewBox je širši od izrisa (-20..410 namesto 0..380): skrajni levi/desni
-    # napis (text-anchor end/start, glej zgoraj) raste samo stran od loka in
-    # pri preozkem viewBoxu se obreže čez rob (izmerjeno z getBBox()).
-    # Na strani (ne static) je viewBox še malo širši: na ozkem telefonu se
-    # pisava merilnika pomanjša in zaokroževanje je skrajni napis
-    # ("SPOLZKO, PAZI") pri 360 px odrezalo.
-    size_attrs = ' width="430" height="230"' if static else ''
-    view_box = "-20 0 430 230" if static else "-34 0 458 230"
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}"{size_attrs} '
-            f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
-            + defs + arc + "".join(labels) + needle + "</svg>")
-
-
-def icon_svg_static(zone_id):
-    """ZONE_ICONS ima viewBox brez width/height/xmlns (velikost pride iz CSS
-    .crn-zicon, xmlns je za inline uporabo odveč) — za canvas Image
-    potrebujemo oboje, isto načelo kot pri gauge_svg(static=True)."""
-    svg = ZONE_ICONS[zone_id].replace('viewBox="0 0 60 60"',
-                                       'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"', 1)
-    return svg
-
-
-ZONE_ICONS = {
-    "sonce": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
-      <g stroke="#111" stroke-width="4" stroke-linecap="round">
-        <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
-        <line x1="2" y1="30" x2="13" y2="30"/><line x1="47" y1="30" x2="58" y2="30"/>
-        <line x1="9" y1="9" x2="17" y2="17"/><line x1="43" y1="43" x2="51" y2="51"/>
-        <line x1="51" y1="9" x2="43" y2="17"/><line x1="17" y1="43" x2="9" y2="51"/>
-      </g>
-      <circle cx="30" cy="30" r="15" fill="#fbbf24" stroke="#111" stroke-width="4"/>
-    </svg>''',
-    "nekaj": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-nekaj" aria-hidden="true">
-      <g fill="#fef3c7" stroke="#111" stroke-width="3.5" stroke-linejoin="round">
-        <circle cx="20" cy="33" r="10"/><circle cx="33" cy="24" r="13"/>
-        <circle cx="45" cy="33" r="9"/><rect x="15" y="30" width="35" height="15" rx="7.5"/>
-      </g>
-      <circle cx="26" cy="35" r="2.2" fill="#111"/><circle cx="40" cy="35" r="2.2" fill="#111"/>
-      <line x1="26" y1="42" x2="38" y2="42" stroke="#111" stroke-width="2.6" stroke-linecap="round"/>
-    </svg>''',
-    "verige": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-verige" aria-hidden="true">
-      <rect x="9" y="18" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
-      <rect x="30" y="12" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
-    </svg>''',
-    "spolzko": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-spolzko" aria-hidden="true">
-      <g stroke="#0284c7" stroke-width="4.5" stroke-linecap="round">
-        <line x1="30" y1="6" x2="30" y2="54"/><line x1="10" y1="17" x2="50" y2="43"/><line x1="10" y1="43" x2="50" y2="17"/>
-        <path d="M30 6 l-5 6 M30 6 l5 6 M30 54 l-5 -6 M30 54 l5 -6"/>
-        <path d="M10 17 l7.5 1 M10 17 l3 6.5 M50 43 l-7.5 -1 M50 43 l-3 -6.5"/>
-        <path d="M10 43 l3 -6.5 M10 43 l7.5 -1 M50 17 l-3 6.5 M50 17 l-7.5 1"/>
-      </g>
-    </svg>''',
-}
-
-
-CSS = '''
 <style>
   /* Prenova 24. 9. 2026: stran je hiter mobilni DASHBOARD za stanje prelaza,
      oblečen v prvotni stripovski slog (debel črn obris, zamaknjena senca,
@@ -1495,18 +471,325 @@ CSS = '''
     .crn-status,.crn-btn,.crn-vote-bar span{transition:none}
   }
 </style>
-'''
 
+  <div class="crn">
+    <div class="crn-top">
+      <a class="crn-brand" href="https://meteorec.si/">Meteorec</a>
+      <div class="crn-install-wrap">
+        <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
+        <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      </div>
+    </div>
 
-SHARE_JS_TEMPLATE = '''
+    <section class="crn-hero" aria-labelledby="crn-h1">
+      <div class="crn-head">
+        <svg viewBox="0 0 200 180" class="crn-icon" id="crn-mascot" role="button"
+       tabindex="0" aria-label="Gorska maskota — klikni za presenečenje">
+    <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
+          fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(38,150) rotate(-8)">
+      <path d="M0 -20 L18 14 L-18 14 Z" fill="#fef08a" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
+      <text x="0" y="10" text-anchor="middle" font-size="16" font-weight="800" fill="#111">!</text>
+    </g>
+  </svg>
+        <div class="crn-head-txt">
+          <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
+          <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
+          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
+        </div>
+      </div>
+
+      <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
+
+      <div class="crn-hero-main">
+      <div class="crn-status" id="crn-status" data-zone="sonce"
+        style="--zc:#16a34a;--zbg:#dcfce7;--zink:#14532d" role="status" aria-live="polite">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-34 0 458 230" class="crn-gauge" role="img" aria-label="Črnivski indeks: SUHO K POPR"><defs><linearGradient id="crnGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#16a34a"/><stop offset="33%" stop-color="#eab308"/><stop offset="67%" stop-color="#ea580c"/><stop offset="100%" stop-color="#dc2626"/></linearGradient><filter id="crnGaugeShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#000" flood-opacity=".16"/></filter></defs><g filter="url(#crnGaugeShadow)"><path d="M 85.0 175.0 A 105 105 0 0 1 295.0 175.0" fill="none" stroke="url(#crnGrad)" stroke-width="30" stroke-linecap="round"/><line x1="126.4" y1="111.4" x2="105.1" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="190.0" y1="85.0" x2="190.0" y2="55.0" stroke="#fff" stroke-width="2" opacity=".8"/><line x1="253.6" y1="111.4" x2="274.9" y2="90.1" stroke="#fff" stroke-width="2" opacity=".8"/></g><text x="54.2" y="118.7" text-anchor="end" font-size="11" font-weight="800" fill="#171717">SUHO K POPR</text><text x="133.7" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">TAK-TAK</text><text x="246.3" y="39.2" text-anchor="middle" font-size="11" font-weight="800" fill="#171717">VZEMI VERIGE</text><text x="325.8" y="118.7" text-anchor="start" font-size="11" font-weight="800" fill="#171717">SPOLZKO, PAZI</text><g class="crn-needle" filter="url(#crnGaugeShadow)" style="--rot:-67.5deg;transform-origin:190px 175px"><line x1="190" y1="175" x2="190" y2="99.4" stroke="#171717" stroke-width="6" stroke-linecap="round"/><circle cx="190" cy="175" r="14" fill="#171717"/><circle cx="190" cy="175" r="14" fill="none" stroke="#fff" stroke-width="3"/><circle cx="190" cy="175" r="4.5" fill="#fff"/></g></svg>
+        <div class="crn-status-icon" id="crn-status-icon"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
+      <g stroke="#111" stroke-width="4" stroke-linecap="round">
+        <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
+        <line x1="2" y1="30" x2="13" y2="30"/><line x1="47" y1="30" x2="58" y2="30"/>
+        <line x1="9" y1="9" x2="17" y2="17"/><line x1="43" y1="43" x2="51" y2="51"/>
+        <line x1="51" y1="9" x2="43" y2="17"/><line x1="17" y1="43" x2="9" y2="51"/>
+      </g>
+      <circle cx="30" cy="30" r="15" fill="#fbbf24" stroke="#111" stroke-width="4"/>
+    </svg></div>
+        <p class="crn-status-title" id="crn-status-title">Cesta je suha</p>
+        <p class="crn-status-desc" id="crn-status-desc">Cesta je normalno prevozna.</p>
+        <p class="crn-says" id="crn-says"><span class="crn-says-h">Črnivec pravi:</span>
+          <span id="crn-says-txt">Danes sem samo lep ovinek z razgledom.</span></p>
+        <div class="crn-now" aria-labelledby="crn-now-h">
+          <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
+          <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">12,5 °C<span class="crn-ck-src">izmerjeno</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan<span class="crn-ck-src">napoved 24 h</span></span></li><li class="crn-ck" data-lvl="ok" data-id="fog"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Megla<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni znakov megle<span class="crn-ck-src">iz izmerjene vlage</span></span></li><li class="crn-ck" data-lvl="ok" data-id="wind"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Veter<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">šibak · 2 km/h, sunki 5<span class="crn-ck-src">izmerjeno</span></span></li></ul>
+          <p class="crn-check-warn" id="crn-check-warn" hidden></p>
+          <p class="crn-check-note" id="crn-check-note">Izmerjeno na prelazu ob 17:37 · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev.</p>
+          <div class="crn-trend" id="crn-trend" hidden>
+            <p class="crn-now-h" id="crn-trend-h">V zadnjih 60 minutah</p>
+            <p class="crn-trend-say" id="crn-trend-say"></p>
+            <ul class="crn-trend-list" id="crn-trend-list"></ul>
+          </div>
+        </div>
+        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:58:56.073066+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:58 · temperatura izmerjena (DRSI), sneg iz modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:58:56.073066+00:00" hidden></p>
+        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
+      </div>
+
+      <section class="crn-panel crn-cam" id="kamera" aria-labelledby="crn-cam-h">
+        <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
+        <div class="crn-cam-frame is-loading">
+          <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
+          <img id="crn-cam-img" src="https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
+          <span class="crn-cam-badge" aria-hidden="true"><i></i>V živo</span>
+          <span class="crn-cam-place" aria-hidden="true">Črnivec · 902 m</span>
+          <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
+          <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej na promet.si</a></p>
+        </div>
+        <p class="crn-cam-time" id="crn-cam-time" hidden></p>
+        <p class="crn-cam-meta">Poglej trenutno stanje prelaza. Vir: <a href="https://www.promet.si" target="_blank"
+        rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
+      </section>
+
+      <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h">
+        <p class="crn-now-h" id="crn-next-h">Naslednjih 6 ur</p>
+        <p class="crn-next-say" id="crn-next-say">Razmere naj bi ostale podobne.</p>
+        <div class="crn-next-grid" id="crn-next-grid"><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">13:00</p><p class="crn-nh-temp">12,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">15:00</p><p class="crn-nh-temp">13,1 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">18:00</p><p class="crn-nh-temp">10,9 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div>
+        <p class="crn-check-note" id="crn-next-note">Napoved Open-Meteo za dolino, preračunana na 902 m in umerjena z meritvami postaje DRSI zadnjih 10 dni, začne pri zadnji meritvi. Vozišče je ocena.</p>
+      </section>
+
+      <section class="crn-commute" id="crn-commute" aria-labelledby="crn-commute-h">
+        <p class="crn-now-h" id="crn-commute-h">Na poti v službo in domov</p>
+        <p class="crn-lead crn-commute-lead">Najnižja temperatura, padavine in vozišče na prelazu v jutranjem in popoldanskem terminu.</p>
+        <div class="crn-commute-grid" id="crn-commute-grid"><div class="crn-cd"><p class="crn-cd-h">Danes</p><div class="crn-cw crn-cw-past"><p class="crn-cw-h">6:00–8:00</p><p class="crn-nh-p">že mimo</p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">12,8 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Jutri</p><div class="crn-cw" data-lvl="warn"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">4,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">14,3 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Nedelja, 27. 9.</p><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">6,4 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">14,4 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Ponedeljek, 28. 9.</p><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">10,1 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">14,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div></div>
+        <p class="crn-check-note">Napoved Open-Meteo, preračunana na 902 m in umerjena z meritvami DRSI. Dlje v prihodnost je manj zanesljiva. Vozišče je ocena.</p>
+      </section>
+
+      <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
+        <p class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</p>
+        <ul class="crn-sp-list"><li class="crn-sp" data-lvl="warn"><span class="crn-ck-i" aria-hidden="true"></span><div><p class="crn-sp-h"><b>Megla</b><span class="crn-sr">: Pozor,</span> · prelaz je na robu</p><ul class="crn-sp-lines"><li>Ocenjena zgornja meja megle jutri zjutraj je ~870 m, prelaz je na 902 m — lahko je v megli ali tik nad njo.</li></ul></div></li></ul>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 12:58 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
+      </section>
+
+      <div class="crn-hero-side">
+      <div class="crn-cards">
+        <div class="crn-card">
+          <span class="crn-card-art"><svg viewBox="0 0 80 120" aria-hidden="true">
+      <rect x="28" y="6" width="24" height="80" rx="12" fill="#fff" stroke="#111" stroke-width="5"/>
+      <circle cx="40" cy="94" r="20" fill="#dc2626" stroke="#111" stroke-width="5"/>
+      <rect x="35" y="40" width="10" height="50" rx="5" fill="#dc2626"/>
+      <g stroke="#111" stroke-width="4" stroke-linecap="round">
+        <line x1="52" y1="24" x2="62" y2="24"/><line x1="52" y1="40" x2="62" y2="40"/>
+        <line x1="52" y1="56" x2="62" y2="56"/><line x1="52" y1="72" x2="62" y2="72"/>
+      </g>
+      <circle cx="33" cy="88" r="5" fill="#fff" opacity=".7"/>
+    </svg></span>
+          <p class="crn-card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg>Temperatura</p>
+          <p class="crn-big" id="crn-temp-val">12,5 °C</p>
+          <p class="crn-card-sub" id="crn-temp-src">izmerjeno na prelazu ob 17:37 (DRSI)</p>
+        </div>
+        <div class="crn-card">
+          <span class="crn-card-art"><svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="54" fill="#e0f2fe" stroke="#111" stroke-width="5"/>
+      <g stroke="#111" stroke-width="7" stroke-linecap="round">
+        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
+        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
+      </g>
+      <g stroke="#0284c7" stroke-width="4" stroke-linecap="round">
+        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
+        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
+      </g>
+      <g fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M50 26 60 36 70 26"/><path d="M50 94 60 84 70 94"/>
+        <path d="M26 52 38 50 34 38"/><path d="M94 68 82 70 86 82"/>
+        <path d="M26 68 38 70 34 82"/><path d="M94 52 82 50 86 38"/>
+      </g>
+      <circle cx="60" cy="60" r="7" fill="#fff" stroke="#111" stroke-width="4"/>
+    </svg></span>
+          <p class="crn-card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5 4.9 17.5M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>Snežna odeja</p>
+          <p class="crn-big">0 cm</p>
+          <p class="crn-card-sub">ocena modela, ~900 m</p>
+          <p class="crn-card-h crn-card-h2">Nov sneg · napoved 24 h</p>
+          <p class="crn-mid" id="crn-snow-new">+0,0 cm</p>
+          <p class="crn-card-sub">padavine <b id="crn-precip">0,0 mm</b></p>
+        </div>
+      </div>
+
+      <section class="crn-duel" id="crn-duel" aria-labelledby="crn-duel-h">
+        <p class="crn-now-h" id="crn-duel-h">Črnivec proti dolini</p>
+        <div class="crn-duel-grid">
+          <div class="crn-duel-rows">
+            <p class="crn-duel-row"><span>Črnivec · 903 m</span><b id="crn-duel-p">12,5 °C</b></p>
+            <p class="crn-duel-row"><span>Gornji Grad · 428 m</span><b id="crn-duel-v">15,9 °C</b></p>
+          </div>
+          <p class="crn-duel-diff" id="crn-duel-diff">−3,4 °C</p>
+        </div>
+        <p class="crn-duel-say" id="crn-duel-say">Običajna razlika za 475 m višine.</p>
+        <p class="crn-check-note" id="crn-duel-min">Najnižja danes: Črnivec 4,2 °C · Gornji Grad 5,2 °C</p>
+        <p class="crn-check-note" id="crn-duel-note">Obe številki sta meritvi postaj DRSI ob 17:37.</p>
+      </section>
+
+      </div>
+      </div>
+    </section>
+
+    <div class="crn-cols">
+      <div class="crn-col">
+      <section class="crn-tip crn-o3" aria-labelledby="crn-tip-h">
+        <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
+        <div class="crn-quote"><p>Ni še za paniko. Ampak verige imajo danes lep dan.</p></div>
+        <p id="crn-visits" class="crn-visits" hidden></p>
+        <div class="crn-actions">
+          <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
+          <button type="button" id="crn-listen" class="crn-btn" hidden>Poslušaj</button>
+          <button type="button" id="crn-share" class="crn-btn" hidden>Deli kot sliko</button>
+        </div>
+        <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+      </section>
+
+      <section class="crn-panel crn-vote crn-o4" id="crn-vote" hidden>
+        <div class="crn-vote-row">
+          <p class="crn-vote-q">Se ti zdi trenutna ocena pravilna?</p>
+          <div class="crn-vote-btns">
+            <button type="button" id="crn-vote-gre" class="crn-btn">👍 Gre</button>
+            <button type="button" id="crn-vote-ne" class="crn-btn">👎 Ne gre</button>
+          </div>
+        </div>
+        <div class="crn-vote-result" id="crn-vote-result" hidden>
+          <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
+          <p class="crn-vote-count" id="crn-vote-count"></p>
+        </div>
+      </section>
+      </div>
+
+      <div class="crn-col">
+
+      <section class="crn-panel crn-report crn-o2" id="crn-report" aria-labelledby="crn-rep-h" hidden>
+        <h2 class="crn-h2" id="crn-rep-h">Kako je bilo tebi?</h2>
+        <p class="crn-lead">Povej naslednjemu vozniku.</p>
+        <div class="crn-zones" id="crn-report-zones">
+          <button type="button" class="crn-zbtn" data-zona="sonce" style="--zc:#16a34a;--zbg:#dcfce7"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sonce" aria-hidden="true">
+      <g stroke="#111" stroke-width="4" stroke-linecap="round">
+        <line x1="30" y1="2" x2="30" y2="13"/><line x1="30" y1="47" x2="30" y2="58"/>
+        <line x1="2" y1="30" x2="13" y2="30"/><line x1="47" y1="30" x2="58" y2="30"/>
+        <line x1="9" y1="9" x2="17" y2="17"/><line x1="43" y1="43" x2="51" y2="51"/>
+        <line x1="51" y1="9" x2="43" y2="17"/><line x1="17" y1="43" x2="9" y2="51"/>
+      </g>
+      <circle cx="30" cy="30" r="15" fill="#fbbf24" stroke="#111" stroke-width="4"/>
+    </svg><span>Suho</span></button><button type="button" class="crn-zbtn" data-zona="nekaj" style="--zc:#eab308;--zbg:#fef9c3"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-nekaj" aria-hidden="true">
+      <g fill="#fef3c7" stroke="#111" stroke-width="3.5" stroke-linejoin="round">
+        <circle cx="20" cy="33" r="10"/><circle cx="33" cy="24" r="13"/>
+        <circle cx="45" cy="33" r="9"/><rect x="15" y="30" width="35" height="15" rx="7.5"/>
+      </g>
+      <circle cx="26" cy="35" r="2.2" fill="#111"/><circle cx="40" cy="35" r="2.2" fill="#111"/>
+      <line x1="26" y1="42" x2="38" y2="42" stroke="#111" stroke-width="2.6" stroke-linecap="round"/>
+    </svg><span>Nekaj je</span></button><button type="button" class="crn-zbtn" data-zona="verige" style="--zc:#ea580c;--zbg:#ffedd5"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-verige" aria-hidden="true">
+      <rect x="9" y="18" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
+      <rect x="30" y="12" width="21" height="31" rx="10.5" fill="none" stroke="#111" stroke-width="6"/>
+    </svg><span>Verige</span></button><button type="button" class="crn-zbtn" data-zona="spolzko" style="--zc:#dc2626;--zbg:#fee2e2"><svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-spolzko" aria-hidden="true">
+      <g stroke="#0284c7" stroke-width="4.5" stroke-linecap="round">
+        <line x1="30" y1="6" x2="30" y2="54"/><line x1="10" y1="17" x2="50" y2="43"/><line x1="10" y1="43" x2="50" y2="17"/>
+        <path d="M30 6 l-5 6 M30 6 l5 6 M30 54 l-5 -6 M30 54 l5 -6"/>
+        <path d="M10 17 l7.5 1 M10 17 l3 6.5 M50 43 l-7.5 -1 M50 43 l-3 -6.5"/>
+        <path d="M10 43 l3 -6.5 M10 43 l7.5 -1 M50 17 l-3 6.5 M50 17 l-7.5 1"/>
+      </g>
+    </svg><span>Spolzko</span></button>
+        </div>
+        <div id="crn-report-form" class="crn-form" hidden>
+          <textarea id="crn-report-note" class="crn-input" maxlength="140"
+            placeholder="Neobvezna opomba (npr. »samo do polovice«) …" aria-label="Opomba"></textarea>
+          <input type="text" id="crn-report-ime" class="crn-input" maxlength="24"
+            placeholder="Vzdevek za lestvico (neobvezno)" aria-label="Vzdevek">
+          <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
+            style="position:absolute;left:-9999px" aria-hidden="true">
+          <button type="button" id="crn-report-submit" class="crn-btn">Pošlji poročilo</button>
+        </div>
+        <p id="crn-report-status" class="crn-status-msg" role="status" aria-live="polite" hidden></p>
+        <div id="crn-report-badge" class="crn-badge" hidden></div>
+
+        <h3 class="crn-h3">Zadnja poročila</h3>
+        <ul id="crn-report-feed" class="crn-feed" aria-live="polite">
+          <li class="crn-feed-item" aria-hidden="true"><span class="crn-skel" style="width:40%"></span></li>
+          <li class="crn-feed-item" aria-hidden="true"><span class="crn-skel" style="width:55%"></span></li>
+        </ul>
+        <p id="crn-report-week" class="crn-week" hidden></p>
+      </section>
+      <div class="crn-o5"><section class="crn-panel crn-accuracy"><h2 class="crn-h2">Kako pošten je indeks?</h2><p class="crn-accuracy-note">Šele začenjam zbirati podatke iz glasovanja (imam 2 od 7 dni, ki jih rabim za prvo številko) — vrni se čez teden dni.</p></section></div>
+      <div class="crn-o5"><section class="crn-panel crn-arso" aria-labelledby="crn-arso-h"><h2 class="crn-h2" id="crn-arso-h">Zime na Črnivcu</h2><p class="crn-lead">Meritve padavinske postaje ARSO Črnivec (848 m), vsak dan ob 7. uri.</p><div class="crn-t-wrap"><table class="crn-t"><thead><tr><th scope="col">Zima</th><th scope="col">Največ snega</th><th scope="col">Dni z odejo</th><th scope="col">Dni sneženja</th><th scope="col">Novi sneg skupaj</th></tr></thead><tbody><tr><th scope="row">2025/26</th><td>19 cm <span class="crn-t-sub">(7. 1.)</span></td><td>32</td><td>13</td><td>86 cm</td></tr><tr><th scope="row">2024/25</th><td>25 cm <span class="crn-t-sub">(14. 2.)</span></td><td>27</td><td>11</td><td>97 cm</td></tr><tr><th scope="row">2023/24</th><td>23 cm <span class="crn-t-sub">(20. 1.)</span></td><td>22</td><td>12</td><td>79 cm</td></tr><tr><th scope="row">2022/23</th><td>65 cm <span class="crn-t-sub">(24. 1.)</span></td><td>57</td><td>26</td><td>175 cm</td></tr><tr><th scope="row">2021/22</th><td>25 cm <span class="crn-t-sub">(29. 11.)</span></td><td>30</td><td>16</td><td>102 cm</td></tr><tr><th scope="row">2020/21 <span class="crn-t-sub">(delno)</span></th><td>7 cm <span class="crn-t-sub">(7. 4.)</span></td><td>4</td><td>3</td><td>11 cm</td></tr></tbody></table></div><p class="crn-check-note">Vir: Agencija RS za okolje (ARSO), arhiv meritev; podatki do 31. 8. 2026. Arhiv zaostaja nekaj tednov, zato to ni trenutno stanje. Dni z odejo: dnevi, ko je ob 7. uri na tleh ležal sneg. Dni sneženja: dnevi z novim snegom. »Delno« pomeni, da za del sezone meritev ni.</p></section></div>
+
+      <section class="crn-panel crn-board crn-o6" id="crn-board" aria-labelledby="crn-board-h" hidden>
+        <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
+        <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
+      </section>
+
+      <div class="crn-stack crn-o7">
+        <details class="crn-acc">
+          <summary>ⓘ Kako nastane Meteorec indeks?</summary>
+          <div class="crn-acc-body">
+            <p>Indeks ni meritev stanja ceste. Temperaturo na vrhu vzame s cestne vremenske postaje
+            Direkcije RS za infrastrukturo (DRSI) na prelazu, kadar je meritev mlajša od 40 minut; sicer jo
+            izračuna iz napovedi Open-Meteo za dolino in višinske razlike do prelaza (902 m). Koliko snega
+            lahko pade v naslednjih 24 urah, je vedno napoved — isti izračun kot na
+            <a href="https://meteorec.si/zima/prevoznost-prelazov/">MeteoZima: prevoznost prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
+            spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
+            za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
+            <p>Seznam »Čez Črnivec zdaj« je ločen od indeksa. Temperatura, veter in vlaga so, kadar so na
+            voljo, <strong>izmerjeni</strong> na cestni vremenski postaji Direkcije RS za infrastrukturo
+            (DRSI) na prelazu; vir je pri vsaki vrstici. Megla je ocenjena iz izmerjene vlage, saj vidljivosti
+            tam nihče ne meri. Vozišče je vedno <strong>ocena</strong>: iz padavin zadnjih treh ur in
+            temperature ocenimo, ali je cesta mokra ali bi lahko bila poledenela. Temperature cestišča
+            DRSI ne objavlja.</p>
+            <p>»Naslednjih 6 ur« je napoved Open-Meteo za dolino, preračunana na višino prelaza. Kadar je
+            meritev s prelaza na voljo, napoved začne pri izmerjeni temperaturi in se v šestih urah postopoma
+            vrne k modelu. Stavek nad urami primerja temperaturo in oceno vozišča z najhujšo uro v tem času.</p>
+            <p>Napoved za prelaz vsak dan umerimo z meritvami postaje DRSI zadnjih 10 dni. Preračun iz doline ne
+            vidi nočne inverzije: hladen zrak se ponoči nabira na dnu doline, prelaz pa je nad njim. Brez
+            popravka je bil model ponoči za okoli 3 °C prehladen in je napovedoval poledico, ko je bilo na
+            prelazu 5 °C.</p>
+            <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
+            indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
+            Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
+          </div>
+        </details>
+
+        <details class="crn-acc crn-embed">
+          <summary>Vstavi značko na svojo stran</summary>
+          <div class="crn-acc-body">
+            <img class="crn-embed-preview" src="https://weatherireica1.filip-eremita.workers.dev/crnivec/znacka.svg"
+              alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
+            <div class="crn-embed-row">
+              <code id="crn-embed-code" class="crn-embed-code">&lt;a href="https://crnivec.si/"&gt;&lt;img src="https://weatherireica1.filip-eremita.workers.dev/crnivec/znacka.svg" alt="Kako je čez Črnivec? – indeks"&gt;&lt;/a&gt;</code>
+              <button type="button" id="crn-embed-copy" class="crn-btn">Kopiraj</button>
+            </div>
+            <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
+            <p class="crn-share-status">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
+          </div>
+        </details>
+      </div>
+      </div>
+    </div>
+
+    <footer class="crn-official">
+      <p><strong>Meteorec indeks je neuradna informacija.</strong> Za uradno stanje cest glej
+      <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
+      (Prometno-informacijski center), AMZS ali DARS.</p>
+      <p>Podrobnejša vremenska ocena za vse prelaze: <a href="https://meteorec.si/zima/prevoznost-prelazov/">MeteoZima:
+      prevoznost prelazov</a>.</p>
+      <a class="crn-btn crn-back" href="https://meteorec.si/">← Nazaj na meteorec.si</a>
+    </footer>
+  </div>
+
 <script>
 (function(){
   "use strict";
-  var quotes = __QUOTES_JSON__;
-  var rareQuote = __RARE_QUOTE_JSON__;
-  var share = __SHARE_JSON__;
+  var quotes = ["Teta pravi, da je suho. Sosed pravi, da je katastrofa. Nekdo se moti.", "Grem pogledat in sporočim. Če se vrnem.", "Odvisno, kdaj vprašaš. In predvsem – koga.", "Kamera kaže sonce. Komentarji pod njo kažejo zimo.", "Ko sem jaz šel čez, je bilo čisto suho. Resda pred dvema letoma.", "Pol skupine pravi, da rabiš zimske. Druga polovica, da ne. Vzemi oboje.", "Vprašaj raje v skupini. Tam imajo vedno tri različne odgovore.", "Nekdo je pravkar vprašal isto. Odgovori so že drugačni kot včeraj.", "Tehnično prevozno. Praktično pa … saj veš, kako je s Črnivcem.", "Indeks pravi eno, dedek drugo. Za zdaj ima dedek boljši rekord.", "Če sprašuješ, ali je prevozno, je odgovor verjetno: previdno.", "Na kameri je videti dobro. Kar je vedno dober začetek.", "Črnivec je prevozen. Vprašanje je samo, za koga.", "Cesta pravi »pojdi«. Vreme pravi »premisli«.", "Snega ni veliko. Ampak tisti, ki je, je očitno dovolj.", "Danes brez težav. Jutri? Vprašaj jutri.", "Če imaš zimske gume, si optimist. Če imaš verige, si pripravljen.", "V dolini suho, na vrhu pa … dobrodošel na Črnivcu.", "Črnivec danes: bolj vprašanje kot odgovor.", "Stanje se spreminja. Mnenja še hitreje.", "Ni panike. Razen če je.", "Zaenkrat gre. Slab znak je, da sem dodal »zaenkrat«.", "Lahko greš čez. Ali pa najprej preveriš, kako zelo ti je všeč tvoj avto.", "Po podatkih je v redu. Po pripovedovanju soseda pa nikakor.", "Črnivec: kraj, kjer »samo malo snega« pomeni štiri različne stvari.", "Če greš čez, poročaj. Če ne greš, tudi.", "Včeraj je bilo prevozno. Danes je danes.", "Stanje na cesti: odvisno od tega, kako samozavestno ga gledaš.", "Ni še za paniko. Ampak verige imajo danes lep dan.", "Čez gre. Vprašanje je, ali želiš biti tisti, ki to preveri."];
+  var rareQuote = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj.";
+  var share = {"verdict": "SUHO K POPR", "color": "#16a34a", "quote": "Ni še za paniko. Ampak verige imajo danes lep dan.", "temp": "12,5 °C", "snow": "0,0 cm snega v 24 h", "streak": "suh niz v dolini: 0 dni", "gauge": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"-20 0 430 230\" width=\"430\" height=\"230\" class=\"crn-gauge\" role=\"img\" aria-label=\"Črnivski indeks: SUHO K POPR\"><defs><linearGradient id=\"crnGrad\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0%\" stop-color=\"#16a34a\"/><stop offset=\"33%\" stop-color=\"#eab308\"/><stop offset=\"67%\" stop-color=\"#ea580c\"/><stop offset=\"100%\" stop-color=\"#dc2626\"/><\/linearGradient><filter id=\"crnGaugeShadow\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"><feDropShadow dx=\"0\" dy=\"3\" stdDeviation=\"3.5\" flood-color=\"#000\" flood-opacity=\".16\"/><\/filter><\/defs><g filter=\"url(#crnGaugeShadow)\"><path d=\"M 85.0 175.0 A 105 105 0 0 1 295.0 175.0\" fill=\"none\" stroke=\"url(#crnGrad)\" stroke-width=\"30\" stroke-linecap=\"round\"/><line x1=\"126.4\" y1=\"111.4\" x2=\"105.1\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"190.0\" y1=\"85.0\" x2=\"190.0\" y2=\"55.0\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><line x1=\"253.6\" y1=\"111.4\" x2=\"274.9\" y2=\"90.1\" stroke=\"#fff\" stroke-width=\"2\" opacity=\".8\"/><\/g><text x=\"54.2\" y=\"118.7\" text-anchor=\"end\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SUHO K POPR<\/text><text x=\"133.7\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">TAK-TAK<\/text><text x=\"246.3\" y=\"39.2\" text-anchor=\"middle\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">VZEMI VERIGE<\/text><text x=\"325.8\" y=\"118.7\" text-anchor=\"start\" font-size=\"11\" font-weight=\"800\" fill=\"#171717\">SPOLZKO, PAZI<\/text><g filter=\"url(#crnGaugeShadow)\" transform=\"rotate(-67.5 190 175)\"><line x1=\"190\" y1=\"175\" x2=\"190\" y2=\"99.4\" stroke=\"#171717\" stroke-width=\"6\" stroke-linecap=\"round\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"#171717\"/><circle cx=\"190\" cy=\"175\" r=\"14\" fill=\"none\" stroke=\"#fff\" stroke-width=\"3\"/><circle cx=\"190\" cy=\"175\" r=\"4.5\" fill=\"#fff\"/><\/g><\/svg>", "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 60 60\" width=\"60\" height=\"60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"};
   var API = "https://weatherireica1.filip-eremita.workers.dev";
-  var CAM_URL = __CAM_URL_JSON__;
+  var CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg";
 
   // Relativni čas ("pred 8 min") -- rabita ga "Posodobljeno" v statusni
   // kartici in seznam zadnjih poročil. Absolutni čas ostane v title.
@@ -1762,7 +1045,7 @@ SHARE_JS_TEMPLATE = '''
   // spremeni tudi tu.
   var LIVE_LAPSE_RATE = 0.65, LIVE_STATION_ELEV = 366, LIVE_PASS_ELEV = 902;
   var LIVE_SNOW_OFFSET = 250, LIVE_SNOW_HALFWIDTH = 100;
-  var ZONE_DATA = __ZONE_DATA_JSON__;
+  var ZONE_DATA = [{"id": "sonce", "label": "SUHO K POPR", "color": "#16a34a", "mid": 157.5, "status": "Cesta je suha", "statusDesc": "Cesta je normalno prevozna.", "bg": "#dcfce7", "ink": "#14532d", "icon": "<svg viewBox=\"0 0 60 60\" class=\"crn-zicon crn-zicon-sonce\" aria-hidden=\"true\">\n      <g stroke=\"#111\" stroke-width=\"4\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"2\" x2=\"30\" y2=\"13\"/><line x1=\"30\" y1=\"47\" x2=\"30\" y2=\"58\"/>\n        <line x1=\"2\" y1=\"30\" x2=\"13\" y2=\"30\"/><line x1=\"47\" y1=\"30\" x2=\"58\" y2=\"30\"/>\n        <line x1=\"9\" y1=\"9\" x2=\"17\" y2=\"17\"/><line x1=\"43\" y1=\"43\" x2=\"51\" y2=\"51\"/>\n        <line x1=\"51\" y1=\"9\" x2=\"43\" y2=\"17\"/><line x1=\"17\" y1=\"43\" x2=\"9\" y2=\"51\"/>\n      <\/g>\n      <circle cx=\"30\" cy=\"30\" r=\"15\" fill=\"#fbbf24\" stroke=\"#111\" stroke-width=\"4\"/>\n    <\/svg>"}, {"id": "nekaj", "label": "TAK-TAK", "color": "#eab308", "mid": 112.5, "status": "Pozor", "statusDesc": "Okoli ničle — ponekod je lahko sneg ali led. Vozi previdno.", "bg": "#fef9c3", "ink": "#713f12", "icon": "<svg viewBox=\"0 0 60 60\" class=\"crn-zicon crn-zicon-nekaj\" aria-hidden=\"true\">\n      <g fill=\"#fef3c7\" stroke=\"#111\" stroke-width=\"3.5\" stroke-linejoin=\"round\">\n        <circle cx=\"20\" cy=\"33\" r=\"10\"/><circle cx=\"33\" cy=\"24\" r=\"13\"/>\n        <circle cx=\"45\" cy=\"33\" r=\"9\"/><rect x=\"15\" y=\"30\" width=\"35\" height=\"15\" rx=\"7.5\"/>\n      <\/g>\n      <circle cx=\"26\" cy=\"35\" r=\"2.2\" fill=\"#111\"/><circle cx=\"40\" cy=\"35\" r=\"2.2\" fill=\"#111\"/>\n      <line x1=\"26\" y1=\"42\" x2=\"38\" y2=\"42\" stroke=\"#111\" stroke-width=\"2.6\" stroke-linecap=\"round\"/>\n    <\/svg>"}, {"id": "verige", "label": "VZEMI VERIGE", "color": "#ea580c", "mid": 67.5, "status": "Zimske razmere", "statusDesc": "V naslednjih 24 urah je pričakovan sneg. Brez zimske opreme ne hodi.", "bg": "#ffedd5", "ink": "#7c2d12", "icon": "<svg viewBox=\"0 0 60 60\" class=\"crn-zicon crn-zicon-verige\" aria-hidden=\"true\">\n      <rect x=\"9\" y=\"18\" width=\"21\" height=\"31\" rx=\"10.5\" fill=\"none\" stroke=\"#111\" stroke-width=\"6\"/>\n      <rect x=\"30\" y=\"12\" width=\"21\" height=\"31\" rx=\"10.5\" fill=\"none\" stroke=\"#111\" stroke-width=\"6\"/>\n    <\/svg>"}, {"id": "spolzko", "label": "SPOLZKO, PAZI", "color": "#dc2626", "mid": 22.5, "status": "Zelo spolzko", "statusDesc": "Pod ničlo — nevarnost poledice. Vozi zelo previdno.", "bg": "#fee2e2", "ink": "#7f1d1d", "icon": "<svg viewBox=\"0 0 60 60\" class=\"crn-zicon crn-zicon-spolzko\" aria-hidden=\"true\">\n      <g stroke=\"#0284c7\" stroke-width=\"4.5\" stroke-linecap=\"round\">\n        <line x1=\"30\" y1=\"6\" x2=\"30\" y2=\"54\"/><line x1=\"10\" y1=\"17\" x2=\"50\" y2=\"43\"/><line x1=\"10\" y1=\"43\" x2=\"50\" y2=\"17\"/>\n        <path d=\"M30 6 l-5 6 M30 6 l5 6 M30 54 l-5 -6 M30 54 l5 -6\"/>\n        <path d=\"M10 17 l7.5 1 M10 17 l3 6.5 M50 43 l-7.5 -1 M50 43 l-3 -6.5\"/>\n        <path d=\"M10 43 l3 -6.5 M10 43 l7.5 -1 M50 17 l-3 6.5 M50 17 l-7.5 1\"/>\n      <\/g>\n    <\/svg>"}];
 
   function numSlLive(x, d){
     if (x == null || isNaN(x)) return "–";
@@ -1864,7 +1147,7 @@ SHARE_JS_TEMPLATE = '''
       share.color = zone.color;
       share.temp = tempTxt;
       share.snow = snowTxt + " snega v 24 h";
-      share.gauge = share.gauge.replace(/rotate\\([^)]*\\)/, "rotate(" + (90 - zone.mid).toFixed(1) + " 190 175)")
+      share.gauge = share.gauge.replace(/rotate\([^)]*\)/, "rotate(" + (90 - zone.mid).toFixed(1) + " 190 175)")
         .replace(/aria-label="[^"]*"/, 'aria-label="Črnivski indeks: ' + zone.label + '"');
       share.icon = zone.icon.replace('viewBox="0 0 60 60"',
         'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60"');
@@ -1887,12 +1170,12 @@ SHARE_JS_TEMPLATE = '''
   // Pythona. Če spremeniš prag ali besedilo tam, ga spremeni tudi tu.
   // Model (Open-Meteo, spodaj) in meritev DRSI (/crnivec-drsi) prideta
   // ločeno; seznam se preriše, ko prispe katerikoli od njiju.
-  var DRSI_MAX_AGE_MIN = __DRSI_MAX_AGE__;
+  var DRSI_MAX_AGE_MIN = 40;
   var CHECK_LEVEL_WORD = { ok: "V redu", warn: "Pozor", stop: "Nevarno", na: "Ni podatka" };
   // Začetni modelski vhodi so strežniški (isti, iz katerih je spečen
   // statični seznam) -- če meritev DRSI prispe pred Open-Meteo, vrstice
   // Vozišče/Sneg ne smejo za trenutek pasti na "ni podatka".
-  var zivModel = __CHECK_MODEL_JSON__, zivDrsi = null, zivZoneId = null, zivModelLive = false;
+  var zivModel = {"temp": 12.1, "snow24": 0.0, "precip24": 0, "p3": 0, "s3": 0.0, "pNow": 0.0, "pPrev": 0.0, "cloud": 0, "windValley": 4.7, "dewValley": 7.6}, zivDrsi = null, zivZoneId = null, zivModelLive = false;
 
   // Indeks poganja IZMERJENA temperatura s prelaza, kadar je sveža (isto kot
   // with_measurement() v crnivec_zones.py); sneg je vedno iz modela.
@@ -1946,7 +1229,7 @@ SHARE_JS_TEMPLATE = '''
   var NEXT_BIAS_HOURS = 6, NEXT_SHOW_H = [1, 3, 6];
   // Popravek modela po uri dneva iz meritev DRSI (compute_pass_calibration
   // v winter_engine.py, izračunan ob jutranjem teku) ali null.
-  var CALIB = __CALIB_JSON__;
+  var CALIB = {"source": "DRSI", "station": 201, "days": 10, "hours": 253, "bias_by_hour": [2.58, 2.62, 2.67, 2.68, 2.75, 2.82, 3.2, 3.68, 3.68, 2.84, 1.55, 0.41, -0.45, -1.03, -1.26, -1.23, -1.24, -1.31, -1.15, -0.51, 0.45, 1.3, 1.94, 2.32], "mae_raw_c": 2.07, "mae_cal_c": 0.94};
   function calibAt(timeStr){
     if (!CALIB || !CALIB.bias_by_hour) return 0;
     var hh = parseInt(String(timeStr).slice(11, 13), 10);
@@ -1958,7 +1241,7 @@ SHARE_JS_TEMPLATE = '''
     if (p == null) return "–";
     if (p < 0.1) return "suho";
     var kind = (frac || 0) >= 0.7 ? "sneg" : (frac || 0) <= 0.3 ? "dež" : "dež in sneg";
-    return kind + " " + numSlLive(p, 1) + "\\u00a0mm";
+    return kind + " " + numSlLive(p, 1) + "\u00a0mm";
   }
   function napovedUr(m, d){
     var tMeas = d && d.temp_c != null ? d.temp_c : null;
@@ -2177,7 +1460,7 @@ SHARE_JS_TEMPLATE = '''
   }
   // "Črnivec proti dolini" -- NAMERNA PODVOJITEV valley_compare()/signed()
   // iz generate_crnivec_page.py (isti pragovi).
-  var DUEL_ELEV = __DUEL_ELEV_JSON__, DUEL_LAPSE = 0.65, DUEL_BAND = 1.5, DUEL_SKEW_MIN = 30;
+  var DUEL_ELEV = {"crnivec": 903, "gornji_grad": 428}, DUEL_LAPSE = 0.65, DUEL_BAND = 1.5, DUEL_SKEW_MIN = 30;
   function predznak(x){ return (x > 0 ? "+" : x < 0 ? "−" : "±") + numSlLive(Math.abs(x), 1); }
   function primerjavaDoline(p, v){
     if (!p || !v || p.temp_c == null || v.temp_c == null) return null;
@@ -2215,7 +1498,7 @@ SHARE_JS_TEMPLATE = '''
 
   // "Črnivec pravi" -- NAMERNA PODVOJITEV fnv1a()/says_state()/
   // crnivec_says() iz generate_crnivec_page.py; mora dati isti indeks.
-  var SAYS = __SAYS_JSON__;
+  var SAYS = {"sonce": ["Danes me lahko prečkaš brez drame.", "Lahko greš. Jaz danes nisem problem.", "Suh sem kot poper. Pelji lepo.", "Danes sem samo lep ovinek z razgledom.", "Nič posebnega pri meni. Za spremembo."], "nekaj": ["Okoli ničle sem. V senci ne bodi preveč pogumen.", "Večinoma sem v redu. Poudarek je na »večinoma«.", "Nekje v senci imam morda presenečenje. Počasi.", "Nisem hud, sem pa muhast. Pelji mirno.", "Mogoče je led, mogoče ni. Ne preverjaj s hitrostjo."], "verige": ["Če nimaš zimskih gum, se bova še pogovorila.", "Sneži. Verige imej pri roki, ne v garaži.", "Danes sem bel. Za poletne gume nisem razpoložen.", "Pridi opremljen ali pa pridi jutri.", "Plug ima danes delo, ti pa potrpljenje."], "spolzko": ["Pod ničlo sem. Drsim bolje kot ti.", "Danes sem drsališče z razgledom.", "Zavore uporabljaj nežno. Jaz ne odpuščam.", "Ti leda ne vidiš, jaz pa vem, kje je.", "Počasi. Zares počasi."], "megla": ["V megli sem. Luči prižgi, hitrost zmanjšaj.", "Danes me ne boš videl, dokler ne boš na meni.", "Oblak je sedel name. Drži se črt.", "Vidim en ovinek naprej. Ti tudi.", "Megla je gosta. Prehitevanje danes ni dobra ideja."]};
   function fnv1a(str){
     var h = 0x811c9dc5;
     for (var i = 0; i < str.length; i++) {
@@ -2250,7 +1533,7 @@ SHARE_JS_TEMPLATE = '''
     else say = "Temperatura se ne spreminja.";
     if (tr.d_vlaga_pct != null && tr.d_vlaga_pct >= 10 && zivDrsi.vlaga_pct != null && zivDrsi.vlaga_pct >= 90)
       say += " Vlaga hitro narašča, možna je megla.";
-    if (tr.padavine_mm) say += " V zadnji uri je padlo " + numSlLive(tr.padavine_mm, 1) + "\u00a0mm.";
+    if (tr.padavine_mm) say += " V zadnji uri je padlo " + numSlLive(tr.padavine_mm, 1) + " mm.";
     var h = document.getElementById("crn-trend-h");
     if (h) h.textContent = "V zadnjih " + tr.minut + " minutah";
     document.getElementById("crn-trend-say").textContent = say;
@@ -2459,7 +1742,7 @@ SHARE_JS_TEMPLATE = '''
   var voteCount = document.getElementById("crn-vote-count");
   if (voteBox && voteBtnGre && voteBtnNe && voteResult && window.fetch) {
     voteBox.hidden = false;
-    var VOTE_KEY = "crn-glas-__TODAY_ISO__";
+    var VOTE_KEY = "crn-glas-2026-09-25";
 
     // Slovenska dvojina/množina gre po zadnjih dveh števkah (101 = ednina).
     function glasovalcev(n){
@@ -2914,7 +2197,7 @@ SHARE_JS_TEMPLATE = '''
 
       ctx.font = "600 18px Inter, system-ui, sans-serif";
       ctx.fillStyle = "#374151";
-      ctx.fillText(share.temp + " \\u00b7 " + share.snow, W / 2, py + 380);
+      ctx.fillText(share.temp + " \u00b7 " + share.snow, W / 2, py + 380);
       ctx.font = "600 15px Inter, system-ui, sans-serif";
       ctx.fillStyle = "#6b7280";
       ctx.fillText(share.streak, W / 2, py + 402);
@@ -2948,7 +2231,7 @@ SHARE_JS_TEMPLATE = '''
   shareBtn.hidden = false;
   shareBtn.addEventListener("click", function(){
     shareBtn.disabled = true;
-    setStatus("Pripravljam sliko\\u2026");
+    setStatus("Pripravljam sliko\u2026");
     buildCanvas().then(function(canvas){
       canvas.toBlob(function(blob){
         if (!blob) { setStatus("Slike ni bilo mogoče pripraviti."); shareBtn.disabled = false; return; }
@@ -2957,7 +2240,7 @@ SHARE_JS_TEMPLATE = '''
           navigator.share({
             files: [file],
             title: "Kako je čez Črnivec?",
-            text: share.verdict + " \\u2013 crnivec.si"
+            text: share.verdict + " \u2013 crnivec.si"
           }).then(function(){
             setStatus("");
           }).catch(function(err){
@@ -2976,599 +2259,12 @@ SHARE_JS_TEMPLATE = '''
   });
 })();
 </script>
-'''
 
-
-def mountain_icon_svg():
-    """Stripovska "maskota" strani — gora z ostrim cik-cak klancem in
-    (mock) prometnim znakom "pozor" ob vznožju. Poenostavljeno za berljivost
-    pri ~90 px (prvotna različica s podrobnim avtomobilčkom se je pri tej
-    velikosti izgubila — glej git zgodovino). Isti stil kot
-    gauge_svg/starburst_svg zgoraj (debel črn obris, ploskovite barve, brez
-    naloženih slik).
-
-    Klikljiva (glej #crn-mascot v SHARE_JS_TEMPLATE) -- zato role="button" +
-    aria-label namesto aria-hidden: čeprav gre za čisti hec (glej
-    crn-mascot-msg), je zdaj interaktivna, ne le okrasje."""
-    return '''<svg viewBox="0 0 200 180" class="crn-icon" id="crn-mascot" role="button"
-       tabindex="0" aria-label="Gorska maskota — klikni za presenečenje">
-    <path d="M10 168 L82 22 L108 64 L134 18 L192 168 Z" fill="#fdf6e3" stroke="#111" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M134 18 L152 48 L138 44 L128 55 L116 46 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M82 22 L96 46 L84 43 L74 52 L64 44 Z" fill="#fff" stroke="#111" stroke-width="4.5" stroke-linejoin="round"/>
-    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
-          fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M108 68 L78 92 L112 108 L80 134 L104 150 L92 168"
-          fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="1 11" stroke-linecap="round" stroke-linejoin="round"/>
-    <g transform="translate(38,150) rotate(-8)">
-      <path d="M0 -20 L18 14 L-18 14 Z" fill="#fef08a" stroke="#dc2626" stroke-width="5" stroke-linejoin="round"/>
-      <text x="0" y="10" text-anchor="middle" font-size="16" font-weight="800" fill="#111">!</text>
-    </g>
-  </svg>'''
-
-
-def build_body(data):
-    passes = data.get("passes") or []
-    crnivec = next((p for p in passes if p["id"] == "crnivec"), None)
-    weather = (crnivec or {}).get("weather") or {}
-    # Indeks poganja IZMERJENA temperatura s postaje DRSI, kadar je sveža
-    # (glej with_measurement v crnivec_zones.py); weather_idx je tisto, kar
-    # vidi merilnik, temperaturna kartica, OG kartica in deljena slika.
-    # Seznam spodaj dobi ločeno model (weather) in meritev (drsi), ker vsaki
-    # vrstici posebej pove vir.
-    drsi_vse = fetch_drsi_postaje()
-    drsi = drsi_vse.get("crnivec")
-    weather_idx = with_measurement(weather, drsi)
-    zone = pick_zone(weather_idx)
-    # zima-forecast.yml teče enkrat na dan in lahko (kot ostali GitHub cron
-    # na tej strani) zamuja za ure — brez tega bi stran tiho kazala včerajšnje
-    # stanje kot današnje. Isto načelo kot MeteoGasilec/Agrometeo
-    # (renderFreshness()/data-generated v generate_agrometeo_page.py): ne
-    # skrivaj stare vrednosti, samo jo označi.
-    generated_at = data.get("generated_at") or ""
-
-    # Arhivira včerajšnji glasovalni izid (glej opombo pri funkciji) in iz
-    # nabranega ("koliko dni je večina rekla, da je pošteno") sestavi
-    # razdelek — samostojen podatek, ne odvisen od živega JS spodaj.
-    vote_history = archive_yesterday_vote()
-    accuracy_html = accuracy_section_html(vote_history)
-    arso_html = arso_section_html(update_arso_cache())
-
-    today_iso = seo.TODAY.isoformat()
-    quote = QUOTES[int(hashlib.sha256(f"{today_iso}|crnivec-quote".encode()).hexdigest(), 16) % len(QUOTES)]
-
-    # Suh niz je iz IZMERJENE zgodovine postaje (dolina), ne iz izračuna za
-    # sam prelaz (902 m) — namenoma OZNAČEN kot tak na kartici (isto načelo
-    # kot ARSO/Open-Meteo, ki se na padavinski ploščici ne smeta zliti v eno
-    # število). dry_streak() je uvožen iz generate_story_card.py, ne
-    # podvojen tu; konča na VČERAJ, ker je danes še nepopoln dan (isti klic
-    # kot pri story-cardovem DROUGHT_DRY_STREAK).
-    hist = seo.load_history()
-    streak = dry_streak(hist, seo.TODAY - datetime.timedelta(days=1))
-
-    temp_c = weather_idx.get("temp_c")
-    temp_meas = weather_idx.get("temp_src") == "izmerjeno"
-    snow_new = weather.get("expected_snow_cm_24h")
-    precip = weather.get("precip_mm_24h")
-    temp_txt = f'{seo.num(temp_c, 1)} °C' if temp_c is not None else "– °C"
-    snow_txt = (f'{seo.num(snow_new, 1)} cm snega v 24 h'
-                if snow_new is not None else "– cm snega v 24 h")
-    streak_val = f"{streak} dni"
-
-    # Snežna odeja: tekoča ocena winter_engine.py za pas 900 m (glej
-    # compute_snowpack tam) -- najbližji pas višini prelaza (902 m). Ločena od
-    # NOVEGA snega (napoved 24 h), ker sta to dva različna podatka: odeja je
-    # to, kar že leži, nov sneg to, kar lahko pade. Ne zlivaj ju v eno število.
-    snowpack_cm = ((data.get("snowpack") or {}).get("depth_cm") or {}).get("900")
-
-    na = '<span class="crn-na">Podatek trenutno ni na voljo.</span>'
-    temp_html = (f'<p class="crn-big" id="crn-temp-val">{temp_txt}</p>' if temp_c is not None
-                 else f'<p id="crn-temp-val">{na}</p>')
-    snowpack_html = (f'<p class="crn-big">{seo.num(snowpack_cm, 0)} cm</p>' if snowpack_cm is not None
-                     else f'<p>{na}</p>')
-    rows = check_rows(weather, drsi)
-    check_html = check_list_html(rows)
-    check_note_txt = check_note(drsi)
-    check_warn_txt = check_warn_text(rows, zone["id"])
-    says_txt = crnivec_says(says_state(zone["id"], rows), today_iso)
-    next_hours, next_corrected = forecast_hours(weather, drsi)
-    next_cells = forecast_cells_html(next_hours)
-    next_say = forecast_sentence(rows, next_hours)
-    next_note = forecast_note(next_corrected, weather.get("calib"))
-    commute_rows = commute_html(commute_windows(weather, drsi, seo.TODAY))
-    sp_html = special_html(special_items(weather, data.get("fog"), seo.TODAY))
-    duel = valley_compare(drsi, drsi_vse.get("gornji_grad"))
-    duel_time = ""
-    if duel:
-        try:
-            duel_time = datetime.datetime.fromisoformat(duel["ts"].replace("Z", "+00:00")).astimezone(
-                ZoneInfo("Europe/Ljubljana")).strftime("%H:%M")
-        except ValueError:
-            pass
-    _cal = " in umerjeno z meritvami DRSI" if weather.get("calib") else ""
-    sp_note = f"Modelna napoved (Open-Meteo, preračunano na 902 m{_cal}), ne uradno stanje ceste."
-    try:
-        _g = datetime.datetime.fromisoformat(generated_at).astimezone(ZoneInfo("Europe/Ljubljana"))
-        sp_note = (f"Modelna napoved iz izračuna ob {_g:%H:%M} (Open-Meteo, preračunano na 902 m{_cal}), "
-                   f"ne uradno stanje ceste.")
-    except (ValueError, TypeError):
-        pass
-
-    snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
-    precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
-
-    temp_src_txt = "na prelazu · ocena modela"
-    upd_suffix = "ocena iz vremenskega modela"
-    if temp_meas:
-        try:
-            mt = datetime.datetime.fromisoformat(weather_idx["temp_measured_at"].replace("Z", "+00:00"))
-            temp_src_txt = f"izmerjeno na prelazu ob {mt.astimezone(ZoneInfo('Europe/Ljubljana')):%H:%M} (DRSI)"
-        except (ValueError, TypeError, AttributeError):
-            temp_src_txt = "izmerjeno na prelazu (DRSI)"
-        upd_suffix = "temperatura izmerjena (DRSI), sneg iz modela"
-
-    # "Posodobljeno ob …" -- čas izračuna v našem pasu. Živi preračun v JS ga
-    # ob uspehu prepiše s trenutnim časom (glej primeniZivoStanje).
-    updated_txt = "Posodobljeno: čas izračuna ni znan"
-    try:
-        gen = datetime.datetime.fromisoformat(generated_at).astimezone(ZoneInfo("Europe/Ljubljana"))
-        updated_txt = (f"Posodobljeno ob {gen:%H:%M}" if gen.date() == seo.TODAY
-                       else f"Posodobljeno {gen.day}. {gen.month}. ob {gen:%H:%M}")
-    except (ValueError, TypeError):
-        pass
-
-    # Dnevna OG kartica: isti vzorec kot generate_igra_og.py, poklican iz
-    # generate_igra_page.py -- riše se tu (ne v svojem koraku delavnega toka),
-    # da slika in og:image na strani nikoli ne moreta biti iz različnih dni.
-    # Ob manjkajočem Pillow ali napaki stran pade nazaj na splošno
-    # og-image.jpg in stran se vseeno objavi (slika ni vredna tega, da bi
-    # zaradi nje izostala stran).
-    og_slika = None
-    try:
-        import generate_crnivec_og  # noqa: PLC0415 — lokalno, da manjkajoč Pillow ne podre teka
-        og_slika = generate_crnivec_og.zapisi(zone, weather_idx, quote, streak)
-    except Exception as e:  # noqa: BLE001 — namenoma široko, glej opombo zgoraj
-        print(f"! OG kartica ni nastala ({e}) — ostane splošna og-image.jpg", file=sys.stderr)
-
-    # "Deli kot sliko" bere ta paket, ne DOM-a (glej gauge_svg/icon_svg_static)
-    # — vsi podatki za canvas so tu že pripravljeni, JS jih samo nariše.
-    # "Vprašaj še enkrat" dobi cel QUOTES seznam za klientski reroll (server
-    # izbere samo dnevni privzetek).
-    share_payload = {
-        "verdict": zone["label"],
-        "color": zone["color"],
-        "quote": quote,
-        "temp": temp_txt,
-        "snow": snow_txt,
-        "streak": f"suh niz v dolini: {streak_val}",
-        "gauge": gauge_svg(zone, static=True),
-        "icon": icon_svg_static(zone["id"]),
-    }
-    # Gumbi za poročanje uporabijo ISTE cone/ikone kot izračun (glej
-    # ZONE_ICONS), samo s krajšo oznako (ZONE_SHORT) -- da poročevalec izbira
-    # med istimi štirimi možnostmi, ki jih izračuna prikazuje, in je
-    # razkorak med njima (bistvo strani) dejansko primerljiv.
-    report_zone_buttons = "".join(
-        f'<button type="button" class="crn-zbtn" data-zona="{z["id"]}" '
-        f'style="--zc:{z["color"]};--zbg:{STATUS[z["id"]]["bg"]}">{ZONE_ICONS[z["id"]]}'
-        f'<span>{ZONE_SHORT[z["id"]]}</span></button>'
-        for z in ZONES
-    )
-
-    # Klientski živi preračun (glej __ZONE_DATA_JSON__ v SHARE_JS_TEMPLATE)
-    # rabi isti ZONES podatek + STATUS + ikone -- v istem vrstnem redu kot
-    # pick_zone() vrača (sonce/nekaj/verige/spolzko), da JS lahko indeksira
-    # ZONE_DATA[0..3] brez iskanja po id-ju.
-    zone_data = [
-        {"id": z["id"], "label": z["label"], "color": z["color"], "mid": z["mid"],
-         "status": STATUS[z["id"]]["status"], "statusDesc": STATUS[z["id"]]["desc"],
-         "bg": STATUS[z["id"]]["bg"], "ink": STATUS[z["id"]]["ink"], "icon": ZONE_ICONS[z["id"]]}
-        for z in ZONES
-    ]
-    st = STATUS[zone["id"]]
-
-    # Koda za "Vstavi značko" (crn-embed spodaj) -- ročno pobegel niz (ne
-    # html.escape, ta modul tu ni uvožen), ker gre za en sam znan literal, ne
-    # uporabniški vnos.
-    # Ovita v povezavo na crnivec.si: brez nje značka na tuji strani ne pripelje
-    # nikogar nazaj (in ne šteje kot povezava na stran).
-    embed_snippet = (f'&lt;a href="{CRN_SITE}/"&gt;&lt;img src="{WORKER_BASE}/crnivec/znacka.svg" '
-                     f'alt="Kako je čez Črnivec? – indeks"&gt;&lt;/a&gt;')
-
-    quotes_json = json.dumps(QUOTES, ensure_ascii=False).replace("</", "<\\/")
-    rare_quote_json = json.dumps(RARE_QUOTE, ensure_ascii=False).replace("</", "<\\/")
-    share_json = json.dumps(share_payload, ensure_ascii=False).replace("</", "<\\/")
-    cam_url_json = json.dumps(CAM_URL, ensure_ascii=False).replace("</", "<\\/")
-    zone_data_json = json.dumps(zone_data, ensure_ascii=False).replace("</", "<\\/")
-    now_in = weather.get("now") or {}
-    check_model_json = json.dumps({
-        "temp": weather.get("temp_c"), "snow24": weather.get("expected_snow_cm_24h"),
-        "precip24": weather.get("precip_mm_24h"),
-        "p3": now_in.get("precip_mm_3h"), "s3": now_in.get("snow_cm_3h"),
-        "pNow": now_in.get("precip_mm_now"), "pPrev": now_in.get("precip_mm_prev"),
-        "cloud": now_in.get("cloud_pct"), "windValley": now_in.get("wind_kmh_valley"),
-        "dewValley": now_in.get("dew_c_valley"),
-    })
-    share_js = (SHARE_JS_TEMPLATE
-                .replace("__QUOTES_JSON__", quotes_json)
-                .replace("__RARE_QUOTE_JSON__", rare_quote_json)
-                .replace("__SHARE_JSON__", share_json)
-                .replace("__CAM_URL_JSON__", cam_url_json)
-                .replace("__ZONE_DATA_JSON__", zone_data_json)
-                .replace("__CHECK_MODEL_JSON__", check_model_json)
-                .replace("__CALIB_JSON__", json.dumps(weather.get("calib")))
-                .replace("__DUEL_ELEV_JSON__", json.dumps(DRSI_ELEV_M))
-                .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
-                .replace("__SAYS_JSON__", json.dumps(CRNIVEC_SAYS, ensure_ascii=False).replace("</", "<\\/"))
-                .replace("__TODAY_ISO__", today_iso))
-
-    # Vrstni red je hierarhija (mobile-first, glej opombo pri CSS): status →
-    # kamera (takoj za glavno kartico) → napoved → meritve → poročanje → vse ostalo.
-    # Na namizju: v heroju merilnik levo, meritve in kamera desno
-    # (.crn-hero-main); pod njim dva stolpca (.crn-cols) -- nasvet, glasovanje | poročanje,
-    # poštenost, lestvica, razlaga + značka. Na telefonu sta stolpca
-    # display:contents in vrstni red nosijo razredi .crn-o1…7 (glej CSS).
-    body = f'''{CSS}
-  <div class="crn">
-    <div class="crn-top">
-      <a class="crn-brand" href="/">Meteorec</a>
-      <div class="crn-install-wrap">
-        <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
-        <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-      </div>
-    </div>
-
-    <section class="crn-hero" aria-labelledby="crn-h1">
-      <div class="crn-head">
-        {mountain_icon_svg()}
-        <div class="crn-head-txt">
-          <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
-          <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
-          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
-        </div>
-      </div>
-
-      <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
-
-      <div class="crn-hero-main">
-      <div class="crn-status" id="crn-status" data-zone="{zone['id']}"
-        style="--zc:{zone['color']};--zbg:{st['bg']};--zink:{st['ink']}" role="status" aria-live="polite">
-        {gauge_svg(zone)}
-        <div class="crn-status-icon" id="crn-status-icon">{ZONE_ICONS[zone['id']]}</div>
-        <p class="crn-status-title" id="crn-status-title">{st['status']}</p>
-        <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
-        <p class="crn-says" id="crn-says"><span class="crn-says-h">Črnivec pravi:</span>
-          <span id="crn-says-txt">{says_txt}</span></p>
-        <div class="crn-now" aria-labelledby="crn-now-h">
-          <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
-          <ul class="crn-check" id="crn-check">{check_html}</ul>
-          <p class="crn-check-warn" id="crn-check-warn"{'' if check_warn_txt else ' hidden'}>{check_warn_txt}</p>
-          <p class="crn-check-note" id="crn-check-note">{check_note_txt}</p>
-          <div class="crn-trend" id="crn-trend" hidden>
-            <p class="crn-now-h" id="crn-trend-h">V zadnjih 60 minutah</p>
-            <p class="crn-trend-say" id="crn-trend-say"></p>
-            <ul class="crn-trend-list" id="crn-trend-list"></ul>
-          </div>
-        </div>
-        <p class="crn-updated" id="crn-updated" data-ts="{generated_at}" data-sfx="{upd_suffix}">{updated_txt} · {upd_suffix}</p>
-        <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
-        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
-      </div>
-
-      <section class="crn-panel crn-cam" id="kamera" aria-labelledby="crn-cam-h">
-        <h2 class="crn-h2" id="crn-cam-h">Kamera na prelazu</h2>
-        <div class="crn-cam-frame is-loading">
-          <p id="crn-cam-loading" class="crn-cam-loading">Nalagam kamero …</p>
-          <img id="crn-cam-img" src="{CAM_URL}" alt="Živa kamera s prelaza Črnivec (902 m)" width="640" height="480">
-          <span class="crn-cam-badge" aria-hidden="true"><i></i>V živo</span>
-          <span class="crn-cam-place" aria-hidden="true">Črnivec · 902 m</span>
-          <p id="crn-cam-fallback" class="crn-cam-fallback" hidden>Kamera trenutno ni dosegljiva.
-          <a href="https://www.promet.si/sl/kamere" target="_blank" rel="noopener">Poglej na promet.si</a></p>
-        </div>
-        <p class="crn-cam-time" id="crn-cam-time" hidden></p>
-        <p class="crn-cam-meta">Poglej trenutno stanje prelaza. Vir: <a href="https://www.promet.si" target="_blank"
-        rel="noopener">promet.si</a> (Direkcija RS za infrastrukturo) — osveži se vsakih 5 minut.</p>
-      </section>
-
-      <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h"{'' if next_cells else ' hidden'}>
-        <p class="crn-now-h" id="crn-next-h">Naslednjih 6 ur</p>
-        <p class="crn-next-say" id="crn-next-say">{next_say}</p>
-        <div class="crn-next-grid" id="crn-next-grid">{next_cells}</div>
-        <p class="crn-check-note" id="crn-next-note">{next_note}</p>
-      </section>
-
-      <section class="crn-commute" id="crn-commute" aria-labelledby="crn-commute-h"{'' if commute_rows else ' hidden'}>
-        <p class="crn-now-h" id="crn-commute-h">Na poti v službo in domov</p>
-        <p class="crn-lead crn-commute-lead">Najnižja temperatura, padavine in vozišče na prelazu v jutranjem in popoldanskem terminu.</p>
-        <div class="crn-commute-grid" id="crn-commute-grid">{commute_rows}</div>
-        <p class="crn-check-note">Napoved Open-Meteo, preračunana na 902 m in umerjena z meritvami DRSI. Dlje v prihodnost je manj zanesljiva. Vozišče je ocena.</p>
-      </section>
-
-      <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
-        <p class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</p>
-        {sp_html}
-        <p class="crn-check-note">{sp_note}</p>
-      </section>
-
-      <div class="crn-hero-side">
-      <div class="crn-cards">
-        <div class="crn-card">
-          <span class="crn-card-art">{CARD_ART['temp']}</span>
-          <p class="crn-card-h">{UI_ICONS['temp']}Temperatura</p>
-          {temp_html}
-          <p class="crn-card-sub" id="crn-temp-src">{temp_src_txt}</p>
-        </div>
-        <div class="crn-card">
-          <span class="crn-card-art">{CARD_ART['snow']}</span>
-          <p class="crn-card-h">{UI_ICONS['snow']}Snežna odeja</p>
-          {snowpack_html}
-          <p class="crn-card-sub">ocena modela, ~900 m</p>
-          <p class="crn-card-h crn-card-h2">Nov sneg · napoved 24 h</p>
-          <p class="crn-mid" id="crn-snow-new">{snow_new_txt}</p>
-          <p class="crn-card-sub">padavine <b id="crn-precip">{precip_txt}</b></p>
-        </div>
-      </div>
-
-      <section class="crn-duel" id="crn-duel" aria-labelledby="crn-duel-h"{'' if duel else ' hidden'}>
-        <p class="crn-now-h" id="crn-duel-h">Črnivec proti dolini</p>
-        <div class="crn-duel-grid">
-          <div class="crn-duel-rows">
-            <p class="crn-duel-row"><span>Črnivec · {DRSI_ELEV_M['crnivec']} m</span><b id="crn-duel-p">{num1(duel['tp']) if duel else '–'} °C</b></p>
-            <p class="crn-duel-row"><span>Gornji Grad · {DRSI_ELEV_M['gornji_grad']} m</span><b id="crn-duel-v">{num1(duel['tv']) if duel else '–'} °C</b></p>
-          </div>
-          <p class="crn-duel-diff" id="crn-duel-diff">{signed(duel['diff']) if duel else '–'} °C</p>
-        </div>
-        <p class="crn-duel-say" id="crn-duel-say">{duel['say'] if duel else ''}</p>
-        <p class="crn-check-note" id="crn-duel-min"{'' if duel and duel['mins'] else ' hidden'}>{(duel or {}).get('mins') or ''}</p>
-        <p class="crn-check-note" id="crn-duel-note">Obe številki sta meritvi postaj DRSI{f' ob {duel_time}' if duel_time else ''}.</p>
-      </section>
-
-      </div>
-      </div>
-    </section>
-
-    <div class="crn-cols">
-      <div class="crn-col">
-      <section class="crn-tip crn-o3" aria-labelledby="crn-tip-h">
-        <p class="crn-tip-h" id="crn-tip-h">💡 Meteorec nasvet</p>
-        <div class="crn-quote"><p>{quote}</p></div>
-        <p id="crn-visits" class="crn-visits" hidden></p>
-        <div class="crn-actions">
-          <button type="button" id="crn-reroll" class="crn-btn" hidden>Vprašaj še enkrat</button>
-          <button type="button" id="crn-listen" class="crn-btn" hidden>Poslušaj</button>
-          <button type="button" id="crn-share" class="crn-btn" hidden>Deli kot sliko</button>
-        </div>
-        <p id="crn-share-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-      </section>
-
-      <section class="crn-panel crn-vote crn-o4" id="crn-vote" hidden>
-        <div class="crn-vote-row">
-          <p class="crn-vote-q">Se ti zdi trenutna ocena pravilna?</p>
-          <div class="crn-vote-btns">
-            <button type="button" id="crn-vote-gre" class="crn-btn">👍 Gre</button>
-            <button type="button" id="crn-vote-ne" class="crn-btn">👎 Ne gre</button>
-          </div>
-        </div>
-        <div class="crn-vote-result" id="crn-vote-result" hidden>
-          <div class="crn-vote-bar"><span id="crn-vote-bar-gre"></span></div>
-          <p class="crn-vote-count" id="crn-vote-count"></p>
-        </div>
-      </section>
-      </div>
-
-      <div class="crn-col">
-
-      <section class="crn-panel crn-report crn-o2" id="crn-report" aria-labelledby="crn-rep-h" hidden>
-        <h2 class="crn-h2" id="crn-rep-h">Kako je bilo tebi?</h2>
-        <p class="crn-lead">Povej naslednjemu vozniku.</p>
-        <div class="crn-zones" id="crn-report-zones">
-          {report_zone_buttons}
-        </div>
-        <div id="crn-report-form" class="crn-form" hidden>
-          <textarea id="crn-report-note" class="crn-input" maxlength="140"
-            placeholder="Neobvezna opomba (npr. »samo do polovice«) …" aria-label="Opomba"></textarea>
-          <input type="text" id="crn-report-ime" class="crn-input" maxlength="24"
-            placeholder="Vzdevek za lestvico (neobvezno)" aria-label="Vzdevek">
-          <input type="text" name="website" id="crn-report-hp" autocomplete="off" tabindex="-1"
-            style="position:absolute;left:-9999px" aria-hidden="true">
-          <button type="button" id="crn-report-submit" class="crn-btn">Pošlji poročilo</button>
-        </div>
-        <p id="crn-report-status" class="crn-status-msg" role="status" aria-live="polite" hidden></p>
-        <div id="crn-report-badge" class="crn-badge" hidden></div>
-
-        <h3 class="crn-h3">Zadnja poročila</h3>
-        <ul id="crn-report-feed" class="crn-feed" aria-live="polite">
-          <li class="crn-feed-item" aria-hidden="true"><span class="crn-skel" style="width:40%"></span></li>
-          <li class="crn-feed-item" aria-hidden="true"><span class="crn-skel" style="width:55%"></span></li>
-        </ul>
-        <p id="crn-report-week" class="crn-week" hidden></p>
-      </section>
-      <div class="crn-o5">{accuracy_html}</div>
-      <div class="crn-o5">{arso_html}</div>
-
-      <section class="crn-panel crn-board crn-o6" id="crn-board" aria-labelledby="crn-board-h" hidden>
-        <h2 class="crn-h2" id="crn-board-h">🏆 Lestvica poročevalcev</h2>
-        <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
-      </section>
-
-      <div class="crn-stack crn-o7">
-        <details class="crn-acc">
-          <summary>ⓘ Kako nastane Meteorec indeks?</summary>
-          <div class="crn-acc-body">
-            <p>Indeks ni meritev stanja ceste. Temperaturo na vrhu vzame s cestne vremenske postaje
-            Direkcije RS za infrastrukturo (DRSI) na prelazu, kadar je meritev mlajša od 40 minut; sicer jo
-            izračuna iz napovedi Open-Meteo za dolino in višinske razlike do prelaza (902 m). Koliko snega
-            lahko pade v naslednjih 24 urah, je vedno napoved — isti izračun kot na
-            <a href="/zima/prevoznost-prelazov/">MeteoZima: prevoznost prelazov</a>. Iz tega sledi stanje: nad 5 °C brez snega je suho, okoli ničle pozor, pod ničlo
-            spolzko, 2 cm ali več novega snega pa zimske razmere. Snežna odeja je tekoča ocena modela
-            za pas okoli 900 m. Stran se ob vsakem obisku preračuna sproti.</p>
-            <p>Seznam »Čez Črnivec zdaj« je ločen od indeksa. Temperatura, veter in vlaga so, kadar so na
-            voljo, <strong>izmerjeni</strong> na cestni vremenski postaji Direkcije RS za infrastrukturo
-            (DRSI) na prelazu; vir je pri vsaki vrstici. Megla je ocenjena iz izmerjene vlage, saj vidljivosti
-            tam nihče ne meri. Vozišče je vedno <strong>ocena</strong>: iz padavin zadnjih treh ur in
-            temperature ocenimo, ali je cesta mokra ali bi lahko bila poledenela. Temperature cestišča
-            DRSI ne objavlja.</p>
-            <p>»Naslednjih 6 ur« je napoved Open-Meteo za dolino, preračunana na višino prelaza. Kadar je
-            meritev s prelaza na voljo, napoved začne pri izmerjeni temperaturi in se v šestih urah postopoma
-            vrne k modelu. Stavek nad urami primerja temperaturo in oceno vozišča z najhujšo uro v tem času.</p>
-            <p>Napoved za prelaz vsak dan umerimo z meritvami postaje DRSI zadnjih 10 dni. Preračun iz doline ne
-            vidi nočne inverzije: hladen zrak se ponoči nabira na dnu doline, prelaz pa je nad njim. Brez
-            popravka je bil model ponoči za okoli 3 °C prehladen in je napovedoval poledico, ko je bilo na
-            prelazu 5 °C.</p>
-            <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
-            indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
-            Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
-          </div>
-        </details>
-
-        <details class="crn-acc crn-embed">
-          <summary>Vstavi značko na svojo stran</summary>
-          <div class="crn-acc-body">
-            <img class="crn-embed-preview" src="{WORKER_BASE}/crnivec/znacka.svg"
-              alt="Črnivec indeks – živa značka" width="153" height="20" loading="lazy">
-            <div class="crn-embed-row">
-              <code id="crn-embed-code" class="crn-embed-code">{embed_snippet}</code>
-              <button type="button" id="crn-embed-copy" class="crn-btn">Kopiraj</button>
-            </div>
-            <p id="crn-embed-status" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-            <p class="crn-share-status">Osveži se sama vsakih nekaj minut — enkrat vstaviš, naprej živi.</p>
-          </div>
-        </details>
-      </div>
-      </div>
-    </div>
-
-    <footer class="crn-official">
-      <p><strong>Meteorec indeks je neuradna informacija.</strong> Za uradno stanje cest glej
-      <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
-      (Prometno-informacijski center), AMZS ali DARS.</p>
-      <p>Podrobnejša vremenska ocena za vse prelaze: <a href="/zima/prevoznost-prelazov/">MeteoZima:
-      prevoznost prelazov</a>.</p>
-      <a class="crn-btn crn-back" href="/">← Nazaj na meteorec.si</a>
-    </footer>
-  </div>
-{share_js}'''
-    return body, og_slika
-
-
-def to_crnivec_site(html):
-    """Stran iz skupnega ovoja (page_shell, pisan za meteorec.si) prestavi na
-    crnivec.si: kanonični URL, og:url in hreflang postanejo koren crnivec.si,
-    korensko-relativne povezave pa absolutne na meteorec.si (razen CRN_LOCAL)."""
-    html = html.replace(f"{seo.SITE}{OLD_PATH}", f"{CRN_SITE}/")
-
-    def absolut(m):
-        attr, path = m.group(1), m.group(2)
-        if path.split("?")[0] in CRN_LOCAL:
-            return m.group(0)
-        return f'{attr}="{seo.SITE}{path}"'
-    return re.sub(r'\b(href|src)="(/(?!/)[^"]*)"', absolut, html)
-
-
-def site_schema(title, desc, image):
-    """WebSite + WebPage za crnivec.si. Avtor je ista oseba kot na meteorec.si
-    (isti @id), da iskalnik obe domeni pripiše istemu avtorju."""
-    data = [
-        {"@context": "https://schema.org", "@type": "WebSite", "@id": f"{CRN_SITE}/#website",
-         "name": "Kako je čez Črnivec?", "url": f"{CRN_SITE}/", "inLanguage": "sl",
-         "publisher": {"@type": "Organization", "name": "Meteorec", "url": f"{seo.SITE}/"}},
-        {"@context": "https://schema.org", "@type": "WebPage", "@id": f"{CRN_SITE}/",
-         "name": title, "description": desc, "url": f"{CRN_SITE}/",
-         "image": image or f"{seo.SITE}/og-image.jpg", "inLanguage": "sl",
-         "isPartOf": {"@id": f"{CRN_SITE}/#website"},
-         "author": {"@id": f"{seo.SITE}/#person"},
-         "about": {"@type": "Place", "name": "Črnivec (preval)",
-                   "sameAs": "https://sl.wikipedia.org/wiki/%C4%8Crnivec_(preval)"},
-         "datePublished": "2026-09-20",
-         "dateModified": datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).isoformat(timespec="seconds")},
-    ]
-    return "\n".join(
-        f'<script type="application/ld+json">\n{json.dumps(d, ensure_ascii=False, separators=(",", ":"))}\n</script>'
-        for d in data)
-
-
-def write_site_files():
-    """Datoteke, ki morajo biti na izvoru crnivec.si: manifest in ikone (PWA),
-    robots.txt in sitemap.xml (ena sama stran)."""
-    out = os.path.join(ROOT, CRN_DIR)
-    os.makedirs(out, exist_ok=True)
-    for ikona in ("icon-192.png", "icon-512.png"):
-        shutil.copyfile(os.path.join(ROOT, ikona), os.path.join(out, ikona))
-    manifest = {
-        "name": "Kako je čez Črnivec?", "short_name": "Črnivec",
-        "description": "Stanje na prelazu Črnivec (902 m): temperatura, vozišče, sneg in kamera.",
-        "start_url": "/", "scope": "/", "display": "standalone", "lang": "sl",
-        "background_color": "#fdf6e3", "theme_color": "#dc2626",
-        "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-                  {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}],
-    }
-    with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
-    with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8") as f:
-        f.write(f"User-agent: *\nAllow: /\n\nSitemap: {CRN_SITE}/sitemap.xml\n")
-    danes = datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).date().isoformat()
-    with open(os.path.join(out, "sitemap.xml"), "w", encoding="utf-8") as f:
-        f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
-                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-                f'  <url><loc>{CRN_SITE}/</loc><lastmod>{danes}</lastmod>'
-                '<changefreq>hourly</changefreq><priority>1.0</priority></url>\n'
-                '</urlset>\n')
-
-
-def redirect_stub():
-    """crnivec.si/ po selitvi: isti vzorec kot stare ARSO objave
-    (noindex + canonical + takojšnja preusmeritev), da indeksirani URL ne pade
-    v 404. Pravi 301 postavi pravilo v Cloudflare (cona meteorec.si); ta
-    stran je rezerva, če pravila ni."""
-    cilj = f"{CRN_SITE}/"
-    return f'''<!DOCTYPE html>
-<html lang="sl">
-<head>
-<meta charset="UTF-8">
-<title>Kako je čez Črnivec? – preseljeno na crnivec.si</title>
-<link rel="canonical" href="{cilj}">
-<meta name="robots" content="noindex, follow">
-<meta http-equiv="refresh" content="0; url={cilj}">
-<script>location.replace({json.dumps(cilj)} + location.search + location.hash);</script>
-</head>
-<body>
-<p>Stran »Kako je čez Črnivec?« je preseljena na <a href="{cilj}">crnivec.si</a>.</p>
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="https://meteorec.si/">Vreme v živo</a> · <a href="https://meteorec.si/blog/">Blog</a> · <a href="https://meteorec.si/vreme/">Arhiv</a> · <a href="https://meteorec.si/vreme/mesec/">Po mesecih</a> · <a href="https://meteorec.si/podatki/">Podatki</a> · <a href="https://meteorec.si/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="https://meteorec.si/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="https://meteorec.si/tocnost-napovedi/">Točnost napovedi</a></span>
+  </footer>
+</div>
+<nav class="app-bottomnav" aria-label="Glavna navigacija"><a href="https://meteorec.si/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11 12 4l8 7v7a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-7Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>Domov</a><a href="https://meteorec.si/klima/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 4.5a1.5 1.5 0 0 0-3 0v9.6a3.5 3.5 0 1 0 3 0V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"/></svg></span>Klima</a><a href="https://meteorec.si/rekord/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10 13.5v2.5h4v-2.5M8.5 20h7l-1-2.5h-5L8.5 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>Rekordi</a><a href="https://meteorec.si/trendi/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16.5 10 10l3.5 3.5L20 6.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 6.5H20v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Trendi</a><a href="https://meteorec.si/blog/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H17a2 2 0 0 1 2 2v14.5a.5.5 0 0 1-.7.46L15 18.5H6.5A1.5 1.5 0 0 1 5 17V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="8" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="11.5" x2="13" y2="11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>Blog</a><a href="https://meteorec.si/vreme/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="5" width="17" height="4" rx="1" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 9.5V18a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V9.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="10" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Arhiv</a><a href="https://meteorec.si/gobarska-napoved/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11.5C4 7.36 7.58 4 12 4s8 3.36 8 7.5c0 .83-.9 1.5-2 1.5H6c-1.1 0-2-.67-2-1.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 13v3.7a2.5 2.5 0 0 0 5 0V13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Gobe</a><a href="https://meteorec.si/o-postaji.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8.3" r="1" fill="currentColor"/><line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>O postaji</a></nav>
 </body>
 </html>
-'''
-
-
-def main():
-    data = load_json(DATA_PATH)
-    if not data:
-        print("✗ data/winter-data.json manjka -- najprej poženi tools/winter_engine.py.", file=sys.stderr)
-        return 1
-
-    body, og_slika = build_body(data)
-    title = "Kako je čez Črnivec? – (ne)uradni indeks"
-    desc = "Vsakodnevno vprašanje iz lokalnih FB-skupin – s samoironičnim »indeksom« in pravimi vremenskimi informacijami s 902 m visokega prelaza."
-    # manifest.json ima relativne poti ("./") -- te se po specifikaciji Web App
-    # Manifest razrešijo proti URL-ju SAME manifest.json (koren strani), ne
-    # proti tej podstrani, zato je varno linkati isti manifest tudi od tu brez
-    # tveganja, da bi "namesti" ustvaril ločeno aplikacijo z obsegom /crnivec/.
-    # Na crnivec.si je manifest svoj (write_site_files()), ker mora biti na
-    # istem izvoru kot stran, da jo brskalnik ponudi za namestitev.
-    pwa_head = (
-        '<meta name="theme-color" content="#dc2626">\n'
-        '<meta name="mobile-web-app-capable" content="yes">\n'
-        '<meta name="apple-mobile-web-app-capable" content="yes">\n'
-        '<meta name="apple-mobile-web-app-title" content="Črnivec">\n'
-        '<link rel="manifest" href="/manifest.json">\n'
-        '<link rel="apple-touch-icon" href="/icon-192.png">'
-    )
-    schema = "\n".join([pwa_head, site_schema(title, desc, og_slika)])
-    html = seo.page_shell(title, desc, OLD_PATH, schema, body, og_image=og_slika)
-    seo.write_page(f"{CRN_DIR}/index.html", to_crnivec_site(html), force=True)
-    write_site_files()
-    seo.write_page("crnivec/index.html", redirect_stub(), force=True)
-    print(f"  → {CRN_DIR}/index.html (crnivec.si){f' (OG: {og_slika})' if og_slika else ''}")
-    print("  → crnivec/index.html (preusmeritev na crnivec.si)")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

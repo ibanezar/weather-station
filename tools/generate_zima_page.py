@@ -1189,7 +1189,7 @@ def build_passes_body(data):
             status_txt = f'{p["status"]} (preverjeno {fmt_day(p["status_checked"])})' if p.get("status_checked") else p["status"]
         else:
             status_txt = f'ni ročno preverjeno — glej <a href="{p["source"]}">vir</a>'
-        joke_link = (' · <a href="/crnivec/">(neuradna varianta: kako je čez Črnivec?)</a>'
+        joke_link = (' · <a href="https://crnivec.si/">(neuradna varianta: kako je čez Črnivec?)</a>'
                       if p["id"] == "crnivec" else "")
         rows.append(
             f'      <tr><th>{p["name"]} ({p["elevation_m"]} m)</th>'

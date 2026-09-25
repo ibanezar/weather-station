@@ -179,7 +179,7 @@ def render(zone, weather, quote, streak, now=None):
         d.text((x, H - BAR_H + 18), lab, font=f_lab, fill=MUTED)
         d.text((x, H - BAR_H + 38), val, font=f_val, fill=WHITE)
         x += 236
-    url = "meteorec.si/crnivec"
+    url = "crnivec.si"
     tb = d.textbbox((0, 0), url, font=f_url)
     d.text((W - PAD - (tb[2] - tb[0]), H - BAR_H + 34), url, font=f_url, fill=accent)
 

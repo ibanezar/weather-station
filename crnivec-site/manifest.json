@@ -1,0 +1,25 @@
+{
+  "name": "Kako je čez Črnivec?",
+  "short_name": "Črnivec",
+  "description": "Stanje na prelazu Črnivec (902 m): temperatura, vozišče, sneg in kamera.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "sl",
+  "background_color": "#fdf6e3",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
