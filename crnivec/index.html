@@ -132,6 +132,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      obarvane statusne kartice, da barva cone ne zmede barv posameznih vrstic.
      Raven nosi ikona IN besedilo (skrit "V redu/Pozor/Nevarno" za bralnike
      zaslona + vrednost sama) -- barva ni edini nosilec pomena. */
+  /* "Črnivec pravi" -- oblaček v stripovskem slogu pod opisom statusa. */
+  .crn-says{position:relative;display:inline-block;max-width:34ch;margin:var(--s3) auto 0;
+    background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;box-shadow:3px 3px 0 #111;
+    padding:6px var(--s2);font-size:15px;font-weight:700;line-height:1.35;transform:rotate(-.6deg)}
+  .crn-says-h{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted)}
+  .crn-says::before{content:"";position:absolute;top:-11px;left:50%;margin-left:-9px;
+    border-style:solid;border-width:0 9px 11px;border-color:transparent transparent #111}
   .crn-now{background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;
     box-shadow:4px 4px 0 #111;padding:var(--s2) var(--s3);margin:var(--s3) auto 0;max-width:480px;text-align:left}
   .crn-now-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
@@ -469,14 +477,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </svg></div>
         <p class="crn-status-title" id="crn-status-title">Cesta je suha</p>
         <p class="crn-status-desc" id="crn-status-desc">Cesta je normalno prevozna.</p>
+        <p class="crn-says" id="crn-says"><span class="crn-says-h">Črnivec pravi:</span>
+          <span id="crn-says-txt">Danes sem samo lep ovinek z razgledom.</span></p>
         <div class="crn-now" aria-labelledby="crn-now-h">
           <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
           <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">11,7 °C<span class="crn-ck-src">izmerjeno</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan<span class="crn-ck-src">napoved 24 h</span></span></li><li class="crn-ck" data-lvl="ok" data-id="fog"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Megla<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni znakov megle<span class="crn-ck-src">iz izmerjene vlage</span></span></li><li class="crn-ck" data-lvl="ok" data-id="wind"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Veter<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">šibak · 7 km/h, sunki 10<span class="crn-ck-src">izmerjeno</span></span></li></ul>
           <p class="crn-check-warn" id="crn-check-warn" hidden></p>
           <p class="crn-check-note" id="crn-check-note">Izmerjeno na prelazu ob 12:37 · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev.</p>
         </div>
-        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:41:39.522050+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:41 · temperatura izmerjena (DRSI), sneg iz modela</p>
-        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:41:39.522050+00:00" hidden></p>
+        <p class="crn-updated" id="crn-updated" data-ts="2026-09-25T10:44:53.367706+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 12:44 · temperatura izmerjena (DRSI), sneg iz modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-25T10:44:53.367706+00:00" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
       </div>
 
@@ -490,7 +500,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
         <p class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</p>
         <ul class="crn-sp-list"><li class="crn-sp" data-lvl="warn"><span class="crn-ck-i" aria-hidden="true"></span><div><p class="crn-sp-h"><b>Megla</b><span class="crn-sr">: Pozor,</span> · prelaz je na robu</p><ul class="crn-sp-lines"><li>Ocenjena zgornja meja megle jutri zjutraj je ~870 m, prelaz je na 902 m — lahko je v megli ali tik nad njo.</li></ul></div></li></ul>
-        <p class="crn-check-note">Modelna napoved iz izračuna ob 12:41 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 12:44 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
       </section>
 
       <div class="crn-hero-side">
@@ -912,11 +922,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var descEl = document.getElementById("crn-status-desc");
       var tempEl = document.getElementById("crn-temp-val");
       var quoteEl = document.querySelector(".crn-quote p");
+      var saysEl2 = document.getElementById("crn-says-txt");
       var label = labelEl ? labelEl.textContent.toLowerCase() : "";
       var desc = descEl ? descEl.textContent : "";
       var temp = tempEl ? tempEl.textContent.replace("°C", "stopinj") : "";
       var quote = quoteEl ? quoteEl.textContent : "";
       var besedilo = "Kako je čez Črnivec? " + label + ". " + desc +
+        (saysEl2 ? (" Črnivec pravi: " + saysEl2.textContent) : "") +
         (temp ? (" Na prelazu je " + temp + ".") : "") +
         (quote ? (" Meteorec nasvet: " + quote) : "");
       var u = new SpeechSynthesisUtterance(besedilo);
@@ -1161,7 +1173,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var NEXT_BIAS_HOURS = 6, NEXT_SHOW_H = [1, 3, 6];
   // Popravek modela po uri dneva iz meritev DRSI (compute_pass_calibration
   // v winter_engine.py, izračunan ob jutranjem teku) ali null.
-  var CALIB = {"source": "DRSI", "station": 201, "days": 10, "hours": 253, "bias_by_hour": [2.58, 2.62, 2.67, 2.68, 2.75, 2.82, 3.2, 3.68, 3.68, 2.83, 1.55, 0.41, -0.45, -1.02, -1.26, -1.23, -1.24, -1.31, -1.15, -0.51, 0.45, 1.3, 1.94, 2.32], "mae_raw_c": 2.07, "mae_cal_c": 0.94};
+  var CALIB = {"source": "DRSI", "station": 201, "days": 10, "hours": 253, "bias_by_hour": [2.58, 2.62, 2.67, 2.68, 2.75, 2.82, 3.2, 3.68, 3.68, 2.84, 1.55, 0.41, -0.45, -1.03, -1.26, -1.23, -1.24, -1.31, -1.15, -0.51, 0.45, 1.3, 1.94, 2.32], "mae_raw_c": 2.07, "mae_cal_c": 0.94};
   function calibAt(timeStr){
     if (!CALIB || !CALIB.bias_by_hour) return 0;
     var hh = parseInt(String(timeStr).slice(11, 13), 10);
@@ -1286,6 +1298,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (!ul || (!zivModel && !zivDrsi)) return;
     var rows = vrsticeSeznama(zivModel, zivDrsi);
     izrisiNapoved(rows);
+    var saysEl = document.getElementById("crn-says-txt"), stEl = document.getElementById("crn-status");
+    var zidSays = zivZoneId || (stEl ? stEl.getAttribute("data-zone") : null);
+    if (saysEl && zidSays) saysEl.textContent = izberiRek(zidSays, rows);
     ul.textContent = "";
     rows.forEach(function(r){
       var li = document.createElement("li");
@@ -1354,6 +1369,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (minEl) { minEl.textContent = r.mins; minEl.hidden = !r.mins; }
     set("crn-duel-note", "Obe številki sta meritvi postaj DRSI ob " + uraSl(new Date(r.ts)) + ".");
     sec.hidden = false;
+  }
+
+  // "Črnivec pravi" -- NAMERNA PODVOJITEV fnv1a()/says_state()/
+  // crnivec_says() iz generate_crnivec_page.py; mora dati isti indeks.
+  var SAYS = {"sonce": ["Danes me lahko prečkaš brez drame.", "Lahko greš. Jaz danes nisem problem.", "Suh sem kot poper. Pelji lepo.", "Danes sem samo lep ovinek z razgledom.", "Nič posebnega pri meni. Za spremembo."], "nekaj": ["Okoli ničle sem. V senci ne bodi preveč pogumen.", "Večinoma sem v redu. Poudarek je na »večinoma«.", "Nekje v senci imam morda presenečenje. Počasi.", "Nisem hud, sem pa muhast. Pelji mirno.", "Mogoče je led, mogoče ni. Ne preverjaj s hitrostjo."], "verige": ["Če nimaš zimskih gum, se bova še pogovorila.", "Sneži. Verige imej pri roki, ne v garaži.", "Danes sem bel. Za poletne gume nisem razpoložen.", "Pridi opremljen ali pa pridi jutri.", "Plug ima danes delo, ti pa potrpljenje."], "spolzko": ["Pod ničlo sem. Drsim bolje kot ti.", "Danes sem drsališče z razgledom.", "Zavore uporabljaj nežno. Jaz ne odpuščam.", "Ti leda ne vidiš, jaz pa vem, kje je.", "Počasi. Zares počasi."], "megla": ["V megli sem. Luči prižgi, hitrost zmanjšaj.", "Danes me ne boš videl, dokler ne boš na meni.", "Oblak je sedel name. Drži se črt.", "Vidim en ovinek naprej. Ti tudi.", "Megla je gosta. Prehitevanje danes ni dobra ideja."]};
+  function fnv1a(str){
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c > 127) continue;
+      h ^= c;
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h >>> 0;
+  }
+  function izberiRek(zoneId, rows){
+    var fog = rows.filter(function(r){ return r.id === "fog"; })[0];
+    var state = (fog && fog.level === "stop" && (zoneId === "sonce" || zoneId === "nekaj")) ? "megla" : zoneId;
+    var pool = SAYS[state] || SAYS.nekaj;
+    var danes = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+    return pool[fnv1a(danes + "|" + state) % pool.length];
   }
 
   function osveziDrsi(){
