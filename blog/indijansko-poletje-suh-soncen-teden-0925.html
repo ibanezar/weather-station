@@ -99,7 +99,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .stats td.day{text-align:left;font-weight:500;color:var(--muted)}
 .stats .dry{color:#f97316}
 .stats .wet{color:#22d3ee}
-.tbl-note{font-size:.75rem;color:var(--muted);margin:-1.2rem 0 1.6rem}
+.tbl-note{font-size:.75rem;color:var(--muted);margin:.7rem 0 0;line-height:1.5}
+.chart-card{margin:1.4rem 0 1.8rem}
+.chart-card h3{margin-bottom:.35rem}
+.chart-sub{font-size:.8rem;color:var(--muted);margin:0 0 .8rem}
+.chart-box{position:relative;height:300px}
+.chart-box.sm{height:150px}
+.chart-card canvas{max-height:none}
+.chart-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;margin:0 0 .7rem;font-size:.8rem;color:var(--text)}
+.chart-legend span{display:inline-flex;align-items:center;gap:.4rem}
+.chart-legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.chart-legend i.dash{height:0;width:16px;border-radius:0;border-top:2px dashed #7f92ab}
+.hist-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media (max-width:560px){.hist-grid{grid-template-columns:1fr}.chart-box{height:260px}}
+details.tbl{margin-top:.8rem}
+details.tbl summary{cursor:pointer;font-size:.8rem;color:var(--muted)}
+details.tbl .table-wrap{margin:.6rem 0 0}
 </style>
 </head>
 <body>
@@ -150,8 +165,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <p>Spodaj so napovedi, ki jih vsak dan beležimo tudi na semaforju <a href="/tocnost-napovedi/" style="color:var(--blue)">točnosti napovedi</a>. Številk ne povprečimo v eno, ker se viri ravno pri popoldanskih temperaturah razhajajo za več stopinj. ARSO objavlja napoved za Ljubno ob Savinji, Open-Meteo in naš model MTR pa za točko postaje v Rečici. MTR napoveduje tri dni vnaprej, zato ima vrednosti samo za soboto, nedeljo in ponedeljek.</p>
 
-    <div class="table-wrap">
-    <table class="stats">
+    <div class="chart-card">
+      <h3>Od jutra do popoldneva, 26. 9.–5. 10.</h3>
+      <p class="chart-sub">Vsak stolpec sega od najnižje do najvišje napovedane temperature dneva. Črtkani črti sta povprečje tega tedna na postaji v letih 2020–2025.</p>
+      <div class="chart-legend" aria-hidden="true"><span><i style="background:#d95926"></i>ARSO (Ljubno)</span><span><i style="background:#a855f7"></i>Open-Meteo</span><span><i style="background:#059669"></i>MTR</span><span><i class="dash"></i>povprečje 2020–2025</span></div>
+      <div class="chart-box"><canvas id="chartRange" role="img" aria-label="Napovedani razpon temperature po dnevih za ARSO, Open-Meteo in MTR"></canvas></div>
+      <h3 style="margin-top:1.3rem">Verjetnost dežja (vsaj 1 mm)</h3>
+      <p class="chart-sub">Delež od 51 izračunov ansambla ECMWF, ki tisti dan dajo vsaj 1 mm dežja. Sivo: noben izračun, torej suho.</p>
+      <div class="chart-box sm"><canvas id="chartRain" role="img" aria-label="Verjetnost dežja po dnevih po ansamblu ECMWF"></canvas></div>
+      <p class="tbl-note">Zapelji z miško ali prstom čez stolpec za točne vrednosti. Vse napovedi so s 25. septembra 2026 dopoldne.</p>
+      <details class="tbl"><summary>Številke v tabeli</summary>
+      <div class="table-wrap">
+      <table class="stats">
       <tr><th>Dan</th><th>ARSO (Ljubno)</th><th>Open-Meteo</th><th>MTR</th><th>Dež ≥ 1 mm (ECMWF)</th></tr>
       <tr><td class="day">sob 26. 9.</td><td>18 / 7</td><td>20,4 / 4,1</td><td>21,1 / 4,6</td><td class="dry">0 %</td></tr>
       <tr><td class="day">ned 27. 9.</td><td>17 / 7</td><td>20,9 / 6,0</td><td>22,1 / 6,3</td><td class="dry">0 %</td></tr>
@@ -164,8 +189,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <tr><td class="day">ned 4. 10.</td><td>16 / 8</td><td>18,9 / 10,1</td><td>–</td><td>27 %</td></tr>
       <tr><td class="day">pon 5. 10.</td><td>11 / 10</td><td>13,6 / 12,3</td><td>–</td><td class="wet">35 %</td></tr>
     </table>
+      </div>
+      <p class="tbl-note">Najvišja / najnižja temperatura v °C.</p>
+      </details>
     </div>
-    <p class="tbl-note">Najvišja / najnižja temperatura v °C. Zadnji stolpec je delež od 51 členov ansambla ECMWF, ki imajo tisti dan vsaj 1 mm padavin. Vse napovedi so s 25. septembra 2026 dopoldne.</p>
 
     <p>Glede suhega vremena so si viri enotni. ARSO do vključno četrtka napoveduje jasno, Open-Meteo do nedelje, 4. oktobra, nič padavin, pri ansamblu ECMWF pa do četrtka nobeden od 51 izračunov ne da niti milimetra dežja. Tako enotnega ansambla šest dni vnaprej ne vidimo pogosto.</p>
 
@@ -185,8 +212,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <p>Postaja IREICA1 meri od jeseni 2019, zato imamo za teden od 28. septembra do 4. oktobra šest popolnih let. Babje poletje v ljudskem izročilu sodi prav v ta čas, meritve pa kažejo, da suh teden takrat ni pravilo:</p>
 
-    <div class="table-wrap">
-    <table class="stats">
+    <div class="chart-card">
+      <div class="hist-grid">
+        <div>
+          <h3>Padavine, 28. 9.–4. 10.</h3>
+          <p class="chart-sub">Vsota v tednu, mm</p>
+          <div class="chart-box"><canvas id="chartHistRain" role="img" aria-label="Padavine v tednu od 28. 9. do 4. 10. po letih 2020–2025"></canvas></div>
+        </div>
+        <div>
+          <h3>Temperatura, 28. 9.–4. 10.</h3>
+          <p class="chart-sub">Od povprečne najnižje do povprečne najvišje, °C</p>
+          <div class="chart-box"><canvas id="chartHistTemp" role="img" aria-label="Povprečni razpon temperature v tednu od 28. 9. do 4. 10. po letih 2020–2025"></canvas></div>
+        </div>
+      </div>
+      <p class="tbl-note">Vir: postaja IREICA1, Rečica ob Savinji. Oranžno je leto 2023, edini povsem suh teden v šestih letih.</p>
+      <details class="tbl"><summary>Številke v tabeli</summary>
+      <div class="table-wrap">
+      <table class="stats">
       <tr><th>Leto</th><th>Povp. najvišja</th><th>Povp. najnižja</th><th>Padavine</th><th>Suhi dnevi</th></tr>
       <tr><td class="day">2020</td><td>18,8 °C</td><td>8,5 °C</td><td class="wet">74,4 mm</td><td>4 / 7</td></tr>
       <tr><td class="day">2021</td><td>21,7 °C</td><td>8,8 °C</td><td>16,0 mm</td><td>5 / 7</td></tr>
@@ -195,8 +237,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <tr><td class="day">2024</td><td>15,5 °C</td><td>6,7 °C</td><td class="wet">117,1 mm</td><td>3 / 7</td></tr>
       <tr><td class="day">2025</td><td>15,4 °C</td><td>4,8 °C</td><td>2,8 mm</td><td>6 / 7</td></tr>
     </table>
+      </div>
+      <p class="tbl-note">Suhi dan: manj kot 1 mm padavin.</p>
+      </details>
     </div>
-    <p class="tbl-note">Suhi dan: manj kot 1 mm padavin. Vir: postaja IREICA1, Rečica ob Savinji.</p>
 
     <p>Pravo indijansko poletje – suho <em>in</em> toplo – je bilo v šestih letih samo eno: leta 2023. Takrat je bila povprečna najvišja temperatura v tem tednu 24 °C, 2. oktobra je postaja namerila 26,3 °C, suho in toplo vreme pa je z dnevi čez 25 °C trajalo vse do 14. oktobra. Končal ga je 15. oktobra dež s 64,5 mm, dva dni pozneje pa je bilo v Rečici prvič pod ničlo (−0,5 °C). Lani je bilo sicer skoraj suho, a hladno: povprečna najvišja temperatura je bila le 15,4 °C, povprečna najnižja 4,8 °C. Leta 2024 je v istem tednu padlo 117 mm dežja.</p>
 
@@ -295,6 +339,104 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var nb = document.getElementById('btn-native'); nb.style.display = 'inline-flex';
     nb.addEventListener('click', function () { navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {}); });
   }
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  if (typeof Chart === 'undefined') return;
+  const INK = '#adc0d8', GRID = 'rgba(255,255,255,.06)', NEUTRAL = '#7f92ab';
+  const num = v => String(v).replace('.', ',');
+  const TIP = { backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+                titleColor: INK, bodyColor: '#e8edf8', padding: 10 };
+  const BAR = { borderRadius: 4, borderSkipped: false, borderColor: 'rgba(10,15,28,.94)', borderWidth: 1 };
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.color = INK;
+
+  const NARROW = window.innerWidth < 560;
+  const DAYS = [['sob',26,9],['ned',27,9],['pon',28,9],['tor',29,9],['sre',30,9],['čet',1,10],['pet',2,10],['sob',3,10],['ned',4,10],['pon',5,10]]
+    .map(([d, n, m]) => [d, NARROW ? n + '.' : n + '. ' + m + '.']);
+  const RAIN = [0,0,0,0,0,0,10,22,27,35];
+  const ARSO = [[7,18],[7,17],[9,18],[9,16],[9,15],[8,14],[7,15],[8,16],[8,16],[10,11]];
+  const OM   = [[4.1,20.4],[6.0,20.9],[10.5,18.9],[11.4,20.3],[10.4,20.2],[6.3,17.6],[6.4,16.8],[7.8,18.3],[10.1,18.9],[12.3,13.6]];
+  const MTR  = [[4.6,21.1],[6.3,22.1],[7.4,23.2],null,null,null,null,null,null,null];
+  const flat = v => DAYS.map(() => v);
+  const rangeTip = ctx => {
+    const r = ctx.raw; if (!r) return null;
+    const f = v => ctx.dataset.label.startsWith('ARSO') ? String(v) : num(v.toFixed(1));
+    return `${ctx.dataset.label}: ${f(r[0])} → ${f(r[1])} °C`;
+  };
+  new Chart(document.getElementById('chartRange'), {
+    data: { labels: DAYS, datasets: [
+      { type: 'bar', label: 'ARSO (Ljubno)', data: ARSO, backgroundColor: '#d95926', ...BAR },
+      { type: 'bar', label: 'Open-Meteo', data: OM, backgroundColor: '#a855f7', ...BAR },
+      { type: 'bar', label: 'MTR', data: MTR, backgroundColor: '#059669', ...BAR },
+      { type: 'line', label: 'Povprečna najvišja 2020–2025', data: flat(18.9), borderColor: NEUTRAL, borderDash: [5,4], borderWidth: 1.5, pointRadius: 0, pointHitRadius: 0 },
+      { type: 'line', label: 'Povprečna najnižja 2020–2025', data: flat(7.5), borderColor: NEUTRAL, borderDash: [5,4], borderWidth: 1.5, pointRadius: 0, pointHitRadius: 0 }
+    ] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      datasets: { bar: { categoryPercentage: .82, barPercentage: .9 } },
+      plugins: { legend: { display: false },
+        tooltip: { ...TIP, filter: i => i.dataset.type === 'bar' && i.raw,
+          callbacks: { title: items => items.length ? items[0].label.replace(',', ' ') : '', label: rangeTip,
+            footer: items => { const k = items[0].dataIndex; return 'Dež ≥ 1 mm: ' + RAIN[k] + ' %'; } } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: false } },
+        y: { min: 0, max: 25, grid: { color: GRID }, ticks: { stepSize: 5, font: { size: 10.5 }, callback: v => v + ' °C' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartRain'), {
+    type: 'bar',
+    data: { labels: DAYS, datasets: [{ label: 'Dež ≥ 1 mm', data: RAIN,
+      backgroundColor: RAIN.map(v => v === 0 ? '#7f92ab' : '#3987e5'),
+      minBarLength: 4, ...BAR }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { ...TIP, callbacks: { title: items => items[0].label.replace(',', ' '), label: ctx => `Dež ≥ 1 mm: ${ctx.raw} % izračunov (${Math.round(ctx.raw * 51 / 100)} od 51)` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: false } },
+        y: { min: 0, max: 50, grid: { color: GRID }, ticks: { stepSize: 25, font: { size: 10.5 }, callback: v => v + ' %' } }
+      }
+    }
+  });
+
+  const YEARS = ['2020','2021','2022','2023','2024','2025'];
+  const HL = YEARS.map(y => y === '2023');
+  const H_RAIN = [74.4, 16.0, 68.6, 1.0, 117.1, 2.8];
+  const H_DRY  = [4, 5, 4, 7, 3, 6];
+  const H_T    = [[8.5,18.8],[8.8,21.7],[6.9,18.5],[9.1,24.0],[6.7,15.5],[4.8,15.4]];
+  const colorBy = hit => HL.map(h => h ? '#d95926' : hit);
+  new Chart(document.getElementById('chartHistRain'), {
+    type: 'bar',
+    data: { labels: YEARS, datasets: [{ label: 'Padavine', data: H_RAIN, backgroundColor: colorBy('#3987e5'), minBarLength: 6, ...BAR }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { ...TIP, callbacks: { label: ctx => `${num(ctx.raw)} mm · suhih dni ${H_DRY[ctx.dataIndex]} od 7` } } },
+      scales: {
+        x: { min: 0, max: 120, grid: { color: GRID }, ticks: { stepSize: 40, maxRotation: 0, font: { size: 10.5 }, callback: v => v + ' mm' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+  new Chart(document.getElementById('chartHistTemp'), {
+    type: 'bar',
+    data: { labels: YEARS, datasets: [{ label: 'Temperatura', data: H_T, backgroundColor: colorBy('#7f92ab'), ...BAR }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { ...TIP, callbacks: { label: ctx => `${num(ctx.raw[0])} → ${num(ctx.raw[1])} °C (razlika ${num((ctx.raw[1] - ctx.raw[0]).toFixed(1))} °C)` } } },
+      scales: {
+        x: { min: 0, max: 25, grid: { color: GRID }, ticks: { stepSize: 5, maxRotation: 0, font: { size: 10.5 }, callback: v => v + ' °C' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
 })();
 </script>
 <script src="likes.js?v=252186ff" defer></script>
