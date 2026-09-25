@@ -521,6 +521,16 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   stran to v opombi pove. Profil prostega ozračja (925/850 hPa) sem preizkusil
   in je enako slab v nasprotno smer (~3 °C pretopel), zato ga ne uvajaj kot
   »izboljšavo«.
+- **»Na poti v službo in domov«** (`commute_windows()`, 25. 9. 2026): termina
+  6:00–8:00 in 14:00–16:00 za danes in 3 dni (`COMMUTE_HOURS`/`COMMUTE_DAYS`
+  v `winter_engine.py`, vhodi `commute_hours` po istem vzorcu kot
+  `next_hours`, z umeritvijo DRSI). Termin je povzetek svojih ur: najslabša
+  raven, najnižja temperatura, najslabše vozišče in padavine v terminu (prva
+  ura termina nosi padavine iz ure pred njim, zato se ne šteje). Pretečen
+  termin danes je »že mimo«. JS kopija `izrisiVoznje()`/`povzemiOkno()` teče
+  na istem živem klicu Open-Meteo (`forecast_days=4`). Posamezna ura je v
+  obeh jezikih ena funkcija (`eval_hour()`/`oceniUro()`) za ta pas in za
+  »Naslednjih 6 ur«.
 - **»Posebne razmere · 48 ur«** (`special_items()`): sneg po dnevih, začetek,
   meja sneženja in verjetnost padavin, poledica (`compute_black_ice_for_location`
   z umeritvijo) in megla (regionalni `data["fog"]`: prelaz nad, na robu ±100 m
@@ -561,7 +571,8 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   lahko nad temperaturo.
 - Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
   `cestaVrstica()`, `blackIceLive()`, `napovedUr()`, `stavekNapovedi()`,
-  `calibAt()`, `primerjavaDoline()`, `izberiRek()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
+  `calibAt()`, `primerjavaDoline()`, `izberiRek()`, `oceniUro()`,
+  `povzemiOkno()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
   drugo.**
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
