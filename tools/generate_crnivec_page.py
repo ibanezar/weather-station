@@ -414,21 +414,101 @@ def forecast_hours(weather, drsi):
     t_model = weather.get("temp_cal_c") if weather.get("temp_cal_c") is not None else weather.get("temp_c")
     t_meas = (drsi or {}).get("temp_c")
     bias = (t_meas - t_model) if (t_meas is not None and t_model is not None) else 0.0
-    out = []
-    for e in weather.get("next_hours") or []:
-        t = e.get("temp_c")
-        if t is not None:
-            t = round(t + bias * max(0.0, 1 - e["h"] / NEXT_BIAS_HOURS), 1)
-        res = black_ice_category(t, e.get("cloud_pct"), e.get("wind_kmh_valley"), e.get("dew_c_valley"),
-                                 e.get("precip_mm"), e.get("precip_mm_prev")) if t is not None else None
-        road = road_row(res[0] if res else None, e.get("precip_mm_3h"), e.get("snow_cm_3h"), t)
-        tl = temp_level(t)
-        out.append({"h": e["h"], "time": (e.get("time") or "")[11:16], "temp": t,
-                    "precip_mm": e.get("precip_mm"), "snow_frac": e.get("snow_frac"),
-                    "precip_txt": precip_text(e.get("precip_mm"), e.get("snow_frac")),
-                    "road": road, "temp_level": tl,
-                    "level": max((tl, road["level"]), key=LEVEL_RANK.get)})
+    out = [eval_hour(e, bias) for e in weather.get("next_hours") or []]
     return out, bias != 0.0
+
+
+def measured_bias(weather, drsi):
+    t_model = weather.get("temp_cal_c") if weather.get("temp_cal_c") is not None else weather.get("temp_c")
+    t_meas = (drsi or {}).get("temp_c")
+    return (t_meas - t_model) if (t_meas is not None and t_model is not None) else 0.0
+
+
+def eval_hour(e, bias):
+    """Ena ura napovedi (vnos iz next_hours/commute_hours) z oceno vozišča.
+    Razlika meritev-model izzveni v NEXT_BIAS_HOURS urah."""
+    t = e.get("temp_c")
+    if t is not None:
+        t = round(t + bias * max(0.0, 1 - e["h"] / NEXT_BIAS_HOURS), 1)
+    res = black_ice_category(t, e.get("cloud_pct"), e.get("wind_kmh_valley"), e.get("dew_c_valley"),
+                             e.get("precip_mm"), e.get("precip_mm_prev")) if t is not None else None
+    road = road_row(res[0] if res else None, e.get("precip_mm_3h"), e.get("snow_cm_3h"), t)
+    tl = temp_level(t)
+    return {"h": e["h"], "time": (e.get("time") or "")[11:16], "date": (e.get("time") or "")[:10], "temp": t,
+            "precip_mm": e.get("precip_mm"), "snow_frac": e.get("snow_frac"),
+            "precip_txt": precip_text(e.get("precip_mm"), e.get("snow_frac")),
+            "road": road, "temp_level": tl,
+            "level": max((tl, road["level"]), key=LEVEL_RANK.get)}
+
+
+# ── "Na poti v službo in domov" ──────────────────────────────────────────
+# Termina 6:00-8:00 in 14:00-16:00 za danes in 3 dni (COMMUTE_HOURS v
+# winter_engine.py). Vsak termin je povzetek svojih ur: najslabša raven,
+# najnižja temperatura, najslabše vozišče in padavine V terminu (ura 6:00
+# nosi padavine od 5 do 6, zato se prva ura termina v vsoto ne šteje).
+# Klientska kopija: oknaVozenj() v SHARE_JS_TEMPLATE.
+COMMUTE_WINDOWS = (("jutro", "6:00–8:00", (6, 7, 8)), ("popoldne", "14:00–16:00", (14, 15, 16)))
+DNI_V_TEDNU = ("ponedeljek", "torek", "sreda", "četrtek", "petek", "sobota", "nedelja")
+
+
+def day_label(date_iso, today):
+    d = datetime.date.fromisoformat(date_iso)
+    delta = (d - today).days
+    if delta == 0:
+        return "Danes"
+    if delta == 1:
+        return "Jutri"
+    return f"{DNI_V_TEDNU[d.weekday()].capitalize()}, {d.day}. {d.month}."
+
+
+def summarize_window(hours):
+    if not hours:
+        return None
+    lvl = max((x["level"] for x in hours), key=LEVEL_RANK.get)
+    temps = [x["temp"] for x in hours if x["temp"] is not None]
+    road = max((x["road"] for x in hours), key=lambda r: LEVEL_RANK[r["level"]])
+    rain_hours = hours[1:] if len(hours) > 1 and hours[0]["time"][:2].lstrip("0") in ("6", "14") else hours
+    p_sum = sum((x["precip_mm"] or 0) for x in rain_hours)
+    wet = [x for x in rain_hours if (x["precip_mm"] or 0) >= 0.1]
+    frac = max((x["snow_frac"] or 0) for x in wet) if wet else 0
+    return {"level": lvl, "tmin": min(temps) if temps else None, "road": road,
+            "precip_txt": precip_text(round(p_sum, 1), frac)}
+
+
+def commute_windows(weather, drsi, today):
+    bias = measured_bias(weather, drsi)
+    hours = [eval_hour(e, bias) for e in weather.get("commute_hours") or []]
+    days = []
+    for date in sorted({x["date"] for x in hours if x["date"]}):
+        wins = []
+        for key, label, hs in COMMUTE_WINDOWS:
+            sel = [x for x in hours if x["date"] == date and int(x["time"][:2]) in hs]
+            wins.append({"key": key, "label": label, "sum": summarize_window(sel)})
+        if any(w["sum"] for w in wins):
+            days.append({"date": date, "label": day_label(date, today), "windows": wins})
+    return days
+
+
+def commute_html(days):
+    if not days:
+        return ""
+    rows = []
+    for d in days:
+        cells = []
+        for w in d["windows"]:
+            sm = w["sum"]
+            if not sm:
+                cells.append(f'<div class="crn-cw crn-cw-past"><p class="crn-cw-h">{w["label"]}</p>'
+                             f'<p class="crn-nh-p">že mimo</p></div>')
+                continue
+            r = sm["road"]
+            cells.append(
+                f'<div class="crn-cw" data-lvl="{sm["level"]}"><p class="crn-cw-h">{w["label"]}</p>'
+                f'<p class="crn-cw-t">{num1(sm["tmin"])} °C</p><p class="crn-nh-p">{sm["precip_txt"]}</p>'
+                f'<p class="crn-nh-road" data-lvl="{r["level"]}"><span class="crn-ck-i" aria-hidden="true"></span>'
+                f'<span><span class="crn-sr">Vozišče: {CHECK_LEVEL_WORD[r["level"]]}, </span>{r["value"]}</span></p></div>')
+        rows.append(f'<div class="crn-cd"><p class="crn-cd-h">{d["label"]}</p>{"".join(cells)}</div>')
+    return "".join(rows)
 
 
 def forecast_sentence(rows_now, hours):
@@ -1122,6 +1202,27 @@ CSS = '''
     overflow-wrap:anywhere}
   .crn-nh-road .crn-ck-i{width:18px;height:18px;font-size:11px;flex:0 0 auto}
 
+  /* "Na poti v službo in domov" (commute_windows) -- vrstica na dan, dva
+     termina. Na telefonu je dan naslov nad celicama, na namizju levi stolpec. */
+  .crn-commute{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
+    padding:var(--s3) var(--s2);margin-top:var(--s4);text-align:left}
+  .crn-commute-lead{margin:0 0 var(--s2)!important;font-size:14px}
+  .crn-cd{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1);padding:var(--s1) 0;border-top:1px solid #efece5}
+  .crn-cd:first-child{border-top:0;padding-top:0}
+  .crn-cd-h{grid-column:1/-1;font-size:14px;font-weight:800;margin:0}
+  .crn-cw{border:3px solid #111;border-top:8px solid #16a34a;border-radius:12px;padding:var(--s1);
+    background:#faf9f6;min-width:0}
+  .crn-cw[data-lvl="warn"]{border-top-color:#facc15}
+  .crn-cw[data-lvl="stop"]{border-top-color:#dc2626}
+  .crn-cw-past{border-top-color:#e5e7eb;opacity:.7}
+  .crn-cw p{margin:0}
+  .crn-cw-h{font-size:12px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+  .crn-cw-t{font-size:20px;font-weight:800;line-height:1.15;white-space:nowrap;font-variant-numeric:tabular-nums}
+  @media (min-width:600px){
+    .crn-cd{grid-template-columns:9.5em 1fr 1fr;align-items:stretch}
+    .crn-cd-h{grid-column:auto;align-self:center}
+  }
+
   /* "Posebne razmere" (special_items) -- sneg, poledica, megla za 48 ur. */
   .crn-special{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
     padding:var(--s3);margin-top:var(--s4);text-align:left}
@@ -1353,7 +1454,8 @@ CSS = '''
     .crn-hero-main .crn-status-index{align-self:center}
     .crn-hero-side{display:flex;flex-direction:column}
     .crn-hero-main .crn-next{grid-column:1/-1;grid-row:2;margin-top:0}
-    .crn-hero-main .crn-special{grid-column:1/-1;grid-row:3;margin-top:0}
+    .crn-hero-main .crn-commute{grid-column:1/-1;grid-row:3;margin-top:0}
+    .crn-hero-main .crn-special{grid-column:1/-1;grid-row:4;margin-top:0}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
     .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
     .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
@@ -1839,14 +1941,82 @@ SHARE_JS_TEMPLATE = '''
     var tMeas = d && d.temp_c != null ? d.temp_c : null;
     var base = m.tempCal != null ? m.tempCal : m.temp;
     var bias = (tMeas != null && base != null) ? tMeas - base : 0;
-    return (m.next || []).map(function(e){
-      var t = e.temp == null ? null : Math.round((e.temp + bias * Math.max(0, 1 - e.h / NEXT_BIAS_HOURS)) * 10) / 10;
-      var bi = t == null ? null : blackIceLive(t, e.cloud, e.wind, e.dew, e.p, e.pPrev);
-      var road = cestaVrstica(bi, e.p3, e.s3, t);
-      var tl = tempNivo(t);
-      return { h: e.h, time: e.time, temp: t, p: e.p, frac: e.frac, road: road, tempLevel: tl,
-        level: LEVEL_RANK[road.level] > LEVEL_RANK[tl] ? road.level : tl };
+    return (m.next || []).map(function(e){ return oceniUro(e, bias); });
+  }
+  function merjeniOdmik(m, d){
+    var tMeas = d && d.temp_c != null ? d.temp_c : null;
+    var base = m.tempCal != null ? m.tempCal : m.temp;
+    return (tMeas != null && base != null) ? tMeas - base : 0;
+  }
+  // Ena ura -- isto kot eval_hour() v generate_crnivec_page.py.
+  function oceniUro(e, bias){
+    var t = e.temp == null ? null : Math.round((e.temp + bias * Math.max(0, 1 - e.h / NEXT_BIAS_HOURS)) * 10) / 10;
+    var bi = t == null ? null : blackIceLive(t, e.cloud, e.wind, e.dew, e.p, e.pPrev);
+    var road = cestaVrstica(bi, e.p3, e.s3, t);
+    var tl = tempNivo(t);
+    return { h: e.h, time: e.time, date: e.date, temp: t, p: e.p, frac: e.frac, road: road, tempLevel: tl,
+      level: LEVEL_RANK[road.level] > LEVEL_RANK[tl] ? road.level : tl };
+  }
+
+  // "Na poti v službo in domov" -- NAMERNA PODVOJITEV commute_windows()/
+  // summarize_window()/day_label() iz generate_crnivec_page.py.
+  var COMMUTE_WINDOWS = [["6:00–8:00", [6, 7, 8]], ["14:00–16:00", [14, 15, 16]]];
+  var DNI_V_TEDNU = ["nedelja", "ponedeljek", "torek", "sreda", "četrtek", "petek", "sobota"];
+  function oznakaDne(dateIso, todayIso){
+    var d = new Date(dateIso + "T12:00:00Z"), t = new Date(todayIso + "T12:00:00Z");
+    var delta = Math.round((d - t) / 86400000);
+    if (delta === 0) return "Danes";
+    if (delta === 1) return "Jutri";
+    var ime = DNI_V_TEDNU[d.getUTCDay()];
+    return ime.charAt(0).toUpperCase() + ime.slice(1) + ", " + d.getUTCDate() + ". " + (d.getUTCMonth() + 1) + ".";
+  }
+  function povzemiOkno(ure){
+    if (!ure.length) return null;
+    var lvl = "na", road = null, tmin = null;
+    ure.forEach(function(x){
+      if (LEVEL_RANK[x.level] > LEVEL_RANK[lvl]) lvl = x.level;
+      if (!road || LEVEL_RANK[x.road.level] > LEVEL_RANK[road.level]) road = x.road;
+      if (x.temp != null && (tmin == null || x.temp < tmin)) tmin = x.temp;
     });
+    var prva = parseInt(ure[0].time.slice(0, 2), 10);
+    var dezne = (ure.length > 1 && (prva === 6 || prva === 14)) ? ure.slice(1) : ure;
+    var pSum = 0, frac = 0;
+    dezne.forEach(function(x){ pSum += (x.p || 0); if ((x.p || 0) >= 0.1 && (x.frac || 0) > frac) frac = x.frac; });
+    return { level: lvl, tmin: tmin, road: road, precipTxt: padavineBesedilo(Math.round(pSum * 10) / 10, frac) };
+  }
+  function izrisiVoznje(){
+    var grid = document.getElementById("crn-commute-grid"), sec = document.getElementById("crn-commute");
+    if (!grid || !sec || !zivModelLive || !zivModel.commute || !zivModel.commute.length) return;
+    var bias = merjeniOdmik(zivModel, zivDrsi);
+    var ure = zivModel.commute.map(function(e){ return oceniUro(e, bias); });
+    var dnevi = [];
+    ure.forEach(function(x){ if (dnevi.indexOf(x.date) < 0) dnevi.push(x.date); });
+    grid.textContent = "";
+    dnevi.forEach(function(date){
+      var row = document.createElement("div"); row.className = "crn-cd";
+      var h = document.createElement("p"); h.className = "crn-cd-h"; h.textContent = oznakaDne(date, zivModel.today);
+      row.appendChild(h);
+      COMMUTE_WINDOWS.forEach(function(w){
+        var sel = ure.filter(function(x){ return x.date === date && w[1].indexOf(parseInt(x.time.slice(0, 2), 10)) >= 0; });
+        var sm = povzemiOkno(sel);
+        var c = document.createElement("div");
+        function p(cls, txt){ var e = document.createElement("p"); e.className = cls; e.textContent = txt; c.appendChild(e); return e; }
+        if (!sm) { c.className = "crn-cw crn-cw-past"; p("crn-cw-h", w[0]); p("crn-nh-p", "že mimo"); row.appendChild(c); return; }
+        c.className = "crn-cw"; c.setAttribute("data-lvl", sm.level);
+        p("crn-cw-h", w[0]);
+        p("crn-cw-t", numSlLive(sm.tmin, 1) + " °C");
+        p("crn-nh-p", sm.precipTxt);
+        var r = p("crn-nh-road", ""); r.setAttribute("data-lvl", sm.road.level);
+        var ic = document.createElement("span"); ic.className = "crn-ck-i"; ic.setAttribute("aria-hidden", "true");
+        var tx = document.createElement("span");
+        var sr = document.createElement("span"); sr.className = "crn-sr"; sr.textContent = "Vozišče: " + CHECK_LEVEL_WORD[sm.road.level] + ", ";
+        tx.appendChild(sr); tx.appendChild(document.createTextNode(sm.road.value));
+        r.appendChild(ic); r.appendChild(tx);
+        row.appendChild(c);
+      });
+      grid.appendChild(row);
+    });
+    sec.hidden = false;
   }
   function stavekNapovedi(rowsNow, ure){
     if (!ure.length) return "";
@@ -1875,6 +2045,7 @@ SHARE_JS_TEMPLATE = '''
   function izrisiNapoved(rowsNow){
     var sec = document.getElementById("crn-next"), grid = document.getElementById("crn-next-grid");
     if (!sec || !grid || !zivModelLive) return;
+    izrisiVoznje();
     var ure = napovedUr(zivModel, zivDrsi);
     if (!ure.length) return;
     grid.textContent = "";
@@ -2090,7 +2261,7 @@ SHARE_JS_TEMPLATE = '''
     if (!window.fetch) { pokaziZastarelostOpozorila(); return; }
     var url = "https://api.open-meteo.com/v1/forecast?latitude=46.325779&longitude=14.921137"
       + "&hourly=temperature_2m,precipitation,freezing_level_height,cloud_cover,dew_point_2m,wind_speed_10m"
-      + "&timezone=Europe%2FLjubljana&past_days=1&forecast_days=2";
+      + "&timezone=Europe%2FLjubljana&past_days=1&forecast_days=4";
     fetch(url).then(function(r){ return r.json(); }).then(function(d){
       var times = (d.hourly && d.hourly.time) || [];
       var temps = (d.hourly && d.hourly.temperature_2m) || [];
@@ -2123,7 +2294,7 @@ SHARE_JS_TEMPLATE = '''
         pNow: hv("precipitation", idx), pPrev: hv("precipitation", idx - 1),
         cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx),
         tempCal: tempC == null ? null : Math.round((tempC + calibAt(times[idx])) * 10) / 10,
-        next: [] };
+        next: [], commute: [], today: String(times[idx]).slice(0, 10) };
       // Ure +1..+6 -- isto kot next_hours v compute_pass_weather (winter_engine.py).
       for (var h = 1; h <= 6 && idx + h < times.length; h++) {
         var k = idx + h, tk = hv("temperature_2m", k), pk3 = 0, sk3 = 0;
@@ -2138,6 +2309,28 @@ SHARE_JS_TEMPLATE = '''
           p: hv("precipitation", k), frac: snowFractionLive(LIVE_PASS_ELEV, fl[k]), p3: pk3, s3: sk3,
           pPrev: hv("precipitation", k - 1), cloud: hv("cloud_cover", k),
           wind: hv("wind_speed_10m", k), dew: hv("dew_point_2m", k) });
+      }
+      // Termini voženj -- isto kot commute_hours v compute_pass_weather
+      // (COMMUTE_HOURS, COMMUTE_DAYS v winter_engine.py): od tekoče ure do
+      // konca četrtega dne.
+      var zadnjiDan = new Date(new Date(zivModel.today + "T12:00:00Z").getTime() + 3 * 86400000).toISOString().slice(0, 10);
+      for (var c = idx; c < times.length; c++) {
+        var ts = String(times[c]);
+        if (ts.slice(0, 10) > zadnjiDan) break;
+        var hh = parseInt(ts.slice(11, 13), 10);
+        if ([6, 7, 8, 14, 15, 16].indexOf(hh) < 0) continue;
+        var tc = hv("temperature_2m", c), pc3 = 0, sc3 = 0;
+        for (var q2 = c - 2; q2 <= c; q2++) {
+          if (q2 < 0) continue;
+          pc3 += (precip[q2] || 0);
+          sc3 += (precip[q2] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[q2]);
+        }
+        zivModel.commute.push({ h: c - idx, time: ts.slice(11, 16), date: ts.slice(0, 10),
+          temp: tc == null ? null : Math.round((tc - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100
+            + calibAt(times[c])) * 10) / 10,
+          p: hv("precipitation", c), frac: snowFractionLive(LIVE_PASS_ELEV, fl[c]), p3: pc3, s3: sc3,
+          pPrev: hv("precipitation", c - 1), cloud: hv("cloud_cover", c),
+          wind: hv("wind_speed_10m", c), dew: hv("dew_point_2m", c) });
       }
       uporabiStanje();
     }).catch(function(){ pokaziZastarelostOpozorila(); });
@@ -2858,6 +3051,7 @@ def build_body(data):
     next_cells = forecast_cells_html(next_hours)
     next_say = forecast_sentence(rows, next_hours)
     next_note = forecast_note(next_corrected, weather.get("calib"))
+    commute_rows = commute_html(commute_windows(weather, drsi, seo.TODAY))
     sp_html = special_html(special_items(weather, data.get("fog"), seo.TODAY))
     duel = valley_compare(drsi, drsi_vse.get("gornji_grad"))
     duel_time = ""
@@ -3039,6 +3233,13 @@ def build_body(data):
         <p class="crn-next-say" id="crn-next-say">{next_say}</p>
         <div class="crn-next-grid" id="crn-next-grid">{next_cells}</div>
         <p class="crn-check-note" id="crn-next-note">{next_note}</p>
+      </section>
+
+      <section class="crn-commute" id="crn-commute" aria-labelledby="crn-commute-h"{'' if commute_rows else ' hidden'}>
+        <p class="crn-now-h" id="crn-commute-h">Na poti v službo in domov</p>
+        <p class="crn-lead crn-commute-lead">Najnižja temperatura, padavine in vozišče na prelazu v jutranjem in popoldanskem terminu.</p>
+        <div class="crn-commute-grid" id="crn-commute-grid">{commute_rows}</div>
+        <p class="crn-check-note">Napoved Open-Meteo, preračunana na 902 m in umerjena z meritvami DRSI. Dlje v prihodnost je manj zanesljiva. Vozišče je ocena.</p>
       </section>
 
       <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">

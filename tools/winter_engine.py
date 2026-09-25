@@ -158,6 +158,10 @@ PASSES = [
 ]
 
 
+COMMUTE_HOURS = (6, 7, 8, 14, 15, 16)  # termina 6:00-8:00 in 14:00-16:00
+COMMUTE_DAYS = 4                        # danes + 3 dni
+
+
 def _calib_at(calib, time_iso):
     """Popravek (°C) za uro dneva iz ISO časa, 0 brez umeritve."""
     if not calib or not time_iso:
@@ -212,35 +216,47 @@ def compute_pass_weather(hourly, idx_now, elevation_m, calib=None):
     # sama sestavi vozišče (black_ice_category) s temperaturo, popravljeno z
     # meritvijo DRSI, zato tu ni ocene, samo podatki. precip_3h/snow_3h sta
     # okno treh ur DO vključno te ure (isto kot "now" zgoraj).
-    nxt = []
-    if idx_now is not None:
-        for h in range(1, 7):
-            i = idx_now + h
-            if i >= n:
+    def hour_entry(i, h):
+        t_i = hval(hourly, "temperature_2m", i)
+        past = [j for j in range(i - 2, i + 1) if 0 <= j < len(precip)]
+        return {
+            "h": h,
+            "time": times[i],
+            "temp_c": round(t_i - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100
+                            + _calib_at(calib, times[i]), 1) if t_i is not None else None,
+            "precip_mm": hval(hourly, "precipitation", i),
+            "snow_frac": round(snow_fraction(elevation_m, fl[i] if i < len(fl) else None), 2),
+            "precip_mm_3h": round(sum((precip[j] or 0) for j in past), 1),
+            "snow_cm_3h": round(sum((precip[j] or 0) * snow_fraction(elevation_m, fl[j] if j < len(fl) else None)
+                                    * SNOW_RATIO_CM_PER_MM for j in past), 1),
+            "precip_mm_prev": hval(hourly, "precipitation", i - 1),
+            "cloud_pct": hval(hourly, "cloud_cover", i),
+            "wind_kmh_valley": hval(hourly, "wind_speed_10m", i),
+            "dew_c_valley": hval(hourly, "dew_point_2m", i),
+        }
+
+    nxt = [hour_entry(idx_now + h, h) for h in range(1, 7)
+           if idx_now is not None and idx_now + h < n]
+
+    # "Na poti v službo in domov" na /crnivec/: ure terminov COMMUTE_HOURS za
+    # danes in naslednje dni (COMMUTE_DAYS), od tekoče ure naprej -- termin,
+    # ki je že mimo, izpade, delno pretečen ostane s preostankom ur.
+    commute = []
+    if idx_now is not None and times:
+        last_day = (datetime.date.fromisoformat(times[idx_now][:10])
+                    + datetime.timedelta(days=COMMUTE_DAYS - 1)).isoformat()
+        for i in range(idx_now, n):
+            if times[i][:10] > last_day:
                 break
-            t_i = hval(hourly, "temperature_2m", i)
-            past = [j for j in range(i - 2, i + 1) if 0 <= j < len(precip)]
-            nxt.append({
-                "h": h,
-                "time": times[i],
-                "temp_c": round(t_i - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100
-                                + _calib_at(calib, times[i]), 1) if t_i is not None else None,
-                "precip_mm": hval(hourly, "precipitation", i),
-                "snow_frac": round(snow_fraction(elevation_m, fl[i] if i < len(fl) else None), 2),
-                "precip_mm_3h": round(sum((precip[j] or 0) for j in past), 1),
-                "snow_cm_3h": round(sum((precip[j] or 0) * snow_fraction(elevation_m, fl[j] if j < len(fl) else None)
-                                        * SNOW_RATIO_CM_PER_MM for j in past), 1),
-                "precip_mm_prev": hval(hourly, "precipitation", i - 1),
-                "cloud_pct": hval(hourly, "cloud_cover", i),
-                "wind_kmh_valley": hval(hourly, "wind_speed_10m", i),
-                "dew_c_valley": hval(hourly, "dew_point_2m", i),
-            })
+            if int(times[i][11:13]) in COMMUTE_HOURS:
+                commute.append(hour_entry(i, i - idx_now))
     return {
         "temp_c": round(temp_c, 1) if temp_c is not None else None,
         "expected_snow_cm_24h": round(snow_cm, 1),
         "precip_mm_24h": round(precip_mm, 1),
         "now": now,
         "next_hours": nxt,
+        "commute_hours": commute,
         # Modelska temperatura ZDAJ z istim popravkom kot next_hours -- stran
         # iz nje in meritve izračuna, koliko se napoved še razlikuje od
         # meritve (glej forecast_hours v generate_crnivec_page.py).
