@@ -531,6 +531,14 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   na istem živem klicu Open-Meteo (`forecast_days=4`). Posamezna ura je v
   obeh jezikih ena funkcija (`eval_hour()`/`oceniUro()`) za ta pas in za
   »Naslednjih 6 ur«.
+- **»Vreme na Črnivcu za 7 dni«** (`week_html()`, 25. 9. 2026, ključna beseda
+  »vreme črnivec 7 dni«): `compute_pass_daily()` v `winter_engine.py` (izhod
+  `weather["daily"]`) -- najnižja/najvišja temperatura na 902 m z isto
+  umeritvijo DRSI po uri dneva, padavine, najvišja verjetnost, nov sneg
+  (`snow_fraction`) in najslabša poledica (`black_ice_category_for_hour`).
+  Dan 0 je samo preostanek današnjega dne. **Samo strežniški izris**, brez JS
+  kopije (dnevni povzetek se čez dan malo spremeni). Na telefonu je tabela
+  preurejena v vrstice z oznako nad vrednostjo (CSS, `data-l`).
 - **»Posebne razmere · 48 ur«** (`special_items()`): sneg po dnevih, začetek,
   meja sneženja in verjetnost padavin, poledica (`compute_black_ice_for_location`
   z umeritvijo) in megla (regionalni `data["fog"]`: prelaz nad, na robu ±100 m
