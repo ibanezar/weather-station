@@ -198,6 +198,75 @@ QUOTES = [
 # verjetnostjo (glej crn-reroll v SHARE_JS_TEMPLATE), kot easter egg, ne kot
 # še en enakovreden citat. Ni deterministična po datumu, ker bi sicer
 # "redka" izguba smisel — mora biti presenečenje ob kliku, ne stalnica dneva.
+# "Črnivec pravi …" -- prelaz govori v prvi osebi, VEZANO NA STANJE (za
+# razliko od QUOTES zgoraj, ki so šale iz FB skupine ne glede na vreme).
+# Stanje je cona indeksa (pick_zone) ali "megla", kadar vrstica Megla v
+# seznamu kaže "verjetna" in je cona suho/okoli ničle -- indeks megle ne
+# vidi; ob ledu ali snegu pa ostane stavek o njiju.
+# Izbira: FNV-1a nad "datum|stanje" (samo ASCII), da je isti dan za isto
+# stanje vedno isti stavek; JS kopija je izberiRek() v SHARE_JS_TEMPLATE in
+# mora dati ISTI indeks -- zato ne sha256 (v brskalniku je asinhron).
+CRNIVEC_SAYS = {
+    "sonce": [
+        "Danes me lahko prečkaš brez drame.",
+        "Lahko greš. Jaz danes nisem problem.",
+        "Suh sem kot poper. Pelji lepo.",
+        "Danes sem samo lep ovinek z razgledom.",
+        "Nič posebnega pri meni. Za spremembo.",
+    ],
+    "nekaj": [
+        "Okoli ničle sem. V senci ne bodi preveč pogumen.",
+        "Večinoma sem v redu. Poudarek je na »večinoma«.",
+        "Nekje v senci imam morda presenečenje. Počasi.",
+        "Nisem hud, sem pa muhast. Pelji mirno.",
+        "Mogoče je led, mogoče ni. Ne preverjaj s hitrostjo.",
+    ],
+    "verige": [
+        "Če nimaš zimskih gum, se bova še pogovorila.",
+        "Sneži. Verige imej pri roki, ne v garaži.",
+        "Danes sem bel. Za poletne gume nisem razpoložen.",
+        "Pridi opremljen ali pa pridi jutri.",
+        "Plug ima danes delo, ti pa potrpljenje.",
+    ],
+    "spolzko": [
+        "Pod ničlo sem. Drsim bolje kot ti.",
+        "Danes sem drsališče z razgledom.",
+        "Zavore uporabljaj nežno. Jaz ne odpuščam.",
+        "Ti leda ne vidiš, jaz pa vem, kje je.",
+        "Počasi. Zares počasi.",
+    ],
+    "megla": [
+        "V megli sem. Luči prižgi, hitrost zmanjšaj.",
+        "Danes me ne boš videl, dokler ne boš na meni.",
+        "Oblak je sedel name. Drži se črt.",
+        "Vidim en ovinek naprej. Ti tudi.",
+        "Megla je gosta. Prehitevanje danes ni dobra ideja.",
+    ],
+}
+
+
+def fnv1a(text):
+    h = 0x811C9DC5
+    for ch in text.encode("ascii", "ignore"):
+        h ^= ch
+        h = (h * 0x01000193) & 0xFFFFFFFF
+    return h
+
+
+def says_state(zone_id, rows):
+    # Megla prevlada samo nad mirnima conama -- ob ledu ali snegu je ta
+    # nevarnost večja in stavek naj govori o njej.
+    fog = next((r for r in rows if r["id"] == "fog"), None)
+    if fog and fog["level"] == "stop" and zone_id in ("sonce", "nekaj"):
+        return "megla"
+    return zone_id
+
+
+def crnivec_says(state, date_iso):
+    pool = CRNIVEC_SAYS.get(state) or CRNIVEC_SAYS["nekaj"]
+    return pool[fnv1a(f"{date_iso}|{state}") % len(pool)]
+
+
 RARE_QUOTE = "Nekdo je pravkar prišel čez. Cesta je suha, sneg ga sploh ni čakal. To se zgodi enkrat na sto vprašanj."
 
 
@@ -860,6 +929,14 @@ CSS = '''
      obarvane statusne kartice, da barva cone ne zmede barv posameznih vrstic.
      Raven nosi ikona IN besedilo (skrit "V redu/Pozor/Nevarno" za bralnike
      zaslona + vrednost sama) -- barva ni edini nosilec pomena. */
+  /* "Črnivec pravi" -- oblaček v stripovskem slogu pod opisom statusa. */
+  .crn-says{position:relative;display:inline-block;max-width:34ch;margin:var(--s3) auto 0;
+    background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;box-shadow:3px 3px 0 #111;
+    padding:6px var(--s2);font-size:15px;font-weight:700;line-height:1.35;transform:rotate(-.6deg)}
+  .crn-says-h{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted)}
+  .crn-says::before{content:"";position:absolute;top:-11px;left:50%;margin-left:-9px;
+    border-style:solid;border-width:0 9px 11px;border-color:transparent transparent #111}
   .crn-now{background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;
     box-shadow:4px 4px 0 #111;padding:var(--s2) var(--s3);margin:var(--s3) auto 0;max-width:480px;text-align:left}
   .crn-now-h{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
@@ -1347,11 +1424,13 @@ SHARE_JS_TEMPLATE = '''
       var descEl = document.getElementById("crn-status-desc");
       var tempEl = document.getElementById("crn-temp-val");
       var quoteEl = document.querySelector(".crn-quote p");
+      var saysEl2 = document.getElementById("crn-says-txt");
       var label = labelEl ? labelEl.textContent.toLowerCase() : "";
       var desc = descEl ? descEl.textContent : "";
       var temp = tempEl ? tempEl.textContent.replace("°C", "stopinj") : "";
       var quote = quoteEl ? quoteEl.textContent : "";
       var besedilo = "Kako je čez Črnivec? " + label + ". " + desc +
+        (saysEl2 ? (" Črnivec pravi: " + saysEl2.textContent) : "") +
         (temp ? (" Na prelazu je " + temp + ".") : "") +
         (quote ? (" Meteorec nasvet: " + quote) : "");
       var u = new SpeechSynthesisUtterance(besedilo);
@@ -1721,6 +1800,9 @@ SHARE_JS_TEMPLATE = '''
     if (!ul || (!zivModel && !zivDrsi)) return;
     var rows = vrsticeSeznama(zivModel, zivDrsi);
     izrisiNapoved(rows);
+    var saysEl = document.getElementById("crn-says-txt"), stEl = document.getElementById("crn-status");
+    var zidSays = zivZoneId || (stEl ? stEl.getAttribute("data-zone") : null);
+    if (saysEl && zidSays) saysEl.textContent = izberiRek(zidSays, rows);
     ul.textContent = "";
     rows.forEach(function(r){
       var li = document.createElement("li");
@@ -1789,6 +1871,27 @@ SHARE_JS_TEMPLATE = '''
     if (minEl) { minEl.textContent = r.mins; minEl.hidden = !r.mins; }
     set("crn-duel-note", "Obe številki sta meritvi postaj DRSI ob " + uraSl(new Date(r.ts)) + ".");
     sec.hidden = false;
+  }
+
+  // "Črnivec pravi" -- NAMERNA PODVOJITEV fnv1a()/says_state()/
+  // crnivec_says() iz generate_crnivec_page.py; mora dati isti indeks.
+  var SAYS = __SAYS_JSON__;
+  function fnv1a(str){
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c > 127) continue;
+      h ^= c;
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h >>> 0;
+  }
+  function izberiRek(zoneId, rows){
+    var fog = rows.filter(function(r){ return r.id === "fog"; })[0];
+    var state = (fog && fog.level === "stop" && (zoneId === "sonce" || zoneId === "nekaj")) ? "megla" : zoneId;
+    var pool = SAYS[state] || SAYS.nekaj;
+    var danes = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+    return pool[fnv1a(danes + "|" + state) % pool.length];
   }
 
   function osveziDrsi(){
@@ -2568,6 +2671,7 @@ def build_body(data):
     check_html = check_list_html(rows)
     check_note_txt = check_note(drsi)
     check_warn_txt = check_warn_text(rows, zone["id"])
+    says_txt = crnivec_says(says_state(zone["id"], rows), today_iso)
     next_hours, next_corrected = forecast_hours(weather, drsi)
     next_cells = forecast_cells_html(next_hours)
     next_say = forecast_sentence(rows, next_hours)
@@ -2692,6 +2796,7 @@ def build_body(data):
                 .replace("__CALIB_JSON__", json.dumps(weather.get("calib")))
                 .replace("__DUEL_ELEV_JSON__", json.dumps(DRSI_ELEV_M))
                 .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
+                .replace("__SAYS_JSON__", json.dumps(CRNIVEC_SAYS, ensure_ascii=False).replace("</", "<\\/"))
                 .replace("__TODAY_ISO__", today_iso))
 
     # Vrstni red je hierarhija (mobile-first, glej opombo pri CSS): status →
@@ -2729,6 +2834,8 @@ def build_body(data):
         <div class="crn-status-icon" id="crn-status-icon">{ZONE_ICONS[zone['id']]}</div>
         <p class="crn-status-title" id="crn-status-title">{st['status']}</p>
         <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
+        <p class="crn-says" id="crn-says"><span class="crn-says-h">Črnivec pravi:</span>
+          <span id="crn-says-txt">{says_txt}</span></p>
         <div class="crn-now" aria-labelledby="crn-now-h">
           <p class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</p>
           <ul class="crn-check" id="crn-check">{check_html}</ul>
