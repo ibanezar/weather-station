@@ -141,6 +141,8 @@ PASSES = [
         "elevation_m": 902,
         "connects": "Kamniška Bistrica (Kamnik) ↔ Gornji Grad",
         "source": "https://sl.wikipedia.org/wiki/%C4%8Crnivec_(preval)",
+        # Cestna vremenska postaja DRSI na prelazu (glej compute_pass_calibration).
+        "drsi_station": 201,
         "status": None,
         "status_checked": None,
     },
@@ -156,7 +158,17 @@ PASSES = [
 ]
 
 
-def compute_pass_weather(hourly, idx_now, elevation_m):
+def _calib_at(calib, time_iso):
+    """Popravek (°C) za uro dneva iz ISO časa, 0 brez umeritve."""
+    if not calib or not time_iso:
+        return 0.0
+    try:
+        return calib["bias_by_hour"][int(time_iso[11:13])] or 0.0
+    except (KeyError, IndexError, ValueError, TypeError):
+        return 0.0
+
+
+def compute_pass_weather(hourly, idx_now, elevation_m, calib=None):
     """Vremenska ocena NA VIŠINI prelaza — isti lapse-rate/snow_fraction kot
     povsod v tej datoteki, NE stanje ceste (glej opombo pri PASSES)."""
     t_now = hval(hourly, "temperature_2m", idx_now)
@@ -211,7 +223,8 @@ def compute_pass_weather(hourly, idx_now, elevation_m):
             nxt.append({
                 "h": h,
                 "time": times[i],
-                "temp_c": round(t_i - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100, 1) if t_i is not None else None,
+                "temp_c": round(t_i - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100
+                                + _calib_at(calib, times[i]), 1) if t_i is not None else None,
                 "precip_mm": hval(hourly, "precipitation", i),
                 "snow_frac": round(snow_fraction(elevation_m, fl[i] if i < len(fl) else None), 2),
                 "precip_mm_3h": round(sum((precip[j] or 0) for j in past), 1),
@@ -228,7 +241,126 @@ def compute_pass_weather(hourly, idx_now, elevation_m):
         "precip_mm_24h": round(precip_mm, 1),
         "now": now,
         "next_hours": nxt,
+        # Modelska temperatura ZDAJ z istim popravkom kot next_hours -- stran
+        # iz nje in meritve izračuna, koliko se napoved še razlikuje od
+        # meritve (glej forecast_hours v generate_crnivec_page.py).
+        "temp_cal_c": (round(temp_c + _calib_at(calib, times[idx_now]), 1)
+                       if (temp_c is not None and idx_now is not None) else None),
+        "calib": calib,
+        "special": compute_pass_special(hourly, idx_now, elevation_m, calib),
     }
+
+
+def compute_pass_special(hourly, idx_now, elevation_m, calib=None):
+    """"Posebne razmere" na /crnivec/: sneg po dnevih (preostanek danes +
+    jutri) na višini prelaza, prvi začetek sneženja, meja sneženja med
+    padavinami, najvišja verjetnost padavin v urah, ko bi snežilo, in
+    poledica v 36 urah (compute_black_ice_for_location -- ista kot za
+    kraje, ne nova). Vse iz istega hourly kot ostali indeksi; to je
+    modelska napoved, ne stanje ceste, in tako jo stran tudi označi."""
+    if idx_now is None:
+        return None
+    times = hourly.get("time") or []
+    precip = hourly.get("precipitation") or []
+    fl = hourly.get("freezing_level_height") or []
+    n = len(times)
+    today = times[idx_now][:10]
+    tomorrow = (datetime.date.fromisoformat(today) + datetime.timedelta(days=1)).isoformat()
+    by_day = {today: 0.0, tomorrow: 0.0}
+    snow_start, levels, probs = None, [], []
+    for i in range(idx_now, min(idx_now + 48, n)):
+        p = hval(hourly, "precipitation", i) or 0
+        flv = fl[i] if i < len(fl) else None
+        frac = snow_fraction(elevation_m, flv)
+        cm = p * frac * SNOW_RATIO_CM_PER_MM
+        day = times[i][:10]
+        if day in by_day:
+            by_day[day] += cm
+        if cm >= 0.1 and snow_start is None:
+            snow_start = times[i]
+        if p >= 0.1 and flv is not None:
+            levels.append(flv - SNOW_LEVEL_OFFSET_M)
+        if frac >= 0.5:
+            pp = hval(hourly, "precipitation_probability", i)
+            if pp is not None:
+                probs.append(pp)
+    levels.sort()
+    return {
+        "snow_cm_by_day": [{"date": d, "cm": round(v, 1)} for d, v in by_day.items()],
+        "snow_start": snow_start,
+        "snow_level_m": round(levels[len(levels) // 2] / 50) * 50 if levels else None,
+        "snow_prob_pct": max(probs) if probs else None,
+        "black_ice": compute_black_ice_for_location(hourly, idx_now, elevation_m, calib),
+    }
+
+
+# ── Umerjanje temperature prelaza z meritvami DRSI ────────────────────────
+# Temperatura prelaza je napoved za Rečico (366 m), preračunana z gradientom.
+# Ponoči to ne drži: hladen zrak se nabira na dnu doline, prelaz je nad njim.
+# Primerjava z meritvami postaje DRSI na Črnivcu (september 2026) je
+# pokazala, da je tak model ponoči ~3 °C prehladen in podnevi ~1,5 °C
+# pretopel -- in je v treh od štirih noči napovedal "visoko" nevarnost
+# poledice, ko je bilo na prelazu 5-6 °C. Popravek po uri dneva iz zadnjih
+# CALIB_DAYS dni je napako zunaj učnega obdobja zmanjšal z 2,1 na 1,0 °C
+# (ponoči z 2,8 na 1,1 °C). Nov je vsak dan, torej sledi letnemu času.
+DRSI_HISTORY_URL = "https://www.ceste.si/Vremenske/Vreme/vremenski_podatki"
+CALIB_DAYS = 10          # en klic vrne največ ~1800 točk (10-min), 10 dni je ~1440
+CALIB_MIN_SAMPLES = 3    # najmanj ur na uro dneva, sicer brez popravka za to uro
+
+
+def _http_json(url, timeout=30):
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (compatible; Meteorec-WinterEngine/1.0)",
+        "Accept": "application/json",
+    })
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+def compute_pass_calibration(station_id, elevation_m, now_local):
+    """Povprečno odstopanje (meritev − model) po uri dneva, zglajeno z
+    sosednjima urama. Vrne None ob kakršnikoli napaki -- brez umeritve stran
+    deluje naprej s surovim modelom (in tako tudi piše)."""
+    try:
+        frm = (now_local - datetime.timedelta(days=CALIB_DAYS)).strftime("%Y-%m-%dT00:00:00")
+        to = now_local.strftime("%Y-%m-%dT%H:%M:%S")
+        rows = _http_json(f"{DRSI_HISTORY_URL}?" + urllib.parse.urlencode({
+            "weatherStationID": station_id, "fromDate": frm, "toDate": to, "queryCount": 2000}))
+        meas = {}
+        for r in rows or []:
+            t, ts = r.get("outdoorTemperatureC"), str(r.get("timestamp") or "")
+            if t is not None and len(ts) >= 13:
+                meas.setdefault(ts[:13], []).append(float(t))
+        om = _http_json("https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode({
+            "latitude": LAT, "longitude": LON, "hourly": "temperature_2m",
+            "timezone": "Europe/Ljubljana", "past_days": CALIB_DAYS, "forecast_days": 1}))
+        h = om.get("hourly") or {}
+        bins = {hh: [] for hh in range(24)}
+        errs = []
+        for tm, tv in zip(h.get("time") or [], h.get("temperature_2m") or []):
+            m = meas.get(tm[:13])
+            if not m or tv is None:
+                continue
+            model = tv - seo.LAPSE_RATE_C_PER_100M * (elevation_m - ELEV) / 100
+            d = sum(m) / len(m) - model
+            bins[int(tm[11:13])].append(d)
+            errs.append((int(tm[11:13]), d))
+        raw = {hh: sum(v) / len(v) for hh, v in bins.items() if len(v) >= CALIB_MIN_SAMPLES}
+        if len(raw) < 20:
+            log(f"umeritev prelaza: premalo meritev ({len(raw)}/24 ur) -- brez popravka")
+            return None
+        bias = []
+        for hh in range(24):
+            near = [raw[(hh + k) % 24] for k in (-1, 0, 1) if (hh + k) % 24 in raw]
+            bias.append(round(sum(near) / len(near), 2) if near else 0.0)
+        mae_raw = sum(abs(d) for _, d in errs) / len(errs)
+        mae_cal = sum(abs(d - bias[hh]) for hh, d in errs) / len(errs)
+        log(f"umeritev prelaza (DRSI {station_id}): {len(errs)} ur, MAE {mae_raw:.2f} -> {mae_cal:.2f} °C")
+        return {"source": "DRSI", "station": station_id, "days": CALIB_DAYS, "hours": len(errs),
+                "bias_by_hour": bias, "mae_raw_c": round(mae_raw, 2), "mae_cal_c": round(mae_cal, 2)}
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError, KeyError, TypeError) as e:
+        log(f"umeritev prelaza ni uspela ({e}) -- brez popravka")
+        return None
 
 # Višinski pasovi za meja sneženja — dno doline (postajna višina) do planinske
 # ravni. NAMENOMA ne poimenujemo konkretnih vrhov s trdno višino (Golte,
@@ -306,7 +438,7 @@ def compute_hourly_48h(hourly, times, idx_now):
 
 def fetch_open_meteo():
     hourly_vars = ["temperature_2m", "dew_point_2m", "cloud_cover", "wind_speed_10m",
-                   "precipitation", "freezing_level_height"]
+                   "precipitation", "freezing_level_height", "precipitation_probability"]
     for hpa in INVERSION_LEVELS_HPA:
         hourly_vars += [f"temperature_{hpa}hPa", f"geopotential_height_{hpa}hPa"]
     params = urllib.parse.urlencode({
@@ -538,7 +670,10 @@ def black_ice_category(t_air_c, cloud_pct, wind_kmh, dew_c, p_now_mm, p_prev_mm)
     g = ground_temp_c(t_air_c, cloud_pct, wind_kmh)
     if g is None:
         return None
-    d = dew_c
+    # Rosišče ne more biti nad temperaturo zraka. Za višje kraje pride
+    # rosišče iz doline (model za Rečico), temperatura pa je preračunana na
+    # višino -- brez te meje je bilo na 902 m rosišče 6 °C ob zraku 3 °C.
+    d = min(dew_c, t_air_c) if dew_c is not None else None
     cat = "nizko"
     if g <= 0.5:
         near_saturated = d is not None and d >= g - 1.0
@@ -549,7 +684,7 @@ def black_ice_category(t_air_c, cloud_pct, wind_kmh, dew_c, p_now_mm, p_prev_mm)
     return cat, g
 
 
-def black_ice_category_for_hour(hourly, i, elevation_m):
+def black_ice_category_for_hour(hourly, i, elevation_m, t_offset=0.0):
     """Kategorija poledice za en kraj/eno uro — jedro tako za 36h pogled po
     krajih (compute_black_ice_for_location) kot za dnevni povzetek
     (compute_black_ice_daily); ne podvajaj te logike na klicnem mestu."""
@@ -558,7 +693,7 @@ def black_ice_category_for_hour(hourly, i, elevation_m):
         return None
     elev_diff = elevation_m - ELEV
     # Isti gradient kot gen_nearby_town_pages v generate_seo_pages.py — uvožen, ne podvojen.
-    t_air_loc = t_air - seo.LAPSE_RATE_C_PER_100M * elev_diff / 100
+    t_air_loc = t_air - seo.LAPSE_RATE_C_PER_100M * elev_diff / 100 + (t_offset or 0.0)
     d = hval(hourly, "dew_point_2m", i)
     result = black_ice_category(
         t_air_loc,
@@ -574,7 +709,9 @@ def black_ice_category_for_hour(hourly, i, elevation_m):
     return cat, g, d
 
 
-def compute_black_ice_for_location(hourly, idx_now, elevation_m):
+def compute_black_ice_for_location(hourly, idx_now, elevation_m, calib=None):
+    """calib: popravek temperature po urah dneva (compute_pass_calibration) --
+    samo za prelaz z meritvijo; kraji v dolini ga nimajo (None)."""
     times = hourly.get("time") or []
     n = len(times)
 
@@ -584,7 +721,7 @@ def compute_black_ice_for_location(hourly, idx_now, elevation_m):
     start = idx_now if idx_now is not None else 0
     end = min(start + 36, n)
     for i in range(start, end):
-        result = black_ice_category_for_hour(hourly, i, elevation_m)
+        result = black_ice_category_for_hour(hourly, i, elevation_m, _calib_at(calib, times[i]))
         if result is None:
             continue
         cat, g, d = result
@@ -888,7 +1025,11 @@ def main():
     heating_index = compute_heating_index(hourly, idx_now, times)
     fog = compute_fog(hourly, idx_now, times)
     snowpack, snowpack_changed = compute_snowpack(hourly, times, idx_now, today_iso)
-    passes = [{**p, "weather": compute_pass_weather(hourly, idx_now, p["elevation_m"])} for p in PASSES]
+    passes = []
+    for p in PASSES:
+        calib = (compute_pass_calibration(p["drsi_station"], p["elevation_m"], now_local)
+                 if p.get("drsi_station") else None)
+        passes.append({**p, "weather": compute_pass_weather(hourly, idx_now, p["elevation_m"], calib)})
     hourly_48h = compute_hourly_48h(hourly, times, idx_now)
 
     locations = []

@@ -508,9 +508,31 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   in zamolčal sneg ob 18:00. Megle in vetra napoved nima (model je za dno
   doline). Statični izris je iz jutranjega teka, JS ga ob živi napovedi
   prepiše.
+- **Model prelaza je umerjen z meritvami DRSI** (`compute_pass_calibration`
+  v `winter_engine.py`, od 25. 9. 2026). Preračun iz doline z gradientom ne
+  vidi nočne inverzije: primerjava z meritvami je pokazala, da je ponoči
+  ~3 °C prehladen, podnevi ~1,5 °C pretopel in je v treh od štirih
+  septembrskih noči napovedal »visoko« nevarnost poledice pri 5–6 °C na
+  prelazu. Vsak dan se iz zadnjih 10 dni (zgodovina DRSI + Open-Meteo
+  `past_days`) izračuna povprečno odstopanje po uri dneva. Zunaj učnega
+  obdobja je napaka padla z 2,1 na 1,0 °C, ponoči z 2,8 na 1,1 °C. Popravek
+  velja za `next_hours`, `temp_cal_c` in poledico v `special`, **ne pa za
+  indeks** (ta ima meritev) in ne za `/zima/`. Ob napaki je `calib` `None` in
+  stran to v opombi pove. Profil prostega ozračja (925/850 hPa) sem preizkusil
+  in je enako slab v nasprotno smer (~3 °C pretopel), zato ga ne uvajaj kot
+  »izboljšavo«.
+- **»Posebne razmere · 48 ur«** (`special_items()`): sneg po dnevih, začetek,
+  meja sneženja in verjetnost padavin, poledica (`compute_black_ice_for_location`
+  z umeritvijo) in megla (regionalni `data["fog"]`: prelaz nad, na robu ±100 m
+  ali pod oceno zgornje meje jutranje megle). Samo strežniški izris iz
+  jutranjega teka, čas izračuna je izpisan. Brez posebnosti je ena vrstica.
+- `black_ice_category()` omeji rosišče na temperaturo zraka: za višje kraje
+  je rosišče iz doline, temperatura pa preračunana, zato je bilo rosišče
+  lahko nad temperaturo.
 - Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
-  `cestaVrstica()`, `blackIceLive()`, `napovedUr()`, `stavekNapovedi()`), kar
-  je namerna podvojitev. **Če spremeniš eno, spremeni drugo.**
+  `cestaVrstica()`, `blackIceLive()`, `napovedUr()`, `stavekNapovedi()`,
+  `calibAt()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
+  drugo.**
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 

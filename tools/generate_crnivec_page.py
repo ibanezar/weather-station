@@ -339,7 +339,9 @@ def precip_text(p, frac):
 def forecast_hours(weather, drsi):
     """Ure +1..+6 z oceno vozišča; vsaka {h, time, temp, precip_txt,
     road (vrstica kot road_row), level}."""
-    t_model = weather.get("temp_c")
+    # temp_cal_c/next_hours so že umerjeni z meritvami DRSI zadnjih dni
+    # (compute_pass_calibration v winter_engine.py), kadar je umeritev.
+    t_model = weather.get("temp_cal_c") if weather.get("temp_cal_c") is not None else weather.get("temp_c")
     t_meas = (drsi or {}).get("temp_c")
     bias = (t_meas - t_model) if (t_meas is not None and t_model is not None) else 0.0
     out = []
@@ -390,9 +392,10 @@ def forecast_sentence(rows_now, hours):
     return say
 
 
-def forecast_note(corrected):
-    fix = ", temperatura popravljena z zadnjo meritvijo" if corrected else ""
-    return f"Napoved Open-Meteo za dolino, preračunana na 902 m{fix}. Vozišče je ocena."
+def forecast_note(corrected, calib=None):
+    cal = (f" in umerjena z meritvami postaje DRSI zadnjih {calib.get('days')} dni" if calib else "")
+    fix = ", začne pri zadnji meritvi" if corrected else ""
+    return f"Napoved Open-Meteo za dolino, preračunana na 902 m{cal}{fix}. Vozišče je ocena."
 
 
 def forecast_cells_html(hours):
@@ -409,6 +412,99 @@ def forecast_cells_html(hours):
             f'<p class="crn-nh-road" data-lvl="{r["level"]}"><span class="crn-ck-i" aria-hidden="true"></span>'
             f'<span><span class="crn-sr">Vozišče: {CHECK_LEVEL_WORD[r["level"]]}, </span>{r["value"]}</span></p></div>')
     return "".join(cells)
+
+
+# ── "Posebne razmere" (48 ur) ────────────────────────────────────────────
+# Sneg, poledica in megla -- samo kadar je kaj povedati (sicer ena vrstica).
+# Vir je weather["special"] (compute_pass_special v winter_engine.py) in
+# regionalni data["fog"] (compute_fog). Samo strežniški izris iz jutranjega
+# teka: sneg jutri in jutranja megla se čez dan ne spreminjata dovolj, da bi
+# upravičila še eno JS kopijo pravil -- čas izračuna je izpisan pod blokom.
+FOG_EDGE_M = 100  # ocena meje inverzije je groba; ±100 m okoli 902 m je "na robu"
+
+
+def rel_day(date_iso, today):
+    try:
+        d = datetime.date.fromisoformat(date_iso[:10])
+    except (TypeError, ValueError):
+        return ""
+    delta = (d - today).days
+    return {0: "danes", 1: "jutri", 2: "pojutrišnjem"}.get(delta, f"{d.day}. {d.month}.")
+
+
+def hour_span(hours, today):
+    """"ponoči 00:00–03:00" / "jutri 07:00–09:00" iz seznama ISO ur."""
+    if not hours:
+        return ""
+    first, last = hours[0], hours[-1]
+    day = rel_day(first, today)
+    if day == "jutri" and int(first[11:13]) < 6:
+        day = "ponoči"
+    span = first[11:16] if first == last else f"{first[11:16]}–{last[11:16]}"
+    return f"{day} {span}"
+
+
+def special_items(weather, fog, today):
+    sp = weather.get("special") or {}
+    items = []
+
+    days = sp.get("snow_cm_by_day") or []
+    top_cm = max((d["cm"] for d in days), default=0)
+    if top_cm >= 0.5 or sp.get("snow_start"):
+        lines = [" · ".join(f'{rel_day(d["date"], today).capitalize()}: {num1(d["cm"])} cm' for d in days)]
+        if sp.get("snow_start"):
+            lines.append(f'Začetek: okoli {sp["snow_start"][11:16]} ({rel_day(sp["snow_start"], today)})')
+        if sp.get("snow_level_m"):
+            lines.append(f'Meja sneženja: ~{sp["snow_level_m"]:.0f} m')
+        if sp.get("snow_prob_pct") is not None:
+            lines.append(f'Verjetnost padavin v urah, ko bi snežilo: {sp["snow_prob_pct"]:.0f} %')
+        lvl = "stop" if top_cm >= 2 else "warn"
+        items.append({"id": "snow", "label": "Sneg", "level": lvl,
+                      "value": f"do {num1(top_cm)} cm" if top_cm >= 0.5 else "rahlo sneženje možno",
+                      "lines": lines})
+
+    bi = sp.get("black_ice") or {}
+    if bi.get("risk_level") in ("srednje", "visoko"):
+        lines = []
+        if bi.get("risk_hours"):
+            lines.append(f'Najbolj tvegano: {hour_span(bi["risk_hours"], today)}')
+        if bi.get("ground_temp_c") is not None:
+            lines.append(f'Ocenjena temperatura cestišča do približno {num1(bi["ground_temp_c"])} °C — '
+                         f'cestišče se ob jasnem in mirnem vremenu ohladi pod temperaturo zraka.')
+        lines.append("Najprej na mostovih in v senčnih odsekih.")
+        items.append({"id": "ice", "label": "Poledica",
+                      "level": "stop" if bi["risk_level"] == "visoko" else "warn",
+                      "value": "pogoji so povečani" if bi["risk_level"] == "visoko" else "pogoji so možni",
+                      "lines": lines})
+
+    if fog and fog.get("has_inversion") and fog.get("top_m"):
+        top = fog["top_m"]
+        when = f'{rel_day(fog.get("morning_date") or "", today)} zjutraj'
+        if top < 902 - FOG_EDGE_M:
+            items.append({"id": "fog", "label": "Megla", "level": "ok", "value": "prelaz bo nad njo",
+                          "lines": [f"Če bo {when} v dolini megla, bo segala do ~{top} m — prelaz (902 m) je nad njo."]})
+        elif top <= 902 + FOG_EDGE_M:
+            items.append({"id": "fog", "label": "Megla", "level": "warn", "value": "prelaz je na robu",
+                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m, prelaz je na 902 m — "
+                                    f"lahko je v megli ali tik nad njo."]})
+        else:
+            items.append({"id": "fog", "label": "Megla", "level": "warn", "value": "možna megla ali nizka oblačnost",
+                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m — prelaz (902 m) je pod njo."]})
+    return items
+
+
+def special_html(items):
+    if not items:
+        return ('<p class="crn-sp-none">Posebnih razmer ni: v naslednjih 48 urah na višini prelaza ni '
+                'pričakovati snega, poledice ali megle.</p>')
+    out = []
+    for it in items:
+        lines = "".join(f"<li>{ln}</li>" for ln in it["lines"])
+        out.append(
+            f'<li class="crn-sp" data-lvl="{it["level"]}"><span class="crn-ck-i" aria-hidden="true"></span>'
+            f'<div><p class="crn-sp-h"><b>{it["label"]}</b><span class="crn-sr">: {CHECK_LEVEL_WORD[it["level"]]},</span> '
+            f'· {it["value"]}</p><ul class="crn-sp-lines">{lines}</ul></div></li>')
+    return f'<ul class="crn-sp-list">{"".join(out)}</ul>'
 
 
 def check_note(drsi):
@@ -768,6 +864,19 @@ CSS = '''
     overflow-wrap:anywhere}
   .crn-nh-road .crn-ck-i{width:18px;height:18px;font-size:11px;flex:0 0 auto}
 
+  /* "Posebne razmere" (special_items) -- sneg, poledica, megla za 48 ur. */
+  .crn-special{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
+    padding:var(--s3);margin-top:var(--s4);text-align:left}
+  .crn-sp-list{list-style:none;margin:0;padding:0}
+  .crn-sp{display:grid;grid-template-columns:24px 1fr;gap:var(--s1);padding:var(--s1) 0;
+    border-top:1px solid #efece5;margin:0}
+  .crn-sp:first-child{border-top:0}
+  .crn-sp > .crn-ck-i{margin-top:2px}
+  .crn-sp-h{font-size:16px;font-weight:600;margin:0}
+  .crn-sp-lines{margin:2px 0 0;padding-left:1.1em;font-size:14px;color:var(--ink2)}
+  .crn-sp-lines li{margin:0}
+  .crn-sp-none{font-size:15px;font-weight:600;margin:0}
+
   .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
   .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
   .crn-card-art{display:none}
@@ -965,6 +1074,7 @@ CSS = '''
     .crn-hero-main .crn-status-index{align-self:center}
     .crn-hero-side{display:flex;flex-direction:column}
     .crn-hero-main .crn-next{grid-column:1/-1;grid-row:2;margin-top:0}
+    .crn-hero-main .crn-special{grid-column:1/-1;grid-row:3;margin-top:0}
     .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
     .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
     .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
@@ -1404,6 +1514,7 @@ SHARE_JS_TEMPLATE = '''
   function blackIceLive(tAir, cloud, wind, dew, pNow, pPrev){
     var g = groundTempLive(tAir, cloud, wind);
     if (g == null) return null;
+    if (dew != null && dew > tAir) dew = tAir;  // isto kot v black_ice_category()
     if (g <= 0.5) {
       var sat = dew != null && dew >= g - 1.0;
       var wet = (pNow || 0) > 0.1 || (pPrev || 0) > 0.1;
@@ -1427,6 +1538,14 @@ SHARE_JS_TEMPLATE = '''
   // forecast_sentence() iz generate_crnivec_page.py (isti pragovi, isto
   // izzvenevanje popravka z meritvijo v NEXT_BIAS_HOURS urah).
   var NEXT_BIAS_HOURS = 6, NEXT_SHOW_H = [1, 3, 6];
+  // Popravek modela po uri dneva iz meritev DRSI (compute_pass_calibration
+  // v winter_engine.py, izračunan ob jutranjem teku) ali null.
+  var CALIB = __CALIB_JSON__;
+  function calibAt(timeStr){
+    if (!CALIB || !CALIB.bias_by_hour) return 0;
+    var hh = parseInt(String(timeStr).slice(11, 13), 10);
+    return isNaN(hh) ? 0 : (CALIB.bias_by_hour[hh] || 0);
+  }
   var LEVEL_RANK = { na: 0, ok: 1, warn: 2, stop: 3 };
   function tempNivo(t){ return t == null ? "na" : t <= 0 ? "stop" : t <= 5 ? "warn" : "ok"; }
   function padavineBesedilo(p, frac){
@@ -1437,7 +1556,8 @@ SHARE_JS_TEMPLATE = '''
   }
   function napovedUr(m, d){
     var tMeas = d && d.temp_c != null ? d.temp_c : null;
-    var bias = (tMeas != null && m.temp != null) ? tMeas - m.temp : 0;
+    var base = m.tempCal != null ? m.tempCal : m.temp;
+    var bias = (tMeas != null && base != null) ? tMeas - base : 0;
     return (m.next || []).map(function(e){
       var t = e.temp == null ? null : Math.round((e.temp + bias * Math.max(0, 1 - e.h / NEXT_BIAS_HOURS)) * 10) / 10;
       var bi = t == null ? null : blackIceLive(t, e.cloud, e.wind, e.dew, e.p, e.pPrev);
@@ -1496,7 +1616,8 @@ SHARE_JS_TEMPLATE = '''
     if (sayEl) sayEl.textContent = stavekNapovedi(rowsNow, ure);
     var noteEl = document.getElementById("crn-next-note");
     if (noteEl) noteEl.textContent = "Napoved Open-Meteo za dolino, preračunana na 902 m" +
-      (zivDrsi && zivDrsi.temp_c != null ? ", temperatura popravljena z zadnjo meritvijo" : "") + ". Vozišče je ocena.";
+      (CALIB ? " in umerjena z meritvami postaje DRSI zadnjih " + CALIB.days + " dni" : "") +
+      (zivDrsi && zivDrsi.temp_c != null ? ", začne pri zadnji meritvi" : "") + ". Vozišče je ocena.";
     sec.hidden = false;
   }
 
@@ -1622,6 +1743,7 @@ SHARE_JS_TEMPLATE = '''
       zivModel = { temp: tempC, snow24: snowCm, precip24: Math.round(precipMm * 10) / 10, p3: p3, s3: s3,
         pNow: hv("precipitation", idx), pPrev: hv("precipitation", idx - 1),
         cloud: hv("cloud_cover", idx), windValley: hv("wind_speed_10m", idx), dewValley: hv("dew_point_2m", idx),
+        tempCal: tempC == null ? null : Math.round((tempC + calibAt(times[idx])) * 10) / 10,
         next: [] };
       // Ure +1..+6 -- isto kot next_hours v compute_pass_weather (winter_engine.py).
       for (var h = 1; h <= 6 && idx + h < times.length; h++) {
@@ -1632,7 +1754,8 @@ SHARE_JS_TEMPLATE = '''
           sk3 += (precip[q] || 0) * snowFractionLive(LIVE_PASS_ELEV, fl[q]);
         }
         zivModel.next.push({ h: h, time: String(times[k]).slice(11, 16),
-          temp: tk == null ? null : Math.round((tk - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100) * 10) / 10,
+          temp: tk == null ? null : Math.round((tk - LIVE_LAPSE_RATE * (LIVE_PASS_ELEV - LIVE_STATION_ELEV) / 100
+            + calibAt(times[k])) * 10) / 10,
           p: hv("precipitation", k), frac: snowFractionLive(LIVE_PASS_ELEV, fl[k]), p3: pk3, s3: sk3,
           pPrev: hv("precipitation", k - 1), cloud: hv("cloud_cover", k),
           wind: hv("wind_speed_10m", k), dew: hv("dew_point_2m", k) });
@@ -2352,7 +2475,16 @@ def build_body(data):
     next_hours, next_corrected = forecast_hours(weather, drsi)
     next_cells = forecast_cells_html(next_hours)
     next_say = forecast_sentence(rows, next_hours)
-    next_note = forecast_note(next_corrected)
+    next_note = forecast_note(next_corrected, weather.get("calib"))
+    sp_html = special_html(special_items(weather, data.get("fog"), seo.TODAY))
+    _cal = " in umerjeno z meritvami DRSI" if weather.get("calib") else ""
+    sp_note = f"Modelna napoved (Open-Meteo, preračunano na 902 m{_cal}), ne uradno stanje ceste."
+    try:
+        _g = datetime.datetime.fromisoformat(generated_at).astimezone(ZoneInfo("Europe/Ljubljana"))
+        sp_note = (f"Modelna napoved iz izračuna ob {_g:%H:%M} (Open-Meteo, preračunano na 902 m{_cal}), "
+                   f"ne uradno stanje ceste.")
+    except (ValueError, TypeError):
+        pass
 
     snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
     precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
@@ -2453,6 +2585,7 @@ def build_body(data):
                 .replace("__CAM_URL_JSON__", cam_url_json)
                 .replace("__ZONE_DATA_JSON__", zone_data_json)
                 .replace("__CHECK_MODEL_JSON__", check_model_json)
+                .replace("__CALIB_JSON__", json.dumps(weather.get("calib")))
                 .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
                 .replace("__TODAY_ISO__", today_iso))
 
@@ -2507,6 +2640,12 @@ def build_body(data):
         <p class="crn-next-say" id="crn-next-say">{next_say}</p>
         <div class="crn-next-grid" id="crn-next-grid">{next_cells}</div>
         <p class="crn-check-note" id="crn-next-note">{next_note}</p>
+      </section>
+
+      <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
+        <p class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</p>
+        {sp_html}
+        <p class="crn-check-note">{sp_note}</p>
       </section>
 
       <div class="crn-hero-side">
@@ -2631,6 +2770,10 @@ def build_body(data):
             <p>»Naslednjih 6 ur« je napoved Open-Meteo za dolino, preračunana na višino prelaza. Kadar je
             meritev s prelaza na voljo, napoved začne pri izmerjeni temperaturi in se v šestih urah postopoma
             vrne k modelu. Stavek nad urami primerja temperaturo in oceno vozišča z najhujšo uro v tem času.</p>
+            <p>Napoved za prelaz vsak dan umerimo z meritvami postaje DRSI zadnjih 10 dni. Preračun iz doline ne
+            vidi nočne inverzije: hladen zrak se ponoči nabira na dnu doline, prelaz pa je nad njim. Brez
+            popravka je bil model ponoči za okoli 3 °C prehladen in je napovedoval poledico, ko je bilo na
+            prelazu 5 °C.</p>
             <p>Šaljive nalepke con (»SUHO K POPR«, »TAK-TAK« …) so samo za hec. <strong>Drobni tisk:</strong>
             indeks je znanstveno pomešan z ugibanjem, klepetom v čakalnici in kakšnim komentarjem iz FB.
             Meteorec ne odgovarja, če je bilo v resnici drugače – kar je, mimogrede, tudi bistvo te strani.</p>
