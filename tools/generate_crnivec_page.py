@@ -1181,9 +1181,9 @@ CSS = '''
   /* "V zadnjih 60 minutah" -- samo JS (trend izračuna /crnivec-drsi). */
   .crn-trend{margin-top:var(--s2);padding-top:var(--s2);border-top:2px dashed #d6d0c2}
   .crn-trend-say{font-size:16px;font-weight:800;margin:0 0 6px}
-  .crn-trend-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .crn-trend-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
   .crn-trend-list li{margin:0;font-size:13px;background:#faf9f6;border:2px solid #111;border-radius:10px;
-    padding:4px 8px;display:flex;justify-content:space-between;gap:6px}
+    padding:4px 8px;display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:6px;min-width:0}
   .crn-trend-list b{font-variant-numeric:tabular-nums;white-space:nowrap}
 
   /* "Naslednjih 6 ur" (forecast_hours) -- trak pod herojem, tri ure. Robna
@@ -1199,11 +1199,12 @@ CSS = '''
   .crn-nh[data-lvl="na"]{border-top-color:#e5e7eb}
   .crn-nh p{margin:0}
   .crn-nh-t{font-size:13px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
-  .crn-nh-temp{font-size:20px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .crn-nh-temp{font-size:clamp(16px,5.2vw,20px);font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
   .crn-nh-p{font-size:13px;font-weight:600;color:var(--ink2)}
-  .crn-nh-road{display:flex;align-items:flex-start;gap:4px;font-size:13px;font-weight:700;margin-top:4px!important;
-    overflow-wrap:anywhere}
-  .crn-nh-road .crn-ck-i{width:18px;height:18px;font-size:11px;flex:0 0 auto}
+  .crn-nh-road{display:flex;flex-wrap:wrap;align-items:flex-start;gap:2px 4px;font-size:clamp(12px,3.6vw,13px);font-weight:700;margin-top:4px!important;
+    overflow-wrap:break-word;hyphens:auto}
+  .crn-nh-road .crn-ck-i{width:16px;height:16px;font-size:10px;flex:0 0 auto}
+  .crn-nh-road>span:last-child{flex:1 1 0;min-width:5em}
 
   /* "Na poti v službo in domov" (commute_windows) -- vrstica na dan, dva
      termina. Na telefonu je dan naslov nad celicama, na namizju levi stolpec. */
@@ -1278,7 +1279,7 @@ CSS = '''
   .crn-btn:disabled{opacity:.6;cursor:default}
   .crn-btn:focus-visible,.crn-zbtn:focus-visible,.crn summary:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
   .crn-btn-primary{background:#dc2626;color:#fff!important;
-    text-transform:uppercase;letter-spacing:.04em;width:100%;max-width:420px;margin-top:var(--s3)}
+    text-transform:uppercase;letter-spacing:.04em;width:100%;max-width:420px;box-sizing:border-box;margin-top:var(--s3)}
   .crn-btn-primary:hover{background:#b91c1c}
   .crn-btn svg{width:20px;height:20px}
 
