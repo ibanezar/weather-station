@@ -36,6 +36,7 @@ Samo pregled — nič ne popravlja. Izhodni status 1, če najde napake.
 Zaženi:
   python3 tools/geo_audit.py
 """
+import html as html_lib
 import difflib, json, os, re, sys, glob, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -286,6 +287,40 @@ def check_id_references(problems):
             problems.append(f"NEVELJAVNA @id REFERENCA: {rel(path)} → {ref_id} (ni definirana nikjer na strani)")
 
 
+# 8) crnivec.si -- samostojna domena iz crnivec-site/ -------------------------
+# Splošni pregledi zgoraj (JSON-LD, FAQ, @id) jo že zajamejo, ker hodijo po vseh
+# .html. Tu je samo tisto, kar je specifično za ločeno domeno: brez tega bi
+# se stran lahko tiho vrnila na meteorec.si (canonical) ali izgubila datoteke,
+# ki jih na tuji domeni nihče drug ne streže.
+
+CRN_DIR = os.path.join(ROOT, "crnivec-site")
+CRN_SITE = "https://crnivec.si/"
+
+
+def check_crnivec_site(problems):
+    idx = os.path.join(CRN_DIR, "index.html")
+    if not os.path.exists(idx):
+        problems.append("crnivec.si: MANJKA crnivec-site/index.html")
+        return
+    page = read(idx)
+    if f'<link rel="canonical" href="{CRN_SITE}">' not in page:
+        problems.append("crnivec.si: canonical ne kaže na https://crnivec.si/")
+    m = re.search(r"<title>(.*?)</title>", page, re.S)
+    title = html_lib.unescape(m.group(1)).strip() if m else ""
+    if not title or len(title) > 60:
+        problems.append(f"crnivec.si: <title> manjka ali je daljši od 60 znakov ({len(title)})")
+    if '"FAQPage"' not in page:
+        problems.append("crnivec.si: stran nima FAQPage sheme")
+    for fn in ("robots.txt", "sitemap.xml", "llms.txt", "manifest.json", "404.html"):
+        if not os.path.exists(os.path.join(CRN_DIR, fn)):
+            problems.append(f"crnivec.si: MANJKA crnivec-site/{fn}")
+    llms = os.path.join(CRN_DIR, "llms.txt")
+    if os.path.exists(llms):
+        for url in re.findall(r"\((https://crnivec\.si/[^\s)#]*)", read(llms)):
+            if url.rstrip("/") != CRN_SITE.rstrip("/"):
+                problems.append(f"crnivec.si llms.txt KAŽE NA MANJKAJOČO STRAN: {url}")
+
+
 def audit():
     problems, notes = [], []
 
@@ -296,6 +331,7 @@ def audit():
     check_freshness(notes)
     check_near_duplicate_towns(notes)
     check_id_references(problems)
+    check_crnivec_site(problems)
 
     lines = [f"# GEO audit — {TODAY}", ""]
     if problems:

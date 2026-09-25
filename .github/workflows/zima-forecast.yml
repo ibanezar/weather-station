@@ -78,3 +78,28 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy -c wrangler-crnivec.toml
+
+      - name: IndexNow za crnivec.si
+        # Stran se spremeni ob vsakem teku (meritve, napoved, dateModified).
+        # Ključ je na crnivec.si (zapiše ga generate_crnivec_page.py). Napaka
+        # tu ne sme podreti objave.
+        continue-on-error: true
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys, urllib.request, urllib.error
+          KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
+          payload = json.dumps({
+              "host": "crnivec.si",
+              "key": KEY,
+              "keyLocation": f"https://crnivec.si/{KEY}.txt",
+              "urlList": ["https://crnivec.si/", "https://crnivec.si/sitemap.xml"],
+          }).encode()
+          req = urllib.request.Request("https://api.indexnow.org/indexnow", data=payload,
+                                       headers={"Content-Type": "application/json"}, method="POST")
+          try:
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  print(f"IndexNow: {r.status} OK")
+          except urllib.error.HTTPError as e:
+              print(f"IndexNow napaka {e.code}: {e.read().decode('utf-8', 'replace')[:300]}", file=sys.stderr)
+              sys.exit(1)
+          PYEOF

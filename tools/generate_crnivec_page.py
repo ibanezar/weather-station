@@ -101,6 +101,10 @@ OLD_PATH = "/crnivec/"
 # ostale korensko-relativne povezave (glava, noga, CSS, pisave, logotip) kažejo
 # nazaj na meteorec.si, od koder se tudi strežejo (pisave imajo CORS *).
 CRN_LOCAL = {"/manifest.json", "/icon-192.png", "/icon-512.png"}
+# Isti ključ kot za meteorec.si (seo_smart_routine.INDEXNOW_KEY) -- IndexNow
+# zahteva, da je ključ na istem gostitelju, zato ga write_site_files() zapiše
+# tudi na crnivec.si. Ping pošlje zima-forecast.yml po objavi.
+INDEXNOW_KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"
 
 # ZONES/pick_zone sta v skupnem crnivec_zones.py (uvožena spodaj) — tudi
 # generate_story_card.py (tema CRNIVEC) ju rabi, glej opombo tam o krožnem
@@ -3582,6 +3586,54 @@ def site_schema(title, desc, image, faq=()):
         for d in data)
 
 
+# llms.txt za crnivec.si -- kratek, dejstven opis za AI asistente (GEO). Isto
+# načelo kot llms.txt na meteorec.si: kaj stran je, od kod so podatki in česa
+# NI (uradne informacije o stanju ceste).
+LLMS_TXT = f"""# Kako je čez Črnivec? (crnivec.si)
+
+> Stanje na prelazu Črnivec (902 m) med Stahovico pri Kamniku in Gornjim Gradom,
+> na državni cesti R1-225, ki Kamnik povezuje z Zgornjo Savinjsko dolino.
+> Spletna kamera, izmerjena temperatura, vlaga in veter, ocena vozišča in vreme
+> po urah na eni strani. Ni uradna informacija o stanju ceste.
+
+## Stran
+
+- [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
+- [Pogosta vprašanja]({CRN_SITE}/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
+- [Zapore in stanje ceste]({CRN_SITE}/#zapore): kje so uradne informacije o zaporah (promet.si, Občina Gornji Grad, AMZS).
+
+## Viri podatkov
+
+- Temperatura, vlaga, rosišče in veter: cestna vremenska postaja Direkcije RS za infrastrukturo (DRSI) na prelazu, meritve na 10 minut.
+- Kamera: DRSI, prek promet.si.
+- Napoved: Open-Meteo, preračunana na 902 m in vsak dan umerjena z meritvami DRSI zadnjih 10 dni.
+- Zgodovina zim: padavinska postaja ARSO Črnivec (848 m).
+- Stanje vozišča je ocena iz temperature in padavin, ne meritev. Temperature cestišča DRSI ne objavlja.
+
+## Avtor
+
+- Meteorec, Filip Eremita: {seo.SITE}/ (vremenska postaja IREICA1, Rečica ob Savinji).
+"""
+
+NOT_FOUND_HTML = f"""<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Stran ne obstaja | crnivec.si</title>
+<link rel="icon" href="/icon-192.png" type="image/png">
+<style>body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#fdf6e3;
+font-family:system-ui,sans-serif;color:#111;text-align:center;padding:16px}}
+a{{display:inline-block;margin-top:16px;padding:12px 20px;border:3px solid #111;border-radius:999px;
+background:#fff;color:#111;font-weight:800;text-decoration:none;box-shadow:3px 3px 0 #111}}</style>
+</head>
+<body><main><h1>Te strani ni.</h1><p>Črnivec pa je še vedno tam.</p>
+<a href="/">Kako je čez Črnivec?</a></main></body>
+</html>
+"""
+
+
 def write_site_files():
     """Datoteke, ki morajo biti na izvoru crnivec.si: manifest in ikone (PWA),
     robots.txt in sitemap.xml (ena sama stran)."""
@@ -3601,6 +3653,12 @@ def write_site_files():
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\n\nSitemap: {CRN_SITE}/sitemap.xml\n")
+    with open(os.path.join(out, f"{INDEXNOW_KEY}.txt"), "w", encoding="utf-8") as f:
+        f.write(INDEXNOW_KEY)
+    with open(os.path.join(out, "llms.txt"), "w", encoding="utf-8") as f:
+        f.write(LLMS_TXT)
+    with open(os.path.join(out, "404.html"), "w", encoding="utf-8") as f:
+        f.write(NOT_FOUND_HTML)
     danes = datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).date().isoformat()
     with open(os.path.join(out, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -3658,6 +3716,7 @@ def main():
         '<meta name="apple-mobile-web-app-capable" content="yes">\n'
         '<meta name="apple-mobile-web-app-title" content="Črnivec">\n'
         '<link rel="manifest" href="/manifest.json">\n'
+        '<link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png">\n'
         '<link rel="apple-touch-icon" href="/icon-192.png">'
     )
     schema = "\n".join([pwa_head, site_schema(title, desc, og_slika, faq)])

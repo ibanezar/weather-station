@@ -595,8 +595,20 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
     Pravi 301 da Redirect Rule v coni `meteorec.si`. Stran **ni** v `CORE`
     v `seo_audit.py` — ne vračaj je tja, ima svoj sitemap na crnivec.si.
   - `www.crnivec.si` → 301 na `crnivec.si` (Redirect Rule v coni `crnivec.si`).
-  - Povezave z meteorec.si (`/zima/prevoznost-prelazov/`, blog) in besedilo
-    na slikah (OG, zgodba, deljena slika) kažejo na `crnivec.si`.
+  - Povezave z meteorec.si (hitre povezave na naslovni strani, vrstica
+    Črnivec na `/zima/`, `/zima/prevoznost-prelazov/`, blog, `llms.txt`) in
+    besedilo na slikah (OG, zgodba, deljena slika) kažejo na `crnivec.si`.
+  - SEO/GEO (25. 9. 2026, po keyword researchu): `<title>` »Prelaz Črnivec:
+    kamera, vreme in stanje ceste« (»kako je čez črnivec« v Googlu ni
+    poizvedba, kamera/vreme/cesta so), razdelki so `<h2>`, pod dashboardom
+    »O prelazu«, »Zapore« in FAQ (`faq_items()` → vidno besedilo in
+    `FAQPage` iz istega seznama). Prelaz je `Place` s sameAs iz
+    `PLACE_SAMEAS["Črnivec (prelaz)"]` (Wikidata Q8079815).
+  - Na domeni so še `llms.txt`, `404.html` (`not_found_handling`), ključ
+    IndexNow (isti kot za meteorec.si) — vse piše `write_site_files()`.
+    Ping IndexNow pošlje `zima-forecast.yml` po objavi. `geo_audit.py`
+    (`check_crnivec_site()`) preveri canonical, dolžino naslova, FAQPage in
+    da te datoteke obstajajo.
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 

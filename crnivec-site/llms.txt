@@ -1,0 +1,24 @@
+# Kako je čez Črnivec? (crnivec.si)
+
+> Stanje na prelazu Črnivec (902 m) med Stahovico pri Kamniku in Gornjim Gradom,
+> na državni cesti R1-225, ki Kamnik povezuje z Zgornjo Savinjsko dolino.
+> Spletna kamera, izmerjena temperatura, vlaga in veter, ocena vozišča in vreme
+> po urah na eni strani. Ni uradna informacija o stanju ceste.
+
+## Stran
+
+- [Kako je čez Črnivec?](https://crnivec.si/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
+- [Pogosta vprašanja](https://crnivec.si/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
+- [Zapore in stanje ceste](https://crnivec.si/#zapore): kje so uradne informacije o zaporah (promet.si, Občina Gornji Grad, AMZS).
+
+## Viri podatkov
+
+- Temperatura, vlaga, rosišče in veter: cestna vremenska postaja Direkcije RS za infrastrukturo (DRSI) na prelazu, meritve na 10 minut.
+- Kamera: DRSI, prek promet.si.
+- Napoved: Open-Meteo, preračunana na 902 m in vsak dan umerjena z meritvami DRSI zadnjih 10 dni.
+- Zgodovina zim: padavinska postaja ARSO Črnivec (848 m).
+- Stanje vozišča je ocena iz temperature in padavin, ne meritev. Temperature cestišča DRSI ne objavlja.
+
+## Avtor
+
+- Meteorec, Filip Eremita: https://meteorec.si/ (vremenska postaja IREICA1, Rečica ob Savinji).
