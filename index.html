@@ -448,13 +448,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div id="alerts-wrap" class="alerts-wrap"></div>
 
-  <!-- WX-DAILY-FACT:START (auto: tools/generate_daily_fact.py) -->
-  <div class="daily-fact-card" id="daily-fact-card" data-date="2026-09-25" role="status">
-    <span class="dfc-icon" aria-hidden="true">🏆</span>
-    <span class="dfc-text">Včeraj, 25. september, smo na Rečici ob Savinji izmerili nov rekord za ta koledarski dan — mraz <strong>4,1 °C</strong>. S tem je padel dosedanji rekord 6,8 °C iz leta 2021, v 6-letni zgodovini meritev postaje IREICA1.</span>
-    <button class="dfc-close" onclick="dismissDailyFact()" aria-label="Zapri" title="Skrij za danes">×</button>
-  </div>
-  <!-- WX-DAILY-FACT:END -->
 
   <div id="live-event-wrap" class="live-event-wrap" hidden>
     <div class="live-event-head">
@@ -640,6 +633,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span>Občutek <strong id="feels-val">13,0</strong>°C</span>
         </div>
         <div class="yesterday-delta" id="yesterday-delta"></div>
+        <!-- Dnevno dejstvo (rekord dneva, niz, primerjava z lani) — od 26. 9. 2026
+             v junaški kartici, ne kot ločena kartica nad njo. -->
+        <!-- WX-DAILY-FACT:START (auto: tools/generate_daily_fact.py) -->
+        <div class="daily-fact-card" id="daily-fact-card" data-date="2026-09-25"><span class="dfc-icon" aria-hidden="true">🏆</span><span class="dfc-text">Včeraj rekord za 25. 9.: najnižja <strong>4,1 °C</strong> (prej 6,8 °C, 2021)</span></div>
+        <!-- WX-DAILY-FACT:END -->
         <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">11,0</strong>°C<span id="dew-desc"></span></div>
         <!-- "Our forecast, graded daily against ARSO" is the site's
              strongest trust signal (/tocnost-napovedi/), but it lived only
