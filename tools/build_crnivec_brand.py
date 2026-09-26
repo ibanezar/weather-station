@@ -308,7 +308,7 @@ def fb_launch(W, H):
     # Podnaslov
     fs_sub = 40 if story else 34
     ys = b2 + fs_sub * (2.1 if story else 1.8)
-    parts.append(tp("Odločitev v 5 sekundah, preden se odpraviš.", INTER_600, fs_sub, CX, ys, INK, "middle"))
+    parts.append(tp("Preden rečeš »bo že« …", INTER_600, fs_sub, CX, ys, INK, "middle"))
 
     # Seznam: kaj je na strani
     if story:
