@@ -269,6 +269,102 @@ def fb_cover():
     return svg(W, H, "".join(parts), defs)
 
 
+def fb_launch(W, H):
+    """Objava ob odprtju crnivec.si: 1080×1080 (feed) ali 1080×1920 (zgodba).
+
+    Zgodba ima zgoraj ~250 px in spodaj ~340 px pod gumbi FB/IG, zato je tam
+    vsebina med tema pasovoma. Trditve na kartici so samo to, kar stran res
+    ima (glej CLAUDE.md, razdelek Črnivec): meritev DRSI, ocena vozišča,
+    napoved po urah in 7 dni, termina voženj, kamera."""
+    story = H > W
+    CX = W / 2
+    M = 70
+    defs = halftone("ht", INK, step=18, r=1.5, opacity=0.9)
+    parts = [f'<rect width="{W}" height="{H}" fill="{CREAM}"/>',
+             f'<rect width="{W}" height="{H}" fill="url(#ht)" opacity=".16"/>']
+
+    def chip_c(y, text, fonts, fs, fill, padx=26):
+        w = tw(text, fonts, fs) + 2 * padx
+        return chip(CX - w / 2, y, text, fonts, fs, fill, padx=padx)[0]
+
+    y = 250 if story else 58
+    fs_chip = 34 if story else 30
+    parts.append(chip_c(y, "NOVO · PRELAZ ČRNIVEC · 902 m", INTER_800, fs_chip, YELLOW))
+
+    # Naslov v dveh vrsticah, »Črnivec?« rdeče z obrisom (isto kot naslovnica)
+    fs = 172 if story else 136
+    tr = -fs * 0.025
+    lh = fs * 1.02
+    b1 = y + fs_chip * 1.9 + fs * 1.02
+    parts.append(tp("Kako je čez", GROTESK, fs, CX + 5, b1 + 5, INK, "middle", tr))
+    parts.append(tp("Kako je čez", GROTESK, fs, CX, b1, INK, "middle", tr))
+    b2 = b1 + lh
+    d2, _ = text_path("Črnivec?", GROTESK, fs, CX + 7, b2 + 7, "middle", tr)
+    d, _ = text_path("Črnivec?", GROTESK, fs, CX, b2, "middle", tr)
+    parts.append(f'<path d="{d2}" fill="{INK}"/>')
+    parts.append(f'<path d="{d}" fill="{RED}" stroke="{INK}" stroke-width="6" stroke-linejoin="round" '
+                 f'paint-order="stroke"/>')
+
+    # Podnaslov
+    fs_sub = 40 if story else 34
+    ys = b2 + fs_sub * (2.1 if story else 1.8)
+    parts.append(tp("Odločitev v 5 sekundah, preden se odpraviš.", INTER_600, fs_sub, CX, ys, INK, "middle"))
+
+    # Seznam: kaj je na strani
+    if story:
+        rows = [("Meritev s prelaza", "temperatura, veter, padavine · DRSI na 10 min"),
+                ("Ocena vozišča", "suho, mokro, poledica ali sneg"),
+                ("Naslednjih 6 ur in 7 dni", "vreme na 902 m, ne v dolini"),
+                ("Pot v službo in domov", "6.00–8.00 in 14.00–16.00, 4 dni"),
+                ("Kamera v živo", "in povezava na uradno stanje ceste")]
+        fs_t, fs_s, rh = 44, 30, 110
+    else:
+        rows = [("Meritev s prelaza (DRSI)", None),
+                ("Ocena vozišča", None),
+                ("Napoved za 6 ur in 7 dni", None),
+                ("Kamera v živo", None)]
+        fs_t, fs_s, rh = 36, 0, 64
+    pad = 26 if story else 24
+    top = ys + (50 if story else 36)
+    ch = pad * 2 + rh * len(rows)
+    cw = W - 2 * M
+    parts.append(f'<rect x="{M + 8}" y="{top + 8}" width="{cw}" height="{ch}" rx="28" fill="{INK}"/>')
+    parts.append(f'<rect x="{M}" y="{top}" width="{cw}" height="{ch}" rx="28" fill="{WHITE}" '
+                 f'stroke="{INK}" stroke-width="5"/>')
+    r = 26 if story else 21
+    for i, (t, s) in enumerate(rows):
+        ry = top + pad + rh * i + rh / 2           # sredina vrstice
+        cx0 = M + pad + r
+        parts.append(f'<circle cx="{cx0}" cy="{ry}" r="{r}" fill="{RED}" stroke="{INK}" stroke-width="4"/>')
+        k = r / 26
+        parts.append(f'<path d="M{cx0 - 11 * k} {ry + 1 * k} L{cx0 - 3 * k} {ry + 9 * k} L{cx0 + 12 * k} {ry - 8 * k}" '
+                     f'fill="none" stroke="{WHITE}" stroke-width="{6 * k}" stroke-linecap="round" '
+                     f'stroke-linejoin="round"/>')
+        tx = cx0 + r + 26
+        if s:
+            parts.append(tp(t, INTER_800, fs_t, tx, ry - 4, INK))
+            parts.append(tp(s, INTER_600, fs_s, tx, ry + fs_s + 6, "#555"))
+        else:
+            parts.append(tp(t, INTER_800, fs_t, tx, ry + fs_t * 0.36, INK))
+        if i:
+            ly = top + pad + rh * i
+            parts.append(f'<path d="M{tx} {ly} L{M + cw - pad} {ly}" stroke="{INK}" stroke-opacity=".12" '
+                         f'stroke-width="2"/>')
+
+    # Spodaj: gori v kotih (kot na naslovnici), med njima naslov strani
+    sc = 1.9 if story else 1.45
+    gy = H - 168 * sc
+    parts.append(f'<g transform="translate({-30},{gy}) scale({sc})">{mountain(True, sign=True)}</g>')
+    parts.append(f'<g transform="translate({W + 30},{gy}) scale({-sc},{sc})">{mountain(True)}</g>')
+    fs_url = 84 if story else 72
+    wu = tw("crnivec.si", GROTESK, fs_url) + 2 * 40
+    hu = fs_url * 1.6
+    # zgodba: tik pod seznamom, nad spodnjim pasom z gumbi; feed: ob spodnjem robu
+    yu = top + ch + 56 if story else H - hu - 48
+    parts.append(chip(CX - wu / 2, yu, "crnivec.si", GROTESK, fs_url, YELLOW, padx=40, h=hu, shadow=8)[0])
+    return svg(W, H, "".join(parts), defs)
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     files = {
@@ -279,6 +375,8 @@ def main():
         "logo-crnivec-dark.svg": logo(dark=True),
         "fb-profile.svg": fb_profile(),
         "fb-cover.svg": fb_cover(),
+        "fb-launch-1x1.svg": fb_launch(1080, 1080),
+        "fb-launch-9x16.svg": fb_launch(1080, 1920),
     }
     for name, content in files.items():
         with open(os.path.join(OUT, name), "w", encoding="utf-8") as f:
