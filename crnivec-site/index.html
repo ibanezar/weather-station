@@ -40,7 +40,7 @@
 {"@context":"https://schema.org","@type":"WebSite","@id":"https://crnivec.si/#website","name":"Kako je čez Črnivec?","alternateName":"crnivec.si","url":"https://crnivec.si/","inLanguage":"sl","image":"https://crnivec.si/logo-crnivec.png","publisher":{"@type":"Organization","name":"Meteorec","url":"https://meteorec.si/"}}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://crnivec.si/","name":"Prelaz Črnivec: kamera, vreme in stanje ceste","description":"Spletna kamera s prelaza Črnivec (902 m) v živo, izmerjena temperatura, sneg, poledica in vreme po urah za cesto Kamnik–Gornji Grad.","url":"https://crnivec.si/","image":"https://meteorec.si/og/crnivec/2026-09-26.jpg","inLanguage":"sl","isPartOf":{"@id":"https://crnivec.si/#website"},"author":{"@id":"https://meteorec.si/#person"},"about":{"@type":"Place","@id":"https://crnivec.si/#prelaz","name":"Črnivec","alternateName":["Prelaz Črnivec","Črnivec Pass"],"description":"Cestni prelaz (902 m) med Stahovico pri Kamniku in Gornjim Gradom, cesta R1-225.","sameAs":["https://www.wikidata.org/wiki/Q8079815","https://sl.wikipedia.org/wiki/%C4%8Crnivec_(prelaz)","https://en.wikipedia.org/wiki/%C4%8Crnivec_Pass"],"containedInPlace":{"@type":"Country","name":"Slovenija"}},"speakable":{"@type":"SpeakableSpecification","cssSelector":["#crn-status-title","#crn-status-desc","#crn-next-say"]},"datePublished":"2026-09-20","dateModified":"2026-09-26T08:39:01+02:00"}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://crnivec.si/","name":"Prelaz Črnivec: kamera, vreme in stanje ceste","description":"Spletna kamera s prelaza Črnivec (902 m) v živo, izmerjena temperatura, sneg, poledica in vreme po urah za cesto Kamnik–Gornji Grad.","url":"https://crnivec.si/","image":"https://meteorec.si/og/crnivec/2026-09-26.jpg","inLanguage":"sl","isPartOf":{"@id":"https://crnivec.si/#website"},"author":{"@id":"https://meteorec.si/#person"},"about":{"@type":"Place","@id":"https://crnivec.si/#prelaz","name":"Črnivec","alternateName":["Prelaz Črnivec","Črnivec Pass"],"description":"Cestni prelaz (902 m) med Stahovico pri Kamniku in Gornjim Gradom, cesta R1-225.","sameAs":["https://www.wikidata.org/wiki/Q8079815","https://sl.wikipedia.org/wiki/%C4%8Crnivec_(prelaz)","https://en.wikipedia.org/wiki/%C4%8Crnivec_Pass"],"containedInPlace":{"@type":"Country","name":"Slovenija"}},"speakable":{"@type":"SpeakableSpecification","cssSelector":["#crn-status-title","#crn-status-desc","#crn-next-say"]},"datePublished":"2026-09-20","dateModified":"2026-09-26T08:46:57+02:00"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","@id":"https://crnivec.si/#vprasanja","mainEntity":[{"@type":"Question","name":"Koliko je visok prelaz Črnivec?","acceptedAnswer":{"@type":"Answer","text":"Prelaz Črnivec je 902 metra nad morjem. Cestna vremenska postaja DRSI na prelazu stoji na približno 903 m, Gornji Grad pod njim pa na 428 m."}},{"@type":"Question","name":"Kje je Črnivec?","acceptedAnswer":{"@type":"Answer","text":"Črnivec je cestni prelaz med Stahovico pri Kamniku in Gornjim Gradom, na meji med Gorenjsko in Štajersko. Čezenj pelje državna cesta R1-225, ki Kamnik povezuje z Zgornjo Savinjsko dolino."}},{"@type":"Question","name":"Ali je na Črnivcu sneg?","acceptedAnswer":{"@type":"Answer","text":"Snega na prelazu ne meri nobena postaja. Po oceni modela je na višini prelaza zdaj 0 cm snežne odeje, v naslednjih 24 urah pa je napovedanih 0,0 cm novega snega. Najzanesljivejši pogled je spletna kamera na vrhu strani."}},{"@type":"Question","name":"Kdaj je na Črnivcu obvezna zimska oprema?","acceptedAnswer":{"@type":"Answer","text":"Od 15. novembra do 15. marca in tudi zunaj tega obdobja, kadar so na cesti zimske razmere, mora imeti osebni avto zimske pnevmatike ali letne pnevmatike in snežne verige v vozilu. Tako določa Zakon o pravilih cestnega prometa."}},{"@type":"Question","name":"Kje je spletna kamera na Črnivcu?","acceptedAnswer":{"@type":"Answer","text":"Kamera Direkcije RS za infrastrukturo (DRSI) stoji na prelazu in gleda na cesto. Slika se osveži vsakih nekaj minut. Na tej strani je na vrhu, vse kamere DRSI pa so tudi na promet.si."}},{"@type":"Question","name":"Od kod so podatki na tej strani?","acceptedAnswer":{"@type":"Answer","text":"Temperatura, vlaga in veter so izmerjeni na cestni vremenski postaji DRSI na prelazu. Napoved je iz modela Open-Meteo, preračunana na višino prelaza in umerjena z meritvami DRSI. Zgodovina zim je iz padavinske postaje ARSO Črnivec. Vozišče je ocena, ne meritev, Meteorec indeks pa ni uradna informacija o stanju ceste."}}]}
@@ -108,14 +108,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
     margin:0 0 var(--s2)}
   /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
-  /* Telefon: maskota levo od naslova in manjša pisava -- glava je prej
-     vzela ~300 px, status pa je bil šele na dnu prvega zaslona (26. 9. 2026).
-     H1 ostane (identiteta + SEO), samo manjši. */
-  .crn-head{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:var(--s2);
-    margin-bottom:var(--s2);text-align:left}
+  /* Telefon: brez maskote -- ista gora je že v logotipu tik nad naslovom
+     in dve gori ena pod drugo sta delovali zmedeno. Naslov je zato čez vso
+     širino in dovolj velik; glava je še vedno krajša kot pred 26. 9. 2026
+     (maskota je vzela ~110 px). Maskota (easter egg) je od 600 px naprej. */
+  .crn-head{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:var(--s3);text-align:center}
+  .crn-head .crn-icon{display:none}
   .crn-head .crn-title{margin:0}
-  .crn-head .crn-eyebrow{font-size:11px;margin:0 0 4px}
-  .crn-title{font-size:clamp(24px,7.4vw,34px);font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+  .crn-head .crn-eyebrow{font-size:12px;margin:0 0 var(--s1)}
+  .crn-title{font-size:clamp(32px,10.4vw,46px);font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
     color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
     text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
   /* Pasica žive zapore (ZAPORE_JS) -- samo ob aktivnem dogodku PIC na R1-225. */
@@ -464,7 +465,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
-    .crn-head{flex-direction:column;gap:4px;margin-bottom:var(--s3);text-align:center}
+    .crn-head .crn-icon{display:block}
     .crn-head .crn-eyebrow{font-size:13px;margin:0 0 var(--s2)}
     .crn-title{font-size:52px}
     .crn-icon{width:140px}
@@ -596,15 +597,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <ul class="crn-trend-list" id="crn-trend-list"></ul>
           </div>
         </div>
-        <p class="crn-updated" id="crn-updated" data-ts="2026-09-26T06:38:49.521956+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 08:38 · temperatura izmerjena (DRSI), sneg iz modela</p>
-        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-26T06:38:49.521956+00:00" hidden></p>
+        <p class="crn-updated" id="crn-updated" data-ts="2026-09-26T06:46:49.982951+00:00" data-sfx="temperatura izmerjena (DRSI), sneg iz modela">Posodobljeno ob 08:46 · temperatura izmerjena (DRSI), sneg iz modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-26T06:46:49.982951+00:00" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
       </div>
 
       <section class="crn-special crn-special-alert" id="crn-special" aria-labelledby="crn-sp-h">
         <h2 class="crn-now-h" id="crn-sp-h">⚠️ Pozor · posebne razmere v 48 urah</h2>
         <ul class="crn-sp-list"><li class="crn-sp" data-lvl="warn"><span class="crn-ck-i" aria-hidden="true"></span><div><p class="crn-sp-h"><b>Megla</b><span class="crn-sr">: Pozor,</span> · prelaz je na robu</p><ul class="crn-sp-lines"><li>Ocenjena zgornja meja megle danes zjutraj je ~871 m, prelaz je na 902 m — lahko je v megli ali tik nad njo.</li></ul></div></li></ul>
-        <p class="crn-check-note">Modelna napoved iz izračuna ob 08:38 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 08:46 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste.</p>
       </section>
 
       <section class="crn-panel crn-cam" id="kamera" aria-labelledby="crn-cam-h">
@@ -640,7 +641,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <section class="crn-week" id="napoved-7-dni" aria-labelledby="crn-wk-h">
         <h2 class="crn-now-h" id="crn-wk-h">Vreme na Črnivcu za 7 dni</h2>
         <div class="crn-wk-scroll"><table class="crn-t crn-wk"><thead><tr><th scope="col">Dan</th><th scope="col">Najnižja / najvišja</th><th scope="col">Padavine</th><th scope="col">Nov sneg</th><th scope="col">Poledica</th></tr></thead><tbody><tr><th scope="row">Danes<span class="crn-t-sub">do polnoči</span></th><td data-l="Min / max">5,4 / 15,2 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Jutri</th><td data-l="Min / max">6,0 / 16,1 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Ponedeljek, 28. 9.</th><td data-l="Min / max">7,7 / 15,5 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Torek, 29. 9.</th><td data-l="Min / max">10,4 / 15,5 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Sreda, 30. 9.</th><td data-l="Min / max">7,8 / 15,2 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Četrtek, 1. 10.</th><td data-l="Min / max">7,3 / 15,3 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Petek, 2. 10.</th><td data-l="Min / max">8,0 / 15,2 °C</td><td data-l="Padavine">suho<span class="crn-t-sub">verjetnost do 2 %</span></td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr></tbody></table></div>
-        <p class="crn-check-note">Modelna napoved iz izračuna ob 08:38 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste. Temperatura je preračunana na 902 m. Dlje v prihodnost je napoved manj zanesljiva.</p>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 08:46 (Open-Meteo, preračunano na 902 m in umerjeno z meritvami DRSI), ne uradno stanje ceste. Temperatura je preračunana na 902 m. Dlje v prihodnost je napoved manj zanesljiva.</p>
       </section>
 
       <section class="crn-duel" id="crn-duel" aria-labelledby="crn-duel-h">
