@@ -85,6 +85,9 @@ DATA_PATH = os.path.join(ROOT, "data", "winter-data.json")
 # Uradna kamera DRSI na prelazu (glej opombo na vrhu datoteke) — spremeni
 # samo tu, JS jo bere iz istega niza (glej CAM_URL v build_body spodaj).
 CAM_URL = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
+# Uradno stanje ceste (zapore, nesreče, dela) -- seznam dogodkov PIC. Gumb v
+# statusni kartici in pasica zapore vodita sem; Meteorec je vreme, ne prevoznost.
+PROMET_URL = "https://www.promet.si/sl/dogodki"
 
 # Isti worker, ki streže /crnivec/porocilo, /crnivec/glas ipd. — tudi
 # /crnivec/znacka.svg (vstavljiva značka, glej opombo pri crn-embed spodaj).
@@ -137,46 +140,12 @@ STATUS = {
                 "bg": "#fee2e2", "ink": "#7f1d1d"},
 }
 
-# Velike stripovske ilustracije za kartici Temperatura/Sneg (samo na namizju,
-# kjer je v desnem stolpcu heroja prostor -- glej .crn-card-art). Isti slog
-# kot ZONE_ICONS: debel črn obris, ploskovite barve. Čisti okras (aria-hidden).
-CARD_ART = {
-    "temp": '''<svg viewBox="0 0 80 120" aria-hidden="true">
-      <rect x="28" y="6" width="24" height="80" rx="12" fill="#fff" stroke="#111" stroke-width="5"/>
-      <circle cx="40" cy="94" r="20" fill="#dc2626" stroke="#111" stroke-width="5"/>
-      <rect x="35" y="40" width="10" height="50" rx="5" fill="#dc2626"/>
-      <g stroke="#111" stroke-width="4" stroke-linecap="round">
-        <line x1="52" y1="24" x2="62" y2="24"/><line x1="52" y1="40" x2="62" y2="40"/>
-        <line x1="52" y1="56" x2="62" y2="56"/><line x1="52" y1="72" x2="62" y2="72"/>
-      </g>
-      <circle cx="33" cy="88" r="5" fill="#fff" opacity=".7"/>
-    </svg>''',
-    "snow": '''<svg viewBox="0 0 120 120" aria-hidden="true">
-      <circle cx="60" cy="60" r="54" fill="#e0f2fe" stroke="#111" stroke-width="5"/>
-      <g stroke="#111" stroke-width="7" stroke-linecap="round">
-        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
-        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
-      </g>
-      <g stroke="#0284c7" stroke-width="4" stroke-linecap="round">
-        <line x1="60" y1="20" x2="60" y2="100"/><line x1="25.4" y1="40" x2="94.6" y2="80"/>
-        <line x1="25.4" y1="80" x2="94.6" y2="40"/>
-      </g>
-      <g fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M50 26 60 36 70 26"/><path d="M50 94 60 84 70 94"/>
-        <path d="M26 52 38 50 34 38"/><path d="M94 68 82 70 86 82"/>
-        <path d="M26 68 38 70 34 82"/><path d="M94 52 82 50 86 38"/>
-      </g>
-      <circle cx="60" cy="60" r="7" fill="#fff" stroke="#111" stroke-width="4"/>
-    </svg>''',
-}
-
 # Enotne obrisne ikone za UI (24×24, currentColor) -- emoji ostanejo samo v
 # sproščenih, šaljivih delih strani, ne v osnovni ikonografiji.
 UI_ICONS = {
-    "temp": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-            'stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V4a2 2 0 1 0-4 0v10.8a4 4 0 1 0 4 0Z"/></svg>',
-    "snow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
-            'aria-hidden="true"><path d="M12 2v20M4.9 6.5l14.2 11M19.1 6.5 4.9 17.5M9 4l3 2 3-2M9 20l3-2 3 2"/></svg>',
+    # Cesta (uradno stanje, promet.si).
+    "road": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+            'stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 21M16 3l4 18M12 5v2M12 11v2M12 17v2"/></svg>',
     "cam":  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
             'stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3Z"/><circle cx="12" cy="13" r="4"/></svg>',
 }
@@ -313,10 +282,10 @@ def num1(x, d=1):
     return seo.num(x, d) if x is not None else "–"
 
 
-def check_rows(weather, drsi):
+def check_rows(weather, drsi, snowpack_cm=None):
     """Vrstice seznama iz modela (weather = passes["crnivec"]["weather"]) in
     meritve DRSI (ali None). Vrne seznam slovarjev {id, label, level, value,
-    src}."""
+    src}. snowpack_cm je ocena snežne odeje za pas 900 m (samo besedilo)."""
     now = weather.get("now") or {}
     rows = []
 
@@ -342,7 +311,7 @@ def check_rows(weather, drsi):
             now.get("precip_mm_now"), now.get("precip_mm_prev"))
         bi = res[0] if res else None
     rows.append(road_row(bi, now.get("precip_mm_3h"), now.get("snow_cm_3h"), t))
-    rows.append(snow_row(weather.get("expected_snow_cm_24h")))
+    rows.append(snow_row(weather.get("expected_snow_cm_24h"), snowpack_cm))
     rows.append(fog_row((drsi or {}).get("vlaga_pct")))
     rows.append(wind_row((drsi or {}).get("veter_kmh"), (drsi or {}).get("sunki_kmh")))
     return rows
@@ -363,15 +332,26 @@ def road_row(black_ice, precip_3h, snow_3h, t):
     return {**r, "level": "ok", "value": "verjetno suho"}
 
 
-def snow_row(cm):
+def snowpack_text(depth_cm):
+    """Snežna odeja (ocena modela za pas 900 m) kot dodatek k vrstici Sneg.
+    Nekoč svoja kartica ob temperaturi; od 26. 9. 2026 je v seznamu, ker je
+    kartica podvajala temperaturo. Raven vrstice nosi samo NOV sneg (odeja
+    leži ob cesti, pluženo cestišče je drugo) -- zato je tu samo besedilo."""
+    if depth_cm is None:
+        return ""
+    return " · na tleh ga ni" if depth_cm < 1 else f" · na tleh ~{depth_cm:.0f} cm"
+
+
+def snow_row(cm, snowpack_cm=None):
     r = {"id": "snow", "label": "Sneg", "src": "napoved 24 h"}
+    tla = snowpack_text(snowpack_cm)
     if cm is None:
-        return {**r, "level": "na", "value": "ni podatka"}
+        return {**r, "level": "na", "value": "ni podatka" + tla}
     if cm < 0.1:
-        return {**r, "level": "ok", "value": "ni pričakovan"}
+        return {**r, "level": "ok", "value": "ni pričakovan" + tla}
     if cm < 2:
-        return {**r, "level": "warn", "value": f"do {num1(cm)} cm"}
-    return {**r, "level": "stop", "value": f"{num1(cm)} cm"}
+        return {**r, "level": "warn", "value": f"do {num1(cm)} cm" + tla}
+    return {**r, "level": "stop", "value": f"{num1(cm)} cm" + tla}
 
 
 def fog_row(rh):
@@ -1170,11 +1150,22 @@ CSS = '''
     color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
     margin:0 0 var(--s2)}
   /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
-  .crn-head{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:var(--s3)}
+  /* Telefon: maskota levo od naslova in manjša pisava -- glava je prej
+     vzela ~300 px, status pa je bil šele na dnu prvega zaslona (26. 9. 2026).
+     H1 ostane (identiteta + SEO), samo manjši. */
+  .crn-head{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:var(--s2);
+    margin-bottom:var(--s2);text-align:left}
   .crn-head .crn-title{margin:0}
-  .crn-title{font-size:clamp(38px,11.5vw,52px);font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+  .crn-head .crn-eyebrow{font-size:11px;margin:0 0 4px}
+  .crn-title{font-size:clamp(24px,7.4vw,34px);font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
     color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
     text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
+  /* Pasica žive zapore (ZAPORE_JS) -- samo ob aktivnem dogodku PIC na R1-225. */
+  .crn-roadban{background:#fef08a;color:var(--ink);border:var(--bd);box-shadow:var(--sh);border-radius:12px;
+    padding:var(--s2) var(--s3);margin:0 0 var(--s3);text-align:left}
+  .crn-roadban-h{font-size:15px;font-weight:800;margin:0;overflow-wrap:anywhere}
+  .crn-roadban-more{font-size:13px;font-weight:600;margin:4px 0 0}
+  .crn-roadban a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
   .crn-strike{font-size:15px;font-weight:800;color:#fff;background:#dc2626;border:var(--bd);
     box-shadow:var(--sh);border-radius:12px;padding:var(--s2) var(--s3);margin:0 0 var(--s3);text-align:left}
 
@@ -1185,7 +1176,7 @@ CSS = '''
   /* Telefon: merilnik, ikona in maskota so namenoma manjši -- status,
      "posodobljeno", temperatura in sneg morajo biti vidni brez drsenja
      (3-sekundni test iz UX audita, 24. 9. 2026). */
-  .crn-gauge{width:100%;max-width:290px;display:block;margin:0 auto}
+  .crn-gauge{width:100%;max-width:230px;display:block;margin:0 auto}
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards;
     transition:transform .6s cubic-bezier(.34,1.56,.64,1)}
   @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
@@ -1209,11 +1200,17 @@ CSS = '''
     color:var(--muted)}
   .crn-says::before{content:"";position:absolute;top:-11px;left:50%;margin-left:-9px;
     border-style:solid;border-width:0 9px 11px;border-color:transparent transparent #111}
+  /* Gumba pod statusom: kamera (skok na #kamera) + uradno stanje (promet.si). */
+  .crn-cta{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1);max-width:480px;margin:var(--s3) auto 0}
+  .crn-cta .crn-cta-btn{min-height:48px;padding:6px 10px;font-size:14px;line-height:1.2;text-align:center;
+    box-shadow:3px 3px 0 #111;gap:6px}
+  .crn-cta-btn svg{width:18px;height:18px;flex:0 0 auto}
+  .crn-cta-note{font-size:12px;font-weight:600;margin:6px auto 0;max-width:480px;opacity:.85}
   .crn-now{background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;
     box-shadow:4px 4px 0 #111;padding:var(--s2) var(--s3);margin:var(--s3) auto 0;max-width:480px;text-align:left}
   .crn-now-h{font-family:inherit;line-height:1.3;color:inherit;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
   .crn-check{list-style:none;margin:0;padding:0}
-  .crn-ck{display:grid;grid-template-columns:24px 6.5em 1fr;align-items:center;gap:var(--s1);
+  .crn-ck{display:grid;grid-template-columns:24px 7.2em 1fr;align-items:center;gap:var(--s1);
     padding:6px 0;border-top:1px solid #efece5;margin:0;font-size:15px}
   .crn-ck:first-child{border-top:0}
   .crn-ck-i{width:22px;height:22px;border-radius:50%;border:2px solid #111;display:flex;
@@ -1287,6 +1284,9 @@ CSS = '''
   /* "Posebne razmere" (special_items) -- sneg, poledica, megla za 48 ur. */
   .crn-special{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
     padding:var(--s3);margin-top:var(--s4);text-align:left}
+  /* Kadar kaj velja, je kartica takoj pod statusom (glej sp_alert). */
+  .crn-special-alert{border-top-width:12px;border-top-color:#facc15}
+  .crn-special-alert .crn-now-h{font-size:14px;margin-bottom:var(--s1)}
   .crn-sp-list{list-style:none;margin:0;padding:0}
   .crn-week{background:#fff;border:4px solid #111;border-radius:18px;box-shadow:8px 8px 0 #111;
     padding:var(--s3);margin-top:var(--s4);text-align:left}
@@ -1321,7 +1321,7 @@ CSS = '''
 
   /* "Črnivec proti dolini" (valley_compare) -- dve meritvi, velika razlika. */
   .crn-duel{background:#fff;border:var(--bd);border-radius:14px;box-shadow:var(--sh);
-    padding:var(--s3);margin-top:var(--s2);text-align:left}
+    padding:var(--s3);margin-top:var(--s4);text-align:left}
   .crn-duel-grid{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2)}
   .crn-duel-rows{flex:1 1 200px;min-width:0}
   .crn-duel-row span{white-space:nowrap}
@@ -1333,19 +1333,6 @@ CSS = '''
     font-variant-numeric:tabular-nums;background:#fef08a;border:3px solid #111;border-radius:12px;padding:6px 10px}
   .crn-duel-say{font-size:15px;font-weight:700;margin:var(--s1) 0 0}
 
-  .crn-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s2);text-align:left}
-  .crn-card{position:relative;background:var(--card);border:var(--bd);border-radius:14px;box-shadow:var(--sh);padding:var(--s3)}
-  .crn-card-art{display:none}
-  .crn-card-h{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--muted);margin:0 0 var(--s1);display:flex;align-items:center;gap:6px}
-  .crn-card-h svg{width:16px;height:16px;flex:0 0 auto}
-  .crn-big{font-size:28px;font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:0;
-    font-variant-numeric:tabular-nums}
-  .crn-card-sub{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
-  .crn-card-sub b{color:var(--ink2)}
-  .crn-card-h2{margin-top:var(--s2);padding-top:var(--s2);border-top:2px dashed #d6d0c2}
-  .crn-mid{font-size:20px;font-weight:800;margin:0;font-variant-numeric:tabular-nums}
-  .crn-na{font-size:15px;font-weight:600;color:var(--muted)}
 
   .crn-updated{font-size:13px;font-weight:700;margin:var(--s2) 0 0;opacity:.85}
   .crn-fresh{font-size:13px;font-weight:700;margin:var(--s1) 0 0}
@@ -1519,6 +1506,8 @@ CSS = '''
 
   /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
+    .crn-head{flex-direction:column;gap:4px;margin-bottom:var(--s3);text-align:center}
+    .crn-head .crn-eyebrow{font-size:13px;margin:0 0 var(--s2)}
     .crn-title{font-size:52px}
     .crn-icon{width:140px}
     .crn-gauge{max-width:560px}
@@ -1526,7 +1515,6 @@ CSS = '''
     .crn-status{padding:var(--s5) var(--s4)}
     .crn-status-title{font-size:48px}
     .crn-status-icon .crn-zicon{width:64px;height:64px}
-    .crn-big{font-size:36px}
     .crn-panel{padding:var(--s4)}
     .crn-zones{grid-template-columns:repeat(4,1fr)}
     .crn-nh{padding:var(--s2)}
@@ -1542,24 +1530,28 @@ CSS = '''
        levo, meritve + gumb desno; spodaj dva stolpca, vsak svoj sklad, da
        se ne poravnavata po vrsticah (brez lukenj ob krajši kartici). */
     .crn-hero{max-width:none}
-    .crn-hero-main{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:var(--s4);
+    .crn-hero-main{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:auto auto 1fr;gap:var(--s4);
       align-items:stretch;text-align:left}
     .crn-hero-main .crn-status{text-align:center;display:flex;flex-direction:column;justify-content:center}
     .crn-hero-main .crn-status-index{align-self:center}
-    /* Kamera je v DOM takoj za statusom (telefon: tik pod njim); na namizju
-       gre v desni stolpec pod meritve, status pa se raztegne čez obe vrstici. */
-    .crn-hero-main .crn-status{grid-column:1;grid-row:1/3}
-    .crn-hero-side{display:flex;flex-direction:column;grid-column:2;grid-row:1}
-    .crn-hero-main .crn-cam{grid-column:2;grid-row:2;margin-top:0;align-self:start}
-    .crn-hero-main .crn-next{grid-column:1/-1;grid-row:3;margin-top:0}
+    /* Status levo čez tri vrstice, desno kamera → dolina → 6 ur. Status je
+       najvišja kartica (~1080 px proti ~690 px za kamero in dolino), zato
+       "6 ur" zapolni preostanek desnega stolpca (vrstica 1fr + stretch,
+       vsebina sredinsko) -- brez tega je pod kamero zevala praznina, še
+       večja, kadar primerjave z dolino ni. Pod tem čez vso širino:
+       (posebne razmere, kadar kaj velja -- .has-alert) → vožnje →
+       (posebne razmere brez posebnosti) → 7 dni. Na telefonu vrstni red
+       nosi DOM (glej build_body). */
+    .crn-hero-main .crn-status{grid-column:1;grid-row:1/4}
+    .crn-hero-main .crn-cam{grid-column:2;grid-row:1;margin-top:0;align-self:start}
+    .crn-hero-main .crn-duel{grid-column:2;grid-row:2;margin-top:0;align-self:start}
+    .crn-hero-main .crn-next{grid-column:2;grid-row:3;margin-top:0;align-self:stretch;
+      display:flex;flex-direction:column;justify-content:center}
     .crn-hero-main .crn-commute{grid-column:1/-1;grid-row:4;margin-top:0}
     .crn-hero-main .crn-special{grid-column:1/-1;grid-row:5;margin-top:0}
     .crn-hero-main .crn-week{grid-column:1/-1;grid-row:6;margin-top:0}
-    .crn-hero-side .crn-cards{grid-template-columns:1fr;margin-top:0;flex:1}
-    .crn-hero-side .crn-card{display:flex;flex-direction:column;justify-content:center;padding-right:136px}
-    .crn-hero-side .crn-card-art{display:block;position:absolute;right:var(--s4);top:50%;
-      width:96px;height:96px;transform:translateY(-50%) rotate(4deg)}
-    .crn-hero-side .crn-card-art svg{width:100%;height:100%;display:block}
+    .crn-hero-main.has-alert .crn-special{grid-row:4}
+    .crn-hero-main.has-alert .crn-commute{grid-row:5}
     .crn-cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
     .crn-col{display:flex;flex-direction:column;gap:var(--s4)}
     .crn-col .crn-zones{grid-template-columns:1fr 1fr}
@@ -1768,12 +1760,15 @@ SHARE_JS_TEMPLATE = '''
       if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
       var labelEl = document.getElementById("crn-status-title");
       var descEl = document.getElementById("crn-status-desc");
-      var tempEl = document.getElementById("crn-temp-val");
+      // Temperatura je iz seznama "Čez Črnivec zdaj" (kartice ni več); prvi
+      // otrok je vrednost, oznaka vira (.crn-ck-src) je za njo.
+      var tempEl = document.querySelector('#crn-check [data-id="temp"] .crn-ck-v');
       var quoteEl = document.querySelector(".crn-quote p");
       var saysEl2 = document.getElementById("crn-says-txt");
       var label = labelEl ? labelEl.textContent.toLowerCase() : "";
       var desc = descEl ? descEl.textContent : "";
-      var temp = tempEl ? tempEl.textContent.replace("°C", "stopinj") : "";
+      var tempRaw = tempEl && tempEl.firstChild ? String(tempEl.firstChild.nodeValue || "") : "";
+      var temp = tempRaw.indexOf("°C") >= 0 ? tempRaw.replace("°C", "stopinj") : "";
       var quote = quoteEl ? quoteEl.textContent : "";
       var besedilo = "Kako je čez Črnivec? " + label + ". " + desc +
         (saysEl2 ? (" Črnivec pravi: " + saysEl2.textContent) : "") +
@@ -1885,18 +1880,9 @@ SHARE_JS_TEMPLATE = '''
     var zone = pickZoneLive(tempC, snowCm || 0);
     var tempTxt = (tempC == null ? "–" : numSlLive(tempC, 1)) + " °C";
     var snowTxt = numSlLive(snowCm, 1) + " cm";
-
-    var tEl = document.getElementById("crn-temp-val");
-    var sEl = document.getElementById("crn-snow-new");
-    var pEl = document.getElementById("crn-precip");
-    if (tEl && tempC != null) { tEl.textContent = tempTxt; tEl.className = "crn-big"; }
-    if (sEl && snowCm != null) sEl.textContent = "+" + snowTxt;
-    var srcEl = document.getElementById("crn-temp-src");
-    if (srcEl) srcEl.textContent = info.meas
-      ? "izmerjeno na prelazu ob " + uraSl(new Date(info.ts)) + " (DRSI)"
-      : "na prelazu · ocena modela";
+    // Kartic Temperatura/Snežna odeja ni več (26. 9. 2026) -- vrednosti kaže
+    // seznam "Čez Črnivec zdaj" (osveziSeznam), tu ostane status + vir.
     if (updEl) updEl.dataset.sfx = info.meas ? "temperatura izmerjena (DRSI), sneg iz modela" : "ocena iz vremenskega modela";
-    if (pEl && precipMm != null) pEl.textContent = numSlLive(precipMm, 1) + " mm";
 
     var card = document.getElementById("crn-status");
     var title = document.getElementById("crn-status-title");
@@ -1968,6 +1954,9 @@ SHARE_JS_TEMPLATE = '''
   // statični seznam) -- če meritev DRSI prispe pred Open-Meteo, vrstice
   // Vozišče/Sneg ne smejo za trenutek pasti na "ni podatka".
   var zivModel = __CHECK_MODEL_JSON__, zivDrsi = null, zivZoneId = null, zivModelLive = false;
+  // Snežna odeja (compute_snowpack, pas 900 m) -- samo strežniška, živi klic
+  // Open-Meteo je ne računa, zato je ločena od zivModel (ta se prepiše).
+  var SNOWPACK = __SNOWPACK_JSON__;
 
   // Indeks poganja IZMERJENA temperatura s prelaza, kadar je sveža (isto kot
   // with_measurement() v crnivec_zones.py); sneg je vedno iz modela.
@@ -2184,11 +2173,14 @@ SHARE_JS_TEMPLATE = '''
       d.rosisce_c != null ? d.rosisce_c : m.dewValley, m.pNow, m.pPrev);
     rows.push(cestaVrstica(bi, m.p3, m.s3, t));
 
+    // Snežna odeja je samo besedilo (snowpack_text), raven nosi nov sneg.
     var cm = m.snow24, snow = { id: "snow", label: "Sneg", src: "napoved 24 h" };
+    var tla = SNOWPACK == null ? "" : SNOWPACK < 1 ? " · na tleh ga ni" : " · na tleh ~" + Math.round(SNOWPACK) + " cm";
     if (cm == null) { snow.level = "na"; snow.value = "ni podatka"; }
     else if (cm < 0.1) { snow.level = "ok"; snow.value = "ni pričakovan"; }
     else if (cm < 2) { snow.level = "warn"; snow.value = "do " + numSlLive(cm, 1) + " cm"; }
     else { snow.level = "stop"; snow.value = numSlLive(cm, 1) + " cm"; }
+    snow.value += tla;
     rows.push(snow);
 
     var rh = d.vlaga_pct, fog = { id: "fog", label: "Megla", src: "iz izmerjene vlage" };
@@ -3146,6 +3138,19 @@ ZAPORE_JS = """<script>
       say.textContent = "Po podatkih Prometno-informacijskega centra na cesti čez Črnivec trenutno ni zapor, del ali drugih dogodkov" + (ob ? " (preverjeno ob " + ob + ")." : ".");
     } else {
       say.textContent = "Trenutno na cesti čez Črnivec (Prometno-informacijski center" + (ob ? ", preverjeno ob " + ob : "") + "):";
+      // Pasica v heroju: samo ob dejanskem dogodku. Brez dogodka ali ob
+      // napaki vira ostane skrita -- nikoli ne trdi "ni zapor" na vrhu.
+      var ban = document.getElementById("crn-zapore-banner");
+      var banTxt = document.getElementById("crn-zapore-banner-txt");
+      if (ban && banTxt) {
+        var d0 = z.dogodki[0];
+        var opis = String(d0.opis || "");
+        if (opis.length > 140) opis = opis.slice(0, 137) + "…";
+        banTxt.textContent = "Na cesti čez Črnivec: " +
+          (d0.vzrok || (d0.tip === "delo" ? "delo na cesti" : "dogodek")) + (opis ? " — " + opis : "") +
+          (z.dogodki.length > 1 ? " (in še " + (z.dogodki.length - 1) + ")" : "");
+        ban.hidden = false;
+      }
       z.dogodki.forEach(function (d) {
         var li = document.createElement("li");
         var b = document.createElement("b");
@@ -3216,7 +3221,7 @@ def build_body(data):
     weather = (crnivec or {}).get("weather") or {}
     # Indeks poganja IZMERJENA temperatura s postaje DRSI, kadar je sveža
     # (glej with_measurement v crnivec_zones.py); weather_idx je tisto, kar
-    # vidi merilnik, temperaturna kartica, OG kartica in deljena slika.
+    # vidi merilnik, OG kartica in deljena slika.
     # Seznam spodaj dobi ločeno model (weather) in meritev (drsi), ker vsaki
     # vrstici posebej pove vir.
     drsi_vse = fetch_drsi_postaje()
@@ -3252,7 +3257,6 @@ def build_body(data):
     temp_c = weather_idx.get("temp_c")
     temp_meas = weather_idx.get("temp_src") == "izmerjeno"
     snow_new = weather.get("expected_snow_cm_24h")
-    precip = weather.get("precip_mm_24h")
     temp_txt = f'{seo.num(temp_c, 1)} °C' if temp_c is not None else "– °C"
     snow_txt = (f'{seo.num(snow_new, 1)} cm snega v 24 h'
                 if snow_new is not None else "– cm snega v 24 h")
@@ -3264,12 +3268,7 @@ def build_body(data):
     # to, kar že leži, nov sneg to, kar lahko pade. Ne zlivaj ju v eno število.
     snowpack_cm = ((data.get("snowpack") or {}).get("depth_cm") or {}).get("900")
 
-    na = '<span class="crn-na">Podatek trenutno ni na voljo.</span>'
-    temp_html = (f'<p class="crn-big" id="crn-temp-val">{temp_txt}</p>' if temp_c is not None
-                 else f'<p id="crn-temp-val">{na}</p>')
-    snowpack_html = (f'<p class="crn-big">{seo.num(snowpack_cm, 0)} cm</p>' if snowpack_cm is not None
-                     else f'<p>{na}</p>')
-    rows = check_rows(weather, drsi)
+    rows = check_rows(weather, drsi, snowpack_cm)
     check_html = check_list_html(rows)
     check_note_txt = check_note(drsi)
     check_warn_txt = check_warn_text(rows, zone["id"])
@@ -3279,7 +3278,11 @@ def build_body(data):
     next_say = forecast_sentence(rows, next_hours)
     next_note = forecast_note(next_corrected, weather.get("calib"))
     commute_rows = commute_html(commute_windows(weather, drsi, seo.TODAY))
-    sp_html = special_html(special_items(weather, data.get("fog"), seo.TODAY))
+    sp_items = special_items(weather, data.get("fog"), seo.TODAY)
+    sp_html = special_html(sp_items)
+    # Kadar kaj velja (sneg, poledica, megla), gre kartica takoj pod status --
+    # pred kamero; brez posebnosti je ena vrstica in ostane nižje (26. 9. 2026).
+    sp_alert = bool(sp_items)
     duel = valley_compare(drsi, drsi_vse.get("gornji_grad"))
     duel_time = ""
     if duel:
@@ -3297,20 +3300,18 @@ def build_body(data):
     except (ValueError, TypeError):
         pass
 
-    snow_new_txt = f'+{seo.num(snow_new, 1)} cm' if snow_new is not None else "–"
+    special_section = f'''
+      <section class="crn-special{' crn-special-alert' if sp_alert else ''}" id="crn-special" aria-labelledby="crn-sp-h">
+        <h2 class="crn-now-h" id="crn-sp-h">{'⚠️ Pozor · posebne razmere v 48 urah' if sp_alert else 'Posebne razmere · 48 ur'}</h2>
+        {sp_html}
+        <p class="crn-check-note">{sp_note}</p>
+      </section>
+'''
     faq = faq_items(snowpack_cm, snow_new)
     week = week_html(weather.get("daily"), seo.TODAY)
-    precip_txt = f'{seo.num(precip, 1)} mm' if precip is not None else "–"
 
-    temp_src_txt = "na prelazu · ocena modela"
-    upd_suffix = "ocena iz vremenskega modela"
-    if temp_meas:
-        try:
-            mt = datetime.datetime.fromisoformat(weather_idx["temp_measured_at"].replace("Z", "+00:00"))
-            temp_src_txt = f"izmerjeno na prelazu ob {mt.astimezone(ZoneInfo('Europe/Ljubljana')):%H:%M} (DRSI)"
-        except (ValueError, TypeError, AttributeError):
-            temp_src_txt = "izmerjeno na prelazu (DRSI)"
-        upd_suffix = "temperatura izmerjena (DRSI), sneg iz modela"
+    upd_suffix = ("temperatura izmerjena (DRSI), sneg iz modela" if temp_meas
+                  else "ocena iz vremenskega modela")
 
     # "Posodobljeno ob …" -- čas izračuna v našem pasu. Živi preračun v JS ga
     # ob uspehu prepiše s trenutnim časom (glej primeniZivoStanje).
@@ -3401,16 +3402,20 @@ def build_body(data):
                 .replace("__CAM_URL_JSON__", cam_url_json)
                 .replace("__ZONE_DATA_JSON__", zone_data_json)
                 .replace("__CHECK_MODEL_JSON__", check_model_json)
+                .replace("__SNOWPACK_JSON__", json.dumps(snowpack_cm))
                 .replace("__CALIB_JSON__", json.dumps(weather.get("calib")))
                 .replace("__DUEL_ELEV_JSON__", json.dumps(DRSI_ELEV_M))
                 .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
                 .replace("__SAYS_JSON__", json.dumps(CRNIVEC_SAYS, ensure_ascii=False).replace("</", "<\\/"))
                 .replace("__TODAY_ISO__", today_iso))
 
-    # Vrstni red je hierarhija (mobile-first, glej opombo pri CSS): status →
-    # kamera (takoj za glavno kartico) → napoved → meritve → poročanje → vse ostalo.
-    # Na namizju: v heroju merilnik levo, meritve in kamera desno
-    # (.crn-hero-main); pod njim dva stolpca (.crn-cols) -- nasvet, glasovanje | poročanje,
+    # Vrstni red je hierarhija odločitve »grem zdaj čez?« (mobile-first,
+    # preurejeno 26. 9. 2026): (pasica žive zapore) → status z meritvami in
+    # gumboma Kamera / Uradno stanje ceste → (posebne razmere, samo kadar kaj
+    # velja) → kamera → 6 ur → vožnje → (posebne razmere brez posebnosti) →
+    # 7 dni → dolina → poročanje in vse ostalo → o prelazu, zapore, FAQ.
+    # Na namizju: status levo, kamera in dolina desno (.crn-hero-main); pod
+    # njim dva stolpca (.crn-cols) -- nasvet, glasovanje | poročanje,
     # poštenost, lestvica, razlaga + značka. Na telefonu sta stolpca
     # display:contents in vrstni red nosijo razredi .crn-o1…7 (glej CSS).
     body = f'''{CSS}
@@ -3434,8 +3439,13 @@ def build_body(data):
       </div>
 
       <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
+      <div id="crn-zapore-banner" class="crn-roadban" role="status" hidden>
+        <p class="crn-roadban-h">🚧 <span id="crn-zapore-banner-txt"></span></p>
+        <p class="crn-roadban-more"><a href="#zapore">Podrobnosti</a> · uradno na
+        <a href="{PROMET_URL}" target="_blank" rel="noopener">promet.si</a></p>
+      </div>
 
-      <div class="crn-hero-main">
+      <div class="crn-hero-main{' has-alert' if sp_alert else ''}">
       <div class="crn-status" id="crn-status" data-zone="{zone['id']}"
         style="--zc:{zone['color']};--zbg:{st['bg']};--zink:{st['ink']}" role="status" aria-live="polite">
         {gauge_svg(zone)}
@@ -3444,6 +3454,14 @@ def build_body(data):
         <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
         <p class="crn-says" id="crn-says"><span class="crn-says-h">Črnivec pravi:</span>
           <span id="crn-says-txt">{says_txt}</span></p>
+        <!-- Odločitev v enem koraku: pokaži cesto (kamera) ali uradno stanje
+             (promet.si). Ločnica je namerna -- Meteorec je vreme, PIC je
+             prevoznost, zapore in nesreče. -->
+        <div class="crn-cta">
+          <a class="crn-btn crn-cta-btn" href="#kamera">{UI_ICONS['cam']}Kamera v živo</a>
+          <a class="crn-btn crn-cta-btn" href="{PROMET_URL}" target="_blank" rel="noopener">{UI_ICONS['road']}Uradno stanje ceste</a>
+        </div>
+        <p class="crn-cta-note">Zapore, nesreče in dela objavlja promet.si, ne Meteorec.</p>
         <div class="crn-now" aria-labelledby="crn-now-h">
           <h2 class="crn-now-h" id="crn-now-h">Čez Črnivec zdaj</h2>
           <ul class="crn-check" id="crn-check">{check_html}</ul>
@@ -3459,7 +3477,7 @@ def build_body(data):
         <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
       </div>
-
+{special_section if sp_alert else ''}
       <section class="crn-panel crn-cam" id="kamera" aria-labelledby="crn-cam-h">
         <h2 class="crn-h2" id="crn-cam-h">Spletna kamera Črnivec v živo</h2>
         <div class="crn-cam-frame is-loading">
@@ -3489,36 +3507,12 @@ def build_body(data):
         <p class="crn-check-note">Napoved Open-Meteo, preračunana na 902 m in umerjena z meritvami DRSI. Dlje v prihodnost je manj zanesljiva. Vozišče je ocena.</p>
       </section>
 
-      <section class="crn-special" id="crn-special" aria-labelledby="crn-sp-h">
-        <h2 class="crn-now-h" id="crn-sp-h">Posebne razmere · 48 ur</h2>
-        {sp_html}
-        <p class="crn-check-note">{sp_note}</p>
-      </section>
-
+{'' if sp_alert else special_section}
       <section class="crn-week" id="napoved-7-dni" aria-labelledby="crn-wk-h"{'' if week else ' hidden'}>
         <h2 class="crn-now-h" id="crn-wk-h">Vreme na Črnivcu za 7 dni</h2>
         <div class="crn-wk-scroll">{week}</div>
         <p class="crn-check-note">{sp_note} Temperatura je preračunana na 902 m. Dlje v prihodnost je napoved manj zanesljiva.</p>
       </section>
-
-      <div class="crn-hero-side">
-      <div class="crn-cards">
-        <div class="crn-card">
-          <span class="crn-card-art">{CARD_ART['temp']}</span>
-          <p class="crn-card-h">{UI_ICONS['temp']}Temperatura</p>
-          {temp_html}
-          <p class="crn-card-sub" id="crn-temp-src">{temp_src_txt}</p>
-        </div>
-        <div class="crn-card">
-          <span class="crn-card-art">{CARD_ART['snow']}</span>
-          <p class="crn-card-h">{UI_ICONS['snow']}Snežna odeja</p>
-          {snowpack_html}
-          <p class="crn-card-sub">ocena modela, ~900 m</p>
-          <p class="crn-card-h crn-card-h2">Nov sneg · napoved 24 h</p>
-          <p class="crn-mid" id="crn-snow-new">{snow_new_txt}</p>
-          <p class="crn-card-sub">padavine <b id="crn-precip">{precip_txt}</b></p>
-        </div>
-      </div>
 
       <section class="crn-duel" id="crn-duel" aria-labelledby="crn-duel-h"{'' if duel else ' hidden'}>
         <h2 class="crn-now-h" id="crn-duel-h">Črnivec proti dolini</h2>
@@ -3533,8 +3527,6 @@ def build_body(data):
         <p class="crn-check-note" id="crn-duel-min"{'' if duel and duel['mins'] else ' hidden'}>{(duel or {}).get('mins') or ''}</p>
         <p class="crn-check-note" id="crn-duel-note">Obe številki sta meritvi postaj DRSI{f' ob {duel_time}' if duel_time else ''}.</p>
       </section>
-
-      </div>
       </div>
     </section>
 
