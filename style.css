@@ -395,17 +395,15 @@ header{position:relative;z-index:30}
 .live-timeline .lt-icon{flex-shrink:0}
 .live-timeline .lt-text{flex:1}
 
-/* Dnevno dejstvo — vidna kartica, nova vsebina vsak dan */
-.daily-fact-card{display:flex;align-items:center;gap:.7rem;background:var(--card-bg);
-  border:1px solid rgba(34,211,238,.35);border-radius:14px;padding:.7rem .9rem;
-  margin:0 0 1rem;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
-  animation:alert-in .35s ease}
-.dfc-icon{font-size:1.2rem;flex-shrink:0;line-height:1}
-.dfc-text{flex:1;font-size:.85rem;line-height:1.4;color:var(--text)}
-.dfc-text strong{color:var(--cyan)}
-.dfc-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;
-  padding:0;line-height:1;flex-shrink:0}
-.dfc-close:hover{color:var(--text)}
+/* Dnevno dejstvo — vrstica v junaški kartici pod primerjavo z včeraj
+   (tools/generate_daily_fact.py), oblikovana kot .yesterday-delta. */
+.daily-fact-card{display:flex;align-items:center;gap:.5rem;font-size:.78rem;line-height:1.35;
+  margin-top:.45rem;padding:.6rem .95rem;border-radius:13px;background:var(--fc-bg);
+  border:1px solid var(--fc-border);color:var(--muted)}
+.yesterday-delta:empty+.daily-fact-card{margin-top:.7rem}
+.dfc-icon{font-size:1rem;flex-shrink:0;line-height:1}
+.dfc-text{flex:1}
+.dfc-text strong{color:var(--text);font-weight:600}
 
 /* Teaserja "Rekordi na dosegu" / "Lovec na nevihte" nad heroj — glej index.html */
 .home-teasers{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}

@@ -6358,20 +6358,6 @@ function initChartScrollHints(){
   window.addEventListener('resize', ()=>wraps.forEach(syncChartScrollEdge), {passive:true});
 }
 
-// ── Dnevna kartica: skrij za danes, jutri se spet pokaže z novo vsebino ──
-const DAILY_FACT_KEY='wx-daily-fact-dismissed';
-function dismissDailyFact(){
-  const card=document.getElementById('daily-fact-card');
-  if(!card)return;
-  card.setAttribute('hidden','');
-  try{localStorage.setItem(DAILY_FACT_KEY,card.dataset.date||'');}catch(_){}
-}
-function initDailyFact(){
-  const card=document.getElementById('daily-fact-card');
-  if(!card)return;
-  let dismissed=''; try{dismissed=localStorage.getItem(DAILY_FACT_KEY)||'';}catch(_){}
-  if(dismissed&&dismissed===card.dataset.date)card.setAttribute('hidden','');
-}
 // ── Namig ob uvedbi menija v glavi (26. 9. 2026) ──
 // Blog, arhiv, igre in Šola so bili prej kapsule v glavi, zdaj so v »Meni«.
 // Namig dobijo samo obiskovalci, ki so stran že obiskali (novi stare vrstice
@@ -16403,7 +16389,6 @@ async function init(){
   try{initNotifBtn();}catch(_){}
   try{initMenuHint();}catch(_){}
   try{initNotifHint();}catch(_){}
-  try{initDailyFact();}catch(_){}
   try{initWeatherQA();}catch(_){}
   try{initChartScrollHints();}catch(_){}
   try{initNowcast();}catch(_){}
