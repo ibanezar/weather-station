@@ -577,7 +577,8 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
 - **Hierarhija strani je »odločitev v 5 sekundah«** (26. 9. 2026): na telefonu
   morajo biti status, gumba **Kamera v živo** in **Uradno stanje ceste**
   (`PROMET_URL`, promet.si) in začetek seznama »zdaj« v prvem zaslonu — zato
-  je glava (maskota + h1) na telefonu v eni vrstici in manjša. Meteorec je
+  je na telefonu glava brez maskote (gora je že v logotipu tik nad njo; dve
+  gori sta delovali zmedeno), h1 pa čez vso širino. Meteorec je
   vreme, prevoznost/zapore so promet.si; gumb to ločnico pove z besedo.
   - Posebne razmere gredo **takoj pod status samo, kadar kaj velja**
     (`sp_alert` v `build_body()`, razred `has-alert` premakne vrstice na
