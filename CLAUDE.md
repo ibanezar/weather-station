@@ -574,6 +574,20 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   s FNV-1a nad `datum|stanje` (ASCII), ne s sha256, ker mora JS
   (`izberiRek()`) sinhrono dati isti indeks. To je ločeno od »Meteorec
   nasveta« (`QUOTES`), ki so šale, neodvisne od vremena.
+- **Hierarhija strani je »odločitev v 5 sekundah«** (26. 9. 2026): na telefonu
+  morajo biti status, gumba **Kamera v živo** in **Uradno stanje ceste**
+  (`PROMET_URL`, promet.si) in začetek seznama »zdaj« v prvem zaslonu — zato
+  je glava (maskota + h1) na telefonu v eni vrstici in manjša. Meteorec je
+  vreme, prevoznost/zapore so promet.si; gumb to ločnico pove z besedo.
+  - Posebne razmere gredo **takoj pod status samo, kadar kaj velja**
+    (`sp_alert` v `build_body()`, razred `has-alert` premakne vrstice na
+    namizju); brez posebnosti je ena vrstica in ostane za vožnjami.
+  - Živa zapora ima **pasico nad statusom** (`#crn-zapore-banner`, v
+    `ZAPORE_JS`), a samo ob dejanskem dogodku; brez dogodka ali ob napaki
+    vira ostane skrita. Razdelek »Zapore« z besedilom ostane spodaj (SEO).
+  - Kartic Temperatura/Snežna odeja ni več: temperatura je v seznamu, snežna
+    odeja pa je dodatek k vrstici »Sneg« (`snowpack_text()` ↔ `SNOWPACK` v
+    JS). Raven vrstice nosi samo nov sneg.
 - `black_ice_category()` omeji rosišče na temperaturo zraka: za višje kraje
   je rosišče iz doline, temperatura pa preračunana, zato je bilo rosišče
   lahko nad temperaturo.
