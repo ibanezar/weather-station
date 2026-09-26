@@ -349,14 +349,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p class="sub-loc">Savinjska regija, Slovenija &middot; 366 m n. m.</p>
     <!-- Glava je bila pred prvim podatkom visoka tri vrstice kapsul (9 povezav),
          zato ob logu ostanejo samo trije samostojni izdelki (MeteoGobar,
-         Črnivec, MeteoZima), vse ostalo je v spustnem »Meni« (26. 9. 2026).
+         Črnivec, MeteoZima) z logotipi, pred njimi spustni »Meni« z vsem
+         ostalim (26. 9. 2026).
          Nova povezava gre v meni, ne kot nova kapsula v vrstico. -->
     <nav class="quick-nav" aria-label="Hitre povezave">
-      <a href="/gobarska-napoved/" class="qn-feat"><span class="qn-ico">🍄</span> MeteoGobar</a>
-      <a href="https://crnivec.si/"><span class="qn-ico">🚗</span> Črnivec</a>
-      <a href="/zima/"><span class="qn-ico">❄️</span> MeteoZima</a>
       <details class="qn-drop">
-        <summary><span class="qn-ico qn-burger" aria-hidden="true">☰</span> Meni</summary>
+        <summary aria-label="Meni" title="Meni"><span class="qn-burger" aria-hidden="true">☰</span> <span class="qn-txt">Meni</span></summary>
         <div class="qn-drop-menu">
           <a href="/blog/"><span class="qn-ico">📖</span> Blog</a>
           <a href="/trendi/"><span class="qn-ico">📈</span> Trendi</a>
@@ -369,6 +367,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="/sola/"><span class="qn-ico">🏫</span> Šola</a>
         </div>
       </details>
+      <!-- Pravi logotipi izdelkov (ne emoji) — isti, kot jih stran nosi v glavi. -->
+      <a href="/gobarska-napoved/" class="qn-feat"><img class="qn-logo" src="/gobarska-napoved/logo-gobar.svg" alt="" width="20" height="20"> MeteoGobar</a>
+      <a href="https://crnivec.si/"><img class="qn-logo" src="/crnivec-brand/favicon.svg" alt="" width="20" height="20"> Črnivec</a>
+      <a href="/zima/"><img class="qn-logo" src="/zima/logo-zima.svg" alt="" width="20" height="20"> MeteoZima</a>
     </nav>
     <script>
       (function(){var d=document.querySelector('.quick-nav .qn-drop');if(!d)return;

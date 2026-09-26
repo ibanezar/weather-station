@@ -201,10 +201,10 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .qn-drop summary::after{content:"";width:.4em;height:.4em;margin-left:.15rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .18s}
 .qn-drop[open] summary::after{transform:rotate(-135deg) translateY(2px)}
 .qn-drop[open] summary{border-color:var(--card-border-h);color:var(--cyan)}
-/* Desno poravnano, ne sredinsko: `.qn-drop` je zadnja kapsula v vrstici in
-   na telefonu blizu desnega roba — sredinjena plošča bi segla čez rob in se
-   odrezala ob `body{overflow-x:hidden}`. */
-.qn-drop-menu{position:absolute;top:calc(100% + .4rem);right:0;z-index:20;display:flex;flex-direction:column;gap:.3rem;min-width:11rem;padding:.4rem;border-radius:14px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
+/* Levo poravnano, ne sredinsko: `.qn-drop` je prva kapsula v vrstici in na
+   telefonu ob levem robu — sredinjena plošča bi segla čez rob in se odrezala
+   ob `body{overflow-x:hidden}`. */
+.qn-drop-menu{position:absolute;top:calc(100% + .4rem);left:0;z-index:20;display:flex;flex-direction:column;gap:.3rem;min-width:11rem;padding:.4rem;border-radius:14px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
 .qn-drop-menu a{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:600;color:var(--blue);text-decoration:none;padding:.5rem .7rem;border-radius:9px;white-space:nowrap}
 .qn-drop-menu a:hover{background:rgba(34,211,238,.1);color:var(--cyan)}
 /* Postavke v meniju so potomke .quick-nav, zato bi sicer podedovale obliko
@@ -220,19 +220,28 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 header{position:relative;z-index:30}
 [data-theme="light"] .qn-drop-menu{background:#fff}
 .qn-drop-sep{height:1px;margin:.1rem .5rem;background:var(--card-border)}
-.qn-drop summary .qn-burger{font-size:.9rem}
+.qn-drop summary .qn-burger{font-size:.9rem;line-height:1}
+.quick-nav .qn-logo{width:20px;height:20px;flex:none;display:block}
 @media (max-width:520px){
   .qn-drop summary{padding:.45rem .6rem;font-size:.74rem;gap:.3rem}
   .quick-nav{gap:.3rem}
   .quick-nav a{padding:.45rem .6rem}
   .quick-nav .qn-drop-menu a .qn-ico,.qn-drop summary .qn-burger{display:inline}
 }
-/* Pod 400 px bi Meni padel v drugo vrstico — zadnjo ikono v vrstici odvzamemo
-   MeteoGobarju (poudarek mu ostane v barvi kapsule). */
-@media (max-width:400px){
-  .quick-nav a.qn-feat .qn-ico{display:none}
-  .quick-nav{gap:.25rem}
-  .quick-nav a,.qn-drop summary{padding:.45rem .55rem}
+/* Pod 440 px bi zadnja kapsula padla v drugo vrstico — Meni pokaže samo ☰,
+   logotipi izdelkov pa ostanejo (zaradi njih je vrstica sploh tu). */
+@media (max-width:440px){
+  /* vrstica sme malo v rob .wrap, da štiri kapsule ostanejo v eni vrsti */
+  .quick-nav{gap:.25rem;margin-left:-.5rem;margin-right:-.5rem}
+  .quick-nav a,.qn-drop summary{padding:.42rem .5rem;font-size:.72rem;gap:.28rem}
+  .qn-drop summary .qn-txt{display:none}
+  .qn-drop summary::after{display:none}
+  .quick-nav .qn-logo{width:17px;height:17px}
+}
+@media (max-width:345px){
+  .quick-nav{gap:.2rem}
+  .quick-nav a,.qn-drop summary{padding:.4rem .4rem;font-size:.68rem;gap:.22rem}
+  .quick-nav .qn-logo{width:15px;height:15px}
 }
 .sskj-entry{margin:.45rem auto 0;font-size:.7rem;color:var(--muted);letter-spacing:.01em;max-width:520px;line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
 .sskj-entry.open{max-height:4rem;opacity:1}
