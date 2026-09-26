@@ -1,5 +1,15 @@
 [
   {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-09-25",
+    "value": 4.1,
+    "prev_value": 6.8,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-09-25",
+    "years_covered": 6
+  },
+  {
     "type": "susa",
     "date": "2026-09-18",
     "end_date": "2026-09-24",
