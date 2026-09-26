@@ -228,21 +228,39 @@ header{position:relative;z-index:30}
   .quick-nav a{padding:.45rem .6rem}
   .quick-nav .qn-drop-menu a .qn-ico,.qn-drop summary .qn-burger{display:inline}
 }
-/* Pod 440 px bi zadnja kapsula padla v drugo vrstico — Meni pokaže samo ☰,
-   logotipi izdelkov pa ostanejo (zaradi njih je vrstica sploh tu). */
+/* Pod 440 px bi zadnja kapsula padla v drugo vrstico. Beseda »Meni« ostane
+   (ljudje, navajeni stare vrstice kapsul, bi goli ☰ spregledali), zato se
+   manjšajo logotipi, pisava in notranji robovi. */
 @media (max-width:440px){
   /* vrstica sme malo v rob .wrap, da štiri kapsule ostanejo v eni vrsti */
-  .quick-nav{gap:.25rem;margin-left:-.5rem;margin-right:-.5rem}
-  .quick-nav a,.qn-drop summary{padding:.42rem .5rem;font-size:.72rem;gap:.28rem}
-  .qn-drop summary .qn-txt{display:none}
+  .quick-nav{gap:.22rem;margin-left:-.5rem;margin-right:-.5rem}
+  .quick-nav a,.qn-drop summary{padding:.42rem .42rem;font-size:.7rem;gap:.24rem}
   .qn-drop summary::after{display:none}
-  .quick-nav .qn-logo{width:17px;height:17px}
-}
-@media (max-width:345px){
-  .quick-nav{gap:.2rem}
-  .quick-nav a,.qn-drop summary{padding:.4rem .4rem;font-size:.68rem;gap:.22rem}
   .quick-nav .qn-logo{width:15px;height:15px}
 }
+@media (max-width:370px){
+  .quick-nav{gap:.18rem;margin-left:-.65rem;margin-right:-.65rem}
+  .quick-nav a,.qn-drop summary{padding:.4rem .34rem;font-size:.66rem;gap:.2rem}
+  .quick-nav .qn-logo{width:13px;height:13px}
+  .qn-drop summary .qn-burger{font-size:.78rem}
+}
+/* Enkraten namig ob uvedbi menija (26. 9. 2026) za obiskovalce, navajene
+   stare vrstice kapsul — initMenuHint() v app.js. Ko datum KONEC_NAMIGA
+   tam poteče, se lahko ta blok, element #menu-hint in funkcija odstranijo. */
+.qn-menu-wrap{position:relative;display:inline-flex}
+.menu-hint{display:none;position:absolute;top:calc(100% + 10px);left:0;z-index:25;background:var(--blue);color:#fff;
+  font-family:'Inter',sans-serif;font-size:.76rem;line-height:1.35;text-align:left;text-shadow:none;
+  padding:.55rem 1.8rem .55rem .8rem;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);
+  width:max-content;max-width:min(78vw,17rem);animation:menuHintPop .35s ease}
+.menu-hint::before{content:'';position:absolute;top:-6px;left:1.1rem;transform:rotate(45deg);width:12px;height:12px;background:var(--blue)}
+.menu-hint.show{display:block}
+.menu-hint-close{position:absolute;top:2px;right:4px;background:none;border:none;color:#fff;opacity:.8;font-size:.9rem;line-height:1;cursor:pointer;padding:.25rem .4rem}
+.menu-hint-close:hover{opacity:1}
+@keyframes menuHintPop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.qn-drop.qn-pulse summary{animation:qnPulse 1.6s ease-in-out 4}
+@keyframes qnPulse{0%,100%{box-shadow:var(--card-shadow)}50%{box-shadow:0 0 0 4px rgba(56,189,248,.45),var(--card-shadow)}}
+@media (prefers-reduced-motion:reduce){.qn-drop.qn-pulse summary,.menu-hint{animation:none}}
+
 .sskj-entry{margin:.45rem auto 0;font-size:.7rem;color:var(--muted);letter-spacing:.01em;max-width:520px;line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
 .sskj-entry.open{max-height:4rem;opacity:1}
 .sskj-entry .sskj-hw{font-weight:700;letter-spacing:.025em;font-style:normal}

@@ -353,8 +353,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
          ostalim (26. 9. 2026).
          Nova povezava gre v meni, ne kot nova kapsula v vrstico. -->
     <nav class="quick-nav" aria-label="Hitre povezave">
+      <span class="qn-menu-wrap">
       <details class="qn-drop">
-        <summary aria-label="Meni" title="Meni"><span class="qn-burger" aria-hidden="true">☰</span> <span class="qn-txt">Meni</span></summary>
+        <summary title="Meni"><span class="qn-burger" aria-hidden="true">☰</span> <span class="qn-txt">Meni</span></summary>
         <div class="qn-drop-menu">
           <a href="/blog/"><span class="qn-ico">📖</span> Blog</a>
           <a href="/trendi/"><span class="qn-ico">📈</span> Trendi</a>
@@ -367,6 +368,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="/sola/"><span class="qn-ico">🏫</span> Šola</a>
         </div>
       </details>
+      <div class="menu-hint" id="menu-hint" role="status">
+        <button class="menu-hint-close" onclick="dismissMenuHint()" aria-label="Zapri">×</button>
+        Novo: blog, arhiv, igre in Šola so zdaj v meniju
+      </div>
+      </span>
       <!-- Pravi logotipi izdelkov (ne emoji) — isti, kot jih stran nosi v glavi. -->
       <a href="/gobarska-napoved/" class="qn-feat"><img class="qn-logo" src="/gobarska-napoved/logo-gobar.svg" alt="" width="20" height="20"> MeteoGobar</a>
       <a href="https://crnivec.si/"><img class="qn-logo" src="/crnivec-brand/favicon.svg" alt="" width="20" height="20"> Črnivec</a>
@@ -375,6 +381,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <script>
       (function(){var d=document.querySelector('.quick-nav .qn-drop');if(!d)return;
         document.addEventListener('click',function(e){if(d.open&&!d.contains(e.target))d.open=false});
+        d.addEventListener('toggle',function(){if(d.open&&window.dismissMenuHint)dismissMenuHint()});
         document.addEventListener('keydown',function(e){if(e.key==='Escape'&&d.open){d.open=false;d.querySelector('summary').focus()}});})();
     </script>
   </header>
