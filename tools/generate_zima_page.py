@@ -778,7 +778,7 @@ def build_hub_body(data):
       <div class="ph-count">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></a>
     <a class="phenom-card zima-phenom" href="/zima/prevoznost-prelazov/" style="{card_style("passes", "")}">
       <span class="ph-icon">{icon_html("passes", 30)}</span>Prevoznost prelazov
-      <div class="ph-count">{len(passes)} prelaza</div></a>
+      <div class="ph-count">{prelazi_n(len(passes))}</div></a>
   </div>'''
 
     season = data.get("season") or {}
@@ -1172,17 +1172,25 @@ def build_snowpack_body(data):
 
 # ── /zima/prevoznost-prelazov/ ────────────────────────────────────────────
 
+def prelazi_n(n, spremljan=False):
+    """»2 prelaza«, »3 prelazi«, »5 prelazov« (dvojina/množina)."""
+    oblika = {1: ("prelaz", "spremljan"), 2: ("prelaza", "spremljana"),
+              3: ("prelazi", "spremljani"), 4: ("prelazi", "spremljani")}.get(n % 100 if n % 100 < 5 else 0,
+                                                                            ("prelazov", "spremljanih"))
+    return f"{n} {oblika[1] + ' ' if spremljan else ''}{oblika[0]}"
+
+
 def build_passes_body(data):
     passes = data.get("passes") or []
 
     known = [(p, p["weather"]) for p in passes if (p.get("weather") or {}).get("expected_snow_cm_24h") is not None]
     if known:
         worst_pass, worst_w = max(known, key=lambda pw: pw[1]["expected_snow_cm_24h"])
-        hero_sub = (f'{len(passes)} spremljana prelaza. Največ snega v naslednjih 24 h je pričakovanih na '
+        hero_sub = (f'{prelazi_n(len(passes), True)}. Največ snega v naslednjih 24 h je pričakovanih na '
                     f'{worst_pass["name"]} ({worst_pass["elevation_m"]} m) — do '
                     f'{num(worst_w["expected_snow_cm_24h"], 1)} cm.')
     else:
-        hero_sub = f'{len(passes)} spremljana prelaza — vreme na višini trenutno ni na voljo.'
+        hero_sub = f'{prelazi_n(len(passes), True)} — vreme na višini trenutno ni na voljo.'
 
     rows = []
     for p in passes:

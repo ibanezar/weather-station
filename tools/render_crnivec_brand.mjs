@@ -30,6 +30,8 @@ const PNGS = [
   ["logo-crnivec.svg", "logo-crnivec.png", 0, 400],          // širina po razmerju
   ["fb-profile.svg", "fb-profile.png", 1080, 1080],
   ["fb-cover.svg", "fb-cover.png", 1640, 624],
+  ["fb-launch-1x1.svg", "fb-launch-1x1.png", 1080, 1080],
+  ["fb-launch-9x16.svg", "fb-launch-9x16.png", 1080, 1920],
 ];
 
 // Na crnivec.si gredo samo ikone in logotip; FB slike ostanejo v crnivec-brand/.

@@ -653,6 +653,31 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
     statično besedilo s povezavami — nikoli ne izpiše »ni zapor«, če vira ni
     prebral.
 
+### »Kaj pa čez Lipo?« — `crnivec.si/lipa/` (26. 9. 2026)
+
+Filip je želel še prelaz **Lipa** (723 m, lokalna cesta Vransko–Lipa–Šmartno ob
+Dreti): povezava »Kaj pa čez Lipo?« je v vrhnji vrstici **tik ob logotipu**
+(`.crn-sib`), na Lipi pa v istem mestu »Kaj pa čez Črnivec?«.
+
+- **Na Lipi ni postaje DRSI ne kamere** (preverjeno na seznamu ceste.si;
+  najbližje so Gornji Grad, Špitalič, Učak, 9–11 km stran). Vse je **ocena
+  modela** in tako tudi piše (`LIPA_BREZ_MERITVE`). Vrstic Megla in Veter ni
+  (model zanju nima rezerve — isto pravilo kot zgoraj), umeritve DRSI tudi ne:
+  izračunana je na Črnivcu in se na drug prelaz brez meritve ne prenaša.
+- Podatki: `PASSES["lipa"]` v `winter_engine.py` (ista serija kot Črnivec,
+  preračunana na 723 m). Snežna odeja je linearno med pasovoma 600/900 m
+  (`snowpack_at()`). Prelaz je zato tudi na `/zima/prevoznost-prelazov/`.
+- **Koda ni podvojena.** `build_lipa_body()` kliče iste Python pomočnike kot
+  Črnivec (`check_rows`, `forecast_hours`, `commute_windows`, `special_items`
+  …, ki imajo višino kot parameter), JS pa je isti `SHARE_JS_TEMPLATE` s
+  `PASS_JS["lipa"]` (`drsi: false` → brez klica meritve in brez vrstic
+  Megla/Veter). Stran ima iste id-je elementov; česar ni (kamera, glasovanje,
+  poročila, dolina, zapore), JS preskoči. Nova stvar na Črnivcu, ki je vezana
+  na višino, gre torej skozi `PASS_JS`/parameter `elev`, ne kot vtipkan 902.
+- V sitemapu in `llms.txt` crnivec.si, `geo_audit.py` (`CRN_PAGES`) preveri
+  canonical, naslov in FAQPage tudi za `/lipa/`. Wikidata je v
+  `PLACE_SAMEAS["Lipa (prelaz)"]` (Q12794904).
+
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 
 Prijatelj iz Varpolja (občina Rečica ob Savinji, ~1,6 km jugozahodno, isto dno

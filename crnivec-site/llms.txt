@@ -8,6 +8,7 @@
 ## Stran
 
 - [Kako je čez Črnivec?](https://crnivec.si/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, vreme za 7 dni (najnižja in najvišja temperatura, padavine, nov sneg, poledica po dnevih), termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
+- [Kako je čez Lipo?](https://crnivec.si/lipa/): isto za prelaz Lipa (723 m) med Vranskim in Šmartnim ob Dreti, a samo kot ocena modela, ker na Lipi ni postaje ne kamere.
 - [Pogosta vprašanja](https://crnivec.si/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
 - [Zapore in stanje ceste](https://crnivec.si/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
 

@@ -107,7 +107,8 @@ OLD_PATH = "/crnivec/"
 # tools/build_crnivec_brand.py), ne Meteorecove.
 BRAND_FILES = ("favicon.ico", "favicon.svg", "apple-touch-icon.png", "icon-192.png",
                "icon-512.png", "icon-maskable-512.png", "logo-crnivec.svg", "logo-crnivec.png")
-CRN_LOCAL = {"/manifest.json"} | {f"/{f}" for f in BRAND_FILES}
+# /lipa/ je podstran na crnivec.si (glej build_lipa_body), zato ostane lokalna.
+CRN_LOCAL = {"/manifest.json", "/lipa/"} | {f"/{f}" for f in BRAND_FILES}
 # Isti ključ kot za meteorec.si (seo_smart_routine.INDEXNOW_KEY) -- IndexNow
 # zahteva, da je ključ na istem gostitelju, zato ga write_site_files() zapiše
 # tudi na crnivec.si. Ping pošlje zima-forecast.yml po objavi.
@@ -580,10 +581,10 @@ def forecast_sentence(rows_now, hours):
     return say
 
 
-def forecast_note(corrected, calib=None):
+def forecast_note(corrected, calib=None, elev=902):
     cal = (f" in umerjena z meritvami postaje DRSI zadnjih {calib.get('days')} dni" if calib else "")
     fix = ", začne pri zadnji meritvi" if corrected else ""
-    return f"Napoved Open-Meteo za dolino, preračunana na 902 m{cal}{fix}. Vozišče je ocena."
+    return f"Napoved Open-Meteo za dolino, preračunana na {elev} m{cal}{fix}. Vozišče je ocena."
 
 
 def forecast_cells_html(hours):
@@ -608,7 +609,7 @@ def forecast_cells_html(hours):
 # regionalni data["fog"] (compute_fog). Samo strežniški izris iz jutranjega
 # teka: sneg jutri in jutranja megla se čez dan ne spreminjata dovolj, da bi
 # upravičila še eno JS kopijo pravil -- čas izračuna je izpisan pod blokom.
-FOG_EDGE_M = 100  # ocena meje inverzije je groba; ±100 m okoli 902 m je "na robu"
+FOG_EDGE_M = 100  # ocena meje inverzije je groba; ±100 m okoli višine prelaza je "na robu"
 
 
 def rel_day(date_iso, today):
@@ -632,7 +633,7 @@ def hour_span(hours, today):
     return f"{day} {span}"
 
 
-def special_items(weather, fog, today):
+def special_items(weather, fog, today, elev=902):
     sp = weather.get("special") or {}
     items = []
 
@@ -668,16 +669,16 @@ def special_items(weather, fog, today):
     if fog and fog.get("has_inversion") and fog.get("top_m"):
         top = fog["top_m"]
         when = f'{rel_day(fog.get("morning_date") or "", today)} zjutraj'
-        if top < 902 - FOG_EDGE_M:
+        if top < elev - FOG_EDGE_M:
             items.append({"id": "fog", "label": "Megla", "level": "ok", "value": "prelaz bo nad njo",
-                          "lines": [f"Če bo {when} v dolini megla, bo segala do ~{top} m — prelaz (902 m) je nad njo."]})
-        elif top <= 902 + FOG_EDGE_M:
+                          "lines": [f"Če bo {when} v dolini megla, bo segala do ~{top} m — prelaz ({elev} m) je nad njo."]})
+        elif top <= elev + FOG_EDGE_M:
             items.append({"id": "fog", "label": "Megla", "level": "warn", "value": "prelaz je na robu",
-                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m, prelaz je na 902 m — "
+                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m, prelaz je na {elev} m — "
                                     f"lahko je v megli ali tik nad njo."]})
         else:
             items.append({"id": "fog", "label": "Megla", "level": "warn", "value": "možna megla ali nizka oblačnost",
-                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m — prelaz (902 m) je pod njo."]})
+                          "lines": [f"Ocenjena zgornja meja megle {when} je ~{top} m — prelaz ({elev} m) je pod njo."]})
     return items
 
 
@@ -1142,6 +1143,12 @@ CSS = '''
   .crn-brand{display:inline-flex;align-items:center;min-height:40px;text-decoration:none}
   .crn-brand img{display:block;height:36px;width:auto}
   .crn-install-wrap{text-align:right}
+  /* »Kaj pa čez Lipo?« / »Kaj pa čez Črnivec?« -- tik ob logotipu (26. 9. 2026). */
+  .crn-top-l{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s1) var(--s2)}
+  .crn .crn-sib{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;font-size:13px;font-weight:800;
+    color:#111;background:#fef08a;border:2px solid #111;border-radius:999px;box-shadow:2px 2px 0 #111;
+    text-decoration:none;white-space:nowrap}
+  .crn .crn-sib:hover,.crn .crn-sib:focus-visible{background:#fde047}
   .crn-top .crn-btn{min-height:40px;font-size:13px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
 
   /* ── HERO ───────────────────────────────────────────────────── */
@@ -1831,7 +1838,11 @@ SHARE_JS_TEMPLATE = '''
   // _smerBesedilo/_ltgDecode drugod v repozitoriju. Če spremeniš
   // LAPSE_RATE_C_PER_100M/SNOW_* konstante ali formulo v winter_engine.py,
   // spremeni tudi tu.
-  var LIVE_LAPSE_RATE = 0.65, LIVE_STATION_ELEV = 366, LIVE_PASS_ELEV = 902;
+  // Prelaz, za katerega teče ta kopija (Črnivec ali Lipa, glej PREL_* v
+  // generate_crnivec_page.py). Brez postaje DRSI (drsi: false) se meritev ne
+  // kliče, vrstic Megla/Veter ni (model zanju nima rezerve) in vse je ocena.
+  var PASS = __PASS_JSON__;
+  var LIVE_LAPSE_RATE = 0.65, LIVE_STATION_ELEV = 366, LIVE_PASS_ELEV = PASS.elev;
   var LIVE_SNOW_OFFSET = 250, LIVE_SNOW_HALFWIDTH = 100;
   var ZONE_DATA = __ZONE_DATA_JSON__;
 
@@ -1916,7 +1927,7 @@ SHARE_JS_TEMPLATE = '''
       needle.style.animation = "none";
       needle.style.transform = "rotate(" + rotLive + ")";
     }
-    if (gaugeSvg) gaugeSvg.setAttribute("aria-label", "Črnivski indeks: " + zone.label);
+    if (gaugeSvg) gaugeSvg.setAttribute("aria-label", PASS.indeks + ": " + zone.label);
 
     // "Deli kot sliko" naj deli TRENUTNO (živo) stanje, ne tisto, spečeno ob
     // generiranju strani. Kazalec v statični SVG kopiji se zasuka
@@ -2155,7 +2166,7 @@ SHARE_JS_TEMPLATE = '''
     var sayEl = document.getElementById("crn-next-say");
     if (sayEl) sayEl.textContent = stavekNapovedi(rowsNow, ure);
     var noteEl = document.getElementById("crn-next-note");
-    if (noteEl) noteEl.textContent = "Napoved Open-Meteo za dolino, preračunana na 902 m" +
+    if (noteEl) noteEl.textContent = "Napoved Open-Meteo za dolino, preračunana na " + PASS.elev + " m" +
       (CALIB ? " in umerjena z meritvami postaje DRSI zadnjih " + CALIB.days + " dni" : "") +
       (zivDrsi && zivDrsi.temp_c != null ? ", začne pri zadnji meritvi" : "") + ". Vozišče je ocena.";
     sec.hidden = false;
@@ -2183,6 +2194,7 @@ SHARE_JS_TEMPLATE = '''
     else { snow.level = "stop"; snow.value = numSlLive(cm, 1) + " cm"; }
     snow.value += tla;
     rows.push(snow);
+    if (!PASS.drsi) return rows;
 
     var rh = d.vlaga_pct, fog = { id: "fog", label: "Megla", src: "iz izmerjene vlage" };
     if (rh == null) { fog.level = "na"; fog.value = "ni meritve"; fog.src = ""; }
@@ -2238,7 +2250,7 @@ SHARE_JS_TEMPLATE = '''
     }
     var noteEl = document.getElementById("crn-check-note");
     if (noteEl) {
-      noteEl.textContent = zivDrsi
+      noteEl.textContent = !PASS.drsi ? PASS.brezMeritve : zivDrsi
         ? "Izmerjeno na prelazu ob " + uraSl(new Date(zivDrsi.ts)) + " · postaja DRSI (ceste.si). Vozišče je ocena, ne meritev."
         : "Meritev s prelaza trenutno ni na voljo — prikazana je ocena modela. Vozišče je ocena, ne meritev.";
     }
@@ -2337,6 +2349,7 @@ SHARE_JS_TEMPLATE = '''
   }
 
   function osveziDrsi(){
+    if (!PASS.drsi) { uporabiStanje(); return; }
     if (!window.fetch) return;
     fetch(API + "/crnivec-drsi").then(function(r){ return r.json(); }).then(function(d){
       var st = d && d.postaje && d.postaje.crnivec;
@@ -3408,7 +3421,8 @@ def build_body(data):
                 .replace("__DUEL_ELEV_JSON__", json.dumps(DRSI_ELEV_M))
                 .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
                 .replace("__SAYS_JSON__", json.dumps(CRNIVEC_SAYS, ensure_ascii=False).replace("</", "<\\/"))
-                .replace("__TODAY_ISO__", today_iso))
+                .replace("__TODAY_ISO__", today_iso)
+                .replace("__PASS_JSON__", json.dumps(PASS_JS["crnivec"], ensure_ascii=False)))
 
     # Vrstni red je hierarhija odločitve »grem zdaj čez?« (mobile-first,
     # preurejeno 26. 9. 2026): (pasica žive zapore) → status z meritvami in
@@ -3422,7 +3436,10 @@ def build_body(data):
     body = f'''{CSS}
   <div class="crn">
     <div class="crn-top">
-      <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
+      <div class="crn-top-l">
+        <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
+        <a class="crn-sib" href="/lipa/">Kaj pa čez Lipo? →</a>
+      </div>
       <div class="crn-install-wrap">
         <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
         <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
@@ -3659,6 +3676,263 @@ def build_body(data):
     return body, og_slika, faq
 
 
+# ── crnivec.si/lipa/ — »Kaj pa čez Lipo?« (26. 9. 2026) ────────────────────
+# Prelaz Lipa (723 m) med Vranskim in Šmartnim ob Dreti, na Filipovo željo
+# podstran crnivec.si (povezava ob logotipu). Na Lipi NI cestne vremenske
+# postaje DRSI in ne kamere (lokalna cesta, preverjeno na seznamu ceste.si
+# 26. 9. 2026; najbližje postaje so Gornji Grad, Špitalič in Učak, vse
+# 9-11 km stran in na drugih višinah) -- zato je VSE ocena modela: ista
+# serija kot za Črnivec (winter_engine.py, PASSES["lipa"]), preračunana na
+# 723 m, brez umeritve (umeritev DRSI je izračunana na Črnivcu in je ne
+# prenašamo na drug prelaz brez meritve, ki bi to potrdila). Vrstic Megla in
+# Veter ni: zanju model nima rezerve (glej fog_row/wind_row).
+#
+# Koda je ISTA kot za Črnivec (Python pomočniki zgoraj, SHARE_JS_TEMPLATE s
+# PASS_JS["lipa"]) -- stran uporablja iste id-je elementov, vse, česar tu ni
+# (kamera, glasovanje, poročila, dolina …), pa JS preskoči, ker elementa ni.
+LIPA_ELEV = 723
+LIPA_PATH = "/crnivec/lipa/"          # page_shell → to_crnivec_site → crnivec.si/lipa/
+LIPA_BREZ_MERITVE = (f"Na Lipi ni merilne postaje, zato je vse ocena modela (Open-Meteo, preračunano "
+                     f"na {LIPA_ELEV} m). Vozišče je ocena, ne meritev.")
+
+# Parametri za SHARE_JS_TEMPLATE (__PASS_JSON__).
+PASS_JS = {
+    "crnivec": {"elev": 902, "drsi": True, "indeks": "Črnivski indeks", "brezMeritve": ""},
+    "lipa": {"elev": LIPA_ELEV, "drsi": False, "indeks": "Lipski indeks", "brezMeritve": LIPA_BREZ_MERITVE},
+}
+
+
+def snowpack_at(data, elev):
+    """Snežna odeja za višino med pasovi compute_snowpack (linearno)."""
+    depth = (data.get("snowpack") or {}).get("depth_cm") or {}
+    pasovi = sorted((int(k), v) for k, v in depth.items() if v is not None)
+    for (e0, d0), (e1, d1) in zip(pasovi, pasovi[1:]):
+        if e0 <= elev <= e1:
+            return d0 + (d1 - d0) * (elev - e0) / (e1 - e0)
+    return None
+
+
+def lipa_faq(snowpack_cm, snow_new):
+    if snowpack_cm is None:
+        sneg = "Snega na Lipi ne meri nobena postaja, ocena snežne odeje pa trenutno ni na voljo."
+    else:
+        novi = (f", v naslednjih 24 urah pa je napovedanih {seo.num(snow_new, 1)} cm novega snega"
+                if snow_new is not None else "")
+        sneg = (f"Snega na Lipi ne meri nobena postaja. Po oceni modela je na višini prelaza zdaj "
+                f"{seo.num(snowpack_cm, 0)} cm snežne odeje{novi}.")
+    return [
+        ("Koliko je visok prelaz Lipa?",
+         f"Prelaz Lipa je {LIPA_ELEV} metrov nad morjem, približno 350 m višje od Šmartnega ob Dreti "
+         "in Vranskega."),
+        ("Kje je prelaz Lipa?",
+         "Lipa je prelaz med Menino planino in Dobroveljsko planoto. Čezenj pelje lokalna cesta "
+         "Vransko–Lipa–Šmartno ob Dreti, najkrajša povezava med Vranskim in Zadrečko dolino."),
+        ("Ali je na Lipi sneg?", sneg),
+        ("Ali je na Lipi kamera ali vremenska postaja?",
+         "Ne. Na Lipi ni cestne vremenske postaje ne spletne kamere, zato so vse številke na tej strani "
+         "ocena iz vremenskega modela, preračunana na višino prelaza. Za Črnivec, kjer sta postaja in "
+         "kamera, glej crnivec.si."),
+        ("Kdaj je na Lipi obvezna zimska oprema?",
+         "Od 15. novembra do 15. marca in tudi zunaj tega obdobja, kadar so na cesti zimske razmere, "
+         "mora imeti osebni avto zimske pnevmatike ali letne pnevmatike in snežne verige v vozilu. "
+         "Tako določa Zakon o pravilih cestnega prometa."),
+    ]
+
+
+def lipa_schema(title, desc, faq):
+    prelaz = {"@type": "Place", "@id": f"{CRN_SITE}/lipa/#prelaz", "name": "Lipa",
+              "alternateName": ["Prelaz Lipa", "Lipa nad Vranskim"],
+              "description": f"Prelaz ({LIPA_ELEV} m) med Vranskim in Šmartnim ob Dreti.",
+              "geo": {"@type": "GeoCoordinates", "latitude": 46.2613, "longitude": 14.8938,
+                      "elevation": LIPA_ELEV},
+              "sameAs": seo.PLACE_SAMEAS["Lipa (prelaz)"],
+              "containedInPlace": {"@type": "Country", "name": "Slovenija"}}
+    data = [
+        {"@context": "https://schema.org", "@type": "WebPage", "@id": f"{CRN_SITE}/lipa/",
+         "name": title, "description": desc, "url": f"{CRN_SITE}/lipa/", "inLanguage": "sl",
+         "isPartOf": {"@id": f"{CRN_SITE}/#website"},
+         "author": {"@id": f"{seo.SITE}/#person"},
+         "about": prelaz,
+         "speakable": {"@type": "SpeakableSpecification",
+                       "cssSelector": ["#crn-status-title", "#crn-status-desc", "#crn-next-say"]},
+         "datePublished": "2026-09-26",
+         "dateModified": datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).isoformat(timespec="seconds")},
+        {"@context": "https://schema.org", "@type": "FAQPage", "@id": f"{CRN_SITE}/lipa/#vprasanja",
+         "mainEntity": [{"@type": "Question", "name": q,
+                         "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]},
+    ]
+    return "\n".join(
+        f'<script type="application/ld+json">\n{json.dumps(d, ensure_ascii=False, separators=(",", ":"))}\n</script>'
+        for d in data)
+
+
+def build_lipa_body(data):
+    lipa = next((p for p in data.get("passes") or [] if p["id"] == "lipa"), None)
+    weather = (lipa or {}).get("weather") or {}
+    zone = pick_zone(with_measurement(weather, None))
+    st = STATUS[zone["id"]]
+    generated_at = data.get("generated_at") or ""
+    snowpack_cm = snowpack_at(data, LIPA_ELEV)
+    snow_new = weather.get("expected_snow_cm_24h")
+
+    rows = [r for r in check_rows(weather, None, snowpack_cm) if r["id"] not in ("fog", "wind")]
+    check_warn_txt = check_warn_text(rows, zone["id"])
+    next_hours, _ = forecast_hours(weather, None)
+    next_cells = forecast_cells_html(next_hours)
+    next_say = forecast_sentence(rows, next_hours)
+    next_note = forecast_note(False, None, LIPA_ELEV)
+    commute_rows = commute_html(commute_windows(weather, None, seo.TODAY))
+    sp_items = special_items(weather, data.get("fog"), seo.TODAY, LIPA_ELEV)
+    sp_alert = bool(sp_items)
+    week = week_html(weather.get("daily"), seo.TODAY)
+    faq = lipa_faq(snowpack_cm, snow_new)
+
+    model_txt = f"Modelna napoved (Open-Meteo, preračunano na {LIPA_ELEV} m), ne uradno stanje ceste."
+    updated_txt = "Posodobljeno: čas izračuna ni znan"
+    try:
+        gen = datetime.datetime.fromisoformat(generated_at).astimezone(ZoneInfo("Europe/Ljubljana"))
+        model_txt = (f"Modelna napoved iz izračuna ob {gen:%H:%M} (Open-Meteo, preračunano na "
+                     f"{LIPA_ELEV} m), ne uradno stanje ceste.")
+        updated_txt = (f"Posodobljeno ob {gen:%H:%M}" if gen.date() == seo.TODAY
+                       else f"Posodobljeno {gen.day}. {gen.month}. ob {gen:%H:%M}")
+    except (ValueError, TypeError):
+        pass
+    upd_suffix = "ocena iz vremenskega modela"
+
+    sp_h = '⚠️ Pozor · posebne razmere v 48 urah' if sp_alert else 'Posebne razmere · 48 ur'
+    special_section = f'''
+      <section class="crn-special{' crn-special-alert' if sp_alert else ''}" id="crn-special" aria-labelledby="crn-sp-h">
+        <h2 class="crn-now-h" id="crn-sp-h">{sp_h}</h2>
+        {special_html(sp_items)}
+        <p class="crn-check-note">{model_txt}</p>
+      </section>
+'''
+    zone_data = [
+        {"id": z["id"], "label": z["label"], "color": z["color"], "mid": z["mid"],
+         "status": STATUS[z["id"]]["status"], "statusDesc": STATUS[z["id"]]["desc"],
+         "bg": STATUS[z["id"]]["bg"], "ink": STATUS[z["id"]]["ink"], "icon": ZONE_ICONS[z["id"]]}
+        for z in ZONES
+    ]
+    now_in = weather.get("now") or {}
+
+    def esc(o):
+        return json.dumps(o, ensure_ascii=False).replace("</", "<\\/")
+
+    js = (SHARE_JS_TEMPLATE
+          .replace("__QUOTES_JSON__", esc(QUOTES))
+          .replace("__RARE_QUOTE_JSON__", esc(RARE_QUOTE))
+          .replace("__SHARE_JSON__", "null")
+          .replace("__CAM_URL_JSON__", "null")
+          .replace("__ZONE_DATA_JSON__", esc(zone_data))
+          .replace("__CHECK_MODEL_JSON__", json.dumps({
+              "temp": weather.get("temp_c"), "snow24": snow_new,
+              "precip24": weather.get("precip_mm_24h"),
+              "p3": now_in.get("precip_mm_3h"), "s3": now_in.get("snow_cm_3h"),
+              "pNow": now_in.get("precip_mm_now"), "pPrev": now_in.get("precip_mm_prev"),
+              "cloud": now_in.get("cloud_pct"), "windValley": now_in.get("wind_kmh_valley"),
+              "dewValley": now_in.get("dew_c_valley")}))
+          .replace("__SNOWPACK_JSON__", json.dumps(snowpack_cm))
+          .replace("__CALIB_JSON__", "null")
+          .replace("__DUEL_ELEV_JSON__", json.dumps(DRSI_ELEV_M))
+          .replace("__DRSI_MAX_AGE__", str(DRSI_MAX_AGE_MIN))
+          .replace("__SAYS_JSON__", esc(CRNIVEC_SAYS))
+          .replace("__TODAY_ISO__", seo.TODAY.isoformat())
+          .replace("__PASS_JSON__", esc(PASS_JS["lipa"])))
+
+    vprasanja = "\n".join(
+        f'''        <details class="crn-acc">
+          <summary><h3 class="crn-faq-q">{q}</h3></summary>
+          <div class="crn-acc-body"><p>{a}</p></div>
+        </details>''' for q, a in faq)
+
+    body = f'''{CSS}
+  <div class="crn">
+    <div class="crn-top">
+      <div class="crn-top-l">
+        <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
+        <a class="crn-sib" href="{CRN_SITE}/">Kaj pa čez Črnivec? →</a>
+      </div>
+    </div>
+
+    <section class="crn-hero" aria-labelledby="crn-h1">
+      <div class="crn-head">
+        {mountain_icon_svg()}
+        <div class="crn-head-txt">
+          <p class="crn-eyebrow">Lipa · {LIPA_ELEV} m n. m.</p>
+          <h1 class="crn-title" id="crn-h1">Kako je čez Lipo?</h1>
+          <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
+        </div>
+      </div>
+
+      <div class="crn-hero-main{' has-alert' if sp_alert else ''}">
+      <div class="crn-status" id="crn-status" data-zone="{zone['id']}"
+        style="--zc:{zone['color']};--zbg:{st['bg']};--zink:{st['ink']}" role="status" aria-live="polite">
+        {gauge_svg(zone).replace("Črnivski indeks", PASS_JS["lipa"]["indeks"])}
+        <div class="crn-status-icon" id="crn-status-icon">{ZONE_ICONS[zone['id']]}</div>
+        <p class="crn-status-title" id="crn-status-title">{st['status']}</p>
+        <p class="crn-status-desc" id="crn-status-desc">{st['desc']}</p>
+        <p class="crn-cta-note">Cesta Vransko–Lipa–Šmartno ob Dreti. Na prelazu ni kamere ne merilne
+        postaje, zato je vse na tej strani ocena.</p>
+        <div class="crn-now" aria-labelledby="crn-now-h">
+          <h2 class="crn-now-h" id="crn-now-h">Čez Lipo zdaj</h2>
+          <ul class="crn-check" id="crn-check">{check_list_html(rows)}</ul>
+          <p class="crn-check-warn" id="crn-check-warn"{'' if check_warn_txt else ' hidden'}>{check_warn_txt}</p>
+          <p class="crn-check-note" id="crn-check-note">{LIPA_BREZ_MERITVE}</p>
+        </div>
+        <p class="crn-updated" id="crn-updated" data-ts="{generated_at}" data-sfx="{upd_suffix}">{updated_txt} · {upd_suffix}</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
+        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
+      </div>
+      </div>
+{special_section if sp_alert else ''}
+      <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h"{'' if next_cells else ' hidden'}>
+        <h2 class="crn-now-h" id="crn-next-h">Vreme na Lipi po urah · naslednjih 6 ur</h2>
+        <p class="crn-next-say" id="crn-next-say">{next_say}</p>
+        <div class="crn-next-grid" id="crn-next-grid">{next_cells}</div>
+        <p class="crn-check-note" id="crn-next-note">{next_note}</p>
+      </section>
+
+      <section class="crn-commute" id="crn-commute" aria-labelledby="crn-commute-h"{'' if commute_rows else ' hidden'}>
+        <h2 class="crn-now-h" id="crn-commute-h">Na poti v službo in domov</h2>
+        <p class="crn-lead crn-commute-lead">Najnižja temperatura, padavine in vozišče na prelazu v jutranjem in popoldanskem terminu.</p>
+        <div class="crn-commute-grid" id="crn-commute-grid">{commute_rows}</div>
+        <p class="crn-check-note">Napoved Open-Meteo, preračunana na {LIPA_ELEV} m. Dlje v prihodnost je manj zanesljiva. Vozišče je ocena.</p>
+      </section>
+
+{'' if sp_alert else special_section}
+      <section class="crn-week" id="napoved-7-dni" aria-labelledby="crn-wk-h"{'' if week else ' hidden'}>
+        <h2 class="crn-now-h" id="crn-wk-h">Vreme na Lipi za 7 dni</h2>
+        <div class="crn-wk-scroll">{week}</div>
+        <p class="crn-check-note">{model_txt} Dlje v prihodnost je napoved manj zanesljiva.</p>
+      </section>
+    </section>
+
+    <section class="crn-panel crn-info" id="o-prelazu" aria-labelledby="crn-about-h">
+      <h2 class="crn-h2" id="crn-about-h">O prelazu Lipa</h2>
+      <p>Lipa ({LIPA_ELEV} m) je prelaz med Menino planino in Dobroveljsko planoto. Čezenj pelje lokalna
+      cesta Vransko–Lipa–Šmartno ob Dreti, najkrajša povezava med Vranskim in Zadrečko dolino. Cesta je
+      ozka in ovinkasta, prelaz pa približno 350 m višje od obeh dolin, zato je pozimi in zjutraj na vrhu
+      pogosto drugače kot spodaj. Ime ima po stari lipi, ki raste na prelazu.</p>
+      <p>Na Lipi ni cestne vremenske postaje ne kamere. Temperatura, sneg in vozišče na tej strani so
+      zato ocena iz vremenske napovedi Open-Meteo, preračunane na višino prelaza, ne meritev.</p>
+    </section>
+
+    <section class="crn-info crn-faq" id="vprasanja" aria-labelledby="crn-faq-h">
+      <h2 class="crn-h2" id="crn-faq-h">Pogosta vprašanja o Lipi</h2>
+{vprasanja}
+    </section>
+
+    <footer class="crn-official">
+      <p><strong>Meteorec indeks je neuradna informacija.</strong> Za uradno stanje cest glej
+      <a href="https://www.promet.si" target="_blank" rel="noopener">promet.si</a>
+      (Prometno-informacijski center) in AMZS.</p>
+      <a class="crn-btn crn-back" href="{CRN_SITE}/">← Kako je čez Črnivec?</a>
+    </footer>
+  </div>
+{js}'''
+    return body, faq
+
+
 def to_crnivec_site(html):
     """Stran iz skupnega ovoja (page_shell, pisan za meteorec.si) prestavi na
     crnivec.si: kanonični URL, og:url in hreflang postanejo koren crnivec.si,
@@ -3720,6 +3994,7 @@ LLMS_TXT = f"""# Kako je čez Črnivec? (crnivec.si)
 ## Stran
 
 - [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, vreme za 7 dni (najnižja in najvišja temperatura, padavine, nov sneg, poledica po dnevih), termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
+- [Kako je čez Lipo?]({CRN_SITE}/lipa/): isto za prelaz Lipa (723 m) med Vranskim in Šmartnim ob Dreti, a samo kot ocena modela, ker na Lipi ni postaje ne kamere.
 - [Pogosta vprašanja]({CRN_SITE}/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
 - [Zapore in stanje ceste]({CRN_SITE}/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
 
@@ -3791,6 +4066,8 @@ def write_site_files():
                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
                 f'  <url><loc>{CRN_SITE}/</loc><lastmod>{danes}</lastmod>'
                 '<changefreq>hourly</changefreq><priority>1.0</priority></url>\n'
+                f'  <url><loc>{CRN_SITE}/lipa/</loc><lastmod>{danes}</lastmod>'
+                '<changefreq>hourly</changefreq><priority>0.8</priority></url>\n'
                 '</urlset>\n')
 
 
@@ -3851,6 +4128,15 @@ def main():
     seo.write_page(f"{CRN_DIR}/index.html", to_crnivec_site(html), force=True)
     write_site_files()
     seo.write_page("crnivec/index.html", redirect_stub(), force=True)
+
+    lipa_body, lipa_faq_list = build_lipa_body(data)
+    lipa_title = "Prelaz Lipa: vreme in stanje ceste Vransko–Šmartno"
+    lipa_desc = ("Kako je čez Lipo (723 m)? Ocena temperature, snega in poledice ter vreme po urah za "
+                 "cesto Vransko–Šmartno ob Dreti.")
+    lipa_head = "\n".join([pwa_head, lipa_schema(lipa_title, lipa_desc, lipa_faq_list)])
+    lipa_html = seo.page_shell(lipa_title, lipa_desc, LIPA_PATH, lipa_head, lipa_body)
+    seo.write_page(f"{CRN_DIR}/lipa/index.html", to_crnivec_site(lipa_html), force=True)
+    print(f"  → {CRN_DIR}/lipa/index.html (crnivec.si/lipa/)")
     print(f"  → {CRN_DIR}/index.html (crnivec.si){f' (OG: {og_slika})' if og_slika else ''}")
     print("  → crnivec/index.html (preusmeritev na crnivec.si)")
     return 0

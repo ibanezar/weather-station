@@ -155,6 +155,18 @@ PASSES = [
         "status": None,
         "status_checked": None,
     },
+    {
+        # Lipa, 723 m: sl.wikipedia.org/wiki/Lipa_(preval); sedlo v OSM
+        # (46.2613, 14.8938, ele 722). Lokalna cesta, na prelazu NI postaje
+        # DRSI in ne kamere -- crnivec.si/lipa/ je zato samo ocena modela.
+        "id": "lipa",
+        "name": "Lipa",
+        "elevation_m": 723,
+        "connects": "Vransko ↔ Šmartno ob Dreti (Zadrečka dolina)",
+        "source": "https://sl.wikipedia.org/wiki/Lipa_(preval)",
+        "status": None,
+        "status_checked": None,
+    },
 ]
 
 
