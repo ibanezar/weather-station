@@ -1530,23 +1530,27 @@ CSS = '''
        levo, meritve + gumb desno; spodaj dva stolpca, vsak svoj sklad, da
        se ne poravnavata po vrsticah (brez lukenj ob krajši kartici). */
     .crn-hero{max-width:none}
-    .crn-hero-main{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:auto 1fr;gap:var(--s4);
+    .crn-hero-main{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-rows:auto auto 1fr;gap:var(--s4);
       align-items:stretch;text-align:left}
     .crn-hero-main .crn-status{text-align:center;display:flex;flex-direction:column;justify-content:center}
     .crn-hero-main .crn-status-index{align-self:center}
-    /* Status levo čez dve vrstici, desno kamera in pod njo primerjava z
-       dolino. Pod tem čez vso širino: (posebne razmere, kadar kaj velja --
-       .has-alert) → 6 ur → vožnje → (posebne razmere brez posebnosti) → 7 dni.
-       Na telefonu vrstni red nosi DOM (glej build_body). */
-    .crn-hero-main .crn-status{grid-column:1;grid-row:1/3}
+    /* Status levo čez tri vrstice, desno kamera → dolina → 6 ur. Status je
+       najvišja kartica (~1080 px proti ~690 px za kamero in dolino), zato
+       "6 ur" zapolni preostanek desnega stolpca (vrstica 1fr + stretch,
+       vsebina sredinsko) -- brez tega je pod kamero zevala praznina, še
+       večja, kadar primerjave z dolino ni. Pod tem čez vso širino:
+       (posebne razmere, kadar kaj velja -- .has-alert) → vožnje →
+       (posebne razmere brez posebnosti) → 7 dni. Na telefonu vrstni red
+       nosi DOM (glej build_body). */
+    .crn-hero-main .crn-status{grid-column:1;grid-row:1/4}
     .crn-hero-main .crn-cam{grid-column:2;grid-row:1;margin-top:0;align-self:start}
     .crn-hero-main .crn-duel{grid-column:2;grid-row:2;margin-top:0;align-self:start}
-    .crn-hero-main .crn-next{grid-column:1/-1;grid-row:3;margin-top:0}
+    .crn-hero-main .crn-next{grid-column:2;grid-row:3;margin-top:0;align-self:stretch;
+      display:flex;flex-direction:column;justify-content:center}
     .crn-hero-main .crn-commute{grid-column:1/-1;grid-row:4;margin-top:0}
     .crn-hero-main .crn-special{grid-column:1/-1;grid-row:5;margin-top:0}
     .crn-hero-main .crn-week{grid-column:1/-1;grid-row:6;margin-top:0}
-    .crn-hero-main.has-alert .crn-special{grid-row:3}
-    .crn-hero-main.has-alert .crn-next{grid-row:4}
+    .crn-hero-main.has-alert .crn-special{grid-row:4}
     .crn-hero-main.has-alert .crn-commute{grid-row:5}
     .crn-cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);align-items:start}
     .crn-col{display:flex;flex-direction:column;gap:var(--s4)}
