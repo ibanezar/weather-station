@@ -148,7 +148,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 /* Layout */
 .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
-header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
+header{text-align:center;padding:2.5rem 0 1rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
 /* Svetla tema: temna senca okoli temnega besedila naredi packo — svetlo obsevanje ga namesto tega dvigne od ozadja */
 [data-theme="light"] header{text-shadow:0 1px 10px rgba(255,255,255,.75)}
 [data-theme="light"] .status{text-shadow:0 1px 8px rgba(255,255,255,.7)}
@@ -178,7 +178,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
    drsenja ni bilo, tako da sta bila »Blog« in »Šola« (pri 360 px tudi
    »Trendi« in »Igre«) nedosegljiva. Prelom v dve vrstici je manjše zlo od
    nedosegljivih povezav; drsni trak (overflow-x:auto) bi odrezal spustni
-   meni »Igre«, ker je ta absolutno pozicioniran znotraj vrstice. */
+   »Meni«, ker je ta absolutno pozicioniran znotraj vrstice. */
 @media (max-width:520px){
   .quick-nav{gap:.4rem}
   .quick-nav a{padding:.45rem .7rem;font-size:.74rem}
@@ -190,11 +190,10 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
   .quick-nav a.qn-feat .qn-ico{display:inline}
 }
 
-/* Igre — <details> namesto dveh ločenih kapsul (Termika + Prehiti model),
-   da se .quick-nav ne razlomi na ozkih zaslonih. Native <details>/<summary>:
-   deluje brez JS, tipkovnica in bralnik zaslona ga poznata sama od sebe,
-   zato tu ni ponovljena logika "zapri ob kliku zunaj", ki jo ima app.js za
-   druge widgete. */
+/* Meni — <details> z vsemi povezavami razen treh izdelkov ob logu
+   (MeteoGobar, Črnivec, MeteoZima). Native <details>/<summary>: deluje brez
+   JS, tipkovnica in bralnik zaslona ga poznata sama od sebe; zapiranje ob
+   kliku zunaj/Esc doda majhna inline skripta za <nav> v index.html. */
 .qn-drop{position:relative}
 .qn-drop summary{display:inline-flex;align-items:center;justify-content:center;gap:.38rem;font-size:.8rem;font-weight:600;color:var(--blue);padding:.4rem .9rem;border-radius:999px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:border-color .18s,color .18s,background .18s,transform .15s;white-space:nowrap;cursor:pointer;list-style:none}
 .qn-drop summary::-webkit-details-marker{display:none}
@@ -202,17 +201,38 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .qn-drop summary::after{content:"";width:.4em;height:.4em;margin-left:.15rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .18s}
 .qn-drop[open] summary::after{transform:rotate(-135deg) translateY(2px)}
 .qn-drop[open] summary{border-color:var(--card-border-h);color:var(--cyan)}
-/* Desno poravnano, ne sredinsko: `.qn-drop` je zadnja kapsula pred »Šola«
-   in blizu desnega roba vrstice, ki je na ozkih zaslonih širša od zaslona
-   (glej opombo o segmentiranem traku zgoraj) — sredinjena menijska plošča bi
-   segla čez desni rob in se odrezala ob `body{overflow-x:hidden}`. */
+/* Desno poravnano, ne sredinsko: `.qn-drop` je zadnja kapsula v vrstici in
+   na telefonu blizu desnega roba — sredinjena plošča bi segla čez rob in se
+   odrezala ob `body{overflow-x:hidden}`. */
 .qn-drop-menu{position:absolute;top:calc(100% + .4rem);right:0;z-index:20;display:flex;flex-direction:column;gap:.3rem;min-width:11rem;padding:.4rem;border-radius:14px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
 .qn-drop-menu a{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:600;color:var(--blue);text-decoration:none;padding:.5rem .7rem;border-radius:9px;white-space:nowrap}
 .qn-drop-menu a:hover{background:rgba(34,211,238,.1);color:var(--cyan)}
+/* Postavke v meniju so potomke .quick-nav, zato bi sicer podedovale obliko
+   kapsule (obroba, podlaga, senca, sredinska poravnava). */
+.quick-nav .qn-drop-menu a{justify-content:flex-start;border:0;background:none;box-shadow:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;padding:.5rem .7rem;font-size:.82rem;transform:none}
+.quick-nav .qn-drop-menu a:hover{background:rgba(34,211,238,.1);color:var(--cyan);transform:none}
+/* Plošča menija leži čez kartice pod glavo — prosojna var(--card-bg) je
+   pustila besedilo pod njo brati skozi postavke, zato je neprosojna. */
+.qn-drop-menu{background:#0c1120}
+/* Kartice pod glavo (preklop pogleda, vprašanje ob prvem obisku) imajo
+   backdrop-filter in s tem svoj sloj, ki bi se izrisal čez odprt meni. */
+header{position:relative;z-index:30}
+[data-theme="light"] .qn-drop-menu{background:#fff}
+.qn-drop-sep{height:1px;margin:.1rem .5rem;background:var(--card-border)}
+.qn-drop summary .qn-burger{font-size:.9rem}
 @media (max-width:520px){
-  .qn-drop summary{padding:.45rem .7rem;font-size:.74rem}
-  .qn-drop summary .qn-ico{display:none}
-  .qn-drop-menu a .qn-ico{display:inline}
+  .qn-drop summary{padding:.45rem .6rem;font-size:.74rem;gap:.3rem}
+  .quick-nav{gap:.3rem}
+  .quick-nav a{padding:.45rem .6rem}
+  .quick-nav .qn-drop-menu a .qn-ico,.qn-drop summary .qn-burger{display:inline}
+}
+/* Pod 400 px bi Meni padel v drugo vrstico — zadnjo ikono v vrstici odvzamemo
+   MeteoGobarju (poudarek mu ostane v barvi kapsule). */
+@media (max-width:400px){
+  .quick-nav a.qn-feat .qn-ico{display:none}
+  .quick-nav{gap:.25rem}
+  .quick-nav a,.qn-drop summary{padding:.45rem .55rem}
 }
 .sskj-entry{margin:.45rem auto 0;font-size:.7rem;color:var(--muted);letter-spacing:.01em;max-width:520px;line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
 .sskj-entry.open{max-height:4rem;opacity:1}
@@ -3045,7 +3065,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
    skrite in jih ni treba posebej dopisovati sem. Izjema so .wx-static
    odstavki (statično besedilo za iskalnike, vizualno itak skrito). */
 
-.mode-switch-wrap{display:flex;justify-content:center;margin:1.1rem 0 .2rem}
+.mode-switch-wrap{display:flex;justify-content:center;margin:.3rem 0 .2rem}
 .mode-switch{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem;border-radius:999px;
   background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
   backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
