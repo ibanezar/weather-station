@@ -1436,3 +1436,8 @@ brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
   (GitHub Pages + auto-deploy Cloudflare workerja ob spremembi worker.js).
+- **Po mergu spremembe generatorja strani vedno takoj ročno poženi workflow,
+  ki stran zgradi** (`workflow_dispatch` na `main`, npr. `zima-forecast.yml`
+  za crnivec.si in `/zima/`) — Filip želi spremembe videti takoj, ne šele ob
+  naslednjem cronu. Pred tem preveri, da je ponovni tek isti dan varen
+  (npr. snežna odeja v `winter_engine.py` se drugič isti dan preskoči).
