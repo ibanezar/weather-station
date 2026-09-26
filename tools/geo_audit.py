@@ -297,27 +297,36 @@ CRN_DIR = os.path.join(ROOT, "crnivec-site")
 CRN_SITE = "https://crnivec.si/"
 
 
+# Strani na crnivec.si: (pot, datoteka v crnivec-site/). /lipa/ je podstran
+# »Kako je čez Lipo?« (26. 9. 2026, build_lipa_body v generate_crnivec_page.py).
+CRN_PAGES = (("", "index.html"), ("lipa/", "lipa/index.html"))
+
+
 def check_crnivec_site(problems):
-    idx = os.path.join(CRN_DIR, "index.html")
-    if not os.path.exists(idx):
-        problems.append("crnivec.si: MANJKA crnivec-site/index.html")
-        return
-    page = read(idx)
-    if f'<link rel="canonical" href="{CRN_SITE}">' not in page:
-        problems.append("crnivec.si: canonical ne kaže na https://crnivec.si/")
-    m = re.search(r"<title>(.*?)</title>", page, re.S)
-    title = html_lib.unescape(m.group(1)).strip() if m else ""
-    if not title or len(title) > 60:
-        problems.append(f"crnivec.si: <title> manjka ali je daljši od 60 znakov ({len(title)})")
-    if '"FAQPage"' not in page:
-        problems.append("crnivec.si: stran nima FAQPage sheme")
+    for pot, fn in CRN_PAGES:
+        url = CRN_SITE + pot
+        idx = os.path.join(CRN_DIR, fn)
+        if not os.path.exists(idx):
+            problems.append(f"crnivec.si: MANJKA crnivec-site/{fn}")
+            continue
+        page = read(idx)
+        if f'<link rel="canonical" href="{url}">' not in page:
+            problems.append(f"crnivec.si/{pot}: canonical ne kaže na {url}")
+        m = re.search(r"<title>(.*?)</title>", page, re.S)
+        title = html_lib.unescape(m.group(1)).strip() if m else ""
+        if not title or len(title) > 60:
+            problems.append(f"crnivec.si/{pot}: <title> manjka ali je daljši od 60 znakov ({len(title)})")
+        if '"FAQPage"' not in page:
+            problems.append(f"crnivec.si/{pot}: stran nima FAQPage sheme")
     for fn in ("robots.txt", "sitemap.xml", "llms.txt", "manifest.json", "404.html"):
         if not os.path.exists(os.path.join(CRN_DIR, fn)):
             problems.append(f"crnivec.si: MANJKA crnivec-site/{fn}")
     llms = os.path.join(CRN_DIR, "llms.txt")
     if os.path.exists(llms):
         for url in re.findall(r"\((https://crnivec\.si/[^\s)#]*)", read(llms)):
-            if url.rstrip("/") != CRN_SITE.rstrip("/"):
+            pot = url[len(CRN_SITE):].strip("/")
+            fn = os.path.join(pot, "index.html") if pot else "index.html"
+            if not os.path.exists(os.path.join(CRN_DIR, fn)):
                 problems.append(f"crnivec.si llms.txt KAŽE NA MANJKAJOČO STRAN: {url}")
 
 
