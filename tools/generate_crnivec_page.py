@@ -1150,14 +1150,15 @@ CSS = '''
     color:var(--ink);background:#fef08a;border:2px solid #111;border-radius:8px;padding:2px var(--s1);
     margin:0 0 var(--s2)}
   /* Glava: gorska maskota (klikljiv easter egg, glej #crn-mascot) + naslov. */
-  /* Telefon: maskota levo od naslova in manjša pisava -- glava je prej
-     vzela ~300 px, status pa je bil šele na dnu prvega zaslona (26. 9. 2026).
-     H1 ostane (identiteta + SEO), samo manjši. */
-  .crn-head{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:var(--s2);
-    margin-bottom:var(--s2);text-align:left}
+  /* Telefon: brez maskote -- ista gora je že v logotipu tik nad naslovom
+     in dve gori ena pod drugo sta delovali zmedeno. Naslov je zato čez vso
+     širino in dovolj velik; glava je še vedno krajša kot pred 26. 9. 2026
+     (maskota je vzela ~110 px). Maskota (easter egg) je od 600 px naprej. */
+  .crn-head{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:var(--s3);text-align:center}
+  .crn-head .crn-icon{display:none}
   .crn-head .crn-title{margin:0}
-  .crn-head .crn-eyebrow{font-size:11px;margin:0 0 4px}
-  .crn-title{font-size:clamp(24px,7.4vw,34px);font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
+  .crn-head .crn-eyebrow{font-size:12px;margin:0 0 var(--s1)}
+  .crn-title{font-size:clamp(32px,10.4vw,46px);font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0 0 var(--s4);
     color:#dc2626;text-transform:uppercase;transform:rotate(-.6deg);
     text-shadow:3px 3px 0 #111,-1px -1px 0 #111,1px -1px 0 #111,-1px 1px 0 #111}
   /* Pasica žive zapore (ZAPORE_JS) -- samo ob aktivnem dogodku PIC na R1-225. */
@@ -1506,7 +1507,7 @@ CSS = '''
 
   /* ── Tablica / namizje ──────────────────────────────────────── */
   @media (min-width:600px){
-    .crn-head{flex-direction:column;gap:4px;margin-bottom:var(--s3);text-align:center}
+    .crn-head .crn-icon{display:block}
     .crn-head .crn-eyebrow{font-size:13px;margin:0 0 var(--s2)}
     .crn-title{font-size:52px}
     .crn-icon{width:140px}
