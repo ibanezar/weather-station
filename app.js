@@ -6372,6 +6372,40 @@ function initDailyFact(){
   let dismissed=''; try{dismissed=localStorage.getItem(DAILY_FACT_KEY)||'';}catch(_){}
   if(dismissed&&dismissed===card.dataset.date)card.setAttribute('hidden','');
 }
+// ── Namig ob uvedbi menija v glavi (26. 9. 2026) ──
+// Blog, arhiv, igre in Šola so bili prej kapsule v glavi, zdaj so v »Meni«.
+// Namig dobijo samo obiskovalci, ki so stran že obiskali (novi stare vrstice
+// ne poznajo), največ MENU_HINT_MAX nalaganj in samo do KONEC_NAMIGA — potem
+// se lahko odstrani (glej opombo pri .menu-hint v style.css).
+const MENU_HINT_KEY='wx-menu-hint';
+const MENU_HINT_MAX=3;
+const KONEC_NAMIGA='2026-10-20';
+let _menuHintShown=false;
+function dismissMenuHint(){
+  const hint=document.getElementById('menu-hint');
+  if(hint)hint.classList.remove('show');
+  const d=document.querySelector('.quick-nav .qn-drop');
+  if(d)d.classList.remove('qn-pulse');
+  try{localStorage.setItem(MENU_HINT_KEY,'done');}catch(_){}
+}
+function initMenuHint(){
+  const hint=document.getElementById('menu-hint');
+  if(!hint||new Date().toISOString().slice(0,10)>KONEC_NAMIGA)return;
+  if((window._wxVisitCount||1)<2)return;
+  let st=null; try{st=localStorage.getItem(MENU_HINT_KEY);}catch(_){}
+  if(st==='done')return;
+  const n=(parseInt(st,10)||0)+1;
+  try{localStorage.setItem(MENU_HINT_KEY,n>=MENU_HINT_MAX?'done':String(n));}catch(_){}
+  _menuHintShown=true;
+  setTimeout(()=>{
+    const d=document.querySelector('.quick-nav .qn-drop');
+    if(d&&d.open)return;
+    hint.classList.add('show');
+    if(d)d.classList.add('qn-pulse');
+    // Samo skrij za to nalaganje; naslednjič se pokaže spet (do MENU_HINT_MAX).
+    setTimeout(()=>{hint.classList.remove('show');if(d)d.classList.remove('qn-pulse');},12000);
+  },1200);
+}
 // ── Prvi obisk: opozori na gumbe za obvestila, da jih uporabnik takoj opazi ──
 const NOTIF_HINT_KEY='wx-notif-hint-seen';
 function dismissNotifHint(){
@@ -6384,6 +6418,8 @@ function initNotifHint(){
   let seen=false; try{seen=!!localStorage.getItem(NOTIF_HINT_KEY);}catch(_){}
   // Ne kaži več, če je uporabnik obvestila že vklopil/izklopil ali jih brskalnik blokira
   if(seen||Notification.permission!=='default')return;
+  // En namig naenkrat: ob namigu za meni obvestila počakajo na naslednji obisk.
+  if(_menuHintShown)return;
   // Ne kaži na prvem obisku in ne, dokler čaka piškotni banner — izogibamo se
   // kopičenju pozivov (piškotki + obvestila + namestitev) ob prvem nalaganju.
   let consentPending=true; try{consentPending=!localStorage.getItem('wx-cookie-consent');}catch(_){}
@@ -16365,6 +16401,7 @@ async function init(){
   try{initBgCanvas();}catch(_){}
   try{applyWeatherBg('night');}catch(_){}
   try{initNotifBtn();}catch(_){}
+  try{initMenuHint();}catch(_){}
   try{initNotifHint();}catch(_){}
   try{initDailyFact();}catch(_){}
   try{initWeatherQA();}catch(_){}
