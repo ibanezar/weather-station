@@ -1364,7 +1364,7 @@ CSS = '''
   .crn-cols{display:flex;flex-direction:column;gap:var(--s4)}
   .crn-col{display:contents}
   .crn-cam{margin-top:var(--s4);text-align:left}
-  .crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
+  .crn-o1{order:1}.crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
   .crn-o7{order:7}
   .crn-cols .crn-o7{margin-top:0}
   .crn-panel{background:var(--card);border:4px solid #111;border-radius:18px;
@@ -1464,6 +1464,8 @@ CSS = '''
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
   .crn-share-status{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
+  .crn-alerts-list{margin:0 0 var(--s3);padding-left:1.2em;font-size:15px}
+  .crn-alerts-list li{margin:2px 0}
 
   .crn-board-list{display:flex;flex-direction:column}
   .crn-board-row{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);
@@ -3118,12 +3120,154 @@ def faq_items(snowpack_cm, snow_new):
         ("Kje je spletna kamera na Črnivcu?",
          "Kamera Direkcije RS za infrastrukturo (DRSI) stoji na prelazu in gleda na cesto. Slika se "
          "osveži vsakih nekaj minut. Na tej strani je na vrhu, vse kamere DRSI pa so tudi na promet.si."),
+        ("Ali lahko dobim opozorilo, ko je na Črnivcu poledica ali zapora?",
+         "Da. Na tej strani lahko vklopiš opozorila na telefon. Obvestilo pride, ko izmerjena "
+         "temperatura na prelazu pade na 0 °C ali pod, ko pada pri temperaturi okoli ničle, ko sunki "
+         "vetra dosežejo 70 km/h in ko je na cesti R1-225 nova zapora ali delo. Med 22. in 5. uro je "
+         "tiho. Na iPhonu mora biti stran najprej dodana na začetni zaslon."),
         ("Od kod so podatki na tej strani?",
          "Temperatura, vlaga in veter so izmerjeni na cestni vremenski postaji DRSI na prelazu. "
          "Napoved je iz modela Open-Meteo, preračunana na višino prelaza in umerjena z meritvami DRSI. "
          "Zgodovina zim je iz padavinske postaje ARSO Črnivec. Vozišče je ocena, ne meritev, "
          "Meteorec indeks pa ni uradna informacija o stanju ceste."),
     ]
+
+
+# Opozorila s prelaza na telefon (Web Push, od 27. 9. 2026). Pošilja jih
+# _cronCheckCrnivec() v worker.js ob prehodu v stanje -- samo iz meritev DRSI
+# in zapor PIC, ne iz modela; pragovi in tihi čas so tam (CRN_*). Naročnine
+# so na svojem seznamu (push/crnivec-subs.json), ločeno od meteorec.si.
+# Za prejem mora crnivec.si imeti svoj service worker (SW_JS, zapiše ga
+# write_site_files()). Na iPhonu Web Push deluje samo v nameščeni aplikaciji
+# (Safari → Deli → Dodaj na začetni zaslon), zato to gumb tam pove.
+ALERTS_HTML = """
+      <section class="crn-panel crn-alerts crn-o1" id="opozorila" aria-labelledby="crn-alerts-h">
+        <h2 class="crn-h2" id="crn-alerts-h">🔔 Opozorila s prelaza na telefon</h2>
+        <p class="crn-lead">Obvestilo dobiš, ko se na Črnivcu razmere poslabšajo:</p>
+        <ul class="crn-alerts-list">
+          <li>temperatura na prelazu pade na 0 °C ali pod,</li>
+          <li>pada pri temperaturi okoli ničle (sneg ali poledica),</li>
+          <li>sunki vetra dosežejo 70 km/h,</li>
+          <li>na cesti R1-225 je nova zapora, nesreča ali delo (in ko je ni več).</li>
+        </ul>
+        <button type="button" id="crn-alerts-btn" class="crn-btn" hidden>Vklopi opozorila</button>
+        <p id="crn-alerts-status" class="crn-share-status" role="status" aria-live="polite">Opozorila potrebujejo JavaScript.</p>
+        <p class="crn-check-note">Temperatura in veter sta meritvi postaje DRSI na prelazu, zapore iz
+        Prometno-informacijskega centra. Med 22. in 5. uro je tiho; kar takrat še velja, pride ob 5.00.
+        Brez e-naslova in brez lokacije. To ni uradno opozorilo.</p>
+      </section>
+"""
+
+ALERTS_JS = """<script>
+(function () {
+  var btn = document.getElementById("crn-alerts-btn");
+  var st = document.getElementById("crn-alerts-status");
+  if (!btn || !st) return;
+  var API = "__API__";
+  function say(t) { st.textContent = t; }
+  var ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+    say(ios && !standalone
+      ? "Na iPhonu opozorila delujejo, ko stran dodaš na začetni zaslon: v Safariju Deli → Dodaj na začetni zaslon, nato jo odpri od tam."
+      : "Ta brskalnik obvestil ne podpira.");
+    return;
+  }
+  function b64(s) {
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    var raw = atob(s), out = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+  function post(pot, body) {
+    body.site = "crnivec";
+    return fetch(API + pot, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+  }
+  var reg = null;
+  function prikazi(sub) {
+    btn.hidden = false;
+    btn.disabled = false;
+    if (Notification.permission === "denied") {
+      btn.hidden = true;
+      say("Obvestila so za crnivec.si v brskalniku blokirana. Dovoli jih v nastavitvah strani.");
+    } else if (sub) {
+      btn.textContent = "Izklopi opozorila";
+      say("Opozorila so vklopljena na tej napravi.");
+    } else {
+      btn.textContent = "Vklopi opozorila";
+      say("");
+    }
+  }
+  navigator.serviceWorker.register("/sw.js").then(function (r) {
+    reg = r;
+    return navigator.serviceWorker.ready;
+  }).then(function (r) {
+    reg = r;
+    return reg.pushManager.getSubscription();
+  }).then(prikazi).catch(function () { say("Opozoril trenutno ni mogoče vklopiti."); });
+
+  btn.addEventListener("click", function () {
+    if (!reg) return;
+    btn.disabled = true;
+    reg.pushManager.getSubscription().then(function (sub) {
+      if (sub) {
+        var ep = sub.endpoint;
+        return sub.unsubscribe().then(function () {
+          return post("/push/unsubscribe", { endpoint: ep }).catch(function () {});
+        }).then(function () { prikazi(null); });
+      }
+      return Notification.requestPermission().then(function (perm) {
+        if (perm !== "granted") { prikazi(null); return; }
+        return fetch(API + "/push/vapid").then(function (r) { return r.json(); }).then(function (v) {
+          return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(v.publicKey) });
+        }).then(function (nova) {
+          return post("/push/subscribe", { subscription: nova.toJSON() }).then(function () { prikazi(nova); });
+        });
+      });
+    }).catch(function () {
+      btn.disabled = false;
+      say("Vklop ni uspel. Poskusi znova čez nekaj minut.");
+    });
+  });
+})();
+</script>
+"""
+
+# Service worker za crnivec.si: samo prikaz obvestila in klik nanj. Brez
+# predpomnjenja (fetch), da stran nikoli ne obtiči na stari različici.
+SW_JS = """// crnivec.si -- samo opozorila (Web Push), brez predpomnjenja.
+// Zapiše ga tools/generate_crnivec_page.py (write_site_files) -- ne urejaj ročno.
+self.addEventListener('install', function () { self.skipWaiting(); });
+self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
+self.addEventListener('push', function (event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) {
+    data = { body: event.data ? event.data.text() : '' };
+  }
+  event.waitUntil(self.registration.showNotification(data.title || 'Črnivec', {
+    body: data.body || '',
+    icon: data.icon || '/icon-192.png',
+    tag: data.tag || 'crnivec',
+    renotify: true,
+    data: { url: data.url || '/' },
+    vibrate: [80, 40, 80]
+  }));
+});
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var target = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].url.indexOf(self.location.origin) === 0 && 'focus' in list[i]) {
+        return list[i].navigate ? list[i].navigate(target).then(function (c) { return c && c.focus(); }) : list[i].focus();
+      }
+    }
+    return self.clients.openWindow ? self.clients.openWindow(target) : null;
+  }));
+});
+"""
 
 
 # Žive zapore na R1-225 (worker /crnivec-zapore, vir PIC prek NAP). Samo JS:
@@ -3583,7 +3727,7 @@ def build_body(data):
       </div>
 
       <div class="crn-col">
-
+{ALERTS_HTML}{ALERTS_JS.replace("__API__", WORKER_BASE)}
       <section class="crn-panel crn-report crn-o2" id="crn-report" aria-labelledby="crn-rep-h" hidden>
         <h2 class="crn-h2" id="crn-rep-h">Kako je bilo tebi?</h2>
         <p class="crn-lead">Povej naslednjemu vozniku.</p>
@@ -3993,7 +4137,7 @@ LLMS_TXT = f"""# Kako je čez Črnivec? (crnivec.si)
 
 ## Stran
 
-- [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, vreme za 7 dni (najnižja in najvišja temperatura, padavine, nov sneg, poledica po dnevih), termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom in zgodovina zim.
+- [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, vreme za 7 dni (najnižja in najvišja temperatura, padavine, nov sneg, poledica po dnevih), termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom, zgodovina zim in opozorila na telefon (zmrzal, padavine okoli ničle, močan veter, nova zapora).
 - [Kako je čez Lipo?]({CRN_SITE}/lipa/): isto za prelaz Lipa (723 m) med Vranskim in Šmartnim ob Dreti, a samo kot ocena modela, ker na Lipi ni postaje ne kamere.
 - [Pogosta vprašanja]({CRN_SITE}/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
 - [Zapore in stanje ceste]({CRN_SITE}/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
@@ -4060,6 +4204,8 @@ def write_site_files():
         f.write(LLMS_TXT)
     with open(os.path.join(out, "404.html"), "w", encoding="utf-8") as f:
         f.write(NOT_FOUND_HTML)
+    with open(os.path.join(out, "sw.js"), "w", encoding="utf-8") as f:
+        f.write(SW_JS)
     danes = datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).date().isoformat()
     with open(os.path.join(out, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
