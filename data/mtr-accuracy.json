@@ -1,27 +1,27 @@
 {
-  "generated_at": "2026-09-26T06:34:13Z",
-  "n_records": 76,
+  "generated_at": "2026-09-27T07:01:50Z",
+  "n_records": 78,
   "date_range": {
     "from": "2026-08-04",
-    "to": "2026-09-25"
+    "to": "2026-09-26"
   },
   "rolling_window_days": 30,
   "leads": {
     "1": {
-      "n": 51,
+      "n": 52,
       "date_range": {
         "from": "2026-08-04",
-        "to": "2026-09-25"
+        "to": "2026-09-26"
       },
       "all_time": {
         "tmax": {
-          "n": 51,
-          "mae_mtr": 1.09,
-          "mae_om": 1.64,
-          "improvement_pct": 33.5
+          "n": 52,
+          "mae_mtr": 1.08,
+          "mae_om": 1.65,
+          "improvement_pct": 34.5
         },
         "tmin": {
-          "n": 51,
+          "n": 52,
           "mae_mtr": 0.97,
           "mae_om": 1.18,
           "improvement_pct": 17.8
@@ -357,6 +357,13 @@
             "mae_mtr": 1.11,
             "mae_om": 1.79,
             "improvement_pct": 38.0
+          },
+          {
+            "date": "2026-09-26",
+            "n": 28,
+            "mae_mtr": 1.08,
+            "mae_om": 1.83,
+            "improvement_pct": 41.0
           }
         ],
         "tmin": [
@@ -688,27 +695,34 @@
             "mae_mtr": 0.84,
             "mae_om": 1.29,
             "improvement_pct": 34.9
+          },
+          {
+            "date": "2026-09-26",
+            "n": 28,
+            "mae_mtr": 0.83,
+            "mae_om": 1.25,
+            "improvement_pct": 33.6
           }
         ]
       }
     },
     "2": {
-      "n": 25,
+      "n": 26,
       "date_range": {
         "from": "2026-08-31",
-        "to": "2026-09-25"
+        "to": "2026-09-26"
       },
       "all_time": {
         "tmax": {
-          "n": 25,
-          "mae_mtr": 1.58,
-          "mae_om": 2.39,
-          "improvement_pct": 33.9
+          "n": 26,
+          "mae_mtr": 1.54,
+          "mae_om": 2.38,
+          "improvement_pct": 35.3
         },
         "tmin": {
-          "n": 25,
-          "mae_mtr": 1.06,
-          "mae_om": 2.15,
+          "n": 26,
+          "mae_mtr": 1.05,
+          "mae_om": 2.13,
           "improvement_pct": 50.7
         }
       },
@@ -860,6 +874,13 @@
             "mae_mtr": 1.58,
             "mae_om": 2.39,
             "improvement_pct": 33.9
+          },
+          {
+            "date": "2026-09-26",
+            "n": 26,
+            "mae_mtr": 1.54,
+            "mae_om": 2.38,
+            "improvement_pct": 35.3
           }
         ],
         "tmin": [
@@ -1009,6 +1030,13 @@
             "mae_mtr": 1.06,
             "mae_om": 2.15,
             "improvement_pct": 50.7
+          },
+          {
+            "date": "2026-09-26",
+            "n": 26,
+            "mae_mtr": 1.05,
+            "mae_om": 2.13,
+            "improvement_pct": 50.7
           }
         ]
       }
@@ -1049,32 +1077,32 @@
     },
     "jesen": {
       "1": {
-        "n": 24,
+        "n": 25,
         "tmax": {
-          "n": 24,
-          "mae_mtr": 1.22,
-          "mae_om": 1.91,
-          "improvement_pct": 36.1
+          "n": 25,
+          "mae_mtr": 1.18,
+          "mae_om": 1.93,
+          "improvement_pct": 38.9
         },
         "tmin": {
-          "n": 24,
-          "mae_mtr": 0.8,
+          "n": 25,
+          "mae_mtr": 0.81,
           "mae_om": 1.22,
-          "improvement_pct": 34.4
+          "improvement_pct": 33.6
         }
       },
       "2": {
-        "n": 24,
+        "n": 25,
         "tmax": {
-          "n": 24,
-          "mae_mtr": 1.54,
-          "mae_om": 2.34,
-          "improvement_pct": 34.2
+          "n": 25,
+          "mae_mtr": 1.49,
+          "mae_om": 2.33,
+          "improvement_pct": 36.1
         },
         "tmin": {
-          "n": 24,
-          "mae_mtr": 1.01,
-          "mae_om": 2.19,
+          "n": 25,
+          "mae_mtr": 1.0,
+          "mae_om": 2.17,
           "improvement_pct": 53.9
         }
       }

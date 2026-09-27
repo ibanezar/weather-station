@@ -1,23 +1,5 @@
 [
   {
-    "target_date": "2026-09-26",
-    "lead": 2,
-    "made_at": "2026-09-24",
-    "mtr_tmax": 21.1,
-    "mtr_tmin": 2.6,
-    "om_tmax": 19.4,
-    "om_tmin": 5.0
-  },
-  {
-    "target_date": "2026-09-26",
-    "lead": 1,
-    "made_at": "2026-09-25",
-    "mtr_tmax": 21.1,
-    "mtr_tmin": 4.6,
-    "om_tmax": 19.2,
-    "om_tmin": 4.6
-  },
-  {
     "target_date": "2026-09-27",
     "lead": 2,
     "made_at": "2026-09-25",
@@ -43,5 +25,23 @@
     "mtr_tmin": 5.7,
     "om_tmax": 20.1,
     "om_tmin": 8.3
+  },
+  {
+    "target_date": "2026-09-28",
+    "lead": 1,
+    "made_at": "2026-09-27",
+    "mtr_tmax": 23.6,
+    "mtr_tmin": 6.7,
+    "om_tmax": 21.7,
+    "om_tmin": 7.3
+  },
+  {
+    "target_date": "2026-09-29",
+    "lead": 2,
+    "made_at": "2026-09-27",
+    "mtr_tmax": 22.9,
+    "mtr_tmin": 4.4,
+    "om_tmax": 20.9,
+    "om_tmin": 8.5
   }
 ]
