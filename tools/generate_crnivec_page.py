@@ -1046,11 +1046,28 @@ def gauge_svg(zone, static=False):
     # samo stran od središča (end=levo, start=desno); zgornji dve coni (mid
     # blizu 90°) sta že dovolj visoko nad lokom in ostaneta na "middle".
     labels = []
-    for z in ZONES:
-        lx, ly = arc_point(cx, cy, r + 42, z["mid"])
-        anchor = "end" if z["mid"] > 135 else "start" if z["mid"] < 45 else "middle"
-        labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="11" '
-                       f'font-weight="800" fill="#171717">{z["label"]}</text>')
+    if static:
+        for z in ZONES:
+            lx, ly = arc_point(cx, cy, r + 42, z["mid"])
+            anchor = "end" if z["mid"] > 135 else "start" if z["mid"] < 45 else "middle"
+            labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="11" '
+                           f'font-weight="800" fill="#171717">{z["label"]}</text>')
+    else:
+        # Na strani (27. 9. 2026): napisi ob loku so bili na telefonu visoki
+        # ~5 px (viewBox 458 enot v 230 px). Večja pisava ob straneh loka ne
+        # gre v širino, zato sta skrajni coni POD koncema loka (sredinsko),
+        # zgornji dve pa nad lokom, dovolj narazen, da se pri tej pisavi ne
+        # prekrivata. Velikost pisave na namizju zmanjša CSS (.crn-gauge text).
+        for z in ZONES:
+            if z["mid"] > 135 or z["mid"] < 45:
+                lx, ly, anchor = arc_point(cx, cy, r, 180 if z["mid"] > 135 else 0)[0], cy + sw / 2 + 30, "middle"
+            else:
+                # 120°/60° namesto sredine cone: napisa sta dovolj narazen,
+                # da se ne bereta kot ena fraza (»TAK-TAK VZEMI VERIGE«).
+                lx, ly = arc_point(cx, cy, r + 48, 120 if z["mid"] > 90 else 60)
+                anchor = "middle"
+            labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="19" '
+                           f'font-weight="800" fill="#171717">{z["label"]}</text>')
 
     # xmlns je za inline SVG v HTML odveč (brskalnik ga uvrsti v SVG imenski
     # prostor sam), a data:image/svg+xml ga bere kot samostojen XML dokument
@@ -1062,7 +1079,7 @@ def gauge_svg(zone, static=False):
     # pisava merilnika pomanjša in zaokroževanje je skrajni napis
     # ("SPOLZKO, PAZI") pri 360 px odrezalo.
     size_attrs = ' width="430" height="230"' if static else ''
-    view_box = "-20 0 430 230" if static else "-34 0 458 230"
+    view_box = "-20 0 430 230" if static else "-22 0 424 236"
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}"{size_attrs} '
             f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
             + defs + arc + "".join(labels) + needle + "</svg>")
@@ -1184,7 +1201,7 @@ CSS = '''
   /* Telefon: merilnik, ikona in maskota so namenoma manjši -- status,
      "posodobljeno", temperatura in sneg morajo biti vidni brez drsenja
      (3-sekundni test iz UX audita, 24. 9. 2026). */
-  .crn-gauge{width:100%;max-width:230px;display:block;margin:0 auto}
+  .crn-gauge{width:100%;max-width:260px;display:block;margin:0 auto}
   .crn-needle{animation:crnNeedleSettle .8s cubic-bezier(.34,1.56,.64,1) forwards;
     transition:transform .6s cubic-bezier(.34,1.56,.64,1)}
   @keyframes crnNeedleSettle{from{transform:rotate(0deg)}to{transform:rotate(var(--rot))}}
@@ -1364,7 +1381,7 @@ CSS = '''
   .crn-cols{display:flex;flex-direction:column;gap:var(--s4)}
   .crn-col{display:contents}
   .crn-cam{margin-top:var(--s4);text-align:left}
-  .crn-o1{order:1}.crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
+  .crn-o2{order:2}.crn-o3{order:3}.crn-o4{order:4}.crn-o5{order:5}.crn-o6{order:6}
   .crn-o7{order:7}
   .crn-cols .crn-o7{margin-top:0}
   .crn-panel{background:var(--card);border:4px solid #111;border-radius:18px;
@@ -1464,8 +1481,12 @@ CSS = '''
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
   .crn-share-status{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
-  .crn-alerts-list{margin:0 0 var(--s3);padding-left:1.2em;font-size:15px}
-  .crn-alerts-list li{margin:2px 0}
+  /* Gumb »🔔 Opozorila« je v obliki .crn-sib (vrhnja vrstica), vklopljen je bel. */
+  .crn .crn-alerts-btn{font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+  .crn .crn-alerts-btn.is-on{background:#fff}
+  .crn .crn-alerts-btn:disabled{opacity:.6;cursor:wait}
+  .crn-alerts-status{font-size:13px;line-height:1.4;margin:calc(-1 * var(--s2)) 0 var(--s3);padding:var(--s1) var(--s2);
+    background:#fff;border:2px solid #111;border-radius:10px}
 
   .crn-board-list{display:flex;flex-direction:column}
   .crn-board-row{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);
@@ -1521,6 +1542,7 @@ CSS = '''
     .crn-title{font-size:52px}
     .crn-icon{width:140px}
     .crn-gauge{max-width:560px}
+    .crn-gauge text{font-size:13px}
     .crn-status-icon .crn-zicon{width:48px;height:48px}
     .crn-status{padding:var(--s5) var(--s4)}
     .crn-status-title{font-size:48px}
@@ -3140,22 +3162,14 @@ def faq_items(snowpack_cm, snow_new):
 # Za prejem mora crnivec.si imeti svoj service worker (SW_JS, zapiše ga
 # write_site_files()). Na iPhonu Web Push deluje samo v nameščeni aplikaciji
 # (Safari → Deli → Dodaj na začetni zaslon), zato to gumb tam pove.
-ALERTS_HTML = """
-      <section class="crn-panel crn-alerts crn-o1" id="opozorila" aria-labelledby="crn-alerts-h">
-        <h2 class="crn-h2" id="crn-alerts-h">🔔 Opozorila s prelaza na telefon</h2>
-        <p class="crn-lead">Obvestilo dobiš, ko se na Črnivcu razmere poslabšajo:</p>
-        <ul class="crn-alerts-list">
-          <li>temperatura na prelazu pade na 0 °C ali pod,</li>
-          <li>pada pri temperaturi okoli ničle (sneg ali poledica),</li>
-          <li>sunki vetra dosežejo 70 km/h,</li>
-          <li>na cesti R1-225 je nova zapora, nesreča ali delo (in ko je ni več).</li>
-        </ul>
-        <button type="button" id="crn-alerts-btn" class="crn-btn" hidden>Vklopi opozorila</button>
-        <p id="crn-alerts-status" class="crn-share-status" role="status" aria-live="polite">Opozorila potrebujejo JavaScript.</p>
-        <p class="crn-check-note">Temperatura in veter sta meritvi postaje DRSI na prelazu, zapore iz
-        Prometno-informacijskega centra. Med 22. in 5. uro je tiho; kar takrat še velja, pride ob 5.00.
-        Brez e-naslova in brez lokacije. To ni uradno opozorilo.</p>
-      </section>
+# En majhen gumb v vrhnji vrstici, ob »Kaj pa čez Lipo?« (27. 9. 2026: Filip
+# je želel opozorila takoj na vrhu, a kot gumb, ne kot kartico -- prvi zaslon
+# na telefonu je rezerviran za status, glej »odločitev v 5 sekundah«).
+# Kaj sproži obvestilo, pove title gumba, sporočilo ob vklopu in FAQ. Brez JS
+# ali brez podpore v brskalniku gumb ostane skrit (razen na iPhonu, kjer ob
+# kliku pove, da je treba stran dodati na začetni zaslon).
+ALERTS_HTML = """        <button type="button" id="crn-alerts-btn" class="crn-sib crn-alerts-btn" hidden
+          title="Obvestilo na telefon ob zmrzali, padavinah okoli ničle, sunkih nad 70 km/h in zaporah na cesti">🔔 Opozorila</button>
 """
 
 ALERTS_JS = """<script>
@@ -3164,13 +3178,17 @@ ALERTS_JS = """<script>
   var st = document.getElementById("crn-alerts-status");
   if (!btn || !st) return;
   var API = "__API__";
-  function say(t) { st.textContent = t; }
+  var KAJ = "Obvestilo pride ob zmrzali ali padavinah okoli ničle na prelazu, sunkih vetra nad 70 km/h in novi zapori na R1-225. Med 22. in 5. uro je tiho.";
+  function say(t) { st.textContent = t || ""; st.hidden = !t; }
   var ios = /iPad|iPhone|iPod/.test(navigator.userAgent);
   var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
   if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
-    say(ios && !standalone
-      ? "Na iPhonu opozorila delujejo, ko stran dodaš na začetni zaslon: v Safariju Deli → Dodaj na začetni zaslon, nato jo odpri od tam."
-      : "Ta brskalnik obvestil ne podpira.");
+    if (ios && !standalone) {
+      btn.hidden = false;
+      btn.addEventListener("click", function () {
+        say("Na iPhonu opozorila delujejo, ko stran dodaš na začetni zaslon: v Safariju Deli → Dodaj na začetni zaslon, nato jo odpri od tam.");
+      });
+    }
     return;
   }
   function b64(s) {
@@ -3187,43 +3205,42 @@ ALERTS_JS = """<script>
   }
   var reg = null;
   function prikazi(sub) {
-    btn.hidden = false;
     btn.disabled = false;
-    if (Notification.permission === "denied") {
-      btn.hidden = true;
-      say("Obvestila so za crnivec.si v brskalniku blokirana. Dovoli jih v nastavitvah strani.");
-    } else if (sub) {
-      btn.textContent = "Izklopi opozorila";
-      say("Opozorila so vklopljena na tej napravi.");
-    } else {
-      btn.textContent = "Vklopi opozorila";
-      say("");
-    }
+    btn.hidden = false;
+    btn.classList.toggle("is-on", !!sub);
+    btn.setAttribute("aria-pressed", sub ? "true" : "false");
+    btn.textContent = sub ? "🔔 Opozorila vklopljena" : "🔔 Opozorila";
   }
-  navigator.serviceWorker.register("/sw.js").then(function (r) {
-    reg = r;
+  navigator.serviceWorker.register("/sw.js").then(function () {
     return navigator.serviceWorker.ready;
   }).then(function (r) {
     reg = r;
     return reg.pushManager.getSubscription();
-  }).then(prikazi).catch(function () { say("Opozoril trenutno ni mogoče vklopiti."); });
+  }).then(prikazi).catch(function () {});
 
   btn.addEventListener("click", function () {
     if (!reg) return;
+    if (Notification.permission === "denied") {
+      say("Obvestila so za crnivec.si v brskalniku blokirana. Dovoli jih v nastavitvah strani.");
+      return;
+    }
     btn.disabled = true;
     reg.pushManager.getSubscription().then(function (sub) {
       if (sub) {
         var ep = sub.endpoint;
         return sub.unsubscribe().then(function () {
           return post("/push/unsubscribe", { endpoint: ep }).catch(function () {});
-        }).then(function () { prikazi(null); });
+        }).then(function () { prikazi(null); say("Opozorila so izklopljena."); });
       }
       return Notification.requestPermission().then(function (perm) {
         if (perm !== "granted") { prikazi(null); return; }
         return fetch(API + "/push/vapid").then(function (r) { return r.json(); }).then(function (v) {
           return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(v.publicKey) });
         }).then(function (nova) {
-          return post("/push/subscribe", { subscription: nova.toJSON() }).then(function () { prikazi(nova); });
+          return post("/push/subscribe", { subscription: nova.toJSON() }).then(function () {
+            prikazi(nova);
+            say("Opozorila so vklopljena. " + KAJ + " Izklopiš jih z istim gumbom.");
+          });
         });
       });
     }).catch(function () {
@@ -3583,13 +3600,14 @@ def build_body(data):
       <div class="crn-top-l">
         <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
         <a class="crn-sib" href="/lipa/">Kaj pa čez Lipo? →</a>
-      </div>
+{ALERTS_HTML}      </div>
       <div class="crn-install-wrap">
         <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
         <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
       </div>
     </div>
-
+    <p id="crn-alerts-status" class="crn-alerts-status" role="status" aria-live="polite" hidden></p>
+{ALERTS_JS.replace("__API__", WORKER_BASE)}
     <section class="crn-hero" aria-labelledby="crn-h1">
       <div class="crn-head">
         {mountain_icon_svg()}
@@ -3727,7 +3745,7 @@ def build_body(data):
       </div>
 
       <div class="crn-col">
-{ALERTS_HTML}{ALERTS_JS.replace("__API__", WORKER_BASE)}
+
       <section class="crn-panel crn-report crn-o2" id="crn-report" aria-labelledby="crn-rep-h" hidden>
         <h2 class="crn-h2" id="crn-rep-h">Kako je bilo tebi?</h2>
         <p class="crn-lead">Povej naslednjemu vozniku.</p>
