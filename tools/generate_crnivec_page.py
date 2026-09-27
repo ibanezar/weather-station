@@ -1043,31 +1043,25 @@ def gauge_svg(zone, static=False):
     # skrajni levi/desni coni (mid blizu 180°/0°, torej vodoravno ob loku) to
     # pomeni, da polovica napisa raste NAZAJ proti loku namesto stran od
     # njega, zato se je dotikala barvnega pasu. Za ti dve coni napis raste
-    # samo stran od središča (end=levo, start=desno); zgornji dve coni (mid
-    # blizu 90°) sta že dovolj visoko nad lokom in ostaneta na "middle".
+    # samo stran od središča (end=levo, start=desno).
+    #
+    # Zgornji coni na strani (ne static, 27. 9. 2026): na telefonu sta bili
+    # visoki ~5 px, zato imata večjo pisavo in stojita pri 120°/60°, dovolj
+    # narazen, da se ne bereta kot ena fraza. Skrajni coni sta ostali, kot
+    # sta bili (Filipova odločitev). Velikost na namizju zmanjša CSS
+    # (.crn-gauge .crn-gl-top).
     labels = []
-    if static:
-        for z in ZONES:
+    for z in ZONES:
+        side = z["mid"] > 135 or z["mid"] < 45
+        if static or side:
             lx, ly = arc_point(cx, cy, r + 42, z["mid"])
             anchor = "end" if z["mid"] > 135 else "start" if z["mid"] < 45 else "middle"
             labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="11" '
                            f'font-weight="800" fill="#171717">{z["label"]}</text>')
-    else:
-        # Na strani (27. 9. 2026): napisi ob loku so bili na telefonu visoki
-        # ~5 px (viewBox 458 enot v 230 px). Večja pisava ob straneh loka ne
-        # gre v širino, zato sta skrajni coni POD koncema loka (sredinsko),
-        # zgornji dve pa nad lokom, dovolj narazen, da se pri tej pisavi ne
-        # prekrivata. Velikost pisave na namizju zmanjša CSS (.crn-gauge text).
-        for z in ZONES:
-            if z["mid"] > 135 or z["mid"] < 45:
-                lx, ly, anchor = arc_point(cx, cy, r, 180 if z["mid"] > 135 else 0)[0], cy + sw / 2 + 30, "middle"
-            else:
-                # 120°/60° namesto sredine cone: napisa sta dovolj narazen,
-                # da se ne bereta kot ena fraza (»TAK-TAK VZEMI VERIGE«).
-                lx, ly = arc_point(cx, cy, r + 48, 120 if z["mid"] > 90 else 60)
-                anchor = "middle"
-            labels.append(f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" font-size="19" '
-                           f'font-weight="800" fill="#171717">{z["label"]}</text>')
+        else:
+            lx, ly = arc_point(cx, cy, r + 48, 120 if z["mid"] > 90 else 60)
+            labels.append(f'<text class="crn-gl-top" x="{lx:.1f}" y="{ly:.1f}" text-anchor="middle" '
+                           f'font-size="19" font-weight="800" fill="#171717">{z["label"]}</text>')
 
     # xmlns je za inline SVG v HTML odveč (brskalnik ga uvrsti v SVG imenski
     # prostor sam), a data:image/svg+xml ga bere kot samostojen XML dokument
@@ -1079,7 +1073,7 @@ def gauge_svg(zone, static=False):
     # pisava merilnika pomanjša in zaokroževanje je skrajni napis
     # ("SPOLZKO, PAZI") pri 360 px odrezalo.
     size_attrs = ' width="430" height="230"' if static else ''
-    view_box = "-20 0 430 230" if static else "-22 0 424 236"
+    view_box = "-20 0 430 230" if static else "-34 0 458 230"
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}"{size_attrs} '
             f'class="crn-gauge" role="img" aria-label="Črnivski indeks: {zone["label"]}">'
             + defs + arc + "".join(labels) + needle + "</svg>")
@@ -1542,7 +1536,7 @@ CSS = '''
     .crn-title{font-size:52px}
     .crn-icon{width:140px}
     .crn-gauge{max-width:560px}
-    .crn-gauge text{font-size:13px}
+    .crn-gauge .crn-gl-top{font-size:13px}
     .crn-status-icon .crn-zicon{width:48px;height:48px}
     .crn-status{padding:var(--s5) var(--s4)}
     .crn-status-title{font-size:48px}

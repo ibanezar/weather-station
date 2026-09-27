@@ -586,11 +586,11 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   - Živa zapora ima **pasico nad statusom** (`#crn-zapore-banner`, v
     `ZAPORE_JS`), a samo ob dejanskem dogodku; brez dogodka ali ob napaki
     vira ostane skrita. Razdelek »Zapore« z besedilom ostane spodaj (SEO).
-  - Napisi con na merilniku (`gauge_svg()`, samo stranska različica) so na
-    telefonu ~12 px: skrajni coni sta pod koncema loka, zgornji dve nad njim
-    pri 120°/60°. Ob straneh loka večja pisava ne gre v širino (prej ~5 px).
-    Na namizju jih pomanjša `.crn-gauge text`. Deljena slika
-    (`static=True`) ostane pri starem razporedu.
+  - Zgornja napisa con na merilniku (»TAK-TAK«, »VZEMI VERIGE«;
+    `gauge_svg()`, samo stranska različica) sta na telefonu ~12 px in stojita
+    pri 120°/60° (razred `crn-gl-top`, na namizju ju pomanjša CSS). Skrajna
+    napisa ob straneh loka ostaneta, kot sta bila — Filipova odločitev
+    27. 9. 2026. Deljena slika (`static=True`) je nespremenjena.
   - Kartic Temperatura/Snežna odeja ni več: temperatura je v seznamu, snežna
     odeja pa je dodatek k vrstici »Sneg« (`snowpack_text()` ↔ `SNOWPACK` v
     JS). Raven vrstice nosi samo nov sneg.
