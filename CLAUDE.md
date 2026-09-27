@@ -586,6 +586,11 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   - Živa zapora ima **pasico nad statusom** (`#crn-zapore-banner`, v
     `ZAPORE_JS`), a samo ob dejanskem dogodku; brez dogodka ali ob napaki
     vira ostane skrita. Razdelek »Zapore« z besedilom ostane spodaj (SEO).
+  - Zgornja napisa con na merilniku (»TAK-TAK«, »VZEMI VERIGE«;
+    `gauge_svg()`, samo stranska različica) sta na telefonu ~12 px in stojita
+    pri 120°/60° (razred `crn-gl-top`, na namizju ju pomanjša CSS). Skrajna
+    napisa ob straneh loka ostaneta, kot sta bila — Filipova odločitev
+    27. 9. 2026. Deljena slika (`static=True`) je nespremenjena.
   - Kartic Temperatura/Snežna odeja ni več: temperatura je v seznamu, snežna
     odeja pa je dodatek k vrstici »Sneg« (`snowpack_text()` ↔ `SNOWPACK` v
     JS). Raven vrstice nosi samo nov sneg.
@@ -655,10 +660,13 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
 
 ### Opozorila s prelaza na telefon (Web Push, 27. 9. 2026)
 
-Kartica **»🔔 Opozorila s prelaza na telefon«** (`#opozorila`, `ALERTS_HTML`/
-`ALERTS_JS` v `generate_crnivec_page.py`, desni stolpec, na telefonu prva pod
-herojem) naroči napravo na push obvestila. Pošilja jih `_cronCheckCrnivec()` v
-`worker.js` (5-minutni cron).
+Gumb **»🔔 Opozorila«** v vrhnji vrstici, tik ob »Kaj pa čez Lipo?«
+(`ALERTS_HTML`/`ALERTS_JS` v `generate_crnivec_page.py`; 27. 9. 2026 Filip:
+takoj na vrhu, a en gumb, ne kartica — prvi zaslon ostane statusu) naroči
+napravo na push obvestila. Kaj sproži obvestilo, povedo `title` gumba,
+sporočilo ob vklopu (`#crn-alerts-status`) in FAQ. Brez podpore v brskalniku
+je gumb skrit, na iPhonu ob kliku pove, da je treba stran dodati na začetni
+zaslon. Pošilja jih `_cronCheckCrnivec()` v `worker.js` (5-minutni cron).
 
 - **Ločen seznam naročnin** `push/crnivec-subs.json` (`CRN_PUSH_KEY`), ne
   `push/subs.json`. Kdor se naroči na crnivec.si, ne dobi vročine v Rečici in
