@@ -57,10 +57,10 @@
   },
   {
     "date": "2026-09-27",
-    "snow_line_m": 3870,
+    "snow_line_m": 3970,
     "snow_cm_at_station": 0.0,
     "heating_level": "visoko",
     "black_ice_level": "nizko",
-    "fog_top_m": 882
+    "fog_top_m": 879
   }
 ]
