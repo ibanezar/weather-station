@@ -215,6 +215,9 @@ async function _crnivecZapore(env) {
       if (kljuc && vidni.has(kljuc)) continue;
       if (kljuc) vidni.add(kljuc);
       dogodki.push({
+        // Stalen ključ dogodka -- po njem _cronCheckCrnivec loči nove dogodke
+        // od že sporočenih.
+        id: String(kljuc || (tip + ":" + String(p.opis || "")).slice(0, 120)),
         tip,
         cesta: String(p.cesta || ""),
         vzrok: String(p.vzrok || ""),
@@ -810,18 +813,144 @@ async function _sendPush(env, sub, payloadObj) {
 // Pošlji obvestilo naročnikom (počisti potekle). Vrne {sent, pruned}.
 // Brez `filter` gre vsem; z njim samo tistim, ki mu ustrezajo — tako gredo
 // obvestila za posamezno vas res le naročnikom te vasi. Potekle naročnine
-// počistimo iz celotnega seznama, ne le iz izbranega podniza.
-async function _pushAll(env, payload, filter) {
+// počistimo iz celotnega seznama, ne le iz izbranega podniza. `key` izbere
+// seznam naročnin: privzeto meteorec.si, CRN_PUSH_KEY za crnivec.si.
+async function _pushAll(env, payload, filter, key = "push/subs.json") {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { sent: 0, pruned: 0 };
-  let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  let subs = []; try { const o = await r2.get(key); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
   const target = filter ? subs.filter(filter) : subs;
   const dead = [];
   await Promise.all(target.map(async s => {
     try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
     catch (_) {}
   }));
-  if (dead.length) await r2.put("push/subs.json", JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
+  if (dead.length) await r2.put(key, JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
   return { sent: target.length - dead.length, pruned: dead.length };
+}
+
+// ── Opozorila s prelaza Črnivec (crnivec.si) ───────────────
+// Ločen seznam naročnin: kdor se naroči na crnivec.si, je pristal na razmere
+// na prelazu, ne na vročino ali dež v Rečici — in obratno. _pushAll brez
+// `key` zato crnivec.si naročnikov nikoli ne doseže.
+//
+// Sproži se ob PREHODU v stanje (histereza), ne ob vsakem tiku:
+//   mraz      izmerjena temperatura DRSI <= 0 °C (ponastavi se pri >= 1 °C)
+//   padavine  dnevna vsota DRSI zraste za >= 0,2 mm pri <= 1,5 °C — sneg ali
+//             poledica (ponastavi se pri > 2,5 °C ali po uri brez padavin)
+//   veter     sunki DRSI >= 70 km/h (ponastavi se pod 50 km/h)
+//   zapora    nov dogodek PIC na R1-225 (/crnivec-zapore) in »ni več dogodkov«,
+//             ko se vsi, o katerih smo obvestili, končajo
+// Samo izmerjeno, ne model: meritev je stara največ 40 min (_drsiCrnivec),
+// sicer vremenska opozorila molčijo. Napaka vira zapor nikoli ne pomeni
+// »ni zapor« — isto pravilo kot na strani (ZAPORE_JS).
+//
+// Tihi čas 22:00–5:00 (Ljubljana): nič se ne pošlje in stanje se ne
+// posodobi, zato razmere, ki trajajo, pridejo ob 5:00. Prvi tik novega dne
+// vremenska stanja tudi ponovno oboroži — kdor se zjutraj vozi čez prelaz,
+// mora izvedeti, da je spet pod ničlo, četudi je bilo tudi sinoči.
+const CRN_PUSH_KEY = "push/crnivec-subs.json";
+const CRN_PUSH_STATE = "push/crnivec_state.json";
+const CRN_PUSH_URL = "https://crnivec.si/";
+const CRN_ALERT_COOLDOWN_MS = 3 * 3600 * 1000;
+const CRN_MRAZ_C = 0, CRN_MRAZ_RESET_C = 1;
+const CRN_PAD_MM = 0.2, CRN_PAD_T_C = 1.5, CRN_PAD_RESET_C = 2.5, CRN_PAD_SUHO_MS = 60 * 60000;
+const CRN_SUNKI_KMH = 70, CRN_SUNKI_RESET_KMH = 50;
+const CRN_TIHO_OD = 22, CRN_TIHO_DO = 5;
+
+function _crnNum(x) { return x.toFixed(1).replace(".", ",").replace("-", "−"); }
+function _crnUra(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Ljubljana" });
+}
+
+async function _cronCheckCrnivec(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI >= CRN_TIHO_OD || hourSI < CRN_TIHO_DO) return;
+  // Brez naročnikov ne kličemo virov (DRSI, NAP) po nepotrebnem.
+  let subs = []; try { const o = await r2.get(CRN_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  if (!subs.length) return;
+
+  let state = {}; try { const o = await r2.get(CRN_PUSH_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  const danes = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+  if (state.dan !== danes) {
+    for (const k of ["mraz", "padavine", "veter"]) if (state[k]) state[k].over = false;
+    state.dan = danes;
+  }
+  const poslji = (tag, body) => _pushAll(env,
+    { title: "Črnivec — opozorilo", body, url: CRN_PUSH_URL, tag: "crn-" + tag, icon: "/icon-192.png" },
+    null, CRN_PUSH_KEY);
+  // over: pogoj velja; reset: pogoj je zanesljivo mimo (histereza). Hladilna
+  // doba po vrsti prepreči, da bi nihanje okoli praga pošiljalo znova.
+  const preveri = async (key, over, reset, msg, tiho) => {
+    const st = state[key] || { over: false, lastSent: 0 };
+    if (over && !st.over) {
+      if (!tiho && now - (st.lastSent || 0) > CRN_ALERT_COOLDOWN_MS) { await poslji(key, msg()); st.lastSent = now; }
+      st.over = true;
+    } else if (reset) {
+      st.over = false;
+    }
+    state[key] = st;
+    return over && !tiho;
+  };
+
+  const m = await _drsiCrnivec();
+  if (m && m.temp_c != null) {
+    const t = m.temp_c, ob = _crnUra(m.ts);
+    // Padavine: prirastek dnevne vsote od prejšnje meritve. Negativen
+    // prirastek pomeni polnočno ponastavitev — takrat je vsa vsota nova.
+    let prirastek = 0;
+    const prej = state.dez;
+    if (m.padavine_danes_mm != null) {
+      if (prej && prej.ts && prej.ts !== m.ts && prej.mm != null) {
+        prirastek = m.padavine_danes_mm >= prej.mm ? m.padavine_danes_mm - prej.mm : m.padavine_danes_mm;
+      }
+      state.dez = { mm: m.padavine_danes_mm, ts: m.ts, mokro: prirastek >= CRN_PAD_MM ? now : (prej && prej.mokro) || 0 };
+    }
+    const pada = prirastek >= CRN_PAD_MM && t <= CRN_PAD_T_C;
+    const suho = now - ((state.dez && state.dez.mokro) || 0) > CRN_PAD_SUHO_MS;
+    const padlo = await preveri("padavine", pada, t > CRN_PAD_RESET_C || suho, () =>
+      t <= 0
+        ? `❄️ Na Črnivcu pada pri ${_crnNum(t)} °C (DRSI ob ${ob}). Na vozišču je lahko sneg ali poledica.`
+        : `❄️ Na Črnivcu pada pri ${_crnNum(t)} °C (DRSI ob ${ob}). Lahko sneži, cesta je lahko spolzka.`);
+    // Kdor je pravkar dobil »pada pri −1 °C«, ne rabi še »pod ničlo«:
+    // mraz se ob tem samo označi kot sporočen.
+    await preveri("mraz", t <= CRN_MRAZ_C, t >= CRN_MRAZ_RESET_C, () =>
+      `🧊 Na Črnivcu je ${_crnNum(t)} °C (DRSI ob ${ob}). Vozišče je lahko poledenelo.`, padlo);
+    if (m.sunki_kmh != null) {
+      await preveri("veter", m.sunki_kmh >= CRN_SUNKI_KMH, m.sunki_kmh < CRN_SUNKI_RESET_KMH, () =>
+        `💨 Sunki vetra na Črnivcu do ${Math.round(m.sunki_kmh)} km/h (DRSI ob ${ob}).`);
+    }
+  }
+
+  const z = await _crnivecZapore(env).catch(() => null);
+  if (z && z.ok && Array.isArray(z.dogodki)) {
+    const ids = z.dogodki.map(d => d.id);
+    const prej = state.zapore;
+    if (!prej) {
+      // Prvi tek: obstoječe dogodke le zabeležimo, sicer bi ob uvedbi vsi
+      // naročniki naenkrat dobili obvestilo o delih, ki trajajo že tedne.
+      state.zapore = { ids, obvescen: false };
+    } else {
+      const novi = z.dogodki.filter(d => prej.ids.indexOf(d.id) === -1);
+      let obvescen = prej.obvescen && ids.length > 0;
+      if (novi.length) {
+        const d = novi[0];
+        let opis = String(d.opis || "").trim().replace(/[.\s]+$/, "");
+        if (opis.length > 160) opis = opis.slice(0, 157) + "…";
+        await poslji("zapora", "🚧 Na cesti čez Črnivec: " +
+          (d.vzrok || (d.tip === "delo" ? "delo na cesti" : "dogodek")) + (opis ? " — " + opis : "") +
+          (novi.length > 1 ? ` (in še ${novi.length - 1})` : "") + ". Uradno na promet.si.");
+        obvescen = true;
+      } else if (!ids.length && prej.obvescen) {
+        await poslji("zapora", "✅ Po podatkih Prometno-informacijskega centra na cesti čez Črnivec ni več zapor ali del.");
+      }
+      state.zapore = { ids, obvescen };
+    }
+  }
+
+  await r2.put(CRN_PUSH_STATE, JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
 }
 
 // ── Samodejni pragovni alarm (cron) ────────────────────────
@@ -2799,6 +2928,7 @@ export default {
     })());
     ctx.waitUntil(_cronCheckRainStartStop(env));
     ctx.waitUntil(_cronCheckAurora(env));
+    ctx.waitUntil(_cronCheckCrnivec(env));
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
     // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
     // izgubljen zapis, ki ga ni mogoče dobiti za nazaj — okvir radarja doriše
@@ -6919,7 +7049,8 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
       //   POST /push/subscribe   { subscription } → shrani naročnino
       //   POST /push/unsubscribe { endpoint }     → odstrani
       //   POST /push/send        { secret, title, body, url? } → pošlji vsem
-      // Naročnine v R2: push/subs.json
+      // Naročnine v R2: push/subs.json. Z { site:"crnivec" } vsi trije klici
+      // delajo s seznamom crnivec.si (push/crnivec-subs.json).
       // ── /nowcast — stanje po vaseh + seznam vasi za izbirnik ──
       //   GET /nowcast/vasi   → seznam vasi (za spustni seznam na strani)
       //   GET /nowcast        → zadnji izračun za vse vasi
@@ -6960,6 +7091,28 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
 
         if (request.method !== "POST") return pj({ error: "Nedovoljena metoda" }, 405);
         let body; try { body = await request.json(); } catch (_) { return pj({ error: "Napačni podatki" }, 400); }
+
+        // crnivec.si ima svoj seznam (glej CRN_PUSH_KEY): brez vasi in
+        // povzetka, samo opozorila s prelaza.
+        if (body.site === "crnivec" && path !== "/push/send") {
+          const CKEY = CRN_PUSH_KEY;
+          let subs = []; if (r2) { try { const o = await r2.get(CKEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {} }
+          const cWrite = a => r2.put(CKEY, JSON.stringify(a), { httpMetadata: { contentType: "application/json" } });
+          if (path === "/push/subscribe") {
+            if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+            const s = body.subscription || body;
+            if (!s || !s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+            if (!subs.some(x => x.endpoint === s.endpoint)) {
+              subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, ts: new Date().toISOString() });
+              await cWrite(subs.slice(0, 5000));
+            }
+            return pj({ ok: true, count: subs.length });
+          }
+          const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
+          const next = subs.filter(x => x.endpoint !== ep);
+          if (r2 && next.length !== subs.length) await cWrite(next);
+          return pj({ ok: true });
+        }
 
         if (path === "/push/subscribe") {
           if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
@@ -7005,6 +7158,11 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           // povzetek (glej /push/subscribe zgoraj) — brez tega parametra je
           // vedenje nespremenjeno (pošlje vsem), kot doslej za huda vremena.
           const filter = body.audience === "digest" ? (s => s.digest === true) : null;
+          // site:"crnivec" gre naročnikom crnivec.si (ročni preizkus opozoril).
+          if (body.site === "crnivec") {
+            const res = await _pushAll(env, { ...payload, url: body.url || CRN_PUSH_URL, icon: "/icon-192.png" }, null, CRN_PUSH_KEY);
+            return pj({ ok: true, ...res });
+          }
           const res = await _pushAll(env, payload, filter);
           return pj({ ok: true, ...res });
         }

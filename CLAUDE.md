@@ -653,6 +653,37 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
     statično besedilo s povezavami — nikoli ne izpiše »ni zapor«, če vira ni
     prebral.
 
+### Opozorila s prelaza na telefon (Web Push, 27. 9. 2026)
+
+Kartica **»🔔 Opozorila s prelaza na telefon«** (`#opozorila`, `ALERTS_HTML`/
+`ALERTS_JS` v `generate_crnivec_page.py`, desni stolpec, na telefonu prva pod
+herojem) naroči napravo na push obvestila. Pošilja jih `_cronCheckCrnivec()` v
+`worker.js` (5-minutni cron).
+
+- **Ločen seznam naročnin** `push/crnivec-subs.json` (`CRN_PUSH_KEY`), ne
+  `push/subs.json`. Kdor se naroči na crnivec.si, ne dobi vročine v Rečici in
+  obratno. `_pushAll()` brez četrtega argumenta crnivec.si naročnikov ne
+  doseže — tako mora ostati. Endpointi so isti `/push/subscribe`,
+  `/push/unsubscribe`, `/push/send`, z `site: "crnivec"` v telesu.
+- **Samo izmerjeno, nikoli model**: mraz (DRSI ≤ 0 °C, ponastavi ≥ 1 °C),
+  padavine okoli ničle (dnevna vsota DRSI +0,2 mm pri ≤ 1,5 °C), sunki
+  ≥ 70 km/h in nova zapora PIC na R1-225 (+ »ni več zapor«, ko se končajo vse,
+  o katerih smo obvestili). Pragovi so `CRN_*` v `worker.js`; besedilo na
+  kartici in v FAQ jih navaja — **če spremeniš prag, popravi tudi besedilo**.
+- Obvestilo gre ob **prehodu** v stanje (histereza + 3 h hladilne dobe po
+  vrsti), ne ob vsakem tiku. Prvi tek zapore samo zabeleži (ob uvedbi ni
+  izbruha obvestil o delih, ki trajajo tedne). Napaka vira zapor nikoli ne
+  pošlje »ni zapor«.
+- **Tihi čas 22:00–5:00**: nič se ne pošlje in stanje se ne posodobi; prvi tik
+  novega dne vremenska stanja ponovno oboroži, zato jutranja zmrzal pride ob
+  5:00, tudi če je bila že sinoči.
+- Brez naročnikov cron virov ne kliče.
+- crnivec.si ima **svoj** `sw.js` (`SW_JS`, piše `write_site_files()`): samo
+  push in klik, **brez predpomnjenja** — stran se ne sme zatakniti na stari
+  različici. Na iPhonu push deluje le v nameščeni aplikaciji (Dodaj na
+  začetni zaslon); kartica to pove.
+- Lipa opozoril nima (ni postaje DRSI ne zapor v viru).
+
 ### »Kaj pa čez Lipo?« — `crnivec.si/lipa/` (26. 9. 2026)
 
 Filip je želel še prelaz **Lipa** (723 m, lokalna cesta Vransko–Lipa–Šmartno ob
