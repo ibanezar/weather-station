@@ -281,7 +281,10 @@
   var level = null, track = null, sim = null, ui = { faza: 'start', zadnji: 0, acc: 0, sporocilo: '', sporT: 0 };
   var keys = {}, touch = { plin: 0, zavora: 0, levo: 0, desno: 0 };
   var canvas, ctx, W = 360, H = 480, dpr = 1;
-  var drevesa = null;
+  var drevesa = null, ovinki = [], table = [], profil = null;
+  var sledi = [], delci = [];
+  var S_VRH = Math.round(11.5 * 1000 / SCALE);   // vrh prelaza na progi (m igre)
+  var PROFIL_Y = 70, PROFIL_H = 34, Z_MIN = 400, Z_MAX = 930;
 
   function beriNivo() {
     try { return JSON.parse(el('cv-level').textContent); } catch (e) { return null; }
@@ -295,6 +298,7 @@
     canvas.width = W * dpr; canvas.height = H * dpr;
     canvas.style.height = H + 'px';
     PX = W / 52;
+    narisiProfil();
     draw();
   }
 
@@ -314,6 +318,72 @@
     drevesa = out;
   }
 
+  // Točka na progi: s (m igre) in bočni odmik (pozitiven = levo od sredine).
+  function tocka(s, off) {
+    var i = Math.max(0, Math.min(L, Math.round(s))), h = track.h[i];
+    return { x: track.x[i] - Math.cos(h) * off, y: track.y[i] + Math.sin(h) * off };
+  }
+
+  // Serpentine in ostri ovinki (polmer pod 30 m): pred njimi opozorilni znak,
+  // na zunanji strani odbojna ograja.
+  function najdiOvinke() {
+    var out = [], s = 0;
+    while (s <= L) {
+      if (Math.abs(track.k[s]) > 1 / 30) {
+        var s0 = s, smer = track.k[s] > 0 ? 1 : -1;
+        while (s <= L && Math.abs(track.k[s]) > 1 / 30 && (track.k[s] > 0 ? 1 : -1) === smer) s++;
+        if (s - s0 > 10) out.push({ s0: s0, s1: s, smer: smer });
+      }
+      s++;
+    }
+    ovinki = out;
+    table = [
+      { s: 25, tip: 'kraj', txt: 'Stahovica' },
+      { s: S_VRH, tip: 'vrh', txt: 'ČRNIVEC', sub: '902 m' },
+      { s: L - 30, tip: 'kraj', txt: 'Gornji Grad' }
+    ];
+  }
+
+  // Višinski profil proge, pobarvan po površinah — nariše se enkrat (ob
+  // velikosti), v HUD-u se nanj nariše samo pika avta.
+  var PROFIL_BARVA = { suho: '#a8a29e', mokro: '#475569', led: '#60a5fa', sneg: '#f8fafc' };
+  function profilY(z) { return PROFIL_Y + PROFIL_H - 4 - (z - Z_MIN) / (Z_MAX - Z_MIN) * (PROFIL_H - 8); }
+  function narisiProfil() {
+    if (!level || !level.odseki) return;
+    profil = document.createElement('canvas');
+    profil.width = W * dpr; profil.height = (PROFIL_Y + PROFIL_H) * dpr;
+    var c = profil.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var x0 = 14, w = W - 28;
+    function px(km) { return x0 + w * km / L_REAL_KM; }
+    c.fillStyle = 'rgba(255,255,255,.9)'; c.strokeStyle = '#111'; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(16, PROFIL_Y); c.lineTo(W - 16, PROFIL_Y);
+    c.quadraticCurveTo(W - 8, PROFIL_Y, W - 8, PROFIL_Y + 8); c.lineTo(W - 8, PROFIL_Y + PROFIL_H - 8);
+    c.quadraticCurveTo(W - 8, PROFIL_Y + PROFIL_H, W - 16, PROFIL_Y + PROFIL_H); c.lineTo(16, PROFIL_Y + PROFIL_H);
+    c.quadraticCurveTo(8, PROFIL_Y + PROFIL_H, 8, PROFIL_Y + PROFIL_H - 8); c.lineTo(8, PROFIL_Y + 8);
+    c.quadraticCurveTo(8, PROFIL_Y, 16, PROFIL_Y); c.closePath(); c.fill(); c.stroke();
+    // Površine pod črto (led po deležu: bolj led, bolj modro)
+    level.odseki.forEach(function (o) {
+      var a = px(o.od_km), b = px(Math.min(L_REAL_KM, o.od_km + 1));
+      c.fillStyle = PROFIL_BARVA[o.povrsina] || PROFIL_BARVA.suho;
+      c.globalAlpha = o.povrsina === 'led' ? 0.45 + 0.55 * (o.led_delez || 0) : 1;
+      c.beginPath();
+      c.moveTo(a, PROFIL_Y + PROFIL_H - 3); c.lineTo(a, profilY(o.z_od)); c.lineTo(b, profilY(o.z_do));
+      c.lineTo(b, PROFIL_Y + PROFIL_H - 3); c.closePath(); c.fill();
+      c.globalAlpha = 1;
+      if (o.megla) {
+        c.fillStyle = 'rgba(203,213,225,.85)';
+        c.fillRect(a, PROFIL_Y + 3, b - a + 0.5, Math.max(2, Math.min(profilY(o.z_od), profilY(o.z_do)) - PROFIL_Y - 4));
+      }
+    });
+    c.strokeStyle = '#111'; c.lineWidth = 1.6; c.beginPath();
+    level.odseki.forEach(function (o, i) {
+      if (!i) c.moveTo(px(o.od_km), profilY(o.z_od));
+      c.lineTo(px(Math.min(L_REAL_KM, o.od_km + 1)), profilY(o.z_do));
+    });
+    c.stroke();
+  }
+
   function vnos() {
     var l = keys.ArrowLeft || keys.a || keys.A || touch.levo;
     var r = keys.ArrowRight || keys.d || keys.D || touch.desno;
@@ -323,9 +393,10 @@
     // zasučeš do konca). Prvotnih 3,5/s je bilo pretrdo (Filip, 28. 9. 2026).
     var rate = cilj === 0 ? 2.4 : 1.8 / (1 + sim.v / 20);
     sim.volan += Math.max(-rate * DT, Math.min(rate * DT, cilj - sim.volan));
+    ui.zavora = (keys.ArrowDown || keys.s || keys.S || keys[' '] || touch.zavora) ? 1 : 0;
     return {
       plin: (keys.ArrowUp || keys.w || keys.W || touch.plin) ? 1 : 0,
-      zavora: (keys.ArrowDown || keys.s || keys.S || keys[' '] || touch.zavora) ? 1 : 0,
+      zavora: ui.zavora,
       volan: sim.volan
     };
   }
@@ -338,7 +409,8 @@
     while (ui.acc >= DT) {
       step(sim, vnos(), DT);
       ui.acc -= DT;
-      if (sim.dogodek === 'jarek') sporoci('V JARKU! +' + PEN_JAREK + ' s');
+      if (sim.dogodek === 'jarek') { sporoci('V JARKU! +' + PEN_JAREK + ' s'); ui.shake = 0.45; ui.sledL = null; }
+      if (!ui.vrh && sim.s >= S_VRH) { ui.vrh = true; sporoci('VRH! 902 m'); }
       if (sim.done) break;
     }
     kamera(dtReal);
@@ -354,6 +426,57 @@
     var cilj = track.h[ahead];
     if (ui.camH == null) { ui.camH = cilj; return; }
     ui.camH += (cilj - ui.camH) * Math.min(1, dt * 2.5);
+    if (ui.shake > 0) ui.shake = Math.max(0, ui.shake - dt);
+    ucinki(dt);
+  }
+
+  // Lega avta v svetu: središče, smer naprej in desno (enotska vektorja).
+  function legaAvta() {
+    var si = Math.max(0, Math.min(L, Math.floor(sim.s))), hh = track.h[si];
+    var H0 = hh + sim.psi;
+    return {
+      x: track.x[si] - Math.cos(hh) * sim.d, y: track.y[si] + Math.sin(hh) * sim.d, h: H0,
+      fx: -Math.sin(H0), fy: -Math.cos(H0), rx: Math.cos(H0), ry: -Math.sin(H0)
+    };
+  }
+
+  // Sledi zdrsa, pršec (voda, sneg) in iskrice na ledu. Samo prikaz — na
+  // fiziko ne vplivajo.
+  function ucinki(dt) {
+    var a = legaAvta(), p = surfAt(sim, sim.s);
+    var zadaj = [
+      { x: a.x - a.fx * 1.45 - a.rx * 0.78, y: a.y - a.fy * 1.45 - a.ry * 0.78 },
+      { x: a.x - a.fx * 1.45 + a.rx * 0.78, y: a.y - a.fy * 1.45 + a.ry * 0.78 }
+    ];
+    var drsa = sim.v > 3 && (sim.drsi || (ui.zavora && p !== 'suho'));
+    if (drsa && ui.sledL) {
+      for (var k = 0; k < 2; k++) {
+        var prej = ui.sledL[k];
+        if (Math.abs(prej.x - zadaj[k].x) + Math.abs(prej.y - zadaj[k].y) > 0.25) {
+          sledi.push({ x1: prej.x, y1: prej.y, x2: zadaj[k].x, y2: zadaj[k].y, led: p === 'led' || p === 'sneg' });
+        }
+      }
+      if (sledi.length > 700) sledi.splice(0, sledi.length - 700);
+    }
+    ui.sledL = drsa ? zadaj : null;
+
+    if (sim.v > 5 && (p === 'mokro' || p === 'sneg' || p === 'led')) {
+      var n = p === 'led' ? (Math.random() < 0.25 ? 1 : 0) : Math.min(3, Math.round(sim.v / 8));
+      for (var i = 0; i < n; i++) {
+        var z = zadaj[i % 2], str = (Math.random() - 0.5) * 2;
+        delci.push({
+          x: z.x, y: z.y,
+          vx: -a.fx * sim.v * 0.25 + a.rx * str * 1.5, vy: -a.fy * sim.v * 0.25 + a.ry * str * 1.5,
+          t: 0, life: p === 'led' ? 0.35 : 0.5, r: p === 'led' ? 0.18 : 0.25 + Math.random() * 0.25, p: p
+        });
+      }
+    }
+    for (var j = delci.length - 1; j >= 0; j--) {
+      var d = delci[j];
+      d.t += dt; d.x += d.vx * dt; d.y += d.vy * dt; d.r += dt * 0.8;
+      if (d.t > d.life) delci.splice(j, 1);
+    }
+    if (delci.length > 200) delci.splice(0, delci.length - 200);
   }
 
   function sporoci(t) { ui.sporocilo = t; ui.sporT = 1.6; }
@@ -377,6 +500,7 @@
 
     ctx.save();
     ctx.translate(W / 2, H * 0.74);
+    if (ui.shake > 0) ctx.translate((Math.random() - 0.5) * ui.shake * 24, (Math.random() - 0.5) * ui.shake * 24);
     ctx.scale(PX, PX);
     ctx.rotate(camH);
     ctx.translate(-hx, -hy);
@@ -411,6 +535,45 @@
     pot(od, doS);
     ctx.setLineDash([2.4, 2.4]); ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 0.18; ctx.lineCap = 'butt';
     ctx.stroke(); ctx.setLineDash([]);
+    // Sledi zdrsa
+    ctx.lineCap = 'round'; ctx.lineWidth = 0.32;
+    for (var j = 0; j < sledi.length; j++) {
+      var sl = sledi[j];
+      ctx.strokeStyle = sl.led ? 'rgba(30,58,138,.35)' : 'rgba(17,17,17,.45)';
+      ctx.beginPath(); ctx.moveTo(sl.x1, sl.y1); ctx.lineTo(sl.x2, sl.y2); ctx.stroke();
+    }
+    // Odbojne ograje na zunanji strani ostrih ovinkov
+    for (var o = 0; o < ovinki.length; o++) {
+      var ov = ovinki[o];
+      if (ov.s1 + 8 < od || ov.s0 - 8 > doS) continue;
+      var off = -ov.smer * (OFF + 0.45), a1 = Math.max(0, ov.s0 - 8), b1 = Math.min(L, ov.s1 + 8);
+      ctx.beginPath();
+      for (var q = a1; q <= b1; q += 2) { var t0 = tocka(q, off); if (q === a1) ctx.moveTo(t0.x, t0.y); else ctx.lineTo(t0.x, t0.y); }
+      ctx.lineCap = 'butt'; ctx.strokeStyle = '#111'; ctx.lineWidth = 0.75; ctx.stroke();
+      ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 0.4; ctx.stroke();
+      ctx.fillStyle = '#111';
+      for (var q2 = a1; q2 <= b1; q2 += 4) { var t1 = tocka(q2, off - ov.smer * 0.35); ctx.fillRect(t1.x - 0.15, t1.y - 0.15, 0.3, 0.3); }
+    }
+    // Opozorilni znaki pred ovinki in table (kraj, vrh)
+    for (var o2 = 0; o2 < ovinki.length; o2++) {
+      var sz = ovinki[o2].s0 - 32;
+      if (sz < od - 10 || sz > doS || sz < 0) continue;
+      var tz = tocka(sz, -(OFF + 1.8));
+      pokoncno(tz.x, tz.y, camH, function () { znakOvinek(ovinki[o2].smer); });
+    }
+    for (var t = 0; t < table.length; t++) {
+      var tb = table[t];
+      if (tb.s < od - 10 || tb.s > doS) continue;
+      var tt = tocka(tb.s, -(OFF + 3.2));
+      pokoncno(tt.x, tt.y, camH, function () { tabla(tb); });
+    }
+    // Pršec in iskrice
+    for (var dI = 0; dI < delci.length; dI++) {
+      var dc = delci[dI], al = 1 - dc.t / dc.life;
+      ctx.fillStyle = dc.p === 'mokro' ? 'rgba(203,213,225,' + (0.55 * al) + ')'
+        : dc.p === 'sneg' ? 'rgba(255,255,255,' + (0.85 * al) + ')' : 'rgba(224,242,254,' + al + ')';
+      ctx.beginPath(); ctx.arc(dc.x, dc.y, dc.r, 0, 6.283); ctx.fill();
+    }
     // Cilj
     if (doS >= L) {
       var fh = track.h[L];
@@ -425,16 +588,7 @@
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(-heading + (sim.drsi ? Math.sin(sim.t * 40) * 0.04 : 0));
-    ctx.fillStyle = '#111';
-    ctx.fillRect(-1.05, -2.2, 2.1, 4.4);
-    ctx.fillStyle = '#dc2626';
-    ctx.fillRect(-0.9, -2.05, 1.8, 4.1);
-    ctx.fillStyle = '#bfdbfe';
-    ctx.fillRect(-0.72, -1.35, 1.44, 0.8);
-    if (sim.verige) {
-      ctx.fillStyle = '#fde047';
-      [[-1.15, -1.5], [0.85, -1.5], [-1.15, 1.0], [0.85, 1.0]].forEach(function (p) { ctx.fillRect(p[0], p[1], 0.3, 0.7); });
-    }
+    narisiAvto();
     ctx.restore();
     ctx.restore();
 
@@ -450,6 +604,75 @@
     }
 
     hud();
+  }
+
+  // Stripovski avto (v metrih, sprednji del proti -y).
+  function narisiAvto() {
+    ctx.fillStyle = 'rgba(0,0,0,.28)';
+    rr(-0.95 + 0.35, -2.15 + 0.45, 1.9, 4.3, 0.5); ctx.fill();
+    // Kolesa (z verigami rumena)
+    ctx.fillStyle = '#111';
+    [[-1.12, -1.75], [0.72, -1.75], [-1.12, 0.95], [0.72, 0.95]].forEach(function (k) {
+      ctx.fillRect(k[0], k[1], 0.4, 0.85);
+      if (sim.verige) {
+        ctx.fillStyle = '#fde047';
+        for (var i = 0; i < 3; i++) ctx.fillRect(k[0] - 0.02, k[1] + 0.1 + i * 0.27, 0.44, 0.1);
+        ctx.fillStyle = '#111';
+      }
+    });
+    ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#111'; ctx.lineWidth = 0.22;
+    rr(-0.95, -2.15, 1.9, 4.3, 0.55); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#b91c1c'; rr(-0.72, -0.6, 1.44, 1.55, 0.25); ctx.fill();
+    ctx.fillStyle = '#bfdbfe'; ctx.strokeStyle = '#111'; ctx.lineWidth = 0.12;
+    rr(-0.74, -1.45, 1.48, 0.72, 0.2); ctx.fill(); ctx.stroke();
+    rr(-0.68, 1.05, 1.36, 0.45, 0.15); ctx.fill(); ctx.stroke();
+    // Žarometi in zavorne luči
+    ctx.fillStyle = '#fef9c3';
+    ctx.fillRect(-0.8, -2.12, 0.42, 0.18); ctx.fillRect(0.38, -2.12, 0.42, 0.18);
+    var zav = ui.faza === 'voznja' && ui.zavora;
+    if (zav) { ctx.shadowColor = '#ef4444'; ctx.shadowBlur = 14; }
+    ctx.fillStyle = zav ? '#ff3b3b' : '#7f1d1d';
+    ctx.fillRect(-0.82, 1.95, 0.46, 0.2); ctx.fillRect(0.36, 1.95, 0.46, 0.2);
+    ctx.shadowBlur = 0;
+  }
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+
+  // Predmet ob cesti, obrnjen pokončno proti gledalcu (risanje v pikslih).
+  function pokoncno(x, y, camH, fn) {
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(-camH); ctx.scale(1 / PX, 1 / PX);
+    fn();
+    ctx.restore();
+  }
+
+  function znakOvinek(smer) {
+    ctx.fillStyle = '#111'; ctx.fillRect(-1.5, -6, 3, 16);
+    ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(14, -6); ctx.lineTo(-14, -6); ctx.closePath();
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = '#dc2626'; ctx.stroke();
+    ctx.lineWidth = 1; ctx.strokeStyle = '#111'; ctx.stroke();
+    // puščica ovinka (levo/desno)
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, -9); ctx.quadraticCurveTo(0, -18, -5 * smer, -20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-5 * smer, -23); ctx.lineTo(-8 * smer, -20); ctx.lineTo(-5 * smer, -17);
+    ctx.stroke();
+  }
+
+  function tabla(tb) {
+    ctx.font = '900 11px Inter,system-ui,sans-serif';
+    var w = Math.max(ctx.measureText(tb.txt).width + 14, 54), h = tb.sub ? 30 : 20;
+    ctx.fillStyle = '#111'; ctx.fillRect(-w / 2 + 4, -2, 3, 12); ctx.fillRect(w / 2 - 7, -2, 3, 12);
+    ctx.fillStyle = tb.tip === 'kraj' ? '#fde047' : '#fff';
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+    ctx.fillRect(-w / 2, -h - 2, w, h); ctx.strokeRect(-w / 2, -h - 2, w, h);
+    ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(tb.txt, 0, tb.sub ? -h + 7 : -h / 2 - 2);
+    if (tb.sub) { ctx.font = '800 10px Inter,system-ui,sans-serif'; ctx.fillStyle = '#dc2626'; ctx.fillText(tb.sub, 0, -9); }
   }
 
   function pot(a, b) {
@@ -481,9 +704,15 @@
     ctx.fillStyle = p === 'led' ? '#1d4ed8' : p === 'sneg' ? '#475569' : '#111';
     ctx.fillText((sim.verige ? '⛓ verige · ' : '') + 'vozišče: ' + SURF_IME[p] + (sim.drsi ? ' · DRSI!' : ''), W / 2, 44);
 
-    // Napredek
-    ctx.fillStyle = 'rgba(17,17,17,.25)'; ctx.fillRect(8, 62, W - 16, 5);
-    ctx.fillStyle = '#dc2626'; ctx.fillRect(8, 62, (W - 16) * sim.s / L, 5);
+    // Višinski profil s površinami in piko avta
+    if (profil) {
+      ctx.drawImage(profil, 0, 0, W, PROFIL_Y + PROFIL_H);
+      var xk = 14 + (W - 28) * sim.s / L, yk = profilY(zNa(level, sim.s));
+      ctx.strokeStyle = 'rgba(220,38,38,.6)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(xk, PROFIL_Y + 3); ctx.lineTo(xk, PROFIL_Y + PROFIL_H - 3); ctx.stroke();
+      ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(xk, yk, 5, 0, 6.283); ctx.fill(); ctx.stroke();
+    }
 
     if (ui.sporT > 0) {
       ui.sporT -= 1 / 60;
@@ -507,6 +736,7 @@
   function zacni(verige) {
     sim = makeSim(level, { track: track, verige: verige });
     ui.faza = 'voznja'; ui.zadnji = 0; ui.acc = 0; ui.sporT = 0; ui.camH = null;
+    ui.shake = 0; ui.vrh = false; ui.sledL = null; ui.zavora = 0; sledi = []; delci = [];
     el('cv-overlay').hidden = true;
     el('cv-chain').textContent = verige ? '⛓ Snemi verige' : '⛓ Natakni verige';
     canvas.focus();
@@ -695,6 +925,7 @@
     ctx = canvas.getContext('2d');
     track = buildTrack();
     postaviDrevesa();
+    najdiOvinke();
     vezi();
     resize();
     pokaziStart();
