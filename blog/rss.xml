@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 25 Sep 2026 17:17:03 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 28 Sep 2026 10:02:54 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Indijansko poletje: pred nami suh in sončen teden</title>
@@ -65,6 +65,18 @@
       <category>luna</category>
       <category>gobarski indeks</category>
       <category>mit ali resnica</category>
+    </item>
+    <item>
+      <title>Invazivke ta teden: 2 opazovanji na novih lokacijah</title>
+      <link>https://meteorec.si/blog/invazivka-tedenski-pregled-20260920.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/invazivka-tedenski-pregled-20260920.html</guid>
+      <pubDate>Sun, 20 Sep 2026 08:00:00 +0000</pubDate>
+      <description>Tedenski pregled invazivnih vrst v Zgornji Savinjski dolini (20. septembra 2026–20. septembra 2026): 2 opazovanji na novih lokacijah — Japonski dresnik in Žlezava nedotika.</description>
+      <category>invazivke</category>
+      <category>tedenski-pregled</category>
+      <category>2026</category>
+      <category>japonski-dresnik</category>
+      <category>zlezava-nedotika</category>
     </item>
     <item>
       <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
