@@ -148,6 +148,9 @@ const NIVO = path.join(ROOT, 'crnivec-site', 'igra', 'nivo.json');
 if (fs.existsSync(NIVO)) {
   const lv = JSON.parse(fs.readFileSync(NIVO, 'utf8'));
   ok('nivo ima odsek za vsak kilometer', lv.odseki.length === Math.ceil(M.L_REAL_KM), `${lv.odseki.length}`);
+  ok('nivo pove svetlobo (noc/somrak/dan)', ['noc', 'somrak', 'dan'].includes(lv.svetloba), String(lv.svetloba));
+  ok('odseki imajo padavine in snežno odejo', lv.odseki.every((o) => 'pada' in o && typeof o.odeja === 'boolean'));
+  ok('pada je samo dez/sneg/null', lv.odseki.every((o) => [null, 'dez', 'sneg'].includes(o.pada)));
   const d = bot(M.makeSim(lv), { mu: null });
   ok('današnji nivo je prevozen', d.done && d.jarki === 0, `jarki ${d.jarki}, t=${d.t.toFixed(1)}`);
 } else {

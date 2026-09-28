@@ -35,6 +35,7 @@ import datetime
 import hashlib
 import html
 import json
+import math
 import os
 import shutil
 import sys
@@ -57,6 +58,8 @@ L_REAL_KM = 24.5                  # L_REAL_KM v voznja.js
 # Višinski profil R1-225 (km od Stahovice, m) — približek iz zemljevida,
 # vrh in oba konca sta prava (Gornji Grad 428 m je višina postaje DRSI).
 PROFIL = ((0, 440), (4, 520), (8, 680), (11.5, PASS_ELEV), (15, 720), (20, 500), (L_REAL_KM, 428))
+CRN_LAT, CRN_LON = 46.26, 14.72   # prelaz (za višino sonca)
+PADA_MM = 0.1                     # od toliko mm v uri v igri pada dež/sneg
 GUST_MIN_KMH = 30                 # pod tem sunki v igri ne premikajo avta (isto v voznja.js)
 
 # road_row() vrednost → površina v igri (in delež ledu v odseku). Neznana
@@ -77,6 +80,46 @@ def z_at(km):
         if km <= k1:
             return z0 + (z1 - z0) * (km - k0) / (k1 - k0)
     return PROFIL[-1][1]
+
+
+def sun_altitude(when_utc, lat=CRN_LAT, lon=CRN_LON):
+    """Višina sonca v stopinjah (NOAA približek, ±0,5°) -- dovolj za to, ali
+    je ob uri nivoja tema, somrak ali dan."""
+    doy = when_utc.timetuple().tm_yday
+    hour = when_utc.hour + when_utc.minute / 60
+    g = 2 * math.pi / 365 * (doy - 1 + (hour - 12) / 24)
+    decl = (0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g)
+            + 0.000907 * math.sin(2 * g) - 0.002697 * math.cos(3 * g) + 0.00148 * math.sin(3 * g))
+    eqt = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g)
+                    - 0.014615 * math.cos(2 * g) - 0.040849 * math.sin(2 * g))
+    ha = math.radians((hour * 60 + eqt + 4 * lon) / 4 - 180)
+    la = math.radians(lat)
+    cosz = math.sin(la) * math.sin(decl) + math.cos(la) * math.cos(decl) * math.cos(ha)
+    return math.degrees(math.asin(max(-1.0, min(1.0, cosz))))
+
+
+def light_at(date_iso, hhmm):
+    """noc / somrak / dan ob uri nivoja (lokalni čas)."""
+    try:
+        local = datetime.datetime.fromisoformat(f"{date_iso}T{hhmm}").replace(tzinfo=ZoneInfo("Europe/Ljubljana"))
+    except ValueError:
+        return "dan"
+    alt = sun_altitude(local.astimezone(datetime.timezone.utc))
+    return "noc" if alt < -6 else "somrak" if alt < 3 else "dan"
+
+
+def snowpack_at_z(data, z):
+    """Snežna odeja (cm) na višini z -- linearno med pasovi winter_engine.py."""
+    bands = sorted(((b["elevation_m"], b.get("depth_cm") or 0)
+                    for b in ((data.get("snowpack") or {}).get("by_elevation") or [])), key=lambda x: x[0])
+    if not bands:
+        return 0.0
+    if z <= bands[0][0]:
+        return bands[0][1]
+    for (z0, d0), (z1, d1) in zip(bands, bands[1:]):
+        if z <= z1:
+            return d0 + (d1 - d0) * (z - z0) / (z1 - z0)
+    return bands[-1][1]
 
 
 def pick_hours(weather, drsi, today_iso):
@@ -125,7 +168,13 @@ def build_level(data, drsi, today):
         snow3 = e.get("snow_cm_3h") if t <= 1.0 else 0
         road = road_row(res[0] if res else None, e.get("precip_mm_3h"), snow3, t)
         surf, led = ROAD_TO_SURF.get(road["value"], ("suho", 0.0))
+        # Padavine v uri nivoja: sneg, kjer je dovolj mraz (isto pravilo kot
+        # sneg na cesti zgoraj), sicer dež. Samo za prikaz (delci na zaslonu).
+        pada = None
+        if (e.get("precip_mm") or 0) >= PADA_MM:
+            pada = "sneg" if t <= 1.0 else "dez"
         odseki.append({"od_km": km, "z_od": round(z0), "z_do": round(z1), "t": round(t, 1),
+                       "pada": pada, "odeja": snowpack_at_z(data, z) >= 1,
                        "povrsina": surf, "led_delez": led,
                        "mokro": (e.get("precip_mm_3h") or 0) >= 0.2,
                        "megla": bool(fog_top and z < fog_top)})
@@ -135,8 +184,11 @@ def build_level(data, drsi, today):
     gust = round(gust) if gust is not None and gust >= GUST_MIN_KMH else None
     snowpack = ((data.get("snowpack") or {}).get("depth_cm") or {}).get("900")
     vrh = next(o for o in odseki if o["od_km"] == 11)
+    date_ev = ev.get("date") or today_iso
     return {
         "datum": today_iso,
+        "svetloba": light_at(date_ev, ev["time"]),
+        "padavine_mm": e.get("precip_mm") or 0,
         "termin": key, "termin_txt": label,
         "ura": ev["time"],
         "t_vrh": t_pass,
