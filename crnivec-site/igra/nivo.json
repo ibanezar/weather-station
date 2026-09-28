@@ -1,0 +1,265 @@
+{
+ "datum": "2026-09-28",
+ "termin": "popoldne",
+ "termin_txt": "14:00–16:00",
+ "ura": "16:00",
+ "t_vrh": 17.1,
+ "vozisce": "suho vozišče",
+ "odeja_cm": 0,
+ "megla_do_m": null,
+ "sunki_kmh": null,
+ "odseki": [
+  {
+   "od_km": 0,
+   "z_od": 440,
+   "z_do": 460,
+   "t": 20.0,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 1,
+   "z_od": 460,
+   "z_do": 480,
+   "t": 19.9,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 2,
+   "z_od": 480,
+   "z_do": 500,
+   "t": 19.8,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 3,
+   "z_od": 500,
+   "z_do": 520,
+   "t": 19.6,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 4,
+   "z_od": 520,
+   "z_do": 560,
+   "t": 19.5,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 5,
+   "z_od": 560,
+   "z_do": 600,
+   "t": 19.2,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 6,
+   "z_od": 600,
+   "z_do": 640,
+   "t": 18.9,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 7,
+   "z_od": 640,
+   "z_do": 680,
+   "t": 18.7,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 8,
+   "z_od": 680,
+   "z_do": 743,
+   "t": 18.3,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 9,
+   "z_od": 743,
+   "z_do": 807,
+   "t": 17.9,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 10,
+   "z_od": 807,
+   "z_do": 870,
+   "t": 17.5,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 11,
+   "z_od": 870,
+   "z_do": 876,
+   "t": 17.3,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 12,
+   "z_od": 876,
+   "z_do": 824,
+   "t": 17.4,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 13,
+   "z_od": 824,
+   "z_do": 772,
+   "t": 17.8,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 14,
+   "z_od": 772,
+   "z_do": 720,
+   "t": 18.1,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 15,
+   "z_od": 720,
+   "z_do": 676,
+   "t": 18.4,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 16,
+   "z_od": 676,
+   "z_do": 632,
+   "t": 18.7,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 17,
+   "z_od": 632,
+   "z_do": 588,
+   "t": 19.0,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 18,
+   "z_od": 588,
+   "z_do": 544,
+   "t": 19.3,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 19,
+   "z_od": 544,
+   "z_do": 500,
+   "t": 19.6,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 20,
+   "z_od": 500,
+   "z_do": 484,
+   "t": 19.8,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 21,
+   "z_od": 484,
+   "z_do": 468,
+   "t": 19.9,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 22,
+   "z_od": 468,
+   "z_do": 452,
+   "t": 20.0,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 23,
+   "z_od": 452,
+   "z_do": 436,
+   "t": 20.1,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  },
+  {
+   "od_km": 24,
+   "z_od": 436,
+   "z_do": 428,
+   "t": 20.2,
+   "povrsina": "suho",
+   "led_delez": 0.0,
+   "mokro": false,
+   "megla": false
+  }
+ ],
+ "opis": "Današnje popoldne (14:00–16:00): na vrhu 17 °C, suho vozišče.",
+ "generated_at": "2026-09-28T09:14:27.612930+00:00"
+}
