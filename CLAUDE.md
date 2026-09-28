@@ -755,8 +755,23 @@ z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
   plasti (`tema()`), sunki nosijo listje (`veter()`). Pokrajina
   (`postaviPokrajino()`): listavci spodaj, smreke nad `Z_GOZD` (620 m), hiše ob
   Stahovici in Gornjem Gradu, kilometrski kamni.
-- Proga je stilizirana (ovinki iz fiksnega semena), prava sta dolžina 24,5 km in
-  višinski profil (`PROFIL`, približek). Led je v zaplatah, sejanih iz datuma.
+- **Proga je prava R1-225 iz OpenStreetMap** (`crnivec-igra/proga.json`, sestavi
+  jo ENKRATNI `tools/build_crnivec_igra_proga.py`: Overpass → najkrajša pot
+  Stahovica–Gornji Grad (18,3 km) → višine Open-Meteo Elevation → proga igre).
+  Stisnjena je na 3,4 km **neenakomerno**: ostri ovinki obdržijo pravi kot in
+  ostanejo skoraj v pravi velikosti (nobeden ožji od `K_GAME_MAX`, sicer ga volan
+  ne zmore), ravnine in blagi ovinki se stisnejo, blagim se del kota izgubi
+  (cesta ima 7700° zavojev — pri enakomernem stiskanju bi bila vsa proga en
+  ovinek). Iz iste datoteke pridejo dolžina in profil v generatorju, vrh
+  (`vrh_km`) in table naselij (OSM `place` ob cesti, ne imena odsekov — ta so
+  naslovna). Igra dobi progo vdelano (`#cv-proga`), `kmNa()`/`sNaKm()` pretvarjata
+  metre igre v kilometre ceste. Navedba »© OpenStreetMap« je pod igro (ODbL). Ob
+  nedosegljivem Open-Meteo sprejme skript `--visine FILE`. Led je v zaplatah,
+  sejanih iz datuma.
+- Zvok (Web Audio, sestavljen sproti, privzeto izklopljen, `crn-igra-zvok`):
+  motor, »TAK-TAK« verig, zdrs, jarek, cilj. Slika rezultata za deljenje
+  (`slikaRezultata()`, 1080×1080 s profilom) gre prek `navigator.share` z
+  datoteko ali se prenese.
 - `crnivec-igra/voznja.js` in `voznja.css` sta **ročno pisana**; generator ju
   skopira v `crnivec-site/igra/` (skupaj z `index.html` in `nivo.json`).
   Model je brez DOM-a in ga preverja `tools/test_crnivec_igra.mjs` (vozniki-
@@ -766,8 +781,8 @@ z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
 - Lestvica: `worker.js` `/crnivec/igra/rezultat` in `/crnivec/igra/lestvica`
   (`crnivec_igra:dan:<datum>` v `COUNTER_KV`, najboljši čas igralca, TTL 60 dni).
   Preveri samo datum (danes) in spodnjo mejo časa `CRN_IGRA_MIN_S` — namerna
-  podvojitev `L / VMAX` iz `voznja.js`; **če spremeniš dolžino proge ali VMAX,
-  popravi tudi tam**. Kazni (8 s jarek, 15 s verige) navaja FAQ strani.
+  podvojitev `L / VMAX` iz `voznja.js` (3400 m / 25 m/s); **če spremeniš dolžino
+  proge (`GAME_LEN_TARGET`) ali VMAX, popravi tudi tam**. Kazni (8 s jarek, 15 s verige) navaja FAQ strani.
 - Stran je v sitemapu in `llms.txt` crnivec.si ter v `CRN_PAGES` v `geo_audit.py`.
   Z glavne strani vodi nanjo kartica ob lestvici poročevalcev (ne v prvem zaslonu).
 

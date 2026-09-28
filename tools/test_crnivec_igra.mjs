@@ -18,6 +18,8 @@ import fs from 'node:fs';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const M = require(path.join(ROOT, 'crnivec-igra', 'voznja.js'));
+const PROGA = JSON.parse(fs.readFileSync(path.join(ROOT, 'crnivec-igra', 'proga.json'), 'utf8'));
+M.nastaviProgo(PROGA);
 
 let failed = 0;
 function ok(name, cond, detail) {
@@ -26,8 +28,8 @@ function ok(name, cond, detail) {
   console.log(`  ✗ ${name}${detail ? '  — ' + detail : ''}`);
 }
 
-// Sintetični nivo: vsi odseki z isto površino (profil je približek pravega).
-const PROFIL = [[0, 430], [11.5, 902], [24.5, 428]];
+// Sintetični nivo: vsi odseki z isto površino, višine iz pravega profila.
+const PROFIL = PROGA.profil;
 function zKm(km) {
   for (let i = 1; i < PROFIL.length; i++) {
     const [k0, z0] = PROFIL[i - 1], [k1, z1] = PROFIL[i];
@@ -37,8 +39,8 @@ function zKm(km) {
 }
 function nivo(povrsina, extra = {}) {
   const odseki = [];
-  for (let km = 0; km < 24.5; km++) {
-    odseki.push({ od_km: km, z_od: zKm(km), z_do: zKm(Math.min(24.5, km + 1)), povrsina,
+  for (let km = 0; km < M.L_REAL_KM; km++) {
+    odseki.push({ od_km: km, z_od: zKm(km), z_do: zKm(Math.min(M.L_REAL_KM, km + 1)), povrsina,
       led_delez: povrsina === 'led' ? 1 : 0, megla: false, ...(extra.odsek || {}) });
   }
   return { datum: '2026-01-15', odseki, sunki_kmh: extra.sunki_kmh || null };
@@ -74,9 +76,15 @@ function bot(sim, { mu, rezerva = 0.8, verige = false } = {}) {
 console.log('Proga');
 const t1 = M.buildTrack(), t2 = M.buildTrack();
 ok('proga je deterministična', t1.k.every((v, i) => v === t2.k[i]));
-ok('dolžina proge ustreza 24,5 km', t1.L === Math.round(24500 / M.SCALE));
+ok('proga je iz proga.json (prava R1-225)', t1.L === PROGA.k.length - 1 && M.L_REAL_KM > 15);
+ok('kilometrina narašča od 0 do konca ceste',
+  M.kmNa(0) < 0.01 && Math.abs(M.kmNa(M.L) - M.L_REAL_KM) < 0.05 && PROGA.km.every((v, i) => !i || v >= PROGA.km[i - 1]));
 const tight = Array.from(t1.k).filter((k) => Math.abs(k) > 1 / 25).length;
-ok('pod vrhom so serpentine', tight > 200, `metrov serpentin: ${tight}`);
+ok('proga ima serpentine', tight > 200, `metrov ostrih ovinkov: ${tight}`);
+const najozji = Math.max(...Array.from(t1.k).map(Math.abs));
+ok('noben ovinek ni ožji, kot ga zmore volan', najozji < M.KMAX * 0.9, `k=${najozji.toFixed(3)}`);
+const sv = M.sNaKm(PROGA.vrh_km);
+ok('vrh je na pravem kilometru proge', Math.abs(M.kmNa(sv) - PROGA.vrh_km) < 0.05);
 
 console.log('Površine');
 const mix = nivo('led', { odsek: { led_delez: 0.3 } });
