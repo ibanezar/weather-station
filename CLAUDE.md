@@ -743,6 +743,14 @@ z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
   odbojne ograje pri ovinkih s polmerom pod 30 m (`najdiOvinke()`), table
   Stahovica / ČRNIVEC 902 m / Gornji Grad, sledi zdrsa, pršec in iskrice
   (`ucinki()`), zavorne luči, senca in tresenje ob jarku.
+- Vreme in pokrajina na zaslonu (samo prikaz): nivo nosi še `svetloba`
+  (noc/somrak/dan iz višine sonca ob uri nivoja, `sun_altitude()`),
+  `padavine_mm` in po odsekih `pada` (dez/sneg po istem pravilu kot sneg na
+  cesti, t ≤ 1 °C) in `odeja` (snežna odeja na višini odseka iz
+  `snowpack.by_elevation`). Ponoči/v somraku žarometi izrežejo stožec iz temne
+  plasti (`tema()`), sunki nosijo listje (`veter()`). Pokrajina
+  (`postaviPokrajino()`): listavci spodaj, smreke nad `Z_GOZD` (620 m), hiše ob
+  Stahovici in Gornjem Gradu, kilometrski kamni.
 - Proga je stilizirana (ovinki iz fiksnega semena), prava sta dolžina 24,5 km in
   višinski profil (`PROFIL`, približek). Led je v zaplatah, sejanih iz datuma.
 - `crnivec-igra/voznja.js` in `voznja.css` sta **ročno pisana**; generator ju

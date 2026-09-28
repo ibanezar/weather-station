@@ -249,7 +249,7 @@
     VERIGE_S: VERIGE_S, BRAKE: BRAKE, KMAX: KMAX,
     buildTrack: buildTrack, buildSurface: buildSurface, makeSim: makeSim, step: step,
     menjajVerige: menjajVerige, koncniCas: koncniCas, surfAt: surfAt, muAt: muAt, kAt: kAt,
-    zNa: zNa, meglaNa: meglaNa, odsekNa: odsekNa, varnaHitrost: varnaHitrost, mulberry32: mulberry32
+    zNa: zNa, meglaNa: meglaNa, sunek: sunek, odsekNa: odsekNa, varnaHitrost: varnaHitrost, mulberry32: mulberry32
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = Model;
   global.VoznjaModel = Model;
@@ -282,7 +282,7 @@
   var keys = {}, touch = { plin: 0, zavora: 0, levo: 0, desno: 0 };
   var canvas, ctx, W = 360, H = 480, dpr = 1;
   var drevesa = null, ovinki = [], table = [], profil = null;
-  var sledi = [], delci = [];
+  var sledi = [], delci = [], kaplje = [], listi = [], hise = [], kamni = [], temaC = null;
   var S_VRH = Math.round(11.5 * 1000 / SCALE);   // vrh prelaza na progi (m igre)
   var PROFIL_Y = 70, PROFIL_H = 34, Z_MIN = 400, Z_MAX = 930;
 
@@ -302,20 +302,55 @@
     draw();
   }
 
-  // Drevesa ob cesti: ena postavitev za cel dan (seme proge), da se ob
-  // ponovni vožnji ne premikajo.
-  function postaviDrevesa() {
-    var rnd = mulberry32(4242), out = [];
-    for (var s = 0; s < L; s += 6) {
-      for (var j = 0; j < 2; j++) {
-        if (rnd() < 0.55) continue;
-        var side = rnd() < 0.5 ? -1 : 1;
-        var off = side * (HALF + 3 + rnd() * 22);
-        var h = track.h[s];
-        out.push({ x: track.x[s] - Math.cos(h) * off, y: track.y[s] + Math.sin(h) * off, r: 1.4 + rnd() * 1.6, s: s });
+  // Pokrajina po višini: ena postavitev za cel dan (seme proge), da se ob
+  // ponovni vožnji ne premika. Spodaj travniki z listavci, od ~620 m smrekov
+  // gozd (gostejši), ob Stahovici in Gornjem Gradu hiše, vsak km kamen.
+  // Snežna odeja (odsek.odeja iz nivoja) pobeli tla in krošnje.
+  var Z_GOZD = 620;
+  function vasNa(km) { return km < 1.3 || km > L_REAL_KM - 1.3; }
+  function odejaNa(s) {
+    var o = odsekNa(level, s);
+    return o && o.odeja != null ? !!o.odeja : !!(level && level.odeja_cm >= 1);
+  }
+  function postaviPokrajino() {
+    var rnd = mulberry32(4242), out = [], hs = [];
+    for (var s = 0; s < L; s += 5) {
+      var z = zNa(level, s), km = s * SCALE / 1000, vas = vasNa(km);
+      var gozd = z >= Z_GOZD;
+      var h = track.h[s];
+      for (var j = 0; j < 3; j++) {
+        var r0 = rnd(), side = rnd() < 0.5 ? -1 : 1, dist = HALF + 3 + rnd() * 24;
+        // Hiša samo ob ravnem delu, sicer jo ovinek »povozi«.
+        if (vas && j === 0 && s % 15 === 0 && dist < 18 && Math.abs(track.k[s]) < 1 / 80) {
+          hs.push({ s: s, side: side, off: side * (OFF + 7 + rnd() * 7), w: 5 + rnd() * 3, l: 7 + rnd() * 4,
+            strop: ['#b45309', '#9a3412', '#7c2d12', '#57534e'][Math.floor(rnd() * 4)] });
+          continue;
+        }
+        if (r0 < (gozd ? 0.25 : vas ? 0.85 : 0.6)) continue;
+        var off = side * dist;
+        out.push({ x: track.x[s] - Math.cos(h) * off, y: track.y[s] + Math.sin(h) * off,
+          r: (gozd ? 1.6 : 1.5) + rnd() * 1.6, s: s, smreka: gozd, sneg: false });
       }
     }
+    // Sneg na krošnjah po odsekih (odvisen od nivoja, ne od semena)
+    out.forEach(function (d) { d.sneg = odejaNa(d.s); });
     drevesa = out;
+    hise = hs.map(function (x) {
+      var t = tocka(x.s, x.off);
+      return { x: t.x, y: t.y, a: -track.h[x.s], w: x.w, l: x.l, strop: x.strop, s: x.s };
+    });
+    kamni = [];
+    for (var k = 1; k < L_REAL_KM; k++) kamni.push({ s: Math.round(k * 1000 / SCALE), km: k });
+  }
+
+  // Barva tal po višini (in snegu): dolina svetlejši travnik, gozd temnejši.
+  function tlaBarva(s) {
+    if (odejaNa(s)) return '#e2e8f0';
+    var z = zNa(level, s);
+    if (vasNa(s * SCALE / 1000)) return '#6fa82a';
+    if (z < Z_GOZD - 60) return '#65a30d';
+    if (z < Z_GOZD) return '#4d7c0f';
+    return '#3f6212';
   }
 
   // Točka na progi: s (m igre) in bočni odmik (pozitiven = levo od sredine).
@@ -461,13 +496,13 @@
     ui.sledL = drsa ? zadaj : null;
 
     if (sim.v > 5 && (p === 'mokro' || p === 'sneg' || p === 'led')) {
-      var n = p === 'led' ? (Math.random() < 0.25 ? 1 : 0) : Math.min(3, Math.round(sim.v / 8));
+      var n = p === 'led' ? (Math.random() < 0.25 ? 1 : 0) : (Math.random() < Math.min(0.9, sim.v / 25) ? 2 : 0);
       for (var i = 0; i < n; i++) {
         var z = zadaj[i % 2], str = (Math.random() - 0.5) * 2;
         delci.push({
           x: z.x, y: z.y,
           vx: -a.fx * sim.v * 0.25 + a.rx * str * 1.5, vy: -a.fy * sim.v * 0.25 + a.ry * str * 1.5,
-          t: 0, life: p === 'led' ? 0.35 : 0.5, r: p === 'led' ? 0.18 : 0.25 + Math.random() * 0.25, p: p
+          t: 0, life: p === 'led' ? 0.35 : 0.35, r: p === 'led' ? 0.18 : 0.2 + Math.random() * 0.2, p: p
         });
       }
     }
@@ -477,6 +512,50 @@
       if (d.t > d.life) delci.splice(j, 1);
     }
     if (delci.length > 200) delci.splice(0, delci.length - 200);
+    padavine(dt);
+    veter(dt);
+  }
+
+  // Dež ali sneg na zaslonu, samo v odsekih, kjer v uri nivoja pada. Gostota
+  // po količini padavin. Delci so v pikslih zaslona (ne v svetu); vožnja jih
+  // pospeši navzdol.
+  function novaKaplja(tip, kjerkoli) {
+    return { tip: tip, x: Math.random() * (W + 80) - 40, y: kjerkoli ? Math.random() * H : -10 - Math.random() * 40,
+      vy: tip === 'sneg' ? 40 + Math.random() * 60 : 650 + Math.random() * 250,
+      vx: tip === 'sneg' ? 0 : -70, f: Math.random() * 6.28, r: 1.2 + Math.random() * 1.8 };
+  }
+  function padavine(dt) {
+    var o = odsekNa(level, sim.s), tip = o && o.pada;
+    var cilj = tip ? Math.min(170, Math.round(50 + (level.padavine_mm || 0) * 80)) : 0;
+    while (kaplje.length < cilj) kaplje.push(novaKaplja(tip, true));
+    var hitro = sim.v * PX * 0.9;
+    for (var i = kaplje.length - 1; i >= 0; i--) {
+      var k = kaplje[i];
+      k.f += dt * 2;
+      k.y += (k.vy + hitro) * dt;
+      k.x += (k.tip === 'sneg' ? Math.sin(k.f) * 25 : k.vx) * dt;
+      if (k.y > H + 10 || k.tip !== tip) {
+        if (kaplje.length > cilj || k.tip !== tip) kaplje.splice(i, 1);
+        else kaplje[i] = novaKaplja(tip, false);
+      }
+    }
+  }
+
+  // Sunek: čez zaslon v smeri vetra nese listje (ali sneg, kadar leži), da je
+  // vidno, zakaj avto zanaša. g > 0 potiska proti +d (levo na zaslonu).
+  function veter(dt) {
+    var g = sunek(sim), sneg = odejaNa(sim.s);
+    if (Math.abs(g) > 0.15 && Math.random() < Math.min(1, Math.abs(g) * 1.5)) {
+      var smer = g > 0 ? -1 : 1;
+      listi.push({ x: smer < 0 ? W + 10 : -10, y: Math.random() * H * 0.9 + 40, vx: smer * (180 + Math.abs(g) * 260),
+        vy: (Math.random() - 0.3) * 40, f: Math.random() * 6.28, t: 0,
+        barva: sneg ? '#f8fafc' : ['#d97706', '#b45309', '#a16207', '#65a30d'][Math.floor(Math.random() * 4)] });
+    }
+    for (var i = listi.length - 1; i >= 0; i--) {
+      var l = listi[i];
+      l.t += dt; l.f += dt * 9; l.x += l.vx * dt; l.y += (l.vy + sim.v * PX * 0.9) * dt;
+      if (l.x < -20 || l.x > W + 20 || l.y > H + 20 || l.t > 4) listi.splice(i, 1);
+    }
   }
 
   function sporoci(t) { ui.sporocilo = t; ui.sporT = 1.6; }
@@ -484,10 +563,8 @@
   function draw() {
     if (!ctx || !track) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var odeja = level && level.odeja_cm >= 1;
-    ctx.fillStyle = odeja ? '#e5e7eb' : '#4d7c0f';
-    ctx.fillRect(0, 0, W, H);
     if (!sim) return;
+    var odeja = odejaNa(sim.s);
 
     var si = Math.max(0, Math.min(L, Math.floor(sim.s)));
     var hx = track.x[si], hy = track.y[si], hh = track.h[si];
@@ -498,20 +575,46 @@
     // avto vedno pokončen in se je vrtel svet). ui.camH se gladi v kamera().
     var camH = ui.camH == null ? hh : ui.camH;
 
+    var shx = ui.shake > 0 ? (Math.random() - 0.5) * ui.shake * 24 : 0;
+    var shy = ui.shake > 0 ? (Math.random() - 0.5) * ui.shake * 24 : 0;
+    ctx.fillStyle = tlaBarva(sim.s);
+    ctx.fillRect(0, 0, W, H);
     ctx.save();
-    ctx.translate(W / 2, H * 0.74);
-    if (ui.shake > 0) ctx.translate((Math.random() - 0.5) * ui.shake * 24, (Math.random() - 0.5) * ui.shake * 24);
-    ctx.scale(PX, PX);
-    ctx.rotate(camH);
-    ctx.translate(-hx, -hy);
+    svetT(ctx, camH, hx, hy, shx, shy);
 
     var od = Math.max(0, si - 40), doS = Math.min(L, si + Math.ceil(H / PX) + 30);
-    // Travnik/sneg ob cesti in drevesa
-    ctx.fillStyle = odeja ? '#94a3b8' : '#166534';
+    // Hiše (Stahovica, Gornji Grad)
+    for (var hI = 0; hI < hise.length; hI++) {
+      var hs = hise[hI];
+      if (hs.s < od - 30 || hs.s > doS + 30) continue;
+      ctx.save(); ctx.translate(hs.x, hs.y); ctx.rotate(hs.a);
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(-hs.w / 2 + 0.6, -hs.l / 2 + 0.8, hs.w, hs.l);
+      ctx.fillStyle = odejaNa(hs.s) ? '#f1f5f9' : hs.strop; ctx.strokeStyle = '#111'; ctx.lineWidth = 0.22;
+      ctx.fillRect(-hs.w / 2, -hs.l / 2, hs.w, hs.l); ctx.strokeRect(-hs.w / 2, -hs.l / 2, hs.w, hs.l);
+      ctx.beginPath(); ctx.moveTo(0, -hs.l / 2); ctx.lineTo(0, hs.l / 2); ctx.stroke();
+      ctx.restore();
+    }
+    // Drevesa: listavci (okrogli) spodaj, smreke (zvezdaste) v gozdu
     for (var i = 0; i < drevesa.length; i++) {
       var dv = drevesa[i];
       if (dv.s < od - 30 || dv.s > doS + 30) continue;
-      ctx.beginPath(); ctx.arc(dv.x, dv.y, dv.r, 0, 6.283); ctx.fill();
+      if (dv.smreka) {
+        ctx.fillStyle = dv.sneg ? '#64748b' : '#14532d';
+        ctx.beginPath();
+        for (var kI = 0; kI < 16; kI++) {
+          var rr0 = kI % 2 ? dv.r * 0.55 : dv.r, an = kI * Math.PI / 8;
+          if (kI) ctx.lineTo(dv.x + Math.cos(an) * rr0, dv.y + Math.sin(an) * rr0);
+          else ctx.moveTo(dv.x + rr0, dv.y);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = dv.sneg ? '#f8fafc' : '#052e16';
+        ctx.beginPath(); ctx.arc(dv.x, dv.y, dv.r * (dv.sneg ? 0.45 : 0.22), 0, 6.283); ctx.fill();
+      } else {
+        ctx.fillStyle = dv.sneg ? '#94a3b8' : '#166534';
+        ctx.beginPath(); ctx.arc(dv.x, dv.y, dv.r, 0, 6.283); ctx.fill();
+        ctx.fillStyle = dv.sneg ? '#f8fafc' : 'rgba(74,222,128,.35)';
+        ctx.beginPath(); ctx.arc(dv.x - dv.r * 0.3, dv.y - dv.r * 0.3, dv.r * 0.45, 0, 6.283); ctx.fill();
+      }
     }
     // Bankina
     pot(od, doS);
@@ -561,6 +664,12 @@
       var tz = tocka(sz, -(OFF + 1.8));
       pokoncno(tz.x, tz.y, camH, function () { znakOvinek(ovinki[o2].smer); });
     }
+    for (var kk = 0; kk < kamni.length; kk++) {
+      var km0 = kamni[kk];
+      if (km0.s < od - 10 || km0.s > doS) continue;
+      var tk = tocka(km0.s, -(OFF + 0.9));
+      pokoncno(tk.x, tk.y, camH, function () { kamen(km0.km); });
+    }
     for (var t = 0; t < table.length; t++) {
       var tb = table[t];
       if (tb.s < od - 10 || tb.s > doS) continue;
@@ -592,6 +701,8 @@
     ctx.restore();
     ctx.restore();
 
+    tema(camH, hx, hy, shx, shy);
+
     // Megla: vidljivost pade na ~vis metrov pred avtom
     if (meglaNa(level, sim.s)) {
       var yCar = H * 0.74, vis = 24 * PX;
@@ -603,7 +714,84 @@
       ctx.fillStyle = 'rgba(226,232,240,.25)'; ctx.fillRect(0, yCar, W, H - yCar);
     }
 
+    // Padavine in listje v vetru (zaslon)
+    for (var pI = 0; pI < kaplje.length; pI++) {
+      var kp = kaplje[pI];
+      if (kp.tip === 'sneg') {
+        ctx.fillStyle = 'rgba(255,255,255,.9)';
+        ctx.beginPath(); ctx.arc(kp.x, kp.y, kp.r, 0, 6.283); ctx.fill();
+      } else {
+        ctx.strokeStyle = 'rgba(191,219,254,.6)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(kp.x, kp.y); ctx.lineTo(kp.x + 2, kp.y - 14); ctx.stroke();
+      }
+    }
+    for (var lI = 0; lI < listi.length; lI++) {
+      var li = listi[lI];
+      ctx.save(); ctx.translate(li.x, li.y); ctx.rotate(li.f);
+      ctx.fillStyle = li.barva; ctx.beginPath(); ctx.ellipse(0, 0, 4, 2, 0, 0, 6.283); ctx.fill();
+      ctx.restore();
+    }
+
     hud();
+  }
+
+  function svetT(c, camH, hx, hy, shx, shy) {
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.translate(W / 2 + (shx || 0), H * 0.74 + (shy || 0));
+    c.scale(PX, PX);
+    c.rotate(camH);
+    c.translate(-hx, -hy);
+  }
+
+  // Tema (noč, somrak) iz level.svetloba (višina sonca ob uri nivoja): temna
+  // plast, iz katere žarometi izrežejo stožec pred avtom.
+  function tema(camH, hx, hy, shx, shy) {
+    var sv = level && level.svetloba;
+    var moc = sv === 'noc' ? 0.74 : sv === 'somrak' ? 0.4 : 0;
+    if (!moc) return;
+    if (!temaC || temaC.width !== canvas.width || temaC.height !== canvas.height) {
+      temaC = document.createElement('canvas');
+      temaC.width = canvas.width; temaC.height = canvas.height;
+    }
+    var t = temaC.getContext('2d');
+    t.setTransform(1, 0, 0, 1, 0, 0);
+    t.globalCompositeOperation = 'source-over';
+    t.clearRect(0, 0, temaC.width, temaC.height);
+    t.fillStyle = 'rgba(8,12,32,' + moc + ')';
+    t.fillRect(0, 0, temaC.width, temaC.height);
+    t.globalCompositeOperation = 'destination-out';
+    svetT(t, camH, hx, hy, shx, shy);
+    var a = legaAvta();
+    var fx = a.x + a.fx * 2.1, fy = a.y + a.fy * 2.1, dol = 34;
+    var gr = t.createRadialGradient(fx, fy, 0, fx, fy, dol);
+    gr.addColorStop(0, 'rgba(0,0,0,.95)'); gr.addColorStop(0.6, 'rgba(0,0,0,.6)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    t.fillStyle = gr;
+    t.beginPath();
+    t.moveTo(fx - a.rx * 0.9, fy - a.ry * 0.9);
+    t.lineTo(fx + a.fx * dol - a.rx * 11, fy + a.fy * dol - a.ry * 11);
+    t.lineTo(fx + a.fx * dol + a.rx * 11, fy + a.fy * dol + a.ry * 11);
+    t.lineTo(fx + a.rx * 0.9, fy + a.ry * 0.9);
+    t.closePath(); t.fill();
+    var gr2 = t.createRadialGradient(a.x, a.y, 0, a.x, a.y, 4.5);
+    gr2.addColorStop(0, 'rgba(0,0,0,.55)'); gr2.addColorStop(1, 'rgba(0,0,0,0)');
+    t.fillStyle = gr2; t.beginPath(); t.arc(a.x, a.y, 4.5, 0, 6.283); t.fill();
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(temaC, 0, 0);
+    ctx.restore();
+    if (sv === 'somrak') {
+      var g2 = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+      g2.addColorStop(0, 'rgba(251,146,60,.22)'); g2.addColorStop(1, 'rgba(251,146,60,0)');
+      ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H * 0.5);
+    }
+  }
+
+  function kamen(km) {
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+    ctx.fillRect(-6, -14, 12, 14); ctx.strokeRect(-6, -14, 12, 14);
+    ctx.fillStyle = '#dc2626'; ctx.fillRect(-6, -14, 12, 4);
+    ctx.fillStyle = '#111'; ctx.font = '800 8px Inter,system-ui,sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(km), 0, -5);
   }
 
   // Stripovski avto (v metrih, sprednji del proti -y).
@@ -736,7 +924,7 @@
   function zacni(verige) {
     sim = makeSim(level, { track: track, verige: verige });
     ui.faza = 'voznja'; ui.zadnji = 0; ui.acc = 0; ui.sporT = 0; ui.camH = null;
-    ui.shake = 0; ui.vrh = false; ui.sledL = null; ui.zavora = 0; sledi = []; delci = [];
+    ui.shake = 0; ui.vrh = false; ui.sledL = null; ui.zavora = 0; sledi = []; delci = []; kaplje = []; listi = [];
     el('cv-overlay').hidden = true;
     el('cv-chain').textContent = verige ? '⛓ Snemi verige' : '⛓ Natakni verige';
     canvas.focus();
@@ -924,7 +1112,7 @@
     if (level.zastarel && el('cv-stale')) el('cv-stale').hidden = false;
     ctx = canvas.getContext('2d');
     track = buildTrack();
-    postaviDrevesa();
+    postaviPokrajino();
     najdiOvinke();
     vezi();
     resize();
