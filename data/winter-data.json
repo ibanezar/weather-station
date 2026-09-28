@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-28T09:26:59.303998+00:00",
-  "generated_at_local": "28. 9. 2026 ob 11:26",
+  "generated_at": "2026-09-28T09:32:24.378931+00:00",
+  "generated_at_local": "28. 9. 2026 ob 11:32",
   "station": "IREICA1",
   "snow_line": {
     "current_line_m": 3750,
@@ -109,7 +109,7 @@
       {
         "date": "2026-10-03",
         "level": "visoko",
-        "inversion_strength_c": 3.6
+        "inversion_strength_c": 3.5
       },
       {
         "date": "2026-10-04",
@@ -657,9 +657,9 @@
             4.51,
             4.66,
             3.86,
-            2.35,
-            0.88,
-            -0.19,
+            2.34,
+            0.87,
+            -0.2,
             -0.88,
             -1.12,
             -1.07,
