@@ -218,6 +218,11 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 /* Kartice pod glavo (preklop pogleda, vprašanje ob prvem obisku) imajo
    backdrop-filter in s tem svoj sloj, ki bi se izrisal čez odprt meni. */
 header{position:relative;z-index:30}
+/* Odprt meni mora še nad .tab-nav-wrap (z-index 100): ko kartice preklopa
+   pogleda ni, vrstica zavihkov stoji tik pod glavo in je prekrila spodnji del
+   plošče. Samo med odprtim menijem — sicer bi glava na nizkem telefonu
+   prekrila visoka menija zavihkov (Kraji, Podatki), ki segata do vrha. */
+header:has(.qn-drop[open]){z-index:110}
 [data-theme="light"] .qn-drop-menu{background:#fff}
 .qn-drop-sep{height:1px;margin:.1rem .5rem;background:var(--card-border)}
 .qn-drop summary .qn-burger{font-size:.9rem;line-height:1}
