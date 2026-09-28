@@ -3866,6 +3866,57 @@ export default {
           { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=120" } });
       }
 
+      // ── Lestvica igre »Čez Črnivec« (crnivec.si/igra/) ─────────
+      // Isti vzorec kot /igra/rezultat zgoraj: igra je klientska simulacija,
+      // strežnik preveri samo, da je rezultat za DANAŠNJI nivo in da čas ni
+      // krajši od najkrajšega mogočega. CRN_IGRA_MIN_S je namerna PODVOJITEV
+      // L / VMAX iz crnivec-igra/voznja.js (3063 m / 25 m/s ≈ 122,5 s, z
+      // rezervo); če spremeniš dolžino proge ali največjo hitrost, popravi
+      // tudi tu. Stran (FAQ) odkrito pove, da lestvica ni zaščitena.
+      // POST /crnivec/igra/rezultat?datum=YYYY-MM-DD&cas=<s>&verige=0|1&igralec=<id>&ime=
+      // GET  /crnivec/igra/lestvica → { datum, lestvica:[{ime,cas,verige},…] } (top 10, danes)
+      const CRN_IGRA_MIN_S = 120;
+      if (path === "/crnivec/igra/rezultat" && request.method === "POST") {
+        const kv = env?.COUNTER_KV;
+        const hdr = { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" };
+        if (!kv) return new Response(JSON.stringify({ error: "lestvica trenutno ni na voljo" }), { status: 503, headers: hdr });
+        const p = url.searchParams;
+        const datum = p.get("datum") || "";
+        const igralec = p.get("igralec") || "";
+        const cas = Number(p.get("cas"));
+        if (datum !== _ljDatum()) {
+          return new Response(JSON.stringify({ error: "rezultat ni za današnji nivo" }), { status: 400, headers: hdr });
+        }
+        if (!/^[a-zA-Z0-9_-]{8,40}$/.test(igralec)) {
+          return new Response(JSON.stringify({ error: "neveljaven igralec" }), { status: 400, headers: hdr });
+        }
+        if (!isFinite(cas) || cas < CRN_IGRA_MIN_S || cas > 3600) {
+          return new Response(JSON.stringify({ error: "čas izven dovoljenega obsega" }), { status: 400, headers: hdr });
+        }
+        let ime = (p.get("ime") || "").trim().slice(0, 24);
+        if (!ime) ime = "Anonimni";
+        const casR = Math.round(cas * 10) / 10;
+        const kljuc = `crnivec_igra:dan:${datum}`;
+        let obstojeci = {};
+        try { obstojeci = JSON.parse(await kv.get(kljuc)) || {}; } catch (_) { obstojeci = {}; }
+        const prej = obstojeci[igralec];
+        if (!prej || casR < prej.cas) {
+          obstojeci[igralec] = { ime, cas: casR, verige: p.get("verige") === "1" };
+          await kv.put(kljuc, JSON.stringify(obstojeci), { expirationTtl: 60 * 86400 });
+        }
+        return new Response(JSON.stringify({ ok: true }), { headers: hdr });
+      }
+      if (path === "/crnivec/igra/lestvica") {
+        const kv = env?.COUNTER_KV;
+        const datum = _ljDatum();
+        let obj = {};
+        if (kv) { try { obj = JSON.parse(await kv.get(`crnivec_igra:dan:${datum}`)) || {}; } catch (_) { obj = {}; } }
+        const lestvica = Object.values(obj).sort((a, b) => a.cas - b.cas).slice(0, 10)
+          .map(r => ({ ime: r.ime, cas: r.cas, verige: !!r.verige }));
+        return new Response(JSON.stringify({ datum, lestvica }),
+          { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "s-maxage=60" } });
+      }
+
       // ── /ecowitt-history ──────────────────────────────────
       if (path === "/ecowitt-history") {
         const now   = new Date();

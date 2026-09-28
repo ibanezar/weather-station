@@ -108,7 +108,9 @@ OLD_PATH = "/crnivec/"
 BRAND_FILES = ("favicon.ico", "favicon.svg", "apple-touch-icon.png", "icon-192.png",
                "icon-512.png", "icon-maskable-512.png", "logo-crnivec.svg", "logo-crnivec.png")
 # /lipa/ je podstran na crnivec.si (glej build_lipa_body), zato ostane lokalna.
-CRN_LOCAL = {"/manifest.json", "/lipa/"} | {f"/{f}" for f in BRAND_FILES}
+# /igra/ je igra »Čez Črnivec« (tools/generate_crnivec_igra.py).
+CRN_LOCAL = ({"/manifest.json", "/lipa/", "/igra/", "/igra/voznja.js", "/igra/voznja.css"}
+             | {f"/{f}" for f in BRAND_FILES})
 # Isti ključ kot za meteorec.si (seo_smart_routine.INDEXNOW_KEY) -- IndexNow
 # zahteva, da je ključ na istem gostitelju, zato ga write_site_files() zapiše
 # tudi na crnivec.si. Ping pošlje zima-forecast.yml po objavi.
@@ -3771,6 +3773,13 @@ def build_body(data):
         <div id="crn-board-list" class="crn-board-list" style="margin-top:12px"></div>
       </section>
 
+      <section class="crn-panel crn-game crn-o6" aria-labelledby="crn-game-h">
+        <h2 class="crn-h2" id="crn-game-h">🎮 Igra: Čez Črnivec</h2>
+        <p class="crn-lead">Od Stahovice do Gornjega Grada v današnjih razmerah. Led, sneg in megla so iz
+        istega izračuna kot ta stran. Verige ali ne?</p>
+        <a class="crn-btn" href="/igra/">Zapelji se čez →</a>
+      </section>
+
       <div class="crn-stack crn-o7">
         <details class="crn-acc">
           <summary>ⓘ Kako nastane Meteorec indeks?</summary>
@@ -4151,6 +4160,7 @@ LLMS_TXT = f"""# Kako je čez Črnivec? (crnivec.si)
 
 - [Kako je čez Črnivec?]({CRN_SITE}/): glavni status (suho, pozor, verige, spolzko), seznam »Čez Črnivec zdaj«, spletna kamera DRSI, vreme po urah za naslednjih 6 ur, vreme za 7 dni (najnižja in najvišja temperatura, padavine, nov sneg, poledica po dnevih), termina za pot v službo in domov (6:00–8:00, 14:00–16:00), posebne razmere za 48 ur (sneg, poledica, megla), primerjava z Gornjim Gradom, zgodovina zim in opozorila na telefon (zmrzal, padavine okoli ničle, močan veter, nova zapora).
 - [Kako je čez Lipo?]({CRN_SITE}/lipa/): isto za prelaz Lipa (723 m) med Vranskim in Šmartnim ob Dreti, a samo kot ocena modela, ker na Lipi ni postaje ne kamere.
+- [Igra »Čez Črnivec«]({CRN_SITE}/igra/): arkadna vožnja od Stahovice čez prelaz do Gornjega Grada; vozišče (suho, mokro, led, sneg), jutranja megla in sunki na vrhu so vsak dan iz istega izračuna kot glavna stran. Igra, ne napoved stanja ceste.
 - [Pogosta vprašanja]({CRN_SITE}/#vprasanja): višina prelaza, lokacija, sneg, zimska oprema, kamera, viri.
 - [Zapore in stanje ceste]({CRN_SITE}/#zapore): trenutne zapore, dela in dogodki na R1-225 iz Prometno-informacijskega centra (DARS, PIC, prek Nacionalne točke dostopa) ter povezave na promet.si, Občino Gornji Grad in AMZS.
 
@@ -4226,6 +4236,8 @@ def write_site_files():
                 '<changefreq>hourly</changefreq><priority>1.0</priority></url>\n'
                 f'  <url><loc>{CRN_SITE}/lipa/</loc><lastmod>{danes}</lastmod>'
                 '<changefreq>hourly</changefreq><priority>0.8</priority></url>\n'
+                f'  <url><loc>{CRN_SITE}/igra/</loc><lastmod>{danes}</lastmod>'
+                '<changefreq>daily</changefreq><priority>0.5</priority></url>\n'
                 '</urlset>\n')
 
 

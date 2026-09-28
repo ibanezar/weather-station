@@ -299,7 +299,7 @@ CRN_SITE = "https://crnivec.si/"
 
 # Strani na crnivec.si: (pot, datoteka v crnivec-site/). /lipa/ je podstran
 # »Kako je čez Lipo?« (26. 9. 2026, build_lipa_body v generate_crnivec_page.py).
-CRN_PAGES = (("", "index.html"), ("lipa/", "lipa/index.html"))
+CRN_PAGES = (("", "index.html"), ("lipa/", "lipa/index.html"), ("igra/", "igra/index.html"))
 
 
 def check_crnivec_site(problems):
