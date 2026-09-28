@@ -101,7 +101,9 @@
     var x = new Float32Array(L + 1), y = new Float32Array(L + 1), h = new Float32Array(L + 1);
     for (var i = 1; i <= L; i++) {
       h[i] = h[i - 1] + k[i - 1];
-      x[i] = x[i - 1] + Math.sin(h[i]);
+      // Smer (-sin h, -cos h) na zaslonu: večji h zavije LEVO, isto kot k > 0
+      // in psi > 0 (proti +d) v modelu. Levo od ceste je (-cos h, +sin h).
+      x[i] = x[i - 1] - Math.sin(h[i]);
       y[i] = y[i - 1] - Math.cos(h[i]);
     }
     return { L: L, k: k, x: x, y: y, h: h };
@@ -306,7 +308,7 @@
         var side = rnd() < 0.5 ? -1 : 1;
         var off = side * (HALF + 3 + rnd() * 22);
         var h = track.h[s];
-        out.push({ x: track.x[s] - Math.cos(h) * off, y: track.y[s] - Math.sin(h) * off, r: 1.4 + rnd() * 1.6, s: s });
+        out.push({ x: track.x[s] - Math.cos(h) * off, y: track.y[s] + Math.sin(h) * off, r: 1.4 + rnd() * 1.6, s: s });
       }
     }
     drevesa = out;
@@ -317,7 +319,9 @@
     var r = keys.ArrowRight || keys.d || keys.D || touch.desno;
     var cilj = (l ? 1 : 0) - (r ? 1 : 0);
     // Volan se obrača postopoma (tipke so digitalne), sicer je vožnja trzava.
-    var rate = cilj === 0 ? 6 : 3.5;
+    // Pri večji hitrosti počasneje (kot pravi volan: pri 90 km/h ga ne
+    // zasučeš do konca). Prvotnih 3,5/s je bilo pretrdo (Filip, 28. 9. 2026).
+    var rate = cilj === 0 ? 2.4 : 1.8 / (1 + sim.v / 20);
     sim.volan += Math.max(-rate * DT, Math.min(rate * DT, cilj - sim.volan));
     return {
       plin: (keys.ArrowUp || keys.w || keys.W || touch.plin) ? 1 : 0,
@@ -337,9 +341,19 @@
       if (sim.dogodek === 'jarek') sporoci('V JARKU! +' + PEN_JAREK + ' s');
       if (sim.done) break;
     }
+    kamera(dtReal);
     draw();
     if (sim.done) { konec(); return; }
     requestAnimationFrame(loop);
+  }
+
+  // Smer kamere: smer ceste malo pred avtom, zglajena (~0,4 s), da se svet v
+  // ovinku zasuče mehko in da se vidi, kam cesta zavije.
+  function kamera(dt) {
+    var ahead = Math.max(0, Math.min(L, Math.floor(sim.s + 8)));
+    var cilj = track.h[ahead];
+    if (ui.camH == null) { ui.camH = cilj; return; }
+    ui.camH += (cilj - ui.camH) * Math.min(1, dt * 2.5);
   }
 
   function sporoci(t) { ui.sporocilo = t; ui.sporT = 1.6; }
@@ -354,14 +368,18 @@
 
     var si = Math.max(0, Math.min(L, Math.floor(sim.s)));
     var hx = track.x[si], hy = track.y[si], hh = track.h[si];
-    var cx = hx - Math.cos(hh) * sim.d, cy = hy - Math.sin(hh) * sim.d;
+    var cx = hx - Math.cos(hh) * sim.d, cy = hy + Math.sin(hh) * sim.d;
     var heading = hh + sim.psi;
+    // Kamera sledi CESTI (središčnici, gladko), ne avtu: ko obrneš volan, se
+    // obrne in premakne avto, okolica ostane (Filip, 28. 9. 2026 -- prej je bil
+    // avto vedno pokončen in se je vrtel svet). ui.camH se gladi v kamera().
+    var camH = ui.camH == null ? hh : ui.camH;
 
     ctx.save();
     ctx.translate(W / 2, H * 0.74);
     ctx.scale(PX, PX);
-    ctx.rotate(-heading);
-    ctx.translate(-cx, -cy);
+    ctx.rotate(camH);
+    ctx.translate(-hx, -hy);
 
     var od = Math.max(0, si - 40), doS = Math.min(L, si + Math.ceil(H / PX) + 30);
     // Travnik/sneg ob cesti in drevesa
@@ -398,17 +416,15 @@
       var fh = track.h[L];
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.setLineDash([0.8, 0.8]);
       ctx.beginPath();
-      ctx.moveTo(track.x[L] - Math.cos(fh) * HALF, track.y[L] - Math.sin(fh) * HALF);
-      ctx.lineTo(track.x[L] + Math.cos(fh) * HALF, track.y[L] + Math.sin(fh) * HALF);
+      ctx.moveTo(track.x[L] - Math.cos(fh) * HALF, track.y[L] + Math.sin(fh) * HALF);
+      ctx.lineTo(track.x[L] + Math.cos(fh) * HALF, track.y[L] - Math.sin(fh) * HALF);
       ctx.stroke(); ctx.setLineDash([]);
     }
-    ctx.restore();
 
-    // Avto (vedno na istem mestu, obrnjen navzgor)
+    // Avto v svetu: na svojem bočnem odmiku, obrnjen v smer vožnje
     ctx.save();
-    ctx.translate(W / 2, H * 0.74);
-    ctx.scale(PX, PX);
-    if (sim.drsi) ctx.rotate((Math.sin(sim.t * 40) * 0.04));
+    ctx.translate(cx, cy);
+    ctx.rotate(-heading + (sim.drsi ? Math.sin(sim.t * 40) * 0.04 : 0));
     ctx.fillStyle = '#111';
     ctx.fillRect(-1.05, -2.2, 2.1, 4.4);
     ctx.fillStyle = '#dc2626';
@@ -419,6 +435,7 @@
       ctx.fillStyle = '#fde047';
       [[-1.15, -1.5], [0.85, -1.5], [-1.15, 1.0], [0.85, 1.0]].forEach(function (p) { ctx.fillRect(p[0], p[1], 0.3, 0.7); });
     }
+    ctx.restore();
     ctx.restore();
 
     // Megla: vidljivost pade na ~vis metrov pred avtom
@@ -489,7 +506,7 @@
 
   function zacni(verige) {
     sim = makeSim(level, { track: track, verige: verige });
-    ui.faza = 'voznja'; ui.zadnji = 0; ui.acc = 0; ui.sporT = 0;
+    ui.faza = 'voznja'; ui.zadnji = 0; ui.acc = 0; ui.sporT = 0; ui.camH = null;
     el('cv-overlay').hidden = true;
     el('cv-chain').textContent = verige ? '⛓ Snemi verige' : '⛓ Natakni verige';
     canvas.focus();
@@ -566,6 +583,7 @@
 
   function pokaziStart() {
     ui.faza = 'start';
+    ui.camH = null;
     sim = makeSim(level, { track: track });
     draw();
     var ov = el('cv-overlay');

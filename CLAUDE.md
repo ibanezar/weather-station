@@ -734,6 +734,10 @@ z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
   Prva različica je ukrivljenost ceste prištela sama in je v ovinek zavila brez
   igralca — ne vračaj take »pomoči«. Test preveri, da brez volana avto v prvem
   ovinku zapelje v jarek.
+- **Kamera sledi cesti, ne avtu** (`kamera()`, zglajena smer ceste malo
+  naprej): ob volanu se obrne in premakne avto, okolica ne. Volan je mehak
+  (`vnos()`: zasuk ~1,8/s, pri hitrosti počasneje). Na zaslonu večji `h`
+  zavije levo (`buildTrack`), enako kot `k > 0` in `psi > 0` v modelu.
 - Proga je stilizirana (ovinki iz fiksnega semena), prava sta dolžina 24,5 km in
   višinski profil (`PROFIL`, približek). Led je v zaplatah, sejanih iz datuma.
 - `crnivec-igra/voznja.js` in `voznja.css` sta **ročno pisana**; generator ju
