@@ -61,7 +61,10 @@ function bot(sim, { mu, rezerva = 0.8, verige = false } = {}) {
       const vz = Math.sqrt(vk * vk + 2 * Math.min(M.BRAKE, muR * M.G) * 0.7 * a);
       vCilj = Math.min(vCilj, vz);
     }
-    const volan = Math.max(-1, Math.min(1, -0.6 * sim.d - 2.5 * sim.psi));
+    // Volan mora sam slediti cesti (avto ne zavije brez njega): ukrivljenost
+    // ceste malo naprej + popravek odmika in smeri.
+    const kNaprej = M.kAt(sim, sim.s + Math.max(2, sim.v * 0.25));
+    const volan = Math.max(-1, Math.min(1, (kNaprej - 0.05 * sim.d - 0.3 * sim.psi) / M.KMAX));
     M.step(sim, { plin: sim.v < vCilj - 0.3 ? 1 : 0, zavora: sim.v > vCilj + 0.3 ? 1 : 0, volan }, dt);
     n++;
   }
@@ -121,8 +124,18 @@ ok('v vožnji se verig ne da menjati', !M.menjajVerige(v));
 for (let i = 0; i < 600; i++) M.step(v, { plin: 0, zavora: 1, volan: 0 }, 1 / 120);
 ok('ustavljen jih lahko snameš, s kaznijo', M.menjajVerige(v) && v.pen === M.VERIGE_S && !v.verige);
 const vv = M.makeSim(suho, { verige: true });
-for (let i = 0; i < 120 * 30; i++) M.step(vv, { plin: 1, zavora: 0, volan: -0.6 * vv.d - 2.5 * vv.psi }, 1 / 120);
+for (let i = 0; i < 120 * 30; i++) {
+  const volan = Math.max(-1, Math.min(1, (M.kAt(vv, vv.s + 3) - 0.05 * vv.d - 0.3 * vv.psi) / M.KMAX));
+  M.step(vv, { plin: 1, zavora: 0, volan }, 1 / 120);
+}
 ok('z verigami ne gre čez 50 km/h', vv.v <= M.VMAX_VERIGE + 0.2, `v=${(vv.v * 3.6).toFixed(1)} km/h`);
+
+console.log('Volan');
+const nv = M.makeSim(suho);
+for (let i = 0; i < 120 * 60 && !nv.jarki; i++) {
+  M.step(nv, { plin: nv.v < 10 ? 1 : 0, zavora: 0, volan: 0 }, 1 / 120);
+}
+ok('brez volana avto v prvem ovinku zapelje v jarek', nv.jarki > 0, `s=${nv.s.toFixed(0)}`);
 
 console.log('Veter');
 const vet = nivo('suho');
