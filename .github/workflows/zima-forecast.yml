@@ -52,6 +52,14 @@ jobs:
       - name: Sestavi /crnivec/
         run: python3 tools/generate_crnivec_page.py
 
+      - name: Sestavi igro crnivec.si/igra/
+        # Dnevni nivo igre »Čez Črnivec« iz istih razmer (glej opombo v
+        # tools/generate_crnivec_igra.py), nato test modela igre na današnjem
+        # nivoju — ob padcu se nič ne commita in ne objavi (isto kot Termika).
+        run: |
+          python3 tools/generate_crnivec_igra.py
+          node tools/test_crnivec_igra.mjs
+
       - name: Commit & push (samo če se je stanje spremenilo)
         run: |
           git config user.name  "meteorec-bot"

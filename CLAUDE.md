@@ -717,6 +717,35 @@ Dreti): povezava »Kaj pa čez Lipo?« je v vrhnji vrstici **tik ob logotipu**
   canonical, naslov in FAQPage tudi za `/lipa/`. Wikidata je v
   `PLACE_SAMEAS["Lipa (prelaz)"]` (Q12794904).
 
+### Igra »Čez Črnivec« — `crnivec.si/igra/` (28. 9. 2026)
+
+Arkadna vožnja od Stahovice čez prelaz do Gornjega Grada. Bistvo je ena
+odločitev: **verige** (na startu zastonj, med vožnjo samo pri miru in +15 s;
+z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
+
+- **Nivo sestavi Python, ne brskalnik** (`tools/generate_crnivec_igra.py`,
+  isti razlog kot Termika: isti dan, isti nivo za vse). Termin je današnja pot
+  v službo (`commute_hours` + `eval_hour()`, najhujša ura termina), vozišče po
+  kilometrih je `black_ice_category()` + `road_row()` na višini odseka — ista
+  ocena kot vrstica »Vozišče«, uvožena, ne podvojena. Megla je jutranja
+  `data["fog"]["top_m"]`, sunki samo **izmerjeni** DRSI (brez modelske rezerve).
+  Nova vrednost v `road_row()` mora v `ROAD_TO_SURF`, sicer v igri pade na suho.
+- Proga je stilizirana (ovinki iz fiksnega semena), prava sta dolžina 24,5 km in
+  višinski profil (`PROFIL`, približek). Led je v zaplatah, sejanih iz datuma.
+- `crnivec-igra/voznja.js` in `voznja.css` sta **ročno pisana**; generator ju
+  skopira v `crnivec-site/igra/` (skupaj z `index.html` in `nivo.json`).
+  Model je brez DOM-a in ga preverja `tools/test_crnivec_igra.mjs` (vozniki-
+  roboti: na suhem so verige počasnejše, na ledu hitrejše, predrzen voznik na
+  ledu konča v jarku, današnji nivo je prevozen). Test teče v
+  `zima-forecast.yml` takoj za generatorjem, pred commitom.
+- Lestvica: `worker.js` `/crnivec/igra/rezultat` in `/crnivec/igra/lestvica`
+  (`crnivec_igra:dan:<datum>` v `COUNTER_KV`, najboljši čas igralca, TTL 60 dni).
+  Preveri samo datum (danes) in spodnjo mejo časa `CRN_IGRA_MIN_S` — namerna
+  podvojitev `L / VMAX` iz `voznja.js`; **če spremeniš dolžino proge ali VMAX,
+  popravi tudi tam**. Kazni (8 s jarek, 15 s verige) navaja FAQ strani.
+- Stran je v sitemapu in `llms.txt` crnivec.si ter v `CRN_PAGES` v `geo_audit.py`.
+  Z glavne strani vodi nanjo kartica ob lestvici poročevalcev (ne v prvem zaslonu).
+
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 
 Prijatelj iz Varpolja (občina Rečica ob Savinji, ~1,6 km jugozahodno, isto dno
