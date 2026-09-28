@@ -41,8 +41,11 @@
   var VMAX = 25;              // 90 km/h
   var VMAX_VERIGE = 13.9;     // 50 km/h
   var ACC = 4.2, BRAKE = 8.5;
-  var KMAX = 0.1;             // največja ukrivljenost, ki jo da volan (1/m)
-  var C_PSI = 0.18;           // pomoč pri ravnanju (vozilo se samo poravna s cesto, če oprijem dopušča)
+  // Največja ukrivljenost, ki jo da volan (1/m) -- polni zasuk je polmer
+  // 10 m, najožja serpentina ima 17 m. Avto zavija SAMO z volanom: prva
+  // različica je ukrivljenost ceste prištela sama (in avto še poravnavala s
+  // cesto), zato je v ovinek zavil brez igralca (Filip, 28. 9. 2026).
+  var KMAX = 0.1;
   var PEN_JAREK = 8;          // s kazni za jarek
   var VERIGE_S = 15;          // s kazni, ko med vožnjo nadeneš ali snameš verige
   var TRACK_SEED = 902;       // proga je vsak dan ista, spreminja se samo vreme
@@ -198,9 +201,10 @@
     if (sim.v > vmax) a = Math.min(a, -2.5);      // verige: čez 50 ne gre
     sim.v = Math.max(0, sim.v + a * dt);
 
-    // Bočno: cesta zahteva ukrivljenost k, vozilo zmore največ grip / v².
+    // Bočno: vozilo zavija, kolikor obrneš volan, a največ grip / v². Kar
+    // se razlikuje od ukrivljenosti ceste k, zasuče avto glede na cesto (psi).
     var k = kAt(sim, sim.s);
-    var kWant = k + vnos.volan * KMAX - C_PSI * sim.psi;
+    var kWant = vnos.volan * KMAX;
     var kLim = sim.v > 0.5 ? grip / (sim.v * sim.v) : 10;
     var kCar = Math.max(-kLim, Math.min(kLim, kWant));
     sim.drsi = Math.abs(kWant) > kLim + 1e-6 && sim.v > 2;
@@ -240,7 +244,7 @@
   var Model = {
     L: L, L_REAL_KM: L_REAL_KM, SCALE: SCALE, HALF: HALF, OFF: OFF, G: G, VMAX: VMAX,
     VMAX_VERIGE: VMAX_VERIGE, MU: MU, MU_VERIGE: MU_VERIGE, PEN_JAREK: PEN_JAREK,
-    VERIGE_S: VERIGE_S, BRAKE: BRAKE,
+    VERIGE_S: VERIGE_S, BRAKE: BRAKE, KMAX: KMAX,
     buildTrack: buildTrack, buildSurface: buildSurface, makeSim: makeSim, step: step,
     menjajVerige: menjajVerige, koncniCas: koncniCas, surfAt: surfAt, muAt: muAt, kAt: kAt,
     zNa: zNa, meglaNa: meglaNa, odsekNa: odsekNa, varnaHitrost: varnaHitrost, mulberry32: mulberry32

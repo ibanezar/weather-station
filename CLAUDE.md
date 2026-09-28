@@ -730,6 +730,10 @@ z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
   ocena kot vrstica »Vozišče«, uvožena, ne podvojena. Megla je jutranja
   `data["fog"]["top_m"]`, sunki samo **izmerjeni** DRSI (brez modelske rezerve).
   Nova vrednost v `road_row()` mora v `ROAD_TO_SURF`, sicer v igri pade na suho.
+- **Avto zavija samo z volanom** (`kWant = volan * KMAX`, omejeno z oprijemom).
+  Prva različica je ukrivljenost ceste prištela sama in je v ovinek zavila brez
+  igralca — ne vračaj take »pomoči«. Test preveri, da brez volana avto v prvem
+  ovinku zapelje v jarek.
 - Proga je stilizirana (ovinki iz fiksnega semena), prava sta dolžina 24,5 km in
   višinski profil (`PROFIL`, približek). Led je v zaplatah, sejanih iz datuma.
 - `crnivec-igra/voznja.js` in `voznja.css` sta **ročno pisana**; generator ju
