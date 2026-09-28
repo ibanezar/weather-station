@@ -20,8 +20,9 @@ ta skript ji vsak dan sestavi NIVO iz istih razmer, ki jih kaže glavna stran:
 
 Nivo je eden za cel dan (isti za vse igralce, sicer časi na lestvici niso
 primerljivi) — isti razlog kot pri Termiki (tools/generate_igra_page.py).
-Proga (ovinki) je stilizirana in vsak dan ista; resnična sta dolžina in
-višinski profil (PROFIL, približek).
+Proga je prava cesta R1-225 iz OpenStreetMap (crnivec-igra/proga.json, enkratni
+tools/build_crnivec_igra_proga.py): dolžina, višinski profil (DEM), vrh in
+naselja so od tam; ovinki imajo prave kote, razdalje so skrajšane.
 
 Piše: crnivec-site/igra/index.html, crnivec-site/igra/nivo.json,
       crnivec-site/igra/voznja.js, crnivec-site/igra/voznja.css
@@ -54,10 +55,15 @@ SRC_DIR = os.path.join(ROOT, "crnivec-igra")
 OUT_DIR = os.path.join(ROOT, CRN_DIR, "igra")
 PAGE_PATH = "/crnivec/igra/"      # page_shell → to_crnivec_site → crnivec.si/igra/
 PASS_ELEV = 902
-L_REAL_KM = 24.5                  # L_REAL_KM v voznja.js
+# Prava cesta (glej tools/build_crnivec_igra_proga.py) -- ista datoteka gre v
+# stran (#cv-proga), da igra in nivo ne moreta imeti različne proge.
+with open(os.path.join(SRC_DIR, "proga.json"), encoding="utf-8") as _f:
+    PROGA = json.load(_f)
+L_REAL_KM = PROGA["dolzina_km"]
+VRH_KM = PROGA["vrh_km"]
 # Višinski profil R1-225 (km od Stahovice, m) — približek iz zemljevida,
 # vrh in oba konca sta prava (Gornji Grad 428 m je višina postaje DRSI).
-PROFIL = ((0, 440), (4, 520), (8, 680), (11.5, PASS_ELEV), (15, 720), (20, 500), (L_REAL_KM, 428))
+PROFIL = tuple((km, min(z, PASS_ELEV)) for km, z in PROGA["profil"])
 CRN_LAT, CRN_LON = 46.26, 14.72   # prelaz (za višino sonca)
 PADA_MM = 0.1                     # od toliko mm v uri v igri pada dež/sneg
 GUST_MIN_KMH = 30                 # pod tem sunki v igri ne premikajo avta (isto v voznja.js)
@@ -183,7 +189,7 @@ def build_level(data, drsi, today):
     gust = (drsi or {}).get("sunki_kmh")
     gust = round(gust) if gust is not None and gust >= GUST_MIN_KMH else None
     snowpack = ((data.get("snowpack") or {}).get("depth_cm") or {}).get("900")
-    vrh = next(o for o in odseki if o["od_km"] == 11)
+    vrh = next(o for o in odseki if o["od_km"] == int(VRH_KM))
     date_ev = ev.get("date") or today_iso
     return {
         "datum": today_iso,
@@ -251,8 +257,9 @@ def faq_items():
         ("Ali igra res uporablja današnje razmere na Črnivcu?",
          "Da. Vsako jutro se nivo sestavi iz istega izračuna kot glavna stran crnivec.si: temperatura na "
          "vrhu za pot v službo (umerjena z meritvami postaje DRSI), ocena vozišča po višini, jutranja megla "
-         "v dolini in izmerjeni sunki vetra na prelazu. Ovinki so stilizirani, dolžina proge in višinski "
-         "profil pa sta prava."),
+         "v dolini in izmerjeni sunki vetra na prelazu. Cesta je prava R1-225 iz OpenStreetMap: ovinki "
+         "in serpentine so v pravem zaporedju in s pravimi koti, razdalje med njimi pa so skrajšane, da "
+         "vožnja traja nekaj minut in ne četrt ure."),
         ("Kdaj se splača natakniti verige?",
          "Na startu so verige zastonj, med vožnjo pa jih lahko nadeneš ali snameš samo, ko stojiš, in stane "
          "15 sekund. Na ledu in snegu z njimi voziš precej hitreje, na suhem pa ropotaš z največ 50 km/h. "
@@ -291,7 +298,8 @@ def build_body(level, faq):
     v_js = asset_version(os.path.join(SRC_DIR, "voznja.js"))
     v_css = asset_version(os.path.join(SRC_DIR, "voznja.css"))
     level_json = json.dumps(level, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    vrh = next(o for o in level["odseki"] if o["od_km"] == 11)
+    proga_json = json.dumps(PROGA, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    vrh = next(o for o in level["odseki"] if o["od_km"] == int(VRH_KM))
     rows = [
         ("Termin", f'{html.escape(level["termin_txt"])}'),
         ("Na vrhu", f'{seo.num(level["t_vrh"], 1)} °C · {road_word(vrh)}'),
@@ -343,7 +351,10 @@ def build_body(level, faq):
         <button type="button" class="cv-key" data-cv="desno" aria-label="Desno">▶</button>
       </div>
       <button type="button" class="crn-btn cv-chain" id="cv-chain">⛓ Natakni verige</button>
+      <button type="button" class="crn-btn cv-zvok" id="cv-zvok" aria-pressed="false">🔇 Zvok izklopljen</button>
       <p class="cv-small cv-help">Tipkovnica: ← → volan, ↑ plin, ↓ zavora, V verige (samo ko stojiš).</p>
+      <p class="cv-small cv-help">Cesta: © <a href="https://www.openstreetmap.org/copyright" target="_blank"
+      rel="noopener">OpenStreetMap</a> (ODbL) · višine: Copernicus DEM prek Open-Meteo</p>
     </section>
 
     <section class="crn-panel cv-lb-panel" aria-labelledby="cv-lb-h">
@@ -359,6 +370,7 @@ def build_body(level, faq):
     </section>
   </div>
 <script type="application/json" id="cv-level">{level_json}</script>
+<script type="application/json" id="cv-proga">{proga_json}</script>
 <script src="/igra/voznja.js?v={v_js}" defer></script>
 '''
 

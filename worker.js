@@ -3870,12 +3870,12 @@ export default {
       // Isti vzorec kot /igra/rezultat zgoraj: igra je klientska simulacija,
       // strežnik preveri samo, da je rezultat za DANAŠNJI nivo in da čas ni
       // krajši od najkrajšega mogočega. CRN_IGRA_MIN_S je namerna PODVOJITEV
-      // L / VMAX iz crnivec-igra/voznja.js (3063 m / 25 m/s ≈ 122,5 s, z
-      // rezervo); če spremeniš dolžino proge ali največjo hitrost, popravi
-      // tudi tu. Stran (FAQ) odkrito pove, da lestvica ni zaščitena.
+      // L / VMAX iz crnivec-igra/voznja.js (proga.json: 3400 m / 25 m/s = 136 s,
+      // z rezervo); če spremeniš dolžino proge (build_crnivec_igra_proga.py)
+      // ali največjo hitrost, popravi tudi tu. Stran (FAQ) odkrito pove, da lestvica ni zaščitena.
       // POST /crnivec/igra/rezultat?datum=YYYY-MM-DD&cas=<s>&verige=0|1&igralec=<id>&ime=
       // GET  /crnivec/igra/lestvica → { datum, lestvica:[{ime,cas,verige},…] } (top 10, danes)
-      const CRN_IGRA_MIN_S = 120;
+      const CRN_IGRA_MIN_S = 130;
       if (path === "/crnivec/igra/rezultat" && request.method === "POST") {
         const kv = env?.COUNTER_KV;
         const hdr = { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" };

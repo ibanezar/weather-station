@@ -28,13 +28,15 @@
   //  MODEL
   // ═══════════════════════════════════════════════════════════════════════
 
-  // Proga je STILIZIRANA, ne dejanski potek ceste: dolžina (24,5 km) in
-  // višinski profil sta prava, ovinki pa so sestavljeni po vzorcu (serpentine
-  // pod vrhom na obeh straneh, sicer daljši ovinki). En meter igre je
-  // SCALE metrov ceste, da vožnja traja ~2-3 minute namesto 25.
-  var L_REAL_KM = 24.5;
-  var SCALE = 8;
-  var L = Math.round(L_REAL_KM * 1000 / SCALE);   // dolžina proge v metrih igre
+  // Proga je PRAVA cesta R1-225 iz OpenStreetMap (crnivec-igra/proga.json,
+  // sestavi jo enkratni tools/build_crnivec_igra_proga.py): ukrivljenost za
+  // vsak meter igre (k) in kilometrina prave ceste (km). Stisnjena je
+  // neenakomerno -- ostri ovinki ostanejo skoraj v pravi velikosti, ravnine
+  // se stisnejo (glej opombo v skripti). Nastavi jo nastaviProgo(); v
+  // brskalniku iz #cv-proga, v testu iz datoteke.
+  var PROGA = null, KM = null;
+  var L = 0;                  // dolžina proge v metrih igre
+  var L_REAL_KM = 0;          // dolžina prave ceste (km)
   var HALF = 3.4;             // pol širine vozišča (m)
   var OFF = HALF + 0.9;       // dlje od sredine = v jarku
   var G = 9.81;
@@ -48,7 +50,6 @@
   var KMAX = 0.1;
   var PEN_JAREK = 8;          // s kazni za jarek
   var VERIGE_S = 15;          // s kazni, ko med vožnjo nadeneš ali snameš verige
-  var TRACK_SEED = 902;       // proga je vsak dan ista, spreminja se samo vreme
 
   // Oprijem (koeficient trenja) po površini. Z verigami je na suhem in
   // mokrem malo slabši (veriga drsi po asfaltu), na ledu in snegu pa bistveno
@@ -72,32 +73,30 @@
     return h >>> 0;
   }
 
+  function nastaviProgo(p) {
+    PROGA = p;
+    L = p.k.length - 1;
+    L_REAL_KM = p.dolzina_km;
+    KM = new Float32Array(p.km);
+  }
+
+  // Kilometer prave ceste na metru igre s.
+  function kmNa(s) {
+    var i = Math.max(0, Math.min(L, Math.floor(s)));
+    var f = Math.max(0, Math.min(1, s - i));
+    return i < L ? KM[i] + (KM[i + 1] - KM[i]) * f : KM[L];
+  }
+  // Meter igre, kjer je kilometer km prave ceste (za table, kamne, vrh).
+  function sNaKm(km) {
+    var lo = 0, hi = L;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (KM[m] < km) lo = m; else hi = m; }
+    return hi;
+  }
+
   // Ukrivljenost po metrih (k > 0 = levi ovinek) in iz nje središčnica.
   function buildTrack() {
-    var rnd = mulberry32(TRACK_SEED);
-    var k = new Float32Array(L + 1);
-    var s = 0, sign = rnd() < 0.5 ? 1 : -1;
-    function put(len, kv) { for (var i = 0; i < len && s <= L; i++) k[s++] = kv; }
-    put(60, 0);                                   // start v Stahovici
-    while (s <= L) {
-      var km = s * SCALE / 1000;
-      var serp = (km > 7.5 && km < 11.3) || (km > 11.8 && km < 15.5);
-      if (serp) {
-        // Serpentina: ~150-170° pri polmeru 17-22 m, izmenično levo/desno.
-        var R = 17 + rnd() * 5;
-        var ang = (150 + rnd() * 20) * Math.PI / 180;
-        put(Math.round(R * ang), sign / R);
-        put(Math.round(22 + rnd() * 22), 0);
-      } else if (km > 11.3 && km <= 11.8) {
-        put(Math.round(0.5 * 1000 / SCALE) + 1, 0); // vrh prelaza: ravno
-      } else {
-        var R2 = 45 + rnd() * 90;
-        var ang2 = (20 + rnd() * 55) * Math.PI / 180;
-        put(Math.round(R2 * ang2), sign / R2);
-        put(Math.round(25 + rnd() * 70), 0);
-      }
-      sign = rnd() < 0.8 ? -sign : sign;
-    }
+    if (!PROGA) throw new Error('proga ni nastavljena (nastaviProgo)');
+    var k = new Float32Array(PROGA.k);
     var x = new Float32Array(L + 1), y = new Float32Array(L + 1), h = new Float32Array(L + 1);
     for (var i = 1; i <= L; i++) {
       h[i] = h[i - 1] + k[i - 1];
@@ -112,7 +111,7 @@
   function odsekNa(level, s) {
     var od = (level && level.odseki) || [];
     if (!od.length) return null;
-    var km = s * SCALE / 1000;
+    var km = kmNa(s);
     var i = Math.min(od.length - 1, Math.max(0, Math.floor(km)));
     return od[i];
   }
@@ -140,7 +139,7 @@
   function zNa(level, s) {
     var od = (level && level.odseki) || [];
     if (!od.length) return 0;
-    var km = Math.max(0, Math.min(L_REAL_KM, s * SCALE / 1000));
+    var km = Math.max(0, Math.min(L_REAL_KM, kmNa(s)));
     var i = Math.min(od.length - 1, Math.floor(km));
     var a = od[i];
     var f = km - i;
@@ -244,7 +243,9 @@
   }
 
   var Model = {
-    L: L, L_REAL_KM: L_REAL_KM, SCALE: SCALE, HALF: HALF, OFF: OFF, G: G, VMAX: VMAX,
+    nastaviProgo: nastaviProgo, kmNa: kmNa, sNaKm: sNaKm,
+    get L() { return L; }, get L_REAL_KM() { return L_REAL_KM; }, get PROGA() { return PROGA; },
+    HALF: HALF, OFF: OFF, G: G, VMAX: VMAX,
     VMAX_VERIGE: VMAX_VERIGE, MU: MU, MU_VERIGE: MU_VERIGE, PEN_JAREK: PEN_JAREK,
     VERIGE_S: VERIGE_S, BRAKE: BRAKE, KMAX: KMAX,
     buildTrack: buildTrack, buildSurface: buildSurface, makeSim: makeSim, step: step,
@@ -283,7 +284,7 @@
   var canvas, ctx, W = 360, H = 480, dpr = 1;
   var drevesa = null, ovinki = [], table = [], profil = null;
   var sledi = [], delci = [], kaplje = [], listi = [], hise = [], kamni = [], temaC = null;
-  var S_VRH = Math.round(11.5 * 1000 / SCALE);   // vrh prelaza na progi (m igre)
+  var S_VRH = 0;              // vrh prelaza na progi (m igre), iz proga.vrh_km
   var PROFIL_Y = 70, PROFIL_H = 34, Z_MIN = 400, Z_MAX = 930;
 
   function beriNivo() {
@@ -307,7 +308,13 @@
   // gozd (gostejši), ob Stahovici in Gornjem Gradu hiše, vsak km kamen.
   // Snežna odeja (odsek.odeja iz nivoja) pobeli tla in krošnje.
   var Z_GOZD = 620;
-  function vasNa(km) { return km < 1.3 || km > L_REAL_KM - 1.3; }
+  // V naselju: do 300 m od kraja iz OSM (proga.naselja) ali na začetku/koncu.
+  function vasNa(km) {
+    if (km < 0.6 || km > L_REAL_KM - 0.8) return true;
+    var n = (PROGA && PROGA.naselja) || [];
+    for (var i = 0; i < n.length; i++) if (Math.abs(n[i].km - km) < 0.3) return true;
+    return false;
+  }
   function odejaNa(s) {
     var o = odsekNa(level, s);
     return o && o.odeja != null ? !!o.odeja : !!(level && level.odeja_cm >= 1);
@@ -315,7 +322,7 @@
   function postaviPokrajino() {
     var rnd = mulberry32(4242), out = [], hs = [];
     for (var s = 0; s < L; s += 5) {
-      var z = zNa(level, s), km = s * SCALE / 1000, vas = vasNa(km);
+      var z = zNa(level, s), km = kmNa(s), vas = vasNa(km);
       var gozd = z >= Z_GOZD;
       var h = track.h[s];
       for (var j = 0; j < 3; j++) {
@@ -340,14 +347,14 @@
       return { x: t.x, y: t.y, a: -track.h[x.s], w: x.w, l: x.l, strop: x.strop, s: x.s };
     });
     kamni = [];
-    for (var k = 1; k < L_REAL_KM; k++) kamni.push({ s: Math.round(k * 1000 / SCALE), km: k });
+    for (var k = 1; k < L_REAL_KM; k++) kamni.push({ s: sNaKm(k), km: k });
   }
 
   // Barva tal po višini (in snegu): dolina svetlejši travnik, gozd temnejši.
   function tlaBarva(s) {
     if (odejaNa(s)) return '#e2e8f0';
     var z = zNa(level, s);
-    if (vasNa(s * SCALE / 1000)) return '#6fa82a';
+    if (vasNa(kmNa(s))) return '#6fa82a';
     if (z < Z_GOZD - 60) return '#65a30d';
     if (z < Z_GOZD) return '#4d7c0f';
     return '#3f6212';
@@ -372,11 +379,14 @@
       s++;
     }
     ovinki = out;
-    table = [
-      { s: 25, tip: 'kraj', txt: 'Stahovica' },
-      { s: S_VRH, tip: 'vrh', txt: 'ČRNIVEC', sub: '902 m' },
-      { s: L - 30, tip: 'kraj', txt: 'Gornji Grad' }
-    ];
+    // Table naselij (OSM place ob cesti) malo pred krajem, vrh in cilj.
+    table = [{ s: 25, tip: 'kraj', txt: 'Stahovica' }];
+    ((PROGA && PROGA.naselja) || []).forEach(function (n) {
+      if (n.ime === 'Gornji Grad' || n.km < 0.4) return;
+      table.push({ s: sNaKm(Math.max(0, n.km - 0.2)), tip: 'kraj', txt: n.ime });
+    });
+    table.push({ s: S_VRH, tip: 'vrh', txt: 'ČRNIVEC', sub: '902 m' });
+    table.push({ s: L - 30, tip: 'kraj', txt: 'Gornji Grad' });
   }
 
   // Višinski profil proge, pobarvan po površinah — nariše se enkrat (ob
@@ -389,32 +399,37 @@
     profil.width = W * dpr; profil.height = (PROFIL_Y + PROFIL_H) * dpr;
     var c = profil.getContext('2d');
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var x0 = 14, w = W - 28;
-    function px(km) { return x0 + w * km / L_REAL_KM; }
     c.fillStyle = 'rgba(255,255,255,.9)'; c.strokeStyle = '#111'; c.lineWidth = 2;
     c.beginPath(); c.moveTo(16, PROFIL_Y); c.lineTo(W - 16, PROFIL_Y);
     c.quadraticCurveTo(W - 8, PROFIL_Y, W - 8, PROFIL_Y + 8); c.lineTo(W - 8, PROFIL_Y + PROFIL_H - 8);
     c.quadraticCurveTo(W - 8, PROFIL_Y + PROFIL_H, W - 16, PROFIL_Y + PROFIL_H); c.lineTo(16, PROFIL_Y + PROFIL_H);
     c.quadraticCurveTo(8, PROFIL_Y + PROFIL_H, 8, PROFIL_Y + PROFIL_H - 8); c.lineTo(8, PROFIL_Y + 8);
     c.quadraticCurveTo(8, PROFIL_Y, 16, PROFIL_Y); c.closePath(); c.fill(); c.stroke();
-    // Površine pod črto (led po deležu: bolj led, bolj modro)
+    risiProfil(c, 14, PROFIL_Y, W - 28, PROFIL_H, 1.6);
+  }
+
+  // Profil proge s površinami v pravokotnik (x0, y0, w, h) -- za HUD in za
+  // sliko rezultata. Višina po isti formuli kot profilY() (zamik 4, rob 8).
+  function risiProfil(c, x0, y0, w, h, crta) {
+    function px(km) { return x0 + w * km / L_REAL_KM; }
+    function py(z) { return y0 + h - 4 - (z - Z_MIN) / (Z_MAX - Z_MIN) * (h - 8); }
     level.odseki.forEach(function (o) {
       var a = px(o.od_km), b = px(Math.min(L_REAL_KM, o.od_km + 1));
       c.fillStyle = PROFIL_BARVA[o.povrsina] || PROFIL_BARVA.suho;
       c.globalAlpha = o.povrsina === 'led' ? 0.45 + 0.55 * (o.led_delez || 0) : 1;
       c.beginPath();
-      c.moveTo(a, PROFIL_Y + PROFIL_H - 3); c.lineTo(a, profilY(o.z_od)); c.lineTo(b, profilY(o.z_do));
-      c.lineTo(b, PROFIL_Y + PROFIL_H - 3); c.closePath(); c.fill();
+      c.moveTo(a, y0 + h - 3); c.lineTo(a, py(o.z_od)); c.lineTo(b, py(o.z_do));
+      c.lineTo(b, y0 + h - 3); c.closePath(); c.fill();
       c.globalAlpha = 1;
       if (o.megla) {
         c.fillStyle = 'rgba(203,213,225,.85)';
-        c.fillRect(a, PROFIL_Y + 3, b - a + 0.5, Math.max(2, Math.min(profilY(o.z_od), profilY(o.z_do)) - PROFIL_Y - 4));
+        c.fillRect(a, y0 + 3, b - a + 0.5, Math.max(2, Math.min(py(o.z_od), py(o.z_do)) - y0 - 4));
       }
     });
-    c.strokeStyle = '#111'; c.lineWidth = 1.6; c.beginPath();
+    c.strokeStyle = '#111'; c.lineWidth = crta; c.beginPath();
     level.odseki.forEach(function (o, i) {
-      if (!i) c.moveTo(px(o.od_km), profilY(o.z_od));
-      c.lineTo(px(Math.min(L_REAL_KM, o.od_km + 1)), profilY(o.z_do));
+      if (!i) c.moveTo(px(o.od_km), py(o.z_od));
+      c.lineTo(px(Math.min(L_REAL_KM, o.od_km + 1)), py(o.z_do));
     });
     c.stroke();
   }
@@ -441,14 +456,17 @@
     var dtReal = Math.min(0.1, (ts - (ui.zadnji || ts)) / 1000);
     ui.zadnji = ts;
     ui.acc += dtReal;
+    var vn = null;
     while (ui.acc >= DT) {
-      step(sim, vnos(), DT);
+      vn = vnos();
+      step(sim, vn, DT);
       ui.acc -= DT;
-      if (sim.dogodek === 'jarek') { sporoci('V JARKU! +' + PEN_JAREK + ' s'); ui.shake = 0.45; ui.sledL = null; }
+      if (sim.dogodek === 'jarek') { sporoci('V JARKU! +' + PEN_JAREK + ' s'); ui.shake = 0.45; ui.sledL = null; zvokJarek(); }
       if (!ui.vrh && sim.s >= S_VRH) { ui.vrh = true; sporoci('VRH! 902 m'); }
       if (sim.done) break;
     }
     kamera(dtReal);
+    zvokTik(dtReal, vn);
     draw();
     if (sim.done) { konec(); return; }
     requestAnimationFrame(loop);
@@ -557,6 +575,66 @@
       if (l.x < -20 || l.x > W + 20 || l.y > H + 20 || l.t > 4) listi.splice(i, 1);
     }
   }
+
+  // ── Zvok (Web Audio, sestavljen sproti, brez datotek) ─────────────────
+  // Privzeto izklopljen; izbira se zapomni (LS_ZVOK). Motor po hitrosti,
+  // »TAK-TAK« verig po prevoženi poti, cviljenje ob zdrsu, udarec ob jarku.
+  var LS_ZVOK = 'crn-igra-zvok';
+  var zv = { on: false, ac: null, faza: 0 };
+  function zvokPripravi() {
+    if (zv.ac) return true;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    var ac = zv.ac = new AC();
+    zv.master = ac.createGain(); zv.master.gain.value = 0.6; zv.master.connect(ac.destination);
+    zv.motor = ac.createOscillator(); zv.motor.type = 'sawtooth'; zv.motor.frequency.value = 45;
+    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700;
+    zv.motorG = ac.createGain(); zv.motorG.gain.value = 0;
+    zv.motor.connect(lp); lp.connect(zv.motorG); zv.motorG.connect(zv.master); zv.motor.start();
+    var buf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    zv.sum = buf;
+    var src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+    var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1900; bp.Q.value = 1.2;
+    zv.drsG = ac.createGain(); zv.drsG.gain.value = 0;
+    src.connect(bp); bp.connect(zv.drsG); zv.drsG.connect(zv.master); src.start();
+    return true;
+  }
+  function zvokNastavi(on) {
+    zv.on = on && zvokPripravi();
+    if (zv.ac) { if (zv.on) zv.ac.resume(); else zv.ac.suspend(); }
+    try { localStorage.setItem(LS_ZVOK, zv.on ? '1' : '0'); } catch (e) { /* ni usodno */ }
+    var b = el('cv-zvok');
+    if (b) { b.textContent = zv.on ? '🔊 Zvok vklopljen' : '🔇 Zvok izklopljen'; b.setAttribute('aria-pressed', zv.on ? 'true' : 'false'); }
+  }
+  function pisk(frek, dolz, tip, glas, kFrek) {
+    if (!zv.on || !zv.ac) return;
+    var t = zv.ac.currentTime, o = zv.ac.createOscillator(), g = zv.ac.createGain();
+    o.type = tip || 'sine'; o.frequency.setValueAtTime(frek, t);
+    if (kFrek) o.frequency.exponentialRampToValueAtTime(kFrek, t + dolz);
+    g.gain.setValueAtTime(glas || 0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t + dolz);
+    o.connect(g); g.connect(zv.master); o.start(t); o.stop(t + dolz + 0.02);
+  }
+  function sum(dolz, glas, hp) {
+    if (!zv.on || !zv.ac) return;
+    var t = zv.ac.currentTime, s0 = zv.ac.createBufferSource(), f = zv.ac.createBiquadFilter(), g = zv.ac.createGain();
+    s0.buffer = zv.sum; f.type = 'highpass'; f.frequency.value = hp || 2500;
+    g.gain.setValueAtTime(glas, t); g.gain.exponentialRampToValueAtTime(0.001, t + dolz);
+    s0.connect(f); f.connect(g); g.connect(zv.master); s0.start(t, Math.random() * 0.5); s0.stop(t + dolz + 0.02);
+  }
+  function zvokTik(dt, vn) {
+    if (!zv.on || !zv.ac) return;
+    var t = zv.ac.currentTime, vozi = ui.faza === 'voznja';
+    zv.motor.frequency.setTargetAtTime(42 + sim.v * 4.2 + (vn && vn.plin ? 12 : 0), t, 0.08);
+    zv.motorG.gain.setTargetAtTime(vozi ? 0.05 + (vn && vn.plin ? 0.035 : 0) : 0, t, 0.1);
+    zv.drsG.gain.setTargetAtTime(vozi && sim.drsi ? 0.1 : 0, t, 0.05);
+    if (vozi && sim.verige && sim.v > 1) {
+      zv.faza += dt * sim.v * 0.55;
+      if (zv.faza >= 1) { zv.faza -= 1; sum(0.035, 0.22, 3000); }
+    }
+  }
+  function zvokJarek() { pisk(110, 0.35, 'sine', 0.5, 35); sum(0.25, 0.3, 300); }
+  function zvokCilj() { pisk(660, 0.18, 'square', 0.08); setTimeout(function () { pisk(880, 0.3, 'square', 0.08); }, 160); }
 
   function sporoci(t) { ui.sporocilo = t; ui.sporT = 1.6; }
 
@@ -872,7 +950,7 @@
 
   function hud() {
     var kmh = Math.round(sim.v * 3.6);
-    var km = sim.s * SCALE / 1000;
+    var km = kmNa(sim.s);
     var z = Math.round(zNa(level, sim.s));
     var p = surfAt(sim, sim.s);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -895,7 +973,7 @@
     // Višinski profil s površinami in piko avta
     if (profil) {
       ctx.drawImage(profil, 0, 0, W, PROFIL_Y + PROFIL_H);
-      var xk = 14 + (W - 28) * sim.s / L, yk = profilY(zNa(level, sim.s));
+      var xk = 14 + (W - 28) * kmNa(sim.s) / L_REAL_KM, yk = profilY(zNa(level, sim.s));
       ctx.strokeStyle = 'rgba(220,38,38,.6)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(xk, PROFIL_Y + 3); ctx.lineTo(xk, PROFIL_Y + PROFIL_H - 3); ctx.stroke();
       ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
@@ -922,6 +1000,7 @@
   }
 
   function zacni(verige) {
+    if (zv.hotel && !zv.on) zvokNastavi(true);
     sim = makeSim(level, { track: track, verige: verige });
     ui.faza = 'voznja'; ui.zadnji = 0; ui.acc = 0; ui.sporT = 0; ui.camH = null;
     ui.shake = 0; ui.vrh = false; ui.sledL = null; ui.zavora = 0; sledi = []; delci = []; kaplje = []; listi = [];
@@ -959,6 +1038,8 @@
 
   function konec() {
     ui.faza = 'konec';
+    zvokTik(0, null);
+    zvokCilj();
     var cas = koncniCas(sim);
     var prej = beriBest();
     var rekord = !prej || cas < prej.cas;
@@ -978,7 +1059,7 @@
         : '<p class="cv-ov-sub cv-small">Tvoj najboljši danes: ' + fmtCas(prej.cas) + '</p>') +
       '<div class="cv-ov-btns">' +
       '<button class="crn-btn crn-btn-primary" id="cv-again" type="button">Še enkrat</button>' +
-      '<button class="crn-btn" id="cv-share" type="button">Deli čas</button>' +
+      '<button class="crn-btn" id="cv-share" type="button">Deli sliko</button>' +
       '</div><p class="cv-small" id="cv-share-note" role="status" aria-live="polite"></p></div>';
     ov.hidden = false;
     el('cv-again').addEventListener('click', function () { pokaziStart(); });
@@ -986,17 +1067,73 @@
     el('cv-again').focus();
   }
 
+  // Slika rezultata (1080×1080, za FB in IG): čas, verige, razmere dneva in
+  // profil proge v stripovskem slogu strani.
+  function slikaRezultata(cas) {
+    var S = 1080, c = document.createElement('canvas');
+    c.width = S; c.height = S;
+    var g = c.getContext('2d');
+    g.fillStyle = '#fdf6e3'; g.fillRect(0, 0, S, S);
+    g.fillStyle = 'rgba(17,17,17,.13)';
+    for (var yy = 12; yy < S; yy += 28) for (var xx = 12; xx < S; xx += 28) { g.beginPath(); g.arc(xx, yy, 2.4, 0, 6.283); g.fill(); }
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+    function napis(t, y, vel, barva, obris) {
+      g.font = '900 ' + vel + 'px Inter,system-ui,sans-serif';
+      if (obris) { g.lineWidth = obris; g.strokeStyle = '#111'; g.strokeText(t, S / 2, y); }
+      g.fillStyle = barva; g.fillText(t, S / 2, y);
+    }
+    function skatla(x, y, w, h, barva) {
+      g.fillStyle = '#111'; g.fillRect(x + 10, y + 10, w, h);
+      g.fillStyle = barva; g.fillRect(x, y, w, h);
+      g.lineWidth = 6; g.strokeStyle = '#111'; g.strokeRect(x, y, w, h);
+    }
+    napis('ČEZ ČRNIVEC', 120, 110, '#dc2626', 14);
+    napis('Stahovica → 902 m → Gornji Grad', 205, 36, '#111');
+    skatla(190, 260, 700, 220, '#fef08a');
+    napis(fmtCas(cas), 372, 170, '#111');
+    var pod = (sim.verige ? 'z verigami' : 'brez verig') +
+      (sim.jarki ? ' · jarek ×' + sim.jarki : ' · brez jarka');
+    napis(pod, 550, 44, '#111');
+    var d = level.datum.split('-');
+    napis(Number(d[2]) + '. ' + Number(d[1]) + '. ' + d[0] + ' · ' + (level.vozisce || ''), 610, 34, '#374151');
+    skatla(80, 670, 920, 250, '#fff');
+    risiProfil(g, 110, 700, 860, 190, 5);
+    napis('crnivec.si/igra · premagaj me!', 990, 44, '#111');
+    return c;
+  }
+
   function deli(cas) {
     var txt = 'Čez Črnivec v ' + fmtCas(cas) + (sim.verige ? ' (z verigami)' : ' (brez verig)') +
       '. Danes ' + (level.vozisce || '') + '. Poskusi premagati:';
     var url = 'https://crnivec.si/igra/';
     var note = el('cv-share-note');
-    if (navigator.share) {
-      navigator.share({ title: 'Čez Črnivec', text: txt, url: url }).catch(function () {});
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(txt + ' ' + url).then(function () { note.textContent = 'Kopirano.'; },
-        function () { note.textContent = txt + ' ' + url; });
-    } else { note.textContent = txt + ' ' + url; }
+    var platno;
+    try { platno = slikaRezultata(cas); } catch (e) { platno = null; }
+    function besedilo() {
+      if (navigator.share) {
+        navigator.share({ title: 'Čez Črnivec', text: txt, url: url }).catch(function () {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt + ' ' + url).then(function () { note.textContent = 'Besedilo kopirano.'; },
+          function () { note.textContent = txt + ' ' + url; });
+      } else { note.textContent = txt + ' ' + url; }
+    }
+    if (!platno || !platno.toBlob) { besedilo(); return; }
+    platno.toBlob(function (blob) {
+      if (!blob) { besedilo(); return; }
+      var file = null;
+      try { file = new File([blob], 'cez-crnivec.png', { type: 'image/png' }); } catch (e) { file = null; }
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], text: txt + ' ' + url }).catch(function () {});
+        return;
+      }
+      // Brez deljenja datotek (npr. namizje): prenesi sliko, besedilo v odložišče.
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'cez-crnivec.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+      if (navigator.clipboard) navigator.clipboard.writeText(txt + ' ' + url).catch(function () {});
+      note.textContent = 'Slika je prenesena, besedilo s povezavo je v odložišču.';
+    }, 'image/png');
   }
 
   function pokaziStart() {
@@ -1085,6 +1222,19 @@
       b.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     });
     el('cv-chain').addEventListener('click', klikVerige);
+    var zb = el('cv-zvok');
+    if (zb) {
+      zb.addEventListener('click', function () { zvokNastavi(!zv.on); });
+      var prej = false;
+      try { prej = localStorage.getItem(LS_ZVOK) === '1'; } catch (e) { prej = false; }
+      // Brskalnik zvoka ne pusti pred prvim klikom -- zapomnjeno izbiro
+      // vklopi šele klik na start (zacni()), do takrat gumb samo pove stanje.
+      zv.hotel = prej;
+      zb.textContent = prej ? '🔊 Zvok se vklopi ob startu' : '🔇 Zvok izklopljen';
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (zv.ac && zv.on) { if (document.hidden) zv.ac.suspend(); else zv.ac.resume(); }
+    });
     var ime = el('cv-ime');
     if (ime) {
       ime.value = beriIme();
@@ -1111,6 +1261,11 @@
     } catch (e) { level.zastarel = false; }
     if (level.zastarel && el('cv-stale')) el('cv-stale').hidden = false;
     ctx = canvas.getContext('2d');
+    try { nastaviProgo(JSON.parse(el('cv-proga').textContent)); } catch (e) {
+      el('cv-overlay').innerHTML = '<div class="cv-ov-in"><p class="cv-ov-sub">Proga se ni naložila. Osveži stran.</p></div>';
+      return;
+    }
+    S_VRH = sNaKm(PROGA.vrh_km);
     track = buildTrack();
     postaviPokrajino();
     najdiOvinke();
