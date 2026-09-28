@@ -1527,7 +1527,16 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
   .tab-nav-wrap.at-end::after{opacity:0}
   .tab-nav-arrow{display:flex;position:absolute;right:.5rem;top:50%;transform:translateY(-50%);z-index:11;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border:none;font-size:1.05rem;line-height:1;padding:0;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(29,78,216,.5);animation:tab-arr 1.3s ease-in-out infinite;transition:opacity .25s}
   .tab-nav-wrap.at-end .tab-nav-arrow,.tab-nav-arrow.hidden{opacity:0;pointer-events:none}
-  .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
+  /* Nad spodnjo navigacijo, ne pod njo: ta je fixed na korenu (z-index 150),
+     meni pa živi v .wrap (z-index 1), zato ga vedno prekrije — razmik mora
+     vključiti varni rob iPhona, za katerega je spodnja vrstica višja. Dolga
+     menija (Kraji, Podatki, ~500 px) bi brez max-height na nižjem zaslonu
+     segla čez vrh pod trak z opozorili; zato se znotraj sebe pomikata. */
+  .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);
+    bottom:calc(4.5rem + env(safe-area-inset-bottom));width:260px;
+    max-height:calc(100vh - 4.5rem - env(safe-area-inset-bottom) - var(--ticker-h,0px) - 1.5rem);
+    max-height:calc(100dvh - 4.5rem - env(safe-area-inset-bottom) - var(--ticker-h,0px) - 1.5rem);
+    overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 }
 .tab-btn{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:.4rem;padding:.46rem .85rem;border-radius:999px;border:1px solid var(--border);background:var(--fc-bg);color:var(--muted);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.045em;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .1s;line-height:1.35;opacity:1}
 /* Line-icon set replacing the old emoji-only tab labels (was a branding
