@@ -308,10 +308,8 @@ def build_body(level, faq):
 <link rel="stylesheet" href="/igra/voznja.css?v={v_css}">
   <div class="crn cv">
     <div class="crn-top">
-      <div class="crn-top-l">
-        <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
-        <a class="crn-sib" href="{CRN_SITE}/">Kako je čez Črnivec zdaj? →</a>
-      </div>
+      <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
+      <a class="crn-sib" href="{CRN_SITE}/">← Stanje ceste</a>
     </div>
 
     <section class="cv-head" aria-labelledby="cv-h1">

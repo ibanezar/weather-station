@@ -1149,22 +1149,37 @@ CSS = '''
   .crn [hidden]{display:none!important}
 
   /* ── Vrhnja vrstica ─────────────────────────────────────────── */
+  /* Ena vrstica (28. 9. 2026): logotip levo, orodja desno. Na telefonu so
+     orodja samo ikone v enako velikih krogih (40 px), od 600 px dobijo še
+     besedo. Menjava prelaza ni več tu, ampak stikalo nad naslovom
+     (.crn-pass) -- prej so bili v vrstici trije gumbi različnih oblik, ki so
+     se na telefonu razlili v dve vrstici. */
   .crn-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
-    min-height:40px;margin-bottom:var(--s3)}
-  /* Vrhnja gumba sta navigacija, ne dejanje -- na telefonu kompaktna, da ne
-     prevpijeta naslova (min. 40 px še vedno zadošča za dotik). */
-  .crn-brand{display:inline-flex;align-items:center;min-height:40px;text-decoration:none}
-  .crn-brand img{display:block;height:36px;width:auto}
-  .crn-install-wrap{text-align:right}
-  /* »Kaj pa čez Lipo?« / »Kaj pa čez Črnivec?« -- tik ob logotipu (26. 9. 2026). */
-  .crn-top-l{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s1) var(--s2)}
-  .crn .crn-sib{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;font-size:13px;font-weight:800;
+    min-height:44px;margin-bottom:var(--s4)}
+  .crn-brand{display:inline-flex;align-items:center;min-height:40px;min-width:0;text-decoration:none}
+  .crn-brand img{display:block;height:32px;width:auto;max-width:100%}
+  .crn-top-r{display:flex;align-items:center;gap:var(--s1);flex:none}
+  .crn .crn-sib{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;min-width:40px;
+    padding:0 12px;font:inherit;font-size:13px;font-weight:800;line-height:1;
     color:#111;background:#fef08a;border:2px solid #111;border-radius:999px;box-shadow:2px 2px 0 #111;
-    text-decoration:none;white-space:nowrap}
+    text-decoration:none;white-space:nowrap;cursor:pointer}
   .crn .crn-sib:hover,.crn .crn-sib:focus-visible{background:#fde047}
-  .crn .crn-game-sib{padding:0 10px}
-  .crn-game-t{display:none}
-  @media (min-width:600px){.crn-game-t{display:inline}}
+  .crn .crn-ic{padding:0;width:40px;font-size:18px}
+  .crn-ic-t{display:none;font-size:13px}
+  @media (min-width:600px){
+    .crn .crn-ic{width:auto;padding:0 14px 0 12px;font-size:16px}
+    .crn-ic-t{display:inline}
+    .crn-brand img{height:36px}
+  }
+  /* Stikalo prelazov nad naslovom (Črnivec | Lipa) -- nadomešča eyebrow z
+     višino in povezavo »Kaj pa čez Lipo?«. */
+  .crn-pass{display:inline-flex;margin:0 0 var(--s2);padding:3px;background:#fff;border:2px solid #111;
+    border-radius:999px;box-shadow:2px 2px 0 #111}
+  .crn .crn-pass a{display:inline-flex;align-items:center;gap:6px;min-height:36px;
+    padding:0 14px;border-radius:999px;font-size:14px;font-weight:800;color:#111;text-decoration:none;white-space:nowrap}
+  .crn .crn-pass a:hover,.crn .crn-pass a:focus-visible{background:#fef9c3}
+  .crn .crn-pass a[aria-current="page"]{background:#fef08a;box-shadow:inset 0 0 0 2px #111}
+  .crn-pass small{font-size:12px;font-weight:600;color:var(--ink2)}
   .crn-top .crn-btn{min-height:40px;font-size:13px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
 
   /* ── HERO ───────────────────────────────────────────────────── */
@@ -1480,9 +1495,10 @@ CSS = '''
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
   .crn-share-status{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
-  /* Gumb »🔔 Opozorila« je v obliki .crn-sib (vrhnja vrstica), vklopljen je bel. */
-  .crn .crn-alerts-btn{font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+  /* Gumb »🔔 Opozorila« je ikona .crn-ic v vrhnji vrstici; vklopljen je bel s
+     kljukico. */
   .crn .crn-alerts-btn.is-on{background:#fff}
+  .crn .crn-alerts-btn.is-on::after{content:"✓";font-size:12px;font-weight:900;color:#15803d}
   .crn .crn-alerts-btn:disabled{opacity:.6;cursor:wait}
   .crn-alerts-status{font-size:13px;line-height:1.4;margin:calc(-1 * var(--s2)) 0 var(--s3);padding:var(--s1) var(--s2);
     background:#fff;border:2px solid #111;border-radius:10px}
@@ -3167,19 +3183,29 @@ def faq_items(snowpack_cm, snow_new):
 # Kaj sproži obvestilo, pove title gumba, sporočilo ob vklopu in FAQ. Brez JS
 # ali brez podpore v brskalniku gumb ostane skrit (razen na iPhonu, kjer ob
 # kliku pove, da je treba stran dodati na začetni zaslon).
-# Igra »Čez Črnivec« (crnivec.si/igra/, tools/generate_crnivec_igra.py) --
-# 28. 9. 2026 Filip: ikona na vrhu. Majhen gumb v isti vrstici kot »Kaj pa čez
-# Lipo?« in opozorila, ne kartica (prvi zaslon ostane statusu). Stoji takoj
-# ob logotipu in je na telefonu samo ikona (.crn-game-t skrit) -- tako pade v
-# vrstico logotipa, sicer bi »Opozorila« na 360 px zdrsnila v tretjo vrstico
-# in potisnila status niže.
-GAME_HTML = """        <a class="crn-sib crn-game-sib" href="/igra/" aria-label="Igra Čez Črnivec"
-          title="Igra: pripelji se čez Črnivec v današnjih razmerah">🎮<span class="crn-game-t">&nbsp;Igra</span></a>
+# Igra »Čez Črnivec« (crnivec.si/igra/, tools/generate_crnivec_igra.py) in
+# opozorila sta ikoni v desnem delu vrhnje vrstice (.crn-top-r, 28. 9. 2026):
+# na telefonu samo ikona v krogu, od 600 px še beseda. Prvi zaslon ostane
+# statusu.
+GAME_HTML = """          <a class="crn-sib crn-ic" href="/igra/" aria-label="Igra Čez Črnivec"
+            title="Igra: pripelji se čez Črnivec v današnjih razmerah"><span aria-hidden="true">🎮</span><span class="crn-ic-t">Igra</span></a>
 """
 
-ALERTS_HTML = """        <button type="button" id="crn-alerts-btn" class="crn-sib crn-alerts-btn" hidden
-          title="Obvestilo na telefon ob zmrzali, padavinah okoli ničle, sunkih nad 70 km/h in zaporah na cesti">🔔 Opozorila</button>
+ALERTS_HTML = """          <button type="button" id="crn-alerts-btn" class="crn-sib crn-ic crn-alerts-btn" hidden
+            aria-label="Opozorila na telefon"
+            title="Obvestilo na telefon ob zmrzali, padavinah okoli ničle, sunkih nad 70 km/h in zaporah na cesti"><span aria-hidden="true">🔔</span><span class="crn-ic-t" id="crn-alerts-t">Opozorila</span></button>
 """
+
+
+def pass_switch(cur):
+    """Stikalo Črnivec | Lipa nad naslovom (nadomešča »Kaj pa čez Lipo?«)."""
+    def a(pid, href, name, elev):
+        cur_attr = ' aria-current="page"' if pid == cur else ""
+        return f'<a href="{href}"{cur_attr}>{name} <small>{elev} m</small></a>'
+    return ('<nav class="crn-pass" aria-label="Prelaz">'
+            + a("crnivec", f"{CRN_SITE}/", "Črnivec", 902)
+            + a("lipa", "/lipa/", "Lipa", LIPA_ELEV) + "</nav>")
+
 
 ALERTS_JS = """<script>
 (function () {
@@ -3218,7 +3244,10 @@ ALERTS_JS = """<script>
     btn.hidden = false;
     btn.classList.toggle("is-on", !!sub);
     btn.setAttribute("aria-pressed", sub ? "true" : "false");
-    btn.textContent = sub ? "🔔 Opozorila vklopljena" : "🔔 Opozorila";
+    var lbl = sub ? "Opozorila vklopljena" : "Opozorila";
+    btn.setAttribute("aria-label", lbl);
+    var t = document.getElementById("crn-alerts-t");
+    if (t) t.textContent = lbl;
   }
   navigator.serviceWorker.register("/sw.js").then(function () {
     return navigator.serviceWorker.ready;
@@ -3606,22 +3635,20 @@ def build_body(data):
     body = f'''{CSS}
   <div class="crn">
     <div class="crn-top">
-      <div class="crn-top-l">
-        <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
-{GAME_HTML}        <a class="crn-sib" href="/lipa/">Kaj pa čez Lipo? →</a>
-{ALERTS_HTML}      </div>
-      <div class="crn-install-wrap">
-        <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
-        <p id="crn-install-hint" class="crn-share-status" role="status" aria-live="polite" hidden></p>
-      </div>
+      <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
+      <div class="crn-top-r">
+          <button type="button" id="crn-install" class="crn-sib crn-ic" hidden aria-label="Namesti na zaslon"
+            title="Namesti na zaslon"><span aria-hidden="true">📲</span><span class="crn-ic-t">Namesti</span></button>
+{ALERTS_HTML}{GAME_HTML}      </div>
     </div>
+    <p id="crn-install-hint" class="crn-alerts-status" role="status" aria-live="polite" hidden></p>
     <p id="crn-alerts-status" class="crn-alerts-status" role="status" aria-live="polite" hidden></p>
 {ALERTS_JS.replace("__API__", WORKER_BASE)}
     <section class="crn-hero" aria-labelledby="crn-h1">
       <div class="crn-head">
         {mountain_icon_svg()}
         <div class="crn-head-txt">
-          <p class="crn-eyebrow">Črnivec · 902 m n. m.</p>
+          {pass_switch("crnivec")}
           <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
           <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
         </div>
@@ -4026,17 +4053,16 @@ def build_lipa_body(data):
     body = f'''{CSS}
   <div class="crn">
     <div class="crn-top">
-      <div class="crn-top-l">
-        <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
-{GAME_HTML}        <a class="crn-sib" href="{CRN_SITE}/">Kaj pa čez Črnivec? →</a>
-      </div>
+      <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
+      <div class="crn-top-r">
+{GAME_HTML}      </div>
     </div>
 
     <section class="crn-hero" aria-labelledby="crn-h1">
       <div class="crn-head">
         {mountain_icon_svg()}
         <div class="crn-head-txt">
-          <p class="crn-eyebrow">Lipa · {LIPA_ELEV} m n. m.</p>
+          {pass_switch("lipa")}
           <h1 class="crn-title" id="crn-h1">Kako je čez Lipo?</h1>
           <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
         </div>

@@ -660,8 +660,9 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
 
 ### Opozorila s prelaza na telefon (Web Push, 27. 9. 2026)
 
-Gumb **»🔔 Opozorila«** v vrhnji vrstici, tik ob »Kaj pa čez Lipo?«
-(`ALERTS_HTML`/`ALERTS_JS` v `generate_crnivec_page.py`; 27. 9. 2026 Filip:
+Gumb **»🔔 Opozorila«** je ikona v desnem delu vrhnje vrstice (`.crn-top-r`,
+ob 🎮 igri; na telefonu samo ikona, od 600 px z besedo — 28. 9. 2026 prenova
+glave) (`ALERTS_HTML`/`ALERTS_JS` v `generate_crnivec_page.py`; 27. 9. 2026 Filip:
 takoj na vrhu, a en gumb, ne kartica — prvi zaslon ostane statusu) naroči
 napravo na push obvestila. Kaj sproži obvestilo, povedo `title` gumba,
 sporočilo ob vklopu (`#crn-alerts-status`) in FAQ. Brez podpore v brskalniku
@@ -695,8 +696,11 @@ zaslon. Pošilja jih `_cronCheckCrnivec()` v `worker.js` (5-minutni cron).
 ### »Kaj pa čez Lipo?« — `crnivec.si/lipa/` (26. 9. 2026)
 
 Filip je želel še prelaz **Lipa** (723 m, lokalna cesta Vransko–Lipa–Šmartno ob
-Dreti): povezava »Kaj pa čez Lipo?« je v vrhnji vrstici **tik ob logotipu**
-(`.crn-sib`), na Lipi pa v istem mestu »Kaj pa čez Črnivec?«.
+Dreti). Med prelazoma se preklaplja s stikalom **Črnivec | Lipa** tik nad
+naslovom (`pass_switch()`, `.crn-pass`, z višino obeh prelazov) — od 28. 9.
+2026 namesto povezave »Kaj pa čez Lipo?« v vrhnji vrstici, ki je bila skupaj
+z opozorili in igro na telefonu razmetana v dve vrstici. Vrhnja vrstica je
+zdaj samo logotip levo in ikone (namesti, 🔔, 🎮) desno.
 
 - **Na Lipi ni postaje DRSI ne kamere** (preverjeno na seznamu ceste.si;
   najbližje so Gornji Grad, Špitalič, Učak, 9–11 km stran). Vse je **ocena
