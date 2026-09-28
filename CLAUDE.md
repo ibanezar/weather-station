@@ -738,6 +738,11 @@ z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
   naprej): ob volanu se obrne in premakne avto, okolica ne. Volan je mehak
   (`vnos()`: zasuk ~1,8/s, pri hitrosti počasneje). Na zaslonu večji `h`
   zavije levo (`buildTrack`), enako kot `k > 0` in `psi > 0` v modelu.
+- Grafika (samo prikaz, fizike ne spreminja): višinski profil proge v HUD-u,
+  pobarvan po površinah iz `nivo.json` (`narisiProfil()`), opozorilni znaki in
+  odbojne ograje pri ovinkih s polmerom pod 30 m (`najdiOvinke()`), table
+  Stahovica / ČRNIVEC 902 m / Gornji Grad, sledi zdrsa, pršec in iskrice
+  (`ucinki()`), zavorne luči, senca in tresenje ob jarku.
 - Proga je stilizirana (ovinki iz fiksnega semena), prava sta dolžina 24,5 km in
   višinski profil (`PROFIL`, približek). Led je v zaplatah, sejanih iz datuma.
 - `crnivec-igra/voznja.js` in `voznja.css` sta **ročno pisana**; generator ju
