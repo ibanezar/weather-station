@@ -1162,6 +1162,9 @@ CSS = '''
     color:#111;background:#fef08a;border:2px solid #111;border-radius:999px;box-shadow:2px 2px 0 #111;
     text-decoration:none;white-space:nowrap}
   .crn .crn-sib:hover,.crn .crn-sib:focus-visible{background:#fde047}
+  .crn .crn-game-sib{padding:0 10px}
+  .crn-game-t{display:none}
+  @media (min-width:600px){.crn-game-t{display:inline}}
   .crn-top .crn-btn{min-height:40px;font-size:13px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
 
   /* ── HERO ───────────────────────────────────────────────────── */
@@ -3164,6 +3167,16 @@ def faq_items(snowpack_cm, snow_new):
 # Kaj sproži obvestilo, pove title gumba, sporočilo ob vklopu in FAQ. Brez JS
 # ali brez podpore v brskalniku gumb ostane skrit (razen na iPhonu, kjer ob
 # kliku pove, da je treba stran dodati na začetni zaslon).
+# Igra »Čez Črnivec« (crnivec.si/igra/, tools/generate_crnivec_igra.py) --
+# 28. 9. 2026 Filip: ikona na vrhu. Majhen gumb v isti vrstici kot »Kaj pa čez
+# Lipo?« in opozorila, ne kartica (prvi zaslon ostane statusu). Stoji takoj
+# ob logotipu in je na telefonu samo ikona (.crn-game-t skrit) -- tako pade v
+# vrstico logotipa, sicer bi »Opozorila« na 360 px zdrsnila v tretjo vrstico
+# in potisnila status niže.
+GAME_HTML = """        <a class="crn-sib crn-game-sib" href="/igra/" aria-label="Igra Čez Črnivec"
+          title="Igra: pripelji se čez Črnivec v današnjih razmerah">🎮<span class="crn-game-t">&nbsp;Igra</span></a>
+"""
+
 ALERTS_HTML = """        <button type="button" id="crn-alerts-btn" class="crn-sib crn-alerts-btn" hidden
           title="Obvestilo na telefon ob zmrzali, padavinah okoli ničle, sunkih nad 70 km/h in zaporah na cesti">🔔 Opozorila</button>
 """
@@ -3595,7 +3608,7 @@ def build_body(data):
     <div class="crn-top">
       <div class="crn-top-l">
         <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
-        <a class="crn-sib" href="/lipa/">Kaj pa čez Lipo? →</a>
+{GAME_HTML}        <a class="crn-sib" href="/lipa/">Kaj pa čez Lipo? →</a>
 {ALERTS_HTML}      </div>
       <div class="crn-install-wrap">
         <button type="button" id="crn-install" class="crn-btn" hidden>Namesti na zaslon</button>
@@ -4015,7 +4028,7 @@ def build_lipa_body(data):
     <div class="crn-top">
       <div class="crn-top-l">
         <a class="crn-brand" href="{CRN_SITE}/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
-        <a class="crn-sib" href="{CRN_SITE}/">Kaj pa čez Črnivec? →</a>
+{GAME_HTML}        <a class="crn-sib" href="{CRN_SITE}/">Kaj pa čez Črnivec? →</a>
       </div>
     </div>
 
