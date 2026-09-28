@@ -37,7 +37,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://crnivec.si/lipa/","name":"Prelaz Lipa: vreme in stanje ceste Vransko–Šmartno","description":"Kako je čez Lipo (723 m)? Ocena temperature, snega in poledice ter vreme po urah za cesto Vransko–Šmartno ob Dreti.","url":"https://crnivec.si/lipa/","inLanguage":"sl","isPartOf":{"@id":"https://crnivec.si/#website"},"author":{"@id":"https://meteorec.si/#person"},"about":{"@type":"Place","@id":"https://crnivec.si/lipa/#prelaz","name":"Lipa","alternateName":["Prelaz Lipa","Lipa nad Vranskim"],"description":"Prelaz (723 m) med Vranskim in Šmartnim ob Dreti.","geo":{"@type":"GeoCoordinates","latitude":46.2613,"longitude":14.8938,"elevation":723},"sameAs":["https://www.wikidata.org/wiki/Q12794904","https://sl.wikipedia.org/wiki/Lipa_(preval)"],"containedInPlace":{"@type":"Country","name":"Slovenija"}},"speakable":{"@type":"SpeakableSpecification","cssSelector":["#crn-status-title","#crn-status-desc","#crn-next-say"]},"datePublished":"2026-09-26","dateModified":"2026-09-28T14:01:39+02:00"}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://crnivec.si/lipa/","name":"Prelaz Lipa: vreme in stanje ceste Vransko–Šmartno","description":"Kako je čez Lipo (723 m)? Ocena temperature, snega in poledice ter vreme po urah za cesto Vransko–Šmartno ob Dreti.","url":"https://crnivec.si/lipa/","inLanguage":"sl","isPartOf":{"@id":"https://crnivec.si/#website"},"author":{"@id":"https://meteorec.si/#person"},"about":{"@type":"Place","@id":"https://crnivec.si/lipa/#prelaz","name":"Lipa","alternateName":["Prelaz Lipa","Lipa nad Vranskim"],"description":"Prelaz (723 m) med Vranskim in Šmartnim ob Dreti.","geo":{"@type":"GeoCoordinates","latitude":46.2613,"longitude":14.8938,"elevation":723},"sameAs":["https://www.wikidata.org/wiki/Q12794904","https://sl.wikipedia.org/wiki/Lipa_(preval)"],"containedInPlace":{"@type":"Country","name":"Slovenija"}},"speakable":{"@type":"SpeakableSpecification","cssSelector":["#crn-status-title","#crn-status-desc","#crn-next-say"]},"datePublished":"2026-09-26","dateModified":"2026-09-28T15:46:28+02:00"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","@id":"https://crnivec.si/lipa/#vprasanja","mainEntity":[{"@type":"Question","name":"Koliko je visok prelaz Lipa?","acceptedAnswer":{"@type":"Answer","text":"Prelaz Lipa je 723 metrov nad morjem, približno 350 m višje od Šmartnega ob Dreti in Vranskega."}},{"@type":"Question","name":"Kje je prelaz Lipa?","acceptedAnswer":{"@type":"Answer","text":"Lipa je prelaz med Menino planino in Dobroveljsko planoto. Čezenj pelje lokalna cesta Vransko–Lipa–Šmartno ob Dreti, najkrajša povezava med Vranskim in Zadrečko dolino."}},{"@type":"Question","name":"Ali je na Lipi sneg?","acceptedAnswer":{"@type":"Answer","text":"Snega na Lipi ne meri nobena postaja. Po oceni modela je na višini prelaza zdaj 0 cm snežne odeje, v naslednjih 24 urah pa je napovedanih 0,0 cm novega snega."}},{"@type":"Question","name":"Ali je na Lipi kamera ali vremenska postaja?","acceptedAnswer":{"@type":"Answer","text":"Ne. Na Lipi ni cestne vremenske postaje ne spletne kamere, zato so vse številke na tej strani ocena iz vremenskega modela, preračunana na višino prelaza. Za Črnivec, kjer sta postaja in kamera, glej crnivec.si."}},{"@type":"Question","name":"Kdaj je na Lipi obvezna zimska oprema?","acceptedAnswer":{"@type":"Answer","text":"Od 15. novembra do 15. marca in tudi zunaj tega obdobja, kadar so na cesti zimske razmere, mora imeti osebni avto zimske pnevmatike ali letne pnevmatike in snežne verige v vozilu. Tako določa Zakon o pravilih cestnega prometa."}}]}
@@ -90,22 +90,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn [hidden]{display:none!important}
 
   /* ── Vrhnja vrstica ─────────────────────────────────────────── */
+  /* Ena vrstica (28. 9. 2026): logotip levo, orodja desno. Na telefonu so
+     orodja samo ikone v enako velikih krogih (40 px), od 600 px dobijo še
+     besedo. Menjava prelaza ni več tu, ampak stikalo nad naslovom
+     (.crn-pass) -- prej so bili v vrstici trije gumbi različnih oblik, ki so
+     se na telefonu razlili v dve vrstici. */
   .crn-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);
-    min-height:40px;margin-bottom:var(--s3)}
-  /* Vrhnja gumba sta navigacija, ne dejanje -- na telefonu kompaktna, da ne
-     prevpijeta naslova (min. 40 px še vedno zadošča za dotik). */
-  .crn-brand{display:inline-flex;align-items:center;min-height:40px;text-decoration:none}
-  .crn-brand img{display:block;height:36px;width:auto}
-  .crn-install-wrap{text-align:right}
-  /* »Kaj pa čez Lipo?« / »Kaj pa čez Črnivec?« -- tik ob logotipu (26. 9. 2026). */
-  .crn-top-l{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s1) var(--s2)}
-  .crn .crn-sib{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;font-size:13px;font-weight:800;
+    min-height:44px;margin-bottom:var(--s4)}
+  .crn-brand{display:inline-flex;align-items:center;min-height:40px;min-width:0;text-decoration:none}
+  .crn-brand img{display:block;height:32px;width:auto;max-width:100%}
+  .crn-top-r{display:flex;align-items:center;gap:var(--s1);flex:none}
+  .crn .crn-sib{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;min-width:40px;
+    padding:0 12px;font:inherit;font-size:13px;font-weight:800;line-height:1;
     color:#111;background:#fef08a;border:2px solid #111;border-radius:999px;box-shadow:2px 2px 0 #111;
-    text-decoration:none;white-space:nowrap}
+    text-decoration:none;white-space:nowrap;cursor:pointer}
   .crn .crn-sib:hover,.crn .crn-sib:focus-visible{background:#fde047}
-  .crn .crn-game-sib{padding:0 10px}
-  .crn-game-t{display:none}
-  @media (min-width:600px){.crn-game-t{display:inline}}
+  .crn .crn-ic{padding:0;width:40px;font-size:18px}
+  .crn-ic-t{display:none;font-size:13px}
+  @media (min-width:600px){
+    .crn .crn-ic{width:auto;padding:0 14px 0 12px;font-size:16px}
+    .crn-ic-t{display:inline}
+    .crn-brand img{height:36px}
+  }
+  /* Stikalo prelazov nad naslovom (Črnivec | Lipa) -- nadomešča eyebrow z
+     višino in povezavo »Kaj pa čez Lipo?«. */
+  .crn-pass{display:inline-flex;margin:0 0 var(--s2);padding:3px;background:#fff;border:2px solid #111;
+    border-radius:999px;box-shadow:2px 2px 0 #111}
+  .crn .crn-pass a{display:inline-flex;align-items:center;gap:6px;min-height:36px;
+    padding:0 14px;border-radius:999px;font-size:14px;font-weight:800;color:#111;text-decoration:none;white-space:nowrap}
+  .crn .crn-pass a:hover,.crn .crn-pass a:focus-visible{background:#fef9c3}
+  .crn .crn-pass a[aria-current="page"]{background:#fef08a;box-shadow:inset 0 0 0 2px #111}
+  .crn-pass small{font-size:12px;font-weight:600;color:var(--ink2)}
   .crn-top .crn-btn{min-height:40px;font-size:13px;padding:0 var(--s2);box-shadow:2px 2px 0 #111}
 
   /* ── HERO ───────────────────────────────────────────────────── */
@@ -421,9 +436,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   .crn-actions{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s3)}
   .crn-actions .crn-btn{font-size:14px;padding:0 var(--s3)}
   .crn-share-status{font-size:13px;color:var(--muted);margin:var(--s1) 0 0}
-  /* Gumb »🔔 Opozorila« je v obliki .crn-sib (vrhnja vrstica), vklopljen je bel. */
-  .crn .crn-alerts-btn{font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+  /* Gumb »🔔 Opozorila« je ikona .crn-ic v vrhnji vrstici; vklopljen je bel s
+     kljukico. */
   .crn .crn-alerts-btn.is-on{background:#fff}
+  .crn .crn-alerts-btn.is-on::after{content:"✓";font-size:12px;font-weight:900;color:#15803d}
   .crn .crn-alerts-btn:disabled{opacity:.6;cursor:wait}
   .crn-alerts-status{font-size:13px;line-height:1.4;margin:calc(-1 * var(--s2)) 0 var(--s3);padding:var(--s1) var(--s2);
     background:#fff;border:2px solid #111;border-radius:10px}
@@ -537,11 +553,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="crn">
     <div class="crn-top">
-      <div class="crn-top-l">
-        <a class="crn-brand" href="https://crnivec.si/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
-        <a class="crn-sib crn-game-sib" href="/igra/" aria-label="Igra Čez Črnivec"
-          title="Igra: pripelji se čez Črnivec v današnjih razmerah">🎮<span class="crn-game-t">&nbsp;Igra</span></a>
-        <a class="crn-sib" href="https://crnivec.si/">Kaj pa čez Črnivec? →</a>
+      <a class="crn-brand" href="https://crnivec.si/"><img src="/logo-crnivec.svg" alt="crnivec.si" width="166" height="36"></a>
+      <div class="crn-top-r">
+          <a class="crn-sib crn-ic" href="/igra/" aria-label="Igra Čez Črnivec"
+            title="Igra: pripelji se čez Črnivec v današnjih razmerah"><span aria-hidden="true">🎮</span><span class="crn-ic-t">Igra</span></a>
       </div>
     </div>
 
@@ -562,7 +577,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </g>
   </svg>
         <div class="crn-head-txt">
-          <p class="crn-eyebrow">Lipa · 723 m n. m.</p>
+          <nav class="crn-pass" aria-label="Prelaz"><a href="https://crnivec.si/">Črnivec <small>902 m</small></a><a href="/lipa/" aria-current="page">Lipa <small>723 m</small></a></nav>
           <h1 class="crn-title" id="crn-h1">Kako je čez Lipo?</h1>
           <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
         </div>
@@ -587,41 +602,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         postaje, zato je vse na tej strani ocena.</p>
         <div class="crn-now" aria-labelledby="crn-now-h">
           <h2 class="crn-now-h" id="crn-now-h">Čez Lipo zdaj</h2>
-          <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">18,9 °C<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan · na tleh ga ni<span class="crn-ck-src">napoved 24 h</span></span></li></ul>
+          <ul class="crn-check" id="crn-check"><li class="crn-ck" data-lvl="ok" data-id="temp"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Temperatura<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">19,3 °C<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="road"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Vozišče<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">verjetno suho<span class="crn-ck-src">ocena</span></span></li><li class="crn-ck" data-lvl="ok" data-id="snow"><span class="crn-ck-i" aria-hidden="true"></span><span class="crn-ck-l">Sneg<span class="crn-sr">: V redu,</span></span><span class="crn-ck-v">ni pričakovan · na tleh ga ni<span class="crn-ck-src">napoved 24 h</span></span></li></ul>
           <p class="crn-check-warn" id="crn-check-warn" hidden></p>
           <p class="crn-check-note" id="crn-check-note">Na Lipi ni merilne postaje, zato je vse ocena modela (Open-Meteo, preračunano na 723 m). Vozišče je ocena, ne meritev.</p>
         </div>
-        <p class="crn-updated" id="crn-updated" data-ts="2026-09-28T12:01:32.732911+00:00" data-sfx="ocena iz vremenskega modela">Posodobljeno ob 14:01 · ocena iz vremenskega modela</p>
-        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-28T12:01:32.732911+00:00" hidden></p>
+        <p class="crn-updated" id="crn-updated" data-ts="2026-09-28T13:46:22.410732+00:00" data-sfx="ocena iz vremenskega modela">Posodobljeno ob 15:46 · ocena iz vremenskega modela</p>
+        <p id="crn-fresh" class="crn-fresh" data-generated="2026-09-28T13:46:22.410732+00:00" hidden></p>
         <span class="crn-status-index" id="crn-status-index">Meteorec indeks: SUHO K POPR</span>
       </div>
       </div>
 
       <section class="crn-special crn-special-alert" id="crn-special" aria-labelledby="crn-sp-h">
         <h2 class="crn-now-h" id="crn-sp-h">⚠️ Pozor · posebne razmere v 48 urah</h2>
-        <ul class="crn-sp-list"><li class="crn-sp" data-lvl="warn"><span class="crn-ck-i" aria-hidden="true"></span><div><p class="crn-sp-h"><b>Megla</b><span class="crn-sr">: Pozor,</span> · možna megla ali nizka oblačnost</p><ul class="crn-sp-lines"><li>Ocenjena zgornja meja megle jutri zjutraj je ~885 m — prelaz (723 m) je pod njo.</li></ul></div></li></ul>
-        <p class="crn-check-note">Modelna napoved iz izračuna ob 14:01 (Open-Meteo, preračunano na 723 m), ne uradno stanje ceste.</p>
+        <ul class="crn-sp-list"><li class="crn-sp" data-lvl="warn"><span class="crn-ck-i" aria-hidden="true"></span><div><p class="crn-sp-h"><b>Megla</b><span class="crn-sr">: Pozor,</span> · možna megla ali nizka oblačnost</p><ul class="crn-sp-lines"><li>Ocenjena zgornja meja megle jutri zjutraj je ~880 m — prelaz (723 m) je pod njo.</li></ul></div></li></ul>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 15:46 (Open-Meteo, preračunano na 723 m), ne uradno stanje ceste.</p>
       </section>
 
       <section class="crn-next" id="crn-next" aria-labelledby="crn-next-h">
         <h2 class="crn-now-h" id="crn-next-h">Vreme na Lipi po urah · naslednjih 6 ur</h2>
         <p class="crn-next-say" id="crn-next-say">Razmere naj bi ostale podobne.</p>
-        <div class="crn-next-grid" id="crn-next-grid"><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">15:00</p><p class="crn-nh-temp">19,4 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">17:00</p><p class="crn-nh-temp">18,6 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">20:00</p><p class="crn-nh-temp">9,6 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div>
+        <div class="crn-next-grid" id="crn-next-grid"><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">16:00</p><p class="crn-nh-temp">19,2 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">18:00</p><p class="crn-nh-temp">17,1 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-nh" data-lvl="ok"><p class="crn-nh-t">21:00</p><p class="crn-nh-temp">9,9 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div>
         <p class="crn-check-note" id="crn-next-note">Napoved Open-Meteo za dolino, preračunana na 723 m. Vozišče je ocena.</p>
       </section>
 
       <section class="crn-commute" id="crn-commute" aria-labelledby="crn-commute-h">
         <h2 class="crn-now-h" id="crn-commute-h">Na poti v službo in domov</h2>
         <p class="crn-lead crn-commute-lead">Najnižja temperatura, padavine in vozišče na prelazu v jutranjem in popoldanskem terminu.</p>
-        <div class="crn-commute-grid" id="crn-commute-grid"><div class="crn-cd"><p class="crn-cd-h">Danes</p><div class="crn-cw crn-cw-past"><p class="crn-cw-h">6:00–8:00</p><p class="crn-nh-p">že mimo</p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">18,9 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Jutri</p><div class="crn-cw" data-lvl="warn"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">4,4 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">19,3 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Sreda, 30. 9.</p><div class="crn-cw" data-lvl="warn"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">3,2 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">18,4 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Četrtek, 1. 10.</p><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">6,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">18,5 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div></div>
+        <div class="crn-commute-grid" id="crn-commute-grid"><div class="crn-cd"><p class="crn-cd-h">Danes</p><div class="crn-cw crn-cw-past"><p class="crn-cw-h">6:00–8:00</p><p class="crn-nh-p">že mimo</p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">19,2 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Jutri</p><div class="crn-cw" data-lvl="warn"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">4,2 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">19,3 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Sreda, 30. 9.</p><div class="crn-cw" data-lvl="warn"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">3,4 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">18,5 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div><div class="crn-cd"><p class="crn-cd-h">Četrtek, 1. 10.</p><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">6:00–8:00</p><p class="crn-cw-t">6,7 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div><div class="crn-cw" data-lvl="ok"><p class="crn-cw-h">14:00–16:00</p><p class="crn-cw-t">18,5 °C</p><p class="crn-nh-p">suho</p><p class="crn-nh-road" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span><span class="crn-sr">Vozišče: V redu, </span>verjetno suho</span></p></div></div></div>
         <p class="crn-check-note">Napoved Open-Meteo, preračunana na 723 m. Dlje v prihodnost je manj zanesljiva. Vozišče je ocena.</p>
       </section>
 
 
       <section class="crn-week" id="napoved-7-dni" aria-labelledby="crn-wk-h">
         <h2 class="crn-now-h" id="crn-wk-h">Vreme na Lipi za 7 dni</h2>
-        <div class="crn-wk-scroll"><table class="crn-t crn-wk"><thead><tr><th scope="col">Dan</th><th scope="col">Najnižja / najvišja</th><th scope="col">Padavine</th><th scope="col">Nov sneg</th><th scope="col">Poledica</th></tr></thead><tbody><tr><th scope="row">Danes<span class="crn-t-sub">do polnoči</span></th><td data-l="Min / max">6,7 / 19,4 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Jutri</th><td data-l="Min / max">4,4 / 19,6 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Sreda, 30. 9.</th><td data-l="Min / max">3,2 / 18,6 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Četrtek, 1. 10.</th><td data-l="Min / max">6,3 / 18,7 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Petek, 2. 10.</th><td data-l="Min / max">6,8 / 18,6 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Sobota, 3. 10.</th><td data-l="Min / max">4,3 / 19,7 °C</td><td data-l="Padavine">suho<span class="crn-t-sub">verjetnost do 2 %</span></td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Nedelja, 4. 10.</th><td data-l="Min / max">3,3 / 21,1 °C</td><td data-l="Padavine">suho<span class="crn-t-sub">verjetnost do 2 %</span></td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr></tbody></table></div>
-        <p class="crn-check-note">Modelna napoved iz izračuna ob 14:01 (Open-Meteo, preračunano na 723 m), ne uradno stanje ceste. Dlje v prihodnost je napoved manj zanesljiva.</p>
+        <div class="crn-wk-scroll"><table class="crn-t crn-wk"><thead><tr><th scope="col">Dan</th><th scope="col">Najnižja / najvišja</th><th scope="col">Padavine</th><th scope="col">Nov sneg</th><th scope="col">Poledica</th></tr></thead><tbody><tr><th scope="row">Danes<span class="crn-t-sub">do polnoči</span></th><td data-l="Min / max">7,0 / 19,3 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Jutri</th><td data-l="Min / max">4,2 / 19,6 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Sreda, 30. 9.</th><td data-l="Min / max">3,4 / 18,6 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Četrtek, 1. 10.</th><td data-l="Min / max">6,3 / 18,7 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Petek, 2. 10.</th><td data-l="Min / max">6,8 / 18,6 °C</td><td data-l="Padavine">suho</td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Sobota, 3. 10.</th><td data-l="Min / max">4,3 / 19,7 °C</td><td data-l="Padavine">suho<span class="crn-t-sub">verjetnost do 2 %</span></td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr><tr><th scope="row">Nedelja, 4. 10.</th><td data-l="Min / max">3,3 / 21,1 °C</td><td data-l="Padavine">suho<span class="crn-t-sub">verjetnost do 2 %</span></td><td data-l="Nov sneg">–</td><td class="crn-wk-bi" data-l="Poledica" data-lvl="ok"><span class="crn-ck-i" aria-hidden="true"></span><span>malo verjetna</span></td></tr></tbody></table></div>
+        <p class="crn-check-note">Modelna napoved iz izračuna ob 15:46 (Open-Meteo, preračunano na 723 m), ne uradno stanje ceste. Dlje v prihodnost je napoved manj zanesljiva.</p>
       </section>
     </section>
 
@@ -1058,7 +1073,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   // Začetni modelski vhodi so strežniški (isti, iz katerih je spečen
   // statični seznam) -- če meritev DRSI prispe pred Open-Meteo, vrstice
   // Vozišče/Sneg ne smejo za trenutek pasti na "ni podatka".
-  var zivModel = {"temp": 18.9, "snow24": 0.0, "precip24": 0, "p3": 0, "s3": 0.0, "pNow": 0.0, "pPrev": 0.0, "cloud": 0, "windValley": 6.1, "dewValley": 10.6}, zivDrsi = null, zivZoneId = null, zivModelLive = false;
+  var zivModel = {"temp": 19.3, "snow24": 0.0, "precip24": 0, "p3": 0, "s3": 0.0, "pNow": 0.0, "pPrev": 0.0, "cloud": 0, "windValley": 5.6, "dewValley": 11.1}, zivDrsi = null, zivZoneId = null, zivModelLive = false;
   // Snežna odeja (compute_snowpack, pas 900 m) -- samo strežniška, živi klic
   // Open-Meteo je ne računa, zato je ločena od zivModel (ta se prepiše).
   var SNOWPACK = 0.0;
