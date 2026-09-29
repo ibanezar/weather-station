@@ -123,6 +123,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 .chart-sub{font-size:.8rem;color:var(--muted);margin:0 0 .8rem}
 .chart-box{position:relative;height:300px}
 .chart-box.sm{height:150px}
+.chart-box.sm2{height:260px}
 .chart-card canvas{max-height:none}
 .chart-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;margin:0 0 .7rem;font-size:.8rem;color:var(--text)}
 .chart-legend span{display:inline-flex;align-items:center;gap:.4rem}
@@ -174,7 +175,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <p>Spodaj je napoved Open-Meteo za Rečico po urah, samo za čas sejma. Jutro je hladno, saj se zrak ob sončnem vzhodu (ob 7.02) šele začne ogrevati: ob 7. uri je napovedanih dobrih 8 °C. Do desetih naraste na 15 °C, opoldne na skoraj 19 °C, popoldne pa se ustali okoli 20 °C. Sonce zaide ob 18.34, zato se po petih hitro ohladi.</p>
 
-    <div class="table-wrap">
+    <div class="chart-card">
+      <h3>Temperatura v nedeljo, 4. 10., po urah</h3>
+      <p class="chart-sub">Napoved Open-Meteo za Rečico. Osenčeno je trajanje sejma od 9. ure naprej; pika označuje odprtje stojnic.</p>
+      <div class="chart-legend" aria-hidden="true"><span><i style="background:#a855f7"></i>Open-Meteo</span><span><i style="background:rgba(127,146,171,.35)"></i>Sejem (9.00–18.00)</span></div>
+      <div class="chart-box"><canvas id="chartHour" role="img" aria-label="Napovedana temperatura po urah v nedeljo, 4. oktobra: od 8 °C ob 7. uri do 20,7 °C ob 15. uri"></canvas></div>
+      <h3 style="margin-top:1.3rem">Oblačnost čez dan</h3>
+      <p class="chart-sub">Delež neba, prekritega z oblaki. Visoka oblačnost sama po sebi ne pomeni dežja: verjetnost dežja je vso uro 0 %.</p>
+      <div class="chart-box sm"><canvas id="chartCloud" role="img" aria-label="Napovedana oblačnost po urah, med 82 in 100 odstotki"></canvas></div>
+      <p class="tbl-note">Zapelji z miško ali prstom čez točko za točne vrednosti. Napoved z 29. septembra 2026.</p>
+      <details class="tbl"><summary>Številke v tabeli</summary>
+      <div class="table-wrap">
     <table class="stats">
     <tr><th>Ura</th><th>Temperatura (°C)</th><th>Oblačnost</th><th>Sunki (km/h)</th><th>Verjetnost dežja</th></tr>
 <tr><td class="day">9.00</td><td>11,8</td><td>95 %</td><td>10</td><td class="dry">0 %</td></tr>
@@ -189,6 +200,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </table>
     </div>
     <p class="tbl-note">Napoved Open-Meteo z 29. septembra 2026, točka Rečica ob Savinji.</p>
+      </details>
+    </div>
 
     <p>Oblačnost ni znak dežja. Model jo drži med 82 in 100 %, torej bo verjetno megleno ali povsem oblačno jutro, čez dan pa se nebo morda za kratek čas nekoliko razjasni, najbolj okoli 14. ure. Jasnega, sončnega dneva ne obljubljamo.</p>
 
@@ -203,6 +216,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <h2 id="primerjava">za začetek oktobra je to običajen, nekoliko suh dan</h2>
 
     <p>Postaja v Rečici je od 1. do 7. oktobra v letih 2020–2025 v povprečju izmerila najvišjo temperaturo <span class="mono">18,9 °C</span> in najnižjo <span class="mono">6,8 °C</span>. Napovedanih <span class="mono">20,7 °C</span> je tako nekoliko nad povprečjem, jutro pa blizu njega.</p>
+
+
+    <div class="chart-card">
+      <h3>4. oktober v preteklih letih in letošnja napoved</h3>
+      <p class="chart-sub">Vsak stolpec sega od najnižje do najvišje temperature dneva. Sivo: meritve postaje IREICA1, modro: dan z dežjem (vsaj 0,2 mm), vijolično: letošnja napoved Open-Meteo.</p>
+      <div class="chart-legend" aria-hidden="true"><span><i style="background:#7f92ab"></i>Meritev, suho</span><span><i style="background:#3987e5"></i>Meritev, dež</span><span><i style="background:#a855f7"></i>Napoved 2026</span></div>
+      <div class="chart-box sm2"><canvas id="chartHist" role="img" aria-label="Najnižja in najvišja temperatura 4. oktobra v letih 2020 do 2025 ter napoved za 2026"></canvas></div>
+      <p class="tbl-note">Napovedanih 7,3 / 20,7 °C je znotraj razpona zadnjih šestih let: najnižja temperatura je bila od −1,2 do 10,6 °C, najvišja od 11,2 do 22,3 °C.</p>
+    </div>
 
     <p>Dež (vsaj 0,2 mm) je v tem tednu padel na 23 od 42 dni, torej na več kot polovici dni. Prav 4. oktobra sta bila mokra dva od šestih dni (2020 in 2024), leta 2025 pa je bilo suho, a je bilo isto jutro pod ničlo (−1,2 °C). Suha nedelja je torej pri tem sejmu prej dobra novica kot nekaj samoumevnega.</p>
 
@@ -284,6 +306,82 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var nb = document.getElementById('btn-native'); nb.style.display = 'inline-flex';
     nb.addEventListener('click', function () { navigator.share({ title: PAGE_TITLE, text: PAGE_TEXT, url: PAGE_URL }).catch(function () {}); });
   }
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  if (typeof Chart === 'undefined') return;
+  const INK = '#adc0d8', GRID = 'rgba(255,255,255,.06)', NEUTRAL = '#7f92ab';
+  const num = v => String(v).replace('.', ',');
+  const TIP = { backgroundColor: 'rgba(4,7,14,.96)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+                titleColor: INK, bodyColor: '#e8edf8', padding: 10 };
+  const BAR = { borderRadius: 4, borderSkipped: false, borderColor: 'rgba(10,15,28,.94)', borderWidth: 1 };
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.color = INK;
+  const NARROW = window.innerWidth < 560;
+
+  // Ure 7.00–18.00, Open-Meteo, 29. 9. 2026
+  const HRS  = [7,8,9,10,11,12,13,14,15,16,17,18];
+  const LAB  = HRS.map(h => h + '.00');
+  const TEMP = [8.1,9.3,11.8,15.0,17.5,18.9,19.8,20.4,20.7,20.4,19.5,17.5];
+  const CLOUD= [91,93,95,98,100,95,89,82,87,94,100,100];
+  const GUST = [12,12,10,9,8,9,11,12,12,11,10,9];
+  const fair = { id: 'fair', beforeDatasetsDraw(c) {
+    const x = c.scales.x, a = c.chartArea, ctx = c.ctx;
+    const x0 = x.getPixelForValue(2), x1 = a.right;
+    ctx.save(); ctx.fillStyle = 'rgba(127,146,171,.16)'; ctx.fillRect(x0, a.top, x1 - x0, a.bottom - a.top);
+    ctx.fillStyle = INK; ctx.font = '600 10.5px Inter, system-ui, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('Sejem od 9.00', x0 + 6, a.top + 14); ctx.restore(); } };
+  new Chart(document.getElementById('chartHour'), {
+    type: 'line', plugins: [fair],
+    data: { labels: LAB, datasets: [{ label: 'Open-Meteo', data: TEMP, borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,.14)',
+      fill: true, tension: .35, borderWidth: 2.5, pointRadius: TEMP.map((_, i) => i === 2 ? 6 : 3), pointBackgroundColor: '#a855f7',
+      pointBorderColor: 'rgba(10,15,28,.94)', pointBorderWidth: 1.5, pointHoverRadius: 7 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false },
+        tooltip: { ...TIP, callbacks: { title: i => 'Ob ' + i[0].label, label: c => 'Temperatura: ' + num(c.raw.toFixed(1)) + ' °C',
+          afterLabel: c => 'Oblačnost: ' + CLOUD[c.dataIndex] + ' %  ·  sunki: ' + GUST[c.dataIndex] + ' km/h' } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true, maxTicksLimit: NARROW ? 6 : 12 } },
+        y: { min: 4, max: 24, grid: { color: GRID }, ticks: { stepSize: 4, font: { size: 10.5 }, callback: v => v + ' °C' } }
+      }
+    }
+  });
+  new Chart(document.getElementById('chartCloud'), {
+    type: 'bar',
+    data: { labels: LAB, datasets: [{ label: 'Oblačnost', data: CLOUD, backgroundColor: NEUTRAL, ...BAR }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { ...TIP, callbacks: { title: i => 'Ob ' + i[0].label, label: c => 'Oblačnost: ' + c.raw + ' %', afterLabel: () => 'Verjetnost dežja: 0 %' } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 0, autoSkip: true, maxTicksLimit: NARROW ? 6 : 12 } },
+        y: { min: 0, max: 100, grid: { color: GRID }, ticks: { stepSize: 50, font: { size: 10.5 }, callback: v => v + ' %' } }
+      }
+    }
+  });
+
+  // 4. oktober: meritve IREICA1 in letošnja napoved
+  const YRS  = ['2020','2021','2022','2023','2024','2025','2026 (napoved)'];
+  const R    = [[10.2,18.0],[10.6,22.3],[3.1,20.3],[9.6,18.3],[7.6,11.2],[-1.2,14.9],[7.3,20.7]];
+  const MM   = [3.3,0,0,0,9.9,0,0];
+  new Chart(document.getElementById('chartHist'), {
+    type: 'bar',
+    data: { labels: YRS, datasets: [{ label: 'Temperatura', data: R,
+      backgroundColor: R.map((_, i) => i === 6 ? '#a855f7' : MM[i] >= 0.2 ? '#3987e5' : NEUTRAL), ...BAR }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { ...TIP, callbacks: { label: c => num(c.raw[0]) + ' → ' + num(c.raw[1]) + ' °C',
+          afterLabel: c => c.dataIndex === 6 ? 'Napoved: brez dežja' : 'Padavine: ' + num(MM[c.dataIndex]) + ' mm' } } },
+      scales: {
+        x: { min: -5, max: 25, grid: { color: GRID }, ticks: { stepSize: 5, maxRotation: 0, font: { size: 10.5 }, callback: v => v + ' °C' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
 })();
 </script>
 <script src="likes.js?v=252186ff" defer></script>
