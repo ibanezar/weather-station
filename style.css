@@ -496,6 +496,24 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .hero-briefing p{margin:0;font-size:.83rem;color:var(--text);line-height:1.55}
 @keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @media(prefers-reduced-motion:no-preference){.hero-icon svg,.hero-icon .wx-icon{animation:heroFloat 6s ease-in-out infinite}}
+/* Telefon: .hero-left je bil ozek stolpec ob ikoni, ki je zasedala le vrh — desna
+   tretjina kartice je bila pod temperaturo prazna, vsaka vrstica (včeraj, rekord,
+   MTR) pa se je zato lomila v 2–3 vrstice in imela svojo škatlo. Ikona gre zdaj ob
+   stanje + temperaturo, vse pod njima gre čez vso širino kot en seznam z
+   ločilnimi črtami namesto štirih škatel. .hero-left je display:contents, da
+   njegovi otroci postanejo celice mreže (HTML in WX-DAILY-FACT ostaneta ista). */
+@media(max-width:680px){
+  .hero .hero-top{display:grid;grid-template-columns:1fr auto;gap:0 .6rem;align-items:start;margin-bottom:.9rem}
+  .hero .hero-left{display:contents}
+  .hero .hero-left>*{grid-column:1/-1}
+  .hero .hero-left>.condition-badge,.hero .hero-left>.temp-huge{grid-column:1}
+  .hero .hero-icon{grid-column:2;grid-row:1/3;align-self:center;margin-top:.9rem}
+  .hero .feels{margin-top:.45rem;margin-bottom:.6rem}
+  .hero .yesterday-delta,.hero .daily-fact-card,.hero .dew-line,.hero .mtr-trust-badge a{
+    margin:0;padding:.5rem .1rem;background:none;border:0;border-top:1px solid var(--border);border-radius:0}
+  .hero .yesterday-delta:empty+.daily-fact-card,.hero .mtr-trust-badge{margin-top:0}
+  .hero .dew-line{font-size:.78rem}
+}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
 .fc-slider-wrap{padding:.55rem 0 .65rem;display:flex;flex-direction:column;gap:.32rem}
