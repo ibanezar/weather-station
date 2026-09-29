@@ -1,8 +1,13 @@
 {
+  "lenartov-sejem-vreme-nedelja-1004": [
+    "indijansko-poletje-suh-soncen-teden-0925",
+    "naslednji-teden-konec-poletja-0904",
+    "tedenska-napoved-24-28-avgust-2026"
+  ],
   "indijansko-poletje-suh-soncen-teden-0925": [
     "naslednji-teden-konec-poletja-0904",
-    "tedenska-napoved-11-17-avgust-2026",
-    "tedenska-napoved-24-28-avgust-2026"
+    "lenartov-sejem-vreme-nedelja-1004",
+    "tedenska-napoved-11-17-avgust-2026"
   ],
   "kelvin-helmholtzovi-valovi-nad-crnivcem-0924": [
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
@@ -11,8 +16,8 @@
   ],
   "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923": [
     "najhladnejsa-julijska-jutra-recica",
-    "temperaturni-trend-ireica1-2020-2025",
-    "indijansko-poletje-suh-soncen-teden-0925"
+    "indijansko-poletje-suh-soncen-teden-0925",
+    "temperaturni-trend-ireica1-2020-2025"
   ],
   "jesenski-vrh-gob-2026-savinjska-dolina-0922": [
     "trije-vali-gob-po-dezju-0911",
@@ -52,12 +57,12 @@
   "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907": [
     "tedenska-napoved-24-28-avgust-2026",
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
-    "naslednji-teden-konec-poletja-0904"
+    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
   ],
   "naslednji-teden-konec-poletja-0904": [
+    "indijansko-poletje-suh-soncen-teden-0925",
     "tedenska-napoved-24-28-avgust-2026",
-    "tedenska-napoved-11-17-avgust-2026",
-    "indijansko-poletje-suh-soncen-teden-0925"
+    "tedenska-napoved-11-17-avgust-2026"
   ],
   "test-napovedi-2026-08": [
     "test-napovedi-2026-07",
@@ -226,8 +231,8 @@
   ],
   "invazivke-mesecni-pregled-2026-07": [
     "invazivka-tedenski-pregled-20260830",
-    "invazivka-tedenski-pregled-20260815",
-    "invazivka-tedenski-pregled-20260920"
+    "invazivka-tedenski-pregled-20260920",
+    "invazivka-tedenski-pregled-20260815"
   ],
   "vremenski-povzetek-julij-2026": [
     "vremenski-povzetek-avgust-2026",
