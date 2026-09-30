@@ -33,6 +33,9 @@ MODELS = {
     "gfs_seamless":             "GFS",
     "meteofrance_arpege_europe": "ARPEGE",
     "best_match":                "Best Match",
+    # AI model ECMWF (od 25. 2. 2025). Arhiv previous_dayN je krajši od ostalih:
+    # pred začetkom AIFS vrstic preprosto ni (glej docs/model-recica.md).
+    "ecmwf_aifs025_single":      "ECMWF AIFS",
 }
 
 LEADS = range(1, 8)

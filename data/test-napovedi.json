@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-30T07:31:00",
+  "generated_at": "2026-09-30T17:11:44",
   "n_obs_days": 2500,
   "n_obs_rejected": 0,
   "n_compared_days": 853,
@@ -40,7 +40,8 @@
     "icon_seamless": "ICON",
     "gfs_seamless": "GFS",
     "meteofrance_arpege_europe": "ARPEGE",
-    "best_match": "Best Match"
+    "best_match": "Best Match",
+    "ecmwf_aifs025_single": "ECMWF AIFS"
   },
   "results": {
     "ecmwf_ifs025": {
@@ -1346,6 +1347,295 @@
           }
         },
         "skill_tmax_vs_climatology": 0.179
+      }
+    },
+    "ecmwf_aifs025_single": {
+      "1": {
+        "tmax": {
+          "n": 585,
+          "mae": 2.07,
+          "bias": -1.88,
+          "rmse": 2.41,
+          "pct_gt3": 21.9
+        },
+        "tmin": {
+          "n": 585,
+          "mae": 2.78,
+          "bias": 2.62,
+          "rmse": 3.21,
+          "pct_gt3": 42.9
+        },
+        "precip_contingency": {
+          "0.2": {
+            "n": 585,
+            "hit": 202,
+            "false_alarm": 108,
+            "miss": 51,
+            "correct_negative": 224,
+            "pod": 0.798,
+            "far": 0.348,
+            "csi": 0.56,
+            "bias_ratio": 1.225
+          },
+          "5.0": {
+            "n": 585,
+            "hit": 66,
+            "false_alarm": 41,
+            "miss": 25,
+            "correct_negative": 453,
+            "pod": 0.725,
+            "far": 0.383,
+            "csi": 0.5,
+            "bias_ratio": 1.176
+          }
+        },
+        "skill_tmax_vs_climatology": 0.384
+      },
+      "2": {
+        "tmax": {
+          "n": 584,
+          "mae": 2.08,
+          "bias": -1.86,
+          "rmse": 2.48,
+          "pct_gt3": 23.3
+        },
+        "tmin": {
+          "n": 584,
+          "mae": 2.96,
+          "bias": 2.79,
+          "rmse": 3.42,
+          "pct_gt3": 46.9
+        },
+        "precip_contingency": {
+          "0.2": {
+            "n": 584,
+            "hit": 205,
+            "false_alarm": 118,
+            "miss": 48,
+            "correct_negative": 213,
+            "pod": 0.81,
+            "far": 0.365,
+            "csi": 0.553,
+            "bias_ratio": 1.277
+          },
+          "5.0": {
+            "n": 584,
+            "hit": 65,
+            "false_alarm": 41,
+            "miss": 26,
+            "correct_negative": 452,
+            "pod": 0.714,
+            "far": 0.387,
+            "csi": 0.492,
+            "bias_ratio": 1.165
+          }
+        },
+        "skill_tmax_vs_climatology": 0.381
+      },
+      "3": {
+        "tmax": {
+          "n": 583,
+          "mae": 2.14,
+          "bias": -1.86,
+          "rmse": 2.59,
+          "pct_gt3": 25.4
+        },
+        "tmin": {
+          "n": 583,
+          "mae": 3.04,
+          "bias": 2.85,
+          "rmse": 3.52,
+          "pct_gt3": 46.8
+        },
+        "precip_contingency": {
+          "0.2": {
+            "n": 583,
+            "hit": 208,
+            "false_alarm": 130,
+            "miss": 44,
+            "correct_negative": 201,
+            "pod": 0.825,
+            "far": 0.385,
+            "csi": 0.545,
+            "bias_ratio": 1.341
+          },
+          "5.0": {
+            "n": 583,
+            "hit": 64,
+            "false_alarm": 30,
+            "miss": 27,
+            "correct_negative": 462,
+            "pod": 0.703,
+            "far": 0.319,
+            "csi": 0.529,
+            "bias_ratio": 1.033
+          }
+        },
+        "skill_tmax_vs_climatology": 0.363
+      },
+      "4": {
+        "tmax": {
+          "n": 569,
+          "mae": 2.21,
+          "bias": -1.77,
+          "rmse": 2.68,
+          "pct_gt3": 28.5
+        },
+        "tmin": {
+          "n": 569,
+          "mae": 3.05,
+          "bias": 2.78,
+          "rmse": 3.55,
+          "pct_gt3": 48.5
+        },
+        "precip_contingency": {
+          "0.2": {
+            "n": 569,
+            "hit": 199,
+            "false_alarm": 141,
+            "miss": 45,
+            "correct_negative": 184,
+            "pod": 0.816,
+            "far": 0.415,
+            "csi": 0.517,
+            "bias_ratio": 1.393
+          },
+          "5.0": {
+            "n": 569,
+            "hit": 61,
+            "false_alarm": 35,
+            "miss": 29,
+            "correct_negative": 444,
+            "pod": 0.678,
+            "far": 0.365,
+            "csi": 0.488,
+            "bias_ratio": 1.067
+          }
+        },
+        "skill_tmax_vs_climatology": 0.342
+      },
+      "5": {
+        "tmax": {
+          "n": 568,
+          "mae": 2.36,
+          "bias": -1.79,
+          "rmse": 2.87,
+          "pct_gt3": 30.6
+        },
+        "tmin": {
+          "n": 568,
+          "mae": 3.18,
+          "bias": 2.89,
+          "rmse": 3.71,
+          "pct_gt3": 51.4
+        },
+        "precip_contingency": {
+          "0.2": {
+            "n": 568,
+            "hit": 196,
+            "false_alarm": 141,
+            "miss": 48,
+            "correct_negative": 183,
+            "pod": 0.803,
+            "far": 0.418,
+            "csi": 0.509,
+            "bias_ratio": 1.381
+          },
+          "5.0": {
+            "n": 568,
+            "hit": 55,
+            "false_alarm": 43,
+            "miss": 35,
+            "correct_negative": 435,
+            "pod": 0.611,
+            "far": 0.439,
+            "csi": 0.414,
+            "bias_ratio": 1.089
+          }
+        },
+        "skill_tmax_vs_climatology": 0.298
+      },
+      "6": {
+        "tmax": {
+          "n": 580,
+          "mae": 2.62,
+          "bias": -1.88,
+          "rmse": 3.26,
+          "pct_gt3": 33.4
+        },
+        "tmin": {
+          "n": 580,
+          "mae": 3.34,
+          "bias": 3.02,
+          "rmse": 3.92,
+          "pct_gt3": 52.4
+        },
+        "precip_contingency": {
+          "0.2": {
+            "n": 580,
+            "hit": 211,
+            "false_alarm": 154,
+            "miss": 40,
+            "correct_negative": 175,
+            "pod": 0.841,
+            "far": 0.422,
+            "csi": 0.521,
+            "bias_ratio": 1.454
+          },
+          "5.0": {
+            "n": 580,
+            "hit": 61,
+            "false_alarm": 71,
+            "miss": 30,
+            "correct_negative": 418,
+            "pod": 0.67,
+            "far": 0.538,
+            "csi": 0.377,
+            "bias_ratio": 1.451
+          }
+        },
+        "skill_tmax_vs_climatology": 0.22
+      },
+      "7": {
+        "tmax": {
+          "n": 566,
+          "mae": 2.89,
+          "bias": -1.83,
+          "rmse": 3.59,
+          "pct_gt3": 41.3
+        },
+        "tmin": {
+          "n": 566,
+          "mae": 3.45,
+          "bias": 2.89,
+          "rmse": 4.08,
+          "pct_gt3": 52.5
+        },
+        "precip_contingency": {
+          "0.2": {
+            "n": 566,
+            "hit": 200,
+            "false_alarm": 178,
+            "miss": 44,
+            "correct_negative": 144,
+            "pod": 0.82,
+            "far": 0.471,
+            "csi": 0.474,
+            "bias_ratio": 1.549
+          },
+          "5.0": {
+            "n": 566,
+            "hit": 47,
+            "false_alarm": 69,
+            "miss": 43,
+            "correct_negative": 407,
+            "pod": 0.522,
+            "far": 0.595,
+            "csi": 0.296,
+            "bias_ratio": 1.289
+          }
+        },
+        "skill_tmax_vs_climatology": 0.14
       }
     }
   },
