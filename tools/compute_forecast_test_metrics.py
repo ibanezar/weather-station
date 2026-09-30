@@ -47,6 +47,7 @@ MODEL_LABELS = {
     "gfs_seamless": "GFS",
     "meteofrance_arpege_europe": "ARPEGE",
     "best_match": "Best Match",
+    "ecmwf_aifs025_single": "ECMWF AIFS",
 }
 # ARSO in Yr/MET Norway nimata arhiva preteklih napovedi (Faza 1b) -- beležimo
 # ju sproti (tools/log_forward_forecasts.py) od datuma prvega zagona naprej.

@@ -34,7 +34,7 @@ TODAY_DATE = datetime.date.fromisoformat(os.environ.get("POST_DATE") or datetime
 TODAY = TODAY_DATE.isoformat()
 
 METHODOLOGY_NOTE = (
-    "Metodologija: vsak dan primerjamo, kaj je pet virov (ECMWF IFS, ICON, GFS, ARPEGE, best_match prek "
+    "Metodologija: vsak dan primerjamo, kaj je šest virov (ECMWF IFS, ECMWF AIFS, ICON, GFS, ARPEGE, best_match prek "
     "Open-Meteo Previous Runs API) dan prej napovedalo za najvišjo temperaturo v Rečici ob Savinji, z dejansko "
     "meritvijo postaje IREICA1. Izhodišče je klimatologija — dolgoletno povprečje za ta koledarski dan — ne "
     "ugibanje na pamet. Rezultat velja izključno za Zgornjo Savinjsko dolino: modeli delujejo na mreži, ki ozke "
@@ -115,7 +115,7 @@ def build_article(y, m, per_model, biggest, site_data):
                 f'{MODEL_LABELS.get(mdl, mdl)} pri D+{ld}' for mdl, ld in zero_crossing.items()) +
                 " napoved ni več boljša od klimatologije.")
         else:
-            crossing_txt = ("noben od petih virov v celotnem vzorcu (D+1 do D+7) ne pade na raven klimatologije "
+            crossing_txt = ("noben od šestih virov v celotnem vzorcu (D+1 do D+7) ne pade na raven klimatologije "
                              f'(±{seo.num(climo_mae) if climo_mae is not None else "—"} °C za Tmax) — razlika se z '
                              "vsakim dnem vnaprej manjša, a modeli ostanejo pred golim ugibanjem povprečja tudi teden vnaprej.")
 
@@ -134,7 +134,7 @@ def build_article(y, m, per_model, biggest, site_data):
     return {
         "title": title,
         "meta_description": (f'Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino '
-                              f'v {mes_loc} {y}: primerjava ECMWF, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.'),
+                              f'v {mes_loc} {y}: primerjava ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.'),
         "tags": ["test-napovedi", "mesecni-pregled", str(y)],
         "section_label": "Test napovedi",
         "og_photo": "weather-station",
@@ -142,7 +142,7 @@ def build_article(y, m, per_model, biggest, site_data):
         "lead": lead,
         "sections": sections,
         "callout": None,
-        "sources_note": ("Viri: Open-Meteo Previous Runs API (ECMWF IFS, ICON, GFS, ARPEGE, best_match), "
+        "sources_note": ("Viri: Open-Meteo Previous Runs API (ECMWF IFS, ECMWF AIFS, ICON, GFS, ARPEGE, best_match), "
                           "meritve postaje IREICA1. Podatki in metodologija: /test-napovedi/."),
     }
 
