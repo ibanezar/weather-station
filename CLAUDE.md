@@ -343,7 +343,10 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   vsega sveta, tišina pomeni mrtvo povezavo) in zataknjeno odpiranje (> 20 s) se zapreta in
   zamenjata — prej se je ob `readyState` 0 ustvarila nova vtičnica brez zapiranja stare, ob
   prekinitvi pa se je izgubilo do 5 min strel. V pokritost (`uptime`) šteje samo **sveža**
-  povezava. Vsak deploy workerja restartira DO (do 10 s luknje) — več deployev na dan = nižja
+  povezava. **Pokritost piše tok sporočil sam** (`_onMessage`, enkrat na režo), ne le klic
+  crona: petminutni cron tike izpušča (opravila si delijo proračun) in je živo povezavo
+  zapisal kot luknjo — 1. 10. 2026 10 od 13 rež v uri, kar bi nevihtno preverjanje (< 90 %)
+  vsak dan preskočilo. Vsak deploy workerja restartira DO (do 10 s luknje) — več deployev na dan = nižja
   pokritost tistega dne, nevihtno preverjanje ga pri < 90 % preskoči. Simulacijo poganja
   `tools/test_lightning_logger.py` (lažen WebSocket, SQLite, alarmi).
 - Prikaz na domači strani (kartica »Strele v bližini«, samo napredni pogled):
