@@ -613,6 +613,96 @@ def normal_precip_for_period(entries, normals, year):
     return tot if have else None
 
 
+# Mesec se uvrsti samo med ENAKE mesece drugih let, ki so skoraj polni — delni
+# mesec (začetek arhiva novembra 2019, tekoči mesec) ni primerljiv. Tekoči mesec
+# se zato ne uvršča; njegova stran ima »do zdaj« le odstopanje od norme.
+RANK_MIN_DAYS = 25
+# Mestnik množine (»med 7 septembri«) — Python nima sklanjatve, zato tabela.
+MES_NOM_PL = {1:"januarji",2:"februarji",3:"marci",4:"aprili",5:"maji",6:"juniji",
+              7:"juliji",8:"avgusti",9:"septembri",10:"oktobri",11:"novembri",12:"decembri"}
+MONTH_SUMMARY_MARK = 'class="archive-intro month-summary"'
+
+
+def month_rank(by_month, y, m, key):
+    """(mesto, število primerljivih let) za mesec y-m po ključu iz month_stats,
+    padajoče (1 = najtoplejši/najbolj moker). None, če mesec ni primerljiv ali je
+    primerljivih let manj kot tri — »2. od 2« ni podatek."""
+    vals = {}
+    for ym, entries in by_month.items():
+        if int(ym[5:7]) != m or len(entries) < RANK_MIN_DAYS:
+            continue
+        s = month_stats(sorted(entries))
+        if s and s.get(key) is not None:
+            vals[int(ym[:4])] = s[key]
+    if y not in vals or len(vals) < 3:
+        return None
+    mine = vals[y]
+    return 1 + sum(1 for v in vals.values() if v > mine), len(vals)
+
+
+def rank_phrase(rank, adj_top, adj_bottom):
+    """»najtoplejši«, »3. najtoplejši«, »najhladnejši« … od n let."""
+    pos, n = rank
+    if n % 2 and pos == (n + 1) // 2:
+        return None
+    if pos == 1:
+        return adj_top
+    if pos == n:
+        return adj_bottom
+    if pos <= n // 2:
+        return f"{pos}. {adj_top}"
+    return f"{n - pos + 1}. {adj_bottom}"
+
+
+def month_summary(y, m, s, by_month, t_anom, p_anom, partial, hot_d, hot_v, pr_d, pr_v):
+    """Odstavek »na kratko« in FAQ za mesečno stran — iste številke kot tabele
+    na strani, brez modela (stran mora biti reproducibilna)."""
+    label = f"{MES_NOM[m].capitalize()} {y}"
+    t_rank = None if partial else month_rank(by_month, y, m, "tavg")
+    p_rank = None if partial else month_rank(by_month, y, m, "prec_total")
+    bits = [f"povprečna temperatura {num(s['tavg'])} °C"]
+    if t_anom and t_anom.lstrip("+-") == "0,0 °C":
+        bits[-1] += " (enako kot norma)"
+    elif t_anom:
+        warmer = not t_anom.startswith("-")
+        bits[-1] += f" (<strong>{t_anom.lstrip('+-')}</strong> {'nad' if warmer else 'pod'} normo)"
+    bits.append(f"{num(s['prec_total'])} mm padavin v {s['prec_days']} deževnih dneh")
+    lead = f"{label} v Rečici ob Savinji {'doslej' if partial else 'na kratko'}"
+    text = f"{lead}: " + ", ".join(bits) + "."
+    t_ph = t_rank and rank_phrase(t_rank, 'najtoplejši', 'najhladnejši')
+    p_ph = p_rank and rank_phrase(p_rank, 'najbolj namočen', 'najbolj suh')
+    if t_rank:
+        text += (f" Med {t_rank[1]} {MES_NOM_PL[m]}, odkar postaja meri, je bil "
+                 + (f"{t_ph}." if t_ph else "po temperaturi točno na sredini."))
+    if p_rank:
+        text += (f" Po padavinah je bil " + (f"{p_ph}." if p_ph else "točno na sredini."))
+
+    qa = []
+    if t_anom and t_anom.lstrip("+-") == "0,0 °C":
+        a = (f"Ne, bil je povprečen. Povprečna temperatura {MES_GEN[m]} {y} je bila "
+             f"{num(s['tavg'])} °C, enako kot dolgoletno povprečje postaje IREICA1")
+    elif t_anom:
+        warmer = not t_anom.startswith("-")
+        a = (f"{'Da' if warmer else 'Ne'}. Povprečna temperatura {MES_GEN[m]} {y} je bila "
+             f"{num(s['tavg'])} °C, kar je {t_anom.lstrip('+-')} {'nad' if warmer else 'pod'} "
+             f"dolgoletnim povprečjem postaje IREICA1")
+    if t_anom:
+        if t_ph:
+            a += f"; {t_ph} {MES_NOM[m]} med {t_rank[1]} leti meritev"
+        qa.append((f"Ali je bil {MES_NOM[m]} {y} v Rečici ob Savinji toplejši od povprečja?", a + "."))
+    a = f"{MES_GEN[m].capitalize()} {y} je {'doslej ' if partial else ''}padlo {num(s['prec_total'])} mm padavin"
+    if p_anom:
+        a += f" ({p_anom})"
+    if pr_d and pr_v:
+        a += f"; največ {fmtd(pr_d)}, {num(pr_v)} mm"
+    qa.append((f"Koliko padavin je padlo {MES_GEN[m]} {y}?", a + "."))
+    if hot_d and hot_v is not None:
+        qa.append((f"Kateri je bil najtoplejši dan {MES_GEN[m]} {y}?",
+                   f"Najvišja temperatura {MES_GEN[m]} {y} je bila {num(hot_v)} °C, "
+                   f"izmerjena {fmtd(hot_d)} na postaji IREICA1 v Rečici ob Savinji."))
+    return text, qa
+
+
 def norm_note(full_years):
     """Norma je iz ~6 let meritev, ne iz 30-letne klimatološke serije — to mora
     biti povedano povsod, kjer se primerja (isto kot /klima/)."""
@@ -823,7 +913,14 @@ def gen_monthly_pages(hist, force, sitemap_urls, normals, full_years):
         lastmod = entries[-1][0]
         is_current = (ym == CURRENT_YM)
 
-        if not force and not is_current and os.path.exists(os.path.join(ROOT, rel)):
+        # Stran brez povzetka (pred 1. 10. 2026) se enkrat prepiše; uvrstitev
+        # zaključenega meseca se spremeni le, ko pride nov enak mesec, kar je
+        # tudi tekoči mesec naslednje leto — zato se prepiše vsakič, ko je
+        # tekoči mesec isti kot ta (sicer bi stara stran trdila staro mesto).
+        path = os.path.join(ROOT, rel)
+        same_month_now = (m == int(CURRENT_YM[5:7]))
+        if (not force and not is_current and not same_month_now and os.path.exists(path)
+                and MONTH_SUMMARY_MARK in open(path, encoding="utf-8").read()):
             sitemap_urls.append(sitemap_entry(SITE + url, lastmod, "monthly", "0.6"))
             continue
 
@@ -893,6 +990,13 @@ def gen_monthly_pages(hist, force, sitemap_urls, normals, full_years):
     <tr><th>Dnevi z zmrzaljo</th><td class="record-val">{m_frost}</td></tr>
 {chr(10).join(m_extra)}
   </table>'''
+
+        summary_txt, qa = month_summary(
+            y, m, s, by_month, t_anom, p_anom, partial, hi_d, hi_v, pr_d, pr_v)
+        summary_html = f'  <p class="archive-intro month-summary">{summary_txt}</p>'
+        faq_html = ("  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+            f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
+        ) + "\n  </div>")
 
         crumbs = [
             ("Meteorec", "/"),
@@ -982,18 +1086,20 @@ def gen_monthly_pages(hist, force, sitemap_urls, normals, full_years):
                            f'    Podatki do {int(entries[-1][0][8:10])}. {MES_GEN[m]} {y} '
                            f'({s["count"]} od {dim} dni) — mesec še ni zaključen.\n  </div>\n')
 
-        schema = "\n".join([webpage_schema(url, title, desc, entries[0][0]), crumbs_schema(crumbs)])
+        schema = "\n".join([webpage_schema(url, title, desc, entries[0][0]), crumbs_schema(crumbs), faq_schema(qa)])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme {MES_NOM[m]} {y} v Rečici ob Savinji</h1>
   <p class="post-meta">Meritve postaje IREICA1 · {ELEV} m n. m. · Savinjska dolina</p>
 {intro}
+{summary_html}
 {partial_note}{cards}
 {anom_html}
 {month_extremes}
   <h2>Dnevi v mesecu</h2>
 {day_table}
   <p class="muted-note">Temperatura je dnevno povprečje. Padavine so dnevna vsota. Prikazana je tudi max. hitrost sunka vetra.</p>
+{faq_html}
 {nav_html}'''
 
         html = page_shell(title, desc, url, schema, body, y)
