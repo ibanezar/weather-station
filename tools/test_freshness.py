@@ -98,7 +98,11 @@ if r:
     check(not jobs["dispatch"]["ok"] and "GH_DISPATCH_TOKEN" in jobs["dispatch"]["err"],
           "/health: razlog neuspeha je viden", str(jobs["dispatch"]))
     check(jobs["aurora"]["err"] == "boom", "/health: izjema je zabeležena")
-    check(jobs["crnivec"]["stale"] and jobs["crnivec"]["err"] == "ni zapisa", "/health: opravilo brez zapisa je zastarelo")
+    check(jobs["crnivec"]["waiting"] and not jobs["crnivec"]["stale"] and jobs["crnivec"]["ok"],
+          "/health: opravilo brez zapisa znotraj roka od prvega zapisa čaka (ni lažnega izpada)", str(jobs["crnivec"]))
+    check(r["long_missing"]["stale"] and not r["long_missing"]["waiting"] and r["long_missing"]["err"] == "ni zapisa",
+          "/health: opravilo, ki ga ni > rok od prvega zapisa, je zastarelo", str(r["long_missing"]))
+    check(r["since_set"] and r["waiting"]["waiting"] and not r["waiting"]["stale"], "/health: dnevno opravilo po deployu čaka na prvi tek")
     check(r["health"]["ok"] is False, "/health: celota ni ok, če je eno opravilo slabo")
 
 print(f"\n{CHECKS} preverjanj, {len(FAILS)} napak")
