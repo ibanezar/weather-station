@@ -2829,6 +2829,9 @@ function _ltgDist(lat1, lon1, lat2, lon2) {
 }
 const LTG_HOSTS = ["ws1.blitzortung.org", "ws2.blitzortung.org", "ws7.blitzortung.org", "ws8.blitzortung.org"];
 const LTG_RADIUS_KM = 200;       // isti obseg kot klientska kartica
+const LTG_STALE_MS = 180000;      // povezava brez sporočila toliko časa je »zombi« (Blitzortung pošilja strele z vsega sveta)
+const LTG_CONNECT_TIMEOUT_MS = 20000;   // WebSocket, ki se toliko časa ne odpre, se nadomesti
+const LTG_RECONNECT_MS = 10000;   // ponovna vzpostavitev po prekinitvi (alarm), brez čakanja na 5-minutni cron
 const LTG_SLOT_MS = 300000;      // pokritost beležimo v 5-minutnih režah (cron keepAlive)
 const LTG_CELL_LAT0 = 45.45, LTG_CELL_DLAT = 0.18, LTG_CELL_LON0 = 13.4, LTG_CELL_DLON = 0.22;  // mreža karte, glej generate_storm_map.py
 const LTG_CELLS_SQL = "SELECT CAST(ROUND((lat - 45.45) / 0.18) AS INTEGER) AS k, CAST(ROUND((lon - 13.4) / 0.22) AS INTEGER) AS j, " +
@@ -2839,6 +2842,8 @@ export class LightningLogger extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
     this.ws = null;
+    this.wsSince = 0;     // kdaj je bil trenutni WebSocket ustvarjen
+    this.lastMsg = 0;     // zadnje prejeto sporočilo (katero koli, tudi zunaj radija)
     this.hostIdx = 0;
     ctx.blockConcurrencyWhile(async () => {
       this.ctx.storage.sql.exec(`
@@ -2862,10 +2867,27 @@ export class LightningLogger extends DurableObject {
     // Prazna ura v zapisu ("ni strel") je brez tega neločljiva od izpada
     // povezave -- preverjanje nevihtne karte (tools/verify_storm_map.py) zato
     // dneva z luknjami v pokritosti ne šteje.
-    const wasConnected = this.ws?.readyState === 1;
+    // Povezava, ki že dolgo ne prinese nobenega sporočila, ni »živa« (zombi) — _ensureConnected
+    // jo zapre in odpre novo, zato se v pokritost šteje samo svež tok.
+    const wasConnected = this._isLive();
     if (wasConnected) this.ctx.storage.sql.exec("INSERT OR IGNORE INTO uptime (slot) VALUES (?)", Math.floor(Date.now() / LTG_SLOT_MS));
     await this._ensureConnected();
-    return { connected: this.ws?.readyState === 1 };
+    return { connected: this.ws?.readyState === 1, last_msg_age_s: this.lastMsg ? Math.round((Date.now() - this.lastMsg) / 1000) : null };
+  }
+
+  _isLive() {
+    return this.ws?.readyState === 1 && (this.lastMsg === 0 || Date.now() - this.lastMsg <= LTG_STALE_MS);
+  }
+
+  // Alarm = ponovna vzpostavitev brez čakanja na naslednji 5-minutni cron: izpad povezave bi sicer
+  // pomenil do 5 min izgubljenih strel ob vsaki prekinitvi (in po vsakem deployu).
+  async alarm() {
+    await this._ensureConnected();
+    if (this.ws?.readyState !== 1) this._scheduleReconnect(LTG_RECONNECT_MS + 5000);   // še ni odprta: poskusi znova
+  }
+
+  _scheduleReconnect(ms) {
+    try { this.ctx.storage.setAlarm(Date.now() + (ms || LTG_RECONNECT_MS)); } catch (_) {}
   }
 
   // Strele v časovnem oknu [od, do) združene po celicah mreže nevihtne karte
@@ -2904,19 +2926,30 @@ export class LightningLogger extends DurableObject {
   }
 
   async _ensureConnected() {
-    if (this.ws && this.ws.readyState === 1) return;
+    const now = Date.now();
+    if (this.ws) {
+      const st = this.ws.readyState;
+      if (st === 1 && (this.lastMsg === 0 || now - this.lastMsg <= LTG_STALE_MS)) return;   // živa
+      if (st === 0 && now - this.wsSince <= LTG_CONNECT_TIMEOUT_MS) return;                  // se še odpira
+      // zombi (odprta, a tiha), zataknjeno odpiranje ali že zaprta: zapri in odpri novo (brez uhajanja vtičnic)
+      try { this.ws.close(); } catch (_) {}
+      this.ws = null;
+    }
     try {
       const host = LTG_HOSTS[this.hostIdx++ % LTG_HOSTS.length];
       const ws = new WebSocket("wss://" + host);
-      ws.addEventListener("open", () => ws.send('{"a":111}'));
+      ws.addEventListener("open", () => { this.lastMsg = Date.now(); ws.send('{"a":111}'); });
       ws.addEventListener("message", (ev) => this._onMessage(ev.data));
-      ws.addEventListener("close", () => { if (this.ws === ws) this.ws = null; });
-      ws.addEventListener("error", () => { if (this.ws === ws) this.ws = null; });
+      const dropped = () => { if (this.ws === ws) { this.ws = null; this._scheduleReconnect(LTG_RECONNECT_MS); } };
+      ws.addEventListener("close", dropped);
+      ws.addEventListener("error", dropped);
       this.ws = ws;
-    } catch (_) { this.ws = null; }
+      this.wsSince = now;
+    } catch (_) { this.ws = null; this._scheduleReconnect(LTG_RECONNECT_MS); }
   }
 
   _onMessage(raw) {
+    this.lastMsg = Date.now();
     try {
       const d = JSON.parse(_ltgDecode(raw));
       if (!("lat" in d) || !("lon" in d)) return;
@@ -2945,7 +2978,9 @@ async function _cronKeepLightningAlive(env) {
     if (!env?.LIGHTNING_LOGGER) return { ok: false, reason: "LIGHTNING_LOGGER ni vezan" };
     const stub = env.LIGHTNING_LOGGER.get(env.LIGHTNING_LOGGER.idFromName("global"));
     const r = await stub.keepAlive();
-    return r && r.connected ? { ok: true } : { ok: false, reason: "ni povezave z Blitzortung (ponovna vzpostavitev v teku)" };
+    if (!r || !r.connected) return { ok: false, reason: "ni povezave z Blitzortung (ponovna vzpostavitev v teku)" };
+    if (r.last_msg_age_s != null && r.last_msg_age_s * 1000 > LTG_STALE_MS) return { ok: false, reason: `povezava je tiha ${r.last_msg_age_s} s (zombi, zamenjana)` };
+    return { ok: true };
   } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
 }
 

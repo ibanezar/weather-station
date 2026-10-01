@@ -64,6 +64,9 @@ jobs:
       - name: Test posnetka ARSO rr24h
         run: python3 tools/test_precip_snapshot.py
 
+      - name: Test LightningLogger (ponovna vzpostavitev, zombi)
+        run: python3 tools/test_lightning_logger.py
+
       - name: Test dolinskega profila
         run: python3 tools/test_valley_profile.py
 
