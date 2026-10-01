@@ -636,7 +636,7 @@ def main():
     title = "Točnost vremenske napovedi — Rečica ob Savinji"
     n = len(verification)
     desc = (f"Koliko točna je vremenska napoved za Zgornjo Savinjsko dolino? Dnevni scoreboard ARSO, "
-            f"Open-Meteo in AI modela ECMWF AIFS proti dejanskim meritvam postaje IREICA1 — "
+            f"Open-Meteo, MTR in AI modela ECMWF AIFS proti dejanskim meritvam postaje IREICA1 — "
             f"{n} razrešenih dni.")
 
     schema = "\n".join([
@@ -644,8 +644,16 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("Točnost napovedi", None)]),
         seo.named_dataset_schema(
             url, "Verifikacija vremenske napovedi — Rečica ob Savinji",
-            "Dnevna primerjava napovedi ARSO, Open-Meteo in ECMWF AIFS z dejansko meritvijo postaje IREICA1.",
-            variable_measured=[{"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"}],
+            ("Dnevna primerjava napovedi ARSO, Open-Meteo, lokalnega modela MTR in ECMWF AIFS za "
+             "jutrišnjo najvišjo in najnižjo temperaturo ter padavine z dejansko meritvijo postaje IREICA1."),
+            variable_measured=[
+                {"@type": "PropertyValue", "name": "Napaka napovedi najvišje temperature", "unitText": "°C"},
+                {"@type": "PropertyValue", "name": "Napaka napovedi najnižje temperature", "unitText": "°C"},
+                {"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"},
+            ],
+            temporal_coverage=(f"{min(verification)}/{max(verification)}" if verification else None),
+            distribution={"@type": "DataDownload", "encodingFormat": "application/json",
+                          "contentUrl": f"{seo.SITE}/forecast_verification.json"},
         ),
     ]) + "\n" + CHART_CSS
 

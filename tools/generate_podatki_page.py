@@ -50,6 +50,22 @@ def monthly_normals(hist):
     return rows
 
 
+# Javni izvozi — (pot, kaj vsebuje, format). Samo datoteke, ki jih repozitorij
+# objavlja na GitHub Pages; test_sezona.py preveri, da vsaka obstaja.
+DOWNLOADS = [
+    ("/history.json", "dnevne meritve postaje IREICA1 od 2019 (temperatura, padavine, vlaga, veter, tlak)", "JSON"),
+    ("/test-napovedi/podatki.csv", "napovedi šestih modelov za D+1 do D+7 in izmerjene vrednosti", "CSV"),
+    ("/forecast_verification.json", "dnevna primerjava napovedi ARSO, Open-Meteo, MTR in ECMWF AIFS z meritvijo", "JSON"),
+    ("/napoved-modela.json", "trenutna napoved lokalnega modela MTR za Rečico ob Savinji", "JSON"),
+]
+
+
+def downloads_html():
+    rows = "\n".join(f'    <tr><th><a href="{p}">{p.lstrip("/")}</a></th><td>{what}</td><td>{fmt}</td></tr>'
+                     for p, what, fmt in DOWNLOADS)
+    return '  <table class="stats">\n' + rows + '\n  </table>'
+
+
 def build_body(hist, facts):
     last_date = max(hist.keys())
     last = hist[last_date]
@@ -134,6 +150,11 @@ def build_body(hist, facts):
   <h2>Ključna dejstva</h2>
 {facts_html}
 
+  <h2>Prenosi</h2>
+  <p class="archive-intro">Vse datoteke so javne in brez registracije, licenca CC BY 4.0 — navedi
+  »Meteorec (meteorec.si), postaja IREICA1«.</p>
+{downloads_html()}
+
   <h2>O postaji in podatkih</h2>
   <table class="stats">
     <tr><th>Oznaka postaje</th><td>{seo.STATION_ID}</td></tr>
@@ -168,6 +189,9 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-14"),
         seo.crumbs_schema([("Meteorec", "/"), ("Podatki", None)]),
+        # Ista entiteta (#dataset) kot na naslovni, /o-postaji.html in /vreme/ — stran,
+        # ki obstaja zaradi podatkov, jo mora nositi tudi sama.
+        seo.archive_dataset_schema(min(hist), max(hist)),
     ])
 
     html_out = seo.page_shell(title, desc, url, schema, body)

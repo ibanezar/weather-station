@@ -85,5 +85,10 @@ check("včerajšnji gobarski indeks se ne bere", g.read_gobe(day + datetime.time
 mtr = g.read_mtr(datetime.date(2100, 1, 1))
 check("MTR iz prihodnosti je prazen (izbira po datumu)", mtr == [])
 
+# 7) /podatki/: vsak javni prenos obstaja v repozitoriju.
+import generate_podatki_page as gp  # noqa: E402
+for path, _w, _f in gp.DOWNLOADS:
+    check(f"prenos {path}", os.path.exists(os.path.join(g.ROOT, path.lstrip("/"))))
+
 print(f"\n{ok} preverjanj, {fail} napak")
 sys.exit(1 if fail else 0)
