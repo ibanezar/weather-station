@@ -1660,6 +1660,40 @@ Prvi zagon (1. 10. 2026) je našel tri prava razhajanja, vsa popravljena:
    od `dayRating()` (dež pred nizkim stropom): ob dežju in nizkem stropu je stran
    pisala eno, igra drugo.
 
+## Zelena kljukica workflowa ni dokaz, da je izdelek nastal (1. 10. 2026)
+
+**GitHubov cron zdaj zamuja 5–7 ur** (cron 05:00 UTC steče ~11:00 UTC = 13:00 po naši
+uri; `update-history` ob 01:15 UTC steče ob ~07:00). Delovni tokovi s časovnimi
+vrati (`tools/*_gate.py`) tak tek zavrnejo in **vseeno javijo uspeh** — zato je bilo:
+
+- **nevihtne karte od 31. 8.** (okno 6:00–8:00, zadnja karta `2026-08-31`),
+- **padavinske karte od 11. 9.** (isto okno) — en mesec oz. 20 dni brez nove karte,
+  brez opozorila nikogar. Odkrito je bilo naključno ob gradnji preverjanja strel.
+- Termika (`igra_gate.py`, okno 5:00–12:00): današnji nivo je bil ob 13:00 še
+  včerajšnji (`igra/nivo.json` `datum` = včeraj). Okna **nisem razširil**: kdor je igral
+  zjutraj, ne sme zvečer dobiti drugačnega stropa (glej razdelek Termika) — to je
+  Filipova odločitev, ne napaka v kodi.
+- Dnevna zgodba (6:00–18:00), digest (7:00–18:00): široka okna, delujeta.
+  `frost-risk.json` je od 27. 8. star **zaradi sezone** (mar–maj), ne okvare.
+
+Kar je zdaj narejeno:
+
+- **Pozni tek kart:** `storm_map_gate.py` in `precip_map_gate.py` po koncu okna
+  (`WINDOW_END` = 8:00) do `LATE_END` = 20:00 še vedno sestavita karto (stran + arhiv sta
+  spet sveža), a izhod `late=true` **prepreči objavo na FB/IG** (jutranja karta, objavljena
+  popoldne, bi lagala); `inject_storm_map.py` na strani pove, ob kateri uri je karta
+  nastala. `tools/test_gates.py` zaklene vedenje (22 preverjanj).
+- **Cloudflare varovalka** (`_cronDispatchScheduledWorkflows`) kliče zdaj tudi
+  `precip-map.yml`. Še vedno rabi `GH_DISPATCH_TOKEN` — brez njega ne naredi nič (od
+  31. 8. ni bilo niti enega `workflow_dispatch`); pozni tek zato ni olajšava, ampak
+  obvezno dopolnilo, dokler žeton ni nastavljen.
+- **Varuh svežine** `tools/check_freshness.py` (`freshness-watch.yml`, 06:40 in 18:40
+  UTC): gleda sam izdelek (`REGISTER`: datoteka, polje s časom, največja starost) in
+  ob zastarelem odpre issue z oznako `stale-output`, ko je spet vse sveže, ga zapre.
+  **Nov dnevni izdelek = nova vrstica v `REGISTER`**; `tools/test_freshness.py` preveri,
+  da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
+  Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
