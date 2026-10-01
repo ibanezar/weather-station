@@ -502,6 +502,69 @@ def crnivec_znacka():
         check(z == b, "cona na strani", f"t={t} sneg={sn}: pick_zone={z} stran={b}")
 
 
+# ── Agrometeo: app.js ↔ generate_agrometeo_page.py ───────────────────────────
+@test
+def agrometeo():
+    """Fenološke stopnje hmelja, ročni status IHPS, fenologija poljščin in bolezni (JS ↔ Python)."""
+    import generate_agrometeo_page as ga
+    stages, ihps, crops = js("app.js", ["HOP_STAGES", "IHPS_STATUS", "CROP_GDD"],
+                             [{"expr": "HOP_STAGES"}, {"expr": "IHPS_STATUS"}, {"expr": "CROP_GDD"}])
+    py_st = [(lo, 9999 if hi == float("inf") else hi, lab, em) for lo, hi, lab, em in ga.HOP_STAGES]
+    js_st = [(x["min"], x["max"], x["label"], x["emoji"]) for x in stages]
+    check(py_st == js_st, "agro: fenološke stopnje hmelja", f"py={py_st}\n    js={js_st}")
+    py_ih = [(a, b, c) for a, b, c in ga.IHPS_STATUS]
+    js_ih = [(x["sorta"], x["status"], x["vir"]) for x in ihps]
+    check(py_ih == js_ih, "agro: IHPS status (ročno vzdrževan)", f"py={py_ih}\n    js={js_ih}")
+    py_cr = [(n, e, b, [(v, l) for v, l in m]) for n, e, b, m in ga.CROP_GDD]
+    js_cr = [(x["name"], x["emoji"], x["base"], [(m["v"], m["l"]) for m in x["milestones"]]) for x in crops]
+    check(py_cr == js_cr, "agro: GDD poljščin", f"py={py_cr}\n    js={js_cr}")
+    # bolezni: širina stolpca (zaokroženo %) in oznaka primernosti
+    prelude = """
+    var _html = '';
+    var document = { getElementById: function(){ return { set innerHTML(v){ _html = v; }, get innerHTML(){ return _html; } }; } };
+    function run(rh, t){ _buildAgroHopDisease(rh, t); return _html; }
+    """
+    grid = [(rh, t) for rh in range(30, 101, 5) for t in range(0, 36, 2)] + [(60, 10), (80, 15), (90, 22), (45, 28)]
+    got = js("app.js", ["_buildAgroHopDisease"], [{"expr": f"run({rh}, {t})"} for rh, t in grid], prelude)
+    for (rh, t), html in zip(grid, got):
+        widths = [int(x) for x in re.findall(r"width:(\d+)%", html)]
+        labels = re.findall(r"Pogoji: (\w+) primernost", html)
+        risks = ga.hop_disease_risk(rh, t)
+        check(widths == [int(round(r[1])) for r in risks], "agro: bolezni, stolpec", f"rh={rh} t={t}: js={widths} py={[round(r[1]) for r in risks]}")
+        check(labels == [ga.suitability_label(r[1]) for r in risks], "agro: bolezni, oznaka",
+              f"rh={rh} t={t}: js={labels} py={[ga.suitability_label(r[1]) for r in risks]}")
+
+
+@test
+def crnivec_opozorila_in_oznake():
+    """Pragovi opozoril (worker) ↔ besedilo na strani; starost meritve DRSI; oznake dni (Python ↔ JS)."""
+    import datetime
+    import generate_crnivec_page as gc
+    import crnivec_zones as cz
+    src = "crnivec-site/index.html"
+    consts = js("worker.js", ["CRN_SUNKI_KMH", "CRN_TIHO_OD"],
+                [{"expr": "[CRN_SUNKI_KMH, CRN_TIHO_OD, CRN_TIHO_DO]"}])[0]
+    page = js_src(src)
+    for kmh in set(re.findall(r"sunk\w* (?:vetra )?nad (\d+) km/h", page)):
+        check(int(kmh) == consts[0], "opozorila: prag sunkov v besedilu", f"stran {kmh} km/h, worker {consts[0]}")
+    quiet = set(re.findall(r"Med (\d+)\. in (\d+)\. uro", page))
+    check(quiet == {(str(consts[1]), str(consts[2]))}, "opozorila: tihi čas v besedilu", f"stran={quiet} worker={consts[1:]}")
+    check(bool(re.search(r"sunk\w* (?:vetra )?nad \d+ km/h", page)) and quiet, "opozorila: besedilo na strani obstaja")
+    # starost meritve: worker (vtipkano), Python, JS na strani
+    w = js_src("worker.js")
+    m = re.search(r"\(Date\.now\(\) - ts\) / 60000 <= (\d+)\) \? st : null", w)
+    page_age = int(re.search(r"var DRSI_MAX_AGE_MIN = (\d+);", page).group(1))
+    check(m and int(m.group(1)) == cz.DRSI_MAX_AGE_MIN == page_age == gc.DRSI_MAX_AGE_MIN, "starost meritve DRSI (min)",
+          f"worker={m and m.group(1)} py={cz.DRSI_MAX_AGE_MIN} stran={page_age}")
+    # oznake dni: day_label() ↔ oznakaDne()
+    today = datetime.date(2026, 10, 1)
+    dates = [today + datetime.timedelta(days=d) for d in range(-1, 12)] + [datetime.date(2026, 12, 31), datetime.date(2027, 1, 1)]
+    got = js(src, ["DNI_V_TEDNU", "oznakaDne"], [{"fn": "oznakaDne", "args": [d.isoformat(), today.isoformat()]} for d in dates])
+    for d, g in zip(dates, got):
+        want = gc.day_label(d.isoformat(), today)
+        check(want == g, "oznaka dneva", f"{d}: py={want!r} js={g!r}")
+
+
 def main():
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
     for t in TESTS:

@@ -1,0 +1,40 @@
+name: Test zasebnosti (notranje meritve)
+
+# CLAUDE.md, prvi razdelek: meritve iz hiše nikoli ne smejo ven. Test požene PRAVI
+# worker.js z lažnim Ecowittom in Varpoljem (z blokom `indoor`) ter preveri, da ga
+# ne vrne nobena javna točka, da ga režejo vsi Python odjemalci in da noben nov
+# odjemalec /ecowitt-current ni dodan brez zareze. Glej tools/test_privacy.py.
+
+on:
+  pull_request:
+    paths:
+      - 'worker.js'
+      - 'app.js'
+      - 'index.html'
+      - 'generate_daily_post.py'
+      - 'tools/**'
+      - '.github/workflows/**'
+  push:
+    branches: [main]
+    paths:
+      - 'worker.js'
+      - 'generate_daily_post.py'
+      - 'tools/**'
+      - '.github/workflows/privacy.yml'
+  workflow_dispatch: {}
+
+jobs:
+  privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Odvisnosti
+        run: pip install Pillow PyYAML --quiet
+      - name: Test zasebnosti
+        run: python3 tools/test_privacy.py
