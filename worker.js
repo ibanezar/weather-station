@@ -2721,6 +2721,10 @@ function _ltgDist(lat1, lon1, lat2, lon2) {
 }
 const LTG_HOSTS = ["ws1.blitzortung.org", "ws2.blitzortung.org", "ws7.blitzortung.org", "ws8.blitzortung.org"];
 const LTG_RADIUS_KM = 200;       // isti obseg kot klientska kartica
+const LTG_SLOT_MS = 300000;      // pokritost beležimo v 5-minutnih režah (cron keepAlive)
+const LTG_CELL_LAT0 = 45.45, LTG_CELL_DLAT = 0.18, LTG_CELL_LON0 = 13.4, LTG_CELL_DLON = 0.22;  // mreža karte, glej generate_storm_map.py
+const LTG_CELLS_SQL = "SELECT CAST(ROUND((lat - 45.45) / 0.18) AS INTEGER) AS k, CAST(ROUND((lon - 13.4) / 0.22) AS INTEGER) AS j, " +
+  "COUNT(*) AS n, MIN(ts) AS t0, MAX(ts) AS t1 FROM strikes WHERE ts >= ? AND ts < ? GROUP BY k, j";
 const LTG_RETENTION_DAYS = 14;   // surovi dogodki — isti rok kot stare karte/zgodbe drugod; dnevni povzetki ostanejo trajno
 
 export class LightningLogger extends DurableObject {
@@ -2733,6 +2737,7 @@ export class LightningLogger extends DurableObject {
         CREATE TABLE IF NOT EXISTS strikes (ts INTEGER NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL, dist_km REAL NOT NULL);
         CREATE INDEX IF NOT EXISTS idx_strikes_ts ON strikes(ts);
         CREATE TABLE IF NOT EXISTS daily (date TEXT PRIMARY KEY, count INTEGER NOT NULL, closest_km REAL NOT NULL);
+        CREATE TABLE IF NOT EXISTS uptime (slot INTEGER PRIMARY KEY);
       `);
     });
   }
@@ -2742,9 +2747,41 @@ export class LightningLogger extends DurableObject {
   // sicer čakajo na prvi dohodni klic. Klic je poceni (WS že odprt → takoj
   // vrne), zato pogostost ni problem.
   async keepAlive() {
-    this.ctx.storage.sql.exec("DELETE FROM strikes WHERE ts < ?", Date.now() - LTG_RETENTION_DAYS * 86400000);
+    const retention = Date.now() - LTG_RETENTION_DAYS * 86400000;
+    this.ctx.storage.sql.exec("DELETE FROM strikes WHERE ts < ?", retention);
+    this.ctx.storage.sql.exec("DELETE FROM uptime WHERE slot < ?", Math.floor(retention / LTG_SLOT_MS));
+    // Pokritost: ob vsakem klicu (5 min) zabeležimo, da je povezava živa.
+    // Prazna ura v zapisu ("ni strel") je brez tega neločljiva od izpada
+    // povezave -- preverjanje nevihtne karte (tools/verify_storm_map.py) zato
+    // dneva z luknjami v pokritosti ne šteje.
+    const wasConnected = this.ws?.readyState === 1;
+    if (wasConnected) this.ctx.storage.sql.exec("INSERT OR IGNORE INTO uptime (slot) VALUES (?)", Math.floor(Date.now() / LTG_SLOT_MS));
     await this._ensureConnected();
     return { connected: this.ws?.readyState === 1 };
+  }
+
+  // Strele v časovnem oknu [od, do) združene po celicah mreže nevihtne karte
+  // (generate_storm_map.build_grid: točke 45,45 + 0,18·k, 13,4 + 0,22·j), skupaj
+  // s pokritostjo okna. SQL je v LTG_CELLS_SQL, da ga tools/test_storm_verify.py
+  // požene nad sqlite3 in preveri enako združevanje kot v Pythonu.
+  async cells(from, to) {
+    const rows = this.ctx.storage.sql.exec(LTG_CELLS_SQL, from, to).toArray();
+    const cells = rows.map(r => ({
+      k: r.k, j: r.j, n: r.n, t0: r.t0, t1: r.t1,
+      la: Math.round((LTG_CELL_LAT0 + LTG_CELL_DLAT * r.k) * 1000) / 1000,
+      lo: Math.round((LTG_CELL_LON0 + LTG_CELL_DLON * r.j) * 1000) / 1000,
+    }));
+    const up = this.ctx.storage.sql.exec(
+      "SELECT COUNT(*) AS n, MIN(slot) AS first FROM uptime WHERE slot >= ? AND slot < ?",
+      Math.floor(from / LTG_SLOT_MS), Math.ceil(to / LTG_SLOT_MS)
+    ).toArray()[0];
+    const firstEver = this.ctx.storage.sql.exec("SELECT MIN(slot) AS first FROM uptime").toArray()[0];
+    return {
+      od: from, do: to, cells, total: cells.reduce((a, c) => a + c.n, 0),
+      slots_connected: up.n, slots_total: Math.ceil(to / LTG_SLOT_MS) - Math.floor(from / LTG_SLOT_MS),
+      uptime_since: firstEver && firstEver.first != null ? firstEver.first * LTG_SLOT_MS : null,
+      connected: this.ws?.readyState === 1,
+    };
   }
 
   async recent(hours, dailyDays) {
@@ -2907,7 +2944,7 @@ async function _cronScoreNapovej(env) {
 
 export default {
   async scheduled(event, env, ctx) {
-    if (event.cron === "10,40 6-7 * * *") {
+    if (event.cron === "10,40 4-5 * * *") {
       ctx.waitUntil(_cronDispatchScheduledWorkflows(env));
       return;
     }
@@ -4922,6 +4959,21 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const ur = Math.min(24, Math.max(1, Number(url.searchParams.get("ur")) || 1));
           const dni = Math.min(365, Math.max(1, Number(url.searchParams.get("dni")) || 30));
           const stub = env.LIGHTNING_LOGGER.get(env.LIGHTNING_LOGGER.idFromName("global"));
+          // ?celice=1&od=<ms>&do=<ms>: strele okna po celicah karte + pokritost
+          // (za tools/verify_storm_map.py). Okno največ 36 h, največ 14 dni nazaj.
+          if (url.searchParams.get("celice") === "1") {
+            const now = Date.now();
+            const od = Math.max(now - LTG_RETENTION_DAYS * 86400000, Number(url.searchParams.get("od")) || 0);
+            const do_ = Math.min(now, Number(url.searchParams.get("do")) || now);
+            if (!(do_ > od) || do_ - od > 36 * 3600000) {
+              return new Response(JSON.stringify({ error: "okno mora biti 0–36 h" }), {
+                status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+            }
+            const cells = await stub.cells(od, do_);
+            return new Response(JSON.stringify(cells), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
+            });
+          }
           const data = await stub.recent(ur, dni);
           return new Response(JSON.stringify(data), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=60" },

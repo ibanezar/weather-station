@@ -21,6 +21,10 @@ Piše:
   og/storm-map/<datum>.jpg        — različica za objavo (1080×1350, feed)
   og/storm-map/<datum>-story.jpg  — različica za zgodbo (1080×1920)
   og/storm-map/latest.json        — kazalec + should_post (glej spodaj)
+  data/storm-map-forecasts/<datum>.json — TRAJEN arhiv ocene po mrežnih točkah
+                                    (za preverjanje proti strelam, glej
+                                    tools/verify_storm_map.py; slike se po 14
+                                    dneh pobrišejo, arhiv ne)
 
 `should_post`: FB/IG feed + zgodba naj gresta ven **samo**, če je nekje v
 Sloveniji danes vsaj ZMERNO (ocena >= 22) — brez tega bi vsak dan, tudi ob
@@ -48,6 +52,7 @@ from generate_nevihte_page import idx, magnus_dewpoint, wind_uv, storm_threat_sc
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(ROOT, "og", "storm-map")
+ARCHIVE_DIR = os.path.join(ROOT, "data", "storm-map-forecasts")
 SITE = "https://meteorec.si"
 FONT_DIR = "/usr/share/fonts/truetype/liberation/"
 KEEP_DAYS = 14
@@ -495,6 +500,29 @@ def prune_old(today):
     return removed
 
 
+def write_archive(today, now, pts, summary):
+    """Trajen zapis napovedi te karte: ocena in ura konice za VSAKO mrežno točko.
+    Brez tega se preverjanje proti dejanskim strelam (tools/verify_storm_map.py)
+    ne bi imelo s čim primerjati. `issued_at` je ura, od katere napoved velja
+    (ocena je »najvišja od zdaj do konca dneva«), zato se strele pred njo ne
+    štejejo — karta, ki je nastala pozno, se ne kaznuje za jutranjo nevihto."""
+    os.makedirs(ARCHIVE_DIR, exist_ok=True)
+    rec = {
+        "date": today.isoformat(),
+        "issued_at": now.isoformat(),
+        "grid": {"lat0": 45.45, "dlat": 0.18, "lon0": 13.4, "dlon": 0.22},
+        "national": {"score": summary["score"], "level": summary["level"],
+                     "place": summary["place"], "hour": summary["hour"]},
+        # [la, lo, ocena, ura konice] — kompaktno, ~100 točk na dan
+        "points": [[p["la"], p["lo"], p["score"], p["hour"]] for p in pts],
+    }
+    path = os.path.join(ARCHIVE_DIR, f"{today.isoformat()}.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(rec, f, ensure_ascii=False, separators=(",", ":"))
+        f.write("\n")
+    print(f"✓ arhiv napovedi: data/storm-map-forecasts/{today.isoformat()}.json ({len(pts)} točk)")
+
+
 def main():
     dry = "--dry-run" in sys.argv[1:]
     now = datetime.datetime.now(TZ)
@@ -543,6 +571,7 @@ def main():
     with open(os.path.join(OUT_DIR, "latest.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)
         f.write("\n")
+    write_archive(today, now, pts, summary)
     return 0
 
 

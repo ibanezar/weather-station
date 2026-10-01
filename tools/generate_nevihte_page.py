@@ -335,6 +335,15 @@ def build_body(data):
         '  <p class="archive-intro">Karta se osvežuje vsak dan do 7:00 zjutraj.</p>\n'
         '  <!-- WX-STORMMAP:END -->')
 
+    # Preverjanje karte proti dejanskim strelam (tools/verify_storm_map.py) —
+    # isti vzorec kot WX-STORMMAP: tu rezervni zapis, nevihte-forecast.yml in
+    # storm-verify.yml ga takoj povrneta z zadnjimi rezultati.
+    stormverif_block = (
+        '<!-- WX-STORMVERIF:START (auto: tools/verify_storm_map.py) -->\n'
+        '  <h2 id="preverjanje">Kako zanesljiva je karta? Preverjanje proti strelam</h2>\n'
+        '  <p class="archive-intro">Karto vsak dan primerjamo z dejansko zabeleženimi streli.</p>\n'
+        '  <!-- WX-STORMVERIF:END -->')
+
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
@@ -346,6 +355,7 @@ def build_body(data):
 {answer}
 {quick}
 {stormmap_block}
+{stormverif_block}
   <p class="archive-intro"><a href="/padavine-karta/">Karta izmerjenih padavin zadnjih 24 ur (ARSO postaje) →</a></p>
   <h2>Indeksi nestabilnosti — trenutno</h2>
   <p class="archive-intro">Ključni atmosferski indeksi, ki jih meteorologi uporabljajo za oceno nevihtnega potenciala nad Rečico ob Savinji.</p>

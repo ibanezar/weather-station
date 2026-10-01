@@ -82,9 +82,12 @@ IDENTIFY_DAILY_CAP = "50"
 # sebe (ne le zamudili — GitHubov cron dogodka ni nikoli dostavil), kljub že
 # obstoječim dvojnim terminom in razširjenim oknom v teh delovnih tokovih.
 # Cloudflarov Cron Trigger teče na ločeni infrastrukturi in take zanesljivostne
-# težave doslej ni imel, zato ob 6:10/6:40/7:10/7:40 UTC (znotraj okna
-# tools/storm_map_gate.py, 6:00-8:00) prek GitHub API pokliče workflow_dispatch
-# za oba delovna tokova — glej _cronDispatchScheduledWorkflows() v worker.js.
+# težave doslej ni imel, zato ob 4:10/4:40/5:10/5:40 UTC prek GitHub API pokliče
+# workflow_dispatch
+# za oba delovna tokova (popravljeno 1. 10. 2026: prejšnji termini 6:10–7:40 UTC so bili
+# po naši uri 7:10–9:40, torej poleti vsi zunaj okna tools/storm_map_gate.py 6:00–8:00;
+# 4:10–5:40 UTC je 6:10–7:40 poleti in 5:10–6:40 pozimi, torej poleti vsi štirje in
+# pozimi dva znotraj okna) — glej _cronDispatchScheduledWorkflows() v worker.js.
 # Rabi skrivnost GH_DISPATCH_TOKEN (fine-grained PAT, samo ta repo, "Actions:
 # Read and write") — `wrangler secret put GH_DISPATCH_TOKEN`. Brez nje funkcija
 # tiho ne naredi nič (glej manjkajoč env.GH_DISPATCH_TOKEN).
@@ -95,4 +98,4 @@ IDENTIFY_DAILY_CAP = "50"
 # push in GitHub Pages redeploy, isti razlog kot pri drugih strežniško
 # generiranih straneh (glej daily-story.yml v CLAUDE.md).
 [triggers]
-crons = ["*/5 * * * *", "2-59/5 * * * *", "10,40 6-7 * * *", "5 2 * * *"]
+crons = ["*/5 * * * *", "2-59/5 * * * *", "10,40 4-5 * * *", "5 2 * * *"]

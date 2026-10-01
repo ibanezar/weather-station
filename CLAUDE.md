@@ -269,6 +269,41 @@ ni).
   `generate_storm_map.py` zato karto poravna na vrh in prazen prostor pod njo
   (če ga je dovolj) zapolni s seznamom potenciala po mestih namesto praznine.
 
+### Preverjanje karte proti dejanskim strelam (1. 10. 2026)
+
+Karta je do zdaj trdila oceno, ne da bi kdo izmeril, ali drži. Zdaj jo vsak dan
+po polnoči preveri `tools/verify_storm_map.py` (`storm-verify.yml`, 01:20 UTC):
+
+- `generate_storm_map.py` poleg slik zapiše **trajen** arhiv ocene po mrežnih
+  točkah, `data/storm-map-forecasts/<datum>.json` (slike se po 14 dneh pobrišejo,
+  arhiv ne).
+- Worker vrne strele okna po celicah iste mreže:
+  `/strele-zgodovina.json?celice=1&od=<ms>&do=<ms>` (`LightningLogger.cells()`,
+  SQL v `LTG_CELLS_SQL`; okno največ 36 h, surove strele se hranijo 14 dni).
+- **Okno je od izdaje karte do polnoči**, ne ves dan: ocena je »najvišja od zdaj do
+  konca dneva«, zato karta, ki je zaradi zamude crona nastala ob 13:00, ni kaznovana
+  za jutranjo nevihto.
+- **Prazen zapis ni »ni strel«.** `keepAlive()` vsakih 5 minut zabeleži, da je bila
+  povezava živa (tabela `uptime`); dan z < 90 % pokritosti (ali pred začetkom
+  zapisa pokritosti) se označi `skipped` z razlogom in se ne šteje.
+- Točka je »zadeta«, če je v njeni celici (≈ 20 × 17 km) vsaj ena strela.
+  Rezultat (po stopnjah ocene + dnevna raven) gre med markerja `WX-STORMVERIF` na
+  `/nevihte/`; `nevihte-forecast.yml` ga po vsakem generiranju strani vgradi nazaj
+  (`verify_storm_map.py inject`). Do `MIN_STORM_DAYS` (10) dni s strelami nad
+  Slovenijo stran pove, da je rezultat zgoden — čez zimo bo to trajalo.
+- Teste (`tools/test_storm_verify.py`, v `parity.yml`) poganjajo okno, pokritost,
+  kontingenčne tabele in **isti SQL nad sqlite3** kot v Pythonu.
+
+**Odkrito ob tem — karte od 31. 8. ni:** `storm-map.yml` teče po GitHubovem
+urniku šele 11:00–12:00 UTC (= 13:00–14:00 po naši uri), gate pa spusti samo
+6:00–8:00, zato vsak dan »uspe« brez dela; zadnja karta je `2026-08-31`. Varovalka v
+workerju (`_cronDispatchScheduledWorkflows`) ne naredi nič: `workflow_dispatch` ni
+bilo od 31. 8. niti enega, torej **secret `GH_DISPATCH_TOKEN` ni nastavljen**
+(`wrangler secret put GH_DISPATCH_TOKEN`, fine-grained PAT, Actions: read & write).
+Hkrati so bili njeni termini napačni (6:10–7:40 **UTC** je 7:10–9:40 po naši uri,
+poleti vsi zunaj okna) — popravljeno na 4:10/4:40/5:10/5:40 UTC. Brez žetona se
+ne bo spremenilo nič: preverjanje dobi napoved šele, ko karta nastane v svojem oknu.
+
 ## Stalno beleženje strel (LightningLogger)
 
 Kartica "Strele v bližini" (`#ltg-list`, `app.js` `connectLightning()`) se poveže

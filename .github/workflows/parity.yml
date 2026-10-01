@@ -51,3 +51,6 @@ jobs:
 
       - name: Test usklajenosti kopij
         run: python3 tools/test_parity.py
+
+      - name: Test preverjanja nevihtne karte
+        run: python3 tools/test_storm_verify.py
