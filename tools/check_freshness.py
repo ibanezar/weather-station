@@ -42,7 +42,7 @@ REGISTER = [
     ("Nevihtna karta Slovenije", "og/storm-map/latest.json", "date", "date", 36,
      "storm-map.yml + tools/storm_map_gate.py (okno, GH_DISPATCH_TOKEN)"),
     ("Padavinska karta Slovenije", "og/precip-map/latest.json", "date", "date", 36,
-     "precip-map.yml + tools/precip_map_gate.py (okno, GH_DISPATCH_TOKEN)"),
+     "precip-map.yml: vrata + jutranji posnetek rr24h v workerju (/arso-rr24h, cron 06:30 UTC)"),
     ("Dnevna zgodba (FB/IG)", "og/story/latest.json", "ts", "generated_at", 36,
      "daily-story.yml + tools/story_gate.py"),
     ("Termika: nivo igre", "igra/nivo.json", "ts", "generated", 36,

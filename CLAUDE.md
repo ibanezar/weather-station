@@ -1683,6 +1683,16 @@ Kar je zdaj narejeno:
   spet sveža), a izhod `late=true` **prepreči objavo na FB/IG** (jutranja karta, objavljena
   popoldne, bi lagala); `inject_storm_map.py` na strani pove, ob kateri uri je karta
   nastala. `tools/test_gates.py` zaklene vedenje (22 preverjanj).
+- **Padavinska karta potrebuje podatkovno rešitev, ne samo vrat** (ugotovljeno ob prvem
+  pozno zagnanem teku 1. 10.): ARSO `rr24h_val` je zapolnjen **samo v jutranji meritvi**
+  (8:00 CEST), v urnih meritvah čez dan je prazen — generator je zato padel z »ni
+  nobene postaje z rr24h_val«. Zato **Cloudflare cron 06:30/07:30 UTC**
+  (`_cronSnapshotArsoRr24h` v `worker.js`) jutranji posnetek shrani v KV
+  (`arso_rr24h:<datum>`, 3 dni), generator ga prebere prek `/arso-rr24h` kadarkoli
+  čez dan (`fetch_snapshot()`), brez posnetka pade nazaj na živi vir. To NE rabi
+  `GH_DISPATCH_TOKEN`. `tools/test_precip_snapshot.py` preverja, da worker razbere iste
+  postaje kot ET. Prvi posnetek nastane naslednje jutro po deployu; do takrat pozni tek
+  pade (vidno kot rdeč tek in v varuhu svežine).
 - **Cloudflare varovalka** (`_cronDispatchScheduledWorkflows`) kliče zdaj tudi
   `precip-map.yml`. Še vedno rabi `GH_DISPATCH_TOKEN` — brez njega ne naredi nič (od
   31. 8. ni bilo niti enega `workflow_dispatch`); pozni tek zato ni olajšava, ampak
