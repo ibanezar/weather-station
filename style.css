@@ -3142,6 +3142,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mode-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
 /* Vprašanje ob prvem obisku — inline kartica, ne prekriva strani */
+html[data-mode-intro="1"] .mode-intro[hidden]{display:block}
 .mode-intro{position:relative;margin:1rem auto 0;max-width:720px;padding:1.3rem 1.5rem 1.4rem;
   border-radius:18px;background:var(--card-bg);border:1px solid var(--card-border);
   box-shadow:var(--card-shadow);backdrop-filter:blur(18px) saturate(180%);

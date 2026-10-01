@@ -125,7 +125,7 @@ function dismissModeIntro(){
   try{ localStorage.setItem(MODE_INTRO_KEY,'dismissed'); }catch(e){}
   hideModeIntro();
 }
-function hideModeIntro(){ const el=document.getElementById('mode-intro'); if(el) el.hidden=true; }
+function hideModeIntro(){ const el=document.getElementById('mode-intro'); if(el) el.hidden=true; delete document.documentElement.dataset.modeIntro; }
 function syncModeButtons(){
   const simple=isSimpleMode();
   document.getElementById('mode-btn-simple')?.setAttribute('aria-pressed',  simple?'true':'false');

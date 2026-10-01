@@ -531,6 +531,16 @@ Kako je narejeno:
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
 
+### Ponudba izbire pogleda se pokaže pred prvim izrisom (CLS, 1. 10. 2026)
+
+`#mode-intro` je prej odkril `initModeUI()` v `app.js` po nalaganju — nov obiskovalec
+(ravno tisti, ki ga meri Google) je dobil skok strani za ~380 px, CLS na telefonu 0,285
+(»slabo«). Zdaj inline skripta v `<head>` (ista kot za `wx-mode`) postavi
+`data-mode-intro="1"`, CSS pa ponudbo pokaže že ob prvem izrisu; `hideModeIntro()`
+oznako pobriše. CLS na telefonu: 0,06. **Nov element nad vsebino, ki ga odkrije JS, naj
+dobi isto obravnavo** (odločitev v `<head>` ali rezerviran prostor), ne `hidden=false` po
+nalaganju.
+
 ## Črnivec (`/crnivec/`) — izmerjeno s postaje DRSI, vozišče je ocena
 
 Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
