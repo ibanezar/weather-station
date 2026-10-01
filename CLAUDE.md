@@ -1254,6 +1254,22 @@ zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
 bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
 prepričaj, da isto pot pokriva tudi `git add`.
 
+## Sezonski vodič (`/sezona/`) in povzetek meseca (1. 10. 2026)
+
+- **`/sezona/`** (`tools/generate_sezona_page.py`, dnevno v `seo-smart-routine.yml`) —
+  »Ta čas v dolini«: klimatologija letnega časa s postaje (prva jesenska / zadnja
+  spomladanska zmrzal — mediana, najzgodneje, najpozneje; vroči dnevi poleti; dnevi z
+  zmrzaljo pozimi), letošnje stanje, današnji gobarski indeks in najnižja napoved MTR
+  (oboje **po datumu**, ne po vrstnem redu workflowov) ter povezave na strani, ki so ta
+  čas pomembne (`LINKS`). Leto brez meritve na začetku obdobja ne šteje (sicer bi bila
+  »prva zmrzal« le prva izmerjena); pod tremi leti ni klimatologije.
+- **Mesečne strani arhiva** (`/vreme/YYYY/MM/`) imajo odstavek »na kratko« in FAQ
+  (`month_summary()` v `generate_seo_pages.py`, FAQ shema in vidno besedilo iz istega
+  seznama). Uvrstitev je samo med enakimi meseci z ≥ 25 dnevi meritev (`RANK_MIN_DAYS`),
+  vsaj tri leta; tekoči mesec se ne uvršča. Strani istega koledarskega meseca kot tekoči
+  se prepišejo ob vsakem teku, ker se jim uvrstitev spremeni.
+- Oboje preverja `tools/test_sezona.py` (v `parity.yml`).
+
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
 Ločeno od `/tocnost-napovedi/` (ta meri samo ARSO+Open-Meteo+MTR pri D+1, dan za
