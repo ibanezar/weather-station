@@ -1641,6 +1641,9 @@ meritve DRSI in oznake dni.
 - Test JS bere iz **generirane strani** za Črnivec/gobe. Ko spremeniš predlogo v
   generatorju, regeneriraj stran (ali isto spremembo ročno prenesi v committano
   stran), sicer test še vidi staro kopijo.
+- **Mutacijski preizkus** (`tools/mutation_check.py`, `mutation-check.yml`, ročno/mesečno):
+  vnese 34 majhnih napak v po eno kopijo in preveri, da `test_parity.py` pade — 1. 10. 2026
+  je ujel vseh 34. Nova podvojitev = nov `@test` **in** nova vrstica v `MUTACIJE`.
 - Znana, namerno neizenačena zaokroževanja: Python `round()` zaokroži x.5 na sodo,
   JS `Math.round` navzgor. Test se jim izogne z vhodi (padavine v korakih 0,1 mm,
   popravek meritve s sodimi desetinkami) ali toleranco ±1 (barve na karti).

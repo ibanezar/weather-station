@@ -1,0 +1,27 @@
+name: Mutacijski preizkus testa usklajenosti
+
+# Ali test_parity.py res pade, ko se ena od kopij pokvari? Skript tools/mutation_check.py
+# po vrsti vnese ~34 majhnih napak (prag, konstanta, oznaka v eni od dveh kopij) in
+# pričakuje padec testa. Preživeli mutant = kopija, ki je test ne pokriva.
+# Zaženi ročno ali mesečno; ob novi namerni podvojitvi dodaj mutacijo v MUTACIJE.
+
+on:
+  schedule:
+    - cron: '30 4 2 * *'
+  workflow_dispatch: {}
+
+jobs:
+  mutacije:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Odvisnosti
+        run: pip install Pillow PyYAML --quiet
+      - name: Mutacije
+        run: python3 tools/mutation_check.py
