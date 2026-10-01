@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T07:40:39Z",
+  "generated_at": "2026-10-01T17:12:44Z",
   "n_records": 86,
   "date_range": {
     "from": "2026-08-04",
@@ -1217,6 +1217,56 @@
           "mae_om": 2.37,
           "improvement_pct": 58.2
         }
+      }
+    }
+  },
+  "situations": {
+    "jasno": {
+      "label": "jasen, miren dan (razpon ≥ 14 °C, brez dežja)",
+      "n": 34,
+      "tmax": {
+        "n": 34,
+        "mae_mtr": 0.69,
+        "mae_om": 1.54,
+        "improvement_pct": 55.2
+      },
+      "tmin": {
+        "n": 34,
+        "mae_mtr": 1.04,
+        "mae_om": 1.46,
+        "improvement_pct": 28.8
+      }
+    },
+    "mokro": {
+      "label": "dan s padavinami (≥ 1 mm)",
+      "n": 13,
+      "tmax": {
+        "n": 13,
+        "mae_mtr": 1.35,
+        "mae_om": 1.68,
+        "improvement_pct": 19.6
+      },
+      "tmin": {
+        "n": 13,
+        "mae_mtr": 0.91,
+        "mae_om": 0.95,
+        "improvement_pct": 4.2
+      }
+    },
+    "vmes": {
+      "label": "oblačno ali vetrovno, brez dežja",
+      "n": 9,
+      "tmax": {
+        "n": 9,
+        "mae_mtr": 2.06,
+        "mae_om": 2.47,
+        "improvement_pct": 16.6
+      },
+      "tmin": {
+        "n": 9,
+        "mae_mtr": 0.7,
+        "mae_om": 0.54,
+        "improvement_pct": -29.6
       }
     }
   }

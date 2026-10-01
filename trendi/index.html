@@ -188,6 +188,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
 
       <div id="mtr-acc-seasons"></div>
+      <div id="mtr-acc-situations"></div>
     </div>
   </section>
 
@@ -554,6 +555,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   } else {
     seasonsEl.innerHTML = '<p style="font-size:.85rem;color:var(--muted);margin-top:1.4rem">'
       + 'Razčlenitev po sezoni bo prikazana, ko bo za vsaj eno letni čas na voljo dovolj razrešenih dni.</p>';
+  }
+
+  // Kdaj MTR pomaga in kdaj ne: D+1 po vremenskem položaju dneva (iz meritev postaje,
+  // compute_mtr_accuracy_metrics.py → situations). Negativen % = MTR slabši od Open-Meteo.
+  const sit = acc.situations || {};
+  const sitOrder = ['jasno', 'vmes', 'mokro'];
+  const sitEl = document.getElementById('mtr-acc-situations');
+  const sitPresent = sitOrder.filter(k => sit[k]);
+  if (sitEl && sitPresent.length) {
+    const cell = v => v && v.mae_mtr != null
+      ? (v.mae_mtr.toFixed(2).replace('.', ',') + ' / ' + v.mae_om.toFixed(2).replace('.', ',') + ' °C'
+         + ' <span style="color:' + (v.improvement_pct < 0 ? 'var(--red)' : 'var(--green)') + '">('
+         + fmtPct(v.improvement_pct) + ')</span>')
+      : '—';
+    let r = '';
+    sitPresent.forEach(k => {
+      const e = sit[k];
+      r += '<tr><th>' + e.label + ' · n=' + e.n + '</th><td>' + cell(e.tmax) + '</td><td>' + cell(e.tmin) + '</td></tr>';
+    });
+    sitEl.innerHTML = '<h3 style="margin:1.6rem 0 .6rem;font-size:1rem;color:var(--text)">Kdaj MTR pomaga in kdaj ne (D+1)</h3>'
+      + '<div class="tbl-x" tabindex="0"><table class="stats"><thead><tr><th>Vreme tistega dne</th><th>Tmax: MTR / Open-Meteo</th><th>Tmin: MTR / Open-Meteo</th></tr></thead><tbody>' + r + '</tbody></table></div>'
+      + '<p style="font-size:.78rem;color:var(--muted)">Povprečna napaka, izmerjeno na postaji IREICA1. Popravek MTR je naučen za dno doline, zato največ pomaga ob jasnih, mirnih dneh z nočno inverzijo; ob dežju ali oblačnosti se dolina obnaša kot okolica in popravek ne prinese veliko — lahko je celo slabši (rdeče). Samo položaji z vsaj 8 razrešenimi dnevi.</p>';
   }
 })();
 </script>

@@ -996,6 +996,11 @@ Pravila, ki jih ne obračaj:
 - Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
   napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
   tiho dobiva druge vhode, kot jih pozna.
+- **Kdaj MTR pomaga** (`/trendi/`, 1. 10. 2026): `compute_mtr_accuracy_metrics.py` razčleni D+1
+  po vremenskem položaju dneva iz meritev postaje (`situation_of()`: jasen in miren —
+  razpon ≥ 14 °C brez dežja; moker ≥ 1 mm; vmes). Prvi rezultat (avg–sep): ob jasnih dneh
+  Tmax 0,69 proti 1,54 °C, ob mokrih dneh Tmin skoraj brez koristi, v »vmes« Tmin celo
+  slabši od Open-Meteo. Stran to pove z rdečo — ne skrivaj negativnega rezultata.
 - Model se uči **samo** iz `history.json` in Open-Meteo. Nobenih notranjih
   meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
   tem cevovodu ne uporablja.
