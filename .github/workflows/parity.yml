@@ -75,3 +75,6 @@ jobs:
 
       - name: Test sezonskega vodiča in uvrstitve meseca
         run: python3 tools/test_sezona.py
+
+      - name: Test User-Agenta pri klicih workerja
+        run: python3 tools/test_worker_ua.py

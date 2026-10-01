@@ -125,6 +125,8 @@ def evaluate(now=None, register=None):
 
 
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
+# Cloudflare zavrne privzeti »Python-urllib« User-Agent s 403 (glej tools/test_worker_ua.py).
+WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
 
 
 def worker_health(fetch=None):
@@ -134,7 +136,7 @@ def worker_health(fetch=None):
     try:
         if fetch is None:
             import urllib.request
-            with urllib.request.urlopen(f"{WORKER}/health", timeout=20) as r:
+            with urllib.request.urlopen(urllib.request.Request(f"{WORKER}/health", headers={"User-Agent": WORKER_UA}), timeout=20) as r:
                 data = json.load(r)
         else:
             data = fetch()

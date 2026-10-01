@@ -1825,7 +1825,12 @@ zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tab
   notranjih: `render_topics_html()` je povezoval teme z ≥ 2 objavama (po surovem tagu),
   `build_tag_pages()` pa jih gradi pri `TAG_MIN_POSTS` = 3 (po slugu) — zdaj oba štejeta po
   slugu z istim pragom; kartica vrste brez proste slike ne zahteva več `.jpg` (404).
-- Python `urllib` brez brskalniškega UA dobi od Cloudflara 403 — oba skripta ga nastavita.
+- **Vsak klic workerja iz Pythona mora poslati User-Agent.** Cloudflare privzeti
+  `Python-urllib/3.x` zavrne s **403** (tudi `/health`, `/push/send`, `/arso-rr24h`,
+  `/strele-zgodovina.json`). 1. 10. 2026 je to tiho kvarilo jutranji povzetek (403 je
+  izgledal kot napačno geslo), branje jutranjega posnetka padavin, preverjanje nevihtne
+  karte in branje `/health` — vsi so ob napaki le padli nazaj. Konstanta `WORKER_UA` v
+  skriptah; `tools/test_worker_ua.py` (v `parity.yml`) zavrne nov klic brez nje.
 
 ### Zdravje Cloudflare cron opravil (`/health`, 1. 10. 2026)
 
