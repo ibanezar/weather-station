@@ -1805,6 +1805,20 @@ potrebuje boljšo ločljivost (opozorila, jutranje karte), mora teči na Cloudfl
 to meri vsak dan; vzroka (obremenitev repozitorija ali politika GitHuba) ni mogoče ločiti,
 zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tabelo čez čas.
 
+### Dimni test in mrtve povezave (1. 10. 2026)
+
+- **`smoke-test.yml`** (po vsaki objavi Pages + dnevno): `tools/smoke_test.py` na ŽIVI strani
+  preveri ključne strani (`CORE` iz `seo_audit.py` — isti seznam kot sitemap) in crnivec.si:
+  200 brez preusmeritve, `<title>`, canonical nase, JSON-LD se razčleni, stran ni prazna,
+  og:image obstaja; plus `style.min.css`, `app.min.js`, `history.json`, `sitemap.xml`, `llms.txt`.
+  Ob napaki issue `smoke-fail` (samo osveži opis, brez komentarja ob vsakem teku).
+- **`link-check.yml`** (tedensko): `tools/check_links.py` — notranje povezave iz repozitorija
+  (brez omrežja, vse strani) in zunanji URL-ji. Issue `broken-links`. Prvi tek je našel 13
+  notranjih: `render_topics_html()` je povezoval teme z ≥ 2 objavama (po surovem tagu),
+  `build_tag_pages()` pa jih gradi pri `TAG_MIN_POSTS` = 3 (po slugu) — zdaj oba štejeta po
+  slugu z istim pragom; kartica vrste brez proste slike ne zahteva več `.jpg` (404).
+- Python `urllib` brez brskalniškega UA dobi od Cloudflara 403 — oba skripta ga nastavita.
+
 ### Zdravje Cloudflare cron opravil (`/health`, 1. 10. 2026)
 
 Vsako opravilo v `scheduled()` teče prek `_cronBeat()`, ki zapiše KV `cron:health:<ime>`

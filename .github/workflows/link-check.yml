@@ -1,0 +1,60 @@
+name: Mrtve povezave
+
+# tools/check_links.py: notranje povezave iz repozitorija (vsaka /pot mora obstajati)
+# in zunanje URL-je (vsak enkrat). Prvi tek (1. 10. 2026) je našel 13 notranjih:
+# teme bloga brez strani, napačne poti /baza-vrst/, manjkajoči sliki gob, fotografijo
+# brez datoteke. Ob napaki odpre issue `broken-links`, ko je vse v redu, ga zapre.
+
+on:
+  schedule:
+    - cron: '35 5 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Preveri povezave
+        id: links
+        run: python3 tools/check_links.py --external --report links-report.md
+
+      - name: Pripravi oznako
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "broken-links" --repo ${{ github.repository }} \
+            --color "A855F7" --description "Mrtve povezave na strani" --force
+
+      - name: Odpri ali posodobi opozorilo
+        if: steps.links.outputs.broken != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          N="${{ steps.links.outputs.broken }}"
+          OPEN=$(gh issue list --repo ${{ github.repository }} --label broken-links --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -z "$OPEN" ]; then
+            gh issue create --repo ${{ github.repository }} --label broken-links \
+              --title "Mrtve povezave (${N})" --body-file links-report.md
+          else
+            gh issue edit "$OPEN" --repo ${{ github.repository }} \
+              --title "Mrtve povezave (${N})" --body-file links-report.md
+          fi
+
+      - name: Zapri opozorilo, ko je vse v redu
+        if: steps.links.outputs.broken == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for NUM in $(gh issue list --repo ${{ github.repository }} --label broken-links --state open --json number --jq '.[].number'); do
+            gh issue close "$NUM" --repo ${{ github.repository }} --comment "Ni več mrtvih povezav."
+          done

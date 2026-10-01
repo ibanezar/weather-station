@@ -242,10 +242,14 @@ def species_section_html(subset, all_species, current=""):
         unver_html = ("" if s.get("verified", True) else
                       '<div class="gp-sp-unver" title="Vnos iz razširjenega seznama; '
                       'podatki so iz literature in niso terensko preverjeni">◌ ni terensko preverjeno</div>')
+        # Vrsta brez proste slike (fetch_species_photos.py) dobi rezervni prikaz takoj,
+        # brez zahteve, ki bi vrnila 404 (check_links.py, 1. 10. 2026).
+        has_photo = os.path.exists(os.path.join(ROOT, "gobarska-napoved", "img", "vrste", f"{s['id']}.jpg"))
+        img_html = (f'''<img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
+          onerror="this.parentElement.classList.add('ph');this.remove()">''' if has_photo else "")
         cards.append(f'''    <div class="gp-sp-card" {data_attrs}>
-      <div class="gp-sp-top {cls}">
-        <img src="/gobarska-napoved/img/vrste/{s['id']}.jpg" alt="{_esc(s['name_sl'])}" loading="lazy"
-          onerror="this.parentElement.classList.add('ph');this.remove()">
+      <div class="gp-sp-top {cls}{"" if has_photo else " ph"}">
+        {img_html}
         <span class="gp-sp-emoji">🍄</span>
         <button type="button" class="gp-sp-fav" data-id="{s['id']}" aria-label="Shrani med priljubljene" aria-pressed="false">♡</button>
       </div>

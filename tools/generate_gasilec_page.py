@@ -1121,7 +1121,7 @@ _NASVETI_CONTACTS = [
     (_FI_SHIELD, "#84cc16", "https://www.gzs-slo.si/", "Gasilska zveza Slovenije", "gzs-slo.si"),
     (_FI_SHIELD, "#0ea5e9", "https://www.gov.si/drzavni-organi/organi-v-sestavi/uprava-za-zascito-in-resevanje/",
      "URSZR", "Uprava RS za zaščito in reševanje"),
-    (_FI_OGROZENOST, "#f59e0b", "https://meteo.arso.gov.si/met/sl/agromet/pozar/", "ARSO",
+    (_FI_OGROZENOST, "#f59e0b", "https://meteo.arso.gov.si/met/sl/agromet/", "ARSO",
      "Uradni indeks požarne ogroženosti"),
 ]
 
@@ -1209,7 +1209,7 @@ def build_metodologija_page(payload):
   <h2>Kaj indeks ni</h2>
   <ul>
     <li>Ni napoved dejanskega požara — pove le, kako ugodni so pogoji, če bi do vžiga prišlo.</li>
-    <li>Ni nadomestilo za uradni <a href="https://meteo.arso.gov.si/met/sl/agromet/pozar/" target="_blank" rel="noopener nofollow">ARSO indeks požarne ogroženosti</a>
+    <li>Ni nadomestilo za uradni <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener nofollow">ARSO indeks požarne ogroženosti</a>
     ali odloke lokalnih oblasti.</li>
     <li>Velja za eno točko (Rečica ob Savinji) — v drugih delih Slovenije se razmere lahko razlikujejo.</li>
   </ul>'''
