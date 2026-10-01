@@ -1,0 +1,60 @@
+{
+ "generated_at": "2026-10-01T14:42:14.324270+02:00",
+ "method": "celica 45,45+0,18k / 13,4+0,22j, okno od izdaje karte do polnoči, pokritost >= 90 %",
+ "days": [],
+ "summary": {
+  "days_ok": 0,
+  "days_skipped": 0,
+  "storm_days": 0,
+  "first_date": null,
+  "last_date": null,
+  "levels": {
+   "BREZ": {
+    "n": 0,
+    "obs": 0
+   },
+   "NIZKO": {
+    "n": 0,
+    "obs": 0
+   },
+   "ZMERNO": {
+    "n": 0,
+    "obs": 0
+   },
+   "VISOKO": {
+    "n": 0,
+    "obs": 0
+   },
+   "EKSTREMNO": {
+    "n": 0,
+    "obs": 0
+   }
+  },
+  "contingency": {
+   "8": {
+    "a": 0,
+    "b": 0,
+    "c": 0,
+    "d": 0
+   },
+   "22": {
+    "a": 0,
+    "b": 0,
+    "c": 0,
+    "d": 0
+   },
+   "40": {
+    "a": 0,
+    "b": 0,
+    "c": 0,
+    "d": 0
+   }
+  },
+  "day_level": {
+   "a": 0,
+   "b": 0,
+   "c": 0,
+   "d": 0
+  }
+ }
+}
