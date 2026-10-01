@@ -871,6 +871,19 @@ Kje je vključena:
 (kartica pove, da postaja ni dosegljiva, tema zgodbe se ne uvrsti) — nobena
 druga stran od tega ni odvisna.
 
+### Dolinski profil v živo (kartica »Dolinski dvoboj«, 1. 10. 2026)
+
+Pod dvobojem Rečica ⇄ Varpolje (`#duel-profile`, `fetchValleyProfile()` v `app.js`) je graf
+**izmerjene** temperature po višini: Rečica (IREICA1, 366 m), Gornji Grad (DRSI, 428 m) in
+Črnivec (DRSI, 903 m) iz `/crnivec-drsi` (isti vir in navedba DRSI kot na crnivec.si).
+Pove, ali je zrak v dolini hladnejši od višine (inverzija, `valleyProfileSummary()`: gradient
+> 0), šibek (> −0,4), običajen (> −0,9) ali strm gradient °C/100 m; prekinjena črta je
+standardni −0,65 od Rečice. Brez preračunov — **primerjava prelaza s preračunanim modelom
+ostaja prepovedana** (glej Črnivec: »Črnivec proti dolini«). DRSI meritev starejša od 40 min se
+izpusti (kot povsod); pod dvema točkama se graf skrije. Varpolje ni na grafu: nima objavljene
+višine in stoji na istem dnu doline kot Rečica. Klic `/crnivec-drsi` je omejen na enkrat/5 min
+(`_vpCache`). Logiko preverja `tools/test_valley_profile.py` (v `parity.yml`).
+
 ## MTR — lastni napovedni model (MOS)
 
 **MTR (Meteorec)** je poskusni statistični model za Rečico: vzame Open-Meteo
