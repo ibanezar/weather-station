@@ -871,6 +871,19 @@ Kje je vključena:
 (kartica pove, da postaja ni dosegljiva, tema zgodbe se ne uvrsti) — nobena
 druga stran od tega ni odvisna.
 
+### Dolinski profil v živo (kartica »Dolinski dvoboj«, 1. 10. 2026)
+
+Pod dvobojem Rečica ⇄ Varpolje (`#duel-profile`, `fetchValleyProfile()` v `app.js`) je graf
+**izmerjene** temperature po višini: Rečica (IREICA1, 366 m), Gornji Grad (DRSI, 428 m) in
+Črnivec (DRSI, 903 m) iz `/crnivec-drsi` (isti vir in navedba DRSI kot na crnivec.si).
+Pove, ali je zrak v dolini hladnejši od višine (inverzija, `valleyProfileSummary()`: gradient
+> 0), šibek (> −0,4), običajen (> −0,9) ali strm gradient °C/100 m; prekinjena črta je
+standardni −0,65 od Rečice. Brez preračunov — **primerjava prelaza s preračunanim modelom
+ostaja prepovedana** (glej Črnivec: »Črnivec proti dolini«). DRSI meritev starejša od 40 min se
+izpusti (kot povsod); pod dvema točkama se graf skrije. Varpolje ni na grafu: nima objavljene
+višine in stoji na istem dnu doline kot Rečica. Klic `/crnivec-drsi` je omejen na enkrat/5 min
+(`_vpCache`). Logiko preverja `tools/test_valley_profile.py` (v `parity.yml`).
+
 ## MTR — lastni napovedni model (MOS)
 
 **MTR (Meteorec)** je poskusni statistični model za Rečico: vzame Open-Meteo
@@ -1641,6 +1654,9 @@ meritve DRSI in oznake dni.
 - Test JS bere iz **generirane strani** za Črnivec/gobe. Ko spremeniš predlogo v
   generatorju, regeneriraj stran (ali isto spremembo ročno prenesi v committano
   stran), sicer test še vidi staro kopijo.
+- **Mutacijski preizkus** (`tools/mutation_check.py`, `mutation-check.yml`, ročno/mesečno):
+  vnese 34 majhnih napak v po eno kopijo in preveri, da `test_parity.py` pade — 1. 10. 2026
+  je ujel vseh 34. Nova podvojitev = nov `@test` **in** nova vrstica v `MUTACIJE`.
 - Znana, namerno neizenačena zaokroževanja: Python `round()` zaokroži x.5 na sodo,
   JS `Math.round` navzgor. Test se jim izogne z vhodi (padavine v korakih 0,1 mm,
   popravek meritve s sodimi desetinkami) ali toleranco ±1 (barve na karti).
@@ -1703,6 +1719,30 @@ Kar je zdaj narejeno:
   **Nov dnevni izdelek = nova vrstica v `REGISTER`**; `tools/test_freshness.py` preveri,
   da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
   Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve.
+
+### Zakaj cron zamuja: GitHub dostavi ~6 tekov na dan (meritev 1. 10. 2026)
+
+Pogosti workflowi sploh ne tečejo na urnik: `toca-tracker` (`*/15`, 96/dan) ima ~6,1 teka/dan,
+`retry-pages-deploy` (`*/20`, 72/dan) ~5,9/dan, `prerender-current` (urno, 24/dan) ~5/dan
+(100 zaporednih tekov zajema ~16 dni). GitHub cron dogodke očitno združuje v pakete na
+~4 ure — zato dnevni workflowi zamujajo 5–7 ur in časovna vrata (6:00–8:00) tiho zavračajo
+vsak tek. **Pogosti urniki so torej varljivi:** `*/15` pomeni ~vsake 4 ure; karkoli, kar
+potrebuje boljšo ločljivost (opozorila, jutranje karte), mora teči na Cloudflaru
+(`wrangler.toml` crons) ali ga mora Cloudflare sprožiti prek `GH_DISPATCH_TOKEN`.
+`tools/measure_cron_throughput.py` (korak v `freshness-watch.yml`, tabela v povzetku teka)
+to meri vsak dan; vzroka (obremenitev repozitorija ali politika GitHuba) ni mogoče ločiti,
+zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tabelo čez čas.
+
+### Zdravje Cloudflare cron opravil (`/health`, 1. 10. 2026)
+
+Vsako opravilo v `scheduled()` teče prek `_cronBeat()`, ki zapiše KV `cron:health:<ime>`
+`{ts, ok, err, ms}` (zapis le ob spremembi ali vsakih 15 min). `GET /health` jih vrne,
+`check_freshness.py` (`worker_health()`) pa v `freshness-watch.yml` odpre issue, ko
+opravilo zastara (`CRON_JOBS`: 20 min za petminutna, 30 h za dnevna) ali javi napako.
+Opravilo, ki ob napaki samo vrne, mora vrniti `{ok:false, reason}` (ali `false`) — prazen
+`catch (_) {}` je ravno to, kar je skrilo manjkajoči `GH_DISPATCH_TOKEN`. Nov cron =
+vnos v `CRON_JOBS` + `_cronBeat` v `scheduled()`. Prikazano: `dispatch` bo javil »manjka
+GH_DISPATCH_TOKEN«, dokler žeton ni nastavljen.
 
 ### Vrstni red workflowov ni zagotovljen — datoteko drugega workflowa preberi po datumu (1. 10. 2026)
 

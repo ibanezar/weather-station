@@ -2635,6 +2635,7 @@ async function _cronRenderIconAndCells(env) {
       }), { httpMetadata: { contentType: "application/json" } });
     } catch (_) {}
   }
+  return cellsErr ? { ok: false, reason: "celice: " + cellsErr } : undefined;   // za _cronBeat
 }
 
 // ── Varovalka za nezanesljiv GitHub Actions "schedule" prožilec ─────────────
@@ -2677,6 +2678,59 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
   }
 }
 
+// ── Zdravstveni zapis cron opravil ────────────────────────────────
+// Večina _cron* opravil ob napaki ne naredi nič vidnega (prazen catch, »raje tiho
+// kot podreti ostala«) — ravno tako je ostala neopažena varovalka, ki od 31. 8. ni
+// poslala nobenega workflow_dispatch (manjkal je GH_DISPATCH_TOKEN). Zato vsako
+// opravilo teče prek _cronBeat(), ki zapiše KV `cron:health:<ime>` {ts, ok, err, ms};
+// GET /health jih vrne, tools/check_freshness.py (freshness-watch.yml) pa odpre issue,
+// ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
+// 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
+const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, aurora: 20, crnivec: 20,
+  lightning: 20, radar_composite: 20, icon_cells: 20,
+  score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60,
+};
+const CRON_BEAT_WRITE_MS = 15 * 60000;
+async function _cronBeat(env, name, fn) {
+  const t0 = Date.now();
+  let ok = true, err = null;
+  try {
+    const r = await fn();
+    if (r === false || (r && typeof r === "object" && r.ok === false)) {
+      ok = false;
+      err = String((r && (r.reason || r.status)) || "opravilo je javilo neuspeh").slice(0, 200);
+    }
+  } catch (e) {
+    ok = false;
+    err = String((e && e.message) || e).slice(0, 200);
+  }
+  const kv = env?.COUNTER_KV;
+  if (kv) {
+    try {
+      const key = "cron:health:" + name;
+      const prev = JSON.parse((await kv.get(key)) || "null");
+      if (!prev || prev.ok !== ok || prev.err !== err || t0 - prev.ts >= CRON_BEAT_WRITE_MS) {
+        await kv.put(key, JSON.stringify({ ts: t0, ok, err, ms: Date.now() - t0 }), { expirationTtl: 7 * 86400 });
+      }
+    } catch (_) { /* zapis zdravja ne sme podreti opravila */ }
+  }
+  return ok;
+}
+async function _cronHealth(env) {
+  const kv = env?.COUNTER_KV;
+  const now = Date.now();
+  const jobs = {};
+  for (const [name, maxMin] of Object.entries(CRON_JOBS)) {
+    let rec = null;
+    try { rec = kv ? JSON.parse((await kv.get("cron:health:" + name)) || "null") : null; } catch (_) {}
+    const age = rec ? Math.round((now - rec.ts) / 60000) : null;
+    jobs[name] = { ok: !!rec && rec.ok, err: rec ? rec.err : "ni zapisa", age_min: age, max_min: maxMin,
+                   stale: age == null || age > maxMin, ms: rec ? rec.ms : null };
+  }
+  return { now: new Date(now).toISOString(), ok: Object.values(jobs).every(j => j.ok && !j.stale), jobs };
+}
+
 // ── ARSO 24-urne padavine: posnetek zjutraj ──────────────────────
 // `rr24h_val` v observation_si_latest.xml je zapolnjen SAMO v jutranji meritvi
 // (ob 8:00 CEST); v urnih meritvah čez dan je prazen. Padavinska karta
@@ -2712,7 +2766,7 @@ async function _cronSnapshotArsoRr24h(env) {
     const res = await fetch(ARSO_OBS_URL, { headers: { "Accept": "application/xml,text/xml", "Referer": "https://meteo.arso.gov.si/" } });
     if (!res.ok) return { ok: false, status: res.status };
     const snap = _parseArsoRr24h(await res.text());
-    if (snap.stations.length < 5) return { ok: false, reason: "rr24h še ni objavljen", n: snap.stations.length };
+    if (snap.stations.length < 5) return { ok: true, pending: true, n: snap.stations.length };  // še ni jutranje meritve — ni napaka
     await kv.put(key, JSON.stringify({ datum, ...snap, saved_at: new Date().toISOString() }), { expirationTtl: 3 * 86400 });
     return { ok: true, n: snap.stations.length };
   } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
@@ -2733,6 +2787,10 @@ async function _cronDispatchScheduledWorkflows(env) {
       });
     } catch (_) {}
   }
+  // Za _cronBeat: brez tega je izpad varovalke (manjka GH_DISPATCH_TOKEN) ostal viden samo v R2
+  // datoteki, ki je nihče ne bere — od 31. 8. 2026 ni bilo niti enega uspešnega dispatcha.
+  const bad = Object.entries(results).filter(([k, v]) => k !== "cas" && v && v.ok === false);
+  return bad.length ? { ok: false, reason: bad.map(([k, v]) => `${k}: ${v.reason || v.status}`).join("; ") } : { ok: true };
 }
 
 // ── Stalno beleženje strel (Blitzortung) ──────────────────
@@ -2873,11 +2931,14 @@ export class LightningLogger extends DurableObject {
 }
 
 async function _cronKeepLightningAlive(env) {
+  // Vrne {ok,reason} za _cronBeat: izpad povezave = izgubljeni zapis strel, ki ga ni mogoče
+  // dobiti za nazaj (in dan brez pokritosti se pri preverjanju nevihtne karte ne šteje).
   try {
-    if (!env?.LIGHTNING_LOGGER) return;
+    if (!env?.LIGHTNING_LOGGER) return { ok: false, reason: "LIGHTNING_LOGGER ni vezan" };
     const stub = env.LIGHTNING_LOGGER.get(env.LIGHTNING_LOGGER.idFromName("global"));
-    await stub.keepAlive();
-  } catch (_) {}
+    const r = await stub.keepAlive();
+    return r && r.connected ? { ok: true } : { ok: false, reason: "ni povezave z Blitzortung (ponovna vzpostavitev v teku)" };
+  } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
 }
 
 // ── Lestvica igre »Prehiti model« (/napovej/) ────────────────
@@ -2987,39 +3048,39 @@ async function _cronScoreNapovej(env) {
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "30 6-7 * * *") {
-      ctx.waitUntil(_cronSnapshotArsoRr24h(env));
+      ctx.waitUntil(_cronBeat(env, "rr24h_snapshot", () => _cronSnapshotArsoRr24h(env)));
       return;
     }
     if (event.cron === "10,40 4-5 * * *") {
-      ctx.waitUntil(_cronDispatchScheduledWorkflows(env));
+      ctx.waitUntil(_cronBeat(env, "dispatch", () => _cronDispatchScheduledWorkflows(env)));
       return;
     }
     if (event.cron === "2-59/5 * * * *") {
-      ctx.waitUntil(_cronRenderIconAndCells(env));
+      ctx.waitUntil(_cronBeat(env, "icon_cells", () => _cronRenderIconAndCells(env)));
       return;
     }
     if (event.cron === "5 2 * * *") {
-      ctx.waitUntil(_cronScoreNapovej(env));
+      ctx.waitUntil(_cronBeat(env, "score_napovej", () => _cronScoreNapovej(env)));
       return;
     }
-    ctx.waitUntil(_cronCheckThresholds(env));
+    ctx.waitUntil(_cronBeat(env, "thresholds", () => _cronCheckThresholds(env)));
     // Radarski nowcast nadomesti modelski; na model pademo le, če radar odpove,
     // sicer bi za isti dogodek poslali dve obvestili.
-    ctx.waitUntil((async () => {
+    ctx.waitUntil(_cronBeat(env, "nowcast", async () => {
       const ok = await _cronCheckRadarNowcast(env).catch(() => false);
       if (!ok) await _cronCheckPrecipNowcast(env);
-    })());
-    ctx.waitUntil(_cronCheckRainStartStop(env));
-    ctx.waitUntil(_cronCheckAurora(env));
-    ctx.waitUntil(_cronCheckCrnivec(env));
+    }));
+    ctx.waitUntil(_cronBeat(env, "rain_start_stop", () => _cronCheckRainStartStop(env)));
+    ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
+    ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
     // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
     // izgubljen zapis, ki ga ni mogoče dobiti za nazaj — okvir radarja doriše
     // naslednji tik, strela, ki je nihče ni poslušal, pa je ni več. Vsa
     // opravila se sicer zaženejo sočasno; vrstni red odloča le, kdo prvi pride
     // do svoje prve zahteve, ko je proračun invokacije tesen.
-    ctx.waitUntil(_cronKeepLightningAlive(env));
-    ctx.waitUntil(_cronRenderRadarComposite(env));
+    ctx.waitUntil(_cronBeat(env, "lightning", () => _cronKeepLightningAlive(env)));
+    ctx.waitUntil(_cronBeat(env, "radar_composite", () => _cronRenderRadarComposite(env)));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -4137,6 +4198,14 @@ export default {
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
           );
         }
+      }
+
+      // ── /health ───────────────────────────────────────────
+      // Zdravje cron opravil (glej _cronBeat). Javno, brez občutljivih podatkov.
+      if (path === "/health") {
+        const h = await _cronHealth(env);
+        return new Response(JSON.stringify(h), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
       }
 
       // ── /arso-rr24h ───────────────────────────────────────

@@ -35,13 +35,13 @@ jobs:
   parity:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
 
@@ -63,6 +63,9 @@ jobs:
 
       - name: Test posnetka ARSO rr24h
         run: python3 tools/test_precip_snapshot.py
+
+      - name: Test dolinskega profila
+        run: python3 tools/test_valley_profile.py
 
       - name: Test potrošnikov datotek drugih workflowov (zastareli vhodi)
         run: python3 tools/test_stale_inputs.py

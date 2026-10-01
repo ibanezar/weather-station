@@ -9405,6 +9405,73 @@ const DUEL_NEIGHBOUR={
   owner:'Jaka Robnik',   // navedba na kartici: »Meritve sosednje postaje deli …«
 };
 
+// ── Dolinski profil: izmerjena temperatura po nadmorski višini ───────────
+// Rečica (IREICA1, 366 m), Gornji Grad (DRSI, 428 m) in Črnivec (DRSI, 903 m) — vse
+// IZMERJENO, nič preračunanega: razlika med postajami pokaže, ali je zrak v dolini
+// hladnejši od višine (inverzija, hladna kotanja) ali običajno toplejši. Varpolje
+// nima objavljene višine in je na istem dnu doline kot Rečica, zato ni na grafu.
+// Višini DRSI postaj sta iz DEM (DRSI_ELEV_M v tools/crnivec_zones.py).
+const VP_HOME_ELEV=366, VP_GG_ELEV=428, VP_CRN_ELEV=903, VP_DRSI_MAX_AGE_MIN=40, VP_STD_LAPSE=-0.65;
+let _vpCache={ts:0,data:null};
+// Čista funkcija (preverja tools/test_valley_profile.py): točke [{name,elev,t}] → povzetek.
+function valleyProfileSummary(pts){
+  const p=(pts||[]).filter(x=>x&&x.t!=null&&isFinite(x.t)).sort((a,b)=>a.elev-b.elev);
+  if(p.length<2)return null;
+  const lo=p[0],hi=p[p.length-1];
+  const lapse=(hi.t-lo.t)/(hi.elev-lo.elev)*100;   // °C na 100 m
+  let kind,text;
+  if(lapse>0){kind='inversion';text='Inverzija: na '+hi.elev+' m je toplejše kot v dolini.';}
+  else if(lapse>-0.4){kind='weak';text='Šibek gradient: temperatura z višino skoraj ne pade.';}
+  else if(lapse>-0.9){kind='normal';text='Običajen gradient (standardni je −0,65 °C/100 m).';}
+  else{kind='steep';text='Strm gradient: z višino se hitro ohlaja.';}
+  return{lo,hi,lapse,kind,text,pts:p};
+}
+function renderValleyProfile(el,sum){
+  const W=320,H=150,L=44,R=10,T=10,B=24;
+  const ts=sum.pts.map(x=>x.t),hs=sum.pts.map(x=>x.elev);
+  const tmin=Math.floor(Math.min(...ts,sum.lo.t+VP_STD_LAPSE*(950-sum.lo.elev)/100)-1),tmax=Math.ceil(Math.max(...ts)+1);
+  const hmin=300,hmax=1000;
+  const X=t=>L+(t-tmin)/(tmax-tmin)*(W-L-R),Y=h=>H-B-(h-hmin)/(hmax-hmin)*(H-T-B);
+  const ref='<line x1="'+X(sum.lo.t+VP_STD_LAPSE*(hmin-sum.lo.elev)/100).toFixed(1)+'" y1="'+Y(hmin).toFixed(1)+
+    '" x2="'+X(sum.lo.t+VP_STD_LAPSE*(hmax-sum.lo.elev)/100).toFixed(1)+'" y2="'+Y(hmax).toFixed(1)+
+    '" stroke="var(--muted)" stroke-dasharray="4 3" stroke-width="1"/>';
+  const obs='<line x1="'+X(sum.lo.t).toFixed(1)+'" y1="'+Y(sum.lo.elev).toFixed(1)+'" x2="'+X(sum.hi.t).toFixed(1)+
+    '" y2="'+Y(sum.hi.elev).toFixed(1)+'" stroke="var(--blue)" stroke-width="2"/>';
+  const dots=sum.pts.map(x=>'<g><title>'+x.name+': '+_duelNum(x.t,1)+' °C na '+x.elev+' m</title>'+
+    '<circle cx="'+X(x.t).toFixed(1)+'" cy="'+Y(x.elev).toFixed(1)+'" r="5" fill="var(--blue)" stroke="var(--bg,#fff)" stroke-width="2"/>'+
+    // oznaka na levo od točke, če bi na desni zlezla čez rob grafa
+    (X(x.t)>W-95?'<text x="'+(X(x.t)-8).toFixed(1)+'" text-anchor="end"':'<text x="'+(X(x.t)+8).toFixed(1)+'"')+
+    ' y="'+(Y(x.elev)+4).toFixed(1)+'" font-size="10" fill="var(--text)">'+x.name+' '+_duelNum(x.t,1)+'°</text></g>').join('');
+  const yTicks=[400,600,800,1000].map(h=>'<text x="'+(L-6)+'" y="'+(Y(h)+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+h+' m</text>'+
+    '<line x1="'+L+'" y1="'+Y(h).toFixed(1)+'" x2="'+(W-R)+'" y2="'+Y(h).toFixed(1)+'" stroke="var(--muted)" stroke-opacity=".15"/>').join('');
+  const aria='Temperatura po višini: '+sum.pts.map(x=>x.name+' '+_duelNum(x.t,1)+' °C na '+x.elev+' m').join(', ')+'. '+sum.text;
+  el.innerHTML='<div class="duel-verdict" style="margin-top:.6rem"><b>Profil doline v živo:</b> '+sum.text+
+    ' Gradient '+(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m ('+sum.lo.name+' → '+sum.hi.name+').</div>'+
+    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block;margin:.3rem auto 0" role="img" aria-label="'+aria.replace(/"/g,'&quot;')+'">'+
+    yTicks+ref+obs+dots+'</svg>'+
+    '<div class="duel-credit">Prekinjena črta: standardni gradient −0,65 °C/100 m od '+sum.lo.name+'. Vse izmerjeno; '+
+    'Črnivec in Gornji Grad: <a href="https://www.ceste.si/sl/razmere/vreme" target="_blank" rel="noopener">DRSI</a> (višini iz DEM).</div>';
+}
+async function fetchValleyProfile(homeT){
+  const el=document.getElementById('duel-profile');
+  if(!el)return;
+  try{
+    // Vir se osveži na ~10 min in je predpomnjen na 5 min v workerju — klienta omejimo na enkrat/5 min.
+    if(!_vpCache.data||Date.now()-_vpCache.ts>5*60*1000){
+      const r=await fetch(PROXY+'/crnivec-drsi');
+      _vpCache={ts:Date.now(),data:r.ok?await r.json():null};
+    }
+    const post=(_vpCache.data&&_vpCache.data.postaje)||{};
+    const fresh=st=>st&&st.temp_c!=null&&st.ts&&(Date.now()-new Date(st.ts))/60000<=VP_DRSI_MAX_AGE_MIN;
+    const pts=[{name:'Rečica',elev:VP_HOME_ELEV,t:homeT}];
+    if(fresh(post.gornji_grad))pts.push({name:'Gornji Grad',elev:VP_GG_ELEV,t:post.gornji_grad.temp_c});
+    if(fresh(post.crnivec))pts.push({name:'Črnivec',elev:VP_CRN_ELEV,t:post.crnivec.temp_c});
+    const sum=valleyProfileSummary(pts);
+    if(!sum){el.innerHTML='';return;}
+    renderValleyProfile(el,sum);
+  }catch(e){el.innerHTML='';console.warn('Dolinski profil:',e);}
+}
+
 function _duelNum(v,d=1){return(v==null||isNaN(v))?'—':Number(v).toFixed(d).replace('.',',');}
 
 function _duelVerdict(diff,hour){
@@ -9471,6 +9538,7 @@ async function fetchValleyDuel(){
         'Arhiv, model MTR in semafor točnosti ostajajo na meritvah IREICA1.</div>';
 
     if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    fetchValleyProfile(homeT);
   }catch(e){
     if(body)body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';
     console.warn('Dvoboj Varpolje:',e);
