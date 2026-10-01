@@ -773,7 +773,7 @@ def same_day_section(mmdd_days, date, m, d):
                  f'({cold[0][:4]})')
     return f'''  <h2>Ta dan v drugih letih</h2>
   <p>{note}.</p>
-  <div class="table-scroll">
+  <div class="table-scroll" tabindex="0">
   <table class="data-table">
     <caption>Isti koledarski dan ({d}. {MES_NOM[m]}) v drugih letih meritev postaje IREICA1.</caption>
     <thead><tr><th>Leto</th><th>Najvišja</th><th>Najnižja</th><th>Padavine</th></tr></thead>
@@ -3219,7 +3219,7 @@ def gen_month_climatology(hist, sitemap_urls):
                 f'<td>{s["prec_days"]}</td></tr>'
             )
         table = f'''  <h2>{MES_NOM[m].capitalize()} po letih</h2>
-  <div class="table-scroll">
+  <div class="table-scroll" tabindex="0">
   <table class="data-table">
     <thead><tr><th>Leto</th><th>Povpr. T (°C)</th><th>Najvišja (°C)</th>
     <th>Najnižja (°C)</th><th>Padavine (mm)</th><th>Dni s padavinami</th></tr></thead>
@@ -3511,7 +3511,7 @@ def gen_landing_page(hist, sitemap_urls):
         _ver = _mos.get("model_version")
         _lbl = f"MTR v{_ver.split('.')[0]}" if _ver else "MTR"
         fc_fallback = (f'  <h2 id="napoved">Napoved za Rečico ob Savinji</h2>\n'
-                       f'  <div class="table-scroll">\n  <table class="data-table">\n'
+                       f'  <div class="table-scroll" tabindex="0">\n  <table class="data-table">\n'
                        f'    <caption>Napoved modela {_lbl} (lastni model Meteorec s popravkom '
                        f'za dno doline). Daljša, 7-dnevna napoved se osveži vsako uro.</caption>\n'
                        f'    <thead><tr><th>Dan</th><th>Najvišja / najnižja (°C)</th>'

@@ -260,7 +260,7 @@ def build_body(data):
                          f'<td>{round(tmax) if tmax is not None else "—"} °C</td>'
                          f'<td>{seo.num(precip, 0) if precip is not None else "—"} mm</td>'
                          f'<td>{seo.num(sun_h, 1)} h</td></tr>')
-    day_table = ('  <div class="table-scroll"><table class="stats">\n'
+    day_table = ('  <div class="table-scroll" tabindex="0"><table class="stats">\n'
                  '    <tr><th>Dan</th><th>Ocena</th><th>Ure letenja</th><th>Tmax</th><th>Padavine</th><th>Sonce</th></tr>\n'
                  + "\n".join(day_rows) + "\n  </table></div>")
     day_chart = (

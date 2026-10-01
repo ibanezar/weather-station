@@ -567,7 +567,7 @@ def build_body(l, svez_opomba):
     <p class="muted-note">Vzdevek za lestvico (neobvezno):
       <input id="pg-lb-ime" type="text" maxlength="24" placeholder="Anonimni" autocomplete="nickname">
       — prikazan je samo tvoj najboljši prelet, ne vsak poskus.</p>
-    <div class="pg-lb-tabs" role="tablist">
+    <div class="pg-lb-tabs" role="group" aria-label="Lestvica">
       <button type="button" class="pg-lb-tab" data-obdobje="dan" aria-pressed="true">Danes</button>
       <button type="button" class="pg-lb-tab" data-obdobje="{esc(kor.get("id", "celje"))}" aria-pressed="false">
         Rekord — {esc(kor.get("kratko", "ta koridor"))}</button>

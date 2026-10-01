@@ -299,7 +299,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
-<link rel="stylesheet" href="/style.min.css?v=23a1e966">
+<link rel="stylesheet" href="/style.min.css?v=73b1180d">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -671,7 +671,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fc-slider-center vis" id="fc-slider-center">zdaj</span>
         <span>+24h</span>
       </div>
-      <input type="range" class="fc-slider" id="fc-slider" min="-6" max="24" value="0" step="1">
+      <input type="range" class="fc-slider" id="fc-slider" min="-6" max="24" value="0" step="1" aria-label="Ura napovedi (glede na zdaj)">
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
@@ -768,7 +768,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="past-days-hdr">
     <span class="past-days-hdr-lbl">📅 Zadnjih 7 dni</span>
   </div>
-  <div class="past-days-scroll" id="past-days-scroll"></div>
+  <div class="past-days-scroll" id="past-days-scroll" tabindex="0" aria-label="Zadnjih 7 dni"></div>
   <div class="pd-detail-wrap" id="pd-detail"></div>
 
   <!-- ── Ta mesec — hitri povzetek (renderMonthCard, deli izračun s spodnjim
@@ -1313,7 +1313,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="insight-card" id="ic-analog">
       <div class="ic-head"><span>👯 Analogni dnevi — vremenski dvojčki</span><span class="ic-badge">zadnjih 7 let</span></div>
       <div class="analog-controls">
-        <input type="date" id="analog-date">
+        <input type="date" id="analog-date" aria-label="Datum za iskanje podobnih dni">
         <button class="analog-btn" id="analog-go">Najdi dvojčke</button>
       </div>
       <div id="analog-body"><div class="analog-empty">Izberi datum in poišči najbolj podobne dni v zgodovini postaje.</div></div>
@@ -3741,7 +3741,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </footer>
 </div>
 
-<script src="app.min.js?v=912febdb" defer></script>
+<script src="app.min.js?v=fbd4a44f" defer></script>
 
 
 <div id="toast"></div>

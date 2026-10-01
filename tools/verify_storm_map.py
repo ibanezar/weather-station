@@ -222,7 +222,7 @@ def build_block(results):
         f'od tega s strelami nad Slovenijo: <strong>{s["storm_days"]}</strong>. '
         f'Dni, ko je karta nekje napovedala vsaj zmeren potencial: {pred_days}, od tega je res streljalo {dl["a"]}. '
         f'Dni s strelami, ki jih karta ni napovedala: {dl["c"]}.</p>\n'
-        f'  <div class="table-scroll"><table class="data-table">\n'
+        f'  <div class="table-scroll" tabindex="0"><table class="data-table">\n'
         f'  <thead><tr><th>Ocena karte</th><th>Točk</th><th>S strelami</th><th>Delež</th></tr></thead>\n'
         f'  <tbody>{rows}</tbody></table></div>\n{early}')
     return head + body + f'  {END}'

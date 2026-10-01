@@ -281,7 +281,7 @@ def wrap_wide_tables(body):
         if 'class="table-scroll"' in before or 'class="tbl-x"' in before:
             continue
         out.append(body[pos:m.start()])
-        out.append(f'<div class="tbl-x">{m.group(0)}</div>')
+        out.append(f'<div class="tbl-x" tabindex="0">{m.group(0)}</div>')
         pos = m.end()
     out.append(body[pos:])
     return "".join(out)

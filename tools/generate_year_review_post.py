@@ -165,7 +165,7 @@ def build_article(end_year, s, t_rank, p_rank):
         rows.append(f'<tr><td><a href="/vreme/{y}/{m:02d}/">{seo.MES_NOM[m].capitalize()} {y}</a></td>'
                     f'<td>{num(ms["tavg"])} °C</td><td>{dev}</td>'
                     f'<td>{num(ms["prec_total"], 0)} mm</td><td>{pp}</td></tr>')
-    table = ('<div class="table-scroll"><table class="data-table"><thead><tr><th>Mesec</th>'
+    table = ('<div class="table-scroll" tabindex="0"><table class="data-table"><thead><tr><th>Mesec</th>'
              '<th>Povp. T</th><th>Odstopanje</th><th>Padavine</th><th>Od norme</th></tr></thead>'
              '<tbody>' + "".join(rows) + '</tbody></table></div>')
 
