@@ -435,6 +435,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/sedem-zim-v-recici-kaj-pravi-arhiv-postaje-1001.html</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/sedem-zim-v-recici-kaj-pravi-arhiv-postaje-1001.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/vremenski-povzetek-september-2026.html</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
