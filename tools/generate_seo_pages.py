@@ -34,7 +34,7 @@ from asset_version import css_links
 # hub strani /klima/, /padavine/, /temperatura/ tam morajo primerjati proti isti
 # normi. Dva ločena izračuna sta se že enkrat razšla — 1147 mm proti 1377 mm
 # povprečnih letnih padavin (popravljeno 20. 8. 2026, SEO audit točka 17).
-from seo_smart_routine import compute_climate
+from seo_smart_routine import compute_climate, wrap_wide_tables
 # Ena sama definicija CSS vrstic za vse ovoje strani (glej tools/asset_version.py).
 CSS_LINKS = css_links('fonts/fonts.css', 'blog/blog.css', 'vreme/vreme.css')
 SITE = "https://meteorec.si"
@@ -422,6 +422,7 @@ def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_
     # title/desc land inside HTML attributes (content="...") below -- escape
     # so a stray straight quote (e.g. from GLOSSARY_TERMS text) can't break
     # the attribute and truncate the tag (see /slovar/kumulus/ incident).
+    body_content = wrap_wide_tables(body_content)
     title_esc = html.escape(seo_title(title))
     og_title_esc = html.escape(title)
     desc_esc = html.escape(desc)

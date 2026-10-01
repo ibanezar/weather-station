@@ -176,6 +176,8 @@
    razredu razlezla čez zaslon na ozkih napravah. V tem komentarju se ta dva
    znaka torej ne smeta znajti enega tik ob drugem. */
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9rem 0}
+/* Samodejni ovoj širokih tabel (wrap_wide_tables v seo_smart_routine.py) — brez robov, da se ožje tabele ne premaknejo. */
+.tbl-x{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
 .data-table{border-collapse:collapse;width:100%;font-size:.87rem;min-width:32rem}
 .data-table th,.data-table td{padding:.5rem .7rem;text-align:right;
   border-bottom:1px solid var(--border);white-space:nowrap}

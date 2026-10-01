@@ -265,8 +265,31 @@ def footer_html():
             f'    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a>'
             f' · <a href="/vreme/">Arhiv</a> · <a href="/trendi/">Trendi</a></span>\n  </footer>')
 
+# Tabele razredov stats/hub-table so na telefonu širše od zaslona (tabela dni
+# meseca 555 px na 360 px — vsa stran se je premikala vstran, najdeno 1. 10. 2026
+# z mobilnim pregledom). Ovoj .tbl-x (vreme.css) tabelo pomika sam zase; ožje
+# tabele ostanejo enake, ker ovoj nima robov ne širine. Uporabljata ga oba
+# page_shell (tu in v generate_seo_pages), zato ga nobena nova stran ne pozabi.
+import re as _re
+_WIDE_TABLE_RE = _re.compile(r'<table\b[^>]*class="[^"]*\b(?:stats|hub-table)\b[^"]*"[^>]*>.*?</table>', _re.S)
+
+
+def wrap_wide_tables(body):
+    out, pos = [], 0
+    for m in _WIDE_TABLE_RE.finditer(body):
+        before = body[max(0, m.start() - 60):m.start()]
+        if 'class="table-scroll"' in before or 'class="tbl-x"' in before:
+            continue
+        out.append(body[pos:m.start()])
+        out.append(f'<div class="tbl-x">{m.group(0)}</div>')
+        pos = m.end()
+    out.append(body[pos:])
+    return "".join(out)
+
+
 def page_shell(title, desc, canonical, head_extras, body_content):
     full_url = f"{SITE}{canonical}"
+    body_content = wrap_wide_tables(body_content)
     return f'''<!DOCTYPE html>
 <html lang="sl">
 <head>

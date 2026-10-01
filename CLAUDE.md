@@ -487,6 +487,15 @@ odgovarjala le z besedilom »napoved je na naslovni strani«.
 - Rezervni zapis (ob generiranju strani) je iz committanega `napoved-modela.json`,
   ker je to edini napovedni vir v repozitoriju.
 
+### Široke tabele na telefonu se ovijejo same (1. 10. 2026)
+
+Mobilni pregled (`tools/check_mobile_overflow.mjs`) je našel, da se je vsaka mesečna stran
+arhiva (tabela dni, 555 px na 360 px), letne strani, `/klima/`, `/temperatura/`, `/teden/`,
+`/podatki/`, `/vreme-za-padalce/` in `/invazivke/` premikala vstran. Oba `page_shell`
+(`generate_seo_pages.py`, `seo_smart_routine.py`) zdaj vsako tabelo `stats`/`hub-table`
+ovije v `.tbl-x` (`wrap_wide_tables()`, pravilo v `vreme.css` — brez robov, ožje tabele
+ostanejo enake). Nova stran prek teh lupin torej ne more pozabiti ovoja.
+
 ### `.data-table` / `.table-scroll` živita v `vreme/vreme.css`
 
 Razreda sta bila v uporabi na 12 straneh `/vreme/mesec/*/`, definirana pa v nobenem
