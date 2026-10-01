@@ -54,6 +54,9 @@ const isDark = () => document.documentElement.dataset.theme === 'dark';
 // sicer barvo ozadja potegne v blatno sivino.
 const meshOpacity = () => isDark() ? '1' : '0.18';
 let _lastTemp = null; // remember temp so theme toggle can re-colour it
+// Grafi, ki barve preberejo samo ob izrisu (isDark()), se ob menjavi teme sami ne
+// posodobijo. Ob prvem izrisu se vpišejo sem, setTheme() jih preriše (samo že narisane).
+const _themeRedraw=new Set();
 function setTheme(t){
   document.documentElement.dataset.theme = t;
   document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
@@ -69,6 +72,8 @@ function setTheme(t){
   // Grafi MTR nosijo lastno paleto po temi (MTR_CC), zato jih je treba prerisati
   // — barve so v atributih SVG, ne v CSS, in se same ne posodobijo.
   if(_mtrState) renderMtrCard();
+  _themeRedraw.forEach(fn=>{ try{ fn(); }catch(_){} });
+  if(_anChartsInit){ _anChartsInit=false; try{ initAnalysisCharts(); }catch(_){} }
   const mc = document.getElementById('mesh-canvas');
   if(mc) mc.style.opacity = meshOpacity();
 }
@@ -5842,6 +5847,7 @@ function setHeatmapMode(mode){
 }
 function drawHeatmap(){
   const svg=document.getElementById('heatmap-svg');if(!svg)return;
+  _themeRedraw.add(drawHeatmap);
   const y=new Date().getFullYear();
   set('hm-year-lbl',y);
   try{
@@ -8241,6 +8247,7 @@ function buildKlimatogram(){
 }
 
 function buildXLSXCharts(){
+  _themeRedraw.add(buildXLSXCharts);
   const dark=isDark();
   const tc=dark?'#94a3b8':'#64748b';
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
@@ -8397,7 +8404,11 @@ function initAnalysisCharts(){
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
   const textC=dark?'#94a3b8':'#64748b';
   const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textC,font:{size:10},boxWidth:10}}},scales:{x:{ticks:{color:textC,font:{size:10}},grid:{color:gridC}},y:{ticks:{color:textC,font:{size:10}},grid:{color:gridC}}}};
-  const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;new Chart(el.getContext('2d'),cfg);};
+  // Ob ponovnem izrisu (menjava teme) mora stari graf najprej izginiti, sicer Chart.js
+  // javi »Canvas is already in use«.
+  const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;
+    try{const existing=typeof Chart.getChart==='function'?Chart.getChart(el):null;if(existing)existing.destroy();}catch(_){}
+    new Chart(el.getContext('2d'),cfg);};
   const yr=AN.years;
 
   // Annual temp + trend
