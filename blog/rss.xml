@@ -5,8 +5,18 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 01 Oct 2026 11:35:33 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 01 Oct 2026 17:15:35 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vremensko leto 2025/26 v Rečici ob Savinji v številkah</title>
+      <link>https://meteorec.si/blog/vremensko-leto-2025-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vremensko-leto-2025-2026.html</guid>
+      <pubDate>Thu, 01 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Vremensko leto 2025/26 v Rečici ob Savinji: 11,3 °C, 1068 mm padavin, 53 vročih dni in 99 dni z zmrzaljo. Meritve postaje IREICA1.</description>
+      <category>letni-pregled</category>
+      <category>klima</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Test napovedi: september 2026 — zmagal ICON</title>
       <link>https://meteorec.si/blog/test-napovedi-2026-09.html</link>

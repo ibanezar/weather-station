@@ -1,4 +1,9 @@
 {
+  "vremensko-leto-2025-2026": [
+    "vremenski-povzetek-september-2026",
+    "temperaturni-trend-ireica1-2020-2025",
+    "vremenski-povzetek-julij-2026"
+  ],
   "test-napovedi-2026-09": [
     "test-napovedi-2026-07",
     "test-napovedi-2026-08",
@@ -86,8 +91,8 @@
   ],
   "vremenski-povzetek-avgust-2026": [
     "vremenski-povzetek-julij-2026",
-    "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-september-2026"
+    "vremenski-povzetek-september-2026",
+    "vremenski-povzetek-junij-2026"
   ],
   "pileus-nad-recico-kapa-nad-nevihtnim-stolpom-0831": [
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
@@ -215,9 +220,9 @@
     "temperaturni-trend-ireica1-2020-2025"
   ],
   "podnebno-povprecje-kako-vroc-je-res-ta-avgust-0806": [
-    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
-    "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816"
+    "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816",
+    "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723"
   ],
   "je-letosnja-susa-rekordna-kaj-pravi-spi": [
     "podnebna-zgodovina-recica-savinji-1950-2025",
@@ -251,8 +256,8 @@
   ],
   "vremenski-povzetek-julij-2026": [
     "vremenski-povzetek-avgust-2026",
-    "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-september-2026"
+    "vremenski-povzetek-september-2026",
+    "vremenski-povzetek-junij-2026"
   ],
   "nov-absolutni-rekord-postaje-37-2-c-0731": [
     "max-temperatura-28-junij-2026",
@@ -421,8 +426,8 @@
   ],
   "dve-nevihte-hladno-jutro": [
     "bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718",
-    "reke-megle-temperaturna-inverzija-recica-savinji",
-    "nevihtni-obeti-11-julij-2026"
+    "nevihtni-obeti-11-julij-2026",
+    "reke-megle-temperaturna-inverzija-recica-savinji"
   ],
   "koliko-je-zalilo-nevihta-11-julij-2026": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
@@ -431,8 +436,8 @@
   ],
   "nevihtni-obeti-11-julij-2026": [
     "kako-brati-nevihtno-napoved-cape-striz-vetra",
-    "nevihte-od-cetrtka-do-nedelje-16-19-julij-2026",
-    "bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718"
+    "bo-danes-v-zgornji-savinjski-dolini-grmelo-nevihtni-obeti-za-0718",
+    "nevihte-od-cetrtka-do-nedelje-16-19-julij-2026"
   ],
   "vreme-golte-sneg-razmere": [
     "razmere-za-pohod-v-savinjske-alpe-ta-konec-tedna-kdaj-veter-0724",
@@ -516,8 +521,8 @@
   ],
   "polletni-pregled-2026-ireica1": [
     "najbolj-suha-pomlad-2026-ireica1",
-    "vremenski-povzetek-junij-2026",
-    "junij-2026-dvoglavi-mesec"
+    "junij-2026-dvoglavi-mesec",
+    "vremenski-povzetek-junij-2026"
   ],
   "najhladnejsa-julijska-jutra-recica": [
     "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
@@ -535,8 +540,8 @@
     "nevihtni-pas-14-julij-2026"
   ],
   "vremenski-povzetek-junij-2026": [
-    "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-julij-2026",
+    "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-september-2026"
   ],
   "nevihte-toca-hudourniki-julij-2026": [
@@ -580,8 +585,8 @@
     "vremenski-povzetek-junij-2026"
   ],
   "vremenski-povzetek-april-2026": [
+    "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-avgust-2026",
-    "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-julij-2026"
+    "vremenski-povzetek-junij-2026"
   ]
 }
