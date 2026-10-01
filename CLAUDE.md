@@ -337,6 +337,15 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   rezerve). Ob prekoračitvi na brezplačnem planu klici v ta DO preprosto
   odpovedo (ni doplačila) — ločen meter od običajnih Worker zahtev, torej
   ostala stran ostane nedotaknjena. Podrobnosti in vezava v `wrangler.toml`.
+- **Ponovna vzpostavitev ne čaka na cron** (1. 10. 2026): ob prekinitvi `close`/`error` nastavi
+  alarm (`_scheduleReconnect`, 10 s; `alarm()` poskuša znova, dokler se vtičnica ne odpre).
+  **Zombi** (odprta, a brez sporočila > `LTG_STALE_MS` = 3 min; Blitzortung pošilja strele z
+  vsega sveta, tišina pomeni mrtvo povezavo) in zataknjeno odpiranje (> 20 s) se zapreta in
+  zamenjata — prej se je ob `readyState` 0 ustvarila nova vtičnica brez zapiranja stare, ob
+  prekinitvi pa se je izgubilo do 5 min strel. V pokritost (`uptime`) šteje samo **sveža**
+  povezava. Vsak deploy workerja restartira DO (do 10 s luknje) — več deployev na dan = nižja
+  pokritost tistega dne, nevihtno preverjanje ga pri < 90 % preskoči. Simulacijo poganja
+  `tools/test_lightning_logger.py` (lažen WebSocket, SQLite, alarmi).
 - Prikaz na domači strani (kartica »Strele v bližini«, samo napredni pogled):
   `fetchLightningHistory()` v `app.js` pokliče `/strele-zgodovina.json?ur=24&dni=14`
   **enkrat ob nalaganju** in iz istega odgovora nariše stolpčni graf strel po dnevih
