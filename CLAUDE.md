@@ -1585,7 +1585,9 @@ pragovih ARSO, poledica/vozišče/ura/povzetek termina/meja sneženja/FNV-1a/bes
 točkovanje `/napovej/` (worker ↔ napovej.js) in prag mokrega dne (tri mesta),
 konstante workerja (`IGRA_KORIDORJI_KM`, `CRN_IGRA_MIN_S`, `KOLICINE`), pragove
 gobarskega indeksa, nevihtno karto (obris, mreža, mesta, barve, stopnje), 16 smeri
-vetra in LZW dekoder strel, oceno dneva v Termiki (`opis_dneva` ↔ `dayRating`).
+vetra in LZW dekoder strel, oceno dneva v Termiki (`opis_dneva` ↔ `dayRating`),
+stavek »Naslednjih 6 ur« in umeritev DRSI po uri, konstante in izbiro cone v znački
+`/crnivec/znacka.svg`.
 
 - **Nova namerna podvojitev = nov `@test`.** Ko v dokument zapišeš »če spremeniš
   eno, spremeni drugo«, dodaj tudi preizkus v `test_parity.py`. Brez njega je

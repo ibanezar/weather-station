@@ -431,6 +431,77 @@ def igra_ocena_dneva():
     check(abs(sink - 1.28) < 0.01, "Termika: spust pri kroženju", f"igra={sink} stran=1.28")
 
 
+@test
+def crnivec_stavek_in_umeritev():
+    """forecast_sentence() ↔ stavekNapovedi() in _calib_at() ↔ calibAt() (Črnivec)."""
+    import winter_engine as we
+    import generate_crnivec_page as gc
+    src = "crnivec-site/index.html"
+    names = CRN_NAMES + ["stavekNapovedi", "calibAt"]
+    rnd = random.Random(33)
+    levels = ["na", "ok", "warn", "stop"]
+    n_cases = 250
+    scen = []
+    for k in range(n_cases):
+        raw = _crn_cases(3, 500 + 3 * k)
+        for e, h in zip(raw, (1, 3, 6)):
+            e["h"] = h
+        bias = rnd.choice([0, 1.2, -2.4])
+        rows_now = [{"id": "temp", "level": rnd.choice(levels)}, {"id": "road", "level": rnd.choice(levels[1:]),
+                    "value": rnd.choice(["verjetno suho", "ni podatka", "verjetno mokro", "nevarnost poledice"])},
+                    {"id": "fog", "level": "ok"}]
+        scen.append((raw, bias, rows_now))
+    calls = []
+    for raw, bias, rows_now in scen:
+        jsh = [{"h": e["h"], "time": f"{10 + 2 * i:02d}:00", "date": "2026-10-02", "temp": e["temp"], "cloud": e["cloud"],
+                "wind": e["wind"], "dew": e["dew"], "p": e["p"], "pPrev": e["pPrev"], "p3": e["p3"], "s3": e["s3"],
+                "frac": e["frac"]} for i, e in enumerate(raw)]
+        calls.append({"expr": f"stavekNapovedi({json.dumps(rows_now)}, {json.dumps(jsh)}.map(function(e){{return oceniUro(e,{bias});}}))"})
+    res = js(src, names, calls, CRN_PRELUDE)
+    for (raw, bias, rows_now), g in zip(scen, res):
+        hours = [gc.eval_hour({"h": e["h"], "time": f"2026-10-02T{10 + 2 * i:02d}:00", "temp_c": e["temp"],
+                               "cloud_pct": e["cloud"], "wind_kmh_valley": e["wind"], "dew_c_valley": e["dew"],
+                               "precip_mm": e["p"], "precip_mm_prev": e["pPrev"], "precip_mm_3h": e["p3"],
+                               "snow_cm_3h": e["s3"], "snow_frac": e["frac"]}, bias) for i, e in enumerate(raw)]
+        want = gc.forecast_sentence(rows_now, hours)
+        check(want == g, "stavek napovedi", f"vrstice={rows_now} bias={bias}\n    py={want!r}\n    js={g!r}")
+    # umeritev po uri dneva
+    calib = {"bias_by_hour": [round(rnd.uniform(-3, 3), 1) for _ in range(24)], "days": 10}
+    times = [f"2026-10-02T{h:02d}:30" for h in range(24)] + ["", None, "2026-10-02"]
+    got = js(src, names, [{"fn": "calibAt", "args": [t]} for t in times], f"var PASS = {{elev: 902}}; var CALIB = {json.dumps(calib)};")
+    for t, g in zip(times, got):
+        want = we._calib_at(calib, t)
+        check(close(want, g, 1e-12), "umeritev po uri", f"{t!r}: py={want} js={g}")
+
+
+@test
+def crnivec_znacka():
+    """/crnivec/znacka.svg v workerju ↔ model (winter_engine) in cona (pick_zone, pickZoneLive)."""
+    import winter_engine as we
+    import crnivec_zones as cz
+    import seo_audit  # noqa: F401 — poskrbi za sys.path kot drugod
+    # konstante modela, vtipkane v workerju
+    names = ["LAPSE", "SNOW_OFFSET"]
+    got = js("worker.js", names, [{"expr": "[LAPSE, STATION_ELEV, PASS_ELEV, SNOW_OFFSET, SNOW_HALFWIDTH]"}])[0]
+    want = [we.seo.LAPSE_RATE_C_PER_100M, we.ELEV, 902, we.SNOW_LEVEL_OFFSET_M, we.SNOW_BAND_HALFWIDTH_M]
+    check(got == want, "značka: konstante modela", f"worker={got} py={want}")
+    # izbira cone: telo veriga if/else iz workerja, izrezano iz izvorne kode
+    w = js_src("worker.js")
+    chain = w[w.index("let zoneLabel, zoneColor;"):w.index('svg = badgeSvg("črnivec", zoneLabel, zoneColor)')]
+    temps = [None, -5, -0.1, 0, 0.1, 3, 5, 5.1, 12]
+    snows = [0, 1.9, 2, 5]
+    cases = [(t, sn) for t in temps for sn in snows]
+    prelude = "function badge(tempC, snowCm){ " + chain + " return zoneLabel; }"
+    wk = js("worker.js", [], [{"expr": f"badge({json.dumps(t)}, {sn})"} for t, sn in cases], prelude)
+    page = js("crnivec-site/index.html", ["pickZoneLive", "ZONE_DATA"],
+              [{"expr": f"pickZoneLive({json.dumps(t)}, {sn}).id"} for t, sn in cases])
+    zone_to_badge = {"sonce": "suho", "nekaj": "tak-tak", "verige": "verige", "spolzko": "spolzko"}
+    for (t, sn), a, b in zip(cases, wk, page):
+        z = cz.pick_zone({"temp_c": t, "expected_snow_cm_24h": sn})["id"]
+        check(zone_to_badge[z] == a, "značka: cona", f"t={t} sneg={sn}: pick_zone={z} worker={a}")
+        check(z == b, "cona na strani", f"t={t} sneg={sn}: pick_zone={z} stran={b}")
+
+
 def main():
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
     for t in TESTS:
