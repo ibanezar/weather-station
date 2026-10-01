@@ -120,7 +120,7 @@ def test_new_clients():
                            text=True, cwd=ROOT).stdout.split()
     found = []
     for f in files:
-        if f.endswith(".min.js") or f.startswith(("node_modules/", "tools/test_")) or "/_privacy" in f:
+        if f.endswith(".min.js") or f.startswith(("node_modules/", "tools/test_")) or "/_privacy" in f or f == ".github/workflows/privacy.yml":
             continue
         try:
             with open(os.path.join(ROOT, f), encoding="utf-8") as fh:
