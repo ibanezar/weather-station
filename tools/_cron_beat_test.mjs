@@ -30,6 +30,11 @@ globalThis.__run = (async function () {
   await _cronBeat(env, 'thresholds', async () => 1);   // enako stanje, < 15 min: brez novega zapisa
   out.rewrite = _puts - p0;
   out.health = await _cronHealth(env);
+  // opravilo brez zapisa, a znotraj roka od prvega zapisa: čaka, ni zastarelo
+  out.waiting = out.health.jobs.score_napovej;
+  out.since_set = _store['cron:health:_since'] !== undefined;
+  _store['cron:health:_since'] = String(Date.now() - 31 * 3600000);   // prvi zapis je star > 30 h
+  out.long_missing = (await _cronHealth(env)).jobs.score_napovej;
   return out;
 })();`, ctx);
 process.stdout.write(JSON.stringify(await ctx.__run));

@@ -2709,6 +2709,9 @@ async function _cronBeat(env, name, fn) {
   if (kv) {
     try {
       const key = "cron:health:" + name;
+      // Prvi zapis sploh: opravilo brez zapisa je »zastarelo« šele, ko je od tega minilo več, kot
+      // dovoljuje njegov rok (sicer bi dnevna opravila po vsakem deployu en dan javljala lažen izpad).
+      if (!(await kv.get("cron:health:_since"))) await kv.put("cron:health:_since", String(t0));
       const prev = JSON.parse((await kv.get(key)) || "null");
       if (!prev || prev.ok !== ok || prev.err !== err || t0 - prev.ts >= CRON_BEAT_WRITE_MS) {
         await kv.put(key, JSON.stringify({ ts: t0, ok, err, ms: Date.now() - t0 }), { expirationTtl: 7 * 86400 });
@@ -2721,12 +2724,17 @@ async function _cronHealth(env) {
   const kv = env?.COUNTER_KV;
   const now = Date.now();
   const jobs = {};
+  let since = null;
+  try { since = kv ? Number(await kv.get("cron:health:_since")) || null : null; } catch (_) {}
   for (const [name, maxMin] of Object.entries(CRON_JOBS)) {
     let rec = null;
     try { rec = kv ? JSON.parse((await kv.get("cron:health:" + name)) || "null") : null; } catch (_) {}
     const age = rec ? Math.round((now - rec.ts) / 60000) : null;
-    jobs[name] = { ok: !!rec && rec.ok, err: rec ? rec.err : "ni zapisa", age_min: age, max_min: maxMin,
-                   stale: age == null || age > maxMin, ms: rec ? rec.ms : null };
+    // brez zapisa: čakamo na prvi tek, dokler ni minil njegov rok od prvega zapisa kateregakoli opravila
+    const waiting = !rec && since != null && (now - since) / 60000 <= maxMin;
+    jobs[name] = { ok: waiting ? true : !!rec && rec.ok, err: rec ? rec.err : (waiting ? "čaka na prvi tek" : "ni zapisa"),
+                   age_min: age, max_min: maxMin, stale: waiting ? false : (age == null || age > maxMin),
+                   waiting, ms: rec ? rec.ms : null };
   }
   return { now: new Date(now).toISOString(), ok: Object.values(jobs).every(j => j.ok && !j.stale), jobs };
 }
