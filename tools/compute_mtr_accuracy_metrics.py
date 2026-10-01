@@ -31,6 +31,30 @@ OUT_PATH = os.path.join(ROOT, "data", "mtr-accuracy.json")
 ROLLING_WINDOW_DAYS = 30
 MIN_ROLLING_N = 5      # premalo za smiseln MAE na dani dan v seriji
 MIN_SEASON_N = 10      # premalo za smiselno razčlenitev po sezoni
+MIN_SITUATION_N = 8    # premalo za smiselno razčlenitev po vremenskem položaju
+HISTORY_PATH = os.path.join(ROOT, "history.json")
+# Vremenski položaj dneva iz IZMERJENEGA (ne napovedanega) — kdaj model pomaga in kdaj ne.
+# Popravek MTR je naučen za dno doline: največ šteje ob jasnih, mirnih dneh (velik dnevni
+# razpon, nočna inverzija), ob dežju in oblačnosti pa dolina ne dela razlike.
+WET_MM = 1.0           # dan z vsaj 1 mm padavin = moker (postaja)
+CLEAR_RANGE_C = 14.0   # izmerjeni Tmax − Tmin vsaj 14 °C = jasen, miren dan
+SITUATIONS = {
+    "jasno": "jasen, miren dan (razpon ≥ 14 °C, brez dežja)",
+    "mokro": "dan s padavinami (≥ 1 mm)",
+    "vmes": "oblačno ali vetrovno, brez dežja",
+}
+
+
+def situation_of(r, hist):
+    """Vremenski položaj razrešenega dne iz meritev postaje; None, če ni podatkov."""
+    try:
+        tx, tn = float(r["actual_tmax"]), float(r["actual_tmin"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    p = (hist.get(r["date"]) or {}).get("precipTotal")
+    if p is not None and p >= WET_MM:
+        return "mokro"
+    return "jasno" if tx - tn >= CLEAR_RANGE_C else "vmes"
 VARS = ("tmax", "tmin")
 LEADS = (1, 2)
 
@@ -167,6 +191,20 @@ def main():
         if by_lead:
             seasons_out[season] = by_lead
 
+    # ── Razčlenitev po vremenskem položaju (samo D+1) ────────────────────────
+    try:
+        hist = json.load(open(HISTORY_PATH, encoding="utf-8"))
+    except (OSError, ValueError):
+        hist = {}
+    situations_out = {}
+    d1 = [r for r in rows if r["lead"] == 1]
+    for key, label in SITUATIONS.items():
+        sr = [r for r in d1 if situation_of(r, hist) == key]
+        if len(sr) < MIN_SITUATION_N:
+            continue
+        situations_out[key] = {"label": label, "n": len(sr),
+                               **{var: mae_pair(sr, f"err_mtr_{var}", f"err_om_{var}") for var in VARS}}
+
     payload = {
         "generated_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "n_records": len(rows),
@@ -174,6 +212,7 @@ def main():
         "rolling_window_days": ROLLING_WINDOW_DAYS,
         "leads": leads_out,
         "seasons": seasons_out,
+        "situations": situations_out,
     }
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:

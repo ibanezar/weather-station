@@ -147,8 +147,10 @@ def build_article(y, m, per_model, biggest, site_data):
     }
 
 
-def build_html(article, y, m, now_utc):
-    slug = f"test-napovedi-{y}-{m:02d}"
+def build_html(article, y, m, now_utc, slug=None, back=("/test-napovedi/", "← Vsi podatki na /test-napovedi/"),
+               og_title=None, meta_note="samodejni mesečni pregled"):
+    """Uporablja ga tudi generate_year_review_post.py (slug, back, og_title, meta_note)."""
+    slug = slug or f"test-napovedi-{y}-{m:02d}"
     url = f"{SITE}/blog/{slug}.html"
     title = article["title"]
     desc = article["meta_description"]
@@ -244,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
       <span class="brand-name">Meteo<em>rec</em></span>
     </a>
-    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/test-napovedi/">Test napovedi</a></nav>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="{back[0]}">{section_label}</a></nav>
   </header>
 
   <nav class="crumbs" aria-label="Drobtine">
@@ -252,15 +254,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </nav>
 
   <article>
-    <div class="stn-badge"><span></span> Test napovedi · {section_label}</div>
+    <div class="stn-badge"><span></span> {section_label}</div>
     <h1>{title}</h1>
-    <p class="post-meta">{date_str} · Filip Eremita · samodejni mesečni pregled</p>
+    <p class="post-meta">{date_str} · Filip Eremita · {meta_note}</p>
 
     <p class="lead">{article["lead"]}</p>
 {sections_html}
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">{article["sources_note"]}</p>
 
-    <a class="back-link" href="/test-napovedi/">← Vsi podatki na /test-napovedi/</a>
+    <a class="back-link" href="{back[0]}">{back[1]}</a>
   </article>
 
   <footer class="site-foot">
@@ -281,7 +283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     entry = {"title": title, "slug": slug, "url": f"/blog/{slug}.html", "date": TODAY,
               "summary": desc, "tags": tags}
     og_meta = {
-        "title": f"Test napovedi\n{seo.MES_NOM[m].capitalize()} {y}",
+        "title": og_title or f"Test napovedi\n{seo.MES_NOM[m].capitalize()} {y}",
         "subtitle": "Zgornja Savinjska dolina · IREICA1",
         "section": section_label,
         "accent": hexrgb(article["og_accent_hex"]),

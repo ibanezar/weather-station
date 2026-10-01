@@ -120,7 +120,7 @@ def test_new_clients():
                            text=True, cwd=ROOT).stdout.split()
     found = []
     for f in files:
-        if f.endswith(".min.js") or f.startswith(("node_modules/", "tools/test_")) or "/_privacy" in f or f == ".github/workflows/privacy.yml":
+        if f.endswith(".min.js") or f.startswith(("node_modules/", "tools/test_")) or "/_privacy" in f or f in (".github/workflows/privacy.yml", "tools/mutation_check.py"):  # orodji testa, ne odjemalca
             continue
         try:
             with open(os.path.join(ROOT, f), encoding="utf-8") as fh:

@@ -24,6 +24,7 @@ EXPECT = {
     "drop_ws_null": True, "drop_alarm": True, "alarm_reconnected": True, "alarm_reschedules_while_connecting": True,
     "zombie_not_counted": True, "zombie_replaced": True, "zombie_age_reported": True,
     "message_keeps_alive": True, "error_alarm": True, "stale_close_ignored": True, "host_rotation": True,
+    "msg_uptime_once_per_slot": True, "msg_uptime_next_slot": True,
 }
 bad = {k: (r.get(k), v) for k, v in EXPECT.items() if r.get(k) != v}
 for k, (got, want) in bad.items():

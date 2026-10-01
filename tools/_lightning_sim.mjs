@@ -88,4 +88,12 @@ alarms.length = 0; nw.readyState = 3; nw.fire('error'); out.error_alarm = alarms
 d = make(); await d.keepAlive(); const o1 = sockets[0]; clock += 30000; await d.keepAlive(); const o2 = sockets[1];
 o1.fire('close'); out.stale_close_ignored = d.ws === o2;
 out.host_rotation = new Set(sockets.map(s => s.url)).size === 2;
+// 11. pokritost iz toka sporočil: enkrat na režo, brez klica crona
+d = make(); await d.keepAlive(); const s11 = sockets[0]; s11.open();
+clock = Math.ceil(clock / 300000) * 300000 + 1000; sqlLog.length = 0;
+s11.fire('message', { data: 'x' }); s11.fire('message', { data: 'x' });
+const ins1 = sqlLog.filter(q => q.startsWith('INSERT OR IGNORE')).length;
+clock += 300000; s11.fire('message', { data: 'x' });
+const ins2 = sqlLog.filter(q => q.startsWith('INSERT OR IGNORE')).length;
+out.msg_uptime_once_per_slot = ins1 === 1; out.msg_uptime_next_slot = ins2 === 2;
 process.stdout.write(JSON.stringify(out));

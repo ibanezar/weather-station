@@ -343,7 +343,10 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   vsega sveta, tišina pomeni mrtvo povezavo) in zataknjeno odpiranje (> 20 s) se zapreta in
   zamenjata — prej se je ob `readyState` 0 ustvarila nova vtičnica brez zapiranja stare, ob
   prekinitvi pa se je izgubilo do 5 min strel. V pokritost (`uptime`) šteje samo **sveža**
-  povezava. Vsak deploy workerja restartira DO (do 10 s luknje) — več deployev na dan = nižja
+  povezava. **Pokritost piše tok sporočil sam** (`_onMessage`, enkrat na režo), ne le klic
+  crona: petminutni cron tike izpušča (opravila si delijo proračun) in je živo povezavo
+  zapisal kot luknjo — 1. 10. 2026 10 od 13 rež v uri, kar bi nevihtno preverjanje (< 90 %)
+  vsak dan preskočilo. Vsak deploy workerja restartira DO (do 10 s luknje) — več deployev na dan = nižja
   pokritost tistega dne, nevihtno preverjanje ga pri < 90 % preskoči. Simulacijo poganja
   `tools/test_lightning_logger.py` (lažen WebSocket, SQLite, alarmi).
 - Prikaz na domači strani (kartica »Strele v bližini«, samo napredni pogled):
@@ -487,6 +490,15 @@ odgovarjala le z besedilom »napoved je na naslovni strani«.
 - Rezervni zapis (ob generiranju strani) je iz committanega `napoved-modela.json`,
   ker je to edini napovedni vir v repozitoriju.
 
+### Široke tabele na telefonu se ovijejo same (1. 10. 2026)
+
+Mobilni pregled (`tools/check_mobile_overflow.mjs`) je našel, da se je vsaka mesečna stran
+arhiva (tabela dni, 555 px na 360 px), letne strani, `/klima/`, `/temperatura/`, `/teden/`,
+`/podatki/`, `/vreme-za-padalce/` in `/invazivke/` premikala vstran. Oba `page_shell`
+(`generate_seo_pages.py`, `seo_smart_routine.py`) zdaj vsako tabelo `stats`/`hub-table`
+ovije v `.tbl-x` (`wrap_wide_tables()`, pravilo v `vreme.css` — brez robov, ožje tabele
+ostanejo enake). Nova stran prek teh lupin torej ne more pozabiti ovoja.
+
 ### `.data-table` / `.table-scroll` živita v `vreme/vreme.css`
 
 Razreda sta bila v uporabi na 12 straneh `/vreme/mesec/*/`, definirana pa v nobenem
@@ -521,6 +533,16 @@ Kako je narejeno:
   kamere, normale …), je v `init()` ovito v `runAdvancedOnly()` — v vrsto gre
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
+
+### Ponudba izbire pogleda se pokaže pred prvim izrisom (CLS, 1. 10. 2026)
+
+`#mode-intro` je prej odkril `initModeUI()` v `app.js` po nalaganju — nov obiskovalec
+(ravno tisti, ki ga meri Google) je dobil skok strani za ~380 px, CLS na telefonu 0,285
+(»slabo«). Zdaj inline skripta v `<head>` (ista kot za `wx-mode`) postavi
+`data-mode-intro="1"`, CSS pa ponudbo pokaže že ob prvem izrisu; `hideModeIntro()`
+oznako pobriše. CLS na telefonu: 0,06. **Nov element nad vsebino, ki ga odkrije JS, naj
+dobi isto obravnavo** (odločitev v `<head>` ali rezerviran prostor), ne `hidden=false` po
+nalaganju.
 
 ## Črnivec (`/crnivec/`) — izmerjeno s postaje DRSI, vozišče je ocena
 
@@ -974,6 +996,11 @@ Pravila, ki jih ne obračaj:
 - Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
   napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
   tiho dobiva druge vhode, kot jih pozna.
+- **Kdaj MTR pomaga** (`/trendi/`, 1. 10. 2026): `compute_mtr_accuracy_metrics.py` razčleni D+1
+  po vremenskem položaju dneva iz meritev postaje (`situation_of()`: jasen in miren —
+  razpon ≥ 14 °C brez dežja; moker ≥ 1 mm; vmes). Prvi rezultat (avg–sep): ob jasnih dneh
+  Tmax 0,69 proti 1,54 °C, ob mokrih dneh Tmin skoraj brez koristi, v »vmes« Tmin celo
+  slabši od Open-Meteo. Stran to pove z rdečo — ne skrivaj negativnega rezultata.
 - Model se uči **samo** iz `history.json` in Open-Meteo. Nobenih notranjih
   meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
   tem cevovodu ne uporablja.
@@ -1253,6 +1280,29 @@ zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
 (stalno starem) katalogu ni bilo. Popravljeno; 3 tako osirotele strani so
 bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
 prepričaj, da isto pot pokriva tudi `git add`.
+
+## Sezonski vodič (`/sezona/`) in povzetek meseca (1. 10. 2026)
+
+- **`/sezona/`** (`tools/generate_sezona_page.py`, dnevno v `seo-smart-routine.yml`) —
+  »Ta čas v dolini«: klimatologija letnega časa s postaje (prva jesenska / zadnja
+  spomladanska zmrzal — mediana, najzgodneje, najpozneje; vroči dnevi poleti; dnevi z
+  zmrzaljo pozimi), letošnje stanje, današnji gobarski indeks in najnižja napoved MTR
+  (oboje **po datumu**, ne po vrstnem redu workflowov) ter povezave na strani, ki so ta
+  čas pomembne (`LINKS`). Leto brez meritve na začetku obdobja ne šteje (sicer bi bila
+  »prva zmrzal« le prva izmerjena); pod tremi leti ni klimatologije.
+- **Mesečne strani arhiva** (`/vreme/YYYY/MM/`) imajo odstavek »na kratko« in FAQ
+  (`month_summary()` v `generate_seo_pages.py`, FAQ shema in vidno besedilo iz istega
+  seznama). Uvrstitev je samo med enakimi meseci z ≥ 25 dnevi meritev (`RANK_MIN_DAYS`),
+  vsaj tri leta; tekoči mesec se ne uvršča. Strani istega koledarskega meseca kot tekoči
+  se prepišejo ob vsakem teku, ker se jim uvrstitev spremeni.
+- Oboje preverja `tools/test_sezona.py` (v `parity.yml`).
+- **Letni pregled »Vremensko leto v številkah«** (`tools/generate_year_review_post.py`,
+  `year-review.yml`, 1. oktobra): vremensko leto 1. 10.–30. 9. (cela zima v enem kosu),
+  predloga s pravimi številkami + en prehod `call_lektor`, isti vzorec in isti HTML
+  (`generate_forecast_test_post.build_html` s parametri) kot mesečni test napovedi.
+  Pragovi dni in norme so uvoženi iz `generate_seo_pages`/`seo_smart_routine`. Objavljen
+  članek se ne prepiše (`--force`). Na FB/IG **ne gre samodejno** (nova vrsta vsebine) —
+  po pregledu ga pošlji s `social-repost.yml`.
 
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
@@ -1631,9 +1681,23 @@ vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem. Panel 17 vprašanj
 natančna shema vnosa (asistent, `prompt_id`, `mentioned`,
 `competitors_mentioned`) sta v `docs/geo-prompt-panel.md` — vsak mesec
 rotiraj 6–8 vprašanj iz panela med ChatGPT, Perplexity in Google AI
-Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
+Overview. Pomočnik `tools/geo_mentions.py` (`plan` / `add` / `report`) bere
+id-je iz tabele v `docs/geo-prompt-panel.md` (en vir), preveri vnos in izračuna delež glasu. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
 brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
 "omenjen/ni omenjen".
+
+**Vsebina brez `dateModified`** (preverjanje 8, 1. 10. 2026): `geo_audit.py` iz git zgodovine
+najde stran, katere vidno besedilo se je spremenilo za ≥ 200 znakov (`MIN_CHANGED_CHARS`),
+`dateModified` pa ostal starejši. Samodejni bloki (`<!-- x:start … x:end -->`, sorodni,
+teme, podatki) se ne štejejo. Prvi tek: 0 opozoril (trije ročni popravki z dodano povezavo
+so pod mejo). Ročno popravljen članek gre skozi lekturo, ta pa `dateModified` osveži sama
+(`touch_existing()`). V plitvem klonu (CI) je preverjanje tiho.
+
+**Search Console** — repozitorij nima dostopa do GSC. Izvoz »Učinkovitost → Izvozi« (ZIP)
+predela `tools/gsc_opportunities.py IZVOZ.zip --out docs/gsc-YYYY-MM.md`: poizvedbe na
+pragu (položaj 4–20, razvrščene po dodatnih klikih), nizek CTR na prvi strani (popravi
+naslov) in poizvedbe brez ustrezne strani. Stolpci se berejo po vrstnem redu, ker so
+glave v jeziku vmesnika.
 
 ## Test usklajenosti namernih podvojitev (`tools/test_parity.py`)
 
@@ -1748,6 +1812,20 @@ potrebuje boljšo ločljivost (opozorila, jutranje karte), mora teči na Cloudfl
 `tools/measure_cron_throughput.py` (korak v `freshness-watch.yml`, tabela v povzetku teka)
 to meri vsak dan; vzroka (obremenitev repozitorija ali politika GitHuba) ni mogoče ločiti,
 zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tabelo čez čas.
+
+### Dimni test in mrtve povezave (1. 10. 2026)
+
+- **`smoke-test.yml`** (po vsaki objavi Pages + dnevno): `tools/smoke_test.py` na ŽIVI strani
+  preveri ključne strani (`CORE` iz `seo_audit.py` — isti seznam kot sitemap) in crnivec.si:
+  200 brez preusmeritve, `<title>`, canonical nase, JSON-LD se razčleni, stran ni prazna,
+  og:image obstaja; plus `style.min.css`, `app.min.js`, `history.json`, `sitemap.xml`, `llms.txt`.
+  Ob napaki issue `smoke-fail` (samo osveži opis, brez komentarja ob vsakem teku).
+- **`link-check.yml`** (tedensko): `tools/check_links.py` — notranje povezave iz repozitorija
+  (brez omrežja, vse strani) in zunanji URL-ji. Issue `broken-links`. Prvi tek je našel 13
+  notranjih: `render_topics_html()` je povezoval teme z ≥ 2 objavama (po surovem tagu),
+  `build_tag_pages()` pa jih gradi pri `TAG_MIN_POSTS` = 3 (po slugu) — zdaj oba štejeta po
+  slugu z istim pragom; kartica vrste brez proste slike ne zahteva več `.jpg` (404).
+- Python `urllib` brez brskalniškega UA dobi od Cloudflara 403 — oba skripta ga nastavita.
 
 ### Zdravje Cloudflare cron opravil (`/health`, 1. 10. 2026)
 

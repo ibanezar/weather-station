@@ -41,6 +41,10 @@ ponavlja**, sicer primerjava v času izgubi smisel.
 
 ## Kako izvesti mesečni tek
 
+Pomočnik: `python3 tools/geo_mentions.py plan` izpiše letošnja vprašanja (rotacija po 7,
+v treh mesecih ves panel) s kontrolnim seznamom, `add` vnos preveri in zapiše,
+`report` pa izpiše delež omemb po mesecih in delež glasu proti konkurenci.
+
 1. Izberi 6–8 `id`-jev iz panela (rotiraj, da se skozi leto pokrijejo vsi).
 2. Vsakega vprašaj **ChatGPT, Perplexity in Google AI Overview** (Claude
    neobvezno — glej opombo spodaj).

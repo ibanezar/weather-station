@@ -54,6 +54,9 @@ const isDark = () => document.documentElement.dataset.theme === 'dark';
 // sicer barvo ozadja potegne v blatno sivino.
 const meshOpacity = () => isDark() ? '1' : '0.18';
 let _lastTemp = null; // remember temp so theme toggle can re-colour it
+// Grafi, ki barve preberejo samo ob izrisu (isDark()), se ob menjavi teme sami ne
+// posodobijo. Ob prvem izrisu se vpišejo sem, setTheme() jih preriše (samo že narisane).
+const _themeRedraw=new Set();
 function setTheme(t){
   document.documentElement.dataset.theme = t;
   document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
@@ -69,6 +72,8 @@ function setTheme(t){
   // Grafi MTR nosijo lastno paleto po temi (MTR_CC), zato jih je treba prerisati
   // — barve so v atributih SVG, ne v CSS, in se same ne posodobijo.
   if(_mtrState) renderMtrCard();
+  _themeRedraw.forEach(fn=>{ try{ fn(); }catch(_){} });
+  if(_anChartsInit){ _anChartsInit=false; try{ initAnalysisCharts(); }catch(_){} }
   const mc = document.getElementById('mesh-canvas');
   if(mc) mc.style.opacity = meshOpacity();
 }
@@ -125,7 +130,7 @@ function dismissModeIntro(){
   try{ localStorage.setItem(MODE_INTRO_KEY,'dismissed'); }catch(e){}
   hideModeIntro();
 }
-function hideModeIntro(){ const el=document.getElementById('mode-intro'); if(el) el.hidden=true; }
+function hideModeIntro(){ const el=document.getElementById('mode-intro'); if(el) el.hidden=true; delete document.documentElement.dataset.modeIntro; }
 function syncModeButtons(){
   const simple=isSimpleMode();
   document.getElementById('mode-btn-simple')?.setAttribute('aria-pressed',  simple?'true':'false');
@@ -800,13 +805,21 @@ function renderThisWeekHistory(){
     const c=stops[i].map((v,j)=>Math.round(v+(stops[i+1][j]-v)*f));
     return'rgb('+c.join(',')+')';
   };
+  // Besedilo celice: bela ali črna, kar ima proti ozadju večji kontrast — bela
+  // na zeleni/oranžni je imela 2,1–3,4:1 (axe, 1. 10. 2026).
+  const ink=(rgb)=>{
+    const L=rgb.match(/\d+/g).map(Number).map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+    const lum=0.2126*L[0]+0.7152*L[1]+0.0722*L[2];
+    // Večji od obeh kontrastov (bela / črna) je vedno ≥ 4,58:1.
+    return 1.05/(lum+0.05)>=(lum+0.05)/0.05?'#fff':'#000';
+  };
   const dayHdr=days.map(d=>'<th>'+d.getDate()+'.'+(d.getMonth()+1)+'.</th>').join('');
   let html='<div class="twh-grid-wrap"><table class="twh-grid"><thead><tr><th></th>'+dayHdr+'</tr></thead><tbody>';
   grid.forEach(row=>{
     html+='<tr><td class="twh-yr">'+row.yr+'</td>';
     row.cells.forEach(t=>{
       if(t==null)html+='<td><div class="twh-cell twh-empty"></div></td>';
-      else html+='<td><div class="twh-cell" style="background:'+colour(t)+'" title="'+t.toFixed(1)+'°C">'+Math.round(t)+'</div></td>';
+      else{const bg=colour(t);html+='<td><div class="twh-cell" style="background:'+bg+';color:'+ink(bg)+'" title="'+t.toFixed(1)+'°C">'+Math.round(t)+'</div></td>';}
     });
     html+='</tr>';
   });
@@ -3642,8 +3655,8 @@ function renderPastDays(){
       <div class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</div>
       <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%"></div></div>
       <div class="pd-meta">
-        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span style="opacity:.3">💧 —</span>'}</span>
-        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span style="opacity:.3">💨 —</span>'}</span>
+        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span style="opacity:.7">💧 —</span>'}</span>
+        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span style="opacity:.7">💨 —</span>'}</span>
       </div>
     </div>`;
   }).join('');
@@ -5834,6 +5847,7 @@ function setHeatmapMode(mode){
 }
 function drawHeatmap(){
   const svg=document.getElementById('heatmap-svg');if(!svg)return;
+  _themeRedraw.add(drawHeatmap);
   const y=new Date().getFullYear();
   set('hm-year-lbl',y);
   try{
@@ -6349,6 +6363,8 @@ function syncChartScrollEdge(wrap){
   if(wrap.clientWidth===0)return;
   const scrollable = wrap.scrollWidth - wrap.clientWidth > 4;
   wrap.classList.toggle('chart-xscroll', scrollable);
+  // Drsno območje mora biti dosegljivo s tipkovnico (WCAG, axe scrollable-region-focusable).
+  if(scrollable) wrap.setAttribute('tabindex','0'); else wrap.removeAttribute('tabindex');
   if(!scrollable){wrap.classList.remove('at-end');return;}
   wrap.classList.toggle('at-end', wrap.scrollWidth - wrap.clientWidth - wrap.scrollLeft <= 2);
   if(wrap.scrollLeft > 8) wrap.classList.add('scrolled');
@@ -8231,6 +8247,7 @@ function buildKlimatogram(){
 }
 
 function buildXLSXCharts(){
+  _themeRedraw.add(buildXLSXCharts);
   const dark=isDark();
   const tc=dark?'#94a3b8':'#64748b';
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
@@ -8387,7 +8404,11 @@ function initAnalysisCharts(){
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
   const textC=dark?'#94a3b8':'#64748b';
   const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textC,font:{size:10},boxWidth:10}}},scales:{x:{ticks:{color:textC,font:{size:10}},grid:{color:gridC}},y:{ticks:{color:textC,font:{size:10}},grid:{color:gridC}}}};
-  const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;new Chart(el.getContext('2d'),cfg);};
+  // Ob ponovnem izrisu (menjava teme) mora stari graf najprej izginiti, sicer Chart.js
+  // javi »Canvas is already in use«.
+  const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;
+    try{const existing=typeof Chart.getChart==='function'?Chart.getChart(el):null;if(existing)existing.destroy();}catch(_){}
+    new Chart(el.getContext('2d'),cfg);};
   const yr=AN.years;
 
   // Annual temp + trend

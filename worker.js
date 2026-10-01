@@ -2832,7 +2832,7 @@ const LTG_RADIUS_KM = 200;       // isti obseg kot klientska kartica
 const LTG_STALE_MS = 180000;      // povezava brez sporočila toliko časa je »zombi« (Blitzortung pošilja strele z vsega sveta)
 const LTG_CONNECT_TIMEOUT_MS = 20000;   // WebSocket, ki se toliko časa ne odpre, se nadomesti
 const LTG_RECONNECT_MS = 10000;   // ponovna vzpostavitev po prekinitvi (alarm), brez čakanja na 5-minutni cron
-const LTG_SLOT_MS = 300000;      // pokritost beležimo v 5-minutnih režah (cron keepAlive)
+const LTG_SLOT_MS = 300000;      // pokritost beležimo v 5-minutnih režah (tok sporočil + cron keepAlive)
 const LTG_CELL_LAT0 = 45.45, LTG_CELL_DLAT = 0.18, LTG_CELL_LON0 = 13.4, LTG_CELL_DLON = 0.22;  // mreža karte, glej generate_storm_map.py
 const LTG_CELLS_SQL = "SELECT CAST(ROUND((lat - 45.45) / 0.18) AS INTEGER) AS k, CAST(ROUND((lon - 13.4) / 0.22) AS INTEGER) AS j, " +
   "COUNT(*) AS n, MIN(ts) AS t0, MAX(ts) AS t1 FROM strikes WHERE ts >= ? AND ts < ? GROUP BY k, j";
@@ -2844,6 +2844,7 @@ export class LightningLogger extends DurableObject {
     this.ws = null;
     this.wsSince = 0;     // kdaj je bil trenutni WebSocket ustvarjen
     this.lastMsg = 0;     // zadnje prejeto sporočilo (katero koli, tudi zunaj radija)
+    this.lastSlot = null; // zadnja reža pokritosti, zapisana iz toka sporočil
     this.hostIdx = 0;
     ctx.blockConcurrencyWhile(async () => {
       this.ctx.storage.sql.exec(`
@@ -2950,6 +2951,15 @@ export class LightningLogger extends DurableObject {
 
   _onMessage(raw) {
     this.lastMsg = Date.now();
+    // Pokritost iz samega toka sporočil (enkrat na režo), ne le ob klicu crona: petminutni
+    // cron si proračun deli z drugimi opravili in tike izpušča, zato je bila živa povezava
+    // zapisana kot luknja (1. 10. 2026: 10 od 13 rež v uri). Blitzortung pošilja strele z vsega
+    // sveta, zato ima vsaka reža z živo povezavo vsaj eno sporočilo.
+    const slot = Math.floor(this.lastMsg / LTG_SLOT_MS);
+    if (slot !== this.lastSlot) {
+      this.lastSlot = slot;
+      try { this.ctx.storage.sql.exec("INSERT OR IGNORE INTO uptime (slot) VALUES (?)", slot); } catch (_) {}
+    }
     try {
       const d = JSON.parse(_ltgDecode(raw));
       if (!("lat" in d) || !("lon" in d)) return;
