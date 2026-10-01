@@ -1704,6 +1704,31 @@ Kar je zdaj narejeno:
   da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
   Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve.
 
+### Vrstni red workflowov ni zagotovljen — datoteko drugega workflowa preberi po datumu (1. 10. 2026)
+
+Komentarji tipa »ob 05:00, po forecast-verify (01:35)« so bili zapisani za čas, ko je
+cron zamujal minute. Zdaj vsak workflow zamuja 5–7 ur po svoje, zato **potrošnik ne sme
+predpostaviti, da je datoteka producenta že današnja**. Revizija je našla štiri tihe
+napake in jih popravila (`tools/test_stale_inputs.py` zaklene vse):
+
+1. **Gasilska stran** `/meteogasilec/vreme-intervencije/` je en mesec (od 31. 8.) kot
+   »Nacionalni nevihtni potencial **danes**« kazala EKSTREMNO z avgusta — `load_storm_map()`
+   ni preverjal datuma. Zdaj blok pove, da današnja karta še ni izdana.
+2. **Jutranji povzetek** je `lead == 1` imenoval »Danes«, a lead je glede na dan nastanka
+   datoteke (jutri). Zdaj bere zamrznjeno napoved za današnji **datum** iz
+   `.forecast_pending.json` (ali dan z današnjim datumom v `napoved-modela.json`), brez nje
+   ne pošlje nič. **Workflow vsak dan pade (rdeč), ker secret `SUBSCRIBE_SECRET` ni
+   nastavljen** — ko ga nastaviš, bodo naročniki dobili pravilne številke.
+3. **Dnevni članek** (`fetch_mtr_forecast`) in 4. **kartica zgodbe** (`load_mtr_forecast`)
+   sta isto jemala za »jutri«, ko je bila datoteka včerajšnja. Zdaj izbereta dan z jutrišnjim
+   datumom.
+
+Pravilo: **dan iz `napoved-modela.json` vedno izberi po `date`, nikoli po `lead`.** Stvari, ki
+so že varne: `verify_forecasts.py` (neizmerjene dni drži v čakalni vrsti do 5 dni, napoved
+modela sprejme samo z današnjim `generated_at`), `update-history` (trije termini + gate),
+zgodba (`load_gobe_index`/`load_igra_level` zahtevata današnji datum), `inject_forecast.py`
+in `generate_seo_pages.py` (MTR vrstice po datumu).
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

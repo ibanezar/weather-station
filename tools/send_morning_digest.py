@@ -4,11 +4,9 @@ tools/send_morning_digest.py — sestavi in pošlji jutranji povzetek kot potisn
 obvestilo naročnikom, ki so ga izrecno vklopili (glej "🌅 Jutranji povzetek" v
 plošči "Moja opozorila", in `digest`/`audience:"digest"` v worker.js).
 
-Podatek za povzetek je `napoved-modela.json` (MTR, `days[0]`, lead=1) —
-committana datoteka, ki jo `tools/predict_recica_mos.py` osveži enkrat dnevno
-v forecast-verify.yml, torej brez dodatnega omrežnega klica tu. `lead=1` je
-napoved za "jutri" v trenutku nastanka (zvečer), kar je "danes" v trenutku, ko
-se ta skript zjutraj požene — glej opombo pri MTR v CLAUDE.md.
+Podatek za povzetek je zamrznjena napoved MTR za DANES iz `tools/.forecast_pending.json`
+(ali dan z današnjim datumom v `napoved-modela.json`) — brez dodatnega omrežnega klica.
+Dan se izbere po datumu, ne po `lead`: glej todays_forecast().
 
 Ob nedosegljivem/manjkajočem modelu ali brez PUSH_SECRET konča z napako (exit
 1) in ne pošlje ničesar — tišina je varnejša od napačnega ali praznega
@@ -21,10 +19,12 @@ Wired into:
 Usage:
   python3 tools/send_morning_digest.py [--dry-run]
 """
-import json, os, sys, urllib.request
+import datetime, json, os, sys, urllib.request
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MOS = os.path.join(ROOT, "napoved-modela.json")
+PENDING = os.path.join(ROOT, "tools", ".forecast_pending.json")
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 
 
@@ -34,19 +34,45 @@ def num(x, d=0):
     return f"{x:.{d}f}"
 
 
-def build_message():
+def today_iso():
+    return datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).date().isoformat()
+
+
+def todays_forecast(today):
+    """Napoved MTR za DANES. Vir 1: `tools/.forecast_pending.json` (zamrznjena napoved,
+    zabeležena včeraj za današnji dan; verify_forecasts.py jo razreši šele po koncu
+    dneva). Vir 2: napoved-modela.json, če vsebuje današnji datum.
+
+    Prej je bral `days[0]` (lead 1) in ga imenoval »Danes«: lead 1 je JUTRI glede na dan
+    nastanka datoteke, ki nastane ob 01:35 UTC istega dne — povzetek bi poslal jutrišnje
+    številke kot današnje (revizija 1. 10. 2026; poslati se še ni mogel, ker secret
+    SUBSCRIBE_SECRET ni nastavljen). Brez današnjega dne se ne pošlje nič."""
+    try:
+        for e in json.load(open(PENDING, encoding="utf-8")):
+            m = e.get("meteorec") or {}
+            if e.get("target_date") == today and m.get("tmax") is not None and m.get("tmin") is not None:
+                return m
+    except Exception:
+        pass
     try:
         mos = json.load(open(MOS, encoding="utf-8"))
+        d = next((d for d in mos.get("days", []) if d.get("date") == today), None)
+        if d and d.get("tmax") is not None and d.get("tmin") is not None:
+            return d
     except Exception as e:
         print(f"ERROR: {MOS} ni berljiva ({e}).", file=sys.stderr)
-        return None
-    today = next((d for d in mos.get("days", []) if d.get("lead") == 1), None)
-    if not today or today.get("tmax") is None or today.get("tmin") is None:
-        print("ERROR: napoved-modela.json nima veljavnega D+1 dneva.", file=sys.stderr)
+    return None
+
+
+def build_message(today=None):
+    today = today or today_iso()
+    fc = todays_forecast(today)
+    if not fc:
+        print(f"ERROR: ni napovedi MTR za današnji dan ({today}).", file=sys.stderr)
         return None
 
-    tmax, tmin = today["tmax"], today["tmin"]
-    pop = today.get("pop")
+    tmax, tmin = fc["tmax"], fc["tmin"]
+    pop = fc.get("pop")
     pop_txt = f" · {round(pop * 100)} % možnost dežja" if isinstance(pop, (int, float)) else ""
     body = f"Danes {num(tmax)}° / {num(tmin)}° C{pop_txt}."
     return {

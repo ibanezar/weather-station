@@ -542,6 +542,14 @@ def build_vreme_intervencije_page():
 
     storm = load_storm_map()
     storm_html = ""
+    # Karta se mora nanašati na DANES: brez te preveritve je stran en mesec (od 31. 8.,
+    # ko je nevihtna karta nehala nastajati) kot »danes« kazala EKSTREMNO iz avgusta —
+    # na strani, ki jo gasilci berejo med intervencijo (revizija 1. 10. 2026).
+    if storm and storm.get("date") != TODAY.isoformat():
+        storm_html = f'''  <h2>🌩 Nacionalni nevihtni potencial danes</h2>
+  <p>Današnja nevihtna karta še ni izdana (zadnja je iz {_esc(storm.get("date"))}).
+  <a href="/nevihte/">Stanje in razlaga na strani Nevihte →</a></p>'''
+        storm = None
     if storm:
         storm_html = f'''  <h2>🌩 Nacionalni nevihtni potencial danes</h2>
   <p>Najvišja pričakovana ocena danes v Sloveniji: <b>{storm.get("national_score")} ({storm.get("national_level")})</b>,
