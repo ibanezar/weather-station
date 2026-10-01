@@ -1654,7 +1654,8 @@ vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem. Panel 17 vprašanj
 natančna shema vnosa (asistent, `prompt_id`, `mentioned`,
 `competitors_mentioned`) sta v `docs/geo-prompt-panel.md` — vsak mesec
 rotiraj 6–8 vprašanj iz panela med ChatGPT, Perplexity in Google AI
-Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
+Overview. Pomočnik `tools/geo_mentions.py` (`plan` / `add` / `report`) bere
+id-je iz tabele v `docs/geo-prompt-panel.md` (en vir), preveri vnos in izračuna delež glasu. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
 brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
 "omenjen/ni omenjen".
 
