@@ -81,8 +81,9 @@ write(dg.MOS, mos_file(0))                      # svež file: danes NI v njem (l
 if os.path.exists(dg.PENDING):
     os.remove(dg.PENDING)
 check(dg.build_message(D(0)) is None, "svež file brez zamrznjene napovedi: ne pošlje jutrišnjih številk kot današnjih")
-write(dg.PENDING, [{"target_date": D(0), "meteorec": {"tmax": 21.0, "tmin": 4.0, "pop": 0.3}},
-                   {"target_date": D(1), "meteorec": {"tmax": 99.0, "tmin": 9.0, "pop": 0.9}}])
+# jutrišnji vnos je PRED današnjim: izbira mora iti po datumu, ne po prvem veljavnem vnosu
+write(dg.PENDING, [{"target_date": D(1), "meteorec": {"tmax": 99.0, "tmin": 9.0, "pop": 0.9}},
+                   {"target_date": D(0), "meteorec": {"tmax": 21.0, "tmin": 4.0, "pop": 0.3}}])
 m = dg.build_message(D(0))
 check(m and "21°" in m["body"] and "30 %" in m["body"] and "99" not in m["body"], "zamrznjena napoved za današnji dan", str(m))
 write(dg.PENDING, [])

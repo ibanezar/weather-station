@@ -37,10 +37,13 @@ cases = {
     "šibek": [P("Rečica", 366, 15.0), P("Črnivec", 903, 13.5)],
     "običajen": [P("Rečica", 366, 20.0), P("Gornji Grad", 428, 19.5), P("Črnivec", 903, 16.5)],
     "strm": [P("Rečica", 366, 25.0), P("Črnivec", 903, 17.0)],
+    "šibka inverzija": [P("Rečica", 366, 10.0), P("Črnivec", 903, 11.1)],        # +0,2 °C/100 m
+    "strm blizu meje": [P("Rečica", 366, 20.0), P("Črnivec", 903, 14.6)],         # −1,0 °C/100 m
 }
 res = js([{"fn": "valleyProfileSummary", "args": [v]} for v in cases.values()])
 kinds = {k: r["kind"] if r else None for k, r in zip(cases, res)}
-check(kinds == {"inverzija": "inversion", "šibek": "weak", "običajen": "normal", "strm": "steep"}, "vrsta gradienta", str(kinds))
+check(kinds == {"inverzija": "inversion", "šibek": "weak", "običajen": "normal", "strm": "steep",
+                "šibka inverzija": "inversion", "strm blizu meje": "steep"}, "vrsta gradienta", str(kinds))
 inv = res[0]
 check(abs(inv["lapse"] - (12.5 - 8.0) / 537 * 100) < 1e-9 and inv["lo"]["name"] == "Rečica" and inv["hi"]["name"] == "Črnivec",
       "gradient med najnižjo in najvišjo postajo", str(inv["lapse"]))
