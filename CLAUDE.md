@@ -1269,6 +1269,13 @@ prepričaj, da isto pot pokriva tudi `git add`.
   vsaj tri leta; tekoči mesec se ne uvršča. Strani istega koledarskega meseca kot tekoči
   se prepišejo ob vsakem teku, ker se jim uvrstitev spremeni.
 - Oboje preverja `tools/test_sezona.py` (v `parity.yml`).
+- **Letni pregled »Vremensko leto v številkah«** (`tools/generate_year_review_post.py`,
+  `year-review.yml`, 1. oktobra): vremensko leto 1. 10.–30. 9. (cela zima v enem kosu),
+  predloga s pravimi številkami + en prehod `call_lektor`, isti vzorec in isti HTML
+  (`generate_forecast_test_post.build_html` s parametri) kot mesečni test napovedi.
+  Pragovi dni in norme so uvoženi iz `generate_seo_pages`/`seo_smart_routine`. Objavljen
+  članek se ne prepiše (`--force`). Na FB/IG **ne gre samodejno** (nova vrsta vsebine) —
+  po pregledu ga pošlji s `social-repost.yml`.
 
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
