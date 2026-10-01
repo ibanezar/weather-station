@@ -21,6 +21,15 @@ Zgodilo se je 30. 7. 2026: dnevni članek je objavil notranjo temperaturo in
 občuteno temperaturo v hiši, ker je surov Ecowitt odgovor romal naravnost v
 model. Odstavek je odstranjen, obe zarezi sta postavljeni.
 
+**To preverja stroj** (od 1. 10. 2026): `python3 tools/test_privacy.py`, workflow
+`privacy.yml`. Test požene pravi `worker.js` z lažnim Ecowittom in Varpoljem, ki
+vrneta blok `indoor`, in preveri, da ga ne vrne nobena javna točka; da ga režejo
+Python odjemalci (`fetch_current()`); da noben **nov** odjemalec `/ecowitt-current`
+ni dodan brez zareze (seznam `KNOWN_CLIENTS` v testu); in da javne datoteke ne
+omenjajo `indoor`. Ko dodaš nov vir ali odjemalca, ga dodaj v test. Prvi zagon je
+našel, da korenska kopija `generate_daily_post.py` (ne teče v nobenem workflowu)
+bloka ni rezala; zdaj ga.
+
 ## Lektura je OBVEZNA za vsak članek
 
 Vsak blog članek — ne glede na to, ali ga generira avtomatika ali je napisan
