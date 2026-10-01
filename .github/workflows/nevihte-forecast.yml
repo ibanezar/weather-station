@@ -32,6 +32,11 @@ jobs:
       - name: Vgradi zadnjo znano nevihtno karto
         run: python3 tools/inject_storm_map.py
 
+      # Generator zgoraj povrne tudi rezervni blok WX-STORMVERIF — rezultate
+      # preverjanja karte proti strelam (tools/verify_storm_map.py) vgradimo nazaj.
+      - name: Vgradi preverjanje karte proti strelam
+        run: python3 tools/verify_storm_map.py inject
+
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"

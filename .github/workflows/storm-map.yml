@@ -59,7 +59,7 @@ jobs:
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           python3 tools/storm_map_gate.py mark
-          git add og/storm-map nevihte/index.html tools/.storm_map_state.json
+          git add og/storm-map data/storm-map-forecasts nevihte/index.html tools/.storm_map_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb za objavo."
           else

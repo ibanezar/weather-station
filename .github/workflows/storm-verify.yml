@@ -1,0 +1,47 @@
+name: Preverjanje nevihtne karte proti strelam
+
+# Vsak dan po polnoči primerja včerajšnjo arhivirano napoved nevihtne karte
+# (data/storm-map-forecasts/) z dejansko zabeleženimi streli iz LightningLoggerja
+# in zapiše rezultat na /nevihte/ (blok WX-STORMVERIF). Glej
+# tools/verify_storm_map.py. Surove strele worker hrani 14 dni, zato zamuda
+# GitHubovega crona ni problem — nepreverjeni dnevi se dohitijo ob naslednjem teku.
+
+on:
+  schedule:
+    - cron: '20 1 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  preveri:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Preveri končane dni
+        run: python3 tools/verify_storm_map.py run
+
+      - name: Objavi na main
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/storm-map-verification.json nevihte/index.html
+          if git diff --cached --quiet; then
+            echo "Ni sprememb za objavo."
+            exit 0
+          fi
+          git commit -m "nevihte: preverjanje karte proti strelam $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
