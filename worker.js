@@ -2681,6 +2681,7 @@ async function _cronDispatchScheduledWorkflows(env) {
   const results = {
     cas: new Date().toISOString(),
     "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
+    "precip-map.yml": await _cronDispatchGithubWorkflow(env, "precip-map.yml", { force: "false" }),
     "vodostaj-forecast.yml": await _cronDispatchGithubWorkflow(env, "vodostaj-forecast.yml"),
   };
   const r2 = env?.PHOTOS_R2;

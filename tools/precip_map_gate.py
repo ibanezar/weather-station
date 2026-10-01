@@ -29,6 +29,14 @@ WINDOW_START = 6   # karta naj bo nova do 7:00 zjutraj (isti rok kot nevihtna
                    # zamude ni izločen po nepotrebnem.
 WINDOW_END = 8     # varovalka za manjšo (do ~1h) zamudo GitHubovega crona.
 
+# Pozni tek (1. 10. 2026): od 31. 8. (nevihtna) oz. 11. 9. (padavinska) ni bilo
+# nobene nove karte, ker GitHubov cron zdaj zamuja 5-7 ur (cron 05:00 UTC steče
+# ~11:00 UTC = 13:00 po naši uri), okno 6:00-8:00 pa je tak tek vsak dan zavrnilo
+# — workflow je »uspel« brez dela. Zato po koncu okna do LATE_END še vedno
+# sestavimo karto (stran in arhiv sta spet sveža), a jo FB/IG NE objavita
+# (`late=true`, glej workflow): objava »jutranje« karte popoldne bi lagala.
+LATE_END = 20
+
 
 def load_state():
     try:
@@ -44,12 +52,13 @@ def save_state(state):
         f.write("\n")
 
 
-def emit(proceed, reason):
-    print(f"proceed={proceed} — {reason}")
+def emit(proceed, reason, late=False):
+    print(f"proceed={proceed} late={late} — {reason}")
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a", encoding="utf-8") as f:
             f.write(f"proceed={'true' if proceed else 'false'}\n")
+            f.write(f"late={'true' if late else 'false'}\n")
 
 
 def main():
@@ -71,12 +80,17 @@ def main():
     if state.get("lastRun") == today and not force:
         emit(False, f"karta za {today} je že sestavljena")
         return 0
+    late = False
     if not force and not (WINDOW_START <= now.hour < WINDOW_END):
-        emit(False, f"lokalna ura je {now.hour}:{now.minute:02d}, "
-                    f"okno je {WINDOW_START}:00–{WINDOW_END}:00")
-        return 0
+        if WINDOW_END <= now.hour < LATE_END:
+            late = True
+        else:
+            emit(False, f"lokalna ura je {now.hour}:{now.minute:02d}, "
+                        f"okno je {WINDOW_START}:00–{LATE_END}:00 (objava do {WINDOW_END}:00)")
+            return 0
 
-    emit(True, f"lokalni čas {now.strftime('%H:%M')}" + (" (--force)" if force else ""))
+    emit(True, f"lokalni čas {now.strftime('%H:%M')}" + (" (--force)" if force else "") +
+         (" — POZNO: karta se sestavi, FB/IG se ne objavi" if late else ""), late)
     return 0
 
 

@@ -1,0 +1,71 @@
+name: Varuh svežine izdelkov
+
+# Zelena kljukica workflowa ni dokaz, da je izdelek nastal: od 31. 8. (nevihtna
+# karta) oz. 11. 9. (padavinska karta) tek vsak dan »uspe«, a ga časovna vrata
+# tiho zavrnejo — karte ni bilo en mesec, pa nihče ni vedel. Ta tek gleda sam
+# izdelek (tools/check_freshness.py REGISTER) in ob zastarelem odpre GitHub issue
+# z oznako `stale-output`; ko je vse spet sveže, ga zapre. Vzorec issue-ja je isti
+# kot v station-monitor.yml.
+
+on:
+  schedule:
+    - cron: '40 6,18 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: freshness-watch
+  cancel-in-progress: false
+
+jobs:
+  preveri:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Preveri svežino izdelkov
+        id: fresh
+        run: python3 tools/check_freshness.py --report freshness-report.md
+
+      - name: Pripravi oznako
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "stale-output" \
+            --repo ${{ github.repository }} \
+            --color "F59E0B" \
+            --description "Dnevni izdelek ne nastaja ali je zastarel" \
+            --force
+
+      - name: Odpri ali posodobi opozorilo
+        if: steps.fresh.outputs.stale != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          N="${{ steps.fresh.outputs.stale }}"
+          OPEN=$(gh issue list --repo ${{ github.repository }} --label stale-output --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -z "$OPEN" ]; then
+            gh issue create --repo ${{ github.repository }} --label stale-output \
+              --title "Zastarel dnevni izdelek (${N})" --body-file freshness-report.md
+          else
+            gh issue edit "$OPEN" --repo ${{ github.repository }} \
+              --title "Zastarel dnevni izdelek (${N})" --body-file freshness-report.md
+            gh issue comment "$OPEN" --repo ${{ github.repository }} \
+              --body "Stanje ob $(date -u +%Y-%m-%d\ %H:%M) UTC: ${N} zastarelih izdelkov — poročilo je v opisu."
+          fi
+
+      - name: Zapri opozorilo, ko je vse sveže
+        if: steps.fresh.outputs.stale == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for NUM in $(gh issue list --repo ${{ github.repository }} --label stale-output --state open --json number --jq '.[].number'); do
+            gh issue close "$NUM" --repo ${{ github.repository }} --comment "Vsi izdelki so spet sveži."
+          done
