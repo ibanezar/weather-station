@@ -68,6 +68,8 @@ OUT_DIR = os.path.join(ROOT, "og", "precip-map")
 KEEP_DAYS = 14
 
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
+# Cloudflare zavrne privzeti »Python-urllib« User-Agent s 403 (glej tools/test_worker_ua.py).
+WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
 OBS_URL = "https://meteo.arso.gov.si/uploads/probase/www/observ/surface/text/sl/observation_si_latest.xml"
 
 try:
@@ -115,7 +117,7 @@ def fetch_snapshot(date):
     GitHubov cron pa zamuja ure — posnetek omogoča karto kadarkoli čez dan.
     Vrne (postaje, izdano) ali None, če posnetka ni."""
     try:
-        req = urllib.request.Request(f"{WORKER}/arso-rr24h?datum={date}", headers={"Accept": "application/json"})
+        req = urllib.request.Request(f"{WORKER}/arso-rr24h?datum={date}", headers={"Accept": "application/json", "User-Agent": WORKER_UA})
         with urllib.request.urlopen(req, timeout=20) as r:
             snap = json.load(r)
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError):

@@ -54,6 +54,8 @@ FORECAST_DIR = os.path.join(ROOT, "data", "storm-map-forecasts")
 RESULTS = os.path.join(ROOT, "data", "storm-map-verification.json")
 PAGE = os.path.join(ROOT, "nevihte", "index.html")
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
+# Cloudflare zavrne privzeti »Python-urllib« User-Agent s 403 (glej tools/test_worker_ua.py).
+WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
 TZ = ZoneInfo("Europe/Ljubljana")
 
 START = "<!-- WX-STORMVERIF:START (auto: tools/verify_storm_map.py) -->"
@@ -161,7 +163,7 @@ def load_results():
 
 def fetch_cells(od, do_):
     q = urllib.parse.urlencode({"celice": 1, "od": od, "do": do_})
-    req = urllib.request.Request(f"{WORKER}/strele-zgodovina.json?{q}", headers={"Accept": "application/json"})
+    req = urllib.request.Request(f"{WORKER}/strele-zgodovina.json?{q}", headers={"Accept": "application/json", "User-Agent": WORKER_UA})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.load(r)
 

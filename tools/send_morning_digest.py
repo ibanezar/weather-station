@@ -26,6 +26,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MOS = os.path.join(ROOT, "napoved-modela.json")
 PENDING = os.path.join(ROOT, "tools", ".forecast_pending.json")
 WORKER = "https://weatherireica1.filip-eremita.workers.dev"
+# Cloudflare zavrne privzeti »Python-urllib« User-Agent s 403 (glej tools/test_worker_ua.py).
+WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
 
 
 def num(x, d=0):
@@ -104,7 +106,7 @@ def main():
     req = urllib.request.Request(
         f"{WORKER}/push/send",
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", "User-Agent": WORKER_UA},
         method="POST",
     )
     try:
