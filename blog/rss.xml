@@ -5,8 +5,18 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 01 Oct 2026 09:35:13 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 01 Oct 2026 11:35:33 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Test napovedi: september 2026 — zmagal ICON</title>
+      <link>https://meteorec.si/blog/test-napovedi-2026-09.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/test-napovedi-2026-09.html</guid>
+      <pubDate>Thu, 01 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino v septembru 2026: primerjava ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.</description>
+      <category>test-napovedi</category>
+      <category>mesecni-pregled</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Vremenski povzetek — september 2026</title>
       <link>https://meteorec.si/blog/vremenski-povzetek-september-2026.html</link>

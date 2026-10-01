@@ -1,4 +1,9 @@
 {
+  "test-napovedi-2026-09": [
+    "test-napovedi-2026-07",
+    "test-napovedi-2026-08",
+    "naslednji-teden-konec-poletja-0904"
+  ],
   "vremenski-povzetek-september-2026": [
     "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-avgust-2026",
@@ -76,13 +81,13 @@
   ],
   "test-napovedi-2026-08": [
     "test-napovedi-2026-07",
-    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907",
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
+    "test-napovedi-2026-09",
+    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907"
   ],
   "vremenski-povzetek-avgust-2026": [
     "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-april-2026"
+    "vremenski-povzetek-september-2026"
   ],
   "pileus-nad-recico-kapa-nad-nevihtnim-stolpom-0831": [
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
@@ -106,8 +111,8 @@
   ],
   "test-napovedi-2026-07": [
     "test-napovedi-2026-08",
-    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907",
-    "koliko-bo-danes-zalilo-primerjava-modelov-0807"
+    "test-napovedi-2026-09",
+    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907"
   ],
   "nevihtni-opazovalec-2026-08-25-0236": [
     "nevihtni-opazovalec-2026-07-17-1205",
@@ -247,7 +252,7 @@
   "vremenski-povzetek-julij-2026": [
     "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-junij-2026",
-    "vremenski-povzetek-maj-2026"
+    "vremenski-povzetek-september-2026"
   ],
   "nov-absolutni-rekord-postaje-37-2-c-0731": [
     "max-temperatura-28-junij-2026",
@@ -532,7 +537,7 @@
   "vremenski-povzetek-junij-2026": [
     "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-julij-2026",
-    "vremenski-povzetek-april-2026"
+    "vremenski-povzetek-september-2026"
   ],
   "nevihte-toca-hudourniki-julij-2026": [
     "nevihtni-pas-14-julij-2026",
