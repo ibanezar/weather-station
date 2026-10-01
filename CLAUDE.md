@@ -293,10 +293,13 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   rezerve). Ob prekoračitvi na brezplačnem planu klici v ta DO preprosto
   odpovedo (ni doplačila) — ločen meter od običajnih Worker zahtev, torej
   ostala stran ostane nedotaknjena. Podrobnosti in vezava v `wrangler.toml`.
-- Zaenkrat samo zapisuje — na strani (razen surovega JSON endpointa) še ni
-  prikazana zgodovina/statistika. Nova prikazna kartica bi šla v `app.js` po
-  istem vzorcu kot obstoječa (`#ltg-list`), z lastnim poizvedovanjem na zgornji
-  endpoint namesto na klientsko WebSocket povezavo.
+- Prikaz na domači strani (kartica »Strele v bližini«, samo napredni pogled):
+  `fetchLightningHistory()` v `app.js` pokliče `/strele-zgodovina.json?ur=24&dni=14`
+  **enkrat ob nalaganju** in iz istega odgovora nariše stolpčni graf strel po dnevih
+  (`ltgHistoryChart()`, 14 dni, dnevi brez strel prazni; dan je **UTC**, kot ga piše
+  `LightningLogger`) in zemljevid strel zadnjih 24 ur (`renderLightningMap()`).
+  Vrednost in najbližja strela sta v `<title>` stolpca in v `aria-label` grafa.
+  Klientski WebSocket (zadnja ura) in trajni zapis ostajata ločena vira.
 
 ## Junaška kartica: padavine — izmerjeno in napovedano ločeno
 

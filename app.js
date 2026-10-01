@@ -5962,14 +5962,45 @@ async function fetchLightningHistory(){
     const dni=(d.daily||[]).filter(x=>x.count>0);
     if(!dni.length){el.hidden=true;}else{
       el.hidden=false;
-      el.innerHTML='<div style="margin-bottom:.3rem">Zadnjih 14 dni (stalni zapis):</div>'+
-        dni.map(x=>{
-          const dan=new Date(x.date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
-          return '<span style="white-space:nowrap;margin-right:.7rem">'+dan+': <b style="color:var(--text)">'+x.count+'</b> (najbližja '+Math.round(x.closest_km)+' km)</span>';
-        }).join('');
+      el.innerHTML=ltgHistoryChart(d.daily||[]);
     }
     renderLightningMap(d.strikes||[]);
   }catch(e){console.warn('Zgodovina strel:',e);}
+}
+
+// Stolpčni graf strel po dnevih (zadnjih 14 dni, stalni zapis LightningLogger).
+// Dnevi brez strel so prazni stolpci — brez njih bi 3 dnevi s strelami izgledali
+// kot cel mesec. En sam niz, zato brez legende; naslov pove, kaj je merjeno.
+// Vrednost in najbližja strela sta v <title> (hover/dotik) in v oznaki za
+// bralnike zaslona, ker je graf sicer samo slika.
+function ltgHistoryChart(daily){
+  const byDate={};daily.forEach(x=>{byDate[x.date]=x;});
+  const days=[];
+  for(let i=13;i>=0;i--){
+    // Dan je UTC, kot ga zapiše LightningLogger (toISOString v worker.js).
+    const key=new Date(Date.now()-i*864e5).toISOString().slice(0,10);
+    days.push({date:key,count:(byDate[key]&&byDate[key].count)||0,closest:byDate[key]&&byDate[key].closest_km});
+  }
+  const max=Math.max(...days.map(x=>x.count),1);
+  const W=320,H=96,padL=4,padR=4,padT=14,padB=18,bw=(W-padL-padR)/days.length;
+  const fmt=x=>new Date(x.date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+  let bars='',lbl='';
+  days.forEach((x,i)=>{
+    const h=x.count?Math.max(3,(H-padT-padB)*x.count/max):0;
+    const bx=padL+i*bw+bw*0.18,w=bw*0.64,y=H-padB-h;
+    const tip=fmt(x)+': '+x.count+(x.count?' strel, najbližja '+Math.round(x.closest)+' km':' strel');
+    bars+='<g><title>'+tip+'</title><rect x="'+(padL+i*bw)+'" y="0" width="'+bw+'" height="'+(H-padB)+'" fill="transparent"/>'+
+      (h?'<rect x="'+bx.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2" fill="var(--amber)"/>':
+         '<rect x="'+bx.toFixed(1)+'" y="'+(H-padB-1)+'" width="'+w.toFixed(1)+'" height="1" fill="var(--muted)" opacity=".5"/>')+'</g>';
+    if(x.count===max&&x.count>0)lbl+='<text x="'+(padL+i*bw+bw/2).toFixed(1)+'" y="'+(y-3).toFixed(1)+'" text-anchor="middle" font-size="9" fill="var(--text)">'+x.count+'</text>';
+  });
+  const ax=[0,6,13].map(i=>'<text x="'+(padL+i*bw+bw/2).toFixed(1)+'" y="'+(H-5)+'" text-anchor="'+(i===0?'start':i===13?'end':'middle')+'" font-size="9" fill="var(--muted)">'+fmt(days[i])+'</text>').join('');
+  const total=days.reduce((a,x)=>a+x.count,0);
+  const aria='Strele v zadnjih 14 dneh, do 200 km od postaje: skupaj '+total+'. '+
+    days.filter(x=>x.count).map(x=>fmt(x)+' '+x.count+' (najbližja '+Math.round(x.closest)+' km)').join('; ')+'.';
+  return '<div style="margin-bottom:.2rem">Strel po dnevih, zadnjih 14 dni (stalni zapis):</div>'+
+    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block" role="img" aria-label="'+aria.replace(/"/g,'&quot;')+'">'+
+    '<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="var(--muted)" stroke-opacity=".35"/>'+bars+lbl+ax+'</svg>';
 }
 
 // Zemljevid strel zadnjih 24 ur (isti vzorec kot renderObsMap: majhen
