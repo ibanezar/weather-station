@@ -1704,6 +1704,30 @@ Kar je zdaj narejeno:
   da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
   Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve.
 
+### Zakaj cron zamuja: GitHub dostavi ~6 tekov na dan (meritev 1. 10. 2026)
+
+Pogosti workflowi sploh ne tečejo na urnik: `toca-tracker` (`*/15`, 96/dan) ima ~6,1 teka/dan,
+`retry-pages-deploy` (`*/20`, 72/dan) ~5,9/dan, `prerender-current` (urno, 24/dan) ~5/dan
+(100 zaporednih tekov zajema ~16 dni). GitHub cron dogodke očitno združuje v pakete na
+~4 ure — zato dnevni workflowi zamujajo 5–7 ur in časovna vrata (6:00–8:00) tiho zavračajo
+vsak tek. **Pogosti urniki so torej varljivi:** `*/15` pomeni ~vsake 4 ure; karkoli, kar
+potrebuje boljšo ločljivost (opozorila, jutranje karte), mora teči na Cloudflaru
+(`wrangler.toml` crons) ali ga mora Cloudflare sprožiti prek `GH_DISPATCH_TOKEN`.
+`tools/measure_cron_throughput.py` (korak v `freshness-watch.yml`, tabela v povzetku teka)
+to meri vsak dan; vzroka (obremenitev repozitorija ali politika GitHuba) ni mogoče ločiti,
+zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tabelo čez čas.
+
+### Zdravje Cloudflare cron opravil (`/health`, 1. 10. 2026)
+
+Vsako opravilo v `scheduled()` teče prek `_cronBeat()`, ki zapiše KV `cron:health:<ime>`
+`{ts, ok, err, ms}` (zapis le ob spremembi ali vsakih 15 min). `GET /health` jih vrne,
+`check_freshness.py` (`worker_health()`) pa v `freshness-watch.yml` odpre issue, ko
+opravilo zastara (`CRON_JOBS`: 20 min za petminutna, 30 h za dnevna) ali javi napako.
+Opravilo, ki ob napaki samo vrne, mora vrniti `{ok:false, reason}` (ali `false`) — prazen
+`catch (_) {}` je ravno to, kar je skrilo manjkajoči `GH_DISPATCH_TOKEN`. Nov cron =
+vnos v `CRON_JOBS` + `_cronBeat` v `scheduled()`. Prikazano: `dispatch` bo javil »manjka
+GH_DISPATCH_TOKEN«, dokler žeton ni nastavljen.
+
 ### Vrstni red workflowov ni zagotovljen — datoteko drugega workflowa preberi po datumu (1. 10. 2026)
 
 Komentarji tipa »ob 05:00, po forecast-verify (01:35)« so bili zapisani za čas, ko je

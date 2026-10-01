@@ -22,16 +22,25 @@ jobs:
     permissions:
       contents: read
       issues: write
+      actions: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
       - name: Preveri svežino izdelkov
         id: fresh
         run: python3 tools/check_freshness.py --report freshness-report.md
+
+      # Podatek za odločanje, ne alarm: koliko pričakovanih cron tekov GitHub res dostavi
+      # (1. 10. 2026: ~6 na dan namesto 96/72/24 pri pogostih urnikih).
+      - name: Dostava GitHub cron tekov
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pip install PyYAML --quiet && python3 tools/measure_cron_throughput.py --days 3
 
       - name: Pripravi oznako
         env:

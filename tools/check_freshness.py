@@ -21,6 +21,8 @@ vsaka vrstica res razreši).
 
 Usage:
   python3 tools/check_freshness.py [--report FILE]
+
+To vključuje tudi zdravje Cloudflare cron opravil (`worker_health()`, workerjev /health).
 """
 import csv
 import datetime
@@ -122,6 +124,39 @@ def evaluate(now=None, register=None):
     return out
 
 
+WORKER = "https://weatherireica1.filip-eremita.workers.dev"
+
+
+def worker_health(fetch=None):
+    """Zdravje Cloudflare cron opravil iz workerjevega /health (glej _cronBeat v worker.js).
+    Opravilo je »neuspešno«, če je zadnji tek javil napako, in »zastarelo«, če ni teklo
+    dlje, kot dovoljuje CRON_JOBS. `fetch` je za teste."""
+    try:
+        if fetch is None:
+            import urllib.request
+            with urllib.request.urlopen(f"{WORKER}/health", timeout=20) as r:
+                data = json.load(r)
+        else:
+            data = fetch()
+        jobs = data["jobs"]
+    except Exception as e:  # noqa: BLE001
+        return [{"name": "Worker: cron opravila", "path": "/health", "status": "unreadable", "age_h": None,
+                 "max_h": None, "hint": f"/health ni dosegljiv ali ni veljaven ({type(e).__name__}) — deploy-worker.yml, Cloudflare"}]
+    out = []
+    for name, j in sorted(jobs.items()):
+        age_h = None if j.get("age_min") is None else round(j["age_min"] / 60, 1)
+        status = "ok"
+        if j.get("stale"):
+            status = "stale"
+        elif not j.get("ok"):
+            status = "failing"
+        out.append({"name": f"Worker cron: {name}", "path": "/health", "status": status, "age_h": age_h,
+                    "max_h": round(j["max_min"] / 60, 1) if j.get("max_min") else None,
+                    "hint": (j.get("err") or "zadnji tek je uspel") if status != "ok" else "ok",
+                    "updated": "—" if age_h is None else f"pred {fmt_age(age_h)}"})
+    return out
+
+
 def fmt_age(h):
     if h is None:
         return "—"
@@ -139,14 +174,14 @@ def report(results):
     lines.append("| Izdelek | Stanje | Starost | Dovoljeno | Zadnja osvežitev | Kje iskati |")
     lines.append("|---|---|---|---|---|---|")
     for r in sorted(results, key=lambda r: (r["status"] == "ok", r["name"])):
-        icon = {"ok": "✅", "stale": "⚠️ zastarelo", "unreadable": "❌ ni berljivo"}[r["status"]]
+        icon = {"ok": "✅", "stale": "⚠️ zastarelo", "unreadable": "❌ ni berljivo", "failing": "❌ napaka"}[r["status"]]
         lines.append(f"| {r['name']} (`{r['path']}`) | {icon} | {fmt_age(r['age_h'])} | {fmt_age(r['max_h'])} | "
                      f"{r.get('updated', '—')} | {r['hint']} |")
     return "\n".join(lines) + "\n", len(bad)
 
 
 def main():
-    results = evaluate()
+    results = evaluate() + worker_health()
     text, n_bad = report(results)
     print(text)
     if "--report" in sys.argv:
