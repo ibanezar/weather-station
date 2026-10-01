@@ -1658,6 +1658,12 @@ Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
 brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
 "omenjen/ni omenjen".
 
+**Search Console** — repozitorij nima dostopa do GSC. Izvoz »Učinkovitost → Izvozi« (ZIP)
+predela `tools/gsc_opportunities.py IZVOZ.zip --out docs/gsc-YYYY-MM.md`: poizvedbe na
+pragu (položaj 4–20, razvrščene po dodatnih klikih), nizek CTR na prvi strani (popravi
+naslov) in poizvedbe brez ustrezne strani. Stolpci se berejo po vrstnem redu, ker so
+glave v jeziku vmesnika.
+
 ## Test usklajenosti namernih podvojitev (`tools/test_parity.py`)
 
 Dokument na ducatu mest pravi »če spremeniš eno, spremeni drugo«. Od 1. 10. 2026
