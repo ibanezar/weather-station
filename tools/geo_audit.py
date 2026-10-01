@@ -27,8 +27,13 @@ sistemov (ChatGPT, Perplexity, Google AI Overviews):
   7. Neveljavne @id reference — {"@id": "..."} brez ustrezne definicije
      tega @id kjerkoli na strani je pokvarjena povezava znotraj grafa
      entitet, enako resno kot mrtva <a href>.
+  8. Vsebina spremenjena brez dateModified — obratno od 5: stran, ki jo je
+     kdo ročno popravil (ali generator, ki dateModified ne piše), shema pa
+     še trdi datum objave. Iz git zgodovine (zadnjih nekaj commitov strani),
+     samo vidno besedilo brez samodejnih blokov (sorodni, teme, podatki,
+     WX-*), z mejo MIN_CHANGED_CHARS, da dodana povezava ni »sprememba«.
 
-Preverjanji 5 in 6 sta opozorili (ne blokirata izhodne kode) — gre za mehka
+Preverjanja 5, 6 in 8 so opozorila (ne blokirata izhodne kode) — gre za mehka
 signala, ne za zlomljeno shemo. Preverjanje 7 je napaka.
 
 Samo pregled — nič ne popravlja. Izhodni status 1, če najde napake.
@@ -213,6 +218,60 @@ def check_freshness(notes):
             notes.append(f"ZASTAREL dateModified: {page} — {m.group(1)} ({age} dni nazaj, prag {max_days})")
 
 
+# 8) Vsebina spremenjena, dateModified pa ne -------------------------------
+
+# Samodejni bloki, ki jih piše wire_all()/injektorji (<!-- x:start … --> …
+# <!-- x:end -->, WX-…:START/END) — njihova sprememba ni sprememba članka.
+AUTO_BLOCK_RE = re.compile(r"<!--\s*([\w-]+):start\b.*?-->.*?<!--\s*\1:end\s*-->", re.S | re.I)
+MIN_CHANGED_CHARS = 200
+CONTENT_LOG_DEPTH = 6
+
+
+def _git(*args):
+    import subprocess
+    r = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+    return r.stdout if r.returncode == 0 else None
+
+
+def content_text(html):
+    return main_content_text(AUTO_BLOCK_RE.sub(" ", html or "")) or ""
+
+
+def changed_chars(a, b):
+    sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
+    return sum(max(i2 - i1, j2 - j1) for op, i1, i2, j1, j2 in sm.get_opcodes() if op != "equal")
+
+
+def last_content_change(rel):
+    """Datum zadnjega commita, ki je vidno besedilo strani spremenil za vsaj
+    MIN_CHANGED_CHARS znakov, ali None (plitev klon, brez take spremembe)."""
+    log = _git("log", "-n", str(CONTENT_LOG_DEPTH), "--format=%H %cs", "--", rel) or ""
+    for line in log.splitlines():
+        sha, day = line.split()
+        new, old = _git("show", f"{sha}:{rel}"), _git("show", f"{sha}^:{rel}")
+        if old is None:
+            return None
+        a, b = content_text(old), content_text(new)
+        if a != b and changed_chars(a, b) >= MIN_CHANGED_CHARS:
+            return day
+    return None
+
+
+def check_content_vs_date_modified(notes):
+    # V plitvem klonu (CI, fetch-depth 1) starša ni in last_content_change vrne
+    # None — preverjanje je tam tiho, smiselno je lokalno ali z globljim klonom.
+    for path in glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True):
+        rel = os.path.relpath(path, ROOT)
+        if rel.startswith(("vreme" + os.sep + "20", "i" + os.sep, "node_modules")):
+            continue
+        m = DATE_MOD_RE.search(read(path))
+        if not m:
+            continue
+        day = last_content_change(rel)
+        if day and (datetime.date.fromisoformat(day) - datetime.date.fromisoformat(m.group(1))).days > 1:
+            notes.append(f"VSEBINA SPREMENJENA {day}, dateModified pa {m.group(1)}: {rel}")
+
+
 # 6) Skoraj podvojena vsebina med kraji v dolini -----------------------------
 
 NEARBY_TOWN_PAGES = [
@@ -341,6 +400,7 @@ def audit():
     check_near_duplicate_towns(notes)
     check_id_references(problems)
     check_crnivec_site(problems)
+    check_content_vs_date_modified(notes)
 
     lines = [f"# GEO audit — {TODAY}", ""]
     if problems:

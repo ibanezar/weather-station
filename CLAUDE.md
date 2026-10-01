@@ -1658,6 +1658,13 @@ Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
 brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
 "omenjen/ni omenjen".
 
+**Vsebina brez `dateModified`** (preverjanje 8, 1. 10. 2026): `geo_audit.py` iz git zgodovine
+najde stran, katere vidno besedilo se je spremenilo za ≥ 200 znakov (`MIN_CHANGED_CHARS`),
+`dateModified` pa ostal starejši. Samodejni bloki (`<!-- x:start … x:end -->`, sorodni,
+teme, podatki) se ne štejejo. Prvi tek: 0 opozoril (trije ročni popravki z dodano povezavo
+so pod mejo). Ročno popravljen članek gre skozi lekturo, ta pa `dateModified` osveži sama
+(`touch_existing()`). V plitvem klonu (CI) je preverjanje tiho.
+
 **Search Console** — repozitorij nima dostopa do GSC. Izvoz »Učinkovitost → Izvozi« (ZIP)
 predela `tools/gsc_opportunities.py IZVOZ.zip --out docs/gsc-YYYY-MM.md`: poizvedbe na
 pragu (položaj 4–20, razvrščene po dodatnih klikih), nizek CTR na prvi strani (popravi
