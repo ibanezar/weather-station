@@ -67,6 +67,7 @@ SITE = seo.SITE
 OUT_DIR = os.path.join(ROOT, "og", "precip-map")
 KEEP_DAYS = 14
 
+WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 OBS_URL = "https://meteo.arso.gov.si/uploads/probase/www/observ/surface/text/sl/observation_si_latest.xml"
 
 try:
@@ -108,7 +109,27 @@ def band_for(mm):
     return b[1], b[2]
 
 
-def fetch_stations():
+def fetch_snapshot(date):
+    """Jutranji posnetek rr24h iz workerja (`/arso-rr24h`, glej worker.js
+    _cronSnapshotArsoRr24h). ARSO polje je zapolnjeno samo v jutranji meritvi,
+    GitHubov cron pa zamuja ure — posnetek omogoča karto kadarkoli čez dan.
+    Vrne (postaje, izdano) ali None, če posnetka ni."""
+    try:
+        req = urllib.request.Request(f"{WORKER}/arso-rr24h?datum={date}", headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            snap = json.load(r)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError):
+        return None
+    out = [{"name": title_sl(s["name"]), "la": s["la"], "lo": s["lo"], "mm": s["mm"]}
+           for s in snap.get("stations", []) if s.get("name")]
+    return (out, snap.get("issued", "")) if out else None
+
+
+def fetch_stations(date=None):
+    snap = fetch_snapshot(date) if date else None
+    if snap:
+        print(f"  → uporabljen jutranji posnetek ARSO ({len(snap[0])} postaj)")
+        return snap
     req = urllib.request.Request(
         OBS_URL,
         headers={"User-Agent": "Mozilla/5.0", "Accept": "application/xml,text/xml,*/*",
@@ -386,7 +407,7 @@ def main():
 
     print(f"[{today}] Sestavljam padavinsko karto Slovenije …")
     try:
-        stations, issued = fetch_stations()
+        stations, issued = fetch_stations(today.isoformat())
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ET.ParseError, ValueError) as e:
         print(f"✗ Napaka pri pridobivanju podatkov ARSO: {e}", file=sys.stderr)
         return 1

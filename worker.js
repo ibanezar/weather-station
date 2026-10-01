@@ -2677,6 +2677,47 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
   }
 }
 
+// ── ARSO 24-urne padavine: posnetek zjutraj ──────────────────────
+// `rr24h_val` v observation_si_latest.xml je zapolnjen SAMO v jutranji meritvi
+// (ob 8:00 CEST); v urnih meritvah čez dan je prazen. Padavinska karta
+// (tools/generate_precip_map.py) je zato delovala samo, če je GitHubov cron
+// tekel v oknu ~1 h po tej meritvi — od 11. 9. 2026 (cron zamuja 5-7 ur) nobenega
+// dne več. Cloudflarov cron zjutraj prebere vir in posnetek hrani v KV, karta
+// ga prebere prek /arso-rr24h kadarkoli čez dan. Brez posnetka generator pade
+// nazaj na živi vir (staro vedenje).
+function _parseArsoRr24h(xml) {
+  const tag = (b, t) => { const m = b.match(new RegExp("<" + t + ">([\\s\\S]*?)</" + t + ">")); return m ? m[1].trim() : null; };
+  const stations = [];
+  for (const m of xml.matchAll(/<metData>([\s\S]*?)<\/metData>/g)) {
+    const b = m[1];
+    const name = tag(b, "domain_shortTitle") || tag(b, "domain_title");
+    const la = parseFloat(tag(b, "domain_lat")), lo = parseFloat(tag(b, "domain_lon"));
+    const rr = tag(b, "rr24h_val");
+    if (!name || !isFinite(la) || !isFinite(lo) || rr == null || rr === "") continue;
+    const mm = parseFloat(rr);
+    if (!isFinite(mm)) continue;
+    stations.push({ name, la, lo, mm });
+  }
+  const issued = (xml.match(/<tsValid_issued>([\s\S]*?)<\/tsValid_issued>/) || [])[1];
+  return { stations, issued: issued ? issued.trim() : "" };
+}
+const ARSO_OBS_URL = "https://meteo.arso.gov.si/uploads/probase/www/observ/surface/text/sl/observation_si_latest.xml";
+async function _cronSnapshotArsoRr24h(env) {
+  const kv = env?.COUNTER_KV;
+  if (!kv) return { ok: false, reason: "brez COUNTER_KV" };
+  const datum = _ljDatum();
+  const key = "arso_rr24h:" + datum;
+  try {
+    if (await kv.get(key)) return { ok: true, already: true };
+    const res = await fetch(ARSO_OBS_URL, { headers: { "Accept": "application/xml,text/xml", "Referer": "https://meteo.arso.gov.si/" } });
+    if (!res.ok) return { ok: false, status: res.status };
+    const snap = _parseArsoRr24h(await res.text());
+    if (snap.stations.length < 5) return { ok: false, reason: "rr24h še ni objavljen", n: snap.stations.length };
+    await kv.put(key, JSON.stringify({ datum, ...snap, saved_at: new Date().toISOString() }), { expirationTtl: 3 * 86400 });
+    return { ok: true, n: snap.stations.length };
+  } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
+}
+
 async function _cronDispatchScheduledWorkflows(env) {
   const results = {
     cas: new Date().toISOString(),
@@ -2945,6 +2986,10 @@ async function _cronScoreNapovej(env) {
 
 export default {
   async scheduled(event, env, ctx) {
+    if (event.cron === "30 6-7 * * *") {
+      ctx.waitUntil(_cronSnapshotArsoRr24h(env));
+      return;
+    }
     if (event.cron === "10,40 4-5 * * *") {
       ctx.waitUntil(_cronDispatchScheduledWorkflows(env));
       return;
@@ -4092,6 +4137,19 @@ export default {
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
           );
         }
+      }
+
+      // ── /arso-rr24h ───────────────────────────────────────
+      // Jutranji posnetek 24-urnih padavin (glej _cronSnapshotArsoRr24h).
+      // ?datum=YYYY-MM-DD (privzeto danes po naši uri).
+      if (path === "/arso-rr24h") {
+        const datum = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get("datum") || "") ? url.searchParams.get("datum") : _ljDatum();
+        const raw = env?.COUNTER_KV ? await env.COUNTER_KV.get("arso_rr24h:" + datum) : null;
+        if (!raw) {
+          return new Response(JSON.stringify({ error: "ni posnetka", datum }), {
+            status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=60" } });
+        }
+        return new Response(raw, { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" } });
       }
 
       // ── /arso-obs ─────────────────────────────────────────

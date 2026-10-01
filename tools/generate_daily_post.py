@@ -30,6 +30,7 @@ Potrebne env spremenljivke:
     ANTHROPIC_API_KEY   -- Claude API ključ (GitHub secret)
     POST_DATE           -- (opcijsko, za testiranje) prepiše današnji datum
 """
+from zoneinfo import ZoneInfo
 import json, os, sys, re, shutil, struct, time, random, datetime, urllib.request, urllib.error, urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -229,7 +230,11 @@ def fetch_mtr_forecast():
             data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return None
-    d1 = next((d for d in data.get("days", []) if d.get("lead") == 1), None)
+    # Dan po DATUMU, ne po `lead == 1`: lead je glede na nastanek datoteke, ta pa je ob
+    # zagonu članka lahko še včerajšnja (forecast-verify.yml zamuja ure) — lead 1 bi bil
+    # potem DANES, članek pa bi ga imenoval »jutri« (revizija 1. 10. 2026).
+    tomorrow = (datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).date() + datetime.timedelta(days=1)).isoformat()
+    d1 = next((d for d in data.get("days", []) if d.get("date") == tomorrow), None)
     if not d1:
         return None
     return {

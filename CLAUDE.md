@@ -1683,6 +1683,16 @@ Kar je zdaj narejeno:
   spet sveža), a izhod `late=true` **prepreči objavo na FB/IG** (jutranja karta, objavljena
   popoldne, bi lagala); `inject_storm_map.py` na strani pove, ob kateri uri je karta
   nastala. `tools/test_gates.py` zaklene vedenje (22 preverjanj).
+- **Padavinska karta potrebuje podatkovno rešitev, ne samo vrat** (ugotovljeno ob prvem
+  pozno zagnanem teku 1. 10.): ARSO `rr24h_val` je zapolnjen **samo v jutranji meritvi**
+  (8:00 CEST), v urnih meritvah čez dan je prazen — generator je zato padel z »ni
+  nobene postaje z rr24h_val«. Zato **Cloudflare cron 06:30/07:30 UTC**
+  (`_cronSnapshotArsoRr24h` v `worker.js`) jutranji posnetek shrani v KV
+  (`arso_rr24h:<datum>`, 3 dni), generator ga prebere prek `/arso-rr24h` kadarkoli
+  čez dan (`fetch_snapshot()`), brez posnetka pade nazaj na živi vir. To NE rabi
+  `GH_DISPATCH_TOKEN`. `tools/test_precip_snapshot.py` preverja, da worker razbere iste
+  postaje kot ET. Prvi posnetek nastane naslednje jutro po deployu; do takrat pozni tek
+  pade (vidno kot rdeč tek in v varuhu svežine).
 - **Cloudflare varovalka** (`_cronDispatchScheduledWorkflows`) kliče zdaj tudi
   `precip-map.yml`. Še vedno rabi `GH_DISPATCH_TOKEN` — brez njega ne naredi nič (od
   31. 8. ni bilo niti enega `workflow_dispatch`); pozni tek zato ni olajšava, ampak
@@ -1693,6 +1703,31 @@ Kar je zdaj narejeno:
   **Nov dnevni izdelek = nova vrstica v `REGISTER`**; `tools/test_freshness.py` preveri,
   da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
   Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve.
+
+### Vrstni red workflowov ni zagotovljen — datoteko drugega workflowa preberi po datumu (1. 10. 2026)
+
+Komentarji tipa »ob 05:00, po forecast-verify (01:35)« so bili zapisani za čas, ko je
+cron zamujal minute. Zdaj vsak workflow zamuja 5–7 ur po svoje, zato **potrošnik ne sme
+predpostaviti, da je datoteka producenta že današnja**. Revizija je našla štiri tihe
+napake in jih popravila (`tools/test_stale_inputs.py` zaklene vse):
+
+1. **Gasilska stran** `/meteogasilec/vreme-intervencije/` je en mesec (od 31. 8.) kot
+   »Nacionalni nevihtni potencial **danes**« kazala EKSTREMNO z avgusta — `load_storm_map()`
+   ni preverjal datuma. Zdaj blok pove, da današnja karta še ni izdana.
+2. **Jutranji povzetek** je `lead == 1` imenoval »Danes«, a lead je glede na dan nastanka
+   datoteke (jutri). Zdaj bere zamrznjeno napoved za današnji **datum** iz
+   `.forecast_pending.json` (ali dan z današnjim datumom v `napoved-modela.json`), brez nje
+   ne pošlje nič. **Workflow vsak dan pade (rdeč), ker secret `SUBSCRIBE_SECRET` ni
+   nastavljen** — ko ga nastaviš, bodo naročniki dobili pravilne številke.
+3. **Dnevni članek** (`fetch_mtr_forecast`) in 4. **kartica zgodbe** (`load_mtr_forecast`)
+   sta isto jemala za »jutri«, ko je bila datoteka včerajšnja. Zdaj izbereta dan z jutrišnjim
+   datumom.
+
+Pravilo: **dan iz `napoved-modela.json` vedno izberi po `date`, nikoli po `lead`.** Stvari, ki
+so že varne: `verify_forecasts.py` (neizmerjene dni drži v čakalni vrsti do 5 dni, napoved
+modela sprejme samo z današnjim `generated_at`), `update-history` (trije termini + gate),
+zgodba (`load_gobe_index`/`load_igra_level` zahtevata današnji datum), `inject_forecast.py`
+in `generate_seo_pages.py` (MTR vrstice po datumu).
 
 ## Razvoj
 

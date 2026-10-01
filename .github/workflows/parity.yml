@@ -60,3 +60,9 @@ jobs:
 
       - name: Test varuha svežine
         run: python3 tools/test_freshness.py
+
+      - name: Test posnetka ARSO rr24h
+        run: python3 tools/test_precip_snapshot.py
+
+      - name: Test potrošnikov datotek drugih workflowov (zastareli vhodi)
+        run: python3 tools/test_stale_inputs.py

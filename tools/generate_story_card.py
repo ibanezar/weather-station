@@ -289,14 +289,19 @@ def load_crnivec_weather():
         return None
 
 
-def load_mtr_forecast():
-    """Jutrišnja (D+1) napoved lastnega modela MTR -- bere lokalni
-    napoved-modela.json (piše ga tools/predict_recica_mos.py), ne uvaža
-    modela samega (isto načelo kot pri gobarskem indeksu)."""
+def load_mtr_forecast(tomorrow_iso):
+    """Napoved lastnega modela MTR za JUTRI -- bere lokalni napoved-modela.json
+    (piše ga tools/predict_recica_mos.py), ne uvaža modela samega (isto načelo kot
+    pri gobarskem indeksu).
+
+    Dan se izbere po DATUMU, ne po `lead == 1`: lead je glede na dan nastanka
+    datoteke, forecast-verify.yml pa zdaj zamuja ure, zato je ob zagonu zgodbe
+    datoteka lahko še včerajšnja — njen lead 1 je potem DANES in bi kartica
+    »Jutri po našem modelu« pokazala napačen dan (revizija 1. 10. 2026)."""
     try:
         with open(MTR_JSON, encoding="utf-8") as f:
             data = json.load(f)
-        return next((d for d in data.get("days", []) if d.get("lead") == 1), None)
+        return next((d for d in data.get("days", []) if d.get("date") == tomorrow_iso), None)
     except Exception as e:
         print(f"⚠ napoved-modela.json ni dosegljiv: {e}", file=sys.stderr)
         return None
@@ -385,7 +390,7 @@ def build_ctx():
 
     yday_key = (today - datetime.timedelta(days=1)).isoformat()
     hist_yesterday = hist.get(yday_key)
-    mtr = load_mtr_forecast()
+    mtr = load_mtr_forecast((today + datetime.timedelta(days=1)).isoformat())
 
     return dict(
         now=now, today=today, date_iso=today.isoformat(),
