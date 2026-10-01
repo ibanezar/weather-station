@@ -1671,6 +1671,8 @@ meritve DRSI in oznake dni.
   (povzetek ni preverjal vrstnega reda vnosov, kontingenca mejne ocene, mejni primeri profila),
   vse zapolnjene → 65/65. Nov test ali nova varovalka = nova vrstica v `MUTACIJE`; mutant, ki
   preživi, je ali luknja v testu ali ekvivalenten mutant (odveč varovalka) — oboje popravi.
+  Skript poganja teste z `python -B` in briše `__pycache__`: mutacija enake dolžine v isti sekundi
+  (npr. `LATE_END = 20` → `24`) je sicer pustila veljaven mutiran `.pyc` in naslednji tek je padel brez razloga.
 - Znana, namerno neizenačena zaokroževanja: Python `round()` zaokroži x.5 na sodo,
   JS `Math.round` navzgor. Test se jim izogne z vhodi (padavine v korakih 0,1 mm,
   popravek meritve s sodimi desetinkami) ali toleranco ±1 (barve na karti).

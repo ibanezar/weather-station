@@ -99,6 +99,15 @@ MUTACIJE = [
 ]
 
 
+def clear_bytecode():
+    """Mutacija enake dolžine v isti sekundi bi pustila veljaven (mutiran) .pyc — zato ga povozimo."""
+    for dirpath, dirs, _ in os.walk(os.path.join(ROOT, "tools")):
+        for d in list(dirs):
+            if d == "__pycache__":
+                subprocess.run(["rm", "-rf", os.path.join(dirpath, d)])
+                dirs.remove(d)
+
+
 def git(*a):
     return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True)
 
@@ -121,10 +130,12 @@ def main():
             continue
         try:
             open(path, "w", encoding="utf-8").write(src.replace(old, new, 1))
-            r = subprocess.run([sys.executable, os.path.join(ROOT, "tools", test)], cwd=ROOT,
+            r = subprocess.run([sys.executable, "-B", os.path.join(ROOT, "tools", test)], cwd=ROOT,
+                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
                                capture_output=True, text=True, timeout=300)
         finally:
             git("checkout", "--", rel)
+            clear_bytecode()
         killed = r.returncode != 0
         ran += 1
         print(f"{'✓ ujet   ' if killed else '✗ PREŽIVEL'} {opis}")
