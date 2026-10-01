@@ -81,6 +81,10 @@ def test_verify():
     r0 = vs.verify_day(forecast(), resp([]))
     check(r0["status"] == "ok" and r0["storm_day"] is False and r0["strike_cells"] == 0, "mirni dan")
     check(r0["contingency"]["22"] == {"a": 0, "b": 3, "c": 0, "d": 2}, "mirni dan: lažni alarmi", str(r0["contingency"]["22"]))
+    # ocena NATANKO na pragu (22) šteje kot napoved (>=) — mutacija `>` bi zadetek spremenila v zgrešitev
+    rb = vs.verify_day(forecast(points=[pt(0, 0, 22), pt(1, 1, 21.99), pt(2, 2, 8), pt(3, 3, 40)]), resp([(0, 0, 1), (2, 2, 1), (3, 3, 1)]))
+    check(rb["contingency"]["22"] == {"a": 2, "b": 0, "c": 1, "d": 1}, "prag 22: ocena 22 je napoved, 21,99 ni", str(rb["contingency"]["22"]))
+    check(rb["contingency"]["8"]["a"] == 3 and rb["contingency"]["40"]["a"] == 1, "pragova 8 in 40 sta vključujoča", str(rb["contingency"]))
     # pokritost
     low = vs.verify_day(forecast(), resp([(4, 4, 9)], connected=200, total=288))
     check(low["status"] == "skipped" and "69" in low["reason"], "slaba pokritost = preskočen dan", str(low))
