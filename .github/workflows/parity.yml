@@ -1,0 +1,53 @@
+name: Test usklajenosti podvojitev
+
+# CLAUDE.md na ducatu mest pravi »če spremeniš eno, spremeni drugo« (Python ↔ JS,
+# worker ↔ klient). Ta test to preverja: JS funkcije izreže iz pravih datotek in
+# jih poganja na istih vhodih kot Python kopijo. Teče ob vsaki spremembi katere
+# od kopij, da razhajanje ujame PR, ne bralec. Glej tools/test_parity.py.
+
+on:
+  pull_request:
+    paths:
+      - 'app.js'
+      - 'worker.js'
+      - 'igra/**'
+      - 'napovej/**'
+      - 'crnivec-igra/**'
+      - 'crnivec-site/**'
+      - 'gobarska-napoved/index.html'
+      - 'meteogasilec/gasilec.js'
+      - 'tools/**'
+      - '.github/workflows/parity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app.js'
+      - 'worker.js'
+      - 'igra/**'
+      - 'napovej/**'
+      - 'crnivec-igra/**'
+      - 'meteogasilec/gasilec.js'
+      - 'tools/**'
+      - '.github/workflows/parity.yml'
+  workflow_dispatch: {}
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # generate_crnivec_page.py uvozi generate_story_card.py (Pillow), gobe_model.py pa PyYAML.
+      - name: Odvisnosti
+        run: pip install Pillow PyYAML --quiet
+
+      - name: Test usklajenosti kopij
+        run: python3 tools/test_parity.py

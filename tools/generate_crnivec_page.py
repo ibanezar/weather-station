@@ -2027,7 +2027,7 @@ SHARE_JS_TEMPLATE = '''
   function groundTempLive(tAir, cloud, wind){
     if (tAir == null) return null;
     var off = 3.0;
-    function lin(x, x0, y0, x1, y1){ return Math.max(0, Math.min(1, y0 + (y1 - y0) * (x - x0) / (x1 - x0))); }
+    function lin(x, x0, y0, x1, y1){ return x <= x0 ? y0 : x >= x1 ? y1 : y0 + (y1 - y0) * (x - x0) / (x1 - x0); }  // kot interp() v winter_engine.py: zunaj [x0,x1] ostane krajna vrednost
     if (cloud != null) off *= lin(cloud, 20, 1.0, 80, 0.0);
     if (wind != null) off *= lin(wind, 5, 1.0, 20, 0.15);
     return tAir - off;

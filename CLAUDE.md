@@ -1566,6 +1566,49 @@ Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
 brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
 "omenjen/ni omenjen".
 
+## Test usklajenosti namernih podvojitev (`tools/test_parity.py`)
+
+Dokument na ducatu mest pravi »če spremeniš eno, spremeni drugo«. Od 1. 10. 2026
+to **preverja stroj**: `python3 tools/test_parity.py` (workflow `parity.yml`, teče ob
+spremembi katere od kopij; ~5 s). JS funkcije se s pomočnikom `tools/_parity_js.mjs`
+**izrežejo iz pravih datotek** (`app.js`, `worker.js`, `gasilec.js`, `igra.js`,
+`napovej.js` in iz že generirane strani `crnivec-site/index.html`,
+`gobarska-napoved/index.html`) in poženejo na istih vhodih kot Python kopija — test
+torej ne primerja kopije v testu, ampak kodo, ki jo dobi bralec.
+
+Pokriva: FWI (app.js ↔ gasilec.js ↔ gasilec_model.py), stanje vodomerne postaje po
+pragovih ARSO, poledica/vozišče/ura/povzetek termina/meja sneženja/FNV-1a/besedila
+»Črnivec pravi« (generirana stran ↔ `winter_engine.py`, `generate_crnivec_page.py`),
+točkovanje `/napovej/` (worker ↔ napovej.js) in prag mokrega dne (tri mesta),
+konstante workerja (`IGRA_KORIDORJI_KM`, `CRN_IGRA_MIN_S`, `KOLICINE`), pragove
+gobarskega indeksa, nevihtno karto (obris, mreža, mesta, barve, stopnje), 16 smeri
+vetra in LZW dekoder strel, oceno dneva v Termiki (`opis_dneva` ↔ `dayRating`).
+
+- **Nova namerna podvojitev = nov `@test`.** Ko v dokument zapišeš »če spremeniš
+  eno, spremeni drugo«, dodaj tudi preizkus v `test_parity.py`. Brez njega je
+  opomba samo upanje.
+- Test JS bere iz **generirane strani** za Črnivec/gobe. Ko spremeniš predlogo v
+  generatorju, regeneriraj stran (ali isto spremembo ročno prenesi v committano
+  stran), sicer test še vidi staro kopijo.
+- Znana, namerno neizenačena zaokroževanja: Python `round()` zaokroži x.5 na sodo,
+  JS `Math.round` navzgor. Test se jim izogne z vhodi (padavine v korakih 0,1 mm,
+  popravek meritve s sodimi desetinkami) ali toleranco ±1 (barve na karti).
+- Znana, nepopravljena razlika: `_napovejSkupaj()` v workerju ob manjkajoči ENI
+  temperaturi ne oceni (null), `oceni()` v napovej.js oceni po preostali. V praksi
+  nedosegljivo (igralec odda obe, `forecast_verification.json` ima obe meritvi).
+
+Prvi zagon (1. 10. 2026) je našel tri prava razhajanja, vsa popravljena:
+1. **FWI pri DMC = DC = 0** (mraz po močnem dežju): Python je vrgel
+   `ZeroDivisionError` (generator `/meteogasilec/` bi ob taki zimski noči padel), JS
+   je tiho vrnil `NaN`. BUI je zdaj 0 v vseh treh kopijah.
+2. **`groundTempLive()` na crnivec.si in /lipa/** je pri vetru > 20 km/h izgubil
+   preostali sevalni primanjkljaj (linearna ekstrapolacija + zareza pri 0 namesto
+   krajne vrednosti 0,15 kot `interp()` v `winter_engine.py`): živa ocena poledice
+   je bila do 0,45 °C preveč optimistična.
+3. **Termika: vrstni red vej** `opis_dneva()` (nizek strop pred dežjem) se je razlikoval
+   od `dayRating()` (dež pred nizkim stropom): ob dežju in nizkem stropu je stran
+   pisala eno, igra drugo.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
