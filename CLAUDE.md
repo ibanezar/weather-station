@@ -72,6 +72,9 @@ nespremenjena od objave (najdeno pri GEO pregledu, popravljeno 2. 9. 2026).
 - Po objavi na `main` pošlji IndexNow ping (glej korak v `daily-post.yml`).
 - Dnevni članki gredo prek sistema jutranjih predlogov: cron pripravi tri
   predloge, Filip po e-pošti izbere, klik sproži objavo (`daily-post.yml`).
+  **Od 2. 10. 2026 IZKLOPLJENO** (Filipova odločitev, API ključ nima
+  dobroimetja): vsi trije posli v `daily-post.yml` imajo `if: false && (...)`,
+  zato ni ne predlogov ne članka. Ne vklapljaj sam; za vklop odstrani `false && `.
 
 ### `<title>` ne sme čez 60 znakov
 
