@@ -23,6 +23,7 @@ jobs:
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          FB_FORCE: '1'  # ročna (re)objava: preverjanje dvojnika izklopljeno
         run: python3 tools/post_to_facebook.py ${{ inputs.slug }}
 
       - name: Objavi na Instagramu

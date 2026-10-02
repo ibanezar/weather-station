@@ -78,3 +78,6 @@ jobs:
 
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py
+
+      - name: Test objavljanja na FB/IG (nov članek, UTM, dvojniki)
+        run: python3 tools/test_social_post.py

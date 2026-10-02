@@ -21,6 +21,11 @@ jobs:
       - name: Namesti odvisnosti
         run: pip install Pillow --quiet
 
+      # Posnetek pred generiranjem: FB/IG/IndexNow dobijo samo NOVE članke, ne
+      # zadnjih 5 s predpono (sicer se je isto objavilo vsak ponedeljek).
+      - name: Zapomni si slugi pred generiranjem
+        run: cp blog.json "$RUNNER_TEMP/blog_before.json"
+
       - name: Preveri nova opazovanja invazivnih vrst (iNaturalist)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -64,7 +69,12 @@ jobs:
           import json, urllib.request, urllib.error, sys
 
           posts = json.load(open("blog.json", encoding="utf-8"))
-          today_posts = [p for p in posts if p.get("slug", "").startswith("invazivka")]
+          import os, subprocess
+          new = subprocess.run(
+              ["python3", "tools/new_slugs.py",
+               os.path.join(os.environ["RUNNER_TEMP"], "blog_before.json"), "invazivka"],
+              capture_output=True, text=True).stdout.split()
+          today_posts = [p for p in posts if p.get("slug") in new]
           if not today_posts:
               print("Brez novih invazivke objav za IndexNow.")
               sys.exit(0)
@@ -95,12 +105,7 @@ jobs:
       - name: Počakaj, da GitHub Pages postreže objave
         if: steps.commit.outputs.published == 'true'
         run: |
-          SLUGS=$(python3 -c "
-          import json
-          posts = json.load(open('blog.json', encoding='utf-8'))
-          today = [p['slug'] for p in posts if p.get('slug', '').startswith('invazivka')]
-          print('\n'.join(today[:5]))
-          ")
+          SLUGS=$(python3 tools/new_slugs.py "$RUNNER_TEMP/blog_before.json" invazivka)
           if [ -n "$SLUGS" ]; then
             python3 tools/wait_for_deploy.py $SLUGS
           fi
@@ -112,12 +117,7 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
         run: |
-          SLUGS=$(python3 -c "
-          import json
-          posts = json.load(open('blog.json', encoding='utf-8'))
-          today = [p['slug'] for p in posts if p.get('slug', '').startswith('invazivka')]
-          print('\n'.join(today[:5]))
-          ")
+          SLUGS=$(python3 tools/new_slugs.py "$RUNNER_TEMP/blog_before.json" invazivka)
           if [ -z "$SLUGS" ]; then
             echo "Brez novih invazivke objav za Facebook."
           else
@@ -133,12 +133,7 @@ jobs:
           IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: |
-          SLUGS=$(python3 -c "
-          import json
-          posts = json.load(open('blog.json', encoding='utf-8'))
-          today = [p['slug'] for p in posts if p.get('slug', '').startswith('invazivka')]
-          print('\n'.join(today[:5]))
-          ")
+          SLUGS=$(python3 tools/new_slugs.py "$RUNNER_TEMP/blog_before.json" invazivka)
           if [ -z "$SLUGS" ]; then
             echo "Brez novih invazivke objav za Instagram."
           else
