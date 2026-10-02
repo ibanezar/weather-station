@@ -2689,7 +2689,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
   thresholds: 20, nowcast: 20, rain_start_stop: 20, aurora: 20, crnivec: 20,
   lightning: 20, radar_composite: 20, icon_cells: 20,
-  score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60,
+  score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
 const CRON_BEAT_WRITE_MS = 15 * 60000;
 async function _cronBeat(env, name, fn) {
@@ -2784,7 +2784,6 @@ async function _cronDispatchScheduledWorkflows(env) {
   const results = {
     cas: new Date().toISOString(),
     "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
-    "precip-map.yml": await _cronDispatchGithubWorkflow(env, "precip-map.yml", { force: "false" }),
     "vodostaj-forecast.yml": await _cronDispatchGithubWorkflow(env, "vodostaj-forecast.yml"),
   };
   const r2 = env?.PHOTOS_R2;
@@ -3101,7 +3100,15 @@ async function _cronScoreNapovej(env) {
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "30 6-7 * * *") {
-      ctx.waitUntil(_cronBeat(env, "rr24h_snapshot", () => _cronSnapshotArsoRr24h(env)));
+      // Padavinska karta potrebuje jutranjo 24-urno vsoto ARSO, ki obstaja šele po meritvi
+      // ob 06:00 UTC — zato jo sproži ta cron takoj za posnetkom, ne skupni dispatch ob 4:10–5:40
+      // UTC (vsi štirje teki 2. 10. 2026 so padli z »ni nobene postaje z rr24h_val«).
+      ctx.waitUntil((async () => {
+        await _cronBeat(env, "rr24h_snapshot", () => _cronSnapshotArsoRr24h(env));
+        let snap = null;
+        try { snap = await env.COUNTER_KV?.get("arso_rr24h:" + _ljDatum()); } catch (_) {}
+        if (snap) await _cronBeat(env, "dispatch_precip", () => _cronDispatchGithubWorkflow(env, "precip-map.yml", { force: "false" }));
+      })());
       return;
     }
     if (event.cron === "10,40 4-5 * * *") {

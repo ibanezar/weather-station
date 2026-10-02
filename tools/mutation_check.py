@@ -61,7 +61,7 @@ MUTACIJE = [
     ("vrata: konec okna (nevihtna)", "tools/storm_map_gate.py", "WINDOW_END = 8 ", "WINDOW_END = 9 ", "test_gates.py"),
     ("vrata: pozni tek odstranjen (nevihtna)", "tools/storm_map_gate.py", "if WINDOW_END <= now.hour < LATE_END:", "if False:", "test_gates.py"),
     ("vrata: pozni tek brez zgornje meje (padavinska)", "tools/precip_map_gate.py", "LATE_END = 20", "LATE_END = 24", "test_gates.py"),
-    ("vrata: začetek okna (padavinska)", "tools/precip_map_gate.py", "WINDOW_START = 6 ", "WINDOW_START = 5 ", "test_gates.py"),
+    ("vrata: okno pred meritvijo ARSO (padavinska)", "tools/precip_map_gate.py", "WINDOW_START = 7 ", "WINDOW_START = 6 ", "test_gates.py"),
     # ── zastareli vhodi (test_stale_inputs.py) ────────────────────────────────
     ("zastareli vhod: zgodba po lead", "tools/generate_story_card.py", 'if d.get("date") == tomorrow_iso), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
     ("zastareli vhod: članek po lead", "tools/generate_daily_post.py", 'if d.get("date") == tomorrow), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),

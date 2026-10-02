@@ -24,10 +24,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, "tools", ".precip_map_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
-WINDOW_START = 6   # karta naj bo nova do 7:00 zjutraj (isti rok kot nevihtna
-                   # karta) -- začne se uro prej, da cron z le nekaj minut
-                   # zamude ni izločen po nepotrebnem.
-WINDOW_END = 8     # varovalka za manjšo (do ~1h) zamudo GitHubovega crona.
+# Okno je PO jutranji meritvi ARSO, ne pred njo (2. 10. 2026): 24-urna vsota
+# (rr24h_val) je samo v meritvi ob 06:00 UTC (8:00 poleti, 7:00 pozimi), zato je
+# okno 6:00-8:00, prepisano od nevihtne karte, vsak tek obsodilo na »ni nobene
+# postaje z rr24h_val«. Karto zdaj sproži worker takoj za jutranjim posnetkom
+# (cron 30 6-7 UTC, _cronSnapshotArsoRr24h → dispatch precip-map.yml).
+WINDOW_START = 7   # pozimi je posnetek ob 7:30 po naši uri
+WINDOW_END = 11    # varovalka za zamudo dispatcha / drugi termin posnetka
 
 # Pozni tek (1. 10. 2026): od 31. 8. (nevihtna) oz. 11. 9. (padavinska) ni bilo
 # nobene nove karte, ker GitHubov cron zdaj zamuja 5-7 ur (cron 05:00 UTC steče
