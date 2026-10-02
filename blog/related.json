@@ -1,8 +1,13 @@
 {
+  "lenartovo-pregovor-vreme-do-bozica": [
+    "lenartov-sejem-vreme-nedelja-1004",
+    "vremensko-leto-2025-2026",
+    "temperaturni-trend-ireica1-2020-2025"
+  ],
   "vremensko-leto-2025-2026": [
     "vremenski-povzetek-september-2026",
-    "temperaturni-trend-ireica1-2020-2025",
-    "vremenski-povzetek-julij-2026"
+    "vremenski-povzetek-julij-2026",
+    "vremenski-povzetek-avgust-2026"
   ],
   "test-napovedi-2026-09": [
     "test-napovedi-2026-07",
@@ -517,7 +522,7 @@
   "najbolj-suha-pomlad-2026-ireica1": [
     "polletni-pregled-2026-ireica1",
     "vremenski-povzetek-maj-2026",
-    "temperaturni-trend-ireica1-2020-2025"
+    "velika-pozarna-ogrozenost-8-julij-2026"
   ],
   "polletni-pregled-2026-ireica1": [
     "najbolj-suha-pomlad-2026-ireica1",
