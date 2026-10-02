@@ -75,6 +75,8 @@ nespremenjena od objave (najdeno pri GEO pregledu, popravljeno 2. 9. 2026).
   **Od 2. 10. 2026 IZKLOPLJENO** (Filipova odločitev, API ključ nima
   dobroimetja): vsi trije posli v `daily-post.yml` imajo `if: false && (...)`,
   zato ni ne predlogov ne članka. Ne vklapljaj sam; za vklop odstrani `false && `.
+  Iz istega razloga je izklopljen `makro-daily.yml` (makro objave, osnutek piše
+  Claude): `if: ${{ false }}` na poslu `publish`.
 
 ### `<title>` ne sme čez 60 znakov
 
