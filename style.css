@@ -148,7 +148,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 /* Layout */
 .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.25rem 5rem;position:relative;z-index:1}
-header{text-align:center;padding:2.5rem 0 2rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
+header{text-align:center;padding:2.5rem 0 1rem;text-shadow:0 2px 18px rgba(0,0,0,.7)}
 /* Svetla tema: temna senca okoli temnega besedila naredi packo — svetlo obsevanje ga namesto tega dvigne od ozadja */
 [data-theme="light"] header{text-shadow:0 1px 10px rgba(255,255,255,.75)}
 [data-theme="light"] .status{text-shadow:0 1px 8px rgba(255,255,255,.7)}
@@ -178,7 +178,7 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
    drsenja ni bilo, tako da sta bila »Blog« in »Šola« (pri 360 px tudi
    »Trendi« in »Igre«) nedosegljiva. Prelom v dve vrstici je manjše zlo od
    nedosegljivih povezav; drsni trak (overflow-x:auto) bi odrezal spustni
-   meni »Igre«, ker je ta absolutno pozicioniran znotraj vrstice. */
+   »Meni«, ker je ta absolutno pozicioniran znotraj vrstice. */
 @media (max-width:520px){
   .quick-nav{gap:.4rem}
   .quick-nav a{padding:.45rem .7rem;font-size:.74rem}
@@ -190,11 +190,10 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
   .quick-nav a.qn-feat .qn-ico{display:inline}
 }
 
-/* Igre — <details> namesto dveh ločenih kapsul (Termika + Prehiti model),
-   da se .quick-nav ne razlomi na ozkih zaslonih. Native <details>/<summary>:
-   deluje brez JS, tipkovnica in bralnik zaslona ga poznata sama od sebe,
-   zato tu ni ponovljena logika "zapri ob kliku zunaj", ki jo ima app.js za
-   druge widgete. */
+/* Meni — <details> z vsemi povezavami razen treh izdelkov ob logu
+   (MeteoGobar, Črnivec, MeteoZima). Native <details>/<summary>: deluje brez
+   JS, tipkovnica in bralnik zaslona ga poznata sama od sebe; zapiranje ob
+   kliku zunaj/Esc doda majhna inline skripta za <nav> v index.html. */
 .qn-drop{position:relative}
 .qn-drop summary{display:inline-flex;align-items:center;justify-content:center;gap:.38rem;font-size:.8rem;font-weight:600;color:var(--blue);padding:.4rem .9rem;border-radius:999px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);transition:border-color .18s,color .18s,background .18s,transform .15s;white-space:nowrap;cursor:pointer;list-style:none}
 .qn-drop summary::-webkit-details-marker{display:none}
@@ -202,18 +201,71 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .qn-drop summary::after{content:"";width:.4em;height:.4em;margin-left:.15rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .18s}
 .qn-drop[open] summary::after{transform:rotate(-135deg) translateY(2px)}
 .qn-drop[open] summary{border-color:var(--card-border-h);color:var(--cyan)}
-/* Desno poravnano, ne sredinsko: `.qn-drop` je zadnja kapsula pred »Šola«
-   in blizu desnega roba vrstice, ki je na ozkih zaslonih širša od zaslona
-   (glej opombo o segmentiranem traku zgoraj) — sredinjena menijska plošča bi
-   segla čez desni rob in se odrezala ob `body{overflow-x:hidden}`. */
-.qn-drop-menu{position:absolute;top:calc(100% + .4rem);right:0;z-index:20;display:flex;flex-direction:column;gap:.3rem;min-width:11rem;padding:.4rem;border-radius:14px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
+/* Levo poravnano, ne sredinsko: `.qn-drop` je prva kapsula v vrstici in na
+   telefonu ob levem robu — sredinjena plošča bi segla čez rob in se odrezala
+   ob `body{overflow-x:hidden}`. */
+.qn-drop-menu{position:absolute;top:calc(100% + .4rem);left:0;z-index:20;display:flex;flex-direction:column;gap:.3rem;min-width:11rem;padding:.4rem;border-radius:14px;border:1px solid var(--card-border);background:var(--card-bg);box-shadow:var(--card-shadow);backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
 .qn-drop-menu a{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:600;color:var(--blue);text-decoration:none;padding:.5rem .7rem;border-radius:9px;white-space:nowrap}
 .qn-drop-menu a:hover{background:rgba(34,211,238,.1);color:var(--cyan)}
+/* Postavke v meniju so potomke .quick-nav, zato bi sicer podedovale obliko
+   kapsule (obroba, podlaga, senca, sredinska poravnava). */
+.quick-nav .qn-drop-menu a{justify-content:flex-start;border:0;background:none;box-shadow:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;padding:.5rem .7rem;font-size:.82rem;transform:none}
+.quick-nav .qn-drop-menu a:hover{background:rgba(34,211,238,.1);color:var(--cyan);transform:none}
+/* Plošča menija leži čez kartice pod glavo — prosojna var(--card-bg) je
+   pustila besedilo pod njo brati skozi postavke, zato je neprosojna. */
+.qn-drop-menu{background:#0c1120}
+/* Kartice pod glavo (preklop pogleda, vprašanje ob prvem obisku) imajo
+   backdrop-filter in s tem svoj sloj, ki bi se izrisal čez odprt meni. */
+header{position:relative;z-index:30}
+/* Odprt meni mora še nad .tab-nav-wrap (z-index 100): ko kartice preklopa
+   pogleda ni, vrstica zavihkov stoji tik pod glavo in je prekrila spodnji del
+   plošče. Samo med odprtim menijem — sicer bi glava na nizkem telefonu
+   prekrila visoka menija zavihkov (Kraji, Podatki), ki segata do vrha. */
+header:has(.qn-drop[open]){z-index:110}
+[data-theme="light"] .qn-drop-menu{background:#fff}
+.qn-drop-sep{height:1px;margin:.1rem .5rem;background:var(--card-border)}
+.qn-drop summary .qn-burger{font-size:.9rem;line-height:1}
+.quick-nav .qn-logo{width:20px;height:20px;flex:none;display:block}
 @media (max-width:520px){
-  .qn-drop summary{padding:.45rem .7rem;font-size:.74rem}
-  .qn-drop summary .qn-ico{display:none}
-  .qn-drop-menu a .qn-ico{display:inline}
+  .qn-drop summary{padding:.45rem .6rem;font-size:.74rem;gap:.3rem}
+  .quick-nav{gap:.3rem}
+  .quick-nav a{padding:.45rem .6rem}
+  .quick-nav .qn-drop-menu a .qn-ico,.qn-drop summary .qn-burger{display:inline}
 }
+/* Pod 440 px bi zadnja kapsula padla v drugo vrstico. Beseda »Meni« ostane
+   (ljudje, navajeni stare vrstice kapsul, bi goli ☰ spregledali), zato se
+   manjšajo logotipi, pisava in notranji robovi. */
+@media (max-width:440px){
+  /* vrstica sme malo v rob .wrap, da štiri kapsule ostanejo v eni vrsti */
+  .quick-nav{gap:.22rem;margin-left:-.5rem;margin-right:-.5rem}
+  .quick-nav a,.qn-drop summary{padding:.42rem .42rem;font-size:.7rem;gap:.24rem}
+  .qn-drop summary::after{display:none}
+  .quick-nav .qn-logo{width:15px;height:15px}
+}
+@media (max-width:370px){
+  .quick-nav{gap:.18rem;margin-left:-.65rem;margin-right:-.65rem}
+  .quick-nav a,.qn-drop summary{padding:.4rem .34rem;font-size:.66rem;gap:.2rem}
+  .quick-nav .qn-logo{width:13px;height:13px}
+  .qn-drop summary .qn-burger{font-size:.78rem}
+}
+/* Enkraten namig ob uvedbi menija (26. 9. 2026) za obiskovalce, navajene
+   stare vrstice kapsul — initMenuHint() v app.js. Ko datum KONEC_NAMIGA
+   tam poteče, se lahko ta blok, element #menu-hint in funkcija odstranijo. */
+.qn-menu-wrap{position:relative;display:inline-flex}
+.menu-hint{display:none;position:absolute;top:calc(100% + 10px);left:0;z-index:25;background:var(--blue);color:#fff;
+  font-family:'Inter',sans-serif;font-size:.76rem;line-height:1.35;text-align:left;text-shadow:none;
+  padding:.55rem 1.8rem .55rem .8rem;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);
+  width:max-content;max-width:min(78vw,17rem);animation:menuHintPop .35s ease}
+.menu-hint::before{content:'';position:absolute;top:-6px;left:1.1rem;transform:rotate(45deg);width:12px;height:12px;background:var(--blue)}
+.menu-hint.show{display:block}
+.menu-hint-close{position:absolute;top:2px;right:4px;background:none;border:none;color:#fff;opacity:.8;font-size:.9rem;line-height:1;cursor:pointer;padding:.25rem .4rem}
+.menu-hint-close:hover{opacity:1}
+@keyframes menuHintPop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.qn-drop.qn-pulse summary{animation:qnPulse 1.6s ease-in-out 4}
+@keyframes qnPulse{0%,100%{box-shadow:var(--card-shadow)}50%{box-shadow:0 0 0 4px rgba(56,189,248,.45),var(--card-shadow)}}
+@media (prefers-reduced-motion:reduce){.qn-drop.qn-pulse summary,.menu-hint{animation:none}}
+
 .sskj-entry{margin:.45rem auto 0;font-size:.7rem;color:var(--muted);letter-spacing:.01em;max-width:520px;line-height:1.55;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .3s ease}
 .sskj-entry.open{max-height:4rem;opacity:1}
 .sskj-entry .sskj-hw{font-weight:700;letter-spacing:.025em;font-style:normal}
@@ -348,17 +400,15 @@ h1 em{font-style:normal;font-weight:800;color:var(--cyan)}
 .live-timeline .lt-icon{flex-shrink:0}
 .live-timeline .lt-text{flex:1}
 
-/* Dnevno dejstvo — vidna kartica, nova vsebina vsak dan */
-.daily-fact-card{display:flex;align-items:center;gap:.7rem;background:var(--card-bg);
-  border:1px solid rgba(34,211,238,.35);border-radius:14px;padding:.7rem .9rem;
-  margin:0 0 1rem;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
-  animation:alert-in .35s ease}
-.dfc-icon{font-size:1.2rem;flex-shrink:0;line-height:1}
-.dfc-text{flex:1;font-size:.85rem;line-height:1.4;color:var(--text)}
-.dfc-text strong{color:var(--cyan)}
-.dfc-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;
-  padding:0;line-height:1;flex-shrink:0}
-.dfc-close:hover{color:var(--text)}
+/* Dnevno dejstvo — vrstica v junaški kartici pod primerjavo z včeraj
+   (tools/generate_daily_fact.py), oblikovana kot .yesterday-delta. */
+.daily-fact-card{display:flex;align-items:center;gap:.5rem;font-size:.78rem;line-height:1.35;
+  margin-top:.45rem;padding:.6rem .95rem;border-radius:13px;background:var(--fc-bg);
+  border:1px solid var(--fc-border);color:var(--muted)}
+.yesterday-delta:empty+.daily-fact-card{margin-top:.7rem}
+.dfc-icon{font-size:1rem;flex-shrink:0;line-height:1}
+.dfc-text{flex:1}
+.dfc-text strong{color:var(--text);font-weight:600}
 
 /* Teaserja "Rekordi na dosegu" / "Lovec na nevihte" nad heroj — glej index.html */
 .home-teasers{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
@@ -446,6 +496,24 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .hero-briefing p{margin:0;font-size:.83rem;color:var(--text);line-height:1.55}
 @keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @media(prefers-reduced-motion:no-preference){.hero-icon svg,.hero-icon .wx-icon{animation:heroFloat 6s ease-in-out infinite}}
+/* Telefon: .hero-left je bil ozek stolpec ob ikoni, ki je zasedala le vrh — desna
+   tretjina kartice je bila pod temperaturo prazna, vsaka vrstica (včeraj, rekord,
+   MTR) pa se je zato lomila v 2–3 vrstice in imela svojo škatlo. Ikona gre zdaj ob
+   stanje + temperaturo, vse pod njima gre čez vso širino kot en seznam z
+   ločilnimi črtami namesto štirih škatel. .hero-left je display:contents, da
+   njegovi otroci postanejo celice mreže (HTML in WX-DAILY-FACT ostaneta ista). */
+@media(max-width:680px){
+  .hero .hero-top{display:grid;grid-template-columns:1fr auto;gap:0 .6rem;align-items:start;margin-bottom:.9rem}
+  .hero .hero-left{display:contents}
+  .hero .hero-left>*{grid-column:1/-1}
+  .hero .hero-left>.condition-badge,.hero .hero-left>.temp-huge{grid-column:1}
+  .hero .hero-icon{grid-column:2;grid-row:1/3;align-self:center;margin-top:.9rem}
+  .hero .feels{margin-top:.45rem;margin-bottom:.6rem}
+  .hero .yesterday-delta,.hero .daily-fact-card,.hero .dew-line,.hero .mtr-trust-badge a{
+    margin:0;padding:.5rem .1rem;background:none;border:0;border-top:1px solid var(--border);border-radius:0}
+  .hero .yesterday-delta:empty+.daily-fact-card,.hero .mtr-trust-badge{margin-top:0}
+  .hero .dew-line{font-size:.78rem}
+}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
 .fc-slider-wrap{padding:.55rem 0 .65rem;display:flex;flex-direction:column;gap:.32rem}
@@ -1045,6 +1113,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .analog-controls{display:flex;gap:.5rem;align-items:center;margin-bottom:.75rem;flex-wrap:wrap}
 .analog-controls input[type=date]{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:9px;padding:.35rem .55rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;color-scheme:light dark}
 .analog-btn{background:var(--blue);border:none;border-radius:9px;padding:.4rem .8rem;color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+[data-theme="dark"] .analog-btn,[data-theme="dark"] .upc-btn,[data-theme="dark"] .cookie-btn-accept{color:#0b1220}
 .analog-btn:hover{opacity:.88}
 .analog-result{display:flex;flex-direction:column;gap:.5rem}
 .analog-day{padding:.6rem .75rem;border-radius:11px;background:var(--fc-bg);border:1px solid var(--fc-border)}
@@ -1482,7 +1551,16 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
   .tab-nav-wrap.at-end::after{opacity:0}
   .tab-nav-arrow{display:flex;position:absolute;right:.5rem;top:50%;transform:translateY(-50%);z-index:11;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border:none;font-size:1.05rem;line-height:1;padding:0;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(29,78,216,.5);animation:tab-arr 1.3s ease-in-out infinite;transition:opacity .25s}
   .tab-nav-wrap.at-end .tab-nav-arrow,.tab-nav-arrow.hidden{opacity:0;pointer-events:none}
-  .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);bottom:4.5rem;width:260px}
+  /* Nad spodnjo navigacijo, ne pod njo: ta je fixed na korenu (z-index 150),
+     meni pa živi v .wrap (z-index 1), zato ga vedno prekrije — razmik mora
+     vključiti varni rob iPhona, za katerega je spodnja vrstica višja. Dolga
+     menija (Kraji, Podatki, ~500 px) bi brez max-height na nižjem zaslonu
+     segla čez vrh pod trak z opozorili; zato se znotraj sebe pomikata. */
+  .tab-dd-menu{position:fixed;top:auto;left:50%;transform:translateX(-50%);
+    bottom:calc(4.5rem + env(safe-area-inset-bottom));width:260px;
+    max-height:calc(100vh - 4.5rem - env(safe-area-inset-bottom) - var(--ticker-h,0px) - 1.5rem);
+    max-height:calc(100dvh - 4.5rem - env(safe-area-inset-bottom) - var(--ticker-h,0px) - 1.5rem);
+    overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 }
 .tab-btn{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:.4rem;padding:.46rem .85rem;border-radius:999px;border:1px solid var(--border);background:var(--fc-bg);color:var(--muted);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.045em;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .1s;line-height:1.35;opacity:1}
 /* Line-icon set replacing the old emoji-only tab labels (was a branding
@@ -2070,7 +2148,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .photo-subjects{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}
 .photo-subject{display:inline-flex;align-items:center;gap:.25rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:20px;padding:3px 10px;font-size:.76rem;transition:border-color .2s}
 .photo-subject.active{border-color:rgba(74,222,128,.4);color:var(--green)}
-.photo-subject.low{opacity:.45}
+.photo-subject.low{opacity:.62}
 
 /* Elevation profile */
 .elev-chart{margin-top:.85rem;overflow-x:auto}
@@ -3045,7 +3123,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
    skrite in jih ni treba posebej dopisovati sem. Izjema so .wx-static
    odstavki (statično besedilo za iskalnike, vizualno itak skrito). */
 
-.mode-switch-wrap{display:flex;justify-content:center;margin:1.1rem 0 .2rem}
+.mode-switch-wrap{display:flex;justify-content:center;margin:.3rem 0 .2rem}
 .mode-switch{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem;border-radius:999px;
   background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);
   backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%)}
@@ -3064,6 +3142,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mode-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
 /* Vprašanje ob prvem obisku — inline kartica, ne prekriva strani */
+html[data-mode-intro="1"] .mode-intro[hidden]{display:block}
 .mode-intro{position:relative;margin:1rem auto 0;max-width:720px;padding:1.3rem 1.5rem 1.4rem;
   border-radius:18px;background:var(--card-bg);border:1px solid var(--card-border);
   box-shadow:var(--card-shadow);backdrop-filter:blur(18px) saturate(180%);

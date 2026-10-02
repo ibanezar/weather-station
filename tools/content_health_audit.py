@@ -52,6 +52,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
 TODAY = datetime.date.today()
 WORKER = os.environ.get("WORKER_BASE") or "https://weatherireica1.filip-eremita.workers.dev"
+# Cloudflare zavrne privzeti »Python-urllib« User-Agent s 403 (glej tools/test_worker_ua.py).
+WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
 
 THIN_WORDS = 500          # samo za tip "evergreen" — arhivski tipi so kratki po zasnovi
 STALE_DAYS = 240          # samo za tip "evergreen"
@@ -124,7 +126,7 @@ def fetch_views(slugs):
         for i in range(0, len(slugs), 80):
             chunk = slugs[i:i + 80]
             url = f"{WORKER}/views?slugs=" + urllib.parse.quote(",".join(chunk))
-            with urllib.request.urlopen(url, timeout=8) as resp:
+            with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": WORKER_UA}), timeout=8) as resp:
                 data = json.load(resp)
             out.update(data.get("views", {}))
         return out

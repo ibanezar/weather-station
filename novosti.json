@@ -1,6 +1,56 @@
 [
   {
     "type": "rekord-dneva-vrocina",
+    "date": "2026-09-30",
+    "value": 25.0,
+    "prev_value": 22.7,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-09-30",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-09-28",
+    "value": 5.1,
+    "prev_value": 6.2,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-09-28",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-09-26",
+    "value": 3.4,
+    "prev_value": 4.7,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-09-26",
+    "years_covered": 6
+  },
+  {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-09-25",
+    "value": 4.1,
+    "prev_value": 6.8,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-09-25",
+    "years_covered": 6
+  },
+  {
+    "type": "susa",
+    "date": "2026-09-18",
+    "end_date": "2026-09-24",
+    "value": 7.0,
+    "param": "precipTotal",
+    "label": "Sušno obdobje (7 dni)",
+    "slug": "susa-2026-09-18",
+    "duration": 7
+  },
+  {
+    "type": "rekord-dneva-vrocina",
     "date": "2026-09-16",
     "value": 28.0,
     "prev_value": 27.0,

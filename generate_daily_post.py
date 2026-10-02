@@ -70,11 +70,18 @@ def fetch_json(url, timeout=15):
 
 
 def fetch_current():
+    """Trenutne razmere postaje, brez meritev iz hiše (CLAUDE.md, prvi razdelek):
+    celoten odgovor bi šel v model, ta pa bi o notranji temperaturi pisal. Worker
+    blok reže pri viru; tu ga režemo še enkrat. Glej tools/generate_daily_post.py
+    (dejanski generator) in tools/test_privacy.py."""
     try:
-        return fetch_json(PROXY + "/ecowitt-current")
+        current = fetch_json(PROXY + "/ecowitt-current")
     except Exception as e:
         print(f"⚠ /ecowitt-current ni uspel: {e}")
         return None
+    if isinstance(current, dict) and isinstance(current.get("data"), dict):
+        current["data"].pop("indoor", None)
+    return current
 
 
 def fetch_hourly():

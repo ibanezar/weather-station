@@ -91,7 +91,7 @@
 
 /* ── Kratka predstavitev arhiva (intro blok) ── */
 .archive-intro{color:var(--muted);font-size:.97rem;margin-bottom:1.6rem;line-height:1.7}
-.archive-intro a{color:var(--cyan);text-decoration:none}
+.archive-intro a{color:var(--cyan);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
 .archive-intro a:hover{text-decoration:underline}
 
 /* ── Vsi-časi povzetek (za arhivno stran) ── */
@@ -176,6 +176,9 @@
    razredu razlezla čez zaslon na ozkih napravah. V tem komentarju se ta dva
    znaka torej ne smeta znajti enega tik ob drugem. */
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.9rem 0}
+/* Samodejni ovoj širokih tabel (wrap_wide_tables v seo_smart_routine.py) — brez robov, da se ožje tabele ne premaknejo. */
+.tbl-x{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.tbl-x:focus-visible,.table-scroll:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .data-table{border-collapse:collapse;width:100%;font-size:.87rem;min-width:32rem}
 .data-table th,.data-table td{padding:.5rem .7rem;text-align:right;
   border-bottom:1px solid var(--border);white-space:nowrap}

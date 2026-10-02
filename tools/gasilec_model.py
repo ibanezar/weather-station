@@ -115,7 +115,9 @@ def calc_one_day_fwi(prev, T, H, W, r, month_idx):
     isi = 0.208 * fW * fF
 
     # BUI (buildup index)
-    if dmc <= 0.4 * dc:
+    if dmc + 0.4 * dc == 0:
+        bui = 0.0  # DMC = DC = 0 (mraz po močnem dežju): brez tega deljenje z 0
+    elif dmc <= 0.4 * dc:
         bui = 0.8 * dmc * dc / (dmc + 0.4 * dc)
     else:
         bui = dmc - (1 - 0.8 * dc / (dmc + 0.4 * dc)) * (0.92 + (0.0114 * dmc) ** 1.7)

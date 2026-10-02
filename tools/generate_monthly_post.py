@@ -32,6 +32,13 @@ PLACE_SAMEAS = {
     "Rečica ob Savinji": ["https://www.wikidata.org/wiki/Q969326",
                           "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],
     "Zgornja Savinjska dolina": ["https://sl.wikipedia.org/wiki/Zgornja_Savinjska_dolina"],
+    # Preverjeno na Wikidati 25. 9. 2026 (Q8079815, sitelinks slwiki/enwiki).
+    "Črnivec (prelaz)": ["https://www.wikidata.org/wiki/Q8079815",
+                         "https://sl.wikipedia.org/wiki/%C4%8Crnivec_(prelaz)",
+                         "https://en.wikipedia.org/wiki/%C4%8Crnivec_Pass"],
+    # Preverjeno na Wikidati 26. 9. 2026 (Q12794904, sitelinka slwiki/plwiki).
+    "Lipa (prelaz)": ["https://www.wikidata.org/wiki/Q12794904",
+                      "https://sl.wikipedia.org/wiki/Lipa_(preval)"],
 }
 RECICA_SAMEAS_JSON = json.dumps(PLACE_SAMEAS["Rečica ob Savinji"], ensure_ascii=False)
 VALLEY_SAMEAS_JSON = json.dumps(PLACE_SAMEAS["Zgornja Savinjska dolina"], ensure_ascii=False)
@@ -533,8 +540,14 @@ def _post_url(p):
 
 
 def render_topics_html(post, freq):
-    """Povezave na tematske strani -- samo tagi, ki stran dejansko imajo (>=2 objavi)."""
-    linkable = [t for t in post.get("tags", []) if freq.get(str(t).lower(), 0) >= 2]
+    """Povezave na tematske strani -- samo tagi, ki stran dejansko imajo
+    (freq je po slugu, prag isti kot v build_tag_pages)."""
+    linkable, seen = [], set()
+    for t in post.get("tags", []):
+        sl = tagslug(str(t).lower())
+        if sl and sl not in seen and freq.get(sl, 0) >= TAG_MIN_POSTS:
+            linkable.append(t)
+            seen.add(sl)
     if not linkable:
         return ""
     links = "".join(
@@ -623,11 +636,14 @@ def inject_related_links(posts, quiet=False):
         return 0
 
     by_slug = {p["slug"].lower(): p for p in posts}
+    # Štetje po SLUGU in isti prag kot build_tag_pages() — prej po surovem tagu in
+    # pri >= 2, strani teme pa nastanejo pri TAG_MIN_POSTS (3): povezave na
+    # /blog/tema/<x>/ so vodile v 404 (check_links.py, 1. 10. 2026).
     freq = {}
     for p in posts:
-        for t in p.get("tags", []):
-            t = str(t).lower()
-            freq[t] = freq.get(t, 0) + 1
+        for slug_t in {tagslug(str(t).lower()) for t in p.get("tags", [])}:
+            if slug_t:
+                freq[slug_t] = freq.get(slug_t, 0) + 1
 
     datalinks_block = render_datalinks_html()
 

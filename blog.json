@@ -1,5 +1,112 @@
 [
   {
+    "title": "Vremensko leto 2025/26 v Rečici ob Savinji v številkah",
+    "slug": "vremensko-leto-2025-2026",
+    "url": "/blog/vremensko-leto-2025-2026.html",
+    "date": "2026-10-01",
+    "summary": "Vremensko leto 2025/26 v Rečici ob Savinji: 11,3 °C, 1068 mm padavin, 53 vročih dni in 99 dni z zmrzaljo. Meritve postaje IREICA1.",
+    "tags": [
+      "letni-pregled",
+      "klima",
+      "2026"
+    ]
+  },
+  {
+    "title": "Test napovedi: september 2026 — zmagal ICON",
+    "slug": "test-napovedi-2026-09",
+    "url": "/blog/test-napovedi-2026-09.html",
+    "date": "2026-10-01",
+    "summary": "Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino v septembru 2026: primerjava ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.",
+    "tags": [
+      "test-napovedi",
+      "mesecni-pregled",
+      "2026"
+    ]
+  },
+  {
+    "title": "Vremenski povzetek — september 2026",
+    "slug": "vremenski-povzetek-september-2026",
+    "url": "/blog/vremenski-povzetek-september-2026.html",
+    "date": "2026-10-01",
+    "summary": "Povprečno 15,8 °C (0,0 °C pod dolgoletnim povprečjem) in 152,2 mm padavin.",
+    "tags": [
+      "povzetek",
+      "september",
+      "2026"
+    ]
+  },
+  {
+    "title": "Oktober 2026 v Rečici: kaj kažejo podatki postaje",
+    "slug": "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001",
+    "url": "/blog/oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001.html",
+    "date": "2026-10-01",
+    "summary": "Kaj lahko v oktobru pričakujemo v Rečici ob Savinji? Šest oktobrov postaje IREICA1: temperature, padavine, prva slana in napoved za prve tri dni.",
+    "tags": [
+      "napoved",
+      "oktober",
+      "analiza",
+      "IREICA1",
+      "Savinja",
+      "2026"
+    ]
+  },
+  {
+    "date": "2026-09-29",
+    "slug": "lenartov-sejem-vreme-nedelja-1004",
+    "title": "Vreme na Lenartov sejem: nedelja, 4. oktobra",
+    "summary": "Nedelja, 4. oktobra, v Rečici ob Savinji: suho in sončno, do 22 °C popoldne, jutro hladno. Ura za uro, kaj obleči in kako zanesljiva je napoved.",
+    "tags": [
+      "napoved",
+      "Rečica ob Savinji",
+      "Zgornja Savinjska dolina"
+    ],
+    "url": "/blog/lenartov-sejem-vreme-nedelja-1004.html",
+    "updated": "2026-09-30"
+  },
+  {
+    "date": "2026-09-25",
+    "slug": "indijansko-poletje-suh-soncen-teden-0925",
+    "summary": "Od sobote do vsaj četrtka suho in sončno, popoldne okoli 20 °C, jutra hladna. Kaj je indijansko poletje, kaj kažejo ARSO, Open-Meteo in MTR ter kdaj se bo verjetno končalo.",
+    "tags": [
+      "napoved",
+      "razlaga",
+      "inverzija",
+      "MTR",
+      "Zgornja Savinjska dolina"
+    ],
+    "title": "Indijansko poletje: pred nami suh in sončen teden",
+    "url": "/blog/indijansko-poletje-suh-soncen-teden-0925.html"
+  },
+  {
+    "title": "Kelvin-Helmholtzovi valovi nad Črnivcem ob zori",
+    "slug": "kelvin-helmholtzovi-valovi-nad-crnivcem-0924",
+    "url": "/blog/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.html",
+    "date": "2026-09-24",
+    "summary": "Ob zori 24. septembra so se nad Črnivcem pokazali redki oblaki v obliki lomečih se morskih valov. Zakaj nastanejo in kaj je tisto jutro pihalo na 2 do 4 km višine.",
+    "tags": [
+      "oblaki",
+      "razlaga",
+      "veter",
+      "inverzija",
+      "Zgornja Savinjska dolina"
+    ]
+  },
+  {
+    "title": "2,1 °C zjutraj: najhladnejše jutro letošnje jeseni v Rečici ob Savinji — kdaj bo prva slana?",
+    "slug": "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
+    "url": "/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html",
+    "date": "2026-09-23",
+    "summary": "Postaja IREICA1 je zjutraj izmerila 2,1 °C — najhladnejše jutro letošnje jeseni, skoraj 7 °C pod normalo. Zakaj je bilo tako mrzlo in kdaj lahko pričakujemo prvo pravo slano.",
+    "tags": [
+      "analiza",
+      "september",
+      "2026",
+      "mraz",
+      "inverzija",
+      "IREICA1"
+    ]
+  },
+  {
     "title": "Jesenski vrh gob 2026: kaj pravijo številke iz petih let",
     "slug": "jesenski-vrh-gob-2026-savinjska-dolina-0922",
     "url": "/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html",
@@ -23,6 +130,20 @@
       "luna",
       "gobarski indeks",
       "mit ali resnica"
+    ]
+  },
+  {
+    "title": "Invazivke ta teden: 2 opazovanji na novih lokacijah",
+    "slug": "invazivka-tedenski-pregled-20260920",
+    "url": "/blog/invazivka-tedenski-pregled-20260920.html",
+    "date": "2026-09-20",
+    "summary": "Tedenski pregled invazivnih vrst v Zgornji Savinjski dolini (20. septembra 2026–20. septembra 2026): 2 opazovanji na novih lokacijah — Japonski dresnik in Žlezava nedotika.",
+    "tags": [
+      "invazivke",
+      "tedenski-pregled",
+      "2026",
+      "japonski-dresnik",
+      "zlezava-nedotika"
     ]
   },
   {

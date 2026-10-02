@@ -35,9 +35,9 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -47,7 +47,7 @@ jobs:
           python3 tools/igra_gate.py check \
             ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.gate.outputs.proceed == 'true'
         with:
           node-version: '20'

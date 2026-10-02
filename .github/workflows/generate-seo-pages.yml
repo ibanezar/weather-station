@@ -12,9 +12,9 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -50,4 +50,12 @@ jobs:
                   ekstremno-vreme/ slovar/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi programatske strani $(date -u +%Y-%m-%d) [skip ci]"
-          git push
+          # Ob hkratnem pushu drugega workflowa (npr. takoj po mergu) rebase in ponovi.
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "Push zavrnjen (poskus $i/5) — rebase na origin/main in ponovni poskus …"
+            git pull --rebase origin main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1

@@ -742,8 +742,12 @@ def build_hub_body(data):
         w = p.get("weather") or {}
         weather_txt = (f'{num(w.get("temp_c"), 1)} °C · do {num(w.get("expected_snow_cm_24h"), 1)} cm snega/24h'
                        if w.get("temp_c") is not None else "vreme na tej višini ni na voljo")
+        # Črnivec ima svojo stran s kamero in meritvami DRSI (crnivec.si) --
+        # povezava s huba je tudi notranja povezava za SEO nove domene.
+        name_html = (f'<a href="https://crnivec.si/">{p["name"]} ({p["elevation_m"]} m)</a>'
+                     if p["id"] == "crnivec" else f'{p["name"]} ({p["elevation_m"]} m)')
         pass_rows.append(f'''    <div class="zima-pass-row">
-      <div><div class="zima-pass-name">{p["name"]} ({p["elevation_m"]} m)</div>
+      <div><div class="zima-pass-name">{name_html}</div>
       <div class="zima-pass-meta">{p["connects"]} · {weather_txt}</div></div>
       {pass_status_chip(p)}
     </div>''')
@@ -774,7 +778,7 @@ def build_hub_body(data):
       <div class="ph-count">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></a>
     <a class="phenom-card zima-phenom" href="/zima/prevoznost-prelazov/" style="{card_style("passes", "")}">
       <span class="ph-icon">{icon_html("passes", 30)}</span>Prevoznost prelazov
-      <div class="ph-count">{len(passes)} prelaza</div></a>
+      <div class="ph-count">{prelazi_n(len(passes))}</div></a>
   </div>'''
 
     season = data.get("season") or {}
@@ -1168,17 +1172,25 @@ def build_snowpack_body(data):
 
 # ── /zima/prevoznost-prelazov/ ────────────────────────────────────────────
 
+def prelazi_n(n, spremljan=False):
+    """»2 prelaza«, »3 prelazi«, »5 prelazov« (dvojina/množina)."""
+    oblika = {1: ("prelaz", "spremljan"), 2: ("prelaza", "spremljana"),
+              3: ("prelazi", "spremljani"), 4: ("prelazi", "spremljani")}.get(n % 100 if n % 100 < 5 else 0,
+                                                                            ("prelazov", "spremljanih"))
+    return f"{n} {oblika[1] + ' ' if spremljan else ''}{oblika[0]}"
+
+
 def build_passes_body(data):
     passes = data.get("passes") or []
 
     known = [(p, p["weather"]) for p in passes if (p.get("weather") or {}).get("expected_snow_cm_24h") is not None]
     if known:
         worst_pass, worst_w = max(known, key=lambda pw: pw[1]["expected_snow_cm_24h"])
-        hero_sub = (f'{len(passes)} spremljana prelaza. Največ snega v naslednjih 24 h je pričakovanih na '
+        hero_sub = (f'{prelazi_n(len(passes), True)}. Največ snega v naslednjih 24 h je pričakovanih na '
                     f'{worst_pass["name"]} ({worst_pass["elevation_m"]} m) — do '
                     f'{num(worst_w["expected_snow_cm_24h"], 1)} cm.')
     else:
-        hero_sub = f'{len(passes)} spremljana prelaza — vreme na višini trenutno ni na voljo.'
+        hero_sub = f'{prelazi_n(len(passes), True)} — vreme na višini trenutno ni na voljo.'
 
     rows = []
     for p in passes:
@@ -1189,7 +1201,7 @@ def build_passes_body(data):
             status_txt = f'{p["status"]} (preverjeno {fmt_day(p["status_checked"])})' if p.get("status_checked") else p["status"]
         else:
             status_txt = f'ni ročno preverjeno — glej <a href="{p["source"]}">vir</a>'
-        joke_link = (' · <a href="/crnivec/">(neuradna varianta: kako je čez Črnivec?)</a>'
+        joke_link = (' · <a href="https://crnivec.si/">(neuradna varianta: kako je čez Črnivec?)</a>'
                       if p["id"] == "crnivec" else "")
         rows.append(
             f'      <tr><th>{p["name"]} ({p["elevation_m"]} m)</th>'

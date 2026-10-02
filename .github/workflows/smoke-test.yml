@@ -1,0 +1,73 @@
+name: Dimni test javne strani
+
+# Zelena objava na Pages ne pove, ali stran deluje (prazna stran, pokvarjen JSON-LD,
+# napačen canonical, manjkajoča OG slika). tools/smoke_test.py preveri ključne strani
+# (CORE iz seo_audit.py) in crnivec.si na ŽIVI strani; ob napaki odpre issue z oznako
+# `smoke-fail`, ko je vse v redu, ga zapre. Teče po vsaki objavi Pages in enkrat dnevno.
+
+on:
+  workflow_run:
+    workflows: ["pages-build-deployment"]
+    types: [completed]
+  schedule:
+    - cron: '25 8 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: smoke-test
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      # Pages po koncu builda potrebuje še trenutek, da CDN postreže novo različico.
+      - name: Počakaj na CDN
+        if: github.event_name == 'workflow_run'
+        run: sleep 60
+
+      - name: Dimni test
+        id: smoke
+        run: python3 tools/smoke_test.py --report smoke-report.md
+
+      - name: Pripravi oznako
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "smoke-fail" --repo ${{ github.repository }} \
+            --color "DC2626" --description "Javna stran ne prestane dimnega testa" --force
+
+      - name: Odpri ali posodobi opozorilo
+        if: steps.smoke.outputs.fail != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          N="${{ steps.smoke.outputs.fail }}"
+          OPEN=$(gh issue list --repo ${{ github.repository }} --label smoke-fail --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -z "$OPEN" ]; then
+            gh issue create --repo ${{ github.repository }} --label smoke-fail \
+              --title "Dimni test: ${N} napak na javni strani" --body-file smoke-report.md
+          else
+            # Brez komentarja ob vsakem teku (teče po vsaki objavi) — samo osveži opis.
+            gh issue edit "$OPEN" --repo ${{ github.repository }} \
+              --title "Dimni test: ${N} napak na javni strani" --body-file smoke-report.md
+          fi
+
+      - name: Zapri opozorilo, ko je vse v redu
+        if: steps.smoke.outputs.fail == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for NUM in $(gh issue list --repo ${{ github.repository }} --label smoke-fail --state open --json number --jq '.[].number'); do
+            gh issue close "$NUM" --repo ${{ github.repository }} --comment "Dimni test spet uspešen."
+          done

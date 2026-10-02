@@ -17,7 +17,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Vbrizgaj trenutno meritev v index.html in pristajalno stran
         run: python3 tools/inject_current_weather.py --live

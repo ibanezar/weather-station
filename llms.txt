@@ -16,9 +16,14 @@
 - [Termika — igra](https://meteorec.si/igra/): igra jadralnega padalca z Golt po Zgornji Savinjski dolini. Nivo se vsak dan sestavi iz dejanske napovedi (strop termike, baza oblakov, moč dvigov, veter po višini), zato je isti za vse igralce tistega dne. Ni pripomoček za odločanje o letenju — za to je [Vreme za padalce](https://meteorec.si/vreme-za-padalce/).
 - [Prehiti model — igra](https://meteorec.si/napovej/): vsak dan napoveš jutrišnjo najvišjo in najnižjo temperaturo za Rečico ob Savinji in tekmuješ proti ARSO, Open-Meteo, MTR in ECMWF AIFS. Oceni te dejanska meritev postaje IREICA1, po istem pravilu kot modele na strani [Točnost napovedi](https://meteorec.si/tocnost-napovedi/). Ni napoved in ni pripomoček za odločanje.
 
+## Črnivec (prelaz, 902 m)
+
+- [Kako je čez Črnivec? — crnivec.si](https://crnivec.si/): stanje na prelazu Črnivec med Kamnikom in Gornjim Gradom (cesta R1-225). Spletna kamera DRSI, temperatura, vlaga in veter z bližnje cestne vremenske postaje DRSI, ocena vozišča (poledica, sneg) in vreme po urah, preračunano na 902 m in umerjeno z meritvami. Ločena domena istega avtorja; ni uradna informacija o stanju ceste.
+
 ## Podnebje in arhiv (2019–danes)
 
 - [Podnebje](https://meteorec.si/klima/): mesečne norme, letne vsote, rekordi za Rečico ob Savinji.
+- [Ta čas v dolini](https://meteorec.si/sezona/): sezonski vodič — kdaj je v Rečici ob Savinji običajno prva jesenska oz. zadnja spomladanska zmrzal, koliko vročih dni ali dni z zmrzaljo ima letni čas (meritve postaje IREICA1), letošnje stanje in katere napovedi so ta čas pomembne.
 - [Padavine](https://meteorec.si/padavine/), [Temperatura](https://meteorec.si/temperatura/): klimatološki povzetki po meritvah postaje IREICA1.
 - [Ta teden](https://meteorec.si/teden/): tedenski vremenski povzetek, samodejno osvežen vsak ponedeljek.
 - [Rekordi](https://meteorec.si/rekord/), [Vremenski dogodki](https://meteorec.si/novosti/): novi absolutni rekordi, toplotni valovi, sušna obdobja.

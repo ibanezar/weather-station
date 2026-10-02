@@ -21,6 +21,15 @@ Zgodilo se je 30. 7. 2026: dnevni članek je objavil notranjo temperaturo in
 občuteno temperaturo v hiši, ker je surov Ecowitt odgovor romal naravnost v
 model. Odstavek je odstranjen, obe zarezi sta postavljeni.
 
+**To preverja stroj** (od 1. 10. 2026): `python3 tools/test_privacy.py`, workflow
+`privacy.yml`. Test požene pravi `worker.js` z lažnim Ecowittom in Varpoljem, ki
+vrneta blok `indoor`, in preveri, da ga ne vrne nobena javna točka; da ga režejo
+Python odjemalci (`fetch_current()`); da noben **nov** odjemalec `/ecowitt-current`
+ni dodan brez zareze (seznam `KNOWN_CLIENTS` v testu); in da javne datoteke ne
+omenjajo `indoor`. Ko dodaš nov vir ali odjemalca, ga dodaj v test. Prvi zagon je
+našel, da korenska kopija `generate_daily_post.py` (ne teče v nobenem workflowu)
+bloka ni rezala; zdaj ga.
+
 ## Lektura je OBVEZNA za vsak članek
 
 Vsak blog članek — ne glede na to, ali ga generira avtomatika ali je napisan
@@ -260,6 +269,41 @@ ni).
   `generate_storm_map.py` zato karto poravna na vrh in prazen prostor pod njo
   (če ga je dovolj) zapolni s seznamom potenciala po mestih namesto praznine.
 
+### Preverjanje karte proti dejanskim strelam (1. 10. 2026)
+
+Karta je do zdaj trdila oceno, ne da bi kdo izmeril, ali drži. Zdaj jo vsak dan
+po polnoči preveri `tools/verify_storm_map.py` (`storm-verify.yml`, 01:20 UTC):
+
+- `generate_storm_map.py` poleg slik zapiše **trajen** arhiv ocene po mrežnih
+  točkah, `data/storm-map-forecasts/<datum>.json` (slike se po 14 dneh pobrišejo,
+  arhiv ne).
+- Worker vrne strele okna po celicah iste mreže:
+  `/strele-zgodovina.json?celice=1&od=<ms>&do=<ms>` (`LightningLogger.cells()`,
+  SQL v `LTG_CELLS_SQL`; okno največ 36 h, surove strele se hranijo 14 dni).
+- **Okno je od izdaje karte do polnoči**, ne ves dan: ocena je »najvišja od zdaj do
+  konca dneva«, zato karta, ki je zaradi zamude crona nastala ob 13:00, ni kaznovana
+  za jutranjo nevihto.
+- **Prazen zapis ni »ni strel«.** `keepAlive()` vsakih 5 minut zabeleži, da je bila
+  povezava živa (tabela `uptime`); dan z < 90 % pokritosti (ali pred začetkom
+  zapisa pokritosti) se označi `skipped` z razlogom in se ne šteje.
+- Točka je »zadeta«, če je v njeni celici (≈ 20 × 17 km) vsaj ena strela.
+  Rezultat (po stopnjah ocene + dnevna raven) gre med markerja `WX-STORMVERIF` na
+  `/nevihte/`; `nevihte-forecast.yml` ga po vsakem generiranju strani vgradi nazaj
+  (`verify_storm_map.py inject`). Do `MIN_STORM_DAYS` (10) dni s strelami nad
+  Slovenijo stran pove, da je rezultat zgoden — čez zimo bo to trajalo.
+- Teste (`tools/test_storm_verify.py`, v `parity.yml`) poganjajo okno, pokritost,
+  kontingenčne tabele in **isti SQL nad sqlite3** kot v Pythonu.
+
+**Odkrito ob tem — karte od 31. 8. ni:** `storm-map.yml` teče po GitHubovem
+urniku šele 11:00–12:00 UTC (= 13:00–14:00 po naši uri), gate pa spusti samo
+6:00–8:00, zato vsak dan »uspe« brez dela; zadnja karta je `2026-08-31`. Varovalka v
+workerju (`_cronDispatchScheduledWorkflows`) ne naredi nič: `workflow_dispatch` ni
+bilo od 31. 8. niti enega, torej **secret `GH_DISPATCH_TOKEN` ni nastavljen**
+(`wrangler secret put GH_DISPATCH_TOKEN`, fine-grained PAT, Actions: read & write).
+Hkrati so bili njeni termini napačni (6:10–7:40 **UTC** je 7:10–9:40 po naši uri,
+poleti vsi zunaj okna) — popravljeno na 4:10/4:40/5:10/5:40 UTC. Brez žetona se
+ne bo spremenilo nič: preverjanje dobi napoved šele, ko karta nastane v svojem oknu.
+
 ## Stalno beleženje strel (LightningLogger)
 
 Kartica "Strele v bližini" (`#ltg-list`, `app.js` `connectLightning()`) se poveže
@@ -293,10 +337,25 @@ Za trajen zapis skrbi **`LightningLogger`**, Durable Object v `worker.js`:
   rezerve). Ob prekoračitvi na brezplačnem planu klici v ta DO preprosto
   odpovedo (ni doplačila) — ločen meter od običajnih Worker zahtev, torej
   ostala stran ostane nedotaknjena. Podrobnosti in vezava v `wrangler.toml`.
-- Zaenkrat samo zapisuje — na strani (razen surovega JSON endpointa) še ni
-  prikazana zgodovina/statistika. Nova prikazna kartica bi šla v `app.js` po
-  istem vzorcu kot obstoječa (`#ltg-list`), z lastnim poizvedovanjem na zgornji
-  endpoint namesto na klientsko WebSocket povezavo.
+- **Ponovna vzpostavitev ne čaka na cron** (1. 10. 2026): ob prekinitvi `close`/`error` nastavi
+  alarm (`_scheduleReconnect`, 10 s; `alarm()` poskuša znova, dokler se vtičnica ne odpre).
+  **Zombi** (odprta, a brez sporočila > `LTG_STALE_MS` = 3 min; Blitzortung pošilja strele z
+  vsega sveta, tišina pomeni mrtvo povezavo) in zataknjeno odpiranje (> 20 s) se zapreta in
+  zamenjata — prej se je ob `readyState` 0 ustvarila nova vtičnica brez zapiranja stare, ob
+  prekinitvi pa se je izgubilo do 5 min strel. V pokritost (`uptime`) šteje samo **sveža**
+  povezava. **Pokritost piše tok sporočil sam** (`_onMessage`, enkrat na režo), ne le klic
+  crona: petminutni cron tike izpušča (opravila si delijo proračun) in je živo povezavo
+  zapisal kot luknjo — 1. 10. 2026 10 od 13 rež v uri, kar bi nevihtno preverjanje (< 90 %)
+  vsak dan preskočilo. Vsak deploy workerja restartira DO (do 10 s luknje) — več deployev na dan = nižja
+  pokritost tistega dne, nevihtno preverjanje ga pri < 90 % preskoči. Simulacijo poganja
+  `tools/test_lightning_logger.py` (lažen WebSocket, SQLite, alarmi).
+- Prikaz na domači strani (kartica »Strele v bližini«, samo napredni pogled):
+  `fetchLightningHistory()` v `app.js` pokliče `/strele-zgodovina.json?ur=24&dni=14`
+  **enkrat ob nalaganju** in iz istega odgovora nariše stolpčni graf strel po dnevih
+  (`ltgHistoryChart()`, 14 dni, dnevi brez strel prazni; dan je **UTC**, kot ga piše
+  `LightningLogger`) in zemljevid strel zadnjih 24 ur (`renderLightningMap()`).
+  Vrednost in najbližja strela sta v `<title>` stolpca in v `aria-label` grafa.
+  Klientski WebSocket (zadnja ura) in trajni zapis ostajata ločena vira.
 
 ## Junaška kartica: padavine — izmerjeno in napovedano ločeno
 
@@ -451,6 +510,15 @@ odgovarjala le z besedilom »napoved je na naslovni strani«.
 - Rezervni zapis (ob generiranju strani) je iz committanega `napoved-modela.json`,
   ker je to edini napovedni vir v repozitoriju.
 
+### Široke tabele na telefonu se ovijejo same (1. 10. 2026)
+
+Mobilni pregled (`tools/check_mobile_overflow.mjs`) je našel, da se je vsaka mesečna stran
+arhiva (tabela dni, 555 px na 360 px), letne strani, `/klima/`, `/temperatura/`, `/teden/`,
+`/podatki/`, `/vreme-za-padalce/` in `/invazivke/` premikala vstran. Oba `page_shell`
+(`generate_seo_pages.py`, `seo_smart_routine.py`) zdaj vsako tabelo `stats`/`hub-table`
+ovije v `.tbl-x` (`wrap_wide_tables()`, pravilo v `vreme.css` — brez robov, ožje tabele
+ostanejo enake). Nova stran prek teh lupin torej ne more pozabiti ovoja.
+
 ### `.data-table` / `.table-scroll` živita v `vreme/vreme.css`
 
 Razreda sta bila v uporabi na 12 straneh `/vreme/mesec/*/`, definirana pa v nobenem
@@ -485,6 +553,336 @@ Kako je narejeno:
   kamere, normale …), je v `init()` ovito v `runAdvancedOnly()` — v vrsto gre
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
+
+### Ponudba izbire pogleda se pokaže pred prvim izrisom (CLS, 1. 10. 2026)
+
+`#mode-intro` je prej odkril `initModeUI()` v `app.js` po nalaganju — nov obiskovalec
+(ravno tisti, ki ga meri Google) je dobil skok strani za ~380 px, CLS na telefonu 0,285
+(»slabo«). Zdaj inline skripta v `<head>` (ista kot za `wx-mode`) postavi
+`data-mode-intro="1"`, CSS pa ponudbo pokaže že ob prvem izrisu; `hideModeIntro()`
+oznako pobriše. CLS na telefonu: 0,06. **Nov element nad vsebino, ki ga odkrije JS, naj
+dobi isto obravnavo** (odločitev v `<head>` ali rezerviran prostor), ne `hidden=false` po
+nalaganju.
+
+## Črnivec (`/crnivec/`) — izmerjeno s postaje DRSI, vozišče je ocena
+
+Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
+**»Čez Črnivec zdaj«** (temperatura, vozišče, sneg, megla, veter —
+`check_rows()` v `tools/generate_crnivec_page.py`).
+
+- **Na prelazu je prava vremenska postaja DRSI** (Direkcija RS za
+  infrastrukturo, postaja 201; 262 je Gornji Grad). Meri na 10 minut:
+  temperatura, vlaga, rosišče, veter, sunki in dnevne padavine. **Temperature
+  cestišča ne objavlja.** Vir je seznam, ki ga bere javna stran ceste.si/vreme.
+  Ta ni dokumentiran API, zato ga `worker.js` `/crnivec-drsi` bere z robnim
+  predpomnilnikom 5 minut (`cf.cacheTtl`), tako da DRSI dobi največ en klic
+  na 5 minut ne glede na obisk. Navedba vira (DRSI) je obvezna.
+- **Meritev je stara največ 40 minut** (`DRSI_MAX_AGE_MIN`), sicer vrstica
+  pade na model ali reče »ni meritve«. Megla in veter **nimata modelske
+  rezerve**: model je za Rečico na dnu doline, megla ali veter tam pa nista
+  megla ali veter na 902 m.
+- **Vozišče je vedno ocena**: `black_ice_category()` iz `winter_engine.py`
+  (ista formula kot na `/zima/`, uvožena), z izmerjenimi vhodi, kjer so, in
+  padavine zadnjih treh ur (`weather["now"]` iz `compute_pass_weather`).
+- **Indeks poganja izmerjena temperatura** (od 25. 9. 2026), kadar je
+  meritev sveža. Prej je šel iz modela za Rečico z gradientom in je lahko
+  kazal »Cesta je suha«, ko je bilo na prelazu že pod ničlo. Sneg ostaja iz
+  modela, ker ga DRSI ne meri. Na vseh **štirih** mestih velja isto pravilo:
+  - `with_measurement()` + `fetch_drsi_crnivec()` v `tools/crnivec_zones.py`
+    (stran, OG kartica in tema zgodbe `CRNIVEC`);
+  - `uporabiStanje()` v JS strani;
+  - `_drsiCrnivec()` v znački `/crnivec/znacka.svg` v `worker.js`.
+
+  Kjer je temperatura izmerjena, je tako tudi označena (kartica, »Posodobljeno«,
+  OG slika, zgodba). Kadar je kakšna druga vrstica »nevarno«, indeks pa
+  zelen/rumen, se izpiše `check_warn_text()`.
+- **»Naslednjih 6 ur«** (`forecast_hours()`/`forecast_sentence()`, dodano
+  25. 9. 2026) pod statusom kaže ure +1, +3 in +6: temperaturo, padavine in
+  oceno vozišča. Vhodi so `next_hours` iz `compute_pass_weather`. Razlika
+  meritev−model se prenese v napoved in **linearno izzveni v 6 urah**
+  (`NEXT_BIAS_HOURS`), sicer bi temperatura med »zdaj« in »čez uro« skočila.
+  Stavek primerja temperaturo + vozišče zdaj z **najhujšo** uro (prvo, ki
+  doseže najvišjo raven), ne s prvo slabšo — sicer bi omenil »4 °C ob 14:00«
+  in zamolčal sneg ob 18:00. Megle in vetra napoved nima (model je za dno
+  doline). Statični izris je iz jutranjega teka, JS ga ob živi napovedi
+  prepiše.
+- **Model prelaza je umerjen z meritvami DRSI** (`compute_pass_calibration`
+  v `winter_engine.py`, od 25. 9. 2026). Preračun iz doline z gradientom ne
+  vidi nočne inverzije: primerjava z meritvami je pokazala, da je ponoči
+  ~3 °C prehladen, podnevi ~1,5 °C pretopel in je v treh od štirih
+  septembrskih noči napovedal »visoko« nevarnost poledice pri 5–6 °C na
+  prelazu. Vsak dan se iz zadnjih 10 dni (zgodovina DRSI + Open-Meteo
+  `past_days`) izračuna povprečno odstopanje po uri dneva. Zunaj učnega
+  obdobja je napaka padla z 2,1 na 1,0 °C, ponoči z 2,8 na 1,1 °C. Popravek
+  velja za `next_hours`, `temp_cal_c` in poledico v `special`, **ne pa za
+  indeks** (ta ima meritev) in ne za `/zima/`. Ob napaki je `calib` `None` in
+  stran to v opombi pove. Profil prostega ozračja (925/850 hPa) sem preizkusil
+  in je enako slab v nasprotno smer (~3 °C pretopel), zato ga ne uvajaj kot
+  »izboljšavo«.
+- **»Na poti v službo in domov«** (`commute_windows()`, 25. 9. 2026): termina
+  6:00–8:00 in 14:00–16:00 za danes in 3 dni (`COMMUTE_HOURS`/`COMMUTE_DAYS`
+  v `winter_engine.py`, vhodi `commute_hours` po istem vzorcu kot
+  `next_hours`, z umeritvijo DRSI). Termin je povzetek svojih ur: najslabša
+  raven, najnižja temperatura, najslabše vozišče in padavine v terminu (prva
+  ura termina nosi padavine iz ure pred njim, zato se ne šteje). Pretečen
+  termin danes je »že mimo«. JS kopija `izrisiVoznje()`/`povzemiOkno()` teče
+  na istem živem klicu Open-Meteo (`forecast_days=4`). Posamezna ura je v
+  obeh jezikih ena funkcija (`eval_hour()`/`oceniUro()`) za ta pas in za
+  »Naslednjih 6 ur«.
+- **»Vreme na Črnivcu za 7 dni«** (`week_html()`, 25. 9. 2026, ključna beseda
+  »vreme črnivec 7 dni«): `compute_pass_daily()` v `winter_engine.py` (izhod
+  `weather["daily"]`) -- najnižja/najvišja temperatura na 902 m z isto
+  umeritvijo DRSI po uri dneva, padavine, najvišja verjetnost, nov sneg
+  (`snow_fraction`) in najslabša poledica (`black_ice_category_for_hour`).
+  Dan 0 je samo preostanek današnjega dne. **Samo strežniški izris**, brez JS
+  kopije (dnevni povzetek se čez dan malo spremeni). Na telefonu je tabela
+  preurejena v vrstice z oznako nad vrednostjo (CSS, `data-l`).
+- **»Posebne razmere · 48 ur«** (`special_items()`): sneg po dnevih, začetek,
+  meja sneženja in verjetnost padavin, poledica (`compute_black_ice_for_location`
+  z umeritvijo) in megla (regionalni `data["fog"]`: prelaz nad, na robu ±100 m
+  ali pod oceno zgornje meje jutranje megle). Samo strežniški izris iz
+  jutranjega teka, čas izračuna je izpisan. Brez posebnosti je ena vrstica.
+- **»Črnivec proti dolini«** (`valley_compare()`, 25. 9. 2026): meritev DRSI
+  na prelazu proti meritvi DRSI v Gornjem Gradu, obe iz `/crnivec-drsi`.
+  Višini postaj (903 m in 428 m) sta iz DEM, v `DRSI_ELEV_M` v
+  `crnivec_zones.py`. Razlika se primerja s pričakovano za 475 m (−3,1 °C,
+  ±1,5 °C): inverzija, manjša razlika, običajna ali večja. Obe meritvi morata
+  biti sveži (40 min) in narejeni v razmiku največ 30 minut, sicer se kartica
+  skrije. **Primerjava prelaza s preračunanim modelom je prepovedana**: to bi
+  bila konstanta gradienta (−3,5 °C vsak dan), ne podatek.
+- **»V zadnjih 60 minutah«** (25. 9. 2026): sprememba temperature, vlage,
+  vetra in padavine v zadnji uri. Izračuna jo `_drsiTrend()` v `worker.js` iz
+  zgodovine postaje DRSI (`vremenski_podatki`, 10-minutni zapisi) in jo doda
+  v odgovor `/crnivec-drsi` kot `trend`. Konca okna sta zaokrožena na 5
+  minut, da je URL stabilen in ga `cacheTtl` ujame. Padavine upoštevajo
+  polnočno ponastavitev `dailyRainMm`. Besedilo izriše samo JS
+  (`izrisiTrend()`), statične različice ni, ker bi bila vedno stara.
+- **»Zime na Črnivcu«** (`arso_section_html()`, 25. 9. 2026): meritve
+  padavinske postaje **ARSO Črnivec** (id 3391, 848 m, od 2021) po sezonah
+  (1. 7.–30. 6.): največja snežna odeja z datumom, dni z odejo, dni sneženja
+  in skupni novi sneg. Vir je arhiv `meteo.arso.gov.si/webmet/archive/data.xml`
+  (`group=dailyData0`, spremenljivke 85/88/89; ključi točk so minute od
+  1. 1. 1800). Enkrat na dan se ves arhiv prenese v `data/crnivec-arso.json`
+  (predpomnilnik, v `git add` koraku `zima-forecast.yml`). **Arhiv zaostaja
+  3–4 tedne**, zato ni vir za trenutno stanje ali indeks, samo za zgodovino.
+  Padavine so v predpomnilniku za poznejše umerjanje snežnega modela.
+- **»Črnivec pravi …«** (`CRNIVEC_SAYS`, 25. 9. 2026): stavek prelaza v
+  prvi osebi v oblačku pod opisom statusa. Vezan je na stanje: cona indeksa
+  ali »megla«, kadar je megla verjetna in je cona suho/okoli ničle. Izbere se
+  s FNV-1a nad `datum|stanje` (ASCII), ne s sha256, ker mora JS
+  (`izberiRek()`) sinhrono dati isti indeks. To je ločeno od »Meteorec
+  nasveta« (`QUOTES`), ki so šale, neodvisne od vremena.
+- **Hierarhija strani je »odločitev v 5 sekundah«** (26. 9. 2026): na telefonu
+  morajo biti status, gumba **Kamera v živo** in **Uradno stanje ceste**
+  (`PROMET_URL`, promet.si) in začetek seznama »zdaj« v prvem zaslonu — zato
+  je na telefonu glava brez maskote (gora je že v logotipu tik nad njo; dve
+  gori sta delovali zmedeno), h1 pa čez vso širino. Meteorec je
+  vreme, prevoznost/zapore so promet.si; gumb to ločnico pove z besedo.
+  - Posebne razmere gredo **takoj pod status samo, kadar kaj velja**
+    (`sp_alert` v `build_body()`, razred `has-alert` premakne vrstice na
+    namizju); brez posebnosti je ena vrstica in ostane za vožnjami.
+  - Živa zapora ima **pasico nad statusom** (`#crn-zapore-banner`, v
+    `ZAPORE_JS`), a samo ob dejanskem dogodku; brez dogodka ali ob napaki
+    vira ostane skrita. Razdelek »Zapore« z besedilom ostane spodaj (SEO).
+  - Zgornja napisa con na merilniku (»TAK-TAK«, »VZEMI VERIGE«;
+    `gauge_svg()`, samo stranska različica) sta na telefonu ~12 px in stojita
+    pri 120°/60° (razred `crn-gl-top`, na namizju ju pomanjša CSS). Skrajna
+    napisa ob straneh loka ostaneta, kot sta bila — Filipova odločitev
+    27. 9. 2026. Deljena slika (`static=True`) je nespremenjena.
+  - Kartic Temperatura/Snežna odeja ni več: temperatura je v seznamu, snežna
+    odeja pa je dodatek k vrstici »Sneg« (`snowpack_text()` ↔ `SNOWPACK` v
+    JS). Raven vrstice nosi samo nov sneg.
+- `black_ice_category()` omeji rosišče na temperaturo zraka: za višje kraje
+  je rosišče iz doline, temperatura pa preračunana, zato je bilo rosišče
+  lahko nad temperaturo.
+- Pravila so v Pythonu (statični izris) in v JS (`vrsticeSeznama()`,
+  `cestaVrstica()`, `blackIceLive()`, `napovedUr()`, `stavekNapovedi()`,
+  `calibAt()`, `primerjavaDoline()`, `izberiRek()`, `oceniUro()`,
+  `povzemiOkno()`), kar je namerna podvojitev. **Če spremeniš eno, spremeni
+  drugo.**
+- **Stran živi na svoji domeni `crnivec.si`** (od 25. 9. 2026, domena pri
+  Neoservu, DNS na Cloudflare). Filip je izrecno želel ločeno stran z ločeno
+  domeno, ne preusmeritve na `meteorec.si/crnivec/`.
+  - Generator piše `crnivec-site/` (stran + `manifest.json`, ikone,
+    `robots.txt`, `sitemap.xml`). Stran gradi isti `page_shell()`, nato jo
+    `to_crnivec_site()` prestavi: canonical/og:url na `https://crnivec.si/`,
+    korensko-relativne povezave (glava, noga, CSS, pisave) absolutno na
+    `meteorec.si`. Izjeme so v `CRN_LOCAL`. Shema je svoja (`site_schema()`):
+    WebSite crnivec.si, avtor je isti `@id` kot na meteorec.si.
+  - Streže jo worker `crnivec-si` brez kode, samo s statičnimi datotekami
+    (`wrangler-crnivec.toml`, route `crnivec.si/*`). Objavi ga
+    `zima-forecast.yml` takoj po commitu (push z `GITHUB_TOKEN` ne sproži
+    drugih workflowov) in `deploy-crnivec.yml` ob ročni spremembi na `main`.
+    GitHub Pages ima eno domeno na repozitorij (`CNAME`), zato ne Pages.
+  - Živi podatki gredo še naprej na glavni worker; `crnivec.si` je zato v
+    `ALLOWED_ORIGINS` v `worker.js`. Brez tega na strani ne dela nič živega.
+  - `meteorec.si/crnivec/` je samo preusmeritev (`redirect_stub()`: noindex +
+    canonical + takojšnja preusmeritev), isti vzorec kot stare ARSO objave.
+    Pravi 301 da Redirect Rule v coni `meteorec.si`. Stran **ni** v `CORE`
+    v `seo_audit.py` — ne vračaj je tja, ima svoj sitemap na crnivec.si.
+  - `www.crnivec.si` → 301 na `crnivec.si` (Redirect Rule v coni `crnivec.si`).
+  - **Znamka** (logotip, favicon, ikone PWA, FB naslovnica in profilna) je v
+    `crnivec-brand/` (25. 9. 2026). Znak je ista gora kot maskota na strani
+    (`mountain_icon_svg()`), na rdeči podlagi `#dc2626`. SVG-je piše
+    `tools/build_crnivec_brand.py` (besedilo obrisano v poti iz `fonts/`),
+    PNG/ICO pa `tools/render_crnivec_brand.mjs` (Chromium), ki jih tudi
+    skopira v `crnivec-site/`. Oboje je ročno; generator strani samo kopira
+    `BRAND_FILES` iz `crnivec-brand/`. Logotip na domeni je
+    `/logo-crnivec.svg`, **ne** `/logo.svg` — to ime ima Meteorecova glava.
+    Favicon (`favicon.svg`/`.ico`) je poenostavljen znak brez snega in obrisa
+    gore, sicer se pri 16 px zlije.
+  - Povezave z meteorec.si (hitre povezave na naslovni strani, vrstica
+    Črnivec na `/zima/`, `/zima/prevoznost-prelazov/`, blog, `llms.txt`) in
+    besedilo na slikah (OG, zgodba, deljena slika) kažejo na `crnivec.si`.
+  - SEO/GEO (25. 9. 2026, po keyword researchu): `<title>` »Prelaz Črnivec:
+    kamera, vreme in stanje ceste« (»kako je čez črnivec« v Googlu ni
+    poizvedba, kamera/vreme/cesta so), razdelki so `<h2>`, pod dashboardom
+    »O prelazu«, »Zapore« in FAQ (`faq_items()` → vidno besedilo in
+    `FAQPage` iz istega seznama). Prelaz je `Place` s sameAs iz
+    `PLACE_SAMEAS["Črnivec (prelaz)"]` (Wikidata Q8079815).
+  - Na domeni so še `llms.txt`, `404.html` (`not_found_handling`), ključ
+    IndexNow (isti kot za meteorec.si) — vse piše `write_site_files()`.
+    Ping IndexNow pošlje `zima-forecast.yml` po objavi. `geo_audit.py`
+    (`check_crnivec_site()`) preveri canonical, dolžino naslova, FAQPage in
+    da te datoteke obstajajo.
+  - **Žive zapore** (razdelek »Zapore«): `worker.js` `/crnivec-zapore`
+    (`_crnivecZapore()`) bere GeoJSON prometnih dogodkov in del na cesti
+    Prometno-informacijskega centra prek NAP (`b2b.nap.si`, HTTP Basic,
+    secreta `NAP_USER`/`NAP_PASS`, račun in odobritev na nap.si) in obdrži
+    samo R1-225 ali omembe Črnivca. Vir je za vso Slovenijo, zato ga bere
+    največ enkrat na 5 minut (pomnilnik izolata + KV `crnivec_zapore`; Cache
+    API na workers.dev ne deluje). Prikaz je samo JS (`ZAPORE_JS`), ker je
+    zapora stanje. Brez secretov ali ob napaki blok ostane skrit in velja
+    statično besedilo s povezavami — nikoli ne izpiše »ni zapor«, če vira ni
+    prebral.
+
+### Opozorila s prelaza na telefon (Web Push, 27. 9. 2026)
+
+Gumb **»🔔 Opozorila«** je ikona v desnem delu vrhnje vrstice (`.crn-top-r`,
+ob 🎮 igri; na telefonu samo ikona, od 600 px z besedo — 28. 9. 2026 prenova
+glave) (`ALERTS_HTML`/`ALERTS_JS` v `generate_crnivec_page.py`; 27. 9. 2026 Filip:
+takoj na vrhu, a en gumb, ne kartica — prvi zaslon ostane statusu) naroči
+napravo na push obvestila. Kaj sproži obvestilo, povedo `title` gumba,
+sporočilo ob vklopu (`#crn-alerts-status`) in FAQ. Brez podpore v brskalniku
+je gumb skrit, na iPhonu ob kliku pove, da je treba stran dodati na začetni
+zaslon. Pošilja jih `_cronCheckCrnivec()` v `worker.js` (5-minutni cron).
+
+- **Ločen seznam naročnin** `push/crnivec-subs.json` (`CRN_PUSH_KEY`), ne
+  `push/subs.json`. Kdor se naroči na crnivec.si, ne dobi vročine v Rečici in
+  obratno. `_pushAll()` brez četrtega argumenta crnivec.si naročnikov ne
+  doseže — tako mora ostati. Endpointi so isti `/push/subscribe`,
+  `/push/unsubscribe`, `/push/send`, z `site: "crnivec"` v telesu.
+- **Samo izmerjeno, nikoli model**: mraz (DRSI ≤ 0 °C, ponastavi ≥ 1 °C),
+  padavine okoli ničle (dnevna vsota DRSI +0,2 mm pri ≤ 1,5 °C), sunki
+  ≥ 70 km/h in nova zapora PIC na R1-225 (+ »ni več zapor«, ko se končajo vse,
+  o katerih smo obvestili). Pragovi so `CRN_*` v `worker.js`; besedilo na
+  kartici in v FAQ jih navaja — **če spremeniš prag, popravi tudi besedilo**.
+- Obvestilo gre ob **prehodu** v stanje (histereza + 3 h hladilne dobe po
+  vrsti), ne ob vsakem tiku. Prvi tek zapore samo zabeleži (ob uvedbi ni
+  izbruha obvestil o delih, ki trajajo tedne). Napaka vira zapor nikoli ne
+  pošlje »ni zapor«.
+- **Tihi čas 22:00–5:00**: nič se ne pošlje in stanje se ne posodobi; prvi tik
+  novega dne vremenska stanja ponovno oboroži, zato jutranja zmrzal pride ob
+  5:00, tudi če je bila že sinoči.
+- Brez naročnikov cron virov ne kliče.
+- crnivec.si ima **svoj** `sw.js` (`SW_JS`, piše `write_site_files()`): samo
+  push in klik, **brez predpomnjenja** — stran se ne sme zatakniti na stari
+  različici. Na iPhonu push deluje le v nameščeni aplikaciji (Dodaj na
+  začetni zaslon); kartica to pove.
+- Lipa opozoril nima (ni postaje DRSI ne zapor v viru).
+
+### »Kaj pa čez Lipo?« — `crnivec.si/lipa/` (26. 9. 2026)
+
+Filip je želel še prelaz **Lipa** (723 m, lokalna cesta Vransko–Lipa–Šmartno ob
+Dreti). Med prelazoma se preklaplja s stikalom **Črnivec | Lipa** tik nad
+naslovom (`pass_switch()`, `.crn-pass`, z višino obeh prelazov) — od 28. 9.
+2026 namesto povezave »Kaj pa čez Lipo?« v vrhnji vrstici, ki je bila skupaj
+z opozorili in igro na telefonu razmetana v dve vrstici. Vrhnja vrstica je
+zdaj samo logotip levo in ikone (namesti, 🔔, 🎮) desno.
+
+- **Na Lipi ni postaje DRSI ne kamere** (preverjeno na seznamu ceste.si;
+  najbližje so Gornji Grad, Špitalič, Učak, 9–11 km stran). Vse je **ocena
+  modela** in tako tudi piše (`LIPA_BREZ_MERITVE`). Vrstic Megla in Veter ni
+  (model zanju nima rezerve — isto pravilo kot zgoraj), umeritve DRSI tudi ne:
+  izračunana je na Črnivcu in se na drug prelaz brez meritve ne prenaša.
+- Podatki: `PASSES["lipa"]` v `winter_engine.py` (ista serija kot Črnivec,
+  preračunana na 723 m). Snežna odeja je linearno med pasovoma 600/900 m
+  (`snowpack_at()`). Prelaz je zato tudi na `/zima/prevoznost-prelazov/`.
+- **Koda ni podvojena.** `build_lipa_body()` kliče iste Python pomočnike kot
+  Črnivec (`check_rows`, `forecast_hours`, `commute_windows`, `special_items`
+  …, ki imajo višino kot parameter), JS pa je isti `SHARE_JS_TEMPLATE` s
+  `PASS_JS["lipa"]` (`drsi: false` → brez klica meritve in brez vrstic
+  Megla/Veter). Stran ima iste id-je elementov; česar ni (kamera, glasovanje,
+  poročila, dolina, zapore), JS preskoči. Nova stvar na Črnivcu, ki je vezana
+  na višino, gre torej skozi `PASS_JS`/parameter `elev`, ne kot vtipkan 902.
+- V sitemapu in `llms.txt` crnivec.si, `geo_audit.py` (`CRN_PAGES`) preveri
+  canonical, naslov in FAQPage tudi za `/lipa/`. Wikidata je v
+  `PLACE_SAMEAS["Lipa (prelaz)"]` (Q12794904).
+
+### Igra »Čez Črnivec« — `crnivec.si/igra/` (28. 9. 2026)
+
+Arkadna vožnja od Stahovice čez prelaz do Gornjega Grada. Bistvo je ena
+odločitev: **verige** (na startu zastonj, med vožnjo samo pri miru in +15 s;
+z njimi največ 50 km/h, na ledu/snegu pa veliko več oprijema).
+
+- **Nivo sestavi Python, ne brskalnik** (`tools/generate_crnivec_igra.py`,
+  isti razlog kot Termika: isti dan, isti nivo za vse). Termin je današnja pot
+  v službo (`commute_hours` + `eval_hour()`, najhujša ura termina), vozišče po
+  kilometrih je `black_ice_category()` + `road_row()` na višini odseka — ista
+  ocena kot vrstica »Vozišče«, uvožena, ne podvojena. Megla je jutranja
+  `data["fog"]["top_m"]`, sunki samo **izmerjeni** DRSI (brez modelske rezerve).
+  Nova vrednost v `road_row()` mora v `ROAD_TO_SURF`, sicer v igri pade na suho.
+- **Avto zavija samo z volanom** (`kWant = volan * KMAX`, omejeno z oprijemom).
+  Prva različica je ukrivljenost ceste prištela sama in je v ovinek zavila brez
+  igralca — ne vračaj take »pomoči«. Test preveri, da brez volana avto v prvem
+  ovinku zapelje v jarek.
+- **Kamera sledi cesti, ne avtu** (`kamera()`, zglajena smer ceste malo
+  naprej): ob volanu se obrne in premakne avto, okolica ne. Volan je mehak
+  (`vnos()`: zasuk ~1,8/s, pri hitrosti počasneje). Na zaslonu večji `h`
+  zavije levo (`buildTrack`), enako kot `k > 0` in `psi > 0` v modelu.
+- Grafika (samo prikaz, fizike ne spreminja): višinski profil proge v HUD-u,
+  pobarvan po površinah iz `nivo.json` (`narisiProfil()`), opozorilni znaki in
+  odbojne ograje pri ovinkih s polmerom pod 30 m (`najdiOvinke()`), table
+  Stahovica / ČRNIVEC 902 m / Gornji Grad, sledi zdrsa, pršec in iskrice
+  (`ucinki()`), zavorne luči, senca in tresenje ob jarku.
+- Vreme in pokrajina na zaslonu (samo prikaz): nivo nosi še `svetloba`
+  (noc/somrak/dan iz višine sonca ob uri nivoja, `sun_altitude()`),
+  `padavine_mm` in po odsekih `pada` (dez/sneg po istem pravilu kot sneg na
+  cesti, t ≤ 1 °C) in `odeja` (snežna odeja na višini odseka iz
+  `snowpack.by_elevation`). Ponoči/v somraku žarometi izrežejo stožec iz temne
+  plasti (`tema()`), sunki nosijo listje (`veter()`). Pokrajina
+  (`postaviPokrajino()`): listavci spodaj, smreke nad `Z_GOZD` (620 m), hiše ob
+  Stahovici in Gornjem Gradu, kilometrski kamni.
+- **Proga je prava R1-225 iz OpenStreetMap** (`crnivec-igra/proga.json`, sestavi
+  jo ENKRATNI `tools/build_crnivec_igra_proga.py`: Overpass → najkrajša pot
+  Stahovica–Gornji Grad (18,3 km) → višine Open-Meteo Elevation → proga igre).
+  Stisnjena je na 3,4 km **neenakomerno**: ostri ovinki obdržijo pravi kot in
+  ostanejo skoraj v pravi velikosti (nobeden ožji od `K_GAME_MAX`, sicer ga volan
+  ne zmore), ravnine in blagi ovinki se stisnejo, blagim se del kota izgubi
+  (cesta ima 7700° zavojev — pri enakomernem stiskanju bi bila vsa proga en
+  ovinek). Iz iste datoteke pridejo dolžina in profil v generatorju, vrh
+  (`vrh_km`) in table naselij (OSM `place` ob cesti, ne imena odsekov — ta so
+  naslovna). Igra dobi progo vdelano (`#cv-proga`), `kmNa()`/`sNaKm()` pretvarjata
+  metre igre v kilometre ceste. Navedba »© OpenStreetMap« je pod igro (ODbL). Ob
+  nedosegljivem Open-Meteo sprejme skript `--visine FILE`. Led je v zaplatah,
+  sejanih iz datuma.
+- Zvok (Web Audio, sestavljen sproti, privzeto izklopljen, `crn-igra-zvok`):
+  motor, »TAK-TAK« verig, zdrs, jarek, cilj. Slika rezultata za deljenje
+  (`slikaRezultata()`, 1080×1080 s profilom) gre prek `navigator.share` z
+  datoteko ali se prenese.
+- `crnivec-igra/voznja.js` in `voznja.css` sta **ročno pisana**; generator ju
+  skopira v `crnivec-site/igra/` (skupaj z `index.html` in `nivo.json`).
+  Model je brez DOM-a in ga preverja `tools/test_crnivec_igra.mjs` (vozniki-
+  roboti: na suhem so verige počasnejše, na ledu hitrejše, predrzen voznik na
+  ledu konča v jarku, današnji nivo je prevozen). Test teče v
+  `zima-forecast.yml` takoj za generatorjem, pred commitom.
+- Lestvica: `worker.js` `/crnivec/igra/rezultat` in `/crnivec/igra/lestvica`
+  (`crnivec_igra:dan:<datum>` v `COUNTER_KV`, najboljši čas igralca, TTL 60 dni).
+  Preveri samo datum (danes) in spodnjo mejo časa `CRN_IGRA_MIN_S` — namerna
+  podvojitev `L / VMAX` iz `voznja.js` (3400 m / 25 m/s); **če spremeniš dolžino
+  proge (`GAME_LEN_TARGET`) ali VMAX, popravi tudi tam**. Kazni (8 s jarek, 15 s verige) navaja FAQ strani.
+- Stran je v sitemapu in `llms.txt` crnivec.si ter v `CRN_PAGES` v `geo_audit.py`.
+  Z glavne strani vodi nanjo kartica ob lestvici poročevalcev (ne v prvem zaslonu).
 
 ## Sosednja postaja Varpolje (IREICA7) — dolinski dvoboj
 
@@ -523,6 +921,19 @@ Kje je vključena:
 Če se vir kdaj ustavi ali spremeni obliko, vse tri točke tiho odpadejo
 (kartica pove, da postaja ni dosegljiva, tema zgodbe se ne uvrsti) — nobena
 druga stran od tega ni odvisna.
+
+### Dolinski profil v živo (kartica »Dolinski dvoboj«, 1. 10. 2026)
+
+Pod dvobojem Rečica ⇄ Varpolje (`#duel-profile`, `fetchValleyProfile()` v `app.js`) je graf
+**izmerjene** temperature po višini: Rečica (IREICA1, 366 m), Gornji Grad (DRSI, 428 m) in
+Črnivec (DRSI, 903 m) iz `/crnivec-drsi` (isti vir in navedba DRSI kot na crnivec.si).
+Pove, ali je zrak v dolini hladnejši od višine (inverzija, `valleyProfileSummary()`: gradient
+> 0), šibek (> −0,4), običajen (> −0,9) ali strm gradient °C/100 m; prekinjena črta je
+standardni −0,65 od Rečice. Brez preračunov — **primerjava prelaza s preračunanim modelom
+ostaja prepovedana** (glej Črnivec: »Črnivec proti dolini«). DRSI meritev starejša od 40 min se
+izpusti (kot povsod); pod dvema točkama se graf skrije. Varpolje ni na grafu: nima objavljene
+višine in stoji na istem dnu doline kot Rečica. Klic `/crnivec-drsi` je omejen na enkrat/5 min
+(`_vpCache`). Logiko preverja `tools/test_valley_profile.py` (v `parity.yml`).
 
 ## MTR — lastni napovedni model (MOS)
 
@@ -605,6 +1016,11 @@ Pravila, ki jih ne obračaj:
 - Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
   napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
   tiho dobiva druge vhode, kot jih pozna.
+- **Kdaj MTR pomaga** (`/trendi/`, 1. 10. 2026): `compute_mtr_accuracy_metrics.py` razčleni D+1
+  po vremenskem položaju dneva iz meritev postaje (`situation_of()`: jasen in miren —
+  razpon ≥ 14 °C brez dežja; moker ≥ 1 mm; vmes). Prvi rezultat (avg–sep): ob jasnih dneh
+  Tmax 0,69 proti 1,54 °C, ob mokrih dneh Tmin skoraj brez koristi, v »vmes« Tmin celo
+  slabši od Open-Meteo. Stran to pove z rdečo — ne skrivaj negativnega rezultata.
 - Model se uči **samo** iz `history.json` in Open-Meteo. Nobenih notranjih
   meritev; datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce `Indoor` in se v
   tem cevovodu ne uporablja.
@@ -884,6 +1300,29 @@ zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
 (stalno starem) katalogu ni bilo. Popravljeno; 3 tako osirotele strani so
 bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
 prepričaj, da isto pot pokriva tudi `git add`.
+
+## Sezonski vodič (`/sezona/`) in povzetek meseca (1. 10. 2026)
+
+- **`/sezona/`** (`tools/generate_sezona_page.py`, dnevno v `seo-smart-routine.yml`) —
+  »Ta čas v dolini«: klimatologija letnega časa s postaje (prva jesenska / zadnja
+  spomladanska zmrzal — mediana, najzgodneje, najpozneje; vroči dnevi poleti; dnevi z
+  zmrzaljo pozimi), letošnje stanje, današnji gobarski indeks in najnižja napoved MTR
+  (oboje **po datumu**, ne po vrstnem redu workflowov) ter povezave na strani, ki so ta
+  čas pomembne (`LINKS`). Leto brez meritve na začetku obdobja ne šteje (sicer bi bila
+  »prva zmrzal« le prva izmerjena); pod tremi leti ni klimatologije.
+- **Mesečne strani arhiva** (`/vreme/YYYY/MM/`) imajo odstavek »na kratko« in FAQ
+  (`month_summary()` v `generate_seo_pages.py`, FAQ shema in vidno besedilo iz istega
+  seznama). Uvrstitev je samo med enakimi meseci z ≥ 25 dnevi meritev (`RANK_MIN_DAYS`),
+  vsaj tri leta; tekoči mesec se ne uvršča. Strani istega koledarskega meseca kot tekoči
+  se prepišejo ob vsakem teku, ker se jim uvrstitev spremeni.
+- Oboje preverja `tools/test_sezona.py` (v `parity.yml`).
+- **Letni pregled »Vremensko leto v številkah«** (`tools/generate_year_review_post.py`,
+  `year-review.yml`, 1. oktobra): vremensko leto 1. 10.–30. 9. (cela zima v enem kosu),
+  predloga s pravimi številkami + en prehod `call_lektor`, isti vzorec in isti HTML
+  (`generate_forecast_test_post.build_html` s parametri) kot mesečni test napovedi.
+  Pragovi dni in norme so uvoženi iz `generate_seo_pages`/`seo_smart_routine`. Objavljen
+  članek se ne prepiše (`--force`). Na FB/IG **ne gre samodejno** (nova vrsta vsebine) —
+  po pregledu ga pošlji s `social-repost.yml`.
 
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
@@ -1262,11 +1701,199 @@ vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem. Panel 17 vprašanj
 natančna shema vnosa (asistent, `prompt_id`, `mentioned`,
 `competitors_mentioned`) sta v `docs/geo-prompt-panel.md` — vsak mesec
 rotiraj 6–8 vprašanj iz panela med ChatGPT, Perplexity in Google AI
-Overview. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
+Overview. Pomočnik `tools/geo_mentions.py` (`plan` / `add` / `report`) bere
+id-je iz tabele v `docs/geo-prompt-panel.md` (en vir), preveri vnos in izračuna delež glasu. Brez tega ni mogoče vedeti, ali GEO delo sploh kaj spremeni, in
 brez `competitors_mentioned` ni mogoče govoriti o deležu glasu, samo o
 "omenjen/ni omenjen".
+
+**Vsebina brez `dateModified`** (preverjanje 8, 1. 10. 2026): `geo_audit.py` iz git zgodovine
+najde stran, katere vidno besedilo se je spremenilo za ≥ 200 znakov (`MIN_CHANGED_CHARS`),
+`dateModified` pa ostal starejši. Samodejni bloki (`<!-- x:start … x:end -->`, sorodni,
+teme, podatki) se ne štejejo. Prvi tek: 0 opozoril (trije ročni popravki z dodano povezavo
+so pod mejo). Ročno popravljen članek gre skozi lekturo, ta pa `dateModified` osveži sama
+(`touch_existing()`). V plitvem klonu (CI) je preverjanje tiho.
+
+**Search Console** — repozitorij nima dostopa do GSC. Izvoz »Učinkovitost → Izvozi« (ZIP)
+predela `tools/gsc_opportunities.py IZVOZ.zip --out docs/gsc-YYYY-MM.md`: poizvedbe na
+pragu (položaj 4–20, razvrščene po dodatnih klikih), nizek CTR na prvi strani (popravi
+naslov) in poizvedbe brez ustrezne strani. Stolpci se berejo po vrstnem redu, ker so
+glave v jeziku vmesnika.
+
+## Test usklajenosti namernih podvojitev (`tools/test_parity.py`)
+
+Dokument na ducatu mest pravi »če spremeniš eno, spremeni drugo«. Od 1. 10. 2026
+to **preverja stroj**: `python3 tools/test_parity.py` (workflow `parity.yml`, teče ob
+spremembi katere od kopij; ~5 s). JS funkcije se s pomočnikom `tools/_parity_js.mjs`
+**izrežejo iz pravih datotek** (`app.js`, `worker.js`, `gasilec.js`, `igra.js`,
+`napovej.js` in iz že generirane strani `crnivec-site/index.html`,
+`gobarska-napoved/index.html`) in poženejo na istih vhodih kot Python kopija — test
+torej ne primerja kopije v testu, ampak kodo, ki jo dobi bralec.
+
+Pokriva: FWI (app.js ↔ gasilec.js ↔ gasilec_model.py), stanje vodomerne postaje po
+pragovih ARSO, poledica/vozišče/ura/povzetek termina/meja sneženja/FNV-1a/besedila
+»Črnivec pravi« (generirana stran ↔ `winter_engine.py`, `generate_crnivec_page.py`),
+točkovanje `/napovej/` (worker ↔ napovej.js) in prag mokrega dne (tri mesta),
+konstante workerja (`IGRA_KORIDORJI_KM`, `CRN_IGRA_MIN_S`, `KOLICINE`), pragove
+gobarskega indeksa, nevihtno karto (obris, mreža, mesta, barve, stopnje), 16 smeri
+vetra in LZW dekoder strel, oceno dneva v Termiki (`opis_dneva` ↔ `dayRating`),
+stavek »Naslednjih 6 ur« in umeritev DRSI po uri, konstante in izbiro cone v znački
+`/crnivec/znacka.svg`, agrometeo (fenološke stopnje hmelja, ročni status IHPS, GDD poljščin,
+primernost za bolezni), pragove opozoril na telefon proti besedilu na strani, starost
+meritve DRSI in oznake dni.
+
+- **Nova namerna podvojitev = nov `@test`.** Ko v dokument zapišeš »če spremeniš
+  eno, spremeni drugo«, dodaj tudi preizkus v `test_parity.py`. Brez njega je
+  opomba samo upanje.
+- Test JS bere iz **generirane strani** za Črnivec/gobe. Ko spremeniš predlogo v
+  generatorju, regeneriraj stran (ali isto spremembo ročno prenesi v committano
+  stran), sicer test še vidi staro kopijo.
+- **Mutacijski preizkus** (`tools/mutation_check.py`, `mutation-check.yml`, ročno/mesečno, ~6 min):
+  vnese 65 majhnih napak (prag, konstanta, obrnjen pogoj, odstranjena varovalka) in preveri, da
+  PRIPADAJOČI test pade — `test_parity`, `test_gates`, `test_stale_inputs`, `test_storm_verify`,
+  `test_lightning_logger`, `test_freshness`, `test_precip_snapshot`, `test_valley_profile`,
+  `test_privacy`. Prvi zagon (1. 10. 2026): 60/65 ujetih, **5 preživelih = 5 lukenj v testih**
+  (povzetek ni preverjal vrstnega reda vnosov, kontingenca mejne ocene, mejni primeri profila),
+  vse zapolnjene → 65/65. Nov test ali nova varovalka = nova vrstica v `MUTACIJE`; mutant, ki
+  preživi, je ali luknja v testu ali ekvivalenten mutant (odveč varovalka) — oboje popravi.
+  Skript poganja teste z `python -B` in briše `__pycache__`: mutacija enake dolžine v isti sekundi
+  (npr. `LATE_END = 20` → `24`) je sicer pustila veljaven mutiran `.pyc` in naslednji tek je padel brez razloga.
+- Znana, namerno neizenačena zaokroževanja: Python `round()` zaokroži x.5 na sodo,
+  JS `Math.round` navzgor. Test se jim izogne z vhodi (padavine v korakih 0,1 mm,
+  popravek meritve s sodimi desetinkami) ali toleranco ±1 (barve na karti).
+- Znana, nepopravljena razlika: `_napovejSkupaj()` v workerju ob manjkajoči ENI
+  temperaturi ne oceni (null), `oceni()` v napovej.js oceni po preostali. V praksi
+  nedosegljivo (igralec odda obe, `forecast_verification.json` ima obe meritvi).
+
+Prvi zagon (1. 10. 2026) je našel tri prava razhajanja, vsa popravljena:
+1. **FWI pri DMC = DC = 0** (mraz po močnem dežju): Python je vrgel
+   `ZeroDivisionError` (generator `/meteogasilec/` bi ob taki zimski noči padel), JS
+   je tiho vrnil `NaN`. BUI je zdaj 0 v vseh treh kopijah.
+2. **`groundTempLive()` na crnivec.si in /lipa/** je pri vetru > 20 km/h izgubil
+   preostali sevalni primanjkljaj (linearna ekstrapolacija + zareza pri 0 namesto
+   krajne vrednosti 0,15 kot `interp()` v `winter_engine.py`): živa ocena poledice
+   je bila do 0,45 °C preveč optimistična.
+3. **Termika: vrstni red vej** `opis_dneva()` (nizek strop pred dežjem) se je razlikoval
+   od `dayRating()` (dež pred nizkim stropom): ob dežju in nizkem stropu je stran
+   pisala eno, igra drugo.
+
+## Zelena kljukica workflowa ni dokaz, da je izdelek nastal (1. 10. 2026)
+
+**GitHubov cron zdaj zamuja 5–7 ur** (cron 05:00 UTC steče ~11:00 UTC = 13:00 po naši
+uri; `update-history` ob 01:15 UTC steče ob ~07:00). Delovni tokovi s časovnimi
+vrati (`tools/*_gate.py`) tak tek zavrnejo in **vseeno javijo uspeh** — zato je bilo:
+
+- **nevihtne karte od 31. 8.** (okno 6:00–8:00, zadnja karta `2026-08-31`),
+- **padavinske karte od 11. 9.** (isto okno) — en mesec oz. 20 dni brez nove karte,
+  brez opozorila nikogar. Odkrito je bilo naključno ob gradnji preverjanja strel.
+- Termika (`igra_gate.py`, okno 5:00–12:00): današnji nivo je bil ob 13:00 še
+  včerajšnji (`igra/nivo.json` `datum` = včeraj). Okna **nisem razširil**: kdor je igral
+  zjutraj, ne sme zvečer dobiti drugačnega stropa (glej razdelek Termika) — to je
+  Filipova odločitev, ne napaka v kodi.
+- Dnevna zgodba (6:00–18:00), digest (7:00–18:00): široka okna, delujeta.
+  `frost-risk.json` je od 27. 8. star **zaradi sezone** (mar–maj), ne okvare.
+
+Kar je zdaj narejeno:
+
+- **Pozni tek kart:** `storm_map_gate.py` in `precip_map_gate.py` po koncu okna
+  (`WINDOW_END` = 8:00) do `LATE_END` = 20:00 še vedno sestavita karto (stran + arhiv sta
+  spet sveža), a izhod `late=true` **prepreči objavo na FB/IG** (jutranja karta, objavljena
+  popoldne, bi lagala); `inject_storm_map.py` na strani pove, ob kateri uri je karta
+  nastala. `tools/test_gates.py` zaklene vedenje (22 preverjanj).
+- **Padavinska karta potrebuje podatkovno rešitev, ne samo vrat** (ugotovljeno ob prvem
+  pozno zagnanem teku 1. 10.): ARSO `rr24h_val` je zapolnjen **samo v jutranji meritvi**
+  (8:00 CEST), v urnih meritvah čez dan je prazen — generator je zato padel z »ni
+  nobene postaje z rr24h_val«. Zato **Cloudflare cron 06:30/07:30 UTC**
+  (`_cronSnapshotArsoRr24h` v `worker.js`) jutranji posnetek shrani v KV
+  (`arso_rr24h:<datum>`, 3 dni), generator ga prebere prek `/arso-rr24h` kadarkoli
+  čez dan (`fetch_snapshot()`), brez posnetka pade nazaj na živi vir. To NE rabi
+  `GH_DISPATCH_TOKEN`. `tools/test_precip_snapshot.py` preverja, da worker razbere iste
+  postaje kot ET. Prvi posnetek nastane naslednje jutro po deployu; do takrat pozni tek
+  pade (vidno kot rdeč tek in v varuhu svežine).
+- **Cloudflare varovalka** (`_cronDispatchScheduledWorkflows`) kliče zdaj tudi
+  `precip-map.yml`. Še vedno rabi `GH_DISPATCH_TOKEN` — brez njega ne naredi nič (od
+  31. 8. ni bilo niti enega `workflow_dispatch`); pozni tek zato ni olajšava, ampak
+  obvezno dopolnilo, dokler žeton ni nastavljen.
+- **Varuh svežine** `tools/check_freshness.py` (`freshness-watch.yml`, 06:40 in 18:40
+  UTC): gleda sam izdelek (`REGISTER`: datoteka, polje s časom, največja starost) in
+  ob zastarelem odpre issue z oznako `stale-output`, ko je spet vse sveže, ga zapre.
+  **Nov dnevni izdelek = nova vrstica v `REGISTER`**; `tools/test_freshness.py` preveri,
+  da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
+  Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve.
+
+### Zakaj cron zamuja: GitHub dostavi ~6 tekov na dan (meritev 1. 10. 2026)
+
+Pogosti workflowi sploh ne tečejo na urnik: `toca-tracker` (`*/15`, 96/dan) ima ~6,1 teka/dan,
+`retry-pages-deploy` (`*/20`, 72/dan) ~5,9/dan, `prerender-current` (urno, 24/dan) ~5/dan
+(100 zaporednih tekov zajema ~16 dni). GitHub cron dogodke očitno združuje v pakete na
+~4 ure — zato dnevni workflowi zamujajo 5–7 ur in časovna vrata (6:00–8:00) tiho zavračajo
+vsak tek. **Pogosti urniki so torej varljivi:** `*/15` pomeni ~vsake 4 ure; karkoli, kar
+potrebuje boljšo ločljivost (opozorila, jutranje karte), mora teči na Cloudflaru
+(`wrangler.toml` crons) ali ga mora Cloudflare sprožiti prek `GH_DISPATCH_TOKEN`.
+`tools/measure_cron_throughput.py` (korak v `freshness-watch.yml`, tabela v povzetku teka)
+to meri vsak dan; vzroka (obremenitev repozitorija ali politika GitHuba) ni mogoče ločiti,
+zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tabelo čez čas.
+
+### Dimni test in mrtve povezave (1. 10. 2026)
+
+- **`smoke-test.yml`** (po vsaki objavi Pages + dnevno): `tools/smoke_test.py` na ŽIVI strani
+  preveri ključne strani (`CORE` iz `seo_audit.py` — isti seznam kot sitemap) in crnivec.si:
+  200 brez preusmeritve, `<title>`, canonical nase, JSON-LD se razčleni, stran ni prazna,
+  og:image obstaja; plus `style.min.css`, `app.min.js`, `history.json`, `sitemap.xml`, `llms.txt`.
+  Ob napaki issue `smoke-fail` (samo osveži opis, brez komentarja ob vsakem teku).
+- **`link-check.yml`** (tedensko): `tools/check_links.py` — notranje povezave iz repozitorija
+  (brez omrežja, vse strani) in zunanji URL-ji. Issue `broken-links`. Prvi tek je našel 13
+  notranjih: `render_topics_html()` je povezoval teme z ≥ 2 objavama (po surovem tagu),
+  `build_tag_pages()` pa jih gradi pri `TAG_MIN_POSTS` = 3 (po slugu) — zdaj oba štejeta po
+  slugu z istim pragom; kartica vrste brez proste slike ne zahteva več `.jpg` (404).
+- **Vsak klic workerja iz Pythona mora poslati User-Agent.** Cloudflare privzeti
+  `Python-urllib/3.x` zavrne s **403** (tudi `/health`, `/push/send`, `/arso-rr24h`,
+  `/strele-zgodovina.json`). 1. 10. 2026 je to tiho kvarilo jutranji povzetek (403 je
+  izgledal kot napačno geslo), branje jutranjega posnetka padavin, preverjanje nevihtne
+  karte in branje `/health` — vsi so ob napaki le padli nazaj. Konstanta `WORKER_UA` v
+  skriptah; `tools/test_worker_ua.py` (v `parity.yml`) zavrne nov klic brez nje.
+
+### Zdravje Cloudflare cron opravil (`/health`, 1. 10. 2026)
+
+Vsako opravilo v `scheduled()` teče prek `_cronBeat()`, ki zapiše KV `cron:health:<ime>`
+`{ts, ok, err, ms}` (zapis le ob spremembi ali vsakih 15 min). `GET /health` jih vrne,
+`check_freshness.py` (`worker_health()`) pa v `freshness-watch.yml` odpre issue, ko
+opravilo zastara (`CRON_JOBS`: 20 min za petminutna, 30 h za dnevna) ali javi napako.
+Opravilo, ki ob napaki samo vrne, mora vrniti `{ok:false, reason}` (ali `false`) — prazen
+`catch (_) {}` je ravno to, kar je skrilo manjkajoči `GH_DISPATCH_TOKEN`. Nov cron =
+vnos v `CRON_JOBS` + `_cronBeat` v `scheduled()`. Prikazano: `dispatch` bo javil »manjka
+GH_DISPATCH_TOKEN«, dokler žeton ni nastavljen.
+
+### Vrstni red workflowov ni zagotovljen — datoteko drugega workflowa preberi po datumu (1. 10. 2026)
+
+Komentarji tipa »ob 05:00, po forecast-verify (01:35)« so bili zapisani za čas, ko je
+cron zamujal minute. Zdaj vsak workflow zamuja 5–7 ur po svoje, zato **potrošnik ne sme
+predpostaviti, da je datoteka producenta že današnja**. Revizija je našla štiri tihe
+napake in jih popravila (`tools/test_stale_inputs.py` zaklene vse):
+
+1. **Gasilska stran** `/meteogasilec/vreme-intervencije/` je en mesec (od 31. 8.) kot
+   »Nacionalni nevihtni potencial **danes**« kazala EKSTREMNO z avgusta — `load_storm_map()`
+   ni preverjal datuma. Zdaj blok pove, da današnja karta še ni izdana.
+2. **Jutranji povzetek** je `lead == 1` imenoval »Danes«, a lead je glede na dan nastanka
+   datoteke (jutri). Zdaj bere zamrznjeno napoved za današnji **datum** iz
+   `.forecast_pending.json` (ali dan z današnjim datumom v `napoved-modela.json`), brez nje
+   ne pošlje nič. **Workflow vsak dan pade (rdeč), ker secret `SUBSCRIBE_SECRET` ni
+   nastavljen** — ko ga nastaviš, bodo naročniki dobili pravilne številke.
+3. **Dnevni članek** (`fetch_mtr_forecast`) in 4. **kartica zgodbe** (`load_mtr_forecast`)
+   sta isto jemala za »jutri«, ko je bila datoteka včerajšnja. Zdaj izbereta dan z jutrišnjim
+   datumom.
+
+Pravilo: **dan iz `napoved-modela.json` vedno izberi po `date`, nikoli po `lead`.** Stvari, ki
+so že varne: `verify_forecasts.py` (neizmerjene dni drži v čakalni vrsti do 5 dni, napoved
+modela sprejme samo z današnjim `generated_at`), `update-history` (trije termini + gate),
+zgodba (`load_gobe_index`/`load_igra_level` zahtevata današnji datum), `inject_forecast.py`
+in `generate_seo_pages.py` (MTR vrstice po datumu).
 
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
   (GitHub Pages + auto-deploy Cloudflare workerja ob spremembi worker.js).
+- **Po mergu spremembe generatorja strani vedno takoj ročno poženi workflow,
+  ki stran zgradi** (`workflow_dispatch` na `main`, npr. `zima-forecast.yml`
+  za crnivec.si in `/zima/`) — Filip želi spremembe videti takoj, ne šele ob
+  naslednjem cronu. Pred tem preveri, da je ponovni tek isti dan varen
+  (npr. snežna odeja v `winter_engine.py` se drugič isti dan preskoči).

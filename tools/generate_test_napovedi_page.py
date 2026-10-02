@@ -82,7 +82,7 @@ def write_csv():
             "# Meteorec test-napovedi -- primerjava vremenskih napovedi z meritvami postaje IREICA1 "
             "(Recica ob Savinji, Zgornja Savinjska dolina)\n"
             f"# Vir napovedi: Open-Meteo Previous Runs API (ecmwf_ifs025, icon_seamless, gfs_seamless, "
-            f"meteofrance_arpege_europe, best_match), ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no)\n"
+            f"meteofrance_arpege_europe, best_match, ecmwf_aifs025_single), ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no)\n"
             "# Vir meritev: postaja IREICA1 (Ecowitt), src=station/wu v history.json\n"
             f"# Licenca podatkov Meteorec: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) -- "
             f"navedi vir: {SITE}/test-napovedi/\n"
@@ -103,7 +103,7 @@ CHART_JS = """<script>
 (function(){
   var wrap = document.getElementById("tnp-charts");
   if (!wrap) return;
-  var COLORS = ["#38bdf8", "#f59e0b", "#34d399", "#f472b6", "#a78bfa"];
+  var COLORS = ["#38bdf8", "#f59e0b", "#34d399", "#f472b6", "#a78bfa", "#ef4444"];
 
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
@@ -315,7 +315,7 @@ def build_body(data, n_csv_rows):
                       '  <p class="archive-intro">Skill = 1 − MAE<sub>model</sub> / MAE<sub>klimatologija</sub>. '
                       'Vrednost 0 pomeni, da je napoved enakovredna ugibanju dolgoletnega povprečja za ta koledarski dan '
                       f'(±{num(climo["tmax"]["mae"])} °C za Tmax, izračunano iz cele postajne zgodovine). '
-                      + ("V tem vzorcu (D+1..D+7) noben od petih virov te meje ne doseže — vsi ostanejo pred "
+                      + ("V tem vzorcu (D+1..D+7) noben od šestih virov te meje ne doseže — vsi ostanejo pred "
                          "klimatologijo tudi teden vnaprej, čeprav razlika pada z vsakim dnem." if not zero_crossing else
                          "; ".join(crossing_lines) + ".") + '</p>')
 
@@ -338,7 +338,7 @@ def build_body(data, n_csv_rows):
                 cells.append('<td>—</td>')
         if any_data:
             lead_table_rows.append(f'    <tr><th>D+{lead}</th>' + "".join(cells) + '</tr>')
-    lead_table = ('  <div class="table-scroll"><table class="stats">\n    <tr><th>Vodilni čas</th>'
+    lead_table = ('  <div class="table-scroll" tabindex="0"><table class="stats">\n    <tr><th>Vodilni čas</th>'
                   + "".join(f'<th>{l}</th>' for l in models.values()) + '</tr>\n'
                   + "\n".join(lead_table_rows) + '\n  </table></div>')
 
@@ -368,7 +368,7 @@ def build_body(data, n_csv_rows):
   segreje. To ni splošna ocena teh modelov za Slovenijo ali kjerkoli drugje.</p>
   <p class="archive-intro">ARSO napoveduje po <strong>regijah</strong>, ne po točkah — za Rečico ob Savinji nima
   krajevne napovedi, zato jemljemo najbližji kraj z njihovega seznama (Ljubno ob Savinji, ~9 km gorvodno).
-  Modeli Open-Meteo delujejo na mreži: ECMWF IFS ima ločljivost ~25 km, GFS ~25 km, ARPEGE ~10 km, ICON (prek
+  Modeli Open-Meteo delujejo na mreži: ECMWF IFS in njegov AI naslednik AIFS imata ločljivost ~25 km, GFS ~25 km, ARPEGE ~10 km, ICON (prek
   best_match) ~2 km (ICON-D2) — noben od njih ozke doline v resnici ne razloči. To ni opravičilo, ampak glavna
   poanta: napaka izvira (tudi) iz ločljivosti mreže, zato ima lokalna postaja sploh smisel.</p>
   <p class="archive-intro"><strong>Klimatologija</strong>: povprečni Tmax/Tmin za ta koledarski dan ±7 dni, iz cele
@@ -379,7 +379,7 @@ def build_body(data, n_csv_rows):
   "&gt;10 % manjkajočih ur" in "zataknjen senzor &gt;6h" na tem arhivu ni izvedljivo — Ecowitt API vrne polno
   urno ločljivost le za zadnjih ~90 dni, starejši dnevi so na strežniku že podvzorčeni. Graf "pristranskost po
   urah dneva" iz prvotnega načrta zato nadomešča primerjava Tmax- in Tmin-pristranskosti zgoraj, ki isto zgodbo
-  (spregledana nočna inverzija) pove brez potrebe po urnem arhivu napovedi vseh petih virov.</p>
+  (spregledana nočna inverzija) pove brez potrebe po urnem arhivu napovedi vseh šestih virov.</p>
   <p class="archive-intro">V besedilu namenoma ne uporabljamo besede "laže" — modeli se motijo, precenjujejo ali
   podcenjujejo, ne lažejo; napaka izvira iz fizike in ločljivosti, ne iz namena.</p>'''
 
@@ -397,8 +397,9 @@ def build_body(data, n_csv_rows):
              "Večina aplikacij uporablja model best_match ali podoben globalni model na mreži, ki naše ozke "
              "doline ne razloči — mreža vidi pobočje, ne dna doline. Ta stran meri prav to razliko."),
             ("Od kdaj tečejo podatki?",
-             f'Napovedi Open-Meteo (pet modelov) so na voljo za nazaj vse od {seo.fmtd("2024-05-26")} '
-             '(Open-Meteo Previous Runs API arhivira toliko nazaj). ARSO in Yr/MET Norway nimata arhiva preteklih '
+             f'Napovedi Open-Meteo (šest modelov) so na voljo za nazaj vse od {seo.fmtd("2024-05-26")} '
+             '(Open-Meteo Previous Runs API arhivira toliko nazaj); izjema je ECMWF AIFS (AI model), ki ga ECMWF poganja šele od februarja 2025, zato ima krajši vzorec in je zanj število razrešenih dni nižje. '
+             'ARSO in Yr/MET Norway nimata arhiva preteklih '
              'napovedi, zato ju beležimo sproti od dneva, ko je ta stran nastala.'),
         ]
     ) + "\n  </div>"
@@ -437,8 +438,8 @@ def main():
     url = "/test-napovedi/"
     title = "Test napovedi — Zgornja Savinjska dolina"
     n = data.get("n_compared_days") or data.get("n_obs_days", 0)
-    desc = (f"Kateri vremenski model najbolje napove vreme v Zgornji Savinjski dolini? Primerjava petih virov "
-            f"(ECMWF, ICON, GFS, ARPEGE, ARSO) z dejansko meritvijo postaje IREICA1 po dnevih vnaprej — "
+    desc = (f"Kateri vremenski model najbolje napove vreme v Zgornji Savinjski dolini? Primerjava šestih virov "
+            f"(ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE, ARSO) z dejansko meritvijo postaje IREICA1 po dnevih vnaprej — "
             f"{n} razrešenih dni, javni podatki.")
 
     schema = "\n".join([
@@ -446,7 +447,7 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("Test napovedi", None)]),
         seo.named_dataset_schema(
             url, "Test napovedi — primerjava modelov proti postaji IREICA1",
-            "Dnevna primerjava napovedi ECMWF, ICON, GFS, ARPEGE, best_match, ARSO in Yr/MET Norway z "
+            "Dnevna primerjava napovedi ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE, best_match, ARSO in Yr/MET Norway z "
             "dejansko meritvijo postaje IREICA1, po vodilnem času D+1..D+7.",
             variable_measured=[{"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"}],
             distribution={"@type": "DataDownload", "encodingFormat": "text/csv",

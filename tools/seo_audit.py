@@ -83,9 +83,8 @@ CORE = {
     "zima/nad-meglo/":           ("daily",   "0.7"),
     "zima/snezna-odeja/":        ("daily",   "0.7"),
     "zima/prevoznost-prelazov/": ("daily",   "0.7"),
-    # Humorna easter-egg stran, namenoma ločena od resne prevoznost-prelazov/
-    # (glej tools/generate_crnivec_page.py) — deli isti data/winter-data.json.
-    "crnivec/":                  ("daily",   "0.4"),
+    # crnivec/ tu NI namenoma: od 25. 9. 2026 stran živi na crnivec.si (svoj
+    # sitemap.xml v crnivec-site/), na meteorec.si pa je samo preusmeritev.
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
@@ -95,6 +94,8 @@ CORE = {
     # »Prehiti model« — igra napovedovanja proti štirim modelom s semaforja.
     # Krog, namigi in tabela zadnjih dni se sestavijo vsak dan, zato daily.
     "napovej/":                  ("daily",   "0.6"),
+    # Sezonski vodič — klimatologija letnega časa + povezave (generate_sezona_page.py).
+    "sezona/":                   ("daily",   "0.6"),
     "trendi/":                   ("weekly",  "0.7"),
     # Stran je obstajala in bila povezana iz index.html, a je ni bilo v nobenem
     # sitemapu — natanko primer, pred katerim svari CLAUDE.md. Dodano 20. 8. 2026.
