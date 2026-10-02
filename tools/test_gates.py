@@ -59,7 +59,18 @@ def run_gate(mod, hour, last_run=None, force=False):
     return kv["proceed"] == "true", kv["late"] == "true"
 
 
-for name in ("storm_map_gate", "precip_map_gate"):
+# Nevihtna karta: okno 6–8 (rok 7:00). Padavinska: 7–11, ker podatek ARSO (rr24h) obstaja
+# šele po jutranji meritvi ob 06:00 UTC — okno pred njo je vsak tek obsodilo na napako.
+print("\nprecip_map_gate (okno po jutranji meritvi)")
+m = importlib.import_module("precip_map_gate")
+check(run_gate(m, 6) == (False, False), "6:30: pred meritvijo ARSO — nič")
+check(run_gate(m, 8) == (True, False), "8:30 (posnetek ob 06:30 UTC poleti): v oknu, objava")
+check(run_gate(m, 10) == (True, False), "10:30: še v oknu")
+check(run_gate(m, 11) == (True, True), "11:30: pozno — sestavi brez objave")
+check(run_gate(m, 20) == (False, False), "20:30: preveč pozno, nič")
+check(run_gate(m, 9, last_run="2026-10-01") == (False, False), "karta za danes že narejena: nič")
+
+for name in ("storm_map_gate",):
     print(f"\n{name}")
     m = importlib.import_module(name)
     check(run_gate(m, 5) == (False, False), "pred oknom: nič")
