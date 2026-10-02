@@ -1,7 +1,12 @@
 {
+  "lenartovo-pregovor-vreme-do-bozica": [
+    "temperaturni-trend-ireica1-2020-2025",
+    "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-julij-2026"
+  ],
   "vremensko-leto-2025-2026": [
     "vremenski-povzetek-september-2026",
-    "temperaturni-trend-ireica1-2020-2025",
+    "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-julij-2026"
   ],
   "test-napovedi-2026-09": [
@@ -455,8 +460,8 @@
     "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723"
   ],
   "velika-pozarna-ogrozenost-8-julij-2026": [
-    "ekoloska-tveganja-pozarna-ogrozenost-vetrolomi",
     "najbolj-suha-pomlad-2026-ireica1",
+    "ekoloska-tveganja-pozarna-ogrozenost-vetrolomi",
     "medtem-ko-istro-pustosi-5-centimetrska-toca-pri-nas-velja-or-0721"
   ],
   "primerjava-krajev-vrocinski-val-julij-2026": [
@@ -516,8 +521,8 @@
   ],
   "najbolj-suha-pomlad-2026-ireica1": [
     "polletni-pregled-2026-ireica1",
-    "vremenski-povzetek-maj-2026",
-    "temperaturni-trend-ireica1-2020-2025"
+    "velika-pozarna-ogrozenost-8-julij-2026",
+    "vremenski-povzetek-maj-2026"
   ],
   "polletni-pregled-2026-ireica1": [
     "najbolj-suha-pomlad-2026-ireica1",
@@ -536,8 +541,8 @@
   ],
   "ekoloska-tveganja-pozarna-ogrozenost-vetrolomi": [
     "velika-pozarna-ogrozenost-8-julij-2026",
-    "nevihte-toca-hudourniki-julij-2026",
-    "nevihtni-pas-14-julij-2026"
+    "najbolj-suha-pomlad-2026-ireica1",
+    "nevihte-toca-hudourniki-julij-2026"
   ],
   "vremenski-povzetek-junij-2026": [
     "vremenski-povzetek-julij-2026",
