@@ -44,8 +44,10 @@ ročno v seji — mora pred koncem dela skozi lekturo:
 **Workflow `lektura.yml` je IZKLOPLJEN od 2. 10. 2026** (Filipova odločitev):
 API ključ nima dobroimetja (»credit balance is too low«) in je vsak tek padel.
 Posel je v `if: ${{ false }}` — ročni zagon se preskoči. Dokler ga Filip ne
-vklopi, ga ne poganjaj in ga ne vklapljaj sam. Vgrajeni `call_lektor` v
-generatorjih ob napaki API lekturo sam preskoči in članek objavi nelektoriran.
+vklopi, ga ne poganjaj in ga ne vklapljaj sam. Izklopljena je tudi **vgrajena
+lektura** v generatorjih: `LEKTURA_VKLOPLJENA = False` v
+`tools/generate_daily_post.py` — `call_lektor()` (skozi gre vsak generator)
+API-ja ne kliče in vrne članek nespremenjen. Ponovni vklop: obe stikali nazaj.
 
 Lektor preverja slovnico, slog, interno konsistentnost in — posebej pomembno —
 anglicizme/kalke (dobesedni prevodi, prekomerni trpnik, angleški narekovaji,
