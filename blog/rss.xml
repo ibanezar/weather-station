@@ -5,8 +5,62 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 30 Sep 2026 05:03:27 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 02 Oct 2026 08:20:36 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kakršno Lenartovo, tako do božiča? Preverili smo</title>
+      <link>https://meteorec.si/blog/lenartovo-pregovor-vreme-do-bozica.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/lenartovo-pregovor-vreme-do-bozica.html</guid>
+      <pubDate>Fri, 02 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Pregovor pravi, da vreme na Lenartovo (6. 11.) obstane do božiča. Šest let meritev v Rečici ob Savinji: pregovor se je ujel 4-krat od 6, kar je kot met kovanca.</description>
+      <category>razlaga</category>
+      <category>klima</category>
+      <category>Rečica ob Savinji</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Vremensko leto 2025/26 v Rečici ob Savinji v številkah</title>
+      <link>https://meteorec.si/blog/vremensko-leto-2025-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vremensko-leto-2025-2026.html</guid>
+      <pubDate>Thu, 01 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Vremensko leto 2025/26 v Rečici ob Savinji: 11,3 °C, 1068 mm padavin, 53 vročih dni in 99 dni z zmrzaljo. Meritve postaje IREICA1.</description>
+      <category>letni-pregled</category>
+      <category>klima</category>
+      <category>2026</category>
+    </item>
+    <item>
+      <title>Test napovedi: september 2026 — zmagal ICON</title>
+      <link>https://meteorec.si/blog/test-napovedi-2026-09.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/test-napovedi-2026-09.html</guid>
+      <pubDate>Thu, 01 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino v septembru 2026: primerjava ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.</description>
+      <category>test-napovedi</category>
+      <category>mesecni-pregled</category>
+      <category>2026</category>
+    </item>
+    <item>
+      <title>Vremenski povzetek — september 2026</title>
+      <link>https://meteorec.si/blog/vremenski-povzetek-september-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vremenski-povzetek-september-2026.html</guid>
+      <pubDate>Thu, 01 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Povprečno 15,8 °C (0,0 °C pod dolgoletnim povprečjem) in 152,2 mm padavin.</description>
+      <category>povzetek</category>
+      <category>september</category>
+      <category>2026</category>
+    </item>
+    <item>
+      <title>Oktober 2026 v Rečici: kaj kažejo podatki postaje</title>
+      <link>https://meteorec.si/blog/oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001.html</guid>
+      <pubDate>Thu, 01 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Kaj lahko v oktobru pričakujemo v Rečici ob Savinji? Šest oktobrov postaje IREICA1: temperature, padavine, prva slana in napoved za prve tri dni.</description>
+      <category>napoved</category>
+      <category>oktober</category>
+      <category>analiza</category>
+      <category>IREICA1</category>
+      <category>Savinja</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>Vreme na Lenartov sejem: nedelja, 4. oktobra</title>
       <link>https://meteorec.si/blog/lenartov-sejem-vreme-nedelja-1004.html</link>

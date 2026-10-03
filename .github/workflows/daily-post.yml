@@ -21,19 +21,22 @@ on:
         default: 'false'
 
 jobs:
+  # IZKLOPLJENO 2. 10. 2026 (Filipova odločitev): API ključ nima dobroimetja.
+  # Vsi trije posli imajo `false && (...)` -- za vklop odstrani `false && `.
+
   # ── 1. faza (cron): pripravi tri predloge in jih pošlje Filipu po e-pošti.
   # Objavi se nič -- objava se zgodi šele, ko Filip v e-mailu klikne predlog
   # (worker /daily-post/pick sproži ta workflow z inputom choice).
   predlogi:
-    if: github.event_name == 'schedule' || inputs.predlogi == 'true'
+    if: false && (github.event_name == 'schedule' || inputs.predlogi == 'true')
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -66,13 +69,13 @@ jobs:
   # ── faza za testiranje: napiše en članek (osnutek + lektura) in ga izpiše
   # v log te naloge -- nič se ne zapiše na disk in nič se ne objavi/commita.
   preview:
-    if: github.event_name == 'workflow_dispatch' && inputs.preview == 'true'
+    if: false && (github.event_name == 'workflow_dispatch' && inputs.preview == 'true')
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -85,16 +88,16 @@ jobs:
   # objavi predlog, ki ga je Filip izbral v e-mailu; brez inputa deluje po
   # starem (takojšnja samodejna izbira teme in objava).
   publish:
-    if: github.event_name == 'workflow_dispatch' && inputs.predlogi != 'true' && inputs.preview != 'true'
+    if: false && (github.event_name == 'workflow_dispatch' && inputs.predlogi != 'true' && inputs.preview != 'true')
     runs-on: ubuntu-latest
     permissions:
       contents: write
       issues: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 

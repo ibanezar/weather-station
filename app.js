@@ -54,6 +54,9 @@ const isDark = () => document.documentElement.dataset.theme === 'dark';
 // sicer barvo ozadja potegne v blatno sivino.
 const meshOpacity = () => isDark() ? '1' : '0.18';
 let _lastTemp = null; // remember temp so theme toggle can re-colour it
+// Grafi, ki barve preberejo samo ob izrisu (isDark()), se ob menjavi teme sami ne
+// posodobijo. Ob prvem izrisu se vpišejo sem, setTheme() jih preriše (samo že narisane).
+const _themeRedraw=new Set();
 function setTheme(t){
   document.documentElement.dataset.theme = t;
   document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
@@ -69,6 +72,8 @@ function setTheme(t){
   // Grafi MTR nosijo lastno paleto po temi (MTR_CC), zato jih je treba prerisati
   // — barve so v atributih SVG, ne v CSS, in se same ne posodobijo.
   if(_mtrState) renderMtrCard();
+  _themeRedraw.forEach(fn=>{ try{ fn(); }catch(_){} });
+  if(_anChartsInit){ _anChartsInit=false; try{ initAnalysisCharts(); }catch(_){} }
   const mc = document.getElementById('mesh-canvas');
   if(mc) mc.style.opacity = meshOpacity();
 }
@@ -125,7 +130,7 @@ function dismissModeIntro(){
   try{ localStorage.setItem(MODE_INTRO_KEY,'dismissed'); }catch(e){}
   hideModeIntro();
 }
-function hideModeIntro(){ const el=document.getElementById('mode-intro'); if(el) el.hidden=true; }
+function hideModeIntro(){ const el=document.getElementById('mode-intro'); if(el) el.hidden=true; delete document.documentElement.dataset.modeIntro; }
 function syncModeButtons(){
   const simple=isSimpleMode();
   document.getElementById('mode-btn-simple')?.setAttribute('aria-pressed',  simple?'true':'false');
@@ -800,13 +805,21 @@ function renderThisWeekHistory(){
     const c=stops[i].map((v,j)=>Math.round(v+(stops[i+1][j]-v)*f));
     return'rgb('+c.join(',')+')';
   };
+  // Besedilo celice: bela ali črna, kar ima proti ozadju večji kontrast — bela
+  // na zeleni/oranžni je imela 2,1–3,4:1 (axe, 1. 10. 2026).
+  const ink=(rgb)=>{
+    const L=rgb.match(/\d+/g).map(Number).map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+    const lum=0.2126*L[0]+0.7152*L[1]+0.0722*L[2];
+    // Večji od obeh kontrastov (bela / črna) je vedno ≥ 4,58:1.
+    return 1.05/(lum+0.05)>=(lum+0.05)/0.05?'#fff':'#000';
+  };
   const dayHdr=days.map(d=>'<th>'+d.getDate()+'.'+(d.getMonth()+1)+'.</th>').join('');
   let html='<div class="twh-grid-wrap"><table class="twh-grid"><thead><tr><th></th>'+dayHdr+'</tr></thead><tbody>';
   grid.forEach(row=>{
     html+='<tr><td class="twh-yr">'+row.yr+'</td>';
     row.cells.forEach(t=>{
       if(t==null)html+='<td><div class="twh-cell twh-empty"></div></td>';
-      else html+='<td><div class="twh-cell" style="background:'+colour(t)+'" title="'+t.toFixed(1)+'°C">'+Math.round(t)+'</div></td>';
+      else{const bg=colour(t);html+='<td><div class="twh-cell" style="background:'+bg+';color:'+ink(bg)+'" title="'+t.toFixed(1)+'°C">'+Math.round(t)+'</div></td>';}
     });
     html+='</tr>';
   });
@@ -1381,6 +1394,8 @@ function openThresholdModal(){
   const notifOn=localStorage.getItem('wx-notif')==='on';
   const digestEl=document.getElementById('thr-digest');
   if(digestEl){digestEl.checked=notifOn&&localStorage.getItem(DIGEST_KEY)==='on';digestEl.disabled=!notifOn;}
+  const fcEl=document.getElementById('thr-fc');
+  if(fcEl){fcEl.checked=notifOn&&localStorage.getItem(FC_THR_KEY)==='on';fcEl.disabled=!notifOn;}
   const hint=document.getElementById('thr-digest-hint');
   if(hint)hint.hidden=notifOn;
   const m=document.getElementById('threshold-modal');if(m){m.style.display='flex';}
@@ -1388,17 +1403,31 @@ function openThresholdModal(){
 function closeThresholdModal(){
   const m=document.getElementById('threshold-modal');if(m)m.style.display='none';
 }
-// Posodobi "jutranji povzetek" na obstoječi push-naročnini (če je ni, ni kaj
-// posodobiti — kljukica je v tem primeru onemogočena, glej openThresholdModal).
-async function updateDigestPreference(on){
+// Posodobi nastavitve na obstoječi push-naročnini (če je ni, ni kaj
+// posodobiti — kljukici sta v tem primeru onemogočeni, glej openThresholdModal).
+// `prefs` pošlje samo polja, ki jih spreminjamo — strežnik ostalih ne dotakne.
+async function updatePushPrefs(prefs){
   try{
     if(!('serviceWorker' in navigator))return;
     const reg=await navigator.serviceWorker.ready;
     const sub=await reg.pushManager.getSubscription();
     if(!sub)return;
     const vas=getNowcastVas();
-    await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,digest:on})});
-  }catch(e){console.warn('digest pref:',e);}
+    await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,...prefs})});
+  }catch(e){console.warn('push prefs:',e);}
+}
+// Opozori vnaprej: isti pragovi gredo na strežnik, ki jih enkrat na uro
+// primerja z napovedjo za izbrano vas (worker.js, _cronCheckForecastThresholds).
+// Meje so dvojnik FC_THR_LIMITS v worker.js — če spremeniš eno, spremeni drugo.
+const FC_THR_KEY='wx-fc-thr';
+const FC_THR_LIMITS={wind:[10,200],rain:[0.5,100],tempMin:[-40,40],tempMax:[-20,50]};
+function fcThresholdsPayload(){
+  if(localStorage.getItem(FC_THR_KEY)!=='on')return null;
+  const out={};let any=false;
+  for(const [k,[lo,hi]] of Object.entries(FC_THR_LIMITS)){
+    const v=_thr[k];if(v!==null&&v>=lo&&v<=hi){out[k]=v;any=true;}
+  }
+  return any?out:null;
 }
 function saveThresholdSettings(){
   const gv=(id)=>{const v=parseFloat(document.getElementById(id)?.value);return isNaN(v)?null:v;};
@@ -1407,12 +1436,19 @@ function saveThresholdSettings(){
   try{localStorage.setItem(THRESHOLD_KEY,JSON.stringify(_thr));}catch{}
   const hasAny=Object.values(_thr).some(v=>v!==null);
   document.getElementById('threshold-btn')?.classList.toggle('has-thresholds',hasAny);
+  const prefs={};
   const digestEl=document.getElementById('thr-digest');
   if(digestEl&&!digestEl.disabled){
     const on=!!digestEl.checked;
     try{localStorage.setItem(DIGEST_KEY,on?'on':'off');}catch{}
-    updateDigestPreference(on);
+    prefs.digest=on;
   }
+  const fcEl=document.getElementById('thr-fc');
+  if(fcEl&&!fcEl.disabled){
+    try{localStorage.setItem(FC_THR_KEY,fcEl.checked?'on':'off');}catch{}
+    prefs.fc=fcThresholdsPayload();
+  }
+  if(Object.keys(prefs).length)updatePushPrefs(prefs);
   closeThresholdModal();
   if(_lastBriefObs)checkThresholdAlerts(_lastBriefObs);
 }
@@ -1423,6 +1459,8 @@ function clearThresholdSettings(){
   document.getElementById('threshold-btn')?.classList.remove('has-thresholds');
   _liveAlerts=_liveAlerts.filter(a=>!a._threshold);
   renderAllAlerts();
+  // Brez pragov ni česa primerjati z napovedjo — izklopi tudi na strežniku.
+  if(localStorage.getItem('wx-notif')==='on')updatePushPrefs({fc:null});
 }
 function checkThresholdAlerts(obs){
   const m=obs.metric;
@@ -3642,8 +3680,8 @@ function renderPastDays(){
       <div class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</div>
       <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%"></div></div>
       <div class="pd-meta">
-        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span style="opacity:.3">💧 —</span>'}</span>
-        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span style="opacity:.3">💨 —</span>'}</span>
+        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span style="opacity:.7">💧 —</span>'}</span>
+        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span style="opacity:.7">💨 —</span>'}</span>
       </div>
     </div>`;
   }).join('');
@@ -5834,6 +5872,7 @@ function setHeatmapMode(mode){
 }
 function drawHeatmap(){
   const svg=document.getElementById('heatmap-svg');if(!svg)return;
+  _themeRedraw.add(drawHeatmap);
   const y=new Date().getFullYear();
   set('hm-year-lbl',y);
   try{
@@ -5962,14 +6001,45 @@ async function fetchLightningHistory(){
     const dni=(d.daily||[]).filter(x=>x.count>0);
     if(!dni.length){el.hidden=true;}else{
       el.hidden=false;
-      el.innerHTML='<div style="margin-bottom:.3rem">Zadnjih 14 dni (stalni zapis):</div>'+
-        dni.map(x=>{
-          const dan=new Date(x.date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
-          return '<span style="white-space:nowrap;margin-right:.7rem">'+dan+': <b style="color:var(--text)">'+x.count+'</b> (najbližja '+Math.round(x.closest_km)+' km)</span>';
-        }).join('');
+      el.innerHTML=ltgHistoryChart(d.daily||[]);
     }
     renderLightningMap(d.strikes||[]);
   }catch(e){console.warn('Zgodovina strel:',e);}
+}
+
+// Stolpčni graf strel po dnevih (zadnjih 14 dni, stalni zapis LightningLogger).
+// Dnevi brez strel so prazni stolpci — brez njih bi 3 dnevi s strelami izgledali
+// kot cel mesec. En sam niz, zato brez legende; naslov pove, kaj je merjeno.
+// Vrednost in najbližja strela sta v <title> (hover/dotik) in v oznaki za
+// bralnike zaslona, ker je graf sicer samo slika.
+function ltgHistoryChart(daily){
+  const byDate={};daily.forEach(x=>{byDate[x.date]=x;});
+  const days=[];
+  for(let i=13;i>=0;i--){
+    // Dan je UTC, kot ga zapiše LightningLogger (toISOString v worker.js).
+    const key=new Date(Date.now()-i*864e5).toISOString().slice(0,10);
+    days.push({date:key,count:(byDate[key]&&byDate[key].count)||0,closest:byDate[key]&&byDate[key].closest_km});
+  }
+  const max=Math.max(...days.map(x=>x.count),1);
+  const W=320,H=96,padL=4,padR=4,padT=14,padB=18,bw=(W-padL-padR)/days.length;
+  const fmt=x=>new Date(x.date+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
+  let bars='',lbl='';
+  days.forEach((x,i)=>{
+    const h=x.count?Math.max(3,(H-padT-padB)*x.count/max):0;
+    const bx=padL+i*bw+bw*0.18,w=bw*0.64,y=H-padB-h;
+    const tip=fmt(x)+': '+x.count+(x.count?' strel, najbližja '+Math.round(x.closest)+' km':' strel');
+    bars+='<g><title>'+tip+'</title><rect x="'+(padL+i*bw)+'" y="0" width="'+bw+'" height="'+(H-padB)+'" fill="transparent"/>'+
+      (h?'<rect x="'+bx.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="2" fill="var(--amber)"/>':
+         '<rect x="'+bx.toFixed(1)+'" y="'+(H-padB-1)+'" width="'+w.toFixed(1)+'" height="1" fill="var(--muted)" opacity=".5"/>')+'</g>';
+    if(x.count===max&&x.count>0)lbl+='<text x="'+(padL+i*bw+bw/2).toFixed(1)+'" y="'+(y-3).toFixed(1)+'" text-anchor="middle" font-size="9" fill="var(--text)">'+x.count+'</text>';
+  });
+  const ax=[0,6,13].map(i=>'<text x="'+(padL+i*bw+bw/2).toFixed(1)+'" y="'+(H-5)+'" text-anchor="'+(i===0?'start':i===13?'end':'middle')+'" font-size="9" fill="var(--muted)">'+fmt(days[i])+'</text>').join('');
+  const total=days.reduce((a,x)=>a+x.count,0);
+  const aria='Strele v zadnjih 14 dneh, do 200 km od postaje: skupaj '+total+'. '+
+    days.filter(x=>x.count).map(x=>fmt(x)+' '+x.count+' (najbližja '+Math.round(x.closest)+' km)').join('; ')+'.';
+  return '<div style="margin-bottom:.2rem">Strel po dnevih, zadnjih 14 dni (stalni zapis):</div>'+
+    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block" role="img" aria-label="'+aria.replace(/"/g,'&quot;')+'">'+
+    '<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="var(--muted)" stroke-opacity=".35"/>'+bars+lbl+ax+'</svg>';
 }
 
 // Zemljevid strel zadnjih 24 ur (isti vzorec kot renderObsMap: majhen
@@ -6288,7 +6358,7 @@ async function toggleNotifications(){
   }
   try{
     const vas=getNowcastVas();
-    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas})});
+    const r=await fetch(PROXY+'/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),vas,fc:fcThresholdsPayload()})});
     if(!r.ok)throw new Error('subscribe failed: HTTP '+r.status);
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');
@@ -6318,6 +6388,8 @@ function syncChartScrollEdge(wrap){
   if(wrap.clientWidth===0)return;
   const scrollable = wrap.scrollWidth - wrap.clientWidth > 4;
   wrap.classList.toggle('chart-xscroll', scrollable);
+  // Drsno območje mora biti dosegljivo s tipkovnico (WCAG, axe scrollable-region-focusable).
+  if(scrollable) wrap.setAttribute('tabindex','0'); else wrap.removeAttribute('tabindex');
   if(!scrollable){wrap.classList.remove('at-end');return;}
   wrap.classList.toggle('at-end', wrap.scrollWidth - wrap.clientWidth - wrap.scrollLeft <= 2);
   if(wrap.scrollLeft > 8) wrap.classList.add('scrolled');
@@ -8200,6 +8272,7 @@ function buildKlimatogram(){
 }
 
 function buildXLSXCharts(){
+  _themeRedraw.add(buildXLSXCharts);
   const dark=isDark();
   const tc=dark?'#94a3b8':'#64748b';
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
@@ -8356,7 +8429,11 @@ function initAnalysisCharts(){
   const gridC=dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
   const textC=dark?'#94a3b8':'#64748b';
   const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textC,font:{size:10},boxWidth:10}}},scales:{x:{ticks:{color:textC,font:{size:10}},grid:{color:gridC}},y:{ticks:{color:textC,font:{size:10}},grid:{color:gridC}}}};
-  const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;new Chart(el.getContext('2d'),cfg);};
+  // Ob ponovnem izrisu (menjava teme) mora stari graf najprej izginiti, sicer Chart.js
+  // javi »Canvas is already in use«.
+  const mk=(id,cfg)=>{const el=document.getElementById(id);if(!el)return;
+    try{const existing=typeof Chart.getChart==='function'?Chart.getChart(el):null;if(existing)existing.destroy();}catch(_){}
+    new Chart(el.getContext('2d'),cfg);};
   const yr=AN.years;
 
   // Annual temp + trend
@@ -9374,6 +9451,73 @@ const DUEL_NEIGHBOUR={
   owner:'Jaka Robnik',   // navedba na kartici: »Meritve sosednje postaje deli …«
 };
 
+// ── Dolinski profil: izmerjena temperatura po nadmorski višini ───────────
+// Rečica (IREICA1, 366 m), Gornji Grad (DRSI, 428 m) in Črnivec (DRSI, 903 m) — vse
+// IZMERJENO, nič preračunanega: razlika med postajami pokaže, ali je zrak v dolini
+// hladnejši od višine (inverzija, hladna kotanja) ali običajno toplejši. Varpolje
+// nima objavljene višine in je na istem dnu doline kot Rečica, zato ni na grafu.
+// Višini DRSI postaj sta iz DEM (DRSI_ELEV_M v tools/crnivec_zones.py).
+const VP_HOME_ELEV=366, VP_GG_ELEV=428, VP_CRN_ELEV=903, VP_DRSI_MAX_AGE_MIN=40, VP_STD_LAPSE=-0.65;
+let _vpCache={ts:0,data:null};
+// Čista funkcija (preverja tools/test_valley_profile.py): točke [{name,elev,t}] → povzetek.
+function valleyProfileSummary(pts){
+  const p=(pts||[]).filter(x=>x&&x.t!=null&&isFinite(x.t)).sort((a,b)=>a.elev-b.elev);
+  if(p.length<2)return null;
+  const lo=p[0],hi=p[p.length-1];
+  const lapse=(hi.t-lo.t)/(hi.elev-lo.elev)*100;   // °C na 100 m
+  let kind,text;
+  if(lapse>0){kind='inversion';text='Inverzija: na '+hi.elev+' m je toplejše kot v dolini.';}
+  else if(lapse>-0.4){kind='weak';text='Šibek gradient: temperatura z višino skoraj ne pade.';}
+  else if(lapse>-0.9){kind='normal';text='Običajen gradient (standardni je −0,65 °C/100 m).';}
+  else{kind='steep';text='Strm gradient: z višino se hitro ohlaja.';}
+  return{lo,hi,lapse,kind,text,pts:p};
+}
+function renderValleyProfile(el,sum){
+  const W=320,H=150,L=44,R=10,T=10,B=24;
+  const ts=sum.pts.map(x=>x.t),hs=sum.pts.map(x=>x.elev);
+  const tmin=Math.floor(Math.min(...ts,sum.lo.t+VP_STD_LAPSE*(950-sum.lo.elev)/100)-1),tmax=Math.ceil(Math.max(...ts)+1);
+  const hmin=300,hmax=1000;
+  const X=t=>L+(t-tmin)/(tmax-tmin)*(W-L-R),Y=h=>H-B-(h-hmin)/(hmax-hmin)*(H-T-B);
+  const ref='<line x1="'+X(sum.lo.t+VP_STD_LAPSE*(hmin-sum.lo.elev)/100).toFixed(1)+'" y1="'+Y(hmin).toFixed(1)+
+    '" x2="'+X(sum.lo.t+VP_STD_LAPSE*(hmax-sum.lo.elev)/100).toFixed(1)+'" y2="'+Y(hmax).toFixed(1)+
+    '" stroke="var(--muted)" stroke-dasharray="4 3" stroke-width="1"/>';
+  const obs='<line x1="'+X(sum.lo.t).toFixed(1)+'" y1="'+Y(sum.lo.elev).toFixed(1)+'" x2="'+X(sum.hi.t).toFixed(1)+
+    '" y2="'+Y(sum.hi.elev).toFixed(1)+'" stroke="var(--blue)" stroke-width="2"/>';
+  const dots=sum.pts.map(x=>'<g><title>'+x.name+': '+_duelNum(x.t,1)+' °C na '+x.elev+' m</title>'+
+    '<circle cx="'+X(x.t).toFixed(1)+'" cy="'+Y(x.elev).toFixed(1)+'" r="5" fill="var(--blue)" stroke="var(--bg,#fff)" stroke-width="2"/>'+
+    // oznaka na levo od točke, če bi na desni zlezla čez rob grafa
+    (X(x.t)>W-95?'<text x="'+(X(x.t)-8).toFixed(1)+'" text-anchor="end"':'<text x="'+(X(x.t)+8).toFixed(1)+'"')+
+    ' y="'+(Y(x.elev)+4).toFixed(1)+'" font-size="10" fill="var(--text)">'+x.name+' '+_duelNum(x.t,1)+'°</text></g>').join('');
+  const yTicks=[400,600,800,1000].map(h=>'<text x="'+(L-6)+'" y="'+(Y(h)+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+h+' m</text>'+
+    '<line x1="'+L+'" y1="'+Y(h).toFixed(1)+'" x2="'+(W-R)+'" y2="'+Y(h).toFixed(1)+'" stroke="var(--muted)" stroke-opacity=".15"/>').join('');
+  const aria='Temperatura po višini: '+sum.pts.map(x=>x.name+' '+_duelNum(x.t,1)+' °C na '+x.elev+' m').join(', ')+'. '+sum.text;
+  el.innerHTML='<div class="duel-verdict" style="margin-top:.6rem"><b>Profil doline v živo:</b> '+sum.text+
+    ' Gradient '+(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m ('+sum.lo.name+' → '+sum.hi.name+').</div>'+
+    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block;margin:.3rem auto 0" role="img" aria-label="'+aria.replace(/"/g,'&quot;')+'">'+
+    yTicks+ref+obs+dots+'</svg>'+
+    '<div class="duel-credit">Prekinjena črta: standardni gradient −0,65 °C/100 m od '+sum.lo.name+'. Vse izmerjeno; '+
+    'Črnivec in Gornji Grad: <a href="https://www.ceste.si/sl/razmere/vreme" target="_blank" rel="noopener">DRSI</a> (višini iz DEM).</div>';
+}
+async function fetchValleyProfile(homeT){
+  const el=document.getElementById('duel-profile');
+  if(!el)return;
+  try{
+    // Vir se osveži na ~10 min in je predpomnjen na 5 min v workerju — klienta omejimo na enkrat/5 min.
+    if(!_vpCache.data||Date.now()-_vpCache.ts>5*60*1000){
+      const r=await fetch(PROXY+'/crnivec-drsi');
+      _vpCache={ts:Date.now(),data:r.ok?await r.json():null};
+    }
+    const post=(_vpCache.data&&_vpCache.data.postaje)||{};
+    const fresh=st=>st&&st.temp_c!=null&&st.ts&&(Date.now()-new Date(st.ts))/60000<=VP_DRSI_MAX_AGE_MIN;
+    const pts=[{name:'Rečica',elev:VP_HOME_ELEV,t:homeT}];
+    if(fresh(post.gornji_grad))pts.push({name:'Gornji Grad',elev:VP_GG_ELEV,t:post.gornji_grad.temp_c});
+    if(fresh(post.crnivec))pts.push({name:'Črnivec',elev:VP_CRN_ELEV,t:post.crnivec.temp_c});
+    const sum=valleyProfileSummary(pts);
+    if(!sum){el.innerHTML='';return;}
+    renderValleyProfile(el,sum);
+  }catch(e){el.innerHTML='';console.warn('Dolinski profil:',e);}
+}
+
 function _duelNum(v,d=1){return(v==null||isNaN(v))?'—':Number(v).toFixed(d).replace('.',',');}
 
 function _duelVerdict(diff,hour){
@@ -9440,6 +9584,7 @@ async function fetchValleyDuel(){
         'Arhiv, model MTR in semafor točnosti ostajajo na meritvah IREICA1.</div>';
 
     if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    fetchValleyProfile(homeT);
   }catch(e){
     if(body)body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';
     console.warn('Dvoboj Varpolje:',e);
@@ -15472,7 +15617,7 @@ function _calcOneDayFWI(prev,T,H,W,r,month){
   const fF=91.9*Math.exp(-0.1386*mF)*(1+Math.pow(mF,5.31)/4.93e7);
   const isi=0.208*fW*fF;
   // BUI
-  const bui=dmc<=0.4*dc?0.8*dmc*dc/(dmc+0.4*dc):dmc-(1-0.8*dc/(dmc+0.4*dc))*(0.92+Math.pow(0.0114*dmc,1.7));
+  const bui=dmc+0.4*dc===0?0:dmc<=0.4*dc?0.8*dmc*dc/(dmc+0.4*dc):dmc-(1-0.8*dc/(dmc+0.4*dc))*(0.92+Math.pow(0.0114*dmc,1.7));
   // FWI
   const fD=bui<=80?0.626*Math.pow(Math.max(bui,0),0.809)+2:1000/(25+108.64*Math.exp(-0.023*bui));
   const B=0.1*isi*fD;

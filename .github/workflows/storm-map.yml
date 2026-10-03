@@ -10,6 +10,10 @@ name: Nevihtna karta Slovenije
 # sta nastavljena dva termina (05:00 in 06:00 UTC = 7:00 pri nas poleti oz.
 # pozimi), tools/storm_map_gate.py pa spusti skozi samo pravega in poskrbi,
 # da gre karta ven enkrat na dan.
+#
+# Pozni tek (od 1. 10. 2026): GitHubov cron zdaj zamuja 5-7 ur, zato je gate pred
+# tem mesec dni zavračal vsak tek. Po koncu okna do 20:00 se karta (stran + arhiv)
+# še sestavi, FB/IG pa ne gresta ven (`late=true`) — glej gate.
 
 on:
   schedule:
@@ -29,9 +33,9 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -59,7 +63,7 @@ jobs:
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           python3 tools/storm_map_gate.py mark
-          git add og/storm-map nevihte/index.html tools/.storm_map_state.json
+          git add og/storm-map data/storm-map-forecasts nevihte/index.html tools/.storm_map_state.json
           if git diff --cached --quiet; then
             echo "Ni sprememb za objavo."
           else
@@ -79,7 +83,7 @@ jobs:
       # javnega URL-ja in Cloudflare zna 404, ujet med deployem, predpomniti
       # za skoraj eno leto, zato vsak poskus uporabi svoj query-string.
       - name: Počakaj, da je slika dosegljiva
-        if: steps.gate.outputs.proceed == 'true'
+        if: steps.gate.outputs.proceed == 'true' && steps.gate.outputs.late != 'true'
         run: |
           URL=$(python3 -c "import json;print(json.load(open('og/storm-map/latest.json'))['image'])")
           echo "Čakam na $URL"
@@ -92,7 +96,7 @@ jobs:
           exit 1
 
       - name: Objavi karto na Facebook (feed)
-        if: steps.gate.outputs.proceed == 'true'
+        if: steps.gate.outputs.proceed == 'true' && steps.gate.outputs.late != 'true'
         continue-on-error: true
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
@@ -100,7 +104,7 @@ jobs:
         run: python3 tools/post_storm_map_to_facebook.py
 
       - name: Objavi karto na Instagram (feed)
-        if: steps.gate.outputs.proceed == 'true'
+        if: steps.gate.outputs.proceed == 'true' && steps.gate.outputs.late != 'true'
         continue-on-error: true
         env:
           IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
@@ -108,7 +112,7 @@ jobs:
         run: python3 tools/post_storm_map_to_instagram.py
 
       - name: Objavi karto kot zgodbo na Facebook
-        if: steps.gate.outputs.proceed == 'true'
+        if: steps.gate.outputs.proceed == 'true' && steps.gate.outputs.late != 'true'
         continue-on-error: true
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
@@ -122,7 +126,7 @@ jobs:
           fi
 
       - name: Objavi karto kot zgodbo na Instagram
-        if: steps.gate.outputs.proceed == 'true'
+        if: steps.gate.outputs.proceed == 'true' && steps.gate.outputs.late != 'true'
         continue-on-error: true
         env:
           IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}

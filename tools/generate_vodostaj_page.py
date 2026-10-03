@@ -335,7 +335,7 @@ def build_body(flood, stations):
             f'<td>{station_status(s["pretok"], s)}</td></tr>'
             for s in rows6
         )
-        st_table = ('  <div class="table-scroll"><table class="stats">\n'
+        st_table = ('  <div class="table-scroll" tabindex="0"><table class="stats">\n'
                     '    <tr><th>Postaja</th><th>Vodostaj</th><th>Pretok</th><th>Stanje</th></tr>\n'
                     f'{st_rows}\n  </table></div>')
         st_chart_svg = stations_chart_svg(rows6)
@@ -363,7 +363,7 @@ def build_body(flood, stations):
         '  <div class="vod-chart-title">Napoved pretoka GloFAS, naslednjih 7 dni</div>\n'
         f'  {outlook_chart_svg(out_rows, mean_q)}\n  </div>'
     )
-    outlook_table = '  <div class="table-scroll"><table class="stats">\n' + "\n".join(
+    outlook_table = '  <div class="table-scroll" tabindex="0"><table class="stats">\n' + "\n".join(
         f'      <tr><th>{lbl}</th><td>{seo.num(q, 1)} m³/s</td></tr>' for lbl, q in out_rows
     ) + "\n  </table></div>"
 
@@ -373,7 +373,7 @@ def build_body(flood, stations):
         f'      <tr><th>{e["date"]}</th><td>{e["q"]} m³/s</td><td>{e["desc"]}</td></tr>'
         for e in reversed(FLOOD_HISTORY)
     )
-    hist_table = ('  <div class="table-scroll"><table class="stats">\n'
+    hist_table = ('  <div class="table-scroll" tabindex="0"><table class="stats">\n'
                   '    <tr><th>Datum</th><th>Vršni pretok</th><th>Opis</th></tr>\n'
                   f'{hist_rows}\n  </table></div>')
 

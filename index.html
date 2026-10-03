@@ -16,7 +16,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script>(function(){try{var p=new URLSearchParams(location.search).get('pogled'),m=null;
 if(p==='preprosto'||p==='simple')m='simple';else if(p==='napredno'||p==='advanced')m='advanced';
 if(m){localStorage.setItem('wx-mode',m);}else{m=localStorage.getItem('wx-mode');}
-if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();</script>
+if(m==='simple')document.documentElement.dataset.mode='simple';
+/* Ponudba izbire pogleda (#mode-intro) mora biti vidna že ob prvem izrisu — prej jo je
+   pokazal app.js po nalaganju in je vso stran potisnila ~380 px navzdol (CLS 0,28). */
+if(!m&&!localStorage.getItem('wx-mode-intro'))document.documentElement.dataset.modeIntro='1';}catch(e){}})();</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
 <script>
@@ -299,7 +302,7 @@ if(m==='simple')document.documentElement.dataset.mode='simple';}catch(e){}})();<
 <link rel="dns-prefetch" href="https://api.open-meteo.com">
 <link rel="dns-prefetch" href="https://vreme.arso.gov.si">
 <link rel="stylesheet" href="/fonts/fonts.css?v=01c90e73">
-<link rel="stylesheet" href="/style.min.css?v=23a1e966">
+<link rel="stylesheet" href="/style.min.css?v=0365b53b">
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -361,6 +364,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <a href="/trendi/"><span class="qn-ico">📈</span> Trendi</a>
           <a href="/vreme/"><span class="qn-ico">🗓️</span> Arhiv</a>
           <a href="/vreme/mesec/"><span class="qn-ico">📅</span> Po mesecih</a>
+          <a href="/sezona/"><span class="qn-ico">🍂</span> Ta čas v dolini</a>
           <a href="/o-postaji.html"><span class="qn-ico">ℹ️</span> O postaji</a>
           <span class="qn-drop-sep" aria-hidden="true"></span>
           <a href="/igra/"><span class="qn-ico">🪂</span> Igra: Termika</a>
@@ -627,18 +631,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="hero-top">
       <div class="hero-left">
         <div class="condition-badge"><span id="cond-icon" class="skel-shimmer">—</span><span id="cond-label" class="skel-shimmer">—</span></div>
-        <div class="temp-huge"><span id="temp-val">7,0</span><span class="temp-unit-sup"> °C</span></div>
+        <div class="temp-huge"><span id="temp-val">3,0</span><span class="temp-unit-sup"> °C</span></div>
         <div class="feels">
           <span id="feels-pill" class="feels-pill"></span>
-          <span>Občutek <strong id="feels-val">7,0</strong>°C</span>
+          <span>Občutek <strong id="feels-val">3,0</strong>°C</span>
         </div>
         <div class="yesterday-delta" id="yesterday-delta"></div>
         <!-- Dnevno dejstvo (rekord dneva, niz, primerjava z lani) — od 26. 9. 2026
              v junaški kartici, ne kot ločena kartica nad njo. -->
         <!-- WX-DAILY-FACT:START (auto: tools/generate_daily_fact.py) -->
-        <div class="daily-fact-card" id="daily-fact-card" data-date="2026-09-28"><span class="dfc-icon" aria-hidden="true">🏆</span><span class="dfc-text">Včeraj rekord za 28. 9.: najnižja <strong>5,1 °C</strong> (prej 6,2 °C, 2022)</span></div>
+        <div class="daily-fact-card" id="daily-fact-card" data-date="2026-10-02"><span class="dfc-icon" aria-hidden="true">🌡️</span><span class="dfc-text">2. 10. letos <strong>2. najtoplejši</strong> v 7 letih meritev (22,5 °C)</span></div>
         <!-- WX-DAILY-FACT:END -->
-        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">6,0</strong>°C<span id="dew-desc"></span></div>
+        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">3,0</strong>°C<span id="dew-desc"></span></div>
         <!-- "Our forecast, graded daily against ARSO" is the site's
              strongest trust signal (/tocnost-napovedi/), but it lived only
              on that one page. Populated by fetchTrustBadge() in app.js;
@@ -670,7 +674,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="fc-slider-center vis" id="fc-slider-center">zdaj</span>
         <span>+24h</span>
       </div>
-      <input type="range" class="fc-slider" id="fc-slider" min="-6" max="24" value="0" step="1">
+      <input type="range" class="fc-slider" id="fc-slider" min="-6" max="24" value="0" step="1" aria-label="Ura napovedi (glede na zdaj)">
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
@@ -679,7 +683,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="hm-sub" id="hs-humidity-range" hidden>danes <span id="hs-hum-min">—</span>–<span id="hs-hum-max">—</span> %</span>
       </div>
       <div class="hm hm-wind" id="hm-wind">
-        <span class="hm-val" id="hs-wind">3,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hm-val" id="hs-wind">4,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter<span id="hs-wind-dir" class="hm-sub-inline"></span></span>
         <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">4,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
         <span class="hm-sub" id="hs-gust-max-line" hidden>danes najmočnejši <span id="hs-gust-max">—</span><span id="hs-gust-max-time"></span></span>
@@ -701,7 +705,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="hm-sub" id="hs-uv-max-line" hidden>danes najvišji <span id="hs-uv-max">—</span><span id="hs-uv-max-time"></span></span>
       </div>
       <div class="hm hm-pres hm-secondary" id="hm-pressure">
-        <span class="hm-val" id="hs-pressure">1026,9<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hm-val" id="hs-pressure">1031,4<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
         <span class="hm-lbl">Zračni tlak</span>
         <span class="hm-sub" id="hs-pressure-trend" hidden></span>
       </div>
@@ -748,26 +752,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
-  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-09-30T02:35">02:35</time>, 30. septembra 2026): temperatura 7,0 °C, rosišče 6,0 °C, relativna vlažnost 99 %, veter 3,0 km/h (sunki 4,0 km/h), zračni tlak 1027 hPa, padavine danes 0,0 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
+  <p class="wx-static" id="wx-static">Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji (<time datetime="2026-10-02">2. oktobra 2026</time>): povprečna temperatura 10,5 °C, najvišja 22,5 °C, najnižja 3,1 °C — 0,0 mm padavin, relativna vlažnost 82 %, najmočnejši sunek vetra 6,6 km/h. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
   <!-- WX-STATIC:END -->
 
   <!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->
-  <p class="wx-static" id="wx-record-watch">Včeraj (28. september) je bilo na Rečici ob Savinji 23,9 °C — <strong>2,1 °C</strong> od rekorda za ta koledarski dan (26,0 °C, 2021), v 6-letni zgodovini meritev postaje IREICA1. <a href="/rekord/">Vsi rekordi postaje →</a></p>
+  <p class="wx-static" id="wx-record-watch">Včeraj (2. oktober) je bilo na Rečici ob Savinji 22,5 °C — <strong>3,8 °C</strong> od rekorda za ta koledarski dan (26,3 °C, 2023), v 6-letni zgodovini meritev postaje IREICA1. <a href="/rekord/">Vsi rekordi postaje →</a></p>
   <!-- WX-RECORD-WATCH:END -->
 
   <!-- Day summary -->
   <div class="day-summary simple-keep">
-    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">7,7</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">00:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
-    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">6,8</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">02:34</span></span></div>
+    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">5,3</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">00:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
+    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">3,4</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">04:05</span></span></div>
     <div class="ds-item ds-rain"><span class="ds-arrow">🌧 Dež danes</span><span class="ds-temp"><span id="day-rain" class="skel-shimmer">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
-    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">7,2</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
+    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">4,4</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
 
   <!-- ── Zadnjih 7 dni ── -->
   <div class="past-days-hdr">
     <span class="past-days-hdr-lbl">📅 Zadnjih 7 dni</span>
   </div>
-  <div class="past-days-scroll" id="past-days-scroll"></div>
+  <div class="past-days-scroll" id="past-days-scroll" tabindex="0" aria-label="Zadnjih 7 dni"></div>
   <div class="pd-detail-wrap" id="pd-detail"></div>
 
   <!-- ── Ta mesec — hitri povzetek (renderMonthCard, deli izračun s spodnjim
@@ -1151,6 +1155,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="duel-body">
       <div class="duel-offline">Nalaganje sosednje postaje…</div>
     </div>
+    <div id="duel-profile"></div>
   </div>
 
   <!-- Padavinske norme -->
@@ -1311,7 +1316,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="insight-card" id="ic-analog">
       <div class="ic-head"><span>👯 Analogni dnevi — vremenski dvojčki</span><span class="ic-badge">zadnjih 7 let</span></div>
       <div class="analog-controls">
-        <input type="date" id="analog-date">
+        <input type="date" id="analog-date" aria-label="Datum za iskanje podobnih dni">
         <button class="analog-btn" id="analog-go">Najdi dvojčke</button>
       </div>
       <div id="analog-body"><div class="analog-empty">Izberi datum in poišči najbolj podobne dni v zgodovini postaje.</div></div>
@@ -1536,13 +1541,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </tr>
           </thead>
           <tbody id="history-tbody">
-<tr><td>30. sep. 2026</td><td class="td-high">7,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">6,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>7,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">3,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>99<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>3. okt. 2026</td><td class="td-high">5,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">3,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>4,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">3,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>99<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>2. okt. 2026</td><td class="td-high">22,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">3,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>10,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>2,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">9,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>82<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>1. okt. 2026</td><td class="td-high">23,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">4,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>12,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>2,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">11,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>82<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>30. sep. 2026</td><td class="td-high">25,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">4,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>12,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">11,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>83<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>29. sep. 2026</td><td class="td-high">25,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">4,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>12,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">9,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>84<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>28. sep. 2026</td><td class="td-high">24,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">5,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>12,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>2,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">10,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>86<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>27. sep. 2026</td><td class="td-high">23,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">4,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>12,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">8,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>86<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
-<tr><td>26. sep. 2026</td><td class="td-high">21,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">3,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>11,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">9,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>85<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
-<tr><td>25. sep. 2026</td><td class="td-high">20,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">4,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>10,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">10,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>84<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
-<tr><td>24. sep. 2026</td><td class="td-high">16,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">3,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>10,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">10,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>93<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -3739,7 +3744,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </footer>
 </div>
 
-<script src="app.min.js?v=81a6ca8d" defer></script>
+<script src="app.min.js?v=0815ec33" defer></script>
 
 
 <div id="toast"></div>
@@ -3752,7 +3757,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <span>🔔 Moja opozorila</span>
       <button onclick="closeThresholdModal()" aria-label="Zapri">×</button>
     </div>
-    <p class="tp-hint">Izbrana vas določa, za kateri kraj računamo nowcast in za katerega pošljemo opozorilo o nevihti ali toči. Ko vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Za potisna obvestila v telefon/brskalnik tudi brez odprte strani vklopi 🔔 Obvestila.</p>
+    <p class="tp-hint">Izbrana vas določa, za kateri kraj računamo nowcast in za katerega pošljemo opozorilo o nevihti ali toči. Ko izmerjena vrednost preseže prag, se prikaže opozorilo na strani (potrebno je imeti stran odprto). Pusti prazno za brez omejitve. Z vklopljenimi 🔔 Obvestili in kljukico »Opozori vnaprej« te na iste pragove opozorimo že po napovedi, tudi brez odprte strani.</p>
     <div class="tp-body">
       <!-- Vas za nowcast in potisna obvestila. Tu zato, ker se plošča
            "Naslednjih 45 minut" skrije, kadar ni padavin na vidiku. -->
@@ -3761,8 +3766,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="tp-row"><label>🌡 Temperatura nad</label><div class="tp-inp"><input type="number" id="thr-temp-max" placeholder="°C" step="0.5" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">°C</span></div></div>
       <div class="tp-row"><label>💨 Sunek vetra nad</label><div class="tp-inp"><input type="number" id="thr-wind" placeholder="km/h" step="1" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">km/h</span></div></div>
       <div class="tp-row"><label>🌧 Intenziteta dežja nad</label><div class="tp-inp"><input type="number" id="thr-rain" placeholder="mm/h" step="0.5" min="0" inputmode="decimal" enterkeyhint="done"><span class="tp-unit">mm/h</span></div></div>
+      <div class="tp-row tp-row-digest"><label for="thr-fc">📲 Opozori vnaprej po napovedi</label><div class="tp-inp tp-inp-check"><input type="checkbox" id="thr-fc" aria-describedby="thr-fc-hint"></div></div>
+      <p class="tp-digest-hint" id="thr-fc-hint">Isti pragovi za naslednjih 12 ur po napovedi Open-Meteo za tvojo vas — potisno obvestilo, tudi ko stran ni odprta. Modelska napoved, ne uradno opozorilo.</p>
       <div class="tp-row tp-row-digest"><label for="thr-digest">🌅 Jutranji povzetek</label><div class="tp-inp tp-inp-check"><input type="checkbox" id="thr-digest"></div></div>
-      <p class="tp-digest-hint" id="thr-digest-hint" hidden>Najprej vklopi 🔔 Obvestila (gumb zgoraj na strani) — jutranji povzetek gre po istem kanalu.</p>
+      <p class="tp-digest-hint" id="thr-digest-hint" hidden>Najprej vklopi 🔔 Obvestila (gumb zgoraj na strani) — opozorila vnaprej in jutranji povzetek gredo po istem kanalu.</p>
     </div>
     <div class="tp-footer">
       <button class="tp-btn-clear" onclick="clearThresholdSettings()">Počisti vse</button>

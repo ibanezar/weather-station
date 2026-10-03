@@ -1311,7 +1311,7 @@ CSS = '''
     background:#faf9f6;min-width:0}
   .crn-cw[data-lvl="warn"]{border-top-color:#facc15}
   .crn-cw[data-lvl="stop"]{border-top-color:#dc2626}
-  .crn-cw-past{border-top-color:#e5e7eb;opacity:.7}
+  .crn-cw-past{border-top-color:#e5e7eb;opacity:.85}
   .crn-cw p{margin:0}
   .crn-cw-h{font-size:12px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
   .crn-cw-t{font-size:20px;font-weight:800;line-height:1.15;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -2027,7 +2027,7 @@ SHARE_JS_TEMPLATE = '''
   function groundTempLive(tAir, cloud, wind){
     if (tAir == null) return null;
     var off = 3.0;
-    function lin(x, x0, y0, x1, y1){ return Math.max(0, Math.min(1, y0 + (y1 - y0) * (x - x0) / (x1 - x0))); }
+    function lin(x, x0, y0, x1, y1){ return x <= x0 ? y0 : x >= x1 ? y1 : y0 + (y1 - y0) * (x - x0) / (x1 - x0); }  // kot interp() v winter_engine.py: zunaj [x0,x1] ostane krajna vrednost
     if (cloud != null) off *= lin(cloud, 20, 1.0, 80, 0.0);
     if (wind != null) off *= lin(wind, 5, 1.0, 20, 0.15);
     return tAir - off;

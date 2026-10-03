@@ -365,19 +365,20 @@ def opis_dneva(l):
     """Besedilo, ki se vsak dan spremeni — to je vsebina strani, ne okras."""
     dvig = (l["termika_ms"] or 0) - 1.28   # spust padala med kroženjem
     strop = l["strop_m"] or 0
-    # Te veje morajo ostati usklajene z dayRating() v igra/igra.js — igralec
+    # Te veje (in njihov VRSTNI RED: megla, dež, nizek strop, …) morajo ostati
+    # usklajene z dayRating() v igra/igra.js, preverja tools/test_parity.py — igralec
     # ne sme tu prebrati »soliden dan«, igra pa mu takoj zatem javiti »nizek
     # strop«. Namerna podvojitev (Python piše stran, JS teče v igri).
     if l["koda_vremena"] in (45, 48):
         znacaj = ("Megla. Sonce ne pride do tal, termike praktično ni — z Golt "
                   "lahko samo zdrsneš v sivino.")
+    elif (l["padavine_mm"] or 0) > 1.2:
+        znacaj = ("Dežuje. Termika je zbita, zrak med stebri pada hitreje kot "
+                  "običajno. Danes gre za preživetje prvih kilometrov.")
     elif strop and strop < 1400:
         znacaj = (f"Konvekcija seže le do {num(strop)} m, to je pod vzletiščem na Goltah "
                   f"({num(teren_na(l, 0))} m). Z Golt boš najprej samo padal; loviti se "
                   f"začne šele nižje, kjer je zrak sploh premešan.")
-    elif (l["padavine_mm"] or 0) > 1.2:
-        znacaj = ("Dežuje. Termika je zbita, zrak med stebri pada hitreje kot "
-                  "običajno. Danes gre za preživetje prvih kilometrov.")
     elif dvig < 0.3:
         znacaj = ("Mrtev zrak — dvigov skoraj ni. Vprašanje ni, kako visoko, "
                   "ampak kako daleč prideš z eno samo višino z vzletišča.")
@@ -566,7 +567,7 @@ def build_body(l, svez_opomba):
     <p class="muted-note">Vzdevek za lestvico (neobvezno):
       <input id="pg-lb-ime" type="text" maxlength="24" placeholder="Anonimni" autocomplete="nickname">
       — prikazan je samo tvoj najboljši prelet, ne vsak poskus.</p>
-    <div class="pg-lb-tabs" role="tablist">
+    <div class="pg-lb-tabs" role="group" aria-label="Lestvica">
       <button type="button" class="pg-lb-tab" data-obdobje="dan" aria-pressed="true">Danes</button>
       <button type="button" class="pg-lb-tab" data-obdobje="{esc(kor.get("id", "celje"))}" aria-pressed="false">
         Rekord — {esc(kor.get("kratko", "ta koridor"))}</button>

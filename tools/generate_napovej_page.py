@@ -268,7 +268,7 @@ def tabela_zadnjih(krog, n=10):
             celice.append(f'<td>{num(m["tmax"])} °C<small> ±{num(nap)}</small></td>')
         vrstice.append(f'    <tr><th>{datum_slo(d)}</th><td><strong>{num(dej["tmax"])} °C</strong></td>'
                        + "".join(celice) + "</tr>")
-    return ('  <table class="np-table np-wide">\n'
+    return ('  <table class="np-table np-wide" tabindex="0">\n'
             f'    <tr><th>Dan</th><th>Izmerjeno</th>{glave}</tr>\n'
             + "\n".join(vrstice) + "\n  </table>")
 
@@ -356,7 +356,7 @@ def build_body(krog, svez):
     <h2 class="np-h2">Lestvica</h2>
     <p class="np-note">Najboljši rezultat vsakega igralca — ocenjen na strežniku, ne v tvojem
     brskalniku, zato ga ni mogoče prirediti. Šteje samo napoved, oddana pred zaklepom.</p>
-    <div class="np-tabs" role="tablist">
+    <div class="np-tabs" role="group" aria-label="Obdobje lestvice">
       <button type="button" class="np-btn np-ghost np-tab" data-obdobje="dan" aria-pressed="true">Danes</button>
       <button type="button" class="np-btn np-ghost np-tab" data-obdobje="teden" aria-pressed="false">Ta teden</button>
       <button type="button" class="np-btn np-ghost np-tab" data-obdobje="mesec" aria-pressed="false">Ta mesec</button>

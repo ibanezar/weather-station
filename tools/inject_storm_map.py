@@ -48,12 +48,23 @@ def build_block(meta):
         f'  <p class="muted-note" style="margin:.5rem 0 0">Prikazana karta je iz {date} — '
         f'današnja bo na voljo predvidoma do 7:00.</p>\n'
     )
+    # Pozni tek (storm_map_gate.LATE_END): karta, nastala po 8:00, ne sme trditi,
+    # da je »izdana do 7:00« — ocena velja za preostanek dneva od izdaje naprej.
+    try:
+        issued = datetime.datetime.fromisoformat(meta.get("issued_at", ""))
+        late = is_today and issued.hour >= 8
+        issued_hm = issued.strftime("%H:%M")
+    except ValueError:
+        late, issued_hm = False, ""
+    if late:
+        note += (f'  <p class="muted-note" style="margin:.5rem 0 0">Karta je nastala šele ob {issued_hm} '
+                 f'(zamuda samodejnega zagona), zato velja ocena za preostanek dneva od takrat naprej.</p>\n')
     return (
         f'{START}\n'
         f'  <h2 id="karta">Nevihtna karta Slovenije — danes</h2>\n'
         f'  <p class="archive-intro">Najvišji nevihtni potencial za {date} je <strong>{level}</strong>, '
         f'pričakovan bliže {place}. Karta prikazuje oceno po vsej Sloveniji iz iste formule kot zgornji '
-        f'indeksi (Open-Meteo) — ni uradno opozorilo ARSO, izdana je vsak dan do 7:00 zjutraj.</p>\n'
+        f'indeksi (Open-Meteo) — ni uradno opozorilo ARSO, ob običajnem teku izdana do 7:00 zjutraj.</p>\n'
         f'  <img src="{image}" alt="Nevihtna karta Slovenije, {date}" loading="lazy" '
         f'style="width:100%;max-width:720px;border-radius:16px;display:block;margin:0 auto">\n'
         f'{note}'

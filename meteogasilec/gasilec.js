@@ -149,7 +149,7 @@
     var mF = 147.2 * (101 - ffmc) / (59.5 + ffmc);
     var fF = 91.9 * Math.exp(-0.1386 * mF) * (1 + Math.pow(mF, 5.31) / 4.93e7);
     var isi = 0.208 * fW * fF;
-    var bui = dmc <= 0.4 * dc ? 0.8 * dmc * dc / (dmc + 0.4 * dc) :
+    var bui = dmc + 0.4 * dc === 0 ? 0 : dmc <= 0.4 * dc ? 0.8 * dmc * dc / (dmc + 0.4 * dc) :
       dmc - (1 - 0.8 * dc / (dmc + 0.4 * dc)) * (0.92 + Math.pow(0.0114 * dmc, 1.7));
     var fD = bui <= 80 ? 0.626 * Math.pow(Math.max(bui, 0), 0.809) + 2 : 1000 / (25 + 108.64 * Math.exp(-0.023 * bui));
     var B = 0.1 * isi * fD;

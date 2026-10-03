@@ -435,7 +435,7 @@ def build_body(verification):
     month_head = ('    <tr><th>Mesec</th><th>ARSO povp. napaka</th><th>Open-Meteo povp. napaka</th>'
                   + ('<th>ECMWF AIFS</th>' if has_aifs else '')
                   + (f'<th>{mtr_label}</th>' if has_mos else '') + '<th>Dni</th></tr>\n')
-    month_table = ('  <div class="table-scroll"><table class="stats">\n'
+    month_table = ('  <div class="table-scroll" tabindex="0"><table class="stats">\n'
                     + month_head
                     + "\n".join(month_rows) + '\n  </table></div>') if month_rows else \
         '  <p class="muted-note">Še ni dovolj podatkov za mesečni pregled.</p>'
@@ -469,7 +469,7 @@ def build_body(verification):
                    '<th>Open-Meteo je napovedal</th>'
                    + ('<th>AIFS je napovedal</th>' if has_aifs else '')
                    + (f'<th>{mtr_label} je napovedal</th>' if has_mos else '') + '</tr>\n')
-    recent_table = ('  <div class="table-scroll"><table class="stats">\n'
+    recent_table = ('  <div class="table-scroll" tabindex="0"><table class="stats">\n'
                      + recent_head
                      + "\n".join(recent_rows) + '\n  </table></div>') if recent_rows else \
         '  <p class="muted-note">Še ni razrešenih dni.</p>'
@@ -524,7 +524,7 @@ def build_body(verification):
                         )
                     year_blocks.append(
                         f'    <details><summary>D+{ln} po letih</summary>\n'
-                        '      <div class="table-scroll"><table class="stats">\n'
+                        '      <div class="table-scroll" tabindex="0"><table class="stats">\n'
                         f'      <tr><th>Leto</th><th colspan="2">Tmax (Open-Meteo / {mtr_label})</th>'
                         f'<th colspan="2">Tmin (Open-Meteo / {mtr_label})</th><th>Vzorcev</th></tr>\n'
                         + "\n".join(py_rows) + '\n      </table></div>\n    </details>'
@@ -533,7 +533,7 @@ def build_body(verification):
             trained_iso = (model.get("trained_at") or "")[:10]
             trained_txt = seo.fmtd(trained_iso) if len(trained_iso) == 10 else "—"
             lead_table = (
-                '  <div class="table-scroll"><table class="stats">\n'
+                '  <div class="table-scroll" tabindex="0"><table class="stats">\n'
                 '    <tr><th>Vodilni čas</th><th colspan="3">Maks. temp. (Tmax)</th>'
                 '<th colspan="3">Min. temp. (Tmin)</th><th>Vzorcev</th></tr>\n'
                 f'    <tr><th></th><th>Open-Meteo</th><th>{mtr_label}</th><th>Izboljšava</th>'
@@ -636,7 +636,7 @@ def main():
     title = "Točnost vremenske napovedi — Rečica ob Savinji"
     n = len(verification)
     desc = (f"Koliko točna je vremenska napoved za Zgornjo Savinjsko dolino? Dnevni scoreboard ARSO, "
-            f"Open-Meteo in AI modela ECMWF AIFS proti dejanskim meritvam postaje IREICA1 — "
+            f"Open-Meteo, MTR in AI modela ECMWF AIFS proti dejanskim meritvam postaje IREICA1 — "
             f"{n} razrešenih dni.")
 
     schema = "\n".join([
@@ -644,8 +644,16 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("Točnost napovedi", None)]),
         seo.named_dataset_schema(
             url, "Verifikacija vremenske napovedi — Rečica ob Savinji",
-            "Dnevna primerjava napovedi ARSO, Open-Meteo in ECMWF AIFS z dejansko meritvijo postaje IREICA1.",
-            variable_measured=[{"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"}],
+            ("Dnevna primerjava napovedi ARSO, Open-Meteo, lokalnega modela MTR in ECMWF AIFS za "
+             "jutrišnjo najvišjo in najnižjo temperaturo ter padavine z dejansko meritvijo postaje IREICA1."),
+            variable_measured=[
+                {"@type": "PropertyValue", "name": "Napaka napovedi najvišje temperature", "unitText": "°C"},
+                {"@type": "PropertyValue", "name": "Napaka napovedi najnižje temperature", "unitText": "°C"},
+                {"@type": "PropertyValue", "name": "Razrešeni dnevi", "value": n, "unitText": "dni"},
+            ],
+            temporal_coverage=(f"{min(verification)}/{max(verification)}" if verification else None),
+            distribution={"@type": "DataDownload", "encodingFormat": "application/json",
+                          "contentUrl": f"{seo.SITE}/forecast_verification.json"},
         ),
     ]) + "\n" + CHART_CSS
 

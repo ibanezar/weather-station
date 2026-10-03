@@ -24,10 +24,21 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, "tools", ".precip_map_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
-WINDOW_START = 6   # karta naj bo nova do 7:00 zjutraj (isti rok kot nevihtna
-                   # karta) -- začne se uro prej, da cron z le nekaj minut
-                   # zamude ni izločen po nepotrebnem.
-WINDOW_END = 8     # varovalka za manjšo (do ~1h) zamudo GitHubovega crona.
+# Okno je PO jutranji meritvi ARSO, ne pred njo (2. 10. 2026): 24-urna vsota
+# (rr24h_val) je samo v meritvi ob 06:00 UTC (8:00 poleti, 7:00 pozimi), zato je
+# okno 6:00-8:00, prepisano od nevihtne karte, vsak tek obsodilo na »ni nobene
+# postaje z rr24h_val«. Karto zdaj sproži worker takoj za jutranjim posnetkom
+# (cron 30 6-7 UTC, _cronSnapshotArsoRr24h → dispatch precip-map.yml).
+WINDOW_START = 7   # pozimi je posnetek ob 7:30 po naši uri
+WINDOW_END = 11    # varovalka za zamudo dispatcha / drugi termin posnetka
+
+# Pozni tek (1. 10. 2026): od 31. 8. (nevihtna) oz. 11. 9. (padavinska) ni bilo
+# nobene nove karte, ker GitHubov cron zdaj zamuja 5-7 ur (cron 05:00 UTC steče
+# ~11:00 UTC = 13:00 po naši uri), okno 6:00-8:00 pa je tak tek vsak dan zavrnilo
+# — workflow je »uspel« brez dela. Zato po koncu okna do LATE_END še vedno
+# sestavimo karto (stran in arhiv sta spet sveža), a jo FB/IG NE objavita
+# (`late=true`, glej workflow): objava »jutranje« karte popoldne bi lagala.
+LATE_END = 20
 
 
 def load_state():
@@ -44,12 +55,13 @@ def save_state(state):
         f.write("\n")
 
 
-def emit(proceed, reason):
-    print(f"proceed={proceed} — {reason}")
+def emit(proceed, reason, late=False):
+    print(f"proceed={proceed} late={late} — {reason}")
     out = os.environ.get("GITHUB_OUTPUT")
     if out:
         with open(out, "a", encoding="utf-8") as f:
             f.write(f"proceed={'true' if proceed else 'false'}\n")
+            f.write(f"late={'true' if late else 'false'}\n")
 
 
 def main():
@@ -71,12 +83,17 @@ def main():
     if state.get("lastRun") == today and not force:
         emit(False, f"karta za {today} je že sestavljena")
         return 0
+    late = False
     if not force and not (WINDOW_START <= now.hour < WINDOW_END):
-        emit(False, f"lokalna ura je {now.hour}:{now.minute:02d}, "
-                    f"okno je {WINDOW_START}:00–{WINDOW_END}:00")
-        return 0
+        if WINDOW_END <= now.hour < LATE_END:
+            late = True
+        else:
+            emit(False, f"lokalna ura je {now.hour}:{now.minute:02d}, "
+                        f"okno je {WINDOW_START}:00–{LATE_END}:00 (objava do {WINDOW_END}:00)")
+            return 0
 
-    emit(True, f"lokalni čas {now.strftime('%H:%M')}" + (" (--force)" if force else ""))
+    emit(True, f"lokalni čas {now.strftime('%H:%M')}" + (" (--force)" if force else "") +
+         (" — POZNO: karta se sestavi, FB/IG se ne objavi" if late else ""), late)
     return 0
 
 

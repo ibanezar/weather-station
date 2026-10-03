@@ -815,13 +815,15 @@ async function _sendPush(env, sub, payloadObj) {
 // obvestila za posamezno vas res le naročnikom te vasi. Potekle naročnine
 // počistimo iz celotnega seznama, ne le iz izbranega podniza. `key` izbere
 // seznam naročnin: privzeto meteorec.si, CRN_PUSH_KEY za crnivec.si.
+// `payload` je lahko tudi funkcija naročnine — za obvestila, ki so za vsakega
+// naročnika drugačna (osebni napovedni pragovi).
 async function _pushAll(env, payload, filter, key = "push/subs.json") {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { sent: 0, pruned: 0 };
   let subs = []; try { const o = await r2.get(key); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
   const target = filter ? subs.filter(filter) : subs;
   const dead = [];
   await Promise.all(target.map(async s => {
-    try { const st = await _sendPush(env, s, payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
+    try { const st = await _sendPush(env, s, typeof payload === "function" ? payload(s) : payload); if (st === 404 || st === 410) dead.push(s.endpoint); }
     catch (_) {}
   }));
   if (dead.length) await r2.put(key, JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
@@ -1025,6 +1027,131 @@ async function _cronCheckPrecipNowcast(env) {
   await maybeFire("rain_soon", !isWetNow && firstWet, s => "🌧️ Dež pričakovan čez ~" + s.minAway + " min v Rečici ob Savinji.");
   await maybeFire("storm_soon", firstStorm, s => "⛈️ Nevihta pričakovana čez ~" + s.minAway + " min v Rečici ob Savinji.");
   if (changed) await r2.put("push/nowcast_state.json", JSON.stringify(state), { httpMetadata: { contentType: "application/json" } });
+}
+
+// ── Osebni pragovi po NAPOVEDI (push vnaprej) ───────────────
+// Pragovi iz "Moja opozorila" (app.js) so prej veljali samo za izmerjene
+// vrednosti in samo pri odprti strani. Kdor izrecno vklopi "Opozori vnaprej",
+// pošlje iste pragove ob naročnini (`fc` v push/subs.json); tu jih enkrat na
+// uro primerjamo z urno napovedjo Open-Meteo za njegovo vas.
+// - Ura, ki teče, se ne šteje (to je že meritev, ne napoved) — gledamo 1–12 h.
+// - Isti dogodek se naznani enkrat: obvestilo gre, ko prag v oknu NA NOVO
+//   preseže, potem pa šele, ko napoved pod pragom pade in spet zraste
+//   (in najprej po FC_THR_COOLDOWN_MS) — sicer bi vsaka ura poslala isto.
+// - Besedilo vedno pove, da gre za modelsko napoved, ne uradno opozorilo.
+// Meje vrednosti so dvojnik tistih v app.js (`FC_THR_LIMITS`) — če spremeniš
+// eno, spremeni drugo, sicer strežnik tiho zavrže prag, ki ga obrazec pošlje.
+const FC_THR_LIMITS = { wind: [10, 200], rain: [0.5, 100], tempMin: [-40, 40], tempMax: [-20, 50] };
+const FC_THR_HOURS = 12;
+const FC_THR_EVERY_MS = 55 * 60 * 1000;
+const FC_THR_COOLDOWN_MS = 12 * 3600 * 1000;
+const FC_THR_STATE = "push/fc_state.json";
+
+// Očisti pragove iz zahtevka: samo znani ključi, števila v mejah. Vrne null,
+// če ni nobenega veljavnega praga (= izklopljeno).
+function _fcThrSanitize(fc) {
+  if (!fc || typeof fc !== "object") return null;
+  const out = {}; let any = false;
+  for (const [k, [lo, hi]] of Object.entries(FC_THR_LIMITS)) {
+    const v = typeof fc[k] === "number" ? fc[k] : NaN;
+    if (Number.isFinite(v) && v >= lo && v <= hi) { out[k] = Math.round(v * 10) / 10; any = true; }
+  }
+  return any ? out : null;
+}
+
+// Prvi presežek vsakega praga v oknu 1–12 h za eno vas. Čista funkcija —
+// `h` je hourly blok Open-Meteo (časi v UTC), `now` ms.
+function _fcThrHits(fc, h, now) {
+  // Urna vrednost Open-Meteo z žigom T velja za uro PRED njim (T-1h..T:
+  // padavine so vsota, sunki maksimum te ure). Ura, ki teče, je torej žig
+  // naslednje polne ure — zato mora začetek intervala (T-1h) biti po `now`.
+  const hits = [];
+  const idx = [];
+  const HOUR = 3600 * 1000;
+  for (let i = 0; i < (h?.time?.length || 0); i++) {
+    const start = Date.parse(h.time[i] + "Z") - HOUR;
+    if (start > now && start <= now + FC_THR_HOURS * HOUR) idx.push(i);
+  }
+  const first = (arr, test) => { for (const i of idx) { const v = arr?.[i]; if (v != null && test(v)) return i; } return -1; };
+  const peak = (arr, from, better) => { let b = arr[from]; for (const i of idx) if (i >= from && arr[i] != null && better(arr[i], b)) b = arr[i]; return b; };
+  const add = (key, arr, test, better) => {
+    const i = first(arr, test); if (i < 0) return;
+    hits.push({ key, value: peak(arr, i, better), at: Date.parse(h.time[i] + "Z") - HOUR });
+  };
+  if (fc.wind != null)    add("wind", h.wind_gusts_10m, v => v >= fc.wind, (a, b) => a > b);
+  if (fc.rain != null)    add("rain", h.precipitation, v => v >= fc.rain, (a, b) => a > b);
+  if (fc.tempMax != null) add("tempMax", h.temperature_2m, v => v >= fc.tempMax, (a, b) => a > b);
+  if (fc.tempMin != null) add("tempMin", h.temperature_2m, v => v <= fc.tempMin, (a, b) => a < b);
+  return hits;
+}
+
+function _fcThrText(hit, fc) {
+  const ura = new Date(hit.at).toLocaleTimeString("sl-SI", { timeZone: "Europe/Ljubljana", hour: "2-digit", minute: "2-digit" });
+  const f = (v, d) => v.toFixed(d).replace(".", ",");
+  if (hit.key === "wind")    return "💨 sunki do " + Math.round(hit.value) + " km/h od ~" + ura + " (tvoj prag " + fc.wind + ")";
+  if (hit.key === "rain")    return "🌧️ dež do " + f(hit.value, 1) + " mm/h od ~" + ura + " (tvoj prag " + f(fc.rain, 1) + ")";
+  if (hit.key === "tempMax") return "🌡️ do " + f(hit.value, 1) + " °C od ~" + ura + " (tvoj prag " + f(fc.tempMax, 1) + ")";
+  return "🧊 do " + f(hit.value, 1) + " °C od ~" + ura + " (tvoj prag " + f(fc.tempMin, 1) + ")";
+}
+
+async function _cronCheckForecastThresholds(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  let state = {}; try { const o = await r2.get(FC_THR_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  // Petminutni tik lahko izpade, zato ne vežemo na minuto 0, ampak na čas
+  // zadnjega teka — tako ena izpuščena minuta ne pomeni izpuščene ure.
+  if (now - (state._lastRun || 0) < FC_THR_EVERY_MS) return;
+
+  let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const vasOf = (s) => NOWCAST_VASI.find(v => v.id === s.vas) || NOWCAST_VASI[0];
+  const withFc = subs.filter(s => s.fc);
+  const subsState = state.subs || {};
+  if (!withFc.length) {
+    await r2.put(FC_THR_STATE, JSON.stringify({ _lastRun: now, subs: {} }), { httpMetadata: { contentType: "application/json" } });
+    return;
+  }
+
+  // En zahtevek za vse vasi z naročniki (Open-Meteo sprejme več točk naenkrat).
+  const vasi = [...new Map(withFc.map(s => [vasOf(s).id, vasOf(s)])).values()];
+  let data;
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + vasi.map(v => v.lat).join(",")
+      + "&longitude=" + vasi.map(v => v.lon).join(",")
+      + "&hourly=temperature_2m,precipitation,wind_gusts_10m&forecast_hours=" + (FC_THR_HOURS + 3) + "&timezone=UTC";
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+    if (!res.ok) return;                                  // brez _lastRun: poskusi naslednji tik
+    data = await res.json();
+  } catch (_) { return; }
+  const list = Array.isArray(data) ? data : [data];
+  const hourlyByVas = new Map(vasi.map((v, i) => [v.id, list[i]?.hourly]));
+
+  const plan = new Map();
+  const nextSubs = {};
+  for (const s of withFc) {
+    const h = hourlyByVas.get(vasOf(s).id); if (!h) continue;
+    const hits = _fcThrHits(s.fc, h, now);
+    const prev = subsState[s.endpoint] || {};
+    const cur = {};
+    const nove = [];
+    for (const k of Object.keys(FC_THR_LIMITS)) {
+      const p = prev[k] || { over: false, lastSent: 0 };
+      const hit = hits.find(x => x.key === k);
+      if (hit && !p.over && now - (p.lastSent || 0) > FC_THR_COOLDOWN_MS) { nove.push(hit); p.lastSent = now; }
+      p.over = !!hit;
+      if (p.over || p.lastSent) cur[k] = p;
+    }
+    if (Object.keys(cur).length) nextSubs[s.endpoint] = cur;
+    if (nove.length) {
+      plan.set(s.endpoint, {
+        title: "Meteorec — napoved " + vasOf(s).loc,
+        body: nove.map(x => _fcThrText(x, s.fc)).join(" · ") + ". Modelska napoved (Open-Meteo), ne uradno opozorilo.",
+        url: "/", tag: "wx-fcthr",
+      });
+    }
+  }
+  if (plan.size) await _pushAll(env, s => plan.get(s.endpoint), s => plan.has(s.endpoint));
+  await r2.put(FC_THR_STATE, JSON.stringify({ _lastRun: now, subs: nextSubs }), { httpMetadata: { contentType: "application/json" } });
 }
 
 // ── Začetek/konec dejanskih padavin na postaji ──────────────
@@ -2635,6 +2762,7 @@ async function _cronRenderIconAndCells(env) {
       }), { httpMetadata: { contentType: "application/json" } });
     } catch (_) {}
   }
+  return cellsErr ? { ok: false, reason: "celice: " + cellsErr } : undefined;   // za _cronBeat
 }
 
 // ── Varovalka za nezanesljiv GitHub Actions "schedule" prožilec ─────────────
@@ -2677,6 +2805,108 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
   }
 }
 
+// ── Zdravstveni zapis cron opravil ────────────────────────────────
+// Večina _cron* opravil ob napaki ne naredi nič vidnega (prazen catch, »raje tiho
+// kot podreti ostala«) — ravno tako je ostala neopažena varovalka, ki od 31. 8. ni
+// poslala nobenega workflow_dispatch (manjkal je GH_DISPATCH_TOKEN). Zato vsako
+// opravilo teče prek _cronBeat(), ki zapiše KV `cron:health:<ime>` {ts, ok, err, ms};
+// GET /health jih vrne, tools/check_freshness.py (freshness-watch.yml) pa odpre issue,
+// ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
+// 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
+const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20,
+  lightning: 20, radar_composite: 20, icon_cells: 20,
+  score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
+};
+const CRON_BEAT_WRITE_MS = 15 * 60000;
+async function _cronBeat(env, name, fn) {
+  const t0 = Date.now();
+  let ok = true, err = null;
+  try {
+    const r = await fn();
+    if (r === false || (r && typeof r === "object" && r.ok === false)) {
+      ok = false;
+      err = String((r && (r.reason || r.status)) || "opravilo je javilo neuspeh").slice(0, 200);
+    }
+  } catch (e) {
+    ok = false;
+    err = String((e && e.message) || e).slice(0, 200);
+  }
+  const kv = env?.COUNTER_KV;
+  if (kv) {
+    try {
+      const key = "cron:health:" + name;
+      // Prvi zapis sploh: opravilo brez zapisa je »zastarelo« šele, ko je od tega minilo več, kot
+      // dovoljuje njegov rok (sicer bi dnevna opravila po vsakem deployu en dan javljala lažen izpad).
+      if (!(await kv.get("cron:health:_since"))) await kv.put("cron:health:_since", String(t0));
+      const prev = JSON.parse((await kv.get(key)) || "null");
+      if (!prev || prev.ok !== ok || prev.err !== err || t0 - prev.ts >= CRON_BEAT_WRITE_MS) {
+        await kv.put(key, JSON.stringify({ ts: t0, ok, err, ms: Date.now() - t0 }), { expirationTtl: 7 * 86400 });
+      }
+    } catch (_) { /* zapis zdravja ne sme podreti opravila */ }
+  }
+  return ok;
+}
+async function _cronHealth(env) {
+  const kv = env?.COUNTER_KV;
+  const now = Date.now();
+  const jobs = {};
+  let since = null;
+  try { since = kv ? Number(await kv.get("cron:health:_since")) || null : null; } catch (_) {}
+  for (const [name, maxMin] of Object.entries(CRON_JOBS)) {
+    let rec = null;
+    try { rec = kv ? JSON.parse((await kv.get("cron:health:" + name)) || "null") : null; } catch (_) {}
+    const age = rec ? Math.round((now - rec.ts) / 60000) : null;
+    // brez zapisa: čakamo na prvi tek, dokler ni minil njegov rok od prvega zapisa kateregakoli opravila
+    const waiting = !rec && since != null && (now - since) / 60000 <= maxMin;
+    jobs[name] = { ok: waiting ? true : !!rec && rec.ok, err: rec ? rec.err : (waiting ? "čaka na prvi tek" : "ni zapisa"),
+                   age_min: age, max_min: maxMin, stale: waiting ? false : (age == null || age > maxMin),
+                   waiting, ms: rec ? rec.ms : null };
+  }
+  return { now: new Date(now).toISOString(), ok: Object.values(jobs).every(j => j.ok && !j.stale), jobs };
+}
+
+// ── ARSO 24-urne padavine: posnetek zjutraj ──────────────────────
+// `rr24h_val` v observation_si_latest.xml je zapolnjen SAMO v jutranji meritvi
+// (ob 8:00 CEST); v urnih meritvah čez dan je prazen. Padavinska karta
+// (tools/generate_precip_map.py) je zato delovala samo, če je GitHubov cron
+// tekel v oknu ~1 h po tej meritvi — od 11. 9. 2026 (cron zamuja 5-7 ur) nobenega
+// dne več. Cloudflarov cron zjutraj prebere vir in posnetek hrani v KV, karta
+// ga prebere prek /arso-rr24h kadarkoli čez dan. Brez posnetka generator pade
+// nazaj na živi vir (staro vedenje).
+function _parseArsoRr24h(xml) {
+  const tag = (b, t) => { const m = b.match(new RegExp("<" + t + ">([\\s\\S]*?)</" + t + ">")); return m ? m[1].trim() : null; };
+  const stations = [];
+  for (const m of xml.matchAll(/<metData>([\s\S]*?)<\/metData>/g)) {
+    const b = m[1];
+    const name = tag(b, "domain_shortTitle") || tag(b, "domain_title");
+    const la = parseFloat(tag(b, "domain_lat")), lo = parseFloat(tag(b, "domain_lon"));
+    const rr = tag(b, "rr24h_val");
+    if (!name || !isFinite(la) || !isFinite(lo) || rr == null || rr === "") continue;
+    const mm = parseFloat(rr);
+    if (!isFinite(mm)) continue;
+    stations.push({ name, la, lo, mm });
+  }
+  const issued = (xml.match(/<tsValid_issued>([\s\S]*?)<\/tsValid_issued>/) || [])[1];
+  return { stations, issued: issued ? issued.trim() : "" };
+}
+const ARSO_OBS_URL = "https://meteo.arso.gov.si/uploads/probase/www/observ/surface/text/sl/observation_si_latest.xml";
+async function _cronSnapshotArsoRr24h(env) {
+  const kv = env?.COUNTER_KV;
+  if (!kv) return { ok: false, reason: "brez COUNTER_KV" };
+  const datum = _ljDatum();
+  const key = "arso_rr24h:" + datum;
+  try {
+    if (await kv.get(key)) return { ok: true, already: true };
+    const res = await fetch(ARSO_OBS_URL, { headers: { "Accept": "application/xml,text/xml", "Referer": "https://meteo.arso.gov.si/" } });
+    if (!res.ok) return { ok: false, status: res.status };
+    const snap = _parseArsoRr24h(await res.text());
+    if (snap.stations.length < 5) return { ok: true, pending: true, n: snap.stations.length };  // še ni jutranje meritve — ni napaka
+    await kv.put(key, JSON.stringify({ datum, ...snap, saved_at: new Date().toISOString() }), { expirationTtl: 3 * 86400 });
+    return { ok: true, n: snap.stations.length };
+  } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
+}
+
 async function _cronDispatchScheduledWorkflows(env) {
   const results = {
     cas: new Date().toISOString(),
@@ -2691,6 +2921,10 @@ async function _cronDispatchScheduledWorkflows(env) {
       });
     } catch (_) {}
   }
+  // Za _cronBeat: brez tega je izpad varovalke (manjka GH_DISPATCH_TOKEN) ostal viden samo v R2
+  // datoteki, ki je nihče ne bere — od 31. 8. 2026 ni bilo niti enega uspešnega dispatcha.
+  const bad = Object.entries(results).filter(([k, v]) => k !== "cas" && v && v.ok === false);
+  return bad.length ? { ok: false, reason: bad.map(([k, v]) => `${k}: ${v.reason || v.status}`).join("; ") } : { ok: true };
 }
 
 // ── Stalno beleženje strel (Blitzortung) ──────────────────
@@ -2721,18 +2955,29 @@ function _ltgDist(lat1, lon1, lat2, lon2) {
 }
 const LTG_HOSTS = ["ws1.blitzortung.org", "ws2.blitzortung.org", "ws7.blitzortung.org", "ws8.blitzortung.org"];
 const LTG_RADIUS_KM = 200;       // isti obseg kot klientska kartica
+const LTG_STALE_MS = 180000;      // povezava brez sporočila toliko časa je »zombi« (Blitzortung pošilja strele z vsega sveta)
+const LTG_CONNECT_TIMEOUT_MS = 20000;   // WebSocket, ki se toliko časa ne odpre, se nadomesti
+const LTG_RECONNECT_MS = 10000;   // ponovna vzpostavitev po prekinitvi (alarm), brez čakanja na 5-minutni cron
+const LTG_SLOT_MS = 300000;      // pokritost beležimo v 5-minutnih režah (tok sporočil + cron keepAlive)
+const LTG_CELL_LAT0 = 45.45, LTG_CELL_DLAT = 0.18, LTG_CELL_LON0 = 13.4, LTG_CELL_DLON = 0.22;  // mreža karte, glej generate_storm_map.py
+const LTG_CELLS_SQL = "SELECT CAST(ROUND((lat - 45.45) / 0.18) AS INTEGER) AS k, CAST(ROUND((lon - 13.4) / 0.22) AS INTEGER) AS j, " +
+  "COUNT(*) AS n, MIN(ts) AS t0, MAX(ts) AS t1 FROM strikes WHERE ts >= ? AND ts < ? GROUP BY k, j";
 const LTG_RETENTION_DAYS = 14;   // surovi dogodki — isti rok kot stare karte/zgodbe drugod; dnevni povzetki ostanejo trajno
 
 export class LightningLogger extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
     this.ws = null;
+    this.wsSince = 0;     // kdaj je bil trenutni WebSocket ustvarjen
+    this.lastMsg = 0;     // zadnje prejeto sporočilo (katero koli, tudi zunaj radija)
+    this.lastSlot = null; // zadnja reža pokritosti, zapisana iz toka sporočil
     this.hostIdx = 0;
     ctx.blockConcurrencyWhile(async () => {
       this.ctx.storage.sql.exec(`
         CREATE TABLE IF NOT EXISTS strikes (ts INTEGER NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL, dist_km REAL NOT NULL);
         CREATE INDEX IF NOT EXISTS idx_strikes_ts ON strikes(ts);
         CREATE TABLE IF NOT EXISTS daily (date TEXT PRIMARY KEY, count INTEGER NOT NULL, closest_km REAL NOT NULL);
+        CREATE TABLE IF NOT EXISTS uptime (slot INTEGER PRIMARY KEY);
       `);
     });
   }
@@ -2742,9 +2987,58 @@ export class LightningLogger extends DurableObject {
   // sicer čakajo na prvi dohodni klic. Klic je poceni (WS že odprt → takoj
   // vrne), zato pogostost ni problem.
   async keepAlive() {
-    this.ctx.storage.sql.exec("DELETE FROM strikes WHERE ts < ?", Date.now() - LTG_RETENTION_DAYS * 86400000);
+    const retention = Date.now() - LTG_RETENTION_DAYS * 86400000;
+    this.ctx.storage.sql.exec("DELETE FROM strikes WHERE ts < ?", retention);
+    this.ctx.storage.sql.exec("DELETE FROM uptime WHERE slot < ?", Math.floor(retention / LTG_SLOT_MS));
+    // Pokritost: ob vsakem klicu (5 min) zabeležimo, da je povezava živa.
+    // Prazna ura v zapisu ("ni strel") je brez tega neločljiva od izpada
+    // povezave -- preverjanje nevihtne karte (tools/verify_storm_map.py) zato
+    // dneva z luknjami v pokritosti ne šteje.
+    // Povezava, ki že dolgo ne prinese nobenega sporočila, ni »živa« (zombi) — _ensureConnected
+    // jo zapre in odpre novo, zato se v pokritost šteje samo svež tok.
+    const wasConnected = this._isLive();
+    if (wasConnected) this.ctx.storage.sql.exec("INSERT OR IGNORE INTO uptime (slot) VALUES (?)", Math.floor(Date.now() / LTG_SLOT_MS));
     await this._ensureConnected();
-    return { connected: this.ws?.readyState === 1 };
+    return { connected: this.ws?.readyState === 1, last_msg_age_s: this.lastMsg ? Math.round((Date.now() - this.lastMsg) / 1000) : null };
+  }
+
+  _isLive() {
+    return this.ws?.readyState === 1 && (this.lastMsg === 0 || Date.now() - this.lastMsg <= LTG_STALE_MS);
+  }
+
+  // Alarm = ponovna vzpostavitev brez čakanja na naslednji 5-minutni cron: izpad povezave bi sicer
+  // pomenil do 5 min izgubljenih strel ob vsaki prekinitvi (in po vsakem deployu).
+  async alarm() {
+    await this._ensureConnected();
+    if (this.ws?.readyState !== 1) this._scheduleReconnect(LTG_RECONNECT_MS + 5000);   // še ni odprta: poskusi znova
+  }
+
+  _scheduleReconnect(ms) {
+    try { this.ctx.storage.setAlarm(Date.now() + (ms || LTG_RECONNECT_MS)); } catch (_) {}
+  }
+
+  // Strele v časovnem oknu [od, do) združene po celicah mreže nevihtne karte
+  // (generate_storm_map.build_grid: točke 45,45 + 0,18·k, 13,4 + 0,22·j), skupaj
+  // s pokritostjo okna. SQL je v LTG_CELLS_SQL, da ga tools/test_storm_verify.py
+  // požene nad sqlite3 in preveri enako združevanje kot v Pythonu.
+  async cells(from, to) {
+    const rows = this.ctx.storage.sql.exec(LTG_CELLS_SQL, from, to).toArray();
+    const cells = rows.map(r => ({
+      k: r.k, j: r.j, n: r.n, t0: r.t0, t1: r.t1,
+      la: Math.round((LTG_CELL_LAT0 + LTG_CELL_DLAT * r.k) * 1000) / 1000,
+      lo: Math.round((LTG_CELL_LON0 + LTG_CELL_DLON * r.j) * 1000) / 1000,
+    }));
+    const up = this.ctx.storage.sql.exec(
+      "SELECT COUNT(*) AS n, MIN(slot) AS first FROM uptime WHERE slot >= ? AND slot < ?",
+      Math.floor(from / LTG_SLOT_MS), Math.ceil(to / LTG_SLOT_MS)
+    ).toArray()[0];
+    const firstEver = this.ctx.storage.sql.exec("SELECT MIN(slot) AS first FROM uptime").toArray()[0];
+    return {
+      od: from, do: to, cells, total: cells.reduce((a, c) => a + c.n, 0),
+      slots_connected: up.n, slots_total: Math.ceil(to / LTG_SLOT_MS) - Math.floor(from / LTG_SLOT_MS),
+      uptime_since: firstEver && firstEver.first != null ? firstEver.first * LTG_SLOT_MS : null,
+      connected: this.ws?.readyState === 1,
+    };
   }
 
   async recent(hours, dailyDays) {
@@ -2759,19 +3053,39 @@ export class LightningLogger extends DurableObject {
   }
 
   async _ensureConnected() {
-    if (this.ws && this.ws.readyState === 1) return;
+    const now = Date.now();
+    if (this.ws) {
+      const st = this.ws.readyState;
+      if (st === 1 && (this.lastMsg === 0 || now - this.lastMsg <= LTG_STALE_MS)) return;   // živa
+      if (st === 0 && now - this.wsSince <= LTG_CONNECT_TIMEOUT_MS) return;                  // se še odpira
+      // zombi (odprta, a tiha), zataknjeno odpiranje ali že zaprta: zapri in odpri novo (brez uhajanja vtičnic)
+      try { this.ws.close(); } catch (_) {}
+      this.ws = null;
+    }
     try {
       const host = LTG_HOSTS[this.hostIdx++ % LTG_HOSTS.length];
       const ws = new WebSocket("wss://" + host);
-      ws.addEventListener("open", () => ws.send('{"a":111}'));
+      ws.addEventListener("open", () => { this.lastMsg = Date.now(); ws.send('{"a":111}'); });
       ws.addEventListener("message", (ev) => this._onMessage(ev.data));
-      ws.addEventListener("close", () => { if (this.ws === ws) this.ws = null; });
-      ws.addEventListener("error", () => { if (this.ws === ws) this.ws = null; });
+      const dropped = () => { if (this.ws === ws) { this.ws = null; this._scheduleReconnect(LTG_RECONNECT_MS); } };
+      ws.addEventListener("close", dropped);
+      ws.addEventListener("error", dropped);
       this.ws = ws;
-    } catch (_) { this.ws = null; }
+      this.wsSince = now;
+    } catch (_) { this.ws = null; this._scheduleReconnect(LTG_RECONNECT_MS); }
   }
 
   _onMessage(raw) {
+    this.lastMsg = Date.now();
+    // Pokritost iz samega toka sporočil (enkrat na režo), ne le ob klicu crona: petminutni
+    // cron si proračun deli z drugimi opravili in tike izpušča, zato je bila živa povezava
+    // zapisana kot luknja (1. 10. 2026: 10 od 13 rež v uri). Blitzortung pošilja strele z vsega
+    // sveta, zato ima vsaka reža z živo povezavo vsaj eno sporočilo.
+    const slot = Math.floor(this.lastMsg / LTG_SLOT_MS);
+    if (slot !== this.lastSlot) {
+      this.lastSlot = slot;
+      try { this.ctx.storage.sql.exec("INSERT OR IGNORE INTO uptime (slot) VALUES (?)", slot); } catch (_) {}
+    }
     try {
       const d = JSON.parse(_ltgDecode(raw));
       if (!("lat" in d) || !("lon" in d)) return;
@@ -2794,11 +3108,16 @@ export class LightningLogger extends DurableObject {
 }
 
 async function _cronKeepLightningAlive(env) {
+  // Vrne {ok,reason} za _cronBeat: izpad povezave = izgubljeni zapis strel, ki ga ni mogoče
+  // dobiti za nazaj (in dan brez pokritosti se pri preverjanju nevihtne karte ne šteje).
   try {
-    if (!env?.LIGHTNING_LOGGER) return;
+    if (!env?.LIGHTNING_LOGGER) return { ok: false, reason: "LIGHTNING_LOGGER ni vezan" };
     const stub = env.LIGHTNING_LOGGER.get(env.LIGHTNING_LOGGER.idFromName("global"));
-    await stub.keepAlive();
-  } catch (_) {}
+    const r = await stub.keepAlive();
+    if (!r || !r.connected) return { ok: false, reason: "ni povezave z Blitzortung (ponovna vzpostavitev v teku)" };
+    if (r.last_msg_age_s != null && r.last_msg_age_s * 1000 > LTG_STALE_MS) return { ok: false, reason: `povezava je tiha ${r.last_msg_age_s} s (zombi, zamenjana)` };
+    return { ok: true };
+  } catch (e) { return { ok: false, reason: String((e && e.message) || e) }; }
 }
 
 // ── Lestvica igre »Prehiti model« (/napovej/) ────────────────
@@ -2907,36 +3226,49 @@ async function _cronScoreNapovej(env) {
 
 export default {
   async scheduled(event, env, ctx) {
-    if (event.cron === "10,40 6-7 * * *") {
-      ctx.waitUntil(_cronDispatchScheduledWorkflows(env));
+    if (event.cron === "30 6-7 * * *") {
+      // Padavinska karta potrebuje jutranjo 24-urno vsoto ARSO, ki obstaja šele po meritvi
+      // ob 06:00 UTC — zato jo sproži ta cron takoj za posnetkom, ne skupni dispatch ob 4:10–5:40
+      // UTC (vsi štirje teki 2. 10. 2026 so padli z »ni nobene postaje z rr24h_val«).
+      ctx.waitUntil((async () => {
+        await _cronBeat(env, "rr24h_snapshot", () => _cronSnapshotArsoRr24h(env));
+        let snap = null;
+        try { snap = await env.COUNTER_KV?.get("arso_rr24h:" + _ljDatum()); } catch (_) {}
+        if (snap) await _cronBeat(env, "dispatch_precip", () => _cronDispatchGithubWorkflow(env, "precip-map.yml", { force: "false" }));
+      })());
+      return;
+    }
+    if (event.cron === "10,40 4-5 * * *") {
+      ctx.waitUntil(_cronBeat(env, "dispatch", () => _cronDispatchScheduledWorkflows(env)));
       return;
     }
     if (event.cron === "2-59/5 * * * *") {
-      ctx.waitUntil(_cronRenderIconAndCells(env));
+      ctx.waitUntil(_cronBeat(env, "icon_cells", () => _cronRenderIconAndCells(env)));
       return;
     }
     if (event.cron === "5 2 * * *") {
-      ctx.waitUntil(_cronScoreNapovej(env));
+      ctx.waitUntil(_cronBeat(env, "score_napovej", () => _cronScoreNapovej(env)));
       return;
     }
-    ctx.waitUntil(_cronCheckThresholds(env));
+    ctx.waitUntil(_cronBeat(env, "thresholds", () => _cronCheckThresholds(env)));
     // Radarski nowcast nadomesti modelski; na model pademo le, če radar odpove,
     // sicer bi za isti dogodek poslali dve obvestili.
-    ctx.waitUntil((async () => {
+    ctx.waitUntil(_cronBeat(env, "nowcast", async () => {
       const ok = await _cronCheckRadarNowcast(env).catch(() => false);
       if (!ok) await _cronCheckPrecipNowcast(env);
-    })());
-    ctx.waitUntil(_cronCheckRainStartStop(env));
-    ctx.waitUntil(_cronCheckAurora(env));
-    ctx.waitUntil(_cronCheckCrnivec(env));
+    }));
+    ctx.waitUntil(_cronBeat(env, "rain_start_stop", () => _cronCheckRainStartStop(env)));
+    ctx.waitUntil(_cronBeat(env, "fc_thresholds", () => _cronCheckForecastThresholds(env)));   // sam se omeji na enkrat na uro
+    ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
+    ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
     // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
     // izgubljen zapis, ki ga ni mogoče dobiti za nazaj — okvir radarja doriše
     // naslednji tik, strela, ki je nihče ni poslušal, pa je ni več. Vsa
     // opravila se sicer zaženejo sočasno; vrstni red odloča le, kdo prvi pride
     // do svoje prve zahteve, ko je proračun invokacije tesen.
-    ctx.waitUntil(_cronKeepLightningAlive(env));
-    ctx.waitUntil(_cronRenderRadarComposite(env));
+    ctx.waitUntil(_cronBeat(env, "lightning", () => _cronKeepLightningAlive(env)));
+    ctx.waitUntil(_cronBeat(env, "radar_composite", () => _cronRenderRadarComposite(env)));
   },
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") {
@@ -4056,6 +4388,27 @@ export default {
         }
       }
 
+      // ── /health ───────────────────────────────────────────
+      // Zdravje cron opravil (glej _cronBeat). Javno, brez občutljivih podatkov.
+      if (path === "/health") {
+        const h = await _cronHealth(env);
+        return new Response(JSON.stringify(h), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
+      }
+
+      // ── /arso-rr24h ───────────────────────────────────────
+      // Jutranji posnetek 24-urnih padavin (glej _cronSnapshotArsoRr24h).
+      // ?datum=YYYY-MM-DD (privzeto danes po naši uri).
+      if (path === "/arso-rr24h") {
+        const datum = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get("datum") || "") ? url.searchParams.get("datum") : _ljDatum();
+        const raw = env?.COUNTER_KV ? await env.COUNTER_KV.get("arso_rr24h:" + datum) : null;
+        if (!raw) {
+          return new Response(JSON.stringify({ error: "ni posnetka", datum }), {
+            status: 404, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=60" } });
+        }
+        return new Response(raw, { headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" } });
+      }
+
       // ── /arso-obs ─────────────────────────────────────────
       if (path === "/arso-obs") {
         const arsoRes = await fetch(
@@ -4922,6 +5275,21 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const ur = Math.min(24, Math.max(1, Number(url.searchParams.get("ur")) || 1));
           const dni = Math.min(365, Math.max(1, Number(url.searchParams.get("dni")) || 30));
           const stub = env.LIGHTNING_LOGGER.get(env.LIGHTNING_LOGGER.idFromName("global"));
+          // ?celice=1&od=<ms>&do=<ms>: strele okna po celicah karte + pokritost
+          // (za tools/verify_storm_map.py). Okno največ 36 h, največ 14 dni nazaj.
+          if (url.searchParams.get("celice") === "1") {
+            const now = Date.now();
+            const od = Math.max(now - LTG_RETENTION_DAYS * 86400000, Number(url.searchParams.get("od")) || 0);
+            const do_ = Math.min(now, Number(url.searchParams.get("do")) || now);
+            if (!(do_ > od) || do_ - od > 36 * 3600000) {
+              return new Response(JSON.stringify({ error: "okno mora biti 0–36 h" }), {
+                status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+            }
+            const cells = await stub.cells(od, do_);
+            return new Response(JSON.stringify(cells), {
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
+            });
+          }
           const data = await stub.recent(ur, dni);
           return new Response(JSON.stringify(data), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=60" },
@@ -7179,15 +7547,20 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           // nedotaknjena — klic, ki posodablja samo vas, drugače ne bi smel
           // tiho izklopiti že vklopljenega povzetka.
           const hasDigest = typeof body.digest === "boolean";
+          // `fc` (osebni pragovi po napovedi) je prav tako ločen opt-in in se
+          // posodobi samo, če ga klic pošlje — `null` ga izklopi.
+          const hasFc = body.fc !== undefined;
+          const fc = hasFc ? _fcThrSanitize(body.fc) : null;
           const subs = await pRead();
           const obstoječa = subs.find(x => x.endpoint === s.endpoint);
           if (obstoječa) {
             let changed = false;
             if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; changed = true; }
             if (hasDigest && obstoječa.digest !== body.digest) { obstoječa.digest = body.digest; changed = true; }
+            if (hasFc && JSON.stringify(obstoječa.fc || null) !== JSON.stringify(fc)) { obstoječa.fc = fc; changed = true; }
             if (changed) await pWrite(subs);
           } else {
-            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, ts: new Date().toISOString() });
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, fc, ts: new Date().toISOString() });
             await pWrite(subs.slice(0, 5000));
           }
           return pj({ ok: true, count: subs.length, vas });

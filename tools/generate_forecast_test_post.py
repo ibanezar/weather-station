@@ -34,7 +34,7 @@ TODAY_DATE = datetime.date.fromisoformat(os.environ.get("POST_DATE") or datetime
 TODAY = TODAY_DATE.isoformat()
 
 METHODOLOGY_NOTE = (
-    "Metodologija: vsak dan primerjamo, kaj je pet virov (ECMWF IFS, ICON, GFS, ARPEGE, best_match prek "
+    "Metodologija: vsak dan primerjamo, kaj je šest virov (ECMWF IFS, ECMWF AIFS, ICON, GFS, ARPEGE, best_match prek "
     "Open-Meteo Previous Runs API) dan prej napovedalo za najvišjo temperaturo v Rečici ob Savinji, z dejansko "
     "meritvijo postaje IREICA1. Izhodišče je klimatologija — dolgoletno povprečje za ta koledarski dan — ne "
     "ugibanje na pamet. Rezultat velja izključno za Zgornjo Savinjsko dolino: modeli delujejo na mreži, ki ozke "
@@ -115,7 +115,7 @@ def build_article(y, m, per_model, biggest, site_data):
                 f'{MODEL_LABELS.get(mdl, mdl)} pri D+{ld}' for mdl, ld in zero_crossing.items()) +
                 " napoved ni več boljša od klimatologije.")
         else:
-            crossing_txt = ("noben od petih virov v celotnem vzorcu (D+1 do D+7) ne pade na raven klimatologije "
+            crossing_txt = ("noben od šestih virov v celotnem vzorcu (D+1 do D+7) ne pade na raven klimatologije "
                              f'(±{seo.num(climo_mae) if climo_mae is not None else "—"} °C za Tmax) — razlika se z '
                              "vsakim dnem vnaprej manjša, a modeli ostanejo pred golim ugibanjem povprečja tudi teden vnaprej.")
 
@@ -134,7 +134,7 @@ def build_article(y, m, per_model, biggest, site_data):
     return {
         "title": title,
         "meta_description": (f'Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino '
-                              f'v {mes_loc} {y}: primerjava ECMWF, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.'),
+                              f'v {mes_loc} {y}: primerjava ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.'),
         "tags": ["test-napovedi", "mesecni-pregled", str(y)],
         "section_label": "Test napovedi",
         "og_photo": "weather-station",
@@ -142,13 +142,15 @@ def build_article(y, m, per_model, biggest, site_data):
         "lead": lead,
         "sections": sections,
         "callout": None,
-        "sources_note": ("Viri: Open-Meteo Previous Runs API (ECMWF IFS, ICON, GFS, ARPEGE, best_match), "
+        "sources_note": ("Viri: Open-Meteo Previous Runs API (ECMWF IFS, ECMWF AIFS, ICON, GFS, ARPEGE, best_match), "
                           "meritve postaje IREICA1. Podatki in metodologija: /test-napovedi/."),
     }
 
 
-def build_html(article, y, m, now_utc):
-    slug = f"test-napovedi-{y}-{m:02d}"
+def build_html(article, y, m, now_utc, slug=None, back=("/test-napovedi/", "← Vsi podatki na /test-napovedi/"),
+               og_title=None, meta_note="samodejni mesečni pregled"):
+    """Uporablja ga tudi generate_year_review_post.py (slug, back, og_title, meta_note)."""
+    slug = slug or f"test-napovedi-{y}-{m:02d}"
     url = f"{SITE}/blog/{slug}.html"
     title = article["title"]
     desc = article["meta_description"]
@@ -244,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
       <span class="brand-name">Meteo<em>rec</em></span>
     </a>
-    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="/test-napovedi/">Test napovedi</a></nav>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="{back[0]}">{section_label}</a></nav>
   </header>
 
   <nav class="crumbs" aria-label="Drobtine">
@@ -252,15 +254,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </nav>
 
   <article>
-    <div class="stn-badge"><span></span> Test napovedi · {section_label}</div>
+    <div class="stn-badge"><span></span> {section_label}</div>
     <h1>{title}</h1>
-    <p class="post-meta">{date_str} · Filip Eremita · samodejni mesečni pregled</p>
+    <p class="post-meta">{date_str} · Filip Eremita · {meta_note}</p>
 
     <p class="lead">{article["lead"]}</p>
 {sections_html}
     <p style="color:var(--muted);font-size:.9rem;margin-top:2rem">{article["sources_note"]}</p>
 
-    <a class="back-link" href="/test-napovedi/">← Vsi podatki na /test-napovedi/</a>
+    <a class="back-link" href="{back[0]}">{back[1]}</a>
   </article>
 
   <footer class="site-foot">
@@ -281,7 +283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     entry = {"title": title, "slug": slug, "url": f"/blog/{slug}.html", "date": TODAY,
               "summary": desc, "tags": tags}
     og_meta = {
-        "title": f"Test napovedi\n{seo.MES_NOM[m].capitalize()} {y}",
+        "title": og_title or f"Test napovedi\n{seo.MES_NOM[m].capitalize()} {y}",
         "subtitle": "Zgornja Savinjska dolina · IREICA1",
         "section": section_label,
         "accent": hexrgb(article["og_accent_hex"]),

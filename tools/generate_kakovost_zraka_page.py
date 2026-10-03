@@ -159,7 +159,7 @@ def pollen_heatmap_html(day_lbls, rows):
             for lvl in levels
         )
         body_rows.append(f"<tr><th>{name}</th>{cells}</tr>")
-    return ('  <div class="table-scroll"><table class="stats aq-heatmap">\n'
+    return ('  <div class="table-scroll" tabindex="0"><table class="stats aq-heatmap">\n'
             f'    <tr>{head}</tr>\n    ' + "\n    ".join(body_rows) + "\n  </table></div>")
 
 

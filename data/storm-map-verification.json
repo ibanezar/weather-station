@@ -1,0 +1,123 @@
+{
+ "generated_at": "2026-10-03T08:37:49.789725+02:00",
+ "method": "celica 45,45+0,18k / 13,4+0,22j, okno od izdaje karte do polnoči, pokritost >= 90 %",
+ "days": [
+  {
+   "date": "2026-10-01",
+   "issued_at": "2026-10-01T14:42:13.460786+02:00",
+   "n_points": 59,
+   "national_score": 10,
+   "coverage": 0.893,
+   "status": "skipped",
+   "reason": "povezava zapisovalnika strel je bila živa le 89 % časa"
+  },
+  {
+   "date": "2026-10-02",
+   "issued_at": "2026-10-02T06:11:07.933955+02:00",
+   "n_points": 59,
+   "national_score": 8,
+   "coverage": 1.0,
+   "status": "ok",
+   "strike_cells": 0,
+   "strikes": 0,
+   "storm_day": false,
+   "levels": {
+    "BREZ": {
+     "n": 32,
+     "obs": 0
+    },
+    "NIZKO": {
+     "n": 27,
+     "obs": 0
+    },
+    "ZMERNO": {
+     "n": 0,
+     "obs": 0
+    },
+    "VISOKO": {
+     "n": 0,
+     "obs": 0
+    },
+    "EKSTREMNO": {
+     "n": 0,
+     "obs": 0
+    }
+   },
+   "contingency": {
+    "8": {
+     "a": 0,
+     "b": 27,
+     "c": 0,
+     "d": 32
+    },
+    "22": {
+     "a": 0,
+     "b": 0,
+     "c": 0,
+     "d": 59
+    },
+    "40": {
+     "a": 0,
+     "b": 0,
+     "c": 0,
+     "d": 59
+    }
+   }
+  }
+ ],
+ "summary": {
+  "days_ok": 1,
+  "days_skipped": 1,
+  "storm_days": 0,
+  "first_date": "2026-10-02",
+  "last_date": "2026-10-02",
+  "levels": {
+   "BREZ": {
+    "n": 32,
+    "obs": 0
+   },
+   "NIZKO": {
+    "n": 27,
+    "obs": 0
+   },
+   "ZMERNO": {
+    "n": 0,
+    "obs": 0
+   },
+   "VISOKO": {
+    "n": 0,
+    "obs": 0
+   },
+   "EKSTREMNO": {
+    "n": 0,
+    "obs": 0
+   }
+  },
+  "contingency": {
+   "8": {
+    "a": 0,
+    "b": 27,
+    "c": 0,
+    "d": 32
+   },
+   "22": {
+    "a": 0,
+    "b": 0,
+    "c": 0,
+    "d": 59
+   },
+   "40": {
+    "a": 0,
+    "b": 0,
+    "c": 0,
+    "d": 59
+   }
+  },
+  "day_level": {
+   "a": 0,
+   "b": 0,
+   "c": 0,
+   "d": 1
+  }
+ }
+}

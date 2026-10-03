@@ -128,8 +128,8 @@ body{
 .gf-interv-banner p{margin:0;font-size:.8rem;color:var(--muted)}
 .gf-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:.7rem;
   font-weight:700;font-size:.88rem;text-decoration:none;border:none;cursor:pointer;
-  background:#ef4444;color:#fff;white-space:nowrap}
-.gf-btn:hover{background:#dc2626}
+  background:#dc2626;color:#fff;white-space:nowrap}
+.gf-btn:hover{background:#b91c1c}
 .gf-btn.secondary{background:var(--card-bg);color:var(--text);border:1px solid var(--card-border)}
 .gf-btn.secondary:hover{border-color:#ef4444}
 .gf-interv-card{border:1px solid var(--card-border);border-radius:1rem;padding:1.2rem;
@@ -542,6 +542,14 @@ def build_vreme_intervencije_page():
 
     storm = load_storm_map()
     storm_html = ""
+    # Karta se mora nanašati na DANES: brez te preveritve je stran en mesec (od 31. 8.,
+    # ko je nevihtna karta nehala nastajati) kot »danes« kazala EKSTREMNO iz avgusta —
+    # na strani, ki jo gasilci berejo med intervencijo (revizija 1. 10. 2026).
+    if storm and storm.get("date") != TODAY.isoformat():
+        storm_html = f'''  <h2>🌩 Nacionalni nevihtni potencial danes</h2>
+  <p>Današnja nevihtna karta še ni izdana (zadnja je iz {_esc(storm.get("date"))}).
+  <a href="/nevihte/">Stanje in razlaga na strani Nevihte →</a></p>'''
+        storm = None
     if storm:
         storm_html = f'''  <h2>🌩 Nacionalni nevihtni potencial danes</h2>
   <p>Najvišja pričakovana ocena danes v Sloveniji: <b>{storm.get("national_score")} ({storm.get("national_level")})</b>,
@@ -1113,7 +1121,7 @@ _NASVETI_CONTACTS = [
     (_FI_SHIELD, "#84cc16", "https://www.gzs-slo.si/", "Gasilska zveza Slovenije", "gzs-slo.si"),
     (_FI_SHIELD, "#0ea5e9", "https://www.gov.si/drzavni-organi/organi-v-sestavi/uprava-za-zascito-in-resevanje/",
      "URSZR", "Uprava RS za zaščito in reševanje"),
-    (_FI_OGROZENOST, "#f59e0b", "https://meteo.arso.gov.si/met/sl/agromet/pozar/", "ARSO",
+    (_FI_OGROZENOST, "#f59e0b", "https://meteo.arso.gov.si/met/sl/agromet/", "ARSO",
      "Uradni indeks požarne ogroženosti"),
 ]
 
@@ -1201,7 +1209,7 @@ def build_metodologija_page(payload):
   <h2>Kaj indeks ni</h2>
   <ul>
     <li>Ni napoved dejanskega požara — pove le, kako ugodni so pogoji, če bi do vžiga prišlo.</li>
-    <li>Ni nadomestilo za uradni <a href="https://meteo.arso.gov.si/met/sl/agromet/pozar/" target="_blank" rel="noopener nofollow">ARSO indeks požarne ogroženosti</a>
+    <li>Ni nadomestilo za uradni <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener nofollow">ARSO indeks požarne ogroženosti</a>
     ali odloke lokalnih oblasti.</li>
     <li>Velja za eno točko (Rečica ob Savinji) — v drugih delih Slovenije se razmere lahko razlikujejo.</li>
   </ul>'''

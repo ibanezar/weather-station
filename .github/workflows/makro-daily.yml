@@ -14,14 +14,17 @@ on:
 
 jobs:
   publish:
+    # IZKLOPLJENO 2. 10. 2026 (Filipova odločitev): API ključ nima dobroimetja,
+    # osnutek makro članka pa piše Claude. Za vklop odstrani to vrstico.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
