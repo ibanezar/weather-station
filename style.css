@@ -509,11 +509,19 @@ img.wx-icon{display:inline-block;vertical-align:middle}
   .hero .hero-left>.condition-badge,.hero .hero-left>.temp-huge{grid-column:1}
   .hero .hero-icon{grid-column:2;grid-row:1/3;align-self:center;margin-top:.9rem}
   .hero .feels{margin-top:.45rem;margin-bottom:.6rem}
-  .hero .yesterday-delta,.hero .daily-fact-card,.hero .dew-line,.hero .mtr-trust-badge a{
-    margin:0;padding:.5rem .1rem;background:none;border:0;border-top:1px solid var(--border);border-radius:0}
-  .hero .yesterday-delta:empty+.daily-fact-card,.hero .mtr-trust-badge{margin-top:0}
-  .hero .dew-line{font-size:.78rem}
 }
+/* Vrstice pod temperaturo (včeraj, rekord, rosišče, MTR) so povsod en seznam z
+   ločilnimi črtami, ne štiri škatle različnih velikosti — na širšem zaslonu so
+   se kopičile kot nametane kartice (2. 10. 2026, opomba Filipa). */
+.hero .hero-left{min-width:0}
+.hero .yesterday-delta,.hero .daily-fact-card,.hero .dew-line,.hero .mtr-trust-badge a{
+  margin:0;padding:.5rem .1rem;background:none;border:0;border-top:1px solid var(--border);border-radius:0}
+.hero .yesterday-delta:empty+.daily-fact-card,.hero .mtr-trust-badge{margin-top:0}
+.hero .dew-line{font-size:.78rem}
+.hero .yesterday-delta{margin-top:.6rem}
+.hero .yesterday-delta:empty{margin:0;padding:0;border:0}
+.hero .yesterday-delta:empty+.daily-fact-card{margin-top:.6rem}
+.hero .mtr-trust-badge a{font-size:.7rem}
 .hero-stats{display:flex;flex-direction:column;justify-content:center;gap:.9rem;min-width:140px}
 .hs{display:flex;flex-direction:column;gap:.15rem}
 .fc-slider-wrap{padding:.55rem 0 .65rem;display:flex;flex-direction:column;gap:.32rem}
