@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-02",
-  "issued_at": "2026-10-02T06:11:07.933955+02:00",
-  "national_score": 8,
+  "date": "2026-10-03",
+  "issued_at": "2026-10-03T06:10:43.254732+02:00",
+  "national_score": 10,
   "national_level": "NIZKO",
-  "national_place": "Novo mesto",
-  "national_hour": "08:00",
+  "national_place": "Kranj",
+  "national_hour": "20:00",
   "should_post": false,
-  "image": "https://meteorec.si/og/storm-map/2026-10-02.jpg",
-  "image_story": "https://meteorec.si/og/storm-map/2026-10-02-story.jpg"
+  "image": "https://meteorec.si/og/storm-map/2026-10-03.jpg",
+  "image_story": "https://meteorec.si/og/storm-map/2026-10-03-story.jpg"
 }
