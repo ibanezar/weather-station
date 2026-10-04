@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 03 Oct 2026 06:55:28 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 04 Oct 2026 18:02:59 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Slana pri 1,7 °C: zakaj trava pobeli, še preden postaja pokaže ničlo</title>
+      <link>https://meteorec.si/blog/slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004.html</guid>
+      <pubDate>Sun, 04 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Danes je postaja IREICA1 izmerila 1,7 °C, na travniku v Nizki pa je bila bela slana. Zakaj trava zmrzne prej kot zrak in kdaj lahko pričakujemo ničlo.</description>
+      <category>analiza</category>
+      <category>oktober</category>
+      <category>2026</category>
+      <category>mraz</category>
+      <category>slana</category>
+      <category>IREICA1</category>
+    </item>
     <item>
       <title>Vreme na Lenartov sejem: nedelja, 4. oktobra</title>
       <link>https://meteorec.si/blog/lenartov-sejem-vreme-nedelja-1004.html</link>
