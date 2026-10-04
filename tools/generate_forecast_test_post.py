@@ -148,8 +148,12 @@ def build_article(y, m, per_model, biggest, site_data):
 
 
 def build_html(article, y, m, now_utc, slug=None, back=("/test-napovedi/", "← Vsi podatki na /test-napovedi/"),
-               og_title=None, meta_note="samodejni mesečni pregled"):
-    """Uporablja ga tudi generate_year_review_post.py (slug, back, og_title, meta_note)."""
+               og_title=None, meta_note="samodejni mesečni pregled", nav_label=None,
+               nav_href=None):
+    """Uporablja ga tudi generate_year_review_post.py (slug, back, og_title, meta_note).
+
+    nav_label/nav_href: tretja povezava v glavi (privzeto oznaka razdelka -> back);
+    ročno napisani članki jo nastavijo na »O postaji« kot ostali blog."""
     slug = slug or f"test-napovedi-{y}-{m:02d}"
     url = f"{SITE}/blog/{slug}.html"
     title = article["title"]
@@ -159,7 +163,8 @@ def build_html(article, y, m, now_utc, slug=None, back=("/test-napovedi/", "← 
     sec_parts = []
     for s in article["sections"]:
         paras = "\n".join(
-            p if p.lstrip().startswith(("<ul", "<ol", "<table", "<p")) else f"    <p>{p}</p>"
+            p if p.lstrip().startswith(("<ul", "<ol", "<table", "<p", "<div", "<figure"))
+            else f"    <p>{p}</p>"
             for p in s["paragraphs"]
         )
         sec_parts.append(f'    <span class="section-label">{s["label"]}</span>\n'
@@ -246,7 +251,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
       <span class="brand-name">Meteo<em>rec</em></span>
     </a>
-    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="{back[0]}">{section_label}</a></nav>
+    <nav class="site-nav"><a href="/">Vreme v živo</a><a href="/blog/">Blog</a><a href="{nav_href or back[0]}">{nav_label or section_label}</a></nav>
   </header>
 
   <nav class="crumbs" aria-label="Drobtine">

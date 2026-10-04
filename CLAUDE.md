@@ -109,6 +109,29 @@ FB/IG ne podre objave članka).
   caption + link), ob napaki fallback na `/feed` (samo link). Besedilo objave
   je prilagojeno tipu članka glede na predpono sluga (glej `PREFIXES` v
   skripti).
+  **Od 2. 10. 2026 je privzeta objava LINK objava (`/feed` + `link`), ne več OG
+  slika s povezavo v prvem komentarju** (`FB_POST_MODE=photo` vrne staro vedenje;
+  ob napaki linka skript sam pade na sliko). Razlog so podatki strani (Meta
+  Business Suite, 2. 7.–1. 10.): objave z linkom 5–15 % klikov na doseženo osebo
+  (20 klikov pri dosegu 137), slika + link v komentarju < 1 % pri podobnem dosegu;
+  od 17. 8. je bilo klikov na povezavo nič. Vzorec je majhen (4 link objave) —
+  če se pokaže drugače, vrni. Povezava ima `utm_source=facebook&utm_medium=social
+  &utm_campaign=<tip>`; kratke povezave `i/<koda>` imajo v ciljnem naslovu
+  `utm_source=instagram` (canonical ostane čist), da GA4 ne šteje FB/IG kot
+  »Direct«. Pred objavo skript pogleda zadnje objave strani in **preskoči članek,
+  ki je že objavljen** (3 dni; best-effort, `FB_FORCE=1` v `social-repost.yml`
+  ga izklopi). Test: `tools/test_social_post.py` (v `parity.yml`).
+- **Workflow ne sme objaviti »zadnjih N člankov s predpono«, samo NOVE.**
+  `invasive-watch.yml` je vsak ponedeljek znova objavil `invazivka*` (5 zadnjih iz
+  `blog.json`) — isti dve objavi tedenskega pregleda šestkrat, vse z dosegom 1–2.
+  Zdaj posname `blog.json` pred generiranjem in `tools/new_slugs.py` vrne samo
+  slugi, ki jih prej ni bilo. Isto načelo za vsak nov workflow.
+- **Doseg na FB (podatki 2. 7.–1. 10. 2026):** ~9 od ~75 objav je naredilo ~78 %
+  ogledov; samodejne predloge (nevihtna karta, ARSO, Invazivke-alarm) so imele
+  doseg 1–2. Zmagale so objave z napisanim uvodom s konkretno številko (gobe po
+  dežju, podatkovne zgodbe o dolini, napoved z neobičajnim podatkom). Sledilcev
+  je bilo +19 v 93 dneh. Stran je torej distribucija, ne kanal rasti — promet iz
+  družbenih omrežij (24 % sej v GA4) gre večinoma mimo strani.
 - **`tools/post_to_instagram.py`** — Instagram Graph API, dvostopenjsko
   (`/media` container → `/media_publish`). Uporablja isto OG sliko.
 - **`tools/short_links.py`** — kratke povezave `meteorec.si/i/<koda>`.

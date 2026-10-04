@@ -89,7 +89,19 @@ def short_url(code):
     return f"{SITE}/{SHORT_DIR}/{code}"
 
 
+# Kratke povezave gredo samo v prvi komentar na Instagramu, zato je vir znan.
+# Merimo ga v GA4 (brez oznake bi šel promet med »Direct«); canonical ostane
+# čist, oznaka je samo v ciljnem naslovu preusmeritve.
+UTM = "utm_source=instagram&utm_medium=social&utm_campaign=ig-komentar"
+
+
+def _with_utm(target):
+    return target + ("&" if "?" in target else "?") + UTM
+
+
 def _redirect_html(slug, target):
+    go = _with_utm(target)
+    go_attr = go.replace("&", "&amp;")
     return f"""<!doctype html>
 <html lang="sl">
 <head>
@@ -97,13 +109,13 @@ def _redirect_html(slug, target):
 <title>Preusmeritev na članek</title>
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="{target}">
-<meta http-equiv="refresh" content="0; url={target}">
-<script>location.replace("{target}");</script>
+<meta http-equiv="refresh" content="0; url={go_attr}">
+<script>location.replace("{go}");</script>
 <style>body{{font:16px/1.6 system-ui,sans-serif;margin:3rem auto;max-width:40rem;padding:0 1rem}}</style>
 </head>
 <body>
 <p>Preusmerjam na članek …</p>
-<p>Če se stran ne odpre sama: <a href="{target}">{slug}</a></p>
+<p>Če se stran ne odpre sama: <a href="{go_attr}">{slug}</a></p>
 </body>
 </html>
 """
