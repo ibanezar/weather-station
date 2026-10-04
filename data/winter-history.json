@@ -94,5 +94,29 @@
     "heating_level": "visoko",
     "black_ice_level": "nizko",
     "fog_top_m": 926
+  },
+  {
+    "date": "2026-10-02",
+    "snow_line_m": 3700,
+    "snow_cm_at_station": 0.0,
+    "heating_level": "visoko",
+    "black_ice_level": "nizko",
+    "fog_top_m": 903
+  },
+  {
+    "date": "2026-10-03",
+    "snow_line_m": 3790,
+    "snow_cm_at_station": 0.0,
+    "heating_level": "visoko",
+    "black_ice_level": "srednje",
+    "fog_top_m": 904
+  },
+  {
+    "date": "2026-10-04",
+    "snow_line_m": 3710,
+    "snow_cm_at_station": 0.0,
+    "heating_level": "visoko",
+    "black_ice_level": "nizko",
+    "fog_top_m": 876
   }
 ]

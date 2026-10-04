@@ -41,6 +41,14 @@ ročno v seji — mora pred koncem dela skozi lekturo:
   poženi workflow **"Lektura obstoječih objav"** (`lektura.yml`) z inputom
   `slugs=<slug članka>`. Workflow popravke sam commita na `main`.
 
+**Workflow `lektura.yml` je IZKLOPLJEN od 2. 10. 2026** (Filipova odločitev):
+API ključ nima dobroimetja (»credit balance is too low«) in je vsak tek padel.
+Posel je v `if: ${{ false }}` — ročni zagon se preskoči. Dokler ga Filip ne
+vklopi, ga ne poganjaj in ga ne vklapljaj sam. Izklopljena je tudi **vgrajena
+lektura** v generatorjih: `LEKTURA_VKLOPLJENA = False` v
+`tools/generate_daily_post.py` — `call_lektor()` (skozi gre vsak generator)
+API-ja ne kliče in vrne članek nespremenjen. Ponovni vklop: obe stikali nazaj.
+
 Lektor preverja slovnico, slog, interno konsistentnost in — posebej pomembno —
 anglicizme/kalke (dobesedni prevodi, prekomerni trpnik, angleški narekovaji,
 vezaj namesto pomišljaja).
@@ -64,6 +72,11 @@ nespremenjena od objave (najdeno pri GEO pregledu, popravljeno 2. 9. 2026).
 - Po objavi na `main` pošlji IndexNow ping (glej korak v `daily-post.yml`).
 - Dnevni članki gredo prek sistema jutranjih predlogov: cron pripravi tri
   predloge, Filip po e-pošti izbere, klik sproži objavo (`daily-post.yml`).
+  **Od 2. 10. 2026 IZKLOPLJENO** (Filipova odločitev, API ključ nima
+  dobroimetja): vsi trije posli v `daily-post.yml` imajo `if: false && (...)`,
+  zato ni ne predlogov ne članka. Ne vklapljaj sam; za vklop odstrani `false && `.
+  Iz istega razloga je izklopljen `makro-daily.yml` (makro objave, osnutek piše
+  Claude): `if: ${{ false }}` na poslu `publish`.
 
 ### `<title>` ne sme čez 60 znakov
 

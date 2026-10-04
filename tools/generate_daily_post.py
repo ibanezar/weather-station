@@ -666,7 +666,16 @@ def parse_lektor_json(text):
     return najdeni[-1] if najdeni else None
 
 
+# Izklopljeno 2. 10. 2026 (Filipova odločitev): API ključ nima dobroimetja.
+# Vsi generatorji gredo skozi call_lektor(), zato je to edino stikalo.
+# Ponovni vklop: True.
+LEKTURA_VKLOPLJENA = False
+
+
 def call_lektor(article, context):
+    if not LEKTURA_VKLOPLJENA:
+        print("ℹ Lektura je izklopljena (LEKTURA_VKLOPLJENA = False), članek gre brez lekture.")
+        return {"ok": True, "issues": ["lektura izklopljena"], "blocking": False, "corrected": article}
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     user_prompt = (
         "Surovi podatki, uporabljeni za članek:\n" + json.dumps(context, ensure_ascii=False, indent=2)

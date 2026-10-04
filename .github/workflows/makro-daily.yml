@@ -14,6 +14,9 @@ on:
 
 jobs:
   publish:
+    # IZKLOPLJENO 2. 10. 2026 (Filipova odločitev): API ključ nima dobroimetja,
+    # osnutek makro članka pa piše Claude. Za vklop odstrani to vrstico.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

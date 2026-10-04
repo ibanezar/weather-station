@@ -2405,7 +2405,6 @@ function renderHeroBriefing(){
   const comfort=_lastComfortLabel,dew=_lastDewLabel;
   let s=(dew&&comfort.toLowerCase()!==dew.toLowerCase())?comfort+' in '+dew.toLowerCase()+'.':comfort+'.';
   const fc=forecastPhrase();if(fc)s+=' '+fc;
-  if(_lastDeltaPhrase)s+=' '+_lastDeltaPhrase;
   textEl.textContent=s;
   wrap.hidden=false;
 }

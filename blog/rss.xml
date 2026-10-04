@@ -5,8 +5,29 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 01 Oct 2026 17:15:35 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 03 Oct 2026 06:55:28 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vreme na Lenartov sejem: nedelja, 4. oktobra</title>
+      <link>https://meteorec.si/blog/lenartov-sejem-vreme-nedelja-1004.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/lenartov-sejem-vreme-nedelja-1004.html</guid>
+      <pubDate>Sat, 03 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Nedelja, 4. oktobra, v Rečici ob Savinji: suho in sončno, do 22 °C popoldne, jutro hladno. Ura za uro, kaj obleči in kako zanesljiva je napoved.</description>
+      <category>napoved</category>
+      <category>Rečica ob Savinji</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Kakršno Lenartovo, tako do božiča? Preverili smo</title>
+      <link>https://meteorec.si/blog/lenartovo-pregovor-vreme-do-bozica.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/lenartovo-pregovor-vreme-do-bozica.html</guid>
+      <pubDate>Fri, 02 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Pregovor pravi, da vreme na Lenartovo (6. 11.) obstane do božiča. Šest let meritev v Rečici ob Savinji: pregovor se je ujel 4-krat od 6, kar je kot met kovanca.</description>
+      <category>razlaga</category>
+      <category>klima</category>
+      <category>Rečica ob Savinji</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
     <item>
       <title>Vremensko leto 2025/26 v Rečici ob Savinji v številkah</title>
       <link>https://meteorec.si/blog/vremensko-leto-2025-2026.html</link>
@@ -49,16 +70,6 @@
       <category>IREICA1</category>
       <category>Savinja</category>
       <category>2026</category>
-    </item>
-    <item>
-      <title>Vreme na Lenartov sejem: nedelja, 4. oktobra</title>
-      <link>https://meteorec.si/blog/lenartov-sejem-vreme-nedelja-1004.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/lenartov-sejem-vreme-nedelja-1004.html</guid>
-      <pubDate>Wed, 30 Sep 2026 08:00:00 +0000</pubDate>
-      <description>Nedelja, 4. oktobra, v Rečici ob Savinji: suho in sončno, do 22 °C popoldne, jutro hladno. Ura za uro, kaj obleči in kako zanesljiva je napoved.</description>
-      <category>napoved</category>
-      <category>Rečica ob Savinji</category>
-      <category>Zgornja Savinjska dolina</category>
     </item>
     <item>
       <title>Indijansko poletje: pred nami suh in sončen teden</title>
