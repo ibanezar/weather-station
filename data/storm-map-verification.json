@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-04T09:01:16.871081+02:00",
+ "generated_at": "2026-10-05T09:11:46.791626+02:00",
  "method": "celica 45,45+0,18k / 13,4+0,22j, okno od izdaje karte do polnoči, pokritost >= 90 %",
  "days": [
   {
@@ -116,21 +116,74 @@
      "d": 59
     }
    }
+  },
+  {
+   "date": "2026-10-04",
+   "issued_at": "2026-10-04T06:10:42.570141+02:00",
+   "n_points": 59,
+   "national_score": 10,
+   "coverage": 1.0,
+   "status": "ok",
+   "strike_cells": 0,
+   "strikes": 0,
+   "storm_day": false,
+   "levels": {
+    "BREZ": {
+     "n": 16,
+     "obs": 0
+    },
+    "NIZKO": {
+     "n": 43,
+     "obs": 0
+    },
+    "ZMERNO": {
+     "n": 0,
+     "obs": 0
+    },
+    "VISOKO": {
+     "n": 0,
+     "obs": 0
+    },
+    "EKSTREMNO": {
+     "n": 0,
+     "obs": 0
+    }
+   },
+   "contingency": {
+    "8": {
+     "a": 0,
+     "b": 43,
+     "c": 0,
+     "d": 16
+    },
+    "22": {
+     "a": 0,
+     "b": 0,
+     "c": 0,
+     "d": 59
+    },
+    "40": {
+     "a": 0,
+     "b": 0,
+     "c": 0,
+     "d": 59
+    }
+   }
   }
  ],
  "summary": {
-  "days_ok": 2,
+  "days_ok": 3,
   "days_skipped": 1,
   "storm_days": 0,
   "first_date": "2026-10-02",
-  "last_date": "2026-10-03",
+  "last_date": "2026-10-04",
   "levels": {
    "BREZ": {
-    "n": 75,
+    "n": 91,
     "obs": 0
    },
    "NIZKO": {
-    "n": 43,
+    "n": 86,
     "obs": 0
    },
    "ZMERNO": {
@@ -149,28 +202,28 @@
   "contingency": {
    "8": {
     "a": 0,
-    "b": 43,
+    "b": 86,
     "c": 0,
-    "d": 75
+    "d": 91
    },
    "22": {
     "a": 0,
     "b": 0,
     "c": 0,
-    "d": 118
+    "d": 177
    },
    "40": {
     "a": 0,
     "b": 0,
     "c": 0,
-    "d": 118
+    "d": 177
    }
   },
   "day_level": {
    "a": 0,
    "b": 0,
    "c": 0,
-   "d": 2
+   "d": 3
   }
  }
 }
