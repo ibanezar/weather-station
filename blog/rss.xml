@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 04 Oct 2026 18:18:02 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Oct 2026 14:16:13 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Krajšanje dneva: koliko minut izgubimo vsak dan</title>
+      <link>https://meteorec.si/blog/krajsanje-dneva-recica-ob-savinji-1005.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/krajsanje-dneva-recica-ob-savinji-1005.html</guid>
+      <pubDate>Mon, 05 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Danes je dan v Rečici ob Savinji dolg 11 h 33 min in se krajša za 3,3 min na dan. Interaktivni grafi: vzhod, zahod, dolžina dneva in temperatura.</description>
+      <category>analiza</category>
+      <category>oktober</category>
+      <category>2026</category>
+      <category>sonce</category>
+      <category>dolžina dneva</category>
+    </item>
     <item>
       <title>Trava je bela, termometer pa kaže 1,7 °C. Kako je to mogoče?</title>
       <link>https://meteorec.si/blog/slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004.html</link>
