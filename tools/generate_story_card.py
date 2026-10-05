@@ -431,9 +431,15 @@ def card(ctx, name, headline, big, big_sub, stats, accent, photo, eyebrow="DANES
 
 
 # ── FROST ──
+FROST_LAST_HOUR = 10   # od te ure (po naši uri) kartica o zmrzali ne velja več
+
 @topic("FROST", 95)
 def t_frost(ctx):
     if ctx["tmin"] is None or ctx["tmin"] > 0:
+        return None
+    # Jutranja zmrzal čez dan ni več novica: ob zamudi crona (okno zgodbe sega
+    # do 18:00) bi ob 13:00 opozarjali na nekaj, kar je že mimo.
+    if ctx["now"].hour >= FROST_LAST_HOUR:
         return None
     variants = [
         ("Bo danes\nzmrzovalo?", "pod ničlo ponoči/zjutraj"),
