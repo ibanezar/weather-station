@@ -2912,6 +2912,10 @@ async function _cronDispatchScheduledWorkflows(env) {
     cas: new Date().toISOString(),
     "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
     "vodostaj-forecast.yml": await _cronDispatchGithubWorkflow(env, "vodostaj-forecast.yml"),
+    // Dnevna zgodba: GitHubov cron zamuja 5-7 ur, zato ob 6:00 ne gre ven (zjutraj veljavna
+    // kartica, npr. zmrzal, bi bila popoldne brezpredmetna). force=false: story_gate.py
+    // ohrani okno in "enkrat na dan", sicer bi vsak dispatch objavil znova.
+    "daily-story.yml": await _cronDispatchGithubWorkflow(env, "daily-story.yml", { force: "false" }),
   };
   const r2 = env?.PHOTOS_R2;
   if (r2) {
