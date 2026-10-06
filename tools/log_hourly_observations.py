@@ -18,7 +18,8 @@ story karte/alert log drugod v repozitoriju) -- za bias-po-urah je dovolj,
 neomejena rast pa ni potrebna.
 
 Usage:
-  python3 tools/log_hourly_observations.py
+  python3 tools/log_hourly_observations.py              # yesterday
+  python3 tools/log_hourly_observations.py --backfill 85  # one-off: fill new channels for the last ~85 days
 """
 import csv, datetime, os, sys
 
@@ -27,7 +28,19 @@ import update_history as uh  # noqa: E402  (fetch_ecowitt, _ew_list, _pick, TZ)
 
 ROOT = uh.ROOT
 LOG_PATH = os.path.join(ROOT, "data", "hourly-observations.csv")
-FIELDS = ["valid_at_local", "temp_c", "precip_mm", "humidity_pct", "quality_flag"]
+FIELDS = ["valid_at_local", "temp_c", "precip_mm", "humidity_pct", "quality_flag",
+          "dewpoint_c", "wind_kmh", "gust_kmh", "pressure_hpa", "solar_wm2"]
+# Extra OUTDOOR channels (added 2026-10-06 for a future hourly forecast-correction
+# model). (path in Ecowitt response, preferred keys, aggregation). Indoor blocks are
+# never read here -- see the privacy rule at the top of CLAUDE.md.
+EXTRA = {
+    "dewpoint_c":   (("outdoor", "dew_point"), ["avg", "value", "max"], "mean"),
+    "wind_kmh":     (("wind", "wind_speed"), ["avg", "value", "max"], "mean"),
+    "gust_kmh":     (("wind", "wind_gust"), ["max", "avg", "value"], "max"),
+    "pressure_hpa": (("pressure", "relative"), ["avg", "value", "max"], "mean"),
+    "solar_wm2":    (("solar_and_uvi", "solar"), ["avg", "value", "max"], "mean"),
+}
+SOLAR_MAX_WM2 = 1500  # sensor glitches above this are dropped
 HOLD_DAYS = 400  # dovolj za "isti mesec/sezona lani", brez neomejene rasti
 
 
@@ -55,6 +68,14 @@ def hourly_from_ecowitt(data, day_iso):
         if val is not None:
             buckets[hour_of(ts)]["p"].append(val)
 
+    extra = {k: {h: [] for h in range(24)} for k in EXTRA}
+    for k, (path, keys, _agg) in EXTRA.items():
+        for ts, v in (uh._ew_list(data, *path) or {}).items():
+            val = uh._pick(v, keys)
+            if val is None or (k == "solar_wm2" and val > SOLAR_MAX_WM2):
+                continue
+            extra[k][hour_of(ts)].append(val)
+
     out = {}
     for h, b in buckets.items():
         if not b["t"]:
@@ -69,7 +90,20 @@ def hourly_from_ecowitt(data, day_iso):
             "precip_mm": precip_hourly,
             "humidity_pct": round(sum(b["h"]) / len(b["h"]), 1) if b["h"] else None,
         }
+        for k, (_path, _keys, agg) in EXTRA.items():
+            xs = extra[k][h]
+            out[h][k] = (round(max(xs) if agg == "max" else sum(xs) / len(xs), 1) if xs else None)
     return out
+
+
+def make_row(key, b, flag):
+    row = {"valid_at_local": key, "temp_c": b["temp_c"],
+           "precip_mm": b["precip_mm"] if b["precip_mm"] is not None else "",
+           "humidity_pct": b["humidity_pct"] if b["humidity_pct"] is not None else "",
+           "quality_flag": flag}
+    for k in EXTRA:
+        row[k] = b[k] if b.get(k) is not None else ""
+    return row
 
 
 def load_existing():
@@ -92,36 +126,55 @@ def save(rows):
             w.writerow({k: r.get(k, "") for k in FIELDS})
 
 
+def ingest_day(day, rows, seen, data):
+    """Add the day's hours to `rows`; for hours already logged (before the extra
+    channels existed) fill ONLY the empty extra columns -- never overwrite."""
+    hourly = hourly_from_ecowitt(data, day)
+    n_hours = len(hourly)
+    flag = "ok" if n_hours >= 22 else ("partial" if n_hours >= 12 else "sparse")
+    by_key = {r["valid_at_local"]: r for r in rows}
+    added = filled = 0
+    for h in range(24):
+        b = hourly.get(h)
+        if not b:
+            continue
+        key = f"{day}T{h:02d}:00"
+        if key in by_key:
+            r = by_key[key]
+            if any(not r.get(k) for k in EXTRA):
+                for k in EXTRA:
+                    if not r.get(k) and b.get(k) is not None:
+                        r[k] = b[k]
+                        filled += 1
+            continue
+        rows.append(make_row(key, b, flag))
+        seen.add(key)
+        added += 1
+    return n_hours, flag, added, filled
+
+
 def main():
-    yesterday = (datetime.datetime.now(uh.TZ).date() - datetime.timedelta(days=1)).isoformat()
+    backfill = 0
+    if "--backfill" in sys.argv:
+        # Ecowitt only keeps 5-min resolution ~90 days back; stay inside that.
+        backfill = min(int(sys.argv[sys.argv.index("--backfill") + 1]), 85)
+    today = datetime.datetime.now(uh.TZ).date()
+    days = [(today - datetime.timedelta(days=d)).isoformat() for d in range(backfill, 0, -1)] \
+        if backfill else [(today - datetime.timedelta(days=1)).isoformat()]
     rows, seen = load_existing()
 
-    if any(r.startswith(yesterday) for r in seen):
-        print(f"{yesterday} je že zabeležen, preskačem zajem.")
-    else:
-        data = uh.fetch_ecowitt(yesterday, yesterday)
+    for day in days:
+        have = [r for r in rows if r["valid_at_local"].startswith(day)]
+        complete = len(have) >= 22 and all(r.get("dewpoint_c") not in (None, "") for r in have)
+        if complete:
+            print(f"{day} je že zabeležen, preskačem zajem.")
+            continue
+        data = uh.fetch_ecowitt(day, day)
         if not data:
-            print(f"⚠ Ecowitt ni vrnil podatkov za {yesterday}.", file=sys.stderr)
-        else:
-            hourly = hourly_from_ecowitt(data, yesterday)
-            n_hours = len(hourly)
-            flag = "ok" if n_hours >= 22 else ("partial" if n_hours >= 12 else "sparse")
-            added = 0
-            for h in range(24):
-                b = hourly.get(h)
-                if not b:
-                    continue
-                key = f"{yesterday}T{h:02d}:00"
-                if key in seen:
-                    continue
-                rows.append({
-                    "valid_at_local": key, "temp_c": b["temp_c"],
-                    "precip_mm": b["precip_mm"] if b["precip_mm"] is not None else "",
-                    "humidity_pct": b["humidity_pct"] if b["humidity_pct"] is not None else "",
-                    "quality_flag": flag,
-                })
-                added += 1
-            print(f"✓ {yesterday}: {n_hours}/24 ur ({flag}), {added} novih vrstic.")
+            print(f"⚠ Ecowitt ni vrnil podatkov za {day}.", file=sys.stderr)
+            continue
+        n_hours, flag, added, filled = ingest_day(day, rows, seen, data)
+        print(f"✓ {day}: {n_hours}/24 ur ({flag}), {added} novih vrstic, {filled} dopolnjenih polj.")
 
     cutoff = (datetime.date.today() - datetime.timedelta(days=HOLD_DAYS)).isoformat()
     before = len(rows)
