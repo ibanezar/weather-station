@@ -228,7 +228,29 @@ Skripte so v `tools/ai/` in niso v nobenem workflowu.
 | Kazalnik zaupanja iz razhajanja modelov (`eval_confidence.py`) | Spearman 0,04–0,19; pri Tmin D+1/D+3 brez učinka → ne objavljaj |
 | Verjetnost padavin: LightGBM / povprečje z v1 (`eval_mtr_calibration.py`) | D+1 Brier 0,172 → 0,165; D+2, D+3 brez dobitka |
 
-Edino ponovljivo izboljšanje je več-modelni Tmax pri D+2 in D+3 (~0,1 °C). Če se kdaj vgradi, naj
-gre kot ločena možnost v `train_recica_mos.py` (ne kot nov model), s ponovljenim bootstrapom.
+Edino ponovljivo izboljšanje je več-modelni Tmax pri D+2 in D+3 (~0,1 °C). **Vgrajeno 6. 10. 2026**
+kot `--multi-tmax` v `train_recica_mos.py` (glej razdelek spodaj); za tmin ni vklopljeno.
 Ko bodo na voljo urni arhivi vseh modelov in dovolj zbranih ansamblov, ponovi `eval_mtr2_models.py`
 (značilke HM še niso preizkušene — urni podatki po modelih se zaradi omejitev Open-Meteo niso prenesli).
+
+## `--multi-tmax`: Tmax drugih modelov kot značilke (6. 10. 2026)
+
+Za model tmax se k 16 osnovnim značilkam (in cond/bias, če so vklopljeni) dodajo `MULTI_FEATURES`:
+razlika Tmax modelov IFS, GFS, ICON, ARPEGE do privzetega Open-Meteo, razlika njihovega povprečja
+in razpršenost vseh vhodov. Vir pri učenju je `data/forecast-archive.csv` (po vodilnem času in
+datumu), pri napovedi živi klic Open-Meteo `models=<id>` za vsak model
+(`predict_recica_mos.fetch_live_multi`, dnevni ekstrem iz urnih vrednosti po lokalnem času, enako kot
+arhiv). Manjkajoč model je nevtralen (razlika 0); pri < 2 modelih za dan se dan preskoči, pri
+nobenem dosegljivem pa se napoved ne osveži (stara ostane, kot pri pristranskosti).
+Učni vzorci za tmax so omejeni na dneve z arhivom (od 2024-05-26); tmin ostaja pri
+prvotnem oknu. Meritev v okviru lastnega walk-forward (`train_recica_mos.py --report`, isto
+okno 2024-05-26 → 2026-10-05, `--use-bias-tmin --use-cond-tmin`):
+
+| Tmax | brez | z `--multi-tmax` |
+|---|---|---|
+| D+1 | 1,11 °C | 1,04 °C |
+| D+2 | 1,34 °C | 1,24 °C |
+| D+3 | 1,53 °C | 1,40 °C |
+
+`model/recica-mos.json` nosi `uses_multi_features` in `multi_models`; model, naučen brez zastavice,
+deluje kot prej. Test: `tools/test_mtr_extras.py`.

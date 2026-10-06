@@ -30,4 +30,15 @@ r = p.predict_day(model, 1, feats)
 check(r["tmin_sd"] == round(2.0 * p.SD_OOS_K, 2), f"card sd inflated ({r['tmin_sd']})")
 check(r["p_frost"] == round(p.frost_probability(r["tmin"], 2.0), 2), "p_frost from raw sd")
 check(r["night_regime"] == "clear_calm", "regime in output")
+# multi-model features (--multi-tmax)
+mos = p.mos
+f = {"om_tmax": 10.0, "mm": {"tmax": {"ecmwf_ifs025": 12.0, "gfs_seamless": 8.0}, "tmin": {}}}
+v = mos.multi_vector(f, "tmax")
+check(len(v) == len(mos.MULTI_FEATURES), "multi_vector length matches MULTI_FEATURES")
+check(v[:4] == [2.0, -2.0, 0.0, 0.0], f"missing models are neutral ({v[:4]})")
+check(abs(v[4]) < 1e-9 and abs(v[5] - 1.633) < 1e-3, f"mean diff / spread ({v[4:]})")
+check(mos.multi_vector({"om_tmin": 3.0}, "tmin") == [0.0] * 5 + [0.0], "no archive -> neutral zeros")
+base = dict(feats); base["mm"] = f["mm"]
+n0 = len(mos.temp_vector(base, "tmax")); n1 = len(mos.temp_vector(base, "tmax", use_multi=True))
+check(n1 - n0 == len(mos.MULTI_FEATURES), "temp_vector appends exactly MULTI_FEATURES")
 print("OK" if not FAILS else f"{len(FAILS)} FAIL"); sys.exit(1 if FAILS else 0)

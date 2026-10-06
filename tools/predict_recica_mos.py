@@ -100,6 +100,28 @@ def night_regime(cloud_n, wind_n):
     return "mixed"
 
 
+def fetch_live_multi(models):
+    """{day: {"tmax": {model: v}, "tmin": {model: v}}} iz žive napovedi drugih modelov.
+    Dnevni ekstrem iz urnih vrednosti po lokalnem času (kot arhiv napovedi); model, ki
+    ga ni mogoče prebrati, preprosto manjka (multi_vector ga obravnava kot nevtralnega)."""
+    out = {}
+    for m in models:
+        try:
+            rows = fetch_live_forecast(m)
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError,
+                json.JSONDecodeError, OSError) as e:
+            print(f"  ⚠ model {m} ni dosegljiv ({e}) — izpuščen", file=sys.stderr)
+            continue
+        for day, series in rows.items():
+            temp = [v for _, v in (series.get("temperature_2m") or [])]
+            if len(temp) < 20:
+                continue
+            e = out.setdefault(day, {"tmax": {}, "tmin": {}})
+            e["tmax"][m] = max(temp)
+            e["tmin"][m] = min(temp)
+    return out
+
+
 def load_model():
     with open(mos.MODEL_PATH, encoding="utf-8") as f:
         return json.load(f)
@@ -125,7 +147,8 @@ def predict_day(model, lead, feats):
         if not coefs:
             return None
         tvec = mos.temp_vector(feats, target, with_aifs,
-                               bool(uses_bias.get(target)), bool(uses_cond.get(target)))
+                               bool(uses_bias.get(target)), bool(uses_cond.get(target)),
+                               bool((model.get("uses_multi_features") or {}).get(target)))
         out[target] = round(mos.predict_linear(coefs, tvec), 1)
         raw_sd = entry["residual_sd"].get(target)
         out[f"{target}_sd"] = round(raw_sd * SD_OOS_K, 2) if raw_sd else raw_sd
@@ -195,6 +218,14 @@ def main():
                   file=sys.stderr)
             return 0
 
+    multi_live = None
+    if any((model.get("uses_multi_features") or {}).values()):
+        multi_live = fetch_live_multi(model.get("multi_models") or mos.MULTI_MODELS)
+        if not any(len(v["tmax"]) >= 2 for v in multi_live.values()):
+            print("✗ Drugi modeli niso dosegljivi (model je naučen z njimi) — napoved ni osvežena",
+                  file=sys.stderr)
+            return 0
+
     days = []
     for lead in mos.LEADS:
         target = (today + dt.timedelta(days=lead)).isoformat()
@@ -215,6 +246,10 @@ def main():
                 feats[f"err_ma3_{t}"] = ma3
                 feats[f"err_ma7_{t}"] = ma7
                 feats[f"is_err_missing_{t}"] = missing
+        if multi_live is not None:
+            feats["mm"] = multi_live.get(target)
+            if not feats["mm"] or len(feats["mm"]["tmax"]) < 2:
+                continue    # premalo drugih modelov za ta dan
         pred = predict_day(model, lead, feats)
         if pred is None:
             continue

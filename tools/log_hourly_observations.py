@@ -21,7 +21,7 @@ Usage:
   python3 tools/log_hourly_observations.py              # yesterday
   python3 tools/log_hourly_observations.py --backfill 85  # one-off: fill new channels for the last ~85 days
 """
-import csv, datetime, os, sys
+import csv, datetime, os, sys, time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import update_history as uh  # noqa: E402  (fetch_ecowitt, _ew_list, _pick, TZ)
@@ -169,6 +169,8 @@ def main():
         if complete:
             print(f"{day} je že zabeležen, preskačem zajem.")
             continue
+        if backfill:
+            time.sleep(1.5)   # blag do Ecowitt API-ja pri ~85 zaporednih klicih
         data = uh.fetch_ecowitt(day, day)
         if not data:
             print(f"⚠ Ecowitt ni vrnil podatkov za {day}.", file=sys.stderr)
