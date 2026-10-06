@@ -997,7 +997,9 @@ normalna aproksimacija iz `tmin_sd` × `FROST_SD_K` = 1,15, ker je sd na kartici
 množice in je ~5–15 % prenizek) in `night_regime` (`clear_calm` / `overcast` / `mixed` iz
 nočne oblačnosti in vetra). Backtest po mesecih (`tools/ai/eval_frost.py`, 366 dni, 99
 zmrzalnih noči): Brier 0,066–0,077 proti 0,197 pri klimatologiji; v srednjem območju
-30–70 % je zmrzal pogostejša od napovedi. Kartica pokaže »zmrzal N %« (zaokroženo na 5 %,
+30–70 % je zmrzal pogostejša od napovedi. Pas P10–P90 na kartici je ±1,2816 · `tmax_sd`/`tmin_sd`; ta sd je v `predict_recica_mos.py` pomnožen s
+`SD_OOS_K` = 1,05, ker je sd iz učne množice prenizek (pokritost 76–81 % namesto 80 %; z 1,05 je
+78–84 %, `tools/ai/eval_mtr_calibration.py`). `p_frost` računa iz surovega sd z lastnim faktorjem. Kartica pokaže »zmrzal N %« (zaokroženo na 5 %,
 pod 10 % nič) in razlog; `/sezona/` uporabi isto številko. Razlog (jasno in mirno: popravek
 −1,5 °C, oblačno: −0,5 °C) je izmerjen na zadnjem letu — pragovi so v Pythonu, JS le preslika
 kodo v stavek (ne podvajaj pragov). `/trendi/` kaže zanesljivostni diagram

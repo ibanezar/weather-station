@@ -74,6 +74,11 @@ def fetch_live_forecast(model_id=None):
 # in-sample residual sd, ~5-15 % below the out-of-sample one, hence K. Walk-forward check
 # (tools/ai/eval_frost.py, 366 days, 99 frost nights): Brier 0.066-0.077 vs 0.197 climatology.
 FROST_SD_K = 1.15
+# The band on the card is pred +- 1.2816 * sd, labelled P10-P90. With the in-sample sd it
+# covered 76-81 % of unseen days (366-day walk-forward, tools/ai/eval_mtr_calibration.py);
+# x1.05 gives 78-84 %, closest to the nominal 80 %. Applied here, not in training, so the
+# model file keeps the raw residual sd. p_frost uses the raw sd with its own factor above.
+SD_OOS_K = 1.05
 # Night regime (backtest: MTR minus Open-Meteo Tmin was -1.5 C on clear calm nights,
 # -0.5 C on overcast ones; observed minus Open-Meteo agreed: -1.5 / -0.8).
 CLEAR_CLOUD_N, CALM_WIND_N, OVERCAST_CLOUD_N = 30, 8, 70
@@ -114,6 +119,7 @@ def predict_day(model, lead, feats):
     uses_bias = model.get("uses_bias_features") or {}
     uses_cond = model.get("uses_cond_features") or {}
     out = {}
+    raw_sds = {}
     for target in ("tmax", "tmin"):
         coefs = entry["coefficients"].get(target)
         if not coefs:
@@ -121,7 +127,9 @@ def predict_day(model, lead, feats):
         tvec = mos.temp_vector(feats, target, with_aifs,
                                bool(uses_bias.get(target)), bool(uses_cond.get(target)))
         out[target] = round(mos.predict_linear(coefs, tvec), 1)
-        out[f"{target}_sd"] = entry["residual_sd"].get(target)
+        raw_sd = entry["residual_sd"].get(target)
+        out[f"{target}_sd"] = round(raw_sd * SD_OOS_K, 2) if raw_sd else raw_sd
+        raw_sds[target] = raw_sd
         skill = (entry.get("skill") or {}).get(target) or {}
         out[f"{target}_mae"] = skill.get("mae_meteorec")
         out[f"{target}_improvement_pct"] = skill.get("improvement_pct")
@@ -129,7 +137,7 @@ def predict_day(model, lead, feats):
     pop_coefs = entry["coefficients"].get("pop")
     out["pop"] = round(mos.predict_prob(pop_coefs, mos.pop_vector(feats, with_aifs)), 2) if pop_coefs else None
 
-    p_frost = frost_probability(out["tmin"], out.get("tmin_sd"))
+    p_frost = frost_probability(out["tmin"], raw_sds.get("tmin"))
     out["p_frost"] = round(p_frost, 2) if p_frost is not None else None
     out["night_regime"] = night_regime(feats["cloud_n"], feats["wind_n"])
 
