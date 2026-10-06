@@ -1393,6 +1393,11 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
   `pressure_hpa`, `solar_wm2` (priprava na urni popravek napovedi; notranjih blokov ne
   bere). Zgodovina za nazaj ne obstaja — `--backfill 85` (ročno, z Ecowitt secreti) dopolni
   prazna polja za zadnjih ~85 dni, preden jih Ecowitt podvzorči. Test: `tools/test_hourly_log.py`.
+- `tools/log_ensemble_forecasts.py` (od 6. 10. 2026, korak v `test-napovedi-daily.yml`) —
+  dnevni zajem ansamblov ECMWF ENS, ICON-EPS in GEFS v `data/ensemble-forward-log.csv`
+  (razpon članov Tmax/Tmin, `p_wet`, `p_frost`). Ansambli nimajo arhiva nazaj, zato se
+  zgodovina za verjetnostni model (zmrzal, padavine) nabira samo s tekočim zajemom.
+  Na strani se ne prikazuje. Test: `tools/test_ensemble_log.py`.
 - `tools/compute_forecast_test_metrics.py` — MAE/bias/RMSE/delež >3 °C in
   kontingenčna tabela za padavine (0,2 in 5 mm), po (vir, vodilni čas), proti
   klimatologiji (±7 dni okoli koledarskega dne, iz cele postajne zgodovine —

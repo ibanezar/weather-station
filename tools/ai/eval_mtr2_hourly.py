@@ -42,7 +42,9 @@ def build(lead, cache, arch, obs):
     return w.merge(v1, on="valid_at", how="inner")
 
 
-def run(lead, target, cache, arch, obs, since):
+def predict_all(lead, target, cache, arch, obs, extra_cols=None):
+    """Walk-forward out-of-sample predictions of every candidate.
+    Returns (frame with valid_at/obs/raw/<name>_ridge/<name>_lgb, month column)."""
     w = build(lead, cache, arch, obs)
     y = w[f"obs_{target}"].values
     mean = w[f"{target}_mean"].values
@@ -51,6 +53,8 @@ def run(lead, target, cache, arch, obs, since):
         "v1feat": v1cols,
         "v1+multi": v1cols + e1.features(target),
     }
+    if extra_cols:
+        sets.update(extra_cols(w, v1cols, target))
     out = {}
     months = sorted(w.month.unique())
     res = {"n": 0}
@@ -70,9 +74,19 @@ def run(lead, target, cache, arch, obs, since):
                                   min_child_samples=20, subsample=0.8, subsample_freq=1,
                                   colsample_bytree=0.8, reg_lambda=5.0, verbose=-1).fit(Xtr, r[tr])
             preds[f"{name}_lgb"][te] = mean[te] + g.predict(Xte)
-    ok = ~np.isnan(preds["v1feat_lgb"]) & ~np.isnan(y) & (w.valid_at >= since).values
-    res["n"] = int(ok.sum())
-    res["raw"] = float(np.mean(np.abs(w[f"best_match_{target}_c"].values[ok] - y[ok])))
+    df = pd.DataFrame({"valid_at": w.valid_at, "obs": y, "raw": w[f"best_match_{target}_c"].values, **preds})
+    return df[~np.isnan(df["v1feat_lgb"]) & ~np.isnan(df.obs)].reset_index(drop=True)
+
+
+def run(lead, target, cache, arch, obs, since, extra_cols=None):
+    df = predict_all(lead, target, cache, arch, obs, extra_cols)
+    df = df[df.valid_at >= since]
+    y = df.obs.values
+    ok = np.ones(len(df), bool)
+    preds = {c: df[c].values for c in df.columns if c.endswith(("_ridge", "_lgb"))}
+    w = df
+    res = {"n": int(ok.sum())}
+    res["raw"] = float(np.mean(np.abs(df.raw.values - y)))
     for k, p in preds.items():
         res[k] = float(np.mean(np.abs(p[ok] - y[ok])))
     return res
