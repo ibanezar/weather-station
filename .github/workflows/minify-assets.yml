@@ -27,6 +27,14 @@ jobs:
       - name: Minificiraj app.js in style.css
         run: npm run minify
 
+      - name: Osveži kritični CSS v index.html
+        # Ni nujno: ob napaki ostane prejšnji kritični blok (celoten CSS se naloži vseeno).
+        continue-on-error: true
+        run: |
+          npm i --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          node tools/critical_css.mjs
+
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"

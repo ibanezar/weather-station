@@ -961,6 +961,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .sc-risk-high .sc-risk-level{color:#fb923c}
 .sc-risk-extreme .sc-risk-level{color:#f87171}
 .sc-risk-desc{font-size:.7rem;color:var(--muted);line-height:1.45;max-width:480px}
+.sc-risk-desc a{color:var(--blue)}
 .sc-risk-gauge{text-align:center;min-width:90px}
 .sc-risk-pct{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:300;color:var(--text)}
 .sc-risk-bar{height:6px;border-radius:4px;background:var(--fc-border);overflow:hidden;margin:.25rem 0 .2rem}
