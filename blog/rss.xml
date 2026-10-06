@@ -5,7 +5,7 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 05 Oct 2026 14:16:13 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 06 Oct 2026 09:40:09 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <item>
       <title>Krajšanje dneva: koliko minut izgubimo vsak dan</title>
@@ -18,6 +18,18 @@
       <category>2026</category>
       <category>sonce</category>
       <category>dolžina dneva</category>
+    </item>
+    <item>
+      <title>Visoki oblaki proti zahodu: ali res napovedujejo dež?</title>
+      <link>https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</guid>
+      <pubDate>Mon, 05 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Valoviti visoki oblaki in nižji pas nad grebenom proti zahodu: kaj pravi o njih postaja IREICA1 (tlak, veter, vlaga) in kdaj naj bi po napovedi prišel dež.</description>
+      <category>analiza</category>
+      <category>oblaki</category>
+      <category>oktober</category>
+      <category>2026</category>
+      <category>IREICA1</category>
     </item>
     <item>
       <title>Trava je bela, termometer pa kaže 1,7 °C. Kako je to mogoče?</title>
