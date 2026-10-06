@@ -1066,6 +1066,11 @@ Pravila, ki jih ne obračaj:
   `tools/backfill_aifs_verification.py` napolni tudi za nazaj; isti skript v
   workflowu zapolni dneve, ki bi viru ušli. Ločljivost 0,25° pomeni, da doline
   ne vidi — na semaforju je zato pošteno, a slabo, in tako je tudi povedano.
+- **`--multi-tmax`** (od 6. 10. 2026, v `mos-train.yml`): za tmax so dodane značilke Tmax drugih
+  modelov (`MULTI_FEATURES`; vir pri učenju `data/forecast-archive.csv`, pri napovedi živi klic
+  `models=<id>` v `predict_recica_mos.fetch_live_multi`). Walk-forward: D+1 1,11→1,04, D+2 1,34→1,24,
+  D+3 1,53→1,40 °C. Pri tminu je dobiček šum (ni vklopljeno). Vse ostale poskuse, ki niso uspeli
+  (LightGBM, ERA5, kazalnik zaupanja), glej `docs/model-recica.md`.
 - Značilke gradi ena sama funkcija (`train_recica_mos.daily_features`), ki jo
   napovedovalnik uvozi. **Ne podvajaj je** — dva prepisa se razideta in model
   tiho dobiva druge vhode, kot jih pozna.

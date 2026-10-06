@@ -1,0 +1,51 @@
+name: Urni zajem meritev — enkratni backfill
+
+# Ecowitt device/history vrne polno 5-min ločljivost samo za zadnjih ~90 dni. Od 6. 10. 2026
+# urni zapis nosi še točko rosišča, veter, sunke, tlak in sončno obsevanje; za dneve pred tem
+# jih ta delavni tok dopolni (samo prazna polja, obstoječih vrednosti ne prepiše).
+# Ročni zagon; poganjaj čim prej — okno 90 dni se vsak dan krči.
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Koliko dni nazaj (največ 85)'
+        required: false
+        default: '85'
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Dopolni urne meritve za nazaj
+        env:
+          EW_APP: ${{ secrets.EW_APP }}
+          EW_API: ${{ secrets.EW_API }}
+          EW_MAC: ${{ secrets.EW_MAC }}
+        run: python3 tools/log_hourly_observations.py --backfill "${{ github.event.inputs.days || '85' }}"
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/hourly-observations.csv
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "test-napovedi: urni backfill zunanjih polj $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1

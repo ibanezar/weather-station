@@ -259,7 +259,7 @@ def merge_aifs(f, af):
     return g
 
 
-def temp_vector(f, target, with_aifs=False, use_bias=False, use_cond=False):
+def temp_vector(f, target, with_aifs=False, use_bias=False, use_cond=False, use_multi=False):
     """Načrtovalna vrstica za temperaturo. `coldpool` je jedro modela: ob jasni
     (nizka nočna oblačnost) in mirni (nizek nočni veter) noči gre proti 1 in
     ujame nabiranje hladnega zraka na dnu doline, ki ga mreža ne razreši.
@@ -301,7 +301,47 @@ def temp_vector(f, target, with_aifs=False, use_bias=False, use_cond=False):
         # interakcija z om_tmin resnično nova informacija, ki je v bazi ni.
         if target == "tmin":
             v += [f["sin_doy"] * f["om_tmin"], f["cos_doy"] * f["om_tmin"]]
+    if use_multi:
+        v += multi_vector(f, target)
     return v
+
+
+# Dodatek pri --multi-tmax/--multi-tmin: dnevna Tmax/Tmin DRUGIH modelov (IFS, GFS, ICON,
+# ARPEGE) iz data/forecast-archive.csv kot razlike do privzetega Open-Meteo, plus razlika
+# povprečja in razpršenost vseh vhodov. Izmerjeno (tools/ai/eval_mtr2_hourly.py, uparjen
+# bootstrap): Tmax D+2 −0,08 °C, D+3 −0,12 °C resnično; Tmin šum. Zato samo za tmax.
+MULTI_MODELS = ["ecmwf_ifs025", "gfs_seamless", "icon_seamless", "meteofrance_arpege_europe"]
+MULTI_FEATURES = ["d_ifs", "d_gfs", "d_icon", "d_arpege", "d_mean", "spread"]
+ARCHIVE_CSV = os.path.join(ROOT, "data", "forecast-archive.csv")
+
+
+def load_multi_archive(path=ARCHIVE_CSV, leads=None):
+    """{(lead, day): {"tmax": {model: v}, "tmin": {model: v}}} iz arhiva napovedi po modelih."""
+    import csv
+    out = {}
+    leads = set(leads or LEADS)
+    with open(path, encoding="utf-8", newline="") as fh:
+        for r in csv.DictReader(fh):
+            if r["model"] not in MULTI_MODELS or int(r["lead_days"]) not in leads:
+                continue
+            e = out.setdefault((int(r["lead_days"]), r["valid_at"]), {"tmax": {}, "tmin": {}})
+            for k in ("tmax", "tmin"):
+                v = r.get(f"{k}_c")
+                if v not in (None, ""):
+                    e[k][r["model"]] = float(v)
+    return out
+
+
+def multi_vector(f, target):
+    """Značilke drugih modelov za en cilj. Manjkajoči model: razlika 0 (nevtralno)."""
+    vals = (f.get("mm") or {}).get(target) or {}
+    om = f["om_" + target]
+    have = [vals[m] for m in MULTI_MODELS if vals.get(m) is not None]
+    diffs = [(vals[m] - om) if vals.get(m) is not None else 0.0 for m in MULTI_MODELS]
+    allv = have + [om]
+    mean = sum(allv) / len(allv)
+    sd = math.sqrt(sum((x - mean) ** 2 for x in allv) / len(allv))
+    return diffs + [mean - om, sd]
 
 
 # ── Avtokorelirana pristranskost (--use-bias) ───────────────────────────────
@@ -458,7 +498,7 @@ def load_history():
         return json.load(f)
 
 
-def build_samples(rows, hist, lead, bias_series=None, aifs_rows=None):
+def build_samples(rows, hist, lead, bias_series=None, aifs_rows=None, multi=None):
     """Poveže dnevne značilke z izmerjenim dnem. Dnevi z izvorom "era5" so
     modelska ocena in ne meritev — v učenju bi model učili lastnega vhoda.
 
@@ -491,6 +531,9 @@ def build_samples(rows, hist, lead, bias_series=None, aifs_rows=None):
                 f[f"err_ma3_{target}"] = ma3
                 f[f"err_ma7_{target}"] = ma7
                 f[f"is_err_missing_{target}"] = missing
+        if multi is not None:
+            # Dan brez arhiva drugih modelov dobi mm=None; učni vzorci za cilj z --multi-* ga izpustijo.
+            f["mm"] = multi.get((lead, day))
         samples.append({
             "date": day,
             "f": f,
@@ -516,7 +559,7 @@ def _season_of(date_str):
 
 
 def select_lambda(samples, target, with_aifs=False, use_bias=False, use_cond=False,
-                   grid=LAMBDA_GRID, inner_folds=INNER_FOLDS):
+                   grid=LAMBDA_GRID, inner_folds=INNER_FOLDS, use_multi=False):
     """Izbere regularizacijo (lambda) z NOTRANJO časovno validacijo znotraj
     `samples` — nikoli na zunanjem testnem nizu, ki bo pozneje meril veščino
     tega izbora (glej walk_forward_cv). Zadnjih `inner_folds` mesecev te množice
@@ -533,9 +576,9 @@ def select_lambda(samples, target, with_aifs=False, use_bias=False, use_cond=Fal
             te = [s for s in samples if s["date"][:7] == tm]
             if not tr or not te:
                 continue
-            coefs = solve_ridge([temp_vector(s["f"], target, with_aifs, use_bias, use_cond) for s in tr],
+            coefs = solve_ridge([temp_vector(s["f"], target, with_aifs, use_bias, use_cond, use_multi) for s in tr],
                                 [s[target] for s in tr], lam)
-            errs += [abs(predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond))
+            errs += [abs(predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond, use_multi))
                          - s[target]) for s in te]
         if errs:
             mae = sum(errs) / len(errs)
@@ -545,7 +588,7 @@ def select_lambda(samples, target, with_aifs=False, use_bias=False, use_cond=Fal
 
 
 def walk_forward_cv(samples, target, om_key, with_aifs=False, use_bias=False, use_cond=False,
-                     outer_folds=OUTER_FOLDS, min_train_months=MIN_TRAIN_MONTHS):
+                     outer_folds=OUTER_FOLDS, min_train_months=MIN_TRAIN_MONTHS, use_multi=False):
     """MAE modela in surovega Open-Meteo pri WALK-FORWARD validaciji: zaporedne
     mesečne rezine, učenje SAMO na tem, kar je pred testnim mesecem — v
     nasprotju s prejšnjim izpuščanjem celega leta (blocked_cv), ki je testni
@@ -565,12 +608,12 @@ def walk_forward_cv(samples, target, om_key, with_aifs=False, use_bias=False, us
         te = [s for s in samples if s["date"][:7] == tm]
         if not tr or not te:
             continue
-        lam = select_lambda(tr, target, with_aifs, use_bias, use_cond)
-        coefs = solve_ridge([temp_vector(s["f"], target, with_aifs, use_bias, use_cond) for s in tr],
+        lam = select_lambda(tr, target, with_aifs, use_bias, use_cond, use_multi=use_multi)
+        coefs = solve_ridge([temp_vector(s["f"], target, with_aifs, use_bias, use_cond, use_multi) for s in tr],
                             [s[target] for s in tr], lam)
         eo, em = [], []
         for s in te:
-            pred = predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond))
+            pred = predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond, use_multi))
             e_om, e_mos = abs(s["f"][om_key] - s[target]), abs(pred - s[target])
             eo.append(e_om)
             em.append(e_mos)
@@ -627,9 +670,9 @@ def blocked_cv_pop(samples, with_aifs=False):
     }
 
 
-def residual_sd(samples, coefs, target, with_aifs=False, use_bias=False, use_cond=False):
+def residual_sd(samples, coefs, target, with_aifs=False, use_bias=False, use_cond=False, use_multi=False):
     """Standardni odklon ostankov — pas negotovosti na kartici."""
-    errs = [predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond)) - s[target]
+    errs = [predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond, use_multi)) - s[target]
             for s in samples]
     if len(errs) < 2:
         return None
@@ -682,11 +725,16 @@ def main():
                     help="dodaj pogojne/režimske prediktorje (glej COND_FEATURES) k modelu tmax")
     ap.add_argument("--use-cond-tmin", action="store_true",
                     help="dodaj pogojne/režimske prediktorje (glej COND_FEATURES) k modelu tmin")
+    ap.add_argument("--multi-tmax", action="store_true",
+                    help="dodaj Tmax drugih modelov (IFS, GFS, ICON, ARPEGE; data/forecast-archive.csv) k modelu tmax")
+    ap.add_argument("--multi-tmin", action="store_true",
+                    help="dodaj Tmin drugih modelov k modelu tmin (poskusno: pri Tmin je dobiček šum)")
     ap.add_argument("--out", default=None, help="druga izhodna pot (za poskuse)")
     args = ap.parse_args()
     use_bias_for = {"tmax": args.use_bias_tmax, "tmin": args.use_bias_tmin}
     use_cond_for = {"tmax": args.use_cond_tmax, "tmin": args.use_cond_tmin}
     any_bias = any(use_bias_for.values())
+    use_multi_for = {"tmax": args.multi_tmax, "tmin": args.multi_tmin}
 
     end = args.end or (dt.date.today() - dt.timedelta(days=1)).isoformat()
     # Z AIFS se učno okno samo po sebi skrči na to, kar arhiv sploh ima. Brez
@@ -710,10 +758,13 @@ def main():
         # neodvisno (glej opombo pri --use-bias-tmax/--use-bias-tmin zgoraj).
         "uses_bias_features": dict(use_bias_for),
         "uses_cond_features": dict(use_cond_for),
+        "uses_multi_features": dict(use_multi_for),
+        "multi_models": MULTI_MODELS if any(use_multi_for.values()) else [],
         "temp_features": {
             target: (TEMP_FEATURES + (AIFS_TEMP_FEATURES if args.aifs else [])
                      + (BIAS_FEATURES if use_bias_for[target] else [])
-                     + (COND_FEATURES if use_cond_for[target] else []))
+                     + (COND_FEATURES if use_cond_for[target] else [])
+                     + (MULTI_FEATURES if use_multi_for[target] else []))
             for target in ("tmax", "tmin")
         },
         "pop_features": POP_FEATURES + (AIFS_POP_FEATURES if args.aifs else []),
@@ -756,6 +807,8 @@ def main():
         bias_series = build_bias_series(lead1_rows, hist)
         print(f"  pristranskost izračunana za {len(bias_series['tmax'])} dni")
 
+    multi_arch = load_multi_archive() if any(use_multi_for.values()) else None
+
     for lead in LEADS:
         rows = archive_rows(lead)
         if rows is None:
@@ -766,7 +819,7 @@ def main():
             if aifs_rows is None:
                 continue
 
-        samples = build_samples(rows, hist, lead, bias_series, aifs_rows)
+        samples = build_samples(rows, hist, lead, bias_series, aifs_rows, multi_arch)
         if len(samples) < 200:
             print(f"  ⚠ premalo vzorcev za D+{lead} ({len(samples)}) — vodilni čas izpuščen",
                   file=sys.stderr)
@@ -779,19 +832,26 @@ def main():
 
         for target, om_key in (("tmax", "om_tmax"), ("tmin", "om_tmin")):
             use_bias, use_cond = use_bias_for[target], use_cond_for[target]
-            skill = walk_forward_cv(samples, target, om_key, args.aifs, use_bias, use_cond)
+            use_multi = use_multi_for[target]
+            # Cilj z --multi-*: samo dnevi, za katere arhiv drugih modelov obstaja.
+            tsamples = [s for s in samples if s["f"].get("mm")] if use_multi else samples
+            if use_multi and len(tsamples) < 200:
+                print(f"  ⚠ {target}: premalo vzorcev z arhivom modelov ({len(tsamples)})", file=sys.stderr)
+                continue
+            skill = walk_forward_cv(tsamples, target, om_key, args.aifs, use_bias, use_cond,
+                                    use_multi=use_multi)
             # Končna lambda za objavljene koeficiente: izbrana z isto notranjo
             # časovno validacijo, tokrat na CELI učni množici (kar bo v produkciji
             # dejansko na voljo), ne na eni izmed zunanjih rezin zgoraj.
-            lam = select_lambda(samples, target, args.aifs, use_bias, use_cond)
-            coefs = solve_ridge([temp_vector(s["f"], target, args.aifs, use_bias, use_cond)
-                                 for s in samples],
-                                [s[target] for s in samples], lam)
+            lam = select_lambda(tsamples, target, args.aifs, use_bias, use_cond, use_multi=use_multi)
+            coefs = solve_ridge([temp_vector(s["f"], target, args.aifs, use_bias, use_cond, use_multi)
+                                 for s in tsamples],
+                                [s[target] for s in tsamples], lam)
             entry["skill"][target] = skill
             entry["coefficients"][target] = [round(c, 6) for c in coefs]
             entry["lambda"][target] = lam
-            entry["residual_sd"][target] = residual_sd(samples, coefs, target, args.aifs,
-                                                        use_bias, use_cond)
+            entry["residual_sd"][target] = residual_sd(tsamples, coefs, target, args.aifs,
+                                                        use_bias, use_cond, use_multi)
             if skill:
                 print(f"  {target}: Open-Meteo {skill['mae_open_meteo']} °C → "
                       f"naš {skill['mae_meteorec']} °C  ({skill['improvement_pct']:+.1f} %, λ={lam})")

@@ -1,0 +1,49 @@
+name: MTR — offline eval (urne značilke po modelih)
+
+# Ročni zagon. Prenese urne arhivirane napovedi (privzeti Open-Meteo + IFS, GFS, ICON, ARPEGE, AIFS),
+# požene tools/ai/eval_mtr2_models.py (HM značilke; uparjen bootstrap proti MTR v1) in rezultat
+# zapiše v povzetek teka. Nič ne zapisuje v repozitorij. Razlog za Actions: iz razvojne seje
+# Open-Meteo skoraj stalno vrača 429. Ponovi, ko se arhiv podaljša ali model spremeni.
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        description: 'Začetek ocenjevalnega okna'
+        required: false
+        default: '2025-10-01'
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      # Odvisnosti samo za to orodje (lightgbm je samo v tools/ai/, ne v produkciji).
+      - name: Namesti odvisnosti
+        run: pip install numpy pandas lightgbm
+
+      - name: Prenesi urne arhive napovedi
+        run: python3 tools/ai/fetch_hourly_cache.py "$RUNNER_TEMP/v1.json" "$RUNNER_TEMP/models.json"
+
+      - name: Poženi eval
+        run: |
+          {
+            echo '## MTR eval: urne značilke po modelih'
+            echo
+            echo '```'
+            python3 -I tools/ai/eval_mtr2_models.py "$RUNNER_TEMP/v1.json" "$RUNNER_TEMP/models.json" "${{ github.event.inputs.since || '2025-10-01' }}" 2>&1 | grep -v Warning
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hourly-caches
+          path: |
+            ${{ runner.temp }}/v1.json
+            ${{ runner.temp }}/models.json
+          retention-days: 14
