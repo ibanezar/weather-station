@@ -990,6 +990,21 @@ tem stikom, ne preimenovanje kode.
   tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
   merilu. Kartico v `app.js` sestavi `fetchMosForecast()` → `renderMtrCard()`.
 
+### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
+
+`predict_recica_mos.py` poleg napovedi zapiše za vsak dan še `p_frost` (P(Tmin ≤ 0 °C),
+normalna aproksimacija iz `tmin_sd` × `FROST_SD_K` = 1,15, ker je sd na kartici iz učne
+množice in je ~5–15 % prenizek) in `night_regime` (`clear_calm` / `overcast` / `mixed` iz
+nočne oblačnosti in vetra). Backtest po mesecih (`tools/ai/eval_frost.py`, 366 dni, 99
+zmrzalnih noči): Brier 0,066–0,077 proti 0,197 pri klimatologiji; v srednjem območju
+30–70 % je zmrzal pogostejša od napovedi. Kartica pokaže »zmrzal N %« (zaokroženo na 5 %,
+pod 10 % nič) in razlog; `/sezona/` uporabi isto številko. Razlog (jasno in mirno: popravek
+−1,5 °C, oblačno: −0,5 °C) je izmerjen na zadnjem letu — pragovi so v Pythonu, JS le preslika
+kodo v stavek (ne podvajaj pragov). `/trendi/` kaže zanesljivostni diagram
+(`data/mtr-reliability.json`, ročno z `tools/ai/export_reliability.py`; BACKTEST, ne živo).
+**Kazalnika zaupanja iz razhajanja modelov ni** (`tools/ai/eval_confidence.py`: Spearman
+0,04–0,19, pri Tmin D+1 in D+3 brez učinka) — semafor, ki ne napove napake, bi bil laž.
+
 ### Kartica MTR na naslovni strani je GRAFIČNA, ne tabela
 
 Zavihek `#tab-mtr` je bil do 13. 9. 2026 seznam številk v vrsticah in je bil

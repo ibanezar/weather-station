@@ -7257,6 +7257,12 @@ function _mtrWmoForDate(dateStr){
   return(i>=0&&Number.isFinite(src.weather_code?.[i]))?src.weather_code[i]:null;
 }
 
+/* Verjetnost zmrzali za prikaz: zaokroženo na 5 %, pod 10 % se ne pokaže (šum). */
+function mtrFrostPct(p){
+  if(!Number.isFinite(p)||p<0.1)return null;
+  return Math.min(95,Math.round(p*20)*5);
+}
+
 /* Tri dnevne ploščice pod grafom: velika številka je MTR, pod njo Open-Meteo
    in popravek. Velika številka nosi nevtralno barvo besedila, identiteto pa
    pike ob njej — barva se v tej kartici uporablja za serijo, ne za številko. */
@@ -7273,6 +7279,7 @@ function renderMtrDays(idp){
     const chip=delta===null?''
       :'<span class="mtr-chip '+(delta<0?'down':'up')+'">'+(delta<0?'−':'+')+fmt(Math.abs(delta),1)+' °C</span>';
     const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
+    const fz=st.metric==='tmin'?mtrFrostPct(d.p_frost):null;
     const wmo=_mtrWmoForDate(d.date);
     const icon=wmo!=null?_wmoImg(wmo,true,26):'';
     return '<div class="mtr-day">'
@@ -7283,6 +7290,7 @@ function renderMtrDays(idp){
       +'<div class="mtr-day-meta">'
         +(Number.isFinite(sd)?'razpon ±'+fmt(MTR_Z80*sd,1)+' °C':'')
         +(pop!==null?(Number.isFinite(sd)?' · ':'')+'dež '+pop+' %':'')
+        +(fz!==null?' · <span title="Verjetnost, da bo najnižja temperatura ≤ 0 °C; iz razpršenosti napake modela, preverjeno na zadnjem letu.">zmrzal '+fz+' %</span>':'')
       +'</div></div>';
   }).join('');
 }
@@ -7293,8 +7301,17 @@ function renderMtrWhy(idp){
   const d1=st.days.find(d=>d.lead===1);
   if(!d1||!Number.isFinite(d1.d_tmax)||!Number.isFinite(d1.d_tmin)){el.textContent='';return;}
   const t=v=>(v>=0?'topleje':'hladneje')+' za '+fmt(Math.abs(v),1)+' °C';
-  el.textContent='Jutri dno doline podnevi '+t(d1.d_tmax)+', ponoči '+t(d1.d_tmin)
+  let txt='Jutri dno doline podnevi '+t(d1.d_tmax)+', ponoči '+t(d1.d_tmin)
     +', kot kaže mreža Open-Meteo — to je celoten prispevek modela.';
+  /* Razlog za nočni popravek (predict_recica_mos.py night_regime). Podprto z zadnjim
+     letom: ob jasni in mirni noči je bila postaja v povprečju 1,5 °C hladnejša od mreže,
+     ob oblačni 0,8 °C — oblačnost meša zrak in dolina ni več poseben primer. */
+  const why={clear_calm:' Noč bo jasna in mirna, zato se na dnu doline nabere hladen zrak, ki ga mreža ne razreši.',
+             overcast:' Noč bo oblačna: zrak se meša, zato je popravek manjši kot ob jasni noči.'}[d1.night_regime];
+  if(why)txt+=why;
+  const fz=mtrFrostPct(d1.p_frost);
+  if(fz!==null)txt+=' Verjetnost zmrzali (najnižja temperatura ≤ 0 °C): '+fz+' %.';
+  el.textContent=txt;
 }
 
 /* Tri ploščice s krepkimi številkami: napaka MTR, napaka Open-Meteo in
