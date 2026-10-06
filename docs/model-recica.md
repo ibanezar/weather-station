@@ -213,3 +213,22 @@ Model se uči izključno iz `history.json` (zunanje meritve) in Open-Meteo.
 Nobenih notranjih meritev. Datoteka `all_Rečiškapstaja(...).xlsx` ima stolpce
 `Indoor` in se v tem cevovodu **ne uporablja**; če bi jo kdaj kdo vključil, mora
 te stolpce zavreči.
+
+## Poskusi, ki MTR v1 niso izboljšali (6. 10. 2026)
+
+Vsi so walk-forward po mesecih, okno 2025-10 → 2026-10 (366 dni), primerjava z MTR v1 na istih
+dneh, razlika preverjena z uparjenim blokovnim bootstrapom (`tools/ai/eval_significance.py`).
+Skripte so v `tools/ai/` in niso v nobenem workflowu.
+
+| Poskus | Rezultat |
+|---|---|
+| LightGBM nad dnevnim arhivom več modelov (`eval_mtr2.py`) | slabši od v1 (Tmin D+2 1,40 proti 1,27 °C) |
+| LightGBM / ridge na značilkah v1 + Tmax/Tmin drugih modelov (`eval_mtr2_hourly.py`) | **Tmax D+2 −0,08 °C, D+3 −0,12 °C resnično** (CI95 brez ničle); Tmax D+1 in vsi Tmin šum |
+| Predhodno učenje lokalnega odstopanja na 7 letih ERA5 (`eval_mtr2_models.py`) | brez dobitka (≤ 0,007 °C čez prejšnjo vrstico) |
+| Kazalnik zaupanja iz razhajanja modelov (`eval_confidence.py`) | Spearman 0,04–0,19; pri Tmin D+1/D+3 brez učinka → ne objavljaj |
+| Verjetnost padavin: LightGBM / povprečje z v1 (`eval_mtr_calibration.py`) | D+1 Brier 0,172 → 0,165; D+2, D+3 brez dobitka |
+
+Edino ponovljivo izboljšanje je več-modelni Tmax pri D+2 in D+3 (~0,1 °C). Če se kdaj vgradi, naj
+gre kot ločena možnost v `train_recica_mos.py` (ne kot nov model), s ponovljenim bootstrapom.
+Ko bodo na voljo urni arhivi vseh modelov in dovolj zbranih ansamblov, ponovi `eval_mtr2_models.py`
+(značilke HM še niso preizkušene — urni podatki po modelih se zaradi omejitev Open-Meteo niso prenesli).
