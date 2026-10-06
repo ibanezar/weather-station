@@ -592,6 +592,36 @@ PageSpeed (mobile) je za `/` javil 1,9 s zadržanega prvega izrisa (`style.min.c
   Lighthouse) se zaradi tega ni premaknil (2,56 s s preloadi in brez; brez preloadov 2,85 s) —
   merilo je PageSpeed na živi strani.
 
+### Delo glavne niti in prvi izris naslovne strani (6. 10. 2026, drugi krog)
+
+Profil (Chromium, CPU 4× počasnejši, brez omrežja): skript je bil < 1 s od ~11 s dela glavne niti — ostalo
+je bilo **risanje**, ne JS. Zato:
+
+- **Okrasna platna (hero, mreža, pokrajina, zvezdno nebo) stečejo šele 1,5 s po `load`** (`_decoReady`),
+  stojijo, kadar platna ni na zaslonu (`IntersectionObserver`, `_watchVisible`) ali ob
+  `prefers-reduced-motion`, in jih časovnik (`_scheduleFrame`) vleče na 15–25 sl./s (zvezdno nebo) oz.
+  20 sl./s (hero, pokrajina) na dotik. Prej je bil »preskoči 2 od 3 sličic« še vedno `requestAnimationFrame`
+  ob vsakem vsync-u: brskalnik je 60× na sekundo opravil poln cikel sličice (Commit 5,2 s → 0,7 s).
+  Polnozaslonsko zvezdno nebo teče ponoči — PageSpeed je merili ob 21:10, zato je bil »Other« 18,5 s.
+- **Velikost platna pokrajine se bere ob spremembi** (`ResizeObserver`, `_artDirty`), ne v vsaki sličici
+  (`getBoundingClientRect` v zanki = prisiljena postavitev vsako sličico).
+- **`init()` steče po prvem izrisu** (dvojni rAF/`setTimeout` na dnu `app.js`) — prej je takoj po
+  razčlenitvi zasedel glavno nit in je prvi izris čakal nanj. Uvoz `history.json` je po prvem valu
+  (`_whenIdle`), `_insStore()` pomni razčlenjeno shrambo (25 klicev je vsakič razčlenilo ~0,5 MB JSON).
+- **Piškotna pasica je na vrhu `<body>`** in jo pokaže razred `cookie-need` na `<html>` (skripta v `<head>`).
+  Ob prvem obisku je ona LCP element (največji besedilni blok); na dnu strani se je izrisala šele po razčlenitvi
+  vsega HTML. Odstavek uporablja sistemsko pisavo.
+- **`.countdown-fill` animira `transform`, ne `width`** (prehod širine je ob vsakem popravku, 1/s, v vsaki
+  sličici sprožil postavitev, za zmeraj). `.skel-shimmer` ima 3 ponovitve, ne neskončno (ob nedosegljivem viru bi
+  prerisoval background-position v nedogled). CSS zvezd je na telefonu 16, na namizju 30 (prej 55).
+- **Dve funkciji `beaufort()`** sta se prekrili (druga vrača `{bf,name}`): kartica vetra je pisala
+  »Beaufort: undefined«. Druga se zdaj imenuje `beaufortGust()`.
+- Lightning WebSocket ima eksponentni zamik (10 s → 5 min), en časovnik naenkrat.
+- Inter ima podmnožico tudi za **kurzivo** (`Inter-sl-italic-400.woff2`, 2,7 KiB; `latin-ext` kurziva je 60 KiB).
+- **Lighthouse na lokalnem strežniku ni merilo za LCP**: Lantern v simulacijo vključi vse, kar se je v
+  opazovanem sledu končalo pred LCP, na localhostu torej tudi 290 KiB JS (LCP 4–6 s ob FCP 2,1 s). Za LCP
+  poglej PageSpeed na živi strani ali opazovane čase pod CDP omejitvijo omrežja (`Network.emulateNetworkConditions`).
+
 ## Preprost ⇄ napredni pogled domače strani
 
 Domača stran ima dve različici, med katerima obiskovalec preklaplja z gumbom

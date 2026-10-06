@@ -555,7 +555,20 @@ function memoryVector(metric){
 // ── INSIGHTS ENGINE (6 features) ──────────────────────────
 // ══════════════════════════════════════════════════════════
 // Shared helpers over the wx-history-v1 store
-function _insStore(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'{}');}catch(e){return{};}}
+// Razčlenjena shramba se pomni, dokler se surovi niz ne spremeni (25 klicev ob nalaganju je vsakič znova
+// razčlenilo ~0,5 MB JSON). Klici so samo za branje — kdor shrambo spreminja, naj jo razčleni sam.
+let _insRaw=null,_insObj=null;
+function _insStore(){
+  try{
+    const raw=localStorage.getItem(LS_KEY)||'{}';
+    if(raw!==_insRaw){_insObj=JSON.parse(raw);_insRaw=raw;}
+    return _insObj;
+  }catch(e){return{};}
+}
+function _whenIdle(fn,timeout){
+  if('requestIdleCallback' in window)requestIdleCallback(fn,{timeout:timeout||2000});
+  else setTimeout(fn,300);
+}
 function _insYears(store){return[...new Set(Object.keys(store).map(k=>+k.slice(0,4)))].sort();}
 function _mmdd(d){return(''+(d.getMonth()+1)).padStart(2,'0')+'-'+(''+d.getDate()).padStart(2,'0');}
 // Gather all historical records for a given MM-DD (± window days) across years
@@ -4156,7 +4169,7 @@ let _nextRefresh=Date.now()+5*60*1000;
 function updateCountdown(){
   const elapsed=Date.now()-(_nextRefresh-5*60*1000);
   const pct=Math.min(100,(elapsed/(5*60*1000))*100);
-  const bar=document.getElementById('countdown-fill');if(bar)bar.style.width=pct+'%';
+  const bar=document.getElementById('countdown-fill');if(bar)bar.style.transform='scaleX('+(pct/100).toFixed(4)+')';
 }
 setInterval(updateCountdown,1000);updateCountdown();
 
@@ -4964,12 +4977,7 @@ if('serviceWorker' in navigator){
 // Pause/resume all canvas animations when the tab is hidden (reduces battery/heat on mobile)
 document.addEventListener('visibilitychange',()=>{
   _animPaused=document.hidden;
-  if(!document.hidden){
-    if(_meshCanvas&&!_meshAnimId)_meshDraw();
-    if(_heroCanvas&&!_heroAnimId)animateHero();
-    if(_sfActive&&!_sfAnim){_sfPrev=0;_sfAnim=requestAnimationFrame(_sfFrame);}
-    if(_artCtx&&!_artAnim)artFrame();
-  }
+  if(!document.hidden)_resumeAnims();
 });
 
 // Tab nav scroll-fade indicator + bounce arrow
@@ -5939,7 +5947,7 @@ function connectLightning(){
     const wsHost=wsHosts[(_ltgRetry||0)%wsHosts.length];
     _ltgRetry=(_ltgRetry||0)+1;
     _ltgWs=new WebSocket('wss://'+wsHost);
-    _ltgWs.onopen=()=>{_ltgWs.send('{"a":111}');applyLightning();};
+    _ltgWs.onopen=()=>{_ltgBackoff=10000;_ltgWs.send('{"a":111}');applyLightning();};
     _ltgWs.onmessage=e=>{
       try{
         const d=JSON.parse(_ltgDecode(e.data));
@@ -5957,8 +5965,18 @@ function connectLightning(){
         applyLightning();
       }catch(_){}
     };
-    _ltgWs.onerror=_ltgWs.onclose=()=>{applyLightning();setTimeout(connectLightning,10000);};
-  }catch(e){applyLightning();setTimeout(connectLightning,10000);}
+    _ltgWs.onerror=_ltgWs.onclose=_ltgRetrySoon;
+  }catch(e){_ltgRetrySoon();}
+}
+// Ponovni poskus z eksponentnim zamikom (10 s → 5 min), en časovnik naenkrat (onerror in onclose sta
+// oba sprožila svojega). Brez omejitve je pri nedosegljivem strežniku (blokiran DNS, požarni zid) vsakih
+// 10 s stekel nov poskus za vsa štiri imena, dokler je stran odprta.
+let _ltgBackoff=10000,_ltgTimer=null;
+function _ltgRetrySoon(){
+  applyLightning();
+  if(_ltgTimer)return;
+  _ltgTimer=setTimeout(()=>{_ltgTimer=null;if(!document.hidden)connectLightning();else _ltgRetrySoon();},_ltgBackoff);
+  _ltgBackoff=Math.min(_ltgBackoff*2,300000);
 }
 function applyLightning(){
   const hourAgo=Date.now()-3600000;
@@ -9808,6 +9826,9 @@ function clearWxParticles(){_wxParticles.forEach(p=>p.remove());_wxParticles=[];
 
 function spawnWxParticles(type,count){
   const bg=document.getElementById('bg');if(!bg||!type||!count)return;
+  // CSS zvezde (vsaka svoj zložen sloj) so le dopolnilo k platnu z zvezdnim nebom — na telefonu jih je
+  // dovolj manj; sicer je bilo ponoči 55 neskončno animiranih elementov.
+  if(type==='star')count=Math.min(count,_isTouch?16:30);
   for(let i=0;i<count;i++){
     const el=document.createElement('div');
     if(type==='rain'||type==='storm'){
@@ -9893,6 +9914,45 @@ function scheduleLightning(){
 
 // ── Animation pause flag (set on visibilitychange) ───────
 let _animPaused=false;
+// Okrasne platno (hero, mreža, pokrajina, zvezdno nebo) ne sme tekmovati z nalaganjem strani:
+// PageSpeed (6. 10. 2026, ponoči, ko teče polnozaslonsko zvezdno nebo) je našel 18,5 s dela glavne
+// niti, večinoma risanja. Zato (1) animacije stečejo šele 1,5 s po `load`, (2) stojijo, kadar platna
+// ni na zaslonu (skrit zavihek, pomaknjeno stran) ali ob prefers-reduced-motion, (3) polnozaslonsko
+// zvezdno nebo riše 15 sl./s na dotik in 25 na namizju.
+let _decoReady=false;
+const _reducedMotionMQ=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):null;
+function _motionReduced(){return !!(_reducedMotionMQ&&_reducedMotionMQ.matches);}
+function _animOff(){return _animPaused||!_decoReady||_motionReduced();}
+const _canvasVisible=new Map();
+function _watchVisible(el,onShow){
+  if(!el)return;
+  _canvasVisible.set(el,true);
+  if(!('IntersectionObserver' in window))return;
+  new IntersectionObserver(es=>{
+    const v=es[es.length-1].isIntersecting;
+    _canvasVisible.set(el,v);
+    if(v)onShow();
+  },{rootMargin:'60px'}).observe(el);
+}
+// Naslednja sličica po presledku `gap` ms. Prejšnje »preskoči 2 od 3 sličic« je ob vsakem vsync-u še
+// vedno klicalo rAF, torej je brskalnik 60× na sekundo opravil poln cikel sličice. Zdaj med risanji
+// zanke sploh ni. Vrne vedno resnično vrednost (-1 = čaka časovnik), da zanka velja za »teče«.
+function _scheduleFrame(fn,gap){
+  if(!(gap>0))return requestAnimationFrame(fn);
+  setTimeout(()=>{requestAnimationFrame(fn);},gap);
+  return -1;
+}
+const _isTouch=navigator.maxTouchPoints>0;
+function _canvasHidden(el){return _canvasVisible.get(el)===false;}
+function _resumeAnims(){
+  if(_animOff())return;
+  if(_meshCanvas&&!_meshAnimId)_meshDraw();
+  if(_heroCanvas&&!_heroAnimId&&!_canvasHidden(_heroCanvas))animateHero();
+  if(_sfActive&&!_sfAnim){_sfPrev=0;_sfAnim=requestAnimationFrame(_sfFrame);}
+  if(_artCtx&&!_artAnim&&!_canvasHidden(_artCtx.canvas))artFrame();
+}
+window.addEventListener('load',()=>setTimeout(()=>{_decoReady=true;_resumeAnims();},1500));
+if(_reducedMotionMQ&&_reducedMotionMQ.addEventListener)_reducedMotionMQ.addEventListener('change',()=>{if(_motionReduced()){_heroAnimId=_meshAnimId=_artAnim=_sfAnim=null;}else _resumeAnims();});
 
 // ── Hero canvas particles ─────────────────────────────────
 let _heroCtx=null,_heroCanvas=null,_heroParticles=[],_heroAnimId=null,_heroCond='',_heroFrame=0;
@@ -9904,6 +9964,7 @@ function initHeroCanvas(){
   const resize=()=>{_heroCanvas.width=hero.offsetWidth||460;_heroCanvas.height=hero.offsetHeight||180;};
   resize();
   new ResizeObserver(resize).observe(hero);
+  _watchVisible(_heroCanvas,()=>{if(!_heroAnimId)animateHero();});
   animateHero();
 }
 function spawnHeroParticles(cond){
@@ -9927,10 +9988,9 @@ function makeHeroP(cond,W,H,init=false){
   return{type:'wisp',x:r()*W,y:r()*H,vx:.08+r()*.12,w:20+r()*35,h:4+r()*8,op:.02+r()*.03};
 }
 function animateHero(){
-  if(_animPaused){_heroAnimId=null;return;}
+  if(_animOff()||_canvasHidden(_heroCanvas)){_heroAnimId=null;return;}
   if(!_heroCtx||!_heroCanvas){return;}
   // On touch devices run at ~20 fps instead of ~60 fps to reduce heat
-  if(_heroFrame%3!==0&&navigator.maxTouchPoints>0){_heroFrame++;_heroAnimId=requestAnimationFrame(animateHero);return;}
   _heroFrame++;
   const ctx=_heroCtx,W=_heroCanvas.width,H=_heroCanvas.height,t=performance.now()/1000;
   ctx.clearRect(0,0,W,H);
@@ -9969,7 +10029,7 @@ function animateHero(){
   if(_heroParticles.length<(cond==='rain'||cond==='heavy_rain'?55:cond==='storm'?45:40)){
     _heroParticles.push(makeHeroP(cond,W,H));
   }
-  _heroAnimId=requestAnimationFrame(animateHero);
+  _heroAnimId=_scheduleFrame(animateHero,_isTouch?50:0);
 }
 function setHeroCond(cond){
   if(cond===_heroCond)return;
@@ -10023,6 +10083,9 @@ function _meshRender(){
 }
 function _meshDraw(){
   if(_animPaused||!_meshCtx||!_meshCanvas){_meshAnimId=null;return;}
+  // Pred koncem nalaganja ali ob prefers-reduced-motion: samo en statičen izris (barve se še vedno
+  // osvežujejo prek updateMeshColors()), gibanje začne šele, ko je stran umirjena.
+  if(!_decoReady||_motionReduced()){_meshRender();_meshAnimId=null;return;}
   // Continuous drift is disabled on touch devices to reduce heat — same
   // treatment as .blob in style.css (see @media(pointer:coarse) there).
   // Colour still updates via _meshRender(), called from updateMeshColors().
@@ -10034,7 +10097,7 @@ function _meshDraw(){
     if(n.x<-.15){n.x=-.15;n.vx*=-.85;}if(n.x>1.15){n.x=1.15;n.vx*=-.85;}
     if(n.y<-.15){n.y=-.15;n.vy*=-.85;}if(n.y>1.15){n.y=1.15;n.vy*=-.85;}
   });
-  _meshAnimId=requestAnimationFrame(_meshDraw);
+  _meshAnimId=_scheduleFrame(_meshDraw,33);
 }
 
 function initMeshCanvas(){
@@ -10370,7 +10433,7 @@ function renderDailyMicroclimateFingerprint(obs,h){
   if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
 }
 
-let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[],_artFrame=0;
+let _artCtx=null,_artAnim=null,_artCondition='clear',_artParticles=[],_artFrame=0,_artDirty=true,_artWatched=false,_artGen=0;
 function resizeWeatherArtCanvas(){
   const c=document.getElementById('weather-art-canvas');if(!c)return false;
   const rect=c.getBoundingClientRect();
@@ -10387,7 +10450,16 @@ function initWeatherArt(){
   const c=document.getElementById('weather-art-canvas');if(!c)return;
   resizeWeatherArtCanvas();
   _artCtx=c.getContext('2d');
-  if(_artAnim)cancelAnimationFrame(_artAnim);
+  // Velikost se bere samo ob spremembi (ResizeObserver), ne v vsakem sličici — getBoundingClientRect
+  // v zanki je vsakič prisilil postavitev (655 ms samega časa pri 4× počasnejšem CPU).
+  if(!_artWatched){
+    _artWatched=true;
+    if('ResizeObserver' in window)new ResizeObserver(()=>{_artDirty=true;}).observe(c);else setInterval(()=>{_artDirty=true;},1000);
+    _watchVisible(c,()=>{if(!_artAnim)artFrame();});
+  }
+  _artDirty=true;
+  _artGen++;
+  if(_artAnim>0)cancelAnimationFrame(_artAnim);
   _artParticles=[];
   artFrame();
 }
@@ -10424,13 +10496,12 @@ function setWeatherArt(obs){
   initWeatherArt();
 }
 function artFrame(){
-  if(_animPaused){_artAnim=null;return;}
+  if(_animOff()||_canvasHidden(_artCtx&&_artCtx.canvas)){_artAnim=null;return;}
   const ctx=_artCtx;if(!ctx)return;
   // On touch devices run at ~20 fps instead of ~60 fps to reduce heat
-  if(_artFrame%3!==0&&navigator.maxTouchPoints>0){_artFrame++;_artAnim=requestAnimationFrame(artFrame);return;}
   _artFrame++;
   const c=document.getElementById('weather-art-canvas');
-  if(resizeWeatherArtCanvas())_artParticles=[];
+  if(_artDirty){_artDirty=false;if(resizeWeatherArtCanvas())_artParticles=[];}
   const W=c.width,H=c.height;const dark=isDark();
   ctx.clearRect(0,0,W,H);
   const cond=_artCondition;
@@ -10488,7 +10559,8 @@ function artFrame(){
   } else { // cloudy
     for(let i=0;i<2;i++){const blobX=(t*12*(i+1)+i*W/2)%W,blobY=H*0.3+i*H*0.25;const bg2=ctx.createRadialGradient(blobX,blobY,0,blobX,blobY,80);bg2.addColorStop(0,dark?'rgba(51,65,85,0.4)':'rgba(148,163,184,0.25)');bg2.addColorStop(1,'rgba(148,163,184,0)');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(blobX,blobY,90,50,0,0,Math.PI*2);ctx.fill();}
   }
-  _artAnim=requestAnimationFrame(artFrame);
+  const g=_artGen;
+  _artAnim=_scheduleFrame(()=>{if(g===_artGen)artFrame();},_isTouch?50:0);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -10544,8 +10616,10 @@ function _sfMoon(ctx,W,H){
 }
 
 function _sfFrame(ts){
-  if(_animPaused){_sfAnim=null;return;}
+  if(_animPaused||!_decoReady){_sfAnim=null;return;}
   if(!_sfActive){_sfAnim=null;return;}
+  // Polnozaslonsko platno: 15 sl./s na dotik, 25 na namizju (prej 60) — enak videz, tretjina do polovica dela.
+  const minGap=_isTouch?66:40;
   const dt=_sfPrev?(ts-_sfPrev)/1000:0.016;_sfPrev=ts;
   const c=_sfCanvas,ctx=_sfCtx,W=c.width,H=c.height,t=ts/1000;
   ctx.clearRect(0,0,W,H);
@@ -10609,7 +10683,9 @@ function _sfFrame(ts){
     return true;
   });
 
-  _sfAnim=requestAnimationFrame(_sfFrame);
+  // prefers-reduced-motion: nebo se nariše enkrat (statično), brez zanke.
+  if(_motionReduced()){_sfAnim=null;return;}
+  _sfAnim=_scheduleFrame(_sfFrame,minGap);
 }
 
 function showStarfield(show){
@@ -11912,7 +11988,9 @@ function scSetHailHour(v){
 // ── HURRICANE-FORCE WIND RISK ─────────────────────────────
 // ══════════════════════════════════════════════════════════
 // Beaufort scale label from gust speed (km/h)
-function beaufort(g){
+// Ime je namenoma drugačno od beaufort() zgoraj (vrača {n,name}): dve funkciji z istim imenom sta se
+// prekrili, zato je kartica vetra pisala »Beaufort: undefined«.
+function beaufortGust(g){
   if(g>=118)return{bf:12,name:'orkan'};if(g>=103)return{bf:11,name:'silovit vihar'};
   if(g>=89)return{bf:10,name:'vihar'};if(g>=75)return{bf:9,name:'viharni veter'};
   if(g>=62)return{bf:8,name:'hud veter'};if(g>=50)return{bf:7,name:'zelo močan veter'};
@@ -11948,7 +12026,7 @@ function calcWindRisk(gust,cape,shear){
 function renderWindRisk(gust,ws10,ws80,cape,shear){
   const g=(id)=>document.getElementById(id);
   const card=g('sc-gale-card');if(!card)return;
-  const r=calcWindRisk(gust,cape,shear);const bf=beaufort(gust);
+  const r=calcWindRisk(gust,cape,shear);const bf=beaufortGust(gust);
   card.className='card sc-risk-card '+r.cls;
   if(g('sc-gale-icon'))g('sc-gale-icon').textContent=r.icon;
   if(g('sc-gale-level'))g('sc-gale-level').textContent=r.level;
@@ -16555,13 +16633,15 @@ async function init(){
   try{initNowcast();}catch(_){}
   try{initMeshCanvas();}catch(_){}
   try{initHeroCanvas();}catch(_){}
-  try{autoLoadHistoryFile();}catch(_){}
   setTimeout(()=>runAdvancedOnly(()=>{initWeatherArt();setWeatherArt(_lastBriefObs||{});}),150);
   try{loadThresholds();}catch(_){} // restore user alert thresholds from localStorage
   try{_fcSliderInit();}catch(_){}
   // ── Wave 1: critical for the initial visible tab ──
   await Promise.all([fetchCurrent(),fetchHourly()]);
   autoAccentCards();
+  // Uvoz history.json (razčlenitev + zapis ~2500 dni v localStorage + ponovni izris desetin kartic) je bil
+  // med nalaganjem; zdaj počaka, da so izrisane trenutne razmere, in steče v prostem času.
+  _whenIdle(()=>{try{autoLoadHistoryFile();}catch(_){}},3000);
   fetchAIForecast(); // non-blocking — populates forecast tab card
 
   // ── Wave 2: forecast tab content (~0.8 s after wave 1) ──
@@ -16605,7 +16685,13 @@ async function init(){
   },6000);
 }
 
-init();
+// Prvi izris (statični HTML + piškotna pasica, ki je LCP element) ne sme čakati na težko sinhrono
+// inicializacijo: PageSpeed je merili 87 % LCP kot »render delay«, ker je init() zasedel glavno nit takoj
+// po razčlenitvi. Dvojni rAF/setTimeout pusti brskalniku izrisati sličico, preden init() steče.
+(function(){
+  if(document.visibilityState==='hidden'){init();return;} // rAF v skritem zavihku ne teče
+  requestAnimationFrame(()=>setTimeout(init,0));
+})();
 setInterval(fetchCurrent,5*60*1000);
 // V preprostem pogledu je kartica skrita; osvežujemo šele, ko je res na
 // zaslonu (drugače bi se klici kopičili v vrsti runAdvancedOnly).

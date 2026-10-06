@@ -12,13 +12,15 @@ import subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "fonts" / "Inter-latin-ext-normal-400.woff2"
-DST = ROOT / "fonts" / "Inter-sl-normal-400.woff2"
+FILES = [("Inter-latin-ext-normal-400.woff2", "Inter-sl-normal-400.woff2"),
+         ("Inter-latin-ext-italic-400.woff2", "Inter-sl-italic-400.woff2")]
 # Mora biti enako kot unicode-range v fonts.css (@font-face »sl«).
 UNICODES = "U+0106-0107,U+010C-010D,U+0110-0111,U+0160-0161,U+017D-017E"
 
-subprocess.run([
-    sys.executable, "-m", "fontTools.subset", str(SRC), f"--unicodes={UNICODES}",
-    "--flavor=woff2", "--layout-features=*", f"--output-file={DST}",
-], check=True)
-print(f"{DST.name}: {DST.stat().st_size} B (izvor {SRC.stat().st_size} B)")
+for src, dst in FILES:
+    SRC, DST = ROOT / "fonts" / src, ROOT / "fonts" / dst
+    subprocess.run([
+        sys.executable, "-m", "fontTools.subset", str(SRC), f"--unicodes={UNICODES}",
+        "--flavor=woff2", "--layout-features=*", f"--output-file={DST}",
+    ], check=True)
+    print(f"{DST.name}: {DST.stat().st_size} B (izvor {SRC.stat().st_size} B)")

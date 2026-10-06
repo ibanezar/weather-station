@@ -875,7 +875,9 @@ img.wx-icon{display:inline-block;vertical-align:middle}
     .skel-shimmer{
       background:linear-gradient(90deg,var(--muted) 20%,var(--text) 50%,var(--muted) 80%);
       background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
-      animation:skel-shimmer 1.6s ease-in-out infinite;
+      /* 3 ponovitve, ne neskončno: ko vir ne odgovori, bi placeholder sicer v nedogled prerisoval
+         background-position (ni zložen na GPU) in zaposloval glavno nit. Po treh ostane statičen. */
+      animation:skel-shimmer 1.6s ease-in-out 3 forwards;
     }
   }
 }
@@ -1613,7 +1615,8 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 
 
 .countdown-wrap{height:2px;background:var(--rain-track);margin:-1.4rem 0 1.6rem;overflow:hidden}
-.countdown-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width 1s linear;width:0%}
+/* transform namesto width: prehod širine je ob vsakem posodobitvi (1 s) sprožal postavitev v vsaki sličici, za zmeraj */
+.countdown-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transform:scaleX(0);transform-origin:0 50%;transition:transform 1s linear;will-change:transform}
 
 /* Yesterday delta */
 .yesterday-delta{display:none;align-items:center;gap:.5rem;font-size:.78rem;margin-top:.7rem;padding:.8rem .95rem;border-radius:13px;background:var(--fc-bg);border:1px solid var(--fc-border)}
@@ -2794,8 +2797,12 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .sc-desc{font-size:.63rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.3;opacity:.85;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ── Cookie consent banner ── */
-#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--card-bg);border-top:1px solid var(--border);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 -4px 24px rgba(0,0,0,.18);padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.78rem;line-height:1.5}
-#cookie-banner p{margin:0;color:var(--text);flex:1;min-width:200px}
+#cookie-banner{display:none}
+html.cookie-need #cookie-banner{display:flex}
+#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--card-bg);border-top:1px solid var(--border);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 -4px 24px rgba(0,0,0,.18);padding:.9rem 1.25rem;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.78rem;line-height:1.5}
+/* Sistemska pisava: piškotna pasica je ob prvem obisku LCP element, Inter pa se zamenja šele, ko se prenese (≈ 4 s v
+   laboratoriju) — velikost odstavka se je takrat spremenila in LCP se je premaknil na čas zamenjave pisave. */
+#cookie-banner p{margin:0;color:var(--text);flex:1;min-width:200px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 #cookie-banner p a{color:var(--blue);text-decoration:none}
 #cookie-banner p a:hover{text-decoration:underline}
 .cookie-actions{display:flex;gap:.5rem;flex-shrink:0}
