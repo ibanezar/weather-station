@@ -1389,6 +1389,10 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
   velikost, ki v repozitorij ne sodi — stran namesto tega prikaže primerjavo
   Tmax- proti Tmin-pristranskosti pri D+1 (ista zgodba — spregledana nočna
   inverzija — brez urnega arhiva).
+  **Od 6. 10. 2026** zapis nosi še zunanja polja `dewpoint_c`, `wind_kmh`, `gust_kmh`,
+  `pressure_hpa`, `solar_wm2` (priprava na urni popravek napovedi; notranjih blokov ne
+  bere). Zgodovina za nazaj ne obstaja — `--backfill 85` (ročno, z Ecowitt secreti) dopolni
+  prazna polja za zadnjih ~85 dni, preden jih Ecowitt podvzorči. Test: `tools/test_hourly_log.py`.
 - `tools/compute_forecast_test_metrics.py` — MAE/bias/RMSE/delež >3 °C in
   kontingenčna tabela za padavine (0,2 in 5 mm), po (vir, vodilni čas), proti
   klimatologiji (±7 dni okoli koledarskega dne, iz cele postajne zgodovine —
