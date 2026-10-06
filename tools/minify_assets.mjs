@@ -54,7 +54,7 @@ function patchIndexHtml(jsHash, cssHash) {
   let html = readFileSync(file, 'utf8');
   const before = html;
   html = html.replace(
-    /href="(\/style\.min\.css)(\?v=[0-9a-f]+)?"/,
+    /href="(\/style\.min\.css)(\?v=[0-9a-f]+)?"/g,
     `href="$1?v=${cssHash}"`
   );
   html = html.replace(

@@ -563,6 +563,28 @@ privzeti modri (kontrast 2,1:1 na temnem ozadju). Popravljeno 17. 8. 2026; isti 
 uporablja napoved. Če dodajaš tabelo na stran, ki nalaga `vreme.css`, uporabi ta
 razreda in ne novih.
 
+## Kritični CSS in odloženi GTM na naslovni strani (6. 10. 2026)
+
+PageSpeed (mobile) je za `/` javil 1,9 s zadržanega prvega izrisa (`style.min.css` 45 KiB +
+`fonts.css`) in 5,2 s dela glavne niti, od tega 290 KiB GTM/gtag. Zato:
+
+- **Kritični CSS je izpeljan, ne ročen.** `tools/critical_css.mjs` (Playwright) naloži stran v 12
+  stanjih (telefon/namizje × tema × nov/napredni/preprosti pogled) in v `index.html` med
+  `CRITICAL-CSS:START/END` zapiše pravila za prvih ~1,5 zaslonov + `@font-face` iz
+  `fonts/fonts.css`. Celoten `style.min.css` se naloži brez blokiranja (`rel=preload` + `onload`,
+  `<noscript>` rezerva). Osvežuje ga `minify-assets.yml` (`continue-on-error`); zastarel blok
+  povzroči kvečjemu kratek drugačen izris, ne zlomljene strani. `node tools/critical_css.mjs`
+  poženi tudi ročno, če spremeniš zgornji del strani.
+- **Element brez postavitve šteje, če ga skriva LASTNO pravilo** (`display:none`, `[hidden]`) in
+  je starš viden — brez tega pravilo, ki skriva pasico, manjka in se pasica pred celotnim CSS
+  pokaže neoblikovana (prva različica: 10–24 % slikovnih pik drugačnih, zdaj < 0,3 %).
+  Preverjeno z zakasnjenim `style.min.css`.
+- **GTM in gtag.js se naložita ob prvi interakciji ali 5 s po `load`** (`GA_DELAY_MS` v `<head>`).
+  Kdor odide prej brez interakcije, v GA ni zabeležen. Samo `index.html`; ostale strani
+  (generatorji) imajo še vedno običajen snippet.
+- Neizkoriščeno: Inter `latin-ext` je preloadan (133 KiB) zaradi č/š/ž brez preskoka pisave in
+  v laboratoriju omejuje FCP — podmnožica samo s slovenskimi znaki bi ga skrčila.
+
 ## Preprost ⇄ napredni pogled domače strani
 
 Domača stran ima dve različici, med katerima obiskovalec preklaplja z gumbom
