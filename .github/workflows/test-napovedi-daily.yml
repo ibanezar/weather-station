@@ -30,6 +30,11 @@ jobs:
       - name: Zabeleži napoved ARSO in Yr (MET Norway)
         run: python3 tools/log_forward_forecasts.py
 
+      # Ansambli nimajo arhiva nazaj — zgodovina se nabira samo s tekočim zajemom.
+      - name: Zabeleži ansamble (ECMWF ENS, ICON-EPS, GEFS)
+        continue-on-error: true
+        run: python3 tools/log_ensemble_forecasts.py
+
       - name: Zabeleži urne meritve (za bodočo analizo pristranskosti)
         run: python3 tools/log_hourly_observations.py
 
@@ -44,7 +49,7 @@ jobs:
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           git add data/forecast-archive.csv data/forecast-forward-log.csv \
-                  data/hourly-observations.csv data/test-napovedi.json test-napovedi/
+                  data/hourly-observations.csv data/ensemble-forward-log.csv data/test-napovedi.json test-napovedi/
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "test-napovedi: dnevni zajem $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do
