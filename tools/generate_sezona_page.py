@@ -264,11 +264,17 @@ def now_block(today, gobe, mtr, season):
                      f'<strong>{gobe["index"]}</strong> ({gobe["level"].lower()}), '
                      f'najbolj obetavna vrsta {gobe["top_species_sl"].lower()}.</li>')
     if mtr:
-        lows = [(x["date"], x["tmin"]) for x in mtr if x.get("tmin") is not None]
+        lows = [(x["date"], x["tmin"], x.get("p_frost")) for x in mtr if x.get("tmin") is not None]
         if lows:
-            d, lo = min(lows, key=lambda x: x[1])
+            d, lo, pf = min(lows, key=lambda x: x[1])
             when = "danes" if d == today.isoformat() else fmtd(d)
-            frost = " — <strong>možna zmrzal</strong>" if lo <= 1 else ""
+            if pf is not None:
+                # P(Tmin <= 0 °C) iz razpršenosti napake modela; zaokroženo na 5 %.
+                pct = int(round(pf * 20)) * 5
+                frost = (f" — <strong>verjetnost zmrzali {pct} %</strong> (najnižja temperatura ≤ 0 °C)"
+                         if pf >= 0.1 else "")
+            else:
+                frost = " — <strong>možna zmrzal</strong>" if lo <= 1 else ""
             items.append(f'<li>Najnižja napovedana temperatura v naslednjih dneh '
                          f'(model <a href="/#tab-mtr">MTR</a>): {num(lo)} °C, {when}{frost}.</li>')
     if not items:

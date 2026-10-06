@@ -24,6 +24,7 @@ Uporaba:
 import argparse
 import datetime as dt
 import json
+import math
 import os
 import sys
 import urllib.error
@@ -69,6 +70,31 @@ def fetch_live_forecast(model_id=None):
     return rows
 
 
+# Frost-night probability: P(Tmin <= 0 C) = Phi(-tmin / (K * sd)). The card's sd is the
+# in-sample residual sd, ~5-15 % below the out-of-sample one, hence K. Walk-forward check
+# (tools/ai/eval_frost.py, 366 days, 99 frost nights): Brier 0.066-0.077 vs 0.197 climatology.
+FROST_SD_K = 1.15
+# Night regime (backtest: MTR minus Open-Meteo Tmin was -1.5 C on clear calm nights,
+# -0.5 C on overcast ones; observed minus Open-Meteo agreed: -1.5 / -0.8).
+CLEAR_CLOUD_N, CALM_WIND_N, OVERCAST_CLOUD_N = 30, 8, 70
+
+
+def frost_probability(tmin, sd, k=FROST_SD_K):
+    """Probability that the night minimum is <= 0 C, from the normal approximation."""
+    if tmin is None or not sd or sd <= 0:
+        return None
+    return 0.5 * (1 + math.erf((0.0 - tmin) / (k * sd) / math.sqrt(2)))
+
+
+def night_regime(cloud_n, wind_n):
+    """'clear_calm' | 'overcast' | 'mixed' - the codes the card turns into a sentence."""
+    if cloud_n < CLEAR_CLOUD_N and wind_n < CALM_WIND_N:
+        return "clear_calm"
+    if cloud_n > OVERCAST_CLOUD_N:
+        return "overcast"
+    return "mixed"
+
+
 def load_model():
     with open(mos.MODEL_PATH, encoding="utf-8") as f:
         return json.load(f)
@@ -102,6 +128,10 @@ def predict_day(model, lead, feats):
 
     pop_coefs = entry["coefficients"].get("pop")
     out["pop"] = round(mos.predict_prob(pop_coefs, mos.pop_vector(feats, with_aifs)), 2) if pop_coefs else None
+
+    p_frost = frost_probability(out["tmin"], out.get("tmin_sd"))
+    out["p_frost"] = round(p_frost, 2) if p_frost is not None else None
+    out["night_regime"] = night_regime(feats["cloud_n"], feats["wind_n"])
 
     # Surovi Open-Meteo za primerjavo — kartica prikaže razliko, ker je prav ta
     # razlika tisto, kar je model prispeval.
