@@ -25,6 +25,16 @@
   src: url('/fonts/Inter-latin-ext-normal-400.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+/* sl: č š ž ć đ — majhna podmnožica, deklarirana PO latin-ext, zato ima prednost za te znake
+   (index.html preloada samo to datoteko; polni latin-ext se naloži le za druge znake) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Inter-sl-normal-400.woff2') format('woff2');
+  unicode-range: U+0106-0107, U+010C-010D, U+0110-0111, U+0160-0161, U+017D-017E;
+}
 /* latin */
 @font-face {
   font-family: 'Inter';
@@ -43,6 +53,16 @@
   src: url('/fonts/Inter-latin-ext-normal-400.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+/* sl: č š ž ć đ — majhna podmnožica, deklarirana PO latin-ext, zato ima prednost za te znake
+   (index.html preloada samo to datoteko; polni latin-ext se naloži le za druge znake) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Inter-sl-normal-400.woff2') format('woff2');
+  unicode-range: U+0106-0107, U+010C-010D, U+0110-0111, U+0160-0161, U+017D-017E;
+}
 /* latin */
 @font-face {
   font-family: 'Inter';
@@ -61,6 +81,16 @@
   src: url('/fonts/Inter-latin-ext-normal-400.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+/* sl: č š ž ć đ — majhna podmnožica, deklarirana PO latin-ext, zato ima prednost za te znake
+   (index.html preloada samo to datoteko; polni latin-ext se naloži le za druge znake) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Inter-sl-normal-400.woff2') format('woff2');
+  unicode-range: U+0106-0107, U+010C-010D, U+0110-0111, U+0160-0161, U+017D-017E;
+}
 /* latin */
 @font-face {
   font-family: 'Inter';
@@ -79,6 +109,16 @@
   src: url('/fonts/Inter-latin-ext-normal-400.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+/* sl: č š ž ć đ — majhna podmnožica, deklarirana PO latin-ext, zato ima prednost za te znake
+   (index.html preloada samo to datoteko; polni latin-ext se naloži le za druge znake) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Inter-sl-normal-400.woff2') format('woff2');
+  unicode-range: U+0106-0107, U+010C-010D, U+0110-0111, U+0160-0161, U+017D-017E;
+}
 /* latin */
 @font-face {
   font-family: 'Inter';
@@ -96,6 +136,16 @@
   font-display: swap;
   src: url('/fonts/Inter-latin-ext-normal-400.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* sl: č š ž ć đ — majhna podmnožica, deklarirana PO latin-ext, zato ima prednost za te znake
+   (index.html preloada samo to datoteko; polni latin-ext se naloži le za druge znake) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/Inter-sl-normal-400.woff2') format('woff2');
+  unicode-range: U+0106-0107, U+010C-010D, U+0110-0111, U+0160-0161, U+017D-017E;
 }
 /* latin */
 @font-face {

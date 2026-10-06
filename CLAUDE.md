@@ -582,8 +582,15 @@ PageSpeed (mobile) je za `/` javil 1,9 s zadržanega prvega izrisa (`style.min.c
 - **GTM in gtag.js se naložita ob prvi interakciji ali 5 s po `load`** (`GA_DELAY_MS` v `<head>`).
   Kdor odide prej brez interakcije, v GA ni zabeležen. Samo `index.html`; ostale strani
   (generatorji) imajo še vedno običajen snippet.
-- Neizkoriščeno: Inter `latin-ext` je preloadan (133 KiB) zaradi č/š/ž brez preskoka pisave in
-  v laboratoriju omejuje FCP — podmnožica samo s slovenskimi znaki bi ga skrčila.
+- **Inter ima slovensko podmnožico** (`fonts/Inter-sl-normal-400.woff2`, 5,5 KiB, samo
+  Č č Š š Ž ž Ć ć Đ đ; `tools/build_inter_sl_subset.py`, enkratno, izhod je commitan). Preloadana je
+  ona, ne polni `latin-ext` (133 KiB). V `fonts/fonts.css` je deklarirana **za** vsakim
+  `latin-ext` obrazom Inter (5 uteži) — pri istem fontu ima prednost kasneje deklariran obraz
+  za znake v svojem `unicode-range`; polni `latin-ext` ostane kot rezerva in se naloži le, če
+  stran rabi znak zunaj podmnožice (preverjeno: na naslovni se ne naloži). Če v podmnožico
+  dodaš znake, popravi `UNICODES` v skripti IN `unicode-range` v `fonts.css`. Lab FCP (lokalni
+  Lighthouse) se zaradi tega ni premaknil (2,56 s s preloadi in brez; brez preloadov 2,85 s) —
+  merilo je PageSpeed na živi strani.
 
 ## Preprost ⇄ napredni pogled domače strani
 
