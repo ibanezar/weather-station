@@ -262,6 +262,25 @@ Opozorilo je **stanje, ne novica** — velja nekaj ur in se prekliče. Zato:
 - `generate_arso_newsjack_post.py` ostaja v repozitoriju zaradi teh dveh funkcij
   in zgodovine; kot generator objav se ne uporablja več.
 
+## Poročila o neurjih (`/nevihte/porocila/`, 7. 10. 2026)
+
+Ideja po pregledu neurje.si (njihova moderirana poročila o toči, nalivih, vetru). Izvedba je naša:
+
+- Worker `/nevihte/porocilo` (POST) shrani poročilo kot `cakajoce` v R2
+  (`feedback/nevihte-porocila.json`); javni `/nevihte/porocila` (GET) vrne **samo odobrena**
+  (privzeto 48 ur). Poročilo je do odobritve skrito — brez moderacije se nič ne objavi.
+- **Moderacija je ročna**: `python3 tools/nevihte_moderacija.py list|odobri|zavrni <id>`
+  (`DELETE_SECRET`, isti zaklep po IP kot galerija). Ni v nobenem workflowu.
+- **Brez fotografij in brez GPS** (kraj + regija): fotografije bi terjale lastno moderacijo in
+  odstranjevanje EXIF, natančna lokacija razkriva zasebna zemljišča. Če kdaj dodaš fotografije,
+  uporabi obstoječi galerijski vzorec (`photos/`, status `pending`).
+- Poročilo bralca **ni meritev in ni uradno opozorilo** — tako piše na strani. Ne mešaj ga v
+  nevihtno karto ali njeno preverjanje (`verify_storm_map.py` meri samo proti strelam).
+- `NP_TIPI`/`NP_REGIJE` v `worker.js` sta namerna podvojitev s
+  `tools/generate_nevihte_porocila_page.py` (`test_parity.py` ju primerja). Besedilo bralcev se
+  izriše samo prek `textContent`.
+- Honeypot `website`, omejitev 10 poročil/uro po IP (`nevihte_porocilo_rl:<ip>`).
+
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
 Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva

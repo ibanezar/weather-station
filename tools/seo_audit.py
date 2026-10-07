@@ -63,6 +63,8 @@ CORE = {
     "meteogasilec/metodologija/":       ("monthly", "0.5"),
     "vodostaj-savinje/":         ("daily",   "0.8"),
     "nevihte/":                  ("daily",   "0.8"),
+    # Moderirana poročila bralcev o neurjih (tools/generate_nevihte_porocila_page.py).
+    "nevihte/porocila/":         ("daily",   "0.6"),
     # Dnevna karta izmerjenih padavin na samodejnih postajah ARSO (glej
     # tools/generate_precip_map.py) — ločena od /nevihte/ (izmerjeno, ne
     # napovedano), zato samostojen vpis.

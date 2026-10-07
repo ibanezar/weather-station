@@ -323,6 +323,18 @@ def konstante_workerja():
           f"worker={kol} meni={sorted(opts)} prikaz={sorted(js_keys)}")
 
 
+@test
+def nevihte_porocila():
+    """NP_TIPI/NP_REGIJE: worker.js ↔ tools/generate_nevihte_porocila_page.py (obrazec in prikaz)."""
+    import generate_nevihte_porocila_page as g
+    tipi, regije = js("worker.js", ["NP_TIPI", "NP_REGIJE"], [{"expr": "NP_TIPI"}, {"expr": "NP_REGIJE"}])
+    check(tipi == [t for t, _ in g.TIPI], "nevihte porocila: NP_TIPI", f"worker={tipi} stran={[t for t, _ in g.TIPI]}")
+    check(regije == g.REGIJE, "nevihte porocila: NP_REGIJE", f"worker={regije} stran={g.REGIJE}")
+    body = g.build_body()
+    for t in tipi:
+        check(f'<option value="{t}">' in body, f"nevihte porocila: meni vsebuje {t}")
+
+
 # ── Gobarski indeks: pragovi (gobe_model ↔ JS na strani) ─────────────────────
 @test
 def gobe_pragovi():
