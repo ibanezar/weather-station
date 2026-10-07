@@ -260,6 +260,7 @@ CSS_GP = """<style>
 .gp-det summary{cursor:pointer;color:var(--muted)}
 .gp-det .table-scroll{margin-top:.6rem}
 .dz-fig .dz-ctl button.gp-g[aria-pressed="true"]{border-width:2px}
+@media(max-width:520px){.dz-fig.chart-card{padding:.9rem .45rem 1rem;margin-left:-.45rem;margin-right:-.45rem}.dz-fig .dz-ro{font-size:.9rem;line-height:1.5}.dz-fig .dz-hint{font-size:.78rem}}
 </style>"""
 
 JS_GP = r"""
@@ -275,7 +276,7 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
 (function(){
   var G=D.groups,nd=D.span.length,idx={};D.span.forEach(function(d,i){idx[d]=i;});
   wrap('gp-fig1',function(w){
-    var L=40,R=12,T=14,H1=120,LH=40,Bt=26,H=T+H1+18+G.length*LH+Bt,pw=w-L-R;
+    var nr=w<460,L=nr?34:40,R=12,T=14,H1=nr?180:120,LH=nr?48:40,Bt=26,H=T+H1+18+G.length*LH+Bt,pw=w-L-R;
     function X(i){return L+(i+.5)/nd*pw;}function Y(v){return T+H1-v/100*H1;}
     var s='<svg viewBox="0 0 '+w+' '+H+'" role="img" aria-label="Povprečni indeks skupin gob po modelu in okna rasti trosnjakov po dežju" font-family="inherit">';
     var ri=D.rain_days.map(function(d){return idx[d];}),rx0=L+ri[0]/nd*pw,rx1=L+(ri[ri.length-1]+1)/nd*pw;
@@ -289,14 +290,14 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
     var ends=G.map(function(g){return Y(g.mean[g.mean.length-1]);}),ly=spread(ends,13);
     G.forEach(function(g,k){
       var pts=g.mean.map(function(v,i){return X(idx[D.dates[i]])+','+Y(v);}).join(' ');
-      s+='<polyline points="'+pts+'" fill="none" stroke="'+g.color+'" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
-      s+='<rect x="'+(hx+5)+'" y="'+(ly[k]-14+3)+'" width="10" height="10" rx="2" fill="'+g.color+'"/>';
-      s+='<text x="'+(hx+19)+'" y="'+(ly[k]-14+13)+'" font-size="12" font-weight="600" fill="'+INK+'">'+g.name+'</text>';
+      s+='<polyline points="'+pts+'" fill="none" stroke="'+g.color+'" stroke-width="'+(nr?3.2:2.4)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+      if(!nr){s+='<rect x="'+(hx+5)+'" y="'+(ly[k]-14+3)+'" width="10" height="10" rx="2" fill="'+g.color+'"/>';
+      s+='<text x="'+(hx+19)+'" y="'+(ly[k]-14+13)+'" font-size="12" font-weight="600" fill="'+INK+'">'+g.name+'</text>';}
     });
     G.forEach(function(g,k){
       var y0=T+H1+18+k*LH,xa=L+idx[g.win[0]]/nd*pw,xb=L+(idx[g.win[1]]+1)/nd*pw;
-      s+='<text x="'+L+'" y="'+(y0+11)+'" font-size="12" fill="'+INK+'">'+g.name+' · '+d0(g.win[0])+'–'+d0(g.win[1])+(w>=520?' <tspan fill="'+MUTED+'">(zamik '+g.lag[0]+'–'+g.lag[1]+' dni)</tspan>':'')+'</text>';
-      s+='<rect class="ln" data-k="'+k+'" x="'+xa+'" y="'+(y0+16)+'" width="'+(xb-xa)+'" height="12" rx="4" fill="'+g.color+'" fill-opacity=".3"/>';
+      s+='<text x="'+L+'" y="'+(y0+12)+'" font-size="'+(nr?13:12)+'" fill="'+INK+'">'+g.name+' · '+d0(g.win[0])+'–'+d0(g.win[1])+(w>=520?' <tspan fill="'+MUTED+'">(zamik '+g.lag[0]+'–'+g.lag[1]+' dni)</tspan>':'')+'</text>';
+      s+='<rect class="ln" data-k="'+k+'" x="'+xa+'" y="'+(y0+18)+'" width="'+(xb-xa)+'" height="'+(nr?18:12)+'" rx="5" fill="'+g.color+'" fill-opacity=".3"/>';
     });
     var step=w<520?3:2;
     D.span.forEach(function(d,i){if(i%step===0)s+='<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="11" fill="'+MUTED+'">'+d0(d).replace(' ',' ')+'</text>';});
@@ -325,7 +326,7 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
   if(host){refs.forEach(function(r){var b=document.createElement('button');b.type='button';b.textContent=r[0]+' '+f1(r[1])+' mm';b.setAttribute('aria-pressed','false');b.dataset.v=Math.round(r[1]);
     b.addEventListener('click',function(){fig.put(+b.dataset.v);});host.appendChild(b);});}
   fig=wrap('gp-fig2',function(w){
-    var narrow=w<420,L=Math.round(narrow?w*.26:Math.min(130,w*.34)),R=40,T=44,RH=32,Bt=46,H=T+S.length*RH+Bt,pw=w-L-R;
+    var narrow=w<460,L=Math.round(narrow?w*.27:Math.min(130,w*.34)),R=40,T=44,RH=narrow?42:32,Bt=46,bh=narrow?22:14,H=T+S.length*RH+Bt,pw=w-L-R;
     function X(v){return L+v/MAX*pw;}
     var s='<svg viewBox="0 0 '+w+' '+H+'" role="img" aria-label="Količina dežja proti pragu sprožilnega dežja po vrstah" font-family="inherit">';
     s+='<rect x="'+X(Rn.p10)+'" y="'+(T-10)+'" width="'+(X(Rn.p90)-X(Rn.p10))+'" height="'+(H-T-Bt+10)+'" fill="'+MUTED+'" fill-opacity=".14"/>';
@@ -334,11 +335,11 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
     s+='<line x1="'+X(Rn.model)+'" x2="'+X(Rn.model)+'" y1="'+(T-10)+'" y2="'+(H-Bt)+'" stroke="'+INK+'" stroke-dasharray="4 3" stroke-width="1.5"/>';
     s+='<text x="'+X(Rn.model)+'" y="'+(T-16)+'" text-anchor="middle" font-size="11" fill="'+MUTED+'">model</text>';
     S.forEach(function(sp,k){
-      var y=T+k*RH+6;
-      s+='<text x="'+(L-8)+'" y="'+(y+11)+'" text-anchor="end" font-size="12" fill="'+INK+'">'+(narrow?sp.name.split(' ').pop().replace(/^./,function(c){return c.toUpperCase();}):sp.name)+'</text>';
-      s+='<rect x="'+L+'" y="'+y+'" width="'+(X(sp.thr)-L)+'" height="14" rx="4" fill="'+sp.color+'" fill-opacity=".25"/>';
-      s+='<rect class="fl" data-k="'+k+'" x="'+L+'" y="'+y+'" width="0" height="14" rx="4" fill="'+sp.color+'"/>';
-      s+='<text x="'+(X(sp.thr)+5)+'" y="'+(y+11)+'" font-size="11" fill="'+INK+'" stroke="'+SURF+'" stroke-width="3" paint-order="stroke">'+sp.thr+'</text>';
+      var y=T+k*RH+(narrow?8:6);
+      s+='<text x="'+(L-8)+'" y="'+(y+bh-3)+'" text-anchor="end" font-size="'+(narrow?13:12)+'" fill="'+INK+'">'+(narrow?sp.name.split(' ').pop().replace(/^./,function(c){return c.toUpperCase();}):sp.name)+'</text>';
+      s+='<rect x="'+L+'" y="'+y+'" width="'+(X(sp.thr)-L)+'" height="'+bh+'" rx="4" fill="'+sp.color+'" fill-opacity=".25"/>';
+      s+='<rect class="fl" data-k="'+k+'" x="'+L+'" y="'+y+'" width="0" height="'+bh+'" rx="4" fill="'+sp.color+'"/>';
+      s+='<text x="'+(X(sp.thr)+5)+'" y="'+(y+bh-3)+'" font-size="11" fill="'+INK+'" stroke="'+SURF+'" stroke-width="3" paint-order="stroke">'+sp.thr+'</text>';
     });
     for(var v=0;v<=MAX;v+=10)s+='<text x="'+X(v)+'" y="'+(H-28)+'" text-anchor="middle" font-size="11" fill="'+MUTED+'">'+v+'</text>';
     s+='<text x="'+L+'" y="'+(H-10)+'" font-size="11" fill="'+MUTED+'">'+(narrow?'mm dežja 8.–10. 10.':'mm dežja 8.–10. 10. · številka ob stolpcu je prag vrste')+'</text>';
@@ -363,7 +364,7 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
     b.style.borderColor=g.color;b.addEventListener('click',function(){gi=k;Array.prototype.forEach.call(host.children,function(c,j){c.setAttribute('aria-pressed',j===k?'true':'false');});fig.redraw();});host.appendChild(b);});}
   var DASH=['','7 4','2 4','10 3 2 3'];
   fig=wrap('gp-fig3',function(w){
-    var L=40,R=Math.min(112,w*.3),T=14,H=230,Bt=26,ph=H-T-Bt,pw=w-L-R,g=D.groups[gi],ser=D.band_series[g.key];
+    var nr=w<460,L=nr?34:40,R=nr?14:Math.min(112,w*.3),T=14,H=nr?320:230,Bt=nr?78:26,ph=H-T-Bt,pw=w-L-R,g=D.groups[gi],ser=D.band_series[g.key];
     var all=[];ser.forEach(function(a){all=all.concat(a);});
     var lo=Math.max(0,Math.floor((Math.min.apply(null,all)-5)/10)*10),hi=Math.min(100,Math.ceil((Math.max.apply(null,all)+5)/10)*10),tk=[];
     for(var t=lo;t<=hi;t+=10)tk.push(t);
@@ -373,15 +374,18 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
     s+='<text x="'+L+'" y="'+(T-3)+'" font-size="12" fill="'+MUTED+'">indeks, % (os od '+lo+') · '+g.name+'</text>';
     var ys=B.map(function(b,k){return Y(ser[k][nd-1]);}),ly=spread(ys,13);
     B.forEach(function(b,k){
-      s+='<polyline points="'+ser[k].map(function(v,i){return X(i)+','+Y(v);}).join(' ')+'" fill="none" stroke="'+g.color+'" stroke-width="2.4" stroke-linejoin="round" stroke-dasharray="'+DASH[k]+'"/>';
-      s+='<line x1="'+(w-R+6)+'" x2="'+(w-R+22)+'" y1="'+ly[k]+'" y2="'+ly[k]+'" stroke="'+g.color+'" stroke-width="2.4" stroke-dasharray="'+DASH[k]+'"/>';
-      s+='<text x="'+(w-R+26)+'" y="'+(ly[k]+4)+'" font-size="11.5" fill="'+INK+'">'+b.name+'</text>';
+      s+='<polyline points="'+ser[k].map(function(v,i){return X(i)+','+Y(v);}).join(' ')+'" fill="none" stroke="'+g.color+'" stroke-width="'+(nr?3.2:2.4)+'" stroke-linejoin="round" stroke-dasharray="'+DASH[k]+'"/>';
+      if(nr){var lx=L+(k%2)*(pw/2),ly2=H-Bt+36+Math.floor(k/2)*22;
+        s+='<line x1="'+lx+'" x2="'+(lx+26)+'" y1="'+ly2+'" y2="'+ly2+'" stroke="'+g.color+'" stroke-width="3" stroke-dasharray="'+DASH[k]+'"/>';
+        s+='<text x="'+(lx+32)+'" y="'+(ly2+4)+'" font-size="12.5" fill="'+INK+'">'+b.name+'</text>';}
+      else{s+='<line x1="'+(w-R+6)+'" x2="'+(w-R+22)+'" y1="'+ly[k]+'" y2="'+ly[k]+'" stroke="'+g.color+'" stroke-width="2.4" stroke-dasharray="'+DASH[k]+'"/>';
+      s+='<text x="'+(w-R+26)+'" y="'+(ly[k]+4)+'" font-size="11.5" fill="'+INK+'">'+b.name+'</text>';}
     });
-    D.dates.forEach(function(d,i){s+='<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle" font-size="11" fill="'+MUTED+'">'+d0(d).replace(' ',' ')+'</text>';});
+    D.dates.forEach(function(d,i){if(nr&&i%2)return;s+='<text x="'+X(i)+'" y="'+(H-Bt+16)+'" text-anchor="middle" font-size="11" fill="'+MUTED+'">'+d0(d).replace(' ',' ')+'</text>';});
     s+='<g class="cur"></g></svg>';
-    return {svg:s,w:w,H:H,T:T,L:L,pw:pw,X:X,Y:Y,big:1,g:g,ser:ser,inv:function(px){return Math.round((px-L)/pw*(nd-1));}};
+    return {svg:s,w:w,H:H,Bt:Bt,T:T,L:L,pw:pw,X:X,Y:Y,big:1,g:g,ser:ser,inv:function(px){return Math.round((px-L)/pw*(nd-1));}};
   },function(i,g,svg){
-    var h='<line x1="'+g.X(i)+'" x2="'+g.X(i)+'" y1="'+g.T+'" y2="'+(g.H-26)+'" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/>';
+    var h='<line x1="'+g.X(i)+'" x2="'+g.X(i)+'" y1="'+g.T+'" y2="'+(g.H-g.Bt)+'" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/>';
     var vals=B.map(function(b,k){h+=dot(g.X(i),g.Y(g.ser[k][i]),g.g.color);return b.name+' <b>'+f0(g.ser[k][i])+' %</b> <small>('+b.n+' območij)</small>';});
     svg.querySelector('.cur').innerHTML=h;
     return '<b>'+dl(D.dates[i])+'</b> · '+g.g.name+', povprečje vseh vrst v skupini:<br>'+vals.join(' · ');
@@ -419,20 +423,20 @@ def build_article(D):
 
     stats = ('<div class="mini-stat-grid">'
              f'<div class="mini-stat"><div class="ms-label">Dež {rr}, ansambel</div><div class="ms-val">{mm(p50)} mm</div><div class="ms-sub">mediana, ARSO {mm(arso)} mm</div></div>'
-             f'<div class="mini-stat"><div class="ms-label">Dež v gobarskem modelu</div><div class="ms-val">{mm(mod)} mm</div><div class="ms-sub">en model, Rečica</div></div>'
+             f'<div class="mini-stat"><div class="ms-label">Dež v modelu gob</div><div class="ms-val">{mm(mod)} mm</div><div class="ms-sub">mokrejši scenarij</div></div>'
              f'<div class="mini-stat"><div class="ms-label">Suša pred dežjem</div><div class="ms-val">{dry["days"]} dni</div><div class="ms-sub">{mm(dry["sum"])} mm</div></div>'
              f'<div class="mini-stat"><div class="ms-label">Mikorizne vrste</div><div class="ms-val" style="font-size:1.15rem">{win["mikorizna"]}</div><div class="ms-sub">okno po zamiku</div></div>'
              '</div>')
 
     sec1 = [
         stats,
-        (f"Koliko dežja pričakujemo, je razvidno iz <a href=\"/blog/{RAIN_SLUG}.html\" style=\"color:var(--blue)\">članka o dežu</a>: "
-         f"mediana ansambla ({ev['n']} članov) za {rr} je {mm(p50)} mm, deset odstotkov članov napoveduje manj kot {mm(ev['p10'])} mm, "
-         f"deset odstotkov več kot {mm(ev['p90'])} mm; ARSO {mm(arso)} mm."),
-        (f"Gobarski model ansambla ne uporablja. Za vsako od {D['n_loc']} območij dobi eno napoved Open-Meteo, ki je za Rečico "
-         f"bistveno mokrejša: <strong>{mm(mod)} mm</strong>, več kot dvakrat toliko kot mediana. Za {short(D['extra_day'])} napoveduje še "
-         f"{mm(D['extra_mm'])} mm, kar v članku o dežu ni zajeto. Modelovi indeksi so zato <strong>scenarij mokre napovedi</strong>; "
-         f"če se uresniči mediana, bodo nižji, predvsem pri vrstah z visokim pragom."),
+        (f"<strong>Ploščici z dežjem se razlikujeta, ker prideta iz različnih virov.</strong> Prva je ansambel iz "
+         f"<a href=\"/blog/{RAIN_SLUG}.html\" style=\"color:var(--blue)\">članka o dežu</a>: mediana {ev['n']} članov za {rr} je {mm(p50)} mm "
+         f"(P10 {mm(ev['p10'])}, P90 {mm(ev['p90'])} mm), ARSO {mm(arso)} mm. Druga je dež, ki ga uporablja gobarski model: ta ansambla ne "
+         f"uporablja, ampak za vsako od {D['n_loc']} območij dobi eno napoved Open-Meteo, ki je za Rečico bistveno mokrejša, "
+         f"<strong>{mm(mod)} mm</strong>."),
+        (f"Modelovi indeksi so zato <strong>scenarij mokre napovedi</strong>: če se uresniči mediana ansambla, bodo nižji, predvsem pri vrstah "
+         f"z visokim pragom. Ta model za {short(D['extra_day'])} napoveduje še {mm(D['extra_mm'])} mm, kar v članku o dežu ni zajeto."),
         (f"Pomembna je tudi suša: tla so danes po modelu skoraj popolnoma suha ({D['soil_now']} % na modelovi lestvici), zato prvi "
          f"milimetri najprej namočijo prst in steljo."),
     ]
@@ -480,7 +484,7 @@ def build_article(D):
          f"Razlike se pokažejo pri povprečju skupin po višini."),
         figure("gp-fig3", '<div class="dz-ctl" role="group" aria-label="Skupina" id="gp-grp"></div>',
                "Izberite skupino in premaknite kazalec po dnevih. Vsaka črta je povprečje indeksa vseh vrst v skupini na območjih "
-               "določenega višinskega pasu; številke ob koncu črt so pasovi."),
+               "določenega višinskega pasu; vrste črt so v legendi."),
         details("Povprečje za " + f"{short(add_days(D['high_date'], -1))} in {short(D['high_date'])} v tabeli",
                 table(["Višina", "Območij", "Razkrojevalke", "Lesne vrste", "Mikorizne vrste"], brow)),
         ("Po modelu so nižje in srednje lege (do približno 800 m) za prve gobe po dežju ugodnejše kot grebeni nad 1100 m: tam je hladneje "
