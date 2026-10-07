@@ -26,11 +26,16 @@ actual measurement):
      the same rule — the whole point is that it can lose in public. ECMWF AIFS
      (the AI model Windy shows as its 15-day ECMWF extension) is the fourth,
      fetched from the same Open-Meteo endpoint with models=ecmwf_aifs025_single.
+     Google DeepMind WeatherNext 2 is the fifth — the ensemble mean of Google's
+     AI model, which Open-Meteo serves from its ensemble endpoint
+     (models=google_weathernext2_ensemble_mean), no key or approval needed.
 
 Za ARSO in Open-Meteo semafor nima zgodovine za nazaj: ARSO ne objavlja arhiva
 preteklih napovedi, Open-Meteo pa smo tu začeli beležiti sproti. AIFS je izjema
 — Open-Meteo hrani arhiv preteklih napovedi (*_previous_dayN), zato ga je
 tools/backfill_aifs_verification.py napolnil za nazaj do prvega dne semaforja.
+Isto velja za WeatherNext 2, a njegov arhiv pri Open-Meteo sega le do
+5. 9. 2026 (WN2_ARCHIVE_START v istem skriptu).
 Ti zapisi imajo src "archive"; sproti zabeleženi imajo "live".
 
 State:
@@ -62,6 +67,15 @@ WET_DAY_MM = 0.2  # isti prag kot pri učenju modela (train_recica_mos.py)
 # razreši, zato je tu predvsem merilo, koliko sinoptična veščina zaleže brez
 # lokalne ločljivosti.
 AIFS_MODEL = "ecmwf_aifs025_single"
+
+# Google DeepMind WeatherNext 2 — AI ansambel s 64 člani. Open-Meteo ga streže
+# na ensemble endpointu (ne na /v1/forecast) in sam izračuna povprečje članov.
+# Ločljivost 0,25°, 6-urni koraki: dnevni Tmax/Tmin je zato vzet iz štirih
+# vrednosti na dan in vrh popoldneva ter jutranji minimum praviloma zgreši —
+# na strani je to povedano. WeatherNext 3 (5 km, učen na postajah) prek
+# Open-Meteo ni na voljo; ta vir je WN2.
+WN2_MODEL = "google_weathernext2_ensemble_mean"
+ENSEMBLE_API = "https://ensemble-api.open-meteo.com/v1/ensemble"
 
 
 def load_json(path, default):
@@ -96,10 +110,11 @@ def fetch_arso_tomorrow(target_date):
     return None
 
 
-def fetch_open_meteo_tomorrow(target_date, model=None):
+def fetch_open_meteo_tomorrow(target_date, model=None, endpoint=None):
     """Open-Meteo napoved za `target_date`. Brez `model` je to privzeti seamless
     (pri nas ICON-D2 ~2 km); z `model` je to en sam imenovan model — tako gre po
-    isti poti tudi AIFS in se meri po povsem istem pravilu."""
+    isti poti tudi AIFS in se meri po povsem istem pravilu. `endpoint` je za
+    modele, ki jih Open-Meteo streže drugje (WeatherNext 2: ENSEMBLE_API)."""
     q = {
         "latitude": LAT, "longitude": LON,
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum",
@@ -109,7 +124,8 @@ def fetch_open_meteo_tomorrow(target_date, model=None):
     if model:
         q["models"] = model
     params = urllib.parse.urlencode(q)
-    req = urllib.request.Request(f"https://api.open-meteo.com/v1/forecast?{params}", headers=UA)
+    base = endpoint or "https://api.open-meteo.com/v1/forecast"
+    req = urllib.request.Request(f"{base}?{params}", headers=UA)
     with urllib.request.urlopen(req, timeout=20) as r:
         data = json.load(r)
     d = data.get("daily", {})
@@ -157,7 +173,22 @@ def fetch_model_tomorrow(target_date):
     return None
 
 
-def build_record(target, made_at, actual, arso, om, meteorec=None, aifs=None):
+def _model_entry(src, actual_tmax, actual_tmin, actual_precip, default_model):
+    """Zapis za AI model prek Open-Meteo (AIFS, WeatherNext 2) — oba po istem kalupu."""
+    return {
+        "tmax": src.get("tmax"), "tmin": src.get("tmin"), "precip": src.get("precip"),
+        "model": src.get("model") or default_model,
+        # "live" = zabeleženo dan prej kot vsi ostali viri; "archive" =
+        # napolnjeno za nazaj iz arhiva napovedi. Razlika je majhna, a jo
+        # zapišemo, da je na strani lahko povedana.
+        "src": src.get("src") or "live",
+        "err_tmax": err(src.get("tmax"), actual_tmax),
+        "err_tmin": err(src.get("tmin"), actual_tmin),
+        "err_precip": err(src.get("precip"), actual_precip),
+    }
+
+
+def build_record(target, made_at, actual, arso, om, meteorec=None, aifs=None, wn2=None):
     """Assemble one verification record from a prediction + the measurement."""
     actual_tmax = actual.get("tempHigh")
     actual_tmin = actual.get("tempLow")
@@ -183,17 +214,9 @@ def build_record(target, made_at, actual, arso, om, meteorec=None, aifs=None):
             "err_precip": err(om.get("precip"), actual_precip),
         }
     if aifs:
-        record["aifs"] = {
-            "tmax": aifs.get("tmax"), "tmin": aifs.get("tmin"), "precip": aifs.get("precip"),
-            "model": aifs.get("model") or AIFS_MODEL,
-            # "live" = zabeleženo dan prej kot vsi ostali viri; "archive" =
-            # napolnjeno za nazaj iz arhiva napovedi. Razlika je majhna, a jo
-            # zapišemo, da je na strani lahko povedana.
-            "src": aifs.get("src") or "live",
-            "err_tmax": err(aifs.get("tmax"), actual_tmax),
-            "err_tmin": err(aifs.get("tmin"), actual_tmin),
-            "err_precip": err(aifs.get("precip"), actual_precip),
-        }
+        record["aifs"] = _model_entry(aifs, actual_tmax, actual_tmin, actual_precip, AIFS_MODEL)
+    if wn2:
+        record["wn2"] = _model_entry(wn2, actual_tmax, actual_tmin, actual_precip, WN2_MODEL)
     if meteorec:
         wet = None if actual_precip is None else (1.0 if actual_precip >= WET_DAY_MM else 0.0)
         pop = meteorec.get("pop")
@@ -229,7 +252,7 @@ def refresh_actuals(verification, hist):
         fresh = build_record(
             date, record.get("made_at"), actual,
             record.get("arso"), record.get("open_meteo"), record.get("meteorec"),
-            record.get("aifs"),
+            record.get("aifs"), record.get("wn2"),
         )
         if fresh != record:
             old = (record.get("actual") or {}).get("tmax")
@@ -260,7 +283,7 @@ def resolve_pending(pending, hist, verification):
         verification[target] = build_record(
             target, entry.get("made_at"), actual,
             entry.get("arso"), entry.get("open_meteo"), entry.get("meteorec"),
-            entry.get("aifs"),
+            entry.get("aifs"), entry.get("wn2"),
         )
         resolved += 1
     return still_pending, resolved
@@ -286,7 +309,7 @@ def main():
     if any(e["target_date"] == tomorrow for e in still_pending):
         print(f"  Napoved za {tomorrow} je že zabeležena, preskačem.")
     else:
-        arso = om = aifs = None
+        arso = om = aifs = wn2 = None
         try:
             arso = fetch_arso_tomorrow(tomorrow)
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
@@ -302,12 +325,19 @@ def main():
                 aifs["src"] = "live"
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
             print(f"  ⚠ AIFS napoved nedosegljiva: {e}", file=sys.stderr)
+        try:
+            wn2 = fetch_open_meteo_tomorrow(tomorrow, model=WN2_MODEL, endpoint=ENSEMBLE_API)
+            if wn2:
+                wn2["model"] = WN2_MODEL
+                wn2["src"] = "live"
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+            print(f"  ⚠ WeatherNext 2 napoved nedosegljiva: {e}", file=sys.stderr)
         meteorec = fetch_model_tomorrow(tomorrow)
         if meteorec is None:
             print("  ⚠ Napovedi lastnega modela ni — napoved-modela.json manjka ali je stara.",
                   file=sys.stderr)
 
-        if arso or om or meteorec or aifs:
+        if arso or om or meteorec or aifs or wn2:
             still_pending.append({
                 "target_date": tomorrow,
                 "made_at": today.isoformat(),
@@ -315,9 +345,11 @@ def main():
                 "open_meteo": om,
                 "meteorec": meteorec,
                 "aifs": aifs,
+                "wn2": wn2,
             })
             print(f"  Zabeležena napoved za {tomorrow}: ARSO={'da' if arso else 'ne'}, "
                   f"Open-Meteo={'da' if om else 'ne'}, AIFS={'da' if aifs else 'ne'}, "
+                  f"WN2={'da' if wn2 else 'ne'}, "
                   f"naš model={'da' if meteorec else 'ne'}")
         else:
             print("  ✗ Nobenega vira napovedi ni bilo mogoče pridobiti.", file=sys.stderr)

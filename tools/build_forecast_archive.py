@@ -11,6 +11,12 @@ padavin) **po lokalnem času (Europe/Ljubljana)** — ista pravila kot za
 meritve v update_history.py, sicer se definicija dneva razide (glavni vir
 lažnih rezultatov pri tovrstni analizi).
 
+AI ansambli (Google DeepMind WeatherNext 2, ECMWF AIFS ENS, ECMWF AIFS Europe)
+niso na Previous Runs API-ju, ampak na ensemble API-ju Open-Meteo — z istimi
+`_previous_dayN` spremenljivkami, a samo za zadnjih ~92 dni (drseče okno).
+Zgodovina se zato za njih nabira z dnevnim tekom; kar okno preskoči, je
+izgubljeno. Povprečje članov izračuna Open-Meteo (`*_ensemble_mean`).
+
 Piše/dopolnjuje data/forecast-archive.csv (dodaja samo nove (model, lead,
 valid_at) vrstice — arhiv se ne prepisuje, kliče se poredko).
 
@@ -38,6 +44,17 @@ MODELS = {
     "ecmwf_aifs025_single":      "ECMWF AIFS",
 }
 
+# AI ansambli prek ensemble API-ja (glej docstring). Vsi trije tečejo na
+# grobi mreži (0,25° oz. ~31 km) in v šesturnih korakih — dnevni vrh in minimum
+# sta zato vzeta iz interpoliranih urnih vrednosti, ne iz pravih ur.
+ENSEMBLE_MODELS = {
+    "google_weathernext2_ensemble_mean": "Google WeatherNext 2",
+    "ecmwf_aifs025_ensemble_mean":       "ECMWF AIFS ENS",
+    "ecmwf_aifs_europe_ensemble_mean":   "ECMWF AIFS Europe",
+}
+ENSEMBLE_API = "https://ensemble-api.open-meteo.com/v1/ensemble"
+ENSEMBLE_MAX_PAST_DAYS = 92
+
 LEADS = range(1, 8)
 ARCHIVE_START = datetime.date(2024, 6, 15)  # potrjena meja previous-runs arhiva za te modele
 
@@ -57,7 +74,14 @@ def fetch_model(model, past_days):
         "forecast_days": 1,
         "hourly": ",".join(hourly_vars),
     }
-    url = "https://previous-runs-api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode(q)
+    base = "https://previous-runs-api.open-meteo.com/v1/forecast"
+    if model in ENSEMBLE_MODELS:
+        base = ENSEMBLE_API
+        # Vedno celo okno, ne le --past-days: okno drsi, zato tek, ki je
+        # zamudil dneve, zamujeno pobere sam, prvi tek pa napolni vse za nazaj.
+        # Že zapisane vrstice preskoči load_existing().
+        q["past_days"] = ENSEMBLE_MAX_PAST_DAYS
+    url = base + "?" + urllib.parse.urlencode(q)
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=90) as r:
         return json.load(r)
@@ -85,7 +109,9 @@ def aggregate_daily(data, model):
                 b["p"].append(pv)
             b["hours"].add(t[11:13])
         for d, b in by_day.items():
-            if len(b["hours"]) < 24 or not b["t"]:
+            # Vseh 24 ur mora biti tudi z vrednostjo, ne le z uro: na začetku
+            # arhiva (AI ansambli: prva vrednost ob 2:00) bi sicer manjkala noč.
+            if len(b["hours"]) < 24 or len(b["t"]) < 24:
                 continue
             valid = datetime.date.fromisoformat(d)
             issued = valid - datetime.timedelta(days=n)
@@ -124,7 +150,7 @@ def save_archive(rows):
 
 
 def main():
-    models = list(MODELS)
+    models = list(MODELS) + list(ENSEMBLE_MODELS)
     past_days = 820
     args = sys.argv[1:]
     if "--models" in args:

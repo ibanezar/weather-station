@@ -82,7 +82,9 @@ def write_csv():
             "# Meteorec test-napovedi -- primerjava vremenskih napovedi z meritvami postaje IREICA1 "
             "(Recica ob Savinji, Zgornja Savinjska dolina)\n"
             f"# Vir napovedi: Open-Meteo Previous Runs API (ecmwf_ifs025, icon_seamless, gfs_seamless, "
-            f"meteofrance_arpege_europe, best_match, ecmwf_aifs025_single), ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no)\n"
+            f"meteofrance_arpege_europe, best_match, ecmwf_aifs025_single), Open-Meteo Ensemble API "
+            f"(google_weathernext2_ensemble_mean, ecmwf_aifs025_ensemble_mean, ecmwf_aifs_europe_ensemble_mean; "
+            f"od 2026-09), ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no)\n"
             "# Vir meritev: postaja IREICA1 (Ecowitt), src=station/wu v history.json\n"
             f"# Licenca podatkov Meteorec: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) -- "
             f"navedi vir: {SITE}/test-napovedi/\n"
@@ -361,6 +363,54 @@ def build_body(data, n_csv_rows):
                 + "; ".join(f'{forward_labels[m]}: {forward_n[m]} razrešenih napovedi' for m in forward_labels)
                 + '.</p>')
 
+    # ── AI ansambli (WeatherNext 2, AIFS ENS, AIFS Europe) ────────────────
+    # Arhiv imajo šele od septembra 2026, zato ne gredo v glavno tabelo zgoraj
+    # (dve leti proti mesecu ni isto merilo), ampak v ločeno — vsaka vrstica
+    # na ISTIH dneh za vse vire, vključno z referenčnimi modeli.
+    ai_html = ""
+    ai_models = data.get("ai_models") or {}
+    ai_ref = data.get("ai_reference") or {}
+    ai_results = data.get("ai_results") or {}
+    if ai_models and ai_results:
+        cols = list(ai_models.items()) + list(ai_ref.items())
+        ai_rows = []
+        n_ai = 0
+        for lead in range(1, 8):
+            r = ai_results.get(str(lead)) or ai_results.get(lead)
+            if not r:
+                continue
+            n_ai = max(n_ai, r["n"])
+            vals = {m: ((r["models"].get(m) or {}).get("tmax") or {}).get("mae") for m, _ in cols}
+            present = [v for v in vals.values() if v is not None]
+            best_v = min(present) if present else None
+            cells = "".join(
+                ('<td>—</td>' if vals[m] is None else
+                 f'<td>{"<strong>" if vals[m] == best_v else ""}±{num(vals[m])} °C{"</strong>" if vals[m] == best_v else ""}</td>')
+                for m, _ in cols)
+            ai_rows.append(f'    <tr><th>D+{lead}</th>{cells}<td>{r["n"]}</td></tr>')
+        d1 = ai_results.get("1") or ai_results.get(1) or {}
+        bias = {m: ((d1.get("models", {}).get(m) or {}).get("tmin") or {}).get("bias") for m in ai_models}
+        bias_txt = "; ".join(f'{ai_models[m]} {"+" if b > 0 else "−"}{num(abs(b))} °C'
+                             for m, b in bias.items() if b is not None)
+        first = data.get("ai_first_date")
+        ai_html = (
+            '  <h2 id="ai-ansambli">AI ansambli: Google WeatherNext 2 in ECMWF AIFS</h2>\n'
+            '  <p class="archive-intro">Trije AI ansambli — <strong>Google DeepMind WeatherNext 2</strong> '
+            '(64 članov), <strong>ECMWF AIFS ENS</strong> (globalni) in <strong>ECMWF AIFS Europe</strong> '
+            '(~31 km) — s povprečjem članov, ki ga izračuna Open-Meteo. Njihov arhiv preteklih napovedi se '
+            f'začne šele {seo.fmtd(first) if first else "septembra 2026"}, zato niso v glavni tabeli zgoraj: '
+            'primerjamo jih ločeno, v vsaki vrstici na <strong>istih dneh</strong> kot ECMWF AIFS (en tek), '
+            'ECMWF IFS in Best Match. Vsi trije tečejo v šesturnih korakih, zato dnevni vrh in minimum '
+            'vzamemo iz interpoliranih vrednosti — to jih na dnu doline dodatno stane.</p>\n'
+            '  <div class="table-scroll" tabindex="0"><table class="stats">\n    <tr><th>Vodilni čas</th>'
+            + "".join(f'<th>{l}</th>' for _, l in cols) + '<th>Dni</th></tr>\n'
+            + "\n".join(ai_rows) + '\n  </table></div>\n'
+            + (f'  <p class="archive-intro">Pristranskost jutranjega minimuma pri D+1: {bias_txt} '
+               '(+ pomeni, da model noč napove pretoplo).</p>\n' if bias_txt else '')
+            + f'  <p class="muted-note">Tmax MAE, °C. Vzorec je kratek ({n_ai} dni, jesen) in zato ni '
+            'končna sodba; tabela raste vsak dan. Vir: Google DeepMind WeatherNext 2 in ECMWF AIFS prek '
+            'Open-Meteo, CC BY 4.0.</p>')
+
     # ── Metodologija (obvezne opombe iz brief-a) ────────────────────────────
     methodology = f'''  <h2>Metodologija</h2>
   <p class="archive-intro">Rezultat velja <strong>izključno za Zgornjo Savinjsko dolino</strong> (postaja IREICA1,
@@ -416,6 +466,7 @@ def build_body(data, n_csv_rows):
   <h2>Natančnost po vodilnem času (Tmax MAE, °C)</h2>
 {lead_table}
 {forward_html}
+{ai_html}
 {methodology}
   <h2>Surovi podatki</h2>
   <p class="archive-intro">Celoten podatkovni niz (napoved vsakega vira, dejanska meritev, napaka) je javno na
