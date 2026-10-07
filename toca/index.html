@@ -72,6 +72,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h1 class="page-title">Toča v Zgornji Savinjski dolini — sledilnik in arhiv</h1>
   <p class="post-meta">ARSO opozorila v živo · skupnostne prijave s fotografijo · še ni prijav · 2026-10-07</p>
   <div class="warn-banner lvl-none">Trenutno ni izdanega uradnega ARSO opozorila pred točo za severovzhodno Slovenijo / Savinjsko regijo.</div>
+  <div class="card" id="toca-live" style="margin-bottom:1rem">
+    <div class="clabel">🟠 Toča zdaj — radar ARSO</div>
+    <div id="toca-live-body" style="font-size:.9rem;line-height:1.6;margin-top:.4rem" aria-live="polite">Preverjam …</div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:.4rem">Zaznano stanje po radarjih Lisca in Pasja ravan
+    (ne napoved). Vir: <a href="https://meteo.arso.gov.si/met/sl/warning/hail/" target="_blank" rel="noopener">ARSO</a>.
+    »Ni zaznana« ne pomeni, da toče ne bo — za nevarnost glej <a href="https://meteo.arso.gov.si/met/sl/warning/"
+    target="_blank" rel="noopener">uradna opozorila</a>.</div>
+  </div>
+<script>
+(function(){
+  var API="https://weatherireica1.filip-eremita.workers.dev/arso-toca";
+  var el=document.getElementById("toca-live-body");
+  if(!el)return;
+  var MY="SI_SAVINJSKA";
+  function show(txt){ el.textContent=txt; }
+  function load(){
+    fetch(API).then(function(r){return r.json();}).then(function(d){
+      var rg=d.regions||[], ok=rg.filter(function(x){return x.ok;});
+      if(!ok.length){ show("Podatka ARSO trenutno ni bilo mogoče prebrati — preveri neposredno na strani ARSO."); return; }
+      var hit=ok.filter(function(x){return x.level>=1;});
+      var mine=rg.filter(function(x){return x.id===MY;})[0];
+      var s="";
+      if(mine&&mine.ok) s+="Savinjska: "+(mine.level>=1?"toča zaznana — verjetnost "+mine.text:"toča ni zaznana")+" ("+mine.issued+"). ";
+      else s+="Za Savinjsko podatka ni bilo mogoče prebrati. ";
+      if(hit.length){ s+="Zaznana toča: "+hit.map(function(x){return x.name+" ("+x.text+")";}).join(", ")+". "; }
+      else s+="Radar trenutno nikjer v Sloveniji ne zaznava toče. ";
+      if(ok.length<rg.length) s+="Pri "+(rg.length-ok.length)+" pokrajinah podatka ni bilo mogoče prebrati.";
+      show(s);
+    }).catch(function(){ show("Podatka ni bilo mogoče naložiti — preveri neposredno na strani ARSO."); });
+  }
+  load();
+  // Največ enkrat na 5 minut in samo, ko je zavihek viden (pravilo o klicih na worker).
+  setInterval(function(){ if(!document.hidden) load(); },300000);
+})();
+</script>
   <p class="archive-intro">Trenutno ni aktivnega uradnega opozorila pred točo, a nevihtna sezona (maj–september) v Zgornji Savinjski dolini vsako leto prinese nekaj epizod toče. Urno napoved tveganja za naslednjih 12 ur najdeš na <a href="/#tab-storm">domači strani (zavihek Nevihte)</a>. Spodaj je arhiv prijav uporabnikov iz doline (fotografija + lokacija) in orientacijski pregled dni z izrazito nevihtno aktivnostjo po meritvah postaje IREICA1. Zadnja osvežitev: 2026-10-07.</p>
   <h2>Arhiv prijav skupnosti</h2>
   <div class="toca-photo-empty" id="toca-grid">Še ni prijav — bodi prvi, ki javi točo v svojem kraju. 👇</div>

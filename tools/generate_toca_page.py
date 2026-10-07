@@ -64,6 +64,47 @@ TOCA_FAQ = [
      "naslednjih 12 ur na podlagi CAPE, striženja vetra in drugih konvektivnih indeksov."),
 ]
 
+# Živi prikaz »Toča zdaj po radarju ARSO« (worker.js /arso-toca). Namerna podvojitev med
+# generate_toca_page.py in generate_nevihte_page.py (generatorji strani si ne delijo knjižnic).
+# Stanje, ne novica: samo JS, statičnega posnetka ni; brez odgovora strani NE sme reči »ni toče«.
+TOCA_LIVE_HTML = """  <div class="card" id="toca-live" style="margin-bottom:1rem">
+    <div class="clabel">🟠 Toča zdaj — radar ARSO</div>
+    <div id="toca-live-body" style="font-size:.9rem;line-height:1.6;margin-top:.4rem" aria-live="polite">Preverjam …</div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:.4rem">Zaznano stanje po radarjih Lisca in Pasja ravan
+    (ne napoved). Vir: <a href="https://meteo.arso.gov.si/met/sl/warning/hail/" target="_blank" rel="noopener">ARSO</a>.
+    »Ni zaznana« ne pomeni, da toče ne bo — za nevarnost glej <a href="https://meteo.arso.gov.si/met/sl/warning/"
+    target="_blank" rel="noopener">uradna opozorila</a>.</div>
+  </div>
+<script>
+(function(){
+  var API="https://weatherireica1.filip-eremita.workers.dev/arso-toca";
+  var el=document.getElementById("toca-live-body");
+  if(!el)return;
+  var MY="SI_SAVINJSKA";
+  function show(txt){ el.textContent=txt; }
+  function load(){
+    fetch(API).then(function(r){return r.json();}).then(function(d){
+      var rg=d.regions||[], ok=rg.filter(function(x){return x.ok;});
+      if(!ok.length){ show("Podatka ARSO trenutno ni bilo mogoče prebrati — preveri neposredno na strani ARSO."); return; }
+      var hit=ok.filter(function(x){return x.level>=1;});
+      var mine=rg.filter(function(x){return x.id===MY;})[0];
+      var s="";
+      if(mine&&mine.ok) s+="Savinjska: "+(mine.level>=1?"toča zaznana — verjetnost "+mine.text:"toča ni zaznana")+" ("+mine.issued+"). ";
+      else s+="Za Savinjsko podatka ni bilo mogoče prebrati. ";
+      if(hit.length){ s+="Zaznana toča: "+hit.map(function(x){return x.name+" ("+x.text+")";}).join(", ")+". "; }
+      else s+="Radar trenutno nikjer v Sloveniji ne zaznava toče. ";
+      if(ok.length<rg.length) s+="Pri "+(rg.length-ok.length)+" pokrajinah podatka ni bilo mogoče prebrati.";
+      show(s);
+    }).catch(function(){ show("Podatka ni bilo mogoče naložiti — preveri neposredno na strani ARSO."); });
+  }
+  load();
+  // Največ enkrat na 5 minut in samo, ko je zavihek viden (pravilo o klicih na worker).
+  setInterval(function(){ if(!document.hidden) load(); },300000);
+})();
+</script>
+"""
+
+
 def fetch_json(url, timeout=15):
     req = urllib.request.Request(url, headers=UA)
     with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -250,6 +291,7 @@ def build_body(alert, reports, hist):
   <h1 class="page-title">Toča v Zgornji Savinjski dolini — sledilnik in arhiv</h1>
   <p class="post-meta">ARSO opozorila v živo · skupnostne prijave s fotografijo · {count_txt} · {now_txt}</p>
 {warn}
+{TOCA_LIVE_HTML}
 {intro}
   <h2>Arhiv prijav skupnosti</h2>
 {gallery_html}

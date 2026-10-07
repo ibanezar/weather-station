@@ -335,6 +335,33 @@ def nevihte_porocila():
         check(f'<option value="{t}">' in body, f"nevihte porocila: meni vsebuje {t}")
 
 
+@test
+def arso_toca_razclenjevanje():
+    """_parseArsoToca() v worker.js razbere stopnjo in čas izdaje iz ARSO RSS (oblika iz 7. 10. 2026)."""
+    def rss(t):
+        return ("<channel><title>ARSO vreme: Verjetnost trenutnega pojavljanja toče - SAVINJSKA</title>"
+                f"<item>\n\t\t<title>{t}</title>\n<link>x</link></item></channel>")
+    cases = [
+        ("SAVINJSKA (07.10.2026 09:05 CEST): Verjetnost trenutnega pojavljanja toče - stopnja 0/3 (NO_SIGNAL - zelo majhna) ",
+         {"level": 0, "text": "zelo majhna", "issued": "07.10.2026 09:05 CEST"}),
+        ("SAVINJSKA (07.10.2026 09:05 CEST): Verjetnost trenutnega pojavljanja toče - stopnja 2/3 (MED - srednja) ",
+         {"level": 2, "text": "srednja", "issued": "07.10.2026 09:05 CEST"}),
+        ("KOROSKA (07.10.2026 09:05 CEST): Verjetnost trenutnega pojavljanja toče - stopnja 3/3 (HGH - velika) ",
+         {"level": 3, "text": "velika", "issued": "07.10.2026 09:05 CEST"}),
+        ("SAVINJSKA (07.10.2026 09:05 CEST): Verjetnost trenutnega pojavljanja toče - stopnja -/3 (NO_DATA - ni podatkov) ",
+         {"level": None, "text": "ni podatkov", "issued": "07.10.2026 09:05 CEST"}),
+        ("nekaj povsem drugega", None),
+        ("SAVINJSKA (07.10.2026 09:05 CEST): Verjetnost trenutnega pojavljanja toče - stopnja 7/3 (X) ", None),
+    ]
+    res = js("worker.js", ["_parseArsoToca", "TOCA_BESEDILO", "_TOCA_ITEM_RE", "_TOCA_TITLE_RE"],
+             [{"fn": "_parseArsoToca", "args": [rss(t)]} for t, _ in cases])
+    for (t, want), got in zip(cases, res):
+        check(got == want, f"arso toča: {t[:40]!r}", f"got={got} want={want}")
+    # opozorilo: prazen odgovor ne sme postati »ni toče«
+    check(js("worker.js", ["_parseArsoToca", "TOCA_BESEDILO", "_TOCA_ITEM_RE", "_TOCA_TITLE_RE"], [{"fn": "_parseArsoToca", "args": [""]}])[0] is None,
+          "arso toča: prazen RSS vrne null")
+
+
 # ── Gobarski indeks: pragovi (gobe_model ↔ JS na strani) ─────────────────────
 @test
 def gobe_pragovi():

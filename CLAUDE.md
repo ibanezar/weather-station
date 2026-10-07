@@ -310,6 +310,23 @@ poledica je sevalno ohlajanje cestišča, **žled je dež, ki zmrzuje**.
   spremeni, slika odpade (`ARSO_SOUNDING_IMG`). Sondaža je za Ljubljano, ne za Rečico.
 - Neurje.si iz tega ni prevzet: besedilo je naše, slike njihove nismo uporabili.
 
+## Toča zdaj po radarju ARSO (`/arso-toca`, 7. 10. 2026)
+
+Neurje.si prikazuje »verjetnost toče« — vir je ARSO (`warning_hp_<POKRAJINA>_latest.rss`, 15 pokrajin,
+osvežitev ~10 min, stopnja 0–3/3 iz radarjev Lisca in Pasja ravan). Pri nas:
+
+- `worker.js` `/arso-toca` prebere vseh 15 RSS vzporedno, rob predpomni 5 min (`cf.cacheTtl`),
+  `_parseArsoToca()` razbere stopnjo in čas izdaje. Pokrajina brez odgovora ima `level:null` — **nikoli
+  ne izpiši »ni toče«, če vira nisi prebral** (isto načelo kot ARSO opozorila na MeteoGasilcu).
+  Test razčlenjevanja je v `tools/test_parity.py` (`arso_toca_razclenjevanje`); regexa sta nizova
+  (`RegExp`), ker izrezovalnik `_parity_js.mjs` ne prenese oklepajev v regex literalih.
+- Prikaz (`TOCA_LIVE_HTML`) je **samo JS** na `/toca/` in `/nevihte/` — to je zaznano stanje, ne
+  novica; statični posnetek bi hitro zastarel. Klic ob nalaganju in nato največ na 5 min, samo ko je
+  zavihek viden. Namerna podvojitev med `generate_toca_page.py` in `generate_nevihte_page.py`.
+- `generate_nevihte_page.py` prepiše bloka WX-STORMMAP/WX-ARSO na rezervno besedilo — **po ponovnem
+  zagonu ga ne commitaj brez injektorjev** (jih poganja `nevihte-forecast.yml`).
+- Ni uradno opozorilo; stran napoti na ARSO.
+
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
 Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva

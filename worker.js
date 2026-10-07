@@ -465,6 +465,34 @@ const WARNING_TEXTS = {
 };
 
 // Fetch warnings from vreme.arso.gov.si JSON API (same host as text forecast — works from CF Workers)
+// ── ARSO: trenutna verjetnost toče po pokrajinah (radar, VIL) ─────────────
+// ARSO objavlja za vsako pokrajino RSS (`warning_hp_<ID>_latest.rss`, osvežuje se na ~10 min):
+// stopnja 0–3/3 ("NO_SIGNAL" … "HGH") ali -/3 (ni podatkov). To je ZAZNANO STANJE po radarju
+// (Lisca, Pasja ravan), ne napoved — zato samo živ prikaz, brez statičnega posnetka.
+// TOCA_REGIJE je seznam z ARSO strani /met/sl/warning/hail (POKRAJINE).
+const TOCA_REGIJE = [
+  ["Belokranjska", "SI_BELOKRANJSKA"], ["Bovška", "SI_BOVSKA"], ["Dolenjska", "SI_DOLENJSKA"],
+  ["Gorenjska", "SI_GORENJSKA"], ["Goriška", "SI_GORISKA"], ["Kočevska", "SI_KOCEVSKA"],
+  ["Koroška", "SI_KOROSKA"], ["Ljubljana in okolica", "SI_OSREDNJESLOVENSKA"],
+  ["Notranjska", "SI_NOTRANJSKO-KRASKA"], ["Obala", "SI_OBALNO-KRASKA"], ["Podravje", "SI_PODRAVSKA"],
+  ["Pomurje", "SI_POMURSKA"], ["Savinjska", "SI_SAVINJSKA"], ["Spodnje Posavje", "SI_SPODNJEPOSAVSKA"],
+  ["Zgornjesavska", "SI_ZGORNJESAVSKA"],
+];
+const TOCA_BESEDILO = ["zelo majhna", "zaznavna", "srednja", "velika"];
+
+// Iz naslova RSS elementa razbere stopnjo (0–3, null = ni podatkov) in čas izdaje (15. člen ZDMHS).
+// Regexa sta nizova (RegExp), ker izrezovalnik v tools/_parity_js.mjs ne prenese oklepajev v regex literalih.
+const _TOCA_ITEM_RE = new RegExp("<item>\\s*<title>([\\s\\S]*?)</title>", "i");
+const _TOCA_TITLE_RE = new RegExp("\\(([^)]*?)\\):\\s*Verjetnost[\\s\\S]*?stopnja\\s*(-|\\d)\\s*/\\s*3", "i");
+function _parseArsoToca(xml) {
+  const t = _TOCA_ITEM_RE.exec(String(xml));
+  const m = t && _TOCA_TITLE_RE.exec(t[1]);
+  if (!m) return null;
+  const level = m[2] === "-" ? null : Number(m[2]);
+  if (level !== null && !(level >= 0 && level <= 3)) return null;
+  return { level, text: level === null ? "ni podatkov" : TOCA_BESEDILO[level], issued: m[1].trim() };
+}
+
 async function fetchArsoWarnings() {
   const r = await _arsoFetch("https://vreme.arso.gov.si/api/1.0/nonlocation/");
   if (!r.ok) throw new Error("ARSO API " + r.status);
@@ -3333,6 +3361,30 @@ export default {
     }
 
     try {
+
+      // ── /arso-toca ─────────────────────────────────────────
+      // Trenutna verjetnost toče po pokrajinah (ARSO radar). Pokrajine vzporedno, rob predpomni
+      // 5 min (ARSO osvežuje na ~10 min), tako da ARSO dobi največ en krog klicev na 5 min.
+      // Pokrajina brez odgovora ima level:null — NIKOLI ne izpisujemo »ni toče«, če vira nismo prebrali.
+      if (path === "/arso-toca") {
+        const rows = await Promise.all(TOCA_REGIJE.map(async ([name, id]) => {
+          try {
+            const r = await fetch(`https://meteo.arso.gov.si/uploads/probase/www/warning/text/sl/warning_hp_${id}_latest.rss`, {
+              headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://meteo.arso.gov.si/" },
+              cf: { cacheTtl: 300, cacheEverything: true },
+            });
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            const p = _parseArsoToca(await r.text());
+            if (!p) throw new Error("neznana oblika");
+            return { id, name, level: p.level, text: p.text, issued: p.issued, ok: true };
+          } catch (e) {
+            return { id, name, level: null, text: "ni podatkov", issued: null, ok: false };
+          }
+        }));
+        return new Response(JSON.stringify({ regions: rows, source: "ARSO", updatedAt: new Date().toISOString() }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" }
+        });
+      }
 
       // ── /arso-warning ─────────────────────────────────────
       // ARSO uradna vremensko opozorila — ATOM feed (strukturiran, zanesljiv)
