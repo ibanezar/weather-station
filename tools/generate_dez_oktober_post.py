@@ -314,7 +314,7 @@ def build_article(D):
 
     pop_txt = ""
     if D["pop"].get(d1) is not None and D["pop"].get(d2) is not None:
-        pop_txt = (f" Naš model MTR verjetnosti padavin ne povezuje s količino, a je zanju precej odločen: "
+        pop_txt = (f" Naš model MTR količine dežja ne napoveduje, verjetnost padavin pa ocenjuje visoko: "
                    f"{dgen(d1)} {D['pop'][d1]} %, {dgen(d2)} {D['pop'][d2]} %.")
 
     sec1 = [
@@ -325,7 +325,7 @@ def build_article(D):
         f"ARSO (točka {D['arso_loc'] or 'v dolini'}) napoveduje {num(sd['ARSO'][ix[d1]])} mm {dgen(d1)} in "
         f"{num(sd['ARSO'][ix[d2]])} mm {dgen(d2)}.{pop_txt}",
         "Razlike med modeli niso napaka, ampak značilnost padavin: nekaj kilometrov vzhodneje ali zahodneje "
-        "pomaknjen pas dežja že spremeni vsoto za desetkrat, zato je ansambel (veliko zagonov z rahlo različnimi "
+        "pomaknjen pas dežja lahko vsoto za kraj večkrat spremeni, zato je ansambel (veliko zagonov z rahlo različnimi "
         "začetnimi pogoji) pošteneje merilo negotovosti kot katera koli posamezna črta.",
     ]
     sec2 = [
