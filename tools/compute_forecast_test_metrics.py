@@ -56,6 +56,16 @@ FORWARD_LABELS = {
     "arso": "ARSO",
     "yr": "Yr (MET Norway)",
 }
+# AI ansambli (ensemble API Open-Meteo) — arhiv napovedi le od septembra 2026,
+# zato ne gredo v glavno primerjavo, ki teče od junija 2024: tam bi bila MAE iz
+# dveh jesenskih mesecev ob MAE iz dveh let, kar je drugo merilo. Merijo se
+# ločeno, na ISTIH dneh kot izbrani referenčni modeli (AI_REFERENCE).
+AI_ENSEMBLE_LABELS = {
+    "google_weathernext2_ensemble_mean": "Google WeatherNext 2",
+    "ecmwf_aifs025_ensemble_mean": "ECMWF AIFS ENS",
+    "ecmwf_aifs_europe_ensemble_mean": "ECMWF AIFS Europe",
+}
+AI_REFERENCE = ["ecmwf_aifs025_single", "ecmwf_ifs025", "best_match"]
 LEADS = list(range(1, 8))
 CLIMO_WINDOW = 7      # +/- dni okoli koledarskega dne za klimatologijo
 MIN_CLIMO_SAMPLES = 15
@@ -305,6 +315,32 @@ def main():
         forward_n[model] = n_total
         print(f"  {FORWARD_LABELS[model]:<16} {n_total} razrešenih napovedi (vseh vodilnih časov skupaj)")
 
+    # ── AI ansambli: na istih dneh kot referenčni modeli ────────────────────
+    # Za vsak vodilni čas vzamemo samo dneve, ko imajo napoved VSI viri v
+    # primerjavi in je meritev veljavna — tako je vsaka vrstica tabele pošten
+    # dvoboj, ne povprečje različnih obdobij.
+    print("\nAI ansambli (na istih dneh kot referenčni modeli):")
+    ai_models = list(AI_ENSEMBLE_LABELS) + AI_REFERENCE
+    ai_results = {}
+    ai_first = None
+    for lead in LEADS:
+        by_model = {m: {r["valid_at"]: r for r in fc_by_key.get((m, lead), [])} for m in ai_models}
+        common = set(obs)
+        for m in ai_models:
+            common &= {d for d, r in by_model[m].items()
+                       if r["tmax_c"] is not None and r["tmin_c"] is not None}
+        if not common:
+            continue
+        ai_first = min(common) if ai_first is None else min(ai_first, min(common))
+        ai_results[lead] = {"n": len(common), "models": {}}
+        for m in ai_models:
+            ai_results[lead]["models"][m] = {
+                "tmax": err_stats([by_model[m][d]["tmax_c"] - obs[d]["tmax"] for d in sorted(common)]),
+                "tmin": err_stats([by_model[m][d]["tmin_c"] - obs[d]["tmin"] for d in sorted(common)]),
+            }
+        print(f"  D+{lead} ({len(common)} dni): " + ", ".join(
+            f"{m.split('_')[0]}={ai_results[lead]['models'][m]['tmax'].get('mae')}" for m in ai_models))
+
     out = {
         "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
         "n_obs_days": len(obs),
@@ -318,6 +354,10 @@ def main():
         "forward_models": FORWARD_LABELS,
         "forward_results": forward_results,
         "forward_n": forward_n,
+        "ai_models": AI_ENSEMBLE_LABELS,
+        "ai_reference": {m: MODEL_LABELS[m] for m in AI_REFERENCE},
+        "ai_results": ai_results,
+        "ai_first_date": ai_first,
     }
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:

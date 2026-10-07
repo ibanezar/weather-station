@@ -14,6 +14,11 @@ Značilke gradi ista funkcija kot učenje (`train_recica_mos.daily_features`).
 Dva ločena prepisa bi se prej ali slej razšla in model bi tiho dobival druge
 vhode, kot jih pozna — zato uvoz in ne kopija.
 
+Ob vsakem dnevu je še »drugo mnenje«: razpon Googlovega AI ansambla WeatherNext 2
+(64 članov, P10/P50/P90, prek Open-Meteo). Na napoved MTR ne vpliva in ni
+značilka — samo prikaz ob njej. Ansambel teče na mreži 0,25° brez popravka za
+dolino, zato je kartica tako tudi označi. Ob nedosegljivem viru ključa ni.
+
 Izhod: napoved-modela.json v korenu (javna, bere jo kartica v app.js in
 tools/verify_forecasts.py, ki napoved vpiše na semafor točnosti).
 
@@ -37,6 +42,57 @@ import train_recica_mos as mos  # noqa: E402
 ROOT = mos.ROOT
 OUT_PATH = os.path.join(ROOT, "napoved-modela.json")
 UA = mos.UA
+
+
+WN2_ENSEMBLE = "google_weathernext2_ensemble"
+ENSEMBLE_API = "https://ensemble-api.open-meteo.com/v1/ensemble"
+
+
+def _quantile(vals, q):
+    """Linearna interpolacija med urejenimi vrednostmi (kot numpy privzeto)."""
+    v = sorted(vals)
+    pos = (len(v) - 1) * q
+    lo = math.floor(pos)
+    hi = min(lo + 1, len(v) - 1)
+    return v[lo] + (v[hi] - v[lo]) * (pos - lo)
+
+
+def fetch_wn2_spread():
+    """{datum: {"tmax": {p10,p50,p90}, "tmin": {…}, "n"}} iz 64 članov
+    WeatherNext 2. Člane bere iz dnevnih ključev temperature_2m_max(_memberNN);
+    dan z manj kot polovico članov se izpusti. Vsaka napaka vrne {} — drugo
+    mnenje ni pogoj za napoved MTR."""
+    q = urllib.parse.urlencode({
+        "latitude": mos.LAT, "longitude": mos.LON, "timezone": mos.TZ,
+        "forecast_days": 4, "daily": "temperature_2m_max,temperature_2m_min",
+        "models": WN2_ENSEMBLE,
+    })
+    try:
+        req = urllib.request.Request(f"{ENSEMBLE_API}?{q}", headers=UA)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            daily = json.load(r).get("daily") or {}
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError,
+            json.JSONDecodeError, OSError) as e:
+        print(f"  ⚠ WeatherNext 2 ansambel ni dosegljiv ({e}) — brez drugega mnenja", file=sys.stderr)
+        return {}
+
+    out = {}
+    for i, day in enumerate(daily.get("time") or []):
+        entry = {}
+        n = 0
+        for var, key in (("temperature_2m_max", "tmax"), ("temperature_2m_min", "tmin")):
+            vals = [daily[k][i] for k in daily
+                    if (k == var or k.startswith(var + "_member"))
+                    and i < len(daily[k]) and daily[k][i] is not None]
+            if len(vals) < 32:
+                break
+            n = len(vals)
+            entry[key] = {p: round(_quantile(vals, q_), 1)
+                          for p, q_ in (("p10", .1), ("p50", .5), ("p90", .9))}
+        else:
+            entry["n"] = n
+            out[day] = entry
+    return out
 
 
 def fetch_live_forecast(model_id=None):
@@ -261,6 +317,11 @@ def main():
         print("✗ Ni bilo mogoče izračunati nobenega dne.", file=sys.stderr)
         return 0
 
+    wn2 = fetch_wn2_spread()
+    for d in days:
+        if d["date"] in wn2:
+            d["wn2"] = wn2[d["date"]]
+
     payload = {
         "generated_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "model_version": model.get("model_version"),
@@ -271,6 +332,8 @@ def main():
                  "popravek za dno doline naučen na meritvah postaje. Količina padavin je "
                  "surova vrednost Open-Meteo — te MTR ne popravlja."),
         "days": days,
+        "wn2_source": ("Google DeepMind WeatherNext 2 (64 članov, prek Open-Meteo, CC BY 4.0) — "
+                       "surova mreža 0,25°, brez popravka za dolino"),
     }
 
     for d in days:

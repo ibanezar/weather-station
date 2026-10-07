@@ -55,7 +55,7 @@ def monthly_normals(hist):
 DOWNLOADS = [
     ("/history.json", "dnevne meritve postaje IREICA1 od 2019 (temperatura, padavine, vlaga, veter, tlak)", "JSON"),
     ("/test-napovedi/podatki.csv", "napovedi šestih modelov za D+1 do D+7 in izmerjene vrednosti", "CSV"),
-    ("/forecast_verification.json", "dnevna primerjava napovedi ARSO, Open-Meteo, MTR in ECMWF AIFS z meritvijo", "JSON"),
+    ("/forecast_verification.json", "dnevna primerjava napovedi ARSO, Open-Meteo, MTR, ECMWF AIFS in Google WeatherNext 2 z meritvijo", "JSON"),
     ("/napoved-modela.json", "trenutna napoved lokalnega modela MTR za Rečico ob Savinji", "JSON"),
 ]
 

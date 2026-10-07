@@ -1265,6 +1265,27 @@ Pravila, ki jih ne obračaj:
   `tools/backfill_aifs_verification.py` napolni tudi za nazaj; isti skript v
   workflowu zapolni dneve, ki bi viru ušli. Ločljivost 0,25° pomeni, da doline
   ne vidi — na semaforju je zato pošteno, a slabo, in tako je tudi povedano.
+- Peti vir je **Google DeepMind WeatherNext 2** (ključ `wn2`, povprečje 64
+  članov `google_weathernext2_ensemble_mean`), dodan 7. 10. 2026. Open-Meteo ga
+  streže na **ensemble API-ju**, ne na `/v1/forecast` (`ENSEMBLE_API` v
+  `verify_forecasts.py`). Arhiv `*_previous_dayN` ima šele od 4. 9. 2026 in je
+  **drseče okno ~92 dni** — kar dnevni tek zamudi za več kot tri mesece, je
+  izgubljeno. Starejši datumi na ensemble API-ju so zlepljeni najsvežejši teki,
+  ne napoved dan prej — **ne polni semaforja z njimi**. Isti skript
+  (`backfill_aifs_verification.py`, `SOURCES`) polni oba AI modela.
+  WeatherNext 3 (5 km, učen na postajah) prek Open-Meteo ni; Googlov dostop
+  (Earth Engine/BigQuery) čaka na odobritev obrazca WeatherNext Data Request.
+  Googlov Maps **Weather API ne uporabljaj**: pogoji (21.1) prepovedujejo rabo v
+  vremenski aplikaciji, napoved pa sme ostati shranjena največ 24 ur.
+- Na `/test-napovedi/` so AI ansambli (WN2, AIFS ENS, AIFS Europe) **ločena
+  tabela na istih dneh** kot referenčni modeli (`AI_ENSEMBLE_LABELS` /
+  `AI_REFERENCE` v `compute_forecast_test_metrics.py`), ne v glavni lestvici —
+  mesec proti dvema letoma ni isto merilo.
+- Na kartici MTR je razpon WN2 (P10–P90 iz članov, `wn2` v
+  `napoved-modela.json`) samo **besedilo** (`renderMtrWn2()`, `#mos-wn2`), ne
+  tretja črta v grafu — barve grafa so validirane. Ni značilka modela: na 31
+  dneh je imela razlika WN2−Open-Meteo nekaj signala za napako Tmax, a za
+  učenje je vzorec premajhen. Ponovno preveri, ko se nabere pol leta.
 - **`--multi-tmax`** (od 6. 10. 2026, v `mos-train.yml`): za tmax so dodane značilke Tmax drugih
   modelov (`MULTI_FEATURES`; vir pri učenju `data/forecast-archive.csv`, pri napovedi živi klic
   `models=<id>` v `predict_recica_mos.fetch_live_multi`). Walk-forward: D+1 1,11→1,04, D+2 1,34→1,24,

@@ -7176,6 +7176,7 @@ function _renderMtrMount(idp){
   drawMtrChart(idp);
   renderMtrDays(idp);
   renderMtrWhy(idp);
+  renderMtrWn2(idp);
   renderMtrKpis(idp);
   drawMtrDuel(idp);
   const dl=document.getElementById(idp+'duel-lbl');
@@ -7421,6 +7422,33 @@ function renderMtrWhy(idp){
   const fz=mtrFrostPct(d1.p_frost);
   if(fz!==null)txt+=' Verjetnost zmrzali (najnižja temperatura ≤ 0 °C): '+fz+' %.';
   el.textContent=txt;
+}
+
+/* Drugo mnenje: razpon Googlovega AI ansambla WeatherNext 2 (P10–P90 iz 64
+   članov, zapiše ga predict_recica_mos.py) ob razponu MTR. Samo besedilo, brez
+   nove serije v grafu — barve grafa so validirane in tretja črta bi jih
+   razbila. Ansambel je surova mreža 0,25°, zato je tako tudi označen; noč
+   na dnu doline praviloma napove pretoplo (glej /test-napovedi/). Element je
+   samo na polni kartici (#mos-wn2), na naslovni strani ga ni in se preskoči. */
+function renderMtrWn2(idp){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(idp+'wn2');if(!el)return;
+  const M=MTR_METRICS[st.metric];
+  const parts=st.days.filter(d=>d.wn2&&d.wn2[M.key]&&Number.isFinite(d[M.key])).map(d=>{
+    const dt=new Date(d.date+'T12:00:00');
+    const name=d.lead===1?'jutri':MTR_SL_DAYS[dt.getDay()];
+    const w=d.wn2[M.key];
+    const sd=d[M.sd];
+    const mtr=Number.isFinite(sd)
+      ?fmt(d[M.key]-MTR_Z80*sd,1)+'–'+fmt(d[M.key]+MTR_Z80*sd,1)
+      :fmt(d[M.key],1);
+    return name+' '+fmt(w.p10,1)+'–'+fmt(w.p90,1)+' °C (MTR '+mtr+' °C)';
+  });
+  el.hidden=!parts.length;
+  el.textContent=parts.length
+    ?'Drugo mnenje — Googlov AI ansambel WeatherNext 2 (64 članov, P10–P90), '+M.lbl.toLowerCase()
+      +' temperatura: '+parts.join('; ')+'. Surova mreža ~28 km brez popravka za dolino.'
+    :'';
 }
 
 /* Tri ploščice s krepkimi številkami: napaka MTR, napaka Open-Meteo in
