@@ -247,6 +247,15 @@ def payload(D):
 
 
 CSS_GP = """<style>
+/* mini-stat, disclaimer in sources so v blog.css manjkali (definirani so bili samo vdelano v starejših člankih) */
+.mini-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin:1.4rem 0 2rem}
+.mini-stat{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.9rem .8rem;text-align:center}
+.ms-label{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace}
+.ms-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.4rem;line-height:1.1;margin:.18rem 0 .1rem;color:var(--cyan)}
+.ms-sub{font-size:.72rem;color:var(--muted)}
+@media(max-width:640px){.mini-stat-grid{grid-template-columns:repeat(2,1fr)}}
+.disclaimer{background:rgba(239,68,68,.06);border:1px solid var(--card-border);border-radius:10px;padding:.8rem 1rem;margin:1.2rem 0;font-size:.85rem;color:var(--muted)}
+.sources{font-size:.82rem;color:var(--muted);border-top:1px solid rgba(255,255,255,.07);margin-top:2.2rem;padding-top:1rem;line-height:1.7}
 .gp-det{margin:.2rem 0 1.4rem;font-size:.88rem}
 .gp-det summary{cursor:pointer;color:var(--muted)}
 .gp-det .table-scroll{margin-top:.6rem}
