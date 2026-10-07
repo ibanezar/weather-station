@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-06",
-  "issued": "06.10.2026 8:00 CEST",
-  "issued_at": "2026-10-06T08:30:27.724251+02:00",
-  "top_station": "Celje",
+  "date": "2026-10-07",
+  "issued": "07.10.2026 8:00 CEST",
+  "issued_at": "2026-10-07T08:30:40.115326+02:00",
+  "top_station": "Bilje",
   "top_mm": 0,
-  "n_stations": 18,
+  "n_stations": 20,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-10-06.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-10-06-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-10-07.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-10-07-story.jpg"
 }
