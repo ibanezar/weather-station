@@ -27,6 +27,18 @@ ROOT = seo.ROOT
 TODAY = seo.TODAY
 LAT, LON = 46.325779, 14.921137  # IREICA1 (isto kot inject_forecast.py)
 TEST_JSON = os.path.join(ROOT, "data", "test-napovedi.json")
+PROXY = "https://weatherireica1.filip-eremita.workers.dev"  # isti worker kot povsod drugje
+
+
+def slo_poly_js():
+    """Obris Slovenije vzamemo iz app.js (en vir; JS in Python ne moreta deliti kode, a
+    obris je podatek). Če ga ni več, generator pade — raje to kot karta brez obrisa."""
+    import re
+    m = re.search(r"const SLO_POLY=(\[\[.*?\]\]);", open(os.path.join(ROOT, "app.js"), encoding="utf-8").read(), re.S)
+    if not m:
+        sys.exit("SLO_POLY ni v app.js — karta modelov potrebuje obris Slovenije")
+    return m.group(1)
+
 URL = "/primerjava-modelov/"
 
 # Modeli, ki jih stran kaže, in njihov razločljiv par v arhivu /test-napovedi/
@@ -97,6 +109,18 @@ CSS = """<style>
 .pm-note{font-size:.8rem;color:var(--muted);margin:.2rem 0 1rem}
 .pm-verdict{margin:1rem 0;padding:.8rem 1rem;border-left:3px solid var(--cyan,#38bdf8);
   background:rgba(56,189,248,.07);border-radius:4px}
+.pm-maps{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+@media (max-width:640px){.pm-maps{grid-template-columns:1fr}}
+.pm-map{position:relative}
+.pm-map canvas{width:100%;height:auto;display:block;border-radius:6px;background:rgba(255,255,255,.04);touch-action:pan-y}
+.pm-map-t{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;margin:0 0 .25rem}
+.pm-ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:.6rem 0}
+.pm-ctrl input[type=range]{flex:1;min-width:140px}
+.pm-ctrl button{font:inherit;font-size:.85rem;padding:.3rem .8rem;border-radius:999px;cursor:pointer;
+  background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.18)}
+.pm-scale{display:flex;height:10px;border-radius:3px;overflow:hidden;margin:.2rem 0}
+.pm-scale i{flex:1}
+.pm-scale-l{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted)}
 </style>"""
 
 JS = r"""<script>
@@ -331,6 +355,153 @@ JS = r"""<script>
 </script>""".replace("%LAT%", str(LAT)).replace("%LON%", str(LON))
 
 
+MAP_JS = r"""<script>
+(function(){
+  var root=document.getElementById("pm-maps"); if(!root) return;
+  var SLO=%SLO%;
+  var PROXY="%PROXY%", TZ="Europe/Ljubljana";
+  var ORDER=["icon_d2","icon_eu","ecmwf_ifs025","arome"];
+  var CITIES=[["Ljubljana",14.506,46.056],["Maribor",15.646,46.554],["Celje",15.26,46.231],["Koper",13.73,45.548],
+              ["Murska Sobota",16.166,46.658],["Rečica",14.921,46.326]];
+  // Lestvice: ColorBrewer YlGnBu (padavine), RdYlBu obrnjen (temperatura), YlOrRd (sunki).
+  var PAL={
+    p:{lbl:"Skupne padavine od zdaj",unit:"mm",d:1,bins:[0.2,1,2,5,10,20,40,80,150],
+       cols:["#ffffcc","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58","#4a1486"]},
+    g:{lbl:"Najvišji sunek",unit:"km/h",d:0,bins:[20,30,40,50,60,80,100,120],
+       cols:["#ffffb2","#fed976","#feb24c","#fd8d3c","#fc4e2a","#e31a1c","#bd0026","#800026","#4d004b"]},
+    t:{lbl:"Temperatura",unit:"°C",d:1,stops:["#4575b4","#91bfdb","#e0f3f8","#ffffbf","#fee090","#fc8d59","#d73027"]}
+  };
+  var S={v:"p",k:0,data:null,play:null,cv:{}};
+  function f(x,d){ return x==null||isNaN(x)?"—":x.toFixed(d).replace(".",","); }
+  function hex(c){ return [parseInt(c.substr(1,2),16),parseInt(c.substr(3,2),16),parseInt(c.substr(5,2),16)]; }
+  function lerp(a,b,u){ return [a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,a[2]+(b[2]-a[2])*u]; }
+  function colorFor(v,range){
+    var P=PAL[S.v];
+    if(S.v==="t"){
+      var u=Math.max(0,Math.min(1,(v-range[0])/(range[1]-range[0])))*(P.stops.length-1), i=Math.min(P.stops.length-2,Math.floor(u));
+      return lerp(hex(P.stops[i]),hex(P.stops[i+1]),u-i);
+    }
+    var n=0; while(n<P.bins.length&&v>=P.bins[n]) n++;
+    if(S.v==="p") return n===0?null:hex(P.cols[n-1]);   // pod 0,2 mm = suho, brez barve
+    return hex(P.cols[n]);
+  }
+  function tempRange(){
+    var lo=1e9,hi=-1e9;
+    ORDER.forEach(function(id){ var m=S.data.models[id]; if(!m) return; m.t[S.k].forEach(function(x){ if(x!=null){ lo=Math.min(lo,x); hi=Math.max(hi,x);} }); });
+    lo=Math.floor(lo/2)*2; hi=Math.ceil(hi/2)*2; if(hi-lo<6) hi=lo+6; return [lo,hi];
+  }
+  function inSlo(lon,lat){
+    var ins=false; for(var i=0,j=SLO.length-1;i<SLO.length;j=i++){
+      var xi=SLO[i][0],yi=SLO[i][1],xj=SLO[j][0],yj=SLO[j][1];
+      if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi)) ins=!ins; }
+    return ins;
+  }
+  function geo(){
+    var D=S.data, W=D.nx, H=D.ny, lon1=D.lon0+(W-1)*D.d, lat1=D.lat0+(H-1)*D.d;
+    var cs=Math.cos(46.2*Math.PI/180), wpx=360, hpx=Math.round(wpx*(lat1-D.lat0)/((lon1-D.lon0)*cs));
+    return {W:W,H:H,lon0:D.lon0,lat0:D.lat0,lon1:lon1,lat1:lat1,w:wpx,h:hpx};
+  }
+  function sample(arr,G,lon,lat){      // bilinearno; null, če manjka kateri koli kot
+    var D=S.data, fx=(lon-D.lon0)/D.d, fy=(lat-D.lat0)/D.d;
+    var x0=Math.max(0,Math.min(G.W-2,Math.floor(fx))), y0=Math.max(0,Math.min(G.H-2,Math.floor(fy)));
+    var u=fx-x0, w=fy-y0, a=arr[y0*G.W+x0], b=arr[y0*G.W+x0+1], c=arr[(y0+1)*G.W+x0], d=arr[(y0+1)*G.W+x0+1];
+    if(a==null||b==null||c==null||d==null) return null;
+    return (a*(1-u)+b*u)*(1-w)+(c*(1-u)+d*u)*w;
+  }
+  function draw(id){
+    var m=S.data.models[id], cv=S.cv[id]; if(!cv) return;
+    var G=geo(), dpr=Math.min(2,window.devicePixelRatio||1);
+    cv.width=G.w*dpr; cv.height=G.h*dpr;
+    var ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+    var arr=m[S.v][S.k], rng=S.v==="t"?tempRange():null;
+    var img=ctx.createImageData(G.w*dpr,G.h*dpr);
+    for(var y=0;y<G.h*dpr;y++) for(var x=0;x<G.w*dpr;x++){
+      var lon=G.lon0+(x/(G.w*dpr-1))*(G.lon1-G.lon0), lat=G.lat1-(y/(G.h*dpr-1))*(G.lat1-G.lat0);
+      var v=sample(arr,G,lon,lat), i=(y*G.w*dpr+x)*4;
+      if(v==null) continue;
+      var c=colorFor(v,rng); if(!c) continue;
+      var out=!inSlo(lon,lat);
+      img.data[i]=c[0]; img.data[i+1]=c[1]; img.data[i+2]=c[2]; img.data[i+3]=out?110:235;
+    }
+    ctx.putImageData(img,0,0);
+    function px(lon,lat){ return [(lon-G.lon0)/(G.lon1-G.lon0)*G.w,(G.lat1-lat)/(G.lat1-G.lat0)*G.h]; }
+    ctx.beginPath(); SLO.forEach(function(p,i){ var q=px(p[0],p[1]); i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); });
+    ctx.closePath(); ctx.strokeStyle="rgba(15,23,42,.7)"; ctx.lineWidth=2.6; ctx.stroke();
+    ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.lineWidth=1; ctx.stroke();
+    ctx.font="10px sans-serif"; ctx.textBaseline="middle";
+    CITIES.forEach(function(c){ var q=px(c[1],c[2]); ctx.beginPath(); ctx.arc(q[0],q[1],c[0]==="Rečica"?3.4:2,0,6.3);
+      ctx.fillStyle=c[0]==="Rečica"?"#fff":"rgba(255,255,255,.8)"; ctx.fill(); ctx.strokeStyle="#0f172a"; ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle="#fff"; ctx.shadowColor="#000"; ctx.shadowBlur=3; ctx.fillText(c[0],q[0]+5,q[1]); ctx.shadowBlur=0; });
+    if(cv._cur){ var q=px(cv._cur[0],cv._cur[1]); ctx.beginPath(); ctx.arc(q[0],q[1],5,0,6.3); ctx.strokeStyle="#fff"; ctx.lineWidth=1.5; ctx.stroke(); }
+    var nn=arr.filter(function(x){ return x!=null; }).length;
+    cv.setAttribute("aria-label",m.label+": "+PAL[S.v].lbl+", "+(nn?"podatki na voljo":"ni podatkov za to uro"));
+    cv._nodata=!nn;
+    if(!nn){ ctx.fillStyle="rgba(15,23,42,.7)"; ctx.fillRect(0,0,G.w,G.h); ctx.fillStyle="#fff"; ctx.font="12px sans-serif"; ctx.textAlign="center";
+      ctx.fillText("ni podatkov za to uro (model sega krajše)",G.w/2,G.h/2); ctx.textAlign="start"; }
+  }
+  function scaleHtml(){
+    var P=PAL[S.v], cols, labs;
+    if(S.v==="t"){ var r=tempRange(); cols=P.stops; labs=[r[0],r[1]].map(function(x){ return x+" °C"; }); }
+    else { cols=P.cols; labs=[0,P.bins[P.bins.length-1]+"+"]; }
+    return '<div class="pm-scale">'+cols.map(function(c){ return '<i style="background:'+c+'"></i>'; }).join("")+'</div>'+
+      '<div class="pm-scale-l"><span>'+(S.v==="t"?labs[0]:(S.v==="p"?"0,2":"0"))+'</span><span>'+PAL[S.v].lbl+' ('+P.unit+')</span><span>'+labs[1]+'</span></div>';
+  }
+  function when(k){ var t=S.data.t0+(k+1)*S.data.stepH*3600000;
+    return new Date(t).toLocaleString("sl-SI",{timeZone:TZ,weekday:"short",hour:"2-digit",minute:"2-digit"}); }
+  function readout(lon,lat){
+    var G=geo(), parts=ORDER.map(function(id){ var m=S.data.models[id]; if(!m) return null;
+      var v=sample(m[S.v][S.k],G,lon,lat); return m.label+' <b>'+(v==null?"—":f(v,PAL[S.v].d)+" "+PAL[S.v].unit)+'</b>'; }).filter(Boolean);
+    document.getElementById("pm-map-read").innerHTML=lat.toFixed(2).replace(".",",")+" °N, "+lon.toFixed(2).replace(".",",")+" °E · "+parts.join(" · ");
+  }
+  function drawAll(){
+    ORDER.forEach(draw);
+    document.getElementById("pm-map-when").textContent=(S.v==="p"?"od zdaj do ":"")+when(S.k);
+    document.getElementById("pm-map-scale").innerHTML=scaleHtml();
+  }
+  function build(){
+    var D=S.data;
+    var run=D.models.arome&&D.models.arome.run?" Tek AROME: "+new Date(D.models.arome.run).toLocaleString("sl-SI",{timeZone:TZ,hour:"2-digit",minute:"2-digit"})+".":"";
+    var fail=(D.failed&&D.failed.length)?" Ni dosegljivo: "+D.failed.join(", ")+".":"";
+    root.innerHTML=
+      '<div class="pm-tabs" role="group" aria-label="Spremenljivka na karti">'+
+        ["p","t","g"].map(function(k){ return '<button type="button" data-mv="'+k+'" aria-pressed="'+(S.v===k)+'">'+PAL[k].lbl+'</button>'; }).join("")+'</div>'+
+      '<div class="pm-ctrl"><button type="button" id="pm-play" aria-label="Predvajaj">▶</button>'+
+        '<input type="range" id="pm-slider" min="0" max="'+(D.steps-1)+'" value="'+S.k+'" aria-label="Ura napovedi">'+
+        '<strong id="pm-map-when"></strong></div>'+
+      '<div class="pm-maps">'+ORDER.filter(function(id){ return D.models[id]; }).map(function(id){
+        return '<div class="pm-map"><p class="pm-map-t">'+D.models[id].label+'</p><canvas id="pm-cv-'+id+'" role="img"></canvas></div>'; }).join("")+'</div>'+
+      '<div id="pm-map-scale"></div>'+
+      '<div class="pm-read" id="pm-map-read">Dotakni se karte: vrednosti vseh modelov na isti točki.</div>'+
+      '<p class="pm-note">Mreža 0,1° (okoli 8 × 11 km), korak 3 ure. Prikaz je pregled vzorca, ne zamenjava za modele v polni ločljivosti (ICON-D2 2 km, AROME 2,5 km).'+run+fail+' Nastalo '+
+      new Date(D.generated).toLocaleString("sl-SI",{timeZone:TZ,hour:"2-digit",minute:"2-digit"})+'.</p>';
+    ORDER.forEach(function(id){
+      var cv=document.getElementById("pm-cv-"+id); if(!cv) return; S.cv[id]=cv;
+      function mv(e){
+        var r=cv.getBoundingClientRect(), G=geo(),
+            lon=G.lon0+(e.clientX-r.left)/r.width*(G.lon1-G.lon0), lat=G.lat1-(e.clientY-r.top)/r.height*(G.lat1-G.lat0);
+        ORDER.forEach(function(o){ if(S.cv[o]) S.cv[o]._cur=[lon,lat]; }); drawAll(); readout(lon,lat);
+      }
+      cv.addEventListener("pointermove",mv); cv.addEventListener("pointerdown",mv);
+    });
+    Array.prototype.forEach.call(root.querySelectorAll("button[data-mv]"),function(b){
+      b.addEventListener("click",function(){ S.v=b.dataset.mv; build(); }); });
+    var sl=document.getElementById("pm-slider");
+    sl.addEventListener("input",function(){ S.k=+sl.value; drawAll(); });
+    document.getElementById("pm-play").addEventListener("click",function(){
+      if(S.play){ clearInterval(S.play); S.play=null; this.textContent="▶"; return; }
+      var btn=this; btn.textContent="❚❚";
+      S.play=setInterval(function(){ S.k=(S.k+1)%S.data.steps; sl.value=S.k; drawAll(); },700);
+    });
+    drawAll();
+  }
+  root.textContent="Nalagam karte modelov …";
+  fetch(PROXY+"/modeli-karta.json").then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(d){ if(!d.models||!Object.keys(d.models).length) throw new Error("prazno"); S.data=d; build(); })
+    .catch(function(){ root.textContent="Karte modelov trenutno niso dosegljive. Primerjava za Rečico zgoraj deluje neodvisno."; });
+})();
+</script>""".replace("%SLO%", slo_poly_js()).replace("%PROXY%", PROXY)
+
+
 def build_body():
     faq = ("  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in FAQ) + "\n  </div>")
@@ -342,6 +513,10 @@ def build_body():
   kjer se razhajajo, je negotova — in prav takrat se splača pogledati, kateri model je doslej v naši dolini
   držal bolje (spodaj). Gre za neposredne izhode modelov, ne za uradno napoved.</p>
   <div id="pm-app" aria-live="polite">Nalagam napovedi modelov …</div>
+  <h2 id="karte">Karte modelov za Slovenijo</h2>
+  <p class="archive-intro">Isti trenutek na štirih kartah hkrati: povleci drsnik, preklopi spremenljivko ali se dotakni karte
+  in preberi vrednost vseh modelov na isti točki. Padavine so skupne od zdaj do izbrane ure.</p>
+  <div id="pm-maps" aria-live="polite">Nalagam karte modelov …</div>
 {verified_table()}
   <h2>Modeli v primerjavi</h2>
   <div class="table-scroll" tabindex="0"><table class="stats">
@@ -369,7 +544,7 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("Primerjava modelov", None)]),
         seo.faq_schema(FAQ),
     ])
-    html_out = seo.page_shell(title, desc, URL, schema + "\n" + CSS, build_body() + "\n" + JS)
+    html_out = seo.page_shell(title, desc, URL, schema + "\n" + CSS, build_body() + "\n" + JS + "\n" + MAP_JS)
     seo.write_page("primerjava-modelov/index.html", html_out, force=True)
     print("  → primerjava-modelov/index.html")
 
