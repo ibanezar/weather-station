@@ -283,16 +283,16 @@ def build_article(D):
     ngrp = D["n_members"]
 
     lead = (f"Po zadnjem pravem dežju {short(dry['last_wet'])} je do {short(dry['archive_end'])} na naši postaji padlo skupaj le "
-            f"{num(dry['sum'])} mm. Zdaj se Rečici ob Savinji {dgen(d1)} in {dgen(d2)} obeta konec suše. Koliko dežja bo "
-            f"padlo, se modeli ne strinjajo: posamezne napovedi za {short(d1)}–{short(d3)} so med {num(lo_det)} in "
-            f"{num(hi_det)} mm, ARSO napoveduje {num(arso)} mm, mediana ansambla s {ev['n']} člani pa je {num(p50)} mm "
-            f"(deset odstotkov članov napoveduje manj kot {num(ev['p10'])} mm, deset odstotkov več kot {num(ev['p90'])} mm). "
-            f"Spodaj so grafi, po katerih lahko potujete sami: kdaj bo padalo, kako verjetne so posamezne količine "
-            f"in kako se napoved kaže ob meritvah naše postaje.")
+            f"{num(dry['sum'])} mm padavin. Zdaj se Rečici ob Savinji {dgen(d1)} in {dgen(d2)} obeta konec suše. "
+            f"Koliko dežja bo padlo, pa modeli ne vedo povsem enako: posamezne napovedi za obdobje {short(d1)}–{short(d3)} "
+            f"segajo od {num(lo_det)} do {num(hi_det)} mm. ARSO napoveduje {num(arso)} mm, mediana ansambla s {ev['n']} člani "
+            f"pa je {num(p50)} mm. Deset odstotkov članov napoveduje manj kot {num(ev['p10'])} mm, deset odstotkov pa več kot "
+            f"{num(ev['p90'])} mm. Spodaj so grafi, po katerih lahko pogledate sami: kdaj bo padalo, kako verjetne so posamezne "
+            f"količine in kako se napoved ujema z meritvami naše postaje.")
 
     d3_s = short(d3).rstrip(".")
-    fig1 = fig("dz-fig1", "", "Izberite dan s klikom ali tipkama ← →. Pike so vrednosti posameznih virov, moder pas je "
-               "razpon ansambla od 10. do 90. percentila, črta v njem mediana. Podatki so za točko postaje IREICA1.", "day")
+    fig1 = fig("dz-fig1", "", "Izberite dan s klikom ali tipkama ← →. Pike predstavljajo vrednosti posameznih virov, moder pas "
+               "razpon ansambla od 10. do 90. percentila, črta v njem pa mediano. Podatki veljajo za točko postaje IREICA1.", "day")
     fig2_ctl = ('<div class="dz-ctl" role="group" aria-label="Prikaz"><button type="button" data-m="rate" aria-pressed="true">'
                 'Dež na uro</button><button type="button" data-m="cum" aria-pressed="false">Seštevek od jutra danes</button></div>'
                 '<div class="dz-ctl" role="group" aria-label="Primerjava z modelom" id="dz-models"></div>')
@@ -302,19 +302,20 @@ def build_article(D):
     fig3_ctl = ('<div class="dz-ctl dz-slide"><label for="dz-thr">Prag: vsaj <b id="dz-thr-v">20</b> mm</label>'
                 '<input type="range" id="dz-thr" min="0" max="80" step="1" value="20" '
                 'aria-describedby="dz-thr-out"></div>')
-    fig3 = fig("dz-fig3", fig3_ctl, f"Vsaka pika je en član ansambla (skupaj {ev['n']}), seštevek od "
-               f"{short(d1)} do konca {d3_s}. Drsnik premika prag.", "thr")
-    fig4 = fig("dz-fig4", "", "Stolpci so oktobrske vsote padavin postaje IREICA1; prekinjena črta je povprečje "
-               f"({num(H['oct_mean'])} mm). Moder stolpec je mediana napovedanega dežja {short(d1)}–{short(d3)}, temnejši nastavek do 90. percentila.", "oct")
+    fig3 = fig("dz-fig3", fig3_ctl, f"Stolpci kažejo, koliko članov ansambla (skupaj {ev['n']}) napoveduje posamezno količino; "
+               f"seštevek velja za obdobje od {short(d1)} do konca {d3_s}. Drsnik premika prag.", "thr")
+    fig4 = fig("dz-fig4", "", "Stolpci predstavljajo oktobrske vsote padavin na postaji IREICA1, prekinjena črta pa povprečje "
+               f"({num(H['oct_mean'])} mm). Moder stolpec je mediana napovedanega dežja za obdobje {short(d1)}–{short(d3)}, "
+               "temnejši nastavek pa sega do 90. percentila.", "oct")
     fig5_ctl = ('<div class="dz-ctl dz-slide"><label for="dz-cmp">Količina v treh dneh: <b id="dz-cmp-v">'
                 f'{int(round(p50))}</b> mm</label><input type="range" id="dz-cmp" min="0" max="120" step="1" '
                 f'value="{int(round(p50))}"></div>')
     fig5 = fig("dz-fig5", fig5_ctl, "Krivulja kaže, v kolikšnem deležu trodnevnih obdobij je na postaji padlo vsaj toliko dežja. "
-               "Navpične črte so napovedani P10, mediana in P90.", "cmp")
+               "Navpične črte predstavljajo napovedani P10, mediano in P90.", "cmp")
 
     pop_txt = ""
     if D["pop"].get(d1) is not None and D["pop"].get(d2) is not None:
-        pop_txt = (f" Naš model MTR količine dežja ne napoveduje, verjetnost padavin pa ocenjuje visoko: "
+        pop_txt = (f"Naš model MTR količine dežja ne napoveduje, verjetnost padavin pa ocenjuje kot visoko: "
                    f"{dgen(d1)} {D['pop'][d1]} %, {dgen(d2)} {D['pop'][d2]} %.")
 
     sec1 = [
@@ -322,19 +323,21 @@ def build_article(D):
         f"Največ dežja se obeta {dgen(wet_d)}, {short(wet_d)}: mediana ansambla je {num(D['ens_days']['p50'][wet_i])} mm, "
         f"posamezni modeli pa segajo od {num(min(v[wet_i] for k, v in sd.items() if k != 'ARSO' and v[wet_i] is not None))} do "
         f"{num(max(v[wet_i] for k, v in sd.items() if k != 'ARSO' and v[wet_i] is not None))} mm. "
-        f"ARSO (točka {D['arso_loc'] or 'v dolini'}) napoveduje {num(sd['ARSO'][ix[d1]])} mm {dgen(d1)} in "
-        f"{num(sd['ARSO'][ix[d2]])} mm {dgen(d2)}.{pop_txt}",
-        "Razlike med modeli niso napaka, ampak značilnost padavin: nekaj kilometrov vzhodneje ali zahodneje "
-        "pomaknjen pas dežja lahko vsoto za kraj večkrat spremeni, zato je ansambel (veliko zagonov z rahlo različnimi "
-        "začetnimi pogoji) pošteneje merilo negotovosti kot katera koli posamezna črta.",
+        f"ARSO za točko {D['arso_loc'] or 'v dolini'} napoveduje {num(sd['ARSO'][ix[d1]])} mm {dgen(d1)} in "
+        f"{num(sd['ARSO'][ix[d2]])} mm {dgen(d2)}.",
+        pop_txt,
+        "Razlike med modeli niso napaka, ampak značilnost napovedovanja padavin. Če se pas dežja pomakne le nekaj kilometrov "
+        "vzhodneje ali zahodneje, se lahko skupna količina za določen kraj večkrat spremeni. Zato je ansambel – torej veliko "
+        "zagonov z nekoliko različnimi začetnimi pogoji – bolj pošteno merilo negotovosti kot katera koli posamezna napoved.",
     ]
+    sec1 = [x for x in sec1 if x]
     sec2 = [
         fig2,
-        "Prvi graf kaže, kdaj naj bi padalo: pas je razpon ansambla, črta mediana. Preklopite na seštevek, "
-        "da vidite, koliko dežja se nabere do posamezne ure, in dodajte posamezen model — kje se z ansamblom ujema in kje "
-        "pada iz pasu.",
-        "Ker mediana ansambla ni nujno enaka nobenemu članu, črta v pasu ne opisuje ene mogoče različice vremena, "
-        "ampak sredino mnogih; posamezen model je lahko bližje resnici, kot je mediana, a vnaprej ne vemo, kateri.",
+        "Prvi graf kaže, kdaj naj bi padalo: pas predstavlja razpon ansambla, črta pa mediano. Preklopite na seštevek, "
+        "da vidite, koliko dežja se nabere do posamezne ure, in dodajte posamezen model – tako lahko vidite, kje se z "
+        "ansamblom ujema in kje izstopa iz njegovega razpona.",
+        "Ker mediana ansambla ni nujno enaka nobenemu posameznemu članu, črta v pasu ne predstavlja ene od možnih različic "
+        "vremena, ampak sredino številnih. Posamezen model je lahko bližje resnici kot mediana, vendar vnaprej ne vemo, kateri.",
     ]
     g = ev["groups"]
     grp_rows = "".join(
@@ -347,13 +350,13 @@ def build_article(D):
            + grp_rows + '</tbody></table></div>')
     sec3 = [
         fig3,
-        f"Mediana vsote za {short(d1)}–{short(d3)} je v ansamblu {num(p50)} mm, a z veliko razpršenostjo: "
+        f"Mediana vsote za obdobje {short(d1)}–{short(d3)} je v ansamblu {num(p50)} mm, vendar je razpršenost velika: "
         f"verjetnost za vsaj 10 mm je {pr['10']} %, za vsaj 20 mm {pr['20']} %, za vsaj 30 mm {pr['30']} % in za vsaj 50 mm "
         f"{pr['50']} %. Najbolj moker član je napovedal {num(ev['max'])} mm, najbolj suh {num(ev['min'])} mm.",
         "Tri družine ansamblov se ne strinjajo povsem:",
         tbl,
-        "Pri tolmačenju verjetnosti pazite: to je delež članov ansambla, ki so dosegli prag, ne izmerjena pogostost. "
-        "Ansambli so pogosto preozko razpršeni, zato dejansko negotovost rahlo podcenjujejo.",
+        "Pri tolmačenju verjetnosti pazite: to je delež članov ansambla, ki so dosegli določen prag, ne izmerjena pogostost dogodka. "
+        "Ansambli so pogosto preozko razpršeni, zato lahko dejansko negotovost nekoliko podcenjujejo.",
     ]
     top_rows = "".join(f"<tr><td>{short(k)}{k[:4] if k[:4] != str(YEAR) else ''}</td><td>{num(v)}</td></tr>"
                        for v, k in H["top"])
@@ -365,47 +368,50 @@ def build_article(D):
     md_v, md_k = H["max_day"]
     sec4 = [
         fig4,
-        f"Postaja IREICA1 je v oktobrih {min(H['octs'])}–{max(H['octs'])} izmerila povprečno {num(H['oct_mean'])} mm "
-        f"(od {num(min(H['octs'].values()))} mm do {num(max(H['octs'].values()))} mm). Mediana napovedanega dežja "
-        f"{short(d1)}–{short(d3)} je torej okoli {pct_oct} % povprečnega oktobra, pri 90. percentilu "
+        f"Postaja IREICA1 je v oktobrih {min(H['octs'])}–{max(H['octs'])} izmerila povprečno {num(H['oct_mean'])} mm padavin, "
+        f"razpon pa je bil od {num(min(H['octs'].values()))} do {num(max(H['octs'].values()))} mm. Mediana napovedanega dežja "
+        f"za obdobje {short(d1)}–{short(d3)} je torej okoli {pct_oct} % povprečne oktobrske količine, pri 90. percentilu "
         f"({num(ev['p90'])} mm) pa približno {round(100 * ev['p90'] / H['oct_mean'])} %.",
         fig5,
         f"Na drugem grafu je napoved postavljena ob vsa trodnevna obdobja v arhivu postaje "
         f"({H['n_win']} obdobij od {fdate(H['first'])}). Mediana napovedi ({num(p50)} mm) je bila presežena "
-        f"v približno {num(rk)} % obdobij. Dež je torej bolj izrazit od običajnega, a ni izjemen.",
-        f"Za občutek mere: 10. septembra letos je v enem dnevu padlo {num(H['sep10'])} mm — celoten september "
-        f"{num(H['sep'])} mm — absolutni dnevni rekord arhiva ({num(md_v)} mm) pa je z "
-        f"{datetime.date.fromisoformat(md_k).day}. {datetime.date.fromisoformat(md_k).month}. {md_k[:4]}. "
-        f"Najmočnejših osem trodnevnih obdobij v arhivu:",
+        f"v približno {num(rk)} % obdobij.",
+        "Dež bo torej po tej primerjavi bolj izrazit od običajnega, vendar ne izjemen.",
+        f"Za občutek: 10. septembra letos je v enem dnevu padlo {num(H['sep10'])} mm, ves september pa {num(H['sep'])} mm. "
+        f"Absolutni dnevni rekord arhiva znaša {num(md_v)} mm in je bil izmerjen "
+        f"{datetime.date.fromisoformat(md_k).day}. {datetime.date.fromisoformat(md_k).month}. {md_k[:4]}.",
+        "Najmočnejših osem trodnevnih obdobij v arhivu:",
         tbl2,
     ]
     sec5 = [
-        f"Po tako suhem obdobju bodo tla prvi dež verjetno deloma vpila, zato odtok ne bo tolik kot po mokrem septembru. "
-        f"Pri količinah okoli 30 mm in več v kratkem času pa postane odtok bolj verjeten; tekoče stanje Savinje "
-        f"spremljajte na <a href=\"/vodostaj-savinje/\">strani Vodostaj</a>, morebitna uradna opozorila pa na "
-        f"<a href=\"/nevihte/\">strani Nevihte</a> in pri ARSO.",
-        "Za gobarje: po dolgem suhem obdobju dež sam gob ne naredi, mikorizne vrste pa potrebujejo po dežju več časa "
-        "(naš gobarski model računa zamik 8–16 dni), zato morebitni učinek ne bo viden prej kot v drugi polovici oktobra. "
+        "Po tako suhem obdobju bodo tla prvi dež verjetno deloma vpila, zato odtok ne bo tolikšen kot po mokrem septembru. "
+        "Pri količinah okoli 30 mm in več v kratkem času pa postane odtok bolj verjeten.",
+        "Tekoče stanje Savinje spremljajte na <a href=\"/vodostaj-savinje/\">strani Vodostaj</a>, morebitna uradna opozorila "
+        "pa na <a href=\"/nevihte/\">strani Nevihte</a> in pri ARSO.",
+        "Za gobarje: po dolgem suhem obdobju dež sam po sebi ne bo povzročil rasti gob. Mikorizne vrste potrebujejo po dežju "
+        "več časa – naš gobarski model računa zamik 8–16 dni –, zato morebitni učinek ne bo viden prej kot v drugi polovici oktobra.",
         "Dnevni indeks je na <a href=\"/gobarska-napoved/\">gobarski napovedi</a>.",
     ]
+    hh, mm_ = D["generated"][11:].split(":")
     sec6 = [
-        f"Napoved je posnetek ob {D['generated'][11:]} ({short(D['today'])}); modeli se osvežujejo večkrat na dan in številke "
-        f"se bodo do dežja še spremenile. Za ukrepanje veljata ARSO in uradna opozorila.",
-        "Deterministične napovedi so urne padavine Open-Meteo (ECMWF IFS, ECMWF AIFS, ICON-D2, ICON-EU, GFS, ARPEGE) za "
-        "točko postaje; ICON-D2 in ARPEGE sežeta le nekaj dni naprej, zato imata za kasnejše dni vrzeli. Ansamblu "
-        "(ECMWF ENS, ICON-EU-EPS, GEFS) štejem vsakega člana enako, ne glede na ločljivost. Mreža ni velika "
-        "(nekaj km do 25 km), zato dolina in pobočja nista razrešena, količina padavin pa ni popravljena z MTR "
-        "(MTR popravlja le temperature).",
-        "ARSO napoved je za najbližjo točko (Ljubno ob Savinji) in ni primerljiva ena proti ena z napovedjo za našo postajo. "
-        f"Primerjave s preteklostjo so iz zunanjih meritev dežemera IREICA1 ({H['n_days']} dni, od {fdate(H['first'])} do {fdate(H['last'])}); "
-        "arhiv ima nekaj lukenj, zato so le trodnevna obdobja z vsemi tremi dnevi vključena v krivuljo. "
+        f"Napoved je posnetek stanja ob {int(hh)}.{mm_} ({short(D['today'])}). Modeli se osvežujejo večkrat na dan, zato se bodo "
+        f"številke do prihoda dežja še spremenile. Za ukrepanje veljata ARSO in uradna opozorila.",
+        "Deterministične napovedi so urne količine padavin Open-Meteo (ECMWF IFS, ECMWF AIFS, ICON-D2, ICON-EU, GFS, ARPEGE) "
+        "za točko postaje. ICON-D2 in ARPEGE segata le nekaj dni naprej, zato imata za kasnejše dni vrzeli.",
+        "V ansamblu (ECMWF ENS, ICON-EU-EPS, GEFS) štejem vsakega člana enako, ne glede na ločljivost. Mreža ni zelo natančna "
+        "(od nekaj kilometrov do 25 km), zato dolina in pobočja niso razločeni. Količina padavin tudi ni popravljena z MTR – "
+        "MTR popravlja le temperature.",
+        "ARSO napoved je za najbližjo točko, Ljubno ob Savinji, zato ni neposredno primerljiva z napovedjo za našo postajo.",
+        f"Primerjave s preteklostjo temeljijo na meritvah zunanjega dežemera IREICA1 ({H['n_days']} dni, od {fdate(H['first'])} do "
+        f"{fdate(H['last'])}). Arhiv ima nekaj lukenj, zato so v krivuljo vključena le trodnevna obdobja, pri katerih so na voljo "
+        "vsi trije dnevi.",
         "Drseča trodnevna obdobja se prekrivajo, zato niso neodvisni dogodki.",
     ]
     data_json = json.dumps(D, ensure_ascii=False, separators=(",", ":"))
     sec6.append(f'<div><script type="application/json" id="dez-data">{data_json}</script>{CSS}{JS}</div>')
 
     return {
-        "title": "Dež 8. in 9. oktobra: koliko ga bo padlo v Rečici",
+        "title": "Dež 8.–10. oktobra: koliko ga bo padlo v Rečici?",
         "meta_description": (f"Po {dry['days']} suhih dneh dež: mediana ansambla {num(p50)} mm do {short(d3)} "
                              f"(P10–P90 {num(ev['p10'])}–{num(ev['p90'])} mm), ARSO {num(arso)} mm. Interaktivni grafi in primerjava s postajo."),
         "tags": ["napoved", "padavine", "oktober", "2026", "analiza"],
@@ -660,7 +666,7 @@ def main():
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     slug, html, entry, og_meta = ftp.build_html(
         article, YEAR, 10, now_utc, slug=SLUG, back=("/blog/", "← Vsi članki"),
-        og_title="Dež 8. in 9. oktobra", meta_note="napoved",
+        og_title="Dež 8.–10. oktobra", meta_note="napoved",
         nav_label="O postaji", nav_href="/o-postaji.html")
     with open(os.path.join(ROOT, "blog", f"{slug}.html"), "w", encoding="utf-8") as fh:
         fh.write(html)
