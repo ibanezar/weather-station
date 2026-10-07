@@ -101,6 +101,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </table></div>
   <h2>ARSO, Yr (MET Norway) — sprotno beleženi viri</h2>
   <p class="archive-intro">Brez arhiva za nazaj, zato krajša zgodovina: ARSO: 280 razrešenih napovedi; Yr (MET Norway): 280 razrešenih napovedi.</p>
+  <h2 id="ai-ansambli">AI ansambli: Google WeatherNext 2 in ECMWF AIFS</h2>
+  <p class="archive-intro">Trije AI ansambli — <strong>Google DeepMind WeatherNext 2</strong> (64 članov), <strong>ECMWF AIFS ENS</strong> (globalni) in <strong>ECMWF AIFS Europe</strong> (~31 km) — s povprečjem članov, ki ga izračuna Open-Meteo. Njihov arhiv preteklih napovedi se začne šele 5. septembra 2026, zato niso v glavni tabeli zgoraj: primerjamo jih ločeno, v vsaki vrstici na <strong>istih dneh</strong> kot ECMWF AIFS (en tek), ECMWF IFS in Best Match. Vsi trije tečejo v šesturnih korakih, zato dnevni vrh in minimum vzamemo iz interpoliranih vrednosti — to jih na dnu doline dodatno stane.</p>
+  <div class="table-scroll" tabindex="0"><table class="stats">
+    <tr><th>Vodilni čas</th><th>Google WeatherNext 2</th><th>ECMWF AIFS ENS</th><th>ECMWF AIFS Europe</th><th>ECMWF AIFS</th><th>ECMWF IFS</th><th>Best Match</th><th>Dni</th></tr>
+    <tr><th>D+1</th><td>±3,6 °C</td><td>±3,0 °C</td><td>±2,9 °C</td><td>±2,6 °C</td><td>±2,9 °C</td><td><strong>±1,9 °C</strong></td><td>32</td></tr>
+    <tr><th>D+2</th><td>±3,8 °C</td><td>±3,0 °C</td><td>±2,9 °C</td><td>±2,8 °C</td><td>±3,0 °C</td><td><strong>±2,4 °C</strong></td><td>32</td></tr>
+    <tr><th>D+3</th><td>±3,9 °C</td><td>±2,9 °C</td><td>±2,9 °C</td><td><strong>±2,7 °C</strong></td><td>±3,0 °C</td><td>±2,7 °C</td><td>32</td></tr>
+    <tr><th>D+4</th><td>±3,8 °C</td><td>±3,0 °C</td><td>±3,0 °C</td><td><strong>±2,7 °C</strong></td><td>±2,9 °C</td><td>±2,7 °C</td><td>32</td></tr>
+    <tr><th>D+5</th><td>±3,8 °C</td><td>±3,0 °C</td><td>±2,9 °C</td><td>±2,8 °C</td><td>±2,8 °C</td><td><strong>±2,3 °C</strong></td><td>32</td></tr>
+    <tr><th>D+6</th><td>±4,1 °C</td><td>±3,2 °C</td><td>±3,1 °C</td><td>±3,1 °C</td><td>±3,4 °C</td><td><strong>±2,5 °C</strong></td><td>32</td></tr>
+    <tr><th>D+7</th><td>±3,7 °C</td><td>±3,1 °C</td><td>±3,0 °C</td><td>±3,0 °C</td><td>±2,8 °C</td><td><strong>±2,5 °C</strong></td><td>32</td></tr>
+  </table></div>
+  <p class="archive-intro">Pristranskost jutranjega minimuma pri D+1: Google WeatherNext 2 +3,3 °C; ECMWF AIFS ENS +1,8 °C; ECMWF AIFS Europe +1,8 °C (+ pomeni, da model noč napove pretoplo).</p>
+  <p class="muted-note">Tmax MAE, °C. Vzorec je kratek (32 dni, jesen) in zato ni končna sodba; tabela raste vsak dan. Vir: Google DeepMind WeatherNext 2 in ECMWF AIFS prek Open-Meteo, CC BY 4.0.</p>
   <h2>Metodologija</h2>
   <p class="archive-intro">Rezultat velja <strong>izključno za Zgornjo Savinjsko dolino</strong> (postaja IREICA1,
   Rečica ob Savinji) — dno ozke alpske doline, kjer se ponoči nabira hladen zrak in podnevi sonce dolino hitro
@@ -124,7 +138,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h2>Surovi podatki</h2>
   <p class="archive-intro">Celoten podatkovni niz (napoved vsakega vira, dejanska meritev, napaka) je javno na
   voljo za prenos: <a href="/test-napovedi/podatki.csv" style="color:var(--blue)">podatki.csv</a>
-  (30438 vrstic, licenca CC BY 4.0 — pri uporabi navedi vir). Viri: Open-Meteo (previous-runs-api.open-meteo.com),
+  (31306 vrstic, licenca CC BY 4.0 — pri uporabi navedi vir). Viri: Open-Meteo (previous-runs-api.open-meteo.com),
   ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no), meritve postaje IREICA1.</p>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
