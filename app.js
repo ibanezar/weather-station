@@ -7409,19 +7409,27 @@ function renderMtrWhy(idp){
   const st=_mtrState;if(!st)return;
   const el=document.getElementById(idp+'why');if(!el)return;
   const d1=st.days.find(d=>d.lead===1);
-  if(!d1||!Number.isFinite(d1.d_tmax)||!Number.isFinite(d1.d_tmin)){el.textContent='';return;}
-  const t=v=>(v>=0?'topleje':'hladneje')+' za '+fmt(Math.abs(v),1)+' °C';
-  let txt='Jutri dno doline podnevi '+t(d1.d_tmax)+', ponoči '+t(d1.d_tmin)
-    +', kot kaže mreža Open-Meteo — to je celoten prispevek modela.';
+  if(!d1||!Number.isFinite(d1.d_tmax)||!Number.isFinite(d1.d_tmin)){el.innerHTML='';el.hidden=true;return;}
+  /* Predznak: pozitiven popravek = dno doline topleje od mreže. Barve kot na ploščicah (chip up/down). */
+  const tile=(lbl,v)=>{
+    const r=Math.round(v*10)/10, sgn=r>0?'+':(r<0?'−':'±');
+    return '<div class="mtr-why-tile"><div class="mtr-why-lbl">'+lbl+'</div>'
+      +'<div class="mtr-why-val '+(r>0?'up':(r<0?'down':''))+'">'+sgn+fmt(Math.abs(r),1)+'<span>°C</span></div>'
+      +'<div class="mtr-why-sub">'+(r>0?'topleje':(r<0?'hladneje':'enako'))+' kot mreža</div></div>';
+  };
   /* Razlog za nočni popravek (predict_recica_mos.py night_regime). Podprto z zadnjim
      letom: ob jasni in mirni noči je bila postaja v povprečju 1,5 °C hladnejša od mreže,
      ob oblačni 0,8 °C — oblačnost meša zrak in dolina ni več poseben primer. */
-  const why={clear_calm:' Noč bo jasna in mirna, zato se na dnu doline nabere hladen zrak, ki ga mreža ne razreši.',
-             overcast:' Noč bo oblačna: zrak se meša, zato je popravek manjši kot ob jasni noči.'}[d1.night_regime];
-  if(why)txt+=why;
+  const why={clear_calm:'Noč bo jasna in mirna, zato se na dnu doline nabere hladen zrak, ki ga mreža ne razreši.',
+             overcast:'Noč bo oblačna: zrak se meša, zato je popravek manjši kot ob jasni noči.'}[d1.night_regime];
   const fz=mtrFrostPct(d1.p_frost);
-  if(fz!==null)txt+=' Verjetnost zmrzali (najnižja temperatura ≤ 0 °C): '+fz+' %.';
-  el.textContent=txt;
+  el.hidden=false;
+  el.innerHTML='<div class="mtr-why-hd">Kaj model popravi · jutri</div>'
+    +'<div class="mtr-why-tiles">'+tile('Podnevi',d1.d_tmax)+tile('Ponoči',d1.d_tmin)
+    +(fz!==null?'<div class="mtr-why-tile"><div class="mtr-why-lbl">Zmrzal</div><div class="mtr-why-val">'+fz
+      +'<span>%</span></div><div class="mtr-why-sub">najnižja ≤ 0 °C</div></div>':'')+'</div>'
+    +'<p class="mtr-why-txt">Popravek MTR proti mreži Open-Meteo — to je celoten prispevek modela.'
+    +(why?' '+why:'')+'</p>';
 }
 
 /* Drugo mnenje: razpon Googlovega AI ansambla WeatherNext 2 (P10–P90 iz 64
@@ -7434,7 +7442,7 @@ function renderMtrWn2(idp){
   const st=_mtrState;if(!st)return;
   const el=document.getElementById(idp+'wn2');if(!el)return;
   const M=MTR_METRICS[st.metric];
-  const parts=st.days.filter(d=>d.wn2&&d.wn2[M.key]&&Number.isFinite(d[M.key])).map(d=>{
+  const rows=st.days.filter(d=>d.wn2&&d.wn2[M.key]&&Number.isFinite(d[M.key])).map(d=>{
     const dt=new Date(d.date+'T12:00:00');
     const name=d.lead===1?'jutri':MTR_SL_DAYS[dt.getDay()];
     const w=d.wn2[M.key];
@@ -7442,12 +7450,17 @@ function renderMtrWn2(idp){
     const mtr=Number.isFinite(sd)
       ?fmt(d[M.key]-MTR_Z80*sd,1)+'–'+fmt(d[M.key]+MTR_Z80*sd,1)
       :fmt(d[M.key],1);
-    return name+' '+fmt(w.p10,1)+'–'+fmt(w.p90,1)+' °C (MTR '+mtr+' °C)';
+    return '<div class="mtr-wn2-row"><span class="mtr-wn2-day">'+name+'</span>'
+      +'<span class="mtr-wn2-rng"><span class="mtr-dot" style="background:'+MTR_CC.mtr+'"></span>'+mtr+' °C</span>'
+      +'<span class="mtr-wn2-rng mtr-wn2-g"><span class="mtr-dot mtr-dot-ring"></span>'+fmt(w.p10,1)+'–'+fmt(w.p90,1)+' °C</span></div>';
   });
-  el.hidden=!parts.length;
-  el.textContent=parts.length
-    ?'Drugo mnenje — Googlov AI ansambel WeatherNext 2 (64 članov, P10–P90), '+M.lbl.toLowerCase()
-      +' temperatura: '+parts.join('; ')+'. Surova mreža ~28 km brez popravka za dolino.'
+  el.hidden=!rows.length;
+  el.innerHTML=rows.length
+    ?'<div class="mtr-why-hd">Drugo mnenje · Google WeatherNext 2</div>'
+      +'<div class="mtr-why-sub2">AI ansambel, 64 članov, razpon P10–P90 · '+M.lbl.toLowerCase()+' temperatura</div>'
+      +'<div class="mtr-wn2-row mtr-wn2-head"><span></span><span>MTR</span><span>WeatherNext 2</span></div>'
+      +rows.join('')
+      +'<p class="mtr-why-txt">WeatherNext 2 je surova mreža ~28 km brez popravka za dolino.</p>'
     :'';
 }
 

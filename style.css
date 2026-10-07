@@ -2406,7 +2406,27 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-chip.down{background:rgba(77,159,248,.16);color:var(--blue)}
 .mtr-day-meta{margin-top:.3rem;font-size:.7rem;color:var(--muted);opacity:.85;
   font-family:'JetBrains Mono',monospace}
-.mtr-why{font-size:.79rem;color:var(--muted);margin:.9rem 0 0;line-height:1.55}
+.mtr-why{margin:.9rem 0 0;padding:.85rem .9rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px}
+.mtr-why[hidden]{display:none}
+.mtr-why-hd{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mtr-why-sub2{font-size:.74rem;color:var(--muted);margin:.15rem 0 .5rem}
+.mtr-why-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(5.5rem,1fr));gap:.5rem;margin:.55rem 0 .6rem}
+.mtr-why-tile{background:var(--card-bg);border:1px solid var(--fc-border);border-radius:11px;padding:.55rem .65rem}
+.mtr-why-lbl{font-size:.7rem;font-weight:600;color:var(--muted)}
+.mtr-why-val{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;line-height:1.1;color:var(--text);margin:.15rem 0}
+.mtr-why-val span{font-size:.8rem;font-weight:600;color:var(--muted);margin-left:.15rem}
+.mtr-why-val.up{color:#f87171}
+.mtr-why-val.down{color:var(--blue)}
+.mtr-why-sub{font-size:.68rem;color:var(--muted)}
+.mtr-why-txt{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.5}
+.mtr-wn2-row{display:grid;grid-template-columns:4.2rem 1fr 1fr;gap:.5rem;align-items:center;padding:.4rem 0;
+  border-top:1px solid var(--fc-border);font-size:.8rem;color:var(--text)}
+.mtr-wn2-head{border-top:0;padding:.1rem 0;font-size:.68rem;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--muted)}
+.mtr-wn2-day{font-weight:700;text-transform:capitalize}
+.mtr-wn2-rng{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.mtr-wn2-g{color:var(--muted)}
+.mtr-dot-ring{background:transparent;border:2px solid var(--muted);box-sizing:border-box}
 
 .mtr-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.2rem}
 .mtr-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.75rem .85rem}
