@@ -59,6 +59,10 @@ function collect(reach) {
   const strip = sel => sel
     .replace(/::?(before|after|first-line|first-letter|placeholder|selection|marker|backdrop|-webkit-[\w-]+|-moz-[\w-]+)/g, '')
     .replace(/:(hover|focus|focus-visible|focus-within|active|visited|target|checked|disabled|enabled)\b/g, '')
+    // [hidden] je stanje, ki ga JS po nalaganju odstrani (npr. .mode-intro[hidden] ob data-mode-intro="1"):
+    // po izpeljavi ujemanje po [hidden] ne bi našlo elementa in pravilo, ki ga pokaže, bi manjkalo v kritičnem
+    // delu — celoten CSS ga je potem pokazal šele ob prihodu (CLS 0,64 pri počasnem omrežju).
+    .replace(/\[hidden\]/g, '')
     .trim();
   const splitSel = text => { // loči po vejicah zunaj oklepajev
     const out = []; let d = 0, cur = '';

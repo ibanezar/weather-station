@@ -1,3 +1,14 @@
+/* Rezervna pisava z Interjevimi merami: do prihoda Interja (v počasnem omrežju ~4 s) besedilo stoji v sistemski
+   pisavi, ob zamenjavi pa se vsa stran preoblikuje (CLS 0,64 v laboratoriju). size-adjust in override-i
+   približata sistemsko pisavo Interju, zato je preskok majhen. Vrednosti: Inter proti Arialu (Next.js fallback). */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('Liberation Sans'), local('Helvetica Neue'), local('Roboto');
+  size-adjust: 107.06%;
+  ascent-override: 90.49%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+}
 /* latin-ext */
 @font-face {
   font-family: 'Inter';

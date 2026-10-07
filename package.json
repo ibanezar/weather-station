@@ -6,7 +6,8 @@
     "minify": "node tools/minify_assets.mjs"
   },
   "devDependencies": {
-    "terser": "5.49.0",
-    "clean-css": "5.3.3"
+    "acorn": "^8.17.0",
+    "clean-css": "5.3.3",
+    "terser": "5.49.0"
   }
 }

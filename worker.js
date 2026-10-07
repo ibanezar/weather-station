@@ -3527,8 +3527,11 @@ export default {
       // Vrne: JSON z alerts[] po Google Weather API formatu
       if (path === "/google-weather-alerts") {
         if (!GOOGLE_WEATHER_KEY || GOOGLE_WEATHER_KEY.startsWith("REPLACE")) {
+          // 200, ne 503: manjkajoč ključ je stanje nastavitve, ne izpad. Odjemalec že bere `error: "no_key"`
+          // v telesu, 503 pa je ob vsakem nalaganju strani pustil napako v konzoli (Lighthouse: Best Practices)
+          // in za nič porabil zahtevo na worker. Kratek predpomnilnik, da brskalnik ne sprašuje znova.
           return new Response(JSON.stringify({ error: "no_key", alerts: [] }),
-            { status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+            { status: 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" } });
         }
         const gwUrl = `https://weather.googleapis.com/v1/publicAlerts:lookup?key=${GOOGLE_WEATHER_KEY}&location.latitude=46.325779&location.longitude=14.921137`;
         const gwRes = await fetch(gwUrl, { headers: { "Accept": "application/json" } });
@@ -4566,8 +4569,9 @@ export default {
       // ── /ai-brief ─────────────────────────────────────────
       if (path === "/ai-brief" && request.method === "POST") {
         if (!ANTHROPIC_KEY || ANTHROPIC_KEY.startsWith("REPLACE")) {
+          // 200, ne 503: glej /google-weather-alerts. app.js ob `error:"no_key"` uporabi lokalni generator.
           return new Response(JSON.stringify({error:"no_key"}),
-            {status:503, headers:{...CORS_ALLOWED,"Content-Type":"application/json"}});
+            {status:200, headers:{...CORS_ALLOWED,"Content-Type":"application/json"}});
         }
         const body = await request.json();
         const prompt = `Si vremenski asistent za makro fotografa Filipa v Rečici ob Savinji, Slovenija (dolina Savinje, 366 m n.v.).

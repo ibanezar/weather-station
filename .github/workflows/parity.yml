@@ -70,6 +70,9 @@ jobs:
       - name: Test dolinskega profila
         run: python3 tools/test_valley_profile.py
 
+      - name: Test ovoja fetch() za Open-Meteo arhiv (predpomnilnik, vrsta, 429)
+        run: node tools/test_om_fetch.mjs
+
       - name: Test potrošnikov datotek drugih workflowov (zastareli vhodi)
         run: python3 tools/test_stale_inputs.py
 
