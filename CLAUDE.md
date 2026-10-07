@@ -622,6 +622,43 @@ je bilo **risanje**, ne JS. Zato:
   opazovanem sledu končalo pred LCP, na localhostu torej tudi 290 KiB JS (LCP 4–6 s ob FCP 2,1 s). Za LCP
   poglej PageSpeed na živi strani ali opazovane čase pod CDP omejitvijo omrežja (`Network.emulateNetworkConditions`).
 
+### Layout shift, prazne zahteve in leni paket kode (7. 10. 2026, tretji krog)
+
+Pravi CLS smo prvič izmerili s **pravimi podatki pod omejitvijo omrežja** (Playwright, CDP `Network.emulateNetworkConditions`
++ `Emulation.setCPUThrottlingRate`, `PerformanceObserver('layout-shift')` s `previousRect`/`currentRect`): 0,78 (nov obiskovalec) in 0,26
+(napredni pogled) → 0,02 / 0,03. Vzroki in popravki:
+
+- **Ponudba pogleda (`#mode-intro`) je bila v kritičnem CSS brez pravila, ki jo pokaže**: `critical_css.mjs` je iskal
+  elemente z `[hidden]`, JS pa `hidden` po nalaganju odstrani, zato pravilo `html[data-mode-intro="1"] .mode-intro[hidden]` ni našlo
+  elementa in je manjkalo. Celoten CSS jo je pokazal šele ob prihodu (~4,6 s v počasnem omrežju) in potisnil vso stran za ~390 px.
+  Generator zdaj pri preizkusu ujemanja odstrani `[hidden]`. **Preizkus kritičnega CSS z zakasnjenim `style.min.css` ne zadošča, če
+  JS v tem času že spremeni stanje** — merjenje je treba ponoviti z omejenim omrežjem.
+- **Rezervna pisava `Inter Fallback`** (`fonts/fonts.css`: `local('Arial')` + `size-adjust 107,06 %`, `ascent-override 90,49 %`,
+  `descent-override 22,56 %`) je v `font-family` za Inter v `style.css` (31 mest + Space Grotesk). Ob zamenjavi pisave se besedilo ne
+  preoblikuje več.
+- **Vrstica stanja (`.status`)** ima od prvega izrisa širine končnih besedil (`min-width` v `ch` na `#status-text`, `#updated`,
+  `#local-time`, monospace): sicer se je ob prihodu podatkov prelomila drugače in vse pod njo se je premaknilo za ~22 px.
+  `_syncAlertBarHeight()` ob **pravem** opozorilu še vedno premakne stran (za višino pasice) — to je vsebina, ne napaka.
+- **`/google-weather-alerts` in `/ai-brief` vrneta 200** z `error:"no_key"` (prej 503): manjkajoči ključ je nastavitev, ne izpad;
+  odjemalec bere `error` v telesu, 503 pa je ob vsakem nalaganju pustil napako v konzoli (Best Practices 93). Ko ključe nastaviš,
+  ni treba spremeniti nič.
+- **Open-Meteo arhiv/zgodovinska napoved/ansambel** gredo skozi ovoj `fetch()` v `app.js` (vrh datoteke): predpomnilnik 6 h v
+  `localStorage` (odgovori < 150 kB, skupaj ≤ 500 kB, najstarejši odpadejo — `wx-history-v1` si deli ~5 MB in ga ne sme izpodriniti),
+  enaki klici si delijo odgovor, vzporedno največ 2, ob 429 en ponovni poskus. Pred tem je stran ob enem nalaganju poslala do 9 zahtev
+  na `archive-api` in dobivala 429. Test: `tools/test_om_fetch.mjs` (v `parity.yml`).
+- **`<td>` brez glave** v tabeli »toplotna karta po letih« (`twh-grid`): leto je zdaj `<th scope="row">`, stolpci `scope="col"`.
+- **Leni paket kode** (`app-lazy.min.js`, ~73 kB): `tools/minify_assets.mjs` razreže `app.js` pri vrstici `// @@LAZY-PACK` (od tam do
+  konca datoteke je trenutno razdelek »METEO NERD« z glosarjem, skupnostjo, nevihtno karto, srednjeročno/dolgoročno napovedjo).
+  Paket se naloži ob prvem klicu katere od njegovih funkcij ali po ~20 s mirovanja; v `app.min.js` stojijo **nadomestki** z istimi
+  imeni (`_lazyStubs`, prvi stavek bundla), ki ob klicu naložijo paket in pokličejo pravo funkcijo (vrnejo obljubo). Build z `acorn`
+  preveri: (1) v paketu so samo deklaracije; (2) jedro in `index.html` (inline `onclick`, vgrajene skripte, `ime(` v nizih) uporabljajo
+  iz paketa samo **funkcije** — za spremenljivko build pade z jasnim sporočilom. **Nova koda za konec `app.js` gre torej v paket**
+  (ne sme imeti stavkov, ki se izvedejo ob nalaganju); če jo mora poklicati jedro, mora biti funkcija. Nerazrezan `app.js` (razvoj,
+  testi, profiliranje) deluje brez paketa. Izbrani razdelek je en sam, ker je statična analiza pokazala, da je preostala koda prepletena
+  (switchTab, applyObs, refresh* kličejo funkcije vseh razdelkov) — nadaljnji paketi zahtevajo ročen pregled klicnih mest.
+- **Source map** (`valid-source-maps`) NI narejen: mapa je ~1,5 MB in bi pri vsakem buildu napihnila git zgodovino; opozorilo je
+  neocenjeno v PageSpeedu.
+
 ## Preprost ⇄ napredni pogled domače strani
 
 Domača stran ima dve različici, med katerima obiskovalec preklaplja z gumbom

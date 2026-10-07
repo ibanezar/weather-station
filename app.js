@@ -1,6 +1,66 @@
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
 const LAT = 46.325779, LON = 14.921137;
 
+// ── Open-Meteo arhiv / zgodovinska napoved: predpomnilnik, vrsta, ponovni poskus ──────────────
+// Lighthouse na živi strani: do 9 zahtev na archive-api in 2 na historical-forecast-api ob enem nalaganju,
+// nekatere so dobile HTTP 429 (omejitev na IP, tudi za obiskovalce za skupnim naslovom). Podatki so zgodovinski
+// (ne spreminjajo se po urah), zato jih pomnimo 6 h (localStorage, odgovori < 150 kB, skupaj največ 500 kB), enaki klici v istem
+// nalaganju si delijo en odgovor, vzporedno pa gresta največ 2; ob 429 sledi en ponovni poskus.
+// Zajema vsak klic fetch() na te gostitelje, tudi prihodnje — klicna mesta se ne spreminjajo.
+(function(){
+  const RE=/^https:\/\/(archive-api|historical-forecast-api|ensemble-api)\.open-meteo\.com\//;
+  const TTL=6*3600*1000,MAXB=150000,BUDGET=500000,PFX='om-c1:';
+  const orig=window.fetch.bind(window),mem=new Map(),waiters=[];
+  let running=0;
+  const key=u=>{let h=5381;for(let i=0;i<u.length;i++)h=((h<<5)+h+u.charCodeAt(i))|0;return PFX+(h>>>0).toString(36)+u.length;};
+  const slot=()=>new Promise(r=>{if(running<2){running++;r();}else waiters.push(r);});
+  const free=()=>{const n=waiters.shift();if(n)n();else running--;};
+  function readLS(k){try{const o=JSON.parse(localStorage.getItem(k)||'null');if(o&&Date.now()-o.t<TTL)return o.b;}catch(_){}return null;}
+  // Proračun predpomnilnika 500 kB skupaj: localStorage si deli ~5 MB z zgodovino postaje (wx-history-v1,
+  // ~0,6 MB), ki je ne sme izpodriniti — zato najstarejši vnosi odpadejo, preden bi zmanjkalo prostora.
+  function writeLS(k,b){
+    if(b.length>MAXB)return;
+    try{
+      const ents=Object.keys(localStorage).filter(x=>x.startsWith(PFX)&&x!==k).map(x=>{
+        const v=localStorage.getItem(x)||'';let t=0;try{t=JSON.parse(v).t||0;}catch(_){}
+        return{x,t,n:v.length};
+      }).sort((a,c)=>a.t-c.t);
+      let total=ents.reduce((a,e)=>a+e.n,0)+b.length;
+      while(total>BUDGET&&ents.length){const e=ents.shift();localStorage.removeItem(e.x);total-=e.n;}
+      localStorage.setItem(k,JSON.stringify({t:Date.now(),b}));
+    }catch(_){
+      try{Object.keys(localStorage).filter(x=>x.startsWith(PFX)).forEach(x=>localStorage.removeItem(x));}catch(__){}
+    }
+  }
+  async function load(url,init){
+    await slot();
+    try{
+      let r=await orig(url,{...init,signal:undefined});
+      if(r.status===429){await new Promise(z=>setTimeout(z,1200+Math.random()*800));r=await orig(url,{...init,signal:undefined});}
+      if(!r.ok)return{status:r.status,body:null};
+      return{status:r.status,body:await r.text()};
+    }finally{free();}
+  }
+  window.fetch=function(input,init){
+    const url=typeof input==='string'?input:(input&&input.url);
+    const method=((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
+    if(!url||method!=='GET'||!RE.test(url))return orig(input,init);
+    const k=key(url);
+    const hit=readLS(k);
+    const respond=(res)=>res.body==null
+      ?new Response('{"error":"upstream"}',{status:res.status,headers:{'Content-Type':'application/json'}})
+      :new Response(res.body,{status:200,headers:{'Content-Type':'application/json'}});
+    if(hit!=null)return Promise.resolve(respond({status:200,body:hit}));
+    let p=mem.get(url);
+    if(!p){
+      p=load(url,init).then(res=>{if(res.body!=null)writeLS(k,res.body);return res;});
+      mem.set(url,p);
+      p.then(res=>{if(res.body==null)mem.delete(url);},()=>mem.delete(url));
+    }
+    return p.then(respond);
+  };
+})();
+
 // ── Lazy resource loader ──────────────────────────────────────
 const _resLoading = {};
 const _resLoaded = new Set();
@@ -565,6 +625,36 @@ function _insStore(){
     return _insObj;
   }catch(e){return{};}
 }
+// ── Leni paket kode (app-lazy.min.js) ─────────────────────────────────────────────────────────
+// tools/minify_assets.mjs razreže app.js pri oznaki `// @@LAZY-PACK` (do konca datoteke) v ločeno datoteko, ki se
+// naloži šele ob prvi uporabi (prvi klic katere od funkcij) ali po ~15 s mirovanja. Funkcije paketa, ki jih kliče
+// ostala koda (switchTab, inline onclick), dobijo v app.min.js nadomestke (_lazyStubs): ob klicu naložijo paket in
+// pokličejo pravo funkcijo — ista imena, isti argumenti, vrne se obljuba. V nerazrezanem app.js (razvoj, testi)
+// nadomestkov ni, ker so funkcije že definirane.
+let _lazyP=null;
+function _lazyLoad(url){
+  return _lazyP||(_lazyP=new Promise((res,rej)=>{
+    const s=document.createElement('script');s.src=url;s.async=true;
+    s.onload=()=>res();
+    s.onerror=()=>{_lazyP=null;s.remove();rej(new Error('lazy pack: '+url));};
+    document.head.appendChild(s);
+  }));
+}
+function _lazyStubs(url,names){
+  names.forEach(n=>{
+    if(typeof window[n]!=='undefined')return;
+    const stub=function(...a){
+      return _lazyLoad(url).then(()=>{
+        const f=window[n];
+        if(f===stub)throw new Error('lazy pack: manjka '+n);
+        return f.apply(this,a);
+      });
+    };
+    window[n]=stub;
+  });
+  // Predhodno nalaganje, ko je stran mirna: klik na zavihek potem ne čaka na omrežje.
+  setTimeout(()=>_whenIdle(()=>{_lazyLoad(url).catch(()=>{});},5000),15000);
+}
 function _whenIdle(fn,timeout){
   if('requestIdleCallback' in window)requestIdleCallback(fn,{timeout:timeout||2000});
   else setTimeout(fn,300);
@@ -826,10 +916,11 @@ function renderThisWeekHistory(){
     // Večji od obeh kontrastov (bela / črna) je vedno ≥ 4,58:1.
     return 1.05/(lum+0.05)>=(lum+0.05)/0.05?'#fff':'#000';
   };
-  const dayHdr=days.map(d=>'<th>'+d.getDate()+'.'+(d.getMonth()+1)+'.</th>').join('');
-  let html='<div class="twh-grid-wrap"><table class="twh-grid"><thead><tr><th></th>'+dayHdr+'</tr></thead><tbody>';
+  // scope=col/row: Lighthouse (td-has-header) in bralniki zaslona morajo vedeti, kateremu letu in dnevu pripada celica.
+  const dayHdr=days.map(d=>'<th scope="col">'+d.getDate()+'.'+(d.getMonth()+1)+'.</th>').join('');
+  let html='<div class="twh-grid-wrap"><table class="twh-grid"><thead><tr><th scope="col"><span class="visually-hidden">Leto</span></th>'+dayHdr+'</tr></thead><tbody>';
   grid.forEach(row=>{
-    html+='<tr><td class="twh-yr">'+row.yr+'</td>';
+    html+='<tr><th scope="row" class="twh-yr">'+row.yr+'</th>';
     row.cells.forEach(t=>{
       if(t==null)html+='<td><div class="twh-cell twh-empty"></div></td>';
       else{const bg=colour(t);html+='<td><div class="twh-cell" style="background:'+bg+';color:'+ink(bg)+'" title="'+t.toFixed(1)+'°C">'+Math.round(t)+'</div></td>';}
@@ -18939,6 +19030,9 @@ function _renderActDay(key){
     strip.innerHTML=html;}
 }
 
+// @@LAZY-PACK — vse od tod do konca datoteke gre v app-lazy.min.js (glej _lazyStubs zgoraj in tools/minify_assets.mjs).
+// Pravila: samo deklaracije (funkcije, let/const); brez stavkov, ki se izvedejo ob nalaganju; ostala koda sme klicati
+// samo FUNKCIJE iz tega dela (za spremenljivke build javi napako).
 // ═══ METEO NERD ═══════════════════════════════════════════
 let _nerdInit=false;
 function initNerd(){

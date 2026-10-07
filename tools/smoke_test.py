@@ -35,7 +35,7 @@ from seo_audit import CORE  # noqa: E402
 UA = "Mozilla/5.0 (compatible; meteorec-smoke/1.0; +https://meteorec.si/o-postaji.html)"
 MIN_TEXT = 400
 CRNIVEC = ["https://crnivec.si/", "https://crnivec.si/lipa/", "https://crnivec.si/igra/"]
-ASSETS = ["/style.min.css", "/app.min.js", "/history.json", "/sitemap.xml", "/llms.txt"]
+ASSETS = ["/style.min.css", "/app.min.js", "/app-lazy.min.js", "/history.json", "/sitemap.xml", "/llms.txt"]
 LDJSON_RE = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
 CANON_RE = re.compile(r'<link rel="canonical" href="([^"]+)"')
 TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
