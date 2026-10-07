@@ -58,6 +58,9 @@ jobs:
       - name: Test zaznave nevihtnih dogodkov
         run: python3 tools/test_storm_events.py
 
+      - name: Test vremena v gorah
+        run: python3 tools/test_gore.py
+
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py
 

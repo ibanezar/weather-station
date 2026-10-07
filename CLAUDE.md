@@ -327,6 +327,23 @@ osvežitev ~10 min, stopnja 0–3/3 iz radarjev Lisca in Pasja ravan). Pri nas:
   zagonu ga ne commitaj brez injektorjev** (jih poganja `nevihte-forecast.yml`).
 - Ni uradno opozorilo; stran napoti na ARSO.
 
+## Vreme v gorah (`/vreme-v-gorah/`, 7. 10. 2026)
+
+Ideja po neurje.si (»Napoved za gore«). Podatke računa `compute_mountains()` v `winter_engine.py`
+za `HIGH_POINTS` (Golte, Menina planina, Smrekovec, Raduha) → `winter-data.json` → `mountains`
+(`generated_at_local` + `peaks`); stran piše `tools/generate_gore_page.py` v koraku `zima-forecast.yml`
+(brez lastnega API-ja, kot `generate_zima_page.py`).
+
+- **Ocena na višini, ne meritev, ne uradna gorska napoved.** Temperatura: gradient iz Rečice (kot povsod);
+  veter: linearna interpolacija med 10 m in nivoji 925/850/700 hPa po geopotencialni višini
+  (`ridge_wind_kmh`; `wind_speed_<hpa>hPa` je zato v `fetch_open_meteo`); občutena temperatura:
+  vetrno hlajenje (Environment Canada, samo ≤ 10 °C in > 4,8 km/h). Model ne vidi terena: grebeni so
+  vetrovnejši, padavine so dolinske brez orografskega ojačanja — stran to pove. **Ne dodajaj ocen
+  nevarnosti ali priporočil za ture** brez meritev na vrhu.
+- Višine vrhov so preverjene (glej opombo pri `HIGH_POINTS`); Open-Meteo Elevation jih zravna, zato jih
+  ne jemlji iz DEM.
+- Test: `tools/test_gore.py`. Stran je v `CORE`, `llms.txt` in na hubu `/zima/`.
+
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
 Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva

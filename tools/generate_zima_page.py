@@ -784,6 +784,9 @@ def build_hub_body(data):
     <a class="phenom-card zima-phenom" href="/zima/snezna-odeja/" style="{card_style("snowpack", "")}">
       <span class="ph-icon">{icon_html("snowpack", 30)}</span>Snežna odeja
       <div class="ph-count">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></a>
+    <a class="phenom-card zima-phenom" href="/vreme-v-gorah/" style="{card_style("passes", "")}">
+      <span class="ph-icon">{icon_html("passes", 30)}</span>Vreme v gorah
+      <div class="ph-count">Golte, Menina, Smrekovec, Raduha</div></a>
     <a class="phenom-card zima-phenom" href="/zima/prevoznost-prelazov/" style="{card_style("passes", "")}">
       <span class="ph-icon">{icon_html("passes", 30)}</span>Prevoznost prelazov
       <div class="ph-count">{prelazi_n(len(passes))}</div></a>
