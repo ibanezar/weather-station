@@ -836,6 +836,57 @@ def compute_black_ice_daily(hourly, times, idx_now):
     return out
 
 
+# ── Žled (dež, ki zmrzuje) ───────────────────────────────────────────────
+# Žled nastane, ko dež pade na podhlajena tla: pri tleh je ≤ 0 °C, više pa je topla plast
+# (> 0 °C), kjer se sneg stopi. Ta ocena je modelski pokazatelj iz Open-Meteo (temperatura
+# na 2 m, 925 in 850 hPa, padavine) — NI uradna napoved žleda (ta je pri ARSO) in ne
+# napove debeline ledu. Brez tople plasti pada sneg, brez podhlajenih tal dež ne zmrzuje.
+FREEZING_RAIN_T2M_MAX_C = 0.0     # pri tleh vsaj mraz
+FREEZING_RAIN_WARM_MIN_C = 0.5    # toplejše od tega na 925 ali 850 hPa = topla plast
+FREEZING_RAIN_PRECIP_MIN_MM = 0.1  # urne padavine, pod tem ni pojava
+FREEZING_RAIN_HIGH_MM = 0.5       # od tod naprej "visoko"
+FREEZING_RAIN_LEVELS_HPA = (925, 850)
+
+
+def freezing_rain_hour(hourly, i):
+    """Raven žleda za eno uro ("nizko"/"srednje"/"visoko") ali None, če podatkov ni."""
+    t2m = hval(hourly, "temperature_2m", i)
+    precip = hval(hourly, "precipitation", i)
+    if t2m is None or precip is None:
+        return None
+    warm = [hval(hourly, f"temperature_{h}hPa", i) for h in FREEZING_RAIN_LEVELS_HPA]
+    warm = [t for t in warm if t is not None]
+    if not warm:
+        return None
+    if (t2m > FREEZING_RAIN_T2M_MAX_C or max(warm) < FREEZING_RAIN_WARM_MIN_C
+            or precip < FREEZING_RAIN_PRECIP_MIN_MM):
+        return "nizko"
+    return "visoko" if precip >= FREEZING_RAIN_HIGH_MM else "srednje"
+
+
+def compute_freezing_rain(hourly, times, idx_now):
+    """Žled za naslednjih 48 ur (ure s pojavom) in dnevni pregled za DAILY_FORECAST_DAYS dni."""
+    hours = []
+    worst = "nizko"
+    peak = 0.0
+    for i in range(idx_now or 0, min(len(times), (idx_now or 0) + 48)):
+        lvl = freezing_rain_hour(hourly, i)
+        if lvl in ("srednje", "visoko"):
+            hours.append(times[i])
+            peak = max(peak, hval(hourly, "precipitation", i) or 0.0)
+            if RANK_ORDER.index(lvl) > RANK_ORDER.index(worst):
+                worst = lvl
+    daily = []
+    for date, idxs in group_by_day(times, idx_now, DAILY_FORECAST_DAYS):
+        worst_d = "nizko"
+        for i in idxs:
+            lvl = freezing_rain_hour(hourly, i)
+            if lvl and RANK_ORDER.index(lvl) > RANK_ORDER.index(worst_d):
+                worst_d = lvl
+        daily.append({"date": date, "level": worst_d})
+    return {"level": worst, "hours": hours, "peak_precip_mm": round(peak, 1), "daily": daily}
+
+
 # ── Skupna ocena inverzije (heating_index + fog) ─────────────────────────
 
 def compute_inversion_profile(hourly, i):
@@ -1142,6 +1193,8 @@ def main():
         # Sedmi-dnevni povzetek poledice ni po kraju (glej compute_black_ice_daily) —
         # zato lasten vrhnji ključ, ne del "locations" (ki nosi 36h pogled po krajih).
         "black_ice_outlook": {"daily": compute_black_ice_daily(hourly, times, idx_now)},
+        "freezing_rain": {**compute_freezing_rain(hourly, times, idx_now),
+                          "generated_at_local": now_local.strftime("%-d. %-m. %Y ob %H:%M")},
         "locations": locations,
     }
 

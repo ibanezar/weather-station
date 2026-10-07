@@ -2040,5 +2040,41 @@
         }
       }
     }
-  ]
+  ],
+  "freezing_rain": {
+    "level": "nizko",
+    "hours": [],
+    "peak_precip_mm": 0.0,
+    "daily": [
+      {
+        "date": "2026-10-07",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-08",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-09",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-10",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-11",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-12",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-13",
+        "level": "nizko"
+      }
+    ],
+    "generated_at_local": "7. 10. 2026 ob 09:09"
+  }
 }

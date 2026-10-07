@@ -294,6 +294,22 @@ v radiju 200 km, daljna nevihta nad Jadranom da tisoče strel. Stran združi str
 Test: `tools/test_storm_events.py`. Na FB/IG **ne gre** (nova vrsta vsebine; ARSO-izkušnja iz
 razdelka zgoraj). Šest septembrskih dni je bilo ustvarjenih za nazaj ob uvedbi.
 
+## Žled (`/zima/zled/`, 7. 10. 2026)
+
+Ideja po neurje.si (njihova stran o žledenju in sondaži). Naša je ločena od `/zima/poledica/`:
+poledica je sevalno ohlajanje cestišča, **žled je dež, ki zmrzuje**.
+
+- `freezing_rain_hour()` v `winter_engine.py`: pojav je samo, če so HKRATI izpolnjeni mraz pri
+  tleh (≤ 0 °C), topla plast (≥ 0,5 °C na 925 ali 850 hPa) in ≥ 0,1 mm/h; ≥ 0,5 mm/h = visoko.
+  Brez tople plasti pada sneg, brez mraza dež ne zmrzuje. Rezultat: `winter-data.json` →
+  `freezing_rain` (raven 48 h, ure, 7-dnevni pregled, lasten `generated_at_local`).
+- **Modelski pokazatelj, ne napoved žleda**: ne pove debeline ledu, ne zajame lokalnih razlik
+  v dolini; stran to pove in napoti na ARSO. Pragovi so podvojeni v `generate_zima_page.py`
+  (`FR_*`), besedilo na strani jih navaja — `tools/test_freezing_rain.py` preverja usklajenost.
+- Sondaža Ljubljana je **slika ARSO, vdelana z navedbo vira** (15. člen ZDMHS); če ARSO naslov
+  spremeni, slika odpade (`ARSO_SOUNDING_IMG`). Sondaža je za Ljubljano, ne za Rečico.
+- Neurje.si iz tega ni prevzet: besedilo je naše, slike njihove nismo uporabili.
+
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
 Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva

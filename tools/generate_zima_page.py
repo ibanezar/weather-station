@@ -20,6 +20,7 @@ lahko prerenderirajo brez ponovnega klica Open-Meteo:
   /zima/                    — hub: povzetek vseh indeksov za danes/jutri + sezonski dnevnik
   /zima/meja-snezenja/      — meja sneženja po višinskih pasovih + 7-dnevni trend
   /zima/poledica/           — tveganje poledice po krajih v dolini + 7-dnevni pregled
+  /zima/zled/               — žled (dež, ki zmrzuje): modelski pokazatelj + sondaža ARSO + razlaga
   /zima/kurilni-semafor/    — ocena prevetrenosti za kurjenje + 7-dnevni graf
   /zima/nad-meglo/          — kateri kraji so nad pričakovano meglo + 7-dnevni trend
   /zima/snezna-odeja/       — tekoča modelirana ocena snežne odeje (degree-day model)
@@ -60,6 +61,9 @@ BRAND_SWAP = '''<script>(function(){
 # podvojitev — ta datoteka podatkov od tam ne uvaža, samo prebere JSON).
 RANK_ORDER = ["nizko", "srednje", "visoko"]
 
+# Pogoji žleda — namerna podvojitev FREEZING_RAIN_* iz winter_engine.py (generatorji strani si
+# ne delijo knjižnic); besedilo na strani jih navaja, preverja tools/test_freezing_rain.py.
+FR_T2M, FR_WARM, FR_PRECIP, FR_HIGH = 0.0, 0.5, 0.1, 0.5
 RISK_LABEL = {"nizko": "Nizko tveganje", "srednje": "Srednje tveganje", "visoko": "Visoko tveganje"}
 RISK_ICON = {"nizko": "🟢", "srednje": "🟡", "visoko": "🔴"}
 RISK_CLASS = {"nizko": "badge-risk-nizko", "srednje": "badge-risk-srednje", "visoko": "badge-risk-visoko"}
@@ -586,6 +590,7 @@ def build_hub_body(data):
 
     heating = data.get("heating_index") or {}
     heating_level = heating.get("level")
+    zled_level = (data.get("freezing_rain") or {}).get("level")
     heating_verdict = (f"Zrak se dobro prevetri, posebnih omejitev za kurjenje ni."
                         if heating_level == "nizko" else
                         f"{heating.get('advice', '')}" if heating.get("advice")
@@ -767,6 +772,9 @@ def build_hub_body(data):
     <a class="phenom-card zima-phenom" href="/zima/poledica/" style="{card_style("black_ice", "")}">
       <span class="ph-icon">{icon_html("black_ice", 30)}</span>Tveganje poledice
       <div class="ph-count">{RISK_ICON.get(worst_level, "⚪")} {RISK_LABEL.get(worst_level, "ni podatka")}</div></a>
+    <a class="phenom-card zima-phenom" href="/zima/zled/" style="{card_style("black_ice", "")}">
+      <span class="ph-icon">{icon_html("black_ice", 30)}</span>Žled
+      <div class="ph-count">{RISK_ICON.get(zled_level, "⚪")} {RISK_LABEL.get(zled_level, "ni podatka")}</div></a>
     <a class="phenom-card zima-phenom" href="/zima/kurilni-semafor/" style="{card_style("heating_index", "")}">
       <span class="ph-icon">{icon_html("heating_index", 30)}</span>Kurilni semafor
       <div class="ph-count">{RISK_ICON.get(heating_level, "⚪")} {RISK_LABEL.get(heating_level, "ni podatka")}</div></a>
@@ -972,6 +980,88 @@ def build_black_ice_body(data):
   <p class="muted-note">Ocena upošteva samo sevalno ohlajanje cestišča (oblačnost, veter, temperatura,
   rosišče) — ne posipa, prometne obremenitve ali dejanskega stanja vozišča. Vedno preveri tudi uradna
   opozorila ARSO na <a href="/nevihte/">strani opozoril</a>.</p>
+  <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
+
+
+# ── /zima/zled/ ──────────────────────────────────────────────────────────
+
+ARSO_SOUNDING_IMG = "https://meteo.arso.gov.si/uploads/probase/www/aviation/observ/upper/graphic/sigps_ljubljana-bezigrad.png"
+
+
+def build_zled_body(data):
+    fr = data.get("freezing_rain") or {}
+    level = fr.get("level", "nizko")
+    hours = fr.get("hours") or []
+    if level == "nizko":
+        hero_sub = "V naslednjih 48 h model ne kaže pogojev za žled (dež pri tleh pod ničlo, nad njimi pa topla plast)."
+    else:
+        hero_sub = (f"V naslednjih 48 h so po modelu možni pogoji za žled — {risk_badge(level)}. "
+                    f"Ure: {', '.join(fmt_hour(h) for h in hours[:6])}"
+                    f"{' …' if len(hours) > 6 else ''}. Največ {num(fr.get('peak_precip_mm', 0), 1)} mm na uro.")
+    outlook = fr.get("daily") or []
+    outlook_html = ""
+    if outlook:
+        chips = "\n".join(
+            f'    <div class="stat-card"><div class="sc-label">{fmt_day_short(d["date"])}</div>'
+            f'<div class="sc-val">{RISK_ICON.get(d["level"], "⚪")}</div>'
+            f'<div class="sc-sub">{RISK_LABEL.get(d["level"], "ni podatka")}</div></div>'
+            for d in outlook
+        )
+        outlook_html = f'  <h2>7-dnevni pregled</h2>\n  <div class="stat-grid">\n{chips}\n  </div>'
+
+    faq = [
+        ("Kaj je žled in kako se razlikuje od poledice?",
+         "Žled nastane, ko dež ali pršeč dež pade na podhlajena tla in drevesa ter takoj zmrzne v plast ledu. "
+         "Poledica je širši pojem: zmrznjena površina po vseh poteh, tudi po sevalnem ohlajanju ob jasni noči "
+         "(to ocenjuje stran Poledica). Žled je redkejši, a veliko bolj nevaren — v žledolomu 2014 je ob "
+         "prelomu januarja in februarja poškodoval okoli 40 % slovenskih gozdov."),
+        ("Kako beremo, ali bo žled, na vertikalni sondaži?",
+         "Iščemo tri stvari: pri tleh temperatura pod 0 °C, nad njo plast s temperaturo nad 0 °C (tam se "
+         "sneg stopi v dež) in vlažen zrak, ki dež vzdržuje. Če je pod ničlo vsa višina, pada sneg; če je nad "
+         "ničlo že pri tleh, pada navaden dež."),
+        ("Ali je ta ocena uradno opozorilo?",
+         "Ne. To je modelski pokazatelj iz javne napovedi Open-Meteo za Rečico ob Savinji. Ne napove "
+         "debeline ledu in ne zajame lokalnih razlik v dolini. Uradna opozorila izdaja ARSO — preveri jih "
+         "pred potjo."),
+        ("Zakaj vidim ob dežju pod ničlo včasih nizko tveganje?",
+         "Ker model potrebuje hkrati mraz pri tleh, toplo plast nad njimi in vsaj 0,1 mm padavin na uro. "
+         "Če nobenega pogoja ni, je tveganje nizko, tudi če je zunaj mrzlo."),
+    ]
+
+    return f'''{BRAND_SWAP}{ZIMA_CSS}
+{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Žled", None)])}
+{seo.stn_badge()}
+  <h1 class="page-title">Žled — nevarnost dežja, ki zmrzuje</h1>
+  <p class="post-meta">Posodobljeno {fr.get("generated_at_local") or data.get("generated_at_local", "—")}</p>
+  <div class="card zima-card" style="{card_style("black_ice")}">
+    <div class="clabel">{icon_html("black_ice")}Žled — naslednjih 48 h</div>
+    <p class="fh-sub">{hero_sub}</p>
+  </div>
+{outlook_html}
+  <h2>Vertikalna sondaža nad Ljubljano</h2>
+  <p class="archive-intro">Balon se spusti iz Ljubljane (Bežigrad) in izmeri temperaturo, vlago ter veter po
+  višini. Na sliki spodaj poglej, ali je pri tleh pod ničlo, nad tem pa topla plast — to je tipična
+  »recepta« za žled. Sondaža je za Ljubljano, ne za Rečico, zato je lahko v naši dolini ob jasni noči pri tleh
+  hladneje.</p>
+  <p><img src="{ARSO_SOUNDING_IMG}" alt="Vertikalna sondaža atmosfere nad Ljubljano (ARSO)" loading="lazy"
+    style="max-width:100%;height:auto;border-radius:8px;background:#fff"></p>
+  <p class="muted-note">Vir: <a href="https://meteo.arso.gov.si/met/sl/aviation/" target="_blank" rel="noopener">ARSO — Agencija RS za okolje</a>,
+  radiosondaža Ljubljana. Čas meritve je izpisan na sliki.</p>
+  <h2>Kako nastane žled</h2>
+  <p class="archive-intro">Pri nas ga najpogosteje povzroči <strong>temperaturna inverzija</strong>: ob tleh se
+  zadržuje hladen zrak pod lediščem, z jugozahoda pa nad njim priteka toplejši in zelo vlažen zrak. Padavine
+  nastanejo kot sneg, v topli plasti se stalijo v dež, v hladni plasti tik nad tlemi pa se dežne kapljice podhladijo
+  in ob stiku s tlemi, cestami, vejami ali žicami zmrznejo. Kjer je hladna plast debelejša, kapljice zmrznejo že
+  v zraku in padejo kot ledena zrna.</p>
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+{chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
+  </div>
+  <p class="muted-note">Pogoji za oceno: temperatura pri tleh ≤ {FR_T2M} °C, topla plast
+  (≥ {FR_WARM} °C na 925 ali 850 hPa) in vsaj {FR_PRECIP} mm padavin na uro; od {FR_HIGH} mm na uro je tveganje
+  »visoko«. Ni uradno opozorilo — preveri <a href="https://meteo.arso.gov.si/met/sl/warning/" target="_blank"
+  rel="noopener">opozorila ARSO</a> in <a href="/nevihte/">stran opozoril</a>. Za poledico po sevalnem
+  ohlajanju glej <a href="/zima/poledica/">Poledica</a>.</p>
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
 
 
@@ -1295,6 +1385,23 @@ def main():
                            "/zima/poledica/", schema, body)
     seo.write_page("zima/poledica/index.html", html, force=True)
     print("  → zima/poledica/index.html")
+
+    # ── zled ──
+    body, faq = build_zled_body(data)
+    schema = "\n".join([
+        seo.webpage_schema("/zima/zled/", "Žled — nevarnost dežja, ki zmrzuje",
+                            "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana "
+                            "(ARSO) in razlaga, kako nastane žled.",
+                            date_published="2026-10-07"),
+        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Žled", None)]),
+        seo.faq_schema(faq),
+    ])
+    html = seo.page_shell("Žled — nevarnost dežja, ki zmrzuje",
+                           "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana in "
+                           "razlaga, kako nastane žled.",
+                           "/zima/zled/", schema, body)
+    seo.write_page("zima/zled/index.html", html, force=True)
+    print("  → zima/zled/index.html")
 
     # ── kurilni-semafor ──
     body, faq = build_heating_index_body(data)
