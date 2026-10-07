@@ -3252,6 +3252,134 @@ async function _cronScoreNapovej(env) {
   } catch (_) { /* lestvica je okras, ne sme podreti crona */ }
 }
 
+// ── Karte modelov (/modeli-karta.json) ─────────────────────────────────────
+// Mreža 0,1° nad Slovenijo za ICON-D2, ICON-EU, ECMWF IFS (Open-Meteo) in AROME
+// (GeoSphere Avstrija), vsake 3 ure do +48 h: skupne padavine od t0, temperatura
+// in sunki. Brskalnik ne sme sam klicati 560 točk × 4 modelov (omejitve API-jev),
+// zato jo sestavi worker enkrat na MK_TTL_MS in jo drži v KV. Endpoint, ki ga
+// kliče brskalnik, tako nikoli ne dela zapisa ob vsakem klicu.
+// Podatki nosijo svojo geometrijo (lat0, lon0, d, nx, ny), zato je stran ne podvaja.
+const MK_LAT0 = 45.4, MK_LON0 = 13.3, MK_D = 0.1, MK_NY = 16, MK_NX = 35;
+const MK_STEPS = 16, MK_STEP_H = 3;
+const MK_TTL_MS = 30 * 60 * 1000;
+const MK_KEY = "modeli_karta_v1";
+let _mkInflight = null;
+
+function _mkPoints() {
+  const pts = [];
+  for (let j = 0; j < MK_NY; j++)
+    for (let i = 0; i < MK_NX; i++)
+      pts.push([+(MK_LAT0 + j * MK_D).toFixed(2), +(MK_LON0 + i * MK_D).toFixed(2)]);
+  return pts;
+}
+function _mkChunks(a, n) { const o = []; for (let i = 0; i < a.length; i += n) o.push(a.slice(i, i + n)); return o; }
+function _mkR(x, d) { return x == null || isNaN(x) ? null : +x.toFixed(d); }
+
+// hourly: po urah {p (mm v uri), t, g} na oznakah ts (ms, UTC). Korak k pokrije
+// (t0+3(k-1), t0+3k]; padavine so skupne od t0, sunek je največji v koraku.
+function _mkReduce(ts, hourly, t0) {
+  const idx = new Map(); ts.forEach((x, i) => idx.set(x, i));
+  const out = [];
+  let cum = 0, broken = false;
+  for (let k = 1; k <= MK_STEPS; k++) {
+    const end = t0 + k * MK_STEP_H * 3600000;
+    let gmax = null;
+    for (let h = 0; h < MK_STEP_H; h++) {
+      const i = idx.get(end - h * 3600000);
+      if (i == null || hourly.p[i] == null) { broken = true; continue; }
+      cum += hourly.p[i];
+      const g = hourly.g[i];
+      if (g != null && (gmax == null || g > gmax)) gmax = g;
+    }
+    const ie = idx.get(end);
+    out.push({ p: broken ? null : cum, t: ie == null ? null : hourly.t[ie], g: gmax });
+  }
+  return out;
+}
+
+async function _mkOpenMeteo(t0, pts) {
+  const models = ["icon_d2", "icon_eu", "ecmwf_ifs025"];
+  const res = {}; models.forEach(m => { res[m] = new Array(pts.length).fill(null); });
+  const chunks = _mkChunks(pts.map((p, i) => [p, i]), 140);
+  for (const ch of chunks) {
+    const u = "https://api.open-meteo.com/v1/forecast?latitude=" + ch.map(c => c[0][0]).join(",")
+      + "&longitude=" + ch.map(c => c[0][1]).join(",")
+      + "&hourly=temperature_2m,precipitation,wind_gusts_10m&models=" + models.join(",")
+      + "&forecast_days=3&timezone=UTC";
+    const r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } });
+    if (!r.ok) throw new Error("open-meteo " + r.status);
+    let j = await r.json(); if (!Array.isArray(j)) j = [j];
+    j.forEach((loc, n) => {
+      const H = loc.hourly, ts = H.time.map(x => Date.parse(x + ":00Z"));
+      models.forEach(m => {
+        res[m][ch[n][1]] = _mkReduce(ts, { p: H["precipitation_" + m], t: H["temperature_2m_" + m], g: H["wind_gusts_10m_" + m] }, t0);
+      });
+    });
+  }
+  return res;
+}
+
+async function _mkArome(t0, pts) {
+  const res = new Array(pts.length).fill(null);
+  let runIso = null;
+  const chunks = _mkChunks(pts.map((p, i) => [p, i]), 100);
+  for (let c = 0; c < chunks.length; c += 3) {
+    await Promise.all(chunks.slice(c, c + 3).map(async ch => {
+      const u = "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m"
+        + "?parameters=rr_acc,t2m,ugust,vgust&output_format=geojson&"
+        + ch.map(x => "lat_lon=" + x[0][0] + "," + x[0][1]).join("&");
+      const r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } });
+      if (!r.ok) throw new Error("geosphere " + r.status);
+      const j = await r.json();
+      runIso = j.reference_time;
+      const ts = j.timestamps.map(Date.parse);
+      j.features.forEach((f, n) => {
+        const P = f.properties.parameters, acc = P.rr_acc.data;
+        const p = acc.map((v, i) => (i === 0 || v == null || acc[i - 1] == null) ? null : Math.max(0, v - acc[i - 1]));
+        const g = P.ugust.data.map((u2, i) => { const v2 = P.vgust.data[i]; return u2 == null || v2 == null ? null : Math.sqrt(u2 * u2 + v2 * v2) * 3.6; });
+        res[ch[n][1]] = _mkReduce(ts, { p, t: P.t2m.data, g }, t0);
+      });
+    }));
+  }
+  return { cells: res, run: runIso };
+}
+
+async function _mkBuild() {
+  const t0 = Math.ceil(Date.now() / 3600000) * 3600000;
+  const pts = _mkPoints();
+  const out = { generated: Date.now(), t0, steps: MK_STEPS, stepH: MK_STEP_H, lat0: MK_LAT0, lon0: MK_LON0, d: MK_D, nx: MK_NX, ny: MK_NY, models: {} };
+  const labels = { icon_d2: "ICON-D2", icon_eu: "ICON-EU", ecmwf_ifs025: "ECMWF IFS", arome: "AROME" };
+  const [om, ar] = await Promise.allSettled([_mkOpenMeteo(t0, pts), _mkArome(t0, pts)]);
+  function pack(label, cells, run) {
+    const m = { label, run: run || null, p: [], t: [], g: [] };
+    for (let k = 0; k < MK_STEPS; k++) {
+      m.p.push(cells.map(c => c && c[k] ? _mkR(c[k].p, 1) : null));
+      m.t.push(cells.map(c => c && c[k] ? _mkR(c[k].t, 1) : null));
+      m.g.push(cells.map(c => c && c[k] ? _mkR(c[k].g, 0) : null));
+    }
+    return m;
+  }
+  if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { out.models[k] = pack(labels[k], om.value[k]); });
+  if (ar.status === "fulfilled") out.models.arome = pack(labels.arome, ar.value.cells, ar.value.run);
+  out.failed = [om.status === "rejected" ? "open-meteo" : null, ar.status === "rejected" ? "geosphere" : null].filter(Boolean);
+  if (!Object.keys(out.models).length) throw new Error("noben model ni dosegljiv: " + (om.reason || "") + " " + (ar.reason || ""));
+  return out;
+}
+
+async function _modeliKarta(env) {
+  let cached = null;
+  try { cached = await env.COUNTER_KV.get(MK_KEY, "json"); } catch (_) {}
+  if (cached && Date.now() - cached.generated < MK_TTL_MS) return cached;
+  if (!_mkInflight) {
+    _mkInflight = _mkBuild().then(async d => {
+      try { await env.COUNTER_KV.put(MK_KEY, JSON.stringify(d), { expirationTtl: 6 * 3600 }); } catch (_) {}
+      return d;
+    }).finally(() => { _mkInflight = null; });
+  }
+  try { return await _mkInflight; }
+  catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
+}
+
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "30 6-7 * * *") {
@@ -4375,6 +4503,20 @@ export default {
             JSON.stringify({ ok: false, error: "varpolje_unreachable", detail: String(e) }),
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
           );
+        }
+      }
+
+      // ── /modeli-karta.json ───────────────────────────────────
+      // Mreža modelov za karte na /primerjava-modelov/, glej _modeliKarta().
+      if (path === "/modeli-karta.json") {
+        try {
+          const d = await _modeliKarta(env);
+          return new Response(JSON.stringify(d), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ ok: false, error: "modeli_unreachable", detail: String(e) }),
+            { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
         }
       }
 

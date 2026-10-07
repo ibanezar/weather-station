@@ -44,12 +44,15 @@ jobs:
       - name: Generiraj stran /test-napovedi/ in podatki.csv
         run: python3 tools/generate_test_napovedi_page.py
 
+      - name: Generiraj stran /primerjava-modelov/ (tabela »kdo je držal«)
+        run: python3 tools/generate_primerjava_modelov_page.py
+
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           git add data/forecast-archive.csv data/forecast-forward-log.csv \
-                  data/hourly-observations.csv data/ensemble-forward-log.csv data/test-napovedi.json test-napovedi/
+                  data/hourly-observations.csv data/ensemble-forward-log.csv data/test-napovedi.json test-napovedi/ primerjava-modelov/
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "test-napovedi: dnevni zajem $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do

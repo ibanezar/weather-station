@@ -741,6 +741,27 @@ Pravi CLS smo prvič izmerili s **pravimi podatki pod omejitvijo omrežja** (Pla
 - **Source map** (`valid-source-maps`) NI narejen: mapa je ~1,5 MB in bi pri vsakem buildu napihnila git zgodovino; opozorilo je
   neocenjeno v PageSpeedu.
 
+## Primerjava modelov (`/primerjava-modelov/`, 7. 10. 2026)
+
+Zamisel je Neurje.si-jeva primerjava modelov (ICON-D2, ICON-EU, ALADIN/SI, C-LAEF 1 km), prirejena našim
+možnostim. `tools/generate_primerjava_modelov_page.py` piše samo besedilo, FAQ in tabelo »kdo je doslej držal«
+(D+1 MAE iz `data/test-napovedi.json`, osvežuje jo `test-napovedi-daily.yml`); **vse številke se nalagajo v
+brskalniku**, ker se modelski teki menjajo čez dan, GitHubov cron pa zamuja ure.
+
+- **Točka (Rečica)**: ICON-D2, ICON-EU, ECMWF IFS iz Open-Meteo, AROME 2,5 km + pas ansambla (10.–90. percentil)
+  iz GeoSphere Austria (`dataset.api.hub.geosphere.at`, CC BY 4.0, CORS odprt). `rr_acc` je akumulacija od
+  začetka teka — urne padavine so razlika; sunek je `sqrt(ugust² + vgust²)` v m/s × 3,6.
+- **Karte (Slovenija)**: `worker.js` `/modeli-karta.json` (`_modeliKarta()`) sestavi mrežo 0,1° (35 × 16 točk) za
+  vse štiri modele, korak 3 h do +48 h, in jo drži 30 min v `COUNTER_KV` (`modeli_karta_v1`) — brskalnik ne
+  sme sam klicati 560 točk (omejitve API-jev), zapis KV pa se naredi največ enkrat na 30 min, ne ob vsakem klicu.
+  GeoSphere ima omejitev **5 zahtevkov/s in 240/uro** ter URL do ~2 KB, zato točke gredo v kosih po 100.
+  Podatek nosi svojo geometrijo (`lat0/lon0/d/nx/ny`), zato je stran ne podvaja. Obris Slovenije generator
+  prebere iz `app.js` (`SLO_POLY`) in pade, če ga ne najde.
+- **Poštenost**: C-LAEF 1 km ni javno dostopen; stran tega ne trdi. 0,1° je pregled vzorca, ne zamenjava za
+  polno ločljivost — to piše pod kartami. ICON-D2 sega 48 h od svojega teka, zato je zadnji korak zanj prazen
+  (karta to napiše). ICON-D2 in AROME nimata arhiva v `/test-napovedi/`, zato tam nimata ocene.
+- Stran **ne bere postaje**, notranjih meritev torej ni.
+
 ## Preprost ⇄ napredni pogled domače strani
 
 Domača stran ima dve različici, med katerima obiskovalec preklaplja z gumbom
