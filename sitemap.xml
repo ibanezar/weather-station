@@ -176,6 +176,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/nevihte/porocila/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/padavine-karta/</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>daily</changefreq>
@@ -213,6 +219,18 @@
   </url>
   <url>
     <loc>https://meteorec.si/zima/poledica/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/zima/zled/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/vreme-v-gorah/</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
@@ -294,6 +312,12 @@
     <lastmod>2026-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/primerjava-modelov/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://meteorec.si/vreme-kamp-menina/</loc>
@@ -439,6 +463,13 @@
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007.html</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/dez-8-9-oktobra-koliko-ga-bo-padlo-1007.html</loc>
@@ -1612,29 +1643,5 @@
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/primerjava-modelov/</loc>
-    <lastmod>2026-10-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/nevihte/porocila/</loc>
-    <lastmod>2026-10-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/zima/zled/</loc>
-    <lastmod>2026-10-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/vreme-v-gorah/</loc>
-    <lastmod>2026-10-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
   </url>
 </urlset>
