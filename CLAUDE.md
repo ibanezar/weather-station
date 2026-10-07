@@ -1282,7 +1282,7 @@ Pravila, ki jih ne obračaj:
   `AI_REFERENCE` v `compute_forecast_test_metrics.py`), ne v glavni lestvici —
   mesec proti dvema letoma ni isto merilo.
 - Na kartici MTR je razpon WN2 (P10–P90 iz članov, `wn2` v
-  `napoved-modela.json`) samo **besedilo** (`renderMtrWn2()`, `#mos-wn2`), ne
+  `napoved-modela.json`) samo **kartica z vrsticami** (`renderMtrWn2()`, `#mos-wn2`; popravek `renderMtrWhy()` je kartica s ploščicami), ne
   tretja črta v grafu — barve grafa so validirane. Ni značilka modela: na 31
   dneh je imela razlika WN2−Open-Meteo nekaj signala za napako Tmax, a za
   učenje je vzorec premajhen. Ponovno preveri, ko se nabere pol leta.
