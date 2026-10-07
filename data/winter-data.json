@@ -2040,5 +2040,330 @@
         }
       }
     }
-  ]
+  ],
+  "freezing_rain": {
+    "level": "nizko",
+    "hours": [],
+    "peak_precip_mm": 0.0,
+    "daily": [
+      {
+        "date": "2026-10-07",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-08",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-09",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-10",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-11",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-12",
+        "level": "nizko"
+      },
+      {
+        "date": "2026-10-13",
+        "level": "nizko"
+      }
+    ],
+    "generated_at_local": "7. 10. 2026 ob 09:09"
+  },
+  "mountains": {
+    "generated_at_local": "7. 10. 2026 ob 09:18",
+    "peaks": [
+      {
+        "name": "Golte",
+        "elevation_m": 1400,
+        "now": {
+          "temp_c": 5.7,
+          "wind_kmh": 38,
+          "felt_c": 0.4
+        },
+        "daily": [
+          {
+            "date": "2026-10-07",
+            "hours": 15,
+            "tmin_c": 5.7,
+            "tmax_c": 14.5,
+            "felt_min_c": 0.3,
+            "wind_max_kmh": 55,
+            "precip_mm": 0.0,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3240,
+            "freezing_max_m": 3740
+          },
+          {
+            "date": "2026-10-08",
+            "hours": 24,
+            "tmin_c": 8.6,
+            "tmax_c": 12.2,
+            "felt_min_c": 5.8,
+            "wind_max_kmh": 54,
+            "precip_mm": 36.4,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3180,
+            "freezing_max_m": 3860
+          },
+          {
+            "date": "2026-10-09",
+            "hours": 24,
+            "tmin_c": 4.1,
+            "tmax_c": 7.8,
+            "felt_min_c": 0.4,
+            "wind_max_kmh": 27,
+            "precip_mm": 12.3,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2510,
+            "freezing_max_m": 3110
+          },
+          {
+            "date": "2026-10-10",
+            "hours": 24,
+            "tmin_c": 0.9,
+            "tmax_c": 7.7,
+            "felt_min_c": -2.0,
+            "wind_max_kmh": 14,
+            "precip_mm": 0.1,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2730,
+            "freezing_max_m": 3010
+          },
+          {
+            "date": "2026-10-11",
+            "hours": 24,
+            "tmin_c": 1.4,
+            "tmax_c": 8.4,
+            "felt_min_c": -0.3,
+            "wind_max_kmh": 15,
+            "precip_mm": 1.2,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2400,
+            "freezing_max_m": 2740
+          }
+        ]
+      },
+      {
+        "name": "Menina planina",
+        "elevation_m": 1500,
+        "now": {
+          "temp_c": 5.0,
+          "wind_kmh": 42,
+          "felt_c": -0.9
+        },
+        "daily": [
+          {
+            "date": "2026-10-07",
+            "hours": 15,
+            "tmin_c": 5.0,
+            "tmax_c": 13.8,
+            "felt_min_c": -0.8,
+            "wind_max_kmh": 58,
+            "precip_mm": 0.0,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3240,
+            "freezing_max_m": 3740
+          },
+          {
+            "date": "2026-10-08",
+            "hours": 24,
+            "tmin_c": 7.9,
+            "tmax_c": 11.5,
+            "felt_min_c": 4.8,
+            "wind_max_kmh": 57,
+            "precip_mm": 36.4,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3180,
+            "freezing_max_m": 3860
+          },
+          {
+            "date": "2026-10-09",
+            "hours": 24,
+            "tmin_c": 3.4,
+            "tmax_c": 7.1,
+            "felt_min_c": -0.8,
+            "wind_max_kmh": 30,
+            "precip_mm": 12.3,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2510,
+            "freezing_max_m": 3110
+          },
+          {
+            "date": "2026-10-10",
+            "hours": 24,
+            "tmin_c": 0.2,
+            "tmax_c": 7.0,
+            "felt_min_c": -3.1,
+            "wind_max_kmh": 16,
+            "precip_mm": 0.1,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2730,
+            "freezing_max_m": 3010
+          },
+          {
+            "date": "2026-10-11",
+            "hours": 24,
+            "tmin_c": 0.7,
+            "tmax_c": 7.7,
+            "felt_min_c": -1.3,
+            "wind_max_kmh": 16,
+            "precip_mm": 1.2,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2400,
+            "freezing_max_m": 2740
+          }
+        ]
+      },
+      {
+        "name": "Smrekovec",
+        "elevation_m": 1577,
+        "now": {
+          "temp_c": 4.5,
+          "wind_kmh": 43,
+          "felt_c": -1.6
+        },
+        "daily": [
+          {
+            "date": "2026-10-07",
+            "hours": 15,
+            "tmin_c": 4.5,
+            "tmax_c": 13.3,
+            "felt_min_c": -1.5,
+            "wind_max_kmh": 57,
+            "precip_mm": 0.0,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3240,
+            "freezing_max_m": 3740
+          },
+          {
+            "date": "2026-10-08",
+            "hours": 24,
+            "tmin_c": 7.4,
+            "tmax_c": 11.0,
+            "felt_min_c": 4.1,
+            "wind_max_kmh": 57,
+            "precip_mm": 36.4,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3180,
+            "freezing_max_m": 3860
+          },
+          {
+            "date": "2026-10-09",
+            "hours": 24,
+            "tmin_c": 2.9,
+            "tmax_c": 6.6,
+            "felt_min_c": -1.4,
+            "wind_max_kmh": 29,
+            "precip_mm": 12.3,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2510,
+            "freezing_max_m": 3110
+          },
+          {
+            "date": "2026-10-10",
+            "hours": 24,
+            "tmin_c": -0.3,
+            "tmax_c": 6.5,
+            "felt_min_c": -3.7,
+            "wind_max_kmh": 15,
+            "precip_mm": 0.1,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2730,
+            "freezing_max_m": 3010
+          },
+          {
+            "date": "2026-10-11",
+            "hours": 24,
+            "tmin_c": 0.2,
+            "tmax_c": 7.2,
+            "felt_min_c": -2.3,
+            "wind_max_kmh": 18,
+            "precip_mm": 1.2,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2400,
+            "freezing_max_m": 2740
+          }
+        ]
+      },
+      {
+        "name": "Raduha",
+        "elevation_m": 2062,
+        "now": {
+          "temp_c": 1.4,
+          "wind_kmh": 43,
+          "felt_c": -5.7
+        },
+        "daily": [
+          {
+            "date": "2026-10-07",
+            "hours": 15,
+            "tmin_c": 1.4,
+            "tmax_c": 10.2,
+            "felt_min_c": -5.8,
+            "wind_max_kmh": 53,
+            "precip_mm": 0.0,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3240,
+            "freezing_max_m": 3740
+          },
+          {
+            "date": "2026-10-08",
+            "hours": 24,
+            "tmin_c": 4.3,
+            "tmax_c": 7.9,
+            "felt_min_c": -0.3,
+            "wind_max_kmh": 60,
+            "precip_mm": 36.4,
+            "snow_cm": 0.0,
+            "freezing_min_m": 3180,
+            "freezing_max_m": 3860
+          },
+          {
+            "date": "2026-10-09",
+            "hours": 24,
+            "tmin_c": -0.2,
+            "tmax_c": 3.5,
+            "felt_min_c": -5.1,
+            "wind_max_kmh": 26,
+            "precip_mm": 12.3,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2510,
+            "freezing_max_m": 3110
+          },
+          {
+            "date": "2026-10-10",
+            "hours": 24,
+            "tmin_c": -3.4,
+            "tmax_c": 3.4,
+            "felt_min_c": -7.6,
+            "wind_max_kmh": 13,
+            "precip_mm": 0.1,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2730,
+            "freezing_max_m": 3010
+          },
+          {
+            "date": "2026-10-11",
+            "hours": 24,
+            "tmin_c": -2.9,
+            "tmax_c": 4.1,
+            "felt_min_c": -7.8,
+            "wind_max_kmh": 28,
+            "precip_mm": 1.2,
+            "snow_cm": 0.0,
+            "freezing_min_m": 2400,
+            "freezing_max_m": 2740
+          }
+        ]
+      }
+    ]
+  }
 }

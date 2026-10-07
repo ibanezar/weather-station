@@ -572,6 +572,60 @@ def detect_events(history, lookback_days=14):
     return events
 
 
+WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
+# Cloudflare privzeti Python-urllib zavrne s 403 (glej CLAUDE.md).
+WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
+
+# Nevihta, ki res doseže dolino: strele zabeleži LightningLogger v radiju 200 km, zato
+# SAMO število ne pove nič (daljna nevihta nad Jadranom da tisoče strel). Zato pogoj
+# vključuje najbližjo strelo.
+STORM_MIN_STRIKES = 300
+STORM_MAX_CLOSEST_KM = 15
+
+
+def fetch_lightning_daily():
+    """Dnevni povzetki strel iz workerja (`/strele-zgodovina.json`) — {datum UTC: {count, closest_km}}.
+    Ob napaki vrne {} (nevihtni dogodki se ta dan samo ne zaznajo)."""
+    try:
+        req = urllib.request.Request(f"{WORKER_BASE}/strele-zgodovina.json?ur=1&dni=30",
+                                     headers={"User-Agent": WORKER_UA})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.load(r)
+        return {d["date"]: d for d in data.get("daily", []) if d.get("date")}
+    except Exception as e:
+        print(f"  ! strele-zgodovina nedosegljivo: {e}", file=sys.stderr)
+        return {}
+
+
+def detect_storms(history, lightning, lookback_days=14):
+    """Nevihtni dnevi: veliko strel IN najbližja strela blizu doline. Vir strel je LightningLogger
+    (dan po UTC), meritve so dnevni povzetek postaje (lokalni dan) — razlika je do dve uri in je
+    na strani povedana. Dan brez meritve postaje se preskoči (history.json zaostaja)."""
+    cutoff = (TODAY - datetime.timedelta(days=lookback_days)).isoformat()
+    events = []
+    for ds, ltg in sorted(lightning.items()):
+        if ds < cutoff or ds not in history:
+            continue
+        if (ltg.get("count") or 0) < STORM_MIN_STRIKES:
+            continue
+        closest = ltg.get("closest_km")
+        if closest is None or closest > STORM_MAX_CLOSEST_KM:
+            continue
+        h = history[ds]
+        events.append({
+            "type": "nevihta",
+            "date": ds,
+            "value": ltg["count"],
+            "param": "strele",
+            "closest_km": round(closest, 1),
+            "precip": h.get("precipTotal"),
+            "gust": h.get("windgustHigh"),
+            "label": "Nevihta s streli",
+            "slug": f"nevihta-{ds}",
+        })
+    return events
+
+
 def detect_heat_waves(history, lookback_days=30):
     """
     Poišče toplotne valove (3+ zaporedni dnevi z max ≥ 30 °C).
@@ -1304,6 +1358,7 @@ def gen_event_page(event, history, sitemap_urls, force=False):
     val  = event["value"]
     ev_type = event["type"]
     label   = event["label"]
+    extra_html = ""
 
     # Določimo vsebino glede na tip
     if ev_type == "rekord-vrocina":
@@ -1443,6 +1498,39 @@ def gen_event_page(event, history, sitemap_urls, force=False):
         link_label = "→ Dnevni podatki za začetni dan"
         link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:10]}/"
 
+    elif ev_type == "nevihta":
+        title      = f"Nevihta v Rečici ob Savinji — {num(val, 0)} strel ({fmtd(ds)})"
+        desc       = (f"Nevihta {fmtd(ds)}: {num(val, 0)} strel v radiju 200 km, najbližja {num(event['closest_km'])} km "
+                      f"od postaje IREICA1; izmerjene padavine in sunki vetra.")
+        val_class  = ""
+        val_unit   = "strel"
+        intro_text = (f"Dne {fmtd(ds)} je sistem za beleženje strel (Blitzortung) v radiju 200 km od postaje "
+                      f"zabeležil {num(val, 0)} strel, najbližja je udarila {num(event['closest_km'])} km stran.")
+        link_label = "→ Dnevni podatki za ta dan"
+        link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:]}/".replace("//", "/")
+        _h = history.get(ds, {})
+        _rows = [("Strele v radiju 200 km", f"{num(val, 0)}"),
+                 ("Najbližja strela", f"{num(event['closest_km'])} km")]
+        if _h.get("precipTotal") is not None:
+            _rows.append(("Padavine (postaja)", f"{num(_h['precipTotal'])} mm"))
+        if _h.get("windgustHigh") is not None:
+            _rows.append(("Najmočnejši sunek (postaja)", f"{num(_h['windgustHigh'])} km/h"))
+        if _h.get("tempHigh") is not None and _h.get("tempLow") is not None:
+            _rows.append(("Temperatura dneva", f"{num(_h['tempLow'])} … {num(_h['tempHigh'])} °C"))
+        if _h.get("pressureHigh") is not None and _h.get("pressureLow") is not None:
+            _rows.append(("Razpon tlaka", f"{num(_h['pressureHigh'] - _h['pressureLow'])} hPa"))
+        extra_html = (
+            '  <div class="hub-section">\n'
+            '    <table class="stats"><tbody>\n'
+            + "\n".join(f'      <tr><th scope="row">{k}</th><td>{v}</td></tr>' for k, v in _rows)
+            + '\n    </tbody></table>\n'
+            '    <p class="hub-intro">Strele so zbrane v radiju 200 km in štete po <b>dnevih po UTC</b>, '
+            'meritve postaje po lokalnem dnevu — razlika je do dve uri. Podatki o strelah so iz omrežja '
+            '<a href="https://www.blitzortung.org/" rel="noopener">Blitzortung</a>; število ni popolno, '
+            'ker omrežje ne zazna vseh strel. To ni uradno opozorilo; za razmere glej '
+            '<a href="/nevihte/">nevihtno napoved</a>.</p>\n'
+            '  </div>')
+
     else:
         title      = f"{label} v Rečici ob Savinji ({fmtd(ds)})"
         desc       = f"Meteorološka postaja IREICA1 je {fmtd(ds)} zabeležila: {label}."
@@ -1452,7 +1540,7 @@ def gen_event_page(event, history, sitemap_urls, force=False):
         link_label = "→ Dnevni podatki"
         link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:]}/".replace("//", "/")
 
-    _val_d = 0 if val_unit == "dni" else (1 if val_unit == "mm" else 1)
+    _val_d = 0 if val_unit in ("dni", "strel") else 1
     _hero_date = (f"{fmtd(ds)} – {fmtd(event.get('end_date', ds))}"
                   if event.get("end_date") and event["end_date"] != ds else fmtd(ds))
     hero_html = (
@@ -1482,7 +1570,7 @@ def gen_event_page(event, history, sitemap_urls, force=False):
     Savinji ({ELEV} m n. m., Zgornja Savinjska dolina). Vse zgodovinske meritve so dostopne
     v <a href="/vreme/">arhivu vremena</a> in na <a href="/klima/">strani klimatoloških norm</a>.</p>
   </div>
-
+{extra_html}
   <a class="back-link" href="{link_url}">{link_label}</a>
   <br><a class="back-link" href="/rekord/">→ Absolutni rekordi postaje</a>
   <br><a class="back-link" href="/novosti/">→ Vse novosti</a>'''
@@ -1507,6 +1595,8 @@ def gen_novosti_index(events_so_far, sitemap_urls):
             return "dni"
         if t == "toplotni-val":
             return "°C"
+        if t == "nevihta":
+            return "strel"
         if ev["param"] in ("tempHigh", "tempLow"):
             return "°C"
         if ev["param"] == "precipTotal":
@@ -1515,7 +1605,7 @@ def gen_novosti_index(events_so_far, sitemap_urls):
 
     def _ev_val_d(ev):
         unit = _ev_unit(ev)
-        return 0 if unit == "dni" else 1
+        return 0 if unit in ("dni", "strel") else 1
 
     cards = []
     for ev in sorted(events_so_far, key=lambda e: e["date"], reverse=True):
@@ -1652,6 +1742,7 @@ def main():
     detected = detect_events(history, lookback_days=30)
     detected += detect_heat_waves(history, lookback_days=30)
     detected += detect_droughts(history, lookback_days=30)
+    detected += detect_storms(history, fetch_lightning_daily(), lookback_days=int(os.environ.get("STORM_LOOKBACK_DAYS", "14")))
     print(f"  → {len(detected)} zaznanh dogodkov")
 
     # Združi v katalog (brez duplikatov)

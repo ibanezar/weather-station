@@ -80,6 +80,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="sc-sub">BREZ · sunki 8 km/h</div>
     </div>
   </div>
+  <div class="card" id="toca-live" style="margin-bottom:1rem">
+    <div class="clabel">🟠 Toča zdaj — radar ARSO</div>
+    <div id="toca-live-body" style="font-size:.9rem;line-height:1.6;margin-top:.4rem" aria-live="polite">Preverjam …</div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:.4rem">Zaznano stanje po radarjih Lisca in Pasja ravan
+    (ne napoved). Vir: <a href="https://meteo.arso.gov.si/met/sl/warning/hail/" target="_blank" rel="noopener">ARSO</a>.
+    »Ni zaznana« ne pomeni, da toče ne bo — za nevarnost glej <a href="https://meteo.arso.gov.si/met/sl/warning/"
+    target="_blank" rel="noopener">uradna opozorila</a>.</div>
+  </div>
+<script>
+(function(){
+  var API="https://weatherireica1.filip-eremita.workers.dev/arso-toca";
+  var el=document.getElementById("toca-live-body");
+  if(!el)return;
+  var MY="SI_SAVINJSKA";
+  function show(txt){ el.textContent=txt; }
+  function load(){
+    fetch(API).then(function(r){return r.json();}).then(function(d){
+      var rg=d.regions||[], ok=rg.filter(function(x){return x.ok;});
+      if(!ok.length){ show("Podatka ARSO trenutno ni bilo mogoče prebrati — preveri neposredno na strani ARSO."); return; }
+      var hit=ok.filter(function(x){return x.level>=1;});
+      var mine=rg.filter(function(x){return x.id===MY;})[0];
+      var s="";
+      if(mine&&mine.ok) s+="Savinjska: "+(mine.level>=1?"toča zaznana — verjetnost "+mine.text:"toča ni zaznana")+" ("+mine.issued+"). ";
+      else s+="Za Savinjsko podatka ni bilo mogoče prebrati. ";
+      if(hit.length){ s+="Zaznana toča: "+hit.map(function(x){return x.name+" ("+x.text+")";}).join(", ")+". "; }
+      else s+="Radar trenutno nikjer v Sloveniji ne zaznava toče. ";
+      if(ok.length<rg.length) s+="Pri "+(rg.length-ok.length)+" pokrajinah podatka ni bilo mogoče prebrati.";
+      show(s);
+    }).catch(function(){ show("Podatka ni bilo mogoče naložiti — preveri neposredno na strani ARSO."); });
+  }
+  load();
+  // Največ enkrat na 5 minut in samo, ko je zavihek viden (pravilo o klicih na worker).
+  setInterval(function(){ if(!document.hidden) load(); },300000);
+})();
+</script>
 <!-- WX-STORMMAP:START (auto: tools/inject_storm_map.py) -->
   <h2 id="karta">Nevihtna karta Slovenije — danes</h2>
   <p class="archive-intro">Najvišji nevihtni potencial za 2026-10-07 je <strong>ZMERNO</strong>, pričakovan bliže Koper. Karta prikazuje oceno po vsej Sloveniji iz iste formule kot zgornji indeksi (Open-Meteo) — ni uradno opozorilo ARSO, ob običajnem teku izdana do 7:00 zjutraj.</p>
@@ -95,6 +130,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <p class="muted-note"><strong>Zgoden rezultat:</strong> dni s strelami nad Slovenijo je 0, za zanesljiv sklep jih potrebujemo vsaj 10. Čez zimo jih je malo; številke se bodo ustalile s sezono neviht.</p>
   <!-- WX-STORMVERIF:END -->
   <p class="archive-intro"><a href="/padavine-karta/">Karta izmerjenih padavin zadnjih 24 ur (ARSO postaje) →</a></p>
+  <p class="archive-intro"><a href="/nevihte/porocila/">Poročila bralcev o neurjih — toča, naliv, veter (pregledana pred objavo) →</a></p>
   <h2>Indeksi nestabilnosti — trenutno</h2>
   <p class="archive-intro">Ključni atmosferski indeksi, ki jih meteorologi uporabljajo za oceno nevihtnega potenciala nad Rečico ob Savinji.</p>
   <div class="tbl-x" tabindex="0"><table class="stats">

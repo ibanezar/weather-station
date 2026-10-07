@@ -1619,4 +1619,22 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://meteorec.si/nevihte/porocila/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/zima/zled/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/vreme-v-gorah/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

@@ -465,6 +465,34 @@ const WARNING_TEXTS = {
 };
 
 // Fetch warnings from vreme.arso.gov.si JSON API (same host as text forecast — works from CF Workers)
+// ── ARSO: trenutna verjetnost toče po pokrajinah (radar, VIL) ─────────────
+// ARSO objavlja za vsako pokrajino RSS (`warning_hp_<ID>_latest.rss`, osvežuje se na ~10 min):
+// stopnja 0–3/3 ("NO_SIGNAL" … "HGH") ali -/3 (ni podatkov). To je ZAZNANO STANJE po radarju
+// (Lisca, Pasja ravan), ne napoved — zato samo živ prikaz, brez statičnega posnetka.
+// TOCA_REGIJE je seznam z ARSO strani /met/sl/warning/hail (POKRAJINE).
+const TOCA_REGIJE = [
+  ["Belokranjska", "SI_BELOKRANJSKA"], ["Bovška", "SI_BOVSKA"], ["Dolenjska", "SI_DOLENJSKA"],
+  ["Gorenjska", "SI_GORENJSKA"], ["Goriška", "SI_GORISKA"], ["Kočevska", "SI_KOCEVSKA"],
+  ["Koroška", "SI_KOROSKA"], ["Ljubljana in okolica", "SI_OSREDNJESLOVENSKA"],
+  ["Notranjska", "SI_NOTRANJSKO-KRASKA"], ["Obala", "SI_OBALNO-KRASKA"], ["Podravje", "SI_PODRAVSKA"],
+  ["Pomurje", "SI_POMURSKA"], ["Savinjska", "SI_SAVINJSKA"], ["Spodnje Posavje", "SI_SPODNJEPOSAVSKA"],
+  ["Zgornjesavska", "SI_ZGORNJESAVSKA"],
+];
+const TOCA_BESEDILO = ["zelo majhna", "zaznavna", "srednja", "velika"];
+
+// Iz naslova RSS elementa razbere stopnjo (0–3, null = ni podatkov) in čas izdaje (15. člen ZDMHS).
+// Regexa sta nizova (RegExp), ker izrezovalnik v tools/_parity_js.mjs ne prenese oklepajev v regex literalih.
+const _TOCA_ITEM_RE = new RegExp("<item>\\s*<title>([\\s\\S]*?)</title>", "i");
+const _TOCA_TITLE_RE = new RegExp("\\(([^)]*?)\\):\\s*Verjetnost[\\s\\S]*?stopnja\\s*(-|\\d)\\s*/\\s*3", "i");
+function _parseArsoToca(xml) {
+  const t = _TOCA_ITEM_RE.exec(String(xml));
+  const m = t && _TOCA_TITLE_RE.exec(t[1]);
+  if (!m) return null;
+  const level = m[2] === "-" ? null : Number(m[2]);
+  if (level !== null && !(level >= 0 && level <= 3)) return null;
+  return { level, text: level === null ? "ni podatkov" : TOCA_BESEDILO[level], issued: m[1].trim() };
+}
+
 async function fetchArsoWarnings() {
   const r = await _arsoFetch("https://vreme.arso.gov.si/api/1.0/nonlocation/");
   if (!r.ok) throw new Error("ARSO API " + r.status);
@@ -3462,6 +3490,30 @@ export default {
 
     try {
 
+      // ── /arso-toca ─────────────────────────────────────────
+      // Trenutna verjetnost toče po pokrajinah (ARSO radar). Pokrajine vzporedno, rob predpomni
+      // 5 min (ARSO osvežuje na ~10 min), tako da ARSO dobi največ en krog klicev na 5 min.
+      // Pokrajina brez odgovora ima level:null — NIKOLI ne izpisujemo »ni toče«, če vira nismo prebrali.
+      if (path === "/arso-toca") {
+        const rows = await Promise.all(TOCA_REGIJE.map(async ([name, id]) => {
+          try {
+            const r = await fetch(`https://meteo.arso.gov.si/uploads/probase/www/warning/text/sl/warning_hp_${id}_latest.rss`, {
+              headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://meteo.arso.gov.si/" },
+              cf: { cacheTtl: 300, cacheEverything: true },
+            });
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            const p = _parseArsoToca(await r.text());
+            if (!p) throw new Error("neznana oblika");
+            return { id, name, level: p.level, text: p.text, issued: p.issued, ok: true };
+          } catch (e) {
+            return { id, name, level: null, text: "ni podatkov", issued: null, ok: false };
+          }
+        }));
+        return new Response(JSON.stringify({ regions: rows, source: "ARSO", updatedAt: new Date().toISOString() }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" }
+        });
+      }
+
       // ── /arso-warning ─────────────────────────────────────
       // ARSO uradna vremensko opozorila — ATOM feed (strukturiran, zanesljiv)
       // Regija za Rečico ob Savinji: SLOVENIA_NORTH-EAST
@@ -6280,6 +6332,124 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             httpMetadata: { contentType: "application/json" }
           });
           return _json({ ok: true, opazovanje: entry });
+        }
+      }
+
+      // ── Poročila o neurjih (moderirana, javna) ────────────────
+      // Ideja po neurje.si (prijavljanje toče, nalivov, vetra …), narejena po
+      // našem vzorcu: isti R2/feedback kot /gobe/opazovanje, a z MODERACIJO —
+      // poročilo je do odobritve skrito (status "cakajoce"), javen GET vrača
+      // samo odobrena. Brez fotografij in brez GPS (kraj + regija), ker
+      // fotografije terjajo svojo moderacijo in odstranjevanje EXIF.
+      //   GET  /nevihte/porocila?ur=48      → odobrena poročila
+      //   POST /nevihte/porocilo            → { tip, regija, kraj, opis?, website? }
+      //   GET  /nevihte/porocila/cakajoca   → admin (Bearer DELETE_SECRET)
+      //   POST /nevihte/porocila/moderacija → admin { id, odlocitev: odobri|zavrni }
+      // TIPI in REGIJE sta namerna podvojitev s tools/generate_nevihte_porocila_page.py
+      // (preverja tools/test_parity.py).
+      if (path === "/nevihte/porocila" || path === "/nevihte/porocilo"
+          || path === "/nevihte/porocila/cakajoca" || path === "/nevihte/porocila/moderacija") {
+        const r2 = env?.PHOTOS_R2;
+        function _json(obj, status) {
+          return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } });
+        }
+        const NP_KEY = "feedback/nevihte-porocila.json";
+        const NP_STORE_CAP = 500;
+        const NP_MAX_UR = 168;
+        const NP_LIST_CAP = 100;
+        const NP_TIPI = ["naliv", "veter", "strele", "toca", "nevihta", "tornado"];
+        const NP_REGIJE = ["Savinjska", "Koroška", "Gorenjska", "Osrednjeslovenska", "Zasavska", "Posavska",
+          "Jugovzhodna Slovenija", "Primorsko-notranjska", "Goriška", "Obalno-kraška", "Podravska", "Pomurska"];
+
+        async function _npRead() {
+          if (!r2) return [];
+          try {
+            const obj = await r2.get(NP_KEY);
+            if (!obj) return [];
+            return JSON.parse(await obj.text());
+          } catch (_) { return []; }
+        }
+        async function _npWrite(all) {
+          await r2.put(NP_KEY, JSON.stringify(all.slice(0, NP_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
+        }
+        // Isti ključ za zaklep kot galerija (gal_admin_fail:<ip>) — en napadalec, ena meja.
+        async function _npAdmin() {
+          const secret = env.DELETE_SECRET;
+          const auth = request.headers.get("Authorization") || "";
+          if (!secret) return false;
+          const kv = env.COUNTER_KV;
+          const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+          const lockKey = "gal_admin_fail:" + ip;
+          if (kv) {
+            const fails = parseInt((await kv.get(lockKey)) || "0") || 0;
+            if (fails >= 8) return false;
+            if (auth !== "Bearer " + secret) { await kv.put(lockKey, String(fails + 1), { expirationTtl: 900 }); return false; }
+            await kv.delete(lockKey);
+            return true;
+          }
+          return auth === "Bearer " + secret;
+        }
+
+        if (path === "/nevihte/porocila" && request.method === "GET") {
+          const ur = Math.min(NP_MAX_UR, Math.max(1, parseInt(url.searchParams.get("ur")) || 48));
+          const all = await _npRead();
+          const now = Date.now();
+          const pub = all
+            .filter(i => i.status === "odobreno" && now - new Date(i.ts).getTime() < ur * 3600000)
+            .slice(0, NP_LIST_CAP)
+            .map(i => ({ id: i.id, ts: i.ts, tip: i.tip, regija: i.regija, kraj: i.kraj, opis: i.opis || null }));
+          return _json({ porocila: pub, updatedAt: new Date().toISOString() });
+        }
+
+        if (path === "/nevihte/porocilo" && request.method === "POST") {
+          if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (body.website) return _json({ ok: true }); // honeypot
+          const tip = NP_TIPI.includes(body.tip) ? body.tip : null;
+          const regija = NP_REGIJE.includes(body.regija) ? body.regija : null;
+          const kraj = (body.kraj || "").trim().slice(0, 60);
+          const opis = (body.opis || "").trim().slice(0, 300);
+          if (!tip || !regija || !kraj) return _json({ error: "Izberi pojav, regijo in vpiši kraj" }, 400);
+
+          const kv = env?.COUNTER_KV;
+          if (kv) {
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+            const rlKey = "nevihte_porocilo_rl:" + ip;
+            const count = parseInt((await kv.get(rlKey)) || "0") || 0;
+            if (count >= 10) return _json({ error: "Preveč poročil v kratkem času — poskusi kasneje" }, 429);
+            await kv.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+          }
+          const all = await _npRead();
+          const now = Date.now();
+          const dup = all.some(i => i.tip === tip && i.kraj === kraj && (now - new Date(i.ts).getTime()) < 120000);
+          if (dup) return _json({ ok: true, status: "cakajoce" });
+          const entry = { id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(),
+            tip, regija, kraj, opis: opis || undefined, status: "cakajoce" };
+          all.unshift(entry);
+          await _npWrite(all);
+          return _json({ ok: true, status: "cakajoce" });
+        }
+
+        if (path === "/nevihte/porocila/cakajoca" && request.method === "GET") {
+          if (!(await _npAdmin())) return _json({ error: "Nepooblaščen dostop" }, 401);
+          const all = await _npRead();
+          return _json({ cakajoca: all.filter(i => i.status === "cakajoce") });
+        }
+
+        if (path === "/nevihte/porocila/moderacija" && request.method === "POST") {
+          if (!(await _npAdmin())) return _json({ error: "Nepooblaščen dostop" }, 401);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          const nov = body.odlocitev === "odobri" ? "odobreno" : body.odlocitev === "zavrni" ? "zavrnjeno" : null;
+          if (!nov || !body.id) return _json({ error: "Manjka id ali odločitev" }, 400);
+          const all = await _npRead();
+          const it = all.find(i => i.id === body.id);
+          if (!it) return _json({ error: "Poročila ni" }, 404);
+          it.status = nov;
+          it.moderatedAt = new Date().toISOString();
+          await _npWrite(all);
+          return _json({ ok: true, id: it.id, status: nov });
         }
       }
 

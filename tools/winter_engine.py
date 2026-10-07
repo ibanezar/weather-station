@@ -512,7 +512,8 @@ def fetch_open_meteo():
     hourly_vars = ["temperature_2m", "dew_point_2m", "cloud_cover", "wind_speed_10m",
                    "precipitation", "freezing_level_height", "precipitation_probability"]
     for hpa in INVERSION_LEVELS_HPA:
-        hourly_vars += [f"temperature_{hpa}hPa", f"geopotential_height_{hpa}hPa"]
+        hourly_vars += [f"temperature_{hpa}hPa", f"geopotential_height_{hpa}hPa",
+                        f"wind_speed_{hpa}hPa"]  # veter po višini: /vreme-v-gorah/ (compute_mountains)
     params = urllib.parse.urlencode({
         "latitude": LAT, "longitude": LON,
         "hourly": ",".join(hourly_vars),
@@ -836,6 +837,147 @@ def compute_black_ice_daily(hourly, times, idx_now):
     return out
 
 
+# ── Žled (dež, ki zmrzuje) ───────────────────────────────────────────────
+# Žled nastane, ko dež pade na podhlajena tla: pri tleh je ≤ 0 °C, više pa je topla plast
+# (> 0 °C), kjer se sneg stopi. Ta ocena je modelski pokazatelj iz Open-Meteo (temperatura
+# na 2 m, 925 in 850 hPa, padavine) — NI uradna napoved žleda (ta je pri ARSO) in ne
+# napove debeline ledu. Brez tople plasti pada sneg, brez podhlajenih tal dež ne zmrzuje.
+FREEZING_RAIN_T2M_MAX_C = 0.0     # pri tleh vsaj mraz
+FREEZING_RAIN_WARM_MIN_C = 0.5    # toplejše od tega na 925 ali 850 hPa = topla plast
+FREEZING_RAIN_PRECIP_MIN_MM = 0.1  # urne padavine, pod tem ni pojava
+FREEZING_RAIN_HIGH_MM = 0.5       # od tod naprej "visoko"
+FREEZING_RAIN_LEVELS_HPA = (925, 850)
+
+
+def freezing_rain_hour(hourly, i):
+    """Raven žleda za eno uro ("nizko"/"srednje"/"visoko") ali None, če podatkov ni."""
+    t2m = hval(hourly, "temperature_2m", i)
+    precip = hval(hourly, "precipitation", i)
+    if t2m is None or precip is None:
+        return None
+    warm = [hval(hourly, f"temperature_{h}hPa", i) for h in FREEZING_RAIN_LEVELS_HPA]
+    warm = [t for t in warm if t is not None]
+    if not warm:
+        return None
+    if (t2m > FREEZING_RAIN_T2M_MAX_C or max(warm) < FREEZING_RAIN_WARM_MIN_C
+            or precip < FREEZING_RAIN_PRECIP_MIN_MM):
+        return "nizko"
+    return "visoko" if precip >= FREEZING_RAIN_HIGH_MM else "srednje"
+
+
+def compute_freezing_rain(hourly, times, idx_now):
+    """Žled za naslednjih 48 ur (ure s pojavom) in dnevni pregled za DAILY_FORECAST_DAYS dni."""
+    hours = []
+    worst = "nizko"
+    peak = 0.0
+    for i in range(idx_now or 0, min(len(times), (idx_now or 0) + 48)):
+        lvl = freezing_rain_hour(hourly, i)
+        if lvl in ("srednje", "visoko"):
+            hours.append(times[i])
+            peak = max(peak, hval(hourly, "precipitation", i) or 0.0)
+            if RANK_ORDER.index(lvl) > RANK_ORDER.index(worst):
+                worst = lvl
+    daily = []
+    for date, idxs in group_by_day(times, idx_now, DAILY_FORECAST_DAYS):
+        worst_d = "nizko"
+        for i in idxs:
+            lvl = freezing_rain_hour(hourly, i)
+            if lvl and RANK_ORDER.index(lvl) > RANK_ORDER.index(worst_d):
+                worst_d = lvl
+        daily.append({"date": date, "level": worst_d})
+    return {"level": worst, "hours": hours, "peak_precip_mm": round(peak, 1), "daily": daily}
+
+
+# ── Vreme v gorah (Golte, Menina planina, Smrekovec, Raduha) ──────────────
+# Ocena NA VIŠINI vrha iz javne napovedi za Rečico: temperatura z gradientom (isti kot povsod),
+# veter z linearno interpolacijo med 10 m (višina postaje) in nivoji 925/850/700 hPa, občutena
+# temperatura po formuli vetrnega hlajenja (Environment Canada 2001). Model ne vidi terena:
+# grebeni so navadno vetrovnejši od interpolacije, doline pa zavetrne — zato stran govori o
+# »oceni na višini«, ne o meritvi in ne o uradni gorski napovedi.
+MOUNTAIN_DAYS = 5
+
+
+def wind_chill_c(t_c, wind_kmh):
+    """Občutena temperatura (vetrno hlajenje). Formula velja za t ≤ 10 °C in veter > 4,8 km/h,
+    sicer je enaka temperaturi zraka."""
+    if t_c is None or wind_kmh is None or t_c > 10 or wind_kmh <= 4.8:
+        return t_c
+    v = wind_kmh ** 0.16
+    return 13.12 + 0.6215 * t_c - 11.37 * v + 0.3965 * t_c * v
+
+
+def ridge_wind_kmh(hourly, i, elevation_m):
+    """Veter na višini `elevation_m` za uro i: linearna interpolacija med vetrom pri tleh
+    (10 m, višina postaje) in nivoji 925/850/700 hPa po njihovi geopotencialni višini."""
+    pts = []
+    w10 = hval(hourly, "wind_speed_10m", i)
+    if w10 is not None:
+        pts.append((ELEV, w10))
+    for hpa in INVERSION_LEVELS_HPA:
+        h = hval(hourly, f"geopotential_height_{hpa}hPa", i)
+        w = hval(hourly, f"wind_speed_{hpa}hPa", i)
+        if h is not None and w is not None and (not pts or h > pts[-1][0]):
+            pts.append((h, w))
+    if not pts:
+        return None
+    if elevation_m <= pts[0][0]:
+        return pts[0][1]
+    for (h0, w0), (h1, w1) in zip(pts, pts[1:]):
+        if elevation_m <= h1:
+            return interp(elevation_m, h0, w0, h1, w1)
+    return pts[-1][1]
+
+
+def compute_mountains(hourly, times, idx_now):
+    """Za vsak vrh iz HIGH_POINTS: stanje zdaj in povzetek po dnevih (MOUNTAIN_DAYS)."""
+    fl = hourly.get("freezing_level_height") or []
+    out = []
+    for pk in HIGH_POINTS:
+        e = pk["elevation_m"]
+        lapse = seo.LAPSE_RATE_C_PER_100M * (e - ELEV) / 100
+        t_now = hval(hourly, "temperature_2m", idx_now)
+        t_peak = round(t_now - lapse, 1) if t_now is not None else None
+        w_now = ridge_wind_kmh(hourly, idx_now, e)
+        daily = []
+        for date, idxs in group_by_day(times, idx_now, MOUNTAIN_DAYS):
+            temps, winds, felt, flv = [], [], [], []
+            precip = snow = 0.0
+            for i in idxs:
+                t = hval(hourly, "temperature_2m", i)
+                w = ridge_wind_kmh(hourly, i, e)
+                if t is not None:
+                    temps.append(t - lapse)
+                    if w is not None:
+                        felt.append(wind_chill_c(t - lapse, w))
+                if w is not None:
+                    winds.append(w)
+                f = fl[i] if i < len(fl) else None
+                if f is not None:
+                    flv.append(f)
+                p = hval(hourly, "precipitation", i) or 0
+                precip += p
+                snow += p * snow_fraction(e, f) * SNOW_RATIO_CM_PER_MM
+            daily.append({
+                "date": date, "hours": len(idxs),
+                "tmin_c": round(min(temps), 1) if temps else None,
+                "tmax_c": round(max(temps), 1) if temps else None,
+                "felt_min_c": round(min(felt), 1) if felt else None,
+                "wind_max_kmh": round(max(winds)) if winds else None,
+                "precip_mm": round(precip, 1), "snow_cm": round(snow, 1),
+                "freezing_min_m": round(min(flv)) if flv else None,
+                "freezing_max_m": round(max(flv)) if flv else None,
+            })
+        out.append({
+            "name": pk["name"], "elevation_m": e,
+            "now": {"temp_c": t_peak,
+                    "wind_kmh": round(w_now) if w_now is not None else None,
+                    "felt_c": (round(wind_chill_c(t_peak, w_now), 1)
+                               if t_peak is not None and w_now is not None else None)},
+            "daily": daily,
+        })
+    return out
+
+
 # ── Skupna ocena inverzije (heating_index + fog) ─────────────────────────
 
 def compute_inversion_profile(hourly, i):
@@ -1142,6 +1284,10 @@ def main():
         # Sedmi-dnevni povzetek poledice ni po kraju (glej compute_black_ice_daily) —
         # zato lasten vrhnji ključ, ne del "locations" (ki nosi 36h pogled po krajih).
         "black_ice_outlook": {"daily": compute_black_ice_daily(hourly, times, idx_now)},
+        "mountains": {"generated_at_local": now_local.strftime("%-d. %-m. %Y ob %H:%M"),
+                      "peaks": compute_mountains(hourly, times, idx_now)},
+        "freezing_rain": {**compute_freezing_rain(hourly, times, idx_now),
+                          "generated_at_local": now_local.strftime("%-d. %-m. %Y ob %H:%M")},
         "locations": locations,
     }
 

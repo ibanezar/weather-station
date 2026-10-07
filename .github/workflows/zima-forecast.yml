@@ -49,6 +49,9 @@ jobs:
         # tam) — isti vzorec kot v padalci-forecast.yml/daily-story.yml.
         run: pip install Pillow --quiet
 
+      - name: Sestavi /vreme-v-gorah/
+        run: python3 tools/generate_gore_page.py
+
       - name: Sestavi /crnivec/
         run: python3 tools/generate_crnivec_page.py
 
@@ -64,7 +67,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/winter-data.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json data/crnivec-arso.json zima/ crnivec/ crnivec-site/ og/crnivec/
+          git add data/winter-data.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json data/crnivec-arso.json zima/ vreme-v-gorah/ crnivec/ crnivec-site/ og/crnivec/
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             exit 0

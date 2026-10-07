@@ -262,6 +262,88 @@ Opozorilo je **stanje, ne novica** — velja nekaj ur in se prekliče. Zato:
 - `generate_arso_newsjack_post.py` ostaja v repozitoriju zaradi teh dveh funkcij
   in zgodovine; kot generator objav se ne uporablja več.
 
+## Poročila o neurjih (`/nevihte/porocila/`, 7. 10. 2026)
+
+Ideja po pregledu neurje.si (njihova moderirana poročila o toči, nalivih, vetru). Izvedba je naša:
+
+- Worker `/nevihte/porocilo` (POST) shrani poročilo kot `cakajoce` v R2
+  (`feedback/nevihte-porocila.json`); javni `/nevihte/porocila` (GET) vrne **samo odobrena**
+  (privzeto 48 ur). Poročilo je do odobritve skrito — brez moderacije se nič ne objavi.
+- **Moderacija je ročna**: `python3 tools/nevihte_moderacija.py list|odobri|zavrni <id>`
+  (`DELETE_SECRET`, isti zaklep po IP kot galerija). Ni v nobenem workflowu.
+- **Brez fotografij in brez GPS** (kraj + regija): fotografije bi terjale lastno moderacijo in
+  odstranjevanje EXIF, natančna lokacija razkriva zasebna zemljišča. Če kdaj dodaš fotografije,
+  uporabi obstoječi galerijski vzorec (`photos/`, status `pending`).
+- Poročilo bralca **ni meritev in ni uradno opozorilo** — tako piše na strani. Ne mešaj ga v
+  nevihtno karto ali njeno preverjanje (`verify_storm_map.py` meri samo proti strelam).
+- `NP_TIPI`/`NP_REGIJE` v `worker.js` sta namerna podvojitev s
+  `tools/generate_nevihte_porocila_page.py` (`test_parity.py` ju primerja). Besedilo bralcev se
+  izriše samo prek `textContent`.
+- Honeypot `website`, omejitev 10 poročil/uro po IP (`nevihte_porocilo_rl:<ip>`).
+
+### Samodejna poročila po nevihti (`/novosti/nevihta-<datum>/`, 7. 10. 2026)
+
+`detect_storms()` v `tools/seo_smart_routine.py` (dnevno, skupaj z ostalimi dogodki) zazna dan,
+ko je `LightningLogger` zabeležil ≥ 300 strel IN je bila najbližja ≤ 15 km
+(`STORM_MIN_STRIKES`, `STORM_MAX_CLOSEST_KM`). **Samo število strel ne zadošča**: logger šteje
+v radiju 200 km, daljna nevihta nad Jadranom da tisoče strel. Stran združi strele
+(`/strele-zgodovina.json`, dan po **UTC**) z dnevnim povzetkom postaje (lokalni dan; razlika do
+2 h je na strani povedana), ustvari se enkrat in gre v `novosti.json`. Dan brez meritve postaje
+(`history.json` zaostaja) se preskoči in zazna naslednji tek. Okno iskanja je 14 dni
+(`STORM_LOOKBACK_DAYS`), ker worker hrani dnevne povzetke 365 dni, a to je meja ažurnosti.
+Test: `tools/test_storm_events.py`. Na FB/IG **ne gre** (nova vrsta vsebine; ARSO-izkušnja iz
+razdelka zgoraj). Šest septembrskih dni je bilo ustvarjenih za nazaj ob uvedbi.
+
+## Žled (`/zima/zled/`, 7. 10. 2026)
+
+Ideja po neurje.si (njihova stran o žledenju in sondaži). Naša je ločena od `/zima/poledica/`:
+poledica je sevalno ohlajanje cestišča, **žled je dež, ki zmrzuje**.
+
+- `freezing_rain_hour()` v `winter_engine.py`: pojav je samo, če so HKRATI izpolnjeni mraz pri
+  tleh (≤ 0 °C), topla plast (≥ 0,5 °C na 925 ali 850 hPa) in ≥ 0,1 mm/h; ≥ 0,5 mm/h = visoko.
+  Brez tople plasti pada sneg, brez mraza dež ne zmrzuje. Rezultat: `winter-data.json` →
+  `freezing_rain` (raven 48 h, ure, 7-dnevni pregled, lasten `generated_at_local`).
+- **Modelski pokazatelj, ne napoved žleda**: ne pove debeline ledu, ne zajame lokalnih razlik
+  v dolini; stran to pove in napoti na ARSO. Pragovi so podvojeni v `generate_zima_page.py`
+  (`FR_*`), besedilo na strani jih navaja — `tools/test_freezing_rain.py` preverja usklajenost.
+- Sondaža Ljubljana je **slika ARSO, vdelana z navedbo vira** (15. člen ZDMHS); če ARSO naslov
+  spremeni, slika odpade (`ARSO_SOUNDING_IMG`). Sondaža je za Ljubljano, ne za Rečico.
+- Neurje.si iz tega ni prevzet: besedilo je naše, slike njihove nismo uporabili.
+
+## Toča zdaj po radarju ARSO (`/arso-toca`, 7. 10. 2026)
+
+Neurje.si prikazuje »verjetnost toče« — vir je ARSO (`warning_hp_<POKRAJINA>_latest.rss`, 15 pokrajin,
+osvežitev ~10 min, stopnja 0–3/3 iz radarjev Lisca in Pasja ravan). Pri nas:
+
+- `worker.js` `/arso-toca` prebere vseh 15 RSS vzporedno, rob predpomni 5 min (`cf.cacheTtl`),
+  `_parseArsoToca()` razbere stopnjo in čas izdaje. Pokrajina brez odgovora ima `level:null` — **nikoli
+  ne izpiši »ni toče«, če vira nisi prebral** (isto načelo kot ARSO opozorila na MeteoGasilcu).
+  Test razčlenjevanja je v `tools/test_parity.py` (`arso_toca_razclenjevanje`); regexa sta nizova
+  (`RegExp`), ker izrezovalnik `_parity_js.mjs` ne prenese oklepajev v regex literalih.
+- Prikaz (`TOCA_LIVE_HTML`) je **samo JS** na `/toca/` in `/nevihte/` — to je zaznano stanje, ne
+  novica; statični posnetek bi hitro zastarel. Klic ob nalaganju in nato največ na 5 min, samo ko je
+  zavihek viden. Namerna podvojitev med `generate_toca_page.py` in `generate_nevihte_page.py`.
+- `generate_nevihte_page.py` prepiše bloka WX-STORMMAP/WX-ARSO na rezervno besedilo — **po ponovnem
+  zagonu ga ne commitaj brez injektorjev** (jih poganja `nevihte-forecast.yml`).
+- Ni uradno opozorilo; stran napoti na ARSO.
+
+## Vreme v gorah (`/vreme-v-gorah/`, 7. 10. 2026)
+
+Ideja po neurje.si (»Napoved za gore«). Podatke računa `compute_mountains()` v `winter_engine.py`
+za `HIGH_POINTS` (Golte, Menina planina, Smrekovec, Raduha) → `winter-data.json` → `mountains`
+(`generated_at_local` + `peaks`); stran piše `tools/generate_gore_page.py` v koraku `zima-forecast.yml`
+(brez lastnega API-ja, kot `generate_zima_page.py`).
+
+- **Ocena na višini, ne meritev, ne uradna gorska napoved.** Temperatura: gradient iz Rečice (kot povsod);
+  veter: linearna interpolacija med 10 m in nivoji 925/850/700 hPa po geopotencialni višini
+  (`ridge_wind_kmh`; `wind_speed_<hpa>hPa` je zato v `fetch_open_meteo`); občutena temperatura:
+  vetrno hlajenje (Environment Canada, samo ≤ 10 °C in > 4,8 km/h). Model ne vidi terena: grebeni so
+  vetrovnejši, padavine so dolinske brez orografskega ojačanja — stran to pove. **Ne dodajaj ocen
+  nevarnosti ali priporočil za ture** brez meritev na vrhu.
+- Višine vrhov so preverjene (glej opombo pri `HIGH_POINTS`); Open-Meteo Elevation jih zravna, zato jih
+  ne jemlji iz DEM.
+- Test: `tools/test_gore.py`. Stran je v `CORE`, `llms.txt` in na hubu `/zima/`.
+
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
 Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva
