@@ -55,6 +55,9 @@ jobs:
       - name: Test preverjanja nevihtne karte
         run: python3 tools/test_storm_verify.py
 
+      - name: Test zaznave nevihtnih dogodkov
+        run: python3 tools/test_storm_events.py
+
       - name: Test časovnih vrat dnevnih kart
         run: python3 tools/test_gates.py
 

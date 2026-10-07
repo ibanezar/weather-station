@@ -90,6 +90,28 @@
     "years_covered": 6
   },
   {
+    "type": "nevihta",
+    "date": "2026-09-14",
+    "value": 1020,
+    "param": "strele",
+    "closest_km": 4.0,
+    "precip": 0.2,
+    "gust": 16.6,
+    "label": "Nevihta s streli",
+    "slug": "nevihta-2026-09-14"
+  },
+  {
+    "type": "nevihta",
+    "date": "2026-09-10",
+    "value": 10091,
+    "param": "strele",
+    "closest_km": 9.2,
+    "precip": 85.1,
+    "gust": 11.1,
+    "label": "Nevihta s streli",
+    "slug": "nevihta-2026-09-10"
+  },
+  {
     "type": "rekord-dneva-vrocina",
     "date": "2026-09-09",
     "value": 27.7,
@@ -100,6 +122,17 @@
     "years_covered": 6
   },
   {
+    "type": "nevihta",
+    "date": "2026-09-09",
+    "value": 15473,
+    "param": "strele",
+    "closest_km": 3.9,
+    "precip": 0,
+    "gust": 29.5,
+    "label": "Nevihta s streli",
+    "slug": "nevihta-2026-09-09"
+  },
+  {
     "type": "rekord-dneva-vrocina",
     "date": "2026-09-08",
     "value": 32.9,
@@ -108,6 +141,39 @@
     "label": "Rekord za ta koledarski dan — vročina",
     "slug": "rekord-dneva-vrocina-2026-09-08",
     "years_covered": 6
+  },
+  {
+    "type": "nevihta",
+    "date": "2026-09-05",
+    "value": 992,
+    "param": "strele",
+    "closest_km": 1.1,
+    "precip": 9.7,
+    "gust": 20.1,
+    "label": "Nevihta s streli",
+    "slug": "nevihta-2026-09-05"
+  },
+  {
+    "type": "nevihta",
+    "date": "2026-09-02",
+    "value": 2746,
+    "param": "strele",
+    "closest_km": 7.6,
+    "precip": 9.7,
+    "gust": 11.1,
+    "label": "Nevihta s streli",
+    "slug": "nevihta-2026-09-02"
+  },
+  {
+    "type": "nevihta",
+    "date": "2026-09-01",
+    "value": 1569,
+    "param": "strele",
+    "closest_km": 3.8,
+    "precip": 1.2,
+    "gust": 13.0,
+    "label": "Nevihta s streli",
+    "slug": "nevihta-2026-09-01"
   },
   {
     "type": "rekord-dneva-vrocina",

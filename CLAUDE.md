@@ -281,6 +281,19 @@ Ideja po pregledu neurje.si (njihova moderirana poročila o toči, nalivih, vetr
   izriše samo prek `textContent`.
 - Honeypot `website`, omejitev 10 poročil/uro po IP (`nevihte_porocilo_rl:<ip>`).
 
+### Samodejna poročila po nevihti (`/novosti/nevihta-<datum>/`, 7. 10. 2026)
+
+`detect_storms()` v `tools/seo_smart_routine.py` (dnevno, skupaj z ostalimi dogodki) zazna dan,
+ko je `LightningLogger` zabeležil ≥ 300 strel IN je bila najbližja ≤ 15 km
+(`STORM_MIN_STRIKES`, `STORM_MAX_CLOSEST_KM`). **Samo število strel ne zadošča**: logger šteje
+v radiju 200 km, daljna nevihta nad Jadranom da tisoče strel. Stran združi strele
+(`/strele-zgodovina.json`, dan po **UTC**) z dnevnim povzetkom postaje (lokalni dan; razlika do
+2 h je na strani povedana), ustvari se enkrat in gre v `novosti.json`. Dan brez meritve postaje
+(`history.json` zaostaja) se preskoči in zazna naslednji tek. Okno iskanja je 14 dni
+(`STORM_LOOKBACK_DAYS`), ker worker hrani dnevne povzetke 365 dni, a to je meja ažurnosti.
+Test: `tools/test_storm_events.py`. Na FB/IG **ne gre** (nova vrsta vsebine; ARSO-izkušnja iz
+razdelka zgoraj). Šest septembrskih dni je bilo ustvarjenih za nazaj ob uvedbi.
+
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
 Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva
