@@ -11,6 +11,7 @@
 - [Domača stran](https://meteorec.si/): trenutne meritve, dnevni povzetek, 7-dnevna napoved, radar, nevihtna karta Slovenije.
 - [Vreme Rečica ob Savinji](https://meteorec.si/vreme-recica-ob-savinji/): trenutna meritev, 7-dnevna napoved in napoved po urah za osrednji kraj, s primerjavo Open-Meteo in poskusnega modela MTR (dno doline).
 - [Točnost napovedi](https://meteorec.si/tocnost-napovedi/): sprotna primerjava napovedi (ARSO, Open-Meteo, MTR, ECMWF AIFS) z dejansko izmerjenim vremenom.
+- [Primerjava vremenskih modelov](https://meteorec.si/primerjava-modelov/): napoved ICON-D2, ICON-EU, ECMWF IFS in AROME (GeoSphere Austria, z ansamblom) za Rečico ob Savinji drugo nad drugo — temperatura, padavine, sunki, oblačnost po urah in razpon med modeli. Neposredni izhodi modelov, ne uradna napoved.
 - [Nevihte in opozorila ARSO](https://meteorec.si/nevihte/): aktivna opozorila ARSO za območje in dnevna nevihtna karta Slovenije.
 - [Toča](https://meteorec.si/toca/), [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/), [Ekstremno vreme](https://meteorec.si/ekstremno-vreme/)
 - [Termika — igra](https://meteorec.si/igra/): igra jadralnega padalca z Golt po Zgornji Savinjski dolini. Nivo se vsak dan sestavi iz dejanske napovedi (strop termike, baza oblakov, moč dvigov, veter po višini), zato je isti za vse igralce tistega dne. Ni pripomoček za odločanje o letenju — za to je [Vreme za padalce](https://meteorec.si/vreme-za-padalce/).
