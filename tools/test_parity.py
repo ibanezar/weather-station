@@ -273,6 +273,28 @@ def crnivec_mokri_naslov():
 
 
 @test
+def crnivec_porocila_izbire():
+    """Izbire v »Kako je bilo tebi?«: CRN_ZONE_IDS (worker) ↔ ZONES + REPORT_EXTRA ↔ ZONE_LABELS/ZONE_COLORS na strani."""
+    import re
+    import crnivec_zones as cz
+    import generate_crnivec_page as gc
+    w = open("worker.js", encoding="utf-8").read()
+    m = re.search(r"const CRN_ZONE_IDS = \[([^\]]*)\]", w)
+    check(m is not None, "CRN_ZONE_IDS", "ni najden v worker.js")
+    ids = re.findall(r'"([a-z]+)"', m.group(1)) if m else []
+    want = [z["id"] for z in cz.ZONES] + [e["id"] for e in gc.REPORT_EXTRA]
+    check(ids == want, "izbire poročila: worker ↔ Python", f"worker={ids} py={want}")
+    page = js("crnivec-site/index.html", ["ZONE_DATA"], [])  # samo preveri, da se stran naloži
+    src = open("crnivec-site/index.html", encoding="utf-8").read()
+    for e in gc.REPORT_EXTRA:
+        check(f'{e["id"]}: "{e["label"]}"' in src, "oznaka na strani", e["id"])
+        check(f'{e["id"]}: "{e["color"]}"' in src, "barva na strani", e["id"])
+        check(f'data-zona="{e["id"]}"' in src, "gumb na strani", e["id"])
+    for z in cz.ZONES:
+        check(gc.ZONE_SHORT[z["id"]] in src, "oznaka cone", z["id"])
+
+
+@test
 def crnivec_sneg_okna_rek():
     """snow_fraction, povzetek termina in izbira »Črnivec pravi«: Python ↔ JS strani."""
     import winter_engine as we
