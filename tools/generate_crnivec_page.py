@@ -1181,6 +1181,36 @@ ZONE_ICONS = {
 }
 
 
+# Dodatne izbire v »Kako je bilo tebi?« (8. 10. 2026): stvari, ki jih je
+# voznik videl, merilnik pa ne razlikuje (kamera je kazala meglo, indeks
+# »suho«). To NISO cone merilnika -- ZONES, pick_zone in OG kartica ostanejo
+# štiri; poročila so ločena od izračuna. Namerna podvojitev: CRN_ZONE_IDS v
+# worker.js in ZONE_LABELS/ZONE_COLORS v SHARE_JS_TEMPLATE (test_parity).
+REPORT_EXTRA = [
+    {"id": "megla", "label": "Megleno", "color": "#64748b", "bg": "#e2e8f0"},
+    {"id": "mokro", "label": "Mokro", "color": "#0369a1", "bg": "#e0f2fe"},
+    {"id": "sneg",  "label": "Sneži", "color": "#38bdf8", "bg": "#f0f9ff"},
+    {"id": "veter", "label": "Veter", "color": "#0d9488", "bg": "#ccfbf1"},
+]
+REPORT_EXTRA_ICONS = {
+    "megla": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-megla" aria-hidden="true">
+      <g fill="none" stroke="#111" stroke-width="4.5" stroke-linecap="round">
+        <path d="M8 18 q8 -6 16 0 t16 0 t12 0"/><path d="M5 31 q8 -6 16 0 t16 0 t14 0"/><path d="M10 44 q8 -6 16 0 t16 0 t10 0"/>
+      </g></svg>''',
+    "mokro": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-mokro" aria-hidden="true">
+      <path d="M30 6 C30 6 12 28 12 38 a18 18 0 0 0 36 0 C48 28 30 6 30 6 Z" fill="#7dd3fc" stroke="#111" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M22 40 a8 8 0 0 0 7 7" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/></svg>''',
+    "sneg": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-sneg" aria-hidden="true">
+      <g stroke="#0284c7" stroke-width="4.5" stroke-linecap="round">
+        <line x1="30" y1="6" x2="30" y2="54"/><line x1="9" y1="18" x2="51" y2="42"/><line x1="9" y1="42" x2="51" y2="18"/>
+      </g></svg>''',
+    "veter": '''<svg viewBox="0 0 60 60" class="crn-zicon crn-zicon-veter" aria-hidden="true">
+      <g fill="none" stroke="#111" stroke-width="4.5" stroke-linecap="round">
+        <path d="M6 22 H38 a8 8 0 1 0 -8 -8"/><path d="M6 34 H46 a8 8 0 1 1 -8 8"/><path d="M6 46 H24"/>
+      </g></svg>''',
+}
+
+
 CSS = '''
 <style>
   /* Prenova 24. 9. 2026: stran je hiter mobilni DASHBOARD za stanje prelaza,
@@ -2740,8 +2770,9 @@ SHARE_JS_TEMPLATE = '''
     var repFeed = document.getElementById("crn-report-feed");
     var repIme = document.getElementById("crn-report-ime");
     var izbranaCona = null;
-    var ZONE_LABELS = { sonce: "Suho", nekaj: "Nekaj je", verige: "Verige", spolzko: "Spolzko" };
-    var ZONE_COLORS = {};
+    var ZONE_LABELS = { sonce: "Suho", nekaj: "Nekaj je", verige: "Verige", spolzko: "Spolzko",
+      megla: "Megleno", mokro: "Mokro", sneg: "Sneži", veter: "Veter" };  // zadnje štiri: REPORT_EXTRA
+    var ZONE_COLORS = { megla: "#64748b", mokro: "#0369a1", sneg: "#38bdf8", veter: "#0d9488" };
     ZONE_DATA.forEach(function(z){ ZONE_COLORS[z.id] = z.color; });
 
     function porocevalecId(){
@@ -3661,6 +3692,11 @@ def build_body(data):
         f'style="--zc:{z["color"]};--zbg:{STATUS[z["id"]]["bg"]}">{ZONE_ICONS[z["id"]]}'
         f'<span>{ZONE_SHORT[z["id"]]}</span></button>'
         for z in ZONES
+    ) + "".join(
+        f'<button type="button" class="crn-zbtn" data-zona="{e["id"]}" '
+        f'style="--zc:{e["color"]};--zbg:{e["bg"]}">{REPORT_EXTRA_ICONS[e["id"]]}'
+        f'<span>{e["label"]}</span></button>'
+        for e in REPORT_EXTRA
     )
 
     # Klientski živi preračun (glej __ZONE_DATA_JSON__ v SHARE_JS_TEMPLATE)

@@ -3925,7 +3925,9 @@ export default {
         const POR_LIST_CAP = 100;
         const LESTVICA_KEY = "crnivec_lestvica";
         const LESTVICA_CAP = 300; // koliko RAZLIČNIH porocevalcev obdržimo, glej _lestvicaWrite
-        const CRN_ZONE_IDS = ["sonce", "nekaj", "verige", "spolzko"];
+        // Prve štiri so cone merilnika, zadnje štiri dodatne izbire poročevalca
+        // (REPORT_EXTRA v generate_crnivec_page.py; test_parity jih primerja).
+        const CRN_ZONE_IDS = ["sonce", "nekaj", "verige", "spolzko", "megla", "mokro", "sneg", "veter"];
         // Pragovi so namenoma rastoči in vedno bolj smešni — enkratno
         // poročilo že šteje (namig na to, da je večina ljudi raje vpraša,
         // kot da bi enkrat pogledala, glej opombo na vrhu
