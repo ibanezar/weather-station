@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-07",
-  "issued": "07.10.2026 8:00 CEST",
-  "issued_at": "2026-10-07T08:30:40.115326+02:00",
-  "top_station": "Bilje",
-  "top_mm": 0,
+  "date": "2026-10-08",
+  "issued": "08.10.2026 8:00 CEST",
+  "issued_at": "2026-10-08T08:30:35.326948+02:00",
+  "top_station": "Vojsko",
+  "top_mm": 58,
   "n_stations": 20,
-  "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-10-07.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-10-07-story.jpg"
+  "should_post": true,
+  "image": "https://meteorec.si/og/precip-map/2026-10-08.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-10-08-story.jpg"
 }
