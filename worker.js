@@ -4122,7 +4122,11 @@ export default {
             let zoneLabel, zoneColor;
             if (snowCm >= 2) { zoneLabel = "verige"; zoneColor = "#ea580c"; }
             else if (tempC != null && tempC <= 0) { zoneLabel = "spolzko"; zoneColor = "#dc2626"; }
-            else if (tempC != null && tempC > 5) { zoneLabel = "suho"; zoneColor = "#16a34a"; }
+            else if (tempC != null && tempC > 5) {
+              // Ob megli (vlaga na prelazu >= 97 %) tak-tak, kot FOG_RH_STOP v crnivec_zones.py.
+              if (drsi && drsi.vlaga_pct != null && drsi.vlaga_pct >= 97) { zoneLabel = "tak-tak"; zoneColor = "#eab308"; }
+              else { zoneLabel = "suho"; zoneColor = "#16a34a"; }
+            }
             else { zoneLabel = "tak-tak"; zoneColor = "#eab308"; }
             svg = badgeSvg("črnivec", zoneLabel, zoneColor);
             if (kv) await kv.put(CRN_BADGE_KEY, JSON.stringify({ ts: Date.now(), svg }), { expirationTtl: 3600 });
