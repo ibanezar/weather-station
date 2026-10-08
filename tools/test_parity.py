@@ -247,7 +247,7 @@ def crnivec_mokri_naslov():
     """WET_STATUS (Python) ↔ mokroNaslov() v generirani strani; status_for() zamenja samo cono »sonce«."""
     import generate_crnivec_page as gc
     page = open("crnivec-site/index.html", encoding="utf-8").read()
-    check(gc.WET_STATUS["status"] in page and gc.WET_STATUS["desc"] in page, "mokri naslov v JS",
+    check(gc.WET_STATUS["status"] in page and gc.WET_STATUS["desc"] in page and gc.WET_STATUS["label"] in page, "mokri naslov v JS",
           "besedilo WET_STATUS manjka v crnivec-site/index.html (mokroNaslov)")
     wet = [{"id": "road", "value": "verjetno mokro"}]
     for z in gc.ZONES:

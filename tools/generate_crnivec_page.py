@@ -149,7 +149,8 @@ STATUS = {
 # mokro«, naslov in opis povesta to; cona, kazalec, OG kartica in značka ostanejo.
 # JS kopija: mokroNaslov() v SHARE_JS_TEMPLATE.
 WET_STATUS = {"status": "Cesta je mokra",
-              "desc": "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost."}
+              "desc": "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost.",
+              "label": "MOKRO, A PREVOZNO"}  # vrstica »Meteorec indeks: …« in deljena slika
 
 
 def status_for(zone_id, rows):
@@ -2306,6 +2307,10 @@ SHARE_JS_TEMPLATE = '''
     var title = document.getElementById("crn-status-title"), desc = document.getElementById("crn-status-desc");
     if (!title || !desc || zid !== "sonce") return;
     var wet = rows.some(function(r){ return r.id === "road" && r.value === "verjetno mokro"; });
+    var lbl = wet ? "MOKRO, A PREVOZNO" : ZONE_DATA[0].label;
+    var idx = document.getElementById("crn-status-index");
+    if (idx) idx.textContent = "Meteorec indeks: " + lbl;
+    if (typeof share !== "undefined" && share) share.verdict = lbl;
     title.textContent = wet ? "Cesta je mokra" : ZONE_DATA[0].status;
     desc.textContent = wet ? "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost." : ZONE_DATA[0].statusDesc;
   }
@@ -3611,7 +3616,7 @@ def build_body(data):
     # "Vprašaj še enkrat" dobi cel QUOTES seznam za klientski reroll (server
     # izbere samo dnevni privzetek).
     share_payload = {
-        "verdict": zone["label"],
+        "verdict": status_for(zone["id"], rows).get("label", zone["label"]),
         "color": zone["color"],
         "quote": quote,
         "temp": temp_txt,
@@ -3748,7 +3753,7 @@ def build_body(data):
         </div>
         <p class="crn-updated" id="crn-updated" data-ts="{generated_at}" data-sfx="{upd_suffix}">{updated_txt} · {upd_suffix}</p>
         <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
-        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
+        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {st.get('label', zone['label'])}</span>
       </div>
 {special_section if sp_alert else ''}
       <section class="crn-panel crn-cam" id="kamera" aria-labelledby="crn-cam-h">
@@ -4142,7 +4147,7 @@ def build_lipa_body(data):
         </div>
         <p class="crn-updated" id="crn-updated" data-ts="{generated_at}" data-sfx="{upd_suffix}">{updated_txt} · {upd_suffix}</p>
         <p id="crn-fresh" class="crn-fresh" data-generated="{generated_at}" hidden></p>
-        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {zone['label']}</span>
+        <span class="crn-status-index" id="crn-status-index">Meteorec indeks: {st.get('label', zone['label'])}</span>
       </div>
       </div>
 {special_section if sp_alert else ''}
