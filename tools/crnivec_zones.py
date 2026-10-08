@@ -39,6 +39,12 @@ ZONES = [
 DRSI_URL = "https://weatherireica1.filip-eremita.workers.dev/crnivec-drsi"
 DRSI_MAX_AGE_MIN = 40
 
+# Vlaga na prelazu, pri kateri je megla »verjetna« (vrstica Megla v
+# generate_crnivec_page.fog_row, level stop). Ob njej kazalec ne sme ostati na
+# »suho k popr« (8. 10. 2026: kamera gosta megla, merilnik zelen). Kopije:
+# pickZoneLive() na strani, badge v /crnivec/znacka.svg (worker.js), fog_row().
+FOG_RH_STOP = 97
+
 
 # Višini postaj DRSI iz DEM (Open-Meteo Elevation API za njuni koordinati,
 # preverjeno 25. 9. 2026) -- ne ugibani. Razlika 475 m je osnova za
@@ -85,6 +91,7 @@ def with_measurement(weather, drsi):
         w["temp_c"] = t
         w["temp_src"] = "izmerjeno"
         w["temp_measured_at"] = drsi.get("ts")
+        w["vlaga_pct"] = drsi.get("vlaga_pct")
     else:
         w["temp_src"] = "ocena"
     return w
@@ -103,5 +110,6 @@ def pick_zone(weather):
     if temp is not None and temp <= 0:
         return ZONES[3]  # spolzko
     if temp is not None and temp > 5:
-        return ZONES[0]  # sonce
+        fog = (weather or {}).get("vlaga_pct")
+        return ZONES[1] if fog is not None and fog >= FOG_RH_STOP else ZONES[0]  # megla: tak-tak, sicer sonce
     return ZONES[1]  # nekaj vmes

@@ -168,7 +168,10 @@ def status_for(zone_id, rows):
     st = STATUS[zone_id]
     wet = any(r["id"] == "road" and r["value"] == "verjetno mokro" for r in rows)
     if zone_id in ("sonce", "nekaj") and any(r["id"] == "fog" and r["level"] == "stop" for r in rows):
-        desc = FOG_STATUS["desc_nekaj"] if zone_id == "nekaj" else FOG_STATUS["desc_wet"] if wet else FOG_STATUS["desc"]
+        # Cona je ob megli »nekaj« tudi pri > 5 °C (pick_zone), zato led omeni
+        # samo, kadar je res hladno (vrstica Temperatura warn/stop).
+        cold = any(r["id"] == "temp" and r["level"] in ("warn", "stop") for r in rows)
+        desc = FOG_STATUS["desc_nekaj"] if cold else FOG_STATUS["desc_wet"] if wet else FOG_STATUS["desc"]
         return {**st, "status": FOG_STATUS["status"], "label": FOG_STATUS["label"], "desc": desc}
     if zone_id == "sonce" and wet:
         return {**st, **WET_STATUS}
@@ -1952,10 +1955,10 @@ SHARE_JS_TEMPLATE = '''
     if (elevM >= hi) return 1;
     return (elevM - lo) / (hi - lo);
   }
-  function pickZoneLive(tempC, snowCm){
+  function pickZoneLive(tempC, snowCm, rh){
     if (snowCm >= 2) return ZONE_DATA[2];        // verige
     if (tempC != null && tempC <= 0) return ZONE_DATA[3];  // spolzko
-    if (tempC != null && tempC > 5) return ZONE_DATA[0];   // sonce
+    if (tempC != null && tempC > 5) return (rh != null && rh >= 97) ? ZONE_DATA[1] : ZONE_DATA[0];  // sonce; ob megli (vlaga >= 97 %) tak-tak, kot FOG_RH_STOP
     return ZONE_DATA[1];                          // nekaj vmes
   }
 
@@ -1983,7 +1986,7 @@ SHARE_JS_TEMPLATE = '''
 
   function primeniZivoStanje(tempC, snowCm, precipMm, info){
     info = info || {};
-    var zone = pickZoneLive(tempC, snowCm || 0);
+    var zone = pickZoneLive(tempC, snowCm || 0, info.rh);
     var tempTxt = (tempC == null ? "–" : numSlLive(tempC, 1)) + " °C";
     var snowTxt = numSlLive(snowCm, 1) + " cm";
     // Kartic Temperatura/Snežna odeja ni več (26. 9. 2026) -- vrednosti kaže
@@ -2074,8 +2077,9 @@ SHARE_JS_TEMPLATE = '''
     var meas = !!(zivDrsi && zivDrsi.temp_c != null);
     if (!zivModelLive && !meas) { osveziSeznam(); return; }
     var t = meas ? zivDrsi.temp_c : m.temp;
-    primeniZivoStanje(t, m.snow24, m.precip24, { meas: meas, ts: meas ? zivDrsi.ts : null, sveze: zivModelLive });
-    zivZoneId = pickZoneLive(t, m.snow24 || 0).id;
+    var rh = meas ? zivDrsi.vlaga_pct : null;
+    primeniZivoStanje(t, m.snow24, m.precip24, { meas: meas, ts: meas ? zivDrsi.ts : null, sveze: zivModelLive, rh: rh });
+    zivZoneId = pickZoneLive(t, m.snow24 || 0, rh).id;
     osveziSeznam();
   }
 
@@ -2324,8 +2328,9 @@ SHARE_JS_TEMPLATE = '''
     var wet = rows.some(function(r){ return r.id === "road" && r.value === "verjetno mokro"; });
     var fog = (zid === "sonce" || zid === "nekaj") && rows.some(function(r){ return r.id === "fog" && r.level === "stop"; });
     var st = { status: z.status, desc: z.statusDesc, label: z.label };
+    var cold = rows.some(function(r){ return r.id === "temp" && (r.level === "warn" || r.level === "stop"); });
     if (fog) st = { status: "Megla na prelazu", label: "MEGLA, PO\u010cASI",
-      desc: zid === "nekaj" ? "Vidljivost je slaba, okoli ni\u010dle je lahko tudi led. Zmanjšaj hitrost in vklopi meglenke."
+      desc: cold ? "Vidljivost je slaba, okoli ni\u010dle je lahko tudi led. Zmanjšaj hitrost in vklopi meglenke."
         : wet ? "Vidljivost je slaba, vozišče je verjetno mokro. Zmanjšaj hitrost in vklopi meglenke."
         : "Vidljivost je slaba. Zmanjšaj hitrost in vklopi meglenke." };
     else if (zid === "sonce" && wet) st = { status: "Cesta je mokra", label: "MOKRO, A PREVOZNO",

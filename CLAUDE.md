@@ -831,6 +831,15 @@ Humorna stran »Kako je čez Črnivec?« ima od 25. 9. 2026 pod statusom seznam
   Kjer je temperatura izmerjena, je tako tudi označena (kartica, »Posodobljeno«,
   OG slika, zgodba). Kadar je kakšna druga vrstica »nevarno«, indeks pa
   zelen/rumen, se izpiše `check_warn_text()`.
+- **Megla in mokra cesta v naslovu in merilniku** (8. 10. 2026; kamera je kazala gosto
+  meglo in mokro cesto, stran pa »Cesta je suha«): `pick_zone()` da ob vlagi na prelazu
+  ≥ 97 % (`FOG_RH_STOP`, izmerjena, kot vrstica Megla) in > 5 °C cono **tak-tak** namesto
+  »suho k popr« -- kopije: `pickZoneLive()` na strani, `badge` v `/crnivec/znacka.svg`
+  (`worker.js`). Naslov, opis in vrstica indeksa gredo prek `status_for()` ↔ `stanjeNaslov()`:
+  megla > mokro vozišče (`measured_wet()`: dež zadnje ure ALI danes padlo in rosišče ≤ 1,5 °C
+  pod temperaturo) > besedilo cone. Vidljivosti nihče ne meri, megla je sklep iz vlage.
+  Pri ledu in snegu (verige, spolzko) ostane, kot je. **Kamero (`CAM_URL`) vedno poglej**,
+  preden razglasiš stanje ceste za pravilno.
 - **»Naslednjih 6 ur«** (`forecast_hours()`/`forecast_sentence()`, dodano
   25. 9. 2026) pod statusom kaže ure +1, +3 in +6: temperaturo, padavine in
   oceno vozišča. Vhodi so `next_hours` iz `compute_pass_weather`. Razlika

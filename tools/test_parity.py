@@ -265,7 +265,11 @@ def crnivec_mokri_naslov():
         check(gc.status_for(zid, [wet, fog])["status"] == want_fog, "status_for megla", zid)
     check(gc.status_for("sonce", [wet, fog])["desc"] == gc.FOG_STATUS["desc_wet"], "megla+mokro", "")
     check(gc.status_for("sonce", [dry, fog])["desc"] == gc.FOG_STATUS["desc"], "megla", "")
-    check(gc.status_for("nekaj", [dry, fog])["desc"] == gc.FOG_STATUS["desc_nekaj"], "megla nekaj", "")
+    cold, mild = {"id": "temp", "level": "warn"}, {"id": "temp", "level": "ok"}
+    check(gc.status_for("nekaj", [dry, fog, cold])["desc"] == gc.FOG_STATUS["desc_nekaj"], "megla nekaj hladno", "")
+    # ob megli pick_zone da »nekaj« tudi nad 5 °C: led se ne omeni
+    check(gc.status_for("nekaj", [dry, fog, mild])["desc"] == gc.FOG_STATUS["desc"], "megla nekaj toplo", "")
+    check(gc.status_for("nekaj", [wet, fog, mild])["desc"] == gc.FOG_STATUS["desc_wet"], "megla nekaj toplo mokro", "")
 
 
 @test
@@ -582,15 +586,19 @@ def crnivec_znacka():
     temps = [None, -5, -0.1, 0, 0.1, 3, 5, 5.1, 12]
     snows = [0, 1.9, 2, 5]
     cases = [(t, sn) for t in temps for sn in snows]
-    prelude = "function badge(tempC, snowCm){ " + chain + " return zoneLabel; }"
-    wk = js("worker.js", [], [{"expr": f"badge({json.dumps(t)}, {sn})"} for t, sn in cases], prelude)
+    rhs = [None, 80, 96.9, 97, 100]
+    cases = [(t, sn, rh) for t, sn in cases for rh in rhs]
+    prelude = ("function badge(tempC, snowCm, rh){ const drsi = rh == null ? null : { vlaga_pct: rh }; "
+               + chain + " return zoneLabel; }")
+    wk = js("worker.js", [], [{"expr": f"badge({json.dumps(t)}, {sn}, {json.dumps(rh)})"} for t, sn, rh in cases], prelude)
     page = js("crnivec-site/index.html", ["pickZoneLive", "ZONE_DATA"],
-              [{"expr": f"pickZoneLive({json.dumps(t)}, {sn}).id"} for t, sn in cases])
+              [{"expr": f"pickZoneLive({json.dumps(t)}, {sn}, {json.dumps(rh)}).id"} for t, sn, rh in cases])
     zone_to_badge = {"sonce": "suho", "nekaj": "tak-tak", "verige": "verige", "spolzko": "spolzko"}
-    for (t, sn), a, b in zip(cases, wk, page):
-        z = cz.pick_zone({"temp_c": t, "expected_snow_cm_24h": sn})["id"]
-        check(zone_to_badge[z] == a, "značka: cona", f"t={t} sneg={sn}: pick_zone={z} worker={a}")
-        check(z == b, "cona na strani", f"t={t} sneg={sn}: pick_zone={z} stran={b}")
+    for (t, sn, rh), a, b in zip(cases, wk, page):
+        z = cz.pick_zone({"temp_c": t, "expected_snow_cm_24h": sn, "vlaga_pct": rh})["id"]
+        check(zone_to_badge[z] == a, "značka: cona", f"t={t} sneg={sn} vlaga={rh}: pick_zone={z} worker={a}")
+        check(z == b, "cona na strani", f"t={t} sneg={sn} vlaga={rh}: pick_zone={z} stran={b}")
+    check(cz.FOG_RH_STOP == 97, "prag megle", f"FOG_RH_STOP={cz.FOG_RH_STOP}")
 
 
 # ── Agrometeo: app.js ↔ generate_agrometeo_page.py ───────────────────────────
