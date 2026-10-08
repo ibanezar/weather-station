@@ -320,8 +320,16 @@ def check_rows(weather, drsi, snowpack_cm=None):
     return rows
 
 
-def road_row(black_ice, precip_3h, snow_3h, t):
+ROAD_WET_MEASURED_MM = 0.1  # izmerjene padavine v zadnji uri, ki vozišče zmočijo
+
+
+def road_row(black_ice, precip_3h, snow_3h, t, measured_rain_1h=None):
+    """measured_rain_1h: padavine zadnje ure, IZMERJENE na prelazu (DRSI, trend
+    iz /crnivec-drsi). Model je za Rečico in lahko dež na prelazu zgreši, zato
+    meritev vozišče samo zmoči, nikoli ne osuši (od 8. 10. 2026)."""
     r = {"id": "road", "label": "Vozišče", "src": "ocena"}
+    if (measured_rain_1h or 0) >= ROAD_WET_MEASURED_MM:
+        precip_3h = max(precip_3h or 0, 0.2)
     if black_ice is None and precip_3h is None:
         return {**r, "level": "na", "value": "ni podatka"}
     if (snow_3h or 0) >= 0.5:
@@ -2004,7 +2012,7 @@ SHARE_JS_TEMPLATE = '''
   // Začetni modelski vhodi so strežniški (isti, iz katerih je spečen
   // statični seznam) -- če meritev DRSI prispe pred Open-Meteo, vrstice
   // Vozišče/Sneg ne smejo za trenutek pasti na "ni podatka".
-  var zivModel = __CHECK_MODEL_JSON__, zivDrsi = null, zivZoneId = null, zivModelLive = false;
+  var zivModel = __CHECK_MODEL_JSON__, zivDrsi = null, zivTrend = null, zivZoneId = null, zivModelLive = false;
   // Snežna odeja (compute_snowpack, pas 900 m) -- samo strežniška, živi klic
   // Open-Meteo je ne računa, zato je ločena od zivModel (ta se prepiše).
   var SNOWPACK = __SNOWPACK_JSON__;
@@ -2044,8 +2052,9 @@ SHARE_JS_TEMPLATE = '''
     if (g <= 1.5 && dew != null && dew >= g - 1.0) return "srednje";
     return "nizko";
   }
-  function cestaVrstica(bi, p3, s3, t){
+  function cestaVrstica(bi, p3, s3, t, merjeno1h){
     var road = { id: "road", label: "Vozišče", src: "ocena" };
+    if ((merjeno1h || 0) >= 0.1) p3 = Math.max(p3 || 0, 0.2);  // kot ROAD_WET_MEASURED_MM v road_row()
     if (bi == null && p3 == null) { road.level = "na"; road.value = "ni podatka"; }
     else if ((s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
     else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
@@ -2222,7 +2231,7 @@ SHARE_JS_TEMPLATE = '''
     var bi = t == null ? null : blackIceLive(t, m.cloud,
       d.veter_kmh != null ? d.veter_kmh : m.windValley,
       d.rosisce_c != null ? d.rosisce_c : m.dewValley, m.pNow, m.pPrev);
-    rows.push(cestaVrstica(bi, m.p3, m.s3, t));
+    rows.push(cestaVrstica(bi, m.p3, m.s3, t, zivTrend ? zivTrend.padavine_mm : null));
 
     // Snežna odeja je samo besedilo (snowpack_text), raven nosi nov sneg.
     var cm = m.snow24, snow = { id: "snow", label: "Sneg", src: "napoved 24 h" };
@@ -2395,9 +2404,10 @@ SHARE_JS_TEMPLATE = '''
       var ts = st && st.ts ? Date.parse(st.ts) : NaN;
       zivDrsi = (!isNaN(ts) && (Date.now() - ts) / 60000 <= DRSI_MAX_AGE_MIN) ? st : null;
       izrisiDolino((d && d.postaje) || {});
+      zivTrend = (d && d.trend) || null;
       izrisiTrend(d && d.trend);
       uporabiStanje();
-    }).catch(function(){ zivDrsi = null; uporabiStanje(); });
+    }).catch(function(){ zivDrsi = null; zivTrend = null; uporabiStanje(); });
   }
 
   function osveziZivoVreme(){
