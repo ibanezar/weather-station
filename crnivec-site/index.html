@@ -1480,9 +1480,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if (g <= 1.5 && dew != null && dew >= g - 1.0) return "srednje";
     return "nizko";
   }
-  function cestaVrstica(bi, p3, s3, t, merjeno1h){
+  function cestaVrstica(bi, p3, s3, t, mokroMerjeno){
     var road = { id: "road", label: "Vozišče", src: "ocena" };
-    if ((merjeno1h || 0) >= 0.1) p3 = Math.max(p3 || 0, 0.2);  // kot ROAD_WET_MEASURED_MM v road_row()
+    if (mokroMerjeno) p3 = Math.max(p3 || 0, 0.2);  // kot wet_measured v road_row()
     if (bi == null && p3 == null) { road.level = "na"; road.value = "ni podatka"; }
     else if ((s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
     else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
@@ -1648,6 +1648,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     sec.hidden = false;
   }
 
+  // Kot measured_wet() v Pythonu (pragovi ROAD_WET_*): dež v zadnji uri ALI danes že padlo in nasičen zrak.
+  function merjenoMokro(d, tr){
+    if (tr && (tr.padavine_mm || 0) >= 0.1) return true;
+    return !!(d && d.padavine_danes_mm != null && d.padavine_danes_mm >= 0.2 && d.temp_c != null
+      && d.rosisce_c != null && d.temp_c - d.rosisce_c <= 1.5);
+  }
   function vrsticeSeznama(m, d){
     m = m || {}; d = d || {};
     var rows = [];
@@ -1659,7 +1665,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var bi = t == null ? null : blackIceLive(t, m.cloud,
       d.veter_kmh != null ? d.veter_kmh : m.windValley,
       d.rosisce_c != null ? d.rosisce_c : m.dewValley, m.pNow, m.pPrev);
-    rows.push(cestaVrstica(bi, m.p3, m.s3, t, zivTrend ? zivTrend.padavine_mm : null));
+    rows.push(cestaVrstica(bi, m.p3, m.s3, t, merjenoMokro(d, zivTrend)));
 
     // Snežna odeja je samo besedilo (snowpack_text), raven nosi nov sneg.
     var cm = m.snow24, snow = { id: "snow", label: "Sneg", src: "napoved 24 h" };

@@ -147,7 +147,7 @@ def vodostaj():
 
 # ── Črnivec: Python (winter_engine, generate_crnivec_page) ↔ JS na strani ────
 CRN_NAMES = ["LIVE_LAPSE_RATE", "LIVE_SNOW_OFFSET", "snowFractionLive", "groundTempLive", "blackIceLive",
-             "cestaVrstica", "NEXT_BIAS_HOURS", "LEVEL_RANK", "tempNivo", "numSlLive", "padavineBesedilo",
+             "cestaVrstica", "merjenoMokro", "NEXT_BIAS_HOURS", "LEVEL_RANK", "tempNivo", "numSlLive", "padavineBesedilo",
              "oceniUro", "povzemiOkno", "fnv1a"]
 CRN_PRELUDE = "var PASS = {elev: 902};"
 
@@ -214,6 +214,32 @@ def crnivec_poledica():
     check(k[0] == we.seo.LAPSE_RATE_C_PER_100M, "gradient temperature", f"js={k[0]} py={we.seo.LAPSE_RATE_C_PER_100M}")
     check(k[1] == we.SNOW_LEVEL_OFFSET_M, "odmik meje sneženja", f"js={k[1]} py={we.SNOW_LEVEL_OFFSET_M}")
     check(k[2] == gc.NEXT_BIAS_HOURS, "izzvenevanje popravka", f"js={k[2]} py={gc.NEXT_BIAS_HOURS}")
+
+
+@test
+def crnivec_mokro_iz_meritve():
+    """measured_wet() ↔ merjenoMokro() in vpliv na vrstico Vozišče (8. 10. 2026: nasičen zrak po dežju)."""
+    import generate_crnivec_page as gc
+    src = "crnivec-site/index.html"
+    cases = []
+    for t in [12, 3]:
+        for spread in [0, 1.4, 1.5, 1.6, 4]:
+            for day in [None, 0, 0.2, 10]:
+                for r1 in [None, 0, 0.1, 0.3]:
+                    cases.append(({"temp_c": t, "rosisce_c": t - spread, "padavine_danes_mm": day}, r1))
+    cases.append(({}, None))
+    cases.append((None, None))
+    got = js(src, CRN_NAMES, [{"fn": "merjenoMokro", "args": [d, None if r is None else {"padavine_mm": r}]}
+                              for d, r in cases], CRN_PRELUDE)
+    for (d, r), g in zip(cases, got):
+        check(gc.measured_wet(d, r) == g, "mokro iz meritve", f"{d} {r}: py={gc.measured_wet(d, r)} js={g}")
+    for wet in (False, True):
+        for bi in (None, "nizko", "srednje", "visoko"):
+            for p3 in (None, 0, 0.3):
+                py = gc.road_row(bi, p3, 0, 6, wet)
+                jsr = js(src, CRN_NAMES, [{"fn": "cestaVrstica", "args": [bi, p3, 0, 6, wet]}], CRN_PRELUDE)[0]
+                check(py["level"] == jsr["level"] and py["value"] == jsr["value"], "vozišče z meritvijo",
+                      f"{bi} {p3} {wet}: py={py} js={jsr}")
 
 
 @test
