@@ -28,4 +28,14 @@ jobs:
           git add vodostaj-savinje/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi vodostaj Savinje $(date -u +%Y-%m-%d) [skip ci]"
-          git push
+          # Drugi workflowi pišejo v main istočasno (varovalka v workerju sproži
+          # več hkrati) -- zavrnjen push ni napaka, samo rebase in ponovni poskus.
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
