@@ -244,17 +244,28 @@ def crnivec_mokro_iz_meritve():
 
 @test
 def crnivec_mokri_naslov():
-    """WET_STATUS (Python) ↔ mokroNaslov() v generirani strani; status_for() zamenja samo cono »sonce«."""
+    """WET_STATUS/FOG_STATUS (Python) ↔ stanjeNaslov() v generirani strani; prednost megla > mokro > cona."""
     import generate_crnivec_page as gc
     page = open("crnivec-site/index.html", encoding="utf-8").read()
-    check(gc.WET_STATUS["status"] in page and gc.WET_STATUS["desc"] in page and gc.WET_STATUS["label"] in page, "mokri naslov v JS",
-          "besedilo WET_STATUS manjka v crnivec-site/index.html (mokroNaslov)")
-    wet = [{"id": "road", "value": "verjetno mokro"}]
+    for k in ("status", "desc", "label"):
+        check(gc.WET_STATUS[k] in page, "mokri naslov v JS", f"WET_STATUS[{k}] manjka v crnivec-site/index.html (stanjeNaslov)")
+    for k in ("status", "desc", "desc_wet", "desc_nekaj", "label"):
+        check(gc.FOG_STATUS[k] in page, "meglen naslov v JS", f"FOG_STATUS[{k}] manjka v crnivec-site/index.html (stanjeNaslov)")
+    wet = {"id": "road", "value": "verjetno mokro"}
+    dry = {"id": "road", "value": "verjetno suho"}
+    fog = {"id": "fog", "level": "stop"}
+    nofog = {"id": "fog", "level": "ok"}
     for z in gc.ZONES:
-        want = gc.WET_STATUS["status"] if z["id"] == "sonce" else gc.STATUS[z["id"]]["status"]
-        check(gc.status_for(z["id"], wet)["status"] == want, "status_for", z["id"])
-    check(gc.status_for("sonce", [{"id": "road", "value": "verjetno suho"}])["status"] == gc.STATUS["sonce"]["status"],
-          "status_for suho", "")
+        zid = z["id"]
+        base = gc.STATUS[zid]["status"]
+        check(gc.status_for(zid, [dry, nofog])["status"] == base, "status_for suho", zid)
+        want_wet = gc.WET_STATUS["status"] if zid == "sonce" else base
+        check(gc.status_for(zid, [wet, nofog])["status"] == want_wet, "status_for mokro", zid)
+        want_fog = gc.FOG_STATUS["status"] if zid in ("sonce", "nekaj") else base
+        check(gc.status_for(zid, [wet, fog])["status"] == want_fog, "status_for megla", zid)
+    check(gc.status_for("sonce", [wet, fog])["desc"] == gc.FOG_STATUS["desc_wet"], "megla+mokro", "")
+    check(gc.status_for("sonce", [dry, fog])["desc"] == gc.FOG_STATUS["desc"], "megla", "")
+    check(gc.status_for("nekaj", [dry, fog])["desc"] == gc.FOG_STATUS["desc_nekaj"], "megla nekaj", "")
 
 
 @test

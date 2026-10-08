@@ -147,16 +147,30 @@ STATUS = {
 # mokroti ne ve ničesar, zato je naslov pisal »Cesta je suha«, ko je kamera
 # kazala mokro cesto (8. 10. 2026). Kadar vrstica Vozišče pravi »verjetno
 # mokro«, naslov in opis povesta to; cona, kazalec, OG kartica in značka ostanejo.
-# JS kopija: mokroNaslov() v SHARE_JS_TEMPLATE.
+# JS kopija: stanjeNaslov() v SHARE_JS_TEMPLATE.
 WET_STATUS = {"status": "Cesta je mokra",
               "desc": "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost.",
               "label": "MOKRO, A PREVOZNO"}  # vrstica »Meteorec indeks: …« in deljena slika
 
 
+# Megla (vrstica Megla na ravni »Nevarno«, vlaga na prelazu >= 97 %) prevlada nad
+# mokroto in nad mirnima conama (isto pravilo kot says_state()): nevarnost je
+# vidljivost, ne vozišče. Kamera je 8. 10. 2026 ob 10:26 kazala gosto meglo,
+# naslov pa je še pisal »Cesta je mokra«. JS kopija: stanjeNaslov().
+FOG_STATUS = {"status": "Megla na prelazu", "label": "MEGLA, POČASI",
+              "desc": "Vidljivost je slaba. Zmanjšaj hitrost in vklopi meglenke.",
+              "desc_wet": "Vidljivost je slaba, vozišče je verjetno mokro. Zmanjšaj hitrost in vklopi meglenke.",
+              "desc_nekaj": "Vidljivost je slaba, okoli ničle je lahko tudi led. Zmanjšaj hitrost in vklopi meglenke."}
+
+
 def status_for(zone_id, rows):
-    """STATUS cone; pri »sonce« z mokrim voziščem naslov in opis mokre ceste."""
+    """STATUS cone: megla (sonce, nekaj) > mokro vozišče (sonce) > osnovno besedilo cone."""
     st = STATUS[zone_id]
-    if zone_id == "sonce" and any(r["id"] == "road" and r["value"] == "verjetno mokro" for r in rows):
+    wet = any(r["id"] == "road" and r["value"] == "verjetno mokro" for r in rows)
+    if zone_id in ("sonce", "nekaj") and any(r["id"] == "fog" and r["level"] == "stop" for r in rows):
+        desc = FOG_STATUS["desc_nekaj"] if zone_id == "nekaj" else FOG_STATUS["desc_wet"] if wet else FOG_STATUS["desc"]
+        return {**st, "status": FOG_STATUS["status"], "label": FOG_STATUS["label"], "desc": desc}
+    if zone_id == "sonce" and wet:
         return {**st, **WET_STATUS}
     return st
 
@@ -2302,17 +2316,25 @@ SHARE_JS_TEMPLATE = '''
     rows.push(wind);
     return rows;
   }
-  // Kot status_for()/WET_STATUS v Pythonu: cona »sonce« z mokrim voziščem ne sme pisati »suha«.
-  function mokroNaslov(rows, zid){
+  // Kot status_for()/WET_STATUS/FOG_STATUS v Pythonu: megla (sonce, nekaj) > mokro vozišče (sonce) > besedilo cone.
+  function stanjeNaslov(rows, zid){
     var title = document.getElementById("crn-status-title"), desc = document.getElementById("crn-status-desc");
-    if (!title || !desc || zid !== "sonce") return;
+    var z = ZONE_DATA.filter(function(x){ return x.id === zid; })[0];
+    if (!title || !desc || !z) return;
     var wet = rows.some(function(r){ return r.id === "road" && r.value === "verjetno mokro"; });
-    var lbl = wet ? "MOKRO, A PREVOZNO" : ZONE_DATA[0].label;
+    var fog = (zid === "sonce" || zid === "nekaj") && rows.some(function(r){ return r.id === "fog" && r.level === "stop"; });
+    var st = { status: z.status, desc: z.statusDesc, label: z.label };
+    if (fog) st = { status: "Megla na prelazu", label: "MEGLA, PO\u010cASI",
+      desc: zid === "nekaj" ? "Vidljivost je slaba, okoli ni\u010dle je lahko tudi led. Zmanjšaj hitrost in vklopi meglenke."
+        : wet ? "Vidljivost je slaba, vozišče je verjetno mokro. Zmanjšaj hitrost in vklopi meglenke."
+        : "Vidljivost je slaba. Zmanjšaj hitrost in vklopi meglenke." };
+    else if (zid === "sonce" && wet) st = { status: "Cesta je mokra", label: "MOKRO, A PREVOZNO",
+      desc: "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost." };
     var idx = document.getElementById("crn-status-index");
-    if (idx) idx.textContent = "Meteorec indeks: " + lbl;
-    if (typeof share !== "undefined" && share) share.verdict = lbl;
-    title.textContent = wet ? "Cesta je mokra" : ZONE_DATA[0].status;
-    desc.textContent = wet ? "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost." : ZONE_DATA[0].statusDesc;
+    if (idx) idx.textContent = "Meteorec indeks: " + st.label;
+    if (typeof share !== "undefined" && share) share.verdict = st.label;
+    title.textContent = st.status;
+    desc.textContent = st.desc;
   }
   function osveziSeznam(){
     var ul = document.getElementById("crn-check");
@@ -2321,7 +2343,7 @@ SHARE_JS_TEMPLATE = '''
     izrisiNapoved(rows);
     var saysEl = document.getElementById("crn-says-txt"), stEl = document.getElementById("crn-status");
     var zidSays = zivZoneId || (stEl ? stEl.getAttribute("data-zone") : null);
-    mokroNaslov(rows, zidSays);
+    stanjeNaslov(rows, zidSays);
     if (saysEl && zidSays) saysEl.textContent = izberiRek(zidSays, rows);
     ul.textContent = "";
     rows.forEach(function(r){

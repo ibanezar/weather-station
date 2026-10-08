@@ -37,7 +37,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://crnivec.si/lipa/","name":"Prelaz Lipa: vreme in stanje ceste Vransko–Šmartno","description":"Kako je čez Lipo (723 m)? Ocena temperature, snega in poledice ter vreme po urah za cesto Vransko–Šmartno ob Dreti.","url":"https://crnivec.si/lipa/","inLanguage":"sl","isPartOf":{"@id":"https://crnivec.si/#website"},"author":{"@id":"https://meteorec.si/#person"},"about":{"@type":"Place","@id":"https://crnivec.si/lipa/#prelaz","name":"Lipa","alternateName":["Prelaz Lipa","Lipa nad Vranskim"],"description":"Prelaz (723 m) med Vranskim in Šmartnim ob Dreti.","geo":{"@type":"GeoCoordinates","latitude":46.2613,"longitude":14.8938,"elevation":723},"sameAs":["https://www.wikidata.org/wiki/Q12794904","https://sl.wikipedia.org/wiki/Lipa_(preval)"],"containedInPlace":{"@type":"Country","name":"Slovenija"}},"speakable":{"@type":"SpeakableSpecification","cssSelector":["#crn-status-title","#crn-status-desc","#crn-next-say"]},"datePublished":"2026-09-26","dateModified":"2026-10-08T07:50:12+02:00"}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://crnivec.si/lipa/","name":"Prelaz Lipa: vreme in stanje ceste Vransko–Šmartno","description":"Kako je čez Lipo (723 m)? Ocena temperature, snega in poledice ter vreme po urah za cesto Vransko–Šmartno ob Dreti.","url":"https://crnivec.si/lipa/","inLanguage":"sl","isPartOf":{"@id":"https://crnivec.si/#website"},"author":{"@id":"https://meteorec.si/#person"},"about":{"@type":"Place","@id":"https://crnivec.si/lipa/#prelaz","name":"Lipa","alternateName":["Prelaz Lipa","Lipa nad Vranskim"],"description":"Prelaz (723 m) med Vranskim in Šmartnim ob Dreti.","geo":{"@type":"GeoCoordinates","latitude":46.2613,"longitude":14.8938,"elevation":723},"sameAs":["https://www.wikidata.org/wiki/Q12794904","https://sl.wikipedia.org/wiki/Lipa_(preval)"],"containedInPlace":{"@type":"Country","name":"Slovenija"}},"speakable":{"@type":"SpeakableSpecification","cssSelector":["#crn-status-title","#crn-status-desc","#crn-next-say"]},"datePublished":"2026-09-26","dateModified":"2026-10-08T10:29:17+02:00"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","@id":"https://crnivec.si/lipa/#vprasanja","mainEntity":[{"@type":"Question","name":"Koliko je visok prelaz Lipa?","acceptedAnswer":{"@type":"Answer","text":"Prelaz Lipa je 723 metrov nad morjem, približno 350 m višje od Šmartnega ob Dreti in Vranskega."}},{"@type":"Question","name":"Kje je prelaz Lipa?","acceptedAnswer":{"@type":"Answer","text":"Lipa je prelaz med Menino planino in Dobroveljsko planoto. Čezenj pelje lokalna cesta Vransko–Lipa–Šmartno ob Dreti, najkrajša povezava med Vranskim in Zadrečko dolino."}},{"@type":"Question","name":"Ali je na Lipi sneg?","acceptedAnswer":{"@type":"Answer","text":"Snega na Lipi ne meri nobena postaja. Po oceni modela je na višini prelaza zdaj 0 cm snežne odeje, v naslednjih 24 urah pa je napovedanih 0,0 cm novega snega."}},{"@type":"Question","name":"Ali je na Lipi kamera ali vremenska postaja?","acceptedAnswer":{"@type":"Answer","text":"Ne. Na Lipi ni cestne vremenske postaje ne spletne kamere, zato so vse številke na tej strani ocena iz vremenskega modela, preračunana na višino prelaza. Za Črnivec, kjer sta postaja in kamera, glej crnivec.si."}},{"@type":"Question","name":"Kdaj je na Lipi obvezna zimska oprema?","acceptedAnswer":{"@type":"Answer","text":"Od 15. novembra do 15. marca in tudi zunaj tega obdobja, kadar so na cesti zimske razmere, mora imeti osebni avto zimske pnevmatike ali letne pnevmatike in snežne verige v vozilu. Tako določa Zakon o pravilih cestnega prometa."}}]}
@@ -1330,17 +1330,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     rows.push(wind);
     return rows;
   }
-  // Kot status_for()/WET_STATUS v Pythonu: cona »sonce« z mokrim voziščem ne sme pisati »suha«.
-  function mokroNaslov(rows, zid){
+  // Kot status_for()/WET_STATUS/FOG_STATUS v Pythonu: megla (sonce, nekaj) > mokro vozišče (sonce) > besedilo cone.
+  function stanjeNaslov(rows, zid){
     var title = document.getElementById("crn-status-title"), desc = document.getElementById("crn-status-desc");
-    if (!title || !desc || zid !== "sonce") return;
+    var z = ZONE_DATA.filter(function(x){ return x.id === zid; })[0];
+    if (!title || !desc || !z) return;
     var wet = rows.some(function(r){ return r.id === "road" && r.value === "verjetno mokro"; });
-    var lbl = wet ? "MOKRO, A PREVOZNO" : ZONE_DATA[0].label;
+    var fog = (zid === "sonce" || zid === "nekaj") && rows.some(function(r){ return r.id === "fog" && r.level === "stop"; });
+    var st = { status: z.status, desc: z.statusDesc, label: z.label };
+    if (fog) st = { status: "Megla na prelazu", label: "MEGLA, POČASI",
+      desc: zid === "nekaj" ? "Vidljivost je slaba, okoli ničle je lahko tudi led. Zmanjšaj hitrost in vklopi meglenke."
+        : wet ? "Vidljivost je slaba, vozišče je verjetno mokro. Zmanjšaj hitrost in vklopi meglenke."
+        : "Vidljivost je slaba. Zmanjšaj hitrost in vklopi meglenke." };
+    else if (zid === "sonce" && wet) st = { status: "Cesta je mokra", label: "MOKRO, A PREVOZNO",
+      desc: "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost." };
     var idx = document.getElementById("crn-status-index");
-    if (idx) idx.textContent = "Meteorec indeks: " + lbl;
-    if (typeof share !== "undefined" && share) share.verdict = lbl;
-    title.textContent = wet ? "Cesta je mokra" : ZONE_DATA[0].status;
-    desc.textContent = wet ? "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost." : ZONE_DATA[0].statusDesc;
+    if (idx) idx.textContent = "Meteorec indeks: " + st.label;
+    if (typeof share !== "undefined" && share) share.verdict = st.label;
+    title.textContent = st.status;
+    desc.textContent = st.desc;
   }
   function osveziSeznam(){
     var ul = document.getElementById("crn-check");
@@ -1349,7 +1357,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     izrisiNapoved(rows);
     var saysEl = document.getElementById("crn-says-txt"), stEl = document.getElementById("crn-status");
     var zidSays = zivZoneId || (stEl ? stEl.getAttribute("data-zone") : null);
-    mokroNaslov(rows, zidSays);
+    stanjeNaslov(rows, zidSays);
     if (saysEl && zidSays) saysEl.textContent = izberiRek(zidSays, rows);
     ul.textContent = "";
     rows.forEach(function(r){
