@@ -143,6 +143,23 @@ STATUS = {
                 "bg": "#fee2e2", "ink": "#7f1d1d"},
 }
 
+# Cona »sonce« (nad 5 °C, brez snega) pove samo, da ni snega ali ledu -- o
+# mokroti ne ve ničesar, zato je naslov pisal »Cesta je suha«, ko je kamera
+# kazala mokro cesto (8. 10. 2026). Kadar vrstica Vozišče pravi »verjetno
+# mokro«, naslov in opis povesta to; cona, kazalec, OG kartica in značka ostanejo.
+# JS kopija: mokroNaslov() v SHARE_JS_TEMPLATE.
+WET_STATUS = {"status": "Cesta je mokra",
+              "desc": "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost."}
+
+
+def status_for(zone_id, rows):
+    """STATUS cone; pri »sonce« z mokrim voziščem naslov in opis mokre ceste."""
+    st = STATUS[zone_id]
+    if zone_id == "sonce" and any(r["id"] == "road" and r["value"] == "verjetno mokro" for r in rows):
+        return {**st, **WET_STATUS}
+    return st
+
+
 # Enotne obrisne ikone za UI (24×24, currentColor) -- emoji ostanejo samo v
 # sproščenih, šaljivih delih strani, ne v osnovni ikonografiji.
 UI_ICONS = {
@@ -2284,6 +2301,14 @@ SHARE_JS_TEMPLATE = '''
     rows.push(wind);
     return rows;
   }
+  // Kot status_for()/WET_STATUS v Pythonu: cona »sonce« z mokrim voziščem ne sme pisati »suha«.
+  function mokroNaslov(rows, zid){
+    var title = document.getElementById("crn-status-title"), desc = document.getElementById("crn-status-desc");
+    if (!title || !desc || zid !== "sonce") return;
+    var wet = rows.some(function(r){ return r.id === "road" && r.value === "verjetno mokro"; });
+    title.textContent = wet ? "Cesta je mokra" : ZONE_DATA[0].status;
+    desc.textContent = wet ? "Brez snega in ledu, a vozišče je verjetno mokro. Prilagodi hitrost." : ZONE_DATA[0].statusDesc;
+  }
   function osveziSeznam(){
     var ul = document.getElementById("crn-check");
     if (!ul || (!zivModel && !zivDrsi)) return;
@@ -2291,6 +2316,7 @@ SHARE_JS_TEMPLATE = '''
     izrisiNapoved(rows);
     var saysEl = document.getElementById("crn-says-txt"), stEl = document.getElementById("crn-status");
     var zidSays = zivZoneId || (stEl ? stEl.getAttribute("data-zone") : null);
+    mokroNaslov(rows, zidSays);
     if (saysEl && zidSays) saysEl.textContent = izberiRek(zidSays, rows);
     ul.textContent = "";
     rows.forEach(function(r){
@@ -3615,7 +3641,7 @@ def build_body(data):
          "bg": STATUS[z["id"]]["bg"], "ink": STATUS[z["id"]]["ink"], "icon": ZONE_ICONS[z["id"]]}
         for z in ZONES
     ]
-    st = STATUS[zone["id"]]
+    st = status_for(zone["id"], rows)
 
     # Koda za "Vstavi značko" (crn-embed spodaj) -- ročno pobegel niz (ne
     # html.escape, ta modul tu ni uvožen), ker gre za en sam znan literal, ne
@@ -4006,12 +4032,12 @@ def build_lipa_body(data):
     lipa = next((p for p in data.get("passes") or [] if p["id"] == "lipa"), None)
     weather = (lipa or {}).get("weather") or {}
     zone = pick_zone(with_measurement(weather, None))
-    st = STATUS[zone["id"]]
     generated_at = data.get("generated_at") or ""
     snowpack_cm = snowpack_at(data, LIPA_ELEV)
     snow_new = weather.get("expected_snow_cm_24h")
 
     rows = [r for r in check_rows(weather, None, snowpack_cm) if r["id"] not in ("fog", "wind")]
+    st = status_for(zone["id"], rows)
     check_warn_txt = check_warn_text(rows, zone["id"])
     next_hours, _ = forecast_hours(weather, None)
     next_cells = forecast_cells_html(next_hours)
