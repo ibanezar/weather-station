@@ -313,22 +313,37 @@ def check_rows(weather, drsi, snowpack_cm=None):
             (drsi or {}).get("rosisce_c") if (drsi or {}).get("rosisce_c") is not None else now.get("dew_c_valley"),
             now.get("precip_mm_now"), now.get("precip_mm_prev"))
         bi = res[0] if res else None
-    rows.append(road_row(bi, now.get("precip_mm_3h"), now.get("snow_cm_3h"), t))
+    rows.append(road_row(bi, now.get("precip_mm_3h"), now.get("snow_cm_3h"), t, measured_wet(drsi)))
     rows.append(snow_row(weather.get("expected_snow_cm_24h"), snowpack_cm))
     rows.append(fog_row((drsi or {}).get("vlaga_pct")))
     rows.append(wind_row((drsi or {}).get("veter_kmh"), (drsi or {}).get("sunki_kmh")))
     return rows
 
 
-ROAD_WET_MEASURED_MM = 0.1  # izmerjene padavine v zadnji uri, ki vozišče zmočijo
+ROAD_WET_MEASURED_MM = 0.1   # izmerjene padavine v zadnji uri, ki vozišče zmočijo
+ROAD_WET_DAY_MM = 0.2        # dnevna vsota DRSI, nad katero nasičen zrak pomeni mokro cesto
+ROAD_WET_SPREAD_C = 1.5      # temperatura − rosišče: manj pomeni, da se mokra cesta ne suši
 
 
-def road_row(black_ice, precip_3h, snow_3h, t, measured_rain_1h=None):
-    """measured_rain_1h: padavine zadnje ure, IZMERJENE na prelazu (DRSI, trend
-    iz /crnivec-drsi). Model je za Rečico in lahko dež na prelazu zgreši, zato
-    meritev vozišče samo zmoči, nikoli ne osuši (od 8. 10. 2026)."""
+def measured_wet(drsi, rain_1h=None):
+    """Ali meritev DRSI kaže mokro vozišče: dež v zadnji uri, ALI je danes že
+    padal in je zrak nasičen (rosišče tik pod temperaturo), tako da se cesta
+    po dežju ne more posušiti. 8. 10. 2026: dež je nehal, dnevna vsota 10 mm,
+    vlaga 100 %, kamera je kazala mokro cesto, stran pa »verjetno suho«.
+    Meritev vozišče samo zmoči, nikoli ne osuši."""
+    d = drsi or {}
+    if (rain_1h or 0) >= ROAD_WET_MEASURED_MM:
+        return True
+    t, dew, day = d.get("temp_c"), d.get("rosisce_c"), d.get("padavine_danes_mm")
+    return (day is not None and day >= ROAD_WET_DAY_MM and t is not None
+            and dew is not None and t - dew <= ROAD_WET_SPREAD_C)
+
+
+def road_row(black_ice, precip_3h, snow_3h, t, wet_measured=False):
+    """wet_measured: glej measured_wet(). Model je za Rečico in lahko dež na
+    prelazu zgreši (od 8. 10. 2026)."""
     r = {"id": "road", "label": "Vozišče", "src": "ocena"}
-    if (measured_rain_1h or 0) >= ROAD_WET_MEASURED_MM:
+    if wet_measured:
         precip_3h = max(precip_3h or 0, 0.2)
     if black_ice is None and precip_3h is None:
         return {**r, "level": "na", "value": "ni podatka"}
@@ -2052,9 +2067,9 @@ SHARE_JS_TEMPLATE = '''
     if (g <= 1.5 && dew != null && dew >= g - 1.0) return "srednje";
     return "nizko";
   }
-  function cestaVrstica(bi, p3, s3, t, merjeno1h){
+  function cestaVrstica(bi, p3, s3, t, mokroMerjeno){
     var road = { id: "road", label: "Vozišče", src: "ocena" };
-    if ((merjeno1h || 0) >= 0.1) p3 = Math.max(p3 || 0, 0.2);  // kot ROAD_WET_MEASURED_MM v road_row()
+    if (mokroMerjeno) p3 = Math.max(p3 || 0, 0.2);  // kot wet_measured v road_row()
     if (bi == null && p3 == null) { road.level = "na"; road.value = "ni podatka"; }
     else if ((s3 || 0) >= 0.5) { road.level = "stop"; road.value = "možen sneg na cesti"; }
     else if (bi === "visoko") { road.level = "stop"; road.value = "nevarnost poledice"; }
@@ -2220,6 +2235,12 @@ SHARE_JS_TEMPLATE = '''
     sec.hidden = false;
   }
 
+  // Kot measured_wet() v Pythonu (pragovi ROAD_WET_*): dež v zadnji uri ALI danes že padlo in nasičen zrak.
+  function merjenoMokro(d, tr){
+    if (tr && (tr.padavine_mm || 0) >= 0.1) return true;
+    return !!(d && d.padavine_danes_mm != null && d.padavine_danes_mm >= 0.2 && d.temp_c != null
+      && d.rosisce_c != null && d.temp_c - d.rosisce_c <= 1.5);
+  }
   function vrsticeSeznama(m, d){
     m = m || {}; d = d || {};
     var rows = [];
@@ -2231,7 +2252,7 @@ SHARE_JS_TEMPLATE = '''
     var bi = t == null ? null : blackIceLive(t, m.cloud,
       d.veter_kmh != null ? d.veter_kmh : m.windValley,
       d.rosisce_c != null ? d.rosisce_c : m.dewValley, m.pNow, m.pPrev);
-    rows.push(cestaVrstica(bi, m.p3, m.s3, t, zivTrend ? zivTrend.padavine_mm : null));
+    rows.push(cestaVrstica(bi, m.p3, m.s3, t, merjenoMokro(d, zivTrend)));
 
     // Snežna odeja je samo besedilo (snowpack_text), raven nosi nov sneg.
     var cm = m.snow24, snow = { id: "snow", label: "Sneg", src: "napoved 24 h" };
