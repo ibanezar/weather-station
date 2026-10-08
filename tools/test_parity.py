@@ -243,6 +243,21 @@ def crnivec_mokro_iz_meritve():
 
 
 @test
+def crnivec_mokri_naslov():
+    """WET_STATUS (Python) ↔ mokroNaslov() v generirani strani; status_for() zamenja samo cono »sonce«."""
+    import generate_crnivec_page as gc
+    page = open("crnivec-site/index.html", encoding="utf-8").read()
+    check(gc.WET_STATUS["status"] in page and gc.WET_STATUS["desc"] in page, "mokri naslov v JS",
+          "besedilo WET_STATUS manjka v crnivec-site/index.html (mokroNaslov)")
+    wet = [{"id": "road", "value": "verjetno mokro"}]
+    for z in gc.ZONES:
+        want = gc.WET_STATUS["status"] if z["id"] == "sonce" else gc.STATUS[z["id"]]["status"]
+        check(gc.status_for(z["id"], wet)["status"] == want, "status_for", z["id"])
+    check(gc.status_for("sonce", [{"id": "road", "value": "verjetno suho"}])["status"] == gc.STATUS["sonce"]["status"],
+          "status_for suho", "")
+
+
+@test
 def crnivec_sneg_okna_rek():
     """snow_fraction, povzetek termina in izbira »Črnivec pravi«: Python ↔ JS strani."""
     import winter_engine as we
