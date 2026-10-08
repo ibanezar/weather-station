@@ -1,27 +1,27 @@
 {
-  "generated_at": "2026-10-07T08:54:28Z",
-  "n_records": 98,
+  "generated_at": "2026-10-08T07:57:30Z",
+  "n_records": 100,
   "date_range": {
     "from": "2026-08-04",
-    "to": "2026-10-06"
+    "to": "2026-10-07"
   },
   "rolling_window_days": 30,
   "leads": {
     "1": {
-      "n": 62,
+      "n": 63,
       "date_range": {
         "from": "2026-08-04",
-        "to": "2026-10-06"
+        "to": "2026-10-07"
       },
       "all_time": {
         "tmax": {
-          "n": 62,
+          "n": 63,
           "mae_mtr": 1.02,
-          "mae_om": 1.71,
-          "improvement_pct": 40.4
+          "mae_om": 1.69,
+          "improvement_pct": 39.6
         },
         "tmin": {
-          "n": 62,
+          "n": 63,
           "mae_mtr": 0.99,
           "mae_om": 1.33,
           "improvement_pct": 25.6
@@ -434,6 +434,13 @@
             "mae_mtr": 1.07,
             "mae_om": 2.08,
             "improvement_pct": 48.6
+          },
+          {
+            "date": "2026-10-07",
+            "n": 29,
+            "mae_mtr": 1.08,
+            "mae_om": 2.07,
+            "improvement_pct": 47.8
           }
         ],
         "tmin": [
@@ -842,28 +849,35 @@
             "mae_mtr": 0.91,
             "mae_om": 1.57,
             "improvement_pct": 42.0
+          },
+          {
+            "date": "2026-10-07",
+            "n": 29,
+            "mae_mtr": 0.92,
+            "mae_om": 1.54,
+            "improvement_pct": 40.3
           }
         ]
       }
     },
     "2": {
-      "n": 36,
+      "n": 37,
       "date_range": {
         "from": "2026-08-31",
-        "to": "2026-10-06"
+        "to": "2026-10-07"
       },
       "all_time": {
         "tmax": {
-          "n": 36,
-          "mae_mtr": 1.42,
-          "mae_om": 2.48,
-          "improvement_pct": 42.7
+          "n": 37,
+          "mae_mtr": 1.41,
+          "mae_om": 2.42,
+          "improvement_pct": 41.7
         },
         "tmin": {
-          "n": 36,
-          "mae_mtr": 1.03,
+          "n": 37,
+          "mae_mtr": 1.01,
           "mae_om": 2.62,
-          "improvement_pct": 60.7
+          "improvement_pct": 61.5
         }
       },
       "rolling": {
@@ -1091,6 +1105,13 @@
             "mae_mtr": 1.21,
             "mae_om": 2.31,
             "improvement_pct": 47.6
+          },
+          {
+            "date": "2026-10-07",
+            "n": 29,
+            "mae_mtr": 1.19,
+            "mae_om": 2.3,
+            "improvement_pct": 48.3
           }
         ],
         "tmin": [
@@ -1317,6 +1338,13 @@
             "mae_mtr": 0.96,
             "mae_om": 2.87,
             "improvement_pct": 66.6
+          },
+          {
+            "date": "2026-10-07",
+            "n": 29,
+            "mae_mtr": 0.9,
+            "mae_om": 2.88,
+            "improvement_pct": 68.8
           }
         ]
       }
@@ -1357,33 +1385,33 @@
     },
     "jesen": {
       "1": {
-        "n": 35,
+        "n": 36,
         "tmax": {
-          "n": 35,
+          "n": 36,
           "mae_mtr": 1.05,
-          "mae_om": 1.96,
-          "improvement_pct": 46.4
+          "mae_om": 1.91,
+          "improvement_pct": 45.0
         },
         "tmin": {
-          "n": 35,
-          "mae_mtr": 0.9,
-          "mae_om": 1.47,
-          "improvement_pct": 38.8
+          "n": 36,
+          "mae_mtr": 0.89,
+          "mae_om": 1.48,
+          "improvement_pct": 39.9
         }
       },
       "2": {
-        "n": 35,
+        "n": 36,
         "tmax": {
-          "n": 35,
+          "n": 36,
           "mae_mtr": 1.38,
-          "mae_om": 2.44,
-          "improvement_pct": 43.4
+          "mae_om": 2.38,
+          "improvement_pct": 42.0
         },
         "tmin": {
-          "n": 35,
-          "mae_mtr": 1.0,
+          "n": 36,
+          "mae_mtr": 0.97,
           "mae_om": 2.66,
-          "improvement_pct": 62.4
+          "improvement_pct": 63.5
         }
       }
     }
@@ -1391,18 +1419,18 @@
   "situations": {
     "jasno": {
       "label": "jasen, miren dan (razpon ≥ 14 °C, brez dežja)",
-      "n": 40,
+      "n": 41,
       "tmax": {
-        "n": 40,
-        "mae_mtr": 0.68,
-        "mae_om": 1.55,
-        "improvement_pct": 56.1
+        "n": 41,
+        "mae_mtr": 0.69,
+        "mae_om": 1.52,
+        "improvement_pct": 54.6
       },
       "tmin": {
-        "n": 40,
-        "mae_mtr": 1.09,
+        "n": 41,
+        "mae_mtr": 1.08,
         "mae_om": 1.62,
-        "improvement_pct": 32.7
+        "improvement_pct": 33.3
       }
     },
     "mokro": {
