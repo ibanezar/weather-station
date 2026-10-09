@@ -3718,6 +3718,24 @@ def build_strupene_page(species):
              '<th>Ključna razlika</th></tr></thead><tbody>\n' + "\n".join(rows) + "\n    </tbody></table></div>\n"
              if rows else "")
 
+    # ── sirovke in mlečnice (poizvedbi »strupena sirovka«, »sirovka zamenjava«) ──
+    sir_rows = []
+    for s in sorted([x for x in toxic + lethal
+                     if any(k in x["name_sl"].lower() for k in ("sirovka", "mlečnica"))],
+                    key=lambda x: x["name_sl"]):
+        sw = swap_text(s)
+        sir_rows.append(
+            f'      <tr><td><b>{_esc(s["name_sl"])}</b><br><span class="lat">{_esc(s["name_lat"])}</span></td>'
+            f'<td>{_esc(sw[0]) + " <span class=lat>(" + _esc(sw[1]) + ")</span>" if sw else "—"}</td>'
+            f'<td>{_esc("; ".join(sw[2])) if sw else "Baza razlike ne navaja."}</td></tr>')
+    sir_html = ('  <h2 class="gp-h2" id="sirovke">Strupene sirovke in mlečnice</h2>\n'
+                '  <p class="archive-intro">Rod Lactarius združuje cenjene užitne sirovke in vrste, ki jih je v bazi '
+                'vpisanih kot strupene. Spodaj so vse strupene iz baze, z užitno vrsto, s katero jih zamenjajo, '
+                'kadar baza to navaja.</p>\n'
+                '  <div class="gp-scroll"><table class="gp-sptable"><thead><tr><th>Strupena</th><th>Zamenjajo z užitno</th>'
+                '<th>Ključna razlika</th></tr></thead><tbody>\n' + "\n".join(sir_rows) +
+                "\n    </tbody></table></div>\n") if sir_rows else ""
+
     # ── FAQ: dinamični odgovori iz baze, ostalo iz splošnih pravil ──
     def lat(s):
         return f'{s["name_sl"]} ({s["name_lat"]})'
@@ -3766,7 +3784,7 @@ def build_strupene_page(species):
   <div class="gp-sp-grid">
 {chr(10).join(cards)}
   </div>
-{table}  <h2 class="gp-h2" id="pravila">Tri pravila, ki veljajo vedno</h2>
+{table}{sir_html}  <h2 class="gp-h2" id="pravila">Tri pravila, ki veljajo vedno</h2>
   <ul class="archive-intro">
     <li><b>Gobo uživaj samo, če jo poznaš 100 %.</b> Podobnost ni dokaz.</li>
     <li><b>Gobo izpuli cela in poglej dno beta.</b> Lupina ali vrečka v dnu beta je ključna lastnost mušnic.</li>

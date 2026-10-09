@@ -62,6 +62,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/gobarska-napoved/strupene-gobe/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/gobarska-napoved/koledar/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
@@ -465,6 +471,41 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/gobarska-sezona-julij-2026-kje-nabirati.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/jesenski-vrh-gob-2026-savinjska-dolina-0922.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/vpliv-lune-na-rast-gob-0921.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-po-dezju-gobe-ne-zrastejo-takoj.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/kdaj-po-tednu-dezja-zrastejo-gobe-0822.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009.html</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
@@ -568,20 +609,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</loc>
-    <lastmod>2026-09-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/jesenski-vrh-gob-2026-savinjska-dolina-0922.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/vpliv-lune-na-rast-gob-0921.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/invazivka-tedenski-pregled-20260920.html</loc>
@@ -701,13 +728,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/tedenska-napoved-24-28-avgust-2026.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</loc>
-    <lastmod>2026-08-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/kdaj-po-tednu-dezja-zrastejo-gobe-0822.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821.html</loc>
@@ -990,13 +1010,6 @@
     <image:image><image:loc>https://meteorec.si/og/medtem-ko-istro-pustosi-5-centimetrska-toca-pri-nas-velja-or-0721.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</loc>
-    <lastmod>2026-07-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zakaj-po-dezju-gobe-ne-zrastejo-takoj.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.html</loc>
     <lastmod>2026-07-20</lastmod>
     <changefreq>monthly</changefreq>
@@ -1170,13 +1183,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/prva-tropska-noc-recica-julij-2026.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</loc>
-    <lastmod>2026-07-07</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/gobarska-sezona-julij-2026-kje-nabirati.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/hmelj-vreme-julij-rastne-stopinje-vodna-bilanca.html</loc>
@@ -1650,11 +1656,5 @@
     <lastmod>2026-10-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://meteorec.si/gobarska-napoved/strupene-gobe/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
 </urlset>

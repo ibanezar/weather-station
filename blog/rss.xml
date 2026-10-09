@@ -5,8 +5,66 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 09 Oct 2026 07:42:41 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Oct 2026 17:31:46 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih</title>
+      <link>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</guid>
+      <pubDate>Fri, 09 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.</description>
+      <category>agrometeo</category>
+      <category>gobe</category>
+      <category>analiza</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>IREICA1</category>
+    </item>
+    <item>
+      <title>Jesenski vrh gob 2026: kaj pravijo številke iz petih let</title>
+      <link>https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</guid>
+      <pubDate>Fri, 09 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Gobarski indeks za Rečico ob Savinji je 21. septembra dosegel 88 (Odlično). Primerjava zadnjih pet septembrov pokaže, da je letošnji le srednje dober – in zakaj.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
+      <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</guid>
+      <pubDate>Fri, 09 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.</description>
+      <category>gobe</category>
+      <category>luna</category>
+      <category>gobarski indeks</category>
+      <category>mit ali resnica</category>
+    </item>
+    <item>
+      <title>Zakaj po dežju gobe ne zrastejo takoj</title>
+      <link>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</guid>
+      <pubDate>Fri, 09 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Med dežjem in prvimi gobami v mahu praviloma mine 7 do 14 dni. Razložimo, kaj se v tem času dogaja pod zemljo, in na primeru julija 2026 (dež 11. julija, indeks 83 % devet dni kasneje) pokažemo, kako zamik dejansko deluje.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>IREICA1</category>
+      <category>agrometeo</category>
+      <category>vlaga tal</category>
+    </item>
+    <item>
+      <title>Kdaj po tednu dežja zrastejo gobe?</title>
+      <link>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</guid>
+      <pubDate>Fri, 09 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Teden je v Zgornji Savinjski dolini prinesel 68,3 mm dežja in visoko vlažnost. Koliko časa mine, preden gobe dejansko zrastejo, in kaj kaže napoved naprej?</description>
+      <category>gobe</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>Savinja</category>
+    </item>
     <item>
       <title>Padlo je 10 mm na suha tla. Zakaj jurčkov še ni?</title>
       <link>https://meteorec.si/blog/padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009.html</link>
@@ -182,28 +240,6 @@
       <category>mraz</category>
       <category>inverzija</category>
       <category>IREICA1</category>
-    </item>
-    <item>
-      <title>Jesenski vrh gob 2026: kaj pravijo številke iz petih let</title>
-      <link>https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</guid>
-      <pubDate>Tue, 22 Sep 2026 08:00:00 +0000</pubDate>
-      <description>Gobarski indeks za Rečico ob Savinji je 21. septembra dosegel 88 (Odlično). Primerjava zadnjih pet septembrov pokaže, da je letošnji le srednje dober – in zakaj.</description>
-      <category>gobe</category>
-      <category>gobarski indeks</category>
-      <category>IREICA1</category>
-      <category>Zgornja Savinjska dolina</category>
-    </item>
-    <item>
-      <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
-      <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</guid>
-      <pubDate>Mon, 21 Sep 2026 08:00:00 +0000</pubDate>
-      <description>Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.</description>
-      <category>gobe</category>
-      <category>luna</category>
-      <category>gobarski indeks</category>
-      <category>mit ali resnica</category>
     </item>
     <item>
       <title>Invazivke ta teden: 2 opazovanji na novih lokacijah</title>
@@ -402,17 +438,6 @@
       <category>ARSO</category>
       <category>IREICA1</category>
       <category>Zgornja Savinjska dolina</category>
-    </item>
-    <item>
-      <title>Kdaj po tednu dežja zrastejo gobe?</title>
-      <link>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</guid>
-      <pubDate>Sat, 22 Aug 2026 08:00:00 +0000</pubDate>
-      <description>Teden je v Zgornji Savinjski dolini prinesel 68,3 mm dežja in visoko vlažnost. Koliko časa mine, preden gobe dejansko zrastejo, in kaj kaže napoved naprej?</description>
-      <category>gobe</category>
-      <category>IREICA1</category>
-      <category>Zgornja Savinjska dolina</category>
-      <category>Savinja</category>
     </item>
     <item>
       <title>Koliko dežja je padlo ponoči in koliko ga še bo?</title>
@@ -912,18 +937,6 @@
       <category>Savinjska dolina</category>
     </item>
     <item>
-      <title>Zakaj po dežju gobe ne zrastejo takoj</title>
-      <link>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</guid>
-      <pubDate>Tue, 21 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Med dežjem in prvimi gobami v mahu praviloma mine 7 do 14 dni. Razložimo, kaj se v tem času dogaja pod zemljo, in na primeru julija 2026 (dež 11. julija, indeks 83 % devet dni kasneje) pokažemo, kako zamik dejansko deluje.</description>
-      <category>gobe</category>
-      <category>gobarski indeks</category>
-      <category>IREICA1</category>
-      <category>agrometeo</category>
-      <category>vlaga tal</category>
-    </item>
-    <item>
       <title>Suša v Zgornji Savinjski dolini: kaj pove ničelna dnevna količina dežja</title>
       <link>https://meteorec.si/blog/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720.html</guid>
@@ -1241,19 +1254,6 @@
       <category>2026</category>
       <category>vrocina</category>
       <category>tropska-noc</category>
-    </item>
-    <item>
-      <title>Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih</title>
-      <link>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</guid>
-      <pubDate>Tue, 07 Jul 2026 08:00:00 +0000</pubDate>
-      <description>Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.</description>
-      <category>agrometeo</category>
-      <category>gobe</category>
-      <category>analiza</category>
-      <category>julij</category>
-      <category>2026</category>
-      <category>IREICA1</category>
     </item>
     <item>
       <title>Hmelj in vreme julija: rastne stopinje in vodna bilanca v Zgornji Savinjski dolini</title>
