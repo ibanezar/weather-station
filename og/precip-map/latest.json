@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-08",
-  "issued": "08.10.2026 8:00 CEST",
-  "issued_at": "2026-10-08T08:30:35.326948+02:00",
-  "top_station": "Vojsko",
-  "top_mm": 58,
+  "date": "2026-10-09",
+  "issued": "09.10.2026 8:00 CEST",
+  "issued_at": "2026-10-09T08:30:46.209091+02:00",
+  "top_station": "Postojna",
+  "top_mm": 69,
   "n_stations": 20,
   "should_post": true,
-  "image": "https://meteorec.si/og/precip-map/2026-10-08.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-10-08-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-10-09.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-10-09-story.jpg"
 }
