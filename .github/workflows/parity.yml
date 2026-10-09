@@ -99,3 +99,6 @@ jobs:
 
       - name: Test objavljanja na FB/IG (nov članek, UTM, dvojniki)
         run: python3 tools/test_social_post.py
+
+      - name: Test opažanj bralcev v gobarskem modelu (stikalo, strogost signala)
+        run: python3 tools/test_gobe_observations.py

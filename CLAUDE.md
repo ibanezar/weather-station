@@ -1519,6 +1519,17 @@ prek `worker.js` `/gobe/opazovanje` (POST) in `/gobe/opazovanja` (GET).
   Open-Meteo (glej opombo pri MTR zgoraj o istem načelu). Ko se nabere dovolj
   opažanj, je vgradnja kot dodaten signal ločen, kasnejši korak — ne
   poskušaj indeksa popravljati po opažanjih, dokler te odločitve ni.
+  **Pripravljeno, a IZKLOPLJENO (9. 10. 2026):** bralec je pripomnil, da bodo vrste,
+  ki so že rasle, ob dežju hitrejše, zamik pa je v modelu privzet za skupino.
+  `gobe_model.py` zato zna (stikalo `--use-observations` ali `GOBE_USE_OBSERVATIONS=1`,
+  **nikjer vklopljeno**) prebrati `/gobe/opazovanja` in mikoriznim vrstam na območju, kjer
+  so že aktivne, skrajšati zamik na 3–10 dni (`OBS_*`). Signal je strog, ker je vnos javen in
+  nepreverjen: najmanj 3 opažanja iste vrste na istem območju, na 2 različnih dneh, v zadnjih
+  21 dneh; ime vrste se prepozna tudi kot »Jurček« ali latinsko (`species_aliases()`, dvoumna
+  imena se zavržejo). Zamik se ne podaljša nikoli, brez stikala je izhod enak. Vrednosti
+  (3–10, 3 opažanja) **niso umerjene** — pred vklopom primerjaj z izmerjenimi najdbami.
+  Vklop je odločitev: dodaj stikalo v `gobe-forecast.yml`. Test: `tools/test_gobe_observations.py`
+  (v `parity.yml`).
 - **Shramba je isti R2/`feedback/` vzorec kot `/observations` in
   `/blog-comments`** v `worker.js`: en JSON seznam (`feedback/gobe-opazovanja.json`),
   honeypot polje `website` (tiho `{ok:true}`, isto ime povsod v repozitoriju),
