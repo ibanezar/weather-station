@@ -1,4 +1,9 @@
 {
+  "koliko-dni-po-dezju-rastejo-gobe": [
+    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
+    "trije-vali-gob-po-dezju-0911",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
   "gobarska-sezona-julij-2026-kje-nabirati": [
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
     "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
@@ -11,13 +16,13 @@
   ],
   "vpliv-lune-na-rast-gob-0921": [
     "trije-vali-gob-po-dezju-0911",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822"
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
     "gobarska-sezona-julij-2026-kje-nabirati",
     "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
   ],
   "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
     "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
@@ -31,8 +36,8 @@
   ],
   "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007": [
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
-    "trije-vali-gob-po-dezju-0911",
-    "zakaj-po-120-mm-dezja-ni-jurckov-0918"
+    "koliko-dni-po-dezju-rastejo-gobe",
+    "trije-vali-gob-po-dezju-0911"
   ],
   "dez-8-9-oktobra-koliko-ga-bo-padlo-1007": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
@@ -106,8 +111,8 @@
   ],
   "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
     "trije-vali-gob-po-dezju-0911",
-    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922",
+    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
   ],
   "zima-2026-2027-el-nino-napoved": [
     "el-nino-2026",
@@ -120,8 +125,8 @@
     "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907"
   ],
   "trije-vali-gob-po-dezju-0911": [
-    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
     "jesenski-vrh-gob-2026-savinjska-dolina-0922",
+    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
     "zakaj-po-120-mm-dezja-ni-jurckov-0918"
   ],
   "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907": [
@@ -391,8 +396,8 @@
   ],
   "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720": [
     "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804",
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
-    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
+    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
   ],
   "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719": [
     "zakaj-je-zjutraj-tako-toplo-v-recici-ob-savinji-0828",
@@ -471,8 +476,8 @@
   ],
   "koliko-je-zalilo-nevihta-11-julij-2026": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
-    "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712",
-    "nocni-naliv-v-recici-60-mm-dezja-0808"
+    "nocni-naliv-v-recici-60-mm-dezja-0808",
+    "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712"
   ],
   "nevihtni-obeti-11-julij-2026": [
     "kako-brati-nevihtno-napoved-cape-striz-vetra",

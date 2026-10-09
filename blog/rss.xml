@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 09 Oct 2026 17:31:46 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Oct 2026 17:37:54 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Koliko dni po dežju rastejo gobe? Podatki po vrstah</title>
+      <link>https://meteorec.si/blog/koliko-dni-po-dezju-rastejo-gobe.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/koliko-dni-po-dezju-rastejo-gobe.html</guid>
+      <pubDate>Fri, 09 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Po dežju gobe ne zrastejo čez noč. Mediana je 6–12 dni, lisička je hitrejša, jurček počasnejši. Podatki iz več kot 2.000 opažanj in meritev postaje.</description>
+      <category>gobe</category>
+      <category>gobarski-indeks</category>
+      <category>analiza</category>
+      <category>zgornja savinjska dolina</category>
+    </item>
     <item>
       <title>Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih</title>
       <link>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</link>
