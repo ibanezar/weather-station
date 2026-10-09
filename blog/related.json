@@ -1,8 +1,33 @@
 {
-  "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009": [
-    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
+  "gobarska-sezona-julij-2026-kje-nabirati": [
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715"
+  ],
+  "jesenski-vrh-gob-2026-savinjska-dolina-0922": [
+    "trije-vali-gob-po-dezju-0911",
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
     "zakaj-po-120-mm-dezja-ni-jurckov-0918"
+  ],
+  "vpliv-lune-na-rast-gob-0921": [
+    "trije-vali-gob-po-dezju-0911",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822"
+  ],
+  "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
+    "gobarska-sezona-julij-2026-kje-nabirati",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
+    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
+  ],
+  "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
+    "gobarska-sezona-julij-2026-kje-nabirati",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
+  "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009": [
+    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
+    "trije-vali-gob-po-dezju-0911",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007": [
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
@@ -37,7 +62,7 @@
   "lenartovo-pregovor-vreme-do-bozica": [
     "temperaturni-trend-ireica1-2020-2025",
     "vremenski-povzetek-avgust-2026",
-    "vremenski-povzetek-julij-2026"
+    "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001"
   ],
   "vremensko-leto-2025-2026": [
     "vremenski-povzetek-september-2026",
@@ -74,16 +99,6 @@
     "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001",
     "najhladnejsa-julijska-jutra-recica"
   ],
-  "jesenski-vrh-gob-2026-savinjska-dolina-0922": [
-    "trije-vali-gob-po-dezju-0911",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "zakaj-po-120-mm-dezja-ni-jurckov-0918"
-  ],
-  "vpliv-lune-na-rast-gob-0921": [
-    "trije-vali-gob-po-dezju-0911",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
-  ],
   "invazivka-tedenski-pregled-20260920": [
     "invazivka-tedenski-pregled-20260815",
     "invazivka-tedenski-pregled-20260830",
@@ -91,8 +106,8 @@
   ],
   "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
     "trije-vali-gob-po-dezju-0911",
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922",
-    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007"
+    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
   ],
   "zima-2026-2027-el-nino-napoved": [
     "el-nino-2026",
@@ -168,11 +183,6 @@
     "tedenska-napoved-11-17-avgust-2026",
     "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907",
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819"
-  ],
-  "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
-    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
-    "gobarska-sezona-julij-2026-kje-nabirati",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821": [
     "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
@@ -374,11 +384,6 @@
     "zakaj-ni-bilo-neurja-14-julij-2026",
     "arso-poziv-odgovorno-obvescanje-kaj-pomeni-za-meteorec"
   ],
-  "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
-    "gobarska-sezona-julij-2026-kje-nabirati",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
-  ],
   "susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720": [
     "susa-v-zgornji-savinjski-dolini-kako-dolgo-ze-brez-dezja-0814",
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
@@ -503,11 +508,6 @@
     "tropske-noci-inverzija-savinjska-dolina",
     "kdaj-pade-temperatura-pod-20-c-nocno-ohlajanje-kljub-vrocins-0802",
     "najhladnejsa-julijska-jutra-recica"
-  ],
-  "gobarska-sezona-julij-2026-kje-nabirati": [
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715"
   ],
   "hmelj-vreme-julij-rastne-stopinje-vodna-bilanca": [
     "vodna-bilanca-tal-koliko-od-zadnjega-dezja-je-res-prislo-do-0716",
