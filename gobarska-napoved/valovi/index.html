@@ -883,6 +883,11 @@ body .app-bottomnav{display:none}
   color:var(--muted);font:inherit;font-size:1.1rem;line-height:1;min-width:2.6rem;min-height:2.6rem;cursor:pointer}
 .gp-val-chk{display:flex;gap:.5rem;align-items:flex-start;font-size:.82rem;color:var(--muted);margin:var(--gp-sp-3) 0 0;line-height:1.4}
 .gp-val-chk input{margin-top:.2rem}
+.gp-val-sel{display:grid;grid-template-columns:1fr 1fr;gap:var(--gp-sp-3);margin:var(--gp-sp-3) 0 0}
+.gp-val-sel label{display:flex;flex-direction:column;gap:.25rem;font-size:.82rem;color:var(--muted);min-width:0}
+.gp-val-sel select{background:rgba(255,255,255,.05);border:1px solid var(--card-border);border-radius:var(--gp-r-control);
+  color:var(--text);font:inherit;font-size:.9rem;padding:.5rem .6rem;min-height:2.6rem;width:100%;min-width:0}
+@media(max-width:600px){.gp-val-sel{grid-template-columns:1fr}}
 .gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
 .gp-val-item:first-child{border-top:none}
 .gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
@@ -942,6 +947,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <button type="button" id="gvalAdd" class="gp-val-clear">+ Dodaj dež</button>
       <button type="button" id="gvalClear" class="gp-val-clear">Ni ga bilo</button>
     </div>
+    <div class="gp-val-sel">
+      <label>Kaj iščeš?<select id="gvalWhat"></select></label>
+      <label>Teren<select id="gvalTerrain"></select></label>
+    </div>
     <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> Upoštevaj še ostali dež s postaje IREICA1 (zaloga vode v tleh pred vnesenimi dogodki)</label>
     <p class="gp-val-suggest" id="gvalSuggest">V zadnjih 25 dneh ni bilo dežja nad 10 mm — če veš za manjši, a pomemben dogodek, vnesi datum in količino ročno.</p>
     <p class="gp-val-hint" id="gvalHint"></p>
@@ -962,18 +971,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
     <div class="gp-val-state" id="gvalStatePanel"></div>
-    <p class="gp-val-suggest">Okna so <strong>modelski razpon</strong>, ne zagotovilo začetka rasti. Odstotek ob vrsti je ujemanje <strong>samo dežja</strong> s pravili modela (sprožilni dež v zamiku vrste in zaloga vode 14 dni pred njim, isti pragovi kot v napovedi); temperatura, vlaga tal in teren niso všteti. Dež po današnjem dnevu se ne šteje. Celotno oceno po območjih najdeš v <a href="/gobarska-napoved/danes/">dnevni napovedi</a> in na <a href="/gobarska-napoved/zemljevid/">zemljevidu</a>.</p>
+    <p class="gp-val-suggest">Okna so <strong>modelski razpon</strong>, ne zagotovilo začetka rasti. Odstotek ob vrsti je ujemanje <strong>samo dežja</strong> s pravili modela (sprožilni dež v zamiku vrste in zaloga vode 14 dni pred njim, isti pragovi kot v napovedi). Če izbereš teren, se ujemanje pomnoži z geološkim faktorjem vrste, kot v modelu (ujemanje podlage ×1,15, neujemanje ×0,75, lesne vrste brez); temperatura, vlaga tal in višina niso všteti. Dež po današnjem dnevu se ne šteje. Celotno oceno po območjih najdeš v <a href="/gobarska-napoved/danes/">dnevni napovedi</a> in na <a href="/gobarska-napoved/zemljevid/">zemljevidu</a>.</p>
   </div>
 <script>(function(){
-  var GROUPS = [{"eco": "razkrojevalka", "name": "Razkrojevalke stelje", "color": "#2dd4bf", "min": 2, "max": 8, "species": [{"id": "macrolepiota_procera", "name": "Orjaški dežnik (Marela)", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0}, {"id": "coprinus_comatus", "name": "Velika tintnica", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0}, {"id": "agaricus_campestris", "name": "Poljski kukmak", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0}, {"id": "lycoperdon_perlatum", "name": "Betičasta prašnica", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0}, {"id": "agaricus_sylvaticus", "name": "Rjavoluski kukmak", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0}, {"id": "agaricus_langei", "name": "Gozdni kukmak", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0}]}, {"eco": "lesna", "name": "Lesne vrste", "color": "#c17f3e", "min": 3, "max": 10, "species": [{"id": "laetiporus_sulphureus", "name": "Žvepleni lepoluknjičar", "min": 3, "max": 10, "r7": 25.0, "r14": 50.0}, {"id": "armillaria_mellea", "name": "Sivorumena mraznica (Štorovka)", "min": 3, "max": 10, "r7": 20.0, "r14": 40.0}, {"id": "auricularia_auricula_judae", "name": "Bezgova uhljevka", "min": 3, "max": 10, "r7": 35.0, "r14": 70.0}]}, {"eco": "mikorizna", "name": "Mikorizne vrste", "color": "#a78bfa", "min": 4, "max": 16, "species": [{"id": "boletus_edulis", "name": "Jesenski goban (Jurček)", "min": 8, "max": 16, "r7": 25.0, "r14": 50.0}, {"id": "cantharellus_cibarius", "name": "Navadna lisička", "min": 4, "max": 14, "r7": 30.0, "r14": 60.0}, {"id": "hydnum_repandum", "name": "Rumeni ježek", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0}, {"id": "russula_vesca", "name": "Užitna golobica", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0}, {"id": "boletus_pinophilus", "name": "Borov goban", "min": 8, "max": 16, "r7": 25.0, "r14": 50.0}, {"id": "imleria_badia", "name": "Kostanjevka", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0}, {"id": "hygrophorus_russula", "name": "Medena polževka", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0}]}];
+  var GROUPS = [{"eco": "razkrojevalka", "name": "Razkrojevalke stelje", "color": "#2dd4bf", "min": 2, "max": 8, "species": [{"id": "macrolepiota_procera", "name": "Orjaški dežnik (Marela)", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0, "geo": "kisla"}, {"id": "coprinus_comatus", "name": "Velika tintnica", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0, "geo": "bazicna"}, {"id": "agaricus_campestris", "name": "Poljski kukmak", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0, "geo": "bazicna"}, {"id": "lycoperdon_perlatum", "name": "Betičasta prašnica", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0, "geo": "kisla"}, {"id": "agaricus_sylvaticus", "name": "Rjavoluski kukmak", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0, "geo": "bazicna"}, {"id": "agaricus_langei", "name": "Gozdni kukmak", "min": 2, "max": 8, "r7": 20.0, "r14": 40.0, "geo": "bazicna"}]}, {"eco": "lesna", "name": "Lesne vrste", "color": "#c17f3e", "min": 3, "max": 10, "species": [{"id": "laetiporus_sulphureus", "name": "Žvepleni lepoluknjičar", "min": 3, "max": 10, "r7": 25.0, "r14": 50.0, "geo": "nevtralna"}, {"id": "armillaria_mellea", "name": "Sivorumena mraznica (Štorovka)", "min": 3, "max": 10, "r7": 20.0, "r14": 40.0, "geo": "vlazna"}, {"id": "auricularia_auricula_judae", "name": "Bezgova uhljevka", "min": 3, "max": 10, "r7": 35.0, "r14": 70.0, "geo": "vlazna"}]}, {"eco": "mikorizna", "name": "Mikorizne vrste", "color": "#a78bfa", "min": 4, "max": 16, "species": [{"id": "boletus_edulis", "name": "Jesenski goban (Jurček)", "min": 8, "max": 16, "r7": 25.0, "r14": 50.0, "geo": "kisla"}, {"id": "cantharellus_cibarius", "name": "Navadna lisička", "min": 4, "max": 14, "r7": 30.0, "r14": 60.0, "geo": "kisla"}, {"id": "hydnum_repandum", "name": "Rumeni ježek", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0, "geo": "bazicna"}, {"id": "russula_vesca", "name": "Užitna golobica", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0, "geo": "kisla"}, {"id": "boletus_pinophilus", "name": "Borov goban", "min": 8, "max": 16, "r7": 25.0, "r14": 50.0, "geo": "kisla"}, {"id": "imleria_badia", "name": "Kostanjevka", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0, "geo": "kisla"}, {"id": "hygrophorus_russula", "name": "Medena polževka", "min": 8, "max": 16, "r7": 20.0, "r14": 40.0, "geo": "nevtralna"}]}];
   var MAXDAY = 20;
   var DEFAULTS = [];
   var STATION = {"2026-07-26":0.0,"2026-07-27":0.0,"2026-07-28":0.0,"2026-07-29":0.0,"2026-07-30":0.0,"2026-07-31":0.0,"2026-08-01":0.0,"2026-08-02":0.0,"2026-08-03":0.0,"2026-08-04":0.0,"2026-08-05":0.0,"2026-08-06":0.0,"2026-08-07":35.6,"2026-08-08":24.9,"2026-08-09":0.0,"2026-08-10":0.0,"2026-08-11":12.7,"2026-08-12":0.0,"2026-08-13":0.0,"2026-08-14":0.0,"2026-08-15":0.0,"2026-08-16":0.0,"2026-08-17":16.2,"2026-08-18":0.5,"2026-08-19":0.0,"2026-08-20":9.9,"2026-08-21":41.7,"2026-08-22":0.0,"2026-08-23":0.0,"2026-08-24":0.0,"2026-08-25":1.3,"2026-08-26":0.0,"2026-08-27":0.0,"2026-08-28":0.0,"2026-08-29":0.0,"2026-08-30":0.0,"2026-08-31":0.0,"2026-09-01":1.2,"2026-09-02":9.7,"2026-09-03":0.0,"2026-09-04":0.0,"2026-09-05":9.7,"2026-09-06":0.0,"2026-09-07":0.0,"2026-09-08":0.0,"2026-09-09":0.0,"2026-09-10":85.1,"2026-09-11":35.6,"2026-09-12":0.0,"2026-09-13":0.0,"2026-09-14":0.2,"2026-09-15":0.0,"2026-09-16":0.3,"2026-09-17":8.9,"2026-09-18":0.0,"2026-09-19":0.0,"2026-09-20":0.2,"2026-09-21":0.0,"2026-09-22":0.0,"2026-09-23":0.3,"2026-09-24":0.2,"2026-09-25":0.3,"2026-09-26":0.0,"2026-09-27":0.2,"2026-09-28":0.0,"2026-09-29":0.0,"2026-09-30":0.3,"2026-10-01":0.0,"2026-10-02":0.0,"2026-10-03":0.0,"2026-10-04":0.0,"2026-10-05":0.0,"2026-10-06":0.0,"2026-10-07":0.0,"2026-10-08":9.9};
-  var CFG = {"norm": 7, "baseDays": 14, "wT": 0.25, "wB": 0.15, "rain": {"overStart": 3.0, "overEnd": 6.0, "overFloor": 0.5}};
+  var CFG = {"norm": 7, "baseDays": 14, "wT": 0.25, "wB": 0.15, "rain": {"overStart": 3.0, "overEnd": 6.0, "overFloor": 0.5}, "geo": {"match": 1.15, "mismatch": 0.75}};
+  var TERRAINS = [{"id": "kisla", "name": "Kislo/vulkansko pogorje (Smrekovec)"}, {"id": "bazicna", "name": "Karbonatni masivi (Golte, Menina, Raduha)"}, {"id": "vlazna", "name": "Rečni logi in dolinske terase"}];
   var MAXEV = 3;
   function $(id){ return document.getElementById(id); }
   var evBox = $('gvalEvents');
   if (!evBox) return;
+  var whatSel = $('gvalWhat'), terSel = $('gvalTerrain');
   var addBtn = $('gvalAdd'), clearBtn = $('gvalClear'), stationChk = $('gvalStation');
   var hint = $('gvalHint'), result = $('gvalResult'), panel = $('gvalStatePanel');
   var plays = {};
@@ -1015,6 +1026,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              fit: (cfg.wT * ft[0] + cfg.wB * fb[0]) / (cfg.wT + cfg.wB) };
   }
 
+  /* Kopija geološkega množitelja iz gobe_model.eval_species (lesne vrste ga nimajo). */
+  function geoFactor(affinity, terrain, eco, gcfg){
+    if (eco === 'lesna') return 1;
+    if (affinity === 'nevtralna' || !terrain) return 1;
+    return affinity === terrain ? gcfg.match : gcfg.mismatch;
+  }
+  function fillSelects(){
+    whatSel.innerHTML = '<option value="all">Vse skupine</option>';
+    GROUPS.forEach(function(g){
+      var o = document.createElement('option'); o.value = 'eco:' + g.eco; o.textContent = g.name; whatSel.appendChild(o);
+    });
+    GROUPS.forEach(function(g){
+      var og = document.createElement('optgroup'); og.label = g.name;
+      g.species.forEach(function(sp){
+        var o = document.createElement('option'); o.value = 'sp:' + sp.id; o.textContent = sp.name; og.appendChild(o);
+      });
+      whatSel.appendChild(og);
+    });
+    terSel.innerHTML = '<option value="">Vsa območja (brez terena)</option>';
+    TERRAINS.forEach(function(t){
+      var o = document.createElement('option'); o.value = t.id; o.textContent = t.name; terSel.appendChild(o);
+    });
+  }
+  function pickSpecies(g, s){
+    var w = whatSel.value;
+    if (w === 'all') return true;
+    if (w.indexOf('eco:') === 0) return w.slice(4) === g.eco;
+    return w.slice(3) === s.id;
+  }
   function usable(){
     var T = todayNum();
     return events.filter(function(e){
@@ -1146,15 +1186,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var drought = droughtText(evs, get);
     hint.textContent = (hint.textContent ? hint.textContent + ' ' : '') + drought;
 
+    var terrain = terSel.value;
     var groupInfo = GROUPS.map(function(g){
       var gWins = [];
-      var spInfo = g.species.map(function(s){
+      var spInfo = [];
+      g.species.forEach(function(s){
+        if (!pickSpecies(g, s)) return;
         var wins = windowsOf(s, evs);
         wins.forEach(function(w){ gWins.push(w); });
-        return { s: s, wins: wins, st: statusOf(wins, T), fit: bestFit(s, wins, get, T, evs) };
+        var fit = bestFit(s, wins, get, T, evs);
+        if (fit){
+          fit.geo = geoFactor(s.geo, terrain, g.eco, CFG.geo);
+          fit.adj = Math.min(1, fit.fit * fit.geo);
+          fit.byTerrain = TERRAINS.map(function(t){
+            return { t: t, v: Math.min(1, fit.fit * geoFactor(s.geo, t.id, g.eco, CFG.geo)) };
+          });
+        }
+        spInfo.push({ s: s, wins: wins, st: statusOf(wins, T), fit: fit });
       });
+      if (!spInfo.length) return null;
       return { g: g, wins: gWins, st: statusOf(gWins, T), sp: spInfo };
-    });
+    }).filter(Boolean);
 
     var on = groupInfo.filter(function(x){ return x.st.tone === 'on'; });
     var next = null;
@@ -1174,9 +1226,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     }
     var bestSp = null;
     groupInfo.forEach(function(x){ x.sp.forEach(function(i){
-      if (i.fit && i.st.tone !== 'past' && (!bestSp || i.fit.fit > bestSp.fit.fit)) bestSp = i;
+      if (i.fit && i.st.tone !== 'past' && (!bestSp || i.fit.adj > bestSp.fit.adj)) bestSp = i;
     }); });
-    if (bestSp) html += ' Količina dežja najbolje ustreza vrsti ' + bestSp.s.name + ' (' + Math.round(bestSp.fit.fit * 100) + ' %).';
+    if (bestSp) html += (terrain ? ' Dež in teren najbolje ustrezata vrsti ' : ' Količina dežja najbolje ustreza vrsti ') + bestSp.s.name + ' (' + Math.round(bestSp.fit.adj * 100) + ' %).';
     else if (events.some(function(e){ return e.iso && e.mm === null; })) html += ' Vnesi količino dežja za oceno, ali bo zadoščala.';
     result.innerHTML = html;
 
@@ -1190,7 +1242,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     panel.innerHTML = '';
     groupInfo.forEach(function(x){
       var g = x.g, tone = x.st.tone;
-      document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]').classList.toggle('active', tone === 'on');
+      var rng = document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]'); if (rng) rng.classList.toggle('active', tone === 'on');
       var item = document.createElement('div'); item.className = 'gp-val-item';
       var dot = document.createElement('div'); dot.className = 'gp-val-dot';
       dot.style.background = g.color; dot.style.opacity = tone === 'on' ? '1' : '.35';
@@ -1211,10 +1263,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (i.st.tone !== 'on') chip.style.opacity = '.5';
         var txt = i.s.name + ' · ' + spanText(i.wins);
         if (i.fit){
-          txt += ' · ' + Math.round(i.fit.fit * 100) + ' %';
-          chip.title = fitWord(i.fit.fit) + ': sprožilni dež ' + fmtMm(i.fit.trig) + ' od ' + fmtMm(i.fit.trigMin) +
+          txt += ' · ' + Math.round(i.fit.adj * 100) + ' %';
+          chip.title = fitWord(i.fit.adj) + ': sprožilni dež ' + fmtMm(i.fit.trig) + ' od ' + fmtMm(i.fit.trigMin) +
             ' mm, zaloga vode ' + fmtMm(i.fit.base) + ' mm (najboljši dan ' + fmt(i.fit.d) + ')' +
-            (i.fit.tState === 'prenamoceno' ? ', prenamočeno' : '');
+            (i.fit.tState === 'prenamoceno' ? ', prenamočeno' : '') +
+            (terrain ? '; teren ×' + String(Math.round(i.fit.geo * 100) / 100).replace('.', ',') : '') +
+            '; po terenih: ' + i.fit.byTerrain.map(function(b){ return b.t.name.split(/[ (/]/)[0] + ' ' + Math.round(b.v * 100) + ' %'; }).join(', ');
         } else chip.title = 'zamik ' + i.s.min + '–' + i.s.max + ' dni po dežju';
         chip.textContent = txt;
         row.appendChild(chip);
@@ -1229,7 +1283,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
   clearBtn.addEventListener('click', function(){ events = [{ iso: '', mm: null }]; renderRows(); render(); });
   stationChk.addEventListener('change', render);
-  renderRows(); render();
+  whatSel.addEventListener('change', render);
+  terSel.addEventListener('change', render);
+  fillSelects(); renderRows(); render();
 })();</script>
   <a class="back-link" href="/gobarska-napoved/">← Nazaj na gobarsko napoved</a>
   <nav class="gp-bottomnav" aria-label="Glavna navigacija">
