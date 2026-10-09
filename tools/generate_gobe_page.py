@@ -1174,6 +1174,18 @@ body .app-bottomnav{display:none}
 .gp-val-play{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;border-radius:2px;
   box-shadow:0 0 8px rgba(255,255,255,.6)}
 .gp-val-state{margin-top:var(--gp-sp-1)}
+.gp-val-result{font-size:.95rem;line-height:1.5;color:var(--text);margin:0 0 var(--gp-sp-4);padding:.7rem .9rem;background:rgba(255,255,255,.04);border-radius:var(--gp-r-control)}
+.gp-val-result:empty{display:none}
+.gp-val-events{display:flex;flex-direction:column;gap:var(--gp-sp-2);margin-bottom:var(--gp-sp-2)}
+.gp-val-ev{display:flex;align-items:center;gap:var(--gp-sp-2)}
+.gp-val-ev .gp-val-date{min-width:0}
+.gp-val-mm{width:4.5rem;flex:none;background:rgba(255,255,255,.05);border:1px solid var(--card-border);
+  border-radius:var(--gp-r-control);color:var(--text);font:inherit;font-size:.95rem;padding:.55rem .7rem;min-height:2.6rem}
+.gp-val-mmlab{font-size:.85rem;color:var(--muted)}
+.gp-val-rm{background:transparent;border:1px solid var(--card-border);border-radius:var(--gp-r-control);
+  color:var(--muted);font:inherit;font-size:1.1rem;line-height:1;min-width:2.6rem;min-height:2.6rem;cursor:pointer}
+.gp-val-chk{display:flex;gap:.5rem;align-items:flex-start;font-size:.82rem;color:var(--muted);margin:var(--gp-sp-3) 0 0;line-height:1.4}
+.gp-val-chk input{margin-top:.2rem}
 .gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
 .gp-val-item:first-child{border-top:none}
 .gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
@@ -3058,15 +3070,18 @@ def build_trend_page():
 # "generatorji strani si ne delijo knjižnic" na vrhu CLAUDE.md -- ta stran
 # bere species_rules.yaml samo za lag-razpone/imena skupin, primeri vrst so tu
 # ročno izbrani in prepisani).
+# Prikazane vrste so ročno izbrane (id iz species_rules.yaml), zamiki pa se
+# BEREJO iz pravil -- vsaka vrsta ima svoje okno (npr. lisička 4-14 d, ne
+# skupinskih 8-16), sicer kalkulator in napoved po vrstah povesta različno.
 VALOVI_GROUPS = [
-    ("razkrojevalka", "Razkrojevalke stelje", "#2dd4bf", 2, 8,
-     ["Orjaški dežnik (marela)", "Velika tintnica", "Poljski kukmak",
-      "Betičasta prašnica", "Rjavoluski kukmak", "Gozdni kukmak"]),
-    ("lesna", "Lesne vrste", "#c17f3e", 3, 10,
-     ["Žvepleni lepoluknjičar", "Sivorumena mraznica (štorovka)", "Bezgova uhljevka"]),
-    ("mikorizna", "Mikorizne vrste", "#a78bfa", 8, 16,
-     ["Jesenski goban (jurček)", "Navadna lisička", "Rumeni ježek", "Užitna golobica",
-      "Borov goban", "Kostanjevka", "Medena polževka"]),
+    ("razkrojevalka", "Razkrojevalke stelje", "#2dd4bf",
+     ["macrolepiota_procera", "coprinus_comatus", "agaricus_campestris",
+      "lycoperdon_perlatum", "agaricus_sylvaticus", "agaricus_langei"]),
+    ("lesna", "Lesne vrste", "#c17f3e",
+     ["laetiporus_sulphureus", "armillaria_mellea", "auricularia_auricula_judae"]),
+    ("mikorizna", "Mikorizne vrste", "#a78bfa",
+     ["boletus_edulis", "cantharellus_cibarius", "hydnum_repandum", "russula_vesca",
+      "boletus_pinophilus", "imleria_badia", "hygrophorus_russula"]),
 ]
 VALOVI_MAXDAY = 20
 # "Izdaten dež" prag za samodejni predlog datuma -- isto pravilo ("vsaj
@@ -3076,25 +3091,323 @@ VALOVI_RAIN_MM = 10
 VALOVI_LOOKBACK_DAYS = 25
 
 
-def _valovi_default_rain():
-    """Zadnji dan z >= VALOVI_RAIN_MM dežja na postaji, znotraj zadnjih
-    VALOVI_LOOKBACK_DAYS dni -- samodejni predlog za vnosno polje, da
-    kalkulator ob obisku ni prazen, če je pri nas res pred kratkim deževalo.
-    Vrne (iso_datum, mm) ali (None, None), če v oknu ni bilo izdatnega dežja."""
+def _valovi_groups():
+    """Skupine z oknom (unija oken njihovih vrst) in vrstami z lastnim oknom,
+    prebranimi iz species_rules.yaml. Vrsta, ki je pravila nimajo, je izpuščena."""
+    by_id = {sp["id"]: sp for sp in gm.load_rules().get("species", [])}
+    out = []
+    for eco, name, color, ids in VALOVI_GROUPS:
+        sps = []
+        for sid in ids:
+            sp = by_id.get(sid)
+            lag = sp.get("fruiting_lag_days") if sp else None
+            if not lag:
+                continue
+            sps.append({"id": sid, "name": sp["name_sl"],
+                        "min": int(lag["min"]), "max": int(lag["max"]),
+                        "r7": float(sp["rain_7d_min"]), "r14": float(sp["rain_14d_min"])})
+        if not sps:
+            continue
+        out.append({"eco": eco, "name": name, "color": color,
+                    "min": min(x["min"] for x in sps),
+                    "max": max(x["max"] for x in sps), "species": sps})
+    return out
+
+
+VALOVI_STATION_DAYS = 75   # koliko dni postajnega dežja vgradimo (zamik 16 + zaloga 14 + rezerva)
+VALOVI_MAX_EVENTS = 3
+
+
+def _valovi_default_events():
+    """Do tri zadnji dnevi z >= VALOVI_RAIN_MM dežja na postaji v oknu
+    VALOVI_LOOKBACK_DAYS, od najstarejšega do najnovejšega."""
     precip = gm.load_station_precip()
-    today = TODAY
+    found = []
     for back in range(0, VALOVI_LOOKBACK_DAYS + 1):
-        d = (today - _dt.timedelta(days=back)).isoformat()
+        d = (TODAY - _dt.timedelta(days=back)).isoformat()
         mm = precip.get(d)
         if mm is not None and mm >= VALOVI_RAIN_MM:
-            return d, mm
-    return None, None
+            found.append({"date": d, "mm": round(mm, 1)})
+        if len(found) >= VALOVI_MAX_EVENTS:
+            break
+    return list(reversed(found))
+
+
+VALOVI_JS = r"""(function(){
+  var GROUPS = __GROUPS__;
+  var MAXDAY = __MAXDAY__;
+  var DEFAULTS = __DEFAULTS__;
+  var STATION = __STATION__;
+  var CFG = __CFG__;
+  var MAXEV = __MAXEV__;
+  function $(id){ return document.getElementById(id); }
+  var evBox = $('gvalEvents');
+  if (!evBox) return;
+  var addBtn = $('gvalAdd'), clearBtn = $('gvalClear'), stationChk = $('gvalStation');
+  var hint = $('gvalHint'), result = $('gvalResult'), panel = $('gvalStatePanel');
+  var plays = {};
+  GROUPS.forEach(function(g){ plays[g.eco] = $('gvalPlay-' + g.eco); });
+  var events = DEFAULTS.map(function(e){ return { iso: e.date, mm: e.mm }; });
+  if (!events.length) events = [{ iso: '', mm: null }];
+
+  function dayNum(iso){ var p = iso.split('-'); return Math.round(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000); }
+  function isoOf(n){ return new Date(n * 86400000).toISOString().slice(0, 10); }
+  function todayNum(){ var d = new Date(); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }
+  function fmt(n){ var d = new Date(n * 86400000); return d.getUTCDate() + '. ' + (d.getUTCMonth() + 1) + '.'; }
+  function dni(n){ return n + (n === 1 ? ' dan' : ' dni'); }
+  function fmtMm(x){ return (Math.round(x * 10) / 10).toString().replace('.', ','); }
+
+  /* Kopija gobe_model.rain_score / rain_lag_window / razmerja trigger+base
+     (tools/test_parity.py preverja usklajenost). */
+  function rainScore(cum, minMm, cfg){
+    if (minMm <= 0) return [1, 'nad_pragom'];
+    var ratio = cum / minMm;
+    if (ratio < 1) return [ratio, 'pod_pragom'];
+    if (ratio <= cfg.overStart) return [1, 'nad_pragom'];
+    if (ratio >= cfg.overEnd) return [cfg.overFloor, 'prenamoceno'];
+    var frac = (ratio - cfg.overStart) / (cfg.overEnd - cfg.overStart);
+    return [1 - frac * (1 - cfg.overFloor), 'prenamoceno'];
+  }
+  function rainWindow(get, i, lagMin, lagMax){
+    var s = 0;
+    for (var k = i - lagMax; k <= i - lagMin; k++) s += get(k);
+    return s;
+  }
+  function rainFit(sp, get, i, cfg){
+    var days = sp.max - sp.min + 1;
+    var trig = rainWindow(get, i, sp.min, sp.max);
+    var trigMin = sp.r7 * days / cfg.norm;
+    var ft = rainScore(trig, trigMin, cfg.rain);
+    var base = rainWindow(get, i, sp.min, sp.min + cfg.baseDays - 1);
+    var fb = rainScore(base, sp.r14, cfg.rain);
+    return { trig: trig, trigMin: trigMin, base: base, tState: ft[1], bState: fb[1],
+             fit: (cfg.wT * ft[0] + cfg.wB * fb[0]) / (cfg.wT + cfg.wB) };
+  }
+
+  function usable(){
+    var T = todayNum();
+    return events.filter(function(e){
+      return e.iso && dayNum(e.iso) <= T && (e.mm === null || e.mm > 0);
+    }).map(function(e){ return { n: dayNum(e.iso), mm: e.mm }; });
+  }
+  function makeGetter(evs, useStation){
+    var ev = {};
+    events.forEach(function(e){ if (e.iso && e.mm !== null) ev[dayNum(e.iso)] = e.mm; });
+    return function(k){
+      if (Object.prototype.hasOwnProperty.call(ev, k)) return ev[k];
+      if (useStation){ var v = STATION[isoOf(k)]; if (typeof v === 'number') return v; }
+      return 0;
+    };
+  }
+  function windowsOf(sp, evs){ return evs.map(function(e){ return [e.n + sp.min, e.n + sp.max]; }); }
+  function statusOf(wins, T){
+    var next = null;
+    for (var i = 0; i < wins.length; i++){
+      if (wins[i][0] <= T && T <= wins[i][1]) {
+        var end = wins[i][1];
+        wins.forEach(function(w){ if (w[0] <= T && T <= w[1] && w[1] > end) end = w[1]; });
+        return { tone: 'on', end: end };
+      }
+      if (wins[i][0] > T && (next === null || wins[i][0] < next)) next = wins[i][0];
+    }
+    return next !== null ? { tone: 'dim', start: next } : { tone: 'past' };
+  }
+  function spanText(wins, fromT){
+    var w = wins.filter(function(x){ return fromT === undefined || x[1] >= fromT; }).sort(function(a, b){ return a[0] - b[0]; }), out = [];
+    w.forEach(function(x){
+      var last = out[out.length - 1];
+      if (last && x[0] <= last[1] + 1) last[1] = Math.max(last[1], x[1]); else out.push([x[0], x[1]]);
+    });
+    return out.map(function(x){ return fmt(x[0]) + '–' + fmt(x[1]); }).join('; ');
+  }
+  function bestFit(sp, wins, get, T, evs){
+    if (!evs.length || events.some(function(e){ return e.iso && e.mm === null; })) return null;
+    var cand = [];
+    wins.forEach(function(w){ for (var d = w[0]; d <= w[1]; d++) cand.push(d); });
+    var fut = cand.filter(function(d){ return d >= T; });
+    if (fut.length) cand = fut;
+    var best = null;
+    cand.forEach(function(d){
+      var f = rainFit(sp, get, d, CFG);
+      if (!best || f.fit > best.fit + 1e-9) { best = f; best.d = d; }
+    });
+    return best;
+  }
+  function fitWord(f){ return f >= 0.95 ? 'dež zadošča' : f >= 0.5 ? 'dež delno zadošča' : 'premalo dežja'; }
+
+  function clearState(){
+    GROUPS.forEach(function(g){ plays[g.eco].hidden = true; });
+    document.querySelectorAll('.gp-val-range').forEach(function(t){ t.classList.remove('active'); });
+    panel.innerHTML = '';
+  }
+
+  function renderRows(){
+    evBox.innerHTML = '';
+    events.forEach(function(e, idx){
+      var row = document.createElement('div');
+      row.className = 'gp-val-ev';
+      var di = document.createElement('input');
+      di.type = 'date'; di.className = 'gp-val-date'; di.value = e.iso || '';
+      di.max = isoOf(todayNum()); di.setAttribute('aria-label', 'Datum dežja ' + (idx + 1));
+      if (idx === 0) di.id = 'gvalDate';
+      var mi = document.createElement('input');
+      mi.type = 'number'; mi.min = '0'; mi.step = '0.1'; mi.inputMode = 'decimal';
+      mi.className = 'gp-val-mm'; mi.placeholder = 'mm';
+      mi.setAttribute('aria-label', 'Količina dežja v mm ' + (idx + 1));
+      if (idx === 0) mi.id = 'gvalMm';
+      mi.value = e.mm === null ? '' : e.mm;
+      di.addEventListener('input', function(){
+        e.iso = di.value;
+        if (e.iso && (e.mm === null || e.auto) && typeof STATION[e.iso] === 'number'){
+          e.mm = Math.round(STATION[e.iso] * 10) / 10; e.auto = true; mi.value = e.mm;
+        }
+        render();
+      });
+      mi.addEventListener('input', function(){
+        e.auto = false;
+        e.mm = mi.value === '' ? null : Math.max(0, parseFloat(mi.value));
+        if (e.mm !== null && isNaN(e.mm)) e.mm = null;
+        render();
+      });
+      row.appendChild(di);
+      var lab = document.createElement('span'); lab.className = 'gp-val-mmlab'; lab.textContent = 'mm';
+      row.appendChild(mi); row.appendChild(lab);
+      if (events.length > 1){
+        var rm = document.createElement('button');
+        rm.type = 'button'; rm.className = 'gp-val-rm'; rm.textContent = '×';
+        rm.setAttribute('aria-label', 'Odstrani dež ' + (idx + 1));
+        rm.addEventListener('click', function(){ events.splice(idx, 1); renderRows(); render(); });
+        row.appendChild(rm);
+      }
+      evBox.appendChild(row);
+    });
+    addBtn.hidden = events.length >= MAXEV;
+  }
+
+  function droughtText(evs, get){
+    if (!stationChk.checked || !evs.length) return '';
+    var first = Math.min.apply(null, evs.map(function(e){ return e.n; }));
+    var dry = 0;
+    for (var k = first - 1; k >= first - 40; k--){
+      var v = STATION[isoOf(k)];
+      if (typeof v !== 'number' || v >= 1) break;
+      dry++;
+    }
+    var sum14 = 0; for (var j = first - 14; j < first; j++) sum14 += get(j);
+    return 'Pred prvim dežjem (' + fmt(first) + '): ' + (dry >= 40 ? 'več kot 40 dni' : dni(dry)) +
+      ' brez dežja (< 1 mm), v 14 dneh pred njim ' + fmtMm(sum14) + ' mm (postaja IREICA1).';
+  }
+
+  function render(){
+    var T = todayNum();
+    var evs = usable();
+    if (events.some(function(e){ return e.iso && dayNum(e.iso) > T; })){
+      hint.textContent = 'Datum v prihodnosti se ne šteje -- izberi pretekli dan.';
+    } else hint.textContent = '';
+    if (!evs.length){
+      if (!hint.textContent) hint.textContent = 'Brez izdatnega dežja se glivna mreža ne odzove -- vse tri skupine mirujejo.';
+      result.innerHTML = '<strong>Brez izdatnega dežja model ne pričakuje vala.</strong> Vse tri skupine mirujejo, ' +
+        'dokler ne pade nov izdaten dež.';
+      clearState();
+      return;
+    }
+    var get = makeGetter(evs, stationChk.checked);
+    var drought = droughtText(evs, get);
+    hint.textContent = (hint.textContent ? hint.textContent + ' ' : '') + drought;
+
+    var groupInfo = GROUPS.map(function(g){
+      var gWins = [];
+      var spInfo = g.species.map(function(s){
+        var wins = windowsOf(s, evs);
+        wins.forEach(function(w){ gWins.push(w); });
+        return { s: s, wins: wins, st: statusOf(wins, T), fit: bestFit(s, wins, get, T, evs) };
+      });
+      return { g: g, wins: gWins, st: statusOf(gWins, T), sp: spInfo };
+    });
+
+    var on = groupInfo.filter(function(x){ return x.st.tone === 'on'; });
+    var next = null;
+    groupInfo.forEach(function(x){ if (x.st.tone === 'dim' && (!next || x.st.start < next.st.start)) next = x; });
+    var html;
+    if (on.length){
+      var first = on.slice().sort(function(a, b){ return a.st.end - b.st.end; })[0];
+      html = '<strong>Zdaj aktivno: ' + on.map(function(x){ return x.g.name.toLowerCase(); }).join(', ') +
+        '.</strong> Najprej mine okno skupine ' + first.g.name.toLowerCase() + ' (do ' + fmt(first.st.end) + ').' +
+        (next ? ' Naslednji val: ' + next.g.name.toLowerCase() + ', okno ' + spanText(next.wins, T) +
+        ' (čez ' + dni(next.st.start - T) + ').' : '');
+    } else if (next){
+      html = '<strong>Prvi val: ' + next.g.name.toLowerCase() + '.</strong> Okno ' + spanText(next.wins, T) +
+        ' (čez ' + dni(next.st.start - T) + ').';
+    } else {
+      html = '<strong>Vsa okna so minila.</strong> Za nov val je potreben nov izdaten dež.';
+    }
+    var bestSp = null;
+    groupInfo.forEach(function(x){ x.sp.forEach(function(i){
+      if (i.fit && i.st.tone !== 'past' && (!bestSp || i.fit.fit > bestSp.fit.fit)) bestSp = i;
+    }); });
+    if (bestSp) html += ' Količina dežja najbolje ustreza vrsti ' + bestSp.s.name + ' (' + Math.round(bestSp.fit.fit * 100) + ' %).';
+    else if (events.some(function(e){ return e.iso && e.mm === null; })) html += ' Vnesi količino dežja za oceno, ali bo zadoščala.';
+    result.innerHTML = html;
+
+    GROUPS.forEach(function(g){
+      var d = T - Math.min.apply(null, evs.map(function(e){ return e.n; }));
+      if (d > MAXDAY || d < 0){ plays[g.eco].hidden = true; return; }
+      plays[g.eco].hidden = false;
+      plays[g.eco].style.left = Math.min(100, d / MAXDAY * 100) + '%';
+    });
+
+    panel.innerHTML = '';
+    groupInfo.forEach(function(x){
+      var g = x.g, tone = x.st.tone;
+      document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]').classList.toggle('active', tone === 'on');
+      var item = document.createElement('div'); item.className = 'gp-val-item';
+      var dot = document.createElement('div'); dot.className = 'gp-val-dot';
+      dot.style.background = g.color; dot.style.opacity = tone === 'on' ? '1' : '.35';
+      item.appendChild(dot);
+      var body = document.createElement('div'); body.style.flex = '1'; body.style.minWidth = '0';
+      var head = document.createElement('div'); head.className = 'gp-val-head';
+      var title = document.createElement('span'); title.className = 'gp-val-title';
+      title.style.opacity = tone === 'on' ? '1' : '.7';
+      title.textContent = g.name + ' · ' + spanText(x.wins);
+      var badge = document.createElement('span'); badge.className = 'gp-val-status';
+      if (tone === 'on') { badge.style.background = g.color + '26'; badge.style.color = g.color; }
+      else { badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }
+      badge.textContent = tone === 'on' ? 'aktivno' : tone === 'past' ? 'okno je minilo' : 'čez ' + dni(x.st.start - T);
+      head.appendChild(title); head.appendChild(badge); body.appendChild(head);
+      var row = document.createElement('div'); row.className = 'gp-val-species';
+      x.sp.forEach(function(i){
+        var chip = document.createElement('span'); chip.className = 'gp-val-chip';
+        if (i.st.tone !== 'on') chip.style.opacity = '.5';
+        var txt = i.s.name + ' · ' + spanText(i.wins);
+        if (i.fit){
+          txt += ' · ' + Math.round(i.fit.fit * 100) + ' %';
+          chip.title = fitWord(i.fit.fit) + ': sprožilni dež ' + fmtMm(i.fit.trig) + ' od ' + fmtMm(i.fit.trigMin) +
+            ' mm, zaloga vode ' + fmtMm(i.fit.base) + ' mm (najboljši dan ' + fmt(i.fit.d) + ')' +
+            (i.fit.tState === 'prenamoceno' ? ', prenamočeno' : '');
+        } else chip.title = 'zamik ' + i.s.min + '–' + i.s.max + ' dni po dežju';
+        chip.textContent = txt;
+        row.appendChild(chip);
+      });
+      body.appendChild(row); item.appendChild(body); panel.appendChild(item);
+    });
+  }
+
+  addBtn.addEventListener('click', function(){
+    if (events.length >= MAXEV) return;
+    events.push({ iso: '', mm: null }); renderRows(); render();
+  });
+  clearBtn.addEventListener('click', function(){ events = [{ iso: '', mm: null }]; renderRows(); render(); });
+  stationChk.addEventListener('change', render);
+  renderRows(); render();
+})();"""
 
 
 def valovi_widget_html():
-    default_date, default_mm = _valovi_default_rain()
+    events = _valovi_default_events()
+    groups = _valovi_groups()
     rows = []
-    for eco, name, color, lo, hi, _species in VALOVI_GROUPS:
+    for g in groups:
+        eco, name, color, lo, hi = g["eco"], g["name"], g["color"], g["min"], g["max"]
         left = round(lo / VALOVI_MAXDAY * 100, 1)
         width = round((hi - lo) / VALOVI_MAXDAY * 100, 1)
         rows.append(
@@ -3105,135 +3418,56 @@ def valovi_widget_html():
             f'<div class="gp-val-play" id="gvalPlay-{eco}" hidden></div></div>\n'
             f'      </div>')
     axis = "".join(f"<span>{n}</span>" for n in (0, 5, 10, 15, 20))
-    groups_json = _json_mod.dumps(
-        [{"eco": eco, "name": name, "color": color, "min": lo, "max": hi, "species": species}
-         for eco, name, color, lo, hi, species in VALOVI_GROUPS], ensure_ascii=False)
-    default_json = _json_mod.dumps({"date": default_date, "mm": default_mm})
-    date_input = (f'value="{default_date}"' if default_date else "")
-    suggest_note = (
-        f'    <p class="gp-val-suggest" id="gvalSuggest">Predlagano iz zadnjega izmerjenega dežja na postaji '
-        f'IREICA1 ({_fmt_mm(default_mm)} mm, ≥ {VALOVI_RAIN_MM} mm) — spremeni, če preverjaš drug dogodek.</p>\n'
-        if default_date else
-        '    <p class="gp-val-suggest" id="gvalSuggest">V zadnjih ' + str(VALOVI_LOOKBACK_DAYS) + ' dneh ni bilo '
-        f'dežja nad {VALOVI_RAIN_MM} mm — če veš za manjši, a pomemben dogodek, vnesi datum ročno.</p>\n')
-    js = f'''<script>(function(){{
-  var GROUPS = {groups_json};
-  var MAXDAY = {VALOVI_MAXDAY};
-  var DEFAULT = {default_json};
-  var dateInput = document.getElementById('gvalDate');
-  var clearBtn = document.getElementById('gvalClear');
-  if (!dateInput) return;
-  var hint = document.getElementById('gvalHint');
-  var panel = document.getElementById('gvalStatePanel');
-  var plays = {{}};
-  GROUPS.forEach(function(g){{ plays[g.eco] = document.getElementById('gvalPlay-' + g.eco); }});
-
-  function pct(d){{ return Math.max(0, Math.min(100, d / MAXDAY * 100)) + '%'; }}
-  function statusFor(g, day){{
-    if (day < g.min) return {{ label: 'še ne', tone: 'dim' }};
-    if (day <= g.max) return {{ label: 'aktivno', tone: 'on' }};
-    return {{ label: 'mimo', tone: 'past' }};
-  }}
-  function daysSince(iso){{
-    var picked = new Date(iso + 'T00:00:00');
-    var today = new Date(); today.setHours(0,0,0,0);
-    return Math.round((today - picked) / 86400000);
-  }}
-
-  function clearState(){{
-    GROUPS.forEach(function(g){{ plays[g.eco].hidden = true; }});
-    document.querySelectorAll('.gp-val-range').forEach(function(t){{ t.classList.remove('active'); }});
-    panel.innerHTML = '';
-  }}
-
-  function render(){{
-    var iso = dateInput.value;
-    if (!iso){{
-      hint.textContent = 'Brez izdatnega dežja se glivna mreža ne odzove -- vse tri skupine mirujejo.';
-      clearState();
-      return;
-    }}
-    var day = daysSince(iso);
-    if (day < 0){{
-      hint.textContent = 'Ta datum je v prihodnosti -- izberi pretekli dan.';
-      clearState();
-      return;
-    }}
-    hint.textContent = day === 0 ? 'To je bilo danes.'
-      : 'To je bilo pred ' + day + (day === 1 ? ' dnevom.' : ' dnevi.');
-
-    GROUPS.forEach(function(g){{
-      if (day > MAXDAY){{ plays[g.eco].hidden = true; return; }}
-      plays[g.eco].hidden = false;
-      plays[g.eco].style.left = pct(day);
-    }});
-
-    panel.innerHTML = '';
-    GROUPS.forEach(function(g){{
-      var st = statusFor(g, day);
-      var track = document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]');
-      track.classList.toggle('active', st.tone === 'on');
-
-      var item = document.createElement('div');
-      item.className = 'gp-val-item';
-      var dot = document.createElement('div');
-      dot.className = 'gp-val-dot';
-      dot.style.background = g.color;
-      dot.style.opacity = st.tone === 'on' ? '1' : '.35';
-      item.appendChild(dot);
-
-      var body = document.createElement('div');
-      body.style.flex = '1'; body.style.minWidth = '0';
-      var head = document.createElement('div');
-      head.className = 'gp-val-head';
-      var title = document.createElement('span');
-      title.className = 'gp-val-title';
-      title.style.opacity = st.tone === 'on' ? '1' : '.55';
-      title.textContent = g.name;
-      var badge = document.createElement('span');
-      badge.className = 'gp-val-status';
-      var badgeText = st.label;
-      if (st.tone === 'dim') badgeText = 'čez ' + (g.min - day) + (g.min - day === 1 ? ' dan' : ' dni');
-      if (st.tone === 'on') {{ badge.style.background = g.color + '26'; badge.style.color = g.color; }}
-      else {{ badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }}
-      badge.textContent = badgeText;
-      head.appendChild(title); head.appendChild(badge);
-      body.appendChild(head);
-
-      if (st.tone === 'on') {{
-        var row = document.createElement('div');
-        row.className = 'gp-val-species';
-        g.species.forEach(function(s){{
-          var chip = document.createElement('span');
-          chip.className = 'gp-val-chip';
-          chip.textContent = s;
-          row.appendChild(chip);
-        }});
-        body.appendChild(row);
-      }}
-      item.appendChild(body);
-      panel.appendChild(item);
-    }});
-  }}
-  dateInput.addEventListener('input', render);
-  clearBtn.addEventListener('click', function(){{ dateInput.value = ''; render(); }});
-  render();
-}})();</script>'''
-    html = (
+    rules = gm.load_rules()
+    rc = rules["scoring"]["rain"]
+    cfg = {"norm": gm.TRIGGER_NORM_DAYS, "baseDays": gm.BASE_WINDOW_DAYS,
+           "wT": float(rules["weights"]["rain_trigger"]), "wB": float(rules["weights"]["rain_base"]),
+           "rain": {"overStart": float(rc["oversat_ratio"]), "overEnd": float(rc["oversat_max_ratio"]),
+                    "overFloor": float(rc["oversat_factor"])}}
+    cutoff = (TODAY - _dt.timedelta(days=VALOVI_STATION_DAYS)).isoformat()
+    station = {d: round(mm, 1) for d, mm in sorted(gm.load_station_precip().items())
+               if cutoff <= d <= TODAY.isoformat()}
+    js = "<script>" + (VALOVI_JS
+        .replace("__GROUPS__", _json_mod.dumps(groups, ensure_ascii=False))
+        .replace("__MAXDAY__", str(VALOVI_MAXDAY))
+        .replace("__DEFAULTS__", _json_mod.dumps(events))
+        .replace("__STATION__", _json_mod.dumps(station, separators=(",", ":")))
+        .replace("__CFG__", _json_mod.dumps(cfg))
+        .replace("__MAXEV__", str(VALOVI_MAX_EVENTS))) + "</script>"
+    if events:
+        d0 = events[-1]
+        suggest_note = (
+            '    <p class="gp-val-suggest" id="gvalSuggest">Predlagano iz izmerjenega dežja na postaji IREICA1 '
+            f'(do {VALOVI_MAX_EVENTS} zadnji dnevi z ≥ {VALOVI_RAIN_MM} mm) — datum in količino lahko '
+            'spremeniš, kadar preverjaš drug dogodek ali drugo lokacijo.</p>\n')
+    else:
+        suggest_note = (
+            '    <p class="gp-val-suggest" id="gvalSuggest">V zadnjih ' + str(VALOVI_LOOKBACK_DAYS) + ' dneh ni bilo '
+            f'dežja nad {VALOVI_RAIN_MM} mm — če veš za manjši, a pomemben dogodek, vnesi datum in količino ročno.</p>\n')
+    return (
         '  <div class="gp-val-card">\n'
-        '    <label class="gp-val-inlabel" for="gvalDate">Kdaj je nazadnje padel izdaten dež (vsaj 10–15 mm '
-        'naenkrat)?</label>\n'
+        '    <span class="gp-val-inlabel">Kdaj je padel izdaten dež (vsaj 10–15 mm naenkrat) in koliko? '
+        f'Vneseš lahko do {VALOVI_MAX_EVENTS} dogodke.</span>\n'
+        '    <div class="gp-val-events" id="gvalEvents"></div>\n'
         '    <div class="gp-val-inrow">\n'
-        f'      <input type="date" id="gvalDate" class="gp-val-date" max="{TODAY}" {date_input}>\n'
+        '      <button type="button" id="gvalAdd" class="gp-val-clear">+ Dodaj dež</button>\n'
         '      <button type="button" id="gvalClear" class="gp-val-clear">Ni ga bilo</button>\n'
         '    </div>\n'
+        '    <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> Upoštevaj še ostali dež s '
+        'postaje IREICA1 (zaloga vode v tleh pred vnesenimi dogodki)</label>\n'
         + suggest_note +
         '    <p class="gp-val-hint" id="gvalHint"></p>\n'
+        '    <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>\n'
         f'    <div class="gp-val-axis">{axis}</div>\n'
         '    <div class="gp-val-bands">\n' + "\n".join(rows) + '\n    </div>\n'
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
+        '    <p class="gp-val-suggest">Okna so <strong>modelski razpon</strong>, ne zagotovilo začetka rasti. '
+        'Odstotek ob vrsti je ujemanje <strong>samo dežja</strong> s pravili modela (sprožilni dež v zamiku vrste in '
+        'zaloga vode 14 dni pred njim, isti pragovi kot v napovedi); temperatura, vlaga tal in teren niso '
+        'všteti. Dež po današnjem dnevu se ne šteje. Celotno oceno po območjih najdeš v '
+        '<a href="/gobarska-napoved/danes/">dnevni napovedi</a> in na '
+        '<a href="/gobarska-napoved/zemljevid/">zemljevidu</a>.</p>\n'
         '  </div>\n' + js)
-    return html
 
 
 def _fmt_mm(mm):

@@ -762,6 +762,21 @@ brskalniku**, ker se modelski teki menjajo čez dan, GitHubov cron pa zamuja ure
   (karta to napiše). ICON-D2 in AROME nimata arhiva v `/test-napovedi/`, zato tam nimata ocene.
 - Stran **ne bere postaje**, notranjih meritev torej ni.
 
+## Kalkulator rasti po dežju (`/gobarska-napoved/valovi/`, 9. 10. 2026)
+
+`valovi_widget_html()` v `tools/generate_gobe_page.py`. Do 3 deževni dogodki (datum + mm), privzeto
+zadnji dnevi z ≥ 10 mm na IREICA1.
+
+- **Zamiki in pragovi se berejo iz `species_rules.yaml`** (`_valovi_groups()`), vsaka vrsta ima svoje okno
+  (lisička 4–14 d); skupina pokaže unijo oken svojih vrst. Prikazane vrste so ročno izbrane (`VALOVI_GROUPS`).
+- **Ujemanje dežja** (odstotek ob vrsti) je `rainFit()`: ista logika kot `gobe_model` — sprožilni dež v zamiku
+  (prag `rain_7d_min` × dolžina okna / 7) in zaloga vode 14 dni pred njim (`rain_14d_min`), utež
+  `rain_trigger`/`rain_base`. **Temperatura, vlaga tal, teren in geologija NISO všteti** — stran to pove.
+  Usklajenost JS ↔ Python preverja `test_parity.valovi_dez`. Če spremeniš formulo v `gobe_model`, spremeni JS.
+- Dež po današnjem dnevu je 0 (brez scenarijev). Postajni dež (`STATION`, 75 dni) vnese zalogo vode; kljukica
+  ga izklopi (drug kraj). Vneseni dogodek ima prednost pred postajo za isti datum.
+- Okno vala je odvisno od časa dogodka, ocena dežja pa je ločena: dež, ki ne doseže praga, okna ne zapre.
+
 ## Preprost ⇄ napredni pogled domače strani
 
 Domača stran ima dve različici, med katerima obiskovalec preklaplja z gumbom

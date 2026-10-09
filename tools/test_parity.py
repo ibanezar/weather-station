@@ -455,6 +455,41 @@ def gobe_pragovi():
         check(got[n + i] == cls_py(p), "gobe: levelClass", f"{p}: py={cls_py(p)} js={got[n + i]}")
 
 
+# ── Kalkulator rasti po dežju: dež (gobe_model ↔ JS na /valovi/) ─────────────
+@test
+def valovi_dez():
+    """rainFit() na /gobarska-napoved/valovi/ = rain_score + rain_lag_window iz gobe_model
+    (ujemanje dežja s pravili vrste: sprožilni dež v zamiku + zaloga vode)."""
+    import random
+    import gobe_model as gm
+    rules = gm.load_rules()
+    rc = rules["scoring"]["rain"]
+    wT, wB = float(rules["weights"]["rain_trigger"]), float(rules["weights"]["rain_base"])
+    cfg = {"norm": gm.TRIGGER_NORM_DAYS, "baseDays": gm.BASE_WINDOW_DAYS, "wT": wT, "wB": wB,
+           "rain": {"overStart": float(rc["oversat_ratio"]), "overEnd": float(rc["oversat_max_ratio"]),
+                    "overFloor": float(rc["oversat_factor"])}}
+    rnd = random.Random(7)
+    series = [round(rnd.choice([0, 0, 0, 0.4, 2, 8, 15, 30, 55]) * rnd.random() * 2, 1) for _ in range(120)]
+    cases = []
+    for sp in [s for s in rules["species"] if s.get("fruiting_lag_days")][:40]:
+        lag = sp["fruiting_lag_days"]
+        for i in (40, 61, 90, 119):
+            cases.append({"min": int(lag["min"]), "max": int(lag["max"]),
+                          "r7": float(sp["rain_7d_min"]), "r14": float(sp["rain_14d_min"]), "i": i})
+    prelude = "var S=%s; var CFG=%s;" % (json.dumps(series), json.dumps(cfg))
+    calls = [{"expr": "rainFit(%s, function(k){return S[k]||0;}, %d, CFG)" % (json.dumps(c), c["i"])} for c in cases]
+    got = js("gobarska-napoved/valovi/index.html", ["rainScore", "rainWindow", "rainFit"], calls, prelude)
+    for c, g in zip(cases, got):
+        days = c["max"] - c["min"] + 1
+        trig = gm.rain_lag_window({"precip": series}, c["i"], c["min"], c["max"])
+        base = gm.rain_lag_window({"precip": series}, c["i"], c["min"], c["min"] + gm.BASE_WINDOW_DAYS - 1)
+        ft, _ = gm.rain_score(trig, c["r7"] * days / gm.TRIGGER_NORM_DAYS, rc)
+        fb, _ = gm.rain_score(base, c["r14"], rc)
+        fit = (wT * ft + wB * fb) / (wT + wB)
+        check(abs(g["fit"] - fit) < 1e-9, "valovi: rainFit", f"{c}: py={fit} js={g['fit']}")
+        check(abs(g["trig"] - trig) < 1e-9 and abs(g["base"] - base) < 1e-9, "valovi: okna dežja", str(c))
+
+
 # ── Nevihtna karta: app.js ↔ generate_storm_map.py ───────────────────────────
 @test
 def nevihtna_karta():
