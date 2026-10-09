@@ -431,7 +431,7 @@ def photo_html(D):
     return (f'<figure class="sg-photo"><img src="/{PHOTO_DIR.replace(os.sep, "/")}/koprenka.jpg" width="900" height="1200" '
             f'alt="Koprenka z vijoličnim klobukom in temnovijoličnimi lamelami v gozdni stelji">'
             f'<figcaption>Koprenka (<em>Cortinarius</em> sp.), posneto {d_long(PHOTO_DATE)}, {n_photo} dni po septembrskem nalivu. '
-            f'Določitev po fotografiji ni zanesljiva, koprenk pa ne nabiramo za prehrano. Foto: Meteorec.</figcaption></figure>')
+            f'Določitev po fotografiji ni zanesljiva, koprenk pa ne nabiramo za prehrano. Foto: Filip Eremita.</figcaption></figure>')
 
 
 def build_article(D):

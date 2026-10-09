@@ -14,7 +14,7 @@ import datetime
 import os
 import sys
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_gobe_suha_tla_post as post  # noqa: E402
@@ -46,6 +46,15 @@ def text_w(d, t, f):
     return b[2] - b[0]
 
 
+def shadow(img, d, xy, t, f, fill):
+    """Besedilo z mehko senco (kot druge kartice s fotografijo v ozadju)."""
+    layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ImageDraw.Draw(layer).text((xy[0] + 2, xy[1] + 3), t, font=f, fill=(0, 0, 0, 215))
+    layer = layer.filter(ImageFilter.GaussianBlur(7))
+    img.paste(layer.convert("RGB"), (0, 0), layer.split()[3])
+    d.text(xy, t, font=f, fill=fill)
+
+
 def main():
     rd = post.RAIN_DAY
     D = post.build_data(rd)
@@ -59,13 +68,30 @@ def main():
     win_lis = post.d_rng(post.d_add(rd, lis[0]), post.d_add(rd, lis[1]))
     win_jur = post.d_rng(post.d_add(rd, L["mikorizna"][0]), post.d_add(rd, L["mikorizna"][1]))
 
-    img = Image.new("RGB", (W, H), BG)
+    # ozadje: fotografija čez celo kartico, temnejši preliv navzdol (kot druge kartice)
+    ph = Image.open(os.path.join(ROOT, post.PHOTO_DIR, "koprenka-kartica.jpg")).convert("RGB")
+    sc = W / ph.width
+    ph = ph.resize((W, round(ph.height * sc)), Image.LANCZOS)
+    top = 40  # izrez: obdrži klobuk in zgornji del beta
+    ph = ph.crop((0, top, W, top + H))
+    grad = Image.new("L", (1, H))
+    for yy in range(H):
+        t = yy / (H - 1)
+        grad.putpixel((0, yy), int(255 * (0.08 + 0.46 * min(1.0, t / 0.45) + 0.40 * max(0.0, (t - 0.45) / 0.55))))
+    grad = grad.resize((W, H))
+    base = Image.composite(Image.new("RGB", (W, H), BG), ph, grad).convert("RGBA")
+    ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    od = ImageDraw.Draw(ov)
+    od.rectangle((0, 0, 12, H), fill=GREEN + (255,))
+    for box in ((70, 540, W - 70, 925), (70, 945, W - 70, 1225)):
+        od.rounded_rectangle(box, radius=26, fill=(10, 14, 28, 214), outline=(255, 255, 255, 235), width=2)
+    img = Image.alpha_composite(base, ov).convert("RGB")
     d = ImageDraw.Draw(img)
     pad = 70
     logo = Image.open(os.path.join(ROOT, "icon-512.png")).convert("RGBA").resize((84, 84), Image.LANCZOS)
     img.paste(logo, (pad, 60), logo)
-    d.text((pad + 106, 60), "METEOREC", font=font("LiberationSans-Bold.ttf", 40), fill=WHITE)
-    d.text((pad + 108, 106), f"dež {post.d_short(rd)} · postaja IREICA1", font=font("LiberationSans-Regular.ttf", 26), fill=DIM)
+    shadow(img, d, (pad + 106, 60), "METEOREC", font("LiberationSans-Bold.ttf", 40), WHITE)
+    shadow(img, d, (pad + 108, 106), f"dež {post.d_short(rd)} · postaja IREICA1", font("LiberationSans-Regular.ttf", 26), MUTED)
 
     f_badge = font("LiberationSans-Bold.ttf", 24)
     badge = "GOBARSKI MODEL"
@@ -73,30 +99,15 @@ def main():
     d.rounded_rectangle((pad, 196, pad + bw, 196 + 46), radius=23, fill=GREEN)
     d.text((pad + 20, 205), badge, font=f_badge, fill=(4, 20, 14))
 
-    # fotografija (kvadrat, zaobljen) desno od naslova, z oznako, da to ni gliva z napovedi
-    PS = 262
-    px, py = W - pad - PS, 180
-    ph = Image.open(os.path.join(ROOT, post.PHOTO_DIR, "koprenka-kvadrat.jpg")).convert("RGB").resize((PS, PS), Image.LANCZOS)
-    mask = Image.new("L", (PS, PS), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, PS - 1, PS - 1), radius=26, fill=255)
-    img.paste(ph, (px, py), mask)
-    chip_f = font("LiberationSans-Bold.ttf", 21)
-    chip = "koprenka · ni za nabiranje"
-    cw = text_w(d, chip, chip_f) + 28
-    d.rounded_rectangle((px + (PS - cw) / 2, py + PS - 46, px + (PS + cw) / 2, py + PS - 12), radius=17, fill=(5, 6, 14))
-    d.text((px + (PS - cw) / 2 + 14, py + PS - 42), chip, font=chip_f, fill=WHITE)
-    d.rounded_rectangle((px, py, px + PS, py + PS), radius=26, outline=LINE, width=2)
-
     f_title = font("LiberationSans-Bold.ttf", 84)
-    d.text((pad, 268), f"Padlo je 10 mm", font=f_title, fill=WHITE)
-    d.text((pad, 360), "na suha tla.", font=f_title, fill=GREEN)
+    shadow(img, d, (pad, 268), "Padlo je 10 mm", f_title, WHITE)
+    shadow(img, d, (pad, 360), "na suha tla.", f_title, GREEN)
 
     f_sub = font("LiberationSans-Regular.ttf", 32)
-    d.text((pad, 470), f"Prvi pravi dež po {D['n_dry']} dneh. Za jurčka je to {share} % praga.", font=f_sub, fill=MUTED)
+    shadow(img, d, (pad, 470), f"Prvi pravi dež po {D['n_dry']} dneh. Za jurčka je to {share} % praga.", f_sub, WHITE)
 
     # ── tabela ──
     px0, py0, px1, py1 = pad, 540, W - pad, 925
-    d.rounded_rectangle((px0, py0, px1, py1), radius=26, fill=PANEL, outline=LINE, width=2)
     f_h = font("LiberationSans-Bold.ttf", 22)
     f_name = font("LiberationSans-Bold.ttf", 32)
     f_val = font("LiberationSans-Regular.ttf", 30)
@@ -129,7 +140,6 @@ def main():
 
     # ── graf: vlaga tal (model) ──
     gx0, gy0, gx1, gy1 = pad, 945, W - pad, 1225
-    d.rounded_rectangle((gx0, gy0, gx1, gy1), radius=26, fill=PANEL, outline=LINE, width=2)
     d.text((gx0 + 32, gy0 + 22), "Vlaga tal 3–9 cm (modelska ocena)", font=font("LiberationSans-Bold.ttf", 26), fill=WHITE)
     first = post.d_add(rd, -27)
     last = D["after"][-1]
@@ -168,8 +178,8 @@ def main():
     d.text((ax1 - text_w(d, post.d_short(last), f_ax), ay1 + 8), post.d_short(last), font=f_ax, fill=DIM)
 
     f_foot = font("LiberationSans-Regular.ttf", 25)
-    d.text((pad, 1252), "Dež: meritev postaje. Vlaga tal (siva črta = napoved) in okna rasti: model,", font=f_foot, fill=DIM)
-    d.text((pad, 1286), "ni obljuba najdbe. Grafi in razlaga: meteorec.si/blog", font=f_foot, fill=DIM)
+    d.text((pad, 1252), "Dež: meritev postaje. Vlaga tal in okna rasti: model, ni obljuba najdbe.", font=f_foot, fill=MUTED)
+    d.text((pad, 1288), "Razlaga: meteorec.si/blog · Foto: Filip Eremita (koprenka, ni za nabiranje)", font=f_foot, fill=MUTED)
 
     out = os.path.join(ROOT, "og", f"{post.SLUG}-kartica.jpg")
     img.save(out, quality=92)
