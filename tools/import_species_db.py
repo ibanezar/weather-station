@@ -119,6 +119,16 @@ CALIBRATION = {
         # 20 mm v tednu — višja pragova jo vrneta med druge vrste.
         "razlog": "celoletna vrsta z najnižjimi pragovi je monopolizirala vrh",
     },
+    "cantharellus_cibarius": {
+        "fruiting_lag_days": (4, 14),
+        # Privzeti zamik mikoriznih vrst (8–16 dni) za lisičko ni potrjen. iNaturalist × Open-Meteo
+        # (tools/study_inat_lag.py, docs/inat-lag-studija-zakljucki.md): n = 255 (avg–nov, širše območje) in
+        # n = 180 (maj–jul), mediana 6–7 dni po začetku dežja (Q1–Q3 3–14), vrh pri 6–8 dneh (1,8× nad povprečno glivo),
+        # po 3 tednih upad. Backtest dež-sprožilca (tools/backtest_lag_window.py): AUC 0,570 → 0,600 (jesen),
+        # 0,633 → 0,658 (poletje). Krajša okna (3–10, 2–8) so podobna — razlika ni razločljiva, zato konzervativnih 4–14.
+        # Jurček, ježek in kostanjevka ostanejo pri skupinskem zamiku (jurček: 8–16 je v backtestu najboljši).
+        "razlog": "zamik 4–14 d iz opažanj iNaturalist (n=255+180, mediana 6–7 d), ne privzetih 8–16 d",
+    },
 }
 
 # Terrain definitions — three productive geological terrains of the valley,
@@ -644,12 +654,16 @@ def build_yaml(species):
         L.append(f"    air_temp: {{ min: {at[0]}, max: {at[1]} }}  # zračni prag iz baze")
         so = s["soil_temp"]
         L.append(f"    soil_temp: {{ min: {so[0]}, opt_low: {so[1]}, opt_high: {so[2]}, max: {so[3]} }}  # TODO: kalibriraj (izpeljano iz air_temp)")
-        cal_note = f"  # ROČNO UMERJENO: {s['calibrated']}" if s.get("calibrated") else ""
+        ck = s.get("calibrated_keys") or []
+        cal_note = f"  # ROČNO UMERJENO: {s['calibrated']}" if s.get("calibrated") and any(k.startswith("rain_") for k in ck) else ""
         L.append(f"    rain_7d_min: {s['rain_7d_min']}        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa){cal_note}")
         L.append(f"    rain_14d_min: {s['rain_14d_min']}       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)")
         L.append(f"    ecology: {s['ecology']}   # TODO: kalibriraj (izpeljano iz substrata)")
         fl = s["fruiting_lag_days"]
-        L.append(f"    fruiting_lag_days: {{ min: {fl[0]}, max: {fl[1]} }}  # TODO: kalibriraj (iz skupine {s['ecology']})")
+        if "fruiting_lag_days" in (s.get("calibrated_keys") or []):
+            L.append(f"    fruiting_lag_days: {{ min: {fl[0]}, max: {fl[1]} }}  # ROČNO UMERJENO: {s['calibrated']}")
+        else:
+            L.append(f"    fruiting_lag_days: {{ min: {fl[0]}, max: {fl[1]} }}  # TODO: kalibriraj (iz skupine {s['ecology']})")
         L.append(f"    mycorrhiza: {yaml_list(s['mycorrhiza'])}")
         L.append(f"    substrate: {q(s['substrate'])}")
         L.append(f"    soil_ph: {q(s['soil_ph'])}")
@@ -709,6 +723,7 @@ def build_record(r, verified, index_flag=None):
     rec.update({k: v for k, v in cal.items() if k != "razlog"})
     if cal:
         rec["calibrated"] = cal["razlog"]
+        rec["calibrated_keys"] = sorted(k for k in cal if k != "razlog")
     return rec
 
 

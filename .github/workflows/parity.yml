@@ -102,3 +102,6 @@ jobs:
 
       - name: Test opažanj bralcev v gobarskem modelu (stikalo, strogost signala)
         run: python3 tools/test_gobe_observations.py
+
+      - name: Test ročnih umeritev vrst (CALIBRATION v species_rules.yaml)
+        run: python3 tools/test_species_calibration.py

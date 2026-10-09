@@ -1368,6 +1368,16 @@ je slug vrste, vrednosti prepišejo polja iz baze, `razlog` pa se izpiše kot
 ko je primerjava med vrstami dokazljivo popačena — ne zato, da bi popravil vtis
 o posameznem dnevu.
 
+**Lisička ima svoj zamik 4–14 dni** (9. 10. 2026), ne skupinskih 8–16. Bralec je pripomnil, da lisičke
+niso tako počasne; študija iNaturalist × Open-Meteo (`tools/study_inat_lag.py`, zaključki v
+`docs/inat-lag-studija-zakljucki.md`; n = 255 jeseni na širšem območju in 180 maja–julija) kaže mediano
+6–7 dni po začetku dežja in vrh pri 6–8 dneh. Backtest dež-sprožilca (`tools/backtest_lag_window.py`,
+AUC 0,570 → 0,600 jeseni, 0,633 → 0,658 poleti) to podpira zmerno; krajša okna (3–10, 2–8) so enako dobra, zato je
+izbrano konzervativno 4–14. **Drugim mikoriznim vrstam zamika ne spreminjaj brez enake študije**: jurček je pri 8–16
+najboljši, ježek in kostanjevka imata premalo opažanj, marela (razkrojevalka, 2–8 d) po opažanjih ni hitra, a je to
+deloma pristranskost (stari trosnjaki). Zamik umerjene vrste gre v `CALIBRATION` (`fruiting_lag_days`), opomba »ROČNO
+UMERJENO« se izpiše ob njem; `tools/test_species_calibration.py` varuje, da skupina ostane nedotaknjena.
+
 ## Baza vrst: preverjeno jedro in razširjeni seznam
 
 Baza ima 300 vrst iz dveh virov, ki ju uvoznik združi (in ju ne mešaj):

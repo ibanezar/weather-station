@@ -20,6 +20,7 @@ Usage:
 `--cache FILE`: zagon modela se shrani v FILE (pickle) in naslednjič prebere od tam — Open-Meteo
 ob več zaporednih zagonih vrne 429.
 """
+import collections
 import datetime
 import json
 import os
@@ -131,8 +132,9 @@ def build_data(cache):
     eco = {}
     for e in ECO_ORDER:
         sp_ids = [i for i, m in meta.items() if m["ecology"] == e]
-        lag = meta[sp_ids[0]]["lag_days"]
-        assert all(meta[i]["lag_days"] == lag for i in sp_ids), e
+        # Skupinski zamik = najpogostejši; posamezna vrsta ima lahko ročno umerjen drug zamik (lisička 4–14).
+        lag = collections.Counter(tuple(meta[i]["lag_days"]) for i in sp_ids).most_common(1)[0][0]
+        lag = list(lag)
         means = [group_mean(home, i, e, meta) for i in range(len(dates))]
         peak_i = max(range(len(dates)), key=lambda i: means[i])
         best_i = max(range(len(dates)),
