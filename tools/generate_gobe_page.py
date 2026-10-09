@@ -1174,6 +1174,8 @@ body .app-bottomnav{display:none}
 .gp-val-play{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;border-radius:2px;
   box-shadow:0 0 8px rgba(255,255,255,.6)}
 .gp-val-state{margin-top:var(--gp-sp-1)}
+.gp-val-result{font-size:.95rem;line-height:1.5;color:var(--text);margin:0 0 var(--gp-sp-4);padding:.7rem .9rem;background:rgba(255,255,255,.04);border-radius:var(--gp-r-control)}
+.gp-val-result:empty{display:none}
 .gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
 .gp-val-item:first-child{border-top:none}
 .gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
@@ -3058,15 +3060,18 @@ def build_trend_page():
 # "generatorji strani si ne delijo knjižnic" na vrhu CLAUDE.md -- ta stran
 # bere species_rules.yaml samo za lag-razpone/imena skupin, primeri vrst so tu
 # ročno izbrani in prepisani).
+# Prikazane vrste so ročno izbrane (id iz species_rules.yaml), zamiki pa se
+# BEREJO iz pravil -- vsaka vrsta ima svoje okno (npr. lisička 4-14 d, ne
+# skupinskih 8-16), sicer kalkulator in napoved po vrstah povesta različno.
 VALOVI_GROUPS = [
-    ("razkrojevalka", "Razkrojevalke stelje", "#2dd4bf", 2, 8,
-     ["Orjaški dežnik (marela)", "Velika tintnica", "Poljski kukmak",
-      "Betičasta prašnica", "Rjavoluski kukmak", "Gozdni kukmak"]),
-    ("lesna", "Lesne vrste", "#c17f3e", 3, 10,
-     ["Žvepleni lepoluknjičar", "Sivorumena mraznica (štorovka)", "Bezgova uhljevka"]),
-    ("mikorizna", "Mikorizne vrste", "#a78bfa", 8, 16,
-     ["Jesenski goban (jurček)", "Navadna lisička", "Rumeni ježek", "Užitna golobica",
-      "Borov goban", "Kostanjevka", "Medena polževka"]),
+    ("razkrojevalka", "Razkrojevalke stelje", "#2dd4bf",
+     ["macrolepiota_procera", "coprinus_comatus", "agaricus_campestris",
+      "lycoperdon_perlatum", "agaricus_sylvaticus", "agaricus_langei"]),
+    ("lesna", "Lesne vrste", "#c17f3e",
+     ["laetiporus_sulphureus", "armillaria_mellea", "auricularia_auricula_judae"]),
+    ("mikorizna", "Mikorizne vrste", "#a78bfa",
+     ["boletus_edulis", "cantharellus_cibarius", "hydnum_repandum", "russula_vesca",
+      "boletus_pinophilus", "imleria_badia", "hygrophorus_russula"]),
 ]
 VALOVI_MAXDAY = 20
 # "Izdaten dež" prag za samodejni predlog datuma -- isto pravilo ("vsaj
@@ -3091,10 +3096,34 @@ def _valovi_default_rain():
     return None, None
 
 
+def _valovi_groups():
+    """Skupine z oknom (unija oken njihovih vrst) in vrstami z lastnim oknom,
+    prebranimi iz species_rules.yaml. Vrsta, ki je pravila nimajo, je izpuščena."""
+    by_id = {sp["id"]: sp for sp in gm.load_rules().get("species", [])}
+    out = []
+    for eco, name, color, ids in VALOVI_GROUPS:
+        sps = []
+        for sid in ids:
+            sp = by_id.get(sid)
+            lag = sp.get("fruiting_lag_days") if sp else None
+            if not lag:
+                continue
+            sps.append({"id": sid, "name": sp["name_sl"],
+                        "min": int(lag["min"]), "max": int(lag["max"])})
+        if not sps:
+            continue
+        out.append({"eco": eco, "name": name, "color": color,
+                    "min": min(x["min"] for x in sps),
+                    "max": max(x["max"] for x in sps), "species": sps})
+    return out
+
+
 def valovi_widget_html():
     default_date, default_mm = _valovi_default_rain()
+    groups = _valovi_groups()
     rows = []
-    for eco, name, color, lo, hi, _species in VALOVI_GROUPS:
+    for g in groups:
+        eco, name, color, lo, hi = g["eco"], g["name"], g["color"], g["min"], g["max"]
         left = round(lo / VALOVI_MAXDAY * 100, 1)
         width = round((hi - lo) / VALOVI_MAXDAY * 100, 1)
         rows.append(
@@ -3105,9 +3134,7 @@ def valovi_widget_html():
             f'<div class="gp-val-play" id="gvalPlay-{eco}" hidden></div></div>\n'
             f'      </div>')
     axis = "".join(f"<span>{n}</span>" for n in (0, 5, 10, 15, 20))
-    groups_json = _json_mod.dumps(
-        [{"eco": eco, "name": name, "color": color, "min": lo, "max": hi, "species": species}
-         for eco, name, color, lo, hi, species in VALOVI_GROUPS], ensure_ascii=False)
+    groups_json = _json_mod.dumps(groups, ensure_ascii=False)
     default_json = _json_mod.dumps({"date": default_date, "mm": default_mm})
     date_input = (f'value="{default_date}"' if default_date else "")
     suggest_note = (
@@ -3128,17 +3155,22 @@ def valovi_widget_html():
   var plays = {{}};
   GROUPS.forEach(function(g){{ plays[g.eco] = document.getElementById('gvalPlay-' + g.eco); }});
 
+  var result = document.getElementById('gvalResult');
   function pct(d){{ return Math.max(0, Math.min(100, d / MAXDAY * 100)) + '%'; }}
-  function statusFor(g, day){{
-    if (day < g.min) return {{ label: 'še ne', tone: 'dim' }};
-    if (day <= g.max) return {{ label: 'aktivno', tone: 'on' }};
-    return {{ label: 'mimo', tone: 'past' }};
+  function statusFor(lo, hi, day){{
+    if (day < lo) return 'dim';
+    if (day <= hi) return 'on';
+    return 'past';
   }}
   function daysSince(iso){{
     var picked = new Date(iso + 'T00:00:00');
     var today = new Date(); today.setHours(0,0,0,0);
     return Math.round((today - picked) / 86400000);
   }}
+  function addDays(iso, n){{ var d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + n); return d; }}
+  function fmt(d){{ return d.getDate() + '. ' + (d.getMonth() + 1) + '.'; }}
+  function span(iso, lo, hi){{ return fmt(addDays(iso, lo)) + '–' + fmt(addDays(iso, hi)); }}
+  function dni(n){{ return n + (n === 1 ? ' dan' : ' dni'); }}
 
   function clearState(){{
     GROUPS.forEach(function(g){{ plays[g.eco].hidden = true; }});
@@ -3146,21 +3178,47 @@ def valovi_widget_html():
     panel.innerHTML = '';
   }}
 
+  function headline(iso, day){{
+    var on = [], next = null;
+    GROUPS.forEach(function(g){{
+      var st = statusFor(g.min, g.max, day);
+      if (st === 'on') on.push(g);
+      else if (st === 'dim' && (!next || g.min < next.min)) next = g;
+    }});
+    if (on.length){{
+      var first = on.slice().sort(function(x, y){{ return x.max - y.max; }})[0];
+      return '<strong>Zdaj aktivno: ' + on.map(function(g){{ return g.name.toLowerCase(); }}).join(', ') +
+        '.</strong> Najprej mine okno skupine ' + first.name.toLowerCase() + ' (do ' + fmt(addDays(iso, first.max)) + ').' +
+        (next ? ' Naslednji val: ' + next.name.toLowerCase() + ', okno ' + span(iso, next.min, next.max) +
+        ' (čez ' + dni(next.min - day) + ').' : '');
+    }}
+    if (next){{
+      return '<strong>Prvi val: ' + next.name.toLowerCase() + '.</strong> Okno ' + span(iso, next.min, next.max) +
+        ' (čez ' + dni(next.min - day) + ').';
+    }}
+    return '<strong>Vsa okna so minila.</strong> Dež je bil pred ' + (day === 1 ? '1 dnevom' : day + ' dnevi') +
+      ' — za nov val je potreben nov izdaten dež.';
+  }}
+
   function render(){{
     var iso = dateInput.value;
     if (!iso){{
       hint.textContent = 'Brez izdatnega dežja se glivna mreža ne odzove -- vse tri skupine mirujejo.';
+      result.innerHTML = '<strong>Brez izdatnega dežja model ne pričakuje vala.</strong> Vse tri skupine mirujejo, ' +
+        'dokler ne pade nov izdaten dež.';
       clearState();
       return;
     }}
     var day = daysSince(iso);
     if (day < 0){{
       hint.textContent = 'Ta datum je v prihodnosti -- izberi pretekli dan.';
+      result.textContent = '';
       clearState();
       return;
     }}
     hint.textContent = day === 0 ? 'To je bilo danes.'
       : 'To je bilo pred ' + day + (day === 1 ? ' dnevom.' : ' dnevi.');
+    result.innerHTML = headline(iso, day);
 
     GROUPS.forEach(function(g){{
       if (day > MAXDAY){{ plays[g.eco].hidden = true; return; }}
@@ -3170,16 +3228,16 @@ def valovi_widget_html():
 
     panel.innerHTML = '';
     GROUPS.forEach(function(g){{
-      var st = statusFor(g, day);
+      var tone = statusFor(g.min, g.max, day);
       var track = document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]');
-      track.classList.toggle('active', st.tone === 'on');
+      track.classList.toggle('active', tone === 'on');
 
       var item = document.createElement('div');
       item.className = 'gp-val-item';
       var dot = document.createElement('div');
       dot.className = 'gp-val-dot';
       dot.style.background = g.color;
-      dot.style.opacity = st.tone === 'on' ? '1' : '.35';
+      dot.style.opacity = tone === 'on' ? '1' : '.35';
       item.appendChild(dot);
 
       var body = document.createElement('div');
@@ -3188,29 +3246,30 @@ def valovi_widget_html():
       head.className = 'gp-val-head';
       var title = document.createElement('span');
       title.className = 'gp-val-title';
-      title.style.opacity = st.tone === 'on' ? '1' : '.55';
-      title.textContent = g.name;
+      title.style.opacity = tone === 'on' ? '1' : '.7';
+      title.textContent = g.name + ' · ' + span(iso, g.min, g.max);
       var badge = document.createElement('span');
       badge.className = 'gp-val-status';
-      var badgeText = st.label;
-      if (st.tone === 'dim') badgeText = 'čez ' + (g.min - day) + (g.min - day === 1 ? ' dan' : ' dni');
-      if (st.tone === 'on') {{ badge.style.background = g.color + '26'; badge.style.color = g.color; }}
+      var badgeText = tone === 'on' ? 'aktivno' : tone === 'past' ? 'okno je minilo'
+        : 'čez ' + dni(g.min - day);
+      if (tone === 'on') {{ badge.style.background = g.color + '26'; badge.style.color = g.color; }}
       else {{ badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }}
       badge.textContent = badgeText;
       head.appendChild(title); head.appendChild(badge);
       body.appendChild(head);
 
-      if (st.tone === 'on') {{
-        var row = document.createElement('div');
-        row.className = 'gp-val-species';
-        g.species.forEach(function(s){{
-          var chip = document.createElement('span');
-          chip.className = 'gp-val-chip';
-          chip.textContent = s;
-          row.appendChild(chip);
-        }});
-        body.appendChild(row);
-      }}
+      var row = document.createElement('div');
+      row.className = 'gp-val-species';
+      g.species.forEach(function(s){{
+        var st = statusFor(s.min, s.max, day);
+        var chip = document.createElement('span');
+        chip.className = 'gp-val-chip';
+        if (st !== 'on') chip.style.opacity = '.5';
+        chip.textContent = s.name + ' · ' + span(iso, s.min, s.max);
+        chip.title = 'zamik ' + s.min + '–' + s.max + ' dni po dežju';
+        row.appendChild(chip);
+      }});
+      body.appendChild(row);
       item.appendChild(body);
       panel.appendChild(item);
     }});
@@ -3229,9 +3288,14 @@ def valovi_widget_html():
         '    </div>\n'
         + suggest_note +
         '    <p class="gp-val-hint" id="gvalHint"></p>\n'
+        '    <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>\n'
         f'    <div class="gp-val-axis">{axis}</div>\n'
         '    <div class="gp-val-bands">\n' + "\n".join(rows) + '\n    </div>\n'
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
+        '    <p class="gp-val-suggest">Okna so <strong>modelski razpon</strong>, ne zagotovilo začetka rasti. '
+        'Kalkulator upošteva en dež in samo zamik; količina dežja, suša pred njim in temperatura so v '
+        '<a href="/gobarska-napoved/danes/">dnevni napovedi po območjih</a> in na '
+        '<a href="/gobarska-napoved/zemljevid/">zemljevidu</a>. Zamik vsake vrste je enak kot v modelu.</p>\n'
         '  </div>\n' + js)
     return html
 

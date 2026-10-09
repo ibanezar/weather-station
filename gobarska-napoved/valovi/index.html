@@ -871,6 +871,8 @@ body .app-bottomnav{display:none}
 .gp-val-play{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;border-radius:2px;
   box-shadow:0 0 8px rgba(255,255,255,.6)}
 .gp-val-state{margin-top:var(--gp-sp-1)}
+.gp-val-result{font-size:.95rem;line-height:1.5;color:var(--text);margin:0 0 var(--gp-sp-4);padding:.7rem .9rem;background:rgba(255,255,255,.04);border-radius:var(--gp-r-control)}
+.gp-val-result:empty{display:none}
 .gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
 .gp-val-item:first-child{border-top:none}
 .gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
@@ -931,6 +933,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <p class="gp-val-suggest" id="gvalSuggest">V zadnjih 25 dneh ni bilo dežja nad 10 mm — če veš za manjši, a pomemben dogodek, vnesi datum ročno.</p>
     <p class="gp-val-hint" id="gvalHint"></p>
+    <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>
     <div class="gp-val-axis"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span></div>
     <div class="gp-val-bands">
       <div class="gp-val-row">
@@ -942,14 +945,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="gp-val-track"><div class="gp-val-range" data-eco="lesna" style="left:15.0%;width:35.0%;background:#c17f3e"></div><div class="gp-val-play" id="gvalPlay-lesna" hidden></div></div>
       </div>
       <div class="gp-val-row">
-        <div class="gp-val-name">Mikorizne vrste<small>8–16 dni</small></div>
-        <div class="gp-val-track"><div class="gp-val-range" data-eco="mikorizna" style="left:40.0%;width:40.0%;background:#a78bfa"></div><div class="gp-val-play" id="gvalPlay-mikorizna" hidden></div></div>
+        <div class="gp-val-name">Mikorizne vrste<small>4–16 dni</small></div>
+        <div class="gp-val-track"><div class="gp-val-range" data-eco="mikorizna" style="left:20.0%;width:60.0%;background:#a78bfa"></div><div class="gp-val-play" id="gvalPlay-mikorizna" hidden></div></div>
       </div>
     </div>
     <div class="gp-val-state" id="gvalStatePanel"></div>
+    <p class="gp-val-suggest">Okna so <strong>modelski razpon</strong>, ne zagotovilo začetka rasti. Kalkulator upošteva en dež in samo zamik; količina dežja, suša pred njim in temperatura so v <a href="/gobarska-napoved/danes/">dnevni napovedi po območjih</a> in na <a href="/gobarska-napoved/zemljevid/">zemljevidu</a>. Zamik vsake vrste je enak kot v modelu.</p>
   </div>
 <script>(function(){
-  var GROUPS = [{"eco": "razkrojevalka", "name": "Razkrojevalke stelje", "color": "#2dd4bf", "min": 2, "max": 8, "species": ["Orjaški dežnik (marela)", "Velika tintnica", "Poljski kukmak", "Betičasta prašnica", "Rjavoluski kukmak", "Gozdni kukmak"]}, {"eco": "lesna", "name": "Lesne vrste", "color": "#c17f3e", "min": 3, "max": 10, "species": ["Žvepleni lepoluknjičar", "Sivorumena mraznica (štorovka)", "Bezgova uhljevka"]}, {"eco": "mikorizna", "name": "Mikorizne vrste", "color": "#a78bfa", "min": 8, "max": 16, "species": ["Jesenski goban (jurček)", "Navadna lisička", "Rumeni ježek", "Užitna golobica", "Borov goban", "Kostanjevka", "Medena polževka"]}];
+  var GROUPS = [{"eco": "razkrojevalka", "name": "Razkrojevalke stelje", "color": "#2dd4bf", "min": 2, "max": 8, "species": [{"id": "macrolepiota_procera", "name": "Orjaški dežnik (Marela)", "min": 2, "max": 8}, {"id": "coprinus_comatus", "name": "Velika tintnica", "min": 2, "max": 8}, {"id": "agaricus_campestris", "name": "Poljski kukmak", "min": 2, "max": 8}, {"id": "lycoperdon_perlatum", "name": "Betičasta prašnica", "min": 2, "max": 8}, {"id": "agaricus_sylvaticus", "name": "Rjavoluski kukmak", "min": 2, "max": 8}, {"id": "agaricus_langei", "name": "Gozdni kukmak", "min": 2, "max": 8}]}, {"eco": "lesna", "name": "Lesne vrste", "color": "#c17f3e", "min": 3, "max": 10, "species": [{"id": "laetiporus_sulphureus", "name": "Žvepleni lepoluknjičar", "min": 3, "max": 10}, {"id": "armillaria_mellea", "name": "Sivorumena mraznica (Štorovka)", "min": 3, "max": 10}, {"id": "auricularia_auricula_judae", "name": "Bezgova uhljevka", "min": 3, "max": 10}]}, {"eco": "mikorizna", "name": "Mikorizne vrste", "color": "#a78bfa", "min": 4, "max": 16, "species": [{"id": "boletus_edulis", "name": "Jesenski goban (Jurček)", "min": 8, "max": 16}, {"id": "cantharellus_cibarius", "name": "Navadna lisička", "min": 4, "max": 14}, {"id": "hydnum_repandum", "name": "Rumeni ježek", "min": 8, "max": 16}, {"id": "russula_vesca", "name": "Užitna golobica", "min": 8, "max": 16}, {"id": "boletus_pinophilus", "name": "Borov goban", "min": 8, "max": 16}, {"id": "imleria_badia", "name": "Kostanjevka", "min": 8, "max": 16}, {"id": "hygrophorus_russula", "name": "Medena polževka", "min": 8, "max": 16}]}];
   var MAXDAY = 20;
   var DEFAULT = {"date": null, "mm": null};
   var dateInput = document.getElementById('gvalDate');
@@ -960,17 +964,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var plays = {};
   GROUPS.forEach(function(g){ plays[g.eco] = document.getElementById('gvalPlay-' + g.eco); });
 
+  var result = document.getElementById('gvalResult');
   function pct(d){ return Math.max(0, Math.min(100, d / MAXDAY * 100)) + '%'; }
-  function statusFor(g, day){
-    if (day < g.min) return { label: 'še ne', tone: 'dim' };
-    if (day <= g.max) return { label: 'aktivno', tone: 'on' };
-    return { label: 'mimo', tone: 'past' };
+  function statusFor(lo, hi, day){
+    if (day < lo) return 'dim';
+    if (day <= hi) return 'on';
+    return 'past';
   }
   function daysSince(iso){
     var picked = new Date(iso + 'T00:00:00');
     var today = new Date(); today.setHours(0,0,0,0);
     return Math.round((today - picked) / 86400000);
   }
+  function addDays(iso, n){ var d = new Date(iso + 'T00:00:00'); d.setDate(d.getDate() + n); return d; }
+  function fmt(d){ return d.getDate() + '. ' + (d.getMonth() + 1) + '.'; }
+  function span(iso, lo, hi){ return fmt(addDays(iso, lo)) + '–' + fmt(addDays(iso, hi)); }
+  function dni(n){ return n + (n === 1 ? ' dan' : ' dni'); }
 
   function clearState(){
     GROUPS.forEach(function(g){ plays[g.eco].hidden = true; });
@@ -978,21 +987,47 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     panel.innerHTML = '';
   }
 
+  function headline(iso, day){
+    var on = [], next = null;
+    GROUPS.forEach(function(g){
+      var st = statusFor(g.min, g.max, day);
+      if (st === 'on') on.push(g);
+      else if (st === 'dim' && (!next || g.min < next.min)) next = g;
+    });
+    if (on.length){
+      var first = on.slice().sort(function(x, y){ return x.max - y.max; })[0];
+      return '<strong>Zdaj aktivno: ' + on.map(function(g){ return g.name.toLowerCase(); }).join(', ') +
+        '.</strong> Najprej mine okno skupine ' + first.name.toLowerCase() + ' (do ' + fmt(addDays(iso, first.max)) + ').' +
+        (next ? ' Naslednji val: ' + next.name.toLowerCase() + ', okno ' + span(iso, next.min, next.max) +
+        ' (čez ' + dni(next.min - day) + ').' : '');
+    }
+    if (next){
+      return '<strong>Prvi val: ' + next.name.toLowerCase() + '.</strong> Okno ' + span(iso, next.min, next.max) +
+        ' (čez ' + dni(next.min - day) + ').';
+    }
+    return '<strong>Vsa okna so minila.</strong> Dež je bil pred ' + (day === 1 ? '1 dnevom' : day + ' dnevi') +
+      ' — za nov val je potreben nov izdaten dež.';
+  }
+
   function render(){
     var iso = dateInput.value;
     if (!iso){
       hint.textContent = 'Brez izdatnega dežja se glivna mreža ne odzove -- vse tri skupine mirujejo.';
+      result.innerHTML = '<strong>Brez izdatnega dežja model ne pričakuje vala.</strong> Vse tri skupine mirujejo, ' +
+        'dokler ne pade nov izdaten dež.';
       clearState();
       return;
     }
     var day = daysSince(iso);
     if (day < 0){
       hint.textContent = 'Ta datum je v prihodnosti -- izberi pretekli dan.';
+      result.textContent = '';
       clearState();
       return;
     }
     hint.textContent = day === 0 ? 'To je bilo danes.'
       : 'To je bilo pred ' + day + (day === 1 ? ' dnevom.' : ' dnevi.');
+    result.innerHTML = headline(iso, day);
 
     GROUPS.forEach(function(g){
       if (day > MAXDAY){ plays[g.eco].hidden = true; return; }
@@ -1002,16 +1037,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     panel.innerHTML = '';
     GROUPS.forEach(function(g){
-      var st = statusFor(g, day);
+      var tone = statusFor(g.min, g.max, day);
       var track = document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]');
-      track.classList.toggle('active', st.tone === 'on');
+      track.classList.toggle('active', tone === 'on');
 
       var item = document.createElement('div');
       item.className = 'gp-val-item';
       var dot = document.createElement('div');
       dot.className = 'gp-val-dot';
       dot.style.background = g.color;
-      dot.style.opacity = st.tone === 'on' ? '1' : '.35';
+      dot.style.opacity = tone === 'on' ? '1' : '.35';
       item.appendChild(dot);
 
       var body = document.createElement('div');
@@ -1020,29 +1055,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       head.className = 'gp-val-head';
       var title = document.createElement('span');
       title.className = 'gp-val-title';
-      title.style.opacity = st.tone === 'on' ? '1' : '.55';
-      title.textContent = g.name;
+      title.style.opacity = tone === 'on' ? '1' : '.7';
+      title.textContent = g.name + ' · ' + span(iso, g.min, g.max);
       var badge = document.createElement('span');
       badge.className = 'gp-val-status';
-      var badgeText = st.label;
-      if (st.tone === 'dim') badgeText = 'čez ' + (g.min - day) + (g.min - day === 1 ? ' dan' : ' dni');
-      if (st.tone === 'on') { badge.style.background = g.color + '26'; badge.style.color = g.color; }
+      var badgeText = tone === 'on' ? 'aktivno' : tone === 'past' ? 'okno je minilo'
+        : 'čez ' + dni(g.min - day);
+      if (tone === 'on') { badge.style.background = g.color + '26'; badge.style.color = g.color; }
       else { badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }
       badge.textContent = badgeText;
       head.appendChild(title); head.appendChild(badge);
       body.appendChild(head);
 
-      if (st.tone === 'on') {
-        var row = document.createElement('div');
-        row.className = 'gp-val-species';
-        g.species.forEach(function(s){
-          var chip = document.createElement('span');
-          chip.className = 'gp-val-chip';
-          chip.textContent = s;
-          row.appendChild(chip);
-        });
-        body.appendChild(row);
-      }
+      var row = document.createElement('div');
+      row.className = 'gp-val-species';
+      g.species.forEach(function(s){
+        var st = statusFor(s.min, s.max, day);
+        var chip = document.createElement('span');
+        chip.className = 'gp-val-chip';
+        if (st !== 'on') chip.style.opacity = '.5';
+        chip.textContent = s.name + ' · ' + span(iso, s.min, s.max);
+        chip.title = 'zamik ' + s.min + '–' + s.max + ' dni po dežju';
+        row.appendChild(chip);
+      });
+      body.appendChild(row);
       item.appendChild(body);
       panel.appendChild(item);
     });
