@@ -77,14 +77,14 @@ def main():
     grad = Image.new("L", (1, H))
     for yy in range(H):
         t = yy / (H - 1)
-        grad.putpixel((0, yy), int(255 * (0.08 + 0.46 * min(1.0, t / 0.45) + 0.40 * max(0.0, (t - 0.45) / 0.55))))
+        grad.putpixel((0, yy), int(255 * (0.34 + 0.36 * min(1.0, t / 0.45) + 0.28 * max(0.0, (t - 0.45) / 0.55))))
     grad = grad.resize((W, H))
     base = Image.composite(Image.new("RGB", (W, H), BG), ph, grad).convert("RGBA")
     ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     od = ImageDraw.Draw(ov)
     od.rectangle((0, 0, 12, H), fill=GREEN + (255,))
     for box in ((70, 540, W - 70, 925), (70, 945, W - 70, 1225)):
-        od.rounded_rectangle(box, radius=26, fill=(10, 14, 28, 214), outline=(255, 255, 255, 235), width=2)
+        od.rounded_rectangle(box, radius=26, fill=(8, 12, 24, 232), outline=(255, 255, 255, 235), width=2)
     img = Image.alpha_composite(base, ov).convert("RGB")
     d = ImageDraw.Draw(img)
     pad = 70
