@@ -430,8 +430,8 @@ def daily_table(D):
 def photo_html(D):
     n_photo = (datetime.date.fromisoformat(PHOTO_DATE) - datetime.date.fromisoformat(D["peak_sept"])).days
     return (f'<figure class="sg-photo"><img src="/{PHOTO_DIR.replace(os.sep, "/")}/koprenka.jpg" width="900" height="1200" '
-            f'alt="Koprenka z vijoličnim klobukom in temnovijoličnimi lamelami v gozdni stelji">'
-            f'<figcaption>Koprenka (<em>Cortinarius</em> sp.), posneto {d_long(PHOTO_DATE)}, {n_photo} dni po septembrskem nalivu. '
+            f'alt="Dve koprenki z vijoličnim klobukom in temnovijoličnimi lamelami v gozdni stelji">'
+            f'<figcaption>Koprenki (<em>Cortinarius</em> sp.), posnete {d_long(PHOTO_DATE)}, {n_photo} dni po septembrskem nalivu. '
             f'Določitev po fotografiji ni zanesljiva, koprenk pa ne nabiramo za prehrano. Foto: Filip Eremita.</figcaption></figure>')
 
 
