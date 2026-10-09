@@ -42,7 +42,7 @@ SPECIES_SHOW = [("boletus_edulis", "Jurček"), ("cantharellus_cibarius", "Lisič
                 ("hydnum_repandum", "Rumeni ježek"), ("pleurotus_ostreatus", "Bukov ostrigar")]
 ECO_ROWS = [("razkrojevalka", "Razkrojevalke stelje in travinja", "marela, kukmaki"),
             ("lesna", "Lesne vrste", "bukov ostrigar, bezgova uhljevka"),
-            ("mikorizna", "Mikorizne vrste", "jurček, lisička, rumeni ježek")]
+            ("mikorizna", "Mikorizne vrste", "jurček, rumeni ježek")]
 CSS = """<style>
 .mini-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin:1.4rem 0 2rem}
 .mini-stat{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:.9rem .8rem;text-align:center}
@@ -132,13 +132,6 @@ def build_data(rain_day):
     if not vals:
         raise SystemExit(f"/hourly nima meritev za {rain_day} — ne izmišljam številke.")
     rain_mm = max(vals)
-    event_mm = None
-    try:
-        cur = get_json(PROXY + "/ecowitt-current")
-        event_mm = cur["data"]["rainfall"]["event"]["value"]
-    except Exception:  # noqa: BLE001  (dopolnilna številka, ni nujna)
-        pass
-
     pre14 = round(sum(rain.get(d_add(rain_day, -i), 0.0) for i in range(1, 15)), 1)
     # suha serija: dnevi pred dežjem brez ≥ 1 mm
     n_dry, d = 0, d_add(rain_day, -1)
@@ -184,20 +177,25 @@ def build_data(rain_day):
     # ── pragovi in zamiki ──
     sp = {s["id"]: s for s in rules["species"]}
     thr = {sid: float(sp[sid]["rain_7d_min"]) for sid, _ in SPECIES_SHOW}
-    lags = {}
-    for s in rules["species"]:
-        lags.setdefault(s["ecology"], set()).add((int(s["fruiting_lag_days"]["min"]),
-                                                  int(s["fruiting_lag_days"]["max"])))
-    for e, v in lags.items():
-        assert len(v) == 1, f"zamik skupine {e} ni enoten: {v}"
-        lags[e] = next(iter(v))
+    # zamik skupine = najpogostejši v pravilih; vrste z drugačnim (ročno umerjenim) zamikom so svoja vrstica
+    from collections import Counter
+    cnt = {}
+    for sp_ in rules["species"]:
+        cnt.setdefault(sp_["ecology"], Counter())[(int(sp_["fruiting_lag_days"]["min"]),
+                                                  int(sp_["fruiting_lag_days"]["max"]))] += 1
+    lags = {e: c.most_common(1)[0][0] for e, c in cnt.items()}
+    lag_lis = (int(sp["cantharellus_cibarius"]["fruiting_lag_days"]["min"]),
+               int(sp["cantharellus_cibarius"]["fruiting_lag_days"]["max"]))
+    lag_jur = (int(sp["boletus_edulis"]["fruiting_lag_days"]["min"]),
+               int(sp["boletus_edulis"]["fruiting_lag_days"]["max"]))
+    assert lag_jur == lags["mikorizna"], f"jurček ni več na skupinskem zamiku: {lag_jur} proti {lags['mikorizna']}"
 
     return {
-        "today": today, "rain_day": rain_day, "rain_mm": rain_mm, "event_mm": event_mm,
+        "today": today, "rain_day": rain_day, "rain_mm": rain_mm,
         "pre14": pre14, "n_dry": n_dry, "last_wet": last_wet, "last_wet_mm": last_wet_mm,
         "sept_sum": sept_sum, "home": home["name"], "dry_v": dry_v, "full_v": full_v,
         "soil": soil, "peak_sept": peak_sept, "before": before, "after": after,
-        "peak_after": peak_after, "nxt": nxt, "om_rain": om_rain, "rain_hist": rain, "thr": thr, "lags": lags,
+        "peak_after": peak_after, "nxt": nxt, "om_rain": om_rain, "rain_hist": rain, "thr": thr, "lags": lags, "lag_lis": lag_lis,
     }
 
 
@@ -341,19 +339,22 @@ def chart_windows(D):
     L_ = D["lags"]
     start, end = d_add(rd, -1), d_add(rd, 19)
     ndays = (datetime.date.fromisoformat(end) - datetime.date.fromisoformat(start)).days
-    W, H = 720, 210
+    rows = [("razkrojevalka", "Razkrojevalke", L_["razkrojevalka"]), ("lesna", "Lesne vrste", L_["lesna"]),
+            ("mikorizna", "Jurček, ježek", L_["mikorizna"])]
+    if D["lag_lis"] != L_["mikorizna"]:
+        rows.append(("mikorizna", "Lisička", D["lag_lis"]))
+    W, H = 720, 210 + 40 * (len(rows) - 3)
     Lm, R = 150, 70
     step = (W - Lm - R) / ndays
     X = lambda dd: Lm + (datetime.date.fromisoformat(dd) - datetime.date.fromisoformat(start)).days * step
-    rows = [("razkrojevalka", "Razkrojevalke"), ("lesna", "Lesne vrste"), ("mikorizna", "Mikorizne vrste")]
     top, rh = 34, 40
     o = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Okna rasti po dežju {d_short(rd)} za tri skupine gob">']
     for k in range(0, ndays + 1, 3):
         dd = d_add(start, k)
-        o.append(f'<line x1="{X(dd):.1f}" x2="{X(dd):.1f}" y1="{top - 6}" y2="{top + rh * 3}" stroke="{GRID}"/>'
-                 f'<text x="{X(dd):.1f}" y="{top + rh * 3 + 18}" text-anchor="middle">{_fmt_day(dd)}</text>')
-    for j, (e, name) in enumerate(rows):
-        a, b = L_[e]
+        o.append(f'<line x1="{X(dd):.1f}" x2="{X(dd):.1f}" y1="{top - 6}" y2="{top + rh * len(rows)}" stroke="{GRID}"/>'
+                 f'<text x="{X(dd):.1f}" y="{top + rh * len(rows) + 18}" text-anchor="middle">{_fmt_day(dd)}</text>')
+    for j, (e, name, lag) in enumerate(rows):
+        a, b = lag
         d0, d1 = d_add(rd, a), d_add(rd, b)
         y = top + j * rh + 6
         x0, x1 = X(d0), X(d_add(d1, 1))
@@ -362,10 +363,10 @@ def chart_windows(D):
                  f'<text x="{x1 + 8:.1f}" y="{y + 16}">{d_rng(d0, d1)}</text>')
     xt = X(D["today"]) if start <= D["today"] <= end else None
     if xt is not None:
-        o.append(f'<line x1="{xt:.1f}" x2="{xt:.1f}" y1="{top - 6}" y2="{top + rh * 3}" stroke="{TXT}" stroke-dasharray="3 4"/>'
+        o.append(f'<line x1="{xt:.1f}" x2="{xt:.1f}" y1="{top - 6}" y2="{top + rh * len(rows)}" stroke="{TXT}" stroke-dasharray="3 4"/>'
                  f'<text x="{xt:.1f}" y="{top - 12}" text-anchor="middle">danes</text>')
     xr = X(rd)
-    o.append(f'<line x1="{xr:.1f}" x2="{xr:.1f}" y1="{top - 6}" y2="{top + rh * 3}" stroke="{TXT}" opacity=".7"/>'
+    o.append(f'<line x1="{xr:.1f}" x2="{xr:.1f}" y1="{top - 6}" y2="{top + rh * len(rows)}" stroke="{TXT}" opacity=".7"/>'
              f'<text x="{xr:.1f}" y="{top - 24}" text-anchor="middle">dež {d_short(rd)}</text>')
     o.append("</svg>")
     return (f'<figure class="sg-fig">{"".join(o)}</figure>'
@@ -494,14 +495,20 @@ def build_article(D):
     for e, name, ex in ECO_ROWS:
         a, b = L[e]
         rows3.append([name, ex, f"{a}–{b} dni", win[e]])
+    lis_differs = D["lag_lis"] != L["mikorizna"]
+    win_lis = d_rng(d_add(rd, D["lag_lis"][0]), d_add(rd, D["lag_lis"][1]))
+    if lis_differs:
+        rows3.append(["Lisička (mikorizna)", "navadna lisička", f"{D['lag_lis'][0]}–{D['lag_lis'][1]} dni", win_lis])
     sec3 = [
         (f"Gobe se po dežju ne pojavijo kar naslednji dan. Različne skupine potrebujejo različno dolgo, da razvijejo trosnjake. "
          f"Gobarski model te časovne zamike povzema v pravilih za posamezne vrste (<code>species_rules.yaml</code>)."),
         chart_windows(D),
         table(["Skupina", "Primeri", "Zamik po dežju", f"Okno po dežju {d_short(rd)}"], rows3),
         ("Navedeno časovno okno pomeni, da bi dež lahko spodbudil rast trosnjakov, ne pa, da se bodo ti v tem obdobju zagotovo pojavili."),
-        (f"Pri mikoriznih vrstah se okno odpre šele {d_long(d_add(rd, L['mikorizna'][0]))} in traja do {d_long(d_add(rd, L['mikorizna'][1]))}. "
-         f"Pri razkrojevalkah je zamik krajši, od {L['razkrojevalka'][0]} do {L['razkrojevalka'][1]} dni, vendar tudi pri njih za rast potrebujejo dovolj vlažna tla."),
+        (f"Pri jurčku in rumenem ježku se okno odpre šele {d_long(d_add(rd, L['mikorizna'][0]))} in traja do {d_long(d_add(rd, L['mikorizna'][1]))}. "
+         + (f"Lisička ima po novih podatkih krajši zamik, od {D['lag_lis'][0]} do {D['lag_lis'][1]} dni, zato se njeno okno odpre že {d_long(d_add(rd, D['lag_lis'][0]))} "
+            f"in traja do {d_long(d_add(rd, D['lag_lis'][1]))}. Model zanjo uporablja krajši zamik, ker so opažanja gob na iNaturalistu pokazala, da lisičke pogosto zrastejo že 6 do 8 dni po dežju. " if lis_differs else "")
+         + f"Pri razkrojevalkah je zamik {'še ' if lis_differs else ''}krajši, od {L['razkrojevalka'][0]} do {L['razkrojevalka'][1]} dni, vendar tudi pri njih za rast potrebujejo dovolj vlažna tla."),
     ]
 
     sec4 = [
@@ -510,11 +517,15 @@ def build_article(D):
          f"<li><strong>Marele, ostrigarji in druge vrste s krajšim zamikom:</strong> časovno okno za razkrojevalke je {win['razkrojevalka']}, "
          f"za lesne vrste pa {win['lesna']} Vrhnja plast tal naj bi bila po dežju deloma navlažena, vendar je model napovedal več dežja, kot ga je postaja dejansko izmerila. "
          "Zato je smiselno najprej pogledati v senčnih legah, ob potokih in na severnih pobočjih, kjer se vlaga lahko zadrži dlje.</li>"
-         f"<li><strong>Jurčki in lisičke:</strong> po modelu se njihovo časovno okno ne odpre pred {d_long(d_add(rd, L['mikorizna'][0]))}. "
+         f"<li><strong>Jurčki:</strong> po modelu se njihovo časovno okno ne odpre pred {d_long(d_add(rd, L['mikorizna'][0]))}. "
          f"Dež je dosegel le približno {share_j} % praga za jurčka, vlaga v globlji plasti tal pa na lestvici modela ostaja pri {deep_pct} %. "
          "Za zdaj torej ni podlage za pričakovanje množične rasti, razen če vmes pade še nekaj dežja.</li>"
-         f"<li><strong>Kaj bi spremenilo sliko:</strong> da bi jurček dosegel svoj prag, bi moralo v sedmih dneh pasti še vsaj približno {int(round(need))} mm dežja. "
-         "Ker so napovedi padavin negotove, spremljaj aktualni gobarski indeks.</li>"
+         + (f"<li><strong>Lisičke:</strong> njihovo okno se odpre že {d_long(d_add(rd, D['lag_lis'][0]))}, vendar je dež dosegel le približno "
+            f"{round(100 * rain / D['thr']['cantharellus_cibarius'])} % njihovega praga ({int(D['thr']['cantharellus_cibarius'])} mm). "
+            "Tudi pri njih torej ni podlage za pričakovanje množične rasti, razen če pride še dež.</li>" if lis_differs else "")
+         + f"<li><strong>Kaj bi spremenilo sliko:</strong> da bi jurček dosegel svoj prag, bi moralo v sedmih dneh pasti še vsaj približno {int(round(need))} mm dežja"
+         + (f", za lisičko pa še vsaj približno {int(round(D['thr']['cantharellus_cibarius'] - rain))} mm" if lis_differs else "")
+         + ". Ker so napovedi padavin negotove, spremljaj aktualni gobarski indeks.</li>"
          "</ul>"),
         ('Današnji indeks za posamezne vrste in območja je na <a href="/gobarska-napoved/danes/" style="color:var(--blue)">gobarski napovedi Meteorec</a>.'),
         ('Če greš v gozd, nam lahko sporočiš tudi svoje opažanje. Zadošča podatek o območju, natančne lokacije najdb pa ni treba razkrivati. '

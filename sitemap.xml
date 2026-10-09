@@ -465,6 +465,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007.html</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
