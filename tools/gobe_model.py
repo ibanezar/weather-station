@@ -298,10 +298,83 @@ def in_season(date, season):
     return cur >= start or cur <= end
 
 
+# ── opažanja bralcev: že rastoča vrsta na območju (STIKALO, privzeto izklopljeno) ──────
+#
+# Komentar bralca (9. 10. 2026): »Če so že sedaj rasle, bodo hitro, kjer bo dovolj dežja; če niso, ne bodo,
+# ker še ni podgobja.« Model tega ne ve — zamik je privzet za skupino. Javna opažanja (`/gobe/opazovanja`,
+# vrsta = točno `name_sl`, območje = ime območja modela) so zato lahko signal, da je vrsta na območju
+# ŽE aktivna; takrat se ji zamik skrajša (OBS_LAG) in sprožilni dež šteje prej.
+#
+# NI VKLOPLJENO samodejno: CLAUDE.md prepoveduje popravljanje indeksa po opažanjih, dokler te odločitve ni.
+# Vklop: `--use-observations` ali GOBE_USE_OBSERVATIONS=1. Brez stikala je izhod bit-za-bit enak.
+# Opažanja so javen, nepreverjen vnos, zato je signal strog: najmanj OBS_MIN_COUNT opažanj iste vrste
+# na istem območju, na najmanj OBS_MIN_DAYS različnih dneh, v zadnjih OBS_ACTIVE_DAYS dneh; velja samo
+# za OBS_APPLIES_TO in zamik se nikoli ne podaljša. Vrednosti niso umerjene na terenu.
+WORKER = "https://weatherireica1.filip-eremita.workers.dev"
+WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
+OBS_ACTIVE_DAYS = 21
+OBS_MIN_COUNT = 3
+OBS_MIN_DAYS = 2
+OBS_APPLIES_TO = ("mikorizna",)
+OBS_LAG = (3, 10)   # enak kot lesne vrste: dež pred 3–10 dnevi
+
+
+def fetch_observations(timeout=15):
+    """Javna opažanja iz workerja. Vrne seznam ali None (nedosegljivo — izračun gre naprej brez njih)."""
+    url = f"{WORKER}/gobe/opazovanja?dni={OBS_ACTIVE_DAYS}"
+    req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": WORKER_UA})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            data = json.load(r)
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as e:
+        print(f"⚠ opažanja nedosegljiva ({e}) — izračun brez njih", file=sys.stderr)
+        return None
+    obs = data.get("opazovanja") if isinstance(data, dict) else None
+    return obs if isinstance(obs, list) else None
+
+
+def species_aliases(rules):
+    """Ime, kot ga bralec vpiše → id vrste. Poleg celotnega `name_sl` še del pred oklepajem, del v
+    oklepaju (»Jurček« za »Jesenski goban (Jurček)«) in latinsko ime. Ime, ki bi pripadalo več vrstam, se
+    zavrže — raje zgrešiti opažanje kot ga pripisati napačni vrsti."""
+    found = {}
+    for sp in rules["species"]:
+        if not sp.get("gets_index"):
+            continue
+        names = {sp["name_sl"], sp.get("name_lat") or ""}
+        base, _, rest = sp["name_sl"].partition("(")
+        names.add(base)
+        names.add(rest.rstrip(") "))
+        for n in names:
+            n = n.strip().casefold()
+            if n:
+                found.setdefault(n, set()).add(sp["id"])
+    return {n: next(iter(ids)) for n, ids in found.items() if len(ids) == 1}
+
+
+def active_species_areas(observations, rules, today):
+    """Množica (id vrste, ime območja), kjer je vrsta po opažanjih že aktivna.
+    Neznana vrsta ali območje, pokvarjen vnos in opažanje izven okna se tiho preskočijo."""
+    by_name = species_aliases(rules)
+    counts = {}
+    for o in observations or []:
+        try:
+            sid = by_name.get(str(o["vrsta"]).strip().casefold())
+            area = str(o["obmocje"]).strip()
+            day = dt.datetime.fromisoformat(str(o["ts"]).replace("Z", "+00:00")).date()
+        except (KeyError, ValueError, TypeError):
+            continue
+        if not sid or not area or not (0 <= (today - day).days <= OBS_ACTIVE_DAYS):
+            continue
+        counts.setdefault((sid, area), []).append(day)
+    return {k for k, days in counts.items() if len(days) >= OBS_MIN_COUNT and len(set(days)) >= OBS_MIN_DAYS}
+
+
 # ── per-species evaluation ───────────────────────────────────────────────────
 
-def eval_species(sp, series, i, date, spot, rules):
+def eval_species(sp, series, i, date, spot, rules, active=False):
     """Score one species for one day at one location.
+    `active`: vrsta je po opažanjih bralcev že aktivna na tem območju (glej OBS_*).
     Returns {index, explanation, components}."""
     weights = rules["weights"]
     scoring = rules["scoring"]
@@ -353,6 +426,11 @@ def eval_species(sp, series, i, date, spot, rules):
     rain_cfg = scoring["rain"]
     lag = sp["fruiting_lag_days"]
     lag_min, lag_max = int(lag["min"]), int(lag["max"])
+    if active and sp.get("ecology") in OBS_APPLIES_TO:
+        new_min, new_max = min(lag_min, OBS_LAG[0]), min(lag_max, OBS_LAG[1])
+        if (new_min, new_max) != (lag_min, lag_max):
+            lag_min, lag_max = new_min, new_max
+            parts.append(f"opažena v zadnjih {OBS_ACTIVE_DAYS} dneh, zamik skrajšan")
 
     # Trigger: rain inside the species' lag window. Its length differs per
     # ecological group, so the 7-day-equivalent threshold is scaled to the
@@ -465,7 +543,7 @@ def level(p):
 
 # ── forecast assembly ────────────────────────────────────────────────────────
 
-def compute_forecast(rules, spots, locs, station_precip, protected=None):
+def compute_forecast(rules, spots, locs, station_precip, protected=None, active=None):
     today = dt.date.today()
     # Only edible / conditionally-edible species get a foraging index; the rest
     # (poisonous, protected, inedible) live in the config solely as reference and
@@ -500,7 +578,8 @@ def compute_forecast(rules, spots, locs, station_precip, protected=None):
             date = dt.date.fromisoformat(dates[i])
             species_out = []
             for sp in indexed:
-                r = eval_species(sp, series, i, date, spot, rules)
+                r = eval_species(sp, series, i, date, spot, rules,
+                                 active=bool(active) and (sp["id"], spot["name"]) in active)
                 species_out.append({
                     "id": sp["id"],
                     "index": r["index"],
@@ -738,6 +817,8 @@ def main():
     ap.add_argument("--out-premium-today", default=None,
                     help="path for the day-0 digest used by /premium/notify")
     ap.add_argument("--no-write", action="store_true", help="print summary only")
+    ap.add_argument("--use-observations", action="store_true",
+                    help="skrajšaj zamik vrstam, ki so po javnih opažanjih že aktivne (privzeto izklopljeno)")
     args = ap.parse_args()
 
     rules = load_rules()
@@ -757,7 +838,13 @@ def main():
     station_precip = load_station_precip()
     print(f"IREICA1 padavine: {len(station_precip)} dni iz history.json")
 
-    premium = compute_forecast(rules, spots, locs, station_precip, protected)
+    active = None
+    if args.use_observations or os.environ.get("GOBE_USE_OBSERVATIONS") == "1":
+        obs = fetch_observations()
+        if obs is not None:
+            active = active_species_areas(obs, rules, dt.date.today())
+            print(f"Opažanja: {len(obs)}, aktivnih parov vrsta/območje: {len(active)}")
+    premium = compute_forecast(rules, spots, locs, station_precip, protected, active)
     free = free_payload(premium)
     print_summary(premium)
 

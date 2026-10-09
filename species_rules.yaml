@@ -8,7 +8,7 @@
 # afiniteta, nočna ohladitev, ekološka skupina in rastni zamik) so označene
 # '# TODO: kalibriraj'. Neposredno iz baze (sezona, zračni prag, mikoriza,
 # dvojnice, užitnost) niso.
-# Zadnja regeneracija: 2026-08-25 · 300 vrst.
+# Zadnja regeneracija: 2026-10-09 · 300 vrst.
 
 # Globalne uteži za izračun indeksa (0–100)
 weights:
@@ -1048,7 +1048,7 @@ species:
     rain_7d_min: 30        # TODO: kalibriraj (baza: vlaga 7d; prag kot 7-dnevna kumulativa)
     rain_14d_min: 60       # TODO: kalibriraj (prag kot 14-dnevna kumulativa)
     ecology: mikorizna   # TODO: kalibriraj (izpeljano iz substrata)
-    fruiting_lag_days: { min: 8, max: 16 }  # TODO: kalibriraj (iz skupine mikorizna)
+    fruiting_lag_days: { min: 4, max: 14 }  # ROČNO UMERJENO: zamik 4–14 d iz opažanj iNaturalist (n=255+180, mediana 6–7 d), ne privzetih 8–16 d
     mycorrhiza: ["smreka", "bukev", "bor", "hrast"]
     substrate: "Mikoriza; v tleh, v mahu, borovničevju ali med listjem"
     soil_ph: "Kisle gozdne talne podlage"
