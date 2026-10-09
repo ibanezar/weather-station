@@ -219,7 +219,12 @@ def build_article(D):
     s_before = S[D["before"]]["pct"]
     s_peak_sept = S[D["peak_sept"]]["pct"]
     s_peak = S[D["peak_after"]]["pct"]
-    s_next = S[D["nxt"]]["pct"] if D["nxt"] in S else None
+    last_day = D["after"][-1]
+    s_last = S[last_day]["pct"]
+    peak_days = [dd for dd in D["after"] if S[dd]["pct"] == s_peak]
+    peak_txt = (d_short(peak_days[0]) if len(peak_days) == 1
+                else d_rng(peak_days[0], peak_days[-1]))
+    deep_pct = round(100 * max(0.0, min(1.0, (S[D["peak_after"]]["deep"] - D["dry_v"]) / (D["full_v"] - D["dry_v"]))))
     gap_days = (datetime.date.fromisoformat(D["before"]) - datetime.date.fromisoformat(D["peak_sept"])).days
     between = round(sum(v for k, v in D["rain_hist"].items() if D["peak_sept"] < k <= D["before"]), 1)
     deep_b, deep_a = S[D["before"]]["deep"], S[D["peak_after"]]["deep"]
@@ -282,10 +287,11 @@ def build_article(D):
          f"ali manj, 100 % pa {num(D['full_v'], 2)} m³/m³ ali več."),
         table(["Datum", "Vlaga tal", "m³/m³", "Opomba"], ROWS_SOIL),
         (f"Po septembrskem nalivu je bila vrhnja plast po modelu povsem namočena ({s_peak_sept} %). Do dneva pred dežjem "
-         f"je v {gap_days} dneh, ko je padlo skupaj le {num(between)} mm, upadla na <strong>{s_before} %</strong>. Dež {d_short(rd)} jo je dvignil "
-         f"na vrh okoli {s_peak} % ({d_short(D['peak_after'])}), a brez novega dežja po modelu spet pade"
-         + (f" na {s_next} % do {d_short(D['nxt']).rstrip('.')}." if s_next is not None else ".")),
-        (f"Globlja plast (9–27 cm) skoraj ne reagira: {num(deep_b, 3)} → {num(deep_a, 3)} m³/m³. Takle dež se vpije v prvih "
+         f"je v {gap_days} dneh, ko je padlo skupaj le {num(between)} mm, upadla na <strong>{s_before} %</strong>. Dež {d_short(rd)} jo je "
+         f"po modelu dvignil na {s_peak} % ({peak_txt}), "
+         + (f"do {d_short(last_day)} pa naj bi spet padla na {s_last} %." if s_last is not None and s_last < s_peak else
+            "kar se do konca napovednega okna ne spremeni.")),
+        (f"Globlja plast (9–27 cm) skoraj ne reagira: {num(deep_b, 3)} → {num(deep_a, 3)} m³/m³. Na isti lestvici je to {deep_pct} %: takle dež se vpije v prvih "
          f"centimetrih. Mikorizni micelij seže globlje od zgornjih nekaj centimetrov, zato je za jurčke pomembno, "
          f"koliko vode pride globlje, ne samo ali je zgornja plast kratko mokra."),
         ('<div class="disclaimer">Vlaga tal je model, ne meritev.'
@@ -311,9 +317,9 @@ def build_article(D):
         (f"Po modelu in izmerjenem dežju je slika taka:"),
         ("<ul>"
          f"<li><strong>Marela, ostrigarji in druge vrste s krajšim zamikom:</strong> v oknu {win['razkrojevalka']} (razkrojevalke) "
-         f"in {win['lesna']} (lesne vrste) je okno odprto, a vrhnja plast tal je suha, zato je rast bolj verjetna tam, kjer se vlaga dlje drži: v senci, ob potokih, na severnih pobočjih.</li>"
+         f"in {win['lesna']} (lesne vrste) je okno odprto. Vrhnja plast tal je po modelu po dežju deloma namočena ({s_peak} %), a model je dež ocenil višje od meritve, zato je rast verjetnejša tam, kjer se vlaga dlje drži: v senci, ob potokih, na severnih pobočjih.</li>"
          f"<li><strong>Jurčki in lisičke:</strong> ne prej kot {d_long(d_add(rd, L['mikorizna'][0]))}. Dež je izpolnil le "
-         f"{share_j} % praga za jurčka in globlja tla ostajajo suha, zato po modelu ni razloga za veliko rast, razen če pride še dež.</li>"
+         f"{share_j} % praga za jurčka in globlja plast tal ostaja suha ({deep_pct} % na lestvici modela), zato po modelu ni razloga za veliko rast, razen če pride še dež.</li>"
          f"<li><strong>Kaj bi sliko spremenilo:</strong> še vsaj {int(round(need))} mm v sedmih dneh bi jurčku pripeljalo prag. "
          "Napovedi dežja so negotove, zato glej tekoči indeks.</li>"
          "</ul>"),
