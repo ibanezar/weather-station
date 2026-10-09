@@ -208,6 +208,186 @@ def table(head, rows):
     return f'<div class="table-scroll" tabindex="0">{t}</div>'
 
 
+# ── grafi: statični SVG (delujejo brez JS), JS doda samo opis ob prehodu miške ──
+C_RAIN, C_SOIL = "#3987e5", "#8e6fd8"      # validate_palette.js --mode dark, surface #0a0f1c: vsi testi PASS
+C_GROUP = {"razkrojevalka": "#3987e5", "lesna": "#d95926", "mikorizna": "#199e70"}  # kot v članku o dežu 8.–10. 10.
+GRID = "rgba(255,255,255,.09)"
+TXT = "var(--muted)"
+
+CHART_CSS = """<style>
+.sg-fig{position:relative;margin:1.4rem 0 .4rem}
+.sg-fig svg{width:100%;height:auto;display:block}
+.sg-fig text{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--muted)}
+.sg-fig .sg-t{font-size:12px;fill:var(--text,#e8ecef)}
+.sg-fig .hit{fill:transparent;cursor:crosshair}
+.sg-tip{position:absolute;pointer-events:none;background:var(--card-bg,#111827);border:1px solid var(--card-border,#2a333c);border-radius:8px;padding:.45rem .6rem;font-size:.78rem;line-height:1.4;display:none;z-index:3;white-space:nowrap}
+.sg-cap{font-size:.8rem;color:var(--muted);margin:.2rem 0 1.4rem}
+.sg-det{margin:.2rem 0 1.4rem;font-size:.88rem}.sg-det summary{cursor:pointer;color:var(--muted)}
+</style>"""
+
+CHART_JS = """<script>
+(function(){
+var f=document.getElementById('sg-a');if(!f)return;
+var tip=f.querySelector('.sg-tip'),svg=f.querySelector('svg'),cx=f.querySelector('.sg-cross');
+function show(e){var t=e.target;if(!t.classList||!t.classList.contains('hit'))return;
+ var r=f.getBoundingClientRect(),x=e.clientX-r.left,s=t.getAttribute('data-s'),fc=t.getAttribute('data-f')==='1';
+ tip.innerHTML='<strong>'+t.getAttribute('data-d')+'</strong><br>dež (postaja): '+t.getAttribute('data-r')+' mm'+
+  '<br>vlaga tal (model): '+(s===''?'–':s+' %')+(fc?' <em>(napoved)</em>':'');
+ tip.style.display='block';var w=tip.offsetWidth;tip.style.left=Math.max(0,Math.min(r.width-w,x+12))+'px';tip.style.top='8px';
+ cx.setAttribute('x1',t.getAttribute('data-x'));cx.setAttribute('x2',t.getAttribute('data-x'));cx.style.display='block'}
+function hide(){tip.style.display='none';cx.style.display='none'}
+svg.addEventListener('pointermove',show);svg.addEventListener('pointerleave',hide);
+})();
+</script>"""
+
+
+def _fmt_day(iso):
+    d = datetime.date.fromisoformat(iso)
+    return f"{d.day}. {d.month}."
+
+
+def chart_rain_soil(D):
+    """Dve plošči z isto časovno osjo (NE dvojna os): zgoraj dež postaje, spodaj modelska vlaga tal."""
+    rd = D["rain_day"]
+    S = D["soil"]
+    rain = dict(D["rain_hist"])
+    rain[rd] = D["rain_mm"]
+    first = d_add(rd, -30)
+    last = D["after"][-1]
+    days = []
+    d = first
+    while d <= last:
+        days.append(d)
+        d = d_add(d, 1)
+    n = len(days)
+    W, H = 720, 420
+    L, R = 46, 22
+    step = (W - L - R) / (n - 1)
+    X = lambda i: L + i * step
+    ry0, rh = 30, 96            # dež
+    sy0, sh = 214, 150          # vlaga tal
+    rmax = 90.0
+    Yr = lambda v: ry0 + rh - rh * min(v, rmax) / rmax
+    Ys = lambda v: sy0 + sh - sh * v / 100.0
+    o = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Dež na postaji IREICA1 in modelska vlaga tal od {_fmt_day(first)} do {_fmt_day(last)}">']
+    # mreža + osi
+    for v in (0, 30, 60, 90):
+        o.append(f'<line x1="{L}" x2="{W - R}" y1="{Yr(v):.1f}" y2="{Yr(v):.1f}" stroke="{GRID}"/>'
+                 f'<text x="{L - 6}" y="{Yr(v) + 4:.1f}" text-anchor="end">{v}</text>')
+    for v in (0, 50, 100):
+        o.append(f'<line x1="{L}" x2="{W - R}" y1="{Ys(v):.1f}" y2="{Ys(v):.1f}" stroke="{GRID}"/>'
+                 f'<text x="{L - 6}" y="{Ys(v) + 4:.1f}" text-anchor="end">{v}</text>')
+    o.append(f'<text class="sg-t" x="{L}" y="16">Dež na postaji IREICA1 (mm na dan)</text>')
+    o.append(f'<text class="sg-t" x="{L}" y="{sy0 - 22}">Vlaga tal 3–9 cm, modelska ocena (% lestvice modela)</text>')
+    # dež: stolpci
+    bw = max(3.0, step * 0.68)
+    for i, dd in enumerate(days):
+        v = rain.get(dd)
+        if v is None or dd > rd:
+            continue
+        h = max(0.0, Yr(0) - Yr(v))
+        if v > 0:
+            o.append(f'<rect x="{X(i) - bw / 2:.1f}" y="{Yr(v):.1f}" width="{bw:.1f}" height="{h:.1f}" rx="2" fill="{C_RAIN}"/>')
+    # izpostavljene oznake dežja
+    for dd, anchor in ((max((k for k in days if k < rd and k in rain), key=lambda k: rain[k]), "middle"), (rd, "middle")):
+        i = days.index(dd)
+        o.append(f'<text x="{X(i):.1f}" y="{Yr(rain[dd]) - 5:.1f}" text-anchor="{anchor}">{num(rain[dd])}</text>')
+    # navpična oznaka dežja
+    ir = days.index(rd)
+    o.append(f'<line x1="{X(ir):.1f}" x2="{X(ir):.1f}" y1="{ry0}" y2="{sy0 + sh}" stroke="{TXT}" stroke-dasharray="3 4" opacity=".7"/>'
+             f'<text x="{X(ir) - 5:.1f}" y="{ry0 + 12}" text-anchor="end">dež {d_short(rd)}</text>')
+    # vlaga tal: polna črta do danes, črtkana naprej
+    today = D["today"]
+    pts = [(i, S[dd]["pct"]) for i, dd in enumerate(days) if dd in S and S[dd]["pct"] is not None]
+    solid = [(i, v) for i, v in pts if days[i] < today]
+    dashed = [(i, v) for i, v in pts if days[i] >= today]
+    if solid and dashed:
+        dashed = [solid[-1]] + dashed
+    pl = lambda a: " ".join(f"{X(i):.1f},{Ys(v):.1f}" for i, v in a)
+    if solid:
+        o.append(f'<polyline points="{pl(solid)}" fill="none" stroke="{C_SOIL}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>')
+    if dashed:
+        o.append(f'<polyline points="{pl(dashed)}" fill="none" stroke="{C_SOIL}" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>')
+    # neposredne oznake vlage tal
+    def lab(dd, dy=-8, anchor="middle"):
+        if dd in days and dd in S:
+            i = days.index(dd)
+            o.append(f'<circle cx="{X(i):.1f}" cy="{Ys(S[dd]["pct"]):.1f}" r="3.5" fill="{C_SOIL}" stroke="var(--bg,#0a0f1c)" stroke-width="2"/>'
+                     f'<text x="{X(i) + (6 if anchor == "start" else -6 if anchor == "end" else 0):.1f}" y="{Ys(S[dd]["pct"]) + dy:.1f}" text-anchor="{anchor}">{S[dd]["pct"]} %</text>')
+    lab(D["peak_sept"], dy=-9, anchor="start")
+    lab(D["before"], dy=-9, anchor="end")
+    lab(D["peak_after"], dy=-9)
+    # x os: vsakih 5 dni
+    for i, dd in enumerate(days):
+        if (len(days) - 1 - i) % 5 == 0:
+            o.append(f'<text x="{X(i):.1f}" y="{sy0 + sh + 18}" text-anchor="{"end" if i == n - 1 else "middle"}">{_fmt_day(dd)}</text>')
+    # prehodna črta + zadetne površine
+    o.append(f'<line class="sg-cross" x1="0" x2="0" y1="{ry0}" y2="{sy0 + sh}" stroke="{TXT}" style="display:none"/>')
+    for i, dd in enumerate(days):
+        r_ = rain.get(dd) if dd <= rd else None
+        s_ = S[dd]["pct"] if dd in S and S[dd]["pct"] is not None else None
+        o.append(f'<rect class="hit" x="{X(i) - step / 2:.1f}" y="{ry0}" width="{step:.1f}" height="{sy0 + sh - ry0}" '
+                 f'data-x="{X(i):.1f}" data-d="{_fmt_day(dd)}" data-r="{num(r_) if r_ is not None else "–"}" '
+                 f'data-s="{"" if s_ is None else s_}" data-f="{1 if dd >= today else 0}"/>')
+    o.append("</svg>")
+    return (CHART_CSS + f'<figure class="sg-fig" id="sg-a">{"".join(o)}<div class="sg-tip"></div></figure>'
+            f'<p class="sg-cap">Zgoraj izmerjen dež, spodaj modelska vlaga tal na isti časovni osi. Črtkani del vlage tal je napoved modela. '
+            f'Dež 10. in 11. 9. je zaradi lestvice (do 90 mm) najvišji stolpec. Vlaga tal ni meritev postaje.</p>' + CHART_JS)
+
+
+def chart_windows(D):
+    """Okna po dežju za tri skupine (isti zamiki kot v tabeli)."""
+    rd = D["rain_day"]
+    L_ = D["lags"]
+    start, end = d_add(rd, -1), d_add(rd, 19)
+    ndays = (datetime.date.fromisoformat(end) - datetime.date.fromisoformat(start)).days
+    W, H = 720, 210
+    Lm, R = 150, 70
+    step = (W - Lm - R) / ndays
+    X = lambda dd: Lm + (datetime.date.fromisoformat(dd) - datetime.date.fromisoformat(start)).days * step
+    rows = [("razkrojevalka", "Razkrojevalke"), ("lesna", "Lesne vrste"), ("mikorizna", "Mikorizne vrste")]
+    top, rh = 34, 40
+    o = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Okna rasti po dežju {d_short(rd)} za tri skupine gob">']
+    for k in range(0, ndays + 1, 3):
+        dd = d_add(start, k)
+        o.append(f'<line x1="{X(dd):.1f}" x2="{X(dd):.1f}" y1="{top - 6}" y2="{top + rh * 3}" stroke="{GRID}"/>'
+                 f'<text x="{X(dd):.1f}" y="{top + rh * 3 + 18}" text-anchor="middle">{_fmt_day(dd)}</text>')
+    for j, (e, name) in enumerate(rows):
+        a, b = L_[e]
+        d0, d1 = d_add(rd, a), d_add(rd, b)
+        y = top + j * rh + 6
+        x0, x1 = X(d0), X(d_add(d1, 1))
+        o.append(f'<text class="sg-t" x="{Lm - 10}" y="{y + 16}" text-anchor="end">{name}</text>'
+                 f'<rect x="{x0:.1f}" y="{y}" width="{x1 - x0:.1f}" height="22" rx="4" fill="{C_GROUP[e]}"/>'
+                 f'<text x="{x1 + 8:.1f}" y="{y + 16}">{d_rng(d0, d1)}</text>')
+    xt = X(D["today"]) if start <= D["today"] <= end else None
+    if xt is not None:
+        o.append(f'<line x1="{xt:.1f}" x2="{xt:.1f}" y1="{top - 6}" y2="{top + rh * 3}" stroke="{TXT}" stroke-dasharray="3 4"/>'
+                 f'<text x="{xt:.1f}" y="{top - 12}" text-anchor="middle">danes</text>')
+    xr = X(rd)
+    o.append(f'<line x1="{xr:.1f}" x2="{xr:.1f}" y1="{top - 6}" y2="{top + rh * 3}" stroke="{TXT}" opacity=".7"/>'
+             f'<text x="{xr:.1f}" y="{top - 24}" text-anchor="middle">dež {d_short(rd)}</text>')
+    o.append("</svg>")
+    return (f'<figure class="sg-fig">{"".join(o)}</figure>'
+            f'<p class="sg-cap">Okno pomeni, da je dež trosnjak lahko sprožil, ne da je ta zrasel. Zamiki so iz pravil vrst v gobarskem modelu.</p>')
+
+
+def daily_table(D):
+    rd = D["rain_day"]
+    rain = dict(D["rain_hist"])
+    rain[rd] = D["rain_mm"]
+    S = D["soil"]
+    rows = []
+    d = d_add(rd, -30)
+    while d <= D["after"][-1]:
+        r_ = rain.get(d) if d <= rd else None
+        s_ = S.get(d, {}).get("pct")
+        rows.append([d_short(d), "–" if r_ is None else num(r_), "–" if s_ is None else f"{s_} %"])
+        d = d_add(d, 1)
+    return ('<details class="sg-det"><summary>Podatki grafa po dnevih</summary>'
+            + table(["Datum", "Dež (mm)", "Vlaga tal (model)"], rows) + "</details>")
+
+
 def build_article(D):
     S = D["soil"]
     rd = D["rain_day"]
@@ -285,6 +465,8 @@ def build_article(D):
         (f"Postaja vlage tal ne meri. Spodnje številke so <strong>modelska ocena</strong> Open-Meteo za plast 3–9 cm "
          f"na območju {D['home']}, preračunana na lestvico gobarskega modela: 0 % pomeni {num(D['dry_v'], 2)} m³/m³ "
          f"ali manj, 100 % pa {num(D['full_v'], 2)} m³/m³ ali več."),
+        chart_rain_soil(D),
+        daily_table(D),
         table(["Datum", "Vlaga tal", "m³/m³", "Opomba"], ROWS_SOIL),
         (f"Po septembrskem nalivu je bila vrhnja plast po modelu povsem namočena ({s_peak_sept} %). Do dneva pred dežjem "
          f"je v {gap_days} dneh, ko je padlo skupaj le {num(between)} mm, upadla na <strong>{s_before} %</strong>. Dež {d_short(rd)} jo je "
@@ -307,6 +489,7 @@ def build_article(D):
     sec3 = [
         (f"Gobe ne zrastejo naslednji dan: vsaka skupina potrebuje čas od dežja do trosnjaka. Model zamike bere "
          f"iz pravil vrst (<code>species_rules.yaml</code>)."),
+        chart_windows(D),
         table(["Skupina", "Primeri", "Zamik po dežju", f"Okno po dežju {d_short(rd)}"], rows3),
         (f"Okno pomeni, da je dež trosnjak <em>lahko</em> sprožil, ne da je ta zrasel. Pri mikoriznih vrstah je okno "
          f"{win['mikorizna']}, torej se ne odpre pred {d_long(d_add(rd, L['mikorizna'][0]))}. Pri razkrojevalkah je zamik krajši "
@@ -374,7 +557,7 @@ def main():
                     print(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", p)).strip())
         print("\nMETA:", article["meta_description"], len(article["meta_description"]))
         return
-    ftp.TODAY = datetime.date.today()
+    ftp.TODAY = datetime.date.today().isoformat()
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     slug, html, entry, og_meta = ftp.build_html(
         article, YEAR, 10, now_utc, slug=SLUG, back=("/blog/", "← Vsi članki"),
