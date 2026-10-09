@@ -84,6 +84,13 @@ jobs:
         if: always()
         run: python3 tools/generate_gobe_page.py
 
+      # Skrita stran za lastnika (noindex, brez povezav): kandidati za objavo v
+      # gobjih FB skupinah. Ob napaki ne podre objave glavne strani.
+      - name: Generate skrita stran z naslovi za FB skupine
+        if: always()
+        continue-on-error: true
+        run: python3 tools/generate_gobe_naslovi_page.py
+
       - name: Commit & push if changed
         if: always()
         run: |
