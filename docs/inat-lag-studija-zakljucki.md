@@ -41,3 +41,39 @@ Vse glive skupaj: mediana DSO okoli 10 dni, 40 % opažanj v tednu po začetku de
 - Jurčka, ježka in kostanjevke ne spreminjati.
 - Marele in štorovke ne spreminjati na podlagi te študije; za oceno potrebujemo opažanja prvega trosnjaka (npr. iz obrazca z opombo »mlad trosnjak«).
 - Če želiš večji vzorec: razširiti na Avstrijo in Hrvaško ter pridobiti opažanja za 2015–2026 po mesecih (maj–julij za lisičko).
+
+---
+
+# Razširitev (9. 10. 2026): širše območje in zgodnja sezona
+
+Tabele: `docs/inat-lag-studija-siroko.md` (jug Avstrije, Slovenija, sever Hrvaške, SV Italija, Z Madžarska, avgust–november, ~37.000 opažanj gliv za kontrolo)
+in `docs/inat-lag-studija-poletje.md` (isto območje, maj–julij, za lisičko, jurčka, ježka, marelo). Vzorec je okoli 2,5× večji.
+Test |z| ≥ 2,5 je grob (opažanja niso neodvisna), zato ga beri kot smer, ne kot dokaz.
+
+| Vrsta | n (SI → široko) | Mediana DSO (Q1–Q3), široko | Jasno odstopanje (široko) | Model | Sklep |
+|---|---|---|---|---|---|
+| Navadna lisička | 104 → **255** | 7 (4–14) | 6–8 d: 1,8× (z = 4,8); 22–30 d: 0,3× (z = −3,7) | 8–16 d | **Potrjeno.** Isti vzorec kot v Sloveniji, jasneje. |
+| Lisička, maj–jul | **180** | 6 (3–13) | 6–8 d: 1,5× (z = 2,6); 31+ d: 0,4× | 8–16 d | **Še krajši zamik poleti.** |
+| Jurček | 132 → **443** | 10 (4–17) | 17–21 d: 1,4× (z = 2,9); po 22 d manj | 8–16 d | Skladno z modelom, razpon širši. |
+| Rumeni ježek | 31 → **84** | 10 (6–21) | 6–8 d: 1,9× (z = 3,0) | 8–16 d | Kaže na krajši zamik kot model, vendar je n še majhen. |
+| Kostanjevka | 89 → **294** | 10 (4–19) | 3–5 d: 1,4× (z = 2,9) | 8–16 d | Zgodnejša od modela, vendar zadržano. |
+| Orjaški dežnik (marela) | 283 → **651** | 11 (6–17) | **13–16 d: 1,7× (z = 6,4)**; 0–2 d: 0,7× | 2–8 d | **Potrjeno: po opažanjih NI hitra.** |
+| Sivorumena mraznica | 52 → **107** | 12 (6–19) | 9–12 d: 1,6× (z = 2,6) | 3–10 d | Pozneje od modela, rahlo. |
+
+## Kaj se je spremenilo
+
+- **Lisička je zdaj najbolje podprta ugotovitev.** Pri n = 255 (jesen) in n = 180 (poletje) je vrh pri 6–8 dneh in opazen upad po ~3 tednih. Zamik 8–16 dni v modelu se ne ujema z nobenim od obeh.
+  **Predlog: `fruiting_lag_days` iz 8–16 v 4–14** (jesen Q1–Q3 = 4–14, poletje 3–13). Ni uvedeno.
+- **Marela ni »takoj«.** Pri n = 651 je razmerje v razredu 0–2 dni 0,7×, v razredu 13–16 dni 1,7×. Model (2–8 d) in komentar bralca (»marele so takoj«) se v podatkih ne potrdita. Opomba o starih trosnjakih ostaja: klobuki ostanejo več dni, zato je to zgornja ocena.
+- **Jurček ostane.** Mediana 10 dni je znotraj 8–16, večji vzorec ne spremeni slike.
+- **Po suši** (7 dni pred dežjem < 8 mm): lisička n = 71, mediana 7 d (jesen), n = 23, 8 d (poletje); v oknu modela 31 % in 43 %. Brez jasne razlike od običajnega vzorca.
+
+## Previdnost (nespremenjeno)
+
+DSO je merjen od zadnjega dogodka dežja, opažanje ni prvi trosnjak, kontrola vključuje tudi lišaje in lesne vrste, ERA5 glaji padavine, in območje je širše od najine doline (sosednje podnebje). Zaključki veljajo za regijo, ne za Rečico.
+
+## Predlog (ni uveden)
+
+1. `CALIBRATION` za **lisičko**: `fruiting_lag_days` 4–14, razlog: »iNaturalist 2015–2026, n = 255 (avg–nov) in 180 (maj–jul), mediana 6–7 d, Q1–Q3 3–14«. Pred uvedbo backtest gobarskega indeksa.
+2. Jurčka, ježka in kostanjevke ne spreminjati; pri ježku in kostanjevki počakati na večji vzorec ali opažanja iz najine doline.
+3. Marele (2–8 d) ne spreminjati samo po tej študiji, ampak razmisliti o razmerju med »prvim trosnjakom« in »opaženo gobo«; za oceno potrebuje opažanja mladih trosnjakov.

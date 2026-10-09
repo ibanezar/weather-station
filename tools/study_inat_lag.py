@@ -294,7 +294,7 @@ def write_report(R, path):
          "|---|---|---|---|---|---|---|"]
     for k, s in R["species"].items():
         a = s["all"]
-        med = "—" if a["median"] is None else f"{a['median']:.0f} ({a['q1']:.0f}–{a['q3']:.0f})"
+        med = "—" if a["median"] is None else (f"{a['median']:.0f} ({a['q1']:.0f}–{a['q3']:.0f})" if a["q1"] is not None else f"{a['median']:.0f}")
         L.append(f"| {s['name_sl']} | {a['n']} | {med} d | {pct(a['le7'])} | {s['model_lag'][0]}–{s['model_lag'][1]} d | "
                  f"{pct(a['in_lag'])} | {pct(ref['all']['le7'])} |")
     L += ["", "## Porazdelitev po razredih DSO (delež opažanj vrste / vseh gliv)", "",
