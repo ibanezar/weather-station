@@ -1377,6 +1377,16 @@ je slug vrste, vrednosti prepišejo polja iz baze, `razlog` pa se izpiše kot
 ko je primerjava med vrstami dokazljivo popačena — ne zato, da bi popravil vtis
 o posameznem dnevu.
 
+**Lisička ima svoj zamik 4–14 dni** (9. 10. 2026), ne skupinskih 8–16. Bralec je pripomnil, da lisičke
+niso tako počasne; študija iNaturalist × Open-Meteo (`tools/study_inat_lag.py`, zaključki v
+`docs/inat-lag-studija-zakljucki.md`; n = 255 jeseni na širšem območju in 180 maja–julija) kaže mediano
+6–7 dni po začetku dežja in vrh pri 6–8 dneh. Backtest dež-sprožilca (`tools/backtest_lag_window.py`,
+AUC 0,570 → 0,600 jeseni, 0,633 → 0,658 poleti) to podpira zmerno; krajša okna (3–10, 2–8) so enako dobra, zato je
+izbrano konzervativno 4–14. **Drugim mikoriznim vrstam zamika ne spreminjaj brez enake študije**: jurček je pri 8–16
+najboljši, ježek in kostanjevka imata premalo opažanj, marela (razkrojevalka, 2–8 d) po opažanjih ni hitra, a je to
+deloma pristranskost (stari trosnjaki). Zamik umerjene vrste gre v `CALIBRATION` (`fruiting_lag_days`), opomba »ROČNO
+UMERJENO« se izpiše ob njem; `tools/test_species_calibration.py` varuje, da skupina ostane nedotaknjena.
+
 ## Baza vrst: preverjeno jedro in razširjeni seznam
 
 Baza ima 300 vrst iz dveh virov, ki ju uvoznik združi (in ju ne mešaj):
@@ -1538,6 +1548,17 @@ prek `worker.js` `/gobe/opazovanje` (POST) in `/gobe/opazovanja` (GET).
   Open-Meteo (glej opombo pri MTR zgoraj o istem načelu). Ko se nabere dovolj
   opažanj, je vgradnja kot dodaten signal ločen, kasnejši korak — ne
   poskušaj indeksa popravljati po opažanjih, dokler te odločitve ni.
+  **Pripravljeno, a IZKLOPLJENO (9. 10. 2026):** bralec je pripomnil, da bodo vrste,
+  ki so že rasle, ob dežju hitrejše, zamik pa je v modelu privzet za skupino.
+  `gobe_model.py` zato zna (stikalo `--use-observations` ali `GOBE_USE_OBSERVATIONS=1`,
+  **nikjer vklopljeno**) prebrati `/gobe/opazovanja` in mikoriznim vrstam na območju, kjer
+  so že aktivne, skrajšati zamik na 3–10 dni (`OBS_*`). Signal je strog, ker je vnos javen in
+  nepreverjen: najmanj 3 opažanja iste vrste na istem območju, na 2 različnih dneh, v zadnjih
+  21 dneh; ime vrste se prepozna tudi kot »Jurček« ali latinsko (`species_aliases()`, dvoumna
+  imena se zavržejo). Zamik se ne podaljša nikoli, brez stikala je izhod enak. Vrednosti
+  (3–10, 3 opažanja) **niso umerjene** — pred vklopom primerjaj z izmerjenimi najdbami.
+  Vklop je odločitev: dodaj stikalo v `gobe-forecast.yml`. Test: `tools/test_gobe_observations.py`
+  (v `parity.yml`).
 - **Shramba je isti R2/`feedback/` vzorec kot `/observations` in
   `/blog-comments`** v `worker.js`: en JSON seznam (`feedback/gobe-opazovanja.json`),
   honeypot polje `website` (tiho `{ok:true}`, isto ime povsod v repozitoriju),
