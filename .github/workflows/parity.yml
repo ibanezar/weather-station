@@ -47,7 +47,7 @@ jobs:
 
       # generate_crnivec_page.py uvozi generate_story_card.py (Pillow), gobe_model.py pa PyYAML.
       - name: Odvisnosti
-        run: pip install Pillow PyYAML --quiet
+        run: pip install Pillow PyYAML openpyxl --quiet
 
       - name: Test usklajenosti kopij
         run: python3 tools/test_parity.py
