@@ -2861,6 +2861,7 @@ GOBE_MORE = [
     ("/gobarska-napoved/koledar/", "Koledar"),
     ("/gobarska-napoved/trend/", "Trend"),
     ("/gobarska-napoved/metodologija/", "Metodologija"),
+    ("/gobarska-napoved/strupene-gobe/", "Strupene gobe"),
     ("/gobarska-napoved/nasveti/", "Nasveti"),
     ("#faq", "FAQ"),
 ]
@@ -2967,7 +2968,7 @@ def top_bar_html(title, back_href):
             f'<a class="gp-topbar-action" href="/gobarska-napoved/#premium" aria-label="AI prepoznava gobe">🔍</a></div>')
 
 
-def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", parent=None):
+def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", parent=None, extra_schema=""):
     """Shared chrome for the gobarska-napoved/<slug>/ reference subpages —
     same header/footer/brand/back-link as the main page, own URL + meta.
 
@@ -2985,7 +2986,7 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", paren
     schema = "\n".join([
         seo.webpage_schema(url, title, desc),
         seo.crumbs_schema(crumbs),
-    ])
+    ] + ([extra_schema] if extra_schema else []))
     head_extras = schema + "\n" + PAGE_CSS
     body = f'''{BRAND_SWAP}
 {top_bar_html(crumb_label, back_href)}
@@ -3595,7 +3596,9 @@ def build_baza_vrst_pages(species, vrste_credits_html):
         title = title_t.format(n=len(subset))
         # Tabela virov fotografij spada na celotno bazo; na strani skupine bi
         # navajala tudi avtorje slik, ki jih ta stran ne prikaže.
-        body = BAZA_INTRO + species_section_html(subset, species, current=path) + \
+        guide = ('  <p class="archive-intro">👉 <a href="/gobarska-napoved/strupene-gobe/">Vodnik: smrtno strupene gobe, '
+                 's čim jih zamenjamo in kam po pomoč</a></p>\n' if path == "strupene" else "")
+        body = BAZA_INTRO + guide + species_section_html(subset, species, current=path) + \
             ("\n" + vrste_credits_html if not path else "")
         subpage_shell(slug, title, desc_t.format(n=len(subset)),
                       "Baza vrst" if not path else label, body, extra_js=SP_JS,
@@ -3615,12 +3618,170 @@ def build_dvojnice_page(vs_html, vs_count, credits_html):
             '  <p class="post-meta">Užitna vrsta ob vrsti, s katero jo je mogoče zamenjati, s ključno razliko za '
             'varno ločevanje. Dvojnica je pri večini parov strupena ali neužitna, ponekod pa prav tako užitna — '
             'oznaka pri njej pove, za kaj gre. <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>\n'
-            + vs_html + "\n" + credits_html)
+            + '  <p class="archive-intro">👉 <a href="/gobarska-napoved/strupene-gobe/">Vodnik po smrtno strupenih '
+            'gobah</a></p>\n' + vs_html + "\n" + credits_html)
     return subpage_shell(
         "dvojnice", "Nevarne dvojnice gob — primerjava s fotografijami",
         f"{vs_count} primerjav užitnih vrst z nevarnimi dvojnicami, s fotografijami in ključno razliko za varno "
         "ločevanje.",
         "Nevarne dvojnice", body)
+
+
+# ── Vodnik: strupene gobe Slovenije (9. 10. 2026) ───────────────────────────
+# Zakaj: Search Console (jun–okt 2026) -- /baza-vrst/strupene/ je druga najbolj
+# obiskana stran (92 klikov), poizvedbe pa so vprašanja (»strupene gobe v
+# sloveniji«, »sirovka zamenjava«, »smrtno strupene gobe«), ne seznam vrst.
+# Stran odgovarja na vprašanja; seznam vseh vrst ostane na /baza-vrst/strupene/
+# (ta stran ga ne podvaja in ne cilja iste poizvedbe).
+# VSE trditve o vrstah, sezonah in zamenjavah so iz species_rules.yaml (`doubles`);
+# tu ni nobene nove trditve o užitnosti. Splošna pravila (zamik simptomov, kuhanje)
+# so ista kot na /nasveti/.
+LETHAL_LEVELS = ("smrtno strupena", "zelo strupena")
+STRUP_PHONE = "(01) 522 52 83"
+
+
+def _fmt_list(names):
+    names = list(names)
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " in " + names[-1]
+
+
+def build_strupene_page(species):
+    ed = lambda s: (s.get("edibility") or "").lower().strip()
+    lethal = sorted([s for s in species if ed(s) in LETHAL_LEVELS],
+                    key=lambda s: (LETHAL_LEVELS.index(ed(s)), s["name_sl"]))
+    toxic = [s for s in species if ed(s) == "strupena"]
+    if not lethal:
+        return None
+    now_m = TODAY.month
+    month_names = ["januar", "februar", "marec", "april", "maj", "junij", "julij", "avgust",
+                   "september", "oktober", "november", "december"]
+
+    def swap_text(s):
+        """(užitna dvojnica, latinsko, razlika) iz polja doubles ali None."""
+        p = parse_double(s.get("doubles"))
+        if not p:
+            return None
+        dn, dl, bl = p
+        if bl:
+            bl = [_re.sub(r"^užit\w*;\s*", "", bl[0])] + bl[1:]
+        return dn, dl, bl
+
+    # ── kartice smrtno nevarnih vrst ──
+    cards = []
+    for s in lethal:
+        se = s["season"]
+        has_photo = os.path.exists(os.path.join(ROOT, "gobarska-napoved", "img", "vrste", f"{s['id']}.jpg"))
+        img = (f'<img src="/gobarska-napoved/img/vrste/{s["id"]}.jpg" alt="{_esc(s["name_sl"])}" loading="lazy" '
+               f'onerror="this.parentElement.classList.add(\'ph\');this.remove()">' if has_photo else "")
+        sw = swap_text(s)
+        if sw:
+            dn, dl, bl = sw
+            swap_html = (f'<div class="gp-sp-dbl"><b>Zamenjajo jo z:</b> {_esc(dn)} <i>({_esc(dl)})</i>'
+                         + (f'<br><b>Razlika:</b> {_esc("; ".join(bl))}' if bl else "") + '</div>')
+        elif s.get("doubles"):
+            swap_html = f'<div class="gp-sp-dbl"><b>Opomba:</b> {_esc(s["doubles"])}</div>'
+        else:
+            swap_html = ""
+        now = ' <span class="gp-sp-season" style="color:#f87171">● zdaj v sezoni</span>' \
+            if now_m in season_months(s) else ""
+        cards.append(f'''    <div class="gp-sp-card">
+      <div class="gp-sp-top e-death{"" if has_photo else " ph"}">{img}<span class="gp-sp-emoji">☠️</span></div>
+      <div class="gp-sp-body">
+        <div class="gp-sp-name">{_esc(s["name_sl"])}</div>
+        <div class="gp-sp-lat">{_esc(s["name_lat"])}</div>
+        <div class="gp-sp-row">{edib_badge(s.get("edibility"))}<span class="gp-sp-season">📅 {format_season_range(se["start"], se["end"])}</span>{now}</div>
+        {swap_html}
+      </div>
+    </div>''')
+
+    in_season = [s["name_sl"] for s in lethal if now_m in season_months(s)]
+    season_line = (f'<p class="archive-intro"><b>Zdaj ({month_names[now_m - 1]}) so v sezoni:</b> '
+                   f'{_esc(_fmt_list(in_season))}.</p>' if in_season else "")
+
+    # ── tabela zamenjav (samo vnosi, ki jih baza zapiše kot »užitna – razlika«) ──
+    rows = []
+    danger_rank = {"smrtno strupena": 0, "zelo strupena": 1, "strupena": 2}
+    for s in sorted([x for x in species if ed(x) in danger_rank],
+                    key=lambda x: (danger_rank[ed(x)], x["name_sl"])):
+        sw = swap_text(s)
+        if not sw:
+            continue
+        dn, dl, bl = sw
+        unver = "" if s.get("verified", True) else ' <span class="gp-sp-unver" title="Podatek iz literature, ni terensko preverjen">◌</span>'
+        rows.append(f'      <tr><td><b>{_esc(s["name_sl"])}</b>{unver}<br><span class="lat">{_esc(s["name_lat"])}</span><br>'
+                    f'{edib_badge(s.get("edibility"))}</td><td>{_esc(dn)}<br><span class="lat">{_esc(dl)}</span></td>'
+                    f'<td>{_esc("; ".join(bl))}</td></tr>')
+    table = ('  <h2 class="gp-h2" id="zamenjave">S čim se strupene gobe najpogosteje zamenjajo</h2>\n'
+             '  <p class="archive-intro">Strupena vrsta v prvem stolpcu, užitna, s katero jo zamenjajo, v drugem, '
+             'ključna razlika v tretjem. ◌ pomeni, da je vnos iz literature in ni terensko preverjen v dolini.</p>\n'
+             '  <div class="gp-scroll"><table class="gp-sptable"><thead><tr><th>Strupena</th><th>Zamenjajo z užitno</th>'
+             '<th>Ključna razlika</th></tr></thead><tbody>\n' + "\n".join(rows) + "\n    </tbody></table></div>\n"
+             if rows else "")
+
+    # ── FAQ: dinamični odgovori iz baze, ostalo iz splošnih pravil ──
+    def lat(s):
+        return f'{s["name_sl"]} ({s["name_lat"]})'
+    phal = next((s for s in lethal if s["id"] == "amanita_phalloides"), None)
+    sirovke = [s for s in toxic + lethal
+               if any(k in s["name_sl"].lower() for k in ("sirovka", "mlečnica"))]
+    qa = [
+        ("Katere gobe v Sloveniji so smrtno strupene?",
+         f"V bazi Meteorec so kot smrtno ali zelo strupene vpisane: {_fmt_list(lat(s) for s in lethal)}. "
+         "To ni popoln seznam vseh nevarnih vrst: strupenih in zamenljivih je še več, vse so v bazi vrst."),
+    ]
+    if phal and swap_text(phal):
+        dn, dl, bl = swap_text(phal)
+        qa.append(("S čim se najpogosteje zamenja zelena mušnica?",
+                   f"Po bazi z užitno {dn} ({dl}). Razlika: {'; '.join(bl)}. Zato je pri nabiranju pomembno, "
+                   "da gobo izpuliš cela in pogledaš dno beta, ne da jo odrežeš."))
+    if sirovke:
+        qa.append(("Katere sirovke in mlečnice so strupene?",
+                   f"Kot strupene so v bazi vpisane: {_fmt_list(lat(s) for s in sirovke)}. Razlika do užitnih sirovk je pri "
+                   "vsaki vrsti zapisana v bazi vrst."))
+    qa += [
+        ("Kdaj se pokažejo simptomi zastrupitve z gobami?",
+         "Odvisno od vrste. Pri nekaterih nevarnih vrstah se prvi znaki pokažejo šele po več urah, ko je strup že v telesu, "
+         "zato na simptome ne čakaj: ob vsakem sumu pokliči 112 ali Center za zastrupitve."),
+        ("Ali kuhanje, sušenje ali zamrzovanje uniči strup v gobah?",
+         "Pri nevarnih strupenih vrstah ne. Kuhanje, sušenje ali zamrzovanje strupene gobe ne naredi užitne. "
+         "Tudi olupljanje ali srebrna žlica nista zanesljiv preizkus."),
+        ("Kaj storiti ob sumu zastrupitve z gobami?",
+         f"Pokliči 112, za posvet pa Center za zastrupitve UKC Ljubljana, {STRUP_PHONE} (24 ur). Shrani ostanke "
+         "gobe (tudi surove, nepripravljene) in primerek za določitev vrste; pri tem ne čakaj na simptome."),
+        ("Kje lahko preverim, ali je goba užitna?",
+         "Pri gobarskem društvu ali gobarski posvetovalnici v bližini. Ta stran in baza vrst sta pomoč pri učenju, "
+         "ne zamenjava za strokovni pregled. Ob dvomu gobe ne uživaj."),
+    ]
+    faq_html = ('  <h2 class="gp-h2" id="faq">Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
+        f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa) + "\n  </div>\n")
+
+    body = f'''  <p class="post-meta">Vodnik po nevarnih vrstah: katere so smrtno strupene, s čim jih zamenjamo in kaj storiti,
+  če se zgodi napaka. <strong>Ob dvomu gobe nikoli ne uživaj.</strong></p>
+  <p class="archive-intro">Podatki so iz baze vrst Meteorec (Zgornja Savinjska dolina). To je pomoč pri učenju, ne
+  zamenjava za pregled pri izkušenem gobarju ali gobarski posvetovalnici. Seznam <a href="/gobarska-napoved/baza-vrst/strupene/">vseh
+  {len(toxic) + len(lethal)} strupenih vrst</a>, <a href="/gobarska-napoved/dvojnice/">primerjave z nevarnimi dvojnicami</a>
+  in <a href="/gobarska-napoved/nasveti/">pravila nabiranja</a> so na svojih straneh.</p>
+  <h2 class="gp-h2" id="smrtno">Smrtno in zelo strupene vrste ({len(lethal)})</h2>
+  {season_line}
+  <div class="gp-sp-grid">
+{chr(10).join(cards)}
+  </div>
+{table}  <h2 class="gp-h2" id="pravila">Tri pravila, ki veljajo vedno</h2>
+  <ul class="archive-intro">
+    <li><b>Gobo uživaj samo, če jo poznaš 100 %.</b> Podobnost ni dokaz.</li>
+    <li><b>Gobo izpuli cela in poglej dno beta.</b> Lupina ali vrečka v dnu beta je ključna lastnost mušnic.</li>
+    <li><b>Ne zaupaj mitom.</b> Kuhanje, sušenje, zamrzovanje, olupljanje ali srebrna žlica strupa ne odstranijo ali pokažejo.</li>
+  </ul>
+  <div class="gp-sos-inline archive-intro" style="border:1px solid #f87171;border-radius:12px;padding:.8rem 1rem;margin:1rem 0">
+    <b>Sum zastrupitve?</b> Pokliči <a href="tel:112"><b>112</b></a> ali Center za zastrupitve UKC Ljubljana
+    <a href="tel:+38615225283"><b>{STRUP_PHONE}</b></a> (24 ur). Vzemi s seboj vzorec gobe. Pokliči tudi, če se počutiš še dobro.
+  </div>
+{faq_html}
+  {photo_credits_html("vrste", only={s["id"] + ".jpg" for s in lethal})}'''
+    return subpage_shell(
+        "strupene-gobe", "Smrtno strupene gobe: s čim jih zamenjamo in kam po pomoč",
+        f"{len(lethal)} smrtno in zelo strupenih gob doline, s čim se zamenjajo z užitnimi in kaj storiti ob zastrupitvi.",
+        "Strupene gobe", body, extra_schema=seo.faq_schema(qa))
 
 
 # ── Razdelki, ki so prej stali na glavni strani ─────────────────────────────
@@ -4265,7 +4426,7 @@ def picker_section_html(picker, total_species, total_locations):
   </script>'''
 
 
-def photo_credits_html(img_dir):
+def photo_credits_html(img_dir, only=None):
     """CC BY / CC BY-SA / GFDL all require visible attribution — render the
     CREDITS.json sitting next to gobarska-napoved/img/<img_dir>/*.jpg as a
     collapsible source table."""
@@ -4275,6 +4436,8 @@ def photo_credits_html(img_dir):
             photo_credits = _json_mod.load(f)
     except (OSError, ValueError):
         photo_credits = {}
+    if only is not None:  # samo fotografije, ki jih stran res prikaže
+        photo_credits = {k: v for k, v in photo_credits.items() if k in only}
     credit_rows = []
     for fn in sorted(photo_credits, key=lambda k: photo_credits[k]["sl"]):
         c = photo_credits[fn]
@@ -4792,6 +4955,7 @@ def main():
     build_valovi_page()
     n_baza = build_baza_vrst_pages(sub["species"], sub["vrste_credits_html"])
     build_dvojnice_page(sub["vs_html"], sub["vs_count"], sub["credits_html"])
+    build_strupene_page(sub["species"])
     build_danes_page(sub["forests_html"], free, sub["indexed"], sub["area_names"])
     build_tereni_page(sub["terrain_html"])
     build_nasveti_page()

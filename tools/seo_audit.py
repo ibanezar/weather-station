@@ -41,6 +41,7 @@ CORE = {
     "gobarska-napoved/baza-vrst/strupene/":        ("weekly",  "0.7"),
     "gobarska-napoved/baza-vrst/neuzitne/":        ("weekly",  "0.5"),
     "gobarska-napoved/dvojnice/":   ("weekly",  "0.7"),
+    "gobarska-napoved/strupene-gobe/": ("weekly", "0.7"),
     "gobarska-napoved/koledar/":    ("monthly", "0.6"),
     "gobarska-napoved/trend/":      ("weekly",  "0.5"),
     "gobarska-napoved/valovi/":     ("monthly", "0.5"),

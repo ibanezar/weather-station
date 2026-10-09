@@ -39,6 +39,7 @@
 - [Gobarska napoved](https://meteorec.si/gobarska-napoved/): dnevni gobarski indeks za okolico Rečice ob Savinji, izpeljan iz vlage tal, padavinskih oken in temperature po ekoloških skupinah vrst.
 - [Indeks po območjih danes](https://meteorec.si/gobarska-napoved/danes/), [Zemljevid](https://meteorec.si/gobarska-napoved/zemljevid/), [Koledar sezone](https://meteorec.si/gobarska-napoved/koledar/), [Trend sezone](https://meteorec.si/gobarska-napoved/trend/)
 - [Baza vrst](https://meteorec.si/gobarska-napoved/baza-vrst/): 300 vrst gob, terensko preverjene in po literaturi, ločene po užitnosti.
+- [Smrtno strupene gobe](https://meteorec.si/gobarska-napoved/strupene-gobe/): vodnik po smrtno in zelo strupenih vrstah, zamenjave z užitnimi in kam po pomoč.
 - [Dvojnice](https://meteorec.si/gobarska-napoved/dvojnice/): zamenljive strupene/užitne vrste s primerjalnimi fotografijami.
 
 ## Druge lokacije v dolini
