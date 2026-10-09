@@ -883,6 +883,11 @@ body .app-bottomnav{display:none}
   color:var(--muted);font:inherit;font-size:1.1rem;line-height:1;min-width:2.6rem;min-height:2.6rem;cursor:pointer}
 .gp-val-chk{display:flex;gap:.5rem;align-items:flex-start;font-size:.82rem;color:var(--muted);margin:var(--gp-sp-3) 0 0;line-height:1.4}
 .gp-val-chk input{margin-top:.2rem}
+.gp-val-sel{display:grid;grid-template-columns:1fr 1fr;gap:var(--gp-sp-3);margin:var(--gp-sp-3) 0 0}
+.gp-val-sel label{display:flex;flex-direction:column;gap:.25rem;font-size:.82rem;color:var(--muted);min-width:0}
+.gp-val-sel select{background:rgba(255,255,255,.05);border:1px solid var(--card-border);border-radius:var(--gp-r-control);
+  color:var(--text);font:inherit;font-size:.9rem;padding:.5rem .6rem;min-height:2.6rem;width:100%;min-width:0}
+@media(max-width:600px){.gp-val-sel{grid-template-columns:1fr}}
 .gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
 .gp-val-item:first-child{border-top:none}
 .gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
