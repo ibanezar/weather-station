@@ -73,6 +73,20 @@ def main():
     d.rounded_rectangle((pad, 196, pad + bw, 196 + 46), radius=23, fill=GREEN)
     d.text((pad + 20, 205), badge, font=f_badge, fill=(4, 20, 14))
 
+    # fotografija (kvadrat, zaobljen) desno od naslova, z oznako, da to ni gliva z napovedi
+    PS = 262
+    px, py = W - pad - PS, 180
+    ph = Image.open(os.path.join(ROOT, post.PHOTO_DIR, "koprenka-kvadrat.jpg")).convert("RGB").resize((PS, PS), Image.LANCZOS)
+    mask = Image.new("L", (PS, PS), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, PS - 1, PS - 1), radius=26, fill=255)
+    img.paste(ph, (px, py), mask)
+    chip_f = font("LiberationSans-Bold.ttf", 21)
+    chip = "koprenka · ni za nabiranje"
+    cw = text_w(d, chip, chip_f) + 28
+    d.rounded_rectangle((px + (PS - cw) / 2, py + PS - 46, px + (PS + cw) / 2, py + PS - 12), radius=17, fill=(5, 6, 14))
+    d.text((px + (PS - cw) / 2 + 14, py + PS - 42), chip, font=chip_f, fill=WHITE)
+    d.rounded_rectangle((px, py, px + PS, py + PS), radius=26, outline=LINE, width=2)
+
     f_title = font("LiberationSans-Bold.ttf", 84)
     d.text((pad, 268), f"Padlo je 10 mm", font=f_title, fill=WHITE)
     d.text((pad, 360), "na suha tla.", font=f_title, fill=GREEN)
