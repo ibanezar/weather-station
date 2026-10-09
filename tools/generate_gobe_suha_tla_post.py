@@ -371,15 +371,15 @@ def chart_windows(D):
     L_ = D["lags"]
     rows = [("razkrojevalka", "Razkrojevalke", "marela, kukmaki", L_["razkrojevalka"]),
             ("lesna", "Lesne vrste", "bukov ostrigar, uhljevka", L_["lesna"]),
-            ("mikorizna", "Jurček, rumeni ježek", "mikorizni", L_["mikorizna"])]
+            ("mikorizna", "Jurček, rumeni ježek", "mikorizna", L_["mikorizna"])]
     if D["lag_lis"] != L_["mikorizna"]:
-        rows.append(("mikorizna", "Lisička", "mikorizna, krajši zamik", D["lag_lis"]))
+        rows.append(("mikorizna", "Lisička", "mikorizna", D["lag_lis"]))
     start, end = d_add(rd, -1), d_add(rd, 19)
     ndays = (datetime.date.fromisoformat(end) - datetime.date.fromisoformat(start)).days
     rh = 54
     top = 74
     W, H = 720, top + rh * len(rows) + 40
-    Lm, R = 190, 82
+    Lm, R = 262, 82
     step = (W - Lm - R) / ndays
     X = lambda dd: Lm + (datetime.date.fromisoformat(dd) - datetime.date.fromisoformat(start)).days * step
     o = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Okna rasti po dežju {d_short(rd)} za skupine gob">']
@@ -395,7 +395,7 @@ def chart_windows(D):
         y = top + j * rh
         x0, x1 = X(d0), X(d_add(d1, 1))
         o.append(f'<text class="sg-t" x="0" y="{y + 14}">{name}</text>'
-                 f'<text class="sg-u" x="0" y="{y + 31}">zamik {a}–{b} dni</text>'
+                 f'<text class="sg-u" x="0" y="{y + 31}">{ex} · zamik {a}–{b} dni</text>'
                  f'<rect x="{x0:.1f}" y="{y + 2}" width="{x1 - x0:.1f}" height="28" rx="14" fill="{C_GROUP[e]}"/>'
                  f'<text class="sg-v" x="{x1 + 10:.1f}" y="{y + 21}">{d_rng(d0, d1)}</text>')
     xr = X(rd)
@@ -407,7 +407,8 @@ def chart_windows(D):
                  f'<text x="{xt + 6:.1f}" y="{top - 14}" text-anchor="start">danes</text>')
     o.append("</svg>")
     return (f'<figure class="sg-fig">{"".join(o)}</figure>'
-            f'<p class="sg-cap">Okno pomeni, da je dež trosnjak lahko sprožil, ne da je ta zrasel.</p>')
+            f'<p class="sg-cap">Barva pomeni skupino gob: vijolična razkrojevalke, oranžna lesne vrste, zelena mikorizne. '
+            f'Okno pomeni, da je dež trosnjak lahko sprožil, ne da je ta zrasel.</p>')
 
 
 def daily_table(D):

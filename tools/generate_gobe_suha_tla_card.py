@@ -119,9 +119,11 @@ def main():
     d.text((cx_bar0, hy), "DELEŽ PRAGA", font=f_h, fill=DIM)
     d.text((cx_win - text_w(d, "OKNO RASTI", f_h), hy), "OKNO RASTI", font=f_h, fill=DIM)
     d.line((px0 + 24, hy + 40, px1 - 24, hy + 40), fill=LINE, width=2)
-    rows = [("Jurček", "boletus_edulis", post.C_GROUP["mikorizna"], win_jur),
-            ("Lisička", "cantharellus_cibarius", post.C_GROUP["mikorizna"], win_lis),
-            ("Marela", "macrolepiota_procera", post.C_GROUP["razkrojevalka"],
+    # vse vrstice v isti barvi: ime vrste je napisano, barva ne nosi pomena
+    BAR = post.C_GROUP["mikorizna"]
+    rows = [("Jurček", "boletus_edulis", BAR, win_jur),
+            ("Lisička", "cantharellus_cibarius", BAR, win_lis),
+            ("Marela", "macrolepiota_procera", BAR,
              post.d_rng(post.d_add(rd, L["razkrojevalka"][0]), post.d_add(rd, L["razkrojevalka"][1])))]
     y = hy + 62
     for name, sid, col, win in rows:
