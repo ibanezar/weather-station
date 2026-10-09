@@ -1503,6 +1503,16 @@ razdelek na glavni strani" zgoraj, ne spodrsljaj. `picker_section_html()` v
   `_smerBesedilo`/`_ltgDecode` drugod v repozitoriju; če spremeniš pragove
   tam, spremeni tudi tu.
 
+### Skrita stran z naslovi za gobje FB skupine (9. 10. 2026)
+
+`tools/gobe_naslovi.py` (ročni CLI, `--izberi N` zapiše izbiro v `data/gobe-naslovi-log.csv`) sestavi
+kandidate za uvod objave iz že committanih podatkov (izbirnik, indeks, trend, `history.json`); predloga
+velja samo, kadar številka obstaja. Isti kandidati so na **skriti strani**
+`/gobarska-napoved/orodje-naslovi/` (`tools/generate_gobe_naslovi_page.py`, korak v `gobe-forecast.yml`):
+noindex, **ni v `CORE`/sitemapu in ni povezana od nikoder** — namenoma, samo za Filipa. Povezava ima
+`utm_medium=group&utm_campaign=gn-<predloga>`, da GA4 loči, katera vrsta naslova prinaša klike.
+Naslov kartice v skupini FB vzame iz `og:title` članka, ne iz te strani.
+
 ## Gobarska opažanja — javna, ločena od dnevnika
 
 Kartica **»Dodaj opažanje«** na `/gobarska-napoved/danes/` (18. 9. 2026) pusti
