@@ -33,7 +33,7 @@ import yaml  # noqa: E402
 
 ROOT = seo.ROOT
 YEAR = 2026
-SLUG = "padlo-10-mm-na-suha-tla-zakaj-jurcki-pocakajo-1009"
+SLUG = "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
 RAIN_DAY = "2026-10-08"
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
@@ -209,8 +209,8 @@ def table(head, rows):
 
 
 # ── grafi: statični SVG (delujejo brez JS), JS doda samo opis ob prehodu miške ──
-C_RAIN, C_SOIL = "#3987e5", "#8e6fd8"      # validate_palette.js --mode dark, surface #0a0f1c: vsi testi PASS
-C_GROUP = {"razkrojevalka": "#3987e5", "lesna": "#d95926", "mikorizna": "#199e70"}  # kot v članku o dežu 8.–10. 10.
+C_RAIN, C_SOIL = "#3987e5", "#e8ecef"      # dež: validirana modra; vlaga tal: nevtralna svetla (ni kategorija)
+C_GROUP = {"razkrojevalka": "#8e6fd8", "lesna": "#d95926", "mikorizna": "#199e70"}  # validate_palette.js --mode dark, surface #0a0f1c: PASS; modre ni, ker je v grafu 1 dež
 GRID = "rgba(255,255,255,.09)"
 TXT = "var(--muted)"
 
@@ -404,6 +404,11 @@ def build_article(D):
     peak_days = [dd for dd in D["after"] if S[dd]["pct"] == s_peak]
     peak_txt = (d_short(peak_days[0]) if len(peak_days) == 1
                 else d_rng(peak_days[0], peak_days[-1]))
+    if len(peak_days) == 1:
+        peak_when = d_long(peak_days[0])
+    else:
+        a_, b_ = datetime.date.fromisoformat(peak_days[0]), datetime.date.fromisoformat(peak_days[-1])
+        peak_when = f"{a_.day}. in {b_.day}. {seo.MES_GEN[b_.month]}" if len(peak_days) == 2 else f"od {d_long(peak_days[0])} do {d_long(peak_days[-1])}"
     deep_pct = round(100 * max(0.0, min(1.0, (S[D["peak_after"]]["deep"] - D["dry_v"]) / (D["full_v"] - D["dry_v"]))))
     gap_days = (datetime.date.fromisoformat(D["before"]) - datetime.date.fromisoformat(D["peak_sept"])).days
     between = round(sum(v for k, v in D["rain_hist"].items() if D["peak_sept"] < k <= D["before"]), 1)
@@ -412,15 +417,16 @@ def build_article(D):
     L = D["lags"]
     win = {e: d_rng(d_add(rd, L[e][0]), d_add(rd, L[e][1])) for e in L}
 
-    lead = (f"{wd.capitalize()}, {d_long(rd)}, je bil na postaji IREICA1 prvi pravi dež po {D['n_dry']} dneh: "
-            f"padlo je {num(rain)} mm (zaokroženo 10). V prejšnjih 14 dneh skupaj le {num(D['pre14'])} mm. Gobarski model za jurčka "
-            f"šteje 25 mm v sedmih dneh, torej je padlo {share_j} % praga. A število milimetrov ni cela zgodba: "
-            f"po modelski oceni so bila tla pred dežjem skoraj povsem suha ({s_before} % na lestvici modela), "
-            f"tak dež pa zmoči predvsem vrhnjo plast. Zato jurčki in lisičke še počakajo.")
+    lead = (f"V {wd_acc}, {d_long(rd)}, je na postaji IREICA1 po {D['n_dry']} dneh znova konkretneje deževalo. "
+            f"Izmerili smo {num(rain)} mm padavin, zaokroženo 10 mm. V predhodnih 14 dneh je skupaj padel le {num(D['pre14'])} mm dežja. "
+            f"Gobarski model za jurčka zahteva {int(thr_j)} mm padavin v sedmih dneh, zato smo dosegli približno {share_j} % tega praga. "
+            f"A sama količina dežja ne pove vsega. Po modelski oceni so bila tla pred dežjem skoraj povsem suha, "
+            f"z vlažnostjo le {s_before} % na lestvici gobarskega modela. Takšna količina padavin navlaži predvsem vrhnjo plast tal. "
+            f"Zato jurčkov in lisičk še ne gre pričakovati na vsakem koraku.")
 
     stats = ('<div class="mini-stat-grid">'
-             f'<div class="mini-stat"><div class="ms-label">Padlo {d_short(rd)}</div><div class="ms-val">{num(rain)} mm</div><div class="ms-sub">postaja IREICA1</div></div>'
-             f'<div class="mini-stat"><div class="ms-label">Prej 14 dni</div><div class="ms-val">{num(D["pre14"])} mm</div><div class="ms-sub">skupaj</div></div>'
+             f'<div class="mini-stat"><div class="ms-label">Padavine {d_short(rd)}</div><div class="ms-val">{num(rain)} mm</div><div class="ms-sub">postaja IREICA1</div></div>'
+             f'<div class="mini-stat"><div class="ms-label">Prejšnjih 14 dni</div><div class="ms-val">{num(D["pre14"])} mm</div><div class="ms-sub">skupaj</div></div>'
              f'<div class="mini-stat"><div class="ms-label">Prag za jurčka</div><div class="ms-val">{int(thr_j)} mm</div><div class="ms-sub">v 7 dneh</div></div>'
              f'<div class="mini-stat"><div class="ms-label">Vlaga tal pred dežjem</div><div class="ms-val">{s_before} %</div><div class="ms-sub">modelska ocena</div></div>'
              '</div>')
@@ -432,13 +438,13 @@ def build_article(D):
     ev = ""
     sec1 = [
         stats,
-        (f"V gobarskem modelu mora v sedmih dneh pasti vsaj toliko dežja, kot zahteva vrsta. Jurček potrebuje {int(thr_j)} mm, "
-         f"lisička {int(D['thr']['cantharellus_cibarius'])} mm, marela {int(D['thr']['macrolepiota_procera'])} mm. "
-         f"Dež {d_short(rd)} je tako izpolnil od tretjine do polovice teh pragov.{ev}"),
+        (f"Gobarski model za vsako vrsto upošteva prag padavin v sedemdnevnem obdobju. Za jurčka je ta prag {int(thr_j)} mm, "
+         f"za lisičko {int(D['thr']['cantharellus_cibarius'])} mm, za marelo pa {int(D['thr']['macrolepiota_procera'])} mm. "
+         f"Dež {d_long(rd)} je tako dosegel od približno tretjine do polovice količine, ki jo model zahteva za posamezne vrste."),
         table(["Vrsta", "Prag (7 dni)", f"Padlo do {d_short(rd)}", "Delež praga"], rows1),
-        (f"Za primerjavo: 10. in 11. septembra je padlo {num(D['sept_sum'])} mm, kar je skoraj petkrat prag za jurčka. "
-         f"Prej je zadnjih {D['n_dry']} {dni(D['n_dry'])} vsak dan padlo manj kot 1 mm "
-         f"(zadnji večji dež: {d_short(D['last_wet'])}, {num(D['last_wet_mm'])} mm)."),
+        (f"Za primerjavo: v obilnem padavinskem obdobju, ki se je začelo 10. septembra, je v dveh dneh padlo {num(D['sept_sum'])} mm dežja. "
+         f"To je skoraj petkrat toliko, kot gobarski model zahteva za jurčka v sedmih dneh. Pozneje je bilo padavin zelo malo. "
+         f"Zadnji izrazitejši dež pred zdajšnjim je padel {d_long(D['last_wet'])}, ko je postaja izmerila {num(D['last_wet_mm'])} mm."),
     ]
 
     ROWS_SOIL = []
@@ -462,24 +468,26 @@ def build_article(D):
         ROWS_SOIL.append([d_short(dd), f"{S[dd]['pct']} %", f"{S[dd]['top']:.3f}".replace(".", ","), note])
 
     sec2 = [
-        (f"Postaja vlage tal ne meri. Spodnje številke so <strong>modelska ocena</strong> Open-Meteo za plast 3–9 cm "
-         f"na območju {D['home']}, preračunana na lestvico gobarskega modela: 0 % pomeni {num(D['dry_v'], 2)} m³/m³ "
+        (f"Postaja IREICA1 vlage tal ne meri. Spodnje vrednosti so modelske ocene Open-Meteo za plast tal na globini 3–9 cm "
+         f"na območju Rečice ob Savinji. Preračunane so na lestvico gobarskega modela: 0 % pomeni vsebnost vode {num(D['dry_v'], 2)} m³/m³ "
          f"ali manj, 100 % pa {num(D['full_v'], 2)} m³/m³ ali več."),
         chart_rain_soil(D),
         daily_table(D),
         table(["Datum", "Vlaga tal", "m³/m³", "Opomba"], ROWS_SOIL),
-        (f"Po septembrskem nalivu je bila vrhnja plast po modelu povsem namočena ({s_peak_sept} %). Do dneva pred dežjem "
-         f"je v {gap_days} dneh, ko je padlo skupaj le {num(between)} mm, upadla na <strong>{s_before} %</strong>. Dež {d_short(rd)} jo je "
-         f"po modelu dvignil na {s_peak} % ({peak_txt}), "
-         + (f"do {d_short(last_day)} pa naj bi spet padla na {s_last} %." if s_last is not None and s_last < s_peak else
-            "kar se do konca napovednega okna ne spremeni.")),
-        (f"Globlja plast (9–27 cm) skoraj ne reagira: {num(deep_b, 3)} → {num(deep_a, 3)} m³/m³. Na isti lestvici je to {deep_pct} %: takle dež se vpije v prvih "
-         f"centimetrih. Mikorizni micelij seže globlje od zgornjih nekaj centimetrov, zato je za jurčke pomembno, "
-         f"koliko vode pride globlje, ne samo ali je zgornja plast kratko mokra."),
-        ('<div class="disclaimer">Vlaga tal je model, ne meritev.'
-         + (f' Open-Meteo je za {d_long(rd)} ocenil {num(D["om_rain"])} mm dežja, postaja pa jih je izmerila {num(rain)}, '
-            'zato so vrednosti po dežju lahko preoptimistične.' if D["om_rain"] is not None and D["om_rain"] - rain >= 2 else '')
-         + ' Gobarski indeks na strani uporablja isto vlago tal.</div>'),
+        (f"Po septembrskem nalivu je bila vlaga v vrhnji plasti po modelu na najvišji ravni lestvice ({s_peak_sept} %). "
+         f"V naslednjih {gap_days} dneh je padlo skupaj le {num(between)} mm dežja, do {d_long(D['before'])} pa je vlažnost po modelu upadla na <strong>{s_before} %</strong>."),
+        (f"Model nato kaže povečanje vlage: {d_long(rd)} na {S[rd]['pct']} %, "
+         f"{peak_when} na {s_peak} %. "
+         + (f"Do {d_long(last_day)} naj bi znova padla na {s_last} %." if s_last is not None and s_last < s_peak else
+            "Do konca napovednega okna se to ne spremeni.")),
+        (f"Globlja plast tal (9–27 cm) se odziva precej manj izrazito. Vsebnost vode se je po modelu spremenila le z {num(deep_b, 3)} na "
+         f"{num(deep_a, 3)} m³/m³. Na lestvici gobarskega modela to ustreza približno {deep_pct} %."),
+        (f"Podatki torej kažejo, da se je po dežju vlaga povečala predvsem v vrhnji plasti tal. Micelij mikoriznih gob sega tudi globlje, "
+         f"zato je za jurčke pomembno, koliko vode pride do globljih plasti, ne le to, ali je površina tal za kratek čas mokra."),
+        ('<div class="disclaimer"><em>Opomba:</em> Vlaga tal je modelska ocena, ne meritev.'
+         + (f' Open-Meteo je za {d_long(rd)} napovedal {num(D["om_rain"])} mm dežja, postaja pa je izmerila {num(rain)} mm. '
+            'Zato so lahko modelske ocene vlage po padavinah previsoke.' if D["om_rain"] is not None and D["om_rain"] - rain >= 2 else '')
+         + ' Gobarski indeks na naši strani uporablja isto oceno vlage tal.</div>'),
     ]
 
     rows3 = []
@@ -487,38 +495,40 @@ def build_article(D):
         a, b = L[e]
         rows3.append([name, ex, f"{a}–{b} dni", win[e]])
     sec3 = [
-        (f"Gobe ne zrastejo naslednji dan: vsaka skupina potrebuje čas od dežja do trosnjaka. Model zamike bere "
-         f"iz pravil vrst (<code>species_rules.yaml</code>)."),
+        (f"Gobe se po dežju ne pojavijo kar naslednji dan. Različne skupine potrebujejo različno dolgo, da razvijejo trosnjake. "
+         f"Gobarski model te časovne zamike povzema v pravilih za posamezne vrste (<code>species_rules.yaml</code>)."),
         chart_windows(D),
         table(["Skupina", "Primeri", "Zamik po dežju", f"Okno po dežju {d_short(rd)}"], rows3),
-        (f"Okno pomeni, da je dež trosnjak <em>lahko</em> sprožil, ne da je ta zrasel. Pri mikoriznih vrstah je okno "
-         f"{win['mikorizna']}, torej se ne odpre pred {d_long(d_add(rd, L['mikorizna'][0]))}. Pri razkrojevalkah je zamik krajši "
-         f"({L['razkrojevalka'][0]}–{L['razkrojevalka'][1]} dni), a tudi tam pomaga le, če so tla dovolj vlažna za rast."),
+        ("Navedeno časovno okno pomeni, da bi dež lahko spodbudil rast trosnjakov, ne pa, da se bodo ti v tem obdobju zagotovo pojavili."),
+        (f"Pri mikoriznih vrstah se okno odpre šele {d_long(d_add(rd, L['mikorizna'][0]))} in traja do {d_long(d_add(rd, L['mikorizna'][1]))}. "
+         f"Pri razkrojevalkah je zamik krajši, od {L['razkrojevalka'][0]} do {L['razkrojevalka'][1]} dni, vendar tudi pri njih za rast potrebujejo dovolj vlažna tla."),
     ]
 
     sec4 = [
-        (f"Po modelu in izmerjenem dežju je slika taka:"),
+        ("Po meritvah in modelski oceni vlage je slika takšna:"),
         ("<ul>"
-         f"<li><strong>Marela, ostrigarji in druge vrste s krajšim zamikom:</strong> v oknu {win['razkrojevalka']} (razkrojevalke) "
-         f"in {win['lesna']} (lesne vrste) je okno odprto. Vrhnja plast tal je po modelu po dežju deloma namočena ({s_peak} %), a model je dež ocenil višje od meritve, zato je rast verjetnejša tam, kjer se vlaga dlje drži: v senci, ob potokih, na severnih pobočjih.</li>"
-         f"<li><strong>Jurčki in lisičke:</strong> ne prej kot {d_long(d_add(rd, L['mikorizna'][0]))}. Dež je izpolnil le "
-         f"{share_j} % praga za jurčka in globlja plast tal ostaja suha ({deep_pct} % na lestvici modela), zato po modelu ni razloga za veliko rast, razen če pride še dež.</li>"
-         f"<li><strong>Kaj bi sliko spremenilo:</strong> še vsaj {int(round(need))} mm v sedmih dneh bi jurčku pripeljalo prag. "
-         "Napovedi dežja so negotove, zato glej tekoči indeks.</li>"
+         f"<li><strong>Marele, ostrigarji in druge vrste s krajšim zamikom:</strong> časovno okno za razkrojevalke je {win['razkrojevalka']}, "
+         f"za lesne vrste pa {win['lesna']} Vrhnja plast tal naj bi bila po dežju deloma navlažena, vendar je model napovedal več dežja, kot ga je postaja dejansko izmerila. "
+         "Zato je smiselno najprej pogledati v senčnih legah, ob potokih in na severnih pobočjih, kjer se vlaga lahko zadrži dlje.</li>"
+         f"<li><strong>Jurčki in lisičke:</strong> po modelu se njihovo časovno okno ne odpre pred {d_long(d_add(rd, L['mikorizna'][0]))}. "
+         f"Dež je dosegel le približno {share_j} % praga za jurčka, vlaga v globlji plasti tal pa na lestvici modela ostaja pri {deep_pct} %. "
+         "Za zdaj torej ni podlage za pričakovanje množične rasti, razen če vmes pade še nekaj dežja.</li>"
+         f"<li><strong>Kaj bi spremenilo sliko:</strong> da bi jurček dosegel svoj prag, bi moralo v sedmih dneh pasti še vsaj približno {int(round(need))} mm dežja. "
+         "Ker so napovedi padavin negotove, spremljaj aktualni gobarski indeks.</li>"
          "</ul>"),
-        ('Današnji indeks po vrstah in območjih je na <a href="/gobarska-napoved/danes/" style="color:var(--blue)">'
-         'meteorec.si/gobarska-napoved/danes</a>. Če greš v gozd, nam lahko pustiš opažanje (območje, ne točne lokacije), '
-         'saj brez tvojih najdb ne vemo, ali model drži.'),
+        ('Današnji indeks za posamezne vrste in območja je na <a href="/gobarska-napoved/danes/" style="color:var(--blue)">gobarski napovedi Meteorec</a>.'),
+        ('Če greš v gozd, nam lahko sporočiš tudi svoje opažanje. Zadošča podatek o območju, natančne lokacije najdb pa ni treba razkrivati. '
+         'Brez opažanj z različnih območij namreč težko preverimo, kako dobro se napoved ujema z dejanskim stanjem v gozdu.'),
     ]
 
-    src = ('<div class="sources">Viri: postaja IREICA1, Rečica ob Savinji (dež: <code>history.json</code> in urni podatki); '
-           'gobarski model (praga in zamiki: <code>species_rules.yaml</code>); vlaga tal: Open-Meteo, modelska ocena za '
-           f'območje {D["home"]}. Posnetek ob uri zajema, današnji izračun je na '
-           '<a href="/gobarska-napoved/" style="color:var(--blue)">meteorec.si/gobarska-napoved</a>.<br>'
+    src = ('<div class="sources"><strong>Viri:</strong> postaja IREICA1 v Rečici ob Savinji (padavine: <code>history.json</code> in urni podatki), '
+           'gobarski model (pragovi in časovni zamiki: <code>species_rules.yaml</code>) ter Open-Meteo (modelska ocena vlage tal za območje Rečice ob Savinji).'
+           '<br><em>Modelske ocene niso meritve na terenu. Časovni zamiki in pragovi opisujejo pravila gobarskega modela, ne zagotavljajo pa, '
+           'da se bodo trosnjaki pojavili v napovedanem obdobju.</em><br>'
            'Postaja IREICA1, Rečica ob Savinji · <a href="/" style="color:var(--blue)">meteorec.si</a></div>')
 
     return {
-        "title": "Padlo je 10 mm na suha tla. Zakaj jurčki še počakajo?",
+        "title": "Padlo je 10 mm na suha tla. Zakaj jurčkov še ni?",
         "meta_description": (f"{num(rain)} mm dežja po {D['n_dry']} suhih dneh je bilo {share_j} % praga za jurčka. "
                              f"Vlaga tal pred dežjem: {s_before} % (model). Jurčki najprej {d_long(d_add(rd, L['mikorizna'][0]))}."),
         "tags": ["gobe", "gobarski indeks", "dež", "vlaga tal", "oktober", "2026"],
@@ -528,10 +538,10 @@ def build_article(D):
         "lead": lead,
         "sources_note": CSS + src,
         "sections": [
-            {"label": "01 — dež", "heading": "Koliko je padlo in koliko bi moralo", "id": "dez", "paragraphs": sec1},
+            {"label": "01 — dež", "heading": "Koliko dežja je padlo in koliko bi ga potrebovali?", "id": "dez", "paragraphs": sec1},
             {"label": "02 — tla", "heading": "Tla so bila pred dežjem skoraj suha", "id": "tla", "paragraphs": sec2},
-            {"label": "03 — zamik", "heading": "Kdo pride prvi in kdo šele čez dva tedna", "id": "zamik", "paragraphs": sec3},
-            {"label": "04 — nabiranje", "heading": "Kaj to pomeni za v gozd", "id": "gozd", "paragraphs": sec4},
+            {"label": "03 — zamik", "heading": "Katere gobe se lahko pojavijo prej in katere pozneje?", "id": "zamik", "paragraphs": sec3},
+            {"label": "04 — nabiranje", "heading": "Kaj to pomeni, če greš v gozd?", "id": "gozd", "paragraphs": sec4},
         ],
     }
 
