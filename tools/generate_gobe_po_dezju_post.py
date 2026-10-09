@@ -104,8 +104,13 @@ def run_model(cache):
     return out
 
 
+# Vrste z ročno umerjenim zamikom (lisička 4–14) niso del skupinskega povprečja ali okna svoje skupine;
+# članek jih prikaže ločeno. Napolni jih build_data().
+EXCL = set()
+
+
 def group_mean(loc, day_i, eco, meta):
-    v = [s["index"] for s in loc["days"][day_i]["species"] if meta[s["id"]]["ecology"] == eco]
+    v = [s["index"] for s in loc["days"][day_i]["species"] if meta[s["id"]]["ecology"] == eco and s["id"] not in EXCL]
     return st.mean(v)
 
 
@@ -128,25 +133,38 @@ def build_data(cache):
     extra_day = add_days(d3, 1)
     extra_mm = round(hrain.get(extra_day) or 0, 1)
 
+    # vrste z umerjenim zamikom (drugačnim od skupinskega) so ločeno
+    modes = {e: collections.Counter(tuple(m["lag_days"]) for m in meta.values() if m["ecology"] == e).most_common(1)[0][0]
+             for e in ECO_ORDER}
+    EXCL.clear()
+    EXCL.update(i for i, m in meta.items() if tuple(m["lag_days"]) != modes[m["ecology"]])
+
     # skupine: zamik, vrhovi v Rečici
     eco = {}
     for e in ECO_ORDER:
-        sp_ids = [i for i, m in meta.items() if m["ecology"] == e]
-        # Skupinski zamik = najpogostejši; posamezna vrsta ima lahko ročno umerjen drug zamik (lisička 4–14).
-        lag = collections.Counter(tuple(meta[i]["lag_days"]) for i in sp_ids).most_common(1)[0][0]
-        lag = list(lag)
+        sp_ids = [i for i, m in meta.items() if m["ecology"] == e and i not in EXCL]
+        lag = list(modes[e])
         means = [group_mean(home, i, e, meta) for i in range(len(dates))]
         peak_i = max(range(len(dates)), key=lambda i: means[i])
         best_i = max(range(len(dates)),
                      key=lambda i: max(s["index"] for s in home["days"][i]["species"]
-                                       if meta[s["id"]]["ecology"] == e))
-        best = max((s for s in home["days"][best_i]["species"] if meta[s["id"]]["ecology"] == e),
+                                       if meta[s["id"]]["ecology"] == e and s["id"] not in EXCL))
+        best = max((s for s in home["days"][best_i]["species"] if meta[s["id"]]["ecology"] == e and s["id"] not in EXCL),
                    key=lambda s: s["index"])
         eco[e] = {"lag": lag, "n": len(sp_ids),
                   "win": (add_days(d1, lag[0]), add_days(d3, lag[1])),
                   "mean_now": round(means[0]), "peak_mean": round(means[peak_i]), "peak_date": dates[peak_i],
                   "best": best["index"], "best_date": dates[best_i], "best_name": meta[best["id"]]["name_sl"],
                   "last_mean": round(means[-1]), "means": [round(m, 1) for m in means]}
+
+    special = []
+    for sid in sorted(EXCL):
+        lag = list(meta[sid]["lag_days"])
+        ser = [next(x["index"] for x in d["species"] if x["id"] == sid) for d in home["days"]]
+        pk = max(range(len(ser)), key=lambda i: ser[i])
+        special.append({"id": sid, "name": SHORT.get(sid, meta[sid]["name_sl"]), "eco": meta[sid]["ecology"], "lag": lag,
+                        "win": (add_days(d1, lag[0]), add_days(d3, lag[1])), "means": ser,
+                        "peak": ser[pk], "peak_date": dates[pk]})
 
     # pragovi sprožilnega dežja po vrstah (iz razlage modela: »… 51.7/40 mm …«)
     thr = {}
@@ -201,7 +219,7 @@ def build_data(cache):
     high = sum(1 for l in L if l["days"][best_i]["overall"] >= 80)
     return {"R": R, "P": P, "home": home, "dates": dates, "today": dates[0], "ev": ev,
             "d1": d1, "d3": d3, "model_mm": model_mm, "extra_day": extra_day, "extra_mm": extra_mm,
-            "eco": eco, "species": species_rows, "bands": bands, "wet": wet, "dry": dry,
+            "eco": eco, "special": special, "species": species_rows, "bands": bands, "wet": wet, "dry": dry,
             "n_loc": len(L), "n_high": high, "high_date": eco["lesna"]["peak_date"],
             "prot": P.get("protected_areas", []), "meta": meta,
             "soil_now": home["days"][0]["soil_moisture_pct"], "model_version": P.get("model_version", "")}
@@ -238,6 +256,8 @@ def payload(D):
         "dates": dates, "span": span, "rain_days": ev["days"], "horizon": dates[-1],
         "groups": [{"key": e, "name": ECO_NAME[e], "color": COLORS[e], "win": list(eco[e]["win"]),
                     "lag": eco[e]["lag"], "mean": eco[e]["means"]} for e in ECO_ORDER],
+        "extra": [{"key": x["id"], "name": x["name"], "color": COLORS[x["eco"]], "win": list(x["win"]), "lag": x["lag"],
+                   "mean": x["means"], "dash": "5 3"} for x in D["special"]],
         "rain": {"p10": ev["p10"], "p50": ev["p50"], "p90": ev["p90"], "arso": ev["arso"],
                  "model": D["model_mm"], "totals": ev["totals"]},
         "species": [{"name": SHORT[r["id"]], "eco": r["eco"], "color": COLORS[r["eco"]], "thr": r["thr"],
@@ -276,7 +296,7 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
 
 /* ---- 1: časovnica valov ---- */
 (function(){
-  var G=D.groups,nd=D.span.length,idx={};D.span.forEach(function(d,i){idx[d]=i;});
+  var G=D.groups.concat(D.extra||[]),nd=D.span.length,idx={};D.span.forEach(function(d,i){idx[d]=i;});
   wrap('gp-fig1',function(w){
     var nr=w<460,L=nr?34:40,R=12,T=14,H1=nr?180:120,LH=nr?48:40,Bt=26,H=T+H1+18+G.length*LH+Bt,pw=w-L-R;
     function X(i){return L+(i+.5)/nd*pw;}function Y(v){return T+H1-v/100*H1;}
@@ -292,7 +312,7 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
     var ends=G.map(function(g){return Y(g.mean[g.mean.length-1]);}),ly=spread(ends,13);
     G.forEach(function(g,k){
       var pts=g.mean.map(function(v,i){return X(idx[D.dates[i]])+','+Y(v);}).join(' ');
-      s+='<polyline points="'+pts+'" fill="none" stroke="'+g.color+'" stroke-width="'+(nr?3.2:2.4)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+      s+='<polyline points="'+pts+'" fill="none" stroke="'+g.color+'" stroke-width="'+(nr?3.2:2.4)+'" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="'+(g.dash||'')+'"/>';
       if(!nr){s+='<rect x="'+(hx+5)+'" y="'+(ly[k]-14+3)+'" width="10" height="10" rx="2" fill="'+g.color+'"/>';
       s+='<text x="'+(hx+19)+'" y="'+(ly[k]-14+13)+'" font-size="12" font-weight="600" fill="'+INK+'">'+g.name+'</text>';}
     });
@@ -308,7 +328,7 @@ function spread(ys,gap){var o=ys.map(function(y,i){return {y:y,i:i};}).sort(func
   },function(i,g,svg){
     var d=D.span[i],x=g.X(i),h='<line x1="'+x+'" x2="'+x+'" y1="'+g.T+'" y2="'+(g.H-26)+'" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/>';
     var act=[],mi=D.dates.indexOf(d),vals=[];
-    D.groups.forEach(function(gr,k){
+    G.forEach(function(gr,k){
       var on=d>=gr.win[0]&&d<=gr.win[1];if(on)act.push(gr.name);
       svg.querySelector('.ln[data-k="'+k+'"]').setAttribute('fill-opacity',on?'.9':'.3');
       if(mi>=0){h+=dot(x,g.Y(gr.mean[mi]),gr.color);vals.push(gr.name+' <b>'+f0(gr.mean[mi])+' %</b>');}
@@ -414,12 +434,15 @@ def build_article(D):
     win = {e: rng(*eco[e]["win"]) for e in ECO_ORDER}
     sp = {r["id"]: r for r in D["species"]}
     kuk, les, mik = eco["razkrojevalka"], eco["lesna"], eco["mikorizna"]
+    lis = next((x for x in D["special"] if x["id"] == "cantharellus_cibarius"), None)
+    lis_win = rng(*lis["win"]) if lis else ""
     share_jurcek = sp["boletus_edulis"]["share"]
     jur_pct = round(100 * p50 / sp["boletus_edulis"]["thr"])
 
     lead = (f"Po {dry['days']} suhih dneh in samo {mm(dry['sum'])} mm dežja se Rečici {rr} obeta konec suše. "
             f"Gobe bodo, a ne vse hkrati in ne takoj: razkrojevalke in lesne vrste v nekaj dneh po dežju, mikorizne "
-            f"(jurček, lisička, rumeni ježek) pa po zamikih, ki jih uporablja model, šele {win['mikorizna']} "
+            f"(jurček, rumeni ježek) pa po zamikih, ki jih uporablja model, šele {win['mikorizna']} Lisička, ki ji je zamik umerjen po "
+            f"opažanjih, je prej: {lis_win} "
             f"Dež, ki ga napovedujejo ansambli (mediana {mm(p50)} mm), je pri nekaterih vrstah natanko na meji "
             f"praga v našem gobarskem modelu. Grafi spodaj kažejo, kdaj, koliko in kje.")
 
@@ -427,7 +450,7 @@ def build_article(D):
              f'<div class="mini-stat"><div class="ms-label">Dež {rr}, ansambel</div><div class="ms-val">{mm(p50)} mm</div><div class="ms-sub">mediana, ARSO {mm(arso)} mm</div></div>'
              f'<div class="mini-stat"><div class="ms-label">Dež v modelu gob</div><div class="ms-val">{mm(mod)} mm</div><div class="ms-sub">mokrejši scenarij</div></div>'
              f'<div class="mini-stat"><div class="ms-label">Suša pred dežjem</div><div class="ms-val">{dry["days"]} dni</div><div class="ms-sub">{mm(dry["sum"])} mm</div></div>'
-             f'<div class="mini-stat"><div class="ms-label">Mikorizne vrste</div><div class="ms-val" style="font-size:1.15rem">{win["mikorizna"]}</div><div class="ms-sub">okno po zamiku</div></div>'
+             f'<div class="mini-stat"><div class="ms-label">Jurček, ježek</div><div class="ms-val" style="font-size:1.15rem">{win["mikorizna"]}</div><div class="ms-sub">lisička: {lis_win}</div></div>'
              '</div>')
 
     sec1 = [
@@ -445,7 +468,9 @@ def build_article(D):
 
     rows = [[ECO_NAME[e], ex, f"{eco[e]['lag'][0]}–{eco[e]['lag'][1]} dni", win[e]] for e, ex in
             [("razkrojevalka", "marela, poljski kukmak"), ("lesna", "bezgova uhljevka, bukov ostrigar, štorovka"),
-             ("mikorizna", "jurček, lisička, rumeni ježek, kostanjevka")]]
+             ("mikorizna", "jurček, rumeni ježek, kostanjevka")]]
+    if lis:
+        rows.append(["Lisička (umerjena)", "navadna lisička", f"{lis['lag'][0]}–{lis['lag'][1]} dni", lis_win])
     sec2 = [
         (f"Vsaka skupina ima v modelu svoj zamik med sprožilnim dežjem in trosnjaki "
          f"(<a href=\"/blog/trije-vali-gob-po-dezju-0911.html\" style=\"color:var(--blue)\">več v septembrskem članku</a>). "
@@ -453,12 +478,20 @@ def build_article(D):
         figure("gp-fig1", "", "Premaknite kazalec po času ali uporabite ← → (PageUp/PageDown: teden dni). Črte kažejo povprečni indeks "
                               "skupine v Rečici po modelu, pasovi spodaj okno, v katerem pričakujemo trosnjake, siv pas dneve dežja."),
         details("Okna v tabeli", table(["Skupina", "Primeri", "Zamik", "Okno"], rows)),
+        ('<div class="callout"><h3>Dopolnitev, 9. oktobra: lisička</h3>'
+         '<p>V prvotni različici je bila lisička med mikoriznimi vrstami z zamikom 8–16 dni. Bralec je pripomnil, da lisičke niso tako '
+         'počasne. Preverili smo to na opažanjih iNaturalist (jesen in zgodnje poletje, širše območje; skupaj okoli 430 potrjenih '
+         'opažanj lisičke): mediana je 6–7 dni po začetku dežja, vrh pri 6–8 dneh. Zamik za lisičko v modelu je zato '
+         f'<strong>{lis["lag"][0] if lis else 4}–{lis["lag"][1] if lis else 14} dni</strong>, okno {lis_win}. Pri marelah ni bilo tako: '
+         'opažanja so pogostejša šele 13–16 dni po dežju, torej niso »takoj«. Jurčka nismo spreminjali: njegova mediana je 10 dni, '
+         'kar se ujema z 8–16. Preizkus je ocena iz opažanj, ne meritev prvega trosnjaka, zato je tudi to okno ocena.</p></div>') if lis else "",
         (f"V Rečici je povprečni indeks razkrojevalk najvišji {short(kuk['peak_date'])} ({kuk['peak_mean']} %), lesnih vrst "
          f"{short(les['peak_date'])} ({les['peak_mean']} %), najboljša posamezna vrsta pa je "
          f"{les['best_name'].split(' (')[0].lower()} s {les['best']} % ({short(les['best_date'])}). Pri mikoriznih vrstah povprečje skupine "
          f"ne preseže {mik['peak_mean']} %, ker je njihovo okno <strong>zunaj sedemdnevnega horizonta modela</strong>; ta bo začetek okna "
          f"dosegel okoli {short(add_days(mik['win'][0], -6))}. V prvih dneh po dežju torej ne iščite jurčkov: prve pridejo gobe na lesu "
-         f"in na stelji."),
+         f"in na stelji." + (f" Lisička je izjema: njeno okno {lis_win} je že v modelovem horizontu in njen indeks v Rečici doseže "
+                              f"{lis['peak']} % ({short(lis['peak_date'])})." if lis else "")),
     ]
 
     prow = [[r["name"].split(" (")[0], ECO_NAME[r["eco"]].lower(), f"{r['lag'][0]}–{r['lag'][1]} dni", f"{thr_s(r['thr'])} mm",
@@ -507,7 +540,7 @@ def build_article(D):
          f"postaji izmerjen."),
         ('<div class="callout"><h3>Skratka</h3>'
          f'<p>Dež {rr} konča {dry["days"]}-dnevno sušo, a jurčkov v prvih dneh ne pričakujte. Najprej pridejo gobe na lesu in razkrojevalke '
-         f'({win["razkrojevalka"]}), mikorizne po zamiku {win["mikorizna"]} Pri mediani ansambla ({mm(p50)} mm) jurček doseže okoli {jur_pct} % '
+         f'({win["razkrojevalka"]}), lisička {lis_win}, jurček in ježek po zamiku {win["mikorizna"]} Pri mediani ansambla ({mm(p50)} mm) jurček doseže okoli {jur_pct} % '
          f'svojega praga, pri mokrejšem scenariju ({mm(mod)} mm) ga presega.</p></div>'),
         ('<div class="disclaimer">Indeks je ocena ugodnosti razmer na podlagi vremena in ni obljuba najdbe. Pred nabiranjem vedno '
          'preverite vrsto z izkušenim nabiralcem ali mikologom – glejte tudi '

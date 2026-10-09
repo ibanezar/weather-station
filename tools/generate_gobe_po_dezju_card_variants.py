@@ -82,6 +82,21 @@ def footer(d, line1, y=1210):
     d.text((PAD, y + 84), "Grafi, pragovi dežja po vrstah in višina: meteorec.si/blog", font=font(R, 27), fill=MUTED)
 
 
+EX = {"razkrojevalka": "marela, poljski kukmak", "lesna": "bezgova uhljevka, bukov ostrigar", "mikorizna": "jurček, rumeni ježek",
+      "cantharellus_cibarius": "navadna lisička"}
+LABEL = {"razkrojevalka": "Razkrojevalke", "lesna": "Lesne vrste", "mikorizna": "Jurček, ježek", "cantharellus_cibarius": "Lisička"}
+
+
+def entries(D):
+    """Skupine in vrste z umerjenim zamikom (lisička), po začetku okna."""
+    out = [{"key": e, "name": LABEL[e], "ex": EX[e], "color": post.COLORS[e], "win": D["eco"][e]["win"], "lag": D["eco"][e]["lag"],
+            "slug": e} for e in post.ECO_ORDER]
+    for x in D["special"]:
+        out.append({"key": x["id"], "name": LABEL.get(x["id"], x["name"]), "ex": EX.get(x["id"], x["name"]), "color": post.COLORS[x["eco"]],
+                    "win": x["win"], "lag": x["lag"], "slug": x["id"]})
+    return sorted(out, key=lambda t: t["win"][0])
+
+
 def info(D):
     eco, ev, dry = D["eco"], D["ev"], D["R"]["dry"]
     return eco, ev, dry, post.rng(D["d1"], D["d3"])
@@ -97,20 +112,18 @@ def v1(D):
     for ln in wrap(d, f"brez dežja ({post.mm(dry['sum'])} mm). Zdaj pride dež, a gobe ne takoj.", font(R, 38), W - 2 * PAD):
         d.text((PAD, y), ln, font=font(R, 38), fill=MUTED)
         y += 52
-    y = 690
-    rows = [("razkrojevalka", "marela, kukmaki"), ("lesna", "uhljevka, ostrigar, štorovka"), ("mikorizna", "jurček, lisička, rumeni ježek")]
-    for e, ex in rows:
-        c = eco[e]
-        col = hexrgb(post.COLORS[e])
-        d.rounded_rectangle((PAD, y, W - PAD, y + 140), radius=22, fill=PANEL, outline=LINE, width=2)
-        d.rounded_rectangle((PAD, y, PAD + 16, y + 140), radius=8, fill=col)
-        d.text((PAD + 44, y + 22), post.ECO_NAME[e], font=font(B, 36), fill=WHITE)
-        d.text((PAD + 44, y + 78), ex, font=font(R, 27), fill=DIM)
-        t = post.rng(*c["win"])
-        d.text((W - PAD - 28 - text_w(d, t, font(B, 46)), y + 26), t, font=font(B, 46), fill=WHITE)
-        z = f"zamik {c['lag'][0]}–{c['lag'][1]} dni"
-        d.text((W - PAD - 28 - text_w(d, z, font(R, 26)), y + 88), z, font=font(R, 26), fill=DIM)
-        y += 162
+    y = 640
+    for en in entries(D):
+        col = hexrgb(en["color"])
+        d.rounded_rectangle((PAD, y, W - PAD, y + 120), radius=22, fill=PANEL, outline=LINE, width=2)
+        d.rounded_rectangle((PAD, y, PAD + 16, y + 120), radius=8, fill=col)
+        d.text((PAD + 44, y + 16), en["name"], font=font(B, 34), fill=WHITE)
+        d.text((PAD + 44, y + 68), en["ex"], font=font(R, 26), fill=DIM)
+        t = post.rng(*en["win"])
+        d.text((W - PAD - 28 - text_w(d, t, font(B, 44)), y + 14), t, font=font(B, 44), fill=WHITE)
+        z = f"zamik {en['lag'][0]}–{en['lag'][1]} dni"
+        d.text((W - PAD - 28 - text_w(d, z, font(R, 25)), y + 72), z, font=font(R, 25), fill=DIM)
+        y += 134
     footer(d, f"Dež {rr}: {post.mm(ev['p50'])} mm (ansambel), ARSO {post.mm(ev['arso'])} mm", 1214)
     return img
 
@@ -123,19 +136,17 @@ def v2(D):
     f = font(B, 92)
     d.text((PAD, 270), "Kdaj po dežju", font=f, fill=WHITE)
     d.text((PAD, 370), "v gozd?", font=f, fill=GREEN)
-    steps = [("PRVI", "razkrojevalka", "marela, poljski kukmak"),
-             ("NATO", "lesna", "bezgova uhljevka, bukov ostrigar"),
-             ("NAZADNJE", "mikorizna", "jurček, lisička, rumeni ježek")]
-    y = 540
-    for i, (lab, e, ex) in enumerate(steps):
-        x0 = PAD + i * 56
-        col = hexrgb(post.COLORS[e])
-        hi = e == "mikorizna"
-        d.rounded_rectangle((x0, y, W - PAD, y + 190), radius=24, fill=PANEL, outline=GREEN if hi else LINE, width=4 if hi else 2)
-        d.text((x0 + 30, y + 22), lab, font=font(B, 24), fill=col)
-        d.text((x0 + 30, y + 58), post.rng(*eco[e]["win"]), font=font(B, 56), fill=WHITE)
-        d.text((x0 + 30, y + 134), ex, font=font(R, 28), fill=MUTED)
-        y += 214
+    labs = ["PRVI", "NATO", "POTEM", "NAZADNJE"]
+    y = 530
+    for i, en in enumerate(entries(D)):
+        x0 = PAD + i * 44
+        col = hexrgb(en["color"])
+        hi = en["key"] == "mikorizna"
+        d.rounded_rectangle((x0, y, W - PAD, y + 148), radius=24, fill=PANEL, outline=GREEN if hi else LINE, width=4 if hi else 2)
+        d.text((x0 + 28, y + 14), labs[min(i, 3)], font=font(B, 22), fill=col)
+        d.text((x0 + 28, y + 42), post.rng(*en["win"]), font=font(B, 52), fill=WHITE)
+        d.text((x0 + 28, y + 108), en["name"] + ": " + en["ex"], font=font(R, 25), fill=MUTED)
+        y += 162
     footer(d, f"Dež {rr}, po {dry['days']} suhih dneh. Jurčki: zamik 8–16 dni.", 1214)
     return img
 
@@ -194,6 +205,9 @@ def v4(D):
     for i, n in enumerate(["pon", "tor", "sre", "čet", "pet", "sob", "ned"]):
         d.text((gx0 + i * cw + cw // 2 - text_w(d, n, font(R, 24)) / 2, gy0 - 36), n, font=font(R, 24), fill=DIM)
     wins = {e: tuple(datetime.date.fromisoformat(x) for x in eco[e]["win"]) for e in post.ECO_ORDER}
+    lis = [x for x in D["special"] if x["id"] == "cantharellus_cibarius"]
+    if lis:
+        wins["lisicka"] = tuple(datetime.date.fromisoformat(x) for x in lis[0]["win"])
     r0, r1 = (datetime.date.fromisoformat(D["d1"]), datetime.date.fromisoformat(D["d3"]))
     days = calendar.monthrange(2026, 10)[1]
     for k in range(35):
@@ -210,13 +224,14 @@ def v4(D):
             continue
         t = str(day.day)
         d.text((x + 16, y + 12), t, font=font(B, 32), fill=WHITE)
-        for j, e in enumerate(("razkrojevalka", "lesna")):
-            if wins[e][0] <= day <= wins[e][1]:
-                d.rounded_rectangle((x + 14, y + 66 + j * 14, x + cw - 14, y + 74 + j * 14), radius=4, fill=hexrgb(post.COLORS[e]))
+        for j, e in enumerate(("razkrojevalka", "lesna", "lisicka")):
+            if e in wins and wins[e][0] <= day <= wins[e][1]:
+                d.rounded_rectangle((x + 14, y + 64 + j * 13, x + cw - 14, y + 71 + j * 13), radius=3,
+                                    fill=hexrgb(post.COLORS["mikorizna" if e == "lisicka" else e]))
         if day in (r0, r1) or day == r0 + datetime.timedelta(days=1):
             d.text((x + 62, y + 20), "dež", font=font(R, 22), fill=MUTED)
     ly = gy0 + 5 * ch + 24
-    items = [((40, 52, 82), "dež 8.–10."), (hexrgb(post.COLORS["razkrojevalka"]), "razkrojevalke"), (hexrgb(post.COLORS["lesna"]), "lesne"), ((16, 92, 66), "jurček, lisička, ježek")]
+    items = [((40, 52, 82), "dež 8.–10."), (hexrgb(post.COLORS["razkrojevalka"]), "razkrojevalke"), (hexrgb(post.COLORS["lesna"]), "lesne"), (hexrgb(post.COLORS["mikorizna"]), "lisička"), ((16, 92, 66), "jurček, ježek")]
     x = PAD
     for col, lab in items:
         d.rounded_rectangle((x, ly, x + 28, ly + 28), radius=7, fill=col)
@@ -234,13 +249,14 @@ def v5(D):
     f = font(B, 96)
     d.text((PAD, 268), "Dež pride prvi.", font=f, fill=WHITE)
     d.text((PAD, 376), "Gobe za njim.", font=f, fill=GREEN)
-    y = 600
-    for e, lab in (("razkrojevalka", "razkrojevalke"), ("lesna", "lesne vrste"), ("mikorizna", "jurčki, lisičke, ježki")):
-        col = hexrgb(post.COLORS[e])
-        d.ellipse((PAD, y + 14, PAD + 34, y + 48), fill=col)
-        d.text((PAD + 64, y), post.rng(*eco[e]["win"]), font=font(B, 66), fill=WHITE)
-        d.text((PAD + 64, y + 80), lab, font=font(R, 32), fill=MUTED)
-        y += 168
+    y = 580
+    lab5 = {"razkrojevalka": "razkrojevalke", "lesna": "lesne vrste", "cantharellus_cibarius": "lisičke", "mikorizna": "jurčki in ježki"}
+    for en in entries(D):
+        col = hexrgb(en["color"])
+        d.ellipse((PAD, y + 12, PAD + 34, y + 46), fill=col)
+        d.text((PAD + 64, y), post.rng(*en["win"]), font=font(B, 62), fill=WHITE)
+        d.text((PAD + 64, y + 72), lab5.get(en["key"], en["name"]), font=font(R, 30), fill=MUTED)
+        y += 148
     footer(d, f"Po {dry['days']} suhih dneh: dež {post.mm(ev['p50'])} mm (ansambel), ARSO {post.mm(ev['arso'])} mm", 1214)
     return img
 

@@ -44,6 +44,18 @@ def text_w(d, t, f):
     return b[2] - b[0]
 
 
+def lane_items(D):
+    """[(ime, barva, okno)] po začetku okna: skupine in vrste z umerjenim zamikom (lisička)."""
+    eco = D["eco"]
+    out = []
+    for e in post.ECO_ORDER:
+        name = "Jurček, ježek" if e == "mikorizna" else post.ECO_NAME[e]
+        out.append((name, post.COLORS[e], eco[e]["win"]))
+    for x in D["special"]:
+        out.append((x["name"], post.COLORS[x["eco"]], x["win"]))
+    return sorted(out, key=lambda t: t[2][0])
+
+
 def main():
     cache = sys.argv[sys.argv.index("--cache") + 1] if "--cache" in sys.argv else None
     D = post.build_data(cache)
@@ -71,14 +83,15 @@ def main():
     mik = eco["mikorizna"]
     big = rng(*mik["win"])
     d.text((pad, 500), big, font=font("LiberationSans-Bold.ttf", 118), fill=WHITE)
-    d.text((pad, 640), "okno za jurčke, lisičke in rumene ježke", font=font("LiberationSans-Regular.ttf", 34), fill=MUTED)
+    d.text((pad, 640), "okno za jurčke in rumene ježke", font=font("LiberationSans-Regular.ttf", 34), fill=MUTED)
 
     # časovnica: panel z rain-pasom in tremi pasovi
-    px0, py0, px1, py1 = pad, 722, W - pad, 1180
+    px0, py0, px1, py1 = pad, 722, W - pad, 1190
     d.rounded_rectangle((px0, py0, px1, py1), radius=26, fill=PANEL, outline=LINE, width=2)
     span = D["P"]  # noqa: F841 (izvor je isti kot članek)
     first = datetime.date.fromisoformat(d1)
-    last = datetime.date.fromisoformat(max(eco[e]["win"][1] for e in post.ECO_ORDER)) + datetime.timedelta(days=1)
+    items = lane_items(D)
+    last = datetime.date.fromisoformat(max(w[1] for _, _, w in items)) + datetime.timedelta(days=1)
     n = (last - first).days + 1
     gx0, gx1 = px0 + 34, px1 - 34
     gy0, gy1 = py0 + 96, py1 - 70
@@ -94,17 +107,16 @@ def main():
 
     f_lane = font("LiberationSans-Bold.ttf", 28)
     f_win = font("LiberationSans-Regular.ttf", 26)
-    lane_h = (gy1 - gy0) / 3
-    for k, e in enumerate(post.ECO_ORDER):
-        c = eco[e]
+    lane_h = (gy1 - gy0) / len(items)
+    for k, (name, colhex, win) in enumerate(items):
         y = gy0 + k * lane_h
-        col = hexrgb(post.COLORS[e])
-        a = datetime.date.fromisoformat(c["win"][0])
-        b = datetime.date.fromisoformat(c["win"][1]) + datetime.timedelta(days=1)
-        d.text((gx0, y + 4), post.ECO_NAME[e], font=f_lane, fill=WHITE)
-        label = rng(*c["win"])
-        d.text((gx1 - text_w(d, label, f_win), y + 6), label, font=f_win, fill=MUTED)
-        d.rounded_rectangle((X(a), y + 48, X(b), y + 48 + 34), radius=12, fill=col)
+        col = hexrgb(colhex)
+        a = datetime.date.fromisoformat(win[0])
+        b = datetime.date.fromisoformat(win[1]) + datetime.timedelta(days=1)
+        d.text((gx0, y + 2), name, font=f_lane, fill=WHITE)
+        label = rng(*win)
+        d.text((gx1 - text_w(d, label, f_win), y + 4), label, font=f_win, fill=MUTED)
+        d.rounded_rectangle((X(a), y + 40, X(b), y + 40 + 30), radius=11, fill=col)
 
     for i in range(0, n, 3):
         day = first + datetime.timedelta(days=i)
