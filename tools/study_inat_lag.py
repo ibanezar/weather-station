@@ -23,6 +23,11 @@ objavijo se samo agregati.
 
 Usage:
     python3 tools/study_inat_lag.py [--cache-dir DIR] [--out-json F] [--out-md F]
+        [--tag T] [--bbox swlat,swlng,nelat,nelng] [--months 8,9,10,11] [--species key,key]
+
+`--tag` loči predpomnilnik in izhod (brez oznake: Slovenija, avg–nov, vse vrste). Razširitev (9. 10. 2026):
+  --tag siroko  --bbox 44.6,12.4,47.9,17.6   (jug Avstrije, Slovenija, sever Hrvaške, SV Italije, Z Madžarske)
+  --tag poletje --bbox 44.6,12.4,47.9,17.6 --months 5,6,7 --species cantharellus_cibarius,boletus_edulis,...
 """
 import collections
 import datetime as dt
@@ -43,6 +48,7 @@ ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 BBOX = {"swlat": 45.4, "swlng": 13.3, "nelat": 46.9, "nelng": 16.6}   # Slovenija (in rob sosed)
 FIRST_YEAR = 2015
 MONTHS = "8,9,10,11"
+TAG = ""
 CELL = 0.25
 DAY_MM, EVENT_MM, GAP, DRY_BEFORE_MM = 3.0, 20.0, 1, 8.0
 BINS = [(0, 2), (3, 5), (6, 8), (9, 12), (13, 16), (17, 21), (22, 30), (31, 9999)]
@@ -203,19 +209,34 @@ def main():
     out_json = a[a.index("--out-json") + 1] if "--out-json" in a else os.path.join(ROOT, "data", "inat-lag-studija.json")
     out_md = a[a.index("--out-md") + 1] if "--out-md" in a else os.path.join(ROOT, "docs", "inat-lag-studija.md")
     os.makedirs(cache, exist_ok=True)
+    global BBOX, MONTHS, TAG
+    if "--tag" in a:
+        TAG = a[a.index("--tag") + 1]
+    if "--bbox" in a:
+        sw_lat, sw_lng, ne_lat, ne_lng = (float(x) for x in a[a.index("--bbox") + 1].split(","))
+        BBOX = {"swlat": sw_lat, "swlng": sw_lng, "nelat": ne_lat, "nelng": ne_lng}
+    if "--months" in a:
+        MONTHS = a[a.index("--months") + 1]
+    wanted = a[a.index("--species") + 1].split(",") if "--species" in a else None
+    species = [t for t in SPECIES if wanted is None or t[0] in wanted]
+    if "--out-json" not in a and TAG:
+        out_json = os.path.join(ROOT, "data", f"inat-lag-studija-{TAG}.json")
+    if "--out-md" not in a and TAG:
+        out_md = os.path.join(ROOT, "docs", f"inat-lag-studija-{TAG}.md")
+    sfx = f"-{TAG}" if TAG else ""
 
-    print("Opažanja iNaturalist …", file=sys.stderr)
-    ref = cached(os.path.join(cache, "fungi.json"), lambda: fetch_observations())
+    print(f"Opažanja iNaturalist (okvir {BBOX}, meseci {MONTHS}) …", file=sys.stderr)
+    ref = cached(os.path.join(cache, f"fungi{sfx}.json"), lambda: fetch_observations())
     sp_obs = {}
-    for key, lat, *_ in SPECIES:
+    for key, lat, *_ in species:
         print(f"  {lat}", file=sys.stderr)
-        sp_obs[key] = cached(os.path.join(cache, f"{key}.json"), lambda l=lat: fetch_observations(taxon_id(l)))
+        sp_obs[key] = cached(os.path.join(cache, f"{key}{sfx}.json"), lambda l=lat: fetch_observations(taxon_id(l)))
 
     end = (dt.date.today() - dt.timedelta(days=6)).isoformat()
     allobs = ref + [o for v in sp_obs.values() for o in v]
     cells = {cell_of(o[1], o[2]) for o in allobs if o[0] <= end}
     print(f"Celic: {len(cells)} — padavine …", file=sys.stderr)
-    rain = cached(os.path.join(cache, f"rain-{end}.json"), lambda: fetch_rain(cells, end))
+    rain = cached(os.path.join(cache, f"rain{sfx}-{end}.json"), lambda: fetch_rain(cells, end))
     ev_cache = {}
 
     def dso_rows(obs):
@@ -238,11 +259,11 @@ def main():
 
     ref_rows = dso_rows(ref)
     result = {"generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "rain_end": end,
-              "bins": BIN_LABELS, "params": {"day_mm": DAY_MM, "event_mm": EVENT_MM, "gap": GAP, "dry_before_mm": DRY_BEFORE_MM,
+              "bins": BIN_LABELS, "params": {"region": BBOX, "tag": TAG, "day_mm": DAY_MM, "event_mm": EVENT_MM, "gap": GAP, "dry_before_mm": DRY_BEFORE_MM,
                                              "cell": CELL, "months": MONTHS, "first_year": FIRST_YEAR},
               "reference": {"all": summarize(ref_rows, (0, 0)), "dry": summarize([r for r in ref_rows if r[1]], (0, 0))},
               "species": {}}
-    for key, lat, sl, eco, lag in SPECIES:
+    for key, lat, sl, eco, lag in species:
         rows = dso_rows(sp_obs[key])
         dry = [r for r in rows if r[1]]
         result["species"][key] = {"name_lat": lat, "name_sl": sl, "model_ecology": eco, "model_lag": list(lag),
@@ -262,7 +283,8 @@ def pct(x):
 def write_report(R, path):
     ref = R["reference"]
     L = ["# Zamik med dežjem in opažanjem gob: iNaturalist × Open-Meteo", "",
-         f"Posnetek: {R['generated'][:10]}, padavine do {R['rain_end']}. Skript: `tools/study_inat_lag.py`. "
+         f"Posnetek: {R['generated'][:10]}, padavine do {R['rain_end']}. Okvir: {R['params']['region']}, meseci {R['params']['months']}. "
+         f"Skript: `tools/study_inat_lag.py`. "
          "**Enkratna študija, v model ni vgrajena.** Podrobna metoda in omejitve so na dnu.", "",
          "## Povzetek po vrstah", "",
          "DSO = dni od začetka zadnjega dogodka dežja (≥ 20 mm v nekaj dneh) do opažanja. »Model« je privzeti zamik v "
@@ -295,7 +317,7 @@ def write_report(R, path):
         L.append(f"| {s['name_sl']} | {d['n']} | {med} d | {pct(d['le7'])} | {pct(d['in_lag'])} |")
     L.append(f"| vse glive | {ref['dry']['n']} | {ref['dry']['median']:.0f} d | {pct(ref['dry']['le7'])} | — |")
     L += ["", "## Metoda in omejitve", "",
-          "- **Opažanja:** iNaturalist, Slovenija (okvir z robom sosed), avgust–november 2015–2026, `research`, odprta lokacija, "
+          "- **Opažanja:** iNaturalist, okvir in meseci so v glavi poročila, 2015–2026, `research`, odprta lokacija, "
           "natančnost ≤ 5 km. Shranjena so samo datum in koordinate (zaokrožene na celico 0,25°), ne fotografije in ne uporabniki.",
           "- **Padavine:** Open-Meteo Archive (ERA5), celica 0,25°. ERA5 glaji padavine in zaokroži močne plohe, zato so dogodki bolj mehki, "
           "kot jih je videla postaja.",
