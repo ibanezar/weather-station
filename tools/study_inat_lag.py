@@ -294,6 +294,19 @@ def write_report(R, path):
         med = "—" if d["median"] is None else f"{d['median']:.0f}"
         L.append(f"| {s['name_sl']} | {d['n']} | {med} d | {pct(d['le7'])} | {pct(d['in_lag'])} |")
     L.append(f"| vse glive | {ref['dry']['n']} | {ref['dry']['median']:.0f} d | {pct(ref['dry']['le7'])} | — |")
+    L += ["", "## Metoda in omejitve", "",
+          "- **Opažanja:** iNaturalist, Slovenija (okvir z robom sosed), avgust–november 2015–2026, `research`, odprta lokacija, "
+          "natančnost ≤ 5 km. Shranjena so samo datum in koordinate (zaokrožene na celico 0,25°), ne fotografije in ne uporabniki.",
+          "- **Padavine:** Open-Meteo Archive (ERA5), celica 0,25°. ERA5 glaji padavine in zaokroži močne plohe, zato so dogodki bolj mehki, "
+          "kot jih je videla postaja.",
+          "- **DSO** je merjen od začetka ZADNJEGA dogodka. Ob ponavljajočem dežju je zato kratek, čeprav je trosnjake sprožil "
+          "prejšnji dež. Podskupina »po suši« to zmanjša, a ima malo opažanj.",
+          "- **Opažanje ni prvi trosnjak.** Stari trosnjaki (marela, jurček) ostanejo več dni in se še fotografirajo, zato je pravi zamik "
+          "do prvega trosnjaka verjetno krajši od izmerjenega.",
+          "- **Pristranskost opazovalcev:** ljudje hodijo v gozd po dežju, ob vikendih in ob poteh. Kontrola (vse glive) to deloma ujame, "
+          "a vključuje tudi lišaje in lesne vrste z drugačnim zamikom.",
+          "- **Majhni vzorci:** pri vrstah z n < 60 (ježek, štorovka) so razmerja šum. Prag zaupanja v poročilu je n ≥ 30.",
+          "- Zaključki so v `docs/inat-lag-studija-zakljucki.md`."]
     open(path, "w", encoding="utf-8").write("\n".join(L) + "\n")
 
 
