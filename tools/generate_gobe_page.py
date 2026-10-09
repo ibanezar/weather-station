@@ -1186,6 +1186,11 @@ body .app-bottomnav{display:none}
   color:var(--muted);font:inherit;font-size:1.1rem;line-height:1;min-width:2.6rem;min-height:2.6rem;cursor:pointer}
 .gp-val-chk{display:flex;gap:.5rem;align-items:flex-start;font-size:.82rem;color:var(--muted);margin:var(--gp-sp-3) 0 0;line-height:1.4}
 .gp-val-chk input{margin-top:.2rem}
+.gp-val-sel{display:grid;grid-template-columns:1fr 1fr;gap:var(--gp-sp-3);margin:var(--gp-sp-3) 0 0}
+.gp-val-sel label{display:flex;flex-direction:column;gap:.25rem;font-size:.82rem;color:var(--muted);min-width:0}
+.gp-val-sel select{background:rgba(255,255,255,.05);border:1px solid var(--card-border);border-radius:var(--gp-r-control);
+  color:var(--text);font:inherit;font-size:.9rem;padding:.5rem .6rem;min-height:2.6rem;width:100%;min-width:0}
+@media(max-width:600px){.gp-val-sel{grid-template-columns:1fr}}
 .gp-val-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem 0;border-top:1px solid var(--card-border)}
 .gp-val-item:first-child{border-top:none}
 .gp-val-dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.35rem;flex-shrink:0}
@@ -3105,7 +3110,8 @@ def _valovi_groups():
                 continue
             sps.append({"id": sid, "name": sp["name_sl"],
                         "min": int(lag["min"]), "max": int(lag["max"]),
-                        "r7": float(sp["rain_7d_min"]), "r14": float(sp["rain_14d_min"])})
+                        "r7": float(sp["rain_7d_min"]), "r14": float(sp["rain_14d_min"]),
+                        "geo": sp.get("geology_affinity", "nevtralna")})
         if not sps:
             continue
         out.append({"eco": eco, "name": name, "color": color,
@@ -3139,10 +3145,12 @@ VALOVI_JS = r"""(function(){
   var DEFAULTS = __DEFAULTS__;
   var STATION = __STATION__;
   var CFG = __CFG__;
+  var TERRAINS = __TERRAINS__;
   var MAXEV = __MAXEV__;
   function $(id){ return document.getElementById(id); }
   var evBox = $('gvalEvents');
   if (!evBox) return;
+  var whatSel = $('gvalWhat'), terSel = $('gvalTerrain');
   var addBtn = $('gvalAdd'), clearBtn = $('gvalClear'), stationChk = $('gvalStation');
   var hint = $('gvalHint'), result = $('gvalResult'), panel = $('gvalStatePanel');
   var plays = {};
@@ -3184,6 +3192,35 @@ VALOVI_JS = r"""(function(){
              fit: (cfg.wT * ft[0] + cfg.wB * fb[0]) / (cfg.wT + cfg.wB) };
   }
 
+  /* Kopija geološkega množitelja iz gobe_model.eval_species (lesne vrste ga nimajo). */
+  function geoFactor(affinity, terrain, eco, gcfg){
+    if (eco === 'lesna') return 1;
+    if (affinity === 'nevtralna' || !terrain) return 1;
+    return affinity === terrain ? gcfg.match : gcfg.mismatch;
+  }
+  function fillSelects(){
+    whatSel.innerHTML = '<option value="all">Vse skupine</option>';
+    GROUPS.forEach(function(g){
+      var o = document.createElement('option'); o.value = 'eco:' + g.eco; o.textContent = g.name; whatSel.appendChild(o);
+    });
+    GROUPS.forEach(function(g){
+      var og = document.createElement('optgroup'); og.label = g.name;
+      g.species.forEach(function(sp){
+        var o = document.createElement('option'); o.value = 'sp:' + sp.id; o.textContent = sp.name; og.appendChild(o);
+      });
+      whatSel.appendChild(og);
+    });
+    terSel.innerHTML = '<option value="">Vsa območja (brez terena)</option>';
+    TERRAINS.forEach(function(t){
+      var o = document.createElement('option'); o.value = t.id; o.textContent = t.name; terSel.appendChild(o);
+    });
+  }
+  function pickSpecies(g, s){
+    var w = whatSel.value;
+    if (w === 'all') return true;
+    if (w.indexOf('eco:') === 0) return w.slice(4) === g.eco;
+    return w.slice(3) === s.id;
+  }
   function usable(){
     var T = todayNum();
     return events.filter(function(e){
@@ -3315,15 +3352,27 @@ VALOVI_JS = r"""(function(){
     var drought = droughtText(evs, get);
     hint.textContent = (hint.textContent ? hint.textContent + ' ' : '') + drought;
 
+    var terrain = terSel.value;
     var groupInfo = GROUPS.map(function(g){
       var gWins = [];
-      var spInfo = g.species.map(function(s){
+      var spInfo = [];
+      g.species.forEach(function(s){
+        if (!pickSpecies(g, s)) return;
         var wins = windowsOf(s, evs);
         wins.forEach(function(w){ gWins.push(w); });
-        return { s: s, wins: wins, st: statusOf(wins, T), fit: bestFit(s, wins, get, T, evs) };
+        var fit = bestFit(s, wins, get, T, evs);
+        if (fit){
+          fit.geo = geoFactor(s.geo, terrain, g.eco, CFG.geo);
+          fit.adj = Math.min(1, fit.fit * fit.geo);
+          fit.byTerrain = TERRAINS.map(function(t){
+            return { t: t, v: Math.min(1, fit.fit * geoFactor(s.geo, t.id, g.eco, CFG.geo)) };
+          });
+        }
+        spInfo.push({ s: s, wins: wins, st: statusOf(wins, T), fit: fit });
       });
+      if (!spInfo.length) return null;
       return { g: g, wins: gWins, st: statusOf(gWins, T), sp: spInfo };
-    });
+    }).filter(Boolean);
 
     var on = groupInfo.filter(function(x){ return x.st.tone === 'on'; });
     var next = null;
@@ -3343,9 +3392,9 @@ VALOVI_JS = r"""(function(){
     }
     var bestSp = null;
     groupInfo.forEach(function(x){ x.sp.forEach(function(i){
-      if (i.fit && i.st.tone !== 'past' && (!bestSp || i.fit.fit > bestSp.fit.fit)) bestSp = i;
+      if (i.fit && i.st.tone !== 'past' && (!bestSp || i.fit.adj > bestSp.fit.adj)) bestSp = i;
     }); });
-    if (bestSp) html += ' Količina dežja najbolje ustreza vrsti ' + bestSp.s.name + ' (' + Math.round(bestSp.fit.fit * 100) + ' %).';
+    if (bestSp) html += (terrain ? ' Dež in teren najbolje ustrezata vrsti ' : ' Količina dežja najbolje ustreza vrsti ') + bestSp.s.name + ' (' + Math.round(bestSp.fit.adj * 100) + ' %).';
     else if (events.some(function(e){ return e.iso && e.mm === null; })) html += ' Vnesi količino dežja za oceno, ali bo zadoščala.';
     result.innerHTML = html;
 
@@ -3359,7 +3408,7 @@ VALOVI_JS = r"""(function(){
     panel.innerHTML = '';
     groupInfo.forEach(function(x){
       var g = x.g, tone = x.st.tone;
-      document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]').classList.toggle('active', tone === 'on');
+      var rng = document.querySelector('.gp-val-range[data-eco="' + g.eco + '"]'); if (rng) rng.classList.toggle('active', tone === 'on');
       var item = document.createElement('div'); item.className = 'gp-val-item';
       var dot = document.createElement('div'); dot.className = 'gp-val-dot';
       dot.style.background = g.color; dot.style.opacity = tone === 'on' ? '1' : '.35';
@@ -3380,10 +3429,12 @@ VALOVI_JS = r"""(function(){
         if (i.st.tone !== 'on') chip.style.opacity = '.5';
         var txt = i.s.name + ' · ' + spanText(i.wins);
         if (i.fit){
-          txt += ' · ' + Math.round(i.fit.fit * 100) + ' %';
-          chip.title = fitWord(i.fit.fit) + ': sprožilni dež ' + fmtMm(i.fit.trig) + ' od ' + fmtMm(i.fit.trigMin) +
+          txt += ' · ' + Math.round(i.fit.adj * 100) + ' %';
+          chip.title = fitWord(i.fit.adj) + ': sprožilni dež ' + fmtMm(i.fit.trig) + ' od ' + fmtMm(i.fit.trigMin) +
             ' mm, zaloga vode ' + fmtMm(i.fit.base) + ' mm (najboljši dan ' + fmt(i.fit.d) + ')' +
-            (i.fit.tState === 'prenamoceno' ? ', prenamočeno' : '');
+            (i.fit.tState === 'prenamoceno' ? ', prenamočeno' : '') +
+            (terrain ? '; teren ×' + String(Math.round(i.fit.geo * 100) / 100).replace('.', ',') : '') +
+            '; po terenih: ' + i.fit.byTerrain.map(function(b){ return b.t.name.split(/[ (/]/)[0] + ' ' + Math.round(b.v * 100) + ' %'; }).join(', ');
         } else chip.title = 'zamik ' + i.s.min + '–' + i.s.max + ' dni po dežju';
         chip.textContent = txt;
         row.appendChild(chip);
@@ -3398,7 +3449,9 @@ VALOVI_JS = r"""(function(){
   });
   clearBtn.addEventListener('click', function(){ events = [{ iso: '', mm: null }]; renderRows(); render(); });
   stationChk.addEventListener('change', render);
-  renderRows(); render();
+  whatSel.addEventListener('change', render);
+  terSel.addEventListener('change', render);
+  fillSelects(); renderRows(); render();
 })();"""
 
 
@@ -3423,7 +3476,10 @@ def valovi_widget_html():
     cfg = {"norm": gm.TRIGGER_NORM_DAYS, "baseDays": gm.BASE_WINDOW_DAYS,
            "wT": float(rules["weights"]["rain_trigger"]), "wB": float(rules["weights"]["rain_base"]),
            "rain": {"overStart": float(rc["oversat_ratio"]), "overEnd": float(rc["oversat_max_ratio"]),
-                    "overFloor": float(rc["oversat_factor"])}}
+                    "overFloor": float(rc["oversat_factor"])},
+           "geo": {"match": float(rules["scoring"]["geology"].get("match_factor", 1.0)),
+                   "mismatch": float(rules["scoring"]["geology"].get("mismatch_factor", 1.0))}}
+    terrains = [{"id": t["id"], "name": t["name_sl"]} for t in rules.get("terrains", [])]
     cutoff = (TODAY - _dt.timedelta(days=VALOVI_STATION_DAYS)).isoformat()
     station = {d: round(mm, 1) for d, mm in sorted(gm.load_station_precip().items())
                if cutoff <= d <= TODAY.isoformat()}
@@ -3433,6 +3489,7 @@ def valovi_widget_html():
         .replace("__DEFAULTS__", _json_mod.dumps(events))
         .replace("__STATION__", _json_mod.dumps(station, separators=(",", ":")))
         .replace("__CFG__", _json_mod.dumps(cfg))
+        .replace("__TERRAINS__", _json_mod.dumps(terrains, ensure_ascii=False))
         .replace("__MAXEV__", str(VALOVI_MAX_EVENTS))) + "</script>"
     if events:
         d0 = events[-1]
@@ -3453,6 +3510,10 @@ def valovi_widget_html():
         '      <button type="button" id="gvalAdd" class="gp-val-clear">+ Dodaj dež</button>\n'
         '      <button type="button" id="gvalClear" class="gp-val-clear">Ni ga bilo</button>\n'
         '    </div>\n'
+        '    <div class="gp-val-sel">\n'
+        '      <label>Kaj iščeš?<select id="gvalWhat"></select></label>\n'
+        '      <label>Teren<select id="gvalTerrain"></select></label>\n'
+        '    </div>\n'
         '    <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> Upoštevaj še ostali dež s '
         'postaje IREICA1 (zaloga vode v tleh pred vnesenimi dogodki)</label>\n'
         + suggest_note +
@@ -3463,7 +3524,9 @@ def valovi_widget_html():
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
         '    <p class="gp-val-suggest">Okna so <strong>modelski razpon</strong>, ne zagotovilo začetka rasti. '
         'Odstotek ob vrsti je ujemanje <strong>samo dežja</strong> s pravili modela (sprožilni dež v zamiku vrste in '
-        'zaloga vode 14 dni pred njim, isti pragovi kot v napovedi); temperatura, vlaga tal in teren niso '
+        'zaloga vode 14 dni pred njim, isti pragovi kot v napovedi). Če izbereš teren, se ujemanje pomnoži z '
+        'geološkim faktorjem vrste, kot v modelu (ujemanje podlage ×' + _fmt_mm(cfg['geo']['match']) + ', neujemanje ×' + _fmt_mm(cfg['geo']['mismatch']) + ', lesne vrste brez); '
+        'temperatura, vlaga tal in višina niso '
         'všteti. Dež po današnjem dnevu se ne šteje. Celotno oceno po območjih najdeš v '
         '<a href="/gobarska-napoved/danes/">dnevni napovedi</a> in na '
         '<a href="/gobarska-napoved/zemljevid/">zemljevidu</a>.</p>\n'
@@ -3471,7 +3534,9 @@ def valovi_widget_html():
 
 
 def _fmt_mm(mm):
-    return f"{mm:.1f}".replace(".", ",") if mm is not None else ""
+    if mm is None:
+        return ""
+    return f"{mm:.2f}".rstrip("0").rstrip(".").replace(".", ",") if abs(mm * 10 - round(mm * 10)) > 1e-9 else f"{mm:.1f}".replace(".", ",")
 
 
 def build_valovi_page():

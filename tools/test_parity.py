@@ -490,6 +490,26 @@ def valovi_dez():
         check(abs(g["trig"] - trig) < 1e-9 and abs(g["base"] - base) < 1e-9, "valovi: okna dežja", str(c))
 
 
+@test
+def valovi_geologija():
+    """geoFactor() na /valovi/ = geološki množitelj v gobe_model.eval_species
+    (match/mismatch iz species_rules.yaml; lesne vrste in nevtralna afiniteta brez)."""
+    import gobe_model as gm
+    g = gm.load_rules()["scoring"]["geology"]
+    gc = {"match": float(g["match_factor"]), "mismatch": float(g["mismatch_factor"])}
+    cases = [(a, t, e) for a in ("kisla", "bazicna", "vlazna", "nevtralna")
+             for t in ("", "kisla", "bazicna", "vlazna") for e in ("mikorizna", "lesna", "razkrojevalka")]
+    calls = [{"expr": "geoFactor(%s, %s, %s, %s)" % (json.dumps(a), json.dumps(t), json.dumps(e), json.dumps(gc))}
+             for a, t, e in cases]
+    got = js("gobarska-napoved/valovi/index.html", ["geoFactor"], calls)
+    for (a, t, e), v in zip(cases, got):
+        if e == "lesna" or a == "nevtralna" or not t:
+            want = 1.0
+        else:
+            want = gc["match"] if a == t else gc["mismatch"]
+        check(abs(v - want) < 1e-9, "valovi: geoFactor", f"{a}/{t}/{e}: py={want} js={v}")
+
+
 # ── Nevihtna karta: app.js ↔ generate_storm_map.py ───────────────────────────
 @test
 def nevihtna_karta():

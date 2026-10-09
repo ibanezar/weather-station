@@ -776,6 +776,11 @@ zadnji dnevi z ≥ 10 mm na IREICA1.
 - Dež po današnjem dnevu je 0 (brez scenarijev). Postajni dež (`STATION`, 75 dni) vnese zalogo vode; kljukica
   ga izklopi (drug kraj). Vneseni dogodek ima prednost pred postajo za isti datum.
 - Okno vala je odvisno od časa dogodka, ocena dežja pa je ločena: dež, ki ne doseže praga, okna ne zapre.
+- **Izbira vrste/skupine in terena** (9. 10. 2026): teren (kisla/bazična/vlažna) pomnoži ujemanje z geološkim faktorjem
+  vrste — `geoFactor()` je kopija pravila v `gobe_model.eval_species` (ujemanje `match_factor`, neujemanje `mismatch_factor`,
+  lesne vrste in nevtralna afiniteta brez), prikaz je omejen na 100 % kot indeks v modelu. Tooltip ob vrsti pokaže ujemanje po
+  vseh treh terenih. **Višina (`elevation_pref_m`) in temperatura NISTA všteti** — kalkulator ne pozna lokacije, samo teren.
+  Usklajenost preverja `test_parity.valovi_geologija`.
 
 ## Preprost ⇄ napredni pogled domače strani
 
