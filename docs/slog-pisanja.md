@@ -65,19 +65,80 @@ Osnutek, 10. 10. 2026. Pravila z oznako **[potrdi]** sem sklepal iz Filipovih po
 - Predolg uvod z več podatki v enem stavku → razbiti na dva.
 - »Opažanja nam pomagajo preverjati« brez povezave → vedno povezava na kraj, kjer opažanje vnesejo.
 
-## 6. Objave na FB/IG
+## 6. Slovnica: mesta, kjer se najpogosteje zmotim
+
+Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba razlikujejo.
+
+**Števniki in samostalniki** (najpogostejša past):
+
+| Število | Pravilo | Primer |
+|---|---|---|
+| 1 | ednina, imenovalnik | 1 goba, 1 dan |
+| 2 | dvojina | 2 gobi, dva dneva |
+| 3, 4 | množina, imenovalnik | 3 gobe, 4 dni |
+| 5 in več | množina, **rodilnik** | 5 gob, 18 kosov, 26 dni |
+| z enoto | rodilnik snovi | 26,6 mm **dežja**, 20 mm padavin |
+
+- Pri številkah v besedilu zapisujemo **»2 dni«**, v celoti pa »dva dneva«. **[potrdi]**
+- »Pol dneva«, »pol ure«, »poldrugi dan«: ne »0,5 dneva«.
+- Število in količina z rodilnikom: »veliko dežja«, »malo gob«, »nekaj dni«.
+
+**Skloni in predlogi:**
+
+- **po + mestnik:** »po dežju«, »po suši«, »po tednu« (ne »po dež«).
+- **zaradi, brez, med, od, do + rodilnik:** »zaradi suše«, »do 9. oktobra«.
+- **kljub + dajalnik** (sodobno tudi rodilnik): »kljub dežju«. **[potrdi]**
+- **v/na:** »v gozdu«, »na Golteh«, »v dolini«, »na postaji«. Kraj, kjer je kaj, mestnik; kam gre, tožilnik (»gre v gozd«).
+- **Zanikanje + rodilnik:** »ni gob«, »ne vidim sledi« (ne »ni gobe«, »ne vidim sled«).
+
+**Besedni red:**
+
+- **Naslonski členki** (se, si, je, bi, ga, mu, mi, vam) so na **drugem mestu** v stavku: »Zjutraj se je pokazala«, »Včeraj mi je rekel«. Ne: »Zjutraj je se pokazala«. Stavek se ne začne z naslonskim členkom.
+- **Vrstni red členkov:** bi → je/so → se/si → ga/jo/jih: »Rad bi se ga spomnil«.
+- **Povedek na koncu** je pogosto zvenel kot knjižna nemščina. Raje: »Odločilo se je pred tedni« kot »Pred tedni se je odločilo«.
+
+**Ločila:**
+
+- **Vejica pred**: ki, ker, da, ko, če, kjer, čeprav, vendar, a, torej, namreč, saj, zato ker.
+- **Vrinjeni stavek** ima vejico na obeh straneh: »Goba, ki je danes velika, je začela nastajati dni prej.«
+- **Pred »in« vejice ne pišemo**, razen če povezuje dva stavka z različnim osebkom. **[potrdi]**
+- **»tako … kot«, »ne le … ampak tudi«**: brez vejice pred »kot«, vejica pred »ampak«.
+- **Dvopičje** za naštevanje ali razlago, **pomišljaj** za premor (»Drži – a ne popolnoma.«).
+
+**Glagol in čas:**
+
+- **Preteklik** brez »sem« v 3. osebi (»je«, »so«), v 1. in 2. osebi je »sem«, »si« obvezen (»pripravil sem«).
+- **Vid:** »doseže« (dovršni) za trenutek, »dosega« (nedovršni) za proces. Za napoved: »bo padlo«, »bo deževalo«.
+- **Trpnik** le, kadar je izvajalec nepomemben (»opažanja so zbrana«). Sicer tvornik: »zbrali smo«.
+- **Deležnik na -č / -ši** v naslovih in uvodih zamenjamo s stavkom: »gobe, ki rastejo«, ne »rastoče gobe«, razen kjer je izraz ustaljen.
+
+**Pridevniki in kazalni zaimki:**
+
+- **»ta« / »ta isti«:** ne »ta isti dan« po nepotrebnem. Raje »isti dan«.
+- **Svojilni zaimek:** »svoj« ob osebku (»gobar najde svoje mesto«), »njegov« za drugega (»sosed in njegova košara«).
+- **Stopnjevanje:** »bolj suh« (ne »suhejši« v pisanem jeziku, razen »suhejši« kot sodobna raba; **[potrdi]**), »najsuhši«.
+
+**Pogoste napake v zadnjih besedilih:**
+
+- Glagol **seštevati**, ne »seštevka« (»dež se sešteva«).
+- **»kateri«** namesto »ki« v dolgih stavkih: raje »ki«.
+- **Dvojina pri »jurček«:** »dva jurčka« (ne »dve jurčka«). Rod: **jurček** je moški, **goba** ženski, **lisička** ženski, **trosnjak** moški.
+- **Podvojeno »že … že«** v istem stavku.
+- Predolg **stavčni člen pred povedkom**: razbijte stavek.
+
+## 7. Objave na FB/IG
 
 - **Link objava** (ne slika s povezavo v komentarju). Uvod z relatabilnim prizorom ali številko, 3–5 kratkih stavkov, vprašanje na koncu, povezava z UTM (`utm_source=facebook&utm_medium=social&utm_campaign=<tip>`).
 - Emoji zmerno (1–3), samo kadar so del tona (🍄).
 - **Kartica:** največ en naslov in ena grafika, fotografija je glavna. Ne več kot 15–20 besed. Če ima kartica vir, ga navedemo v nogi.
 - **Odgovori na komentarje:** do 3 stavke, najprej priznanje, nato dodatek. Ne prepiramo se. Na vprašanje, na katero ne vemo, odgovorimo »tega ne vemo, preverimo« in preverimo.
 
-## 7. Preverjanje pred objavo
+## 8. Preverjanje pred objavo
 
 1. Naslov ≤ 60 znakov. Opis ≤ 160.
 2. Vsaka številka v besedilu je v grafu, tabeli ali viru.
 3. Preberi nasglas: kje se zatakneš, tam stavek razbij.
-4. Iskanje po anglicizmih in trpniku (`call_lektor` ali ročno).
+4. Iskanje po anglicizmih, trpniku in slovničnih pastih iz razdelka 6 (`call_lektor` ali ročno).
 5. `geo_audit.py`, `seo_audit.py`, `test_privacy.py`.
 6. Po objavi: IndexNow in (če je namenjeno) objava FB/IG.
 
