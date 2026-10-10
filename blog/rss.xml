@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 10 Oct 2026 06:47:54 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 10 Oct 2026 17:05:54 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Goba zraste čez noč? Odločilo se je pred tedni</title>
+      <link>https://meteorec.si/blog/goba-zraste-cez-noc-odlocilo-se-je-pred-tedni.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/goba-zraste-cez-noc-odlocilo-se-je-pred-tedni.html</guid>
+      <pubDate>Sat, 10 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Goba res zraste čez noč? Pol res. Zadnja faza je hitra, odločilo pa se je pred tedni: študija jurčkov, podatki postaje in opažanja gob. S štirimi interaktivnimi grafi.</description>
+      <category>gobe</category>
+      <category>gobarski-indeks</category>
+      <category>analiza</category>
+      <category>zgornja savinjska dolina</category>
+    </item>
     <item>
       <title>Zakaj vaš sosed vedno najde gobe, vi pa ne?</title>
       <link>https://meteorec.si/blog/zakaj-sosed-vedno-najde-gobe.html</link>

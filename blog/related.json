@@ -1,4 +1,9 @@
 {
+  "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni": [
+    "koliko-dni-po-dezju-rastejo-gobe",
+    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
+    "zakaj-sosed-vedno-najde-gobe"
+  ],
   "zakaj-sosed-vedno-najde-gobe": [
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
     "koliko-dni-po-dezju-rastejo-gobe",
@@ -6,7 +11,7 @@
   ],
   "koliko-dni-po-dezju-rastejo-gobe": [
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
-    "trije-vali-gob-po-dezju-0911",
+    "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni",
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
   ],
   "gobarska-sezona-julij-2026-kje-nabirati": [
@@ -21,8 +26,8 @@
   ],
   "vpliv-lune-na-rast-gob-0921": [
     "trije-vali-gob-po-dezju-0911",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822"
+    "zakaj-sosed-vedno-najde-gobe",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
     "gobarska-sezona-julij-2026-kje-nabirati",
@@ -36,8 +41,8 @@
   ],
   "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009": [
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
-    "trije-vali-gob-po-dezju-0911",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+    "koliko-dni-po-dezju-rastejo-gobe",
+    "trije-vali-gob-po-dezju-0911"
   ],
   "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007": [
     "koliko-dni-po-dezju-rastejo-gobe",
@@ -196,8 +201,8 @@
   ],
   "koliko-dezja-je-padlo-ponoci-in-koliko-ga-se-bo-0821": [
     "padlo-je-16-2-mm-kdo-je-zadel-in-kaj-so-dobila-tla-0818",
-    "nocni-naliv-v-recici-60-mm-dezja-0808",
-    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817"
+    "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
+    "nocni-naliv-v-recici-60-mm-dezja-0808"
   ],
   "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
@@ -330,8 +335,8 @@
     "koliko-je-letos-dezevalo-v-recici-ob-savinji-0808"
   ],
   "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730": [
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
     "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816",
+    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
     "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714"
   ],
   "letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730": [
