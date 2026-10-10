@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Fri, 09 Oct 2026 17:39:03 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 10 Oct 2026 06:47:54 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Zakaj vaš sosed vedno najde gobe, vi pa ne?</title>
+      <link>https://meteorec.si/blog/zakaj-sosed-vedno-najde-gobe.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-sosed-vedno-najde-gobe.html</guid>
+      <pubDate>Sat, 10 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Pet stvari, ki jih dobri gobarji upoštevajo: zamik po dežju, višina, podlaga, temperatura in več lokacij. S štirimi interaktivnimi grafi iz gobarskega modela.</description>
+      <category>gobe</category>
+      <category>gobarski-indeks</category>
+      <category>nasveti</category>
+      <category>zgornja savinjska dolina</category>
+    </item>
     <item>
       <title>Koliko dni po dežju rastejo gobe? Podatki po vrstah</title>
       <link>https://meteorec.si/blog/koliko-dni-po-dezju-rastejo-gobe.html</link>
