@@ -60,6 +60,8 @@ nespremenjena od objave (najdeno pri GEO pregledu, popravljeno 2. 9. 2026).
 
 ## Objava člankov
 
+- **Pred pisanjem ali urejanjem besedila (članek, FB/IG, kartica, odgovor na komentar) preberi `docs/slog-pisanja.md`** in upoštevaj razdelek »Preverjanje pred objavo«: naslov ≤ 60 znakov, zapis ure in števk po Pravopisu, vejice, anglicizmi, napoved cela števila / meritev z decimalko. Filipove popravke dodaj v seznam napak v vodniku.
+
 - Vse izpeljane datoteke (blog.json, blog/index.html, sitemap.xml,
   blog/rss.xml, blog/tema/*, blog/related.json, OG slika) ureja
   `wire_all()` iz `tools/generate_monthly_post.py` — nikoli ročno.
