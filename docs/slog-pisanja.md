@@ -14,7 +14,7 @@ Osnutek, 10. 10. 2026. Pravila z oznako **[potrdi]** sem sklepal iz Filipovih po
 
 - **Naslov do 60 znakov** (Google odreže, glej `seo_title()`), brez dvopičja, če gre brez. Najbolje deluje relatabilen prizor ali konkretna številka (»Zakaj vaš sosed vedno najde gobe, vi pa ne?«, »8–16 dni«). Ne uporabljamo vabljivih naslovov, ki jih besedilo ne izpolni.
 - **Uvod: odgovor ali prizor v prvih dveh stavkih.** Če je mogoče, s konkretno številko. Po podatkih strani so objave z napisanim uvodom in številko prinesle večino dosega.
-- **Kratek odgovor najprej** (»Kratek odgovor: pol res.«), nato razlaga in grafi.
+- **Kratek odgovor najprej** (»Kratek odgovor: deloma drži.«), nato razlaga in grafi.
 - **Odstavki do 4 stavkov.** Seznam, kadar so 3 ali več vzporednih stvari. Razdelki z oznako (`section-label`) in naslovom, ki je sam po sebi odgovor.
 - **Konec: kaj naj bralec naredi** (povezava na napoved, kalkulator, vpis opažanja), ne povzetek.
 
