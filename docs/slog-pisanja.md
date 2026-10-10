@@ -67,7 +67,7 @@ Osnutek, 10. 10. 2026. Pravila z oznako **[potrdi]** sem sklepal iz Filipovih po
 
 ## 6. Slovnica: mesta, kjer se najpogosteje zmotim
 
-Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba razlikujejo.
+Preverjeno v Slovenskem pravopisu (2001): števniki »dva dni«, »kljub« z dajalnikom, vejica pred »in«, zapis ure, pomišljaj, decimalna vejica (viri na koncu). Z oznako **[potrdi]** ostajajo pravila, ki jih v Pravopisu nisem našel ali kjer se norma in raba razlikujeta.
 
 **Števniki in samostalniki** (najpogostejša past):
 
