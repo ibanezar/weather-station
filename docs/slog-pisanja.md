@@ -93,15 +93,13 @@ Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba 
 
 **Besedni red:**
 
-- **Naslonski členki** (se, si, je, bi, ga, mu, mi, vam) so na **drugem mestu** v stavku: »Zjutraj se je pokazala«, »Včeraj mi je rekel«. Ne: »Zjutraj je se pokazala«. Stavek se ne začne z naslonskim členkom.
-- **Vrstni red členkov:** bi → je/so → se/si → ga/jo/jih: »Rad bi se ga spomnil«.
-- **Povedek na koncu** je pogosto zvenel kot knjižna nemščina. Raje: »Odločilo se je pred tedni« kot »Pred tedni se je odločilo«.
+- **Naslonski členki** (se, si, je, bi, ga, mu, mi, vam) so na **drugem mestu** v stavku: »Zjutraj se je pokazala«, »Včeraj mi je rekel«. Stavek se ne začne z naslonskim členkom. Pri več členkih skupaj (»bi se ga«) vrstnega reda sam ne uganjujem, ampak ga preveri lektor.
 
 **Ločila:**
 
 - **Vejica pred**: ki, ker, da, ko, če, kjer, čeprav, vendar, a, torej, namreč, saj, zato ker.
 - **Vrinjeni stavek** ima vejico na obeh straneh: »Goba, ki je danes velika, je začela nastajati dni prej.«
-- **Pred »in« vejice ne pišemo**, razen če povezuje dva stavka z različnim osebkom. **[potrdi]**
+- **Pred »in« vejice navadno ne pišemo.** Če so členki v daljšem stavku nejasni, stavek raje razbijte.
 - **»tako … kot«, »ne le … ampak tudi«**: brez vejice pred »kot«, vejica pred »ampak«.
 - **Dvopičje** za naštevanje ali razlago, **pomišljaj** za premor (»Drži – a ne popolnoma.«).
 
@@ -114,9 +112,8 @@ Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba 
 
 **Pridevniki in kazalni zaimki:**
 
-- **»ta« / »ta isti«:** ne »ta isti dan« po nepotrebnem. Raje »isti dan«.
 - **Svojilni zaimek:** »svoj« ob osebku (»gobar najde svoje mesto«), »njegov« za drugega (»sosed in njegova košara«).
-- **Stopnjevanje:** »bolj suh« (ne »suhejši« v pisanem jeziku, razen »suhejši« kot sodobna raba; **[potrdi]**), »najsuhši«.
+- **Stopnjevanje:** »suh, suhejši (ali bolj suh), najsuhši«; kjer sem negotov, pišem opisno (»manj dežja«). **[potrdi]**
 
 **Pogoste napake v zadnjih besedilih:**
 
