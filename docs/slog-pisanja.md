@@ -32,12 +32,12 @@ Osnutek, 10. 10. 2026. Pravila z oznako **[potrdi]** sem sklepal iz Filipovih po
 | Stvar | Pravilo | Primer |
 |---|---|---|
 | Narekovaji | slovenski »…« | »zraste čez noč« |
-| Pomišljaj | en pomišljaj (–) z razmaki med besedama, brez razmakov med številkama | gobe – torej – rastejo; 8–16 dni |
+| Pomišljaj | med besedama z razmaki (SP § 381), »od … do« stično brez razmakov (SP § 394), negativna temperatura stično (SP § 397) | gobe – torej – rastejo; 8–16 dni; v letih 2021–2026; –3 °C |
 | Vezaj | samo v sestavljenih besedah | hmeljsko-pivovarski |
 | Decimalna vejica | vedno vejica | 26,6 mm; 12,0 °C |
 | Enote | presledek pred enoto | 26,6 mm; 13 °C; 366 m |
 | Datum | »10. oktobra 2026«; v tabelah »10. 10.« | 9. 10. |
-| Ura | 7.30 ali 7:30, dosledno v eni objavi | **[potrdi]** |
+| Ura | pika med uro in minutami (SP § 255); cela ura »ob 8. uri«; dvopičje samo za digitalni prikaz (SP § 370) | ob 7.30; ob 8. uri |
 | Odstotek | presledek: 14 % | 82 % |
 | Naslovi | samo prva beseda z veliko | »Kaj je odločilo: tri tedne vremena« |
 | Latinska imena | poševno, v oklepaju ob prvi omembi | jurček (*Boletus edulis*) |
@@ -79,7 +79,7 @@ Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba 
 | 5 in več | množina, **rodilnik** | 5 gob, 18 kosov, 26 dni |
 | z enoto | rodilnik snovi | 26,6 mm **dežja**, 20 mm padavin |
 
-- Pri številkah v besedilu zapisujemo **»2 dni«**, v celoti pa »dva dneva«. **[potrdi]**
+- Pri številkah v besedilu zapisujemo **»2 dni«**, v celoti »dva dni« ali »dva dneva«. Pravopis v iztočnici *dan* navaja »čez dva dni«, v iztočnici *odrejati* »dva dneva«, torej sta obe obliki pravilni (Fran, Slovenski pravopis).
 - »Pol dneva«, »pol ure«, »poldrugi dan«: ne »0,5 dneva«.
 - Število in količina z rodilnikom: »veliko dežja«, »malo gob«, »nekaj dni«.
 
@@ -87,7 +87,7 @@ Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba 
 
 - **po + mestnik:** »po dežju«, »po suši«, »po tednu« (ne »po dež«).
 - **zaradi, brez, med, od, do + rodilnik:** »zaradi suše«, »do 9. oktobra«.
-- **kljub + dajalnik** (sodobno tudi rodilnik): »kljub dežju«. **[potrdi]**
+- **kljub + dajalnik:** »kljub dežju«, »kljub vsemu«, »kljub temu da …«. Pravopis ga vodi kot »nepravi predlog z dajalnikom« (Fran, Slovenski pravopis, *kljub*).
 - **v/na:** »v gozdu«, »na Golteh«, »v dolini«, »na postaji«. Kraj, kjer je kaj, mestnik; kam gre, tožilnik (»gre v gozd«).
 - **Zanikanje + rodilnik:** »ni gob«, »ne vidim sledi« (ne »ni gobe«, »ne vidim sled«).
 
@@ -99,7 +99,7 @@ Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba 
 
 - **Vejica pred**: ki, ker, da, ko, če, kjer, čeprav, vendar, a, torej, namreč, saj, zato ker.
 - **Vrinjeni stavek** ima vejico na obeh straneh: »Goba, ki je danes velika, je začela nastajati dni prej.«
-- **Pred »in« vejice navadno ne pišemo.** Če so členki v daljšem stavku nejasni, stavek raje razbijte.
+- **Pred vezalnim »in« vejice ne pišemo** (SP § 316). Pišemo jo, kadar jo zahteva vrinjeni ali vmesni stavek (§ 321: »Povej mi, kje si bil ves ta čas, in pojdi potem hitro na postajo«), in lahko pred »in«, če sta osebka slabo združljiva (»Komaj je zatisnil oči, se je zbudil, in dan je bil.«).
 - **»tako … kot«, »ne le … ampak tudi«**: brez vejice pred »kot«, vejica pred »ampak«.
 - **Dvopičje** za naštevanje ali razlago, **pomišljaj** za premor (»Drži – a ne popolnoma.«).
 
@@ -142,7 +142,13 @@ Pravila z oznako **[potrdi]** so tista, kjer se normativni viri in sodobna raba 
 ## Odprta vprašanja za Filipa
 
 - Vikanje ali tikanje v komentarjih na FB? Zdaj vikam.
-- Ura: »7.30« ali »7:30«?
 - Emoji: kje so za vas še sprejemljivi, kje ne?
 - Kdaj »jaz« in kdaj »mi«? Kaj je Meteorec: oseba (Filip) ali ekipa?
 - Je kakšna beseda, ki je ne želite nikoli videti (npr. »fenomenalno«, »neverjetno«)?
+
+## Viri in kaj sem preveril (10. 10. 2026)
+
+- **Slovenski pravopis 2001, pravila** (PDF, Fran): https://www.fran.si/134/slovenski-pravopis/datoteke/Pravopis_Pravila.pdf — § 255–256 (zapis ure), § 316–321 (vejica pred »in«), § 351 (decimalna vejica), § 370 (dvopičje na digitalnih urah), § 381 (pomišljaj med besedami), § 394 in § 397 (pomišljaj »od … do« in negativna števila).
+- **Iztočnice v Pravopisu:** *kljub* (https://www.fran.si/134/slovenski-pravopis/3752874/kljub), *dan* (https://www.fran.si/134/slovenski-pravopis/3732256/dan).
+- **Jezikovna svetovalnica ZRC SAZU:** strani odgovorov (`svetovalnica.zrc-sazu.si/topic/…`) iz tega okolja ne morem brati (HTTP 403), zato nisem povzemal ničesar iz njih. Iskanje prek Frana (`dictionaryId=151`) vrne samo vprašanja. Zanimivi zapisi za branje: zapis ure (https://svetovalnica.zrc-sazu.si/topic/1490), »kljub visokim letom« (/topic/5512), vejica pred »in« (/topic/2366).
+- **Še ni preverjeno:** presledek pred % in enotami (SI-uzus, v Pravopisu nisem našel pravila), stopnjevanje »suhejši«, »kateri« proti »ki«, zapis latinskih imen.
