@@ -130,7 +130,7 @@ Preverjeno v Slovenskem pravopisu (2001): števniki »dva dni«, »kljub« z daj
 - **Kartica:** največ en naslov in ena grafika, fotografija je glavna. Ne več kot 15–20 besed. Če ima kartica vir, ga navedemo v nogi.
 - **Odgovori na komentarje:** do 3 stavke, najprej priznanje, nato dodatek. Ne prepiramo se. Na vprašanje, na katero ne vemo, odgovorimo »tega ne vemo, preverimo« in preverimo.
 
-## 9. Niša: kako pišejo ARSO in gobarji (10. 10. 2026)
+## 8. Niša: kako pišejo ARSO in gobarji (10. 10. 2026)
 
 Povzetek branja besedil, ne kopija. Namen: uporabljati besede, ki jih bralec že pozna, in ne trditi bolj gotovo kot viri.
 
@@ -140,7 +140,7 @@ Povzetek branja besedil, ne kopija. Namen: uporabljati besede, ki jih bralec že
 - **Kratki stavki v prihodnjiku:** »Zvečer in ponoči bo ponekod rahlo rosilo.« »V nedeljo se bo jasnilo, po nižinah bo dopoldne megleno.«
 - **Kakovost in obseg z besedo, ne z odstotkom:** ponekod, kakšna ploha, po nižinah, na Primorskem; pretežno jasno; megla ali nizka oblačnost; šibka burja.
 - **Časovni izrazi:** zvečer, ponoči, dopoldne, v noči na ponedeljek, jutri, v nedeljo.
-- **Številke v napovedi so cele in v obsegu:** »od 5 do 11«, »do 22 °C«, brez decimalk. Napoved ne lažna natančnost.
+- **Številke v napovedi so cele in v obsegu:** »od 5 do 11«, »do 22 °C«, brez decimalk. Napoved ne kaže lažne natančnosti.
 - **Ura izdaje:** »ob 17h« (Pravopis § 253 dovoljuje obliko »ob 8h«).
 
 *Za Meteorec:* **napoved zaokrožimo na cela števila, meritev (IREICA1) pišemo z decimalko** (26,6 mm; 12,0 °C). To je pošteno do obeh. Ko navajamo uradno ARSO opozorilo, ostane obvezna navedba vira in časa izdaje (15. člen ZDMHS, glej `CLAUDE.md`).
@@ -155,7 +155,7 @@ Povzetek branja besedil, ne kopija. Namen: uporabljati besede, ki jih bralec že
 
 **Kar prevzamemo:** kratke stavke, lokacijske kvalifikatorje (ponekod, po nižinah), podnaslove-vprašanja, besedo »rastišče«. **Česar ne:** neutemeljenih pragov, čustveno obarvanih besed (»ropanje«), trditev brez vira.
 
-## 10. Preverjanje pred objavo
+## 9. Preverjanje pred objavo
 
 1. Naslov ≤ 60 znakov. Opis ≤ 160.
 2. Vsaka številka v besedilu je v grafu, tabeli ali viru.
