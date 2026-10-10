@@ -471,6 +471,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/goba-zraste-cez-noc-odlocilo-se-je-pred-tedni.html</loc>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/goba-zraste-cez-noc-odlocilo-se-je-pred-tedni.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/zakaj-sosed-vedno-najde-gobe.html</loc>
     <lastmod>2026-10-10</lastmod>
     <changefreq>monthly</changefreq>
