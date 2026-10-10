@@ -130,7 +130,32 @@ Preverjeno v Slovenskem pravopisu (2001): števniki »dva dni«, »kljub« z daj
 - **Kartica:** največ en naslov in ena grafika, fotografija je glavna. Ne več kot 15–20 besed. Če ima kartica vir, ga navedemo v nogi.
 - **Odgovori na komentarje:** do 3 stavke, najprej priznanje, nato dodatek. Ne prepiramo se. Na vprašanje, na katero ne vemo, odgovorimo »tega ne vemo, preverimo« in preverimo.
 
-## 8. Preverjanje pred objavo
+## 9. Niša: kako pišejo ARSO in gobarji (10. 10. 2026)
+
+Povzetek branja besedil, ne kopija. Namen: uporabljati besede, ki jih bralec že pozna, in ne trditi bolj gotovo kot viri.
+
+**ARSO (besedilna napoved za Slovenijo, 10. 10. 2026 ob 17h)**
+
+- **Zgradba:** glava (kraj, datum, ura izdaje) → povzetek → podrobna napoved (večer in noč, nato jutri po delih dneva) → obeti → vremenska slika → sosednje pokrajine → vir. Naši članki o napovedi lahko sledijo istemu vrstnemu redu, da bralec ve, kje je kaj.
+- **Kratki stavki v prihodnjiku:** »Zvečer in ponoči bo ponekod rahlo rosilo.« »V nedeljo se bo jasnilo, po nižinah bo dopoldne megleno.«
+- **Kakovost in obseg z besedo, ne z odstotkom:** ponekod, kakšna ploha, po nižinah, na Primorskem; pretežno jasno; megla ali nizka oblačnost; šibka burja.
+- **Časovni izrazi:** zvečer, ponoči, dopoldne, v noči na ponedeljek, jutri, v nedeljo.
+- **Številke v napovedi so cele in v obsegu:** »od 5 do 11«, »do 22 °C«, brez decimalk. Napoved ne lažna natančnost.
+- **Ura izdaje:** »ob 17h« (Pravopis § 253 dovoljuje obliko »ob 8h«).
+
+*Za Meteorec:* **napoved zaokrožimo na cela števila, meritev (IREICA1) pišemo z decimalko** (26,6 mm; 12,0 °C). To je pošteno do obeh. Ko navajamo uradno ARSO opozorilo, ostane obvezna navedba vira in časa izdaje (15. člen ZDMHS, glej `CLAUDE.md`).
+
+**Gobarji in mikologi (n1info, 24ur/STA)**
+
+- **Besede, ki jih bralec pozna:** *gobarska sezona, gobar, rastišče, potencial rasti, samonikle glive, tržno zanimive vrste, zavarovane vrste, količinsko nabiranje, dovolilnice*. V običajnem besedilu »goba«, »gobe«; »glive« v strokovnem ali pravnem okviru.
+- **Slog poročil:** informativen naslov (trditev ali vprašanje), kratek aktualen uvod s časom (»Ob začetku gobarske sezone …«), izjave strokovnjakov kot citati, podnaslovi v obliki vprašanj (»Zakaj ne bi imeli dovolilnic?«).
+- **Kaj strokovnjaki pravijo o razmerah:** suša je glavni omejitveni dejavnik; noči ne smejo biti prehladne; sezona lahko traja do decembra; **tik po dežju v gozd ni priporočljivo** (dež in megla spereta značilnosti klobuka, zato je prepoznavanje težje). To je drug razlog za »počakajte« kot naš zamik rasti, zato ju v člankih ločimo.
+- **Ljudski prag:** v starem poročilu (STA, 2013) predsednik Mikološke zveze Slovenije pravi, da gobe začnejo rasti ob 33 litrih dežja na m² naenkrat; vira članek ne navaja. Pri nas tega **ne navajamo kot dejstvo** (naš model uporablja 25 mm v 7 dneh za jurčka in zalogo vode v 14 dneh). Če bralec to omeni, odgovorimo, da je ljudski prag in da je odvisen od vrste in tal.
+- **Luna:** gobarji pogosto omenjajo polno luno kot spodbudo za rast. Imamo članek o tem (`vpliv-lune-na-rast-gob-0921`); pišemo previdno (»po izkušnjah gobarjev«), ne kot dokazan učinek.
+
+**Kar prevzamemo:** kratke stavke, lokacijske kvalifikatorje (ponekod, po nižinah), podnaslove-vprašanja, besedo »rastišče«. **Česar ne:** neutemeljenih pragov, čustveno obarvanih besed (»ropanje«), trditev brez vira.
+
+## 10. Preverjanje pred objavo
 
 1. Naslov ≤ 60 znakov. Opis ≤ 160.
 2. Vsaka številka v besedilu je v grafu, tabeli ali viru.
@@ -152,3 +177,5 @@ Preverjeno v Slovenskem pravopisu (2001): števniki »dva dni«, »kljub« z daj
 - **Iztočnice v Pravopisu:** *kljub* (https://www.fran.si/134/slovenski-pravopis/3752874/kljub), *dan* (https://www.fran.si/134/slovenski-pravopis/3732256/dan).
 - **Jezikovna svetovalnica ZRC SAZU:** strani odgovorov (`svetovalnica.zrc-sazu.si/topic/…`) iz tega okolja ne morem brati (HTTP 403), zato nisem povzemal ničesar iz njih. Iskanje prek Frana (`dictionaryId=151`) vrne samo vprašanja. Zanimivi zapisi za branje: zapis ure (https://svetovalnica.zrc-sazu.si/topic/1490), »kljub visokim letom« (/topic/5512), vejica pred »in« (/topic/2366).
 - **Še ni preverjeno:** presledek pred % in enotami (SI-uzus, v Pravopisu nisem našel pravila), stopnjevanje »suhejši«, »kateri« proti »ki«, zapis latinskih imen.
+- **ARSO besedilna napoved:** https://meteo.arso.gov.si/uploads/probase/www/fproduct/text/sl/fcast_si_text.html (prebrano 10. 10. 2026).
+- **Gobarji:** https://n1info.si/novice/slovenija/bliza-se-glavna-sezona-gobarjenja-na-kaj-ob-tem-opozarja-strokovnjakinja/ (Metka Bertoncelj, Gobarsko mikološko društvo Ljubljana) in https://www.24ur.com/ne-najdete-gob-doslej-gre-za-eno-najslabsih-gobarskih-sezon.html (STA, 15. 9. 2013, Mikološka zveza Slovenije).
