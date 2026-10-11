@@ -1,0 +1,267 @@
+{
+ "generated": "2026-10-11",
+ "cutoff": "10-10",
+ "last_year": 2026,
+ "place": "Slovenija (iNaturalist place 8228)",
+ "taxa": {
+  "halys": 81923,
+  "penta": 47742,
+  "insecta": 47158
+ },
+ "autumn_window": [
+  "09-15",
+  "10-10"
+ ],
+ "ytd": {
+  "2018": {
+   "halys": 2,
+   "penta": 18,
+   "insecta": 1066,
+   "vse": 5439
+  },
+  "2019": {
+   "halys": 3,
+   "penta": 43,
+   "insecta": 1707,
+   "vse": 8659
+  },
+  "2020": {
+   "halys": 6,
+   "penta": 88,
+   "insecta": 3629,
+   "vse": 14353
+  },
+  "2021": {
+   "halys": 19,
+   "penta": 108,
+   "insecta": 4858,
+   "vse": 20739
+  },
+  "2022": {
+   "halys": 16,
+   "penta": 169,
+   "insecta": 7151,
+   "vse": 30352
+  },
+  "2023": {
+   "halys": 41,
+   "penta": 186,
+   "insecta": 7951,
+   "vse": 42001
+  },
+  "2024": {
+   "halys": 49,
+   "penta": 210,
+   "insecta": 13501,
+   "vse": 54690
+  },
+  "2025": {
+   "halys": 37,
+   "penta": 295,
+   "insecta": 13883,
+   "vse": 60362
+  },
+  "2026": {
+   "halys": 50,
+   "penta": 415,
+   "insecta": 17805,
+   "vse": 74247
+  }
+ },
+ "autumn": {
+  "2018": {
+   "halys": 1,
+   "penta": 3,
+   "insecta": 48,
+   "halys_observers": 1
+  },
+  "2019": {
+   "halys": 2,
+   "penta": 8,
+   "insecta": 161,
+   "halys_observers": 2
+  },
+  "2020": {
+   "halys": 2,
+   "penta": 11,
+   "insecta": 213,
+   "halys_observers": 2
+  },
+  "2021": {
+   "halys": 2,
+   "penta": 7,
+   "insecta": 188,
+   "halys_observers": 2
+  },
+  "2022": {
+   "halys": 6,
+   "penta": 29,
+   "insecta": 443,
+   "halys_observers": 5
+  },
+  "2023": {
+   "halys": 3,
+   "penta": 31,
+   "insecta": 490,
+   "halys_observers": 3
+  },
+  "2024": {
+   "halys": 8,
+   "penta": 29,
+   "insecta": 905,
+   "halys_observers": 6
+  },
+  "2025": {
+   "halys": 8,
+   "penta": 42,
+   "insecta": 787,
+   "halys_observers": 7
+  },
+  "2026": {
+   "halys": 15,
+   "penta": 39,
+   "insecta": 537,
+   "halys_observers": 7
+  }
+ },
+ "month": {
+  "halys": [
+   8,
+   6,
+   11,
+   11,
+   16,
+   18,
+   37,
+   43,
+   45,
+   52,
+   8,
+   8
+  ],
+  "penta": [
+   13,
+   14,
+   19,
+   86,
+   177,
+   230,
+   375,
+   304,
+   276,
+   132,
+   24,
+   15
+  ],
+  "ostali": [
+   5,
+   8,
+   8,
+   75,
+   161,
+   212,
+   338,
+   261,
+   231,
+   80,
+   16,
+   7
+  ]
+ },
+ "weather": {
+  "window": [
+   "10-01",
+   "11-05"
+  ],
+  "n_obs_halys": 49,
+  "n_obs_ostali": 64,
+  "thr": {
+   "15": {
+    "hladno": {
+     "dni": 64,
+     "halys": 5,
+     "ostali": 16
+    },
+    "toplo": {
+     "dni": 162,
+     "halys": 44,
+     "ostali": 48
+    },
+    "rr_halys": {
+     "rr": 3.476543209876543,
+     "lo": 1.3785555640851825,
+     "hi": 8.76740336408513
+    },
+    "rr_ostali": {
+     "rr": 1.1851851851851851,
+     "lo": 0.673071154887317,
+     "hi": 2.0869471421897514
+    }
+   },
+   "18": {
+    "hladno": {
+     "dni": 120,
+     "halys": 17,
+     "ostali": 35
+    },
+    "toplo": {
+     "dni": 106,
+     "halys": 32,
+     "ostali": 29
+    },
+    "rr_halys": {
+     "rr": 2.130965593784684,
+     "lo": 1.183333032240677,
+     "hi": 3.837477901969458
+    },
+    "rr_ostali": {
+     "rr": 0.9380053908355794,
+     "lo": 0.5734025937060067,
+     "hi": 1.5344439018839258
+    }
+   }
+  },
+  "n_days": 226
+ },
+ "station_years": {
+  "2020": {
+   "gdd": 1203,
+   "poletje": 19.2,
+   "jesen_tmax": 20.3
+  },
+  "2021": {
+   "gdd": 1218,
+   "poletje": 20.1,
+   "jesen_tmax": 19.8
+  },
+  "2022": {
+   "gdd": 1401,
+   "poletje": 21.0,
+   "jesen_tmax": 18.5
+  },
+  "2023": {
+   "gdd": 1328,
+   "poletje": 20.0,
+   "jesen_tmax": 23.5
+  },
+  "2024": {
+   "gdd": 1525,
+   "poletje": 21.3,
+   "jesen_tmax": 18.8
+  },
+  "2025": {
+   "gdd": 1412,
+   "poletje": 20.5,
+   "jesen_tmax": 19.2
+  },
+  "2026": {
+   "gdd": 1528,
+   "poletje": 21.5,
+   "jesen_tmax": 21.7
+  }
+ },
+ "spearman_gdd_halys_autumn": {
+  "n": 7,
+  "rho": 0.32142857142857145
+ }
+}
