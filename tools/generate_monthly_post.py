@@ -426,6 +426,15 @@ def core_sitemap_entries():
     return entries
 
 
+def thumb_src(slug):
+    """Sličica na seznamu: kvadratna izbira iz og/thumb/<slug>.jpg, če obstaja
+    (OG slika je 1200x630 z besedilom, ob kvadratnem izrezu pa besedilo ostane
+    odrezano); sicer OG slika."""
+    if os.path.exists(os.path.join(ROOT, "og", "thumb", f"{slug}.jpg")):
+        return f"/og/thumb/{slug}.jpg"
+    return f"/og/{slug}.jpg"
+
+
 def rewrite_sitemap_and_index(posts):
     # sitemap.xml — pregeneriraj iz fiksnih vnosov + objav (lastmod = zadnja sprememba)
     # image: samo za strani z resnično lastno (ne generično) sliko -- domača
@@ -469,7 +478,7 @@ def rewrite_sitemap_and_index(posts):
         # jo odkrije šele po layoutu in LCP zato zamakne. Ostale ostanejo lazy.
         ld = ('loading="eager" fetchpriority="high"' if i == 0 else 'loading="lazy"')
         return (f'    <li>\n      <a class="post-card" href="{p["slug"]}.html">\n'
-                f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{alt}" width="260" height="260" {ld}>\n'
+                f'        <img class="post-thumb" src="{thumb_src(p["slug"])}" alt="{alt}" width="260" height="260" {ld}>\n'
                 f'        <div class="post-card-body">\n'
                 f'          <div class="date">{date_html}</div>\n'
                 f'          <h2>{p["title"]}</h2>\n          <p>{p["summary"]}</p>\n'
@@ -737,7 +746,7 @@ def build_tag_pages(posts):
         plist = sorted(plist, key=lambda p: p.get("updated") or p["date"], reverse=True)
         cards = "\n".join(
             f'    <li>\n      <a class="post-card" href="/blog/{p["slug"]}.html">\n'
-            f'        <img class="post-thumb" src="/og/{p["slug"]}.jpg" alt="{p["title"].replace(chr(34), "&quot;")}" width="260" height="260" '
+            f'        <img class="post-thumb" src="{thumb_src(p["slug"])}" alt="{p["title"].replace(chr(34), "&quot;")}" width="260" height="260" '
             f'{"loading=" + chr(34) + "eager" + chr(34) + " fetchpriority=" + chr(34) + "high" + chr(34) if _i == 0 else "loading=" + chr(34) + "lazy" + chr(34)}>\n'
             f'        <div class="post-card-body">\n'
             f'          <div class="date">{fmtdate(p["date"])}</div>\n'
