@@ -98,6 +98,14 @@ Modelu je meja 60 znakov povedana že v pozivu (`generate_daily_post.py` in
 `generate_daily_proposals.py`), tako da so naslovi praviloma dovolj kratki že
 ob nastanku; `seo_title()` je varovalka za ostalo.
 
+### Uporaba vsebine s strani tretjih (12. 10. 2026)
+
+NaDlani.si je 10. 10. 2026 objavil članek z grafi, ki prevzemajo naše parametre (okna zamikov, temperaturni
+trapezi po vrstah; koda je napisana na novo), kot vir pa navedel »Meteorec, Facebook« brez povezave. Zato imajo
+ročni gobarski članki pod besedilom vrstico »Uporaba vsebine« (povzemanje samo z navedbo avtorja in povezavo,
+za prepis ali vdelavo grafov vprašajte). **Nov ročni analitični članek jo dobi tudi.** Samodejni generatorji je
+nimajo. Dokaz o prvenstvu: datum objave v `blog.json` in git zgodovina.
+
 ## Objava na Facebook in Instagram
 
 Vsak nov članek, ki ga `wire_all()` zapiše v `blog.json`, se samodejno objavi

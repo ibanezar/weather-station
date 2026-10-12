@@ -478,6 +478,13 @@
     <image:image><image:loc>https://meteorec.si/og/smrdljivci-inaturalist-vreme-1011.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zakaj-gobe-rastejo-do-meje-megle.html</loc>
+    <lastmod>2026-10-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-gobe-rastejo-do-meje-megle.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/goba-zraste-cez-noc-odlocilo-se-je-pred-tedni.html</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
@@ -1465,6 +1472,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/klima/</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/megla/</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
