@@ -2331,11 +2331,6 @@
   }
  },
  "snow_ljubljana": {
-  "1995": {
-   "days": 80,
-   "longest": 80,
-   "max_cm": 36.1
-  },
   "1996": {
    "days": 69,
    "longest": 50,
@@ -2568,6 +2563,15 @@
     "01": -0.01,
     "02": 5.17
    }
+  }
+ },
+ "snow_ljubljana_partial": {
+  "1995": {
+   "days": 80,
+   "longest": 80,
+   "max_cm": 36.1,
+   "from": "1996-01-01",
+   "depth_first_cm": 36.1
   }
  },
  "crnivec": {

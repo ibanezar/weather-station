@@ -15,6 +15,9 @@ Zima = december–februar (zima 2012/13 ima oznako 2012); zima velja, če ima �
 temperatur. Snežna odeja: GHCN za Ljubljano hrani SAMO dneve z odejo (ničle ni), zato je dan
 brez zapisa v zimi, ki ima kje v sezoni (1. 11.–31. 3.) vsaj en zapis, dan brez odeje; zimi
 brez katerega koli zapisa (2004/05) ne štejemo (ni podatka ali odeje ni bilo — ne vemo).
+Preverjeno 12. 10. 2026: odeja se v zapisih skoraj vedno konča pri 1–3 cm (postopno kopnenje), luknje
+1–2 dni sredi odeje ≥ 5 cm so štiri v 30 letih — izpuščene so ničle, ne podatki. Zapisi se začnejo
+1. 1. 1996 (že 36 cm), zato je zima 1995/96 okrnjena in gre samo v `snow_ljubljana_partial`.
 
 Usage: python3 tools/study_zime.py [--cache DIR]
 """
@@ -41,7 +44,10 @@ def fetch(sid, cache):
     return path
 
 
-def read(path, el):
+def read(path, el, qc=False):
+    """Dnevne vrednosti elementa. qc=True izpusti vrednosti z zastavico kakovosti (Q, npr. O = osamelec, G = vrzel) —
+    samo za snežno odejo (poletni zapisi 1–5 cm, 128 cm aprila). Pri temperaturah ne: GHCN kot osamelce označi tudi
+    resnične ekstreme (februar 1929), brez njih bi zima 1928/29 izpadla."""
     out = {}
     for l in open(path):
         if l[17:21] != el:
@@ -49,10 +55,10 @@ def read(path, el):
         y, m = int(l[11:15]), int(l[15:17])
         for i in range(31):
             v = int(l[21 + 8 * i:26 + 8 * i])
-            if v == -9999:
+            if v == -9999 or (qc and l[27 + 8 * i] != " "):
                 continue
             try:
-                out[datetime.date(y, m, i + 1).isoformat()] = v / 10 if el != "SNWD" else v / 10
+                out[datetime.date(y, m, i + 1).isoformat()] = v / 10      # °C ali cm (GHCN: desetinke °C, mm)
             except ValueError:
                 pass
     return out
@@ -138,8 +144,13 @@ def main():
         w = {y: s for y in range(1900, 2026) if (s := winter_stats(tx, tn, y))}
         D["stations"][key] = {"id": sid, "name": name, "elev_m": elev, "winters": w}
         if key == "ljubljana":
-            sn = read(p, "SNWD")
-            D["snow_ljubljana"] = {y: s for y in range(1990, 2026) if (s := snow_stats(sn, y))}
+            sn = read(p, "SNWD", qc=True)
+            first = min(sn)                    # prvi zapis odeje (1996-01-01): zima, ki se začne prej, je okrnjena
+            D["snow_ljubljana"] = {y: s for y in range(1990, 2026)
+                                   if datetime.date(y, 11, 1).isoformat() >= first[:8] + "01" and (s := snow_stats(sn, y))}
+            w0 = int(first[:4]) - 1
+            part = snow_stats(sn, w0)
+            D["snow_ljubljana_partial"] = {w0: part | {"from": first, "depth_first_cm": sn[first]}} if part else {}
     D["own"] = own_station()
     D["crnivec"] = crnivec()
     json.dump(D, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
