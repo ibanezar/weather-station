@@ -1237,6 +1237,35 @@ kodo v stavek (ne podvajaj pragov). `/trendi/` kaže zanesljivostni diagram
 **Kazalnika zaupanja iz razhajanja modelov ni** (`tools/ai/eval_confidence.py`: Spearman
 0,04–0,19, pri Tmin D+1 in D+3 brez učinka) — semafor, ki ne napove napake, bi bil laž.
 
+### WeatherNext 3 kot vhod za razširitev MTR (zajem, 12. 10. 2026)
+
+Filip ima od 12. 10. 2026 odobren dostop do WeatherNext (WN3, 5 km, postajna glava). **Zajem je napisan,
+v učenje in napoved MTR še NI vezan** — najprej mora nabrati dovolj dni, nato walk-forward (kot `--multi-tmax`:
+vklop samo, če izboljša, ločeno za Tmax in Tmin).
+
+- `tools/fetch_wn3.py` → `data/wn3-archive.csv` (samo dodaja; shema `forecast-archive.csv` + `init_at`, celica).
+  Test brez omrežja in poverilnic: `tools/test_wn3.py` (v `parity.yml`, 10 mutacij v `mutation_check.py`).
+  Omrežni del (`open_init()`, `make_reader()`) testa NIMA — preizkušen je bil le ročno v Cloud Shellu.
+- **Vir je Zarr, ne BigQuery.** Tabela 0,05° v BigQuery je razvrščena po geografiji, a poizvedba za eno točko
+  javi ~1,03 TB (`bq --maximum_bytes_billed` jo je zavrnil, brez stroška); `ST_DWITHIN` branja ne zmanjša.
+  Zarr (`gs://weathernext3_statistics_spatial/weathernext_3_0_0_statistics/zarr/`, brez Requester Pays) ima
+  kos = ena ura za CELOTNO mrežo (`chunks=(1,3601,7200)`, 78 MB), torej en dan ≈ 24 kosov ≈ 1,9 GB.
+  **Enojni dolgi prenos se v Cloud Shellu zatika** (`gcloud storage cp` obstal pri 42 in 67 MB); branje po
+  kosih 8 MB z ponovnimi poskusi je prineslo 78 MB v 11 s. Vsako branje ima zato časovno omejitev in retry.
+- **Zgodovine je malo.** Vedro ima `2026_to_present/` od 1. 1. 2026 (urne inicializacije) in `2024/`
+  (`6hr_inits.zarr`); **`2025/` manjka** (vodnik: »currently being backfilled«). 2024 je najverjetneje v učnem
+  vzorcu modela (WN2 je učen do 2024) — **ne uči se na njem, dokler učno obdobje WN3 ni potrjeno.**
+  Občasno poglej `gcloud storage ls …/zarr/`, ali se je `2025/` pojavil.
+- **Dan = lokalni dan (Europe/Ljubljana)**, ob prehodu ure 23/25 ur (dan z manjkajočo uro se zavrže).
+  `issued_at` = datum, ko je napoved DOSTOPNA (init + 7 h; GCS objavi ~6 h 50 min po inicializaciji), da je
+  `lead_days` primerljiv z drugimi viri. Privzeta inicializacija je **18 UTC** (6-urna, horizont 360 h; jutranji
+  tek MTR je ob zamudi crona ne ujame pred objavo). Tmax/Tmin sta ekstrema urnega povprečja ansambla.
+- Celica `46,35 N, 14,90 E` je ~3 km od postaje (mreža 0,05°) — zapisana je v vsaki vrstici.
+- Tek v GitHub Actions rabi service account z dostopom do vedra (dostop je vezen na odobritev, ne na
+  poljuben račun) — **workflow še ne obstaja.** Ko ga dodaš: pred zajemom preveri, da račun vedro sploh vidi.
+- Pogoji: podatki, mlajši od 1 h ali prihodnji, so pod GDM Real-Time Terms of Use (ne CC BY). Preberi jih,
+  preden napoved WN3 kjerkoli OBJAVIŠ (zajem sam za učenje je interen).
+
 ### Kartica MTR na naslovni strani je GRAFIČNA, ne tabela
 
 Zavihek `#tab-mtr` je bil do 13. 9. 2026 seznam številk v vrsticah in je bil

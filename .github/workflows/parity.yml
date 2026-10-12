@@ -88,11 +88,12 @@ jobs:
       - name: Test sezonskega vodiča in uvrstitve meseca
         run: python3 tools/test_sezona.py
 
-      - name: Test napovedi MTR (verjetnost zmrzali, režim noči), urnega zajema in ansamblov
+      - name: Test napovedi MTR (verjetnost zmrzali, režim noči), urnega zajema, ansamblov in zajema WN3
         run: |
           python3 tools/test_mtr_extras.py
           python3 tools/test_hourly_log.py
           python3 tools/test_ensemble_log.py
+          python3 tools/test_wn3.py
 
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py

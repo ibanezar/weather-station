@@ -96,6 +96,17 @@ MUTACIJE = [
     ("zasebnost: dnevni članek", "tools/generate_daily_post.py", 'current["data"].pop("indoor", None)', "pass", "test_privacy.py"),
     ("zasebnost: zmrzal", "tools/calculate_frost_risk.py", 'current["data"].pop("indoor", None)', "pass", "test_privacy.py"),
     ("zasebnost: korenska kopija članka", "generate_daily_post.py", 'current["data"].pop("indoor", None)', "pass", "test_privacy.py"),
+    # ── zajem WeatherNext 3 (test_wn3.py) ─────────────────────────────────────
+    ("WN3: zamik objave (00 UTC še ni na voljo ob 6:00)", "tools/fetch_wn3.py", "PUBLISH_DELAY_H = 7 ", "PUBLISH_DELAY_H = 6 ", "test_wn3.py"),
+    ("WN3: horizont 6-urnih inicializacij", "tools/fetch_wn3.py", "MAX_LEAD_H = 360 ", "MAX_LEAD_H = 400 ", "test_wn3.py"),
+    ("WN3: privzeta inicializacija", "tools/fetch_wn3.py", "INIT_HOUR = 18 ", "INIT_HOUR = 12 ", "test_wn3.py"),
+    ("WN3: lead 0 ni napoved", "tools/fetch_wn3.py", "if lead_h < 1 or", "if lead_h < 0 or", "test_wn3.py"),
+    ("WN3: lokalni dan (25 ur)", "tools/fetch_wn3.py", "    while t < t_end:", "    while t <= t_end:", "test_wn3.py"),
+    ("WN3: K -> °C", "tools/fetch_wn3.py", "round(max(vals) - 273.15, 1)", "round(max(vals) - 273.0, 1)", "test_wn3.py"),
+    ("WN3: najvišja različica mape", "tools/fetch_wn3.py", "int(mid) > best[0]", "int(mid) < best[0]", "test_wn3.py"),
+    ("WN3: dolžine 0..360", "tools/fetch_wn3.py", "return lon % 360", "return lon % 359", "test_wn3.py"),
+    ("WN3: arhiv ne prepisuje", "tools/fetch_wn3.py", 'new = [r for r in rows if (r["init_at"], r["valid_at"]) not in seen]', "new = list(rows)", "test_wn3.py"),
+    ("WN3: že zajeto se preskoči v načrtu", "tools/fetch_wn3.py", ") not in existing:", ") not in set():", "test_wn3.py"),
 ]
 
 
