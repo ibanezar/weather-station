@@ -8,6 +8,7 @@ Viri:
   * NOAA GHCN-Daily (ECA&D/ARSO podatki): Ljubljana Bežigrad (SIM00014015, 299 m, od 1901),
     Šmartno pri Slovenj Gradcu (SIE00115136, 444 m, od 1961) — dnevni TMAX/TMIN; za Ljubljano
     še SNWD (višina snežne odeje, cm).
+  * ARSO Črnivec (848 m, od 2021): snežna odeja iz data/crnivec-arso.json (predpomnilnik crnivec.si).
   * lastna postaja IREICA1 (history.json, od novembra 2019). Notranjih meritev ne bere.
 
 Zima = december–februar (zima 2012/13 ima oznako 2012); zima velja, če ima ≥ 95 % dni obeh
@@ -75,7 +76,8 @@ def winter_stats(tx, tn, w):
         return None
     return {"tmean": round(st.mean((tx[x] + tn[x]) / 2 for x in ok), 2),
             "frost": sum(tn[x] < 0 for x in ok), "ice": sum(tx[x] < 0 for x in ok),
-            "hard": sum(tn[x] <= -10 for x in ok), "n": len(ok)}
+            "hard": sum(tn[x] <= -10 for x in ok), "mild": sum(tx[x] >= 5 for x in ok), "n": len(ok),
+            "months": {m: round(st.mean((tx[x] + tn[x]) / 2 for x in ok if x[5:7] == m), 2) for m in ("12", "01", "02")}}
 
 
 def snow_stats(sn, w):
@@ -104,6 +106,29 @@ def own_station():
     return out
 
 
+def crnivec():
+    """ARSO Črnivec (id 3391, 848 m, od 2021) iz predpomnilnika crnivec.si (data/crnivec-arso.json):
+    dnevi s snežno odejo od 1. 11. do 31. 3. po sezonah; samo cele sezone."""
+    c = json.load(open(os.path.join(ROOT, "data", "crnivec-arso.json"), encoding="utf-8"))
+    out = {}
+    for d, depth, new, _ in c["days"]:
+        dt = datetime.date.fromisoformat(d)
+        if not (dt.month >= 11 or dt.month <= 3):
+            continue
+        w = dt.year if dt.month >= 11 else dt.year - 1
+        s = out.setdefault(w, {"n": 0, "days": 0, "longest": 0, "max_cm": 0, "new_cm": 0, "_run": 0})
+        s["n"] += 1
+        if depth:
+            s["days"] += 1
+            s["_run"] += 1
+            s["longest"] = max(s["longest"], s["_run"])
+            s["max_cm"] = max(s["max_cm"], depth)
+        else:
+            s["_run"] = 0
+        s["new_cm"] += new or 0
+    return {w: {k: v for k, v in s.items() if k != "_run"} for w, s in out.items() if s["n"] >= 150}
+
+
 def main():
     cache = sys.argv[sys.argv.index("--cache") + 1] if "--cache" in sys.argv else "/tmp"
     D = {"generated": datetime.date.today().isoformat(), "stations": {}, "snow_ljubljana": {}, "own": {}}
@@ -116,6 +141,7 @@ def main():
             sn = read(p, "SNWD")
             D["snow_ljubljana"] = {y: s for y in range(1990, 2026) if (s := snow_stats(sn, y))}
     D["own"] = own_station()
+    D["crnivec"] = crnivec()
     json.dump(D, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print("zapisano", OUT)
 
