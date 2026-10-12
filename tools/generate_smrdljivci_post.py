@@ -460,7 +460,7 @@ def build_article(D):
         "Popolne rešitve ni. Strokovnjaki Biotehniške fakultete marmorirano smrdljivko opisujejo kot trdovratnega škodljivca, "
         "ki ga je težko učinkovito obvladovati tudi s fitofarmacevtskimi sredstvi.",
         "Realističen cilj je zato zmanjšati število smrdljivk v hiši in na vrtu, ne pa pričakovati, da bomo vrsto iz okolja "
-        "iztrebili. V nadaljevanju povzemam priporočila iz navedenih virov. Podatkov o učinkovitosti posameznih ukrepov nimam, "
+        "iztrebili. V nadaljevanju povzemam priporočila iz virov, navedenih na koncu članka. Podatkov o učinkovitosti posameznih ukrepov nimam, "
         "zato jih ne predstavljam kot zagotovljene rešitve.",
         "<h3>1. Pred njihovim prihodom preprečite vstop</h3>",
         "Po strokovnih priporočilih " + a("bf", "Biotehniške fakultete") + " se odrasle marmorirane smrdljivke pred prezimovanjem "
@@ -535,14 +535,15 @@ def build_article(D):
         f"{opaz(now_h)} marmorirane smrdljivke, največ doslej za to obdobje. Lani jih je bilo {numw(prev_h)}.",
         "Toda če pogledamo vse leto, delež marmoriranih smrdljivk med opažanji žuželk ne narašča. Ob toplih jesenskih dneh "
         "jih ljudje sicer pogosteje opazijo, pri drugih smrdljivcih pa se enak vzorec ne pokaže.",
-        'Kako zmanjšati število smrdljivk v hiši in na vrtu, pojasnjujem v <a href="#znebiti" style="color:var(--blue)">6. razdelku</a>.'])
+        "Kratko o ukrepih: odprtine v hiši je smiselno zatesniti, še preden se septembra začnejo zbirati, smrdljivke v hiši pa "
+        'posesajte ali ujemite, ne stiskajte. Podrobneje in z viri je to v <a href="#znebiti" style="color:var(--blue)">2. razdelku</a>.'])
     sections = [
         {"label": "01 — opažanja", "heading": "Koliko jih je res?", "id": "opazanja", "paragraphs": p1},
-        {"label": "02 — sezona", "heading": "Zakaj ravno jeseni?", "id": "sezona", "paragraphs": p2},
-        {"label": "03 — vreme", "heading": "Kdaj jih fotografirajo? Ob toplih dneh", "id": "vreme", "paragraphs": p3},
-        {"label": "04 — letos", "heading": "Je letošnja jesen izjemna?", "id": "letos", "paragraphs": p4},
-        {"label": "05 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": p5},
-        {"label": "06 — zmanjšanje", "heading": "Kako se jih znebiti?", "id": "znebiti", "paragraphs": p_znebiti},
+        {"label": "02 — ukrepi", "heading": "Kako se jih znebiti?", "id": "znebiti", "paragraphs": p_znebiti},
+        {"label": "03 — sezona", "heading": "Zakaj ravno jeseni?", "id": "sezona", "paragraphs": p2},
+        {"label": "04 — vreme", "heading": "Kdaj jih fotografirajo? Ob toplih dneh", "id": "vreme", "paragraphs": p3},
+        {"label": "05 — letos", "heading": "Je letošnja jesen izjemna?", "id": "letos", "paragraphs": p4},
+        {"label": "06 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": p5},
         {"label": "07 — viri", "heading": "Viri", "id": "viri", "paragraphs": p_viri},
         {"label": "08 — kaj lahko storite", "heading": "Vnesite opažanje", "id": "opazanje", "paragraphs": p6},
     ]
