@@ -2277,8 +2277,14 @@ nobenega workflowa (isti vzorec kot `study_inat_lag.py`).
   datum v glavi in vnos v `blog.json`; nastavi `dateModified` in `updated` (`touch_existing()`), `wire_all()` ne
   pokliče drugič. Slogovni pregled po `docs/slog-pisanja.md` (ednina, brez »kontrole« in »vidimo«) je opravljen;
   lektura prek workflowa še ne.
-- Trditev, da marmorirana smrdljivka jeseni išče zavetje v poslopjih, je splošno znana lastnost vrste in v članku
-  tako označena — iz opažanj iNaturalist se ne da razbrati, kje je bila fotografirana.
+- **Razdelek »Kako se jih znebiti?«** (12. 10. 2026, ob želji bralca): povzetek virov, ne lastnih preizkusov. Viri so v
+  slovarju `SRC` v generatorju in na koncu razdelka: portal IVR (Modic idr., 2023), Strokovna priporočila Biotehniške
+  fakultete (2024), N1 (14. 10. 2025), University of Maryland Extension (2021, **ameriška** priporočila, tako tudi označena)
+  in Vse za moj dan o Krškem (24. 5. 2026). Pravila: **ne priporoči konkretnih pesticidov ali odmerkov** (samo napoti na
+  etiketo in FITO-INFO, kot pri agrometeu); vsak ukrep ima vir, lastni sklepi so označeni z »moj sklep«; N1 navaja ustanove
+  svetovalk nedosledno, zato so v besedilu kraji (novogoriška, celjska svetovalka). WVU Extension vrača 403 in ni naveden.
+  Trditev o zbiranju v poslopjih zdaj navaja Strokovna priporočila (prej »splošno znana lastnost«). Predloge za FB, ki so
+  trdile »nasvetov za zatiranje v članku ni«, so zastarele.
 
 ## Razvoj
 
