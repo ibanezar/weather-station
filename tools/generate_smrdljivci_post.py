@@ -54,6 +54,19 @@ def opaz(n):
     return f"{n}{NBSP}{w}"
 
 
+SRC = {
+    "ivr": "https://www.ivr.si/skodljivec/marmorirana-smrdljivka/",
+    "bf": "https://www.ivr.si/app/uploads/2024/02/Strokovna-priporocila-za-obvladovanje-marmorirane-smrdljivke-s-CIPom-9.2.2024.pdf",
+    "n1": "https://n1info.si/novice/slovenija/zakaj-je-spet-toliko-smrdljivcev-in-ali-jih-je-res-najbolje-kar-posesati/",
+    "umd": "https://extension.umd.edu/resource/tips-dealing-brown-marmorated-stink-bugs",
+    "krsko": "https://www.vsezamojdan.si/krsko-smrdljivci-smrdljivke-projekt-rezultati/",
+}
+
+
+def a(key, text):
+    return f'<a href="{SRC[key]}" style="color:var(--blue)" rel="noopener">{text}</a>'
+
+
 def per1000(a, b):
     return 1000 * a / b if b else 0.0
 
@@ -275,7 +288,7 @@ def build_article(D):
         f"({num(sh[ph], 0)} %). V {loc[ph]} je delež ostalih smrdljivcev že precej nižji ({num(so[ph], 0)} %).",
         f"Še bolj zgovoren je zimski del: od novembra do marca je {num(wh, 0)} % opažanj marmorirane smrdljivke, pri ostalih "
         f"smrdljivcih le {num(wo, 0)} %. To je skladno s tem, da marmorirana smrdljivka jeseni pogosto poišče zavetje za "
-        "prezimovanje v poslopjih (splošno znana lastnost vrste), vendar iz opažanj ni razvidno, kje je bila fotografirana.",
+        "prezimovanje v poslopjih (to opisujejo " + a("bf", "Strokovna priporočila Biotehniške fakultete") + "), vendar iz opažanj ni razvidno, kje je bila fotografirana.",
         fig2,
     ]
 
@@ -324,7 +337,7 @@ def build_article(D):
         fig3,
         "Ob toplih dneh ljudje fotografirajo več žuželk, zato sem ostale smrdljivce vzel za primerjavo: če bi šlo samo za to, "
         "bi se razlika pokazala pri obeh skupinah. Marmorirana smrdljivka je ob toplih jesenskih dneh opažena pogosteje, "
-        "pri ostalih smrdljivcih te razlike ni. To je skladno z zbiranjem pred prezimovanjem, ki je za to vrsto znano, vendar je vzorec majhen: "
+        "pri ostalih smrdljivcih te razlike ni. To je skladno z zbiranjem pred prezimovanjem, vendar je vzorec majhen: "
         f"ob hladnejših dneh je bilo samo {opaz(hx['cn'])}.",
         tbl3,
     ]
@@ -362,6 +375,11 @@ def build_article(D):
         f"Za letošnjih {now_h} opažanj stoji {aut[last]['halys_observers']} različnih opazovalcev; lani je bilo {prev_h} opažanj "
         f"in {aut[last - 1]['halys_observers']} opazovalcev. Povečanje torej ni v tem, da bi več ljudi fotografiralo smrdljivce, "
         "ampak v več opažanjih na opazovalca.",
+        "Slovenski svetovalci za varstvo rastlin omenjajo ugodne vremenske razmere: po poročanju " + a("n1", "N1 (14. 10. 2025)")
+        + " večina meni, da se populacija množi zaradi njih, jeseni pa se smrdljivke selijo v urbana okolja, zlasti tja, kjer je "
+        "popoldne sonce in višja temperatura. " + a("bf", "Biotehniška fakulteta") + " dodaja, da je vrsta precej odporna na nizke "
+        "temperature, vendar je njeno preživetje pozimi močno odvisno od temperaturnih pogojev. To so mnenja strokovnjakov, "
+        "naši podatki jih ne potrjujejo in ne ovržejo.",
         "Možni razlogi, ki jih iz teh podatkov ne morem ločiti: toplo poletje, topla jesen, večja pozornost posameznih ljudi "
         "do smrdljivcev in naključje majhnega vzorca. Več kot to, da je letošnja jesen v teh podatkih izstopajoča, ne morem trditi.",
     ]
@@ -380,6 +398,49 @@ def build_article(D):
         "<p style=\"margin-top:1rem\">Podatki so samo agregati; posameznih opažanj ne objavljam, ker imajo različne licence. Zbrane številke so v "
         f'<a href="/data/inat-smrdljivci.json" style="color:var(--blue)">data/inat-smrdljivci.json</a>.</p>',
     ]
+    p_znebiti = [
+        "Popolne rešitve ni. Strokovnjaki Biotehniške fakultete opisujejo marmorirano smrdljivko kot izjemno vztrajnega škodljivca, "
+        "ki se ga ne da enostavno obvladovati niti s fitofarmacevtskimi sredstvi. Realen cilj je zato manj smrdljivcev v hiši, "
+        "ne konec vrste. Spodaj povzemam, kaj priporočajo viri na koncu razdelka; podatkov o učinku posameznih metod nimam.",
+        "<strong>1. Pred prihodom: zaprite jim pot.</strong> Po Strokovnih priporočilih Biotehniške fakultete se odrasle smrdljivke "
+        "pred prezimovanjem ne parijo, v septembru pa se začnejo zbirati in iskati zavetje v hišah, vrtnih lopah in razpokah v lubju. Ameriški univerzitetni svetovalci mehansko "
+        "izključitev imenujejo najboljšo metodo: razpoke okoli oken, vrat, fasadne obloge in cevi, za dimnikom in pod čelnimi "
+        "deskami zatesnite s kakovostnim silikonskim ali silikonsko-lateksnim kitom, poškodovane komarnike pa popravite ali "
+        "zamenjajte. Novogoriška svetovalka za varstvo rastlin priporoča komarnike ali podobne mreže. Ker se zbiranje začne "
+        "septembra, je kitanje smiselno že prej; to je moj sklep, ne priporočilo vira.",
+        "<strong>2. Če so že notri: posesajte ali ujemite, ne stiskajte.</strong> Večina slovenskih svetovalcev, ki jih je "
+        "povprašal N1, predlaga, da jih posesate ali pometete, ujamete v vrečko in zavržete ali ujamete v posodo z vodo in "
+        "detergentom. University of Maryland Extension dodaja, da sesalnik izpraznite v posodo z milnico; na cev lahko nataknete "
+        "nogavico, ki jih ujame, preden pridejo v zbiralnik. Ne stiskajte jih: ob grožnji ali stiskanju izločijo močan, neprijeten vonj.",
+        "<strong>3. Insekticidi in pasti: viri so skeptični.</strong> University of Maryland Extension pesticide v hiši in okoli "
+        "nje na splošno ne priporoča; meglilniki ne pobijejo vseh smrdljivk in ne preprečijo novih vstopov. Slovenski svetovalci "
+        "o insekticidih za odrasle smrdljivke in o pasteh govorijo večinoma skeptično, predvsem v kmetijskem okviru: insekticidi slabo "
+        "delujejo, pasti pa po besedah celjske svetovalke za varstvo rastlin niso dovolj učinkovite. Eden od svetovalcev v N1 dopušča "
+        "pršila za žuželke na prostem, na primer na dvorišču, ne pa na zaprtem balkonu. Za vsako uporabo fitofarmacevtskih "
+        "sredstev na vrtu veljata etiketa in FITO-INFO.",
+        "<strong>4. Na vrtu: mreže in pregled listov.</strong> Po opisu na portalu IVR so protiinsektne mreže najučinkovitejši in "
+        "okoljsko sprejemljiv ukrep; v sadovnjakih jih namestijo kmalu po cvetenju. Za manjši vrt je to prenos iz kmetijstva (moj "
+        "sklep). Samice odlagajo jajčna legla z 20–30 jajčeci na spodnjo stran listov, od sredine junija do konca septembra; "
+        "spodnjo stran listov je zato smiselno pregledati (moj sklep).",
+        "<strong>5. Naravni sovražniki delujejo počasi in niso za dom.</strong> Parazitske osice, ki odlagajo jajčeca v jajčeca "
+        "smrdljivke, IVR opisuje kot najučinkovitejšega naravnega sovražnika; domorodni sta <em>Anastatus bifasciatus</em> in "
+        "<em>Trissolcus basalis</em>. Samurajska osa (<em>Trissolcus japonicus</em>) je v Aziji najučinkovitejši naravni sovražnik in "
+        "se že uporablja v programih biotičnega varstva v Severni Ameriki in Italiji. V Krškem, kjer od 2025 (projekt naj bi trajal "
+        "do 2029) vnašajo osico <em>Anastatus bifasciatus</em>, so v prvem letu izmerili 28 % parazitiranih jajčec marmorirane "
+        "smrdljivke (pri zeleni smrdljivki 85 %); dolgoročnega učinka še ni mogoče oceniti. Vnos osic poteka strokovno in "
+        "nadzorovano, ni ukrep za domačo rabo.",
+        "<strong>6. Kaj lahko pričakujete.</strong> Smrdljivke so izredno mobilne, zato noben ukrep ne zagotovi, da jih ne bo. "
+        "Novogoriška svetovalka za varstvo rastlin meni, da se z osebkom, ki ga odstranite jeseni, spomladi ne boste srečali.",
+        '<p style="margin-top:1rem">Viri:</p><ul>'
+        "<li>" + a("ivr", "Marmorirana smrdljivka") + ", portal IVR (Modic, Žigon, Devetak, Jančar, Hoblaj; marec 2023).</li>"
+        "<li>" + a("bf", "Strokovna priporočila za obvladovanje marmorirane smrdljivke") + ", Univerza v Ljubljani, Biotehniška "
+        "fakulteta (Lešnik, Rot, Batistič, Vidrih, Bohinc, Godeša, Trdan; 2024).</li>"
+        "<li>" + a("n1", "Zakaj je spet toliko smrdljivcev in ali jih je res najbolje kar posesati") + ", N1 (Kamenarič, 14. 10. 2025).</li>"
+        "<li>" + a("umd", "Tips for Dealing With Brown Marmorated Stink Bugs") + ", University of Maryland Extension (2021); "
+        "ameriška priporočila, ne slovenska.</li>"
+        "<li>" + a("krsko", "Krško: projekt obvladovanja smrdljivcev") + ", Vse za moj dan (24. 5. 2026).</li>"
+        "</ul>",
+    ]
     p6 = [
         'Če smrdljivca najdete doma ali na vrtu, ga lahko fotografirate in vnesete na '
         '<a href="https://www.inaturalist.org/" style="color:var(--blue)" rel="noopener">iNaturalist</a>: vsako opažanje z datumom '
@@ -392,14 +453,16 @@ def build_article(D):
             f"Ob toplih jesenskih dneh so pogosteje opažene.")
     lead = (f"Kratek odgovor: deloma drži. Med 15. 9. in 10. 10. je na iNaturalist za Slovenijo {opaz(now_h)} marmorirane smrdljivke, "
             f"največ doslej; lani jih je bilo {prev_h}. Čez vse leto njihov delež med opažanji žuželk ne raste, ob toplih "
-            "jesenskih dneh pa so marmorirane smrdljivke opažene pogosteje, drugi smrdljivci pa ne.")
+            "jesenskih dneh pa so marmorirane smrdljivke opažene pogosteje, drugi smrdljivci pa ne. "
+            'Kako jih zmanjšati v hiši in na vrtu, piše <a href="#znebiti" style="color:var(--blue)">razdelek 06</a>.')
     sections = [
         {"label": "01 — opažanja", "heading": "Koliko jih je res?", "id": "opazanja", "paragraphs": p1},
         {"label": "02 — sezona", "heading": "Zakaj ravno jeseni?", "id": "sezona", "paragraphs": p2},
         {"label": "03 — vreme", "heading": "Kdaj jih fotografirajo: topli dnevi", "id": "vreme", "paragraphs": p3},
         {"label": "04 — letos", "heading": "Je letošnja jesen izjemna?", "id": "letos", "paragraphs": p4},
         {"label": "05 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": p5},
-        {"label": "06 — kaj lahko storite", "heading": "Vnesite opažanje", "id": "opazanje", "paragraphs": p6},
+        {"label": "06 — zmanjšanje", "heading": "Kako se jih znebiti?", "id": "znebiti", "paragraphs": p_znebiti},
+        {"label": "07 — kaj lahko storite", "heading": "Vnesite opažanje", "id": "opazanje", "paragraphs": p6},
     ]
     return {
         "title": title, "meta_description": desc,
