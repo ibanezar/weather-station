@@ -37,7 +37,32 @@ def num(x, d=1):
 
 
 def big(n):
-    return f"{int(n):,}".replace(",", NBSP)
+    """tisočice s piko od 10.000 naprej (5439, 14.353) — kot v lektoriranem besedilu."""
+    n = int(n)
+    return f"{n:,}".replace(",", ".") if n >= 10000 else str(n)
+
+
+_NOM = ["nič", "ena", "dve", "tri", "štiri", "pet", "šest", "sedem", "osem", "devet", "deset", "enajst", "dvanajst"]
+_GEN = ["nič", "ene", "dveh", "treh", "štirih", "petih", "šestih", "sedmih", "osmih", "devetih", "desetih",
+        "enajstih", "dvanajstih"]
+
+
+def numw(n):
+    """števnik z besedo do 12 (imenovalnik), sicer številka."""
+    n = int(n)
+    return _NOM[n] if 2 <= n <= 12 else str(n)
+
+
+def numg(n):
+    """števnik z besedo do 12 (rodilnik/mestnik: z dveh, v petih), sicer številka."""
+    n = int(n)
+    return _GEN[n] if 2 <= n <= 12 else str(n)
+
+
+def opazw(n):
+    """kot opaz(), a z besedo do 12 (srednji spol: dve opažanji, tri opažanja, pet opažanj)."""
+    n = int(n)
+    return opaz(n).replace(str(n), numw(n), 1) if 2 <= n <= 12 else opaz(n)
 
 
 def opaz(n):
@@ -158,6 +183,7 @@ STYLE = """<style>
 .sm-gal-grid img{aspect-ratio:2/3;object-fit:cover}
 .sm-fig{margin:1.4rem 0;padding:1rem 1rem .8rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px}
 .sm-fig figcaption{color:var(--muted);font-size:.88rem;line-height:1.55;margin-top:.6rem}
+h3.sm-h3,.post-body h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin:1.6rem 0 .4rem}
 .sm-fig h3{font-family:'Space Grotesk',sans-serif;font-size:.95rem;margin:0 0 .4rem;color:var(--text)}
 .sm-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 @media(max-width:640px){.sm-row{grid-template-columns:1fr}}
@@ -187,7 +213,7 @@ PHOTOS = [
 def gallery_html():
     imgs = "".join(f'<img src="/img/blog/{SLUG}/{f}" alt="{alt}" width="640" height="960">' for f, alt in PHOTOS)
     return (STYLE + f'<figure class="post-photo sm-gal"><div class="sm-gal-grid">{imgs}</div>'
-            '<figcaption>Uhata rusonožka (levo in v sredini) in rjava usnjatka (desno). Marmorirane smrdljivke, o kateri piše članek, na teh fotografijah ni. '
+            '<figcaption>Uhata rusonožka (levo in na sredini) ter rjava usnjatka (desno). Marmorirana smrdljivka, o kateri govori članek, na fotografijah ni prikazana. '
             'Foto: Filip Eremita.</figcaption></figure>')
 
 
@@ -209,6 +235,7 @@ def table(head, rows, now_label=None, cap="", note=""):
 def build_article(D):
     last = D["last_year"]
     cut = D["cutoff"]                      # »10-10«
+    assert cut == "10-10", "besedilo ima datum zaustavitve zapisan z besedo"
     cut_txt = f"{int(cut.split('-')[1])}. {int(cut.split('-')[0])}."
     ytd = {int(y): v for y, v in D["ytd"].items()}
     aut = {int(y): v for y, v in D["autumn"].items()}
@@ -233,27 +260,31 @@ def build_article(D):
     fig1 = fig("Marmorirana smrdljivka v Sloveniji, 1. 1.–" + cut_txt + " vsako leto",
                '<div class="sm-row"><div><p class="sm-leg">Število opažanj</p>' + ch1 + '</div>'
                '<div><p class="sm-leg">Na 1000 opažanj žuželk</p>' + ch2 + '</div></div>',
-               f"Levo surovo število, desno delež med vsemi opažanji žuželk. Leto {last} je nepolno (do {cut_txt}); "
-               f"vsa leta so primerjana na enako obdobje. Vir: iNaturalist.")
+               f"Levo je prikazano surovo število opažanj, desno pa delež med vsemi opažanji žuželk. Podatki za leto {last} so "
+               f"nepopolni in segajo do 10. oktobra. Za vsa leta je uporabljeno enako obdobje. Vir: iNaturalist.")
     rows1 = [(str(y), big(ytd[y]["vse"]), big(ytd[y]["insecta"]), str(ytd[y]["halys"]), big(ytd[y]["penta"]),
               num(per1000(ytd[y]["halys"], ytd[y]["insecta"])),
               num(100 * ytd[y]["penta"] / ytd[y]["insecta"]) + f"{NBSP}%") for y in years]
-    tbl1 = table(["Leto", "Vsa opažanja", "Žuželke", "Marmo&shy;rirana", "Vsi smrdljivci", "Marm. na 1000 žuželk",
+    tbl1 = table(["Leto", "Vsa opažanja", "Žuželke", "Marmo&shy;rirana smrdljivka", "Vsi smrdljivci", "Marmo&shy;rirana na 1000 žuželk",
                   "Smrdljivci med žuželkami"], rows1, str(last), "Opažanja po letih")
 
     p1 = [
-        "iNaturalist je zbirka opažanj, ki jih prostovoljci fotografirajo in objavijo, vrsto pa določi skupnost. "
-        f"Dejavnost v Sloveniji hitro raste: vseh opažanj od 1. 1. do {cut_txt} je bilo leta {years[0]} skupaj "
-        f"{big(ytd[years[0]]['vse'])}, letos pa {big(ytd[last]['vse'])}. Samo štetje smrdljivcev bi zato kazalo rast "
-        "tudi tam, kjer je ni.",
-        f"Zato sem za vsako leto vzel enako obdobje in marmorirano smrdljivko (<em>Halyomorpha halys</em>) primerjal z vsemi "
-        f"opažanji žuželk. Surovo število opažanj je zraslo z {ytd[years[0]]['halys']} v letu {years[0]} na {ytd[last]['halys']} letos. "
-        f"Na 1000 opažanj žuželk pa je bilo marmoriranih smrdljivk največ leta {peak_y} ({num(per1000(ytd[peak_y]['halys'], ytd[peak_y]['insecta']))}); "
-        f"od tam se delež ni povečal (letos {num(per1000(ytd[last]['halys'], ytd[last]['insecta']))}).",
+        "iNaturalist je zbirka opažanj, v katero uporabniki nalagajo fotografije rastlin, živali in drugih organizmov. Vrste "
+        "določajo sami opazovalci in skupnost.",
+        f"Število opažanj v Sloveniji hitro narašča. Med 1. januarjem in {cut_txt.replace('10. 10.', '10. oktobrom')} jih je bilo leta {years[0]} "
+        f"skupaj {big(ytd[years[0]]['vse'])}, letos pa že {big(ytd[last]['vse'])}. Samo s štetjem opažanj smrdljivk bi zato lahko "
+        "napačno sklepali, da jih je vse več, tudi če gre v resnici zgolj za večjo dejavnost opazovalcev.",
+        "Da bi zmanjšal vpliv te razlike, sem za vsako leto uporabil enako obdobje in marmorirano smrdljivko "
+        "(<em>Halyomorpha halys</em>) primerjal z vsemi opažanji žuželk.",
+        f"Surovo število opažanj marmorirane smrdljivke se je povečalo z {numg(ytd[years[0]]['halys'])} leta {years[0]} na "
+        f"{ytd[last]['halys']} letos. Toda na 1000 opažanj žuželk jih je bilo največ leta {peak_y}, in sicer "
+        f"{num(per1000(ytd[peak_y]['halys'], ytd[peak_y]['insecta']))}. Od takrat se delež ni povečal; letos znaša "
+        f"{num(per1000(ytd[last]['halys'], ytd[last]['insecta']))}.",
         fig1,
-        f"Vsi smrdljivci skupaj (družina <em>Pentatomidae</em>) ostajajo okoli 2 % opažanj žuželk: med {num(min(pen_share[1:]))} in "
-        f"{num(max(pen_share[1:]))} % v letih {years[1]}–{last}. Smrdljivcev je med fotografiranimi "
-        "žuželkami torej enako kot pred leti.",
+        f"Tudi vsi smrdljivci skupaj (družina <em>Pentatomidae</em>) predstavljajo približno enak delež opažanj žuželk kot v "
+        f"prejšnjih letih. Med letoma {years[1]} in {last} je ta delež nihal med {num(min(pen_share[1:]))} in "
+        f"{num(max(pen_share[1:]))} %.",
+        "Med fotografiranimi žuželkami torej ni videti jasnega dolgoročnega naraščanja deleža smrdljivcev.",
         tbl1,
     ]
 
@@ -272,23 +303,27 @@ def build_article(D):
     c3 = bar_chart([(MONTHS[i], sh[i], f"{mnames[i]}: {num(sh[i])} % vseh opažanj marmorirane smrdljivke") for i in range(12)],
                    CYAN, "Marmorirana smrdljivka: delež opažanj po mesecih", labels=False, w=360, h=200,
                    vfmt=lambda v: num(v), ymax=ymx)
-    c4 = bar_chart([(MONTHS[i], so[i], f"{mnames[i]}: {num(so[i])} % vseh opažanj ostalih smrdljivcev") for i in range(12)],
-                   PURPLE, "Ostali smrdljivci: delež opažanj po mesecih", labels=False, w=360, h=200,
+    c4 = bar_chart([(MONTHS[i], so[i], f"{mnames[i]}: {num(so[i])} % vseh opažanj drugih smrdljivcev") for i in range(12)],
+                   PURPLE, "Drugi smrdljivci: delež opažanj po mesecih", labels=False, w=360, h=200,
                    vfmt=lambda v: num(v), ymax=ymx)
     fig2 = fig("Kdaj med letom jih fotografirajo (vsa leta, v %)",
                '<div class="sm-row"><div>' + legend([("Marmorirana smrdljivka", CYAN)]) + c3 + '</div><div>'
-               + legend([("Ostali smrdljivci", PURPLE)]) + c4 + '</div></div>',
-               f"Obe skupini imata isto lestvico. Višina palice je delež opažanj skupine v tistem mesecu "
-               f"(marmorirana {big(sum(mh))}, ostali {big(sum(mo))} opažanj; vsa leta, ne glede na kakovost določitve). "
-               "Oznake na osi so začetnice mesecev, od januarja do decembra.")
-    loc = ["januarju", "februarju", "marcu", "aprilu", "maju", "juniju", "juliju", "avgustu", "septembru",
-           "oktobru", "novembru", "decembru"]
+               + legend([("Drugi smrdljivci", PURPLE)]) + c4 + '</div></div>',
+               f"Obe skupini sta prikazani na isti lestvici. Višina stolpca pomeni delež vseh opažanj posamezne skupine, zabeleženih v "
+               f"tistem mesecu. Za marmorirano smrdljivko je bilo skupaj {big(sum(mh))} opažanj, za druge smrdljivce pa {big(sum(mo))}. "
+               "Upoštevana so vsa leta, ne glede na kakovost določitve vrste. Oznake na osi so začetnice mesecev od januarja do decembra.")
+    mgen = ["januarja", "februarja", "marca", "aprila", "maja", "junija", "julija", "avgusta", "septembra",
+            "oktobra", "novembra", "decembra"]
+    assert po < ph
     p2 = [
-        f"Ostali smrdljivci imajo vrh opažanj v {loc[po]} ({num(so[po], 0)} %), marmorirana smrdljivka pa v {loc[ph]} "
-        f"({num(sh[ph], 0)} %). V {loc[ph]} je delež ostalih smrdljivcev že precej nižji ({num(so[ph], 0)} %).",
-        f"Še bolj zgovoren je zimski del: od novembra do marca je {num(wh, 0)} % opažanj marmorirane smrdljivke, pri ostalih "
-        f"smrdljivcih le {num(wo, 0)} %. To je skladno s tem, da marmorirana smrdljivka jeseni pogosto poišče zavetje za "
-        "prezimovanje v poslopjih (to opisujejo " + a("bf", "Strokovna priporočila Biotehniške fakultete") + "), vendar iz opažanj ni razvidno, kje je bila fotografirana.",
+        f"Pri drugih smrdljivcih je največ opažanj zabeleženih {mgen[po]}, ko jih je {num(so[po], 0)} % vseh opažanj te skupine. "
+        f"Pri marmorirani smrdljivki je vrhunec pozneje, {mgen[ph]}, ko je zabeleženih {num(sh[ph], 0)} % opažanj. "
+        f"{mgen[ph].capitalize()} delež opažanj drugih smrdljivcev že precej upade, na {num(so[ph], 0)} %.",
+        f"Zanimiv je tudi zimski del leta. Od novembra do marca je {num(wh, 0)} % opažanj marmorirane smrdljivke, pri drugih "
+        f"smrdljivcih pa le {num(wo, 0)} %.",
+        "To se ujema z znanim vedenjem marmorirane smrdljivke, ki jeseni pogosto išče zavetje za prezimovanje v stavbah. Tako "
+        "vedenje opisujejo tudi " + a("bf", "strokovna priporočila Biotehniške fakultete") + ". Iz podatkov iNaturalist pa ne "
+        "moremo razbrati, ali je bila posamezna smrdljivka fotografirana v hiši, na vrtu ali v naravi.",
         fig2,
     ]
 
@@ -308,37 +343,47 @@ def build_article(D):
                               "wn": b["toplo"]["opaz"], "rr": T["rr_" + key]}
     g15 = grouped_chart(["pod 15 °C", "15 °C ali več"],
                         [("Marmorirana smrdljivka", CYAN, [r[("15", "halys")]["c"], r[("15", "halys")]["w"]]),
-                         ("Ostali smrdljivci", PURPLE, [r[("15", "ostali")]["c"], r[("15", "ostali")]["w"]])],
+                         ("Drugi smrdljivci", PURPLE, [r[("15", "ostali")]["c"], r[("15", "ostali")]["w"]])],
                         "Opažanja na dan ob hladnejših in toplejših dneh, 1. oktober do 5. november")
     fig3 = fig("Opažanja na dan glede na najvišjo temperaturo dneva v Rečici (1. 10.–5. 11.)",
-               legend([("Marmorirana smrdljivka", CYAN), ("Ostali smrdljivci", PURPLE)]) + g15,
-               f"{W['n_days']} dni (2020–{last}), {opaz(W['n_obs_halys'])} marmorirane smrdljivke in "
-               f"{opaz(W['n_obs_ostali'])} ostalih smrdljivcev. Vir: iNaturalist (raziskovalna kakovost, odprta lokacija), "
-               "meritve postaje IREICA1.")
+               legend([("Marmorirana smrdljivka", CYAN), ("Drugi smrdljivci", PURPLE)]) + g15,
+               f"Analiza zajema {W['n_days']} dni v obdobju 2020–{last}, {opaz(W['n_obs_halys'])} marmorirane smrdljivke in "
+               f"{opaz(W['n_obs_ostali'])} drugih smrdljivcev. Viri: iNaturalist (opažanja raziskovalne kakovosti z odprto "
+               "lokacijo) in meritve postaje IREICA1.")
 
     def rr_txt(x):
         return f"{num(x['rr'])} ({num(x['lo'])}–{num(x['hi'])})"
     rows3 = []
     for thr in ("15", "18"):
-        for key, name in (("halys", "Marmorirana"), ("ostali", "Ostali smrdljivci")):
+        for key, name in (("halys", "Marmorirana"), ("ostali", "Drugi smrdljivci")):
             x = r[(thr, key)]
             rows3.append((f"{thr}{NBSP}°C", name, f"{num(x['c'], 2)} ({x['cn']})", f"{num(x['w'], 2)} ({x['wn']})", rr_txt(x["rr"])))
     tbl3 = table(["Prag", "Skupina", "Hladnejši dnevi", "Toplejši dnevi", "Razmerje"], rows3, None,
                  "Opažanja na dan glede na temperaturo",
-                 "Opažanj na dan (v oklepaju skupno število); razmerje toplejši proti hladnejšim dnevom z 95 % intervalom.")
+                 "Številke prikazujejo povprečno število opažanj na dan, v oklepajih pa je skupno število opažanj. Razmerje primerja "
+                 "toplejše in hladnejše dni; v oklepaju je 95-odstotni interval zaupanja.")
     hx, ox = r[("15", "halys")], r[("15", "ostali")]
+    assert ox["rr"]["lo"] < 1 < ox["rr"]["hi"] and hx["cn"] >= 5
+    o18 = r[("18", "ostali")]["rr"]
+    assert o18["lo"] < 1 < o18["hi"]
     p3 = [
-        f"Vreme pa pove, kdaj jih ljudje fotografirajo. Med 1. 10. in 5. 11. sem primerjal dneve glede na najvišjo temperaturo na postaji "
-        f"IREICA1. Ob dnevih s 15 °C ali več je bilo na dan {num(hx['w'], 2)} opažanja marmorirane smrdljivke, ob hladnejših "
-        f"{num(hx['c'], 2)}: to je {num(hx['rr']['rr'])}-krat pogosteje (95 % interval {num(hx['rr']['lo'])}–{num(hx['rr']['hi'])}).",
-        f"Pri ostalih smrdljivcih zanesljive razlike ni: {num(ox['w'], 2)} proti {num(ox['c'], 2)} na dan; razmerje je {num(ox['rr']['rr'])}, "
-        f"interval ({num(ox['rr']['lo'])}–{num(ox['rr']['hi'])}) pa vključuje 1. Isti vzorec se pokaže pri pragu 18 °C: "
-        f"{num(r[('18', 'halys')]['rr']['rr'])}-krat pri marmorirani in {num(r[('18', 'ostali')]['rr']['rr'])}-krat pri ostalih.",
+        "Vreme lahko pomaga pojasniti, kdaj ljudje smrdljivke pogosteje opazijo in fotografirajo.",
+        f"Za obdobje od 1. oktobra do 5. novembra sem dneve razdelil glede na najvišjo dnevno temperaturo, izmerjeno na postaji "
+        f"IREICA1. Ob dnevih, ko je temperatura dosegla vsaj 15 °C, je bilo v povprečju {num(hx['w'], 2)} opažanja marmorirane "
+        f"smrdljivke na dan. Ob hladnejših dneh jih je bilo {num(hx['c'], 2)}. To pomeni, da so jo ob toplejših dneh zabeležili "
+        f"{num(hx['rr']['rr'])}-krat pogosteje. 95-odstotni interval ocene razmerja je od {num(hx['rr']['lo'])} do {num(hx['rr']['hi'])}.",
+        f"Pri drugih smrdljivcih zanesljive razlike ni bilo: ob hladnejših dneh je bilo povprečje {num(ox['c'], 2)} opažanja na dan, "
+        f"ob toplejših pa {num(ox['w'], 2)}. Razmerje {num(ox['rr']['rr'])} ima interval od {num(ox['rr']['lo'])} do "
+        f"{num(ox['rr']['hi'])}, ki vključuje tudi vrednost 1, zato razlika ni statistično prepričljiva.",
+        f"Podoben vzorec dobimo, če kot mejo uporabimo 18 °C. Pri marmorirani smrdljivki je bilo opažanj na toplejše dni "
+        f"{num(r[('18', 'halys')]['rr']['rr'])}-krat več, pri drugih smrdljivcih pa izrazite razlike ni bilo.",
         fig3,
-        "Ob toplih dneh ljudje fotografirajo več žuželk, zato sem ostale smrdljivce vzel za primerjavo: če bi šlo samo za to, "
-        "bi se razlika pokazala pri obeh skupinah. Marmorirana smrdljivka je ob toplih jesenskih dneh opažena pogosteje, "
-        "pri ostalih smrdljivcih te razlike ni. To je skladno z zbiranjem pred prezimovanjem, vendar je vzorec majhen: "
-        f"ob hladnejših dneh je bilo samo {opaz(hx['cn'])}.",
+        "Ob toplejših dneh ljudje praviloma opazijo in fotografirajo več žuželk. Zato sem druge smrdljivce uporabil kot "
+        "primerjalno skupino: če bi bila razlika zgolj posledica večje dejavnosti opazovalcev ob toplejšem vremenu, bi "
+        "pričakovali podoben vzorec pri obeh skupinah.",
+        "Podatki kažejo, da je marmorirana smrdljivka ob toplih jesenskih dneh opažena pogosteje, pri drugih smrdljivcih pa "
+        "takšne razlike ni. To je skladno z možnostjo, da se marmorirane smrdljivke v toplejšem vremenu pogosteje zbirajo pred "
+        f"prezimovanjem. Vendar je vzorec majhen: ob hladnejših dneh je bilo zabeleženih le {opazw(hx['cn'])} marmorirane smrdljivke.",
         tbl3,
     ]
 
@@ -349,10 +394,11 @@ def build_article(D):
         rows4.append((str(y), num(sy[y].get("jesen_tmax", float("nan"))) + f"{NBSP}°C", big(sy[y]["gdd"]),
                       str(aut[y]["halys"]), str(aut[y]["halys_observers"]), big(aut[y]["insecta"]),
                       num(per1000(aut[y]["halys"], aut[y]["insecta"]))))
-    tbl4 = table(["Leto", "Najvišja T", "Stop. dnevi", "Marmo&shy;rirana", "Opazo&shy;valcev", "Žuželke", "Na 1000 žuželk"],
+    tbl4 = table(["Leto", "Povpr. najvišja T", "Stopinjski dnevi", "Marmo&shy;rirana smrdljivka", "Opazo&shy;valci", "Opažanja žuželk", "Marmo&shy;rirana na 1000 žuželk"],
                  rows4, str(last), "Jesensko okno po letih",
-                 "Okno 15. 9.–10. 10.: povprečna najvišja dnevna temperatura, stopinjski dnevi apr–sep (nad 10 °C), opažanja "
-                 "marmorirane smrdljivke in število opazovalcev, opažanja žuželk, marmorirana na 1000 žuželk.")
+                 "Obdobje 15. 9.–10. 10. Povprečna najvišja dnevna temperatura, stopinjski dnevi od aprila do septembra (nad 10 °C), "
+                 "opažanja marmorirane smrdljivke, število opazovalcev, število opažanj žuželk in število opažanj marmorirane "
+                 "smrdljivke na 1000 opažanj žuželk.")
     prev = [y for y in ys if y < last]
     lo_p = min(per1000(aut[y]["halys"], aut[y]["insecta"]) for y in prev)
     hi_p = max(per1000(aut[y]["halys"], aut[y]["insecta"]) for y in prev)
@@ -361,115 +407,151 @@ def build_article(D):
     warm_y = max(prev, key=lambda y: sy[y].get("jesen_tmax", 0))
     rho = D["spearman_gdd_halys_autumn"]
     gdd_max_y = max(ys, key=lambda y: sy[y]["gdd"])
+    assert D["autumn_window"] == ["09-15", "10-10"]
     p4 = [
-        f"Jesen {last} je v podatkih res izstopajoča. V obdobju 15. 9.–10. 10. je {opaz(now_h)} marmorirane "
-        f"smrdljivke; lani jih je bilo {prev_h}" + (", kar je bilo doslej največ" if prev_h == prev_max
-                                                     else f", največ pa {prev_max}") +
-        f". Na 1000 opažanj žuželk je to {num(now_p)} proti {num(lo_p, 0)}–{num(hi_p, 0)} v letih {prev[0]}–{prev[-1]}.",
-        f"Kaj je razlog? Letošnja jesen je bila toplejša (povprečna najvišja dnevna temperatura v tem obdobju {num(sy[last]['jesen_tmax'])} °C) kot "
-        f"v {warmer} od {len(prev)} prejšnjih let. Leta {warm_y} je bilo še toplejše ({num(sy[warm_y]['jesen_tmax'])} °C), "
-        f"opažanj marmorirane smrdljivke pa le {aut[warm_y]['halys']}. Vsota stopinjskih dni od aprila do septembra (seštevek, za koliko stopinj je bilo "
-        f"povprečje dneva nad 10 °C) je bila največja leta {gdd_max_y}. Korelacija med njo in jesenskimi opažanji je pri "
-        f"{rho['n']} letih {num(rho['rho'], 2)}, kar za kakršen koli sklep ne zadošča.",
+        f"V podatkih za letošnjo jesen je marmorirana smrdljivka res izstopala. Med 15. septembrom in 10. oktobrom je bilo "
+        f"zabeleženih {opaz(now_h)}, lani pa {numw(prev_h)}" + (", kar je bilo do tedaj največ" if prev_h == prev_max
+                                                              else f", največ pa {numw(prev_max)}") +
+        f". Na 1000 opažanj žuželk to pomeni {num(now_p)} opažanja marmorirane smrdljivke, medtem ko so bile vrednosti v istem "
+        f"obdobju v letih {prev[0]}–{prev[-1]} med {num(lo_p, 0)} in {num(hi_p, 0)}.",
+        f"Kaj je razlog? Letošnja jesen je bila v tem obdobju toplejša kot v {numg(warmer)} od {numg(len(prev))} predhodnih let. "
+        f"Povprečna najvišja dnevna temperatura je znašala {num(sy[last]['jesen_tmax'])} °C. Leta {warm_y} je bilo še topleje, "
+        f"s povprečjem {num(sy[warm_y]['jesen_tmax'])} °C, vendar so bila takrat zabeležena le {opazw(aut[warm_y]['halys'])} "
+        "marmorirane smrdljivke.",
+        f"Tudi vsota stopinjskih dni od aprila do septembra je bila leta {gdd_max_y} največja. Gre za seštevek dnevnih vrednosti, "
+        "ki kaže, za koliko je povprečna dnevna temperatura presegla izhodiščno mejo 10 °C.",
+        f"Korelacija med to vsoto in jesenskim številom opažanj je pri {numg(rho['n'])} letih znašala {num(rho['rho'], 2)}. "
+        "To je premalo, da bi lahko na podlagi teh podatkov sklepali o zanesljivi povezavi.",
         tbl4,
-        f"Za letošnjih {now_h} opažanj stoji {aut[last]['halys_observers']} različnih opazovalcev; lani je bilo {prev_h} opažanj "
-        f"in {aut[last - 1]['halys_observers']} opazovalcev. Povečanje torej ni v tem, da bi več ljudi fotografiralo smrdljivce, "
-        "ampak v več opažanjih na opazovalca.",
-        "Slovenski svetovalci za varstvo rastlin omenjajo ugodne vremenske razmere: po poročanju " + a("n1", "N1 (14. 10. 2025)")
-        + " večina meni, da se populacija množi zaradi njih, jeseni pa se smrdljivke selijo v urbana okolja, zlasti tja, kjer je "
-        "popoldne sonce in višja temperatura. " + a("bf", "Biotehniška fakulteta") + " dodaja, da je vrsta precej odporna na nizke "
-        "temperature, vendar je njeno preživetje pozimi močno odvisno od temperaturnih pogojev. To so mnenja strokovnjakov, "
-        "naši podatki jih ne potrjujejo in ne ovržejo.",
-        "Možni razlogi, ki jih iz teh podatkov ne morem ločiti: toplo poletje, topla jesen, večja pozornost posameznih ljudi "
-        "do smrdljivcev in naključje majhnega vzorca. Več kot to, da je letošnja jesen v teh podatkih izstopajoča, ne morem trditi.",
+        f"Za letošnjih {now_h} opažanj je zaslužnih {numg(aut[last]['halys_observers'])} različnih opazovalcev. "
+        + (f"Tudi lani je bilo {numw(aut[last - 1]['halys_observers'])} opazovalcev, čeprav so skupaj zabeležili {numw(prev_h)} opažanj. "
+           if aut[last - 1]["halys_observers"] == aut[last]["halys_observers"]
+           else f"Lani je bilo opazovalcev {numw(aut[last - 1]['halys_observers'])}, opažanj pa {numw(prev_h)}. ") +
+        "Povečanje torej ni posledica tega, da bi letos smrdljivke fotografiralo več ljudi, temveč tega, da so posamezni "
+        "opazovalci zabeležili več opažanj.",
+        "Slovenski strokovnjaki za varstvo rastlin omenjajo ugodne vremenske razmere kot enega od možnih razlogov za širjenje "
+        "vrste. Po poročanju " + a("n1", "N1") + " z dne 14. oktobra 2025 je večina vprašanih strokovnjakov menila, da so "
+        "vremenske razmere prispevale k njenemu širjenju. Jeseni se smrdljivke selijo tudi v urbana okolja, zlasti na sončna "
+        "in toplejša mesta (tako N1).",
+        a("bf", "Biotehniška fakulteta") + " dodaja, da je vrsta precej odporna proti nizkim temperaturam, vendar je njeno "
+        "preživetje pozimi močno odvisno od temperaturnih razmer. To so strokovne ocene, ki jih naši podatki ne potrjujejo in "
+        "ne ovržejo.",
+        "Iz teh podatkov ne morem ločiti več možnih razlag: vpliva toplega poletja, tople jeseni, večje pozornosti posameznih "
+        "opazovalcev ali preprostega naključja pri majhnem vzorcu. Zanesljivo lahko rečem le, da letošnja jesen v teh podatkih izstopa.",
     ]
 
     p5 = [
         "<ul>"
-        "<li><strong>Opažanje ni štetje.</strong> iNaturalist pokaže, kje in kdaj je kdo fotografiral, ne koliko osebkov je bilo.</li>"
-        "<li><strong>Hišni obiski so slabo pokriti.</strong> Smrdljivca na zavesi ljudje verjetno redko objavijo, zato iNaturalist "
-        "hišne obiske najverjetneje podcenjuje.</li>"
-        f"<li><strong>Majhni vzorci.</strong> V vremenskem oknu je samo {opaz(W['n_obs_halys'])} marmorirane smrdljivke.</li>"
-        "<li><strong>Interval je optimističen.</strong> Opažanja istega opazovalca na isti dan niso neodvisna, pravi interval "
-        "je širši od izračunanega.</li>"
-        "<li><strong>Ena postaja, vsa Slovenija.</strong> Vreme v Rečici ob Savinji ni vreme vsepovsod, kjer so smrdljivce "
-        "fotografirali.</li>"
+        "<li><strong>Opažanja niso štetje osebkov.</strong> iNaturalist pokaže, kje in kdaj je nekdo fotografiral smrdljivko, "
+        "ne pa, koliko osebkov je bilo dejansko prisotnih.</li>"
+        "<li><strong>Opažanja iz hiš so slabo zajeta.</strong> Smrdljivko na zavesi ljudje verjetno redkeje objavijo, zato "
+        "iNaturalist obiske smrdljivk v domovih najverjetneje podcenjuje.</li>"
+        f"<li><strong>Vzorec je majhen.</strong> V vremenski analizi je le {opaz(W['n_obs_halys'])} marmorirane smrdljivke.</li>"
+        "<li><strong>Intervali negotovosti so lahko preozki.</strong> Opažanja istega opazovalca na isti dan niso neodvisna, "
+        "zato je dejanska negotovost večja od izračunane.</li>"
+        "<li><strong>Ena postaja ne predstavlja vse Slovenije.</strong> Vreme v Rečici ob Savinji ni nujno enako vremenu na "
+        "vseh območjih, kjer so smrdljivke fotografirali.</li>"
         "</ul>",
-        "<p style=\"margin-top:1rem\">Podatki so samo agregati; posameznih opažanj ne objavljam, ker imajo različne licence. Zbrane številke so v "
-        f'<a href="/data/inat-smrdljivci.json" style="color:var(--blue)">data/inat-smrdljivci.json</a>.</p>',
+        "<p style=\"margin-top:1rem\">V članku so uporabljeni le združeni podatki. Posameznih opažanj ne objavljam, ker zanje "
+        "veljajo različni licenčni pogoji. Zbrane številke so shranjene v "
+        '<a href="/data/inat-smrdljivci.json" style="color:var(--blue)">data/inat-smrdljivci.json</a>.</p>',
     ]
     p_znebiti = [
-        "Popolne rešitve ni. Strokovnjaki Biotehniške fakultete opisujejo marmorirano smrdljivko kot izjemno vztrajnega škodljivca, "
-        "ki se ga ne da enostavno obvladovati niti s fitofarmacevtskimi sredstvi. Realen cilj je zato manj smrdljivcev v hiši, "
-        "ne konec vrste. Spodaj povzemam, kaj priporočajo viri na koncu razdelka; podatkov o učinku posameznih metod nimam.",
-        "<strong>1. Pred prihodom: zaprite jim pot.</strong> Po Strokovnih priporočilih Biotehniške fakultete se odrasle smrdljivke "
-        "pred prezimovanjem ne parijo, v septembru pa se začnejo zbirati in iskati zavetje v hišah, vrtnih lopah in razpokah v lubju. Ameriški univerzitetni svetovalci mehansko "
-        "izključitev imenujejo najboljšo metodo: razpoke okoli oken, vrat, fasadne obloge in cevi, za dimnikom in pod čelnimi "
-        "deskami zatesnite s kakovostnim silikonskim ali silikonsko-lateksnim kitom, poškodovane komarnike pa popravite ali "
-        "zamenjajte. Novogoriška svetovalka za varstvo rastlin priporoča komarnike ali podobne mreže. Ker se zbiranje začne "
-        "septembra, je kitanje smiselno že prej; to je moj sklep, ne priporočilo vira.",
-        "<strong>2. Če so že notri: posesajte ali ujemite, ne stiskajte.</strong> Večina slovenskih svetovalcev, ki jih je "
-        "povprašal N1, predlaga, da jih posesate ali pometete, ujamete v vrečko in zavržete ali ujamete v posodo z vodo in "
-        "detergentom. University of Maryland Extension dodaja, da sesalnik izpraznite v posodo z milnico; na cev lahko nataknete "
-        "nogavico, ki jih ujame, preden pridejo v zbiralnik. Ne stiskajte jih: ob grožnji ali stiskanju izločijo močan, neprijeten vonj.",
-        "<strong>3. Insekticidi in pasti: viri so skeptični.</strong> University of Maryland Extension pesticide v hiši in okoli "
-        "nje na splošno ne priporoča; meglilniki ne pobijejo vseh smrdljivk in ne preprečijo novih vstopov. Slovenski svetovalci "
-        "o insekticidih za odrasle smrdljivke in o pasteh govorijo večinoma skeptično, predvsem v kmetijskem okviru: insekticidi slabo "
-        "delujejo, pasti pa po besedah celjske svetovalke za varstvo rastlin niso dovolj učinkovite. Eden od svetovalcev v N1 dopušča "
-        "pršila za žuželke na prostem, na primer na dvorišču, ne pa na zaprtem balkonu. Za vsako uporabo fitofarmacevtskih "
-        "sredstev na vrtu veljata etiketa in FITO-INFO.",
-        "<strong>4. Na vrtu: mreže in pregled listov.</strong> Po opisu na portalu IVR so protiinsektne mreže najučinkovitejši in "
-        "okoljsko sprejemljiv ukrep; v sadovnjakih jih namestijo kmalu po cvetenju. Za manjši vrt je to prenos iz kmetijstva (moj "
-        "sklep). Samice odlagajo jajčna legla z 20–30 jajčeci na spodnjo stran listov, od sredine junija do konca septembra; "
-        "spodnjo stran listov je zato smiselno pregledati (moj sklep).",
-        "<strong>5. Naravni sovražniki delujejo počasi in niso za dom.</strong> Parazitske osice, ki odlagajo jajčeca v jajčeca "
-        "smrdljivke, IVR opisuje kot najučinkovitejšega naravnega sovražnika; domorodni sta <em>Anastatus bifasciatus</em> in "
-        "<em>Trissolcus basalis</em>. Samurajska osa (<em>Trissolcus japonicus</em>) je v Aziji najučinkovitejši naravni sovražnik in "
-        "se že uporablja v programih biotičnega varstva v Severni Ameriki in Italiji. V Krškem, kjer od 2025 (projekt naj bi trajal "
-        "do 2029) vnašajo osico <em>Anastatus bifasciatus</em>, so v prvem letu izmerili 28 % parazitiranih jajčec marmorirane "
-        "smrdljivke (pri zeleni smrdljivki 85 %); dolgoročnega učinka še ni mogoče oceniti. Vnos osic poteka strokovno in "
-        "nadzorovano, ni ukrep za domačo rabo.",
-        "<strong>6. Kaj lahko pričakujete.</strong> Smrdljivke so izredno mobilne, zato noben ukrep ne zagotovi, da jih ne bo. "
-        "Novogoriška svetovalka za varstvo rastlin meni, da se z osebkom, ki ga odstranite jeseni, spomladi ne boste srečali.",
-        '<p style="margin-top:1rem">Viri:</p><ul>'
+        "Popolne rešitve ni. Strokovnjaki Biotehniške fakultete marmorirano smrdljivko opisujejo kot trdovratnega škodljivca, "
+        "ki ga je težko učinkovito obvladovati tudi s fitofarmacevtskimi sredstvi.",
+        "Realističen cilj je zato zmanjšati število smrdljivk v hiši in na vrtu, ne pa pričakovati, da bomo vrsto iz okolja "
+        "iztrebili. V nadaljevanju povzemam priporočila iz navedenih virov. Podatkov o učinkovitosti posameznih ukrepov nimam, "
+        "zato jih ne predstavljam kot zagotovljene rešitve.",
+        "<h3>1. Pred njihovim prihodom preprečite vstop</h3>",
+        "Po strokovnih priporočilih " + a("bf", "Biotehniške fakultete") + " se odrasle marmorirane smrdljivke pred prezimovanjem "
+        "ne parijo, septembra pa se začnejo zbirati in iskati zavetje v hišah, vrtnih lopah ter razpokah v lubju.",
+        "Ameriški univerzitetni svetovalci mehansko preprečevanje vstopa opisujejo kot najboljši ukrep. Zatesnite razpoke okoli "
+        "oken, vrat, fasadnih oblog in cevi, pa tudi odprtine za dimnikom in pod čelnimi deskami. Uporabite kakovosten silikonski "
+        "ali silikonsko-lateksni kit. Poškodovane komarnike popravite ali zamenjajte.",
+        "Novogoriška svetovalka za varstvo rastlin priporoča uporabo komarnikov ali podobnih mrež.",
+        "Ker se smrdljivke začnejo zbirati že septembra, je smiselno odprtine zatesniti še pred začetkom njihovega jesenskega "
+        "iskanja zavetja. To je moj sklep na podlagi opisanega vedenja vrste, ne neposredno priporočilo navedenega vira.",
+        "<h3>2. Če so že v hiši, jih posesajte ali ujemite – ne stiskajte</h3>",
+        "Večina slovenskih strokovnjakov, ki jih je vprašal " + a("n1", "N1") + ", priporoča, da smrdljivke posesate ali pometete, "
+        "jih ujamete v vrečko in zavržete ali pa jih ujamete v posodo z vodo in detergentom.",
+        a("umd", "University of Maryland Extension") + " svetuje, da vsebino sesalnika izpraznite v posodo z milnico. Na cev "
+        "sesalnika lahko namestite tudi nogavico, ki smrdljivke ujame, še preden dosežejo zbiralnik.",
+        "Ne stiskajte jih, saj lahko ob občutku ogroženosti ali stiskanju izločijo močan in neprijeten vonj.",
+        "<h3>3. Insekticidi in pasti: priporočila so zadržana</h3>",
+        "University of Maryland Extension uporabe pesticidov v hiši in okoli nje na splošno ne priporoča. Meglilniki ne uničijo "
+        "vseh smrdljivk, prav tako ne preprečijo vstopa novih osebkov.",
+        "Tudi slovenski strokovnjaki so pri uporabi insekticidov proti odraslim smrdljivkam in pri pasteh večinoma zadržani, "
+        "zlasti v kmetijskem okolju. Insekticidi so lahko slabo učinkoviti, pasti pa po oceni celjske svetovalke za varstvo "
+        "rastlin ne zagotavljajo zadovoljivega učinka.",
+        "Eden od strokovnjakov, ki jih je vprašal N1, dopušča uporabo pršil proti žuželkam na prostem, na primer na dvorišču, "
+        "ne pa na zaprtem balkonu.",
+        "Pri uporabi fitofarmacevtskih sredstev na vrtu vedno upoštevajte navodila na etiketi in informacije na portalu FITO-INFO.",
+        "<h3>4. Na vrtu pomagajo mreže in pregledovanje listov</h3>",
+        "Po podatkih portala " + a("ivr", "IVR") + " so protiinsektne mreže eden najučinkovitejših in okoljsko sprejemljivih ukrepov. "
+        "V sadovnjakih jih namestijo kmalu po cvetenju.",
+        "Uporaba takšnih mrež na domačem vrtu je prenos priporočil iz kmetijske prakse, ne neposredno preverjeno navodilo za "
+        "vsako vrsto vrta.",
+        "Samice marmorirane smrdljivke odlagajo jajčna legla s približno 20–30 jajčeci na spodnjo stran listov, predvsem od "
+        "sredine junija do konca septembra. Zato je smiselno občasno pregledati tudi spodnjo stran listov. Tudi to je moj "
+        "praktičen sklep iz podatkov o razmnoževanju vrste.",
+        "<h3>5. Naravni sovražniki delujejo počasi in niso rešitev za dom</h3>",
+        "Parazitske osice, ki odlagajo jajčeca v jajčeca smrdljivk, portal IVR opisuje kot pomembne naravne sovražnike. Med "
+        "domorodnimi vrstami sta <em>Anastatus bifasciatus</em> in <em>Trissolcus basalis</em>.",
+        "Samurajska osa (<em>Trissolcus japonicus</em>) je v Aziji zelo učinkovit naravni sovražnik marmorirane smrdljivke. "
+        "Uporabljajo jo tudi v programih biotičnega varstva v Severni Ameriki in Italiji.",
+        "V Krškem od leta 2025 poteka projekt z osico <em>Anastatus bifasciatus</em>, ki naj bi trajal do leta 2029. V prvem "
+        "letu so izmerili 28 % parazitiranih jajčec marmorirane smrdljivke, pri zeleni smrdljivki pa 85 %. Dolgoročnega "
+        "učinka projekta še ni mogoče oceniti.",
+        "Vnos osic poteka strokovno in nadzorovano, zato to ni ukrep za domačo uporabo.",
+        "<h3>6. Kaj lahko pričakujete?</h3>",
+        "Marmorirane smrdljivke se dobro premikajo, zato noben posamezen ukrep ne zagotavlja, da se ne bodo pojavile. Po oceni "
+        "novogoriške svetovalke za varstvo rastlin pa se z osebkom, ki ga odstranite iz hiše jeseni, spomladi ne boste srečali znova.",
+    ]
+    p_viri = [
+        "<ul>"
         "<li>" + a("ivr", "Marmorirana smrdljivka") + ", portal IVR (Modic, Žigon, Devetak, Jančar, Hoblaj; marec 2023).</li>"
         "<li>" + a("bf", "Strokovna priporočila za obvladovanje marmorirane smrdljivke") + ", Univerza v Ljubljani, Biotehniška "
         "fakulteta (Lešnik, Rot, Batistič, Vidrih, Bohinc, Godeša, Trdan; 2024).</li>"
-        "<li>" + a("n1", "Zakaj je spet toliko smrdljivcev in ali jih je res najbolje kar posesati") + ", N1 (Kamenarič, 14. 10. 2025).</li>"
-        "<li>" + a("umd", "Tips for Dealing With Brown Marmorated Stink Bugs") + ", University of Maryland Extension (2021); "
-        "ameriška priporočila, ne slovenska.</li>"
+        "<li>" + a("n1", "Zakaj je spet toliko smrdljivcev in ali jih je res najbolje kar posesati?") + ", N1 (Kamenarič, 14. 10. 2025).</li>"
+        "<li>" + a("umd", "Tips for Dealing With Brown Marmorated Stink Bugs") + ", University of Maryland Extension (2021). "
+        "Ameriška priporočila, ne slovenska.</li>"
         "<li>" + a("krsko", "Krško: projekt obvladovanja smrdljivcev") + ", Vse za moj dan (24. 5. 2026).</li>"
         "</ul>",
     ]
     p6 = [
-        'Če smrdljivca najdete doma ali na vrtu, ga lahko fotografirate in vnesete na '
-        '<a href="https://www.inaturalist.org/" style="color:var(--blue)" rel="noopener">iNaturalist</a>: vsako opažanje z datumom '
-        'in krajem v prihodnje izboljša takšne primerjave. Dnevne meritve postaje, ki sem jih uporabil, so v '
+        'Če marmorirano smrdljivko najdete doma ali na vrtu, jo lahko fotografirate in opažanje vnesete na '
+        '<a href="https://www.inaturalist.org/" style="color:var(--blue)" rel="noopener">iNaturalist</a>. Vsako opažanje z datumom '
+        'in krajem lahko pomaga izboljšati prihodnje primerjave.',
+        f'Dnevne meritve vremenske postaje, uporabljene v članku, so na voljo v '
         f'<a href="{SITE}/vreme/" style="color:var(--blue)">vremenskem arhivu</a>.',
     ]
 
     title = "Smrdljivcev je čedalje več? Podatki in vreme"
-    desc = (f"Marmoriranih smrdljivk je v opažanjih iNaturalist letos jeseni največ doslej, a čez leto njihov delež ne raste. "
-            f"Ob toplih jesenskih dneh so pogosteje opažene.")
-    lead = (f"Kratek odgovor: deloma drži. Med 15. 9. in 10. 10. je na iNaturalist za Slovenijo {opaz(now_h)} marmorirane smrdljivke, "
-            f"največ doslej; lani jih je bilo {prev_h}. Čez vse leto njihov delež med opažanji žuželk ne raste, ob toplih "
-            "jesenskih dneh pa so marmorirane smrdljivke opažene pogosteje, drugi smrdljivci pa ne. "
-            'Kako jih zmanjšati v hiši in na vrtu, piše <a href="#znebiti" style="color:var(--blue)">razdelek 06</a>.')
+    desc = ("Opažanj marmorirane smrdljivke je jeseni več kot prej, a njen delež med opažanji žuželk ne narašča. "
+            "Ob toplih dneh jo ljudje pogosteje opazijo.")
+    assert len(desc) <= 160, len(desc)
+    lead = "</p>\n<p class=\"lead\">".join([
+        f"Kratek odgovor: deloma drži. Med 15. septembrom in 10. oktobrom je bilo na iNaturalist v Sloveniji zabeleženih "
+        f"{opaz(now_h)} marmorirane smrdljivke, največ doslej za to obdobje. Lani jih je bilo {numw(prev_h)}.",
+        "Toda če pogledamo vse leto, delež marmoriranih smrdljivk med opažanji žuželk ne narašča. Ob toplih jesenskih dneh "
+        "jih ljudje sicer pogosteje opazijo, pri drugih smrdljivcih pa se enak vzorec ne pokaže.",
+        'Kako zmanjšati število smrdljivk v hiši in na vrtu, pojasnjujem v <a href="#znebiti" style="color:var(--blue)">6. razdelku</a>.'])
     sections = [
         {"label": "01 — opažanja", "heading": "Koliko jih je res?", "id": "opazanja", "paragraphs": p1},
         {"label": "02 — sezona", "heading": "Zakaj ravno jeseni?", "id": "sezona", "paragraphs": p2},
-        {"label": "03 — vreme", "heading": "Kdaj jih fotografirajo: topli dnevi", "id": "vreme", "paragraphs": p3},
+        {"label": "03 — vreme", "heading": "Kdaj jih fotografirajo? Ob toplih dneh", "id": "vreme", "paragraphs": p3},
         {"label": "04 — letos", "heading": "Je letošnja jesen izjemna?", "id": "letos", "paragraphs": p4},
         {"label": "05 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": p5},
         {"label": "06 — zmanjšanje", "heading": "Kako se jih znebiti?", "id": "znebiti", "paragraphs": p_znebiti},
-        {"label": "07 — kaj lahko storite", "heading": "Vnesite opažanje", "id": "opazanje", "paragraphs": p6},
+        {"label": "07 — viri", "heading": "Viri", "id": "viri", "paragraphs": p_viri},
+        {"label": "08 — kaj lahko storite", "heading": "Vnesite opažanje", "id": "opazanje", "paragraphs": p6},
     ]
     return {
         "title": title, "meta_description": desc,
         "tags": ["smrdljivci", "iNaturalist", "jesen", "podatki", str(last)],
         "section_label": "Podatkovna analiza", "og_photo": "weather-station", "og_accent_hex": "#22d3ee",
         "lead": lead, "sections": sections, "callout": None,
-        "sources_note": (f"Viri: iNaturalist (API, opažanja v Sloveniji, stanje {D['generated'][8:10].lstrip('0')}. "
+        "sources_note": (f"Podatki in metodologija: iNaturalist (API, opažanja v Sloveniji; stanje {D['generated'][8:10].lstrip('0')}. "
                          f"{int(D['generated'][5:7])}. {D['generated'][:4]}), meritve postaje IREICA1 (Meteorec). "
                          "Podatki: /data/inat-smrdljivci.json."),
     }
