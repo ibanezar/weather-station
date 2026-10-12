@@ -2279,7 +2279,7 @@ nobenega workflowa (isti vzorec kot `study_inat_lag.py`).
   lektura prek workflowa še ne.
 - **Besedilo je Filipov lektoriran tekst (12. 10. 2026)**: v generatorju je zapisan z njegovimi stavki, številke pa še vedno
   iz JSON-a (`numw()`/`numg()`/`opazw()` zapišejo števnike do 12 z besedo, `big()` ločuje tisočice s piko šele od 10.000).
-  Skupina je v besedilu in grafih »drugi smrdljivci«, ne »ostali«. Ukrepi imajo `<h3>`, viri so svoj razdelek 07.
+  Skupina je v besedilu in grafih »drugi smrdljivci«, ne »ostali«. Ukrepi imajo `<h3>` in so razdelek 02 (takoj za podatkom »koliko jih je«; bralec je pripomnil, da je članek sama statistika), viri so razdelek 07.
   Meta opis ≤ 160 znakov (assert), avtor govori v ednini. Obe tabeli (celo leto 1. 1.–10. 10.; jesen 15. 9.–10. 10.) uporabljata
   za vsa leta enako obdobje.
 - **Razdelek »Kako se jih znebiti?«** (12. 10. 2026, ob želji bralca): povzetek virov, ne lastnih preizkusov. Viri so v
