@@ -174,5 +174,13 @@
     "heating_level": "srednje",
     "black_ice_level": "nizko",
     "fog_top_m": 863
+  },
+  {
+    "date": "2026-10-12",
+    "snow_line_m": 1930,
+    "snow_cm_at_station": 0.0,
+    "heating_level": "srednje",
+    "black_ice_level": "srednje",
+    "fog_top_m": 855
   }
 ]
