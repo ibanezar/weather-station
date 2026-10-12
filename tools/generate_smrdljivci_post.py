@@ -17,6 +17,7 @@ import datetime
 import json
 import math
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -139,7 +140,9 @@ def legend(entries):
         f'<span><i style="background:{c}"></i>{n}</span>' for n, c in entries) + "</p>"
 
 
-STYLE = """<div><style>
+STYLE = """<style>
+.sm-gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.sm-gal-grid img{aspect-ratio:2/3;object-fit:cover}
 .sm-fig{margin:1.4rem 0;padding:1rem 1rem .8rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px}
 .sm-fig figcaption{color:var(--muted);font-size:.88rem;line-height:1.55;margin-top:.6rem}
 .sm-fig h3{font-family:'Space Grotesk',sans-serif;font-size:.95rem;margin:0 0 .4rem;color:var(--text)}
@@ -157,7 +160,22 @@ STYLE = """<div><style>
 .sm-tbl th:first-child,.sm-tbl td:first-child,.sm-tbl th:nth-child(2),.sm-tbl td:nth-child(2){text-align:left}
 .sm-tbl thead th{color:var(--muted);font-weight:600;font-size:.76rem}
 .sm-tbl tr.sm-now td{font-weight:700;background:rgba(34,211,238,.08)}
-</style></div>"""
+</style>"""
+
+# Fotografije so Filipove (img/blog/<slug>/foto-N.jpg, 640 × 960, brez EXIF). Podnapisi NE imenujejo vrst:
+# na nobeni ni marmorirana smrdljivka, o kateri piše članek, vrste pa niso potrjene.
+PHOTOS = [
+    ("foto-1.jpg", "Stenica z oranžnim vrhom ščitka in črno-oranžnim robom zadka na zelenem listu, pogled od zgoraj."),
+    ("foto-2.jpg", "Oranžna stenica z rosnimi kapljicami na beli cvetni listič, pogled od spredaj."),
+    ("foto-3.jpg", "Rjava stenica z dolgimi tipalnicami in rombastim zadkom na zelenem listu, pogled od zgoraj."),
+]
+
+
+def gallery_html():
+    imgs = "".join(f'<img src="/img/blog/{SLUG}/{f}" alt="{alt}" width="640" height="960">' for f, alt in PHOTOS)
+    return (STYLE + f'<figure class="post-photo sm-gal"><div class="sm-gal-grid">{imgs}</div>'
+            '<figcaption>Tri stenice. Marmorirane smrdljivke, o kateri piše članek, na teh fotografijah ni. '
+            'Foto: Filip Eremita.</figcaption></figure>')
 
 
 def fig(title, inner, caption):
@@ -212,17 +230,17 @@ def build_article(D):
 
     p1 = [
         "iNaturalist je zbirka opažanj, ki jih prostovoljci fotografirajo in objavijo, vrsto pa določi skupnost. "
-        f"Opazovalcev v Sloveniji je iz leta v leto več: vseh opažanj od 1. 1. do {cut_txt} je bilo leta {years[0]} "
-        f"{big(ytd[years[0]]['vse'])}, letos {big(ytd[last]['vse'])}. Samo štetje smrdljivcev bi zato kazalo rast "
+        f"Dejavnost v Sloveniji hitro raste: vseh opažanj od 1. 1. do {cut_txt} je bilo leta {years[0]} skupaj "
+        f"{big(ytd[years[0]]['vse'])}, letos pa {big(ytd[last]['vse'])}. Samo štetje smrdljivcev bi zato kazalo rast "
         "tudi tam, kjer je ni.",
         f"Zato sem za vsako leto vzel enako obdobje in marmorirano smrdljivko (<em>Halyomorpha halys</em>) primerjal z vsemi "
-        f"opažanji žuželk. Surovo število je zraslo z {ytd[years[0]]['halys']} leta {years[0]} na {ytd[last]['halys']} letos. "
-        f"Na 1000 opažanj žuželk pa je bil delež največji leta {peak_y} ({num(per1000(ytd[peak_y]['halys'], ytd[peak_y]['insecta']))}) "
-        f"in se od tam ni povečal (letos {num(per1000(ytd[last]['halys'], ytd[last]['insecta']))}).",
+        f"opažanji žuželk. Surovo število opažanj je zraslo z {ytd[years[0]]['halys']} v letu {years[0]} na {ytd[last]['halys']} letos. "
+        f"Na 1000 opažanj žuželk pa je bilo marmoriranih smrdljivk največ leta {peak_y} ({num(per1000(ytd[peak_y]['halys'], ytd[peak_y]['insecta']))}); "
+        f"od tam se delež ni povečal (letos {num(per1000(ytd[last]['halys'], ytd[last]['insecta']))}).",
         fig1,
         f"Vsi smrdljivci skupaj (družina <em>Pentatomidae</em>) ostajajo okoli 2 % opažanj žuželk: med {num(min(pen_share[1:]))} in "
-        f"{num(max(pen_share[1:]))} % v letih {years[1]}–{last}. Smrdljivcev kot skupine med fotografiranimi "
-        "žuželkami torej ni več kot pred leti.",
+        f"{num(max(pen_share[1:]))} % v letih {years[1]}–{last}. Smrdljivcev je med fotografiranimi "
+        "žuželkami torej enako kot pred leti.",
         tbl1,
     ]
 
@@ -247,9 +265,9 @@ def build_article(D):
     fig2 = fig("Kdaj med letom jih fotografirajo (vsa leta, v %)",
                '<div class="sm-row"><div>' + legend([("Marmorirana smrdljivka", CYAN)]) + c3 + '</div><div>'
                + legend([("Ostali smrdljivci", PURPLE)]) + c4 + '</div></div>',
-               f"Vsaka vrsta ima svojo skupino: višina palice je delež njenih opažanj v tistem mesecu "
-               f"(marmorirana {big(sum(mh))}, ostali {big(sum(mo))} opažanj; vsa leta, vsa kakovost). Oznake: "
-               "januar–december.")
+               f"Obe skupini imata isto lestvico. Višina palice je delež opažanj skupine v tistem mesecu "
+               f"(marmorirana {big(sum(mh))}, ostali {big(sum(mo))} opažanj; vsa leta, ne glede na kakovost določitve). "
+               "Oznake na osi so začetnice mesecev, od januarja do decembra.")
     loc = ["januarju", "februarju", "marcu", "aprilu", "maju", "juniju", "juliju", "avgustu", "septembru",
            "oktobru", "novembru", "decembru"]
     p2 = [
@@ -257,7 +275,7 @@ def build_article(D):
         f"({num(sh[ph], 0)} %). V {loc[ph]} je delež ostalih smrdljivcev že precej nižji ({num(so[ph], 0)} %).",
         f"Še bolj zgovoren je zimski del: od novembra do marca je {num(wh, 0)} % opažanj marmorirane smrdljivke, pri ostalih "
         f"smrdljivcih le {num(wo, 0)} %. To je skladno s tem, da marmorirana smrdljivka jeseni pogosto poišče zavetje za "
-        "prezimovanje v poslopjih (splošno znana lastnost vrste), vendar iz opažanj ne vem, kje je bila fotografirana.",
+        "prezimovanje v poslopjih (splošno znana lastnost vrste), vendar iz opažanj ni razvidno, kje je bila fotografirana.",
         fig2,
     ]
 
@@ -297,16 +315,16 @@ def build_article(D):
                  "Opažanj na dan (v oklepaju skupno število); razmerje toplejši proti hladnejšim dnevom z 95 % intervalom.")
     hx, ox = r[("15", "halys")], r[("15", "ostali")]
     p3 = [
-        f"Vreme pa pove, kdaj jih opazimo. Med 1. 10. in 5. 11. sem primerjal dneve glede na najvišjo temperaturo na postaji "
+        f"Vreme pa pove, kdaj jih ljudje fotografirajo. Med 1. 10. in 5. 11. sem primerjal dneve glede na najvišjo temperaturo na postaji "
         f"IREICA1. Ob dnevih s 15 °C ali več je bilo na dan {num(hx['w'], 2)} opažanja marmorirane smrdljivke, ob hladnejših "
         f"{num(hx['c'], 2)}: to je {num(hx['rr']['rr'])}-krat pogosteje (95 % interval {num(hx['rr']['lo'])}–{num(hx['rr']['hi'])}).",
-        f"Pri ostalih smrdljivcih zanesljive razlike ni: {num(ox['w'], 2)} proti {num(ox['c'], 2)} na dan, razmerje {num(ox['rr']['rr'])} "
-        f"(interval {num(ox['rr']['lo'])}–{num(ox['rr']['hi'])} vključuje 1). Isti vzorec se pokaže pri pragu 18 °C: "
+        f"Pri ostalih smrdljivcih zanesljive razlike ni: {num(ox['w'], 2)} proti {num(ox['c'], 2)} na dan; razmerje je {num(ox['rr']['rr'])}, "
+        f"interval ({num(ox['rr']['lo'])}–{num(ox['rr']['hi'])}) pa vključuje 1. Isti vzorec se pokaže pri pragu 18 °C: "
         f"{num(r[('18', 'halys')]['rr']['rr'])}-krat pri marmorirani in {num(r[('18', 'ostali')]['rr']['rr'])}-krat pri ostalih.",
         fig3,
-        "Ob toplih dneh ljudje fotografirajo več žuželk, zato sem ostale smrdljivce vzel za kontrolo: če bi šlo samo za to, "
-        "bi se razlika pokazala pri obeh skupinah. Marmorirano smrdljivko vidimo ob toplih jesenskih dneh pogosteje, "
-        "pri ostalih smrdljivcih te razlike ne vidimo. To je skladno z njenim zbiranjem pred prezimovanjem, vendar je vzorec majhen: "
+        "Ob toplih dneh ljudje fotografirajo več žuželk, zato sem ostale smrdljivce vzel za primerjavo: če bi šlo samo za to, "
+        "bi se razlika pokazala pri obeh skupinah. Marmorirana smrdljivka je ob toplih jesenskih dneh opažena pogosteje, "
+        "pri ostalih smrdljivcih te razlike ni. To je skladno z zbiranjem pred prezimovanjem, ki je za to vrsto znano, vendar je vzorec majhen: "
         f"ob hladnejših dneh je bilo samo {opaz(hx['cn'])}.",
         tbl3,
     ]
@@ -331,13 +349,14 @@ def build_article(D):
     rho = D["spearman_gdd_halys_autumn"]
     gdd_max_y = max(ys, key=lambda y: sy[y]["gdd"])
     p4 = [
-        f"Jeseni so torej letos res bolj opazne. V obdobju 15. 9.–10. 10. je {opaz(now_h)} marmorirane "
-        f"smrdljivke, lani {prev_h}, v nobenem prejšnjem letu več kot {prev_max}. Na 1000 opažanj žuželk je to "
-        f"{num(now_p)} proti {num(lo_p, 0)}–{num(hi_p, 0)} v letih {prev[0]}–{prev[-1]}.",
+        f"Jesen {last} je v podatkih res izstopajoča. V obdobju 15. 9.–10. 10. je {opaz(now_h)} marmorirane "
+        f"smrdljivke; lani jih je bilo {prev_h}" + (", kar je bilo doslej največ" if prev_h == prev_max
+                                                     else f", največ pa {prev_max}") +
+        f". Na 1000 opažanj žuželk je to {num(now_p)} proti {num(lo_p, 0)}–{num(hi_p, 0)} v letih {prev[0]}–{prev[-1]}.",
         f"Kaj je razlog? Letošnja jesen je bila toplejša (povprečna najvišja dnevna temperatura v tem obdobju {num(sy[last]['jesen_tmax'])} °C) kot "
-        f"v {warmer} od {len(prev)} prejšnjih let, a leta {warm_y} je bilo še toplejše ({num(sy[warm_y]['jesen_tmax'])} °C), "
+        f"v {warmer} od {len(prev)} prejšnjih let. Leta {warm_y} je bilo še toplejše ({num(sy[warm_y]['jesen_tmax'])} °C), "
         f"opažanj marmorirane smrdljivke pa le {aut[warm_y]['halys']}. Vsota stopinjskih dni od aprila do septembra (seštevek, za koliko stopinj je bilo "
-        f"povprečje dneva nad 10 °C) je bila največja leta {gdd_max_y}; korelacija med njo in jesenskimi opažanji je pri "
+        f"povprečje dneva nad 10 °C) je bila največja leta {gdd_max_y}. Korelacija med njo in jesenskimi opažanji je pri "
         f"{rho['n']} letih {num(rho['rho'], 2)}, kar za kakršen koli sklep ne zadošča.",
         tbl4,
         f"Za letošnjih {now_h} opažanj stoji {aut[last]['halys_observers']} različnih opazovalcev; lani je bilo {prev_h} opažanj "
@@ -350,7 +369,7 @@ def build_article(D):
     p5 = [
         "<ul>"
         "<li><strong>Opažanje ni štetje.</strong> iNaturalist pokaže, kje in kdaj je kdo fotografiral, ne koliko osebkov je bilo.</li>"
-        "<li><strong>Hiše so slabo pokrite.</strong> Smrdljivca na zavesi ljudje verjetno redko objavijo, zato iNaturalist "
+        "<li><strong>Hišni obiski so slabo pokriti.</strong> Smrdljivca na zavesi ljudje verjetno redko objavijo, zato iNaturalist "
         "hišne obiske najverjetneje podcenjuje.</li>"
         f"<li><strong>Majhni vzorci.</strong> V vremenskem oknu je samo {opaz(W['n_obs_halys'])} marmorirane smrdljivke.</li>"
         "<li><strong>Interval je optimističen.</strong> Opažanja istega opazovalca na isti dan niso neodvisna, pravi interval "
@@ -358,7 +377,7 @@ def build_article(D):
         "<li><strong>Ena postaja, vsa Slovenija.</strong> Vreme v Rečici ob Savinji ni vreme vsepovsod, kjer so smrdljivce "
         "fotografirali.</li>"
         "</ul>",
-        "<p style=\"margin-top:1rem\">Podatki so samo agregati; posameznih opažanj ne objavljam, ker imajo različne licence. Teh nekaj številk je v "
+        "<p style=\"margin-top:1rem\">Podatki so samo agregati; posameznih opažanj ne objavljam, ker imajo različne licence. Zbrane številke so v "
         f'<a href="/data/inat-smrdljivci.json" style="color:var(--blue)">data/inat-smrdljivci.json</a>.</p>',
     ]
     p6 = [
@@ -370,14 +389,14 @@ def build_article(D):
 
     title = "Smrdljivcev je čedalje več? Podatki in vreme"
     desc = (f"Marmoriranih smrdljivk je v opažanjih iNaturalist letos jeseni največ doslej, a čez leto njihov delež ne raste. "
-            f"Ob toplih dneh jih vidimo pogosteje.")
+            f"Ob toplih jesenskih dneh so pogosteje opažene.")
     lead = (f"Kratek odgovor: deloma drži. Med 15. 9. in 10. 10. je na iNaturalist za Slovenijo {opaz(now_h)} marmorirane smrdljivke, "
             f"največ doslej; lani jih je bilo {prev_h}. Čez vse leto njihov delež med opažanji žuželk ne raste, ob toplih "
-            "jesenskih dneh pa jih opazimo pogosteje, drugih smrdljivcev ne.")
+            "jesenskih dneh pa so marmorirane smrdljivke opažene pogosteje, drugi smrdljivci pa ne.")
     sections = [
-        {"label": "01 — opažanja", "heading": "Koliko jih je res", "id": "opazanja", "paragraphs": [STYLE] + p1},
-        {"label": "02 — sezona", "heading": "Zakaj jeseni", "id": "sezona", "paragraphs": p2},
-        {"label": "03 — vreme", "heading": "Kdaj jih vidimo: topli dnevi", "id": "vreme", "paragraphs": p3},
+        {"label": "01 — opažanja", "heading": "Koliko jih je res?", "id": "opazanja", "paragraphs": p1},
+        {"label": "02 — sezona", "heading": "Zakaj ravno jeseni?", "id": "sezona", "paragraphs": p2},
+        {"label": "03 — vreme", "heading": "Kdaj jih fotografirajo: topli dnevi", "id": "vreme", "paragraphs": p3},
         {"label": "04 — letos", "heading": "Je letošnja jesen izjemna?", "id": "letos", "paragraphs": p4},
         {"label": "05 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": p5},
         {"label": "06 — kaj lahko storite", "heading": "Vnesite opažanje", "id": "opazanje", "paragraphs": p6},
@@ -418,25 +437,46 @@ def main():
         print("  ⚠ ANTHROPIC_API_KEY ni nastavljen -- lektura preskočena.")
 
     today = datetime.date.today()
-    ftp.TODAY = today.isoformat()
     now_utc = datetime.datetime.now(datetime.timezone.utc)
+    # Posodobitev že objavljenega članka (--force): izvirni datum objave ostane, osveži se samo dateModified
+    # in polje `updated` v blog.json (touch_existing). Nov članek: današnji datum.
+    old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+    pub = re.search(r'"datePublished": "([^"]+)"', old) if old else None
+    posts = json.load(open(os.path.join(ROOT, "blog.json"), encoding="utf-8"))
+    prev_entry = next((e for e in posts if e.get("slug") == SLUG), None)
+    ftp.TODAY = prev_entry["date"] if prev_entry else today.isoformat()
     slug, html, entry, og_meta = ftp.build_html(
         final, today.year, today.month, now_utc, slug=SLUG,
         back=("/blog/", "← Vsi članki"), og_title="Smrdljivci\njeseni " + str(today.year),
         meta_note="podatkovna analiza", nav_label="O postaji", nav_href="/o-postaji.html")
+    lead = f'<p class="lead">{final["lead"]}</p>'
+    assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev galerije"
+    html = html.replace(lead, lead + "\n" + gallery_html(), 1)
+    if pub:
+        iso = now_utc.isoformat()
+        html = html.replace(f'"datePublished": "{iso}"', f'"datePublished": "{pub.group(1)}"')
+        html = html.replace(f'<meta property="article:published_time" content="{iso}">',
+                            f'<meta property="article:published_time" content="{pub.group(1)}">')
+        html = re.sub(r'("dateModified":\s*")[^"]*(")', rf'\g<1>{today.isoformat()}\g<2>', html, count=1)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"✓ zapisano: blog/{slug}.html")
+    print(f"✓ zapisano: blog/{slug}.html" + (" (posodobitev)" if pub else ""))
     if wire:
+        if "--og-photo" in sys.argv:       # original v polni ločljivosti; v repozitorij gre samo 640 × 960
+            os.environ["DRIVE_PHOTO_PATH"] = sys.argv[sys.argv.index("--og-photo") + 1]
         try:
             from generate_og_images import make_og
             make_og({"slug": slug, **og_meta})
             print(f"✓ OG slika: og/{slug}.jpg")
         except Exception as e:  # noqa: BLE001
             print(f"⚠ OG slika preskočena: {e}")
-        from generate_monthly_post import wire_all
-        wire_all(entry, entry["url"])
-        print("✓ blog.json, blog/index.html, sitemap.xml, blog/rss.xml osveženi.")
+        if prev_entry:
+            from generate_monthly_post import touch_existing
+            touch_existing(SLUG, wire=True)
+        else:
+            from generate_monthly_post import wire_all
+            wire_all(entry, entry["url"])
+            print("✓ blog.json, blog/index.html, sitemap.xml, blog/rss.xml osveženi.")
 
 
 if __name__ == "__main__":
