@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-11",
-  "issued": "11.10.2026 8:00 CEST",
-  "issued_at": "2026-10-11T08:30:58.180774+02:00",
-  "top_station": "Črnomelj - Dobliče",
-  "top_mm": 12,
+  "date": "2026-10-12",
+  "issued": "12.10.2026 8:00 CEST",
+  "issued_at": "2026-10-12T08:30:27.540366+02:00",
+  "top_station": "Vojsko",
+  "top_mm": 22,
   "n_stations": 20,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-10-11.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-10-11-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-10-12.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-10-12-story.jpg"
 }

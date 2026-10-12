@@ -2252,6 +2252,53 @@ modela sprejme samo z današnjim `generated_at`), `update-history` (trije termin
 zgodba (`load_gobe_index`/`load_igra_level` zahtevata današnji datum), `inject_forecast.py`
 in `generate_seo_pages.py` (MTR vrstice po datumu).
 
+## Smrdljivci: iNaturalist × vreme (`/blog/smrdljivci-inaturalist-vreme-1011.html`, 11. 10. 2026)
+
+Članek po bralčevem vprašanju »smrdljivcev je čedalje več, kaka povezava z vremenom?«. Ročno pognan, ne del
+nobenega workflowa (isti vzorec kot `study_inat_lag.py`).
+
+- `tools/study_inat_smrdljivci.py` povpraša iNaturalist (Slovenija, place 8228) in zapiše **samo agregate** v
+  `data/inat-smrdljivci.json` — posameznih opažanj ne hrani in ne objavlja (licence so po opažanju različne).
+  `tools/generate_smrdljivci_post.py` iz tega JSON-a sestavi članek (številke v besedilu, grafih in tabelah so vse
+  iz njega, nič ni vtipkano) in z `--wire` pokliče `wire_all()`. Objavljen članek se ne prepiše (`--force`).
+- **Surovo število opažanj ni merilo**: opazovalcev v Sloveniji je iz leta v leto več (vsa opažanja 5 439 → 74 247
+  od 1. 1. do 10. 10.). Vedno **enako obdobje** za vsa leta in **delež med vsemi opažanji žuželk**.
+- **Vreme brez kontrole ne šteje**: ob toplih dneh ljudje fotografirajo več vsega. Kontrola so OSTALI smrdljivci
+  (Pentatomidae brez *Halyomorpha halys*); šele razlika med marmorirano in njimi je trditev (okno 1. 10.–5. 11.,
+  najvišja temperatura IREICA1, prag 15 °C, 18 °C kot preverjanje). Interval je Poissonov in je **optimističen**
+  (opažanja istega opazovalca se kopičijo) — tako je tudi napisano.
+- **Število različnih opazovalcev** (`halys_observers`) gre zraven vsakega jesenskega števila: letošnjih 15 opažanj
+  stoji 7 opazovalcev, lani 8 opažanj 7 opazovalcev — povečanje je v opažanjih na opazovalca, ne v opazovalcih.
+- Vremenski kazalniki po letih (vsota stopinjskih dni apr–sep nad 10 °C, povprečna najvišja temperatura
+  15. 9.–10. 10.) so samo ob tabeli; Spearman na 7 letih (0,32) **ni dokaz** in tako piše. Postaja meri od
+  novembra 2019, zato vremenska analiza zajame leta 2020–2026.
+- `generate_smrdljivci_post.py` ima `assert`, da je letošnja jesen res največja doslej (uvod in naslov to trdita).
+  Če podatke osvežiš in trditev ne drži več, generator pade — besedilo je treba pregledati, ne zaobiti asserta.
+- Članek je **posnetek na dan objave**; ob osvežitvi podatkov se sam ne spremeni. Lektura še ni bila opravljena
+  (`lektura.yml` je izklopljena od 2. 10. 2026); na FB/IG ne gre samodejno (nova vrsta vsebine), pošlji ga po
+  pregledu s `social-repost.yml`.
+- **Fotografije** (12. 10. 2026): tri Filipove fotografije stenic za uvodom (`img/blog/<slug>/foto-N.jpg`, 640 × 960,
+  **brez EXIF** — originali (1335 × 2000) ne gredo v repozitorij). Vrste je določil Filip: fotografiji 1 in 2 uhata rusonožka, fotografija 3 rjava usnjatka (v `PHOTOS` v generatorju). Na nobeni
+  ni marmorirana smrdljivka, zato podpis to pove. Latinskih imen in družin v podpisu ni (preslikava slovenskih imen ni preverjena v viru). Fotografija 1 je tudi
+  ozadje OG slike (`--og-photo <original>`; privzeta slika postaje je bila generična).
+- **Posodobitev že objavljenega članka**: `generate_smrdljivci_post.py --force --wire` ohrani izvirni `datePublished`,
+  datum v glavi in vnos v `blog.json`; nastavi `dateModified` in `updated` (`touch_existing()`), `wire_all()` ne
+  pokliče drugič. Slogovni pregled po `docs/slog-pisanja.md` (ednina, brez »kontrole« in »vidimo«) je opravljen;
+  lektura prek workflowa še ne.
+- **Besedilo je Filipov lektoriran tekst (12. 10. 2026)**: v generatorju je zapisan z njegovimi stavki, številke pa še vedno
+  iz JSON-a (`numw()`/`numg()`/`opazw()` zapišejo števnike do 12 z besedo, `big()` ločuje tisočice s piko šele od 10.000).
+  Skupina je v besedilu in grafih »drugi smrdljivci«, ne »ostali«. Ukrepi imajo `<h3>` in so razdelek 02 (takoj za podatkom »koliko jih je«; bralec je pripomnil, da je članek sama statistika), viri so razdelek 07.
+  Meta opis ≤ 160 znakov (assert), avtor govori v ednini. Obe tabeli (celo leto 1. 1.–10. 10.; jesen 15. 9.–10. 10.) uporabljata
+  za vsa leta enako obdobje.
+- **Razdelek »Kako se jih znebiti?«** (12. 10. 2026, ob želji bralca): povzetek virov, ne lastnih preizkusov. Viri so v
+  slovarju `SRC` v generatorju in na koncu razdelka: portal IVR (Modic idr., 2023), Strokovna priporočila Biotehniške
+  fakultete (2024), N1 (14. 10. 2025), University of Maryland Extension (2021, **ameriška** priporočila, tako tudi označena)
+  in Vse za moj dan o Krškem (24. 5. 2026). Pravila: **ne priporoči konkretnih pesticidov ali odmerkov** (samo napoti na
+  etiketo in FITO-INFO, kot pri agrometeu); vsak ukrep ima vir, lastni sklepi so označeni z »moj sklep«; N1 navaja ustanove
+  svetovalk nedosledno, zato so v besedilu kraji (novogoriška, celjska svetovalka). WVU Extension vrača 403 in ni naveden.
+  Trditev o zbiranju v poslopjih zdaj navaja Strokovna priporočila (prej »splošno znana lastnost«). Predloge za FB, ki so
+  trdile »nasvetov za zatiranje v članku ni«, so zastarele.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
