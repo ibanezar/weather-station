@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 12 Oct 2026 12:11:12 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 12 Oct 2026 20:00:35 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>So zime še kar so bile? Podatki in spomin</title>
+      <link>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</guid>
+      <pubDate>Mon, 12 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Ledenih dni je v Ljubljani za dve tretjini manj kot v letih 1981–2002, snega pa več kot polovico manj. Kaj to pomeni za otroke, ki poznajo samo današnje zime?</description>
+      <category>zima</category>
+      <category>sneg</category>
+      <category>podnebje</category>
+      <category>otroci</category>
+      <category>podatki</category>
+    </item>
     <item>
       <title>Smrdljivcev je čedalje več? Podatki in vreme</title>
       <link>https://meteorec.si/blog/smrdljivci-inaturalist-vreme-1011.html</link>
