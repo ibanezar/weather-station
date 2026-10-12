@@ -2270,9 +2270,8 @@ nobenega workflowa (isti vzorec kot `study_inat_lag.py`).
   (`lektura.yml` je izklopljena od 2. 10. 2026); na FB/IG ne gre samodejno (nova vrsta vsebine), pošlji ga po
   pregledu s `social-repost.yml`.
 - **Fotografije** (12. 10. 2026): tri Filipove fotografije stenic za uvodom (`img/blog/<slug>/foto-N.jpg`, 640 × 960,
-  **brez EXIF** — originali (1335 × 2000) ne gredo v repozitorij). Podnapisi in `alt` **ne imenujejo vrst**: na nobeni
-  ni marmorirana smrdljivka, vrste pa niso potrjene (po videzu tretja verjetno ni iz družine smrdljivcev, ampak iz
-  Coreidae — mnenje, ne podatek). Ko Filip vrste potrdi, jih dopiši v `PHOTOS` v generatorju. Fotografija 1 je tudi
+  **brez EXIF** — originali (1335 × 2000) ne gredo v repozitorij). Vrste je določil Filip: fotografiji 1 in 2 uhata rusonožka, fotografija 3 rjava usnjatka (v `PHOTOS` v generatorju). Na nobeni
+  ni marmorirana smrdljivka, zato podpis to pove. Latinskih imen in družin v podpisu ni (preslikava slovenskih imen ni preverjena v viru). Fotografija 1 je tudi
   ozadje OG slike (`--og-photo <original>`; privzeta slika postaje je bila generična).
 - **Posodobitev že objavljenega članka**: `generate_smrdljivci_post.py --force --wire` ohrani izvirni `datePublished`,
   datum v glavi in vnos v `blog.json`; nastavi `dateModified` in `updated` (`touch_existing()`), `wire_all()` ne

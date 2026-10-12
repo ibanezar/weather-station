@@ -162,19 +162,19 @@ STYLE = """<style>
 .sm-tbl tr.sm-now td{font-weight:700;background:rgba(34,211,238,.08)}
 </style>"""
 
-# Fotografije so Filipove (img/blog/<slug>/foto-N.jpg, 640 × 960, brez EXIF). Podnapisi NE imenujejo vrst:
-# na nobeni ni marmorirana smrdljivka, o kateri piše članek, vrste pa niso potrjene.
+# Fotografije so Filipove (img/blog/<slug>/foto-N.jpg, 640 × 960, brez EXIF). Vrste je določil Filip (12. 10. 2026):
+# 1 in 2 uhata rusonožka, 3 rjava usnjatka. Na nobeni ni marmorirana smrdljivka, o kateri piše članek.
 PHOTOS = [
-    ("foto-1.jpg", "Stenica z oranžnim vrhom ščitka in črno-oranžnim robom zadka na zelenem listu, pogled od zgoraj."),
-    ("foto-2.jpg", "Oranžna stenica z rosnimi kapljicami na beli cvetni listič, pogled od spredaj."),
-    ("foto-3.jpg", "Rjava stenica z dolgimi tipalnicami in rombastim zadkom na zelenem listu, pogled od zgoraj."),
+    ("foto-1.jpg", "Uhata rusonožka z oranžnim vrhom ščitka in črno-oranžnim robom zadka na zelenem listu, pogled od zgoraj."),
+    ("foto-2.jpg", "Uhata rusonožka, prekrita z rosnimi kapljicami, na beli cvetni listič, pogled od spredaj."),
+    ("foto-3.jpg", "Rjava usnjatka z dolgimi tipalnicami in rombastim zadkom na zelenem listu, pogled od zgoraj."),
 ]
 
 
 def gallery_html():
     imgs = "".join(f'<img src="/img/blog/{SLUG}/{f}" alt="{alt}" width="640" height="960">' for f, alt in PHOTOS)
     return (STYLE + f'<figure class="post-photo sm-gal"><div class="sm-gal-grid">{imgs}</div>'
-            '<figcaption>Tri stenice. Marmorirane smrdljivke, o kateri piše članek, na teh fotografijah ni. '
+            '<figcaption>Uhata rusonožka (levo in v sredini) in rjava usnjatka (desno). Marmorirane smrdljivke, o kateri piše članek, na teh fotografijah ni. '
             'Foto: Filip Eremita.</figcaption></figure>')
 
 
