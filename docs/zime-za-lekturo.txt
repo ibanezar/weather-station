@@ -1,0 +1,50 @@
+So zime še kar so bile? Podatki in spomin
+
+Ledenih dni je v Ljubljani za dve tretjini manj kot v letih 1981–2002, snega pa več kot polovico manj. Kaj to pomeni za otroke, ki poznajo samo današnje zime?
+
+Kratek odgovor: deloma drži. V Ljubljani je bilo v zimah 1981–2002 povprečno 16 ledenih dni (ves dan pod 0 °C), v zadnjih desetih zimah pa 5. Snežna odeja je v Ljubljani nekoč ležala povprečno 53 dni na zimo, zdaj 20 dni.
+
+Spomin pa je pogosto lepši od povprečja: tudi med letoma 1995 in 2003 sta bili dve zimi z manj kot tremi tedni snega. Spodaj so podatki, omejitve in misli o tem, kako zimo vidi otrok, ki starih zim ni poznal.
+
+## Mraza je manj, ledenih dni še posebej
+Začnimo z mrazom. Ledeni dan je dan, ko se temperatura ves dan ne dvigne nad 0 °C. Njihovo število na zimo je bilo v Ljubljani v zimah 1981–2002 povprečno 16,4, v zadnjih desetih zimah (2013–2022) pa 5,4. V Šmartnem pri Slovenj Gradcu, ki je hladnejša kotlina, je bilo prej 21,1, zdaj 8,0.
+Povprečna temperatura zime (december–februar) je v Ljubljani zrasla z 1,1 °C na 3,2 °C, v Šmartnem z –1,1 °C na 0,8 °C. V obeh primerih je to približno 2 °C več.
+[GRAF] Ledeni dnevi v zimi (december–februar): koliko dni je bilo ves dan pod 0 °C? — Povprečje ledenih dni (najvišja dnevna temperatura pod 0 °C) na zimo po obdobjih. Vir: GHCN-Daily (ARSO). Zima 2022/23 je zadnja v podatkih.
+[TABELA] Povprečja na zimo. Dan z zmrzaljo: najnižja temperatura pod 0 °C; ledeni dan: najvišja pod 0 °C; dan pod –10 °C: najnižja –10 °C ali manj. Zima je december–februar in velja, če ima vsaj 95 % dni obeh meritev.
+Dni z zmrzaljo (najnižja temperatura pod 0 °C) je sicer tudi manj, a upad je precej manjši: v Šmartnem je bilo povprečno 80 na zimo, zdaj 74. Noči so v kotlinah še vedno mrzle. Izginjajo predvsem dnevi, ko mraz ne popusti niti opoldne.
+
+## Sneg: krajši in manj zanesljiv
+Sneg je zgodba zase, ker potrebuje mraz in padavine hkrati. Podatki o snežni odeji v Ljubljani, ki jih imam, segajo samo do leta 1995 nazaj. V zimah 1995/96–2003/04 je snežna odeja od novembra do marca ležala povprečno 53 dni, v zimah 2015/16–2024/25 pa 20 dni.
+[GRAF] Dnevi s snežno odejo od novembra do marca, Ljubljana, po zimah — Označeno je leto, v katerem zima začne (95 = zima 1995/96). Zime 2004/05 v podatkih ni. Vir: GHCN-Daily (ARSO), višina snežne odeje.
+[TABELA] Povprečja na zimo. Podatki o snegu so iz Ljubljane, ne iz Zgornje Savinjske doline.
+Ni pa res, da so bile vse zime nekoč take. Od devetih zim 1995/96–2003/04 jih je imelo pet vsaj 60 dni snega, dve pa največ 20 (zimi 1997/98 in 2000/01: po 13 dni). V zadnjih desetih zimah ni bilo nobene z vsaj 60 dnevi, sedem pa jih je imelo največ 20.
+Najdaljša snežna zima v teh podatkih je 1995/96: odeja je ležala 80 dni zapored (največ 36 cm). Takšna zima se spominu vtisne; tiste s 13 dnevi snega pa ne.
+
+## Kaj kaže postaja v Rečici?
+Moja postaja IREICA1 meri od novembra 2019, to je 7 zim. Za trend je premalo, za sliko današnje doline pa zadošča. V teh zimah je bilo v Rečici od 1 do 6 ledenih dni, povprečna temperatura od decembra do februarja pa od 1,8 do 3,9 °C. Snežne odeje postaja ne meri, zato za Rečico podatka o snegu nimam.
+[TABELA] Povprečna temperatura je povprečje dnevnih najvišjih in najnižjih vrednosti (dec.–feb.).
+Rečice ne smemo enačiti z nobeno od teh postaj: stoji na dnu doline in ima svojo mikroklimo. Povprečna temperatura je bila v vseh štirih skupnih zimah med ljubljansko in šmarško, po številu ledenih dni pa je bila večinoma bliže Ljubljani.
+
+## Zima, ki je otrok ne pozna
+Otrok, ki je rojen leta 2018, je do zdaj doživel zime z 17, 10, 17, 7, 23, 16 in 8 dnevi snežne odeje (Ljubljana, zime 2018/19–2024/25; povprečno 14 dni). Zanj je to zima. Ribiški biolog Daniel Pauly je leta 1995 opisal tako imenovani sindrom premikajoče se osnove (shifting baseline syndrome): vsaka generacija za normalno vzame stanje, ki ga je videla na začetku, in počasnih sprememb ne opazi. Pauly je to opisal za ribolov, a načelo velja tudi za zimo.
+Pri odraslih deluje obratno: spomin hrani izjeme, ne povprečja. Zima z 80 dnevi snega se vtisne; zima s 13 dnevi ne. To je moja razlaga, ne meritev: o spominu na zime nimam podatkov, zato je ne trdim kot dejstvo.
+Po mojem opažanju vrtci in šole še vedno opevajo zimo, v kateri sneg leži tri mesece. Domnevam, da se kultura prilagaja počasneje kot vreme, a to je domneva. Raziskave o tem, kako otroci v Sloveniji doživljajo zimo, nisem našel.
+Pesem o skoraj treh mesecih snega torej ni izmišljena: take zime so bile, v zadnjih desetih zimah v Ljubljani pa nobene. Otrok jo zato pozna predvsem iz pesmi. Hkrati pa tudi nekoč ni bila vsaka zima taka.
+
+## Česa podatki ne povedo
+• Ljubljana ni Rečica. Bežigrad je mestna postaja na 299 m, Šmartno kotlina na 444 m. Zgornja Savinjska dolina je med njima in ni nobena od njiju.
+• Sneg je samo iz Ljubljane. GHCN za Ljubljano hrani le dneve z odejo, ničle ne. Dan brez zapisa štejem za dan brez odeje; zimi 2004/05 ni nobenega zapisa, zato je nisem upošteval. Pred letom 1995 ni snežnih podatkov, zato se mojih osemdesetih let po snegu ne da preveriti, po temperaturi pa.
+• Podatki o temperaturi segajo do zime 2022/23. Kasnejših zim v teh virih ni.
+• Obdobja so poljubno izbrana. 1981–2002 je obdobje mojega spomina, 2013–2022 zadnjih deset zim s podatki; druga razdelitev da druge številke, a smer ostane ista.
+• Zimski občutek ni samo temperatura in sneg. Megla, oblačnost, veter in dolžina dneva so v zimi prav tako pomembni; tu jih ne merimo.
+
+## Viri
+• Global Historical Climatology Network – Daily, NOAA NCEI: Ljubljana Bežigrad (SIM00014015), Šmartno pri Slovenj Gradcu (SIE00115136). Podatki ARSO prek ECA&D. Prenos 12. 10. 2026.
+• Meritve postaje IREICA1 (Meteorec), od novembra 2019. Notranjih meritev nisem uporabil.
+• Pauly, D. (1995): Anecdotes and the shifting baseline syndrome of fisheries. Trends in Ecology & Evolution 10(10): 430.
+Uporaba vsebine. Besedilo, grafe in podatke lahko povzamete le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov prosim vprašajte vnaprej.
+
+## Zapišite svojo zimo
+Zimo v naši dolini spremljamo na strani Zima, vse dnevne meritve postaje pa so v vremenskem arhivu. Ko bo naslednjič padel sneg, si zapišite datum in koliko dni je ležal: čez nekaj let boste imeli svoje podatke namesto spomina.
+
+Podatki in metodologija: NOAA GHCN-Daily (Ljubljana, Šmartno), meritve postaje IREICA1 (Meteorec). Podatki: /data/zime.json.
