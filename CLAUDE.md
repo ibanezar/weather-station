@@ -2277,6 +2277,11 @@ nobenega workflowa (isti vzorec kot `study_inat_lag.py`).
   datum v glavi in vnos v `blog.json`; nastavi `dateModified` in `updated` (`touch_existing()`), `wire_all()` ne
   pokliče drugič. Slogovni pregled po `docs/slog-pisanja.md` (ednina, brez »kontrole« in »vidimo«) je opravljen;
   lektura prek workflowa še ne.
+- **Besedilo je Filipov lektoriran tekst (12. 10. 2026)**: v generatorju je zapisan z njegovimi stavki, številke pa še vedno
+  iz JSON-a (`numw()`/`numg()`/`opazw()` zapišejo števnike do 12 z besedo, `big()` ločuje tisočice s piko šele od 10.000).
+  Skupina je v besedilu in grafih »drugi smrdljivci«, ne »ostali«. Ukrepi imajo `<h3>`, viri so svoj razdelek 07.
+  Meta opis ≤ 160 znakov (assert), avtor govori v ednini. Obe tabeli (celo leto 1. 1.–10. 10.; jesen 15. 9.–10. 10.) uporabljata
+  za vsa leta enako obdobje.
 - **Razdelek »Kako se jih znebiti?«** (12. 10. 2026, ob želji bralca): povzetek virov, ne lastnih preizkusov. Viri so v
   slovarju `SRC` v generatorju in na koncu razdelka: portal IVR (Modic idr., 2023), Strokovna priporočila Biotehniške
   fakultete (2024), N1 (14. 10. 2025), University of Maryland Extension (2021, **ameriška** priporočila, tako tudi označena)

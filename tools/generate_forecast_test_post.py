@@ -163,7 +163,7 @@ def build_html(article, y, m, now_utc, slug=None, back=("/test-napovedi/", "← 
     sec_parts = []
     for s in article["sections"]:
         paras = "\n".join(
-            p if p.lstrip().startswith(("<ul", "<ol", "<table", "<p", "<div", "<figure"))
+            p if p.lstrip().startswith(("<ul", "<ol", "<table", "<p", "<div", "<figure", "<h3"))
             else f"    <p>{p}</p>"
             for p in s["paragraphs"]
         )
