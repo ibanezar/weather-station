@@ -60,6 +60,7 @@ from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import story_gate  # noqa: E402 — stanje večerne kartice (evening_posted_for)
 from crnivec_zones import fetch_drsi_crnivec, pick_zone, with_measurement  # noqa: E402 — deljeno z generate_crnivec_page.py, glej opombo tam
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -410,6 +411,7 @@ def build_ctx():
         varpolje=varpolje,
         aq=aq, hist=hist, hist_yesterday=hist_yesterday, gobe=gobe, igra=igra,
         crnivec=crnivec,
+        evening_done=story_gate.evening_posted_for(today.isoformat()),
     )
 
 
@@ -1159,9 +1161,25 @@ def t_general(ctx):
                 C_CYAN, photo)
 
 
+# Teme, ki govorijo o jutru. Opoldne »kako hladno bo jutro« pove nekaj, kar je
+# že mimo (cron zamuja ure, okno objave sega do 18:00). Take teme gredo ven
+# samo zjutraj; njihovo mesto je VEČERNA kartica dan prej (evening_card()).
+MORNING_TOPICS = {"FROST", "COLD_MORNING", "FOG_MORNING"}
+MORNING_LAST_HOUR = 10
+
+
+def morning_topics_allowed(now, evening_done):
+    """Jutranje teme: samo pred MORNING_LAST_HOUR in samo, če jih večerna
+    kartica za današnje jutro še ni povedala (dvakrat isto ni novica)."""
+    return now.hour < MORNING_LAST_HOUR and not evening_done
+
+
 def pick_topic(ctx):
     eligible = []
+    allow_morning = morning_topics_allowed(ctx["now"], ctx.get("evening_done", False))
     for name, priority, fn in TOPICS:
+        if name in MORNING_TOPICS and not allow_morning:
+            continue
         try:
             result = fn(ctx)
         except Exception as e:
@@ -1349,7 +1367,7 @@ def prune_old(today):
         if not name.endswith(".jpg"):
             continue
         try:
-            d = datetime.date.fromisoformat(name[:-4])
+            d = datetime.date.fromisoformat(name[:10])  # tudi »<datum>-vecer.jpg«
         except ValueError:
             continue
         if d < cutoff:
@@ -1382,9 +1400,137 @@ def count_variants_by_ast():
     return counts
 
 
+# ────────────────────────── večerna kartica (jutri zjutraj) ──────────────────────────
+
+EVENING_LATEST = os.path.join(OUT_DIR, "latest-evening.json")
+MORNING_END_HOUR = 9  # »jutro« = ure 0:00-9:00 jutrišnjega dne
+
+
+def fetch_tomorrow():
+    url = (
+        "https://api.open-meteo.com/v1/forecast"
+        f"?latitude={LAT}&longitude={LON}"
+        "&hourly=temperature_2m"
+        "&daily=temperature_2m_max,precipitation_sum,weather_code"
+        "&timezone=Europe%2FLjubljana&forecast_days=2"
+    )
+    return fetch_json(url)
+
+
+def build_evening_ctx():
+    """Kontekst za kartico o JUTRIŠNJEM jutru. Min. temperatura je najnižja
+    urna vrednost med 0:00 in 9:00 jutri (dnevni minimum bi lahko padel na
+    23:59 ob prehodu fronte, kar ni jutro)."""
+    now = datetime.datetime.now(TZ)
+    tomorrow = now.date() + datetime.timedelta(days=1)
+    fc = fetch_tomorrow()
+    hourly = fc.get("hourly", {})
+    daily = fc.get("daily", {})
+    temps = [t for ts, t in zip(hourly.get("time", []), hourly.get("temperature_2m", []))
+             if t is not None and ts.startswith(tomorrow.isoformat())
+             and int(ts[11:13]) <= MORNING_END_HOUR]
+    try:
+        i = daily["time"].index(tomorrow.isoformat())
+    except (KeyError, ValueError):
+        i = None
+
+    def d(field):
+        arr = daily.get(field) or []
+        return arr[i] if i is not None and i < len(arr) else None
+
+    current = fetch_current()
+    return dict(
+        now=now, tomorrow=tomorrow, date_iso=tomorrow.isoformat(),
+        tmin=min(temps) if temps else None,
+        tmax=d("temperature_2m_max"), rain=d("precipitation_sum") or 0,
+        code=d("weather_code"), cond=WMO.get(d("weather_code"), ""),
+        current_temp=((current.get("outdoor") or {}).get("temperature") or {}).get("value"),
+    )
+
+
+def evening_card(ctx):
+    """Kartica za jutri zjutraj ali None, če ni nič, kar bi bilo vredno večerne
+    objave (samo zmrzal in izrazito hladno jutro, kot pri jutranjih temah)."""
+    tmin = ctx["tmin"]
+    if tmin is None:
+        return None
+    stats = [("Najvišja jutri", f"{num_sl(ctx['tmax'], 1)} °C"),
+             ("Vreme jutri", ctx["cond"] or "jasno"),
+             ("Dež jutri", f"{num_sl(ctx['rain'], 1)} mm")]
+    if tmin <= 0:
+        name = "FROST_TOMORROW"
+        variants = [
+            ("Jutri zjutraj\nzmrzal", "napovedan minimum jutri zjutraj"),
+            ("Pokrij rastline,\njutri zmrzuje", "napovedan minimum jutri zjutraj"),
+            ("Noč pod ničlo", "napovedan minimum jutri zjutraj"),
+            ("Jutri bo\nzmrzovalo", "napovedan minimum jutri zjutraj"),
+            ("Hladna past\nza rastline", "napovedan minimum jutri zjutraj"),
+        ]
+        headline, big_sub = pick(ctx, name, variants)
+        return card(ctx, name, headline, f"{num_sl(tmin, 1)} °C", big_sub, stats,
+                    C_CYAN, "night-fog-valley", eyebrow="POZOR JUTRI ZJUTRAJ")
+    if tmin <= 5:
+        name = "COLD_TOMORROW"
+        variants = [
+            ("Jutri zjutraj\nmrzlo", "napovedan minimum jutri zjutraj"),
+            ("Jutri zjutraj\nhladen start", "napovedan minimum jutri zjutraj"),
+            ("Jutri obleci\ntopleje", "napovedan minimum jutri zjutraj"),
+            ("Hladen\nstart jutrišnjega dne", "napovedan minimum jutri zjutraj"),
+            ("Jutri zjutraj\nbo sveže", "napovedan minimum jutri zjutraj"),
+        ]
+        headline, big_sub = pick(ctx, name, variants)
+        return card(ctx, name, headline, f"{num_sl(tmin, 1)} °C", big_sub, stats,
+                    C_CYAN, "misty-valley", eyebrow="JUTRI ZJUTRAJ")
+    return None
+
+
+def set_output(key, value):
+    out = os.environ.get("GITHUB_OUTPUT")
+    if out:
+        with open(out, "a", encoding="utf-8") as f:
+            f.write(f"{key}={value}\n")
+
+
+def main_evening(dry):
+    ctx = build_evening_ctx()
+    result = evening_card(ctx)
+    tmin = ctx["tmin"]
+    print(f"jutranji minimum za {ctx['date_iso']}: "
+          f"{'–' if tmin is None else num_sl(tmin, 1) + ' °C'}")
+    if result is None:
+        print("večerna kartica: ni potrebna (jutro ni zmrzal ali izrazito hladno)")
+        set_output("card", "false")
+        return 0
+    print(f"predlog: {result['topic']} — {result['headline'].replace(chr(10), ' ')} [{result['big']}]")
+    if dry:
+        print("(--dry-run: nič ni zapisano)")
+        set_output("card", "false")
+        return 0
+
+    os.makedirs(OUT_DIR, exist_ok=True)
+    # Na kartici je datum JUTRIŠNJEGA dne: bralec zvečer vidi, za kdaj velja.
+    img = render(result, datetime.datetime.combine(ctx["tomorrow"], datetime.time(6, 0), TZ),
+                 ctx["current_temp"])
+    name = f"{ctx['date_iso']}-vecer.jpg"
+    img.save(os.path.join(OUT_DIR, name), "JPEG", quality=90)
+    print(f"✓ zapisano: og/story/{name}")
+    prune_old(ctx["now"].date())
+    meta = {"date": ctx["date_iso"], "topic": result["topic"],
+            "image": f"{SITE}/og/story/{name}", "generated_at": ctx["now"].isoformat()}
+    with open(EVENING_LATEST, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    print(f"✓ zapisano: og/story/latest-evening.json ({meta['image']})")
+    set_output("card", "true")
+    return 0
+
+
 def main():
     dry = "--dry-run" in sys.argv
     list_topics = "--list-topics" in sys.argv
+
+    if "--evening" in sys.argv:
+        return main_evening(dry)
 
     if list_topics:
         counts = count_variants_by_ast()

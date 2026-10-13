@@ -85,5 +85,49 @@ for name in ("storm_map_gate",):
     check(run_gate(m, 7, last_run="2026-09-30") == (True, False), "včerajšnja karta ne blokira današnje")
     check(run_gate(m, 3, force=True) == (True, False), "--force ni pozno in ni omejeno z uro")
 
+# Večerna kartica (zmrzal/hladno jutro dan prej, 13. 10. 2026): okno 17–23, stanje po
+# datumu JUTRIŠNJEGA jutra; jutranja zgodba jutranjih tem opoldne ne sme več objaviti.
+print("\nstory_gate --evening")
+sg = importlib.import_module("story_gate")
+
+
+def run_evening(hour, last_for=None, force=False):
+    FakeDT.fixed = FakeDT(2026, 10, 1, hour, 30, tzinfo=sg.TZ)
+    sg.STATE_EVENING = os.path.join(tempfile.mkdtemp(), "ev.json")
+    if last_for:
+        sg.save_state({"lastFor": last_for}, sg.STATE_EVENING)
+    out = os.path.join(tempfile.mkdtemp(), "out")
+    os.environ["GITHUB_OUTPUT"] = out
+    fake = type("D", (), {"datetime": FakeDT, "date": datetime.date, "timedelta": datetime.timedelta})
+    saved_dt, saved_argv = sg.datetime, sys.argv
+    sg.datetime = fake
+    sys.argv = ["gate", "check", "--evening"] + (["--force"] if force else [])
+    try:
+        with redirect_stdout(io.StringIO()):
+            sg.main()
+    finally:
+        sg.datetime, sys.argv = saved_dt, saved_argv
+    return dict(line.split("=") for line in open(out).read().split())["proceed"] == "true"
+
+
+check(not run_evening(14), "14:30: prezgodaj za večerno kartico")
+check(run_evening(17), "17:30: v oknu")
+check(run_evening(22), "22:30 (zamujen cron): še v oknu")
+check(not run_evening(23), "23:30: prepozno")
+check(not run_evening(18, last_for="2026-10-02"), "kartica za jutri že objavljena: nič")
+check(run_evening(18, last_for="2026-10-01"), "kartica za DANES ne blokira kartice za jutri")
+check(run_evening(3, force=True), "--force ni omejen z uro")
+sg.STATE_EVENING = os.path.join(tempfile.mkdtemp(), "ev.json")
+sg.save_state({"lastFor": "2026-10-02"}, sg.STATE_EVENING)
+check(sg.evening_posted_for("2026-10-02") and not sg.evening_posted_for("2026-10-03"),
+      "evening_posted_for po datumu")
+
+print("\njutranje teme zgodbe")
+sc = importlib.import_module("generate_story_card")
+mk = lambda h: datetime.datetime(2026, 10, 1, h, 0)
+check(sc.morning_topics_allowed(mk(6), False), "6:00: jutranje teme dovoljene")
+check(not sc.morning_topics_allowed(mk(13), False), "13:00: jutro je že mimo")
+check(not sc.morning_topics_allowed(mk(6), True), "večerna kartica je že šla ven: ne ponavljaj")
+
 print(f"\n{CHECKS} preverjanj, {len(FAILS)} napak")
 sys.exit(1 if FAILS else 0)

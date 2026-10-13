@@ -208,6 +208,15 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   kartica ni šla ven); okno je bilo zato razširjeno do 15:00.
 - Ker FB/IG sliko poberata prek javnega URL-ja, workflow po push-u počaka, da jo
   GitHub Pages res postreže (do 10 minut), preden objavi.
+- **Jutranje teme gredo ven samo zjutraj, večerna kartica pa dan prej** (13. 10. 2026): FROST,
+  COLD_MORNING in FOG_MORNING (`MORNING_TOPICS`) so čez dan lagale -- cron zamuja ure in opoldne je
+  kartica »Hladno jutro danes« povedala nekaj, kar je že mimo. Zdaj so dovoljene samo pred 10:00
+  (`MORNING_LAST_HOUR`) in samo, če večerna kartica za današnje jutro še ni šla ven. Večerno kartico
+  (`generate_story_card.py --evening`, `evening-story.yml`, vrata `story_gate.py --evening`, okno
+  17:00–23:00) sestavi urna napoved za jutri 0:00–9:00: min ≤ 0 °C → `FROST_TOMORROW`, ≤ 5 °C →
+  `COLD_TOMORROW`, sicer ni kartice in ni objave. Stanje je ločeno (`tools/.story_evening_state.json`,
+  ključ = datum jutrišnjega jutra), meta v `og/story/latest-evening.json` (ne `latest.json`, da varuh
+  svežine jutranje zgodbe ne zmoti). Testi: `tools/test_gates.py`.
 
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
 Token — Meta app "Meteorec", App ID 4757580174464018), `IG_ACCOUNT_ID`,
