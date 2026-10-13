@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 12 Oct 2026 20:16:28 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 13 Oct 2026 19:36:18 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Bi gobarski indeks deloval po vsej Sloveniji?</title>
+      <link>https://meteorec.si/blog/gobarski-indeks-po-vsej-sloveniji-1013.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/gobarski-indeks-po-vsej-sloveniji-1013.html</guid>
+      <pubDate>Tue, 13 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Gobarski indeks danes velja za Zgornjo Savinjsko dolino. Kaj bi se preneslo po državi in česa model brez lokalnih podatkov ne zna.</description>
+      <category>gobe</category>
+      <category>gobarski-indeks</category>
+      <category>model</category>
+      <category>Slovenija</category>
+    </item>
     <item>
       <title>So zime še takšne, kot so bile nekoč? Podatki in spomin</title>
       <link>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</link>
