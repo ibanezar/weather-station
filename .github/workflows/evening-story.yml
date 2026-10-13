@@ -1,0 +1,106 @@
+name: Večerna zgodba (FB + IG)
+
+# Zmrzal ali izrazito hladno jutro je novica DAN PREJ, zvečer -- takrat se je
+# še mogoče odzvati. Jutranja zgodba (daily-story.yml) take teme čez dan ne
+# objavlja več, ker opoldne pove nekaj, kar je že mimo.
+#
+# Kartico sestavi `generate_story_card.py --evening` iz urne napovedi za jutrišnje
+# ure 0:00-9:00. Če jutro ni ne zmrzal ne ≤ 5 °C, ni kartice in ni objave.
+#
+# Termin: cron zamuja ure, zato oba termina (CEST/CET) + okno 17:00-23:00 v
+# tools/story_gate.py --evening; ta poskrbi tudi, da gre kartica ven enkrat za
+# isto jutro. Stanje je v ločeni datoteki, da se ne tepe z daily-story.yml.
+
+on:
+  schedule:
+    - cron: '0 15 * * *'   # 17:00 po naši uri poleti (CEST)
+    - cron: '0 16 * * *'   # 17:00 po naši uri pozimi (CET)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = objavi ne glede na uro in na to, ali je kartica za jutri že šla ven'
+        required: false
+        default: 'true'
+
+concurrency:
+  group: evening-story
+  cancel-in-progress: false
+
+jobs:
+  zgodba:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Preveri, ali je čas za objavo
+        id: gate
+        run: |
+          python3 tools/story_gate.py check --evening \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
+      - name: Namesti Pillow
+        if: steps.gate.outputs.proceed == 'true'
+        run: pip install Pillow --quiet
+
+      - name: Sestavi kartico za jutrišnje jutro
+        id: card
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/generate_story_card.py --evening
+
+      - name: Objavi kartico na main
+        if: steps.card.outputs.card == 'true'
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          python3 tools/story_gate.py mark --evening
+          git add -A og/story tools/.story_evening_state.json
+          if git diff --cached --quiet; then
+            echo "Ni sprememb za objavo."
+          else
+            git commit -m "story: večerna kartica $(date -u +%Y-%m-%d) [skip ci]"
+            for i in 1 2 3 4; do
+              git push && exit 0
+              echo "push spodletel, poskus $i" && sleep $((2 ** i))
+              git pull --rebase origin main || true
+            done
+            echo "Push ni uspel po 4 poskusih." >&2
+            exit 1
+          fi
+
+      # Glej opombo v daily-story.yml: vsak poskus na svoj query-string, ker
+      # Cloudflare predpomni tudi 404.
+      - name: Počakaj, da je slika dosegljiva
+        if: steps.card.outputs.card == 'true'
+        run: |
+          URL=$(python3 -c "import json;print(json.load(open('og/story/latest-evening.json'))['image'])")
+          echo "Čakam na $URL"
+          for i in $(seq 1 40); do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' "${URL}?probe=${i}-$(date +%s%N)" || echo 000)
+            if [ "$CODE" = "200" ]; then echo "Slika je dosegljiva (poskus $i)."; exit 0; fi
+            sleep 15
+          done
+          echo "Slika po 10 minutah ni dosegljiva — objavo preskačem." >&2
+          exit 1
+
+      - name: Objavi zgodbo na Facebook
+        if: steps.card.outputs.card == 'true'
+        continue-on-error: true
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 tools/post_story_to_facebook.py "$(python3 -c "import json;print(json.load(open('og/story/latest-evening.json'))['image'])")"
+
+      - name: Objavi zgodbo na Instagram
+        if: steps.card.outputs.card == 'true'
+        continue-on-error: true
+        env:
+          IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python3 tools/post_story_to_instagram.py "$(python3 -c "import json;print(json.load(open('og/story/latest-evening.json'))['image'])")"

@@ -18,9 +18,18 @@ Zakaj je to potrebno:
 3. Ker se lahko sprožita oba termina, si zapomnimo, kateri dan je zgodba
    že šla ven, in drugega preskočimo.
 
+4. VEČERNA kartica (`--evening`, 13. 10. 2026): zmrzal/hladno jutro je novica
+   dan prej, zvečer -- ko jo je še mogoče upoštevati (pokriti rastline, obleči
+   otroke) --, ne opoldne, ko je jutro že mimo. Okno 17:00-23:00 (cron zamuja
+   ure), stanje je ločeno (`.story_evening_state.json`, da se dva workflowa ne
+   tepeta za isto datoteko pri commitu). Jutranja zgodba iz stanja izve, da je
+   večerna že šla ven (`evening_posted_for()`), in jutranje teme ne ponovi.
+
 Usage:
-  python3 tools/story_gate.py check [--force]   # nastavi proceed=true|false
-  python3 tools/story_gate.py mark              # zabeleži, da je zgodba objavljena
+  python3 tools/story_gate.py check [--force]            # nastavi proceed=true|false
+  python3 tools/story_gate.py mark                       # zabeleži, da je zgodba objavljena
+  python3 tools/story_gate.py check --evening [--force]  # večerna kartica za jutri
+  python3 tools/story_gate.py mark --evening
 """
 import datetime
 import json
@@ -30,6 +39,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, "tools", ".story_state.json")
+STATE_EVENING = os.path.join(ROOT, "tools", ".story_evening_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
 WINDOW_START = 6   # ne prej kot ob 6:00 po naši uri
@@ -41,18 +51,27 @@ WINDOW_END = 18    # razširjeno s 15 na 18 (31. 8. 2026): 27. in 28. 8. je ta
                    # varovalka proti ponovitvi.
 
 
-def load_state():
+EVENING_START = 17  # ne prej kot ob 17:00 po naši uri
+EVENING_END = 23    # cron zamuja ure; po 23h kartica za jutri ni več "zvečer"
+
+
+def load_state(path=STATE):
     try:
-        with open(STATE, encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except Exception:
         return {}
 
 
-def save_state(state):
-    with open(STATE, "w", encoding="utf-8") as f:
+def save_state(state, path=STATE):
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
         f.write("\n")
+
+
+def evening_posted_for(date_iso):
+    """Ali je večerna kartica za ta dan (datum JUTRIŠNJEGA jutra) že šla ven."""
+    return load_state(STATE_EVENING).get("lastFor") == date_iso
 
 
 def emit(proceed, reason):
@@ -67,6 +86,26 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "check"
     now = datetime.datetime.now(TZ)
     today = now.date().isoformat()
+
+    if "--evening" in sys.argv:
+        tomorrow = (now.date() + datetime.timedelta(days=1)).isoformat()
+        state = load_state(STATE_EVENING)
+        if cmd == "mark":
+            state["lastFor"] = tomorrow
+            state["lastPostedAt"] = now.isoformat()
+            save_state(state, STATE_EVENING)
+            print(f"✓ zabeleženo: večerna kartica za {tomorrow}")
+            return 0
+        force = "--force" in sys.argv
+        if state.get("lastFor") == tomorrow and not force:
+            emit(False, f"večerna kartica za {tomorrow} je že objavljena")
+            return 0
+        if not force and not (EVENING_START <= now.hour < EVENING_END):
+            emit(False, f"lokalna ura je {now.hour}:{now.minute:02d}, "
+                        f"okno za večerno kartico je {EVENING_START}:00–{EVENING_END}:00")
+            return 0
+        emit(True, f"lokalni čas {now.strftime('%H:%M')}" + (" (--force)" if force else ""))
+        return 0
 
     if cmd == "mark":
         state = load_state()
