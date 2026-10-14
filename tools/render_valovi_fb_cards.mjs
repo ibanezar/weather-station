@@ -64,7 +64,10 @@ for (const g of groups) { g.s0 = off(g.start); g.e0 = off(g.end); g.id = PHOTO[g
 
 // posnetek strani za telefon (zaslon 442 x 989 px = 390 x 872 enot strani): zgornji del (logotip) + rezultat z kartico skupine, zloženo v en zaslon
 // (fullPage + clip: pri premiku okna se v headless sticky vrstice pokvarijo)
-const HERO_Y = 58, HERO_H = 285, NOTCH = 38;  // zgornja vrstica strani (HERO_Y) ostane zunaj, pod »otokom« telefona je prostor (NOTCH)
+// logotip na zaslonu telefona je manjši od logotipa na kartici (samo v posnetku, prava stran se ne spremeni)
+await pg.addStyleTag({ content: '.gp-pv-hero{padding:.7rem .8rem!important;gap:.7rem!important}.gp-pv-hero img{width:2.5rem!important;height:2.5rem!important;border-radius:.7rem!important}.gp-pv-n{font-size:1.3rem!important}.gp-pv-s{font-size:.78rem!important}.gp-pv-k{font-size:.58rem!important}' });
+await pg.waitForTimeout(200);
+const HERO_Y = 58, HERO_H = 255, NOTCH = 38;  // zgornja vrstica strani (HERO_Y) ostane zunaj, pod »otokom« telefona je prostor (NOTCH)
 const topY = await pg.evaluate(() => document.querySelector('#gvalResult').getBoundingClientRect().top + scrollY - 70);
 const heroShot = await pg.screenshot({ type: 'png', fullPage: true, clip: { x: 0, y: HERO_Y, width: 390, height: HERO_H } });
 const resShot = await pg.screenshot({ type: 'png', fullPage: true, clip: { x: 0, y: topY, width: 390, height: 872 - NOTCH - HERO_H } });
@@ -201,9 +204,9 @@ const TEXTS = {
 const telefon = t => `<style>${BASE}
 html,body{background:#0b1510;color:#eef6f0}
 .bg{position:absolute;inset:0;background:radial-gradient(800px 700px at 85% 55%,rgba(63,207,142,.35),transparent 70%),radial-gradient(500px 400px at 0% 0%,rgba(167,139,250,.18),transparent 70%)}
-.brand{position:absolute;left:64px;top:60px;display:flex;align-items:center;gap:18px;font-size:28px;font-weight:800}
-.brand svg{width:64px;height:64px;border-radius:15px}.brand em{font-style:normal;color:#3fcf8e}
-.col{position:absolute;left:64px;width:490px;top:190px;bottom:300px;display:flex;flex-direction:column;gap:34px}
+.brand{position:absolute;left:64px;top:50px;display:flex;align-items:center;gap:24px;font-size:48px;font-weight:800;letter-spacing:-.01em}
+.brand svg{width:116px;height:116px;border-radius:26px}.brand em{font-style:normal;color:#3fcf8e}
+.col{position:absolute;left:64px;width:490px;top:226px;bottom:300px;display:flex;flex-direction:column;gap:34px}
 h1{margin:0;font-size:${t.size}px;line-height:1.05;font-weight:800;letter-spacing:-.03em}h1 span{color:#3fcf8e}
 p.sub{margin:0;font-size:32px;line-height:1.35;color:#c4d5c9}
 ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:22px}
