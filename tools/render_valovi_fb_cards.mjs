@@ -3,7 +3,7 @@
 //   2 casovnica prave številke iz kalkulatorja: dež in tri okna rasti na osi dni
 //   3 poster    svetla, jesenska, velike številke »2–8 dni« (brez datumov, zato je kartica trajna)
 //   4 telefon   pravi posnetek strani v telefonu
-// Ročno: node tools/render_valovi_fb_cards.mjs [foto|casovnica|poster|telefon|telefon-a …]   (potrebuje Playwright/Chromium)
+// Ročno: node tools/render_valovi_fb_cards.mjs [foto|casovnica|poster|telefon]   (potrebuje Playwright/Chromium)
 // Številke (okna, zamiki) se preberejo iz PRAVE strani gobarska-napoved/valovi/ s primerom dežja pred 4 dnevi, 35 mm;
 // datumi na slikah so zato izračunani na dan izdelave. Slika je primer izračuna, ne napoved.
 // Foto: Wikimedia Commons, licence in avtorji so v gobarska-napoved/img/vrste/CREDITS.json in v vrstici na sliki.
@@ -197,16 +197,6 @@ const GREEN = '#3fcf8e';
 const TEXTS = {
   a: { h: 'Je deževalo?<br><span>Preverite, kdaj rastejo gobe.</span>', size: 66,
        bullets: ['Vnesite datum in količino dežja', 'Izberite skupino gob', 'Poglejte okno rasti'] },
-  b: { h: 'Kdaj po dežju<br><span>v gozd?</span>', size: 96,
-       sub: 'Vpišite dež in kalkulator pokaže okno rasti za vsako skupino gob.' },
-  c: { h: 'Gobe ne rastejo<br><span>takoj po dežju.</span>', size: 62,
-       bullets: groups.map(g => [`${g.short}: ${lag(g)} po dežju`, g.color]) },
-  d: { h: 'Koliko dni<br><span>po dežju do gob?</span>', size: 70,
-       sub: 'Vpišite dež, pa boste videli okno rasti.' },
-  e: { h: 'Vpišite dež.<br><span>Kalkulator pove, kdaj v gozd.</span>', size: 60,
-       sub: 'Okno rasti za stelje, les in mikorizne vrste.' },
-  f: { h: 'Gobe po dežju<br><span>potrebujejo čas.</span>', size: 66,
-       sub: 'Koliko, je odvisno od skupine. Preračunajte za svoj dež.' },
 };
 const telefon = t => `<style>${BASE}
 html,body{background:#0b1510;color:#eef6f0}
@@ -238,7 +228,7 @@ for (const [k, t] of Object.entries(TEXTS)) cards['telefon-' + k] = telefon(t);
 
 // ── izris ──────────────────────────────────────────────────────────────────
 const FILES = { foto: 'valovi-fb-1-foto.jpg', casovnica: 'valovi-fb-2-casovnica.jpg', poster: 'valovi-fb-3-poster.jpg', };
-for (const k of Object.keys(TEXTS)) FILES['telefon-' + k] = `valovi-fb-4${k}-telefon.jpg`;
+FILES['telefon-a'] = 'valovi-fb-4-telefon.jpg';
 const ctx2 = await b.newContext({ viewport: { width: 1080, height: 1350 } });
 for (const [k, html] of Object.entries(cards)) {
   if (only && only !== k && only !== k.split('-')[0]) continue;
