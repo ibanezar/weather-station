@@ -875,6 +875,10 @@ body .app-bottomnav{display:none}
   background:#60a5fa;border:2px solid var(--card-bg);z-index:2}
 .gp-val-range.gp-val-dyn{opacity:.3}
 .gp-val-range.gp-val-dyn.active{opacity:.85}
+.gp-val-ico{flex:none;vertical-align:-.2em;margin-right:.35rem}
+.gp-val-name .gp-val-ico{margin-right:.4rem}
+.gp-val-clear .gp-val-ico,.gp-cta .gp-val-ico{margin-right:.3rem;vertical-align:-.25em}
+.gp-val-meaning h3 .gp-val-ico,.gp-val-why summary .gp-val-ico{color:#34d399;margin-right:.45rem;vertical-align:-.28em}
 .gp-val-legend{font-size:var(--gp-fs-xs);color:var(--muted);margin:.4rem 0 var(--gp-sp-3);line-height:1.5}
 .gp-val-sub{font-size:.8rem;color:var(--muted);margin:.25rem 0 0;line-height:1.45}
 .gp-val-tnote{font-size:.78rem;color:var(--muted);margin:var(--gp-sp-2) 0 0;line-height:1.45}
@@ -961,8 +965,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="gp-val-inlabel">Kdaj je padel izdaten dež (vsaj 10–15 mm naenkrat) in koliko? Vneseš lahko do 3 dogodke.</span>
     <div class="gp-val-events" id="gvalEvents"></div>
     <div class="gp-val-inrow">
-      <button type="button" id="gvalAdd" class="gp-val-clear">+ Dodaj dež</button>
-      <button type="button" id="gvalClear" class="gp-val-clear">V zadnjem obdobju ni bilo omembe vrednega dežja</button>
+      <button type="button" id="gvalAdd" class="gp-val-clear"><svg class="gp-val-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Dodaj dež</button>
+      <button type="button" id="gvalClear" class="gp-val-clear"><svg class="gp-val-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M8 12h8"/></svg>V zadnjem obdobju ni bilo omembe vrednega dežja</button>
     </div>
     <div class="gp-val-sel">
       <label>Kaj iščeš?<select id="gvalWhat"></select></label>
@@ -976,31 +980,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="gp-val-axis" id="gvalAxis"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span></div>
     <div class="gp-val-bands">
       <div class="gp-val-row">
-        <div class="gp-val-name">Razkrojevalke stelje<small>2–8 dni</small></div>
+        <div class="gp-val-name"><span style="color:#2dd4bf"><svg class="gp-val-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19C5 10 10 5 19 5c0 9-5 14-14 14z" fill="currentColor" fill-opacity=".15"/><path d="M5 19L13 11"/></svg></span>Razkrojevalke stelje<small>2–8 dni</small></div>
         <div class="gp-val-track"><div class="gp-val-range" data-eco="razkrojevalka" style="left:10.0%;width:30.0%;background:#2dd4bf"></div><div class="gp-val-play" id="gvalPlay-razkrojevalka" hidden></div></div>
       </div>
       <div class="gp-val-row">
-        <div class="gp-val-name">Lesne vrste<small>3–10 dni</small></div>
+        <div class="gp-val-name"><span style="color:#c17f3e"><svg class="gp-val-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="7" width="16" height="11" rx="3" fill="currentColor" fill-opacity=".15"/><circle cx="17" cy="12.5" r="3.2"/><circle cx="17" cy="12.5" r="1"/><path d="M4 12.5h9"/></svg></span>Lesne vrste<small>3–10 dni</small></div>
         <div class="gp-val-track"><div class="gp-val-range" data-eco="lesna" style="left:15.0%;width:35.0%;background:#c17f3e"></div><div class="gp-val-play" id="gvalPlay-lesna" hidden></div></div>
       </div>
       <div class="gp-val-row">
-        <div class="gp-val-name">Mikorizne vrste<small>4–16 dni</small></div>
+        <div class="gp-val-name"><span style="color:#a78bfa"><svg class="gp-val-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12.5a8.5 8 0 0 1 17 0z" fill="currentColor" fill-opacity=".15"/><path d="M10 12.5v5.5a2 2 0 0 0 4 0v-5.5"/></svg></span>Mikorizne vrste<small>4–16 dni</small></div>
         <div class="gp-val-track"><div class="gp-val-range" data-eco="mikorizna" style="left:20.0%;width:60.0%;background:#a78bfa"></div><div class="gp-val-play" id="gvalPlay-mikorizna" hidden></div></div>
       </div>
     </div>
     <p class="gp-val-legend">Barvni trak je okno po modelu za vsak vnesen dež, modra pika je dan dežja, bela črta je danes. Brez vnosa je os v dneh po prvem dežju.</p>
     <div class="gp-val-state" id="gvalStatePanel"></div>
-    <details class="gp-val-why" id="gvalWhyBox" hidden><summary>Zakaj je rezultat takšen?</summary><div id="gvalWhy"></div></details>
+    <details class="gp-val-why" id="gvalWhyBox" hidden><summary><svg class="gp-val-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.8"/><path d="M12 16.6v.1"/></svg>Zakaj je rezultat takšen?</summary><div id="gvalWhy"></div></details>
     <div class="gp-val-meaning">
-      <h3>Kaj ta rezultat pomeni?</h3>
+      <h3><svg class="gp-val-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M12 11v5"/><path d="M12 7.8v.1"/></svg>Kaj ta rezultat pomeni?</h3>
       <p>Kalkulator preverja, kako dobro se <strong>čas in količina padavin</strong> ujemata z modelskimi pravili za posamezne skupine gob. Odstotek je <strong>ujemanje padavinskih pogojev</strong>, ne verjetnost najdbe. Okna so modelski razpon, ne zagotovilo začetka rasti. Ujemanje temelji na sprožilnem dežju v zamiku vrste in zalogi vode 14 dni pred njim (isti pragovi kot v napovedi). Dež po današnjem dnevu se ne šteje.</p>
       <p>Če izbereš teren, se ujemanje pomnoži z geološkim faktorjem vrste, kot v modelu (ujemanje podlage ×1,15, neujemanje ×0,75, lesne vrste brez). <strong>Ni upoštevano:</strong></p>
       <ul><li>temperatura zraka in tal ter nočno ohlajanje,</li><li>vlaga tal in zraka,</li><li>višina rastišča,</li><li>dejanske najdbe (model še ni preverjen z opažanji).</li></ul>
       <p>Širšo oceno razmer po območjih, ki vključuje tudi te dejavnike, najdeš v gobarski napovedi.</p>
-      <p><a class="gp-cta" href="/gobarska-napoved/danes/">Odpri celotno gobarsko napoved →</a> <a href="/gobarska-napoved/zemljevid/">zemljevid</a></p>
+      <p><a class="gp-cta" href="/gobarska-napoved/danes/">Odpri celotno gobarsko napoved →</a> <a href="/gobarska-napoved/zemljevid/"><svg class="gp-val-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5L3.5 7v12L9 17l6 2 5.5-2V5L15 7z" fill="currentColor" fill-opacity=".15"/><path d="M9 5v12M15 7v12"/></svg>zemljevid</a></p>
     </div>
     <div class="gp-val-acts">
-      <button type="button" id="gvalShare" class="gp-val-clear">Kopiraj povezavo do izračuna</button>
+      <button type="button" id="gvalShare" class="gp-val-clear"><svg class="gp-val-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>Kopiraj povezavo do izračuna</button>
       <span class="gp-val-suggest" id="gvalShareMsg" aria-live="polite" style="margin:0;align-self:center"></span>
     </div>
   </div>
@@ -1011,6 +1015,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var STATION = {"2026-07-31":0.0,"2026-08-01":0.0,"2026-08-02":0.0,"2026-08-03":0.0,"2026-08-04":0.0,"2026-08-05":0.0,"2026-08-06":0.0,"2026-08-07":35.6,"2026-08-08":24.9,"2026-08-09":0.0,"2026-08-10":0.0,"2026-08-11":12.7,"2026-08-12":0.0,"2026-08-13":0.0,"2026-08-14":0.0,"2026-08-15":0.0,"2026-08-16":0.0,"2026-08-17":16.2,"2026-08-18":0.5,"2026-08-19":0.0,"2026-08-20":9.9,"2026-08-21":41.7,"2026-08-22":0.0,"2026-08-23":0.0,"2026-08-24":0.0,"2026-08-25":1.3,"2026-08-26":0.0,"2026-08-27":0.0,"2026-08-28":0.0,"2026-08-29":0.0,"2026-08-30":0.0,"2026-08-31":0.0,"2026-09-01":1.2,"2026-09-02":9.7,"2026-09-03":0.0,"2026-09-04":0.0,"2026-09-05":9.7,"2026-09-06":0.0,"2026-09-07":0.0,"2026-09-08":0.0,"2026-09-09":0.0,"2026-09-10":85.1,"2026-09-11":35.6,"2026-09-12":0.0,"2026-09-13":0.0,"2026-09-14":0.2,"2026-09-15":0.0,"2026-09-16":0.3,"2026-09-17":8.9,"2026-09-18":0.0,"2026-09-19":0.0,"2026-09-20":0.2,"2026-09-21":0.0,"2026-09-22":0.0,"2026-09-23":0.3,"2026-09-24":0.2,"2026-09-25":0.3,"2026-09-26":0.0,"2026-09-27":0.2,"2026-09-28":0.0,"2026-09-29":0.0,"2026-09-30":0.3,"2026-10-01":0.0,"2026-10-02":0.0,"2026-10-03":0.0,"2026-10-04":0.0,"2026-10-05":0.0,"2026-10-06":0.0,"2026-10-07":0.0,"2026-10-08":9.9,"2026-10-09":5.8,"2026-10-10":0.5,"2026-10-11":0.0,"2026-10-12":6.4,"2026-10-13":0.0};
   var CFG = {"norm": 7, "baseDays": 14, "wT": 0.25, "wB": 0.15, "rain": {"overStart": 3.0, "overEnd": 6.0, "overFloor": 0.5}, "geo": {"match": 1.15, "mismatch": 0.75}};
   var TERRAINS = [{"id": "kisla", "name": "Kislo/vulkansko pogorje (Smrekovec)", "note": "Silikatna kisla tla; dobro zadržujejo vlago. Kraljestvo jurčka in žametastega gobana."}, {"id": "bazicna", "name": "Karbonatni masivi (Golte, Menina, Raduha)", "note": "Apnenčasta bazična tla; hitreje se sušijo. Kraljestvo marele in poletnega gobana."}, {"id": "vlazna", "name": "Rečni logi in dolinske terase", "note": "Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk."}];
+  var ICONS = {"razkrojevalka": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 19C5 10 10 5 19 5c0 9-5 14-14 14z\" fill=\"currentColor\" fill-opacity=\".15\"/><path d=\"M5 19L13 11\"/></svg>", "lesna": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"7\" width=\"16\" height=\"11\" rx=\"3\" fill=\"currentColor\" fill-opacity=\".15\"/><circle cx=\"17\" cy=\"12.5\" r=\"3.2\"/><circle cx=\"17\" cy=\"12.5\" r=\"1\"/><path d=\"M4 12.5h9\"/></svg>", "mikorizna": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3.5 12.5a8.5 8 0 0 1 17 0z\" fill=\"currentColor\" fill-opacity=\".15\"/><path d=\"M10 12.5v5.5a2 2 0 0 0 4 0v-5.5\"/></svg>", "dez": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3.5C8.5 8 6.5 11 6.5 14a5.5 5.5 0 0 0 11 0c0-3-2-6-5.5-10.5z\" fill=\"currentColor\" fill-opacity=\".15\"/></svg>"};
   var MAXEV = 3;
   function $(id){ return document.getElementById(id); }
   var evBox = $('gvalEvents');
@@ -1421,13 +1426,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var head = document.createElement('div'); head.className = 'gp-val-head';
       var title = document.createElement('span'); title.className = 'gp-val-title';
       title.style.opacity = tone === 'on' ? '1' : '.7';
-      title.textContent = g.name + ' · ' + spanText(x.wins);
+      title.innerHTML = '<span style="color:' + g.color + '">' + ICONS[g.eco] + '</span>';
+      title.appendChild(document.createTextNode(g.name + ' · ' + spanText(x.wins)));
       var badge = document.createElement('span'); badge.className = 'gp-val-status';
       if (tone === 'on') { badge.style.background = g.color + '26'; badge.style.color = g.color; }
       else { badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }
       badge.textContent = tone === 'on' ? 'aktivno' : tone === 'past' ? 'okno je minilo' : 'čez ' + dni(x.st.start - T);
       head.appendChild(title); head.appendChild(badge); body.appendChild(head);
-      var sub = document.createElement('div'); sub.className = 'gp-val-sub'; sub.textContent = groupSub(x, T, evs);
+      var sub = document.createElement('div'); sub.className = 'gp-val-sub';
+      sub.innerHTML = '<span style="color:#60a5fa">' + ICONS.dez + '</span>';
+      sub.appendChild(document.createTextNode(groupSub(x, T, evs)));
       body.appendChild(sub);
       var row = document.createElement('div'); row.className = 'gp-val-species';
       x.sp.forEach(function(i){
