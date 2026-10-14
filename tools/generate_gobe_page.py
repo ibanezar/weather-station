@@ -3329,6 +3329,18 @@ VALOVI_JS = r"""(function(){
     if (x > optHi) return (hi - x) / (hi - optHi);
     return 1;
   }
+  /* Kopija gobe_model.ramp in zračne vlage iz eval_species (tools/test_parity.py). */
+  function ramp(x, lo, hi){
+    if (x === null || x === undefined) return null;
+    if (x <= lo) return 0;
+    if (x >= hi) return 1;
+    return (x - lo) / (hi - lo);
+  }
+  function airHumFit(rh, tair, td){
+    var f = ramp(rh, CFG.hum.rhLow, CFG.hum.rhFull);
+    if (tair !== null && tair !== undefined && td !== null && td !== undefined && tair - td <= CFG.hum.spread) f = 1;
+    return f === null ? 0 : f;
+  }
   /* Krivulja vrste: lesne po zračni temperaturi z rameni, ostale po talni (kot gobe_model.eval_species). */
   function curveOf(sp, eco){
     if (eco === 'lesna'){
@@ -3343,28 +3355,29 @@ VALOVI_JS = r"""(function(){
   function parseOM(j){
     var days = {}, i;
     var dt = (j.daily && j.daily.time) || [], pr = (j.daily && j.daily.precipitation_sum) || [];
-    for (i = 0; i < dt.length; i++) days[dt[i]] = { mm: typeof pr[i] === 'number' ? pr[i] : null, soil: null, tair: null };
+    for (i = 0; i < dt.length; i++) days[dt[i]] = { mm: typeof pr[i] === 'number' ? pr[i] : null, soil: null, tair: null, sm: null, rh: null, td: null };
     var h = j.hourly || {}, ht = h.time || [], acc = {};
     function add(key, d, v){ if (typeof v !== 'number') return; var a = acc[key] = acc[key] || {}; var b = a[d] = a[d] || [0, 0]; b[0] += v; b[1]++; }
     for (i = 0; i < ht.length; i++){
       var d = ht[i].slice(0, 10);
       add('t6', d, (h.soil_temperature_6cm || [])[i]); add('t18', d, (h.soil_temperature_18cm || [])[i]); add('ta', d, (h.temperature_2m || [])[i]);
+      add('sm', d, (h.soil_moisture_3_to_9cm || [])[i]); add('rh', d, (h.relative_humidity_2m || [])[i]); add('td', d, (h.dew_point_2m || [])[i]);
     }
     function mean(key, d){ var b = acc[key] && acc[key][d]; return b ? b[0] / b[1] : null; }
     Object.keys(days).forEach(function(d){
       var a = mean('t6', d), b = mean('t18', d), v = [a, b].filter(function(x){ return x !== null; });
       days[d].soil = v.length ? (v[0] + (v.length > 1 ? v[1] : 0)) / v.length : null;
-      days[d].tair = mean('ta', d);
+      days[d].tair = mean('ta', d); days[d].sm = mean('sm', d); days[d].rh = mean('rh', d); days[d].td = mean('td', d);
     });
     var last = null; Object.keys(days).forEach(function(d){ if (days[d].tair !== null && (!last || d > last)) last = d; });
     return { days: days, last: last };
   }
   function loadOM(){
-    var KEY = 'wx-valovi-om-v1', cached = null;
+    var KEY = 'wx-valovi-om-v2', cached = null;
     try { cached = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
     if (cached && cached.t && Date.now() - cached.t < 3600000 && cached.j){ OM = parseOM(cached.j); OM_STATE = 'ok'; renderFcStrip(); render(); return; }
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + CFG.lat + '&longitude=' + CFG.lon +
-      '&hourly=soil_temperature_6cm,soil_temperature_18cm,temperature_2m&daily=precipitation_sum&past_days=31&forecast_days=8&timezone=Europe%2FLjubljana';
+      '&hourly=soil_temperature_6cm,soil_temperature_18cm,soil_moisture_3_to_9cm,relative_humidity_2m,dew_point_2m,temperature_2m&daily=precipitation_sum&past_days=31&forecast_days=8&timezone=Europe%2FLjubljana';
     var ctl = window.AbortController ? new AbortController() : null;
     var to = setTimeout(function(){ if (ctl) ctl.abort(); }, 9000);
     fetch(url, ctl ? { signal: ctl.signal } : {}).then(function(r){ if (!r.ok) throw new Error('http'); return r.json(); }).then(function(j){
@@ -3400,6 +3413,26 @@ VALOVI_JS = r"""(function(){
   function fmtT(x){ return (Math.round(x * 10) / 10).toString().replace('.', ','); }
   function rngT(a, b){ return fmtT(a) === fmtT(b) ? fmtT(a) : fmtT(a) + '–' + fmtT(b); }
   function tempOf(g, iso){ var d = OM && OM.days[iso]; if (!d) return null; var v = g.eco === 'lesna' ? d.tair : d.soil; return typeof v === 'number' ? v : null; }
+  /* Vlaga v oknu (vlaga tal 3-9 cm, zračna vlaga): ločena od ujemanja dežja. Isti ramp in dvig ob rosišču kot gobe_model. */
+  function wetSummary(wins){
+    if (!OM) return null;
+    var days = {}; wins.forEach(function(w){ for (var d = w[0]; d <= w[1]; d++) days[d] = 1; });
+    var r = { sn: 0, sFull: 0, sDry: 0, sMin: null, sMax: null, an: 0, aFull: 0, aMin: null, aMax: null };
+    Object.keys(days).map(Number).sort(function(a, b){ return a - b; }).forEach(function(d){
+      var o = OM.days[isoOf(d)]; if (!o) return;
+      if (typeof o.sm === 'number'){
+        var f = ramp(o.sm, CFG.sm.dry, CFG.sm.full); r.sn++; if (f >= 1) r.sFull++; if (f <= 0) r.sDry++;
+        r.sMin = r.sMin === null ? o.sm : Math.min(r.sMin, o.sm); r.sMax = r.sMax === null ? o.sm : Math.max(r.sMax, o.sm);
+      }
+      if (typeof o.rh === 'number'){
+        var h = airHumFit(o.rh, typeof o.tair === 'number' ? o.tair : null, typeof o.td === 'number' ? o.td : null); r.an++; if (h >= 1) r.aFull++;
+        r.aMin = r.aMin === null ? o.rh : Math.min(r.aMin, o.rh); r.aMax = r.aMax === null ? o.rh : Math.max(r.aMax, o.rh);
+      }
+    });
+    return r;
+  }
+  function pctRng(a, b){ var x = Math.round(a), y = Math.round(b); return x === y ? x + ' %' : x + '–' + y + ' %'; }
+
   /* Temperatura v oknu: ločena od ujemanja dežja, ne vpliva na odstotek. */
   function tempSummary(g, wins, curve){
     if (!OM) return null;
@@ -3693,6 +3726,10 @@ VALOVI_JS = r"""(function(){
       ' mm, prag predhodnih padavin je ' + fmtMm(s.r14) + ' mm. ' + stB + '</li>' +
       '<li><strong>Časovni zamik:</strong> ' + s.min + '–' + s.max + ' dni po dežju. ' + tst + '</li>' +
       '<li><strong>Vpliv terena:</strong> ' + ter + '</li>' +
+      (bi.gwet && (bi.gwet.sn || bi.gwet.an) ? '<li><strong>Vlaga (ločeno, ne vpliva na odstotek):</strong> ' +
+        (bi.gwet.sn ? 'vlaga tal 3–9 cm ' + pctRng(bi.gwet.sMin * 100, bi.gwet.sMax * 100) + ', polna (nad ' + Math.round(CFG.sm.full * 100) + ' %) ' + bi.gwet.sFull + ' od ' + bi.gwet.sn + ' dni, suha (pod ' + Math.round(CFG.sm.dry * 100) + ' %) ' + bi.gwet.sDry + '. ' : '') +
+        (bi.gwet.an ? 'Zračna vlaga ' + pctRng(bi.gwet.aMin, bi.gwet.aMax) + ', polna (nad ' + CFG.hum.rhFull + ' % ali rosišče ob temperaturi) ' + bi.gwet.aFull + ' od ' + bi.gwet.an + ' dni. ' : '') +
+        'Vlaga tal je modelska vrednost Open-Meteo za mrežno celico, ne meritev v gozdu.</li>' : '') +
       (bi.tmp && bi.tmp.n && bi.tmp.curve ? '<li><strong>Temperatura (ločeno, ne vpliva na odstotek):</strong> v oknu ' + rngT(bi.tmp.min, bi.tmp.max) + ' °C (' +
         (g.eco === 'lesna' ? 'zračna' : 'talna') + ', Open-Meteo); razpon vrste ' + fmtT(bi.tmp.curve[0]) + '–' + fmtT(bi.tmp.curve[3]) + ' °C, optimum ' +
         fmtT(bi.tmp.curve[1]) + '–' + fmtT(bi.tmp.curve[2]) + ' °C. Ustreza ' + bi.tmp.ok + ' od ' + bi.tmp.n + ' dni, v optimumu ' + bi.tmp.opt + '.</li>' : '') +
@@ -3824,7 +3861,7 @@ VALOVI_JS = r"""(function(){
         spInfo.push({ s: s, wins: wins, st: statusOf(wins, T), fit: fit, tmp: tempSummary(g, wins, curveOf(s, g.eco)) });
       });
       if (!spInfo.length) return null;
-      return { g: g, wins: gWins, st: statusOf(gWins, T), sp: spInfo, tmp: tempSummary(g, gWins, null) };
+      return { g: g, wins: gWins, st: statusOf(gWins, T), sp: spInfo, tmp: tempSummary(g, gWins, null), wet: wetSummary(gWins) };
     }).filter(Boolean);
 
   }
@@ -3832,7 +3869,7 @@ VALOVI_JS = r"""(function(){
   function bestOf(groupInfo){
     var best = null;
     groupInfo.forEach(function(x){ x.sp.forEach(function(i){
-      i.g = x.g;
+      i.g = x.g; i.gwet = x.wet;
       if (i.fit && i.st.tone !== 'past' && (!best || i.fit.adj > best.fit.adj)) best = i;
     }); });
     return best;
@@ -3924,6 +3961,14 @@ VALOVI_JS = r"""(function(){
       } else if (OM && x.tmp) {
         var tl2 = document.createElement('div'); tl2.className = 'gp-val-sub'; tl2.textContent = 'Temperatura za to okno še ni na voljo (napoved sega do ' + (OM.last ? fmt(dayNum(OM.last)) : '?') + ').';
         body.appendChild(tl2);
+      }
+      if (x.wet && (x.wet.sn || x.wet.an)){
+        var wl = document.createElement('div'); wl.className = 'gp-val-sub';
+        var bits = [];
+        if (x.wet.sn) bits.push('vlaga tal ' + pctRng(x.wet.sMin * 100, x.wet.sMax * 100) + ' (polna ' + x.wet.sFull + '/' + x.wet.sn + ' dni)');
+        if (x.wet.an) bits.push('zračna vlaga ' + pctRng(x.wet.aMin, x.wet.aMax) + ' (polna ' + x.wet.aFull + '/' + x.wet.an + ' dni)');
+        wl.textContent = 'Vlaga v oknu: ' + bits.join(' · ') + '.';
+        body.appendChild(wl);
       }
       var sub = document.createElement('div'); sub.className = 'gp-val-sub';
       sub.innerHTML = '<span style="color:#60a5fa">' + ICONS.dez + '</span>';
@@ -4029,6 +4074,9 @@ def valovi_widget_html():
     cfg["lat"], cfg["lon"] = float(rloc.get("lat", 46.326)), float(rloc.get("lon", 14.921))
     cfg["airShoulder"] = float(rules["scoring"]["temperature"]["air_shoulder_c"])
     cfg["rainMm"] = VALOVI_RAIN_MM
+    sm_c, hm_c = rules["scoring"]["soil_moisture"], rules["scoring"]["humidity"]
+    cfg["sm"] = {"dry": float(sm_c["dry"]), "full": float(sm_c["full"])}
+    cfg["hum"] = {"rhLow": float(hm_c["rh_low"]), "rhFull": float(hm_c["rh_full"]), "spread": float(hm_c["dewpoint_spread_full"])}
     terrains = [{"id": t["id"], "name": t["name_sl"], "note": t.get("note", "")} for t in rules.get("terrains", [])]
     photos, credit_bits = {}, []
     try:
@@ -4119,8 +4167,9 @@ def valovi_widget_html():
         '<div id="gvalWhy"></div></details>\n'
         '    <details class="gp-val-why"><summary>' + _vi('mimo', 20) + 'Omejitve</summary>'
         '<p class="gp-val-tnote" style="margin-top:0">Temperatura (talna na 6–18 cm, lesne vrste zračna; Open-Meteo, za pretekle dni modelski podatek, ne meritev '
-        'postaje) je v kartici prikazana <strong>ločeno</strong> in ne vpliva na odstotek. Kalkulator <strong>ne upošteva</strong> nočnega '
-        'ohlajanja, vlage tal in zraka, višine rastišča ter dejanskih najdb (model še ni preverjen z opažanji). Geološki faktor '
+        'postaje) in vlaga (tal na 3–9 cm in zračna; Open-Meteo, vlaga tal je modelska vrednost za mrežno celico, ne meritev v gozdu) sta v kartici '
+        'prikazani <strong>ločeno</strong> in ne vplivata na odstotek. Kalkulator <strong>ne upošteva</strong> nočnega '
+        'ohlajanja, višine rastišča ter dejanskih najdb (model še ni preverjen z opažanji). Geološki faktor '
         '(ujemanje podlage ×' + _fmt_mm(cfg['geo']['match']) + ', neujemanje ×' + _fmt_mm(cfg['geo']['mismatch']) + '; lesne vrste '
         'ga nimajo) prilagodi modelski rezultat, rezultat je omejen na 100 %. Ni potrjena sprememba verjetnosti najdbe. '
         'Za širšo oceno po območjih, ki upošteva tudi temperaturo, vlago in teren, glej <a href="/gobarska-napoved/danes/">'

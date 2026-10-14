@@ -541,6 +541,35 @@ def valovi_temperatura():
         check(v is not None and all(abs(a - b) < 1e-9 for a, b in zip(v, want)), "valovi: krivulja vrste", f"{sp['id']}: py={want} js={v}")
 
 
+@test
+def valovi_vlaga():
+    """ramp() in airHumFit() na /valovi/ = gobe_model.ramp in zračna vlaga v eval_species
+    (rh_low/rh_full, dvig na 1 ob razliki temperatura - rosišče <= dewpoint_spread_full)."""
+    import gobe_model as gm
+    sc = gm.load_rules()["scoring"]
+    hc, smc = sc["humidity"], sc["soil_moisture"]
+    cfg = {"hum": {"rhLow": float(hc["rh_low"]), "rhFull": float(hc["rh_full"]), "spread": float(hc["dewpoint_spread_full"])},
+           "sm": {"dry": float(smc["dry"]), "full": float(smc["full"])}}
+    xs = [0.05, 0.12, 0.15, 0.2, 0.28, 0.35]
+    rh = [40, 60, 70, 85, 95]
+    pairs = [(10.0, 5.0), (10.0, 8.5), (10.0, 8.0), (10.0, None), (None, 8.0)]
+    calls = [{"expr": "ramp(%s, %s, %s)" % (x, cfg["sm"]["dry"], cfg["sm"]["full"])} for x in xs]
+    calls += [{"expr": "airHumFit(%s, %s, %s)" % (r, json.dumps(t_), json.dumps(d))} for r in rh for t_, d in pairs]
+    got = js("gobarska-napoved/valovi/index.html", ["ramp", "airHumFit"], calls, "var CFG = %s;" % json.dumps(cfg))
+    for x, v in zip(xs, got):
+        want = gm.ramp(x, cfg["sm"]["dry"], cfg["sm"]["full"])
+        check(abs(v - want) < 1e-9, "valovi: ramp vlage tal", f"{x}: py={want} js={v}")
+    i = len(xs)
+    for r in rh:
+        for t_, d in pairs:
+            f = gm.ramp(r, cfg["hum"]["rhLow"], cfg["hum"]["rhFull"])
+            if t_ is not None and d is not None and t_ - d <= cfg["hum"]["spread"]:
+                f = 1.0
+            want = 0.0 if f is None else f
+            check(abs(got[i] - want) < 1e-9, "valovi: zračna vlaga", f"{r} {t_} {d}: py={want} js={got[i]}")
+            i += 1
+
+
 # ── Nevihtna karta: app.js ↔ generate_storm_map.py ───────────────────────────
 @test
 def nevihtna_karta():
