@@ -236,8 +236,22 @@ STYLE = """<style>
 .vs-tbl th:first-child,.vs-tbl td:first-child{text-align:left}
 .vs-tbl tr.vs-now td{font-weight:700;background:rgba(52,211,153,.08)}
 .vs-note{color:var(--muted);font-size:.82rem;line-height:1.5;margin:-.4rem 0 1.2rem}
+.vs-photo{max-width:360px;margin:1.6rem auto 1.9rem}
 h3.vs-h3,.post-body h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin:1.6rem 0 .4rem}
 </style>"""
+
+
+# Fotografija je Filipova (14. 10. 2026): img/blog/<slug>/foto-1.jpg (640 × 960, brez EXIF); original 880 × 1320 je v og/bg/
+# (OG slika in kartice). Vrste na fotografiji ne imenujem: določena ni.
+PHOTO = ("foto-1.jpg", "Drobna goba z majhnim rjavim klobukom na dolgem tankem črnem betu, na klobuku stoji muha. Ozadje je zeleno in zamegljeno.")
+PHOTO_FILE = os.path.join(ROOT, "og", "bg", "vrh-sezone-foto.jpg")
+PHOTO_OG = os.path.join(ROOT, "og", "bg", "vrh-sezone-foto-og.jpg")   # ležeči izrez (muha in goba cela) za OG sliko
+
+
+def photo_html():
+    f, alt = PHOTO
+    return (f'<figure class="post-photo vs-photo"><img src="/img/blog/{SLUG}/{f}" alt="{alt}" width="640" height="960">'
+            '<figcaption>Muha na klobuku drobne gobe. Foto: Filip Eremita.</figcaption></figure>')
 
 
 def fig(title, inner, caption):
@@ -552,20 +566,22 @@ def main():
         nav_label="O postaji", nav_href="/o-postaji.html")
     lead = f'<p class="lead">{article["lead"]}</p>'
     assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"
-    html = html.replace(lead, STYLE + "\n" + lead, 1)
+    html = html.replace(lead, STYLE + "\n" + lead + "\n" + photo_html(), 1)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"✓ zapisano: blog/{slug}.html")
-    if wire:
+    if wire or "--og" in sys.argv:
+        os.environ["DRIVE_PHOTO_PATH"] = PHOTO_OG
         try:
             from generate_og_images import make_og
             make_og({"slug": slug, **og_meta})
             print(f"✓ OG slika: og/{slug}.jpg")
         except Exception as e:  # noqa: BLE001
             print(f"⚠ OG slika preskočena: {e}")
+    if wire:        # idempotentno: ohrani izvirni datum, obnovi teme/sorodne članke (build_html jih prepiše)
         from generate_monthly_post import wire_all
         wire_all(entry, entry["url"])
-        print("✓ blog.json, blog/index.html, sitemap.xml, blog/rss.xml osveženi.")
+        print("✓ blog.json, blog/index.html, sitemap.xml, blog/rss.xml, teme in sorodni članki osveženi.")
 
 
 if __name__ == "__main__":

@@ -43,13 +43,13 @@ def text_w(d, t, f):
     return b[2] - b[0]
 
 
-def canvas(photo=False):
+def canvas(photo=False, blur=2):
     if photo:
-        bg = Image.open(os.path.join(ROOT, "og", "bg", "gobe-lastna.jpg")).convert("RGB")
+        bg = Image.open(post.PHOTO_FILE).convert("RGB")
         s = max(W / bg.width, H / bg.height)
         bg = bg.resize((int(bg.width * s) + 1, int(bg.height * s) + 1), Image.LANCZOS)
         x, y = (bg.width - W) // 2, (bg.height - H) // 2
-        img = bg.crop((x, y, x + W, y + H)).filter(ImageFilter.GaussianBlur(2))
+        img = bg.crop((x, y, x + W, y + H)).filter(ImageFilter.GaussianBlur(blur))
         ov = Image.new("RGBA", (W, H))
         od = ImageDraw.Draw(ov)
         for yy in range(H):
@@ -60,7 +60,12 @@ def canvas(photo=False):
     return img, ImageDraw.Draw(img)
 
 
-def header(img, d, sub):
+def header(img, d, sub, thumb=True):
+    if thumb:                                   # Filipova fotografija, sličica zgoraj desno
+        ph = Image.open(post.PHOTO_FILE).convert("RGB").resize((148, 222), Image.LANCZOS)
+        mask = Image.new("L", ph.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, ph.width - 1, ph.height - 1), radius=18, fill=255)
+        img.paste(ph, (W - PAD - ph.width, 34), mask)
     logo = Image.open(os.path.join(ROOT, "icon-512.png")).convert("RGBA").resize((84, 84), Image.LANCZOS)
     img.paste(logo, (PAD, 60), logo)
     d.text((PAD + 106, 60), "METEOREC", font=font(B, 40), fill=WHITE)
@@ -213,8 +218,8 @@ def v3(S):
 
 def v4(S):
     D, by_year, peak, cnt, sh, w26 = S
-    img, d = canvas(photo=True)
-    header(img, d, "vrh opažanj gob")
+    img, d = canvas(photo=True, blur=16)
+    header(img, d, "vrh opažanj gob", thumb=False)
     badge(d, "PODATKI iNATURALISTA")
     f = font(B, 88)
     d.text((PAD, 268), "Oktobra še ne", font=f, fill=WHITE)
@@ -224,6 +229,10 @@ def v4(S):
     rows = [("6 od 6", "let z vrhom opažanj med 7. in 27. oktobrom"),
             (f"{oct_lo}–{oct_hi} %", "vseh opažanj so oktobra gobe"),
             (f"{sep_lo}–{sep_hi} %", "vseh opažanj so septembra gobe")]
+    ph = Image.open(post.PHOTO_FILE).convert("RGB").resize((260, 390), Image.LANCZOS)     # ostra fotografija ob številkah
+    mask = Image.new("L", ph.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, ph.width - 1, ph.height - 1), radius=22, fill=255)
+    img.paste(ph, (W - PAD - ph.width, 620), mask)
     y = 580
     for big, lab in rows:
         d.ellipse((PAD, y + 20, PAD + 34, y + 54), fill=GREEN)
@@ -231,6 +240,7 @@ def v4(S):
         d.text((PAD + 64, y + 88), lab, font=font(R, 30), fill=MUTED)
         y += 190
     footer(d, "Prave gobe (Basidiomycota), Slovenija, 2020–2025")
+    d.text((W - PAD - 260, 1020), "Foto: Filip Eremita", font=font(R, 22), fill=MUTED)
     return img
 
 
