@@ -29,6 +29,17 @@ await pg.waitForSelector('#gvalStatePanel .gp-val-item');
 await pg.waitForTimeout(500);
 // samo kartice skupin (brez zloženih podrobnosti): skrij mapo vrst
 await pg.addStyleTag({ content: '.gp-val-more,.gp-val-sub{display:none!important}.gp-val-item{margin-bottom:.4rem;padding:.5rem .85rem}.gp-val-big{font-size:1.4rem;margin:.15rem 0 0}.gp-val-state{margin:0}' });
+// fotografija po skupini (iz baze vrst; licence in avtorji so v CREDITS.json in na kartici)
+const PHOTOS = { 'Razkrojevalke stelje': 'macrolepiota_procera', 'Lesne vrste': 'laetiporus_sulphureus', 'Mikorizne vrste': 'boletus_edulis' };
+await pg.addStyleTag({ content: '.gp-val-item{position:relative;padding-right:6.2rem!important}.gp-val-ph{position:absolute;right:.55rem;top:.5rem;height:calc(100% - 1rem);width:4.6rem;object-fit:cover;border-radius:.7rem}' });
+await pg.evaluate((photos) => {
+  document.querySelectorAll('#gvalStatePanel .gp-val-item').forEach(it => {
+    const name = it.querySelector('.gp-val-title').textContent.trim();
+    const id = photos[name]; if (!id) return;
+    const im = document.createElement('img'); im.className = 'gp-val-ph'; im.src = '/gobarska-napoved/img/vrste/' + id + '.jpg'; it.appendChild(im);
+  });
+}, PHOTOS);
+await pg.waitForFunction(() => [...document.querySelectorAll('.gp-val-ph')].every(i => i.complete && i.naturalWidth > 0));
 const shot = await (await pg.$('#gvalStatePanel')).screenshot({ type: 'png' });
 const resultTxt = await pg.textContent('#gvalResult');
 await ctx.close();
@@ -59,14 +70,14 @@ height:600px;overflow:hidden}
 .btn{background:#27834d;color:#fff;font-weight:800;font-size:36px;padding:26px 40px;border-radius:22px;white-space:nowrap}
 .url{font-size:26px;color:#9fb3a6;text-align:right;line-height:1.3}
 .url b{color:#eaf3ec}
-.fine{margin-top:auto;padding-top:18px;font-size:21px;color:#7f9486;line-height:1.4}
+.fine{margin-top:auto;padding-top:14px;font-size:19px;color:#7f9486;line-height:1.4}
 </style><div class="bg"></div><div class="w">
 <div class="top">${logo}<div><div class="k">MeteoGobar · Rečica ob Savinji</div><div class="n">Gobji <em>valovi</em></div></div></div>
 <h1>Dež je padel.<br><span>Kdaj v gozd?</span></h1>
 <p class="s">Vsaka skupina gob se po dežju odzove po svoje. Kalkulator pokaže, kdaj se začne in konča okno rasti.</p>
 <div class="frame"><div class="tag">${primer}</div><img src="data:image/png;base64,${shot.toString('base64')}"></div>
 <div class="cta"><div class="btn">Preračunajte dež →</div><div class="url">Kalkulator rasti gob<br><b>meteorec.si</b></div></div>
-<div class="fine">Primer izračuna na dan izdelave kartice. Ujemanje pravil ni verjetnost najdbe, okna so modelski razpon.</div>
+<div class="fine">Primer izračuna na dan izdelave kartice. Ujemanje pravil ni verjetnost najdbe, okna so modelski razpon.<br>Foto: Chrumps (CC BY-SA 4.0), Rror (CC BY-SA 3.0), Holger Krisp (CC BY 3.0), Wikimedia Commons.</div>
 </div>`;
 const pg2 = await (await b.newContext({ viewport: { width: 1080, height: 1350 } })).newPage();
 await pg2.setContent(html, { waitUntil: 'load' });
