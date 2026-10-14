@@ -1,0 +1,10 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gobji valovi">
+  <defs><linearGradient id="vb" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#0e3340"/><stop offset="100%" stop-color="#06141a"/></linearGradient></defs>
+  <rect width="64" height="64" rx="14" fill="url(#vb)"/>
+  <path d="M10 44A22 22 0 0 1 54 44" fill="none" stroke="#a78bfa" stroke-width="6" stroke-linecap="round"/>
+  <path d="M16 44A16 16 0 0 1 48 44" fill="none" stroke="#c17f3e" stroke-width="6" stroke-linecap="round"/>
+  <path d="M22 44A10 10 0 0 1 42 44" fill="none" stroke="#2dd4bf" stroke-width="6" stroke-linecap="round"/>
+  <rect x="28" y="40" width="8" height="15" rx="3.5" fill="#f1e6cf"/>
+  
+</svg>

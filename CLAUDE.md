@@ -795,6 +795,12 @@ zadnji dnevi z ≥ 10 mm na IREICA1.
 - Dež po današnjem dnevu je 0 (brez scenarijev). Postajni dež (`STATION`, 75 dni) vnese zalogo vode; kljukica
   ga izklopi (drug kraj). Vneseni dogodek ima prednost pred postajo za isti datum.
 - Okno vala je odvisno od časa dogodka, ocena dežja pa je ločena: dež, ki ne doseže praga, okna ne zapre.
+- **Lastna podoba »Gobji valovi«** (14. 10. 2026): stran ima svoj logotip, barve in OG sliko, ostalo (glava, noga, spodnja
+  navigacija) je skupno. Znak so trije valovi v barvah skupin (turkizna/jantarna/vijolična) v obliki klobuka gobe + kaplji dežja;
+  `tools/build_valovi_brand.py` zapiše `gobarska-napoved/valovi/logo-valovi.svg`, `favicon.svg` in `og/valovi-src/valovi.html`,
+  `node tools/render_valovi_brand.mjs` iz tega naredi `og/valovi.jpg` (ročno, izhod je commitan; dnevi v OG sliki so
+  zapisani ročno, ob spremembi oken popravi). Barve in CSS strani so `VALOVI_BRAND_CSS` v `generate_gobe_page.py`, prek
+  parametra `brand=` v `subpage_shell()` (drugim podstranem se ne spremeni nič). Barve skupin morajo ostati enake kot v `VALOVI_GROUPS`.
 - **Izbira vrste/skupine in terena** (9. 10. 2026): teren (kisla/bazična/vlažna) pomnoži ujemanje z geološkim faktorjem
   vrste — `geoFactor()` je kopija pravila v `gobe_model.eval_species` (ujemanje `match_factor`, neujemanje `mismatch_factor`,
   lesne vrste in nevtralna afiniteta brez), prikaz je omejen na 100 % kot indeks v modelu. Tooltip ob vrsti pokaže ujemanje po
