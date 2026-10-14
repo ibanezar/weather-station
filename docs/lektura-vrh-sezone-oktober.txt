@@ -1,0 +1,157 @@
+Vrh opažanj gob je oktobra. Šest let podatkov
+
+META OPIS: V vseh šestih letih od 2020 do 2025 je bil teden z največ opaženimi gobami v Sloveniji med 7. in 27. oktobrom, ne septembra. Kaj kažejo podatki iNaturalista?
+
+UVOD
+Kratek odgovor: po fotografijah gob na iNaturalistu je vrhunec opažanj oktobra, ne septembra. V vseh šestih letih od 2020 do 2025 je teden z največ opaženimi gobami padel med 7. in 27. oktobrom. Oktobra so gobe predstavljale od 25 do 44 % vseh opažanj na iNaturalistu v Sloveniji, septembra pa od 10 do 32 %.
+
+Se vam zdi, da je gobarske sezone konec, ko mine septembrski vrhunec? Podatki zadnjih šestih let tega ne potrjujejo.
+
+01 — PODATKI -- Kaj sem prešteval
+
+iNaturalist je spletna zbirka opažanj narave, v katero uporabniki nalagajo fotografije rastlin, živali in gliv. Vrste določajo opazovalci in skupnost.
+
+Za vsak teden od julija do novembra sem preštel, koliko opažanj v Sloveniji se nanaša na gobe in koliko je vseh opažanj skupaj (rastline, žuželke, ptice in drugo).
+
+V tej analizi sem med »prave gobe« uvrstil organizme iz debla Basidiomycota. Sem spadajo klobučnice, kot so jurčki, lisičke in mušnice, pa tudi trdoživke na lesu, želatinaste glive in rje. Ta izbor ne vključuje zaprtotrosnic, kot so smrčki in tartufi, lišajev pa je v njem zelo malo.
+
+Preštel sem le skupna števila opažanj, posameznih zapisov pa nisem pregledoval. Prvi teden se začne 1. julija, nato si obdobja sledijo v sedemdnevnih intervalih.
+
+Absolutna števila med leti niso neposredno primerljiva, saj je opazovalcev vsako leto več. Zato me zanimata predvsem dva podatka: kdaj je vrh in kolikšen delež vseh opažanj predstavljajo gobe.
+
+02 — VRH -- Kdaj je vrh?
+
+V vseh šestih letih je teden z največ opaženimi gobami padel med 7. in 27. oktobrom.
+
+Teden z največ opaženimi gobami
+
+največ opažanj v tednu največji delež med vsemi opažanji 7.–27. oktober
+
+Vsak teden traja sedem dni, pika pa je postavljena na sredino tedna. Desno je prikazano število opažanj gob v tem tednu. Obroč označuje teden z največjim deležem gob, če je bilo v njem vsaj 150 vseh opažanj. Vir: iNaturalist.
+
+Če namesto absolutnega števila pogledamo teden z največjim deležem gob, se vrh premakne v obdobje med 30. septembrom in 3. novembrom. Pri klobučnicah in pri vseh glivah skupaj je teden z največ opažanji enak kot pri zgoraj opredeljenih »pravih gobah« (glej razdelek 05).
+
+Leto | Teden z največ opažanji | Število | Delež, september | oktober | november |
+2020 | 21.–27. 10. | 221 | 16 % | 41 % | 44 % |
+2021 | 14.–20. 10. | 144 | 10 % | 25 % | 17 % |
+2022 | 7.–13. 10. | 361 | 32 % | 44 % | 26 % |
+2023 | 21.–27. 10. | 413 | 10 % | 39 % | 32 % |
+2024 | 7.–13. 10. | 238 | 13 % | 30 % | 21 % |
+2025 | 21.–27. 10. | 395 | 16 % | 26 % | 16 % |
+2026 | 30. 9.–6. 10. (do zdaj) | 236 | 14 % | 16 % | – |
+
+Podatki za oktober in november 2026 še niso popolni, saj zajemajo le obdobje do 13. oktobra. Za zdaj je vrh v tednu od 30. septembra do 6. oktobra.
+
+Tudi tedenski potek kaže podobno sliko. Delež opažanj gob je julija majhen, septembra začne naraščati, oktobra pa doseže vrh.
+
+Delež gob med vsemi opažanji v Sloveniji, po tednih
+
+2020–2025, vsako leto ena črta 2026 (do 13. 10.) 7.–27. oktober
+
+Vsaka točka predstavlja en teden. Tedni z manj kot 150 vsemi opažanji so izpuščeni, saj bi bil izračunani delež pri tako majhnem vzorcu preveč odvisen od naključja. Zadnji teden letošnje krivulje je podcenjen, ker uporabniki opažanja pogosto objavijo z zamikom. Vir: iNaturalist.
+
+03 — MESECI -- Oktober je močnejši od septembra
+
+V vseh šestih letih je bil delež opažanj gob oktobra višji kot septembra. Oktobra so gobe predstavljale od 25 do 44 % vseh opažanj, septembra pa od 10 do 32 %. Novembra je delež v petih od šestih let znova upadel. Izjema je bilo leto 2020.
+
+Delež gob med vsemi opažanji po mesecih (2020–2025)
+
+Stolpec prikazuje mediano šestih let, navpična črta pa razpon med najmanjšo in največjo vrednostjo. Višina pomeni delež vseh opažanj v posameznem mesecu, ki se nanašajo na gobe. Vir: iNaturalist.
+
+Mesec | Mediana | Najmanj | Največ |
+julij | 3 % | 1 % | 11 % |
+avgust | 4 % | 3 % | 10 % |
+september | 14 % | 10 % | 32 % |
+oktober | 34 % | 25 % | 44 % |
+november | 24 % | 16 % | 44 % |
+
+To ni v nasprotju z našim gobarskim modelom, vendar gre za različni stvari. Gobarski indeks za Rečico ob Savinji je bil oktobra višji kot septembra v treh od štirih let s popolnimi podatki:
+
+2023: 81,0 oktobra proti 77,6 septembra
+
+2024: 91,3 oktobra proti 79,5 septembra
+
+2025: 86,9 oktobra proti 83,1 septembra
+
+Leta 2022 je bilo ravno obratno: septembrski indeks je znašal 89,3, oktobrski pa 82,7.
+
+Gobarski indeks je modelska ocena razmer za rast gob, ki vključuje tudi celoletne vrste. Zato sam po sebi ni dokaz, da je dejanska rast gob oktobra vedno večja kot septembra.
+
+04 — ŠTEVILO -- Tudi število opažanj doseže vrh oktobra
+
+Delež ima svojo past: novembra je manj opažanj žuželk in rastlin, zato se lahko delež gob poveča tudi takrat, ko njihovo absolutno število ne raste.
+
+Zato sem pogledal še absolutno število opažanj gob. Tudi pri tem kazalniku se vrh pojavi oktobra.
+
+Število opažanj gob po tednih
+
+2020–2025, vsako leto ena črta 2026 (do 13. 10.) 7.–27. oktober
+
+Absolutna števila med leti niso neposredno primerljiva, saj je število opazovalcev vsako leto večje. Primerljiv je predvsem čas, ko število opažanj doseže vrh, ne pa višina posameznih vrhov. Vir: iNaturalist.
+
+05 — SKUPINE -- Prave gobe, klobučnice ali vse glive?
+
+Kaj se zgodi, če namesto skupine, uporabljene v osnovni analizi, upoštevam samo klobučnice (Agaricomycetes) ali pa vse glive?
+
+V vsakem od šestih let je bil teden z največ opažanji v vseh treh skupinah enak. Število opažanj se je med skupinami razlikovalo le za nekaj odstotkov.
+
+Leto | Teden z največ opažanji (isti v vseh treh skupinah) | Prave gobe | Klobučnice | Vse glive |
+2020 | 21.–27. 10. | 221 | 218 | 231 |
+2021 | 14.–20. 10. | 144 | 139 | 174 |
+2022 | 7.–13. 10. | 361 | 358 | 374 |
+2023 | 21.–27. 10. | 413 | 407 | 487 |
+2024 | 7.–13. 10. | 238 | 227 | 258 |
+2025 | 21.–27. 10. | 395 | 390 | 427 |
+
+Število opažanj v tednu z največ opažanji za posamezno skupino.
+
+Pri vrhu, določenem glede na delež opažanj, se pojavi ena razlika: leta 2024 je pri pravih gobah vrh padel na 14. oktober, pri klobučnicah in pri vseh glivah skupaj pa na 4. november.
+
+06 — LETOS -- Kaj kaže letošnja jesen?
+
+Do 13. oktobra so bila števila opažanj gob v posameznih tednih naslednja:
+
+Teden od 9. septembra: 136 opažanj
+
+Teden od 16. septembra: 221 opažanj
+
+Teden od 23. septembra: 195 opažanj
+
+Teden od 30. septembra: 236 opažanj
+
+Teden od 7. oktobra: 142 opažanj
+
+Septembra so gobe predstavljale 14 % vseh opažanj, kar je znotraj običajnega razpona za obravnavana leta (10–32 %).
+
+Zadnje število je še nepopolno, saj uporabniki opažanja pogosto naložijo z zamikom. Ali bo tudi letošnji vrh oktobra, še ne vemo. V vseh šestih predhodnih letih pa je bil teden z največ opaženimi gobami prav v obdobju med 7. in 27. oktobrom.
+
+07 — OMEJITVE -- Česa podatki ne povedo
+
+Fotografije niso košare. Opažanje gobe ne pomeni, da jo je nekdo nabral, prav tako ne pove, ali je užitna. V analizo so vključene tudi neužitne vrste in trdoživke, ki rastejo na lesu.
+
+Šest let je malo. Dejstvo, da se je vrh v vseh šestih letih pojavil oktobra, je zanimivo, ni pa univerzalno pravilo.
+
+Tudi poleti je lahko veliko gob. Leta 2023 je bilo v tednu od 29. julija do 4. avgusta zabeleženih 371 opažanj, kar je skoraj toliko kot oktobra, ko je bilo na vrhuncu 413 opažanj. V drugih letih je bil poletni vrh vsaj za tretjino nižji od oktobrskega. Iz teh podatkov ne morem ugotoviti, zakaj je bilo leto 2023 drugačno.
+
+Podatki veljajo za Slovenijo kot celoto. V Rečici ob Savinji in na višjih legah je lahko čas vrhunca drugačen.
+
+Opazovalci niso isto kot gobarji. Gobe fotografira druga skupina ljudi, kot jih nabira. Na število opažanj vplivata tudi to, kdaj imajo ljudje čas, in vreme.
+
+Opažanja se objavljajo z zamikom. Zato je število opažanj v zadnjem tednu praviloma podcenjeno.
+
+O vplivu dežja ne sklepam. Povezave med padavinami in deležem opažanj gob v tem članku ne obravnavam. Za to bi bila potrebna ločena analiza.
+
+V članku uporabljam samo združene podatke. Posameznih opažanj ne objavljam, ker zanje veljajo različni licenčni pogoji. Zbrane številke so shranjene v data/inat-glive-po-tednih.json.
+
+08 — NABIRANJE -- Kaj to pomeni za nabiranje?
+
+Podatki ne povedo, kje rastejo gobe, temveč kdaj jih ljudje v Sloveniji najpogosteje fotografirajo. Praktično sporočilo je preprosto: oktobra še ne odpišite gobarske sezone.
+
+Poglejte gobarsko napoved za današnji dan in kalkulator rasti po dežju, ki upošteva tudi to, kdaj je nazadnje deževalo.
+
+Gobe nabirajte le, če jih zanesljivo poznate. Informacije o nevarnih zamenjavah in strupenih vrstah najdete na strani Strupene gobe.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Viri: iNaturalist (API, število opažanj po tednih v Sloveniji; deblo Basidiomycota, razred Agaricomycetes in kraljestvo Fungi; stanje 14. 10. 2026) ter gobarski model Meteorec (mesečno povprečje indeksa za Rečico ob Savinji). Podatki: data/inat-glive-po-tednih.json.

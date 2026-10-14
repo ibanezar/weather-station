@@ -1,0 +1,542 @@
+{
+ "_meta": {
+  "vir_napovedi": "data/forecast-archive.csv (Open-Meteo Previous Runs)",
+  "vir_meritev": "history.json (IREICA1)",
+  "modeli": [
+   "ecmwf_ifs025",
+   "gfs_seamless"
+  ],
+  "klimatologija": "±7 dni, brez ocenjevanega leta",
+  "popravek": "ena konstanta na vodilni čas, povprečna napaka v drugih letih (arhiv obsega le 2024-2026)",
+  "prag_dezja_mm": 0.2
+ },
+ "leads": {
+  "1": {
+   "n": 865,
+   "od": "2024-05-26",
+   "do": "2026-10-12",
+   "tmax": {
+    "klimatologija": {
+     "mae": 3.49,
+     "pct_gt3": 51.0
+    },
+    "persistenca": {
+     "mae": 2.58,
+     "pct_gt3": 32.9
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.2,
+     "pct_gt3": 24.4,
+     "skill": 0.37,
+     "bias": -1.86,
+     "mae_s_popravkom": 1.33
+    },
+    "gfs_seamless": {
+     "mae": 1.95,
+     "pct_gt3": 18.6,
+     "skill": 0.44,
+     "bias": -1.34,
+     "mae_s_popravkom": 1.48
+    }
+   },
+   "tmin": {
+    "klimatologija": {
+     "mae": 2.78,
+     "pct_gt3": 38.2
+    },
+    "persistenca": {
+     "mae": 2.01,
+     "pct_gt3": 20.6
+    },
+    "ecmwf_ifs025": {
+     "mae": 1.99,
+     "pct_gt3": 22.7,
+     "skill": 0.28,
+     "bias": 1.34,
+     "mae_s_popravkom": 1.66
+    },
+    "gfs_seamless": {
+     "mae": 2.99,
+     "pct_gt3": 44.0,
+     "skill": -0.07,
+     "bias": 2.58,
+     "mae_s_popravkom": 2.12
+    }
+   },
+   "dez": {
+    "ecmwf_ifs025": {
+     "napovedan_dez": 402,
+     "dez_res": 287,
+     "ni_bilo_dezja": 115,
+     "delez_zgresenih_alarmov": 28.6,
+     "delez_zamujenega_dezja": 27.9
+    },
+    "gfs_seamless": {
+     "napovedan_dez": 425,
+     "dez_res": 296,
+     "ni_bilo_dezja": 129,
+     "delez_zgresenih_alarmov": 30.4,
+     "delez_zamujenega_dezja": 25.6
+    }
+   }
+  },
+  "2": {
+   "n": 864,
+   "od": "2024-05-26",
+   "do": "2026-10-12",
+   "tmax": {
+    "klimatologija": {
+     "mae": 3.49,
+     "pct_gt3": 51.0
+    },
+    "persistenca": {
+     "mae": 3.5,
+     "pct_gt3": 47.9
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.21,
+     "pct_gt3": 25.9,
+     "skill": 0.37,
+     "bias": -1.81,
+     "mae_s_popravkom": 1.43
+    },
+    "gfs_seamless": {
+     "mae": 2.07,
+     "pct_gt3": 22.8,
+     "skill": 0.41,
+     "bias": -1.32,
+     "mae_s_popravkom": 1.63
+    }
+   },
+   "tmin": {
+    "klimatologija": {
+     "mae": 2.78,
+     "pct_gt3": 38.1
+    },
+    "persistenca": {
+     "mae": 2.84,
+     "pct_gt3": 37.0
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.11,
+     "pct_gt3": 24.7,
+     "skill": 0.24,
+     "bias": 1.38,
+     "mae_s_popravkom": 1.73
+    },
+    "gfs_seamless": {
+     "mae": 2.99,
+     "pct_gt3": 43.4,
+     "skill": -0.07,
+     "bias": 2.54,
+     "mae_s_popravkom": 2.15
+    }
+   },
+   "dez": {
+    "ecmwf_ifs025": {
+     "napovedan_dez": 388,
+     "dez_res": 275,
+     "ni_bilo_dezja": 113,
+     "delez_zgresenih_alarmov": 29.1,
+     "delez_zamujenega_dezja": 30.7
+    },
+    "gfs_seamless": {
+     "napovedan_dez": 429,
+     "dez_res": 295,
+     "ni_bilo_dezja": 134,
+     "delez_zgresenih_alarmov": 31.2,
+     "delez_zamujenega_dezja": 25.7
+    }
+   }
+  },
+  "3": {
+   "n": 863,
+   "od": "2024-05-26",
+   "do": "2026-10-12",
+   "tmax": {
+    "klimatologija": {
+     "mae": 3.49,
+     "pct_gt3": 51.1
+    },
+    "persistenca": {
+     "mae": 3.95,
+     "pct_gt3": 54.9
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.26,
+     "pct_gt3": 26.3,
+     "skill": 0.35,
+     "bias": -1.75,
+     "mae_s_popravkom": 1.53
+    },
+    "gfs_seamless": {
+     "mae": 2.16,
+     "pct_gt3": 24.9,
+     "skill": 0.38,
+     "bias": -1.29,
+     "mae_s_popravkom": 1.76
+    }
+   },
+   "tmin": {
+    "klimatologija": {
+     "mae": 2.79,
+     "pct_gt3": 38.1
+    },
+    "persistenca": {
+     "mae": 3.25,
+     "pct_gt3": 42.5
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.15,
+     "pct_gt3": 25.8,
+     "skill": 0.23,
+     "bias": 1.37,
+     "mae_s_popravkom": 1.78
+    },
+    "gfs_seamless": {
+     "mae": 3.01,
+     "pct_gt3": 43.7,
+     "skill": -0.08,
+     "bias": 2.44,
+     "mae_s_popravkom": 2.23
+    }
+   },
+   "dez": {
+    "ecmwf_ifs025": {
+     "napovedan_dez": 389,
+     "dez_res": 277,
+     "ni_bilo_dezja": 112,
+     "delez_zgresenih_alarmov": 28.8,
+     "delez_zamujenega_dezja": 30.2
+    },
+    "gfs_seamless": {
+     "napovedan_dez": 425,
+     "dez_res": 284,
+     "ni_bilo_dezja": 141,
+     "delez_zgresenih_alarmov": 33.2,
+     "delez_zamujenega_dezja": 28.5
+    }
+   }
+  },
+  "4": {
+   "n": 862,
+   "od": "2024-05-26",
+   "do": "2026-10-12",
+   "tmax": {
+    "klimatologija": {
+     "mae": 3.5,
+     "pct_gt3": 51.2
+    },
+    "persistenca": {
+     "mae": 4.2,
+     "pct_gt3": 55.5
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.35,
+     "pct_gt3": 31.9,
+     "skill": 0.33,
+     "bias": -1.68,
+     "mae_s_popravkom": 1.73
+    },
+    "gfs_seamless": {
+     "mae": 2.23,
+     "pct_gt3": 27.1,
+     "skill": 0.36,
+     "bias": -1.22,
+     "mae_s_popravkom": 1.9
+    }
+   },
+   "tmin": {
+    "klimatologija": {
+     "mae": 2.79,
+     "pct_gt3": 38.1
+    },
+    "persistenca": {
+     "mae": 3.48,
+     "pct_gt3": 45.6
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.28,
+     "pct_gt3": 29.0,
+     "skill": 0.18,
+     "bias": 1.43,
+     "mae_s_popravkom": 1.88
+    },
+    "gfs_seamless": {
+     "mae": 2.99,
+     "pct_gt3": 44.4,
+     "skill": -0.07,
+     "bias": 2.36,
+     "mae_s_popravkom": 2.26
+    }
+   },
+   "dez": {
+    "ecmwf_ifs025": {
+     "napovedan_dez": 403,
+     "dez_res": 276,
+     "ni_bilo_dezja": 127,
+     "delez_zgresenih_alarmov": 31.5,
+     "delez_zamujenega_dezja": 30.3
+    },
+    "gfs_seamless": {
+     "napovedan_dez": 429,
+     "dez_res": 283,
+     "ni_bilo_dezja": 146,
+     "delez_zgresenih_alarmov": 34.0,
+     "delez_zamujenega_dezja": 28.5
+    }
+   }
+  },
+  "5": {
+   "n": 857,
+   "od": "2024-05-26",
+   "do": "2026-10-12",
+   "tmax": {
+    "klimatologija": {
+     "mae": 3.5,
+     "pct_gt3": 51.1
+    },
+    "persistenca": {
+     "mae": 4.42,
+     "pct_gt3": 58.3
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.45,
+     "pct_gt3": 33.1,
+     "skill": 0.3,
+     "bias": -1.64,
+     "mae_s_popravkom": 1.88
+    },
+    "gfs_seamless": {
+     "mae": 2.38,
+     "pct_gt3": 29.3,
+     "skill": 0.32,
+     "bias": -1.07,
+     "mae_s_popravkom": 2.13
+    }
+   },
+   "tmin": {
+    "klimatologija": {
+     "mae": 2.79,
+     "pct_gt3": 38.0
+    },
+    "persistenca": {
+     "mae": 3.62,
+     "pct_gt3": 47.5
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.43,
+     "pct_gt3": 31.3,
+     "skill": 0.13,
+     "bias": 1.33,
+     "mae_s_popravkom": 2.11
+    },
+    "gfs_seamless": {
+     "mae": 3.08,
+     "pct_gt3": 47.6,
+     "skill": -0.1,
+     "bias": 2.25,
+     "mae_s_popravkom": 2.42
+    }
+   },
+   "dez": {
+    "ecmwf_ifs025": {
+     "napovedan_dez": 392,
+     "dez_res": 262,
+     "ni_bilo_dezja": 130,
+     "delez_zgresenih_alarmov": 33.2,
+     "delez_zamujenega_dezja": 33.2
+    },
+    "gfs_seamless": {
+     "napovedan_dez": 384,
+     "dez_res": 264,
+     "ni_bilo_dezja": 120,
+     "delez_zgresenih_alarmov": 31.2,
+     "delez_zamujenega_dezja": 32.7
+    }
+   }
+  },
+  "6": {
+   "n": 862,
+   "od": "2024-05-26",
+   "do": "2026-10-12",
+   "tmax": {
+    "klimatologija": {
+     "mae": 3.5,
+     "pct_gt3": 51.2
+    },
+    "persistenca": {
+     "mae": 4.61,
+     "pct_gt3": 60.3
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.89,
+     "pct_gt3": 40.8,
+     "skill": 0.17,
+     "bias": -1.86,
+     "mae_s_popravkom": 2.31
+    },
+    "gfs_seamless": {
+     "mae": 2.59,
+     "pct_gt3": 32.6,
+     "skill": 0.26,
+     "bias": -1.01,
+     "mae_s_popravkom": 2.43
+    }
+   },
+   "tmin": {
+    "klimatologija": {
+     "mae": 2.78,
+     "pct_gt3": 38.1
+    },
+    "persistenca": {
+     "mae": 3.75,
+     "pct_gt3": 49.5
+    },
+    "ecmwf_ifs025": {
+     "mae": 2.85,
+     "pct_gt3": 42.2,
+     "skill": -0.02,
+     "bias": 1.72,
+     "mae_s_popravkom": 2.32
+    },
+    "gfs_seamless": {
+     "mae": 3.14,
+     "pct_gt3": 47.1,
+     "skill": -0.13,
+     "bias": 2.14,
+     "mae_s_popravkom": 2.49
+    }
+   },
+   "dez": {
+    "ecmwf_ifs025": {
+     "napovedan_dez": 425,
+     "dez_res": 267,
+     "ni_bilo_dezja": 158,
+     "delez_zgresenih_alarmov": 37.2,
+     "delez_zamujenega_dezja": 32.6
+    },
+    "gfs_seamless": {
+     "napovedan_dez": 391,
+     "dez_res": 240,
+     "ni_bilo_dezja": 151,
+     "delez_zgresenih_alarmov": 38.6,
+     "delez_zamujenega_dezja": 39.4
+    }
+   }
+  },
+  "7": {
+   "n": 857,
+   "od": "2024-05-26",
+   "do": "2026-10-12",
+   "tmax": {
+    "klimatologija": {
+     "mae": 3.49,
+     "pct_gt3": 51.0
+    },
+    "persistenca": {
+     "mae": 4.69,
+     "pct_gt3": 61.5
+    },
+    "ecmwf_ifs025": {
+     "mae": 3.05,
+     "pct_gt3": 41.5,
+     "skill": 0.13,
+     "bias": -1.81,
+     "mae_s_popravkom": 2.5
+    },
+    "gfs_seamless": {
+     "mae": 2.76,
+     "pct_gt3": 37.3,
+     "skill": 0.21,
+     "bias": -0.76,
+     "mae_s_popravkom": 2.67
+    }
+   },
+   "tmin": {
+    "klimatologija": {
+     "mae": 2.79,
+     "pct_gt3": 37.9
+    },
+    "persistenca": {
+     "mae": 3.78,
+     "pct_gt3": 50.5
+    },
+    "ecmwf_ifs025": {
+     "mae": 3.03,
+     "pct_gt3": 43.4,
+     "skill": -0.09,
+     "bias": 1.58,
+     "mae_s_popravkom": 2.59
+    },
+    "gfs_seamless": {
+     "mae": 3.15,
+     "pct_gt3": 45.9,
+     "skill": -0.13,
+     "bias": 1.87,
+     "mae_s_popravkom": 2.66
+    }
+   },
+   "dez": {
+    "ecmwf_ifs025": {
+     "napovedan_dez": 437,
+     "dez_res": 248,
+     "ni_bilo_dezja": 189,
+     "delez_zgresenih_alarmov": 43.2,
+     "delez_zamujenega_dezja": 36.7
+    },
+    "gfs_seamless": {
+     "napovedan_dez": 417,
+     "dez_res": 228,
+     "ni_bilo_dezja": 189,
+     "delez_zgresenih_alarmov": 45.3,
+     "delez_zamujenega_dezja": 41.8
+    }
+   }
+  }
+ },
+ "smer_d1": {
+  "ecmwf_ifs025": {
+   "n": 866,
+   "tmax": {
+    "delez_dni_v_tipicno_smer": 86,
+    "bias_po_letnih_casih": {
+     "pomlad": -1.97,
+     "poletje": -2.32,
+     "jesen": -1.68,
+     "zima": -1.24
+    }
+   },
+   "tmin": {
+    "delez_dni_v_tipicno_smer": 73,
+    "bias_po_letnih_casih": {
+     "pomlad": 1.36,
+     "poletje": 1.88,
+     "jesen": 1.54,
+     "zima": 0.18
+    }
+   }
+  },
+  "gfs_seamless": {
+   "n": 866,
+   "tmax": {
+    "delez_dni_v_tipicno_smer": 79,
+    "bias_po_letnih_casih": {
+     "pomlad": -1.91,
+     "poletje": -1.71,
+     "jesen": -1.26,
+     "zima": -0.23
+    }
+   },
+   "tmin": {
+    "delez_dni_v_tipicno_smer": 84,
+    "bias_po_letnih_casih": {
+     "pomlad": 2.65,
+     "poletje": 2.2,
+     "jesen": 2.67,
+     "zima": 2.92
+    }
+   }
+  }
+ }
+}
