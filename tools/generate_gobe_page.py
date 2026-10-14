@@ -2989,7 +2989,8 @@ def top_bar_html(title, back_href):
             f'<a class="gp-topbar-action" href="/gobarska-napoved/#premium" aria-label="AI prepoznava gobe">🔍</a></div>')
 
 
-def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", parent=None, extra_schema=""):
+def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", parent=None, extra_schema="",
+                  brand=None):
     """Shared chrome for the gobarska-napoved/<slug>/ reference subpages —
     same header/footer/brand/back-link as the main page, own URL + meta.
 
@@ -3008,8 +3009,8 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", paren
         seo.webpage_schema(url, title, desc),
         seo.crumbs_schema(crumbs),
     ] + ([extra_schema] if extra_schema else []))
-    head_extras = schema + "\n" + PAGE_CSS
-    body = f'''{BRAND_SWAP}
+    head_extras = schema + "\n" + PAGE_CSS + ("\n" + brand["head"] if brand else "")
+    body = f'''{brand["swap"] if brand else BRAND_SWAP}
 {top_bar_html(crumb_label, back_href)}
 {seo.crumbs_html(crumbs)}
 {seo.stn_badge()}
@@ -3019,7 +3020,7 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", paren
 {bottom_nav_html(slug)}
 {extra_js}'''
     html = seo.page_shell(f"{title} — Gobarska napoved", desc, url, head_extras, body,
-                           og_image=f"{seo.SITE}/og/gobarska-napoved.jpg")
+                           og_image=brand["og"] if brand else f"{seo.SITE}/og/gobarska-napoved.jpg")
     seo.write_page(f"gobarska-napoved/{slug}/index.html", html, force=True)
     return url
 
@@ -3111,6 +3112,41 @@ VALOVI_GROUPS = [
       "boletus_pinophilus", "imleria_badia", "hygrophorus_russula"]),
 ]
 VALOVI_MAXDAY = 20
+# Lastna podoba kalkulatorja (logotip, barve, favicon, OG): tools/build_valovi_brand.py.
+# Barve skupin so iste kot v VALOVI_GROUPS. Prepiše samo spremenljivke in nekaj pravil te strani.
+VALOVI_BRAND_CSS = """<link rel="icon" type="image/svg+xml" href="/gobarska-napoved/valovi/favicon.svg">
+<meta name="theme-color" content="#06141a">
+<style>
+body{--blue:#2dd4bf;--cyan:#a78bfa;--muted:#93aab0;--bg:#06141a;--card-bg:rgba(8,28,35,.94);
+  --stn-bg:rgba(45,212,191,.14);--stn-border:rgba(45,212,191,.42);
+  --blob-1:rgba(45,212,191,.18);--blob-2:rgba(167,139,250,.14);--blob-3:rgba(193,127,62,.12);--blob-4:rgba(45,212,191,.09)}
+.gp-vhero{display:flex;align-items:center;gap:1.1rem;margin:.4rem 0 1.2rem;padding:1.1rem 1.2rem;border-radius:var(--gp-r-panel);
+  background:radial-gradient(120% 140% at 0% 0%,rgba(45,212,191,.16),rgba(8,28,35,.9) 60%);
+  border:1px solid rgba(45,212,191,.28)}
+.gp-vhero img{width:4.6rem;height:4.6rem;flex:none;border-radius:1rem}
+.gp-vhero-k{font-size:var(--gp-fs-xs);letter-spacing:.14em;text-transform:uppercase;color:#2dd4bf;font-weight:700}
+.gp-vhero-n{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.15rem 0 .2rem;color:var(--text)}
+.gp-vhero-n em{font-style:normal;color:#2dd4bf}
+.gp-vhero-s{font-size:.92rem;color:var(--muted);margin:0}
+.gp-vchips{display:flex;gap:.5rem;flex-wrap:wrap;margin:-.4rem 0 1.2rem}
+.gp-vchip{display:inline-flex;align-items:center;font-size:.82rem;font-weight:700;padding:.35rem .8rem;border-radius:999px}
+.gp-val-card{border-color:rgba(45,212,191,.25);background:linear-gradient(180deg,rgba(11,40,49,.96),rgba(7,22,28,.96))}
+.gp-val-result{background:rgba(45,212,191,.09);border:1px solid rgba(45,212,191,.2)}
+.gp-val-meaning{border-left-color:#2dd4bf}
+.gp-val-meaning .gp-cta{background:#2dd4bf;color:#04252b}
+.gp-val-clear:hover{border-color:#2dd4bf;color:#2dd4bf}
+@media(max-width:600px){.gp-vhero{padding:.9rem}.gp-vhero img{width:3.6rem;height:3.6rem}.gp-vhero-n{font-size:1.5rem}}
+</style>"""
+VALOVI_BRAND = {
+    "head": VALOVI_BRAND_CSS,
+    "swap": '''<script>(function(){
+  var img=document.querySelector(".site-head .brand-logo");
+  var nm=document.querySelector(".site-head .brand-name");
+  if(img){img.src="/gobarska-napoved/valovi/logo-valovi.svg";img.alt="Gobji valovi";}
+  if(nm){nm.innerHTML="Gobji<em>valovi</em>";}
+})();</script>''',
+    "og": "https://meteorec.si/og/valovi.jpg",
+}
 _VI_OPEN = ('<svg class="gp-val-ico" viewBox="0 0 24 24" width="{s}" height="{s}" fill="none" stroke="currentColor" '
             'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">')
 _VI_PATHS = {
@@ -3776,11 +3812,16 @@ def build_valovi_page():
     load_station_precip), a je povsem uredljiv -- to ni enkratna članku
     vezana objava (glej blog/trije-vali-gob-po-dezju-0911.html), ampak trajno
     orodje v slogu MeteoGobarja (isti vzorec kot koledar/trend)."""
-    body = ('''  <figure class="gp-banner">
-    <img src="/gobarska-napoved/img/foto/gozd-mah-banner.jpg" loading="lazy" width="1400" height="600"
-      alt="Mah in stelja na gozdnih tleh po dežju">
-    <figcaption>📷 Avtorski posnetek — gozdna tla po dežju</figcaption>
-  </figure>
+    chips = "".join(
+        f'<span class="gp-vchip" style="background:{g["color"]}26;color:{g["color"]}">{_vi(g["eco"], 16)}'
+        f'&nbsp;{_esc(g["name"])} · {g["min"]}–{g["max"]} dni</span>' for g in _valovi_groups())
+    body = ('''  <header class="gp-vhero">
+    <img src="/gobarska-napoved/valovi/logo-valovi.svg" width="74" height="74" alt="Logotip Gobji valovi">
+    <div><div class="gp-vhero-k">MeteoGobar · Rečica ob Savinji</div>
+      <div class="gp-vhero-n">Gobji <em>valovi</em></div>
+      <p class="gp-vhero-s">Kdaj po dežju zrastejo gobe?</p></div>
+  </header>
+  <div class="gp-vchips">''' + chips + '''</div>
 '''
             '  <p class="post-meta">Isti dež ne prebudi vseh gob hkrati. Razkrojevalke stelje, lesne in mikorizne '
             'vrste imajo vsaka svoj zamik med padavinami in trosnjakom — model za Rečico ta zamik upošteva tako, '
@@ -3791,7 +3832,7 @@ def build_valovi_page():
         "valovi", "Kalkulator rasti gob po dežju",
         "Vnesi datum zadnjega izdatnega dežja in preveri, kdaj se začne okno rasti razkrojevalk, lesnih in "
         "mikoriznih gob ter ali je danes znotraj njega. Za Rečico ob Savinji.",
-        "Kalkulator rasti", body)
+        "Kalkulator rasti", body, brand=VALOVI_BRAND)
 
 
 BAZA_INTRO = (
