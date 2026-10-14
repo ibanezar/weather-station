@@ -3400,8 +3400,8 @@ VALOVI_JS = r"""(function(){
     });
     if (on) return sinceText(on.e, T) + ' Danes si znotraj okna (' + fmt(on.a) + '–' + fmt(on.b) + '), ' +
       (on.b === T ? 'danes je zadnji dan.' : 'še ' + dni(on.b - T) + '.');
-    if (nxt) return sinceText(nxt.e, T) + ' Okno se začne ' + fmt(nxt.a) + ' (čez ' + dni(nxt.a - T) + ') in traja do ' + fmt(nxt.b) + '.';
-    return sinceText(last.e, T) + ' Okno se je končalo ' + fmt(last.b) + '.';
+    if (nxt) return sinceText(nxt.e, T) + ' Okno se začne ' + fmt(nxt.a) + ' (čez ' + dni(nxt.a - T) + ') in traja do ' + fmt(nxt.b);
+    return sinceText(last.e, T) + ' Okno se je končalo ' + fmt(last.b);
   }
   function affLabel(a){
     var n = null; TERRAINS.forEach(function(t){ if (t.id === a) n = t.name; });
