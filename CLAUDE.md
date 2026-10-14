@@ -795,6 +795,7 @@ zadnji dnevi z ≥ 10 mm na IREICA1.
 - Dež po današnjem dnevu je 0 (brez scenarijev). Postajni dež (`STATION`, 75 dni) vnese zalogo vode; kljukica
   ga izklopi (drug kraj). Vneseni dogodek ima prednost pred postajo za isti datum.
 - Okno vala je odvisno od časa dogodka, ocena dežja pa je ločena: dež, ki ne doseže praga, okna ne zapre.
+- **Rezultat najprej za odločitev** (14. 10. 2026, po pregledu bralca): glavni stavek pove stanje »danes (datum)«, vsaka skupina ima velik datumski razpon (»12.–18. oktobra«), stanje (pred oknom / v oknu / za oknom) in pri več dogodkih vrstico za vsak dež z oknom, ki ga je sprožil. Drugi dež v oknu prvega se prišteje k sprožilnemu dežju (`rainFit` bere vse dogodke), zato stran pri prekrivanju oken to pove. Pogled `analyze()` je skupen za prikaz in za **primerjavo scenarijev** (»Shrani kot scenarij A« ↔ trenutni B: okno, stanje, ujemanje). Izraz je dosledno »ujemanje padavinskih pravil«; »zaloga vode« se ne uporablja, ker kalkulator ne pozna vlage tal (predhodne padavine). **Zgodovine valov in opažanj na isti časovnici še ni** (potrebuje tudi podatke o neuspešnih iskanjih).
 - **Lastna podoba »Gobji valovi«** (14. 10. 2026): stran ima svoj logotip, barve in OG sliko, ostalo (glava, noga, spodnja
   navigacija) je skupno. Znak so trije valovi v barvah skupin (turkizna/jantarna/vijolična) v obliki klobuka gobe + kaplji dežja;
   `tools/build_valovi_brand.py` zapiše `gobarska-napoved/valovi/logo-valovi.svg`, `favicon.svg` in `og/valovi-src/valovi.html`,
