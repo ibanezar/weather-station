@@ -977,6 +977,11 @@ body{--blue:#4cae78;--cyan:#a78bfa;--muted:#9fb3a6;--bg:#0b1510;--card-bg:#101e1
 .gp-val-big{font-size:1.4rem;font-weight:800;margin:.35rem 0 0;line-height:1.25}
 .gp-val-more{margin-top:.6rem;border-top:1px solid var(--card-border)}
 .gp-val-more>summary{cursor:pointer;font-size:.82rem;color:var(--muted);padding:.7rem 0;min-height:1.4rem}
+.gp-val-item{position:relative}
+.gp-val-ph{position:absolute;right:.9rem;top:.9rem;width:4.5rem;height:4.5rem;object-fit:cover;border-radius:.8rem;border:1px solid var(--card-border)}
+.gp-val-item.has-ph .gp-val-head,.gp-val-item.has-ph .gp-val-big,.gp-val-item.has-ph>div>.gp-val-sub{padding-right:5.4rem}
+.gp-val-credit{font-size:.72rem;color:var(--muted);margin:.1rem 0 .6rem;line-height:1.4}
+@media(max-width:380px){.gp-val-ph{width:3.8rem;height:3.8rem}.gp-val-item.has-ph .gp-val-head,.gp-val-item.has-ph .gp-val-big,.gp-val-item.has-ph>div>.gp-val-sub{padding-right:4.7rem}}
 .gp-val-note{font-size:.85rem;color:var(--muted);margin:.2rem 0 .8rem;line-height:1.5}
 .gp-val-note strong{color:var(--text)}
 .gp-val-meaning .gp-cta,.gp-val-card .gp-cta{background:#27834d;color:#fff;min-height:3rem;width:100%;box-sizing:border-box}
@@ -1055,6 +1060,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="gp-vstep">3 · Rezultat</div>
     <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>
     <div class="gp-val-state" id="gvalStatePanel"></div>
+    <p class="gp-val-credit">Foto, Wikimedia Commons: Orjaški dežnik (Marela): Chrumps (CC BY-SA 4.0); Žvepleni lepoluknjičar: Rror (CC BY-SA 3.0); Jesenski goban (Jurček): Holger Krisp (CC BY 3.0).</p>
     <p class="gp-val-note">Odstotek je <strong>ujemanje padavinskih pravil</strong>, ne verjetnost najdbe. Okna so modelski razpon, ne zagotovilo začetka rasti.</p>
     <p><a class="gp-cta" href="/gobarska-napoved/danes/">Odpri celotno gobarsko napoved →</a></p>
     <details class="gp-val-why" id="gvalTimeline" open><summary><svg class="gp-val-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M12 7.5V12l3 2"/></svg>Časovnica oken</summary>
@@ -1096,6 +1102,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var CFG = {"norm": 7, "baseDays": 14, "wT": 0.25, "wB": 0.15, "rain": {"overStart": 3.0, "overEnd": 6.0, "overFloor": 0.5}, "geo": {"match": 1.15, "mismatch": 0.75}};
   var TERRAINS = [{"id": "kisla", "name": "Kislo/vulkansko pogorje (Smrekovec)", "note": "Silikatna kisla tla; dobro zadržujejo vlago. Kraljestvo jurčka in žametastega gobana."}, {"id": "bazicna", "name": "Karbonatni masivi (Golte, Menina, Raduha)", "note": "Apnenčasta bazična tla; hitreje se sušijo. Kraljestvo marele in poletnega gobana."}, {"id": "vlazna", "name": "Rečni logi in dolinske terase", "note": "Stalno vlažna tla ob Savinji in Dreti. Kraljestvo smrčkov in uhljevk."}];
   var ICONS = {"razkrojevalka": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 19C5 10 10 5 19 5c0 9-5 14-14 14z\" fill=\"currentColor\" fill-opacity=\".15\"/><path d=\"M5 19L13 11\"/></svg>", "lesna": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"7\" width=\"16\" height=\"11\" rx=\"3\" fill=\"currentColor\" fill-opacity=\".15\"/><circle cx=\"17\" cy=\"12.5\" r=\"3.2\"/><circle cx=\"17\" cy=\"12.5\" r=\"1\"/><path d=\"M4 12.5h9\"/></svg>", "mikorizna": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3.5 12.5a8.5 8 0 0 1 17 0z\" fill=\"currentColor\" fill-opacity=\".15\"/><path d=\"M10 12.5v5.5a2 2 0 0 0 4 0v-5.5\"/></svg>", "dez": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3.5C8.5 8 6.5 11 6.5 14a5.5 5.5 0 0 0 11 0c0-3-2-6-5.5-10.5z\" fill=\"currentColor\" fill-opacity=\".15\"/></svg>", "ok": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"currentColor\" fill-opacity=\".15\"/><path d=\"M8 12.5l2.7 2.7L16 9.5\"/></svg>", "cas": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"currentColor\" fill-opacity=\".15\"/><path d=\"M12 7.5V12l3 2\"/></svg>", "mimo": "<svg class=\"gp-val-ico\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"currentColor\" fill-opacity=\".15\"/><path d=\"M9 9l6 6M15 9l-6 6\"/></svg>"};
+  var PHOTOS = {"razkrojevalka": {"src": "/gobarska-napoved/img/vrste/macrolepiota_procera.jpg", "alt": "Orjaški dežnik (Marela)"}, "lesna": {"src": "/gobarska-napoved/img/vrste/laetiporus_sulphureus.jpg", "alt": "Žvepleni lepoluknjičar"}, "mikorizna": {"src": "/gobarska-napoved/img/vrste/boletus_edulis.jpg", "alt": "Jesenski goban (Jurček)"}};
   var MAXEV = 3;
   function $(id){ return document.getElementById(id); }
   var evBox = $('gvalEvents');
@@ -1584,6 +1591,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       var dot = document.createElement('div'); dot.className = 'gp-val-dot';
       dot.style.background = g.color; dot.style.opacity = tone === 'on' ? '1' : '.35';
       item.style.borderLeft = '4px solid ' + g.color; item.style.opacity = tone === 'on' ? '1' : '.92';
+      var ph = PHOTOS[g.eco];
+      if (ph){
+        var im = document.createElement('img'); im.className = 'gp-val-ph'; im.src = ph.src; im.alt = ph.alt;
+        im.loading = 'lazy'; im.width = 72; im.height = 72; item.appendChild(im); item.classList.add('has-ph');
+      }
       var body = document.createElement('div'); body.style.flex = '1'; body.style.minWidth = '0';
       var head = document.createElement('div'); head.className = 'gp-val-head';
       var title = document.createElement('span'); title.className = 'gp-val-title';

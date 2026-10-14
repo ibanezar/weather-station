@@ -3117,6 +3117,8 @@ VALOVI_GROUPS = [
       "boletus_pinophilus", "imleria_badia", "hygrophorus_russula"]),
 ]
 VALOVI_MAXDAY = 20
+# Fotografija skupine = ena vrsta iz baze vrst (avtor in licenca iz CREDITS.json, navedba pod rezultati je obvezna).
+VALOVI_PHOTOS = {"razkrojevalka": "macrolepiota_procera", "lesna": "laetiporus_sulphureus", "mikorizna": "boletus_edulis"}
 VALOVI_SHORT = {"razkrojevalka": "Stelja", "lesna": "Les", "mikorizna": "Mikorizne"}
 # Lastna podoba kalkulatorja (logotip, barve, favicon, OG): tools/build_valovi_brand.py.
 # Barve skupin so iste kot v VALOVI_GROUPS. Prepiše samo spremenljivke in nekaj pravil te strani.
@@ -3171,6 +3173,11 @@ body{--blue:#4cae78;--cyan:#a78bfa;--muted:#9fb3a6;--bg:#0b1510;--card-bg:#101e1
 .gp-val-big{font-size:1.4rem;font-weight:800;margin:.35rem 0 0;line-height:1.25}
 .gp-val-more{margin-top:.6rem;border-top:1px solid var(--card-border)}
 .gp-val-more>summary{cursor:pointer;font-size:.82rem;color:var(--muted);padding:.7rem 0;min-height:1.4rem}
+.gp-val-item{position:relative}
+.gp-val-ph{position:absolute;right:.9rem;top:.9rem;width:4.5rem;height:4.5rem;object-fit:cover;border-radius:.8rem;border:1px solid var(--card-border)}
+.gp-val-item.has-ph .gp-val-head,.gp-val-item.has-ph .gp-val-big,.gp-val-item.has-ph>div>.gp-val-sub{padding-right:5.4rem}
+.gp-val-credit{font-size:.72rem;color:var(--muted);margin:.1rem 0 .6rem;line-height:1.4}
+@media(max-width:380px){.gp-val-ph{width:3.8rem;height:3.8rem}.gp-val-item.has-ph .gp-val-head,.gp-val-item.has-ph .gp-val-big,.gp-val-item.has-ph>div>.gp-val-sub{padding-right:4.7rem}}
 .gp-val-note{font-size:.85rem;color:var(--muted);margin:.2rem 0 .8rem;line-height:1.5}
 .gp-val-note strong{color:var(--text)}
 .gp-val-meaning .gp-cta,.gp-val-card .gp-cta{background:#27834d;color:#fff;min-height:3rem;width:100%;box-sizing:border-box}
@@ -3285,6 +3292,7 @@ VALOVI_JS = r"""(function(){
   var CFG = __CFG__;
   var TERRAINS = __TERRAINS__;
   var ICONS = __ICONS__;
+  var PHOTOS = __PHOTOS__;
   var MAXEV = __MAXEV__;
   function $(id){ return document.getElementById(id); }
   var evBox = $('gvalEvents');
@@ -3773,6 +3781,11 @@ VALOVI_JS = r"""(function(){
       var dot = document.createElement('div'); dot.className = 'gp-val-dot';
       dot.style.background = g.color; dot.style.opacity = tone === 'on' ? '1' : '.35';
       item.style.borderLeft = '4px solid ' + g.color; item.style.opacity = tone === 'on' ? '1' : '.92';
+      var ph = PHOTOS[g.eco];
+      if (ph){
+        var im = document.createElement('img'); im.className = 'gp-val-ph'; im.src = ph.src; im.alt = ph.alt;
+        im.loading = 'lazy'; im.width = 72; im.height = 72; item.appendChild(im); item.classList.add('has-ph');
+      }
       var body = document.createElement('div'); body.style.flex = '1'; body.style.minWidth = '0';
       var head = document.createElement('div'); head.className = 'gp-val-head';
       var title = document.createElement('span'); title.className = 'gp-val-title';
@@ -3888,6 +3901,18 @@ def valovi_widget_html():
            "geo": {"match": float(rules["scoring"]["geology"].get("match_factor", 1.0)),
                    "mismatch": float(rules["scoring"]["geology"].get("mismatch_factor", 1.0))}}
     terrains = [{"id": t["id"], "name": t["name_sl"], "note": t.get("note", "")} for t in rules.get("terrains", [])]
+    photos, credit_bits = {}, []
+    try:
+        with open(os.path.join(ROOT, "gobarska-napoved", "img", "vrste", "CREDITS.json"), encoding="utf-8") as f:
+            credits = _json_mod.load(f)
+    except (OSError, ValueError):
+        credits = {}
+    for eco, sid in VALOVI_PHOTOS.items():
+        c = credits.get(sid + ".jpg")
+        if c and os.path.exists(os.path.join(ROOT, "gobarska-napoved", "img", "vrste", sid + ".jpg")):
+            photos[eco] = {"src": f"/gobarska-napoved/img/vrste/{sid}.jpg", "alt": c.get("sl") or sid}
+            credit_bits.append(f'{_esc(c.get("sl") or sid)}: {_esc(c.get("artist", ""))} ({_esc(c.get("license", ""))})')
+    photo_credit = ('    <p class="gp-val-credit">Foto, Wikimedia Commons: ' + "; ".join(credit_bits) + '.</p>\n') if credit_bits else ""
     cutoff = (TODAY - _dt.timedelta(days=VALOVI_STATION_DAYS)).isoformat()
     station = {d: round(mm, 1) for d, mm in sorted(gm.load_station_precip().items())
                if cutoff <= d <= TODAY.isoformat()}
@@ -3898,6 +3923,7 @@ def valovi_widget_html():
         .replace("__STATION__", _json_mod.dumps(station, separators=(",", ":")))
         .replace("__CFG__", _json_mod.dumps(cfg))
         .replace("__TERRAINS__", _json_mod.dumps(terrains, ensure_ascii=False))
+        .replace("__PHOTOS__", _json_mod.dumps(photos, ensure_ascii=False))
         .replace("__ICONS__", _json_mod.dumps({k: _vi(k, 18) for k in ("razkrojevalka", "lesna", "mikorizna", "dez", "ok", "cas", "mimo")}))
         .replace("__MAXEV__", str(VALOVI_MAX_EVENTS))) + "</script>"
     if events:
@@ -3939,6 +3965,7 @@ def valovi_widget_html():
         '    <div class="gp-vstep">3 · Rezultat</div>\n'
         '    <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>\n'
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
+        + photo_credit +
         '    <p class="gp-val-note">Odstotek je <strong>ujemanje padavinskih pravil</strong>, ne verjetnost najdbe. '
         'Okna so modelski razpon, ne zagotovilo začetka rasti.</p>\n'
         '    <p><a class="gp-cta" href="/gobarska-napoved/danes/">Odpri celotno gobarsko napoved →</a></p>\n'
