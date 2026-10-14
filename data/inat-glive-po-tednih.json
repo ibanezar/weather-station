@@ -1,731 +1,1295 @@
 {
  "_meta": {
-  "vir": "iNaturalist API, place_id 8228, taxon_id 47169 (Fungi)",
+  "vir": "iNaturalist API, place_id 8228; skupine: fungi 47170, basidio 47169, agarico 50814",
   "opomba": "agregati po tednih; teden se začne 1. 7. + 7n dni; zadnji teden je podcenjen (zamuda nalaganja)",
   "generirano": "2026-10-14"
  },
  "tedni": {
   "2020-07-01": {
    "vse": 610,
-   "glive": 15
+   "basidio": 15,
+   "fungi": 16,
+   "agarico": 15
   },
   "2020-07-08": {
    "vse": 619,
-   "glive": 21
+   "basidio": 21,
+   "fungi": 23,
+   "agarico": 21
   },
   "2020-07-15": {
    "vse": 940,
-   "glive": 33
+   "basidio": 33,
+   "fungi": 35,
+   "agarico": 33
   },
   "2020-07-22": {
    "vse": 476,
-   "glive": 13
+   "basidio": 13,
+   "fungi": 16,
+   "agarico": 11
   },
   "2020-07-29": {
    "vse": 453,
-   "glive": 18
+   "basidio": 18,
+   "fungi": 20,
+   "agarico": 18
   },
   "2020-08-05": {
    "vse": 613,
-   "glive": 21
+   "basidio": 21,
+   "fungi": 22,
+   "agarico": 21
   },
   "2020-08-12": {
    "vse": 633,
-   "glive": 69
+   "basidio": 69,
+   "fungi": 73,
+   "agarico": 65
   },
   "2020-08-19": {
    "vse": 351,
-   "glive": 54
+   "basidio": 54,
+   "fungi": 55,
+   "agarico": 51
   },
   "2020-08-26": {
    "vse": 295,
-   "glive": 22
+   "basidio": 22,
+   "fungi": 24,
+   "agarico": 21
   },
   "2020-09-02": {
    "vse": 755,
-   "glive": 46
+   "basidio": 46,
+   "fungi": 59,
+   "agarico": 45
   },
   "2020-09-09": {
    "vse": 610,
-   "glive": 67
+   "basidio": 67,
+   "fungi": 69,
+   "agarico": 64
   },
   "2020-09-16": {
    "vse": 417,
-   "glive": 70
+   "basidio": 70,
+   "fungi": 76,
+   "agarico": 68
   },
   "2020-09-23": {
    "vse": 295,
-   "glive": 92
+   "basidio": 92,
+   "fungi": 106,
+   "agarico": 88
   },
   "2020-09-30": {
    "vse": 299,
-   "glive": 116
+   "basidio": 116,
+   "fungi": 126,
+   "agarico": 113
   },
   "2020-10-07": {
    "vse": 268,
-   "glive": 145
+   "basidio": 145,
+   "fungi": 153,
+   "agarico": 140
   },
   "2020-10-14": {
    "vse": 375,
-   "glive": 88
+   "basidio": 88,
+   "fungi": 95,
+   "agarico": 82
   },
   "2020-10-21": {
    "vse": 450,
-   "glive": 221
+   "basidio": 221,
+   "fungi": 231,
+   "agarico": 218
   },
   "2020-10-28": {
    "vse": 285,
-   "glive": 113
+   "basidio": 113,
+   "fungi": 121,
+   "agarico": 112
   },
   "2020-11-04": {
    "vse": 246,
-   "glive": 108
+   "basidio": 108,
+   "fungi": 120,
+   "agarico": 108
   },
   "2020-11-11": {
    "vse": 198,
-   "glive": 88
+   "basidio": 88,
+   "fungi": 102,
+   "agarico": 87
   },
   "2020-11-18": {
    "vse": 144,
-   "glive": 66
+   "basidio": 66,
+   "fungi": 77,
+   "agarico": 66
   },
   "2020-11-25": {
    "vse": 96,
-   "glive": 38
+   "basidio": 38,
+   "fungi": 42,
+   "agarico": 34
   },
   "2021-07-01": {
    "vse": 536,
-   "glive": 8
+   "basidio": 8,
+   "fungi": 16,
+   "agarico": 8
   },
   "2021-07-08": {
    "vse": 659,
-   "glive": 5
+   "basidio": 5,
+   "fungi": 5,
+   "agarico": 5
   },
   "2021-07-15": {
    "vse": 1744,
-   "glive": 18
+   "basidio": 18,
+   "fungi": 27,
+   "agarico": 18
   },
   "2021-07-22": {
    "vse": 1400,
-   "glive": 32
+   "basidio": 32,
+   "fungi": 42,
+   "agarico": 29
   },
   "2021-07-29": {
    "vse": 672,
-   "glive": 12
+   "basidio": 12,
+   "fungi": 14,
+   "agarico": 12
   },
   "2021-08-05": {
    "vse": 1230,
-   "glive": 43
+   "basidio": 43,
+   "fungi": 49,
+   "agarico": 43
   },
   "2021-08-12": {
    "vse": 1743,
-   "glive": 28
+   "basidio": 28,
+   "fungi": 35,
+   "agarico": 27
   },
   "2021-08-19": {
    "vse": 739,
-   "glive": 22
+   "basidio": 22,
+   "fungi": 22,
+   "agarico": 21
   },
   "2021-08-26": {
    "vse": 529,
-   "glive": 19
+   "basidio": 19,
+   "fungi": 21,
+   "agarico": 18
   },
   "2021-09-02": {
    "vse": 632,
-   "glive": 19
+   "basidio": 19,
+   "fungi": 25,
+   "agarico": 19
   },
   "2021-09-09": {
    "vse": 394,
-   "glive": 35
+   "basidio": 35,
+   "fungi": 41,
+   "agarico": 34
   },
   "2021-09-16": {
    "vse": 229,
-   "glive": 29
+   "basidio": 29,
+   "fungi": 29,
+   "agarico": 28
   },
   "2021-09-23": {
    "vse": 240,
-   "glive": 15
+   "basidio": 15,
+   "fungi": 15,
+   "agarico": 15
   },
   "2021-09-30": {
    "vse": 367,
-   "glive": 92
+   "basidio": 92,
+   "fungi": 106,
+   "agarico": 92
   },
   "2021-10-07": {
    "vse": 575,
-   "glive": 126
+   "basidio": 126,
+   "fungi": 154,
+   "agarico": 122
   },
   "2021-10-14": {
    "vse": 499,
-   "glive": 144
+   "basidio": 144,
+   "fungi": 174,
+   "agarico": 139
   },
   "2021-10-21": {
    "vse": 596,
-   "glive": 123
+   "basidio": 123,
+   "fungi": 137,
+   "agarico": 112
   },
   "2021-10-28": {
    "vse": 214,
-   "glive": 70
+   "basidio": 70,
+   "fungi": 83,
+   "agarico": 68
   },
   "2021-11-04": {
    "vse": 370,
-   "glive": 46
+   "basidio": 46,
+   "fungi": 54,
+   "agarico": 44
   },
   "2021-11-11": {
    "vse": 91,
-   "glive": 8
+   "basidio": 8,
+   "fungi": 10,
+   "agarico": 6
   },
   "2021-11-18": {
    "vse": 352,
-   "glive": 90
+   "basidio": 90,
+   "fungi": 117,
+   "agarico": 87
   },
   "2021-11-25": {
    "vse": 38,
-   "glive": 3
+   "basidio": 3,
+   "fungi": 3,
+   "agarico": 1
   },
   "2022-07-01": {
    "vse": 1142,
-   "glive": 12
+   "basidio": 12,
+   "fungi": 14,
+   "agarico": 10
   },
   "2022-07-08": {
    "vse": 993,
-   "glive": 15
+   "basidio": 15,
+   "fungi": 17,
+   "agarico": 14
   },
   "2022-07-15": {
    "vse": 1070,
-   "glive": 14
+   "basidio": 14,
+   "fungi": 19,
+   "agarico": 12
   },
   "2022-07-22": {
    "vse": 476,
-   "glive": 8
+   "basidio": 8,
+   "fungi": 9,
+   "agarico": 7
   },
   "2022-07-29": {
    "vse": 754,
-   "glive": 4
+   "basidio": 4,
+   "fungi": 6,
+   "agarico": 3
   },
   "2022-08-05": {
    "vse": 1576,
-   "glive": 21
+   "basidio": 21,
+   "fungi": 29,
+   "agarico": 18
   },
   "2022-08-12": {
    "vse": 1244,
-   "glive": 18
+   "basidio": 18,
+   "fungi": 67,
+   "agarico": 17
   },
   "2022-08-19": {
    "vse": 915,
-   "glive": 27
+   "basidio": 27,
+   "fungi": 30,
+   "agarico": 23
   },
   "2022-08-26": {
    "vse": 649,
-   "glive": 49
+   "basidio": 49,
+   "fungi": 59,
+   "agarico": 46
   },
   "2022-09-02": {
    "vse": 751,
-   "glive": 125
+   "basidio": 125,
+   "fungi": 139,
+   "agarico": 120
   },
   "2022-09-09": {
    "vse": 797,
-   "glive": 191
+   "basidio": 191,
+   "fungi": 208,
+   "agarico": 185
   },
   "2022-09-16": {
    "vse": 1112,
-   "glive": 323
+   "basidio": 323,
+   "fungi": 344,
+   "agarico": 300
   },
   "2022-09-23": {
    "vse": 565,
-   "glive": 255
+   "basidio": 255,
+   "fungi": 269,
+   "agarico": 250
   },
   "2022-09-30": {
    "vse": 701,
-   "glive": 360
+   "basidio": 360,
+   "fungi": 372,
+   "agarico": 351
   },
   "2022-10-07": {
    "vse": 737,
-   "glive": 361
+   "basidio": 361,
+   "fungi": 374,
+   "agarico": 358
   },
   "2022-10-14": {
    "vse": 780,
-   "glive": 274
+   "basidio": 274,
+   "fungi": 298,
+   "agarico": 270
   },
   "2022-10-21": {
    "vse": 412,
-   "glive": 208
+   "basidio": 208,
+   "fungi": 218,
+   "agarico": 203
   },
   "2022-10-28": {
    "vse": 619,
-   "glive": 287
+   "basidio": 287,
+   "fungi": 324,
+   "agarico": 282
   },
   "2022-11-04": {
    "vse": 224,
-   "glive": 61
+   "basidio": 61,
+   "fungi": 69,
+   "agarico": 60
   },
   "2022-11-11": {
    "vse": 210,
-   "glive": 75
+   "basidio": 75,
+   "fungi": 88,
+   "agarico": 71
   },
   "2022-11-18": {
    "vse": 108,
-   "glive": 14
+   "basidio": 14,
+   "fungi": 17,
+   "agarico": 12
   },
   "2022-11-25": {
    "vse": 55,
-   "glive": 8
+   "basidio": 8,
+   "fungi": 10,
+   "agarico": 7
   },
   "2023-07-01": {
    "vse": 1630,
-   "glive": 69
+   "basidio": 69,
+   "fungi": 81,
+   "agarico": 68
   },
   "2023-07-08": {
    "vse": 1203,
-   "glive": 78
+   "basidio": 78,
+   "fungi": 89,
+   "agarico": 77
   },
   "2023-07-15": {
    "vse": 1233,
-   "glive": 80
+   "basidio": 80,
+   "fungi": 86,
+   "agarico": 78
   },
   "2023-07-22": {
    "vse": 1057,
-   "glive": 78
+   "basidio": 78,
+   "fungi": 82,
+   "agarico": 76
   },
   "2023-07-29": {
    "vse": 1214,
-   "glive": 371
+   "basidio": 371,
+   "fungi": 392,
+   "agarico": 357
   },
   "2023-08-05": {
    "vse": 1350,
-   "glive": 165
+   "basidio": 165,
+   "fungi": 179,
+   "agarico": 163
   },
   "2023-08-12": {
    "vse": 2428,
-   "glive": 293
+   "basidio": 293,
+   "fungi": 307,
+   "agarico": 285
   },
   "2023-08-19": {
    "vse": 1845,
-   "glive": 143
+   "basidio": 143,
+   "fungi": 169,
+   "agarico": 141
   },
   "2023-08-26": {
    "vse": 873,
-   "glive": 60
+   "basidio": 60,
+   "fungi": 77,
+   "agarico": 55
   },
   "2023-09-02": {
    "vse": 918,
-   "glive": 78
+   "basidio": 78,
+   "fungi": 99,
+   "agarico": 76
   },
   "2023-09-09": {
    "vse": 1199,
-   "glive": 43
+   "basidio": 43,
+   "fungi": 307,
+   "agarico": 40
   },
   "2023-09-16": {
    "vse": 811,
-   "glive": 38
+   "basidio": 38,
+   "fungi": 198,
+   "agarico": 34
   },
   "2023-09-23": {
    "vse": 710,
-   "glive": 98
+   "basidio": 98,
+   "fungi": 106,
+   "agarico": 98
   },
   "2023-09-30": {
    "vse": 956,
-   "glive": 185
+   "basidio": 185,
+   "fungi": 214,
+   "agarico": 184
   },
   "2023-10-07": {
    "vse": 983,
-   "glive": 247
+   "basidio": 247,
+   "fungi": 282,
+   "agarico": 246
   },
   "2023-10-14": {
    "vse": 396,
-   "glive": 137
+   "basidio": 137,
+   "fungi": 157,
+   "agarico": 136
   },
   "2023-10-21": {
    "vse": 817,
-   "glive": 413
+   "basidio": 413,
+   "fungi": 487,
+   "agarico": 407
   },
   "2023-10-28": {
    "vse": 766,
-   "glive": 358
+   "basidio": 358,
+   "fungi": 409,
+   "agarico": 348
   },
   "2023-11-04": {
    "vse": 435,
-   "glive": 162
+   "basidio": 162,
+   "fungi": 185,
+   "agarico": 161
   },
   "2023-11-11": {
    "vse": 507,
-   "glive": 106
+   "basidio": 106,
+   "fungi": 124,
+   "agarico": 106
   },
   "2023-11-18": {
    "vse": 335,
-   "glive": 141
+   "basidio": 141,
+   "fungi": 162,
+   "agarico": 135
   },
   "2023-11-25": {
    "vse": 317,
-   "glive": 94
+   "basidio": 94,
+   "fungi": 109,
+   "agarico": 93
   },
   "2024-07-01": {
    "vse": 3663,
-   "glive": 87
+   "basidio": 87,
+   "fungi": 139,
+   "agarico": 83
   },
   "2024-07-08": {
    "vse": 2166,
-   "glive": 142
+   "basidio": 142,
+   "fungi": 169,
+   "agarico": 137
   },
   "2024-07-15": {
    "vse": 1903,
-   "glive": 44
+   "basidio": 44,
+   "fungi": 51,
+   "agarico": 43
   },
   "2024-07-22": {
    "vse": 1412,
-   "glive": 25
+   "basidio": 25,
+   "fungi": 27,
+   "agarico": 25
   },
   "2024-07-29": {
    "vse": 1032,
-   "glive": 41
+   "basidio": 41,
+   "fungi": 43,
+   "agarico": 40
   },
   "2024-08-05": {
    "vse": 1399,
-   "glive": 59
+   "basidio": 59,
+   "fungi": 72,
+   "agarico": 58
   },
   "2024-08-12": {
    "vse": 1056,
-   "glive": 47
+   "basidio": 47,
+   "fungi": 53,
+   "agarico": 46
   },
   "2024-08-19": {
    "vse": 1855,
-   "glive": 69
+   "basidio": 69,
+   "fungi": 83,
+   "agarico": 66
   },
   "2024-08-26": {
    "vse": 1216,
-   "glive": 54
+   "basidio": 54,
+   "fungi": 68,
+   "agarico": 52
   },
   "2024-09-02": {
    "vse": 1097,
-   "glive": 50
+   "basidio": 50,
+   "fungi": 67,
+   "agarico": 49
   },
   "2024-09-09": {
    "vse": 528,
-   "glive": 65
+   "basidio": 65,
+   "fungi": 71,
+   "agarico": 62
   },
   "2024-09-16": {
    "vse": 1207,
-   "glive": 109
+   "basidio": 109,
+   "fungi": 120,
+   "agarico": 107
   },
   "2024-09-23": {
    "vse": 826,
-   "glive": 195
+   "basidio": 195,
+   "fungi": 202,
+   "agarico": 186
   },
   "2024-09-30": {
    "vse": 730,
-   "glive": 145
+   "basidio": 145,
+   "fungi": 165,
+   "agarico": 136
   },
   "2024-10-07": {
    "vse": 723,
-   "glive": 238
+   "basidio": 238,
+   "fungi": 258,
+   "agarico": 227
   },
   "2024-10-14": {
    "vse": 607,
-   "glive": 201
+   "basidio": 201,
+   "fungi": 210,
+   "agarico": 196
   },
   "2024-10-21": {
    "vse": 631,
-   "glive": 169
+   "basidio": 169,
+   "fungi": 189,
+   "agarico": 167
   },
   "2024-10-28": {
    "vse": 601,
-   "glive": 159
+   "basidio": 159,
+   "fungi": 184,
+   "agarico": 153
   },
   "2024-11-04": {
    "vse": 352,
-   "glive": 115
+   "basidio": 115,
+   "fungi": 154,
+   "agarico": 114
   },
   "2024-11-11": {
    "vse": 200,
-   "glive": 20
+   "basidio": 20,
+   "fungi": 24,
+   "agarico": 20
   },
   "2024-11-18": {
    "vse": 126,
-   "glive": 11
+   "basidio": 11,
+   "fungi": 14,
+   "agarico": 11
   },
   "2024-11-25": {
    "vse": 105,
-   "glive": 21
+   "basidio": 21,
+   "fungi": 22,
+   "agarico": 19
   },
   "2025-07-01": {
    "vse": 3077,
-   "glive": 8
+   "basidio": 8,
+   "fungi": 27,
+   "agarico": 7
   },
   "2025-07-08": {
    "vse": 2424,
-   "glive": 37
+   "basidio": 37,
+   "fungi": 42,
+   "agarico": 31
   },
   "2025-07-15": {
    "vse": 2691,
-   "glive": 38
+   "basidio": 38,
+   "fungi": 50,
+   "agarico": 38
   },
   "2025-07-22": {
    "vse": 1830,
-   "glive": 63
+   "basidio": 63,
+   "fungi": 70,
+   "agarico": 59
   },
   "2025-07-29": {
    "vse": 1947,
-   "glive": 156
+   "basidio": 156,
+   "fungi": 176,
+   "agarico": 149
   },
   "2025-08-05": {
    "vse": 2126,
-   "glive": 199
+   "basidio": 199,
+   "fungi": 212,
+   "agarico": 192
   },
   "2025-08-12": {
    "vse": 2209,
-   "glive": 97
+   "basidio": 97,
+   "fungi": 110,
+   "agarico": 94
   },
   "2025-08-19": {
    "vse": 1630,
-   "glive": 58
+   "basidio": 58,
+   "fungi": 72,
+   "agarico": 57
   },
   "2025-08-26": {
    "vse": 1859,
-   "glive": 57
+   "basidio": 57,
+   "fungi": 70,
+   "agarico": 51
   },
   "2025-09-02": {
    "vse": 1905,
-   "glive": 136
+   "basidio": 136,
+   "fungi": 155,
+   "agarico": 129
   },
   "2025-09-09": {
    "vse": 1727,
-   "glive": 220
+   "basidio": 220,
+   "fungi": 247,
+   "agarico": 217
   },
   "2025-09-16": {
    "vse": 2160,
-   "glive": 358
+   "basidio": 358,
+   "fungi": 394,
+   "agarico": 354
   },
   "2025-09-23": {
    "vse": 1324,
-   "glive": 378
+   "basidio": 378,
+   "fungi": 410,
+   "agarico": 368
   },
   "2025-09-30": {
    "vse": 1200,
-   "glive": 221
+   "basidio": 221,
+   "fungi": 234,
+   "agarico": 217
   },
   "2025-10-07": {
    "vse": 1051,
-   "glive": 292
+   "basidio": 292,
+   "fungi": 314,
+   "agarico": 287
   },
   "2025-10-14": {
    "vse": 1005,
-   "glive": 199
+   "basidio": 199,
+   "fungi": 215,
+   "agarico": 197
   },
   "2025-10-21": {
    "vse": 1491,
-   "glive": 395
+   "basidio": 395,
+   "fungi": 427,
+   "agarico": 390
   },
   "2025-10-28": {
    "vse": 1015,
-   "glive": 300
+   "basidio": 300,
+   "fungi": 327,
+   "agarico": 298
   },
   "2025-11-04": {
    "vse": 435,
-   "glive": 118
+   "basidio": 118,
+   "fungi": 134,
+   "agarico": 115
   },
   "2025-11-11": {
    "vse": 638,
-   "glive": 63
+   "basidio": 63,
+   "fungi": 68,
+   "agarico": 63
   },
   "2025-11-18": {
    "vse": 199,
-   "glive": 15
+   "basidio": 15,
+   "fungi": 17,
+   "agarico": 15
   },
   "2025-11-25": {
    "vse": 262,
-   "glive": 53
+   "basidio": 53,
+   "fungi": 59,
+   "agarico": 51
   },
   "2026-07-01": {
    "vse": 2297,
-   "glive": 20
+   "basidio": 20,
+   "fungi": 38,
+   "agarico": 15
   },
   "2026-07-08": {
    "vse": 3051,
-   "glive": 29
+   "basidio": 29,
+   "fungi": 46,
+   "agarico": 27
   },
   "2026-07-15": {
    "vse": 2450,
-   "glive": 12
+   "basidio": 12,
+   "fungi": 20,
+   "agarico": 12
   },
   "2026-07-22": {
    "vse": 3182,
-   "glive": 46
+   "basidio": 46,
+   "fungi": 75,
+   "agarico": 44
   },
   "2026-07-29": {
    "vse": 3496,
-   "glive": 50
+   "basidio": 50,
+   "fungi": 255,
+   "agarico": 48
   },
   "2026-08-05": {
    "vse": 3388,
-   "glive": 21
+   "basidio": 21,
+   "fungi": 120,
+   "agarico": 18
   },
   "2026-08-12": {
    "vse": 1921,
-   "glive": 23
+   "basidio": 23,
+   "fungi": 64,
+   "agarico": 22
   },
   "2026-08-19": {
    "vse": 1954,
-   "glive": 61
+   "basidio": 61,
+   "fungi": 80,
+   "agarico": 57
   },
   "2026-08-26": {
    "vse": 1569,
-   "glive": 75
+   "basidio": 75,
+   "fungi": 86,
+   "agarico": 74
   },
   "2026-09-02": {
    "vse": 1744,
-   "glive": 154
+   "basidio": 154,
+   "fungi": 169,
+   "agarico": 149
   },
   "2026-09-09": {
    "vse": 1386,
-   "glive": 136
+   "basidio": 136,
+   "fungi": 154,
+   "agarico": 130
   },
   "2026-09-16": {
    "vse": 1234,
-   "glive": 221
+   "basidio": 221,
+   "fungi": 267,
+   "agarico": 212
   },
   "2026-09-23": {
    "vse": 1142,
-   "glive": 195
+   "basidio": 195,
+   "fungi": 220,
+   "agarico": 191
   },
   "2026-09-30": {
    "vse": 1329,
-   "glive": 236
+   "basidio": 236,
+   "fungi": 266,
+   "agarico": 227
   },
   "2026-10-07": {
    "vse": 903,
-   "glive": 142
+   "basidio": 142,
+   "fungi": 188,
+   "agarico": 140
   }
  },
  "povzetek": {
-  "2020": {
-   "teden_z_najvec_glivami": {
-    "zacetek": "2020-10-21",
-    "glive": 221
+  "fungi": {
+   "2020": {
+    "teden_z_najvec": {
+     "zacetek": "2020-10-21",
+     "stevilo": 231
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2020-10-07",
+     "delez": 57
+    },
+    "delez_po_mesecih": {
+     "7": 4,
+     "8": 9,
+     "9": 18,
+     "10": 44,
+     "11": 50
+    },
+    "skupaj": 1661,
+    "zadnji_teden": "2020-11-25"
    },
-   "teden_z_najvecjim_delezem": {
-    "zacetek": "2020-10-07",
-    "delez": 54
+   "2021": {
+    "teden_z_najvec": {
+     "zacetek": "2021-10-14",
+     "stevilo": 174
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2021-10-28",
+     "delez": 39
+    },
+    "delez_po_mesecih": {
+     "7": 2,
+     "8": 3,
+     "9": 12,
+     "10": 29,
+     "11": 22
+    },
+    "skupaj": 1179,
+    "zadnji_teden": "2021-11-25"
    },
-   "delez_po_mesecih": {
-    "7": 3,
-    "8": 9,
-    "9": 16,
-    "10": 41,
-    "11": 44
+   "2022": {
+    "teden_z_najvec": {
+     "zacetek": "2022-10-07",
+     "stevilo": 374
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2022-09-30",
+     "delez": 53
+    },
+    "delez_po_mesecih": {
+     "7": 1,
+     "8": 4,
+     "9": 34,
+     "10": 48,
+     "11": 31
+    },
+    "skupaj": 2980,
+    "zadnji_teden": "2022-11-25"
    },
-   "skupaj_glive": 1524,
-   "zadnji_teden": "2020-11-25"
+   "2023": {
+    "teden_z_najvec": {
+     "zacetek": "2023-10-21",
+     "stevilo": 487
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2023-10-21",
+     "delez": 60
+    },
+    "delez_po_mesecih": {
+     "7": 12,
+     "8": 11,
+     "9": 20,
+     "10": 45,
+     "11": 36
+    },
+    "skupaj": 4301,
+    "zadnji_teden": "2023-11-25"
+   },
+   "2024": {
+    "teden_z_najvec": {
+     "zacetek": "2024-10-07",
+     "stevilo": 258
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2024-11-04",
+     "delez": 44
+    },
+    "delez_po_mesecih": {
+     "7": 4,
+     "8": 5,
+     "9": 14,
+     "10": 33,
+     "11": 27
+    },
+    "skupaj": 2385,
+    "zadnji_teden": "2024-11-25"
+   },
+   "2025": {
+    "teden_z_najvec": {
+     "zacetek": "2025-10-21",
+     "stevilo": 427
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2025-10-28",
+     "delez": 32
+    },
+    "delez_po_mesecih": {
+     "7": 3,
+     "8": 6,
+     "9": 17,
+     "10": 28,
+     "11": 18
+    },
+    "skupaj": 3830,
+    "zadnji_teden": "2025-11-25"
+   },
+   "2026": {
+    "teden_z_najvec": {
+     "zacetek": "2026-09-16",
+     "stevilo": 267
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2026-09-16",
+     "delez": 22
+    },
+    "delez_po_mesecih": {
+     "7": 3,
+     "8": 4,
+     "9": 16,
+     "10": 21
+    },
+    "skupaj": 2048,
+    "zadnji_teden": "2026-10-07"
+   }
   },
-  "2021": {
-   "teden_z_najvec_glivami": {
-    "zacetek": "2021-10-14",
-    "glive": 144
+  "basidio": {
+   "2020": {
+    "teden_z_najvec": {
+     "zacetek": "2020-10-21",
+     "stevilo": 221
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2020-10-07",
+     "delez": 54
+    },
+    "delez_po_mesecih": {
+     "7": 3,
+     "8": 9,
+     "9": 16,
+     "10": 41,
+     "11": 44
+    },
+    "skupaj": 1524,
+    "zadnji_teden": "2020-11-25"
    },
-   "teden_z_najvecjim_delezem": {
-    "zacetek": "2021-10-28",
-    "delez": 33
+   "2021": {
+    "teden_z_najvec": {
+     "zacetek": "2021-10-14",
+     "stevilo": 144
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2021-10-28",
+     "delez": 33
+    },
+    "delez_po_mesecih": {
+     "7": 1,
+     "8": 3,
+     "9": 10,
+     "10": 25,
+     "11": 17
+    },
+    "skupaj": 987,
+    "zadnji_teden": "2021-11-25"
    },
-   "delez_po_mesecih": {
-    "7": 1,
-    "8": 3,
-    "9": 10,
-    "10": 25,
-    "11": 17
+   "2022": {
+    "teden_z_najvec": {
+     "zacetek": "2022-10-07",
+     "stevilo": 361
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2022-09-30",
+     "delez": 51
+    },
+    "delez_po_mesecih": {
+     "7": 1,
+     "8": 3,
+     "9": 32,
+     "10": 44,
+     "11": 26
+    },
+    "skupaj": 2710,
+    "zadnji_teden": "2022-11-25"
    },
-   "skupaj_glive": 987,
-   "zadnji_teden": "2021-11-25"
+   "2023": {
+    "teden_z_najvec": {
+     "zacetek": "2023-10-21",
+     "stevilo": 413
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2023-10-21",
+     "delez": 51
+    },
+    "delez_po_mesecih": {
+     "7": 11,
+     "8": 10,
+     "9": 10,
+     "10": 39,
+     "11": 32
+    },
+    "skupaj": 3437,
+    "zadnji_teden": "2023-11-25"
+   },
+   "2024": {
+    "teden_z_najvec": {
+     "zacetek": "2024-10-07",
+     "stevilo": 238
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2024-10-14",
+     "delez": 33
+    },
+    "delez_po_mesecih": {
+     "7": 3,
+     "8": 4,
+     "9": 13,
+     "10": 30,
+     "11": 21
+    },
+    "skupaj": 2066,
+    "zadnji_teden": "2024-11-25"
+   },
+   "2025": {
+    "teden_z_najvec": {
+     "zacetek": "2025-10-21",
+     "stevilo": 395
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2025-10-28",
+     "delez": 30
+    },
+    "delez_po_mesecih": {
+     "7": 3,
+     "8": 5,
+     "9": 16,
+     "10": 26,
+     "11": 16
+    },
+    "skupaj": 3461,
+    "zadnji_teden": "2025-11-25"
+   },
+   "2026": {
+    "teden_z_najvec": {
+     "zacetek": "2026-09-30",
+     "stevilo": 236
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2026-09-16",
+     "delez": 18
+    },
+    "delez_po_mesecih": {
+     "7": 1,
+     "8": 2,
+     "9": 14,
+     "10": 16
+    },
+    "skupaj": 1421,
+    "zadnji_teden": "2026-10-07"
+   }
   },
-  "2022": {
-   "teden_z_najvec_glivami": {
-    "zacetek": "2022-10-07",
-    "glive": 361
+  "agarico": {
+   "2020": {
+    "teden_z_najvec": {
+     "zacetek": "2020-10-21",
+     "stevilo": 218
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2020-10-07",
+     "delez": 52
+    },
+    "delez_po_mesecih": {
+     "7": 3,
+     "8": 8,
+     "9": 16,
+     "10": 40,
+     "11": 43
+    },
+    "skupaj": 1481,
+    "zadnji_teden": "2020-11-25"
    },
-   "teden_z_najvecjim_delezem": {
-    "zacetek": "2022-09-30",
-    "delez": 51
+   "2021": {
+    "teden_z_najvec": {
+     "zacetek": "2021-10-14",
+     "stevilo": 139
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2021-10-28",
+     "delez": 32
+    },
+    "delez_po_mesecih": {
+     "7": 1,
+     "8": 3,
+     "9": 10,
+     "10": 23,
+     "11": 16
+    },
+    "skupaj": 948,
+    "zadnji_teden": "2021-11-25"
    },
-   "delez_po_mesecih": {
-    "7": 1,
-    "8": 3,
-    "9": 32,
-    "10": 44,
-    "11": 26
+   "2022": {
+    "teden_z_najvec": {
+     "zacetek": "2022-10-07",
+     "stevilo": 358
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2022-09-30",
+     "delez": 50
+    },
+    "delez_po_mesecih": {
+     "7": 1,
+     "8": 2,
+     "9": 31,
+     "10": 44,
+     "11": 25
+    },
+    "skupaj": 2619,
+    "zadnji_teden": "2022-11-25"
    },
-   "skupaj_glive": 2710,
-   "zadnji_teden": "2022-11-25"
-  },
-  "2023": {
-   "teden_z_najvec_glivami": {
-    "zacetek": "2023-10-21",
-    "glive": 413
+   "2023": {
+    "teden_z_najvec": {
+     "zacetek": "2023-10-21",
+     "stevilo": 407
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2023-10-21",
+     "delez": 50
+    },
+    "delez_po_mesecih": {
+     "7": 10,
+     "8": 10,
+     "9": 9,
+     "10": 38,
+     "11": 31
+    },
+    "skupaj": 3364,
+    "zadnji_teden": "2023-11-25"
    },
-   "teden_z_najvecjim_delezem": {
-    "zacetek": "2023-10-21",
-    "delez": 51
+   "2024": {
+    "teden_z_najvec": {
+     "zacetek": "2024-10-07",
+     "stevilo": 227
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2024-11-04",
+     "delez": 32
+    },
+    "delez_po_mesecih": {
+     "7": 3,
+     "8": 4,
+     "9": 12,
+     "10": 29,
+     "11": 21
+    },
+    "skupaj": 1997,
+    "zadnji_teden": "2024-11-25"
    },
-   "delez_po_mesecih": {
-    "7": 11,
-    "8": 10,
-    "9": 10,
-    "10": 39,
-    "11": 32
+   "2025": {
+    "teden_z_najvec": {
+     "zacetek": "2025-10-21",
+     "stevilo": 390
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2025-10-28",
+     "delez": 29
+    },
+    "delez_po_mesecih": {
+     "7": 2,
+     "8": 5,
+     "9": 15,
+     "10": 26,
+     "11": 16
+    },
+    "skupaj": 3379,
+    "zadnji_teden": "2025-11-25"
    },
-   "skupaj_glive": 3437,
-   "zadnji_teden": "2023-11-25"
-  },
-  "2024": {
-   "teden_z_najvec_glivami": {
-    "zacetek": "2024-10-07",
-    "glive": 238
-   },
-   "teden_z_najvecjim_delezem": {
-    "zacetek": "2024-10-14",
-    "delez": 33
-   },
-   "delez_po_mesecih": {
-    "7": 3,
-    "8": 4,
-    "9": 13,
-    "10": 30,
-    "11": 21
-   },
-   "skupaj_glive": 2066,
-   "zadnji_teden": "2024-11-25"
-  },
-  "2025": {
-   "teden_z_najvec_glivami": {
-    "zacetek": "2025-10-21",
-    "glive": 395
-   },
-   "teden_z_najvecjim_delezem": {
-    "zacetek": "2025-10-28",
-    "delez": 30
-   },
-   "delez_po_mesecih": {
-    "7": 3,
-    "8": 5,
-    "9": 16,
-    "10": 26,
-    "11": 16
-   },
-   "skupaj_glive": 3461,
-   "zadnji_teden": "2025-11-25"
-  },
-  "2026": {
-   "teden_z_najvec_glivami": {
-    "zacetek": "2026-09-30",
-    "glive": 236
-   },
-   "teden_z_najvecjim_delezem": {
-    "zacetek": "2026-09-16",
-    "delez": 18
-   },
-   "delez_po_mesecih": {
-    "7": 1,
-    "8": 2,
-    "9": 14,
-    "10": 16
-   },
-   "skupaj_glive": 1421,
-   "zadnji_teden": "2026-10-07"
+   "2026": {
+    "teden_z_najvec": {
+     "zacetek": "2026-09-30",
+     "stevilo": 227
+    },
+    "teden_z_najvecjim_delezem": {
+     "zacetek": "2026-09-16",
+     "delez": 17
+    },
+    "delez_po_mesecih": {
+     "7": 1,
+     "8": 2,
+     "9": 13,
+     "10": 16
+    },
+    "skupaj": 1366,
+    "zadnji_teden": "2026-10-07"
+   }
   }
  }
 }
