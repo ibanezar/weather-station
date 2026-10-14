@@ -1182,6 +1182,11 @@ body .app-bottomnav{display:none}
 .gp-val-name .gp-val-ico{margin-right:.4rem}
 .gp-val-clear .gp-val-ico,.gp-cta .gp-val-ico{margin-right:.3rem;vertical-align:-.25em}
 .gp-val-meaning h3 .gp-val-ico,.gp-val-why summary .gp-val-ico{color:#34d399;margin-right:.45rem;vertical-align:-.28em}
+.gp-val-big{font-size:1.15rem;font-weight:800;margin:.2rem 0 0;line-height:1.3}
+.gp-val-cmp{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:var(--gp-sp-3)}
+.gp-val-cmp th,.gp-val-cmp td{padding:.45rem .5rem;border-top:1px solid var(--card-border);text-align:left;vertical-align:top}
+.gp-val-cmp thead th{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-top:none}
+.gp-val-cmp small{color:var(--muted)}
 .gp-val-legend{font-size:var(--gp-fs-xs);color:var(--muted);margin:.4rem 0 var(--gp-sp-3);line-height:1.5}
 .gp-val-sub{font-size:.8rem;color:var(--muted);margin:.25rem 0 0;line-height:1.45}
 .gp-val-tnote{font-size:.78rem;color:var(--muted);margin:var(--gp-sp-2) 0 0;line-height:1.45}
@@ -3346,6 +3351,22 @@ VALOVI_JS = r"""(function(){
     }
     return next !== null ? { tone: 'dim', start: next } : { tone: 'past' };
   }
+  var MONTHS = ['januarja','februarja','marca','aprila','maja','junija','julija','avgusta','septembra','oktobra','novembra','decembra'];
+  function mergeSpans(wins, fromT){
+    var w = wins.filter(function(x){ return fromT === undefined || x[1] >= fromT; }).sort(function(a, b){ return a[0] - b[0]; }), out = [];
+    w.forEach(function(x){
+      var last = out[out.length - 1];
+      if (last && x[0] <= last[1] + 1) last[1] = Math.max(last[1], x[1]); else out.push([x[0], x[1]]);
+    });
+    return out;
+  }
+  function spanLong(a, b){
+    var da = new Date(a * 86400000), db = new Date(b * 86400000);
+    if (da.getUTCMonth() === db.getUTCMonth() && da.getUTCFullYear() === db.getUTCFullYear())
+      return da.getUTCDate() + '.–' + db.getUTCDate() + '. ' + MONTHS[db.getUTCMonth()];
+    return fmt(a) + '–' + fmt(b);
+  }
+  function spanTextLong(wins){ return mergeSpans(wins).map(function(x){ return spanLong(x[0], x[1]); }).join('; '); }
   function spanText(wins, fromT){
     var w = wins.filter(function(x){ return fromT === undefined || x[1] >= fromT; }).sort(function(a, b){ return a[0] - b[0]; }), out = [];
     w.forEach(function(x){
@@ -3375,7 +3396,6 @@ VALOVI_JS = r"""(function(){
     document.querySelectorAll('.gp-val-range[data-eco]').forEach(function(t){ t.style.display = ''; t.classList.remove('active'); });
     if (axisEl) axisEl.innerHTML = AXIS_STATIC;
     panel.innerHTML = '';
-    whyBox.hidden = true;
   }
 
   /* Časovnica z datumi: os se začne pri prvem vnesenem dežju, vsak dogodek dobi svoje okno. */
@@ -3439,17 +3459,65 @@ VALOVI_JS = r"""(function(){
     if (nxt) return sinceText(nxt.e, T) + ' Okno se začne ' + fmt(nxt.a) + ' (čez ' + dni(nxt.a - T) + ') in traja do ' + fmt(nxt.b);
     return sinceText(last.e, T) + ' Okno se je končalo ' + fmt(last.b);
   }
+  /* Kateri dogodek je sprožil katero okno; drugi dež v oknu se prišteje k sprožilnemu dežju. */
+  function eventLines(x, T, evs){
+    var lo = Math.min.apply(null, x.sp.map(function(i){ return i.s.min; }));
+    var hi = Math.max.apply(null, x.sp.map(function(i){ return i.s.max; }));
+    var out = [], overlap = false, ws = [];
+    evs.slice().sort(function(a, b){ return a.n - b.n; }).forEach(function(e){
+      var a = e.n + lo, b = e.n + hi;
+      if (ws.some(function(w){ return a <= w[1]; })) overlap = true;
+      ws.push([a, b]);
+      out.push('Dež ' + fmt(e.n) + (e.mm !== null ? ' (' + fmtMm(e.mm) + ' mm)' : '') + ' → okno ' + spanLong(a, b) +
+        (a <= T && T <= b ? ' · danes v oknu' : T < a ? ' · še ni' : ' · minilo'));
+    });
+    if (overlap) out.push('Okna se prekrivata: dež drugega dogodka v oknu prvega se prišteje k sprožilnemu dežju, zato ujemanje ni enako kot pri enem samem dogodku.');
+    return out;
+  }
+
+  /* Primerjava dveh scenarijev (A shranjen, B trenutni). */
+  var scenA = null;
+  function summarize(groupInfo, evs, T){
+    var o = { evs: evs.map(function(e){ return fmt(e.n) + (e.mm !== null ? ' ' + fmtMm(e.mm) + ' mm' : ''); }).join(' + '), g: {} };
+    groupInfo.forEach(function(x){
+      var best = 0; x.sp.forEach(function(i){ if (i.fit && i.fit.adj > best) best = i.fit.adj; });
+      var hasFit = x.sp.some(function(i){ return i.fit; });
+      o.g[x.g.eco] = { name: x.g.name, span: spanTextLong(x.wins), tone: x.st.tone, pct: hasFit ? Math.round(best * 100) : null };
+    });
+    return o;
+  }
+  function toneWord(t){ return t === 'on' ? 'v oknu' : t === 'past' ? 'za oknom' : 'pred oknom'; }
+  function renderCompare(groupInfo, evs, T){
+    var box = $('gvalCompare'); if (!box) return;
+    if (!scenA){ box.innerHTML = ''; return; }
+    var B = summarize(groupInfo, evs, T), rows = '';
+    GROUPS.forEach(function(g){
+      var a = scenA.g[g.eco], b = B.g[g.eco]; if (!a && !b) return;
+      var chg = [];
+      if (a && b){
+        if (a.span !== b.span) chg.push('okno se premakne');
+        if (a.tone !== b.tone) chg.push('stanje: ' + toneWord(a.tone) + ' → ' + toneWord(b.tone));
+        if (a.pct !== null && b.pct !== null && a.pct !== b.pct) chg.push('ujemanje ' + (b.pct > a.pct ? '+' : '') + (b.pct - a.pct) + ' točk');
+      }
+      var cell = function(c){ return c ? c.span + '<br><small>' + toneWord(c.tone) + (c.pct !== null ? ' · ' + c.pct + ' %' : '') + '</small>' : '–'; };
+      rows += '<tr><th scope="row">' + g.name + '</th><td>' + cell(a) + '</td><td>' + cell(b) + '</td><td>' + (chg.length ? chg.join('; ') : 'brez spremembe') + '</td></tr>';
+    });
+    box.innerHTML = '<div class="gp-scroll"><table class="gp-val-cmp"><thead><tr><th></th><th>A: ' + scenA.evs + '</th><th>B (zdaj): ' + B.evs +
+      '</th><th>Kaj se je spremenilo</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="gp-val-sub">Spremeni vnos zgoraj in primerjaj z shranjenim scenarijem A. Ujemanje je najvišje med prikazanimi vrstami skupine.</p>';
+  }
+
   function affLabel(a){
     var n = null; TERRAINS.forEach(function(t){ if (t.id === a) n = t.name; });
     return n || a;
   }
   function factorText(x){ return '×' + String(Math.round(x * 100) / 100).replace('.', ','); }
   function renderWhy(bi, terrain, T){
-    if (!bi){ whyBox.hidden = true; return; }
+    if (!bi){ whyEl.innerHTML = ''; return; }
     var s = bi.s, f = bi.fit, g = bi.g;
     var stT = f.tState === 'prenamoceno' ? 'Dež je presegel zgornjo mejo (prenamočeno), zato je ocena nižja.' :
       f.tState === 'nad_pragom' ? 'Prag je dosežen.' : 'To je pod pragom, zato je ujemanje delno.';
-    var stB = f.bState === 'prenamoceno' ? 'Zaloge je več, kot jo model šteje za ugodno.' :
+    var stB = f.bState === 'prenamoceno' ? 'Padavin je več, kot jih model šteje za ugodne.' :
       f.bState === 'nad_pragom' ? 'Prag je dosežen.' : 'To je pod pragom.';
     var tst = bi.st.tone === 'on' ? 'Danes je ' + fmt(T) + ' znotraj tega okna.' :
       bi.st.tone === 'dim' ? 'Okno se še ni začelo.' : 'Okno je minilo.';
@@ -3464,11 +3532,10 @@ VALOVI_JS = r"""(function(){
       '<ul><li><strong>Sprožilni dež:</strong> v oknu ' + s.min + '–' + s.max + ' dni pred ' + fmt(f.d) + ' je padlo ' + fmtMm(f.trig) +
       ' mm, model zahteva ' + fmtMm(f.trigMin) + ' mm. ' + stT + '</li>' +
       '<li><strong>Predhodne padavine:</strong> v ' + CFG.baseDays + ' dneh do ' + fmt(f.d - s.min) + ' je padlo ' + fmtMm(f.base) +
-      ' mm, prag zaloge vode je ' + fmtMm(s.r14) + ' mm. ' + stB + '</li>' +
+      ' mm, prag predhodnih padavin je ' + fmtMm(s.r14) + ' mm. ' + stB + '</li>' +
       '<li><strong>Časovni zamik:</strong> ' + s.min + '–' + s.max + ' dni po dežju. ' + tst + '</li>' +
       '<li><strong>Vpliv terena:</strong> ' + ter + '</li>' +
-      '<li><strong>Skupaj:</strong> ujemanje padavinskih pogojev ' + fin + '.</li></ul>';
-    whyBox.hidden = false;
+      '<li><strong>Skupaj:</strong> ujemanje padavinskih pravil ' + fin + '. Geološki faktor prilagodi modelski rezultat, ni potrjena sprememba verjetnosti najdbe.</li></ul>';
   }
 
   /* Deljiva povezava: datumi, količine, izbira in teren v #hash (brez strežnika). */
@@ -3566,25 +3633,8 @@ VALOVI_JS = r"""(function(){
       ' brez dežja (< 1 mm), v 14 dneh pred njim ' + fmtMm(sum14) + ' mm (postaja IREICA1).';
   }
 
-  function render(){
-    var T = todayNum();
-    var evs = usable();
-    if (events.some(function(e){ return e.iso && dayNum(e.iso) > T; })){
-      hint.textContent = 'Datum v prihodnosti se ne šteje -- izberi pretekli dan.';
-    } else hint.textContent = '';
-    if (!evs.length){
-      if (!hint.textContent) hint.textContent = 'Brez izdatnega dežja se glivna mreža ne odzove -- vse tri skupine mirujejo.';
-      result.innerHTML = '<strong>Brez izdatnega dežja model ne pričakuje vala.</strong> Vse tri skupine mirujejo, ' +
-        'dokler ne pade nov izdaten dež.';
-      clearState();
-      return;
-    }
-    var get = makeGetter(evs, stationChk.checked);
-    var drought = droughtText(evs, get);
-    hint.textContent = (hint.textContent ? hint.textContent + ' ' : '') + drought;
-
-    var terrain = terSel.value;
-    var groupInfo = GROUPS.map(function(g){
+  function analyze(evs, get, terrain, T){
+    return GROUPS.map(function(g){
       var gWins = [];
       var spInfo = [];
       g.species.forEach(function(s){
@@ -3605,33 +3655,62 @@ VALOVI_JS = r"""(function(){
       return { g: g, wins: gWins, st: statusOf(gWins, T), sp: spInfo };
     }).filter(Boolean);
 
+  }
+
+  function bestOf(groupInfo){
+    var best = null;
+    groupInfo.forEach(function(x){ x.sp.forEach(function(i){
+      i.g = x.g;
+      if (i.fit && i.st.tone !== 'past' && (!best || i.fit.adj > best.fit.adj)) best = i;
+    }); });
+    return best;
+  }
+
+  function render(){
+    var T = todayNum();
+    var evs = usable();
+    if (events.some(function(e){ return e.iso && dayNum(e.iso) > T; })){
+      hint.textContent = 'Datum v prihodnosti se ne šteje -- izberi pretekli dan.';
+    } else hint.textContent = '';
+    if (!evs.length){
+      if (!hint.textContent) hint.textContent = 'Brez izdatnega dežja se glivna mreža ne odzove -- vse tri skupine mirujejo.';
+      result.innerHTML = '<strong>Brez izdatnega dežja model ne pričakuje vala.</strong> Vse tri skupine mirujejo, ' +
+        'dokler ne pade nov izdaten dež.';
+      clearState();
+      var cb = $('gvalCompare'); if (cb && scenA) cb.innerHTML = '<p class="gp-val-sub">Scenarij B nima dežja, zato ni primerjave.</p>';
+      return;
+    }
+    var get = makeGetter(evs, stationChk.checked);
+    var drought = droughtText(evs, get);
+    hint.textContent = (hint.textContent ? hint.textContent + ' ' : '') + drought;
+
+    var terrain = terSel.value;
+    var groupInfo = analyze(evs, get, terrain, T);
+
     var on = groupInfo.filter(function(x){ return x.st.tone === 'on'; });
     var next = null;
     groupInfo.forEach(function(x){ if (x.st.tone === 'dim' && (!next || x.st.start < next.st.start)) next = x; });
     var html;
     if (on.length){
       var first = on.slice().sort(function(a, b){ return a.st.end - b.st.end; })[0];
-      html = '<strong>Zdaj aktivno: ' + on.map(function(x){ return x.g.name.toLowerCase(); }).join(', ') +
+      html = '<strong>Danes (' + fmt(T) + ') je aktivno: ' + on.map(function(x){ return x.g.name.toLowerCase(); }).join(', ') +
         '.</strong> Najprej mine okno skupine ' + first.g.name.toLowerCase() + ' (do ' + fmt(first.st.end) + ').' +
         (next ? ' Naslednji val: ' + next.g.name.toLowerCase() + ', okno ' + spanText(next.wins, T) +
         ' (čez ' + dni(next.st.start - T) + ').' : '');
     } else if (next){
-      html = '<strong>Prvi val: ' + next.g.name.toLowerCase() + '.</strong> Okno ' + spanText(next.wins, T) +
+      html = '<strong>Danes (' + fmt(T) + ') še ni aktivna nobena skupina. Prvi val: ' + next.g.name.toLowerCase() + '.</strong> Okno ' + spanTextLong(next.wins) +
         ' (čez ' + dni(next.st.start - T) + ').';
     } else {
-      html = '<strong>Vsa okna so minila.</strong> Za nov val je potreben nov izdaten dež.';
+      html = '<strong>Danes (' + fmt(T) + ') so vsa okna minila.</strong> Za nov val je potreben nov izdaten dež.';
     }
-    var bestSp = null;
-    groupInfo.forEach(function(x){ x.sp.forEach(function(i){
-      i.g = x.g;
-      if (i.fit && i.st.tone !== 'past' && (!bestSp || i.fit.adj > bestSp.fit.adj)) bestSp = i;
-    }); });
-    if (bestSp) html += (terrain ? ' Dež in teren najbolje ustrezata vrsti ' : ' Količina dežja najbolje ustreza vrsti ') + bestSp.s.name + ' (ujemanje padavinskih pogojev ' + Math.round(bestSp.fit.adj * 100) + ' %).';
+    var bestSp = bestOf(groupInfo);
+    if (bestSp) html += (terrain ? ' Dež in teren najbolje ustrezata vrsti ' : ' Količina dežja najbolje ustreza vrsti ') + bestSp.s.name + ' (ujemanje padavinskih pravil ' + Math.round(bestSp.fit.adj * 100) + ' %).';
     else if (events.some(function(e){ return e.iso && e.mm === null; })) html += ' Vnesi količino dežja za oceno, ali bo zadoščala.';
     result.innerHTML = html;
 
     drawTimeline(groupInfo, evs, T);
     renderWhy(bestSp, terrain, T);
+    renderCompare(groupInfo, evs, T);
 
     panel.innerHTML = '';
     groupInfo.forEach(function(x){
@@ -3645,25 +3724,37 @@ VALOVI_JS = r"""(function(){
       var title = document.createElement('span'); title.className = 'gp-val-title';
       title.style.opacity = tone === 'on' ? '1' : '.7';
       title.innerHTML = '<span style="color:' + g.color + '">' + ICONS[g.eco] + '</span>';
-      title.appendChild(document.createTextNode(g.name + ' · ' + spanText(x.wins)));
+      title.appendChild(document.createTextNode(g.name));
       var badge = document.createElement('span'); badge.className = 'gp-val-status';
       if (tone === 'on') { badge.style.background = g.color + '26'; badge.style.color = g.color; }
       else { badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }
-      badge.textContent = tone === 'on' ? 'aktivno' : tone === 'past' ? 'okno je minilo' : 'čez ' + dni(x.st.start - T);
+      badge.textContent = tone === 'on' ? 'v oknu' : tone === 'past' ? 'za oknom' : 'pred oknom · čez ' + dni(x.st.start - T);
       head.appendChild(title); head.appendChild(badge); body.appendChild(head);
+      var big = document.createElement('div'); big.className = 'gp-val-big'; big.style.color = g.color;
+      big.textContent = spanTextLong(x.wins);
+      body.appendChild(big);
+      var lagLine = document.createElement('div'); lagLine.className = 'gp-val-sub';
+      lagLine.textContent = 'Modelski zamik: ' + Math.min.apply(null, x.sp.map(function(i){ return i.s.min; })) + '–' +
+        Math.max.apply(null, x.sp.map(function(i){ return i.s.max; })) + ' dni po padavinah.';
+      body.appendChild(lagLine);
       var sub = document.createElement('div'); sub.className = 'gp-val-sub';
       sub.innerHTML = '<span style="color:#60a5fa">' + ICONS.dez + '</span>';
       sub.appendChild(document.createTextNode(groupSub(x, T, evs)));
       body.appendChild(sub);
+      if (evs.length > 1){
+        eventLines(x, T, evs).forEach(function(t){
+          var l = document.createElement('div'); l.className = 'gp-val-sub'; l.textContent = t; body.appendChild(l);
+        });
+      }
       var row = document.createElement('div'); row.className = 'gp-val-species';
       x.sp.forEach(function(i){
         var chip = document.createElement('span'); chip.className = 'gp-val-chip';
         if (i.st.tone !== 'on') chip.style.opacity = '.5';
         var txt = i.s.name + ' · ' + spanText(i.wins);
         if (i.fit){
-          txt += ' · ujemanje ' + Math.round(i.fit.adj * 100) + ' %';
+          txt += ' · ' + Math.round(i.fit.adj * 100) + ' % ujemanje pravil';
           chip.title = fitWord(i.fit.adj) + ': sprožilni dež ' + fmtMm(i.fit.trig) + ' od ' + fmtMm(i.fit.trigMin) +
-            ' mm, zaloga vode ' + fmtMm(i.fit.base) + ' mm (najboljši dan ' + fmt(i.fit.d) + ')' +
+            ' mm, predhodne padavine ' + fmtMm(i.fit.base) + ' mm (najboljši dan ' + fmt(i.fit.d) + ')' +
             (i.fit.tState === 'prenamoceno' ? ', prenamočeno' : '') +
             (terrain ? '; teren ×' + String(Math.round(i.fit.geo * 100) / 100).replace('.', ',') : '') +
             '; po terenih: ' + i.fit.byTerrain.map(function(b){ return b.t.name.split(/[ (/]/)[0] + ' ' + Math.round(b.v * 100) + ' %'; }).join(', ');
@@ -3681,6 +3772,14 @@ VALOVI_JS = r"""(function(){
   });
   clearBtn.addEventListener('click', function(){ events = [{ iso: '', mm: null }]; renderRows(); render(); });
   if (measBtn) measBtn.addEventListener('click', useMeasured);
+  var saveA = $('gvalSaveA'), clearA = $('gvalClearA');
+  if (saveA) saveA.addEventListener('click', function(){
+    var T = todayNum(), evs = usable();
+    if (!evs.length){ shareMsg.textContent = 'Najprej vnesi dež.'; return; }
+    scenA = summarize(analyze(evs, makeGetter(evs, stationChk.checked), terSel.value, T), evs, T);
+    shareMsg.textContent = 'Scenarij A je shranjen. Spremeni vnos in primerjaj.'; render();
+  });
+  if (clearA) clearA.addEventListener('click', function(){ scenA = null; shareMsg.textContent = ''; render(); });
   stationChk.addEventListener('change', render);
   whatSel.addEventListener('change', render);
   terSel.addEventListener('change', function(){ terrainNote(); render(); });
@@ -3747,53 +3846,57 @@ def valovi_widget_html():
         if events else '')
     return (
         '  <div class="gp-val-card">\n'
-        '    <span class="gp-val-inlabel">Kdaj je padel izdaten dež (vsaj 10–15 mm naenkrat) in koliko? '
-        f'Vneseš lahko do {VALOVI_MAX_EVENTS} dogodke.</span>\n'
+        '    <span class="gp-val-inlabel">Vnesi pomembnejše padavinske dogodke: datum in količino. '
+        f'Vneseš lahko do {VALOVI_MAX_EVENTS} dogodke. Model za vsako vrsto sam preveri, ali dež doseže njen prag; '
+        f'samodejni predlog s postaje vzame dneve z vsaj {VALOVI_RAIN_MM} mm.</span>\n'
         '    <div class="gp-val-events" id="gvalEvents"></div>\n'
         '    <div class="gp-val-inrow">\n'
         + measured_btn +
         '      <button type="button" id="gvalAdd" class="gp-val-clear">' + _vi('plus', 16) + 'Dodaj dež</button>\n'
-        '      <button type="button" id="gvalClear" class="gp-val-clear">' + _vi('nic', 16) + 'V zadnjem obdobju ni bilo omembe vrednega dežja</button>\n'
+        '      <button type="button" id="gvalClear" class="gp-val-clear">' + _vi('nic', 16) + 'Ni bilo izdatnega dežja</button>\n'
         '    </div>\n'
         '    <div class="gp-val-sel">\n'
         '      <label>Kaj iščeš?<select id="gvalWhat"></select></label>\n'
         '      <label>Teren<select id="gvalTerrain"></select></label>\n'
         '    </div>\n'
         '    <p class="gp-val-tnote" id="gvalTerrainNote"></p>\n'
-        '    <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> Upoštevaj še drug dež s '
-        'postaje IREICA1: dnevi zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni, ki jih nisi vnesel, se vzamejo z '
-        'izmerjenimi padavinami postaje in prispevajo k zalogi vode pred vnesenimi dogodki. Izklopi, če te zanima '
-        'drug kraj.</label>\n'
+        '    <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> Upoštevaj tudi predhodne padavine '
+        's postaje IREICA1 (zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni). Dnevi, ki jih nisi vnesel, se vzamejo z izmerjenimi '
+        'padavinami postaje in se prištejejo k oceni predhodne namočenosti. To ni meritev vlage tal, rezultat pa se lahko '
+        'spremeni. Izklopi, če te zanima drug kraj.</label>\n'
         + suggest_note +
         '    <p class="gp-val-hint" id="gvalHint"></p>\n'
         '    <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>\n'
         f'    <div class="gp-val-axis" id="gvalAxis">{axis}</div>\n'
         '    <div class="gp-val-bands">\n' + "\n".join(rows) + '\n    </div>\n'
         '    <p class="gp-val-legend">Barvni trak je okno po modelu za vsak vnesen dež, modra pika je dan dežja, '
-        'bela črta je danes. Brez vnosa je os v dneh po prvem dežju.</p>\n'
+        'bela črta je <strong>danes</strong>. Brez vnosa je os v dneh po prvem dežju.</p>\n'
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
-        '    <details class="gp-val-why" id="gvalWhyBox" hidden><summary>' + _vi('vprasaj', 20) + 'Zakaj je rezultat takšen?</summary>'
-        '<div id="gvalWhy"></div></details>\n'
         '    <div class="gp-val-meaning">\n'
         '      <h3>' + _vi('info', 20) + 'Kaj ta rezultat pomeni?</h3>\n'
-        '      <p>Kalkulator preverja, kako dobro se <strong>čas in količina padavin</strong> ujemata z modelskimi '
-        'pravili za posamezne skupine gob. Odstotek je <strong>ujemanje padavinskih pogojev</strong>, ne verjetnost '
-        'najdbe. Okna so modelski razpon, ne zagotovilo začetka rasti. Ujemanje temelji na sprožilnem dežju v zamiku '
-        'vrste in zalogi vode ' + str(gm.BASE_WINDOW_DAYS) + ' dni pred njim (isti pragovi kot v napovedi). '
-        'Dež po današnjem dnevu se ne šteje.</p>\n'
-        '      <p>Če izbereš teren, se ujemanje pomnoži z geološkim faktorjem vrste, kot v modelu (ujemanje podlage ×'
-        + _fmt_mm(cfg['geo']['match']) + ', neujemanje ×' + _fmt_mm(cfg['geo']['mismatch']) + ', lesne vrste brez). '
-        '<strong>Ni upoštevano:</strong></p>\n'
-        '      <ul><li>temperatura zraka in tal ter nočno ohlajanje,</li><li>vlaga tal in zraka,</li>'
-        '<li>višina rastišča,</li><li>dejanske najdbe (model še ni preverjen z opažanji).</li></ul>\n'
-        '      <p>Širšo oceno razmer po območjih, ki vključuje tudi te dejavnike, najdeš v gobarski napovedi.</p>\n'
+        '      <p>Odstotek je <strong>ujemanje padavinskih pravil</strong>: kako dobro se čas in količina dežja ujemata z '
+        'modelskimi pravili vrste. Ni verjetnost najdbe in ne vključuje temperature, vlage tal, višine ali dejanskih '
+        'najdb. Okna so modelski razpon, ne zagotovilo začetka rasti. Geološki faktor (ujemanje podlage ×'
+        + _fmt_mm(cfg['geo']['match']) + ', neujemanje ×' + _fmt_mm(cfg['geo']['mismatch']) + ') prilagodi modelski rezultat, '
+        'ni potrjena sprememba verjetnosti najdbe.</p>\n'
+        '      <p>Za širšo oceno razmer po območjih, ki upošteva tudi temperaturo, vlago in teren, glej gobarsko napoved.</p>\n'
         '      <p><a class="gp-cta" href="/gobarska-napoved/danes/">Odpri celotno gobarsko napoved →</a> '
         '<a href="/gobarska-napoved/zemljevid/">' + _vi('zemljevid', 16) + 'zemljevid</a></p>\n'
         '    </div>\n'
+        '    <details class="gp-val-why" id="gvalWhyBox"><summary>' + _vi('vprasaj', 20) + 'Kako smo izračunali rezultat?</summary>'
+        '<p class="gp-val-tnote" style="margin-top:0">Za vsako vrsto model sešteje dež v oknu njenega zamika (prag sprožilnega '
+        'dežja je izpeljan iz 7-dnevnega praga vrste, preračunanega na dolžino okna) in dež v ' + str(gm.BASE_WINDOW_DAYS) +
+        ' dneh predhodnih padavin; obe oceni se stehtata kot v napovedi. Preveliko količino dežja model šteje kot '
+        'prenamočenost in oceno zniža. Če izbereš teren, se rezultat pomnoži z geološkim faktorjem vrste (lesne vrste ga '
+        'nimajo) in je omejen na 100 %. Dež po današnjem dnevu se ne šteje. Spodaj so dejanske komponente za vrsto z '
+        'najboljšim ujemanjem.</p><div id="gvalWhy"></div></details>\n'
         '    <div class="gp-val-acts">\n'
         '      <button type="button" id="gvalShare" class="gp-val-clear">' + _vi('povezava', 16) + 'Kopiraj povezavo do izračuna</button>\n'
+        '      <button type="button" id="gvalSaveA" class="gp-val-clear">' + _vi('plus', 16) + 'Shrani kot scenarij A</button>\n'
+        '      <button type="button" id="gvalClearA" class="gp-val-clear">Počisti primerjavo</button>\n'
         '      <span class="gp-val-suggest" id="gvalShareMsg" aria-live="polite" style="margin:0;align-self:center"></span>\n'
         '    </div>\n'
+        '    <div id="gvalCompare"></div>\n'
         '  </div>\n' + js)
 
 
