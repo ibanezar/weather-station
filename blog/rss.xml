@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 12 Oct 2026 20:16:28 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 14 Oct 2026 07:52:02 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Vrh opažanj gob je oktobra. Šest let podatkov</title>
+      <link>https://meteorec.si/blog/vrh-gobarske-sezone-oktober-1014.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vrh-gobarske-sezone-oktober-1014.html</guid>
+      <pubDate>Wed, 14 Oct 2026 08:00:00 +0000</pubDate>
+      <description>V vseh šestih letih od 2020 do 2025 je bil teden z največ opaženimi gobami v Sloveniji med 7. in 27. oktobrom, ne septembra. Kaj kažejo podatki iNaturalista?</description>
+      <category>gobe</category>
+      <category>iNaturalist</category>
+      <category>oktober</category>
+      <category>sezona</category>
+      <category>podatki</category>
+    </item>
     <item>
       <title>So zime še takšne, kot so bile nekoč? Podatki in spomin</title>
       <link>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</link>

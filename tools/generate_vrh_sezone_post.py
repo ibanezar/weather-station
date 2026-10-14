@@ -329,7 +329,7 @@ def build_article(D, by_year):
     mnames = {"jul": "julij", "avg": "avgust", "sep": "september", "okt": "oktober", "nov": "november"}
     tbl_m = table(["Mesec", "Mediana", "Najmanj", "Največ"],
                   [(mnames[l], pct(med), pct(lo), pct(hi)) for l, med, lo, hi, _ in mitems], None,
-                  "Delež gob po mesecih", "Delež gob med vsemi opažanji v mesecu, 2020–2025: mediana in razpon šestih let.")
+                  "Delež gob po mesecih")
 
     leg_line = legend([("2020–2025, vsako leto ena črta", "line", GREY), (str(LAST) + " (do 13. 10.)", "line", GREEN),
                        ("7.–27. oktober", "band", AMBER)])
@@ -337,17 +337,18 @@ def build_article(D, by_year):
     fig_dots = fig("Teden z največ opaženimi gobami",
                    legend([("največ opažanj v tednu", "dot", GREEN), ("največji delež med vsemi opažanji", "ring", GREY),
                            ("7.–27. oktober", "band", AMBER)]) + dot_ch,
-                   "Vsak teden traja sedem dni; piko vrišem na sredino tedna. Desno je število opažanj gob v tem tednu. "
-                   "Obroč pokaže teden z največjim deležem gob, če je bilo v tednu vsaj 150 vseh opažanj. Vir: iNaturalist.")
+                   "Vsak teden traja sedem dni, pika pa je postavljena na sredino tedna. Desno je prikazano število opažanj gob v tem tednu. "
+                   "Obroč označuje teden z največjim deležem gob, če je bilo v njem vsaj 150 vseh opažanj. Vir: iNaturalist.")
     fig_share = fig("Delež gob med vsemi opažanji v Sloveniji, po tednih", leg_line + share_ch,
-                    "Vsak teden je ena točka. Teden z manj kot 150 vsemi opažanji je izpuščen, ker bi bil delež preveč naključen. "
-                    "Zadnji teden letošnje črte je podcenjen, ker opazovalci opažanja nalagajo z zamudo. Vir: iNaturalist.")
+                    "Vsaka točka predstavlja en teden. Tedni z manj kot 150 vsemi opažanji so izpuščeni, saj bi bil izračunani delež pri tako majhnem "
+                    "vzorcu preveč odvisen od naključja. Zadnji teden letošnje krivulje je podcenjen, ker uporabniki opažanja pogosto objavijo z zamikom. "
+                    "Vir: iNaturalist.")
     fig_month = fig("Delež gob med vsemi opažanji po mesecih (2020–2025)", month_ch,
-                    "Stolpec je mediana šestih let, navpična črta pa razpon od najmanjše do največje vrednosti. "
-                    "Višina pomeni delež vseh opažanj v tistem mesecu, ki so gobe. Vir: iNaturalist.")
+                    "Stolpec prikazuje mediano šestih let, navpična črta pa razpon med najmanjšo in največjo vrednostjo. "
+                    "Višina pomeni delež vseh opažanj v posameznem mesecu, ki se nanašajo na gobe. Vir: iNaturalist.")
     fig_count = fig("Število opažanj gob po tednih", leg_line + count_ch,
-                    "Absolutna števila med leti niso primerljiva, ker je opazovalcev vsako leto več. Primerljiv je čas vrha, "
-                    "ne višina. Vir: iNaturalist.")
+                    "Absolutna števila med leti niso neposredno primerljiva, saj je število opazovalcev vsako leto večje. Primerljiv je predvsem čas, "
+                    "ko število opažanj doseže vrh, ne pa višina posameznih vrhov. Vir: iNaturalist.")
 
     # --- tabele ---
     rows1 = []
@@ -359,7 +360,7 @@ def build_article(D, by_year):
                       pct(s[11]) if 11 in s else "–"))
     tbl1 = table(["Leto", "Teden z največ opažanji", "Število", "Delež, september", "oktober", "november"], rows1, str(LAST),
                  "Vrh po letih",
-                 "Za leto 2026 so oktober in november še nepopolna (podatki do 13. 10.), vrh pa je za zdaj 30. 9.–6. 10.")
+                 "Podatki za oktober in november 2026 še niso popolni, saj zajemajo le obdobje do 13. oktobra. Za zdaj je vrh v tednu od 30. septembra do 6. oktobra.")
     rows2 = []
     for y in YEARS:
         ps = B[str(y)]["teden_z_najvec"]["zacetek"]
@@ -367,7 +368,7 @@ def build_article(D, by_year):
                       str(B[str(y)]["teden_z_najvec"]["stevilo"]), str(A[str(y)]["teden_z_najvec"]["stevilo"]),
                       str(F[str(y)]["teden_z_najvec"]["stevilo"])))
     tbl2 = table(["Leto", "Teden z največ opažanji (isti v vseh treh skupinah)", "Prave gobe", "Klobučnice", "Vse glive"], rows2, None,
-                 "Tri skupine", "Število opažanj v tednu vrha po skupinah.")
+                 "Tri skupine", "Število opažanj v tednu z največ opažanji za posamezno skupino.")
 
     summer = {}
     for y in YEARS:
@@ -384,104 +385,114 @@ def build_article(D, by_year):
     sep26 = int(B[str(LAST)]["delez_po_mesecih"]["9"])
     assert 10 <= sep26 <= 32
 
-    # --- besedilo ---
+    # --- besedilo (lektorirano 14. 10. 2026) ---
     lead = "</p>\n<p class=\"lead\">".join([
-        f"Kratek odgovor: po fotografijah gob v Sloveniji je vrh oktobra, ne septembra. V vsakem od šestih let, 2020–2025, je teden "
-        f"z največ opaženimi gobami padel med 7. in 27. oktobrom. Oktobra so bile gobe {oct_lo}–{oct_hi} {NBSP}% vseh opažanj na iNaturalistu "
-        f"v Sloveniji, septembra {sep_lo}–{sep_hi} {NBSP}%.".replace(f" {NBSP}%", f"{NBSP}%"),
-        "Poznate občutek, da je gobarske sezone konec, ko mine septembrski vrh? Podatki iz šestih let tega ne podpirajo."])
+        f"Kratek odgovor: po fotografijah gob na iNaturalistu je vrhunec opažanj oktobra, ne septembra. V vseh šestih letih od 2020 do 2025 "
+        f"je teden z največ opaženimi gobami padel med 7. in 27. oktobrom. Oktobra so gobe predstavljale od {oct_lo} do {oct_hi}{NBSP}% vseh "
+        f"opažanj na iNaturalistu v Sloveniji, septembra pa od {sep_lo} do {sep_hi}{NBSP}%.",
+        "Se vam zdi, da je gobarske sezone konec, ko mine septembrski vrhunec? Podatki zadnjih šestih let tega ne potrjujejo."])
     p1 = [
         "iNaturalist je spletna zbirka opažanj narave, v katero uporabniki nalagajo fotografije rastlin, živali in gliv. "
         "Vrste določajo opazovalci in skupnost.",
-        "Za vsak teden od julija do novembra sem prešteval, koliko opažanj v Sloveniji je pravih gob in koliko je vseh opažanj "
-        "(rastline, žuželke, ptice …). Prave gobe so tu deblo <em>Basidiomycota</em>: klobučnice (jurčki, lisičke, mušnice …), "
-        "pa tudi trdoživke na lesu, želatinaste glive in rje. Ne vsebuje zaprtotrosnic (smrčki, tartufi) in plesni, lišajev pa skoraj nič. "
-        "Preštel sem samo skupna števila, posameznih opažanj nisem bral. Teden se začne 1. julija in teče po sedem dni.",
-        "Absolutna števila med leti niso primerljiva: opazovalcev je vsako leto več. Zato gledam <strong>kdaj</strong> je vrh in "
-        "<strong>kolikšen delež</strong> vseh opažanj so gobe.",
+        "Za vsak teden od julija do novembra sem preštel, koliko opažanj v Sloveniji se nanaša na gobe in koliko je vseh opažanj skupaj "
+        "(rastline, žuželke, ptice in drugo).",
+        "V tej analizi sem med »prave gobe« uvrstil organizme iz debla <em>Basidiomycota</em>. Sem spadajo klobučnice, kot so jurčki, lisičke "
+        "in mušnice, pa tudi trdoživke na lesu, želatinaste glive in rje. Ta izbor ne vključuje zaprtotrosnic, kot so smrčki in tartufi, "
+        "lišajev pa je v njem zelo malo.",
+        "Preštel sem le skupna števila opažanj, posameznih zapisov pa nisem pregledoval. Prvi teden se začne 1. julija, nato si obdobja "
+        "sledijo v sedemdnevnih intervalih.",
+        "Absolutna števila med leti niso neposredno primerljiva, saj je opazovalcev vsako leto več. Zato me zanimata predvsem dva podatka: "
+        "<strong>kdaj</strong> je vrh in <strong>kolikšen delež</strong> vseh opažanj predstavljajo gobe.",
     ]
     p2 = [
-        "V vseh šestih letih je teden z največ opaženimi gobami padel med 7. in 27. oktobrom:",
+        "V vseh šestih letih je teden z največ opaženimi gobami padel med 7. in 27. oktobrom.",
         fig_dots,
-        "Tudi če namesto števila gledam teden z največjim deležem gob, pade vrh med 30. septembrom in 3. novembrom. "
-        "Pri klobučnicah in pri celotnem kraljestvu gliv je teden z največ opažanji isti (glej razdelek 05).",
+        "Če namesto absolutnega števila pogledamo teden z največjim deležem gob, se vrh premakne v obdobje med 30. septembrom in "
+        "3. novembrom. Pri klobučnicah in pri vseh glivah skupaj je teden z največ opažanji enak kot pri zgoraj opredeljenih »pravih gobah« "
+        "(glej razdelek 05).",
         tbl1,
-        "Poteki po tednih kažejo isto zgodbo. Delež gob je julija majhen, septembra začne rasti, oktobra doseže vrh:",
+        "Tudi tedenski potek kaže podobno sliko. Delež opažanj gob je julija majhen, septembra začne naraščati, oktobra pa doseže vrh.",
         fig_share,
     ]
+    ind = lambda y: (num(idx[y][1]), num(idx[y][0]))
     p3 = [
-        f"Oktober je v vseh šestih letih višji od septembra. Gobe so bile oktobra {oct_lo}–{oct_hi}{NBSP}% vseh opažanj, "
-        f"septembra {sep_lo}–{sep_hi}{NBSP}%. Novembra delež v petih od šestih let spet pade (izjema je 2020).",
+        f"V vseh šestih letih je bil delež opažanj gob oktobra višji kot septembra. Oktobra so gobe predstavljale od {oct_lo} do {oct_hi}{NBSP}% "
+        f"vseh opažanj, septembra pa od {sep_lo} do {sep_hi}{NBSP}%. Novembra je delež v petih od šestih let znova upadel. Izjema je bilo leto 2020.",
         fig_month,
         tbl_m,
-        "To ni v nasprotju z našim gobarskim modelom, a ni isto. Gobarski indeks za Rečico ob Savinji je bil v oktobru višji kot v septembru "
-        f"v treh od štirih celih let ({'; '.join(f'{y}: {num(idx[y][1])} proti {num(idx[y][0])}' for y in (2023, 2024, 2025))}). "
-        f"Leta 2022 je bilo obratno ({num(idx[2022][1])} proti {num(idx[2022][0])}). Indeks je modelska ocena in zajema tudi "
-        "celoletne vrste, zato ni dokaz.",
+        "To ni v nasprotju z našim gobarskim modelom, vendar gre za različni stvari. Gobarski indeks za Rečico ob Savinji je bil oktobra "
+        "višji kot septembra v treh od štirih let s popolnimi podatki:",
+        "<ul>" + "".join(f"<li>{y}: {ind(y)[0]} oktobra proti {ind(y)[1]} septembra</li>" for y in (2023, 2024, 2025)) + "</ul>",
+        f"Leta 2022 je bilo ravno obratno: septembrski indeks je znašal {ind(2022)[1]}, oktobrski pa {ind(2022)[0]}.",
+        "Gobarski indeks je modelska ocena razmer za rast gob, ki vključuje tudi celoletne vrste. Zato sam po sebi ni dokaz, da je dejanska "
+        "rast gob oktobra vedno večja kot septembra.",
     ]
     p4 = [
-        "Delež ima svojo past: novembra upade opazovanje žuželk in rastlin, zato se delež gob poveča, tudi če jih ni več. Zato sem "
-        "pogledal tudi absolutno število opažanj. Tudi tam je vrh oktobra:",
+        "Delež ima svojo past: novembra je manj opažanj žuželk in rastlin, zato se lahko delež gob poveča tudi takrat, ko njihovo "
+        "absolutno število ne raste.",
+        "Zato sem pogledal še absolutno število opažanj gob. Tudi pri tem kazalniku se vrh pojavi oktobra.",
         fig_count,
     ]
     p5 = [
-        "Kaj pa, če za gobe vzamem le klobučnice (<em>Agaricomycetes</em>), ali če vzamem vse glive? Teden z največ opažanji je v "
-        "vseh treh skupinah v vsakem od šestih let isti, števila pa se razlikujejo za nekaj odstotkov:",
+        "Kaj se zgodi, če namesto skupine, uporabljene v osnovni analizi, upoštevam samo klobučnice (<em>Agaricomycetes</em>) ali pa vse glive?",
+        "V vsakem od šestih let je bil teden z največ opažanji v vseh treh skupinah enak. Število opažanj se je med skupinami razlikovalo "
+        "le za nekaj odstotkov.",
         tbl2,
-        "Razlika pri vrhu po deležu je samo ena: leta 2024 pade pri pravih gobah na 14. oktober, pri klobučnicah in pri kraljestvu "
-        "gliv pa na 4. november.",
+        "Pri vrhu, določenem glede na delež opažanj, se pojavi ena razlika: leta 2024 je pri pravih gobah vrh padel na 14. oktober, pri "
+        "klobučnicah in pri vseh glivah skupaj pa na 4. november.",
     ]
+    wk = ("9. septembra", "16. septembra", "23. septembra", "30. septembra", "7. oktobra")
     p6 = [
-        f"Letos so bila do 13. oktobra v posameznih tednih opažanja gob: {nums26[0]} (9. septembra), {nums26[1]} (16. septembra), "
-        f"{nums26[2]} (23. septembra), {nums26[3]} (30. septembra) in {nums26[4]} (7.–13. oktobra). Delež gob je septembra "
-        f"znašal {sep26}{NBSP}%, kar je v običajnem razponu ({sep_lo}–{sep_hi}{NBSP}%).",
-        "Zadnja številka je še podcenjena, ker opazovalci opažanja nalagajo z zamudo. Ali bo letos vrh oktobra, še ne vemo. "
-        "V prejšnjih letih je padel prav v tedne od 7. do 27. oktobra.",
+        "Do 13. oktobra so bila števila opažanj gob v posameznih tednih naslednja:",
+        "<ul>" + "".join(f"<li>Teden od {w}: {n} opažanj</li>" for w, n in zip(wk, nums26)) + "</ul>",
+        f"Septembra so gobe predstavljale {sep26}{NBSP}% vseh opažanj, kar je znotraj običajnega razpona za obravnavana leta ({sep_lo}–{sep_hi}{NBSP}%).",
+        "Zadnje število je še nepopolno, saj uporabniki opažanja pogosto naložijo z zamikom. Ali bo tudi letošnji vrh oktobra, še ne vemo. "
+        "V vseh šestih predhodnih letih pa je bil teden z največ opaženimi gobami prav v obdobju med 7. in 27. oktobrom.",
     ]
     p7 = [
         "<ul>"
-        "<li><strong>To so fotografije, ne košare.</strong> Opažanje gobe ni nabirka in ne pove, ali je goba užitna. Vključene so "
-        "tudi nejestne vrste in trdoživke na lesu.</li>"
-        "<li><strong>Šest let je malo.</strong> Šest od šestih je zanimivo, ni pa zakon.</li>"
-        f"<li><strong>Oktober ni edini vrh.</strong> Leta 2023 je bil že teden od 29. julija do 4. avgusta (<strong>{y23[1]}</strong> opažanj) skoraj tako "
-        f"visok kot oktobrski vrh ({peak23}). V drugih letih je bil poletni vrh najmanj tretjino nižji od oktobrskega. "
-        "Razloga iz teh podatkov ne morem ugotoviti.</li>"
-        "<li><strong>To je Slovenija kot celota.</strong> Rečica in višje lege imajo lahko drugačen vrh.</li>"
-        "<li><strong>Opazovalci niso nabiralci.</strong> Gobe fotografira drugačna skupina ljudi, kot jih nabira. Pomembno je tudi, "
-        "kdaj imajo ljudje čas in kakšno je vreme.</li>"
-        "<li><strong>Opažanja se nalagajo z zamudo.</strong> Zadnji teden je zato vedno podcenjen.</li>"
-        "<li><strong>O dežju ne trdim ničesar.</strong> Povezave med dežjem in deležem gob v tem članku ne obravnavam. "
-        "To bi zahtevalo ločeno analizo.</li>"
+        "<li><strong>Fotografije niso košare.</strong> Opažanje gobe ne pomeni, da jo je nekdo nabral, prav tako ne pove, ali je užitna. "
+        "V analizo so vključene tudi neužitne vrste in trdoživke, ki rastejo na lesu.</li>"
+        "<li><strong>Šest let je malo.</strong> Dejstvo, da se je vrh v vseh šestih letih pojavil oktobra, je zanimivo, ni pa univerzalno pravilo.</li>"
+        f"<li><strong>Tudi poleti je lahko veliko gob.</strong> Leta 2023 je bilo v tednu od 29. julija do 4. avgusta zabeleženih {y23[1]} opažanj, "
+        f"kar je skoraj toliko kot oktobra, ko je bilo na vrhuncu {peak23} opažanj. V drugih letih je bil poletni vrh vsaj za tretjino nižji od "
+        "oktobrskega. Iz teh podatkov ne morem ugotoviti, zakaj je bilo leto 2023 drugačno.</li>"
+        "<li><strong>Podatki veljajo za Slovenijo kot celoto.</strong> V Rečici ob Savinji in na višjih legah je lahko čas vrhunca drugačen.</li>"
+        "<li><strong>Opazovalci niso isto kot gobarji.</strong> Gobe fotografira druga skupina ljudi, kot jih nabira. Na število opažanj vplivata "
+        "tudi to, kdaj imajo ljudje čas, in vreme.</li>"
+        "<li><strong>Opažanja se objavljajo z zamikom.</strong> Zato je število opažanj v zadnjem tednu praviloma podcenjeno.</li>"
+        "<li><strong>O vplivu dežja ne sklepam.</strong> Povezave med padavinami in deležem opažanj gob v tem članku ne obravnavam. "
+        "Za to bi bila potrebna ločena analiza.</li>"
         "</ul>",
-        "<p style=\"margin-top:1rem\">V članku so uporabljeni samo združeni podatki. Posameznih opažanj ne objavljam, ker zanje veljajo "
-        "različni licenčni pogoji. Zbrane številke so v "
+        "<p style=\"margin-top:1rem\">V članku uporabljam samo združene podatke. Posameznih opažanj ne objavljam, ker zanje veljajo različni "
+        "licenčni pogoji. Zbrane številke so shranjene v "
         '<a href="/data/inat-glive-po-tednih.json" style="color:var(--blue)">data/inat-glive-po-tednih.json</a>.</p>',
     ]
     p8 = [
-        "Podatki ne povedo, kje je goba, ampak kdaj jih ljudje v Sloveniji najpogosteje fotografirajo. Prva praktična posledica je "
-        "preprosta: ne odpišite oktobra. Poglejte "
-        f'<a href="{SITE}/gobarska-napoved/danes/" style="color:var(--blue)">gobarsko napoved za danes</a> in '
-        f'<a href="{SITE}/gobarska-napoved/valovi/" style="color:var(--blue)">kalkulator rasti po dežju</a>, ki upošteva, kdaj je deževalo.',
-        "Gobe nabirajte samo, če jih zanesljivo poznate. Dvojnice in strupene vrste so na strani "
-        f'<a href="{SITE}/gobarska-napoved/strupene-gobe/" style="color:var(--blue)">strupene gobe</a>.',
-        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine.</strong> Besedilo, grafe in podatke lahko povzamete le z '
-        'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov '
-        'prosim vprašajte vnaprej.</p>',
+        "Podatki ne povedo, kje rastejo gobe, temveč kdaj jih ljudje v Sloveniji najpogosteje fotografirajo. Praktično sporočilo je preprosto: "
+        "oktobra še ne odpišite gobarske sezone.",
+        f'Poglejte <a href="{SITE}/gobarska-napoved/danes/" style="color:var(--blue)">gobarsko napoved za današnji dan</a> in '
+        f'<a href="{SITE}/gobarska-napoved/valovi/" style="color:var(--blue)">kalkulator rasti po dežju</a>, ki upošteva tudi to, kdaj je nazadnje deževalo.',
+        "Gobe nabirajte le, če jih zanesljivo poznate. Informacije o nevarnih zamenjavah in strupenih vrstah najdete na strani "
+        f'<a href="{SITE}/gobarska-napoved/strupene-gobe/" style="color:var(--blue)">Strupene gobe</a>.',
+        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate le z '
+        'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se '
+        'predhodno dogovorite z avtorjem.</p>',
     ]
-    title = "Vrh gobarske sezone je oktobra. Šest let podatkov"
+    title = "Vrh opažanj gob je oktobra. Šest let podatkov"
     assert len(title) <= 60
-    desc = ("V vsakem od šestih let (2020–2025) je bil teden z največ opaženimi gobami v Sloveniji med 7. in 27. oktobrom, "
-            "ne septembra. Podatki iNaturalista.")
+    desc = ("V vseh šestih letih od 2020 do 2025 je bil teden z največ opaženimi gobami v Sloveniji med 7. in 27. oktobrom, "
+            "ne septembra. Kaj kažejo podatki iNaturalista?")
     assert len(desc) <= 160, len(desc)
     sections = [
         {"label": "01 — podatki", "heading": "Kaj sem prešteval", "id": "podatki", "paragraphs": p1},
         {"label": "02 — vrh", "heading": "Kdaj je vrh?", "id": "vrh", "paragraphs": p2},
-        {"label": "03 — meseci", "heading": "Oktober je višji od septembra", "id": "meseci", "paragraphs": p3},
-        {"label": "04 — število", "heading": "Tudi število opažanj vrhuni oktobra", "id": "stevilo", "paragraphs": p4},
+        {"label": "03 — meseci", "heading": "Oktober je močnejši od septembra", "id": "meseci", "paragraphs": p3},
+        {"label": "04 — število", "heading": "Tudi število opažanj doseže vrh oktobra", "id": "stevilo", "paragraphs": p4},
         {"label": "05 — skupine", "heading": "Prave gobe, klobučnice ali vse glive?", "id": "skupine", "paragraphs": p5},
-        {"label": "06 — letos", "heading": "Kaj kaže letošnja jesen", "id": "letos", "paragraphs": p6},
+        {"label": "06 — letos", "heading": "Kaj kaže letošnja jesen?", "id": "letos", "paragraphs": p6},
         {"label": "07 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": p7},
-        {"label": "08 — nabiranje", "heading": "Kaj to pomeni za nabiranje", "id": "nabiranje", "paragraphs": p8},
+        {"label": "08 — nabiranje", "heading": "Kaj to pomeni za nabiranje?", "id": "nabiranje", "paragraphs": p8},
     ]
     gen = D["_meta"]["generirano"]
     return {
@@ -489,9 +500,9 @@ def build_article(D, by_year):
         "tags": ["gobe", "iNaturalist", "oktober", "sezona", "podatki"],
         "section_label": "Podatkovna analiza", "og_photo": "gobe-lastna", "og_accent_hex": "#34d399",
         "lead": lead, "sections": sections, "callout": None,
-        "sources_note": (f"Viri: iNaturalist (API, število opažanj po tednih v Sloveniji, deblo Basidiomycota, razred Agaricomycetes in "
-                         f"kraljestvo Fungi; stanje {int(gen[8:10])}. {int(gen[5:7])}. {gen[:4]}), gobarski model Meteorec "
-                         "(mesečno povprečje indeksa za Rečico ob Savinji). Podatki: /data/inat-glive-po-tednih.json."),
+        "sources_note": (f"Viri: iNaturalist (API, število opažanj po tednih v Sloveniji; deblo Basidiomycota, razred Agaricomycetes in "
+                         f"kraljestvo Fungi; stanje {int(gen[8:10])}. {int(gen[5:7])}. {gen[:4]}) ter gobarski model Meteorec "
+                         "(mesečno povprečje indeksa za Rečico ob Savinji). Podatki: data/inat-glive-po-tednih.json."),
     }
 
 
@@ -537,7 +548,7 @@ def main():
     ftp.TODAY = today.isoformat()
     slug, html, entry, og_meta = ftp.build_html(
         article, today.year, today.month, now_utc, slug=SLUG, back=("/blog/", "← Vsi članki"),
-        og_title="Vrh gobarske\nsezone", meta_note="podatkovna analiza",
+        og_title="Vrh opažanj gob\nje oktobra", meta_note="podatkovna analiza",
         nav_label="O postaji", nav_href="/o-postaji.html")
     lead = f'<p class="lead">{article["lead"]}</p>'
     assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"
