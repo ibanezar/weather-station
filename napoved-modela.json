@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-13T08:20:52Z",
+  "generated_at": "2026-10-14T06:38:13Z",
   "model_version": "1.0",
   "trained_at": "2026-10-06T14:43:45Z",
   "train_range": {
@@ -14,100 +14,100 @@
   "note": "MTR (Meteorec) — poskusni lokalni model (MOS): Open-Meteo kot vhod, popravek za dno doline naučen na meritvah postaje. Količina padavin je surova vrednost Open-Meteo — te MTR ne popravlja.",
   "days": [
     {
-      "tmax": 19.5,
+      "tmax": 17.7,
       "tmax_sd": 1.32,
       "tmax_mae": 1.04,
       "tmax_improvement_pct": 25.8,
-      "tmin": 6.2,
+      "tmin": 7.5,
       "tmin_sd": 1.56,
       "tmin_mae": 1.17,
       "tmin_improvement_pct": 24.4,
-      "pop": 0.64,
+      "pop": 0.38,
       "p_frost": 0.0,
-      "night_regime": "overcast",
-      "om_tmax": 17.6,
-      "om_tmin": 7.7,
-      "om_precip": 0.8,
-      "d_tmax": 1.9,
-      "d_tmin": -1.5,
-      "date": "2026-10-14",
+      "night_regime": "mixed",
+      "om_tmax": 16.1,
+      "om_tmin": 9.2,
+      "om_precip": 0.0,
+      "d_tmax": 1.6,
+      "d_tmin": -1.7,
+      "date": "2026-10-15",
       "lead": 1,
       "wn2": {
         "tmax": {
-          "p10": 15.3,
-          "p50": 16.5,
-          "p90": 18.0
+          "p10": 15.5,
+          "p50": 16.8,
+          "p90": 17.7
         },
         "tmin": {
-          "p10": 4.8,
-          "p50": 6.2,
-          "p90": 8.2
+          "p10": 7.7,
+          "p50": 9.1,
+          "p90": 10.3
         },
         "n": 64
       }
     },
     {
-      "tmax": 17.7,
+      "tmax": 17.0,
       "tmax_sd": 1.52,
       "tmax_mae": 1.24,
       "tmax_improvement_pct": 30.5,
-      "tmin": 6.3,
+      "tmin": 4.3,
       "tmin_sd": 1.66,
       "tmin_mae": 1.27,
       "tmin_improvement_pct": 52.9,
-      "pop": 0.37,
-      "p_frost": 0.0,
-      "night_regime": "overcast",
-      "om_tmax": 16.3,
-      "om_tmin": 9.5,
+      "pop": 0.41,
+      "p_frost": 0.01,
+      "night_regime": "mixed",
+      "om_tmax": 15.5,
+      "om_tmin": 6.6,
       "om_precip": 0.0,
-      "d_tmax": 1.4,
-      "d_tmin": -3.2,
-      "date": "2026-10-15",
+      "d_tmax": 1.5,
+      "d_tmin": -2.3,
+      "date": "2026-10-16",
       "lead": 2,
       "wn2": {
         "tmax": {
-          "p10": 15.9,
-          "p50": 16.9,
-          "p90": 17.8
+          "p10": 13.8,
+          "p50": 15.9,
+          "p90": 17.1
         },
         "tmin": {
-          "p10": 7.6,
-          "p50": 8.9,
-          "p90": 10.4
+          "p10": 5.9,
+          "p50": 7.6,
+          "p90": 8.7
         },
         "n": 64
       }
     },
     {
-      "tmax": 16.9,
+      "tmax": 18.9,
       "tmax_sd": 1.72,
       "tmax_mae": 1.4,
       "tmax_improvement_pct": 27.1,
-      "tmin": 2.7,
+      "tmin": 4.1,
       "tmin_sd": 1.78,
       "tmin_mae": 1.38,
       "tmin_improvement_pct": 49.2,
-      "pop": 0.33,
-      "p_frost": 0.08,
+      "pop": 0.47,
+      "p_frost": 0.02,
       "night_regime": "overcast",
-      "om_tmax": 14.7,
+      "om_tmax": 18.4,
       "om_tmin": 5.8,
       "om_precip": 0.0,
-      "d_tmax": 2.2,
-      "d_tmin": -3.1,
-      "date": "2026-10-16",
+      "d_tmax": 0.5,
+      "d_tmin": -1.7,
+      "date": "2026-10-17",
       "lead": 3,
       "wn2": {
         "tmax": {
-          "p10": 14.0,
-          "p50": 16.9,
-          "p90": 19.0
+          "p10": 14.8,
+          "p50": 16.3,
+          "p90": 17.6
         },
         "tmin": {
-          "p10": 6.2,
-          "p50": 7.7,
-          "p90": 9.4
+          "p10": 4.4,
+          "p50": 6.2,
+          "p90": 7.8
         },
         "n": 64
       }
