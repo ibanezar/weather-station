@@ -3155,6 +3155,11 @@ body{--blue:#4cae78;--cyan:#a78bfa;--muted:#9fb3a6;--bg:#0b1510;--card-bg:#101e1
 .gp-val-clear{min-height:3rem;padding:0 1rem;font-size:.92rem;display:inline-flex;align-items:center;justify-content:center}
 .gp-val-clear:hover{border-color:#4cae78;color:#4cae78}
 .gp-val-sel select{min-height:3rem;font-size:1rem}
+/* Temna tema: brez tega je spustni seznam bel s svetlim besedilom, datumski izbirnik pa svetel. */
+.gp-val-card{color-scheme:dark}
+.gp-val-sel select{background-color:#16261c;color:#eaf3ec}
+.gp-val-sel select option,.gp-val-sel select optgroup{background-color:#16261c;color:#eaf3ec}
+.gp-val-date,.gp-val-mm{background-color:#16261c;color:#eaf3ec}
 .gp-val-chk{margin-top:.9rem;padding:.7rem .8rem;border:1px solid var(--card-border);border-radius:.9rem;align-items:flex-start;font-size:.85rem}
 .gp-val-chk input{width:1.4rem;height:1.4rem;flex:none;margin:0}
 .gp-val-calc{display:block;width:100%;min-height:3.25rem;margin:1.1rem 0 .3rem;background:#27834d;color:#fff;border:0;
