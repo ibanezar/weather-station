@@ -3117,30 +3117,73 @@ VALOVI_GROUPS = [
       "boletus_pinophilus", "imleria_badia", "hygrophorus_russula"]),
 ]
 VALOVI_MAXDAY = 20
+VALOVI_SHORT = {"razkrojevalka": "Stelja", "lesna": "Les", "mikorizna": "Mikorizne"}
 # Lastna podoba kalkulatorja (logotip, barve, favicon, OG): tools/build_valovi_brand.py.
 # Barve skupin so iste kot v VALOVI_GROUPS. Prepiše samo spremenljivke in nekaj pravil te strani.
 VALOVI_BRAND_CSS = """<link rel="icon" type="image/svg+xml" href="/gobarska-napoved/valovi/favicon.svg">
-<meta name="theme-color" content="#06141a">
+<meta name="theme-color" content="#0b1510">
 <style>
-body{--blue:#2dd4bf;--cyan:#a78bfa;--muted:#93aab0;--bg:#06141a;--card-bg:rgba(8,28,35,.94);
-  --stn-bg:rgba(45,212,191,.14);--stn-border:rgba(45,212,191,.42);
-  --blob-1:rgba(45,212,191,.18);--blob-2:rgba(167,139,250,.14);--blob-3:rgba(193,127,62,.12);--blob-4:rgba(45,212,191,.09)}
-.gp-vhero{display:flex;align-items:center;gap:1.1rem;margin:.4rem 0 1.2rem;padding:1.1rem 1.2rem;border-radius:var(--gp-r-panel);
-  background:radial-gradient(120% 140% at 0% 0%,rgba(45,212,191,.16),rgba(8,28,35,.9) 60%);
-  border:1px solid rgba(45,212,191,.28)}
-.gp-vhero img{width:4.6rem;height:4.6rem;flex:none;border-radius:1rem}
-.gp-vhero-k{font-size:var(--gp-fs-xs);letter-spacing:.14em;text-transform:uppercase;color:#2dd4bf;font-weight:700}
-.gp-vhero-n{font-size:1.9rem;font-weight:800;line-height:1.1;margin:.15rem 0 .2rem;color:var(--text)}
-.gp-vhero-n em{font-style:normal;color:#2dd4bf}
+/* Mobile-first: gozdno zelena podoba, ravne kartice brez gradientov, vnosi in gumbi >= 48 px. */
+body{--blue:#4cae78;--cyan:#a78bfa;--muted:#9fb3a6;--bg:#0b1510;--card-bg:#101e16;
+  --stn-bg:rgba(76,174,120,.14);--stn-border:rgba(76,174,120,.42);
+  --blob-1:rgba(76,174,120,.14);--blob-2:rgba(111,174,85,.10);--blob-3:rgba(193,127,62,.08);--blob-4:rgba(76,174,120,.07)}
+.gp-vhero{display:flex;align-items:center;gap:1rem;margin:.4rem 0 .9rem;padding:.9rem 1rem;border-radius:var(--gp-r-panel);
+  background:#101e16;border:1px solid rgba(76,174,120,.28)}
+.gp-vhero img{width:3.6rem;height:3.6rem;flex:none;border-radius:.9rem}
+.gp-vhero-k{font-size:var(--gp-fs-xs);letter-spacing:.12em;text-transform:uppercase;color:#4cae78;font-weight:700}
+.gp-vhero-n{font-size:1.6rem;font-weight:800;line-height:1.1;margin:.1rem 0 .15rem;color:var(--text)}
+.gp-vhero-n em{font-style:normal;color:#4cae78}
 .gp-vhero-s{font-size:.92rem;color:var(--muted);margin:0}
-.gp-vchips{display:flex;gap:.5rem;flex-wrap:wrap;margin:-.4rem 0 1.2rem}
-.gp-vchip{display:inline-flex;align-items:center;font-size:.82rem;font-weight:700;padding:.35rem .8rem;border-radius:999px}
-.gp-val-card{border-color:rgba(45,212,191,.25);background:linear-gradient(180deg,rgba(11,40,49,.96),rgba(7,22,28,.96))}
-.gp-val-result{background:rgba(45,212,191,.09);border:1px solid rgba(45,212,191,.2)}
-.gp-val-meaning{border-left-color:#2dd4bf}
-.gp-val-meaning .gp-cta{background:#2dd4bf;color:#04252b}
-.gp-val-clear:hover{border-color:#2dd4bf;color:#2dd4bf}
-@media(max-width:600px){.gp-vhero{padding:.9rem}.gp-vhero img{width:3.6rem;height:3.6rem}.gp-vhero-n{font-size:1.5rem}}
+.gp-vchips{display:flex;gap:.4rem;flex-wrap:wrap;margin:0 0 .8rem}
+.gp-vchip{display:inline-flex;align-items:center;font-size:.8rem;font-weight:700;padding:.3rem .7rem;border-radius:999px}
+.gp-val-card{border-color:rgba(76,174,120,.25);background:#101e16;box-shadow:none;padding:1.1rem 1rem 1.3rem}
+.gp-vstep{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:#4cae78;font-weight:800;margin:1.4rem 0 .6rem}
+.gp-vstep:first-child{margin-top:0}
+.gp-val-inlabel{font-weight:500;color:var(--muted);margin:0 0 .6rem}
+/* padavinski dogodek = kartica */
+.gp-val-events{gap:.7rem}
+.gp-val-ev{display:block;border:1px solid var(--card-border);border-radius:.9rem;padding:.8rem;background:rgba(255,255,255,.03)}
+.gp-val-evhead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.55rem;min-height:2.2rem}
+.gp-val-evtitle{font-weight:700;font-size:.9rem}
+.gp-val-evgrid{display:grid;grid-template-columns:minmax(0,1fr) 7.5rem;gap:.6rem}
+.gp-val-evgrid label{display:flex;flex-direction:column;gap:.3rem;font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;min-width:0}
+.gp-val-date,.gp-val-mm{min-height:3rem;font-size:1rem;width:100%;min-width:0;box-sizing:border-box}
+.gp-val-rm{min-height:2.75rem;padding:0 1rem;font-size:.85rem;width:auto}
+.gp-val-inrow{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.7rem}
+.gp-val-clear{min-height:3rem;padding:0 1rem;font-size:.92rem;display:inline-flex;align-items:center;justify-content:center}
+.gp-val-clear:hover{border-color:#4cae78;color:#4cae78}
+.gp-val-sel select{min-height:3rem;font-size:1rem}
+.gp-val-chk{margin-top:.9rem;padding:.7rem .8rem;border:1px solid var(--card-border);border-radius:.9rem;align-items:flex-start;font-size:.85rem}
+.gp-val-chk input{width:1.4rem;height:1.4rem;flex:none;margin:0}
+.gp-val-calc{display:block;width:100%;min-height:3.25rem;margin:1.1rem 0 .3rem;background:#27834d;color:#fff;border:0;
+  border-radius:.9rem;font-size:1.05rem;font-weight:800;cursor:pointer}
+.gp-val-calc:hover,.gp-val-calc:focus-visible{background:#2f9a5a}
+/* rezultat */
+.gp-val-result{background:rgba(76,174,120,.10);border:1px solid rgba(76,174,120,.25);font-size:1rem}
+.gp-val-result.flash{animation:gpvflash .9s ease-out}
+@keyframes gpvflash{from{box-shadow:0 0 0 3px rgba(76,174,120,.7)}to{box-shadow:0 0 0 3px rgba(76,174,120,0)}}
+@media(prefers-reduced-motion:reduce){.gp-val-result.flash{animation:none}}
+.gp-val-item{display:block;border:1px solid var(--card-border);border-radius:.9rem;padding:.9rem;margin-bottom:.7rem;background:rgba(255,255,255,.03)}
+.gp-val-item:first-child{border-top:1px solid var(--card-border)}
+.gp-val-title{font-size:1rem}
+.gp-val-status{display:inline-flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:700;text-transform:none;letter-spacing:0;padding:.3rem .6rem}
+.gp-val-status .gp-val-ico{margin-right:0}
+.gp-val-big{font-size:1.4rem;font-weight:800;margin:.35rem 0 0;line-height:1.25}
+.gp-val-more{margin-top:.6rem;border-top:1px solid var(--card-border)}
+.gp-val-more>summary{cursor:pointer;font-size:.82rem;color:var(--muted);padding:.7rem 0;min-height:1.4rem}
+.gp-val-note{font-size:.85rem;color:var(--muted);margin:.2rem 0 .8rem;line-height:1.5}
+.gp-val-note strong{color:var(--text)}
+.gp-val-meaning .gp-cta,.gp-val-card .gp-cta{background:#27834d;color:#fff;min-height:3rem;width:100%;box-sizing:border-box}
+.gp-val-why{margin:.7rem 0 0}
+.gp-val-why summary{min-height:3rem;display:flex;align-items:center;padding:.2rem 0}
+.gp-val-acts{display:flex;gap:.6rem;flex-wrap:wrap}
+.gp-val-cmp{width:100%}
+@media(max-width:600px){
+  .gp-val-inrow .gp-val-clear,.gp-val-acts .gp-val-clear{flex:1 1 100%}
+  .gp-vhero-n{font-size:1.4rem}
+  .gp-val-evgrid{grid-template-columns:minmax(0,1fr) 6.5rem}
+  .gp-val-big{font-size:1.25rem}
+}
 </style>"""
 VALOVI_BRAND = {
     "head": VALOVI_BRAND_CSS,
@@ -3172,6 +3215,9 @@ _VI_PATHS = {
                 '<path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
     "plus": '<path d="M12 5v14M5 12h14"/>',
     "nic": '<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M8 12h8"/>',
+    "ok": '<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M8 12.5l2.7 2.7L16 9.5"/>',
+    "cas": '<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M12 7.5V12l3 2"/>',
+    "mimo": '<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity=".15"/><path d="M9 9l6 6M15 9l-6 6"/>',
     "zemljevid": '<path d="M9 5L3.5 7v12L9 17l6 2 5.5-2V5L15 7z" fill="currentColor" fill-opacity=".15"/>'
                  '<path d="M9 5v12M15 7v12"/>',
 }
@@ -3579,18 +3625,34 @@ VALOVI_JS = r"""(function(){
   function renderRows(){
     evBox.innerHTML = '';
     events.forEach(function(e, idx){
-      var row = document.createElement('div');
-      row.className = 'gp-val-ev';
+      var card = document.createElement('div');
+      card.className = 'gp-val-ev';
+      var head = document.createElement('div'); head.className = 'gp-val-evhead';
+      var ttl = document.createElement('span'); ttl.className = 'gp-val-evtitle'; ttl.textContent = 'Padavinski dogodek ' + (idx + 1);
+      head.appendChild(ttl);
+      if (events.length > 1){
+        var rm = document.createElement('button');
+        rm.type = 'button'; rm.className = 'gp-val-rm'; rm.textContent = 'Odstrani';
+        rm.setAttribute('aria-label', 'Odstrani padavinski dogodek ' + (idx + 1));
+        rm.addEventListener('click', function(){ events.splice(idx, 1); renderRows(); render(); });
+        head.appendChild(rm);
+      }
+      card.appendChild(head);
+      var grid = document.createElement('div'); grid.className = 'gp-val-evgrid';
+      var ld = document.createElement('label'); ld.appendChild(document.createTextNode('Datum dežja'));
       var di = document.createElement('input');
       di.type = 'date'; di.className = 'gp-val-date'; di.value = e.iso || '';
       di.max = isoOf(todayNum()); di.setAttribute('aria-label', 'Datum dežja ' + (idx + 1));
       if (idx === 0) di.id = 'gvalDate';
+      ld.appendChild(di);
+      var lm = document.createElement('label'); lm.appendChild(document.createTextNode('Količina (mm)'));
       var mi = document.createElement('input');
       mi.type = 'number'; mi.min = '0'; mi.step = '0.1'; mi.inputMode = 'decimal';
       mi.className = 'gp-val-mm'; mi.placeholder = 'mm';
       mi.setAttribute('aria-label', 'Količina dežja v mm ' + (idx + 1));
       if (idx === 0) mi.id = 'gvalMm';
       mi.value = e.mm === null ? '' : e.mm;
+      lm.appendChild(mi);
       di.addEventListener('input', function(){
         e.iso = di.value;
         if (e.iso && (e.mm === null || e.auto) && typeof STATION[e.iso] === 'number'){
@@ -3604,17 +3666,9 @@ VALOVI_JS = r"""(function(){
         if (e.mm !== null && isNaN(e.mm)) e.mm = null;
         render();
       });
-      row.appendChild(di);
-      var lab = document.createElement('span'); lab.className = 'gp-val-mmlab'; lab.textContent = 'mm';
-      row.appendChild(mi); row.appendChild(lab);
-      if (events.length > 1){
-        var rm = document.createElement('button');
-        rm.type = 'button'; rm.className = 'gp-val-rm'; rm.textContent = '×';
-        rm.setAttribute('aria-label', 'Odstrani dež ' + (idx + 1));
-        rm.addEventListener('click', function(){ events.splice(idx, 1); renderRows(); render(); });
-        row.appendChild(rm);
-      }
-      evBox.appendChild(row);
+      grid.appendChild(ld); grid.appendChild(lm);
+      card.appendChild(grid);
+      evBox.appendChild(card);
     });
     addBtn.hidden = events.length >= MAXEV;
   }
@@ -3718,7 +3772,7 @@ VALOVI_JS = r"""(function(){
       var item = document.createElement('div'); item.className = 'gp-val-item';
       var dot = document.createElement('div'); dot.className = 'gp-val-dot';
       dot.style.background = g.color; dot.style.opacity = tone === 'on' ? '1' : '.35';
-      item.appendChild(dot);
+      item.style.borderLeft = '4px solid ' + g.color; item.style.opacity = tone === 'on' ? '1' : '.92';
       var body = document.createElement('div'); body.style.flex = '1'; body.style.minWidth = '0';
       var head = document.createElement('div'); head.className = 'gp-val-head';
       var title = document.createElement('span'); title.className = 'gp-val-title';
@@ -3728,7 +3782,9 @@ VALOVI_JS = r"""(function(){
       var badge = document.createElement('span'); badge.className = 'gp-val-status';
       if (tone === 'on') { badge.style.background = g.color + '26'; badge.style.color = g.color; }
       else { badge.style.background = 'rgba(255,255,255,.05)'; badge.style.color = 'var(--muted)'; }
-      badge.textContent = tone === 'on' ? 'v oknu' : tone === 'past' ? 'za oknom' : 'pred oknom · čez ' + dni(x.st.start - T);
+      badge.innerHTML = ICONS[tone === 'on' ? 'ok' : tone === 'past' ? 'mimo' : 'cas'];
+      badge.appendChild(document.createTextNode(tone === 'on' ? 'V časovnem oknu' : tone === 'past' ? 'Okno je mimo' : 'Pred oknom · čez ' + dni(x.st.start - T)));
+      badge.setAttribute('role', 'status');
       head.appendChild(title); head.appendChild(badge); body.appendChild(head);
       var big = document.createElement('div'); big.className = 'gp-val-big'; big.style.color = g.color;
       big.textContent = spanTextLong(x.wins);
@@ -3741,9 +3797,14 @@ VALOVI_JS = r"""(function(){
       sub.innerHTML = '<span style="color:#60a5fa">' + ICONS.dez + '</span>';
       sub.appendChild(document.createTextNode(groupSub(x, T, evs)));
       body.appendChild(sub);
+      var more = document.createElement('details'); more.className = 'gp-val-more';
+      var msum = document.createElement('summary');
+      var bestPct = 0; x.sp.forEach(function(i){ if (i.fit && i.fit.adj > bestPct) bestPct = i.fit.adj; });
+      msum.textContent = 'Vrste in podrobnosti' + (x.sp.some(function(i){ return i.fit; }) ? ' · najboljše ujemanje pravil ' + Math.round(bestPct * 100) + ' %' : '');
+      more.appendChild(msum);
       if (evs.length > 1){
         eventLines(x, T, evs).forEach(function(t){
-          var l = document.createElement('div'); l.className = 'gp-val-sub'; l.textContent = t; body.appendChild(l);
+          var l = document.createElement('div'); l.className = 'gp-val-sub'; l.textContent = t; more.appendChild(l);
         });
       }
       var row = document.createElement('div'); row.className = 'gp-val-species';
@@ -3762,7 +3823,7 @@ VALOVI_JS = r"""(function(){
         chip.textContent = txt;
         row.appendChild(chip);
       });
-      body.appendChild(row); item.appendChild(body); panel.appendChild(item);
+      more.appendChild(row); body.appendChild(more); item.appendChild(body); panel.appendChild(item);
     });
   }
 
@@ -3772,6 +3833,14 @@ VALOVI_JS = r"""(function(){
   });
   clearBtn.addEventListener('click', function(){ events = [{ iso: '', mm: null }]; renderRows(); render(); });
   if (measBtn) measBtn.addEventListener('click', useMeasured);
+  var calcBtn = $('gvalCalc'), tlBox = $('gvalTimeline');
+  if (tlBox && window.matchMedia && matchMedia('(max-width:600px)').matches) tlBox.open = false;
+  if (calcBtn) calcBtn.addEventListener('click', function(){
+    render();
+    var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    result.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+    result.classList.remove('flash'); void result.offsetWidth; result.classList.add('flash');
+  });
   var saveA = $('gvalSaveA'), clearA = $('gvalClearA');
   if (saveA) saveA.addEventListener('click', function(){
     var T = todayNum(), evs = usable();
@@ -3829,7 +3898,7 @@ def valovi_widget_html():
         .replace("__STATION__", _json_mod.dumps(station, separators=(",", ":")))
         .replace("__CFG__", _json_mod.dumps(cfg))
         .replace("__TERRAINS__", _json_mod.dumps(terrains, ensure_ascii=False))
-        .replace("__ICONS__", _json_mod.dumps({k: _vi(k, 18) for k in ("razkrojevalka", "lesna", "mikorizna", "dez")}))
+        .replace("__ICONS__", _json_mod.dumps({k: _vi(k, 18) for k in ("razkrojevalka", "lesna", "mikorizna", "dez", "ok", "cas", "mimo")}))
         .replace("__MAXEV__", str(VALOVI_MAX_EVENTS))) + "</script>"
     if events:
         d0 = events[-1]
@@ -3842,61 +3911,68 @@ def valovi_widget_html():
             '    <p class="gp-val-suggest" id="gvalSuggest">V zadnjih ' + str(VALOVI_LOOKBACK_DAYS) + ' dneh ni bilo '
             f'dežja nad {VALOVI_RAIN_MM} mm — če veš za manjši, a pomemben dogodek, vnesi datum in količino ročno.</p>\n')
     measured_btn = (
-        '      <button type="button" id="gvalMeasured" class="gp-val-clear">' + _vi('dez', 16) + 'Uporabi izmerjeni dež</button>\n'
+        '      <button type="button" id="gvalMeasured" class="gp-val-clear">' + _vi('dez', 18) + 'Uporabi izmerjeni dež</button>\n'
         if events else '')
     return (
         '  <div class="gp-val-card">\n'
-        '    <span class="gp-val-inlabel">Vnesi pomembnejše padavinske dogodke: datum in količino. '
-        f'Vneseš lahko do {VALOVI_MAX_EVENTS} dogodke. Model za vsako vrsto sam preveri, ali dež doseže njen prag; '
-        f'samodejni predlog s postaje vzame dneve z vsaj {VALOVI_RAIN_MM} mm.</span>\n'
+        '    <div class="gp-vstep">1 · Vnesi padavine</div>\n'
+        '    <p class="gp-val-inlabel">Dodaj do ' + str(VALOVI_MAX_EVENTS) + ' pomembnejše padavinske dogodke.</p>\n'
         '    <div class="gp-val-events" id="gvalEvents"></div>\n'
         '    <div class="gp-val-inrow">\n'
+        '      <button type="button" id="gvalAdd" class="gp-val-clear">' + _vi('plus', 18) + 'Dodaj padavinski dogodek</button>\n'
         + measured_btn +
-        '      <button type="button" id="gvalAdd" class="gp-val-clear">' + _vi('plus', 16) + 'Dodaj dež</button>\n'
-        '      <button type="button" id="gvalClear" class="gp-val-clear">' + _vi('nic', 16) + 'Ni bilo izdatnega dežja</button>\n'
+        '      <button type="button" id="gvalClear" class="gp-val-clear">' + _vi('nic', 18) + 'Ni bilo izdatnega dežja</button>\n'
         '    </div>\n'
+        + suggest_note +
+        '    <div class="gp-vstep">2 · Prilagodi izračun</div>\n'
         '    <div class="gp-val-sel">\n'
         '      <label>Kaj iščeš?<select id="gvalWhat"></select></label>\n'
         '      <label>Teren<select id="gvalTerrain"></select></label>\n'
         '    </div>\n'
         '    <p class="gp-val-tnote" id="gvalTerrainNote"></p>\n'
-        '    <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> Upoštevaj tudi predhodne padavine '
-        's postaje IREICA1 (zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni). Dnevi, ki jih nisi vnesel, se vzamejo z izmerjenimi '
-        'padavinami postaje in se prištejejo k oceni predhodne namočenosti. To ni meritev vlage tal, rezultat pa se lahko '
-        'spremeni. Izklopi, če te zanima drug kraj.</label>\n'
-        + suggest_note +
+        '    <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> <span><strong>Upoštevaj padavine s postaje IREICA1</strong> '
+        '(zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni). Dnevi, ki jih nisi vnesel, se prištejejo k predhodnim padavinam. '
+        'To ni meritev vlage tal. Izklopi za drug kraj.</span></label>\n'
+        '    <button type="button" id="gvalCalc" class="gp-val-calc">Izračunaj gobje valove</button>\n'
+        '    <p class="gp-val-suggest" style="text-align:center">Rezultat se posodablja sproti ob vsaki spremembi.</p>\n'
         '    <p class="gp-val-hint" id="gvalHint"></p>\n'
+        '    <div class="gp-vstep">3 · Rezultat</div>\n'
         '    <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>\n'
-        f'    <div class="gp-val-axis" id="gvalAxis">{axis}</div>\n'
-        '    <div class="gp-val-bands">\n' + "\n".join(rows) + '\n    </div>\n'
-        '    <p class="gp-val-legend">Barvni trak je okno po modelu za vsak vnesen dež, modra pika je dan dežja, '
-        'bela črta je <strong>danes</strong>. Brez vnosa je os v dneh po prvem dežju.</p>\n'
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
-        '    <div class="gp-val-meaning">\n'
-        '      <h3>' + _vi('info', 20) + 'Kaj ta rezultat pomeni?</h3>\n'
-        '      <p>Odstotek je <strong>ujemanje padavinskih pravil</strong>: kako dobro se čas in količina dežja ujemata z '
-        'modelskimi pravili vrste. Ni verjetnost najdbe in ne vključuje temperature, vlage tal, višine ali dejanskih '
-        'najdb. Okna so modelski razpon, ne zagotovilo začetka rasti. Geološki faktor (ujemanje podlage ×'
-        + _fmt_mm(cfg['geo']['match']) + ', neujemanje ×' + _fmt_mm(cfg['geo']['mismatch']) + ') prilagodi modelski rezultat, '
-        'ni potrjena sprememba verjetnosti najdbe.</p>\n'
-        '      <p>Za širšo oceno razmer po območjih, ki upošteva tudi temperaturo, vlago in teren, glej gobarsko napoved.</p>\n'
-        '      <p><a class="gp-cta" href="/gobarska-napoved/danes/">Odpri celotno gobarsko napoved →</a> '
-        '<a href="/gobarska-napoved/zemljevid/">' + _vi('zemljevid', 16) + 'zemljevid</a></p>\n'
-        '    </div>\n'
-        '    <details class="gp-val-why" id="gvalWhyBox"><summary>' + _vi('vprasaj', 20) + 'Kako smo izračunali rezultat?</summary>'
-        '<p class="gp-val-tnote" style="margin-top:0">Za vsako vrsto model sešteje dež v oknu njenega zamika (prag sprožilnega '
-        'dežja je izpeljan iz 7-dnevnega praga vrste, preračunanega na dolžino okna) in dež v ' + str(gm.BASE_WINDOW_DAYS) +
-        ' dneh predhodnih padavin; obe oceni se stehtata kot v napovedi. Preveliko količino dežja model šteje kot '
-        'prenamočenost in oceno zniža. Če izbereš teren, se rezultat pomnoži z geološkim faktorjem vrste (lesne vrste ga '
-        'nimajo) in je omejen na 100 %. Dež po današnjem dnevu se ne šteje. Spodaj so dejanske komponente za vrsto z '
-        'najboljšim ujemanjem.</p><div id="gvalWhy"></div></details>\n'
-        '    <div class="gp-val-acts">\n'
-        '      <button type="button" id="gvalShare" class="gp-val-clear">' + _vi('povezava', 16) + 'Kopiraj povezavo do izračuna</button>\n'
-        '      <button type="button" id="gvalSaveA" class="gp-val-clear">' + _vi('plus', 16) + 'Shrani kot scenarij A</button>\n'
-        '      <button type="button" id="gvalClearA" class="gp-val-clear">Počisti primerjavo</button>\n'
-        '      <span class="gp-val-suggest" id="gvalShareMsg" aria-live="polite" style="margin:0;align-self:center"></span>\n'
-        '    </div>\n'
-        '    <div id="gvalCompare"></div>\n'
+        '    <p class="gp-val-note">Odstotek je <strong>ujemanje padavinskih pravil</strong>, ne verjetnost najdbe. '
+        'Okna so modelski razpon, ne zagotovilo začetka rasti.</p>\n'
+        '    <p><a class="gp-cta" href="/gobarska-napoved/danes/">Odpri celotno gobarsko napoved →</a></p>\n'
+        '    <details class="gp-val-why" id="gvalTimeline" open><summary>' + _vi('cas', 20) + 'Časovnica oken</summary>\n'
+        f'      <div class="gp-val-axis" id="gvalAxis">{axis}</div>\n'
+        '      <div class="gp-val-bands">\n' + "\n".join(rows) + '\n      </div>\n'
+        '      <p class="gp-val-legend">Barvni trak je okno po modelu za vsak vnesen dež, modra pika je dan dežja, '
+        'bela črta je <strong>danes</strong>. Brez vnosa je os v dneh po prvem dežju.</p>\n'
+        '    </details>\n'
+        '    <details class="gp-val-why"><summary>' + _vi('info', 20) + 'Kako deluje model?</summary>'
+        '<p class="gp-val-tnote" style="margin-top:0">Isti dež ne prebudi vseh gob hkrati. Razkrojevalke stelje, lesne in '
+        'mikorizne vrste imajo vsaka svoj zamik med padavinami in trosnjakom. Model za Rečico zato vsaki vrsti padavinsko '
+        'okno premakne nazaj po časovnici. Za vsako vrsto sešteje dež v oknu njenega zamika (prag je izpeljan iz '
+        '7-dnevnega praga vrste, preračunanega na dolžino okna) in predhodne padavine v ' + str(gm.BASE_WINDOW_DAYS) +
+        ' dneh; oceni se stehtata kot v napovedi. Preveč dežja model šteje kot prenamočenost in oceno zniža. '
+        'Dež po današnjem dnevu se ne šteje.</p></details>\n'
+        '    <details class="gp-val-why" id="gvalWhyBox"><summary>' + _vi('vprasaj', 20) + 'Zakaj je rezultat takšen?</summary>'
+        '<div id="gvalWhy"></div></details>\n'
+        '    <details class="gp-val-why"><summary>' + _vi('mimo', 20) + 'Omejitve</summary>'
+        '<p class="gp-val-tnote" style="margin-top:0">Kalkulator <strong>ne upošteva</strong> temperature zraka in tal, nočnega '
+        'ohlajanja, vlage tal in zraka, višine rastišča ter dejanskih najdb (model še ni preverjen z opažanji). Geološki faktor '
+        '(ujemanje podlage ×' + _fmt_mm(cfg['geo']['match']) + ', neujemanje ×' + _fmt_mm(cfg['geo']['mismatch']) + '; lesne vrste '
+        'ga nimajo) prilagodi modelski rezultat, rezultat je omejen na 100 %. Ni potrjena sprememba verjetnosti najdbe. '
+        'Za širšo oceno po območjih, ki upošteva tudi temperaturo, vlago in teren, glej <a href="/gobarska-napoved/danes/">'
+        'gobarsko napoved</a> ali <a href="/gobarska-napoved/zemljevid/">zemljevid</a>.</p></details>\n'
+        '    <details class="gp-val-why"><summary>' + _vi('povezava', 20) + 'Primerjaj scenarije in deli</summary>\n'
+        '      <div class="gp-val-acts">\n'
+        '        <button type="button" id="gvalShare" class="gp-val-clear">' + _vi('povezava', 18) + 'Kopiraj povezavo do izračuna</button>\n'
+        '        <button type="button" id="gvalSaveA" class="gp-val-clear">' + _vi('plus', 18) + 'Shrani kot scenarij A</button>\n'
+        '        <button type="button" id="gvalClearA" class="gp-val-clear">Počisti primerjavo</button>\n'
+        '      </div>\n'
+        '      <p class="gp-val-suggest" id="gvalShareMsg" aria-live="polite"></p>\n'
+        '      <div id="gvalCompare"></div>\n'
+        '    </details>\n'
         '  </div>\n' + js)
 
 
@@ -3917,19 +3993,16 @@ def build_valovi_page():
     orodje v slogu MeteoGobarja (isti vzorec kot koledar/trend)."""
     chips = "".join(
         f'<span class="gp-vchip" style="background:{g["color"]}26;color:{g["color"]}">{_vi(g["eco"], 16)}'
-        f'&nbsp;{_esc(g["name"])} · {g["min"]}–{g["max"]} dni</span>' for g in _valovi_groups())
+        f'&nbsp;{_esc(VALOVI_SHORT[g["eco"]])} · {g["min"]}–{g["max"]} dni</span>' for g in _valovi_groups())
     body = ('''  <header class="gp-vhero">
     <img src="/gobarska-napoved/valovi/logo-valovi.svg" width="74" height="74" alt="Logotip Gobji valovi">
     <div><div class="gp-vhero-k">MeteoGobar · Rečica ob Savinji</div>
       <div class="gp-vhero-n">Gobji <em>valovi</em></div>
-      <p class="gp-vhero-s">Kdaj po dežju zrastejo gobe?</p></div>
+      <p class="gp-vhero-s">Kdaj po dežju pričakujemo rast?</p></div>
   </header>
   <div class="gp-vchips">''' + chips + '''</div>
 '''
-            '  <p class="post-meta">Isti dež ne prebudi vseh gob hkrati. Razkrojevalke stelje, lesne in mikorizne '
-            'vrste imajo vsaka svoj zamik med padavinami in trosnjakom — model za Rečico ta zamik upošteva tako, '
-            'da vsaki vrsti glede na skupino premakne padavinsko okno nazaj po časovnici. Vnesi datum zadnjega '
-            'izdatnega dežja (ali povej, da ga ni bilo) in preveri, kaj je danes lahko aktivno.</p>\n'
+            '  <p class="post-meta">Vnesi, kdaj in koliko je deževalo, in poglej, kdaj se začne in konča modelsko okno rasti.</p>\n'
             + valovi_widget_html())
     return subpage_shell(
         "valovi", "Kalkulator rasti gob po dežju",
