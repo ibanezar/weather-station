@@ -510,6 +510,37 @@ def valovi_geologija():
         check(abs(v - want) < 1e-9, "valovi: geoFactor", f"{a}/{t}/{e}: py={want} js={v}")
 
 
+@test
+def valovi_temperatura():
+    """trapezoid() in curveOf() na /valovi/ = gobe_model.trapezoid in krivulja v eval_species
+    (lesne vrste po zračni temperaturi z rameni, ostale po talni)."""
+    import gobe_model as gm
+    rules = gm.load_rules()
+    sh = float(rules["scoring"]["temperature"]["air_shoulder_c"])
+    curves = [(-5, 0, 5, 10), (3.5, 6.5, 13.5, 16.5), (8, 12, 20, 25)]
+    xs = [-10, -5, -2, 0, 2.5, 3.5, 5, 6.5, 8, 10, 13.5, 15, 16.5, 20, 25, 30]
+    calls = [{"expr": "trapezoid(%s, %s, %s, %s, %s)" % ((x,) + c)} for c in curves for x in xs]
+    got = js("gobarska-napoved/valovi/index.html", ["trapezoid"], calls)
+    i = 0
+    for c in curves:
+        for x in xs:
+            check(abs(got[i] - gm.trapezoid(x, *c)) < 1e-9, "valovi: trapezoid", f"{x} {c}: py={gm.trapezoid(x, *c)} js={got[i]}")
+            i += 1
+    sps = [sp for sp in rules.get("species", []) if sp.get("ecology") in ("lesna", "mikorizna", "razkrojevalka")
+           and (sp.get("air_temp") or sp.get("soil_temp"))][:60]
+    calls = [{"expr": "curveOf(%s, %s)" % (json.dumps({"at": sp.get("air_temp"), "st": sp.get("soil_temp")}), json.dumps(sp["ecology"]))}
+             for sp in sps]
+    got = js("gobarska-napoved/valovi/index.html", ["trapezoid", "curveOf"], calls, "var CFG = %s;" % json.dumps({"airShoulder": sh}))
+    for sp, v in zip(sps, got):
+        if sp["ecology"] == "lesna":
+            at = sp["air_temp"]
+            want = [float(at["min"]) - sh, float(at["min"]), float(at["max"]), float(at["max"]) + sh]
+        else:
+            st = sp["soil_temp"]
+            want = [st["min"], st["opt_low"], st["opt_high"], st["max"]]
+        check(v is not None and all(abs(a - b) < 1e-9 for a, b in zip(v, want)), "valovi: krivulja vrste", f"{sp['id']}: py={want} js={v}")
+
+
 # ── Nevihtna karta: app.js ↔ generate_storm_map.py ───────────────────────────
 @test
 def nevihtna_karta():
