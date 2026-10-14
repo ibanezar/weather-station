@@ -3123,82 +3123,183 @@ VALOVI_SHORT = {"razkrojevalka": "Stelja", "lesna": "Les", "mikorizna": "Mikoriz
 # Lastna podoba kalkulatorja (logotip, barve, favicon, OG): tools/build_valovi_brand.py.
 # Barve skupin so iste kot v VALOVI_GROUPS. Prepiše samo spremenljivke in nekaj pravil te strani.
 VALOVI_BRAND_CSS = """<link rel="icon" type="image/svg+xml" href="/gobarska-napoved/valovi/favicon.svg">
-<meta name="theme-color" content="#0b1510">
+<meta name="theme-color" content="#07110c">
 <style>
-/* Mobile-first: gozdno zelena podoba, ravne kartice brez gradientov, vnosi in gumbi >= 48 px. */
-body{--blue:#4cae78;--cyan:#a78bfa;--muted:#9fb3a6;--bg:#0b1510;--card-bg:#101e16;
-  --stn-bg:rgba(76,174,120,.14);--stn-border:rgba(76,174,120,.42);
-  --blob-1:rgba(76,174,120,.14);--blob-2:rgba(111,174,85,.10);--blob-3:rgba(193,127,62,.08);--blob-4:rgba(76,174,120,.07)}
-.gp-vhero{display:flex;align-items:center;gap:1rem;margin:.4rem 0 .9rem;padding:.9rem 1rem;border-radius:var(--gp-r-panel);
-  background:#101e16;border:1px solid rgba(76,174,120,.28)}
-.gp-vhero img{width:3.6rem;height:3.6rem;flex:none;border-radius:.9rem}
-.gp-vhero-k{font-size:var(--gp-fs-xs);letter-spacing:.12em;text-transform:uppercase;color:#4cae78;font-weight:700}
-.gp-vhero-n{font-size:1.6rem;font-weight:800;line-height:1.1;margin:.1rem 0 .15rem;color:var(--text)}
-.gp-vhero-n em{font-style:normal;color:#4cae78}
-.gp-vhero-s{font-size:.92rem;color:var(--muted);margin:0}
-.gp-vchips{display:flex;gap:.4rem;flex-wrap:wrap;margin:0 0 .8rem}
-.gp-vchip{display:inline-flex;align-items:center;font-size:.8rem;font-weight:700;padding:.3rem .7rem;border-radius:999px}
-.gp-val-card{border-color:rgba(76,174,120,.25);background:#101e16;box-shadow:none;padding:1.1rem 1rem 1.3rem}
-.gp-vstep{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:#4cae78;font-weight:800;margin:1.4rem 0 .6rem}
-.gp-vstep:first-child{margin-top:0}
-.gp-val-inlabel{font-weight:500;color:var(--muted);margin:0 0 .6rem}
-/* padavinski dogodek = kartica */
-.gp-val-events{gap:.7rem}
-.gp-val-ev{display:block;border:1px solid var(--card-border);border-radius:.9rem;padding:.8rem;background:rgba(255,255,255,.03)}
-.gp-val-evhead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-bottom:.55rem;min-height:2.2rem}
-.gp-val-evtitle{font-weight:700;font-size:.9rem}
-.gp-val-evgrid{display:grid;grid-template-columns:minmax(0,1fr) 7.5rem;gap:.6rem}
-.gp-val-evgrid label{display:flex;flex-direction:column;gap:.3rem;font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;min-width:0}
-.gp-val-date,.gp-val-mm{min-height:3rem;font-size:1rem;width:100%;min-width:0;box-sizing:border-box}
-.gp-val-rm{min-height:2.75rem;padding:0 1rem;font-size:.85rem;width:auto}
-.gp-val-inrow{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.7rem}
-.gp-val-clear{min-height:3rem;padding:0 1rem;font-size:.92rem;display:inline-flex;align-items:center;justify-content:center}
-.gp-val-clear:hover{border-color:#4cae78;color:#4cae78}
-.gp-val-sel select{min-height:3rem;font-size:1rem}
-/* Temna tema: brez tega je spustni seznam bel s svetlim besedilom, datumski izbirnik pa svetel. */
-.gp-val-card{color-scheme:dark}
-.gp-val-sel select{background-color:#16261c;color:#eaf3ec}
-.gp-val-sel select option,.gp-val-sel select optgroup{background-color:#16261c;color:#eaf3ec}
-.gp-val-date,.gp-val-mm{background-color:#16261c;color:#eaf3ec}
-.gp-val-chk{margin-top:.9rem;padding:.7rem .8rem;border:1px solid var(--card-border);border-radius:.9rem;align-items:flex-start;font-size:.85rem}
-.gp-val-chk input{width:1.4rem;height:1.4rem;flex:none;margin:0}
-.gp-val-calc{display:block;width:100%;min-height:3.25rem;margin:1.1rem 0 .3rem;background:#27834d;color:#fff;border:0;
-  border-radius:.9rem;font-size:1.05rem;font-weight:800;cursor:pointer}
-.gp-val-calc:hover,.gp-val-calc:focus-visible{background:#2f9a5a}
-/* rezultat */
-.gp-val-result{background:rgba(76,174,120,.10);border:1px solid rgba(76,174,120,.25);font-size:1rem}
+/* Aplikacijski mobilni videz: steklene površine, veliki dotični elementi, hitri izbirniki namesto obrazca. */
+body{--blue:#3fcf8e;--cyan:#a78bfa;--muted:#93a89a;--bg:#07110c;--card-bg:#0e1a13;--text:#eef6f0;
+  --pv-surf:rgba(255,255,255,.045);--pv-bd:rgba(255,255,255,.09);--pv-acc:#3fcf8e;--pv-acc2:#22a06b;
+  --stn-bg:rgba(63,207,142,.14);--stn-border:rgba(63,207,142,.4);
+  --blob-1:rgba(63,207,142,.16);--blob-2:rgba(111,174,85,.08);--blob-3:rgba(167,139,250,.07);--blob-4:rgba(63,207,142,.06)}
+body .crumbs,body .stn-badge{display:none}
+@media(max-width:700px){body .site-head{display:none}}
+.page-title{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.gp-val-card{max-width:640px;margin:0 auto;background:none;border:0;box-shadow:none;padding:0 0 2rem;color-scheme:dark}
+.gp-val-card .gp-val-suggest{color:var(--muted)}
+
+/* ── glava ── */
+.gp-pv-hero{position:relative;overflow:hidden;display:flex;align-items:center;gap:1rem;margin:.2rem auto 1rem;max-width:640px;
+  padding:1.15rem 1.1rem;border-radius:26px;border:1px solid rgba(63,207,142,.25);
+  background:radial-gradient(120% 140% at 0% 0%,rgba(63,207,142,.22),rgba(14,26,19,.96) 62%)}
+.gp-pv-hero:after{content:"";position:absolute;right:-1rem;top:-1.3rem;width:5.6rem;height:5.6rem;opacity:.28;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke-linecap='round' stroke-width='5'%3E%3Cpath d='M10 70A40 40 0 0 1 90 70' stroke='%23a78bfa' opacity='.55'/%3E%3Cpath d='M24 70A26 26 0 0 1 76 70' stroke='%23c17f3e' opacity='.6'/%3E%3Cpath d='M38 70A12 12 0 0 1 62 70' stroke='%232dd4bf' opacity='.7'/%3E%3C/svg%3E") no-repeat center/contain}
+.gp-pv-hero img{position:relative;z-index:1;width:3.7rem;height:3.7rem;flex:none;border-radius:1rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.gp-pv-hero>div{position:relative;z-index:1}
+.gp-pv-k{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pv-acc);font-weight:800}
+.gp-pv-n{font-size:1.75rem;font-weight:800;line-height:1.05;margin:.15rem 0 .2rem;letter-spacing:-.02em}
+.gp-pv-n em{font-style:normal;color:var(--pv-acc)}
+.gp-pv-s{font-size:.9rem;color:var(--muted);margin:0}
+.gp-pv-chips{display:flex;gap:.4rem;flex-wrap:wrap;max-width:640px;margin:0 auto 1.1rem}
+.gp-pv-chip{display:inline-flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:700;padding:.4rem .75rem;border-radius:999px}
+.post-meta{max-width:640px;margin:0 auto 1rem!important;color:var(--muted)}
+
+/* ── koraki ── */
+.gp-vstep{display:flex;align-items:center;gap:.6rem;font-size:1.05rem;font-weight:800;letter-spacing:-.01em;margin:1.7rem 0 .75rem;color:var(--text);text-transform:none}
+.gp-vstep b{display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:50%;background:rgba(63,207,142,.16);
+  color:var(--pv-acc);font-size:.85rem}
+.gp-vstep:first-child{margin-top:.4rem}
+.gp-val-inlabel{font-weight:500;color:var(--muted);margin:-.2rem 0 .8rem;font-size:.88rem}
+.gp-vlab{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:1rem 0 .45rem}
+
+/* ── padavinski dogodek ── */
+.gp-val-events{display:flex;flex-direction:column;gap:.8rem;margin:0}
+.gp-val-ev{display:block;padding:1rem;border-radius:22px;background:var(--pv-surf);border:1px solid var(--pv-bd)}
+.gp-val-evhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem;min-height:2.2rem}
+.gp-val-evtitle{font-weight:800;font-size:.95rem}
+.gp-val-rm{min-height:2.4rem;padding:0 .9rem;border-radius:999px;border:1px solid rgba(248,113,113,.4);background:rgba(248,113,113,.08);color:#fca5a5;font-size:.8rem;font-weight:700;width:auto}
+.gp-pv-quick{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem}
+.gp-pv-q,.gp-pv-p,.gp-pv-sg{flex:none;min-height:2.75rem;padding:0 .6rem;border-radius:14px;border:1px solid var(--pv-bd);background:rgba(255,255,255,.04);
+  color:var(--text);font-size:.88rem;font-weight:700;cursor:pointer;transition:transform .12s,background .15s,border-color .15s}
+.gp-pv-q:active,.gp-pv-p:active,.gp-pv-sg:active,.gp-pv-sb:active,.gp-val-clear:active,.gp-val-calc:active{transform:scale(.97)}
+.gp-pv-q.on,.gp-pv-p.on,.gp-pv-sg.on{background:rgba(63,207,142,.17);border-color:var(--pv-acc);color:var(--pv-acc)}
+.gp-val-date{width:100%;min-height:3rem;margin-top:.6rem;padding:0 .9rem;border-radius:14px;border:1px solid var(--pv-bd);background:rgba(255,255,255,.04);
+  color:var(--text);font-size:1rem;box-sizing:border-box;min-width:0}
+.gp-pv-step{display:flex;align-items:stretch;gap:.6rem}
+.gp-pv-sb{flex:none;width:3.4rem;min-height:3.4rem;border-radius:16px;border:1px solid var(--pv-bd);background:rgba(255,255,255,.05);color:var(--text);
+  font-size:1.6rem;font-weight:500;cursor:pointer;transition:transform .12s}
+.gp-pv-mm{flex:1;display:flex;align-items:center;justify-content:center;gap:.2rem;position:relative;border-radius:16px;background:rgba(0,0,0,.28);border:1px solid var(--pv-bd);padding:.2rem .6rem}
+.gp-val-mm{width:100%;min-width:0;background:transparent;border:0;color:var(--text);font-size:2.3rem;font-weight:800;text-align:center;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;padding:0;box-sizing:border-box}
+.gp-val-mm::placeholder{color:rgba(255,255,255,.25)}
+.gp-val-mm:focus{outline:none}
+.gp-pv-mm span{position:absolute;right:.9rem;bottom:.55rem;color:var(--muted);font-weight:700;font-size:.85rem;pointer-events:none}
+.gp-pv-presets{display:flex;gap:.45rem;margin-top:.6rem}
+.gp-pv-p{flex:1;padding:0}
+
+.gp-val-inrow{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.8rem}
+.gp-val-clear{min-height:2.9rem;padding:0 1.05rem;border-radius:999px;border:1px solid var(--pv-bd);background:rgba(255,255,255,.04);color:var(--text);
+  font-size:.86rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:.1rem;cursor:pointer;transition:transform .12s}
+.gp-val-clear:hover{border-color:var(--pv-acc);color:var(--pv-acc)}
+#gvalAdd{border-color:rgba(63,207,142,.5);color:var(--pv-acc)}
+
+/* ── izbira ── */
+.gp-pv-seg{display:flex;flex-wrap:wrap;gap:.45rem}
+.gp-pv-sg{display:inline-flex;align-items:center;gap:.4rem;padding:0 .95rem}
+.gp-pv-sg i{width:.55rem;height:.55rem;border-radius:50%;flex:none}
+.gp-pv-sg small{display:block;font-size:.66rem;font-weight:600;color:var(--muted);line-height:1}
+.gp-pv-sg.two{flex-direction:column;align-items:flex-start;justify-content:center;gap:.15rem;padding:.4rem .9rem;min-height:3.1rem}
+.gp-pv-sg.on small{color:rgba(63,207,142,.8)}
+#gvalSpWrap{margin-top:.6rem}
+.gp-val-sel{display:block;margin:0}
+.gp-val-sel select,#gvalWhat{width:100%;min-height:3rem;font-size:1rem;border-radius:14px;border:1px solid var(--pv-bd);padding:0 .9rem;
+  background-color:#16261c;color:#eef6f0;color-scheme:dark}
+#gvalWhat option,#gvalWhat optgroup{background-color:#16261c;color:#eef6f0}
+.gp-val-tnote{font-size:.8rem;color:var(--muted);margin:.7rem 0 0;line-height:1.5}
+
+.gp-pv-switch{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:.7rem;padding:.95rem 1rem;border-radius:18px;
+  background:var(--pv-surf);border:1px solid var(--pv-bd);cursor:pointer}
+.gp-pv-switch .t{display:block;min-width:0}
+.gp-pv-switch strong{display:block;font-size:.95rem}
+.gp-pv-switch small{display:block;color:var(--muted);font-size:.78rem;line-height:1.45;margin-top:.2rem}
+.gp-pv-switch input{-webkit-appearance:none;appearance:none;flex:none;width:3.1rem;height:1.85rem;margin:0;border-radius:999px;background:rgba(255,255,255,.16);
+  position:relative;cursor:pointer;transition:background .2s}
+.gp-pv-switch input:after{content:"";position:absolute;top:.2rem;left:.2rem;width:1.45rem;height:1.45rem;border-radius:50%;background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .2s}
+.gp-pv-switch input:checked{background:var(--pv-acc2)}
+.gp-pv-switch input:checked:after{transform:translateX(1.25rem)}
+.gp-pv-switch input:focus-visible{outline:2px solid var(--pv-acc);outline-offset:3px}
+
+/* napoved dežja po dneh */
+.gp-val-fc{margin-top:.7rem;font-size:.8rem;color:var(--muted)}
+.gp-val-fclab{display:block;margin-bottom:.5rem}
+.gp-pv-days{display:flex;gap:.45rem;overflow-x:auto;margin:0 -.2rem;padding:.1rem .2rem .3rem;scrollbar-width:none}
+.gp-pv-days::-webkit-scrollbar{display:none}
+.gp-val-fcchip{flex:none;display:flex;flex-direction:column;align-items:center;gap:.1rem;min-width:3.9rem;padding:.55rem .4rem;border-radius:16px;
+  background:var(--pv-surf);border:1px solid var(--pv-bd);margin:0;font-size:.7rem;color:var(--muted)}
+.gp-val-fcchip b{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text)}
+.gp-val-fcchip em{font-style:normal;font-size:1.05rem;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.gp-val-fcchip.big{background:rgba(96,165,250,.14);border-color:rgba(96,165,250,.55)}
+.gp-val-fcchip.big em{color:#9cc9ff}
+
+/* glavni gumb */
+.gp-val-calc{display:block;width:100%;min-height:3.6rem;margin:1.5rem 0 .5rem;border:0;border-radius:20px;cursor:pointer;
+  background:linear-gradient(180deg,#46dc9a,#23a56e);color:#04170e;font-size:1.08rem;font-weight:800;letter-spacing:-.01em;
+  box-shadow:0 10px 30px rgba(35,165,110,.35),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .12s}
+.gp-val-calc:hover,.gp-val-calc:focus-visible{filter:brightness(1.06)}
+
+/* ── rezultat ── */
+.gp-val-hint{font-size:.82rem;color:var(--muted);font-weight:500;margin:.4rem 0 0}
+.gp-val-result{margin:0 0 1rem;padding:1.2rem 1.25rem;border-radius:26px;font-size:.92rem;line-height:1.55;color:#cfe3d5;
+  background:linear-gradient(155deg,rgba(63,207,142,.2),rgba(63,207,142,.05) 60%);border:1px solid rgba(63,207,142,.3)}
+.gp-val-result strong{display:block;font-size:1.35rem;line-height:1.22;color:#fff;margin-bottom:.4rem;letter-spacing:-.015em;font-weight:800}
 .gp-val-result.flash{animation:gpvflash .9s ease-out}
-@keyframes gpvflash{from{box-shadow:0 0 0 3px rgba(76,174,120,.7)}to{box-shadow:0 0 0 3px rgba(76,174,120,0)}}
-@media(prefers-reduced-motion:reduce){.gp-val-result.flash{animation:none}}
-.gp-val-item{display:block;border:1px solid var(--card-border);border-radius:.9rem;padding:.9rem;margin-bottom:.7rem;background:rgba(255,255,255,.03)}
-.gp-val-item:first-child{border-top:1px solid var(--card-border)}
-.gp-val-title{font-size:1rem}
-.gp-val-status{display:inline-flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:700;text-transform:none;letter-spacing:0;padding:.3rem .6rem}
+@keyframes gpvflash{from{box-shadow:0 0 0 4px rgba(63,207,142,.55)}to{box-shadow:0 0 0 4px rgba(63,207,142,0)}}
+@media(prefers-reduced-motion:reduce){.gp-val-result.flash{animation:none}.gp-val-calc,.gp-pv-q,.gp-pv-p,.gp-pv-sg{transition:none}}
+.gp-val-state{margin:0}
+.gp-val-item{position:relative;overflow:hidden;display:block;margin:0 0 .85rem;padding:1.1rem;border-radius:24px;background:var(--pv-surf);border:1px solid var(--pv-bd)}
+.gp-val-item:first-child{border-top:1px solid var(--pv-bd)}
+.gp-val-item:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.16;background:radial-gradient(110% 80% at 100% 0%,var(--gc,transparent),transparent 62%)}
+.gp-val-item>*{position:relative}
+.gp-val-title{font-size:1.02rem;font-weight:800}
+.gp-val-head{margin-bottom:.45rem}
+.gp-val-status{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;font-weight:700;text-transform:none;letter-spacing:0;padding:.35rem .7rem;border-radius:999px}
 .gp-val-status .gp-val-ico{margin-right:0}
-.gp-val-big{font-size:1.4rem;font-weight:800;margin:.35rem 0 0;line-height:1.25}
-.gp-val-more{margin-top:.6rem;border-top:1px solid var(--card-border)}
-.gp-val-more>summary{cursor:pointer;font-size:.82rem;color:var(--muted);padding:.7rem 0;min-height:1.4rem}
-.gp-val-item{position:relative}
-.gp-val-ph{position:absolute;right:.9rem;top:.9rem;width:4.5rem;height:4.5rem;object-fit:cover;border-radius:.8rem;border:1px solid var(--card-border)}
-.gp-val-item.has-ph .gp-val-head,.gp-val-item.has-ph .gp-val-big,.gp-val-item.has-ph>div>.gp-val-sub{padding-right:5.4rem}
-.gp-val-credit{font-size:.72rem;color:var(--muted);margin:.1rem 0 .6rem;line-height:1.4}
-@media(max-width:380px){.gp-val-ph{width:3.8rem;height:3.8rem}.gp-val-item.has-ph .gp-val-head,.gp-val-item.has-ph .gp-val-big,.gp-val-item.has-ph>div>.gp-val-sub{padding-right:4.7rem}}
-.gp-val-fc{font-size:.8rem;color:var(--muted);margin:.6rem 0 0;line-height:1.5}
-.gp-val-fclab{display:block;margin-bottom:.3rem}
-.gp-val-fcchip{display:inline-block;margin:0 .35rem .35rem 0;padding:.3rem .6rem;border:1px solid var(--card-border);border-radius:999px;font-size:.78rem}
-.gp-val-fcchip.big{border-color:#60a5fa;color:#9cc9ff;font-weight:700}
-.gp-val-note{font-size:.85rem;color:var(--muted);margin:.2rem 0 .8rem;line-height:1.5}
+.gp-val-big{font-size:1.65rem;font-weight:800;letter-spacing:-.02em;margin:.2rem 0 .1rem;line-height:1.15}
+.gp-val-sub{font-size:.8rem;color:var(--muted);margin:.3rem 0 0;line-height:1.5}
+.gp-pv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-top:.8rem}
+.gp-pv-stat{padding:.65rem .6rem;border-radius:16px;background:rgba(0,0,0,.26);border:1px solid var(--pv-bd);min-width:0}
+.gp-pv-stat span{display:block;font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.gp-pv-stat b{display:block;font-size:.98rem;font-weight:800;margin:.15rem 0 .05rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gp-pv-stat small{display:block;font-size:.66rem;color:var(--muted)}
+.gp-pv-statnote{font-size:.68rem;color:var(--muted);margin:.45rem 0 0}
+.gp-pv-prog{margin:.7rem 0 .2rem}
+.gp-pv-track{height:.5rem;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
+.gp-pv-fill{height:100%;border-radius:999px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.gp-pv-prl{display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:.3rem;font-variant-numeric:tabular-nums}
+.gp-val-ph{position:absolute;right:1.1rem;top:1.1rem;width:5rem;height:5rem;object-fit:cover;border-radius:18px;border:1px solid var(--pv-bd);box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.gp-val-item.has-ph .gp-val-head,.gp-val-item.has-ph .gp-val-big,.gp-val-item.has-ph>div>.gp-val-sub{padding-right:5.8rem}
+.gp-val-more{margin-top:.7rem;border-top:1px solid var(--pv-bd)}
+.gp-val-more>summary{cursor:pointer;font-size:.8rem;color:var(--muted);padding:.8rem 0 .2rem}
+.gp-val-species{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+.gp-val-chip{font-size:.74rem;background:rgba(255,255,255,.05);border:1px solid var(--pv-bd);border-radius:999px;padding:.3rem .65rem;color:var(--text)}
+.gp-val-credit{font-size:.7rem;color:var(--muted);margin:.1rem 0 .7rem;line-height:1.4}
+.gp-val-note{font-size:.84rem;color:var(--muted);margin:.2rem 0 .9rem;line-height:1.5}
 .gp-val-note strong{color:var(--text)}
-.gp-val-meaning .gp-cta,.gp-val-card .gp-cta{background:#27834d;color:#fff;min-height:3rem;width:100%;box-sizing:border-box}
-.gp-val-why{margin:.7rem 0 0}
-.gp-val-why summary{min-height:3rem;display:flex;align-items:center;padding:.2rem 0}
-.gp-val-acts{display:flex;gap:.6rem;flex-wrap:wrap}
-.gp-val-cmp{width:100%}
+.gp-val-card .gp-cta{display:flex;align-items:center;justify-content:center;width:100%;min-height:3.1rem;border-radius:16px;box-sizing:border-box;
+  background:rgba(63,207,142,.14);border:1px solid rgba(63,207,142,.4);color:var(--pv-acc);font-weight:800}
+
+/* ── zložljivi razdelki kot seznam v aplikaciji ── */
+.gp-val-why{margin:.6rem 0 0;padding:0 1rem;border-radius:18px;background:var(--pv-surf);border:1px solid var(--pv-bd)}
+.gp-val-why summary{display:flex;align-items:center;min-height:3.2rem;cursor:pointer;font-weight:700;font-size:.92rem;list-style:none}
+.gp-val-why summary::-webkit-details-marker{display:none}
+.gp-val-why summary:after{content:"";margin-left:auto;width:.55rem;height:.55rem;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+  transform:rotate(45deg);transition:transform .2s;flex:none}
+.gp-val-why[open] summary:after{transform:rotate(-135deg)}
+.gp-val-why ul{margin:0 0 .8rem;padding-left:1.1rem;font-size:.84rem;line-height:1.55}
+.gp-val-why li{margin:.35rem 0}
+.gp-val-why[open]{padding-bottom:.4rem}
+.gp-val-ico{flex:none;vertical-align:-.2em;margin-right:.45rem}
+.gp-val-why summary .gp-val-ico{color:var(--pv-acc)}
+.gp-val-axis{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin:.4rem 0 .5rem}
+.gp-val-track{height:2rem;border-radius:12px;background:rgba(255,255,255,.07)}
+.gp-val-bands{gap:.9rem}
+.gp-val-legend{font-size:.74rem;color:var(--muted);margin:.5rem 0 .8rem;line-height:1.5}
+.gp-val-acts{display:flex;gap:.55rem;flex-wrap:wrap;margin:.2rem 0 .6rem}
+.gp-val-cmp{width:100%;border-collapse:collapse;font-size:.8rem}
+.gp-val-cmp th,.gp-val-cmp td{padding:.55rem .45rem;border-top:1px solid var(--pv-bd);text-align:left;vertical-align:top}
 @media(max-width:600px){
   .gp-val-inrow .gp-val-clear,.gp-val-acts .gp-val-clear{flex:1 1 100%}
-  .gp-vhero-n{font-size:1.4rem}
-  .gp-val-evgrid{grid-template-columns:minmax(0,1fr) 6.5rem}
-  .gp-val-big{font-size:1.25rem}
+  .gp-pv-n{font-size:1.55rem}
+  .gp-val-big{font-size:1.5rem}
 }
 </style>"""
 VALOVI_BRAND = {
@@ -3305,6 +3406,7 @@ VALOVI_JS = r"""(function(){
   var PHOTOS = __PHOTOS__;
   var MAXEV = __MAXEV__;
   function $(id){ return document.getElementById(id); }
+  function el(t, c){ var x = document.createElement(t); if (c) x.className = c; return x; }
   var evBox = $('gvalEvents');
   if (!evBox) return;
   var whatSel = $('gvalWhat'), terSel = $('gvalTerrain');
@@ -3397,13 +3499,13 @@ VALOVI_JS = r"""(function(){
     if (!fcStrip) return;
     if (OM_STATE === 'nalagam'){ fcStrip.textContent = 'Napoved dežja se nalaga …'; return; }
     if (!OM){ fcStrip.textContent = 'Napoved dežja ni dosegljiva, zato rezultat temelji samo na vnesenih in izmerjenih padavinah.'; return; }
-    var T = todayNum(), html = '<span class="gp-val-fclab">Napoved dežja, Open-Meteo (modelska, negotova):</span> ';
+    var T = todayNum(), html = '<span class="gp-val-fclab">Napoved dežja, Open-Meteo (modelska, negotova)</span><div class="gp-pv-days">';
     for (var k = 1; k <= 7; k++){
       var d = OM.days[isoOf(T + k)]; if (!d || typeof d.mm !== 'number') continue;
       var d0 = new Date((T + k) * 86400000);
-      html += '<span class="gp-val-fcchip' + (d.mm >= CFG.rainMm ? ' big' : '') + '">' + WD[d0.getUTCDay()] + ' ' + fmt(T + k) + ' · ' + fmtMm(d.mm) + ' mm</span>';
+      html += '<span class="gp-val-fcchip' + (d.mm >= CFG.rainMm ? ' big' : '') + '"><b>' + WD[d0.getUTCDay()] + '</b><em>' + fmtMm(d.mm) + '</em>' + fmt(T + k) + '</span>';
     }
-    fcStrip.innerHTML = html;
+    fcStrip.innerHTML = html + '</div>';
   }
   /* Napovedani izdatni dnevi (>= prag predloga) postanejo dogodki z oznako napoved. */
   function fcEvents(){
@@ -3500,6 +3602,42 @@ VALOVI_JS = r"""(function(){
     TERRAINS.forEach(function(t){
       var o = document.createElement('option'); o.value = t.id; o.textContent = t.name; terSel.appendChild(o);
     });
+  }
+  var whatChips = $('gvalWhatChips'), terChips = $('gvalTerChips'), spWrap = $('gvalSpWrap');
+  var SHORTG = { razkrojevalka: 'Stelja', lesna: 'Les', mikorizna: 'Mikorizne' };
+  var TSHORT = { kisla: ['Kisla tla', 'Smrekovec'], bazicna: ['Apnenec', 'Golte, Menina'], vlazna: ['Rečni logi', 'Savinja, Dreta'] };
+  function buildChips(){
+    if (!whatChips || !terChips) return;
+    whatChips.innerHTML = ''; terChips.innerHTML = '';
+    function add(box, val, label, sub, color, onPick){
+      var b = el('button', 'gp-pv-sg' + (sub ? ' two' : '')); b.type = 'button'; b.setAttribute('data-v', val);
+      if (color){ var i = el('i'); i.style.background = color; b.appendChild(i); }
+      var t = el('span'); t.textContent = label;
+      if (sub){ var d = el('div'); d.appendChild(t); var sm = el('small'); sm.textContent = sub; d.appendChild(sm); b.appendChild(d); }
+      else b.appendChild(t);
+      b.addEventListener('click', function(){ onPick(val); });
+      box.appendChild(b);
+    }
+    function pickWhat(v){
+      if (v === 'sp'){
+        var first = whatSel.querySelector('optgroup option'); whatSel.value = first ? first.value : 'all';
+      } else whatSel.value = v;
+      whatSel.dispatchEvent(new Event('change', { bubbles: true })); syncChips();
+    }
+    add(whatChips, 'all', 'Vse', '', null, pickWhat);
+    GROUPS.forEach(function(g){ add(whatChips, 'eco:' + g.eco, SHORTG[g.eco] || g.name, '', g.color, pickWhat); });
+    add(whatChips, 'sp', 'Vrsta …', '', null, pickWhat);
+    function pickTer(v){ terSel.value = v; terSel.dispatchEvent(new Event('change', { bubbles: true })); syncChips(); }
+    add(terChips, '', 'Ne vem', 'nevtralno', null, pickTer);
+    TERRAINS.forEach(function(t){ var s = TSHORT[t.id] || [t.name, '']; add(terChips, t.id, s[0], s[1], null, pickTer); });
+    syncChips();
+  }
+  function syncChips(){
+    if (!whatChips || !terChips) return;
+    var v = whatSel.value, act = v === 'all' ? 'all' : v.indexOf('eco:') === 0 ? v : 'sp';
+    [].forEach.call(whatChips.children, function(b){ b.classList.toggle('on', b.getAttribute('data-v') === act); });
+    if (spWrap) spWrap.hidden = v.indexOf('sp:') !== 0;
+    [].forEach.call(terChips.children, function(b){ b.classList.toggle('on', b.getAttribute('data-v') === terSel.value); });
   }
   function terrainNote(){
     var t = null;
@@ -3635,6 +3773,39 @@ VALOVI_JS = r"""(function(){
     });
   }
 
+  /* Temperatura in vlaga v oknu kot ploščice (Open-Meteo; ločeno od odstotka). */
+  function statTiles(x, g){
+    if (!OM || !x) return null;
+    var box = el('div'), grid = el('div', 'gp-pv-stats');
+    function tile(label, val, sub){
+      var t = el('div', 'gp-pv-stat'), l = el('span'), v = el('b'), s2 = el('small');
+      l.textContent = label; v.textContent = val; s2.textContent = sub || ''; t.appendChild(l); t.appendChild(v); t.appendChild(s2); return t;
+    }
+    if (x.tmp && x.tmp.n) grid.appendChild(tile((g.eco === 'lesna' ? 'Zračna' : 'Talna') + ' temp.', rngT(x.tmp.min, x.tmp.max) + ' °C', 'povpr. ' + fmtT(x.tmp.avg) + ' °C'));
+    if (x.wet && x.wet.sn) grid.appendChild(tile('Vlaga tal', pctRng(x.wet.sMin * 100, x.wet.sMax * 100), 'polna ' + x.wet.sFull + '/' + x.wet.sn + ' dni'));
+    if (x.wet && x.wet.an) grid.appendChild(tile('Zračna vlaga', pctRng(x.wet.aMin, x.wet.aMax), 'polna ' + x.wet.aFull + '/' + x.wet.an + ' dni'));
+    var miss = Math.max(x.tmp ? x.tmp.miss : 0, 0), note = el('div', 'gp-pv-statnote');
+    if (grid.children.length){
+      box.appendChild(grid);
+      note.textContent = 'Open-Meteo, v oknu' + (miss ? '; za ' + dni(miss) + ' okna podatkov še ni' : '') + '. Ne vpliva na odstotek.';
+    } else note.textContent = 'Temperatura in vlaga za to okno še nista na voljo (napoved sega do ' + (OM.last ? fmt(dayNum(OM.last)) : '?') + ').';
+    box.appendChild(note);
+    return box;
+  }
+  /* Napredek okna: kje je danes glede na najbližje okno skupine. */
+  function windowBar(x, T, g){
+    var spans = mergeSpans(x.wins), sp = null, k;
+    for (k = 0; k < spans.length; k++) if (spans[k][0] <= T && T <= spans[k][1]) sp = spans[k];
+    if (!sp) for (k = 0; k < spans.length; k++) if (spans[k][0] > T){ sp = spans[k]; break; }
+    if (!sp) sp = spans[spans.length - 1];
+    var on = sp[0] <= T && T <= sp[1], pct = on ? (T - sp[0] + 1) / (sp[1] - sp[0] + 1) * 100 : (T > sp[1] ? 100 : 0);
+    var wrap = el('div', 'gp-pv-prog'), tr = el('div', 'gp-pv-track'), fl = el('div', 'gp-pv-fill');
+    fl.style.background = g.color; fl.style.width = Math.round(pct) + '%'; fl.style.opacity = on ? '1' : '.4';
+    tr.appendChild(fl); wrap.appendChild(tr);
+    var lab = el('div', 'gp-pv-prl'), a = el('span'), b = el('span');
+    a.textContent = 'začetek ' + fmt(sp[0]); b.textContent = 'konec ' + fmt(sp[1]); lab.appendChild(a); lab.appendChild(b); wrap.appendChild(lab);
+    return wrap;
+  }
   function sinceText(e, T){
     if (e.fc) return 'Napovedan dež ' + fmt(e.n) + ' (' + fmtMm(e.mm) + ' mm).';
     var d = T - e.n;
@@ -3778,55 +3949,81 @@ VALOVI_JS = r"""(function(){
     events = DEFAULTS.map(function(e){ return { iso: e.date, mm: e.mm }; });
     if (!events.length) events = [{ iso: '', mm: null }];
     stationChk.checked = true; if (fcChk) fcChk.checked = true; whatSel.value = 'all'; terSel.value = '';
-    renderRows(); render();
+    syncChips(); terrainNote(); renderRows(); render();
   }
 
+  var QUICK = [[0, 'Danes'], [1, 'Včeraj'], [2, 'Pred 2 d'], [3, 'Pred 3 d'], [5, 'Pred 5 d'], [7, 'Pred 7 d']];
+  var PRESETS = [10, 20, 35, 50];
   function renderRows(){
     evBox.innerHTML = '';
     events.forEach(function(e, idx){
-      var card = document.createElement('div');
-      card.className = 'gp-val-ev';
-      var head = document.createElement('div'); head.className = 'gp-val-evhead';
-      var ttl = document.createElement('span'); ttl.className = 'gp-val-evtitle'; ttl.textContent = 'Padavinski dogodek ' + (idx + 1);
+      var card = el('div', 'gp-val-ev');
+      var head = el('div', 'gp-val-evhead');
+      var ttl = el('span', 'gp-val-evtitle'); ttl.textContent = 'Dež ' + (idx + 1);
       head.appendChild(ttl);
       if (events.length > 1){
-        var rm = document.createElement('button');
-        rm.type = 'button'; rm.className = 'gp-val-rm'; rm.textContent = 'Odstrani';
+        var rm = el('button', 'gp-val-rm'); rm.type = 'button'; rm.textContent = 'Odstrani';
         rm.setAttribute('aria-label', 'Odstrani padavinski dogodek ' + (idx + 1));
         rm.addEventListener('click', function(){ events.splice(idx, 1); renderRows(); render(); });
         head.appendChild(rm);
       }
       card.appendChild(head);
-      var grid = document.createElement('div'); grid.className = 'gp-val-evgrid';
-      var ld = document.createElement('label'); ld.appendChild(document.createTextNode('Datum dežja'));
-      var di = document.createElement('input');
-      di.type = 'date'; di.className = 'gp-val-date'; di.value = e.iso || '';
-      di.max = isoOf(todayNum()); di.setAttribute('aria-label', 'Datum dežja ' + (idx + 1));
+
+      var l1 = el('div', 'gp-vlab'); l1.textContent = 'Kdaj je deževalo?'; l1.style.marginTop = '.2rem'; card.appendChild(l1);
+      var quick = el('div', 'gp-pv-quick'), qb = [];
+      var di = el('input', 'gp-val-date');
+      di.type = 'date'; di.value = e.iso || ''; di.max = isoOf(todayNum()); di.setAttribute('aria-label', 'Datum dežja ' + (idx + 1));
       if (idx === 0) di.id = 'gvalDate';
-      ld.appendChild(di);
-      var lm = document.createElement('label'); lm.appendChild(document.createTextNode('Količina (mm)'));
-      var mi = document.createElement('input');
-      mi.type = 'number'; mi.min = '0'; mi.step = '0.1'; mi.inputMode = 'decimal';
-      mi.className = 'gp-val-mm'; mi.placeholder = 'mm';
+      QUICK.forEach(function(p){
+        var b = el('button', 'gp-pv-q'); b.type = 'button'; b.textContent = p[1];
+        b.addEventListener('click', function(){ di.value = isoOf(todayNum() - p[0]); di.dispatchEvent(new Event('input', { bubbles: true })); });
+        qb.push([b, p[0]]); quick.appendChild(b);
+      });
+      card.appendChild(quick); card.appendChild(di);
+
+      var l2 = el('div', 'gp-vlab'); l2.textContent = 'Koliko je padlo?'; card.appendChild(l2);
+      var mi = el('input', 'gp-val-mm');
+      mi.type = 'number'; mi.min = '0'; mi.step = '0.1'; mi.inputMode = 'decimal'; mi.placeholder = '0';
       mi.setAttribute('aria-label', 'Količina dežja v mm ' + (idx + 1));
       if (idx === 0) mi.id = 'gvalMm';
       mi.value = e.mm === null ? '' : e.mm;
-      lm.appendChild(mi);
+      var stp = el('div', 'gp-pv-step');
+      function bump(d){
+        var v = parseFloat(mi.value); if (isNaN(v)) v = 0;
+        mi.value = Math.max(0, Math.round((v + d) * 10) / 10); mi.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      var minus = el('button', 'gp-pv-sb'); minus.type = 'button'; minus.textContent = '−'; minus.setAttribute('aria-label', 'Manj dežja');
+      var plus = el('button', 'gp-pv-sb'); plus.type = 'button'; plus.textContent = '+'; plus.setAttribute('aria-label', 'Več dežja');
+      minus.addEventListener('click', function(){ bump(-5); }); plus.addEventListener('click', function(){ bump(5); });
+      var mmw = el('div', 'gp-pv-mm'); mmw.appendChild(mi); var unit = el('span'); unit.textContent = 'mm'; mmw.appendChild(unit);
+      stp.appendChild(minus); stp.appendChild(mmw); stp.appendChild(plus);
+      card.appendChild(stp);
+      var pre = el('div', 'gp-pv-presets'), pb = [];
+      PRESETS.forEach(function(n){
+        var b = el('button', 'gp-pv-p'); b.type = 'button'; b.textContent = n + ' mm';
+        b.addEventListener('click', function(){ mi.value = n; mi.dispatchEvent(new Event('input', { bubbles: true })); });
+        pb.push([b, n]); pre.appendChild(b);
+      });
+      card.appendChild(pre);
+
+      function mark(){
+        qb.forEach(function(x){ x[0].classList.toggle('on', di.value === isoOf(todayNum() - x[1])); });
+        pb.forEach(function(x){ x[0].classList.toggle('on', parseFloat(mi.value) === x[1]); });
+      }
       di.addEventListener('input', function(){
         e.iso = di.value;
         if (e.iso && (e.mm === null || e.auto) && typeof STATION[e.iso] === 'number'){
           e.mm = Math.round(STATION[e.iso] * 10) / 10; e.auto = true; mi.value = e.mm;
         }
-        render();
+        mark(); render();
       });
       mi.addEventListener('input', function(){
         e.auto = false;
         e.mm = mi.value === '' ? null : Math.max(0, parseFloat(mi.value));
         if (e.mm !== null && isNaN(e.mm)) e.mm = null;
-        render();
+        mark(); render();
       });
-      grid.appendChild(ld); grid.appendChild(lm);
-      card.appendChild(grid);
+      mark();
       evBox.appendChild(card);
     });
     addBtn.hidden = events.length >= MAXEV;
@@ -3932,7 +4129,7 @@ VALOVI_JS = r"""(function(){
       var item = document.createElement('div'); item.className = 'gp-val-item';
       var dot = document.createElement('div'); dot.className = 'gp-val-dot';
       dot.style.background = g.color; dot.style.opacity = tone === 'on' ? '1' : '.35';
-      item.style.borderLeft = '4px solid ' + g.color; item.style.opacity = tone === 'on' ? '1' : '.92';
+      item.style.setProperty('--gc', g.color);
       var ph = PHOTOS[g.eco];
       if (ph){
         var im = document.createElement('img'); im.className = 'gp-val-ph'; im.src = ph.src; im.alt = ph.alt;
@@ -3954,27 +4151,12 @@ VALOVI_JS = r"""(function(){
       var big = document.createElement('div'); big.className = 'gp-val-big'; big.style.color = g.color;
       big.textContent = spanTextLong(x.wins);
       body.appendChild(big);
+      body.appendChild(windowBar(x, T, g));
       var lagLine = document.createElement('div'); lagLine.className = 'gp-val-sub';
       lagLine.textContent = 'Modelski zamik: ' + Math.min.apply(null, x.sp.map(function(i){ return i.s.min; })) + '–' +
         Math.max.apply(null, x.sp.map(function(i){ return i.s.max; })) + ' dni po padavinah.';
       body.appendChild(lagLine);
-      if (x.tmp && x.tmp.n){
-        var tl = document.createElement('div'); tl.className = 'gp-val-sub';
-        tl.textContent = (g.eco === 'lesna' ? 'Zračna' : 'Talna') + ' temp. v oknu: ' + rngT(x.tmp.min, x.tmp.max) +
-          ' °C' + (fmtT(x.tmp.min) === fmtT(x.tmp.max) ? '' : ', povprečje ' + fmtT(x.tmp.avg) + ' °C') + (x.tmp.miss ? ' (za ' + dni(x.tmp.miss) + ' še ni podatka)' : '');
-        body.appendChild(tl);
-      } else if (OM && x.tmp) {
-        var tl2 = document.createElement('div'); tl2.className = 'gp-val-sub'; tl2.textContent = 'Temperatura za to okno še ni na voljo (napoved sega do ' + (OM.last ? fmt(dayNum(OM.last)) : '?') + ').';
-        body.appendChild(tl2);
-      }
-      if (x.wet && (x.wet.sn || x.wet.an)){
-        var wl = document.createElement('div'); wl.className = 'gp-val-sub';
-        var bits = [];
-        if (x.wet.sn) bits.push('vlaga tal ' + pctRng(x.wet.sMin * 100, x.wet.sMax * 100) + ' (polna ' + x.wet.sFull + '/' + x.wet.sn + ' dni)');
-        if (x.wet.an) bits.push('zračna vlaga ' + pctRng(x.wet.aMin, x.wet.aMax) + ' (polna ' + x.wet.aFull + '/' + x.wet.an + ' dni)');
-        wl.textContent = 'Vlaga v oknu: ' + bits.join(' · ') + '.';
-        body.appendChild(wl);
-      }
+      var stg = statTiles(x, g); if (stg) body.appendChild(stg);
       var sub = document.createElement('div'); sub.className = 'gp-val-sub';
       sub.innerHTML = '<span style="color:#60a5fa">' + ICONS.dez + '</span>';
       sub.appendChild(document.createTextNode(groupSub(x, T, evs)));
@@ -4047,7 +4229,7 @@ VALOVI_JS = r"""(function(){
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function(){ done(true); }, function(){ done(false); });
     else done(false);
   });
-  fillSelects(); loadHash(); terrainNote(); renderRows(); renderFcStrip(); render(); loadOM();
+  fillSelects(); buildChips(); loadHash(); syncChips(); terrainNote(); renderRows(); renderFcStrip(); render(); loadOM();
 })();"""
 
 
@@ -4123,7 +4305,7 @@ def valovi_widget_html():
         if events else '')
     return (
         '  <div class="gp-val-card">\n'
-        '    <div class="gp-vstep">1 · Vnesi padavine</div>\n'
+        '    <div class="gp-vstep"><b>1</b>Padavine</div>\n'
         '    <p class="gp-val-inlabel">Dodaj do ' + str(VALOVI_MAX_EVENTS) + ' pomembnejše padavinske dogodke.</p>\n'
         '    <div class="gp-val-events" id="gvalEvents"></div>\n'
         '    <div class="gp-val-inrow">\n'
@@ -4132,23 +4314,25 @@ def valovi_widget_html():
         '      <button type="button" id="gvalClear" class="gp-val-clear">' + _vi('nic', 18) + 'Ni bilo izdatnega dežja</button>\n'
         '    </div>\n'
         + suggest_note +
-        '    <div class="gp-vstep">2 · Prilagodi izračun</div>\n'
-        '    <div class="gp-val-sel">\n'
-        '      <label>Kaj iščeš?<select id="gvalWhat"></select></label>\n'
-        '      <label>Teren<select id="gvalTerrain"></select></label>\n'
-        '    </div>\n'
+        '    <div class="gp-vstep"><b>2</b>Prilagodi izračun</div>\n'
+        '    <div class="gp-vlab">Kaj iščeš?</div>\n'
+        '    <div class="gp-pv-seg" id="gvalWhatChips" role="group" aria-label="Skupina gob"></div>\n'
+        '    <div id="gvalSpWrap" hidden><select id="gvalWhat" aria-label="Posamezna vrsta"></select></div>\n'
+        '    <div class="gp-vlab">Teren</div>\n'
+        '    <div class="gp-pv-seg" id="gvalTerChips" role="group" aria-label="Teren"></div>\n'
+        '    <div class="gp-val-sel" hidden><select id="gvalTerrain" aria-label="Teren"></select></div>\n'
         '    <p class="gp-val-tnote" id="gvalTerrainNote"></p>\n'
-        '    <label class="gp-val-chk"><input type="checkbox" id="gvalStation" checked> <span><strong>Upoštevaj padavine s postaje IREICA1</strong> '
-        '(zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni). Dnevi, ki jih nisi vnesel, se prištejejo k predhodnim padavinam. '
-        'To ni meritev vlage tal. Izklopi za drug kraj.</span></label>\n'
-        '    <label class="gp-val-chk"><input type="checkbox" id="gvalFc" checked> <span><strong>Upoštevaj napoved dežja</strong> '
-        '(Open-Meteo, do 7 dni). Napoved je modelska in negotova; napovedan izdaten dež (vsaj ' + str(VALOVI_RAIN_MM) + ' mm) se doda kot dogodek '
-        'z oznako napoved. Izklopi za izračun samo iz preteklega dežja.</span></label>\n'
+        '    <label class="gp-pv-switch"><span class="t"><strong>Padavine s postaje IREICA1</strong>'
+        '<small>Zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni; dnevi, ki jih nisi vnesel, se prištejejo k predhodnim padavinam. '
+        'To ni meritev vlage tal. Izklopi za drug kraj.</small></span><input type="checkbox" id="gvalStation" checked></label>\n'
+        '    <label class="gp-pv-switch"><span class="t"><strong>Napoved dežja</strong>'
+        '<small>Open-Meteo, do 7 dni. Modelska in negotova; napovedan izdaten dež (vsaj ' + str(VALOVI_RAIN_MM) + ' mm) se doda kot dogodek '
+        'z oznako napoved.</small></span><input type="checkbox" id="gvalFc" checked></label>\n'
         '    <div class="gp-val-fc" id="gvalFcStrip" aria-live="polite"></div>\n'
         '    <button type="button" id="gvalCalc" class="gp-val-calc">Izračunaj gobje valove</button>\n'
-        '    <p class="gp-val-suggest" style="text-align:center">Rezultat se posodablja sproti ob vsaki spremembi.</p>\n'
+        '    <p class="gp-val-suggest" style="text-align:center;margin:0">Rezultat se posodablja sproti ob vsaki spremembi.</p>\n'
         '    <p class="gp-val-hint" id="gvalHint"></p>\n'
-        '    <div class="gp-vstep">3 · Rezultat</div>\n'
+        '    <div class="gp-vstep"><b>3</b>Rezultat</div>\n'
         '    <p class="gp-val-result" id="gvalResult" aria-live="polite"></p>\n'
         '    <div class="gp-val-state" id="gvalStatePanel"></div>\n'
         + photo_credit +
@@ -4165,8 +4349,8 @@ def valovi_widget_html():
         '<p class="gp-val-tnote" style="margin-top:0">Isti dež ne prebudi vseh gob hkrati. Razkrojevalke stelje, lesne in '
         'mikorizne vrste imajo vsaka svoj zamik med padavinami in trosnjakom. Model za Rečico zato vsaki vrsti padavinsko '
         'okno premakne nazaj po časovnici. Za vsako vrsto sešteje dež v oknu njenega zamika (prag je izpeljan iz '
-        '7-dnevnega praga vrste, preračunanega na dolžino okna) in predhodne padavine v ' + str(gm.BASE_WINDOW_DAYS) +
-        ' dneh; oceni se stehtata kot v napovedi. Preveč dežja model šteje kot prenamočenost in oceno zniža. '
+        '7-dnevnega praga vrste, preračunanega na dolžino okna) in dež v ' + str(gm.BASE_WINDOW_DAYS) +
+        ' dneh predhodnih padavin; oceni se stehtata kot v napovedi. Preveč dežja model šteje kot prenamočenost in oceno zniža. '
         'Dež po današnjem dnevu se šteje samo kot napoved Open-Meteo, če je ta vklopljena.</p></details>\n'
         '    <details class="gp-val-why" id="gvalWhyBox"><summary>' + _vi('vprasaj', 20) + 'Zakaj je rezultat takšen?</summary>'
         '<div id="gvalWhy"></div></details>\n'
@@ -4207,15 +4391,15 @@ def build_valovi_page():
     vezana objava (glej blog/trije-vali-gob-po-dezju-0911.html), ampak trajno
     orodje v slogu MeteoGobarja (isti vzorec kot koledar/trend)."""
     chips = "".join(
-        f'<span class="gp-vchip" style="background:{g["color"]}26;color:{g["color"]}">{_vi(g["eco"], 16)}'
-        f'&nbsp;{_esc(VALOVI_SHORT[g["eco"]])} · {g["min"]}–{g["max"]} dni</span>' for g in _valovi_groups())
-    body = ('''  <header class="gp-vhero">
+        f'<span class="gp-pv-chip" style="background:{g["color"]}26;color:{g["color"]}">{_vi(g["eco"], 16)}'
+        f'{_esc(VALOVI_SHORT[g["eco"]])} · {g["min"]}–{g["max"]} dni</span>' for g in _valovi_groups())
+    body = ('''  <header class="gp-pv-hero">
     <img src="/gobarska-napoved/valovi/logo-valovi.svg" width="74" height="74" alt="Logotip Gobji valovi">
-    <div><div class="gp-vhero-k">MeteoGobar · Rečica ob Savinji</div>
-      <div class="gp-vhero-n">Gobji <em>valovi</em></div>
-      <p class="gp-vhero-s">Kdaj po dežju pričakujemo rast?</p></div>
+    <div><div class="gp-pv-k">MeteoGobar</div>
+      <div class="gp-pv-n">Gobji <em>valovi</em></div>
+      <p class="gp-pv-s">Kdaj po dežju pričakujemo rast?</p></div>
   </header>
-  <div class="gp-vchips">''' + chips + '''</div>
+  <div class="gp-pv-chips">''' + chips + '''</div>
 '''
             '  <p class="post-meta">Vnesi, kdaj in koliko je deževalo, in poglej, kdaj se začne in konča modelsko okno rasti.</p>\n'
             + valovi_widget_html())
