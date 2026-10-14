@@ -3,7 +3,7 @@
 //   2 casovnica prave številke iz kalkulatorja: dež in tri okna rasti na osi dni
 //   3 poster    svetla, jesenska, velike številke »2–8 dni« (brez datumov, zato je kartica trajna)
 //   4 telefon   pravi posnetek strani v telefonu
-// Ročno: node tools/render_valovi_fb_cards.mjs [foto|casovnica|poster|telefon]   (potrebuje Playwright/Chromium)
+// Ročno: node tools/render_valovi_fb_cards.mjs [foto|casovnica|poster|telefon|telefon-a …]   (potrebuje Playwright/Chromium)
 // Številke (okna, zamiki) se preberejo iz PRAVE strani gobarska-napoved/valovi/ s primerom dežja pred 4 dnevi, 35 mm;
 // datumi na slikah so zato izračunani na dan izdelave. Slika je primer izračuna, ne napoved.
 // Foto: Wikimedia Commons, licence in avtorji so v gobarska-napoved/img/vrste/CREDITS.json in v vrstici na sliki.
@@ -190,16 +190,35 @@ ${rows}
 <div class="fine">Modelski razpon od dežja do rasti, ne napoved najdbe. ${credAll}</div>`;
 }
 
-// ── 4. TELEFON ─────────────────────────────────────────────────────────────
-cards.telefon = `<style>${BASE}
+// ── 4. TELEFON (več besedilnih različic; postavitev ista) ───────────────────
+const lag = g => `${g.lagMin}–${g.lagMax} dni`;
+const TICK = c => `<i style="background:${c}22"><svg viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.500 4.500L19 7.500"/></svg></i>`;
+const GREEN = '#3fcf8e';
+const TEXTS = {
+  a: { h: 'Je deževalo?<br><span>Preverite, kdaj rastejo gobe.</span>', size: 66,
+       bullets: ['Vnesite datum in količino dežja', 'Izberite skupino gob', 'Poglejte okno rasti'] },
+  b: { h: 'Kdaj po dežju<br><span>v gozd?</span>', size: 96,
+       sub: 'Vpišite dež in kalkulator pokaže okno rasti za vsako skupino gob.' },
+  c: { h: 'Gobe ne rastejo<br><span>takoj po dežju.</span>', size: 62,
+       bullets: groups.map(g => [`${g.short}: ${lag(g)} po dežju`, g.color]) },
+  d: { h: 'Koliko dni<br><span>po dežju do gob?</span>', size: 70,
+       sub: 'Vpišite dež, pa boste videli okno rasti.' },
+  e: { h: 'Vpišite dež.<br><span>Kalkulator pove, kdaj v gozd.</span>', size: 60,
+       sub: 'Okno rasti za stelje, les in mikorizne vrste.' },
+  f: { h: 'Gobe po dežju<br><span>potrebujejo čas.</span>', size: 66,
+       sub: 'Koliko, je odvisno od skupine. Preračunajte za svoj dež.' },
+};
+const telefon = t => `<style>${BASE}
 html,body{background:#0b1510;color:#eef6f0}
 .bg{position:absolute;inset:0;background:radial-gradient(800px 700px at 85% 55%,rgba(63,207,142,.35),transparent 70%),radial-gradient(500px 400px at 0% 0%,rgba(167,139,250,.18),transparent 70%)}
 .brand{position:absolute;left:64px;top:60px;display:flex;align-items:center;gap:18px;font-size:28px;font-weight:800}
 .brand svg{width:64px;height:64px;border-radius:15px}.brand em{font-style:normal;color:#3fcf8e}
-h1{position:absolute;left:64px;width:520px;top:190px;margin:0;font-size:84px;line-height:1.03;font-weight:800;letter-spacing:-.03em}h1 span{color:#3fcf8e}
-ul{position:absolute;left:64px;width:470px;top:640px;margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:22px}
+.col{position:absolute;left:64px;width:490px;top:190px;bottom:300px;display:flex;flex-direction:column;gap:34px}
+h1{margin:0;font-size:${t.size}px;line-height:1.05;font-weight:800;letter-spacing:-.03em}h1 span{color:#3fcf8e}
+p.sub{margin:0;font-size:32px;line-height:1.35;color:#c4d5c9}
+ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:22px}
 li{display:flex;align-items:center;gap:18px;font-size:29px;line-height:1.25;color:#d4e3d8;font-weight:600}
-li i{flex:none;width:44px;height:44px;border-radius:50%;background:rgba(63,207,142,.18);display:flex;align-items:center;justify-content:center}
+li i{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 li svg{width:24px;height:24px}
 .btn{position:absolute;left:64px;top:1090px;background:#27834d;color:#fff;font-size:32px;font-weight:800;padding:22px 36px;border-radius:20px}
 .url{position:absolute;left:64px;top:1190px;font-size:26px;color:#9fb3a6}.url u{text-decoration:none;color:#eef6f0;font-weight:800}
@@ -210,17 +229,19 @@ li svg{width:24px;height:24px}
 .fine{position:absolute;left:64px;width:480px;bottom:20px;font-size:16px;color:#7f9486;line-height:1.35}
 </style><div class="bg"></div>
 <div class="brand">${logo}<span>Gobji <em>valovi</em></span></div>
-<h1>Vnesite dež.<br><span>Preberite okno rasti.</span></h1>
-<ul>${['Datum in količina dežja', 'Skupina gob in teren', 'Okno rasti za vsako skupino'].map(t => `<li><i><svg viewBox="0 0 24 24" fill="none" stroke="#3fcf8e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.500 4.500L19 7.500"/></svg></i>${t}</li>`).join('')}</ul>
+<div class="col"><h1>${t.h}</h1>${t.sub ? `<p class="sub">${t.sub}</p>` : ''}
+${t.bullets ? `<ul>${t.bullets.map(x => { const [txt, c] = Array.isArray(x) ? x : [x, GREEN]; return `<li>${TICK(c)}${txt}</li>`; }).join('')}</ul>` : ''}</div>
 <div class="btn">Preračunajte dež →</div><div class="url">Kalkulator rasti gob · <u>meteorec.si</u></div>
 <div class="phone"><div class="scr"><img src="data:image/png;base64,${heroShot.toString('base64')}"><img src="data:image/png;base64,${resShot.toString('base64')}"></div></div>
 <div class="fine">${FINE_TXT} ${credAll}</div>`;
+for (const [k, t] of Object.entries(TEXTS)) cards['telefon-' + k] = telefon(t);
 
 // ── izris ──────────────────────────────────────────────────────────────────
-const FILES = { foto: 'valovi-fb-1-foto.jpg', casovnica: 'valovi-fb-2-casovnica.jpg', poster: 'valovi-fb-3-poster.jpg', telefon: 'valovi-fb-4-telefon.jpg' };
+const FILES = { foto: 'valovi-fb-1-foto.jpg', casovnica: 'valovi-fb-2-casovnica.jpg', poster: 'valovi-fb-3-poster.jpg', };
+for (const k of Object.keys(TEXTS)) FILES['telefon-' + k] = `valovi-fb-4${k}-telefon.jpg`;
 const ctx2 = await b.newContext({ viewport: { width: 1080, height: 1350 } });
 for (const [k, html] of Object.entries(cards)) {
-  if (only && only !== k) continue;
+  if (only && only !== k && only !== k.split('-')[0]) continue;
   const p = await ctx2.newPage();
   await p.setContent(`<!doctype html><meta charset="utf-8">${html}`, { waitUntil: 'load' });
   await p.evaluate(() => document.fonts.ready);
