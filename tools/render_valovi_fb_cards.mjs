@@ -62,9 +62,12 @@ const off = s => { const m = s.match(/(\d+)\.\s*(\d+)\./); const d = new Date(Da
   return Math.round((d - Date.UTC(rainDate.getUTCFullYear(), rainDate.getUTCMonth(), rainDate.getUTCDate())) / DAY); };
 for (const g of groups) { g.s0 = off(g.start); g.e0 = off(g.end); g.id = PHOTO[g.name]; g.short = { 'Razkrojevalke stelje': 'Stelja', 'Lesne vrste': 'Les', 'Mikorizne vrste': 'Mikorizne' }[g.name]; }
 
-// posnetek strani za telefon: rezultat s prvo kartico (fullPage + clip: pri premiku okna se v headless sticky vrstice pokvarijo)
+// posnetek strani za telefon (zaslon 442 x 989 px = 390 x 872 enot strani): zgornji del (logotip) + rezultat z kartico skupine, zloženo v en zaslon
+// (fullPage + clip: pri premiku okna se v headless sticky vrstice pokvarijo)
+const HERO_Y = 58, HERO_H = 285, NOTCH = 38;  // zgornja vrstica strani (HERO_Y) ostane zunaj, pod »otokom« telefona je prostor (NOTCH)
 const topY = await pg.evaluate(() => document.querySelector('#gvalResult').getBoundingClientRect().top + scrollY - 70);
-const phoneShot = await pg.screenshot({ type: 'png', fullPage: true, clip: { x: 0, y: topY, width: 390, height: 844 } });
+const heroShot = await pg.screenshot({ type: 'png', fullPage: true, clip: { x: 0, y: HERO_Y, width: 390, height: HERO_H } });
+const resShot = await pg.screenshot({ type: 'png', fullPage: true, clip: { x: 0, y: topY, width: 390, height: 872 - NOTCH - HERO_H } });
 await ctx.close();
 
 const logo = fs.readFileSync(path.join(root, 'gobarska-napoved/valovi/logo-valovi.svg'), 'utf8');
@@ -202,7 +205,7 @@ li svg{width:24px;height:24px}
 .url{position:absolute;left:64px;top:1190px;font-size:26px;color:#9fb3a6}.url u{text-decoration:none;color:#eef6f0;font-weight:800}
 .phone{position:absolute;left:575px;top:150px;width:470px;height:1017px;transform:rotate(5deg);border-radius:66px;background:#111;padding:14px;
  box-shadow:0 0 0 3px #2a3a30,0 40px 90px rgba(0,0,0,.7),0 0 120px rgba(63,207,142,.25)}
-.phone img{width:100%;height:100%;display:block;border-radius:54px;object-fit:cover;object-position:top}
+.scr{width:100%;height:100%;border-radius:54px;overflow:hidden;background:#0b1510;padding-top:${Math.round(NOTCH * 442 / 390)}px}.scr img{width:100%;display:block}
 .phone:before{content:"";position:absolute;left:50%;top:26px;width:120px;height:30px;margin-left:-60px;border-radius:20px;background:#000;z-index:2}
 .fine{position:absolute;left:64px;width:480px;bottom:20px;font-size:16px;color:#7f9486;line-height:1.35}
 </style><div class="bg"></div>
@@ -210,7 +213,7 @@ li svg{width:24px;height:24px}
 <h1>Vnesite dež.<br><span>Preberite okno rasti.</span></h1>
 <ul>${['Datum in količina dežja', 'Skupina gob in teren', 'Okno rasti za vsako skupino'].map(t => `<li><i><svg viewBox="0 0 24 24" fill="none" stroke="#3fcf8e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.500 4.500L19 7.500"/></svg></i>${t}</li>`).join('')}</ul>
 <div class="btn">Preračunajte dež →</div><div class="url">Kalkulator rasti gob · <u>meteorec.si</u></div>
-<div class="phone"><img src="data:image/png;base64,${phoneShot.toString('base64')}"></div>
+<div class="phone"><div class="scr"><img src="data:image/png;base64,${heroShot.toString('base64')}"><img src="data:image/png;base64,${resShot.toString('base64')}"></div></div>
 <div class="fine">${FINE_TXT} ${credAll}</div>`;
 
 // ── izris ──────────────────────────────────────────────────────────────────
