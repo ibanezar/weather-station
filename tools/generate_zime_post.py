@@ -530,7 +530,7 @@ def build_article(D):
         "<ul>"
         "<li>" + a("ghcn", "Global Historical Climatology Network – Daily") + ", NOAA NCEI: Ljubljana Bežigrad (SIM00014015) in "
         "Šmartno pri Slovenj Gradcu (SIE00115136). Podatki ARSO prek ECA&amp;D. Prenos: 12. 10. 2026.</li>"
-        "<li>Meritve postaje IREICA1 (Meteorec), od novembra 2019. Notranjih meritev v tej analizi nisem uporabil.</li>"
+        "<li>Meritve postaje IREICA1 (Meteorec), od novembra 2019.</li>"
         "<li>ARSO, arhiv meritev: padavinska postaja Črnivec (848 m), podatki o snežni odeji in novem snegu od leta 2021.</li>"
         "<li>Rubin, D. C., Wetzler, S. E., Nebes, R. D. (1986): Autobiographical memory across the lifespan. V: Rubin, D. C. (ur.), "
         "Autobiographical Memory, Cambridge University Press, str. 202–221.</li>"
