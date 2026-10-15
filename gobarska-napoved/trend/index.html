@@ -97,11 +97,15 @@ body{
   --gp-fs-lg:1.35rem; --gp-fs-xl:1.9rem; --gp-fs-display:2.7rem;
   --gp-r-control:.625rem; --gp-r-card:.875rem; --gp-r-panel:1.125rem; --gp-r-pill:999px;
 }
-.gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:var(--gp-r-panel);
-  padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:linear-gradient(200deg,rgba(8,14,7,.45) 0%,rgba(6,10,6,.72) 55%,rgba(6,10,6,.92) 100%),
-    url('/og/bg/gobe-inverzija.jpg') center 35%/cover}
-.gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+/* Hero (prenova 15. 10. 2026, PDF »Vizualna prenova«): temno gozdna podlaga
+   #183B2C brez fotografije, ki bi potisnila podatke pod pregib; listna zelena
+   #78A95F samo za primarni gumb. Barve ravni indeksa (level_color) ostanejo
+   iste kot po vsej strani — ista semantika povsod, vedno z besedno oznako. */
+.gp-hero{position:relative;border:1px solid rgba(120,169,95,.38);border-radius:18px;
+  padding:1.4rem;margin:.6rem 0 .8rem;box-shadow:var(--card-shadow);color:#E9F0E4;scroll-margin-top:6.5rem;
+  background:linear-gradient(165deg,#1d4634 0%,#183B2C 55%,#122e22 100%)}
+.gp-hero a{color:inherit}
+.gp-hero-top{display:flex;align-items:center;gap:1.2rem}
 .gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
 /* No width/height attrs on the <svg> itself — those are fixed pixel values
    that ignore .gp-gauge-wrap's own size, so the ring silently overflowed its
@@ -110,57 +114,81 @@ body{
    (smaller) box. Filling 100% here keeps the ring locked to whatever size
    the wrapper actually is at every breakpoint. */
 .gp-ring{display:block;width:100%;height:100%}
-.gp-ring-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:11}
+.gp-ring-bg{fill:none;stroke:rgba(233,240,228,.14);stroke-width:11}
 .gp-ring-fg{fill:none;stroke-width:11;stroke-linecap:round;transform:rotate(-90deg);transform-origin:64px 64px}
-/* % stacked under the number (not beside it) — any side-by-side arrangement
-   is lopsided one way or the other, since % only adds width on one side.
-   Stacking both lines and centering each independently sidesteps that. */
+/* /100 pod številko (ne ob njej): vsak sosednji zapis je na eni strani
+   daljši, zato obe vrstici centriramo vsako zase. */
 .gp-gauge-num{position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;line-height:1}
-.gp-gauge-num .num{font-size:var(--gp-fs-display);font-weight:800;color:var(--text)}
-.gp-gauge-num small{display:block;margin-top:.15rem;font-size:var(--gp-fs-sm);color:var(--muted);font-weight:600}
-.gp-hero-body{flex:1;min-width:250px}
-/* .74rem → --gp-fs-xs (.7rem): this and .gp-hero-best-label below are the
-   same "eyebrow" label style repeated at slightly different sizes picked up
-   over separate edits; the token scale is what makes that drift visible, so
-   both now share one size instead of two that differ by a fraction of a
-   pixel. */
-.gp-hero-kicker{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.gp-hero-lvl{font-size:var(--gp-fs-xl);font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
-/* Best-area score gets its own bordered card, not an inline sentence right
-   under the gauge — the two numbers ("your station" vs "best area today")
-   read as similar-weight stats a few lines apart otherwise, which reviewer
-   feedback flagged as easy to misread as one figure. Same best_loc/best_o
-   data as before, just given equal visual footing instead of a footnote. */
-.gp-hero-best-card{background:rgba(0,0,0,.24);border:1px solid var(--card-border);border-radius:12px;
-  padding:.6rem .85rem;margin-bottom:.75rem}
-.gp-hero-best-label{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.gp-hero-best-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
-  flex-wrap:wrap;margin-top:.25rem}
-.gp-hero-best-name{font-size:1rem;font-weight:700}
-.gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
-  border-radius:6px;font-variant-numeric:tabular-nums}
-.gp-hero-topsp{font-size:.85rem;color:var(--muted);margin-bottom:.75rem}
-.gp-hero-trend{display:flex;align-items:center;gap:.6rem;margin:-.25rem 0 .55rem}
-.gp-hero-delta{font-size:.82rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.gp-gauge-num .num{font-size:var(--gp-fs-display);font-weight:800;color:#E9F0E4}
+.gp-gauge-num small{display:block;margin-top:.15rem;font-size:var(--gp-fs-sm);color:#b9c9b0;font-weight:600}
+.gp-hero-body{flex:1;min-width:0}
+.gp-hero-kicker{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:#b9c9b0;margin-bottom:.8rem}
+.gp-hero-lvl{font-size:var(--gp-fs-xl);font-weight:800;line-height:1.1;margin:.1rem 0 .45rem}
+.gp-hero-trend{display:flex;align-items:center;flex-wrap:wrap;gap:.2rem .6rem;margin:0 0 .45rem}
+.gp-hero-delta{font-size:.88rem;font-weight:700;color:#d3dfcb;font-variant-numeric:tabular-nums}
 .gp-hero-spark .gp-spark{width:84px;height:22px}
-/* Thumb-friendly action row right under the gauge — "glanceable" actions
-   (share, map, notify) instead of making the user read/scroll for them. */
-.gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
-.gp-chip-action{display:inline-flex;align-items:center;gap:.4rem;min-height:2.75rem;
-  padding:.5rem 1.1rem;border-radius:22px;background:var(--badge-bg);border:1px solid var(--card-border);
-  color:var(--text);font:inherit;font-size:.88rem;font-weight:600;text-decoration:none;cursor:pointer}
-.gp-chip-action:hover{border-color:var(--blue)}
-/* .hi — same green as .e-ok (already palette-validated elsewhere on this
-   page), for the one chip in the row that should read as "do this", not
-   just "you can also go here" like the plain Deli/zemljevid chips. */
-.gp-chip-action.hi{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)}
-.gp-chip-action.hi:hover{background:rgba(52,211,153,.24);border-color:var(--green)}
-.gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
-  border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
+.gp-hero-fresh{font-size:.82rem;color:#b9c9b0;margin-top:.8rem}
+.gp-hero-fresh.stale{color:#E5B861;font-weight:600}
+/* Najboljši teren: svoja kartica, da se dve številki (postaja proti
+   najboljšemu območju) ne berete kot ena. */
+.gp-hero-best-card{background:rgba(233,240,228,.08);border:1px solid rgba(233,240,228,.16);border-radius:14px;
+  padding:.85rem 1rem;margin:.8rem 0 1rem}
+.gp-hero-best-label{display:flex;align-items:center;gap:.4rem;font-size:var(--gp-fs-xs);text-transform:uppercase;
+  letter-spacing:.06em;color:#b9c9b0}
+.gp-hero-best-ic svg{display:block;width:1.15rem;height:1.15rem;color:#78A95F}
+.gp-hero-best-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;margin-top:.3rem}
+.gp-hero-best-name{font-size:1.1rem;font-weight:700}
+.gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.85rem;padding:.1rem .55rem;
+  border-radius:8px;font-variant-numeric:tabular-nums}
+.gp-hero-best-meta{font-size:.82rem;color:#b9c9b0;margin-top:.25rem}
+/* En primarni gumb; bližnjici sta mirnejši (obroba, brez polnila). */
+.gp-hero .gp-cta-primary{display:flex;width:100%;box-sizing:border-box;min-height:3.1rem;margin-top:0;
+  background:#78A95F;color:#0f2218;border-radius:14px;font-size:1rem;text-align:center}
+.gp-hero .gp-cta-primary:hover{background:#8bbb72}
+.gp-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.7rem}
+.gp-shortcut{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:3rem;
+  padding:.4rem .6rem;border-radius:14px;border:1px solid rgba(233,240,228,.28);
+  font-weight:600;font-size:.9rem;line-height:1.2;text-align:center;text-decoration:none}
+.gp-shortcut:hover{border-color:#78A95F}
+.gp-shortcut-ic svg{display:block;width:1.35rem;height:1.35rem}
+.gp-hero-access{font-size:.84rem;line-height:1.45;color:#d3dfcb;margin:.85rem 0 0}
+.gp-hero-links{display:flex;flex-wrap:wrap;gap:0 1.2rem;margin-top:.5rem;font-size:.88rem}
+.gp-hero-links a,.gp-linkbtn{display:inline-flex;align-items:center;min-height:2.75rem;padding:0;
+  background:none;border:0;font:inherit;font-size:.88rem;color:#cfe0c4;text-decoration:underline;
+  text-underline-offset:3px;cursor:pointer}
+.gp-hero-note{color:#b9c9b0;font-size:.82rem;line-height:1.55;margin-top:.3rem;
+  border-top:1px solid rgba(233,240,228,.12);padding-top:.7rem}
+.gp-hero-note a{color:#cfe0c4}
+/* Lepljiva navigacija po razdelkih: nizka, vodoravno drsi, brez spodnje
+   fiksne vrstice. Na telefonu se prilepi pod zgornjo vrstico (3rem). */
+.gp-secnav{position:sticky;top:0;z-index:50;display:flex;gap:.45rem;overflow-x:auto;scrollbar-width:none;
+  padding:.45rem 0;margin:0 0 .6rem;background:var(--bg);border-bottom:1px solid var(--card-border)}
+.gp-secnav::-webkit-scrollbar{display:none}
+.gp-secnav a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:2.5rem;padding:0 1rem;
+  border-radius:var(--gp-r-pill);border:1px solid var(--card-border);background:var(--card-bg);
+  color:var(--muted);font-size:.85rem;font-weight:600;text-decoration:none}
+.gp-secnav a:hover,.gp-secnav a:focus-visible{color:var(--text);border-color:#78A95F}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+.gp-mini-map,.gp-picker,.gp-top-species{scroll-margin-top:6.5rem}
+/* Najbolj obetavne vrste: kartica = fotografija + ime + indeks /100. */
+.gp-top-sp-list{display:grid;gap:.6rem;margin:.6rem 0 .8rem}
+.gp-top-sp{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;border:1px solid var(--card-border);
+  border-radius:16px;background:var(--card-bg);color:var(--text);text-decoration:none}
+.gp-top-sp:hover{border-color:#78A95F}
+.gp-top-sp-ph{position:relative;flex:0 0 3.6rem;width:3.6rem;height:3.6rem;border-radius:12px;overflow:hidden;
+  background:rgba(120,169,95,.16)}
+.gp-top-sp-ph img{display:block;width:100%;height:100%;object-fit:cover}
+.gp-top-sp-ph.ph::after{content:"🍄";display:grid;place-items:center;width:100%;height:100%;font-size:1.5rem}
+.gp-top-sp-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem}
+.gp-top-sp-nm{font-weight:700;line-height:1.25}
+.gp-top-sp-lat{font-size:.78rem;color:var(--muted);font-style:italic;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+@media (min-width:561px){.gp-top-sp-list{grid-template-columns:repeat(2,1fr)}}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
 .gp-h2{margin-top:2.6rem;margin-bottom:.9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);
-  font-size:var(--gp-fs-lg);scroll-margin-top:4rem}
+  font-size:var(--gp-fs-lg);scroll-margin-top:6.5rem}
 .gp-h2 + .archive-intro,.gp-h2 + .post-meta{margin-top:-.3rem}
 .gp-cta{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
   background:var(--blue);color:#04070e;font:inherit;
@@ -693,6 +721,7 @@ body .app-bottomnav{display:none}
      safe-area inset, so content can always be scrolled clear of the fixed
      bar regardless of how tall that inset actually is on a given phone. */
   body .wrap{padding-bottom:calc(var(--gp-bnh) + env(safe-area-inset-bottom) + 1rem);padding-top:3.5rem}
+  .gp-secnav{top:3rem}
   .gp-topbar{display:flex;position:fixed;left:0;right:0;top:0;z-index:55;height:3rem;
     align-items:center;gap:.5rem;padding:0 .5rem;background:var(--card-bg);
     backdrop-filter:blur(10px);border-bottom:1px solid var(--card-border)}
@@ -817,8 +846,8 @@ body .app-bottomnav{display:none}
 @media (max-width:560px){
   .gp-h2{margin-top:2rem;font-size:1.18rem}
   /* Hero: gauge in besedilo naj bosta poravnana levo, ne razpotegnjena. */
-  .gp-hero{padding:1.2rem}
-  .gp-hero-top{gap:1rem}
+  .gp-hero{padding:1.1rem}
+  .gp-hero-top{gap:.9rem}
   .gp-gauge-wrap{width:104px;height:104px}
   .gp-gauge-num .num{font-size:2.1rem}
   .gp-hero-lvl{font-size:1.55rem}
@@ -1054,7 +1083,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var bestHtml='';
     if(allBest){
       bestHtml+='<div class="gp-trend-best">🏆 Najboljši dan v zadnjih '+years.length+' letih: <b>'+
-        fmtDate(allBest.b.date)+'</b> — '+allBest.b.overall+' % ('+esc3(allBest.b.top||'')+')';
+        fmtDate(allBest.b.date)+'</b> — '+allBest.b.overall+'/100 ('+esc3(allBest.b.top||'')+')';
       if(thisBest&&allBest.yr!==curYear){
         bestHtml+='<br>🍄 Letošnji vrh do zdaj: <b>'+fmtDate(thisBest.date)+'</b> — '+thisBest.overall+
           ' % ('+esc3(thisBest.top||'')+')';
