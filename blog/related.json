@@ -1,4 +1,69 @@
 {
+  "zima-2026-2027-el-nino-napoved": [
+    "el-nino-2026",
+    "zime-nekoc-in-zdaj-1012",
+    "napoved-avgust-2026-zgornja-savinjska-dolina"
+  ],
+  "naslednji-teden-konec-poletja-0904": [
+    "tedenska-napoved-24-28-avgust-2026",
+    "indijansko-poletje-suh-soncen-teden-0925",
+    "tedenska-napoved-11-17-avgust-2026"
+  ],
+  "trije-vali-gob-po-dezju-0911": [
+    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922",
+    "zakaj-po-120-mm-dezja-ni-jurckov-0918"
+  ],
+  "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916": [
+    "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
+    "koliko-dezja-bo-jutri-arso-in-open-meteo-narazen-0824",
+    "visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005"
+  ],
+  "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
+    "trije-vali-gob-po-dezju-0911",
+    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
+  ],
+  "indijansko-poletje-suh-soncen-teden-0925": [
+    "naslednji-teden-konec-poletja-0904",
+    "lenartov-sejem-vreme-nedelja-1004",
+    "tedenska-napoved-11-17-avgust-2026"
+  ],
+  "kelvin-helmholtzovi-valovi-nad-crnivcem-0924": [
+    "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
+    "pileus-nad-recico-kapa-nad-nevihtnim-stolpom-0831",
+    "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916"
+  ],
+  "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923": [
+    "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
+    "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001",
+    "najhladnejsa-julijska-jutra-recica"
+  ],
+  "gobarska-sezona-julij-2026-kje-nabirati": [
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715"
+  ],
+  "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
+    "gobarska-sezona-julij-2026-kje-nabirati",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
+  "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
+    "gobarska-sezona-julij-2026-kje-nabirati",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
+  ],
+  "jesenski-vrh-gob-2026-savinjska-dolina-0922": [
+    "trije-vali-gob-po-dezju-0911",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
+    "zakaj-po-120-mm-dezja-ni-jurckov-0918"
+  ],
+  "vpliv-lune-na-rast-gob-0921": [
+    "trije-vali-gob-po-dezju-0911",
+    "zakaj-sosed-vedno-najde-gobe",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
   "visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005": [
     "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916",
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
@@ -36,8 +101,8 @@
   ],
   "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009": [
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
-    "koliko-dni-po-dezju-rastejo-gobe",
-    "trije-vali-gob-po-dezju-0911"
+    "trije-vali-gob-po-dezju-0911",
+    "koliko-dni-po-dezju-rastejo-gobe"
   ],
   "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004": [
     "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
@@ -79,31 +144,6 @@
     "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni",
     "koliko-dni-po-dezju-rastejo-gobe"
   ],
-  "gobarska-sezona-julij-2026-kje-nabirati": [
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715"
-  ],
-  "jesenski-vrh-gob-2026-savinjska-dolina-0922": [
-    "trije-vali-gob-po-dezju-0911",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "zakaj-po-120-mm-dezja-ni-jurckov-0918"
-  ],
-  "vpliv-lune-na-rast-gob-0921": [
-    "trije-vali-gob-po-dezju-0911",
-    "zakaj-sosed-vedno-najde-gobe",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
-  ],
-  "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
-    "gobarska-sezona-julij-2026-kje-nabirati",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
-  ],
-  "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
-    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
-    "gobarska-sezona-julij-2026-kje-nabirati",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
-  ],
   "vremensko-leto-2025-2026": [
     "vremenski-povzetek-september-2026",
     "vremenski-povzetek-avgust-2026",
@@ -124,55 +164,15 @@
     "temperaturni-trend-ireica1-2020-2025",
     "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004"
   ],
-  "indijansko-poletje-suh-soncen-teden-0925": [
-    "naslednji-teden-konec-poletja-0904",
-    "lenartov-sejem-vreme-nedelja-1004",
-    "tedenska-napoved-11-17-avgust-2026"
-  ],
-  "kelvin-helmholtzovi-valovi-nad-crnivcem-0924": [
-    "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
-    "pileus-nad-recico-kapa-nad-nevihtnim-stolpom-0831",
-    "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916"
-  ],
-  "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923": [
-    "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
-    "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001",
-    "najhladnejsa-julijska-jutra-recica"
-  ],
   "invazivka-tedenski-pregled-20260920": [
     "invazivka-tedenski-pregled-20260815",
     "invazivka-tedenski-pregled-20260830",
     "invazivke-mesecni-pregled-2026-07"
   ],
-  "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
-    "trije-vali-gob-po-dezju-0911",
-    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
-  ],
-  "zima-2026-2027-el-nino-napoved": [
-    "el-nino-2026",
-    "zime-nekoc-in-zdaj-1012",
-    "napoved-avgust-2026-zgornja-savinjska-dolina"
-  ],
-  "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916": [
-    "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
-    "koliko-dezja-bo-jutri-arso-in-open-meteo-narazen-0824",
-    "visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005"
-  ],
-  "trije-vali-gob-po-dezju-0911": [
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922",
-    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
-    "zakaj-po-120-mm-dezja-ni-jurckov-0918"
-  ],
   "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907": [
     "tedenska-napoved-24-28-avgust-2026",
     "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819",
     "koliko-bo-danes-zalilo-primerjava-modelov-0807"
-  ],
-  "naslednji-teden-konec-poletja-0904": [
-    "tedenska-napoved-24-28-avgust-2026",
-    "tedenska-napoved-11-17-avgust-2026",
-    "indijansko-poletje-suh-soncen-teden-0925"
   ],
   "test-napovedi-2026-08": [
     "test-napovedi-2026-07",

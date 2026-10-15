@@ -1,5 +1,198 @@
 [
   {
+    "title": "Zima 2026/2027 na Rečici ob Savinji: kaj pravi najmočnejši El Niño doslej",
+    "slug": "zima-2026-2027-el-nino-napoved",
+    "url": "/blog/zima-2026-2027-el-nino-napoved.html",
+    "date": "2026-09-16",
+    "summary": "Niño 3.4 je avgusta 2026 dosegel +2,7 °C, NOAA daje 75 % verjetnost zgodovinsko najmočnejšega El Niña. Kaj to pomeni za zimo v Zgornji Savinjski dolini in kaj pove postaja IREICA1.",
+    "tags": [
+      "analiza",
+      "podnebje",
+      "ireica1",
+      "napoved",
+      "2026"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Naslednji teden konec poletja?",
+    "slug": "naslednji-teden-konec-poletja-0904",
+    "url": "/blog/naslednji-teden-konec-poletja-0904.html",
+    "date": "2026-09-04",
+    "summary": "Do torka še okoli 30 °C, nato vsi modeli obrnejo navzdol: od četrtka najvišje temperature od 14 do 20 °C in dež. Kaj o koncu poletja pove šest let meritev.",
+    "tags": [
+      "napoved",
+      "konec poletja",
+      "ohladitev",
+      "september",
+      "IREICA1",
+      "Zgornja Savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Trije valovi gob po dežju: kdo pride prvi in kdo šele čez dva tedna",
+    "slug": "trije-vali-gob-po-dezju-0911",
+    "url": "/blog/trije-vali-gob-po-dezju-0911.html",
+    "date": "2026-09-11",
+    "summary": "V četrtek je v Rečici ob Savinji v enem dnevu padlo 85 mm dežja, temperatura pa se je spustila z 32,9 na 17,5 °C. A gozd se ne odzove čez noč: razkrojevalke pridejo prve, že jutri, mikorizne vrste (jurčki, lisičke) pa šele čez teden in pol.",
+    "tags": [
+      "gobe",
+      "gobarski indeks",
+      "IREICA1",
+      "Zgornja Savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Cirrocumulus nad Rečico: predznak jutrišnjega dežja",
+    "slug": "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916",
+    "url": "/blog/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.html",
+    "date": "2026-09-16",
+    "summary": "Danes dopoldne so se nad Rečico ob Savinji razprli cirokumulusi na približno 7,5 km, kjer je pri −23 °C pihalo do 36 km/h iz zahoda. Kaj to pove o jutrišnjem dežju in ohladitvi.",
+    "tags": [
+      "napoved",
+      "poslabšanje",
+      "cirrocumulus",
+      "IREICA1",
+      "Zgornja Savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Zakaj po 120 mm dežja v gozdu ni jurčkov",
+    "slug": "zakaj-po-120-mm-dezja-ni-jurckov-0918",
+    "url": "/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html",
+    "date": "2026-09-18",
+    "summary": "10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.",
+    "tags": [
+      "gobe",
+      "gobarski indeks",
+      "IREICA1",
+      "Zgornja Savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "date": "2026-09-25",
+    "slug": "indijansko-poletje-suh-soncen-teden-0925",
+    "summary": "Od sobote do vsaj četrtka suho in sončno, popoldne okoli 20 °C, jutra hladna. Kaj je indijansko poletje, kaj kažejo ARSO, Open-Meteo in MTR ter kdaj se bo verjetno končalo.",
+    "tags": [
+      "napoved",
+      "razlaga",
+      "inverzija",
+      "MTR",
+      "Zgornja Savinjska dolina"
+    ],
+    "title": "Indijansko poletje: pred nami suh in sončen teden",
+    "url": "/blog/indijansko-poletje-suh-soncen-teden-0925.html",
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Kelvin-Helmholtzovi valovi nad Črnivcem ob zori",
+    "slug": "kelvin-helmholtzovi-valovi-nad-crnivcem-0924",
+    "url": "/blog/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.html",
+    "date": "2026-09-24",
+    "summary": "Ob zori 24. septembra so se nad Črnivcem pokazali redki oblaki v obliki lomečih se morskih valov. Zakaj nastanejo in kaj je tisto jutro pihalo na 2 do 4 km višine.",
+    "tags": [
+      "oblaki",
+      "razlaga",
+      "veter",
+      "inverzija",
+      "Zgornja Savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "2,1 °C zjutraj: najhladnejše jutro letošnje jeseni v Rečici ob Savinji — kdaj bo prva slana?",
+    "slug": "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
+    "url": "/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html",
+    "date": "2026-09-23",
+    "summary": "Postaja IREICA1 je zjutraj izmerila 2,1 °C — najhladnejše jutro letošnje jeseni, skoraj 7 °C pod normalo. Zakaj je bilo tako mrzlo in kdaj lahko pričakujemo prvo pravo slano.",
+    "tags": [
+      "analiza",
+      "september",
+      "2026",
+      "mraz",
+      "inverzija",
+      "IREICA1"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih",
+    "slug": "gobarska-sezona-julij-2026-kje-nabirati",
+    "url": "/blog/gobarska-sezona-julij-2026-kje-nabirati.html",
+    "date": "2026-07-07",
+    "summary": "Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.",
+    "tags": [
+      "agrometeo",
+      "gobe",
+      "analiza",
+      "julij",
+      "2026",
+      "IREICA1"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Kdaj po tednu dežja zrastejo gobe?",
+    "slug": "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
+    "url": "/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html",
+    "date": "2026-08-22",
+    "summary": "Teden je v Zgornji Savinjski dolini prinesel 68,3 mm dežja in visoko vlažnost. Koliko časa mine, preden gobe dejansko zrastejo, in kaj kaže napoved naprej?",
+    "tags": [
+      "gobe",
+      "IREICA1",
+      "Zgornja Savinjska dolina",
+      "Savinja"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Zakaj po dežju gobe ne zrastejo takoj",
+    "slug": "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
+    "url": "/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html",
+    "date": "2026-07-21",
+    "summary": "Med dežjem in prvimi gobami v mahu praviloma mine 7 do 14 dni. Razložimo, kaj se v tem času dogaja pod zemljo, in na primeru julija 2026 (dež 11. julija, indeks 83 % devet dni kasneje) pokažemo, kako zamik dejansko deluje.",
+    "tags": [
+      "gobe",
+      "gobarski indeks",
+      "IREICA1",
+      "agrometeo",
+      "vlaga tal"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Jesenski vrh gob 2026: kaj pravijo številke iz petih let",
+    "slug": "jesenski-vrh-gob-2026-savinjska-dolina-0922",
+    "url": "/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html",
+    "date": "2026-09-22",
+    "summary": "Gobarski indeks za Rečico ob Savinji je 21. septembra dosegel 88 (Odlično). Primerjava zadnjih pet septembrov pokaže, da je letošnji le srednje dober – in zakaj.",
+    "tags": [
+      "gobe",
+      "gobarski indeks",
+      "IREICA1",
+      "Zgornja Savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje",
+    "slug": "vpliv-lune-na-rast-gob-0921",
+    "url": "/blog/vpliv-lune-na-rast-gob-0921.html",
+    "date": "2026-09-21",
+    "summary": "Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.",
+    "tags": [
+      "gobe",
+      "luna",
+      "gobarski indeks",
+      "mit ali resnica"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
     "title": "Visoki oblaki proti zahodu: ali res napovedujejo dež?",
     "slug": "visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005",
     "url": "/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html",
@@ -239,79 +432,6 @@
     "updated": "2026-10-12"
   },
   {
-    "title": "Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih",
-    "slug": "gobarska-sezona-julij-2026-kje-nabirati",
-    "url": "/blog/gobarska-sezona-julij-2026-kje-nabirati.html",
-    "date": "2026-07-07",
-    "summary": "Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.",
-    "tags": [
-      "agrometeo",
-      "gobe",
-      "analiza",
-      "julij",
-      "2026",
-      "IREICA1"
-    ],
-    "updated": "2026-10-09"
-  },
-  {
-    "title": "Jesenski vrh gob 2026: kaj pravijo številke iz petih let",
-    "slug": "jesenski-vrh-gob-2026-savinjska-dolina-0922",
-    "url": "/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html",
-    "date": "2026-09-22",
-    "summary": "Gobarski indeks za Rečico ob Savinji je 21. septembra dosegel 88 (Odlično). Primerjava zadnjih pet septembrov pokaže, da je letošnji le srednje dober – in zakaj.",
-    "tags": [
-      "gobe",
-      "gobarski indeks",
-      "IREICA1",
-      "Zgornja Savinjska dolina"
-    ],
-    "updated": "2026-10-09"
-  },
-  {
-    "title": "Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje",
-    "slug": "vpliv-lune-na-rast-gob-0921",
-    "url": "/blog/vpliv-lune-na-rast-gob-0921.html",
-    "date": "2026-09-21",
-    "summary": "Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.",
-    "tags": [
-      "gobe",
-      "luna",
-      "gobarski indeks",
-      "mit ali resnica"
-    ],
-    "updated": "2026-10-09"
-  },
-  {
-    "title": "Zakaj po dežju gobe ne zrastejo takoj",
-    "slug": "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "url": "/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html",
-    "date": "2026-07-21",
-    "summary": "Med dežjem in prvimi gobami v mahu praviloma mine 7 do 14 dni. Razložimo, kaj se v tem času dogaja pod zemljo, in na primeru julija 2026 (dež 11. julija, indeks 83 % devet dni kasneje) pokažemo, kako zamik dejansko deluje.",
-    "tags": [
-      "gobe",
-      "gobarski indeks",
-      "IREICA1",
-      "agrometeo",
-      "vlaga tal"
-    ],
-    "updated": "2026-10-09"
-  },
-  {
-    "title": "Kdaj po tednu dežja zrastejo gobe?",
-    "slug": "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "url": "/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html",
-    "date": "2026-08-22",
-    "summary": "Teden je v Zgornji Savinjski dolini prinesel 68,3 mm dežja in visoko vlažnost. Koliko časa mine, preden gobe dejansko zrastejo, in kaj kaže napoved naprej?",
-    "tags": [
-      "gobe",
-      "IREICA1",
-      "Zgornja Savinjska dolina",
-      "Savinja"
-    ],
-    "updated": "2026-10-09"
-  },
-  {
     "title": "Vremensko leto 2025/26 v Rečici ob Savinji v številkah",
     "slug": "vremensko-leto-2025-2026",
     "url": "/blog/vremensko-leto-2025-2026.html",
@@ -363,49 +483,6 @@
     ]
   },
   {
-    "date": "2026-09-25",
-    "slug": "indijansko-poletje-suh-soncen-teden-0925",
-    "summary": "Od sobote do vsaj četrtka suho in sončno, popoldne okoli 20 °C, jutra hladna. Kaj je indijansko poletje, kaj kažejo ARSO, Open-Meteo in MTR ter kdaj se bo verjetno končalo.",
-    "tags": [
-      "napoved",
-      "razlaga",
-      "inverzija",
-      "MTR",
-      "Zgornja Savinjska dolina"
-    ],
-    "title": "Indijansko poletje: pred nami suh in sončen teden",
-    "url": "/blog/indijansko-poletje-suh-soncen-teden-0925.html"
-  },
-  {
-    "title": "Kelvin-Helmholtzovi valovi nad Črnivcem ob zori",
-    "slug": "kelvin-helmholtzovi-valovi-nad-crnivcem-0924",
-    "url": "/blog/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.html",
-    "date": "2026-09-24",
-    "summary": "Ob zori 24. septembra so se nad Črnivcem pokazali redki oblaki v obliki lomečih se morskih valov. Zakaj nastanejo in kaj je tisto jutro pihalo na 2 do 4 km višine.",
-    "tags": [
-      "oblaki",
-      "razlaga",
-      "veter",
-      "inverzija",
-      "Zgornja Savinjska dolina"
-    ]
-  },
-  {
-    "title": "2,1 °C zjutraj: najhladnejše jutro letošnje jeseni v Rečici ob Savinji — kdaj bo prva slana?",
-    "slug": "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
-    "url": "/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html",
-    "date": "2026-09-23",
-    "summary": "Postaja IREICA1 je zjutraj izmerila 2,1 °C — najhladnejše jutro letošnje jeseni, skoraj 7 °C pod normalo. Zakaj je bilo tako mrzlo in kdaj lahko pričakujemo prvo pravo slano.",
-    "tags": [
-      "analiza",
-      "september",
-      "2026",
-      "mraz",
-      "inverzija",
-      "IREICA1"
-    ]
-  },
-  {
     "title": "Invazivke ta teden: 2 opazovanji na novih lokacijah",
     "slug": "invazivka-tedenski-pregled-20260920",
     "url": "/blog/invazivka-tedenski-pregled-20260920.html",
@@ -417,60 +494,6 @@
       "2026",
       "japonski-dresnik",
       "zlezava-nedotika"
-    ]
-  },
-  {
-    "title": "Zakaj po 120 mm dežja v gozdu ni jurčkov",
-    "slug": "zakaj-po-120-mm-dezja-ni-jurckov-0918",
-    "url": "/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html",
-    "date": "2026-09-18",
-    "summary": "10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.",
-    "tags": [
-      "gobe",
-      "gobarski indeks",
-      "IREICA1",
-      "Zgornja Savinjska dolina"
-    ]
-  },
-  {
-    "title": "Zima 2026/2027 na Rečici ob Savinji: kaj pravi najmočnejši El Niño doslej",
-    "slug": "zima-2026-2027-el-nino-napoved",
-    "url": "/blog/zima-2026-2027-el-nino-napoved.html",
-    "date": "2026-09-16",
-    "summary": "Niño 3.4 je avgusta 2026 dosegel +2,7 °C, NOAA daje 75 % verjetnost zgodovinsko najmočnejšega El Niña. Kaj to pomeni za zimo v Zgornji Savinjski dolini in kaj pove postaja IREICA1.",
-    "tags": [
-      "analiza",
-      "podnebje",
-      "ireica1",
-      "napoved",
-      "2026"
-    ]
-  },
-  {
-    "title": "Cirrocumulus nad Rečico: predznak jutrišnjega dežja",
-    "slug": "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916",
-    "url": "/blog/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.html",
-    "date": "2026-09-16",
-    "summary": "Danes dopoldne so se nad Rečico ob Savinji razprli cirokumulusi na približno 7,5 km, kjer je pri −23 °C pihalo do 36 km/h iz zahoda. Kaj to pove o jutrišnjem dežju in ohladitvi.",
-    "tags": [
-      "napoved",
-      "poslabšanje",
-      "cirrocumulus",
-      "IREICA1",
-      "Zgornja Savinjska dolina"
-    ]
-  },
-  {
-    "title": "Trije valovi gob po dežju: kdo pride prvi in kdo šele čez dva tedna",
-    "slug": "trije-vali-gob-po-dezju-0911",
-    "url": "/blog/trije-vali-gob-po-dezju-0911.html",
-    "date": "2026-09-11",
-    "summary": "V četrtek je v Rečici ob Savinji v enem dnevu padlo 85 mm dežja, temperatura pa se je spustila z 32,9 na 17,5 °C. A gozd se ne odzove čez noč: razkrojevalke pridejo prve, že jutri, mikorizne vrste (jurčki, lisičke) pa šele čez teden in pol.",
-    "tags": [
-      "gobe",
-      "gobarski indeks",
-      "IREICA1",
-      "Zgornja Savinjska dolina"
     ]
   },
   {
@@ -488,21 +511,6 @@
       "Zgornja Savinjska dolina"
     ],
     "updated": "2026-09-08"
-  },
-  {
-    "title": "Naslednji teden konec poletja?",
-    "slug": "naslednji-teden-konec-poletja-0904",
-    "url": "/blog/naslednji-teden-konec-poletja-0904.html",
-    "date": "2026-09-04",
-    "summary": "Do torka še okoli 30 °C, nato vsi modeli obrnejo navzdol: od četrtka najvišje temperature od 14 do 20 °C in dež. Kaj o koncu poletja pove šest let meritev.",
-    "tags": [
-      "napoved",
-      "konec poletja",
-      "ohladitev",
-      "september",
-      "IREICA1",
-      "Zgornja Savinjska dolina"
-    ]
   },
   {
     "title": "Test napovedi: avgust 2026 — zmagal ICON",
