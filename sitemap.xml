@@ -471,6 +471,20 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-po-120-mm-dezja-ni-jurckov-0918.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/jurcki-preverba-napovedi-1015.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/jurcki-preverba-napovedi-1015.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -490,13 +504,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/naslednji-teden-konec-poletja-0904.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</loc>
-    <lastmod>2026-10-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zakaj-po-120-mm-dezja-ni-jurckov-0918.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</loc>

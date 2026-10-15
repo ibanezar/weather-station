@@ -1,0 +1,3280 @@
+{
+ "generated": "2026-10-15T11:21:22+00:00",
+ "model_version": "1.3",
+ "obs_total": 13,
+ "obs": [
+  {
+   "date": "2026-09-20",
+   "area": "Spodnje Pobrežje – ob Savinji",
+   "qty": "posamezno"
+  },
+  {
+   "date": "2026-09-21",
+   "area": "Počivavnik–Korte",
+   "qty": "posamezno"
+  },
+  {
+   "date": "2026-09-23",
+   "area": "Pod Smrekovcem, južni gozd",
+   "qty": "posamezno"
+  },
+  {
+   "date": "2026-09-25",
+   "area": "Spodnje Pobrežje – ob Savinji",
+   "qty": "nekaj"
+  },
+  {
+   "date": "2026-09-26",
+   "area": "Pod Smrekovcem, južni gozd",
+   "qty": "posamezno"
+  },
+  {
+   "date": "2026-10-02",
+   "area": "Kašni vrh – gozd pod vrhom",
+   "qty": "nekaj"
+  },
+  {
+   "date": "2026-10-13",
+   "area": "Bočka trata – orientacijski gozdni pas",
+   "qty": "posamezno"
+  }
+ ],
+ "hind": {
+  "Bočka trata – orientacijski gozdni pas": {
+   "elev": 900,
+   "terrain": "bazicna",
+   "days": {
+    "2026-09-10": {
+     "idx": 49,
+     "comp": {
+      "temperature": 27,
+      "rain_trigger": 66,
+      "rain_base": 90,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 15.7,
+     "tmin": 8.6
+    },
+    "2026-09-11": {
+     "idx": 63,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 46,
+      "rain_base": 85,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 12.7,
+     "tmin": 8.5
+    },
+    "2026-09-12": {
+     "idx": 56,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 46,
+      "rain_base": 45,
+      "soil_moisture": 100,
+      "humidity": 52,
+      "temp_drop": 100
+     },
+     "soil": 12.8,
+     "tmin": 8.8
+    },
+    "2026-09-13": {
+     "idx": 48,
+     "comp": {
+      "temperature": 66,
+      "rain_trigger": 63,
+      "rain_base": 54,
+      "soil_moisture": 91,
+      "humidity": 5,
+      "temp_drop": 100
+     },
+     "soil": 14.5,
+     "tmin": 12.5
+    },
+    "2026-09-14": {
+     "idx": 41,
+     "comp": {
+      "temperature": 30,
+      "rain_trigger": 63,
+      "rain_base": 53,
+      "soil_moisture": 81,
+      "humidity": 74,
+      "temp_drop": 100
+     },
+     "soil": 15.6,
+     "tmin": 12.5
+    },
+    "2026-09-15": {
+     "idx": 50,
+     "comp": {
+      "temperature": 66,
+      "rain_trigger": 58,
+      "rain_base": 53,
+      "soil_moisture": 82,
+      "humidity": 67,
+      "temp_drop": 100
+     },
+     "soil": 14.5,
+     "tmin": 10.5
+    },
+    "2026-09-16": {
+     "idx": 51,
+     "comp": {
+      "temperature": 84,
+      "rain_trigger": 58,
+      "rain_base": 40,
+      "soil_moisture": 77,
+      "humidity": 44,
+      "temp_drop": 100
+     },
+     "soil": 14.0,
+     "tmin": 11.6
+    },
+    "2026-09-17": {
+     "idx": 61,
+     "comp": {
+      "temperature": 75,
+      "rain_trigger": 100,
+      "rain_base": 81,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 14.2,
+     "tmin": 11.0
+    },
+    "2026-09-18": {
+     "idx": 70,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.7,
+     "tmin": 9.5
+    },
+    "2026-09-19": {
+     "idx": 67,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 88,
+      "rain_base": 100,
+      "soil_moisture": 96,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 13.3,
+     "tmin": 11.8
+    },
+    "2026-09-20": {
+     "idx": 64,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 88,
+      "rain_base": 100,
+      "soil_moisture": 87,
+      "humidity": 65,
+      "temp_drop": 0
+     },
+     "soil": 13.3,
+     "tmin": 11.8
+    },
+    "2026-09-21": {
+     "idx": 57,
+     "comp": {
+      "temperature": 68,
+      "rain_trigger": 88,
+      "rain_base": 100,
+      "soil_moisture": 78,
+      "humidity": 90,
+      "temp_drop": 0
+     },
+     "soil": 14.5,
+     "tmin": 9.9
+    },
+    "2026-09-22": {
+     "idx": 67,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 90,
+      "rain_base": 100,
+      "soil_moisture": 72,
+      "humidity": 39,
+      "temp_drop": 100
+     },
+     "soil": 11.6,
+     "tmin": 7.3
+    },
+    "2026-09-23": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 90,
+      "rain_base": 100,
+      "soil_moisture": 65,
+      "humidity": 21,
+      "temp_drop": 100
+     },
+     "soil": 10.6,
+     "tmin": 6.3
+    },
+    "2026-09-24": {
+     "idx": 67,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 90,
+      "rain_base": 100,
+      "soil_moisture": 58,
+      "humidity": 45,
+      "temp_drop": 100
+     },
+     "soil": 11.5,
+     "tmin": 8.6
+    },
+    "2026-09-25": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 85,
+      "rain_base": 100,
+      "soil_moisture": 68,
+      "humidity": 39,
+      "temp_drop": 100
+     },
+     "soil": 10.7,
+     "tmin": 6.6
+    },
+    "2026-09-26": {
+     "idx": 69,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 96,
+      "rain_base": 100,
+      "soil_moisture": 69,
+      "humidity": 54,
+      "temp_drop": 100
+     },
+     "soil": 10.2,
+     "tmin": 6.9
+    },
+    "2026-09-27": {
+     "idx": 69,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 63,
+      "humidity": 53,
+      "temp_drop": 100
+     },
+     "soil": 9.8,
+     "tmin": 7.6
+    },
+    "2026-09-28": {
+     "idx": 50,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 33,
+      "rain_base": 100,
+      "soil_moisture": 57,
+      "humidity": 30,
+      "temp_drop": 0
+     },
+     "soil": 10.0,
+     "tmin": 8.8
+    },
+    "2026-09-29": {
+     "idx": 49,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 33,
+      "rain_base": 100,
+      "soil_moisture": 51,
+      "humidity": 26,
+      "temp_drop": 0
+     },
+     "soil": 10.2,
+     "tmin": 9.2
+    },
+    "2026-09-30": {
+     "idx": 48,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 33,
+      "rain_base": 100,
+      "soil_moisture": 45,
+      "humidity": 7,
+      "temp_drop": 0
+     },
+     "soil": 12.5,
+     "tmin": 10.7
+    },
+    "2026-10-01": {
+     "idx": 47,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 31,
+      "rain_base": 100,
+      "soil_moisture": 39,
+      "humidity": 11,
+      "temp_drop": 0
+     },
+     "soil": 12.3,
+     "tmin": 9.9
+    },
+    "2026-10-02": {
+     "idx": 47,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 36,
+      "rain_base": 100,
+      "soil_moisture": 33,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 9.8,
+     "tmin": 7.8
+    },
+    "2026-10-03": {
+     "idx": 38,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 36,
+      "rain_base": 24,
+      "soil_moisture": 28,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 9.0,
+     "tmin": 7.8
+    },
+    "2026-10-04": {
+     "idx": 32,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 24,
+      "soil_moisture": 23,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 8.3,
+     "tmin": 6.7
+    },
+    "2026-10-05": {
+     "idx": 32,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 24,
+      "soil_moisture": 19,
+      "humidity": 18,
+      "temp_drop": 0
+     },
+     "soil": 7.9,
+     "tmin": 7.3
+    },
+    "2026-10-06": {
+     "idx": 31,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 23,
+      "soil_moisture": 16,
+      "humidity": 4,
+      "temp_drop": 0
+     },
+     "soil": 8.4,
+     "tmin": 6.9
+    },
+    "2026-10-07": {
+     "idx": 34,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 23,
+      "soil_moisture": 14,
+      "humidity": 62,
+      "temp_drop": 0
+     },
+     "soil": 12.3,
+     "tmin": 12.3
+    },
+    "2026-10-08": {
+     "idx": 40,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 23,
+      "soil_moisture": 60,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.9,
+     "tmin": 12.9
+    },
+    "2026-10-09": {
+     "idx": 40,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 3,
+      "soil_moisture": 91,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.6,
+     "tmin": 8.3
+    },
+    "2026-10-10": {
+     "idx": 40,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 3,
+      "soil_moisture": 84,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 9.7,
+     "tmin": 8.7
+    },
+    "2026-10-11": {
+     "idx": 39,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 3,
+      "soil_moisture": 83,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 9.9,
+     "tmin": 8.6
+    },
+    "2026-10-12": {
+     "idx": 45,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 3,
+      "soil_moisture": 96,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 8.9,
+     "tmin": 5.2
+    },
+    "2026-10-13": {
+     "idx": 41,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 3,
+      "soil_moisture": 88,
+      "humidity": 46,
+      "temp_drop": 100
+     },
+     "soil": 7.1,
+     "tmin": 4.1
+    },
+    "2026-10-14": {
+     "idx": 41,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 3,
+      "soil_moisture": 76,
+      "humidity": 52,
+      "temp_drop": 100
+     },
+     "soil": 9.2,
+     "tmin": 7.1
+    }
+   }
+  },
+  "Gozdovi nad Ljubnim": {
+   "elev": 700,
+   "terrain": "kisla",
+   "days": {
+    "2026-09-10": {
+     "idx": 52,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 45,
+      "rain_base": 61,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 17.0,
+     "tmin": 11.2
+    },
+    "2026-09-11": {
+     "idx": 69,
+     "comp": {
+      "temperature": 58,
+      "rain_trigger": 23,
+      "rain_base": 59,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 14.8,
+     "tmin": 11.1
+    },
+    "2026-09-12": {
+     "idx": 65,
+     "comp": {
+      "temperature": 67,
+      "rain_trigger": 23,
+      "rain_base": 30,
+      "soil_moisture": 100,
+      "humidity": 78,
+      "temp_drop": 100
+     },
+     "soil": 14.5,
+     "tmin": 8.5
+    },
+    "2026-09-13": {
+     "idx": 76,
+     "comp": {
+      "temperature": 43,
+      "rain_trigger": 83,
+      "rain_base": 68,
+      "soil_moisture": 91,
+      "humidity": 48,
+      "temp_drop": 100
+     },
+     "soil": 15.2,
+     "tmin": 10.0
+    },
+    "2026-09-14": {
+     "idx": 60,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 83,
+      "rain_base": 67,
+      "soil_moisture": 83,
+      "humidity": 76,
+      "temp_drop": 100
+     },
+     "soil": 16.8,
+     "tmin": 12.5
+    },
+    "2026-09-15": {
+     "idx": 63,
+     "comp": {
+      "temperature": 8,
+      "rain_trigger": 82,
+      "rain_base": 67,
+      "soil_moisture": 85,
+      "humidity": 71,
+      "temp_drop": 100
+     },
+     "soil": 16.3,
+     "tmin": 9.6
+    },
+    "2026-09-16": {
+     "idx": 57,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 82,
+      "rain_base": 53,
+      "soil_moisture": 80,
+      "humidity": 72,
+      "temp_drop": 100
+     },
+     "soil": 16.6,
+     "tmin": 11.9
+    },
+    "2026-09-17": {
+     "idx": 74,
+     "comp": {
+      "temperature": 32,
+      "rain_trigger": 100,
+      "rain_base": 68,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 15.5,
+     "tmin": 12.5
+    },
+    "2026-09-18": {
+     "idx": 90,
+     "comp": {
+      "temperature": 59,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 14.7,
+     "tmin": 9.2
+    },
+    "2026-09-19": {
+     "idx": 69,
+     "comp": {
+      "temperature": 22,
+      "rain_trigger": 85,
+      "rain_base": 100,
+      "soil_moisture": 90,
+      "humidity": 91,
+      "temp_drop": 0
+     },
+     "soil": 15.8,
+     "tmin": 12.2
+    },
+    "2026-09-20": {
+     "idx": 61,
+     "comp": {
+      "temperature": 7,
+      "rain_trigger": 85,
+      "rain_base": 100,
+      "soil_moisture": 83,
+      "humidity": 74,
+      "temp_drop": 0
+     },
+     "soil": 16.3,
+     "tmin": 11.3
+    },
+    "2026-09-21": {
+     "idx": 68,
+     "comp": {
+      "temperature": 27,
+      "rain_trigger": 85,
+      "rain_base": 100,
+      "soil_moisture": 76,
+      "humidity": 72,
+      "temp_drop": 0
+     },
+     "soil": 15.7,
+     "tmin": 9.7
+    },
+    "2026-09-22": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 73,
+      "humidity": 41,
+      "temp_drop": 100
+     },
+     "soil": 13.0,
+     "tmin": 6.5
+    },
+    "2026-09-23": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 68,
+      "humidity": 45,
+      "temp_drop": 100
+     },
+     "soil": 11.8,
+     "tmin": 4.4
+    },
+    "2026-09-24": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 63,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 11.7,
+     "tmin": 6.4
+    },
+    "2026-09-25": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 88,
+      "rain_base": 100,
+      "soil_moisture": 71,
+      "humidity": 67,
+      "temp_drop": 100
+     },
+     "soil": 11.4,
+     "tmin": 6.2
+    },
+    "2026-09-26": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 91,
+      "rain_base": 100,
+      "soil_moisture": 70,
+      "humidity": 63,
+      "temp_drop": 100
+     },
+     "soil": 11.6,
+     "tmin": 6.0
+    },
+    "2026-09-27": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 64,
+      "humidity": 71,
+      "temp_drop": 100
+     },
+     "soil": 12.5,
+     "tmin": 7.6
+    },
+    "2026-09-28": {
+     "idx": 82,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 44,
+      "rain_base": 100,
+      "soil_moisture": 58,
+      "humidity": 58,
+      "temp_drop": 0
+     },
+     "soil": 13.3,
+     "tmin": 8.3
+    },
+    "2026-09-29": {
+     "idx": 71,
+     "comp": {
+      "temperature": 78,
+      "rain_trigger": 44,
+      "rain_base": 100,
+      "soil_moisture": 52,
+      "humidity": 43,
+      "temp_drop": 0
+     },
+     "soil": 14.1,
+     "tmin": 8.9
+    },
+    "2026-09-30": {
+     "idx": 65,
+     "comp": {
+      "temperature": 66,
+      "rain_trigger": 44,
+      "rain_base": 100,
+      "soil_moisture": 46,
+      "humidity": 36,
+      "temp_drop": 0
+     },
+     "soil": 14.5,
+     "tmin": 10.1
+    },
+    "2026-10-01": {
+     "idx": 63,
+     "comp": {
+      "temperature": 63,
+      "rain_trigger": 44,
+      "rain_base": 100,
+      "soil_moisture": 40,
+      "humidity": 30,
+      "temp_drop": 0
+     },
+     "soil": 14.6,
+     "tmin": 9.1
+    },
+    "2026-10-02": {
+     "idx": 74,
+     "comp": {
+      "temperature": 92,
+      "rain_trigger": 48,
+      "rain_base": 100,
+      "soil_moisture": 34,
+      "humidity": 19,
+      "temp_drop": 0
+     },
+     "soil": 13.7,
+     "tmin": 7.0
+    },
+    "2026-10-03": {
+     "idx": 61,
+     "comp": {
+      "temperature": 97,
+      "rain_trigger": 48,
+      "rain_base": 31,
+      "soil_moisture": 29,
+      "humidity": 2,
+      "temp_drop": 0
+     },
+     "soil": 13.6,
+     "tmin": 7.7
+    },
+    "2026-10-04": {
+     "idx": 49,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 31,
+      "soil_moisture": 24,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 12.3,
+     "tmin": 7.9
+    },
+    "2026-10-05": {
+     "idx": 56,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 31,
+      "soil_moisture": 20,
+      "humidity": 78,
+      "temp_drop": 0
+     },
+     "soil": 12.0,
+     "tmin": 6.6
+    },
+    "2026-10-06": {
+     "idx": 54,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 31,
+      "soil_moisture": 16,
+      "humidity": 59,
+      "temp_drop": 0
+     },
+     "soil": 12.0,
+     "tmin": 6.9
+    },
+    "2026-10-07": {
+     "idx": 56,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 31,
+      "soil_moisture": 12,
+      "humidity": 86,
+      "temp_drop": 0
+     },
+     "soil": 12.6,
+     "tmin": 8.5
+    },
+    "2026-10-08": {
+     "idx": 45,
+     "comp": {
+      "temperature": 69,
+      "rain_trigger": 4,
+      "rain_base": 31,
+      "soil_moisture": 13,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 14.4,
+     "tmin": 13.2
+    },
+    "2026-10-09": {
+     "idx": 54,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 2,
+      "soil_moisture": 23,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 13.1,
+     "tmin": 8.6
+    },
+    "2026-10-10": {
+     "idx": 54,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 2,
+      "soil_moisture": 23,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.3,
+     "tmin": 6.8
+    },
+    "2026-10-11": {
+     "idx": 53,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 2,
+      "soil_moisture": 29,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.2,
+     "tmin": 8.0
+    },
+    "2026-10-12": {
+     "idx": 63,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 2,
+      "soil_moisture": 47,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 11.5,
+     "tmin": 4.5
+    },
+    "2026-10-13": {
+     "idx": 63,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 2,
+      "soil_moisture": 64,
+      "humidity": 80,
+      "temp_drop": 100
+     },
+     "soil": 9.7,
+     "tmin": 3.4
+    },
+    "2026-10-14": {
+     "idx": 61,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 2,
+      "soil_moisture": 60,
+      "humidity": 58,
+      "temp_drop": 100
+     },
+     "soil": 10.5,
+     "tmin": 6.2
+    }
+   }
+  },
+  "Kašni vrh – gozd pod vrhom": {
+   "elev": 1175,
+   "terrain": "kisla",
+   "days": {
+    "2026-09-10": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 63,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 12.5,
+     "tmin": 6.8
+    },
+    "2026-09-11": {
+     "idx": 98,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 42,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 10.3,
+     "tmin": 6.9
+    },
+    "2026-09-12": {
+     "idx": 87,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 42,
+      "rain_base": 59,
+      "soil_moisture": 100,
+      "humidity": 50,
+      "temp_drop": 100
+     },
+     "soil": 9.9,
+     "tmin": 5.3
+    },
+    "2026-09-13": {
+     "idx": 96,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 81,
+      "rain_base": 68,
+      "soil_moisture": 95,
+      "humidity": 16,
+      "temp_drop": 100
+     },
+     "soil": 10.7,
+     "tmin": 7.7
+    },
+    "2026-09-14": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 81,
+      "rain_base": 66,
+      "soil_moisture": 88,
+      "humidity": 79,
+      "temp_drop": 100
+     },
+     "soil": 12.0,
+     "tmin": 9.1
+    },
+    "2026-09-15": {
+     "idx": 97,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 72,
+      "rain_base": 66,
+      "soil_moisture": 88,
+      "humidity": 68,
+      "temp_drop": 100
+     },
+     "soil": 11.3,
+     "tmin": 7.3
+    },
+    "2026-09-16": {
+     "idx": 93,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 72,
+      "rain_base": 52,
+      "soil_moisture": 84,
+      "humidity": 59,
+      "temp_drop": 100
+     },
+     "soil": 11.6,
+     "tmin": 7.3
+    },
+    "2026-09-17": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 73,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.3,
+     "tmin": 8.6
+    },
+    "2026-09-18": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 9.8,
+     "tmin": 5.9
+    },
+    "2026-09-19": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 84,
+      "rain_base": 100,
+      "soil_moisture": 96,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 10.4,
+     "tmin": 8.4
+    },
+    "2026-09-20": {
+     "idx": 99,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 84,
+      "rain_base": 100,
+      "soil_moisture": 88,
+      "humidity": 78,
+      "temp_drop": 0
+     },
+     "soil": 10.5,
+     "tmin": 7.2
+    },
+    "2026-09-21": {
+     "idx": 99,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 84,
+      "rain_base": 100,
+      "soil_moisture": 81,
+      "humidity": 90,
+      "temp_drop": 0
+     },
+     "soil": 10.9,
+     "tmin": 7.1
+    },
+    "2026-09-22": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 90,
+      "rain_base": 100,
+      "soil_moisture": 77,
+      "humidity": 30,
+      "temp_drop": 100
+     },
+     "soil": 8.2,
+     "tmin": 3.8
+    },
+    "2026-09-23": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 90,
+      "rain_base": 100,
+      "soil_moisture": 72,
+      "humidity": 30,
+      "temp_drop": 100
+     },
+     "soil": 7.1,
+     "tmin": 2.5
+    },
+    "2026-09-24": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 90,
+      "rain_base": 100,
+      "soil_moisture": 67,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 7.5,
+     "tmin": 5.0
+    },
+    "2026-09-25": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 83,
+      "rain_base": 100,
+      "soil_moisture": 77,
+      "humidity": 68,
+      "temp_drop": 100
+     },
+     "soil": 7.0,
+     "tmin": 2.7
+    },
+    "2026-09-26": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 88,
+      "rain_base": 100,
+      "soil_moisture": 75,
+      "humidity": 72,
+      "temp_drop": 100
+     },
+     "soil": 6.5,
+     "tmin": 3.1
+    },
+    "2026-09-27": {
+     "idx": 100,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 69,
+      "humidity": 73,
+      "temp_drop": 100
+     },
+     "soil": 6.6,
+     "tmin": 4.3
+    },
+    "2026-09-28": {
+     "idx": 84,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 44,
+      "rain_base": 100,
+      "soil_moisture": 63,
+      "humidity": 72,
+      "temp_drop": 0
+     },
+     "soil": 7.6,
+     "tmin": 5.1
+    },
+    "2026-09-29": {
+     "idx": 82,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 44,
+      "rain_base": 100,
+      "soil_moisture": 57,
+      "humidity": 62,
+      "temp_drop": 0
+     },
+     "soil": 7.2,
+     "tmin": 4.7
+    },
+    "2026-09-30": {
+     "idx": 81,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 44,
+      "rain_base": 100,
+      "soil_moisture": 52,
+      "humidity": 57,
+      "temp_drop": 0
+     },
+     "soil": 8.1,
+     "tmin": 5.2
+    },
+    "2026-10-01": {
+     "idx": 77,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 42,
+      "rain_base": 100,
+      "soil_moisture": 46,
+      "humidity": 23,
+      "temp_drop": 0
+     },
+     "soil": 7.2,
+     "tmin": 5.2
+    },
+    "2026-10-02": {
+     "idx": 78,
+     "comp": {
+      "temperature": 85,
+      "rain_trigger": 48,
+      "rain_base": 100,
+      "soil_moisture": 40,
+      "humidity": 7,
+      "temp_drop": 100
+     },
+     "soil": 6.1,
+     "tmin": 1.8
+    },
+    "2026-10-03": {
+     "idx": 66,
+     "comp": {
+      "temperature": 80,
+      "rain_trigger": 48,
+      "rain_base": 32,
+      "soil_moisture": 34,
+      "humidity": 30,
+      "temp_drop": 100
+     },
+     "soil": 5.9,
+     "tmin": 3.2
+    },
+    "2026-10-04": {
+     "idx": 46,
+     "comp": {
+      "temperature": 69,
+      "rain_trigger": 6,
+      "rain_base": 32,
+      "soil_moisture": 30,
+      "humidity": 0,
+      "temp_drop": 100
+     },
+     "soil": 5.6,
+     "tmin": 3.3
+    },
+    "2026-10-05": {
+     "idx": 50,
+     "comp": {
+      "temperature": 73,
+      "rain_trigger": 6,
+      "rain_base": 32,
+      "soil_moisture": 25,
+      "humidity": 33,
+      "temp_drop": 100
+     },
+     "soil": 5.7,
+     "tmin": 3.4
+    },
+    "2026-10-06": {
+     "idx": 50,
+     "comp": {
+      "temperature": 75,
+      "rain_trigger": 6,
+      "rain_base": 31,
+      "soil_moisture": 22,
+      "humidity": 26,
+      "temp_drop": 100
+     },
+     "soil": 5.7,
+     "tmin": 2.7
+    },
+    "2026-10-07": {
+     "idx": 55,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 31,
+      "soil_moisture": 16,
+      "humidity": 70,
+      "temp_drop": 0
+     },
+     "soil": 8.8,
+     "tmin": 8.4
+    },
+    "2026-10-08": {
+     "idx": 60,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 31,
+      "soil_moisture": 32,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 9.8,
+     "tmin": 10.4
+    },
+    "2026-10-09": {
+     "idx": 59,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 4,
+      "soil_moisture": 59,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 8.3,
+     "tmin": 5.5
+    },
+    "2026-10-10": {
+     "idx": 59,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 4,
+      "soil_moisture": 59,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 6.7,
+     "tmin": 4.3
+    },
+    "2026-10-11": {
+     "idx": 58,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 65,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 7.1,
+     "tmin": 4.8
+    },
+    "2026-10-12": {
+     "idx": 66,
+     "comp": {
+      "temperature": 95,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 80,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 6.4,
+     "tmin": 2.2
+    },
+    "2026-10-13": {
+     "idx": 37,
+     "comp": {
+      "temperature": 32,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 83,
+      "humidity": 68,
+      "temp_drop": 100
+     },
+     "soil": 4.5,
+     "tmin": 0.8
+    },
+    "2026-10-14": {
+     "idx": 46,
+     "comp": {
+      "temperature": 50,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 74,
+      "humidity": 90,
+      "temp_drop": 100
+     },
+     "soil": 5.0,
+     "tmin": 3.0
+    }
+   }
+  },
+  "Pod Smrekovcem, južni gozd": {
+   "elev": 1225,
+   "terrain": null,
+   "days": {
+    "2026-09-10": {
+     "idx": 82,
+     "comp": {
+      "temperature": 89,
+      "rain_trigger": 49,
+      "rain_base": 88,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 13.8,
+     "tmin": 9.0
+    },
+    "2026-09-11": {
+     "idx": 77,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 16,
+      "rain_base": 84,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 11.8,
+     "tmin": 8.3
+    },
+    "2026-09-12": {
+     "idx": 64,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 16,
+      "rain_base": 38,
+      "soil_moisture": 100,
+      "humidity": 30,
+      "temp_drop": 100
+     },
+     "soil": 12.0,
+     "tmin": 7.8
+    },
+    "2026-09-13": {
+     "idx": 64,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 23,
+      "rain_base": 37,
+      "soil_moisture": 93,
+      "humidity": 18,
+      "temp_drop": 100
+     },
+     "soil": 13.1,
+     "tmin": 10.4
+    },
+    "2026-09-14": {
+     "idx": 60,
+     "comp": {
+      "temperature": 82,
+      "rain_trigger": 23,
+      "rain_base": 36,
+      "soil_moisture": 85,
+      "humidity": 54,
+      "temp_drop": 100
+     },
+     "soil": 14.0,
+     "tmin": 11.0
+    },
+    "2026-09-15": {
+     "idx": 67,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 21,
+      "rain_base": 36,
+      "soil_moisture": 86,
+      "humidity": 72,
+      "temp_drop": 100
+     },
+     "soil": 13.5,
+     "tmin": 9.1
+    },
+    "2026-09-16": {
+     "idx": 62,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 21,
+      "rain_base": 15,
+      "soil_moisture": 80,
+      "humidity": 56,
+      "temp_drop": 100
+     },
+     "soil": 12.4,
+     "tmin": 10.2
+    },
+    "2026-09-17": {
+     "idx": 69,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 47,
+      "rain_base": 32,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.2,
+     "tmin": 9.7
+    },
+    "2026-09-18": {
+     "idx": 93,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.0,
+     "tmin": 7.6
+    },
+    "2026-09-19": {
+     "idx": 92,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 99,
+      "rain_base": 100,
+      "soil_moisture": 90,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.9,
+     "tmin": 9.8
+    },
+    "2026-09-20": {
+     "idx": 88,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 99,
+      "rain_base": 100,
+      "soil_moisture": 82,
+      "humidity": 66,
+      "temp_drop": 0
+     },
+     "soil": 12.9,
+     "tmin": 10.9
+    },
+    "2026-09-21": {
+     "idx": 87,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 99,
+      "rain_base": 100,
+      "soil_moisture": 76,
+      "humidity": 61,
+      "temp_drop": 0
+     },
+     "soil": 13.3,
+     "tmin": 8.7
+    },
+    "2026-09-22": {
+     "idx": 89,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 72,
+      "humidity": 0,
+      "temp_drop": 100
+     },
+     "soil": 11.0,
+     "tmin": 6.2
+    },
+    "2026-09-23": {
+     "idx": 89,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 67,
+      "humidity": 10,
+      "temp_drop": 100
+     },
+     "soil": 9.8,
+     "tmin": 4.5
+    },
+    "2026-09-24": {
+     "idx": 91,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 62,
+      "humidity": 29,
+      "temp_drop": 100
+     },
+     "soil": 9.4,
+     "tmin": 7.6
+    },
+    "2026-09-25": {
+     "idx": 91,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 92,
+      "rain_base": 100,
+      "soil_moisture": 74,
+      "humidity": 39,
+      "temp_drop": 100
+     },
+     "soil": 9.6,
+     "tmin": 5.4
+    },
+    "2026-09-26": {
+     "idx": 93,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 97,
+      "rain_base": 100,
+      "soil_moisture": 70,
+      "humidity": 56,
+      "temp_drop": 100
+     },
+     "soil": 9.8,
+     "tmin": 6.0
+    },
+    "2026-09-27": {
+     "idx": 93,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 62,
+      "humidity": 58,
+      "temp_drop": 100
+     },
+     "soil": 10.0,
+     "tmin": 7.5
+    },
+    "2026-09-28": {
+     "idx": 72,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 50,
+      "rain_base": 100,
+      "soil_moisture": 56,
+      "humidity": 53,
+      "temp_drop": 0
+     },
+     "soil": 10.0,
+     "tmin": 7.3
+    },
+    "2026-09-29": {
+     "idx": 70,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 50,
+      "rain_base": 100,
+      "soil_moisture": 50,
+      "humidity": 35,
+      "temp_drop": 0
+     },
+     "soil": 10.7,
+     "tmin": 7.6
+    },
+    "2026-09-30": {
+     "idx": 69,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 50,
+      "rain_base": 100,
+      "soil_moisture": 45,
+      "humidity": 32,
+      "temp_drop": 0
+     },
+     "soil": 10.4,
+     "tmin": 7.8
+    },
+    "2026-10-01": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 46,
+      "rain_base": 100,
+      "soil_moisture": 39,
+      "humidity": 4,
+      "temp_drop": 0
+     },
+     "soil": 11.0,
+     "tmin": 7.9
+    },
+    "2026-10-02": {
+     "idx": 67,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 56,
+      "rain_base": 100,
+      "soil_moisture": 33,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 11.0,
+     "tmin": 7.4
+    },
+    "2026-10-03": {
+     "idx": 58,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 56,
+      "rain_base": 38,
+      "soil_moisture": 28,
+      "humidity": 4,
+      "temp_drop": 0
+     },
+     "soil": 10.1,
+     "tmin": 7.1
+    },
+    "2026-10-04": {
+     "idx": 46,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 10,
+      "rain_base": 38,
+      "soil_moisture": 24,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 8.2,
+     "tmin": 6.1
+    },
+    "2026-10-05": {
+     "idx": 46,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 10,
+      "rain_base": 38,
+      "soil_moisture": 20,
+      "humidity": 13,
+      "temp_drop": 0
+     },
+     "soil": 9.3,
+     "tmin": 6.8
+    },
+    "2026-10-06": {
+     "idx": 45,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 10,
+      "rain_base": 36,
+      "soil_moisture": 18,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 10.2,
+     "tmin": 7.8
+    },
+    "2026-10-07": {
+     "idx": 50,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 10,
+      "rain_base": 36,
+      "soil_moisture": 15,
+      "humidity": 77,
+      "temp_drop": 0
+     },
+     "soil": 10.9,
+     "tmin": 8.9
+    },
+    "2026-10-08": {
+     "idx": 54,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 10,
+      "rain_base": 36,
+      "soil_moisture": 31,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.5,
+     "tmin": 11.6
+    },
+    "2026-10-09": {
+     "idx": 51,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 10,
+      "rain_base": 6,
+      "soil_moisture": 51,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 10.0,
+     "tmin": 6.0
+    },
+    "2026-10-10": {
+     "idx": 51,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 10,
+      "rain_base": 6,
+      "soil_moisture": 43,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 8.4,
+     "tmin": 6.0
+    },
+    "2026-10-11": {
+     "idx": 49,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 6,
+      "soil_moisture": 55,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 9.0,
+     "tmin": 6.7
+    },
+    "2026-10-12": {
+     "idx": 59,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 6,
+      "soil_moisture": 83,
+      "humidity": 95,
+      "temp_drop": 100
+     },
+     "soil": 7.9,
+     "tmin": 3.6
+    },
+    "2026-10-13": {
+     "idx": 56,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 6,
+      "soil_moisture": 83,
+      "humidity": 60,
+      "temp_drop": 100
+     },
+     "soil": 6.8,
+     "tmin": 2.6
+    },
+    "2026-10-14": {
+     "idx": 55,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 6,
+      "soil_moisture": 70,
+      "humidity": 60,
+      "temp_drop": 100
+     },
+     "soil": 8.1,
+     "tmin": 4.9
+    }
+   }
+  },
+  "Počivavnik–Korte": {
+   "elev": 900,
+   "terrain": "bazicna",
+   "days": {
+    "2026-09-10": {
+     "idx": 57,
+     "comp": {
+      "temperature": 63,
+      "rain_trigger": 61,
+      "rain_base": 96,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 14.6,
+     "tmin": 7.7
+    },
+    "2026-09-11": {
+     "idx": 61,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 29,
+      "rain_base": 92,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 12.1,
+     "tmin": 8.1
+    },
+    "2026-09-12": {
+     "idx": 53,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 29,
+      "rain_base": 46,
+      "soil_moisture": 100,
+      "humidity": 59,
+      "temp_drop": 100
+     },
+     "soil": 12.1,
+     "tmin": 8.3
+    },
+    "2026-09-13": {
+     "idx": 54,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 46,
+      "rain_base": 51,
+      "soil_moisture": 91,
+      "humidity": 22,
+      "temp_drop": 100
+     },
+     "soil": 13.2,
+     "tmin": 11.2
+    },
+    "2026-09-14": {
+     "idx": 51,
+     "comp": {
+      "temperature": 79,
+      "rain_trigger": 46,
+      "rain_base": 51,
+      "soil_moisture": 84,
+      "humidity": 77,
+      "temp_drop": 100
+     },
+     "soil": 14.1,
+     "tmin": 11.5
+    },
+    "2026-09-15": {
+     "idx": 57,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 45,
+      "rain_base": 51,
+      "soil_moisture": 85,
+      "humidity": 78,
+      "temp_drop": 100
+     },
+     "soil": 13.4,
+     "tmin": 10.0
+    },
+    "2026-09-16": {
+     "idx": 53,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 45,
+      "rain_base": 29,
+      "soil_moisture": 79,
+      "humidity": 68,
+      "temp_drop": 100
+     },
+     "soil": 12.9,
+     "tmin": 10.5
+    },
+    "2026-09-17": {
+     "idx": 59,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 75,
+      "rain_base": 49,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 13.2,
+     "tmin": 9.8
+    },
+    "2026-09-18": {
+     "idx": 70,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.1,
+     "tmin": 8.8
+    },
+    "2026-09-19": {
+     "idx": 68,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 92,
+      "rain_base": 100,
+      "soil_moisture": 94,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.5,
+     "tmin": 11.4
+    },
+    "2026-09-20": {
+     "idx": 65,
+     "comp": {
+      "temperature": 99,
+      "rain_trigger": 92,
+      "rain_base": 100,
+      "soil_moisture": 85,
+      "humidity": 71,
+      "temp_drop": 0
+     },
+     "soil": 13.5,
+     "tmin": 11.9
+    },
+    "2026-09-21": {
+     "idx": 64,
+     "comp": {
+      "temperature": 97,
+      "rain_trigger": 92,
+      "rain_base": 100,
+      "soil_moisture": 77,
+      "humidity": 67,
+      "temp_drop": 0
+     },
+     "soil": 13.6,
+     "tmin": 9.2
+    },
+    "2026-09-22": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 72,
+      "humidity": 0,
+      "temp_drop": 100
+     },
+     "soil": 11.3,
+     "tmin": 7.1
+    },
+    "2026-09-23": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 67,
+      "humidity": 6,
+      "temp_drop": 100
+     },
+     "soil": 10.4,
+     "tmin": 5.7
+    },
+    "2026-09-24": {
+     "idx": 68,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 63,
+      "humidity": 46,
+      "temp_drop": 100
+     },
+     "soil": 10.4,
+     "tmin": 7.9
+    },
+    "2026-09-25": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 86,
+      "rain_base": 100,
+      "soil_moisture": 69,
+      "humidity": 39,
+      "temp_drop": 100
+     },
+     "soil": 10.0,
+     "tmin": 6.2
+    },
+    "2026-09-26": {
+     "idx": 68,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 91,
+      "rain_base": 100,
+      "soil_moisture": 69,
+      "humidity": 50,
+      "temp_drop": 100
+     },
+     "soil": 10.0,
+     "tmin": 6.5
+    },
+    "2026-09-27": {
+     "idx": 70,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 63,
+      "humidity": 55,
+      "temp_drop": 100
+     },
+     "soil": 9.9,
+     "tmin": 7.7
+    },
+    "2026-09-28": {
+     "idx": 56,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 58,
+      "rain_base": 100,
+      "soil_moisture": 58,
+      "humidity": 49,
+      "temp_drop": 0
+     },
+     "soil": 10.1,
+     "tmin": 8.2
+    },
+    "2026-09-29": {
+     "idx": 55,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 58,
+      "rain_base": 100,
+      "soil_moisture": 52,
+      "humidity": 42,
+      "temp_drop": 0
+     },
+     "soil": 10.1,
+     "tmin": 8.4
+    },
+    "2026-09-30": {
+     "idx": 54,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 58,
+      "rain_base": 100,
+      "soil_moisture": 46,
+      "humidity": 31,
+      "temp_drop": 0
+     },
+     "soil": 10.1,
+     "tmin": 8.2
+    },
+    "2026-10-01": {
+     "idx": 52,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 55,
+      "rain_base": 100,
+      "soil_moisture": 41,
+      "humidity": 16,
+      "temp_drop": 0
+     },
+     "soil": 9.7,
+     "tmin": 8.4
+    },
+    "2026-10-02": {
+     "idx": 52,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 62,
+      "rain_base": 100,
+      "soil_moisture": 36,
+      "humidity": 2,
+      "temp_drop": 0
+     },
+     "soil": 9.0,
+     "tmin": 7.5
+    },
+    "2026-10-03": {
+     "idx": 45,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 62,
+      "rain_base": 41,
+      "soil_moisture": 32,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 8.5,
+     "tmin": 6.9
+    },
+    "2026-10-04": {
+     "idx": 34,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 7,
+      "rain_base": 41,
+      "soil_moisture": 29,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 8.0,
+     "tmin": 7.1
+    },
+    "2026-10-05": {
+     "idx": 35,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 7,
+      "rain_base": 41,
+      "soil_moisture": 26,
+      "humidity": 10,
+      "temp_drop": 0
+     },
+     "soil": 8.0,
+     "tmin": 8.0
+    },
+    "2026-10-06": {
+     "idx": 34,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 7,
+      "rain_base": 40,
+      "soil_moisture": 24,
+      "humidity": 0,
+      "temp_drop": 0
+     },
+     "soil": 8.5,
+     "tmin": 6.7
+    },
+    "2026-10-07": {
+     "idx": 37,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 7,
+      "rain_base": 40,
+      "soil_moisture": 23,
+      "humidity": 62,
+      "temp_drop": 0
+     },
+     "soil": 11.1,
+     "tmin": 10.5
+    },
+    "2026-10-08": {
+     "idx": 40,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 7,
+      "rain_base": 40,
+      "soil_moisture": 32,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.8,
+     "tmin": 12.1
+    },
+    "2026-10-09": {
+     "idx": 37,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 7,
+      "rain_base": 4,
+      "soil_moisture": 46,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 10.4,
+     "tmin": 6.8
+    },
+    "2026-10-10": {
+     "idx": 38,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 7,
+      "rain_base": 4,
+      "soil_moisture": 50,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 9.6,
+     "tmin": 7.5
+    },
+    "2026-10-11": {
+     "idx": 38,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 64,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 9.6,
+     "tmin": 7.6
+    },
+    "2026-10-12": {
+     "idx": 45,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 94,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 8.4,
+     "tmin": 4.7
+    },
+    "2026-10-13": {
+     "idx": 42,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 88,
+      "humidity": 62,
+      "temp_drop": 100
+     },
+     "soil": 7.2,
+     "tmin": 3.7
+    },
+    "2026-10-14": {
+     "idx": 41,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 77,
+      "humidity": 61,
+      "temp_drop": 100
+     },
+     "soil": 8.1,
+     "tmin": 5.1
+    }
+   }
+  },
+  "Rečica ob Savinji": {
+   "elev": 400,
+   "terrain": "vlazna",
+   "days": {
+    "2026-09-10": {
+     "idx": 37,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 38,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 17.2,
+     "tmin": 11.6
+    },
+    "2026-09-11": {
+     "idx": 51,
+     "comp": {
+      "temperature": 55,
+      "rain_trigger": 34,
+      "rain_base": 100,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 14.9,
+     "tmin": 11.2
+    },
+    "2026-09-12": {
+     "idx": 33,
+     "comp": {
+      "temperature": 43,
+      "rain_trigger": 34,
+      "rain_base": 24,
+      "soil_moisture": 100,
+      "humidity": 78,
+      "temp_drop": 0
+     },
+     "soil": 15.2,
+     "tmin": 10.1
+    },
+    "2026-09-13": {
+     "idx": 32,
+     "comp": {
+      "temperature": 23,
+      "rain_trigger": 64,
+      "rain_base": 44,
+      "soil_moisture": 90,
+      "humidity": 39,
+      "temp_drop": 0
+     },
+     "soil": 15.8,
+     "tmin": 10.3
+    },
+    "2026-09-14": {
+     "idx": 28,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 64,
+      "rain_base": 44,
+      "soil_moisture": 81,
+      "humidity": 82,
+      "temp_drop": 0
+     },
+     "soil": 17.4,
+     "tmin": 13.2
+    },
+    "2026-09-15": {
+     "idx": 27,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 64,
+      "rain_base": 44,
+      "soil_moisture": 82,
+      "humidity": 69,
+      "temp_drop": 0
+     },
+     "soil": 16.9,
+     "tmin": 11.7
+    },
+    "2026-09-16": {
+     "idx": 27,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 64,
+      "rain_base": 41,
+      "soil_moisture": 76,
+      "humidity": 69,
+      "temp_drop": 0
+     },
+     "soil": 16.7,
+     "tmin": 10.2
+    },
+    "2026-09-17": {
+     "idx": 34,
+     "comp": {
+      "temperature": 20,
+      "rain_trigger": 64,
+      "rain_base": 41,
+      "soil_moisture": 86,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 15.9,
+     "tmin": 13.3
+    },
+    "2026-09-18": {
+     "idx": 55,
+     "comp": {
+      "temperature": 48,
+      "rain_trigger": 96,
+      "rain_base": 100,
+      "soil_moisture": 94,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 15.1,
+     "tmin": 9.2
+    },
+    "2026-09-19": {
+     "idx": 42,
+     "comp": {
+      "temperature": 11,
+      "rain_trigger": 82,
+      "rain_base": 100,
+      "soil_moisture": 85,
+      "humidity": 94,
+      "temp_drop": 0
+     },
+     "soil": 16.2,
+     "tmin": 12.5
+    },
+    "2026-09-20": {
+     "idx": 40,
+     "comp": {
+      "temperature": 10,
+      "rain_trigger": 82,
+      "rain_base": 100,
+      "soil_moisture": 77,
+      "humidity": 77,
+      "temp_drop": 0
+     },
+     "soil": 16.2,
+     "tmin": 11.0
+    },
+    "2026-09-21": {
+     "idx": 40,
+     "comp": {
+      "temperature": 10,
+      "rain_trigger": 82,
+      "rain_base": 100,
+      "soil_moisture": 70,
+      "humidity": 83,
+      "temp_drop": 0
+     },
+     "soil": 16.2,
+     "tmin": 9.2
+    },
+    "2026-09-22": {
+     "idx": 65,
+     "comp": {
+      "temperature": 93,
+      "rain_trigger": 87,
+      "rain_base": 100,
+      "soil_moisture": 64,
+      "humidity": 50,
+      "temp_drop": 100
+     },
+     "soil": 13.7,
+     "tmin": 7.2
+    },
+    "2026-09-23": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 87,
+      "rain_base": 100,
+      "soil_moisture": 58,
+      "humidity": 43,
+      "temp_drop": 100
+     },
+     "soil": 12.4,
+     "tmin": 4.5
+    },
+    "2026-09-24": {
+     "idx": 68,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 87,
+      "rain_base": 100,
+      "soil_moisture": 53,
+      "humidity": 85,
+      "temp_drop": 100
+     },
+     "soil": 12.2,
+     "tmin": 7.0
+    },
+    "2026-09-25": {
+     "idx": 66,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 83,
+      "rain_base": 100,
+      "soil_moisture": 55,
+      "humidity": 68,
+      "temp_drop": 100
+     },
+     "soil": 12.3,
+     "tmin": 6.2
+    },
+    "2026-09-26": {
+     "idx": 67,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 83,
+      "rain_base": 100,
+      "soil_moisture": 56,
+      "humidity": 72,
+      "temp_drop": 100
+     },
+     "soil": 12.0,
+     "tmin": 4.0
+    },
+    "2026-09-27": {
+     "idx": 70,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 52,
+      "humidity": 82,
+      "temp_drop": 100
+     },
+     "soil": 12.7,
+     "tmin": 5.0
+    },
+    "2026-09-28": {
+     "idx": 51,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 30,
+      "rain_base": 100,
+      "soil_moisture": 46,
+      "humidity": 70,
+      "temp_drop": 0
+     },
+     "soil": 13.3,
+     "tmin": 6.5
+    },
+    "2026-09-29": {
+     "idx": 49,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 30,
+      "rain_base": 100,
+      "soil_moisture": 41,
+      "humidity": 48,
+      "temp_drop": 0
+     },
+     "soil": 13.5,
+     "tmin": 5.8
+    },
+    "2026-09-30": {
+     "idx": 48,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 30,
+      "rain_base": 100,
+      "soil_moisture": 35,
+      "humidity": 37,
+      "temp_drop": 0
+     },
+     "soil": 12.4,
+     "tmin": 7.2
+    },
+    "2026-10-01": {
+     "idx": 48,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 30,
+      "rain_base": 100,
+      "soil_moisture": 28,
+      "humidity": 37,
+      "temp_drop": 0
+     },
+     "soil": 12.9,
+     "tmin": 7.5
+    },
+    "2026-10-02": {
+     "idx": 46,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 31,
+      "rain_base": 91,
+      "soil_moisture": 23,
+      "humidity": 29,
+      "temp_drop": 0
+     },
+     "soil": 12.0,
+     "tmin": 6.3
+    },
+    "2026-10-03": {
+     "idx": 37,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 31,
+      "rain_base": 21,
+      "soil_moisture": 17,
+      "humidity": 28,
+      "temp_drop": 0
+     },
+     "soil": 11.9,
+     "tmin": 5.6
+    },
+    "2026-10-04": {
+     "idx": 37,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 3,
+      "rain_base": 21,
+      "soil_moisture": 13,
+      "humidity": 30,
+      "temp_drop": 100
+     },
+     "soil": 11.0,
+     "tmin": 3.0
+    },
+    "2026-10-05": {
+     "idx": 40,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 21,
+      "soil_moisture": 9,
+      "humidity": 78,
+      "temp_drop": 100
+     },
+     "soil": 10.8,
+     "tmin": 3.4
+    },
+    "2026-10-06": {
+     "idx": 39,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 21,
+      "soil_moisture": 6,
+      "humidity": 62,
+      "temp_drop": 100
+     },
+     "soil": 11.3,
+     "tmin": 3.9
+    },
+    "2026-10-07": {
+     "idx": 38,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 3,
+      "rain_base": 21,
+      "soil_moisture": 4,
+      "humidity": 56,
+      "temp_drop": 100
+     },
+     "soil": 12.4,
+     "tmin": 7.1
+    },
+    "2026-10-08": {
+     "idx": 35,
+     "comp": {
+      "temperature": 70,
+      "rain_trigger": 4,
+      "rain_base": 21,
+      "soil_moisture": 34,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 14.4,
+     "tmin": 14.2
+    },
+    "2026-10-09": {
+     "idx": 38,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 4,
+      "rain_base": 3,
+      "soil_moisture": 57,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 13.3,
+     "tmin": 9.7
+    },
+    "2026-10-10": {
+     "idx": 36,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 3,
+      "rain_base": 3,
+      "soil_moisture": 36,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.8,
+     "tmin": 8.6
+    },
+    "2026-10-11": {
+     "idx": 35,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 2,
+      "rain_base": 3,
+      "soil_moisture": 31,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.5,
+     "tmin": 9.2
+    },
+    "2026-10-12": {
+     "idx": 41,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 2,
+      "rain_base": 3,
+      "soil_moisture": 44,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 11.7,
+     "tmin": 4.8
+    },
+    "2026-10-13": {
+     "idx": 43,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 2,
+      "rain_base": 3,
+      "soil_moisture": 64,
+      "humidity": 94,
+      "temp_drop": 100
+     },
+     "soil": 9.1,
+     "tmin": 1.8
+    },
+    "2026-10-14": {
+     "idx": 42,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 1,
+      "rain_base": 3,
+      "soil_moisture": 61,
+      "humidity": 95,
+      "temp_drop": 100
+     },
+     "soil": 10.0,
+     "tmin": 3.6
+    }
+   }
+  },
+  "Spodnje Pobrežje – ob Savinji": {
+   "elev": 350,
+   "terrain": "vlazna",
+   "days": {
+    "2026-09-10": {
+     "idx": 43,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 79,
+      "rain_base": 83,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 16.9,
+     "tmin": 11.3
+    },
+    "2026-09-11": {
+     "idx": 56,
+     "comp": {
+      "temperature": 67,
+      "rain_trigger": 57,
+      "rain_base": 81,
+      "soil_moisture": 100,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 14.5,
+     "tmin": 10.8
+    },
+    "2026-09-12": {
+     "idx": 43,
+     "comp": {
+      "temperature": 55,
+      "rain_trigger": 57,
+      "rain_base": 52,
+      "soil_moisture": 100,
+      "humidity": 78,
+      "temp_drop": 0
+     },
+     "soil": 14.9,
+     "tmin": 9.7
+    },
+    "2026-09-13": {
+     "idx": 48,
+     "comp": {
+      "temperature": 35,
+      "rain_trigger": 100,
+      "rain_base": 95,
+      "soil_moisture": 90,
+      "humidity": 39,
+      "temp_drop": 0
+     },
+     "soil": 15.5,
+     "tmin": 9.9
+    },
+    "2026-09-14": {
+     "idx": 40,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 100,
+      "rain_base": 94,
+      "soil_moisture": 81,
+      "humidity": 82,
+      "temp_drop": 0
+     },
+     "soil": 17.1,
+     "tmin": 12.9
+    },
+    "2026-09-15": {
+     "idx": 40,
+     "comp": {
+      "temperature": 0,
+      "rain_trigger": 100,
+      "rain_base": 94,
+      "soil_moisture": 82,
+      "humidity": 69,
+      "temp_drop": 0
+     },
+     "soil": 16.5,
+     "tmin": 11.3
+    },
+    "2026-09-16": {
+     "idx": 39,
+     "comp": {
+      "temperature": 4,
+      "rain_trigger": 100,
+      "rain_base": 80,
+      "soil_moisture": 76,
+      "humidity": 69,
+      "temp_drop": 0
+     },
+     "soil": 16.4,
+     "tmin": 9.8
+    },
+    "2026-09-17": {
+     "idx": 51,
+     "comp": {
+      "temperature": 32,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 86,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 15.5,
+     "tmin": 13.0
+    },
+    "2026-09-18": {
+     "idx": 59,
+     "comp": {
+      "temperature": 59,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 94,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 14.7,
+     "tmin": 8.9
+    },
+    "2026-09-19": {
+     "idx": 45,
+     "comp": {
+      "temperature": 22,
+      "rain_trigger": 84,
+      "rain_base": 100,
+      "soil_moisture": 85,
+      "humidity": 94,
+      "temp_drop": 0
+     },
+     "soil": 15.8,
+     "tmin": 12.2
+    },
+    "2026-09-20": {
+     "idx": 43,
+     "comp": {
+      "temperature": 21,
+      "rain_trigger": 84,
+      "rain_base": 100,
+      "soil_moisture": 77,
+      "humidity": 77,
+      "temp_drop": 0
+     },
+     "soil": 15.9,
+     "tmin": 10.6
+    },
+    "2026-09-21": {
+     "idx": 43,
+     "comp": {
+      "temperature": 22,
+      "rain_trigger": 84,
+      "rain_base": 100,
+      "soil_moisture": 70,
+      "humidity": 83,
+      "temp_drop": 0
+     },
+     "soil": 15.8,
+     "tmin": 8.8
+    },
+    "2026-09-22": {
+     "idx": 68,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 64,
+      "humidity": 50,
+      "temp_drop": 100
+     },
+     "soil": 13.4,
+     "tmin": 6.9
+    },
+    "2026-09-23": {
+     "idx": 68,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 58,
+      "humidity": 43,
+      "temp_drop": 100
+     },
+     "soil": 12.1,
+     "tmin": 4.1
+    },
+    "2026-09-24": {
+     "idx": 70,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 95,
+      "rain_base": 100,
+      "soil_moisture": 53,
+      "humidity": 85,
+      "temp_drop": 100
+     },
+     "soil": 11.9,
+     "tmin": 6.7
+    },
+    "2026-09-25": {
+     "idx": 68,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 92,
+      "rain_base": 100,
+      "soil_moisture": 55,
+      "humidity": 68,
+      "temp_drop": 100
+     },
+     "soil": 12.0,
+     "tmin": 5.8
+    },
+    "2026-09-26": {
+     "idx": 69,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 97,
+      "rain_base": 100,
+      "soil_moisture": 56,
+      "humidity": 72,
+      "temp_drop": 100
+     },
+     "soil": 11.7,
+     "tmin": 3.7
+    },
+    "2026-09-27": {
+     "idx": 70,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 100,
+      "rain_base": 100,
+      "soil_moisture": 52,
+      "humidity": 82,
+      "temp_drop": 100
+     },
+     "soil": 12.4,
+     "tmin": 4.7
+    },
+    "2026-09-28": {
+     "idx": 49,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 22,
+      "rain_base": 100,
+      "soil_moisture": 46,
+      "humidity": 70,
+      "temp_drop": 0
+     },
+     "soil": 13.0,
+     "tmin": 6.2
+    },
+    "2026-09-29": {
+     "idx": 47,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 22,
+      "rain_base": 100,
+      "soil_moisture": 41,
+      "humidity": 48,
+      "temp_drop": 0
+     },
+     "soil": 13.2,
+     "tmin": 5.5
+    },
+    "2026-09-30": {
+     "idx": 46,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 22,
+      "rain_base": 100,
+      "soil_moisture": 35,
+      "humidity": 37,
+      "temp_drop": 0
+     },
+     "soil": 12.1,
+     "tmin": 6.9
+    },
+    "2026-10-01": {
+     "idx": 46,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 21,
+      "rain_base": 100,
+      "soil_moisture": 28,
+      "humidity": 37,
+      "temp_drop": 0
+     },
+     "soil": 12.6,
+     "tmin": 7.1
+    },
+    "2026-10-02": {
+     "idx": 46,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 27,
+      "rain_base": 100,
+      "soil_moisture": 23,
+      "humidity": 29,
+      "temp_drop": 0
+     },
+     "soil": 11.6,
+     "tmin": 5.9
+    },
+    "2026-10-03": {
+     "idx": 36,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 27,
+      "rain_base": 18,
+      "soil_moisture": 17,
+      "humidity": 28,
+      "temp_drop": 0
+     },
+     "soil": 11.5,
+     "tmin": 5.3
+    },
+    "2026-10-04": {
+     "idx": 37,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 18,
+      "soil_moisture": 13,
+      "humidity": 30,
+      "temp_drop": 100
+     },
+     "soil": 10.6,
+     "tmin": 2.7
+    },
+    "2026-10-05": {
+     "idx": 40,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 18,
+      "soil_moisture": 9,
+      "humidity": 78,
+      "temp_drop": 100
+     },
+     "soil": 10.4,
+     "tmin": 3.0
+    },
+    "2026-10-06": {
+     "idx": 39,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 17,
+      "soil_moisture": 6,
+      "humidity": 62,
+      "temp_drop": 100
+     },
+     "soil": 11.0,
+     "tmin": 3.5
+    },
+    "2026-10-07": {
+     "idx": 38,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 17,
+      "soil_moisture": 4,
+      "humidity": 56,
+      "temp_drop": 100
+     },
+     "soil": 12.1,
+     "tmin": 6.7
+    },
+    "2026-10-08": {
+     "idx": 38,
+     "comp": {
+      "temperature": 82,
+      "rain_trigger": 6,
+      "rain_base": 17,
+      "soil_moisture": 34,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 14.0,
+     "tmin": 13.9
+    },
+    "2026-10-09": {
+     "idx": 38,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 4,
+      "soil_moisture": 57,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 13.0,
+     "tmin": 9.4
+    },
+    "2026-10-10": {
+     "idx": 37,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 6,
+      "rain_base": 4,
+      "soil_moisture": 36,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 11.5,
+     "tmin": 8.3
+    },
+    "2026-10-11": {
+     "idx": 35,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 31,
+      "humidity": 100,
+      "temp_drop": 0
+     },
+     "soil": 12.2,
+     "tmin": 8.8
+    },
+    "2026-10-12": {
+     "idx": 41,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 44,
+      "humidity": 100,
+      "temp_drop": 100
+     },
+     "soil": 11.3,
+     "tmin": 4.5
+    },
+    "2026-10-13": {
+     "idx": 42,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 64,
+      "humidity": 94,
+      "temp_drop": 100
+     },
+     "soil": 8.7,
+     "tmin": 1.4
+    },
+    "2026-10-14": {
+     "idx": 42,
+     "comp": {
+      "temperature": 100,
+      "rain_trigger": 0,
+      "rain_base": 4,
+      "soil_moisture": 61,
+      "humidity": 95,
+      "temp_drop": 100
+     },
+     "soil": 9.7,
+     "tmin": 3.3
+    }
+   }
+  }
+ },
+ "rain": {
+  "2026-09-10": 85.1,
+  "2026-09-11": 35.6
+ },
+ "lag": [
+  8,
+  16
+ ],
+ "rain_min": 25.0
+}
