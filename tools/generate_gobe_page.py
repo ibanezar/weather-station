@@ -331,15 +331,19 @@ def season_months(sp):
 # synchronous script (runs immediately after the shared header markup is
 # parsed) rather than touching generate_seo_pages.py's shared HEADER template —
 # every other generated page keeps the plain Meteorec header untouched.
-# Samo glavna stran: na telefonu je krovna vsebina (glava strani, drobtinice,
-# značka postaje, podnaslov) skrita, da so indeks, najboljši teren in primarni
+# Samo glavna stran: na telefonu je krovna vsebina (drobtinice, značka postaje,
+# podnaslov) skrita, da so indeks, najboljši teren in primarni
 # gumb v prvem zaslonu (PDF »Vizualna prenova«: »glavna informacija brez dolgega
-# drsenja«). Zgornja vrstica (.gp-topbar) in spodnja navigacija ostaneta; isti
-# vzorec kot na /valovi/. h1 ostane viden, a manjši. Subpage_shell tega sloga
+# drsenja«). Spodnja navigacija ostane, zgornje aplikacijske vrstice (.gp-topbar)
+# glavna stran nima; glava z logotipom MeteoGobar je vidna. h1 ostane viden, a manjši. Subpage_shell tega sloga
 # ne dobi, zato podstrani ostanejo nespremenjene.
 HUB_MOBILE_CSS = """<style>
 @media (max-width:760px){
-  body .site-head,body .crumbs,body .stn-badge,body .gp-hub-meta{display:none}
+  body .crumbs,body .stn-badge,body .gp-hub-meta{display:none}
+  /* Glavna stran nima zgornje aplikacijske vrstice (.gp-topbar) — vidna je glava z logotipom
+     MeteoGobar, zato ni odmika zanjo in se lepljiva navigacija prilepi na rob. */
+  body .wrap{padding-top:1rem}
+  .gp-secnav{top:0}
   body .wrap .page-title{font-size:1.3rem;line-height:1.25;margin:.1rem 0 .7rem}
   /* gumb SOS je na telefonu prilepljen na zgornji desni rob (top:9.2rem) */
   .gp-hero-kicker{padding-right:2.6rem}
@@ -5904,7 +5908,6 @@ def build_body(rules, premium, free):
                   if PREMIUM_FREE_LAUNCH else "Premium: 7-dnevna napoved po vrstah")
 
     body = f'''{BRAND_SWAP}
-{top_bar_html("Gobarska napoved", None)}
 {seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
