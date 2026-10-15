@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-15T18:11:20+00:00",
+ "generated": "2026-10-15T19:16:41+00:00",
  "model_version": "1.3",
  "days": [
   "2026-10-15",
@@ -42,81 +42,105 @@
    "name": "Rečica ob Savinji",
    "terrain": "vlazna",
    "elev_m": 400,
-   "home": true
+   "home": true,
+   "lat": 46.326,
+   "lon": 14.921
   },
   {
    "name": "Nazarje – sotočje Drete in Savinje",
    "terrain": "vlazna",
    "elev_m": 340,
-   "home": false
+   "home": false,
+   "lat": 46.319,
+   "lon": 14.949
   },
   {
    "name": "Luče (nad dolino)",
    "terrain": "vlazna",
    "elev_m": 600,
-   "home": false
+   "home": false,
+   "lat": 46.356,
+   "lon": 14.743
   },
   {
    "name": "Solčava – ob Savinji",
    "terrain": "vlazna",
    "elev_m": 640,
-   "home": false
+   "home": false,
+   "lat": 46.419,
+   "lon": 14.693
   },
   {
    "name": "Radegunda spodaj",
    "terrain": "kisla",
    "elev_m": 495,
-   "home": false
+   "home": false,
+   "lat": 46.359,
+   "lon": 14.931
   },
   {
    "name": "Gozdovi nad Ljubnim",
    "terrain": "kisla",
    "elev_m": 700,
-   "home": false
+   "home": false,
+   "lat": 46.348,
+   "lon": 14.834
   },
   {
    "name": "Smrekovško pogorje",
    "terrain": "kisla",
    "elev_m": 1300,
-   "home": false
+   "home": false,
+   "lat": 46.43,
+   "lon": 14.86
   },
   {
    "name": "Dobrovlje – Čreta",
    "terrain": "bazicna",
    "elev_m": 900,
-   "home": false
+   "home": false,
+   "lat": 46.3,
+   "lon": 14.86
   },
   {
    "name": "Mozirska koča – gozd precej nižje",
    "terrain": "bazicna",
    "elev_m": 1100,
-   "home": false
+   "home": false,
+   "lat": 46.371,
+   "lon": 14.905
   },
   {
    "name": "Golte",
    "terrain": "bazicna",
    "elev_m": 1300,
-   "home": false
+   "home": false,
+   "lat": 46.348,
+   "lon": 14.84
   },
   {
    "name": "Menina planina",
    "terrain": "bazicna",
    "elev_m": 1453,
-   "home": false
+   "home": false,
+   "lat": 46.262,
+   "lon": 14.819
   },
   {
    "name": "Dleskovška planota",
    "terrain": "bazicna",
    "elev_m": 1500,
-   "home": false
+   "home": false,
+   "lat": 46.357,
+   "lon": 14.698
   }
  ],
  "index": {
   "boletus_edulis": {
    "Rečica ob Savinji": [
-    41,
+    42,
     49,
-    53,
+    52,
     48,
     47,
     52,
@@ -125,7 +149,7 @@
    "Nazarje – sotočje Drete in Savinje": [
     42,
     52,
-    53,
+    52,
     48,
     47,
     51,
@@ -141,9 +165,9 @@
     60
    ],
    "Solčava – ob Savinji": [
-    44,
+    45,
     55,
-    54,
+    55,
     53,
     53,
     53,
@@ -152,7 +176,7 @@
    "Radegunda spodaj": [
     63,
     78,
-    79,
+    78,
     73,
     72,
     79,
@@ -161,15 +185,15 @@
    "Gozdovi nad Ljubnim": [
     63,
     81,
-    81,
+    80,
     76,
     76,
     79,
     82
    ],
    "Smrekovško pogorje": [
-    67,
-    77,
+    68,
+    78,
     77,
     74,
     74,
@@ -187,7 +211,7 @@
    ],
    "Mozirska koča – gozd precej nižje": [
     44,
-    54,
+    55,
     54,
     52,
     52,
@@ -197,7 +221,7 @@
    "Golte": [
     41,
     53,
-    53,
+    52,
     50,
     50,
     52,
@@ -206,7 +230,7 @@
    "Menina planina": [
     43,
     65,
-    67,
+    66,
     64,
     65,
     56,
@@ -242,9 +266,9 @@
     52
    ],
    "Luče (nad dolino)": [
-    41,
-    46,
-    51,
+    42,
+    48,
+    49,
     58,
     57,
     55,
@@ -252,17 +276,17 @@
    ],
    "Solčava – ob Savinji": [
     49,
-    54,
     56,
+    57,
     57,
     58,
     52,
     53
    ],
    "Radegunda spodaj": [
-    76,
-    71,
-    70,
+    77,
+    78,
+    68,
     81,
     80,
     70,
@@ -271,7 +295,7 @@
    "Gozdovi nad Ljubnim": [
     79,
     84,
-    78,
+    75,
     82,
     82,
     74,
@@ -279,8 +303,8 @@
    ],
    "Smrekovško pogorje": [
     26,
-    37,
-    40,
+    38,
+    39,
     43,
     36,
     29,
@@ -289,7 +313,7 @@
    "Dobrovlje – Čreta": [
     57,
     60,
-    60,
+    59,
     59,
     58,
     52,
@@ -297,7 +321,7 @@
    ],
    "Mozirska koča – gozd precej nižje": [
     23,
-    22,
+    24,
     21,
     22,
     22,
@@ -306,8 +330,8 @@
    ],
    "Golte": [
     33,
-    36,
-    32,
+    35,
+    31,
     38,
     37,
     31,
@@ -325,7 +349,7 @@
    "Dleskovška planota": [
     26,
     28,
-    29,
+    27,
     27,
     28,
     27,
@@ -352,9 +376,9 @@
     46
    ],
    "Luče (nad dolino)": [
-    54,
-    56,
-    53,
+    55,
+    57,
+    51,
     58,
     54,
     51,
@@ -362,8 +386,8 @@
    ],
    "Solčava – ob Savinji": [
     64,
-    66,
-    59,
+    68,
+    60,
     59,
     56,
     50,
@@ -371,8 +395,8 @@
    ],
    "Radegunda spodaj": [
     100,
-    90,
-    72,
+    96,
+    71,
     81,
     78,
     68,
@@ -381,7 +405,7 @@
    "Gozdovi nad Ljubnim": [
     100,
     100,
-    80,
+    77,
     82,
     78,
     71,
@@ -390,7 +414,7 @@
    "Smrekovško pogorje": [
     63,
     72,
-    63,
+    62,
     67,
     53,
     43,
@@ -406,8 +430,8 @@
     49
    ],
    "Mozirska koča – gozd precej nižje": [
-    48,
-    42,
+    49,
+    45,
     32,
     33,
     31,
@@ -415,9 +439,9 @@
     25
    ],
    "Golte": [
-    61,
-    63,
-    48,
+    62,
+    62,
+    46,
     54,
     51,
     42,
@@ -434,8 +458,8 @@
    ],
    "Dleskovška planota": [
     34,
-    34,
-    30,
+    33,
+    29,
     27,
     25,
     24,
@@ -463,8 +487,8 @@
    ],
    "Luče (nad dolino)": [
     25,
-    43,
-    49,
+    44,
+    47,
     58,
     58,
     58,
@@ -472,17 +496,17 @@
    ],
    "Solčava – ob Savinji": [
     35,
-    48,
-    51,
+    50,
+    52,
     55,
     56,
     55,
     57
    ],
    "Radegunda spodaj": [
-    56,
+    57,
+    71,
     65,
-    66,
     78,
     77,
     77,
@@ -491,7 +515,7 @@
    "Gozdovi nad Ljubnim": [
     57,
     77,
-    74,
+    71,
     81,
     81,
     81,
@@ -499,8 +523,8 @@
    ],
    "Smrekovško pogorje": [
     25,
-    45,
-    49,
+    46,
+    48,
     56,
     47,
     49,
@@ -516,8 +540,8 @@
     61
    ],
    "Mozirska koča – gozd precej nižje": [
-    20,
-    28,
+    21,
+    31,
     28,
     31,
     31,
@@ -526,8 +550,8 @@
    ],
    "Golte": [
     33,
-    47,
-    44,
+    46,
+    42,
     53,
     53,
     49,
@@ -535,7 +559,7 @@
    ],
    "Menina planina": [
     15,
-    38,
+    39,
     38,
     41,
     41,
@@ -544,8 +568,8 @@
    ],
    "Dleskovška planota": [
     19,
-    38,
-    41,
+    37,
+    40,
     41,
     41,
     41,
@@ -573,8 +597,8 @@
    ],
    "Luče (nad dolino)": [
     25,
-    43,
-    49,
+    44,
+    47,
     58,
     58,
     58,
@@ -582,17 +606,17 @@
    ],
    "Solčava – ob Savinji": [
     35,
-    48,
-    51,
+    50,
+    52,
     55,
     56,
     55,
     57
    ],
    "Radegunda spodaj": [
-    39,
+    40,
+    49,
     45,
-    46,
     55,
     54,
     54,
@@ -601,7 +625,7 @@
    "Gozdovi nad Ljubnim": [
     57,
     77,
-    74,
+    71,
     81,
     81,
     81,
@@ -609,8 +633,8 @@
    ],
    "Smrekovško pogorje": [
     25,
-    45,
-    49,
+    46,
+    48,
     56,
     47,
     49,
@@ -626,8 +650,8 @@
     61
    ],
    "Mozirska koča – gozd precej nižje": [
-    20,
-    28,
+    21,
+    31,
     28,
     31,
     31,
@@ -636,8 +660,8 @@
    ],
    "Golte": [
     33,
-    47,
-    44,
+    46,
+    42,
     53,
     53,
     49,
@@ -645,7 +669,7 @@
    ],
    "Menina planina": [
     15,
-    38,
+    39,
     38,
     41,
     41,
@@ -654,8 +678,8 @@
    ],
    "Dleskovška planota": [
     19,
-    38,
-    41,
+    37,
+    40,
     41,
     41,
     41,
