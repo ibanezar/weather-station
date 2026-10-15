@@ -5,8 +5,31 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 15 Oct 2026 11:00:32 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 11:22:25 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
+      <link>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</guid>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
+      <description>10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Jurčki: pet od sedmih najdb ob dobrem indeksu</title>
+      <link>https://meteorec.si/blog/jurcki-preverba-napovedi-1015.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/jurcki-preverba-napovedi-1015.html</guid>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Napoved okna za jurčke 23. septembra proti 7 opažanjem bralcev: 5 najdb na dnevih z indeksom 55 ali več, napoved vremena je zgrešila indeks za največ 8 točk.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>jurčki</category>
+      <category>preverba</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>So zime še takšne, kot so bile nekoč? Podatki in spomin</title>
       <link>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</link>
@@ -41,17 +64,6 @@
       <category>konec poletja</category>
       <category>ohladitev</category>
       <category>september</category>
-      <category>IREICA1</category>
-      <category>Zgornja Savinjska dolina</category>
-    </item>
-    <item>
-      <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
-      <link>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.</description>
-      <category>gobe</category>
-      <category>gobarski indeks</category>
       <category>IREICA1</category>
       <category>Zgornja Savinjska dolina</category>
     </item>
