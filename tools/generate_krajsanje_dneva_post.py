@@ -57,6 +57,11 @@ def hm(m):
     return f"{m // 60}:{m % 60:02d}"
 
 
+def hmp(m):
+    """ura v besedilu: pika med uro in minutami (Pravopis § 255); dvopičje je samo v tabeli in na grafu."""
+    return hm(m).replace(":", ".")
+
+
 def ur_min(m):
     m = round(m)
     return f"{m // 60} h {m % 60:02d} min"
@@ -198,7 +203,7 @@ def weekly_table(D, f):
     idxs = list(range(f["t"], f["win_i"], 7)) + [f["win_i"]]
     prev = None
     for i in idxs:
-        week = f"{dur[i] - dur[prev]:+.0f}".replace("-", "−") if prev is not None else "—"
+        week = f"{dur[i] - dur[prev]:+.0f}".replace("-", "–") if prev is not None else "—"
         mark = " (najkrajši dan)" if i == f["win_i"] else ""
         rows.append(f"<tr><td>{short(iso[i])}{mark}</td><td>{hm(rise[i])}</td><td>{hm(sett[i])}</td>"
                     f"<td>{ur_min(dur[i])}</td><td>{week}</td></tr>")
@@ -231,7 +236,7 @@ function dobj(i){var p=D.dates[i].split('-');return new Date(Date.UTC(+p[0],+p[1
 function dl(i){var d=dobj(i);return DN[d.getUTCDay()]+', '+d.getUTCDate()+'. '+(d.getUTCMonth()+1)+'.';}
 function hm(m){m=Math.round(m);return Math.floor(m/60)+':'+('0'+m%60).slice(-2);}
 function du(m){m=Math.round(m);return Math.floor(m/60)+' h '+('0'+m%60).slice(-2)+' min';}
-function sg(x,d){var a=Math.abs(x).toFixed(d).replace('.',',');return (x>0.04?'+':x<-0.04?'−':'±')+a;}
+function sg(x,d){var a=Math.abs(x).toFixed(d).replace('.',',');return (x>0.04?'+':x<-0.04?'–':'±')+a;}
 function f1(x){return x.toFixed(1).replace('.',',');}
 function monthStarts(a,b){var r=[];for(var i=a;i<=b;i++){var d=dobj(i);if(d.getUTCDate()===1)r.push([i,MS[d.getUTCMonth()]]);}return r;}
 
@@ -341,7 +346,7 @@ if(f1el)Fig(f1el,{
   vlines:[{i:D.dst[0],c:MUTED,label:'poletni čas',labelPanel:2,pos:'mid',panels:[2]},{i:D.dst[1],c:MUTED,label:'zimski čas',labelPanel:2,pos:'mid',anchor:'end',panels:[2]}],
   panels:[
     {title:'Dolžina dneva (ure)',h:120,y0:8,y1:16.5,ticks:[8,10,12,14,16],series:[{c:BLUE,name:'dolžina dneva',v:function(i){return D.dur_m[i]/60;}}]},
-    {title:'Sprememba glede na prejšnji dan (min)',h:100,y0:-3.4,y1:3.4,ticks:[-3,-2,-1,0,1,2,3],zero:true,area:true,tf:function(t){return t>0?'+'+t:(t<0?'−'+(-t):t);},series:[{c:BLUE,name:'sprememba',v:function(i){return D.d[i];}}]},
+    {title:'Sprememba glede na prejšnji dan (min)',h:100,y0:-3.4,y1:3.4,ticks:[-3,-2,-1,0,1,2,3],zero:true,area:true,tf:function(t){return t>0?'+'+t:(t<0?'–'+(-t):t);},series:[{c:BLUE,name:'sprememba',v:function(i){return D.d[i];}}]},
     {title:'Sončni vzhod in zahod (lokalni čas)',h:130,y0:4,y1:21.5,ticks:[4,8,12,16,20],tf:function(t){return t+':00';},series:[{c:GREEN,name:'vzhod',brk:true,v:function(i){return D.rise_m[i]/60;}},{c:PURPLE,name:'zahod',brk:true,v:function(i){return D.set_m[i]/60;}}]}
   ],
   readout:function(i){
@@ -383,9 +388,9 @@ def build_article(D, f):
     lost = f["lost"]
     left = f["left"]
     lead = (f"Danes, 5. oktobra, je dan v Rečici ob Savinji dolg {ur_min(f['dur_today'])}: sonce vzide ob "
-            f"{hm(f['rise_today'])}, zaide ob {hm(f['set_today'])}. Vsak dan je krajši za približno "
+            f"{hmp(f['rise_today'])}, zaide ob {hmp(f['set_today'])}. Vsak dan je krajši za približno "
             f"{num(d_today)} minute, do zimskega solsticija pa bomo izgubili še {ur_min(left)}. "
-            f"Krajšanje ni enakomerno — in spodnji grafi to pokažejo, ko z miško (ali prstom) potujete po letu.")
+            f"Krajšanje ni enakomerno – in spodnji grafi to pokažejo, ko z miško (ali prstom) potujete po letu.")
 
     fig1_ctl = ('<div class="dn-ctl"><button type="button" data-r="0" aria-pressed="true">Celo leto</button>'
                 '<button type="button" data-r="1" aria-pressed="false">Jesen in zima</button>'
@@ -401,7 +406,7 @@ def build_article(D, f):
     sec1 = [
         fig1,
         f"Od najdaljšega dne, {short(iso[f['sum_i']])}, ko je bil dan dolg {ur_min(f['sum_max'])}, je do danes "
-        f"minilo {ur_min(lost)} dnevne svetlobe. Do najkrajšega dne, {short(iso[f['win_i']])}, ko bo dan dolg samo "
+        f"odpadlo {ur_min(lost)} dnevne svetlobe. Do najkrajšega dne, {short(iso[f['win_i']])}, ko bo dan dolg samo "
         f"{ur_min(f['win_min'])}, jih bo odpadlo še {ur_min(left)}. Skupaj je torej razlika med poletjem in zimo "
         f"{ur_min(f['sum_max'] - f['win_min'])}.",
         f"Pod mejo 10 ur pade dan {short(iso[f['b10']])}, pod mejo 9 ur pa {short(iso[f['b9']])}",
@@ -422,15 +427,15 @@ def build_article(D, f):
     a, b = f["oct_a"], f["oct_b"]
     sec3 = [
         f"Dan se skrajša na dveh koncih. Med {short(iso[a])} in {short(iso[b])} (pred menjavo ure) se vzhod pomakne "
-        f"z {hm(D['rise_m'][a])} na {hm(D['rise_m'][b])}, zahod pa z {hm(D['set_m'][a])} na {hm(D['set_m'][b])}. "
+        f"z {hmp(D['rise_m'][a])} na {hmp(D['rise_m'][b])}, zahod pa z {hmp(D['set_m'][a])} na {hmp(D['set_m'][b])}. "
         f"Jutra so torej temnejša za {round(D['rise_m'][b] - D['rise_m'][a])} min, večeri za "
         f"{round(D['set_m'][a] - D['set_m'][b])} min.",
         f"Potem pride menjava ure. V noči na {short(iso[dst_f])} se ura pomakne nazaj: sonce zaide že ob "
-        f"{hm(f['dst_set_after'])} namesto ob {hm(f['dst_set_before'])}, vzide pa ob {hm(f['dst_rise_after'])} namesto "
-        f"ob {hm(f['dst_rise_before'])}. Dan sam se zaradi tega ne skrajša — samo prestavi se, večer dobi eno uro manj, "
+        f"{hmp(f['dst_set_after'])} namesto ob {hmp(f['dst_set_before'])}, vzide pa ob {hmp(f['dst_rise_after'])} namesto "
+        f"ob {hmp(f['dst_rise_before'])}. Dan sam se zaradi tega ne skrajša – samo prestavi se, večer dobi eno uro manj, "
         f"jutro eno uro več svetlobe.",
         f"Najkrajši dan ni dan z najzgodnejšim zahodom. Najzgodneje sonce zaide okoli {short(iso[ei])} "
-        f"(ob {hm(D['set_m'][ei])}), najpozneje pa vzide šele okoli {short(iso[li])} (ob {hm(D['rise_m'][li])}), "
+        f"(ob {hmp(D['set_m'][ei])}), najpozneje pa vzide šele okoli {short(iso[li])} (ob {hmp(D['rise_m'][li])}), "
         f"torej več kot teden dni pred oziroma po zimskem solsticiju. Vzrok je razlika med pravim sončnim časom in uro: "
         f"pravi opoldan se te tedne iz dneva v dan pomika pozneje po uri, zato se zahod začne zamikati nazaj, še preden "
         f"se dan neha krajšati, vzhod pa še zamuja, ko se dan že daljša.",
@@ -447,8 +452,8 @@ def build_article(D, f):
         f"februar {num(f['mon'][2])} °C). Najhladnejši dan tipičnega poteka je {short(iso[f['tmin_i']])}, "
         f"{f['lag_cold']} dni po solsticiju.",
         f"Zaostanek je običajen: zemlja in zrak se segrevata in ohlajata počasi, zato temperatura sledi sončnemu "
-        f"obsevanju z zamikom nekaj tednov. Zdaj pomeni: tipična povprečna dnevna temperatura pade s {num(f['t_now'])} °C "
-        f"5. oktobra na {num(f['t_nov'])} °C 5. novembra in {num(f['t_dec'])} °C 1. decembra — ohlajanje se "
+        f"obsevanju z zamikom nekaj tednov. Zdaj to pomeni: tipična povprečna dnevna temperatura pade s {num(f['t_now'])} °C "
+        f"5. oktobra na {num(f['t_nov'])} °C 5. novembra in {num(f['t_dec'])} °C 1. decembra – ohlajanje se "
         f"torej nadaljuje, čeprav se dan krajša vse počasneje.",
     ]
     sec6 = [
@@ -456,7 +461,7 @@ def build_article(D, f):
         f"IREICA1 ({num(LAT, 4)} °N, {num(LON, 4)} °E), z upoštevano refrakcijo in navideznim premerom sonca (zenitni kot "
         "90,833°). Napaka je do približno dveh minut. Uradni podatki (ARSO, Astronomsko društvo) se lahko razlikujejo za minuto ali dve.",
         "Račun predpostavlja ravno obzorje. Rečica leži v ozki dolini, zato sonce dejansko vzide pozneje in zaide prej "
-        "(na dnu doline pogosto za več deset minut, odvisno od pobočij) — dolžina dneva, ki jo čutite na vrtu, "
+        "(na dnu doline pogosto za več deset minut, odvisno od pobočij) – dolžina dneva, ki jo čutite na vrtu, "
         "je torej krajša od astronomske, spremembe po dnevih pa so enake.",
         "Temperaturna krivulja je iz meritev postaje IREICA1 (zunanja temperatura) in ima samo nekaj let podatkov, "
         "zato je to tipični potek v zadnjih letih, ne dolgoletna klimatološka norma; poletni vrh je na krivulji ploščat in nanj vplivajo posamezni vročinski valovi.",
