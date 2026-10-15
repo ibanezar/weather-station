@@ -36,6 +36,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
@@ -330,6 +331,21 @@ def season_months(sp):
 # synchronous script (runs immediately after the shared header markup is
 # parsed) rather than touching generate_seo_pages.py's shared HEADER template —
 # every other generated page keeps the plain Meteorec header untouched.
+# Samo glavna stran: na telefonu je krovna vsebina (glava strani, drobtinice,
+# značka postaje, podnaslov) skrita, da so indeks, najboljši teren in primarni
+# gumb v prvem zaslonu (PDF »Vizualna prenova«: »glavna informacija brez dolgega
+# drsenja«). Zgornja vrstica (.gp-topbar) in spodnja navigacija ostaneta; isti
+# vzorec kot na /valovi/. h1 ostane viden, a manjši. Subpage_shell tega sloga
+# ne dobi, zato podstrani ostanejo nespremenjene.
+HUB_MOBILE_CSS = """<style>
+@media (max-width:760px){
+  body .site-head,body .crumbs,body .stn-badge,body .gp-hub-meta{display:none}
+  body .wrap .page-title{font-size:1.3rem;line-height:1.25;margin:.1rem 0 .7rem}
+  /* gumb SOS je na telefonu prilepljen na zgornji desni rob (top:9.2rem) */
+  .gp-hero-kicker{padding-right:2.6rem}
+}
+</style>"""
+
 BRAND_SWAP = '''<script>(function(){
   var img=document.querySelector(".site-head .brand-logo");
   var nm=document.querySelector(".site-head .brand-name");
@@ -400,11 +416,15 @@ body{
   --gp-fs-lg:1.35rem; --gp-fs-xl:1.9rem; --gp-fs-display:2.7rem;
   --gp-r-control:.625rem; --gp-r-card:.875rem; --gp-r-panel:1.125rem; --gp-r-pill:999px;
 }
-.gp-hero{position:relative;overflow:hidden;border:1px solid var(--card-border);border-radius:var(--gp-r-panel);
-  padding:1.6rem;margin:.6rem 0 1.4rem;box-shadow:var(--card-shadow);
-  background:linear-gradient(200deg,rgba(8,14,7,.45) 0%,rgba(6,10,6,.72) 55%,rgba(6,10,6,.92) 100%),
-    url('/og/bg/gobe-inverzija.jpg') center 35%/cover}
-.gp-hero-top{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+/* Hero (prenova 15. 10. 2026, PDF »Vizualna prenova«): temno gozdna podlaga
+   #183B2C brez fotografije, ki bi potisnila podatke pod pregib; listna zelena
+   #78A95F samo za primarni gumb. Barve ravni indeksa (level_color) ostanejo
+   iste kot po vsej strani — ista semantika povsod, vedno z besedno oznako. */
+.gp-hero{position:relative;border:1px solid rgba(120,169,95,.38);border-radius:18px;
+  padding:1.4rem;margin:.6rem 0 .8rem;box-shadow:var(--card-shadow);color:#E9F0E4;scroll-margin-top:6.5rem;
+  background:linear-gradient(165deg,#1d4634 0%,#183B2C 55%,#122e22 100%)}
+.gp-hero a{color:inherit}
+.gp-hero-top{display:flex;align-items:center;gap:1.2rem}
 .gp-gauge-wrap{position:relative;width:132px;height:132px;flex:0 0 auto}
 /* No width/height attrs on the <svg> itself — those are fixed pixel values
    that ignore .gp-gauge-wrap's own size, so the ring silently overflowed its
@@ -413,57 +433,81 @@ body{
    (smaller) box. Filling 100% here keeps the ring locked to whatever size
    the wrapper actually is at every breakpoint. */
 .gp-ring{display:block;width:100%;height:100%}
-.gp-ring-bg{fill:none;stroke:rgba(255,255,255,.10);stroke-width:11}
+.gp-ring-bg{fill:none;stroke:rgba(233,240,228,.14);stroke-width:11}
 .gp-ring-fg{fill:none;stroke-width:11;stroke-linecap:round;transform:rotate(-90deg);transform-origin:64px 64px}
-/* % stacked under the number (not beside it) — any side-by-side arrangement
-   is lopsided one way or the other, since % only adds width on one side.
-   Stacking both lines and centering each independently sidesteps that. */
+/* /100 pod številko (ne ob njej): vsak sosednji zapis je na eni strani
+   daljši, zato obe vrstici centriramo vsako zase. */
 .gp-gauge-num{position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;line-height:1}
-.gp-gauge-num .num{font-size:var(--gp-fs-display);font-weight:800;color:var(--text)}
-.gp-gauge-num small{display:block;margin-top:.15rem;font-size:var(--gp-fs-sm);color:var(--muted);font-weight:600}
-.gp-hero-body{flex:1;min-width:250px}
-/* .74rem → --gp-fs-xs (.7rem): this and .gp-hero-best-label below are the
-   same "eyebrow" label style repeated at slightly different sizes picked up
-   over separate edits; the token scale is what makes that drift visible, so
-   both now share one size instead of two that differ by a fraction of a
-   pixel. */
-.gp-hero-kicker{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.gp-hero-lvl{font-size:var(--gp-fs-xl);font-weight:800;line-height:1.1;margin:.1rem 0 .55rem}
-/* Best-area score gets its own bordered card, not an inline sentence right
-   under the gauge — the two numbers ("your station" vs "best area today")
-   read as similar-weight stats a few lines apart otherwise, which reviewer
-   feedback flagged as easy to misread as one figure. Same best_loc/best_o
-   data as before, just given equal visual footing instead of a footnote. */
-.gp-hero-best-card{background:rgba(0,0,0,.24);border:1px solid var(--card-border);border-radius:12px;
-  padding:.6rem .85rem;margin-bottom:.75rem}
-.gp-hero-best-label{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.gp-hero-best-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
-  flex-wrap:wrap;margin-top:.25rem}
-.gp-hero-best-name{font-size:1rem;font-weight:700}
-.gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.8rem;padding:.05rem .45rem;
-  border-radius:6px;font-variant-numeric:tabular-nums}
-.gp-hero-topsp{font-size:.85rem;color:var(--muted);margin-bottom:.75rem}
-.gp-hero-trend{display:flex;align-items:center;gap:.6rem;margin:-.25rem 0 .55rem}
-.gp-hero-delta{font-size:.82rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.gp-gauge-num .num{font-size:var(--gp-fs-display);font-weight:800;color:#E9F0E4}
+.gp-gauge-num small{display:block;margin-top:.15rem;font-size:var(--gp-fs-sm);color:#b9c9b0;font-weight:600}
+.gp-hero-body{flex:1;min-width:0}
+.gp-hero-kicker{font-size:var(--gp-fs-xs);text-transform:uppercase;letter-spacing:.06em;color:#b9c9b0;margin-bottom:.8rem}
+.gp-hero-lvl{font-size:var(--gp-fs-xl);font-weight:800;line-height:1.1;margin:.1rem 0 .45rem}
+.gp-hero-trend{display:flex;align-items:center;flex-wrap:wrap;gap:.2rem .6rem;margin:0 0 .45rem}
+.gp-hero-delta{font-size:.88rem;font-weight:700;color:#d3dfcb;font-variant-numeric:tabular-nums}
 .gp-hero-spark .gp-spark{width:84px;height:22px}
-/* Thumb-friendly action row right under the gauge — "glanceable" actions
-   (share, map, notify) instead of making the user read/scroll for them. */
-.gp-action-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
-.gp-chip-action{display:inline-flex;align-items:center;gap:.4rem;min-height:2.75rem;
-  padding:.5rem 1.1rem;border-radius:22px;background:var(--badge-bg);border:1px solid var(--card-border);
-  color:var(--text);font:inherit;font-size:.88rem;font-weight:600;text-decoration:none;cursor:pointer}
-.gp-chip-action:hover{border-color:var(--blue)}
-/* .hi — same green as .e-ok (already palette-validated elsewhere on this
-   page), for the one chip in the row that should read as "do this", not
-   just "you can also go here" like the plain Deli/zemljevid chips. */
-.gp-chip-action.hi{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)}
-.gp-chip-action.hi:hover{background:rgba(52,211,153,.24);border-color:var(--green)}
-.gp-hero-note{color:var(--muted);font-size:.85rem;line-height:1.55;margin-top:1rem;
-  border-top:1px solid rgba(255,255,255,.09);padding-top:.85rem}
+.gp-hero-fresh{font-size:.82rem;color:#b9c9b0;margin-top:.8rem}
+.gp-hero-fresh.stale{color:#E5B861;font-weight:600}
+/* Najboljši teren: svoja kartica, da se dve številki (postaja proti
+   najboljšemu območju) ne berete kot ena. */
+.gp-hero-best-card{background:rgba(233,240,228,.08);border:1px solid rgba(233,240,228,.16);border-radius:14px;
+  padding:.85rem 1rem;margin:.8rem 0 1rem}
+.gp-hero-best-label{display:flex;align-items:center;gap:.4rem;font-size:var(--gp-fs-xs);text-transform:uppercase;
+  letter-spacing:.06em;color:#b9c9b0}
+.gp-hero-best-ic svg{display:block;width:1.15rem;height:1.15rem;color:#78A95F}
+.gp-hero-best-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;margin-top:.3rem}
+.gp-hero-best-name{font-size:1.1rem;font-weight:700}
+.gp-hero-best-pct{display:inline-block;font-weight:700;font-size:.85rem;padding:.1rem .55rem;
+  border-radius:8px;font-variant-numeric:tabular-nums}
+.gp-hero-best-meta{font-size:.82rem;color:#b9c9b0;margin-top:.25rem}
+/* En primarni gumb; bližnjici sta mirnejši (obroba, brez polnila). */
+.gp-hero .gp-cta-primary{display:flex;width:100%;box-sizing:border-box;min-height:3.1rem;margin-top:0;
+  background:#78A95F;color:#0f2218;border-radius:14px;font-size:1rem;text-align:center}
+.gp-hero .gp-cta-primary:hover{background:#8bbb72}
+.gp-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.7rem}
+.gp-shortcut{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:3rem;
+  padding:.4rem .6rem;border-radius:14px;border:1px solid rgba(233,240,228,.28);
+  font-weight:600;font-size:.9rem;line-height:1.2;text-align:center;text-decoration:none}
+.gp-shortcut:hover{border-color:#78A95F}
+.gp-shortcut-ic svg{display:block;width:1.35rem;height:1.35rem}
+.gp-hero-access{font-size:.84rem;line-height:1.45;color:#d3dfcb;margin:.85rem 0 0}
+.gp-hero-links{display:flex;flex-wrap:wrap;gap:0 1.2rem;margin-top:.5rem;font-size:.88rem}
+.gp-hero-links a,.gp-linkbtn{display:inline-flex;align-items:center;min-height:2.75rem;padding:0;
+  background:none;border:0;font:inherit;font-size:.88rem;color:#cfe0c4;text-decoration:underline;
+  text-underline-offset:3px;cursor:pointer}
+.gp-hero-note{color:#b9c9b0;font-size:.82rem;line-height:1.55;margin-top:.3rem;
+  border-top:1px solid rgba(233,240,228,.12);padding-top:.7rem}
+.gp-hero-note a{color:#cfe0c4}
+/* Lepljiva navigacija po razdelkih: nizka, vodoravno drsi, brez spodnje
+   fiksne vrstice. Na telefonu se prilepi pod zgornjo vrstico (3rem). */
+.gp-secnav{position:sticky;top:0;z-index:50;display:flex;gap:.45rem;overflow-x:auto;scrollbar-width:none;
+  padding:.45rem 0;margin:0 0 .6rem;background:var(--bg);border-bottom:1px solid var(--card-border)}
+.gp-secnav::-webkit-scrollbar{display:none}
+.gp-secnav a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:2.5rem;padding:0 1rem;
+  border-radius:var(--gp-r-pill);border:1px solid var(--card-border);background:var(--card-bg);
+  color:var(--muted);font-size:.85rem;font-weight:600;text-decoration:none}
+.gp-secnav a:hover,.gp-secnav a:focus-visible{color:var(--text);border-color:#78A95F}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+.gp-mini-map,.gp-picker,.gp-top-species{scroll-margin-top:6.5rem}
+/* Najbolj obetavne vrste: kartica = fotografija + ime + indeks /100. */
+.gp-top-sp-list{display:grid;gap:.6rem;margin:.6rem 0 .8rem}
+.gp-top-sp{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;border:1px solid var(--card-border);
+  border-radius:16px;background:var(--card-bg);color:var(--text);text-decoration:none}
+.gp-top-sp:hover{border-color:#78A95F}
+.gp-top-sp-ph{position:relative;flex:0 0 3.6rem;width:3.6rem;height:3.6rem;border-radius:12px;overflow:hidden;
+  background:rgba(120,169,95,.16)}
+.gp-top-sp-ph img{display:block;width:100%;height:100%;object-fit:cover}
+.gp-top-sp-ph.ph::after{content:"🍄";display:grid;place-items:center;width:100%;height:100%;font-size:1.5rem}
+.gp-top-sp-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem}
+.gp-top-sp-nm{font-weight:700;line-height:1.25}
+.gp-top-sp-lat{font-size:.78rem;color:var(--muted);font-style:italic;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+@media (min-width:561px){.gp-top-sp-list{grid-template-columns:repeat(2,1fr)}}
 .gp-hero-sub{color:var(--muted);font-size:.9rem;margin-top:.35rem;line-height:1.55}
 .gp-h2{margin-top:2.6rem;margin-bottom:.9rem;padding-bottom:.4rem;border-bottom:1px solid var(--border);
-  font-size:var(--gp-fs-lg);scroll-margin-top:4rem}
+  font-size:var(--gp-fs-lg);scroll-margin-top:6.5rem}
 .gp-h2 + .archive-intro,.gp-h2 + .post-meta{margin-top:-.3rem}
 .gp-cta{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;
   background:var(--blue);color:#04070e;font:inherit;
@@ -996,6 +1040,7 @@ body .app-bottomnav{display:none}
      safe-area inset, so content can always be scrolled clear of the fixed
      bar regardless of how tall that inset actually is on a given phone. */
   body .wrap{padding-bottom:calc(var(--gp-bnh) + env(safe-area-inset-bottom) + 1rem);padding-top:3.5rem}
+  .gp-secnav{top:3rem}
   .gp-topbar{display:flex;position:fixed;left:0;right:0;top:0;z-index:55;height:3rem;
     align-items:center;gap:.5rem;padding:0 .5rem;background:var(--card-bg);
     backdrop-filter:blur(10px);border-bottom:1px solid var(--card-border)}
@@ -1120,8 +1165,8 @@ body .app-bottomnav{display:none}
 @media (max-width:560px){
   .gp-h2{margin-top:2rem;font-size:1.18rem}
   /* Hero: gauge in besedilo naj bosta poravnana levo, ne razpotegnjena. */
-  .gp-hero{padding:1.2rem}
-  .gp-hero-top{gap:1rem}
+  .gp-hero{padding:1.1rem}
+  .gp-hero-top{gap:.9rem}
   .gp-gauge-wrap{width:104px;height:104px}
   .gp-gauge-num .num{font-size:2.1rem}
   .gp-hero-lvl{font-size:1.55rem}
@@ -1373,7 +1418,7 @@ PAGE_JS = """<script>
           onerror="this.replaceWith(document.createTextNode('🍄'))"></div>
         <div class="gp-explain-body">
         <div class="gp-explain-name">${esc2(m.name_sl||s.id)}</div>
-        <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index} %</div>
+        <div class="gp-explain-idx" style="color:${levelColor(s.index)}">${s.index}/100</div>
         <details class="gp-explain-more"><summary></summary><p>${esc2(explText(s))}${dblHtml}</p>${ecoBadgeHtml(m)}${factorsHtml}</details>
         </div></div>`;}).join('');
   }
@@ -1389,7 +1434,7 @@ PAGE_JS = """<script>
     var days=loc.days,bi=0;
     for(var i=1;i<days.length;i++){if(days[i].overall>days[bi].overall)bi=i;}
     if(bi===dayIdx)return null;
-    return dayLabel(days[bi],bi===0)+' · '+days[bi].overall+' %';
+    return dayLabel(days[bi],bi===0)+' · '+days[bi].overall+'/100';
   }
   // Single "today per forest" row for an arbitrary day index — used both for
   // the initial render and for the day-chip re-render below, so picking a
@@ -1405,7 +1450,7 @@ PAGE_JS = """<script>
         `onerror="this.replaceWith(document.createTextNode('🍄'))">`;
       return '<div class="gp-fsp-row"><div class="gp-fsp-left">'+ic+
         '<span class="gp-fsp-name">'+esc2(m.name_sl||s.id)+'</span></div>'+
-        '<div class="gp-sp-right">'+warn+s.index+' %</div></div>';
+        '<div class="gp-sp-right">'+warn+s.index+'/100</div></div>';
     }).join('');
     var peak=bestDayText(l,dayIdx);
     var peakHtml=peak?('<span>📈 najboljši dan: '+peak+'</span>')
@@ -1441,7 +1486,7 @@ PAGE_JS = """<script>
     html+='<div class="gp-chip-row gp-day-chips">';
     loc.days.forEach(function(day,i){
       html+='<button type="button" class="gp-chip'+(i===0?' active':'')+'" data-day="'+i+'">'+
-        dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(day.overall)+'">'+day.overall+' %</span></button>';
+        dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(day.overall)+'">'+day.overall+'/100</span></button>';
     });
     html+='</div>';
     var day0=loc.days[0], total0=day0.species.length;
@@ -1450,10 +1495,10 @@ PAGE_JS = """<script>
       (total0<=gpExplainShown?' hidden':'')+'>Pokaži več vrst ('+(total0-gpExplainShown)+')</button></div>';
     html+=soilCardHtml(loc);
     html+='<details class="gp-collapse gp-matrix-toggle"><summary>Podrobna tabela vseh dni <small>(vseh 8 vrst)</small></summary>';
-    html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (≥55%)</span>'+
-      '<span><i style="background:#f59e0b"></i>Zmerna (35–54%)</span>'+
-      '<span><i style="background:#fb923c"></i>Slaba (18–34%)</span>'+
-      '<span><i style="background:#f87171"></i>Brez (&lt;18%)</span></div>';
+    html+='<div class="gp-legend"><span><i style="background:#34d399"></i>Dobra/odlična (55–100)</span>'+
+      '<span><i style="background:#f59e0b"></i>Zmerna (35–54)</span>'+
+      '<span><i style="background:#fb923c"></i>Slaba (18–34)</span>'+
+      '<span><i style="background:#f87171"></i>Brez (0–17)</span></div>';
     html+='<div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
     loc.days.forEach(function(day,i){html+='<th>'+dayLabel(day,i===0)+'</th>';});
     html+='</tr></thead><tbody>';
@@ -1513,7 +1558,7 @@ PAGE_JS = """<script>
     home.days.forEach(function(day,i){
       var peak=Math.max.apply(null,locs.map(function(l){return l.days[i].overall;}));
       html+='<button type="button" class="gp-chip'+(i===0?' active':'')+'" data-day="'+i+'">'+
-        dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(peak)+'">'+peak+' %</span></button>';
+        dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(peak)+'">'+peak+'/100</span></button>';
     });
     html+='</div>';
     html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta)+'</div>';
@@ -1523,7 +1568,7 @@ PAGE_JS = """<script>
     locs.forEach(function(l,i){
       var o=l.days[0];
       html+='<button type="button" class="gp-chip'+(l===home?' active':'')+'" data-i="'+i+'">'+
-        esc2(l.name)+'<span class="gp-chip-pct" style="color:'+levelColor(o.overall)+'">'+o.overall+' %</span></button>';
+        esc2(l.name)+'<span class="gp-chip-pct" style="color:'+levelColor(o.overall)+'">'+o.overall+'/100</span></button>';
     });
     html+='</div>';
     html+='<div id="gp-loc-detail">'+locDetailHtml(home, meta)+'</div>';
@@ -1891,13 +1936,24 @@ PAGE_JS = """<script>
     });
   }
 
+  // Svežina podatkov: čas izračuna je vgrajen ob generiranju; če cron izpade in
+  // je starejši od 26 h, ga označimo (stare vrednosti ne skrivamo, samo označimo).
+  var fresh=document.getElementById("gp-hero-fresh");
+  if(fresh&&fresh.dataset.generated){
+    var ageH=(Date.now()-Date.parse(fresh.dataset.generated))/36e5;
+    if(ageH>26){
+      fresh.classList.add("stale");
+      fresh.appendChild(document.createTextNode(" · podatki niso sveži, napoved lahko zaostaja"));
+    }
+  }
+
   // Share chip — native share sheet where available, clipboard fallback
   var shareBtn=document.getElementById("gp-share-btn"), shareMsg=document.getElementById("gp-share-msg");
   if(shareBtn){
     shareBtn.addEventListener("click",function(){
       var pct=shareBtn.dataset.pct, lvl=shareBtn.dataset.lvl;
       var data={title:"Gobarska napoved",
-        text:"Gobarski indeks danes: "+pct+" % ("+lvl+") — Zgornja Savinjska dolina",
+        text:"Gobarski indeks danes: "+pct+"/100 ("+lvl+") — Zgornja Savinjska dolina",
         url:location.href};
       if(navigator.share){navigator.share(data).catch(function(){});return;}
       if(navigator.clipboard&&navigator.clipboard.writeText){
@@ -2197,6 +2253,12 @@ SP_JS = """<script>
     });
   }
   moreEl.addEventListener("click",function(){ shown+=PAGE*2; render(); });
+  // ?q=<ime> (povezave iz »Najbolj obetavne vrste« na glavni strani): iskalnik se
+  // napolni vnaprej, kot da bi bralec ime vtipkal sam.
+  try{
+    var qp=new URLSearchParams(location.search).get("q");
+    if(qp&&qEl){ qEl.value=qp; query=norm(qp); }
+  }catch(e){}
   // Vrstica skupin drsi vodoravno; na strani skupine je aktivna lahko zunaj
   // vidnega dela, zato jo pripeljemo v pogled (brez premika same strani).
   var active=document.querySelector(".gp-sp-chips a.on");
@@ -2518,7 +2580,7 @@ TREND_JS = """<script>
     var bestHtml='';
     if(allBest){
       bestHtml+='<div class="gp-trend-best">🏆 Najboljši dan v zadnjih '+years.length+' letih: <b>'+
-        fmtDate(allBest.b.date)+'</b> — '+allBest.b.overall+' % ('+esc3(allBest.b.top||'')+')';
+        fmtDate(allBest.b.date)+'</b> — '+allBest.b.overall+'/100 ('+esc3(allBest.b.top||'')+')';
       if(thisBest&&allBest.yr!==curYear){
         bestHtml+='<br>🍄 Letošnji vrh do zdaj: <b>'+fmtDate(thisBest.date)+'</b> — '+thisBest.overall+
           ' % ('+esc3(thisBest.top||'')+')';
@@ -2646,6 +2708,36 @@ def hero_sparkline_svg(vals, color):
             'stroke-linecap="round" stroke-linejoin="round"/></svg>')
 
 
+def _tocke(n):
+    """»točka« po števniku (Pravopis: 1 točka, 2 točki, 3–4 točke, od 5 točk)."""
+    n = abs(n)
+    if n % 100 == 1: return f"{n} točka"
+    if n % 100 == 2: return f"{n} točki"
+    if n % 100 in (3, 4): return f"{n} točke"
+    return f"{n} točk"
+
+
+def _delta_text(delta):
+    """Sprememba indeksa v besedi (»4 točke manj kot včeraj«), ne v predznaku —
+    na telefonu se »+4« bere kot odstotek ali kot napaka."""
+    if delta == 0:
+        return "→ Enako kot včeraj"
+    return f'{"↑" if delta > 0 else "↓"} {_tocke(delta)} {"več" if delta > 0 else "manj"} kot včeraj'
+
+
+def fmt_updated(iso_utc):
+    """Čas izračuna napovedi po naši uri: »15. 10. 2026 ob 7.30« (ura s piko,
+    Pravopis § 255). Vir je `generated` iz gobe_model.compute_forecast, ne
+    datum strani: pri statičnem datumu bi bralec videl »danes« tudi, če cron
+    ni stekel (isto načelo kot svežina na /agrometeo/ in /meteogasilec/).
+    Ob neberljivem zapisu vrne None — raje brez časa kot izmišljen čas."""
+    try:
+        d = _dt.datetime.fromisoformat(iso_utc).astimezone(ZoneInfo("Europe/Ljubljana"))
+    except (TypeError, ValueError):
+        return None
+    return f"{d.day}. {d.month}. {d.year} ob {d.hour}.{d.minute:02d}"
+
+
 def hero_trend_html(pct):
     """Delta vs. yesterday + 7-day sparkline under the hero level line.
     Empty string until there's at least 2 days of history — no fabricated
@@ -2657,9 +2749,7 @@ def hero_trend_html(pct):
     yesterday = next((h["index"] for h in hist if h["date"] == yesterday_iso), None)
     delta_html = ""
     if yesterday is not None:
-        delta = pct - yesterday
-        arrow = "↑" if delta > 0 else ("↓" if delta < 0 else "→")
-        delta_html = f'<span class="gp-hero-delta">{arrow} {delta:+d} od včeraj</span>'
+        delta_html = f'<span class="gp-hero-delta">{_delta_text(pct - yesterday)}</span>'
     spark = hero_sparkline_svg([h["index"] for h in hist[-7:]], "#c17f3e")
     spark_html = f'<span class="gp-hero-spark">{spark}</span>' if spark else ""
     if not delta_html and not spark_html:
@@ -2918,14 +3008,68 @@ def feature_cards_html(counts):
             )
         groups.append(
             f'  <div class="gp-feat-group" data-cat="{key}">\n'
-            f'    <h3 class="gp-feat-group-title">{emoji} {_esc(label)}</h3>\n'
+            f'    <h3 class="gp-feat-group-title">{_esc(label)}</h3>\n'
             f'    <div class="gp-feat">\n' + "\n".join(cards) + '\n    </div>\n'
             '  </div>')
     more_html = " · ".join(f'<a href="{href}">{_esc(label)}</a>' for href, label in GOBE_MORE)
-    return ('  <h2 class="gp-h2" id="zmoznosti">🧭 Orodja za gobarje</h2>\n'
+    free_note = (' Oznaka »brezplačno« pomeni: brezplačno z e-pošto, brez gesla in plačila.'
+                 if PREMIUM_FREE_LAUNCH else '')
+    return ('  <h2 class="gp-h2" id="zmoznosti">Orodja za gobarje</h2>\n'
             '  <p class="archive-intro">Zemljevid, baza vrst, dnevnik in drugo — vsaka kartica pelje naravnost na '
-            'svojo stran ali razdelek.</p>\n' + "\n".join(groups) +
+            f'svojo stran ali razdelek.{free_note}</p>\n' + "\n".join(groups) +
             f'\n  <p class="gp-feat-more">Več: {more_html}</p>')
+
+
+# ── Lepljiva navigacija po razdelkih (samo sidra, brez JS) ───────────────────
+# Zaporedje sledi odločitvi bralca: razmere → območja → napoved → vrste →
+# orodja. Ni spodnje fiksne vrstice (že obstaja bottom nav za podstrani), zato
+# je ta nizka in vodoravno drsi. Vsako sidro mora obstajati v build_body().
+SECTION_NAV = [("#danes", "Danes"), ("#obmocja", "Območja"), ("#izbirnik", "7 dni"),
+               ("#vrste", "Vrste"), ("#zmoznosti", "Orodja")]
+
+
+def section_nav_html():
+    links = "".join(f'<a href="{href}">{_esc(label)}</a>' for href, label in SECTION_NAV)
+    return f'  <nav class="gp-secnav" aria-label="Razdelki strani">{links}</nav>'
+
+
+TOP_SPECIES_N = 4
+
+
+def top_species_html(premium, total_species):
+    """»Najbolj obetavne vrste« za domače območje (Rečica ob Savinji) danes:
+    fotografija, ime, indeks /100 z besedno oznako in povezava na vrsto v bazi.
+    Iste vrednosti kot v junaški kartici (home, days[0]) — ne drugi izračun.
+    Vrsta z indeksom 0 ni »obetavna«, zato je ne prikažemo; če je ni nobene,
+    razdelek pove, da danes nobena vrsta nima ugodnih pogojev, namesto da ga
+    izpustimo (sidro #vrste mora obstajati)."""
+    home = next((l for l in premium["locations"] if l["home"]), premium["locations"][0])
+    meta = premium["species_meta"]
+    cat_path = {key: path for path, key, *_ in BAZA_CATS if key}
+    cards = []
+    for sp in [s for s in home["days"][0]["species"] if s["index"] > 0][:TOP_SPECIES_N]:
+        m = meta[sp["id"]]
+        has_photo = os.path.exists(os.path.join(ROOT, "gobarska-napoved", "img", "vrste", f"{sp['id']}.jpg"))
+        photo = (f'<img src="/gobarska-napoved/img/vrste/{sp["id"]}.jpg" alt="{_esc(m["name_sl"])}" loading="lazy" '
+                 'onerror="this.parentElement.classList.add(\'ph\');this.remove()">' if has_photo else "")
+        path = cat_path.get(EDIB_FILTER.get((m.get("edibility") or "").lower().strip(), ""), "")
+        href = ("/gobarska-napoved/baza-vrst/" + (f"{path}/" if path else "")
+                + "?q=" + urllib.parse.quote(m["name_sl"]))
+        lvl = level_class(sp["index"])
+        cards.append(
+            f'    <a class="gp-top-sp" href="{href}">'
+            f'<span class="gp-top-sp-ph{"" if has_photo else " ph"}">{photo}</span>'
+            f'<span class="gp-top-sp-body"><span class="gp-top-sp-nm">{_esc(m["name_sl"])}</span>'
+            f'<span class="gp-top-sp-lat">{_esc(m["name_lat"])}</span></span>'
+            f'<span class="gp-forest-pct {lvl}"><span class="n">{sp["index"]}/100</span>'
+            f'<span class="lvl">{_esc(gm.level(sp["index"]))}</span></span></a>')
+    body = ('    <div class="gp-top-sp-list">\n' + "\n".join(cards) + '\n    </div>' if cards else
+            '    <p class="gp-hero-sub">Danes v Rečici ob Savinji nobena vrsta nima ugodnih pogojev.</p>')
+    return ('  <div class="gp-top-species" id="vrste">\n'
+            '    <h2 class="gp-h2">Najbolj obetavne vrste danes</h2>\n'
+            f'    <p class="gp-hero-sub">Rečica ob Savinji · indeks po vrstah, od 0 do 100.</p>\n{body}\n'
+            f'    <a class="gp-cta alt" href="/gobarska-napoved/baza-vrst/">Vse vrste v bazi ({total_species}) →</a>\n'
+            '  </div>')
 
 
 # Custom two-tone (duotone) SVG icon set for the bottom nav — replaces the
@@ -4713,7 +4857,7 @@ def build_danes_page(forests_html, free, indexed, area_names):
             f'{TODAY.isoformat()}. Izračunan je iz vlage in temperature tal, kumulativnih padavin '
             '(lokalno iz postaje IREICA1), zračne vlage in nočne ohladitve — po vrstah in po geologiji '
             'terena.</p>\n'
-            f'  <p class="archive-intro">Danes v Rečici ob Savinji: <strong>{free["index"]} % · '
+            f'  <p class="archive-intro">Danes v Rečici ob Savinji: <strong>{free["index"]}/100 · '
             f'{_esc(free["level"])}</strong>. Indeks je ocena ugodnosti pogojev za rast, ne obljuba '
             'najdbe — gozd ima vedno zadnjo besedo.</p>\n'
             + forests_html)
@@ -5018,10 +5162,10 @@ def build_zemljevid_page(premium, rules):
   so označena posebej — pred nabiranjem preveri veljavne omejitve na kraju samem. Oznake so
   <strong>širša območja</strong>, ne točne najdbe.</p>
   <div class="gp-map-legend">
-    <span><i style="background:#34d399"></i>Dobra/odlična (≥55 %)</span>
-    <span><i style="background:#f59e0b"></i>Zmerna (35–54 %)</span>
-    <span><i style="background:#fb923c"></i>Slaba (18–34 %)</span>
-    <span><i style="background:#f87171"></i>Brez (&lt;18 %)</span>
+    <span><i style="background:#34d399"></i>Dobra/odlična (55–100)</span>
+    <span><i style="background:#f59e0b"></i>Zmerna (35–54)</span>
+    <span><i style="background:#fb923c"></i>Slaba (18–34)</span>
+    <span><i style="background:#f87171"></i>Brez (0–17)</span>
     <span><i style="background:#a78bfa"></i>Zaščiteno</span>
   </div>
   <div id="gp-species-legend" class="gp-map-legend" hidden>
@@ -5068,7 +5212,7 @@ def build_zemljevid_page(premium, rules):
       h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' / 100</span> · '+esc(p.lvl)+'</div>';
       if(p.sp&&p.sp.length){
         h+='<ul class="sp-list">'+p.sp.map(function(s){
-          return'<li>🍄 '+esc(s.n)+' <span class="sp-pct">'+s.i+' %</span></li>';
+          return'<li>🍄 '+esc(s.n)+' <span class="sp-pct">'+s.i+'/100</span></li>';
         }).join('')+'</ul>';
         if(p.sp_total>p.sp.length)h+='<div class="sp-more">+'+(p.sp_total-p.sp.length)+' drugih vrst z indeksom</div>';
       }
@@ -5183,8 +5327,9 @@ def mini_map_preview_html(premium):
             f'<span class="gp-forest-sp">{top_ic}{_esc(top_nm)}</span></div>'
             f'<div class="gp-forest-pct {level_class(o["overall"])}">'
             f'<span class="n">{o["overall"]}/100</span><span class="lvl">{o["level"]}</span></div></a>')
-    return ('  <div class="gp-mini-map">\n'
-            '    <h2 class="gp-h2">🗺️ Danes v dolini</h2>\n'
+    return ('  <div class="gp-mini-map" id="obmocja">\n'
+            '    <h2 class="gp-h2">Najboljša območja danes</h2>\n'
+            '    <p class="gp-hero-sub">Tri območja z najvišjim indeksom. Klik odpre zemljevid.</p>\n'
             '    <div class="gp-forests">\n' + "\n".join(chips) + '\n    </div>\n'
             f'    <a class="gp-cta alt" href="/gobarska-napoved/danes/">Vsa območja ({len(locs)}) →</a>\n'
             '  </div>')
@@ -5222,7 +5367,7 @@ def picker_section_html(picker, total_species, total_locations):
     data_json = _json_mod.dumps(picker, ensure_ascii=False, separators=(",", ":"))
 
     return f'''  <div class="gp-picker" id="gp-picker">
-    <h2 class="gp-h2" id="izbirnik" style="margin-top:1.5rem">🔎 Preveri vrsto, dan in območje</h2>
+    <h2 class="gp-h2" id="izbirnik" style="margin-top:1.5rem">Napoved za 7 dni: vrsta, dan, območje</h2>
     <p class="gp-hero-sub">{len(picker["species"])} najpogostejših vrst za naslednjih {len(picker["days"])} dni in
     {len(picker["locations"])} osrednjih območij doline — brez prijave.</p>
     <div class="gp-picker-row">
@@ -5338,53 +5483,67 @@ def build_body(rules, premium, free):
     month = TODAY.month
 
     # ── HERO (free teaser) ────────────────────────────────────────────────────
-    hero_trend = hero_trend_html(pct)
-    # Kratek gumb + ločena majhna značka namesto ene dolge promocijske vrstice
-    # ("🎉 Poglej ... (zaenkrat brezplačno) →") — bralec naj v enem pogledu
-    # loči akcijo (kam vodi klik) od stanja cenika (da je trenutno brezplačno).
-    hero_cta = (f'<a class="gp-cta gp-cta-lg" href="#premium" id="gp-hero-unlock">7-dnevna napoved →</a>'
-                f'<span class="gp-badge e-ok" style="margin-left:.5rem;vertical-align:middle">Trenutno brezplačno</span>'
-                if PREMIUM_FREE_LAUNCH else
-                f'<a class="gp-cta gp-cta-lg" href="#pricing" id="gp-hero-unlock">'
-                f'Odkleni 7-dnevno napoved po vrstah →</a>')
-    # "Obvesti me ob ugodnih pogojih" vodi na cenik za nastavitev alarma —
+    # Hero sledi zaporedju odločitve (PDF »Vizualna prenova«, 15. 10. 2026):
+    # indeks → čas osvežitve → najboljši teren → EN primarni gumb (območja) →
+    # največ dve bližnjici (7 dni, prepoznava). Deli / zemljevid / opažanje so
+    # mirna vrstica povezav, ne gumbi. id-ji gp-share-btn / gp-share-msg ostanejo
+    # (PAGE_JS jih bere).
+    updated = fmt_updated(free["generated"])
+    fresh_html = (f'<div class="gp-hero-fresh" id="gp-hero-fresh" data-generated="{_esc(free["generated"])}">'
+                  f'Posodobljeno: <time datetime="{_esc(free["generated"])}">{updated}</time></div>'
+                  if updated else "")
+    if PREMIUM_FREE_LAUNCH:
+        shortcut_fc = ('<a class="gp-shortcut" href="#premium"><span class="gp-shortcut-ic" aria-hidden="true">'
+                       f'{_FI_7DNI}</span><span>7-dnevna napoved</span></a>')
+        access_note = ('<p class="gp-hero-access">Napoved po vrstah in prepoznava gob: <strong>brezplačno z e-pošto, '
+                       'brez gesla in plačila.</strong></p>')
+    else:
+        shortcut_fc = ('<a class="gp-shortcut" href="#pricing"><span class="gp-shortcut-ic" aria-hidden="true">'
+                       f'{_FI_7DNI}</span><span>Odkleni 7-dnevno napoved</span></a>')
+        access_note = ""
+    shortcut_ai = ('<a class="gp-shortcut" href="#premium"><span class="gp-shortcut-ic" aria-hidden="true">'
+                   f'{_FI_AI}</span><span>Prepoznaj gobo</span></a>')
+    # »Obvesti me ob ugodnih pogojih« vodi na cenik za nastavitev alarma —
     # med brezplačnim zagonom cenika ni (glej PREMIUM_FREE_LAUNCH), zato gre
-    # ta klic ven šele, ko se cenik vrne.
-    alert_chip = ('' if PREMIUM_FREE_LAUNCH else
-                  '\n      <a class="gp-chip-action" href="#pricing">🔔 Obvesti me ob ugodnih pogojih</a>')
-    hero = f'''  <div class="gp-hero">
+    # ta povezava ven šele, ko se cenik vrne.
+    alert_link = ('' if PREMIUM_FREE_LAUNCH else '\n      <a href="#pricing">Obvesti me ob ugodnih pogojih</a>')
+    best_terr = best_loc.get("terrain") or ""
+    best_meta = " · ".join(x for x in (best_terr, f'{best_loc["elev_m"]} m') if x)
+    hero_trend = hero_trend_html(pct)
+    hero = f'''  <section class="gp-hero" id="danes" aria-labelledby="gp-hero-title">
+    <div class="gp-hero-kicker" id="gp-hero-title">Gobarski indeks danes · {_esc(free["location"])}</div>
     <div class="gp-hero-top">
-      <div class="gp-gauge-wrap">
+      <div class="gp-gauge-wrap" role="img" aria-label="Gobarski indeks {pct} od 100, {_esc(lvl)}">
         {gauge_svg(pct)}
-        <div class="gp-gauge-num"><span class="num">{pct}</span><small>/ 100</small></div>
+        <div class="gp-gauge-num" aria-hidden="true"><span class="num">{pct}</span><small>/100</small></div>
       </div>
       <div class="gp-hero-body">
-        <div class="gp-hero-kicker">Gobarski indeks danes · Rečica ob Savinji</div>
         <div class="gp-hero-lvl" style="color:{level_color(pct)}">{lvl}</div>
         {hero_trend}
-        <div class="gp-hero-best-card">
-          <div class="gp-hero-best-label">🌲 Najboljši teren danes</div>
-          <div class="gp-hero-best-row">
-            <strong class="gp-hero-best-name">{_esc(best_loc["name"])}</strong>
-            <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]} / 100 · {best_o["level"]}</span>
-          </div>
-        </div>
-        {f'<div class="gp-hero-topsp">🍄 Najbolj obetavna vrsta za Rečico ob Savinji: <strong>{_esc(top_sl)}</strong></div>' if top_sl != "—" else ""}
-        {hero_cta}
       </div>
     </div>
-    <div class="gp-action-chips">
-      <button type="button" class="gp-chip-action" id="gp-share-btn"
+    {fresh_html}
+    <div class="gp-hero-best-card">
+      <div class="gp-hero-best-label"><span class="gp-hero-best-ic" aria-hidden="true">{_FI_GOZDOVI}</span>Najbolj obetavno območje</div>
+      <div class="gp-hero-best-row">
+        <strong class="gp-hero-best-name">{_esc(best_loc["name"])}</strong>
+        <span class="gp-hero-best-pct" style="background:{level_color(best_o["overall"])}22;color:{level_color(best_o["overall"])}">{best_o["overall"]}/100 · {best_o["level"]}</span>
+      </div>
+      <div class="gp-hero-best-meta">{_esc(best_meta)}</div>
+    </div>
+    <a class="gp-cta gp-cta-lg gp-cta-primary" href="/gobarska-napoved/danes/">Poglej najboljša območja →</a>
+    <div class="gp-shortcuts">{shortcut_fc}{shortcut_ai}</div>
+    {access_note}
+    <div class="gp-hero-links">
+      <button type="button" class="gp-linkbtn" id="gp-share-btn"
         data-pct="{pct}" data-lvl="{_esc(lvl)}">Deli</button>
-      <a class="gp-chip-action" href="/gobarska-napoved/zemljevid/">Odpri zemljevid</a>
-      <a class="gp-chip-action hi" href="/gobarska-napoved/danes/#opazovanja">📝 Dodaj opažanje</a>{alert_chip}
+      <a href="/gobarska-napoved/zemljevid/">Zemljevid</a>
+      <a href="/gobarska-napoved/danes/#opazovanja">Dodaj opažanje</a>{alert_link}
     </div>
     <span id="gp-share-msg" class="gp-msg" style="min-height:auto"></span>
     <div class="gp-hero-note">Indeks je <strong>ocena ugodnosti pogojev</strong> za rast, ne obljuba najdbe.
-    Upošteva temperaturo in vlago tal, kumulativne padavine (lokalno iz postaje IREICA1), zračno vlago in
-    nočno ohladitev — po vrstah in po geologiji terena.
     <a href="/gobarska-napoved/metodologija/">Kako deluje indeks →</a></div>
-  </div>'''
+  </section>'''
 
     # ── interactive species/day/area picker (free) — right under the hero,
     # see CLAUDE.md "Glavna stran gobarja" for the documented exception.
@@ -5452,14 +5611,14 @@ def build_body(rules, premium, free):
     _SKEL_DECOY = [(72, "Dobro"), (58, "Zmerno"), (81, "Odlično"), (44, "Zmerno"), (65, "Dobro")]
     skel_rows = "\n".join(
         f'      <div class="gp-forest"><span>{_esc(premium["species_meta"][s["id"]]["name_sl"])}</span>'
-        f'<b>{_SKEL_DECOY[i % len(_SKEL_DECOY)][0]} % · {_SKEL_DECOY[i % len(_SKEL_DECOY)][1]}</b></div>'
+        f'<b>{_SKEL_DECOY[i % len(_SKEL_DECOY)][0]}/100 · {_SKEL_DECOY[i % len(_SKEL_DECOY)][1]}</b></div>'
         for i, s in enumerate(home["days"][0]["species"][:5]))
     premium_block = f'''  <div id="gp-premium-status" class="gp-msg" hidden></div>
   <div id="gp-content" hidden></div>
   ''' + (f'''<div id="gp-freeauth" class="gp-diary" hidden>
-    <p class="gp-diary-priv" style="margin-bottom:.5rem">🔓 <b>7-dnevna napoved po vrstah, AI prepoznava, moji alarmi
-    in sinhronizacija dnevnika so ob zagonu sezone brezplačni za vse</b> — vpiši e-naslov (brez gesla, brez plačila)
-    in dobiš povezavo za dostop, ki velja na vseh tvojih napravah.</p>
+    <p class="gp-diary-priv" style="margin-bottom:.5rem"><b>Brezplačno z e-pošto – brez gesla in plačila.</b>
+    7-dnevna napoved po vrstah, AI prepoznava, moji alarmi in sinhronizacija dnevnika so ob zagonu sezone
+    brezplačni za vse. Vpiši e-naslov in dobiš povezavo za dostop, ki velja na vseh tvojih napravah.</p>
     <div class="gp-diary-row">
       <input type="text" id="gp-freeauth-website" name="website" autocomplete="off" tabindex="-1"
         style="position:absolute;left:-9999px" aria-hidden="true">
@@ -5510,12 +5669,12 @@ def build_body(rules, premium, free):
     <div id="gp-alert-msg" class="gp-msg"></div>
   </div>
   ''' + (f'''<div id="gp-lock" class="gp-lock">
-    <span class="gp-tag">🔓 BREZPLAČNO — a šele po prijavi</span>
+    <span class="gp-tag">BREZPLAČNO Z E-POŠTO</span>
     <h3>7-dnevna napoved po vrstah in gozdovih</h3>
     <p class="gp-hero-sub">Za vsak dan naslednjega tedna in vsako od {len(premium["locations"])} nabiralnih območij:
     indeks po posameznih vrstah, plastovita razlaga (»talna temp. optimalna, sprožilni dež pred 8–16 dnevi pod pragom,
     nočna ohladitev zaznana«) in opozorila na nevarne dvojnice. Vključuje tudi <b>🔍 AI prepoznavo gobe iz fotografije</b>.
-    Ob zagonu sezone brezplačno za vse — vpiši e-naslov zgoraj, da odkleneš.</p>
+    Ob zagonu sezone brezplačno za vse: brez gesla in plačila, vpiši samo e-naslov zgoraj.</p>
     <div class="gp-skel">
 {skel_rows}
     </div>
@@ -5664,7 +5823,7 @@ def build_body(rules, premium, free):
          "temperatura in vlaga tal, sprožilni dež v rastnem zamiku vrste, zaloga vode pred njim, zračna vlaga "
          "in nočna ohladitev, uteženo po vrsti in geologiji terena. Gozd ima vedno zadnjo besedo; visok indeks "
          "pomeni ugodne razmere, ne zajamčene gobe. Podrobno na strani »Kako deluje model«."),
-        ("Katere vrste zajema premium napoved?",
+        ("Katere vrste zajema napoved po vrstah?",
          "Napoved po vrstah pokriva užitne in pogojno užitne gobe iz lokalne baze Zgornje Savinjske doline. "
          "Strupene vrste se pojavijo le kot opozorilo na nevarne dvojnice ob pripadajoči užitni vrsti."),
         ("Zakaj indeksa ne dobijo vse vrste iz baze?",
@@ -5684,10 +5843,10 @@ def build_body(rules, premium, free):
          "karbonatni masivi Golte in Menine pa marelam in poletnemu gobanu. Zato ista vrsta isti dan ni enako "
          "verjetna povsod."),
         ("Ali napoved po vrstah kaj stane?",
-         "Ob zagonu gobarske sezone je ves MeteoGobar Premium brezplačen za vse — tudi napoved po vrstah, AI "
-         "prepoznava gobe iz fotografije, e-mail alarmi ob ugodnih pogojih in sinhronizacija dnevnika med napravami. "
-         "Vpiši samo e-naslov (razdelek 🍄 7-dnevna napoved po vrstah) — brez gesla in brez plačila, dobiš povezavo "
-         "za dostop, ki velja na vseh tvojih napravah."
+         "Zaenkrat ne. Ob zagonu gobarske sezone je ves MeteoGobar Premium brezplačen za vse: napoved po vrstah, "
+         "AI prepoznava gobe iz fotografije, e-mail alarmi ob ugodnih pogojih in sinhronizacija dnevnika med "
+         "napravami. Dostop je brezplačen z e-pošto, brez gesla in plačila: vpiši samo e-naslov (razdelek "
+         "7-dnevna napoved po vrstah) in dobiš povezavo za dostop, ki velja na vseh tvojih napravah."
          ) if PREMIUM_FREE_LAUNCH else
         ("Kako plačam in dostopam?",
          "Plačilo obdela Paddle. Po nakupu prejmeš na e-naslov povezavo za dostop, ki deluje na vseh napravah — "
@@ -5701,7 +5860,7 @@ def build_body(rules, premium, free):
          "Ne. Gre za samostojen model, izračunan iz podatkov Open-Meteo in meritev postaje IREICA1 v Rečici ob "
          "Savinji. Ni uradna napoved ARSO."),
     ]
-    faq_html = ("  <h2 class=\"gp-h2\" id=\"faq\">❓ Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+    faq_html = ("  <h2 class=\"gp-h2\" id=\"faq\">Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa
     ) + "\n  </div>")
 
@@ -5741,22 +5900,24 @@ def build_body(rules, premium, free):
     # tisto poimenovanje, ki bralca prepriča, da mora plačati, ko pa je
     # napoved po vrstah zdaj brezplačna za vse (glej _FORECAST_BADGE zgoraj,
     # ki iz istega razloga med zagonom kaže "BREZPLAČNO", ne "PREMIUM").
-    premium_h2 = ("🍄 7-dnevna napoved po vrstah — zaenkrat brezplačno"
-                  if PREMIUM_FREE_LAUNCH else "🔒 Premium: 7-dnevna napoved po vrstah")
+    premium_h2 = ("7-dnevna napoved po vrstah — brezplačno z e-pošto"
+                  if PREMIUM_FREE_LAUNCH else "Premium: 7-dnevna napoved po vrstah")
 
     body = f'''{BRAND_SWAP}
 {top_bar_html("Gobarska napoved", None)}
 {seo.crumbs_html([("Meteorec", "/"), ("Gobarska napoved", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
-  <p class="post-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno · {TODAY.isoformat()}</p>
+  <p class="post-meta gp-hub-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno</p>
 {hero}
-{picker_html}
-{features_html}
+{section_nav_html()}
 {mini_map_html}
+{picker_html}
   <h2 class="gp-h2" id="premium">{premium_h2}</h2>
 {premium_block}
 {pricing}
+{top_species_html(premium, len(species))}
+{features_html}
 {faq_html}
   <p class="gp-disc">Napoved je <strong>indeks ugodnosti pogojev</strong>, ne obljuba najdbe. Pripravlja jo Filip Eremita
   (gozdarstvo/mikologija) iz meritev postaje IREICA1 in podatkov Open-Meteo. Ni uradna napoved ARSO.</p>
@@ -5829,21 +5990,21 @@ def main():
     title = "Gobarska napoved — Zgornja Savinjska dolina"
     # Meta description naj ostane pod ~160 znaki, sicer jo Google odreže sredi
     # stavka; zadnji del je zato najbolj pogrešljiv.
-    desc = (f"Gobarski indeks danes: {free['index']} % ({free['level']}). Napoved rasti gob po vrstah za "
+    desc = (f"Gobarski indeks danes: {free['index']}/100 ({free['level']}). Napoved rasti gob po vrstah za "
             f"Zgornjo Savinjsko dolino, baza {len(rules['species'])} vrst in nevarne dvojnice.")
 
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02",
-                           speakable=[".gp-hero-kicker", ".gp-hero-lvl", ".gp-hero-topsp"]),
+                           speakable=[".gp-hero-kicker", ".gp-hero-lvl", ".gp-hero-best-card"]),
         seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", None)]),
         seo.faq_schema(sub["qa"]),
     ])
-    head_extras = schema + "\n" + PAGE_CSS + "\n" + paddle_head()
+    head_extras = schema + "\n" + PAGE_CSS + "\n" + HUB_MOBILE_CSS + "\n" + paddle_head()
 
     og_image = f"{seo.SITE}/og/gobarska-napoved.jpg"
     html = seo.page_shell(title, desc, url, head_extras, body, og_image=og_image)
     seo.write_page("gobarska-napoved/index.html", html, force=True)
-    print(f"  → gobarska-napoved/index.html ({free['index']} %, {free['level']})")
+    print(f"  → gobarska-napoved/index.html ({free['index']}/100, {free['level']})")
 
 
 if __name__ == "__main__":
