@@ -402,6 +402,15 @@ def konstante_workerja():
 
 
 @test
+def push_pragovi_meje():
+    """FC_THR_LIMITS: worker.js (strežnik zavrže prag izven mej) ↔ app.js (obrazec »Opozori vnaprej po napovedi«)."""
+    w = js("worker.js", ["FC_THR_LIMITS"], [{"expr": "FC_THR_LIMITS"}])[0]
+    a = js("app.js", ["FC_THR_LIMITS"], [{"expr": "FC_THR_LIMITS"}])[0]
+    check(w == a, "push vnaprej: FC_THR_LIMITS", f"worker={w} app={a}")
+    check(set(w) == {"wind", "rain", "tempMin", "tempMax"}, "push vnaprej: ključi mej", f"{sorted(w)}")
+
+
+@test
 def nevihte_porocila():
     """NP_TIPI/NP_REGIJE: worker.js ↔ tools/generate_nevihte_porocila_page.py (obrazec in prikaz)."""
     import generate_nevihte_porocila_page as g

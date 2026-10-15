@@ -471,6 +471,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/lenartovo-pregovor-vreme-do-bozica.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -1316,13 +1323,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/anatomija-poletne-nevihte-recica-savinji.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</loc>
-    <lastmod>2026-07-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/vremenski-povzetek-junij-2026.html</loc>

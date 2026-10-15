@@ -2114,7 +2114,7 @@ gobarskega indeksa, nevihtno karto (obris, mreža, mesta, barve, stopnje), 16 sm
 vetra in LZW dekoder strel, oceno dneva v Termiki (`opis_dneva` ↔ `dayRating`),
 stavek »Naslednjih 6 ur« in umeritev DRSI po uri, konstante in izbiro cone v znački
 `/crnivec/znacka.svg`, agrometeo (fenološke stopnje hmelja, ročni status IHPS, GDD poljščin,
-primernost za bolezni), pragove opozoril na telefon proti besedilu na strani, starost
+primernost za bolezni), pragove opozoril na telefon proti besedilu na strani, meje pragov »Opozori vnaprej« (`FC_THR_LIMITS`, worker ↔ app.js), starost
 meritve DRSI in oznake dni.
 
 - **Nova namerna podvojitev = nov `@test`.** Ko v dokument zapišeš »če spremeniš
