@@ -871,6 +871,8 @@ body{
 .gp-chip-row{display:flex;gap:.5rem;overflow-x:auto;padding:.15rem .05rem .6rem;margin:.5rem 0 .3rem;
   scrollbar-width:none}
 .gp-chip-row::-webkit-scrollbar{display:none}
+.gp-loc-select{width:100%;max-width:26rem;margin:.5rem 0 .8rem;padding:.65rem .8rem;border-radius:10px;font:inherit;font-size:16px;
+  background:var(--card-bg);color:inherit;border:1px solid var(--card-border)}
 .gp-chip{flex:0 0 auto;display:flex;align-items:center;gap:.4rem;background:var(--badge-bg);
   border:1.5px solid var(--card-border);color:var(--text);border-radius:999px;padding:.5rem .9rem;
   font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;
@@ -1411,7 +1413,7 @@ PAGE_JS = """<script>
     if(s.explanation!=null)return s.explanation;
     return (s.e!=null&&EXPL[s.e]!=null)?EXPL[s.e]:"";
   }
-  var GP_EXPLAIN_PAGE=12, GP_EXPLAIN_STEP=24;
+  var GP_EXPLAIN_PAGE=6, GP_EXPLAIN_STEP=24;
   var gpExplainShown=GP_EXPLAIN_PAGE;
   function explainCardsHtml(day, meta, shown){
     return day.species.slice(0,shown).map(function(s){var m=meta[s.id]||{};
@@ -1474,10 +1476,14 @@ PAGE_JS = """<script>
       '<div class="gp-forest-more">🍄 napoved po vrstah · 🗺️ zemljevid · 7-dnevna napoved →</div>'+
       '</div>';
   }
-  function forestsListHtml(locs, dayIdx, meta){
-    return locs.map(function(l,i){return {l:l,i:i};})
-      .sort(function(a,b){return b.l.days[dayIdx].overall-a.l.days[dayIdx].overall;})
-      .map(function(o){return forestRowHtml(o.l,dayIdx,meta,o.i);}).join('');
+  // Pokaže samo najboljših GP_FORESTS_TOP območij (97 kartic je bilo preveč za
+  // skrolanje); gumb pod seznamom odpre vsa.
+  var GP_FORESTS_TOP=8;
+  function forestsListHtml(locs, dayIdx, meta, all){
+    var sorted=locs.map(function(l,i){return {l:l,i:i};})
+      .sort(function(a,b){return b.l.days[dayIdx].overall-a.l.days[dayIdx].overall;});
+    if(!all)sorted=sorted.slice(0,GP_FORESTS_TOP);
+    return sorted.map(function(o){return forestRowHtml(o.l,dayIdx,meta,o.i);}).join('');
   }
   function locDetailHtml(loc, meta){
     var html="";
@@ -1565,16 +1571,18 @@ PAGE_JS = """<script>
         dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(peak)+'">'+peak+'/100</span></button>';
     });
     html+='</div>';
-    html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta)+'</div>';
+    var forestsAll=locs.length<=GP_FORESTS_TOP;
+    html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta,forestsAll)+'</div>';
+    html+='<div class="gp-sp-more"><button type="button" id="gp-forests-more"'+(forestsAll?' hidden':'')+'>Pokaži vseh '+locs.length+' območij</button></div>';
     // location picker — 7-day per-species matrix for ANY pickable area, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
-    html+='<div class="gp-chip-row" id="gp-loc-chips">';
-    locs.forEach(function(l,i){
-      var o=l.days[0];
-      html+='<button type="button" class="gp-chip'+(l===home?' active':'')+'" data-i="'+i+'">'+
-        esc2(l.name)+'<span class="gp-chip-pct" style="color:'+levelColor(o.overall)+'">'+o.overall+'/100</span></button>';
-    });
-    html+='</div>';
+    html+='<select id="gp-loc-chips" class="gp-loc-select" aria-label="Izberi območje">';
+    locs.map(function(l,i){return {l:l,i:i};})
+      .sort(function(a,b){return b.l.days[0].overall-a.l.days[0].overall;})
+      .forEach(function(o){
+        html+='<option value="'+o.i+'"'+(o.l===home?' selected':'')+'>'+esc2(o.l.name)+' · '+o.l.days[0].overall+'/100</option>';
+      });
+    html+='</select>';
     html+='<div id="gp-loc-detail">'+locDetailHtml(home, meta)+'</div>';
     content.innerHTML=html;
     content.hidden=false;if(lock)lock.hidden=true;
@@ -1586,7 +1594,13 @@ PAGE_JS = """<script>
       todayDayChips.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
       btn.classList.add("active");
       btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
-      todayForests.innerHTML=forestsListHtml(locs, parseInt(btn.dataset.day,10), meta);
+      todayForests.innerHTML=forestsListHtml(locs, parseInt(btn.dataset.day,10), meta, forestsAll);
+    });}
+    var forestsMore=document.getElementById("gp-forests-more");
+    if(forestsMore&&todayForests){forestsMore.addEventListener("click",function(){
+      forestsAll=true;forestsMore.hidden=true;
+      var act=todayDayChips&&todayDayChips.querySelector(".gp-chip.active");
+      todayForests.innerHTML=forestsListHtml(locs, act?parseInt(act.dataset.day,10):0, meta, true);
     });}
     var chipRow=document.getElementById("gp-loc-chips");
     var detail=document.getElementById("gp-loc-detail");
@@ -1596,20 +1610,13 @@ PAGE_JS = """<script>
     // exactly the same detail view (species matrix, map link, day picker).
     function selectLoc(i, scrollTarget){
       var newLoc=locs[i];
-      if(chipRow){
-        chipRow.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
-        var btn=chipRow.querySelector('.gp-chip[data-i="'+i+'"]');
-        if(btn)btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
-        if(btn)btn.classList.add("active");
-      }
+      if(chipRow)chipRow.value=String(i);
       detail.innerHTML=locDetailHtml(newLoc, meta);
       wireDayChips(detail, newLoc, meta);
       (scrollTarget||detail).scrollIntoView({block:"start",behavior:"smooth"});
     }
-    if(chipRow){chipRow.addEventListener("click",function(e){
-      var btn=e.target.closest(".gp-chip");
-      if(!btn)return;
-      selectLoc(parseInt(btn.dataset.i,10));
+    if(chipRow){chipRow.addEventListener("change",function(){
+      selectLoc(parseInt(chipRow.value,10));
     });}
     // Forest cards up top (the compact "Napoved po gozdovih" summary) are
     // clickable too — jumping straight to that area's full species/day
