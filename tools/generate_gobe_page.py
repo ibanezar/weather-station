@@ -346,7 +346,9 @@ HUB_MOBILE_CSS = """<style>
   .gp-secnav{top:0}
   body .wrap .page-title{font-size:1.3rem;line-height:1.25;margin:.1rem 0 .7rem}
   /* gumb SOS je na telefonu prilepljen na zgornji desni rob (top:9.2rem) */
-  .gp-hero-kicker{padding-right:2.6rem}
+  .gp-hero-kicker{padding:0 2.6rem;text-align:center;text-wrap:balance}
+  .gp-k-dot{display:none}
+  .gp-k-loc{display:block}
   /* Glava in naslov na telefonu na sredini (logotip nad menijem, h1 centriran) */
   body .site-head{flex-direction:column;justify-content:center;gap:.5rem;text-align:center}
   body .site-head .brand{justify-content:center}
@@ -5532,7 +5534,7 @@ def build_body(rules, premium, free):
     best_meta = " · ".join(x for x in (best_terr, f'{best_loc["elev_m"]} m') if x)
     hero_trend = hero_trend_html(pct)
     hero = f'''  <section class="gp-hero" id="danes" aria-labelledby="gp-hero-title">
-    <div class="gp-hero-kicker" id="gp-hero-title">Gobarski indeks danes · {_esc(free["location"])}</div>
+    <div class="gp-hero-kicker" id="gp-hero-title">Gobarski indeks danes<span class="gp-k-dot"> ·</span> <span class="gp-k-loc">{_esc(free["location"])}</span></div>
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap" role="img" aria-label="Gobarski indeks {pct} od 100, {_esc(lvl)}">
         {gauge_svg(pct)}
