@@ -77,6 +77,19 @@ jobs:
             -H "Authorization: Bearer $PREMIUM_SYNC_KEY" || \
             echo "::warning::Klic /premium/notify ni uspel."
 
+      - name: Gobji alarm (Web Push, brezplačni izbirnik)
+        env:
+          PREMIUM_SYNC_KEY: ${{ secrets.PREMIUM_SYNC_KEY }}
+        run: |
+          if [ -z "$PREMIUM_SYNC_KEY" ]; then
+            echo "PREMIUM_SYNC_KEY ni nastavljen — preskočim Gobji alarm."
+            exit 0
+          fi
+          # Worker sam preveri pravila vsake naročnine (prag, histereza, hladilna doba).
+          curl -sf -X POST "https://weatherireica1.filip-eremita.workers.dev/gobe/alarm-notify" \
+            -H "Authorization: Bearer $PREMIUM_SYNC_KEY" || \
+            echo "::warning::Klic /gobe/alarm-notify ni uspel."
+
       # if: always() — statične strani so neodvisne od KV in se morajo
       # osvežiti tudi, kadar push v KV pade (korak zgoraj namenoma pade
       # glasno, da odpoved ne ostane neopažena kot doslej).

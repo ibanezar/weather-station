@@ -858,6 +858,101 @@ async function _pushAll(env, payload, filter, key = "push/subs.json") {
   return { sent: target.length - dead.length, pruned: dead.length };
 }
 
+// ── Gobji alarm (Web Push, brezplačni del) ─────────────────
+// Ločen seznam naročnin (kot crnivec.si): kdor si nastavi alarm za jurčka
+// nad Ljubnim, ne dobi vročine v Rečici in obratno. Pravila so omejena na
+// vrste in območja javnega izbirnika (izbirnik.json) -- polna paleta (vse
+// vrste, vseh 97 območij, nastavljivi pragovi) ostane Premium, kot piše v
+// CLAUDE.md. Vrednosti so iste kot v `premium:today` (isti model, isti dan),
+// zato pošiljanje ne rabi svojega vira.
+//
+// Obvestilo gre ob PREHODU čez prag (histereza GOBE_ALARM_RESET_PTS) in
+// najprej po GOBE_ALARM_COOLDOWN_DAYS dneh -- ne vsak dan, ko je indeks visok.
+// Indeks je ocena ugodnosti pogojev, ne obljuba najdbe; besedilo to pove.
+const GOBE_PUSH_KEY = "push/gobe-subs.json";
+const GOBE_PICKER_URL = "https://meteorec.si/gobarska-napoved/izbirnik.json";
+const GOBE_PAGE_URL = "https://meteorec.si/gobarska-napoved/";
+const GOBE_ALARM_MAX_RULES = 3;
+const GOBE_ALARM_THR_MIN = 40, GOBE_ALARM_THR_MAX = 95, GOBE_ALARM_THR_DEFAULT = 75;
+const GOBE_ALARM_RESET_PTS = 8;
+const GOBE_ALARM_COOLDOWN_DAYS = 3;
+
+async function _gobePicker() {
+  try {
+    const r = await fetch(GOBE_PICKER_URL, { cf: { cacheTtl: 3600, cacheEverything: true } });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return {
+      species: new Set((d.species || []).map(x => x.id)),
+      locations: new Set((d.locations || []).map(x => x.name)),
+    };
+  } catch (_) { return null; }
+}
+// Vrne očiščen seznam ali null, če katero pravilo ni v izbirniku.
+function _gobeAlarmClean(picker, rules) {
+  if (!Array.isArray(rules)) return null;
+  const out = [], seen = new Set();
+  for (const r of rules.slice(0, GOBE_ALARM_MAX_RULES)) {
+    if (!r || typeof r !== "object") return null;
+    const species_id = String(r.species_id || ""), location = String(r.location || "");
+    if (!picker.species.has(species_id) || !picker.locations.has(location)) return null;
+    const threshold = Math.max(GOBE_ALARM_THR_MIN, Math.min(GOBE_ALARM_THR_MAX, parseInt(r.threshold, 10) || GOBE_ALARM_THR_DEFAULT));
+    const key = species_id + "|" + location;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ species_id, location, threshold });
+  }
+  return out;
+}
+// Preveri pravila vsake naročnine proti današnjemu izvlečku in pošlje obvestila.
+async function _gobeAlarmNotify(env, data) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { checked: 0, sent: 0, skipped: "ni shrambe ali VAPID" };
+  let subs = []; try { const o = await r2.get(GOBE_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const meta = data.species_meta || {};
+  const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+  const idx = (rule) => {
+    const loc = (data.locations || []).find(l => l.name === rule.location);
+    const d0 = loc && (loc.days || [])[0];
+    const sp = d0 && (d0.species || []).find(x => x.id === rule.species_id);
+    return sp ? sp.index : null;
+  };
+  let sent = 0, dead = [], changed = false;
+  for (const sub of subs) {
+    const st = sub.st || (sub.st = {});
+    const hits = [];
+    for (const rule of sub.rules || []) {
+      const v = idx(rule);
+      if (v == null) continue;
+      const key = rule.species_id + "|" + rule.location;
+      const s = st[key] || (st[key] = { over: false, last: null });
+      if (v >= rule.threshold) {
+        const days = s.last ? (Date.parse(today) - Date.parse(s.last)) / 864e5 : Infinity;
+        if (!s.over && days >= GOBE_ALARM_COOLDOWN_DAYS) { hits.push({ rule, v }); s.last = today; changed = true; }
+        if (!s.over) changed = true;
+        s.over = true;
+      } else if (v < rule.threshold - GOBE_ALARM_RESET_PTS && s.over) {
+        s.over = false; changed = true;
+      }
+    }
+    if (!hits.length) continue;
+    hits.sort((a, b) => b.v - a.v);
+    const h = hits[0];
+    const name = (meta[h.rule.species_id] && meta[h.rule.species_id].name_sl) || h.rule.species_id;
+    const body = `${name} · ${h.rule.location}: ${h.v}/100 (prag ${h.rule.threshold}).` +
+      (hits.length > 1 ? ` In še ${hits.length - 1} ${hits.length === 2 ? "tvoj alarm" : "tvojih alarmov"}.` : "") +
+      " Ocena ugodnosti pogojev, ne obljuba najdbe.";
+    try {
+      const code = await _sendPush(env, sub, { title: "🍄 Gobji alarm", body, url: GOBE_PAGE_URL + "#izbirnik", tag: "gobe-alarm", icon: "/icons/logo-192.png" });
+      if (code === 404 || code === 410) dead.push(sub.endpoint); else sent++;
+    } catch (_) {}
+  }
+  if (dead.length || changed) {
+    const keep = subs.filter(x => dead.indexOf(x.endpoint) === -1);
+    await r2.put(GOBE_PUSH_KEY, JSON.stringify(keep), { httpMetadata: { contentType: "application/json" } });
+  }
+  return { checked: subs.length, sent, pruned: dead.length };
+}
+
 // ── Opozorila s prelaza Črnivec (crnivec.si) ───────────────
 // Ločen seznam naročnin: kdor se naroči na crnivec.si, je pristal na razmere
 // na prelazu, ne na vročino ali dež v Rečici — in obratno. _pushAll brez
@@ -6252,6 +6347,18 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Gobji alarm: dnevni klic iz gobe-forecast.yml (po /premium/data) ──
+      //   POST /gobe/alarm-notify  Bearer PREMIUM_SYNC_KEY
+      if (path === "/gobe/alarm-notify" && request.method === "POST") {
+        const secret = env.PREMIUM_SYNC_KEY;
+        const auth = request.headers.get("Authorization") || "";
+        const j = (o, st) => new Response(JSON.stringify(o), { status: st || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        if (!secret || auth !== `Bearer ${secret}`) return j({ error: "Nedovoljeno" }, 401);
+        const digest = await env.COUNTER_KV?.get("premium:today", { type: "json" });
+        if (!digest) return j({ error: "Ni podatkov" }, 503);
+        return j({ ok: true, ...(await _gobeAlarmNotify(env, digest)) });
+      }
+
       // ── Gobarska opažanja (crowdsourced sightings) ───────────
       // Ločeno od "Gobarjev dnevnik" v app-u gobarske strani (ta je izrecno
       // zaseben, samo localStorage — glej CLAUDE.md). Opažanje je namenoma
@@ -7852,6 +7959,33 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
           const next = subs.filter(x => x.endpoint !== ep);
           if (r2 && next.length !== subs.length) await cWrite(next);
+          return pj({ ok: true });
+        }
+
+        // Gobji alarm: lasten seznam (GOBE_PUSH_KEY), pravila samo iz izbirnika.
+        // Odjava tu NE odjavi brskalnika -- ta je lahko hkrati naročen na vremenska opozorila.
+        if (body.site === "gobe" && path !== "/push/send") {
+          let subs = []; if (r2) { try { const o = await r2.get(GOBE_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {} }
+          const gWrite = a => r2.put(GOBE_PUSH_KEY, JSON.stringify(a), { httpMetadata: { contentType: "application/json" } });
+          if (path === "/push/subscribe") {
+            if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+            const s = body.subscription || {};
+            if (!s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+            const picker = await _gobePicker();
+            if (!picker) return pj({ error: "Seznam vrst trenutno ni dosegljiv" }, 503);
+            const rules = _gobeAlarmClean(picker, body.rules);
+            if (rules === null) return pj({ error: "Neznana vrsta ali območje" }, 422);
+            const rest = subs.filter(x => x.endpoint !== s.endpoint);
+            if (rules.length) {
+              const old = subs.find(x => x.endpoint === s.endpoint);
+              rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, rules, st: old ? old.st || {} : {}, ts: old ? old.ts : new Date().toISOString() });
+            }
+            await gWrite(rest.slice(0, 5000));
+            return pj({ ok: true, rules: rules.length });
+          }
+          const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
+          const next = subs.filter(x => x.endpoint !== ep);
+          if (r2 && next.length !== subs.length) await gWrite(next);
           return pj({ ok: true });
         }
 

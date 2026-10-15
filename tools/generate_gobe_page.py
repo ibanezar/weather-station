@@ -1060,6 +1060,12 @@ body .app-bottomnav{display:none}
 .gp-map-hint span{font-size:.85rem;color:var(--muted)}
 .gp-map-hint .gp-map-load{background:var(--blue);color:#04070e;font-weight:700;padding:.5rem 1.1rem;border-radius:10px}
 .gp-map-legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin:.5rem 0;font-size:.78rem;color:var(--muted);clear:both}
+.gp-radar{display:grid;grid-template-columns:auto 1fr;gap:.5rem 1rem;align-items:center;margin:.7rem 0 .4rem}
+.gp-radar-day{font-size:.85rem;color:var(--muted)}
+.gp-radar-day b{color:var(--text)}
+.gp-radar input[type=range]{width:100%;min-height:2.75rem;accent-color:var(--green)}
+.gp-radar-obs{grid-column:1/-1;font-size:.85rem;display:flex;gap:.5rem;align-items:center;min-height:2.75rem}
+.gp-radar .gp-picker-note{grid-column:1/-1;margin-top:0}
 .gp-map-legend span{display:inline-flex;align-items:center;gap:.35rem}
 .gp-map-legend i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.4)}
 .gp-species-legend-title{flex-basis:100%}
@@ -4950,6 +4956,9 @@ def build_zemljevid_page(premium, rules):
             "name": loc["name"], "lat": loc["lat"], "lon": loc["lon"],
             "elev": loc["elev_m"], "terrain": loc.get("terrain"),
             "idx": d0["overall"], "lvl": d0["level"],
+            # indeks in beseda stopnje za vsak dan napovedi (drsnik »Gobji radar«);
+            # stopnja je izračunana tu, da je JS ne računa še enkrat
+            "ds": [[dd["overall"], dd["level"]] for dd in loc["days"]],
             "sp": [{"n": meta[s["id"]]["name_sl"], "i": s["index"]} for s in top],
             "sp_total": len(nonzero),
             "prot": False,
@@ -4963,6 +4972,8 @@ def build_zemljevid_page(premium, rules):
             })
     data_js = _json_mod.dumps(pts, ensure_ascii=False)
     pick_count = sum(1 for p in pts if not p["prot"])
+    radar_days = [d["date"] for d in premium["locations"][0]["days"]] if premium["locations"] else []
+    days_js = _json_mod.dumps(radar_days)
 
     # Server-rendered fallback list — same `pts` as the interactive map, so
     # there's no second source of truth to drift. Leaflet stays click-to-load
@@ -5024,6 +5035,12 @@ def build_zemljevid_page(premium, rules):
     <span><i style="background:#f87171"></i>Brez (&lt;18 %)</span>
     <span><i style="background:#a78bfa"></i>Zaščiteno</span>
   </div>
+  <div class="gp-radar" id="gp-radar">
+    <label class="gp-radar-day" for="gp-radar-day">Dan napovedi: <b id="gp-radar-lbl">danes</b></label>
+    <input type="range" id="gp-radar-day" min="0" max="{max(len(radar_days) - 1, 0)}" value="0" step="1" aria-label="Dan napovedi (0 = danes)">
+    <label class="gp-radar-obs"><input type="checkbox" id="gp-radar-obs" checked> Najdbe bralcev (zadnjih 30 dni)</label>
+    <p class="gp-picker-note" id="gp-radar-note" role="status" aria-live="polite">Barva območja je indeks za izbrani dan; <b>bel obroč</b> pomeni, da je bralec tam v zadnjih 30 dneh vnesel opažanje.</p>
+  </div>
   <div id="gp-species-legend" class="gp-map-legend" hidden>
     <b class="gp-species-legend-title">Drevesna sestava sestojev (ZGS):</b>
     {species_legend_html}
@@ -5046,6 +5063,8 @@ def build_zemljevid_page(premium, rules):
 (function(){
   var PTS=''' + data_js + ''';
   var SESTOJI=''' + sestoji_js + ''';
+  var DAYS=''' + days_js + ''';
+  var API="''' + WORKER_BASE + '''";
   var hint=document.getElementById("gp-map-hint");
   var mapEl=document.getElementById("gp-map");
   var speciesLegend=document.getElementById("gp-species-legend");
@@ -5058,6 +5077,35 @@ def build_zemljevid_page(premium, rules):
   function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   function loadCss(href){var l=document.createElement("link");l.rel="stylesheet";l.href=href;document.head.appendChild(l);}
   function loadScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+  var curDay=0,paintFn=null;
+  var obsByArea={};
+  var slEl=document.getElementById("gp-radar-day"),lblEl=document.getElementById("gp-radar-lbl");
+  var cbEl=document.getElementById("gp-radar-obs"),noteEl=document.getElementById("gp-radar-note");
+  if(slEl){
+    slEl.addEventListener("input",function(){
+      curDay=parseInt(slEl.value,10)||0;
+      if(lblEl)lblEl.textContent=curDay===0?"danes":(function(){var d=new Date(DAYS[curDay]+"T12:00:00");return d.getDate()+". "+(d.getMonth()+1)+".";})();
+      if(paintFn)paintFn();
+    });
+  }
+  function dayLabel(i){
+    if(i===0)return"danes";
+    var dt=new Date(DAYS[i]+"T12:00:00");
+    return dt.getDate()+". "+(dt.getMonth()+1)+".";
+  }
+  function idxOf(p){return p.prot?null:(p.ds&&p.ds[curDay]?p.ds[curDay][0]:p.idx);}
+  function obsHtml(name){
+    var o=obsByArea[name];
+    if(!o||!o.length)return"";
+    var h='<div class="sp" style="margin-top:.4rem"><b>Najdbe bralcev (30 dni):</b><ul class="sp-list">';
+    o.slice(0,5).forEach(function(x){
+      var dt=new Date(x.ts);
+      h+='<li>🧺 '+esc(x.vrsta)+' · '+dt.getDate()+". "+(dt.getMonth()+1)+'.'+(x.kolicina?' · '+esc(x.kolicina):'')+'</li>';
+    });
+    h+='</ul>'+(o.length>5?'<div class="sp-more">+'+(o.length-5)+' drugih</div>':'')+
+       '<div class="sp-more">Neovereni javni vnosi, območje namesto točne lokacije.</div></div>';
+    return h;
+  }
   function popupHtml(p){
     var h='<div class="gp-map-pop"><b>'+esc(p.name)+'</b><br>';
     h+='<span class="terr">'+esc(p.terrain||"")+(p.elev?" · "+p.elev+" m":"")+'</span>';
@@ -5065,14 +5113,16 @@ def build_zemljevid_page(premium, rules):
       h+='<div class="sp" style="color:#c4b5fd;margin-top:.35rem">🔒 Zavarovano območje — preveri aktualne '+
         'omejitve nabiranja na kraju samem</div>';
     }else{
-      h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(p.idx)+'">'+p.idx+' / 100</span> · '+esc(p.lvl)+'</div>';
-      if(p.sp&&p.sp.length){
+      var di=p.ds&&p.ds[curDay]?p.ds[curDay]:[p.idx,p.lvl];
+      h+='<div style="margin-top:.35rem"><span class="idx" style="color:'+levelColor(di[0])+'">'+di[0]+' / 100</span> · '+esc(di[1])+' · '+dayLabel(curDay)+'</div>';
+      if(curDay===0&&p.sp&&p.sp.length){
         h+='<ul class="sp-list">'+p.sp.map(function(s){
           return'<li>🍄 '+esc(s.n)+' <span class="sp-pct">'+s.i+' %</span></li>';
         }).join('')+'</ul>';
         if(p.sp_total>p.sp.length)h+='<div class="sp-more">+'+(p.sp_total-p.sp.length)+' drugih vrst z indeksom</div>';
       }
     }
+    if(!p.prot)h+=obsHtml(p.name);
     h+='</div>';
     return h;
   }
@@ -5097,14 +5147,15 @@ def build_zemljevid_page(premium, rules):
       var map=L.map("gp-map",{zoomControl:true,attributionControl:false,scrollWheelZoom:false,fullscreenControl:true}).setView([46.35,14.80],10);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {maxZoom:15,subdomains:"abc"}).addTo(map);
-      var group=[],focusMarker=null;
+      var group=[],focusMarker=null,markers=[];
       PTS.forEach(function(p){
         var isFocus=focusName&&p.name===focusName;
         var m=L.circleMarker([p.lat,p.lon],{
           radius:p.prot?7:(isFocus?12:9),color:isFocus?"#fff":"#0b0906",weight:isFocus?2.5:1.5,
           fillColor:levelColor(p.idx),fillOpacity:p.prot?.55:.9
         }).addTo(map);
-        m.bindPopup(popupHtml(p));
+        m.bindPopup(function(){return popupHtml(p);});
+        markers.push({p:p,m:m,ring:null});
         m.bindTooltip(p.name,{direction:"top",offset:[0,-6]});
         if(isFocus)focusMarker=m;
         group.push(m);
@@ -5124,6 +5175,29 @@ def build_zemljevid_page(premium, rules):
         var fg=L.featureGroup(group);
         map.fitBounds(fg.getBounds().pad(0.15));
       }
+      // Gobji radar: barva = indeks izbranega dne, bel obroč = bralci so tam v zadnjih
+      // 30 dneh vnesli opažanje (javni vnosi, neovereni; območje namesto točne lokacije).
+      function drawObs(){
+        markers.forEach(function(x){if(x.ring){map.removeLayer(x.ring);x.ring=null;}});
+        if(!cbEl||!cbEl.checked)return;
+        markers.forEach(function(x){
+          var o=obsByArea[x.p.name];
+          if(o&&o.length)x.ring=L.circleMarker(x.m.getLatLng(),{radius:15,color:"#fff",weight:2,fill:false,interactive:false}).addTo(map);
+        });
+      }
+      paintFn=function(){
+        markers.forEach(function(x){if(!x.p.prot)x.m.setStyle({fillColor:levelColor(idxOf(x.p))});});
+        map.closePopup();
+      };
+      paintFn();
+      if(cbEl)cbEl.addEventListener("change",drawObs);
+      fetch(API+"/gobe/opazovanja?dni=30").then(function(r){return r.json();}).then(function(j){
+        var n=0;
+        (j.opazovanja||[]).forEach(function(o){(obsByArea[o.obmocje]=obsByArea[o.obmocje]||[]).push(o);n++;});
+        drawObs();
+        if(noteEl)noteEl.textContent=(n?"Vnosov bralcev v zadnjih 30 dneh: "+n+". ":"Bralci v zadnjih 30 dneh niso vnesli opažanj. ")+
+          "Barva območja je indeks za izbrani dan; bel obroč pomeni opažanje. Vnosi so javni in neovereni.";
+      }).catch(function(){if(noteEl)noteEl.textContent="Najdb bralcev trenutno ni mogoče naložiti; barve območij so brez njih še vedno pravilne.";});
       setTimeout(function(){map.invalidateSize();},60);
     }catch(e){
       hint.style.display="flex";
@@ -5188,6 +5262,90 @@ def mini_map_preview_html(premium):
             '    <div class="gp-forests">\n' + "\n".join(chips) + '\n    </div>\n'
             f'    <a class="gp-cta alt" href="/gobarska-napoved/danes/">Vsa območja ({len(locs)}) →</a>\n'
             '  </div>')
+
+
+# Gobji alarm (Web Push) pod izbirnikom: pravila so samo vrste/območja izbirnika
+# (polna paleta je Premium). Pravila hrani strežnik (/push/subscribe, site:"gobe"),
+# tu je kopija za prikaz v localStorage. Prag mora ustrezati mejam v worker.js
+# (GOBE_ALARM_THR_MIN/MAX: 40–95) -- možnosti 55 in 75 sta znotraj.
+GOBE_ALARM_HTML = """
+  <div class="gp-alarm" id="gp-alarm" hidden>
+    <h3 class="gp-h3" style="margin:1.2rem 0 .3rem">🔔 Gobji alarm</h3>
+    <p class="gp-picker-note" style="margin-top:0">Dobiš obvestilo na telefon ali računalnik, ko izbrana vrsta v izbranem območju
+    <strong>preseže prag</strong>. Ne pošiljamo ga vsak dan: znova šele, ko indeks pade in spet naraste, in najprej po 3 dneh.
+    Do 3 alarmi, brez prijave in brez e-naslova.</p>
+    <div class="gp-picker-row">
+      <label class="gp-picker-field">Obvesti me, ko je
+        <select id="gp-alarm-thr" aria-label="Prag alarma">
+          <option value="55">Dobro (55 ali več)</option>
+          <option value="75" selected>Odlično (75 ali več)</option>
+        </select></label>
+      <button type="button" class="gp-chip-action hi" id="gp-alarm-add">🔔 Dodaj alarm za izbrano vrsto in območje</button>
+    </div>
+    <ul id="gp-alarm-list" class="gp-alarm-list" style="list-style:none;padding:0;margin:.6rem 0 0"></ul>
+    <p class="gp-picker-note" id="gp-alarm-msg" role="status" aria-live="polite"></p>
+    <p class="gp-picker-note">Indeks je ocena ugodnosti pogojev po modelu, ne obljuba najdbe in ne nadomestilo za poznavanje gob.
+    Alarme lahko izbrišeš tukaj; na iPhonu najprej dodaj stran na začetni zaslon.</p>
+  </div>
+  <script>
+  (function(){
+    var API="{WORKER}", KEY="gobe-alarm-rules";
+    var box=document.getElementById("gp-alarm");
+    var selSp=document.getElementById("gp-picker-sp"), selLoc=document.getElementById("gp-picker-loc");
+    var thr=document.getElementById("gp-alarm-thr"), add=document.getElementById("gp-alarm-add");
+    var list=document.getElementById("gp-alarm-list"), msg=document.getElementById("gp-alarm-msg");
+    if(!box||!selSp||!selLoc||!add||!list)return;
+    if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)){return;}
+    box.hidden=false;
+    function say(t){msg.textContent=t||"";}
+    function load(){try{var r=JSON.parse(localStorage.getItem(KEY));return Array.isArray(r)?r:[];}catch(e){return[];}}
+    function save(r){try{localStorage.setItem(KEY,JSON.stringify(r));}catch(e){}}
+    function spName(id){var o=selSp.querySelector('option[value="'+id+'"]');return o?o.textContent:id;}
+    function b64(s){var p="=".repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,"+").replace(/_/g,"/"),r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+    function draw(){
+      var rules=load();list.innerHTML="";
+      rules.forEach(function(r,i){
+        var li=document.createElement("li");li.style.cssText="display:flex;gap:.6rem;align-items:center;justify-content:space-between;padding:.45rem 0;border-top:1px solid rgba(255,255,255,.08)";
+        var t=document.createElement("span");t.textContent=spName(r.species_id)+" · "+r.location+" · od "+r.threshold;
+        var b=document.createElement("button");b.type="button";b.className="gp-chip-action";b.textContent="Izbriši";b.setAttribute("aria-label","Izbriši alarm: "+t.textContent);
+        b.addEventListener("click",function(){var x=load();x.splice(i,1);sync(x,"Alarm izbrisan.");});
+        li.appendChild(t);li.appendChild(b);list.appendChild(li);
+      });
+    }
+    function post(path,body){return fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j;});});}
+    // Strežnik hrani celoten seznam pravil za to napravo; prazen seznam = odjava.
+    // Brskalnika NE odjavimo: ta je lahko naročen tudi na vremenska opozorila.
+    function sync(rules,okMsg){
+      add.disabled=true;
+      return navigator.serviceWorker.register("/sw.js").then(function(){return navigator.serviceWorker.ready;}).then(function(reg){
+        return reg.pushManager.getSubscription().then(function(sub){
+          if(!rules.length){
+            if(sub)return post("/push/unsubscribe",{site:"gobe",endpoint:sub.endpoint});
+            return null;
+          }
+          if(sub)return sub;
+          return fetch(API+"/push/vapid").then(function(r){return r.json();}).then(function(v){
+            return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(v.publicKey)});});
+        }).then(function(sub){
+          if(rules.length&&sub)return post("/push/subscribe",{site:"gobe",subscription:sub.toJSON(),rules:rules});
+        });
+      }).then(function(){save(rules);draw();say(okMsg);}).catch(function(e){say("Ni uspelo: "+(e&&e.message?e.message:"poskusi znova čez nekaj minut")+".");}).then(function(){add.disabled=false;});
+    }
+    add.addEventListener("click",function(){
+      if(Notification.permission==="denied"){say("Obvestila so za to stran v brskalniku blokirana. Dovoli jih v nastavitvah strani.");return;}
+      var rules=load();
+      var r={species_id:selSp.value,location:selLoc.value,threshold:parseInt(thr.value,10)};
+      if(rules.some(function(x){return x.species_id===r.species_id&&x.location===r.location;})){say("Za to vrsto in območje alarm že imaš. Najprej ga izbriši.");return;}
+      if(rules.length>=3){say("Največ 3 alarmi. Enega izbriši.");return;}
+      Notification.requestPermission().then(function(p){
+        if(p!=="granted"){say("Brez dovoljenja za obvestila alarm ne more delovati.");return;}
+        rules.push(r);
+        return sync(rules,"Alarm dodan: "+spName(r.species_id)+" · "+r.location+" · od "+r.threshold+".");
+      });
+    });
+    draw();
+  })();
+  </script>"""
 
 
 def picker_section_html(picker, total_species, total_locations):
@@ -5284,7 +5442,7 @@ def picker_section_html(picker, total_species, total_locations):
     selDay.addEventListener("change",render);
     selLoc.addEventListener("change",render);
   }})();
-  </script>'''
+  </script>''' + GOBE_ALARM_HTML.replace("{WORKER}", WORKER_BASE)
 
 
 def photo_credits_html(img_dir, only=None):
