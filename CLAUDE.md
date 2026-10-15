@@ -1658,6 +1658,29 @@ prek `worker.js` `/gobe/opazovanje` (POST) in `/gobe/opazovanja` (GET).
   strežniško izrisati (spreminja se sproti), zato ga `OPZ_JS` ob nalaganju
   strani prenese sam.
 
+### Gobji radar in Gobji alarm (15. 10. 2026)
+
+Dva dodatka za gobarsko stran, zgrajena na obstoječih podatkih (nobenega novega vira):
+
+- **Gobji radar** (`/gobarska-napoved/zemljevid/`, `build_zemljevid_page()`): drsnik čez **7 dni napovedi** barva
+  območja po indeksu izbranega dne (`ds` = [indeks, stopnja] za vsak dan, stopnjo izračuna Python, JS je ne računa) in
+  kljukica »Najdbe bralcev« nariše **bel obroč** ob območjih z javnimi opažanji zadnjih 30 dni (`/gobe/opazovanja?dni=30`
+  ob odprtju karte; območje opažanja = ime območja modela). Popup pokaže zadnje vnose (`esc()`, neovereno).
+  **Nazaj v čas ni drsnika**: indeksa po območjih za pretekle dni nihče ne hrani (`indeks-zgodovina.json` je samo
+  za Rečico). Če to želiš, mora `gobe-forecast.yml` dnevno zapisati arhiv po območjih (kot `data/storm-map-forecasts/`).
+- **Gobji alarm** (kartica pod izbirnikom na glavni strani): Web Push brez prijave. Lasten seznam naročnin
+  `push/gobe-subs.json` (`GOBE_PUSH_KEY`, `site:"gobe"` v `/push/subscribe`) — **odjava ne odjavi brskalnika**,
+  ker je lahko naročen tudi na vremenska opozorila (isti `sw.js`, isti VAPID). Do 3 pravila `{species_id, location,
+  threshold}`, samo vrste in območja **izbirnika** (`izbirnik.json`; polna paleta in nastavljivi pragovi so Premium);
+  worker seznam prebere prek `_gobePicker()` (predpomnilnik 1 h), ga ne podvaja. Prag 40–95 (UI ponudi 55 in 75).
+- Pošiljanje: `POST /gobe/alarm-notify` (Bearer `PREMIUM_SYNC_KEY`, korak v `gobe-forecast.yml` po `/premium/notify`)
+  prebere `premium:today` iz KV — iste vrednosti kot Premium alarm po e-pošti. Obvestilo gre ob **prehodu čez prag**
+  (histereza 8 točk, `GOBE_ALARM_RESET_PTS`) in najprej po 3 dneh (`GOBE_ALARM_COOLDOWN_DAYS`); stanje je na naročnini
+  (`st`). Besedilo pove, da je to ocena, ne obljuba najdbe. Test: `tools/test_gobe_alarm.mjs` (v `parity.yml`,
+  prava koda iz `worker.js` z lažnim R2).
+- **Razmislek o napaki:** ob najdbah 20. 9. in 13. 10. je bil indeks 43 in 41, torej pod pragom 55. Alarm pri 55+ bi
+  jih zgrešil — pragova ne spuščaj, dokler ni podatkov (glej članek `jurcki-preverba-napovedi-1015`).
+
 ## SEO smart routina — hub strani in vremenski dogodki
 
 `tools/seo_smart_routine.py` teče dnevno ob 01:45 UTC

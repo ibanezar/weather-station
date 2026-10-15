@@ -105,3 +105,6 @@ jobs:
 
       - name: Test ročnih umeritev vrst (CALIBRATION v species_rules.yaml)
         run: python3 tools/test_species_calibration.py
+
+      - name: Test Gobjega alarma (pravila, histereza, hladilna doba)
+        run: node tools/test_gobe_alarm.mjs
