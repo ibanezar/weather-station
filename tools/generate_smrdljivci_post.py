@@ -407,6 +407,8 @@ def build_article(D):
     warm_y = max(prev, key=lambda y: sy[y].get("jesen_tmax", 0))
     rho = D["spearman_gdd_halys_autumn"]
     gdd_max_y = max(ys, key=lambda y: sy[y]["gdd"])
+    gdd_2nd_y = max((y for y in ys if y != gdd_max_y), key=lambda y: sy[y]["gdd"])
+    gdd_gap = round(sy[gdd_max_y]["gdd"] - sy[gdd_2nd_y]["gdd"])
     assert D["autumn_window"] == ["09-15", "10-10"]
     p4 = [
         f"V podatkih za letošnjo jesen je marmorirana smrdljivka res izstopala. Med 15. septembrom in 10. oktobrom je bilo "
@@ -418,12 +420,12 @@ def build_article(D):
         f"Povprečna najvišja dnevna temperatura je znašala {num(sy[last]['jesen_tmax'])} °C. Leta {warm_y} je bilo še topleje, "
         f"s povprečjem {num(sy[warm_y]['jesen_tmax'])} °C, vendar so bila takrat zabeležena le {opazw(aut[warm_y]['halys'])} "
         "marmorirane smrdljivke.",
-        f"Tudi vsota stopinjskih dni od aprila do septembra je bila leta {gdd_max_y} največja. Gre za seštevek dnevnih vrednosti, "
+        f"Tudi vsota stopinjskih dni od aprila do septembra je bila leta {gdd_max_y} največja, a le za {gdd_gap} {"stopinjski dan" if gdd_gap == 1 else "stopinjska dneva" if gdd_gap == 2 else "stopinjske dni" if gdd_gap in (3, 4) else "stopinjskih dni"} večja kot leta {gdd_2nd_y}. Gre za seštevek dnevnih vrednosti, "
         "ki kaže, za koliko je povprečna dnevna temperatura presegla izhodiščno mejo 10 °C.",
-        f"Korelacija med to vsoto in jesenskim številom opažanj je pri {numg(rho['n'])} letih znašala {num(rho['rho'], 2)}. "
+        f"Spearmanova korelacija med to vsoto in jesenskim številom opažanj je pri {numg(rho['n'])} letih znašala {num(rho['rho'], 2)}. "
         "To je premalo, da bi lahko na podlagi teh podatkov sklepali o zanesljivi povezavi.",
         tbl4,
-        f"Za letošnjih {now_h} opažanj je zaslužnih {numg(aut[last]['halys_observers'])} različnih opazovalcev. "
+        f"Za letošnjih {now_h} opažanj je poskrbelo {numw(aut[last]['halys_observers'])} različnih opazovalcev. "
         + (f"Tudi lani je bilo {numw(aut[last - 1]['halys_observers'])} opazovalcev, čeprav so skupaj zabeležili {numw(prev_h)} opažanj. "
            if aut[last - 1]["halys_observers"] == aut[last]["halys_observers"]
            else f"Lani je bilo opazovalcev {numw(aut[last - 1]['halys_observers'])}, opažanj pa {numw(prev_h)}. ") +

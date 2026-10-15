@@ -471,6 +471,20 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/smrdljivci-inaturalist-vreme-1011.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/smrdljivci-inaturalist-vreme-1011.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/vpliv-lune-na-rast-gob-0921.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -569,13 +583,6 @@
     <image:image><image:loc>https://meteorec.si/og/jesenski-vrh-gob-2026-savinjska-dolina-0922.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</loc>
-    <lastmod>2026-10-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/vpliv-lune-na-rast-gob-0921.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -672,13 +679,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/vrh-gobarske-sezone-oktober-1014.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/smrdljivci-inaturalist-vreme-1011.html</loc>
-    <lastmod>2026-10-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/smrdljivci-inaturalist-vreme-1011.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/vremensko-leto-2025-2026.html</loc>
