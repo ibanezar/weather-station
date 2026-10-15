@@ -346,7 +346,19 @@ HUB_MOBILE_CSS = """<style>
   .gp-secnav{top:0}
   body .wrap .page-title{font-size:1.3rem;line-height:1.25;margin:.1rem 0 .7rem}
   /* gumb SOS je na telefonu prilepljen na zgornji desni rob (top:9.2rem) */
-  .gp-hero-kicker{padding-right:2.6rem}
+  /* Vrstica »Gobarski indeks danes · …« je na telefonu odveč (kartica je že pod glavo MeteoGobar);
+     ostane v HTML za aria-labelledby in speakable. */
+  .gp-hero-kicker{display:none}
+  /* Glava in naslov na telefonu na sredini (logotip nad menijem, h1 centriran) */
+  body .site-head{flex-direction:column;justify-content:center;gap:.5rem;text-align:center}
+  body .site-head .brand{justify-content:center}
+  body .site-head .site-nav{display:flex;justify-content:center;gap:1.3rem}
+  body .site-head .site-nav a{margin-left:0}
+  /* h1 ostane v HTML (SEO, bralniki zaslona), vidno pa ga ne kažemo: naslovno vlogo ima
+     vrstica na vrhu hero kartice (»Gobarski indeks danes · …«). */
+  body .wrap .page-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  body .site-head{margin-bottom:.8rem}
 }
 </style>"""
 
@@ -871,6 +883,8 @@ body{
 .gp-chip-row{display:flex;gap:.5rem;overflow-x:auto;padding:.15rem .05rem .6rem;margin:.5rem 0 .3rem;
   scrollbar-width:none}
 .gp-chip-row::-webkit-scrollbar{display:none}
+.gp-loc-select{width:100%;max-width:26rem;margin:.5rem 0 .8rem;padding:.65rem .8rem;border-radius:10px;font:inherit;font-size:16px;
+  background:var(--card-bg);color:inherit;border:1px solid var(--card-border)}
 .gp-chip{flex:0 0 auto;display:flex;align-items:center;gap:.4rem;background:var(--badge-bg);
   border:1.5px solid var(--card-border);color:var(--text);border-radius:999px;padding:.5rem .9rem;
   font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;
@@ -1411,7 +1425,7 @@ PAGE_JS = """<script>
     if(s.explanation!=null)return s.explanation;
     return (s.e!=null&&EXPL[s.e]!=null)?EXPL[s.e]:"";
   }
-  var GP_EXPLAIN_PAGE=12, GP_EXPLAIN_STEP=24;
+  var GP_EXPLAIN_PAGE=6, GP_EXPLAIN_STEP=24;
   var gpExplainShown=GP_EXPLAIN_PAGE;
   function explainCardsHtml(day, meta, shown){
     return day.species.slice(0,shown).map(function(s){var m=meta[s.id]||{};
@@ -1474,10 +1488,14 @@ PAGE_JS = """<script>
       '<div class="gp-forest-more">🍄 napoved po vrstah · 🗺️ zemljevid · 7-dnevna napoved →</div>'+
       '</div>';
   }
-  function forestsListHtml(locs, dayIdx, meta){
-    return locs.map(function(l,i){return {l:l,i:i};})
-      .sort(function(a,b){return b.l.days[dayIdx].overall-a.l.days[dayIdx].overall;})
-      .map(function(o){return forestRowHtml(o.l,dayIdx,meta,o.i);}).join('');
+  // Pokaže samo najboljših GP_FORESTS_TOP območij (97 kartic je bilo preveč za
+  // skrolanje); gumb pod seznamom odpre vsa.
+  var GP_FORESTS_TOP=8;
+  function forestsListHtml(locs, dayIdx, meta, all){
+    var sorted=locs.map(function(l,i){return {l:l,i:i};})
+      .sort(function(a,b){return b.l.days[dayIdx].overall-a.l.days[dayIdx].overall;});
+    if(!all)sorted=sorted.slice(0,GP_FORESTS_TOP);
+    return sorted.map(function(o){return forestRowHtml(o.l,dayIdx,meta,o.i);}).join('');
   }
   function locDetailHtml(loc, meta){
     var html="";
@@ -1565,16 +1583,18 @@ PAGE_JS = """<script>
         dayLabel(day,i===0)+'<span class="gp-chip-pct" style="color:'+levelColor(peak)+'">'+peak+'/100</span></button>';
     });
     html+='</div>';
-    html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta)+'</div>';
+    var forestsAll=locs.length<=GP_FORESTS_TOP;
+    html+='<div class="gp-forests-premium" id="gp-today-forests">'+forestsListHtml(locs,0,meta,forestsAll)+'</div>';
+    html+='<div class="gp-sp-more"><button type="button" id="gp-forests-more"'+(forestsAll?' hidden':'')+'>Pokaži vseh '+locs.length+' območij</button></div>';
     // location picker — 7-day per-species matrix for ANY pickable area, not just home
     html+='<h3>7-dnevna napoved po vrstah — izberi območje</h3>';
-    html+='<div class="gp-chip-row" id="gp-loc-chips">';
-    locs.forEach(function(l,i){
-      var o=l.days[0];
-      html+='<button type="button" class="gp-chip'+(l===home?' active':'')+'" data-i="'+i+'">'+
-        esc2(l.name)+'<span class="gp-chip-pct" style="color:'+levelColor(o.overall)+'">'+o.overall+'/100</span></button>';
-    });
-    html+='</div>';
+    html+='<select id="gp-loc-chips" class="gp-loc-select" aria-label="Izberi območje">';
+    locs.map(function(l,i){return {l:l,i:i};})
+      .sort(function(a,b){return b.l.days[0].overall-a.l.days[0].overall;})
+      .forEach(function(o){
+        html+='<option value="'+o.i+'"'+(o.l===home?' selected':'')+'>'+esc2(o.l.name)+' · '+o.l.days[0].overall+'/100</option>';
+      });
+    html+='</select>';
     html+='<div id="gp-loc-detail">'+locDetailHtml(home, meta)+'</div>';
     content.innerHTML=html;
     content.hidden=false;if(lock)lock.hidden=true;
@@ -1586,7 +1606,13 @@ PAGE_JS = """<script>
       todayDayChips.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
       btn.classList.add("active");
       btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
-      todayForests.innerHTML=forestsListHtml(locs, parseInt(btn.dataset.day,10), meta);
+      todayForests.innerHTML=forestsListHtml(locs, parseInt(btn.dataset.day,10), meta, forestsAll);
+    });}
+    var forestsMore=document.getElementById("gp-forests-more");
+    if(forestsMore&&todayForests){forestsMore.addEventListener("click",function(){
+      forestsAll=true;forestsMore.hidden=true;
+      var act=todayDayChips&&todayDayChips.querySelector(".gp-chip.active");
+      todayForests.innerHTML=forestsListHtml(locs, act?parseInt(act.dataset.day,10):0, meta, true);
     });}
     var chipRow=document.getElementById("gp-loc-chips");
     var detail=document.getElementById("gp-loc-detail");
@@ -1596,20 +1622,13 @@ PAGE_JS = """<script>
     // exactly the same detail view (species matrix, map link, day picker).
     function selectLoc(i, scrollTarget){
       var newLoc=locs[i];
-      if(chipRow){
-        chipRow.querySelectorAll(".gp-chip").forEach(function(c){c.classList.remove("active");});
-        var btn=chipRow.querySelector('.gp-chip[data-i="'+i+'"]');
-        if(btn)btn.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
-        if(btn)btn.classList.add("active");
-      }
+      if(chipRow)chipRow.value=String(i);
       detail.innerHTML=locDetailHtml(newLoc, meta);
       wireDayChips(detail, newLoc, meta);
       (scrollTarget||detail).scrollIntoView({block:"start",behavior:"smooth"});
     }
-    if(chipRow){chipRow.addEventListener("click",function(e){
-      var btn=e.target.closest(".gp-chip");
-      if(!btn)return;
-      selectLoc(parseInt(btn.dataset.i,10));
+    if(chipRow){chipRow.addEventListener("change",function(){
+      selectLoc(parseInt(chipRow.value,10));
     });}
     // Forest cards up top (the compact "Napoved po gozdovih" summary) are
     // clickable too — jumping straight to that area's full species/day
@@ -5515,7 +5534,7 @@ def build_body(rules, premium, free):
     best_meta = " · ".join(x for x in (best_terr, f'{best_loc["elev_m"]} m') if x)
     hero_trend = hero_trend_html(pct)
     hero = f'''  <section class="gp-hero" id="danes" aria-labelledby="gp-hero-title">
-    <div class="gp-hero-kicker" id="gp-hero-title">Gobarski indeks danes · {_esc(free["location"])}</div>
+    <div class="gp-hero-kicker" id="gp-hero-title">Gobarski indeks danes<span class="gp-k-dot"> ·</span> <span class="gp-k-loc">{_esc(free["location"])}</span></div>
     <div class="gp-hero-top">
       <div class="gp-gauge-wrap" role="img" aria-label="Gobarski indeks {pct} od 100, {_esc(lvl)}">
         {gauge_svg(pct)}
