@@ -352,7 +352,11 @@ HUB_MOBILE_CSS = """<style>
   body .site-head .brand{justify-content:center}
   body .site-head .site-nav{display:flex;justify-content:center;gap:1.3rem}
   body .site-head .site-nav a{margin-left:0}
-  body .wrap .page-title{text-align:center;padding:0 2.9rem}
+  /* h1 ostane v HTML (SEO, bralniki zaslona), vidno pa ga ne kažemo: naslovno vlogo ima
+     vrstica na vrhu hero kartice (»Gobarski indeks danes · …«). */
+  body .wrap .page-title{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+    clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  body .site-head{margin-bottom:.8rem}
 }
 </style>"""
 
