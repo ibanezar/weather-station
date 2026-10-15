@@ -369,6 +369,15 @@ BRAND_SWAP = '''<script>(function(){
   if(nm){nm.innerHTML="Meteo<em>Gobar</em>";}
 })();</script>'''
 
+# MeteoGobar kot namestljiva aplikacija: ločen manifest (obseg /gobarska-napoved/), da namestitev s te strani
+# ne postane aplikacija Meteorec s korena. Ikone: gobarska-napoved/icon-*.png (iz logo-gobar.svg na #183B2C).
+GOBE_PWA_HEAD = ('<link rel="manifest" href="/gobarska-napoved/manifest.json">\n'
+                 '<meta name="theme-color" content="#183B2C">\n'
+                 '<meta name="apple-mobile-web-app-capable" content="yes">\n'
+                 '<meta name="apple-mobile-web-app-title" content="MeteoGobar">\n'
+                 '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
+                 '<link rel="apple-touch-icon" href="/gobarska-napoved/icon-192.png">')
+
 PAGE_CSS = """<style>
 /* [hidden] loses to any class setting its own `display` at equal specificity
    (author CSS always beats the UA stylesheet) — e.g. .gp-cta{display:inline-block}
@@ -2405,7 +2414,7 @@ OPZ_JS = """<script>
   if(!form)return;
   var msgEl=document.getElementById("gp-opz-msg");
   var listEl=document.getElementById("gp-opz-list");
-  var KOLICINE={posamezno:"Par kosov",nekaj:"Kar nekaj",obilo:"Obilo"};
+  var KOLICINE={posamezno:"Par kosov",nekaj:"Kar nekaj",obilo:"Obilo",nic:"Nič"};
 
   // Živo iskanje vrst med tipkanjem — brskalnikov <datalist> na mobilu
   // (predvsem iOS Safari) predlogov med tipkanjem sploh ne pokaže, zato je
@@ -2494,7 +2503,7 @@ OPZ_JS = """<script>
         var note=document.createElement("span"); note.className="gp-forest-sp"; note.textContent=o.opomba;
         info.appendChild(note);
       }
-      var badge=document.createElement("div"); badge.className="gp-forest-pct gp-pct-hi";
+      var badge=document.createElement("div"); badge.className="gp-forest-pct "+(o.kolicina==="nic"?"gp-pct-none":"gp-pct-hi");
       var n=document.createElement("span"); n.className="n"; n.textContent=KOLICINE[o.kolicina]||o.kolicina;
       badge.appendChild(n);
       row.appendChild(info); row.appendChild(badge);
@@ -3187,7 +3196,7 @@ def subpage_shell(slug, title, desc, crumb_label, inner_html, extra_js="", paren
         seo.webpage_schema(url, title, desc),
         seo.crumbs_schema(crumbs),
     ] + ([extra_schema] if extra_schema else []))
-    head_extras = schema + "\n" + PAGE_CSS + ("\n" + brand["head"] if brand else "")
+    head_extras = schema + "\n" + GOBE_PWA_HEAD + "\n" + PAGE_CSS + ("\n" + brand["head"] if brand else "")
     body = f'''{brand["swap"] if brand else BRAND_SWAP}
 {top_bar_html(crumb_label, back_href)}
 {seo.crumbs_html(crumbs)}
@@ -4845,7 +4854,8 @@ def opazovanje_section_html(indexed, area_names):
     return f'''  <div class="gp-diary" id="gp-opz">
     <h2 class="gp-h2" id="opazovanja" style="margin-top:0">📝 Dodaj opažanje</h2>
     <p class="gp-diary-priv">Si danes v gozdu res našel gobo? Povej katero, kje (samo območje, brez natančne
-    lokacije) in koliko — brez prijave. Opažanje je <b>javno</b> in pomaga do bolj zanesljivih napovedi za vse
+    lokacije) in koliko — brez prijave. <b>Tudi »nič« je koristen podatek:</b> če si iskal in nisi našel ničesar,
+    izberi »Nič«, saj model brez tega ne more preveriti, kdaj se moti. Opažanje je <b>javno</b> in pomaga do bolj zanesljivih napovedi za vse
     (drugače od dnevnika spodaj, ki ostane samo v tvojem brskalniku).</p>
     <form id="gp-opz-form">
       <input type="text" id="gp-opz-website" name="website" autocomplete="off" tabindex="-1"
@@ -4868,6 +4878,7 @@ def opazovanje_section_html(indexed, area_names):
           <option value="posamezno">Par kosov</option>
           <option value="nekaj">Kar nekaj</option>
           <option value="obilo">Obilo</option>
+          <option value="nic">Nič (iskal sem, a nisem našel)</option>
         </select>
         <input type="text" id="gp-opz-opomba" placeholder="Opomba (neobvezno)" maxlength="200">
       </div>
@@ -5245,7 +5256,7 @@ def build_zemljevid_page(premium, rules):
   function loadCss(href){var l=document.createElement("link");l.rel="stylesheet";l.href=href;document.head.appendChild(l);}
   function loadScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
   var curDay=0,paintFn=null;
-  var obsByArea={};
+  var obsByArea={},negByArea={};
   var slEl=document.getElementById("gp-radar-day"),lblEl=document.getElementById("gp-radar-lbl");
   var cbEl=document.getElementById("gp-radar-obs"),noteEl=document.getElementById("gp-radar-note");
   if(slEl){
@@ -5262,14 +5273,16 @@ def build_zemljevid_page(premium, rules):
   }
   function idxOf(p){return p.prot?null:(p.ds&&p.ds[curDay]?p.ds[curDay][0]:p.idx);}
   function obsHtml(name){
-    var o=obsByArea[name];
-    if(!o||!o.length)return"";
+    var o=obsByArea[name], neg=negByArea[name]||0;
+    if((!o||!o.length)&&!neg)return"";
+    o=o||[];
     var h='<div class="sp" style="margin-top:.4rem"><b>Najdbe bralcev (30 dni):</b><ul class="sp-list">';
     o.slice(0,5).forEach(function(x){
       var dt=new Date(x.ts);
       h+='<li>🧺 '+esc(x.vrsta)+' · '+dt.getDate()+". "+(dt.getMonth()+1)+'.'+(x.kolicina?' · '+esc(x.kolicina):'')+'</li>';
     });
     h+='</ul>'+(o.length>5?'<div class="sp-more">+'+(o.length-5)+' drugih</div>':'')+
+       (neg?'<div class="sp-more">Brez najdb: '+neg+' '+(neg===1?'vnos':neg===2?'vnosa':'vnosov')+' (iskali, a niso našli).</div>':'')+
        '<div class="sp-more">Neovereni javni vnosi, območje namesto točne lokacije.</div></div>';
     return h;
   }
@@ -5360,9 +5373,12 @@ def build_zemljevid_page(premium, rules):
       if(cbEl)cbEl.addEventListener("change",drawObs);
       fetch(API+"/gobe/opazovanja?dni=30").then(function(r){return r.json();}).then(function(j){
         var n=0;
-        (j.opazovanja||[]).forEach(function(o){(obsByArea[o.obmocje]=obsByArea[o.obmocje]||[]).push(o);n++;});
+        var nn=0;
+        (j.opazovanja||[]).forEach(function(o){
+          if(o.kolicina==="nic"){negByArea[o.obmocje]=(negByArea[o.obmocje]||0)+1;nn++;return;}
+          (obsByArea[o.obmocje]=obsByArea[o.obmocje]||[]).push(o);n++;});
         drawObs();
-        if(noteEl)noteEl.textContent=(n?"Vnosov bralcev v zadnjih 30 dneh: "+n+". ":"Bralci v zadnjih 30 dneh niso vnesli opažanj. ")+
+        if(noteEl)noteEl.textContent=(n?"Najdb bralcev v zadnjih 30 dneh: "+n+". ":"Bralci v zadnjih 30 dneh niso vnesli najdb. ")+(nn?"Vnosov »iskal, a nisem našel«: "+nn+". ":"")+
           "Barva območja je indeks za izbrani dan; bel obroč pomeni opažanje. Vnosi so javni in neovereni.";
       }).catch(function(){if(noteEl)noteEl.textContent="Najdb bralcev trenutno ni mogoče naložiti; barve območij so brez njih še vedno pravilne.";});
       setTimeout(function(){map.invalidateSize();},60);
@@ -5452,8 +5468,11 @@ GOBE_ALARM_HTML = """
     </div>
     <ul id="gp-alarm-list" class="gp-alarm-list" style="list-style:none;padding:0;margin:.6rem 0 0"></ul>
     <p class="gp-picker-note" id="gp-alarm-msg" role="status" aria-live="polite"></p>
+    <p class="gp-picker-note" id="gp-alarm-ios" hidden><b>iPhone in iPad:</b> obvestila delujejo samo v nameščeni aplikaciji.
+    V Safariju tapni »Deli« in nato »Dodaj na začetni zaslon«, odpri MeteoGobar z začetnega zaslona in alarm nastavi tam.</p>
+    <p class="gp-picker-note"><button type="button" class="gp-chip-action" id="gp-install" hidden>📲 Namesti MeteoGobar kot aplikacijo</button></p>
     <p class="gp-picker-note">Indeks je ocena ugodnosti pogojev po modelu, ne obljuba najdbe in ne nadomestilo za poznavanje gob.
-    Alarme lahko izbrišeš tukaj; na iPhonu najprej dodaj stran na začetni zaslon.</p>
+    Alarme lahko izbrišeš tukaj.</p>
   </div>
   <script>
   (function(){
@@ -5463,6 +5482,19 @@ GOBE_ALARM_HTML = """
     var thr=document.getElementById("gp-alarm-thr"), add=document.getElementById("gp-alarm-add");
     var list=document.getElementById("gp-alarm-list"), msg=document.getElementById("gp-alarm-msg");
     if(!box||!selSp||!selLoc||!add||!list)return;
+    // Namestitev: Chrome/Android/namizje sprožijo beforeinstallprompt; na iOS je samo »Dodaj na začetni zaslon«.
+    if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(function(){});}
+    var installBtn=document.getElementById("gp-install"), iosNote=document.getElementById("gp-alarm-ios"), deferred=null;
+    var standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+    var isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+    window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;if(installBtn&&!standalone)installBtn.hidden=false;});
+    if(installBtn)installBtn.addEventListener("click",function(){
+      if(!deferred)return; deferred.prompt(); deferred.userChoice.then(function(){deferred=null;installBtn.hidden=true;});});
+    window.addEventListener("appinstalled",function(){if(installBtn)installBtn.hidden=true;});
+    if(isIOS&&!standalone){
+      // v Safariju (ne nameščenem) PushManager ne obstaja: pokaži navodilo namesto da kartica izgine
+      box.hidden=false; if(iosNote)iosNote.hidden=false; add.disabled=true; return;
+    }
     if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)){return;}
     box.hidden=false;
     function say(t){msg.textContent=t||"";}
@@ -5556,6 +5588,10 @@ def picker_section_html(picker, total_species, total_locations):
       <label class="gp-picker-field">Dan<select id="gp-picker-day" aria-label="Izberi dan">{day_options}</select></label>
       <label class="gp-picker-field">Območje<select id="gp-picker-loc" aria-label="Izberi območje">{loc_options}</select></label>
     </div>
+    <div class="gp-picker-geo" style="margin:.6rem 0 0">
+      <button type="button" class="gp-chip-action" id="gp-picker-geo">📍 Najbližje območje</button>
+      <span class="gp-picker-note" id="gp-picker-geo-msg" role="status" aria-live="polite" style="margin:0 0 0 .6rem"></span>
+    </div>
     <div class="gp-picker-result" id="gp-picker-result">
       <div class="gp-forest-pct {level_class(val0)}" id="gp-picker-pct">
         <span class="n">{val0}/100</span><span class="lvl">{_esc(gm.level(val0))}</span>
@@ -5606,9 +5642,44 @@ def picker_section_html(picker, total_species, total_locations):
       txtEl.appendChild(strong);
       txtEl.appendChild(document.createTextNode(" · "+dayLabel(di)+" · "+loc));
     }}
+    // Moje območje: izbira se zapomni v brskalniku; »Najbližje območje« uporabi položaj samo v
+    // brskalniku (nikamor se ne pošlje) in izbere najbližje središče območja iz izbirnika.
+    var LK="gobe-moje-obmocje";
+    function lsGet(){{try{{return localStorage.getItem(LK);}}catch(e){{return null;}}}}
+    function lsSet(v){{try{{localStorage.setItem(LK,v);}}catch(e){{}}}}
+    function hasLoc(n){{return D.locations.some(function(l){{return l.name===n;}});}}
+    var saved=lsGet();
+    if(saved&&hasLoc(saved)){{selLoc.value=saved;}}
+    function km(a,b,c,d){{
+      var R=6371,r=Math.PI/180,dl=(c-a)*r,dg=(d-b)*r;
+      var h=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dg/2)*Math.sin(dg/2);
+      return 2*R*Math.asin(Math.sqrt(h));
+    }}
+    var geoBtn=document.getElementById("gp-picker-geo"), geoMsg=document.getElementById("gp-picker-geo-msg");
+    if(geoBtn){{
+      if(!("geolocation" in navigator)){{geoBtn.hidden=true;}}
+      geoBtn.addEventListener("click",function(){{
+        geoMsg.textContent="Iščem položaj …";
+        navigator.geolocation.getCurrentPosition(function(p){{
+          var best=null;
+          D.locations.forEach(function(l){{
+            if(typeof l.lat!=="number")return;
+            var d=km(p.coords.latitude,p.coords.longitude,l.lat,l.lon);
+            if(!best||d<best.d)best={{l:l,d:d}};
+          }});
+          if(!best){{geoMsg.textContent="Območja ni bilo mogoče določiti.";return;}}
+          if(best.d>40){{geoMsg.textContent="Si več kot 40 km od območij doline; izberi območje ročno.";return;}}
+          selLoc.value=best.l.name; lsSet(best.l.name); render();
+          geoMsg.textContent="Najbližje: "+best.l.name+" (~"+Math.round(best.d)+" km). Položaj ostane v tvojem brskalniku.";
+        }},function(){{
+          geoMsg.textContent="Položaja ni mogoče dobiti. Dovoli ga v brskalniku ali izberi območje ročno.";
+        }},{{timeout:10000,maximumAge:600000}});
+      }});
+    }}
     selSp.addEventListener("change",render);
     selDay.addEventListener("change",render);
-    selLoc.addEventListener("change",render);
+    selLoc.addEventListener("change",function(){{lsSet(selLoc.value);render();}});
+    render();
   }})();
   </script>''' + GOBE_ALARM_HTML.replace("{WORKER}", WORKER_BASE)
 
@@ -6179,7 +6250,7 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("Gobarska napoved", None)]),
         seo.faq_schema(sub["qa"]),
     ])
-    head_extras = schema + "\n" + PAGE_CSS + "\n" + HUB_MOBILE_CSS + "\n" + paddle_head()
+    head_extras = schema + "\n" + GOBE_PWA_HEAD + "\n" + PAGE_CSS + "\n" + HUB_MOBILE_CSS + "\n" + paddle_head()
 
     og_image = f"{seo.SITE}/og/gobarska-napoved.jpg"
     html = seo.page_shell(title, desc, url, head_extras, body, og_image=og_image)

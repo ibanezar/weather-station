@@ -394,7 +394,7 @@ def konstante_workerja():
     # opažanja gob: količine
     kol = js("worker.js", ["KOLICINE"], [{"expr": "KOLICINE"}])[0]
     html = js_src("tools/generate_gobe_page.py")
-    opts = set(re.findall(r'<option value="(posamezno|nekaj|obilo|[a-z]+)">(?:Par kosov|Kar nekaj|Obilo)', html))
+    opts = set(re.findall(r'<option value="(posamezno|nekaj|obilo|[a-z]+)">(?:Par kosov|Kar nekaj|Obilo|Nič)', html))
     js_map = set(re.findall(r'KOLICINE=\{([^}]*)\}', html)[0].replace('"', "").split(","))
     js_keys = {x.split(":")[0] for x in js_map}
     check(set(kol) == opts == js_keys, "gobe: KOLICINE",

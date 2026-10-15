@@ -1,0 +1,19 @@
+{
+  "name": "MeteoGobar — gobarska napoved",
+  "short_name": "MeteoGobar",
+  "description": "Gobarski indeks za Zgornjo Savinjsko dolino: napoved po vrstah in območjih, zemljevid in alarmi.",
+  "id": "/gobarska-napoved/",
+  "start_url": "/gobarska-napoved/?vir=aplikacija",
+  "scope": "/gobarska-napoved/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#183B2C",
+  "theme_color": "#183B2C",
+  "lang": "sl",
+  "icons": [
+    { "src": "/gobarska-napoved/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/gobarska-napoved/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/gobarska-napoved/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["weather", "lifestyle"]
+}

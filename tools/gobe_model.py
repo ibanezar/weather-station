@@ -364,6 +364,8 @@ def active_species_areas(observations, rules, today):
             day = dt.datetime.fromisoformat(str(o["ts"]).replace("Z", "+00:00")).date()
         except (KeyError, ValueError, TypeError):
             continue
+        if o.get("kolicina") == "nic":   # »iskal sem, a nisem našel« ni znak, da je vrsta aktivna
+            continue
         if not sid or not area or not (0 <= (today - day).days <= OBS_ACTIVE_DAYS):
             continue
         counts.setdefault((sid, area), []).append(day)
@@ -754,8 +756,10 @@ def picker_wire(premium, species_ids=None, location_names=None):
         "days": days,
         "species": [{"id": sid, "name_sl": premium["species_meta"][sid]["name_sl"],
                       "name_lat": premium["species_meta"][sid]["name_lat"]} for sid in species_ids],
+        # lat/lon: središče območja (že javno na zemljevidu), za »najbližje območje« v brskalniku
         "locations": [{"name": loc["name"], "terrain": loc.get("terrain"), "elev_m": loc["elev_m"],
-                        "home": bool(loc.get("home"))} for loc in locations],
+                        "home": bool(loc.get("home")), "lat": round(loc["lat"], 3), "lon": round(loc["lon"], 3)}
+                       for loc in locations],
         "index": index,
     }
 

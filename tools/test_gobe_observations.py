@@ -59,6 +59,13 @@ check("neznana vrsta se preskoči", gm.active_species_areas(
 check("pokvarjen vnos ne podre izračuna", gm.active_species_areas(
     base + [{"vrsta": N}, {"ts": "ni datum", "vrsta": N, "obmocje": A}, None, 5], rules, TODAY) == {("boletus_edulis", A)})
 check("brez opažanj (None) → prazno", gm.active_species_areas(None, rules, TODAY) == set())
+neg = lambda d, i=0: {**obs(N, A, d, i), "kolicina": "nic"}
+check("»iskal sem, a nisem našel« ne šteje kot aktivnost", gm.active_species_areas(
+    [neg(1), neg(3), neg(5)], rules, TODAY) == set())
+check("negativni vnos ne pokvari signala iz pravih najdb", gm.active_species_areas(
+    base + [neg(2), neg(4)], rules, TODAY) == {("boletus_edulis", A)})
+check("negativni vnos ne nadomesti manjkajoče najdbe", gm.active_species_areas(
+    base[:2] + [neg(5)], rules, TODAY) == set())
 
 
 def synth(rain_idx):
