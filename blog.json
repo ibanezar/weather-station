@@ -1,5 +1,34 @@
 [
   {
+    "title": "Smrdljivcev je čedalje več? Podatki in vreme",
+    "slug": "smrdljivci-inaturalist-vreme-1011",
+    "url": "/blog/smrdljivci-inaturalist-vreme-1011.html",
+    "date": "2026-10-11",
+    "summary": "Marmoriranih smrdljivk je v opažanjih iNaturalist letos jeseni največ doslej, a čez leto njihov delež ne raste. Ob toplih dneh jih vidimo pogosteje.",
+    "tags": [
+      "smrdljivci",
+      "iNaturalist",
+      "jesen",
+      "podatki",
+      "2026"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje",
+    "slug": "vpliv-lune-na-rast-gob-0921",
+    "url": "/blog/vpliv-lune-na-rast-gob-0921.html",
+    "date": "2026-09-21",
+    "summary": "Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.",
+    "tags": [
+      "gobe",
+      "luna",
+      "gobarski indeks",
+      "mit ali resnica"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
     "title": "Zakaj po 120 mm dežja v gozdu ni jurčkov",
     "slug": "zakaj-po-120-mm-dezja-ni-jurckov-0918",
     "url": "/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html",
@@ -204,20 +233,6 @@
       "gobarski indeks",
       "IREICA1",
       "Zgornja Savinjska dolina"
-    ],
-    "updated": "2026-10-15"
-  },
-  {
-    "title": "Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje",
-    "slug": "vpliv-lune-na-rast-gob-0921",
-    "url": "/blog/vpliv-lune-na-rast-gob-0921.html",
-    "date": "2026-09-21",
-    "summary": "Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.",
-    "tags": [
-      "gobe",
-      "luna",
-      "gobarski indeks",
-      "mit ali resnica"
     ],
     "updated": "2026-10-15"
   },
@@ -429,21 +444,6 @@
       "podatki"
     ],
     "updated": "2026-10-15"
-  },
-  {
-    "title": "Smrdljivcev je čedalje več? Podatki in vreme",
-    "slug": "smrdljivci-inaturalist-vreme-1011",
-    "url": "/blog/smrdljivci-inaturalist-vreme-1011.html",
-    "date": "2026-10-11",
-    "summary": "Marmoriranih smrdljivk je v opažanjih iNaturalist letos jeseni največ doslej, a čez leto njihov delež ne raste. Ob toplih dneh jih vidimo pogosteje.",
-    "tags": [
-      "smrdljivci",
-      "iNaturalist",
-      "jesen",
-      "podatki",
-      "2026"
-    ],
-    "updated": "2026-10-12"
   },
   {
     "title": "Vremensko leto 2025/26 v Rečici ob Savinji v številkah",

@@ -5,8 +5,31 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 15 Oct 2026 11:22:25 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 11:46:36 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Smrdljivcev je čedalje več? Podatki in vreme</title>
+      <link>https://meteorec.si/blog/smrdljivci-inaturalist-vreme-1011.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/smrdljivci-inaturalist-vreme-1011.html</guid>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Marmoriranih smrdljivk je v opažanjih iNaturalist letos jeseni največ doslej, a čez leto njihov delež ne raste. Ob toplih dneh jih vidimo pogosteje.</description>
+      <category>smrdljivci</category>
+      <category>iNaturalist</category>
+      <category>jesen</category>
+      <category>podatki</category>
+      <category>2026</category>
+    </item>
+    <item>
+      <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
+      <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</guid>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.</description>
+      <category>gobe</category>
+      <category>luna</category>
+      <category>gobarski indeks</category>
+      <category>mit ali resnica</category>
+    </item>
     <item>
       <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
       <link>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</link>
@@ -175,17 +198,6 @@
       <category>Zgornja Savinjska dolina</category>
     </item>
     <item>
-      <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
-      <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.</description>
-      <category>gobe</category>
-      <category>luna</category>
-      <category>gobarski indeks</category>
-      <category>mit ali resnica</category>
-    </item>
-    <item>
       <title>Visoki oblaki proti zahodu: ali res napovedujejo dež?</title>
       <link>https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</guid>
@@ -351,18 +363,6 @@
       <category>oktober</category>
       <category>sezona</category>
       <category>podatki</category>
-    </item>
-    <item>
-      <title>Smrdljivcev je čedalje več? Podatki in vreme</title>
-      <link>https://meteorec.si/blog/smrdljivci-inaturalist-vreme-1011.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/smrdljivci-inaturalist-vreme-1011.html</guid>
-      <pubDate>Mon, 12 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Marmoriranih smrdljivk je v opažanjih iNaturalist letos jeseni največ doslej, a čez leto njihov delež ne raste. Ob toplih dneh jih vidimo pogosteje.</description>
-      <category>smrdljivci</category>
-      <category>iNaturalist</category>
-      <category>jesen</category>
-      <category>podatki</category>
-      <category>2026</category>
     </item>
     <item>
       <title>Vremensko leto 2025/26 v Rečici ob Savinji v številkah</title>
