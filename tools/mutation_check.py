@@ -43,7 +43,7 @@ MUTACIJE = [
     ("push vnaprej: meje pragov (app.js)", "app.js", "const FC_THR_LIMITS={wind:[10,200]", "const FC_THR_LIMITS={wind:[10,199]"),
     ("igra Črnivec: najkrajši čas (worker)", "worker.js", "const CRN_IGRA_MIN_S = 130;", "const CRN_IGRA_MIN_S = 30;"),
     ("Termika: dolžina koridorja (worker)", "worker.js", "celje: 44.57", "celje: 44.0"),
-    ("opažanja gob: količine (worker)", "worker.js", 'const KOLICINE = ["posamezno", "nekaj", "obilo"];', 'const KOLICINE = ["posamezno", "nekaj", "obilo", "veliko"];'),
+    ("opažanja gob: količine (worker)", "worker.js", 'const KOLICINE = ["posamezno", "nekaj", "obilo", "nic"]; // "nic" = iskal sem, a nisem našel (negativen podatek)', 'const KOLICINE = ["posamezno", "nekaj", "obilo", "nic", "veliko"]; // "nic" = iskal sem, a nisem našel (negativen podatek)'),
     ("gobarski prag (JS na strani)", "gobarska-napoved/index.html", 'if(p>=75)return"Odlično"', 'if(p>=76)return"Odlično"'),
     ("nevihtna karta: stopnja (app.js)", "app.js", "if(s>=60)return'Ekstremno'", "if(s>=61)return'Ekstremno'"),
     ("nevihtna karta: mesto (app.js)", "app.js", "const SLO_CITIES=[\n  {n:'Ljubljana',la:46.056", "const SLO_CITIES=[\n  {n:'Ljubljana',la:46.057"),

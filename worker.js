@@ -6383,7 +6383,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const OPZ_MAX_DNI = 30;       // dlje od tega se opažanje ne šteje več kot "nedavno"
         const OPZ_STORE_CAP = 1000;   // koliko vnosov obdržimo v datoteki (ne vseh se vrne)
         const OPZ_LIST_CAP = 200;     // koliko jih vrne GET
-        const KOLICINE = ["posamezno", "nekaj", "obilo"];
+        const KOLICINE = ["posamezno", "nekaj", "obilo", "nic"]; // "nic" = iskal sem, a nisem našel (negativen podatek)
 
         async function _opzRead() {
           if (!r2) return [];

@@ -1681,6 +1681,22 @@ Dva dodatka za gobarsko stran, zgrajena na obstoječih podatkih (nobenega novega
 - **Razmislek o napaki:** ob najdbah 20. 9. in 13. 10. je bil indeks 43 in 41, torej pod pragom 55. Alarm pri 55+ bi
   jih zgrešil — pragova ne spuščaj, dokler ni podatkov (glej članek `jurcki-preverba-napovedi-1015`).
 
+### Moje območje, namestitev kot aplikacija in negativna opažanja (15. 10. 2026)
+
+- **Moje območje** (izbirnik na glavni strani): izbira območja se zapomni v `localStorage` (`gobe-moje-obmocje`), gumb
+  »Najbližje območje« uporabi geolokacijo **samo v brskalniku** (nikamor se ne pošlje) in izbere najbližje središče
+  območja iz `izbirnik.json` (`lat`/`lon` sta zato v `picker_wire()`; to so središča območij, že javna na zemljevidu).
+  Nad 40 km stran ne izbere nič. Alarm uporabi isto izbiro.
+- **MeteoGobar je namestljiva aplikacija**: `gobarska-napoved/manifest.json` (obseg `/gobarska-napoved/`, ikone
+  `icon-192.png`/`icon-512.png` iz `logo-gobar.svg` na #183B2C) + `GOBE_PWA_HEAD` v obeh `head_extras`. Ločen manifest je
+  nujen: korenski `manifest.json` bi namestitev s te strani naredil za aplikacijo Meteorec. Kartica Gobji alarm pokaže
+  gumb »Namesti« (`beforeinstallprompt`) in na **iPhonu v Safariju** navodilo »Dodaj na začetni zaslon« (tam `PushManager`
+  ne obstaja in je kartica prej kar izginila); alarm tam deluje samo v nameščeni aplikaciji.
+- **Negativna opažanja**: količina `nic` (»Nič — iskal sem, a nisem našel«) je četrta vrednost `KOLICINE` (worker ↔ obrazec ↔
+  prikaz, `test_parity`). **Ni znak aktivnosti vrste**: `active_species_areas()` jih preskoči (test v
+  `test_gobe_observations.py`), na radarju ne naredijo belega obroča, v popupu so le štetje »Brez najdb«. Namen: šele z njimi
+  je mogoče šteti napačne alarme (dan z visokim indeksom, ko nihče ni našel ničesar). Še ni analize, samo zbiranje.
+
 ## SEO smart routina — hub strani in vremenski dogodki
 
 `tools/seo_smart_routine.py` teče dnevno ob 01:45 UTC
