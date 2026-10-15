@@ -1562,6 +1562,32 @@ razdelek na glavni strani" zgoraj, ne spodrsljaj. `picker_section_html()` v
   `_smerBesedilo`/`_ltgDecode` drugod v repozitoriju; če spremeniš pragove
   tam, spremeni tudi tu.
 
+### Vizualna prenova glavne strani (15. 10. 2026, po oblikovalskem predlogu)
+
+Predlog (PDF »Vizualna prenova«) je zahteval odločitev v nekaj sekundah na telefonu. Kar velja po prenovi:
+
+- **Zaporedje:** hero → lepljiva navigacija (`SECTION_NAV`) → Najboljša območja (`#obmocja`, `mini_map_preview_html`) →
+  7 dni (`#izbirnik` + `#premium`) → Najbolj obetavne vrste (`#vrste`, `top_species_html`) → Orodja (`#zmoznosti`) → FAQ.
+  **Vsako sidro v `SECTION_NAV` mora obstajati v `build_body()`**, sicer povezava ne vodi nikamor.
+- **Hero (`#danes`):** indeks, besedna ocena, sprememba glede na včeraj z besedo (`_delta_text()`: »4 točke manj kot
+  včeraj«, ne »−4«), čas osvežitve, najboljši teren, **en** primarni gumb (območja), največ dve bližnjici (7 dni,
+  prepoznava). Deli / zemljevid / opažanje so povezave, ne gumbi. `gp-share-btn` in `gp-share-msg` ostaneta (PAGE_JS).
+  Barve ravni indeksa (`level_color`) ostanejo iste kot povsod; nova je samo podlaga hero kartice (#183B2C) in zelena
+  primarnega gumba (#78A95F).
+- **Indeks je povsod `/100`**, nikoli `%` (to je ocena ugodnosti, ne verjetnost najdbe). Velja za strežniški in
+  odjemalski izris, legende (»55–100«, brez odstotkov), meta opis in besedilo za deljenje. `%` ostane pri vlagi tal in
+  pri »ujemanju padavinskih pravil« na `/valovi/` — to sta drugi meri.
+- **Čas osvežitve je `generated` iz `compute_forecast`** (čas izračuna, po naši uri, `fmt_updated()`), ne datum strani.
+  Če je starejši od 26 h, ga JS označi (»podatki niso sveži«); stare vrednosti ne skrivamo.
+- **Brezplačno z e-pošto:** povsod isti stavek (»brezplačno z e-pošto, brez gesla in plačila«). Besede »Premium« ne
+  uporabljamo v naslovih in vprašanjih, dokler je `PREMIUM_FREE_LAUNCH` vklopljen.
+- **Na telefonu je krovna vsebina skrita samo na glavni strani** (`HUB_MOBILE_CSS`: glava strani, drobtinice, značka
+  postaje, podnaslov; h1 ostane, manjši). Isti vzorec kot `/valovi/`; podstrani ga ne dobijo. SOS gumb je na telefonu
+  prilepljen na zgornji rob, zato ima kicker hero kartice desni odmik.
+- **Kartice vrst vodijo na `/baza-vrst/<skupina>/?q=<ime>`** — `SP_JS` bere `?q=` in vnaprej napolni iskalnik.
+- **Ni narejeno (P2 iz predloga):** svetla podlaga celotne strani (stran je temna in vsi razdelki to predpostavljajo),
+  mikroanimacije, napredni grafi. Emoji so ostali v kartici območij (teren) in v skritih karticah po prijavi.
+
 ### Skrita stran z naslovi za gobje FB skupine (9. 10. 2026)
 
 `tools/gobe_naslovi.py` (ročni CLI, `--izberi N` zapiše izbiro v `data/gobe-naslovi-log.csv`) sestavi
