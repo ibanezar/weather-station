@@ -2,14 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://meteorec.si/</loc>
-    <lastmod>2026-10-14</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
     <image:image><image:loc>https://meteorec.si/og-image.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/</loc>
-    <lastmod>2026-10-14</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -471,6 +471,97 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zima-2026-2027-el-nino-napoved.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/naslednji-teden-konec-poletja-0904.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/naslednji-teden-konec-poletja-0904.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/trije-vali-gob-po-dezju-0911.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/trije-vali-gob-po-dezju-0911.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-po-120-mm-dezja-ni-jurckov-0918.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/indijansko-poletje-suh-soncen-teden-0925.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/indijansko-poletje-suh-soncen-teden-0925.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/gobarska-sezona-julij-2026-kje-nabirati.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/kdaj-po-tednu-dezja-zrastejo-gobe-0822.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-po-dezju-gobe-ne-zrastejo-takoj.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/jesenski-vrh-gob-2026-savinjska-dolina-0922.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/vpliv-lune-na-rast-gob-0921.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -583,41 +674,6 @@
     <image:image><image:loc>https://meteorec.si/og/smrdljivci-inaturalist-vreme-1011.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/gobarska-sezona-julij-2026-kje-nabirati.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/jesenski-vrh-gob-2026-savinjska-dolina-0922.html</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/jesenski-vrh-gob-2026-savinjska-dolina-0922.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/vpliv-lune-na-rast-gob-0921.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zakaj-po-dezju-gobe-ne-zrastejo-takoj.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/kdaj-po-tednu-dezja-zrastejo-gobe-0822.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/vremensko-leto-2025-2026.html</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -646,27 +702,6 @@
     <image:image><image:loc>https://meteorec.si/og/oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/indijansko-poletje-suh-soncen-teden-0925.html</loc>
-    <lastmod>2026-09-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/indijansko-poletje-suh-soncen-teden-0925.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.html</loc>
-    <lastmod>2026-09-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/kelvin-helmholtzovi-valovi-nad-crnivcem-0924.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html</loc>
-    <lastmod>2026-09-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/invazivka-tedenski-pregled-20260920.html</loc>
     <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>
@@ -674,46 +709,11 @@
     <image:image><image:loc>https://meteorec.si/og/invazivka-tedenski-pregled-20260920.jpg</image:loc></image:image>
   </url>
   <url>
-    <loc>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</loc>
-    <lastmod>2026-09-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zakaj-po-120-mm-dezja-ni-jurckov-0918.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zima-2026-2027-el-nino-napoved.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.html</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/trije-vali-gob-po-dezju-0911.html</loc>
-    <lastmod>2026-09-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/trije-vali-gob-po-dezju-0911.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://meteorec.si/blog/poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907.html</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/naslednji-teden-konec-poletja-0904.html</loc>
-    <lastmod>2026-09-04</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/naslednji-teden-konec-poletja-0904.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/test-napovedi-2026-08.html</loc>
