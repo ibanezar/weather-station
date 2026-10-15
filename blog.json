@@ -1,5 +1,20 @@
 [
   {
+    "title": "So zime še takšne, kot so bile nekoč? Podatki in spomin",
+    "slug": "zime-nekoc-in-zdaj-1012",
+    "url": "/blog/zime-nekoc-in-zdaj-1012.html",
+    "date": "2026-10-12",
+    "summary": "Ledenih dni je v Ljubljani za dve tretjini manj kot v letih 1981–2002, snežne odeje več kot pol manj. Kaj to pomeni za otroke, ki poznajo le današnje zime?",
+    "tags": [
+      "zima",
+      "sneg",
+      "podnebje",
+      "otroci",
+      "podatki"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
     "title": "Zima 2026/2027 na Rečici ob Savinji: kaj pravi najmočnejši El Niño doslej",
     "slug": "zima-2026-2027-el-nino-napoved",
     "url": "/blog/zima-2026-2027-el-nino-napoved.html",
@@ -31,6 +46,36 @@
     "updated": "2026-10-15"
   },
   {
+    "title": "Zakaj po 120 mm dežja v gozdu ni jurčkov",
+    "slug": "zakaj-po-120-mm-dezja-ni-jurckov-0918",
+    "url": "/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html",
+    "date": "2026-09-18",
+    "summary": "10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.",
+    "tags": [
+      "gobe",
+      "gobarski indeks",
+      "IREICA1",
+      "Zgornja Savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih",
+    "slug": "gobarska-sezona-julij-2026-kje-nabirati",
+    "url": "/blog/gobarska-sezona-julij-2026-kje-nabirati.html",
+    "date": "2026-07-07",
+    "summary": "Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.",
+    "tags": [
+      "agrometeo",
+      "gobe",
+      "analiza",
+      "julij",
+      "2026",
+      "IREICA1"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
     "title": "Trije valovi gob po dežju: kdo pride prvi in kdo šele čez dva tedna",
     "slug": "trije-vali-gob-po-dezju-0911",
     "url": "/blog/trije-vali-gob-po-dezju-0911.html",
@@ -54,20 +99,6 @@
       "napoved",
       "poslabšanje",
       "cirrocumulus",
-      "IREICA1",
-      "Zgornja Savinjska dolina"
-    ],
-    "updated": "2026-10-15"
-  },
-  {
-    "title": "Zakaj po 120 mm dežja v gozdu ni jurčkov",
-    "slug": "zakaj-po-120-mm-dezja-ni-jurckov-0918",
-    "url": "/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html",
-    "date": "2026-09-18",
-    "summary": "10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.",
-    "tags": [
-      "gobe",
-      "gobarski indeks",
       "IREICA1",
       "Zgornja Savinjska dolina"
     ],
@@ -115,22 +146,6 @@
       "2026",
       "mraz",
       "inverzija",
-      "IREICA1"
-    ],
-    "updated": "2026-10-15"
-  },
-  {
-    "title": "Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih",
-    "slug": "gobarska-sezona-julij-2026-kje-nabirati",
-    "url": "/blog/gobarska-sezona-julij-2026-kje-nabirati.html",
-    "date": "2026-07-07",
-    "summary": "Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.",
-    "tags": [
-      "agrometeo",
-      "gobe",
-      "analiza",
-      "julij",
-      "2026",
       "IREICA1"
     ],
     "updated": "2026-10-15"
@@ -383,21 +398,6 @@
       "gobarski-indeks",
       "analiza",
       "zgornja savinjska dolina"
-    ],
-    "updated": "2026-10-15"
-  },
-  {
-    "title": "So zime še takšne, kot so bile nekoč? Podatki in spomin",
-    "slug": "zime-nekoc-in-zdaj-1012",
-    "url": "/blog/zime-nekoc-in-zdaj-1012.html",
-    "date": "2026-10-12",
-    "summary": "Ledenih dni je v Ljubljani za dve tretjini manj kot v letih 1981–2002, snežne odeje več kot pol manj. Kaj to pomeni za otroke, ki poznajo le današnje zime?",
-    "tags": [
-      "zima",
-      "sneg",
-      "podnebje",
-      "otroci",
-      "podatki"
     ],
     "updated": "2026-10-15"
   },

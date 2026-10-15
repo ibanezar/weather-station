@@ -471,6 +471,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zime-nekoc-in-zdaj-1012.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -485,6 +492,20 @@
     <image:image><image:loc>https://meteorec.si/og/naslednji-teden-konec-poletja-0904.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zakaj-po-120-mm-dezja-ni-jurckov-0918.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/gobarska-sezona-julij-2026-kje-nabirati.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/trije-vali-gob-po-dezju-0911.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -497,13 +518,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</loc>
-    <lastmod>2026-10-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zakaj-po-120-mm-dezja-ni-jurckov-0918.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/indijansko-poletje-suh-soncen-teden-0925.html</loc>
@@ -525,13 +539,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</loc>
-    <lastmod>2026-10-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/gobarska-sezona-julij-2026-kje-nabirati.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</loc>
@@ -651,13 +658,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/koliko-dni-po-dezju-rastejo-gobe.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</loc>
-    <lastmod>2026-10-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zime-nekoc-in-zdaj-1012.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/vrh-gobarske-sezone-oktober-1014.html</loc>

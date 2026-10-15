@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 15 Oct 2026 10:01:29 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 11:00:32 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>So zime še takšne, kot so bile nekoč? Podatki in spomin</title>
+      <link>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</guid>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Ledenih dni je v Ljubljani za dve tretjini manj kot v letih 1981–2002, snežne odeje več kot pol manj. Kaj to pomeni za otroke, ki poznajo le današnje zime?</description>
+      <category>zima</category>
+      <category>sneg</category>
+      <category>podnebje</category>
+      <category>otroci</category>
+      <category>podatki</category>
+    </item>
     <item>
       <title>Zima 2026/2027 na Rečici ob Savinji: kaj pravi najmočnejši El Niño doslej</title>
       <link>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</link>
@@ -33,6 +45,30 @@
       <category>Zgornja Savinjska dolina</category>
     </item>
     <item>
+      <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
+      <link>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</guid>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
+      <description>10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+    </item>
+    <item>
+      <title>Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih</title>
+      <link>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</guid>
+      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.</description>
+      <category>agrometeo</category>
+      <category>gobe</category>
+      <category>analiza</category>
+      <category>julij</category>
+      <category>2026</category>
+      <category>IREICA1</category>
+    </item>
+    <item>
       <title>Trije valovi gob po dežju: kdo pride prvi in kdo šele čez dva tedna</title>
       <link>https://meteorec.si/blog/trije-vali-gob-po-dezju-0911.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/trije-vali-gob-po-dezju-0911.html</guid>
@@ -52,17 +88,6 @@
       <category>napoved</category>
       <category>poslabšanje</category>
       <category>cirrocumulus</category>
-      <category>IREICA1</category>
-      <category>Zgornja Savinjska dolina</category>
-    </item>
-    <item>
-      <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
-      <link>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>10. in 11. septembra je v Rečici padlo 120,7 mm dežja, a v gozdu so bile samo golobice in lisičke. Tla so ostala pretopla, nočna ohladitev pa je prišla pred dežjem namesto po njem. Okno za jurčke se odpre 23.–26. septembra.</description>
-      <category>gobe</category>
-      <category>gobarski indeks</category>
       <category>IREICA1</category>
       <category>Zgornja Savinjska dolina</category>
     </item>
@@ -101,19 +126,6 @@
       <category>2026</category>
       <category>mraz</category>
       <category>inverzija</category>
-      <category>IREICA1</category>
-    </item>
-    <item>
-      <title>Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih</title>
-      <link>https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/gobarska-sezona-julij-2026-kje-nabirati.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Julij je nominalno sezona jurčkov in lisičk, a letos dno Zgornje Savinjske doline zaostaja: gobarski indeks za Rečico ob Savinji je le 7 % zaradi vročinskega vala in suše konec junija. V Logarski dolini je razmere že zmerne (39 %). Primerjava petih nabiralnih območij in kaj mora pasti, da se sezona sproži.</description>
-      <category>agrometeo</category>
-      <category>gobe</category>
-      <category>analiza</category>
-      <category>julij</category>
-      <category>2026</category>
       <category>IREICA1</category>
     </item>
     <item>
@@ -315,18 +327,6 @@
       <category>gobarski-indeks</category>
       <category>analiza</category>
       <category>zgornja savinjska dolina</category>
-    </item>
-    <item>
-      <title>So zime še takšne, kot so bile nekoč? Podatki in spomin</title>
-      <link>https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/zime-nekoc-in-zdaj-1012.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Ledenih dni je v Ljubljani za dve tretjini manj kot v letih 1981–2002, snežne odeje več kot pol manj. Kaj to pomeni za otroke, ki poznajo le današnje zime?</description>
-      <category>zima</category>
-      <category>sneg</category>
-      <category>podnebje</category>
-      <category>otroci</category>
-      <category>podatki</category>
     </item>
     <item>
       <title>Vrh opažanj gob je oktobra. Šest let podatkov</title>

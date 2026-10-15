@@ -1,4 +1,9 @@
 {
+  "zime-nekoc-in-zdaj-1012": [
+    "zima-2026-2027-el-nino-napoved",
+    "susa-savinjska-dolina-hidrologija",
+    "koliko-dni-po-dezju-rastejo-gobe"
+  ],
   "zima-2026-2027-el-nino-napoved": [
     "el-nino-2026",
     "zime-nekoc-in-zdaj-1012",
@@ -6,8 +11,18 @@
   ],
   "naslednji-teden-konec-poletja-0904": [
     "tedenska-napoved-24-28-avgust-2026",
-    "indijansko-poletje-suh-soncen-teden-0925",
-    "tedenska-napoved-11-17-avgust-2026"
+    "tedenska-napoved-11-17-avgust-2026",
+    "indijansko-poletje-suh-soncen-teden-0925"
+  ],
+  "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
+    "trije-vali-gob-po-dezju-0911",
+    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
+  ],
+  "gobarska-sezona-julij-2026-kje-nabirati": [
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715"
   ],
   "trije-vali-gob-po-dezju-0911": [
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
@@ -18,11 +33,6 @@
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
     "koliko-dezja-bo-jutri-arso-in-open-meteo-narazen-0824",
     "visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005"
-  ],
-  "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
-    "trije-vali-gob-po-dezju-0911",
-    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
   ],
   "indijansko-poletje-suh-soncen-teden-0925": [
     "naslednji-teden-konec-poletja-0904",
@@ -38,11 +48,6 @@
     "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
     "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001",
     "najhladnejsa-julijska-jutra-recica"
-  ],
-  "gobarska-sezona-julij-2026-kje-nabirati": [
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715"
   ],
   "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
     "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
@@ -128,11 +133,6 @@
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
     "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni",
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
-  ],
-  "zime-nekoc-in-zdaj-1012": [
-    "zima-2026-2027-el-nino-napoved",
-    "susa-savinjska-dolina-hidrologija",
-    "koliko-dni-po-dezju-rastejo-gobe"
   ],
   "vrh-gobarske-sezone-oktober-1014": [
     "smrdljivci-inaturalist-vreme-1011",

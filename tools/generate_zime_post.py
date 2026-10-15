@@ -271,7 +271,7 @@ def build_article(D):
                  f"{num(LJ[y]['tmean'])} °C · {ledeni(LJ[y]['ice'])}",
                  f"{num(SM[y]['tmean'])} °C · {ledeni(SM[y]['ice'])}"] for y in ov],
                "Primerjava zim 2019/20 do 2022/23: Rečica, Ljubljana in Šmartno",
-               "Povprečna temperatura je izračunana iz dnevnih najvišjih in najnižjih temperatur za obdobje od decembra do februarja.")
+               "Povprečna temperatura je izračunana iz dnevnih najvišjih in najnižjih temperatur za obdobje od decembra do februarja. Povprečje dnevnih povprečij je za 0,3 do 0,8 °C nižje; tako je temperatura računana v članku o zimi 2026/2027 in El Niñu.")
     # --- sto let v Ljubljani ---
     decades = []
     for d0 in range(1900, 2030, 10):
