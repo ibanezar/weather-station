@@ -471,6 +471,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/ekoloska-tveganja-pozarna-ogrozenost-vetrolomi.html</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -525,13 +532,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html</loc>
-    <lastmod>2026-10-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/zakaj-gobe-rastejo-do-meje-megle.html</loc>
