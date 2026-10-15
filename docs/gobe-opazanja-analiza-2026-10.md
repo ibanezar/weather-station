@@ -2,7 +2,7 @@
 
 Vir: `GET /gobe/opazovanja?dni=120` (javni vnosi, 13 opažanj od 20. 9. do 14. 10. 2026) in `history.json` (postaja IREICA1). Rezultat je okviren: vnosi so javni in nepreverjeni, vzorec je majhen.
 
-## Jurček (8 vnosov: »Jesenski goban« in »Jurček«)
+## Jurček (7 vnosov: »Jesenski goban« in »Jurček«)
 
 Sprožilni dež: 10. in 11. 9. (85,1 + 35,6 mm). Model za mikorizne vrste uporablja zamik 8–16 dni.
 
@@ -32,6 +32,6 @@ Ne. Pogoj je najmanj 3 opažanja iste vrste na istem območju, na 2 različnih d
 
 ## Omejitve
 
-- 13 vnosov, od tega 8 jurčkov. Ni podatka, kdaj je bil trosnjak najden, samo kdaj je bil vnesen.
+- 13 vnosov, od tega 7 jurčkov. Ni podatka, kdaj je bil trosnjak najden, samo kdaj je bil vnesen.
 - Vnosi niso preverjeni (ime vrste je prosto besedilo).
 - Sprožilni dež je izbran ročno (dan ≥ 10 mm), ne po pravilu modela.
