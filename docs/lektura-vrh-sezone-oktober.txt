@@ -29,7 +29,7 @@ največ opažanj v tednu največji delež med vsemi opažanji 7.–27. oktober
 
 Vsak teden traja sedem dni, pika pa je postavljena na sredino tedna. Desno je prikazano število opažanj gob v tem tednu. Obroč označuje teden z največjim deležem gob, če je bilo v njem vsaj 150 vseh opažanj. Vir: iNaturalist.
 
-Če namesto absolutnega števila pogledamo teden z največjim deležem gob, se vrh premakne v obdobje med 30. septembrom in 3. novembrom. Pri klobučnicah in pri vseh glivah skupaj je teden z največ opažanji enak kot pri zgoraj opredeljenih »pravih gobah« (glej razdelek 05).
+Če namesto absolutnega števila pogledam teden z največjim deležem gob, se vrh premakne v obdobje med 30. septembrom in 3. novembrom. Pri klobučnicah in pri vseh glivah skupaj je teden z največ opažanji enak kot pri zgoraj opredeljenih »pravih gobah« (glej razdelek 05).
 
 Leto | Teden z največ opažanji | Število | Delež, september | oktober | november |
 2020 | 21.–27. 10. | 221 | 16 % | 41 % | 44 % |
@@ -65,7 +65,7 @@ september | 14 % | 10 % | 32 % |
 oktober | 34 % | 25 % | 44 % |
 november | 24 % | 16 % | 44 % |
 
-To ni v nasprotju z našim gobarskim modelom, vendar gre za različni stvari. Gobarski indeks za Rečico ob Savinji je bil oktobra višji kot septembra v treh od štirih let s popolnimi podatki:
+To ni v nasprotju z gobarskim modelom na Meteorcu, vendar gre za različni stvari. Gobarski indeks za Rečico ob Savinji je bil oktobra višji kot septembra v treh od štirih let s popolnimi podatki:
 
 2023: 81,0 oktobra proti 77,6 septembra
 
@@ -93,7 +93,7 @@ Absolutna števila med leti niso neposredno primerljiva, saj je število opazova
 
 Kaj se zgodi, če namesto skupine, uporabljene v osnovni analizi, upoštevam samo klobučnice (Agaricomycetes) ali pa vse glive?
 
-V vsakem od šestih let je bil teden z največ opažanji v vseh treh skupinah enak. Število opažanj se je med skupinami razlikovalo le za nekaj odstotkov.
+V vsakem od šestih let je bil teden z največ opažanji v vseh treh skupinah enak. Klobučnic je v tem tednu do 5 % manj kot pravih gob, vseh gliv pa do 21 % več.
 
 Leto | Teden z največ opažanji (isti v vseh treh skupinah) | Prave gobe | Klobučnice | Vse glive |
 2020 | 21.–27. 10. | 221 | 218 | 231 |
@@ -105,7 +105,7 @@ Leto | Teden z največ opažanji (isti v vseh treh skupinah) | Prave gobe | Klob
 
 Število opažanj v tednu z največ opažanji za posamezno skupino.
 
-Pri vrhu, določenem glede na delež opažanj, se pojavi ena razlika: leta 2024 je pri pravih gobah vrh padel na 14. oktober, pri klobučnicah in pri vseh glivah skupaj pa na 4. november.
+Pri vrhu, določenem glede na delež opažanj, se pojavi ena razlika: leta 2024 je pri pravih gobah vrh padel v teden od 14. oktobra, pri klobučnicah in pri vseh glivah skupaj pa v teden od 4. novembra.
 
 06 — LETOS -- Kaj kaže letošnja jesen?
 
@@ -135,7 +135,7 @@ Tudi poleti je lahko veliko gob. Leta 2023 je bilo v tednu od 29. julija do 4. a
 
 Podatki veljajo za Slovenijo kot celoto. V Rečici ob Savinji in na višjih legah je lahko čas vrhunca drugačen.
 
-Opazovalci niso isto kot gobarji. Gobe fotografira druga skupina ljudi, kot jih nabira. Na število opažanj vplivata tudi to, kdaj imajo ljudje čas, in vreme.
+Opazovalci niso isto kot gobarji. Gobe fotografirajo deloma drugi ljudje kot tisti, ki jih nabirajo. Na število opažanj vplivata tudi to, kdaj imajo ljudje čas, in vreme.
 
 Opažanja se objavljajo z zamikom. Zato je število opažanj v zadnjem tednu praviloma podcenjeno.
 

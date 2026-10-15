@@ -43,6 +43,14 @@ def dni(x):
 _W = ["nič", "ena", "dve", "tri", "štiri", "pet", "šest", "sedem", "osem", "devet", "deset"]
 
 
+def ledeni(n):
+    """število + oblika »ledeni dan« (1 ledeni dan, 2 ledena dneva, 3–4 ledeni dnevi, 5+ ledenih dni)."""
+    n = int(n)
+    r = n % 100
+    w = "ledeni dan" if r == 1 else "ledena dneva" if r == 2 else "ledeni dnevi" if r in (3, 4) else "ledenih dni"
+    return f"{n} {w}"
+
+
 def numw(n):
     return _W[n] if 0 <= n <= 10 else str(n)
 
@@ -259,9 +267,9 @@ def build_article(D):
     ov = [y for y in (2019, 2020, 2021, 2022) if y in OWN and y in LJ and y in SM]
     t3 = table(["Zima", "Rečica ob Savinji (IREICA1)", "Ljubljana", "Šmartno"],
                [[f"{y}/{str(y + 1)[2:]}",
-                 f"{num(OWN[y]['tmean'])} °C · {OWN[y]['ice']} ledenih dni",
-                 f"{num(LJ[y]['tmean'])} °C · {LJ[y]['ice']} ledenih dni",
-                 f"{num(SM[y]['tmean'])} °C · {SM[y]['ice']} ledenih dni"] for y in ov],
+                 f"{num(OWN[y]['tmean'])} °C · {ledeni(OWN[y]['ice'])}",
+                 f"{num(LJ[y]['tmean'])} °C · {ledeni(LJ[y]['ice'])}",
+                 f"{num(SM[y]['tmean'])} °C · {ledeni(SM[y]['ice'])}"] for y in ov],
                "Primerjava zim 2019/20 do 2022/23: Rečica, Ljubljana in Šmartno",
                "Povprečna temperatura je izračunana iz dnevnih najvišjih in najnižjih temperatur za obdobje od decembra do februarja.")
     # --- sto let v Ljubljani ---
@@ -425,7 +433,7 @@ def build_article(D):
         f"V zadnjih desetih zimah ni bilo nobene s 60 ali več dnevi snežne odeje, v {numg(short_new)} pa je snežna odeja vztrajala "
         "največ 20 dni.",
         f"Najdaljša zima s snežno odejo v tem nizu je bila {wl(P95)}. Ko se zapisi 1. januarja 1996 začnejo, je na tleh že "
-        f"{num(SP['depth_first_cm'], 0)} cm snega, odeja pa od tega dne leži {dni(SP['longest'])} zapored, torej skupno vsaj toliko. Ker november in december 1995 "
+        f"{num(SP['depth_first_cm'], 0)} cm snega, odeja pa od tega dne leži {dni(SP['longest'])} zapored, torej skupno vsaj 80 dni. Ker november in december 1995 "
         "v podatkih manjkata, te zime ne štejem v povprečja. Takšna zima se človeku vtisne v spomin. Zima s samo 13 dnevi snežne odeje "
         "pa precej manj.",
         "<h3>In višje? Črnivec na 848 metrih</h3>",
@@ -439,7 +447,7 @@ def build_article(D):
     p3 = [
         f"Moja vremenska postaja IREICA1 meri od novembra 2019. Za ugotavljanje dolgoročnih trendov je {numw(n_own)} zim premalo, za opis "
         "razmer v dolini v zadnjih letih pa so podatki vseeno zanimivi.",
-        f"V teh zimah je bilo v Rečici od {numg(min(own_ice))} do {numg(max(own_ice))} ledenih dni. Povprečna temperatura od decembra do "
+        f"V vseh {numg(n_own)} zimah je bilo v Rečici od{numg(min(own_ice))} do {numg(max(own_ice))} ledenih dni. Povprečna temperatura od decembra do "
         f"februarja se je gibala med {num(min(own_t))} in {num(max(own_t))} °C. Snežne odeje postaja ne meri, zato za Rečico nimam podatkov "
         "o številu dni s snegom.",
         t3,
@@ -455,7 +463,7 @@ def build_article(D):
         "Ribiški biolog Daniel Pauly je leta 1995 opisal pojav, imenovan " + a("pauly", "sindrom premikajoče se osnove") + " (shifting "
         "baseline syndrome). Vsaka generacija za normalno vzame stanje, ki ga je poznala na začetku svojega življenja, zato počasne "
         "spremembe težje opazi. Pauly je ta pojav opisal pri ribištvu, vendar se podobno načelo lahko pokaže tudi pri našem dojemanju zime.",
-        "<h3>Zakaj se odrasli spomnimo drugače?</h3>",
+        "<h3>Zakaj se odrasli zim spominjamo drugače?</h3>",
         "Pri odraslih se lahko zgodi ravno nasprotno. Psihologi so ugotovili, da se ljudje, starejši od približno 40 let, nesorazmerno "
         "pogosto spominjajo dogodkov iz obdobja med približno 10. in 30. letom starosti. Ta pojav se imenuje reminiscenčni vrh (Rubin, "
         "Wetzler in Nebes, 1986).",
@@ -466,7 +474,7 @@ def build_article(D):
         f"Tretji razlog je preprost: v spominu ostanejo izjeme, ne povprečja. Zima z vsaj {SP['longest']} dnevi snežne odeje "
         "se vtisne v spomin, zima s 13 dnevi pa precej manj. Zato je naš spomin na zime najverjetneje bolj zasnežen, kot so bile zime "
         "v povprečju.",
-        "To je moja razlaga, ki se ujema z omenjenimi raziskavami. Raziskav, ki bi posebej merile spomin na zime, ni bilo.",
+        "To je moja razlaga, ki se ujema z omenjenimi raziskavami. Raziskav, ki bi posebej merile spomin na zime, nisem našel.",
         "<h3>Kultura zime</h3>",
         "Po mojem opažanju vrtci in šole še vedno opevajo zimo, v kateri sneg leži tri mesece. Domnevam, da se kultura prilagaja počasneje "
         "kot vreme, vendar je to za zdaj le domneva. Raziskave o tem, kako otroci v Sloveniji doživljajo zimo, nisem našel.",
@@ -486,7 +494,7 @@ def build_article(D):
         f"{dni(max(kid_runs))}. Če snega ne izkoristite v prvih dneh, ga morda kmalu ne bo več.",
         "<h3>3. Izmerite ga</h3>",
         "Dovolj so ravnilo, zapisan datum in podatek o višini snega. Otrok, ki tri zime zapored meri snežno odejo, si bo ustvaril lastno "
-        "primerjavo, ne le spomina na pripovedi odraslih.",
+        "primerjavo in ne bo odvisen le od pripovedi odraslih.",
         "V vrtcu ali šoli lahko meritve primerjajo s tem, kar o nekdanjih zimah pripovedujejo stari starši.",
         "<h3>4. Pesmi ni treba opustiti</h3>",
         "Pesem o zimi, v kateri sneg leži tri mesece, je lahko izhodišče za pogovor. Kakšne zime so poznali dedki in babice? Kakšne so "
@@ -508,7 +516,7 @@ def build_article(D):
         "<li><strong>Črnivec ima le nekaj let meritev.</strong> Pet zim ni dovolj za sklepanje o dolgoročnem trendu. Podatki kažejo "
         "samo, kakšne so bile zadnje zime na nadmorski višini 848 m.</li>"
         "<li><strong>Prag odjuge je moja izbira.</strong> Za odjugo sem določil mejo 5 °C, ker uradne opredelitve s takšnim temperaturnim "
-        "pragom nisem našel. Pri drugačnem pragu bi dobili drugačne številke.</li>"
+        "pragom nisem našel. Pri drugačnem pragu bi bile številke drugačne.</li>"
         "<li><strong>Psihološki del temelji na splošnih raziskavah spomina.</strong> Nobena od navedenih raziskav ni posebej obravnavala "
         "spomina na zime ali doživljanja zime pri otrocih v Sloveniji.</li>"
         "<li><strong>Obdobja primerjave so izbrana za potrebe analize.</strong> Obdobje 1981–2002 sem izbral zato, ker zajema del mojega "
@@ -553,7 +561,7 @@ def build_article(D):
         {"label": "04 — sneg", "heading": "Sneg: krajši in manj zanesljiv", "id": "sneg", "paragraphs": p2},
         {"label": "05 — Rečica", "heading": "Kaj kaže postaja v Rečici?", "id": "recica", "paragraphs": p3},
         {"label": "06 — otroci", "heading": "Zima, ki je otrok ne pozna", "id": "otroci", "paragraphs": p4},
-        {"label": "07 — starši in šole", "heading": "Kaj lahko naredimo starši, vrtci in šole?", "id": "starsi", "paragraphs": p_starsi},
+        {"label": "07 — starši in šole", "heading": "Kaj lahko storijo starši, vrtci in šole?", "id": "starsi", "paragraphs": p_starsi},
         {"label": "08 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": p5},
         {"label": "09 — viri", "heading": "Viri", "id": "viri", "paragraphs": p_viri},
         {"label": "10 — kaj lahko storite", "heading": "Zapišite svojo zimo", "id": "zapisite", "paragraphs": p6},

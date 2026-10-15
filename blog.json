@@ -1,17 +1,90 @@
 [
   {
-    "title": "Vrh opažanj gob je oktobra. Šest let podatkov",
-    "slug": "vrh-gobarske-sezone-oktober-1014",
-    "url": "/blog/vrh-gobarske-sezone-oktober-1014.html",
-    "date": "2026-10-14",
-    "summary": "V vseh šestih letih od 2020 do 2025 je bil teden z največ opaženimi gobami v Sloveniji med 7. in 27. oktobrom, ne septembra. Kaj kažejo podatki iNaturalista?",
+    "title": "Trava je bela, termometer pa kaže 1,7 °C. Kako je to mogoče?",
+    "slug": "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
+    "url": "/blog/slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004.html",
+    "date": "2026-10-04",
+    "summary": "Trava v Nizki je bila bela od slane, termometer na postaji IREICA1 pa je zjutraj kazal 1,7 °C. Kako je to mogoče, kdaj pride ničla in kaj bi pokazala sonda tik nad travo.",
+    "tags": [
+      "analiza",
+      "oktober",
+      "2026",
+      "mraz",
+      "slana",
+      "IREICA1"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Visoki oblaki proti zahodu: ali res napovedujejo dež?",
+    "slug": "visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005",
+    "url": "/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html",
+    "date": "2026-10-05",
+    "summary": "Valoviti visoki oblaki in nižji pas nad grebenom proti zahodu: kaj pravi o njih postaja IREICA1 (tlak, veter, vlaga) in kdaj naj bi po napovedi prišel dež.",
+    "tags": [
+      "analiza",
+      "oblaki",
+      "oktober",
+      "2026",
+      "IREICA1"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Zakaj so gobe rasle samo do meje megle?",
+    "slug": "zakaj-gobe-rastejo-do-meje-megle",
+    "url": "/blog/zakaj-gobe-rastejo-do-meje-megle.html",
+    "date": "2026-10-11",
+    "summary": "Gobe so v suši rasle le do višine jutranje megle. Kaj pravijo študije, kaj kažejo naši podatki in kaj ostaja domneva.",
     "tags": [
       "gobe",
-      "iNaturalist",
-      "oktober",
-      "sezona",
-      "podatki"
-    ]
+      "megla",
+      "analiza",
+      "zgornja savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Goba zraste čez noč? Odločilo se je pred tedni",
+    "slug": "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni",
+    "url": "/blog/goba-zraste-cez-noc-odlocilo-se-je-pred-tedni.html",
+    "date": "2026-10-10",
+    "summary": "Goba res zraste čez noč? Deloma drži. Zadnja faza je hitra, odločilo pa se je pred tedni: študija jurčkov, podatki postaje in opažanja gob. S štirimi interaktivnimi grafi.",
+    "tags": [
+      "gobe",
+      "gobarski-indeks",
+      "analiza",
+      "zgornja savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Zakaj vaš sosed vedno najde gobe, vi pa ne?",
+    "slug": "zakaj-sosed-vedno-najde-gobe",
+    "url": "/blog/zakaj-sosed-vedno-najde-gobe.html",
+    "date": "2026-10-10",
+    "summary": "Pet stvari, ki jih dobri gobarji upoštevajo: zamik po dežju, višina, podlaga, temperatura in več lokacij. S štirimi interaktivnimi grafi iz gobarskega modela.",
+    "tags": [
+      "gobe",
+      "gobarski-indeks",
+      "nasveti",
+      "zgornja savinjska dolina"
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Koliko dni po dežju rastejo gobe? Podatki po vrstah",
+    "slug": "koliko-dni-po-dezju-rastejo-gobe",
+    "url": "/blog/koliko-dni-po-dezju-rastejo-gobe.html",
+    "date": "2026-10-09",
+    "summary": "Po dežju gobe ne zrastejo čez noč. Mediana je 6–12 dni, lisička je hitrejša, jurček počasnejši. Podatki iz več kot 2.000 opažanj in meritev postaje.",
+    "tags": [
+      "gobe",
+      "gobarski-indeks",
+      "analiza",
+      "zgornja savinjska dolina"
+    ],
+    "updated": "2026-10-15"
   },
   {
     "title": "So zime še takšne, kot so bile nekoč? Podatki in spomin",
@@ -25,7 +98,23 @@
       "podnebje",
       "otroci",
       "podatki"
-    ]
+    ],
+    "updated": "2026-10-15"
+  },
+  {
+    "title": "Vrh opažanj gob je oktobra. Šest let podatkov",
+    "slug": "vrh-gobarske-sezone-oktober-1014",
+    "url": "/blog/vrh-gobarske-sezone-oktober-1014.html",
+    "date": "2026-10-14",
+    "summary": "V vseh šestih letih od 2020 do 2025 je bil teden z največ opaženimi gobami v Sloveniji med 7. in 27. oktobrom, ne septembra. Kaj kažejo podatki iNaturalista?",
+    "tags": [
+      "gobe",
+      "iNaturalist",
+      "oktober",
+      "sezona",
+      "podatki"
+    ],
+    "updated": "2026-10-15"
   },
   {
     "title": "Smrdljivcev je čedalje več? Podatki in vreme",
@@ -41,59 +130,6 @@
       "2026"
     ],
     "updated": "2026-10-12"
-  },
-  {
-    "title": "Zakaj so gobe rasle samo do meje megle?",
-    "slug": "zakaj-gobe-rastejo-do-meje-megle",
-    "url": "/blog/zakaj-gobe-rastejo-do-meje-megle.html",
-    "date": "2026-10-11",
-    "summary": "Gobe so v suši rasle le do višine jutranje megle. Kaj pravijo študije, kaj kažejo naši podatki in kaj ostaja domneva.",
-    "tags": [
-      "gobe",
-      "megla",
-      "analiza",
-      "zgornja savinjska dolina"
-    ]
-  },
-  {
-    "title": "Goba zraste čez noč? Odločilo se je pred tedni",
-    "slug": "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni",
-    "url": "/blog/goba-zraste-cez-noc-odlocilo-se-je-pred-tedni.html",
-    "date": "2026-10-10",
-    "summary": "Goba res zraste čez noč? Deloma drži. Zadnja faza je hitra, odločilo pa se je pred tedni: študija jurčkov, podatki postaje in opažanja gob. S štirimi interaktivnimi grafi.",
-    "tags": [
-      "gobe",
-      "gobarski-indeks",
-      "analiza",
-      "zgornja savinjska dolina"
-    ],
-    "updated": "2026-10-11"
-  },
-  {
-    "title": "Zakaj vaš sosed vedno najde gobe, vi pa ne?",
-    "slug": "zakaj-sosed-vedno-najde-gobe",
-    "url": "/blog/zakaj-sosed-vedno-najde-gobe.html",
-    "date": "2026-10-10",
-    "summary": "Pet stvari, ki jih dobri gobarji upoštevajo: zamik po dežju, višina, podlaga, temperatura in več lokacij. S štirimi interaktivnimi grafi iz gobarskega modela.",
-    "tags": [
-      "gobe",
-      "gobarski-indeks",
-      "nasveti",
-      "zgornja savinjska dolina"
-    ]
-  },
-  {
-    "title": "Koliko dni po dežju rastejo gobe? Podatki po vrstah",
-    "slug": "koliko-dni-po-dezju-rastejo-gobe",
-    "url": "/blog/koliko-dni-po-dezju-rastejo-gobe.html",
-    "date": "2026-10-09",
-    "summary": "Po dežju gobe ne zrastejo čez noč. Mediana je 6–12 dni, lisička je hitrejša, jurček počasnejši. Podatki iz več kot 2.000 opažanj in meritev postaje.",
-    "tags": [
-      "gobe",
-      "gobarski-indeks",
-      "analiza",
-      "zgornja savinjska dolina"
-    ]
   },
   {
     "title": "Kje v Zgornji Savinjski dolini rastejo gobe zdaj: gobarski indeks po petih območjih",
@@ -225,35 +261,6 @@
       "2026",
       "sonce",
       "dolžina dneva"
-    ]
-  },
-  {
-    "title": "Visoki oblaki proti zahodu: ali res napovedujejo dež?",
-    "slug": "visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005",
-    "url": "/blog/visoki-oblaki-proti-zahodu-ali-napovedujejo-dez-1005.html",
-    "date": "2026-10-05",
-    "summary": "Valoviti visoki oblaki in nižji pas nad grebenom proti zahodu: kaj pravi o njih postaja IREICA1 (tlak, veter, vlaga) in kdaj naj bi po napovedi prišel dež.",
-    "tags": [
-      "analiza",
-      "oblaki",
-      "oktober",
-      "2026",
-      "IREICA1"
-    ]
-  },
-  {
-    "title": "Trava je bela, termometer pa kaže 1,7 °C. Kako je to mogoče?",
-    "slug": "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
-    "url": "/blog/slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004.html",
-    "date": "2026-10-04",
-    "summary": "Trava v Nizki je bila bela od slane, termometer na postaji IREICA1 pa je zjutraj kazal 1,7 °C. Kako je to mogoče, kdaj pride ničla in kaj bi pokazala sonda tik nad travo.",
-    "tags": [
-      "analiza",
-      "oktober",
-      "2026",
-      "mraz",
-      "slana",
-      "IREICA1"
     ]
   },
   {
