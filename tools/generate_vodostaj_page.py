@@ -465,12 +465,12 @@ def main():
         sys.exit(1)
 
     url = "/vodostaj-savinje/"
-    title = "Vodostaj in pretok Savinje — Zgornja Savinjska dolina"
+    title = "Vodostaj Savinje danes: Nazarje, Letuš, Solčava"
     # Opis vodi izmerjena vrednost; modelska gre v besedilo strani, ne v opis,
     # ker je opis odgovor na "kakšen je pretok danes".
     desc = ((f"Pretok Savinje danes: {seo.num(meritev, 1)} m³/s, izmerjeno na najbližji postaji ARSO. "
              if meritev is not None else "Pretok Savinje danes po napovedi GloFAS. ")
-            + "GloFAS napoved za 7 dni, meritve ARSO ob Savinji in zgodovina poplav vključno z avgustom 2023.")
+            + "Nazarje, Letuš, Solčava, napoved za 7 dni in zgodovina poplav.")
 
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
