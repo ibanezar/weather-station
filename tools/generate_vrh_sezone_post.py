@@ -421,7 +421,7 @@ def build_article(D, by_year):
     p2 = [
         "V vseh šestih letih je teden z največ opaženimi gobami padel med 7. in 27. oktobrom.",
         fig_dots,
-        "Če namesto absolutnega števila pogledamo teden z največjim deležem gob, se vrh premakne v obdobje med 30. septembrom in "
+        "Če namesto absolutnega števila pogledam teden z največjim deležem gob, se vrh premakne v obdobje med 30. septembrom in "
         "3. novembrom. Pri klobučnicah in pri vseh glivah skupaj je teden z največ opažanji enak kot pri zgoraj opredeljenih »pravih gobah« "
         "(glej razdelek 05).",
         tbl1,
@@ -434,7 +434,7 @@ def build_article(D, by_year):
         f"vseh opažanj, septembra pa od {sep_lo} do {sep_hi}{NBSP}%. Novembra je delež v petih od šestih let znova upadel. Izjema je bilo leto 2020.",
         fig_month,
         tbl_m,
-        "To ni v nasprotju z našim gobarskim modelom, vendar gre za različni stvari. Gobarski indeks za Rečico ob Savinji je bil oktobra "
+        "To ni v nasprotju z gobarskim modelom na Meteorcu, vendar gre za različni stvari. Gobarski indeks za Rečico ob Savinji je bil oktobra "
         "višji kot septembra v treh od štirih let s popolnimi podatki:",
         "<ul>" + "".join(f"<li>{y}: {ind(y)[0]} oktobra proti {ind(y)[1]} septembra</li>" for y in (2023, 2024, 2025)) + "</ul>",
         f"Leta 2022 je bilo ravno obratno: septembrski indeks je znašal {ind(2022)[1]}, oktobrski pa {ind(2022)[0]}.",
@@ -449,11 +449,11 @@ def build_article(D, by_year):
     ]
     p5 = [
         "Kaj se zgodi, če namesto skupine, uporabljene v osnovni analizi, upoštevam samo klobučnice (<em>Agaricomycetes</em>) ali pa vse glive?",
-        "V vsakem od šestih let je bil teden z največ opažanji v vseh treh skupinah enak. Število opažanj se je med skupinami razlikovalo "
-        "le za nekaj odstotkov.",
+        f"V vsakem od šestih let je bil teden z največ opažanji v vseh treh skupinah enak. Klobučnic je v tem tednu do 5{NBSP}% manj "
+        f"kot pravih gob, vseh gliv pa do 21{NBSP}% več.",
         tbl2,
-        "Pri vrhu, določenem glede na delež opažanj, se pojavi ena razlika: leta 2024 je pri pravih gobah vrh padel na 14. oktober, pri "
-        "klobučnicah in pri vseh glivah skupaj pa na 4. november.",
+        "Pri vrhu, določenem glede na delež opažanj, se pojavi ena razlika: leta 2024 je pri pravih gobah vrh padel v teden od 14. oktobra, pri "
+        "klobučnicah in pri vseh glivah skupaj pa v teden od 4. novembra.",
     ]
     wk = ("9. septembra", "16. septembra", "23. septembra", "30. septembra", "7. oktobra")
     p6 = [
@@ -472,7 +472,7 @@ def build_article(D, by_year):
         f"kar je skoraj toliko kot oktobra, ko je bilo na vrhuncu {peak23} opažanj. V drugih letih je bil poletni vrh vsaj za tretjino nižji od "
         "oktobrskega. Iz teh podatkov ne morem ugotoviti, zakaj je bilo leto 2023 drugačno.</li>"
         "<li><strong>Podatki veljajo za Slovenijo kot celoto.</strong> V Rečici ob Savinji in na višjih legah je lahko čas vrhunca drugačen.</li>"
-        "<li><strong>Opazovalci niso isto kot gobarji.</strong> Gobe fotografira druga skupina ljudi, kot jih nabira. Na število opažanj vplivata "
+        "<li><strong>Opazovalci niso isto kot gobarji.</strong> Gobe fotografirajo deloma drugi ljudje kot tisti, ki jih nabirajo. Na število opažanj vplivata "
         "tudi to, kdaj imajo ljudje čas, in vreme.</li>"
         "<li><strong>Opažanja se objavljajo z zamikom.</strong> Zato je število opažanj v zadnjem tednu praviloma podcenjeno.</li>"
         "<li><strong>O vplivu dežja ne sklepam.</strong> Povezave med padavinami in deležem opažanj gob v tem članku ne obravnavam. "

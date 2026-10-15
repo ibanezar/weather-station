@@ -460,9 +460,9 @@ def build_article(D):
          f"(P10 {mm(ev['p10'])}, P90 {mm(ev['p90'])} mm), ARSO {mm(arso)} mm. Druga je dež, ki ga uporablja gobarski model: ta ansambla ne "
          f"uporablja, ampak za vsako od {D['n_loc']} območij dobi eno napoved Open-Meteo, ki je za Rečico bistveno mokrejša, "
          f"<strong>{mm(mod)} mm</strong>."),
-        (f"Modelovi indeksi so zato <strong>scenarij mokre napovedi</strong>: če se uresniči mediana ansambla, bodo nižji, predvsem pri vrstah "
+        (f"Indeksi modela so zato <strong>scenarij mokre napovedi</strong>: če se uresniči mediana ansambla, bodo nižji, predvsem pri vrstah "
          f"z visokim pragom. Ta model za {short(D['extra_day'])} napoveduje še {mm(D['extra_mm'])} mm, kar v članku o dežu ni zajeto."),
-        (f"Pomembna je tudi suša: tla so danes po modelu skoraj popolnoma suha ({D['soil_now']} % na modelovi lestvici), zato prvi "
+        (f"Pomembna je tudi suša: tla so danes po modelu skoraj popolnoma suha ({D['soil_now']} % na lestvici modela), zato prvi "
          f"milimetri najprej namočijo prst in steljo."),
     ]
 
@@ -474,23 +474,23 @@ def build_article(D):
     sec2 = [
         (f"Vsaka skupina ima v modelu svoj zamik med sprožilnim dežjem in trosnjaki "
          f"(<a href=\"/blog/trije-vali-gob-po-dezju-0911.html\" style=\"color:var(--blue)\">več v septembrskem članku</a>). "
-         f"Računano od prvega do zadnjega dne dežja ({rr}) so okna taka; črte kažejo, kaj za isti čas napove model."),
+         f"Če štejemo od prvega do zadnjega dne dežja ({rr}), so okna taka; črte kažejo, kaj za isti čas napove model."),
         figure("gp-fig1", "", "Premaknite kazalec po času ali uporabite ← → (PageUp/PageDown: teden dni). Črte kažejo povprečni indeks "
                               "skupine v Rečici po modelu, pasovi spodaj okno, v katerem pričakujemo trosnjake, siv pas dneve dežja."),
         details("Okna v tabeli", table(["Skupina", "Primeri", "Zamik", "Okno"], rows)),
         ('<div class="callout"><h3>Dopolnitev, 9. oktobra: lisička</h3>'
          '<p>V prvotni različici je bila lisička med mikoriznimi vrstami z zamikom 8–16 dni. Bralec je pripomnil, da lisičke niso tako '
-         'počasne. Preverili smo to na opažanjih iNaturalist (jesen in zgodnje poletje, širše območje; skupaj okoli 430 potrjenih '
+         'počasne. Preveril sem to na opažanjih na iNaturalistu (jesen in zgodnje poletje, širše območje; skupaj okoli 430 potrjenih '
          'opažanj lisičke): mediana je 6–7 dni po začetku dežja, vrh pri 6–8 dneh. Zamik za lisičko v modelu je zato '
-         f'<strong>{lis["lag"][0] if lis else 4}–{lis["lag"][1] if lis else 14} dni</strong>, okno {lis_win}. Pri marelah ni bilo tako: '
-         'opažanja so pogostejša šele 13–16 dni po dežju, torej niso »takoj«. Jurčka nismo spreminjali: njegova mediana je 10 dni, '
+         f'<strong>{lis["lag"][0] if lis else 4}–{lis["lag"][1] if lis else 14} dni</strong>, okno {lis_win} Pri marelah ni bilo tako: '
+         'opažanja so pogostejša šele 13–16 dni po dežju, torej niso »takoj«. Jurčka nisem spreminjal: njegova mediana je 10 dni, '
          'kar se ujema z 8–16. Preizkus je ocena iz opažanj, ne meritev prvega trosnjaka, zato je tudi to okno ocena.</p></div>') if lis else "",
         (f"V Rečici je povprečni indeks razkrojevalk najvišji {short(kuk['peak_date'])} ({kuk['peak_mean']} %), lesnih vrst "
          f"{short(les['peak_date'])} ({les['peak_mean']} %), najboljša posamezna vrsta pa je "
          f"{les['best_name'].split(' (')[0].lower()} s {les['best']} % ({short(les['best_date'])}). Pri mikoriznih vrstah povprečje skupine "
          f"ne preseže {mik['peak_mean']} %, ker je njihovo okno <strong>zunaj sedemdnevnega horizonta modela</strong>; ta bo začetek okna "
-         f"dosegel okoli {short(add_days(mik['win'][0], -6))}. V prvih dneh po dežju torej ne iščite jurčkov: prve pridejo gobe na lesu "
-         f"in na stelji." + (f" Lisička je izjema: njeno okno {lis_win} je že v modelovem horizontu in njen indeks v Rečici doseže "
+         f"dosegel okoli {short(add_days(mik['win'][0], -6))} V prvih dneh po dežju torej ne iščite jurčkov: prve pridejo gobe na lesu "
+         f"in na stelji." + (f" Lisička je izjema: njeno okno {lis_win} je že v horizontu modela in njen indeks v Rečici doseže "
                               f"{lis['peak']} % ({short(lis['peak_date'])})." if lis else "")),
     ]
 

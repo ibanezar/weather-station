@@ -284,7 +284,7 @@ def build_article(D):
 
     lead = (f"Po zadnjem pravem dežju {short(dry['last_wet'])} je do {short(dry['archive_end'])} na naši postaji padlo skupaj le "
             f"{num(dry['sum'])} mm padavin. Zdaj se Rečici ob Savinji {dgen(d1)} in {dgen(d2)} obeta konec suše. "
-            f"Koliko dežja bo padlo, pa modeli ne vedo povsem enako: posamezne napovedi za obdobje {short(d1)}–{short(d3)} "
+            f"Koliko dežja bo padlo, pa modeli ne vedo povsem enako: napovedi posameznih modelov za obdobje {short(d1)}–{short(d3)} "
             f"segajo od {num(lo_det)} do {num(hi_det)} mm. ARSO napoveduje {num(arso)} mm, mediana ansambla s {ev['n']} člani "
             f"pa je {num(p50)} mm. Deset odstotkov članov napoveduje manj kot {num(ev['p10'])} mm, deset odstotkov pa več kot "
             f"{num(ev['p90'])} mm. Spodaj so grafi, po katerih lahko pogledate sami: kdaj bo padalo, kako verjetne so posamezne "
@@ -327,7 +327,7 @@ def build_article(D):
         f"{num(sd['ARSO'][ix[d2]])} mm {dgen(d2)}.",
         pop_txt,
         "Razlike med modeli niso napaka, ampak značilnost napovedovanja padavin. Če se pas dežja pomakne le nekaj kilometrov "
-        "vzhodneje ali zahodneje, se lahko skupna količina za določen kraj večkrat spremeni. Zato je ansambel – torej veliko "
+        "vzhodneje ali zahodneje, se lahko skupna količina za določen kraj zelo spremeni. Zato je ansambel – torej veliko "
         "zagonov z nekoliko različnimi začetnimi pogoji – bolj pošteno merilo negotovosti kot katera koli posamezna napoved.",
     ]
     sec1 = [x for x in sec1 if x]

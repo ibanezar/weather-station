@@ -465,8 +465,8 @@ def build_article(D):
     win = {e: d_rng(d_add(rd, L[e][0]), d_add(rd, L[e][1])) for e in L}
 
     lead = (f"V {wd_acc}, {d_long(rd)}, je na postaji IREICA1 po {D['n_dry']} dneh znova konkretneje deževalo. "
-            f"Izmerili smo {num(rain)} mm padavin, zaokroženo 10 mm. V predhodnih 14 dneh je skupaj padel le {num(D['pre14'])} mm dežja. "
-            f"Gobarski model za jurčka zahteva {int(thr_j)} mm padavin v sedmih dneh, zato smo dosegli približno {share_j} % tega praga. "
+            f"Postaja je izmerila {num(rain)} mm padavin, zaokroženo 10 mm. V predhodnih 14 dneh je skupaj padel le {num(D['pre14'])} mm dežja. "
+            f"Gobarski model za jurčka zahteva {int(thr_j)} mm padavin v sedmih dneh, zato je dež dosegel približno {share_j} % tega praga. "
             f"A sama količina dežja ne pove vsega. Po modelski oceni so bila tla pred dežjem skoraj povsem suha, "
             f"z vlažnostjo le {s_before} % na lestvici gobarskega modela. Takšna količina padavin navlaži predvsem vrhnjo plast tal. "
             f"Zato jurčkov in lisičk še ne gre pričakovati na vsakem koraku.")
@@ -551,7 +551,7 @@ def build_article(D):
         ("Navedeno časovno okno pomeni, da bi dež lahko spodbudil rast trosnjakov, ne pa, da se bodo ti v tem obdobju zagotovo pojavili."),
         (f"Pri jurčku in rumenem ježku se okno odpre šele {d_long(d_add(rd, L['mikorizna'][0]))} in traja do {d_long(d_add(rd, L['mikorizna'][1]))}. "
          + (f"Lisička ima po novih podatkih krajši zamik, od {D['lag_lis'][0]} do {D['lag_lis'][1]} dni, zato se njeno okno odpre že {d_long(d_add(rd, D['lag_lis'][0]))} "
-            f"in traja do {d_long(d_add(rd, D['lag_lis'][1]))}. Model zanjo uporablja krajši zamik, ker so opažanja gob na iNaturalistu pokazala, da lisičke pogosto zrastejo že 6 do 8 dni po dežju. " if lis_differs else "")
+            f"in traja do {d_long(d_add(rd, D['lag_lis'][1]))}. Model zanjo uporablja krajši zamik, ker so opažanja gob na iNaturalistu pokazala, da lisičke pogosto opazijo že 6 do 8 dni po dežju. " if lis_differs else "")
          + f"Pri razkrojevalkah je zamik {'še ' if lis_differs else ''}krajši, od {L['razkrojevalka'][0]} do {L['razkrojevalka'][1]} dni, vendar tudi pri njih za rast potrebujejo dovolj vlažna tla."),
     ]
 
@@ -560,7 +560,7 @@ def build_article(D):
         ("<ul>"
          f"<li><strong>Marele, ostrigarji in druge vrste s krajšim zamikom:</strong> časovno okno za razkrojevalke je {win['razkrojevalka']}, "
          f"za lesne vrste pa {win['lesna']} Vrhnja plast tal naj bi bila po dežju deloma navlažena, vendar je model napovedal več dežja, kot ga je postaja dejansko izmerila. "
-         "Zato je smiselno najprej pogledati v senčnih legah, ob potokih in na severnih pobočjih, kjer se vlaga lahko zadrži dlje.</li>"
+         "Zato je smiselno najprej iskati v senčnih legah, ob potokih in na severnih pobočjih, kjer se vlaga lahko zadrži dlje.</li>"
          f"<li><strong>Jurčki:</strong> po modelu se njihovo časovno okno ne odpre pred {d_long(d_add(rd, L['mikorizna'][0]))}. "
          f"Dež je dosegel le približno {share_j} % praga za jurčka, vlaga v globlji plasti tal pa na lestvici modela ostaja pri {deep_pct} %. "
          "Za zdaj torej ni podlage za pričakovanje množične rasti, razen če vmes pade še nekaj dežja.</li>"
@@ -569,10 +569,10 @@ def build_article(D):
             "Tudi pri njih torej ni podlage za pričakovanje množične rasti, razen če pride še dež.</li>" if lis_differs else "")
          + f"<li><strong>Kaj bi spremenilo sliko:</strong> da bi jurček dosegel svoj prag, bi moralo v sedmih dneh pasti še vsaj približno {int(round(need))} mm dežja"
          + (f", za lisičko pa še vsaj približno {int(round(D['thr']['cantharellus_cibarius'] - rain))} mm" if lis_differs else "")
-         + ". Ker so napovedi padavin negotove, spremljaj aktualni gobarski indeks.</li>"
+         + ". Ker so napovedi padavin negotove, spremljajte aktualni gobarski indeks.</li>"
          "</ul>"),
         ('Današnji indeks za posamezne vrste in območja je na <a href="/gobarska-napoved/danes/" style="color:var(--blue)">gobarski napovedi Meteorec</a>.'),
-        ('Če greš v gozd, nam lahko sporočiš tudi svoje opažanje. Zadošča podatek o območju, natančne lokacije najdb pa ni treba razkrivati. '
+        ('Če greste v gozd, nam lahko sporočite tudi svoje opažanje. Zadošča podatek o območju, natančne lokacije najdb pa ni treba razkrivati. '
          'Brez opažanj z različnih območij namreč težko preverimo, kako dobro se napoved ujema z dejanskim stanjem v gozdu.'),
     ]
 
@@ -596,7 +596,7 @@ def build_article(D):
             {"label": "01 — dež", "heading": "Koliko dežja je padlo in koliko bi ga potrebovali?", "id": "dez", "paragraphs": sec1},
             {"label": "02 — tla", "heading": "Tla so bila pred dežjem skoraj suha", "id": "tla", "paragraphs": sec2},
             {"label": "03 — zamik", "heading": "Katere gobe se lahko pojavijo prej in katere pozneje?", "id": "zamik", "paragraphs": sec3},
-            {"label": "04 — nabiranje", "heading": "Kaj to pomeni, če greš v gozd?", "id": "gozd", "paragraphs": sec4},
+            {"label": "04 — nabiranje", "heading": "Kaj to pomeni, če greste v gozd?", "id": "gozd", "paragraphs": sec4},
         ],
     }
 

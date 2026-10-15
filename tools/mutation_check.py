@@ -39,6 +39,8 @@ MUTACIJE = [
     ("FNV-1a: praštevilo (JS na strani)", "crnivec-site/index.html", "0x01000193", "0x01000194"),
     ("napovej: toleranca (worker)", "worker.js", "const NAPOVEJ_TOL_T = 5;", "const NAPOVEJ_TOL_T = 6;"),
     ("napovej: toleranca (napovej.js)", "napovej/napovej.js", "var TOL_T = 5;", "var TOL_T = 6;"),
+    ("push vnaprej: meje pragov (worker)", "worker.js", "const FC_THR_LIMITS = { wind: [10, 200]", "const FC_THR_LIMITS = { wind: [10, 201]"),
+    ("push vnaprej: meje pragov (app.js)", "app.js", "const FC_THR_LIMITS={wind:[10,200]", "const FC_THR_LIMITS={wind:[10,199]"),
     ("igra Črnivec: najkrajši čas (worker)", "worker.js", "const CRN_IGRA_MIN_S = 130;", "const CRN_IGRA_MIN_S = 30;"),
     ("Termika: dolžina koridorja (worker)", "worker.js", "celje: 44.57", "celje: 44.0"),
     ("opažanja gob: količine (worker)", "worker.js", 'const KOLICINE = ["posamezno", "nekaj", "obilo"];', 'const KOLICINE = ["posamezno", "nekaj", "obilo", "veliko"];'),
