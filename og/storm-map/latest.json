@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-14",
-  "issued_at": "2026-10-14T06:11:11.132659+02:00",
+  "date": "2026-10-15",
+  "issued_at": "2026-10-15T06:11:01.453676+02:00",
   "national_score": 20,
   "national_level": "NIZKO",
-  "national_place": "Postojna",
-  "national_hour": "18:00",
+  "national_place": "Nova Gorica",
+  "national_hour": "12:00",
   "should_post": false,
-  "image": "https://meteorec.si/og/storm-map/2026-10-14.jpg",
-  "image_story": "https://meteorec.si/og/storm-map/2026-10-14-story.jpg"
+  "image": "https://meteorec.si/og/storm-map/2026-10-15.jpg",
+  "image_story": "https://meteorec.si/og/storm-map/2026-10-15-story.jpg"
 }
