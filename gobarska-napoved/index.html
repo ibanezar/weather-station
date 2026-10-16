@@ -836,6 +836,17 @@ body .app-bottomnav{display:none}
 .gp-picker-result .gp-forest-pct{box-shadow:none;border:1px solid var(--card-border)}
 .gp-picker-txt{font-size:.92rem;color:var(--text)}
 .gp-picker-note{font-size:.82rem;color:var(--muted);margin-top:.7rem}
+/* Gumbi v izbirniku in alarmu: brez tega pravila so privzeti brskalniški (sivi, kotni). */
+.gp-chip-action{appearance:none;-webkit-appearance:none;font:inherit;font-size:.9rem;font-weight:600;
+  color:var(--text);background:transparent;border:1px solid var(--card-border);border-radius:999px;
+  padding:.55rem 1rem;min-height:2.75rem;cursor:pointer;line-height:1.25;text-align:center}
+.gp-chip-action:hover{border-color:#78A95F}
+.gp-chip-action:focus-visible{outline:2px solid #78A95F;outline-offset:2px}
+.gp-chip-action.hi{background:#78A95F;border-color:#78A95F;color:#10200f;border-radius:12px}
+.gp-chip-action.hi:hover{filter:brightness(1.08)}
+.gp-chip-action[hidden]{display:none}
+.gp-picker-row .gp-chip-action.hi{align-self:end}
+.gp-alarm-list .gp-chip-action{padding:.3rem .8rem;min-height:2.25rem;font-size:.82rem}
 .gp-photo-card{float:right;width:260px;margin:.1rem 0 .9rem 1.2rem;border-radius:14px;overflow:hidden;
   border:1px solid var(--card-border);box-shadow:var(--card-shadow)}
 .gp-photo-card img{display:block;width:100%;height:auto}
