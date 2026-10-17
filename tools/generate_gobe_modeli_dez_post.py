@@ -238,9 +238,9 @@ def chart(S, A):
             cx, cy = x(d["tot"]), yc(ei) + 17
             out.append(f'<path d="M{cx:.1f},{cy - 6:.1f} l6,6 l-6,6 l-6,-6 z" fill="var(--text,#e8ecef)" stroke="var(--bg,#0a0f1c)" stroke-width="1.5"><title>{d["lab"]}, determinističen tek: {mm(d["tot"])} mm</title></path>')
     out.append('</svg>')
-    cap = ('<p class="sg-cap">Barvni pas je razpon od 10. do 90. percentila članov ansambla, debela črta mediana. Romb je determinističen tek istega modela '
-           '(en sam izračun, brez razpona). Črtkani črti sta sprožilna praga gobarskega modela za rumenega ježka in jurčka v oknu, ki ga odpre ta dež. '
-           'Vir: Open-Meteo (ensemble-api), mreža 0,25°, zajem 17. oktobra 2026. Vse je napoved, ne meritev.</p>')
+    cap = ('<p class="sg-cap">Barvni pas prikazuje razpon med 10. in 90. percentilom članov ansambla, debela črta pa mediano. Romb označuje posamezni izračun istega modela. '
+           'Črtkani črti prikazujeta sprožilna praga gobarskega modela za rumenega ježka in jurčka v časovnem oknu, ki ga odpre napovedani dež. '
+           'Vir: Open-Meteo (ensemble API), mreža 0,25°, zajem 17. oktobra 2026. Vse prikazane količine so napovedi, ne meritve.</p>')
     return f'<div class="sg-fig">{"".join(out)}</div>{cap}'
 
 
@@ -278,13 +278,25 @@ def build_article(S):
     wetter = [m for m in ens_of if A["det"][m]["full"] and A["det"][m]["tot"] > E[ens_of[m]]["med"]]
     cl = S["clim"]
 
-    lead = (f"Dež prihodnji teden bo skoraj zagotovo padel ({ge9} od {np_} članov ansamblov do sobote napoveduje 9 mm ali več), a se modeli razhajajo v količini: "
-            f"od torka do sobote napovedujejo za Rečico med {mm(p10)} in {mm(p90)} mm (razpon P10–P90). "
-            f"Petek in sobota sta po večini napovedi suha, odločilna sta sreda in četrtek. "
-            f"Za gobe to pomeni priložnost, ki je odvisna od vrste: marele, štorovke in rumeni ježek bodo po naših pragovih dobili dovolj dežja v več kot polovici napovedi, "
-            f"jurček in lisička pa le v mokrejši tretjini oziroma desetini.")
+    # Besedilo je lektorirano (Filip, 17. 10. 2026); številke ostajajo iz posnetka. Besedne oznake deležev so zavarovane z assert.
+    shares = {sid: round(100 * sp[sid]["over_all"] / np_) for sid, _ in SPECIES}
+    low = [shares[x] for x in ("macrolepiota_procera", "armillaria_mellea", "hydnum_repandum")]
+    assert min(low) > 50, low                     # »več kot polovica«
+    assert 28 <= shares["boletus_edulis"] <= 38   # »približno tretjina«
+    assert 8 <= shares["cantharellus_cibarius"] <= 13   # »desetina«
+    assert (n_wed, n_thu) == (2, 2)               # »dva … za sredo, druga dva za četrtek«
+    assert len(wetter) == 3                       # »pri vseh treh modelih«
+    assert all(e["fri_sat_med"] <= 1.5 for e in FE) and fs_ge10 < np_ * 0.15
+    thr = {sid: sp[sid]["thr"] for sid, _ in SPECIES}
+    lo_thr = f"{mm(thr['macrolepiota_procera'])}–{mm(thr['hydnum_repandum'])}"
 
-    # --- 01 kratek odgovor + tabela dnevov
+    lead = (f"Dež bo prihodnji teden skoraj zagotovo padel: {ge9} od {np_} članov vremenskih ansamblov do sobote napoveduje vsaj 9 mm padavin. "
+            f"Koliko dežja bo v resnici padlo, pa še ni jasno. Modeli za Rečico od torka do sobote napovedujejo od {mm(p10)} do {mm(p90)} mm padavin (razpon P10–P90). "
+            "Petek in sobota bosta po večini napovedi suha, odločilna pa bosta sreda in četrtek. "
+            "Za gobe to pomeni novo priložnost, vendar ne za vse vrste enako: prag za marelo, štorovko in rumenega ježka bo po naših izračunih presegla več kot polovica napovedi, "
+            "za jurčka približno tretjina, za lisičko pa le desetina.")
+
+    # --- 01
     pd_rows = []
     for d in EV_DAYS:
         row = [f"{wd(d)}, {d_short(d)}"]
@@ -295,24 +307,29 @@ def build_article(S):
     stats = ('<div class="mini-stat-grid">'
              f'<div class="mini-stat"><div class="ms-label">Dež 20.–24. 10.</div><div class="ms-val">{mm(med)} mm</div><div class="ms-sub">mediana {np_} članov do sobote</div></div>'
              f'<div class="mini-stat"><div class="ms-label">Razpon P10–P90</div><div class="ms-val">{mm(p10)}–{mm(p90)}</div><div class="ms-sub">mm, ansambli do sobote</div></div>'
-             f'<div class="mini-stat"><div class="ms-label">Determ. teki</div><div class="ms-val">{mm(dmin)}–{mm(dmax)}</div><div class="ms-sub">mm, {A["det_full_n"]} modeli do sobote</div></div>'
-             f'<div class="mini-stat"><div class="ms-label">Petek in sobota</div><div class="ms-val">{fs_ge10} od {np_}</div><div class="ms-sub">članov z ≥ 10 mm</div></div>'
+             f'<div class="mini-stat"><div class="ms-label">Posamezni izračuni</div><div class="ms-val">{mm(dmin)}–{mm(dmax)}</div><div class="ms-sub">mm, {A["det_full_n"]} modeli do sobote</div></div>'
+             f'<div class="mini-stat"><div class="ms-label">Petek in sobota</div><div class="ms-val">{fs_ge10} od {np_}</div><div class="ms-sub">članov z vsaj 10 mm</div></div>'
              '</div>')
     sec1 = [
-        (f"Kratek odgovor: <strong>da, a ne za vse vrste enako</strong>. Mediana ansamblov ({mm(med)} mm) je nad sprožilnimi pragovi gobarskega modela za marelo, štorovko in rumenega ježka "
-         f"({mm(sp['macrolepiota_procera']['thr'])}–{mm(sp['hydnum_repandum']['thr'])} mm), pod pragom za jurčka ({mm(sp['boletus_edulis']['thr'])} mm) in daleč pod pragom za lisičko ({mm(sp['cantharellus_cibarius']['thr'])} mm). "
-         "Jurček in lisička bosta dobila dovolj dežja le v mokrejšem delu napovedi. "
-         "Vsi ansambli kažejo glavnino dežja v sredo in četrtek (ICON-EU-EPS sega le do četrtka zjutraj, zato njegovih številk za četrtek, petek in soboto ni). "
-         "Razlikujejo se v količini in v tem, kateri od teh dveh dni bo mokrejši."),
+        (f"Kratek odgovor: <strong>da, vendar ne za vse vrste enako</strong>. Mediana napovedi vseh članov ansamblov znaša {mm(med)} mm. "
+         f"To je več od sprožilnih pragov gobarskega modela za marelo, štorovko in rumenega ježka ({lo_thr} mm), vendar manj od praga za jurčka ({mm(thr['boletus_edulis'])} mm) "
+         f"in precej manj od praga za lisičko ({mm(thr['cantharellus_cibarius'])} mm)."),
+        ("Jurček in lisička bosta torej dobila dovolj dežja le, če se uresniči mokrejši del napovedi. Vsi ansambli glavnino padavin napovedujejo za sredo in četrtek, "
+         "razlikujejo pa se v količini in v tem, kateri od teh dveh dni bo bolj moker. Ansambel ICON-EU-EPS sega le do četrtka zjutraj, zato njegovih podatkov za preostanek tedna ni."),
         stats,
-        ("Dež po dnevih (mediana ansambla in razpon P10–P90, mm; pomišljaj pomeni, da ansambel do tja ne sega):"),
+        ("<strong>Napoved padavin po dnevih.</strong> Mediana in razpon P10–P90 za posamezne ansamble, v milimetrih. Pomišljaj pomeni, da napoved za ta dan ni na voljo."),
         table(["Dan"] + [lab for _, lab, _, _ in ENS], pd_rows),
-        (f"Petek in sobota sta v vseh treh ansamblih, ki sežejo do sobote, skoraj suha: najvišja mediana za ta dva dneva skupaj je {mm(fs_med)} mm. "
-         f"Dež z 10 mm ali več v teh dveh dneh ima {fs_ge10} od {np_} članov ({', '.join(fs_who)}). Za gobe pa petek in sobota nista odločilna: "
-         "dež, ki sproži rast, pade pred njima."),
+        (f"Petek in sobota bosta po vseh treh ansamblih, ki segajo do konca tedna, skoraj suha. Najvišja mediana skupnih padavin za ta dva dneva znaša le {mm(fs_med)} mm. "
+         f"Vsaj 10 mm padavin v petek in soboto skupaj napoveduje {fs_ge10} od {np_} članov ansamblov ({', '.join(fs_who)})."),
+        ("Za gobe pa petek in sobota nista več odločilna. Glavnina dežja, ki bi lahko spodbudil rast, naj bi padla že prej."),
     ]
 
-    # --- 02 modeli: deterministični
+    # --- 02
+    def until(iso):
+        d = datetime.date.fromisoformat(iso[:10])
+        h = int(iso[11:13])
+        return f"{d.day}. {d.month}." if h == 23 else f"{d.day}. {d.month}. ob {h}. uri"
+
     det_rows = []
     for m, lab in DET:
         d = A["det"][m]
@@ -324,89 +341,99 @@ def build_article(S):
             cells.append(f"<strong>{mm(d['tot'])}</strong>")
             cells.append("")
         else:
-            ld = datetime.date.fromisoformat(d["last"][:10]) if d["last"] else None
             cells.append("–")
-            cells.append(f"napoved sega do {ld.day}. {ld.month}." if ld else "ni podatkov")
+            cells.append(f"Napoved sega do {until(d['last'])}" if d["last"] else "Ni podatkov")
         det_rows.append(cells)
     ie = A["det"]["icon_eu"]
     ie_peak = max(EV_DAYS, key=lambda d: ie["days"].get(d) or 0)
     ie_other = [A["det"][m]["days"][ie_peak] for m in full]
     sec2 = [
-        ("Najprej deterministični teki, torej en sam izračun vsakega modela. Tabela kaže dež po dnevih; pomišljaj pomeni, da model do tega "
-         "dne ali do konca tega dne še ne sega, zato dneva ne smemo brati kot »suh«."),
+        ("Najprej poglejmo posamezne izračune modelov. Vsak model lahko pripravi več izračunov, ki se nekoliko razlikujejo. "
+         "V spodnji tabeli je prikazan po en izračun vsakega modela, brez razpona možnih izidov."),
+        ("Pomišljaj pomeni, da napoved ne sega do navedenega dne oziroma ne pokriva celotnega dne. Zato ga ne smemo razumeti kot napoved suhega vremena."),
         table(["Model"] + [f"{wd(d)[:3]}. {d_short(d)}" for d in EV_DAYS] + ["Skupaj", "Opomba"], det_rows),
-        (f"Štirje modeli, ki segajo do sobote, se v vsoti ne razlikujejo veliko ({mm(dmin)}–{mm(dmax)} mm), a se razlikujejo v dnevu: pri {n_wed} je vrh v sredo, pri {n_thu} v četrtek. "
-         f"Posebej izstopa ICON-EU, ki za {WD_TOZ[wd(ie_peak)]}, {d_short(ie_peak)} napoveduje {mm(ie['days'][ie_peak])} mm v enem dnevu; ostali modeli imajo za ta dan {mm(min(ie_other))}–{mm(max(ie_other))} mm. "
-         f"ICON-EU je za torek in sredo skupaj napovedal {mm(sum(ie['days'][d] for d in EV_DAYS[:2]))} mm, najmokrejši član njegovega ansambla ICON-EU-EPS pa {mm(ie_e['max2'])} mm (mediana {mm(ie_e['med2'])} mm). "
-         f"Pri {len(wetter)} od treh modelov, ki imajo ansambel in segajo do sobote, je determinističen tek mokrejši od mediane njegovega ansambla; en izračun torej lahko dež precenjuje."),
-        ("Poštenejša slika so ansambli: pokažejo razpon možnosti, ne ene številke. Pas P10–P90 spodaj kaže skupno količino dežja za vseh pet dni; "
-         "ICON-EU-EPS ni vključen, ker ne sega do konca tedna."),
+        (f"Štirje modeli, ki napovedujejo do sobote, se glede skupne količine padavin ne razlikujejo veliko: napovedujejo od {mm(dmin)} do {mm(dmax)} mm. "
+         "Razlikujejo pa se v tem, kdaj bo dež najmočnejši. Dva največ padavin napovedujeta za sredo, druga dva za četrtek."),
+        (f"Posebej izstopa ICON-EU, ki za {WD_TOZ[wd(ie_peak)]}, {d_long(ie_peak)}, napoveduje kar {mm(ie['days'][ie_peak])} mm dežja v enem dnevu. "
+         f"Drugi modeli za isti dan napovedujejo od {mm(min(ie_other))} do {mm(max(ie_other))} mm. "
+         f"ICON-EU za torek in sredo skupaj napoveduje {mm(sum(ie['days'][d] for d in EV_DAYS[:2]))} mm, medtem ko njegov ansambel ICON-EU-EPS kaže precej manj: "
+         f"mediana znaša {mm(ie_e['med2'])} mm, najmokrejši član pa napoveduje {mm(ie_e['max2'])} mm."),
+        ("Pri vseh treh modelih, katerih ansambli segajo do sobote, je posamezni izračun bolj moker od mediane ansambla. "
+         "To opozarja, da lahko posamezen izračun količino dežja tudi preceni."),
+        ("Zato je bolj smiselno pogledati ansambelske napovedi. Te pokažejo razpon možnih izidov, ne le ene številke. "
+         "Spodnji graf prikazuje skupno količino padavin v petih dneh. Ansambel ICON-EU-EPS ni vključen, ker njegova napoved ne sega do konca tedna."),
         chart(S, A),
-        (f"Mediane treh ansamblov so med {mm(dry_e['med'])} mm ({dry_e['lab']}) in {mm(wet_e['med'])} mm ({wet_e['lab']}). "
-         f"Za torek in sredo skupaj, do kamor sežejo vsi štirje, so mediane med {mm(min(e['med2'] for e in E.values()))} in {mm(max(e['med2'] for e in E.values()))} mm; "
-         f"ICON-EU-EPS ima {mm(ie_e['med2'])} mm. Ansambli imajo mrežo 0,25° (ICON-EU-EPS drugačno celico, nekoliko severovzhodno) in doline ne razločijo, "
-         "zato so to ocene za širšo okolico Rečice."),
+        (f"Mediane treh ansamblov se gibljejo med {mm(dry_e['med'])} mm pri {dry_e['lab'].replace(' ENS', '')} in {mm(wet_e['med'])} mm pri {wet_e['lab']}. "
+         f"Za torek in sredo skupaj, ko so na voljo podatki vseh štirih ansamblov, so mediane med {mm(min(e['med2'] for e in E.values()))} in {mm(max(e['med2'] for e in E.values()))} mm; "
+         f"pri ICON-EU-EPS znaša mediana {mm(ie_e['med2'])} mm."),
+        ("Večina ansamblov uporablja mrežo z ločljivostjo 0,25°. Takšna mreža ne zajame vseh posebnosti dolin, zato gre za oceno razmer v širši okolici Rečice. "
+         "ICON-EU-EPS uporablja nekoliko drugačno mrežno celico, ki leži nekoliko severovzhodneje."),
     ]
 
-    # --- 03 prag
+    # --- 03
     sp_rows = []
     for sid, _ in SPECIES:
         r = sp[sid]
         lo, hi = r["lag"]
-        sp_rows.append([r["name"], f"{lo}–{hi} dni", f"{d_short(r['win'][0])}–{d_short(r['win'][1])}",
+        sp_rows.append([r["name"].capitalize(), f"{lo}–{hi} dni", f"{d_short(r['win'][0])}–{d_short(r['win'][1])}",
                         f"{mm(r['thr'])} mm", f"{round(100 * min(med / r['thr'], 1))} %",
-                        f"{r['over_all']} od {np_} ({round(100 * r['over_all'] / np_)} %)"])
+                        f"{r['over_all']} od {np_} ({shares[sid]} %)"])
     sec3 = [
-        ("Gobarski model ne gleda skupnega dežja, ampak <strong>dež v zamiku</strong>: za vsako vrsto šteje samo dež, ki je padel v oknu "
-         "med toliko in toliko dnevi pred dnem napovedi (več o tem v članku "
-         '<a href="/blog/koliko-dni-po-dezju-rastejo-gobe.html" style="color:var(--blue)">Koliko dni po dežju rastejo gobe</a>). '
-         "Če dež pade od torka do četrtka (20.–22. 10.), se okna odprejo takole:"),
-        table(["Vrsta", "Zamik", "Okno", "Sprožilni prag", "Mediana dežja kot delež praga", "Članov, ki prag presežejo*"], sp_rows),
-        ('<p class="sg-cap">* Seštevek dežja 20.–24. 10. proti pragu, ki ga model za vrsto uporablja v oknu te dolžine '
-         '(<code>rain_7d_min</code> × dolžina okna / 7). Pod pragom model dež šteje sorazmerno (polovica praga = polovica ocene dežja), nad pragom je ocena polna. '
-         'Upoštevani so ansambli, ki sežejo do sobote (ECMWF IFS ENS, ECMWF AIFS ENS, GEFS). Je samo sprožilni dež; indeks vrste potrebuje še temperaturo tal, vlago, zalogo vode in teren. '
-         'Člani treh ansamblov niso neodvisni, zato je delež ocena, ne verjetnost.</p>'),
-        (f"Pri vrstah z nižjim pragom (marela {mm(sp['macrolepiota_procera']['thr'])} mm, štorovka {mm(sp['armillaria_mellea']['thr'])} mm, rumeni ježek {mm(sp['hydnum_repandum']['thr'])} mm) prag preseže "
-         f"{round(100 * sp['macrolepiota_procera']['over_all'] / np_)} %, {round(100 * sp['armillaria_mellea']['over_all'] / np_)} % oziroma {round(100 * sp['hydnum_repandum']['over_all'] / np_)} % članov, torej več kot polovica. "
-         f"Pri jurčku ({mm(sp['boletus_edulis']['thr'])} mm) jih je {round(100 * sp['boletus_edulis']['over_all'] / np_)} %, pri lisički "
-         f"({mm(sp['cantharellus_cibarius']['thr'])} mm) pa {round(100 * sp['cantharellus_cibarius']['over_all'] / np_)} %. "
-         f"Mediani dež bi jurčku dal približno {round(100 * min(med / sp['boletus_edulis']['thr'], 1))} % sprožilne ocene, lisički {round(100 * min(med / sp['cantharellus_cibarius']['thr'], 1))} %. "
-         "<strong>Druga priložnost je torej verjetna za vrste z nižjim pragom, za jurčka mogoča, za lisičko šibka</strong>, razen če se uresniči mokrejši del napovedi."),
+        ("Gobarski model ne upošteva le skupne količine dežja, temveč tudi čas, ki preteče od padavin do pričakovanega pojava gob. "
+         "Za vsako vrsto šteje dež, ki je padel v določenem časovnem oknu pred napovedanim dnem. Več o tem je v članku "
+         '<a href="/blog/koliko-dni-po-dezju-rastejo-gobe.html" style="color:var(--blue)">Koliko dni po dežju rastejo gobe?</a>'),
+        ("Če glavnina dežja pade od torka do četrtka, 20.–22. oktobra, se za posamezne vrste odprejo naslednja časovna okna:"),
+        table(["Vrsta", "Zamik", "Okno po dežju", "Sprožilni prag", "Mediana dežja glede na prag", "Članov, ki presežejo prag*"], sp_rows),
+        ('<p class="sg-cap">* Primerjava skupne količine padavin od 20. do 24. oktobra s pragom, ki ga model uporablja za posamezno vrsto in dolžino njenega časovnega okna '
+         '(<code>rain_7d_min</code> × dolžina okna / 7). Pod pragom model oceno dežja zmanjšuje sorazmerno: polovica praga pomeni polovico ocene. Ko je prag dosežen, je ocena za dež polna.</p>'),
+        ("Upoštevani so člani treh ansamblov, katerih napovedi segajo do sobote: ECMWF IFS ENS, ECMWF AIFS ENS in GEFS. Gre samo za sprožilni dež. "
+         "Končni indeks za posamezno vrsto upošteva tudi temperaturo tal, vlago, zalogo vode in teren. Člani različnih ansamblov niso med seboj neodvisni, "
+         "zato prikazani deleži niso dejanske verjetnosti, temveč ocena na podlagi razpoložljivih napovedi."),
+        (f"Pri vrstah z nižjim pragom — mareli ({mm(thr['macrolepiota_procera'])} mm), štorovki ({mm(thr['armillaria_mellea'])} mm) in rumenem ježku ({mm(thr['hydnum_repandum'])} mm) — "
+         f"prag preseže od {min(low)} do {max(low)} % članov. Pri jurčku, ki potrebuje {mm(thr['boletus_edulis'])} mm, ga preseže {shares['boletus_edulis']} % članov, "
+         f"pri lisički s pragom {mm(thr['cantharellus_cibarius'])} mm pa le {shares['cantharellus_cibarius']} %."),
+        (f"Mediana količine dežja bi jurčku zagotovila približno {round(100 * min(med / thr['boletus_edulis'], 1))} % njegovega sprožilnega praga, "
+         f"lisički pa {round(100 * min(med / thr['cantharellus_cibarius'], 1))} %. "
+         "<strong>Nova priložnost je torej verjetna za vrste z nižjim pragom, mogoča za jurčka, za lisičko pa za zdaj manj obetavna.</strong> "
+         "Če se uresniči mokrejši del napovedi, se lahko slika spremeni."),
     ]
 
-    # --- 04 prejšnji val + temperatura
+    # --- 04
     t = A["tmin"]
     cold = min(t, key=lambda d: t[d]["med"])
-    cold_txt = ("noben član ne napoveduje temperature pod 0 °C" if t[cold]["frost"] == 0
-                else f"{t[cold]['frost']} od {t[cold]['n']} članov napoveduje 0 °C ali manj")
+    assert t[cold]["frost"] == 0                  # »nobeden od članov ne napoveduje pod 0 °C«
     sec4 = [
-        (f"Prvi val dežja je že mimo: od {d_short(RAIN_DAYS_OLD[0])} do {d_short(RAIN_DAYS_OLD[1])} je postaja IREICA1 izmerila {num(A['old_rain'])} mm. "
-         f"Okno mikoriznih vrst za ta dež (8–16 dni) se zaključi okoli 28. oktobra, drugo okno pa se začne približno takrat. "
-         f"Če dež doseže prag, bi se sezona jurčkov, ježkov in lisičk podaljšala v prve dni novembra."),
-        (f"Temperatura do 26. oktobra ne kaže ovire. Mediana najnižje temperature članov ECMWF IFS ENS je od {num(round(min(x['med'] for x in t.values()), 1))} °C do "
-         f"{num(round(max(x['med'] for x in t.values()), 1))} °C; najhladnejša je noč na {d_short(cold)}, ko {cold_txt}. "
-         f"Okno drugega vala (28. 10.–7. 11.) je zunaj dosega napovedi, zato sem pogledal postajo: od 28. oktobra do 7. novembra 2020–2025 je bilo {cl['frost_days']} od {cl['days']} dni "
-         f"({round(100 * cl['frost_days'] / cl['days'])} %) z najnižjo temperaturo pod ničlo, povprečna dnevna temperatura pa je bila {num(cl['mean'])} °C. "
-         "To je klimatologija šestih let, ne napoved."),
+        (f"Prvi val dežja je že za nami. Od {int(RAIN_DAYS_OLD[0][8:])}. do {d_long(RAIN_DAYS_OLD[1])} je postaja IREICA1 izmerila {num(A['old_rain'])} mm padavin. "
+         "Časovno okno za mikorizne vrste, ki ga je odprl ta dež, traja od 8 do 16 dni in se izteče približno 28. oktobra. Novo okno se bo začelo odpirati približno takrat. "
+         "Če bo padlo dovolj dežja, bi se sezona jurčkov, rumenih ježkov in lisičk lahko podaljšala v prve dni novembra."),
+        (f"Temperatura vsaj do 26. oktobra po trenutni napovedi ne kaže večje ovire. Mediana najnižje temperature v ansamblu ECMWF IFS ENS je med "
+         f"{num(round(min(x['med'] for x in t.values()), 1))} in {num(round(max(x['med'] for x in t.values()), 1))} °C. "
+         f"Najhladnejša naj bi bila noč na {cold[8:10].lstrip('0')}. oktober, vendar nobeden od članov ansambla ne napoveduje temperature pod 0 °C."),
+        (f"Časovno okno drugega vala, od 28. oktobra do 7. novembra, je zunaj dosega trenutne napovedi. Zato sem pogledal podatke postaje za isto obdobje v preteklih letih. "
+         f"Med letoma 2020 in 2025 je bilo v tem obdobju {cl['frost_days']} od {cl['days']} dni ({round(100 * cl['frost_days'] / cl['days'])} %) z najnižjo temperaturo pod ničlo. "
+         f"Povprečna dnevna temperatura je znašala {num(cl['mean'])} °C."),
+        ("To je primerjava s šestimi leti meritev, ne napoved za letošnji konec oktobra in začetek novembra."),
     ]
 
-    th_j, th_l = sp["boletus_edulis"]["thr"], sp["cantharellus_cibarius"]["thr"]
     sec5 = [
         ("<ul>"
-         f"<li><strong>Količina dežja je odločilna.</strong> Pod približno {mm(sp['macrolepiota_procera']['thr'])} mm ni polne ocene dežja pri nobeni od teh vrst; "
-         f"nad {mm(th_j)} mm jo ima jurček, nad {mm(th_l)} mm tudi lisička. Razpon P10–P90 ({mm(p10)}–{mm(p90)} mm) pokrije oba konca.</li>"
-         "<li><strong>Čas je pomemben, a manj.</strong> Sreda ali četrtek za dan premakne okno, ne spremeni pa bistva.</li>"
-         "<li><strong>Za gobe petek in sobota nista več odločilna.</strong> Šteje dež do četrtka; kar pade pozneje, je v večini napovedi majhno.</li>"
-         "<li><strong>Napoved se bo do srede še spreminjala.</strong> Ansambli se običajno zožijo, ko se dogodek približa; ta članek je posnetek 17. oktobra in napovedi ne osvežuje.</li>"
-         "<li><strong>Dež ni vse.</strong> Prag je samo en del indeksa. Temperatura tal, vlaga in teren lahko oceno vrste še znižajo.</li>"
+         f"<li><strong>Odločilna bo količina dežja.</strong> Pri količinah pod približno {mm(thr['macrolepiota_procera'])} mm nobena od obravnavanih vrst ne doseže polne ocene za sprožilni dež. "
+         f"Jurček doseže svoj prag pri {mm(thr['boletus_edulis'])} mm, lisička pa pri {mm(thr['cantharellus_cibarius'])} mm. "
+         f"Napovedani razpon P10–P90, od {mm(p10)} do {mm(p90)} mm, zajema tako sušnejše kot precej mokrejše možnosti.</li>"
+         "<li><strong>Pomemben je tudi čas padavin.</strong> Če bo največ dežja padlo v sredo namesto v četrtek ali obratno, se bodo časovna okna nekoliko premaknila, osnovna slika pa se ne bo bistveno spremenila.</li>"
+         "<li><strong>Petek in sobota za ta val nista več odločilna.</strong> Glavnina padavin naj bi padla do četrtka, pozneje pa večina napovedi kaže le malo dežja.</li>"
+         "<li><strong>Napoved se lahko do srede še spremeni.</strong> Ko se vremenski dogodek približuje, se razpon med člani ansamblov pogosto zmanjša. "
+         "Ta članek temelji na podatkih, zajetih 17. oktobra 2026, in se ne posodablja samodejno.</li>"
+         "<li><strong>Dež ni vse.</strong> Sprožilni prag je le en del gobarskega indeksa. Temperatura tal, vlaga, zaloga vode in teren lahko končno oceno za posamezno vrsto še znižajo.</li>"
          "</ul>"),
     ]
 
     sec6 = [
-        (f'Dež in indeks po območjih spremljajte na strani <a href="{SITE}/gobarska-napoved/" style="color:var(--blue)">Gobarska napoved</a>, '
-         f'dež iz svojega kraja pa vnesite v <a href="{SITE}/gobarska-napoved/valovi/" style="color:var(--blue)">kalkulator gobjih valov</a>, '
-         "ki zna napoved dežja vključiti v izračun okna. Če boste v gozdu, vnesite opažanje na strani "
-         f'<a href="{SITE}/gobarska-napoved/danes/" style="color:var(--blue)">Danes po gozdovih</a> – tudi to, da ste iskali in ničesar našli.'),
+        (f'Dež in gobarski indeks po območjih spremljajte na strani <a href="{SITE}/gobarska-napoved/" style="color:var(--blue)">Gobarska napoved</a>. '
+         f'Padavine iz svojega kraja lahko vnesete tudi v <a href="{SITE}/gobarska-napoved/valovi/" style="color:var(--blue)">kalkulator gobjih valov</a>, '
+         "ki zna pri izračunu časovnega okna upoštevati napovedani dež."),
+        (f'Če se odpravite v gozd, vnesite svoje opažanje na strani <a href="{SITE}/gobarska-napoved/danes/" style="color:var(--blue)">Danes po gozdovih</a>. '
+         "Koristno je tudi, če ste iskali, pa niste našli ničesar. Tudi takšna opažanja pomagajo preverjati, kako dobro se model ujema z dejanskimi razmerami."),
         (f'Gobe nabirajte le, če jih zanesljivo poznate. Informacije o nevarnih zamenjavah in strupenih vrstah najdete na strani '
          f'<a href="{SITE}/gobarska-napoved/strupene-gobe/" style="color:var(--blue)">Strupene gobe</a>.'),
         ('<p class="sg-cap" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate le z '
@@ -416,13 +443,13 @@ def build_article(S):
 
     src = ('<div class="sources"><strong>Viri:</strong> napoved dežja za mrežno celico Rečice (46,33° N, 14,92° E): Open-Meteo '
            '(forecast API: ICON-D2, ICON-EU, ECMWF IFS in AIFS, GFS, GEM, UKMO, ARPEGE; ensemble API: ECMWF IFS ENS, ECMWF AIFS ENS, ICON-EU-EPS, GEFS), '
-           f'zajem {d_long(TODAY)} 2026; sprožilni pragovi: gobarski model Meteorec (<code>species_rules.yaml</code>, različica {gm.MODEL_VERSION}); '
-           'dež in temperatura preteklosti: postaja IREICA1 (<code>history.json</code>). Posnetek podatkov: <code>data/gobe-modeli-dez-2026-10-17.json</code>.'
-           '<br><em>Vse količine za prihodnost so modelska napoved in ne meritev. Indeks gob je ocena ugodnosti razmer in ni obljuba najdbe.</em></div>')
+           f'zajem {d_long(TODAY)} 2026. Sprožilni pragovi: gobarski model Meteorec (<code>species_rules.yaml</code>, različica {gm.MODEL_VERSION}); '
+           'pretekle padavine in temperature: postaja IREICA1 (<code>history.json</code>). Posnetek podatkov: <code>data/gobe-modeli-dez-2026-10-17.json</code>.'
+           '<br><em>Vse prihodnje količine padavin so modelske napovedi, ne meritve. Gobarski indeks je ocena ugodnosti razmer za rast gob in ne zagotavlja, da boste gobe našli.</em></div>')
 
     title = "Še ena priložnost za gobe? Modeli se ne strinjajo"
     assert len(title) <= 60, len(title)
-    desc = (f"Dež 20.–24. 10.: ansambli {mm(p10)}–{mm(p90)} mm, petek in sobota skoraj suha. Kaj to pomeni za drugi val jurčkov, lisičk in drugih gob?")
+    desc = (f"Dež 20.–24. oktobra: ansambli napovedujejo {mm(p10)}–{mm(p90)} mm, petek in sobota pa bosta skoraj suha. Kaj to pomeni za drugi val gob?")
     assert len(desc) <= 160, len(desc)
     return {
         "title": title, "meta_description": desc,
@@ -430,12 +457,12 @@ def build_article(S):
         "section_label": "Gobarski model", "og_photo": "gobe-lastna", "og_accent_hex": "#34d399",
         "lead": lead, "sources_note": CSS + src,
         "sections": [
-            {"label": "01 — odgovor", "heading": "Dež bo, vprašanje je koliko", "id": "odgovor", "paragraphs": sec1},
+            {"label": "01 — odgovor", "heading": "Dež bo, vprašanje je, koliko", "id": "odgovor", "paragraphs": sec1},
             {"label": "02 — modeli", "heading": "Kje se modeli razhajajo", "id": "modeli", "paragraphs": sec2},
-            {"label": "03 — prag", "heading": "Kdo bo dobil dovolj dežja", "id": "prag", "paragraphs": sec3},
+            {"label": "03 — prag", "heading": "Katere gobe bodo dobile dovolj dežja?", "id": "prag", "paragraphs": sec3},
             {"label": "04 — okno", "heading": "Drugi val se začne, ko se prvi konča", "id": "okno", "paragraphs": sec4},
-            {"label": "05 — negotovost", "heading": "Kaj še ni znano", "id": "negotovost", "paragraphs": sec5},
-            {"label": "06 — naprej", "heading": "Kaj naj naredite", "id": "naprej", "paragraphs": sec6},
+            {"label": "05 — negotovost", "heading": "Kaj še ni znano?", "id": "negotovost", "paragraphs": sec5},
+            {"label": "06 — naprej", "heading": "Kaj lahko naredite?", "id": "naprej", "paragraphs": sec6},
         ],
     }, A
 
