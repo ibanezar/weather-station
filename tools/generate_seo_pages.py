@@ -2271,7 +2271,7 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         url = f"/{t['slug']}/"
         rel = f"{t['slug']}/index.html"
 
-        title = f"Vreme {town} — najbližja meritev (postaja IREICA1, {num(km,0)} km)"
+        title = f"Vreme {town}: temperatura, padavine, meritve v bližini"
         desc = (f"Vreme za {town} ({t['short']}): {town} nima lastne postaje ARSO. "
                 f"Najbližje neprekinjene meritve so s postaje IREICA1 v Rečici ob Savinji, "
                 f"približno {num(km,0)} km {dirn}, {abs(elev_diff):.0f} m {'više' if elev_diff > 0 else 'niže'}. "
@@ -3356,11 +3356,11 @@ def gen_landing_page(hist, sitemap_urls):
     # 53 znakov: seo_title() ga pusti celega, a brez priponke » | Meteorec« (64 > 60).
     # Prejšnji 68-znakovni naslov se je tiho razbil po » — « nazaj na »Vreme Rečica ob
     # Savinji zdaj« in ključni rep se je izgubil — na glavni money strani.
-    title = "Vreme Rečica ob Savinji — napoved, temperatura, radar"
+    title = "Vreme Rečica ob Savinji: v živo, po urah, 7 dni"
     # Krajši opis (152 znakov): prejšnji (198 znakov, arhivsko/statistično usmerjen)
     # se je na mobilnem odrezal, glavna poizvedba »vreme rečica ob savinji« pa je imela
     # kljub poziciji ~9 CTR 0,2% — opis ni odgovarjal na takojšnjo namero (trenutno vreme).
-    desc = ("Trenutno vreme v Rečici ob Savinji: temperatura, padavine in veter v živo "
+    desc = ("Vreme Rečica ob Savinji (recica): temperatura, padavine in veter v živo "
             "(IREICA1). Napoved po urah, 7 dni naprej in radar za Zgornjo Savinjsko dolino.")
 
     crumbs = [("Meteorec", "/"), ("Vreme Rečica ob Savinji", None)]
@@ -3440,8 +3440,8 @@ def gen_landing_page(hist, sitemap_urls):
         ("Se podnebje v Rečici ob Savinji segreva?",
          f"Da. Iz arhiva postaje IREICA1 je razviden trend naraščanja povprečne letne temperature za "
          f"približno {num(trend, 2)} °C na leto v obdobju {full_years[0]}–{full_years[-1]}."),
-        ("Je na voljo napoved po urah za Rečico ob Savinji?",
-         "Da, urna napoved (temperatura, padavine, veter po urah za naslednje dni) je na naslovni "
+        ("Kje vidim vreme po urah za Rečico ob Savinji (recica ob savinji)?",
+         "Napoved po urah je v razdelku »Vreme po urah« na tej strani; urna napoved (temperatura, padavine, veter po urah za naslednje dni) je na naslovni "
          "strani Meteorec (meteorec.si), skupaj s trenutnimi meritvami v živo."),
         ("Kako daleč vnaprej sega napoved za Rečico ob Savinji?",
          "Meteorec na naslovni strani prikazuje srednjeročno napoved do 16 dni vnaprej, poleg "
