@@ -32,6 +32,7 @@ import generate_seo_pages as seo  # noqa: E402
 import generate_forecast_test_post as ftp  # noqa: E402
 import gobe_model as gm  # noqa: E402
 from generate_seo_pages import num  # noqa: E402
+import gobe_modeli_dez_widgets as wg  # noqa: E402
 from generate_jurcki_preverba_post import CSS, table, d_short, d_long, d_add, drange, get_json as _get_json  # noqa: E402
 
 
@@ -296,6 +297,19 @@ def build_article(S):
             "Za gobe to pomeni novo priložnost, vendar ne za vse vrste enako: prag za marelo, štorovko in rumenega ježka bo po naših izračunih presegla več kot polovica napovedi, "
             "za jurčka približno tretjina, za lisičko pa le desetina.")
 
+    # podatki za interaktivne grafe (iz iste analize kot besedilo)
+    def until(iso):
+        d = datetime.date.fromisoformat(iso[:10])
+        h = int(iso[11:13])
+        return f"{d.day}. {d.month}." if h == 23 else f"{d.day}. {d.month}. ob {h}. uri"
+
+    short = {"icon_d2": "ICON-D2", "icon_eu": "ICON-EU", "ecmwf_ifs025": "IFS", "ecmwf_aifs025_single": "AIFS", "gfs_seamless": "GFS",
+             "gem_seamless": "GEM", "ukmo_seamless": "UKMO", "meteofrance_arpege_europe": "ARPEGE"}
+    sp_sorted = sorted(SPECIES, key=lambda t: (A["sp"][t[0]]["win"][0], A["sp"][t[0]]["thr"]))
+    sp_w = [(sid, A["sp"][sid]["name"].capitalize(),
+             f"{d_short(A['sp'][sid]['win'][0])}–{d_short(A['sp'][sid]['win'][1])}") for sid, _ in sp_sorted]
+    WDATA = wg.data_json(S, A, EV_DAYS, wd, until, short.get, sp_w)
+
     # --- 01
     pd_rows = []
     for d in EV_DAYS:
@@ -317,19 +331,15 @@ def build_article(S):
         ("Jurček in lisička bosta torej dobila dovolj dežja le, če se uresniči mokrejši del napovedi. Vsi ansambli glavnino padavin napovedujejo za sredo in četrtek, "
          "razlikujejo pa se v količini in v tem, kateri od teh dveh dni bo bolj moker. Ansambel ICON-EU-EPS sega le do četrtka zjutraj, zato njegovih podatkov za preostanek tedna ni."),
         stats,
-        ("<strong>Napoved padavin po dnevih.</strong> Mediana in razpon P10–P90 za posamezne ansamble, v milimetrih. Pomišljaj pomeni, da napoved za ta dan ni na voljo."),
-        table(["Dan"] + [lab for _, lab, _, _ in ENS], pd_rows),
+        wg.widget_a(),
+        wg.details("Tabela: dež po dnevih (mediana in razpon P10–P90, mm; pomišljaj pomeni, da napoved za ta dan ni na voljo)",
+                   table(["Dan"] + [lab for _, lab, _, _ in ENS], pd_rows)),
         (f"Petek in sobota bosta po vseh treh ansamblih, ki segajo do konca tedna, skoraj suha. Najvišja mediana skupnih padavin za ta dva dneva znaša le {mm(fs_med)} mm. "
          f"Vsaj 10 mm padavin v petek in soboto skupaj napoveduje {fs_ge10} od {np_} članov ansamblov ({', '.join(fs_who)})."),
         ("Za gobe pa petek in sobota nista več odločilna. Glavnina dežja, ki bi lahko spodbudil rast, naj bi padla že prej."),
     ]
 
     # --- 02
-    def until(iso):
-        d = datetime.date.fromisoformat(iso[:10])
-        h = int(iso[11:13])
-        return f"{d.day}. {d.month}." if h == 23 else f"{d.day}. {d.month}. ob {h}. uri"
-
     det_rows = []
     for m, lab in DET:
         d = A["det"][m]
@@ -349,9 +359,11 @@ def build_article(S):
     ie_other = [A["det"][m]["days"][ie_peak] for m in full]
     sec2 = [
         ("Najprej poglejmo posamezne izračune modelov. Vsak model lahko pripravi več izračunov, ki se nekoliko razlikujejo. "
-         "V spodnji tabeli je prikazan po en izračun vsakega modela, brez razpona možnih izidov."),
-        ("Pomišljaj pomeni, da napoved ne sega do navedenega dne oziroma ne pokriva celotnega dne. Zato ga ne smemo razumeti kot napoved suhega vremena."),
-        table(["Model"] + [f"{wd(d)[:3]}. {d_short(d)}" for d in EV_DAYS] + ["Skupaj", "Opomba"], det_rows),
+         "V spodnjem grafu je prikazan po en izračun vsakega modela, brez razpona možnih izidov."),
+        ("Črtkana črta pomeni, da napoved tam preneha oziroma ne pokriva celotnega dne. Zato prazen prostor za njo ne pomeni napovedi suhega vremena."),
+        wg.widget_c(),
+        wg.details("Tabela: posamezni izračuni po dnevih (mm)",
+                   table(["Model"] + [f"{wd(d)[:3]}. {d_short(d)}" for d in EV_DAYS] + ["Skupaj", "Opomba"], det_rows)),
         (f"Štirje modeli, ki napovedujejo do sobote, se glede skupne količine padavin ne razlikujejo veliko: napovedujejo od {mm(dmin)} do {mm(dmax)} mm. "
          "Razlikujejo pa se v tem, kdaj bo dež najmočnejši. Dva največ padavin napovedujeta za sredo, druga dva za četrtek."),
         (f"Posebej izstopa ICON-EU, ki za {WD_TOZ[wd(ie_peak)]}, {d_long(ie_peak)}, napoveduje kar {mm(ie['days'][ie_peak])} mm dežja v enem dnevu. "
@@ -361,8 +373,8 @@ def build_article(S):
         ("Pri vseh treh modelih, katerih ansambli segajo do sobote, je posamezni izračun bolj moker od mediane ansambla. "
          "To opozarja, da lahko posamezen izračun količino dežja tudi preceni."),
         ("Zato je bolj smiselno pogledati ansambelske napovedi. Te pokažejo razpon možnih izidov, ne le ene številke. "
-         "Spodnji graf prikazuje skupno količino padavin v petih dneh. Ansambel ICON-EU-EPS ni vključen, ker njegova napoved ne sega do konca tedna."),
-        chart(S, A),
+         "Spodnji graf prikazuje skupno količino padavin v petih dneh, vsaka pika je en član ansambla. Ansambel ICON-EU-EPS ni vključen, ker njegova napoved ne sega do konca tedna."),
+        wg.widget_b(),
         (f"Mediane treh ansamblov se gibljejo med {mm(dry_e['med'])} mm pri {dry_e['lab'].replace(' ENS', '')} in {mm(wet_e['med'])} mm pri {wet_e['lab']}. "
          f"Za torek in sredo skupaj, ko so na voljo podatki vseh štirih ansamblov, so mediane med {mm(min(e['med2'] for e in E.values()))} in {mm(max(e['med2'] for e in E.values()))} mm; "
          f"pri ICON-EU-EPS znaša mediana {mm(ie_e['med2'])} mm."),
@@ -383,7 +395,9 @@ def build_article(S):
          "Za vsako vrsto šteje dež, ki je padel v določenem časovnem oknu pred napovedanim dnem. Več o tem je v članku "
          '<a href="/blog/koliko-dni-po-dezju-rastejo-gobe.html" style="color:var(--blue)">Koliko dni po dežju rastejo gobe?</a>'),
         ("Če glavnina dežja pade od torka do četrtka, 20.–22. oktobra, se za posamezne vrste odprejo naslednja časovna okna:"),
-        table(["Vrsta", "Zamik", "Okno po dežju", "Sprožilni prag", "Mediana dežja glede na prag", "Članov, ki presežejo prag*"], sp_rows),
+        wg.widget_sp(WDATA),
+        wg.details("Tabela: sprožilni pragi po vrstah",
+                   table(["Vrsta", "Zamik", "Okno po dežju", "Sprožilni prag", "Mediana dežja glede na prag", "Članov, ki presežejo prag*"], sp_rows)),
         ('<p class="sg-cap">* Primerjava skupne količine padavin od 20. do 24. oktobra s pragom, ki ga model uporablja za posamezno vrsto in dolžino njenega časovnega okna '
          '(<code>rain_7d_min</code> × dolžina okna / 7). Pod pragom model oceno dežja zmanjšuje sorazmerno: polovica praga pomeni polovico ocene. Ko je prag dosežen, je ocena za dež polna.</p>'),
         ("Upoštevani so člani treh ansamblov, katerih napovedi segajo do sobote: ECMWF IFS ENS, ECMWF AIFS ENS in GEFS. Gre samo za sprožilni dež. "
