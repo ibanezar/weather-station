@@ -433,7 +433,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     po času in intenzivnosti od tega, kar je navedeno za širšo regijo.</p>
     <p style="color:var(--muted);font-size:.9rem">To je hiter, samodejno ustvarjen zapis ob izdaji ARSO opozorila.
     Ko opozorilo preteče, ta stran dobi posodobitev z dejanskimi meritvami postaje za to obdobje.</p>
-    <p style="color:var(--muted);font-size:.9rem">Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.
+    <p style="color:var(--muted);font-size:.9rem">Trenutne meritve in napoved po urah: <a href="/vreme-recica-ob-savinji/" style="color:var(--blue)">vreme Rečica ob Savinji</a>.
     Uradna opozorila: <a href="https://meteo.arso.gov.si/met/sl/warning/" target="_blank" rel="noopener" style="color:var(--blue)">ARSO</a>.</p>
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>

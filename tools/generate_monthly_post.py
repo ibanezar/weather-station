@@ -299,7 +299,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 {rows_html}
     </table>
     <p style="color:var(--muted);font-size:.9rem">Povprečna temperatura je povprečje dnevnih vrednosti; najvišja in najnižja sta dejanski izmerjeni skrajnosti v mesecu.</p>
-    <p style="color:var(--muted);font-size:.9rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. m.). Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+    <p style="color:var(--muted);font-size:.9rem">Vir podatkov: osebna meteorološka postaja IREICA1, Rečica ob Savinji (Savinjska dolina, 366 m n. m.). Trenutne meritve in napoved po urah: <a href="/vreme-recica-ob-savinji/" style="color:var(--blue)">vreme Rečica ob Savinji</a>.</p>
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
   <footer class="site-foot">

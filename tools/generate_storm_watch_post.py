@@ -245,7 +245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 {rows_html}
     </table>
     <p style="color:var(--muted);font-size:.9rem">To je kratek, samodejno ustvarjen zapis ob preseženem pragu na živi postaji. Za ozadje in razlago si preberi: <a href="{related_url}" style="color:var(--blue)">{related_title}</a>.</p>
-    <p style="color:var(--muted);font-size:.9rem">Trenutne meritve v živo: <a href="/" style="color:var(--blue)">meteorec.si</a>.</p>
+    <p style="color:var(--muted);font-size:.9rem">Trenutne meritve in napoved po urah: <a href="/vreme-recica-ob-savinji/" style="color:var(--blue)">vreme Rečica ob Savinji</a>.</p>
     <a class="back-link" href="/blog/">← Nazaj na blog</a>
   </article>
   <footer class="site-foot">
