@@ -1258,6 +1258,11 @@ def main():
     # z besedilom počasi razšla (glej geo_audit.py: shema mora obljubljati
     # samo vprašanja/odgovore, ki so res prikazani).
     qa = [
+        ("Ali danes velja opozorilo glede resnih gozdnih požarov?",
+         f"Uradna opozorila ARSO so v razdelku »Uradna opozorila« na vrhu te strani. Lokalni indeks "
+         f"požarne ogroženosti gozda (FWI) za Rečico ob Savinji je danes {payload['fwi']} "
+         f"({payload['level']}); to je naš izračun iz napovedi Open-Meteo, ne uradno opozorilo. "
+         f"Za ukrepanje in prepovedi kurjenja veljajo ARSO in civilna zaščita."),
         ("Je MeteoGasilec uradna napoved?",
          "Ne. Je samostojen izračun iz javnih podatkov Open-Meteo, po kanadski FWI metodologiji, ki jo za "
          "Evropo uporablja EFFIS/GWIS. Uradno oceno objavlja ARSO."),
@@ -1291,7 +1296,7 @@ def main():
 
     url = "/meteogasilec/"
     title = "MeteoGasilec — požarna ogroženost, Rečica ob Savinji"
-    desc = (f"Indeks požarne ogroženosti FWI danes: {payload['fwi']} ({payload['level']}). Veter za intervencije, "
+    desc = (f"Požarna ogroženost gozda (FWI) danes: {payload['fwi']} ({payload['level']}). Veter za intervencije, "
             f"aktivna opozorila ARSO in zaznana požarišča NASA FIRMS za Rečico ob Savinji.")
     schema = "\n".join([
         seo.webpage_schema(url, title, desc),

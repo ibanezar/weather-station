@@ -1014,7 +1014,7 @@ def build_zled_body(data):
 
     faq = [
         ("Kaj je žled in kako se razlikuje od poledice?",
-         "Žled nastane, ko dež ali pršeč dež pade na podhlajena tla in drevesa ter takoj zmrzne v plast ledu. "
+         "Žled (ledeni dež) nastane, ko dež ali pršeč dež pade na podhlajena tla in drevesa ter takoj zmrzne v plast ledu. "
          "Poledica je širši pojem: zmrznjena površina po vseh poteh, tudi po sevalnem ohlajanju ob jasni noči "
          "(to ocenjuje stran Poledica). Žled je redkejši, a veliko bolj nevaren — v žledolomu 2014 je ob "
          "prelomu januarja in februarja poškodoval okoli 40 % slovenskih gozdov."),

@@ -3755,6 +3755,20 @@ def beaufort(kmh):
     return 12
 
 
+# Povezave iz slovarskih pojmov na strani, kjer bralec pojav vidi v praksi.
+# Samo strani, ki res obstajajo (preveri tools/check_links.py).
+GLOSS_RELATED = {
+    "temperaturna-inverzija": [("/vreme-recica-ob-savinji/", "Mikroklima in megla v Rečici ob Savinji"),
+                               ("/zima/poledica/", "Poledica po sevalnem ohlajanju")],
+    "kumulonimbus": [("/nevihte/", "Nevihte: karta potenciala in strele")],
+    "konvekcija": [("/nevihte/", "Nevihte: karta potenciala in strele")],
+    "nevihta": [("/nevihte/", "Nevihte: karta potenciala in strele"), ("/toca/", "Toča")],
+    "zled": [("/zima/zled/", "Žled: modelski pokazatelj za Rečico")],
+    "vetrna-roza": [("/vreme-zgornja-savinjska-dolina/", "Vreme po krajih Zgornje Savinjske doline")],
+    "barometer": [("/", "Zračni tlak v živo na naslovni strani")],
+}
+
+
 def gen_slovar_pages(sitemap_urls):
     terms = load_glossary_terms()
     lastmod = TODAY.isoformat()
@@ -3787,6 +3801,9 @@ def gen_slovar_pages(sitemap_urls):
             faq_schema(qa),
         ])
         cat_label = GLOSS_CAT_LABELS.get(t["cat"], t["cat"])
+        rel_links = GLOSS_RELATED.get(t["slug"], [])
+        related_html = ("  <h2>Na Meteorcu</h2>\n  <ul>\n" + "\n".join(
+            f'    <li><a href="{h}">{lbl}</a></li>' for h, lbl in rel_links) + "\n  </ul>\n") if rel_links else ""
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">{t["icon"]} {t["term"]}</h1>
@@ -3797,7 +3814,7 @@ def gen_slovar_pages(sitemap_urls):
     <div class="clabel">💡 Zanimivost</div>
     <p class="archive-intro" style="margin:.4rem 0 0">{t["fun"]}</p>
   </div>
-{fact_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
+{fact_html}{related_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
   <a href="/">trenutne meritve v živo</a> iz Rečice ob Savinji.</p>
   <a class="back-link" href="/slovar/">← Vremenski slovar</a>'''
 
