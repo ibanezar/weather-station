@@ -145,6 +145,21 @@ def vodostaj():
           "vodostaj približni pragovi", f"js={th} py={gv.THRESHOLDS}")
 
 
+# ── Savinja push: worker.js _savinjaLevel ↔ generate_vodostaj_page.station_level ──
+@test
+def savinja_push_stopnja():
+    """Stopnja postaje za opozorilo ob pragu Savinje (worker) ↔ stran vodostaja (generator)."""
+    import generate_vodostaj_page as gv
+    stations = [{"vv1": 56, "vv2": 66, "vv3": 100}, {"vv1": 310, "vv2": 420, "vv3": 530},
+                {"vv1": 360, "vv2": 450, "vv3": 580}, {"vv1": 30, "vv2": None, "vv3": None}]
+    cases = [(q, st) for st in stations for q in [0, 0.5, 29.9, 30, 55.9, 56, 65.9, 66, 99.9, 100, 309.9, 310, 419.9, 420, 529.9, 530, 579.9, 580, 900]]
+    calls = [{"fn": "_savinjaLevel", "args": [q, st]} for q, st in cases]
+    got = js("worker.js", ["_savinjaLevel"], calls)
+    for (q, st), g in zip(cases, got):
+        want = gv.station_level(q, st)
+        check(g == want, "savinja stopnja", f"q={q} st={st}: py={want} js={g}")
+
+
 # ── Črnivec: Python (winter_engine, generate_crnivec_page) ↔ JS na strani ────
 CRN_NAMES = ["LIVE_LAPSE_RATE", "LIVE_SNOW_OFFSET", "snowFractionLive", "groundTempLive", "blackIceLive",
              "cestaVrstica", "merjenoMokro", "NEXT_BIAS_HOURS", "LEVEL_RANK", "tempNivo", "numSlLive", "padavineBesedilo",
