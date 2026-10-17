@@ -556,6 +556,22 @@ omeji na **18–22 h po naši uri in enkrat na jutrišnji datum** (`push/frost_s
 - Brez naročnikov vira ne kliče. Test: `tools/test_frost_push.mjs` (v `parity.yml`, prava koda iz `worker.js`).
 - Prag v besedilu strani (`index.html`, »40 % ali več«) je podvojitev `FROST_PUSH_MIN_P` — če spremeniš eno, spremeni drugo.
 
+## Opozorilo ob visoki Savinji (Web Push, 17. 10. 2026)
+
+Kljukica **»🌊 Opozori na visoko Savinjo«** v »Moja opozorila« (`savinja: true` na naročnini, ločen opt-in).
+`_cronCheckSavinja()` v `worker.js` (petminutni cron) bere ARSO `hidro_podatki_zadnji.xml` prek skupnega
+`_parseArsoHidroXml()` (isti razčlenjevalnik kot `/arso-water`) in spremlja **Solčavo I, Nazarje in Letuš I**.
+
+- **Samo uradni pragovi ARSO ZA TO POSTAJO** (`vv1–vv3`), stopnjo računa `_savinjaLevel()` ↔ `station_level()` v
+  `generate_vodostaj_page.py` in `riverStationStatus()` v `app.js` (`test_parity.savinja_push_stopnja`). Postaje brez pragov
+  pretoka (Medlog) se ne obravnavajo — ocene (`THRESHOLDS`) za push ni.
+- Obvestilo ob **porastu** stopnje (višja stopnja takoj, ponovitve iste ne). Spust po stopnjah šele pod **90 %** praga
+  (`SAVINJA_HYST`), sicer bi pretok na meji pošiljal obvestila ob vsakem tiku. Stanje: `push/savinja_state.json`.
+- Čas meritve je `datum_cet` (srednjeevropski, brez poletnega — zato `+01:00`); starejša od 3 h se ne upošteva.
+  Brez sveže meritve ali ob napaki vira cron javi `{ok:false}` (`/health`) — **nikoli ne sporoči »ni nevarnosti« iz manjkajočih podatkov**.
+- Besedilo pove, da gre za izmerjeno vrednost ARSO in ni uradno opozorilo; za ukrepanje veljata ARSO in URSZR.
+- Brez naročnikov vira ne kliče. Test: `tools/test_savinja_push.mjs` (v `parity.yml`).
+
 ## Lasten radar padavin — luknja v animaciji ni dovoljena
 
 Kompozit (ARSO jedro + obroč EUMETNET OPERA) sestavi `worker.js`
