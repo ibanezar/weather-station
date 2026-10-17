@@ -542,6 +542,20 @@ v obrazcu kljukica **»Opozori vnaprej po napovedi«**:
 - `FC_THR_LIMITS` je namerna podvojitev med `worker.js` in `app.js` — če
   spremeniš eno, spremeni drugo, sicer strežnik tiho zavrže prag iz obrazca.
 
+## Opozorilo na zmrzal (Web Push, 17. 10. 2026)
+
+Kljukica **»🧊 Opozori na zmrzal«** v »Moja opozorila« (`frost: true` na naročnini v `push/subs.json`, ločen opt-in kot
+`digest` in `fc`; klic brez `frost` ga pusti pri miru). `_cronCheckFrost()` v `worker.js` teče v petminutnem cronu, a se sam
+omeji na **18–22 h po naši uri in enkrat na jutrišnji datum** (`push/frost_state.json`).
+
+- Vir je **MTR** (`napoved-modela.json`, `p_frost`, `tmin`), ne Open-Meteo: to je model za dno doline, naučen na postaji.
+  Prag `FROST_PUSH_MIN_P` = 0,4 (backtest: v srednjem območju je zmrzal pogostejša od napovedi, torej je 40 % že resen signal).
+- Dan se izbere po **datumu**, nikoli po `lead`; datoteka, starejša od 36 h, se ne uporabi. Takrat cron javi `{ok:false}`
+  (vidno v `/health`), dneva ne zaklene in poskusi znova ob naslednjem tiku — **nikoli ne pošlje »ni zmrzali« zaradi manjkajočega podatka**.
+- Verjetnost je zaokrožena na 5 %, besedilo pove, da je modelska napoved za Rečico, ne uradno opozorilo.
+- Brez naročnikov vira ne kliče. Test: `tools/test_frost_push.mjs` (v `parity.yml`, prava koda iz `worker.js`).
+- Prag v besedilu strani (`index.html`, »40 % ali več«) je podvojitev `FROST_PUSH_MIN_P` — če spremeniš eno, spremeni drugo.
+
 ## Lasten radar padavin — luknja v animaciji ni dovoljena
 
 Kompozit (ARSO jedro + obroč EUMETNET OPERA) sestavi `worker.js`

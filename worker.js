@@ -1277,6 +1277,55 @@ async function _cronCheckForecastThresholds(env) {
   await r2.put(FC_THR_STATE, JSON.stringify({ _lastRun: now, subs: nextSubs }), { httpMetadata: { contentType: "application/json" } });
 }
 
+// ── Zmrzal nocoj (Web Push, ločen opt-in `frost`) ───────────
+// Večer med 18. in 22. uro po naši uri, enkrat na jutrišnji datum: če MTR (naš
+// model za dno doline) za JUTRI napove verjetnost zmrzali (Tmin ≤ 0 °C) nad
+// FROST_PUSH_MIN_P, gre obvestilo naročnikom s kljukico »Opozori na zmrzal«.
+// Za vrtičkarje, sadjarje in hmeljarje: zvečer je še čas, da pokrijejo sadike.
+// - Dan se izbere po DATUMU, nikoli po `lead` (datoteka je lahko včerajšnja).
+// - Datoteka, starejša od FROST_MODEL_MAX_AGE_H, se ne uporabi: raje nič kot
+//   obvestilo iz stare napovedi. Tiho ne pomeni »ni zmrzali« — cron to javi.
+// - Verjetnost je zaokrožena na 5 % (kot na kartici MTR), brez številke ne gre nič.
+// - Modelska napoved za Rečico (dno doline), ne uradno opozorilo.
+const FROST_PUSH_MIN_P = 0.4;
+const FROST_MODEL_MAX_AGE_H = 36;
+const FROST_STATE = "push/frost_state.json";
+function _frostPick(model, tomorrow, nowMs) {
+  if (!model || !Array.isArray(model.days)) return { ok: false, reason: "napoved-modela.json brez dni" };
+  const gen = Date.parse(model.generated_at);
+  if (!Number.isFinite(gen) || nowMs - gen > FROST_MODEL_MAX_AGE_H * 3600 * 1000) return { ok: false, reason: "napoved-modela.json je zastarela" };
+  const day = model.days.find(d => d && d.date === tomorrow);
+  if (!day || typeof day.p_frost !== "number" || typeof day.tmin !== "number") return { ok: false, reason: "ni jutrišnjega dne z verjetnostjo zmrzali" };
+  if (day.p_frost < FROST_PUSH_MIN_P) return { ok: true, send: false };
+  return { ok: true, send: true, pct: Math.round(day.p_frost * 20) * 5, tmin: day.tmin };
+}
+async function _cronCheckFrost(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  const now = Date.now();
+  // % 24, ker nekatere izvedbe ICU za polnoč vrnejo "24" namesto "00".
+  const hourSI = Number(new Date(now).toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI < 18 || hourSI >= 22) return;
+  const tomorrow = _ljDatum(new Date(now + 86400000));
+  let state = {}; try { const o = await r2.get(FROST_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  if (state.date === tomorrow) return;                      // za ta dan že odločeno
+  const subs = await (async () => { try { const o = await r2.get("push/subs.json"); return o ? JSON.parse(await o.text()) : []; } catch (_) { return []; } })();
+  if (!subs.some(s => s.frost)) return;                     // brez naročnikov ne kličemo vira
+  let model;
+  try { const res = await fetch("https://meteorec.si/napoved-modela.json", { cf: { cacheTtl: 300 } }); if (!res.ok) return { ok: false, reason: "napoved-modela.json HTTP " + res.status }; model = await res.json(); }
+  catch (e) { return { ok: false, reason: "napoved-modela.json: " + String((e && e.message) || e).slice(0, 100) }; }
+  const pick = _frostPick(model, tomorrow, now);
+  if (!pick.ok) return pick;                                // poskusi znova ob naslednjem tiku do 22:00
+  if (pick.send) {
+    const t = pick.tmin.toFixed(1).replace(".", ",");
+    await _pushAll(env, {
+      title: "Meteorec — zmrzal nocoj?",
+      body: "🧊 Jutri zjutraj v Rečici ob Savinji zmrzal ~" + pick.pct + " % verjetna (najnižja ~" + t + " °C na dnu doline). Pokrij občutljive rastline. Modelska napoved MTR, ne uradno opozorilo.",
+      url: "/", tag: "wx-frost",
+    }, s => !!s.frost);
+  }
+  await r2.put(FROST_STATE, JSON.stringify({ date: tomorrow, sent: !!pick.send, ts: now }), { httpMetadata: { contentType: "application/json" } });
+}
+
 // ── Začetek/konec dejanskih padavin na postaji ──────────────
 // Ločeno od PUSH_THRESHOLDS (tisti javi šele pri intenzivnem nalivu >18 mm/h).
 // Tu: dogodek se šteje za začetega pri ≥1 mm/h, konča pa se šele, ko stopnja pade na 0.
@@ -2937,7 +2986,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 // ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
 // 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
-  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20,
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, frost: 20, aurora: 20, crnivec: 20,
   lightning: 20, radar_composite: 20, icon_cells: 20,
   score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
@@ -3510,6 +3559,7 @@ export default {
     }));
     ctx.waitUntil(_cronBeat(env, "rain_start_stop", () => _cronCheckRainStartStop(env)));
     ctx.waitUntil(_cronBeat(env, "fc_thresholds", () => _cronCheckForecastThresholds(env)));   // sam se omeji na enkrat na uro
+    ctx.waitUntil(_cronBeat(env, "frost", () => _cronCheckFrost(env)));   // sam se omeji na 18–22 h, enkrat na dan
     ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
     ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
@@ -8006,6 +8056,8 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           // `fc` (osebni pragovi po napovedi) je prav tako ločen opt-in in se
           // posodobi samo, če ga klic pošlje — `null` ga izklopi.
           const hasFc = body.fc !== undefined;
+          // `frost` (večerno opozorilo na zmrzal) je ločen opt-in kot digest.
+          const hasFrost = typeof body.frost === "boolean";
           const fc = hasFc ? _fcThrSanitize(body.fc) : null;
           const subs = await pRead();
           const obstoječa = subs.find(x => x.endpoint === s.endpoint);
@@ -8013,10 +8065,11 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
             let changed = false;
             if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; changed = true; }
             if (hasDigest && obstoječa.digest !== body.digest) { obstoječa.digest = body.digest; changed = true; }
+            if (hasFrost && !!obstoječa.frost !== body.frost) { obstoječa.frost = body.frost; changed = true; }
             if (hasFc && JSON.stringify(obstoječa.fc || null) !== JSON.stringify(fc)) { obstoječa.fc = fc; changed = true; }
             if (changed) await pWrite(subs);
           } else {
-            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, fc, ts: new Date().toISOString() });
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, fc, frost: hasFrost ? body.frost : false, ts: new Date().toISOString() });
             await pWrite(subs.slice(0, 5000));
           }
           return pj({ ok: true, count: subs.length, vas });

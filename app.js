@@ -1475,6 +1475,7 @@ function evaluateLiveEvent(obs){
 // ── Moja opozorila (osebni pragovi) ──────────────────────
 const THRESHOLD_KEY='wx-thresholds-v1';
 const DIGEST_KEY='wx-digest';
+const FROST_KEY='wx-frost';
 const _thr={tempMin:null,tempMax:null,wind:null,rain:null};
 
 function loadThresholds(){
@@ -1498,6 +1499,8 @@ function openThresholdModal(){
   const notifOn=localStorage.getItem('wx-notif')==='on';
   const digestEl=document.getElementById('thr-digest');
   if(digestEl){digestEl.checked=notifOn&&localStorage.getItem(DIGEST_KEY)==='on';digestEl.disabled=!notifOn;}
+  const frostEl=document.getElementById('thr-frost');
+  if(frostEl){frostEl.checked=notifOn&&localStorage.getItem(FROST_KEY)==='on';frostEl.disabled=!notifOn;}
   const fcEl=document.getElementById('thr-fc');
   if(fcEl){fcEl.checked=notifOn&&localStorage.getItem(FC_THR_KEY)==='on';fcEl.disabled=!notifOn;}
   const hint=document.getElementById('thr-digest-hint');
@@ -1546,6 +1549,11 @@ function saveThresholdSettings(){
     const on=!!digestEl.checked;
     try{localStorage.setItem(DIGEST_KEY,on?'on':'off');}catch{}
     prefs.digest=on;
+  }
+  const frostEl=document.getElementById('thr-frost');
+  if(frostEl&&!frostEl.disabled){
+    try{localStorage.setItem(FROST_KEY,frostEl.checked?'on':'off');}catch{}
+    prefs.frost=!!frostEl.checked;
   }
   const fcEl=document.getElementById('thr-fc');
   if(fcEl&&!fcEl.disabled){
