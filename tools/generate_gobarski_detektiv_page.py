@@ -15,9 +15,9 @@ workflowu: po spremembi ovoja ga poženi ročno in commitaj rezultat.
 Imena in užitnost vrst so ista kot v bazi (species_rules.yaml); preverja ju
 tools/test_detektiv.mjs.
 
-Stran NE bere postaje: notranjih meritev tu ni. (Zamenjava izmišljenih
-vremenskih zapisov z IREICA1 je odložena; trenutno igra vremena sploh ne
-prikazuje.)
+Igra bere samo zunanje meritve IREICA1, in to prek workerja `/detektiv/vreme`
+(ta bere history.json, ne Ecowitta; notranjih meritev tu ni in ne smejo priti).
+Primeri v igri so izmišljeni, vreme na kartici je pravo.
 
 Uporaba:
   python3 tools/generate_gobarski_detektiv_page.py
@@ -52,7 +52,9 @@ FAQ = [
      "<a href=\"/gobarska-napoved/dvojnice/\">Nevarne dvojnice</a>. Ilustracije so narisane za igro "
      "in so poenostavljene: prave gobe se med seboj razlikujejo bolj kot risbe."),
     ("Ali igra uporablja podatke postaje?",
-     "Ne. Primeri so izmišljene zgodbe, ki ne temeljijo na vremenskih meritvah."),
+     "Samo za kartico z vremenom: na začetku in koncu igre pokaže zadnjih sedem dni z zunanjega senzorja "
+     "postaje IREICA1 v Rečici ob Savinji (najnižja in najvišja temperatura, padavine). Zgodbe v primerih so "
+     "izmišljene in niso vezane na te meritve. Če podatka ni, kartice ni."),
 ]
 
 WARNING = ('<strong>Pomembno:</strong> igra je samo vaja. Gob <strong>ne uživaj</strong> na podlagi '

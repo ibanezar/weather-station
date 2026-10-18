@@ -423,6 +423,31 @@ def nevihte_porocila():
 
 
 @test
+def detektiv_vreme():
+    """_detektivVreme() v worker.js vrne samo tri zunanja polja, zadnjih 7 dni, brez prihodnosti in brez nepopolnih dni."""
+    hist = {}
+    for i in range(1, 11):
+        hist[f"2026-10-{i:02d}"] = {"tempHigh": 10 + i, "tempLow": i, "precipTotal": i / 10, "humidityAvg": 80,
+                                    "indoor": {"temp": 22}, "tempIndoor": 21}
+    hist["2026-10-05"] = {"tempHigh": 9.0, "tempLow": None, "precipTotal": 0.0}      # nepopoln dan
+    hist["2026-10-20"] = {"tempHigh": 30, "tempLow": 20, "precipTotal": 0}           # prihodnost
+    hist["slabo"] = {"tempHigh": 1, "tempLow": 1, "precipTotal": 1}                  # ni datum
+    names = ["_detektivVreme", "DETEKTIV_VREME_DNI"]
+    got = js("worker.js", names, [{"fn": "_detektivVreme", "args": [hist, "2026-10-18"]},
+                                  {"fn": "_detektivVreme", "args": [{}, "2026-10-18"]},
+                                  {"fn": "_detektivVreme", "args": [None, "2026-10-18"]}])
+    days = got[0]
+    check(len(days) == 7, "detektiv vreme: največ 7 dni", f"got={len(days)}")
+    check([d["date"] for d in days] == ["2026-10-03", "2026-10-04", "2026-10-06", "2026-10-07", "2026-10-08",
+                                        "2026-10-09", "2026-10-10"], "detektiv vreme: zadnjih 7 veljavnih dni, brez prihodnosti",
+          f"got={[d['date'] for d in days]}")
+    check("2026-10-05" not in [d["date"] for d in days], "detektiv vreme: nepopoln dan preskočen")
+    check(all(set(d) == {"date", "tmax", "tmin", "precip"} for d in days), "detektiv vreme: samo bela lista polj")
+    check("indoor" not in json.dumps(days).lower(), "detektiv vreme: brez notranjih meritev")
+    check(got[1] is None and got[2] is None, "detektiv vreme: prazen vhod vrne null")
+
+
+@test
 def arso_toca_razclenjevanje():
     """_parseArsoToca() v worker.js razbere stopnjo in čas izdaje iz ARSO RSS (oblika iz 7. 10. 2026)."""
     def rss(t):

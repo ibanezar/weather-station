@@ -116,6 +116,13 @@
 .gd-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 .4rem; }
 .gd-share-msg { min-height: 1.2rem; font-size: .88rem; color: var(--muted, #adc0d8); word-break: break-word; }
 
+/* Pravo vreme IREICA1 (kartica izgine, če podatka ni). */
+.gd-vreme { margin: 1rem 0; padding: .75rem .9rem; border-radius: 12px; background: rgba(77, 159, 248, .1); border: 1px solid rgba(77, 159, 248, .3); line-height: 1.5; }
+.gd-vreme p { margin: .2rem 0; }
+.gd-vreme-title { font-weight: 600; }
+.gd-vreme-note { font-size: .85rem; color: var(--muted, #adc0d8); }
+.gd-vreme-note a { color: var(--blue, #4d9ff8); }
+
 /* Opozorilo: vedno vidno pod igro in ob koncu igre. */
 .gd-warning,
 .gd-final-warning {

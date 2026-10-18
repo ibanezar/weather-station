@@ -96,6 +96,11 @@ check("največ točk", node("m.NAJVEC_TOCK") == 3 * KROG)
 check("naziv 0 točk", "Začetnik" in node("m.naziv(0)"))
 check("naziv max", node("m.naziv(m.NAJVEC_TOCK)") == "Mojster detektiv")
 
+# 4b) Povzetek vremena (kartica z IREICA1).
+pv = node("m.povzetekVremena([{date:'2026-10-16',tmax:14.2,tmin:5.1,precip:0},{date:'2026-10-17',tmax:19.4,tmin:4.6,precip:0.1},{date:'2026-10-18',tmax:12,tmin:7,precip:6.4}])")
+check("povzetek vremena", pv == {"n": 3, "tmin": 4.6, "tmax": 19.4, "dez": 6.5, "dniDez": 1, "zadnjiDez": "2026-10-18", "zadnji": "2026-10-18"}, str(pv))
+check("brez dni ni povzetka", node("[m.povzetekVremena([]), m.povzetekVremena(null)]") == [None, None])
+
 # 5) Opozorilo je na strani in v igri.
 html = open(os.path.join(ROOT, "igra", "gobarski-detektiv", "index.html"), encoding="utf-8").read()
 check("opozorilo na strani", 'class="gd-warning"' in html and "ne uživaj" in html)

@@ -482,6 +482,23 @@ const TOCA_BESEDILO = ["zelo majhna", "zaznavna", "srednja", "velika"];
 
 // Iz naslova RSS elementa razbere stopnjo (0–3, null = ni podatkov) in čas izdaje (15. člen ZDMHS).
 // Regexa sta nizova (RegExp), ker izrezovalnik v tools/_parity_js.mjs ne prenese oklepajev v regex literalih.
+// ── Gobarski detektiv: vreme v Rečici (zadnjih N dni iz history.json) ───────
+// Vrne SAMO tri zunanja polja (tempHigh, tempLow, precipTotal) po dnevih. history.json je
+// zunanji senzor IREICA1; notranjih meritev v njem ni, a odgovor je vseeno po beli listi, ne po
+// »vse razen«. Dan brez katerega koli polja se preskoči (ne izmišljamo vrednosti).
+const DETEKTIV_VREME_DNI = 7;
+function _detektivVreme(hist, danes) {
+  if (!hist || typeof hist !== "object") return null;
+  const dnevi = Object.keys(hist).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= danes).sort();
+  const out = [];
+  for (const d of dnevi) {
+    const v = hist[d] || {};
+    if (typeof v.tempHigh !== "number" || typeof v.tempLow !== "number" || typeof v.precipTotal !== "number") continue;
+    out.push({ date: d, tmax: v.tempHigh, tmin: v.tempLow, precip: v.precipTotal });
+  }
+  return out.length ? out.slice(-DETEKTIV_VREME_DNI) : null;
+}
+
 const _TOCA_ITEM_RE = new RegExp("<item>\\s*<title>([\\s\\S]*?)</title>", "i");
 const _TOCA_TITLE_RE = new RegExp("\\(([^)]*?)\\):\\s*Verjetnost[\\s\\S]*?stopnja\\s*(-|\\d)\\s*/\\s*3", "i");
 function _parseArsoToca(xml) {
@@ -3561,6 +3578,22 @@ export default {
         });
       } catch (_) {
         return fetch(request);
+      }
+    }
+
+    // /detektiv/vreme — zadnjih 7 dni z IREICA1 za igro Gobarski detektiv. Bere history.json (rob
+    // ga predpomni 1 h), ne Ecowitta, zato ne more vrniti notranjih meritev. Brez podatka vrne
+    // {ok:false}: igra kartice ne pokaže, nikoli ne izmisli vrednosti.
+    if (path === "/detektiv/vreme") {
+      const h = { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "public, max-age=1800" };
+      try {
+        const r = await fetch("https://meteorec.si/history.json", { cf: { cacheTtl: 3600, cacheEverything: true } });
+        if (!r.ok) return new Response(JSON.stringify({ ok: false }), { headers: h });
+        const danes = new Date().toISOString().slice(0, 10);
+        const days = _detektivVreme(await r.json(), danes);
+        return new Response(JSON.stringify(days ? { ok: true, station: "IREICA1", days } : { ok: false }), { headers: h });
+      } catch (_) {
+        return new Response(JSON.stringify({ ok: false }), { headers: h });
       }
     }
 
