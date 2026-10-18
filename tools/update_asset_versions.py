@@ -56,6 +56,7 @@ ASSETS = [
     "blog/views.js",
     "blog/comments.js",
     "blog/share-bar.js",
+    "blog/toc.js",
     "blog/article-enhance.js",
     "blog/subscribe.js",
     "blog/list-enhance.js",
