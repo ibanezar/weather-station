@@ -45,7 +45,7 @@ FAQ = [
     ("Zakaj igra nagradi pregled več sledi?",
      "Ker nobena lastnost ni zanesljiva sama zase. Rjav klobuk imata jurček in žolčasti goban, "
      "beli sta lahko užitna šampinjonka in smrtno strupena zelena mušnica. Šele klobuk, spodnja "
-     "stran, noga, dno noge in vonj skupaj povedo, s čim imaš opravka."),
+     "stran, noga, dno noge, meso z vonjem in okolje skupaj povedo, s čim imaš opravka."),
     ("Od kod so podatki o vrstah?",
      "Imena in užitnost so enaka kot v <a href=\"/gobarska-napoved/baza-vrst/\">bazi vrst</a>, "
      "pare, ki se zamenjajo, pa najdeš tudi na strani "
@@ -109,10 +109,10 @@ def build_body():
   <aside class="gd-warning" role="note">{WARNING}</aside>
 
   <h2>Kako igra deluje</h2>
-  <p>Vsak krog ima šest primerov, ki jih igra žreba med {N_PAROV} pari. V vsakem primeru dobiš eno gobo. Z gumbi preglejuješ klobuk, spodnjo stran (cevke ali listi),
-  nogo, dno noge in meso, ilustracija pa se obrne tako, da vidiš, kaj bereš. Nato izbereš, katera od
+  <p>Vsak krog ima šest primerov, ki jih igra žreba med {N_PAROV} pari. V vsakem primeru dobiš eno gobo. Z gumbi preglejuješ šest sledi: klobuk, spodnjo stran (cevke ali listi),
+  nogo, dno noge, meso z vonjem in okolje, kjer goba raste. Ilustracija se obrne tako, da vidiš, kaj bereš. Nato izbereš, katera od
   treh ponujenih vrst je to. Pravilna vrsta je vredna dve točki, tretjo dobiš, če si pregledal vsaj
-  štiri od šestih sledi. Na koncu vidiš, kje bi bila odločitev nevarna.</p>
+  štiri od šestih sledi. Po vsakem odgovoru igra primerja ključne sledi obeh vrst in pove, katero si spregledal. Na koncu vidiš, kje bi bila odločitev nevarna, in lahko ponoviš samo napačne primere.</p>
   <p>Vsak par je resničen. Med njimi so jurček in žolčasti goban, navadna in lažna lisička, poljski
   kukmak in zelena mušnica, pšenična in poljska koprenka, užitna in zlata sirovka ter rdečkasta in
   panterjeva mušnica. Več o njih: <a href="/gobarska-napoved/dvojnice/">Nevarne dvojnice</a>,

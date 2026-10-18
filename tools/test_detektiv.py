@@ -96,6 +96,17 @@ check("največ točk", node("m.NAJVEC_TOCK") == 3 * KROG)
 check("naziv 0 točk", "Začetnik" in node("m.naziv(0)"))
 check("naziv max", node("m.naziv(m.NAJVEC_TOCK)") == "Mojster detektiv")
 
+# 4a) Ključne sledi, ponovitev napačnih parov, naziv glede na dolžino kroga.
+for p_ in pari:
+    check(f"par {p_['id']}: ključne sledi so veljavne", 2 <= len(p_["kljuc"]) <= 3 and set(p_["kljuc"]) <= set(sledi))
+ks = node("m.kljucneSledi('goban',{noga:true,klobuk:true})")
+check("ključne sledi: pregledane/spregledane", ks == {"pregledane": ["noga"], "spregledane": ["spodaj", "meso"]}, str(ks))
+for seed in range(20):
+    pon = node(f"(()=>{{let s={seed}+1;const r=()=>{{s=(s*16807)%2147483647;return s/2147483647}};return m.sestaviKrog(r,['goban','kukmak'])}})()")
+    check("ponovitev: samo zahtevana para", [k["par"] for k in pon] == ["goban", "kukmak"])
+    check("ponovitev: ponudba 3 različne", all(len(set(k["ponudba"])) == 3 for k in pon))
+check("naziv za krajši krog", node("m.naziv(6,6)") == "Mojster detektiv" and "Začetnik" in node("m.naziv(0,6)"))
+
 # 4b) Povzetek vremena (kartica z IREICA1).
 pv = node("m.povzetekVremena([{date:'2026-10-16',tmax:14.2,tmin:5.1,precip:0},{date:'2026-10-17',tmax:19.4,tmin:4.6,precip:0.1},{date:'2026-10-18',tmax:12,tmin:7,precip:6.4}])")
 check("povzetek vremena", pv == {"n": 3, "tmin": 4.6, "tmax": 19.4, "dez": 6.5, "dniDez": 1, "zadnjiDez": "2026-10-18", "zadnji": "2026-10-18"}, str(pv))
@@ -107,6 +118,12 @@ check("opozorilo na strani", 'class="gd-warning"' in html and "ne uživaj" in ht
 check("opozorilo ob koncu igre", "gd-final-warning" in open(JS, encoding="utf-8").read())
 n_vrst = sum(len(p["vrste"]) for p in pari)
 check("generator navaja pravo število vrst in parov", f"{n_vrst} vrst v {len(pari)} parih" in html, f"({n_vrst}/{len(pari)})")
+js = open(JS, encoding="utf-8").read()
+# Navodila morajo šteti enako kot igra: šest sledi, bonus od štirih (opis na strani, FAQ, začetni zaslon).
+check("igra ima šest sledi", len(sledi) == 6 and node("m.MIN_SLEDI_ZA_BONUS") == 4)
+check("stran navaja šest sledi in okolje", "šest sledi" in html and "okolje" in html)
+check("začetni zaslon navaja vse sledi iz STRIPOV", "meso z vonjem in okolje (skupaj ' + STRIPOV" in js)
+check("analitika: dogodki", all(e in js for e in ("game_start", "clue_opened", "answer_submitted", "game_completed", "retry_wrong_answers", "species_link_opened")))
 check("lang=sl", '<html lang="sl">' in html)
 check("brez notranjih meritev", "indoor" not in html.lower() and "indoor" not in open(JS, encoding="utf-8").read().lower())
 
