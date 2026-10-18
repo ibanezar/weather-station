@@ -596,7 +596,23 @@
     return 'Začetnik: raje vprašaj izkušenega gobarja';
   }
 
+  /* Povzetek vremena iz /detektiv/vreme (zadnji dnevi IREICA1: date, tmax, tmin, precip).
+   * Samo računa nad podanimi dnevi; brez dni vrne null (kartica se ne pokaže). */
+  function povzetekVremena(days) {
+    if (!days || !days.length) return null;
+    var tmax = -Infinity, tmin = Infinity, dez = 0, dniDez = 0, zadnjiDez = null;
+    days.forEach(function (d) {
+      if (d.tmax > tmax) tmax = d.tmax;
+      if (d.tmin < tmin) tmin = d.tmin;
+      dez += d.precip;
+      if (d.precip >= 0.2) { dniDez++; zadnjiDez = d.date; }
+    });
+    return { n: days.length, tmin: tmin, tmax: tmax, dez: Math.round(dez * 10) / 10, dniDez: dniDez,
+             zadnjiDez: zadnjiDez, zadnji: days[days.length - 1].date };
+  }
+
   var model = {
+    povzetekVremena: povzetekVremena,
     PARI: PARI, SLEDI: SLEDI, SLEDI_IME: SLEDI_IME, EDIB: EDIB,
     NAJVEC_TOCK: NAJVEC_TOCK, KROG_DOLZINA: KROG_DOLZINA, MIN_SLEDI_ZA_BONUS: MIN_SLEDI_ZA_BONUS,
     sestaviKrog: sestaviKrog, oceni: oceni, naziv: naziv,
@@ -799,6 +815,40 @@
   var app = document.getElementById('gd-app');
   if (!app) { return; }
 
+  var VREME_WORKER = 'https://weatherireica1.filip-eremita.workers.dev';
+  var vreme = null;          // povzetek zadnjih dni IREICA1; null = ni podatka, kartice ni
+
+  function dec(x) { return x.toFixed(1).replace('.', ','); }   // meritve vedno z decimalko
+  function datumKratko(iso) { var p = iso.split('-'); return parseInt(p[2], 10) + '. ' + parseInt(p[1], 10) + '.'; }
+
+  function vremeHtml() {
+    if (!vreme) return '';
+    var danes = new Date().toISOString().slice(0, 10);
+    var staro = (Date.parse(danes) - Date.parse(vreme.zadnji)) / 86400000 > 3;
+    var dez = vreme.dez > 0
+      ? 'padavine skupaj ' + dec(vreme.dez) + ' mm (' + vreme.dniDez + (vreme.dniDez === 1 ? ' dan' : ' dni') + ' z dežjem' +
+        (vreme.zadnjiDez ? ', zadnji dež ' + datumKratko(vreme.zadnjiDez) : '') + ')'
+      : 'brez padavin';
+    return '<div class="gd-vreme"><p class="gd-vreme-title">Vreme v Rečici ob Savinji, zadnjih ' + vreme.n + ' dni</p>' +
+      '<p>Od ' + dec(vreme.tmin) + ' °C do ' + dec(vreme.tmax) + ' °C, ' + dez + '.' +
+      (staro ? ' Zadnji zapis: ' + datumKratko(vreme.zadnji) + '.' : '') + '</p>' +
+      '<p class="gd-vreme-note">Meritve postaje IREICA1 (zunanji senzor). Zgodbe v igri so izmišljene, vreme je pravo. ' +
+      'Gobe rastejo po dežju in ob primernih temperaturah: <a href="/gobarska-napoved/danes/">gobarski indeks za danes</a>.</p></div>';
+  }
+
+  function naloziVreme() {
+    if (!window.fetch) return;
+    fetch(VREME_WORKER + '/detektiv/vreme')
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok) return;
+        vreme = povzetekVremena(j.days);
+        var slot = document.getElementById('gd-vreme-slot');
+        if (slot) slot.innerHTML = vremeHtml();
+      })
+      .catch(function () { /* brez podatka kartice ni, vrednosti se ne izmišljajo */ });
+  }
+
   var KLJUC = 'gobarski-detektiv-rekord';
   var stanje = null;
 
@@ -834,6 +884,7 @@
       'Dobrega detektiva ne preslepi ena lastnost, zato nagradimo, če pregledaš vsaj ' + MIN_SLEDI_ZA_BONUS + ' sledi.</p>' +
       '<ul class="gd-rules"><li><strong>2 točki</strong> za pravilno vrsto</li><li><strong>+1 točka</strong>, če si pregledal vsaj ' + MIN_SLEDI_ZA_BONUS + ' od ' + STRIPOV + ' sledi</li><li>Največ ' + NAJVEC_TOCK + ' točk</li></ul>' +
       (r ? '<p class="gd-best">Tvoj rekord v tem brskalniku: <strong>' + r + ' / ' + NAJVEC_TOCK + '</strong></p>' : '') +
+      '<div id="gd-vreme-slot">' + vremeHtml() + '</div>' +
       '<button type="button" class="gd-btn gd-btn-main" id="gd-go">Začni preiskavo</button>' +
       '</div>';
     document.getElementById('gd-go').addEventListener('click', novaIgra);
@@ -956,6 +1007,7 @@
       '<p class="gd-best">Rekord v tem brskalniku: ' + rekord + ' / ' + NAJVEC_TOCK + '</p>' +
       '<ul class="gd-summary">' + vrstice + '</ul>' + opozorilo +
       '<div class="gd-final-warning" role="note"><strong>Pomembno:</strong> ta igra je samo vaja. Gob <strong>ne uživaj</strong> na podlagi igre, slike ali spletne strani. Vsako nabrano gobo mora pred jedjo pregledati usposobljen gobar (pregledovalnica gob). Če nisi povsem prepričan, gobo pusti. Ob sumu na zastrupitev takoj pokliči <a href="tel:112">112</a>.</div>' +
+      '<div id="gd-vreme-slot">' + vremeHtml() + '</div>' +
       '<div class="gd-actions"><button type="button" class="gd-btn gd-btn-main" id="gd-again">Nova preiskava</button>' +
       '<button type="button" class="gd-btn" id="gd-share">Kopiraj rezultat</button></div>' +
       '<p id="gd-share-msg" class="gd-share-msg" aria-live="polite"></p>' +
@@ -972,4 +1024,5 @@
   }
 
   zacetek();
+  naloziVreme();
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -2031,7 +2031,11 @@ Krog je `KROG_DOLZINA` = 6 naključnih parov, iz vsakega en primerek; igralec ga
   (`.gd-final-warning`); test to preveri. Točke: 2 za pravilno vrsto, +1 za pregled ≥ 4 od 6 sledi.
 - Povezave: kartica v skupini »Prepoznaj gobo« na `/gobarska-napoved/` (`GOBE_CATEGORIES`; v committano
   stran vstavljena tudi ročno), odstavek na `/sola/`, `CORE` v `seo_audit.py`, `llms.txt`.
-- **Odloženo:** vremenski zapisi iz IREICA1 prek workerja (igra jih zdaj sploh ne prikazuje).
+- **Pravo vreme** (18. 10. 2026): kartica »Vreme v Rečici, zadnjih 7 dni« na začetku in koncu igre (najnižja/najvišja
+  temperatura, padavine) iz worker endpointa `/detektiv/vreme` (`_detektivVreme()`): bere `history.json` (rob 1 h), **ne
+  Ecowitta**, in vrne samo `tempHigh`/`tempLow`/`precipTotal` po beli listi — notranjih meritev ne more vrniti.
+  Brez podatka kartice ni (nikoli izmišljena vrednost); zgodbe primerov so izmišljene in z vremenom niso vezane.
+  Test: `test_parity.detektiv_vreme`, `test_detektiv.py` (`povzetekVremena`). Endpoint začne delovati po deployu workerja.
 
 ## Termika (`/igra/`) — igra jadralnega padalca na dnevnem vremenu
 
