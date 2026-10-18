@@ -108,3 +108,9 @@ jobs:
 
       - name: Test Gobjega alarma (pravila, histereza, hladilna doba)
         run: node tools/test_gobe_alarm.mjs
+
+      - name: Test opozorila na zmrzal (datum, zastarelost, prag, enkrat na dan)
+        run: node tools/test_frost_push.mjs
+
+      - name: Test opozorila ob pragu Savinje (razčlenjevalnik ARSO, stopnje, histereza, zastarelost)
+        run: node tools/test_savinja_push.mjs

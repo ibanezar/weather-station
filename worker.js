@@ -1277,6 +1277,168 @@ async function _cronCheckForecastThresholds(env) {
   await r2.put(FC_THR_STATE, JSON.stringify({ _lastRun: now, subs: nextSubs }), { httpMetadata: { contentType: "application/json" } });
 }
 
+// ── Zmrzal nocoj (Web Push, ločen opt-in `frost`) ───────────
+// Večer med 18. in 22. uro po naši uri, enkrat na jutrišnji datum: če MTR (naš
+// model za dno doline) za JUTRI napove verjetnost zmrzali (Tmin ≤ 0 °C) nad
+// FROST_PUSH_MIN_P, gre obvestilo naročnikom s kljukico »Opozori na zmrzal«.
+// Za vrtičkarje, sadjarje in hmeljarje: zvečer je še čas, da pokrijejo sadike.
+// - Dan se izbere po DATUMU, nikoli po `lead` (datoteka je lahko včerajšnja).
+// - Datoteka, starejša od FROST_MODEL_MAX_AGE_H, se ne uporabi: raje nič kot
+//   obvestilo iz stare napovedi. Tiho ne pomeni »ni zmrzali« — cron to javi.
+// - Verjetnost je zaokrožena na 5 % (kot na kartici MTR), brez številke ne gre nič.
+// - Modelska napoved za Rečico (dno doline), ne uradno opozorilo.
+const FROST_PUSH_MIN_P = 0.4;
+const FROST_MODEL_MAX_AGE_H = 36;
+const FROST_STATE = "push/frost_state.json";
+function _frostPick(model, tomorrow, nowMs) {
+  if (!model || !Array.isArray(model.days)) return { ok: false, reason: "napoved-modela.json brez dni" };
+  const gen = Date.parse(model.generated_at);
+  if (!Number.isFinite(gen) || nowMs - gen > FROST_MODEL_MAX_AGE_H * 3600 * 1000) return { ok: false, reason: "napoved-modela.json je zastarela" };
+  const day = model.days.find(d => d && d.date === tomorrow);
+  if (!day || typeof day.p_frost !== "number" || typeof day.tmin !== "number") return { ok: false, reason: "ni jutrišnjega dne z verjetnostjo zmrzali" };
+  if (day.p_frost < FROST_PUSH_MIN_P) return { ok: true, send: false };
+  return { ok: true, send: true, pct: Math.round(day.p_frost * 20) * 5, tmin: day.tmin };
+}
+async function _cronCheckFrost(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  const now = Date.now();
+  // % 24, ker nekatere izvedbe ICU za polnoč vrnejo "24" namesto "00".
+  const hourSI = Number(new Date(now).toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI < 18 || hourSI >= 22) return;
+  const tomorrow = _ljDatum(new Date(now + 86400000));
+  let state = {}; try { const o = await r2.get(FROST_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  if (state.date === tomorrow) return;                      // za ta dan že odločeno
+  const subs = await (async () => { try { const o = await r2.get("push/subs.json"); return o ? JSON.parse(await o.text()) : []; } catch (_) { return []; } })();
+  if (!subs.some(s => s.frost)) return;                     // brez naročnikov ne kličemo vira
+  let model;
+  try { const res = await fetch("https://meteorec.si/napoved-modela.json", { cf: { cacheTtl: 300 } }); if (!res.ok) return { ok: false, reason: "napoved-modela.json HTTP " + res.status }; model = await res.json(); }
+  catch (e) { return { ok: false, reason: "napoved-modela.json: " + String((e && e.message) || e).slice(0, 100) }; }
+  const pick = _frostPick(model, tomorrow, now);
+  if (!pick.ok) return pick;                                // poskusi znova ob naslednjem tiku do 22:00
+  if (pick.send) {
+    const t = pick.tmin.toFixed(1).replace(".", ",");
+    await _pushAll(env, {
+      title: "Meteorec — zmrzal nocoj?",
+      body: "🧊 Jutri zjutraj v Rečici ob Savinji zmrzal ~" + pick.pct + " % verjetna (najnižja ~" + t + " °C na dnu doline). Pokrij občutljive rastline. Modelska napoved MTR, ne uradno opozorilo.",
+      url: "/", tag: "wx-frost",
+    }, s => !!s.frost);
+  }
+  await r2.put(FROST_STATE, JSON.stringify({ date: tomorrow, sent: !!pick.send, ts: now }), { httpMetadata: { contentType: "application/json" } });
+}
+
+// ── ARSO hidrološke postaje: razčlenitev hidro_podatki_zadnji.xml ──
+// Skupno za /arso-water in za opozorilo ob pragu Savinje (_cronCheckSavinja).
+// Vrne GeoJSON točke; pragovi visokih voda (vv1–vv3) so ZA TO POSTAJO (glej CLAUDE.md, Vodostaj).
+function _parseArsoHidroXml(xml) {
+  const decode = (s) => (s || "")
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(parseInt(d, 10)))
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
+  const field = (block, tag) => {
+    const m = block.match(new RegExp("<" + tag + ">([\\s\\S]*?)</" + tag + ">"));
+    return m ? decode(m[1]).trim() : null;
+  };
+  const num = (v) => (v == null || v === "" ? null : Number(v));
+  const blocks = xml.match(/<postaja\b[\s\S]*?<\/postaja>/g) || [];
+  const features = [];
+  for (const b of blocks) {
+    const lat = num((b.match(/wgs84_sirina="([\d.]+)"/) || [])[1]);
+    const lon = num((b.match(/wgs84_dolzina="([\d.]+)"/) || [])[1]);
+    if (lat == null || lon == null) continue;
+    features.push({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [lon, lat] },
+      properties: {
+        sifra: (b.match(/sifra="(\d+)"/) || [])[1] || null,
+        reka: field(b, "reka"),
+        merilno_mesto: field(b, "merilno_mesto"),
+        postaja: field(b, "ime_kratko") || field(b, "merilno_mesto"),
+        vodostaj: num(field(b, "vodostaj")),
+        pretok: num(field(b, "pretok")),
+        temperatura: num(field(b, "temp_vode")),
+        datum: field(b, "datum"),
+        datum_cet: field(b, "datum_cet"),
+        // Uradni pragovi visokih voda ZA TO POSTAJO in ARSO-jeva lastna oznaka
+        // pretoka. Brez njih je vsaka ocena stanja umerjena na eno postajo in
+        // za ostale napačna: prvi prag je pri Solčavi 56 m³/s, pri Letušu 360.
+        vv1: num(field(b, "prvi_vv_pretok")),
+        vv2: num(field(b, "drugi_vv_pretok")),
+        vv3: num(field(b, "tretji_vv_pretok")),
+        znacilni: field(b, "pretok_znacilni"),
+      },
+    });
+  }
+  return features;
+}
+
+// ── Savinja čez prag visokih voda ARSO (Web Push, ločen opt-in `savinja`) ──
+// Za postaje Solčava I, Nazarje in Letuš I, ki imajo ARSO pragove pretoka (vv1–vv3).
+// Stanje se meri po pragovih TE postaje (isto pravilo kot riverStationStatus() v app.js
+// in station_level() v tools/generate_vodostaj_page.py — namerna podvojitev, test_parity).
+// - Brez ocene: postaja brez uradnih pragov (Medlog) se ne obravnava.
+// - Obvestilo gre ob PORASTU stopnje (0→1, 1→2, 2→3); vsaka višja stopnja takoj.
+// - Histereza: stopnja se spusti šele, ko pretok pade pod 90 % praga trenutne stopnje.
+// - Meritev, starejša od SAVINJA_MAX_AGE_MIN, se ne upošteva (stanje se ne spremeni).
+// - Ni uradno opozorilo: za ukrepanje veljata ARSO in URSZR.
+const SAVINJA_STATIONS = { "6020": "Solčavi", "6060": "Nazarjah", "6068": "Letušu" };
+const SAVINJA_MAX_AGE_MIN = 180;
+const SAVINJA_HYST = 0.9;
+const SAVINJA_STATE = "push/savinja_state.json";
+function _savinjaLevel(q, p) {
+  if (p.vv3 != null && q >= p.vv3) return 3;
+  if (p.vv2 != null && q >= p.vv2) return 2;
+  return q >= p.vv1 ? 1 : 0;
+}
+// Čista funkcija: iz postaj in prejšnjega stanja izračuna dogodke in novo stanje.
+function _savinjaTransitions(features, prev, nowMs) {
+  const next = { ...prev }, events = []; let fresh = 0;
+  for (const f of features) {
+    const p = f.properties || {};
+    if (!SAVINJA_STATIONS[p.sifra] || p.vv1 == null || p.pretok == null) continue;
+    const t = Date.parse(String(p.datum_cet || "").replace(" ", "T") + ":00+01:00");   // datum_cet = srednjeevropski čas brez poletnega
+    if (!Number.isFinite(t) || nowMs - t > SAVINJA_MAX_AGE_MIN * 60000) continue;
+    fresh++;
+    const old = (prev[p.sifra] && prev[p.sifra].lvl) || 0;
+    let lvl = _savinjaLevel(p.pretok, p);
+    // Spust po stopnjah: stopnja velja, dokler pretok ne pade pod 90 % njenega praga.
+    for (let l = old; l > lvl; l--) {
+      const thr = l === 3 ? p.vv3 : l === 2 ? p.vv2 : p.vv1;
+      if (thr != null && p.pretok >= thr * SAVINJA_HYST) { lvl = l; break; }
+    }
+    if (lvl > old) events.push({ sifra: p.sifra, lvl, q: p.pretok, thr: lvl === 3 ? p.vv3 : lvl === 2 ? p.vv2 : p.vv1, cas: String(p.datum || "").slice(11, 16) });
+    next[p.sifra] = { lvl, ts: nowMs };
+  }
+  return { events, next, fresh };
+}
+async function _cronCheckSavinja(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  let subs = []; try { const o = await r2.get("push/subs.json"); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  if (!subs.some(s => s.savinja)) return;                   // brez naročnikov vira ne kličemo
+  let features;
+  try {
+    const res = await fetch("https://www.arso.gov.si/xml/vode/hidro_podatki_zadnji.xml", {
+      headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/xml,text/xml,*/*", "Referer": "https://www.arso.gov.si/" },
+      cf: { cacheTtl: 300 },
+    });
+    if (!res.ok) return { ok: false, reason: "ARSO hidro XML HTTP " + res.status };
+    features = _parseArsoHidroXml(await res.text());
+  } catch (e) { return { ok: false, reason: "ARSO hidro XML: " + String((e && e.message) || e).slice(0, 100) }; }
+  let state = {}; try { const o = await r2.get(SAVINJA_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const { events, next, fresh } = _savinjaTransitions(features, state, Date.now());
+  if (!fresh) return { ok: false, reason: "ni sveže meritve nobene postaje Savinje" };   // stanje ostane, nikoli »ni nevarnosti« iz manjkajočih podatkov
+  for (const e of events) {
+    const imena = ["", "1. prag", "2. prag", "3. prag"];
+    const pretok = String(Math.round(e.q * 10) / 10).replace(".", ",");
+    await _pushAll(env, {
+      title: "Meteorec — Savinja pri " + SAVINJA_STATIONS[e.sifra],
+      body: "🌊 Pretok Savinje pri " + SAVINJA_STATIONS[e.sifra] + " je presegel " + imena[e.lvl] + " visokih voda ARSO: " + pretok + " m³/s (prag " + e.thr + ")"
+        + (e.cas ? ", izmerjeno ob " + e.cas : "") + ". Meritev ARSO, ni uradno opozorilo — za ukrepanje veljata ARSO in URSZR.",
+      url: "/vodostaj-savinje/", tag: "wx-savinja-" + e.sifra,
+    }, s => !!s.savinja);
+  }
+  if (JSON.stringify(next) !== JSON.stringify(state)) await r2.put(SAVINJA_STATE, JSON.stringify(next), { httpMetadata: { contentType: "application/json" } });
+}
+
 // ── Začetek/konec dejanskih padavin na postaji ──────────────
 // Ločeno od PUSH_THRESHOLDS (tisti javi šele pri intenzivnem nalivu >18 mm/h).
 // Tu: dogodek se šteje za začetega pri ≥1 mm/h, konča pa se šele, ko stopnja pade na 0.
@@ -2937,7 +3099,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 // ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
 // 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
-  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20,
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, frost: 20, savinja: 20, aurora: 20, crnivec: 20,
   lightning: 20, radar_composite: 20, icon_cells: 20,
   score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
@@ -3510,6 +3672,8 @@ export default {
     }));
     ctx.waitUntil(_cronBeat(env, "rain_start_stop", () => _cronCheckRainStartStop(env)));
     ctx.waitUntil(_cronBeat(env, "fc_thresholds", () => _cronCheckForecastThresholds(env)));   // sam se omeji na enkrat na uro
+    ctx.waitUntil(_cronBeat(env, "frost", () => _cronCheckFrost(env)));   // sam se omeji na 18–22 h, enkrat na dan
+    ctx.waitUntil(_cronBeat(env, "savinja", () => _cronCheckSavinja(env)));
     ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
     ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
@@ -6037,44 +6201,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           clearTimeout(tid);
           if (r.ok) {
             const xml = await r.text();
-            const decode = (s) => (s || "")
-              .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
-              .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(parseInt(d, 10)))
-              .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
-            const field = (block, tag) => {
-              const m = block.match(new RegExp("<" + tag + ">([\\s\\S]*?)</" + tag + ">"));
-              return m ? decode(m[1]).trim() : null;
-            };
-            const num = (v) => (v == null || v === "" ? null : Number(v));
-            const blocks = xml.match(/<postaja\b[\s\S]*?<\/postaja>/g) || [];
-            const features = [];
-            for (const b of blocks) {
-              const lat = num((b.match(/wgs84_sirina="([\d.]+)"/) || [])[1]);
-              const lon = num((b.match(/wgs84_dolzina="([\d.]+)"/) || [])[1]);
-              if (lat == null || lon == null) continue;
-              features.push({
-                type: "Feature",
-                geometry: { type: "Point", coordinates: [lon, lat] },
-                properties: {
-                  sifra: (b.match(/sifra="(\d+)"/) || [])[1] || null,
-                  reka: field(b, "reka"),
-                  merilno_mesto: field(b, "merilno_mesto"),
-                  postaja: field(b, "ime_kratko") || field(b, "merilno_mesto"),
-                  vodostaj: num(field(b, "vodostaj")),
-                  pretok: num(field(b, "pretok")),
-                  temperatura: num(field(b, "temp_vode")),
-                  datum: field(b, "datum"),
-                  // Uradni pragovi visokih voda ZA TO POSTAJO in ARSO-jeva
-                  // lastna oznaka pretoka. Brez njih je vsaka ocena stanja
-                  // umerjena na eno postajo in za ostale napačna: prvi prag
-                  // je pri Solčavi 56 m³/s, pri Letušu 360.
-                  vv1: num(field(b, "prvi_vv_pretok")),
-                  vv2: num(field(b, "drugi_vv_pretok")),
-                  vv3: num(field(b, "tretji_vv_pretok")),
-                  znacilni: field(b, "pretok_znacilni"),
-                },
-              });
-            }
+            const features = _parseArsoHidroXml(xml);
             // Filter: v bližini Rečice, prednost rekam Savinjske doline
             const nearby = features.filter(f => {
               const [lon, lat] = f.geometry.coordinates;
@@ -8006,6 +8133,9 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           // `fc` (osebni pragovi po napovedi) je prav tako ločen opt-in in se
           // posodobi samo, če ga klic pošlje — `null` ga izklopi.
           const hasFc = body.fc !== undefined;
+          // `frost` (večerno opozorilo na zmrzal) je ločen opt-in kot digest.
+          const hasFrost = typeof body.frost === "boolean";
+          const hasSavinja = typeof body.savinja === "boolean";   // opozorilo ob pragu Savinje, ločen opt-in
           const fc = hasFc ? _fcThrSanitize(body.fc) : null;
           const subs = await pRead();
           const obstoječa = subs.find(x => x.endpoint === s.endpoint);
@@ -8013,10 +8143,12 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
             let changed = false;
             if (vas && obstoječa.vas !== vas) { obstoječa.vas = vas; changed = true; }
             if (hasDigest && obstoječa.digest !== body.digest) { obstoječa.digest = body.digest; changed = true; }
+            if (hasSavinja && !!obstoječa.savinja !== body.savinja) { obstoječa.savinja = body.savinja; changed = true; }
+            if (hasFrost && !!obstoječa.frost !== body.frost) { obstoječa.frost = body.frost; changed = true; }
             if (hasFc && JSON.stringify(obstoječa.fc || null) !== JSON.stringify(fc)) { obstoječa.fc = fc; changed = true; }
             if (changed) await pWrite(subs);
           } else {
-            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, fc, ts: new Date().toISOString() });
+            subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, vas, digest: hasDigest ? body.digest : false, fc, frost: hasFrost ? body.frost : false, savinja: hasSavinja ? body.savinja : false, ts: new Date().toISOString() });
             await pWrite(subs.slice(0, 5000));
           }
           return pj({ ok: true, count: subs.length, vas });
