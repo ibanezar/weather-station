@@ -2383,6 +2383,25 @@ nobenega workflowa (isti vzorec kot `study_inat_lag.py`).
   Trditev o zbiranju v poslopjih zdaj navaja Strokovna priporočila (prej »splošno znana lastnost«). Predloge za FB, ki so
   trdile »nasvetov za zatiranje v članku ni«, so zastarele.
 
+## Slana in gobe (`/blog/slana-gobarska-sezona-1018.html`, 18. 10. 2026)
+
+Nadaljevanje članka o vrhu sezone (`vrh-gobarske-sezone-oktober-1014`, ta je **objavljen**, ne osnutek, kot še stoji v
+`docs/osnutek-vrh-sezone-oktober.md`). Ročno pognan, ne del nobenega workflowa.
+
+- `tools/generate_slana_gobe_post.py` sestavi članek iz treh committanih virov: `history.json` (samo `tempLow`
+  zunanjega senzorja), `data/inat-glive-po-tednih.json` in `data/tla-temperatura-dnevna.json` (dnevna povprečja
+  temperature tal, Open-Meteo/ERA5-Land, povprečje plasti 0–7 in 7–28 cm; `--fetch-tla` jo osveži). Pragovi vrst so iz
+  `species_rules.yaml`. Objavljen članek se ne prepiše (`--force`); `--wire` pokliče `wire_all()` in OG sliko.
+- **Trditve varujejo assert-i** (prva noč ≤ 0 °C oktobra v 2020/2021/2023/2025, vrh gob po njej; padec pod polovico vrha
+  v tednu od 4. 11. v 5 od 6 let; tla pod 3,5 °C šele od 17. 11.). Če se podatki osvežijo in trditev ne drži več,
+  generator pade: besedilo je treba pregledati, ne zaobiti asserta. Odstavek »letos« pade, ko pade prva ničelna noč.
+- **Rezultat je negativen in tako tudi piše:** prva slana vala ne konča; padec v novembru je splošen (upadejo tudi vsa
+  opažanja iNaturalista, gobe nekoliko bolj) in se ne ujema ne s slano ne s temperaturo tal. Leto 2021 (noč pod –2 °C že
+  oktobra, tla < 7,5 °C 29. 10., najzgodnejši padec) je ena sama jesen in ni uporabljena kot dokaz.
+- Prag v bazi vrst je parameter modela, ne izmerjena meja rasti; tla so reanaliza, ne meritev v gozdu (oboje piše v članku).
+- Lektura še ni bila opravljena (`lektura.yml` je izklopljena od 2. 10. 2026); na FB/IG ne gre samodejno (nova vrsta
+  vsebine), po pregledu ga pošlji s `social-repost.yml`.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
