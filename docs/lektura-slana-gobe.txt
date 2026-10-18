@@ -9,13 +9,42 @@ V štirih od šestih jeseni med letoma 2020 in 2025 je postaja v Rečici prvič 
 
 Kratek odgovor: ne. V vseh štirih letih, ko je bila prva noč z 0 °C ali manj že oktobra (2020, 2021, 2023 in 2025), je bil teden z največ opaženimi gobami šele po njej. V letih 2022 in 2024, ko je temperatura prvič padla na 0 °C ali manj šele novembra, pa je bil vrh pred prvo tako hladno nočjo.
 
-Leto | Prva noč z 0 °C ali manj | Prva noč z –2 °C ali manj | Teden z največ opaženimi gobami | Prvi teden z manj kot polovico vršnega števila opažanj |
-2020 | 14. 10. | 8. 11. | 21.–27. 10. | 4.–10. 11. |
-2021 | 13. 10. | 14. 10. | 14.–20. 10. | 28. 10.–3. 11. |
-2022 | 20. 11. | 25. 11. | 7.–13. 10. | 4.–10. 11. |
-2023 | 17. 10. | 24. 11. | 21.–27. 10. | 4.–10. 11. |
-2024 | 4. 11. | 14. 11. | 7.–13. 10. | 4.–10. 11. |
-2025 | 3. 10. | 11. 11. | 21.–27. 10. | 4.–10. 11. |
+2020vrh gob po slani
+prva noč z mrazom14. 10.
+
+vrh opažanj gob21.–27. 10.
+
+pod polovico vrha4.–10. 11.
+2021vrh gob po slani
+prva noč z mrazom13. 10.
+
+vrh opažanj gob14.–20. 10.
+
+pod polovico vrha28. 10.–3. 11.
+2022vrh gob pred slano
+prva noč z mrazom20. 11.
+
+vrh opažanj gob7.–13. 10.
+
+pod polovico vrha4.–10. 11.
+2023vrh gob po slani
+prva noč z mrazom17. 10.
+
+vrh opažanj gob21.–27. 10.
+
+pod polovico vrha4.–10. 11.
+2024vrh gob pred slano
+prva noč z mrazom4. 11.
+
+vrh opažanj gob7.–13. 10.
+
+pod polovico vrha4.–10. 11.
+2025vrh gob po slani
+prva noč z mrazom3. 10.
+
+vrh opažanj gob21.–27. 10.
+
+pod polovico vrha4.–10. 11.
 
 Temperatura: postaja IREICA1, najnižja dnevna vrednost od 1. 9. Opažanja: iNaturalist, Slovenija, deblo Basidiomycota. Tedni se začnejo 1. 7. in si sledijo v sedemdnevnih intervalih.
 
@@ -39,7 +68,7 @@ gobe vsa opažanja (rastline, žuželke, ptice in druge skupine)
 
 Graf primerja vsoto opažanj v treh tednih v drugi polovici oktobra z vsoto v treh tednih novembra. V petih od šestih let je zelena vrstica daljša od sive, kar pomeni, da je število opažanj gob upadlo bolj kot število vseh opažanj.
 
-Leto | Opažanja gob, 13.–29. 10. | Opažanja gob, 3.–19. 11. | Upad opažanj gob | Upad vseh opažanj | Delež gob prej → pozneje |
+Vse številke po letih (tabela)Leto | Opažanja gob, 13.–29. 10. | Opažanja gob, 3.–19. 11. | Upad opažanj gob | Upad vseh opažanj | Delež gob prej → pozneje |
 2020 | 422 | 262 | 38 % | 47 % | 38 → 45 % |
 2021 | 337 | 144 | 57 % | 38 % | 26 → 18 % |
 2022 | 769 | 150 | 80 % | 70 % | 42 → 28 % |
@@ -59,15 +88,11 @@ V gobarskem modelu je pri večini vrst pomembnejša temperatura tal kot temperat
 
 Po podatkih v bazi vrst gobarskega modela jurček in užitna sirovka potrebujeta temperaturo tal nad 3,5 °C, lisička, marela in črna trobenta pa nad 7,5 °C. V šestih analiziranih letih so tla v Rečici pod 3,5 °C padla šele med 17. novembrom in 14. decembrom, pod 7,5 °C pa med 29. oktobrom in 22. novembrom.
 
-Leto | Tla prvič pod 7,5 °C | Tla prvič pod 3,5 °C | Teden z največ opaženimi gobami |
-2020 | 12. 11. | 24. 11. | 21.–27. 10. |
-2021 | 29. 10. | 25. 11. | 14.–20. 10. |
-2022 | 22. 11. | 14. 12. | 7.–13. 10. |
-2023 | 22. 11. | 30. 11. | 21.–27. 10. |
-2024 | 10. 11. | 17. 11. | 7.–13. 10. |
-2025 | 10. 11. | 24. 11. | 21.–27. 10. |
+Kdaj so se ohladila tla in kdaj je val gob upadel?
 
-Prvi dan od 1. oktobra, ko je sedemdnevno povprečje temperature tal padlo pod navedeni prag. Temperatura tal je povprečje plasti od 0 do 7 cm in od 7 do 28 cm; vir je Open-Meteo oziroma reanaliza ERA5-Land za Rečico.
+tla pod 7,5 °C tla pod 3,5 °C prvi teden pod polovico vrha opažanj gob
+
+Prvi dan od 1. oktobra, ko je sedemdnevno povprečje temperature tal padlo pod prag. Temperatura tal je povprečje plasti od 0 do 7 cm in od 7 do 28 cm; vir je Open-Meteo oziroma reanaliza ERA5-Land za Rečico.
 
 V petih od šestih let so tla ostala toplejša od 7,5 °C vsaj do 10. novembra, število opaženih gob pa je začelo izraziteje upadati že v tednu od 4. novembra. V teh letih upada torej ne moremo neposredno povezati niti s prvo slano niti s prehladnimi tlemi. Bolj se ujema s koledarskim obdobjem.
 
@@ -79,19 +104,11 @@ Ena sama jesen je premalo za zanesljiv sklep, da huda slana ustavi rast gob. Ka�
 
 Ko jesenska gobarska sezona slabi, se začnejo pojavljati tudi vrste, ki jim ustrezajo nižje temperature. V bazi vrst gobarskega modela je več vrst z nižjimi temperaturnimi pragovi kot pri lisički ali mareli.
 
-Vrsta | Merilo | Najnižja temperatura v bazi vrst | Sezona v bazi |
-Lisička | tla | 7,5 °C | 1. 5.–30. 11. |
-Orjaški dežnik (marela) | tla | 7,5 °C | 1. 7.–30. 11. |
-Rumeni ježek | tla | 5,5 °C | 1. 7.–30. 11. |
-Jurček | tla | 3,5 °C | 1. 9.–30. 11. |
-Užitna sirovka | tla | 3,5 °C | 1. 8.–30. 11. |
-Zimska kolobarnica | tla | 0,0 °C | 1. 9.–31. 12. |
-Zimska polževka | tla | 0,0 °C | 1. 10.–31. 12. |
-Štorovka (sivorumena mraznica) | zrak | 8,0 °C | 1. 9.–30. 11. |
-Bukov ostrigar | zrak | 4,0 °C | 1. 10.–31. 1. |
-Zimska panjevka | zrak | –2,0 °C | 1. 11.–31. 3. |
+Pri kateri temperaturi baza vrst še dopušča rast
 
-Vir: baza vrst gobarskega modela Meteorec (species_rules.yaml). Pri lesnih vrstah je merilo temperatura zraka, pri ostalih temperatura tal. Navedene vrednosti so parametri modela, ne rezultati laboratorijskih meritev.
+tla (mikorizne vrste in razkrojevalke) zrak (lesne vrste)
+
+Pika je najnižja temperatura, pri kateri baza vrst gobarskega modela Meteorec (species_rules.yaml) še dopušča rast, blag trak pa temperature nad njo. Pri lesnih vrstah je merilo temperatura zraka, pri ostalih temperatura tal. To so parametri modela, ne rezultati laboratorijskih meritev.
 
 Sezona zimske kolobarnice in zimske polževke po podatkih modela sega do konca leta, bukov ostrigar ima sezono do konca januarja, zimska panjevka pa do konca marca. Zimska panjevka ima v bazi najnižji prag: po podatkih modela lahko raste tudi pri –2 °C.
 
@@ -101,7 +118,7 @@ To seveda ne pomeni, da so vse gobe, ki jih najdemo pozimi, užitne. Nabirajte j
 
 Od 1. septembra do 17. oktobra je bila najnižja temperatura na postaji 1,7 °C, izmerjena 4. oktobra. Prve noči z 0 °C ali manj torej še ni bilo. Do istega datuma je ni bilo niti v letih 2022 in 2024, v preostalih štirih letih (2020, 2021, 2023, 2025) pa je bila do tega datuma prva taka noč že za nami.
 
-Povprečna temperatura tal je bila 16. oktobra 11,1 °C. Podatek temelji na povprečju plasti od 0 do 7 cm in od 7 do 28 cm po viru Open-Meteo. Gobarski indeks za Rečico je 17. oktobra znašal 77 od 100. Napoved modela MTR za Rečico za obdobje od 19. do 21. oktobra ni kazala možnosti zmrzali; napovedana verjetnost je bila 0 %.
+Povprečna temperatura tal je bila 16. oktobra 11,1 °C. Podatek temelji na povprečju plasti od 0 do 7 cm in od 7 do 28 cm po viru Open-Meteo. Gobarski indeks za Rečico je 18. oktobra znašal 71 od 100. Napoved modela MTR za Rečico za obdobje od 19. do 21. oktobra ni kazala možnosti zmrzali; napovedana verjetnost je bila 0 %.
 
 Padavine, napovedane za sredo in četrtek, sem podrobneje obravnaval v članku z dne 17. oktobra.
 

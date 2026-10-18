@@ -255,6 +255,88 @@ def change_chart(rows, w=460):
     return "".join(p)
 
 
+VIOLET, BLUE = "#a78bfa", "#60a5fa"
+
+
+def soil_chart(rows, w=460):
+    """rows = [{leto, s75, s35, drop}]; x = dnevi od 1. 10. (0 = 1. 10., 75 = 15. 12.)."""
+    pl, pr, pt, pb = 40, 14, 14, 32
+    rh = 36
+    h = pt + pb + rh * len(rows)
+    iw = w - pl - pr
+    X = lambda d: pl + iw * (d - datetime.date(d.year, 10, 1)).days / 75
+    p = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="Kdaj so tla padla pod 7,5 in 3,5 °C in kdaj je število opažanj gob upadlo pod polovico vrha" '
+         'xmlns="http://www.w3.org/2000/svg">']
+    base = pt + rh * len(rows)
+    for off, lab in ((0, "1. 10."), (31, "1. 11."), (61, "1. 12.")):
+        x = pl + iw * off / 75
+        p.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{pt}" y2="{base}" stroke="{GRID}" stroke-width="1"/>')
+        p.append(f'<text x="{x:.1f}" y="{base + 16}" text-anchor="middle" font-size="10.5" fill="{MUTED}">{lab}</text>')
+    for i, r in enumerate(rows):
+        y = r["leto"]
+        cy = pt + rh * i + rh / 2
+        p.append(f'<text x="{pl - 8}" y="{cy + 4:.1f}" text-anchor="end" font-size="11.5" fill="{INK}">{y}</text>')
+        p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{cy:.1f}" y2="{cy:.1f}" stroke="{GRID}" stroke-width="1"/>')
+        x75, x35 = X(r["s75"]), X(r["s35"])
+        p.append(f'<line x1="{x75:.1f}" x2="{x35:.1f}" y1="{cy:.1f}" y2="{cy:.1f}" stroke="{BLUE}" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/>')
+        p.append(f'<circle cx="{x75:.1f}" cy="{cy:.1f}" r="6" fill="{VIOLET}" stroke="{SURFACE}" stroke-width="1.8"><title>{y}: tla pod 7,5 °C, {dm(r["s75"])}</title></circle>')
+        p.append(f'<rect x="{x35 - 5.5:.1f}" y="{cy - 5.5:.1f}" width="11" height="11" rx="2" fill="{BLUE}" stroke="{SURFACE}" stroke-width="1.8">'
+                 f'<title>{y}: tla pod 3,5 °C, {dm(r["s35"])}</title></rect>')
+        xd = X(r["drop"] + datetime.timedelta(3))
+        p.append(f'<circle cx="{xd:.1f}" cy="{cy:.1f}" r="8.5" fill="none" stroke="{AMBER}" stroke-width="2.4">'
+                 f'<title>{y}: prvi teden pod polovico vrha, {week_label(r["drop"])}</title></circle>')
+    p.append("</svg>")
+    return "".join(p)
+
+
+def species_chart(sp_rows, w=460):
+    """sp_rows = [(ime, merilo, temp, sezona)] -- termometer: pika = najnižja temperatura, trak = ustrezna območja nad njo."""
+    short = {"Orjaški dežnik (marela)": "Marela", "Štorovka (sivorumena mraznica)": "Štorovka"}
+    rows = sorted(sp_rows, key=lambda r: -r[2])
+    pl, pr, pt, pb = 118, 14, 14, 32
+    rh = 30
+    h = pt + pb + rh * len(rows)
+    iw = w - pl - pr
+    lo, hi = -3, 9
+    X = lambda t: pl + iw * (t - lo) / (hi - lo)
+    base = pt + rh * len(rows)
+    p = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="Najnižja temperatura, pri kateri baza vrst dopušča rast, po vrstah" xmlns="http://www.w3.org/2000/svg">']
+    for t in (-2, 0, 2, 4, 6, 8):
+        x = X(t)
+        dash = "" if t else ' stroke-dasharray="4 3" stroke-opacity=".7"'
+        p.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{pt}" y2="{base}" stroke="{GRID if t else MUTED}" stroke-width="{1 if t else 1.6}"{dash}/>')
+        p.append(f'<text x="{x:.1f}" y="{base + 16}" text-anchor="middle" font-size="10.5" fill="{MUTED}">{str(t).replace("-", "–")}{NBSP}°C</text>')
+    for i, (name, how, t, season) in enumerate(rows):
+        cy = pt + rh * i + rh / 2
+        nm = short.get(name, name)
+        p.append(f'<text x="{pl - 10}" y="{cy + 4:.1f}" text-anchor="end" font-size="11.5" fill="{INK}">{nm}</text>')
+        col = GREEN if how == "tla" else CYAN
+        p.append(f'<rect x="{X(t):.1f}" y="{cy - 5:.1f}" width="{X(hi) - X(t):.1f}" height="10" rx="5" fill="{col}" fill-opacity=".22"/>')
+        tip = f'{name}: najnižja temperatura {num(t)} °C ({"tla" if how == "tla" else "zraka"}), sezona v bazi {season}'
+        if how == "tla":
+            p.append(f'<circle cx="{X(t):.1f}" cy="{cy:.1f}" r="6.5" fill="{col}" stroke="{SURFACE}" stroke-width="1.8"><title>{tip}</title></circle>')
+        else:
+            p.append(f'<rect x="{X(t) - 6:.1f}" y="{cy - 6:.1f}" width="12" height="12" rx="2" fill="{col}" stroke="{SURFACE}" stroke-width="1.8"><title>{tip}</title></rect>')
+        lab = f"{num(t)}".replace("-", "–")
+        p.append(f'<text x="{X(t) + 11:.1f}" y="{cy + 4:.1f}" font-size="10.5" font-weight="700" fill="{INK}" stroke="{SURFACE}" stroke-width="3" paint-order="stroke">{lab}</text>')
+    p.append("</svg>")
+    return "".join(p)
+
+
+def year_cards(data):
+    out = []
+    for y in YEARS:
+        d = data[y]
+        after = d["peak"] > d["f0"]
+        chip = ('<span class="vs-chip vs-chip-on">vrh gob po slani</span>' if after else '<span class="vs-chip">vrh gob pred slano</span>')
+        out.append(
+            f'<div class="vs-card"><div class="vs-card-top"><strong>{y}</strong>{chip}</div>'
+            f'<p><i class="vs-dia" style="background:{CYAN}"></i>prva noč z mrazom<b>{dm(d["f0"])}</b></p>'
+            f'<p><i class="vs-dot" style="background:{GREEN}"></i>vrh opažanj gob<b>{week_label(d["peak"])}</b></p>'
+            f'<p><i class="vs-ring" style="border-color:{AMBER}"></i>pod polovico vrha<b>{week_label(d["drop"])}</b></p></div>')
+    return '<div class="vs-cards">' + "".join(out) + "</div>"
+
+
 def legend(entries):
     out = []
     for n, kind, c in entries:
@@ -290,6 +372,20 @@ STYLE = """<style>
 .vs-tbl th:first-child,.vs-tbl td:first-child{text-align:left}
 .vs-tbl tr.vs-now td{font-weight:700;background:rgba(52,211,153,.08)}
 .vs-note{color:var(--muted);font-size:.82rem;line-height:1.5;margin:-.4rem 0 1.2rem}
+.vs-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;margin:1.2rem 0}
+.vs-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.7rem .8rem}
+.vs-card-top{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .5rem;margin-bottom:.45rem}
+.vs-card-top strong{font-family:'Space Grotesk',sans-serif;font-size:1.25rem}
+.vs-chip{font-size:.7rem;padding:.15rem .5rem;border-radius:99px;background:rgba(138,160,189,.18);color:var(--muted);white-space:nowrap}
+.vs-chip-on{background:rgba(52,211,153,.18);color:#34d399}
+.vs-card p{display:block;position:relative;padding-left:1.1rem;margin:.4rem 0;font-size:.78rem;line-height:1.25;color:var(--muted)}
+.vs-card p b{display:block;color:var(--text);font-weight:600;font-size:.88rem;white-space:nowrap}
+.vs-card i{position:absolute;left:0;top:.18rem;display:block;width:.7rem;height:.7rem}
+.vs-card i.vs-dot{border-radius:50%}
+.vs-card i.vs-ring{border-radius:50%;background:none;border:2px solid}
+.vs-card i.vs-dia{transform:rotate(45deg) scale(.8);border-radius:2px}
+.vs-more{margin:.6rem 0 1.2rem}
+.vs-more summary{cursor:pointer;color:var(--blue);font-size:.9rem}
 h3.vs-h3,.post-body h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin:1.6rem 0 .4rem}
 </style>"""
 
@@ -396,12 +492,8 @@ def build_article(H, I, wk, soil, soil_meta):
             f"V vseh {numg(len(early))} primerih je bil teden z največ opaženimi gobami v Sloveniji šele po tej noči. "
             "Prva slana torej ne konča gobarske sezone. Podatki sicer pokažejo, kdaj se val gob umiri, vendar se to ne zgodi ob prvi slani.")
 
-    t1 = table(["Leto", "Prva noč z 0 °C ali manj", "Prva noč z –2 °C ali manj", "Teden z največ opaženimi gobami",
-                "Prvi teden z manj kot polovico vršnega števila opažanj"],
-               [[str(y), dm(data[y]["f0"]), dm(data[y]["f2"]), week_label(data[y]["peak"]), week_label(data[y]["drop"])] for y in YEARS],
-               cap="Prva noč z mrazom, vrh opažanj gob in padec pod polovico vrha po letih",
-               note="Temperatura: postaja IREICA1, najnižja dnevna vrednost od 1. 9. Opažanja: iNaturalist, Slovenija, deblo Basidiomycota. "
-                    "Tedni se začnejo 1. 7. in si sledijo v sedemdnevnih intervalih.")
+    t1 = (year_cards(data) + '<p class="vs-note">Temperatura: postaja IREICA1, najnižja dnevna vrednost od 1. 9. Opažanja: iNaturalist, Slovenija, '
+          'deblo Basidiomycota. Tedni se začnejo 1. 7. in si sledijo v sedemdnevnih intervalih.</p>')
     f_timeline = fig("Kdaj je bila prva slana in kdaj je nastopil vrh opažanj gob?",
                      legend([("prva noč z 0 °C ali manj", "dia", CYAN), ("prva noč z –2 °C ali manj", "diaring", CYAN),
                              ("teden z največ opaženimi gobami", "dot", GREEN),
@@ -416,24 +508,26 @@ def build_article(H, I, wk, soil, soil_meta):
                cap="Število opažanj gob in vseh opažanj v drugi polovici oktobra in v novembru",
                note="Vsota opažanj v treh tednih, ki se začnejo med 13. in 29. oktobrom oziroma med 3. in 19. novembrom. "
                     "Delež pomeni odstotek opažanj gob med vsemi opažanji.")
+    t2 = '<details class="vs-more"><summary>Vse številke po letih (tabela)</summary>' + t2 + '</details>'
     f_change = fig("Upad opažanj od druge polovice oktobra do novembra",
                    legend([("gobe", "sq", GREEN), ("vsa opažanja (rastline, žuželke, ptice in druge skupine)", "sq", GREY)])
                    + change_chart([(y, data[y]["dg"], data[y]["da"]) for y in YEARS]),
                    "Graf primerja vsoto opažanj v treh tednih v drugi polovici oktobra z vsoto v treh tednih novembra. V petih od šestih let je zelena "
                    "vrstica daljša od sive, kar pomeni, da je število opažanj gob upadlo bolj kot število vseh opažanj.")
 
-    t3 = table(["Leto", "Tla prvič pod 7,5 °C", "Tla prvič pod 3,5 °C", "Teden z največ opaženimi gobami"],
-               [[str(y), dm(data[y]["s75"]), dm(data[y]["s35"]), week_label(data[y]["peak"])] for y in YEARS],
-               cap="Kdaj so tla v dolini padla pod pragova vrst, in vrh opažanj gob",
-               note="Prvi dan od 1. oktobra, ko je sedemdnevno povprečje temperature tal padlo pod navedeni prag. Temperatura tal je povprečje plasti "
-                    "od 0 do 7 cm in od 7 do 28 cm; vir je Open-Meteo oziroma reanaliza ERA5-Land za Rečico.")
+    f_soil = fig("Kdaj so se ohladila tla in kdaj je val gob upadel?",
+                 legend([("tla pod 7,5 °C", "dot", VIOLET), ("tla pod 3,5 °C", "sq", BLUE),
+                         ("prvi teden pod polovico vrha opažanj gob", "ring", AMBER)])
+                 + soil_chart([{"leto": y, "s75": data[y]["s75"], "s35": data[y]["s35"], "drop": data[y]["drop"]} for y in YEARS]),
+                 "Prvi dan od 1. oktobra, ko je sedemdnevno povprečje temperature tal padlo pod prag. Temperatura tal je povprečje plasti od 0 do 7 cm "
+                 "in od 7 do 28 cm; vir je Open-Meteo oziroma reanaliza ERA5-Land za Rečico.")
 
     sp_rows = species_rows()
-    t4 = table(["Vrsta", "Merilo", "Najnižja temperatura v bazi vrst", "Sezona v bazi"],
-               [[n, m, temp(t, 1), s] for n, m, t, s in sp_rows],
-               cap="Najnižja temperatura, pri kateri baza vrst gobarskega modela še dopušča rast",
-               note="Vir: baza vrst gobarskega modela Meteorec (species_rules.yaml). Pri lesnih vrstah je merilo temperatura zraka, pri ostalih "
-                    "temperatura tal. Navedene vrednosti so parametri modela, ne rezultati laboratorijskih meritev.")
+    f_species = fig("Pri kateri temperaturi baza vrst še dopušča rast",
+                    legend([("tla (mikorizne vrste in razkrojevalke)", "dot", GREEN), ("zrak (lesne vrste)", "sq", CYAN)])
+                    + species_chart(sp_rows),
+                    "Pika je najnižja temperatura, pri kateri baza vrst gobarskega modela Meteorec (species_rules.yaml) še dopušča rast, blag trak pa temperature nad njo. "
+                    "Pri lesnih vrstah je merilo temperatura zraka, pri ostalih temperatura tal. To so parametri modela, ne rezultati laboratorijskih meritev.")
 
     nums_f = [r for r in fdays][:3]
     fc_txt = ""
@@ -485,7 +579,7 @@ def build_article(H, I, wk, soil, soil_meta):
         f"Po podatkih v bazi vrst gobarskega modela jurček in užitna sirovka potrebujeta temperaturo tal nad 3,5{NBSP}°C, lisička, marela in črna trobenta pa nad 7,5{NBSP}°C. "
         f"V šestih analiziranih letih so tla v Rečici pod 3,5{NBSP}°C padla šele med {dmed(s35_lo)} in {dmed(s35_hi)}, "
         f"pod 7,5{NBSP}°C pa med {dmed(s75_lo)} in {dmed(s75_hi)}.",
-        t3,
+        f_soil,
         f"V petih od šestih let so tla ostala toplejša od 7,5{NBSP}°C vsaj do {dlong(s75_min_other)}, število opaženih gob pa je začelo izraziteje upadati že v tednu "
         "od 4. novembra. V teh letih upada torej ne moremo neposredno povezati niti s prvo slano niti s prehladnimi tlemi. Bolj se ujema s koledarskim obdobjem.",
         f"Izjema je leto 2021. Takrat je bila temperatura zraka pod –2{NBSP}°C že oktobra: {dlong(data[2021]['f2'])} so izmerili {temp(low2021)}. "
@@ -496,7 +590,7 @@ def build_article(H, I, wk, soil, soil_meta):
     p4 = [
         "Ko jesenska gobarska sezona slabi, se začnejo pojavljati tudi vrste, ki jim ustrezajo nižje temperature. V bazi vrst gobarskega modela je več vrst "
         "z nižjimi temperaturnimi pragovi kot pri lisički ali mareli.",
-        t4,
+        f_species,
         "Sezona zimske kolobarnice in zimske polževke po podatkih modela sega do konca leta, bukov ostrigar ima sezono do konca januarja, zimska panjevka pa do konca marca. "
         f"Zimska panjevka ima v bazi najnižji prag: po podatkih modela lahko raste tudi pri –2{NBSP}°C.",
         "To seveda ne pomeni, da so vse gobe, ki jih najdemo pozimi, užitne. Nabirajte jih samo, če jih zanesljivo poznate, saj imajo tudi zimske vrste nevarne zamenjave.",
