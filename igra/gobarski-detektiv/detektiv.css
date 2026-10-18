@@ -171,3 +171,5 @@
   .gd-clues { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .gd-progress span { transition: none; } }
+
+.gd-weak { display: inline-block; margin: 0 0 .4rem; padding: .1rem .6rem; border-radius: 999px; font-size: .82rem; font-weight: 600; background: rgba(245, 158, 11, .2); color: #fcd34d; }

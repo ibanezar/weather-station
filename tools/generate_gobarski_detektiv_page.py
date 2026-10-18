@@ -112,7 +112,7 @@ def build_body():
   <p>Vsak krog ima šest primerov, ki jih igra žreba med {N_PAROV} pari. V vsakem primeru dobiš eno gobo. Z gumbi preglejuješ šest sledi: klobuk, spodnjo stran (cevke ali listi),
   nogo, dno noge, meso z vonjem in okolje, kjer goba raste. Ilustracija se obrne tako, da vidiš, kaj bereš. Nato izbereš, katera od
   treh ponujenih vrst je to. Pravilna vrsta je vredna dve točki, tretjo dobiš, če si pregledal vsaj
-  štiri od šestih sledi. Po vsakem odgovoru igra primerja ključne sledi obeh vrst in pove, katero si spregledal. Na koncu vidiš, kje bi bila odločitev nevarna, in lahko ponoviš samo napačne primere.</p>
+  štiri od šestih sledi. Po vsakem odgovoru igra primerja ključne sledi obeh vrst in pove, katero si spregledal. Na koncu vidiš, kje bi bila odločitev nevarna, in lahko ponoviš samo napačne primere. Pari, pri katerih se zmotiš, se v naslednjih krogih ponudijo znova (zapomni si jih samo tvoj brskalnik). Začetnik lahko izbere <strong>način učenja</strong>: brez točk, vse sledi so že odprte.</p>
   <p>Vsak par je resničen. Med njimi so jurček in žolčasti goban, navadna in lažna lisička, poljski
   kukmak in zelena mušnica, pšenična in poljska koprenka, užitna in zlata sirovka ter rdečkasta in
   panterjeva mušnica. Več o njih: <a href="/gobarska-napoved/dvojnice/">Nevarne dvojnice</a>,

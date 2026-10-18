@@ -544,6 +544,7 @@
   var MIN_SLEDI_ZA_BONUS = 4;     // preglej vsaj toliko sledi, da dobiš bonus
   var T_PRAVILNO = 2;
   var T_BONUS = 1;
+  var MAX_SIBKIH = 2;             // največ toliko šibkih parov na krog
   var KROG_DOLZINA = 6;           // primerov v enem krogu (iz vseh parov se žreba šest)
   var NAJVEC_TOCK = KROG_DOLZINA * (T_PRAVILNO + T_BONUS);
 
@@ -572,12 +573,23 @@
   /* Krog: KROG_DOLZINA naključnih parov, iz vsakega en primerek; ponujene so
    * obe vrsti para in ena vrsta iz drugega para (ta ni nikoli iz istega para).
    * Z `parIds` se krog sestavi samo iz teh parov (ponovitev napačnih primerov). */
-  function sestaviKrog(rng, parIds) {
+  function sestaviKrog(rng, parIds, sibki) {
     rng = rng || Math.random;
-    var indeksi = parIds
-      ? parIds.map(function (id) { return PARI.indexOf(najdiPar(id)); }).filter(function (i) { return i >= 0; })
-      : premesaj(PARI.map(function (_, i) { return i; }), rng).slice(0, KROG_DOLZINA);
-    return indeksi.map(function (pi) { return sestaviPrimer(pi, rng); });
+    var indeksi, sibkiIdx = [];
+    if (parIds) {
+      indeksi = parIds.map(function (id) { return PARI.indexOf(najdiPar(id)); }).filter(function (i) { return i >= 0; });
+    } else {
+      // Šibka področja (pari, kjer se je igralec že zmotil): do MAX_SIBKIH jih ponudimo znova, ostalo je naključno.
+      sibkiIdx = premesaj(Object.keys(sibki || {}).map(function (id) { return PARI.indexOf(najdiPar(id)); })
+        .filter(function (i) { return i >= 0; }), rng).slice(0, MAX_SIBKIH);
+      var ostali = premesaj(PARI.map(function (_, i) { return i; }).filter(function (i) { return sibkiIdx.indexOf(i) < 0; }), rng);
+      indeksi = premesaj(sibkiIdx.concat(ostali.slice(0, KROG_DOLZINA - sibkiIdx.length)), rng);
+    }
+    return indeksi.map(function (pi) {
+      var pr = sestaviPrimer(pi, rng);
+      if (sibkiIdx.indexOf(pi) >= 0) pr.sibek = true;
+      return pr;
+    });
   }
 
   function najdiVrsto(id) {
@@ -640,7 +652,7 @@
   var model = {
     povzetekVremena: povzetekVremena,
     PARI: PARI, SLEDI: SLEDI, SLEDI_IME: SLEDI_IME, EDIB: EDIB,
-    NAJVEC_TOCK: NAJVEC_TOCK, KROG_DOLZINA: KROG_DOLZINA, MIN_SLEDI_ZA_BONUS: MIN_SLEDI_ZA_BONUS,
+    NAJVEC_TOCK: NAJVEC_TOCK, MAX_SIBKIH: MAX_SIBKIH, KROG_DOLZINA: KROG_DOLZINA, MIN_SLEDI_ZA_BONUS: MIN_SLEDI_ZA_BONUS,
     sestaviKrog: sestaviKrog, oceni: oceni, naziv: naziv, kljucneSledi: kljucneSledi,
     najdiVrsto: najdiVrsto, najdiPar: najdiPar
   };
@@ -889,6 +901,22 @@
     try { return parseInt(localStorage.getItem(KLJUC) || '0', 10) || 0; } catch (e) { return 0; }
   }
 
+  /* Šibka področja: {parId: koliko zaporednih zmot}; pravilen odgovor par odstrani. Samo v brskalniku. */
+  var KLJUC_SIBKI = 'gobarski-detektiv-sibki';
+  function preberiSibke() {
+    try {
+      var o = JSON.parse(localStorage.getItem(KLJUC_SIBKI) || '{}');
+      return o && typeof o === 'object' ? o : {};
+    } catch (e) { return {}; }
+  }
+  function zabeleziOdgovor(parId, prav) {
+    try {
+      var o = preberiSibke();
+      if (prav) delete o[parId]; else o[parId] = Math.min((o[parId] || 0) + 1, 3);
+      localStorage.setItem(KLJUC_SIBKI, JSON.stringify(o));
+    } catch (e) { /* brez shrambe igra deluje naprej */ }
+  }
+
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
@@ -906,7 +934,7 @@
   }
 
   function zacetek() {
-    var r = preberiRekord();
+    var r = preberiRekord(), nSibkih = Object.keys(preberiSibke()).filter(function (id) { return najdiPar(id); }).length;
     app.innerHTML =
       '<div class="gd-start">' +
       '<p class="gd-kicker">Poučna igra · ' + KROG_DOLZINA + ' primerov v krogu · ' + stVrst() + ' vrst · ~4 minute</p>' +
@@ -916,17 +944,21 @@
       '<ul class="gd-rules"><li><strong>2 točki</strong> za pravilno vrsto</li><li><strong>+1 točka</strong>, če si pregledal vsaj ' + MIN_SLEDI_ZA_BONUS + ' od ' + STRIPOV + ' sledi</li><li>Največ ' + NAJVEC_TOCK + ' točk</li></ul>' +
       (r ? '<p class="gd-best">Tvoj rekord v tem brskalniku: <strong>' + r + ' / ' + NAJVEC_TOCK + '</strong></p>' : '') +
       '<div id="gd-vreme-slot">' + vremeHtml() + '</div>' +
-      '<button type="button" class="gd-btn gd-btn-main" id="gd-go">Začni preiskavo</button>' +
+      (nSibkih ? '<p class="gd-best">Šibka področja: <strong>' + nSibkih + '</strong> ' + (nSibkih === 1 ? 'par' : nSibkih === 2 ? 'para' : 'parov') + ', pri katerih si se zmotil. V naslednjem krogu jih do ' + MAX_SIBKIH + ' ponudimo znova.</p>' : '') +
+      '<div class="gd-actions"><button type="button" class="gd-btn gd-btn-main" id="gd-go">Detektivski izziv</button>' +
+      '<button type="button" class="gd-btn" id="gd-learn">Način učenja</button></div>' +
+      '<p class="gd-best">Učenje: brez točk, vse sledi so odprte. Izziv: točke, sledi odpiraš sam.</p>' +
       '</div>';
     document.getElementById('gd-go').addEventListener('click', function () { novaIgra(); });
+    document.getElementById('gd-learn').addEventListener('click', function () { novaIgra(null, true); });
   }
 
   /* parIds: ponovitev samo napačnih parov; brez njih je to poln krog. */
-  function novaIgra(parIds) {
-    var krog = sestaviKrog(null, parIds);
+  function novaIgra(parIds, ucenje) {
+    var krog = sestaviKrog(null, parIds, preberiSibke());
     stanje = { krog: krog, i: 0, tocke: 0, nevarne: 0, odgovori: [], pogled: 'cela', sledi: {},
-               najvec: krog.length * (T_PRAVILNO + T_BONUS), ponovitev: !!parIds };
-    dogodek(parIds ? 'retry_wrong_answers' : 'game_start', { primerov: krog.length });
+               najvec: krog.length * (T_PRAVILNO + T_BONUS), ponovitev: !!parIds, ucenje: !!ucenje };
+    dogodek(parIds ? 'retry_wrong_answers' : ucenje ? 'learn_start' : 'game_start', { primerov: krog.length });
     primer();
   }
 
@@ -960,14 +992,15 @@
     }).join('');
     app.innerHTML =
       '<div class="gd-hudbar">' +
-      '<div class="gd-hud"><span>Primer ' + (stanje.i + 1) + ' / ' + stanje.krog.length + '</span><span id="gd-sledi">' + sledBesedilo() + '</span><span>Točke: <strong id="gd-pts">' + stanje.tocke + '</strong></span></div>' +
+      '<div class="gd-hud"><span>Primer ' + (stanje.i + 1) + ' / ' + stanje.krog.length + '</span><span id="gd-sledi">' + sledBesedilo() + '</span>' + (stanje.ucenje ? '<span>Učenje</span>' : '<span>Točke: <strong id="gd-pts">' + stanje.tocke + '</strong></span>') + '</div>' +
       '<div class="gd-progress" aria-hidden="true"><span style="width:' + (stanje.i / stanje.krog.length * 100) + '%"></span></div></div>' +
+      (p.sibek ? '<p class="gd-weak">Ponovitev: pri tem paru si se že zmotil.</p>' : '') +
       '<h2 class="gd-h2">' + esc(par.naslov) + '</h2>' +
       '<p class="gd-story">' + esc(par.uvod) + '</p>' +
       '<div class="gd-stage">' +
       '<div class="gd-view"><div class="gd-tabs" role="group" aria-label="Pogled na gobo">' + tabs + '</div><div id="gd-art">' + risi(vrsta, 'cela') + '</div></div>' +
       '<div class="gd-lens"><p class="gd-lens-title">Lupa: preglej sledi <span id="gd-count" class="gd-count">0 / ' + STRIPOV + '</span></p>' +
-      '<p class="gd-bonus" id="gd-bonus">' + bonusNamig() + '</p>' +
+      '<p class="gd-bonus" id="gd-bonus">' + (stanje.ucenje ? 'Vse sledi so odprte. Preberi jih in izberi vrsto.' : bonusNamig()) + '</p>' +
       '<div class="gd-clues">' + gumbi + '</div>' +
       '<ul class="gd-found" id="gd-found" aria-live="polite"><li class="gd-found-empty">Še nisi pregledal nobene sledi. Najnovejša je vedno na vrhu.</li></ul></div>' +
       '</div>' +
@@ -976,6 +1009,10 @@
     app.querySelectorAll('.gd-clue-btn').forEach(function (b) { b.addEventListener('click', function () { pregledaj(b.getAttribute('data-clue'), b); }); });
     app.querySelectorAll('.gd-tab').forEach(function (b) { b.addEventListener('click', function () { nastaviPogled(b.getAttribute('data-view')); }); });
     app.querySelectorAll('.gd-answer').forEach(function (b) { b.addEventListener('click', function () { odgovori(b.getAttribute('data-id')); }); });
+    if (stanje.ucenje) {   // učenje: vse sledi so že odprte
+      app.querySelectorAll('.gd-clue-btn').forEach(function (b) { pregledaj(b.getAttribute('data-clue'), b, true); });
+      nastaviPogled('cela');
+    }
   }
 
   function nastaviPogled(v) {
@@ -988,7 +1025,7 @@
     });
   }
 
-  function pregledaj(k, gumb) {
+  function pregledaj(k, gumb, tiho) {
     if (stanje.zaklenjen) return;
     var vrsta = najdiVrsto(trenutni().resnica);
     if (!stanje.sledi[k]) {
@@ -1004,9 +1041,9 @@
       document.getElementById('gd-count').textContent = stSledi() + ' / ' + STRIPOV;
       document.getElementById('gd-sledi').textContent = sledBesedilo();
       document.getElementById('gd-bonus').textContent = bonusNamig();
-      dogodek('clue_opened', { sled: k });
+      if (!tiho) dogodek('clue_opened', { sled: k });
     }
-    nastaviPogled(SLEDI_POGLED[k]);
+    if (!tiho) nastaviPogled(SLEDI_POGLED[k]);
   }
 
   /* Primerjalna kartica: ključne sledi pravilne vrste in njene dvojnice, ostale v zložljivem delu.
@@ -1041,11 +1078,13 @@
     stanje.zaklenjen = true;
     var p = trenutni(), n = stSledi();
     var o = oceni(p, id, n);
+    if (stanje.ucenje) { o.tocke = 0; o.bonus = false; }
     stanje.tocke += o.tocke;
+    zabeleziOdgovor(p.par, o.prav);
     if (o.nevarna) stanje.nevarne++;
     stanje.odgovori.push({ par: p.par, prav: o.prav, tocke: o.tocke, nevarna: o.nevarna });
-    dogodek('answer_submitted', { par: p.par, pravilno: o.prav ? 1 : 0, sledi: n });
-    document.getElementById('gd-pts').textContent = stanje.tocke;
+    dogodek('answer_submitted', { nacin: stanje.ucenje ? 'ucenje' : 'izziv', par: p.par, pravilno: o.prav ? 1 : 0, sledi: n });
+    if (!stanje.ucenje) document.getElementById('gd-pts').textContent = stanje.tocke;
     document.getElementById('gd-sledi').textContent = sledBesedilo();
     app.querySelectorAll('.gd-answer').forEach(function (b) {
       var bid = b.getAttribute('data-id');
@@ -1058,7 +1097,7 @@
     var glava = o.prav
       ? '<p class="gd-verdict gd-verdict-ok">Pravilno! To je <strong>' + esc(res.ime) + '</strong> · ' + oznaka(res.edib) + '</p>'
       : '<p class="gd-verdict gd-verdict-bad">Ni pravilno. To je <strong>' + esc(res.ime) + '</strong> · ' + oznaka(res.edib) + '</p>';
-    var tocke = o.prav
+    var tocke = stanje.ucenje ? '' : o.prav
       ? '<p class="gd-score">+' + o.tocke + ' ' + (o.tocke === 1 ? 'točka' : 'točki') + (o.bonus ? ' (z bonusom za temeljit pregled)' : ' (brez bonusa: pregledal si ' + n + ' od ' + STRIPOV + ' sledi, za bonus jih je treba ' + MIN_SLEDI_ZA_BONUS + ')') + '</p>'
       : '<p class="gd-score">0 točk</p>';
     var nevarna = o.nevarna ? '<p class="gd-danger"><strong>Nevarna napaka:</strong> če bi to pojedel, bi pojedel ' + esc(res.ime.toLowerCase()) + '. V resnici bi se tu moral ustaviti in gobo pustiti.</p>' : '';
@@ -1086,7 +1125,7 @@
   }
 
   function konec() {
-    var polni = !stanje.ponovitev;
+    var polni = !stanje.ponovitev && !stanje.ucenje;
     var rekord = polni ? shraniRekord(stanje.tocke) : preberiRekord();
     var vrstice = stanje.odgovori.map(function (o) {
       var par = najdiPar(o.par);
@@ -1097,27 +1136,31 @@
       ? '<p class="gd-danger">V ' + stanje.nevarne + (stanje.nevarne === 1 ? ' primeru' : ' primerih') + ' bi pojedel neužitno ali strupeno gobo. Ravno zato gob ne nabiramo po slikah in ugibanju.</p>' : '';
     var pravilnih = stanje.odgovori.length - napacni.length;
     var besedilo = 'Gobarski detektiv: ' + stanje.tocke + ' / ' + stanje.najvec + ' (' + naziv(stanje.tocke, stanje.najvec) + '). Poskusi še ti: https://meteorec.si/igra/gobarski-detektiv/';
-    dogodek('game_completed', { tocke: stanje.tocke, najvec: stanje.najvec, pravilnih: pravilnih, ponovitev: stanje.ponovitev ? 1 : 0 });
+    dogodek('game_completed', { nacin: stanje.ucenje ? 'ucenje' : 'izziv', tocke: stanje.tocke, najvec: stanje.najvec, pravilnih: pravilnih, ponovitev: stanje.ponovitev ? 1 : 0 });
     app.innerHTML =
       '<div class="gd-end">' +
-      '<p class="gd-kicker">' + (stanje.ponovitev ? 'Ponovitev napačnih primerov končana' : 'Preiskava zaključena') + '</p>' +
-      '<h2 class="gd-h2">' + esc(naziv(stanje.tocke, stanje.najvec)) + '</h2>' +
-      '<p class="gd-bigscore"><strong>' + stanje.tocke + '</strong> / ' + stanje.najvec + '</p>' +
-      '<p class="gd-best">Pravilnih odgovorov: ' + pravilnih + ' od ' + stanje.odgovori.length + '. Rekord v tem brskalniku: ' + rekord + ' / ' + NAJVEC_TOCK + '</p>' +
+      '<p class="gd-kicker">' + (stanje.ucenje ? 'Učenje končano' : stanje.ponovitev ? 'Ponovitev napačnih primerov končana' : 'Preiskava zaključena') + '</p>' +
+      (stanje.ucenje
+        ? '<h2 class="gd-h2">Pravilnih odgovorov: ' + pravilnih + ' od ' + stanje.odgovori.length + '</h2>' +
+          '<p class="gd-best">V učenju ni točk. Ko si pripravljen, poskusi izziv.</p>'
+        : '<h2 class="gd-h2">' + esc(naziv(stanje.tocke, stanje.najvec)) + '</h2>' +
+          '<p class="gd-bigscore"><strong>' + stanje.tocke + '</strong> / ' + stanje.najvec + '</p>' +
+          '<p class="gd-best">Pravilnih odgovorov: ' + pravilnih + ' od ' + stanje.odgovori.length + '. Rekord v tem brskalniku: ' + rekord + ' / ' + NAJVEC_TOCK + '</p>') +
       '<ul class="gd-summary">' + vrstice + '</ul>' + opozorilo +
       '<div class="gd-final-warning" role="note"><strong>Pomembno:</strong> ta igra je samo vaja. Gob <strong>ne uživaj</strong> na podlagi igre, slike ali spletne strani. Vsako nabrano gobo mora pred jedjo pregledati usposobljen gobar (pregledovalnica gob). Če nisi povsem prepričan, gobo pusti. Ob sumu na zastrupitev takoj pokliči <a href="tel:112">112</a>.</div>' +
       '<div id="gd-vreme-slot">' + vremeHtml() + '</div>' +
       '<div class="gd-actions">' +
       (napacni.length ? '<button type="button" class="gd-btn gd-btn-main" id="gd-retry">Ponovi napačne primere (' + napacni.length + ')</button>' : '') +
-      '<button type="button" class="gd-btn' + (napacni.length ? '' : ' gd-btn-main') + '" id="gd-again">Nova preiskava</button>' +
-      '<button type="button" class="gd-btn" id="gd-share">Kopiraj rezultat</button></div>' +
+      '<button type="button" class="gd-btn' + (napacni.length ? '' : ' gd-btn-main') + '" id="gd-again">' + (stanje.ucenje ? 'Izziv s točkami' : 'Nova preiskava') + '</button>' +
+      (stanje.ucenje ? '' : '<button type="button" class="gd-btn" id="gd-share">Kopiraj rezultat</button>') + '</div>' +
       '<p id="gd-share-msg" class="gd-share-msg" aria-live="polite"></p>' +
       '<p class="gd-more"><a href="/gobarska-napoved/dvojnice/">Nevarne dvojnice →</a> · <a href="/gobarska-napoved/baza-vrst/">Baza vrst →</a> · <a href="/gobarska-napoved/strupene-gobe/">Strupene gobe →</a></p>' +
       '</div>';
     document.getElementById('gd-again').addEventListener('click', function () { novaIgra(); });
     var retry = document.getElementById('gd-retry');
-    if (retry) retry.addEventListener('click', function () { novaIgra(napacni); });
-    document.getElementById('gd-share').addEventListener('click', function () {
+    if (retry) retry.addEventListener('click', function () { novaIgra(napacni, stanje.ucenje); });
+    var deli = document.getElementById('gd-share');
+    if (deli) deli.addEventListener('click', function () {
       var msg = document.getElementById('gd-share-msg');
       function ok() { msg.textContent = 'Kopirano.'; }
       function ne() { msg.textContent = besedilo; }

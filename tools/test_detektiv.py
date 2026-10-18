@@ -107,6 +107,16 @@ for seed in range(20):
     check("ponovitev: ponudba 3 različne", all(len(set(k["ponudba"])) == 3 for k in pon))
 check("naziv za krajši krog", node("m.naziv(6,6)") == "Mojster detektiv" and "Začetnik" in node("m.naziv(0,6)"))
 
+# 4a2) Šibka področja: do MAX_SIBKIH šibkih parov v krogu, krog ostane 6 različnih parov.
+MAXS = node("m.MAX_SIBKIH")
+for seed in range(30):
+    kr = node(f"(()=>{{let s={seed}+1;const r=()=>{{s=(s*16807)%2147483647;return s/2147483647}};return m.sestaviKrog(r,null,{{goban:2,kukmak:1,tintnice:3,sirovke:1}})}})()")
+    check("šibki: različni pari", len(kr) == KROG and len({k['par'] for k in kr}) == KROG)
+    check("šibki: oznaka sibek na natanko MAX_SIBKIH parih", sum(1 for k in kr if k.get("sibek")) == MAXS)
+    check("šibki: označeni so res šibki", all(k["par"] in ("goban", "kukmak", "tintnice", "sirovke") for k in kr if k.get("sibek")))
+check("brez šibkih ni oznak", not any(k.get("sibek") for k in node("m.sestaviKrog()")))
+check("neznan šibek par se ignorira", len(node("m.sestaviKrog(null,null,{nepar:3})")) == KROG)
+
 # 4b) Povzetek vremena (kartica z IREICA1).
 pv = node("m.povzetekVremena([{date:'2026-10-16',tmax:14.2,tmin:5.1,precip:0},{date:'2026-10-17',tmax:19.4,tmin:4.6,precip:0.1},{date:'2026-10-18',tmax:12,tmin:7,precip:6.4}])")
 check("povzetek vremena", pv == {"n": 3, "tmin": 4.6, "tmax": 19.4, "dez": 6.5, "dniDez": 1, "zadnjiDez": "2026-10-18", "zadnji": "2026-10-18"}, str(pv))
@@ -123,7 +133,7 @@ js = open(JS, encoding="utf-8").read()
 check("igra ima šest sledi", len(sledi) == 6 and node("m.MIN_SLEDI_ZA_BONUS") == 4)
 check("stran navaja šest sledi in okolje", "šest sledi" in html and "okolje" in html)
 check("začetni zaslon navaja vse sledi iz STRIPOV", "meso z vonjem in okolje (skupaj ' + STRIPOV" in js)
-check("analitika: dogodki", all(e in js for e in ("game_start", "clue_opened", "answer_submitted", "game_completed", "retry_wrong_answers", "species_link_opened")))
+check("analitika: dogodki", all(e in js for e in ("game_start", "clue_opened", "answer_submitted", "game_completed", "retry_wrong_answers", "species_link_opened", "learn_start")))
 check("lang=sl", '<html lang="sl">' in html)
 check("brez notranjih meritev", "indoor" not in html.lower() and "indoor" not in open(JS, encoding="utf-8").read().lower())
 
