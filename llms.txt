@@ -18,6 +18,7 @@
 - [Žled](https://meteorec.si/zima/zled/): modelski pokazatelj dežja, ki zmrzuje, z vertikalno sondažo ARSO.
 - [Toča](https://meteorec.si/toca/), [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/), [Ekstremno vreme](https://meteorec.si/ekstremno-vreme/)
 - [Termika — igra](https://meteorec.si/igra/): igra jadralnega padalca z Golt po Zgornji Savinjski dolini. Nivo se vsak dan sestavi iz dejanske napovedi (strop termike, baza oblakov, moč dvigov, veter po višini), zato je isti za vse igralce tistega dne. Ni pripomoček za odločanje o letenju — za to je [Vreme za padalce](https://meteorec.si/vreme-za-padalce/).
+- [Gobarski detektiv — igra](https://meteorec.si/igra/gobarski-detektiv/): poučna igra prepoznavanja gob v šestih primerih (jurček in žolčasti goban, lisička in lažna lisička, poljski kukmak in zelena mušnica …). Samo vaja: gob ne uživaj na podlagi igre, nabrane naj pregleda usposobljen gobar.
 - [Prehiti model — igra](https://meteorec.si/napovej/): vsak dan napoveš jutrišnjo najvišjo in najnižjo temperaturo za Rečico ob Savinji in tekmuješ proti ARSO, Open-Meteo, MTR in ECMWF AIFS. Oceni te dejanska meritev postaje IREICA1, po istem pravilu kot modele na strani [Točnost napovedi](https://meteorec.si/tocnost-napovedi/). Ni napoved in ni pripomoček za odločanje.
 
 ## Črnivec (prelaz, 902 m)
