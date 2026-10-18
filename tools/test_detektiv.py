@@ -55,17 +55,26 @@ for p in pari:
             check(f"{v['ime']}: užitnost {EDIB[v['edib']]} = {b['edibility']}", EDIB[v["edib"]] == b["edibility"])
             check(f"{v['ime']}: skupina {v['kat']}", v["kat"] == KAT[v["edib"]])
 
-# 3) Krog: vsak par natanko enkrat, resnica iz para, ponudba = par + tuja vrsta.
-import itertools
+# 3) Krog: KROG_DOLZINA različnih parov, resnica iz para, ponudba = par + tuja vrsta.
+KROG = node("m.KROG_DOLZINA")
+check("v bazi igre je vsaj 30 vrst", sum(len(p["vrste"]) for p in pari) >= 30)
 for seed in range(40):
     krog = node(f"(()=>{{let s={seed}+1;const r=()=>{{s=(s*16807)%2147483647;return s/2147483647}};return m.sestaviKrog(r)}})()")
-    check("krog: vsi pari", sorted(k["par"] for k in krog) == sorted(p["id"] for p in pari))
+    check("krog: dolžina in različni pari", len(krog) == KROG and len({k["par"] for k in krog}) == KROG)
     for k in krog:
         par = next(p for p in pari if p["id"] == k["par"])
         parids = {v["id"] for v in par["vrste"]}
         check("resnica iz para", k["resnica"] in parids)
         check("ponudba 3 različne", len(set(k["ponudba"])) == 3 and parids <= set(k["ponudba"]))
         check("resnica v ponudbi", k["resnica"] in k["ponudba"])
+
+# 3b) Čez veliko krogov se pojavi vsak par in vsaka vrsta (žrebanje ne zanemari nobenega).
+vidni_pari, vidne_vrste = set(), set()
+# Math.random (ne šibek LCG iz zgornjih krogov: pri majhnem semenu so prve vrednosti skoraj enake)
+for k in node("Array.from({length:300},()=>m.sestaviKrog()).flat()"):
+    vidni_pari.add(k["par"]); vidne_vrste.add(k["resnica"])
+check("vsak par se pojavi", vidni_pari == {p["id"] for p in pari})
+check("vsaka vrsta je kdaj resnica", vidne_vrste == ids)
 
 # 4) Ocenjevanje.
 def ocena(par, resnica, izbrana, n):
@@ -83,7 +92,7 @@ o = ocena("kukmak", "kukmak", "zelena", 6)
 check("strupena namesto užitne ni nevarna (ne bi je pojedel)", not o["nevarna"])
 o = ocena("goban", "zolcasti", "jurcek", 2)
 check("jurček namesto žolčastega = nevarna napaka", o["nevarna"])
-check("največ točk", node("m.NAJVEC_TOCK") == 3 * len(pari))
+check("največ točk", node("m.NAJVEC_TOCK") == 3 * KROG)
 check("naziv 0 točk", "Začetnik" in node("m.naziv(0)"))
 check("naziv max", node("m.naziv(m.NAJVEC_TOCK)") == "Mojster detektiv")
 
@@ -91,6 +100,8 @@ check("naziv max", node("m.naziv(m.NAJVEC_TOCK)") == "Mojster detektiv")
 html = open(os.path.join(ROOT, "igra", "gobarski-detektiv", "index.html"), encoding="utf-8").read()
 check("opozorilo na strani", 'class="gd-warning"' in html and "ne uživaj" in html)
 check("opozorilo ob koncu igre", "gd-final-warning" in open(JS, encoding="utf-8").read())
+n_vrst = sum(len(p["vrste"]) for p in pari)
+check("generator navaja pravo število vrst in parov", f"{n_vrst} vrst v {len(pari)} parih" in html, f"({n_vrst}/{len(pari)})")
 check("lang=sl", '<html lang="sl">' in html)
 check("brez notranjih meritev", "indoor" not in html.lower() and "indoor" not in open(JS, encoding="utf-8").read().lower())
 

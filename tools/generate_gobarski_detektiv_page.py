@@ -32,8 +32,10 @@ from asset_version import asset_href  # noqa: E402
 
 URL = "/igra/gobarski-detektiv/"
 TITLE = "Gobarski detektiv — igra prepoznavanja gob"
-DESC = ("Poučna igra za gobarje: pregleduj klobuk, liste, nogo in meso ter loči jurčka od "
-        "žolčastega gobana, lisičko od lažne in kukmak od zelene mušnice. Šest primerov.")
+N_VRST = 32     # število vrst v igri; preverja tools/test_detektiv.py
+N_PAROV = 16
+DESC = (f"Poučna igra za gobarje: {N_VRST} vrst v {N_PAROV} parih dvojnic. Pregleduj klobuk, liste, nogo "
+        "in meso ter loči jurčka od žolčastega gobana, lisičko od lažne in kukmak od zelene mušnice.")
 DATE_PUBLISHED = "2026-10-18"
 
 FAQ = [
@@ -93,8 +95,8 @@ def build_body():
     return f'''{seo.crumbs_html(crumbs)}
   <h1 class="page-title">Gobarski detektiv</h1>
   <p class="post-meta">Poučna igra: preglej sledi, imenuj gobo in loči užitno od nevarne dvojnice</p>
-  <p class="archive-intro">Šest primerov, v vsakem ena goba iz para, ki ga gobarji radi zamenjajo.
-  Ugotoviš, ali je ena lastnost dovolj. Običajno ni.</p>
+  <p class="archive-intro">{N_VRST} vrst v {N_PAROV} parih, ki jih gobarji radi zamenjajo. Vsak krog je šest primerov,
+  vsakič drugačnih. Ugotoviš, ali je ena lastnost dovolj. Običajno ni.</p>
 
   <section id="gd-app" aria-label="Igra Gobarski detektiv">
     <noscript><p>Igra potrebuje JavaScript. Brez njega si lahko ogledaš
@@ -105,12 +107,12 @@ def build_body():
   <aside class="gd-warning" role="note">{WARNING}</aside>
 
   <h2>Kako igra deluje</h2>
-  <p>V vsakem primeru dobiš eno gobo. Z gumbi preglejuješ klobuk, spodnjo stran (cevke ali listi),
+  <p>Vsak krog ima šest primerov, ki jih igra žreba med {N_PAROV} pari. V vsakem primeru dobiš eno gobo. Z gumbi preglejuješ klobuk, spodnjo stran (cevke ali listi),
   nogo, dno noge in meso, ilustracija pa se obrne tako, da vidiš, kaj bereš. Nato izbereš, katera od
   treh ponujenih vrst je to. Pravilna vrsta je vredna dve točki, tretjo dobiš, če si pregledal vsaj
   štiri od šestih sledi. Na koncu vidiš, kje bi bila odločitev nevarna.</p>
-  <p>Vsak par je resničen: jurček in žolčasti goban, navadna in lažna lisička, poljski kukmak in
-  zelena mušnica, orjaški dežnik in smrdljiva marelica, velika in gola tintnica ter rdečkasta in
+  <p>Vsak par je resničen. Med njimi so jurček in žolčasti goban, navadna in lažna lisička, poljski
+  kukmak in zelena mušnica, pšenična in poljska koprenka, užitna in zlata sirovka ter rdečkasta in
   panterjeva mušnica. Več o njih: <a href="/gobarska-napoved/dvojnice/">Nevarne dvojnice</a>,
   <a href="/gobarska-napoved/strupene-gobe/">Strupene gobe</a>,
   <a href="/gobarska-napoved/baza-vrst/">Baza vrst</a>.</p>

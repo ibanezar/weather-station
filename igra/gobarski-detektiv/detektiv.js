@@ -13,8 +13,8 @@
   'use strict';
 
   /* ── Podatki ─────────────────────────────────────────────────────────────
-   * Par = dve vrsti, ki se pogosto zamenjata. V krogu je iz vsakega para
-   * natanko en primerek; kateri, se vsakič žreba.
+   * Par = dve vrsti, ki se pogosto zamenjata. Krog je KROG_DOLZINA parov, iz
+   * vsakega natanko en primerek; kateri pari in kateri primerek, se vsakič žreba.
    * edib: u = užitna, p = pogojno užitna, n = neužitna, s = strupena, z = zelo strupena, d = smrtno strupena.
    * Sledi (6 mest): klobuk, spodaj, noga, dno, meso, okolje.
    * spec = parametri za SVG (glej risi()). */
@@ -216,6 +216,316 @@
           }
         }
       ]
+    },
+    {
+      id: 'mraznice', naslov: 'Primer: šop na starem panju',
+      uvod: 'Ob gozdni cesti je na trhlem panju zrasel šop rjavkastih gob. Sprehajalec jih že vidi v juhi. Previdno.',
+      razlaga: 'Obe rasteta v šopih na lesu, zato ju je lahko zamenjati. Sivorumena mraznica ima bele liste z rjastimi pegami, obroček in črne vrvice ob koreninah. Navadna žveplenjača je žveplenorumena, brez obročka, njeni listi pa so zelenkasto sivi in nazadnje škrlatno rjavi, okus pa grenak. Mraznica je užitna le dobro kuhana.',
+      vrste: [
+        {
+          id: 'mraznica', ime: 'Sivorumena mraznica (Štorovka)', lat: 'Armillaria mellea', edib: 'p', q: 'Sivorumena mraznica (Štorovka)', kat: 'pogojno-uzitne',
+          spec: { klobuk: '#b98a4c', rob: '#d2a96a', oblika: 'kupola', sirina: 52, visina: 30, dno: 'listi', cevke: '#efe6cf', noga: '#d6b98a', nogaV: 70, nogaS: 14, nogaS2: 18, mreza: null, ovoj: null, obroc: 'visec', luske: '#6b4a26', rez: '#f4eede' },
+          sledi: {
+            klobuk: 'Medeno rjav, 7 cm, v sredini z drobnimi temnimi luskami. Rob je rahlo progast.',
+            spodaj: 'Listi so beli do kremni, pozneje z rjastimi pegami.',
+            noga: 'Žilava in vlaknata, z belim do rumenkastim obročkom, ki visi kot krilce.',
+            dno: 'Noge so spodaj zraščene v šop. Ob koreninah so črne vrvice (rizomorfe).',
+            meso: 'Meso je belo in žilavo. Vonj je prijeten, rahlo po gobah. Surovo je trpko.',
+            okolje: 'Šop na panju ali ob korenini drevesa, listnati in iglasti gozd.'
+          }
+        },
+        {
+          id: 'zveplenjaca', ime: 'Navadna žveplenjača', lat: 'Hypholoma fasciculare', edib: 's', q: 'Navadna žveplenjača', kat: 'strupene',
+          spec: { klobuk: '#d9c030', rob: '#e8d86a', oblika: 'kupola', sirina: 48, visina: 28, dno: 'listi', listiBarva: 'rgba(110,120,40,.55)', cevke: '#d9cf6a', noga: '#d9c868', nogaV: 64, nogaS: 10, nogaS2: 11, mreza: null, ovoj: null, obroc: null, izboklina: '#b86a1c', rez: '#f2e6a0' },
+          sledi: {
+            klobuk: 'Žveplenorumen, 5 cm, sredina oranžno rjava. Na robu so ostanki koprene.',
+            spodaj: 'Listi so sprva žveplenorumeni, nato zelenkasto sivi in na koncu škrlatno rjavi.',
+            noga: 'Tanka in rumena, brez pravega obročka. V zgornjem delu je le nežna sled koprene.',
+            dno: 'Spodaj je temnejša, rjavkasta. Gobe rastejo v gostih šopih.',
+            meso: 'Meso je rumenkasto in neprijetno grenko. Vonj je neprijeten, po plesni.',
+            okolje: 'Šop na panju ali štoru, listnati in iglasti gozd, od pomladi do pozne jeseni.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'sirovke', naslov: 'Primer: oranžna goba z mlekom',
+      uvod: 'Gobar je v hrastovem gozdu našel oranžno gobo, ki ob rezu izteka mleko. »Sirovka, torej užitna,« pravi. Preveri.',
+      razlaga: 'Užitna sirovka izteka korenjasto oranžno mleko, ki ostane oranžno, in se ob poškodbi obarva zeleno. Zlata sirovka ima mleko, ki je sprva belo in v nekaj minutah porumeni; stran jo vodi kot strupeno. Mleko in barvne spremembe so ključne: barva klobuka sama ne zadošča.',
+      vrste: [
+        {
+          id: 'sirovka', ime: 'Užitna sirovka', lat: 'Lactarius deliciosus', edib: 'u', q: 'Užitna sirovka', kat: 'uzitne',
+          spec: { klobuk: '#d9812b', rob: '#e6a45c', oblika: 'lijak', sirina: 58, visina: 24, dno: 'listi', listiBarva: 'rgba(210,120,40,.75)', cevke: '#e49a4a', noga: '#e0a060', nogaV: 44, nogaS: 20, nogaS2: 18, mreza: null, ovoj: null, obroc: null, krogi: '#a85a1d', rez: '#f0a860' },
+          sledi: {
+            klobuk: 'Oranžen, 9 cm, z jasnimi koncentričnimi krogi. Ob poškodbi se obarva zeleno.',
+            spodaj: 'Listi so oranžni in gosti. Ob dotiku se obarvajo zeleno.',
+            noga: 'Kratka, oranžna in votla, z vdrtimi plitvimi jamicami.',
+            dno: 'Spodaj brez gomolja. Noga je ob dnu rahlo zožena.',
+            meso: 'Ob rezu izteka korenjasto oranžno mleko, ki ostane oranžno še dolgo.',
+            okolje: 'Borov in smrekov gozd, med iglicami.'
+          }
+        },
+        {
+          id: 'zlata', ime: 'Zlata sirovka', lat: 'Lactarius chrysorrheus', edib: 's', q: 'Zlata sirovka', kat: 'strupene',
+          spec: { klobuk: '#e3b799', rob: '#efccb2', oblika: 'lijak', sirina: 52, visina: 22, dno: 'listi', listiBarva: 'rgba(215,175,150,.7)', cevke: '#ecc5a8', noga: '#ecd0b8', nogaV: 46, nogaS: 14, nogaS2: 14, mreza: null, ovoj: null, obroc: null, krogi: '#c99478', rez: '#faf3d0' },
+          sledi: {
+            klobuk: 'Bledo oranžno rožnat, 7 cm, z nejasnimi krogi. V sredini je vdrt.',
+            spodaj: 'Listi so kremno rožnati in gosti.',
+            noga: 'Bledo rožnata in polna, brez jamic.',
+            dno: 'Spodaj brez gomolja.',
+            meso: 'Mleko je sprva belo, v nekaj minutah pa porumeni. Okus je pekoč.',
+            okolje: 'Hrastov gozd na toplejših legah, tudi pod gabrom.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'gobani', naslov: 'Primer: goban z rdečimi cevkami',
+      uvod: 'Na apnenčastem pobočju stoji debela goba z rdečimi cevkami. Prijatelj trdi, da je »samo velik goban«. Preglej jo.',
+      razlaga: 'Oba imata rdeče ustje cevk in meso, ki zamodri. Preprosti goban ima oljčno rjav klobuk in gosto rdečo mrežo po nogi, vražji goban bled, siv klobuk in zelo trebušasto nogo. Preprosti goban je užiten le dobro kuhan, vražji je strupen. Pri gobanih z rdečimi cevkami se v dvomu ustavi.',
+      vrste: [
+        {
+          id: 'preprosti', ime: 'Preprosti goban', lat: 'Suillellus luridus', edib: 'p', q: 'Preprosti goban', kat: 'pogojno-uzitne',
+          spec: { klobuk: '#7a6a3a', rob: '#9a8a55', oblika: 'kupola', sirina: 76, visina: 46, dno: 'cevke', cevke: '#cf5a2a', noga: '#e0b84a', nogaV: 70, nogaS: 38, nogaS2: 46, mreza: 'rdeca', ovoj: null, obroc: null, rez: '#6a86b4' },
+          sledi: {
+            klobuk: 'Oljčno rjav, 11 cm, žametast. Ob pritisku se obarva modro.',
+            spodaj: 'Cevke so rumene, ustja oranžno rdeča. Ob pritisku se hitro obarvajo modro.',
+            noga: 'Rumenkasta, z gosto rdečo mrežico po večjem delu noge.',
+            dno: 'Spodaj odebeljena in rdečkasto rjava.',
+            meso: 'Meso je rumeno in ob prerezu hitro postane temno modro. Vonj je prijeten.',
+            okolje: 'Listnati gozd s hrasti in bukvami, apnenčasta tla.'
+          }
+        },
+        {
+          id: 'vrazji', ime: 'Vražji goban', lat: 'Rubroboletus satanas', edib: 's', q: 'Vražji goban', kat: 'strupene',
+          spec: { klobuk: '#cfcab8', rob: '#e2dece', oblika: 'kupola', sirina: 86, visina: 50, dno: 'cevke', cevke: '#c0302a', noga: '#d9a44a', nogaV: 56, nogaS: 52, nogaS2: 70, mreza: 'rdeca', ovoj: null, obroc: null, rez: '#e8e3c8' },
+          sledi: {
+            klobuk: 'Bledo siv do bel, 13 cm, debel in blazinast.',
+            spodaj: 'Cevke so rumene, ustja krvavo rdeča. Modro se obarvajo počasi.',
+            noga: 'Zelo čokata in trebušasta, rumeno rdeča, z drobno rdečo mrežico.',
+            dno: 'Noga je spodaj izrazito odebeljena, gomoljasta, ob dnu temno rdeča.',
+            meso: 'Meso je belkasto in ob prerezu počasi rahlo zamodri. Pri starejših gobah je vonj neprijeten, po gnilem.',
+            okolje: 'Topel hrastov in bukov gozd na apnencu. Redka vrsta.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'zelene', naslov: 'Primer: zelenkasta goba pod borom',
+      uvod: 'Na peščenem robu borovega gozda je trop zelenkastih gob. »Zelena golobica,« je prepričan nabiralec. Preveri.',
+      razlaga: 'Zelena golobica je krhka kot steklo, z razpokanim zelenim klobukom in belimi listi. Zelenkasta kolobarnica ima žveplenorumene, ne krhke liste in rumen klobuk; hujši primeri zaužitja večjih količin so povzročili poškodbe mišic. Vedno preveri barvo listov in krhkost mesa.',
+      vrste: [
+        {
+          id: 'zgolobica', ime: 'Zelena golobica', lat: 'Russula virescens', edib: 'u', q: 'Zelena golobica', kat: 'uzitne',
+          spec: { klobuk: '#8fa86a', rob: '#b3c58e', oblika: 'kupola', sirina: 74, visina: 44, dno: 'listi', listiBarva: 'rgba(230,230,215,.7)', cevke: '#f4f1e6', noga: '#f2efe4', nogaV: 52, nogaS: 24, nogaS2: 26, mreza: null, ovoj: null, obroc: null, luske: '#5e7a3e', rez: '#fbf9f0' },
+          sledi: {
+            klobuk: 'Zelenkast, 9 cm. Površina je razpokana v ploščate, žametne luske.',
+            spodaj: 'Listi so beli in krhki. Lomijo se kot steklo.',
+            noga: 'Bela, kratka in čokata, brez obročka.',
+            dno: 'Spodaj brez gomolja in brez ovojnice.',
+            meso: 'Meso je belo in krhko. Vonj je blag, okus sladkast.',
+            okolje: 'Svetel listnati gozd s hrastom, poleti in jeseni.'
+          }
+        },
+        {
+          id: 'kolobarnica', ime: 'Zelenkasta kolobarnica', lat: 'Tricholoma equestre', edib: 's', q: 'Zelenkasta kolobarnica', kat: 'strupene',
+          spec: { klobuk: '#cdbb3a', rob: '#e4d66a', oblika: 'kupola', sirina: 66, visina: 40, dno: 'listi', listiBarva: 'rgba(215,200,60,.65)', cevke: '#e3d864', noga: '#e4d98a', nogaV: 48, nogaS: 22, nogaS2: 24, mreza: null, ovoj: null, obroc: null, izboklina: '#8a8a2c', rez: '#f3eec6' },
+          sledi: {
+            klobuk: 'Žveplenorumen z zelenkasto sredino, 8 cm, rahlo lepljiv.',
+            spodaj: 'Listi so žveplenorumeni in gosti. Niso krhki.',
+            noga: 'Rumenkasta in polna, brez obročka.',
+            dno: 'Spodaj brez gomolja. Noga je zakopana globoko v pesek.',
+            meso: 'Meso je belkasto do rumenkasto in žilavo. Vonj je po moki.',
+            okolje: 'Borov gozd na peščenih tleh.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'kukmaki2', naslov: 'Primer: beli kukmaki v parku',
+      uvod: 'V mestnem parku raste več belih gob s krilcem. Upokojenka pravi: »Prava šampinjonka, kot iz trgovine.« Ali drži?',
+      razlaga: 'Karbolni kukmak ob rezu pri dnu noge zasije kromovo rumeno in diši po karbolu. Rjavoluski kukmak ob rezu zardi, vonj pa je prijeten. Pri vsakem kukmaku zato prereži dno noge in povohaj.',
+      vrste: [
+        {
+          id: 'rjavoluski', ime: 'Rjavoluski kukmak', lat: 'Agaricus sylvaticus', edib: 'u', q: 'Rjavoluski kukmak', kat: 'uzitne',
+          spec: { klobuk: '#a07a55', rob: '#cfb08a', oblika: 'kupola', sirina: 62, visina: 40, dno: 'listi', listiBarva: 'rgba(120,70,70,.5)', cevke: '#e8b3b3', noga: '#efe6dc', nogaV: 56, nogaS: 18, nogaS2: 26, mreza: null, ovoj: null, obroc: 'visec', luske: '#6e4a30', rez: '#f2c6b8' },
+          sledi: {
+            klobuk: 'Rjav, 9 cm, pokrit z drobnimi rjavimi luskami na svetli podlagi.',
+            spodaj: 'Listi so sprva svetlo rožnati, pozneje temno rjavi.',
+            noga: 'Bela, z obročkom v obliki krilca. Ob pritisku rahlo zardi.',
+            dno: 'Spodaj odebeljena, brez vrečaste ovojnice.',
+            meso: 'Ob rezu postane rdečkasto, čez nekaj minut rjavkasto. Vonj je prijeten, po gobah ali mandljih.',
+            okolje: 'Smrekov gozd, med iglicami.'
+          }
+        },
+        {
+          id: 'karbolni', ime: 'Karbolni kukmak', lat: 'Agaricus xanthodermus', edib: 's', q: 'Karbolni kukmak', kat: 'strupene',
+          spec: { klobuk: '#e8e4d8', rob: '#f4f1e8', oblika: 'kupola', sirina: 64, visina: 44, dno: 'listi', listiBarva: 'rgba(110,70,70,.5)', cevke: '#e3b6b6', noga: '#efeadf', nogaV: 56, nogaS: 18, nogaS2: 28, mreza: null, ovoj: null, obroc: 'visec', rez: '#e8cf3a' },
+          sledi: {
+            klobuk: 'Bel do sivkast, 9 cm, kockaste oblike. Ob dotiku se obarva rumeno.',
+            spodaj: 'Listi so sprva rožnati, pozneje temno rjavi.',
+            noga: 'Bela, z velikim obročkom. Spodaj je rumenkasto obarvana.',
+            dno: 'Spodaj odebeljena. Ob rezu pri dnu noge hitro zasije kromovo rumeno.',
+            meso: 'Ob rezu pri dnu noge zasije kromovo rumeno. Vonj je po karbolu ali črnilu.',
+            okolje: 'Park, vrt, rob gozda, tudi travnik.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'dezniki2', naslov: 'Primer: dežnik z bodicami',
+      uvod: 'Na gozdnem robu rastejo dežnikom podobne gobe. Ena ima klobuk, kot da bi bil pokrit z drobnimi bodicami. Preglej jo.',
+      razlaga: 'Poljski dežnik ima kožico klobuka razpokano v velike ploščate krpe in gladko nogo. Bodičasti dežnik ima ostre, vzravnane bodice, nogo pod obročkom luskasto in neprijeten vonj. Če klobuk ni velik in gladek, dežnika ne nabiraj.',
+      vrste: [
+        {
+          id: 'poljski', ime: 'Poljski dežnik', lat: 'Macrolepiota excoriata', edib: 'u', q: 'Poljski dežnik', kat: 'uzitne',
+          spec: { klobuk: '#d9c7a4', rob: '#ece1c6', oblika: 'kupola', sirina: 66, visina: 34, dno: 'listi', cevke: '#f4efe2', noga: '#e2d2b0', nogaV: 80, nogaS: 12, nogaS2: 18, mreza: null, ovoj: null, obroc: 'drsni', luske: '#bba17a', izboklina: '#9d7b4e', rez: '#fbf8ee' },
+          sledi: {
+            klobuk: 'Svetlo rjav, 10 cm. Kožica je razpokana v velike ploščate krpe.',
+            spodaj: 'Listi so beli in prosti.',
+            noga: 'Gladka, svetla, 12 cm, z enostavnim premičnim obročkom.',
+            dno: 'Spodaj rahlo odebeljena, brez ovojnice.',
+            meso: 'Meso je belo in mehko. Vonj je prijeten.',
+            okolje: 'Pašnik in travnik, tudi rob gozda na odprtem.'
+          }
+        },
+        {
+          id: 'bodicasti', ime: 'Bodičasti dežnik', lat: 'Echinoderma asperum', edib: 's', q: 'Bodičasti dežnik', kat: 'strupene',
+          spec: { klobuk: '#a35b3d', rob: '#c48660', oblika: 'kupola', sirina: 46, visina: 30, dno: 'listi', cevke: '#f3ede0', noga: '#d9bfa4', nogaV: 56, nogaS: 11, nogaS2: 14, mreza: null, ovoj: null, obroc: 'tanek', bodice: '#6e2f1d', rez: '#f8f2e4' },
+          sledi: {
+            klobuk: 'Rdečkasto rjav, 7 cm, pokrit z ostrimi, vzravnanimi bodicami.',
+            spodaj: 'Listi so beli do kremni.',
+            noga: 'Pod obročkom luskasta in kosmata, nad njim gladka.',
+            dno: 'Spodaj brez gomolja.',
+            meso: 'Meso je belo. Vonj je neprijeten.',
+            okolje: 'Gozd in kompost, med odpadlim listjem.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'golobice', naslov: 'Primer: rdeča golobica na mahu',
+      uvod: 'Otrok je v mahu našel rdečo gobo in jo hoče pokazati učiteljici. Mama pravi, da so golobice vse užitne. Res?',
+      razlaga: 'Mnoge golobice so užitne, a ne vse. Užitna golobica ima blag, oreškast okus in bledo rožnat klobuk. Bljuvna golobica je svetleče rdeča in zelo pekoča; povzroča bruhanje. Pravilo: pekoča golobica ne gre v košaro.',
+      vrste: [
+        {
+          id: 'vesca', ime: 'Užitna golobica', lat: 'Russula vesca', edib: 'u', q: 'Užitna golobica', kat: 'uzitne',
+          spec: { klobuk: '#c9a79a', rob: '#dcc2b6', oblika: 'kupola', sirina: 60, visina: 36, dno: 'listi', listiBarva: 'rgba(235,225,205,.7)', cevke: '#f4f0e4', noga: '#f2eee4', nogaV: 46, nogaS: 22, nogaS2: 20, mreza: null, ovoj: null, obroc: null, rez: '#fbf9f0' },
+          sledi: {
+            klobuk: 'Bledo rožnato rjav, 8 cm. Kožica ne sega do roba in razkrije konce listov.',
+            spodaj: 'Listi so beli, gosti in krhki.',
+            noga: 'Bela in čokata, lahko z rjastimi pegami.',
+            dno: 'Spodaj rahlo zožena, brez ovojnice.',
+            meso: 'Meso je belo in trdno. Okus je blag, oreškast.',
+            okolje: 'Listnati gozd, bukev in hrast.'
+          }
+        },
+        {
+          id: 'bljuvna', ime: 'Bljuvna golobica', lat: 'Russula emetica', edib: 's', q: 'Bljuvna golobica', kat: 'strupene',
+          spec: { klobuk: '#c3202c', rob: '#d9505a', oblika: 'kupola', sirina: 54, visina: 34, dno: 'listi', listiBarva: 'rgba(235,230,220,.7)', cevke: '#f4efe6', noga: '#f1ddd8', nogaV: 48, nogaS: 18, nogaS2: 18, mreza: null, ovoj: null, obroc: null, rez: '#fbf8f0' },
+          sledi: {
+            klobuk: 'Sijoče češnjevo rdeč, 6 cm, lepljiv, z rahlo progastim robom.',
+            spodaj: 'Listi so beli.',
+            noga: 'Bela do rožnata in krhka.',
+            dno: 'Spodaj brez gomolja.',
+            meso: 'Meso je belo in krhko. Okus je zelo pekoč.',
+            okolje: 'Iglasti gozd, vlažna mahovita tla, tudi močvirje.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'mlecnici', naslov: 'Primer: mlečnica pod brezo',
+      uvod: 'Pod brezo rastejo oranžkaste gobe, ob rezu pa izteka mleko. Nabiralec: »Mlečnice so dobre za vlaganje.« Preveri.',
+      razlaga: 'Sočna mlečnica izteka obilo belega mleka, ki porjavi, klobuk pa je žametast in gladek. Kosmata mlečnica ima kosmat, navznoter zavit rob in pekoče mleko; surova je strupena.',
+      vrste: [
+        {
+          id: 'socna', ime: 'Sočna mlečnica', lat: 'Lactifluus volemus', edib: 'u', q: 'Sočna mlečnica', kat: 'uzitne',
+          spec: { klobuk: '#b9783a', rob: '#cf9660', oblika: 'kupola', sirina: 60, visina: 30, dno: 'listi', listiBarva: 'rgba(235,215,185,.7)', cevke: '#eadbc3', noga: '#c8935a', nogaV: 60, nogaS: 20, nogaS2: 22, mreza: null, ovoj: null, obroc: null, rez: '#f8eed8' },
+          sledi: {
+            klobuk: 'Oranžno rjav, 10 cm, žametast, z gladkim robom.',
+            spodaj: 'Listi so kremni in gosti.',
+            noga: 'Čvrsta, oranžno rjava in gladka.',
+            dno: 'Spodaj brez gomolja.',
+            meso: 'Ob rezu izteka obilo belega mleka, ki ob zraku porjavi. Pri starejših gobah je vonj po ribah.',
+            okolje: 'Listnati gozd, bukev in hrast, jeseni.'
+          }
+        },
+        {
+          id: 'kosmata', ime: 'Kosmata mlečnica', lat: 'Lactarius torminosus', edib: 's', q: 'Kosmata mlečnica', kat: 'strupene',
+          spec: { klobuk: '#e1a98d', rob: '#efc3ab', oblika: 'lijak', sirina: 56, visina: 24, dno: 'listi', listiBarva: 'rgba(235,215,195,.7)', cevke: '#eadac8', noga: '#eacbb8', nogaV: 40, nogaS: 18, nogaS2: 18, mreza: null, ovoj: null, obroc: null, krogi: '#b87c62', rez: '#faf3e6' },
+          sledi: {
+            klobuk: 'Rožnat do bledo oranžen, 8 cm, s krogi in kosmatim, navznoter zavitim robom.',
+            spodaj: 'Listi so kremni in gosti.',
+            noga: 'Kratka, bledo rožnata in votla, z jamicami.',
+            dno: 'Spodaj rahlo zožena.',
+            meso: 'Mleko je belo in ostro, pekoče. Meso je krhko.',
+            okolje: 'Pod brezami, na vlažnih tleh.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'koprenke', naslov: 'Primer: rjavi klobuki v bukovem gozdu',
+      uvod: 'Na kislih tleh pod bukvami raste skupina rdečkasto rjavih gob. Gobar jih šteje za »navadne koprenke«. Pomagaj mu.',
+      razlaga: 'To je ena nevarnejših zamenjav: poljska koprenka vsebuje strup, ki po nekaj dneh poškoduje ledvice, ko je obrok že pozabljen. Pšenična koprenka ima velik obroček in svilnato svetel rob klobuka, poljska koprenka obroča nima in diši po redkvici. Brez obročka in z vonjem po redkvici gobe ne nabiraj.',
+      vrste: [
+        {
+          id: 'psenicna', ime: 'Pšenična koprenka', lat: 'Cortinarius caperatus', edib: 'u', q: 'Pšenična koprenka', kat: 'uzitne',
+          spec: { klobuk: '#c9a24a', rob: '#e6cf9a', oblika: 'kupola', sirina: 66, visina: 38, dno: 'listi', listiBarva: 'rgba(150,100,60,.5)', cevke: '#d6b58a', noga: '#e2d5b4', nogaV: 62, nogaS: 24, nogaS2: 30, mreza: null, ovoj: null, obroc: 'visec', krogi: '#a8842f', rez: '#f9f5e8' },
+          sledi: {
+            klobuk: 'Ocker rumen, 9 cm, nagubran, na robu svilnato svetel kot oprašen.',
+            spodaj: 'Listi so glinasto rjavi in gosti.',
+            noga: 'Debela in svetla, s širokim, membranastim obročkom.',
+            dno: 'Spodaj brez gomolja in brez ovojnice.',
+            meso: 'Meso je belo. Vonj je prijeten.',
+            okolje: 'Smrekov gozd, mah in borovnice, pozno poleti in jeseni.'
+          }
+        },
+        {
+          id: 'poljska', ime: 'Poljska koprenka', lat: 'Cortinarius orellanus', edib: 'd', q: 'Poljska koprenka', kat: 'strupene',
+          spec: { klobuk: '#b5601f', rob: '#cf8240', oblika: 'kupola', sirina: 50, visina: 30, dno: 'listi', listiBarva: 'rgba(170,80,30,.75)', cevke: '#c26a2a', noga: '#c99a5a', nogaV: 64, nogaS: 14, nogaS2: 16, mreza: null, ovoj: null, obroc: null, izboklina: '#8a4513', rez: '#ecd79a' },
+          sledi: {
+            klobuk: 'Oranžno rjav, 6 cm, drobno žametast, v sredini rahla izboklina.',
+            spodaj: 'Listi so rjasto oranžni in razmaknjeni.',
+            noga: 'Rumenkasto rjava, brez pravega obročka. Le sledi rjavih nitk (koprene).',
+            dno: 'Spodaj rahlo odebeljena, brez ovojnice.',
+            meso: 'Meso je rumenkasto. Vonj je po redkvici.',
+            okolje: 'Bukov in hrastov gozd, kisla tla.'
+          }
+        }
+      ]
+    },
+    {
+      id: 'kolobarnice', naslov: 'Primer: siva goba pod smreko',
+      uvod: 'V gorskem smrekovem gozdu je velika siva goba. »Kolobarnica, jedla sem jih že,« pravi nabiralka. Katera?',
+      razlaga: 'Pegasta kolobarnica je večja, mesnata in ima grobe luske; prstena je manjša, tanka in drobno luskasta. Pegasta je zelo strupena. Po velikosti in debelini mesa ju je mogoče ločiti, a pri sivih kolobarnicah je zamenjava pogosta in nevarna.',
+      vrste: [
+        {
+          id: 'prstena', ime: 'Prstena kolobarnica', lat: 'Tricholoma terreum', edib: 'u', q: 'Prstena kolobarnica', kat: 'uzitne',
+          spec: { klobuk: '#8a8c8f', rob: '#a8aaad', oblika: 'kupola', sirina: 48, visina: 28, dno: 'listi', listiBarva: 'rgba(210,210,205,.7)', cevke: '#e8e8e4', noga: '#ecebe6', nogaV: 46, nogaS: 12, nogaS2: 13, mreza: null, ovoj: null, obroc: null, luske: '#5c5e62', rez: '#f5f5f2' },
+          sledi: {
+            klobuk: 'Siv, 5 cm, pokrit z drobnimi, mehkimi sivimi luskami. Sredina je temnejša.',
+            spodaj: 'Listi so beli do sivkasti in redki.',
+            noga: 'Bela in tanka, brez obročka.',
+            dno: 'Spodaj brez gomolja.',
+            meso: 'Meso je tanko in belo. Vonj je po moki, okus blag.',
+            okolje: 'Iglasti gozd, pod borom in smreko, pozno jeseni.'
+          }
+        },
+        {
+          id: 'pegasta', ime: 'Pegasta kolobarnica', lat: 'Tricholoma pardinum', edib: 'z', q: 'Pegasta kolobarnica', kat: 'strupene',
+          spec: { klobuk: '#7b7466', rob: '#9a9382', oblika: 'kupola', sirina: 76, visina: 46, dno: 'listi', listiBarva: 'rgba(235,230,215,.75)', cevke: '#f0ecdc', noga: '#e6dfc4', nogaV: 60, nogaS: 30, nogaS2: 34, mreza: null, ovoj: null, obroc: null, luske: '#4c453a', rez: '#faf8f0' },
+          sledi: {
+            klobuk: 'Siv, 12 cm, debel, z velikimi grobimi sivorjavimi luskami.',
+            spodaj: 'Listi so debeli in beli, pri starih gobah z rumenkastimi do zelenkastimi pegami.',
+            noga: 'Debela in čvrsta, bela do rumenkasta, brez obročka.',
+            dno: 'Spodaj odebeljena, brez ovojnice.',
+            meso: 'Meso je belo in zelo debelo. Vonj je po moki.',
+            okolje: 'Gorski smrekov gozd na apnencu.'
+          }
+        }
+      ]
     }
   ];
 
@@ -223,7 +533,8 @@
   var MIN_SLEDI_ZA_BONUS = 4;     // preglej vsaj toliko sledi, da dobiš bonus
   var T_PRAVILNO = 2;
   var T_BONUS = 1;
-  var NAJVEC_TOCK = PARI.length * (T_PRAVILNO + T_BONUS);
+  var KROG_DOLZINA = 6;           // primerov v enem krogu (iz vseh parov se žreba šest)
+  var NAJVEC_TOCK = KROG_DOLZINA * (T_PRAVILNO + T_BONUS);
 
   /* ── Model ───────────────────────────────────────────────────────────── */
   function nakljucno(rng, n) { return Math.floor(rng() * n); }
@@ -236,11 +547,11 @@
     return a;
   }
 
-  /* Krog: iz vsakega para en primerek, v premešanem vrstnem redu; ponujene so
+  /* Krog: KROG_DOLZINA naključnih parov, iz vsakega en primerek; ponujene so
    * obe vrsti para in ena vrsta iz drugega para (ta ni nikoli iz istega para). */
   function sestaviKrog(rng) {
     rng = rng || Math.random;
-    var vrstniRed = premesaj(PARI.map(function (_, i) { return i; }), rng);
+    var vrstniRed = premesaj(PARI.map(function (_, i) { return i; }), rng).slice(0, KROG_DOLZINA);
     return vrstniRed.map(function (pi) {
       var par = PARI[pi];
       var ti = nakljucno(rng, par.vrste.length);
@@ -287,7 +598,7 @@
 
   var model = {
     PARI: PARI, SLEDI: SLEDI, SLEDI_IME: SLEDI_IME, EDIB: EDIB,
-    NAJVEC_TOCK: NAJVEC_TOCK, MIN_SLEDI_ZA_BONUS: MIN_SLEDI_ZA_BONUS,
+    NAJVEC_TOCK: NAJVEC_TOCK, KROG_DOLZINA: KROG_DOLZINA, MIN_SLEDI_ZA_BONUS: MIN_SLEDI_ZA_BONUS,
     sestaviKrog: sestaviKrog, oceni: oceni, naziv: naziv,
     najdiVrsto: najdiVrsto, najdiPar: najdiPar
   };
@@ -356,8 +667,8 @@
       if (sp.ovoj === 'rob') g += el('path', { d: 'M' + (cx - s2 / 2 - 7) + ',' + (baza - 14) + ' q' + (s2 / 2 + 7) + ',6 ' + (s2 + 14) + ',0 M' + (cx - s2 / 2 - 5) + ',' + (baza - 8) + ' q' + (s2 / 2 + 5) + ',6 ' + (s2 + 10) + ',0', stroke: '#b9b09a', 'stroke-width': 1.6, fill: 'none' });
     }
     // vzorci na nogi
-    if (sp.mreza === 'bela' || sp.mreza === 'temna') {
-      var kol = sp.mreza === 'bela' ? '#fffaf0' : '#5a3a22', dol = sp.mreza === 'bela' ? sp.nogaV * 0.35 : sp.nogaV * 0.8, d = '';
+    if (sp.mreza === 'bela' || sp.mreza === 'temna' || sp.mreza === 'rdeca') {
+      var kol = sp.mreza === 'bela' ? '#fffaf0' : sp.mreza === 'rdeca' ? '#b3262d' : '#5a3a22', dol = sp.mreza === 'bela' ? sp.nogaV * 0.35 : sp.nogaV * 0.8, d = '';
       for (var i = 0; i < dol; i += 6) {
         var wi = s1 / 2 - 4 + (s2 / 2 - s1 / 2) * (i / sp.nogaV);
         d += 'M' + (cx - wi) + ',' + (capY + 6 + i) + ' l' + wi + ',5 l' + wi + ',-5 M' + (cx - wi) + ',' + (capY + 9 + i) + ' l' + wi + ',5 l' + wi + ',-5 ';
@@ -389,6 +700,18 @@
     g += el('path', { d: 'M' + (cx - w + 4) + ',' + (capY - 3) + ' Q' + cx + ',' + (capY + 5) + ' ' + (cx + w - 4) + ',' + (capY - 3), fill: 'none', stroke: sp.rob, 'stroke-width': 3.2, opacity: 0.75, 'stroke-linecap': 'round' });
     if (sp.oblika === 'lijak') g += el('ellipse', { cx: cx, cy: capY - h * 0.4, rx: w * 0.4, ry: h * 0.22, fill: 'rgba(0,0,0,.18)' });
     if (sp.izboklina) g += el('ellipse', { cx: cx, cy: capY - h * 0.85, rx: w * 0.2, ry: h * 0.16, fill: sp.izboklina });
+    if (sp.krogi) {
+      var kr = '';
+      for (var q = 1; q <= 3; q++) kr += 'M' + (cx - w * q / 3.6) + ',' + (capY - h * 0.15) + ' Q' + cx + ',' + (capY - h * (0.3 + 0.22 * q)) + ' ' + (cx + w * q / 3.6) + ',' + (capY - h * 0.15) + ' ';
+      g += el('path', { d: kr, stroke: sp.krogi, 'stroke-width': 1.6, fill: 'none', opacity: 0.8 });
+    }
+    if (sp.bodice) {
+      for (var bi = 0; bi < Math.round(w / 2.4); bi++) {
+        var ba = rng() * Math.PI, br = rng() * 0.85;
+        var bx = cx + Math.cos(ba) * w * br * (rng() < 0.5 ? -1 : 1), by = capY - Math.sin(ba) * h * 0.9 * (1 - br * br * 0.4);
+        g += el('path', { d: 'M' + (bx - 2).toFixed(1) + ',' + by.toFixed(1) + ' l2,-6 l2,6Z', fill: sp.bodice, opacity: 0.9 });
+      }
+    }
     // luske, bradavice
     var n = Math.round(w / 3.2);
     for (var j = 0; j < n; j++) {
@@ -425,7 +748,7 @@
           d += 'M' + xm.toFixed(1) + ',' + ym.toFixed(1) + ' L' + (cx + Math.cos(a + 0.12) * r1).toFixed(1) + ',' + (cy + Math.sin(a + 0.12) * r1 * 0.68).toFixed(1) + ' ';
         }
       }
-      var barva = sp.dno === 'listi' ? ({ kukmak: 'rgba(92,40,48,.55)', velika: 'rgba(30,30,30,.55)', gola: 'rgba(40,40,40,.5)' }[id] || 'rgba(120,100,80,.45)') : 'rgba(110,60,10,.5)';
+      var barva = sp.dno === 'listi' ? (sp.listiBarva || { kukmak: 'rgba(92,40,48,.55)', velika: 'rgba(30,30,30,.55)', gola: 'rgba(40,40,40,.5)' }[id] || 'rgba(120,100,80,.45)') : 'rgba(110,60,10,.5)';
       g += el('path', { d: d, stroke: barva, 'stroke-width': sp.dno === 'grebeni' ? 3 : 1.6, fill: 'none', 'stroke-linecap': 'round' });
     }
     g += el('ellipse', { cx: cx, cy: cy, rx: Math.max(sp.nogaS * 0.5, 7), ry: Math.max(sp.nogaS * 0.34, 5), fill: sp.noga, stroke: 'rgba(0,0,0,.35)', 'stroke-width': 1 });
@@ -446,10 +769,13 @@
       g += el('ellipse', { cx: cx, cy: spod - 12, rx: botW / 2 + 14, ry: 22, fill: sp.noga, stroke: 'rgba(0,0,0,.3)', 'stroke-width': 1.2 });
       if (sp.ovoj === 'rob') g += el('path', { d: 'M' + (cx - botW / 2 - 12) + ',' + (spod - 26) + ' q' + (botW / 2 + 12) + ',8 ' + (botW + 24) + ',0 M' + (cx - botW / 2 - 9) + ',' + (spod - 16) + ' q' + (botW / 2 + 9) + ',8 ' + (botW + 18) + ',0', stroke: '#b9b09a', 'stroke-width': 2, fill: 'none' });
     }
-    if (sp.mreza === 'temna') {
+    if (sp.mreza === 'temna' || sp.mreza === 'rdeca') {
       var dd = '';
-      for (var y = zg + 6; y < spod - 4; y += 9) dd += 'M' + (cx - botW / 2) + ',' + y + ' l' + (botW / 4) + ',6 l' + (botW / 4) + ',-6 l' + (botW / 4) + ',6 l' + (botW / 4) + ',-6 ';
-      g += el('path', { d: dd, stroke: '#5a3a22', 'stroke-width': 1.7, fill: 'none', opacity: 0.9 });
+      for (var y = zg + 6; y < spod - 4; y += 9) {
+        var wy = (topW + (botW - topW) * ((y - zg) / (spod - zg))) - 4;   // širina noge na tej višini
+        dd += 'M' + (cx - wy / 2) + ',' + y + ' l' + (wy / 4) + ',6 l' + (wy / 4) + ',-6 l' + (wy / 4) + ',6 l' + (wy / 4) + ',-6 ';
+      }
+      g += el('path', { d: dd, stroke: sp.mreza === 'rdeca' ? '#b3262d' : '#5a3a22', 'stroke-width': 1.7, fill: 'none', opacity: 0.9 });
     }
     // presek
     g += el('circle', { cx: 245, cy: 58, r: 30, fill: sp.rez, stroke: 'rgba(255,255,255,.4)', 'stroke-width': 2 });
@@ -496,14 +822,16 @@
     return '<span class="gd-tag gd-tag-' + e[1] + '">' + e[0] + '</span>';
   }
 
+  function stVrst() { return PARI.reduce(function (n, p) { return n + p.vrste.length; }, 0); }
+
   function zacetek() {
     var r = preberiRekord();
     app.innerHTML =
       '<div class="gd-start">' +
-      '<p class="gd-kicker">Poučna igra · ' + PARI.length + ' primerov · ~4 minute</p>' +
+      '<p class="gd-kicker">Poučna igra · ' + KROG_DOLZINA + ' primerov v krogu · ' + stVrst() + ' vrst · ~4 minute</p>' +
       '<h2 class="gd-h2">Si pripravljen na primer?</h2>' +
       '<p>V vsakem primeru dobiš eno gobo. Preglej jo z lupo: klobuk, spodnjo stran, nogo, dno in meso. Nato jo imenuj. ' +
-      'Dobra detektiva ne preslepi ena lastnost, zato nagradimo, če pregledaš vsaj ' + MIN_SLEDI_ZA_BONUS + ' sledi.</p>' +
+      'Dobrega detektiva ne preslepi ena lastnost, zato nagradimo, če pregledaš vsaj ' + MIN_SLEDI_ZA_BONUS + ' sledi.</p>' +
       '<ul class="gd-rules"><li><strong>2 točki</strong> za pravilno vrsto</li><li><strong>+1 točka</strong>, če si pregledal vsaj ' + MIN_SLEDI_ZA_BONUS + ' od ' + STRIPOV + ' sledi</li><li>Največ ' + NAJVEC_TOCK + ' točk</li></ul>' +
       (r ? '<p class="gd-best">Tvoj rekord v tem brskalniku: <strong>' + r + ' / ' + NAJVEC_TOCK + '</strong></p>' : '') +
       '<button type="button" class="gd-btn gd-btn-main" id="gd-go">Začni preiskavo</button>' +
