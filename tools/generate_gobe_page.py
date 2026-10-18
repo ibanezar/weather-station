@@ -3018,7 +3018,7 @@ GOBE_CATEGORIES = [
         ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
          "{pairs} parov: užitna vrsta ob tisti, s katero jo zamenjajo.", None),
         ("/igra/gobarski-detektiv/", _FI_DETEKTIV, "#2dd4bf", "Gobarski detektiv",
-         "Preglej sledi in loči jurčka od žolčastega gobana: igra v šestih primerih.", None),
+         "Preglej sledi in loči jurčka od žolčastega gobana: igra s 32 vrstami.", None),
     ]),
     ("moje", "♡", "Moje gobe", [
         ("#premium", _FI_ALARM, "#fbbf24", "Moji alarmi",

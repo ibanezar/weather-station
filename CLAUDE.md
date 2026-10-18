@@ -2018,15 +2018,15 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
 
 ## Gobarski detektiv (`/igra/gobarski-detektiv/`, 18. 10. 2026)
 
-Poučna igra prepoznavanja gob: šest parov dvojnic (jurček/žolčasti goban, lisička/lažna lisička, poljski
-kukmak/zelena mušnica, orjaški dežnik/smrdljiva marelica, velika/gola tintnica, rdečkasta/panterjeva
-mušnica), v krogu je iz vsakega para en primerek, igralec ga pregleda po sledeh in imenuje.
+Poučna igra prepoznavanja gob: **16 parov dvojnic, 32 vrst** (jurček/žolčasti goban, lisička/lažna lisička,
+poljski kukmak/zelena mušnica, pšenična/poljska koprenka, užitna/zlata sirovka, rdečkasta/panterjeva mušnica …).
+Krog je `KROG_DOLZINA` = 6 naključnih parov, iz vsakega en primerek; igralec ga pregleda po sledeh in imenuje.
 
 - **Ovoj piše `tools/generate_gobarski_detektiv_page.py`** (statična stran, ni v nobenem workflowu: po spremembi
   ovoja ga poženi ročno in commitaj). Igra je **ročno pisan** `igra/gobarski-detektiv/detektiv.js` + `detektiv.css`
   (model brez DOM-a, izvožen za Node). Podatkov postaje ne bere; notranjih meritev ni.
 - **Imena in užitnost vrst morajo biti ista kot v `species_rules.yaml`** — preverja `tools/test_detektiv.py`
-  (v `parity.yml`). Nova vrsta = nov par v `PARI` z vsemi šestimi sledmi in `spec` za ilustracijo.
+  (v `parity.yml`). Nov par = vnos v `PARI` z vsemi šestimi sledmi in `spec` za ilustracijo; število vrst in parov v `N_VRST`/`N_PAROV` v generatorju mora ustrezati (test to preveri). **Vsaka vrsta mora biti v bazi; zaščitenih (npr. knežja mušnica) ne dodajaj.**
 - **Opozorilo (gob ne uživaj na podlagi igre, 112) mora ostati vidno** pod igro (`.gd-warning`) in ob koncu
   (`.gd-final-warning`); test to preveri. Točke: 2 za pravilno vrsto, +1 za pregled ≥ 4 od 6 sledi.
 - Povezave: kartica v skupini »Prepoznaj gobo« na `/gobarska-napoved/` (`GOBE_CATEGORIES`; v committano
