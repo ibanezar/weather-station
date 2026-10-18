@@ -96,6 +96,8 @@ CORE = {
     # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
     # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.
     "igra/":                     ("daily",   "0.6"),
+    # »Gobarski detektiv« — statična poučna igra (generate_gobarski_detektiv_page.py).
+    "igra/gobarski-detektiv/":   ("monthly", "0.6"),
     # »Prehiti model« — igra napovedovanja proti štirim modelom s semaforja.
     # Krog, namigi in tabela zadnjih dni se sestavijo vsak dan, zato daily.
     "napovej/":                  ("daily",   "0.6"),

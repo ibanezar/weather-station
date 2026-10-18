@@ -2016,6 +2016,23 @@ GPS lokacija, grafičen veter, detektor obrata vetra, kopiraj briefing).
 - Nova `/meteogasilec/*` podstran gre tudi v `CORE` v `tools/seo_audit.py` —
   isto pravilo kot za gobarske in ostale podstrani drugod v tem dokumentu.
 
+## Gobarski detektiv (`/igra/gobarski-detektiv/`, 18. 10. 2026)
+
+Poučna igra prepoznavanja gob: šest parov dvojnic (jurček/žolčasti goban, lisička/lažna lisička, poljski
+kukmak/zelena mušnica, orjaški dežnik/smrdljiva marelica, velika/gola tintnica, rdečkasta/panterjeva
+mušnica), v krogu je iz vsakega para en primerek, igralec ga pregleda po sledeh in imenuje.
+
+- **Ovoj piše `tools/generate_gobarski_detektiv_page.py`** (statična stran, ni v nobenem workflowu: po spremembi
+  ovoja ga poženi ročno in commitaj). Igra je **ročno pisan** `igra/gobarski-detektiv/detektiv.js` + `detektiv.css`
+  (model brez DOM-a, izvožen za Node). Podatkov postaje ne bere; notranjih meritev ni.
+- **Imena in užitnost vrst morajo biti ista kot v `species_rules.yaml`** — preverja `tools/test_detektiv.py`
+  (v `parity.yml`). Nova vrsta = nov par v `PARI` z vsemi šestimi sledmi in `spec` za ilustracijo.
+- **Opozorilo (gob ne uživaj na podlagi igre, 112) mora ostati vidno** pod igro (`.gd-warning`) in ob koncu
+  (`.gd-final-warning`); test to preveri. Točke: 2 za pravilno vrsto, +1 za pregled ≥ 4 od 6 sledi.
+- Povezave: kartica v skupini »Prepoznaj gobo« na `/gobarska-napoved/` (`GOBE_CATEGORIES`; v committano
+  stran vstavljena tudi ročno), odstavek na `/sola/`, `CORE` v `seo_audit.py`, `llms.txt`.
+- **Odloženo:** vremenski zapisi iz IREICA1 prek workerja (igra jih zdaj sploh ne prikazuje).
+
 ## Termika (`/igra/`) — igra jadralnega padalca na dnevnem vremenu
 
 Arkadna igra, v kateri z Golt letiš po dolini, koliko daleč te nesejo dvigi.

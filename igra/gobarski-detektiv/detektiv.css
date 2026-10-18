@@ -1,0 +1,139 @@
+/*
+ * igra/gobarski-detektiv/detektiv.css — slogi za /igra/gobarski-detektiv/
+ *
+ * ROČNO pisana, samostojna datoteka. Vsi razredi imajo predpono .gd-; stran
+ * nalaga tudi blog/blog.css in vreme/vreme.css (pridata ZA to datoteko), zato se
+ * z njima ne sme prekrivati noben izbirnik. Barve so spremenljivke iz blog.css
+ * z rezervo. Skupna ovoja strani (glava, noga, spodnja navigacija) je dosledno
+ * temna; igra ima isto podobo v obeh barvnih shemah brskalnika.
+ *
+ * Ni celozaslonska (drugače kot Termika): igra je branje in izbira, zato ostane
+ * navadna stran z glavo, nogo in spodnjim trakom.
+ */
+
+#gd-app {
+  margin: 1.2rem 0;
+  padding: 1.1rem;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, .11));
+  border-radius: 16px;
+  background: var(--card-bg, rgba(10, 15, 28, .94));
+  color: var(--text, #e8edf8);
+  min-height: 18rem;
+}
+
+.gd-kicker { margin: 0 0 .4rem; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #adc0d8); }
+.gd-h2 { margin: .1rem 0 .5rem; font-size: 1.3rem; line-height: 1.25; }
+.gd-h3 { margin: 1.1rem 0 .5rem; font-size: 1.05rem; }
+.gd-story { margin: 0 0 .9rem; line-height: 1.55; }
+.gd-best { color: var(--muted, #adc0d8); }
+
+.gd-rules { margin: .6rem 0 1rem; padding-left: 1.2rem; line-height: 1.7; }
+
+.gd-btn {
+  appearance: none;
+  min-height: 48px;
+  padding: .6rem 1.1rem;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, .25));
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .06);
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gd-btn:hover { background: rgba(255, 255, 255, .12); }
+.gd-btn-main { background: #2f8f62; border-color: #34d399; color: #fff; }
+.gd-btn-main:hover { background: #38a574; }
+.gd-btn:focus-visible,
+.gd-clue-btn:focus-visible,
+.gd-tab:focus-visible,
+.gd-answer:focus-visible { outline: 3px solid var(--blue, #4d9ff8); outline-offset: 2px; }
+
+.gd-hud { display: flex; justify-content: space-between; font-size: .92rem; color: var(--muted, #adc0d8); margin-bottom: .4rem; }
+.gd-progress { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .1); margin-bottom: .9rem; overflow: hidden; }
+.gd-progress span { display: block; height: 100%; background: #34d399; }
+
+.gd-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+@media (min-width: 760px) { .gd-stage { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; } }
+
+.gd-svg { display: block; width: 100%; height: auto; border-radius: 14px; }
+.gd-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .5rem; }
+.gd-tab {
+  min-height: 44px; padding: .35rem .8rem; border-radius: 999px;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, .25));
+  background: transparent; color: inherit; font: inherit; font-size: .9rem; cursor: pointer;
+}
+.gd-tab.is-on { background: rgba(52, 211, 153, .18); border-color: #34d399; }
+
+.gd-lens-title { margin: 0 0 .5rem; font-weight: 600; }
+.gd-count { font-weight: 400; color: var(--muted, #adc0d8); margin-left: .4rem; }
+.gd-clues { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; }
+.gd-clue-btn {
+  min-height: 48px; padding: .4rem .6rem; border-radius: 12px; text-align: left;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, .25));
+  background: rgba(255, 255, 255, .05); color: inherit; font: inherit; cursor: pointer;
+}
+.gd-clue-btn.is-done { background: rgba(77, 159, 248, .16); border-color: var(--blue, #4d9ff8); }
+.gd-clue-btn:disabled { opacity: .7; cursor: default; }
+
+.gd-found { list-style: none; margin: .8rem 0 0; padding: 0; display: grid; gap: .5rem; }
+.gd-found li { padding: .55rem .7rem; border-radius: 10px; background: rgba(255, 255, 255, .06); line-height: 1.45; }
+.gd-found-empty { color: var(--muted, #adc0d8); font-style: italic; }
+
+.gd-answers { display: grid; gap: .5rem; }
+.gd-answer {
+  display: flex; flex-direction: column; align-items: flex-start; gap: .1rem;
+  min-height: 56px; padding: .6rem .9rem; border-radius: 12px; text-align: left;
+  border: 1px solid var(--card-border, rgba(255, 255, 255, .25));
+  background: rgba(255, 255, 255, .05); color: inherit; font: inherit; cursor: pointer;
+}
+.gd-answer:hover:not(:disabled) { background: rgba(255, 255, 255, .12); }
+.gd-answer-name { font-weight: 600; }
+.gd-answer-lat { font-size: .85rem; font-style: italic; color: var(--muted, #adc0d8); }
+.gd-answer:disabled { cursor: default; opacity: .75; }
+.gd-answer.is-right { opacity: 1; border-color: #34d399; background: rgba(52, 211, 153, .18); }
+.gd-answer.is-wrong { opacity: 1; border-color: #f87171; background: rgba(248, 113, 113, .16); }
+
+.gd-reveal { margin-top: 1.1rem; padding: 1rem; border-radius: 12px; background: rgba(255, 255, 255, .05); line-height: 1.55; }
+.gd-reveal p { margin: .4rem 0; }
+.gd-verdict { font-size: 1.05rem; }
+.gd-verdict-ok { color: #6ee7b7; }
+.gd-verdict-bad { color: #fca5a5; }
+.gd-score { color: var(--muted, #adc0d8); }
+.gd-danger { padding: .6rem .8rem; border-left: 4px solid #f87171; background: rgba(248, 113, 113, .12); border-radius: 6px; }
+.gd-more a { color: var(--blue, #4d9ff8); }
+
+.gd-tag { display: inline-block; padding: .05rem .5rem; border-radius: 999px; font-size: .8rem; font-weight: 600; }
+.gd-tag-ok { background: rgba(52, 211, 153, .2); color: #6ee7b7; }
+.gd-tag-warn { background: rgba(245, 158, 11, .2); color: #fcd34d; }
+.gd-tag-bad { background: rgba(248, 113, 113, .22); color: #fca5a5; }
+
+.gd-bigscore { margin: .2rem 0; font-size: 2.2rem; }
+.gd-summary { list-style: none; margin: .8rem 0; padding: 0; display: grid; gap: .35rem; }
+.gd-summary li { display: flex; justify-content: space-between; gap: .6rem; padding: .5rem .7rem; border-radius: 10px; background: rgba(255, 255, 255, .05); border-left: 4px solid transparent; }
+.gd-summary li.is-ok { border-left-color: #34d399; }
+.gd-summary li.is-bad { border-left-color: #f87171; }
+.gd-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 .4rem; }
+.gd-share-msg { min-height: 1.2rem; font-size: .88rem; color: var(--muted, #adc0d8); word-break: break-word; }
+
+/* Opozorilo: vedno vidno pod igro in ob koncu igre. */
+.gd-warning,
+.gd-final-warning {
+  margin: 1rem 0;
+  padding: .85rem 1rem;
+  border: 1px solid #f59e0b;
+  border-left-width: 5px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, .12);
+  line-height: 1.55;
+  color: var(--text, #e8edf8);
+}
+.gd-warning a, .gd-final-warning a { color: #fcd34d; font-weight: 600; }
+
+.gd-sources { font-size: .9rem; color: var(--muted, #adc0d8); }
+
+@media (max-width: 480px) {
+  #gd-app { padding: .85rem; }
+  .gd-clues { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .gd-progress span { transition: none; } }

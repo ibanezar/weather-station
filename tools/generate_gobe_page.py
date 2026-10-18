@@ -2867,6 +2867,12 @@ _FI_BAZA = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/
 # Dvojnici: levo obris (užitna), desno polna (strupena), vmes črtkana meja —
 # par, ki se ga da ločiti tudi pri 20 px. Klicaj v trikotniku se pri tej
 # velikosti zlije v packo, zato ga tu ni; nevarnost pove rdeč poudarek kartice.
+_FI_DETEKTIV = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M2.6 12.2c0-3.6 2.8-6.4 6.4-6.4s6.4 2.8 6.4 6.4H2.6Z" fill="currentColor" fill-opacity=".2" '
+    'stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+    '<path d="M6.4 12.2v5a2.6 2.6 0 0 0 5.2 0v-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
+    '<circle cx="16.4" cy="14.4" r="4" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/>'
+    '<path d="m19.4 17.4 2.6 2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>')
 _FI_DVOJNICE = ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
     '<path d="M1.4 10.4c0-2.7 2.1-4.8 4.8-4.8s4.8 2.1 4.8 4.8H1.4Z" fill="currentColor" fill-opacity=".2" '
     'stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'
@@ -3011,6 +3017,8 @@ GOBE_CATEGORIES = [
          "Užitnost, sezona, opis in fotografija za vsako vrsto.", None),
         ("/gobarska-napoved/dvojnice/", _FI_DVOJNICE, "#f87171", "Nevarne dvojnice",
          "{pairs} parov: užitna vrsta ob tisti, s katero jo zamenjajo.", None),
+        ("/igra/gobarski-detektiv/", _FI_DETEKTIV, "#2dd4bf", "Gobarski detektiv",
+         "Preglej sledi in loči jurčka od žolčastega gobana: igra v šestih primerih.", None),
     ]),
     ("moje", "♡", "Moje gobe", [
         ("#premium", _FI_ALARM, "#fbbf24", "Moji alarmi",

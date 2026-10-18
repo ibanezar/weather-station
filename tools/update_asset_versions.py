@@ -46,6 +46,8 @@ ASSETS = [
     "sola/sola.css",
     "igra/igra.css",
     "igra/igra.js",
+    "igra/gobarski-detektiv/detektiv.css",
+    "igra/gobarski-detektiv/detektiv.js",
     "napovej/napovej.css",
     "napovej/napovej.js",
     "meteogasilec/gasilec.js",
