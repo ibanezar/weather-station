@@ -1013,8 +1013,14 @@ def t_igra(ctx):
 
 
 # ── VS_YESTERDAY ──
+VS_YESTERDAY_LAST_HOUR = 7
+
 @topic("VS_YESTERDAY", 38)
 def t_vs_yesterday(ctx):
+    # Samo zjutraj (do 7:00): cron zamuja ure in kartica »danes bo hladneje«
+    # opoldne ni novica (19. 10. 2026: šla ven ob 11:44, ohladitev šele popoldne).
+    if ctx["now"].hour >= VS_YESTERDAY_LAST_HOUR:
+        return None
     hy = ctx["hist_yesterday"]
     if not hy or ctx["tmax"] is None or hy.get("tempHigh") is None:
         return None

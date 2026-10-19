@@ -217,6 +217,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   `COLD_TOMORROW`, sicer ni kartice in ni objave. Stanje je ločeno (`tools/.story_evening_state.json`,
   ključ = datum jutrišnjega jutra), meta v `og/story/latest-evening.json` (ne `latest.json`, da varuh
   svežine jutranje zgodbe ne zmoti). Testi: `tools/test_gates.py`.
+- **VS_YESTERDAY samo do 7:00** (19. 10. 2026): kartica »Danes bo hladneje kot včeraj« je šla ven ob 11:44, ohladitev pa je bila šele popoldne. Po 7:00 tema odpade (`VS_YESTERDAY_LAST_HOUR`), zgodbo dobi druga tema.
 
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
 Token — Meta app "Meteorec", App ID 4757580174464018), `IG_ACCOUNT_ID`,
