@@ -133,3 +133,6 @@ check(not sc.morning_topics_allowed(mk(6), True), "večerna kartica je že šla 
 
 print(f"\n{CHECKS} preverjanj, {len(FAILS)} napak")
 sys.exit(1 if FAILS else 0)
+
+print("\ndnevna zgodba: samo do 7:00")
+check(sg.WINDOW_END == 7, "okno dnevne zgodbe se konča ob 7:00")

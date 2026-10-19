@@ -208,6 +208,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   kartica ni šla ven); okno je bilo zato razširjeno do 15:00.
 - Ker FB/IG sliko poberata prek javnega URL-ja, workflow po push-u počaka, da jo
   GitHub Pages res postreže (do 10 minut), preden objavi.
+- **Dnevna zgodba gre ven samo med 6:00 in 7:00** (19. 10. 2026, Filip): napoved dneva popoldne laže (kartica »danes hladneje« ob 11:44). `story_gate.py` `WINDOW_END = 7`; zamujen cron = danes ni kartice. Ker GitHubov cron zamuja 5–7 ur, bo kartica brez `GH_DISPATCH_TOKEN`/Cloudflare sprožilca večinoma izpadla.
 - **Jutranje teme gredo ven samo zjutraj, večerna kartica pa dan prej** (13. 10. 2026): FROST,
   COLD_MORNING in FOG_MORNING (`MORNING_TOPICS`) so čez dan lagale -- cron zamuja ure in opoldne je
   kartica »Hladno jutro danes« povedala nekaj, kar je že mimo. Zdaj so dovoljene samo pred 10:00
