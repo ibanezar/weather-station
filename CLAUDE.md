@@ -208,6 +208,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   kartica ni šla ven); okno je bilo zato razširjeno do 15:00.
 - Ker FB/IG sliko poberata prek javnega URL-ja, workflow po push-u počaka, da jo
   GitHub Pages res postreže (do 10 minut), preden objavi.
+- **Dnevna zgodba gre ven samo med 6:00 in 7:00** (19. 10. 2026, Filip): napoved dneva popoldne laže (kartica »danes hladneje« ob 11:44). `story_gate.py` `WINDOW_END = 7`; zamujen cron = danes ni kartice. Ker GitHubov cron zamuja 5–7 ur, bo kartica brez `GH_DISPATCH_TOKEN`/Cloudflare sprožilca večinoma izpadla.
 - **Jutranje teme gredo ven samo zjutraj, večerna kartica pa dan prej** (13. 10. 2026): FROST,
   COLD_MORNING in FOG_MORNING (`MORNING_TOPICS`) so čez dan lagale -- cron zamuja ure in opoldne je
   kartica »Hladno jutro danes« povedala nekaj, kar je že mimo. Zdaj so dovoljene samo pred 10:00
@@ -217,6 +218,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   `COLD_TOMORROW`, sicer ni kartice in ni objave. Stanje je ločeno (`tools/.story_evening_state.json`,
   ključ = datum jutrišnjega jutra), meta v `og/story/latest-evening.json` (ne `latest.json`, da varuh
   svežine jutranje zgodbe ne zmoti). Testi: `tools/test_gates.py`.
+- **VS_YESTERDAY samo do 7:00** (19. 10. 2026): kartica »Danes bo hladneje kot včeraj« je šla ven ob 11:44, ohladitev pa je bila šele popoldne. Po 7:00 tema odpade (`VS_YESTERDAY_LAST_HOUR`), zgodbo dobi druga tema.
 
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
 Token — Meta app "Meteorec", App ID 4757580174464018), `IG_ACCOUNT_ID`,

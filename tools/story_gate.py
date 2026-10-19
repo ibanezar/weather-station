@@ -43,12 +43,9 @@ STATE_EVENING = os.path.join(ROOT, "tools", ".story_evening_state.json")
 TZ = ZoneInfo("Europe/Ljubljana")
 
 WINDOW_START = 6   # ne prej kot ob 6:00 po naši uri
-WINDOW_END = 18    # razširjeno s 15 na 18 (31. 8. 2026): 27. in 28. 8. je ta
-                   # cron zamudil tudi to okno (zagon šele ob 17:04 in 19:06
-                   # po naši uri) — ista GitHubova zamuda crona, ki je isti
-                   # teden prizadela tudi storm_map_gate in digest_gate.
-                   # Tista dva dneva zgodba ni šla ven; širše okno je poceni
-                   # varovalka proti ponovitvi.
+WINDOW_END = 7     # 19. 10. 2026 (Filip): zgodba je napoved dneva, zato gre ven do 7:00 ali
+                   # sploh ne. Popoldanska kartica »danes bo hladneje« je lagala (ohladitev
+                   # je bila že mimo/šele popoldne). Zamujen cron = ni kartice, ne pozna kartica.
 
 
 EVENING_START = 17  # ne prej kot ob 17:00 po naši uri

@@ -127,7 +127,12 @@ sc = importlib.import_module("generate_story_card")
 mk = lambda h: datetime.datetime(2026, 10, 1, h, 0)
 check(sc.morning_topics_allowed(mk(6), False), "6:00: jutranje teme dovoljene")
 check(not sc.morning_topics_allowed(mk(13), False), "13:00: jutro je že mimo")
+_c = {"now": mk(11), "hist_yesterday": {"tempHigh": 20.0}, "tmax": 12.0}
+check(sc.t_vs_yesterday(_c) is None, "11:00: VS_YESTERDAY po 7:00 ne gre ven")
 check(not sc.morning_topics_allowed(mk(6), True), "večerna kartica je že šla ven: ne ponavljaj")
 
 print(f"\n{CHECKS} preverjanj, {len(FAILS)} napak")
 sys.exit(1 if FAILS else 0)
+
+print("\ndnevna zgodba: samo do 7:00")
+check(sg.WINDOW_END == 7, "okno dnevne zgodbe se konča ob 7:00")
