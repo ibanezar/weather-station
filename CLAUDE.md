@@ -771,6 +771,7 @@ Ideja po Neurje.si »Snow Map« (sneženje po urah, meja sneženja, skupni novi 
 - `tools/generate_snezna_karta_page.py` piše samo besedilo/FAQ in JS; vse številke se računajo v brskalniku (skupno = vsota ur od zdaj do izbrane ure). Ni v nobenem workflowu: po spremembi ga poženi ročno in commitaj.
 - **Ni uradna napoved in ni višina snežne odeje**; mreža 0,1° ne razloči dolin in pobočij — stran to pove. Brez podlage z imeni krajev in brez zooma (Neurje.si ima C-LAEF 1 km + MapTiler); nadgradnja bi bila Leaflet kot na `/meteogasilec/karta/`.
 - **Živega Open-Meteo odgovora ob pisanju ni bilo mogoče preizkusiti** (peskovnik brez dostopa): JS je preizkušen na sintetičnih podatkih. Po deployu workerja preveri `/sneg-karta.json` (oblika `hourly.snowfall`/`freezing_level_height` ob `models=icon_d2` z eno samo vrsto modela).
+- Koda je v skupnih datotekah `zima/snezna-karta/karta.js` in `karta.css` (piše jih generator, `?v=` datum); isti JS poganja stran in **vdelano karto na vrhu `/zima/`** (`#sk-app` z `data-compact`/`data-view`/`data-hours`; hub jo vdela prek `snow_map_assets()` v `generate_zima_page.py`). Ne podvajaj JS-ja v hub.
 - Stran je v `CORE`, `llms.txt` in na hubu `/zima/`.
 
 ## Primerjava modelov (`/primerjava-modelov/`, 7. 10. 2026)

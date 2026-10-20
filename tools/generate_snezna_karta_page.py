@@ -50,7 +50,7 @@ FAQ = [
      "ARSO, promet.si in stanje na cesti."),
 ]
 
-CSS = """<style>
+CSS_SRC = """
 .sk-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
 .sk-tabs button,.sk-ctrl button{font:inherit;font-size:.9rem;padding:.45rem .9rem;border-radius:999px;cursor:pointer;
   background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.18);min-height:40px}
@@ -67,9 +67,9 @@ CSS = """<style>
 .sk-read{min-height:3em;font-size:.9rem;color:var(--muted);margin:.5rem 0}
 .sk-read b{color:var(--text,#e5e7eb)}
 .sk-note{font-size:.8rem;color:var(--muted);margin:.2rem 0 1rem}
-</style>"""
+"""
 
-JS = r"""<script>
+JS_SRC = r"""
 (function(){
   var root=document.getElementById("sk-app"); if(!root) return;
   var SLO=%SLO%, PROXY="%PROXY%", TZ="Europe/Ljubljana";
@@ -83,7 +83,8 @@ JS = r"""<script>
     s:{lbl:"Skupaj novega snega",unit:"cm",d:0,bins:[0.5,2,5,10,20,30,50,80],
        cols:["#deebf7","#bdd7e7","#9ecae1","#6baed6","#3182bd","#08519c","#6a51a3","#54278f","#3f007d"]}
   };
-  var S={v:"h",k:0,data:null,play:null,cv:null,cur:null};
+  var S={v:root.dataset.view||"h",k:(+root.dataset.hours||1)-1,data:null,play:null,cv:null,cur:null};
+  var COMPACT=root.dataset.compact==="1";
   function f(x,d){ return x==null||isNaN(x)?"—":x.toFixed(d).replace(".",","); }
   function hex(c){ return [parseInt(c.substr(1,2),16),parseInt(c.substr(3,2),16),parseInt(c.substr(5,2),16)]; }
   function inSlo(lon,lat){
@@ -199,7 +200,8 @@ JS = r"""<script>
       '<div id="sk-scale"></div>'+
       '<div class="sk-read" id="sk-read" aria-live="polite">Dotakni se karte: sneženje, skupna količina in meja sneženja na izbrani točki.</div>'+
       '<p class="sk-note">Model '+D.model+' na mreži 0,1° (okoli 8 × 11 km), korak 1 ura. Nastalo ob '+gen+(D.stale?" (podatki so nekoliko stari, vir trenutno ne odgovarja)":"")+
-      '. Pregled vzorca, ne napoved za posamezno pobočje.</p>';
+      '. Pregled vzorca, ne napoved za posamezno pobočje.</p>'+
+      (COMPACT?'<p><a href="/zima/snezna-karta/">Celotna snežna karta in vprašanja →</a></p>':'');
     S.cv=document.getElementById("sk-cv");
     function mv(e){
       var r=S.cv.getBoundingClientRect(), G=geo();
@@ -233,7 +235,23 @@ JS = r"""<script>
     .then(function(d){ if(!d.sn||!d.sn.length) throw new Error("prazno"); S.data=d; build(); })
     .catch(function(){ root.textContent="Snežna karta trenutno ni dosegljiva. Poskusi znova čez nekaj minut ali poglej Mejo sneženja za Rečico."; });
 })();
-</script>""".replace("%SLO%", slo_poly_js()).replace("%PROXY%", PROXY)
+""".replace("%SLO%", slo_poly_js()).replace("%PROXY%", PROXY)
+
+ASSET_DIR = "zima/snezna-karta"
+
+
+def head_assets():
+    """Povezavi na skupna CSS/JS (stran in hub /zima/ nalagata isto datoteko; ?v= zaobide predpomnilnik)."""
+    v = TODAY.strftime("%Y%m%d")
+    return (f'<link rel="stylesheet" href="/{ASSET_DIR}/karta.css?v={v}">\n'
+            f'<script src="/{ASSET_DIR}/karta.js?v={v}" defer></script>')
+
+
+def write_assets():
+    os.makedirs(os.path.join(ROOT, ASSET_DIR), exist_ok=True)
+    for name, src in (("karta.css", CSS_SRC), ("karta.js", JS_SRC)):
+        with open(os.path.join(ROOT, ASSET_DIR, name), "w", encoding="utf-8") as fh:
+            fh.write(src)
 
 
 def build_body():
@@ -270,7 +288,8 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("Zima", "/zima/"), ("Snežna karta", None)]),
         seo.faq_schema(FAQ),
     ])
-    html_out = seo.page_shell(title, desc, URL, schema + "\n" + CSS, build_body() + "\n" + JS)
+    write_assets()
+    html_out = seo.page_shell(title, desc, URL, schema + "\n" + head_assets(), build_body())
     seo.write_page("zima/snezna-karta/index.html", html_out, force=True)
     print("  → zima/snezna-karta/index.html")
 

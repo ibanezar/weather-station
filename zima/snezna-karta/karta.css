@@ -1,0 +1,17 @@
+
+.sk-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
+.sk-tabs button,.sk-ctrl button{font:inherit;font-size:.9rem;padding:.45rem .9rem;border-radius:999px;cursor:pointer;
+  background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.18);min-height:40px}
+.sk-tabs button[aria-pressed="true"]{color:var(--text,#e5e7eb);border-color:var(--cyan,#38bdf8);background:rgba(56,189,248,.12)}
+.sk-ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:.6rem 0}
+.sk-ctrl input[type=range]{flex:1;min-width:160px;min-height:32px}
+.sk-ctrl button[aria-pressed="true"]{color:var(--text,#e5e7eb);border-color:var(--cyan,#38bdf8);background:rgba(56,189,248,.12)}
+.sk-range{font-size:.85rem;color:var(--muted);min-height:1.3em}
+.sk-ctrl strong{min-width:9ch}
+.sk-map canvas{width:100%;max-width:760px;height:auto;display:block;border-radius:8px;background:rgba(255,255,255,.04);touch-action:pan-y}
+.sk-scale{display:flex;height:10px;border-radius:3px;overflow:hidden;margin:.5rem 0 .2rem;max-width:760px}
+.sk-scale i{flex:1}
+.sk-scale-l{display:flex;justify-content:space-between;max-width:760px;font-size:.75rem;color:var(--muted)}
+.sk-read{min-height:3em;font-size:.9rem;color:var(--muted);margin:.5rem 0}
+.sk-read b{color:var(--text,#e5e7eb)}
+.sk-note{font-size:.8rem;color:var(--muted);margin:.2rem 0 1rem}

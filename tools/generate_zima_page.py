@@ -131,6 +131,12 @@ ZIMA_ACCENT = {
 }
 
 
+def snow_map_assets():
+    import generate_snezna_karta_page as sk
+    sk.write_assets()
+    return sk.head_assets()
+
+
 def _rgba(hex_color, alpha):
     """#rrggbb -> rgba(r,g,b,alpha) -- mehka podlaga ikone iz istega poudarka
     (namerna podvojitev _rgba() iz generate_gobe_page.py, isto načelo kot
@@ -765,6 +771,10 @@ def build_hub_body(data):
   preveri tudi promet.si, AMZS ali DARS.</p>
   <a class="mtn-avk-link" href="/zima/prevoznost-prelazov/">Vse podrobnosti o prelazih →</a>'''
 
+    snow_map_html = '''  <h2 class="zima-section-title">❄️ Snežna karta Slovenije</h2>
+  <p class="muted-note">Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).</p>
+  <div id="sk-app" data-compact="1" data-view="s" data-hours="24" aria-live="polite">Nalagam snežno karto …</div>'''
+
     nav_cards = f'''  <h2 class="zima-section-title">📚 Podrobno po temah</h2>
   <div class="card-grid">
     <a class="phenom-card zima-phenom" href="/zima/meja-snezenja/" style="{card_style("snow_line", "")}">
@@ -836,6 +846,7 @@ def build_hub_body(data):
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
 {seo.stn_badge()}
 {hero_html}
+{snow_map_html}
 {chart_html}
 {conditions_html}
 {meter_html}
@@ -1357,7 +1368,7 @@ def main():
     html = seo.page_shell("MeteoZima — Zgornja Savinjska dolina",
                            "MeteoZima: meja sneženja in tveganje poledice za Zgornjo Savinjsko dolino, "
                            "posodobljeno dnevno.",
-                           "/zima/", schema, body)
+                           "/zima/", schema + "\n" + snow_map_assets(), body)
     seo.write_page("zima/index.html", html, force=True)
     print("  → zima/index.html")
 
