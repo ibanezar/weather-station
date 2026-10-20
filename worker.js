@@ -3492,6 +3492,65 @@ async function _modeliKarta(env) {
   catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
 }
 
+// ── Snežna karta (/sneg-karta.json) ────────────────────────────────────────
+// Mreža 0,1° nad Slovenijo (ista geometrija kot MK_*), ICON-D2 (Open-Meteo), urno do +48 h:
+// sneženje (cm v uri), meja sneženja (m) in višina modelske celice. Brskalnik sešteva obdobja
+// sam, zato je tu samo urni izhod. Isti vzorec kot _modeliKarta: sestavi ga worker enkrat na
+// SK_TTL_MS in ga drži v KV, endpoint pa ob klicu ne dela zapisa.
+// Meja sneženja = ničta izoterma − SK_SNOW_LINE_OFFSET_M (namerna podvojitev
+// SNOW_LEVEL_OFFSET_M iz tools/winter_engine.py; preverja test_parity).
+const SK_HOURS = 48;
+const SK_TTL_MS = 30 * 60 * 1000;
+const SK_KEY = "sneg_karta_v1";
+const SK_SNOW_LINE_OFFSET_M = 250;
+let _skInflight = null;
+
+async function _skBuild() {
+  const t0 = Math.ceil(Date.now() / 3600000) * 3600000;
+  const pts = _mkPoints();
+  const sn = Array.from({ length: SK_HOURS }, () => new Array(pts.length).fill(null));
+  const ln = Array.from({ length: SK_HOURS }, () => new Array(pts.length).fill(null));
+  const z = new Array(pts.length).fill(null);
+  const chunks = _mkChunks(pts.map((p, i) => [p, i]), 140);
+  for (const ch of chunks) {
+    const u = "https://api.open-meteo.com/v1/forecast?latitude=" + ch.map(c => c[0][0]).join(",")
+      + "&longitude=" + ch.map(c => c[0][1]).join(",")
+      + "&hourly=snowfall,freezing_level_height&models=icon_d2&forecast_days=3&timezone=UTC";
+    const r = await fetch(u, { headers: { "User-Agent": "meteorec-sneg-karta" } });
+    if (!r.ok) throw new Error("open-meteo " + r.status);
+    let j = await r.json(); if (!Array.isArray(j)) j = [j];
+    j.forEach((loc, n) => {
+      const idx = ch[n][1], H = loc.hourly;
+      const ts = new Map(); H.time.forEach((x, i) => ts.set(Date.parse(x + ":00Z"), i));
+      z[idx] = _mkR(loc.elevation, 0);
+      for (let k = 0; k < SK_HOURS; k++) {
+        const i = ts.get(t0 + (k + 1) * 3600000);
+        if (i == null) continue;
+        const s = H.snowfall[i], f = H.freezing_level_height[i];
+        sn[k][idx] = s == null ? null : Math.round(s * 10);                       // 0,1 cm
+        ln[k][idx] = f == null ? null : Math.round((f - SK_SNOW_LINE_OFFSET_M) / 10); // 10 m
+      }
+    });
+  }
+  if (!sn.some(a => a.some(v => v != null))) throw new Error("ICON-D2 ni vrnil podatkov");
+  return { generated: Date.now(), t0, hours: SK_HOURS, lat0: MK_LAT0, lon0: MK_LON0, d: MK_D, nx: MK_NX, ny: MK_NY,
+           model: "ICON-D2", units: { sn: 0.1, ln: 10 }, z, sn, ln };
+}
+
+async function _snegKarta(env) {
+  let cached = null;
+  try { cached = await env.COUNTER_KV.get(SK_KEY, "json"); } catch (_) {}
+  if (cached && Date.now() - cached.generated < SK_TTL_MS) return cached;
+  if (!_skInflight) {
+    _skInflight = _skBuild().then(async d => {
+      try { await env.COUNTER_KV.put(SK_KEY, JSON.stringify(d), { expirationTtl: 6 * 3600 }); } catch (_) {}
+      return d;
+    }).finally(() => { _skInflight = null; });
+  }
+  try { return await _skInflight; }
+  catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
+}
+
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "30 6-7 * * *") {
@@ -4650,6 +4709,20 @@ export default {
           });
         } catch (e) {
           return new Response(JSON.stringify({ ok: false, error: "modeli_unreachable", detail: String(e) }),
+            { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+      }
+
+      // ── /sneg-karta.json ─────────────────────────────────────
+      // Urno sneženje in meja sneženja nad Slovenijo za /zima/snezna-karta/, glej _snegKarta().
+      if (path === "/sneg-karta.json") {
+        try {
+          const d = await _snegKarta(env);
+          return new Response(JSON.stringify(d), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ ok: false, error: "sneg_unreachable", detail: String(e) }),
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
         }
       }

@@ -762,6 +762,17 @@ Pravi CLS smo prvič izmerili s **pravimi podatki pod omejitvijo omrežja** (Pla
 - **Source map** (`valid-source-maps`) NI narejen: mapa je ~1,5 MB in bi pri vsakem buildu napihnila git zgodovino; opozorilo je
   neocenjeno v PageSpeedu.
 
+## Snežna karta (`/zima/snezna-karta/`, 20. 10. 2026)
+
+Ideja po Neurje.si »Snow Map« (sneženje po urah, meja sneženja, skupni novi sneg na eni karti). Izvedba je naša, po vzorcu `/primerjava-modelov/`:
+
+- `worker.js` `/sneg-karta.json` (`_snegKarta()`): mreža 0,1° (ista geometrija kot `MK_*`), **ICON-D2** prek Open-Meteo, urno do +48 h: `sn` (sneženje, enota 0,1 cm), `ln` (meja sneženja, enota 10 m), `z` (višina modelske celice). KV `sneg_karta_v1`, 30 min; endpoint ob klicu ne dela zapisa.
+- Meja sneženja = `freezing_level_height` − `SK_SNOW_LINE_OFFSET_M` (250 m) — namerna podvojitev `SNOW_LEVEL_OFFSET_M` iz `winter_engine.py`, preverja `test_parity.konstante_workerja`.
+- `tools/generate_snezna_karta_page.py` piše samo besedilo/FAQ in JS; vse številke se računajo v brskalniku (skupno = vsota ur od zdaj do izbrane ure). Ni v nobenem workflowu: po spremembi ga poženi ročno in commitaj.
+- **Ni uradna napoved in ni višina snežne odeje**; mreža 0,1° ne razloči dolin in pobočij — stran to pove. Brez podlage z imeni krajev in brez zooma (Neurje.si ima C-LAEF 1 km + MapTiler); nadgradnja bi bila Leaflet kot na `/meteogasilec/karta/`.
+- **Živega Open-Meteo odgovora ob pisanju ni bilo mogoče preizkusiti** (peskovnik brez dostopa): JS je preizkušen na sintetičnih podatkih. Po deployu workerja preveri `/sneg-karta.json` (oblika `hourly.snowfall`/`freezing_level_height` ob `models=icon_d2` z eno samo vrsto modela).
+- Stran je v `CORE`, `llms.txt` in na hubu `/zima/`.
+
 ## Primerjava modelov (`/primerjava-modelov/`, 7. 10. 2026)
 
 Zamisel je Neurje.si-jeva primerjava modelov (ICON-D2, ICON-EU, ALADIN/SI, C-LAEF 1 km), prirejena našim

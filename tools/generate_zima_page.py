@@ -19,6 +19,7 @@ lahko prerenderirajo brez ponovnega klica Open-Meteo:
 
   /zima/                    — hub: povzetek vseh indeksov za danes/jutri + sezonski dnevnik
   /zima/meja-snezenja/      — meja sneženja po višinskih pasovih + 7-dnevni trend
+  /zima/snezna-karta/       — karta Slovenije: sneženje po urah, meja, skupni novi sneg (JS + worker)
   /zima/poledica/           — tveganje poledice po krajih v dolini + 7-dnevni pregled
   /zima/zled/               — žled (dež, ki zmrzuje): modelski pokazatelj + sondaža ARSO + razlaga
   /zima/kurilni-semafor/    — ocena prevetrenosti za kurjenje + 7-dnevni graf
@@ -769,6 +770,9 @@ def build_hub_body(data):
     <a class="phenom-card zima-phenom" href="/zima/meja-snezenja/" style="{card_style("snow_line", "")}">
       <span class="ph-icon">{icon_html("snow_line", 30)}</span>Meja sneženja
       <div class="ph-count">{num(line_m, 0) if line_m is not None else "—"} m n. m.</div></a>
+    <a class="phenom-card zima-phenom" href="/zima/snezna-karta/" style="{card_style("snow_line", "")}">
+      <span class="ph-icon">{icon_html("snow_line", 30)}</span>Snežna karta
+      <div class="ph-count">sneženje in meja, +48 h</div></a>
     <a class="phenom-card zima-phenom" href="/zima/poledica/" style="{card_style("black_ice", "")}">
       <span class="ph-icon">{icon_html("black_ice", 30)}</span>Tveganje poledice
       <div class="ph-count">{RISK_ICON.get(worst_level, "⚪")} {RISK_LABEL.get(worst_level, "ni podatka")}</div></a>

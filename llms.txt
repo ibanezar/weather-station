@@ -14,6 +14,7 @@
 - [Primerjava vremenskih modelov](https://meteorec.si/primerjava-modelov/): napoved ICON-D2, ICON-EU, ECMWF IFS in AROME (GeoSphere Austria, z ansamblom) za Rečico ob Savinji drugo nad drugo — temperatura, padavine, sunki, oblačnost po urah in razpon med modeli. Neposredni izhodi modelov, ne uradna napoved.
 - [Nevihte in opozorila ARSO](https://meteorec.si/nevihte/): aktivna opozorila ARSO za območje in dnevna nevihtna karta Slovenije.
 - [Poročila o neurjih](https://meteorec.si/nevihte/porocila/): moderirana opažanja bralcev o toči, nalivih, vetru in strelah po Sloveniji (ne uradno opozorilo).
+- [Snežna karta Slovenije](https://meteorec.si/zima/snezna-karta/): sneženje po urah, meja sneženja in skupni novi sneg do +48 ur na karti Slovenije (ICON-D2 prek Open-Meteo, mreža 0,1°; modelski izhod, ne uradna napoved).
 - [Vreme v gorah](https://meteorec.si/vreme-v-gorah/): ocena temperature, občutene temperature, vetra in ničte izoterme na višini vrhov Golte, Menina planina, Smrekovec in Raduha (modelska ocena, ne uradna napoved).
 - [Žled](https://meteorec.si/zima/zled/): modelski pokazatelj dežja, ki zmrzuje, z vertikalno sondažo ARSO.
 - [Toča](https://meteorec.si/toca/), [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/), [Ekstremno vreme](https://meteorec.si/ekstremno-vreme/)
