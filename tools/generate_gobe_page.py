@@ -3601,6 +3601,7 @@ VALOVI_JS = r"""(function(){
   var MAXDAY = __MAXDAY__;
   var DEFAULTS = __DEFAULTS__;
   var STATION = __STATION__;
+  var LOCS = __LOCS__;
   var CFG = __CFG__;
   var TERRAINS = __TERRAINS__;
   var ICONS = __ICONS__;
@@ -3618,10 +3619,30 @@ VALOVI_JS = r"""(function(){
   var AXIS_STATIC = axisEl ? axisEl.innerHTML : '';
   var fcChk = $('gvalFc'), fcStrip = $('gvalFcStrip');
   var OM = null, OM_STATE = 'nalagam';
+  var loc = LOCS[0], pendingSuggest = false;
+  var locSel = $('gvalLoc'), locNote = $('gvalLocNote'), geoBtn = $('gvalGeo');
+  var stTitle = $('gvalStationTitle'), stSub = $('gvalStationSub'), measLab = $('gvalMeasLab'), sugEl = $('gvalSuggest');
+  var SUG_HOME = sugEl ? sugEl.textContent : '';
+  /* Pretekli dež: za Rečico izmerjen na postaji, drugje modelski podatek Open-Meteo za izbrano točko. */
+  function pastMm(iso){
+    if (loc.home){ var v = STATION[iso]; return typeof v === 'number' ? v : null; }
+    var d = OM && OM.days[iso]; return d && typeof d.mm === 'number' ? d.mm : null;
+  }
+  function srcName(){ return loc.home ? 'postaja IREICA1' : 'Open-Meteo, modelski podatek'; }
   var plays = {};
   GROUPS.forEach(function(g){ plays[g.eco] = $('gvalPlay-' + g.eco); });
   var events = DEFAULTS.map(function(e){ return { iso: e.date, mm: e.mm }; });
   if (!events.length) events = [{ iso: '', mm: null }];
+  /* Predlog dogodkov: do MAXEV zadnjih dni z izdatnim dežjem (Rečica: postaja, drugje: model). */
+  function suggest(){
+    if (loc.home) return DEFAULTS.map(function(e){ return { iso: e.date, mm: e.mm }; });
+    var out = [], T = todayNum();
+    for (var b = 0; b <= CFG.lookback && out.length < MAXEV; b++){
+      var iso = isoOf(T - b), mm = pastMm(iso);
+      if (mm !== null && mm >= CFG.rainMm) out.push({ iso: iso, mm: Math.round(mm * 10) / 10, auto: true });
+    }
+    return out.reverse();
+  }
 
   function dayNum(iso){ var p = iso.split('-'); return Math.round(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000); }
   function isoOf(n){ return new Date(n * 86400000).toISOString().slice(0, 10); }
@@ -3681,25 +3702,35 @@ VALOVI_JS = r"""(function(){
     return { days: days, last: last };
   }
   function loadOM(){
-    var KEY = 'wx-valovi-om-v2', cached = null;
+    var KEY = 'wx-valovi-om-v3', ck = loc.lat + ',' + loc.lon, cached = null, my = loc;
     try { cached = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
-    if (cached && cached.t && Date.now() - cached.t < 3600000 && cached.j){ OM = parseOM(cached.j); OM_STATE = 'ok'; renderFcStrip(); render(); return; }
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + CFG.lat + '&longitude=' + CFG.lon +
-      '&hourly=soil_temperature_6cm,soil_temperature_18cm,soil_moisture_3_to_9cm,relative_humidity_2m,dew_point_2m,temperature_2m&daily=precipitation_sum&past_days=31&forecast_days=8&timezone=Europe%2FLjubljana';
+    if (cached && cached.k === ck && cached.t && Date.now() - cached.t < 3600000 && cached.p){ gotOM(cached.p); return; }
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + loc.lat + '&longitude=' + loc.lon +
+      '&hourly=soil_temperature_6cm,soil_temperature_18cm,soil_moisture_3_to_9cm,relative_humidity_2m,dew_point_2m,temperature_2m&daily=precipitation_sum&past_days=' +
+      (loc.home ? 31 : CFG.pastDays) + '&forecast_days=8&timezone=Europe%2FLjubljana';
     var ctl = window.AbortController ? new AbortController() : null;
-    var to = setTimeout(function(){ if (ctl) ctl.abort(); }, 9000);
+    var to = setTimeout(function(){ if (ctl) ctl.abort(); }, 12000);
     fetch(url, ctl ? { signal: ctl.signal } : {}).then(function(r){ if (!r.ok) throw new Error('http'); return r.json(); }).then(function(j){
-      clearTimeout(to); OM = parseOM(j); OM_STATE = 'ok';
-      try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), j: j })); } catch (e) {}
-      renderFcStrip(); render();
-    }).catch(function(){ clearTimeout(to); OM = null; OM_STATE = 'napaka'; renderFcStrip(); render(); });
+      clearTimeout(to); if (my !== loc) return;
+      var p = parseOM(j);
+      try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), k: ck, p: p })); } catch (e) {}
+      gotOM(p);
+    }).catch(function(){ clearTimeout(to); if (my !== loc) return; OM = null; OM_STATE = 'napaka'; afterOM(); });
+  }
+  function gotOM(p){ OM = p; OM_STATE = 'ok'; afterOM(); }
+  function afterOM(){
+    if (pendingSuggest && OM_STATE === 'ok'){
+      pendingSuggest = false;
+      var sg = suggest(); events = sg.length ? sg : [{ iso: '', mm: null }]; renderRows();
+    }
+    renderFcStrip(); render();
   }
   var WD = ['ned', 'pon', 'tor', 'sre', 'čet', 'pet', 'sob'];
   function fcOn(){ return !!(fcChk && fcChk.checked && OM); }
   function renderFcStrip(){
     if (!fcStrip) return;
     if (OM_STATE === 'nalagam'){ fcStrip.textContent = 'Napoved dežja se nalaga …'; return; }
-    if (!OM){ fcStrip.textContent = 'Napoved dežja ni dosegljiva, zato rezultat temelji samo na vnesenih in izmerjenih padavinah.'; return; }
+    if (!OM){ fcStrip.textContent = 'Napoved dežja ni dosegljiva, zato rezultat temelji samo na vnesenih' + (loc.home ? ' in izmerjenih' : '') + ' padavinah.'; return; }
     var T = todayNum(), html = '<span class="gp-val-fclab">Napoved dežja, Open-Meteo (modelska, negotova)</span><div class="gp-pv-days">';
     for (var k = 1; k <= 7; k++){
       var d = OM.days[isoOf(T + k)]; if (!d || typeof d.mm !== 'number') continue;
@@ -3788,6 +3819,11 @@ VALOVI_JS = r"""(function(){
     return affinity === terrain ? gcfg.match : gcfg.mismatch;
   }
   function fillSelects(){
+    var grp = null, grpName = null;
+    LOCS.forEach(function(l){
+      if (l.r !== grpName){ grpName = l.r; grp = document.createElement('optgroup'); grp.label = l.r; locSel.appendChild(grp); }
+      var o = document.createElement('option'); o.value = l.n; o.textContent = l.n + (l.home ? ' (postaja IREICA1)' : ''); grp.appendChild(o);
+    });
     whatSel.innerHTML = '<option value="all">Vse skupine</option>';
     GROUPS.forEach(function(g){
       var o = document.createElement('option'); o.value = 'eco:' + g.eco; o.textContent = g.name; whatSel.appendChild(o);
@@ -3868,7 +3904,7 @@ VALOVI_JS = r"""(function(){
         if (fcOn() && k <= T0 + 7){ var f = OM.days[isoOf(k)]; if (f && typeof f.mm === 'number') return f.mm; }
         return 0;
       }
-      if (useStation){ var v = STATION[isoOf(k)]; if (typeof v === 'number') return v; }
+      if (useStation){ var v = pastMm(isoOf(k)); if (v !== null) return v; }
       return 0;
     };
   }
@@ -4121,6 +4157,7 @@ VALOVI_JS = r"""(function(){
     if (!evp.length && events.length) p.push('d=');
     if (whatSel.value !== 'all') p.push('w=' + encodeURIComponent(whatSel.value));
     if (terSel.value) p.push('t=' + encodeURIComponent(terSel.value));
+    if (!loc.home) p.push('l=' + encodeURIComponent(loc.n));
     if (!stationChk.checked) p.push('s=0');
     if (fcChk && !fcChk.checked) p.push('f=0');
     return p.join('&');
@@ -4128,7 +4165,15 @@ VALOVI_JS = r"""(function(){
   function loadHash(){
     var h = (location.hash || '').replace(/^#/, ''); if (!h) return false;
     var q = {}; h.split('&').forEach(function(kv){ var i = kv.indexOf('='); if (i > 0) q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); });
-    if (q.d === undefined && !q.w && !q.t) return false;
+    if (q.d === undefined && !q.w && !q.t && !q.l) return false;
+    if (q.l){
+      var lf = null; LOCS.forEach(function(x){ if (x.n === q.l) lf = x; });
+      if (lf && lf !== loc){
+        loc = lf; locSel.value = lf.n;
+        if (!lf.home && q.d === undefined){ events = [{ iso: '', mm: null }]; pendingSuggest = true; }
+        if (!lf.home && !q.t) terSel.value = lf.t;
+      }
+    }
     if (q.d !== undefined){
       var list = [];
       q.d.split(',').slice(0, MAXEV).forEach(function(part){
@@ -4147,9 +4192,9 @@ VALOVI_JS = r"""(function(){
     return true;
   }
   function useMeasured(){
-    events = DEFAULTS.map(function(e){ return { iso: e.date, mm: e.mm }; });
+    events = suggest();
     if (!events.length) events = [{ iso: '', mm: null }];
-    stationChk.checked = true; if (fcChk) fcChk.checked = true; whatSel.value = 'all'; terSel.value = '';
+    stationChk.checked = true; if (fcChk) fcChk.checked = true; whatSel.value = 'all'; terSel.value = loc.home ? '' : loc.t;
     syncChips(); terrainNote(); renderRows(); render();
   }
 
@@ -4213,8 +4258,9 @@ VALOVI_JS = r"""(function(){
       }
       di.addEventListener('input', function(){
         e.iso = di.value;
-        if (e.iso && (e.mm === null || e.auto) && typeof STATION[e.iso] === 'number'){
-          e.mm = Math.round(STATION[e.iso] * 10) / 10; e.auto = true; mi.value = e.mm;
+        var pm = e.iso ? pastMm(e.iso) : null;
+        if (e.iso && (e.mm === null || e.auto) && pm !== null){
+          e.mm = Math.round(pm * 10) / 10; e.auto = true; mi.value = e.mm;
         }
         mark(); render();
       });
@@ -4236,13 +4282,13 @@ VALOVI_JS = r"""(function(){
     var first = Math.min.apply(null, evs.map(function(e){ return e.n; }));
     var dry = 0;
     for (var k = first - 1; k >= first - 40; k--){
-      var v = STATION[isoOf(k)];
-      if (typeof v !== 'number' || v >= 1) break;
+      var v = pastMm(isoOf(k));
+      if (v === null || v >= 1) break;
       dry++;
     }
     var sum14 = 0; for (var j = first - 14; j < first; j++) sum14 += get(j);
     return 'Pred prvim dežjem (' + fmt(first) + '): ' + (dry >= 40 ? 'več kot 40 dni' : dni(dry)) +
-      ' brez dežja (< 1 mm), v 14 dneh pred njim ' + fmtMm(sum14) + ' mm (postaja IREICA1).';
+      ' brez dežja (< 1 mm), v 14 dneh pred njim ' + fmtMm(sum14) + ' mm (' + srcName() + ').';
   }
 
   function analyze(evs, get, terrain, T){
@@ -4430,8 +4476,106 @@ VALOVI_JS = r"""(function(){
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function(){ done(true); }, function(){ done(false); });
     else done(false);
   });
-  fillSelects(); buildChips(); loadHash(); syncChips(); terrainNote(); renderRows(); renderFcStrip(); render(); loadOM();
+  function updateLocUi(){
+    if (stTitle) stTitle.textContent = loc.home ? 'Padavine s postaje IREICA1' : 'Padavine za izbrano območje';
+    if (stSub) stSub.textContent = loc.home
+      ? 'Zadnjih ' + CFG.pastDays + ' dni; dnevi, ki jih nisi vnesel, se prištejejo k predhodnim padavinam. To ni meritev vlage tal.'
+      : 'Zadnjih ' + CFG.pastDays + ' dni po modelu Open-Meteo (ni meritev); dnevi, ki jih nisi vnesel, se prištejejo k predhodnim padavinam.';
+    if (measLab) measLab.textContent = loc.home ? 'Uporabi izmerjeni dež' : 'Uporabi modelski dež';
+    if (sugEl) sugEl.textContent = loc.home ? SUG_HOME : 'Predlagano iz modelskega dežja Open-Meteo za območje ' + loc.n + ' (do ' + MAXEV + ' zadnji dnevi z ≥ ' + CFG.rainMm + ' mm). Datum in količino lahko spremeniš, kadar imaš točnejši podatek.';
+    if (locNote) locNote.textContent = loc.home
+      ? 'Rečica ob Savinji: dež je izmerjen na postaji IREICA1, temperatura, vlaga in napoved so Open-Meteo.'
+      : 'Orientacijska točka območja na ' + loc.e + ' m: dež, napoved, temperatura in vlaga so modelski podatki Open-Meteo, ne meritve. Teren je prednastavljen glede na območje.';
+  }
+  function setLoc(l){
+    if (!l || l === loc) { if (l) locSel.value = l.n; return; }
+    loc = l; locSel.value = l.n;
+    terSel.value = l.home ? '' : l.t;
+    OM = null; OM_STATE = 'nalagam';
+    if (l.home){ pendingSuggest = false; events = suggest(); if (!events.length) events = [{ iso: '', mm: null }]; }
+    else { pendingSuggest = true; events = [{ iso: '', mm: null }]; }
+    updateLocUi(); syncChips(); terrainNote(); renderRows(); renderFcStrip(); render(); loadOM();
+  }
+  locSel.addEventListener('change', function(){ LOCS.forEach(function(l){ if (l.n === locSel.value) setLoc(l); }); });
+  function km(a, b, c, d){
+    var r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r * Math.cos((a + c) / 2 * r);
+    return 6371 * Math.sqrt(x * x + y * y);
+  }
+  if (geoBtn){
+    if (!navigator.geolocation) geoBtn.hidden = true;
+    else geoBtn.addEventListener('click', function(){
+      locNote.textContent = 'Iščem najbližje območje …';
+      navigator.geolocation.getCurrentPosition(function(p){
+        var best = null, bd = 1e9;
+        LOCS.forEach(function(l){ var d = km(p.coords.latitude, p.coords.longitude, l.lat, l.lon); if (d < bd){ bd = d; best = l; } });
+        if (best && bd <= 50) setLoc(best);
+        else locNote.textContent = 'V bližini ni območja' + (best ? ' (najbližje: ' + best.n + ', ' + Math.round(bd) + ' km)' : '') + '. Izberi ga s seznama.';
+        if (best && bd <= 50) locNote.textContent = 'Najbližje območje (' + Math.round(bd) + ' km): ' + best.n + '. ' + locNote.textContent;
+      }, function(){ locNote.textContent = 'Lokacije ni mogoče prebrati. Izberi območje s seznama.'; }, { timeout: 8000, maximumAge: 600000 });
+    });
+  }
+  fillSelects(); buildChips(); loadHash(); updateLocUi(); syncChips(); terrainNote(); renderRows(); renderFcStrip(); render(); loadOM();
 })();"""
+
+
+# Znana gobarska območja zunaj Zgornje Savinjske doline (samo za kalkulator /valovi/; glavna napoved
+# in premium payload ostaneta pri območjih iz species_rules.yaml). Točke so ORIENTACIJSKA SREDIŠČA
+# območij (±5 km), teren je grobo po geološki podlagi ("" = nevtralno / mešano). Dež in vreme sta
+# modelska podatka Open-Meteo za to točko -- ne vsebujeta lokalnih razlik v območju.
+VALOVI_EXTRA_LOCATIONS = [
+    # (regija, ime, lat, lon, višina m, teren)
+    ("Gorenjska", "Pokljuka", 46.34, 13.96, 1200, "bazicna"),
+    ("Gorenjska", "Jelovica", 46.28, 14.10, 1000, "bazicna"),
+    ("Gorenjska", "Mežakla", 46.43, 14.02, 1100, "bazicna"),
+    ("Gorenjska", "Škofjeloško hribovje", 46.17, 14.22, 700, "kisla"),
+    ("Gorenjska", "Velika planina (Kamnik)", 46.30, 14.62, 1300, "bazicna"),
+    ("Koroška", "Peca", 46.44, 14.78, 1200, "bazicna"),
+    ("Koroška", "Strojna", 46.53, 14.93, 800, "kisla"),
+    ("Koroška", "Uršlja gora", 46.47, 14.99, 1100, ""),
+    ("Štajerska", "Pohorje – Rogla", 46.45, 15.33, 1450, "kisla"),
+    ("Štajerska", "Pohorje – Areh", 46.50, 15.52, 1200, "kisla"),
+    ("Štajerska", "Pohorje – Zreče, Skomarje", 46.40, 15.40, 900, "kisla"),
+    ("Štajerska", "Kozjak", 46.60, 15.48, 700, "kisla"),
+    ("Štajerska", "Boč", 46.28, 15.60, 700, "bazicna"),
+    ("Štajerska", "Donačka gora", 46.26, 15.74, 600, "bazicna"),
+    ("Štajerska", "Haloze", 46.30, 15.95, 300, ""),
+    ("Pomurje", "Goričko", 46.85, 16.10, 300, "kisla"),
+    ("Pomurje", "Ob Muri – Veržej", 46.58, 16.17, 170, "vlazna"),
+    ("Dolenjska in Posavje", "Kum", 46.08, 15.05, 800, "bazicna"),
+    ("Dolenjska in Posavje", "Gorjanci", 45.80, 15.32, 800, "bazicna"),
+    ("Dolenjska in Posavje", "Krakovski gozd", 45.83, 15.43, 150, "vlazna"),
+    ("Dolenjska in Posavje", "Kočevski Rog", 45.67, 14.85, 850, "bazicna"),
+    ("Dolenjska in Posavje", "Kočevska – Stojna", 45.62, 14.78, 800, "bazicna"),
+    ("Dolenjska in Posavje", "Bela krajina", 45.55, 15.18, 250, ""),
+    ("Notranjska in Kras", "Snežnik", 45.60, 14.40, 1000, "bazicna"),
+    ("Notranjska in Kras", "Javorniki", 45.70, 14.30, 800, "bazicna"),
+    ("Notranjska in Kras", "Nanos", 45.77, 14.00, 800, "bazicna"),
+    ("Notranjska in Kras", "Krimsko hribovje", 45.91, 14.46, 800, "bazicna"),
+    ("Notranjska in Kras", "Polhograjsko hribovje", 46.06, 14.28, 600, ""),
+    ("Notranjska in Kras", "Brkini", 45.55, 14.10, 500, ""),
+    ("Primorska", "Kras", 45.78, 13.85, 300, "bazicna"),
+    ("Primorska", "Slovenska Istra", 45.50, 13.85, 250, ""),
+    ("Primorska", "Trnovski gozd", 45.97, 13.82, 900, "bazicna"),
+    ("Primorska", "Idrijsko in Cerkljansko hribovje", 46.05, 13.95, 700, ""),
+]
+
+
+def _valovi_locations(rules):
+    """Območja za izbirnik: domača (Rečica, postaja IREICA1) prva, nato Zgornja Savinjska dolina
+    (območja iz species_rules.yaml, brez zaščitenih), nato druge regije (VALOVI_EXTRA_LOCATIONS).
+    Znotraj regije po abecedi. Višina je samo informativna."""
+    tr = str.maketrans({"č": "c~", "š": "s~", "ž": "z~"})
+    key = lambda x: (not x["home"], x["n"].lower().translate(tr))
+    base = sorted(({"n": l["name"], "lat": float(l["lat"]), "lon": float(l["lon"]), "t": l.get("terrain") or "",
+                    "e": int(l.get("elev_m", 0)), "home": bool(l.get("home")), "r": "Zgornja Savinjska dolina"}
+                   for l in rules.get("locations", []) if not l.get("protected")), key=key)
+    names = {x["n"] for x in base}
+    extra = []
+    for r, n, la, lo, e, t in VALOVI_EXTRA_LOCATIONS:
+        assert n not in names, n
+        extra.append({"n": n, "lat": la, "lon": lo, "t": t, "e": e, "home": False, "r": r})
+    extra.sort(key=lambda x: (x["r"].translate(tr), x["n"].lower().translate(tr)))
+    return base + extra
 
 
 def valovi_widget_html():
@@ -4462,6 +4606,8 @@ def valovi_widget_html():
     cfg["lat"], cfg["lon"] = float(rloc.get("lat", 46.326)), float(rloc.get("lon", 14.921))
     cfg["airShoulder"] = float(rules["scoring"]["temperature"]["air_shoulder_c"])
     cfg["rainMm"] = VALOVI_RAIN_MM
+    cfg["lookback"] = VALOVI_LOOKBACK_DAYS
+    cfg["pastDays"] = VALOVI_STATION_DAYS
     sm_c, hm_c = rules["scoring"]["soil_moisture"], rules["scoring"]["humidity"]
     cfg["sm"] = {"dry": float(sm_c["dry"]), "full": float(sm_c["full"])}
     cfg["hum"] = {"rhLow": float(hm_c["rh_low"]), "rhFull": float(hm_c["rh_full"]), "spread": float(hm_c["dewpoint_spread_full"])}
@@ -4481,7 +4627,9 @@ def valovi_widget_html():
     cutoff = (TODAY - _dt.timedelta(days=VALOVI_STATION_DAYS)).isoformat()
     station = {d: round(mm, 1) for d, mm in sorted(gm.load_station_precip().items())
                if cutoff <= d <= TODAY.isoformat()}
+    locs = _valovi_locations(rules)
     js = "<script>" + (VALOVI_JS
+        .replace("__LOCS__", _json_mod.dumps(locs, ensure_ascii=False, separators=(",", ":")))
         .replace("__GROUPS__", _json_mod.dumps(groups, ensure_ascii=False))
         .replace("__MAXDAY__", str(VALOVI_MAXDAY))
         .replace("__DEFAULTS__", _json_mod.dumps(events))
@@ -4502,10 +4650,13 @@ def valovi_widget_html():
             '    <p class="gp-val-suggest" id="gvalSuggest">V zadnjih ' + str(VALOVI_LOOKBACK_DAYS) + ' dneh ni bilo '
             f'dežja nad {VALOVI_RAIN_MM} mm — če veš za manjši, a pomemben dogodek, vnesi datum in količino ročno.</p>\n')
     measured_btn = (
-        '      <button type="button" id="gvalMeasured" class="gp-val-clear">' + _vi('dez', 18) + 'Uporabi izmerjeni dež</button>\n'
-        if events else '')
+        '      <button type="button" id="gvalMeasured" class="gp-val-clear">' + _vi('dez', 18) + '<span id="gvalMeasLab">Uporabi izmerjeni dež</span></button>\n')
     return (
         '  <div class="gp-val-card">\n'
+        '    <div class="gp-vlab">Območje</div>\n'
+        '    <div class="gp-val-sel"><select id="gvalLoc" aria-label="Območje v Sloveniji"></select></div>\n'
+        '    <div class="gp-val-inrow"><button type="button" id="gvalGeo" class="gp-val-clear">' + _vi('plus', 18) + 'Najbližje območje</button></div>\n'
+        '    <p class="gp-val-tnote" id="gvalLocNote"></p>\n'
         '    <div class="gp-vstep"><b>1</b>Padavine</div>\n'
         '    <p class="gp-val-inlabel">Dodaj do ' + str(VALOVI_MAX_EVENTS) + ' pomembnejše padavinske dogodke.</p>\n'
         '    <div class="gp-val-events" id="gvalEvents"></div>\n'
@@ -4523,9 +4674,9 @@ def valovi_widget_html():
         '    <div class="gp-pv-seg" id="gvalTerChips" role="group" aria-label="Teren"></div>\n'
         '    <div class="gp-val-sel" hidden><select id="gvalTerrain" aria-label="Teren"></select></div>\n'
         '    <p class="gp-val-tnote" id="gvalTerrainNote"></p>\n'
-        '    <label class="gp-pv-switch"><span class="t"><strong>Padavine s postaje IREICA1</strong>'
-        '<small>Zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni; dnevi, ki jih nisi vnesel, se prištejejo k predhodnim padavinam. '
-        'To ni meritev vlage tal. Izklopi za drug kraj.</small></span><input type="checkbox" id="gvalStation" checked></label>\n'
+        '    <label class="gp-pv-switch"><span class="t"><strong id="gvalStationTitle">Padavine s postaje IREICA1</strong>'
+        '<small id="gvalStationSub">Zadnjih ' + str(VALOVI_STATION_DAYS) + ' dni; dnevi, ki jih nisi vnesel, se prištejejo k predhodnim padavinam. '
+        'To ni meritev vlage tal.</small></span><input type="checkbox" id="gvalStation" checked></label>\n'
         '    <label class="gp-pv-switch"><span class="t"><strong>Napoved dežja</strong>'
         '<small>Open-Meteo, do 7 dni. Modelska in negotova; napovedan izdaten dež (vsaj ' + str(VALOVI_RAIN_MM) + ' mm) se doda kot dogodek '
         'z oznako napoved.</small></span><input type="checkbox" id="gvalFc" checked></label>\n'
@@ -4548,7 +4699,7 @@ def valovi_widget_html():
         '    </details>\n'
         '    <details class="gp-val-why"><summary>' + _vi('info', 20) + 'Kako deluje model?</summary>'
         '<p class="gp-val-tnote" style="margin-top:0">Isti dež ne prebudi vseh gob hkrati. Razkrojevalke stelje, lesne in '
-        'mikorizne vrste imajo vsaka svoj zamik med padavinami in trosnjakom. Model za Rečico zato vsaki vrsti padavinsko '
+        'mikorizne vrste imajo vsaka svoj zamik med padavinami in trosnjakom. Model zato vsaki vrsti padavinsko '
         'okno premakne nazaj po časovnici. Za vsako vrsto sešteje dež v oknu njenega zamika (prag je izpeljan iz '
         '7-dnevnega praga vrste, preračunanega na dolžino okna) in dež v ' + str(gm.BASE_WINDOW_DAYS) +
         ' dneh predhodnih padavin; oceni se stehtata kot v napovedi. Preveč dežja model šteje kot prenamočenost in oceno zniža. '
@@ -4602,12 +4753,12 @@ def build_valovi_page():
   </header>
   <div class="gp-pv-chips">''' + chips + '''</div>
 '''
-            '  <p class="post-meta">Vnesi, kdaj in koliko je deževalo, in poglej, kdaj se začne in konča modelsko okno rasti.</p>\n'
+            '  <p class="post-meta">Izberi območje in vnesi, kdaj in koliko je deževalo, in poglej, kdaj se začne in konča modelsko okno rasti.</p>\n'
             + valovi_widget_html())
     return subpage_shell(
         "valovi", "Kalkulator rasti gob po dežju",
         "Vnesi datum zadnjega izdatnega dežja in preveri, kdaj se začne okno rasti razkrojevalk, lesnih in "
-        "mikoriznih gob ter ali je danes znotraj njega. Za Rečico ob Savinji.",
+        "mikoriznih gob ter ali je danes znotraj njega. Za izbrano območje v Sloveniji, privzeto Rečica ob Savinji.",
         "Kalkulator rasti", body, brand=VALOVI_BRAND)
 
 
