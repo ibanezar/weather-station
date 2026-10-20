@@ -3819,8 +3819,10 @@ VALOVI_JS = r"""(function(){
     return affinity === terrain ? gcfg.match : gcfg.mismatch;
   }
   function fillSelects(){
+    var grp = null, grpName = null;
     LOCS.forEach(function(l){
-      var o = document.createElement('option'); o.value = l.n; o.textContent = l.n + (l.home ? ' (postaja IREICA1)' : ''); locSel.appendChild(o);
+      if (l.r !== grpName){ grpName = l.r; grp = document.createElement('optgroup'); grp.label = l.r; locSel.appendChild(grp); }
+      var o = document.createElement('option'); o.value = l.n; o.textContent = l.n + (l.home ? ' (postaja IREICA1)' : ''); grp.appendChild(o);
     });
     whatSel.innerHTML = '<option value="all">Vse skupine</option>';
     GROUPS.forEach(function(g){
@@ -4483,7 +4485,7 @@ VALOVI_JS = r"""(function(){
     if (sugEl) sugEl.textContent = loc.home ? SUG_HOME : 'Predlagano iz modelskega dežja Open-Meteo za območje ' + loc.n + ' (do ' + MAXEV + ' zadnji dnevi z ≥ ' + CFG.rainMm + ' mm). Datum in količino lahko spremeniš, kadar imaš točnejši podatek.';
     if (locNote) locNote.textContent = loc.home
       ? 'Rečica ob Savinji: dež je izmerjen na postaji IREICA1, temperatura, vlaga in napoved so Open-Meteo.'
-      : 'Točka območja na ' + loc.e + ' m: dež, napoved, temperatura in vlaga so modelski podatki Open-Meteo, ne meritve. Teren je prednastavljen glede na območje.';
+      : 'Orientacijska točka območja na ' + loc.e + ' m: dež, napoved, temperatura in vlaga so modelski podatki Open-Meteo, ne meritve. Teren je prednastavljen glede na območje.';
   }
   function setLoc(l){
     if (!l || l === loc) { if (l) locSel.value = l.n; return; }
@@ -4506,9 +4508,9 @@ VALOVI_JS = r"""(function(){
       navigator.geolocation.getCurrentPosition(function(p){
         var best = null, bd = 1e9;
         LOCS.forEach(function(l){ var d = km(p.coords.latitude, p.coords.longitude, l.lat, l.lon); if (d < bd){ bd = d; best = l; } });
-        if (best && bd <= 40) setLoc(best);
+        if (best && bd <= 50) setLoc(best);
         else locNote.textContent = 'V bližini ni območja' + (best ? ' (najbližje: ' + best.n + ', ' + Math.round(bd) + ' km)' : '') + '. Izberi ga s seznama.';
-        if (best && bd <= 40) locNote.textContent = 'Najbližje območje (' + Math.round(bd) + ' km): ' + best.n + '. ' + locNote.textContent;
+        if (best && bd <= 50) locNote.textContent = 'Najbližje območje (' + Math.round(bd) + ' km): ' + best.n + '. ' + locNote.textContent;
       }, function(){ locNote.textContent = 'Lokacije ni mogoče prebrati. Izberi območje s seznama.'; }, { timeout: 8000, maximumAge: 600000 });
     });
   }
@@ -4516,15 +4518,64 @@ VALOVI_JS = r"""(function(){
 })();"""
 
 
+# Znana gobarska območja zunaj Zgornje Savinjske doline (samo za kalkulator /valovi/; glavna napoved
+# in premium payload ostaneta pri območjih iz species_rules.yaml). Točke so ORIENTACIJSKA SREDIŠČA
+# območij (±5 km), teren je grobo po geološki podlagi ("" = nevtralno / mešano). Dež in vreme sta
+# modelska podatka Open-Meteo za to točko -- ne vsebujeta lokalnih razlik v območju.
+VALOVI_EXTRA_LOCATIONS = [
+    # (regija, ime, lat, lon, višina m, teren)
+    ("Gorenjska", "Pokljuka", 46.34, 13.96, 1200, "bazicna"),
+    ("Gorenjska", "Jelovica", 46.28, 14.10, 1000, "bazicna"),
+    ("Gorenjska", "Mežakla", 46.43, 14.02, 1100, "bazicna"),
+    ("Gorenjska", "Škofjeloško hribovje", 46.17, 14.22, 700, "kisla"),
+    ("Gorenjska", "Velika planina (Kamnik)", 46.30, 14.62, 1300, "bazicna"),
+    ("Koroška", "Peca", 46.44, 14.78, 1200, "bazicna"),
+    ("Koroška", "Strojna", 46.53, 14.93, 800, "kisla"),
+    ("Koroška", "Uršlja gora", 46.47, 14.99, 1100, ""),
+    ("Štajerska", "Pohorje – Rogla", 46.45, 15.33, 1450, "kisla"),
+    ("Štajerska", "Pohorje – Areh", 46.50, 15.52, 1200, "kisla"),
+    ("Štajerska", "Pohorje – Zreče, Skomarje", 46.40, 15.40, 900, "kisla"),
+    ("Štajerska", "Kozjak", 46.60, 15.48, 700, "kisla"),
+    ("Štajerska", "Boč", 46.28, 15.60, 700, "bazicna"),
+    ("Štajerska", "Donačka gora", 46.26, 15.74, 600, "bazicna"),
+    ("Štajerska", "Haloze", 46.30, 15.95, 300, ""),
+    ("Pomurje", "Goričko", 46.85, 16.10, 300, "kisla"),
+    ("Pomurje", "Ob Muri – Veržej", 46.58, 16.17, 170, "vlazna"),
+    ("Dolenjska in Posavje", "Kum", 46.08, 15.05, 800, "bazicna"),
+    ("Dolenjska in Posavje", "Gorjanci", 45.80, 15.32, 800, "bazicna"),
+    ("Dolenjska in Posavje", "Krakovski gozd", 45.83, 15.43, 150, "vlazna"),
+    ("Dolenjska in Posavje", "Kočevski Rog", 45.67, 14.85, 850, "bazicna"),
+    ("Dolenjska in Posavje", "Kočevska – Stojna", 45.62, 14.78, 800, "bazicna"),
+    ("Dolenjska in Posavje", "Bela krajina", 45.55, 15.18, 250, ""),
+    ("Notranjska in Kras", "Snežnik", 45.60, 14.40, 1000, "bazicna"),
+    ("Notranjska in Kras", "Javorniki", 45.70, 14.30, 800, "bazicna"),
+    ("Notranjska in Kras", "Nanos", 45.77, 14.00, 800, "bazicna"),
+    ("Notranjska in Kras", "Krimsko hribovje", 45.91, 14.46, 800, "bazicna"),
+    ("Notranjska in Kras", "Polhograjsko hribovje", 46.06, 14.28, 600, ""),
+    ("Notranjska in Kras", "Brkini", 45.55, 14.10, 500, ""),
+    ("Primorska", "Kras", 45.78, 13.85, 300, "bazicna"),
+    ("Primorska", "Slovenska Istra", 45.50, 13.85, 250, ""),
+    ("Primorska", "Trnovski gozd", 45.97, 13.82, 900, "bazicna"),
+    ("Primorska", "Idrijsko in Cerkljansko hribovje", 46.05, 13.95, 700, ""),
+]
+
+
 def _valovi_locations(rules):
-    """Območja za izbirnik: domača (Rečica, postaja IREICA1) prva, ostala po abecedi.
-    Zaščitena območja so izpuščena, kot povsod drugje. Višina je samo informativna."""
+    """Območja za izbirnik: domača (Rečica, postaja IREICA1) prva, nato Zgornja Savinjska dolina
+    (območja iz species_rules.yaml, brez zaščitenih), nato druge regije (VALOVI_EXTRA_LOCATIONS).
+    Znotraj regije po abecedi. Višina je samo informativna."""
     tr = str.maketrans({"č": "c~", "š": "s~", "ž": "z~"})
-    out = [{"n": l["name"], "lat": float(l["lat"]), "lon": float(l["lon"]), "t": l.get("terrain", ""),
-            "e": int(l.get("elev_m", 0)), "home": bool(l.get("home"))}
-           for l in rules.get("locations", []) if not l.get("protected")]
-    out.sort(key=lambda x: (not x["home"], x["n"].lower().translate(tr)))
-    return out
+    key = lambda x: (not x["home"], x["n"].lower().translate(tr))
+    base = sorted(({"n": l["name"], "lat": float(l["lat"]), "lon": float(l["lon"]), "t": l.get("terrain") or "",
+                    "e": int(l.get("elev_m", 0)), "home": bool(l.get("home")), "r": "Zgornja Savinjska dolina"}
+                   for l in rules.get("locations", []) if not l.get("protected")), key=key)
+    names = {x["n"] for x in base}
+    extra = []
+    for r, n, la, lo, e, t in VALOVI_EXTRA_LOCATIONS:
+        assert n not in names, n
+        extra.append({"n": n, "lat": la, "lon": lo, "t": t, "e": e, "home": False, "r": r})
+    extra.sort(key=lambda x: (x["r"].translate(tr), x["n"].lower().translate(tr)))
+    return base + extra
 
 
 def valovi_widget_html():
