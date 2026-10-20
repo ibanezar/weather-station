@@ -391,6 +391,11 @@ def konstante_workerja():
     teor = L / vmax
     check(0.85 * teor <= min_s <= teor, "Črnivec igra: CRN_IGRA_MIN_S",
           f"worker={min_s} s; najhitrejša možna vožnja L/VMAX = {L}/{vmax} = {teor:.1f} s (pričakovano 0,85–1,0 tega)")
+    # snežna karta: odmik meje sneženja pod ničto izotermo
+    import winter_engine as we
+    off = js("worker.js", ["SK_SNOW_LINE_OFFSET_M"], [{"expr": "SK_SNOW_LINE_OFFSET_M"}])[0]
+    check(off == we.SNOW_LEVEL_OFFSET_M, "snežna karta: SK_SNOW_LINE_OFFSET_M",
+          f"worker={off} winter_engine={we.SNOW_LEVEL_OFFSET_M}")
     # opažanja gob: količine
     kol = js("worker.js", ["KOLICINE"], [{"expr": "KOLICINE"}])[0]
     html = js_src("tools/generate_gobe_page.py")

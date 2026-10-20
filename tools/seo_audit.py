@@ -83,6 +83,7 @@ CORE = {
     "zima/meja-snezenja/":       ("daily",   "0.7"),
     "zima/poledica/":            ("daily",   "0.7"),
     "zima/zled/":                ("daily",   "0.7"),
+    "zima/snezna-karta/":        ("daily",   "0.7"),
     "vreme-v-gorah/":            ("daily",   "0.7"),
     "zima/kurilni-semafor/":     ("daily",   "0.7"),
     "zima/nad-meglo/":           ("daily",   "0.7"),

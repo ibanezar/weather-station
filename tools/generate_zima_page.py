@@ -19,6 +19,7 @@ lahko prerenderirajo brez ponovnega klica Open-Meteo:
 
   /zima/                    — hub: povzetek vseh indeksov za danes/jutri + sezonski dnevnik
   /zima/meja-snezenja/      — meja sneženja po višinskih pasovih + 7-dnevni trend
+  /zima/snezna-karta/       — karta Slovenije: sneženje po urah, meja, skupni novi sneg (JS + worker)
   /zima/poledica/           — tveganje poledice po krajih v dolini + 7-dnevni pregled
   /zima/zled/               — žled (dež, ki zmrzuje): modelski pokazatelj + sondaža ARSO + razlaga
   /zima/kurilni-semafor/    — ocena prevetrenosti za kurjenje + 7-dnevni graf
@@ -128,6 +129,12 @@ ZIMA_ACCENT = {
     "snowpack": "#f472b6",
     "passes": "#fbbf24",
 }
+
+
+def snow_map_assets():
+    import generate_snezna_karta_page as sk
+    sk.write_assets()
+    return sk.head_assets()
 
 
 def _rgba(hex_color, alpha):
@@ -764,11 +771,18 @@ def build_hub_body(data):
   preveri tudi promet.si, AMZS ali DARS.</p>
   <a class="mtn-avk-link" href="/zima/prevoznost-prelazov/">Vse podrobnosti o prelazih →</a>'''
 
+    snow_map_html = '''  <h2 class="zima-section-title">❄️ Snežna karta Slovenije</h2>
+  <p class="muted-note">Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).</p>
+  <div id="sk-app" data-compact="1" data-view="s" data-hours="24" aria-live="polite">Nalagam snežno karto …</div>'''
+
     nav_cards = f'''  <h2 class="zima-section-title">📚 Podrobno po temah</h2>
   <div class="card-grid">
     <a class="phenom-card zima-phenom" href="/zima/meja-snezenja/" style="{card_style("snow_line", "")}">
       <span class="ph-icon">{icon_html("snow_line", 30)}</span>Meja sneženja
       <div class="ph-count">{num(line_m, 0) if line_m is not None else "—"} m n. m.</div></a>
+    <a class="phenom-card zima-phenom" href="/zima/snezna-karta/" style="{card_style("snow_line", "")}">
+      <span class="ph-icon">{icon_html("snow_line", 30)}</span>Snežna karta
+      <div class="ph-count">sneženje in meja, +48 h</div></a>
     <a class="phenom-card zima-phenom" href="/zima/poledica/" style="{card_style("black_ice", "")}">
       <span class="ph-icon">{icon_html("black_ice", 30)}</span>Tveganje poledice
       <div class="ph-count">{RISK_ICON.get(worst_level, "⚪")} {RISK_LABEL.get(worst_level, "ni podatka")}</div></a>
@@ -832,6 +846,7 @@ def build_hub_body(data):
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
 {seo.stn_badge()}
 {hero_html}
+{snow_map_html}
 {chart_html}
 {conditions_html}
 {meter_html}
@@ -1353,7 +1368,7 @@ def main():
     html = seo.page_shell("MeteoZima — Zgornja Savinjska dolina",
                            "MeteoZima: meja sneženja in tveganje poledice za Zgornjo Savinjsko dolino, "
                            "posodobljeno dnevno.",
-                           "/zima/", schema, body)
+                           "/zima/", schema + "\n" + snow_map_assets(), body)
     seo.write_page("zima/index.html", html, force=True)
     print("  → zima/index.html")
 
