@@ -1,0 +1,83 @@
+16 noči pod 5 °C, prave slane pa še ni
+
+META OPIS: Do 20. oktobra je bilo v Rečici 16 noči pod 5 °C, a nobene z mrazom. Model MTR za petek kaže 0,1 °C. Kaj kažejo podatki šestih jeseni?
+
+UVOD
+Od 1. septembra do 20. oktobra je postaja v Rečici 16-krat izmerila manj kot 5 °C. Toliko hladnih noči v istem obdobju ni bilo v nobeni od prejšnjih šestih jeseni. A niti ena noč ni padla pod ničlo: najbližje je bila 4. oktobra z 1,7 °C. Prva prava slana, pri kateri se tudi termometer spusti do ničle ali pod njo, torej še ni bila. Napoved modela MTR za petek zjutraj pa kaže 0,1 °C.
+
+01 — NOČI -- Šestnajst hladnih noči, nobene ničle
+
+Kratek odgovor: slana na travi je že bila, prave zmrzali na termometru pa še ni. Postaja meri temperaturo zraka na višini približno 1,5–2 m. Ko tu piše 0 °C ali manj, ji pravim prva ničelna noč, in to število lahko primerjam med leti.
+
+16 nočipod 5 °C od 1. 9. do 20. 10. Najbolj od vseh šestih prejšnjih jeseni.
+
+1,7 °Cnajnižja letošnja temperatura (4. 10.). Do ničle je zmanjkalo 1,7 stopinje.
+
+48 %verjetnost mraza v petek zjutraj po modelu MTR; napovedana najnižja temperatura 0,1 °C.
+
+Najnižja temperatura vsake noči od 1. septembra
+
+pod 3 °C od 3 do 5 °C 5 °C ali več napoved MTR (22.–24. 10.)
+
+Vsak stolpec je ena noč: najnižja temperatura zraka, ki jo je izmerila postaja IREICA1 (zunanji senzor). Črtkani stolpci so napoved modela MTR za naslednje tri dni; za današnji dan podatka še ni. Črtkana črta pri 0 °C je meja, ki jo šteje ta članek.
+
+Najhladnejše noči so bile 4. oktobra (1,7 °C), 6. oktobra (1,8 °C) in 13. oktobra (2,1 °C). Za primerjavo: največ hladnih noči v istem obdobju je bilo doslej leta 2020 (14), najmanj pa leta 2023 (3) in 2024 (4). Prag 5 °C sem izbral sam; je zgolj merilo za to primerjavo, ne uradna meja.
+
+02 — RAZLOG -- Topli popoldnevi, mrzla jutra
+
+Hladnih noči ne pojasni hladna jesen. Med 1. in 20. oktobrom je bila povprečna najvišja dnevna temperatura 19,7 °C, kar je tretja najvišja vrednost od šestih let.
+
+Razlika med popoldnevom in jutrom je v povprečju znašala 14,0 °C, največ v teh letih. Lani je bila 12,2 °C, leta 2024 samo 7,7 °C. Tak vzorec – topli popoldnevi in hladna jutra – je značilen za jasno in mirno vreme: ponoči tla oddajajo toploto proti nebu, čez dan pa jih sonce spet ogreje. Kako to deluje, sem pojasnil že 23. septembra.
+
+Oktober je bil tudi suh: do 20. oktobra je padlo 23,4 mm padavin. Leta 2020 in 2024 je v istem obdobju padlo več kot 170 mm. Zakaj tudi take noči niso prišle do ničle, iz teh podatkov ne morem reči zanesljivo. Verjetno je manjkalo še nekaj stopinj hladnejše zračne mase: jasna noč ohladi zrak ob tleh, vendar le do mere, ki jo dovoli zračna masa nad dolino.
+
+03 — TRAVA -- Na travi je slana že bila, na termometru ne
+
+Na travniku v Nizki je bila 4. oktobra ob 8.35 trava bela od slane, postaja pa je kazala 1,7 °C. O tem sem pisal v članku o slani pri 1,7 °C. To ni protislovje, ker slana in zmrzal nista isto.
+
+Slana je led, ki se nabere na hladni površini, na primer na travi, avtu ali strehi. Pojavi se lahko že, ko je zrak še nekaj stopinj nad ničlo.
+
+Zmrzal pomeni 0 °C ali manj v zraku na višini merjenja. Samo to štejem v tem članku.
+
+Na odprtem travniku ali v mrazišču je ob jasni noči lahko hladneje kot na postaji. Če imate vrt, je zato dobro misliti na jasno in mirno jutro, tudi ko številka v napovedi še ni ničla.
+
+04 — KDAJ -- Kdaj bo prva ničla? Morda že v petek
+
+Kdaj je postaja prvič izmerila 0 °C ali manj
+
+Siva črta pomeni čakanje od 1. septembra, moder krog prvo noč z 0 °C ali manj. Oranžna črta je letošnje čakanje do 20. oktobra, prazen romb pa petek, ko model MTR kaže 0,1 °C.
+
+V šestih letih je prva ničelna noč prišla 3. oktobra (2025), 13. oktobra (2021), 14. oktobra (2020), 17. oktobra (2023), 4. novembra (2024) in 20. novembra (2022). Tri leta je torej prišla do 14. oktobra, tri leta po 17. oktobru. Letos smo 20. oktobra še brez nje. To ni rekord: leta 2022 in 2024 je bilo čakanje daljše.
+
+Petek, 23. oktobra. Napoved z 21. oktobra: model MTR pričakuje 0,1 °C in ocenjuje 48-odstotno verjetnost zmrzali. Surovi model Open-Meteo kaže 2,6 °C, ansambel Google WeatherNext 2 pa mediano 3,5 °C (razpon od 1,9 do 4,9 °C). Modeli se torej ne strinjajo. MTR je naučen na meritvah postaje in zna upoštevati dno doline, zato tokrat surovo vrednost popravi za 2,5 °C navzdol.
+
+MTR je poskusen model in se lahko moti v obe smeri. V preizkusu na 366 preteklih dneh je bila zmrzal pri napovedih med 30 in 70 % pogostejša od napovedane. To ni zagotovilo za petek, je pa razlog, da 0,1 °C ne jemljem kot zanesljivo številko.
+
+V soboto sledi ohladitev in dež: najvišja temperatura okoli 8 °C, po Open-Meteo okoli 34 mm padavin (količin MTR ne popravlja).
+
+05 — PRAKTIČNO -- Kaj lahko naredite
+
+Vrt in balkon: če imate še kaj, kar mraza ne prenese, je petkovo jutro razlog, da rastline pokrijete ali vnesete v hišo. Na travniku ali v mrazišču je lahko hladneje kot na postaji.
+
+Gobarji: prva slana gobarske sezone ne konča. V vseh štirih letih, ko je prva ničelna noč prišla oktobra, je bil vrh opažanj gob šele po njej. Več v članku o slani in gobah.
+
+Preizkusite sami: v igri Prehiti model napovejte jutrišnjo najnižjo temperaturo in jo primerjajte z modeli in meritvijo postaje.
+
+Spremljajte v živo: trenutna meritev je na naslovni strani.
+
+06 — OMEJITVE -- Česa podatki ne povedo
+
+Šest let je malo. Postaja meri od novembra 2019, zato so primerjave samo med jesenmi 2020–2025. Če sta dve leti poznejši od ostalih, to še ni trend.
+
+Ena postaja, ena točka. Postaja stoji na dnu doline v Rečici ob Savinji. Na travi, v mrazišču ali na višjih legah je lahko hladneje.
+
+Napoved ni meritev. Stanje je z dne 21. oktobra, ko je bil model MTR izdan; do petka se lahko spremeni. MTR je poskusen model, Open-Meteo in WeatherNext 2 sta tuja modela in nobeden ni uradno opozorilo. Za uradna opozorila velja ARSO.
+
+Prag 5 °C je moja izbira. Namenjen je primerjavi med leti.
+
+Članek je posnetek na dan objave. Po prvi ničelni noči se samodejno ne spremeni.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Viri: postaja IREICA1 (najnižja in najvišja dnevna temperatura, padavine, zunanji senzor, od 7. 11. 2019); model MTR (napoved-modela.json, izdan 21. 10. 2026); Open-Meteo; Google WeatherNext 2 (ansambel, prek Open-Meteo).

@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 18 Oct 2026 13:01:23 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 21 Oct 2026 08:23:32 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>16 noči pod 5 °C, prave slane pa še ni</title>
+      <link>https://meteorec.si/blog/16-noci-pod-5-c-slane-se-ni-1021.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/16-noci-pod-5-c-slane-se-ni-1021.html</guid>
+      <pubDate>Wed, 21 Oct 2026 08:00:00 +0000</pubDate>
+      <description>Do 20. oktobra je bilo v Rečici 16 noči pod 5 °C, a nobene z mrazom. Model MTR za petek kaže 0,1 °C. Kaj kažejo podatki šestih jeseni?</description>
+      <category>slana</category>
+      <category>zmrzal</category>
+      <category>oktober</category>
+      <category>napoved</category>
+      <category>podatki</category>
+    </item>
     <item>
       <title>Ali prva slana konča gobarsko sezono? Šest let podatkov</title>
       <link>https://meteorec.si/blog/slana-gobarska-sezona-1018.html</link>

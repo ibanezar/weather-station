@@ -2438,6 +2438,18 @@ Nadaljevanje članka o vrhu sezone (`vrh-gobarske-sezone-oktober-1014`, ta je **
 - Lektura še ni bila opravljena (`lektura.yml` je izklopljena od 2. 10. 2026); na FB/IG ne gre samodejno (nova vrsta
   vsebine), po pregledu ga pošlji s `social-repost.yml`.
 
+## 16 noči pod 5 °C, prave slane pa še ni (`/blog/16-noci-pod-5-c-slane-se-ni-1021.html`, 21. 10. 2026)
+
+Ročno pognan članek brez tabel (dva grafa + ploščice), ne del nobenega workflowa. `tools/generate_slane_se_ni_post.py`
+bere samo `history.json` (zunanji `tempLow`/`tempHigh`/`precipTotal`) in `napoved-modela.json`.
+
+- **Časovno vezan posnetek**: zadnji dan v `history.json` mora biti 20. 10. in napoved modela mora biti današnja, sicer
+  generator pade (assert-i). Ko postaja prvič izmeri ≤ 0 °C, `first_freeze(H, 2026)` ni več `None` in članek je treba
+  prenoviti, ne zaobiti asserta; naravno nadaljevanje je članek »prva ničla je bila …«.
+- Prag »hladna noč« (< 5 °C) je naša izbira za primerjavo med jesenmi, ne uradna meja; napoved zmrzali (`p_frost`) je
+  poskusni MTR in je tako označena. Slana (led na površini) in zmrzal (≤ 0 °C v zraku) se razlikujeta; šteje samo zmrzal.
+- Lektura še ni bila opravljena (`lektura.yml` izklopljena); na FB/IG ne gre samodejno, po pregledu s `social-repost.yml`.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
