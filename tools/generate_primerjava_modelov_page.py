@@ -130,7 +130,8 @@ JS = r"""<script>
   var MODELS=[
     {id:"icon_d2",label:"ICON-D2",col:"#38bdf8"},
     {id:"icon_eu",label:"ICON-EU",col:"#f59e0b"},
-    {id:"ecmwf_ifs025",label:"ECMWF IFS",col:"#a78bfa"},
+    {id:"ecmwf_ifs",label:"ECMWF IFS 9 km",col:"#e879f9"},
+    {id:"ecmwf_ifs025",label:"ECMWF IFS 25 km",col:"#a78bfa"},
     {id:"arome",label:"AROME (GeoSphere)",col:"#34d399"}
   ];
   var VARS={
@@ -157,10 +158,10 @@ JS = r"""<script>
   function loadOpenMeteo(){
     var u="https://api.open-meteo.com/v1/forecast?latitude="+LAT+"&longitude="+LON+
       "&hourly=temperature_2m,precipitation,wind_gusts_10m,cloud_cover"+
-      "&models=icon_d2,icon_eu,ecmwf_ifs025&forecast_days=3&timezone=UTC";
+      "&models=icon_d2,icon_eu,ecmwf_ifs,ecmwf_ifs025&forecast_days=3&timezone=UTC";
     return get(u).then(function(j){
       var H=j.hourly, t=H.time.map(function(s){ return Date.parse(s+":00Z"); }), out={};
-      ["icon_d2","icon_eu","ecmwf_ifs025"].forEach(function(m){
+      ["icon_d2","icon_eu","ecmwf_ifs","ecmwf_ifs025"].forEach(function(m){
         out[m]={t:t,temp:H["temperature_2m_"+m],rain:H["precipitation_"+m],
                 gust:H["wind_gusts_10m_"+m],cloud:H["cloud_cover_"+m]};
       });
@@ -508,8 +509,8 @@ def build_body():
     return f'''{seo.crumbs_html([("Meteorec", "/"), ("Primerjava modelov", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Primerjava vremenskih modelov za Rečico ob Savinji</h1>
-  <p class="post-meta">ICON-D2 · ICON-EU · ECMWF IFS · AROME (GeoSphere) — zadnji tek vsakega modela, v živo</p>
-  <p class="archive-intro">Isti kraj, isti čas, štirje modeli. Kjer se črte ujemajo, je napoved zanesljiva;
+  <p class="post-meta">ICON-D2 · ICON-EU · ECMWF IFS (9 in 25 km) · AROME (GeoSphere) — zadnji tek vsakega modela, v živo</p>
+  <p class="archive-intro">Isti kraj, isti čas, pet izhodov modelov. Kjer se črte ujemajo, je napoved zanesljiva;
   kjer se razhajajo, je negotova — in prav takrat se splača pogledati, kateri model je doslej v naši dolini
   držal bolje (spodaj). Gre za neposredne izhode modelov, ne za uradno napoved.</p>
   <div id="pm-app" aria-live="polite">Nalagam napovedi modelov …</div>
@@ -523,13 +524,14 @@ def build_body():
     <tr><th>Model</th><th>Izdajatelj</th><th>Mreža</th><th>Doseg</th></tr>
     <tr><th>ICON-D2</th><th>DWD (Nemčija)</th><td>~2 km</td><td>48 ur, Srednja Evropa</td></tr>
     <tr><th>ICON-EU</th><th>DWD (Nemčija)</th><td>~6,5 km</td><td>120 ur, Evropa</td></tr>
-    <tr><th>ECMWF IFS</th><th>ECMWF</th><td>~25 km</td><td>10 dni, svet</td></tr>
+    <tr><th>ECMWF IFS 9 km</th><th>ECMWF</th><td>~9 km</td><td>10 dni, svet; prosti podatki z 2-urnim zamikom (od 20. 10. 2026)</td></tr>
+    <tr><th>ECMWF IFS 25 km</th><th>ECMWF</th><td>~25 km</td><td>10 dni, svet</td></tr>
     <tr><th>AROME + ansambel</th><th>GeoSphere Austria</th><td>2,5 km</td><td>60 ur, Alpe in okolica</td></tr>
   </table></div>
   <p class="archive-intro">Vrednosti so za najbližjo mrežno celico točke postaje IREICA1 (Open-Meteo) oziroma
   za celico AROME, ki ji leži najbliže. Nobena celica ne razloči dna ozke doline, zato modelska temperatura ponoči
   praviloma ni enaka izmerjeni — to meri <a href="/test-napovedi/" style="color:var(--blue)">test napovedi</a>.
-  Viri: Open-Meteo (open-meteo.com), GeoSphere Austria (data.hub.geosphere.at, licenca CC BY 4.0).</p>
+  Viri: Open-Meteo (open-meteo.com), ECMWF (podatke je treba navesti: ECMWF), GeoSphere Austria (data.hub.geosphere.at, licenca CC BY 4.0).</p>
 {faq}
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
