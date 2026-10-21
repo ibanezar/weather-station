@@ -3340,3 +3340,21 @@ html[data-mode="simple"] .wrap{max-width:860px}
   #tab-current.active>.card--wide,#tab-current.active>.card--sm{grid-column:1/-1}
   #tab-current.active>.card--tall{grid-row:auto}
 }
+
+/* ── Faza 5 redizajna: skeleton loaderji ─────────────────────────────────
+   Nadomestijo golo »Nalaganje…« (tools/skeletonize.py). Višina trakov je rezervirana, svetlikanje
+   samo ob no-preference (3 ponovitve, kot .skel-shimmer), sicer statični trakovi. Skrito besedilo
+   (.visually-hidden) ostane za bralnike. aria-busy upravlja _skelWatch() v app.js. */
+:root{--skel-bg:var(--c-line);--skel-hi:rgba(255,255,255,.55)}
+[data-theme="dark"]{--skel-hi:rgba(230,237,232,.09)}
+.skel-wrap{min-height:3.6rem;padding:.5rem 0}
+.skel{display:flex;flex-direction:column;gap:.55rem;min-width:0}
+.skel-bars{display:flex;flex-direction:column;gap:.55rem;width:100%}
+.skel-bars i{display:block;height:.8rem;border-radius:var(--r-sm);background:var(--skel-bg)}
+.skel-bars i:nth-child(1){width:92%}.skel-bars i:nth-child(2){width:78%}.skel-bars i:nth-child(3){width:56%}
+.skel-inline{display:inline-block;width:7ch;height:.8em;vertical-align:-.1em;border-radius:var(--r-sm);background:var(--skel-bg)}
+@media (prefers-reduced-motion:no-preference){
+  .skel-bars i,.skel-inline{background:linear-gradient(90deg,var(--skel-bg) 30%,var(--skel-hi) 50%,var(--skel-bg) 70%);background-size:200% 100%;animation:skel-shimmer 1.6s ease-in-out 3}
+}
+/* rezervirana višina besedilnih kartic (tipično 3 vrstice), da zamenjava skeletona ne premakne strani */
+.why-text,.ai-brief-text{min-height:4.8rem}

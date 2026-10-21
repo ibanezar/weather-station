@@ -109,6 +109,21 @@ function _archDrain(){
 }
 
 // SVG ikona iz sprite-a v index.html (tools/emoji_to_icons.py); samo za nize, ki gredo v innerHTML
+// Skeleton (CSS: faza 5) za placeholderje, ki jih piše JS; skrito besedilo ostane za bralnike.
+const _skel=(t='Nalaganje…')=>'<span class="skel"><span class="skel-bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="visually-hidden">'+t+'</span></span>';
+// aria-busy na elementu, ki vsebuje skeleton, dokler ga JS ne zamenja z vsebino (en observer na element, ne na cel DOM).
+function _skelWatch(){
+  const done=new Set();
+  document.querySelectorAll('.skel,.skel-inline').forEach(sk=>{
+    const host=sk.closest('[id]')||sk.parentElement;
+    if(!host||done.has(host))return;done.add(host);
+    host.setAttribute('aria-busy','true');
+    const mo=new MutationObserver(()=>{
+      if(!host.querySelector('.skel,.skel-inline')){host.removeAttribute('aria-busy');mo.disconnect();}
+    });
+    mo.observe(host,{childList:true,subtree:true,characterData:true});
+  });
+}
 const _ico=n=>'<svg class="ic" aria-hidden="true"><use href="#i-'+n+'"/></svg>';
 // ── Theme ─────────────────────────────────────────────────
 const isDark = () => document.documentElement.dataset.theme === 'dark';
@@ -3808,7 +3823,7 @@ async function togglePdDetail(date,el){
   document.querySelectorAll('.pd-card').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   panel.classList.add('open');
-  panel.innerHTML='<div class="pd-detail-loading">Nalaganje urnih podatkov…</div>';
+  panel.innerHTML='<div class="pd-detail-loading">'+_skel('Nalaganje urnih podatkov…')+'</div>';
   const dt=new Date(date+'T12:00:00');
   const title=`${_PD_DAYS_FULL[dt.getDay()]}, ${dt.getDate()}. ${dt.getMonth()+1}. ${dt.getFullYear()}`;
   try{
@@ -5453,7 +5468,7 @@ function _buildAgroHop(gdd10){
     +'<div style="font-size:.66rem;color:var(--muted);margin-bottom:.85rem">Vir: <a href="https://www.ihps.si/" target="_blank" rel="noopener">IHPS</a>. Seznam ni izčrpen in se ne osvežuje samodejno.</div>'
     +'<div style="font-size:.75rem;font-weight:600;color:var(--text);margin-bottom:.35rem">🌦️ Meteorološka primernost pogojev za bolezni</div>'
     +'<div class="agro-risk-grid" id="agro-disease-grid">'
-    +'<div style="color:var(--muted);font-size:.75rem">Nalaganje podatkov …</div>'
+    +'<div>'+_skel('Nalaganje podatkov …')+'</div>'
     +'</div>';
 }
 
@@ -9593,7 +9608,7 @@ async function initSurroundings(){
         +'<button onclick="_surInit=false;initSurroundings()" style="background:none;border:1px solid var(--blue);color:var(--blue);border-radius:14px;padding:2px 12px;cursor:pointer;font-size:.72rem;margin-left:.5rem">Poskusi znova</button></div>';
     }
     const elev=document.getElementById('elev-lapse');
-    if(elev&&elev.textContent==='Nalaganje…')elev.textContent='Podatki niso dosegljivi.';
+    if(elev&&elev.textContent.includes('Nalaganje'))elev.textContent='Podatki niso dosegljivi.';
   }
 }
 
@@ -16766,6 +16781,7 @@ async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
   try{initModeUI();}catch(_){}
+  try{_skelWatch();}catch(_){}
   try{applyStationOnThisDay();}catch(_){}
   try{applyMoon();}catch(_){}
   try{applyMonthlySummary();}catch(_){}
