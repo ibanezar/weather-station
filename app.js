@@ -284,11 +284,20 @@ function feelsStyle(t){
   }
 }
 function beaufort(kmh){const s=[[1,'0','Tišina'],[5,'1','Tih zrak'],[11,'2','Lahek vetrič'],[19,'3','Blagi vetrič'],[28,'4','Zmerni vetrič'],[38,'5','Svež veter'],[49,'6','Močan veter'],[61,'7','Skoraj vihar'],[74,'8','Vihar'],[88,'9','Močan vihar'],[102,'10','Nevihta'],[117,'11','Silovit vihar'],[999,'12','Orkan']];for(const[mx,n,name]of s)if(kmh<=mx)return{n,name};return{n:'12',name:'Hurricane'};}
+// Števila v herou: prvič se preštejejo od 0, ob osvežitvah (vsakih 5 min) samo kratek prehod od prejšnje vrednosti
+// (prej so se ob vsakem osveženju začela znova pri 0). Ob prefers-reduced-motion se vrednost vpiše takoj.
+const _cuPrev={};
 function countUp(id,target,dec,unitHTML,dur){
   const el=document.getElementById(id);if(!el||isNaN(Number(target)))return;
   el.classList.remove('skel-shimmer');
-  const uHTML=unitHTML||'',t0=performance.now();
-  const step=(now)=>{const p=Math.min((now-t0)/dur,1),ease=1-Math.pow(1-p,3);el.innerHTML=(Number(target)*ease).toFixed(dec).replace('.',',')+uHTML;if(p<1)requestAnimationFrame(step);};
+  const uHTML=unitHTML||'',to=Number(target);
+  const fmt=v=>v.toFixed(dec).replace('.',',')+uHTML;
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const first=_cuPrev[id]===undefined,from=first?0:_cuPrev[id];
+  _cuPrev[id]=to;
+  if(reduce||from===to){el.innerHTML=fmt(to);return;}
+  const d=first?dur:Math.min(dur,400),t0=performance.now();
+  const step=now=>{const p=Math.max(0,Math.min((now-t0)/d,1)),ease=1-Math.pow(1-p,3);el.innerHTML=fmt(from+(to-from)*ease);if(p<1&&_cuPrev[id]===to)requestAnimationFrame(step);else if(_cuPrev[id]===to)el.innerHTML=fmt(to);};
   requestAnimationFrame(step);
 }
 
@@ -10047,9 +10056,12 @@ function spawnWxParticles(type,count){
   }
 }
 
+const _WX_DATA={night:'clear-night',sunny:'clear-day',hot:'clear-day',cloudy:'cloudy',fog:'fog',rain:'rain',heavy_rain:'rain',storm:'storm',snow:'snow'};
 function applyWeatherBg(cond){
   if(cond===_wxCond)return;
   _wxCond=cond;
+  // data-weather na <body>: CSS rahlo spremeni akcent (glej style.css, faza 7); ozadje in delce še vedno vodi spodnja koda.
+  document.body.dataset.weather=_WX_DATA[cond]||'cloudy';
   const dark=isDark();
   const t=WX_THEMES[cond]||WX_THEMES.cloudy;
   const lt=WX_LIGHT[cond]||WX_LIGHT.cloudy;
@@ -16814,11 +16826,21 @@ function _whenVisible(key,id,fn,margin){
   const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();go();}},{rootMargin:margin||'400px 0px'});
   io.observe(el);
 }
+// Grafi plavno vstopijo: kartica z grafom je pred prvim prikazom rahlo prosojna in pomaknjena, ob vstopu v vidno
+// polje se zdrsne na mesto (samo no-preference; skrit zavihek/pogled se razkrije ob prikazu; varnostni čas 8 s).
+function _revealCards(){
+  if(!('IntersectionObserver' in window)||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;
+  const cards=[...document.querySelectorAll('.chart-card')];
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('rv-pre');io.unobserve(e.target);}}),{rootMargin:'0px 0px -40px 0px'});
+  cards.forEach(c=>{const r=c.getBoundingClientRect();if(r.top>innerHeight||r.height===0){c.classList.add('rv-pre');io.observe(c);}});
+  setTimeout(()=>document.querySelectorAll('.rv-pre').forEach(c=>c.classList.remove('rv-pre')),8000);
+}
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
   try{initModeUI();}catch(_){}
   try{_skelWatch();}catch(_){}
+  try{_revealCards();}catch(_){}
   try{applyStationOnThisDay();}catch(_){}
   try{applyMoon();}catch(_){}
   try{applyMonthlySummary();}catch(_){}

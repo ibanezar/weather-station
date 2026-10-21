@@ -85,3 +85,11 @@ Playwright posnetki, `check_mobile_overflow.mjs`, `critical_css.mjs` (12 stanj),
 - Enoten `:focus-visible` obroč (`--c-accent`) za zavihke, menije, gumbe, spodnjo vrstico; `scroll-padding-bottom` pod 760 px.
 - Preverjeno s Playwright (tipkovnica): 1. Tab = skip link, Enter → `#main-content`; ArrowDown odpre meni (`aria-expanded=true`) in premika fokus; Escape zapre in vrne fokus; `aria-current` sledi `switchTab`. test_parity/privacy/freshness brez napak.
 - Za fazo 9 (axe, obstoječe stanje): `color-contrast` (več sto vozlišč, trdo kodirane barve), `region` (116: vsebina izven landmarkov), `landmark-one-main` (stran nima `<main>`; glava in noga sta v `.wrap`, zato jo je treba najprej razstaviti).
+
+## Faza 7 (opravljeno): vremenske teme in gibanje
+- `applyWeatherBg()` (`app.js`) nastavlja `body[data-weather]`: `clear-day`, `clear-night`, `cloudy`, `fog`, `rain`, `snow`, `storm` (preslikava obstoječih pogojev: `sunny`/`hot` → clear-day, `heavy_rain` → rain). `cloudy` je dodan poleg šestih iz navodila, ker ga logika že pozna.
+- `style.css`: akcent se po vremenu rahlo premakne (`--c-accent`, `--blue` ponovno prevezan); vseh 14 vrednosti (7 × 2 temi) je ≥ 5,4:1 na ozadju in površini. Ozadje `#bg` ima prehod 1,6 s. Ozadje in delce (dež, sneg, megla, zvezde, strele; ustavljeni pri `prefers-reduced-motion`) že vodi obstoječi canvas sistem, zato novega vzorca dežja/megle nisem dodajal.
+- `countUp()`: prvič šteje od 0, ob osvežitvah (5 min) kratek prehod od prejšnje vrednosti (prej vsakič znova od 0); pri `reduce` vpiše takoj; popravljen negativen začetek (rAF časovni žig pred `t0`).
+- Grafi plavno vstopijo (`_revealCards()`): kartice `.chart-card` pod pregibom so prosojne in pomaknjene 12 px, ob vstopu v vidno polje (IntersectionObserver) zdrsnejo na mesto; samo `no-preference`, varnostni čas 8 s.
+- `theme-color` še vedno prepiše `applyWeatherBg` (barva ozadja po vremenu); statična začetna vrednost iz faze 1 velja do prve meritve.
+- Preverjeno s Playwright: preslikava `data-weather` + akcent za 6 pogojev, `countUp` (0 → 12,0 → 13,5), `reduce` brez animacij, vsi vidni grafi se razkrijejo po drsenju; test_parity/privacy/freshness brez napak.

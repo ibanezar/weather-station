@@ -3367,3 +3367,24 @@ html[data-mode="simple"] .wrap{max-width:860px}
 .qn-drop summary:focus-visible,.qn-drop a:focus-visible,.qn-feat:focus-visible,.app-bottomnav a:focus-visible,.notif-btn:focus-visible,.install-btn:focus-visible,.sc-btn:focus-visible{outline:2px solid var(--c-accent);outline-offset:2px;border-radius:var(--r-sm)}
 @media(max-width:760px){html{scroll-padding-bottom:calc(4rem + env(safe-area-inset-bottom))}}
 @media (prefers-reduced-motion:reduce){.skip-link{transition:none}}
+
+/* ── Faza 7 redizajna: vremenske teme in gibanje ────────────────────────
+   body[data-weather] (nastavi applyWeatherBg): clear-day | clear-night | cloudy | fog | rain | snow | storm.
+   Rahlo premakne samo akcent (vrednosti preverjene ≥ 4,5:1 na ozadju in površini obeh tem); ozadje (#bg) in delce
+   še vodi JS. --blue je treba ponovno prevezati, ker je preslikan na :root. Vse animacije izklopi reduced-motion. */
+body[data-weather]{transition:color .6s}
+#bg{transition:background 1.6s ease}
+[data-theme="dark"] body[data-weather="clear-day"]{--c-accent:#7FC38A}[data-theme="dark"] body[data-weather="clear-night"]{--c-accent:#74BFB0}
+[data-theme="dark"] body[data-weather="cloudy"]{--c-accent:#7BBF9F}[data-theme="dark"] body[data-weather="fog"]{--c-accent:#8FB8A6}
+[data-theme="dark"] body[data-weather="rain"]{--c-accent:#6FB9B5}[data-theme="dark"] body[data-weather="snow"]{--c-accent:#8CC3D1}
+[data-theme="dark"] body[data-weather="storm"]{--c-accent:#9FB4E0}
+[data-theme="light"] body[data-weather="clear-day"]{--c-accent:#3F6B2F}[data-theme="light"] body[data-weather="clear-night"]{--c-accent:#2F6B5F}
+[data-theme="light"] body[data-weather="cloudy"]{--c-accent:#3E6B5A}[data-theme="light"] body[data-weather="fog"]{--c-accent:#4C6B5C}
+[data-theme="light"] body[data-weather="rain"]{--c-accent:#2F6670}[data-theme="light"] body[data-weather="snow"]{--c-accent:#2F6575}
+[data-theme="light"] body[data-weather="storm"]{--c-accent:#4A5E8C}
+body[data-weather]{--blue:var(--c-accent)}
+@media (prefers-reduced-motion:no-preference){
+  .chart-card{transition:opacity .6s ease,transform .6s ease,box-shadow .25s,border-color .25s,background .35s}
+  .chart-card.rv-pre{opacity:0;transform:translateY(12px)}
+}
+@media (prefers-reduced-motion:reduce){#bg,body[data-weather]{transition:none}}
