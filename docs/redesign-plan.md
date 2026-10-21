@@ -62,3 +62,10 @@ Playwright posnetki, `check_mobile_overflow.mjs`, `critical_css.mjs` (12 stanj),
 - Kartice: radij `--r-lg`, sence iz tokenov, `backdrop-filter` odstranjen.
 - Ni v tej fazi: štetje števil (faza 7), širine globljih kartic z grafi (JS riše po `clientWidth`).
 - Preverjeno: test_privacy/parity/freshness, brez vodoravnega drsenja (6 kombinacij), CLS ≤ 0,001.
+
+## Faza 4 (opravljeno): leno nalaganje naprednih razdelkov
+- Privzeti pogled ostane **napredni** (odločitev uporabnika); preprost pogled in njegov `localStorage` mehanizem sta nespremenjena.
+- `app.js`: `_whenVisible(ključ, id, fn)` (IntersectionObserver, rootMargin 400 px; brez podpore steče takoj). Element v skritem zavihku ali v preprostem pogledu je `display:none`, zato klic steče šele ob prikazu. `_visDone` pomni aktivne razdelke; intervali (`fetchValleyDuel`, `fetchPollen`) tečejo samo za že odprte.
+- Odloženo do prikaza: dolinski dvoboj (`duel-card`), cvetni prah (`pollen-grid`), biovreme (`biovreme-card`), strele (WebSocket + zgodovina, `ltg-card`), normale padavin/sonca (`pn-grid`, `sn-grid`), fenologija (`pheno-year`) in **AI napoved** (`aifc-text` na zavihku `forecast2`; prej en klic `/ai-forecast` pri vsakem nalaganju, zdaj samo ob odprtju zavihka; to je tudi strošek Workers AI).
+- Ne odloženo (potrebujejo jih hero ali drugi razdelki): `fetchCurrent`, `fetchHourly`, napoved, `fetchAirQuality`, `fetchFogForecast`, `fetchClimateComparison` (nastavi `_climAnomalyT`), `fetchAgrometeo` (polni tudi `ak-*` na drugem zavihku), `fetchAIBrief`, opozorila.
+- Preverjeno s Playwright: pred prikazom 0 klicev `/ai-forecast`, po odprtju zavihka 1; `_whenVisible` ne sproži elementa pod robom, dokler ga ne prikažemo; `test_parity`, `test_privacy`, `test_freshness`, `test_om_fetch` brez napak.

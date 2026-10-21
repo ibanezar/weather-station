@@ -16750,6 +16750,18 @@ function closeQaModal(e){
   document.body.style.overflow='';
 }
 
+// Leno nalaganje: fn steče enkrat, ko element `id` prvič pride v vidno polje (rootMargin 400 px nad/pod zaslonom).
+// Element v skritem zavihku ali v preprostem pogledu je display:none, torej se sproži šele ob prikazu.
+// `key` pomni, da je razdelek že aktiven: intervali in ročno osveževanje se ga držijo (_visDone.has(key)).
+// Brez IntersectionObserver (star brskalnik) steče takoj, kot pred uvedbo.
+const _visDone=new Set();
+function _whenVisible(key,id,fn,margin){
+  const go=()=>{_visDone.add(key);try{fn();}catch(_){}};
+  const el=document.getElementById(id);
+  if(!el||!('IntersectionObserver' in window)){go();return;}
+  const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();go();}},{rootMargin:margin||'400px 0px'});
+  io.observe(el);
+}
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
@@ -16780,7 +16792,8 @@ async function init(){
   // Uvoz history.json (razčlenitev + zapis ~2500 dni v localStorage + ponovni izris desetin kartic) je bil
   // med nalaganjem; zdaj počaka, da so izrisane trenutne razmere, in steče v prostem času.
   _whenIdle(()=>{try{autoLoadHistoryFile();}catch(_){}},3000);
-  fetchAIForecast(); // non-blocking — populates forecast tab card
+  // Kartica je na zavihku »AI napoved« (display:none): klic (in strošek Workers AI) steče šele, ko jo obiskovalec odpre.
+  _whenVisible('aifc','aifc-text',fetchAIForecast);
 
   // ── Wave 2: forecast tab content (~0.8 s after wave 1) ──
   setTimeout(()=>{
@@ -16796,7 +16809,7 @@ async function init(){
     fetchAgrometeo();
     fetchClimateComparison();
     fetchFogForecast();
-    runAdvancedOnly(()=>fetchValleyDuel());
+    runAdvancedOnly(()=>_whenVisible('duel','duel-card',fetchValleyDuel));
     runAdvancedOnly(()=>initInsights());
     initVisitorCounter();
     checkSmartNotifications();
@@ -16812,14 +16825,13 @@ async function init(){
     fetchSevereWeather();
     fetchMeteoalarm();
     fetchGoogleAlerts();
-    runAdvancedOnly(()=>fetchPollen());
-    runAdvancedOnly(()=>initBiovreme());
+    runAdvancedOnly(()=>_whenVisible('pollen','pollen-grid',fetchPollen));
+    runAdvancedOnly(()=>_whenVisible('bio','biovreme-card',initBiovreme));
     fetchAIBrief();
-    runAdvancedOnly(()=>connectLightning());
-    runAdvancedOnly(()=>fetchLightningHistory());
-    runAdvancedOnly(()=>buildPrecipNormals());
-    runAdvancedOnly(()=>buildSunshineNormals());
-    runAdvancedOnly(()=>applyPheno());
+    runAdvancedOnly(()=>_whenVisible('ltg','ltg-card',()=>{connectLightning();fetchLightningHistory();}));
+    runAdvancedOnly(()=>_whenVisible('pn','pn-grid',buildPrecipNormals));
+    runAdvancedOnly(()=>_whenVisible('sn','sn-grid',buildSunshineNormals));
+    runAdvancedOnly(()=>_whenVisible('pheno','pheno-year',applyPheno));
   },6000);
 }
 
@@ -16833,8 +16845,8 @@ async function init(){
 setInterval(fetchCurrent,5*60*1000);
 // V preprostem pogledu je kartica skrita; osvežujemo šele, ko je res na
 // zaslonu (drugače bi se klici kopičili v vrsti runAdvancedOnly).
-setInterval(()=>{if(!isSimpleMode())fetchValleyDuel();},5*60*1000);
-setInterval(fetchPollen,30*60*1000);
+setInterval(()=>{if(!isSimpleMode()&&_visDone.has('duel'))fetchValleyDuel();},5*60*1000);
+setInterval(()=>{if(_visDone.has('pollen'))fetchPollen();},30*60*1000);
 setInterval(fetchSevereWeather,30*60*1000);
 setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchPrecipNowcast,10*60*1000);
