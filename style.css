@@ -92,7 +92,8 @@
   --card-shadow:var(--sh-1); --card-shadow-h:var(--sh-2);
 }
 [data-theme="dark"] {
-  --c-bg:#0F1713; --c-surface:#17221C; --c-ink:#E6EDE8; --c-ink-soft:#9DB0A4;
+  --c-bg:#0F1713; --c-surface:#17221C; --c-ink:#E6EDE8; --c-ink-soft:#C0CFC5; /* #9DB0A4 iz predloga je pri opacity .6–.7 (uporabljeno na ~40 mestih) padel pod 4,5:1 (Lighthouse: 42 vozlišč) */
+  --red:#fb8a8a;
   --c-accent:#6FBF95; --c-on-accent:#0F1713;
   --c-warm:#E0A94A; --c-warm-text:#E0A94A;
   --c-line:#26342C; --c-line-strong:#5A7566;
@@ -2437,7 +2438,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-day-base{font-size:.74rem;color:var(--muted);display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
 .mtr-chip{font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:999px;white-space:nowrap;
   font-family:'JetBrains Mono',monospace}
-.mtr-chip.up{background:rgba(248,113,113,.16);color:#f87171}
+.mtr-chip.up{background:rgba(248,113,113,.16);color:var(--red)}
 .mtr-chip.down{background:rgba(77,159,248,.16);color:var(--blue)}
 .mtr-day-meta{margin-top:.3rem;font-size:.7rem;color:var(--muted);opacity:.85;
   font-family:'JetBrains Mono',monospace}
