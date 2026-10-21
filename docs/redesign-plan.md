@@ -76,3 +76,12 @@ Playwright posnetki, `check_mobile_overflow.mjs`, `critical_css.mjs` (12 stanj),
 - `app.js`: `_skel()` za JS placeholderje (urni podatki dneva, agro bolezni) in `_skelWatch()`: `aria-busy="true"` na elementu s skeletonom, odstranjen s `MutationObserver`, ko ga JS zamenja (en observer na element, ne na cel DOM).
 - Preverjeno (Playwright, brez omrežja): 67 skeletonov, 67 × `aria-busy`; po zamenjavi vsebine `aria-busy` izgine; z `reduced-motion: reduce` 0 animacij; test_parity/privacy/freshness brez napak.
 - Omejitev: skok ob zamenjavi z resnično vsebino (CLS) s pravimi podatki ni merljiv v peskovniku; preveri ga `lighthouse.yml` po objavi. "—" vrednosti niso spremenjene (hero ima že `skel-shimmer` in pre-render).
+
+## Faza 6 (opravljeno): dostopnost navigacije (spodnja vrstica ohranjena)
+- Spodnja vrstica na telefonu (8 ciljev) ostane po odločitvi uporabnika; dodano `aria-current="page"` in `aria-hidden` na ikonah. Meni, "Kraji" in povezave se ne selijo.
+- `.tab-nav-wrap` je `role="navigation"` (`aria-label="Razdelki strani"`); `switchTab()` nastavlja `aria-current="true"` (`_syncTabCurrent()`). Brez `tablist`, ker so v traku tudi povezave.
+- Spustni meniji: `aria-haspopup`/`aria-expanded` (`_syncDDAria()`), Escape zapre in vrne fokus na sprožilec, puščici Gor/Dol po postavkah.
+- Povezava "Preskoči na vsebino" (prvi tabulator) vodi na `#main-content` (`.wrap`, `tabindex=-1`). `role="main"` na `.wrap` NI dodan: v njem sta glava in noga strani, axe bi javil `landmark-banner-is-top-level`.
+- Enoten `:focus-visible` obroč (`--c-accent`) za zavihke, menije, gumbe, spodnjo vrstico; `scroll-padding-bottom` pod 760 px.
+- Preverjeno s Playwright (tipkovnica): 1. Tab = skip link, Enter → `#main-content`; ArrowDown odpre meni (`aria-expanded=true`) in premika fokus; Escape zapre in vrne fokus; `aria-current` sledi `switchTab`. test_parity/privacy/freshness brez napak.
+- Za fazo 9 (axe, obstoječe stanje): `color-contrast` (več sto vozlišč, trdo kodirane barve), `region` (116: vsebina izven landmarkov), `landmark-one-main` (stran nima `<main>`; glava in noga sta v `.wrap`, zato jo je treba najprej razstaviti).

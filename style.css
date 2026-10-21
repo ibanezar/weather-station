@@ -3358,3 +3358,12 @@ html[data-mode="simple"] .wrap{max-width:860px}
 }
 /* rezervirana višina besedilnih kartic (tipično 3 vrstice), da zamenjava skeletona ne premakne strani */
 .why-text,.ai-brief-text{min-height:4.8rem}
+
+/* ── Faza 6 redizajna: dostopnost navigacije ─────────────────────────── */
+.skip-link{position:fixed;left:.75rem;top:-4rem;z-index:1000;padding:.6rem 1rem;border-radius:var(--r-md);background:var(--c-accent);color:var(--c-on-accent);font-weight:600;text-decoration:none;transition:top .15s}
+.skip-link:focus{top:.75rem}
+#main-content:focus{outline:none}
+.tab-btn:focus-visible,.tab-dd-menu button:focus-visible,.tab-dd-menu a:focus-visible,.theme-btn:focus-visible,.share-btn:focus-visible,
+.qn-drop summary:focus-visible,.qn-drop a:focus-visible,.qn-feat:focus-visible,.app-bottomnav a:focus-visible,.notif-btn:focus-visible,.install-btn:focus-visible,.sc-btn:focus-visible{outline:2px solid var(--c-accent);outline-offset:2px;border-radius:var(--r-sm)}
+@media(max-width:760px){html{scroll-padding-bottom:calc(4rem + env(safe-area-inset-bottom))}}
+@media (prefers-reduced-motion:reduce){.skip-link{transition:none}}

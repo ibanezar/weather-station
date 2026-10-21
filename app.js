@@ -2849,8 +2849,44 @@ function toggleTabDD(group){
   const isOpen=menu?.classList.contains('open');
   closeTabDDs();
   if(!isOpen)menu?.classList.add('open');
+  _syncDDAria();
 }
-function closeTabDDs(){document.querySelectorAll('.tab-dd-menu').forEach(m=>m.classList.remove('open'));}
+function closeTabDDs(){document.querySelectorAll('.tab-dd-menu').forEach(m=>m.classList.remove('open'));_syncDDAria();}
+// aria-expanded na sprožilcih sledi razredu .open menija (tab-dd-<skupina>-btn -> tab-dd-<skupina>-menu)
+function _syncDDAria(){
+  document.querySelectorAll('.tab-dd-trigger').forEach(b=>{
+    const m=document.getElementById(b.id.replace(/-btn$/,'-menu'));
+    b.setAttribute('aria-expanded',m&&m.classList.contains('open')?'true':'false');
+  });
+}
+// aria-current na aktivnem zavihku (ne tablist: v istem traku so tudi povezave)
+function _syncTabCurrent(){
+  document.querySelectorAll('.tab-btn, .tab-dd-menu button').forEach(b=>{
+    if(b.classList.contains('active'))b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');
+  });
+}
+// Tipkovnica: Escape zapre meni in vrne fokus na sprožilec; puščici Gor/Dol po postavkah menija
+document.addEventListener('keydown',e=>{
+  const dd=e.target.closest&&e.target.closest('.tab-dropdown');
+  if(e.key==='Escape'){
+    const open=document.querySelector('.tab-dd-menu.open');
+    if(open){const trg=document.getElementById(open.id.replace(/-menu$/,'-btn'));closeTabDDs();if(trg)trg.focus();}
+    return;
+  }
+  if(!dd||(e.key!=='ArrowDown'&&e.key!=='ArrowUp'))return;
+  const menu=dd.querySelector('.tab-dd-menu');
+  if(!menu)return;
+  if(!menu.classList.contains('open')){
+    if(e.key==='ArrowDown'&&e.target.classList.contains('tab-dd-trigger')){e.preventDefault();toggleTabDD(dd.id.replace(/^tab-dd-/,''));}
+    else return;
+  }
+  const items=[...menu.querySelectorAll('button,a')].filter(x=>x.offsetParent!==null);
+  if(!items.length)return;
+  e.preventDefault();
+  const i=items.indexOf(document.activeElement);
+  const next=e.key==='ArrowDown'?(i+1)%items.length:(i<=0?items.length-1:i-1);
+  items[next].focus();
+});
 // Close on outside click
 document.addEventListener('click',e=>{if(!e.target.closest('.tab-dropdown'))closeTabDDs();});
 
@@ -3413,6 +3449,7 @@ function switchTab(tab){
       if(directBtn)directBtn.classList.add('active');
     }
   }
+  _syncTabCurrent();
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){
     const _runAnalysis=()=>{ initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); };
