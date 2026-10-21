@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-20",
-  "issued_at": "2026-10-20T06:10:57.217918+02:00",
-  "national_score": 20,
-  "national_level": "NIZKO",
-  "national_place": "Nova Gorica",
-  "national_hour": "06:00",
-  "should_post": false,
-  "image": "https://meteorec.si/og/storm-map/2026-10-20.jpg",
-  "image_story": "https://meteorec.si/og/storm-map/2026-10-20-story.jpg"
+  "date": "2026-10-21",
+  "issued_at": "2026-10-21T06:10:56.191101+02:00",
+  "national_score": 37,
+  "national_level": "ZMERNO",
+  "national_place": "Koper",
+  "national_hour": "15:00",
+  "should_post": true,
+  "image": "https://meteorec.si/og/storm-map/2026-10-21.jpg",
+  "image_story": "https://meteorec.si/og/storm-map/2026-10-21-story.jpg"
 }
