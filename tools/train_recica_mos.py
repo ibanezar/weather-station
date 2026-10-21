@@ -71,6 +71,8 @@ LEADS = (1, 2, 3)
 TRAIN_START = "2024-01-01"   # prej *_previous_dayN ni na voljo
 RIDGE_LAMBDA = 2.0
 WET_DAY_MM = 0.2             # prag za "moker dan"
+# Dodatni pragovi dnevne vsote (mm): ključ v koeficientih -> prag. Isti vhodi kot `pop`, drug cilj.
+POP_THRESHOLDS = {"pop1": 1.0, "pop5": 5.0}
 
 # ECMWF AIFS — AI model, ki ga ECMWF poganja operativno od 25. 2. 2025 (Windy ga
 # prikazuje kot 15-dnevni podaljšek modela ECMWF). Z --aifs ga vzamemo kot drugi
@@ -540,6 +542,7 @@ def build_samples(rows, hist, lead, bias_series=None, aifs_rows=None, multi=None
             "tmax": obs["tempHigh"],
             "tmin": obs["tempLow"],
             "wet": 1.0 if (obs.get("precipTotal") or 0) >= WET_DAY_MM else 0.0,
+            "mm": obs.get("precipTotal") or 0.0,
         })
     return samples
 
@@ -643,8 +646,11 @@ def walk_forward_cv(samples, target, om_key, with_aifs=False, use_bias=False, us
     return out
 
 
-def blocked_cv_pop(samples, with_aifs=False):
-    """Brierjeva ocena za verjetnost padavin, proti klimatologiji učne množice."""
+def blocked_cv_pop(samples, with_aifs=False, thr_mm=None):
+    """Brierjeva ocena za verjetnost padavin, proti klimatologiji učne množice.
+    `thr_mm`: prag dnevne vsote namesto mokrega dne (pop1, pop5)."""
+    def y_of(s):
+        return s["wet"] if thr_mm is None else (1.0 if s["mm"] >= thr_mm else 0.0)
     years = sorted({s["date"][:4] for s in samples})
     brier, base = [], []
     for hold in years:
@@ -652,12 +658,15 @@ def blocked_cv_pop(samples, with_aifs=False):
         te = [s for s in samples if s["date"][:4] == hold]
         if not tr or not te:
             continue
-        coefs = solve_logistic([pop_vector(s["f"], with_aifs) for s in tr], [s["wet"] for s in tr])
-        clim = sum(s["wet"] for s in tr) / len(tr)
+        ytr = [y_of(s) for s in tr]
+        if sum(ytr) < 5:   # leto brez dovolj pozitivnih primerov ne da smiselne rezine
+            continue
+        coefs = solve_logistic([pop_vector(s["f"], with_aifs) for s in tr], ytr)
+        clim = sum(ytr) / len(tr)
         for s in te:
             p = predict_prob(coefs, pop_vector(s["f"], with_aifs))
-            brier.append((p - s["wet"]) ** 2)
-            base.append((clim - s["wet"]) ** 2)
+            brier.append((p - y_of(s)) ** 2)
+            base.append((clim - y_of(s)) ** 2)
     if not brier:
         return None
     b = sum(brier) / len(brier)
@@ -769,6 +778,7 @@ def main():
         },
         "pop_features": POP_FEATURES + (AIFS_POP_FEATURES if args.aifs else []),
         "wet_day_mm": WET_DAY_MM,
+        "pop_thresholds_mm": POP_THRESHOLDS,
         "ridge_lambda": RIDGE_LAMBDA,  # rezervna vrednost; dejanska je od uvedbe select_lambda po ciljih spodaj
         "leads": {},
     }
@@ -864,6 +874,21 @@ def main():
         if pop_skill:
             print(f"  padavine: Brier {pop_skill['brier']} proti klimatologiji "
                   f"{pop_skill['brier_climatology']} (veščina {pop_skill['skill_score']})")
+
+        # Verjetnost, da dnevna vsota doseže 1 oz. 5 mm. Količine same ne napovedujemo (glej
+        # docs/model-recica.md); prag je odgovor, ki ga šum še dopušča. Brez veščine ni koeficientov.
+        for key, thr in POP_THRESHOLDS.items():
+            ys = [1.0 if s["mm"] >= thr else 0.0 for s in samples]
+            sk = blocked_cv_pop(samples, args.aifs, thr)
+            if sum(ys) < 30 or not sk or sk["skill_score"] <= 0:
+                print(f"  {key} (≥ {thr:g} mm): izpuščeno (pozitivnih {int(sum(ys))}, veščina "
+                      f"{sk['skill_score'] if sk else None})")
+                continue
+            cf = solve_logistic([pop_vector(s["f"], args.aifs) for s in samples], ys)
+            entry["skill"][key] = sk
+            entry["coefficients"][key] = [round(c, 6) for c in cf]
+            print(f"  {key} (≥ {thr:g} mm): Brier {sk['brier']} proti klimatologiji "
+                  f"{sk['brier_climatology']} (veščina {sk['skill_score']})")
 
         model["leads"][str(lead)] = entry
 
