@@ -7456,6 +7456,9 @@ function renderMtrDays(idp){
     const chip=delta===null?''
       :'<span class="mtr-chip '+(delta<0?'down':'up')+'">'+(delta<0?'−':'+')+fmt(Math.abs(delta),1)+' °C</span>';
     const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
+    /* Verjetnosti pragov (≥ 1 in ≥ 5 mm): MTR-ova, ne količina. Pod 5 % se ne izpišeta. */
+    const pr=[[d.pop1,'1'],[d.pop5,'5']].filter(a=>Number.isFinite(a[0])&&a[0]>=0.05)
+      .map(a=>'≥ '+a[1]+' mm '+(Math.round(a[0]*20)*5)+' %').join(' · ');
     const fz=st.metric==='tmin'?mtrFrostPct(d.p_frost):null;
     const wmo=_mtrWmoForDate(d.date);
     const icon=wmo!=null?_wmoImg(wmo,true,26):'';
@@ -7467,6 +7470,7 @@ function renderMtrDays(idp){
       +'<div class="mtr-day-meta">'
         +(Number.isFinite(sd)?'razpon ±'+fmt(MTR_Z80*sd,1)+' °C':'')
         +(pop!==null?(Number.isFinite(sd)?' · ':'')+'dež '+pop+' %':'')
+        +(pr?' · <span title="Verjetnost, da bo dnevna vsota padavin dosegla prag; MTR-ov model, naučen na meritvah postaje. Količine ne napovedujemo.">'+pr+'</span>':'')
         +(fz!==null?' · <span title="Verjetnost, da bo najnižja temperatura ≤ 0 °C; iz razpršenosti napake modela, preverjeno na zadnjem letu.">zmrzal '+fz+' %</span>':'')
       +'</div></div>';
   }).join('');

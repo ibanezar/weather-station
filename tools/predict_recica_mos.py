@@ -216,6 +216,12 @@ def predict_day(model, lead, feats):
     pop_coefs = entry["coefficients"].get("pop")
     out["pop"] = round(mos.predict_prob(pop_coefs, mos.pop_vector(feats, with_aifs)), 2) if pop_coefs else None
 
+    # P(dnevna vsota ≥ 1 / 5 mm): ločena logistična modela; ju v model/recica-mos.json ni (stari
+    # model ali brez veščine), ostane None in kartica vrstice ne pokaže.
+    for key in mos.POP_THRESHOLDS:
+        kc = entry["coefficients"].get(key)
+        out[key] = round(mos.predict_prob(kc, mos.pop_vector(feats, with_aifs)), 2) if kc else None
+
     p_frost = frost_probability(out["tmin"], raw_sds.get("tmin"))
     out["p_frost"] = round(p_frost, 2) if p_frost is not None else None
     out["night_regime"] = night_regime(feats["cloud_n"], feats["wind_n"])

@@ -69,6 +69,14 @@ slej razšla in model bi tiho dobival druge vhode, kot jih pozna.
   smiselno), letni hod prek `sin`/`cos` dneva v letu, člen hladne kotanje ter
   dve sezonski interakciji.
 - **padavine** — logistična regresija za verjetnost mokrega dne (≥ 0,2 mm).
+- **verjetnost, da dnevna vsota doseže 1 oz. 5 mm** (`pop1`, `pop5`, 21. 10. 2026): isti vhodi in ista
+  logistična regresija kot `pop`, drug cilj (`POP_THRESHOLDS` v `train_recica_mos.py`). Koeficienti se
+  zapišejo samo, če je pozitivnih dni ≥ 30 in je veščina proti klimatologiji (izpuščanje celega leta)
+  pozitivna; sicer polje v napovedi ostane `null` in kartica vrstice ne pokaže. Prototip na arhivu
+  šestih virov (`tools/ai/eval_pop_thresholds.py --csv`, 874 dni, manj značilk): Brier D+1 0,085 (1 mm) in
+  0,064 (5 mm) proti klimatologiji 0,206 / 0,137, zanesljivost dobra. **Številke s pravim `pop_vector` še
+  niso izmerjene** — prvo učenje (`mos-train.yml`) jih zapiše v `skill.pop1/pop5`; preveri, preden
+  jih kje navedeš.
 - **količine padavin ne napovedujemo.** Poskus je dal ~5 % izboljšave, kar je v
   okviru šuma; količina, ki jo objavimo, je surova vrednost Open-Meteo in je
   tako tudi označena.
