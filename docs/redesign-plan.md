@@ -55,3 +55,10 @@ Playwright posnetki, `check_mobile_overflow.mjs`, `critical_css.mjs` (12 stanj),
 - `app.js`: pomočnik `_ico(ime)`; gumb teme (sonce/luna), radar Predvajaj/Pavza, značka nowcast, nekaj gumbov, ki jim JS prepiše besedilo.
 - Preslikava in izjeme (taksonomski čipi, skupnostni vnosi, tabele v JS, `<option>`): `docs/ikone.md`.
 - Preverjeno: `test_privacy`, `test_parity`, `test_freshness` brez napak; CLS ≤ 0,001; minify + kritični CSS ponovno zgrajena.
+
+## Faza 3 (opravljeno): hero in bento mreža
+- Hero: `.temp-huge` na `--fs-hero`; primarne ploščice veter, vlaga, padlo danes, tlak (4 stolpci, 2×2 na telefonu), sekundarni min–maks in UV (`hm-secondary`, span 2); DOM vrstni red spremenjen, id-ji in regex-kompatibilen HTML nespremenjeni (`inject_current_weather.py` preizkušen, markerji ujeti). Vrstica postaje "IREICA1 · Rečica ob Savinji · 366 m · pred X min"; ob > 15 min `is-stale` z ikono `clock-alert` in besedilom "podatki stari X min".
+- Bento: `#tab-current.active` je grid 4/2/1 stolpcev; otroci privzeto čez celo širino, `card--wide`/`card--sm`/`card--tall` na zahtevo. Označena sta `why-card` in `day-summary` (v isti vrstici). `.wrap` 1000 → 1160 px (preprost pogled ostane 860).
+- Kartice: radij `--r-lg`, sence iz tokenov, `backdrop-filter` odstranjen.
+- Ni v tej fazi: štetje števil (faza 7), širine globljih kartic z grafi (JS riše po `clientWidth`).
+- Preverjeno: test_privacy/parity/freshness, brez vodoravnega drsenja (6 kombinacij), CLS ≤ 0,001.

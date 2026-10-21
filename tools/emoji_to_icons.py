@@ -37,7 +37,7 @@ MAP = {
  "🏷":"tag","🗜":"minimize-2","🗑":"trash-2","🔒":"lock","☰":"menu",
 }
 # ikone, ki jih potrebuje JS (app.js), tudi če jih HTML ne uporablja
-EXTRA = ["sun","moon","play","pause","hourglass","cloud-rain","cloud-lightning","thermometer-snowflake","refresh-cw","tag","minimize-2","share-2"]
+EXTRA = ["sun","moon","play","pause","hourglass","cloud-rain","cloud-lightning","thermometer-snowflake","refresh-cw","tag","minimize-2","share-2","clock-alert"]
 
 # razredi elementov, katerih VODILNI emoji zamenjamo
 TARGET = ["clabel","an-title","tri-title","nt-title","kf-label","qn-ico","qn-burger","mode-btn-ico","mi-ico",

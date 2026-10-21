@@ -3306,3 +3306,37 @@ html[data-mode="simple"] .mca-in-advanced{display:none}
     scroll-behavior:auto!important;
   }
 }
+
+/* ── Faza 3 redizajna: hero + bento mreža ───────────────────────────────
+   Kartice: enotna zaobljenost in senca iz tokenov, brez backdrop-filter (drag izris, "brez glassmorphisma").
+   #tab-current je mreža 4 / 2 / 1 stolpcev; vsak otrok je privzeto čez celo širino, širino dobi samo
+   kar nosi razred card--wide (span 2) ali card--sm (span 1). card--tall = dve vrstici. */
+.card,.hero,.day-summary{backdrop-filter:none;-webkit-backdrop-filter:none}
+.card{border-radius:var(--r-lg)}
+.hero{border-radius:var(--r-lg);box-shadow:var(--sh-2)}
+.temp-huge{font-size:var(--fs-hero)}
+.hero-station{max-width:60%;text-align:right;line-height:1.35}
+.hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
+.hero-station .ic{width:.95em;height:.95em}
+.hero-metrics{grid-template-columns:repeat(4,1fr)}
+.hero-metrics .hm-secondary{grid-column:span 2}
+html[data-mode="simple"] .hero .hm-secondary{grid-column:auto}
+#tab-current.active{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-4)}
+#tab-current.active>*{grid-column:1/-1;min-width:0;margin-bottom:0!important}
+#tab-current.active>.card--wide{grid-column:span 2}
+#tab-current.active>.card--sm{grid-column:span 1}
+#tab-current.active>.card--tall{grid-row:span 2}
+.wrap{max-width:var(--wrap-max,1160px)}
+html[data-mode="simple"] .wrap{max-width:860px}
+@media(max-width:1023px){
+  #tab-current.active{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .hero-metrics{grid-template-columns:repeat(2,1fr)}
+  .hero-station{max-width:55%}
+}
+@media(max-width:639px){
+  #tab-current.active{grid-template-columns:minmax(0,1fr)}
+  #tab-current.active>.card--wide,#tab-current.active>.card--sm{grid-column:1/-1}
+  #tab-current.active>.card--tall{grid-row:auto}
+}

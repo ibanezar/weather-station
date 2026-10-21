@@ -2445,9 +2445,13 @@ function updateHeroStationTime(){
   const el=document.getElementById('hero-station-time');
   if(!el||!_lastObsTime)return;
   const mins=Math.round((Date.now()-_lastObsTime.getTime())/60000);
-  if(mins<1)el.textContent='· zdaj';
-  else if(mins<60)el.textContent='· pred '+mins+' min';
-  else el.textContent='· '+fmtTime(_lastObsTime);
+  // > 15 min: opozorilo z ikono in besedilom (ne samo barva), meritev postaje je običajno sveža do ~5 min
+  const stale=mins>15;
+  const box=document.getElementById('hero-station');
+  if(box)box.classList.toggle('is-stale',stale);
+  if(stale)el.innerHTML='· '+_ico('clock-alert')+' podatki stari '+(mins<60?mins+' min':Math.floor(mins/60)+' h');
+  else if(mins<1)el.textContent='· zdaj';
+  else el.textContent='· pred '+mins+' min';
 }
 setInterval(updateHeroStationTime,30000);
 
