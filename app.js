@@ -944,7 +944,7 @@ function renderThisWeekHistory(){
   };
   // scope=col/row: Lighthouse (td-has-header) in bralniki zaslona morajo vedeti, kateremu letu in dnevu pripada celica.
   const dayHdr=days.map(d=>'<th scope="col">'+d.getDate()+'.'+(d.getMonth()+1)+'.</th>').join('');
-  let html='<div class="twh-grid-wrap"><table class="twh-grid"><thead><tr><th scope="col"><span class="visually-hidden">Leto</span></th>'+dayHdr+'</tr></thead><tbody>';
+  let html='<div class="twh-grid-wrap" tabindex="0" role="group" aria-label="Toplotna karta po letih, drsi vodoravno"><table class="twh-grid"><thead><tr><th scope="col"><span class="visually-hidden">Leto</span></th>'+dayHdr+'</tr></thead><tbody>';
   grid.forEach(row=>{
     html+='<tr><th scope="row" class="twh-yr">'+row.yr+'</th>';
     row.cells.forEach(t=>{
@@ -3850,8 +3850,8 @@ function renderPastDays(){
       <div class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</div>
       <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%"></div></div>
       <div class="pd-meta">
-        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span style="opacity:.7">💧 —</span>'}</span>
-        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span style="opacity:.7">💨 —</span>'}</span>
+        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span>💧 —</span>'}</span>
+        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span>💨 —</span>'}</span>
       </div>
     </div>`;
   }).join('');
@@ -5391,7 +5391,7 @@ async function fetchAirQuality(){
     const no2=data.hourly?.nitrogen_dioxide?.[h]??0;
     const ozone=data.hourly?.ozone?.[h]??0;
     const[label,col]=aqi<=20?['Zelo dobro','#22c55e']:aqi<=40?['Dobro','#84cc16']:aqi<=60?['Zmerno','#eab308']:aqi<=80?['Slabo','#f97316']:aqi<=100?['Zelo slabo','#ef4444']:['Nevarno','#9333ea'];
-    const el=document.getElementById('aqi-val');if(el){el.style.color=col;el.childNodes[0].textContent=aqi;}
+    const el=document.getElementById('aqi-val');if(el){el.style.color=col;el.dataset.aqi=col;el.childNodes[0].textContent=aqi;}
     set('aqi-lbl',' · '+label);
     const dot=document.getElementById('aqi-dot');if(dot)dot.style.left=Math.min(95,aqi/120*100)+'%';
     set('aqi-pm25',pm25.toFixed(1));set('aqi-pm10',pm10.toFixed(1));
