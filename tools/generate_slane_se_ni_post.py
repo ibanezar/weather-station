@@ -115,7 +115,7 @@ def nights_chart(ns, fc, w=460):
         col = CYAN if t == 0 else GRID
         p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{y:.1f}" y2="{y:.1f}" stroke="{col}" stroke-width="{1.5 if t == 0 else 1}"{dash}/>')
         p.append(f'<text x="{pl - 6}" y="{y + 3.5:.1f}" text-anchor="end" font-size="10.5" fill="{MUTED}">{t}</text>')
-    p.append(f'<text x="{pl + 2}" y="{Y(0) + 13:.1f}" font-size="10" fill="{CYAN}">0{NBSP}°C = zmrzal</text>')
+    p.append(f'<text x="{pl + 2}" y="{Y(0) + 13:.1f}" font-size="10" fill="{CYAN}">0{NBSP}°C</text>')
     for lab_d in (datetime.date(LAST, 9, 1), datetime.date(LAST, 9, 15), datetime.date(LAST, 10, 1), datetime.date(LAST, 10, 15)):
         x = X(lab_d) + bw / 2
         p.append(f'<text x="{x:.1f}" y="{h - 10}" text-anchor="middle" font-size="10.5" fill="{MUTED}">{dm(lab_d)}</text>')
@@ -276,106 +276,117 @@ def build_article(H):
     # --- grafi ---
     f_nights = fig("Najnižja temperatura vsake noči od 1. septembra",
                    legend([("pod 3 °C", CYAN, ""), ("od 3 do 5 °C", CYAN, "op"), ("5 °C ali več", GREY, "op"),
-                           ("napoved MTR (22.–24. 10.)", AMBER, "dash")])
+                           ("napoved MTR za obdobje 22.–24. 10.", AMBER, "dash")])
                    + nights_chart(ns, fc),
-                   "Vsak stolpec je ena noč: najnižja temperatura zraka, ki jo je izmerila postaja IREICA1 (zunanji senzor). Črtkani stolpci so napoved modela MTR "
-                   "za naslednje tri dni; za današnji dan podatka še ni. Črtkana črta pri 0 °C je meja, ki jo šteje ta članek.")
+                   "Vsak stolpec predstavlja eno noč in prikazuje najnižjo temperaturo zraka, ki jo je izmerila postaja IREICA1 z zunanjim senzorjem. "
+                   "Črtkani stolpci prikazujejo napoved modela MTR za naslednje tri dni. Podatka za današnji dan še ni. "
+                   "Črtkana črta pri 0 °C označuje mejo, ki jo spremljam v tem članku.")
     wrows = [(y, ff[y]) for y in YEARS] + [(LAST, None)]
     f_wait = fig("Kdaj je postaja prvič izmerila 0 °C ali manj",
                  wait_chart(wrows, today - datetime.timedelta(days=1), fri_d),
-                 "Siva črta pomeni čakanje od 1. septembra, moder krog prvo noč z 0 °C ali manj. Oranžna črta je letošnje čakanje do 20. oktobra, "
-                 "prazen romb pa petek, ko model MTR kaže 0,1 °C.")
+                 "Siva črta prikazuje čakanje od 1. septembra do prve ničelne noči, modri krog pa označuje datum, ko je postaja prvič izmerila 0 °C ali manj. "
+                 "Oranžna črta prikazuje letošnje čakanje do 20. oktobra, prazen romb pa petek, ko model MTR napoveduje 0,1 °C.")
 
     t_tiles = tiles([
-        ("16", "noči", "pod 5 °C od 1. 9. do 20. 10. Najbolj od vseh šestih prejšnjih jeseni.", False),
-        (num(coldest[0][1]), "°C", f"najnižja letošnja temperatura ({dm(coldest[0][0])}). Do ničle je zmanjkalo 1,7 stopinje.", False),
-        ("48", "%", f"verjetnost mraza v petek zjutraj po modelu MTR; napovedana najnižja temperatura {temp(fri['tmin'])}.", True),
+        ("16", "noči", "od 1. septembra do 20. oktobra je bila temperatura pod 5 °C. To je največ med zadnjimi šestimi jesenmi.", False),
+        (num(coldest[0][1]), "°C", f"najnižja letošnja temperatura, izmerjena {dlong(coldest[0][0])}. Do ničle je manjkalo 1,7 stopinje.", False),
+        ("48", "%", f"po modelu MTR je verjetnost temperature zraka pod ničlo v petek zjutraj 48 %, napovedana najnižja temperatura pa je {temp(fri['tmin'])}.", True),
     ])
 
-    lead = (f"Od 1. septembra do 20. oktobra je postaja v Rečici <strong>16-krat</strong> izmerila manj kot 5 °C. Toliko hladnih noči v istem obdobju "
-            "ni bilo v nobeni od prejšnjih šestih jeseni. A niti ena noč ni padla pod ničlo: najbližje je bila 4. oktobra z 1,7 °C. "
-            "Prva prava slana, pri kateri se tudi termometer spusti do ničle ali pod njo, torej še ni bila. "
-            f"Napoved modela MTR za <strong>petek zjutraj</strong> pa kaže {temp(fri['tmin'])}.")
+    lead = ("Od 1. septembra do 20. oktobra je postaja v Rečici <strong>16-krat</strong> izmerila manj kot 5 °C. "
+            "V nobeni od prejšnjih šestih jeseni v istem obdobju ni bilo toliko hladnih noči. "
+            "A temperatura zraka ni niti enkrat padla do ničle: najbližje ji je bila 4. oktobra, ko je postaja izmerila 1,7 °C. "
+            "Prva noč s temperaturo zraka 0 °C ali manj torej še ni nastopila. "
+            f"Napoved modela MTR za <strong>petkovo jutro</strong> pa kaže {temp(fri['tmin'])}.")
 
     p1 = [
-        "<strong>Kratek odgovor: slana na travi je že bila, prave zmrzali na termometru pa še ni.</strong> "
-        "Postaja meri temperaturo zraka na višini približno 1,5–2 m. Ko tu piše 0 °C ali manj, ji pravim prva ničelna noč, in to število lahko primerjam med leti.",
+        "<strong>Kratek odgovor: slana na travi se je že pojavila, temperatura zraka na postaji pa še ni padla do ničle.</strong> "
+        "Postaja meri temperaturo zraka na višini približno 1,5–2 m. V tem članku kot ničelno noč štejem noč, ko postaja na tej višini izmeri 0 °C ali manj. "
+        "Tako lahko pojav primerjam med posameznimi leti.",
+        "Podatki v številkah:",
         t_tiles,
         f_nights,
         f"Najhladnejše noči so bile 4. oktobra ({temp(1.7)}), 6. oktobra ({temp(1.8)}) in 13. oktobra ({temp(2.1)}). "
-        f"Za primerjavo: največ hladnih noči v istem obdobju je bilo doslej leta 2020 ({n_cold[2020]}), najmanj pa leta 2023 ({n_cold[2023]}) in 2024 ({n_cold[2024]}). "
-        "Prag 5 °C sem izbral sam; je zgolj merilo za to primerjavo, ne uradna meja.",
+        f"Za primerjavo: največ noči s temperaturo pod 5 °C je bilo v istem obdobju doslej leta 2020, in sicer {n_cold[2020]}. "
+        f"Najmanj jih je bilo leta 2023 ({n_cold[2023]}) in 2024 ({n_cold[2024]}).",
+        "Prag 5 °C sem izbral sam. Uporabljam ga zgolj za primerjavo med leti, ne gre pa za uradno določeno mejo.",
     ]
     p2 = [
-        "Hladnih noči ne pojasni hladna jesen. Med 1. in 20. oktobrom je bila povprečna najvišja dnevna temperatura "
-        f"<strong>{temp(S[LAST]['hi'])}</strong>, kar je tretja najvišja vrednost od šestih let.",
-        f"Razlika med popoldnevom in jutrom je v povprečju znašala <strong>{temp(S[LAST]['rng'])}</strong>, največ v teh letih. "
-        f"Lani je bila {temp(S[2025]['rng'])}, leta 2024 samo {temp(S[2024]['rng'])}. Tak vzorec – topli popoldnevi in hladna jutra – "
-        "je značilen za jasno in mirno vreme: ponoči tla oddajajo toploto proti nebu, čez dan pa jih sonce spet ogreje. "
-        'Kako to deluje, sem pojasnil <a href="/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html" style="color:var(--blue)">že 23. septembra</a>.',
-        f"Oktober je bil tudi suh: do 20. oktobra je padlo {num(S[LAST]['rain'])} mm padavin. Leta 2020 in 2024 je v istem obdobju padlo več kot 170 mm. "
-        "Zakaj tudi take noči niso prišle do ničle, iz teh podatkov ne morem reči zanesljivo. Verjetno je manjkalo še nekaj stopinj hladnejše zračne mase: "
-        "jasna noč ohladi zrak ob tleh, vendar le do mere, ki jo dovoli zračna masa nad dolino.",
+        "Veliko hladnih noči ne pomeni nujno, da je jesen hladna. Med 1. in 20. oktobrom je povprečje najvišjih dnevnih temperatur znašalo "
+        f"<strong>{temp(S[LAST]['hi'])}</strong>, kar je tretja najvišja vrednost med šestimi analiziranimi leti.",
+        f"Povprečna razlika med najvišjo in najnižjo dnevno temperaturo je znašala <strong>{temp(S[LAST]['rng'])}</strong>, največ v vseh šestih letih. "
+        f"Lani je bila {temp(S[2025]['rng'])}, leta 2024 pa le {temp(S[2024]['rng'])}.",
+        "Tak vzorec – topli popoldnevi in hladna jutra – je značilen za jasno in mirno vreme. Ponoči tla oddajajo toploto proti nebu, čez dan pa jih sonce znova ogreje. "
+        'Kako ta proces deluje, sem pojasnil <a href="/blog/2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923.html" style="color:var(--blue)">že 23. septembra</a>.',
+        f"Oktober je bil tudi suh: do 20. oktobra je padlo {num(S[LAST]['rain'])} mm padavin. V letih 2020 in 2024 jih je v istem obdobju padlo več kot 170 mm.",
+        "Zakaj kljub takšnim razmeram temperatura zraka ni padla do ničle, iz teh podatkov ne morem zanesljivo ugotoviti. Verjetno je manjkalo še nekaj stopinj hladnejše zračne mase. "
+        "Jasna noč sicer omogoča močno ohlajanje zraka ob tleh, vendar je najnižja dosežena temperatura odvisna tudi od temperature zračne mase nad dolino.",
     ]
     p3 = [
-        "Na travniku v Nizki je bila 4. oktobra ob 8.35 trava bela od slane, postaja pa je kazala 1,7 °C. "
+        "Na travniku v Nizki je bila 4. oktobra ob 8.35 trava bela od slane, postaja pa je takrat kazala 1,7 °C. "
         'O tem sem pisal <a href="/blog/slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004.html" style="color:var(--blue)">v članku o slani pri 1,7 °C</a>. '
-        "To ni protislovje, ker slana in zmrzal nista isto.",
+        "To ni protislovje, saj slana in temperatura zraka pod ničlo nista isto.",
         "<ul>"
-        "<li><strong>Slana</strong> je led, ki se nabere na hladni površini, na primer na travi, avtu ali strehi. Pojavi se lahko že, ko je zrak še nekaj stopinj nad ničlo.</li>"
-        "<li><strong>Zmrzal</strong> pomeni 0 °C ali manj v zraku na višini merjenja. Samo to štejem v tem članku.</li>"
+        "<li><strong>Slana</strong> je plast ledenih kristalov, ki nastane na hladni površini, na primer na travi, avtomobilu ali strehi. "
+        "Pojavi se lahko tudi, ko je temperatura zraka še nekaj stopinj nad ničlo.</li>"
+        "<li><strong>Ničelna noč</strong> je v tem članku noč, ko temperatura zraka na višini merjenja pade na 0 °C ali manj. "
+        "Spremljam jo zato, da lahko podatke primerjam med leti.</li>"
         "</ul>",
-        "Na odprtem travniku ali v mrazišču je ob jasni noči lahko hladneje kot na postaji. Če imate vrt, je zato dobro misliti na jasno in mirno jutro, "
-        "tudi ko številka v napovedi še ni ničla.",
+        "Na odprtem travniku ali v mrazišču je lahko ob jasni noči hladneje kot pri vremenski postaji. "
+        "Če imate vrt, zato upoštevajte možnost hladnega in jasnega jutra tudi takrat, ko napovedana temperatura še ni blizu ničle.",
     ]
     p4 = [
         f_wait,
-        "V šestih letih je prva ničelna noč prišla 3. oktobra (2025), 13. oktobra (2021), 14. oktobra (2020), 17. oktobra (2023), 4. novembra (2024) in 20. novembra (2022). "
-        "Tri leta je torej prišla do 14. oktobra, tri leta po 17. oktobru. Letos smo 20. oktobra še brez nje. To ni rekord: leta 2022 in 2024 je bilo čakanje daljše.",
-        f"<strong>Petek, 23. oktobra.</strong> Napoved z 21. oktobra: model MTR pričakuje {temp(fri['tmin'])} in ocenjuje {round(fri['p_frost'] * 100)}-odstotno verjetnost zmrzali. "
-        f"Surovi model Open-Meteo kaže {temp(fri['om_tmin'])}, ansambel Google WeatherNext 2 pa mediano {temp(fri['wn2']['tmin']['p50'])} "
-        f"(razpon od {num(fri['wn2']['tmin']['p10'])} do {temp(fri['wn2']['tmin']['p90'])}). "
-        f"Modeli se torej ne strinjajo. MTR je naučen na meritvah postaje in zna upoštevati dno doline, zato tokrat surovo vrednost popravi za {num(abs(fri['d_tmin']))} °C navzdol.",
-        "MTR je poskusen model in se lahko moti v obe smeri. V preizkusu na 366 preteklih dneh je bila zmrzal pri napovedih med 30 in 70 % pogostejša od napovedane. "
-        "To ni zagotovilo za petek, je pa razlog, da 0,1 °C ne jemljem kot zanesljivo številko.",
-        f"V soboto sledi ohladitev in dež: najvišja temperatura okoli {num(sat['tmax'], 0)} °C, po Open-Meteo okoli {num(sat['om_precip'], 0)} mm padavin "
-        "(količin MTR ne popravlja).",
+        "V šestih analiziranih letih je prva ničelna noč nastopila 3. oktobra 2025, 13. oktobra 2021, 14. oktobra 2020, 17. oktobra 2023, 4. novembra 2024 in 20. novembra 2022.",
+        "V treh letih je torej nastopila najpozneje do 14. oktobra, v preostalih treh pa 17. oktobra ali pozneje. "
+        "Letos smo bili 20. oktobra še brez nje. To ni rekord: leta 2022 in 2024 je bilo treba nanjo čakati dlje.",
+        f"<strong>Petek, 23. oktober.</strong> Napoved, izdana 21. oktobra, kaže, da MTR pričakuje {temp(fri['tmin'])} in ocenjuje verjetnost temperature zraka pod ničlo na {round(fri['p_frost'] * 100)} %. "
+        f"Surovi izračun Open-Meteo kaže {temp(fri['om_tmin'])}, ansambel Google WeatherNext 2 pa mediano {temp(fri['wn2']['tmin']['p50'])}, "
+        f"z razponom od {num(fri['wn2']['tmin']['p10'])} do {temp(fri['wn2']['tmin']['p90'])}.",
+        "Modeli se torej precej razlikujejo. MTR je naučen na meritvah postaje in lahko upošteva značilnosti dna doline. "
+        f"V tem primeru napovedano temperaturo v primerjavi s surovim izračunom Open-Meteo zniža za {num(abs(fri['d_tmin']))} °C.",
+        "MTR je poskusni model in se lahko zmoti v obe smeri. V preizkusu na 366 preteklih dneh se je temperatura zraka pri napovedih z verjetnostjo zmrzali med 30 in 70 % "
+        "spustila pod ničlo pogosteje, kot je napovedoval model. To seveda ni zagotovilo za petek, je pa razlog, da vrednosti 0,1 °C ne jemljem kot zanesljive napovedi.",
+        f"V soboto sledi ohladitev z dežjem. Najvišja temperatura naj bi bila okoli {num(sat['tmax'], 0)} °C, Open-Meteo pa napoveduje približno {num(sat['om_precip'], 0)} mm padavin. "
+        "Količin padavin model MTR ne popravlja.",
     ]
     letos = [
         "<ul>"
-        "<li><strong>Vrt in balkon:</strong> če imate še kaj, kar mraza ne prenese, je petkovo jutro razlog, da rastline pokrijete ali vnesete v hišo. "
-        "Na travniku ali v mrazišču je lahko hladneje kot na postaji.</li>"
-        "<li><strong>Gobarji:</strong> prva slana gobarske sezone ne konča. V vseh štirih letih, ko je prva ničelna noč prišla oktobra, je bil vrh opažanj gob šele po njej. "
-        'Več v <a href="/blog/slana-gobarska-sezona-1018.html" style="color:var(--blue)">članku o slani in gobah</a>.</li>'
+        "<li><strong>Vrt in balkon:</strong> če imate še rastline, ki ne prenašajo mraza, jih pred petkovim jutrom pokrijte ali prenesite v hišo. "
+        "Na odprtem travniku ali v mrazišču je lahko hladneje kot pri postaji.</li>"
+        "<li><strong>Gobarji:</strong> prva slana ne pomeni konca gobarske sezone. V vseh štirih letih, ko je temperatura zraka prvič padla do ničle ali pod njo že oktobra, "
+        "je bil vrh opažanj gob šele pozneje. "
+        'Več o tem pišem v <a href="/blog/slana-gobarska-sezona-1018.html" style="color:var(--blue)">članku o slani in gobah</a>.</li>'
         f'<li><strong>Preizkusite sami:</strong> v igri <a href="{SITE}/napovej/" style="color:var(--blue)">Prehiti model</a> napovejte jutrišnjo najnižjo temperaturo '
-        "in jo primerjajte z modeli in meritvijo postaje.</li>"
-        f'<li><strong>Spremljajte v živo:</strong> trenutna meritev je na <a href="{SITE}/" style="color:var(--blue)">naslovni strani</a>.'
-        "</li>"
+        "ter svojo napoved primerjajte z modeli in meritvijo postaje.</li>"
+        f'<li><strong>Spremljajte razmere v živo:</strong> trenutno meritev najdete na <a href="{SITE}/" style="color:var(--blue)">naslovni strani</a>.</li>'
         "</ul>",
     ]
     omejitve = [
         "<ul>"
-        "<li><strong>Šest let je malo.</strong> Postaja meri od novembra 2019, zato so primerjave samo med jesenmi 2020–2025. Če sta dve leti poznejši od ostalih, to še ni trend.</li>"
-        "<li><strong>Ena postaja, ena točka.</strong> Postaja stoji na dnu doline v Rečici ob Savinji. Na travi, v mrazišču ali na višjih legah je lahko hladneje.</li>"
-        "<li><strong>Napoved ni meritev.</strong> Stanje je z dne 21. oktobra, ko je bil model MTR izdan; do petka se lahko spremeni. MTR je poskusen model, Open-Meteo in WeatherNext 2 sta tuja modela in nobeden ni uradno opozorilo. "
-        'Za uradna opozorila velja <a href="https://vreme.arso.gov.si/napoved" style="color:var(--blue)">ARSO</a>.</li>'
-        "<li><strong>Prag 5 °C je moja izbira.</strong> Namenjen je primerjavi med leti.</li>"
-        "<li><strong>Članek je posnetek na dan objave.</strong> Po prvi ničelni noči se samodejno ne spremeni.</li>"
+        "<li><strong>Šest let je malo.</strong> Postaja meri od novembra 2019, zato so primerjave omejene na jeseni med letoma 2020 in 2025. "
+        "Razlike med posameznimi leti same po sebi še ne pomenijo dolgoročnega trenda.</li>"
+        "<li><strong>Ena postaja, ena lokacija.</strong> Postaja stoji na dnu doline v Rečici ob Savinji. Na travi, v mrazišču ali na višjih legah je lahko hladneje.</li>"
+        "<li><strong>Napoved ni meritev.</strong> Podatki o napovedi so z dne 21. oktobra, ko je bil izračun MTR pripravljen. Do petka se lahko napoved še spremeni. "
+        "MTR je poskusni model, Open-Meteo in WeatherNext 2 pa sta tuja vira napovedi. Nobeden od teh podatkov ni uradno vremensko opozorilo. "
+        'Za uradna opozorila spremljajte <a href="https://vreme.arso.gov.si/napoved" style="color:var(--blue)">ARSO</a>.</li>'
+        "<li><strong>Prag 5 °C je moja izbira.</strong> Uporabljam ga za primerjavo med leti, ne gre pa za uradno vremensko mejo.</li>"
+        "<li><strong>Članek je posnetek stanja na dan objave.</strong> Po prvi ničelni noči se besedilo ne posodobi samodejno.</li>"
         "</ul>",
-        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate le z '
+        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate samo z '
         'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se '
         'predhodno dogovorite z avtorjem.</p>',
     ]
-    title = "16 noči pod 5 °C, prave slane pa še ni"
+    title = "16 noči pod 5 °C, temperature pod ničlo pa še ni bilo"
     assert len(title) <= 60, len(title)
-    desc = ("Do 20. oktobra je bilo v Rečici 16 noči pod 5 °C, a nobene z mrazom. Model MTR za petek kaže 0,1 °C. Kaj kažejo podatki šestih jeseni?")
+    desc = ("Do 20. oktobra je bilo v Rečici 16 noči pod 5 °C, a temperatura zraka še ni padla do ničle. Model MTR za petek napoveduje 0,1 °C. Podatki šestih jeseni.")
     assert len(desc) <= 160, len(desc)
     sections = [
         {"label": "01 — noči", "heading": "Šestnajst hladnih noči, nobene ničle", "id": "noci", "paragraphs": p1},
-        {"label": "02 — razlog", "heading": "Topli popoldnevi, mrzla jutra", "id": "razlog", "paragraphs": p2},
-        {"label": "03 — trava", "heading": "Na travi je slana že bila, na termometru ne", "id": "trava", "paragraphs": p3},
+        {"label": "02 — razlog", "heading": "Topli popoldnevi, hladna jutra", "id": "razlog", "paragraphs": p2},
+        {"label": "03 — trava", "heading": "Na travi je slana že bila, temperatura zraka pa še ni padla do ničle", "id": "trava", "paragraphs": p3},
         {"label": "04 — kdaj", "heading": "Kdaj bo prva ničla? Morda že v petek", "id": "kdaj", "paragraphs": p4},
-        {"label": "05 — praktično", "heading": "Kaj lahko naredite", "id": "prakticno", "paragraphs": letos},
+        {"label": "05 — praktično", "heading": "Kaj lahko naredite?", "id": "prakticno", "paragraphs": letos},
         {"label": "06 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": omejitve},
     ]
 
@@ -389,8 +400,8 @@ def build_article(H):
         "tags": ["slana", "zmrzal", "oktober", "napoved", "podatki"],
         "section_label": "Podatkovna analiza", "og_photo": "night-fog-valley", "og_accent_hex": "#22d3ee",
         "lead": lead, "sections": sections, "callout": None,
-        "sources_note": ("Viri: postaja IREICA1 (najnižja in najvišja dnevna temperatura, padavine, zunanji senzor, od 7. 11. 2019); "
-                         "model MTR (napoved-modela.json, izdan 21. 10. 2026); Open-Meteo; Google WeatherNext 2 (ansambel, prek Open-Meteo)."),
+        "sources_note": ("Viri: postaja IREICA1 (najnižja in najvišja dnevna temperatura, padavine ter meritve zunanjega senzorja od 7. 11. 2019); "
+                         "model MTR (napoved-modela.json, izdaja z dne 21. 10. 2026); Open-Meteo; Google WeatherNext 2 (ansambelska napoved prek Open-Meteo)."),
     }
 
 
@@ -432,7 +443,7 @@ def main():
     ftp.TODAY = today.isoformat()
     slug, html, entry, og_meta = ftp.build_html(
         article, today.year, today.month, now_utc, slug=SLUG, back=("/blog/", "← Vsi članki"),
-        og_title="16 noči pod 5 °C,\nslane pa še ni", meta_note="podatkovna analiza",
+        og_title="16 noči pod 5 °C,\nbrez ničle", meta_note="podatkovna analiza",
         nav_label="O postaji", nav_href="/o-postaji.html")
     lead = f'<p class="lead">{article["lead"]}</p>'
     assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"
