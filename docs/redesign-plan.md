@@ -41,3 +41,11 @@ Playwright posnetki, `check_mobile_overflow.mjs`, `critical_css.mjs` (12 stanj),
 - CLS (Playwright, brez omrežne omejitve): 360 px svetla 0,012; vse ostalo ≤ 0,001.
 - Posnetki 360/390/768/1280 px × svetla/temna so bili posneti v scratchpadu seje (niso v repozitoriju).
 - Lighthouse lokalno ni na voljo; merilo za LCP/INP ostaja `lighthouse.yml` na živi strani.
+
+## Faza 1 (opravljeno): tokeni, paleta, kontrast
+- Tokeni `--c-*`, `--r-*`, `--sh-*`, `--sp-*`, `--fs-*` so v `style.css` za blokoma `:root` in `[data-theme="dark"]`. Obstoječe spremenljivke `--text`, `--muted`, `--blue`, `--card-*` so preslikane nanje; ostale (ozadje `#bg` prek JS, trdo kodirane barve v grafih in gradientih gumbov) ostanejo do faz 3 in 7.
+- Brez `prefers-color-scheme` (odločitev uporabnika); izbira teme ostaja v `localStorage 'wx-theme'`, privzeta je temna.
+- Kontrast (WCAG): vsi pari besedilo/akcent na ozadju in površini ≥ 4,5:1 v obeh temah. Popravki glede na izhodiščno tabelo: jantar kot besedilo v svetli temi `--c-warm-text:#8A5A12` (5,4:1; `#C98A2B` ima 2,7:1 in je samo za polnila), besedilo na akcentu v temni temi `#0F1713` (bela bi imela 2,2:1), obroba kontrolnikov `--c-line-strong` (`#6F867A` svetla 3,6:1, `#5A7566` temna 3,6:1).
+- Pisava: Inter je že variabilna (osi `wght` 100–900 in `opsz`, lokalni woff2, slovenska podmnožica), zato je ni treba zamenjati. Dodano `font-variant-numeric: tabular-nums` na `body`.
+- `theme-color` `#0F1713` (temna privzeta; JS ga še vedno prepiše glede na vreme), manifest `theme_color` `#2F6B4F`, `background_color` `#0F1713`. TWA konfiguracije (PWABuilder) v repozitoriju ni; barvi je treba uskladiti ob naslednjem paketu.
+- Preverjeno: `npm run minify`, `critical_css.mjs`, `test_privacy.py`, `test_parity.py` brez napak; CLS ≤ 0,001 pri vseh širinah.

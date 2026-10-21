@@ -69,12 +69,45 @@
   --t-fl-bg:rgba(148,163,184,.08); --t-fl-c:var(--muted);
 }
 
+/* ── Design tokeni (redizajn 2026, faza 1) ──────────────────────────────
+   Naturalistična paleta. Kontrast preverjen programsko (WCAG AA, glej docs/redesign-plan.md):
+   besedilo in akcent ≥ 4,5:1 na ozadju in površini; --warm je samo za polnila/ikone, za besedilo
+   --warm-text; --line je okras, za obrobe kontrolnikov --line-strong (≥ 3:1).
+   Prva faza preslika samo "znamčne" spremenljivke (besedilo, površine, akcent); ozadje (#bg) še
+   vodi vreme prek JS, trdo kodirane barve v grafih se menjajo v poznejših fazah. */
+:root {
+  --c-bg:#F4F6F1; --c-surface:#FFFFFF; --c-ink:#1C2A22; --c-ink-soft:#5B6B60;
+  --c-accent:#2F6B4F; --c-on-accent:#FFFFFF;
+  --c-warm:#C98A2B; --c-warm-text:#8A5A12;
+  --c-line:#DCE3DE; --c-line-strong:#6F867A;
+  --r-sm:8px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(28,42,34,.08),0 2px 8px rgba(28,42,34,.06);
+  --sh-2:0 4px 12px rgba(28,42,34,.10),0 12px 32px rgba(28,42,34,.10);
+  --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.5rem; --sp-6:2rem; --sp-7:3rem; --sp-8:4rem;
+  --fs-hero:clamp(3.5rem,12vw,7rem); --fs-h1:clamp(1.6rem,4vw,2.4rem); --fs-h2:clamp(1.15rem,2.4vw,1.5rem);
+  --fs-body:clamp(.95rem,1.1vw + .6rem,1.05rem); --fs-small:clamp(.78rem,.8vw + .55rem,.875rem);
+  /* preslikava obstoječih spremenljivk */
+  --text:var(--c-ink); --muted:var(--c-ink-soft); --blue:var(--c-accent);
+  --card-bg:rgba(255,255,255,.97); --card-border:rgba(28,42,34,.09); --card-border-h:rgba(28,42,34,.16);
+  --card-shadow:var(--sh-1); --card-shadow-h:var(--sh-2);
+}
+[data-theme="dark"] {
+  --c-bg:#0F1713; --c-surface:#17221C; --c-ink:#E6EDE8; --c-ink-soft:#9DB0A4;
+  --c-accent:#6FBF95; --c-on-accent:#0F1713;
+  --c-warm:#E0A94A; --c-warm-text:#E0A94A;
+  --c-line:#26342C; --c-line-strong:#5A7566;
+  --sh-1:0 1px 2px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.25);
+  --sh-2:0 4px 12px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.3);
+  --card-bg:rgba(23,34,28,.94); --card-border:rgba(230,237,232,.10); --card-border-h:rgba(230,237,232,.18);
+  --card-shadow:var(--sh-1); --card-shadow-h:var(--sh-2);
+}
+
 html{scroll-behavior:smooth;overflow-x:hidden}
 /* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
    sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže
    -> oscilacija (flicker). +1px zagotovi da je stran VEDNO scrollable v
    obeh stanjih URL vrstice -> body višina konstantna -> ni povratne zanke. */
-body{background:var(--bg);color:var(--text);font-family:'Inter','Inter Fallback',sans-serif;font-weight:400;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
+body{background:var(--bg);color:var(--text);font-family:'Inter','Inter Fallback',sans-serif;font-weight:400;font-variant-numeric:tabular-nums;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
 
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
