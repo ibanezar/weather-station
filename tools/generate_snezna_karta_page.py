@@ -58,6 +58,7 @@ CSS_SRC = """
 .sk-ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:.6rem 0}
 .sk-ctrl input[type=range]{flex:1;min-width:160px;min-height:32px}
 .sk-ctrl button[aria-pressed="true"]{color:var(--text,#e5e7eb);border-color:var(--cyan,#38bdf8);background:rgba(56,189,248,.12)}
+.sk-empty{max-width:760px;margin:.5rem 0;padding:.6rem .9rem;border-left:3px solid var(--cyan,#38bdf8);background:rgba(56,189,248,.07);border-radius:4px;font-size:.9rem}
 .sk-range{font-size:.85rem;color:var(--muted);min-height:1.3em}
 .sk-ctrl strong{min-width:9ch}
 .sk-map canvas{width:100%;max-width:760px;height:auto;display:block;border-radius:8px;background:rgba(255,255,255,.04);touch-action:pan-y}
@@ -134,6 +135,19 @@ JS_SRC = r"""
     var cur=dayKey(S.data.t0+(S.k+1)*3600000);
     Array.prototype.forEach.call(document.querySelectorAll("#sk-days button"),function(b){ b.setAttribute("aria-pressed",String(b.dataset.key===cur)); });
   }
+  function firstSnow(){ // prva ura z vsaj enim 0,1 cm sneženja kjerkoli na mreži
+    var D=S.data, k, i; for(k=0;k<D.hours;k++) for(i=0;i<D.sn[k].length;i++) if(D.sn[k][i]>=1) return k;
+    return -1;
+  }
+  function emptyNote(){
+    var el=document.getElementById("sk-empty"); if(!el) return;
+    if(S.v==="l"){ el.hidden=true; return; }
+    var arr=field(S.v,S.k), has=arr.some(function(x){ return x!=null&&x>=0.1; });
+    if(has){ el.hidden=true; return; }
+    var fs=firstSnow(), msg=S.v==="s"?"V izbranem obdobju model nikjer na karti ne napoveduje sneženja.":"V tej uri model nikjer na karti ne napoveduje sneženja.";
+    msg+=fs<0?" V naslednjih 48 urah sneženja ni.":" Prvo sneženje v naslednjih 48 urah: "+when(fs)+".";
+    el.textContent=msg; el.hidden=false;
+  }
   function draw(){
     var cv=S.cv, G=geo(), dpr=Math.min(2,window.devicePixelRatio||1), PW=G.w*dpr, PH=G.h*dpr;
     cv.width=PW; cv.height=PH;
@@ -179,6 +193,7 @@ JS_SRC = r"""
     var rg=document.getElementById("sk-range");
     rg.textContent=S.v==="s"?"Skupaj: "+whenAt(0,-1)+" → "+when(S.k)+" ("+(S.k+1)+" h)":"";
     markDay();
+    emptyNote();
     document.getElementById("sk-scale").innerHTML=scaleHtml();
     readout();
   }
@@ -197,6 +212,7 @@ JS_SRC = r"""
         '<button type="button" id="sk-now">Na prvo uro</button></div>'+
       '<div class="sk-range" id="sk-range"></div>'+
       '<div class="sk-map"><canvas id="sk-cv" role="img"></canvas></div>'+
+      '<div class="sk-empty" id="sk-empty" role="status" hidden></div>'+
       '<div id="sk-scale"></div>'+
       '<div class="sk-read" id="sk-read" aria-live="polite">Dotakni se karte: sneženje, skupna količina in meja sneženja na izbrani točki.</div>'+
       '<p class="sk-note">Model '+D.model+' na mreži 0,1° (okoli 8 × 11 km), korak 1 ura. Nastalo ob '+gen+(D.stale?" (podatki so nekoliko stari, vir trenutno ne odgovarja)":"")+
@@ -241,8 +257,9 @@ ASSET_DIR = "zima/snezna-karta"
 
 
 def head_assets():
-    """Povezavi na skupna CSS/JS (stran in hub /zima/ nalagata isto datoteko; ?v= zaobide predpomnilnik)."""
-    v = TODAY.strftime("%Y%m%d")
+    """Povezavi na skupna CSS/JS (stran in hub /zima/ nalagata isto datoteko; ?v= je zgoščena vsebina)."""
+    import hashlib
+    v = hashlib.sha1((CSS_SRC + JS_SRC).encode("utf-8")).hexdigest()[:8]   # vsebina, ne datum: sprememba istega dne zaobide predpomnilnik
     return (f'<link rel="stylesheet" href="/{ASSET_DIR}/karta.css?v={v}">\n'
             f'<script src="/{ASSET_DIR}/karta.js?v={v}" defer></script>')
 
