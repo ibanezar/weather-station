@@ -944,7 +944,7 @@ function renderThisWeekHistory(){
   };
   // scope=col/row: Lighthouse (td-has-header) in bralniki zaslona morajo vedeti, kateremu letu in dnevu pripada celica.
   const dayHdr=days.map(d=>'<th scope="col">'+d.getDate()+'.'+(d.getMonth()+1)+'.</th>').join('');
-  let html='<div class="twh-grid-wrap"><table class="twh-grid"><thead><tr><th scope="col"><span class="visually-hidden">Leto</span></th>'+dayHdr+'</tr></thead><tbody>';
+  let html='<div class="twh-grid-wrap" tabindex="0" role="group" aria-label="Toplotna karta po letih, drsi vodoravno"><table class="twh-grid"><thead><tr><th scope="col"><span class="visually-hidden">Leto</span></th>'+dayHdr+'</tr></thead><tbody>';
   grid.forEach(row=>{
     html+='<tr><th scope="row" class="twh-yr">'+row.yr+'</th>';
     row.cells.forEach(t=>{
