@@ -2448,7 +2448,8 @@ bere samo `history.json` (zunanji `tempLow`/`tempHigh`/`precipTotal`) in `napove
   prenoviti, ne zaobiti asserta; naravno nadaljevanje je članek »prva ničla je bila …«.
 - Prag »hladna noč« (< 5 °C) je naša izbira za primerjavo med jesenmi, ne uradna meja; napoved zmrzali (`p_frost`) je
   poskusni MTR in je tako označena. Slana (led na površini) in zmrzal (≤ 0 °C v zraku) se razlikujeta; šteje samo zmrzal.
-- Lektura še ni bila opravljena (`lektura.yml` izklopljena); na FB/IG ne gre samodejno, po pregledu s `social-repost.yml`.
+- Lektura je opravljena ročno (Filip, 21. 10. 2026; besedilo je v generatorju). Na FB/IG ne gre samodejno; kartice (`tools/generate_slane_se_ni_card_variants.py`, ista varovalka kot članek) in besedila so v `docs/fb-slane-se-ni.md`.
+  Kartica 3 (petkovo jutro) je vezana na napoved, zato jo je treba objaviti pred petkom zjutraj.
 
 ## Razvoj
 
