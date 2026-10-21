@@ -80,6 +80,7 @@
   --c-accent:#2F6B4F; --c-on-accent:#FFFFFF;
   --c-warm:#C98A2B; --c-warm-text:#8A5A12;
   --c-line:#DCE3DE; --c-line-strong:#6F867A;
+  --c-cool:#0369a1; /* semantično »hladno/voda« (modra), ločeno od akcenta; ≥ 5,4:1 */
   --r-sm:8px; --r-md:14px; --r-lg:20px; --r-pill:999px;
   --sh-1:0 1px 2px rgba(28,42,34,.08),0 2px 8px rgba(28,42,34,.06);
   --sh-2:0 4px 12px rgba(28,42,34,.10),0 12px 32px rgba(28,42,34,.10);
@@ -97,6 +98,7 @@
   --c-accent:#6FBF95; --c-on-accent:#0F1713;
   --c-warm:#E0A94A; --c-warm-text:#E0A94A;
   --c-line:#26342C; --c-line-strong:#5A7566;
+  --c-cool:#4d9ff8;
   --sh-1:0 1px 2px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.25);
   --sh-2:0 4px 12px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.3);
   --card-bg:rgba(23,34,28,.94); --card-border:rgba(230,237,232,.10); --card-border-h:rgba(230,237,232,.18);
@@ -485,7 +487,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .hm{display:flex;flex-direction:column;gap:.22rem;padding:.7rem .9rem;border-radius:12px;background:var(--fc-bg);border:1px solid var(--fc-border);border-left:3px solid var(--hm-accent,var(--blue));transition:border-color .5s,background .5s}
 .hm-val{font-family:'JetBrains Mono',monospace;font-size:1.28rem;font-weight:300;color:var(--text);line-height:1.15;font-variant-numeric:tabular-nums}
 .hm-lbl{font-size:.61rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
-.hm-hum{--hm-accent:var(--blue)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-rain{--hm-accent:var(--blue)}.hm-uv{--hm-accent:var(--amber)}.hm-range{--hm-accent:var(--red)}
+.hm-hum{--hm-accent:var(--c-cool)}.hm-pres{--hm-accent:var(--purple)}.hm-wind{--hm-accent:var(--green)}.hm-rain{--hm-accent:var(--c-cool)}.hm-uv{--hm-accent:var(--amber)}.hm-range{--hm-accent:var(--red)}
 /* Sekundarni podatki (UV/tlak) — manj vizualne teže kot vlaga/veter/padavine/razpon v prvi vrsti,
    in samo v naprednem pogledu (glej pravilo "Kaj je v preprostem pogledu skrito" nižje) */
 .hm-secondary{background:transparent}
@@ -1251,7 +1253,7 @@ img.wx-icon{display:inline-block;vertical-align:middle}
 .ds-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
 .ds-time{font-family:'JetBrains Mono',monospace;font-weight:300}
 .ds-percentile{display:block;font-size:.72rem;color:var(--amber)}
-.ds-high .ds-arrow{color:var(--red)}.ds-low .ds-arrow{color:var(--blue)}
+.ds-high .ds-arrow{color:var(--red)}.ds-low .ds-arrow{color:var(--c-cool)}
 .ds-rain .ds-arrow{color:var(--rain-col)}.ds-avg .ds-arrow{color:var(--green)}
 
 /* Wind */
@@ -1348,7 +1350,7 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .visitor-counter .vc-num{color:var(--text);font-weight:500}
 @keyframes vc-in{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
 .visitor-counter.loaded{animation:vc-in .4s ease}
-.ft-donate-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.69rem;color:rgba(0,191,174,.75);text-decoration:none;transition:color .2s}
+.ft-donate-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.69rem;color:var(--c-accent);text-decoration:none;transition:color .2s}
 .ft-donate-link:hover{color:#00bfae}
 .ft-social{display:flex;align-items:center;gap:.6rem}
 .ft-social a{display:inline-flex;color:var(--muted);opacity:.8;transition:opacity .2s,color .2s}
@@ -2439,7 +2441,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-chip{font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:999px;white-space:nowrap;
   font-family:'JetBrains Mono',monospace}
 .mtr-chip.up{background:rgba(248,113,113,.16);color:var(--red)}
-.mtr-chip.down{background:rgba(77,159,248,.16);color:var(--blue)}
+.mtr-chip.down{background:rgba(77,159,248,.16);color:var(--c-cool)}
 .mtr-day-meta{margin-top:.3rem;font-size:.7rem;color:var(--muted);opacity:.85;
   font-family:'JetBrains Mono',monospace}
 .mtr-why{margin:.9rem 0 0;padding:.85rem .9rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px}
@@ -3047,7 +3049,7 @@ html.cookie-need #cookie-banner{display:flex}
   border-radius:10px;color:var(--text);font:inherit;font-size:.98rem;padding:.65rem .85rem}
 .sub-input:focus{outline:none;border-color:var(--blue)}
 .sub-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
-.sub-btn{background:var(--blue);color:#04070e;border:none;border-radius:10px;font:inherit;font-weight:600;
+.sub-btn{background:var(--blue);color:var(--c-on-accent);border:none;border-radius:10px;font:inherit;font-weight:600;
   padding:.65rem 1.5rem;cursor:pointer;transition:opacity .15s;white-space:nowrap}
 .sub-btn:hover{opacity:.9}
 .sub-btn:disabled{opacity:.55;cursor:default}
@@ -3389,3 +3391,11 @@ body[data-weather]{--blue:var(--c-accent)}
   .chart-card.rv-pre{opacity:0;transform:translateY(12px)}
 }
 @media (prefers-reduced-motion:reduce){#bg,body[data-weather]{transition:none}}
+
+/* ── Kontrast v svetli temi (axe, 21. 10. 2026) ─────────────────────────
+   Oznake na ozadju strani (ne na kartici) rabijo polno barvo besedila; lestvica AQI ima v svetli temi temnejše odtenke
+   (JS barvo vpiše inline, zato !important; data-aqi nosi izvirno barvo, da menjava teme ne zahteva ponovnega klica). */
+[data-theme="light"] .past-days-hdr-lbl,[data-theme="light"] .section-fold-lbl{color:var(--c-ink)}
+[data-theme="light"] #aqi-val[data-aqi="#22c55e"]{color:#15803d!important}[data-theme="light"] #aqi-val[data-aqi="#84cc16"]{color:#4d7c0f!important}
+[data-theme="light"] #aqi-val[data-aqi="#eab308"]{color:#a16207!important}[data-theme="light"] #aqi-val[data-aqi="#f97316"]{color:#c2410c!important}
+[data-theme="light"] #aqi-val[data-aqi="#ef4444"]{color:#b91c1c!important}[data-theme="light"] #aqi-val[data-aqi="#9333ea"]{color:#7e22ce!important}

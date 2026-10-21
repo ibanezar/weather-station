@@ -41,3 +41,8 @@ Primerjava `index.html` prej/potem: `<title>`, `canonical`, JSON-LD, `h1` in vsi
 3. `.mtr-chip.down` uporablja `var(--blue)`, ki je zdaj akcent (zelen): semantika »pod napovedjo = modro« je izgubljena; potreben je namenski token.
 4. Pravi LCP/INP/CLS s pravimi podatki: preveri `lighthouse.yml` po objavi (peskovnik nima zunanjih API-jev).
 5. Globlje kartice z grafi še niso v bento mreži (JS jih riše po `clientWidth`).
+
+## Dopolnitev (po mergu, 21. 10. 2026)
+- **Živi Lighthouse po mergu** (`lighthouse.yml`, 1 tek vsak): mobilni performance 0,42 → 0,48, desktop 0,28 → 0,26 (znotraj šuma). Vsi workflowi po mergu zeleni (minify, smoke, parity, privacy, Pages, IndexNow).
+- **`--c-cool`** (semantična »hladno/voda« modra, ločena od akcenta): `.mtr-chip.down`, `.ds-low`, ploščici vlage in dežja. Prej so po preslikavi `--blue` → akcent postale zelene.
+- **Kontrast v svetli temi: 0 kršitev axe** (prej 9) pri 1280 in 390 px, temna tema 0: oznake `.past-days-hdr-lbl`/`.section-fold-lbl` (`--c-ink`), `.pd-meta` placeholderji (brez `opacity .7`), `#aqi-val` (temnejša lestvica prek `data-aqi`, odziva se tudi na menjavo teme), `.sub-btn` (`--c-on-accent`), `.ft-donate-link` (`--c-accent`). Pozor: `#visitor-counter` axe javi samo med 0,4 s animacijo `vc-in`; po koncu je v redu (merimo po 7 s).
