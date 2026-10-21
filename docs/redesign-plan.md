@@ -49,3 +49,9 @@ Playwright posnetki, `check_mobile_overflow.mjs`, `critical_css.mjs` (12 stanj),
 - Pisava: Inter je že variabilna (osi `wght` 100–900 in `opsz`, lokalni woff2, slovenska podmnožica), zato je ni treba zamenjati. Dodano `font-variant-numeric: tabular-nums` na `body`.
 - `theme-color` `#0F1713` (temna privzeta; JS ga še vedno prepiše glede na vreme), manifest `theme_color` `#2F6B4F`, `background_color` `#0F1713`. TWA konfiguracije (PWABuilder) v repozitoriju ni; barvi je treba uskladiti ob naslednjem paketu.
 - Preverjeno: `npm run minify`, `critical_css.mjs`, `test_privacy.py`, `test_parity.py` brez napak; CLS ≤ 0,001 pri vseh širinah.
+
+## Faza 2 (opravljeno): SVG ikone
+- `tools/emoji_to_icons.py` preoblikuje vodilne emojije v naslovih (`.clabel`, `.an-title`, `.tri-title`, `.nt-title`, `.kf-label`, `.ic-head`), meniju, preklopu pogleda in gumbih v SVG (Lucide, vendorirano v `tools/icons/lucide/`); sprite je inline v `index.html` (`#icon-sprite`, ~23 KB). 262 ikon v HTML; `aria-hidden` na dekorativnih, gumbi samo z ikono dobijo `aria-label` iz `title`.
+- `app.js`: pomočnik `_ico(ime)`; gumb teme (sonce/luna), radar Predvajaj/Pavza, značka nowcast, nekaj gumbov, ki jim JS prepiše besedilo.
+- Preslikava in izjeme (taksonomski čipi, skupnostni vnosi, tabele v JS, `<option>`): `docs/ikone.md`.
+- Preverjeno: `test_privacy`, `test_parity`, `test_freshness` brez napak; CLS ≤ 0,001; minify + kritični CSS ponovno zgrajena.

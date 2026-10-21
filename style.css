@@ -102,6 +102,8 @@
   --card-shadow:var(--sh-1); --card-shadow-h:var(--sh-2);
 }
 
+/* SVG ikone (sprite v index.html, tools/emoji_to_icons.py): barva = currentColor, velikost v em, da je rezervirana ob prvem izrisu */
+.ic{width:1.1em;height:1.1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
 html{scroll-behavior:smooth;overflow-x:hidden}
 /* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
    sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže

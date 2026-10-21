@@ -108,6 +108,8 @@ function _archDrain(){
   fetch(url).then(r=>r.json()).then(d=>{_archCache[url]=d;res(d);}).catch(rej).finally(()=>setTimeout(_archDrain,650));
 }
 
+// SVG ikona iz sprite-a v index.html (tools/emoji_to_icons.py); samo za nize, ki gredo v innerHTML
+const _ico=n=>'<svg class="ic" aria-hidden="true"><use href="#i-'+n+'"/></svg>';
 // ── Theme ─────────────────────────────────────────────────
 const isDark = () => document.documentElement.dataset.theme === 'dark';
 // Mrežna plast je risana v temnih odtenkih — v svetli temi jo močno zbledimo,
@@ -119,7 +121,7 @@ let _lastTemp = null; // remember temp so theme toggle can re-colour it
 const _themeRedraw=new Set();
 function setTheme(t){
   document.documentElement.dataset.theme = t;
-  document.getElementById('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
+  document.getElementById('theme-btn').innerHTML = _ico(t === 'dark' ? 'sun' : 'moon');
   try { localStorage.setItem('wx-theme', t); } catch(e){}
   const _prevWxCond = _wxCond; _wxCond = ''; applyWeatherBg(_prevWxCond || 'cloudy');
   updatePhotoBackground(null);
@@ -206,7 +208,7 @@ document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 (function initTheme(){
   // data-theme je že nastavljen sinhrono v <head> (glej inline script pred CSS-jem),
   // tu le uskladimo ikono gumba, brez ponovnega nastavljanja teme.
-  document.getElementById('theme-btn').textContent = isDark() ? '☀️' : '🌙';
+  document.getElementById('theme-btn').innerHTML = _ico(isDark() ? 'sun' : 'moon');
 })();
 
 // ── Chart colour helpers ──────────────────────────────────
@@ -3118,7 +3120,7 @@ async function galleryOptimizeExisting(){
   } catch(e){
     showToast('Napaka pri optimizaciji.');
   } finally {
-    if(btn){ btn.disabled = false; btn.textContent = '🗜️ Optimiziraj'; }
+    if(btn){ btn.disabled = false; btn.innerHTML = _ico('minimize-2') + ' Optimiziraj'; }
   }
 }
 
@@ -3198,7 +3200,7 @@ async function galleryRecategorizeExisting(){
   }
   showToast(fail ? `Kategoriziranih ${ok}, napaka pri ${fail}.` : `Kategoriziranih vseh ${ok}.`);
   loadGallery();
-  if(btn){ btn.disabled = false; btn.textContent = '🏷️ Kategoriziraj obstoječe'; }
+  if(btn){ btn.disabled = false; btn.innerHTML = _ico('tag') + ' Kategoriziraj obstoječe'; }
 }
 
 // Fotke iz telefonskih kamer znašajo 2-5 MB pri 3000-4000px širine, za
@@ -3291,7 +3293,7 @@ async function gallerySubmitUpload(){
     showToast('Napaka: '+e.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = '⬆ Naloži fotografijo';
+    btn.innerHTML = _ico('share-2') + ' Naloži fotografijo';
     if(prog) setTimeout(()=>{ prog.style.display='none'; fill.style.width='0%'; }, 800);
   }
 }
@@ -4625,8 +4627,8 @@ function switchMeteorecRadarView(id){
 function toggleMeteorecRadarPlay(){
   _mradPlaying=!_mradPlaying;
   const btn=document.getElementById('mrad-play');
-  if(_mradPlaying){startMeteorecRadarAnim();if(btn)btn.textContent='⏸ Pavza';}
-  else{clearInterval(_mradTimer);_mradTimer=null;if(btn)btn.textContent='▶ Predvajaj';}
+  if(_mradPlaying){startMeteorecRadarAnim();if(btn)btn.innerHTML=_ico('pause')+' Pavza';}
+  else{clearInterval(_mradTimer);_mradTimer=null;if(btn)btn.innerHTML=_ico('play')+' Predvajaj';}
 }
 
 function meteorecRadarSeek(e){
@@ -4643,7 +4645,7 @@ function meteorecRadarSeek(e){
   }
   showMeteorecRadarFrame(i);
   _mradPlaying=false;clearInterval(_mradTimer);_mradTimer=null;
-  const btn=document.getElementById('mrad-play');if(btn)btn.textContent='▶ Predvajaj';
+  const btn=document.getElementById('mrad-play');if(btn)btn.innerHTML=_ico('play')+' Predvajaj';
 }
 
 // Legendo rišemo iz odgovora in ne iz prepisane lestvice, da se ob spremembi
@@ -4827,8 +4829,8 @@ function startRadarAnim(){
 function toggleRadarPlay(){
   _radarPlaying=!_radarPlaying;
   const btn=document.getElementById('radar-play');
-  if(_radarPlaying){startRadarAnim();if(btn)btn.textContent='⏸ Pavza';}
-  else{clearInterval(_radarTimer);if(btn)btn.textContent='▶ Predvajaj';}
+  if(_radarPlaying){startRadarAnim();if(btn)btn.innerHTML=_ico('pause')+' Pavza';}
+  else{clearInterval(_radarTimer);if(btn)btn.innerHTML=_ico('play')+' Predvajaj';}
 }
 
 function radarSeek(e){
@@ -4838,7 +4840,7 @@ function radarSeek(e){
   _radarIdx=Math.max(0,Math.min(_radarFrames.length-1,Math.floor(pct*_radarFrames.length)));
   showRadarFrame(_radarIdx);
   _radarPlaying=false;clearInterval(_radarTimer);
-  const btn=document.getElementById('radar-play');if(btn)btn.textContent='▶ Predvajaj';
+  const btn=document.getElementById('radar-play');if(btn)btn.innerHTML=_ico('play')+' Predvajaj';
 }
 
 // ══════════════════════════════════════════════════════════
@@ -6319,7 +6321,7 @@ function _ncSetBadge(vrsta,ikona,beseda){
   const b=document.getElementById('nowcast-badge'),t=document.getElementById('nowcast-badge-txt');
   if(!b||!t)return;
   b.className='nc-badge nc-badge-'+vrsta;
-  b.querySelector('.nc-badge-ic').textContent=ikona;
+  b.querySelector('.nc-badge-ic').innerHTML=_ico(ikona);
   t.textContent=beseda;
 }
 async function loadNowcast(){
@@ -6358,20 +6360,20 @@ async function loadNowcast(){
   const eta=(min)=>{hero.innerHTML='čez ~'+min+'<span class="nc-unit">min</span>';};
   const zeDez=v.zdaj>=6, zeNevihta=v.zdaj>=10, zeJedro=v.zdaj>=12;
   if(v.toca&&!zeJedro){
-    _ncSetBadge('hail','🧊','Možnost toče'); eta(v.jedro);
+    _ncSetBadge('hail','thermometer-snowflake','Možnost toče'); eta(v.jedro);
     sub.textContent='Radar kaže močno jedro na poti proti vasi. Toče od močnega naliva ne loči zanesljivo — pripravi se, a ne paniči.';
   }else if(v.nevihta!=null&&!zeNevihta){
-    _ncSetBadge('storm','⛈️','Nevihta'); eta(v.nevihta);
+    _ncSetBadge('storm','cloud-lightning','Nevihta'); eta(v.nevihta);
     sub.textContent=zeDez?'Nad vasjo že dežuje (~'+v.zdajMmh+' mm/h), jakost pa naj bi še narasla.'
                          :'Radar kaže nevihtno celico na poti proti vasi.';
   }else if(zeNevihta){
-    _ncSetBadge('storm','⛈️','Nevihta nad vasjo'); hero.textContent='';
+    _ncSetBadge('storm','cloud-lightning','Nevihta nad vasjo'); hero.textContent='';
     sub.textContent='Nevihta je nad vasjo (~'+v.zdajMmh+' mm/h).';
   }else if(v.dez!=null&&!zeDez){
-    _ncSetBadge('rain','🌧️','Dež'); eta(v.dez);
+    _ncSetBadge('rain','cloud-rain','Dež'); eta(v.dez);
     sub.textContent='Padavine se približujejo z radarske slike.';
   }else{
-    _ncSetBadge('rain','🌧️','Dež nad vasjo'); hero.textContent='';
+    _ncSetBadge('rain','cloud-rain','Dež nad vasjo'); hero.textContent='';
     sub.textContent='Nad vasjo dežuje (~'+v.zdajMmh+' mm/h).';
   }
 
@@ -14137,7 +14139,7 @@ async function aiTrainAndPredict(){
     aiDrawComparisonChart();
     // Train autoencoder for anomaly detection
     if(typeof tf!=='undefined'&&typeof tf.sequential==='function')setTimeout(()=>buildAndTrainAE().then(()=>runAnomalyScoring()),1000);
-    if(btn){btn.textContent='🔄 Ponovi učenje';btn.disabled=false;}
+    if(btn){btn.innerHTML=_ico('refresh-cw')+' Ponovi učenje';btn.disabled=false;}
   }catch(e){
     aiSetStatus('❌ Napaka: '+e.message);console.error('AI Nowcast:',e);
     if(btn)btn.disabled=false;
@@ -14325,7 +14327,7 @@ function aiResetModel(){
   localStorage.removeItem(AI_PRED_LOG_KEY);
   _aiModel=null;_aiNorm=null;_aiLstmPredictions=null;_aiInit=false;
   const btn=document.getElementById('ai-train-btn');
-  if(btn){btn.textContent='↻ Osveži napoved';btn.disabled=false;}
+  if(btn){btn.innerHTML=_ico('refresh-cw')+' Osveži napoved';btn.disabled=false;}
   aiSetStatus('Model je izbrisan. Kliknite za novo učenje.',0);
   const fg=document.getElementById('ai-forecast-grid');
   if(fg)fg.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Nalagam…</div>';
