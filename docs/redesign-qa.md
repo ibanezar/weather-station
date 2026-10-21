@@ -1,0 +1,43 @@
+# Redizajn meteorec.si: QA pred/po (21. 10. 2026)
+
+Primerjava izhodišča (commit `f462675`, faza 0 = stran pred redizajnom) z vejo `ccr-af309e71-sjhsj1` (faze 1–7; faza 8, pod-brandi, je po odločitvi uporabnika izpuščena). Vse meritve lokalno (strežnik `python3 -m http.server`, Lighthouse 12 + Chromium iz `/opt/pw-browsers`, mobilni profil), zato absolutne vrednosti performansa niso merilo (glej CLAUDE.md, »Lighthouse na lokalnem strežniku ni merilo za LCP«); pomembna je primerjava.
+
+## Lighthouse (mobilni profil, 2 teka vsak)
+| | Prej | Potem |
+|---|---|---|
+| Performance | 34 / 39 | 36 / 39 (35 po zadnji gradnji) |
+| Accessibility | 100 / 100 | 97 → **100** (po popravku kontrasta, glej spodaj) |
+| Best practices | 77 | 77 |
+| SEO | 100 | 100 |
+| CLS | 0,02 | 0,019 |
+| LCP (lokalno, nezanesljivo) | 9,7–10,9 s | 11,0–11,1 s |
+| TBT | 950–1500 ms | 960–1180 ms |
+
+Rezultat performansa ni slabši znotraj šuma. LCP/FCP je na lokalnem strežniku dominiran z zunanjimi skripti; pravo merilo je `lighthouse.yml` na živi strani po objavi (ni v moči peskovnika).
+
+## Dostopnost
+- Lighthouse je po fazi 7 padel s 100 na 97: **42 vozlišč `color-contrast`**. Vzrok: predlagana temna `Bledo besedilo` `#9DB0A4` je pri `opacity .6–.7` (uporabljena na ~40 mestih) pod 4,5:1. Popravek: temna `--c-ink-soft` `#C0CFC5` (4,58:1 pri opacity .6), temna `--red` `#fb8a8a`, `.mtr-chip.up` na `var(--red)`. Rezultat: 100.
+- axe-core 4 (wcag2a+aa), naslovna, 1280 px:
+  - prej: temna brez kršitev, svetla `color-contrast` ×107
+  - potem: temna brez kršitev, svetla `color-contrast` ×9
+- axe `best-practice` (informativno): `region` (116), `landmark-one-main` (stran nima `<main>`; glava in noga sta znotraj `.wrap`), obstajalo že prej.
+- Tipkovnica (Playwright): prvi Tab = skip link; Enter → `#main-content`; ArrowDown odpre meni (`aria-expanded`), Escape zapre in vrne fokus; `aria-current` sledi `switchTab`.
+- `prefers-reduced-motion: reduce`: 0 aktivnih `skel-shimmer`, štetje števil takoj, grafi brez razkritja.
+
+## SEO in pre-render
+Primerjava `index.html` prej/potem: `<title>`, `canonical`, JSON-LD, `h1` in vsi `meta` **enaki**; razlikuje se samo `theme-color` (`#2563eb` → `#0F1713`). `inject_current_weather.py` še prime vse vzorce (preizkušeno v fazi 3, rezultat razveljavljen). `test_privacy` 41/41, `test_parity` 6820/6820, `test_freshness` 62/62, `test_om_fetch` 11/11.
+
+## PWA / TWA
+- Service worker aktiven; **ponovno nalaganje brez povezave** (offline) naloži naslovno stran iz predpomnilnika (`naslov` in predrenderirana temperatura prisotna).
+- `manifest.json`: `theme_color` `#2F6B4F`, `background_color` `#0F1713`. Konfiguracije TWA (PWABuilder) v repozitoriju ni: ob naslednji gradnji paketa uskladi `theme-color`/barvo statusne vrstice z manifestom.
+- `sw.js` nespremenjen (`vreme-static-v17`); CSS in JS ostajata na stale-while-revalidate, zato obiskovalci novo različico dobijo ob drugem nalaganju.
+
+## Posnetki zaslona
+360/390/768/1280 px × svetla/temna × napredni/preprosti pogled in `reduce` varianta: v scratchpadu seje (`f9/`, `f9r/`), niso v repozitoriju. Brez vodoravnega drsenja (`overflowX` 0 pri vseh šestih kombinacijah).
+
+## Znane omejitve in predlogi
+1. **Faza 8 (pod-brandi) ni izvedena**; `blog.css`/`fonts.css` nespremenjena, zato Gobar, Zima, Gasilec in Črnivec ostajajo v starih barvah.
+2. Preostalih 9 `color-contrast` v svetli temi in `region`/`main` landmarki: zahtevajo ločen pregled (trdo kodirane barve v JS grafih in `.simple-keep`).
+3. `.mtr-chip.down` uporablja `var(--blue)`, ki je zdaj akcent (zelen): semantika »pod napovedjo = modro« je izgubljena; potreben je namenski token.
+4. Pravi LCP/INP/CLS s pravimi podatki: preveri `lighthouse.yml` po objavi (peskovnik nima zunanjih API-jev).
+5. Globlje kartice z grafi še niso v bento mreži (JS jih riše po `clientWidth`).

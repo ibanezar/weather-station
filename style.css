@@ -69,12 +69,48 @@
   --t-fl-bg:rgba(148,163,184,.08); --t-fl-c:var(--muted);
 }
 
+/* ── Design tokeni (redizajn 2026, faza 1) ──────────────────────────────
+   Naturalistična paleta. Kontrast preverjen programsko (WCAG AA, glej docs/redesign-plan.md):
+   besedilo in akcent ≥ 4,5:1 na ozadju in površini; --warm je samo za polnila/ikone, za besedilo
+   --warm-text; --line je okras, za obrobe kontrolnikov --line-strong (≥ 3:1).
+   Prva faza preslika samo "znamčne" spremenljivke (besedilo, površine, akcent); ozadje (#bg) še
+   vodi vreme prek JS, trdo kodirane barve v grafih se menjajo v poznejših fazah. */
+:root {
+  --c-bg:#F4F6F1; --c-surface:#FFFFFF; --c-ink:#1C2A22; --c-ink-soft:#5B6B60;
+  --c-accent:#2F6B4F; --c-on-accent:#FFFFFF;
+  --c-warm:#C98A2B; --c-warm-text:#8A5A12;
+  --c-line:#DCE3DE; --c-line-strong:#6F867A;
+  --r-sm:8px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(28,42,34,.08),0 2px 8px rgba(28,42,34,.06);
+  --sh-2:0 4px 12px rgba(28,42,34,.10),0 12px 32px rgba(28,42,34,.10);
+  --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.5rem; --sp-6:2rem; --sp-7:3rem; --sp-8:4rem;
+  --fs-hero:clamp(3.5rem,12vw,7rem); --fs-h1:clamp(1.6rem,4vw,2.4rem); --fs-h2:clamp(1.15rem,2.4vw,1.5rem);
+  --fs-body:clamp(.95rem,1.1vw + .6rem,1.05rem); --fs-small:clamp(.78rem,.8vw + .55rem,.875rem);
+  /* preslikava obstoječih spremenljivk */
+  --text:var(--c-ink); --muted:var(--c-ink-soft); --blue:var(--c-accent);
+  --card-bg:rgba(255,255,255,.97); --card-border:rgba(28,42,34,.09); --card-border-h:rgba(28,42,34,.16);
+  --card-shadow:var(--sh-1); --card-shadow-h:var(--sh-2);
+}
+[data-theme="dark"] {
+  --c-bg:#0F1713; --c-surface:#17221C; --c-ink:#E6EDE8; --c-ink-soft:#C0CFC5; /* #9DB0A4 iz predloga je pri opacity .6–.7 (uporabljeno na ~40 mestih) padel pod 4,5:1 (Lighthouse: 42 vozlišč) */
+  --red:#fb8a8a;
+  --c-accent:#6FBF95; --c-on-accent:#0F1713;
+  --c-warm:#E0A94A; --c-warm-text:#E0A94A;
+  --c-line:#26342C; --c-line-strong:#5A7566;
+  --sh-1:0 1px 2px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.25);
+  --sh-2:0 4px 12px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.3);
+  --card-bg:rgba(23,34,28,.94); --card-border:rgba(230,237,232,.10); --card-border-h:rgba(230,237,232,.18);
+  --card-shadow:var(--sh-1); --card-shadow-h:var(--sh-2);
+}
+
+/* SVG ikone (sprite v index.html, tools/emoji_to_icons.py): barva = currentColor, velikost v em, da je rezervirana ob prvem izrisu */
+.ic{width:1.1em;height:1.1em;flex:none;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
 html{scroll-behavior:smooth;overflow-x:hidden}
 /* min-height mora biti KONSTANTNO večja od največjega viewporta (lvh),
    sicer body višina niha glede na viewport ko se URL vrstica skrije/prikaže
    -> oscilacija (flicker). +1px zagotovi da je stran VEDNO scrollable v
    obeh stanjih URL vrstice -> body višina konstantna -> ni povratne zanke. */
-body{background:var(--bg);color:var(--text);font-family:'Inter','Inter Fallback',sans-serif;font-weight:400;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
+body{background:var(--bg);color:var(--text);font-family:'Inter','Inter Fallback',sans-serif;font-weight:400;font-variant-numeric:tabular-nums;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
 
 /* Background blobs */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
@@ -2402,7 +2438,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-day-base{font-size:.74rem;color:var(--muted);display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
 .mtr-chip{font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:999px;white-space:nowrap;
   font-family:'JetBrains Mono',monospace}
-.mtr-chip.up{background:rgba(248,113,113,.16);color:#f87171}
+.mtr-chip.up{background:rgba(248,113,113,.16);color:var(--red)}
 .mtr-chip.down{background:rgba(77,159,248,.16);color:var(--blue)}
 .mtr-day-meta{margin-top:.3rem;font-size:.7rem;color:var(--muted);opacity:.85;
   font-family:'JetBrains Mono',monospace}
@@ -3271,3 +3307,85 @@ html[data-mode="simple"] .mca-in-advanced{display:none}
     scroll-behavior:auto!important;
   }
 }
+
+/* ── Faza 3 redizajna: hero + bento mreža ───────────────────────────────
+   Kartice: enotna zaobljenost in senca iz tokenov, brez backdrop-filter (drag izris, "brez glassmorphisma").
+   #tab-current je mreža 4 / 2 / 1 stolpcev; vsak otrok je privzeto čez celo širino, širino dobi samo
+   kar nosi razred card--wide (span 2) ali card--sm (span 1). card--tall = dve vrstici. */
+.card,.hero,.day-summary{backdrop-filter:none;-webkit-backdrop-filter:none}
+.card{border-radius:var(--r-lg)}
+.hero{border-radius:var(--r-lg);box-shadow:var(--sh-2)}
+.temp-huge{font-size:var(--fs-hero)}
+.hero-station{max-width:60%;text-align:right;line-height:1.35}
+.hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
+.hero-station .ic{width:.95em;height:.95em}
+.hero-metrics{grid-template-columns:repeat(4,1fr)}
+.hero-metrics .hm-secondary{grid-column:span 2}
+html[data-mode="simple"] .hero .hm-secondary{grid-column:auto}
+#tab-current.active{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-4)}
+#tab-current.active>*{grid-column:1/-1;min-width:0;margin-bottom:0!important}
+#tab-current.active>.card--wide{grid-column:span 2}
+#tab-current.active>.card--sm{grid-column:span 1}
+#tab-current.active>.card--tall{grid-row:span 2}
+.wrap{max-width:var(--wrap-max,1160px)}
+html[data-mode="simple"] .wrap{max-width:860px}
+@media(max-width:1023px){
+  #tab-current.active{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .hero-metrics{grid-template-columns:repeat(2,1fr)}
+  .hero-station{max-width:55%}
+}
+@media(max-width:639px){
+  #tab-current.active{grid-template-columns:minmax(0,1fr)}
+  #tab-current.active>.card--wide,#tab-current.active>.card--sm{grid-column:1/-1}
+  #tab-current.active>.card--tall{grid-row:auto}
+}
+
+/* ── Faza 5 redizajna: skeleton loaderji ─────────────────────────────────
+   Nadomestijo golo »Nalaganje…« (tools/skeletonize.py). Višina trakov je rezervirana, svetlikanje
+   samo ob no-preference (3 ponovitve, kot .skel-shimmer), sicer statični trakovi. Skrito besedilo
+   (.visually-hidden) ostane za bralnike. aria-busy upravlja _skelWatch() v app.js. */
+:root{--skel-bg:var(--c-line);--skel-hi:rgba(255,255,255,.55)}
+[data-theme="dark"]{--skel-hi:rgba(230,237,232,.09)}
+.skel-wrap{min-height:3.6rem;padding:.5rem 0}
+.skel{display:flex;flex-direction:column;gap:.55rem;min-width:0}
+.skel-bars{display:flex;flex-direction:column;gap:.55rem;width:100%}
+.skel-bars i{display:block;height:.8rem;border-radius:var(--r-sm);background:var(--skel-bg)}
+.skel-bars i:nth-child(1){width:92%}.skel-bars i:nth-child(2){width:78%}.skel-bars i:nth-child(3){width:56%}
+.skel-inline{display:inline-block;width:7ch;height:.8em;vertical-align:-.1em;border-radius:var(--r-sm);background:var(--skel-bg)}
+@media (prefers-reduced-motion:no-preference){
+  .skel-bars i,.skel-inline{background:linear-gradient(90deg,var(--skel-bg) 30%,var(--skel-hi) 50%,var(--skel-bg) 70%);background-size:200% 100%;animation:skel-shimmer 1.6s ease-in-out 3}
+}
+/* rezervirana višina besedilnih kartic (tipično 3 vrstice), da zamenjava skeletona ne premakne strani */
+.why-text,.ai-brief-text{min-height:4.8rem}
+
+/* ── Faza 6 redizajna: dostopnost navigacije ─────────────────────────── */
+.skip-link{position:fixed;left:.75rem;top:-4rem;z-index:1000;padding:.6rem 1rem;border-radius:var(--r-md);background:var(--c-accent);color:var(--c-on-accent);font-weight:600;text-decoration:none;transition:top .15s}
+.skip-link:focus{top:.75rem}
+#main-content:focus{outline:none}
+.tab-btn:focus-visible,.tab-dd-menu button:focus-visible,.tab-dd-menu a:focus-visible,.theme-btn:focus-visible,.share-btn:focus-visible,
+.qn-drop summary:focus-visible,.qn-drop a:focus-visible,.qn-feat:focus-visible,.app-bottomnav a:focus-visible,.notif-btn:focus-visible,.install-btn:focus-visible,.sc-btn:focus-visible{outline:2px solid var(--c-accent);outline-offset:2px;border-radius:var(--r-sm)}
+@media(max-width:760px){html{scroll-padding-bottom:calc(4rem + env(safe-area-inset-bottom))}}
+@media (prefers-reduced-motion:reduce){.skip-link{transition:none}}
+
+/* ── Faza 7 redizajna: vremenske teme in gibanje ────────────────────────
+   body[data-weather] (nastavi applyWeatherBg): clear-day | clear-night | cloudy | fog | rain | snow | storm.
+   Rahlo premakne samo akcent (vrednosti preverjene ≥ 4,5:1 na ozadju in površini obeh tem); ozadje (#bg) in delce
+   še vodi JS. --blue je treba ponovno prevezati, ker je preslikan na :root. Vse animacije izklopi reduced-motion. */
+body[data-weather]{transition:color .6s}
+#bg{transition:background 1.6s ease}
+[data-theme="dark"] body[data-weather="clear-day"]{--c-accent:#7FC38A}[data-theme="dark"] body[data-weather="clear-night"]{--c-accent:#74BFB0}
+[data-theme="dark"] body[data-weather="cloudy"]{--c-accent:#7BBF9F}[data-theme="dark"] body[data-weather="fog"]{--c-accent:#8FB8A6}
+[data-theme="dark"] body[data-weather="rain"]{--c-accent:#6FB9B5}[data-theme="dark"] body[data-weather="snow"]{--c-accent:#8CC3D1}
+[data-theme="dark"] body[data-weather="storm"]{--c-accent:#9FB4E0}
+[data-theme="light"] body[data-weather="clear-day"]{--c-accent:#3F6B2F}[data-theme="light"] body[data-weather="clear-night"]{--c-accent:#2F6B5F}
+[data-theme="light"] body[data-weather="cloudy"]{--c-accent:#3E6B5A}[data-theme="light"] body[data-weather="fog"]{--c-accent:#4C6B5C}
+[data-theme="light"] body[data-weather="rain"]{--c-accent:#2F6670}[data-theme="light"] body[data-weather="snow"]{--c-accent:#2F6575}
+[data-theme="light"] body[data-weather="storm"]{--c-accent:#4A5E8C}
+body[data-weather]{--blue:var(--c-accent)}
+@media (prefers-reduced-motion:no-preference){
+  .chart-card{transition:opacity .6s ease,transform .6s ease,box-shadow .25s,border-color .25s,background .35s}
+  .chart-card.rv-pre{opacity:0;transform:translateY(12px)}
+}
+@media (prefers-reduced-motion:reduce){#bg,body[data-weather]{transition:none}}
