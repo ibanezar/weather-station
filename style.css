@@ -3452,3 +3452,20 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 [data-theme="light"] #hs-pm[data-pm="#22c55e"]{color:#15803d!important}[data-theme="light"] #hs-pm[data-pm="#84cc16"]{color:#4d7c0f!important}
 [data-theme="light"] #hs-pm[data-pm="#eab308"]{color:#a16207!important}[data-theme="light"] #hs-pm[data-pm="#f97316"]{color:#c2410c!important}
 [data-theme="light"] #hs-pm[data-pm="#ef4444"]{color:#b91c1c!important}[data-theme="light"] #hs-pm[data-pm="#9333ea"]{color:#7e22ce!important}
+
+/* Kontrast v svetli temi (axe, 22. 10. 2026): barvne oznake z neonskimi odtenki na svetlih podlagah
+   (slovar, legenda nevihtne karte, vlaga tal) so imele 1,5–2,9:1. Odtenki so temnejši, matične barve
+   skupin ostanejo; v temni temi se nič ne spremeni. */
+[data-theme="light"] .gloss-vlaga{color:#0369a1}
+[data-theme="light"] .gloss-padavine{color:#4338ca}
+[data-theme="light"] .gloss-oblaki{color:#475569}
+[data-theme="light"] .gloss-veter{color:#166534}
+[data-theme="light"] .gloss-tlak{color:#92400e}
+[data-theme="light"] .gloss-temperatura{color:#b91c1c}
+[data-theme="light"] .gloss-sevanje{color:#854d0e}
+[data-theme="light"] .soil-val{color:var(--text) !important}
+[data-theme="light"] .sm-leg-past{color:#6d28d9}
+[data-theme="light"] .sm-leg-now{color:#15803d}
+.sm-leg-past{color:#a78bfa}.sm-leg-now{color:#4ade80}
+[data-theme="light"] .snd-source{opacity:1}
+[data-theme="light"] .sm-updated{color:#4b5563}

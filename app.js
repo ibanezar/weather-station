@@ -20982,7 +20982,7 @@ function renderSmDaybar(){
     const sub=_smDates[i]
       ? new Date(_smDates[i]).toLocaleDateString('sl',{weekday:'short',day:'numeric',month:'numeric'})
       : '';
-    html+='<button class="sm-day'+(i===_smDay?' active':'')+'" onclick="smSetDay('+i+')">'+
+    html+='<button class="sm-day'+(i===_smDay?' active':'')+'" role="tab" aria-selected="'+(i===_smDay)+'" onclick="smSetDay('+i+')">'+
       labels[i]+(sub?'<span>'+sub+'</span>':'')+'</button>';
   }
   bar.innerHTML=html;
