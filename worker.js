@@ -3375,6 +3375,10 @@ const MK_LAT0 = 45.4, MK_LON0 = 13.3, MK_D = 0.1, MK_NY = 16, MK_NX = 35;
 const MK_STEPS = 16, MK_STEP_H = 3;
 const MK_TTL_MS = 30 * 60 * 1000;
 const MK_KEY = "modeli_karta_v1";
+// Izdelava, pri kateri je kak vir odpovedal (`failed`), ne sme obstati ves TTL: nepopolna karta
+// (npr. samo AROME ob 429 pri Open-Meteo) bi se sicer pol ure postregla vsem.
+const MK_PARTIAL_TTL_MS = 5 * 60 * 1000;
+function _mkFresh(d, ttl) { return !!d && Date.now() - d.generated < ((d.failed && d.failed.length) ? MK_PARTIAL_TTL_MS : ttl); }
 let _mkInflight = null;
 
 function _mkPoints() {
@@ -3481,7 +3485,7 @@ async function _mkBuild() {
 async function _modeliKarta(env) {
   let cached = null;
   try { cached = await env.COUNTER_KV.get(MK_KEY, "json"); } catch (_) {}
-  if (cached && Date.now() - cached.generated < MK_TTL_MS) return cached;
+  if (_mkFresh(cached, MK_TTL_MS)) return cached;
   if (!_mkInflight) {
     _mkInflight = _mkBuild().then(async d => {
       try { await env.COUNTER_KV.put(MK_KEY, JSON.stringify(d), { expirationTtl: 6 * 3600 }); } catch (_) {}
@@ -3591,11 +3595,13 @@ async function _mk2OpenMeteo(t0, pts) {
       + "&longitude=" + ch.map(c => c[0][1]).join(",")
       + "&hourly=wind_speed_10m,wind_direction_10m,cloud_cover,pressure_msl,cape,freezing_level_height"
       + "&models=" + models.join(",") + "&forecast_days=3&timezone=UTC";
-    // En spodleteli kos (prekinjena povezava, 429) ne sme podreti cele karte: do 3 poskusov.
+    // En spodleteli kos ne sme podreti cele karte: do 3 poskusov. Ob 429 (minutna omejitev
+    // Open-Meteo, skupna z /modeli-karta.json in /sneg-karta.json) je kratek premor brez smisla,
+    // zato se počaka 20 s oziroma 40 s; drugače 1,5 s.
     let r = null;
     for (let a = 0; a < 3; a++) {
       try { r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } }); if (r.ok) break; } catch (_) { r = null; }
-      await new Promise(res => setTimeout(res, 1500 * (a + 1)));
+      if (a < 2) await new Promise(res => setTimeout(res, r && r.status === 429 ? 20000 * (a + 1) : 1500 * (a + 1)));
     }
     if (!r || !r.ok) throw new Error("open-meteo " + (r ? r.status : "povezava"));
     let j = await r.json(); if (!Array.isArray(j)) j = [j];
@@ -3662,24 +3668,35 @@ async function _mk2Build(t0Hint) {
   return out;
 }
 
-async function _modeliKarta2(env) {
-  let cached = null;
-  try { cached = await env.COUNTER_KV.get(MK2_KEY, "json"); } catch (_) {}
-  if (cached && Date.now() - cached.generated < MK2_TTL_MS) return cached;
+function _mk2Refresh(env) {
   if (!_mk2Inflight) {
-    // Koraki morajo sovpadati s karto padavin/temperature/sunkov, sicer se ob istem drsniku
-    // prikazujeta dva različna trenutka: prevzemi t0 njene zadnje izdelave (če ni starejša od 5 ur).
-    let t0Hint = null;
-    try {
-      const base = await env.COUNTER_KV.get(MK_KEY, "json");
-      if (base && base.t0 && Date.now() - base.generated < 5 * 3600000) t0Hint = base.t0;
-    } catch (_) {}
-    _mk2Inflight = _mk2Build(t0Hint).then(async d => {
+    _mk2Inflight = (async () => {
+      // Koraki morajo sovpadati s karto padavin/temperature/sunkov, sicer se ob istem drsniku
+      // prikazujeta dva različna trenutka: prevzemi t0 njene zadnje izdelave (če ni starejša od 5 ur).
+      let t0Hint = null;
+      try {
+        const base = await env.COUNTER_KV.get(MK_KEY, "json");
+        if (base && base.t0 && Date.now() - base.generated < 5 * 3600000) t0Hint = base.t0;
+      } catch (_) {}
+      const d = await _mk2Build(t0Hint);
       try { await env.COUNTER_KV.put(MK2_KEY, JSON.stringify(d), { expirationTtl: 6 * 3600 }); } catch (_) {}
       return d;
-    }).finally(() => { _mk2Inflight = null; });
+    })().finally(() => { _mk2Inflight = null; });
   }
-  try { return await _mk2Inflight; }
+  return _mk2Inflight;
+}
+
+async function _modeliKarta2(env, ctx) {
+  let cached = null;
+  try { cached = await env.COUNTER_KV.get(MK2_KEY, "json"); } catch (_) {}
+  if (_mkFresh(cached, MK2_TTL_MS)) return cached;
+  // Izdelava traja 15–60 s (560 točk, ob 429 s čakanjem): popolno, a potekla karto postrežemo takoj
+  // in osvežimo v ozadju; blokira samo prvi obisk ali nepopolna karta.
+  if (cached && !(cached.failed && cached.failed.length) && ctx && ctx.waitUntil) {
+    ctx.waitUntil(_mk2Refresh(env).catch(() => {}));
+    return Object.assign({}, cached, { refreshing: true });
+  }
+  try { return await _mk2Refresh(env); }
   catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
 }
 
@@ -4849,7 +4866,7 @@ export default {
       // Veter, oblačnost, tlak, CAPE in ničta izoterma na isti mreži, glej _modeliKarta2().
       if (path === "/modeli-karta2.json") {
         try {
-          const d = await _modeliKarta2(env);
+          const d = await _modeliKarta2(env, ctx);
           return new Response(JSON.stringify(d), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
           });

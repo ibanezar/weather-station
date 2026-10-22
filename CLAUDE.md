@@ -803,6 +803,11 @@ drug ob drugem ali razlika A − B (diverging lestvica); dotik karte pokaže vre
 - Izris je canvas (brez Leafleta, kot snežna karta); maska Slovenije je obris `SLO_POLY`, narisan na skrito platno.
 - **Namerna podvojitev**: lestvice in polja v `MM_VARS` ↔ `MK2_VARS` v workerju; preverja ju `test_parity.modelske_karte`
   (skupaj z `_mk2Reduce`, časovno poravnavo in snegom). Nova spremenljivka = polje v `_mk2Build()` + vnos v `MM_VARS`.
+- **Prva izdelava traja 15–60 s in lahko ob 429 odpove** (23. 10. 2026: prvi dan je zavihek obtičal na skeletonu, `/modeli-karta.json` in
+  karta2 sta vračala samo AROME, ker Open-Meteo iz workerja ni odgovarjal): nepopolna izdelava (`failed`) je sveža samo 5 min
+  (`MK_PARTIAL_TTL_MS`, velja tudi za `/modeli-karta.json`), popolna a potekla karta2 se postreže takoj in osveži v ozadju
+  (`ctx.waitUntil`, polje `refreshing`), ob 429 se čaka 20/40 s. Zavihek se pokaže s prvim virom, ki prispe, drugi se vgradi naknadno;
+  spremenljivka brez vira je izklopljena.
 - **Obremenitev Open-Meteo**: ena izdelava karte2 je 560 točk × 3 modeli (+ 6 kosov GeoSphere); gradi se samo ob obisku, največ
   enkrat na uro. Skupaj s `/modeli-karta.json` in `/sneg-karta.json` je to že blizu brezplačne dnevne kvote Open-Meteo — če se pojavi
   429, podaljšaj `MK2_TTL_MS`, ne dodajaj poskusov.

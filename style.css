@@ -3615,3 +3615,4 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 #mm-app .mm-note p{margin:.3rem 0}
 #mm-app .mm-sub{font-size:.78rem}
 #mm-app [hidden]{display:none!important}
+#mm-app .mm-wait{font-size:.88rem;color:var(--muted);margin:.4rem 0}

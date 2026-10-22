@@ -21530,7 +21530,11 @@ function _mmDayKey(ms){ return new Date(ms).toLocaleDateString('sl-SI',{timeZone
 function _mmSyncControls(){
   const V=_mmSpec(_mm.v), av=_mmAvail(V).map(m=>m[0]);
   _mmFix();
-  document.querySelectorAll('#mm-app button[data-mmv]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mmv===_mm.v)));
+  document.querySelectorAll('#mm-app button[data-mmv]').forEach(b=>{
+    b.setAttribute('aria-pressed',String(b.dataset.mmv===_mm.v));
+    // spremenljivka, katere vir še ni prispel (ali ne odgovarja), je izklopljena
+    b.disabled=b.dataset.mmv!==_mm.v&&_mmAvail(_mmSpec(b.dataset.mmv)).length===0;
+  });
   document.querySelectorAll('#mm-app button[data-mmmode]').forEach(b=>{
     b.setAttribute('aria-pressed',String(b.dataset.mmmode===_mm.mode));
     b.disabled=b.dataset.mmmode!=='one'&&av.length<2;
@@ -21552,9 +21556,11 @@ function _mmNote(V){
   const ar=(b&&b.models.arome&&b.models.arome.run)||(a&&a.models.arome&&a.models.arome.run);
   const gen=Math.max.apply(null,srcs.map(s=>s.generated));
   const off=[a,b].filter(Boolean).some(s=>s.t0!==_mm.M.t0);
+  const miss=!a||!b||srcs.some(s=>s.failed&&s.failed.length);
   return '<p>'+V.note+'</p><p class="mm-sub">Mreža 0,1° (okoli 8 × 11 km): ne razloči dolin, posameznih pobočij in nevihtnih celic, zato je to pregled vzorca, ne napoved za kraj. '+
     'ICON-D2 sega 48 h od svojega teka, ostali modeli dlje (karta do +48 h). Karta izdelana ob '+_mmFmtT(gen)+(ar?', AROME tek '+_mmFmtT(Date.parse(ar))+' (po naši uri)':'')+'.'+
     (off?' Spremenljivke iz različnih izdelav so poravnane na najbližji korak (do 1,5 h razlike).':'')+
+    (miss?' Del modelov ali spremenljivk trenutno ni na voljo (vir ne odgovarja ali se še nalaga); osveži zavihek čez nekaj minut.':'')+
     ' Ni uradna napoved &mdash; opozorila izdaja ARSO. Več: <a href="/primerjava-modelov/">primerjava modelov za Rečico</a>, <a href="/zima/snezna-karta/">snežna karta</a>.</p>';
 }
 function _mmBuildMaps(){
@@ -21634,21 +21640,28 @@ async function initModelMaps(){
   const root=document.getElementById('mm-app'); if(!root) return;
   if(_mm){ if(_mm.built) setTimeout(_mmRedraw,30); return; }
   _mm={a:null,b:null,s:null,M:null,v:'p',mode:'one',A:'icon_d2',B:'ecmwf_ifs025',k:0,cur:null,play:null,has:{},mask:null,built:false,sBusy:false};
-  const get=u=>fetch(PROXY+u).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); });
-  const [ra,rb]=await Promise.allSettled([get('/modeli-karta.json'),get('/modeli-karta2.json')]);
-  const a=ra.status==='fulfilled'&&ra.value&&ra.value.models?ra.value:null, b=rb.status==='fulfilled'&&rb.value&&rb.value.models?rb.value:null;
-  [ra,rb].forEach(r=>{ if(r.status==='rejected') console.warn('modelske karte: vir ni dosegljiv',r.reason); });
-  const base=a||b;
-  if(!base){
+  const wait=document.createElement('p'); wait.className='mm-wait';
+  wait.textContent='Nalagam modelske karte … prva izdelava lahko traja do minute.';
+  root.appendChild(wait);
+  const get=(u,kind)=>fetch(PROXY+u).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(d=>d&&d.models&&Object.keys(d.models).length?d:null)
+    .catch(e=>{ console.warn('modelske karte: vir ni dosegljiv',u,e); return null; });
+  // Vsak vir se vgradi, ko prispe: zavihek se pokaže že s prvim, drugi se doda naknadno (stran ne čaka na počasnejšega).
+  const take=(kind,d)=>{
+    if(!d) return;
+    if(!_mm.M){
+      _mm.M={t0:d.t0,steps:d.steps,stepH:d.stepH,lat0:d.lat0,lon0:d.lon0,d:d.d,nx:d.nx,ny:d.ny};
+      _mm[kind]=d; _mmShell(root); _mm.built=true;
+    }else{
+      const M=_mm.M; if(d.nx!==M.nx||d.ny!==M.ny||d.lat0!==M.lat0||d.lon0!==M.lon0) return;
+      _mm[kind]=d; _mm.has={};
+    }
+    _mmSyncControls(); _mmBuildMaps(); _mmRedraw();
+  };
+  await Promise.all([get('/modeli-karta.json').then(d=>take('a',d)),get('/modeli-karta2.json').then(d=>take('b',d))]);
+  if(!_mm.M){
     _mm=null;
     root.innerHTML='<p>Modelskih kart trenutno ni mogoče naložiti (vir ne odgovarja). <button type="button" class="mm-retry" id="mm-retry">Poskusi znova</button></p>';
     document.getElementById('mm-retry').onclick=()=>{ root.textContent='Nalagam …'; initModelMaps(); };
-    return;
   }
-  const same=x=>x&&x.nx===base.nx&&x.ny===base.ny&&x.lat0===base.lat0&&x.lon0===base.lon0;
-  _mm.a=same(a)?a:null; _mm.b=same(b)?b:null;
-  _mm.M={t0:base.t0,steps:base.steps,stepH:base.stepH,lat0:base.lat0,lon0:base.lon0,d:base.d,nx:base.nx,ny:base.ny};
-  _mmShell(root);
-  _mm.built=true;
-  _mmSyncControls(); _mmBuildMaps(); _mmRedraw();
 }
