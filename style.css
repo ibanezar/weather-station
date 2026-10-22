@@ -3340,7 +3340,7 @@ html[data-mode="simple"] .wrap{max-width:860px}
 }
 @media(max-width:680px){
   .hero-metrics{grid-template-columns:repeat(2,1fr)}
-  .hero-station{max-width:55%}
+  .hero-station{position:relative;top:auto;right:auto;max-width:none;text-align:left;margin-bottom:.6rem}
 }
 @media(max-width:639px){
   #tab-current.active{grid-template-columns:minmax(0,1fr)}
