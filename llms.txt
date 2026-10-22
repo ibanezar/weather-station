@@ -53,6 +53,14 @@
 
 - [Blog](https://meteorec.si/blog/): dnevni in mesečni članki o vremenu, podnebju in gobarski sezoni v dolini, vsi vezani na dejanske meritve postaje IREICA1.
 
+## Odprti podatki in kako citirati
+
+- [Podatki](https://meteorec.si/podatki/): seznam vseh javnih podatkovnih datotek, brez registracije, licenca CC BY 4.0.
+- [history.json](https://meteorec.si/history.json): dnevne meritve postaje IREICA1 od 7. 11. 2019 (najvišja, najnižja in povprečna temperatura, padavine, vlažnost, veter, sunki, tlak, rosišče, sevanje, UV). Polje `src` loči meritve postaje (`station`, `wu`) od nadomestnih ERA5 ocen (`era5`) — za trditve o izmerjenem vremenu uporabi samo prve.
+- [test-napovedi/podatki.csv](https://meteorec.si/test-napovedi/podatki.csv): napovedi šestih modelov za D+1 do D+7 ob dejanskih meritvah postaje, za primerjavo natančnosti. Razlaga in metodologija: [Test napovedi](https://meteorec.si/test-napovedi/).
+- [napoved-modela.json](https://meteorec.si/napoved-modela.json): trenutna napoved poskusnega modela MTR za Rečico ob Savinji (modelska napoved, ne meritev).
+- Citiraj kot: »Meteorec (meteorec.si), postaja IREICA1, Rečica ob Savinji« in navedi datum dostopa. Modelske ocene (napoved, gobarski indeks, požarni indeks FWI, snežna karta, vodostaj po modelu GloFAS) označi kot modelske, ne kot meritve.
+
 ## Opombe
 
 - Vse meritve so iz ene same postaje (IREICA1, Rečica ob Savinji) — za širše območje glej Open-Meteo/ARSO, ne ekstrapoliraj te postaje na drugo lokacijo.
