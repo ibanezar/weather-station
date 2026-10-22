@@ -6554,6 +6554,85 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Anketa obiskovalcev (popup od 2. obiska, 22. 10. 2026) ──
+      // Anonimno: ne shranimo IP ne user-agenta (IP je samo v KV števcu omejitve, TTL 1 h).
+      // Javnega branja ni — rezultate bere samo admin (Bearer DELETE_SECRET).
+      //   POST /anketa            { q1?, q2?, q3?, q4?, q5?, website? }
+      //   GET  /anketa/rezultati  → admin
+      // ANKETA_Q1/Q2/Q3/Q5 so namerna podvojitev z SURVEY_OPTS v app.js (preverja tools/test_parity.py).
+      if (path === "/anketa" || path === "/anketa/rezultati") {
+        const r2 = env?.PHOTOS_R2;
+        function _json(obj, status) {
+          return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } });
+        }
+        const AN_KEY = "feedback/anketa.json";
+        const AN_STORE_CAP = 2000;
+        const ANKETA_Q1 = ["trenutno", "napoved", "gobe", "nevihte", "crnivec", "drugo"];
+        const ANKETA_Q2 = ["trenutno", "napoved", "radar", "gobe", "nevihte", "crnivec", "igre", "drugo"];
+        const ANKETA_Q3 = ["google", "facebook", "instagram", "prijatelj", "drugo"];
+        const ANKETA_Q5 = ["android", "iphone", "oba", "ne"];   // ali si želi aplikacijo
+
+        async function _anRead() {
+          if (!r2) return [];
+          try {
+            const obj = await r2.get(AN_KEY);
+            if (!obj) return [];
+            return JSON.parse(await obj.text());
+          } catch (_) { return []; }
+        }
+
+        if (path === "/anketa" && request.method === "POST") {
+          if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (body.website) return _json({ ok: true }); // honeypot
+          const q1 = ANKETA_Q1.includes(body.q1) ? body.q1 : undefined;
+          const q2 = ANKETA_Q2.includes(body.q2) ? body.q2 : undefined;
+          const q3 = ANKETA_Q3.includes(body.q3) ? body.q3 : undefined;
+          const q5 = ANKETA_Q5.includes(body.q5) ? body.q5 : undefined;
+          const q4 = (typeof body.q4 === "string" ? body.q4 : "").trim().slice(0, 300) || undefined;
+          if (!q1 && !q2 && !q3 && !q4 && !q5) return _json({ error: "Odgovori vsaj na eno vprašanje" }, 400);
+
+          const kv = env?.COUNTER_KV;
+          if (kv) {
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+            const rlKey = "anketa_rl:" + ip;
+            const count = parseInt((await kv.get(rlKey)) || "0") || 0;
+            if (count >= 5) return _json({ error: "Preveč odgovorov v kratkem času — poskusi kasneje" }, 429);
+            await kv.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+          }
+          const all = await _anRead();
+          const now = Date.now();
+          const dup = all.some(i => i.q1 === q1 && i.q2 === q2 && i.q3 === q3 && i.q4 === q4 && i.q5 === q5
+            && (now - new Date(i.ts).getTime()) < 60000);
+          if (dup) return _json({ ok: true });
+          all.unshift({ id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(), v: "2026-10", q1, q2, q3, q4, q5 });
+          await r2.put(AN_KEY, JSON.stringify(all.slice(0, AN_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
+          return _json({ ok: true });
+        }
+
+        if (path === "/anketa/rezultati" && request.method === "GET") {
+          // Isti zaklep kot galerija in poročila o neurjih (gal_admin_fail:<ip>).
+          const secret = env.DELETE_SECRET;
+          const auth = request.headers.get("Authorization") || "";
+          let okAdmin = false;
+          if (secret) {
+            const kv = env.COUNTER_KV;
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+            const lockKey = "gal_admin_fail:" + ip;
+            if (kv) {
+              const fails = parseInt((await kv.get(lockKey)) || "0") || 0;
+              if (fails < 8) {
+                if (auth === "Bearer " + secret) { await kv.delete(lockKey); okAdmin = true; }
+                else await kv.put(lockKey, String(fails + 1), { expirationTtl: 900 });
+              }
+            } else okAdmin = auth === "Bearer " + secret;
+          }
+          if (!okAdmin) return _json({ error: "Nepooblaščen dostop" }, 401);
+          return _json({ odgovori: await _anRead() });
+        }
+      }
+
       // ── Poročila o neurjih (moderirana, javna) ────────────────
       // Ideja po neurje.si (prijavljanje toče, nalivov, vetra …), narejena po
       // našem vzorcu: isti R2/feedback kot /gobe/opazovanje, a z MODERACIJO —

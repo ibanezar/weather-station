@@ -2538,6 +2538,17 @@ Open-Meteo/MTR. Brez dokaza proti IREICA1 ne nastane nobena stran, kartica ali z
 - **WPS_GEOG** je samo na `www2.mmm.ucar.edu`, katerega potrdilo ima nepopolno verigo (v peskovniku curl pade) — TLS preverjanja ne izklapljaj.
 - Notranjih meritev cevovod ne bere. Ni narejeno: samodejen najem strežnika (Hetzner), umerjanje fizike, ansambel.
 
+## Anketa obiskovalcev (popup, 22. 10. 2026)
+
+Kratka anonimna anketa (5 vprašanj, vsa neobvezna: kaj jih je pripeljalo, kaj jim je všeč, kako so nas našli, ali si želijo aplikacijo (`q5`), kaj manjka).
+
+- `initSurvey()` v lazy-paketu `app.js` (DOM se zgradi v JS, `#survey` je fiksen prekrivni element: brez vpliva na CLS, CSS na koncu `style.css`).
+  **Samo od 2. obiska** in ko piškotno soglasje ni več čakajoče (isto pravilo kot `initNotifHint`; na prvem obisku sta že pasica in ponudba pogleda). Največ 3 prikazi; `wx-survey` = `done`/`dismissed` jo ugasne za vedno.
+- Worker: `POST /anketa` (honeypot `website`, 5 oddaj/uro po IP v KV `anketa_rl:<ip>`, dedup) → R2 `feedback/anketa.json` (cap 2000). **IP in user-agent se ne shranita.** `GET /anketa/rezultati` samo z `Bearer DELETE_SECRET` (isti zaklep kot galerija).
+- `ANKETA_Q1/Q2/Q3/Q5` (worker) in `SURVEY_OPTS` (app.js) sta namerna podvojitev: `test_parity.konstante_workerja`. Test endpointa: `tools/test_anketa.mjs` (v `parity.yml`).
+- Branje: ročno `python3 tools/anketa_rezultati.py [--csv]` (`DELETE_SECRET`), ni v nobenem workflowu. Nova različica ankete = nov `v` v workerju (zdaj `2026-10`) in `wx-survey` ključ.
+- `zasebnost.html` ima razdelek »Anketa obiskovalcev«; notranjih meritev anketa ne dotika.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

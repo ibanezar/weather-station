@@ -102,6 +102,9 @@ jobs:
       - name: Test ovoja fetch() za Open-Meteo arhiv (predpomnilnik, vrsta, 429)
         run: node tools/test_om_fetch.mjs
 
+      - name: Test končne točke /anketa (pravi worker.js, lažen R2/KV)
+        run: node tools/test_anketa.mjs
+
       - name: Test potrošnikov datotek drugih workflowov (zastareli vhodi)
         run: python3 tools/test_stale_inputs.py
 

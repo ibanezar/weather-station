@@ -17132,6 +17132,7 @@ async function init(){
   try{initNotifBtn();}catch(_){}
   try{initMenuHint();}catch(_){}
   try{initNotifHint();}catch(_){}
+  try{_whenIdle(()=>{try{initSurvey();}catch(_){}},4000);}catch(_){}
   try{initWeatherQA();}catch(_){}
   try{initChartScrollHints();}catch(_){}
   try{initNowcast();}catch(_){}
@@ -21132,4 +21133,100 @@ function renderSmRanking(list){
   });
   html+='</div>';
   el.innerHTML=html;
+}
+
+// ═══ ANKETA OBISKOVALCEV (popup od 2. obiska, 22. 10. 2026) ═══
+// Anonimna, vsa vprašanja neobvezna. Možnosti so namerna podvojitev z ANKETA_Q1/Q2/Q3 v worker.js
+// (preverja tools/test_parity.py). DOM se zgradi tu (fiksen prekrivni element: brez vpliva na postavitev/CLS).
+const SURVEY_KEY='wx-survey', SURVEY_SHOWN_KEY='wx-survey-shown';
+const SURVEY_OPTS={
+  q1:{t:'Kaj te je danes pripeljalo?',o:[['trenutno','Trenutno vreme'],['napoved','Napoved'],['gobe','Gobe'],['nevihte','Nevihte'],['crnivec','Črnivec'],['drugo','Drugo']]},
+  q2:{t:'Kaj ti je na strani najbolj všeč?',o:[['trenutno','Trenutno vreme'],['napoved','Napoved'],['radar','Radar'],['gobe','Gobe'],['nevihte','Nevihte'],['crnivec','Črnivec'],['igre','Igre'],['drugo','Drugo']]},
+  q3:{t:'Kako si nas našel?',o:[['google','Google'],['facebook','Facebook'],['instagram','Instagram'],['prijatelj','Prijatelj'],['drugo','Drugo']]},
+  q5:{t:'Bi si želel aplikacijo za telefon?',o:[['android','Android'],['iphone','iPhone'],['oba','Oba'],['ne','Ne rabim je']]}
+};
+function _surveyLs(k,v){
+  try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(_){}
+  return null;
+}
+function _surveyClose(state){
+  const el=document.getElementById('survey');
+  if(el)el.remove();
+  document.removeEventListener('keydown',_surveyKey);
+  if(state)_surveyLs(SURVEY_KEY,state);
+}
+function _surveyKey(e){ if(e.key==='Escape')_surveyClose('dismissed'); }
+function _surveySend(ans,box){
+  const body=Object.assign({website:''},ans);
+  box.querySelector('.sv-send').disabled=true;
+  fetch(PROXY+'/anketa',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(r=>{ if(!r.ok&&r.status!==429)throw new Error('http '+r.status); return r.ok; })
+    .then(ok=>{
+      box.querySelector('.sv-body').textContent=ok?'Hvala! Tvoj odgovor nam pomaga izboljšati stran.':'Danes je odgovorov že preveč — poskusi jutri. Hvala!';
+      _surveyLs(SURVEY_KEY,'done');
+      setTimeout(()=>_surveyClose(),2200);
+    })
+    .catch(()=>{
+      box.querySelector('.sv-send').disabled=false;
+      const m=box.querySelector('.sv-msg'); if(m)m.textContent='Pošiljanje ni uspelo. Poskusi znova.';
+    });
+}
+function initSurvey(){
+  if(document.getElementById('survey'))return;
+  const st=_surveyLs(SURVEY_KEY);
+  if(st==='done'||st==='dismissed')return;
+  const shown=parseInt(_surveyLs(SURVEY_SHOWN_KEY)||'0',10)||0;
+  if(shown>=3)return;
+  // Ne na prvem obisku in ne, dokler čaka piškotni banner (isto pravilo kot initNotifHint).
+  let consentPending=true; try{consentPending=!localStorage.getItem('wx-cookie-consent');}catch(_){}
+  if((window._wxVisitCount||1)<2||consentPending)return;
+  const intro=document.getElementById('mode-intro');
+  if(intro&&!intro.hidden)return;
+  setTimeout(()=>{
+    if(document.getElementById('survey')||document.hidden)return;
+    _surveyLs(SURVEY_SHOWN_KEY,String(shown+1));
+    const ans={};
+    const el=document.createElement('div');
+    el.id='survey'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','sv-title');
+    const box=document.createElement('div'); box.className='sv-box';
+    const x=document.createElement('button'); x.type='button'; x.className='sv-x'; x.setAttribute('aria-label','Zapri'); x.textContent='✕';
+    x.onclick=()=>_surveyClose('dismissed');
+    const h=document.createElement('h2'); h.id='sv-title'; h.textContent='Pomagaj nam izboljšati Meteorec';
+    const p=document.createElement('p'); p.className='sv-sub'; p.textContent='5 kratkih vprašanj, vsa neobvezna. Odgovori so anonimni.';
+    const body=document.createElement('div'); body.className='sv-body';
+    Object.keys(SURVEY_OPTS).forEach(q=>{
+      const g=document.createElement('div'); g.className='sv-q';
+      const t=document.createElement('div'); t.className='sv-t'; t.textContent=SURVEY_OPTS[q].t;
+      const chips=document.createElement('div'); chips.className='sv-chips';
+      SURVEY_OPTS[q].o.forEach(([val,lab])=>{
+        const b=document.createElement('button'); b.type='button'; b.className='sv-chip'; b.textContent=lab; b.setAttribute('aria-pressed','false');
+        b.onclick=()=>{
+          const on=ans[q]!==val; ans[q]=on?val:undefined;
+          chips.querySelectorAll('.sv-chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+          if(on)b.setAttribute('aria-pressed','true');
+        };
+        chips.appendChild(b);
+      });
+      g.append(t,chips); body.appendChild(g);
+    });
+    const g4=document.createElement('div'); g4.className='sv-q';
+    const l4=document.createElement('label'); l4.className='sv-t'; l4.htmlFor='sv-q4'; l4.textContent='Kaj ti na strani manjka?';
+    const ta=document.createElement('textarea'); ta.id='sv-q4'; ta.maxLength=300; ta.rows=3; ta.placeholder='Npr. napoved za drug kraj, nova funkcija …';
+    ta.oninput=()=>{ ans.q4=ta.value.trim()||undefined; };
+    g4.append(l4,ta); body.appendChild(g4);
+    const msg=document.createElement('div'); msg.className='sv-msg'; msg.setAttribute('role','status');
+    const act=document.createElement('div'); act.className='sv-act';
+    const later=document.createElement('button'); later.type='button'; later.className='sv-later'; later.textContent='Ne zdaj'; later.onclick=()=>_surveyClose('dismissed');
+    const send=document.createElement('button'); send.type='button'; send.className='sv-send'; send.textContent='Pošlji';
+    send.onclick=()=>{
+      if(!Object.keys(ans).some(k=>ans[k])){ msg.textContent='Odgovori vsaj na eno vprašanje.'; return; }
+      msg.textContent=''; _surveySend(ans,box);
+    };
+    act.append(later,send);
+    body.append(msg,act);
+    box.append(x,h,p,body); el.appendChild(box);
+    document.body.appendChild(el);
+    document.addEventListener('keydown',_surveyKey);
+    send.focus({preventScroll:true});
+  },3000);
 }
