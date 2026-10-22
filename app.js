@@ -2506,7 +2506,30 @@ function forecastPhrase(){
 // klica, glej dnevne meje v CLAUDE.md).
 // Ura, ki teče, je namenoma izpuščena: njen dež je deloma že v izmerjeni
 // kumulativi od polnoči in bi ga sicer prikazali dvakrat.
+/* Junaška ploščica: MTR-ova verjetnost padavin za DANES. napoved-modela.json se začne pri jutri, današnji
+   dan je v polju `today` (včerajšnja zamrznjena napoved, glej predict_recica_mos.frozen_today); ob prvem
+   tekočem dnevu polja še ni — takrat vrstice ni (ničesar ne izmišljamo). Ločen sosednji element, ne
+   znotraj hs-rain-today/hs-rain-rate (glej opombo o junaški kartici). */
+let _heroMtrP=null;
+async function renderHeroRainMtr(){
+  const el=document.getElementById('hs-rain-mtr');if(!el)return;
+  try{
+    if(!_heroMtrP)_heroMtrP=fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5)).then(r=>r.ok?r.json():null).catch(()=>null);
+    const j=await _heroMtrP;
+    const t=j&&j.today;
+    const todayIso=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
+    if(!t||t.date!==todayIso||!Number.isFinite(t.pop)){el.hidden=true;return;}
+    const r5=v=>Math.round(v*20)*5;
+    let txt='MTR: dež '+r5(t.pop)+' %';
+    if(Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥ 5 mm '+r5(t.pop5)+' %';
+    el.textContent=txt;
+    el.title='Verjetnost padavin po MTR, našem modelu (včerajšnja napoved za današnji dan). Količine ne napovedujemo.';
+    el.hidden=false;
+  }catch(_){el.hidden=true;}
+}
+
 function renderHeroRainOutlook(){
+  renderHeroRainMtr();
   const el=document.getElementById('hs-rain-fc');
   if(!el)return;
   const now=Date.now(),todayStr=new Date().toDateString();
