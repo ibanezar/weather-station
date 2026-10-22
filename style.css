@@ -3507,3 +3507,25 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 [data-theme="light"] .mtr-why-val.up{color:#b91c1c !important}
 [data-theme="light"] .aifc-badge.mtr{color:#065f46 !important}
 [data-theme="light"] #agro-hop-body div > span:nth-child(2) > span{color:#3f4c42 !important;opacity:1 !important}
+
+/* Verjetnost in količina padavin (MTR): merilnik dežja + tri vrstice verjetnosti. Ena barva (--rain-col),
+   prosojnost naraste s pragom. Besedilo v barvah besedila, ne serije. */
+.rain-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin-top:.5rem}
+.rain-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.7rem .8rem;min-width:0}
+.rain-hd{font-size:.72rem;font-weight:600;color:var(--text);margin-bottom:.45rem}
+.rain-hd span{margin-left:.4rem;font-weight:400;color:var(--muted)}
+.rain-main{display:flex;align-items:flex-end;gap:.65rem;margin-bottom:.55rem}
+.rain-gauge{flex:none}
+.rain-g-tube{fill:none;stroke:var(--muted);stroke-opacity:.55;stroke-width:1.2}
+.rain-g-fill{fill:var(--rain-col)}
+.rain-g-tick{stroke:var(--muted);stroke-opacity:.7;stroke-width:1}
+.rain-amt{display:flex;flex-direction:column;line-height:1.1}
+.rain-amt b{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:400;color:var(--text)}
+.rain-amt i{font-size:.62rem;font-style:normal;color:var(--muted);margin-top:.15rem}
+.rain-bars{display:flex;flex-direction:column;gap:.32rem}
+.rain-row{display:grid;grid-template-columns:3.6rem 1fr 2.4rem;align-items:center;gap:.4rem;font-size:.68rem}
+.rain-l{color:var(--muted);white-space:nowrap}
+.rain-v{color:var(--text);text-align:right;font-family:'JetBrains Mono',monospace}
+.rain-t{position:relative;height:6px;border-radius:3px;background:rgba(127,127,127,.18);overflow:hidden}
+.rain-f{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--rain-col)}
+@media(forced-colors:active){.rain-f{background:Highlight;opacity:1 !important}.rain-g-fill{fill:Highlight}}
