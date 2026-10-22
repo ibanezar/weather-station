@@ -172,9 +172,12 @@ def fetch_live_multi(models):
             temp = [v for _, v in (series.get("temperature_2m") or [])]
             if len(temp) < 20:
                 continue
-            e = out.setdefault(day, {"tmax": {}, "tmin": {}})
+            e = out.setdefault(day, {"tmax": {}, "tmin": {}, "prec": {}})
             e["tmax"][m] = max(temp)
             e["tmin"][m] = min(temp)
+            prec = [v for _, v in (series.get("precipitation") or []) if v is not None]
+            if len(prec) >= 20:
+                e["prec"][m] = sum(prec)
     return out
 
 
@@ -236,7 +239,20 @@ def predict_day(model, lead, feats):
     return out
 
 
-TODAY_KEYS = ("date", "lead", "pop", "pop1", "pop5")
+TODAY_KEYS = ("date", "lead", "pop", "pop1", "pop5", "mm", "mm_n")
+MM_MIN_MODELS = 4   # najmanj virov (od 5: best_match + MULTI_MODELS), sicer količine ne objavimo
+
+
+def mean_precip(om_prec, multi_prec):
+    """Grobo pričakovana dnevna količina padavin (mm): povprečje Open-Meteo best_match in
+    drugih modelov. NI naučen popravek: na 875 dneh (izpuščanje leta) je regresija na teh
+    vhodih dala enako kot navadno povprečje, povprečje pa je boljše od surovega best_match
+    (MAE D+1 1,96 proti 2,30 mm, D+2 2,26 proti 2,40, D+3 2,49 proti 2,62;
+    tools/ai/eval_precip_amount.py). Vrne (mm, n) ali (None, n), kadar je virov premalo."""
+    vals = [v for v in [om_prec] + list((multi_prec or {}).values()) if v is not None]
+    if len(vals) < MM_MIN_MODELS:
+        return None, len(vals)
+    return round(sum(vals) / len(vals), 1), len(vals)
 
 
 def frozen_today(path, today):
@@ -338,6 +354,8 @@ def main():
         pred = predict_day(model, lead, feats)
         if pred is None:
             continue
+        mm, mm_n = mean_precip(feats.get("om_prec"), ((multi_live or {}).get(target) or {}).get("prec"))
+        pred["mm"], pred["mm_n"] = mm, mm_n
         pred["date"] = target
         pred["lead"] = lead
         days.append(pred)
