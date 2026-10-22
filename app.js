@@ -2520,10 +2520,10 @@ async function renderHeroRainMtr(){
     const todayIso=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
     if(!t||t.date!==todayIso||!Number.isFinite(t.pop)){el.hidden=true;return;}
     const r5=v=>Math.round(v*20)*5;
-    let txt='MTR: dež '+r5(t.pop)+' %';
+    let txt='MTR: dež '+r5(t.pop)+' %'+(_mtrMm(t.mm)?' · '+_mtrMm(t.mm):'');
     if(Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥ 5 mm '+r5(t.pop5)+' %';
     el.textContent=txt;
-    el.title='Verjetnost padavin po MTR, našem modelu (včerajšnja napoved za današnji dan). Količine ne napovedujemo.';
+    el.title='Verjetnost padavin po MTR, našem modelu (včerajšnja napoved za današnji dan). Količina (~ mm) je grobo povprečje petih modelov.';
     el.hidden=false;
   }catch(_){el.hidden=true;}
 }
@@ -7099,7 +7099,7 @@ async function fetchTextForecast(){
         '<div class="txfc-desc">'+desc+'</div>'+
         '<div class="txfc-temp"><span class="txfc-th">'+Math.round(tmax)+'°</span><span style="color:var(--muted);font-size:.74rem">/</span><span class="txfc-tl">'+Math.round(tmin)+'°</span></div>'+
         (rain>0.3?'<div class="txfc-rain">🌧 '+rain.toFixed(1)+' mm</div>':'')+
-        (mtrRain[t]?'<div class="txfc-mtr" title="Verjetnost padavin po MTR, našem modelu, naučenem na meritvah postaje (samo prve 3 dni). Količine ne napovedujemo.">MTR dež '+r5(mtrRain[t].pop)+'</div>'
+        (mtrRain[t]?'<div class="txfc-mtr" title="Verjetnost padavin po MTR, našem modelu, naučenem na meritvah postaje (samo prve 3 dni). Količina (~ mm) je grobo povprečje petih modelov, ne naučen popravek.">MTR dež '+r5(mtrRain[t].pop)+(_mtrMm(mtrRain[t].mm)?' · '+_mtrMm(mtrRain[t].mm):'')+'</div>'
           +((r5(mtrRain[t].pop1)||r5(mtrRain[t].pop5))?'<div class="txfc-mtr2">≥1 mm '+(r5(mtrRain[t].pop1)||'—')+' · ≥5 mm '+(r5(mtrRain[t].pop5)||'—')+'</div>':''):'');
       grid.appendChild(card);
     });
@@ -7192,9 +7192,18 @@ function _mtrVerifRows(){
    iste. Montaže se poiščejo v DOM, zato dodajanje nove kartice v HTML ne
    zahteva spremembe v app.js: dovolj je predpono dopisati sem. */
 const MTR_MOUNT_IDS=['mos-','hmos-'];
+/* Grobo pričakovana dnevna količina (mm): povprečje petih modelov, računa jo predict_recica_mos.mean_precip.
+   NI naučen popravek MTR in je bolj negotova od temperature (na dnevih z dežjem je napaka več mm), zato
+   vedno »~« in opis v namigu. Pod 0,2 mm = suho. null, če polja ni (premalo virov ali stara datoteka). */
+const MTR_MM_HINT='Grobo pričakovana količina: povprečje petih modelov (Open-Meteo, IFS, GFS, ICON, ARPEGE). Ni naučen popravek MTR; pri dežju je napaka lahko več mm in z dnevi narašča.';
+function _mtrMm(v){
+  if(!Number.isFinite(v))return null;
+  return v<0.2?'< 0,2 mm':'~'+v.toFixed(1).replace('.',',')+' mm';
+}
+
 /* Verjetnost padavin pod MTR-jevimi ploščicami (samo montaža z elementom `rain`, tj. zavihek MTR):
    po dnevih dež ≥ 0,2 mm, ≥ 1 mm, ≥ 5 mm. Skrito, če noben dan nima pop; pop1/pop5 manjkata, dokler
-   ju model ni naučen — takrat ostane samo dež. Količine ne napovedujemo. */
+   ju model ni naučen — takrat ostane samo dež. Količina (~ mm) je grobo povprečje virov. */
 function renderMtrRain(idp){
   const el=document.getElementById(idp+'rain');if(!el)return;
   const st=_mtrState;
@@ -7208,9 +7217,10 @@ function renderMtrRain(idp){
       const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
       return '<div class="mtr-day"><div class="mtr-day-hd">'+name+'<span class="mtr-day-date">'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
         +'<div class="mtr-day-val">'+pct(d.pop)+'<span class="mtr-day-unit">dež ≥ 0,2 mm</span></div>'
+        +(_mtrMm(d.mm)?'<div class="mtr-day-base" title="'+MTR_MM_HINT+'">'+_mtrMm(d.mm)+' · grobo</div>':'')
         +'<div class="mtr-day-meta">≥ 1 mm '+pct(d.pop1)+' · ≥ 5 mm '+pct(d.pop5)+'</div></div>';
     }).join('')+'</div>'
-    +'<div class="mtr-day-base" style="margin-top:.5rem">Verjetnost, da dnevna vsota padavin na postaji doseže prag; model naučen na meritvah IREICA1. Količine v mm ne napovedujemo.</div>';
+    +'<div class="mtr-day-base" style="margin-top:.5rem">Verjetnost, da dnevna vsota padavin na postaji doseže prag; model naučen na meritvah IREICA1. Količina (~ mm) je grobo povprečje petih modelov, ne naučen popravek.</div>';
 }
 
 /* Kartica »Verjetnost padavin« v zavihku AI napoved: dež (pop), >= 1 mm (pop1), >= 5 mm (pop5) iz
@@ -7232,6 +7242,7 @@ async function fetchAiRain(){
       return '<div class="ai-fc-card"><div class="ai-fc-hour">'+name+' '+dt.getDate()+'. '+(dt.getMonth()+1)+'.</div>'
         +'<div class="ai-fc-temp">'+pct(d.pop)+'</div>'
         +'<div class="ai-fc-unit">dež ≥ 0,2 mm</div>'
+        +(_mtrMm(d.mm)?'<div class="ai-fc-unit" title="'+MTR_MM_HINT+'">'+_mtrMm(d.mm)+' · grobo</div>':'')
         +'<div class="ai-fc-delta flat">≥ 1 mm '+pct(d.pop1)+'<br>≥ 5 mm '+pct(d.pop5)+'</div></div>';
     }).join('');
     const rng=document.getElementById('ai-rain-range');
@@ -7559,7 +7570,7 @@ function renderMtrDays(idp){
       +'<div class="mtr-day-meta">'
         +(Number.isFinite(sd)?'razpon ±'+fmt(MTR_Z80*sd,1)+' °C':'')
         +(pop!==null?(Number.isFinite(sd)?' · ':'')+'dež '+pop+' %':'')
-        +(pr?' · <span title="Verjetnost, da bo dnevna vsota padavin dosegla prag; MTR-ov model, naučen na meritvah postaje. Količine ne napovedujemo.">'+pr+'</span>':'')
+        +(pr?' · <span title="Verjetnost, da bo dnevna vsota padavin dosegla prag; MTR-ov model, naučen na meritvah postaje.">'+pr+'</span>':'')
         +(fz!==null?' · <span title="Verjetnost, da bo najnižja temperatura ≤ 0 °C; iz razpršenosti napake modela, preverjeno na zadnjem letu.">zmrzal '+fz+' %</span>':'')
       +'</div></div>';
   }).join('');

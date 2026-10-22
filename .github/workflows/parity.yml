@@ -88,6 +88,9 @@ jobs:
       - name: Test verjetnosti padavin po pragovih (MTR pop1/pop5)
         run: python3 tools/test_pop_thresholds.py
 
+      - name: Test količine padavin MTR (povprečje virov)
+        run: python3 tools/test_precip_amount.py
+
       - name: Test igre Gobarski detektiv
         run: python3 tools/test_detektiv.py
 
