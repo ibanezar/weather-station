@@ -3501,4 +3501,9 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 [data-theme="light"] .swx-g1 span{color:#c2410c !important}
 [data-theme="light"] #agro-hop-body span span{color:var(--muted) !important}
 [data-theme="light"] .sm-day.active{background:#c2410c;border-color:#c2410c}
-[data-theme="light"] .clabel > span[style*="var(--muted)"]{color:#566559 !important}
+[data-theme="light"] .clabel > span[style*="var(--muted)"]{color:#3f4c42 !important}
+[data-theme="light"] .visitor-counter{color:#3f4c42 !important;opacity:1 !important}
+[data-theme="light"] .mtr-day-meta,[data-theme="light"] .mtr-day-meta span,[data-theme="light"] .mtr-kpi-sub,[data-theme="light"] .mtr-kpi-sub span{color:#3f4c42 !important;opacity:1 !important}
+[data-theme="light"] .mtr-why-val.up{color:#b91c1c !important}
+[data-theme="light"] .aifc-badge.mtr{color:#065f46 !important}
+[data-theme="light"] #agro-hop-body div > span:nth-child(2) > span{color:#3f4c42 !important;opacity:1 !important}
