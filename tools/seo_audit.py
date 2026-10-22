@@ -104,6 +104,15 @@ CORE = {
     "napovej/":                  ("daily",   "0.6"),
     # Sezonski vodič — klimatologija letnega časa + povezave (generate_sezona_page.py).
     "sezona/":                   ("daily",   "0.6"),
+    # Vremenski pojmi (tools/generate_pojmi_pages.py) -- GSC: poizvedbe po pojmih
+    # (inverzija, hladna fronta, vetrna roža ...) na položaju 8-9 brez klikov.
+    "pojmi/":                    ("monthly", "0.6"),
+    "pojmi/inverzija/":          ("monthly", "0.6"),
+    "pojmi/kumulonimbus/":       ("monthly", "0.6"),
+    "pojmi/vetrna-roza/":        ("monthly", "0.6"),
+    "pojmi/hladna-fronta/":      ("monthly", "0.6"),
+    "pojmi/barometer/":          ("monthly", "0.6"),
+    "pojmi/albedo/":             ("monthly", "0.6"),
     "trendi/":                   ("weekly",  "0.7"),
     # Stran je obstajala in bila povezana iz index.html, a je ni bilo v nobenem
     # sitemapu — natanko primer, pred katerim svari CLAUDE.md. Dodano 20. 8. 2026.

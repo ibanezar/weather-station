@@ -30,6 +30,7 @@
 
 - [Podnebje](https://meteorec.si/klima/): mesečne norme, letne vsote, rekordi za Rečico ob Savinji.
 - [Ta čas v dolini](https://meteorec.si/sezona/): sezonski vodič — kdaj je v Rečici ob Savinji običajno prva jesenska oz. zadnja spomladanska zmrzal, koliko vročih dni ali dni z zmrzaljo ima letni čas (meritve postaje IREICA1), letošnje stanje in katere napovedi so ta čas pomembne.
+- [Vremenski pojmi](https://meteorec.si/pojmi/): kratke razlage z odgovorom v prvih dveh stavkih in eno številko s postaje IREICA1 — [inverzija](https://meteorec.si/pojmi/inverzija/), [kumulonimbus](https://meteorec.si/pojmi/kumulonimbus/), [vetrna roža](https://meteorec.si/pojmi/vetrna-roza/), [hladna fronta](https://meteorec.si/pojmi/hladna-fronta/), [barometer](https://meteorec.si/pojmi/barometer/), [albedo](https://meteorec.si/pojmi/albedo/).
 - [Padavine](https://meteorec.si/padavine/), [Temperatura](https://meteorec.si/temperatura/): klimatološki povzetki po meritvah postaje IREICA1.
 - [Ta teden](https://meteorec.si/teden/): tedenski vremenski povzetek, samodejno osvežen vsak ponedeljek.
 - [Rekordi](https://meteorec.si/rekord/), [Vremenski dogodki](https://meteorec.si/novosti/): novi absolutni rekordi, toplotni valovi, sušna obdobja.

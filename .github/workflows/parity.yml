@@ -100,6 +100,9 @@ jobs:
       - name: Test krajevnih strani (statična meritev, smer postaje, naslov)
         run: python3 tools/test_town_pages.py
 
+      - name: Test vremenskih pojmov (/pojmi/)
+        run: python3 tools/test_pojmi.py
+
       - name: Test napovedi MTR (verjetnost zmrzali, režim noči), urnega zajema in ansamblov
         run: |
           python3 tools/test_mtr_extras.py

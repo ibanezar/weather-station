@@ -3419,7 +3419,8 @@ def gen_landing_page(hist, sitemap_urls):
   <p>Visoka povprečna relativna vlažnost (<strong>{num(mean_hum, 0)} %</strong>) in zaprta lega doline
   pomenita pogosto <strong>radiacijsko meglo</strong> ter <strong>temperaturne inverzije</strong>,
   predvsem pozno jeseni in pozimi. V takih razmerah je na dnu doline mrzlo in megleno, nekaj sto metrov
-  višje pa sončno in toplo — klasičen savinjski inverzijski vzorec.</p>
+  višje pa sončno in toplo — klasičen savinjski inverzijski vzorec
+  (<a href="/pojmi/inverzija/">kaj je temperaturna inverzija</a>).</p>
 
   <h2>Padavine in veter</h2>
   <p>Območje je razmeroma namočeno: povprečno okrog <strong>{num(annual_precip, 0)} mm padavin na leto</strong>,

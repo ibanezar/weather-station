@@ -1755,6 +1755,21 @@ zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
 bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
 prepričaj, da isto pot pokriva tudi `git add`.
 
+## Vremenski pojmi (`/pojmi/`, 22. 10. 2026)
+
+Šest kratkih strani (inverzija, kumulonimbus, vetrna roža, hladna fronta, barometer, albedo) po izvozu Search Console
+(18. 6.–15. 10.): ti pojmi so imeli 75–347 prikazov na položaju 8–9 in skoraj nič klikov, ker ustrezne strani ni bilo.
+`tools/generate_pojmi_pages.py` (dnevno v `seo-smart-routine.yml`, `continue-on-error`).
+
+- Oblika: **odgovor v prvih dveh stavkih**, razlaga, razdelek »Kaj kaže postaja« z eno številko iz `history.json`
+  (samo prave meritve, `src != era5`; vsaka številka pove, na koliko dneh stoji), FAQ, povezave naprej.
+- **Številke so kazalniki, ne dokazi**: razpon temperature pozimi ob visokem tlaku (posreden znak inverzije), delež dni z
+  dežjem po padcu tlaka ≥ 5 hPa (41 % proti 31 % vseh dni: blag signal in tako tudi piše), največji padec povprečne
+  temperature v enem dnevu (16. 4. 2024). Postaja ne meri višinskega profila, odbitega sevanja ali front; strani to povedo.
+- Če dejstvo nima dovolj dni (`< 30`), se razdelek izpusti, ne piše se izmišljena vrednost.
+- Hub `/pojmi/` je v `CORE`, `llms.txt`; test: `tools/test_pojmi.py` (v `parity.yml`). Nov pojem = vnos v `pages()` +
+  vrstica v `CORE`; GEO: FAQPage samo, če je FAQ viden (hub ga nima).
+
 ## Sezonski vodič (`/sezona/`) in povzetek meseca (1. 10. 2026)
 
 - **`/sezona/`** (`tools/generate_sezona_page.py`, dnevno v `seo-smart-routine.yml`) —
