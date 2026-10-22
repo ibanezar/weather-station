@@ -71,6 +71,14 @@ REGISTER = [
      "valley-duel-log.yml"),
     ("Model MTR (mesečno učenje)", "model/recica-mos.json", "ts", "trained_at", 24 * 40,
      "mos-train.yml"),
+    ("Indeksi AO/NAO/ENSO", "data/indeksi.json", "ts", "generated_at", 36,
+     "atmos-forecast.yml → generate_indeksi_page.py (NOAA CPC)"),
+    ("Stratosfera (GFS)", "data/stratosfera.json", "ts", "generated_at", 36,
+     "atmos-forecast.yml → generate_stratosfera_page.py (GFS na AWS)"),
+    ("Saharski prah (CAMS)", "data/prah.json", "ts", "generated_at", 36,
+     "atmos-forecast.yml → generate_prah_page.py (Open-Meteo)"),
+    ("Sinoptična karta (ECMWF)", "data/sinopticna.json", "ts", "generated_at", 48,
+     "atmos-forecast.yml → generate_sinopticna_page.py (ECMWF open data, 00 UTC tek)"),
 ]
 
 
