@@ -294,11 +294,12 @@ def build_body(hist, fc):
     diseases = hop_disease_risk(rh_now, t_now)
 
     # ── answer block ─────────────────────────────────────────────────────────
-    answer = (f'  <p class="archive-intro">Vsota efektivnih temperatur za Zgornjo Savinjsko dolino je danes '
+    answer = (f'  <p class="archive-intro"><strong>Na kratko:</strong> vsota efektivnih temperatur za Zgornjo Savinjsko dolino je danes '
               f'<strong>GDD₅ {gdd5}</strong> in <strong>GDD₁₀ {gdd10}</strong> (od 1. januarja {TODAY.year}). '
               f'Modelirani razvoj hmelja je po vsoti GDD₁₀ v fazi <strong>{stage_label.lower()}</strong>. Danes: ET₀ {seo.num(et0, 1)} mm, '
               f'sonce {seo.num(sun_h, 1)} h, vodna bilanca {"+" if wbal_today >= 0 else ""}{seo.num(wbal_today, 1)} mm '
-              f'— nazadnje posodobljeno {TODAY.isoformat()}.</p>\n'
+              f'— nazadnje posodobljeno {TODAY.isoformat()}. '
+              f'Vir: meritve postaje IREICA1 in napoved Open-Meteo; faza hmelja je modelirana ocena iz temperature, ne ugotovitev o tehnološki zrelosti (glej IHPS).</p>\n'
               f'  <div id="agro-fresh" class="muted-note" data-generated="{GEN_TIME.isoformat()}" style="margin:.2rem 0 .8rem"></div>\n'
               f'  <script>(function(){{var el=document.getElementById("agro-fresh");if(!el)return;'
               f'var then=new Date(el.dataset.generated).getTime();if(isNaN(then))return;'
