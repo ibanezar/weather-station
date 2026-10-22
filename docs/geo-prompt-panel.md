@@ -69,7 +69,7 @@ v treh mesecih ves panel) s kontrolnim seznamom, `add` vnos preveri in zapiše,
 }
 ```
 
-- `assistant`: `chatgpt` | `perplexity` | `google-ai-overview` | `claude`.
+- `assistant`: `chatgpt` | `perplexity` | `google-ai-overview` | `claude` | `gemini` (aplikacija Gemini; ni isto kot Google AI Overview).
 - `prompt_id`: eden od `id`-jev iz panela zgoraj — ne prosto besedilo, da so
   vnosi skozi mesece primerljivi.
 - `mentioned`: `true`/`false` — je meteorec.si sploh omenjen (po imenu, ne
