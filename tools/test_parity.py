@@ -845,6 +845,78 @@ def crnivec_opozorila_in_oznake():
         check(want == g, "oznaka dneva", f"{d}: py={want!r} js={g!r}")
 
 
+# ── Modelske karte (worker /modeli-karta2.json ↔ zavihek v app.js) ───────────
+@test
+def modelske_karte():
+    """_mk2Reduce (worker), spremenljivke zavihka, časovna poravnava in sneg (app.js)."""
+    H = 3600000
+    t0 = 1_000_000 * H
+    # 1. worker: korak k pokrije (t0+3(k-1), t0+3k]; CAPE = največ v koraku, ostalo trenutna vrednost ob koncu
+    ts = [t0 + h * H for h in range(0, 49)]
+    e = [None if h % 7 == 0 and h > 0 else (h * 10) % 130 for h in range(49)]
+    w = [h * 0.5 for h in range(49)]
+    got = js("worker.js", ["_mk2Reduce", "MK_STEPS"],
+             [{"expr": "_mk2Reduce(%s, {w:%s, d:null, c:null, m:null, e:%s, z:null}, %d)"
+               % (json.dumps(ts), json.dumps(w), json.dumps(e), t0)}])[0]
+    check(len(got) == 16, "worker: 16 korakov", len(got))
+    for k in range(1, 17):
+        hrs = [3 * k - 2, 3 * k - 1, 3 * k]
+        vals = [e[h] for h in hrs if e[h] is not None]
+        want_e = max(vals) if vals else None
+        check(got[k - 1]["e"] == want_e, f"worker: CAPE korak {k}", f"{got[k-1]['e']} proti {want_e}")
+        check(got[k - 1]["w"] == w[3 * k], f"worker: veter korak {k}", f"{got[k-1]['w']} proti {w[3*k]}")
+        check(got[k - 1]["d"] is None and got[k - 1]["z"] is None, f"worker: manjkajoča spremenljivka je null (korak {k})")
+    # 2. polja, ki jih zavihek bere, morajo obstajati v odgovoru workerja (ali v /modeli-karta.json)
+    vars_js = js("app.js", ["MM_PRECIP", "MM_VARS"], [{"expr": "MM_VARS.map(v=>({k:v.k,f:v.f,st:v.st,diff:v.diff,only:v.only||null}))"}])[0]
+    mk2 = js("worker.js", ["MK2_VARS"], [{"expr": "MK2_VARS"}])[0]
+    ok_fields = set(mk2) | {"p", "t", "g", "sn"}
+    for v in vars_js:
+        check(v["f"] in ok_fields, f"zavihek: polje {v['f']} ({v['k']}) obstaja v virih", sorted(ok_fields))
+        vals = [x[0] for x in v["st"]]
+        check(vals == sorted(vals) and len(set(vals)) == len(vals), f"zavihek: lestvica {v['k']} narašča", vals)
+        check(v["diff"] and v["diff"] > 0, f"zavihek: razpon razlike {v['k']}")
+    check("d" in mk2, "worker: smer vetra (puščice)")
+    # 3. časovna poravnava: najbližji korak vira (največ 1,5 h), sicer -1
+    pre = "var MM_H=%d; var _mm={M:{t0:%d,stepH:3,steps:16}};" % (H, t0)
+    for off, k, want in [(0, 0, 0), (0, 5, 5), (1, 0, 0), (1, 4, 4), (-1, 3, 3), (2, 0, -1), (2, 1, 0), (3, 2, 1), (0, 40, -1)]:
+        S = {"t0": t0 + off * H, "stepH": 3, "steps": 16}
+        r = js("app.js", ["_mmTime", "_mmIdx"], [{"expr": "_mmIdx(%s,%d)" % (json.dumps(S), k)}], prelude=pre)[0]
+        check(r == want, f"časovna poravnava off={off} h, k={k}", f"{r} proti {want}")
+    r = js("app.js", ["_mmTime", "_mmIdx"], [{"expr": "_mmIdx(null,0)"}], prelude=pre)[0]
+    check(r == -1, "časovna poravnava: vir brez podatkov")
+    # 4. sneg: vsota ur od t0 skupne karte do konca koraka; null, če sneg ne pokriva okna
+    def snow(off, k, hours=48):
+        D = {"t0": t0 + off * H, "hours": hours, "units": {"sn": 0.1},
+             "sn": [[h + 1, 2] for h in range(hours)]}
+        pre2 = "var MM_H=%d; var _mm={M:{t0:%d,stepH:3,steps:16,nx:2,ny:1},s:%s};" % (H, t0, json.dumps(D))
+        return js("app.js", ["_mmTime", "_mmSnow"], [{"expr": "_mmSnow(%d)" % k}], prelude=pre2)[0]
+    r = snow(0, 0)   # ure 0..2 -> (1+2+3) * 0,1
+    check(r is not None and abs(r[0] - 0.6) < 1e-9 and abs(r[1] - 0.6) < 1e-9, "sneg: prvi korak", r)
+    r = snow(1, 0)   # sneg se začne eno uro po t0 skupne karte: okno ni pokrito, ne smemo ugibati
+    check(r is None, "sneg: začetek pozneje kot karta -> null", r)
+    r = snow(-2, 0)  # sneg se začne 2 h prej: ure 2..4 -> (3+4+5) * 0,1
+    check(r is not None and abs(r[0] - 1.2) < 1e-9, "sneg: prejšnji začetek", r)
+    r = snow(0, 15)  # zadnji korak (+48 h) je še pokrit
+    check(r is not None and abs(r[0] - 117.6) < 1e-9, "sneg: zadnji korak", r)
+    r = snow(0, 15, hours=40)  # podatkov je manj kot karte: konec je zunaj
+    check(r is None, "sneg: korak zunaj podatkov -> null", r)
+    # 5. barvna lestvica: stopnice, zvezni prehod, prag, razlika
+    col = lambda v, spec_expr, diff="false": js("app.js", ["MM_PRECIP", "MM_VARS", "MM_DIVERGE", "_mmRgb", "_mmStops", "_mmColor"],
+                                                   [{"expr": "_mmColor(%s,%s,%s)" % (spec_expr, v, diff)}])[0]
+    check(col(0.05, "MM_VARS[0]") is None, "lestvica: pod pragom brez barve")
+    check(col(0.5, "MM_VARS[0]") == [0xd9, 0xf0, 0xff], "lestvica: prva stopnica")
+    c1 = col(2, "MM_VARS[0]")
+    check(c1 == [0x9e, 0xca, 0xe1], "lestvica: stopnica pri 2 mm", c1)
+    t = [v for v in vars_js if v["k"] == "t"][0]
+    ti = [i for i, v in enumerate(vars_js) if v["k"] == "t"][0]
+    c0 = col(0, f"MM_VARS[{ti}]")
+    check(c0 == [0xe0, 0xf3, 0xf8], "lestvica: temperatura 0 °C", c0)
+    cm = col(2.5, f"MM_VARS[{ti}]")
+    check(cm[0] > 0xe0 and cm[0] < 0xff, "lestvica: zvezen prehod", cm)
+    cz = col(0, f"MM_VARS[{ti}]", "true")
+    check(cz == [0xf7, 0xf7, 0xf7], "lestvica: razlika 0 je nevtralna", cz)
+
+
 def main():
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
     for t in TESTS:

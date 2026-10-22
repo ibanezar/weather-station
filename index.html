@@ -503,6 +503,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button id="tab-btn-srednja"    onclick="switchTab('srednja');closeTabDDs()"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="5.5" width="16" height="14" rx="2" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.6"/><path d="M4 9.5h16M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Srednja (16 dni)</button>
         <button id="tab-btn-dolgorocna" onclick="switchTab('dolgorocna');closeTabDDs()"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="5.5" width="16" height="14" rx="2" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.6"/><path d="M4 9.5h16M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8.5" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/><circle cx="15.5" cy="14" r="1" fill="currentColor"/></svg>Dolgoročna</button>
         <button id="tab-btn-stormmap"   onclick="switchTab('stormmap');closeTabDDs()"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 5 4 7v12l5-2 6 2 5-2V5l-5 2-6-2Z" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 5v12M15 7v12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>Nevihtni zemljevid SLO</button>
+        <button id="tab-btn-modelmaps"  onclick="switchTab('modelmaps');closeTabDDs()"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 10h17M3.5 15h17M9.2 4.5v15M14.8 4.5v15" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"/><circle cx="12" cy="12.5" r="2.2" fill="currentColor"/></svg>Modelske karte</button>
       </div>
     </div>
     <!-- Kraji dropdown: real <a href> links (not switchTab) to the 14
@@ -2415,6 +2416,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="sm-ranking"><div class="skel-wrap"><span class="skel"><span class="skel-bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="visually-hidden">Nalaganje…</span></span></div></div>
     </div>
   </div><!-- /tab-stormmap -->
+
+  <!-- ═══ MODELSKE KARTE TAB ═══ -->
+  <div id="tab-modelmaps" class="tab-pane">
+    <h2 class="visually-hidden">Modelske karte</h2>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-map"/></svg> Modelske karte</div>
+      <p class="card-intro" style="margin:.2rem 0 .8rem;font-size:.86rem;opacity:.8">
+        Neposreden izhod numeričnih modelov (ICON-D2, ICON-EU, ECMWF IFS, AROME) nad Slovenijo:
+        padavine, temperatura, veter, sunki, CAPE, oblačnost, tlak, ničta izoterma in sneg.
+        Dva modela lahko postaviš drug ob drugega ali pogledaš njuno razliko.
+        <em>Ni meritev in ni uradna napoved &mdash; za opozorila velja ARSO.</em>
+      </p>
+      <div id="mm-app" aria-live="polite"><div class="skel-wrap"><span class="skel"><span class="skel-bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="visually-hidden">Nalaganje…</span></span></div></div>
+    </div>
+  </div><!-- /tab-modelmaps -->
 
   <!-- ═══ VREME & ŽIVLJENJE TAB ═══ -->
   <div id="tab-life" class="tab-pane">
