@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-21",
-  "issued": "21.10.2026 8:00 CEST",
-  "issued_at": "2026-10-21T08:30:41.098096+02:00",
+  "date": "2026-10-22",
+  "issued": "22.10.2026 8:00 CEST",
+  "issued_at": "2026-10-22T08:30:41.736728+02:00",
   "top_station": "Vogel",
-  "top_mm": 23,
-  "n_stations": 18,
-  "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-10-21.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-10-21-story.jpg"
+  "top_mm": 88,
+  "n_stations": 20,
+  "should_post": true,
+  "image": "https://meteorec.si/og/precip-map/2026-10-22.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-10-22-story.jpg"
 }
