@@ -256,6 +256,13 @@ trenutno vreme pošiljala na naslovno. Zdaj nanj odgovori sama.
   tisto stran in nadaljuje z drugo (izhod 1).
 - Osvežujeta `prerender-current.yml` (urno, `--live`) in `generate-seo-pages.yml`
   (takoj po generiranju, da stran ni pol dneva na rezervnem zapisu).
+- **Krajevne strani** (`/vreme-mozirje/`, `-nazarje/`, `-ljubno-ob-savinji/`, `-gornji-grad/`, `-luce/`, `-solcava/`;
+  22. 10. 2026) imajo isti blok pod `<h1>`, a z besedilom »Vreme v Mozirju: najbližja meritev je s postaje IREICA1 …«.
+  `generate_seo_pages.py` zapiše v odstavek `data-loc`/`data-where`, `town_targets()` v injektorju odkrije strani po
+  teh atributih -- podatki o kraju so samo v generatorju. Razlog: GSC (18. 6.–15. 10.) »vreme mozirje« 753 prikazov,
+  poz. 11, nič klikov; naslov je zdaj »Vreme X danes, po urah in 7 dni«. **Smer postaje glede na kraj je nasprotna
+  smeri kraja glede na postajo** (`_opposite_compass()`): prej je na 11 straneh pisalo, da je postaja severovzhodno od
+  Mozirja, v resnici je jugozahodno. Test: `tools/test_town_pages.py` (v `parity.yml`).
 - **Notranjih meritev tu ni** in ne smejo priti — velja pravilo z vrha dokumenta.
 - Razred bloka je `CLS_*`: na naslovni strani `wx-static` (v `style.css` namenoma
   vizualno skrit — vrednosti kaže živa kartica), na pristajalni `wx-static wx-now`,

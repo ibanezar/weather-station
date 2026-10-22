@@ -97,6 +97,9 @@ jobs:
       - name: Test sezonskega vodiča in uvrstitve meseca
         run: python3 tools/test_sezona.py
 
+      - name: Test krajevnih strani (statična meritev, smer postaje, naslov)
+        run: python3 tools/test_town_pages.py
+
       - name: Test napovedi MTR (verjetnost zmrzali, režim noči), urnega zajema in ansamblov
         run: |
           python3 tools/test_mtr_extras.py
