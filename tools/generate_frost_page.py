@@ -278,6 +278,14 @@ def main():
         return 1
     log_entries = load_json(LOG_PATH, default=[])
 
+    # »Na kratko«: odgovor na vprašanje »je danes nevarnost pozebe?« brez dnevnih številk, ker model za
+    # sadno drevje teče samo v sezoni (mar-maj) in se izven nje stran ne osvežuje -- številka bi zastarela.
+    na_kratko = (
+        '  <p class="archive-intro"><strong>Na kratko:</strong> ta stran ocenjuje nevarnost pozebe za sadno drevje '
+        'in jo model računa v sezoni cvetenja (1. marec – 31. maj) iz meritev postaje IREICA1 in napovedi ARSO. '
+        'Izven sezone velja za jesensko ali zimsko zmrzal napoved najnižje temperature s kartice MTR na '
+        '<a href="/">naslovni strani</a> (z verjetnostjo zmrzali), običajen čas prve jesenske zmrzali v dolini pa '
+        'je na strani <a href="/sezona/">Sezona</a>. Za ukrepanje veljajo uradna opozorila ARSO.</p>')
     hero_html, hero_cat = build_hero(risk)
     outlook = build_outlook(risk)
     phen_table = build_phenophase_table(risk)
@@ -289,6 +297,7 @@ def main():
 {seo.stn_badge()}
   <h1 class="page-title">Opozorilo pred pozebo — Savinjska dolina</h1>
   <p class="post-meta">Tveganje pozebe za sadno drevje iz meritev IREICA1 + napovedi ARSO · posodobljeno {risk.get("generated_at_local", "—")}</p>
+{na_kratko}
 {hero_html}
   <h2>Naslednje tri noči</h2>
 {outlook}
