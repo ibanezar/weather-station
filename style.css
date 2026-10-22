@@ -1633,6 +1633,8 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .tab-btn.active{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(29,78,216,.4),0 1px 3px rgba(0,0,0,.15)}
 .tab-btn:hover:not(.active){background:var(--border);color:var(--text);border-color:var(--card-border);transform:translateY(-1px)}
 .tab-btn:active:not(.active){transform:scale(.97)}
+/* Desktop: kompaktnejši gumbi, da se glavni meni (10 gumbov) ujame v eno vrstico */
+@media(min-width:769px){.tab-nav{gap:.3rem}.tab-nav .tab-btn{padding:.46rem .62rem;gap:.35rem;letter-spacing:.03em}}
 .tab-pane{display:none}.tab-pane.active{display:block}
 
 /* History table */
