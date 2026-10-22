@@ -9803,8 +9803,8 @@ function hvColor(t){
   return'rgb('+s[s.length-1][1].join(',')+')';
 }
 function heroValleySvg(pts,colorFn,w0){
-  // Širina viewBox = širina vsebnika (merilo 1:1, pisava ostane berljiva na telefonu); višina po razmerju 640:190 (širše od 620 px 1:0,24, da hero na namizju ne zrase).
-  const W=Math.max(280,Math.min(900,Math.round(w0||640))),H=Math.round(W*(w0&&w0>=620?0.24:190/640)),{T,B,hmin,hmax}=VALLEY_HERO,Y=h=>H-B-(Math.min(hmax,Math.max(hmin,h))-hmin)/(hmax-hmin)*(H-T-B),X=f=>f*W;
+  // Širina viewBox = širina vsebnika (merilo 1:1, pisava ostane berljiva na telefonu); višina po razmerju 640:190 (širše od 620 px 1:0,18, da kartica na namizju ostane nizka).
+  const W=Math.max(280,Math.min(900,Math.round(w0||640))),H=Math.round(W*(w0&&w0>=620?0.18:190/640)),{T,B,hmin,hmax}=VALLEY_HERO,Y=h=>H-B-(Math.min(hmax,Math.max(hmin,h))-hmin)/(hmax-hmin)*(H-T-B),X=f=>f*W;
   const cf=colorFn||(()=> '#888');
   // zvezen teren: kosinusna interpolacija med ključnimi točkami
   const kp=VALLEY_HERO.terrain,ground=f=>{

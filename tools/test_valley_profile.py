@@ -89,6 +89,6 @@ for name, pts_, w in (("inverzija", cases["inverzija"], 330), ("običajen", case
 small = js([{"fn": "heroValleySvg", "args": [cases["običajen"], None, 330]}])[0]
 check("· 366 m" not in small, "prerez: ozek zaslon brez višin v oznakah (preprečuje prekrivanje)")
 wide = js([{"fn": "heroValleySvg", "args": [cases["običajen"], None, 900]}])[0]
-check("· 366 m" in wide and 'viewBox="0 0 900 216"' in wide, "prerez: širok zaslon z višinami, razmerje 0,24", wide[:90])
+check("· 366 m" in wide and 'viewBox="0 0 900 162"' in wide, "prerez: širok zaslon z višinami, razmerje 0,18", wide[:90])
 print(f"\n{CHECKS} preverjanj, {len(FAILS)} napak")
 sys.exit(1 if FAILS else 0)
