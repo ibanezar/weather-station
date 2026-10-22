@@ -7154,6 +7154,27 @@ function _mtrVerifRows(){
    iste. Montaže se poiščejo v DOM, zato dodajanje nove kartice v HTML ne
    zahteva spremembe v app.js: dovolj je predpono dopisati sem. */
 const MTR_MOUNT_IDS=['mos-','hmos-'];
+/* Verjetnost padavin pod MTR-jevimi ploščicami (samo montaža z elementom `rain`, tj. zavihek MTR):
+   po dnevih dež ≥ 0,2 mm, ≥ 1 mm, ≥ 5 mm. Skrito, če noben dan nima pop; pop1/pop5 manjkata, dokler
+   ju model ni naučen — takrat ostane samo dež. Količine ne napovedujemo. */
+function renderMtrRain(idp){
+  const el=document.getElementById(idp+'rain');if(!el)return;
+  const st=_mtrState;
+  const days=st?st.days.filter(d=>Number.isFinite(d.pop)):[];
+  if(!days.length){el.hidden=true;el.innerHTML='';return;}
+  const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':'—';
+  el.hidden=false;
+  el.innerHTML='<div class="mtr-why-hd">Verjetnost padavin · MTR</div>'
+    +'<div class="mtr-days" style="margin-top:.5rem">'+days.map(d=>{
+      const dt=new Date(d.date+'T12:00:00');
+      const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
+      return '<div class="mtr-day"><div class="mtr-day-hd">'+name+'<span class="mtr-day-date">'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
+        +'<div class="mtr-day-val">'+pct(d.pop)+'<span class="mtr-day-unit">dež ≥ 0,2 mm</span></div>'
+        +'<div class="mtr-day-meta">≥ 1 mm '+pct(d.pop1)+' · ≥ 5 mm '+pct(d.pop5)+'</div></div>';
+    }).join('')+'</div>'
+    +'<div class="mtr-day-base" style="margin-top:.5rem">Verjetnost, da dnevna vsota padavin na postaji doseže prag; model naučen na meritvah IREICA1. Količine v mm ne napovedujemo.</div>';
+}
+
 /* Kartica »Verjetnost padavin« v zavihku AI napoved: dež (pop), >= 1 mm (pop1), >= 5 mm (pop5) iz
    napoved-modela.json. Zaokroženo na 5 %; pop1/pop5 manjkata, dokler ju model ni naučen — takrat
    ostane samo dež, ničesar se ne izmišlja. */
@@ -7243,6 +7264,7 @@ function renderMtrCard(){
 function _renderMtrMount(idp){
   const st=_mtrState;if(!st)return;
   const M=MTR_METRICS[st.metric];
+  renderMtrRain(idp);
 
   const seg=document.getElementById(idp+'seg');
   if(seg)seg.querySelectorAll('.mtr-seg-btn').forEach(b=>{
