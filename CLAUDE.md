@@ -2540,12 +2540,12 @@ Open-Meteo/MTR. Brez dokaza proti IREICA1 ne nastane nobena stran, kartica ali z
 
 ## Anketa obiskovalcev (popup, 22. 10. 2026)
 
-Kratka anonimna anketa (4 vprašanja, vsa neobvezna: kaj jih je pripeljalo, kaj jim je všeč, kako so nas našli, kaj manjka).
+Kratka anonimna anketa (6 vprašanj, vsa neobvezna: kaj jih je pripeljalo, kaj jim je všeč, kako so nas našli, ali si želijo aplikacijo (`q5`), ali bi plačali 2 €/mesec za delovanje postaje in strani (`q6`), kaj manjka).
 
 - `initSurvey()` v lazy-paketu `app.js` (DOM se zgradi v JS, `#survey` je fiksen prekrivni element: brez vpliva na CLS, CSS na koncu `style.css`).
   **Samo od 2. obiska** in ko piškotno soglasje ni več čakajoče (isto pravilo kot `initNotifHint`; na prvem obisku sta že pasica in ponudba pogleda). Največ 3 prikazi; `wx-survey` = `done`/`dismissed` jo ugasne za vedno.
 - Worker: `POST /anketa` (honeypot `website`, 5 oddaj/uro po IP v KV `anketa_rl:<ip>`, dedup) → R2 `feedback/anketa.json` (cap 2000). **IP in user-agent se ne shranita.** `GET /anketa/rezultati` samo z `Bearer DELETE_SECRET` (isti zaklep kot galerija).
-- `ANKETA_Q1/Q2/Q3` (worker) in `SURVEY_OPTS` (app.js) sta namerna podvojitev: `test_parity.konstante_workerja`. Test endpointa: `tools/test_anketa.mjs` (v `parity.yml`).
+- `ANKETA_Q1/Q2/Q3/Q5/Q6` (worker) in `SURVEY_OPTS` (app.js) sta namerna podvojitev: `test_parity.konstante_workerja`. Test endpointa: `tools/test_anketa.mjs` (v `parity.yml`).
 - Branje: ročno `python3 tools/anketa_rezultati.py [--csv]` (`DELETE_SECRET`), ni v nobenem workflowu. Nova različica ankete = nov `v` v workerju (zdaj `2026-10`) in `wx-survey` ključ.
 - `zasebnost.html` ima razdelek »Anketa obiskovalcev«; notranjih meritev anketa ne dotika.
 
