@@ -1,0 +1,83 @@
+name: Veliko vreme (sinoptika, stratosfera, indeksi, prah)
+
+# Štiri strani o širši sliki ozračja (ideja po polarnivrtinec.si; podatki so javni, izris je naš):
+#   /sinopticna/  — ECMWF IFS open data (0,25°, CC BY 4.0): tlak + T850 in višina 500 hPa, +0…+96 h, tek 00 UTC
+#   /stratosfera/ — NOAA GFS na AWS: zonalni veter 10 hPa pri 60 °N + temperatura polarne kape (analiza + do +10 dni)
+#   /indeksi/     — NOAA CPC/PSL: AO, NAO (dnevno + ansambel GEFS), ENSO (ONI, Niño 3.4)
+#   /prah/        — Copernicus CAMS prek Open-Meteo: saharski prah in PM10 (zemljevid + slovenski kraji)
+# Glej tools/atmos_common.py in razdelek »Veliko vreme« v CLAUDE.md.
+#
+# 09:40 UTC: ECMWF 00 UTC tek je objavljen okoli 7:40 UTC, GFS 00 UTC okoli 5:00 UTC; GitHubov cron zamuja ure,
+# a nobena od strani ne potrebuje točnega termina. Vsak generator ob napaki vira pusti zadnjo stran (označeno kot
+# nesveža) in tek postane RDEČ — varuh svežine (check_freshness.py REGISTER) ujame dolgotrajno izpadanje.
+
+on:
+  schedule:
+    - cron: '40 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  atmos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Odvisnosti
+        # eccodes (pip) vsebuje svojo knjižnico; matplotlib/Pillow narišeta karte; scipy glajenje in H/L.
+        run: pip install numpy scipy matplotlib Pillow eccodes ecmwf-opendata --quiet
+
+      - name: Test (razčlenjevanje, razlaga, projekcija)
+        run: python3 tools/test_atmos.py
+
+      - name: Indeksi AO, NAO, ENSO
+        id: indeksi
+        continue-on-error: true
+        run: python3 tools/generate_indeksi_page.py
+
+      - name: Stratosfera
+        id: strat
+        continue-on-error: true
+        run: python3 tools/generate_stratosfera_page.py
+
+      - name: Prah
+        id: prah
+        continue-on-error: true
+        run: python3 tools/generate_prah_page.py
+
+      - name: Sinoptična karta
+        id: sinop
+        continue-on-error: true
+        run: python3 tools/generate_sinopticna_page.py
+
+      - name: Commit & push (samo če se je stanje spremenilo)
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/indeksi.json data/stratosfera.json data/prah.json data/sinopticna.json indeksi/ stratosfera/ prah/ sinopticna/
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+            exit 0
+          fi
+          git commit -m "atmos: posodobi sinoptiko, stratosfero, indekse in prah $(date -u +%Y-%m-%dT%H:%M) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then exit 0; fi
+            echo "Push zavrnjen (poskus $i/5) — rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
+
+      - name: Rdeč tek, če je kateri vir odpovedal
+        if: always() && (steps.indeksi.outcome == 'failure' || steps.strat.outcome == 'failure' || steps.prah.outcome == 'failure' || steps.sinop.outcome == 'failure')
+        run: |
+          echo "indeksi=${{ steps.indeksi.outcome }} stratosfera=${{ steps.strat.outcome }} prah=${{ steps.prah.outcome }} sinopticna=${{ steps.sinop.outcome }}"
+          exit 1

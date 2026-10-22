@@ -85,6 +85,11 @@ CORE = {
     "zima/zled/":                ("daily",   "0.7"),
     "zima/snezna-karta/":        ("daily",   "0.7"),
     "vreme-v-gorah/":            ("daily",   "0.7"),
+    # Širša slika ozračja (tools/generate_{sinopticna,stratosfera,indeksi,prah}_page.py, atmos-forecast.yml).
+    "sinopticna/":               ("daily",   "0.7"),
+    "stratosfera/":              ("daily",   "0.6"),
+    "indeksi/":                  ("daily",   "0.6"),
+    "prah/":                     ("daily",   "0.6"),
     "zima/kurilni-semafor/":     ("daily",   "0.7"),
     "zima/nad-meglo/":           ("daily",   "0.7"),
     "zima/snezna-odeja/":        ("daily",   "0.7"),

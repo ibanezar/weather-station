@@ -2486,6 +2486,37 @@ Assert-i: 53 dogodkov, jurček 0/53 v prvem vikendu, 53/53 v drugem, lisička 28
 aritmetika in je tako povedan; na blogu so že štirje članki o zamiku po dežju. Objava: Filip prebere `docs/lektura-dopust-gobe.txt`
 (`--text`), nato `--wire`; na FB/IG ne gre samodejno.
 
+## Veliko vreme: sinoptika, stratosfera, indeksi, prah (22. 10. 2026)
+
+Ideja po polarnivrtinec.si (Polarni vrtinec VRTINEC: sinoptika, stratosfera, indeksi, prah, WRF). Podatki so javni, izris in
+besedilo naši; skupne pomočnike (prenos, graf SVG, Lambertova projekcija, osnova karte, ovoj strani) drži `tools/atmos_common.py`,
+vsak generator je svoja datoteka. Osvežuje jih `atmos-forecast.yml` (09:40 UTC, vsak vir `continue-on-error`, ob izpadu rdeč tek;
+`check_freshness.py` REGISTER ima štiri vrstice). Test: `tools/test_atmos.py` (v `parity.yml`). Vse štiri strani so v `CORE`,
+`llms.txt`, med povezavami na naslovni strani samo `/sinopticna/` (»Vreme nad Evropo«); med seboj se povezujejo prek `related_links()`.
+
+- **`/sinopticna/`** (`generate_sinopticna_page.py`): ECMWF IFS open data 0,25° (CC BY 4.0, `ecmwf-opendata` + `eccodes`), tek **00 UTC**,
+  koraki +0…+96 h, dve karti (tlak + T850, višina 500 hPa), WebP v `sinopticna/karte/` (**prepisane na isto ime**, da repozitorij ne
+  raste z arhivom). **Front ni**: fronte so analiza sinoptika, ne polje modela — stran tega ne sme trditi. H/L sta iskana z `local_extrema`
+  (izrazitost 3 hPa, razmik 10°); nad gorami (Alpe, Pireneji) so artefakt redukcije tlaka. Obris obale/meja je `data/europe-outline.json`
+  (Natural Earth 50 m, javna domena; enkraten `tools/build_europe_outline.py`). Brez novega teka (`data/sinopticna.json` → `run`) tek konča brez
+  sprememb; `--force` nariše znova.
+- **`/stratosfera/`** (`generate_stratosfera_page.py`): NOAA GFS na AWS (`noaa-gfs-bdp-pds`, bajtna območja prek `.idx` → samo 10 hPa UGRD/TMP):
+  zonalni veter 10 hPa pri 60 °N (povprečje po dolžinah) in temperatura polarne kape 60–90 °N (cos φ). `data/stratosfera.json` **nabira
+  zgodovino** (00 UTC analiza, `BACKFILL_DAYS` = 75 nazaj iz arhiva) in hrani zadnjo napoved do +10 dni. `data/stratosfera-klima.json`
+  (enkraten `--climatology`, vsake 3 dni zime 2021/22–2025/26) da pas »prejšnjih zim« — to je **kratek vzorec, ne klimatologija**, in tako
+  piše. SSW = u < 0 pozimi (11–3) po WMO; **ena napoved ni zanesljiva** in stran ne napoveduje mraza. Test varuje razvrstitev stanj
+  (`classify()`), razpon in `.idx` razčlenjevanje.
+- **`/indeksi/`** (`generate_indeksi_page.py`): AO (z1000), NAO (z500) dnevno iz CPC CDAS + napoved ansambla GEFS (31 članov) in GFS za
+  zadnji čas izdaje, ENSO: ONI (CPC) + Niño 3.4 (PSL). Delitev moči ENSO (0,5/1/1,5/2) je konvencija, ne uradno pravilo — tako piše.
+  **MJO ni vključen namenoma**: običajni vir (RMM, avstralski BoM) samodejnega prenosa izrecno prepoveduje (HTTP 403 in besedilo), CPC-jev
+  ekvivalent pa nima ustaljene razlage predznaka. Ne dodajaj ga s skrivanjem User-Agenta.
+- **`/prah/`** (`generate_prah_page.py`): CAMS prek Open-Meteo Air Quality, mreža 2° × 2,5° (`cams_global`, 540 točk v kosih po 100) za
+  zemljevid največje urne vrednosti po lokalnem dnevu (4 dni) + 6 krajev (privzeta domena, 0,1°) za prah in PM10. `/kakovost-zraka/`
+  kaže trenutno stanje za dolino, tu je napoved in Sredozemlje. Razredi »nizka/zmerna/visoka« (10/50 µg/m³) so **naša delitev**; za prah
+  uradnih mej ni, PM10 ima mejo EU 50 in smernico WHO 45 (navedeni samo kot primerjava). Je modelska napoved, ne meritev.
+- Notranjih meritev na teh straneh ni in ne smejo priti (test preveri, da generirane datoteke ne omenjajo `indoor`).
+- **Ni narejeno:** lastni WRF (potrebuje strežnik; glej pogovor), MJO, satelit, sondaža, evropska snežna karta.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

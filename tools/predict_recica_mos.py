@@ -172,9 +172,12 @@ def fetch_live_multi(models):
             temp = [v for _, v in (series.get("temperature_2m") or [])]
             if len(temp) < 20:
                 continue
-            e = out.setdefault(day, {"tmax": {}, "tmin": {}})
+            e = out.setdefault(day, {"tmax": {}, "tmin": {}, "prec": {}})
             e["tmax"][m] = max(temp)
             e["tmin"][m] = min(temp)
+            prec = [v for _, v in (series.get("precipitation") or []) if v is not None]
+            if len(prec) >= 20:
+                e["prec"][m] = sum(prec)
     return out
 
 
@@ -234,6 +237,42 @@ def predict_day(model, lead, feats):
     out["d_tmax"] = round(out["tmax"] - out["om_tmax"], 1)
     out["d_tmin"] = round(out["tmin"] - out["om_tmin"], 1)
     return out
+
+
+TODAY_KEYS = ("date", "lead", "pop", "pop1", "pop5", "mm", "mm_n")
+MM_MIN_MODELS = 4   # najmanj virov (od 5: best_match + MULTI_MODELS), sicer količine ne objavimo
+
+
+def mean_precip(om_prec, multi_prec):
+    """Grobo pričakovana dnevna količina padavin (mm): povprečje Open-Meteo best_match in
+    drugih modelov. NI naučen popravek: na 875 dneh (izpuščanje leta) je regresija na teh
+    vhodih dala enako kot navadno povprečje, povprečje pa je boljše od surovega best_match
+    (MAE D+1 1,96 proti 2,30 mm, D+2 2,26 proti 2,40, D+3 2,49 proti 2,62;
+    tools/ai/eval_precip_amount.py). Vrne (mm, n) ali (None, n), kadar je virov premalo."""
+    vals = [v for v in [om_prec] + list((multi_prec or {}).values()) if v is not None]
+    if len(vals) < MM_MIN_MODELS:
+        return None, len(vals)
+    return round(sum(vals) / len(vals), 1), len(vals)
+
+
+def frozen_today(path, today):
+    """Včerajšnja (zamrznjena) napoved MTR za današnji dan. Datoteka vsebuje samo D+1..D+3, zato
+    današnji dan ob jutranjem prepisu izpade; vzamemo ga iz prejšnje datoteke po DATUMU (ne po
+    `lead`), bodisi iz `days` bodisi iz njenega `today` (drugi tek istega dne). Napovedi za danes
+    ne preračunavamo: bila bi že narejena z včerajšnjimi vhodi, ki so zdaj stari."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            old = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return None
+    cands = list(old.get("days") or []) + ([old["today"]] if isinstance(old.get("today"), dict) else [])
+    for d in cands:
+        if d.get("date") == today.isoformat() and d.get("pop") is not None:
+            out = {k: d.get(k) for k in TODAY_KEYS}
+            out["frozen_at"] = (old.get("today") or {}).get("frozen_at") if d is old.get("today") \
+                else old.get("generated_at")
+            return out
+    return None
 
 
 def main():
@@ -315,6 +354,8 @@ def main():
         pred = predict_day(model, lead, feats)
         if pred is None:
             continue
+        mm, mm_n = mean_precip(feats.get("om_prec"), ((multi_live or {}).get(target) or {}).get("prec"))
+        pred["mm"], pred["mm_n"] = mm, mm_n
         pred["date"] = target
         pred["lead"] = lead
         days.append(pred)
@@ -341,6 +382,11 @@ def main():
         "wn2_source": ("Google DeepMind WeatherNext 2 (64 članov, prek Open-Meteo, CC BY 4.0) — "
                        "surova mreža 0,25°, brez popravka za dolino"),
     }
+
+    fz = frozen_today(OUT_PATH, today)
+    if fz:
+        payload["today"] = fz
+        print(f"  danes ({fz['date']}): zamrznjena napoved, dež {int((fz['pop'] or 0) * 100)} %")
 
     for d in days:
         print(f"  {d['date']} (D+{d['lead']}): {d['tmax']} / {d['tmin']} °C "

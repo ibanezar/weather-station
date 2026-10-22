@@ -77,7 +77,14 @@ slej razšla in model bi tiho dobival druge vhode, kot jih pozna.
   0,064 (5 mm) proti klimatologiji 0,206 / 0,137, zanesljivost dobra. **Številke s pravim `pop_vector` še
   niso izmerjene** — prvo učenje (`mos-train.yml`) jih zapiše v `skill.pop1/pop5`; preveri, preden
   jih kje navedeš.
-- **količine padavin ne napovedujemo.** Poskus je dal ~5 % izboljšave, kar je v
+- **grobo pričakovana količina (`mm`, 22. 10. 2026)** je povprečje petih virov (best_match + `MULTI_MODELS`),
+  ne naučen popravek (`mean_precip` v `predict_recica_mos.py`; `mm_n` = število virov, pod 4 se ne objavi).
+  Na 875 dneh (`tools/ai/eval_precip_amount.py`, izpuščanje leta) je boljše od surovega best_match:
+  MAE D+1 1,96 proti 2,30 mm, D+2 2,26 proti 2,40, D+3 2,49 proti 2,62; RMSE 4,78 / 5,48 / 5,80 proti
+  6,04 / 5,97 / 6,44. Grebenska regresija na sqrt(mm) s temi vhodi ni dala nič več od povprečja (D+1 2,10).
+  Napaka na dneh ≥ 1 mm ostaja 5,5–6,9 mm, razred (<1 / 1–5 / 5–15 / >15 mm) zadene v 69–76 %,
+  zato je na straneh vedno »~« in »grobo«. Zamrzne se tudi v `today`.
+- **naučene količine padavin še vedno ni.** Poskus je dal ~5 % izboljšave, kar je v
   okviru šuma; količina, ki jo objavimo, je surova vrednost Open-Meteo in je
   tako tudi označena.
 - **persistence (včerajšnja meritev) ni v modelu.** Preizkušena je bila in ni
