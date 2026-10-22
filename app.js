@@ -7039,6 +7039,15 @@ async function fetchTextForecast(){
     const grid=document.getElementById('txfc-grid');if(!grid)return;
     grid.innerHTML='';
 
+    /* MTR (naš model) pokriva samo D+1..D+3: verjetnost dežja po datumu (ne po indeksu) in pragov 1/5 mm.
+       Ni pogoj za kartico — ob napaki ali manjkajočih poljih ostane samo Open-Meteo. */
+    const mtrRain={};
+    try{
+      const mr=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
+      if(mr.ok)((await mr.json()).days||[]).forEach(x=>{if(Number.isFinite(x.pop))mtrRain[x.date]=x;});
+    }catch(_){}
+    const r5=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':null;
+
     d.time.forEach((t,i)=>{
       const date=new Date(t+'T12:00:00');
       const isToday=i===0, isTomorrow=i===1;
@@ -7062,7 +7071,9 @@ async function fetchTextForecast(){
         '<div class="txfc-emoji">'+_wmoImg(wmo,true,40)+'</div>'+
         '<div class="txfc-desc">'+desc+'</div>'+
         '<div class="txfc-temp"><span class="txfc-th">'+Math.round(tmax)+'°</span><span style="color:var(--muted);font-size:.74rem">/</span><span class="txfc-tl">'+Math.round(tmin)+'°</span></div>'+
-        (rain>0.3?'<div class="txfc-rain">🌧 '+rain.toFixed(1)+' mm</div>':'');
+        (rain>0.3?'<div class="txfc-rain">🌧 '+rain.toFixed(1)+' mm</div>':'')+
+        (mtrRain[t]?'<div class="txfc-mtr" title="Verjetnost padavin po MTR, našem modelu, naučenem na meritvah postaje (samo prve 3 dni). Količine ne napovedujemo.">MTR dež '+r5(mtrRain[t].pop)+'</div>'
+          +((r5(mtrRain[t].pop1)||r5(mtrRain[t].pop5))?'<div class="txfc-mtr2">≥1 mm '+(r5(mtrRain[t].pop1)||'—')+' · ≥5 mm '+(r5(mtrRain[t].pop5)||'—')+'</div>':''):'');
       grid.appendChild(card);
     });
 
