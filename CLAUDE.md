@@ -2577,6 +2577,7 @@ Kratka anonimna anketa (5 vprašanj, vsa neobvezna: kaj jih je pripeljalo, kaj j
 - Worker: `POST /anketa` (honeypot `website`, 5 oddaj/uro po IP v KV `anketa_rl:<ip>`, dedup) → R2 `feedback/anketa.json` (cap 2000). **IP in user-agent se ne shranita.** `GET /anketa/rezultati` samo z `Bearer DELETE_SECRET` (isti zaklep kot galerija).
 - `ANKETA_Q1/Q2/Q3/Q5` (worker) in `SURVEY_OPTS` (app.js) sta namerna podvojitev: `test_parity.konstante_workerja`. Test endpointa: `tools/test_anketa.mjs` (v `parity.yml`).
 - Branje: ročno `python3 tools/anketa_rezultati.py [--csv]` (`DELETE_SECRET`), ni v nobenem workflowu. Nova različica ankete = nov `v` v workerju (zdaj `2026-10`) in `wx-survey` ključ.
+- **Skrita stran za rezultate** `/anketa-rezultati/` (ročno pisan `anketa-rezultati/index.html`): noindex, ni v `CORE`/sitemapu in ni povezana od nikoder (isti vzorec kot `/gobarska-napoved/orodje-naslovi/`). Geslo `DELETE_SECRET` vpišeš v obrazec; hrani se samo v `sessionStorage` zavihka in gre kot `Bearer` na `GET /anketa/rezultati`. Besedila izpiše samo prek `textContent`. Oznake možnosti so podvojitev `SURVEY_OPTS` (samo prikaz).
 - `zasebnost.html` ima razdelek »Anketa obiskovalcev«; notranjih meritev anketa ne dotika.
 
 ## Razvoj
