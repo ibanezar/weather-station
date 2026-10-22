@@ -19190,7 +19190,7 @@ function _actPanelHTML(key){
     <div class="sc-risk-factors" id="${key}-factors"></div>
     <div class="sc-risk-scrub">
       <div class="sc-risk-scrub-head"><span class="clabel" style="margin:0">${c.sliderLbl}</span><span class="sc-risk-scrub-time" id="${key}-time">zdaj</span></div>
-      <input type="range" class="sc-scrub-range" id="${key}-range" min="0" max="${max}" value="0" step="1" oninput="actSlide('${key}',this.value)">
+      <input type="range" class="sc-scrub-range" id="${key}-range" aria-label="Izbira časa" min="0" max="${max}" value="0" step="1" oninput="actSlide('${key}',this.value)">
       <div class="sc-scrub-ticks">${ticks}</div>
     </div>
   </div>
