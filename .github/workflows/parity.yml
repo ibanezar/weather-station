@@ -79,6 +79,9 @@ jobs:
       - name: Test dolinskega profila
         run: python3 tools/test_valley_profile.py
 
+      - name: Test ploščice PM2,5 (Varpolje)
+        run: python3 tools/test_pm_tile.py
+
       - name: Test verjetnosti padavin po pragovih (MTR pop1/pop5)
         run: python3 tools/test_pop_thresholds.py
 

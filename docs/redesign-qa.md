@@ -61,3 +61,11 @@ Primerjava `index.html` prej/potem: `<title>`, `canonical`, JSON-LD, `h1` in vsi
 - **Rezervirana višina:** `aspect-ratio` vsebnika sovpada z viewBox (640:190 na telefonu, 1:0,18 od 760 px); višina pred/po prihodu podatkov enaka, podnaslov ima `min-height` za 2 vrstici.
 - **Pozor (Playwright):** service worker prestreže API klice, zato `route()` mock deluje šele z `serviceWorkers:'block'`. `tools/_parity_js.mjs` ne prenese regex literala `/"/g` v funkciji (zmede sledenje narekovajem): zamenjano z `split('"').join('&quot;')`.
 - **Ni v tej verziji:** animacija po urah (drsnik −6…+24 h; izmerjenih višinskih podatkov za napoved ni), megleni pas (ocena `data["fog"]` še ni povezana).
+
+## PM2,5 (Varpolje) v herou (22. 10. 2026)
+- **Vir:** `varpolje.si/station.json` prek obstoječega workerja `/varpolje-current` (CORS, blok `indoor` se reže pri viru; `pm25_ugm3`, `pm25_24h_avg_ugm3`, `pm25_agreement`). IREICA1 PM ne meri, zato je ploščica vedno označena »PM₂,₅ · Varpolje« (tooltip: sosednja postaja, ~1,6 km); sosed ostane gost (CLAUDE.md), nič ne gre v `history.json`, MTR ali semafor.
+- **Prikaz:** sekundarna ploščica v `.hero-metrics` (zdaj mreža 12 stolpcev: 4 primarne × span 3, 3 sekundarne × span 4; telefon 2 stolpca), vrednost v µg/m³, razred in 24 h povprečje v podnapisu. Samo napredni pogled (v preprostem skrita). Osveži se na 5 min (`fetchHeroPm()`, val 2).
+- **Razredi** (`pmBand()`): urna lestvica EAQI za PM2,5, kot jo uporablja Open-Meteo `european_aqi` (kartica »Kakovost zraka«): ≤ 10 zelo dobro, ≤ 20 dobro, ≤ 25 zmerno, ≤ 50 slabo, ≤ 75 zelo slabo, nad tem nevarno. **Meje nisem mogel potrditi pri EEA** (iskanje je vrnilo samo letne kategorije mest); preveri jih pred javno objavo.
+- **Svežina:** posnetek starejši od 45 min (`PM_MAX_AGE_MIN`) ali `pm25 = null` se ne prikaže kot vrednost (»—« + razlog), ne skrije se tiho.
+- **Barve v svetli temi:** temnejši odtenki prek `data-pm` (axe `color-contrast` 0 pri vseh šestih razredih).
+- Test: `tools/test_pm_tile.py` (10 preverjanj; v `parity.yml`). Višina hera pred/po prihodu podatkov enaka (739 px namizje, 845 px telefon).
