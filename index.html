@@ -2863,6 +2863,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 
+    <!-- Verjetnost padavin iz MTR (napoved-modela.json): dež (>= 0,2 mm), >= 1 mm, >= 5 mm.
+         Količine ne napovedujemo; pop1/pop5 sta prazna, dokler ju mos-train.yml ne nauči. -->
+    <div class="card chart-card" style="margin-bottom:1rem" id="ai-rain-card">
+      <div class="chart-hdr">
+        <span class="clabel" style="margin:0"><svg class="ic" aria-hidden="true"><use href="#i-cloud-rain"/></svg> Verjetnost padavin – MTR, naslednji dnevi</span>
+        <span class="chart-range" id="ai-rain-range">—</span>
+      </div>
+      <div class="ai-forecast-grid" id="ai-rain-grid">
+        <div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Nalagam …</div>
+      </div>
+      <div style="color:var(--muted);font-size:.74rem;margin-top:.5rem">Verjetnost, da bo dnevna vsota padavin na postaji dosegla prag. Model MTR je naučen na meritvah IREICA1; količine v mm ne napovedujemo.</div>
+    </div>
+
     <!-- Comparison LSTM vs Open-Meteo vs Actual -->
     <div class="card chart-card" style="margin-bottom:1rem">
       <div class="chart-hdr">
