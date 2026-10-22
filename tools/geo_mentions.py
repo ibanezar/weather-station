@@ -26,7 +26,7 @@ from collections import Counter, defaultdict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PANEL_MD = os.path.join(ROOT, "docs", "geo-prompt-panel.md")
 DATA = os.path.join(ROOT, "data", "geo-mentions.json")
-ASSISTANTS = ("chatgpt", "perplexity", "google-ai-overview", "claude")
+ASSISTANTS = ("chatgpt", "perplexity", "google-ai-overview", "claude", "gemini")
 CORE_ASSISTANTS = ASSISTANTS[:3]
 PER_MONTH = 7
 YES = {"da", "yes", "true", "1", "y"}

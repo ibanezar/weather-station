@@ -1,1 +1,255 @@
-[]
+[
+  {
+    "date": "2026-10-22",
+    "assistant": "chatgpt",
+    "prompt_id": "kako-brati-arso-opozorilo",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "chatgpt",
+    "prompt_id": "kako-izracunam-fwi",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "Natural Resources Canada"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "chatgpt",
+    "prompt_id": "kje-nevihtna-karta-slovenije",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO",
+      "Meteoinfo",
+      "Radar-padavin.si"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "chatgpt",
+    "prompt_id": "najbolj-natancen-model-recica",
+    "mentioned": true,
+    "context": "Povzame lokalno analizo IREICA1 (853 dni; ICON MAE 1,4/1,5 °C proti ECMWF IFS 2,2/2,0), priporoča /test-napovedi/ in /tocnost-napovedi/ kot vira.",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "chatgpt",
+    "prompt_id": "najboljsa-aplikacija-vreme-slovenija",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO",
+      "Windy",
+      "Meteoblue",
+      "Yr.no",
+      "Triglav Vreme"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "chatgpt",
+    "prompt_id": "pozeba-savinjska-danes",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "chatgpt",
+    "prompt_id": "termika-golte-padalstvo",
+    "mentioned": true,
+    "context": "Povezava »Meteorec – vreme za jadralne padalce« med viri; hkrati pove, da nima zanesljivih podatkov za Golte.",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "gemini",
+    "prompt_id": "kako-brati-arso-opozorilo",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "gemini",
+    "prompt_id": "kako-izracunam-fwi",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "gemini",
+    "prompt_id": "kje-nevihtna-karta-slovenije",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO",
+      "Blitzortung",
+      "LightningMaps",
+      "Windy",
+      "Vreme & Radar",
+      "RainViewer"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "gemini",
+    "prompt_id": "najbolj-natancen-model-recica",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "gemini",
+    "prompt_id": "najboljsa-aplikacija-vreme-slovenija",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO",
+      "Meteoblue",
+      "SiVreme",
+      "Vreme & Radar",
+      "Windy",
+      "RainViewer"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "gemini",
+    "prompt_id": "pozeba-savinjska-danes",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "Bergfex"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "gemini",
+    "prompt_id": "termika-golte-padalstvo",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "RASP",
+      "XCWeather",
+      "Meteoblue"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "perplexity",
+    "prompt_id": "kako-brati-arso-opozorilo",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "perplexity",
+    "prompt_id": "kako-izracunam-fwi",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "Zdrav gozd",
+      "Natural Resources Canada"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "perplexity",
+    "prompt_id": "kje-nevihtna-karta-slovenije",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO",
+      "Meteoinfo",
+      "Neverin",
+      "radarska.si",
+      "Radar-padavin.si"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "perplexity",
+    "prompt_id": "najbolj-natancen-model-recica",
+    "mentioned": true,
+    "context": "Citira meteorec.si: MTR (lokalni statistični popravek), članek o razhajanju modelov pri dežju (avgust) in primerjavo ICON-D2/ECMWF; ARSO le kot pomanjkljivo hiperlokalen (Ljubno).",
+    "competitors_mentioned": [],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "perplexity",
+    "prompt_id": "najboljsa-aplikacija-vreme-slovenija",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO",
+      "Windy",
+      "Vreme & Radar",
+      "SiVreme",
+      "Triglav Vreme",
+      "Bergfex"
+    ],
+    "note": ""
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "perplexity",
+    "prompt_id": "pozeba-savinjska-danes",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": "Napoved -2 do 4 °C iz ARSO; /opozorilo-pred-pozebo/ ni citirana."
+  },
+  {
+    "date": "2026-10-22",
+    "assistant": "perplexity",
+    "prompt_id": "termika-golte-padalstvo",
+    "mentioned": false,
+    "context": "",
+    "competitors_mentioned": [
+      "ARSO"
+    ],
+    "note": ""
+  }
+]
