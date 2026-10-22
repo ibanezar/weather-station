@@ -2409,11 +2409,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .txfc-temp{font-family:'JetBrains Mono',monospace;font-size:.78rem;display:flex;gap:.2rem;align-items:baseline;margin-top:.1rem}
 .txfc-th{color:#f87171}.txfc-tl{color:var(--blue)}
 .txfc-rain{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
-.txfc-mtr{font-size:.66rem;color:var(--text);font-family:'JetBrains Mono',monospace;margin-top:.25rem;padding-top:.25rem;border-top:1px solid var(--fc-border)}
-.txfc-mtr2{font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.txfc-mtrbox{margin-top:.25rem;padding-top:.25rem;border-top:1px solid var(--fc-border);white-space:nowrap;text-align:center;line-height:1.35}
+.txfc-mtr-l{font-size:.55rem;color:var(--muted);letter-spacing:.06em}
+.txfc-mtr{font-size:.64rem;color:var(--text);font-family:'JetBrains Mono',monospace}
+.txfc-mtr2{font-size:.56rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
-@media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
-@media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
+@media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.txfc-card{padding-left:.3rem;padding-right:.3rem;min-width:0}.txfc-card:nth-child(n+5){display:none}}
+@media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.txfc-card:nth-child(n+4){display:none}}
 
 /* Naš model (MOS) — grafična kartica: hero graf (izmerjena preteklost →
    napoved s pasom negotovosti), dnevne ploščice, KPI-ji in "dvoboj" po dnevih.

@@ -2525,8 +2525,8 @@ async function renderHeroRainMtr(){
     const todayIso=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
     if(!t||t.date!==todayIso||!Number.isFinite(t.pop)){el.hidden=true;return;}
     const r5=v=>Math.round(v*20)*5;
-    let txt='MTR: dež '+r5(t.pop)+' %'+(_mtrMm(t.mm)?' · '+_mtrMm(t.mm):'');
-    if(Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥ 5 mm '+r5(t.pop5)+' %';
+    let txt='MTR: dež '+r5(t.pop)+'\u00A0%'+(_mtrMm(t.mm)?' · '+_mtrMm(t.mm):'');
+    if(Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥\u00A05\u00A0mm\u00A0'+r5(t.pop5)+'\u00A0%';
     el.textContent=txt;
     el.title='Verjetnost padavin po MTR, našem modelu (včerajšnja napoved za današnji dan). Količina (~ mm) je grobo povprečje petih modelov.';
     el.hidden=false;
@@ -7078,7 +7078,7 @@ async function fetchTextForecast(){
         (mj.days||[]).concat(mj.today?[mj.today]:[]).forEach(x=>{if(Number.isFinite(x.pop))mtrRain[x.date]=x;});
       }
     }catch(_){}
-    const r5=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':null;
+    const r5=v=>Number.isFinite(v)?(Math.round(v*20)*5)+'\u00A0%':null;
 
     d.time.forEach((t,i)=>{
       const date=new Date(t+'T12:00:00');
@@ -7104,8 +7104,11 @@ async function fetchTextForecast(){
         '<div class="txfc-desc">'+desc+'</div>'+
         '<div class="txfc-temp"><span class="txfc-th">'+Math.round(tmax)+'°</span><span style="color:var(--muted);font-size:.74rem">/</span><span class="txfc-tl">'+Math.round(tmin)+'°</span></div>'+
         (rain>0.3?'<div class="txfc-rain">🌧 '+rain.toFixed(1)+' mm</div>':'')+
-        (mtrRain[t]?'<div class="txfc-mtr" title="Verjetnost padavin po MTR, našem modelu, naučenem na meritvah postaje (samo prve 3 dni). Količina (~ mm) je grobo povprečje petih modelov, ne naučen popravek.">MTR dež '+r5(mtrRain[t].pop)+(_mtrMm(mtrRain[t].mm)?' · '+_mtrMm(mtrRain[t].mm):'')+'</div>'
-          +((r5(mtrRain[t].pop1)||r5(mtrRain[t].pop5))?'<div class="txfc-mtr2">≥1 mm '+(r5(mtrRain[t].pop1)||'—')+' · ≥5 mm '+(r5(mtrRain[t].pop5)||'—')+'</div>':''):'');
+        (mtrRain[t]?'<div class="txfc-mtrbox" title="Verjetnost padavin po MTR, našem modelu, naučenem na meritvah postaje (samo prve 3 dni). Količina (~ mm) je grobo povprečje petih modelov, ne naučen popravek."><div class="txfc-mtr-l">MTR</div>'
+          +(_mtrMm(mtrRain[t].mm)?'<div class="txfc-mtr">'+_mtrMm(mtrRain[t].mm)+'</div>':'')
+          +'<div class="txfc-mtr2">dež '+r5(mtrRain[t].pop)+'</div>'
+          +(r5(mtrRain[t].pop1)?'<div class="txfc-mtr2">≥1\u00A0mm '+r5(mtrRain[t].pop1)+'</div>':'')
+          +(r5(mtrRain[t].pop5)?'<div class="txfc-mtr2">≥5\u00A0mm '+r5(mtrRain[t].pop5)+'</div>':'')+'</div>':'');
       grid.appendChild(card);
     });
 
@@ -7203,7 +7206,7 @@ const MTR_MOUNT_IDS=['mos-','hmos-'];
 const MTR_MM_HINT='Grobo pričakovana količina: povprečje petih modelov (Open-Meteo, IFS, GFS, ICON, ARPEGE). Ni naučen popravek MTR; pri dežju je napaka lahko več mm in z dnevi narašča.';
 function _mtrMm(v){
   if(!Number.isFinite(v))return null;
-  return v<0.2?'< 0,2 mm':'~'+v.toFixed(1).replace('.',',')+' mm';
+  return v<0.2?'< 0,2\u00A0mm':'~'+v.toFixed(1).replace('.',',')+'\u00A0mm';
 }
 
 /* Grafična ploščica dneva za verjetnost in količino padavin (MTR tab in AI tab): merilnik dežja (pričakovana
