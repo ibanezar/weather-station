@@ -3433,3 +3433,20 @@ body[data-weather]{--blue:var(--c-accent)}
 .hv-t{font:500 11px 'JetBrains Mono',monospace;fill:var(--text);paint-order:stroke;stroke:var(--card-bg);stroke-width:3px;stroke-linejoin:round}
 .hv-cap{margin-top:.4rem;font-size:.76rem;line-height:1.45;color:var(--muted);min-height:2.9em}
 @media (min-width:760px){.hv-n,.hv-t{font-size:13px}.hv-cap{font-size:.82rem}}
+
+/* ── PM2,5 (Varpolje) v herou: mreža 12 stolpcev, da so primarne ploščice 4 v vrsti (span 3), sekundarne 3 (span 4) ── */
+.hero-metrics{grid-template-columns:repeat(12,1fr)}
+.hero-metrics>.hm{grid-column:span 3}
+.hero-metrics>.hm.hm-secondary{grid-column:span 4}
+.hm-pm .hm-val{font-variant-numeric:tabular-nums}
+@media(max-width:680px){
+  .hero-metrics{grid-template-columns:repeat(2,1fr)}
+  .hero-metrics>.hm,.hero-metrics>.hm.hm-uv,.hero-metrics>.hm.hm-pm{grid-column:span 1}
+  .hero-metrics>.hm.hm-range{grid-column:span 2}
+}
+html[data-mode="simple"] .hero-metrics>.hm,html[data-mode="simple"] .hero-metrics>.hm.hm-secondary{grid-column:auto}
+html[data-mode="simple"] .hero .hm-pm{display:none !important}
+/* barve razredov PM2,5 v svetli temi: temnejši odtenki (kot lestvica AQI); inline barvo piše JS, zato !important */
+[data-theme="light"] #hs-pm[data-pm="#22c55e"]{color:#15803d!important}[data-theme="light"] #hs-pm[data-pm="#84cc16"]{color:#4d7c0f!important}
+[data-theme="light"] #hs-pm[data-pm="#eab308"]{color:#a16207!important}[data-theme="light"] #hs-pm[data-pm="#f97316"]{color:#c2410c!important}
+[data-theme="light"] #hs-pm[data-pm="#ef4444"]{color:#b91c1c!important}[data-theme="light"] #hs-pm[data-pm="#9333ea"]{color:#7e22ce!important}

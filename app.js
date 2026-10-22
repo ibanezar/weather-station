@@ -9863,6 +9863,43 @@ function heroValleySvg(pts,colorFn,w0){
     '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="url(#hv-air)" opacity=".62"/>'+
     '<path d="'+d+'" class="hv-ground"/>'+zl+dots+'</svg>';
 }
+// ── PM2,5 v herou (Varpolje, IREICA7) ─────────────────────────────────
+// Sosednja postaja (gost, CLAUDE.md): vrednost je vedno označena z imenom postaje in ni IREICA1. Lestvica razredov je
+// urna lestvica EAQI za PM2,5 (EEA; kot jo uporablja Open-Meteo european_aqi, na kateri sloni tudi kartica »Kakovost zraka«):
+// ≤ 10 zelo dobro, ≤ 20 dobro, ≤ 25 zmerno, ≤ 50 slabo, ≤ 75 zelo slabo, nad tem nevarno. Posnetek starejši od 45 min se ne
+// prikaže kot trenutna vrednost (viri se osvežijo na ~5 min).
+const PM_MAX_AGE_MIN=45;
+function pmBand(v){
+  if(v==null||!isFinite(v))return null;
+  const b=[[10,'Zelo dobro','#22c55e'],[20,'Dobro','#84cc16'],[25,'Zmerno','#eab308'],[50,'Slabo','#f97316'],[75,'Zelo slabo','#ef4444']];
+  for(const x of b)if(v<=x[0])return{label:x[1],color:x[2]};
+  return{label:'Nevarno',color:'#9333ea'};
+}
+// Čista funkcija (tools/test_pm_tile.py): odgovor /varpolje-current + trenutni čas → vsebina ploščice.
+function pmTileModel(vp,nowMs){
+  const cur=vp&&vp.current,upd=vp&&vp.updated_utc?new Date(vp.updated_utc).getTime():NaN;
+  const age=isFinite(upd)?Math.round((nowMs-upd)/60000):null;
+  if(!cur||cur.pm25_ugm3==null||!isFinite(cur.pm25_ugm3))return{value:null,band:null,sub:'meritev ni dosegljiva',age};
+  if(age==null||age>PM_MAX_AGE_MIN)return{value:null,band:null,sub:'posnetek je star '+(age==null?'?':age)+' min',age};
+  const v=Number(cur.pm25_ugm3),avg=cur.pm25_24h_avg_ugm3,f=x=>(Math.round(x*10)/10).toFixed(1).replace('.',',');
+  const band=pmBand(v);
+  return{value:f(v),band,sub:band.label+(avg!=null&&isFinite(avg)?' · 24 h povpr. '+f(avg):''),age};
+}
+let _pmCache={ts:0,data:null};
+async function fetchHeroPm(){
+  const val=document.getElementById('hs-pm'),sub=document.getElementById('hs-pm-sub');if(!val)return;
+  try{
+    if(!_pmCache.data||Date.now()-_pmCache.ts>5*60*1000){
+      const r=await fetch(PROXY+'/varpolje-current');
+      _pmCache={ts:Date.now(),data:r.ok?await r.json():null};
+    }
+    const m=pmTileModel(_pmCache.data,Date.now());
+    val.innerHTML=m.value==null?'—':m.value+'<span style="font-size:.7rem;color:var(--muted)"> µg/m³</span>';
+    val.style.color=m.band?m.band.color:'';if(m.band)val.dataset.pm=m.band.color;else delete val.dataset.pm;
+    if(sub)sub.textContent=m.sub;
+    val.classList.remove('skel-shimmer');
+  }catch(e){if(sub)sub.textContent='meritev ni dosegljiva';console.warn('PM2,5 Varpolje:',e);}
+}
 let _hvTries=0;
 async function fetchHeroValley(){
   const el=document.getElementById('hero-valley-body');if(!el)return;
@@ -17003,6 +17040,7 @@ async function init(){
     fetchComingUp();
     runAdvancedOnly(()=>fetchMosForecast());
     runAdvancedOnly(()=>fetchHeroValley());
+    runAdvancedOnly(()=>fetchHeroPm());
   },800);
 
   // ── Wave 3: secondary widgets (2.5 s) ──
@@ -17046,6 +17084,7 @@ async function init(){
 })();
 setInterval(fetchCurrent,5*60*1000);
 setInterval(()=>{if(!isSimpleMode())fetchHeroValley();},5*60*1000);
+setInterval(()=>{if(!isSimpleMode())fetchHeroPm();},5*60*1000);
 // V preprostem pogledu je kartica skrita; osvežujemo šele, ko je res na
 // zaslonu (drugače bi se klici kopičili v vrsti runAdvancedOnly).
 setInterval(()=>{if(!isSimpleMode()&&_visDone.has('duel'))fetchValleyDuel();},5*60*1000);
