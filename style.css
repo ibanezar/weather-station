@@ -3548,3 +3548,24 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 .txfc-mtr-l{margin-bottom:.1rem}
 .cu-mtr-hd{display:flex;align-items:center;justify-content:center;gap:.3rem;flex-wrap:wrap}
 @media(forced-colors:active){.mtr-pill{background:Highlight;color:HighlightText}}
+
+/* ── Anketa obiskovalcev (popup od 2. obiska) — fiksen prekrivni element, brez vpliva na postavitev ── */
+#survey{position:fixed;inset:0;z-index:9000;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.45);font-family:'Inter','Inter Fallback',sans-serif}
+#survey .sv-box{position:relative;width:100%;max-width:480px;max-height:92vh;overflow:auto;background:var(--card-bg);color:var(--text);border:1px solid var(--card-border);border-radius:18px 18px 0 0;padding:1.2rem 1.1rem 1.1rem;box-shadow:var(--card-shadow-h)}
+#survey h2{margin:0 2rem .25rem 0;font-size:1.1rem;line-height:1.3}
+#survey .sv-sub{margin:0 0 .9rem;color:var(--muted);font-size:.85rem}
+#survey .sv-x{position:absolute;top:.5rem;right:.5rem;width:44px;height:44px;border:0;background:none;color:var(--muted);font-size:1.1rem;cursor:pointer}
+#survey .sv-q{margin-bottom:.9rem}
+#survey .sv-t{display:block;font-weight:600;font-size:.92rem;margin-bottom:.4rem}
+#survey .sv-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+#survey .sv-chip{min-height:44px;padding:.4rem .9rem;border-radius:999px;border:1px solid var(--bh);background:transparent;color:var(--text);font:inherit;font-size:.88rem;cursor:pointer}
+#survey .sv-chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+#survey textarea{width:100%;box-sizing:border-box;padding:.6rem .7rem;border:1px solid var(--bh);border-radius:10px;background:transparent;color:var(--text);font:inherit;font-size:16px;resize:vertical}
+#survey .sv-msg{min-height:1.2em;font-size:.85rem;color:var(--muted);margin-bottom:.4rem}
+#survey .sv-act{display:flex;gap:.6rem;justify-content:flex-end}
+#survey .sv-later,#survey .sv-send{min-height:48px;padding:.5rem 1.2rem;border-radius:12px;font:inherit;font-weight:600;cursor:pointer}
+#survey .sv-later{border:1px solid var(--bh);background:transparent;color:var(--text)}
+#survey .sv-send{border:0;background:var(--blue);color:#fff}
+#survey .sv-send:disabled{opacity:.6}
+@media(min-width:600px){#survey{align-items:center}#survey .sv-box{border-radius:18px}}
+@media(prefers-reduced-motion:no-preference){#survey .sv-box{animation:svIn .25s ease}@keyframes svIn{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}}

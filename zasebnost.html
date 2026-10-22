@@ -87,8 +87,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p>Pri tem <strong>ne uporabljamo GPS in ne beremo vaše dejanske lokacije</strong>. Shranjeno je le ime kraja, ki ste ga sami izbrali v spustnem seznamu — torej podatek natančnosti nekaj kilometrov, ne vaš naslov. Dokler obvestil ne vklopite, izbrana vas ostane samo v vašem brskalniku in se na strežnik sploh ne pošlje.</p>
     <p>Naročnino lahko kadarkoli izklopite z istim gumbom, s katerim ste jo vklopili; s tem se naslovnica in izbrana vas izbrišeta s strežnika. Naročnine, ki jih brskalnik zavrne kot potekle, samodejno odstranimo. Pravna podlaga je vaše soglasje (člen 6(1)(a) GDPR).</p>
 
+    <h2>Anketa obiskovalcev</h2>
+    <p>Od drugega obiska vam lahko pokažemo kratko anketo (kaj vas je pripeljalo, kaj vam je všeč, kako ste nas našli, kaj manjka). Vsa vprašanja so neobvezna. Če anketo pošljete, shranimo samo izbrane odgovore in prosto besedilo ter čas oddaje. <strong>IP-naslova, identifikatorja naprave ali drugih podatkov o vas ne shranjujemo</strong> (IP se kratkotrajno, največ eno uro, uporablja le za omejitev števila oddaj). Prosto besedilo ne vpisujte osebnih podatkov. Anketo lahko zaprete z »Ne zdaj«.</p>
+
     <h2>Lokalno shranjevanje (localStorage)</h2>
-    <p>Stran za lastne funkcije shranjuje nekatere nastavitve neposredno v vaš brskalnik (<em>localStorage</em>). Ti podatki ostanejo le pri vas, nikoli niso poslani na strežnik in se izbrišejo, ko počistite podatke brskalnika. Shranjevanje zajema:</p>
+    <p>Stran za lastne funkcije shranjuje nekatere nastavitve neposredno v vaš brskalnik (<em>localStorage</em>). Ti podatki ostanejo le pri vas, nikoli niso poslani na strežnik (razen anonimnega odgovora na anketo, če ga sami oddate — glej spodaj) in se izbrišejo, ko počistite podatke brskalnika. Shranjevanje zajema:</p>
     <ul>
       <li><strong>Tema vmesnika</strong> (svetla / temna) — vaša vizualna nastavitev</li>
       <li><strong>Opozorila</strong> — pragovi za obvestila o temperaturi, vetru in dežju</li>
@@ -96,6 +99,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <li><strong>Vremenski arhiv</strong> — dnevne meritve vaše postaje, zbrane med obiski (za funkcijo »Na ta dan«)</li>
       <li><strong>Dostopni žeton za gobarsko napoved</strong> (<em>mr_gobe_token</em>) — če ste naročnik Premium, se žeton iz vaše dostopne povezave shrani v brskalnik, da vam ob vsakem obisku ni treba znova odpirati povezave. Odstranite ga s čiščenjem podatkov brskalnika.</li>
       <li><strong>Gobarjev dnevnik</strong> (<em>mr_gobe_dnevnik</em>) — če na strani <a href="/gobarska-napoved/">gobarska napoved</a> uporabljate osebni dnevnik najdb, se vrsta, datum, opombe, GPS lokacija (če jo dovolite brskalniku) in fotografija (zmanjšana, shranjena kot slika v besedilni obliki) privzeto shranijo <strong>izključno v vaš brskalnik</strong> in se nikoli ne pošljejo na noben strežnik. Izjema je aktivna Premium naročnina — glej spodaj.</li>
+      <li><strong>Anketa</strong> (<em>wx-survey</em>, <em>wx-survey-shown</em>) — si zapomni, da ste anketo že izpolnili ali zaprli in kolikokrat smo vam jo pokazali.</li>
     </ul>
     <p>Vse te podatke lahko kadarkoli izbrišete v nastavitvah brskalnika (razdelek »Piškotki in podatki strani«).</p>
 
