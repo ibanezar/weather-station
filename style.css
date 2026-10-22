@@ -2409,11 +2409,13 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .txfc-temp{font-family:'JetBrains Mono',monospace;font-size:.78rem;display:flex;gap:.2rem;align-items:baseline;margin-top:.1rem}
 .txfc-th{color:#f87171}.txfc-tl{color:var(--blue)}
 .txfc-rain{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
-.txfc-mtr{font-size:.66rem;color:var(--text);font-family:'JetBrains Mono',monospace;margin-top:.25rem;padding-top:.25rem;border-top:1px solid var(--fc-border)}
-.txfc-mtr2{font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.txfc-mtrbox{margin-top:.3rem;padding:.3rem .2rem .35rem;border-radius:10px;background:rgba(3,105,161,.1);background:color-mix(in srgb,var(--rain-col) 13%,transparent);white-space:nowrap;text-align:center;line-height:1.35;width:100%}
+.txfc-mtr-l{font-size:.55rem;color:var(--muted);letter-spacing:.06em}
+.txfc-mtr{font-size:.66rem;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;margin-top:.1rem}
+.txfc-mtr2{font-size:.56rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
-@media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,1fr)}.txfc-card:nth-child(n+5){display:none}}
-@media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,1fr)}.txfc-card:nth-child(n+4){display:none}}
+@media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.txfc-card{padding-left:.3rem;padding-right:.3rem;min-width:0}.txfc-card:nth-child(n+5){display:none}}
+@media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.txfc-card:nth-child(n+4){display:none}}
 
 /* Naš model (MOS) — grafična kartica: hero graf (izmerjena preteklost →
    napoved s pasom negotovosti), dnevne ploščice, KPI-ji in "dvoboj" po dnevih.
@@ -3531,8 +3533,18 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 @media(forced-colors:active){.rain-f{background:Highlight;opacity:1 !important}.rain-g-fill{fill:Highlight}}
 
 /* MTR verjetnost + količina v pasu »Naslednjih 7 dni« (celica ~104 px) */
-.cu-mtr{width:100%;margin-top:.35rem;padding-top:.4rem;border-top:1px solid var(--fc-border);display:flex;flex-direction:column;gap:.22rem;text-align:left}
+.cu-mtr{width:100%;margin-top:.35rem;padding:.4rem .4rem .45rem;border-radius:10px;background:rgba(3,105,161,.1);background:color-mix(in srgb,var(--rain-col) 13%,transparent);display:flex;flex-direction:column;gap:.22rem;text-align:left}
 .cu-mtr-hd{font-size:.58rem;color:var(--muted);letter-spacing:.05em;text-align:center;margin-bottom:.1rem}
-.cu-mtr-hd b{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;color:var(--text);letter-spacing:0}
+.cu-mtr-hd b{font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;color:var(--text);letter-spacing:0}
 .cu-mtr .rain-row{grid-template-columns:1.7rem 1fr 1.5rem;gap:.25rem;font-size:.56rem}
 .cu-mtr .rain-t{height:5px}
+
+/* Poudarek celic, kjer je MTR: barvit obris + sij v barvi padavin, tonirana plošča bloka, značka »MTR«.
+   Značka: bela na #0369a1 (5,9:1) v svetli, temna na #60a5fa (8:1) v temni temi. */
+.txfc-card.has-mtr,.cu-day.has-mtr{border-color:rgba(3,105,161,.5);box-shadow:0 0 0 1px rgba(3,105,161,.14),0 6px 16px -8px rgba(3,105,161,.55)}
+.txfc-card.has-mtr,.cu-day.has-mtr{border-color:color-mix(in srgb,var(--rain-col) 50%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--rain-col) 14%,transparent),0 6px 16px -8px color-mix(in srgb,var(--rain-col) 60%,transparent)}
+.mtr-pill{display:inline-block;font-size:.56rem;font-weight:800;letter-spacing:.09em;line-height:1;padding:.18rem .42rem;border-radius:999px;background:var(--rain-col);color:#fff}
+[data-theme="dark"] .mtr-pill{color:#04070e}
+.txfc-mtr-l{margin-bottom:.1rem}
+.cu-mtr-hd{display:flex;align-items:center;justify-content:center;gap:.3rem;flex-wrap:wrap}
+@media(forced-colors:active){.mtr-pill{background:Highlight;color:HighlightText}}
