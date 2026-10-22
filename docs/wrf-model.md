@@ -83,6 +83,22 @@ docker run --rm -v /work:/work -v /data/geog:/geog -e INIT=2026102212 -e HOURS=3
 katerem je nastajal ta cevovod, curl pade s »unable to get local issuer certificate«). Če se to zgodi tudi na
 strežniku, podatke prenesi drugje in jih naloži na disk; TLS preverjanja ne izklapljaj.
 
+### Strežnik (Hetzner, `wrf-run.yml`)
+
+Workflow `WRF tek na najetem strežniku` najame strežnik, požene `wrf/server/remote.sh`, vzame izvleček v `data/wrf/` in
+strežnik **vedno izbriše** (tudi ob napaki; poleg tega vsak tek pobriše zapuščene strežnike z oznako `purpose=wrf`, starejše od 12 h).
+Disk `wrf-data` (100 GB, ≈ 5 €/mesec) ostane med teki in drži statiko, da je ni treba snemati vsak dan.
+
+Kar mora narediti lastnik računa (enkrat):
+1. Račun na hetzner.com → Cloud → nov projekt → Security → API tokens → **Read & Write**.
+2. `ssh-keygen -t ed25519 -N "" -f wrf_key` (zasebni ključ gre v secret, javnega workflow izpelje sam).
+3. GitHub → Settings → Secrets → Actions: `HCLOUD_TOKEN` (žeton) in `WRF_SSH_KEY` (vsebina `wrf_key`).
+4. Actions → »WRF tek na najetem strežniku« → Run workflow z `setup_only = true` (prenese ≈ 29 GB statike in zgradi DEM), nato
+   običajen tek (`profile = prod`). Prvi prod tek je tudi prvi preizkus hitrosti na 16 jedrih.
+
+Ni preizkušeno (v peskovniku ni Hetznerja): najem/brisanje strežnika, prenos WPS_GEOG z ucar.edu (če veriga potrdil ne gre skozi,
+tek pade z jasnim sporočilom; TLS se ne izklaplja), 36 h prod tek. Prvi tek zato štej za preizkus.
+
 ## Preverjanje, preden pride kaj na stran
 
 `tools/verify_wrf.py` primerja vsak tek z IREICA1 (`history.json`) in z napovedmi Open-Meteo, **izdanimi isti dan**
