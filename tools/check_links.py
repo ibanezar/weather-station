@@ -67,6 +67,9 @@ def scan():
             continue
         # Predloge in kode v <script> (npr. '/vreme/'+y+'/') niso povezave.
         h = re.sub(r"<script\b[^>]*>[\s\S]*?</script>", " ", h)
+        # preconnect/dns-prefetch kaže na izvor (npr. https://api.open-meteo.com), ne na stran:
+        # koren API strežnika vrne 400 in to ni mrtva povezava (issue #1070).
+        h = re.sub(r"<link\b[^>]*\brel=[\"'](?:preconnect|dns-prefetch)[\"'][^>]*>", " ", h, flags=re.I)
         root = site_root(rel)
         for url in LINK_RE.findall(h):
             if url.startswith(("mailto:", "tel:", "javascript:", "data:", "sms:", "whatsapp:", "{", "$")):
