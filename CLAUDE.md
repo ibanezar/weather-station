@@ -2476,6 +2476,16 @@ bere samo `history.json` (zunanji `tempLow`/`tempHigh`/`precipTotal`) in `napove
 - Lektura je opravljena ročno (Filip, 21. 10. 2026; besedilo je v generatorju). Na FB/IG ne gre samodejno; kartice (`tools/generate_slane_se_ni_card_variants.py`, ista varovalka kot članek) in besedila so v `docs/fb-slane-se-ni.md`.
   Kartica 3 (petkovo jutro) je vezana na napoved, zato jo je treba objaviti pred petkom zjutraj.
 
+## Prvi vikend po dežju (`tools/generate_dopust_gobe_post.py`, 22. 10. 2026) -- čaka na Filipov pregled
+
+Osnutek `docs/osnutek-dopust-gobe.md` je v generatorju (`blog/prvi-vikend-po-dezju-jurcki-1022.html`, **še ni objavljen**: brez
+`--wire` se datoteka tudi ne sme commitati, ker bi šla z mergem javno brez vnosa v `blog.json`). Bere samo `history.json`
+(`src != era5`) in okna iz `species_rules.yaml`; dogodek = dnevi ≥ 3 mm z vrzeljo ≤ 1 dan, skupaj ≥ 20 mm, avg-nov 2020-2026.
+Assert-i: 53 dogodkov, jurček 0/53 v prvem vikendu, 53/53 v drugem, lisička 28/53, primer 10.-11. 9. = 120,7 mm.
+**Osnutek je navajal 52 in 37 -- z jasno definicijo teh številk ni mogoče ponoviti**, članek navaja izračunane. Koledarski del je
+aritmetika in je tako povedan; na blogu so že štirje članki o zamiku po dežju. Objava: Filip prebere `docs/lektura-dopust-gobe.txt`
+(`--text`), nato `--wire`; na FB/IG ne gre samodejno.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
