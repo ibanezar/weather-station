@@ -3551,6 +3551,138 @@ async function _snegKarta(env) {
   catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
 }
 
+// ── Dodatne spremenljivke modelskih kart (/modeli-karta2.json) ──────────────
+// Ista mreža in isti koraki kot _modeliKarta (MK_*), zato ju zavihek »Modelske karte« zloži eno
+// na drugo: veter 10 m (km/h + smer, od kod piha), oblačnost (%), tlak na morski gladini (hPa),
+// CAPE (J/kg, največ v 3-urnem koraku, ker nevihtni potencial ne sme izpasti med urami) in ničta
+// izoterma (m). Vse ostalo je trenutna vrednost ob koncu koraka. Model, ki spremenljivke nima
+// (AROME nima tlaka na morski gladini in ničte izoterme, IFS nima ničte izoterme), vrne null v
+// polju — odjemalec ga za to spremenljivko izklopi in ne izmišlja vrednosti.
+// Ločen KV ključ in daljši rok (MK2_TTL_MS) kot pri osnovni karti: teki modelov se menjajo na 1–3 ure.
+const MK2_TTL_MS = 60 * 60 * 1000;
+const MK2_KEY = "modeli_karta2_v1";
+const MK2_VARS = ["w", "d", "c", "m", "e", "z"];
+let _mk2Inflight = null;
+
+// H: po urah {w, d, c, m, e, z} na oznakah ts (ms, UTC); korak k = (t0+3(k-1), t0+3k].
+function _mk2Reduce(ts, H, t0) {
+  const idx = new Map(); ts.forEach((x, i) => idx.set(x, i));
+  const out = [];
+  for (let k = 1; k <= MK_STEPS; k++) {
+    const end = t0 + k * MK_STEP_H * 3600000;
+    const ie = idx.get(end);
+    const at = (a) => (ie == null || !a ? null : a[ie]);
+    let emax = null;
+    for (let h = 0; h < MK_STEP_H; h++) {
+      const i = idx.get(end - h * 3600000);
+      const v = i == null || !H.e ? null : H.e[i];
+      if (v != null && (emax == null || v > emax)) emax = v;
+    }
+    out.push({ w: at(H.w), d: at(H.d), c: at(H.c), m: at(H.m), e: emax, z: at(H.z) });
+  }
+  return out;
+}
+
+async function _mk2OpenMeteo(t0, pts) {
+  const models = ["icon_d2", "icon_eu", "ecmwf_ifs025"];
+  const res = {}; models.forEach(m => { res[m] = new Array(pts.length).fill(null); });
+  for (const ch of _mkChunks(pts.map((p, i) => [p, i]), 140)) {
+    const u = "https://api.open-meteo.com/v1/forecast?latitude=" + ch.map(c => c[0][0]).join(",")
+      + "&longitude=" + ch.map(c => c[0][1]).join(",")
+      + "&hourly=wind_speed_10m,wind_direction_10m,cloud_cover,pressure_msl,cape,freezing_level_height"
+      + "&models=" + models.join(",") + "&forecast_days=3&timezone=UTC";
+    // En spodleteli kos (prekinjena povezava, 429) ne sme podreti cele karte: do 3 poskusov.
+    let r = null;
+    for (let a = 0; a < 3; a++) {
+      try { r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } }); if (r.ok) break; } catch (_) { r = null; }
+      await new Promise(res => setTimeout(res, 1500 * (a + 1)));
+    }
+    if (!r || !r.ok) throw new Error("open-meteo " + (r ? r.status : "povezava"));
+    let j = await r.json(); if (!Array.isArray(j)) j = [j];
+    j.forEach((loc, n) => {
+      const L = loc.hourly, ts = L.time.map(x => Date.parse(x + ":00Z"));
+      models.forEach(m => {
+        res[m][ch[n][1]] = _mk2Reduce(ts, {
+          w: L["wind_speed_10m_" + m], d: L["wind_direction_10m_" + m], c: L["cloud_cover_" + m],
+          m: L["pressure_msl_" + m], e: L["cape_" + m], z: L["freezing_level_height_" + m],
+        }, t0);
+      });
+    });
+  }
+  return res;
+}
+
+async function _mk2Arome(t0, pts) {
+  const res = new Array(pts.length).fill(null);
+  let runIso = null;
+  const chunks = _mkChunks(pts.map((p, i) => [p, i]), 100);
+  for (let c = 0; c < chunks.length; c += 3) {
+    await Promise.all(chunks.slice(c, c + 3).map(async ch => {
+      const u = "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m"
+        + "?parameters=u10m,v10m,tcc,cape&output_format=geojson&"
+        + ch.map(x => "lat_lon=" + x[0][0] + "," + x[0][1]).join("&");
+      const r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } });
+      if (!r.ok) throw new Error("geosphere " + r.status);
+      const j = await r.json();
+      runIso = j.reference_time;
+      const ts = j.timestamps.map(Date.parse);
+      j.features.forEach((f, n) => {
+        const P = f.properties.parameters, U = P.u10m.data, V = P.v10m.data;
+        const w = U.map((u2, i) => { const v2 = V[i]; return u2 == null || v2 == null ? null : Math.sqrt(u2 * u2 + v2 * v2) * 3.6; });
+        // meteorološka smer: od kod piha (0° = sever, 90° = vzhod)
+        const d = U.map((u2, i) => { const v2 = V[i]; return u2 == null || v2 == null ? null : (Math.atan2(-u2, -v2) * 180 / Math.PI + 360) % 360; });
+        const cc = P.tcc.data.map(v => v == null ? null : v * 100);
+        res[ch[n][1]] = _mk2Reduce(ts, { w, d, c: cc, e: P.cape.data }, t0);
+      });
+    }));
+  }
+  return { cells: res, run: runIso };
+}
+
+async function _mk2Build(t0Hint) {
+  const t0 = t0Hint || Math.ceil(Date.now() / 3600000) * 3600000;
+  const pts = _mkPoints();
+  const out = { generated: Date.now(), t0, steps: MK_STEPS, stepH: MK_STEP_H, lat0: MK_LAT0, lon0: MK_LON0, d: MK_D, nx: MK_NX, ny: MK_NY, models: {} };
+  const labels = { icon_d2: "ICON-D2", icon_eu: "ICON-EU", ecmwf_ifs025: "ECMWF IFS", arome: "AROME" };
+  const [om, ar] = await Promise.allSettled([_mk2OpenMeteo(t0, pts), _mk2Arome(t0, pts)]);
+  function pack(label, cells, run) {
+    const m = { label, run: run || null };
+    MK2_VARS.forEach(v => {
+      m[v] = [];
+      for (let k = 0; k < MK_STEPS; k++) {
+        m[v].push(cells.map(c => c && c[k] ? _mkR(c[k][v], v === "m" ? 1 : 0) : null));
+      }
+    });
+    return m;
+  }
+  if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { out.models[k] = pack(labels[k], om.value[k]); });
+  if (ar.status === "fulfilled") out.models.arome = pack(labels.arome, ar.value.cells, ar.value.run);
+  out.failed = [om.status === "rejected" ? "open-meteo" : null, ar.status === "rejected" ? "geosphere" : null].filter(Boolean);
+  if (!Object.keys(out.models).length) throw new Error("noben model ni dosegljiv: " + (om.reason || "") + " " + (ar.reason || ""));
+  return out;
+}
+
+async function _modeliKarta2(env) {
+  let cached = null;
+  try { cached = await env.COUNTER_KV.get(MK2_KEY, "json"); } catch (_) {}
+  if (cached && Date.now() - cached.generated < MK2_TTL_MS) return cached;
+  if (!_mk2Inflight) {
+    // Koraki morajo sovpadati s karto padavin/temperature/sunkov, sicer se ob istem drsniku
+    // prikazujeta dva različna trenutka: prevzemi t0 njene zadnje izdelave (če ni starejša od 5 ur).
+    let t0Hint = null;
+    try {
+      const base = await env.COUNTER_KV.get(MK_KEY, "json");
+      if (base && base.t0 && Date.now() - base.generated < 5 * 3600000) t0Hint = base.t0;
+    } catch (_) {}
+    _mk2Inflight = _mk2Build(t0Hint).then(async d => {
+      try { await env.COUNTER_KV.put(MK2_KEY, JSON.stringify(d), { expirationTtl: 6 * 3600 }); } catch (_) {}
+      return d;
+    }).finally(() => { _mk2Inflight = null; });
+  }
+  try { return await _mk2Inflight; }
+  catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
+}
+
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "30 6-7 * * *") {
@@ -4704,6 +4836,20 @@ export default {
       if (path === "/modeli-karta.json") {
         try {
           const d = await _modeliKarta(env);
+          return new Response(JSON.stringify(d), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ ok: false, error: "modeli_unreachable", detail: String(e) }),
+            { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
+      }
+
+      // ── /modeli-karta2.json ──────────────────────────────────
+      // Veter, oblačnost, tlak, CAPE in ničta izoterma na isti mreži, glej _modeliKarta2().
+      if (path === "/modeli-karta2.json") {
+        try {
+          const d = await _modeliKarta2(env);
           return new Response(JSON.stringify(d), {
             headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=600" }
           });

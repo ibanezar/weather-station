@@ -784,6 +784,31 @@ Ideja po Neurje.si »Snow Map« (sneženje po urah, meja sneženja, skupni novi 
 - Koda je v skupnih datotekah `zima/snezna-karta/karta.js` in `karta.css` (piše jih generator, `?v=` datum); isti JS poganja stran in **vdelano karto na vrhu `/zima/`** (`#sk-app` z `data-compact`/`data-view`/`data-hours`; hub jo vdela prek `snow_map_assets()` v `generate_zima_page.py`). Ne podvajaj JS-ja v hub.
 - Stran je v `CORE`, `llms.txt` in na hubu `/zima/`.
 
+## Modelske karte (zavihek na naslovni strani, 22. 10. 2026)
+
+Zavihek »Modelske karte« (meni Napoved, `#tab-modelmaps`, `initModelMaps()` v lenem paketu `app.js`) kaže **samo izhod numeričnih
+modelov** — ne meritev, radarja, strel ali opozoril (Filipova odločitev). Spremenljivke: padavine od zdaj in v 3 h, sneg (ICON-D2),
+temperatura 2 m, ničta izoterma, veter 10 m s puščicami, sunki, CAPE, oblačnost, tlak z izobarami. Prikaz: ena karta, dva modela
+drug ob drugem ali razlika A − B (diverging lestvica); dotik karte pokaže vrednosti vseh modelov na točki.
+
+- **Viri so trije, vsi na isti mreži 0,1°** (`lat0/lon0/d/nx/ny` nosi odgovor, zavihek ničesar ne podvaja): `/modeli-karta.json`
+  (padavine, temperatura, sunki), **`/modeli-karta2.json`** (`_modeliKarta2()` v workerju: veter + smer, oblačnost, tlak, CAPE,
+  ničta izoterma; KV `modeli_karta2_v1`, 60 min) in `/sneg-karta.json` (naloži se šele ob izbiri »Sneg«). Karta2 prevzame `t0`
+  osnovne karte (če ni starejša od 5 h), da se koraki ujemajo.
+- **Vsaka spremenljivka ima svojo časovno os**: `_mmIdx()` poišče korak vira, najbližji skupnemu drsniku (največ 1,5 h razlike),
+  sicer ni podatka. Sneg se sešteva po urah od `t0` skupne karte; če snežni podatek okna ne pokriva, je `null`, ne ugibanje.
+- **Model, ki spremenljivke nima, je izklopljen, vrednosti se ne izmišlja**: AROME nima tlaka na morski gladini in ničte izoterme,
+  IFS nima ničte izoterme (v workerju so to `null` polja; `_mmHas()`). CAPE je v 3-urnem koraku **največ**, ostalo trenutna vrednost.
+- **CAPE ni napoved neviht** in tako piše (potrebna sta sprožilec in CIN). Mreža 0,1° ne razloči dolin — pove se pod karto.
+- Izris je canvas (brez Leafleta, kot snežna karta); maska Slovenije je obris `SLO_POLY`, narisan na skrito platno.
+- **Namerna podvojitev**: lestvice in polja v `MM_VARS` ↔ `MK2_VARS` v workerju; preverja ju `test_parity.modelske_karte`
+  (skupaj z `_mk2Reduce`, časovno poravnavo in snegom). Nova spremenljivka = polje v `_mk2Build()` + vnos v `MM_VARS`.
+- **Obremenitev Open-Meteo**: ena izdelava karte2 je 560 točk × 3 modeli (+ 6 kosov GeoSphere); gradi se samo ob obisku, največ
+  enkrat na uro. Skupaj s `/modeli-karta.json` in `/sneg-karta.json` je to že blizu brezplačne dnevne kvote Open-Meteo — če se pojavi
+  429, podaljšaj `MK2_TTL_MS`, ne dodajaj poskusov.
+- Živega Open-Meteo odgovora za celotno mrežo ob pisanju ni bilo mogoče preizkusiti do konca (429 iz skupnega izhoda peskovnika):
+  oblika odgovora je preverjena na 140 točkah in AROME na vseh. Po deployu workerja preveri `/modeli-karta2.json`.
+
 ## Primerjava modelov (`/primerjava-modelov/`, 7. 10. 2026)
 
 Zamisel je Neurje.si-jeva primerjava modelov (ICON-D2, ICON-EU, ALADIN/SI, C-LAEF 1 km), prirejena našim

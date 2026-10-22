@@ -2880,7 +2880,7 @@ function wmoInfo(code){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','mtr','srednja','dolgorocna','stormmap'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
+const DD_TABS={fc:['forecast2','mtr','srednja','dolgorocna','stormmap','modelmaps'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -3509,6 +3509,7 @@ function switchTab(tab){
   if(tab==='records'){   initRecords(); }
   if(tab==='storm'){     initStormChaser(); }
   if(tab==='stormmap'){  initStormMap(); }
+  if(tab==='modelmaps'){ initModelMaps(); }
   if(tab==='climate'){   initClimate(); }
   if(tab==='life'){      initLife(); }
   if(tab==='water'){     initVodostaj(); }
@@ -21229,4 +21230,425 @@ function initSurvey(){
     document.addEventListener('keydown',_surveyKey);
     send.focus({preventScroll:true});
   },3000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODELSKE KARTE (zavihek »Modelske karte«, 22. 10. 2026)
+// Samo izhod numeričnih modelov (ne meritve, ne radar): padavine, temperatura, sunki iz
+// /modeli-karta.json; veter, oblačnost, tlak, CAPE in ničta izoterma iz /modeli-karta2.json;
+// sneženje ICON-D2 iz /sneg-karta.json (naloži se šele ob izbiri). Vsi trije vrnejo isto mrežo
+// 0,1° (lat0/lon0/d/nx/ny), zato se zlagajo na eno platno. Vsaka spremenljivka ima SVOJO časovno
+// os (vir): _mmIdx() poišče korak, ki je najbližje skupnemu drsniku (največ 1,5 h razlike).
+// Model, ki spremenljivke nima (AROME: tlak, ničta izoterma; IFS: ničta izoterma), je izklopljen —
+// vrednosti se ne izmišlja. Barvne lestvice so lastne (ColorBrewer), ne iz tuje karte.
+const MM_TZ='Europe/Ljubljana', MM_H=3600000, MM_W=640;
+const MM_MODELS=[['icon_d2','ICON-D2'],['icon_eu','ICON-EU'],['ecmwf_ifs025','ECMWF IFS'],['arome','AROME']];
+const MM_CITIES=[['Ljubljana',14.506,46.056],['Maribor',15.646,46.554],['Celje',15.26,46.231],['Koper',13.73,45.548],
+  ['Kranj',14.356,46.239],['Nova Gorica',13.644,45.956],['Novo mesto',15.169,45.804],['Rečica',14.921,46.326]];
+const MM_DIVERGE=['#2166ac','#92c5de','#f7f7f7','#f4a582','#b2182b'];
+const MM_PRECIP=[[0.1,'#d9f0ff'],[1,'#9ecae1'],[5,'#4292c6'],[10,'#2171b5'],[20,'#08519c'],[40,'#6a51a3'],[70,'#54278f'],[100,'#3f007d']];
+const MM_VARS=[
+  {k:'p',grp:'Padavine',lbl:'Od zdaj',title:'Skupne padavine od začetka karte',unit:'mm',d:1,f:'p',st:MM_PRECIP,step:true,floor:0.1,diff:20,
+   note:'Skupna količina padavin (dež in sneg, vodna vrednost) od prve ure karte do izbrane ure.'},
+  {k:'p3',grp:'Padavine',lbl:'V 3 urah',title:'Padavine v 3 urah',unit:'mm/3 h',d:1,f:'p',st:MM_PRECIP.slice(0,7).map((s,i)=>[[0.1,0.5,1,2,5,10,20][i],s[1]]),step:true,floor:0.1,diff:10,
+   note:'Padavine v 3-urnem koraku, ki se konča ob izbrani uri.'},
+  {k:'sn',grp:'Padavine',lbl:'Sneg',title:'Novi sneg od začetka karte',unit:'cm',d:1,f:'sn',only:['icon_d2'],step:true,floor:0.1,diff:10,
+   st:[[0.1,'#deebf7'],[1,'#bdd7e7'],[3,'#9ecae1'],[5,'#6baed6'],[10,'#3182bd'],[20,'#08519c'],[40,'#6a51a3'],[70,'#3f007d']],
+   note:'Modelsko sneženje (cm svežega snega), samo ICON-D2, brez tajanja in sesedanja — ni višina snežne odeje. Podrobneje: Snežna karta.'},
+  {k:'t',grp:'Temperatura',lbl:'2 m',title:'Temperatura zraka na 2 m',unit:'°C',d:1,f:'t',diff:5,
+   st:[[-20,'#313695'],[-10,'#4575b4'],[-5,'#74add1'],[0,'#e0f3f8'],[5,'#ffffbf'],[10,'#fee090'],[15,'#fdae61'],[20,'#f46d43'],[27,'#d73027'],[35,'#a50026']],
+   note:'Temperatura ob izbrani uri, povprečje modelske celice. V kotlinah je ponoči pogosto precej hladneje, podnevi pa topleje od karte.'},
+  {k:'z',grp:'Temperatura',lbl:'Ničta izoterma',title:'Višina ničte izoterme',unit:'m',d:0,f:'z',diff:600,
+   st:[[0,'#08306b'],[1000,'#2171b5'],[2000,'#9ecae1'],[3000,'#fee391'],[4000,'#fe9929'],[5000,'#cc4c02']],
+   note:'Višina nad morjem, kjer je zrak 0 °C. Meja sneženja je običajno okoli 200–300 m pod njo. IFS te spremenljivke prek našega vira ne ponuja, AROME tudi ne.'},
+  {k:'w',grp:'Veter',lbl:'Veter 10 m',title:'Veter na 10 m (puščice: kam piha)',unit:'km/h',d:0,f:'w',arrows:true,diff:20,
+   st:[[0,'#f7fcf0'],[10,'#ccebc5'],[20,'#7bccc4'],[30,'#43a2ca'],[45,'#0868ac'],[60,'#fe9929'],[80,'#d7301f'],[110,'#7f0000']],
+   note:'Povprečni veter ob izbrani uri; puščica kaže, kam piha. Sunki so posebej (Sunki).'},
+  {k:'g',grp:'Veter',lbl:'Sunki',title:'Najmočnejši sunek v 3 urah',unit:'km/h',d:0,f:'g',floor:15,diff:30,
+   st:[[15,'#ffffcc'],[40,'#fed976'],[60,'#fd8d3c'],[80,'#e31a1c'],[100,'#800026'],[130,'#4a0033']],
+   note:'Največji sunek vetra na 10 m v 3-urnem koraku, ki se konča ob izbrani uri. Pod 15 km/h ni obarvano.'},
+  {k:'e',grp:'Nevihte in oblaki',lbl:'CAPE',title:'CAPE (konvektivna energija)',unit:'J/kg',d:0,f:'e',step:true,floor:50,diff:800,
+   st:[[50,'#ffffb2'],[250,'#fed976'],[500,'#feb24c'],[1000,'#fd8d3c'],[1500,'#f03b20'],[2500,'#bd0026'],[4000,'#67001f']],
+   note:'Največja CAPE v 3 urah. Je potencial za nevihte, ne napoved: potrebna sta še sprožilec (fronta, konvergenca, pobočje) in šibka zapora (CIN). Pod 50 J/kg ni obarvano.'},
+  {k:'c',grp:'Nevihte in oblaki',lbl:'Oblačnost',title:'Skupna oblačnost',unit:'%',d:0,f:'c',diff:50,
+   st:[[0,'#0b2a4a'],[25,'#3b5f86'],[50,'#7f98b3'],[75,'#c1ceda'],[100,'#f3f4f6']],
+   note:'Delež neba, pokritega z oblaki: temno = jasno, svetlo = oblačno.'},
+  {k:'m',grp:'Tlak',lbl:'Tlak',title:'Tlak na morski gladini',unit:'hPa',d:0,f:'m',iso:true,diff:5,
+   st:[[985,'#542788'],[995,'#8073ac'],[1005,'#b2abd2'],[1013,'#f7f7f7'],[1020,'#fdb863'],[1030,'#e08214'],[1040,'#b35806']],
+   note:'Tlak, preračunan na morsko gladino; črte (izobare) so na vsakih 2 hPa, številke na vsakih 4. AROME te spremenljivke ne ponuja.'},
+];
+let _mm=null;
+
+function _mmSpec(k){ return MM_VARS.find(v=>v.k===k)||MM_VARS[0]; }
+function _mmF(x,d){ return x==null||isNaN(x)?'—':x.toFixed(d).replace('.',','); }
+function _mmRgb(c){ return [parseInt(c.substr(1,2),16),parseInt(c.substr(3,2),16),parseInt(c.substr(5,2),16)]; }
+function _mmStops(V,diff){
+  if(diff) return MM_DIVERGE.map((c,i)=>[(i-2)/2*V.diff,c]);
+  return V.st;
+}
+function _mmColor(V,val,diff){
+  const st=_mmStops(V,diff), key=diff?'_rd':'_r';
+  const rgb=V[key]||(V[key]=st.map(s=>_mmRgb(s[1])));
+  if(!diff&&V.floor!=null&&val<V.floor) return null;
+  if(V.step&&!diff){ let c=null; for(let i=0;i<st.length;i++){ if(val>=st[i][0]) c=rgb[i]; else break; } return c; }
+  if(val<=st[0][0]) return rgb[0];
+  for(let i=1;i<st.length;i++){
+    if(val<=st[i][0]){
+      const t=(val-st[i-1][0])/(st[i][0]-st[i-1][0]), a=rgb[i-1], b=rgb[i];
+      return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+    }
+  }
+  return rgb[rgb.length-1];
+}
+function _mmLegend(V,diff){
+  const st=_mmStops(V,diff), lo=st[0][0], hi=st[st.length-1][0];
+  const fmt=x=>_mmF(x,Number.isInteger(x)?0:1);
+  let bar;
+  if(V.step&&!diff){
+    bar='<div class="mm-leg mm-leg-step">'+st.map(s=>'<span style="background:'+s[1]+'"><i>'+fmt(s[0])+'</i></span>').join('')+'</div>';
+  }else{
+    const g=st.map(s=>s[1]+' '+((s[0]-lo)/(hi-lo)*100).toFixed(1)+'%').join(',');
+    bar='<div class="mm-leg"><span class="mm-leg-grad" style="background:linear-gradient(90deg,'+g+')"></span>'+
+      '<span class="mm-leg-ticks">'+st.map(s=>'<i style="left:'+((s[0]-lo)/(hi-lo)*100).toFixed(1)+'%">'+(diff&&s[0]>0?'+':'')+fmt(s[0])+'</i>').join('')+'</span></div>';
+  }
+  return bar+'<div class="mm-leg-cap">'+(diff?'Razlika A − B':V.title)+' ('+V.unit+')'+(V.floor!=null&&!diff?' · pod '+_mmF(V.floor,V.floor<1?1:0)+' ni obarvano':'')+'</div>';
+}
+function _mmTime(k){ return _mm.M.t0+(k+1)*_mm.M.stepH*MM_H; }
+function _mmFmtT(ms,long){
+  return new Date(ms).toLocaleString('sl-SI',long?{timeZone:MM_TZ,weekday:'short',day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'}:{timeZone:MM_TZ,hour:'2-digit',minute:'2-digit'});
+}
+// korak vira S, ki je najbližje koraku k skupnega drsnika (-1: ni podatka)
+function _mmIdx(S,k){
+  if(!S) return -1;
+  const T=_mmTime(k), j=Math.round((T-S.t0)/(S.stepH*MM_H))-1;
+  if(j<0||j>=S.steps) return -1;
+  return Math.abs(T-(S.t0+(j+1)*S.stepH*MM_H))<=1.5*MM_H?j:-1;
+}
+function _mmRaw(mk,f,k){
+  const S=(f==='p'||f==='t'||f==='g')?_mm.a:_mm.b, m=S&&S.models[mk];
+  if(!m||!m[f]) return null;
+  const j=_mmIdx(S,k); if(j<0) return null;
+  const a=m[f][j];
+  return a&&a.some(v=>v!=null)?a:null;
+}
+function _mmSnow(k){
+  const D=_mm.s; if(!D) return null;
+  const M=_mm.M, h0=(M.t0-D.t0)/MM_H, h1=(_mmTime(k)-D.t0)/MM_H-1, n=M.nx*M.ny, out=new Array(n);
+  if(h0<0||h1>=D.hours||h1<h0) return null;
+  for(let i=0;i<n;i++){
+    let sum=0, bad=false;
+    for(let h=h0;h<=h1;h++){ const x=D.sn[h][i]; if(x==null){ bad=true; break; } sum+=x; }
+    out[i]=bad?null:sum*D.units.sn;
+  }
+  return out;
+}
+function _mmField(mk,V,k){
+  if(V.k==='sn') return mk==='icon_d2'?_mmSnow(k):null;
+  if(V.k==='p3'){
+    const c=_mmRaw(mk,'p',k); if(!c) return null;
+    let prev=null;
+    if(k>0) prev=_mmRaw(mk,'p',k-1);
+    else if(_mm.a&&_mm.a.t0===_mm.M.t0) prev=c.map(()=>0);
+    if(!prev) return null;
+    return c.map((v,i)=>v==null||prev[i]==null?null:Math.max(0,v-prev[i]));
+  }
+  return _mmRaw(mk,V.f,k);
+}
+function _mmHas(mk,V){
+  const key=mk+'|'+V.f; if(key in _mm.has) return _mm.has[key];
+  let ok=false;
+  if(V.only&&!V.only.includes(mk)) ok=false;
+  else if(V.f==='sn') ok=true;
+  else{
+    const S=(V.f==='p'||V.f==='t'||V.f==='g')?_mm.a:_mm.b, m=S&&S.models[mk];
+    ok=!!(m&&m[V.f]&&m[V.f].some(a=>a.some(v=>v!=null)));
+  }
+  _mm.has[key]=ok; return ok;
+}
+function _mmAvail(V){ return MM_MODELS.filter(m=>_mmHas(m[0],V)); }
+function _mmName(mk){ const m=MM_MODELS.find(x=>x[0]===mk); return m?m[1]:mk; }
+function _mmFix(){
+  const V=_mmSpec(_mm.v), av=_mmAvail(V).map(m=>m[0]);
+  if(av.length<2) _mm.mode='one';
+  if(!av.includes(_mm.A)) _mm.A=av[0]||_mm.A;
+  if(!av.includes(_mm.B)||_mm.B===_mm.A) _mm.B=av.find(x=>x!==_mm.A)||_mm.B;
+}
+function _mmGeom(){
+  const M=_mm.M, lon1=M.lon0+(M.nx-1)*M.d, lat1=M.lat0+(M.ny-1)*M.d, cs=Math.cos(46.2*Math.PI/180);
+  return {w:MM_W,h:Math.round(MM_W*(lat1-M.lat0)/((lon1-M.lon0)*cs)),lon0:M.lon0,lon1,lat0:M.lat0,lat1};
+}
+function _mmSample(arr,lon,lat){
+  const M=_mm.M, fx=(lon-M.lon0)/M.d, fy=(lat-M.lat0)/M.d;
+  const x0=Math.max(0,Math.min(M.nx-2,Math.floor(fx))), y0=Math.max(0,Math.min(M.ny-2,Math.floor(fy)));
+  const u=fx-x0, w=fy-y0, a=arr[y0*M.nx+x0], b=arr[y0*M.nx+x0+1], c=arr[(y0+1)*M.nx+x0], d=arr[(y0+1)*M.nx+x0+1];
+  if(a==null||b==null||c==null||d==null) return null;
+  return (a*(1-u)+b*u)*(1-w)+(c*(1-u)+d*u)*w;
+}
+// maska Slovenije: obris se nariše na skrito platno, alfa pove, ali je slikovna pika znotraj
+function _mmMask(PW,PH,G){
+  const key=PW+'x'+PH; if(_mm.mask&&_mm.mask.key===key) return _mm.mask.d;
+  const oc=document.createElement('canvas'); oc.width=PW; oc.height=PH;
+  const x=oc.getContext('2d'); x.fillStyle='#000'; x.beginPath();
+  SLO_POLY.forEach((p,i)=>{ const q=[(p[0]-G.lon0)/(G.lon1-G.lon0)*PW,(G.lat1-p[1])/(G.lat1-G.lat0)*PH]; i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); });
+  x.fill();
+  const im=x.getImageData(0,0,PW,PH).data, d=new Uint8Array(PW*PH);
+  for(let i=0;i<d.length;i++) d[i]=im[i*4+3]>127?1:0;
+  _mm.mask={key,d}; return d;
+}
+function _mmIsoLines(ctx,fld,G){
+  const M=_mm.M, nx=M.nx, ny=M.ny;
+  const px=(gx,gy)=>[gx/(nx-1)*G.w,G.h-gy/(ny-1)*G.h];
+  let lo=Infinity,hi=-Infinity; fld.forEach(v=>{ if(v!=null){ if(v<lo) lo=v; if(v>hi) hi=v; } });
+  if(!isFinite(lo)) return;
+  ctx.font='600 11px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(let lv=Math.ceil(lo/2)*2; lv<=hi; lv+=2){
+    const labeled=lv%4===0; let placed=false;
+    ctx.beginPath();
+    const segs=[];
+    for(let j=0;j<ny-1;j++) for(let i=0;i<nx-1;i++){
+      const a=fld[j*nx+i], b=fld[j*nx+i+1], c=fld[(j+1)*nx+i+1], d=fld[(j+1)*nx+i];
+      if(a==null||b==null||c==null||d==null) continue;
+      const cs=(a>=lv?1:0)|(b>=lv?2:0)|(c>=lv?4:0)|(d>=lv?8:0);
+      if(cs===0||cs===15) continue;
+      const E=[()=>[i+(lv-a)/(b-a),j],()=>[i+1,j+(lv-b)/(c-b)],()=>[i+(lv-d)/(c-d),j+1],()=>[i,j+(lv-a)/(d-a)]];
+      const T={1:[[3,0]],2:[[0,1]],3:[[3,1]],4:[[1,2]],5:[[3,0],[1,2]],6:[[0,2]],7:[[3,2]],8:[[2,3]],9:[[0,2]],10:[[0,1],[2,3]],11:[[1,2]],12:[[1,3]],13:[[0,1]],14:[[3,0]]};
+      T[cs].forEach(p=>{ const s=E[p[0]](), e=E[p[1]](); segs.push([px(s[0],s[1]),px(e[0],e[1])]); });
+    }
+    segs.forEach(s=>{ ctx.moveTo(s[0][0],s[0][1]); ctx.lineTo(s[1][0],s[1][1]); });
+    ctx.strokeStyle='rgba(15,23,42,.8)'; ctx.lineWidth=labeled?1.5:0.8; ctx.stroke();
+    if(labeled&&segs.length){
+      const s=segs[Math.floor(segs.length/2)], x=(s[0][0]+s[1][0])/2, y=(s[0][1]+s[1][1])/2;
+      if(!placed){ ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.85)'; ctx.strokeText(String(lv),x,y); ctx.fillStyle='#0f172a'; ctx.fillText(String(lv),x,y); placed=true; }
+    }
+  }
+}
+function _mmArrows(ctx,wf,df,G){
+  const M=_mm.M;
+  for(let j=0;j<M.ny;j+=2) for(let i=0;i<M.nx;i+=2){
+    const w=wf[j*M.nx+i], d=df?df[j*M.nx+i]:null; if(w==null||d==null||w<2) continue;
+    const x=i/(M.nx-1)*G.w, y=G.h-j/(M.ny-1)*G.h, a=(d+180)*Math.PI/180;
+    const len=9+Math.min(w,70)/70*11, dx=Math.sin(a)*len/2, dy=-Math.cos(a)*len/2;
+    ctx.beginPath(); ctx.moveTo(x-dx,y-dy); ctx.lineTo(x+dx,y+dy);
+    const hx=Math.sin(a-2.7)*5, hy=-Math.cos(a-2.7)*5, kx=Math.sin(a+2.7)*5, ky=-Math.cos(a+2.7)*5;
+    ctx.moveTo(x+dx+hx,y+dy+hy); ctx.lineTo(x+dx,y+dy); ctx.lineTo(x+dx+kx,y+dy+ky);
+    ctx.strokeStyle='rgba(15,23,42,.9)'; ctx.lineWidth=2.6; ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.95)'; ctx.lineWidth=1.1; ctx.stroke();
+  }
+}
+// fld: polje (ali null); diff: razlika A − B; mk: model za puščice/izobare
+function _mmDraw(cv,fld,V,diff,mk,msg){
+  const G=_mmGeom(), dpr=Math.min(1.5,window.devicePixelRatio||1), PW=Math.round(G.w*dpr), PH=Math.round(G.h*dpr), M=_mm.M;
+  cv.width=PW; cv.height=PH;
+  const ctx=cv.getContext('2d'); ctx.setTransform(1,0,0,1,0,0);
+  if(!fld){
+    ctx.fillStyle='rgba(128,128,128,.12)'; ctx.fillRect(0,0,PW,PH);
+    ctx.fillStyle='#94a3b8'; ctx.font=(14*dpr)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    (msg||'Ni podatkov').split('\n').forEach((t,i,a)=>ctx.fillText(t,PW/2,PH/2+(i-(a.length-1)/2)*20*dpr));
+    cv.setAttribute('aria-label',(msg||'Ni podatkov').replace('\n',' '));
+    return;
+  }
+  const mask=_mmMask(PW,PH,G), img=ctx.createImageData(PW,PH), xs=new Int16Array(PW), us=new Float32Array(PW);
+  for(let x=0;x<PW;x++){ const fx=x/(PW-1)*(M.nx-1), x0=Math.min(M.nx-2,Math.floor(fx)); xs[x]=x0; us[x]=fx-x0; }
+  let painted=0;
+  for(let y=0;y<PH;y++){
+    const fy=(PH-1-y)/(PH-1)*(M.ny-1), y0=Math.min(M.ny-2,Math.floor(fy)), w=fy-y0, r0=y0*M.nx, r1=r0+M.nx;
+    for(let x=0;x<PW;x++){
+      const x0=xs[x], u=us[x], a=fld[r0+x0], b=fld[r0+x0+1], c=fld[r1+x0], d=fld[r1+x0+1];
+      if(a==null||b==null||c==null||d==null) continue;
+      const val=(a*(1-u)+b*u)*(1-w)+(c*(1-u)+d*u)*w, col=_mmColor(V,val,diff);
+      if(!col) continue;
+      const i=(y*PW+x)*4; img.data[i]=col[0]; img.data[i+1]=col[1]; img.data[i+2]=col[2]; img.data[i+3]=mask[y*PW+x]?235:120; painted++;
+    }
+  }
+  ctx.putImageData(img,0,0);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(!painted&&!diff&&V.floor!=null){
+    ctx.font='600 13px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.shadowColor='#000'; ctx.shadowBlur=4; ctx.fillStyle='#fff';
+    ctx.fillText('Model nikjer ne napoveduje vrednosti nad '+_mmF(V.floor,V.floor<1?1:0)+' '+V.unit+'.',G.w/2,G.h-14); ctx.shadowBlur=0;
+  }
+  if(V.iso&&!diff) _mmIsoLines(ctx,fld,G);
+  if(V.arrows&&!diff&&mk){ const df=_mmField(mk,{k:'d',f:'d'},_mm.k); if(df) _mmArrows(ctx,fld,df,G); }
+  const px=(lon,lat)=>[(lon-G.lon0)/(G.lon1-G.lon0)*G.w,(G.lat1-lat)/(G.lat1-G.lat0)*G.h];
+  ctx.beginPath(); SLO_POLY.forEach((p,i)=>{ const q=px(p[0],p[1]); i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); }); ctx.closePath();
+  ctx.strokeStyle='rgba(15,23,42,.75)'; ctx.lineWidth=2.6; ctx.stroke(); ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.font='11px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='middle';
+  MM_CITIES.forEach(c=>{
+    const q=px(c[1],c[2]); ctx.beginPath(); ctx.arc(q[0],q[1],c[0]==='Rečica'?3.8:2.4,0,6.3);
+    ctx.fillStyle='#fff'; ctx.fill(); ctx.strokeStyle='#0f172a'; ctx.lineWidth=1; ctx.stroke();
+    ctx.shadowColor='#000'; ctx.shadowBlur=3; ctx.fillStyle='#fff'; ctx.fillText(c[0],q[0]+6,q[1]); ctx.shadowBlur=0;
+  });
+  cv.setAttribute('aria-label',(diff?'Razlika '+_mmName(_mm.A)+' − '+_mmName(_mm.B):_mmName(mk))+', '+V.title+', '+_mmFmtT(_mmTime(_mm.k),true));
+}
+function _mmOverlay(){
+  const G=_mmGeom();
+  document.querySelectorAll('#mm-app .mm-ov').forEach(ov=>{
+    const dpr=Math.min(1.5,window.devicePixelRatio||1);
+    if(ov.width!==Math.round(G.w*dpr)){ ov.width=Math.round(G.w*dpr); ov.height=Math.round(G.h*dpr); }
+    const ctx=ov.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,G.w,G.h);
+    if(!_mm.cur) return;
+    const x=(_mm.cur[0]-G.lon0)/(G.lon1-G.lon0)*G.w, y=(G.lat1-_mm.cur[1])/(G.lat1-G.lat0)*G.h;
+    ctx.beginPath(); ctx.arc(x,y,7,0,6.3); ctx.strokeStyle='#0f172a'; ctx.lineWidth=3.5; ctx.stroke();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.8; ctx.stroke();
+  });
+}
+function _mmDirName(d){ return ['S','SV','V','JV','J','JZ','Z','SZ'][Math.round(d/45)%8]; }
+function _mmRead(){
+  const el=document.getElementById('mm-read'); if(!el) return;
+  if(!_mm.cur){ el.innerHTML='Dotakni se karte: vrednosti vseh modelov na izbrani točki.'; return; }
+  const V=_mmSpec(_mm.v), lon=_mm.cur[0], lat=_mm.cur[1], k=_mm.k;
+  const rows=MM_MODELS.map(m=>{
+    const mk=m[0], f=_mmHas(mk,V)?_mmField(mk,V,k):null, val=f?_mmSample(f,lon,lat):null;
+    let extra='';
+    if(V.k==='w'&&f){ const df=_mmField(mk,{k:'d',f:'d'},k); if(df){ const gi=Math.round((lat-_mm.M.lat0)/_mm.M.d)*_mm.M.nx+Math.round((lon-_mm.M.lon0)/_mm.M.d); if(df[gi]!=null) extra=' · od '+_mmDirName(df[gi])+' ('+Math.round(df[gi])+'°)'; } }
+    const on=mk===_mm.A||(_mm.mode!=='one'&&mk===_mm.B);
+    return '<tr'+(on?' class="mm-on"':'')+'><th scope="row">'+m[1]+'</th><td>'+(val==null?'<span class="mm-na">'+(_mmHas(mk,V)?'ni podatka za ta čas':'ni v modelu')+'</span>':'<b>'+_mmF(val,V.d)+'</b> '+V.unit+extra)+'</td></tr>';
+  }).join('');
+  el.innerHTML='<div class="mm-read-h">'+_mmF(lat,2)+' °N, '+_mmF(lon,2)+' °E · '+_mmFmtT(_mmTime(k),true)+'</div><table class="mm-tbl"><tbody>'+rows+'</tbody></table>';
+}
+function _mmTitleOf(V,k){
+  const t0=_mm.M.t0, cum=V.k==='p'||V.k==='sn';
+  return (cum?'od '+_mmFmtT(t0,true)+' do ':'')+_mmFmtT(_mmTime(k),true);
+}
+function _mmRedraw(){
+  if(!_mm||!_mm.built) return;
+  const V=_mmSpec(_mm.v), k=_mm.k, figs=document.querySelectorAll('#mm-maps .mm-cv');
+  const miss=mk=>mk==='icon_d2'&&k>=14?'ICON-D2 sega le 48 h od svojega teka.\nZa ta čas podatka ni.':'Za ta čas ni podatka.';
+  if(_mm.mode==='diff'){
+    const fa=_mmField(_mm.A,V,k), fb=_mmField(_mm.B,V,k);
+    const d=fa&&fb?fa.map((v,i)=>v==null||fb[i]==null?null:v-fb[i]):null;
+    _mmDraw(figs[0],d,V,true,null,'Razlike ni mogoče izračunati:\nenemu od modelov manjka podatek za ta čas.');
+  }else{
+    [_mm.A,_mm.B].slice(0,_mm.mode==='two'?2:1).forEach((mk,i)=>_mmDraw(figs[i],_mmField(mk,V,k),V,false,mk,miss(mk)));
+  }
+  document.getElementById('mm-when').textContent=_mmTitleOf(V,k);
+  document.getElementById('mm-slider').value=k;
+  document.getElementById('mm-scale').innerHTML=_mmLegend(V,_mm.mode==='diff');
+  document.querySelectorAll('#mm-days button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.day===_mmDayKey(_mmTime(k)))));
+  _mmOverlay(); _mmRead();
+}
+function _mmDayKey(ms){ return new Date(ms).toLocaleDateString('sl-SI',{timeZone:MM_TZ,year:'numeric',month:'numeric',day:'numeric'}); }
+function _mmSyncControls(){
+  const V=_mmSpec(_mm.v), av=_mmAvail(V).map(m=>m[0]);
+  _mmFix();
+  document.querySelectorAll('#mm-app button[data-mmv]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mmv===_mm.v)));
+  document.querySelectorAll('#mm-app button[data-mmmode]').forEach(b=>{
+    b.setAttribute('aria-pressed',String(b.dataset.mmmode===_mm.mode));
+    b.disabled=b.dataset.mmmode!=='one'&&av.length<2;
+  });
+  [['A','mm-ma'],['B','mm-mb']].forEach(p=>{
+    document.querySelectorAll('#'+p[1]+' button').forEach(b=>{
+      b.disabled=!av.includes(b.dataset.mmm)||(_mm.mode!=='one'&&b.dataset.mmm===_mm[p[0]==='A'?'B':'A']);
+      b.setAttribute('aria-pressed',String(b.dataset.mmm===_mm[p[0]]));
+    });
+  });
+  document.getElementById('mm-rowb').hidden=_mm.mode==='one';
+  document.getElementById('mm-laba').textContent=_mm.mode==='one'?'Model':(_mm.mode==='diff'?'A (od njega odštejemo B)':'Model A');
+  document.getElementById('mm-note').innerHTML=_mmNote(V);
+}
+function _mmNote(V){
+  const a=_mm.a, b=_mm.b, bits=[];
+  const srcs=[a,b].filter(Boolean);
+  if(srcs.some(s=>s.stale)) bits.push('Podatki so nekoliko stari: vir trenutno ne odgovarja.');
+  const ar=(b&&b.models.arome&&b.models.arome.run)||(a&&a.models.arome&&a.models.arome.run);
+  const gen=Math.max.apply(null,srcs.map(s=>s.generated));
+  const off=[a,b].filter(Boolean).some(s=>s.t0!==_mm.M.t0);
+  return '<p>'+V.note+'</p><p class="mm-sub">Mreža 0,1° (okoli 8 × 11 km): ne razloči dolin, posameznih pobočij in nevihtnih celic, zato je to pregled vzorca, ne napoved za kraj. '+
+    'ICON-D2 sega 48 h od svojega teka, ostali modeli dlje (karta do +48 h). Karta izdelana ob '+_mmFmtT(gen)+(ar?', AROME tek '+_mmFmtT(Date.parse(ar))+' (po naši uri)':'')+'.'+
+    (off?' Spremenljivke iz različnih izdelav so poravnane na najbližji korak (do 1,5 h razlike).':'')+
+    ' Ni uradna napoved &mdash; opozorila izdaja ARSO. Več: <a href="/primerjava-modelov/">primerjava modelov za Rečico</a>, <a href="/zima/snezna-karta/">snežna karta</a>.</p>';
+}
+function _mmBuildMaps(){
+  const box=document.getElementById('mm-maps'), one=_mm.mode!=='two';
+  const caps=_mm.mode==='diff'?['Razlika '+_mmName(_mm.A)+' − '+_mmName(_mm.B)]:(_mm.mode==='two'?[_mmName(_mm.A),_mmName(_mm.B)]:[_mmName(_mm.A)]);
+  const G=_mmGeom();
+  box.className='mm-maps'+(one?'':' mm-two');
+  box.innerHTML=caps.map(c=>'<figure class="mm-fig"><figcaption>'+c+'</figcaption><div class="mm-map" style="aspect-ratio:'+G.w+'/'+G.h+'">'+
+    '<canvas class="mm-cv" role="img"></canvas><canvas class="mm-ov" aria-hidden="true"></canvas></div></figure>').join('');
+  box.querySelectorAll('.mm-ov').forEach(ov=>{
+    const mv=e=>{
+      const r=ov.getBoundingClientRect(), g=_mmGeom();
+      _mm.cur=[g.lon0+(e.clientX-r.left)/r.width*(g.lon1-g.lon0),g.lat1-(e.clientY-r.top)/r.height*(g.lat1-g.lat0)];
+      _mmOverlay(); _mmRead();
+    };
+    ov.addEventListener('pointerdown',mv);
+    ov.addEventListener('pointermove',e=>{ if(e.pointerType==='mouse'||e.buttons) mv(e); });
+  });
+}
+function _mmStop(){ if(_mm&&_mm.play){ clearInterval(_mm.play); _mm.play=null; const b=document.getElementById('mm-play'); if(b){ b.textContent='▶'; b.setAttribute('aria-label','Predvajaj'); } } }
+async function _mmEnsureSnow(){
+  if(_mm.s||_mm.sBusy||_mm.v!=='sn') return;
+  _mm.sBusy=true;
+  try{
+    const r=await fetch(PROXY+'/sneg-karta.json'); if(!r.ok) throw new Error(r.status);
+    const d=await r.json();
+    if(d.sn&&d.sn.length&&d.nx===_mm.M.nx&&d.ny===_mm.M.ny&&d.lat0===_mm.M.lat0&&d.lon0===_mm.M.lon0) _mm.s=d;
+  }catch(e){ console.warn('modelske karte: sneg',e); }
+  _mm.sBusy=false; _mmRedraw();
+}
+function _mmSet(patch){
+  Object.assign(_mm,patch);
+  const rebuild=('mode' in patch)||('A' in patch)||('B' in patch)||('v' in patch);
+  _mmSyncControls();
+  if(rebuild) _mmBuildMaps();
+  _mmRedraw();
+  if(_mm.v==='sn') _mmEnsureSnow();
+}
+function _mmShell(root){
+  const groups=[]; MM_VARS.forEach(v=>{ let g=groups.find(x=>x.n===v.grp); if(!g){ g={n:v.grp,v:[]}; groups.push(g); } g.v.push(v); });
+  const chips=(attr,items)=>items.map(i=>'<button type="button" '+attr+'="'+i[0]+'" aria-pressed="false">'+i[1]+'</button>').join('');
+  root.innerHTML=
+    '<div class="mm-vars">'+groups.map(g=>'<div class="mm-grp"><span class="mm-lab">'+g.n+'</span><div class="mm-chips">'+chips('data-mmv',g.v.map(v=>[v.k,v.lbl]))+'</div></div>').join('')+'</div>'+
+    '<div class="mm-row"><span class="mm-lab">Prikaz</span><div class="mm-chips">'+chips('data-mmmode',[['one','Ena karta'],['two','Dva modela'],['diff','Razlika']])+'</div></div>'+
+    '<div class="mm-row"><span class="mm-lab" id="mm-laba">Model</span><div class="mm-chips" id="mm-ma">'+chips('data-mmm',MM_MODELS)+'</div></div>'+
+    '<div class="mm-row" id="mm-rowb" hidden><span class="mm-lab">Model B</span><div class="mm-chips" id="mm-mb">'+chips('data-mmm',MM_MODELS)+'</div></div>'+
+    '<div class="mm-ctrl"><button type="button" id="mm-play" aria-label="Predvajaj">▶</button>'+
+      '<input type="range" id="mm-slider" min="0" max="'+(_mm.M.steps-1)+'" value="0" aria-label="Čas napovedi (korak 3 h)"><strong id="mm-when"></strong></div>'+
+    '<div class="mm-ctrl" id="mm-days" aria-label="Izbira dneva"></div>'+
+    '<div id="mm-maps" class="mm-maps"></div><div id="mm-scale"></div><div class="mm-read" id="mm-read" aria-live="polite"></div><div id="mm-note" class="mm-note"></div>';
+  const days=document.getElementById('mm-days'), seen={};
+  for(let k=0;k<_mm.M.steps;k++){
+    const t=_mmTime(k), key=_mmDayKey(t); if(seen[key]) continue; seen[key]=1;
+    const b=document.createElement('button'); b.type='button'; b.dataset.day=key; b.dataset.k=k;
+    const n=Object.keys(seen).length;
+    b.textContent=n===1?'Danes':n===2?'Jutri':new Date(t).toLocaleDateString('sl-SI',{timeZone:MM_TZ,weekday:'short',day:'numeric',month:'numeric'});
+    days.appendChild(b);
+  }
+  root.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b||b.disabled) return;
+    if(b.dataset.mmv){ _mmSet({v:b.dataset.mmv}); }
+    else if(b.dataset.mmmode){ _mmSet({mode:b.dataset.mmmode}); }
+    else if(b.dataset.mmm){ const p={}; p[b.closest('#mm-mb')?'B':'A']=b.dataset.mmm; _mmSet(p); }
+    else if(b.dataset.k!==undefined){ _mmStop(); _mmSet({k:+b.dataset.k}); }
+    else if(b.id==='mm-play'){
+      if(_mm.play){ _mmStop(); return; }
+      b.textContent='❚❚'; b.setAttribute('aria-label','Ustavi');
+      _mm.play=setInterval(()=>{
+        if(!document.getElementById('tab-modelmaps').classList.contains('active')){ _mmStop(); return; }
+        _mmSet({k:(_mm.k+1)%_mm.M.steps});
+      },800);
+    }
+  });
+  document.getElementById('mm-slider').addEventListener('input',e=>{ _mmStop(); _mmSet({k:+e.target.value}); });
+}
+async function initModelMaps(){
+  const root=document.getElementById('mm-app'); if(!root) return;
+  if(_mm){ if(_mm.built) setTimeout(_mmRedraw,30); return; }
+  _mm={a:null,b:null,s:null,M:null,v:'p',mode:'one',A:'icon_d2',B:'ecmwf_ifs025',k:0,cur:null,play:null,has:{},mask:null,built:false,sBusy:false};
+  const get=u=>fetch(PROXY+u).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); });
+  const [ra,rb]=await Promise.allSettled([get('/modeli-karta.json'),get('/modeli-karta2.json')]);
+  const a=ra.status==='fulfilled'&&ra.value&&ra.value.models?ra.value:null, b=rb.status==='fulfilled'&&rb.value&&rb.value.models?rb.value:null;
+  [ra,rb].forEach(r=>{ if(r.status==='rejected') console.warn('modelske karte: vir ni dosegljiv',r.reason); });
+  const base=a||b;
+  if(!base){
+    _mm=null;
+    root.innerHTML='<p>Modelskih kart trenutno ni mogoče naložiti (vir ne odgovarja). <button type="button" class="mm-retry" id="mm-retry">Poskusi znova</button></p>';
+    document.getElementById('mm-retry').onclick=()=>{ root.textContent='Nalagam …'; initModelMaps(); };
+    return;
+  }
+  const same=x=>x&&x.nx===base.nx&&x.ny===base.ny&&x.lat0===base.lat0&&x.lon0===base.lon0;
+  _mm.a=same(a)?a:null; _mm.b=same(b)?b:null;
+  _mm.M={t0:base.t0,steps:base.steps,stepH:base.stepH,lat0:base.lat0,lon0:base.lon0,d:base.d,nx:base.nx,ny:base.ny};
+  _mmShell(root);
+  _mm.built=true;
+  _mmSyncControls(); _mmBuildMaps(); _mmRedraw();
 }
