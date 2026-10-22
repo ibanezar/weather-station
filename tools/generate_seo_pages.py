@@ -2257,6 +2257,16 @@ def _opposite_compass(d):
 LAPSE_RATE_C_PER_100M = 0.65  # standard environmental lapse rate
 
 
+def _forecast_markers(name):
+    """Markerja WX-FCH/WX-FC7 z rezervnim besedilom; urni tools/inject_forecast.py ju napolni."""
+    import inject_forecast as IF
+    fc7 = (f'{IF.FC7_START}\n  <h2 id="napoved">Napoved, {name} — 7 dni</h2>\n'
+           f'  <p>Napoved se osveži vsako uro.</p>\n  {IF.FC7_END}')
+    fch = (f'{IF.FCH_START}\n  <h2 id="po-urah">Vreme po urah, {name}</h2>\n'
+           f'  <p>Napoved po urah se osveži vsako uro.</p>\n  {IF.FCH_END}')
+    return fch, fc7
+
+
 def gen_nearby_town_pages(hist, sitemap_urls):
     """Honest 'nearest station' pages for neighbouring towns without a station —
     each with a real distance/bearing/elevation computed from its own
@@ -2838,6 +2848,8 @@ def gen_camp_menina_page(hist, sitemap_urls):
   in informacije o kampu se obrni neposredno na Kamp Menina.</div>
 {intro}
 {cta}
+{_forecast_markers("Kamp Menina")[0]}
+{_forecast_markers("Kamp Menina")[1]}
 {camping}
   <h2>Podnebje se segreva</h2>
   <p>Iz arhiva postaje je razviden trend naraščanja povprečne letne temperature za približno
@@ -3007,6 +3019,8 @@ def gen_valley_camp_pages(hist, sitemap_urls):
   <div class="partial-note">{disclaimer}</div>
 {intro}
 {cta}
+{_forecast_markers(name)[0]}
+{_forecast_markers(name)[1]}
 {facts}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja

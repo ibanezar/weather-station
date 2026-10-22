@@ -42,6 +42,14 @@ for t in g.NEARBY_TOWNS:
     check(f"{t['slug']} smer postaje", where and g._opposite_compass(dirn) in where.group(1),
           where.group(1) if where else "")
 
+# 2b) Kampi in Menina imajo markerja napovedi in so v injektorju napovedi (sicer bi ostali prazni).
+import inject_forecast as IF  # noqa: E402
+tw = {t[0] for t in IF.TOWNS}
+for slug in ["vreme-kamp-menina"] + [c["slug"] for c in g.VALLEY_CAMPS]:
+    html = open(os.path.join(g.ROOT, slug, "index.html"), encoding="utf-8").read()
+    check(f"{slug} markerja napovedi", IF.FC7_START in html and IF.FCH_START in html)
+    check(f"{slug} v TOWNS", slug in tw)
+
 # 3) Blok z `place` ima kraj v besedilu in v atributih; brez `place` je kot prej.
 b = inj.build_block_history(inj.TAIL_TOWN, inj.CLS_RECICA, ("Mozirju", "3 km jugozahodno od Mozirja, 26 m više"))
 check("blok kraj", "Vreme v Mozirju" in b and 'data-loc="Mozirju"' in b)
