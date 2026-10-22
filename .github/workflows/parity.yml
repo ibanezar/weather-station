@@ -64,6 +64,11 @@ jobs:
       - name: Test strani o velikem vremenu (indeksi, stratosfera, prah, sinoptična karta)
         run: python3 tools/test_atmos.py
 
+      - name: Test cevovoda lastnega WRF (domene, namelisti, izbira polj GFS, DEM, izvleček, verifikacija)
+        run: |
+          pip install netCDF4 --quiet
+          python3 tools/test_wrf.py
+
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py
 

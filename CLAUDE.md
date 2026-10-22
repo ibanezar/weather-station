@@ -2517,6 +2517,27 @@ vsak generator je svoja datoteka. Osvežuje jih `atmos-forecast.yml` (09:40 UTC,
 - Notranjih meritev na teh straneh ni in ne smejo priti (test preveri, da generirane datoteke ne omenjajo `indoor`).
 - **Ni narejeno:** lastni WRF (potrebuje strežnik; glej pogovor), MJO, satelit, sondaža, evropska snežna karta.
 
+## Lasten WRF 0,5 km (`wrf/`, `docs/wrf-model.md`, 22. 10. 2026)
+
+Ideja po polarnivrtinec.si (WRF 0,5 km za Ljubljansko kotlino). **Namen je merjenje, ne stran**: ali lasten model dolino napove bolje kot
+Open-Meteo/MTR. Brez dokaza proti IREICA1 ne nastane nobena stran, kartica ali zgodba (glej `tools/verify_wrf.py`).
+
+- `wrf/Dockerfile` (WRF 4.6.1 + WPS 4.6.0, Ubuntu 20.04, gfortran, MPI dmpar; slika `ghcr.io/ibanezar/weather-station-wrf`, gradi jo
+  `wrf-image.yml` ob spremembi Dockerfile ali ročno). **Gradnja traja ~1 uro in v repozitoriju ni samodejnega dnevnega teka.**
+- `wrf/config.py`: domene 13,5 → 4,5 → 1,5 → 0,5 km (60 × 60 km d04, središče Rečica), namelisti; `tools/test_wrf.py` (v `parity.yml`) preverja
+  gnezdenje, število vrednosti na domeno in da namelist ne vsebuje ničesar nenavadnega. Tek ob **12 UTC, 36 h**: napoved za jutrišnji lokalni
+  dan je 12–36 ur v teku (spin-up inverzije); 00 UTC bi dal Tmin v 5. uri teka.
+- **Preizkušeno do konca v peskovniku** (sintetična statika, pravi GFS + DEM): MYNN se sesuje (privzet YSU); d04 brez `wrf/limit_slope.py` (22°) zraste w v 2 s — ne
+  odstranjuj. Časovni korak 4 × dx. Hitrost ~0,5 s/s modela na 4 jedrih (36 h ≈ 4–5 h na 16 jedrih, ne preizkušeno). Preizkus brez WPS_GEOG: `wrf/smoke.sh`.
+- `wrf/fetch_gfs.py`: GFS 0,25° (AWS) samo polja iz `Vtable.GFS` prek bajtnih območij (~150 MB/korak). `wrf/dem_tiles.py`: Copernicus GLO-30 →
+  ploščice WPS (`$GEOG/cop30m`) in popravek `GEOGRID.TBL`; **brez tega 0,5 km ne pomeni nič** (privzeti teren GMTED2010 je 900 m).
+- `wrf/run.sh` je cel cevovod v vsebniku; `wrf/extract.py` zapiše `data/wrf/recica-<tek>.json` (celica 0,5 km, višina celice, 30-min vrednosti,
+  dnevni povzetek po lokalnem dnevu). Veter je trenutna vrednost, ne sunek; Tmin/Tmax sta iz 30-min izhoda.
+- **Verifikacija** (`tools/verify_wrf.py` → `data/wrf-verification.json`): samo dnevi, ko imajo VSI viri napoved in meritev; IREICA1 je edina
+  referenca (ne Varpolje, ne DRSI); do 30 dni »zgodno«; negativen rezultat se objavi enako.
+- **WPS_GEOG** je samo na `www2.mmm.ucar.edu`, katerega potrdilo ima nepopolno verigo (v peskovniku curl pade) — TLS preverjanja ne izklapljaj.
+- Notranjih meritev cevovod ne bere. Ni narejeno: samodejen najem strežnika (Hetzner), umerjanje fizike, ansambel.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

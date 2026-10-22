@@ -1,0 +1,36 @@
+name: WRF preizkus cevovoda (brez WPS_GEOG)
+
+# Ročni preizkus: povleče sliko iz ghcr.io (wrf-image.yml), požene wrf/smoke.sh (sintetični statični podatki + pravi GFS,
+# tri majhne domene, 6 ur) in naloži izvleček kot artefakt. Dokazuje, da cevovod teče na GitHubovem strežniku; rezultat
+# NI napoved. Ne commita ničesar.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tek
+        run: |
+          IMG="ghcr.io/${GITHUB_REPOSITORY,,}-wrf:latest"
+          docker pull "$IMG"
+          mkdir -p /tmp/geog work-out
+          docker run --rm -v "$PWD":/work -v /tmp/geog:/geog -e NP=4 "$IMG" bash /work/wrf/smoke.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wrf-smoke
+          path: out/recica-*.json
