@@ -7201,6 +7201,42 @@ function _mtrMm(v){
   return v<0.2?'< 0,2 mm':'~'+v.toFixed(1).replace('.',',')+' mm';
 }
 
+/* Grafična ploščica dneva za verjetnost in količino padavin (MTR tab in AI tab): merilnik dežja (pričakovana
+   količina, linearno do 30 mm) + tri vodoravne vrstice verjetnosti (≥ 0,2 / ≥ 1 / ≥ 5 mm). Ena barva (modra
+   padavin, --rain-col), tri stopnje prosojnosti svetlo → temno = isto merilo z naraščajočim pragom; besedilo
+   nosi barvo besedila, ne barve serije. Identiteta ni v barvi (vrstice imajo oznako in številko), celotna
+   ploščica ima aria-label z vsemi številkami. Brez `mm` merilnika ni, brez pop1/pop5 ostane ena vrstica. */
+let _rainGaugeId=0;
+const RAIN_GAUGE_MAX=30;
+function rainDayHTML(d){
+  const r5=v=>Number.isFinite(v)?Math.round(v*20)*5:null;
+  const dt=new Date(d.date+'T12:00:00');
+  const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
+  const rows=[['≥ 0,2 mm',r5(d.pop),.6],['≥ 1 mm',r5(d.pop1),.8],['≥ 5 mm',r5(d.pop5),1]].filter(x=>x[1]!==null);
+  const mmTxt=_mtrMm(d.mm);
+  let gauge='',amt='';
+  if(mmTxt){
+    const id='rg'+(++_rainGaugeId);
+    const frac=Math.min(d.mm/RAIN_GAUGE_MAX,1);
+    const h=d.mm>=0.2?Math.max(2,Math.round(frac*62)):0;
+    gauge='<svg class="rain-gauge" viewBox="0 0 18 70" width="18" height="70" aria-hidden="true" focusable="false">'
+      +'<defs><clipPath id="'+id+'"><rect x="3" y="2" width="12" height="66" rx="6"/></clipPath></defs>'
+      +'<rect x="3" y="2" width="12" height="66" rx="6" class="rain-g-tube"/>'
+      +(h?'<rect x="3" y="'+(68-h)+'" width="12" height="'+h+'" class="rain-g-fill" clip-path="url(#'+id+')"/>':'')
+      +[10,20].map(m=>'<line x1="3" x2="7" y1="'+(68-Math.round(m/RAIN_GAUGE_MAX*62))+'" y2="'+(68-Math.round(m/RAIN_GAUGE_MAX*62))+'" class="rain-g-tick"/>').join('')
+      +'</svg>';
+    amt='<div class="rain-amt"><b>'+mmTxt+'</b><i>grobo</i></div>';
+  }
+  const aria=name+' '+dt.getDate()+'. '+(dt.getMonth()+1)+'.: '
+    +rows.map(x=>'verjetnost '+x[0]+' '+x[1]+' %').join(', ')+(mmTxt?', količina '+mmTxt+' (grobo)':'');
+  return '<div class="rain-day" role="img" aria-label="'+aria+'"'+(mmTxt?' title="'+MTR_MM_HINT+'"':'')+'>'
+    +'<div class="rain-hd">'+name+'<span>'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
+    +(mmTxt?'<div class="rain-main">'+gauge+amt+'</div>':'')
+    +'<div class="rain-bars">'+rows.map(x=>'<div class="rain-row"><span class="rain-l">'+x[0]+'</span>'
+      +'<span class="rain-t"><span class="rain-f" style="width:'+x[1]+'%;opacity:'+x[2]+'"></span></span>'
+      +'<span class="rain-v">'+x[1]+' %</span></div>').join('')+'</div></div>';
+}
+
 /* Verjetnost padavin pod MTR-jevimi ploščicami (samo montaža z elementom `rain`, tj. zavihek MTR):
    po dnevih dež ≥ 0,2 mm, ≥ 1 mm, ≥ 5 mm. Skrito, če noben dan nima pop; pop1/pop5 manjkata, dokler
    ju model ni naučen — takrat ostane samo dež. Količina (~ mm) je grobo povprečje virov. */
@@ -7212,15 +7248,8 @@ function renderMtrRain(idp){
   const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':'—';
   el.hidden=false;
   el.innerHTML='<div class="mtr-why-hd">Verjetnost padavin · MTR</div>'
-    +'<div class="mtr-days" style="margin-top:.5rem">'+days.map(d=>{
-      const dt=new Date(d.date+'T12:00:00');
-      const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
-      return '<div class="mtr-day"><div class="mtr-day-hd">'+name+'<span class="mtr-day-date">'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
-        +'<div class="mtr-day-val">'+pct(d.pop)+'<span class="mtr-day-unit">dež ≥ 0,2 mm</span></div>'
-        +(_mtrMm(d.mm)?'<div class="mtr-day-base" title="'+MTR_MM_HINT+'">'+_mtrMm(d.mm)+' · grobo</div>':'')
-        +'<div class="mtr-day-meta">≥ 1 mm '+pct(d.pop1)+' · ≥ 5 mm '+pct(d.pop5)+'</div></div>';
-    }).join('')+'</div>'
-    +'<div class="mtr-day-base" style="margin-top:.5rem">Verjetnost, da dnevna vsota padavin na postaji doseže prag; model naučen na meritvah IREICA1. Količina (~ mm) je grobo povprečje petih modelov, ne naučen popravek.</div>';
+    +'<div class="rain-g">'+days.map(rainDayHTML).join('')+'</div>'
+    +'<div class="mtr-day-base" style="margin-top:.5rem">Verjetnost, da dnevna vsota padavin na postaji doseže prag; model naučen na meritvah IREICA1. Količina (~ mm) je grobo povprečje petih modelov, ne naučen popravek. Merilnik: do 30 mm.</div>';
 }
 
 /* Kartica »Verjetnost padavin« v zavihku AI napoved: dež (pop), >= 1 mm (pop1), >= 5 mm (pop5) iz
@@ -7235,16 +7264,8 @@ async function fetchAiRain(){
     const days=(data.days||[]).filter(d=>Number.isFinite(d.pop));
     if(!days.length)throw new Error('brez dni');
     const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':'—';
-    grid.style.gridTemplateColumns='repeat('+Math.min(days.length,3)+',1fr)';
-    grid.innerHTML=days.map(d=>{
-      const dt=new Date(d.date+'T12:00:00');
-      const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
-      return '<div class="ai-fc-card"><div class="ai-fc-hour">'+name+' '+dt.getDate()+'. '+(dt.getMonth()+1)+'.</div>'
-        +'<div class="ai-fc-temp">'+pct(d.pop)+'</div>'
-        +'<div class="ai-fc-unit">dež ≥ 0,2 mm</div>'
-        +(_mtrMm(d.mm)?'<div class="ai-fc-unit" title="'+MTR_MM_HINT+'">'+_mtrMm(d.mm)+' · grobo</div>':'')
-        +'<div class="ai-fc-delta flat">≥ 1 mm '+pct(d.pop1)+'<br>≥ 5 mm '+pct(d.pop5)+'</div></div>';
-    }).join('');
+    grid.className='rain-g';
+    grid.innerHTML=days.map(rainDayHTML).join('');
     const rng=document.getElementById('ai-rain-range');
     if(rng)rng.textContent='D+1 … D+'+Math.max(...days.map(d=>d.lead||1));
   }catch(e){
