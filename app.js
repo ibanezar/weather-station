@@ -1726,6 +1726,11 @@ async function fetchComingUp(){
               capTitle='Razlika med ARSO ('+fmt(a.tmax,0)+'°C) in Open-Meteo ('+fmt(d.temperature_2m_max[i],0)+'°C) za najvišjo temperaturo — ne izmerjena negotovost, samo koliko se dva vira razhajata.';
             }
           }
+          if(m&&Number.isFinite(m.pop)){
+            const box=document.createElement('div');
+            box.innerHTML=rainMiniHTML(m);
+            if(box.firstChild)cell.appendChild(box.firstChild);
+          }
           if(capText){
             const cap=document.createElement('span');
             cap.className='cu-confidence';
@@ -7235,6 +7240,21 @@ function rainDayHTML(d){
     +'<div class="rain-bars">'+rows.map(x=>'<div class="rain-row"><span class="rain-l">'+x[0]+'</span>'
       +'<span class="rain-t"><span class="rain-f" style="width:'+x[1]+'%;opacity:'+x[2]+'"></span></span>'
       +'<span class="rain-v">'+x[1]+' %</span></div>').join('')+'</div></div>';
+}
+
+/* Strnjena različica za pas »Naslednjih 7 dni« (celica ~104 px): ena vrstica količine + tri tanke vrstice
+   verjetnosti (≥ 0,2 / ≥ 1 / ≥ 5 mm), iste barve in pravila kot rainDayHTML. Samo dnevi, ki jih MTR pokriva. */
+function rainMiniHTML(m){
+  const r5=v=>Number.isFinite(v)?Math.round(v*20)*5:null;
+  const rows=[['≥0,2',r5(m.pop),.6],['≥1',r5(m.pop1),.8],['≥5',r5(m.pop5),1]].filter(x=>x[1]!==null);
+  if(!rows.length)return '';
+  const mmTxt=_mtrMm(m.mm);
+  const aria='MTR: '+rows.map(x=>'verjetnost '+x[0]+' mm '+x[1]+' %').join(', ')+(mmTxt?', količina '+mmTxt+' (grobo)':'');
+  return '<div class="cu-mtr" role="img" aria-label="'+aria+'" title="'+(mmTxt?MTR_MM_HINT+' ':'')+'Verjetnost padavin po MTR, našem modelu (≥ 0,2 / ≥ 1 / ≥ 5 mm).">'
+    +'<div class="cu-mtr-hd">MTR'+(mmTxt?' <b>'+mmTxt+'</b>':'')+'</div>'
+    +rows.map(x=>'<div class="rain-row"><span class="rain-l">'+x[0]+'</span>'
+      +'<span class="rain-t"><span class="rain-f" style="width:'+x[1]+'%;opacity:'+x[2]+'"></span></span>'
+      +'<span class="rain-v">'+x[1]+'</span></div>').join('')+'</div>';
 }
 
 /* Verjetnost padavin pod MTR-jevimi ploščicami (samo montaža z elementom `rain`, tj. zavihek MTR):
