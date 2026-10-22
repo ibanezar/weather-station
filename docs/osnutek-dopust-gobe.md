@@ -1,5 +1,7 @@
 # Osnutek: gobe in vikend (idea 2)
 
+> **22. 10. 2026: besedilo je zdaj v `tools/generate_dopust_gobe_post.py`** (številke iz `history.json` z assert-i). Z jasno definicijo je rezultat **53 dogodkov** (ne 52) in lisička **28 od 53** (okoli polovice, ne 37 od 52). Ta datoteka je zgodovinski osnutek; merodajen je generator. Ni objavljeno: `python3 tools/generate_dopust_gobe_post.py --wire` šele po Filipovem pregledu (`docs/lektura-dopust-gobe.txt`).
+
 Stanje: **osnutek za Filipa**, ni objavljen, ni v `blog.json`, brez lekture (`lektura.yml` je izklopljena od 2. 10. 2026). Pisano po `docs/slog-pisanja.md`: vikanje, avtor v ednini, kratek odgovor najprej, naslov do 60 znakov.
 
 Izvirna ideja je bila »Zakaj gobe vedno rastejo, ko ste na dopustu?«. Tega podatki ne morejo preveriti (dopusta ne merimo, indeks pa ima v repozitoriju samo 30 dni zgodovine). Zato je kot članek obrnjena v obliko, ki jo **lahko preverimo**: koledarski račun zamika po dežju in 52 pravih dogodkov z dežjem iz postaje.

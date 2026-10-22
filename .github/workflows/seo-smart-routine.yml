@@ -31,11 +31,17 @@ jobs:
         continue-on-error: true
         run: python3 tools/generate_sezona_page.py
 
+      # /pojmi/ — vremenski pojmi s številko s postaje. Številke se skoraj ne
+      # spreminjajo, zato je dnevni tek le varovalka pred zastarelim datumom.
+      - name: Vremenski pojmi (/pojmi/)
+        continue-on-error: true
+        run: python3 tools/generate_pojmi_pages.py
+
       - name: Commit & push če je kaj novega
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ || true
+          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ pojmi/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi hub strani in novosti $(date -u +%Y-%m-%d) [skip ci]"
           # Ob hkratnem pushu drugega workflowa (npr. takoj po mergu) rebase in ponovi.

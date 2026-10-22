@@ -61,6 +61,12 @@ TOWNS = [
     ("vreme-gornji-grad", "Gornji Grad", 46.296042, 14.807663),
     ("vreme-luce", "Luče", 46.356461, 14.743625),
     ("vreme-solcava", "Solčava", 46.420125, 14.691811),
+    # Kampi: lastne koordinate (podvojitev CAMP_MENINA_LAT/LON in VALLEY_CAMPS v
+    # generate_seo_pages.py -- ista opomba kot zgoraj).
+    ("vreme-kamp-menina", "Kamp Menina", 46.3119, 14.9085),
+    ("vreme-forest-camping-mozirje", "Forest Camping Mozirje", 46.330360, 14.992459),
+    ("vreme-glamping-savinja", "Glamping Savinja", 46.339006, 14.848857),
+    ("vreme-herbal-glamping-ljubno", "Herbal Glamping Resort Ljubno", 46.3713, 14.8424),
 ]
 
 FC7_START = "<!-- WX-FC7:START (auto: tools/inject_forecast.py) -->"

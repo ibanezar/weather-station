@@ -2240,7 +2240,31 @@ def _bearing_compass(lat1, lon1, lat2, lon2):
     return dirs[int((deg + 22.5) // 45) % 8]
 
 
+_OPPOSITE_COMPASS = {"severno": "južno", "južno": "severno",
+                     "vzhodno": "zahodno", "zahodno": "vzhodno",
+                     "severovzhodno": "jugozahodno", "jugozahodno": "severovzhodno",
+                     "jugovzhodno": "severozahodno", "severozahodno": "jugovzhodno"}
+
+
+def _opposite_compass(d):
+    """_bearing_compass(postaja → kraj) pove, kje je KRAJ glede na postajo. Besedilo,
+    ki opisuje POSTAJO glede na kraj (»postaja je 3 km jugozahodno od Mozirja«),
+    mora uporabiti nasprotno smer -- prej je stalo obratno, na 6 krajevnih straneh,
+    3 kampih in Logarski dolini."""
+    return _OPPOSITE_COMPASS[d]
+
+
 LAPSE_RATE_C_PER_100M = 0.65  # standard environmental lapse rate
+
+
+def _forecast_markers(name):
+    """Markerja WX-FCH/WX-FC7 z rezervnim besedilom; urni tools/inject_forecast.py ju napolni."""
+    import inject_forecast as IF
+    fc7 = (f'{IF.FC7_START}\n  <h2 id="napoved">Napoved, {name} — 7 dni</h2>\n'
+           f'  <p>Napoved se osveži vsako uro.</p>\n  {IF.FC7_END}')
+    fch = (f'{IF.FCH_START}\n  <h2 id="po-urah">Vreme po urah, {name}</h2>\n'
+           f'  <p>Napoved po urah se osveži vsako uro.</p>\n  {IF.FCH_END}')
+    return fch, fc7
 
 
 def gen_nearby_town_pages(hist, sitemap_urls):
@@ -2264,6 +2288,7 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         town = t["town"]
         km = _haversine_km(LAT, LON, t["lat"], t["lon"])
         dirn = _bearing_compass(LAT, LON, t["lat"], t["lon"])
+        dirn_st = _opposite_compass(dirn)
         elev_diff = t["elev"] - ELEV
         lapse_corr = -LAPSE_RATE_C_PER_100M * elev_diff / 100
         est_mean_t = f["mean_t"] + lapse_corr if f["mean_t"] is not None else None
@@ -2271,11 +2296,13 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         url = f"/{t['slug']}/"
         rel = f"{t['slug']}/index.html"
 
-        title = f"Vreme {town} — najbližja meritev (postaja IREICA1, {num(km,0)} km)"
-        desc = (f"Vreme za {town} ({t['short']}): {town} nima lastne postaje ARSO. "
-                f"Najbližje neprekinjene meritve so s postaje IREICA1 v Rečici ob Savinji, "
-                f"približno {num(km,0)} km {dirn}, {abs(elev_diff):.0f} m {'više' if elev_diff > 0 else 'niže'}. "
-                f"Ocena temperature, lokalna mikroklima in trend segrevanja.")
+        # Poizvedba je »vreme {kraj}« (+ »po urah«): naslov mora obljubiti prav to, kar
+        # stran ima (trenutna meritev, urna napoved, 7 dni). Pojasnilo, da kraj nima
+        # lastne postaje, je v opisu in v vidnem bloku.
+        title = f"Vreme {town} danes, po urah in 7 dni"
+        desc = (f"Vreme {town}: trenutna meritev, napoved po urah in za 7 dni. {town} nima "
+                f"lastne postaje ARSO; najbližja je IREICA1 v Rečici ob Savinji, "
+                f"{num(km,0)} km {dirn_st}, {abs(elev_diff):.0f} m {'niže' if elev_diff > 0 else 'više'}.")
 
         crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
                   (f"Vreme {town}", None)]
@@ -2283,14 +2310,14 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         disclaimer = (f'  <div class="partial-note">Pomembno: {town} nima lastne uradne '
                       f'meteorološke postaje. Spodnji podatki so dejanske meritve postaje '
                       f'<strong>IREICA1 v Rečici ob Savinji</strong> ({ELEV} m n. m.) — najbližje '
-                      f'neprekinjene meritve, približno <strong>{num(km,0)} km {dirn}</strong> od {t["gen"]}. '
+                      f'neprekinjene meritve, približno <strong>{num(km,0)} km {dirn_st}</strong> od {t["gen"]}. '
                       f'{town} leži na {t["elev"]} m n. m., '
                       f'kar je <strong>{abs(elev_diff):.0f} m {"više" if elev_diff > 0 else "niže"}</strong> '
                       f'od postaje — ocene spodaj to upoštevajo, a niso izmerjene v samem kraju.</div>'
                       .replace("\n", " "))
 
         intro = f'''  <p class="archive-intro">
-  <strong>{town}</strong> je {t["note"]}. Postaja IREICA1 ({num(km,0)} km {dirn}, {t["elev"]} m n. m. v {t["loc"]}
+  <strong>{town}</strong> je {t["note"]}. Postaja IREICA1 ({num(km,0)} km {dirn_st}, {t["elev"]} m n. m. v {t["loc"]}
   proti {ELEV} m pri postaji) ponuja {f["n_days"]} dni realnih meritev — za razliko od splošnih napovedi,
   ki za to območje računajo le iz modela. {t["microclimate"]}</p>'''
 
@@ -2351,6 +2378,16 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         fch = (f'{IF.FCH_START}\n  <h2 id="po-urah">Vreme po urah, {town}</h2>\n'
                f'  <p>Napoved po urah se osveži vsako uro.</p>\n  {IF.FCH_END}')
 
+        # Statična meritev takoj pod naslovom (isti blok kot na /vreme-recica-ob-savinji/).
+        # Kraj in »kje je postaja« zapišemo kot atributa, da urni
+        # tools/inject_current_weather.py ve, katera stran je krajevna -- podatki o kraju
+        # so tako samo tu. Besedilo gradi ista funkcija kot drugod, ne podvajaj je.
+        from inject_current_weather import build_block_history as _bbh, TAIL_TOWN, CLS_RECICA
+        wx_now = _bbh(TAIL_TOWN, CLS_RECICA, (
+            t["loc"],
+            f"{num(km,0)} km {dirn_st} od {t['gen']}, {abs(elev_diff):.0f} m "
+            f"{'niže' if elev_diff > 0 else 'više'}"))
+
         others = [o for o in NEARBY_TOWNS if o["slug"] != t["slug"]]
         nearby_links = ('  <h2>Vreme po krajih v dolini</h2>\n'
                          '  <p>Pregled vseh krajev na enem mestu: '
@@ -2374,9 +2411,9 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         qa = [
             (f"Ima {town} svojo vremensko postajo?",
              f"{town} nima lastne uradne postaje ARSO. Najbližje neprekinjene meritve vremena "
-             f"prihajajo s postaje IREICA1 v Rečici ob Savinji, približno {num(km,0)} km {dirn}."),
+             f"prihajajo s postaje IREICA1 v Rečici ob Savinji, približno {num(km,0)} km {dirn_st}."),
             (f"Kako daleč in koliko više je {t['gen']} od postaje IREICA1?",
-             f"Postaja IREICA1 v Rečici ob Savinji je približno {num(km,0)} km {dirn} od {t['gen']}, "
+             f"Postaja IREICA1 v Rečici ob Savinji je približno {num(km,0)} km {dirn_st} od {t['gen']}, "
              f"{t['gen']} pa leži na {t['elev']} m n. m. — {abs(elev_diff):.0f} m "
              f"{'više' if elev_diff > 0 else 'niže'} od postaje ({ELEV} m)."),
             (f"So meritve IREICA1 reprezentativne za {town}?",
@@ -2385,7 +2422,7 @@ def gen_nearby_town_pages(hist, sitemap_urls):
             (f"Kje najdem trenutno vreme za {town}?",
              f"{town} nima lastne postaje, zato najbolj sveže podatke dobiš na živi kartici postaje "
              f"IREICA1 na naslovni strani Meteorec (meteorec.si) — z zavedanjem, da gre za meritev "
-             f"{num(km,0)} km {dirn} od {t['gen']}, ne s kraja samega."),
+             f"{num(km,0)} km {dirn_st} od {t['gen']}, ne s kraja samega."),
         ]
         if est_mean_t is not None:
             qa.append((
@@ -2416,7 +2453,8 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme {town}</h1>
-  <p class="post-meta">Najbližja postaja IREICA1 · {num(km,1)} km {dirn} · {t["elev"]} m n. m. · Zgornja Savinjska dolina</p>
+  <p class="post-meta">Najbližja postaja IREICA1 · {num(km,1)} km {dirn_st} · {t["elev"]} m n. m. · Zgornja Savinjska dolina</p>
+{wx_now}
 {disclaimer}
 {intro}
 {cta}
@@ -2715,6 +2753,7 @@ def gen_camp_menina_page(hist, sitemap_urls):
 
     km = _haversine_km(LAT, LON, CAMP_MENINA_LAT, CAMP_MENINA_LON)
     dirn = _bearing_compass(LAT, LON, CAMP_MENINA_LAT, CAMP_MENINA_LON)
+    dirn_st = _opposite_compass(dirn)
 
     def dl(d):
         y, m, dd = int(d[:4]), int(d[5:7]), int(d[8:10])
@@ -2725,7 +2764,7 @@ def gen_camp_menina_page(hist, sitemap_urls):
 
     title = "Vreme Kamp Menina — razmere za kampiranje ob Savinji"
     desc = (f"Vreme za Kamp Menina v Rečici ob Savinji: postaja IREICA1 stoji le "
-            f"{num(km,1)} km {dirn}, na istem dolinskem dnu ob Savinji — brez višinske "
+            f"{num(km,1)} km {dirn_st}, na istem dolinskem dnu ob Savinji — brez višinske "
             f"korekcije. Nočne temperature, padavine in vodostaj Savinje za kampiranje.")
 
     crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
@@ -2734,7 +2773,7 @@ def gen_camp_menina_page(hist, sitemap_urls):
     intro = f'''  <p class="archive-intro">
   <strong>Kamp Menina</strong> leži ob reki Savinji v Rečici ob Savinji, na istem dolinskem
   dnu Zgornje Savinjske doline kot meteorološka postaja <strong>IREICA1</strong> — le
-  {num(km,1)} km {dirn}. Ker gre za isto nadmorsko višino iste doline, tukajšnje meritve
+  {num(km,1)} km {dirn_st}. Ker gre za isto nadmorsko višino iste doline, tukajšnje meritve
   ne potrebujejo višinske korekcije, kot jo uporabljamo za oddaljenejše kraje: spodaj so
   <strong>dejanske meritve</strong>, ne ocena. Postaja meri neprekinjeno od {fmtd(f["first_date"])} —
   skupaj {n_days} dni podatkov o temperaturi, padavinah, vlagi in vetru.</p>'''
@@ -2803,12 +2842,14 @@ def gen_camp_menina_page(hist, sitemap_urls):
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme Kamp Menina</h1>
-  <p class="post-meta">Postaja IREICA1 · {num(km,1)} km {dirn} · isto dolinsko dno · Rečica ob Savinji</p>
+  <p class="post-meta">Postaja IREICA1 · {num(km,1)} km {dirn_st} · isto dolinsko dno · Rečica ob Savinji</p>
   <div class="partial-note">Ta stran ni uradna stran kampa, temveč vremenski pregled Meteorec za
-  okolico Kampa Menina, izpeljan iz meritev postaje IREICA1 ({num(km,1)} km {dirn}). Za rezervacije
+  okolico Kampa Menina, izpeljan iz meritev postaje IREICA1 ({num(km,1)} km {dirn_st}). Za rezervacije
   in informacije o kampu se obrni neposredno na Kamp Menina.</div>
 {intro}
 {cta}
+{_forecast_markers("Kamp Menina")[0]}
+{_forecast_markers("Kamp Menina")[1]}
 {camping}
   <h2>Podnebje se segreva</h2>
   <p>Iz arhiva postaje je razviden trend naraščanja povprečne letne temperature za približno
@@ -2871,6 +2912,7 @@ def gen_valley_camp_pages(hist, sitemap_urls):
         t = anchors[c["anchor_slug"]]
         km_station = _haversine_km(LAT, LON, c["lat"], c["lon"])
         dir_station = _bearing_compass(LAT, LON, c["lat"], c["lon"])
+        dir_station_st = _opposite_compass(dir_station)
         km_anchor = _haversine_km(t["lat"], t["lon"], c["lat"], c["lon"])
         elev_diff = t["elev"] - ELEV
         lapse_corr = -LAPSE_RATE_C_PER_100M * elev_diff / 100
@@ -2893,13 +2935,13 @@ def gen_valley_camp_pages(hist, sitemap_urls):
   <strong>{name}</strong> ({c["addr"]}) leži v Zgornji Savinjski dolini, {num(km_anchor,1)} km od
   {t["gen"]} — dovolj blizu, da velja ista ocena podnebja kot za <a href="/{t['slug']}/">{t['town']}</a>,
   brez dodatne (in nezanesljive) korekcije za tako majhno razdaljo. Ta ocena izhaja iz meritev postaje
-  <strong>IREICA1</strong> v Rečici ob Savinji, {num(km_station,0)} km {dir_station}, prilagojenih
+  <strong>IREICA1</strong> v Rečici ob Savinji, {num(km_station,0)} km {dir_station_st}, prilagojenih
   nadmorski višini {t["gen"]} ({t["elev"]} m).</p>''',
             f'''  <p class="archive-intro">
   Na naslovu {c["addr"]} leži <strong>{name}</strong>, {num(km_anchor,1)} km od {t["gen"]} v Zgornji
   Savinjski dolini. Razdalja je premajhna za lastno korekcijo, zato tu velja ocena podnebja za
   <a href="/{t['slug']}/">{t['town']}</a> — izpeljana iz meritev postaje <strong>IREICA1</strong> v
-  Rečici ob Savinji ({num(km_station,0)} km {dir_station}) in prilagojena nadmorski višini {t["gen"]}
+  Rečici ob Savinji ({num(km_station,0)} km {dir_station_st}) in prilagojena nadmorski višini {t["gen"]}
   ({t["elev"]} m).</p>''',
         ]
         intro = intro_variants[_camp_variant(c["slug"], "intro", len(intro_variants))]
@@ -2933,12 +2975,12 @@ def gen_valley_camp_pages(hist, sitemap_urls):
         qa1_variants = [
             (f"Ima {name} svojo vremensko postajo?",
              f"Ne. Najbližje neprekinjene meritve so s postaje IREICA1 v Rečici ob Savinji, "
-             f"{num(km_station,0)} km {dir_station}. {name} leži {num(km_anchor,1)} km od {t['gen']}, "
+             f"{num(km_station,0)} km {dir_station_st}. {name} leži {num(km_anchor,1)} km od {t['gen']}, "
              f"zato zanj velja ista ocena podnebja kot za {t['town']}."),
             (f"Od kod prihajajo vremenski podatki za {name}?",
              f"{name} nima lastne postaje. Uporabljena je ocena za {t['town']} "
              f"({num(km_anchor,1)} km stran), izpeljana iz meritev postaje IREICA1 v Rečici ob Savinji "
-             f"({num(km_station,0)} km {dir_station})."),
+             f"({num(km_station,0)} km {dir_station_st})."),
         ]
         qa = [
             qa1_variants[_camp_variant(c["slug"], "qa1", len(qa1_variants))],
@@ -2973,10 +3015,12 @@ def gen_valley_camp_pages(hist, sitemap_urls):
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme {name}</h1>
-  <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station} · {c["addr"]}</p>
+  <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station_st} · {c["addr"]}</p>
   <div class="partial-note">{disclaimer}</div>
 {intro}
 {cta}
+{_forecast_markers(name)[0]}
+{_forecast_markers(name)[1]}
 {facts}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja
@@ -3015,6 +3059,7 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
     solcava = next(t for t in NEARBY_TOWNS if t["slug"] == "vreme-solcava")
     km_station = _haversine_km(LAT, LON, LOGARSKA_LAT, LOGARSKA_LON)
     dir_station = _bearing_compass(LAT, LON, LOGARSKA_LAT, LOGARSKA_LON)
+    dir_station_st = _opposite_compass(dir_station)
     km_solcava = _haversine_km(solcava["lat"], solcava["lon"], LOGARSKA_LAT, LOGARSKA_LON)
 
     title = "Vreme Logarska dolina — najbližji realni vir"
@@ -3036,7 +3081,7 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
     intro = f'''  <p class="archive-intro">
   <strong>Logarska dolina</strong> je 7 km dolga ledeniška dolina v Kamniško-Savinjskih Alpah, zavarovana
   kot krajinski park, na zgornjem koncu Zgornje Savinjske doline. Postaja <strong>IREICA1</strong> v Rečici
-  ob Savinji je od nje {num(km_station,0)} km {dir_station} — predaleč in prenizko za zanesljivo oceno
+  ob Savinji je od nje {num(km_station,0)} km {dir_station_st} — predaleč in prenizko za zanesljivo oceno
   razmer v visokogorju, kjer se veter, sneg in nevihte pogosto močno razlikujejo od dolinskega dna.</p>'''
 
     nearest = f'''  <h2>Kar dejansko vemo</h2>
@@ -3096,7 +3141,7 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme Logarska dolina</h1>
-  <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station} · Kamniško-Savinjske Alpe</p>
+  <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station_st} · Kamniško-Savinjske Alpe</p>
 {disclaimer}
 {intro}
 {cta}
@@ -3356,7 +3401,9 @@ def gen_landing_page(hist, sitemap_urls):
     # 53 znakov: seo_title() ga pusti celega, a brez priponke » | Meteorec« (64 > 60).
     # Prejšnji 68-znakovni naslov se je tiho razbil po » — « nazaj na »Vreme Rečica ob
     # Savinji zdaj« in ključni rep se je izgubil — na glavni money strani.
-    title = "Vreme Rečica ob Savinji — napoved, temperatura, radar"
+    # 22. 10. 2026: »po urah« v naslov (GSC: »vreme rečica ob savinji po urah« 202 prikazov,
+    # položaj 9,4, noben naslov te besede ne vsebuje); 48 znakov, s priponko 58.
+    title = "Vreme Rečica ob Savinji: v živo, po urah, 7 dni"
     # Krajši opis (152 znakov): prejšnji (198 znakov, arhivsko/statistično usmerjen)
     # se je na mobilnem odrezal, glavna poizvedba »vreme rečica ob savinji« pa je imela
     # kljub poziciji ~9 CTR 0,2% — opis ni odgovarjal na takojšnjo namero (trenutno vreme).
@@ -3386,7 +3433,8 @@ def gen_landing_page(hist, sitemap_urls):
   <p>Visoka povprečna relativna vlažnost (<strong>{num(mean_hum, 0)} %</strong>) in zaprta lega doline
   pomenita pogosto <strong>radiacijsko meglo</strong> ter <strong>temperaturne inverzije</strong>,
   predvsem pozno jeseni in pozimi. V takih razmerah je na dnu doline mrzlo in megleno, nekaj sto metrov
-  višje pa sončno in toplo — klasičen savinjski inverzijski vzorec.</p>
+  višje pa sončno in toplo — klasičen savinjski inverzijski vzorec
+  (<a href="/pojmi/inverzija/">kaj je temperaturna inverzija</a>).</p>
 
   <h2>Padavine in veter</h2>
   <p>Območje je razmeroma namočeno: povprečno okrog <strong>{num(annual_precip, 0)} mm padavin na leto</strong>,

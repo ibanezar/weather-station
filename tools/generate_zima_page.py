@@ -789,6 +789,9 @@ def build_hub_body(data):
     <a class="phenom-card zima-phenom" href="/zima/zled/" style="{card_style("black_ice", "")}">
       <span class="ph-icon">{icon_html("black_ice", 30)}</span>Žled
       <div class="ph-count">{RISK_ICON.get(zled_level, "⚪")} {RISK_LABEL.get(zled_level, "ni podatka")}</div></a>
+    <a class="phenom-card zima-phenom" href="/blog/zima-2026-2027-el-nino-napoved.html" style="{card_style("snow_line", "")}">
+      <span class="ph-icon">{icon_html("snow_line", 30)}</span>Zima 2026/27
+      <div class="ph-count">El Niño: kaj čaka dolino</div></a>
     <a class="phenom-card zima-phenom" href="/zima/kurilni-semafor/" style="{card_style("heating_index", "")}">
       <span class="ph-icon">{icon_html("heating_index", 30)}</span>Kurilni semafor
       <div class="ph-count">{RISK_ICON.get(heating_level, "⚪")} {RISK_LABEL.get(heating_level, "ni podatka")}</div></a>
@@ -1407,14 +1410,14 @@ def main():
     # ── zled ──
     body, faq = build_zled_body(data)
     schema = "\n".join([
-        seo.webpage_schema("/zima/zled/", "Žled — nevarnost dežja, ki zmrzuje",
+        seo.webpage_schema("/zima/zled/", "Žled: kdaj dež zmrzuje in ali ga bo v dolini",
                             "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana "
                             "(ARSO) in razlaga, kako nastane žled.",
                             date_published="2026-10-07"),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Žled", None)]),
         seo.faq_schema(faq),
     ])
-    html = seo.page_shell("Žled — nevarnost dežja, ki zmrzuje",
+    html = seo.page_shell("Žled: kdaj dež zmrzuje in ali ga bo v dolini",
                            "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana in "
                            "razlaga, kako nastane žled.",
                            "/zima/zled/", schema, body)

@@ -45,7 +45,10 @@ REGISTER = [
      "storm-map.yml + tools/storm_map_gate.py (okno, GH_DISPATCH_TOKEN)"),
     ("Padavinska karta Slovenije", "og/precip-map/latest.json", "date", "date", 36,
      "precip-map.yml: vrata + jutranji posnetek rr24h v workerju (/arso-rr24h, cron 06:30 UTC)"),
-    ("Dnevna zgodba (FB/IG)", "og/story/latest.json", "ts", "generated_at", 36,
+    # 168 h (22. 10. 2026, Filip): okno 6:00-7:00 (story_gate.py) + zamujanje GitHubovega crona
+    # brez GH_DISPATCH_TOKEN pomenita, da zgodbe pogosto ni -- to je znana posledica odločitve,
+    # ne okvara. Alarm šele, ko je ni teden dni.
+    ("Dnevna zgodba (FB/IG)", "og/story/latest.json", "ts", "generated_at", 168,
      "daily-story.yml + tools/story_gate.py"),
     ("Termika: nivo igre", "igra/nivo.json", "ts", "generated", 36,
      "padalci-forecast.yml + tools/igra_gate.py (okno 5:00–12:00)"),

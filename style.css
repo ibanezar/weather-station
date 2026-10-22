@@ -3454,3 +3454,51 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 [data-theme="light"] #hs-pm[data-pm="#22c55e"]{color:#15803d!important}[data-theme="light"] #hs-pm[data-pm="#84cc16"]{color:#4d7c0f!important}
 [data-theme="light"] #hs-pm[data-pm="#eab308"]{color:#a16207!important}[data-theme="light"] #hs-pm[data-pm="#f97316"]{color:#c2410c!important}
 [data-theme="light"] #hs-pm[data-pm="#ef4444"]{color:#b91c1c!important}[data-theme="light"] #hs-pm[data-pm="#9333ea"]{color:#7e22ce!important}
+
+/* Kontrast v svetli temi (axe, 22. 10. 2026): barvne oznake z neonskimi odtenki na svetlih podlagah
+   (slovar, legenda nevihtne karte, vlaga tal) so imele 1,5–2,9:1. Odtenki so temnejši, matične barve
+   skupin ostanejo; v temni temi se nič ne spremeni. */
+[data-theme="light"] .gloss-vlaga{color:#0369a1}
+[data-theme="light"] .gloss-padavine{color:#4338ca}
+[data-theme="light"] .gloss-oblaki{color:#475569}
+[data-theme="light"] .gloss-veter{color:#166534}
+[data-theme="light"] .gloss-tlak{color:#92400e}
+[data-theme="light"] .gloss-temperatura{color:#b91c1c}
+[data-theme="light"] .gloss-sevanje{color:#854d0e}
+[data-theme="light"] .soil-val{color:var(--text) !important}
+[data-theme="light"] .sm-leg-past{color:#6d28d9}
+[data-theme="light"] .sm-leg-now{color:#15803d}
+.sm-leg-past{color:#a78bfa}.sm-leg-now{color:#4ade80}
+[data-theme="light"] .snd-source{opacity:1}
+[data-theme="light"] .sm-updated{color:#4b5563}
+
+/* Kontrast v svetli temi, 2. del (axe, 22. 10. 2026): neonski odtenki, zapisani vgrajeno (style="color:#4ade80")
+   ali v razredih, so na svetlih podlagah imeli 1,4–2,6:1. Selektor začne z »;color:« ali na začetku niza,
+   zato ne zadene background-color. Temna tema je nespremenjena. */
+[data-theme="light"] .pulse-now{color:#15803d}
+[data-theme="light"] .pulse-eta{color:#9a3412}
+[data-theme="light"] .med-card-rain{color:#1d4ed8}
+[data-theme="light"] .med-card-anom.cold{color:#1d4ed8}
+[data-theme="light"] .med-card-anom.warm{color:#9a3412}
+[data-theme="light"] [style^="color:#4ade80"],[data-theme="light"] [style*=";color:#4ade80"],[data-theme="light"] [style^="color: #4ade80"],[data-theme="light"] [style*="; color: #4ade80"],[data-theme="light"] [style*=";color: #4ade80"]{color:#15803d !important}
+[data-theme="light"] [style^="color:#fbbf24"],[data-theme="light"] [style*=";color:#fbbf24"],[data-theme="light"] [style^="color: #fbbf24"],[data-theme="light"] [style*="; color: #fbbf24"],[data-theme="light"] [style*=";color: #fbbf24"]{color:#a16207 !important}
+[data-theme="light"] [style^="color:#60a5fa"],[data-theme="light"] [style*=";color:#60a5fa"],[data-theme="light"] [style^="color: #60a5fa"],[data-theme="light"] [style*="; color: #60a5fa"],[data-theme="light"] [style*=";color: #60a5fa"]{color:#1d4ed8 !important}
+[data-theme="light"] [style^="color:#a78bfa"],[data-theme="light"] [style*=";color:#a78bfa"],[data-theme="light"] [style^="color: #a78bfa"],[data-theme="light"] [style*="; color: #a78bfa"],[data-theme="light"] [style*=";color: #a78bfa"]{color:#6d28d9 !important}
+[data-theme="light"] [style^="color:#fb923c"],[data-theme="light"] [style*=";color:#fb923c"],[data-theme="light"] [style^="color: #fb923c"],[data-theme="light"] [style*="; color: #fb923c"],[data-theme="light"] [style*=";color: #fb923c"]{color:#c2410c !important}
+[data-theme="light"] [style^="color:#f9a8d4"],[data-theme="light"] [style*=";color:#f9a8d4"],[data-theme="light"] [style^="color: #f9a8d4"],[data-theme="light"] [style*="; color: #f9a8d4"],[data-theme="light"] [style*=";color: #f9a8d4"]{color:#be185d !important}
+[data-theme="light"] [style^="color:#818cf8"],[data-theme="light"] [style*=";color:#818cf8"],[data-theme="light"] [style^="color: #818cf8"],[data-theme="light"] [style*="; color: #818cf8"],[data-theme="light"] [style*=";color: #818cf8"]{color:#4338ca !important}
+
+/* Kontrast v svetli temi, 3. del (axe, 22. 10. 2026): barve, ki jih JS nastavi prek el.style.color, se serializirajo kot
+   rgb(...), zato jih selektor po nizu hex ne ujame -- tu so razredna pravila z !important. Temna tema je nespremenjena. */
+[data-theme="light"] .pulse-now{color:#166534 !important}
+[data-theme="light"] .aq-ok .aq-score,[data-theme="light"] .aq-ok .aq-badge{color:#166534 !important}
+[data-theme="light"] .aq-warn .aq-score,[data-theme="light"] .aq-warn .aq-badge{color:#92400e !important}
+[data-theme="light"] .aq-bad .aq-score,[data-theme="light"] .aq-bad .aq-badge{color:#b91c1c !important}
+[data-theme="light"] .gdd-crop-val,[data-theme="light"] .flood-ev-q{color:#b45309 !important}
+[data-theme="light"] .gdd-crop-val{color:var(--text) !important}
+[data-theme="light"] .flood-ev-q{color:#b91c1c !important}
+[data-theme="light"] .nerd-idx-name{color:var(--text) !important}
+[data-theme="light"] .swx-g1 span{color:#c2410c !important}
+[data-theme="light"] #agro-hop-body span span{color:var(--muted) !important}
+[data-theme="light"] .sm-day.active{background:#c2410c;border-color:#c2410c}
+[data-theme="light"] .clabel > span[style*="var(--muted)"]{color:#566559 !important}

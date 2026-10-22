@@ -1,0 +1,63 @@
+Prvi vikend po dežju je za jurčke prezgodaj
+
+META OPIS: V petek dežuje, v soboto greste v gozd, pa ni nič. Po modelu je prvi vikend za jurčke prezgodaj, za lisičke je ravno prav le približno v polovici primerov.
+
+UVOD
+Kratek odgovor: prvi vikend po dežju je za jurčka po našem modelu prezgodaj. Ni slaba sreča in ni sosedova skrivnost, ampak koledar. Drugi vikend je po istem modelu za jurčka v oknu.
+
+01 — KOLEDAR -- Koledar
+
+Poznate takšen teden? V petek vsa dolina dežuje, v soboto zjutraj greste v gozd, pa so tla mokra in klobukov ni. V torek vas sosed vpraša, ali ste že bili, v soboto pa se pohvali s košaro. Zgleda, kot da gobe rastejo takrat, ko ste v službi ali drugje.
+
+Model za mikorizne vrste računa, da po sprožilnem dežju mine 8–16 dni, preden zraste trosnjak (jurček), za lisičko pa 4–14 dni. Okno jurčka je torej 9 dni dolgo in vedno vsebuje vsaj eno soboto in eno nedeljo. Prvi vikend po dežju pa pade v prvih 1–7 dneh, zato je pri jurčku vedno pred oknom. To je čisti koledarski račun, brez podatkov postaje:
+
+Zadnji deževni dan | Prvi vikend (dan po dežju) | Drugi vikend (dan po dežju) | Prvi vikend v oknu lisičke (4–14) | Drugi vikend v oknu jurčka (8–16) |
+
+pon | 5., 6. | 12., 13. | da | da |
+
+tor | 4., 5. | 11., 12. | da | da |
+
+sre | 3., 4. | 10., 11. | deloma | da |
+
+čet | 2., 3. | 9., 10. | ne | da |
+
+pet | 1., 2. | 8., 9. | ne | da |
+
+sob | 1. | 7., 8. | ne | deloma |
+
+ned | 6., 7. | 13., 14. | da | da |
+
+02 — PRIMER -- Primer: september 2026
+
+V Rečici je 10. septembra padlo 85,1 mm, 11. septembra še 35,6 mm, skupaj 120,7 mm. Zadnji deževni dan je bil petek. Prvi vikend (12. in 13. septembra) je bil 1. in 2. dan po dežju, za jurčka torej močno prezgodaj. Okno jurčka se je po modelu začelo 19. septembra in je trajalo do 27. septembra; drugi vikend (19. in 20. septembra) je bil v njem. Prvi zabeleženi opažanji bralcev sta 20. in 21. septembra.
+
+03 — POSTAJA -- Kaj pravijo padavine postaje
+
+Pregledal sem padavine postaje IREICA1 od avgusta do novembra v letih 2020–2026. Dogodek dežja je skupina dni z vsaj 3 mm (vrzel največ en dan), skupaj vsaj 20 mm. Takih dogodkov je bilo 53. Pri vsakem sem preveril, ali vsaj en dan prvega oziroma drugega vikenda po zadnjem deževnem dnevu pade v okno vrste.
+
+Pri jurčku noben dan prvega vikenda po dežju ni bil v oknu 8–16 dni v nobenem od 53 dogodkov. Vsaj en dan drugega vikenda je bil v oknu v vseh 53. To sicer sledi iz koledarja, a vidno je tudi, da se gobar brez tega znanja ob vsakem dežju odpravi prvi vikend.
+
+Pri lisički je bil vsaj en dan prvega vikenda v oknu 4–14 dni v 28 od 53 dogodkov, torej v okoli 53 %. Če dežuje v petek ali četrtek, je za lisičko prvi vikend prezgodaj; če dežuje na začetku tedna, je večinoma ravno prav.
+
+Dež sam na dan v tednu ne gleda. Dogodki so se začeli v vseh dnevih tedna, najpogosteje v četrtek (11 od 53) in v sredo (9 od 53).
+
+04 — OMEJITVE -- Česa ne vemo
+
+Zamiki so modelska ocena. Okno 8–16 dni za jurčka je v bazi označeno kot nekalibrirano. Za lisičko ga podpira analiza iNaturalista, ki kaže mediano 6–7 dni po začetku dežja; za jurčka je podpora šibkejša.
+
+Opažanje ni prvi trosnjak. Stari trosnjaki se fotografirajo še dolgo, zato je zamik v opažanjih zgornja ocena.
+
+Dopusta ne merimo. Članek ne trdi, da gobe ne rastejo, ko ste v službi, ampak da je vzorec delno posledica koledarja.
+
+Model ne pozna vašega gozda. Višina, tla in suša pred dežjem lahko okno premaknejo za več dni; kalkulator rasti po dežju vzame del tega v račun.
+
+05 — PRAKTIČNO -- Kaj naj naredite
+
+Če dežuje v četrtek ali petek, prvi vikend preskočite (za lisičke ga lahko izkoristite, če je dež padel na začetku tedna). Pojdite drugi vikend, ko je jurček po modelu v oknu. V kalkulator rasti po dežju vpišite datum dežja in količino in preberite okno za svoje območje.
+
+Gobe nabirajte samo, če jih zanesljivo poznate. Dvojnice jurčka in druge strupene vrste so na strani strupene gobe.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Viri: postaja IREICA1 (dnevne padavine, history.json, avgust–november 2020–2026); model Meteorec (okna zamika po skupinah, species_rules.yaml); iNaturalist × Open-Meteo (analiza zamika lisičke).

@@ -218,6 +218,9 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   `COLD_TOMORROW`, sicer ni kartice in ni objave. Stanje je ločeno (`tools/.story_evening_state.json`,
   ključ = datum jutrišnjega jutra), meta v `og/story/latest-evening.json` (ne `latest.json`, da varuh
   svežine jutranje zgodbe ne zmoti). Testi: `tools/test_gates.py`.
+- **Izpad zgodbe je pričakovan** (22. 10. 2026, issue #1224): zadnja zgodba je 19. 10., ker okno 6–7 in zamujanje crona
+  brez `GH_DISPATCH_TOKEN` dnevni tek zgrešita. Filip je izpade sprejel; prag svežine zgodbe v `check_freshness.py` je
+  zato 168 h (7 dni). Vrnitev rednosti: nastavi `GH_DISPATCH_TOKEN` ali razširi `WINDOW_END`.
 - **VS_YESTERDAY samo do 7:00** (19. 10. 2026): kartica »Danes bo hladneje kot včeraj« je šla ven ob 11:44, ohladitev pa je bila šele popoldne. Po 7:00 tema odpade (`VS_YESTERDAY_LAST_HOUR`), zgodbo dobi druga tema.
 
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
@@ -256,6 +259,13 @@ trenutno vreme pošiljala na naslovno. Zdaj nanj odgovori sama.
   tisto stran in nadaljuje z drugo (izhod 1).
 - Osvežujeta `prerender-current.yml` (urno, `--live`) in `generate-seo-pages.yml`
   (takoj po generiranju, da stran ni pol dneva na rezervnem zapisu).
+- **Krajevne strani** (`/vreme-mozirje/`, `-nazarje/`, `-ljubno-ob-savinji/`, `-gornji-grad/`, `-luce/`, `-solcava/`;
+  22. 10. 2026) imajo isti blok pod `<h1>`, a z besedilom »Vreme v Mozirju: najbližja meritev je s postaje IREICA1 …«.
+  `generate_seo_pages.py` zapiše v odstavek `data-loc`/`data-where`, `town_targets()` v injektorju odkrije strani po
+  teh atributih -- podatki o kraju so samo v generatorju. Razlog: GSC (18. 6.–15. 10.) »vreme mozirje« 753 prikazov,
+  poz. 11, nič klikov; naslov je zdaj »Vreme X danes, po urah in 7 dni«. **Smer postaje glede na kraj je nasprotna
+  smeri kraja glede na postajo** (`_opposite_compass()`): prej je na 11 straneh pisalo, da je postaja severovzhodno od
+  Mozirja, v resnici je jugozahodno. Test: `tools/test_town_pages.py` (v `parity.yml`).
 - **Notranjih meritev tu ni** in ne smejo priti — velja pravilo z vrha dokumenta.
 - Razred bloka je `CLS_*`: na naslovni strani `wx-static` (v `style.css` namenoma
   vizualno skrit — vrednosti kaže živa kartica), na pristajalni `wx-static wx-now`,
@@ -1748,6 +1758,21 @@ zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
 bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
 prepričaj, da isto pot pokriva tudi `git add`.
 
+## Vremenski pojmi (`/pojmi/`, 22. 10. 2026)
+
+Šest kratkih strani (inverzija, kumulonimbus, vetrna roža, hladna fronta, barometer, albedo) po izvozu Search Console
+(18. 6.–15. 10.): ti pojmi so imeli 75–347 prikazov na položaju 8–9 in skoraj nič klikov, ker ustrezne strani ni bilo.
+`tools/generate_pojmi_pages.py` (dnevno v `seo-smart-routine.yml`, `continue-on-error`).
+
+- Oblika: **odgovor v prvih dveh stavkih**, razlaga, razdelek »Kaj kaže postaja« z eno številko iz `history.json`
+  (samo prave meritve, `src != era5`; vsaka številka pove, na koliko dneh stoji), FAQ, povezave naprej.
+- **Številke so kazalniki, ne dokazi**: razpon temperature pozimi ob visokem tlaku (posreden znak inverzije), delež dni z
+  dežjem po padcu tlaka ≥ 5 hPa (41 % proti 31 % vseh dni: blag signal in tako tudi piše), največji padec povprečne
+  temperature v enem dnevu (16. 4. 2024). Postaja ne meri višinskega profila, odbitega sevanja ali front; strani to povedo.
+- Če dejstvo nima dovolj dni (`< 30`), se razdelek izpusti, ne piše se izmišljena vrednost.
+- Hub `/pojmi/` je v `CORE`, `llms.txt`; test: `tools/test_pojmi.py` (v `parity.yml`). Nov pojem = vnos v `pages()` +
+  vrstica v `CORE`; GEO: FAQPage samo, če je FAQ viden (hub ga nima).
+
 ## Sezonski vodič (`/sezona/`) in povzetek meseca (1. 10. 2026)
 
 - **`/sezona/`** (`tools/generate_sezona_page.py`, dnevno v `seo-smart-routine.yml`) —
@@ -2450,6 +2475,16 @@ bere samo `history.json` (zunanji `tempLow`/`tempHigh`/`precipTotal`) in `napove
   poskusni MTR in je tako označena. Slana (led na površini) in zmrzal (≤ 0 °C v zraku) se razlikujeta; šteje samo zmrzal.
 - Lektura je opravljena ročno (Filip, 21. 10. 2026; besedilo je v generatorju). Na FB/IG ne gre samodejno; kartice (`tools/generate_slane_se_ni_card_variants.py`, ista varovalka kot članek) in besedila so v `docs/fb-slane-se-ni.md`.
   Kartica 3 (petkovo jutro) je vezana na napoved, zato jo je treba objaviti pred petkom zjutraj.
+
+## Prvi vikend po dežju (`tools/generate_dopust_gobe_post.py`, 22. 10. 2026) -- čaka na Filipov pregled
+
+Osnutek `docs/osnutek-dopust-gobe.md` je v generatorju (`blog/prvi-vikend-po-dezju-jurcki-1022.html`, **še ni objavljen**: brez
+`--wire` se datoteka tudi ne sme commitati, ker bi šla z mergem javno brez vnosa v `blog.json`). Bere samo `history.json`
+(`src != era5`) in okna iz `species_rules.yaml`; dogodek = dnevi ≥ 3 mm z vrzeljo ≤ 1 dan, skupaj ≥ 20 mm, avg-nov 2020-2026.
+Assert-i: 53 dogodkov, jurček 0/53 v prvem vikendu, 53/53 v drugem, lisička 28/53, primer 10.-11. 9. = 120,7 mm.
+**Osnutek je navajal 52 in 37 -- z jasno definicijo teh številk ni mogoče ponoviti**, članek navaja izračunane. Koledarski del je
+aritmetika in je tako povedan; na blogu so že štirje članki o zamiku po dežju. Objava: Filip prebere `docs/lektura-dopust-gobe.txt`
+(`--text`), nato `--wire`; na FB/IG ne gre samodejno.
 
 ## Veliko vreme: sinoptika, stratosfera, indeksi, prah (22. 10. 2026)
 

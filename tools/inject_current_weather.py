@@ -58,6 +58,28 @@ CLS_INDEX = "wx-static"
 CLS_RECICA = "wx-static wx-now"
 TARGETS = [(INDEX, TAIL_INDEX, CLS_INDEX), (RECICA, TAIL_RECICA, CLS_RECICA)]
 
+# Krajevne strani (/vreme-mozirje/ ipd.) imajo isti blok, a besedilo pove, da
+# je meritev z najbližje postaje, ne iz kraja. Strani se odkrijejo same: generator
+# (generate_seo_pages.py) zapiše v odstavek `data-loc` (kraj v mestniku) in
+# `data-where` (razdalja, smer, višinska razlika), tu ju preberemo -- podatki o
+# kraju so tako samo na enem mestu. Brez teh atributov stran ni krajevna.
+TAIL_TOWN = ('Meritev se osveži vsako uro. Urna napoved in napoved za 7 dni sta '
+             'spodaj, pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, '
+             'vrednosti v živo pa na <a href="/">naslovni strani</a>.')
+PLACE_RE = re.compile(r'data-loc="([^"]*)"\s+data-where="([^"]*)"')
+
+
+def town_targets():
+    """[(pot, TAIL_TOWN, CLS_RECICA)] za vse /vreme-*/ strani z krajevnim blokom."""
+    out = []
+    for d in sorted(os.listdir(ROOT)):
+        path = os.path.join(ROOT, d, "index.html")
+        if not d.startswith("vreme-") or not os.path.isfile(path):
+            continue
+        if PLACE_RE.search(open(path, encoding="utf-8").read()):
+            out.append((path, TAIL_TOWN, CLS_RECICA))
+    return out
+
 START = "<!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->"
 END = "<!-- WX-STATIC:END -->"
 
@@ -108,11 +130,12 @@ def _strip_rain_test_offset(precip_total, day_iso):
     return max(0.0, precip_total - RAIN_TEST_OFFSET_MM)
 
 
-def wrap(text, cls=CLS_INDEX):
-    return f'{START}\n  <p class="{cls}" id="wx-static">{text}</p>\n  {END}'
+def wrap(text, cls=CLS_INDEX, place=None):
+    attrs = (f' data-loc="{place[0]}" data-where="{place[1]}"' if place else "")
+    return f'{START}\n  <p class="{cls}" id="wx-static"{attrs}>{text}</p>\n  {END}'
 
 
-def build_block_history(tail=TAIL_INDEX, cls=CLS_INDEX):
+def build_block_history(tail=TAIL_INDEX, cls=CLS_INDEX, place=None):
     hist = json.load(open(HIST, encoding="utf-8"))
     # Zadnji dan s PRAVO meritvijo: modelske (ERA5) ocene preskočimo, da uvod ne
     # prikazuje rezervnih podatkov kot "meritev postaje IREICA1".
@@ -130,9 +153,14 @@ def build_block_history(tail=TAIL_INDEX, cls=CLS_INDEX):
         parts.append(f"najmočnejši sunek vetra {num(v['windspeedHigh'])} km/h")
     summary = ", ".join(parts[:2]) + " — " + ", ".join(parts[2:]) + "."
 
-    text = (f'Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji '
-            f'(<time datetime="{last}">{fmtd(last)}</time>): {summary} {tail}')
-    return wrap(text, cls)
+    if place:
+        text = (f'Vreme v {place[0]}: zadnja znana dnevna meritev najbližje postaje IREICA1 v '
+                f'Rečici ob Savinji ({place[1]}), <time datetime="{last}">{fmtd(last)}</time>: '
+                f'{summary} {tail}')
+    else:
+        text = (f'Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji '
+                f'(<time datetime="{last}">{fmtd(last)}</time>): {summary} {tail}')
+    return wrap(text, cls, place)
 
 
 def fetch_live_wu():
@@ -151,7 +179,7 @@ def fetch_live_wu():
         return None
 
 
-def build_block_live(obs, tail=TAIL_INDEX, cls=CLS_INDEX):
+def build_block_live(obs, tail=TAIL_INDEX, cls=CLS_INDEX, place=None):
     m = obs.get("metric", {})
     # obsTimeLocal e.g. "2026-06-27 14:35:00"
     local = obs.get("obsTimeLocal", "")
@@ -172,10 +200,15 @@ def build_block_live(obs, tail=TAIL_INDEX, cls=CLS_INDEX):
     if rain_today is not None:
         parts.append(f"padavine danes {num(rain_today)} mm")
 
-    text = (f'Trenutno vreme na Rečici ob Savinji '
-            f'(meritev postaje IREICA1 ob <time datetime="{iso}">{hhmm}</time>, {fmtd(iso)}): '
-            f'{", ".join(parts)}. {tail}')
-    return wrap(text, cls)
+    if place:
+        text = (f'Vreme v {place[0]}: najbližja meritev je s postaje IREICA1 v Rečici ob Savinji '
+                f'({place[1]}), ob <time datetime="{iso}">{hhmm}</time>, {fmtd(iso)}: '
+                f'{", ".join(parts)}. {tail}')
+    else:
+        text = (f'Trenutno vreme na Rečici ob Savinji '
+                f'(meritev postaje IREICA1 ob <time datetime="{iso}">{hhmm}</time>, {fmtd(iso)}): '
+                f'{", ".join(parts)}. {tail}')
+    return wrap(text, cls, place)
 
 
 def js_num(x):
@@ -415,18 +448,21 @@ def main():
     hourly = fetch_hourly_wu() if live else None
 
     rc = 0
-    for path, tail, cls in TARGETS:
+    for path, tail, cls in TARGETS + town_targets():
         rel = os.path.relpath(path, ROOT)
         if not os.path.exists(path):
             print(f"OPOZORILO: {rel} ne obstaja — preskočeno.", file=sys.stderr)
             continue
+        html = open(path, encoding="utf-8").read()
+        pm = PLACE_RE.search(html)
+        place = (pm.group(1), pm.group(2)) if pm else None
 
         has_temp = obs and obs.get("metric", {}).get("temp") is not None
         if obs and not has_temp:
             print("OPOZORILO: WU obs brez temp — WX-STATIC pade nazaj na "
                   "dnevni povzetek namesto »temperatura — °C«.", file=sys.stderr)
-        block = build_block_live(obs, tail, cls) if has_temp else build_block_history(tail, cls)
-        html = open(path, encoding="utf-8").read()
+        block = (build_block_live(obs, tail, cls, place) if has_temp
+                 else build_block_history(tail, cls, place))
 
         if START not in html or END not in html:
             print(f"ERROR: markerjev ni v {rel} — dodaj jih enkrat.", file=sys.stderr)
