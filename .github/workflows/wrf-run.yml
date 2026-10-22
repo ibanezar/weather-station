@@ -1,0 +1,101 @@
+name: WRF tek na najetem strežniku (Hetzner)
+
+# Ročni tek lastnega WRF 0,5 km: najame strežnik (hcloud), prenese kodo, požene wrf/server/remote.sh, vzame izvleček
+# `recica-<tek>.json` v data/wrf/ in strežnik VEDNO izbriše (tudi ob napaki). Disk s statiko (`wrf-data`) ostane med teki.
+# Potrebuje secreta HCLOUD_TOKEN (Hetzner Cloud API, branje+pisanje) in WRF_SSH_KEY (zasebni ključ ed25519 brez gesla).
+# Cena: ob nastavljenem `server_type` ccx43 okoli 0,2–0,3 €/h; preveri aktualni cenik. Disk 100 GB ≈ 5 €/mesec.
+# Prvi tek: setup_only=true (prenese ≈29 GB statike, brez modela), nato običajni tek.
+
+on:
+  workflow_dispatch:
+    inputs:
+      init:
+        description: "Začetek teka YYYYMMDDHH (UTC); prazno = današnji 12 UTC (zadnji dosegljiv GFS tek)"
+        default: ""
+      hours:
+        description: "Dolžina napovedi (ur)"
+        default: "36"
+      profile:
+        description: "prod (4 domene, 0,5 km) ali test (majhne domene)"
+        default: "prod"
+      server_type:
+        description: "Hetzner tip strežnika"
+        default: "ccx43"
+      location:
+        description: "Lokacija (disk in strežnik morata biti v isti)"
+        default: "nbg1"
+      setup_only:
+        description: "true = samo pripravi statiko na disku"
+        default: "false"
+
+concurrency: wrf-run
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 600
+    permissions:
+      contents: write
+      packages: read
+    env:
+      HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+      SERVER: wrf-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Preveri secrete
+        run: |
+          [ -n "$HCLOUD_TOKEN" ] || { echo "::error::manjka secret HCLOUD_TOKEN (glej docs/wrf-model.md, »Strežnik«)"; exit 1; }
+          [ -n "${{ secrets.WRF_SSH_KEY }}" ] || { echo "::error::manjka secret WRF_SSH_KEY"; exit 1; }
+
+      - uses: hetznercloud/setup-hcloud@v1
+
+      - name: Pospravi zapuščene strežnike (starejši od 12 h)
+        run: |
+          now=$(date +%s)
+          hcloud server list -l purpose=wrf -o noheader -o columns=id,created | while read -r id created _; do
+            age=$(( now - $(date -d "$created" +%s 2>/dev/null || echo "$now") ))
+            [ "$age" -gt 43200 ] && { echo "brišem zapuščen strežnik $id"; hcloud server delete "$id"; }
+          done || true
+
+      - name: SSH ključ in disk
+        run: |
+          install -m 600 /dev/null key; printf '%s\n' "${{ secrets.WRF_SSH_KEY }}" > key
+          ssh-keygen -y -f key > key.pub
+          hcloud ssh-key describe wrf-actions >/dev/null 2>&1 || hcloud ssh-key create --name wrf-actions --public-key-from-file key.pub
+          hcloud volume describe wrf-data >/dev/null 2>&1 || hcloud volume create --name wrf-data --size 100 --location "${{ inputs.location }}" --format ext4 --label purpose=wrf
+
+      - name: Najem strežnika
+        run: |
+          hcloud server create --name "$SERVER" --type "${{ inputs.server_type }}" --image ubuntu-22.04 \
+            --location "${{ inputs.location }}" --ssh-key wrf-actions --volume wrf-data --automount --label purpose=wrf
+          IP=$(hcloud server ip "$SERVER"); echo "IP=$IP" >> "$GITHUB_ENV"
+          for i in $(seq 1 40); do
+            ssh -i key -o StrictHostKeyChecking=no -o ConnectTimeout=5 root@"$IP" true 2>/dev/null && break; sleep 5
+          done
+
+      - name: Tek
+        run: |
+          INIT="${{ inputs.init }}"
+          [ -n "$INIT" ] || INIT="$(date -u +%Y%m%d)12"
+          SSH="ssh -i key -o StrictHostKeyChecking=no root@$IP"
+          $SSH 'mkdir -p /work'
+          rsync -a -e "ssh -i key -o StrictHostKeyChecking=no" wrf root@"$IP":/work/
+          $SSH "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}-wrf:latest GHCR_USER=${{ github.actor }} GHCR_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+                INIT=$INIT HOURS=${{ inputs.hours }} PROFILE=${{ inputs.profile }} SETUP_ONLY=$([ '${{ inputs.setup_only }}' = true ] && echo 1) \
+                bash /work/wrf/server/remote.sh" 2>&1 | tee run.log
+          mkdir -p data/wrf
+          scp -i key -o StrictHostKeyChecking=no "root@$IP:/work/recica-*.json" data/wrf/ || echo "ni izvlečka (setup_only?)"
+
+      - name: Izbriši strežnik
+        if: always()
+        run: hcloud server delete "$SERVER" || true
+
+      - name: Verifikacija in commit
+        if: ${{ inputs.setup_only != 'true' }}
+        run: |
+          ls data/wrf/recica-*.json >/dev/null 2>&1 || { echo "::error::tek ni dal izvlečka"; exit 1; }
+          python3 tools/verify_wrf.py || true
+          git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
+          git add data/wrf data/wrf-verification.json
+          git commit -m "wrf: tek ${{ inputs.init }} [skip ci]" && git pull --rebase -q origin main && git push || true
