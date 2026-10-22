@@ -291,15 +291,17 @@ def build_body(flood, stations):
                  f'({status.lower()}, {round(ratio * 100)} % tipične vrednosti {seo.num(mean_q, 1)} m³/s); '
                  f'v ozki dolini pretok podceni, zato je merodajna meritev.')
     if meritev is not None:
-        answer = (f'  <p class="archive-intro">Savinja pri Rečici ob Savinji ima danes izmerjen pretok '
+        answer = (f'  <p class="archive-intro"><strong>Na kratko:</strong> Savinja pri Rečici ob Savinji ima danes izmerjen pretok '
                   f'<strong>{seo.num(meritev, 1)} m³/s</strong>'
                   + (f' in vodostaj {seo.num(nearest["vodostaj"], 0)} cm' if nearest.get("vodostaj") is not None else '')
                   + f' — najbližja merilna postaja ARSO je {nearest["name"]} '
                   f'({station_status(meritev, nearest).lower()}). {model_txt} '
-                  f'Podatki se osvežujejo dnevno — nazadnje {TODAY.isoformat()}.</p>')
+                  f'Podatki se osvežujejo dnevno — nazadnje {TODAY.isoformat()}. '
+                  f'Vir: meritve ARSO in modelska napoved GloFAS (Open-Meteo); to ni uradno opozorilo, za ukrepanje veljata ARSO in URSZR.</p>')
     else:
-        answer = (f'  <p class="archive-intro">Meritev ARSO trenutno ni na voljo. {model_txt} '
-                  f'Podatki se osvežujejo dnevno — nazadnje {TODAY.isoformat()}.</p>')
+        answer = (f'  <p class="archive-intro"><strong>Na kratko:</strong> meritev ARSO trenutno ni na voljo. {model_txt} '
+                  f'Podatki se osvežujejo dnevno — nazadnje {TODAY.isoformat()}. '
+                  f'Vir: meritve ARSO in modelska napoved GloFAS (Open-Meteo); to ni uradno opozorilo, za ukrepanje veljata ARSO in URSZR.</p>')
 
     warn_box = ""
     if ratio >= 2.5:
