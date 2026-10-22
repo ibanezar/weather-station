@@ -3486,7 +3486,7 @@ function switchTab(tab){
   if(tab==='water'){     initVodostaj(); }
   if(tab==='agro'){      initAgro(); }
   if(tab==='nerd'){      initNerd(); }
-  if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); }
+  if(tab==='ai'){        initSensorDiag(); aiAutoLoad(); fetchAiRain(); }
   if(tab==='mtr'){       fetchMosForecast(); }
   if(tab==='surroundings'){ initSurroundings(); setTimeout(initRadarMap,100); }
   if(tab==='gallery'){     initGallery(); }
@@ -7154,6 +7154,35 @@ function _mtrVerifRows(){
    iste. Montaže se poiščejo v DOM, zato dodajanje nove kartice v HTML ne
    zahteva spremembe v app.js: dovolj je predpono dopisati sem. */
 const MTR_MOUNT_IDS=['mos-','hmos-'];
+/* Kartica »Verjetnost padavin« v zavihku AI napoved: dež (pop), >= 1 mm (pop1), >= 5 mm (pop5) iz
+   napoved-modela.json. Zaokroženo na 5 %; pop1/pop5 manjkata, dokler ju model ni naučen — takrat
+   ostane samo dež, ničesar se ne izmišlja. */
+async function fetchAiRain(){
+  const grid=document.getElementById('ai-rain-grid');if(!grid)return;
+  try{
+    const r=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const days=(data.days||[]).filter(d=>Number.isFinite(d.pop));
+    if(!days.length)throw new Error('brez dni');
+    const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':'—';
+    grid.style.gridTemplateColumns='repeat('+Math.min(days.length,3)+',1fr)';
+    grid.innerHTML=days.map(d=>{
+      const dt=new Date(d.date+'T12:00:00');
+      const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
+      return '<div class="ai-fc-card"><div class="ai-fc-hour">'+name+' '+dt.getDate()+'. '+(dt.getMonth()+1)+'.</div>'
+        +'<div class="ai-fc-temp">'+pct(d.pop)+'</div>'
+        +'<div class="ai-fc-unit">dež ≥ 0,2 mm</div>'
+        +'<div class="ai-fc-delta flat">≥ 1 mm '+pct(d.pop1)+'<br>≥ 5 mm '+pct(d.pop5)+'</div></div>';
+    }).join('');
+    const rng=document.getElementById('ai-rain-range');
+    if(rng)rng.textContent='D+1 … D+'+Math.max(...days.map(d=>d.lead||1));
+  }catch(e){
+    grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:.5rem 0">Napoved padavin MTR trenutno ni na voljo.</div>';
+    console.warn('AI padavine:',e);
+  }
+}
+
 function _mtrMounts(){return MTR_MOUNT_IDS.filter(p=>document.getElementById(p+'chart'));}
 
 async function fetchMosForecast(){
