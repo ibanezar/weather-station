@@ -52,4 +52,23 @@ for key in t.POP_THRESHOLDS:
     check(entry["coefficients"].get(key) is None, f"{key} manjka v starem modelu -> None")
 check(hasattr(p, "mos"), "napovedovalnik uvaža isti modul kot učenje")
 
+# Zamrznjena napoved za danes: iz prejšnje datoteke po datumu; drugi tek istega dne jo obdrži.
+import datetime as dt, json, tempfile  # noqa: E402
+d0 = dt.date(2026, 10, 22)
+old = {"generated_at": "2026-10-21T06:30:00Z",
+       "days": [{"date": "2026-10-22", "lead": 1, "pop": 0.9, "pop1": 0.8, "pop5": 0.4},
+                {"date": "2026-10-23", "lead": 2, "pop": 0.1}]}
+with tempfile.TemporaryDirectory() as tmp:
+    path = os.path.join(tmp, "n.json")
+    json.dump(old, open(path, "w"))
+    fz = p.frozen_today(path, d0)
+    check(fz and fz["pop"] == 0.9 and fz["pop5"] == 0.4 and fz["frozen_at"] == "2026-10-21T06:30:00Z",
+          "frozen_today: današnji dan iz prejšnje datoteke po datumu")
+    check(p.frozen_today(path, dt.date(2026, 10, 25)) is None, "frozen_today: brez dneva ni nič")
+    json.dump({"generated_at": "2026-10-22T08:00:00Z", "days": [], "today": fz}, open(path, "w"))
+    fz2 = p.frozen_today(path, d0)
+    check(fz2 and fz2["pop"] == 0.9 and fz2["frozen_at"] == "2026-10-21T06:30:00Z",
+          "frozen_today: drugi tek istega dne ohrani prvotno zamrznitev")
+    check(p.frozen_today(os.path.join(tmp, "ni.json"), d0) is None, "frozen_today: manjkajoča datoteka")
+
 sys.exit(1 if FAIL else 0)

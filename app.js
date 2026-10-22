@@ -7044,7 +7044,11 @@ async function fetchTextForecast(){
     const mtrRain={};
     try{
       const mr=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
-      if(mr.ok)((await mr.json()).days||[]).forEach(x=>{if(Number.isFinite(x.pop))mtrRain[x.date]=x;});
+      if(mr.ok){
+        /* `today` = včerajšnja zamrznjena napoved za današnji dan (days se začne pri jutri). */
+        const mj=await mr.json();
+        (mj.days||[]).concat(mj.today?[mj.today]:[]).forEach(x=>{if(Number.isFinite(x.pop))mtrRain[x.date]=x;});
+      }
     }catch(_){}
     const r5=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':null;
 
