@@ -275,8 +275,8 @@ def main():
     js = JS.replace("__VALID__", valid_js).replace("__V__", run_dt.strftime("%Y%m%d%H"))
     body = build_body(run_dt, generated) + "\n" + js
     title = "Sinoptična karta Evrope: tlak, T850, višina 500 hPa"
-    desc = ("Izobare, visoki in nizki tlak, temperatura na 850 hPa in višina 500 hPa nad Evropo za naslednje štiri "
-            "dni iz modela ECMWF IFS. Izris enega teka, ne uradna napoved.")
+    desc = ("Izobare, tlak, T850 in višina 500 hPa nad Evropo za 4 dni iz ECMWF IFS. Izris enega teka, "
+            "ne uradna napoved.")
     ac.write_site_page(REL + "index.html", REL, title, desc, body, FAQ, "Sinoptična karta", "2026-10-22",
                        modified=generated[:10],
                        extra_head=CSS)

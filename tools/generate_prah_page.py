@@ -267,8 +267,8 @@ def main():
         stale = (f'  <p class="callout"><strong>Podatki niso sveži:</strong> vir ob zadnjem teku ni bil dosegljiv, '
                  f'prikazan je posnetek z {_html.escape(ac.fmt_dt_local(d["generated_at"]))}.</p>\n')
     title = "Saharski prah nad Evropo in Slovenijo: napoved"
-    desc = ("Napoved saharskega prahu za naslednje štiri dni: zemljevid Evrope in Sredozemlja ter prah in PM10 za "
-            "slovenske kraje po dnevih in urah. Model CAMS, ne meritev.")
+    desc = ("Napoved saharskega prahu za 4 dni: zemljevid Evrope ter prah in PM10 za slovenske kraje. "
+            "Model CAMS, ne meritev.")
     ac.write_site_page(REL + "index.html", REL, title, desc, build_body(d, stale), FAQ, "Saharski prah", "2026-10-22",
                        modified=d["generated_at"][:10])
     return 0

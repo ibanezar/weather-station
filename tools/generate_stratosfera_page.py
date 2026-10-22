@@ -355,8 +355,8 @@ def main():
                  f'dosegljiv, prikazan je posnetek z {_html.escape(ac.fmt_dt_local(d["generated_at"]))}.</p>\n')
     clima = ac.read_json(CLIMA_PATH)
     title = "Stratosfera in polarni vrtinec: veter na 10 hPa, SSW"
-    desc = ("Zonalni veter na 10 hPa pri 60 °N, temperatura polarne kape in nenadna stratosferska segrevanja (SSW) iz "
-            "modela GFS: zadnji meseci in napoved za 10 dni. Spremljanje vrtinca, ne napoved mraza.")
+    desc = ("Veter na 10 hPa pri 60 °N, polarna kapa in SSW iz modela GFS: zadnji meseci in napoved za 10 dni. "
+            "Spremljanje vrtinca, ne napoved mraza.")
     ac.write_site_page(REL + "index.html", REL, title, desc, build_body(d, clima, stale), FAQ,
                        "Stratosfera in polarni vrtinec", "2026-10-22", modified=d["generated_at"][:10])
     return 0

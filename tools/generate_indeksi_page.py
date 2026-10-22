@@ -310,8 +310,8 @@ def main():
         stale = (f'  <p class="callout"><strong>Podatki niso sveži:</strong> NOAA ob zadnjem teku ni bil '
                  f'dosegljiv, prikazan je posnetek z {_esc(ac.fmt_dt_local(d["generated_at"]))}.</p>\n')
     title = "Indeksi AO, NAO in ENSO: polarni vrtinec in sezona"
-    desc = ("Arktična oscilacija (AO), Severnoatlantska oscilacija (NAO) in ENSO z NOAA: zadnjih 120 dni, 15-dnevna "
-            "napoved ansambla GEFS in razlaga. Kazalniki sezone, ne napoved za Rečico.")
+    desc = ("AO, NAO in ENSO iz NOAA: zadnjih 120 dni, 15-dnevna napoved ansambla GEFS in razlaga. Kazalniki sezone, "
+            "ne napoved za Rečico.")
     ac.write_site_page(REL + "index.html", REL, title, desc, build_body(d, stale), FAQ, "Indeksi AO, NAO, ENSO",
                        "2026-10-22", modified=d["generated_at"][:10])
     return 0
