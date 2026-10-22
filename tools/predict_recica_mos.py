@@ -236,6 +236,29 @@ def predict_day(model, lead, feats):
     return out
 
 
+TODAY_KEYS = ("date", "lead", "pop", "pop1", "pop5")
+
+
+def frozen_today(path, today):
+    """Včerajšnja (zamrznjena) napoved MTR za današnji dan. Datoteka vsebuje samo D+1..D+3, zato
+    današnji dan ob jutranjem prepisu izpade; vzamemo ga iz prejšnje datoteke po DATUMU (ne po
+    `lead`), bodisi iz `days` bodisi iz njenega `today` (drugi tek istega dne). Napovedi za danes
+    ne preračunavamo: bila bi že narejena z včerajšnjimi vhodi, ki so zdaj stari."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            old = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return None
+    cands = list(old.get("days") or []) + ([old["today"]] if isinstance(old.get("today"), dict) else [])
+    for d in cands:
+        if d.get("date") == today.isoformat() and d.get("pop") is not None:
+            out = {k: d.get(k) for k in TODAY_KEYS}
+            out["frozen_at"] = (old.get("today") or {}).get("frozen_at") if d is old.get("today") \
+                else old.get("generated_at")
+            return out
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser(description="Napoved lokalnega MOS modela.")
     ap.add_argument("--no-write", action="store_true")
@@ -341,6 +364,11 @@ def main():
         "wn2_source": ("Google DeepMind WeatherNext 2 (64 članov, prek Open-Meteo, CC BY 4.0) — "
                        "surova mreža 0,25°, brez popravka za dolino"),
     }
+
+    fz = frozen_today(OUT_PATH, today)
+    if fz:
+        payload["today"] = fz
+        print(f"  danes ({fz['date']}): zamrznjena napoved, dež {int((fz['pop'] or 0) * 100)} %")
 
     for d in days:
         print(f"  {d['date']} (D+{d['lead']}): {d['tmax']} / {d['tmin']} °C "
