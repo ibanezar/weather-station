@@ -3416,3 +3416,20 @@ body[data-weather]{--blue:var(--c-accent)}
    vodoravni drsniki grafov se ob prikazu uskladijo prek obstoječega ResizeObserverja (initChartScrollHints). */
 #tab-current.active>.card:not(.chart-card):nth-child(n+10),#tab-current.active>.g2,#tab-current.active>.g3,#tab-current.active>.g4,#tab-current.active>.insights-row{content-visibility:auto;contain-intrinsic-size:auto 420px}
 @media print{#tab-current.active>*{content-visibility:visible}}
+
+/* ── Dolinski prerez v herou (A1) ────────────────────────────────────────
+   Shematski prerez Rečica → Gornji Grad → Črnivec; stolpec zraka je obarvan z izmerjenimi temperaturami (app.js heroValleySvg).
+   Višina je rezervirana (aspect-ratio), da prihod podatkov ne premakne strani; v preprostem pogledu skrito. */
+.hero-valley{margin:0 0 1.1rem;padding:.6rem .7rem .55rem;border-radius:var(--r-md);background:var(--fc-bg);border:1px solid var(--fc-border)}
+.hv-body{aspect-ratio:640/190;display:flex;align-items:center}
+@media (min-width:760px){.hv-body{aspect-ratio:1/.24}}
+.hv-body>.skel{width:100%}
+.hv-svg{display:block;width:100%;height:100%;overflow:visible}
+.hv-ground{fill:var(--hv-ground,#0a120e);stroke:var(--c-line-strong);stroke-width:1.2}
+[data-theme="light"] .hero-valley{--hv-ground:#d7e0d9}
+.hv-dot{fill:var(--c-accent);stroke:var(--card-bg);stroke-width:2}
+.hv-n{font:600 11px 'Inter','Inter Fallback',sans-serif;fill:var(--text);paint-order:stroke;stroke:var(--card-bg);stroke-width:3px;stroke-linejoin:round}
+.hv-t{font:500 11px 'JetBrains Mono',monospace;fill:var(--text);paint-order:stroke;stroke:var(--card-bg);stroke-width:3px;stroke-linejoin:round}
+.hv-cap{margin-top:.4rem;font-size:.76rem;line-height:1.45;color:var(--muted);min-height:2.9em}
+html[data-mode="simple"] .hero .hero-valley{display:none !important}
+@media (min-width:760px){.hv-n,.hv-t{font-size:13px}.hv-cap{font-size:.82rem}}

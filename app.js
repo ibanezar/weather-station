@@ -6213,7 +6213,7 @@ function ltgHistoryChart(daily){
   const aria='Strele v zadnjih 14 dneh, do 200 km od postaje: skupaj '+total+'. '+
     days.filter(x=>x.count).map(x=>fmt(x)+' '+x.count+' (najbližja '+Math.round(x.closest)+' km)').join('; ')+'.';
   return '<div style="margin-bottom:.2rem">Strel po dnevih, zadnjih 14 dni (stalni zapis):</div>'+
-    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block" role="img" aria-label="'+aria.replace(/"/g,'&quot;')+'">'+
+    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block" role="img" aria-label="'+aria.split('"').join('&quot;')+'">'+
     '<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="var(--muted)" stroke-opacity=".35"/>'+bars+lbl+ax+'</svg>';
 }
 
@@ -9730,29 +9730,122 @@ function renderValleyProfile(el,sum){
   const aria='Temperatura po višini: '+sum.pts.map(x=>x.name+' '+_duelNum(x.t,1)+' °C na '+x.elev+' m').join(', ')+'. '+sum.text;
   el.innerHTML='<div class="duel-verdict" style="margin-top:.6rem"><b>Profil doline v živo:</b> '+sum.text+
     ' Gradient '+(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m ('+sum.lo.name+' → '+sum.hi.name+').</div>'+
-    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block;margin:.3rem auto 0" role="img" aria-label="'+aria.replace(/"/g,'&quot;')+'">'+
+    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block;margin:.3rem auto 0" role="img" aria-label="'+aria.split('"').join('&quot;')+'">'+
     yTicks+ref+obs+dots+'</svg>'+
     '<div class="duel-credit">Prekinjena črta: standardni gradient −0,65 °C/100 m od '+sum.lo.name+'. Vse izmerjeno; '+
     'Črnivec in Gornji Grad: <a href="https://www.ceste.si/sl/razmere/vreme" target="_blank" rel="noopener">DRSI</a> (višini iz DEM).</div>';
+}
+// Izmerjene točke profila (Rečica + sveže DRSI postaje); vir deljen z dvobojem in junaškim prerezom.
+async function _vpPoints(homeT){
+  // Vir se osveži na ~10 min in je predpomnjen na 5 min v workerju — klienta omejimo na enkrat/5 min.
+  if(!_vpCache.data||Date.now()-_vpCache.ts>5*60*1000){
+    const r=await fetch(PROXY+'/crnivec-drsi');
+    _vpCache={ts:Date.now(),data:r.ok?await r.json():null};
+  }
+  const post=(_vpCache.data&&_vpCache.data.postaje)||{};
+  const fresh=st=>st&&st.temp_c!=null&&st.ts&&(Date.now()-new Date(st.ts))/60000<=VP_DRSI_MAX_AGE_MIN;
+  const pts=[{name:'Rečica',elev:VP_HOME_ELEV,t:homeT}];
+  if(fresh(post.gornji_grad))pts.push({name:'Gornji Grad',elev:VP_GG_ELEV,t:post.gornji_grad.temp_c});
+  if(fresh(post.crnivec))pts.push({name:'Črnivec',elev:VP_CRN_ELEV,t:post.crnivec.temp_c});
+  return pts;
 }
 async function fetchValleyProfile(homeT){
   const el=document.getElementById('duel-profile');
   if(!el)return;
   try{
-    // Vir se osveži na ~10 min in je predpomnjen na 5 min v workerju — klienta omejimo na enkrat/5 min.
-    if(!_vpCache.data||Date.now()-_vpCache.ts>5*60*1000){
-      const r=await fetch(PROXY+'/crnivec-drsi');
-      _vpCache={ts:Date.now(),data:r.ok?await r.json():null};
-    }
-    const post=(_vpCache.data&&_vpCache.data.postaje)||{};
-    const fresh=st=>st&&st.temp_c!=null&&st.ts&&(Date.now()-new Date(st.ts))/60000<=VP_DRSI_MAX_AGE_MIN;
-    const pts=[{name:'Rečica',elev:VP_HOME_ELEV,t:homeT}];
-    if(fresh(post.gornji_grad))pts.push({name:'Gornji Grad',elev:VP_GG_ELEV,t:post.gornji_grad.temp_c});
-    if(fresh(post.crnivec))pts.push({name:'Črnivec',elev:VP_CRN_ELEV,t:post.crnivec.temp_c});
+    const pts=await _vpPoints(homeT);
     const sum=valleyProfileSummary(pts);
     if(!sum){el.innerHTML='';return;}
     renderValleyProfile(el,sum);
   }catch(e){el.innerHTML='';console.warn('Dolinski profil:',e);}
+}
+
+// ── Dolinski prerez v herou ───────────────────────────────────────────
+// Shematski prerez doline (ne zemljevid): teren Rečica → Gornji Grad → Črnivec, nad njim stolpec zraka, obarvan z
+// IZMERJENIMI temperaturami treh postaj (linearno med njimi, nad najvišjo postajo standardni gradient −0,65 °C/100 m,
+// pod najnižjo ista temperatura). Črta 0 °C je ocena iz iste krivulje in tako tudi označena. Čiste funkcije
+// (tools/test_valley_profile.py): valleyTempAt, valleyZeroHeight, heroValleySvg.
+function valleyTempAt(pts,h){
+  const p=(pts||[]).filter(x=>x&&x.t!=null&&isFinite(x.t)).sort((a,b)=>a.elev-b.elev);
+  if(!p.length)return null;
+  if(h<=p[0].elev)return p[0].t;
+  const top=p[p.length-1];
+  if(h>=top.elev)return top.t+VP_STD_LAPSE*(h-top.elev)/100;
+  for(let i=1;i<p.length;i++){
+    if(h<=p[i].elev){const a=p[i-1],b=p[i];return a.t+(b.t-a.t)*(h-a.elev)/(b.elev-a.elev);}
+  }
+  return top.t;
+}
+// Prva višina (od spodaj), kjer krivulja preseka 0 °C; est=true, če je zunaj izmerjenega razpona višin.
+function valleyZeroHeight(pts,hmin,hmax){
+  const p=(pts||[]).filter(x=>x&&x.t!=null&&isFinite(x.t)).sort((a,b)=>a.elev-b.elev);
+  if(!p.length)return null;
+  let prev=valleyTempAt(p,hmin);
+  for(let h=hmin+10;h<=hmax;h+=10){
+    const t=valleyTempAt(p,h);
+    if((prev>0)!==(t>0)||t===0){
+      const hh=h-10+10*(prev/(prev-t||1));
+      return{h:Math.round(hh),est:hh>p[p.length-1].elev||hh<p[0].elev};
+    }
+    prev=t;
+  }
+  return null;
+}
+const VALLEY_HERO={T:26,B:12,hmin:300,hmax:1000,
+  // shematski teren: [delež širine, višina m]; postaje stojijo na terenu
+  terrain:[[0,560],[0.07,440],[0.18,366],[0.30,380],[0.45,428],[0.58,620],[0.70,800],[0.80,903],[0.90,950],[1,860]],
+  st:{'Rečica':0.18,'Gornji Grad':0.45,'Črnivec':0.80}};
+// Barvna lestvica zraka v prerezu: izrazitejša kot tempColor v območju −5…+18 °C, kjer se dolinski profili dejansko gibljejo.
+const VALLEY_COLORS=[[-8,[59,130,246]],[-2,[56,189,248]],[3,[45,212,191]],[9,[163,230,53]],[16,[251,191,36]],[24,[249,115,22]]];
+function hvColor(t){
+  const s=VALLEY_COLORS;if(t<=s[0][0])return'rgb('+s[0][1].join(',')+')';
+  for(let i=1;i<s.length;i++)if(t<=s[i][0]){const a=s[i-1],b=s[i],u=(t-a[0])/(b[0]-a[0]);return'rgb('+a[1].map((c,k)=>Math.round(c+(b[1][k]-c)*u)).join(',')+')';}
+  return'rgb('+s[s.length-1][1].join(',')+')';
+}
+function heroValleySvg(pts,colorFn,w0){
+  // Širina viewBox = širina vsebnika (merilo 1:1, pisava ostane berljiva na telefonu); višina po razmerju 640:190 (širše od 620 px 1:0,24, da hero na namizju ne zrase).
+  const W=Math.max(280,Math.min(900,Math.round(w0||640))),H=Math.round(W*(w0&&w0>=620?0.24:190/640)),{T,B,hmin,hmax}=VALLEY_HERO,Y=h=>H-B-(Math.min(hmax,Math.max(hmin,h))-hmin)/(hmax-hmin)*(H-T-B),X=f=>f*W;
+  const cf=colorFn||(()=> '#888');
+  // zvezen teren: kosinusna interpolacija med ključnimi točkami
+  const kp=VALLEY_HERO.terrain,ground=f=>{
+    for(let i=1;i<kp.length;i++)if(f<=kp[i][0]){const a=kp[i-1],b=kp[i],u=(f-a[0])/(b[0]-a[0]),e=(1-Math.cos(u*Math.PI))/2;return a[1]+(b[1]-a[1])*e;}
+    return kp[kp.length-1][1];};
+  let d='M0,'+H;for(let i=0;i<=64;i++){const f=i/64;d+=' L'+X(f).toFixed(1)+','+Y(ground(f)).toFixed(1);}d+=' L'+W+','+H+' Z';
+  let stops='';for(let h=hmax;h>=hmin;h-=50){const t=valleyTempAt(pts,h);if(t!=null)stops+='<stop offset="'+((hmax-h)/(hmax-hmin)*100).toFixed(0)+'%" stop-color="'+cf(t)+'"/>';}
+  const z=valleyZeroHeight(pts,hmin,hmax);
+  // oznaka 0 °C: prvi prosti položaj (desno, levo, sredina), da ne prekrije oznake postaje
+  let zl='';
+  if(z){
+    const zy=Y(z.h),txt='0 °C ≈ '+z.h+' m'+(z.est?' (ocena)':''),tw=txt.length*6.6+6;
+    const boxes=(pts||[]).filter(x=>VALLEY_HERO.st[x.name]!=null&&x.t!=null).map(x=>({x:X(VALLEY_HERO.st[x.name]),y:Y(x.elev)}));
+    const cand=[{x:W-6,a:'end',l:W-6-tw,r:W-6},{x:6,a:'start',l:6,r:6+tw},{x:W*0.62,a:'middle',l:W*0.62-tw/2,r:W*0.62+tw/2}];
+    const free=c=>boxes.every(b=>c.r<b.x-46||c.l>b.x+46||zy<b.y-32||zy-12>b.y+8);
+    const pick=cand.find(free)||cand[2];
+    zl='<line x1="0" x2="'+W+'" y1="'+zy.toFixed(1)+'" y2="'+zy.toFixed(1)+'" stroke="var(--text)" stroke-opacity=".7" stroke-dasharray="5 4"/>'+
+      '<text x="'+pick.x.toFixed(1)+'" y="'+(zy-4).toFixed(1)+'" text-anchor="'+pick.a+'" class="hv-t">'+txt+'</text>';
+  }
+  const dots=(pts||[]).map(x=>{const fx=VALLEY_HERO.st[x.name];if(fx==null||x.t==null)return '';
+    const cx=X(fx),cy=Y(x.elev);return '<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" class="hv-dot"/>'+
+      '<text x="'+cx.toFixed(1)+'" y="'+(cy-20).toFixed(1)+'" text-anchor="middle" class="hv-n">'+x.name+'</text>'+
+      '<text x="'+cx.toFixed(1)+'" y="'+(cy-7).toFixed(1)+'" text-anchor="middle" class="hv-t">'+_duelNum(x.t,1)+' °C'+(W>=480?' · '+x.elev+' m':'')+'</text>';}).join('');
+  const aria='Shematski prerez doline: '+(pts||[]).map(x=>x.name+' '+_duelNum(x.t,1)+' °C na '+x.elev+' m').join(', ')+(z?'. 0 °C približno na '+z.h+' m'+(z.est?' (ocena)':''):'')+'.';
+  return '<svg class="hv-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+aria.split('"').join('&quot;')+'">'+
+    '<defs><linearGradient id="hv-air" gradientUnits="userSpaceOnUse" x1="0" y1="'+Y(hmax).toFixed(1)+'" x2="0" y2="'+Y(hmin).toFixed(1)+'">'+stops+'</linearGradient></defs>'+
+    '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="url(#hv-air)" opacity=".62"/>'+
+    '<path d="'+d+'" class="hv-ground"/>'+zl+dots+'</svg>';
+}
+let _hvTries=0;
+async function fetchHeroValley(){
+  const el=document.getElementById('hero-valley-body');if(!el)return;
+  const obs=_lastBriefObs,homeT=obs&&obs.metric?obs.metric.temp:null;
+  if(homeT==null){if(++_hvTries<=12)setTimeout(fetchHeroValley,5000);return;}
+  try{
+    const pts=await _vpPoints(homeT),sum=valleyProfileSummary(pts);
+    const cap=document.getElementById('hero-valley-cap');
+    el.innerHTML=heroValleySvg(pts,hvColor,el.clientWidth);
+    if(cap)cap.textContent=sum?sum.text+' Gradient '+(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m.':'Višinske postaje trenutno niso dosegljive; kaže se samo Rečica.';
+    el.removeAttribute('aria-busy');
+  }catch(e){console.warn('Dolinski prerez:',e);}
 }
 
 function _duelNum(v,d=1){return(v==null||isNaN(v))?'—':Number(v).toFixed(d).replace('.',',');}
@@ -16880,6 +16973,7 @@ async function init(){
     fetchForecastExtras();
     fetchComingUp();
     runAdvancedOnly(()=>fetchMosForecast());
+    runAdvancedOnly(()=>fetchHeroValley());
   },800);
 
   // ── Wave 3: secondary widgets (2.5 s) ──
@@ -16922,6 +17016,7 @@ async function init(){
   requestAnimationFrame(()=>setTimeout(init,0));
 })();
 setInterval(fetchCurrent,5*60*1000);
+setInterval(()=>{if(!isSimpleMode())fetchHeroValley();},5*60*1000);
 // V preprostem pogledu je kartica skrita; osvežujemo šele, ko je res na
 // zaslonu (drugače bi se klici kopičili v vrsti runAdvancedOnly).
 setInterval(()=>{if(!isSimpleMode()&&_visDone.has('duel'))fetchValleyDuel();},5*60*1000);
