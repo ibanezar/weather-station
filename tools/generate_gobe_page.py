@@ -5932,6 +5932,14 @@ def build_body(rules, premium, free):
     best_terr = best_loc.get("terrain") or ""
     best_meta = " · ".join(x for x in (best_terr, f'{best_loc["elev_m"]} m') if x)
     hero_trend = hero_trend_html(pct)
+    # »Na kratko«: odgovor v enem odstavku z datumom osvežitve in virom -- besedilo za bralce, ki
+    # kartice ne vidijo (iskalniki, AI asistenti, bralniki zaslona). Čas je `generated`, ne datum strani.
+    short_when = f" Podatki so bili osveženi {updated}." if updated else ""
+    na_kratko = (f'  <p class="gp-short" style="margin:.9rem 0 0;font-size:.95rem;line-height:1.55;color:#d3dfcb">'
+                 f'<strong>Na kratko:</strong> gobarski indeks za {_esc(free["location"])} je danes {pct} od 100 ({_esc(lvl)}). '
+                 f'Najbolj obetavno območje je {_esc(best_loc["name"])} ({best_o["overall"]} od 100).{short_when} '
+                 f'Indeks je ocena, kako ugodno je vreme za rast gob, ne verjetnost najdbe. '
+                 f'Vir: model MeteoGobar iz napovedi Open-Meteo in pravil rasti za 300 vrst.</p>')
     hero = f'''  <section class="gp-hero" id="danes" aria-labelledby="gp-hero-title">
     <div class="gp-hero-kicker" id="gp-hero-title">Gobarski indeks danes<span class="gp-k-dot"> ·</span> <span class="gp-k-loc">{_esc(free["location"])}</span></div>
     <div class="gp-hero-top">
@@ -6331,6 +6339,7 @@ def build_body(rules, premium, free):
   <h1 class="page-title">Gobarska napoved — Zgornja Savinjska dolina</h1>
   <p class="post-meta gp-hub-meta">Model rasti gob po vrstah · lokalna baza {len(species)} vrst · osvežuje se dnevno</p>
 {hero}
+{na_kratko}
 {section_nav_html()}
 {mini_map_html}
 {picker_html}

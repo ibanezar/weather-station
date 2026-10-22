@@ -266,7 +266,14 @@ def _bars_svg_html(days):
 def build_hero(payload):
     today = payload
     color = next((d["color"] for d in payload["days"] if d["date"] == payload["date"]), "#f59e0b")
-    return f'''  <div class="gf-hero" data-generated="{_esc(payload.get("generated"))}">
+    _d = _dt.date.fromisoformat(payload["date"])
+    _fwi_txt = f'{payload["fwi"]:.1f}'.replace(".", ",")
+    na_kratko = (f'  <p class="gf-short" style="margin:.8rem 0;font-size:.95rem;line-height:1.55">'
+                 f'<strong>Na kratko:</strong> lokalni indeks požarne ogroženosti FWI za Rečico ob Savinji je '
+                 f'{_d.day}. {_d.month}. {_d.year} {_fwi_txt} ({_esc(payload["level"]).lower()} ogroženost). '
+                 f'To je izračun modela MeteoGasilec iz napovedi Open-Meteo, ne uradna ocena ARSO ali URSZR; '
+                 f'uradna opozorila so na tej strani zgoraj.</p>\n')
+    return na_kratko + f'''  <div class="gf-hero" data-generated="{_esc(payload.get("generated"))}">
     <span class="gf-kicker" style="color:rgba(255,255,255,.65)">📊 Lokalni meteorološki indeks · model MeteoGasilec</span>
     <div class="gf-hero-top">
       <div class="gf-gauge-wrap">
