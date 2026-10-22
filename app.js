@@ -21143,8 +21143,7 @@ const SURVEY_OPTS={
   q1:{t:'Kaj te je danes pripeljalo?',o:[['trenutno','Trenutno vreme'],['napoved','Napoved'],['gobe','Gobe'],['nevihte','Nevihte'],['crnivec','Črnivec'],['drugo','Drugo']]},
   q2:{t:'Kaj ti je na strani najbolj všeč?',o:[['trenutno','Trenutno vreme'],['napoved','Napoved'],['radar','Radar'],['gobe','Gobe'],['nevihte','Nevihte'],['crnivec','Črnivec'],['igre','Igre'],['drugo','Drugo']]},
   q3:{t:'Kako si nas našel?',o:[['google','Google'],['facebook','Facebook'],['instagram','Instagram'],['prijatelj','Prijatelj'],['drugo','Drugo']]},
-  q5:{t:'Bi si želel aplikacijo za telefon?',o:[['android','Android'],['iphone','iPhone'],['oba','Oba'],['ne','Ne rabim je']]},
-  q6:{t:'Bi plačal 2 € na mesec za delovanje postaje in strani?',o:[['da','Da'],['manj','Morda manj'],['ne','Ne']]}
+  q5:{t:'Bi si želel aplikacijo za telefon?',o:[['android','Android'],['iphone','iPhone'],['oba','Oba'],['ne','Ne rabim je']]}
 };
 function _surveyLs(k,v){
   try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(_){}
@@ -21193,7 +21192,7 @@ function initSurvey(){
     const x=document.createElement('button'); x.type='button'; x.className='sv-x'; x.setAttribute('aria-label','Zapri'); x.textContent='✕';
     x.onclick=()=>_surveyClose('dismissed');
     const h=document.createElement('h2'); h.id='sv-title'; h.textContent='Pomagaj nam izboljšati Meteorec';
-    const p=document.createElement('p'); p.className='sv-sub'; p.textContent='6 kratkih vprašanj, vsa neobvezna. Odgovori so anonimni.';
+    const p=document.createElement('p'); p.className='sv-sub'; p.textContent='5 kratkih vprašanj, vsa neobvezna. Odgovori so anonimni.';
     const body=document.createElement('div'); body.className='sv-body';
     Object.keys(SURVEY_OPTS).forEach(q=>{
       const g=document.createElement('div'); g.className='sv-q';

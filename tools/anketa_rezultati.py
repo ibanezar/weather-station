@@ -20,7 +20,7 @@ WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 # Cloudflare privzeti Python-urllib zavrne s 403 (glej CLAUDE.md).
 WORKER_UA = "Mozilla/5.0 (compatible; meteorec-bot/1.0; +https://meteorec.si/o-postaji.html)"
 TITLES = {"q1": "Kaj jih je pripeljalo", "q2": "Kaj jim je najbolj všeč", "q3": "Kako so nas našli",
-          "q5": "Aplikacija za telefon", "q6": "Plačilo 2 €/mesec"}
+          "q5": "Aplikacija za telefon"}
 
 
 def fetch():
@@ -35,9 +35,9 @@ def main():
     rows = fetch()
     if "--csv" in sys.argv:
         w = csv.writer(sys.stdout)
-        w.writerow(["ts", "q1", "q2", "q3", "q5", "q6", "q4"])
+        w.writerow(["ts", "q1", "q2", "q3", "q5", "q4"])
         for r in rows:
-            w.writerow([r.get("ts"), r.get("q1", ""), r.get("q2", ""), r.get("q3", ""), r.get("q5", ""), r.get("q6", ""), r.get("q4", "")])
+            w.writerow([r.get("ts"), r.get("q1", ""), r.get("q2", ""), r.get("q3", ""), r.get("q5", ""), r.get("q4", "")])
         return
     print(f"Odgovorov: {len(rows)}")
     for q, title in TITLES.items():

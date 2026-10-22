@@ -33,9 +33,9 @@ let r = await call('/anketa', 'POST', { q1: 'gobe', q3: 'google', q4: '  več kr
 check(r.status === 200, 'veljaven vnos sprejet');
 const saved = JSON.parse(store.get('feedback/anketa.json'));
 check(saved.length === 1 && saved[0].q1 === 'gobe' && saved[0].q4 === 'več krajev' && !('ip' in saved[0]), 'shranjeno brez IP, besedilo obrezano');
-r = await call('/anketa', 'POST', { q5: 'iphone', q6: 'da' });
-check(JSON.parse(store.get('feedback/anketa.json'))[0].q6 === 'da', 'q5/q6 shranjena');
-r = await call('/anketa', 'POST', { q1: 'napaka', q6: '5 €' });
+r = await call('/anketa', 'POST', { q5: 'iphone' });
+check(JSON.parse(store.get('feedback/anketa.json'))[0].q5 === 'iphone', 'q5 shranjena');
+r = await call('/anketa', 'POST', { q1: 'napaka', q5: 'windows' });
 check(r.status === 400, 'neveljavna vrednost in prazen odgovor zavrnjena');
 r = await call('/anketa', 'POST', { q1: 'gobe', website: 'x' });
 check(r.status === 200 && JSON.parse(store.get('feedback/anketa.json')).length === 2, 'honeypot: ok, a brez zapisa');

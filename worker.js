@@ -6557,9 +6557,9 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // ── Anketa obiskovalcev (popup od 2. obiska, 22. 10. 2026) ──
       // Anonimno: ne shranimo IP ne user-agenta (IP je samo v KV števcu omejitve, TTL 1 h).
       // Javnega branja ni — rezultate bere samo admin (Bearer DELETE_SECRET).
-      //   POST /anketa            { q1?, q2?, q3?, q4?, q5?, q6?, website? }
+      //   POST /anketa            { q1?, q2?, q3?, q4?, q5?, website? }
       //   GET  /anketa/rezultati  → admin
-      // ANKETA_Q1/Q2/Q3/Q5/Q6 so namerna podvojitev z SURVEY_OPTS v app.js (preverja tools/test_parity.py).
+      // ANKETA_Q1/Q2/Q3/Q5 so namerna podvojitev z SURVEY_OPTS v app.js (preverja tools/test_parity.py).
       if (path === "/anketa" || path === "/anketa/rezultati") {
         const r2 = env?.PHOTOS_R2;
         function _json(obj, status) {
@@ -6571,7 +6571,6 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const ANKETA_Q2 = ["trenutno", "napoved", "radar", "gobe", "nevihte", "crnivec", "igre", "drugo"];
         const ANKETA_Q3 = ["google", "facebook", "instagram", "prijatelj", "drugo"];
         const ANKETA_Q5 = ["android", "iphone", "oba", "ne"];   // ali si želi aplikacijo
-        const ANKETA_Q6 = ["da", "manj", "ne"];                 // ali bi plačal 2 €/mesec za delovanje postaje in strani
 
         async function _anRead() {
           if (!r2) return [];
@@ -6591,9 +6590,8 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const q2 = ANKETA_Q2.includes(body.q2) ? body.q2 : undefined;
           const q3 = ANKETA_Q3.includes(body.q3) ? body.q3 : undefined;
           const q5 = ANKETA_Q5.includes(body.q5) ? body.q5 : undefined;
-          const q6 = ANKETA_Q6.includes(body.q6) ? body.q6 : undefined;
           const q4 = (typeof body.q4 === "string" ? body.q4 : "").trim().slice(0, 300) || undefined;
-          if (!q1 && !q2 && !q3 && !q4 && !q5 && !q6) return _json({ error: "Odgovori vsaj na eno vprašanje" }, 400);
+          if (!q1 && !q2 && !q3 && !q4 && !q5) return _json({ error: "Odgovori vsaj na eno vprašanje" }, 400);
 
           const kv = env?.COUNTER_KV;
           if (kv) {
@@ -6605,10 +6603,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           }
           const all = await _anRead();
           const now = Date.now();
-          const dup = all.some(i => i.q1 === q1 && i.q2 === q2 && i.q3 === q3 && i.q4 === q4 && i.q5 === q5 && i.q6 === q6
+          const dup = all.some(i => i.q1 === q1 && i.q2 === q2 && i.q3 === q3 && i.q4 === q4 && i.q5 === q5
             && (now - new Date(i.ts).getTime()) < 60000);
           if (dup) return _json({ ok: true });
-          all.unshift({ id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(), v: "2026-10", q1, q2, q3, q4, q5, q6 });
+          all.unshift({ id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(), v: "2026-10", q1, q2, q3, q4, q5 });
           await r2.put(AN_KEY, JSON.stringify(all.slice(0, AN_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
           return _json({ ok: true });
         }

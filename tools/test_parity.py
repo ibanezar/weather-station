@@ -405,9 +405,9 @@ def konstante_workerja():
     check(set(kol) == opts == js_keys, "gobe: KOLICINE",
           f"worker={kol} meni={sorted(opts)} prikaz={sorted(js_keys)}")
     # anketa: možnosti odgovorov (worker ↔ app.js)
-    an = {q: js("worker.js", [f"ANKETA_{q.upper()}"], [{"expr": f"ANKETA_{q.upper()}"}])[0] for q in ("q1", "q2", "q3", "q5", "q6")}
+    an = {q: js("worker.js", [f"ANKETA_{q.upper()}"], [{"expr": f"ANKETA_{q.upper()}"}])[0] for q in ("q1", "q2", "q3", "q5")}
     ap = js("app.js", ["SURVEY_OPTS"], [{"expr": "SURVEY_OPTS"}])[0]
-    for q in ("q1", "q2", "q3", "q5", "q6"):
+    for q in ("q1", "q2", "q3", "q5"):
         check(an[q] == [v for v, _ in ap[q]["o"]], f"anketa: {q}", f"worker={an[q]} app={[v for v, _ in ap[q]['o']]}")
 
 
