@@ -3529,3 +3529,10 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 .rain-t{position:relative;height:6px;border-radius:3px;background:rgba(127,127,127,.18);overflow:hidden}
 .rain-f{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--rain-col)}
 @media(forced-colors:active){.rain-f{background:Highlight;opacity:1 !important}.rain-g-fill{fill:Highlight}}
+
+/* MTR verjetnost + količina v pasu »Naslednjih 7 dni« (celica ~104 px) */
+.cu-mtr{width:100%;margin-top:.35rem;padding-top:.4rem;border-top:1px solid var(--fc-border);display:flex;flex-direction:column;gap:.22rem;text-align:left}
+.cu-mtr-hd{font-size:.58rem;color:var(--muted);letter-spacing:.05em;text-align:center;margin-bottom:.1rem}
+.cu-mtr-hd b{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:500;color:var(--text);letter-spacing:0}
+.cu-mtr .rain-row{grid-template-columns:1.7rem 1fr 1.5rem;gap:.25rem;font-size:.56rem}
+.cu-mtr .rain-t{height:5px}
