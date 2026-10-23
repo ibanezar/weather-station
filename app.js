@@ -7738,6 +7738,8 @@ function renderMtrHero(idp){
     const parts=[];
     if(half!==null)parts.push('<span><b>'+fmt(d.tmax-half,1)+' – '+fmt(d.tmax+half,1)+' °C</b>razpon P10–P90</span>');
     if(Number.isFinite(d.tmin))parts.push('<span><b>'+fmt(d.tmin,1)+' °C</b>najnižja noč</span>');
+    const popP=Number.isFinite(d.pop)?Math.round(d.pop*20)*5:null,mmT=_mtrMm(d.mm);
+    if(popP!==null||mmT)parts.push('<span><b>'+(mmT||(popP+' %'))+'</b>dež'+(mmT&&popP!==null?' · verjetnost '+popP+' %':'')+'</span>');
     parts.push('<span><b>'+(fz===null?'&lt;10':fz)+' %</b>zmrzal</span>');
     if(Number.isFinite(d.d_tmax)){const r=Math.round(d.d_tmax*10)/10;
       parts.push('<span><b>'+(r>0?'+':(r<0?'−':'±'))+fmt(Math.abs(r),1)+' °C</b>popravek proti Open-Meteo</span>');}
