@@ -1,5 +1,26 @@
 [
   {
+    "type": "rekord-dneva-mraz",
+    "date": "2026-10-22",
+    "value": 4.1,
+    "prev_value": 7.9,
+    "param": "tempLow",
+    "label": "Rekord za ta koledarski dan — mraz",
+    "slug": "rekord-dneva-mraz-2026-10-22",
+    "years_covered": 6
+  },
+  {
+    "type": "nevihta",
+    "date": "2026-10-22",
+    "value": 799,
+    "param": "strele",
+    "closest_km": 11.6,
+    "precip": 21.8,
+    "gust": 13.0,
+    "label": "Nevihta s streli",
+    "slug": "nevihta-2026-10-22"
+  },
+  {
     "type": "susa",
     "date": "2026-10-13",
     "end_date": "2026-10-20",
