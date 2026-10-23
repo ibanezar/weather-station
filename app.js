@@ -7481,8 +7481,24 @@ function drawMtrChart(idp){
   const dn=fut.map((f,k)=>({x:fx(k),y:yS(f.mtr-(Number.isFinite(f.sd)?MTR_Z80*f.sd:0))})).reverse()
     .concat(junction?[junction]:[]);
   const ring=up.concat(dn);
-  if(ring.length>2)mkSVG(svg,'path',{d:'M '+ring.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ')+' Z',
-    fill:MTR_CC.mtrSoft,stroke:'none'});
+  const firstDraw=!svg.dataset.drawn;svg.dataset.drawn='1';
+  const anim=firstDraw&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // Pas se proti koncu širi in bledi: negotovost narašča z dnevi, zato naj bo tudi videti kot stožec.
+  const defs=mkSVG(svg,'defs',{});
+  const gid='mtrBand'+idp.replace(/\W/g,'');
+  const g=mkSVG(defs,'linearGradient',{id:gid,x1:'0',x2:'1',y1:'0',y2:'0'});
+  mkSVG(g,'stop',{offset:'0','stop-color':MTR_CC.mtr,'stop-opacity':'.42'});
+  mkSVG(g,'stop',{offset:'1','stop-color':MTR_CC.mtr,'stop-opacity':'.10'});
+  const poly=r=>'M '+r.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ')+' Z';
+  if(ring.length>2){
+    const outer=mkSVG(svg,'path',{d:poly(ring),fill:'url(#'+gid+')',stroke:'none'});
+    // Notranji pas P25–P75: tam je napoved najverjetnejša, zato je gostejši.
+    const Z50=0.6745;
+    const up2=(junction?[junction]:[]).concat(fut.map((f,k)=>({x:fx(k),y:yS(f.mtr+(Number.isFinite(f.sd)?Z50*f.sd:0))})));
+    const dn2=fut.map((f,k)=>({x:fx(k),y:yS(f.mtr-(Number.isFinite(f.sd)?Z50*f.sd:0))})).reverse().concat(junction?[junction]:[]);
+    const inner=mkSVG(svg,'path',{d:poly(up2.concat(dn2)),fill:MTR_CC.mtr,'fill-opacity':'.22',stroke:'none'});
+    if(anim)[outer,inner].forEach(e=>e.classList.add('mtr-fadein'));
+  }
 
   const line=pts=>'M '+pts.map(p=>p.x.toFixed(1)+','+p.y.toFixed(1)).join(' L ');
   // Meritve so ravne daljice med dnevi, NE zglajena krivulja: smoothPath bi med
@@ -7501,8 +7517,13 @@ function drawMtrChart(idp){
   if(omPts.length>1)mkSVG(svg,'path',{d:line(omPts),fill:'none',stroke:MTR_CC.om,'stroke-width':'2',
     'stroke-dasharray':'7,5','stroke-linecap':'round'});
   const mtrPts=(junction?[junction]:[]).concat(fut.map((f,k)=>({x:fx(k),y:yS(f.mtr)})));
-  if(mtrPts.length>1)mkSVG(svg,'path',{d:line(mtrPts),fill:'none',stroke:MTR_CC.mtr,'stroke-width':'2.8',
-    'stroke-linecap':'round','stroke-linejoin':'round'});
+  if(mtrPts.length>1){
+    mkSVG(svg,'path',{d:line(mtrPts),fill:'none',stroke:MTR_CC.mtr,'stroke-width':'9',opacity:'.16',
+      'stroke-linecap':'round','stroke-linejoin':'round'});
+    const ml=mkSVG(svg,'path',{d:line(mtrPts),fill:'none',stroke:MTR_CC.mtr,'stroke-width':'3',
+      'stroke-linecap':'round','stroke-linejoin':'round',pathLength:'1'});
+    if(anim)ml.classList.add('mtr-draw');
+  }
 
   fut.forEach((f,k)=>{
     if(Number.isFinite(f.om))mkSVG(svg,'circle',{cx:fx(k).toFixed(1),cy:yS(f.om).toFixed(1),r:'4',
@@ -7903,38 +7924,46 @@ function drawMtrDuel(idp){
     diff:r.open_meteo[M.err]-r.meteorec[M.err]}));
 
   const narrow=(window.innerWidth||880)<620;
-  const VW=narrow?430:880,VH=narrow?150:132,pad={t:16,r:14,b:16,l:14};
+  const VW=narrow?430:880,VH=narrow?170:150,pad={t:8,r:14,b:10,l:14};
   svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
-  const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
-  const mid=pad.t+ch/2,half=ch/2;
-  const maxAbs=Math.max(...data.map(d=>Math.abs(d.diff)),0.5);
-  const bw=Math.max(3,(cw/data.length)*0.62);
-  const xB=i=>pad.l+(i+0.5)/data.length*cw;
+  const cw=VW-pad.l-pad.r;
+  const wins=data.filter(d=>d.diff>0).length,loss=data.filter(d=>d.diff<0).length,ties=data.length-wins-loss;
+  const col=d=>d.diff>0?MTR_CC.mtr:(d.diff<0?MTR_CC.om:CC.grid);
 
-  data.forEach((d,i)=>{
-    const h=Math.max(1.5,Math.abs(d.diff)/maxAbs*(half-4));
-    const win=d.diff>0;
-    mkSVG(svg,'rect',{x:(xB(i)-bw/2).toFixed(1),y:(win?mid-h:mid+1).toFixed(1),
-      width:bw.toFixed(1),height:h.toFixed(1),rx:'2',fill:win?MTR_CC.mtr:MTR_CC.om,opacity:'.92'});
+  // Naslov: ena številka, ki pove celotno zgodbo.
+  const big=mkSVG(svg,'text',{x:pad.l,y:pad.t+40,'font-size':narrow?'40':'48','font-weight':'700',
+    fill:MTR_CC.actual,'font-family':"'Space Grotesk',Inter,sans-serif",'letter-spacing':'-1.5'});
+  big.textContent=wins;
+  const bw0=(String(wins).length)*(narrow?23:28);
+  const cap=mkSVG(svg,'text',{x:pad.l+bw0+8,y:pad.t+38,'font-size':narrow?'13':'15',fill:CC.label,'font-family':'Inter,sans-serif'});
+  cap.textContent='od '+data.length+' dni je bil MTR bližje meritvi';
+
+  // Trak zmag: zeleno MTR, siva neodločeno, vijolično Open-Meteo.
+  const by=pad.t+58,bh=14,gap=3;
+  const segs=[[wins,MTR_CC.mtr],[ties,CC.grid],[loss,MTR_CC.om]].filter(x=>x[0]>0);
+  const room=cw-gap*(segs.length-1);let x=pad.l;
+  segs.forEach(([n,c],k)=>{
+    const w=n/data.length*room;
+    mkSVG(svg,'rect',{x:x.toFixed(1),y:by,width:Math.max(2,w).toFixed(1),height:bh,rx:bh/2,fill:c,opacity:'.95'});
+    x+=w+gap;
   });
-  mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:mid.toFixed(1),y2:mid.toFixed(1),stroke:CC.grid,'stroke-width':'1.5'});
+  const l1=mkSVG(svg,'text',{x:pad.l,y:by+bh+16,'font-size':'11','font-weight':'700',fill:MTR_CC.mtr,'font-family':'Inter,sans-serif'});
+  l1.textContent='MTR '+wins;
+  const l2=mkSVG(svg,'text',{x:VW-pad.r,y:by+bh+16,'text-anchor':'end','font-size':'11','font-weight':'700',fill:MTR_CC.om,'font-family':'Inter,sans-serif'});
+  l2.textContent='Open-Meteo '+loss;
 
-  const t1=mkSVG(svg,'text',{x:pad.l,y:(pad.t-4).toFixed(1),'font-size':'10','font-weight':'700',
-    fill:MTR_CC.mtr,'font-family':'Inter,sans-serif'});
-  t1.textContent='▲ MTR bližje meritvi';
-  const t2=mkSVG(svg,'text',{x:pad.l,y:(VH-4).toFixed(1),'font-size':'10','font-weight':'700',
-    fill:MTR_CC.om,'font-family':'Inter,sans-serif'});
-  t2.textContent='▼ Open-Meteo bližje';
-
-  mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
-  const hl=mkSVG(svg,'rect',{x:0,y:pad.t,width:bw.toFixed(1),height:ch.toFixed(1),fill:CC.grid,
-    opacity:'0',rx:'2',style:'pointer-events:none'});
+  // Pike po dnevih (časovno, od najstarejšega): vsaka je en dan, barva = kdo je zmagal.
+  const dy=VH-pad.b-4,step=cw/data.length,r=Math.max(2.2,Math.min(4,step*0.4));
+  const xB=i=>pad.l+(i+0.5)*step;
+  data.forEach((d,i)=>mkSVG(svg,'circle',{cx:xB(i).toFixed(1),cy:dy,r:r.toFixed(1),fill:col(d),opacity:d.diff===0?'.6':'.9'}));
+  mkSVG(svg,'rect',{x:pad.l,y:dy-12,width:cw,height:24,fill:'transparent'});
+  const hl=mkSVG(svg,'circle',{cx:0,cy:dy,r:(r+3).toFixed(1),fill:'none',stroke:CC.label,'stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
   const tip=document.getElementById('chart-tip');
   attachScrub(svg,(sx,clientX,clientY)=>{
-    const i=Math.max(0,Math.min(data.length-1,Math.round((sx-pad.l)/cw*data.length-0.5)));
+    const i=Math.max(0,Math.min(data.length-1,Math.floor((sx-pad.l)/step)));
     const d=data[i];if(!d||!tip)return;
     const dd=new Date(d.date+'T12:00:00');
-    hl.setAttribute('x',(xB(i)-bw/2).toFixed(1));hl.setAttribute('opacity','.5');
+    hl.setAttribute('cx',xB(i).toFixed(1));hl.setAttribute('opacity','1');
     tip.innerHTML='<b>'+MTR_SL_DAYS[dd.getDay()].slice(0,3)+' '+dd.getDate()+'. '+(dd.getMonth()+1)+'.</b>'
       +'&ensp;zgrešil za: MTR <b style="color:'+MTR_CC.mtr+'">'+fmt(d.mtr,1)+' °C</b>'
       +'&ensp;·&ensp;Open-Meteo <b style="color:'+MTR_CC.om+'">'+fmt(d.om,1)+' °C</b>';
@@ -7944,10 +7973,8 @@ function drawMtrDuel(idp){
   },()=>{hl.setAttribute('opacity','0');if(tip)tip.style.opacity='0';});
 
   if(note){
-    const wins=data.filter(d=>d.diff>0).length,ties=data.filter(d=>d.diff===0).length;
-    note.innerHTML='MTR je bil bližje meritvi postaje v <b>'+wins+' od '+data.length+' dni</b>'
-      +(ties?' (·'+ties+' neodločeno)':'')+' — '+M.lbl.toLowerCase()
-      +', napoved za naslednji dan. Vsak stolpec je en dan, višina je razlika napak.';
+    note.innerHTML='Primerjava napake na '+M.lbl.toLowerCase()+', napoved za naslednji dan.'
+      +(ties?' Neodločeno: '+ties+'.':'')+' Vsaka pika spodaj je en dan (od najstarejšega), barva pove, kdo je bil bližje meritvi.';
   }
 }
 

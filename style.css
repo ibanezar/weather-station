@@ -3706,3 +3706,11 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 #tab-mtr .mtr-day-val,#tab-mtr .mtr-kpi-val,#tab-mtr .mtr-why-val,#tab-mtr .mtr-frost-big{font-family:var(--mtr-disp);letter-spacing:-.03em}
 #tab-mtr .mtr-day-date,#tab-mtr .mtr-day-meta,#tab-mtr .mtr-chip,#tab-mtr .txfc-mtr{font-family:Inter,sans-serif}
 #tab-mtr .mtr-day-meta{font-size:.76rem;line-height:1.5}
+
+/* MTR graf: pas in črta se ob prvem prikazu razpreta (samo če uporabnik animacij ne izklopi) */
+@media(prefers-reduced-motion:no-preference){
+  .mtr-fadein{animation:mtrFade .9s ease-out .15s both}
+  .mtr-draw{stroke-dasharray:1;animation:mtrDraw 1s cubic-bezier(.2,.7,.2,1) both}
+}
+@keyframes mtrFade{from{opacity:0}to{opacity:1}}
+@keyframes mtrDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
