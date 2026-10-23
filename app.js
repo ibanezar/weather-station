@@ -2880,7 +2880,7 @@ function wmoInfo(code){
 
 let _historyLoaded=false;
 // Tabs in each dropdown group
-const DD_TABS={fc:['forecast2','mtr','srednja','dolgorocna','stormmap','modelmaps'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
+const DD_TABS={fc:['forecast2','srednja','dolgorocna','stormmap','modelmaps'],data:['history','analysis','climate','nerd','records','extremes','surroundings','trivia','glossary'],okolje:['life','water','oceanologija','zrak','agro'],skupnost:['gallery','community']};
 function toggleTabDD(group){
   const menu=document.getElementById('tab-dd-'+group+'-menu');
   const isOpen=menu?.classList.contains('open');
@@ -7317,17 +7317,18 @@ async function fetchMosForecast(){
   if(!mounts.length)return;
   try{
     const cb='?_='+Math.floor(Date.now()/36e5);
-    const [fcRes,accRes,verif]=await Promise.all([
+    const [fcRes,accRes,verif,rel]=await Promise.all([
       fetch('/napoved-modela.json'+cb),
       fetch('/data/mtr-accuracy.json'+cb).catch(()=>null),
       _verifOnce().catch(()=>null),
+      fetch('/data/mtr-reliability.json'+cb).then(r=>r.ok?r.json():null).catch(()=>null),
     ]);
     if(!fcRes.ok)throw new Error('HTTP '+fcRes.status);
     const data=await fcRes.json();
     const acc=(accRes&&accRes.ok)?await accRes.json().catch(()=>null):null;
     const days=(data.days||[]).filter(d=>Number.isFinite(d.tmax)&&Number.isFinite(d.tmin));
     if(!days.length)throw new Error('brez dni');
-    _mtrState={data,days,acc,verif:verif||null,metric:(_mtrState&&_mtrState.metric)||'tmax'};
+    _mtrState={data,days,acc,verif:verif||null,rel:rel||null,metric:(_mtrState&&_mtrState.metric)||'tmax'};
     mounts.forEach(_mtrBindSeg);
     renderMtrCard();
   }catch(e){
@@ -7399,10 +7400,14 @@ function _renderMtrMount(idp){
 
   drawMtrChart(idp);
   renderMtrDays(idp);
+  renderMtrFrost(idp);
   renderMtrWhy(idp);
   renderMtrWn2(idp);
   renderMtrKpis(idp);
   drawMtrDuel(idp);
+  renderMtrSituations(idp);
+  renderMtrReliability(idp);
+  renderMtrMisses(idp);
   const dl=document.getElementById(idp+'duel-lbl');
   if(dl)dl.textContent=M.lbl.toLowerCase();
 }
@@ -7658,6 +7663,102 @@ function renderMtrWhy(idp){
       +'<span>%</span></div><div class="mtr-why-sub">najnižja ≤ 0 °C</div></div>':'')+'</div>'
     +'<p class="mtr-why-txt">Popravek MTR proti mreži Open-Meteo — to je celoten prispevek modela.'
     +(why?' '+why:'')+'</p>';
+}
+
+/* ═══ MTR zavihek: zmrzal, kdaj pomaga, zanesljivost, dnevnik zgrešitev ═══
+   Vse številke pridejo iz že naloženih datotek (napoved-modela.json, mtr-accuracy.json,
+   mtr-reliability.json, forecast_verification.json). Nobenega novega klica, nič izmišljenega:
+   brez podatka se kartica skrije ali pove, da ga ni. */
+
+/* Velika kartica zmrzali: prva noč kot naslov, vse noči kot trak. p_frost je poskusna verjetnost (glej docs). */
+function renderMtrFrost(idp){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(idp+'frost');if(!el)return;
+  const nights=st.days.filter(d=>Number.isFinite(d.p_frost)&&Number.isFinite(d.tmin));
+  if(!nights.length){el.hidden=true;el.innerHTML='';return;}
+  const n0=nights[0],pc=mtrFrostPct(n0.p_frost);
+  const word=n0.p_frost>=.5?'Zmrzal je verjetna':(n0.p_frost>=.2?'Zmrzal je možna':'Zmrzal ni verjetna');
+  const when=_mtrDayName(n0).toLowerCase();
+  const why={clear_calm:'Jasna in mirna noč: hladen zrak se zbere na dnu doline.',overcast:'Oblačna noč: zrak se meša, zato je hladneje manj.'}[n0.night_regime]||'';
+  el.hidden=false;
+  el.innerHTML='<div class="mtr-frost-hd">Zmrzal · noč za '+when+' ('+new Date(n0.date+'T12:00:00').getDate()+'. '+(new Date(n0.date+'T12:00:00').getMonth()+1)+'.)</div>'
+    +'<div class="mtr-frost-main"><div class="mtr-frost-big">'+(pc===null?'&lt;10':pc)+'<small>%</small></div>'
+    +'<div class="mtr-frost-txt"><b>'+word+'.</b> Najnižja temperatura '+fmt(n0.tmin,1)+' °C'
+    +(Number.isFinite(n0.tmin_sd)?' (±'+fmt(MTR_Z80*n0.tmin_sd,1)+' °C, P10–P90)':'')+'. '+why+'</div></div>'
+    +(nights.length>1?'<div class="mtr-frost-strip">'+nights.map(d=>{
+        const p=mtrFrostPct(d.p_frost),dt=new Date(d.date+'T12:00:00');
+        return '<div class="mtr-frost-night">'+_mtrDayName(d)+' · '+dt.getDate()+'. '+(dt.getMonth()+1)+'.<b>'+(p===null?'&lt;10':p)+' %</b>'
+          +'<i><span style="width:'+(p||0)+'%"></span></i></div>';}).join('')+'</div>':'')
+    +'<div class="mtr-frost-note">Poskusna verjetnost: P(najnižja ≤ 0 °C) iz napake modela na zadnjem letu, zaokroženo na 5 %. Ni uradno opozorilo.</div>';
+}
+
+/* Kdaj MTR pomaga: D+1 po vremenskem položaju dneva (mtr-accuracy.json → situations). Negativno = slabše od Open-Meteo. */
+function renderMtrSituations(idp){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(idp+'sit');if(!el)return;
+  const sit=(st.acc&&st.acc.situations)||{};
+  const keys=['jasno','vmes','mokro'].filter(k=>sit[k]);
+  if(!keys.length){el.innerHTML='<div class="mtr-empty">Razčlenitev bo prikazana, ko bo dovolj razrešenih dni.</div>';return;}
+  const cell=v=>v&&v.mae_mtr!=null?fmt(v.mae_mtr,2)+' / '+fmt(v.mae_om,2)+' °C <span style="color:var(--'+(v.improvement_pct<0?'red':'green')+')">('
+    +(v.improvement_pct>0?'+':'')+Math.round(v.improvement_pct)+' %)</span>':'—';
+  el.innerHTML='<div class="tbl-x" tabindex="0"><table class="mtr-miss"><thead><tr><th>Vreme tistega dne</th><th>Tmax: MTR / Open-Meteo</th><th>Tmin: MTR / Open-Meteo</th></tr></thead><tbody>'
+    +keys.map(k=>'<tr><td>'+sit[k].label+' · n='+sit[k].n+'</td><td>'+cell(sit[k].tmax)+'</td><td>'+cell(sit[k].tmin)+'</td></tr>').join('')
+    +'</tbody></table></div><p class="mtr-note">Povprečna napaka D+1 na postaji IREICA1. Največ pomaga ob jasnih, mirnih dneh z nočno inverzijo; ob dežju in oblačnosti se dolina obnaša kot mreža. Če je odstotek negativen, je MTR slabši od Open-Meteo.</p>';
+}
+
+/* Zanesljivostni diagram (BACKTEST po mesecih, ne živa meritev): dež in zmrzal, D+1. */
+function renderMtrReliability(idp){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(idp+'rel');if(!el)return;
+  const d=st.rel;if(!d){el.innerHTML='<div class="mtr-empty">Podatek trenutno ni na voljo.</div>';return;}
+  const pct=v=>Math.round(v*100),f3=v=>v.toFixed(3).replace('.',',');
+  const chart=(title,key)=>{
+    const e=(d[key]||{})['D+1'];if(!e||!e.bins||!e.bins.length)return '';
+    const W=300,H=290,P=34,S=W-P-12,x=v=>P+v*S,y=v=>H-P-v*S;
+    let g='';
+    [0,.25,.5,.75,1].forEach(t=>{
+      g+='<line x1="'+x(0)+'" x2="'+x(1)+'" y1="'+y(t)+'" y2="'+y(t)+'" stroke="currentColor" stroke-opacity=".12"/>'
+        +'<text x="'+(P-6)+'" y="'+(y(t)+3)+'" text-anchor="end" font-size="9" fill="currentColor" fill-opacity=".7">'+pct(t)+'</text>'
+        +'<text x="'+x(t)+'" y="'+(H-P+13)+'" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity=".7">'+pct(t)+'</text>';
+    });
+    g+='<line x1="'+x(0)+'" y1="'+y(0)+'" x2="'+x(1)+'" y2="'+y(1)+'" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="4 3"/>';
+    const pts=e.bins.filter(b=>b.n>=10).map(b=>[x(b.mean_p),y(b.freq),b]);
+    g+='<polyline fill="none" stroke="'+MTR_CC.mtr+'" stroke-width="2" points="'+pts.map(p=>p[0]+','+p[1]).join(' ')+'"/>';
+    pts.forEach(p=>{g+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+Math.max(3,Math.min(9,Math.sqrt(p[2].n)*.7))+'" fill="'+MTR_CC.mtr+'" fill-opacity=".85"><title>napovedano '
+      +pct(p[2].mean_p)+' %, zgodilo se je '+pct(p[2].freq)+' % (n='+p[2].n+')</title></circle>';});
+    g+='<text x="'+(P+S/2)+'" y="'+(H-4)+'" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity=".8">napovedana verjetnost (%)</text>'
+      +'<text transform="translate(10 '+(H/2)+') rotate(-90)" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity=".8">zgodilo se je (%)</text>';
+    return '<div style="flex:1 1 260px;min-width:240px"><div class="mtr-why-hd">'+title+'</div>'
+      +'<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+title+'" style="width:100%;max-width:340px;height:auto">'+g+'</svg>'
+      +'<p class="mtr-note">Brierjeva ocena '+f3(e.brier)+' (samo klimatologija: '+f3(e.brier_climatology)+'; manj je bolje), n = '+e.n+' dni.</p></div>';
+  };
+  const html=chart('Dež (≥ 0,2 mm), jutri','rain')+chart('Zmrzal (Tmin ≤ 0 °C), jutri','frost');
+  el.innerHTML=html?'<div class="mtr-rel">'+html+'</div><p class="mtr-note">Preverjanje za nazaj ('+(d.since||'').slice(0,7)+' do danes): vsak mesec napovedan z modelom, učenim samo na prejšnjih mesecih. Točka na črtkani črti = poštena verjetnost; nad njo = dogodek se je zgodil pogosteje, kot je bilo napovedano. Razredi z manj kot 10 dnevi niso narisani. To ni živa meritev; uradno dnevno preverjanje je na semaforju natančnosti.</p>'
+    :'<div class="mtr-empty">Podatek trenutno ni na voljo.</div>';
+}
+
+/* Dnevnik zgrešitev: pet največjih napak MTR v zadnjih 30 razrešenih dneh (Tmax ali Tmin), z ARSO ob strani. */
+function renderMtrMisses(idp){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(idp+'miss');if(!el)return;
+  const rows=_mtrVerifRows().slice(-30),out=[];
+  rows.forEach(r=>{
+    const m=r.meteorec;if(!m)return;
+    [['tmax','Tmax'],['tmin','Tmin']].forEach(([k,lbl])=>{
+      const a=r.actual[k],f=m[k];
+      if(!Number.isFinite(a)||!Number.isFinite(f))return;
+      const ar=r.arso&&Number.isFinite(r.arso[k])?r.arso[k]-a:null;
+      out.push({date:r.date,lbl,a,f,e:f-a,ar});
+    });
+  });
+  if(!out.length){el.innerHTML='<div class="mtr-empty">Ni razrešenih dni.</div>';return;}
+  out.sort((p,q)=>Math.abs(q.e)-Math.abs(p.e));
+  const sgn=v=>v===null?'—':(v>0?'+':(v<0?'−':'±'))+fmt(Math.abs(v),1);
+  const top=out.slice(0,5);
+  const hit=out.filter(o=>Math.abs(o.e)<=1).length;
+  el.innerHTML='<div class="tbl-x" tabindex="0"><table class="mtr-miss"><thead><tr><th>Dan</th><th>Meritev</th><th>Izmerjeno</th><th>MTR</th><th>Napaka MTR</th><th>Napaka ARSO</th></tr></thead><tbody>'
+    +top.map(o=>{const dt=new Date(o.date+'T12:00:00');return '<tr><td>'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</td><td>'+o.lbl+'</td><td>'+fmt(o.a,1)+' °C</td><td>'+fmt(o.f,1)+' °C</td><td><b>'+sgn(o.e)+'</b></td><td>'+sgn(o.ar)+'</td></tr>';}).join('')
+    +'</tbody></table></div><p class="mtr-note">Od '+out.length+' napovedi (Tmax in Tmin) jih je '+hit+' ('+Math.round(hit/out.length*100)+' %) v mejah ±1 °C. Napaka = napovedano − izmerjeno; D+1.</p>';
 }
 
 /* Drugo mnenje: razpon Googlovega AI ansambla WeatherNext 2 (P10–P90 iz 64
