@@ -259,6 +259,76 @@ def num(x, d=1):
     return seo.num(x, d)
 
 
+def precip_section(data):
+    """Padavine: kateri vir najbolje ujame mokre dni (CSI po vodilnem času). Vse iz test-napovedi.json."""
+    models = data["models"]
+    results = data["results"]
+
+    def ct(m, lead, thr):
+        r = (results.get(m) or {}).get(str(lead)) or (results.get(m) or {}).get(lead) or {}
+        return (r.get("precip_contingency") or {}).get(thr)
+
+    def table(thr):
+        rows = []
+        for lead in range(1, 8):
+            vals = {m: ct(m, lead, thr) for m in models}
+            vals = {m: c for m, c in vals.items() if c and c.get("csi") is not None}
+            if not vals:
+                continue
+            best = max(c["csi"] for c in vals.values())
+            cells = []
+            for m in models:
+                c = vals.get(m)
+                if not c:
+                    cells.append("<td>—</td>")
+                    continue
+                txt = num(c["csi"], 2)
+                cells.append(f"<td><strong>{txt}</strong></td>" if c["csi"] >= best - 1e-9 else f"<td>{txt}</td>")
+            rows.append(f"    <tr><th>D+{lead}</th>" + "".join(cells) + "</tr>")
+        return ('  <div class="table-scroll" tabindex="0"><table class="stats">\n    <tr><th>Vodilni čas</th>'
+                + "".join(f"<th>{l}</th>" for l in models.values()) + "</tr>\n"
+                + "\n".join(rows) + "\n  </table></div>")
+
+    def spread(lead, thr):
+        v = [ct(m, lead, thr)["csi"] for m in models if ct(m, lead, thr)]
+        return (min(v), max(v)) if v else None
+
+    s1, s3 = spread(1, "0.2"), spread(1, "5.0")
+    near = ""
+    if s1 and s3:
+        near = (f'Pri napovedi za jutri (D+1) so si viri blizu: za mokri dan je CSI med {num(s1[0], 2)} in {num(s1[1], 2)}, '
+                f'za izdaten dež (≥ 5 mm) med {num(s3[0], 2)} in {num(s3[1], 2)}. Tako majhne razlike pri tem vzorcu '
+                'niso zanesljive. ')
+    far_lead = 7
+    ai = "ecmwf_aifs025_single"
+    far = ""
+    if ai in models and ct(ai, far_lead, "5.0"):
+        others = [ct(m, far_lead, "5.0")["csi"] for m in models if m != ai and ct(m, far_lead, "5.0")]
+        if others and ct(ai, far_lead, "5.0")["csi"] > max(others):
+            far = (f'Pri D+7 je pri izdatnem dežu v prednosti {models[ai]} (CSI {num(ct(ai, far_lead, "5.0")["csi"], 2)} proti '
+                   f'{num(min(others), 2)}–{num(max(others), 2)}), a napoveduje tudi več dežja, kot ga pade '
+                   '(razmerje napovedanih in izmerjenih mokrih dni nad 1). ')
+    n_ai = (ct(ai, 1, "0.2") or {}).get("n") if ai in models else None
+    n_all = (ct(next(iter(models)), 1, "0.2") or {}).get("n")
+    return (
+        '  <h2 id="padavine">Padavine: kateri vir najbolje ujame dež?</h2>\n'
+        '  <p class="archive-intro">Napoved dežja ocenjujemo kot da/ne: ali je dan prejel vsaj izbrano količino padavin '
+        'po meritvi IREICA1. <strong>CSI</strong> (kritični indeks uspeha) je delež pravilnih napovedi dežja med vsemi dnevi, '
+        'ko je dež bil ali ga je vir napovedal; 1 je popolna napoved, 0 pomeni, da ni zadel nobenega. '
+        'Ker kaznuje zgrešene dneve in lažne alarme hkrati, ni mogoče zmagati s tem, da vir napoveduje dež vsak dan. '
+        'Najboljša vrednost v vrstici je odebeljena.</p>\n'
+        f'  <p class="archive-intro">{near}{far}'
+        'Dež v dolini je krajevni pojav, mreža modela pa ga prikaže povprečen čez celico, zato so vsi viri zmerni.</p>\n'
+        '  <div class="tnp-chart-title">Dan z dežjem: vsaj 0,2 mm (CSI)</div>\n'
+        + table("0.2") + '\n'
+        '  <div class="tnp-chart-title">Izdaten dež: vsaj 5 mm (CSI)</div>\n'
+        + table("5.0") + '\n'
+        f'  <p class="muted-note">Primerjava proti meritvi IREICA1, {n_all} razrešenih dni; '
+        + (f'pri {models[ai]} je vzorec krajši ({n_ai} dni). ' if n_ai and n_all and n_ai != n_all else '')
+        + 'Dni z izdatnim dežjem je bistveno manj kot dni z dežjem nasploh, zato so vrednosti za 5 mm manj zanesljive. '
+        'ARSO in Yr tu nista vključena: beležimo ju šele od uvedbe strani, zato imata za padavine premalo dni.</p>')
+
+
 def build_body(data, n_csv_rows):
     models = data["models"]
     results = data["results"]
@@ -343,6 +413,8 @@ def build_body(data, n_csv_rows):
     lead_table = ('  <div class="table-scroll" tabindex="0"><table class="stats">\n    <tr><th>Vodilni čas</th>'
                   + "".join(f'<th>{l}</th>' for l in models.values()) + '</tr>\n'
                   + "\n".join(lead_table_rows) + '\n  </table></div>')
+
+    precip_html = precip_section(data)
 
     # ── ARSO/Yr sprotno beleženje ──────────────────────────────────────────
     forward_html = ""
@@ -439,6 +511,10 @@ def build_body(data, n_csv_rows):
              f'Pri napovedi za jutri (D+1) ima v tem vzorcu ({n_obs} dni) najnižjo povprečno napako '
              f'{d1_rows[0][0] if d1_rows else "—"}. Razlike med viri se z vodilnim časom (D+2, D+3, …) spreminjajo — '
              'glej tabelo po vodilnem času zgoraj.'),
+            ("Kateri model najbolje napove padavine v Rečici?",
+             'Pri napovedi za jutri so si viri po CSI zelo blizu in zanesljivega zmagovalca ni; za napoved čez nekaj dni '
+             'je pri izdatnem dežju v prednosti AI model ECMWF AIFS, ki pa pogosteje napove dež, kot ga pade. '
+             'Natančne vrednosti so v razdelku Padavine zgoraj.'),
             ("Kaj pomeni skill score?",
              "1 minus razmerje med povprečno napako modela in povprečno napako klimatologije (dolgoletnega "
              "povprečja za ta koledarski dan). 0 pomeni, da napoved ni boljša od ugibanja povprečja; 1 bi "
@@ -465,6 +541,7 @@ def build_body(data, n_csv_rows):
 {pers_html}
   <h2>Natančnost po vodilnem času (Tmax MAE, °C)</h2>
 {lead_table}
+{precip_html}
 {forward_html}
 {ai_html}
 {methodology}
