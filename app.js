@@ -7646,7 +7646,7 @@ function renderMtrDays(idp){
     const fz=st.metric==='tmin'?mtrFrostPct(d.p_frost):null;
     const wmo=_mtrWmoForDate(d.date);
     const icon=wmo!=null?_wmoImg(wmo,true,26):'';
-    return '<div class="mtr-day">'
+    return '<div class="mtr-day" style="--tc:'+mtrTempColor(v)+'">'
       +'<div class="mtr-day-hd">'+name+'<span class="mtr-day-date">'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
       +'<div class="mtr-day-val">'+icon+'<span class="mtr-dot" style="background:'+MTR_CC.mtr+'"></span>'
         +fmt(v,1)+'<span class="mtr-day-unit">°C</span></div>'
@@ -7693,6 +7693,23 @@ function renderMtrWhy(idp){
    brez podatka se kartica skrije ali pove, da ga ni. */
 
 
+
+/* Toplotna lestvica za številke in ploščice: ledeno modra → turkizna → zelena → rumena → oranžna → rdeča.
+   Samo okras okoli številke: barve podatkovnih serij v grafih (MTR_CC) so validirane in se ne spreminjajo. */
+const MTR_TEMP_STOPS=[[-5,[165,180,252]],[0,[125,211,252]],[6,[94,234,212]],[12,[134,239,172]],[18,[253,224,71]],[24,[251,146,60]],[30,[248,113,113]]];
+function mtrTempColor(t){
+  if(!Number.isFinite(t))return '#34d399';
+  const S=MTR_TEMP_STOPS;
+  if(t<=S[0][0])return 'rgb('+S[0][1].join(',')+')';
+  if(t>=S[S.length-1][0])return 'rgb('+S[S.length-1][1].join(',')+')';
+  for(let i=1;i<S.length;i++){
+    if(t<=S[i][0]){
+      const a=S[i-1],b=S[i],k=(t-a[0])/(b[0]-a[0]);
+      return 'rgb('+a[1].map((c,j)=>Math.round(c+(b[1][j]-c)*k)).join(',')+')';
+    }
+  }
+}
+
 /* Junak zavihka: jutrišnja najvišja kot velika številka, pod njo razpon, najnižja noč, zmrzal in popravek. */
 let _mtrHeroShown=false;
 function renderMtrHero(idp){
@@ -7703,6 +7720,8 @@ function renderMtrHero(idp){
   const dt=new Date(d.date+'T12:00:00');
   if(kick)kick.textContent=_mtrDayName(d)+' v Rečici · najvišja '+dt.getDate()+'. '+(dt.getMonth()+1)+'.';
   const target=d.tmax,fin=fmt(target,1)+'<small>°C</small>';
+  const hc=mtrTempColor(d.tmax),hero=document.getElementById(idp+'hero');
+  if(hero)hero.style.setProperty('--tc',hc);
   const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(_mtrHeroShown||reduce){num.innerHTML=fin;}
   else{
@@ -7737,6 +7756,7 @@ function renderMtrFrost(idp){
   const when=_mtrDayName(n0).toLowerCase();
   const why={clear_calm:'Jasna in mirna noč: hladen zrak se zbere na dnu doline.',overcast:'Oblačna noč: zrak se meša, zato je hladneje manj.'}[n0.night_regime]||'';
   el.hidden=false;
+  el.className='mtr-frost '+(n0.p_frost>=.5?'hi':(n0.p_frost>=.2?'mid':'lo'));
   el.innerHTML='<div class="mtr-frost-hd">Zmrzal · noč za '+when+' ('+new Date(n0.date+'T12:00:00').getDate()+'. '+(new Date(n0.date+'T12:00:00').getMonth()+1)+'.)</div>'
     +'<div class="mtr-frost-main"><div class="mtr-frost-big">'+(pc===null?'&lt;10':pc)+'<small>%</small></div>'
     +'<div class="mtr-frost-txt"><b>'+word+'.</b> Najnižja temperatura '+fmt(n0.tmin,1)+' °C'
