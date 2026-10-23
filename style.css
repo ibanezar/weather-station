@@ -3669,3 +3669,40 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 .mtr-rel{display:flex;flex-wrap:wrap;gap:1.2rem;color:var(--text)}
 .mtr-note{font-size:.78rem;color:var(--muted);margin:.6rem 0 0;line-height:1.5}
 .mtr-hist-row a{color:#34d399;text-decoration:underline}
+
+/* ═══ MTR — premium: junak, tri ravni kartic, odseki, tipografija (23. 10. 2026) ═══ */
+#tab-mtr{--mtr-disp:'Space Grotesk','Inter Fallback',Inter,sans-serif}
+.mtr-hero{position:relative;overflow:hidden;border-radius:26px;padding:2.4rem 2rem 1.6rem;margin-bottom:1.6rem;color:#e8edf8;
+  background:radial-gradient(900px 420px at 88% 0%,rgba(52,211,153,.28),transparent 65%),linear-gradient(160deg,#041a14 0%,#06241b 55%,#0a3a2b 100%);
+  border:1px solid rgba(52,211,153,.28);box-shadow:0 30px 80px -30px rgba(5,150,105,.45)}
+.mtr-hero>*{position:relative}
+.mtr-hero-bg{position:absolute!important;inset:0;width:100%;height:100%;pointer-events:none}
+.mtr-hero-top{display:flex;align-items:center;gap:.8rem}
+.mtr-hero-top .mtr-logo{width:44px;height:44px}
+.mtr-hero-name{font-family:var(--mtr-disp);font-size:1.15rem;font-weight:700;letter-spacing:.2em}
+.mtr-hero-tag{font-size:.78rem;color:#9fc7b8}
+.mtr-hero-kick{margin-top:2.2rem;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:#7ee2bd;font-weight:600}
+.mtr-hero-num{font-family:var(--mtr-disp);font-size:clamp(4.6rem,17vw,8.5rem);font-weight:700;line-height:.95;letter-spacing:-.045em;font-variant-numeric:tabular-nums;margin:.15rem 0 .6rem}
+.mtr-hero-num small{font-size:.38em;font-weight:500;letter-spacing:0;margin-left:.15em;color:#9fc7b8}
+.mtr-hero-sub{display:flex;flex-wrap:wrap;gap:.6rem 2rem;font-size:.78rem;color:#9fc7b8}
+.mtr-hero-sub b{display:block;font-family:var(--mtr-disp);font-size:1.25rem;color:#e8edf8;font-weight:600;letter-spacing:-.01em}
+.mtr-about{margin-top:1.4rem;border-top:1px solid rgba(255,255,255,.1);padding-top:.8rem;font-size:.85rem;color:#b6d3c8}
+.mtr-about summary{cursor:pointer;font-weight:600;color:#e8edf8;list-style:none}
+.mtr-about summary::after{content:' +';color:#34d399}
+.mtr-about[open] summary::after{content:' −'}
+.mtr-about p{margin:.6rem 0 0;line-height:1.6;max-width:42rem}
+@media(prefers-reduced-motion:no-preference){.mtr-hero-bg{animation:mtrBand 1.1s cubic-bezier(.2,.7,.2,1) both}}
+@keyframes mtrBand{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+/* odseki */
+.mtr-sec{margin:3.2rem 0 1.1rem;font-family:var(--mtr-disp);font-size:clamp(1.45rem,4.5vw,2rem);font-weight:600;letter-spacing:-.025em;line-height:1.15;color:var(--text)}
+.mtr-sec span{display:block;margin-bottom:.45rem;font-family:Inter,sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#10b981}
+/* raven 2: navadne kartice — ravne, brez roba */
+#tab-mtr>.card{border:0;box-shadow:none;background:color-mix(in srgb,var(--text) 4%,transparent);backdrop-filter:none;-webkit-backdrop-filter:none}
+/* raven 3: dokazi — tiho, samo ločilna črta */
+#tab-mtr>.card.mtr-quiet{background:transparent;border-radius:0;border-top:1px solid color-mix(in srgb,var(--text) 14%,transparent);padding:1.4rem 0 .4rem}
+#tab-mtr .mtr-quiet .clabel{font-family:var(--mtr-disp);font-size:1.15rem;font-weight:600;letter-spacing:-.015em;text-transform:none;color:var(--text)}
+#tab-mtr .mtr-quiet .clabel .ic{display:none}
+/* tipografija: velike številke v display pisavi, opisi niso več monospace */
+#tab-mtr .mtr-day-val,#tab-mtr .mtr-kpi-val,#tab-mtr .mtr-why-val,#tab-mtr .mtr-frost-big{font-family:var(--mtr-disp);letter-spacing:-.03em}
+#tab-mtr .mtr-day-date,#tab-mtr .mtr-day-meta,#tab-mtr .mtr-chip,#tab-mtr .txfc-mtr{font-family:Inter,sans-serif}
+#tab-mtr .mtr-day-meta{font-size:.76rem;line-height:1.5}

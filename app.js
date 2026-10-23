@@ -7400,6 +7400,7 @@ function _renderMtrMount(idp){
 
   drawMtrChart(idp);
   renderMtrDays(idp);
+  renderMtrHero(idp);
   renderMtrFrost(idp);
   renderMtrWhy(idp);
   renderMtrWn2(idp);
@@ -7669,6 +7670,40 @@ function renderMtrWhy(idp){
    Vse številke pridejo iz že naloženih datotek (napoved-modela.json, mtr-accuracy.json,
    mtr-reliability.json, forecast_verification.json). Nobenega novega klica, nič izmišljenega:
    brez podatka se kartica skrije ali pove, da ga ni. */
+
+
+/* Junak zavihka: jutrišnja najvišja kot velika številka, pod njo razpon, najnižja noč, zmrzal in popravek. */
+let _mtrHeroShown=false;
+function renderMtrHero(idp){
+  const st=_mtrState;if(!st)return;
+  const num=document.getElementById(idp+'hero-num');if(!num)return;
+  const d=st.days[0];if(!d||!Number.isFinite(d.tmax))return;
+  const kick=document.getElementById(idp+'hero-kick'),sub=document.getElementById(idp+'hero-sub');
+  const dt=new Date(d.date+'T12:00:00');
+  if(kick)kick.textContent=_mtrDayName(d)+' v Rečici · najvišja '+dt.getDate()+'. '+(dt.getMonth()+1)+'.';
+  const target=d.tmax,fin=fmt(target,1)+'<small>°C</small>';
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(_mtrHeroShown||reduce){num.innerHTML=fin;}
+  else{
+    const t0=performance.now(),dur=700;
+    const step=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);
+      num.innerHTML=fmt(target*e,1)+'<small>°C</small>';
+      if(k<1)requestAnimationFrame(step);else num.innerHTML=fin;};
+    requestAnimationFrame(step);
+  }
+  _mtrHeroShown=true;
+  if(sub){
+    const half=Number.isFinite(d.tmax_sd)?MTR_Z80*d.tmax_sd:null;
+    const fz=mtrFrostPct(d.p_frost);
+    const parts=[];
+    if(half!==null)parts.push('<span><b>'+fmt(d.tmax-half,1)+' – '+fmt(d.tmax+half,1)+' °C</b>razpon P10–P90</span>');
+    if(Number.isFinite(d.tmin))parts.push('<span><b>'+fmt(d.tmin,1)+' °C</b>najnižja noč</span>');
+    parts.push('<span><b>'+(fz===null?'&lt;10':fz)+' %</b>zmrzal</span>');
+    if(Number.isFinite(d.d_tmax)){const r=Math.round(d.d_tmax*10)/10;
+      parts.push('<span><b>'+(r>0?'+':(r<0?'−':'±'))+fmt(Math.abs(r),1)+' °C</b>popravek proti Open-Meteo</span>');}
+    sub.innerHTML=parts.join('');
+  }
+}
 
 /* Velika kartica zmrzali: prva noč kot naslov, vse noči kot trak. p_frost je poskusna verjetnost (glej docs). */
 function renderMtrFrost(idp){
