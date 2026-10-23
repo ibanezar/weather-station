@@ -2463,20 +2463,41 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-why-val.down{color:var(--blue)}
 .mtr-why-sub{font-size:.68rem;color:var(--muted)}
 .mtr-why-txt{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.5}
-.mtr-wn2-row{display:grid;grid-template-columns:4.2rem 1fr 1fr;gap:.5rem;align-items:center;padding:.4rem 0;
-  border-top:1px solid var(--fc-border);font-size:.8rem;color:var(--text)}
-.mtr-wn2-head{border-top:0;padding:.1rem 0;font-size:.68rem;font-weight:700;letter-spacing:.05em;
-  text-transform:uppercase;color:var(--muted)}
-.mtr-wn2-day{font-weight:700;text-transform:capitalize}
-.mtr-wn2-rng{display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;white-space:nowrap}
-.mtr-wn2-g{color:var(--muted)}
-.mtr-wn2-row{grid-template-columns:4.2rem minmax(0,1fr) minmax(0,1fr)}
+/* Drugo mnenje: plavajoči stolpci P10–P90 na skupni temperaturni osi */
+.wn2-legend{display:flex;flex-wrap:wrap;gap:.2rem .9rem;font-size:.7rem;color:var(--muted);margin:0 0 .5rem}
+.wn2-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.wn2-legend i{width:14px;height:8px;border-radius:4px;display:inline-block}
+.wn2-chart{position:relative;padding-right:.9rem}
+.wn2-axis{height:1.1rem;position:relative}
+.wn2-axis .wn2-plot{margin-left:3.9rem;height:100%}
+.wn2-axis .wn2-plot span{position:absolute;top:0;transform:translateX(-50%);font:600 .62rem 'JetBrains Mono',monospace;color:var(--muted)}
+.wn2-grid{position:absolute;top:1.1rem;bottom:0;left:3.9rem;right:.9rem;pointer-events:none}
+.wn2-grid .wn2-plot{height:100%}
+.wn2-grid i{position:absolute;top:0;bottom:0;width:1px;background:var(--fc-border);opacity:.7}
+.wn2-grid i.z{background:var(--blue);opacity:.55}
+.wn2-row{display:grid;grid-template-columns:3.9rem minmax(0,1fr);align-items:center;position:relative;
+  padding:.5rem 0;border-top:1px solid var(--fc-border)}
+.wn2-day{display:flex;flex-direction:column;gap:.15rem;font-size:.8rem;font-weight:700;color:var(--text);text-transform:capitalize;
+  line-height:1.15;min-width:0}
+.wn2-day{font-size:.78rem}
+.wn2-d{align-self:flex-start;font:600 .6rem 'JetBrains Mono',monospace;text-transform:none;color:var(--muted);
+  padding:.08rem .3rem;border-radius:6px;background:var(--card-bg);border:1px solid var(--fc-border);white-space:nowrap}
+.wn2-d.up{color:#f87171}
+.wn2-d.down{color:var(--blue)}
+.wn2-plot{position:relative}
+.wn2-lane{position:relative;height:1.25rem}
+.wn2-bar{position:absolute;top:50%;height:10px;margin-top:-5px;border-radius:5px;opacity:.95;min-width:6px}
+.wn2-mid{position:absolute;top:50%;width:3px;height:16px;margin:-8px 0 0 -1px;border-radius:2px;background:var(--text);opacity:.9}
+.wn2-val{position:absolute;top:50%;transform:translateY(-50%);font:600 .68rem 'JetBrains Mono',monospace;color:var(--text);white-space:nowrap}
+.wn2-lane:last-child .wn2-val{color:var(--muted)}
+.wn2-lg-mid{margin-left:auto}
 @media (max-width:480px){
-  .mtr-wn2-row{grid-template-columns:3.4rem minmax(0,1fr) minmax(0,1fr);gap:.35rem;font-size:.74rem}
-  .mtr-wn2-head{font-size:.62rem;letter-spacing:.02em}
-  .mtr-wn2-rng{gap:.25rem}
+  .wn2-row,.wn2-axis .wn2-plot{--lw:3.4rem}
+  .wn2-row{grid-template-columns:3.4rem minmax(0,1fr)}
+  .wn2-axis .wn2-plot{margin-left:3.4rem}
+  .wn2-grid{left:3.4rem}
+  .wn2-val{font-size:.64rem}
 }
-.mtr-dot-ring{background:transparent;border:2px solid var(--muted);box-sizing:border-box}
 
 .mtr-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.2rem}
 .mtr-kpi{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.75rem .85rem}
