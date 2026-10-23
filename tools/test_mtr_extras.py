@@ -30,6 +30,14 @@ r = p.predict_day(model, 1, feats)
 check(r["tmin_sd"] == round(2.0 * p.SD_OOS_K, 2), f"card sd inflated ({r['tmin_sd']})")
 check(r["p_frost"] == round(p.frost_probability(r["tmin"], 2.0), 2), "p_frost from raw sd")
 check(r["night_regime"] == "clear_calm", "regime in output")
+# sd po režimu noči (samo tmax): za razred velja njegova sd, brez razreda globalna, tmin ostane globalen
+model["leads"]["1"]["residual_sd_regime"] = {"tmax": {"clear_calm": 3.0, "overcast": 1.0}}
+r = p.predict_day(model, 1, feats)
+check(r["tmax_sd"] == round(3.0 * p.SD_OOS_K, 2), f"tmax sd from clear_calm regime ({r['tmax_sd']})")
+check(r["tmin_sd"] == round(2.0 * p.SD_OOS_K, 2), "tmin keeps the global sd")
+f2 = dict(feats); f2["cloud_n"] = 50.0
+check(p.predict_day(model, 1, f2)["tmax_sd"] == round(2.0 * p.SD_OOS_K, 2), "regime without own sd -> global")
+check(p.mos.REGIME_MIN_N == 40 and p.night_regime is p.mos.night_regime, "one night_regime definition")
 # multi-model features (--multi-tmax)
 mos = p.mos
 f = {"om_tmax": 10.0, "mm": {"tmax": {"ecmwf_ifs025": 12.0, "gfs_seamless": 8.0}, "tmin": {}}}

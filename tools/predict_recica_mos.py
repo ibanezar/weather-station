@@ -136,8 +136,10 @@ FROST_SD_K = 1.15
 # model file keeps the raw residual sd. p_frost uses the raw sd with its own factor above.
 SD_OOS_K = 1.05
 # Night regime (backtest: MTR minus Open-Meteo Tmin was -1.5 C on clear calm nights,
-# -0.5 C on overcast ones; observed minus Open-Meteo agreed: -1.5 / -0.8).
-CLEAR_CLOUD_N, CALM_WIND_N, OVERCAST_CLOUD_N = 30, 8, 70
+# -0.5 C on overcast ones; observed minus Open-Meteo agreed: -1.5 / -0.8). Defined in
+# train_recica_mos.py (the same classes give the per-regime residual sd).
+CLEAR_CLOUD_N, CALM_WIND_N, OVERCAST_CLOUD_N = mos.CLEAR_CLOUD_N, mos.CALM_WIND_N, mos.OVERCAST_CLOUD_N
+night_regime = mos.night_regime
 
 
 def frost_probability(tmin, sd, k=FROST_SD_K):
@@ -145,15 +147,6 @@ def frost_probability(tmin, sd, k=FROST_SD_K):
     if tmin is None or not sd or sd <= 0:
         return None
     return 0.5 * (1 + math.erf((0.0 - tmin) / (k * sd) / math.sqrt(2)))
-
-
-def night_regime(cloud_n, wind_n):
-    """'clear_calm' | 'overcast' | 'mixed' - the codes the card turns into a sentence."""
-    if cloud_n < CLEAR_CLOUD_N and wind_n < CALM_WIND_N:
-        return "clear_calm"
-    if cloud_n > OVERCAST_CLOUD_N:
-        return "overcast"
-    return "mixed"
 
 
 def fetch_live_multi(models):
@@ -210,6 +203,11 @@ def predict_day(model, lead, feats):
                                bool((model.get("uses_multi_features") or {}).get(target)))
         out[target] = round(mos.predict_linear(coefs, tvec), 1)
         raw_sd = entry["residual_sd"].get(target)
+        # sd po režimu noči (samo tmax, glej train_recica_mos.residual_sd_by_regime); brez razreda velja globalna.
+        regime_sd = ((entry.get("residual_sd_regime") or {}).get(target) or {}).get(
+            night_regime(feats["cloud_n"], feats["wind_n"]))
+        if regime_sd:
+            raw_sd = regime_sd
         out[f"{target}_sd"] = round(raw_sd * SD_OOS_K, 2) if raw_sd else raw_sd
         raw_sds[target] = raw_sd
         skill = (entry.get("skill") or {}).get(target) or {}

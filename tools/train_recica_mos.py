@@ -690,6 +690,41 @@ def residual_sd(samples, coefs, target, with_aifs=False, use_bias=False, use_con
     return round(math.sqrt(var), 2)
 
 
+# Režim noči (jasna in mirna / oblačna / vmes): ena definicija za napovedovalnik (razlaga na kartici)
+# in za sd ostankov po režimu. predict_recica_mos.py jo uvozi od tu.
+CLEAR_CLOUD_N, CALM_WIND_N, OVERCAST_CLOUD_N = 30, 8, 70
+REGIMES = ("clear_calm", "overcast", "mixed")
+REGIME_MIN_N = 40   # pod tem številom učnih dni razred nima svoje sd (velja globalna)
+
+
+def night_regime(cloud_n, wind_n):
+    """'clear_calm' | 'overcast' | 'mixed' - the codes the card turns into a sentence."""
+    if cloud_n < CLEAR_CLOUD_N and wind_n < CALM_WIND_N:
+        return "clear_calm"
+    if cloud_n > OVERCAST_CLOUD_N:
+        return "overcast"
+    return "mixed"
+
+
+def residual_sd_by_regime(samples, coefs, target, with_aifs=False, use_bias=False, use_cond=False,
+                          use_multi=False):
+    """sd ostankov po režimu noči. Razred z manj kot REGIME_MIN_N dnevi je izpuščen.
+    Walk-forward (tools/ai/eval_mtr_sd.py, 383 dni): pri Tmax izenači pokritost P10-P90 med
+    razredi (jasne noči 89-92 % → 72-79 %, oblačne 74-75 % → 80-81 %) in nekoliko izboljša
+    logaritemsko oceno; pri Tmin brez razlike, zato se tam ne uporablja."""
+    by = {}
+    for s in samples:
+        e = predict_linear(coefs, temp_vector(s["f"], target, with_aifs, use_bias, use_cond, use_multi)) - s[target]
+        by.setdefault(night_regime(s["f"]["cloud_n"], s["f"]["wind_n"]), []).append(e)
+    out = {}
+    for k in REGIMES:
+        v = by.get(k) or []
+        if len(v) >= REGIME_MIN_N:
+            m = sum(v) / len(v)
+            out[k] = round(math.sqrt(sum((x - m) ** 2 for x in v) / (len(v) - 1)), 2)
+    return out
+
+
 # ── Predpomnilnik ───────────────────────────────────────────────────────────
 def load_cache():
     try:
@@ -838,7 +873,8 @@ def main():
 
         entry = {"n_samples": len(samples),
                  "date_range": {"from": samples[0]["date"], "to": samples[-1]["date"]},
-                 "skill": {}, "coefficients": {}, "residual_sd": {}, "lambda": {}}
+                 "skill": {}, "coefficients": {}, "residual_sd": {}, "residual_sd_regime": {},
+                 "lambda": {}}
 
         for target, om_key in (("tmax", "om_tmax"), ("tmin", "om_tmin")):
             use_bias, use_cond = use_bias_for[target], use_cond_for[target]
@@ -862,6 +898,9 @@ def main():
             entry["lambda"][target] = lam
             entry["residual_sd"][target] = residual_sd(tsamples, coefs, target, args.aifs,
                                                         use_bias, use_cond, use_multi)
+            if target == "tmax":
+                entry["residual_sd_regime"][target] = residual_sd_by_regime(
+                    tsamples, coefs, target, args.aifs, use_bias, use_cond, use_multi)
             if skill:
                 print(f"  {target}: Open-Meteo {skill['mae_open_meteo']} °C → "
                       f"naš {skill['mae_meteorec']} °C  ({skill['improvement_pct']:+.1f} %, λ={lam})")

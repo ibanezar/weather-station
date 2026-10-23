@@ -269,3 +269,25 @@ okno 2024-05-26 → 2026-10-05, `--use-bias-tmin --use-cond-tmin`):
 
 `model/recica-mos.json` nosi `uses_multi_features` in `multi_models`; model, naučen brez zastavice,
 deluje kot prej. Test: `tools/test_mtr_extras.py`.
+
+## Poskusi 23. 10. 2026: značilke po režimu noči in pas negotovosti
+
+Isti walk-forward po mesecih kot v produkciji (okno 2025-10 → 2026-10, 383 dni, produkcijske zastavice: Tmin
+`--use-bias-tmin --use-cond-tmin`, Tmax `--multi-tmax`), uparjen blokovni bootstrap (7-dnevni bloki).
+Skripti: `tools/ai/eval_mtr3.py` (značilke), `tools/ai/eval_mtr_sd.py` (sd).
+
+**Značilke: nič ni resnično.** Mehka utež »jasna in mirna noč« (`regime`: utež, utež × razlika temperature
+in rosišča, utež × Tmin, utež × tlak), razredna obravnava mokrih dni (`wet`: ure z dežjem, interakcija s
+temperaturo), razlika temperatura − rosišče (`dp`) in kombinacija so pri vseh šestih celicah (Tmax/Tmin × D+1..D+3)
+v šumu: razlike MAE od −0,023 do +0,013 °C, vsak interval zaupanja zajema 0. Tmin D+1: osnova 1,234,
+`regime` 1,231, `dp` 1,234. **Ne dodajaj teh značilk**; ostanek napake ob jasnih nočeh ni linearen v teh
+vhodih. Preostane urni model (potrebuje urne meritve, glej `data/hourly-observations.csv`).
+
+**sd po režimu noči: pri Tmax pomaga, pri Tmin ne.** Ena sama sd je pri Tmax preširoka ob jasnih nočeh
+(pokritost P10–P90 89–92 % namesto 80 %) in preozka ob oblačnih (74–75 %). Z ločeno sd po razredu
+(`night_regime`) je 72–81 % v vseh razredih in logaritemska ocena je pri D+1/D+2/D+3 boljša
+(1,739→1,735, 1,897→1,875, 2,017→1,999). Pri Tmin in `p_frost` razlike ni (Brier zmrzali 0,0632 / 0,0631),
+zato ostane tam globalna sd. **Vgrajeno**: `residual_sd_by_regime()` v `train_recica_mos.py` zapiše
+`residual_sd_regime.tmax` (razred z < 40 dnevi ga nima), `predict_day` ga uporabi za pas na kartici; brez njega
+velja globalna sd, stari modeli delujejo nespremenjeno. Pokritost 72 % ob jasnih nočeh pri D+3 je še vedno
+pod nominalnimi 80 %: razred ima le 74 dni. Ponovi, ko se nabere več.
