@@ -108,6 +108,9 @@ jobs:
       - name: Test potrošnikov datotek drugih workflowov (zastareli vhodi)
         run: python3 tools/test_stale_inputs.py
 
+      - name: Test žive napovedi MTR (zamrznjena ostane nedotaknjena)
+        run: python3 tools/test_mtr_live.py
+
       - name: Test sezonskega vodiča in uvrstitve meseca
         run: python3 tools/test_sezona.py
 

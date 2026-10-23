@@ -54,6 +54,9 @@ REGISTER = [
      "padalci-forecast.yml + tools/igra_gate.py (okno 5:00–12:00)"),
     ("Napoved MTR", "napoved-modela.json", "ts", "generated_at", 36,
      "forecast-verify.yml → predict_recica_mos.py"),
+    # Živa osvežitev za kartice (mtr-live.yml, 4 termini/dan); radodaren prag zaradi zamud crona.
+    ("Napoved MTR (živa)", "napoved-modela-live.json", "ts", "generated_at", 36,
+     "mtr-live.yml → predict_recica_mos.py --live"),
     ("Točnost MTR", "data/mtr-accuracy.json", "ts", "generated_at", 36,
      "forecast-verify.yml"),
     ("Test napovedi", "data/test-napovedi.json", "ts", "generated_at", 36,

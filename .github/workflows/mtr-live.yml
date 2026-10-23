@@ -1,0 +1,51 @@
+name: MTR napoved - osvežitev čez dan
+
+# Osveži SAMO napoved-modela-live.json (kartice na strani). Zamrznjena dnevna napoved
+# (napoved-modela.json) ostane pri forecast-verify.yml: ta gre na semafor točnosti in je ne
+# smemo prepisovati čez dan. Termini sledijo novim tekom modelov Open-Meteo (ICON 6-urno,
+# IFS ~7 h po 00/12 UTC). GitHubov cron zamuja in združuje teke, zato je dejanska
+# razdalja med osvežitvami neenakomerna; Cloudflare ne more nadomestiti, ker se MTR računa
+# v Pythonu (isto načelo kot daily_features: brez druge kopije modela).
+on:
+  schedule:
+    - cron: '40 4,10,16,22 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: mtr-live
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Živa napoved MTR
+        run: python3 tools/predict_recica_mos.py --live
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add napoved-modela-live.json
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "chore: osveži živo napoved MTR $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1

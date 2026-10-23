@@ -1701,7 +1701,7 @@ async function fetchComingUp(){
       // of the site never blends sources into a single invented number.
       try{
         const [mos,arso]=await Promise.all([
-          fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5)).then(r=>r.json()).catch(()=>null),
+          _mtrFetch().catch(()=>null),
           fetch(PROXY+'/arso-forecast').then(r=>r.json()).catch(()=>null)
         ]);
         const mosByDate={};
@@ -7072,12 +7072,9 @@ async function fetchTextForecast(){
        Ni pogoj za kartico — ob napaki ali manjkajočih poljih ostane samo Open-Meteo. */
     const mtrRain={};
     try{
-      const mr=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
-      if(mr.ok){
-        /* `today` = včerajšnja zamrznjena napoved za današnji dan (days se začne pri jutri). */
-        const mj=await mr.json();
-        (mj.days||[]).concat(mj.today?[mj.today]:[]).forEach(x=>{if(Number.isFinite(x.pop))mtrRain[x.date]=x;});
-      }
+      /* `today` = včerajšnja zamrznjena napoved za današnji dan (days se začne pri jutri). */
+      const mj=await _mtrFetch();
+      (mj.days||[]).concat(mj.today?[mj.today]:[]).forEach(x=>{if(Number.isFinite(x.pop))mtrRain[x.date]=x;});
     }catch(_){}
     const r5=v=>Number.isFinite(v)?(Math.round(v*20)*5)+'\u00A0%':null;
 
@@ -7294,9 +7291,7 @@ function renderMtrRain(idp){
 async function fetchAiRain(){
   const grid=document.getElementById('ai-rain-grid');if(!grid)return;
   try{
-    const r=await fetch('/napoved-modela.json?_='+Math.floor(Date.now()/36e5));
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const data=await r.json();
+    const data=await _mtrFetch();
     const days=(data.days||[]).filter(d=>Number.isFinite(d.pop));
     if(!days.length)throw new Error('brez dni');
     const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':'—';
@@ -7310,6 +7305,22 @@ async function fetchAiRain(){
   }
 }
 
+/* Napoved MTR: živa datoteka (mtr-live.yml, več osvežitev na dan) z rezervo na zamrznjeno dnevno. Zamrznjena
+   (napoved-modela.json) ostane vir za semafor in junaško ploščico »danes«; živa nosi isto obliko in `today`. */
+async function _mtrFetch(cb){
+  cb=cb||('?_='+Math.floor(Date.now()/36e5));
+  try{
+    const r=await fetch('/napoved-modela-live.json'+cb);
+    if(r.ok){
+      const j=await r.json();
+      if(j&&Array.isArray(j.days)&&j.days.length)return j;
+    }
+  }catch(_){}
+  const r=await fetch('/napoved-modela.json'+cb);
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
 function _mtrMounts(){return MTR_MOUNT_IDS.filter(p=>document.getElementById(p+'chart'));}
 
 async function fetchMosForecast(){
@@ -7318,13 +7329,12 @@ async function fetchMosForecast(){
   try{
     const cb='?_='+Math.floor(Date.now()/36e5);
     const [fcRes,accRes,verif,rel]=await Promise.all([
-      fetch('/napoved-modela.json'+cb),
+      _mtrFetch(cb),
       fetch('/data/mtr-accuracy.json'+cb).catch(()=>null),
       _verifOnce().catch(()=>null),
       fetch('/data/mtr-reliability.json'+cb).then(r=>r.ok?r.json():null).catch(()=>null),
     ]);
-    if(!fcRes.ok)throw new Error('HTTP '+fcRes.status);
-    const data=await fcRes.json();
+    const data=fcRes;
     const acc=(accRes&&accRes.ok)?await accRes.json().catch(()=>null):null;
     const days=(data.days||[]).filter(d=>Number.isFinite(d.tmax)&&Number.isFinite(d.tmin));
     if(!days.length)throw new Error('brez dni');
