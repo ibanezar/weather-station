@@ -7735,14 +7735,23 @@ function renderMtrHero(idp){
   if(sub){
     const half=Number.isFinite(d.tmax_sd)?MTR_Z80*d.tmax_sd:null;
     const fz=mtrFrostPct(d.p_frost);
+    const ic=(path)=>'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+path+'</svg>';
+    const I={
+      range:ic('<path d="M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4"/>'),
+      moon:ic('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>'),
+      drop:ic('<path d="M12 3.5c3.5 4.3 6 7.2 6 10.2a6 6 0 0 1-12 0c0-3 2.5-5.9 6-10.2Z"/>'),
+      snow:ic('<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/>'),
+      delta:ic('<path d="M12 4 3.5 19h17L12 4Z"/>')};
+    const tile=(cls,icon,val,lbl,extra)=>'<div class="mtr-st '+cls+'"><div class="mtr-st-ic">'+icon+'</div><b>'+val+'</b><em>'+lbl+'</em>'+(extra||'')+'</div>';
     const parts=[];
-    if(half!==null)parts.push('<span><b>'+fmt(d.tmax-half,1)+' – '+fmt(d.tmax+half,1)+' °C</b>razpon P10–P90</span>');
-    if(Number.isFinite(d.tmin))parts.push('<span><b>'+fmt(d.tmin,1)+' °C</b>najnižja noč</span>');
     const popP=Number.isFinite(d.pop)?Math.round(d.pop*20)*5:null,mmT=_mtrMm(d.mm);
-    if(popP!==null||mmT)parts.push('<span><b>'+(mmT||(popP+' %'))+'</b>dež'+(mmT&&popP!==null?' · verjetnost '+popP+' %':'')+'</span>');
-    parts.push('<span><b>'+(fz===null?'&lt;10':fz)+' %</b>zmrzal</span>');
+    if(popP!==null||mmT)parts.push(tile('st-rain',I.drop,mmT||(popP+' %'),'dež'+(mmT&&popP!==null?' · verjetnost '+popP+' %':''),
+      popP!==null?'<span class="mtr-st-bar"><u style="width:'+popP+'%"></u></span>':''));
+    if(half!==null)parts.push(tile('st-range',I.range,fmt(d.tmax-half,1)+' – '+fmt(d.tmax+half,1)+' °C','razpon P10–P90'));
+    if(Number.isFinite(d.tmin))parts.push(tile('st-night',I.moon,fmt(d.tmin,1)+' °C','najnižja noč'));
+    parts.push(tile('st-frost',I.snow,(fz===null?'&lt;10':fz)+' %','zmrzal'));
     if(Number.isFinite(d.d_tmax)){const r=Math.round(d.d_tmax*10)/10;
-      parts.push('<span><b>'+(r>0?'+':(r<0?'−':'±'))+fmt(Math.abs(r),1)+' °C</b>popravek proti Open-Meteo</span>');}
+      parts.push(tile('st-corr',I.delta,(r>0?'+':(r<0?'−':'±'))+fmt(Math.abs(r),1)+' °C','proti Open-Meteo'));}
     sub.innerHTML=parts.join('');
   }
 }

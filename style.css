@@ -3727,11 +3727,6 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
   box-shadow:0 30px 90px -30px color-mix(in srgb,var(--tc) 55%,transparent)}
 .mtr-hero-num{background:linear-gradient(180deg,#fff 12%,var(--tc) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 .mtr-hero-num small{-webkit-text-fill-color:var(--tc);color:var(--tc)}
-.mtr-hero-sub span:nth-child(1) b{color:#7dd3fc}
-.mtr-hero-sub span:nth-child(2) b{color:#a5b4fc}
-.mtr-hero-sub span:nth-child(3) b{color:#60a5fa}
-.mtr-hero-sub span:nth-child(4) b{color:#5eead4}
-.mtr-hero-sub span:nth-child(5) b{color:#fcd34d}
 /* zmrzal: zelena = mirno, modra = možna, ledena = verjetna */
 .mtr-frost.mid{background:linear-gradient(135deg,#0c1f3d,#173a6b);border-color:rgba(125,211,252,.45)}
 .mtr-frost.hi{background:linear-gradient(135deg,#0b2a4a,#2a6fa8 70%,#7dd3fc);border-color:rgba(186,230,253,.7);box-shadow:0 0 50px -10px rgba(125,211,252,.55)}
@@ -3762,3 +3757,22 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 .mtr-hist-row:nth-child(2) b::before{background:#38bdf8}
 .mtr-hist-row:nth-child(3) b::before{background:#a78bfa}
 .mtr-hist-neg b::before{background:#f87171}
+
+/* ═══ MTR junak: steklene ploščice z ikonami (23. 10. 2026) ═══ */
+.mtr-hero-sub{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-top:.4rem}
+.mtr-st{position:relative;overflow:hidden;padding:.85rem .95rem .8rem;border-radius:16px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);--sc:#5eead4}
+.mtr-st::before{content:'';position:absolute;left:0;top:0;right:0;height:3px;background:var(--sc);opacity:.9}
+.mtr-st::after{content:'';position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:var(--sc);opacity:.16;filter:blur(18px)}
+.mtr-st-ic{display:flex;color:var(--sc);margin-bottom:.35rem}
+.mtr-st b{display:block;font-family:var(--mtr-disp);font-size:1.3rem;font-weight:600;letter-spacing:-.02em;color:#f1f5f9;line-height:1.15}
+.mtr-st em{display:block;font-style:normal;font-size:.74rem;color:#a7c4ba;margin-top:.15rem}
+.mtr-st.st-rain{--sc:#60a5fa;grid-column:span 2;background:linear-gradient(135deg,rgba(59,130,246,.30),rgba(255,255,255,.06))}
+.mtr-st.st-rain b{font-size:1.9rem}
+.mtr-st.st-range{--sc:#7dd3fc}.mtr-st.st-night{--sc:#a5b4fc}.mtr-st.st-frost{--sc:#67e8f9}.mtr-st.st-corr{--sc:#fcd34d}
+.mtr-st-bar{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.14);margin-top:.55rem;overflow:hidden}
+.mtr-st-bar u{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#60a5fa,#38bdf8)}
+@media(min-width:700px){.mtr-hero-sub{grid-template-columns:repeat(6,1fr)}.mtr-st.st-rain{grid-column:span 2}.mtr-st b{font-size:1.15rem}.mtr-st.st-rain b{font-size:1.9rem}}
+@media(max-width:699px){.mtr-hero-sub{grid-template-columns:1fr 1fr}.mtr-st b{font-size:1.15rem}.mtr-st.st-rain b{font-size:1.9rem}}
+.mtr-st b{white-space:nowrap}
+@media(min-width:700px){.mtr-st.st-range b{font-size:1rem}}
