@@ -3714,3 +3714,50 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 }
 @keyframes mtrFade{from{opacity:0}to{opacity:1}}
 @keyframes mtrDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+
+/* ═══ MTR — barvito (23. 10. 2026): toplotna lestvica, led pri zmrzali, barvni odseki ═══
+   Barve podatkovnih serij v grafih ostajajo validirane (MTR_CC); to je okras okoli njih. */
+.mtr-hero{--tc:#5eead4;
+  background:
+    radial-gradient(700px 380px at 92% -5%,color-mix(in srgb,var(--tc) 55%,transparent),transparent 62%),
+    radial-gradient(620px 360px at -8% 105%,rgba(56,189,248,.30),transparent 60%),
+    radial-gradient(520px 300px at 70% 115%,rgba(251,146,60,.22),transparent 65%),
+    linear-gradient(160deg,#041a2a 0%,#06241f 50%,#0a3a35 100%);
+  border-color:color-mix(in srgb,var(--tc) 45%,transparent);
+  box-shadow:0 30px 90px -30px color-mix(in srgb,var(--tc) 55%,transparent)}
+.mtr-hero-num{background:linear-gradient(180deg,#fff 12%,var(--tc) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.mtr-hero-num small{-webkit-text-fill-color:var(--tc);color:var(--tc)}
+.mtr-hero-sub span:nth-child(1) b{color:#7dd3fc}
+.mtr-hero-sub span:nth-child(2) b{color:#a5b4fc}
+.mtr-hero-sub span:nth-child(3) b{color:#5eead4}
+.mtr-hero-sub span:nth-child(4) b{color:#fcd34d}
+/* zmrzal: zelena = mirno, modra = možna, ledena = verjetna */
+.mtr-frost.mid{background:linear-gradient(135deg,#0c1f3d,#173a6b);border-color:rgba(125,211,252,.45)}
+.mtr-frost.hi{background:linear-gradient(135deg,#0b2a4a,#2a6fa8 70%,#7dd3fc);border-color:rgba(186,230,253,.7);box-shadow:0 0 50px -10px rgba(125,211,252,.55)}
+.mtr-frost.mid .mtr-frost-hd,.mtr-frost.hi .mtr-frost-hd{color:#bae6fd}
+.mtr-frost.mid .mtr-frost-night i span,.mtr-frost.hi .mtr-frost-night i span{background:#7dd3fc}
+.mtr-frost.hi .mtr-frost-big{color:#fff;text-shadow:0 0 30px rgba(186,230,253,.8)}
+.mtr-frost.mid .mtr-frost-note,.mtr-frost.hi .mtr-frost-note{color:#c7defa}
+/* odseki dobijo vsak svojo barvo */
+#tab-mtr .mtr-sec:nth-of-type(1) span{color:#34d399}
+#tab-mtr .mtr-sec:nth-of-type(2) span{color:#38bdf8}
+#tab-mtr .mtr-sec:nth-of-type(3) span{color:#fbbf24}
+#tab-mtr .mtr-sec span::after{content:'';display:block;width:2.4rem;height:3px;border-radius:2px;margin-top:.45rem;background:currentColor}
+#tab-mtr .mtr-sec:nth-of-type(2)~.mtr-quiet{border-top-color:rgba(56,189,248,.35)}
+#tab-mtr .mtr-sec:nth-of-type(3)~.mtr-quiet{border-top-color:rgba(251,191,36,.4)}
+/* ploščice dni: rob in rahla podlaga po temperaturi */
+#tab-mtr .mtr-day{border:1px solid color-mix(in srgb,var(--tc,#34d399) 35%,transparent);border-top:4px solid var(--tc,#34d399);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tc,#34d399) 14%,var(--fc-bg)),var(--fc-bg) 70%)}
+/* KPI */
+#tab-mtr .mtr-kpi:nth-child(1){background:linear-gradient(160deg,rgba(5,150,105,.20),transparent 70%)}
+#tab-mtr .mtr-kpi:nth-child(2){background:linear-gradient(160deg,rgba(168,85,247,.20),transparent 70%)}
+#tab-mtr .mtr-kpi.is-gain{background:linear-gradient(135deg,rgba(52,211,153,.30),rgba(56,189,248,.22))}
+#tab-mtr .mtr-kpi.is-gain .mtr-kpi-val{background:linear-gradient(90deg,#6ee7b7,#7dd3fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+/* popravek: topleje = jantarno, hladneje = modro */
+#tab-mtr .mtr-why-val.up{color:#fb923c}
+#tab-mtr .mtr-why-val.down{color:#7dd3fc}
+/* zgodovina: barvne pike */
+.mtr-hist-row b::before{content:'';display:inline-block;width:.55rem;height:.55rem;border-radius:50%;margin-right:.5rem;background:#34d399}
+.mtr-hist-row:nth-child(2) b::before{background:#38bdf8}
+.mtr-hist-row:nth-child(3) b::before{background:#a78bfa}
+.mtr-hist-neg b::before{background:#f87171}
