@@ -7211,6 +7211,16 @@ function _mtrMm(v){
   return v<0.2?'< 0,2\u00A0mm':'~'+v.toFixed(1).replace('.',',')+'\u00A0mm';
 }
 
+/* Ime dne po DATUMU (ne po `lead`): datoteka napoved-modela.json nastane enkrat na dan, do jutranjega teka pa je
+   njen `lead` 1 že današnji dan. »Danes« / »Jutri« / dan v tednu glede na ljubljanski datum. */
+function _mtrDayName(d){
+  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
+  const diff=Math.round((Date.parse(d.date+'T12:00:00Z')-Date.parse(today+'T12:00:00Z'))/864e5);
+  if(diff===0)return 'Danes';
+  if(diff===1)return 'Jutri';
+  return MTR_SL_DAYS[new Date(d.date+'T12:00:00').getDay()];
+}
+
 /* Grafična ploščica dneva za verjetnost in količino padavin (MTR tab in AI tab): merilnik dežja (pričakovana
    količina, linearno do 30 mm) + tri vodoravne vrstice verjetnosti (≥ 0,2 / ≥ 1 / ≥ 5 mm). Ena barva (modra
    padavin, --rain-col), tri stopnje prosojnosti svetlo → temno = isto merilo z naraščajočim pragom; besedilo
@@ -7221,7 +7231,7 @@ const RAIN_GAUGE_MAX=30;
 function rainDayHTML(d){
   const r5=v=>Number.isFinite(v)?Math.round(v*20)*5:null;
   const dt=new Date(d.date+'T12:00:00');
-  const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
+  const name=_mtrDayName(d);
   const rows=[['≥ 0,2 mm',r5(d.pop),.6],['≥ 1 mm',r5(d.pop1),.8],['≥ 5 mm',r5(d.pop5),1]].filter(x=>x[1]!==null);
   const mmTxt=_mtrMm(d.mm);
   let gauge='',amt='';
@@ -7597,7 +7607,7 @@ function renderMtrDays(idp){
     const v=d[M.key],om=d[M.om],sd=d[M.sd];
     if(!Number.isFinite(v))return'';
     const dt=new Date(d.date+'T12:00:00');
-    const name=d.lead===1?'Jutri':MTR_SL_DAYS[dt.getDay()];
+    const name=_mtrDayName(d);
     const delta=Number.isFinite(om)?v-om:null;
     const chip=delta===null?''
       :'<span class="mtr-chip '+(delta<0?'down':'up')+'">'+(delta<0?'−':'+')+fmt(Math.abs(delta),1)+' °C</span>';
