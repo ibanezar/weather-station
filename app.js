@@ -7166,6 +7166,7 @@ const MTR_CC={
   get actual() {return isDark()?'#e8edf8':'#0a1628';},
   get mtr()    {return isDark()?'#059669':'#047857';},
   get om()     {return isDark()?'#a855f7':'#6d28d9';},
+  get wn2()    {return isDark()?'#38bdf8':'#0369a1';},   // samo za razpon WN2 (ne za črto grafa)
   get mtrSoft(){return isDark()?'rgba(5,150,105,.22)':'rgba(4,120,87,.14)';},
   get surface(){return isDark()?'#0a0f1c':'#ffffff';},
 };
@@ -7669,26 +7670,52 @@ function renderMtrWn2(idp){
   const st=_mtrState;if(!st)return;
   const el=document.getElementById(idp+'wn2');if(!el)return;
   const M=MTR_METRICS[st.metric];
-  const rows=st.days.filter(d=>d.wn2&&d.wn2[M.key]&&Number.isFinite(d[M.key])).map(d=>{
+  const data=st.days.filter(d=>d.wn2&&d.wn2[M.key]&&Number.isFinite(d[M.key])).map(d=>{
     const dt=new Date(d.date+'T12:00:00');
-    const name=d.lead===1?'jutri':MTR_SL_DAYS[dt.getDay()];
     const w=d.wn2[M.key];
     const sd=d[M.sd];
-    const mtr=Number.isFinite(sd)
-      ?fmt(d[M.key]-MTR_Z80*sd,1)+'–'+fmt(d[M.key]+MTR_Z80*sd,1)
-      :fmt(d[M.key],1);
-    return '<div class="mtr-wn2-row"><span class="mtr-wn2-day">'+name+'</span>'
-      +'<span class="mtr-wn2-rng"><span class="mtr-dot" style="background:'+MTR_CC.mtr+'"></span>'+mtr+' °C</span>'
-      +'<span class="mtr-wn2-rng mtr-wn2-g"><span class="mtr-dot mtr-dot-ring"></span>'+fmt(w.p10,1)+'–'+fmt(w.p90,1)+' °C</span></div>';
-  });
-  el.hidden=!rows.length;
-  el.innerHTML=rows.length
-    ?'<div class="mtr-why-hd">Drugo mnenje · Google WeatherNext 2</div>'
-      +'<div class="mtr-why-sub2">AI ansambel, 64 članov, razpon P10–P90 · '+M.lbl.toLowerCase()+' temperatura</div>'
-      +'<div class="mtr-wn2-row mtr-wn2-head"><span></span><span>MTR</span><span>WeatherNext 2</span></div>'
-      +rows.join('')
-      +'<p class="mtr-why-txt">WeatherNext 2 je surova mreža ~28 km brez popravka za dolino.</p>'
-    :'';
+    const half=Number.isFinite(sd)?MTR_Z80*sd:0;
+    return {name:d.lead===1?'jutri':MTR_SL_DAYS[dt.getDay()],
+      m:[d[M.key]-half,d[M.key]+half],mc:d[M.key],w:[w.p10,w.p90]};
+  }).filter(r=>Number.isFinite(r.w[0])&&Number.isFinite(r.w[1]));
+  el.hidden=!data.length;
+  if(!data.length){el.innerHTML='';return;}
+  /* Skupna temperaturna os za vse dni, da so razponi med dnevi primerljivi. */
+  const all=[].concat.apply([],data.map(r=>r.m.concat(r.w)));
+  const lo=Math.floor(Math.min.apply(null,all))-1,hi=Math.ceil(Math.max.apply(null,all))+1;
+  const step=(hi-lo)>16?5:2;
+  const pos=v=>((v-lo)/(hi-lo)*100);
+  let grid='',axis='';
+  for(let t=Math.ceil(lo/step)*step;t<=hi;t+=step){
+    grid+='<i style="left:'+pos(t).toFixed(2)+'%"'+(t===0?' class="z"':'')+'></i>';
+    axis+='<span style="left:'+pos(t).toFixed(2)+'%">'+t+'°</span>';
+  }
+  const lane=(rng,cls,col,lbl,mid)=>{
+    const l=pos(rng[0]),w=Math.max(pos(rng[1])-l,1.2);
+    const txt=fmt(rng[0],1)+'–'+fmt(rng[1],1);
+    const side=(l+w/2)>50?'right:'+(100-l+1.5).toFixed(2)+'%':'left:'+(l+w+1.5).toFixed(2)+'%';
+    return '<div class="wn2-lane"><span class="wn2-bar '+cls+'" style="left:'+l.toFixed(2)+'%;width:'+w.toFixed(2)
+      +'%;background:'+col+'" title="'+lbl+' '+txt+' °C"></span>'
+      +(mid!=null?'<span class="wn2-mid" style="left:'+pos(mid).toFixed(2)+'%"></span>':'')
+      +'<span class="wn2-val" style="'+side+'">'+txt+'</span></div>';
+  };
+  const rows=data.map(r=>{
+    const dm=(r.w[0]+r.w[1])/2-(r.m[0]+r.m[1])/2;
+    const chip=Math.abs(dm)>=0.5
+      ?'<span class="wn2-d '+(dm>0?'up':'down')+'">WN2 '+(dm>0?'+':'−')+fmt(Math.abs(dm),1)+'°</span>'
+      :'<span class="wn2-d">enako</span>';
+    return '<div class="wn2-row"><div class="wn2-day">'+r.name+chip+'</div>'
+      +'<div class="wn2-plot">'+lane(r.m,'m',MTR_CC.mtr,'MTR',r.mc)+lane(r.w,'w',MTR_CC.wn2,'WeatherNext 2',null)+'</div></div>';
+  }).join('');
+  el.innerHTML='<div class="mtr-why-hd">Drugo mnenje · Google WeatherNext 2</div>'
+    +'<div class="mtr-why-sub2">AI ansambel, 64 članov, razpon P10–P90 · '+M.lbl.toLowerCase()+' temperatura</div>'
+    +'<div class="wn2-legend"><span><i style="background:'+MTR_CC.mtr+'"></i>MTR</span>'
+    +'<span><i style="background:'+MTR_CC.wn2+'"></i>WeatherNext 2</span>'
+    +'<span class="wn2-lg-mid">╷ najverjetneje (MTR)</span></div>'
+    +'<div class="wn2-chart"><div class="wn2-axis"><div class="wn2-plot">'+axis+'</div></div>'
+    +'<div class="wn2-grid"><div class="wn2-plot">'+grid+'</div></div>'+rows+'</div>'
+    +'<p class="mtr-why-txt">Oznaka ob dnevu: kako se sredina razpona WeatherNext 2 razlikuje od MTR. '
+    +'WeatherNext 2 je surova mreža ~28 km brez popravka za dolino.</p>';
 }
 
 /* Tri ploščice s krepkimi številkami: napaka MTR, napaka Open-Meteo in
