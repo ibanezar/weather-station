@@ -111,6 +111,7 @@ KNOWN_CLIENTS = {
     "tools/generate_story_card.py": "zareza",
     "tools/calculate_frost_risk.py": "zareza",
     "tools/log_valley_duel.py": "bere samo outdoor.temperature",
+    ".github/workflows/station-monitor.yml": "bere samo čas outdoor.temperature",
 }
 
 
