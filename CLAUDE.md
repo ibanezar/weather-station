@@ -1302,6 +1302,24 @@ tem stikom, ne preimenovanje kode.
   tretji vir na semaforju `/tocnost-napovedi/` — ob ARSO in Open-Meteo, po istem
   merilu. Kartico v `app.js` sestavi `fetchMosForecast()` → `renderMtrCard()`.
 
+### Živa osvežitev napovedi čez dan (23. 10. 2026)
+
+`napoved-modela.json` je **zamrznjena dnevna napoved** (01:35 UTC, `forecast-verify.yml`): gre na semafor
+točnosti in je čez dan ne smemo prepisovati, sicer bi MTR ocenjevali po napovedi, nastali bližje dogodku,
+ARSO in Open-Meteo pa po jutranji. Kartice na strani zato berejo **`napoved-modela-live.json`**
+(`predict_recica_mos.py --live`, `mtr-live.yml`, 4 termini/dan: 04:40, 10:40, 16:40, 22:40 UTC ob novih tekih
+Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica ostane »včerajšnja napoved za danes«).
+
+- `_mtrFetch()` v `app.js`: živa datoteka, ob napaki rezerva na zamrznjeno. Na živo prehajajo kartica MTR,
+  kartica »Verjetnost padavin«, pas dni in obeti za padavine; **semafor, igra, zgodba, digest in generatorji
+  strani (`inject_forecast.py` …) še vedno berejo zamrznjeno** — namerno.
+- **Računa se v Pythonu, zato Cloudflare cron ne more nadomestiti GitHubovega** (druga kopija modela v workerju
+  bi se razšla, kot opozarja `daily_features`). Cloudflare bi lahko le sprožil workflow, to pa terja
+  `GH_DISPATCH_TOKEN`, ki ni nastavljen. GitHubov cron združuje teke, razmik med osvežitvami je torej neenakomeren.
+- Model je naučen na jutranjem zajemu D+1; popoldanski vhodi so svežji, a **točnosti po poznejših osvežitvah ne
+  merimo**. Če bi jo želeli, bi bilo treba živo napoved posebej beležiti (ne na semafor).
+- Varuh svežine ima vrstico »Napoved MTR (živa)«, test: `tools/test_mtr_live.py` (v `parity.yml`).
+
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
 
 `predict_recica_mos.py` poleg napovedi zapiše za vsak dan še `p_frost` (P(Tmin ≤ 0 °C),

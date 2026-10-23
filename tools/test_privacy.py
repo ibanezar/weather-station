@@ -139,7 +139,7 @@ def test_new_clients():
 def test_public_files():
     section("Javne datoteke ne omenjajo `indoor`")
     must_be_clean = ["app.js", "index.html", "style.css", "tools/inject_current_weather.py", "history.json",
-                     "blog.json", "napoved-modela.json", "forecast_verification.json", "meteogasilec/index.json",
+                     "blog.json", "napoved-modela.json", "napoved-modela-live.json", "forecast_verification.json", "meteogasilec/index.json",
                      "og/story/latest.json", "llms.txt", "manifest.json", "sw.js"]
     for f in must_be_clean:
         p = os.path.join(ROOT, f)

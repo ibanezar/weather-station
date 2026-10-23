@@ -25,6 +25,13 @@ tools/verify_forecasts.py, ki napoved vpiše na semafor točnosti).
 Uporaba:
   python3 tools/predict_recica_mos.py
   python3 tools/predict_recica_mos.py --no-write
+  python3 tools/predict_recica_mos.py --live
+
+`--live` (mtr-live.yml, večkrat na dan) piše SAMO napoved-modela-live.json. Zamrznjena
+dnevna napoved (napoved-modela.json) ostane nedotaknjena: to je tista, ki jo
+verify_forecasts.py vpiše na semafor, in če bi jo čez dan prepisovali, bi MTR ocenjevali
+po napovedi, nastali bližje dogodku, ARSO in Open-Meteo pa po jutranji. Živa datoteka
+nosi `today` iz zamrznjene (junaška ploščica ostane »včerajšnja napoved za danes«).
 """
 import argparse
 import datetime as dt
@@ -41,6 +48,7 @@ import train_recica_mos as mos  # noqa: E402
 
 ROOT = mos.ROOT
 OUT_PATH = os.path.join(ROOT, "napoved-modela.json")
+LIVE_PATH = os.path.join(ROOT, "napoved-modela-live.json")
 UA = mos.UA
 
 
@@ -276,7 +284,10 @@ def frozen_today(path, today):
 def main():
     ap = argparse.ArgumentParser(description="Napoved lokalnega MOS modela.")
     ap.add_argument("--no-write", action="store_true")
+    ap.add_argument("--live", action="store_true",
+                    help="osveži samo napoved-modela-live.json (zamrznjene dnevne ne dotakne)")
     args = ap.parse_args()
+    out_path = LIVE_PATH if args.live else OUT_PATH
 
     try:
         model = load_model()
@@ -381,6 +392,7 @@ def main():
                        "surova mreža 0,25°, brez popravka za dolino"),
     }
 
+    # Pri živi osvežitvi je `today` še vedno zamrznjena JUTRANJA napoved (OUT_PATH), ne prejšnja živa.
     fz = frozen_today(OUT_PATH, today)
     if fz:
         payload["today"] = fz
@@ -395,10 +407,10 @@ def main():
         print("(--no-write: datoteka ni zapisana)")
         return 0
 
-    with open(OUT_PATH, "w", encoding="utf-8") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
         f.write("\n")
-    print(f"→ {os.path.relpath(OUT_PATH, ROOT)}: {len(days)} dni")
+    print(f"→ {os.path.relpath(out_path, ROOT)}: {len(days)} dni")
     return 0
 
 
