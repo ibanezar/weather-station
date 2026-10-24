@@ -17321,7 +17321,7 @@ setInterval(fetchMeteoalarm,30*60*1000);
 setInterval(fetchPrecipNowcast,10*60*1000);
 setInterval(fetchComingUp,30*60*1000);
 setInterval(fetchGoogleAlerts,30*60*1000);
-setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchTextForecast,60*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
+setInterval(()=>{if(_radarMap&&document.getElementById('tab-surroundings')?.classList.contains('active'))loadRadarFrames();},5*60*1000);setInterval(fetchHourly,30*60*1000);setInterval(fetchForecastExtras,30*60*1000);setInterval(updateSunArc.bind(null,LAT,LON),60*1000);
 
 
 // ══════════════════════════════════════════════════════════
