@@ -6,6 +6,7 @@ name: MTR napoved - osvežitev čez dan
 # IFS ~7 h po 00/12 UTC). GitHubov cron zamuja in združuje teke, zato je dejanska
 # razdalja med osvežitvami neenakomerna; Cloudflare ne more nadomestiti, ker se MTR računa
 # v Pythonu (isto načelo kot daily_features: brez druge kopije modela).
+# Vsaka osvežitev se doda tudi v data/mtr-live-log.csv (samo za preverjanje, tools/ai/eval_live_refresh.py).
 on:
   schedule:
     - cron: '40 4,10,16,22 * * *'
@@ -35,7 +36,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add napoved-modela-live.json
+          git add napoved-modela-live.json data/mtr-live-log.csv
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "chore: osveži živo napoved MTR $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
           for i in 1 2 3 4 5; do

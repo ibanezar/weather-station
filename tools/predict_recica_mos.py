@@ -32,8 +32,14 @@ dnevna napoved (napoved-modela.json) ostane nedotaknjena: to je tista, ki jo
 verify_forecasts.py vpiše na semafor, in če bi jo čez dan prepisovali, bi MTR ocenjevali
 po napovedi, nastali bližje dogodku, ARSO in Open-Meteo pa po jutranji. Živa datoteka
 nosi `today` iz zamrznjene (junaška ploščica ostane »včerajšnja napoved za danes«).
+
+Vsaka živa osvežitev se poleg tega doda v data/mtr-live-log.csv (`append_live_log`). Samo za
+preverjanje, na strani se ne prikazuje in na semafor ne gre: model je naučen na jutranjem zajemu
+D+1, točnosti poznejših osvežitev pa prej ni bilo mogoče meriti. Dnevnik to omogoči
+(tools/ai/eval_live_refresh.py).
 """
 import argparse
+import csv
 import datetime as dt
 import json
 import math
@@ -42,6 +48,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import train_recica_mos as mos  # noqa: E402
@@ -49,6 +56,10 @@ import train_recica_mos as mos  # noqa: E402
 ROOT = mos.ROOT
 OUT_PATH = os.path.join(ROOT, "napoved-modela.json")
 LIVE_PATH = os.path.join(ROOT, "napoved-modela-live.json")
+LIVE_LOG_PATH = os.path.join(ROOT, "data", "mtr-live-log.csv")
+LIVE_LOG_FIELDS = ["issued_at", "valid_at", "lead_days", "hours_before", "tmax", "tmin", "pop",
+                   "p_frost", "mm", "om_tmax", "om_tmin"]
+LJ = ZoneInfo("Europe/Ljubljana")
 UA = mos.UA
 
 
@@ -281,6 +292,43 @@ def frozen_today(path, today):
     return None
 
 
+def append_live_log(payload, path=None, now=None):
+    """Doda vrstico na (osvežitev, dan) v dnevnik živih napovedi. `hours_before` = ure od izdaje do
+    začetka ciljnega dne po lokalnem času (negativno: dan že teče; pri terminu 22:40 UTC je
+    `today` še UTC-jev datum, zato je lahko »lead 1« že lokalni danes). Napaka pri zapisu
+    dnevnika ne sme ovreti osvežitve strani: klicatelj jo ujame."""
+    path = path or LIVE_LOG_PATH
+    issued = payload["generated_at"]
+    now = now or dt.datetime.strptime(issued, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    seen = set()
+    if os.path.exists(path):
+        with open(path, encoding="utf-8", newline="") as f:
+            seen = {(r["issued_at"], r["valid_at"]) for r in csv.DictReader(f)}
+    rows = []
+    for d in payload.get("days") or []:
+        if (issued, d["date"]) in seen:
+            continue
+        start = dt.datetime.combine(dt.date.fromisoformat(d["date"]), dt.time(0, 0), tzinfo=LJ)
+        rows.append({
+            "issued_at": issued, "valid_at": d["date"], "lead_days": d.get("lead"),
+            "hours_before": round((start - now).total_seconds() / 3600, 1),
+            "tmax": d.get("tmax"), "tmin": d.get("tmin"), "pop": d.get("pop"),
+            "p_frost": d.get("p_frost"), "mm": d.get("mm"),
+            "om_tmax": d.get("om_tmax"), "om_tmin": d.get("om_tmin"),
+        })
+    if not rows:
+        return 0
+    new_file = not os.path.exists(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "a", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=LIVE_LOG_FIELDS)
+        if new_file:
+            w.writeheader()
+        for r in rows:
+            w.writerow({k: ("" if r[k] is None else r[k]) for k in LIVE_LOG_FIELDS})
+    return len(rows)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Napoved lokalnega MOS modela.")
     ap.add_argument("--no-write", action="store_true")
@@ -411,6 +459,12 @@ def main():
         json.dump(payload, f, ensure_ascii=False, indent=2)
         f.write("\n")
     print(f"→ {os.path.relpath(out_path, ROOT)}: {len(days)} dni")
+    if args.live:
+        try:
+            n = append_live_log(payload)
+            print(f"→ {os.path.relpath(LIVE_LOG_PATH, ROOT)}: {n} vrstic")
+        except (OSError, ValueError, KeyError) as e:       # dnevnik je dodatek, ne pogoj
+            print(f"⚠ dnevnik živih napovedi ni zapisan ({e})", file=sys.stderr)
     return 0
 
 

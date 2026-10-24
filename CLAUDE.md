@@ -1319,6 +1319,12 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
 - Model je naučen na jutranjem zajemu D+1; popoldanski vhodi so svežji, a **točnosti po poznejših osvežitvah ne
   merimo**. Če bi jo želeli, bi bilo treba živo napoved posebej beležiti (ne na semafor).
 - Varuh svežine ima vrstico »Napoved MTR (živa)«, test: `tools/test_mtr_live.py` (v `parity.yml`).
+- **Dnevnik osvežitev** (24. 10. 2026): `predict_recica_mos.py --live` doda vsako osvežitev v `data/mtr-live-log.csv`
+  (`issued_at` UTC, `valid_at`, `lead_days`, `hours_before`, tmax/tmin/pop/p_frost/mm, Open-Meteo). Na semafor ne gre.
+  `hours_before` = ure od izdaje do začetka dneva po lokalnem času; ≤ 0 pomeni, da dan že teče (pri terminu 22:40 UTC je
+  `today` še UTC datum, zato je »lead 1« že lokalni danes). `python3 tools/ai/eval_live_refresh.py` primerja zadnjo
+  osvežitev v razredu ur z zamrznjeno napovedjo na istih dneh (uparjen blokovni bootstrap); pod 20 dni na razred sklepa ni.
+  Do takrat ne trdi, da so poznejše osvežitve boljše.
 
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
 
@@ -1882,6 +1888,13 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
   (razpon članov Tmax/Tmin, `p_wet`, `p_frost`). Ansambli nimajo arhiva nazaj, zato se
   zgodovina za verjetnostni model (zmrzal, padavine) nabira samo s tekočim zajemom.
   Na strani se ne prikazuje. Test: `tools/test_ensemble_log.py`.
+- `tools/log_profile_forecasts.py` (od 24. 10. 2026, korak v `test-napovedi-daily.yml`) — dnevni zajem PRAVIH napovedi
+  višinskega profila (T925/T850 → stabilnost), oblačnosti po slojih, snega, vlage tal in mejne plasti za D+1..D+3 v
+  `data/profile-forward-log.csv`. Open-Meteo za te spremenljivke nima arhiva `previous_dayN`; poskus iz zlepljenih serij
+  (`tools/ai/eval_mtr4.py`) ni ločil dobitka od uhajanja informacije (docs/model-recica.md, »Poskusi 24. 10. 2026«), zato se
+  pošteni podatki nabirajo samo s tekočim zajemom — vsak dan zamujenega zajema je izgubljen. Agregacija je ena funkcija
+  (`daily_columns()`), ki jo uvaža tudi eval. **Ne dodajaj teh značilk v MTR, dokler niso izmerjene na tem dnevniku.**
+  Test: `tools/test_profile_log.py`.
 - `tools/compute_forecast_test_metrics.py` — MAE/bias/RMSE/delež >3 °C in
   kontingenčna tabela za padavine (0,2 in 5 mm), po (vir, vodilni čas), proti
   klimatologiji (±7 dni okoli koledarskega dne, iz cele postajne zgodovine —

@@ -291,3 +291,69 @@ zato ostane tam globalna sd. **Vgrajeno**: `residual_sd_by_regime()` v `train_re
 `residual_sd_regime.tmax` (razred z < 40 dnevi ga nima), `predict_day` ga uporabi za pas na kartici; brez njega
 velja globalna sd, stari modeli delujejo nespremenjeno. Pokritost 72 % ob jasnih nočeh pri D+3 je še vedno
 pod nominalnimi 80 %: razred ima le 74 dni. Ponovi, ko se nabere več.
+
+## Poskusi 24. 10. 2026: višinski nivoji, sloji oblačnosti, sneg, mejna plast, sonce
+
+Skripti: `tools/ai/fetch_profile_cache.py` (zajem), `tools/ai/eval_mtr4.py` (isti walk-forward po mesecih in
+uparjeni blokovni bootstrap kot `eval_mtr3.py`; okno 2025-10 → 2026-10, n = 384 dni na celico).
+
+**Za večino teh spremenljivk pošten arhiv ne obstaja.** Open-Meteo nima `*_previous_dayN` za višinske nivoje
+(T925/T850; HTTP 400) ter za oblačnost po slojih, višino snega, vlago tal in mejno plast (same vrednosti `null`,
+preverjeno na `historical-forecast-api` in `previous-runs-api`). Dobiti jih je mogoče samo kot zlepljeno serijo
+najsvežejšega teka, ki je blizu analize. Zato je eval nad njimi **zgornja meja in ne napoved**. Edino
+`sunshine_duration` ima pravi `previous_dayN`.
+
+| kandidat | rezultat |
+|---|---|
+| `sun` (sončni čas, **prava napoved**) | šum pri vseh šestih celicah (Tmin D+1 celo −0,004, CI [−0,009; −0,000]). **Mrtvo.** |
+| `blh` (mejna plast) | šum / Tmin D+2 −0,004. **Mrtvo, tudi kot zgornja meja.** |
+| `snow` (višina snega + vlaga tal) | šum povsod; v vzorcu je samo **20 dni s snegom > 1 cm** od 779, torej **ni preizkušljivo**, ne ovrženo. |
+| `prof`, `cloud3`, `stab` | dobitek, ki narašča z vodilnim časom (Tmax `prof` 0,03 → 0,17 → 0,30 °C) — podpis uhajanja. |
+
+**Kontrola uhajanja (`ctrl`).** Namesto profila model dobi zlepljeni Tmax/Tmin istega dne iz iste serije
+(čisti »nowcast«, brez kakršne koli informacije o profilu). Pri Tmax `ctrl` premaga `prof` v vseh treh vodilnih
+časih (0,145 / 0,316 / 0,451 proti 0,030 / 0,168 / 0,301 °C): **dobitek profila pri Tmax je ves razložen z
+uhajanjem, dokaza o resnični informaciji ni.** Pri Tmin je `stab` (T925 − T2m ponoči, T850 − T2m podnevi) pri
+D+2/D+3 dosegel 0,157/0,166 °C proti `ctrl` 0,223/0,304 — pod stropom uhajanja, zato **ne moremo ločiti**
+informacije od uhajanja (pozimi 0,23–0,29 °C, ena zima). To je edini kandidat s fizikalnim razlogom (inverzija).
+
+**Kaj to pomeni.** Brez arhiva napovedi se vprašanje »ali stabilnost iz višinskih nivojev izboljša Tmin« ne da
+odločiti. Pošten odgovor zahteva, da od zdaj sproti beležimo prave napovedi izpred 1–3 dni (T925/T850, sloji
+oblačnosti, sneg) in ponovimo eval po zimi (ni narejeno; prva prava zima s tem arhivom je 2026/27).
+**Ne dodajaj teh značilk v produkcijski model, dokler niso izmerjene na pravih napovedih.**
+
+**Beleženje pravih napovedi teče od 24. 10. 2026** (`tools/log_profile_forecasts.py`, korak v
+`test-napovedi-daily.yml`, `continue-on-error`): za D+1..D+3 zapiše dnevne stolpce (`inv_n`, `lapse_d`, `t850_d`,
+`w925_n`, sloji oblačnosti, `snow_max`, `soil_mean`, `blh_max`) v `data/profile-forward-log.csv`. Agregacija je ena
+funkcija, `daily_columns()`; `eval_mtr4.py` jo uvaža (`groups_from_columns()` preslika stolpce v skupine kandidatov),
+tako da učenje in napoved nikoli ne dobita različnih vhodov (preverjeno: izhod za vseh 881 dni enak staremu).
+Test: `tools/test_profile_log.py` (v `parity.yml`). Izdaja je ob uri teka workflowa (GitHubov cron zamuja ure), zato je
+lahko naslednji tek modela že vključen — razlika do arhiva `previous_dayN`, ki jo je treba imeti v mislih.
+**Še ni narejeno:** eval, ki bere ta dnevnik (potrebuje meritve IREICA1 za iste dneve, `build_samples`); smiselno ga je
+napisati po zimi 2026/27, ko bo vsaj ~120 zimskih dni. Do takrat ne objavljaj nobene številke o koristi profila.
+
+## Dnevnik živih osvežitev (24. 10. 2026)
+
+Model je naučen na jutranjem zajemu D+1; kartice pa od 23. 10. berejo živo osvežitev (4 termini na dan), katere točnosti
+nismo merili. `predict_recica_mos.py --live` zato vsako osvežitev doda v `data/mtr-live-log.csv` (na semafor ne gre, ta
+še naprej meri zamrznjeno jutranjo napoved). `tools/ai/eval_live_refresh.py` združi dnevnik z meritvijo in zamrznjeno
+napovedjo iz `forecast_verification.json` ter za vsak razred `hours_before` izpiše MAE in uparjeno razliko z blokovnim
+bootstrapom. **Rezultata še ni**: potrebuje vsaj 20 razrešenih dni na razred (~3 tedne). Pozor na razred »že teče«:
+osvežitev ob 22:40 UTC je že po lokalni polnoči in vključuje del dneva, zato ni poštena primerjava z jutranjo.
+
+## Poskus 24. 10. 2026: utež novejših dni
+
+Skripta: `tools/ai/eval_mtr5_recency.py` (isti walk-forward po mesecih, produkcijske zastavice, uparjen blokovni bootstrap
+kot `eval_mtr3.py`; okno 2025-10 → 2026-10, n = 384 dni na celico, **pravi** `previous_dayN`, brez uhajanja). Vprašanje: ali se
+nočni/dnevni ostanek skozi leta premika (rast drevja, gradnja, staranje senzorjev), tako da so starejši dnevi slabši učitelj?
+Utež dneva `0,5 ** (starost / polčas)`; lambda iz notranje validacije, ne popravljena za uteži.
+
+| polčas | Tmax D+1/D+2/D+3 | Tmin D+1/D+2/D+3 |
+|---|---|---|
+| 365 dni | šum / šum / šum | šum / **slabše** / šum (−0,015 °C) |
+| 180 dni | šum / šum / slabše | šum / slabše / slabše |
+| 90 dni | **slabše** (−0,06…−0,09 °C) pri vseh | šum / slabše / slabše (−0,09 °C) |
+
+**Brez dobitka pri nobenem polčasu.** Krajši polčas je dosledno slabši, ker utež skrči efektivno učno množico (~900 dni), preden
+bi premik karkoli prinesel. Dokaza za drift ni; **MTR ostane pri enakomernih utežeh**. Če se po dveh letih meritev (2027) pokaže
+razlika v povprečnem ostanku med letoma, poskus ponovi.
