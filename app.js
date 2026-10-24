@@ -1683,7 +1683,7 @@ async function fetchComingUp(){
         div.innerHTML=
           '<span class="cu-dlbl">'+lbl+'</span>'+
           '<span class="cu-demo">'+_wmoImg(d.weather_code[i],true,40)+'</span>'+
-          '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+'</span>'+
+          '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+(d.wind_speed_10m_max[i]>=30?' · '+Math.round(d.wind_speed_10m_max[i])+' km/h':'')+'</span>'+
           '<div class="cu-dtemp"><span style="color:'+tempColor(d.temperature_2m_max[i])+'">'+Math.round(d.temperature_2m_max[i])+'°</span>'+
             '<span class="cu-dtl"> / '+Math.round(d.temperature_2m_min[i])+'°</span></div>'+
           (rain>0.3
@@ -2271,7 +2271,7 @@ function triggerLivePulse(){
   if(tv){tv.classList.remove('pulse-live');void tv.offsetWidth;tv.classList.add('pulse-live');
     tv.addEventListener('animationend',()=>tv.classList.remove('pulse-live'),{once:true});}
   // Small data cards — pulse the parent .card
-  ['rain-rate','uv-val','solar-val','dewpt-val','pressure-val','wind-speed','fog-now-val','bio-humidex'].forEach(id=>{
+  ['rain-rate','uv-val','pressure-val','wind-speed','fog-now-val','bio-humidex'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
     const card=el.closest('.card');if(!card)return;
     card.classList.remove('pulse-card');void card.offsetWidth;
@@ -2614,14 +2614,12 @@ function applyObs(obs){
   else{pEl.className='p-trend t-flat';pEl.textContent='→ Blizu povprečja';}
   set('pressure-label',m.pressure>1020?'Visok tlak — stabilno':m.pressure<1005?'Nizek tlak — nestabilno':'Zmerni tlak');
   updatePressureArc(m.pressure);
-  const rr=m.precipRate??0;set('rain-rate',fmt(rr,2));set('rain-total',fmt(m.precipTotal,1));
+  const rr=m.precipRate??0;set('rain-rate',fmt(rr,2));
   const rrEl=document.getElementById('hs-rain-rate');if(rrEl){rrEl.textContent='trenutno '+rr.toFixed(1).replace('.',',')+' mm/h';rrEl.style.color=rr>=0.1?'var(--blue)':'var(--muted)';}
   renderHeroRainOutlook();
   document.getElementById('rain-bar').style.width=Math.min(100,(rr/10)*100)+'%';
   const uv=obs.uv??0;set('uv-val',uv);set('uv-label',uvLabel(uv));document.getElementById('uv-dot').style.left=Math.min(95,(uv/11)*100)+'%';
   const sol=m.solarRadiation??obs.solarRadiation;set('solar-val',sol!=null?Math.round(sol):'—');set('solar-label',solarLabel(sol));
-  set('dewpt-val',fmt(m.dewpt,1));set('dewpt-label',dewLabel(m.dewpt));
-  set('snap-fog',obs.humidity>95?'Verjetnost megle':'Jasno');set('snap-chill',fmt(m.windChill,1)+'°C');set('snap-heat',fmt(m.heatIndex,1)+'°C');
   set('snap-sw',obs.softwareType||'—');set('snap-qc',obs.qcStatus===1?'✓ Uspešno':'—');
   document.getElementById('dot').className='dot';set('status-text','V živo');set('updated',fmtTime(new Date(obs.obsTimeUtc)));
   const h=new Date().getHours();if(rr>0)setBgEffect('rain');else if(h<5||h>22)setBgEffect('night');else setBgEffect('clear');
@@ -3782,7 +3780,7 @@ function confirmImport(){
     // Invalidate cache and refresh
     Object.keys(_histCache).forEach(k=>delete _histCache[k]);
     switchPeriod(_currentPeriod);
-    applyMonthlySummary();renderMonthCard();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();
+    renderMonthCard();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();
     // Success toast
     const t=document.getElementById('toast');
     if(t){t.textContent='✅ Uvoženih '+_importParsed.length+' dni podatkov';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
@@ -3822,7 +3820,7 @@ async function autoLoadHistoryFile(){
     if(added>0||fixed>0){
       localStorage.setItem(LS_KEY,JSON.stringify(stored));
       Object.keys(_histCache).forEach(k=>delete _histCache[k]);
-      applyMonthlySummary();renderMonthCard();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();renderPastDays();
+      renderMonthCard();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();renderPastDays();
       if(histTabActive())switchPeriod(_currentPeriod);
       const t=document.getElementById('toast');
       const msg=[added?'uvoženih '+added+' novih dni':'',fixed?'usklajenih '+fixed+' dni z arhivom':''].filter(Boolean).join(', ');
@@ -4315,7 +4313,7 @@ function shareWeather(){
   const g=id=>document.getElementById(id)?.textContent||'—';
   const cond=g('cond-label'),hum=g('hs-humidity').replace(/\D/g,'');
   const wSpd=g('wind-speed').replace(/[^0-9.]/g,''),wDir=g('wind-dir-lbl').split('·')[0].trim();
-  const rain=g('rain-total'),high=g('day-high'),low=g('day-low');
+  const rain=g('day-rain'),high=g('day-high'),low=g('day-low');
   const temp=_lastTemp!=null?_lastTemp.toFixed(1)+'°C':'—';
   const txt=`🌤 Vreme – Rečica ob Savinji\n🌡 ${temp} — ${cond}\n💧 Vlažnost: ${hum} %  |  Rosišče: ${g('dewpt-hero')}°C\n💨 Veter: ${wDir} ${wSpd} km/h\n🌧 Padavine danes: ${rain} mm\n📈 Maks: ${high}°C  |  Min: ${low}°C\n\n📡 Postaja IREICA1 · Rečica ob Savinji`;
   if(navigator.share){navigator.share({title:'Meteorec — Rečica ob Savinji',text:txt}).catch(()=>{});}
@@ -4337,7 +4335,7 @@ async function refreshWeatherNow(){
   if(btn){btn.disabled=true;btn.classList.add('spinning');}
   try{
     await Promise.all([fetchCurrent(),fetchHourly()]);
-    fetchTextForecast();fetchForecastExtras();fetchComingUp();fetchPrecipNowcast();
+    fetchForecastExtras();fetchComingUp();fetchPrecipNowcast();
     fetchSevereWeather();fetchMeteoalarm();fetchGoogleAlerts();
     updateSunArc(LAT,LON);
     runAdvancedOnly(()=>{fetchValleyDuel();fetchPollen();});
@@ -5890,11 +5888,10 @@ async function fetchClimateComparison(){
       statsHtml+='<div><div class="chart-range">Povp. temp. (1.–'+endDay+'.)</div>'
         +'<div style="font-size:1.1rem;font-family:JetBrains Mono,monospace;color:var(--text)">'+curAvgT.toFixed(1)+'°C'
         +' <span style="font-size:.78rem;color:'+col+'">'+sT+dT.toFixed(1)+'° vs. povp.</span></div></div>';
-      // Mesečni povzetek (applyMonthlySummary) nima lastnega vira za odstopanje
-      // od povprečja — namesto podvojenih klicev na archive-api ponovno uporabi
-      // tega, ki ga ta funkcija itak že izračuna, in osveži povzetek.
+      // Kartica "Ta mesec" (renderMonthCard) nima lastnega vira za odstopanje
+      // od povprečja — ponovno uporabi izračun te funkcije.
       _climAnomalyT=dT;_climAnomalyYears=histOk.length;
-      try{applyMonthlySummary();renderMonthCard();}catch(_){}
+      try{renderMonthCard();}catch(_){}
     }
     if(histAvgR>0){
       const dR=((curR-histAvgR)/histAvgR*100),sR=dR>=0?'+':'';
@@ -5959,9 +5956,7 @@ function loadBlogTicker(){
 }
 
 // ── Monthly summary ───────────────────────────────────────
-// computeMonthStats() je edini vir za tekoči mesec iz history.json — uporabita
-// ga applyMonthlySummary() (besedilna kartica) in renderMonthCard() (kartica
-// "Ta mesec"), da se izračun ne podvaja.
+// computeMonthStats() je edini vir za tekoči mesec iz history.json (kartica "Ta mesec").
 function computeMonthStats(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
   const pad=n=>String(n).padStart(2,'0');
@@ -5984,26 +5979,8 @@ function computeMonthStats(){
   const minE=entries.find(([,v])=>v.tempLow===minT);
   return{ok:true,monthName:mn,entries,avgT,totR,rainyDays,frostDays,maxT,maxDate:maxE?maxE[0]:null,minT,minDate:minE?minE[0]:null};
 }
-function applyMonthlySummary(){
-  const s=computeMonthStats();
-  set('month-title',s.monthName);
-  try{
-    if(!s.ok){set('month-txt','Zbiranje podatkov za '+s.monthName+'…');return;}
-    const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
-    // Odstopanje od povprečja pride iz fetchClimateComparison() (isti izračun,
-    // brez podvojenih klicev na archive-api) — na voljo šele, ko ta reši.
-    const anomTxt=_climAnomalyT!=null
-      ?' To je '+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1).replace('.',',')+'°C glede na '+_climAnomalyYears+'-letno povprečje.'
-      :'';
-    const dec=v=>v.toFixed(1).replace('.',',');
-    const el=document.getElementById('month-txt');
-    if(el)el.innerHTML=s.monthName+' — '+s.entries.length+' dni podatkov. Povprečna temperatura: <b>'+dec(s.avgT)+'°C</b>.'+anomTxt+' Skupne padavine: <b>'+dec(s.totR)+' mm</b> v <b>'+s.rainyDays+' deževnih dnevih</b>.'+(s.frostDays>0?' Zmrzujočih dni: <b>'+s.frostDays+'</b>.':'')+' Najtoplejše: <b>'+dec(s.maxT)+'°C</b>'+(s.maxDate?' ('+fmtD(s.maxDate)+')':"")+'.'+ ' Najhladnejše: <b>'+dec(s.minT)+'°C</b>'+(s.minDate?' ('+fmtD(s.minDate)+')':"")+'.';
-  }catch(e){set('month-txt','Napaka: '+e.message);}
-}
-
 // ── "Ta mesec" — hitra kartica ─────────────────────────────
-// Isti podatki kot applyMonthlySummary() (computeMonthStats()), samo v
-// hitro berljivi mreži kartic namesto v odstavku — za pregled na prvi pogled
+// Podatki iz computeMonthStats(), v hitro berljivi mreži — za pregled na prvi pogled
 // pod kartico "Zadnjih 7 dni". Uporabi obstoječ .yr-grid/.yr-item vzorec
 // (glej applyYearRecords), da ne uvaja novega vizualnega jezika kartic.
 function renderMonthCard(){
@@ -7048,75 +7025,6 @@ ${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
     const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
     metaEl.textContent=src+(t?' · 🕐 '+t:'');
-  }
-}
-
-async function fetchTextForecast(){
-  try{
-    const url='https://api.open-meteo.com/v1/forecast'
-      +'?latitude='+LAT+'&longitude='+LON
-      +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,'
-      +'wind_speed_10m_max,wind_direction_10m_dominant,precipitation_probability_max'
-      +'&timezone=Europe%2FLjubljana&forecast_days=7';
-    const res=await fetch(url);const data=await res.json();
-    const d=data.daily;if(!d?.time?.length)return;
-
-    const SL_DAYS_SHORT=['ned','pon','tor','sre','čet','pet','sob'];
-    const SL_DAYS_FULL=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'];
-    const SL_MON=['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'];
-
-    const grid=document.getElementById('txfc-grid');if(!grid)return;
-    grid.innerHTML='';
-
-    /* MTR (naš model) pokriva samo D+1..D+3: verjetnost dežja po datumu (ne po indeksu) in pragov 1/5 mm.
-       Ni pogoj za kartico — ob napaki ali manjkajočih poljih ostane samo Open-Meteo. */
-    const mtrRain={};
-    try{
-      /* `today` = včerajšnja zamrznjena napoved za današnji dan (days se začne pri jutri). */
-      const mj=await _mtrFetch();
-      (mj.days||[]).concat(mj.today?[mj.today]:[]).forEach(x=>{if(Number.isFinite(x.pop))mtrRain[x.date]=x;});
-    }catch(_){}
-    const r5=v=>Number.isFinite(v)?(Math.round(v*20)*5)+'\u00A0%':null;
-
-    d.time.forEach((t,i)=>{
-      const date=new Date(t+'T12:00:00');
-      const isToday=i===0, isTomorrow=i===1;
-      const lbl=isToday?'Danes':isTomorrow?'Jutri':SL_DAYS_SHORT[date.getDay()]+' '+date.getDate()+'.';
-      const wmo=d.weather_code[i];
-      const tmax=d.temperature_2m_max[i],tmin=d.temperature_2m_min[i];
-      const rain=d.precipitation_sum[i]||0;
-      const wind=d.wind_speed_10m_max[i];
-      const prob=d.precipitation_probability_max[i];
-
-      const desc=_wmoTxt(wmo)+(wind>=30?' · '+Math.round(wind)+' km/h':'');
-
-      const card=document.createElement('div');
-      card.className='txfc-card'+(isToday?' today':'');
-      card.title=(isToday?SL_DAYS_FULL[date.getDay()]+', ':'')+date.getDate()+'. '+SL_MON[date.getMonth()]
-        +(rain>0?' · '+rain.toFixed(1)+' mm':'')
-        +(prob?(' · '+prob+'% verj. dežja'):'')
-        +(wind?' · veter '+Math.round(wind)+' km/h':'');
-      card.innerHTML=
-        '<div class="txfc-lbl">'+lbl+'</div>'+
-        '<div class="txfc-emoji">'+_wmoImg(wmo,true,40)+'</div>'+
-        '<div class="txfc-desc">'+desc+'</div>'+
-        '<div class="txfc-temp"><span class="txfc-th">'+Math.round(tmax)+'°</span><span style="color:var(--muted);font-size:.74rem">/</span><span class="txfc-tl">'+Math.round(tmin)+'°</span></div>'+
-        (rain>0.3?'<div class="txfc-rain">🌧 '+rain.toFixed(1)+' mm</div>':'')+
-        (mtrRain[t]?'<div class="txfc-mtrbox" title="Verjetnost padavin po MTR, našem modelu, naučenem na meritvah postaje (samo prve 3 dni). Količina (~ mm) je grobo povprečje petih modelov, ne naučen popravek."><div class="txfc-mtr-l"><span class="mtr-pill">MTR</span></div>'
-          +(_mtrMm(mtrRain[t].mm)?'<div class="txfc-mtr">'+_mtrMm(mtrRain[t].mm)+'</div>':'')
-          +'<div class="txfc-mtr2">dež '+r5(mtrRain[t].pop)+'</div>'
-          +(r5(mtrRain[t].pop1)?'<div class="txfc-mtr2">≥1\u00A0mm '+r5(mtrRain[t].pop1)+'</div>':'')
-          +(r5(mtrRain[t].pop5)?'<div class="txfc-mtr2">≥5\u00A0mm '+r5(mtrRain[t].pop5)+'</div>':'')+'</div>':'');
-      if(mtrRain[t])card.classList.add('has-mtr');
-      grid.appendChild(card);
-    });
-
-    const upd=document.getElementById('txfc-updated');
-    if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-  }catch(e){
-    const g=document.getElementById('txfc-grid');
-    if(g)g.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">Napoved trenutno ni na voljo.</div>';
-    console.warn('TextForecast:',e);
   }
 }
 
@@ -10124,33 +10032,7 @@ function valleyProfileSummary(pts){
   else{kind='steep';text='Strm gradient: z višino se hitro ohlaja.';}
   return{lo,hi,lapse,kind,text,pts:p};
 }
-function renderValleyProfile(el,sum){
-  const W=320,H=150,L=44,R=10,T=10,B=24;
-  const ts=sum.pts.map(x=>x.t),hs=sum.pts.map(x=>x.elev);
-  const tmin=Math.floor(Math.min(...ts,sum.lo.t+VP_STD_LAPSE*(950-sum.lo.elev)/100)-1),tmax=Math.ceil(Math.max(...ts)+1);
-  const hmin=300,hmax=1000;
-  const X=t=>L+(t-tmin)/(tmax-tmin)*(W-L-R),Y=h=>H-B-(h-hmin)/(hmax-hmin)*(H-T-B);
-  const ref='<line x1="'+X(sum.lo.t+VP_STD_LAPSE*(hmin-sum.lo.elev)/100).toFixed(1)+'" y1="'+Y(hmin).toFixed(1)+
-    '" x2="'+X(sum.lo.t+VP_STD_LAPSE*(hmax-sum.lo.elev)/100).toFixed(1)+'" y2="'+Y(hmax).toFixed(1)+
-    '" stroke="var(--muted)" stroke-dasharray="4 3" stroke-width="1"/>';
-  const obs='<line x1="'+X(sum.lo.t).toFixed(1)+'" y1="'+Y(sum.lo.elev).toFixed(1)+'" x2="'+X(sum.hi.t).toFixed(1)+
-    '" y2="'+Y(sum.hi.elev).toFixed(1)+'" stroke="var(--blue)" stroke-width="2"/>';
-  const dots=sum.pts.map(x=>'<g><title>'+x.name+': '+_duelNum(x.t,1)+' °C na '+x.elev+' m</title>'+
-    '<circle cx="'+X(x.t).toFixed(1)+'" cy="'+Y(x.elev).toFixed(1)+'" r="5" fill="var(--blue)" stroke="var(--bg,#fff)" stroke-width="2"/>'+
-    // oznaka na levo od točke, če bi na desni zlezla čez rob grafa
-    (X(x.t)>W-95?'<text x="'+(X(x.t)-8).toFixed(1)+'" text-anchor="end"':'<text x="'+(X(x.t)+8).toFixed(1)+'"')+
-    ' y="'+(Y(x.elev)+4).toFixed(1)+'" font-size="10" fill="var(--text)">'+x.name+' '+_duelNum(x.t,1)+'°</text></g>').join('');
-  const yTicks=[400,600,800,1000].map(h=>'<text x="'+(L-6)+'" y="'+(Y(h)+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="var(--muted)">'+h+' m</text>'+
-    '<line x1="'+L+'" y1="'+Y(h).toFixed(1)+'" x2="'+(W-R)+'" y2="'+Y(h).toFixed(1)+'" stroke="var(--muted)" stroke-opacity=".15"/>').join('');
-  const aria='Temperatura po višini: '+sum.pts.map(x=>x.name+' '+_duelNum(x.t,1)+' °C na '+x.elev+' m').join(', ')+'. '+sum.text;
-  el.innerHTML='<div class="duel-verdict" style="margin-top:.6rem"><b>Profil doline v živo:</b> '+sum.text+
-    ' Gradient '+(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m ('+sum.lo.name+' → '+sum.hi.name+').</div>'+
-    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:420px;display:block;margin:.3rem auto 0" role="img" aria-label="'+aria.split('"').join('&quot;')+'">'+
-    yTicks+ref+obs+dots+'</svg>'+
-    '<div class="duel-credit">Prekinjena črta: standardni gradient −0,65 °C/100 m od '+sum.lo.name+'. Vse izmerjeno; '+
-    'Črnivec in Gornji Grad: <a href="https://www.ceste.si/sl/razmere/vreme" target="_blank" rel="noopener">DRSI</a> (višini iz DEM).</div>';
-}
-// Izmerjene točke profila (Rečica + sveže DRSI postaje); vir deljen z dvobojem in junaškim prerezom.
+// Izmerjene točke profila (Rečica + sveže DRSI postaje); vir junaškega prereza.
 async function _vpPoints(homeT){
   // Vir se osveži na ~10 min in je predpomnjen na 5 min v workerju — klienta omejimo na enkrat/5 min.
   if(!_vpCache.data||Date.now()-_vpCache.ts>5*60*1000){
@@ -10164,17 +10046,6 @@ async function _vpPoints(homeT){
   if(fresh(post.crnivec))pts.push({name:'Črnivec',elev:VP_CRN_ELEV,t:post.crnivec.temp_c});
   return pts;
 }
-async function fetchValleyProfile(homeT){
-  const el=document.getElementById('duel-profile');
-  if(!el)return;
-  try{
-    const pts=await _vpPoints(homeT);
-    const sum=valleyProfileSummary(pts);
-    if(!sum){el.innerHTML='';return;}
-    renderValleyProfile(el,sum);
-  }catch(e){el.innerHTML='';console.warn('Dolinski profil:',e);}
-}
-
 // ── Dolinski prerez v herou ───────────────────────────────────────────
 // Shematski prerez doline (ne zemljevid): teren Rečica → Gornji Grad → Črnivec, nad njim stolpec zraka, obarvan z
 // IZMERJENIMI temperaturami treh postaj (linearno med njimi, nad najvišjo postajo standardni gradient −0,65 °C/100 m,
@@ -10366,7 +10237,6 @@ async function fetchValleyDuel(){
         'Arhiv, model MTR in semafor točnosti ostajajo na meritvah IREICA1.</div>';
 
     if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    fetchValleyProfile(homeT);
   }catch(e){
     if(body)body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';
     console.warn('Dvoboj Varpolje:',e);
@@ -17392,7 +17262,6 @@ async function init(){
   try{_revealCards();}catch(_){}
   try{applyStationOnThisDay();}catch(_){}
   try{applyMoon();}catch(_){}
-  try{applyMonthlySummary();}catch(_){}
   try{renderMonthCard();}catch(_){}
   try{applyYearRecords();}catch(_){}
   try{renderPastDays();}catch(_){}
@@ -17422,7 +17291,6 @@ async function init(){
 
   // ── Wave 2: forecast tab content (~0.8 s after wave 1) ──
   setTimeout(()=>{
-    fetchTextForecast();
     fetchForecastExtras();
     fetchComingUp();
     runAdvancedOnly(()=>fetchMosForecast());
@@ -19798,7 +19666,7 @@ function _buildNerdKPIs(){
   // je od fmt()/countUp() zdaj z decimalno vejico, zato pred parseFloat nazaj v piko.
   const domNum=s=>{const n=parseFloat((s||'').replace(',','.'));return isNaN(n)?null:n;};
   const T  = domNum(document.querySelector('#temp-val')?.textContent);
-  const Td = domNum(document.getElementById('dewpt-val')?.textContent);
+  const Td = domNum(document.getElementById('dewpt-hero')?.textContent);
   const RH = domNum(document.querySelector('.hm-humidity .hm-val')?.textContent);
   const P  = domNum(document.getElementById('pressure-val')?.textContent);
 

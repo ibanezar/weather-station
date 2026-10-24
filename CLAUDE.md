@@ -1270,14 +1270,15 @@ Kje je vključena:
 (kartica pove, da postaja ni dosegljiva, tema zgodbe se ne uvrsti) — nobena
 druga stran od tega ni odvisna.
 
-### Dolinski profil v živo (kartica »Dolinski dvoboj«, 1. 10. 2026)
+### Dolinski profil v živo (junaški prerez »Dolina zdaj«, 1. 10. 2026)
 
-Pod dvobojem Rečica ⇄ Varpolje (`#duel-profile`, `fetchValleyProfile()` v `app.js`) je graf
-**izmerjene** temperature po višini: Rečica (IREICA1, 366 m), Gornji Grad (DRSI, 428 m) in
-Črnivec (DRSI, 903 m) iz `/crnivec-drsi` (isti vir in navedba DRSI kot na crnivec.si).
-Pove, ali je zrak v dolini hladnejši od višine (inverzija, `valleyProfileSummary()`: gradient
-> 0), šibek (> −0,4), običajen (> −0,9) ali strm gradient °C/100 m; prekinjena črta je
-standardni −0,65 od Rečice. Brez preračunov — **primerjava prelaza s preračunanim modelom
+Izmerjena temperatura po višini — Rečica (IREICA1, 366 m), Gornji Grad (DRSI, 428 m) in
+Črnivec (DRSI, 903 m) iz `/crnivec-drsi` (isti vir in navedba DRSI kot na crnivec.si) — je
+prikazana **samo enkrat**: kartica »Dolina zdaj: Rečica → Črnivec« pod junaško kartico
+(`fetchHeroValley()`, `heroValleySvg()`). Pod dvobojem je bil do 24. 10. 2026 še en graf iz
+istih točk (`#duel-profile`, `fetchValleyProfile()`); odstranjen kot podvojen. Povzetek
+(`valleyProfileSummary()`): gradient > 0 inverzija, > −0,4 šibek, > −0,9 običajen, sicer strm
+(°C/100 m). Brez preračunov — **primerjava prelaza s preračunanim modelom
 ostaja prepovedana** (glej Črnivec: »Črnivec proti dolini«). DRSI meritev starejša od 40 min se
 izpusti (kot povsod); pod dvema točkama se graf skrije. Varpolje ni na grafu: nima objavljene
 višine in stoji na istem dnu doline kot Rečica. Klic `/crnivec-drsi` je omejen na enkrat/5 min

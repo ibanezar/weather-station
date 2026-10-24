@@ -1876,8 +1876,6 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .yr-val{font-family:'JetBrains Mono',monospace;font-size:1.35rem;font-weight:300}
 .yr-dt{font-size:.72rem;color:var(--muted-text,var(--muted));margin-top:.2rem}
 /* Monthly summary */
-.month-txt{font-size:.82rem;line-height:1.85;color:var(--text)}
-.month-txt b{color:var(--blue)}
 /* Climate comparison */
 .clim-bars{display:flex;gap:.4rem;align-items:flex-end;height:80px;margin-top:.75rem}
 .clim-bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem}
@@ -2396,26 +2394,7 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 
 
 /* Text forecast — compact cards */
-.txfc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:.25rem;min-height:112px}
-.txfc-card{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.7rem .5rem .65rem;display:flex;flex-direction:column;align-items:center;gap:.18rem;text-align:center;transition:background .2s,box-shadow .2s;cursor:default}
-.txfc-card:hover{background:var(--card-bg);box-shadow:var(--card-shadow-h)}
-.txfc-card.today{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.06)}
-.txfc-card.today:hover{background:rgba(56,189,248,.1)}
-.txfc-lbl{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.txfc-card.today .txfc-lbl{color:var(--blue)}
-.txfc-emoji{font-size:1.55rem;line-height:1.2;margin:.15rem 0}
-.txfc-card.today .txfc-emoji{font-size:1.9rem}
-.txfc-desc{font-size:.76rem;color:var(--muted);line-height:1.35;min-height:2.1em;display:flex;align-items:center;justify-content:center}
-.txfc-temp{font-family:'JetBrains Mono',monospace;font-size:.78rem;display:flex;gap:.2rem;align-items:baseline;margin-top:.1rem}
-.txfc-th{color:#f87171}.txfc-tl{color:var(--blue)}
-.txfc-rain{font-size:.7rem;color:var(--rain-col);font-family:'JetBrains Mono',monospace}
-.txfc-mtrbox{margin-top:.3rem;padding:.3rem .2rem .35rem;border-radius:10px;background:rgba(3,105,161,.1);background:color-mix(in srgb,var(--rain-col) 13%,transparent);white-space:nowrap;text-align:center;line-height:1.35;width:100%}
-.txfc-mtr-l{font-size:.55rem;color:var(--muted);letter-spacing:.06em}
-.txfc-mtr{font-size:.66rem;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;margin-top:.1rem}
-.txfc-mtr2{font-size:.56rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .txfc-source{font-size:.76rem;color:var(--muted);margin-top:.65rem;opacity:.65}
-@media(max-width:600px){.txfc-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.txfc-card{padding-left:.3rem;padding-right:.3rem;min-width:0}.txfc-card:nth-child(n+5){display:none}}
-@media(max-width:380px){.txfc-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.txfc-card:nth-child(n+4){display:none}}
 
 /* Naš model (MOS) — grafična kartica: hero graf (izmerjena preteklost →
    napoved s pasom negotovosti), dnevne ploščice, KPI-ji in "dvoboj" po dnevih.
@@ -3582,7 +3561,6 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 .txfc-card.has-mtr,.cu-day.has-mtr{border-color:color-mix(in srgb,var(--rain-col) 50%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--rain-col) 14%,transparent),0 6px 16px -8px color-mix(in srgb,var(--rain-col) 60%,transparent)}
 .mtr-pill{display:inline-block;font-size:.56rem;font-weight:800;letter-spacing:.09em;line-height:1;padding:.18rem .42rem;border-radius:999px;background:var(--rain-col);color:#fff}
 [data-theme="dark"] .mtr-pill{color:#04070e}
-.txfc-mtr-l{margin-bottom:.1rem}
 .cu-mtr-hd{display:flex;align-items:center;justify-content:center;gap:.3rem;flex-wrap:wrap}
 @media(forced-colors:active){.mtr-pill{background:Highlight;color:HighlightText}}
 
