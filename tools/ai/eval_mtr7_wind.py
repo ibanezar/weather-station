@@ -12,6 +12,9 @@ V1_CACHE = {lead: rows} (hitrost vetra wind_speed_10m + oblačnost, tlak …), W
 Hipoteza: postaja stoji na zavetrnem dnu doline, zato model veter sistematično precenjuje (povprečno
 2× pri hitrosti) — ponovljiva razlika, ki jo MOS odstrani, kot Tmin ponoči.
 
+Dnevni stolpci vetra in vektor značilk sta v train_recica_mos (wind_columns/wind_vector): ISTA funkcija kot
+pri učenju in napovedi (isto načelo kot daily_features), eval jo samo uvozi.
+
 Primerjani modeli (isti walk-forward po mesecih, lambda iz notranje validacije, enaki dnevi, uparjen 7-dnevni
 blokovni bootstrap kot eval_mtr3.py):
   raw      surov Open-Meteo
@@ -37,34 +40,6 @@ TARGETS = {"mean": "windspeedAvg", "gust": "windgustHigh"}
 
 def _l(x):
     return math.log1p(max(x, 0.0))
-
-
-def hourly(rec, key):
-    return [(int(h), v) for h, v in (rec.get(key) or [])]
-
-
-def wind_columns(rows_day, wind_day):
-    """Dnevne vrednosti iz urnih serij: hitrost, sunek, smer. None, če manjka."""
-    w = hourly(rows_day, "wind_speed_10m")
-    g = hourly(wind_day or {}, "wind_gusts_10m")
-    d = {h: v for h, v in hourly(wind_day or {}, "wind_direction_10m")}
-    if len(w) < 20 or len(g) < 20:
-        return None
-    wn = [v for h, v in w if h in t.NIGHT_HOURS]
-    wd = [v for h, v in w if h in t.DAY_HOURS]
-    s = sum(v for _, v in w)
-    ex = sum(v * math.sin(math.radians(d[h])) for h, v in w if h in d) / s if s > 0 else 0.0
-    ey = sum(v * math.cos(math.radians(d[h])) for h, v in w if h in d) / s if s > 0 else 0.0
-    return {"wmean": s / len(w), "wmax": max(v for _, v in w), "wn": sum(wn) / len(wn),
-            "wd": sum(wd) / len(wd), "gmax": max(v for _, v in g),
-            "gmean_d": sum(v for h, v in g if h in t.DAY_HOURS) / max(1, sum(1 for h, _ in g if h in t.DAY_HOURS)),
-            "ex": ex, "ey": ey}
-
-
-def vec_mos(c, f):
-    return [1.0, _l(c["wmean"]), _l(c["wmax"]), _l(c["wn"]), _l(c["wd"]), _l(c["gmax"]), _l(c["gmean_d"]),
-            c["ex"], c["ey"], f["cloud"] / 100, f["cloud_n"] / 100, f["rad"] / 100, (f["pres"] - 1013) / 10,
-            f["sin_doy"], f["cos_doy"]]
 
 
 def vec_loglin(c, key):
@@ -106,7 +81,7 @@ def walk(samples, since, key):
         ratio = float(np.median([s["obs"] / s["om"] for s in tr if s["om"] > 0.5] or [1.0]))
         v1 = lambda s: vec_loglin(s["c"], key)
         co1 = solve([v1(s) for s in tr], [s["y"] for s in tr], 0.01)
-        vm = lambda s: vec_mos(s["c"], s["f"])
+        vm = lambda s: t.wind_vector(s["c"], s["f"])
         com = solve([vm(s) for s in tr], [s["y"] for s in tr], pick_lambda(tr, vm))
         for s in te:
             out["raw"].append((s["date"], s["om"], s["obs"]))
@@ -149,7 +124,7 @@ def main():
                 if not o or o.get("src") not in ("station", "wu") or o.get(field) is None:
                     continue
                 f = t.daily_features(rows[day], day)
-                c = wind_columns(rows[day], wind[str(lead)].get(day))
+                c = t.wind_columns({**rows[day], **(wind[str(lead)].get(day) or {})})
                 if f is None or c is None or c[key] is None:
                     continue
                 samples.append({"date": day, "f": f, "c": c, "om": c[key], "obs": o[field], "y": _l(o[field])})

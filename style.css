@@ -2463,6 +2463,16 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-why-val.down{color:var(--blue)}
 .mtr-why-sub{font-size:.68rem;color:var(--muted)}
 .mtr-why-txt{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.5}
+/* Veter v dolini: vrstica na dan (umerjeno na postajo) in surov Open-Meteo ob strani */
+.mtr-wind-row{display:grid;grid-template-columns:5.6rem 1fr auto;gap:.2rem .6rem;align-items:baseline;padding:.45rem 0;
+  border-top:1px solid var(--fc-border);font-size:.84rem}
+.mtr-wind-row:first-of-type{border-top:0}
+.mtr-wind-day{font-weight:600;color:var(--text);text-transform:capitalize}
+.mtr-wind-day span{font-weight:500;color:var(--muted);font-size:.7rem}
+.mtr-wind-main{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text)}
+.mtr-wind-main span{font-size:.7rem;font-weight:600;color:var(--muted);margin:0 .15rem 0 .15rem}
+.mtr-wind-om{font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:right}
+@media (max-width:480px){.mtr-wind-row{grid-template-columns:5rem 1fr}.mtr-wind-om{grid-column:2;text-align:left}}
 /* Drugo mnenje: plavajoči stolpci P10–P90 na skupni temperaturni osi */
 .wn2-legend{display:flex;flex-wrap:wrap;gap:.2rem .9rem;font-size:.7rem;color:var(--muted);margin:0 0 .5rem}
 .wn2-legend span{display:inline-flex;align-items:center;gap:.35rem}

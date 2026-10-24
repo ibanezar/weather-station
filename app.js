@@ -7414,6 +7414,7 @@ function _renderMtrMount(idp){
   renderMtrFrost(idp);
   renderMtrWhy(idp);
   renderMtrWn2(idp);
+  renderMtrWind(idp);
   renderMtrKpis(idp);
   drawMtrDuel(idp);
   renderMtrSituations(idp);
@@ -7914,6 +7915,33 @@ function renderMtrWn2(idp){
     +'<div class="wn2-grid"><div class="wn2-plot">'+grid+'</div></div>'+rows+'</div>'
     +'<p class="mtr-why-txt">Oznaka ob dnevu: kako se sredina razpona WeatherNext 2 razlikuje od MTR. '
     +'WeatherNext 2 je surova mreža ~28 km brez popravka za dolino.</p>';
+}
+
+/* Veter in sunki v dolini (24. 10. 2026): postaja stoji v zavetju, Open-Meteo veter v povprečju precenjuje ~2×
+   (razmerje 0,5), zato je povprečni veter surov model × naučena skala, sunki pa ridge v log1p (D+1/D+2 značilno
+   boljši od skale). Surov Open-Meteo je ob vsaki vrstici, napis pove, da je prikazano umerjeno na postajo.
+   Element je samo na polni kartici (#mos-wind); brez polj wind/gust (model ali živa napoved jih nima) je skrit. */
+function renderMtrWind(idp){
+  const st=_mtrState;if(!st)return;
+  const el=document.getElementById(idp+'wind');if(!el)return;
+  const days=st.days.filter(d=>Number.isFinite(d.wind)||Number.isFinite(d.gust));
+  el.hidden=!days.length;
+  if(!days.length){el.innerHTML='';return;}
+  const kmh=v=>!Number.isFinite(v)?'—':(v<0.5?'<\u00A01':String(Math.round(v)));
+  const rows=days.map(d=>{
+    const dt=new Date(d.date+'T12:00:00');
+    return '<div class="mtr-wind-row"><div class="mtr-wind-day">'+_mtrDayName(d)
+      +'<span> '+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
+      +'<div class="mtr-wind-main">veter '+kmh(d.wind)+'<span>km/h</span> · sunki do '+kmh(d.gust)+'<span>km/h</span></div>'
+      +'<div class="mtr-wind-om">Open-Meteo '+kmh(d.om_wind)+' / '+kmh(d.om_gust)+'</div></div>';
+  }).join('');
+  const d0=days.find(d=>Number.isFinite(d.gust_mae)&&Number.isFinite(d.gust_mae_om));
+  const err=d0?' Napaka največjega sunka pri tem vodilnem času je ~'+Math.round(d0.gust_mae)+'\u00A0km/h (surov model ~'
+    +Math.round(d0.gust_mae_om)+'\u00A0km/h).':'';
+  el.innerHTML='<div class="mtr-why-hd">Veter v dolini · umerjeno na postajo</div>'
+    +'<div class="mtr-why-sub2">povprečni dnevni veter in največji sunek · IREICA1</div>'+rows
+    +'<p class="mtr-why-txt">Postaja stoji v zavetju doline: Open-Meteo veter tu v povprečju precenjuje za polovico, zato je '
+    +'prikazano umerjeno na meritve postaje (desno surov model, povprečje / sunek). Poskusna ocena, ne opozorilo.'+err+'</p>';
 }
 
 /* Tri ploščice s krepkimi številkami: napaka MTR, napaka Open-Meteo in

@@ -397,5 +397,18 @@ Open-Meteo (**razmerje 0,50**, korelacija 0,75); največji sunek postaje je 18,0
   (−0,31 km/h, CI [+0,03; +0,60]); pri D+3 šum. Skupaj proti surovemu modelu je MAE sunkov 45 % manjša pri D+1.
 - Samo skala je torej dovolj za povprečni veter; za sunke se nekaj dobi tudi iz značilk (hitrost po delih dneva, smer, oblačnost, sevanje, tlak).
 
-**Ni vgrajeno** (potrebuje odločitev): veter in sunki v MTR (`napoved-modela.json`, kartica) ali samo umerjena skala pri prikazu
-modelskega vetra. Pri vsakem prikazu modelskega vetra za Rečico je treba povedati, ali je surov ali umerjen na postajo.
+**Vgrajeno 24. 10. 2026 (po odločitvi Filipa):** veter in sunki so del MTR.
+- **Učenje** (`train_recica_mos.py`): povprečni veter = Open-Meteo × skala (mediana razmerja postaja/model, `wind.mean.ratio`; ridge
+  ni značilno boljši), sunki = ridge v `log1p` prostoru z 15 značilkami (`WIND_FEATURES`, `wind.gust.coefficients`). Sunki se
+  zapišejo samo, če so v walk-forward boljši od surovega Open-Meteo. Veščina je v `leads.<N>.wind.<mean|gust>.skill`
+  (MAE surov / skala / model, pristranskost). Zajem sunkov in smeri je **ločen** od `HOURLY_VARS` (`WIND_EXTRA_VARS`, lasten ključ
+  `wind<N>:…` v predpomnilniku): temperaturni model in njegov zajem se nista spremenila, neuspešen zajem vetra izpusti samo veter.
+- **Stolpci** gradi ena funkcija, `wind_columns()` + `wind_vector()` (isto načelo kot `daily_features`); uvaža jo napovedovalnik
+  in `tools/ai/eval_mtr7_wind.py` (enakost z evalom preverjena na 2643 vektorjih).
+- **Napoved** (`predict_recica_mos.py`): živi klic doda `WIND_EXTRA_VARS` samo, kadar ima model veter (isti klic, brez nove
+  zahteve); polja `wind`, `gust`, `om_wind`, `om_gust`, `gust_mae`, `gust_mae_om` v `napoved-modela.json` in živi različici
+  (`None`, kadar jih ni). **Na semafor in v `forecast_verification.json` ne gre**: veter tam ni merjen.
+- **Kartica**: `renderMtrWind()` (`#mos-wind`, samo polna kartica) — vrstica na dan »veter ~1, sunki do 11 km/h« z napisom
+  **»umerjeno na postajo«**, surov Open-Meteo ob strani in napaka sunkov. Skrita, kadar polj ni.
+- Test: `tools/test_mtr_wind.py` (v `parity.yml`). **Veter zaživi šele po ponovnem učenju** (`mos-train.yml`, ročno ali 1. v mesecu):
+  do takrat model v `model/recica-mos.json` nima `wind` in kartica je skrita.
