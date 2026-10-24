@@ -1013,29 +1013,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
-  <!-- 4 small cards -->
-  <div class="g4" style="margin-bottom:1rem">
+  <!-- 2 majhni kartici (rosišče je v heroju, dež danes v dnevnem povzetku) -->
+  <div class="g2" style="margin-bottom:1rem">
     <div class="card">
       <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-cloud-rain"/></svg> Intenziteta padavin</div>
       <div class="cval skel-shimmer" id="rain-rate">—<span class="unit"> mm/h</span></div>
       <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
-      <div class="csub">Danes: <span id="rain-total" class="skel-shimmer">—</span> mm</div>
     </div>
     <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg> UV indeks</div>
+      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg> UV indeks in sončno sevanje</div>
       <div class="cval skel-shimmer" id="uv-val">—</div>
       <div class="uv-bar"><div class="uv-dot" id="uv-dot" style="left:0%"></div></div>
       <div class="csub skel-shimmer" id="uv-label">—</div>
-    </div>
-    <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg> Sončno sevanje</div>
-      <div class="cval skel-shimmer" id="solar-val">—<span class="unit"> W/m²</span></div>
-      <div class="csub skel-shimmer" id="solar-label">—</div>
-    </div>
-    <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-droplet"/></svg> Temperatura rosišča</div>
-      <div class="cval skel-shimmer" id="dewpt-val">—<span class="unit"> °C</span></div>
-      <div class="csub skel-shimmer" id="dewpt-label">—</div>
+      <div class="csub" style="margin-top:.5rem">Sevanje: <span id="solar-val" class="skel-shimmer">—</span> W/m² · <span id="solar-label" class="skel-shimmer">—</span></div>
     </div>
   </div>
 
@@ -1292,12 +1282,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="pollen-grid" id="pollen-grid"></div>
   </div>
 
-  <!-- Monthly summary + Year records -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg> <span id="month-title">Mesečni povzetek</span></div>
-      <div class="month-txt" id="month-txt">Zbiranje podatkov…</div>
-    </div>
+  <!-- Rekordi leta (mesečni povzetek je zgoraj, kartica "Ta mesec") -->
+  <div style="margin-bottom:1rem">
     <div class="card">
       <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-medal"/></svg> Rekordi leta <span id="rec-year-lbl"></span></div>
       <div class="yr-grid" id="yr-grid">
@@ -1427,9 +1413,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="card span2">
       <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-map-pin"/></svg> Pregled postaje</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Verjetnost megle</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Občutena temp.</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadmorska višina</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem">366 m</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska oprema</div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status kontrole kakovosti</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
