@@ -1319,6 +1319,12 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
 - Model je naučen na jutranjem zajemu D+1; popoldanski vhodi so svežji, a **točnosti po poznejših osvežitvah ne
   merimo**. Če bi jo želeli, bi bilo treba živo napoved posebej beležiti (ne na semafor).
 - Varuh svežine ima vrstico »Napoved MTR (živa)«, test: `tools/test_mtr_live.py` (v `parity.yml`).
+- **Dnevnik osvežitev** (24. 10. 2026): `predict_recica_mos.py --live` doda vsako osvežitev v `data/mtr-live-log.csv`
+  (`issued_at` UTC, `valid_at`, `lead_days`, `hours_before`, tmax/tmin/pop/p_frost/mm, Open-Meteo). Na semafor ne gre.
+  `hours_before` = ure od izdaje do začetka dneva po lokalnem času; ≤ 0 pomeni, da dan že teče (pri terminu 22:40 UTC je
+  `today` še UTC datum, zato je »lead 1« že lokalni danes). `python3 tools/ai/eval_live_refresh.py` primerja zadnjo
+  osvežitev v razredu ur z zamrznjeno napovedjo na istih dneh (uparjen blokovni bootstrap); pod 20 dni na razred sklepa ni.
+  Do takrat ne trdi, da so poznejše osvežitve boljše.
 
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
 

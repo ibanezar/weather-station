@@ -331,3 +331,12 @@ Test: `tools/test_profile_log.py` (v `parity.yml`). Izdaja je ob uri teka workfl
 lahko naslednji tek modela že vključen — razlika do arhiva `previous_dayN`, ki jo je treba imeti v mislih.
 **Še ni narejeno:** eval, ki bere ta dnevnik (potrebuje meritve IREICA1 za iste dneve, `build_samples`); smiselno ga je
 napisati po zimi 2026/27, ko bo vsaj ~120 zimskih dni. Do takrat ne objavljaj nobene številke o koristi profila.
+
+## Dnevnik živih osvežitev (24. 10. 2026)
+
+Model je naučen na jutranjem zajemu D+1; kartice pa od 23. 10. berejo živo osvežitev (4 termini na dan), katere točnosti
+nismo merili. `predict_recica_mos.py --live` zato vsako osvežitev doda v `data/mtr-live-log.csv` (na semafor ne gre, ta
+še naprej meri zamrznjeno jutranjo napoved). `tools/ai/eval_live_refresh.py` združi dnevnik z meritvijo in zamrznjeno
+napovedjo iz `forecast_verification.json` ter za vsak razred `hours_before` izpiše MAE in uparjeno razliko z blokovnim
+bootstrapom. **Rezultata še ni**: potrebuje vsaj 20 razrešenih dni na razred (~3 tedne). Pozor na razred »že teče«:
+osvežitev ob 22:40 UTC je že po lokalni polnoči in vključuje del dneva, zato ni poštena primerjava z jutranjo.
