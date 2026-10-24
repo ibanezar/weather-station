@@ -375,3 +375,27 @@ močan, če kaj, je (zaradi grebenske regularizacije) rahlo prešibak. Zato krč
 slabše. Tudi razred »mixed« pri Tmin ima `w` ≈ 1,0. Rezultat »v ›vmes‹ je Tmin slabši od Open-Meteo« iz `/trendi/` je torej
 **lastnost teh dni (večja nepredvidljivost obeh virov), ne napačen popravek**; krčenje ga ne reši. Povečanje (`w > 1`) tudi ne
 izboljša (diff negativen), ker so ocene `w` med meseci šumne. **MTR ostane brez krčenja.**
+
+## Poskus 24. 10. 2026: MOS za veter in sunke v dolini
+
+Skripti: `tools/ai/fetch_wind_cache.py` (sunki in smer, **pravi** `wind_gusts_10m_previous_dayN`), `tools/ai/eval_mtr7_wind.py`.
+Cilja iz `history.json` (IREICA1, km/h): `windspeedAvg` (dnevno povprečje, proti Open-Meteo povprečju `wind_speed_10m`) in
+`windgustHigh` (dnevni največji sunek, proti največjemu modelskemu sunku). Isti walk-forward po mesecih in uparjeni blokovni
+bootstrap kot `eval_mtr3.py`, okno 2025-10 → 2026-10, n = 384 dni. Model v `log1p` prostoru (veter je asimetričen), ocena v km/h.
+
+**Diagnostika:** postaja stoji na zavetrnem dnu doline. Na 877 dneh je povprečni veter postaje 2,22 km/h proti 4,44 km/h pri
+Open-Meteo (**razmerje 0,50**, korelacija 0,75); največji sunek postaje je 18,0 km/h, največji modelski *veter* pa le 10,1 km/h.
+
+| MAE (km/h) | surov OM | skala (mediana razmerja) | log-linearno (1 značilka) | MOS |
+|---|---|---|---|---|
+| povprečni veter D+1 / D+2 / D+3 | 2,16 / 2,71 / 2,74 | 0,57 / 0,58 / 0,60 | 0,57 / 0,58 / 0,61 | 0,53 / 0,58 / 0,60 |
+| največji sunek D+1 / D+2 / D+3 | 7,15 / 8,36 / 8,51 | 4,72 / 4,89 / 4,80 | 4,34 / 4,75 / 4,69 | **3,93 / 4,44 / 4,57** |
+
+- **Povprečni veter: ves dobitek je v skali.** Surov model ima pristranskost +2,1 do +2,7 km/h; že množenje z mediano razmerja jo odpravi
+  (MAE −74 %). Polni MOS ni značilno boljši ne od skale ne od log-linearne osnove pri nobenem vodilnem času.
+- **Sunki: MOS doda majhen, a pravi dobitek** pri D+1 (−0,41 km/h proti log-linearni, CI [+0,06; +0,79], proti skali −0,80) in D+2
+  (−0,31 km/h, CI [+0,03; +0,60]); pri D+3 šum. Skupaj proti surovemu modelu je MAE sunkov 45 % manjša pri D+1.
+- Samo skala je torej dovolj za povprečni veter; za sunke se nekaj dobi tudi iz značilk (hitrost po delih dneva, smer, oblačnost, sevanje, tlak).
+
+**Ni vgrajeno** (potrebuje odločitev): veter in sunki v MTR (`napoved-modela.json`, kartica) ali samo umerjena skala pri prikazu
+modelskega vetra. Pri vsakem prikazu modelskega vetra za Rečico je treba povedati, ali je surov ali umerjen na postajo.
