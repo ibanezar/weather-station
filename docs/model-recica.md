@@ -340,3 +340,20 @@ nismo merili. `predict_recica_mos.py --live` zato vsako osvežitev doda v `data/
 napovedjo iz `forecast_verification.json` ter za vsak razred `hours_before` izpiše MAE in uparjeno razliko z blokovnim
 bootstrapom. **Rezultata še ni**: potrebuje vsaj 20 razrešenih dni na razred (~3 tedne). Pozor na razred »že teče«:
 osvežitev ob 22:40 UTC je že po lokalni polnoči in vključuje del dneva, zato ni poštena primerjava z jutranjo.
+
+## Poskus 24. 10. 2026: utež novejših dni
+
+Skripta: `tools/ai/eval_mtr5_recency.py` (isti walk-forward po mesecih, produkcijske zastavice, uparjen blokovni bootstrap
+kot `eval_mtr3.py`; okno 2025-10 → 2026-10, n = 384 dni na celico, **pravi** `previous_dayN`, brez uhajanja). Vprašanje: ali se
+nočni/dnevni ostanek skozi leta premika (rast drevja, gradnja, staranje senzorjev), tako da so starejši dnevi slabši učitelj?
+Utež dneva `0,5 ** (starost / polčas)`; lambda iz notranje validacije, ne popravljena za uteži.
+
+| polčas | Tmax D+1/D+2/D+3 | Tmin D+1/D+2/D+3 |
+|---|---|---|
+| 365 dni | šum / šum / šum | šum / **slabše** / šum (−0,015 °C) |
+| 180 dni | šum / šum / slabše | šum / slabše / slabše |
+| 90 dni | **slabše** (−0,06…−0,09 °C) pri vseh | šum / slabše / slabše (−0,09 °C) |
+
+**Brez dobitka pri nobenem polčasu.** Krajši polčas je dosledno slabši, ker utež skrči efektivno učno množico (~900 dni), preden
+bi premik karkoli prinesel. Dokaza za drift ni; **MTR ostane pri enakomernih utežeh**. Če se po dveh letih meritev (2027) pokaže
+razlika v povprečnem ostanku med letoma, poskus ponovi.
