@@ -291,3 +291,33 @@ zato ostane tam globalna sd. **Vgrajeno**: `residual_sd_by_regime()` v `train_re
 `residual_sd_regime.tmax` (razred z < 40 dnevi ga nima), `predict_day` ga uporabi za pas na kartici; brez njega
 velja globalna sd, stari modeli delujejo nespremenjeno. Pokritost 72 % ob jasnih nočeh pri D+3 je še vedno
 pod nominalnimi 80 %: razred ima le 74 dni. Ponovi, ko se nabere več.
+
+## Poskusi 24. 10. 2026: višinski nivoji, sloji oblačnosti, sneg, mejna plast, sonce
+
+Skripti: `tools/ai/fetch_profile_cache.py` (zajem), `tools/ai/eval_mtr4.py` (isti walk-forward po mesecih in
+uparjeni blokovni bootstrap kot `eval_mtr3.py`; okno 2025-10 → 2026-10, n = 384 dni na celico).
+
+**Za večino teh spremenljivk pošten arhiv ne obstaja.** Open-Meteo nima `*_previous_dayN` za višinske nivoje
+(T925/T850; HTTP 400) ter za oblačnost po slojih, višino snega, vlago tal in mejno plast (same vrednosti `null`,
+preverjeno na `historical-forecast-api` in `previous-runs-api`). Dobiti jih je mogoče samo kot zlepljeno serijo
+najsvežejšega teka, ki je blizu analize. Zato je eval nad njimi **zgornja meja in ne napoved**. Edino
+`sunshine_duration` ima pravi `previous_dayN`.
+
+| kandidat | rezultat |
+|---|---|
+| `sun` (sončni čas, **prava napoved**) | šum pri vseh šestih celicah (Tmin D+1 celo −0,004, CI [−0,009; −0,000]). **Mrtvo.** |
+| `blh` (mejna plast) | šum / Tmin D+2 −0,004. **Mrtvo, tudi kot zgornja meja.** |
+| `snow` (višina snega + vlaga tal) | šum povsod; v vzorcu je samo **20 dni s snegom > 1 cm** od 779, torej **ni preizkušljivo**, ne ovrženo. |
+| `prof`, `cloud3`, `stab` | dobitek, ki narašča z vodilnim časom (Tmax `prof` 0,03 → 0,17 → 0,30 °C) — podpis uhajanja. |
+
+**Kontrola uhajanja (`ctrl`).** Namesto profila model dobi zlepljeni Tmax/Tmin istega dne iz iste serije
+(čisti »nowcast«, brez kakršne koli informacije o profilu). Pri Tmax `ctrl` premaga `prof` v vseh treh vodilnih
+časih (0,145 / 0,316 / 0,451 proti 0,030 / 0,168 / 0,301 °C): **dobitek profila pri Tmax je ves razložen z
+uhajanjem, dokaza o resnični informaciji ni.** Pri Tmin je `stab` (T925 − T2m ponoči, T850 − T2m podnevi) pri
+D+2/D+3 dosegel 0,157/0,166 °C proti `ctrl` 0,223/0,304 — pod stropom uhajanja, zato **ne moremo ločiti**
+informacije od uhajanja (pozimi 0,23–0,29 °C, ena zima). To je edini kandidat s fizikalnim razlogom (inverzija).
+
+**Kaj to pomeni.** Brez arhiva napovedi se vprašanje »ali stabilnost iz višinskih nivojev izboljša Tmin« ne da
+odločiti. Pošten odgovor zahteva, da od zdaj sproti beležimo prave napovedi izpred 1–3 dni (T925/T850, sloji
+oblačnosti, sneg) in ponovimo eval po zimi (ni narejeno; prva prava zima s tem arhivom je 2026/27).
+**Ne dodajaj teh značilk v produkcijski model, dokler niso izmerjene na pravih napovedih.**

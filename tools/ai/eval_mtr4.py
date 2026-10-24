@@ -16,6 +16,9 @@ Kandidati (dodatni stolpci k produkcijskemu vektorju):
   blh    višina mejne plasti
   all    prof + cloud3 + snow + blh
   sun    trajanje sončnega obsevanja (sunshine_duration_previous_dayN)
+  stab   samo stabilnost (T925 − T2m ponoči, T850 − T2m podnevi), brez ravni T850 in vetra
+  ctrl   KONTROLA uhajanja: zlepljena Tmax/Tmin istega dne iz iste serije (čisti nowcast, brez
+         profila). Če ctrl doseže enak dobitek kot prof, je dobitek uhajanje, ne informacija profila.
 
 PRAVICA DO ZAKLJUČKA: za prof/cloud3/snow/blh arhiv `*_previous_dayN` ne obstaja (glej
 fetch_profile_cache.py), zato so to ZLEPLJENE serije blizu analize: pri učenju IN pri oceni so
@@ -67,6 +70,10 @@ def profile_features(rec):
     w_n = _mean(w925, t.NIGHT_HOURS)
     if None not in (inv_n, lapse_d, t850d, w_n):
         out["prof"] = [inv_n / 5, lapse_d / 10, t850d / 10, w_n / 20]
+    if None not in (inv_n, lapse_d):
+        out["stab"] = [inv_n / 5, lapse_d / 10]
+    out["ctrl"] = [max(v for _, v in t2) / 10, min(v for _, v in t2) / 10]
+    out["_snow_max"] = max((v for _, v in snow), default=None)
     ln, ld, md, hd = _mean(low, t.NIGHT_HOURS), _mean(low, t.DAY_HOURS), _mean(mid, t.DAY_HOURS), _mean(high, t.DAY_HOURS)
     if None not in (ln, ld, md, hd):
         out["cloud3"] = [ln / 100, ld / 100, md / 100, hd / 100]
@@ -102,17 +109,20 @@ CANDIDATES = {
     "cloud3": ("cloud3",),
     "snow": ("snow",),
     "blh": ("blh",),
+    "stab": ("stab",),
+    "ctrl": ("ctrl",),
     "all": ("prof", "cloud3", "snow", "blh"),
     "sun": ("sun",),
     "all+sun": ("prof", "cloud3", "snow", "blh", "sun"),
 }
-NEEDED = ("prof", "cloud3", "snow", "blh", "sun")
+NEEDED = ("prof", "cloud3", "snow", "blh", "sun", "stab", "ctrl")
 
 
 def main():
     cache = json.load(open(sys.argv[1]))
     blob = json.load(open(sys.argv[2]))
     since = sys.argv[3] if len(sys.argv) > 3 else "2025-10-01"
+    only = set(sys.argv[4].split(",")) | {"base"} if len(sys.argv) > 4 else None
     prof_days = {d: profile_features(rec) for d, rec in blob["profile"].items()}
     hist = t.load_history()
     multi = t.load_multi_archive()
@@ -141,10 +151,14 @@ def main():
                     s["f"]["x"] = x
                     kept.append(s)
             if lead == 1 and tg == "tmax":
+                sn = [s["f"]["x"]["_snow_max"] for s in kept]
+                print(f"dni s snegom > 1 cm v vzorcu: {sum(1 for v in sn if v and v > 0.01)} od {len(sn)}")
                 print(f"vzorci: {len(smp)} → {len(kept)} z vsemi vhodi; manjka po skupini: {miss}\n")
             kw = dict(use_bias=(tg == "tmin"), use_cond=(tg == "tmin"), use_multi=(tg == "tmax"))
             res = {}
             for name, groups in CANDIDATES.items():
+                if only and name not in only:
+                    continue
                 t.temp_vector = e3.make_vec(build_extra(groups) if groups else None)
                 try:
                     res[name] = e3.walk(kept, tg, since, **kw)
