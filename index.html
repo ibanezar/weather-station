@@ -780,6 +780,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="cu-sep"></div>
     <div class="cu-section-lbl">Naslednjih 7 dni</div>
     <div class="cu-days" id="cu-days" tabindex="0" role="group" aria-label="Napoved po dneh, drsi vodoravno"></div>
+    <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji · vrstica MTR (naš model): prvi trije dnevi</div>
   </div>
 
   <!-- Why is weather like this — premaknjeno tik pod heroj (prej ~15 kartic nižje, samo v naprednem pogledu) -->
@@ -1058,23 +1059,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="chart-scroll-hint">↔ povlecite za cel potek</div>
   </div>
 
-  <!-- Text forecast -->
-  <div class="card chart-card simple-keep" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0"><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg> 7-dnevna napoved</span>
-      <span class="chart-range" id="txfc-updated"></span>
-    </div>
-    <div id="txfc-grid" class="txfc-grid">
-      <div class="skel-wrap" style="grid-column:1/-1;padding:.5rem 0"><span class="skel"><span class="skel-bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="visually-hidden">Nalaganje…</span></span></div>
-    </div>
-    <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji · vrstica MTR (naš model): prvi trije dnevi</div>
-  </div>
-
   <!-- MTR na naslovni strani: isti graf kot na zavihku #tab-mtr, samo brez
        KPI-jev in dvoboja (ta dva ostaneta tam, da se natančnost ne razlaga na
        dveh mestih). Koda se NE podvaja — risalne funkcije v app.js sprejmejo
        id-predpono, tu je 'hmos-'; predpona je vpisana v MTR_MOUNT_IDS.
-       Stoji takoj za 7-dnevno napovedjo, ker odgovarja na isto vprašanje:
+       Stoji takoj za kartico »Vremenski obeti«, ker odgovarja na isto vprašanje:
        splošna mreža pove to, naš popravek za dno doline pa to.
        Kartica nima simple-keep, torej je v preprostem pogledu skrita in klic
        gre skozi runAdvancedOnly() — velja pravilo iz CLAUDE.md. -->
@@ -1186,7 +1175,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="duel-body">
       <div class="duel-offline">Nalaganje sosednje postaje…</div>
     </div>
-    <div id="duel-profile"></div>
   </div>
 
   <!-- Padavinske norme -->
