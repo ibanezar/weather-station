@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T20:46:30Z",
+  "generated_at": "2026-10-24T01:02:18Z",
   "model_version": "1.0",
   "trained_at": "2026-10-23T06:54:11Z",
   "train_range": {
@@ -14,65 +14,28 @@
   "note": "MTR (Meteorec) — poskusni lokalni model (MOS): Open-Meteo kot vhod, popravek za dno doline naučen na meritvah postaje. Količina padavin je surova vrednost Open-Meteo — te MTR ne popravlja.",
   "days": [
     {
-      "tmax": 10.3,
+      "tmax": 12.0,
       "tmax_sd": 1.45,
       "tmax_mae": 1.05,
       "tmax_improvement_pct": 26.8,
-      "tmin": 5.4,
+      "tmin": 1.4,
       "tmin_sd": 1.58,
       "tmin_mae": 1.2,
       "tmin_improvement_pct": 29.7,
-      "pop": 0.97,
-      "pop1": 0.84,
-      "pop5": 0.38,
-      "p_frost": 0.0,
-      "night_regime": "overcast",
-      "om_tmax": 9.4,
-      "om_tmin": 6.0,
-      "om_precip": 6.4,
-      "d_tmax": 0.9,
-      "d_tmin": -0.6,
-      "mm": 14.5,
-      "mm_n": 5,
-      "date": "2026-10-24",
-      "lead": 1,
-      "wn2": {
-        "tmax": {
-          "p10": 7.0,
-          "p50": 8.3,
-          "p90": 9.3
-        },
-        "tmin": {
-          "p10": 3.2,
-          "p50": 4.7,
-          "p90": 6.3
-        },
-        "n": 64
-      }
-    },
-    {
-      "tmax": 11.3,
-      "tmax_sd": 1.34,
-      "tmax_mae": 1.23,
-      "tmax_improvement_pct": 30.5,
-      "tmin": 0.2,
-      "tmin_sd": 1.67,
-      "tmin_mae": 1.29,
-      "tmin_improvement_pct": 51.6,
-      "pop": 0.64,
-      "pop1": 0.19,
+      "pop": 0.71,
+      "pop1": 0.23,
       "pop5": 0.07,
-      "p_frost": 0.46,
-      "night_regime": "mixed",
-      "om_tmax": 10.3,
+      "p_frost": 0.21,
+      "night_regime": "overcast",
+      "om_tmax": 10.5,
       "om_tmin": 2.2,
       "om_precip": 0.3,
-      "d_tmax": 1.0,
-      "d_tmin": -2.0,
+      "d_tmax": 1.5,
+      "d_tmin": -0.8,
       "mm": 0.3,
       "mm_n": 5,
       "date": "2026-10-25",
-      "lead": 2,
+      "lead": 1,
       "wn2": {
         "tmax": {
           "p10": 8.2,
@@ -89,27 +52,27 @@
     },
     {
       "tmax": 15.3,
-      "tmax_sd": 1.56,
-      "tmax_mae": 1.4,
-      "tmax_improvement_pct": 27.7,
-      "tmin": 0.1,
-      "tmin_sd": 1.8,
-      "tmin_mae": 1.41,
-      "tmin_improvement_pct": 47.4,
-      "pop": 0.38,
-      "pop1": 0.06,
+      "tmax_sd": 1.34,
+      "tmax_mae": 1.23,
+      "tmax_improvement_pct": 30.5,
+      "tmin": -1.3,
+      "tmin_sd": 1.67,
+      "tmin_mae": 1.29,
+      "tmin_improvement_pct": 51.6,
+      "pop": 0.41,
+      "pop1": 0.07,
       "pop5": 0.03,
-      "p_frost": 0.48,
+      "p_frost": 0.76,
       "night_regime": "mixed",
-      "om_tmax": 14.3,
+      "om_tmax": 13.8,
       "om_tmin": 2.6,
       "om_precip": 0.0,
-      "d_tmax": 1.0,
-      "d_tmin": -2.5,
-      "mm": 0.0,
+      "d_tmax": 1.5,
+      "d_tmin": -3.9,
+      "mm": 0.1,
       "mm_n": 5,
       "date": "2026-10-26",
-      "lead": 3,
+      "lead": 2,
       "wn2": {
         "tmax": {
           "p10": 10.7,
@@ -123,17 +86,54 @@
         },
         "n": 64
       }
+    },
+    {
+      "tmax": 14.3,
+      "tmax_sd": 1.94,
+      "tmax_mae": 1.4,
+      "tmax_improvement_pct": 27.7,
+      "tmin": -0.6,
+      "tmin_sd": 1.8,
+      "tmin_mae": 1.41,
+      "tmin_improvement_pct": 47.4,
+      "pop": 0.39,
+      "pop1": 0.06,
+      "pop5": 0.03,
+      "p_frost": 0.62,
+      "night_regime": "overcast",
+      "om_tmax": 14.4,
+      "om_tmin": 2.9,
+      "om_precip": 0.0,
+      "d_tmax": -0.1,
+      "d_tmin": -3.5,
+      "mm": 0.0,
+      "mm_n": 5,
+      "date": "2026-10-27",
+      "lead": 3,
+      "wn2": {
+        "tmax": {
+          "p10": 11.2,
+          "p50": 12.8,
+          "p90": 15.0
+        },
+        "tmin": {
+          "p10": 2.4,
+          "p50": 4.2,
+          "p90": 6.4
+        },
+        "n": 64
+      }
     }
   ],
   "wn2_source": "Google DeepMind WeatherNext 2 (64 članov, prek Open-Meteo, CC BY 4.0) — surova mreža 0,25°, brez popravka za dolino",
   "today": {
-    "date": "2026-10-23",
+    "date": "2026-10-24",
     "lead": 1,
-    "pop": 0.84,
-    "pop1": 0.28,
-    "pop5": 0.08,
-    "mm": 1.7,
+    "pop": 1.0,
+    "pop1": 0.99,
+    "pop5": 0.91,
+    "mm": 21.3,
     "mm_n": 5,
-    "frozen_at": "2026-10-22T11:02:44Z"
+    "frozen_at": "2026-10-23T07:13:37Z"
   }
 }
