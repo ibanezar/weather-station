@@ -357,3 +357,21 @@ Utež dneva `0,5 ** (starost / polčas)`; lambda iz notranje validacije, ne popr
 **Brez dobitka pri nobenem polčasu.** Krajši polčas je dosledno slabši, ker utež skrči efektivno učno množico (~900 dni), preden
 bi premik karkoli prinesel. Dokaza za drift ni; **MTR ostane pri enakomernih utežeh**. Če se po dveh letih meritev (2027) pokaže
 razlika v povprečnem ostanku med letoma, poskus ponovi.
+
+## Poskus 24. 10. 2026: krčenje popravka po režimu noči
+
+Skripta: `tools/ai/eval_mtr6_shrink.py`. Ideja iz `/trendi/`: v dnevih »vmes« je Tmin slabši od Open-Meteo, zato popravek tam
+škodi; namesto značilk (te so 23. 10. padle v šum) popravek množimo z `w`: `pred' = om + w · (pred − om)`. `w` po `night_regime`
+(`clear_calm`/`overcast`/`mixed`, izračunan iz **napovedane** oblačnosti in vetra, torej brez uhajanja) se uči ločeno in pošteno:
+walk-forward po mesecih od 2025-04, `w` za testni mesec je tisti iz mreže 0,0…1,2, ki minimizira MAE na preteklih izven-vzorčnih
+napovedih (razred z < 30 dnevi dobi 1,0). Okno 2025-10 → 2026-10, n = 384 dni, pravi `previous_dayN`, produkcijske zastavice.
+
+| | Tmax D+1/D+2/D+3 | Tmin D+1/D+2/D+3 |
+|---|---|---|
+| razlika MAE (osnova − krčenje) | −0,023 (**slabše**) / −0,008 / −0,023 (šum) | +0,004 / −0,021 / −0,013 (šum) |
+
+**Brez dobitka in brez razloga zanj.** Naučeni `w` je skoraj povsod **1,0–1,2, ne pod 1**: popravek MTR v nobenem režimu ni preveč
+močan, če kaj, je (zaradi grebenske regularizacije) rahlo prešibak. Zato krčenje nikjer ne pomaga, pri Tmax D+1 je celo značilno
+slabše. Tudi razred »mixed« pri Tmin ima `w` ≈ 1,0. Rezultat »v ›vmes‹ je Tmin slabši od Open-Meteo« iz `/trendi/` je torej
+**lastnost teh dni (večja nepredvidljivost obeh virov), ne napačen popravek**; krčenje ga ne reši. Povečanje (`w > 1`) tudi ne
+izboljša (diff negativen), ker so ocene `w` med meseci šumne. **MTR ostane brez krčenja.**
