@@ -35,6 +35,12 @@ jobs:
         continue-on-error: true
         run: python3 tools/log_ensemble_forecasts.py
 
+      # Višinski profil, sloji oblačnosti, sneg in mejna plast nimajo arhiva napovedi izpred N dni
+      # (eval_mtr4, docs/model-recica.md) — prave napovedi se nabirajo samo s tekočim zajemom.
+      - name: Zabeleži napovedi profila (T925/T850, sloji oblačnosti, sneg, mejna plast)
+        continue-on-error: true
+        run: python3 tools/log_profile_forecasts.py
+
       - name: Zabeleži urne meritve (za bodočo analizo pristranskosti)
         run: python3 tools/log_hourly_observations.py
 
@@ -52,7 +58,7 @@ jobs:
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           git add data/forecast-archive.csv data/forecast-forward-log.csv \
-                  data/hourly-observations.csv data/ensemble-forward-log.csv data/test-napovedi.json test-napovedi/ primerjava-modelov/
+                  data/hourly-observations.csv data/ensemble-forward-log.csv data/profile-forward-log.csv data/test-napovedi.json test-napovedi/ primerjava-modelov/
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "test-napovedi: dnevni zajem $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do

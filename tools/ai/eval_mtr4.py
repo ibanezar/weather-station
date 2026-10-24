@@ -37,52 +37,37 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, ".."))
 import train_recica_mos as t   # noqa: E402
 import eval_mtr3 as e3         # noqa: E402
+import log_profile_forecasts as lp   # noqa: E402
 
 WINTER = {11, 12, 1, 2}
 
 
-def _mean(series, hours=None):
-    xs = [v for h, v in series if hours is None or h in hours]
-    return sum(xs) / len(xs) if xs else None
-
-
-def _diff_mean(a, b, hours):
-    """Povprečje (a − b) po urah, ki jih imata obe seriji."""
-    bm = {h: v for h, v in b}
-    xs = [v - bm[h] for h, v in a if h in hours and h in bm]
-    return sum(xs) / len(xs) if xs else None
+def groups_from_columns(c):
+    """Dnevni stolpci (log_profile_forecasts.daily_columns) → skupine vhodov za eval.
+    Enaka preslikava velja za zlepljene serije (fetch_profile_cache) in za zapis pravih napovedi."""
+    out = {}
+    if None not in (c["inv_n"], c["lapse_d"], c["t850_d"], c["w925_n"]):
+        out["prof"] = [c["inv_n"] / 5, c["lapse_d"] / 10, c["t850_d"] / 10, c["w925_n"] / 20]
+    if None not in (c["inv_n"], c["lapse_d"]):
+        out["stab"] = [c["inv_n"] / 5, c["lapse_d"] / 10]
+    out["ctrl"] = [c["t2_max"] / 10, c["t2_min"] / 10]
+    out["_snow_max"] = c["snow_max"]
+    if None not in (c["low_n"], c["low_d"], c["mid_d"], c["high_d"]):
+        out["cloud3"] = [c["low_n"] / 100, c["low_d"] / 100, c["mid_d"] / 100, c["high_d"] / 100]
+    if c["snow_max"] is not None and c["soil_mean"] is not None:
+        out["snow"] = [min(c["snow_max"], 0.3) * 3, 1.0 if c["snow_max"] > 0.01 else 0.0,
+                       (c["soil_mean"] - 0.3) * 5]
+    if c["blh_max"] is not None:
+        out["blh"] = [c["blh_max"] / 1000]
+    return out
 
 
 def profile_features(rec):
-    """Urne serije enega dne → dnevni vhodi (ali None, če kakšnega ni).
-    Vrne dict skupin: prof / cloud3 / snow / blh (vsaka je seznam stolpcev)."""
-    g = lambda k: [(int(h), x) for h, x in rec.get(k, [])]
-    t2, t925, t850 = g("temperature_2m"), g("temperature_925hPa"), g("temperature_850hPa")
-    w925 = g("wind_speed_925hPa")
-    low, mid, high = g("cloud_cover_low"), g("cloud_cover_mid"), g("cloud_cover_high")
-    snow, soil, blh = g("snow_depth"), g("soil_moisture_0_to_7cm"), g("boundary_layer_height")
-    if len(t2) < 20:
-        return None
-    out = {}
-    inv_n = _diff_mean(t925, t2, t.NIGHT_HOURS)
-    lapse_d = _diff_mean(t850, t2, t.DAY_HOURS)
-    t850d = _mean(t850, t.DAY_HOURS)
-    w_n = _mean(w925, t.NIGHT_HOURS)
-    if None not in (inv_n, lapse_d, t850d, w_n):
-        out["prof"] = [inv_n / 5, lapse_d / 10, t850d / 10, w_n / 20]
-    if None not in (inv_n, lapse_d):
-        out["stab"] = [inv_n / 5, lapse_d / 10]
-    out["ctrl"] = [max(v for _, v in t2) / 10, min(v for _, v in t2) / 10]
-    out["_snow_max"] = max((v for _, v in snow), default=None)
-    ln, ld, md, hd = _mean(low, t.NIGHT_HOURS), _mean(low, t.DAY_HOURS), _mean(mid, t.DAY_HOURS), _mean(high, t.DAY_HOURS)
-    if None not in (ln, ld, md, hd):
-        out["cloud3"] = [ln / 100, ld / 100, md / 100, hd / 100]
-    sd, sm = (max(v for _, v in snow) if snow else None), _mean(soil)
-    if sd is not None and sm is not None:
-        out["snow"] = [min(sd, 0.3) * 3, 1.0 if sd > 0.01 else 0.0, (sm - 0.3) * 5]
-    if blh:
-        out["blh"] = [max(v for _, v in blh) / 1000]
-    return out
+    """Urne serije enega dne ([[ura, vrednost], ...] po spremenljivki) → skupine vhodov
+    (prof / cloud3 / snow / blh / stab / ctrl) ali None, če dan nima dovolj ur temperature.
+    Agregacija je v lp.daily_columns(), isti kot pri beleženju pravih napovedi."""
+    cols = lp.daily_columns(rec)
+    return None if cols is None else groups_from_columns(cols)
 
 
 def sun_features(pairs):

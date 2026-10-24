@@ -321,3 +321,13 @@ informacije od uhajanja (pozimi 0,23–0,29 °C, ena zima). To je edini kandidat
 odločiti. Pošten odgovor zahteva, da od zdaj sproti beležimo prave napovedi izpred 1–3 dni (T925/T850, sloji
 oblačnosti, sneg) in ponovimo eval po zimi (ni narejeno; prva prava zima s tem arhivom je 2026/27).
 **Ne dodajaj teh značilk v produkcijski model, dokler niso izmerjene na pravih napovedih.**
+
+**Beleženje pravih napovedi teče od 24. 10. 2026** (`tools/log_profile_forecasts.py`, korak v
+`test-napovedi-daily.yml`, `continue-on-error`): za D+1..D+3 zapiše dnevne stolpce (`inv_n`, `lapse_d`, `t850_d`,
+`w925_n`, sloji oblačnosti, `snow_max`, `soil_mean`, `blh_max`) v `data/profile-forward-log.csv`. Agregacija je ena
+funkcija, `daily_columns()`; `eval_mtr4.py` jo uvaža (`groups_from_columns()` preslika stolpce v skupine kandidatov),
+tako da učenje in napoved nikoli ne dobita različnih vhodov (preverjeno: izhod za vseh 881 dni enak staremu).
+Test: `tools/test_profile_log.py` (v `parity.yml`). Izdaja je ob uri teka workflowa (GitHubov cron zamuja ure), zato je
+lahko naslednji tek modela že vključen — razlika do arhiva `previous_dayN`, ki jo je treba imeti v mislih.
+**Še ni narejeno:** eval, ki bere ta dnevnik (potrebuje meritve IREICA1 za iste dneve, `build_samples`); smiselno ga je
+napisati po zimi 2026/27, ko bo vsaj ~120 zimskih dni. Do takrat ne objavljaj nobene številke o koristi profila.

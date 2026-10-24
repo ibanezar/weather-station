@@ -1882,6 +1882,13 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
   (razpon članov Tmax/Tmin, `p_wet`, `p_frost`). Ansambli nimajo arhiva nazaj, zato se
   zgodovina za verjetnostni model (zmrzal, padavine) nabira samo s tekočim zajemom.
   Na strani se ne prikazuje. Test: `tools/test_ensemble_log.py`.
+- `tools/log_profile_forecasts.py` (od 24. 10. 2026, korak v `test-napovedi-daily.yml`) — dnevni zajem PRAVIH napovedi
+  višinskega profila (T925/T850 → stabilnost), oblačnosti po slojih, snega, vlage tal in mejne plasti za D+1..D+3 v
+  `data/profile-forward-log.csv`. Open-Meteo za te spremenljivke nima arhiva `previous_dayN`; poskus iz zlepljenih serij
+  (`tools/ai/eval_mtr4.py`) ni ločil dobitka od uhajanja informacije (docs/model-recica.md, »Poskusi 24. 10. 2026«), zato se
+  pošteni podatki nabirajo samo s tekočim zajemom — vsak dan zamujenega zajema je izgubljen. Agregacija je ena funkcija
+  (`daily_columns()`), ki jo uvaža tudi eval. **Ne dodajaj teh značilk v MTR, dokler niso izmerjene na tem dnevniku.**
+  Test: `tools/test_profile_log.py`.
 - `tools/compute_forecast_test_metrics.py` — MAE/bias/RMSE/delež >3 °C in
   kontingenčna tabela za padavine (0,2 in 5 mm), po (vir, vodilni čas), proti
   klimatologiji (±7 dni okoli koledarskega dne, iz cele postajne zgodovine —
