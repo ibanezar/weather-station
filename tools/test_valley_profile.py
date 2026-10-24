@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tools/test_valley_profile.py — dolinski profil (app.js: valleyProfileSummary / renderValleyProfile).
+"""tools/test_valley_profile.py — dolinski profil (app.js: valleyProfileSummary).
 
 Zaženi:  python3 tools/test_valley_profile.py
 """
@@ -24,7 +24,7 @@ def check(ok, name, detail=""):
 def js(calls, prelude=""):
     p = subprocess.run(["node", os.path.join(HERE, "_parity_js.mjs")], capture_output=True, text=True, cwd=ROOT,
                        input=json.dumps({"file": "app.js", "names": ["VP_HOME_ELEV", "valleyProfileSummary",
-                                                                      "renderValleyProfile", "_duelNum", "valleyTempAt",
+                                                                      "_duelNum", "valleyTempAt",
                                                                       "valleyZeroHeight", "VALLEY_HERO", "VALLEY_COLORS", "hvColor",
                                                                       "heroValleySvg"],
                                          "calls": calls, "prelude": prelude}))
@@ -54,13 +54,6 @@ one = js([{"fn": "valleyProfileSummary", "args": [[P("Rečica", 366, 8.0)]]},
           {"fn": "valleyProfileSummary", "args": [[P("Rečica", 366, 8.0), {"name": "X", "elev": 900, "t": None}]]},
           {"fn": "valleyProfileSummary", "args": [[]]}])
 check(one == [None, None, None], "manj kot dve veljavni točki: brez povzetka (graf se skrije)", str(one))
-
-# izris: brez NaN/undefined, vsebuje vse postaje in navedbo vira
-prelude = "var captured=''; var el={set innerHTML(v){captured=v;},get innerHTML(){return captured;}};"
-for name, pts in cases.items():
-    html = js([{"expr": f"(renderValleyProfile(el, valleyProfileSummary({json.dumps(pts)})), captured)"}], prelude)[0]
-    check("NaN" not in html and "undefined" not in html and "Infinity" not in html, f"izris {name}: brez NaN", html[:80])
-    check(all(p["name"] in html for p in pts) and "DRSI" in html and "<svg" in html, f"izris {name}: postaje in vir")
 
 # ── Junaški prerez doline (faza A1): valleyTempAt, valleyZeroHeight, hvColor, heroValleySvg ──
 Q = [P("Rečica", 366, 2.0), P("Gornji Grad", 428, 4.0), P("Črnivec", 903, 8.0)]

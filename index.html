@@ -780,6 +780,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="cu-sep"></div>
     <div class="cu-section-lbl">Naslednjih 7 dni</div>
     <div class="cu-days" id="cu-days" tabindex="0" role="group" aria-label="Napoved po dneh, drsi vodoravno"></div>
+    <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji · vrstica MTR (naš model): prvi trije dnevi</div>
   </div>
 
   <!-- Why is weather like this — premaknjeno tik pod heroj (prej ~15 kartic nižje, samo v naprednem pogledu) -->
@@ -1013,29 +1014,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 
-  <!-- 4 small cards -->
-  <div class="g4" style="margin-bottom:1rem">
+  <!-- 2 majhni kartici (rosišče je v heroju, dež danes v dnevnem povzetku) -->
+  <div class="g2" style="margin-bottom:1rem">
     <div class="card">
       <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-cloud-rain"/></svg> Intenziteta padavin</div>
       <div class="cval skel-shimmer" id="rain-rate">—<span class="unit"> mm/h</span></div>
       <div class="rain-bar-wrap"><div class="rain-bar-fill" id="rain-bar" style="width:0%"></div></div>
-      <div class="csub">Danes: <span id="rain-total" class="skel-shimmer">—</span> mm</div>
     </div>
     <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg> UV indeks</div>
+      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg> UV indeks in sončno sevanje</div>
       <div class="cval skel-shimmer" id="uv-val">—</div>
       <div class="uv-bar"><div class="uv-dot" id="uv-dot" style="left:0%"></div></div>
       <div class="csub skel-shimmer" id="uv-label">—</div>
-    </div>
-    <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg> Sončno sevanje</div>
-      <div class="cval skel-shimmer" id="solar-val">—<span class="unit"> W/m²</span></div>
-      <div class="csub skel-shimmer" id="solar-label">—</div>
-    </div>
-    <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-droplet"/></svg> Temperatura rosišča</div>
-      <div class="cval skel-shimmer" id="dewpt-val">—<span class="unit"> °C</span></div>
-      <div class="csub skel-shimmer" id="dewpt-label">—</div>
+      <div class="csub" style="margin-top:.5rem">Sevanje: <span id="solar-val" class="skel-shimmer">—</span> W/m² · <span id="solar-label" class="skel-shimmer">—</span></div>
     </div>
   </div>
 
@@ -1068,23 +1059,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="chart-scroll-hint">↔ povlecite za cel potek</div>
   </div>
 
-  <!-- Text forecast -->
-  <div class="card chart-card simple-keep" style="margin-bottom:1rem">
-    <div class="chart-hdr">
-      <span class="clabel" style="margin:0"><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg> 7-dnevna napoved</span>
-      <span class="chart-range" id="txfc-updated"></span>
-    </div>
-    <div id="txfc-grid" class="txfc-grid">
-      <div class="skel-wrap" style="grid-column:1/-1;padding:.5rem 0"><span class="skel"><span class="skel-bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="visually-hidden">Nalaganje…</span></span></div>
-    </div>
-    <div class="txfc-source">Open-Meteo · ECMWF · Rečica ob Savinji · vrstica MTR (naš model): prvi trije dnevi</div>
-  </div>
-
   <!-- MTR na naslovni strani: isti graf kot na zavihku #tab-mtr, samo brez
        KPI-jev in dvoboja (ta dva ostaneta tam, da se natančnost ne razlaga na
        dveh mestih). Koda se NE podvaja — risalne funkcije v app.js sprejmejo
        id-predpono, tu je 'hmos-'; predpona je vpisana v MTR_MOUNT_IDS.
-       Stoji takoj za 7-dnevno napovedjo, ker odgovarja na isto vprašanje:
+       Stoji takoj za kartico »Vremenski obeti«, ker odgovarja na isto vprašanje:
        splošna mreža pove to, naš popravek za dno doline pa to.
        Kartica nima simple-keep, torej je v preprostem pogledu skrita in klic
        gre skozi runAdvancedOnly() — velja pravilo iz CLAUDE.md. -->
@@ -1196,7 +1175,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="duel-body">
       <div class="duel-offline">Nalaganje sosednje postaje…</div>
     </div>
-    <div id="duel-profile"></div>
   </div>
 
   <!-- Padavinske norme -->
@@ -1292,12 +1270,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="pollen-grid" id="pollen-grid"></div>
   </div>
 
-  <!-- Monthly summary + Year records -->
-  <div class="g2" style="margin-bottom:1rem">
-    <div class="card">
-      <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-chart-column"/></svg> <span id="month-title">Mesečni povzetek</span></div>
-      <div class="month-txt" id="month-txt">Zbiranje podatkov…</div>
-    </div>
+  <!-- Rekordi leta (mesečni povzetek je zgoraj, kartica "Ta mesec") -->
+  <div style="margin-bottom:1rem">
     <div class="card">
       <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-medal"/></svg> Rekordi leta <span id="rec-year-lbl"></span></div>
       <div class="yr-grid" id="yr-grid">
@@ -1427,9 +1401,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="card span2">
       <div class="clabel"><svg class="ic" aria-hidden="true"><use href="#i-map-pin"/></svg> Pregled postaje</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.25rem">
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Verjetnost megle</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-fog">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Občutena temp.</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-chill">—</div></div>
-        <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Toplotni indeks</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem" id="snap-heat">—</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Nadmorska višina</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem">366 m</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Programska oprema</div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted)" id="snap-sw">—</div></div>
         <div><div style="font-size:.72rem;color:var(--muted-text,var(--muted));letter-spacing:.08em;text-transform:uppercase;margin-bottom:.3rem">Status kontrole kakovosti</div><div style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--green)" id="snap-qc">—</div></div>
