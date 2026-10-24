@@ -1327,6 +1327,22 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
   osvežitev v razredu ur z zamrznjeno napovedjo na istih dneh (uparjen blokovni bootstrap); pod 20 dni na razred sklepa ni.
   Do takrat ne trdi, da so poznejše osvežitve boljše.
 
+### Veter in sunki v dolini (24. 10. 2026)
+
+Postaja stoji na zavetrnem dnu doline: Open-Meteo povprečni veter precenjuje ~2× (razmerje postaja/model 0,50, korelacija 0,75;
+sunki postaje so ~2× večji od modelskega *vetra*, zato jih primerjamo z modelskimi sunki). MTR ima zato `wind` (Open-Meteo × naučena
+skala) in `gust` (ridge v log1p, pri D+1/D+2 značilno boljši od skale in log-linearne osnove, pri D+3 šum); MAE sunkov D+1 3,9 proti 7,1 km/h
+surovega modela (`tools/ai/eval_mtr7_wind.py`, docs/model-recica.md).
+
+- **Zajem je ločen od `HOURLY_VARS`** (`WIND_EXTRA_VARS` = sunki + smer): temperaturni model in njegov zajem sta nespremenjena in
+  neuspešen zajem vetra izpusti samo veter. Stolpce gradi ena funkcija, `wind_columns()`/`wind_vector()` v `train_recica_mos.py` —
+  **ne podvajaj je**.
+- **Kartica (`renderMtrWind`) vedno pove, da je veter umerjen na postajo**, in kaže surov Open-Meteo ob strani. Vsak nov prikaz
+  modelskega vetra za Rečico mora povedati, ali je surov ali umerjen; surov model je tu za polovico previsok.
+- Veter **ne gre na semafor** (`forecast_verification.json`): tam ga nihče ne meri. Poskusna ocena, ne opozorilo.
+- **Zaživi šele po ponovnem učenju** (`mos-train.yml`): model brez `wind` v `leads.<N>` pusti polja `None` in kartica je skrita.
+  Test: `tools/test_mtr_wind.py` (v `parity.yml`).
+
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
 
 `predict_recica_mos.py` poleg napovedi zapiše za vsak dan še `p_frost` (P(Tmin ≤ 0 °C),

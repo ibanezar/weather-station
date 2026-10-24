@@ -114,13 +114,15 @@ def fetch_wn2_spread():
     return out
 
 
-def fetch_live_forecast(model_id=None):
+def fetch_live_forecast(model_id=None, variables=None):
     """Živa napoved Open-Meteo, urno, za danes + 3 dni naprej. Brez `model_id`
     je to privzeti seamless; z njim en sam imenovan model (AIFS), kadar se je
-    model učil z drugim vhodom."""
+    model učil z drugim vhodom. `variables` (privzeto HOURLY_VARS) doda dodatne
+    spremenljivke (veter: WIND_EXTRA_VARS) samo za klic, ki jih rabi."""
+    variables = variables or mos.HOURLY_VARS
     params = {
         "latitude": mos.LAT, "longitude": mos.LON,
-        "hourly": ",".join(mos.HOURLY_VARS),
+        "hourly": ",".join(variables),
         "timezone": mos.TZ,
         "forecast_days": 4,
     }
@@ -136,8 +138,8 @@ def fetch_live_forecast(model_id=None):
     times = h.get("time") or []
     for i, ts in enumerate(times):
         day, hour = ts[:10], int(ts[11:13])
-        rec = rows.setdefault(day, {v: [] for v in mos.HOURLY_VARS})
-        for v in mos.HOURLY_VARS:
+        rec = rows.setdefault(day, {v: [] for v in variables})
+        for v in variables:
             series = h.get(v) or []
             val = series[i] if i < len(series) else None
             if val is not None:
@@ -242,6 +244,24 @@ def predict_day(model, lead, feats):
         kc = entry["coefficients"].get(key)
         out[key] = round(mos.predict_prob(kc, mos.pop_vector(feats, with_aifs)), 2) if kc else None
 
+    # Veter in sunki (od 24. 10. 2026, glej train_recica_mos.WIND_EXTRA_VARS): povprečni veter = Open-Meteo × skala,
+    # sunki = ridge v log1p. Brez vetra v modelu ali brez sunkov v živi napovedi ostanejo None in kartica
+    # vrstice ne pokaže. `om_*` je surov Open-Meteo: kartica mora povedati, da je prikazan veter umerjen na postajo.
+    wc = feats.get("wind_c")
+    wind = entry.get("wind") or {}
+    out["wind"] = out["gust"] = out["om_wind"] = out["om_gust"] = out["gust_mae"] = out["gust_mae_om"] = None
+    if wc and wind:
+        out["om_wind"] = round(wc["wmean"], 1)
+        out["om_gust"] = round(wc["gmax"], 1)
+        wm = wind.get("mean")
+        if wm and wm.get("ratio"):
+            out["wind"] = round(wm["ratio"] * wc["wmean"], 1)
+        wg = wind.get("gust")
+        if wg and wg.get("coefficients"):
+            out["gust"] = round(mos.predict_wind_gust(wg["coefficients"], wc, feats), 1)
+            gsk = wg.get("skill") or {}
+            out["gust_mae"], out["gust_mae_om"] = gsk.get("mae_meteorec"), gsk.get("mae_open_meteo")
+
     p_frost = frost_probability(out["tmin"], raw_sds.get("tmin"))
     out["p_frost"] = round(p_frost, 2) if p_frost is not None else None
     out["night_regime"] = night_regime(feats["cloud_n"], feats["wind_n"])
@@ -344,8 +364,11 @@ def main():
               f"tools/train_recica_mos.py", file=sys.stderr)
         return 0  # CI naj zaradi tega ne pade; prejšnja napoved ostane
 
+    # Dodatne spremenljivke vetra samo, kadar jih model rabi (isti klic, brez nove zahteve).
+    wind_on = any((e or {}).get("wind") for e in (model.get("leads") or {}).values())
     try:
-        rows = fetch_live_forecast()
+        rows = (fetch_live_forecast(variables=mos.HOURLY_VARS + mos.WIND_EXTRA_VARS) if wind_on
+                else fetch_live_forecast())
         # Model, naučen z drugim vhodom, ga mora dobiti tudi v napovedi — sicer
         # bi mu manjkale značilke, ki jih ima v koeficientih.
         aifs_rows = fetch_live_forecast(model.get("aifs_model") or mos.AIFS_MODEL) \
@@ -393,6 +416,7 @@ def main():
         feats = mos.daily_features(series, target)
         if feats is None:
             continue
+        feats["wind_c"] = mos.wind_columns(series) if wind_on else None
         if aifs_rows is not None:
             feats = mos.merge_aifs(feats, mos.daily_features(aifs_rows.get(target) or {}, target))
             if feats is None:

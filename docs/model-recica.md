@@ -357,3 +357,58 @@ Utež dneva `0,5 ** (starost / polčas)`; lambda iz notranje validacije, ne popr
 **Brez dobitka pri nobenem polčasu.** Krajši polčas je dosledno slabši, ker utež skrči efektivno učno množico (~900 dni), preden
 bi premik karkoli prinesel. Dokaza za drift ni; **MTR ostane pri enakomernih utežeh**. Če se po dveh letih meritev (2027) pokaže
 razlika v povprečnem ostanku med letoma, poskus ponovi.
+
+## Poskus 24. 10. 2026: krčenje popravka po režimu noči
+
+Skripta: `tools/ai/eval_mtr6_shrink.py`. Ideja iz `/trendi/`: v dnevih »vmes« je Tmin slabši od Open-Meteo, zato popravek tam
+škodi; namesto značilk (te so 23. 10. padle v šum) popravek množimo z `w`: `pred' = om + w · (pred − om)`. `w` po `night_regime`
+(`clear_calm`/`overcast`/`mixed`, izračunan iz **napovedane** oblačnosti in vetra, torej brez uhajanja) se uči ločeno in pošteno:
+walk-forward po mesecih od 2025-04, `w` za testni mesec je tisti iz mreže 0,0…1,2, ki minimizira MAE na preteklih izven-vzorčnih
+napovedih (razred z < 30 dnevi dobi 1,0). Okno 2025-10 → 2026-10, n = 384 dni, pravi `previous_dayN`, produkcijske zastavice.
+
+| | Tmax D+1/D+2/D+3 | Tmin D+1/D+2/D+3 |
+|---|---|---|
+| razlika MAE (osnova − krčenje) | −0,023 (**slabše**) / −0,008 / −0,023 (šum) | +0,004 / −0,021 / −0,013 (šum) |
+
+**Brez dobitka in brez razloga zanj.** Naučeni `w` je skoraj povsod **1,0–1,2, ne pod 1**: popravek MTR v nobenem režimu ni preveč
+močan, če kaj, je (zaradi grebenske regularizacije) rahlo prešibak. Zato krčenje nikjer ne pomaga, pri Tmax D+1 je celo značilno
+slabše. Tudi razred »mixed« pri Tmin ima `w` ≈ 1,0. Rezultat »v ›vmes‹ je Tmin slabši od Open-Meteo« iz `/trendi/` je torej
+**lastnost teh dni (večja nepredvidljivost obeh virov), ne napačen popravek**; krčenje ga ne reši. Povečanje (`w > 1`) tudi ne
+izboljša (diff negativen), ker so ocene `w` med meseci šumne. **MTR ostane brez krčenja.**
+
+## Poskus 24. 10. 2026: MOS za veter in sunke v dolini
+
+Skripti: `tools/ai/fetch_wind_cache.py` (sunki in smer, **pravi** `wind_gusts_10m_previous_dayN`), `tools/ai/eval_mtr7_wind.py`.
+Cilja iz `history.json` (IREICA1, km/h): `windspeedAvg` (dnevno povprečje, proti Open-Meteo povprečju `wind_speed_10m`) in
+`windgustHigh` (dnevni največji sunek, proti največjemu modelskemu sunku). Isti walk-forward po mesecih in uparjeni blokovni
+bootstrap kot `eval_mtr3.py`, okno 2025-10 → 2026-10, n = 384 dni. Model v `log1p` prostoru (veter je asimetričen), ocena v km/h.
+
+**Diagnostika:** postaja stoji na zavetrnem dnu doline. Na 877 dneh je povprečni veter postaje 2,22 km/h proti 4,44 km/h pri
+Open-Meteo (**razmerje 0,50**, korelacija 0,75); največji sunek postaje je 18,0 km/h, največji modelski *veter* pa le 10,1 km/h.
+
+| MAE (km/h) | surov OM | skala (mediana razmerja) | log-linearno (1 značilka) | MOS |
+|---|---|---|---|---|
+| povprečni veter D+1 / D+2 / D+3 | 2,16 / 2,71 / 2,74 | 0,57 / 0,58 / 0,60 | 0,57 / 0,58 / 0,61 | 0,53 / 0,58 / 0,60 |
+| največji sunek D+1 / D+2 / D+3 | 7,15 / 8,36 / 8,51 | 4,72 / 4,89 / 4,80 | 4,34 / 4,75 / 4,69 | **3,93 / 4,44 / 4,57** |
+
+- **Povprečni veter: ves dobitek je v skali.** Surov model ima pristranskost +2,1 do +2,7 km/h; že množenje z mediano razmerja jo odpravi
+  (MAE −74 %). Polni MOS ni značilno boljši ne od skale ne od log-linearne osnove pri nobenem vodilnem času.
+- **Sunki: MOS doda majhen, a pravi dobitek** pri D+1 (−0,41 km/h proti log-linearni, CI [+0,06; +0,79], proti skali −0,80) in D+2
+  (−0,31 km/h, CI [+0,03; +0,60]); pri D+3 šum. Skupaj proti surovemu modelu je MAE sunkov 45 % manjša pri D+1.
+- Samo skala je torej dovolj za povprečni veter; za sunke se nekaj dobi tudi iz značilk (hitrost po delih dneva, smer, oblačnost, sevanje, tlak).
+
+**Vgrajeno 24. 10. 2026 (po odločitvi Filipa):** veter in sunki so del MTR.
+- **Učenje** (`train_recica_mos.py`): povprečni veter = Open-Meteo × skala (mediana razmerja postaja/model, `wind.mean.ratio`; ridge
+  ni značilno boljši), sunki = ridge v `log1p` prostoru z 15 značilkami (`WIND_FEATURES`, `wind.gust.coefficients`). Sunki se
+  zapišejo samo, če so v walk-forward boljši od surovega Open-Meteo. Veščina je v `leads.<N>.wind.<mean|gust>.skill`
+  (MAE surov / skala / model, pristranskost). Zajem sunkov in smeri je **ločen** od `HOURLY_VARS` (`WIND_EXTRA_VARS`, lasten ključ
+  `wind<N>:…` v predpomnilniku): temperaturni model in njegov zajem se nista spremenila, neuspešen zajem vetra izpusti samo veter.
+- **Stolpci** gradi ena funkcija, `wind_columns()` + `wind_vector()` (isto načelo kot `daily_features`); uvaža jo napovedovalnik
+  in `tools/ai/eval_mtr7_wind.py` (enakost z evalom preverjena na 2643 vektorjih).
+- **Napoved** (`predict_recica_mos.py`): živi klic doda `WIND_EXTRA_VARS` samo, kadar ima model veter (isti klic, brez nove
+  zahteve); polja `wind`, `gust`, `om_wind`, `om_gust`, `gust_mae`, `gust_mae_om` v `napoved-modela.json` in živi različici
+  (`None`, kadar jih ni). **Na semafor in v `forecast_verification.json` ne gre**: veter tam ni merjen.
+- **Kartica**: `renderMtrWind()` (`#mos-wind`, samo polna kartica) — vrstica na dan »veter ~1, sunki do 11 km/h« z napisom
+  **»umerjeno na postajo«**, surov Open-Meteo ob strani in napaka sunkov. Skrita, kadar polj ni.
+- Test: `tools/test_mtr_wind.py` (v `parity.yml`). **Veter zaživi šele po ponovnem učenju** (`mos-train.yml`, ročno ali 1. v mesecu):
+  do takrat model v `model/recica-mos.json` nima `wind` in kartica je skrita.

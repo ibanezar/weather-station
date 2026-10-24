@@ -159,13 +159,16 @@ def _get_json(url, timeout=240, tries=4):
     raise RuntimeError(f"zajem ni uspel: {last}")
 
 
-def fetch_archived_forecasts(lead, start, end, model=None):
+def fetch_archived_forecasts(lead, start, end, model=None, variables=None):
     """Vrne {datum: {spremenljivka: [(ura, vrednost), ...]}} za napoved izpred
     `lead` dni. Zajema po letih, ker je enoletni odgovor še obvladljiv.
 
     Brez `model` je to privzeti seamless Open-Meteo; z `model` en sam imenovan
-    model (pri nas AIFS)."""
-    hourly = ",".join(f"{v}_previous_day{lead}" for v in HOURLY_VARS)
+    model (pri nas AIFS). `variables` (privzeto HOURLY_VARS) omogoča ločen zajem
+    dodatnih spremenljivk (veter: WIND_EXTRA_VARS), da temperaturni zajem ostane
+    nespremenjen."""
+    variables = variables or HOURLY_VARS
+    hourly = ",".join(f"{v}_previous_day{lead}" for v in variables)
     rows = {}
     y0 = int(start[:4])
     y1 = int(end[:4])
@@ -188,8 +191,8 @@ def fetch_archived_forecasts(lead, start, end, model=None):
         times = h.get("time") or []
         for i, ts in enumerate(times):
             day, hour = ts[:10], int(ts[11:13])
-            rec = rows.setdefault(day, {v: [] for v in HOURLY_VARS})
-            for v in HOURLY_VARS:
+            rec = rows.setdefault(day, {v: [] for v in variables})
+            for v in variables:
                 val = (h.get(f"{v}_previous_day{lead}") or [])[i] if h.get(f"{v}_previous_day{lead}") else None
                 if val is not None:
                     rec[v].append((hour, val))
@@ -344,6 +347,145 @@ def multi_vector(f, target):
     mean = sum(allv) / len(allv)
     sd = math.sqrt(sum((x - mean) ** 2 for x in allv) / len(allv))
     return diffs + [mean - om, sd]
+
+
+# ── Veter in sunki v dolini (24. 10. 2026) ───────────────────────────────────
+# Postaja stoji na zavetrnem dnu doline: model povprečni veter precenjuje za ~2× (razmerje postaja/model 0,50,
+# korelacija 0,75). Povprečni veter popravi že skala (mediana razmerja; ridge ni značilno boljši), sunke pa
+# ridge v log1p prostoru z značilkami spodaj (D+1/D+2 značilno boljši od skale in log-linearne osnove; D+3 šum).
+# Zajem dodatnih spremenljivk je LOČEN od HOURLY_VARS (temperaturni model in njegov zajem se ne spremenita);
+# manjkajoči veter ne sme podreti učenja temperature. Rezultat: docs/model-recica.md, tools/ai/eval_mtr7_wind.py.
+WIND_EXTRA_VARS = ["wind_gusts_10m", "wind_direction_10m"]
+WIND_TARGETS = {"mean": "windspeedAvg", "gust": "windgustHigh"}   # polja v history.json (IREICA1, km/h)
+WIND_FEATURES = ["bias", "log_wmean", "log_wmax", "log_wnight", "log_wday", "log_gmax", "log_gmean_day",
+                 "dir_x", "dir_y", "cloud", "cloud_n", "rad100", "pres_anom10", "sin_doy", "cos_doy"]
+WIND_LAMBDA_GRID = [0.1, 0.5, 2.0, 8.0, 32.0]
+WIND_INNER_FOLDS = 3
+WIND_MIN_OM = 0.5     # km/h: pod tem razmerje obs/om ni stabilno (veter blizu 0)
+WIND_MIN_SAMPLES = 200
+
+
+def _log1p(x):
+    return math.log1p(max(x, 0.0))
+
+
+def wind_columns(series):
+    """Urne serije enega dne ({spremenljivka: [(ura, vrednost), ...]}) → dnevne vrednosti vetra ali None.
+    Potrebuje wind_speed_10m (HOURLY_VARS) in wind_gusts_10m + wind_direction_10m (WIND_EXTRA_VARS), po vsaj 20 ur
+    hitrosti in sunkov. ISTA funkcija pri učenju in pri napovedi (isto načelo kot daily_features)."""
+    g = lambda k: [(int(h), v) for h, v in (series.get(k) or [])]
+    w, gu, di = g("wind_speed_10m"), g("wind_gusts_10m"), dict(g("wind_direction_10m"))
+    if len(w) < 20 or len(gu) < 20:
+        return None
+    wn = [v for h, v in w if h in NIGHT_HOURS]
+    wd = [v for h, v in w if h in DAY_HOURS]
+    gd = [v for h, v in gu if h in DAY_HOURS]
+    if not wn or not wd or not gd:
+        return None
+    tot = sum(v for _, v in w)
+    ex = sum(v * math.sin(math.radians(di[h])) for h, v in w if h in di) / tot if tot > 0 else 0.0
+    ey = sum(v * math.cos(math.radians(di[h])) for h, v in w if h in di) / tot if tot > 0 else 0.0
+    return {"wmean": tot / len(w), "wmax": max(v for _, v in w), "wn": sum(wn) / len(wn),
+            "wd": sum(wd) / len(wd), "gmax": max(v for _, v in gu), "gmean_d": sum(gd) / len(gd),
+            "ex": ex, "ey": ey}
+
+
+def wind_vector(c, f):
+    """Načrtovalna vrstica za sunke (vrstni red = WIND_FEATURES). `c` = wind_columns, `f` = daily_features."""
+    return [1.0, _log1p(c["wmean"]), _log1p(c["wmax"]), _log1p(c["wn"]), _log1p(c["wd"]), _log1p(c["gmax"]),
+            _log1p(c["gmean_d"]), c["ex"], c["ey"], f["cloud"] / 100, f["cloud_n"] / 100, f["rad"] / 100,
+            (f["pres"] - 1013) / 10, f["sin_doy"], f["cos_doy"]]
+
+
+def build_wind_samples(samples, merged_rows, hist):
+    """Iz že zgrajenih temperaturnih vzorcev (datum + daily_features) naredi vetrovne: doda stolpce vetra in
+    izmerjeni povprečni veter in največji sunek postaje. Dan brez stolpcev ali meritve odpade."""
+    out = []
+    for s in samples:
+        o = hist.get(s["date"]) or {}
+        c = wind_columns(merged_rows.get(s["date"]) or {})
+        if c is None or o.get(WIND_TARGETS["mean"]) is None or o.get(WIND_TARGETS["gust"]) is None:
+            continue
+        out.append({"date": s["date"], "f": s["f"], "c": c,
+                    "mean": float(o[WIND_TARGETS["mean"]]), "gust": float(o[WIND_TARGETS["gust"]])})
+    return out
+
+
+def _median(xs):
+    xs = sorted(xs)
+    n = len(xs)
+    return xs[n // 2] if n % 2 else 0.5 * (xs[n // 2 - 1] + xs[n // 2])
+
+
+def fit_wind_ratio(samples):
+    """Skala povprečnega vetra: mediana obs/om na dnevih z vetrom nad WIND_MIN_OM."""
+    r = [s["mean"] / s["c"]["wmean"] for s in samples if s["c"]["wmean"] > WIND_MIN_OM]
+    return _median(r) if r else 1.0
+
+
+def select_wind_lambda(samples):
+    months = sorted({s["date"][:7] for s in samples})
+    if len(months) <= WIND_INNER_FOLDS:
+        return 2.0
+    best, best_mae = 2.0, None
+    for lam in WIND_LAMBDA_GRID:
+        errs = []
+        for tm in months[-WIND_INNER_FOLDS:]:
+            tr = [s for s in samples if s["date"][:7] < tm]
+            te = [s for s in samples if s["date"][:7] == tm]
+            if not tr or not te:
+                continue
+            co = solve_ridge([wind_vector(s["c"], s["f"]) for s in tr], [_log1p(s["gust"]) for s in tr], lam)
+            errs += [abs(math.expm1(predict_linear(co, wind_vector(s["c"], s["f"]))) - s["gust"]) for s in te]
+        if errs and (best_mae is None or sum(errs) / len(errs) < best_mae):
+            best_mae, best = sum(errs) / len(errs), lam
+    return best
+
+
+def fit_wind_gust(samples):
+    """(koeficienti, lambda) ridge modela sunkov v log1p prostoru."""
+    lam = select_wind_lambda(samples)
+    co = solve_ridge([wind_vector(s["c"], s["f"]) for s in samples], [_log1p(s["gust"]) for s in samples], lam)
+    return co, lam
+
+
+def predict_wind_gust(coefs, c, f):
+    return max(math.expm1(predict_linear(coefs, wind_vector(c, f))), 0.0)
+
+
+def walk_forward_wind(samples, kind, outer_folds=OUTER_FOLDS, min_train_months=MIN_TRAIN_MONTHS):
+    """MAE (km/h) surovega Open-Meteo, skale in modela pri walk-forward po mesecih (kot walk_forward_cv:
+    učenje samo iz mesecev pred testnim). `kind` = "mean" (model = skala) ali "gust" (model = ridge).
+    Vrne None, kadar ni dovolj zgodovine."""
+    months = sorted({s["date"][:7] for s in samples})
+    if len(months) <= min_train_months:
+        return None
+    om_key = "wmean" if kind == "mean" else "gmax"
+    errs = {"om": [], "scalar": [], "model": []}
+    bias = {"om": [], "model": []}
+    for tm in months[-outer_folds:]:
+        tr = [s for s in samples if s["date"][:7] < tm]
+        te = [s for s in samples if s["date"][:7] == tm]
+        if len(tr) < 100 or not te:
+            continue
+        r = _median([s[kind] / s["c"][om_key] for s in tr if s["c"][om_key] > WIND_MIN_OM] or [1.0])
+        co = fit_wind_gust(tr)[0] if kind == "gust" else None
+        for s in te:
+            om = s["c"][om_key]
+            model = r * om if kind == "mean" else predict_wind_gust(co, s["c"], s["f"])
+            errs["om"].append(abs(om - s[kind]))
+            errs["scalar"].append(abs(r * om - s[kind]))
+            errs["model"].append(abs(model - s[kind]))
+            bias["om"].append(om - s[kind])
+            bias["model"].append(model - s[kind])
+    if not errs["om"]:
+        return None
+    mae = {k: sum(v) / len(v) for k, v in errs.items()}
+    return {"n": len(errs["om"]), "mae_open_meteo": round(mae["om"], 2), "mae_scalar": round(mae["scalar"], 2),
+            "mae_meteorec": round(mae["model"], 2),
+            "improvement_pct": round(100 * (1 - mae["model"] / mae["om"]), 1) if mae["om"] else None,
+            "bias_open_meteo": round(sum(bias["om"]) / len(bias["om"]), 2),
+            "bias_meteorec": round(sum(bias["model"]) / len(bias["model"]), 2)}
 
 
 # ── Avtokorelirana pristranskost (--use-bias) ───────────────────────────────
@@ -812,6 +954,8 @@ def main():
             for target in ("tmax", "tmin")
         },
         "pop_features": POP_FEATURES + (AIFS_POP_FEATURES if args.aifs else []),
+        "wind_extra_vars": WIND_EXTRA_VARS,
+        "wind_features": WIND_FEATURES,
         "wet_day_mm": WET_DAY_MM,
         "pop_thresholds_mm": POP_THRESHOLDS,
         "ridge_lambda": RIDGE_LAMBDA,  # rezervna vrednost; dejanska je od uvedbe select_lambda po ciljih spodaj
@@ -839,6 +983,23 @@ def main():
             cache[key] = _rows_to_cache(rows)
             save_cache(cache)
         return rows
+
+    def wind_archive(lead):
+        """Arhiv napovedi sunkov in smeri za en vodilni čas (ločen zajem, svoj ključ v predpomnilniku).
+        Vrne None, kadar zajem ni uspel — veter se tedaj izpusti, temperatura ostane."""
+        key = f"wind{lead}:{args.start}:{end}"
+        if key in cache:
+            return _rows_from_cache(cache[key])
+        print(f"D+{lead}: zajemam arhiv napovedi vetra (sunki, smer)")
+        try:
+            wrows = fetch_archived_forecasts(lead, args.start, end, variables=WIND_EXTRA_VARS)
+        except RuntimeError as e:
+            print(f"  ⚠ veter D+{lead} preskočen: {e}", file=sys.stderr)
+            return None
+        if not args.no_cache:
+            cache[key] = _rows_to_cache(wrows)
+            save_cache(cache)
+        return wrows
 
     bias_series = None
     if any_bias:
@@ -928,6 +1089,30 @@ def main():
             entry["coefficients"][key] = [round(c, 6) for c in cf]
             print(f"  {key} (≥ {thr:g} mm): Brier {sk['brier']} proti klimatologiji "
                   f"{sk['brier_climatology']} (veščina {sk['skill_score']})")
+
+        # Veter in sunki (glej opombo pri WIND_EXTRA_VARS): povprečni veter = skala, sunki = ridge v log1p.
+        # Sunki se objavijo samo, če so v walk-forward boljši od surovega Open-Meteo; ob nedosegljivem
+        # zajemu ali premalo dneh se veter izpusti, temperatura in padavine ostanejo.
+        wrows = wind_archive(lead)
+        if wrows:
+            merged = {d: {**rows[d], **wrows.get(d, {})} for d in rows}
+            wsamples = build_wind_samples(samples, merged, hist)
+            if len(wsamples) >= WIND_MIN_SAMPLES:
+                wind = {"mean": {"method": "scalar", "ratio": round(fit_wind_ratio(wsamples), 4),
+                                 "skill": walk_forward_wind(wsamples, "mean")}}
+                gskill = walk_forward_wind(wsamples, "gust")
+                if gskill and gskill["mae_meteorec"] < gskill["mae_open_meteo"]:
+                    gco, glam = fit_wind_gust(wsamples)
+                    wind["gust"] = {"method": "ridge_log1p", "coefficients": [round(c, 6) for c in gco],
+                                    "lambda": glam, "skill": gskill}
+                entry["wind"] = wind
+                ms, gs = wind["mean"]["skill"], gskill
+                print(f"  veter ({len(wsamples)} dni): povprečni Open-Meteo {ms and ms['mae_open_meteo']} → "
+                      f"skala {ms and ms['mae_meteorec']} km/h (×{wind['mean']['ratio']}); sunki Open-Meteo "
+                      f"{gs and gs['mae_open_meteo']} → naš {gs and gs['mae_meteorec']} km/h"
+                      f"{'' if 'gust' in wind else ' (sunki izpuščeni: ni boljše od surovega)'}")
+            else:
+                print(f"  ⚠ veter: premalo dni z meritvijo in napovedjo ({len(wsamples)})", file=sys.stderr)
 
         model["leads"][str(lead)] = entry
 

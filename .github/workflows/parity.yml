@@ -126,6 +126,7 @@ jobs:
           python3 tools/test_hourly_log.py
           python3 tools/test_ensemble_log.py
           python3 tools/test_profile_log.py
+          python3 tools/test_mtr_wind.py
 
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py
