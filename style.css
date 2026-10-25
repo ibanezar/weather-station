@@ -3846,3 +3846,17 @@ html[data-mode-intro="1"] .mode-switch-wrap{display:none}
 .hm-sub{line-height:1.35;opacity:.9}
 @keyframes live-pulse-hm{0%,100%{box-shadow:none}30%{box-shadow:0 0 0 1px var(--hm-accent,var(--blue)),0 0 14px 0 var(--hm-accent,var(--blue))}}
 .hm.pulse-live{animation-name:live-pulse-hm}
+
+/* ── Srednji del naslovnice: povzetek dneva, zadnjih 7 dni, ta mesec (25. 10. 2026) ───────────────────────
+   Naslov »Zadnjih 7 dni« ima isto črkovno podobo in ikono kot ostale kartice (prej emoji in mono), ploščice
+   meseca nosijo ikone iz sklada (prej emoji, ki se med napravami razlikujejo), na telefonu so v dveh stolpcih,
+   vrednosti povzetka dneva pa so na telefonu poravnane, ker se oznake različno prelomijo. */
+.past-days-hdr-lbl{display:flex;align-items:center;gap:.45rem;font-family:inherit;font-size:.72rem;letter-spacing:.1em;font-weight:600;color:var(--text);opacity:.85}
+.yr-item{background:linear-gradient(180deg,color-mix(in srgb,var(--text) 5%,var(--fc-bg)),var(--fc-bg))}
+@media (max-width:560px){
+  .ds-arrow{line-height:1.25;min-height:2.5em}
+  #month-card-grid{grid-template-columns:1fr 1fr;gap:.55rem}
+  #month-card-grid .yr-item{padding:.7rem .8rem}
+  #month-card-grid .yr-item:last-child:nth-child(odd){grid-column:1/-1}
+  #month-card-grid .yr-val{font-size:1.15rem}
+}

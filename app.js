@@ -5997,14 +5997,14 @@ function renderMonthCard(){
     anomHtml=' <span style="font-size:.68rem;color:'+col+'">('+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1)+'° vs. '+_climAnomalyYears+'l)</span>';
   }
   const items=[
-    {icon:'🌡',lbl:'Povp. temperatura',val:s.avgT.toFixed(1)+'°C'+anomHtml,col:'var(--text)'},
-    {icon:'💧',lbl:'Padavine skupaj',val:s.totR.toFixed(1)+' mm',sub:s.rainyDays+' deževnih dni',col:'var(--rain-col)'},
-    {icon:'🥵',lbl:'Najtoplejši dan',val:s.maxT.toFixed(1)+'°C',sub:s.maxDate?fmtD(s.maxDate):'',col:'var(--red)'},
-    {icon:'🥶',lbl:'Najhladnejši dan',val:s.minT.toFixed(1)+'°C',sub:s.minDate?fmtD(s.minDate):'',col:'var(--blue)'},
+    {icon:'thermometer',lbl:'Povp. temperatura',val:s.avgT.toFixed(1)+'°C'+anomHtml,col:'var(--text)'},
+    {icon:'droplet',lbl:'Padavine skupaj',val:s.totR.toFixed(1)+' mm',sub:s.rainyDays+' deževnih dni',col:'var(--rain-col)'},
+    {icon:'flame',lbl:'Najtoplejši dan',val:s.maxT.toFixed(1)+'°C',sub:s.maxDate?fmtD(s.maxDate):'',col:'var(--red)'},
+    {icon:'thermometer-snowflake',lbl:'Najhladnejši dan',val:s.minT.toFixed(1)+'°C',sub:s.minDate?fmtD(s.minDate):'',col:'var(--blue)'},
   ];
-  if(s.frostDays>0)items.push({icon:'❄️',lbl:'Zmrzujoči dnevi',val:s.frostDays,col:'var(--blue)'});
+  if(s.frostDays>0)items.push({icon:'snowflake',lbl:'Zmrzujoči dnevi',val:s.frostDays,col:'var(--blue)'});
   wrap.innerHTML=items.map(it=>
-    '<div class="yr-item"><div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">'+it.icon+' '+it.lbl+'</div>'
+    '<div class="yr-item"><div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem"><svg class="ic" aria-hidden="true" style="color:'+it.col+';flex:none"><use href="#i-'+it.icon+'"/></svg><span>'+it.lbl+'</span></div>'
     +'<div class="yr-val" style="color:'+it.col+'">'+it.val+'</div>'
     +(it.sub?'<div class="yr-dt">'+it.sub+'</div>':'')
     +'</div>'
