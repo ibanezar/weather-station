@@ -2443,15 +2443,63 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-why-sub{font-size:.68rem;color:var(--muted)}
 .mtr-why-txt{font-size:.78rem;color:var(--muted);margin:.4rem 0 0;line-height:1.5}
 /* Veter v dolini: vrstica na dan (umerjeno na postajo) in surov Open-Meteo ob strani */
-.mtr-wind-row{display:grid;grid-template-columns:5.6rem 1fr auto;gap:.2rem .6rem;align-items:baseline;padding:.45rem 0;
-  border-top:1px solid var(--fc-border);font-size:.84rem}
+.mtr-wind-row{display:grid;grid-template-columns:3.9rem minmax(0,1fr);gap:.2rem .5rem;align-items:center;padding:.5rem 0;
+  border-top:1px solid var(--fc-border);font-size:.8rem}
 .mtr-wind-row:first-of-type{border-top:0}
-.mtr-wind-day{font-weight:600;color:var(--text);text-transform:capitalize}
-.mtr-wind-day span{font-weight:500;color:var(--muted);font-size:.7rem}
-.mtr-wind-main{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text)}
-.mtr-wind-main span{font-size:.7rem;font-weight:600;color:var(--muted);margin:0 .15rem 0 .15rem}
-.mtr-wind-om{font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:right}
-@media (max-width:480px){.mtr-wind-row{grid-template-columns:5rem 1fr}.mtr-wind-om{grid-column:2;text-align:left}}
+.mtr-wind-day{font-weight:700;color:var(--text);text-transform:capitalize;line-height:1.2}
+.mtr-wind-day span{display:block;font-weight:500;color:var(--muted);font-size:.66rem}
+.wb-axis{position:relative;height:1rem;margin:0 6.6rem 0 7.4rem}
+.wb-axis span{position:absolute;top:0;transform:translateX(-50%);font:600 .62rem 'JetBrains Mono',monospace;color:var(--muted)}
+.wb-lane{display:grid;grid-template-columns:2.6rem minmax(0,1fr) 6.2rem;gap:.4rem;align-items:center;height:1.45rem}
+.wb-l{font-size:.68rem;color:var(--muted)}
+.wb-t{position:relative;height:10px;border-radius:5px;background-color:rgba(127,127,127,.14);
+  background-image:linear-gradient(to right,var(--fc-border) 1px,transparent 1px);background-size:var(--gs,20%) 100%}
+.wb-bar{position:absolute;left:0;top:0;bottom:0;border-radius:5px;min-width:4px}
+.wb-om{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1px;border-radius:2px}
+.wb-v{font:700 .78rem 'JetBrains Mono',monospace;color:var(--text);white-space:nowrap}
+.wb-v small{font-size:.62rem;font-weight:600;color:var(--muted);margin-left:.1rem}
+.wb-v em{font-style:normal;font-weight:500;font-size:.64rem;color:var(--muted);margin-left:.3rem}
+.wn2-legend .wb-tick{width:3px;height:12px;border-radius:2px}
+@media (max-width:480px){
+  .mtr-wind-row{grid-template-columns:3.2rem minmax(0,1fr)}
+  .wb-axis{margin:0 5.4rem 0 6.3rem}
+  .wb-lane{grid-template-columns:2.2rem minmax(0,1fr) 5rem}
+  .wb-v em{display:none}
+}
+/* Kdaj MTR pomaga: dva stolpca (MTR, Open-Meteo) na isti lestvici napake, po vremenskem položaju dneva */
+.sit-row{padding:.7rem 0;border-top:1px solid var(--fc-border)}
+.sit-row:first-of-type{border-top:0}
+.sit-hd{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:.45rem}
+.sit-hd span{font-weight:500;color:var(--muted);font-size:.72rem;margin-left:.4rem}
+.sit-pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem 1.2rem}
+.sit-pair{min-width:0}
+.sit-m{display:flex;align-items:baseline;justify-content:space-between;font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:.25rem}
+.sit-m b{font:700 .74rem 'JetBrains Mono',monospace}
+.sit-m b.pos{color:var(--green)}
+.sit-m b.neg{color:var(--red)}
+.sit-b{display:grid;grid-template-columns:minmax(0,1fr) 3.6rem;gap:.4rem;align-items:center;height:1.1rem}
+.sit-bt{position:relative;height:8px;border-radius:4px;background:rgba(127,127,127,.14)}
+.sit-bt i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;min-width:3px}
+.sit-b em{font:600 .68rem 'JetBrains Mono',monospace;font-style:normal;color:var(--text);white-space:nowrap}
+@media (max-width:480px){.sit-pairs{grid-template-columns:1fr}}
+/* Zgrešitve: odstopanje MTR od izmerjenega kot stolpec od ničle; ARSO kot oznaka na isti lestvici */
+.ms-top{display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem}
+.ms-big{font-family:var(--mtr-disp,inherit);font-size:2rem;font-weight:700;line-height:1;color:var(--text);letter-spacing:-.03em;white-space:nowrap}
+.ms-big small{font-size:.9rem;font-weight:600;color:var(--muted);margin-left:.1rem}
+.ms-top-r{flex:1;min-width:0;font-size:.72rem;color:var(--muted)}
+.ms-share{height:8px;border-radius:4px;background:rgba(127,127,127,.18);overflow:hidden;margin-top:.35rem}
+.ms-share i{display:block;height:100%;border-radius:4px}
+.ms-row{display:grid;grid-template-columns:4.4rem minmax(0,1fr) 3.4rem;gap:.5rem;align-items:center;padding:.35rem 0;border-top:1px solid var(--fc-border)}
+.ms-row:first-of-type{border-top:0}
+.ms-d{font-size:.8rem;font-weight:700;color:var(--text);line-height:1.2}
+.ms-d span{display:block;font-weight:500;color:var(--muted);font-size:.64rem}
+.ms-plot{position:relative;height:1.4rem}
+.ms-zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted);opacity:.6}
+.ms-bar{position:absolute;top:50%;height:10px;margin-top:-5px;border-radius:3px;min-width:3px}
+.ms-ar{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;transform:rotate(45deg);background:var(--text);opacity:.85;border-radius:1px}
+.ms-v{font:700 .78rem 'JetBrains Mono',monospace;color:var(--text);text-align:right;white-space:nowrap}
+.ms-scale{display:grid;grid-template-columns:4.4rem minmax(0,1fr) 3.4rem;gap:.5rem;font-size:.62rem;color:var(--muted)}
+.ms-scale div{display:flex;justify-content:space-between}
 /* Drugo mnenje: plavajoči stolpci P10–P90 na skupni temperaturni osi */
 .wn2-legend{display:flex;flex-wrap:wrap;gap:.2rem .9rem;font-size:.7rem;color:var(--muted);margin:0 0 .5rem}
 .wn2-legend span{display:inline-flex;align-items:center;gap:.35rem}
@@ -3651,9 +3699,6 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 .mtr-hist-row b{flex:0 0 7.5rem;color:var(--text)}
 .mtr-hist-row span{color:var(--muted)}
 .mtr-hist-neg b{color:var(--red,#dc2626)}
-.mtr-miss{width:100%;border-collapse:collapse;font-size:.82rem}
-.mtr-miss th,.mtr-miss td{text-align:left;padding:.4rem .5rem;border-top:1px solid var(--border,rgba(128,128,128,.2));font-variant-numeric:tabular-nums}
-.mtr-miss thead th{border-top:0;color:var(--muted);font-weight:600}
 .mtr-rel{display:flex;flex-wrap:wrap;gap:1.2rem;color:var(--text)}
 .mtr-note{font-size:.78rem;color:var(--muted);margin:.6rem 0 0;line-height:1.5}
 .mtr-hist-row a{color:#34d399;text-decoration:underline}

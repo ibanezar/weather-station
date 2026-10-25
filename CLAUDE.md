@@ -1388,6 +1388,12 @@ nobenega. Zdaj to pokaže geometrija:
 - **Preklopnik Tmax/Tmin** prerisuje vse štiri dele. Model popravlja obe
   meritvi po svoje (podnevi navzgor, ponoči navzdol), zato sta to dve zgodbi
   in ne ena — tudi dvoboj se izide drugače (Tmax 26/40, Tmin 21/40).
+- **Vse kartice zavihka so grafične, brez tabel in vrstic s številkami** (25. 10. 2026). Veter (`renderMtrWind`: stolpec
+  umerjeno + navpična oznaka surovega Open-Meteo, skupna os), »Jasne noči so njegov teren« (`renderMtrSituations`: par
+  stolpcev MTR / Open-Meteo na skupni lestvici napake, odstotek ob paru) in »Kje se je zmotil« (`renderMtrMisses`: stolpec
+  odstopanja od ničle, ARSO kot oznaka na isti lestvici, zgoraj delež napovedi v ±1 °C) uporabljajo iste barve serij
+  (`MTR_CC`) kot hero graf in drugo mnenje WN2. Številke ostanejo v besedilu ob stolpcu in v `aria-label` vrstice.
+  Nova kartica na tem zavihku naj bo grafična po istem vzorcu (`wn2-legend` za legendo, `MTR_CC` za barve), ne tabela.
 
 Pravila, ki jih ne obračaj:
 
