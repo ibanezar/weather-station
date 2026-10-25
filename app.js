@@ -10111,7 +10111,7 @@ function heroValleySvg(pts,colorFn,w0){
       '<text x="'+pick.x.toFixed(1)+'" y="'+(zy-4).toFixed(1)+'" text-anchor="'+pick.a+'" class="hv-t">'+txt+'</text>';
   }
   const dots=(pts||[]).map(x=>{const fx=VALLEY_HERO.st[x.name];if(fx==null||x.t==null)return '';
-    const cx=X(fx),cy=Y(x.elev);return '<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" class="hv-dot"/>'+
+    const cx=X(fx),cy=Y(x.elev);return '<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="10" class="hv-halo"/><circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" class="hv-dot"/>'+
       '<text x="'+cx.toFixed(1)+'" y="'+(cy-20).toFixed(1)+'" text-anchor="middle" class="hv-n">'+x.name+'</text>'+
       '<text x="'+cx.toFixed(1)+'" y="'+(cy-7).toFixed(1)+'" text-anchor="middle" class="hv-t">'+_duelNum(x.t,1)+' °C'+(W>=480?' · '+x.elev+' m':'')+'</text>';}).join('');
   const aria='Shematski prerez doline: '+(pts||[]).map(x=>x.name+' '+_duelNum(x.t,1)+' °C na '+x.elev+' m').join(', ')+(z?'. 0 °C približno na '+z.h+' m'+(z.est?' (ocena)':''):'')+'.';
@@ -10166,7 +10166,17 @@ async function fetchHeroValley(){
     const pts=await _vpPoints(homeT),sum=valleyProfileSummary(pts);
     const cap=document.getElementById('hero-valley-cap');
     el.innerHTML=heroValleySvg(pts,hvColor,el.clientWidth);
-    if(cap)cap.textContent=sum?sum.text+' Gradient '+(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m.':'Višinske postaje trenutno niso dosegljive; kaže se samo Rečica.';
+    if(cap){
+      if(sum){
+        // Oznaka stanja (Inverzija, Šibek gradient …) je prvi del stavka pred dvopičjem; ostalo je razlaga.
+        const m=sum.text.match(/^([^:]+):\s*(.*)$/),kindTxt=m?m[1]:'',rest=m?m[2]:sum.text;
+        cap.innerHTML=(kindTxt?'<b class="hv-kind hv-k-'+sum.kind+'">'+kindTxt+'</b> ':'')+'<span class="hv-rest"></span><span class="hv-grad"></span>';
+        cap.querySelector('.hv-rest').textContent=rest;
+        cap.querySelector('.hv-grad').textContent=(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m';
+      }else cap.textContent='Višinske postaje trenutno niso dosegljive; kaže se samo Rečica.';
+    }
+    const lg=document.getElementById('hv-lg-bar');
+    if(lg){lg.style.background='linear-gradient(90deg,'+[-8,-2,3,9,16,24].map(t=>hvColor(t)+' '+Math.round((t+8)/32*100)+'%').join(',')+')';lg.parentNode.classList.add('is-ready');}
     el.removeAttribute('aria-busy');
   }catch(e){console.warn('Dolinski prerez:',e);}
 }

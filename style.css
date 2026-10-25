@@ -3787,3 +3787,30 @@ html[data-mode-intro="1"] .mode-switch-wrap{display:none}
   .cookie-btn{flex:1;padding:.5rem .8rem}
   .status{gap:.35rem .8rem;padding:.4rem 0 1rem}
 }
+
+/* ── Dolina zdaj: tišji prerez (25. 10. 2026) ───────────────────────────────────────────
+   Oznake postaj so lažje (Inter, tanjši obris), pike imajo svetel obroč, pod prerezom je lestvica barv
+   (brez nje barva zraka ni nič povedala) in oznaka stanja (Inverzija …) namesto surovega stavka.
+   Višina podnožja je rezervirana, da prihod podatkov ne premakne strani. */
+.valley-card .clabel{margin-bottom:.75rem}
+.hv-halo{fill:var(--text);opacity:.16}
+.hv-dot{fill:var(--text);stroke:var(--card-bg);stroke-width:2.5}
+.hv-n{font:600 10px 'Inter','Inter Fallback',sans-serif;letter-spacing:.07em;text-transform:uppercase;fill-opacity:.82;stroke-width:2.5px;stroke-opacity:.85}
+.hv-t{font:600 12px 'Inter','Inter Fallback',sans-serif;font-variant-numeric:tabular-nums;stroke-width:2.5px;stroke-opacity:.85}
+@media (min-width:760px){.hv-n{font-size:11px}.hv-t{font-size:13.5px}}
+.hv-foot{display:flex;flex-direction:column;gap:.55rem;margin-top:.7rem;min-height:5.6rem}
+.hv-cap{margin-top:0;min-height:0;display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .55rem;font-size:.8rem;line-height:1.45}
+.hv-kind{display:inline-block;padding:.12rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text);background:var(--fc-bg);border:1px solid var(--card-border)}
+.hv-k-inversion{color:#fbbf24;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.1)}
+[data-theme="light"] .hv-k-inversion{color:#92400e}
+.hv-grad{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.hv-legend{max-width:240px;opacity:0;transition:opacity .3s}
+.hv-legend.is-ready{opacity:1}
+.hv-lg-bar{display:block;height:6px;border-radius:3px}
+.hv-lg-ticks{display:flex;justify-content:space-between;margin-top:.25rem;font-size:.62rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (min-width:760px){
+  .hv-foot{flex-direction:row;align-items:flex-start;justify-content:space-between;gap:1.5rem;min-height:3.4rem}
+  .hv-cap{flex:1;font-size:.84rem}
+  .hv-legend{flex:0 0 220px}
+}
+@media (max-width:360px){.hv-foot{min-height:6.4rem}}
