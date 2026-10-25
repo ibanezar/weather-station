@@ -3764,3 +3764,26 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 @media(max-width:699px){.mtr-hero-sub{grid-template-columns:1fr 1fr}.mtr-st b{font-size:1.15rem}.mtr-st.st-rain b{font-size:1.9rem}}
 .mtr-st b{white-space:nowrap}
 @media(min-width:700px){.mtr-st.st-range b{font-size:1rem}}
+
+/* ── Prvi zaslon: premium zadržanost (25. 10. 2026) ──────────────────────────────────────────
+   Ponudba pogleda je ob prvem obisku ena vrstica (ne pol zaslona), preklopnik Prikaz je med
+   ponudbo skrit (dvojnik), piškotna pasica je na telefonu nizka, ploščice hero kartice pa
+   nosijo barvo samo kot tih poudarek. Vse je CSS; višino določi CSS že ob prvem izrisu (brez CLS). */
+html[data-mode-intro="1"] .mode-switch-wrap{display:none}
+.hm{border-left-color:color-mix(in srgb,var(--hm-accent,var(--blue)) 55%,transparent)}
+@media (max-width:560px){
+  .sub-loc{display:none}
+  .mode-intro{margin-top:.6rem;padding:.8rem .85rem .85rem;border-radius:16px}
+  .mode-intro-title{font-size:.95rem;text-align:left;margin:0 1.6rem .55rem 0}
+  .mode-intro-sub{display:none}
+  .mode-intro-btns{grid-template-columns:1fr 1fr;gap:.5rem}
+  .mode-intro-btn{flex-direction:row;align-items:center;gap:.5rem;padding:.65rem .75rem;border-radius:12px}
+  .mode-intro-btn small{display:none}
+  .mode-intro-btn .mi-ico{font-size:1.1rem;display:inline-flex}
+  .mode-intro-btn .mi-ttl{font-size:.88rem}
+  #cookie-banner{padding:.6rem .85rem;gap:.55rem;font-size:.72rem;line-height:1.4}
+  #cookie-banner p{min-width:0;flex-basis:100%}
+  .cookie-actions{width:100%}
+  .cookie-btn{flex:1;padding:.5rem .8rem}
+  .status{gap:.35rem .8rem;padding:.4rem 0 1rem}
+}
