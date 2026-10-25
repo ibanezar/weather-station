@@ -7705,11 +7705,24 @@ function renderMtrSituations(idp){
   const sit=(st.acc&&st.acc.situations)||{};
   const keys=['jasno','vmes','mokro'].filter(k=>sit[k]);
   if(!keys.length){el.innerHTML='<div class="mtr-empty">Razčlenitev bo prikazana, ko bo dovolj razrešenih dni.</div>';return;}
-  const cell=v=>v&&v.mae_mtr!=null?fmt(v.mae_mtr,2)+' / '+fmt(v.mae_om,2)+' °C <span style="color:var(--'+(v.improvement_pct<0?'red':'green')+')">('
-    +(v.improvement_pct>0?'+':'')+Math.round(v.improvement_pct)+' %)</span>':'—';
-  el.innerHTML='<div class="tbl-x" tabindex="0"><table class="mtr-miss"><thead><tr><th>Vreme tistega dne</th><th>Tmax: MTR / Open-Meteo</th><th>Tmin: MTR / Open-Meteo</th></tr></thead><tbody>'
-    +keys.map(k=>'<tr><td>'+sit[k].label+' · n='+sit[k].n+'</td><td>'+cell(sit[k].tmax)+'</td><td>'+cell(sit[k].tmin)+'</td></tr>').join('')
-    +'</tbody></table></div><p class="mtr-note">Povprečna napaka D+1 na postaji IREICA1. Največ pomaga ob jasnih, mirnih dneh z nočno inverzijo; ob dežju in oblačnosti se dolina obnaša kot mreža. Če je odstotek negativen, je MTR slabši od Open-Meteo.</p>';
+  /* Ena lestvica napake za vse stolpce, da je višina primerljiva med položaji in med Tmax/Tmin. */
+  const maes=[];
+  keys.forEach(k=>['tmax','tmin'].forEach(m=>{const v=sit[k][m];if(v&&v.mae_mtr!=null){maes.push(v.mae_mtr);maes.push(v.mae_om);}}));
+  const mx=Math.max.apply(null,maes.filter(Number.isFinite).concat([0.1]));
+  const bar=(val,col)=>'<div class="sit-b"><span class="sit-bt"><i style="width:'+(Math.max(0,val)/mx*100).toFixed(1)+'%;background:'+col+'"></i></span>'
+    +'<em>'+fmt(val,2)+' °C</em></div>';
+  const pair=(lbl,v)=>{
+    if(!v||v.mae_mtr==null)return '<div class="sit-pair"><div class="sit-m">'+lbl+'<b>—</b></div></div>';
+    const p=Math.round(v.improvement_pct);
+    return '<div class="sit-pair" role="img" aria-label="'+lbl+': napaka MTR '+fmt(v.mae_mtr,2)+' °C, Open-Meteo '+fmt(v.mae_om,2)+' °C ('
+      +(p>0?'+':'')+p+' %)"><div class="sit-m">'+lbl+'<b class="'+(p<0?'neg':'pos')+'">'+(p>0?'+':'')+p+' %</b></div>'
+      +bar(v.mae_mtr,MTR_CC.mtr)+bar(v.mae_om,MTR_CC.om)+'</div>';
+  };
+  el.innerHTML='<div class="wn2-legend"><span><i style="background:'+MTR_CC.mtr+'"></i>MTR</span>'
+    +'<span><i style="background:'+MTR_CC.om+'"></i>Open-Meteo</span><span class="wn2-lg-mid">povprečna napaka, krajši stolpec = bolje</span></div>'
+    +keys.map(k=>'<div class="sit-row"><div class="sit-hd">'+sit[k].label+'<span>n = '+sit[k].n+' dni</span></div>'
+      +'<div class="sit-pairs">'+pair('Najvišja',sit[k].tmax)+pair('Najnižja',sit[k].tmin)+'</div></div>').join('')
+    +'<p class="mtr-note">Povprečna napaka D+1 na postaji IREICA1; odstotek ob stolpcih je izboljšava MTR proti Open-Meteo. Največ pomaga ob jasnih, mirnih dneh z nočno inverzijo; ob dežju in oblačnosti se dolina obnaša kot mreža. Če je odstotek negativen (rdeč), je MTR slabši od Open-Meteo.</p>';
 }
 
 /* Zanesljivostni diagram (BACKTEST po mesecih, ne živa meritev): dež in zmrzal, D+1. */
@@ -7762,9 +7775,28 @@ function renderMtrMisses(idp){
   const sgn=v=>v===null?'—':(v>0?'+':(v<0?'−':'±'))+fmt(Math.abs(v),1);
   const top=out.slice(0,5);
   const hit=out.filter(o=>Math.abs(o.e)<=1).length;
-  el.innerHTML='<div class="tbl-x" tabindex="0"><table class="mtr-miss"><thead><tr><th>Dan</th><th>Meritev</th><th>Izmerjeno</th><th>MTR</th><th>Napaka MTR</th><th>Napaka ARSO</th></tr></thead><tbody>'
-    +top.map(o=>{const dt=new Date(o.date+'T12:00:00');return '<tr><td>'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</td><td>'+o.lbl+'</td><td>'+fmt(o.a,1)+' °C</td><td>'+fmt(o.f,1)+' °C</td><td><b>'+sgn(o.e)+'</b></td><td>'+sgn(o.ar)+'</td></tr>';}).join('')
-    +'</tbody></table></div><p class="mtr-note">Od '+out.length+' napovedi (Tmax in Tmin) jih je '+hit+' ('+Math.round(hit/out.length*100)+' %) v mejah ±1 °C. Napaka = napovedano − izmerjeno; D+1.</p>';
+  const hitPct=Math.round(hit/out.length*100);
+  /* Simetrična lestvica okoli ničle, skupna za MTR in ARSO; najmanj ±2 °C, da majhne napake ne izgledajo velike. */
+  const S=Math.max(2,Math.ceil(Math.max.apply(null,top.map(o=>Math.max(Math.abs(o.e),o.ar===null?0:Math.abs(o.ar))))));
+  const at=v=>50+Math.max(-S,Math.min(S,v))/S*50;
+  const rowsHtml=top.map(o=>{
+    const dt=new Date(o.date+'T12:00:00');
+    const l=Math.min(50,at(o.e)),w=Math.abs(at(o.e)-50);
+    return '<div class="ms-row" role="img" aria-label="'+dt.getDate()+'. '+(dt.getMonth()+1)+'. '+o.lbl+': izmerjeno '+fmt(o.a,1)+' °C, MTR '+fmt(o.f,1)
+      +' °C, napaka MTR '+sgn(o.e)+' °C'+(o.ar===null?'':', napaka ARSO '+sgn(o.ar)+' °C')+'">'
+      +'<div class="ms-d">'+dt.getDate()+'. '+(dt.getMonth()+1)+'.<span>'+o.lbl+' · izm. '+fmt(o.a,1)+' °C</span></div>'
+      +'<div class="ms-plot"><i class="ms-zero"></i><span class="ms-bar" style="left:'+l.toFixed(1)+'%;width:'+w.toFixed(1)+'%;background:'+MTR_CC.mtr+'"></span>'
+      +(o.ar===null?'':'<span class="ms-ar" style="left:'+at(o.ar).toFixed(1)+'%"></span>')+'</div>'
+      +'<div class="ms-v">'+sgn(o.e)+'</div></div>';
+  }).join('');
+  el.innerHTML='<div class="ms-top"><div class="ms-big">'+hitPct+'<small>%</small></div>'
+    +'<div class="ms-top-r">napovedi (od '+out.length+', Tmax in Tmin) v mejah ±1 °C<div class="ms-share"><i style="width:'+hitPct+'%;background:'+MTR_CC.mtr+'"></i></div></div></div>'
+    +'<div class="wn2-legend"><span><i style="background:'+MTR_CC.mtr+'"></i>napaka MTR</span>'
+    +'<span><i style="width:9px;height:9px;border-radius:1px;transform:rotate(45deg);background:var(--text)"></i>napaka ARSO</span>'
+    +'<span class="wn2-lg-mid">pet največjih zgrešitev</span></div>'
+    +rowsHtml
+    +'<div class="ms-scale"><span></span><div><span>−'+S+' °C · prenizko</span><span>previsoko · +'+S+' °C</span></div><span></span></div>'
+    +'<p class="mtr-note">Napaka = napovedano − izmerjeno, D+1; stolpec levo od ničle pomeni, da je bil model prehladen, desno pa pretopel.</p>';
 }
 
 /* Drugo mnenje: razpon Googlovega AI ansambla WeatherNext 2 (P10–P90 iz 64
@@ -7836,20 +7868,38 @@ function renderMtrWind(idp){
   el.hidden=!days.length;
   if(!days.length){el.innerHTML='';return;}
   const kmh=v=>!Number.isFinite(v)?'—':(v<0.5?'<\u00A01':String(Math.round(v)));
+  /* Skupna lestvica za vse dni in oba kazalnika, da so stolpci med seboj primerljivi. */
+  const all=[].concat.apply([],days.map(d=>[d.wind,d.gust,d.om_wind,d.om_gust])).filter(Number.isFinite);
+  const step=Math.max.apply(null,all)>25?10:5;
+  const top=Math.max(step,Math.ceil(Math.max.apply(null,all)/step)*step);
+  const pos=v=>Math.min(100,v/top*100);
+  let axis='';
+  for(let t=0;t<=top;t+=step)axis+='<span style="left:'+pos(t).toFixed(2)+'%">'+t+'</span>';
+  /* Stolpec = umerjeno na postajo (barva MTR), navpična oznaka = surov Open-Meteo (barva Open-Meteo na grafu). */
+  const lane=(lbl,v,om)=>{
+    if(!Number.isFinite(v))return'';
+    return '<div class="wb-lane"><span class="wb-l">'+lbl+'</span><span class="wb-t" style="--gs:'+pos(step).toFixed(2)+'%">'
+      +'<i class="wb-bar" style="width:'+pos(v).toFixed(2)+'%;background:'+MTR_CC.mtr+'"></i>'
+      +(Number.isFinite(om)?'<u class="wb-om" style="left:'+pos(om).toFixed(2)+'%;background:'+MTR_CC.om+'"></u>':'')
+      +'</span><span class="wb-v">'+kmh(v)+'<small>km/h</small>'
+      +(Number.isFinite(om)?'<em>surov '+kmh(om)+'</em>':'')+'</span></div>';
+  };
   const rows=days.map(d=>{
     const dt=new Date(d.date+'T12:00:00');
     return '<div class="mtr-wind-row"><div class="mtr-wind-day">'+_mtrDayName(d)
-      +'<span> '+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
-      +'<div class="mtr-wind-main">veter '+kmh(d.wind)+'<span>km/h</span> · sunki do '+kmh(d.gust)+'<span>km/h</span></div>'
-      +'<div class="mtr-wind-om">Open-Meteo '+kmh(d.om_wind)+' / '+kmh(d.om_gust)+'</div></div>';
+      +'<span>'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
+      +'<div>'+lane('veter',d.wind,d.om_wind)+lane('sunki',d.gust,d.om_gust)+'</div></div>';
   }).join('');
+  const legend='<div class="wn2-legend"><span><i style="background:'+MTR_CC.mtr+'"></i>umerjeno na postajo</span>'
+    +'<span><i class="wb-tick" style="background:'+MTR_CC.om+'"></i>surov Open-Meteo</span><span class="wn2-lg-mid">km/h</span></div>'
+    +'<div class="wb-axis" aria-hidden="true">'+axis+'</div>';
   const d0=days.find(d=>Number.isFinite(d.gust_mae)&&Number.isFinite(d.gust_mae_om));
   const err=d0?' Napaka največjega sunka pri tem vodilnem času je ~'+Math.round(d0.gust_mae)+'\u00A0km/h (surov model ~'
     +Math.round(d0.gust_mae_om)+'\u00A0km/h).':'';
   el.innerHTML='<div class="mtr-why-hd">Veter v dolini · umerjeno na postajo</div>'
-    +'<div class="mtr-why-sub2">povprečni dnevni veter in največji sunek · IREICA1</div>'+rows
+    +'<div class="mtr-why-sub2">povprečni dnevni veter in največji sunek · IREICA1</div>'+legend+rows
     +'<p class="mtr-why-txt">Postaja stoji v zavetju doline: Open-Meteo veter tu v povprečju precenjuje za polovico, zato je '
-    +'prikazano umerjeno na meritve postaje (desno surov model, povprečje / sunek). Poskusna ocena, ne opozorilo.'+err+'</p>';
+    +'prikazano umerjeno na meritve postaje (surov model je označen ob stolpcu). Poskusna ocena, ne opozorilo.'+err+'</p>';
 }
 
 /* Tri ploščice s krepkimi številkami: napaka MTR, napaka Open-Meteo in
