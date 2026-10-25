@@ -3860,3 +3860,6 @@ html[data-mode-intro="1"] .mode-switch-wrap{display:none}
   #month-card-grid .yr-item:last-child:nth-child(odd){grid-column:1/-1}
   #month-card-grid .yr-val{font-size:1.15rem}
 }
+/* Vrstica stanja ima na ozkem telefonu ob prihodu gumbov (Obvestila, Moja opozorila …) vedno tri vrstice (132 px);
+   brez rezervacije je vse pod njo ob prihodu skočilo za ~44 px (CLS 0,05–0,1 ob počasnem omrežju). */
+@media (max-width:420px){.status{min-height:132px;align-content:flex-start}}
