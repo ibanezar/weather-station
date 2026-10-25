@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-24",
-  "issued_at": "2026-10-24T06:10:57.304827+02:00",
-  "national_score": 43,
-  "national_level": "VISOKO",
-  "national_place": "Koper",
-  "national_hour": "12:00",
-  "should_post": true,
-  "image": "https://meteorec.si/og/storm-map/2026-10-24.jpg",
-  "image_story": "https://meteorec.si/og/storm-map/2026-10-24-story.jpg"
+  "date": "2026-10-25",
+  "issued_at": "2026-10-25T06:10:54.408797+01:00",
+  "national_score": 20,
+  "national_level": "NIZKO",
+  "national_place": "Kranj",
+  "national_hour": "22:00",
+  "should_post": false,
+  "image": "https://meteorec.si/og/storm-map/2026-10-25.jpg",
+  "image_story": "https://meteorec.si/og/storm-map/2026-10-25-story.jpg"
 }

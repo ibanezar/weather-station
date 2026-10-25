@@ -1,69 +1,5 @@
 [
   {
-    "target_date": "2026-10-23",
-    "made_at": "2026-10-22",
-    "arso": {
-      "tmax": 9,
-      "tmin": 2,
-      "loc": "Ljubno ob Savinji"
-    },
-    "open_meteo": {
-      "tmax": 13.5,
-      "tmin": 2.6,
-      "precip": 0.1
-    },
-    "meteorec": {
-      "tmax": 14.4,
-      "tmin": 1.4,
-      "pop": 0.47,
-      "lead": 1,
-      "model_version": "1.0"
-    },
-    "aifs": null,
-    "wn2": {
-      "tmax": 9.8,
-      "tmin": 3.8,
-      "precip": 0.0,
-      "model": "google_weathernext2_ensemble_mean",
-      "src": "live"
-    }
-  },
-  {
-    "target_date": "2026-10-24",
-    "made_at": "2026-10-23",
-    "arso": {
-      "tmax": 6,
-      "tmin": 1,
-      "loc": "Ljubno ob Savinji"
-    },
-    "open_meteo": {
-      "tmax": 9.9,
-      "tmin": 4.9,
-      "precip": 14.55
-    },
-    "meteorec": {
-      "tmax": 9.8,
-      "tmin": 4.9,
-      "pop": 1.0,
-      "lead": 1,
-      "model_version": "1.0"
-    },
-    "aifs": {
-      "tmax": 8.0,
-      "tmin": 4.7,
-      "precip": 15.7,
-      "model": "ecmwf_aifs025_single",
-      "src": "live"
-    },
-    "wn2": {
-      "tmax": 7.6,
-      "tmin": 4.6,
-      "precip": 16.3,
-      "model": "google_weathernext2_ensemble_mean",
-      "src": "live"
-    }
-  },
-  {
     "target_date": "2026-10-25",
     "made_at": "2026-10-24",
     "arso": {
@@ -94,6 +30,41 @@
       "tmax": 9.0,
       "tmin": 2.0,
       "precip": 1.3,
+      "model": "google_weathernext2_ensemble_mean",
+      "src": "live"
+    }
+  },
+  {
+    "target_date": "2026-10-26",
+    "made_at": "2026-10-25",
+    "arso": {
+      "tmax": 10,
+      "tmin": 1,
+      "loc": "Ljubno ob Savinji"
+    },
+    "open_meteo": {
+      "tmax": 13.2,
+      "tmin": 3.7,
+      "precip": 0.0
+    },
+    "meteorec": {
+      "tmax": 15.5,
+      "tmin": 2.3,
+      "pop": 0.39,
+      "lead": 1,
+      "model_version": "1.0"
+    },
+    "aifs": {
+      "tmax": 13.0,
+      "tmin": 3.9,
+      "precip": 0.8,
+      "model": "ecmwf_aifs025_single",
+      "src": "live"
+    },
+    "wn2": {
+      "tmax": 11.5,
+      "tmin": 3.3,
+      "precip": 0.9,
       "model": "google_weathernext2_ensemble_mean",
       "src": "live"
     }

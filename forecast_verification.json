@@ -4588,5 +4588,115 @@
       "wet": 1.0,
       "brier": 0.002
     }
+  },
+  "2026-10-23": {
+    "date": "2026-10-23",
+    "made_at": "2026-10-22",
+    "actual": {
+      "tmax": 13.4,
+      "tmin": -0.1,
+      "precip": 0.3
+    },
+    "arso": {
+      "tmax": 9,
+      "tmin": 2,
+      "loc": "Ljubno ob Savinji",
+      "err_tmax": 4.4,
+      "err_tmin": 2.1
+    },
+    "open_meteo": {
+      "tmax": 13.5,
+      "tmin": 2.6,
+      "precip": 0.1,
+      "err_tmax": 0.1,
+      "err_tmin": 2.7,
+      "err_precip": 0.2
+    },
+    "aifs": {
+      "tmax": 11.0,
+      "tmin": 2.8,
+      "precip": 2.8,
+      "model": "ecmwf_aifs025_single",
+      "src": "archive",
+      "err_tmax": 2.4,
+      "err_tmin": 2.9,
+      "err_precip": 2.5
+    },
+    "wn2": {
+      "tmax": 9.8,
+      "tmin": 3.8,
+      "precip": 0.0,
+      "model": "google_weathernext2_ensemble_mean",
+      "src": "live",
+      "err_tmax": 3.6,
+      "err_tmin": 3.9,
+      "err_precip": 0.3
+    },
+    "meteorec": {
+      "tmax": 14.4,
+      "tmin": 1.4,
+      "pop": 0.47,
+      "lead": 1,
+      "model_version": "1.0",
+      "err_tmax": 1.0,
+      "err_tmin": 1.5,
+      "wet": 1.0,
+      "brier": 0.281
+    }
+  },
+  "2026-10-24": {
+    "date": "2026-10-24",
+    "made_at": "2026-10-23",
+    "actual": {
+      "tmax": 9.7,
+      "tmin": 3.8,
+      "precip": 8.9
+    },
+    "arso": {
+      "tmax": 6,
+      "tmin": 1,
+      "loc": "Ljubno ob Savinji",
+      "err_tmax": 3.7,
+      "err_tmin": 2.8
+    },
+    "open_meteo": {
+      "tmax": 9.9,
+      "tmin": 4.9,
+      "precip": 14.55,
+      "err_tmax": 0.2,
+      "err_tmin": 1.1,
+      "err_precip": 5.7
+    },
+    "aifs": {
+      "tmax": 8.0,
+      "tmin": 4.7,
+      "precip": 15.7,
+      "model": "ecmwf_aifs025_single",
+      "src": "live",
+      "err_tmax": 1.7,
+      "err_tmin": 0.9,
+      "err_precip": 6.8
+    },
+    "wn2": {
+      "tmax": 7.6,
+      "tmin": 4.6,
+      "precip": 16.3,
+      "model": "google_weathernext2_ensemble_mean",
+      "src": "live",
+      "err_tmax": 2.1,
+      "err_tmin": 0.8,
+      "err_precip": 7.4
+    },
+    "meteorec": {
+      "tmax": 9.8,
+      "tmin": 4.9,
+      "pop": 1.0,
+      "lead": 1,
+      "model_version": "1.0",
+      "err_tmax": 0.1,
+      "err_tmin": 1.1,
+      "wet": 1.0,
+      "brier": 0.0
+    }
   }
 }
