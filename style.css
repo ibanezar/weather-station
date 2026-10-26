@@ -3916,3 +3916,17 @@ html[data-mode-intro="1"] .mode-switch-wrap{display:none}
 .insight-card .ic-head .ic-badge{opacity:1;color:var(--muted)}
 .inv-status .ic{width:1em;height:1em;vertical-align:-.12em}
 a.tab-btn{text-decoration:none}
+
+/* Ploščice hero kartice na ozkih telefonih (≤ 360 px): manjši odmiki, razpon min–maks se ne prelomi (26. 10. 2026) */
+@media (max-width:360px){
+  .hm{padding:.6rem .55rem .6rem .8rem;gap:.18rem}
+  .hm-val{font-size:1rem}
+  .hm-range .hm-val{font-size:.92rem;white-space:nowrap}
+  .hm-lbl{letter-spacing:.05em}
+}
+@media (max-width:380px){.why-card .chart-hdr{flex-wrap:wrap}.why-card .why-updated{white-space:normal}}
+/* Svetla tema: prosojnost bi spustila kontrast pod 4,5:1 (podvrstice ploščic 4,42, naslov »Zadnjih 7 dni« 4,27) */
+[data-theme="light"] .hm-sub,[data-theme="light"] .past-days-hdr-lbl{opacity:1}
+/* Ploščice meseca se na 320 px ne smejo razlezti čez kartico (1fr se ne skrči pod vsebino; minmax(0,1fr) ja) */
+@media (max-width:560px){#month-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#month-card-grid .yr-item{min-width:0}#month-card-grid .yr-val{overflow-wrap:anywhere}}
+@media (max-width:360px){#month-card-grid .yr-item>div:first-child{letter-spacing:.03em!important;font-size:.66rem!important;gap:.3rem!important}}
