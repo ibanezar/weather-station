@@ -174,6 +174,7 @@ days = [{"date": "2026-10-25", "lead": 1, "wind": 1.1, "gust": 10.5, "om_wind": 
          "gust_mae": 4.4, "gust_mae_om": 8.4},
         {"date": "2026-10-27", "lead": 3, "wind": None, "gust": None, "om_wind": None, "om_gust": None}]
 prelude = ("var EL={hidden:true,innerHTML:''};var document={getElementById:function(id){return id==='mos-wind'?EL:null;}};"
+           "var MTR_CC={mtr:'#059669',om:'#a855f7'};"
            "function _mtrDayName(d){return d.lead===1?'jutri':'pojutrišnjem';}"
            "var _mtrState={days:" + json.dumps(days) + "};")
 
@@ -189,9 +190,12 @@ def render(prel):
 
 
 hidden, html = render(prelude)
-check(hidden is False and "veter 1<span>km/h</span> · sunki do 11<span>km/h</span>" in html, "kartica: jutri veter 1, sunki do 11 km/h")
-check("Open-Meteo 2 / 11" in html and "umerjeno na postajo" in html, "kartica: surov Open-Meteo ob vrstici in oznaka umerjeno")
-check("veter &lt;" in html or "veter < 1<span>" in html, "kartica: veter pod 0,5 km/h se izpiše kot < 1")
+check(hidden is False and 'wb-v">1<small>km/h</small><em>surov 2</em>' in html and 'wb-v">11<small>km/h</small><em>surov 11</em>' in html,
+      "kartica: jutri veter 1 (surov 2), sunki 11 (surov 11) km/h")
+check(html.count('<u class="wb-om"') == 4 and "surov Open-Meteo" in html and "umerjeno na postajo" in html,
+      "kartica: oznaka surovega Open-Meteo ob vsakem stolpcu in legenda umerjeno")
+check("wb-bar" in html and html.count('class="wb-axis"') == 1, "kartica: stolpci in ena skupna os")
+check('wb-v">&lt;' in html or 'wb-v"><' in html or "veter< 1<span>" in html, "kartica: veter pod 0,5 km/h se izpiše kot < 1")
 check(html.count("mtr-wind-row") == 2, "kartica: dan brez vetra in sunkov nima vrstice")
 check("~4 km/h (surov model ~7 km/h)" in html, "kartica: napaka sunka iz prvega dne s podatkom")
 hidden2, html2 = render(prelude.replace(json.dumps(days), json.dumps([days[2]])))

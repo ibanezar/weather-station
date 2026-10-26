@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-25",
-  "issued": "25.10.2026 7:00 CET",
-  "issued_at": "2026-10-25T07:31:54.911184+01:00",
-  "top_station": "Rateče - Planica",
-  "top_mm": 18,
+  "date": "2026-10-26",
+  "issued": "26.10.2026 7:00 CET",
+  "issued_at": "2026-10-26T07:30:35.299383+01:00",
+  "top_station": "Črnomelj - Dobliče",
+  "top_mm": 1,
   "n_stations": 20,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-10-25.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-10-25-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-10-26.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-10-26-story.jpg"
 }
