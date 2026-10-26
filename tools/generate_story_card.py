@@ -71,6 +71,7 @@ WORKER = "https://weatherireica1.filip-eremita.workers.dev"
 HISTORY = os.path.join(ROOT, "history.json")
 GOBE_JSON = os.path.join(ROOT, "gobarska-napoved", "index.json")
 MTR_JSON = os.path.join(ROOT, "napoved-modela.json")
+MTR_PENDING = os.path.join(ROOT, "tools", ".forecast_pending.json")
 IGRA_JSON = os.path.join(ROOT, "igra", "nivo.json")
 CRNIVEC_JSON = os.path.join(ROOT, "data", "winter-data.json")
 
@@ -290,22 +291,37 @@ def load_crnivec_weather():
         return None
 
 
-def load_mtr_forecast(tomorrow_iso):
-    """Napoved lastnega modela MTR za JUTRI -- bere lokalni napoved-modela.json
+def load_mtr_forecast(date_iso):
+    """Napoved lastnega modela MTR za dan `date_iso` -- bere lokalni napoved-modela.json
     (piše ga tools/predict_recica_mos.py), ne uvaža modela samega (isto načelo kot
     pri gobarskem indeksu).
 
     Dan se izbere po DATUMU, ne po `lead == 1`: lead je glede na dan nastanka
     datoteke, forecast-verify.yml pa zdaj zamuja ure, zato je ob zagonu zgodbe
     datoteka lahko še včerajšnja — njen lead 1 je potem DANES in bi kartica
-    »Jutri po našem modelu« pokazala napačen dan (revizija 1. 10. 2026)."""
+    »Jutri po našem modelu« pokazala napačen dan (revizija 1. 10. 2026).
+
+    Za DANES `days` datoteke tmax/tmin nimata (začnejo se jutri); zamrznjena
+    jutranja napoved za danes je v čakalni vrsti semaforja (.forecast_pending.json,
+    ključ `meteorec`) -- ista, ki jo bo ocenila meritev, ne nova."""
     try:
         with open(MTR_JSON, encoding="utf-8") as f:
             data = json.load(f)
-        return next((d for d in data.get("days", []) if d.get("date") == tomorrow_iso), None)
+        day = next((d for d in data.get("days", []) if d.get("date") == date_iso), None)
+        if day:
+            return day
     except Exception as e:
         print(f"⚠ napoved-modela.json ni dosegljiv: {e}", file=sys.stderr)
-        return None
+    try:
+        with open(MTR_PENDING, encoding="utf-8") as f:
+            for e in json.load(f):
+                m = e.get("meteorec") or {}
+                if e.get("target_date") == date_iso and m.get("tmax") is not None and m.get("tmin") is not None:
+                    return dict(m, date=date_iso, om_tmax=(e.get("open_meteo") or {}).get("tmax"),
+                                om_tmin=(e.get("open_meteo") or {}).get("tmin"))
+    except Exception as e:
+        print(f"⚠ .forecast_pending.json ni dosegljiv: {e}", file=sys.stderr)
+    return None
 
 
 # ────────────────────────── pomožne funkcije ──────────────────────────
@@ -392,8 +408,9 @@ def build_ctx():
     yday_key = (today - datetime.timedelta(days=1)).isoformat()
     hist_yesterday = hist.get(yday_key)
     mtr = load_mtr_forecast((today + datetime.timedelta(days=1)).isoformat())
+    mtr_today = load_mtr_forecast(today.isoformat())
 
-    return dict(
+    ctx = dict(
         now=now, today=today, date_iso=today.isoformat(),
         fc=fc, daily=daily, hourly=hourly, mtr=mtr,
         tmax=d("temperature_2m_max"), tmin=d("temperature_2m_min"),
@@ -413,6 +430,13 @@ def build_ctx():
         crnivec=crnivec,
         evening_done=story_gate.evening_posted_for(today.isoformat()),
     )
+    # Temperature kartic so MTR (popravek za dno doline, boljši od surovega Open-Meteo),
+    # kadar ima model dan; sicer ostane Open-Meteo. Vsi viri se ne mešajo na isti kartici:
+    # `temp_src` pove, kateri je dejansko na njej.
+    ctx["om_tmax"], ctx["om_tmin"], ctx["temp_src"] = ctx["tmax"], ctx["tmin"], "Open-Meteo"
+    if mtr_today and mtr_today.get("tmax") is not None and mtr_today.get("tmin") is not None:
+        ctx["tmax"], ctx["tmin"], ctx["temp_src"] = mtr_today["tmax"], mtr_today["tmin"], "MTR"
+    return ctx
 
 
 # ────────────────────────── registrator tem ──────────────────────────
@@ -427,7 +451,14 @@ def topic(name, priority):
     return deco
 
 
+TEMP_TOPICS = {"FROST", "HEAT_EXTREME", "HEAT", "COLD_MORNING", "RECORD_WATCH", "GENERAL",
+               "FROST_TOMORROW", "COLD_TOMORROW"}
+
+
 def card(ctx, name, headline, big, big_sub, stats, accent, photo, eyebrow="DANES V REČICI"):
+    # Veliko številko teh kartic je temperatura: povej, od kod je (MTR ali Open-Meteo).
+    if name in TEMP_TOPICS and ctx.get("temp_src") and "·" not in big_sub:
+        big_sub = f"{big_sub} · {ctx['temp_src']}"
     return dict(topic=name, eyebrow=eyebrow, headline=headline, big=big,
                 big_sub=big_sub, stats=stats[:3], accent=accent, photo=photo)
 
@@ -1445,13 +1476,21 @@ def build_evening_ctx():
         return arr[i] if i is not None and i < len(arr) else None
 
     current = fetch_current()
-    return dict(
+    ctx = dict(
         now=now, tomorrow=tomorrow, date_iso=tomorrow.isoformat(),
         tmin=min(temps) if temps else None,
         tmax=d("temperature_2m_max"), rain=d("precipitation_sum") or 0,
         code=d("weather_code"), cond=WMO.get(d("weather_code"), ""),
         current_temp=((current.get("outdoor") or {}).get("temperature") or {}).get("value"),
+        temp_src="Open-Meteo",
     )
+    # MTR je za dno doline boljši od Open-Meteo (ta zmrzal pogosto zgreši za več stopinj).
+    # Njegov tmin je nočni minimum dneva; ob zmrzali ravno to zanima bralca.
+    mtr = load_mtr_forecast(tomorrow.isoformat())
+    if mtr and mtr.get("tmin") is not None and mtr.get("tmax") is not None:
+        ctx["om_tmin"] = ctx["tmin"]
+        ctx["tmin"], ctx["tmax"], ctx["temp_src"] = mtr["tmin"], mtr["tmax"], "MTR"
+    return ctx
 
 
 def evening_card(ctx):
@@ -1502,7 +1541,7 @@ def main_evening(dry):
     result = evening_card(ctx)
     tmin = ctx["tmin"]
     print(f"jutranji minimum za {ctx['date_iso']}: "
-          f"{'–' if tmin is None else num_sl(tmin, 1) + ' °C'}")
+          f"{'–' if tmin is None else num_sl(tmin, 1) + ' °C'} ({ctx['temp_src']})")
     if result is None:
         print("večerna kartica: ni potrebna (jutro ni zmrzal ali izrazito hladno)")
         set_output("card", "false")
