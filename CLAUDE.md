@@ -2634,6 +2634,20 @@ Kratka anonimna anketa (5 vprašanj, vsa neobvezna: kaj jih je pripeljalo, kaj j
 - **Skrita stran za rezultate** `/anketa-rezultati/` (ročno pisan `anketa-rezultati/index.html`): noindex, ni v `CORE`/sitemapu in ni povezana od nikoder (isti vzorec kot `/gobarska-napoved/orodje-naslovi/`). Geslo `DELETE_SECRET` vpišeš v obrazec; hrani se samo v `sessionStorage` zavihka in gre kot `Bearer` na `GET /anketa/rezultati`. Besedila izpiše samo prek `textContent`. Oznake možnosti so podvojitev `SURVEY_OPTS` (samo prikaz).
 - `zasebnost.html` ima razdelek »Anketa obiskovalcev«; notranjih meritev anketa ne dotika.
 
+## Podoba naslovnice: premium poliranje (26. 10. 2026, PR #1284 in nadaljevanje)
+
+Samo videz (`style.css`, `index.html`, malo `app.js`); logika in id-ji so nedotaknjeni. Kar velja po prenovi:
+
+- **Prvi zaslon na telefonu:** ponudba pogleda (`#mode-intro`) je ena vrstica (opis in `small` skrita), preklopnik Prikaz je med ponudbo skrit (`html[data-mode-intro="1"] .mode-switch-wrap`), piškotna pasica je nizka, `.sub-loc` skrit. Temperatura mora biti ob prvem obisku vidna brez pomikanja — ne vračaj velike ponudbe.
+- **`.status` ima na ≤ 420 px `min-height:132px`** (rezervacija; brez nje se vrstica ob prihodu gumbov podaljša za ~44 px in potisne zavihke: CLS 0,05–0,1). Če dodaš gumb v `.status`, preveri višino na 320/390 px.
+- **Ploščice (`.hm`)**: barvni poudarek je `::before` trak znotraj ploščice, ne `border-left`. **Pred številko v `hs-rain-today` še vedno ne sme priti noben element** (pravilo `numOf()`). `.hm.pulse-live` animira samo senco (`live-pulse-hm`).
+- **Dolina zdaj**: oznaka stanja (`.hv-kind`), gradient (`.hv-grad`) in lestvica barv (`#hv-lg-bar`, gradient iz `VALLEY_COLORS` prek `hvColor()`, ne podvojen v CSS). Višina podnožja `.hv-foot` je rezervirana (mobile 5,6 rem, ≤ 360 px 6,4 rem; namizje 3,4 rem) — ob spremembi besedila izmeri skok kartice pred in po podatkih.
+- **Brez emojijev v prikazu podatkov:** ikone so iz sklada (`<svg class="ic"><use href="#i-…">`): »Ta mesec«, letni rekordi, stanje inverzije. Nov emoji v JS-generiranem prikazu je napaka (med napravami se razlikujejo, ne dajo se prebarvati). Ikona mora obstajati v skladu v `index.html` (`id="i-…"`).
+- **Kontrast:** v svetli temi prosojnost besedila (`opacity`) spusti kontrast pod 4,5:1 (`.hm-sub`, `.past-days-hdr-lbl` — popravljeno). Pred novo `opacity` pri drobnem besedilu preveri v obeh temah.
+- **320 px:** `.hm` ima na ≤ 360 px manjše odmike, razpon min–maks se ne sme prelomiti; ploščice meseca uporabljajo `minmax(0,1fr)`.
+- **Nowcast (`#nowcast-wrap`, »Naslednjih 45 minut«) ostane nad hero kartico po Filipovi odločitvi** (26. 10. 2026), čeprav ob prihodu radarja ob dežju zraste za ~340 px in da CLS 0,07–0,17. Možna rešitev, če bo treba: premik pod hero kartico. Ne rezerviraj prostora za mirno vreme (prazna luknja).
+- **Merjenje CLS:** Playwright + CDP (`Network.emulateNetworkConditions` 200 kB/s, 150 ms; `Emulation.setCPUThrottlingRate` 4×), `PerformanceObserver('layout-shift')`. Posamezni teki so zelo nestanovitni (osnovna različica 0,02–0,10 v 5 s): primerjaj vsaj 3 teke. Open-Meteo vrne ob veliko meritvah 429/503 in kartice (obeti) ostanejo prazne — ne zamenjaj za napako v kodi.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
