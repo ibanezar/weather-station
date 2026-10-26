@@ -1672,7 +1672,15 @@ async function fetchComingUp(){
     const daysEl=document.getElementById('cu-days');
     if(daysEl){
       daysEl.innerHTML='';
+      // MTR je glavna napoved temperature, kjer ima dan (D+1..D+3); drugje ostane Open-Meteo.
+      // Vira se ne zlivata: Open-Meteo vrednost je v title, ikona in količina sta Open-Meteo.
+      const mtrDays={};
+      try{((await _mtrFetch().catch(()=>null))?.days||[]).forEach(x=>{
+        if(x.date&&Number.isFinite(x.tmax)&&Number.isFinite(x.tmin))mtrDays[x.date]=x;
+      });}catch(_){}
       for(let i=1;i<=7&&i<d.time.length;i++){
+        const mt=mtrDays[d.time[i]];
+        const tHi=mt?mt.tmax:d.temperature_2m_max[i],tLo=mt?mt.tmin:d.temperature_2m_min[i];
         const date=new Date(d.time[i]+'T12:00:00');
         const lbl=i===1?'Jutri':SL[date.getDay()]+' '+date.getDate()+'.';
         const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
@@ -1684,8 +1692,9 @@ async function fetchComingUp(){
           '<span class="cu-dlbl">'+lbl+'</span>'+
           '<span class="cu-demo">'+_wmoImg(d.weather_code[i],true,40)+'</span>'+
           '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+(d.wind_speed_10m_max[i]>=30?' · '+Math.round(d.wind_speed_10m_max[i])+' km/h':'')+'</span>'+
-          '<div class="cu-dtemp"><span style="color:'+tempColor(d.temperature_2m_max[i])+'">'+Math.round(d.temperature_2m_max[i])+'°</span>'+
-            '<span class="cu-dtl"> / '+Math.round(d.temperature_2m_min[i])+'°</span></div>'+
+          '<div class="cu-dtemp"'+(mt?' title="Temperatura po MTR, našem modelu. Open-Meteo: '+Math.round(d.temperature_2m_max[i])+'° / '+Math.round(d.temperature_2m_min[i])+'°"':'')+'>'
+            +'<span style="color:'+tempColor(tHi)+'">'+Math.round(tHi)+'°</span>'+
+            '<span class="cu-dtl"> / '+Math.round(tLo)+'°</span></div>'+
           (rain>0.3
             ?'<span class="cu-drain">🌧 '+rain.toFixed(1)+' mm'+(prob?' · '+prob+'%':'')+'</span>'
             :'<span class="cu-drain cu-dry">☀️ suho</span>')+
