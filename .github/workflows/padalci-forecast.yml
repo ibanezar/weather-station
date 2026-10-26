@@ -50,7 +50,7 @@ jobs:
       - uses: actions/setup-node@v5
         if: steps.gate.outputs.proceed == 'true'
         with:
-          node-version: '20'
+          node-version: '22'
 
       # Za dnevno OG kartico igre (tools/generate_igra_og.py). Če je namestitev
       # spodletela, generator strani to ujame in pade nazaj na og-image.jpg.
