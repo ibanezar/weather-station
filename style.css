@@ -3908,3 +3908,11 @@ html[data-mode-intro="1"] .mode-switch-wrap{display:none}
 /* Vrstica stanja ima na ozkem telefonu ob prihodu gumbov (Obvestila, Moja opozorila …) vedno tri vrstice (132 px);
    brez rezervacije je vse pod njo ob prihodu skočilo za ~44 px (CLS 0,05–0,1 ob počasnem omrežju). */
 @media (max-width:420px){.status{min-height:132px;align-content:flex-start}}
+
+/* ── Kartice vpogledov, zavihki (26. 10. 2026) ───────────────────────────────────────────────────────────────
+   Naslovi vpogledov (Temperaturna inverzija, Aktivni nizi) imajo isto črkovno podobo kot .clabel; stanje
+   inverzije nosi ikono iz sklada namesto emojija; povezava-zavihek (Šola) ni podčrtana. */
+.insight-card .ic-head{font-size:.72rem;letter-spacing:.1em;font-weight:600;color:var(--text);opacity:.9;margin-bottom:.8rem}
+.insight-card .ic-head .ic-badge{opacity:1;color:var(--muted)}
+.inv-status .ic{width:1em;height:1em;vertical-align:-.12em}
+a.tab-btn{text-decoration:none}
