@@ -998,20 +998,20 @@ function renderInversion(){
   const actualDiff=upperT-valleyT; // if positive → genuinely warmer up high (strong inversion)
   let status,cls,sub,emoji;
   if(actualDiff>=0){
-    status='Inverzija';cls='inv-active';emoji='🔄';
+    status='Inverzija';cls='inv-active';emoji='refresh-cw';
     sub='Topleje na višini kot v dolini — hladen zrak je ujet v Savinjski dolini. Klasičen zimski/jutranji pojav. Pričakuj meglo ali nizko oblačnost v dolini.';
   }else if(diff>3){
-    status='Šibka inverzija';cls='inv-active';emoji='🌫️';
+    status='Šibka inverzija';cls='inv-active';emoji='cloud-fog';
     sub='Ozračje je bolj stabilno od običajnega — temperatura z višino pada počasneje. Možna jutranja megla v dolini.';
   }else{
-    status='Normalna stratifikacija';cls='inv-none';emoji='✅';
+    status='Normalna stratifikacija';cls='inv-none';emoji='trending-down';
     sub='Temperatura normalno pada z višino. Brez inverzijskega ujetja v dolini.';
   }
   // Visual: valley vs peak thermometer
   const vis='<svg class="inv-visual" viewBox="0 0 72 72"><line x1="20" y1="58" x2="52" y2="14" stroke="var(--fc-border)" stroke-width="2"/>'+
     '<circle cx="20" cy="58" r="6" fill="var(--blue)"/><text x="20" y="72" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="JetBrains Mono,monospace">'+valleyT.toFixed(0)+'°</text>'+
     '<circle cx="52" cy="14" r="6" fill="'+(actualDiff>=0?'var(--amber)':'var(--cyan)')+'"/><text x="52" y="9" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="JetBrains Mono,monospace">'+upperT.toFixed(0)+'°</text></svg>';
-  body.innerHTML='<div class="inv-wrap">'+vis+'<div class="inv-info"><div class="inv-status '+cls+'">'+emoji+' '+status+'</div><div class="inv-sub">'+sub+'</div></div></div>';
+  body.innerHTML='<div class="inv-wrap">'+vis+'<div class="inv-info"><div class="inv-status '+cls+'"><svg class="ic" aria-hidden="true"><use href="#i-'+emoji+'"/></svg> '+status+'</div><div class="inv-sub">'+sub+'</div></div></div>';
   badge.textContent=(actualDiff>=0?'+':'')+actualDiff.toFixed(1)+'°C @1500m';
 }
 
@@ -5997,14 +5997,14 @@ function renderMonthCard(){
     anomHtml=' <span style="font-size:.68rem;color:'+col+'">('+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1)+'° vs. '+_climAnomalyYears+'l)</span>';
   }
   const items=[
-    {icon:'🌡',lbl:'Povp. temperatura',val:s.avgT.toFixed(1)+'°C'+anomHtml,col:'var(--text)'},
-    {icon:'💧',lbl:'Padavine skupaj',val:s.totR.toFixed(1)+' mm',sub:s.rainyDays+' deževnih dni',col:'var(--rain-col)'},
-    {icon:'🥵',lbl:'Najtoplejši dan',val:s.maxT.toFixed(1)+'°C',sub:s.maxDate?fmtD(s.maxDate):'',col:'var(--red)'},
-    {icon:'🥶',lbl:'Najhladnejši dan',val:s.minT.toFixed(1)+'°C',sub:s.minDate?fmtD(s.minDate):'',col:'var(--blue)'},
+    {icon:'thermometer',lbl:'Povp. temperatura',val:s.avgT.toFixed(1)+'°C'+anomHtml,col:'var(--text)'},
+    {icon:'droplet',lbl:'Padavine skupaj',val:s.totR.toFixed(1)+' mm',sub:s.rainyDays+' deževnih dni',col:'var(--rain-col)'},
+    {icon:'flame',lbl:'Najtoplejši dan',val:s.maxT.toFixed(1)+'°C',sub:s.maxDate?fmtD(s.maxDate):'',col:'var(--red)'},
+    {icon:'thermometer-snowflake',lbl:'Najhladnejši dan',val:s.minT.toFixed(1)+'°C',sub:s.minDate?fmtD(s.minDate):'',col:'var(--blue)'},
   ];
-  if(s.frostDays>0)items.push({icon:'❄️',lbl:'Zmrzujoči dnevi',val:s.frostDays,col:'var(--blue)'});
+  if(s.frostDays>0)items.push({icon:'snowflake',lbl:'Zmrzujoči dnevi',val:s.frostDays,col:'var(--blue)'});
   wrap.innerHTML=items.map(it=>
-    '<div class="yr-item"><div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">'+it.icon+' '+it.lbl+'</div>'
+    '<div class="yr-item"><div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem"><svg class="ic" aria-hidden="true" style="color:'+it.col+';flex:none"><use href="#i-'+it.icon+'"/></svg><span>'+it.lbl+'</span></div>'
     +'<div class="yr-val" style="color:'+it.col+'">'+it.val+'</div>'
     +(it.sub?'<div class="yr-dt">'+it.sub+'</div>':'')
     +'</div>'
@@ -6021,14 +6021,14 @@ function applyYearRecords(){
     if(entries.length<3){const g=document.getElementById('yr-grid');if(g)g.innerHTML='<div style="color:var(--muted);font-size:.75rem">Zbiranje podatkov za '+y+'…</div>';return;}
     const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
     const recs=[
-      {icon:'🌡',lbl:'Najvišja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempHigh!=null).reduce((m,c)=>parseFloat(c[1].tempHigh)>parseFloat(m[1].tempHigh)?c:m);return{v:parseFloat(e[1].tempHigh).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--red)'},
-      {icon:'❄️',lbl:'Najnižja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempLow!=null).reduce((m,c)=>parseFloat(c[1].tempLow)<parseFloat(m[1].tempLow)?c:m);return{v:parseFloat(e[1].tempLow).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--blue)'},
-      {icon:'🌧',lbl:'Največ padavin',val:()=>{const e=entries.filter(([,v])=>(v.precipTotal||0)>0).sort((a,b)=>b[1].precipTotal-a[1].precipTotal)[0];return e?{v:parseFloat(e[1].precipTotal).toFixed(1)+' mm',d:fmtD(e[0])}:{v:'0 mm',d:'—'};},col:'var(--rain-col)'},
-      {icon:'💨',lbl:'Najmočnejši sunek',val:()=>{const e=entries.filter(([,v])=>v.windspeedHigh!=null).reduce((m,c)=>parseFloat(c[1].windspeedHigh)>parseFloat(m[1].windspeedHigh)?c:m);return{v:parseFloat(e[1].windspeedHigh).toFixed(1)+' km/h',d:fmtD(e[0])};},col:'var(--purple)'},
+      {icon:'thermometer',lbl:'Najvišja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempHigh!=null).reduce((m,c)=>parseFloat(c[1].tempHigh)>parseFloat(m[1].tempHigh)?c:m);return{v:parseFloat(e[1].tempHigh).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--red)'},
+      {icon:'thermometer-snowflake',lbl:'Najnižja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempLow!=null).reduce((m,c)=>parseFloat(c[1].tempLow)<parseFloat(m[1].tempLow)?c:m);return{v:parseFloat(e[1].tempLow).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--blue)'},
+      {icon:'cloud-rain',lbl:'Največ padavin',val:()=>{const e=entries.filter(([,v])=>(v.precipTotal||0)>0).sort((a,b)=>b[1].precipTotal-a[1].precipTotal)[0];return e?{v:parseFloat(e[1].precipTotal).toFixed(1)+' mm',d:fmtD(e[0])}:{v:'0 mm',d:'—'};},col:'var(--rain-col)'},
+      {icon:'wind',lbl:'Najmočnejši sunek',val:()=>{const e=entries.filter(([,v])=>v.windspeedHigh!=null).reduce((m,c)=>parseFloat(c[1].windspeedHigh)>parseFloat(m[1].windspeedHigh)?c:m);return{v:parseFloat(e[1].windspeedHigh).toFixed(1)+' km/h',d:fmtD(e[0])};},col:'var(--purple)'},
     ];
     const g=document.getElementById('yr-grid');if(!g)return;g.innerHTML='';
     recs.forEach(r=>{
-      try{const{v,d}=r.val();const item=document.createElement('div');item.className='yr-item';item.innerHTML='<div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">'+r.icon+' '+r.lbl+'</div><div class="yr-val" style="color:'+r.col+'">'+v+'</div><div class="yr-dt">'+d+'</div>';g.appendChild(item);}catch(_){}
+      try{const{v,d}=r.val();const item=document.createElement('div');item.className='yr-item';item.innerHTML='<div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem"><svg class="ic" aria-hidden="true" style="color:'+r.col+';flex:none"><use href="#i-'+r.icon+'"/></svg><span>'+r.lbl+'</span></div><div class="yr-val" style="color:'+r.col+'">'+v+'</div><div class="yr-dt">'+d+'</div>';g.appendChild(item);}catch(_){}
     });
   }catch(e){const g=document.getElementById('yr-grid');if(g)g.innerHTML='<div style="color:var(--muted);font-size:.75rem">Ni dovolj podatkov</div>';}
 }
@@ -10161,7 +10161,7 @@ function heroValleySvg(pts,colorFn,w0){
       '<text x="'+pick.x.toFixed(1)+'" y="'+(zy-4).toFixed(1)+'" text-anchor="'+pick.a+'" class="hv-t">'+txt+'</text>';
   }
   const dots=(pts||[]).map(x=>{const fx=VALLEY_HERO.st[x.name];if(fx==null||x.t==null)return '';
-    const cx=X(fx),cy=Y(x.elev);return '<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" class="hv-dot"/>'+
+    const cx=X(fx),cy=Y(x.elev);return '<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="10" class="hv-halo"/><circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" class="hv-dot"/>'+
       '<text x="'+cx.toFixed(1)+'" y="'+(cy-20).toFixed(1)+'" text-anchor="middle" class="hv-n">'+x.name+'</text>'+
       '<text x="'+cx.toFixed(1)+'" y="'+(cy-7).toFixed(1)+'" text-anchor="middle" class="hv-t">'+_duelNum(x.t,1)+' °C'+(W>=480?' · '+x.elev+' m':'')+'</text>';}).join('');
   const aria='Shematski prerez doline: '+(pts||[]).map(x=>x.name+' '+_duelNum(x.t,1)+' °C na '+x.elev+' m').join(', ')+(z?'. 0 °C približno na '+z.h+' m'+(z.est?' (ocena)':''):'')+'.';
@@ -10216,7 +10216,17 @@ async function fetchHeroValley(){
     const pts=await _vpPoints(homeT),sum=valleyProfileSummary(pts);
     const cap=document.getElementById('hero-valley-cap');
     el.innerHTML=heroValleySvg(pts,hvColor,el.clientWidth);
-    if(cap)cap.textContent=sum?sum.text+' Gradient '+(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m.':'Višinske postaje trenutno niso dosegljive; kaže se samo Rečica.';
+    if(cap){
+      if(sum){
+        // Oznaka stanja (Inverzija, Šibek gradient …) je prvi del stavka pred dvopičjem; ostalo je razlaga.
+        const m=sum.text.match(/^([^:]+):\s*(.*)$/),kindTxt=m?m[1]:'',rest=m?m[2]:sum.text;
+        cap.innerHTML=(kindTxt?'<b class="hv-kind hv-k-'+sum.kind+'">'+kindTxt+'</b> ':'')+'<span class="hv-rest"></span><span class="hv-grad"></span>';
+        cap.querySelector('.hv-rest').textContent=rest;
+        cap.querySelector('.hv-grad').textContent=(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m';
+      }else cap.textContent='Višinske postaje trenutno niso dosegljive; kaže se samo Rečica.';
+    }
+    const lg=document.getElementById('hv-lg-bar');
+    if(lg){lg.style.background='linear-gradient(90deg,'+[-8,-2,3,9,16,24].map(t=>hvColor(t)+' '+Math.round((t+8)/32*100)+'%').join(',')+')';lg.parentNode.classList.add('is-ready');}
     el.removeAttribute('aria-busy');
   }catch(e){console.warn('Dolinski prerez:',e);}
 }

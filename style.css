@@ -3809,3 +3809,110 @@ html[data-mode="simple"] .hero .hm-pm{display:none !important}
 @media(max-width:699px){.mtr-hero-sub{grid-template-columns:1fr 1fr}.mtr-st b{font-size:1.15rem}.mtr-st.st-rain b{font-size:1.9rem}}
 .mtr-st b{white-space:nowrap}
 @media(min-width:700px){.mtr-st.st-range b{font-size:1rem}}
+
+/* ── Prvi zaslon: premium zadržanost (25. 10. 2026) ──────────────────────────────────────────
+   Ponudba pogleda je ob prvem obisku ena vrstica (ne pol zaslona), preklopnik Prikaz je med
+   ponudbo skrit (dvojnik), piškotna pasica je na telefonu nizka, ploščice hero kartice pa
+   nosijo barvo samo kot tih poudarek. Vse je CSS; višino določi CSS že ob prvem izrisu (brez CLS). */
+html[data-mode-intro="1"] .mode-switch-wrap{display:none}
+.hm{border-left-color:color-mix(in srgb,var(--hm-accent,var(--blue)) 55%,transparent)}
+@media (max-width:560px){
+  .sub-loc{display:none}
+  .mode-intro{margin-top:.6rem;padding:.8rem .85rem .85rem;border-radius:16px}
+  .mode-intro-title{font-size:.95rem;text-align:left;margin:0 1.6rem .55rem 0}
+  .mode-intro-sub{display:none}
+  .mode-intro-btns{grid-template-columns:1fr 1fr;gap:.5rem}
+  .mode-intro-btn{flex-direction:row;align-items:center;gap:.5rem;padding:.65rem .75rem;border-radius:12px}
+  .mode-intro-btn small{display:none}
+  .mode-intro-btn .mi-ico{font-size:1.1rem;display:inline-flex}
+  .mode-intro-btn .mi-ttl{font-size:.88rem}
+  #cookie-banner{padding:.6rem .85rem;gap:.55rem;font-size:.72rem;line-height:1.4}
+  #cookie-banner p{min-width:0;flex-basis:100%}
+  .cookie-actions{width:100%}
+  .cookie-btn{flex:1;padding:.5rem .8rem}
+  .status{gap:.35rem .8rem;padding:.4rem 0 1rem}
+}
+
+/* ── Dolina zdaj: tišji prerez (25. 10. 2026) ───────────────────────────────────────────
+   Oznake postaj so lažje (Inter, tanjši obris), pike imajo svetel obroč, pod prerezom je lestvica barv
+   (brez nje barva zraka ni nič povedala) in oznaka stanja (Inverzija …) namesto surovega stavka.
+   Višina podnožja je rezervirana, da prihod podatkov ne premakne strani. */
+.valley-card .clabel{margin-bottom:.75rem}
+.hv-halo{fill:var(--text);opacity:.16}
+.hv-dot{fill:var(--text);stroke:var(--card-bg);stroke-width:2.5}
+.hv-n{font:600 10px 'Inter','Inter Fallback',sans-serif;letter-spacing:.07em;text-transform:uppercase;fill-opacity:.82;stroke-width:2.5px;stroke-opacity:.85}
+.hv-t{font:600 12px 'Inter','Inter Fallback',sans-serif;font-variant-numeric:tabular-nums;stroke-width:2.5px;stroke-opacity:.85}
+@media (min-width:760px){.hv-n{font-size:11px}.hv-t{font-size:13.5px}}
+.hv-foot{display:flex;flex-direction:column;gap:.55rem;margin-top:.7rem;min-height:5.6rem}
+.hv-cap{margin-top:0;min-height:0;display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .55rem;font-size:.8rem;line-height:1.45}
+.hv-kind{display:inline-block;padding:.12rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text);background:var(--fc-bg);border:1px solid var(--card-border)}
+.hv-k-inversion{color:#fbbf24;border-color:rgba(251,191,36,.45);background:rgba(251,191,36,.1)}
+[data-theme="light"] .hv-k-inversion{color:#92400e}
+.hv-grad{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.hv-legend{max-width:240px;opacity:0;transition:opacity .3s}
+.hv-legend.is-ready{opacity:1}
+.hv-lg-bar{display:block;height:6px;border-radius:3px}
+.hv-lg-ticks{display:flex;justify-content:space-between;margin-top:.25rem;font-size:.62rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (min-width:760px){
+  .hv-foot{flex-direction:row;align-items:flex-start;justify-content:space-between;gap:1.5rem;min-height:3.4rem}
+  .hv-cap{flex:1;font-size:.84rem}
+  .hv-legend{flex:0 0 220px}
+}
+@media (max-width:360px){.hv-foot{min-height:6.4rem}}
+
+/* ── Vremenski obeti in »Zakaj je danes takšno vreme?«: skupen ritem kartic (25. 10. 2026) ──────────
+   Naslov kartice ima povsod enak razmik do vsebine (.8rem), čas osvežitve stoji v isti vrstici kot naslov,
+   dnevne kartice imajo spodnjo vrstico (zaupanje) poravnano na dno, drsni trakovi na telefonu kažejo, da se
+   drsijo (zbledel desni rob), vir pa je tišji. Samo CSS; višine se ne spreminjajo (CLS). */
+.cu-hdr{margin-bottom:.8rem}
+.why-card .chart-hdr{flex-wrap:nowrap}
+.why-card .why-updated{margin-top:0;white-space:nowrap}
+.why-text{line-height:1.8}
+@media (min-width:760px){.why-text{max-width:68ch}}
+.cu-day .cu-confidence{margin-top:auto;padding-top:.4rem}
+.cu-card .txfc-source{font-size:.68rem;margin-top:.9rem;opacity:.75}
+@media (max-width:700px){
+  .cu-strip,.cu-days{padding-right:1.6rem;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 1.6rem),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 1.6rem),transparent)}
+}
+
+/* ── Ploščice hero kartice (25. 10. 2026) ─────────────────────────────────────────────
+   Barvni poudarek je tanek navpičen trak znotraj ploščice (ne več zakrivljen levi rob, ki je ob zaobljenem
+   kotu izgledal kot srp), površina ima rahel svetel vrh, vrednost je težja za berljivost na temnem ozadju,
+   vrstice pod njo imajo isti ritem. Samo videz: id-ji in struktura (numOf(), hs-rain-rate) so nedotaknjeni. */
+.hm{position:relative;overflow:hidden;border-left:1px solid var(--fc-border);padding-left:1rem;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--text) 5%,var(--fc-bg)),var(--fc-bg))}
+.hm::before{content:'';position:absolute;left:0;top:.8rem;bottom:.8rem;width:3px;border-radius:0 3px 3px 0;
+  background:var(--hm-accent,var(--blue));opacity:.7}
+.hm.hm-secondary{background:transparent}
+.hm-val{font-weight:400}
+.hm-secondary .hm-val{font-weight:400}
+.hm-lbl{font-weight:500;letter-spacing:.08em}
+.hm-lbl+.hm-sub,.hm-lbl+span[id]{margin-top:.2rem}
+.hm-sub{line-height:1.35;opacity:.9}
+@keyframes live-pulse-hm{0%,100%{box-shadow:none}30%{box-shadow:0 0 0 1px var(--hm-accent,var(--blue)),0 0 14px 0 var(--hm-accent,var(--blue))}}
+.hm.pulse-live{animation-name:live-pulse-hm}
+
+/* ── Srednji del naslovnice: povzetek dneva, zadnjih 7 dni, ta mesec (25. 10. 2026) ───────────────────────
+   Naslov »Zadnjih 7 dni« ima isto črkovno podobo in ikono kot ostale kartice (prej emoji in mono), ploščice
+   meseca nosijo ikone iz sklada (prej emoji, ki se med napravami razlikujejo), na telefonu so v dveh stolpcih,
+   vrednosti povzetka dneva pa so na telefonu poravnane, ker se oznake različno prelomijo. */
+.past-days-hdr-lbl{display:flex;align-items:center;gap:.45rem;font-family:inherit;font-size:.72rem;letter-spacing:.1em;font-weight:600;color:var(--text);opacity:.85}
+.yr-item{background:linear-gradient(180deg,color-mix(in srgb,var(--text) 5%,var(--fc-bg)),var(--fc-bg))}
+@media (max-width:560px){
+  .ds-arrow{line-height:1.25;min-height:2.5em}
+  #month-card-grid{grid-template-columns:1fr 1fr;gap:.55rem}
+  #month-card-grid .yr-item{padding:.7rem .8rem}
+  #month-card-grid .yr-item:last-child:nth-child(odd){grid-column:1/-1}
+  #month-card-grid .yr-val{font-size:1.15rem}
+}
+/* Vrstica stanja ima na ozkem telefonu ob prihodu gumbov (Obvestila, Moja opozorila …) vedno tri vrstice (132 px);
+   brez rezervacije je vse pod njo ob prihodu skočilo za ~44 px (CLS 0,05–0,1 ob počasnem omrežju). */
+@media (max-width:420px){.status{min-height:132px;align-content:flex-start}}
+
+/* ── Kartice vpogledov, zavihki (26. 10. 2026) ───────────────────────────────────────────────────────────────
+   Naslovi vpogledov (Temperaturna inverzija, Aktivni nizi) imajo isto črkovno podobo kot .clabel; stanje
+   inverzije nosi ikono iz sklada namesto emojija; povezava-zavihek (Šola) ni podčrtana. */
+.insight-card .ic-head{font-size:.72rem;letter-spacing:.1em;font-weight:600;color:var(--text);opacity:.9;margin-bottom:.8rem}
+.insight-card .ic-head .ic-badge{opacity:1;color:var(--muted)}
+.inv-status .ic{width:1em;height:1em;vertical-align:-.12em}
+a.tab-btn{text-decoration:none}
