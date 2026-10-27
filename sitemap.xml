@@ -507,6 +507,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/el-nino-2026.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/el-nino-2026.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</loc>
     <lastmod>2026-10-27</lastmod>
     <changefreq>monthly</changefreq>
@@ -1492,13 +1499,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/junij-2026-dvoglavi-mesec.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/el-nino-2026.html</loc>
-    <lastmod>2026-06-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/el-nino-2026.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/vremenski-povzetek-maj-2026.html</loc>
