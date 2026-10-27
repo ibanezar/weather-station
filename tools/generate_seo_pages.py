@@ -3483,6 +3483,11 @@ def gen_landing_page(hist, sitemap_urls):
          "Savinjski dolini, zato služi kot referenčna postaja za vso dolino. Za sosednje kraje "
          "(Mozirje, Nazarje, Ljubno ob Savinji, Gornji Grad, Luče, Solčava) so na voljo ločene "
          "ocene, prilagojene njihovi nadmorski višini in legi."),
+        # 27. 10. 2026: GSC »vreme recica ob savinji« (299 prikazov, poz. 9,1, 0 klikov) -- iskalci
+        # brez šumnikov; vprašanje je vidno in odgovarja z isto besedo, kot jo iščejo.
+        ("Kje najdem vreme Recica ob Savinji (brez šumnikov)?",
+         "Na tej strani: vreme Recica ob Savinji (Rečica ob Savinji) v živo iz postaje IREICA1, "
+         "napoved po urah in za 7 dni ter radar."),
         ("Kje stoji vremenska postaja v Rečici ob Savinji?",
          f"Postaja IREICA1 stoji v Rečici ob Savinji na dnu Zgornje Savinjske doline, na približno "
          f"{ELEV} m nadmorske višine. Meritve so na voljo od novembra 2019."),
