@@ -3910,7 +3910,7 @@ html[data-mode-intro="1"] .mode-switch-wrap{display:none}
 /* Prenova 27. 10. 2026: na telefonu sta samo dve vrstici (stanje + ura + deli; nato gumbi), zato je rezervacija ~88 px.
    Deli (.share-btn) je v prvi vrstici ob uri, ne v drugi ob gumbih. */
 @media (max-width:420px){
-  .status{min-height:94px;align-content:flex-start;gap:.3rem .6rem;padding:.3rem 0 .9rem;font-size:.7rem}
+  .status{min-height:106px;align-content:flex-start;gap:.3rem .6rem;padding:.3rem 0 1.7rem;font-size:.7rem}
   #local-time{display:none} /* telefon ima uro; vrstica stanja ostane v eni vrstici */
   .status>.share-btn{width:32px;height:32px;order:3}
   .status>.share-btn .ic{width:16px;height:16px}
