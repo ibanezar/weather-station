@@ -1,17 +1,7 @@
 {
-  "el-nino-2026": [
-    "zima-2026-2027-el-nino-napoved",
-    "vremenski-povzetek-junij-2026",
-    "junij-2026-dvoglavi-mesec"
-  ],
-  "zima-2026-2027-el-nino-napoved": [
-    "el-nino-2026",
-    "zime-nekoc-in-zdaj-1012",
-    "napoved-avgust-2026-zgornja-savinjska-dolina"
-  ],
   "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
-    "zakaj-gobe-rastejo-do-meje-megle",
     "reke-megle-temperaturna-inverzija-recica-savinji",
+    "zakaj-gobe-rastejo-do-meje-megle",
     "dve-nevihte-hladno-jutro"
   ],
   "stopinjski-dnevi-recica-koliko-kuriti-1027": [
@@ -22,7 +12,7 @@
   "prvi-sneg-golte-solcava-menina-1027": [
     "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
     "crnivec-pozimi-sneg-verige-1027",
-    "bela-bozic-zgornja-savinjska-dolina-1027"
+    "vreme-golte-sneg-razmere"
   ],
   "crnivec-pozimi-sneg-verige-1027": [
     "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
@@ -48,6 +38,16 @@
     "16-noci-pod-5-c-slane-se-ni-1021",
     "slana-gobarska-sezona-1018",
     "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
+  ],
+  "el-nino-2026": [
+    "zima-2026-2027-el-nino-napoved",
+    "vremenski-povzetek-junij-2026",
+    "junij-2026-dvoglavi-mesec"
+  ],
+  "zima-2026-2027-el-nino-napoved": [
+    "el-nino-2026",
+    "zime-nekoc-in-zdaj-1012",
+    "napoved-avgust-2026-zgornja-savinjska-dolina"
   ],
   "16-noci-pod-5-c-slane-se-ni-1021": [
     "kdaj-menjati-zimske-gume-recica-1027",
@@ -87,7 +87,7 @@
   "zime-nekoc-in-zdaj-1012": [
     "zima-2026-2027-el-nino-napoved",
     "crnivec-pozimi-sneg-verige-1027",
-    "bela-bozic-zgornja-savinjska-dolina-1027"
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
   ],
   "naslednji-teden-konec-poletja-0904": [
     "tedenska-napoved-24-28-avgust-2026",
@@ -446,8 +446,8 @@
   ],
   "reke-megle-temperaturna-inverzija-recica-savinji": [
     "zakaj-gobe-rastejo-do-meje-megle",
-    "kdaj-se-dvigne-jutranja-megla-dolina-1027",
-    "tropske-noci-inverzija-savinjska-dolina"
+    "tropske-noci-inverzija-savinjska-dolina",
+    "kdaj-se-dvigne-jutranja-megla-dolina-1027"
   ],
   "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -495,8 +495,8 @@
     "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712"
   ],
   "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720": [
-    "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804",
     "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
+    "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
   ],
   "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719": [

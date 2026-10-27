@@ -1,35 +1,5 @@
 [
   {
-    "title": "El Niño 2026: Pacifik se segreva",
-    "slug": "el-nino-2026",
-    "url": "/blog/el-nino-2026.html",
-    "date": "2026-06-20",
-    "summary": "El Niño je uradno aktiven. NOAA in IRI/CPC napovedujeta 97–98 % verjetnost za super El Niño 2026/27 — morda najmočnejšega v zgodovini meritev. Pregled napovedi, mehanizmov in posledic za Slovenijo.",
-    "tags": [
-      "El Niño",
-      "podnebje",
-      "IREICA1",
-      "analiza",
-      "2026"
-    ],
-    "updated": "2026-10-27"
-  },
-  {
-    "title": "Zima 2026/2027 na Rečici ob Savinji: kaj pravi najmočnejši El Niño doslej",
-    "slug": "zima-2026-2027-el-nino-napoved",
-    "url": "/blog/zima-2026-2027-el-nino-napoved.html",
-    "date": "2026-09-16",
-    "summary": "Niño 3.4 je avgusta 2026 dosegel +2,7 °C, NOAA daje 75 % verjetnost zgodovinsko najmočnejšega El Niña. Kaj to pomeni za zimo v Zgornji Savinjski dolini in kaj pove postaja IREICA1.",
-    "tags": [
-      "analiza",
-      "podnebje",
-      "ireica1",
-      "napoved",
-      "2026"
-    ],
-    "updated": "2026-10-27"
-  },
-  {
     "title": "Kdaj se dvigne jutranja megla v dolini? Izmerjeno",
     "slug": "kdaj-se-dvigne-jutranja-megla-dolina-1027",
     "url": "/blog/kdaj-se-dvigne-jutranja-megla-dolina-1027.html",
@@ -62,7 +32,7 @@
     "slug": "prvi-sneg-golte-solcava-menina-1027",
     "url": "/blog/prvi-sneg-golte-solcava-menina-1027.html",
     "date": "2026-10-27",
-    "summary": "Model za 31. oktobra napoveduje prvi sneg na Goltah (1,3 cm), v Solčavi pa običajno šele konec novembra. Podatki ARSO Črnivec in modela.",
+    "summary": "Model za 31. oktobra napoveduje prvi sneg na Goltah (1 cm). Za Solčavo ni meritev; na Črnivcu je prvi sneg padel med 18. in 30. novembrom.",
     "tags": [
       "Golte",
       "Solčava",
@@ -100,13 +70,13 @@
     ]
   },
   {
-    "title": "Bela božič v Savinjski dolini: kako pogosta je?",
+    "title": "Bel božič v Savinjski dolini: kako pogost je?",
     "slug": "bela-bozic-zgornja-savinjska-dolina-1027",
     "url": "/blog/bela-bozic-zgornja-savinjska-dolina-1027.html",
     "date": "2026-10-27",
     "summary": "Na Črnivcu je bil sneg na božič v 2 od 5 let, v Rečici je bil hladen padavinski dan v 2 od 7. Podatki postaje in ARSO za zadnje božiče.",
     "tags": [
-      "bela božič",
+      "bel božič",
       "božič",
       "sneg",
       "zima",
@@ -140,6 +110,36 @@
       "podatki",
       "Rečica"
     ]
+  },
+  {
+    "title": "El Niño 2026: Pacifik se segreva",
+    "slug": "el-nino-2026",
+    "url": "/blog/el-nino-2026.html",
+    "date": "2026-06-20",
+    "summary": "El Niño je uradno aktiven. NOAA in IRI/CPC napovedujeta 97–98 % verjetnost za super El Niño 2026/27 — morda najmočnejšega v zgodovini meritev. Pregled napovedi, mehanizmov in posledic za Slovenijo.",
+    "tags": [
+      "El Niño",
+      "podnebje",
+      "IREICA1",
+      "analiza",
+      "2026"
+    ],
+    "updated": "2026-10-27"
+  },
+  {
+    "title": "Zima 2026/2027 na Rečici ob Savinji: kaj pravi najmočnejši El Niño doslej",
+    "slug": "zima-2026-2027-el-nino-napoved",
+    "url": "/blog/zima-2026-2027-el-nino-napoved.html",
+    "date": "2026-09-16",
+    "summary": "Niño 3.4 je avgusta 2026 dosegel +2,7 °C, NOAA daje 75 % verjetnost zgodovinsko najmočnejšega El Niña. Kaj to pomeni za zimo v Zgornji Savinjski dolini in kaj pove postaja IREICA1.",
+    "tags": [
+      "analiza",
+      "podnebje",
+      "ireica1",
+      "napoved",
+      "2026"
+    ],
+    "updated": "2026-10-27"
   },
   {
     "title": "16 noči pod 5 °C, temperature pod ničlo pa še ni bilo",

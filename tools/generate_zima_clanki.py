@@ -279,13 +279,13 @@ def art_gume(c):
     ])
     lead = ("Zimska oprema je v Sloveniji obvezna od <strong>15. novembra</strong>, jutra v Rečici ob Savinji pa so hladna precej prej: "
             "v oktobrih med letoma 2020 in 2026 je bila najnižja dnevna temperatura pod 7 °C v <strong>58 %</strong> dni. "
-            "Sedemdnevno povprečje dnevne temperature je v zadnjih šestih jeseni prvič padlo pod 7 °C med 15. oktobrom in 20. novembrom, najpogosteje okoli 9. novembra. "
+            "Sedemdnevno povprečje dnevne temperature je v zadnjih šestih jesenih prvič padlo pod 7 °C med 15. oktobrom in 20. novembrom, najpogosteje okoli 9. novembra. "
             "Za dolino je zakonski datum torej razumen za povprečen dan, za zgodnja jutra pa je pozen.")
     s1 = [
-        "<strong>Kratek odgovor:</strong> po podatkih iz Rečice je 15. november dober datum za povprečen dan, za jutra pa prepozen. "
+        "<strong>Kratek odgovor:</strong> po podatkih iz Rečice je 15. november dober datum za povprečen dan, za jutra pa pozen. "
         "Če se pogosto vozite zgodaj zjutraj ali v hribe, po mojem branju podatkov ni razloga čakati do tega datuma.",
         "Pravilo in priporočilo sta dve različni stvari. Zimska oprema je obvezna od 15. novembra do 15. marca, v zimskih razmerah (sneg, led, žled) pa tudi zunaj tega obdobja. "
-        "Priporočilo, da gume zamenjate, ko se temperatura stalno spusti pod 7 °C, je splošno praktično pravilo, ne zakonska meja. "
+        "Priporočilo, da gume zamenjate, ko se temperatura stalno spusti pod 7 °C, je praktično pravilo, ne zakonska meja. "
         "Natančna pravila preverite pri AMZS ali v veljavnih predpisih.",
         t_tiles,
     ]
@@ -294,7 +294,7 @@ def art_gume(c):
         f"Za povprečno dnevno temperaturo sem uporabil sedemdnevno drseče povprečje, ker en hladen dan še ne pomeni jeseni. "
         f"Sedemdnevno povprečje je padlo pod 7 °C {dlong(fb[2021])} 2021, {dlong(fb[2024])} 2024, {dlong(fb[2020])} 2020 in 2025, {dlong(fb[2023])} 2023 ter {dlong(fb[2022])} 2022.",
         "Do 15. novembra se je to zgodilo v petih od šestih let. Izjema je jesen 2022, ki je bila tako topla, da je bila povprečna najvišja dnevna temperatura v prvih 14 novembrskih dneh 15,0 °C.",
-        f"Letos je sedemdnevno povprečje do 26. oktobra {num(m7)} °C, torej še ni pod 7 °C.",
+        f"Letos je bilo sedemdnevno povprečje 26. oktobra {num(m7)} °C, torej še ni pod 7 °C.",
     ]
     s3 = [
         f_mon,
@@ -310,7 +310,7 @@ def art_gume(c):
     s4 = [
         tbl,
         "V nobenem od šestih let sedemdnevno povprečje do 15. marca ni bilo trajno nad 7 °C. Najbolj zgodaj je to postalo 25. marca 2025. "
-        "Tudi jutra z 0 °C ali manj so se v vseh letih pojavila še po 15. marcu: zadnje je bilo najprej 11. aprila, najpozneje pa 7. maja 2020.",
+        "Tudi jutra z 0 °C ali manj so se v vseh letih pojavila še po 15. marcu: zadnje je bilo najzgodneje 11. aprila, najpozneje pa 7. maja 2020.",
         "Zakonska obveznost se torej konča sredi marca, hladna jutra v dolini pa še ne. Po podatkih je v aprilu zamenjava varnejša kot sredi marca, "
         "v hribih in na prelazih pa lahko zimske razmere trajajo še dlje.",
     ]
@@ -385,15 +385,15 @@ def art_sneg(c):
                  "Oranžne pike: prvi dan z novim snegom, ki ga je izmerila padavinska postaja ARSO Črnivec (848 m). Za Črnivec imam podatke od aprila 2021.")
     tl = tiles([
         ("25. 11.", "", "mediana prvega hladnega padavinskega dne v Rečici v zadnjih sedmih zimah. Razpon je od 19. 11. do 11. 12.", False),
-        ("18.–30. 11.", "", "izmerjen prvi nov sneg na Črnivcu v petih zimah. Prej ali pozneje ga v teh zimah ni bilo.", False),
+        ("18.–30. 11.", "", "izmerjen prvi nov sneg na Črnivcu v petih zimah. Zunaj tega razpona ga v teh zimah ni bilo.", False),
         ("23. 10.", "", "letošnja prva noč z 0 °C ali manj (–0,1 °C). Hladnega padavinskega dne letos še ni bilo.", True),
     ])
     lead = ("Postaja v Rečici ob Savinji snega ne meri, hladne padavine pa so vidne v podatkih. "
             "Prvi dan s padavinami in povprečno dnevno temperaturo do 1 °C je v zadnjih sedmih zimah nastopil med <strong>19. novembrom in 11. decembrom</strong>, mediana je 25. november. "
-            "Na Črnivcu, na 848 m, je ARSO prvi nov sneg v petih zimah izmeril med 18. in 30. novembrom. Hladne padavine v dolini torej običajno pridejo ob koncu novembra, datum pa niha za do tri tedne.")
+            "Na Črnivcu, na 848 m, je ARSO prvi nov sneg v petih zimah izmeril med 18. in 30. novembrom. Hladne padavine v dolini torej običajno pridejo ob koncu novembra, datum pa se spreminja za približno tri tedne.")
     s1 = [
-        "<strong>Kratek odgovor:</strong> prvi sneg v dolini je po podatkih zadnjih sedmih zim običajno ob koncu novembra. "
-        "V štirih od sedmih zim se je prvi hladen padavinski dan zgodil pred 1. decembrom, v treh pozneje, enkrat šele 11. decembra.",
+        "<strong>Kratek odgovor:</strong> prvi možen sneg v dolini je po podatkih zadnjih sedmih zim običajno ob koncu novembra (merim hladne padavine, ne snega). "
+        "V štirih od sedmih zim se je prvi hladen padavinski dan zgodil pred 1. decembrom, v treh pa 1. decembra ali pozneje, enkrat šele 11. decembra.",
         tl,
         "Pri razlagi je potrebna previdnost. Padavine ob povprečni temperaturi do 1 °C so lahko sneg, dež s snegom ali podhlajen dež. "
         "Postaja ne razlikuje vrste padavin in ne meri višine snežne odeje. Zato rečem »hladen padavinski dan«, ne »prvi sneg«.",
@@ -404,13 +404,13 @@ def art_sneg(c):
         f"{dlong(crn[2021])} 2021 in {dlong(crn[2023])} 2023.",
         f"V Rečici sem v istih petih zimah našel prvi hladen padavinski dan {dlong(rec[2025])} 2025, {dlong(rec[2024])} 2024, {dlong(rec[2022])} 2022, {dlong(rec[2021])} 2021 in {dlong(rec[2023])} 2023. "
         "Razlika do Črnivca je v štirih od petih zim največ tri dni. Izjema je zima 2022/23: na Črnivcu je sneg padel 23. novembra, v dolini pa je bila prva hladna padavina šele 11. decembra, 18 dni pozneje.",
-        "Dolina in postaja, ki leži skoraj 500 m više, torej prvi hladen val pogosto doživita skoraj hkrati. Zakaj je bilo pozimi 2022/23 drugače, iz teh podatkov ne morem reči.",
+        "Dolina in postaja skoraj 500 m više torej prvi hladen val pogosto doživita skoraj hkrati. Zakaj je bilo pozimi 2022/23 drugače, iz teh podatkov ne morem reči.",
     ]
     s3 = [
         f"Letos je 23. oktobra postaja prvič izmerila temperaturo pod ničlo: –0,1 °C. Hladnega padavinskega dne od 1. oktobra še ni bilo. "
         "O napovedi te noči sem pisal v članku o " + a("/blog/16-noci-pod-5-c-slane-se-ni-1021.html", "šestnajstih nočeh pod 5 °C") + ".",
         "Modelski posnetek z dne 27. oktobra (Open-Meteo, ne meritev): meja sneženja naj bi se do 2. novembra spustila z 2660 na 1210 m. "
-        "Pričakovani nov sneg na višini postaje (366 m) je v vseh sedmih dneh 0 cm. Na Goltah (1400 m) model 31. oktobra napoveduje približno 1,3 cm snega.",
+        "Pričakovani nov sneg na višini postaje (366 m) je v vseh sedmih dneh 0 cm. Na Goltah (1400 m) model 31. oktobra napoveduje približno 1 cm snega.",
         "V naslednjih sedmih dneh sneg v dolini po modelu ni pričakovan, v visokih legah pa se približuje. Za sprotno sliko spremljajte "
         + a("/zima/meja-snezenja/", "mejo sneženja") + " in " + a("/zima/snezna-karta/", "snežno karto") + ". Več o višjih legah je v članku o "
         + a("/blog/prvi-sneg-golte-solcava-menina-1027.html", "prvem snegu na Goltah in v Solčavi") + ".",
@@ -426,7 +426,7 @@ def art_sneg(c):
     ]
     s5 = [
         ul([
-            "<strong>Sedem zim je malo.</strong> Postaja meri od novembra 2019. Zima 2019/20 je nepopolna na začetku (podatki od 7. novembra), vendar prvi hladen padavinski dan v tej zimi nastopi šele 1. decembra, zato je ocena veljavna.",
+            "<strong>Sedem zim je malo.</strong> Postaja meri od novembra 2019. Zima 2019/20 je nepopolna na začetku (podatki od 7. novembra), vendar je prvi hladen padavinski dan v tej zimi nastopil šele 1. decembra, zato je ocena veljavna.",
             "<strong>Hladen padavinski dan ni sneg.</strong> Prag 1 °C in 0,2 mm sta moja izbira za primerjavo med leti. Brez meritve vrste padavin je to najbližji približek, ki ga imam.",
             "<strong>Črnivec ni dolina.</strong> Padavinska postaja ARSO stoji na 848 m, arhiv ARSO zaostaja za nekaj tednov (zadnji vnos v mojem zapisu je 30. 9. 2026).",
             "<strong>Modelski podatki niso uradna napoved.</strong> Za opozorila spremljajte " + a("https://vreme.arso.gov.si/napoved", "ARSO") + ".",
@@ -439,7 +439,7 @@ def art_sneg(c):
         slug="kdaj-pade-prvi-sneg-v-dolini-recica-1027", title=title, desc=desc, og_title="Kdaj pade\nprvi sneg v dolini?",
         tags=["sneg", "prvi sneg", "zima", "Črnivec", "podatki"], og_photo="misty-valley", accent="#22d3ee", lead=lead,
         sections=[
-            {"label": "01 — odgovor", "heading": "Prvi sneg v dolini je običajno ob koncu novembra", "id": "odgovor", "paragraphs": s1},
+            {"label": "01 — odgovor", "heading": "Hladne padavine v dolini običajno pridejo ob koncu novembra", "id": "odgovor", "paragraphs": s1},
             {"label": "02 — primerjava", "heading": "Dolina in Črnivec: razlika je pogosto le nekaj dni", "id": "primerjava", "paragraphs": s2},
             {"label": "03 — letos", "heading": "Letos: ničla je že bila, sneg še ne", "id": "letos", "paragraphs": s3},
             {"label": "04 — praktično", "heading": "Kaj naj naredite", "id": "prakticno", "paragraphs": s4},
@@ -492,7 +492,7 @@ def art_bozic(c):
         "Na Črnivcu je ARSO izmeril snežno odejo: 4 cm na sveti večer, 15 cm na božič in 12 cm na štefanovo.",
         "Leta 2024 je bila slika drugačna: na Črnivcu je 24. decembra ležalo 14 cm snega, v dolini pa je bilo suho in hladno (najnižja dnevna temperatura je od 24. do 26. decembra padla z 2,4 °C na –7,3 °C). "
         "Za dolino je to pomenilo mraz brez snega, za višje lege bel božič.",
-        "Med najtoplejšimi so bili božiči 2019, 2022 in 2023, ko se je temperatura čez dan dvignila na 11–14 °C. Takrat sneg ni bil blizu.",
+        "Štirje božiči (2019, 2020, 2022 in 2023) so bili topli: čez dan se je temperatura dvignila na 11–14 °C. Takrat sneg ni bil blizu.",
     ]
     s3 = [
         "Za napoved božiča je še prezgodaj, tudi za modele. Nobeden vir danes ne more zanesljivo napovedati, ali bo 25. decembra sneg. "
@@ -507,7 +507,7 @@ def art_bozic(c):
         ul([
             "<strong>Sedem božičev je malo</strong> za oceno verjetnosti. Podatki kažejo, kaj se je dogajalo, ne kaj se bo.",
             "<strong>Hladen padavinski dan ni sneg.</strong> Če je bila temperatura okoli 1 °C, je lahko padal tudi dež s snegom.",
-            "<strong>Črnivec ni dolina.</strong> Arhiv ARSO imam od aprila 2021, zato sta v primerjavi samo dva božiča s snegom in tri brez.",
+            "<strong>Črnivec ni dolina.</strong> Arhiv ARSO imam od aprila 2021, zato je v primerjavi samo pet božičev: dva s snegom in trije brez.",
             "<strong>Bel božič nima enotne definicije.</strong> Tu štejem snežno odejo (Črnivec) ali hladne padavine (Rečica), ne snega, ki je padel in se stopil.",
         ]),
         USE_NOTE,
@@ -552,6 +552,7 @@ def zled_schema():
 
 def art_zled(c):
     fr = c.W["freezing_rain"]
+    gen_t = re.sub(r"(\d{1,2}):(\d{2})", r"\1.\2", fr["generated_at_local"])
     assert fr["level"] == "nizko" and all(x["level"] == "nizko" for x in fr["daily"]), "žled: modelski posnetek se je spremenil"
     tbl = table(["", "Žled", "Poledica"],
                 [["Kaj je", "Dež ali pršenje, ki zmrzne ob stiku s površino", "Led na cestišču ali poti, ki ga povzroči kateri koli vzrok"],
@@ -574,21 +575,21 @@ def art_zled(c):
         "Zmrznejo šele, ko zadenejo tla, žico ali vejo, in tam naredijo prozorno ledeno skorjo.",
         "Taka razporeditev je mogoča, kadar se topel zrak pomika nad dolino, v kateri se je zadržal mrzel zrak. Žled je kljub temu redek pojav.",
         "Modelski pokazatelj na strani " + a("/zima/zled/", "Žled") + " označi uro kot možen žled, kadar so hkrati izpolnjeni trije pogoji: temperatura pri tleh 0 °C ali manj, "
-        "temperatura vsaj 0,5 °C na višini 925 ali 850 hPa in vsaj 0,1 mm padavin na uro. Od 0,5 mm na uro naprej je tveganje označeno kot visoko.",
+        "temperatura vsaj 0,5 °C na višini 925 ali 850 hPa in vsaj 0,1 mm padavin na uro. Od 0,5 mm na uro naprej pokazatelj tveganje označi kot visoko.",
     ]
     s3 = [
-        "Žled je nevaren, ker ne povzroča samo drsnih cest. Led obtežuje veje in žice. Konec januarja in v začetku februarja 2014 je žled prekril velik del Slovenije in povzročil obsežno škodo na gozdovih in električnem omrežju.",
+        "Žled je nevaren, ker ne povzroča samo drsnih cest. Led obtežuje veje in žice. Konec januarja in v začetku februarja 2014 je žled prekril velik del Slovenije in povzročil veliko škodo na gozdovih in električnem omrežju.",
         "Poledica je pogostejša od žleda. Pojavlja se tam, kjer se cesta najhitreje ohladi: na mostovih, v senčnih odsekih, ob gozdu in v mraziščih. Sevalno ohlajanje je pogost razlog, da je poledica možna že pri pozitivni temperaturi zraka.",
     ]
     s4 = [
         ul([
-            "<strong>Žled:</strong> dež pada, ko je zunaj okoli 0 °C ali manj, površine se bleščijo kot steklo, veje in avtomobili so prekriti z ledom. Če je zunaj žled, se vožnji izognite. Nevarna je že hoja po dvorišču.",
-            "<strong>Poledica:</strong> vreme je suho ali vlažno, jutro pa jasno, zrak pri tleh pa blizu ničle. Cesta je lahko drsna, čeprav je temperatura zraka nad 0 °C. Mostovi zmrznejo prej kot cesta.",
+            "<strong>Žled:</strong> dež pada, ko je zunaj okoli 0 °C ali pod njo, površine se bleščijo kot steklo, veje in avtomobili so prekriti z ledom. Če je zunaj žled, se vožnji izognite. Nevarna je že hoja po dvorišču.",
+            "<strong>Poledica:</strong> vreme je suho ali vlažno, jutro je jasno, zrak pa pri tleh blizu ničle. Cesta je lahko drsna, čeprav je temperatura zraka nad 0 °C. Mostovi zmrznejo prej kot cesta.",
             "<strong>Če pride do nesreče</strong> ali nevarnega stanja na cesti, pokličite 112.",
         ]),
     ]
     s5 = [
-        f"Modelski posnetek (izračun {fr['generated_at_local']}): raven možnosti žleda je za vseh sedem dni <strong>nizka</strong>, nobena ura ne izpolnjuje vseh treh pogojev. "
+        f"Modelski posnetek (izračun {gen_t}): raven možnosti žleda je za vseh sedem dni <strong>nizka</strong>, nobena ura ne izpolnjuje vseh treh pogojev. "
         "Posnetek se vsak dan spremeni, zato za sprotno sliko odprite " + a("/zima/zled/", "stran Žled") + ".",
         "Za poledico je namenjena stran " + a("/zima/poledica/", "Poledica") + ", za razmere na prelazih pa " + a("/zima/prevoznost-prelazov/", "Prevoznost prelazov") + ".",
     ]
@@ -596,7 +597,7 @@ def art_zled(c):
         ul([
             "<strong>Modelski pokazatelj ni napoved žleda.</strong> Ne pove debeline ledu in ne zajame lokalnih razlik v dolini. Za uradna opozorila spremljajte " + a("https://vreme.arso.gov.si/napoved", "ARSO") + ".",
             "<strong>Brez meritve.</strong> Postaja v Rečici ne razlikuje dežja od podhlajenega dežja, zato v članku ne štejem zgodovinskih primerov žleda.",
-            "<strong>Žledolom leta 2014 omenjam le kot ozadje.</strong> Podrobnosti in obseg škode so v uradnih poročilih, ki jih nisem povzemal.",
+            "<strong>Žledolom leta 2014 omenjam le kot ozadje.</strong> Podrobnosti so v uradnih poročilih, ki jih nisem povzemal.",
         ]),
         USE_NOTE,
     ]
@@ -613,7 +614,7 @@ def art_zled(c):
             {"label": "05 — zdaj", "heading": "Kaj kaže modelski pokazatelj danes", "id": "zdaj", "paragraphs": s5},
             {"label": "06 — omejitve", "heading": "Česa članek ne pove", "id": "omejitve", "paragraphs": s6},
         ],
-        sources="Viri: pogoji pokazatelja žleda iz modela Open-Meteo (strani /zima/zled/), modelski posnetek z dne 27. 10. 2026. Splošna razlaga pojavov je avtorjeva; podatkov o zgodovini žleda v Rečici ni.")
+        sources="Viri: pogoji pokazatelja žleda iz modela Open-Meteo (stran /zima/zled/), modelski posnetek z dne 27. 10. 2026. Splošna razlaga pojavov je avtorjeva; podatkov o zgodovini žleda v Rečici ni.")
 
 
 # ───────────────────────── 6. Črnivec pozimi ─────────────────────────
@@ -723,8 +724,8 @@ def art_hribi(c):
         p = peaks[nm]
         ds = [x for x in p["daily"] if "2026-10-27" <= x["date"] <= "2026-10-31"]
         assert len(ds) == 5
-        rows.append([nm, f"{p['elevation_m']} m", temp(min(x["tmin_c"] for x in ds)), f"{num(sum(x['snow_cm'] for x in ds))} cm"])
-    assert rows[0][2] == temp(-5.0) and rows[0][3] == "1,3 cm"
+        rows.append([nm, f"{p['elevation_m']} m", temp(min(x["tmin_c"] for x in ds), 0), f"{num(sum(x['snow_cm'] for x in ds), 0)} cm"])
+    assert rows[0][2] == temp(-5.0, 0) and rows[0][3] == "1 cm"
     tbl = table(["Vrh", "Višina", "Najnižja temperatura 27.–31. 10.", "Pričakovan nov sneg 27.–31. 10."], rows,
                 "Modelska ocena za višje lege od 27. do 31. oktobra 2026",
                 "Modelski posnetek z dne 27. oktobra (Open-Meteo), temperatura na višini je preračunana iz doline z gradientom. To ni meritev in ni uradna gorska napoved.")
@@ -732,10 +733,10 @@ def art_hribi(c):
     assert be == {366: 0.0, 600: 0.0, 900: 0.0, 1200: 0.7, 1600: 3.3}, be
     tl = tiles([
         ("1210", "m", "višina, na katero naj bi se do 2. novembra spustila meja sneženja (27. oktobra je bila na 2660 m).", False),
-        ("1,3", "cm", "novega snega na Goltah 31. oktobra po modelu.", False),
+        ("1", "cm", "novega snega na Goltah 31. oktobra po modelu.", False),
         ("0", "cm", "novega snega do 900 m v naslednjih sedmih dneh.", True),
     ])
-    lead = ("Sneg v hribih nad Zgornjo Savinjsko dolino se približuje: model za <strong>31. oktobra</strong> napoveduje prve centimetre na Goltah (1,3 cm), "
+    lead = ("Sneg v hribih nad Zgornjo Savinjsko dolino se približuje: model za <strong>31. oktobra</strong> napoveduje prve centimetre na Goltah (približno 1 cm), "
             "meja sneženja pa naj bi se do 2. novembra spustila z 2660 na 1210 m. Do 900 m, tudi v Solčavi in Logarski dolini, model v naslednjem tednu ne napoveduje snega. "
             "Na najbližji izmerjeni točki, Črnivcu (848 m), je ARSO prvi nov sneg v petih zimah izmeril med 18. in 30. novembrom.")
     s1 = [
@@ -766,7 +767,7 @@ def art_hribi(c):
         USE_NOTE,
     ]
     title = "Prvi sneg na Goltah in v Solčavi: kdaj ga pričakovati"
-    desc = "Model za 31. oktobra napoveduje prvi sneg na Goltah (1,3 cm). Za Solčavo ni meritev; na Črnivcu je prvi sneg padel med 18. in 30. novembrom."
+    desc = "Model za 31. oktobra napoveduje prvi sneg na Goltah (1 cm). Za Solčavo ni meritev; na Črnivcu je prvi sneg padel med 18. in 30. novembrom."
     return dict(
         slug="prvi-sneg-golte-solcava-menina-1027", title=title, desc=desc, og_title="Prvi sneg na Goltah\nin v Solčavi",
         tags=["Golte", "Solčava", "Logarska dolina", "sneg", "zima"], og_photo="misty-valley", accent="#22d3ee", lead=lead,
