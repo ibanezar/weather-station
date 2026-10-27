@@ -884,7 +884,8 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, full_years, last
   <h1 class="page-title">Klima in podnebje Rečice ob Savinji</h1>
   <p class="archive-intro">Klimatološki povzetek meteorološke postaje IREICA1 v Rečici ob Savinji
   ({ELEV} m n. m., Zgornja Savinjska dolina) na osnovi {years_span} let meritev (2019–{TODAY.year}).
-  Mesečna povprečja temperature in padavin, absolutni rekordi ter fenološki kazalniki.</p>
+  Mesečna povprečja temperature in padavin, absolutni rekordi ter fenološki kazalniki.
+  <span class="muted-note">Posodobljeno: {fmtd(lastmod)}.</span></p>
 
 {summary_html}
 {table_html}

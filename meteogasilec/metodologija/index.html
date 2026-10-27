@@ -12,24 +12,24 @@
 <link rel="canonical" href="https://meteorec.si/meteogasilec/metodologija/">
 <link rel="alternate" hreflang="sl" href="https://meteorec.si/meteogasilec/metodologija/">
 <link rel="alternate" hreflang="x-default" href="https://meteorec.si/meteogasilec/metodologija/">
-<meta name="description" content="Kako MeteoGasilec izračuna indeks FWI, kateri podatki ga poganjajo in kaj indeks ni.">
+<meta name="description" content="Kako izračunam FWI: postopek v šestih korakih z izračunanim primerom in kaj indeks ni.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Filip Eremita">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://meteorec.si/meteogasilec/metodologija/">
 <meta property="og:site_name" content="Meteorec">
 <meta property="og:title" content="Metodologija — MeteoGasilec">
-<meta property="og:description" content="Kako MeteoGasilec izračuna indeks FWI, kateri podatki ga poganjajo in kaj indeks ni.">
+<meta property="og:description" content="Kako izračunam FWI: postopek v šestih korakih z izračunanim primerom in kaj indeks ni.">
 <meta property="og:image" content="https://meteorec.si/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="sl_SI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Metodologija — MeteoGasilec">
-<meta name="twitter:description" content="Kako MeteoGasilec izračuna indeks FWI, kateri podatki ga poganjajo in kaj indeks ni.">
+<meta name="twitter:description" content="Kako izračunam FWI: postopek v šestih korakih z izračunanim primerom in kaj indeks ni.">
 <meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/meteogasilec/metodologija/","name":"Metodologija","description":"Kako MeteoGasilec izra\u010duna indeks FWI, kateri podatki ga poganjajo in kaj indeks ni.","url":"https://meteorec.si/meteogasilec/metodologija/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/meteogasilec/metodologija/","name":"Metodologija","description":"Kako izra\u010dunam FWI: postopek v \u0161estih korakih z izra\u010dunanim primerom in kaj indeks ni.","url":"https://meteorec.si/meteogasilec/metodologija/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}}}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"MeteoGasilec","item":"https://meteorec.si/meteogasilec/"},{"@type":"ListItem","position":3,"name":"Metodologija"}]}
@@ -178,6 +178,9 @@ body{
   .gf-feat-sub{display:none}
 }
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Kaj pomeni kratica FWI?","acceptedAnswer":{"@type":"Answer","text":"Fire Weather Index (kanadski indeks po\u017earnega vremena). Iz temperature, vla\u017enosti, vetra in padavin pove, kako ugodni so pogoji za \u0161irjenje po\u017eara."}},{"@type":"Question","name":"Koliko podatkov potrebujem za izra\u010dun FWI?","acceptedAnswer":{"@type":"Answer","text":"Za en dan \u0161tiri vrednosti (temperatura, relativna vla\u017enost, veter, padavine v 24 urah) in tri kode iz prej\u0161njega dne. Pri zagonu sredi sezone uporabite za\u010detne vrednosti 85, 6 in 15 ter po\u010dakajte nekaj dni."}},{"@type":"Question","name":"Katere stopnje ima FWI?","acceptedAnswer":{"@type":"Answer","text":"Pri tej izvedbi: nizka do 5,2, zmerna do 11,2, visoka do 21,3, zelo visoka do 38 in ekstremna nad 38. Razmejitve so konvencija, ne uradna opozorila."}}]}
+</script>
 <link rel="stylesheet" href="/fonts/fonts.css?v=c490d62a">
 <link rel="stylesheet" href="/blog/blog.css?v=6352b4f1">
 <link rel="stylesheet" href="/vreme/vreme.css?v=a32fe9ac">
@@ -244,6 +247,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     ali odloke lokalnih oblasti.</li>
     <li>Velja za eno točko (Rečica ob Savinji) — v drugih delih Slovenije se razmere lahko razlikujejo.</li>
   </ul>
+  <h2 id="kako-izracunam-fwi">Kako izračunam FWI: postopek in primer</h2>
+  <p class="archive-intro"><b>Na kratko:</b> FWI se izračuna vsak dan v šestih korakih iz štirih vhodnih podatkov
+  (temperatura, relativna vlažnost, hitrost vetra in padavine v 24 urah) ter treh kod iz prejšnjega dne (FFMC, DMC, DC).
+  Vrstni red je: FFMC → DMC → DC → ISI → BUI → FWI. Brez kod iz prejšnjega dne ni mogoče začeti sredi sezone, zato se zaženejo
+  s standardnimi začetnimi vrednostmi 85, 6 in 15 in se »ogrejejo« nekaj dni.</p>
+  <ol>
+    <li><b>FFMC</b>: iz včerajšnje vrednosti se izračuna vlažnost tanke stelje; dež kodo zmanjša (stelja je bolj vlažna), nato se glede na temperaturo, vlažnost zraka in veter približa ravnovesni vlažnosti.</li>
+    <li><b>DMC</b>: padavine nad 1,5 mm zmanjšajo kodo, sušenje je sorazmerno s temperaturo, primanjkljajem vlage in dolžino dneva za mesec.</li>
+    <li><b>DC</b>: padavine nad 2,8 mm jo zmanjšajo, sicer raste s temperaturo in faktorjem sušenja za mesec.</li>
+    <li><b>ISI</b> = 0,208 × f(veter) × f(FFMC): vpliv vetra in tanke stelje na začetno širjenje.</li>
+    <li><b>BUI</b>: iz DMC in DC, razpoložljivo gorivo.</li>
+    <li><b>FWI</b> iz ISI in BUI; razvrstitev na stopnje: nizka (do 5,2), zmerna (do 11,2), visoka (do 21,3), zelo visoka (do 38), ekstremna.</li>
+  </ol>
+  <h3>Izračunan primer (izmišljen vroč, suh dan v juliju, ne meritev)</h3>
+  <p>Vhod: včerajšnje kode FFMC 88, DMC 40, DC 250; danes
+  28 °C, najnižja relativna vlažnost 35 %, veter 18 km/h, padavine 0 mm, mesec julij.</p>
+  <div class="table-scroll" tabindex="0"><table class="data-table">
+    <thead><tr><th>FFMC</th><th>DMC</th><th>DC</th><th>ISI</th><th>BUI</th><th>FWI</th><th>Stopnja</th></tr></thead>
+    <tbody><tr><td>90.7</td><td>44.4</td><td>258.7</td><td>11.7</td><td>62.2</td><td>27.7</td><td>Zelo visoka</td></tr></tbody>
+  </table></div>
+  <p class="muted-note">Naša izvedba uporablja dnevni najvišji veter in najnižjo relativno vlažnost iz napovedi Open-Meteo, standardni
+  kanadski postopek pa opoldanska opazovanja; vrednosti zato niso neposredno primerljive z uradnimi indeksi. Enaka koda v Pythonu in JavaScriptu
+  je odprta v repozitoriju (tools/gasilec_model.py).
+  Izvirna metoda: Van Wagner 1987 (Canadian Forest Fire Weather Index System), <a href="https://cwfis.cfs.nrcan.gc.ca/background/summary/fwi" target="_blank" rel="noopener">Natural Resources Canada</a>.</p>
+  <h2>Pogosta vprašanja</h2>
+  <details><summary>Kaj pomeni kratica FWI?</summary><p>Fire Weather Index (kanadski indeks požarnega vremena). Iz temperature, vlažnosti, vetra in padavin pove, kako ugodni so pogoji za širjenje požara.</p></details>
+  <details><summary>Koliko podatkov potrebujem za izračun FWI?</summary><p>Za en dan štiri vrednosti (temperatura, relativna vlažnost, veter, padavine v 24 urah) in tri kode iz prejšnjega dne. Pri zagonu sredi sezone uporabite začetne vrednosti 85, 6 in 15 ter počakajte nekaj dni.</p></details>
+  <details><summary>Katere stopnje ima FWI?</summary><p>Pri tej izvedbi: nizka do 5,2, zmerna do 11,2, visoka do 21,3, zelo visoka do 38 in ekstremna nad 38. Razmejitve so konvencija, ne uradna opozorila.</p></details>
   <a class="gf-back" href="/meteogasilec/">← Nazaj na MeteoGasilec</a>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
