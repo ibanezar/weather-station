@@ -3063,9 +3063,8 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
     km_solcava = _haversine_km(solcava["lat"], solcava["lon"], LOGARSKA_LAT, LOGARSKA_LON)
 
     title = "Vreme Logarska dolina — najbližji realni vir"
-    desc = (f"Logarska dolina nima lastne postaje ARSO in je ~{num(km_station,0)} km ter precej "
-            f"više od postaje IREICA1 — pretegnjena ocena bi bila nezanesljiva. Kar dejansko "
-            f"vemo: Solčava kot najbližji realni vir, izvir Savinje, in povezava na ARSO gorsko napoved.")
+    desc = (f"Vreme v Logarski dolini in na Okrešlju: postaje ni, zato brez izmišljene ocene. "
+            f"Najbližji vir je Solčava, za gore pa uradna gorska napoved ARSO.")
 
     crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
               ("Vreme Logarska dolina", None)]
@@ -3117,6 +3116,11 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
         ("Kje dobim zanesljivo napoved za pohod v Logarski dolini ali na Rinko?",
          f'Za gorske razmere (veter, sneg, nevihte, meja sneženja) je pravi vir '
          f'<a href="{ARSO_MOUNTAIN_FORECAST}" rel="nofollow">uradna gorska napoved ARSO</a>, ne dolinska ocena.'),
+        ("Kakšno je vreme na Okrešlju?",
+         "Na Okrešlju (krnica nad Logarsko dolino, 1280–1380 m) ni vremenske postaje, zato številke ne "
+         "objavljamo. Splošno pravilo: temperatura pade za približno 0,6 °C na vsakih 100 m višine, torej "
+         "je tam okvirno 5–6 °C hladneje kot v Rečici (366 m), veter in sneg pa sta lahko povsem drugačna. "
+         "Za pohod glej uradno gorsko napoved ARSO."),
         ("Kje izvira reka Savinja?",
          "V zatrepu Logarske doline, pod krnico Okrešelj, na približno 1280–1380 m nadmorske višine. "
          "Slap Rinka, ena od znamenitosti doline, leži nekoliko niže, na 1120 m."),
@@ -3434,7 +3438,7 @@ def gen_landing_page(hist, sitemap_urls):
   pomenita pogosto <strong>radiacijsko meglo</strong> ter <strong>temperaturne inverzije</strong>,
   predvsem pozno jeseni in pozimi. V takih razmerah je na dnu doline mrzlo in megleno, nekaj sto metrov
   višje pa sončno in toplo — klasičen savinjski inverzijski vzorec
-  (<a href="/pojmi/inverzija/">kaj je temperaturna inverzija</a>).</p>
+  (<a href="/slovar/temperaturna-inverzija/">kaj je temperaturna inverzija</a>).</p>
 
   <h2>Padavine in veter</h2>
   <p>Območje je razmeroma namočeno: povprečno okrog <strong>{num(annual_precip, 0)} mm padavin na leto</strong>,
@@ -3479,6 +3483,11 @@ def gen_landing_page(hist, sitemap_urls):
          "Savinjski dolini, zato služi kot referenčna postaja za vso dolino. Za sosednje kraje "
          "(Mozirje, Nazarje, Ljubno ob Savinji, Gornji Grad, Luče, Solčava) so na voljo ločene "
          "ocene, prilagojene njihovi nadmorski višini in legi."),
+        # 27. 10. 2026: GSC »vreme recica ob savinji« (299 prikazov, poz. 9,1, 0 klikov) -- iskalci
+        # brez šumnikov; vprašanje je vidno in odgovarja z isto besedo, kot jo iščejo.
+        ("Kje najdem vreme Recica ob Savinji (brez šumnikov)?",
+         "Na tej strani: vreme Recica ob Savinji (Rečica ob Savinji) v živo iz postaje IREICA1, "
+         "napoved po urah in za 7 dni ter radar."),
         ("Kje stoji vremenska postaja v Rečici ob Savinji?",
          f"Postaja IREICA1 stoji v Rečici ob Savinji na dnu Zgornje Savinjske doline, na približno "
          f"{ELEV} m nadmorske višine. Meritve so na voljo od novembra 2019."),
@@ -3803,10 +3812,21 @@ def beaufort(kmh):
     return 12
 
 
+# Slovarski pojem -> stran z živimi podatki ali daljšo razlago (GSC: /slovar/zled/ poz. 30).
+SLOVAR_SEE_ALSO = {
+    "zled": [("/zima/zled/", "Žled: ali dež zmrzuje in ali ga bo v dolini (modelski pokazatelj)"),
+             ("/zima/poledica/", "Poledica: ko zmrzuje vlaga na cesti")],
+}
+
+
 def gen_slovar_pages(sitemap_urls):
     terms = load_glossary_terms()
     lastmod = TODAY.isoformat()
-    facts = station_facts(load_history())
+    hist = load_history()
+    facts = station_facts(hist)
+    # 27. 10. 2026: vsebina nekdanjih /pojmi/ strani (odgovor, razlaga, številka s postaje, FAQ).
+    import generate_pojmi_pages as _pojmi
+    extras = _pojmi.slovar_extras(hist)
 
     for t in terms:
         url = f"/slovar/{t['slug']}/"
@@ -3814,11 +3834,16 @@ def gen_slovar_pages(sitemap_urls):
         short_name = re.sub(r"\s*\([^)]*\)\s*$", "", t["term"]).strip() or t["term"]
         title = f"{short_name} — pomen in razlaga"
         desc = t["def"] if len(t["def"]) <= 155 else t["def"][:152].rsplit(" ", 1)[0] + "…"
+        ex = extras.get(t["slug"])
+        if ex:
+            title, desc = ex["title"], ex["desc"]
         crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
 
         q0 = f"Kaj je {short_name.lower()}?"
         qa = [(q0, t["def"])]
-        fact = facts.get(t["slug"])
+        fact = None if ex else facts.get(t["slug"])
+        if ex:
+            qa += [(q, a) for q, a in ex["faq"] if q.lower() != q0.lower()]
         if fact:
             # Vprašanje se ujema z vidnim h2 v fact_html spodaj — FAQPage shema
             # sme obljubljati samo besedilo, ki je res prikazano (glej geo_audit.py).
@@ -3828,6 +3853,27 @@ def gen_slovar_pages(sitemap_urls):
   <p class="muted-note">Vir: meritve postaje IREICA1 na Rečici ob Savinji (366 m n. m.).
   Celoten arhiv po dnevih je v <a href="/vreme/">vremenskem arhivu</a>.</p>
 ''' if fact else "")
+        see = SLOVAR_SEE_ALSO.get(t["slug"])
+        see_html = ("  <h2>Več o tem</h2>\n  <ul>\n" + "\n".join(
+            f'    <li><a href="{h}">{tt}</a></li>' for h, tt in see) + "\n  </ul>\n") if see else ""
+        ex_html = ""
+        if ex:
+            faq_vis = "\n".join(f'    <details><summary>{q}</summary><p>{a}</p></details>'
+                                for q, a in qa[1:])
+            more = "\n".join(f'    <li><a href="{h}">{tt}</a></li>' for h, tt in ex["links"])
+            ex_html = f'''  <p class="archive-intro"><strong>Na kratko:</strong> {ex["answer"]}</p>{ex["body_html"]}
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+{faq_vis}
+  </div>
+  <h2>Naprej</h2>
+  <ul>
+{more}
+    <li><a href="/slovar/">Vremenski slovar</a></li>
+  </ul>
+  <p class="muted-note">Številke so izračunane iz meritev postaje IREICA1 v Rečici ob Savinji.
+  Besedilo je splošna razlaga pojma, ne uradna napoved.</p>
+'''
         schema = "\n".join([
             webpage_schema(url, title, desc),
             crumbs_schema(crumbs),
@@ -3845,7 +3891,7 @@ def gen_slovar_pages(sitemap_urls):
     <div class="clabel">💡 Zanimivost</div>
     <p class="archive-intro" style="margin:.4rem 0 0">{t["fun"]}</p>
   </div>
-{fact_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
+{fact_html}{ex_html}{see_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
   <a href="/">trenutne meritve v živo</a> iz Rečice ob Savinji.</p>
   <a class="back-link" href="/slovar/">← Vremenski slovar</a>'''
 

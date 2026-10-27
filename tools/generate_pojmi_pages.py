@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-/pojmi/ — kratki vremenski pojmi z odgovorom v prvih dveh stavkih in eno številko
+Vsebina za slovarske strani (/slovar/<pojem>/): odgovor v prvih dveh stavkih, razlaga in eno številko
 s postaje IREICA1 (inverzija, kumulonimbus, vetrna roža, hladna fronta, barometer,
 albedo).
 
@@ -9,6 +9,11 @@ Zakaj: Search Console (18. 6.–15. 10. 2026) kaže poizvedbe »inverzija« (129
 (347), »barometer« (118), »albedo« (173) na položaju 8–9, a skoraj brez klikov: ustrezne
 strani nismo imeli ali je bila le del daljšega članka. Vsaka stran odgovori na pojem
 in pove, kaj o njem kaže naša postaja.
+
+27. 10. 2026: samostojne strani /pojmi/ so odpravljene -- GSC je pokazal, da za iste poizvedbe
+(»hladna fronta« 712 prikazov) rangira starejša /slovar/ stran, naša /pojmi/ stran pa na 23. mestu
+(kanibalizacija). Vsebina zdaj živi na /slovar/ (`gen_slovar_pages()` jo vzame iz `slovar_extras()`),
+/pojmi/ so preusmeritve (`python3 tools/generate_pojmi_pages.py` jih zapiše).
 
 Številke so iz history.json (samo prave meritve, brez ERA5 ocen); vsaka stran pove, na
 koliko dneh stoji. Brez klicev na zunanje vire. Teče mesečno v seo-smart-routine.yml
@@ -21,12 +26,17 @@ import statistics as st
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate_seo_pages import (  # noqa: E402
-    ROOT, MES_GEN, page_shell, crumbs_html, crumbs_schema, faq_schema,
-    webpage_schema, num, load_history, stn_badge,
-)
+# Ko generate_seo_pages teče kot skripta (__main__), ga uvoz od tu ne sme naložiti drugič.
+if "generate_seo_pages" not in sys.modules and "__main__" in sys.modules and \
+        getattr(sys.modules["__main__"], "gen_slovar_pages", None):
+    sys.modules["generate_seo_pages"] = sys.modules["__main__"]
+from generate_seo_pages import ROOT, MES_GEN, num, load_history  # noqa: E402
 
 HUB_URL = "/pojmi/"
+SLOVAR_URL = "/slovar/"
+
+# slug v /pojmi/ -> slug v /slovar/ (ostali so enaki)
+SLOVAR_SLUG = {"inverzija": "temperaturna-inverzija"}
 
 
 def fmt_date(iso):
@@ -384,70 +394,64 @@ def pages(hist):
     return out
 
 
-# ── Gradnja HTML ─────────────────────────────────────────────────────────────
+# ── Prenos v slovar ──────────────────────────────────────────────────────────
 
-def build_page(p, lastmod):
-    url = f"{HUB_URL}{p['slug']}/"
-    crumbs = [("Meteorec", "/"), ("Vremenski pojmi", HUB_URL), (p["h1"], None)]
-    faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
-        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in p["faq"]) + "\n  </div>"
-    links = "\n".join(f'    <li><a href="{h}">{t}</a></li>' for h, t in p["links"])
-    body = f'''{crumbs_html(crumbs)}
-{stn_badge()}
-  <h1 class="page-title">{p["h1"]}</h1>
-  <p class="archive-intro"><strong>Na kratko:</strong> {p["answer"]}</p>{p["body_html"]}
-{faq_html}
-  <h2>Naprej</h2>
-  <ul>
-{links}
-    <li><a href="{HUB_URL}">Vsi vremenski pojmi</a></li>
-  </ul>
-  <p class="muted-note">Številke so izračunane iz meritev postaje IREICA1 v Rečici ob Savinji
-  (zadnja posodobitev: {fmt_date(lastmod)}). Besedilo je splošna razlaga pojma, ne uradna napoved.</p>
-  <a class="back-link" href="{HUB_URL}">← Vremenski pojmi</a>'''
-    schema = "\n".join([
-        webpage_schema(url, p["title"], p["desc"]),
-        crumbs_schema(crumbs),
-        faq_schema(p["faq"]),
-    ])
-    return page_shell(p["title"], p["desc"], url, schema, body)
+def slovar_slug(slug):
+    return SLOVAR_SLUG.get(slug, slug)
 
 
-def build_hub(items, lastmod):
-    title = "Vremenski pojmi: inverzija, fronta, barometer"
-    desc = ("Kratki odgovori na pogosta vremenska vprašanja: inverzija, kumulonimbus, vetrna roža, "
-            "hladna fronta, barometer in albedo, s podatki postaje v Rečici ob Savinji.")
-    crumbs = [("Meteorec", "/"), ("Vremenski pojmi", None)]
-    cards = "\n".join(
-        f'    <a class="phenom-card" href="{HUB_URL}{p["slug"]}/">{p["h1"]}'
-        f'<div class="ph-count">{p["answer"].split(". ")[0]}.</div></a>' for p in items)
-    body = f'''{crumbs_html(crumbs)}
-{stn_badge()}
-  <h1 class="page-title">Vremenski pojmi</h1>
-  <p class="archive-intro">Kratki odgovori na vprašanja, ki jih bralci pogosto iščejo, vsak z eno številko
-  iz meritev postaje v Rečici ob Savinji.</p>
-  <div class="card-grid">
-{cards}
-  </div>
-  <p class="muted-note">Zadnja posodobitev: {fmt_date(lastmod)}.</p>'''
-    schema = "\n".join([webpage_schema(HUB_URL, title, desc), crumbs_schema(crumbs)])
-    return page_shell(title, desc, HUB_URL, schema, body)
+def remap_links(text):
+    """/pojmi/<x>/ -> /slovar/<x>/ (z zamenjavo sluga)."""
+    for old in SLOVAR_SLUG:
+        text = text.replace(f"{HUB_URL}{old}/", f"{SLOVAR_URL}{SLOVAR_SLUG[old]}/")
+    return text.replace(HUB_URL, SLOVAR_URL)
+
+
+def slovar_extras(hist):
+    """{slovar_slug: {title, desc, answer, body_html, faq, links}} za gen_slovar_pages()."""
+    out = {}
+    for p in pages(hist):
+        out[slovar_slug(p["slug"])] = dict(
+            title=p["title"], desc=p["desc"], answer=p["answer"],
+            body_html=remap_links(p["body_html"]),
+            faq=[(remap_links(q), remap_links(a)) for q, a in p["faq"]],
+            links=[(remap_links(h), t) for h, t in p["links"]],
+        )
+    return out
+
+
+def redirect_stub(target):
+    """noindex + canonical + takojšnja preusmeritev (isti vzorec kot stare ARSO objave in
+    meteorec.si/crnivec/): indeksirani URL ne pade v 404. Pravi 301 bi dala Redirect Rule v Cloudflare."""
+    url = f"https://meteorec.si{target}"
+    return f'''<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<title>Preseljeno v vremenski slovar | Meteorec</title>
+<link rel="canonical" href="{url}">
+<meta name="robots" content="noindex, follow">
+<meta http-equiv="refresh" content="0; url={url}">
+<script>location.replace({json.dumps(url)} + location.hash);</script>
+</head>
+<body>
+<p>Ta stran je preseljena v <a href="{url}">vremenski slovar</a>.</p>
+</body>
+</html>
+'''
 
 
 def main():
-    hist = load_history()
-    lastmod = max(real_days(hist))
-    items = pages(hist)
+    items = pages(load_history())
     written = []
     for p in items:
         rel = os.path.join("pojmi", p["slug"], "index.html")
         os.makedirs(os.path.join(ROOT, "pojmi", p["slug"]), exist_ok=True)
         with open(os.path.join(ROOT, rel), "w", encoding="utf-8") as fh:
-            fh.write(build_page(p, lastmod))
+            fh.write(redirect_stub(f"{SLOVAR_URL}{slovar_slug(p['slug'])}/"))
         written.append(rel)
-    os.makedirs(os.path.join(ROOT, "pojmi"), exist_ok=True)
     with open(os.path.join(ROOT, "pojmi", "index.html"), "w", encoding="utf-8") as fh:
-        fh.write(build_hub(items, lastmod))
+        fh.write(redirect_stub(SLOVAR_URL))
     written.append("pojmi/index.html")
     print("✓", ", ".join(written))
 

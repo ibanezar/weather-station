@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Preizkus /pojmi/ (generate_pojmi_pages.py): vsaka notranja povezava obstaja,
-vsak pojem ima odgovor, FAQ in številko s postaje (ali jo pošteno izpusti),
-naslov je znotraj 60 znakov in committane strani obstajajo."""
+"""Preizkus vsebine pojmov na /slovar/ (generate_pojmi_pages.slovar_extras): vsak pojem ima odgovor,
+FAQ in številko s postaje (ali jo pošteno izpusti), naslov je znotraj 60 znakov, notranje povezave
+obstajajo, committane slovarske strani vsebujejo nov odsek, /pojmi/ so samo preusmeritve."""
 import os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_pojmi_pages as g  # noqa: E402
@@ -19,36 +19,35 @@ def check(name, cond, detail=""):
 
 
 hist = g.load_history()
-items = g.pages(hist)
-check("šest pojmov", len(items) == 6, str(len(items)))
-lastmod = max(g.real_days(hist))
-for p in items:
-    html = g.build_page(p, lastmod)
-    check(f"{p['slug']} odgovor", len(p["answer"]) > 40)
-    check(f"{p['slug']} FAQ ≥ 3", len(p["faq"]) >= 3)
-    m = re.search(r"<title>([^<]*)</title>", html)
-    check(f"{p['slug']} naslov ≤ 60", m and len(m.group(1)) <= 60, m.group(1) if m else "")
+extras = g.slovar_extras(hist)
+check("šest pojmov", len(extras) == 6, str(len(extras)))
+for slug, p in extras.items():
+    check(f"{slug} odgovor", len(p["answer"]) > 40)
+    check(f"{slug} FAQ >= 3", len(p["faq"]) >= 3)
+    check(f"{slug} naslov <= 60", len(p["title"]) + len(" | Meteorec") <= 60 or len(p["title"]) <= 60, p["title"])
+    html = p["body_html"] + " ".join(h for h, _ in p["links"])
+    check(f"{slug} brez /pojmi/ povezav", "/pojmi/" not in html)
+    check(f"{slug} brez notranjih meritev", "indoor" not in html.lower())
     for href in re.findall(r'href="(/[^"#?]*)"', html):
-        if href.endswith(".html"):
-            path = os.path.join(g.ROOT, href.lstrip("/"))
-        else:
-            path = os.path.join(g.ROOT, href.lstrip("/"), "index.html")
-        # skupne datoteke (CSS, ikone …) niso strani
-        if href.startswith(("/fonts/", "/blog/blog.css", "/vreme/vreme.css")) or "." in os.path.basename(href):
-            if not href.endswith(".html"):
-                continue
-        check(f"{p['slug']} povezava {href}", os.path.exists(path))
-    check(f"{p['slug']} brez notranjih meritev", "indoor" not in html.lower())
-    # Stran mora obstajati (zapiše jo generator, dnevni tek jo osveži).
-    disk = os.path.join(g.ROOT, "pojmi", p["slug"], "index.html")
-    check(f"{p['slug']} obstaja", os.path.exists(disk))
+        if "." in os.path.basename(href) and not href.endswith(".html"):
+            continue
+        path = os.path.join(g.ROOT, href.lstrip("/")) if href.endswith(".html") \
+            else os.path.join(g.ROOT, href.lstrip("/"), "index.html")
+        check(f"{slug} povezava {href}", os.path.exists(path))
+    disk = os.path.join(g.ROOT, "slovar", slug, "index.html")
+    txt = open(disk, encoding="utf-8").read() if os.path.exists(disk) else ""
+    check(f"{slug} slovarska stran ima odsek Na kratko", "<strong>Na kratko:</strong>" in txt)
+    check(f"{slug} naslov strani iz pojmov", p["title"] in txt)
 
-# Številke: pogoji, pod katerimi se dejstvo izpusti, ne smejo vrniti napačne vrednosti.
+for slug in [p["slug"] for p in g.pages(hist)] + [""]:
+    f = os.path.join(g.ROOT, "pojmi", slug, "index.html")
+    t = open(f, encoding="utf-8").read() if os.path.exists(f) else ""
+    check(f"pojmi/{slug} je preusmeritev", 'name="robots" content="noindex' in t and "/slovar/" in t)
+
 f = g.fact_barometer(hist)
 check("barometer: delež v [0,1]", f is None or (0 <= f["p_drop"] <= 1 and 0 <= f["p_all"] <= 1))
 f = g.fact_inverzija(hist)
 check("inverzija: razpon pozitiven", f is None or (f["hi"] > 0 and f["lo"] > 0))
-check("hub se zgradi", "Vremenski pojmi" in g.build_hub(items, lastmod))
 
 print(f"{ok} preverjanj, {fail} napak")
 sys.exit(1 if fail else 0)

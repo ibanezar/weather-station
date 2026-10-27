@@ -560,8 +560,10 @@ def main():
 
     url = "/agrometeo/"
     title = "Agrometeo — Zgornja Savinjska dolina"
-    desc = (f"GDD₅ {gdd5}, GDD₁₀ {gdd10} od začetka leta. Fenologija hmelja ({stage_label.lower()}), alarm pred "
-            f"pozebo, okno za škropljenje in sušenje sena ter vodna bilanca za Zgornjo Savinjsko dolino.")
+    # 27. 10. 2026: GSC »agrometeo« 149 prikazov, poz. 6,7, 0 klikov -- opis je začel s
+    # številkami (GDD), ne z odgovorom na poizvedbo. Zdaj najprej pove, kaj stran je.
+    desc = (f"Agrometeo za Zgornjo Savinjsko dolino iz meritev postaje: razvoj hmelja, alarm pred pozebo, "
+            f"primernost za škropljenje in sušenje sena, vodna bilanca. GDD₅ {gdd5}, GDD₁₀ {gdd10}.")
 
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-02"),
