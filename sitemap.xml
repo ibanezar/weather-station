@@ -514,6 +514,69 @@
     <image:image><image:loc>https://meteorec.si/og/el-nino-2026.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zima-2026-2027-el-nino-napoved.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/kdaj-se-dvigne-jutranja-megla-dolina-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/kdaj-se-dvigne-jutranja-megla-dolina-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/stopinjski-dnevi-recica-koliko-kuriti-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/stopinjski-dnevi-recica-koliko-kuriti-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/prvi-sneg-golte-solcava-menina-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/prvi-sneg-golte-solcava-menina-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/crnivec-pozimi-sneg-verige-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/crnivec-pozimi-sneg-verige-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/zled-ali-poledica-razlika-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/zled-ali-poledica-razlika-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/bela-bozic-zgornja-savinjska-dolina-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/bela-bozic-zgornja-savinjska-dolina-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/kdaj-pade-prvi-sneg-v-dolini-recica-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/kdaj-pade-prvi-sneg-v-dolini-recica-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/kdaj-menjati-zimske-gume-recica-1027.html</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/kdaj-menjati-zimske-gume-recica-1027.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/16-noci-pod-5-c-slane-se-ni-1021.html</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>monthly</changefreq>
@@ -568,13 +631,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <image:image><image:loc>https://meteorec.si/og/zime-nekoc-in-zdaj-1012.jpg</image:loc></image:image>
-  </url>
-  <url>
-    <loc>https://meteorec.si/blog/zima-2026-2027-el-nino-napoved.html</loc>
-    <lastmod>2026-10-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <image:image><image:loc>https://meteorec.si/og/zima-2026-2027-el-nino-napoved.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/naslednji-teden-konec-poletja-0904.html</loc>
@@ -1615,6 +1671,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/tema/ogrevanje/</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/tema/ohladitev/</loc>
     <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
@@ -1711,6 +1773,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/tema/sneg/</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/tema/susa/</loc>
     <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
@@ -1790,6 +1858,12 @@
   </url>
   <url>
     <loc>https://meteorec.si/blog/tema/zgornja-savinjska-dolina/</loc>
+    <lastmod>2026-10-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/tema/zima/</loc>
     <lastmod>2026-10-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
