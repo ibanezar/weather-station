@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 21 Oct 2026 10:15:23 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 27 Oct 2026 12:48:40 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>El Niño 2026: Pacifik se segreva</title>
+      <link>https://meteorec.si/blog/el-nino-2026.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/el-nino-2026.html</guid>
+      <pubDate>Tue, 27 Oct 2026 08:00:00 +0000</pubDate>
+      <description>El Niño je uradno aktiven. NOAA in IRI/CPC napovedujeta 97–98 % verjetnost za super El Niño 2026/27 — morda najmočnejšega v zgodovini meritev. Pregled napovedi, mehanizmov in posledic za Slovenijo.</description>
+      <category>El Niño</category>
+      <category>podnebje</category>
+      <category>IREICA1</category>
+      <category>analiza</category>
+      <category>2026</category>
+    </item>
     <item>
       <title>16 noči pod 5 °C, temperature pod ničlo pa še ni bilo</title>
       <link>https://meteorec.si/blog/16-noci-pod-5-c-slane-se-ni-1021.html</link>
@@ -1646,18 +1658,6 @@
       <category>2026</category>
       <category>padavine</category>
       <category>vrocina</category>
-    </item>
-    <item>
-      <title>El Niño 2026: Pacifik se segreva</title>
-      <link>https://meteorec.si/blog/el-nino-2026.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/el-nino-2026.html</guid>
-      <pubDate>Sat, 20 Jun 2026 08:00:00 +0000</pubDate>
-      <description>El Niño je uradno aktiven. NOAA in IRI/CPC napovedujeta 97–98 % verjetnost za super El Niño 2026/27 — morda najmočnejšega v zgodovini meritev. Pregled napovedi, mehanizmov in posledic za Slovenijo.</description>
-      <category>El Niño</category>
-      <category>podnebje</category>
-      <category>IREICA1</category>
-      <category>analiza</category>
-      <category>2026</category>
     </item>
     <item>
       <title>Vremenski povzetek — maj 2026</title>
