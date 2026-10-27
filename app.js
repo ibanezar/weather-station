@@ -1,6 +1,30 @@
 const PROXY   = "https://weatherireica1.filip-eremita.workers.dev";
 const LAT = 46.325779, LON = 14.921137;
 
+// ── Dogodki v analitiki (GA4) ────────────────────────────────────────────────────────────────
+// Merimo samo UPORABO funkcij (kaj obiskovalec odpre ali vklopi), nikoli vrednosti meritev --
+// notranjih meritev tu ni in ne smejo priti. gtag() obstaja takoj (inline v <head>), klici pred
+// nalaganjem GTM se zapišejo v vrsto. Dogodek z `once` gre ven največ enkrat na nalaganje strani.
+const _trackDone={};
+function track(name,params,once){
+  try{
+    if(once){ if(_trackDone[name])return; _trackDone[name]=1; }
+    if(typeof gtag==='function')gtag('event',name,params||{});
+  }catch(_){}
+}
+document.addEventListener('pointerdown',function(e){
+  const t=e.target; if(!t||!t.closest)return;
+  if(t.closest('#fc-slider,#cu-hourly'))track('forecast_engagement',{element:t.closest('#cu-hourly')?'hourly_strip':'hour_slider'},true);
+  const a=t.closest('a[href]');
+  if(a){
+    const h=a.getAttribute('href')||'';
+    if(/^(https?:\/\/meteorec\.si)?\/blog\//.test(h))track('article_click',{link_path:h.replace(/^https?:\/\/meteorec\.si/,'').slice(0,100)});
+  }
+},{passive:true});
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.id==='fc-slider')track('forecast_engagement',{element:'hour_slider'},true);
+},{passive:true});
+
 // ── Open-Meteo arhiv / zgodovinska napoved: predpomnilnik, vrsta, ponovni poskus ──────────────
 // Lighthouse na živi strani: do 9 zahtev na archive-api in 2 na historical-forecast-api ob enem nalaganju,
 // nekatere so dobile HTTP 429 (omejitev na IP, tudi za obiskovalce za skupnim naslovom). Podatki so zgodovinski
@@ -201,6 +225,7 @@ function chooseWxMode(m){
   try{ localStorage.setItem(MODE_INTRO_KEY,'chosen'); }catch(e){}
   hideModeIntro();
   setWxMode(m);
+  track(m==='advanced'?'advanced_view_enabled':'simple_view_enabled');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function dismissModeIntro(){
@@ -4726,6 +4751,7 @@ function switchMeteorecRadarView(id){
 }
 
 function toggleMeteorecRadarPlay(){
+  track('radar_engagement',{action:'play_toggle'},true);
   _mradPlaying=!_mradPlaying;
   const btn=document.getElementById('mrad-play');
   if(_mradPlaying){startMeteorecRadarAnim();if(btn)btn.innerHTML=_ico('pause')+' Pavza';}
@@ -4733,6 +4759,7 @@ function toggleMeteorecRadarPlay(){
 }
 
 function meteorecRadarSeek(e){
+  track('radar_engagement',{action:'seek'},true);
   const track=document.getElementById('mrad-track');
   if(!track||!_mradFrames.length)return;
   const rect=track.getBoundingClientRect();
@@ -4928,6 +4955,7 @@ function startRadarAnim(){
 }
 
 function toggleRadarPlay(){
+  track('radar_engagement',{action:'play_toggle'},true);
   _radarPlaying=!_radarPlaying;
   const btn=document.getElementById('radar-play');
   if(_radarPlaying){startRadarAnim();if(btn)btn.innerHTML=_ico('pause')+' Pavza';}
@@ -6280,6 +6308,7 @@ function getNowcastVas(){
 // mogoče več spremeniti, potisna obvestila pa bi za vedno ostala na privzeti.
 async function _ncApplyVas(id){
   try{localStorage.setItem(NOWCAST_VAS_KEY,id);}catch(_){}
+  track('select_location',{location_id:String(id).slice(0,40)});
   for(const el of [document.getElementById('nowcast-vas'),document.getElementById('thr-vas')]){
     if(el&&el.value!==id)el.value=id;
   }
@@ -6552,6 +6581,7 @@ async function toggleNotifications(){
     if(!r.ok)throw new Error('subscribe failed: HTTP '+r.status);
     localStorage.setItem('wx-notif','on');
     btn?.classList.add('on');
+    track('notifications_opt_in',{location_id:String(vas).slice(0,40)});
     const imeVasi=document.getElementById('nowcast-vas')?.selectedOptions?.[0]?.textContent||'Rečico ob Savinji';
     reg.showNotification('Meteorec — obvestila vklopljena',{body:'Obvestili te bomo ob izrazitih dogodkih (močni sunki, nalivi, zmrzal) in vnaprej, ko se z radarja proti kraju '+imeVasi+' pomika dež, nevihta ali močno jedro s točo.',icon:'/icons/logo-192.png',badge:'/icons/badge-96.png'});
   }catch(e){
