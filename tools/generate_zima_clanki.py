@@ -679,11 +679,11 @@ def art_crnivec(c):
         "Največja višina snega je bila v štirih zimah 19–25 cm, v eni pa 65 cm, torej so velike odeje redke.",
     ]
     s3 = [
-        "Prelaz Črnivec leži okoli 900 m, torej nekoliko više kot padavinska postaja. Temperatura je tam običajno nižja kot v dolini, zato se sneg začne in obleži prej.",
+        "Prelaz Črnivec leži okoli 900 m, torej nekoliko više kot padavinska postaja. Temperatura je tam običajno nižja kot v dolini, zato sneg prej začne padati in obleži.",
         ul([
             "Zimska oprema je v Sloveniji obvezna od 15. novembra do 15. marca, ob snegu in ledu pa tudi zunaj tega obdobja. Verige morate imeti s seboj ali namestiti tam, kjer to določa prometni znak ali stanje na cesti. Natančna pravila preverite pri AMZS ali v predpisih.",
             "Stanje ceste in zapore: " + a("https://www.promet.si/", "promet.si") + ". To je uradni vir; moji podatki so informativni.",
-            "Izmerjena temperatura na prelazu, ocena vozišča in kamera: " + a("https://crnivec.si/", "crnivec.si") + ". Temperatura in veter sta izmerjena na postaji DRSI na prelazu, stanje vozišča pa je ocena in ne meritev.",
+            "Izmerjena temperatura na prelazu, ocena vozišča in kamera: " + a("https://crnivec.si/", "crnivec.si") + ". Temperaturo in veter meri postaja DRSI na prelazu, stanje vozišča pa je ocena in ne meritev.",
             "Pregled prelazov v regiji: " + a("/zima/prevoznost-prelazov/", "Prevoznost prelazov") + ".",
         ]),
     ]
@@ -692,7 +692,7 @@ def art_crnivec(c):
             "<strong>Pet zim je malo.</strong> Postaja ARSO Črnivec ima podatke od aprila 2021, zato ne vem, kako običajne so te zime v daljšem obdobju.",
             "<strong>Postaja ni prelaz.</strong> Padavinska postaja ARSO stoji na 848 m, prelaz je okoli 900 m. Na prelazu lahko leži več ali manj snega, kot ga izmeri postaja.",
             "<strong>Arhiv zaostaja.</strong> Arhiv ARSO zaostaja za nekaj tednov (zadnji vnos v mojem zapisu je 30. 9. 2026), zato letošnje zime še ni v podatkih.",
-            "<strong>Snežna odeja ni prevoznost.</strong> Cesta je lahko očiščena, čeprav sneg leži ob robu, ali drsna, čeprav snega ni. Odločitev o poti naj temelji na uradnih podatkih.",
+            "<strong>Snežna odeja ni prevoznost.</strong> Cesta je lahko očiščena, čeprav sneg leži ob robu, ali drsna, čeprav snega ni. Pri izbiri poti se zanesite na uradne podatke.",
         ]),
         USE_NOTE,
     ]
@@ -746,7 +746,7 @@ def art_hribi(c):
     s2 = [
         "Za višje lege nimam izmerjenih podatkov. Najbližja izmerjena točka je padavinska postaja ARSO Črnivec na 848 m. Prvi nov sneg so tam izmerili 18. novembra 2025, "
         f"22. novembra 2024, 23. novembra 2022, 27. novembra 2021 in 30. novembra 2023.",
-        "Golte in Menina planina ležijo na 1400 m in več, zato sneg tam običajno pride prej kot na Črnivcu. Koliko prej, iz teh meritev ne vem, zato ne trdim številk.",
+        "Golte in Menina planina ležita na 1400 m in več, zato sneg tam običajno pride prej kot na Črnivcu. Koliko prej, iz teh meritev ne vem, zato ne trdim številk.",
         "Meja sneženja je približek: višina ničte izoterme, zmanjšana za 250 m. Kaže, kje bi dež prešel v sneg, ne pove pa, ali bo sneg obležal.",
     ]
     s3 = [
@@ -754,12 +754,12 @@ def art_hribi(c):
             "<strong>Golte:</strong> o obratovanju smučišča in stanju prog se pozanimajte pri upravljavcu. Iz teh podatkov tega ne morem reči.",
             "<strong>Veter in občutek mraza:</strong> na grebenu je hladneje, kot kaže temperatura zraka. Ocene so na strani " + a("/vreme-v-gorah/", "Vreme v gorah") + ".",
             "<strong>Solčava in Logarska dolina:</strong> sproti spremljajte " + a("/vreme-solcava/", "vreme v Solčavi") + " in " + a("/zima/snezna-karta/", "snežno karto") + ".",
-            "<strong>Za osnove:</strong> razlago razmer na Goltah najdete v članku " + a("/blog/vreme-golte-sneg-razmere.html", "Vreme na Golteh") + ".",
+            "<strong>Več o razmerah:</strong> o razmerah na Goltah najdete več v članku " + a("/blog/vreme-golte-sneg-razmere.html", "Vreme na Golteh") + ".",
         ]),
     ]
     s4 = [
         ul([
-            "<strong>Modelski posnetek.</strong> Podatki so z dne 27. oktobra in se vsak dan spremenijo. Za sprotno stanje glejte " + a("/zima/meja-snezenja/", "mejo sneženja") + ".",
+            "<strong>Modelski posnetek.</strong> Podatki so z dne 27. oktobra in se vsak dan spremenijo. Za sprotno stanje glejte stran " + a("/zima/meja-snezenja/", "Meja sneženja") + ".",
             "<strong>Brez meritev na višini.</strong> Temperature na Goltah in drugih vrhovih so preračunane iz doline. Ne pomenijo, da je tam res tako hladno.",
             "<strong>Ni uradna gorska napoved.</strong> Za razmere v gorah in nevarnost snega spremljajte ARSO in lokalne službe.",
         ]),
@@ -841,20 +841,20 @@ def art_hdd(c):
     s3 = [
         "Če poznate lanskoletno porabo, jo lahko grobo prilagodite. Poraba je približno sorazmerna s številom stopinjskih dni: "
         f"<strong>poraba letos ≈ poraba lani × (stopinjski dnevi letos / stopinjski dnevi lani)</strong>.",
-        f"Primer, ne meritev: če ste v sezoni 2024/25 ({season[2024]} stopinjskih dni) porabili 10 enot, bi v sezoni, kakršna je bila 2021/22 ({season[2021]}), po tem računu porabili približno {num(10 * season[2021] / season[2024], 0)} enot, "
+        f"Primer, ne meritev: če ste v sezoni 2024/25 ({season[2024]} stopinjskih dni) porabili 10 enot, bi v sezoni, kakršna je bila 2021/22 ({season[2021]}), po tem računu porabili približno {num(10 * season[2021] / season[2024], 1)} enote, "
         f"torej {ex} % več.",
-        "Račun velja le, če se hiša, način ogrevanja in navade niso spremenili. Je grob: poraba ni natančno sorazmerna z vremenom.",
-        f"Od 1. do 26. oktobra je letos nabralo {oct26[2026]} stopinjskih dni. To je tretji najhladnejši oktober od sedmih (2020–2026); hladnejša sta bila 2025 ({oct26[2025]}) in 2021 ({oct26[2021]}). "
+        "Račun velja le, če se hiša, način ogrevanja in navade niso spremenili. Račun je grob, saj poraba ni natančno sorazmerna z vremenom.",
+        f"Od 1. do 26. oktobra se je letos nabralo {oct26[2026]} stopinjskih dni. To je tretji najhladnejši oktober od sedmih (2020–2026); hladnejša sta bila 2025 ({oct26[2025]}) in 2021 ({oct26[2021]}). "
         "Oktober je majhen del sezone, zato iz njega ne morem sklepati o vsej zimi.",
     ]
     s4 = [
-        "Vprašanje, kdaj kuriti, je drugo: pri temperaturni inverziji dim ostane v dolini. Dnevno oceno prevetrenosti za Zgornjo Savinjsko dolino pokaže " + a("/zima/kurilni-semafor/", "kurilni semafor") + ".",
+        "Drugo vprašanje je, kdaj kuriti: pri temperaturni inverziji dim ostane v dolini. Dnevno oceno prevetrenosti za Zgornjo Savinjsko dolino pokaže " + a("/zima/kurilni-semafor/", "kurilni semafor") + ".",
         "Splošna slika za zimo 2026/27 (topla ali hladna) je v članku " + a("/blog/zima-2026-2027-el-nino-napoved.html", "o El Niñu in zimi") + ".",
     ]
     s5 = [
         ul([
-            "<strong>Pet popolnih sezon je malo.</strong> Postaja meri od novembra 2019, sezona 2019/20 je nepopolna, v sezoni 2025/26 pa manjkajo 4 dnevi od 212 (2877 stopinjskih dni), zato ni vključena v povprečje.",
-            "<strong>Poraba ni samo vreme.</strong> Odvisna je od hiše, ogrevanja, števila ljudi doma in navad. Stopinjski dnevi pojasnijo le vreme, ne pa vsega.",
+            "<strong>Pet popolnih sezon je malo.</strong> Postaja meri od novembra 2019, sezona 2019/20 je nepopolna, v sezoni 2025/26 pa manjkajo 4 dni od 212 (2877 stopinjskih dni), zato ni vključena v povprečje.",
+            "<strong>Poraba ni samo vreme.</strong> Odvisna je od hiše, ogrevanja, števila ljudi doma in navad. Stopinjski dnevi zajamejo le vpliv vremena, ne pa vsega.",
             "<strong>Definicija in meje so moja izbira.</strong> Za obračun toplote ali energetske izračune uporabite metodologijo, ki jo zahteva dobavitelj ali predpis.",
         ]),
         USE_NOTE,
@@ -929,9 +929,9 @@ def art_megla(c):
     ]
     s2 = [
         f_end,
-        f"Od julija do oktobra je delež jutr z nasičenim zrakom ob 7. uri narasel z {pct(k[7], n[7])} % (julij) na {pct(k[8], n[8])} % (avgust), nato na {pct(k[9], n[9])} % (september) in {pct(k[10], n[10])} % (oktober). "
-        "Pozneje se je tudi končala nasičenost: mediana zadnje nasičene ure je julija 7, avgusta 7 ali 8 (7,5), septembra 8 in oktobra 9.",
-        "Razlogi so znani: noči so daljše, sonce je nižje in tla se zjutraj počasneje segrejejo. Natančnega deleža posameznih vzrokov iz teh podatkov ne morem oceniti.",
+        f"Od julija do oktobra je delež jutr z nasičenim zrakom ob 7. uri narasel z {pct(k[7], n[7])} % (julij) na {pct(k[8], n[8])} % (avgust) in {pct(k[9], n[9])} % (september), oktobra pa je rahlo upadel na {pct(k[10], n[10])} %. "
+        "Nasičenost se je končala tudi pozneje: mediana zadnje nasičene ure je julija 7, avgusta 7 ali 8 (7,5), septembra 8 in oktobra 9.",
+        "Verjetni razlogi so: noči so daljše, sonce je nižje in tla se zjutraj počasneje segrejejo. Natančnega deleža posameznih vzrokov iz teh podatkov ne morem oceniti.",
     ]
     s3 = [
         f"Če je nad dolino temperaturna inverzija, je nad plastjo megle pogosto jasno. Modelska ocena za jutro 28. oktobra 2026 kaže zgornjo mejo inverzije okoli {inv['top_m']} m: "
