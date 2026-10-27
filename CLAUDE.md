@@ -1835,20 +1835,24 @@ zaznave, je tiho izginil iz `/novosti/` in iz `sitemap-seo.xml`, ker ga v
 bile ročno povrnjene v katalog. Če spreminjaš, kaj skript zapiše na disk, se
 prepričaj, da isto pot pokriva tudi `git add`.
 
-## Vremenski pojmi (`/pojmi/`, 22. 10. 2026)
+## Vremenski pojmi: vsebina živi na `/slovar/` (27. 10. 2026)
 
-Šest kratkih strani (inverzija, kumulonimbus, vetrna roža, hladna fronta, barometer, albedo) po izvozu Search Console
-(18. 6.–15. 10.): ti pojmi so imeli 75–347 prikazov na položaju 8–9 in skoraj nič klikov, ker ustrezne strani ni bilo.
-`tools/generate_pojmi_pages.py` (dnevno v `seo-smart-routine.yml`, `continue-on-error`).
+Šest kratkih razlag (inverzija, kumulonimbus, vetrna roža, hladna fronta, barometer, albedo) je bilo 22. 10. objavljenih kot
+samostojne `/pojmi/` strani. GSC (izvoz 27. 10.) je pokazal **kanibalizacijo**: za »hladna fronta« (712 prikazov, poz. 9,3)
+rangira starejša `/slovar/hladna-fronta/` (736 prikazov), naša `/pojmi/` stran je imela 5 prikazov na poz. 23; enako albedo,
+barometer, kumulonimbus. Zato so vsebina in številke s postaje preseljene na slovarske strani, `/pojmi/*` pa so preusmeritve.
 
-- Oblika: **odgovor v prvih dveh stavkih**, razlaga, razdelek »Kaj kaže postaja« z eno številko iz `history.json`
-  (samo prave meritve, `src != era5`; vsaka številka pove, na koliko dneh stoji), FAQ, povezave naprej.
-- **Številke so kazalniki, ne dokazi**: razpon temperature pozimi ob visokem tlaku (posreden znak inverzije), delež dni z
-  dežjem po padcu tlaka ≥ 5 hPa (41 % proti 31 % vseh dni: blag signal in tako tudi piše), največji padec povprečne
-  temperature v enem dnevu (16. 4. 2024). Postaja ne meri višinskega profila, odbitega sevanja ali front; strani to povedo.
-- Če dejstvo nima dovolj dni (`< 30`), se razdelek izpusti, ne piše se izmišljena vrednost.
-- Hub `/pojmi/` je v `CORE`, `llms.txt`; test: `tools/test_pojmi.py` (v `parity.yml`). Nov pojem = vnos v `pages()` +
-  vrstica v `CORE`; GEO: FAQPage samo, če je FAQ viden (hub ga nima).
+- `tools/generate_pojmi_pages.py` je zdaj samo **vir vsebine** (`pages()`, `slovar_extras()`); `gen_slovar_pages()` v
+  `generate_seo_pages.py` iz nje doda odsek »Na kratko«, razlago, »Kaj kaže postaja«, vidni FAQ in povezave ter prevzame naslov in
+  opis (naslov ≤ 60 znakov). Pojem z `slovar_extras` ne dobi še generičnega bloka `station_facts` (bi bil podvojen).
+  Preslikava slugov: `SLOVAR_SLUG` (inverzija → `temperaturna-inverzija`); povezave `/pojmi/…` v besedilu se preslikajo.
+- `/pojmi/*` so `redirect_stub()` (noindex + canonical + takojšnja preusmeritev, kot stare ARSO objave); zapiše jih
+  `python3 tools/generate_pojmi_pages.py`, v nobenem workflowu ni več. Niso v `CORE` in ne v sitemapu. Pravi 301 bi dala
+  Redirect Rule v coni meteorec.si (ročno).
+- **Novi pojem = vnos v `pages()`** in obstoječa slovarska stran (slug mora obstajati v `GLOSSARY_TERMS`). Ne ustvarjaj
+  samostojne strani za pojem, ki ga slovar že ima.
+- Številke so kazalniki, ne dokazi (razpon temperature ob visokem tlaku, delež dni z dežjem po padcu tlaka ≥ 5 hPa, največji
+  padec povprečne temperature); če dejstvo nima dovolj dni (< 30), se razdelek izpusti. Test: `tools/test_pojmi.py` (v `parity.yml`).
 
 ## Sezonski vodič (`/sezona/`) in povzetek meseca (1. 10. 2026)
 

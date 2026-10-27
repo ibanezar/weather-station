@@ -3434,7 +3434,7 @@ def gen_landing_page(hist, sitemap_urls):
   pomenita pogosto <strong>radiacijsko meglo</strong> ter <strong>temperaturne inverzije</strong>,
   predvsem pozno jeseni in pozimi. V takih razmerah je na dnu doline mrzlo in megleno, nekaj sto metrov
   višje pa sončno in toplo — klasičen savinjski inverzijski vzorec
-  (<a href="/pojmi/inverzija/">kaj je temperaturna inverzija</a>).</p>
+  (<a href="/slovar/temperaturna-inverzija/">kaj je temperaturna inverzija</a>).</p>
 
   <h2>Padavine in veter</h2>
   <p>Območje je razmeroma namočeno: povprečno okrog <strong>{num(annual_precip, 0)} mm padavin na leto</strong>,
@@ -3806,7 +3806,11 @@ def beaufort(kmh):
 def gen_slovar_pages(sitemap_urls):
     terms = load_glossary_terms()
     lastmod = TODAY.isoformat()
-    facts = station_facts(load_history())
+    hist = load_history()
+    facts = station_facts(hist)
+    # 27. 10. 2026: vsebina nekdanjih /pojmi/ strani (odgovor, razlaga, številka s postaje, FAQ).
+    import generate_pojmi_pages as _pojmi
+    extras = _pojmi.slovar_extras(hist)
 
     for t in terms:
         url = f"/slovar/{t['slug']}/"
@@ -3814,11 +3818,16 @@ def gen_slovar_pages(sitemap_urls):
         short_name = re.sub(r"\s*\([^)]*\)\s*$", "", t["term"]).strip() or t["term"]
         title = f"{short_name} — pomen in razlaga"
         desc = t["def"] if len(t["def"]) <= 155 else t["def"][:152].rsplit(" ", 1)[0] + "…"
+        ex = extras.get(t["slug"])
+        if ex:
+            title, desc = ex["title"], ex["desc"]
         crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
 
         q0 = f"Kaj je {short_name.lower()}?"
         qa = [(q0, t["def"])]
-        fact = facts.get(t["slug"])
+        fact = None if ex else facts.get(t["slug"])
+        if ex:
+            qa += [(q, a) for q, a in ex["faq"] if q.lower() != q0.lower()]
         if fact:
             # Vprašanje se ujema z vidnim h2 v fact_html spodaj — FAQPage shema
             # sme obljubljati samo besedilo, ki je res prikazano (glej geo_audit.py).
@@ -3828,6 +3837,24 @@ def gen_slovar_pages(sitemap_urls):
   <p class="muted-note">Vir: meritve postaje IREICA1 na Rečici ob Savinji (366 m n. m.).
   Celoten arhiv po dnevih je v <a href="/vreme/">vremenskem arhivu</a>.</p>
 ''' if fact else "")
+        ex_html = ""
+        if ex:
+            faq_vis = "\n".join(f'    <details><summary>{q}</summary><p>{a}</p></details>'
+                                for q, a in qa[1:])
+            more = "\n".join(f'    <li><a href="{h}">{tt}</a></li>' for h, tt in ex["links"])
+            ex_html = f'''  <p class="archive-intro"><strong>Na kratko:</strong> {ex["answer"]}</p>{ex["body_html"]}
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+{faq_vis}
+  </div>
+  <h2>Naprej</h2>
+  <ul>
+{more}
+    <li><a href="/slovar/">Vremenski slovar</a></li>
+  </ul>
+  <p class="muted-note">Številke so izračunane iz meritev postaje IREICA1 v Rečici ob Savinji.
+  Besedilo je splošna razlaga pojma, ne uradna napoved.</p>
+'''
         schema = "\n".join([
             webpage_schema(url, title, desc),
             crumbs_schema(crumbs),
@@ -3845,7 +3872,7 @@ def gen_slovar_pages(sitemap_urls):
     <div class="clabel">💡 Zanimivost</div>
     <p class="archive-intro" style="margin:.4rem 0 0">{t["fun"]}</p>
   </div>
-{fact_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
+{fact_html}{ex_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
   <a href="/">trenutne meritve v živo</a> iz Rečice ob Savinji.</p>
   <a class="back-link" href="/slovar/">← Vremenski slovar</a>'''
 
