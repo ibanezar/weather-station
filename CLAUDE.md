@@ -2583,7 +2583,7 @@ aritmetika in je tako povedan; na blogu so že štirje članki o zamiku po dežj
 ## Zimski članki po iskalnih izrazih (`tools/generate_zima_clanki.py`, 27. 10. 2026)
 
 Osem ročnih podatkovnih člankov, izbranih po analizi iskalnih namenov (GSC je o zimi imel skoraj nič, zato so izrazi **presoja, ne meritev**;
-obseg preveri v Ahrefsu ali iz GSC čez 2–3 tedne): zimske gume (`kdaj-menjati-zimske-gume-recica-1027`), prvi sneg v dolini, bela božič,
+obseg preveri v Ahrefsu ali iz GSC čez 2–3 tedne): zimske gume (`kdaj-menjati-zimske-gume-recica-1027`), prvi sneg v dolini, bel božič,
 žled ali poledica, Črnivec pozimi, prvi sneg na Goltah in v Solčavi, stopinjski dnevi (kurjenje), jutranja megla. Posodobljen je tudi
 `zima-2026-2027-el-nino-napoved` (opis v `<meta>`/JSON-LD, ker je imel »zima 2026/27« 126 prikazov brez klika).
 
