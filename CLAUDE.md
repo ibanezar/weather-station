@@ -2574,6 +2574,21 @@ Assert-i: 53 dogodkov, jurček 0/53 v prvem vikendu, 53/53 v drugem, lisička 28
 aritmetika in je tako povedan; na blogu so že štirje članki o zamiku po dežju. Objava: Filip prebere `docs/lektura-dopust-gobe.txt`
 (`--text`), nato `--wire`; na FB/IG ne gre samodejno.
 
+## Zimski članki po iskalnih izrazih (`tools/generate_zima_clanki.py`, 27. 10. 2026)
+
+Osem ročnih podatkovnih člankov, izbranih po analizi iskalnih namenov (GSC je o zimi imel skoraj nič, zato so izrazi **presoja, ne meritev**;
+obseg preveri v Ahrefsu ali iz GSC čez 2–3 tedne): zimske gume (`kdaj-menjati-zimske-gume-recica-1027`), prvi sneg v dolini, bela božič,
+žled ali poledica, Črnivec pozimi, prvi sneg na Goltah in v Solčavi, stopinjski dnevi (kurjenje), jutranja megla. Posodobljen je tudi
+`zima-2026-2027-el-nino-napoved` (opis v `<meta>`/JSON-LD, ker je imel »zima 2026/27« 126 prikazov brez klika).
+
+- Številke iz `history.json` (brez ERA5), `data/hourly-observations.csv`, `data/crnivec-arso.json` in modelskega posnetka `data/winter-data.json`.
+  Vsako trditev varuje `assert`; ob osvežitvi podatkov generator pade -- besedilo je treba prenoviti, ne zaobiti asserta (isti vzorec kot `generate_slane_se_ni_post.py`).
+  Generator zahteva `history.json` do 26. 10. in `winter-data.json` z dne 27. 10.; ni v nobenem workflowu.
+- **Postaja ne meri snega.** »Hladen padavinski dan« (≥ 0,2 mm, povprečje ≤ 1 °C) je približek in je tako imenovan; sneg v člankih je samo ARSO Črnivec (848 m, od aprila 2021).
+  »Nasičen zrak« (temperatura − rosišče ≤ 0,5 °C) ni megla -- vidljivosti nihče ne meri.
+- Stopinjski dnevi so 12/20 °C (moja definicija, ni za obračun). Zimska oprema 15. 11.–15. 3.: članki vedno napotijo na AMZS, pravil ne razlagajo na dolgo.
+- Članki so posnetek na dan objave. Lektura po `lektura.yml` še ni opravljena (izklopljena od 2. 10. 2026); na FB/IG ne gredo samodejno. Po mergu: IndexNow.
+
 ## Veliko vreme: sinoptika, stratosfera, indeksi, prah (22. 10. 2026)
 
 Ideja po polarnivrtinec.si (Polarni vrtinec VRTINEC: sinoptika, stratosfera, indeksi, prah, WRF). Podatki so javni, izris in
