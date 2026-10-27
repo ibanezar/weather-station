@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-26",
-  "issued_at": "2026-10-26T06:13:59.841230+01:00",
-  "national_score": 20,
+  "date": "2026-10-27",
+  "issued_at": "2026-10-27T06:10:56.916525+01:00",
+  "national_score": 15,
   "national_level": "NIZKO",
-  "national_place": "Ptuj",
+  "national_place": "Koper",
   "national_hour": "06:00",
   "should_post": false,
-  "image": "https://meteorec.si/og/storm-map/2026-10-26.jpg",
-  "image_story": "https://meteorec.si/og/storm-map/2026-10-26-story.jpg"
+  "image": "https://meteorec.si/og/storm-map/2026-10-27.jpg",
+  "image_story": "https://meteorec.si/og/storm-map/2026-10-27-story.jpg"
 }
