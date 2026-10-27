@@ -348,6 +348,14 @@ def build_body(data):
         ("Kako natančna je ta napoved v primerjavi z ARSO?",
          "Gre za model, izračunan iz napovedi Open-Meteo (isti vhodni podatki in algoritem kot živi pripomoček "
          "na naslovni strani), namenjen hitri orientaciji. Za uradna opozorila vedno preveri ARSO."),
+        # 27. 10. 2026 (GEO): AI asistenti na vprašanje o nevihtni karti navajajo ARSO in tuje strani;
+        # edino, kar je samo naše, je karta za vso Slovenijo in njeno preverjanje proti strelam.
+        ("Kje lahko spremljam nevihtno karto Slovenije?",
+         "Na tej strani: dnevna karta nevihtnega potenciala za vso Slovenijo (osvežena do 7:00 zjutraj), "
+         "radar toče ARSO v živo in aktivna opozorila ARSO. Karto vsak dan primerjamo z dejansko zabeleženimi "
+         "streli; rezultat preverjanja je v razdelku »Kako zanesljiva je karta?« in se spreminja z vsakim dnevom."),
+        ("Ali je nevihtna karta uradno opozorilo?",
+         "Ne. Je naš izračun nevihtnega potenciala iz modelskih podatkov in ni nadomestilo za opozorila ARSO."),
         ("Kdaj je verjetnost toče v Sloveniji največja?",
          "Toča je v Sloveniji, tudi v Zgornji Savinjski dolini, najpogostejša med majem in avgustom v popoldanskih "
          "in večernih urah, ko je dnevno segrevanje največje in atmosfera najbolj nestabilna."),

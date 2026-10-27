@@ -1195,6 +1195,46 @@ def build_metodologija_page(payload):
 {cards_html}
   </div>''' if cards_html else ""
 
+    # 27. 10. 2026 (GEO): »kako izračunam FWI« je bilo vprašanje, na katerega AI asistenti navajajo samo
+    # NRCan. Primer je izračunan z isto funkcijo kot stran (calc_one_day_fwi), ne vtipkan.
+    faq_qa = [
+        ("Kaj pomeni kratica FWI?",
+         "Fire Weather Index (kanadski indeks požarnega vremena). Iz temperature, vlažnosti, vetra in padavin pove, kako ugodni so pogoji za širjenje požara."),
+        ("Koliko podatkov potrebujem za izračun FWI?",
+         "Za en dan štiri vrednosti (temperatura, relativna vlažnost, veter, padavine v 24 urah) in tri kode iz prejšnjega dne. Pri zagonu sredi sezone uporabite začetne vrednosti 85, 6 in 15 ter počakajte nekaj dni."),
+        ("Katere stopnje ima FWI?",
+         "Pri tej izvedbi: nizka do 5,2, zmerna do 11,2, visoka do 21,3, zelo visoka do 38 in ekstremna nad 38. Razmejitve so konvencija, ne uradna opozorila."),
+    ]
+    faq_vis = "\n".join(f'  <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq_qa)
+    ex_prev = {"ffmc": 88.0, "dmc": 40.0, "dc": 250.0}
+    ex_in = dict(T=28.0, H=35.0, W=18.0, r=0.0)
+    ex = fm.calc_one_day_fwi(ex_prev, ex_in["T"], ex_in["H"], ex_in["W"], ex_in["r"], 6)
+    ex_label, _ex_color = fm.fwi_class(ex["fwi"])
+    steps_html = f'''  <h2 id="kako-izracunam-fwi">Kako izračunam FWI: postopek in primer</h2>
+  <p class="archive-intro"><b>Na kratko:</b> FWI se izračuna vsak dan v šestih korakih iz štirih vhodnih podatkov
+  (temperatura, relativna vlažnost, hitrost vetra in padavine v 24 urah) ter treh kod iz prejšnjega dne (FFMC, DMC, DC).
+  Vrstni red je: FFMC → DMC → DC → ISI → BUI → FWI. Brez kod iz prejšnjega dne ni mogoče začeti sredi sezone, zato se zaženejo
+  s standardnimi začetnimi vrednostmi 85, 6 in 15 in se »ogrejejo« nekaj dni.</p>
+  <ol>
+    <li><b>FFMC</b>: iz včerajšnje vrednosti se izračuna vlažnost tanke stelje; dež kodo zmanjša (stelja je bolj vlažna), nato se glede na temperaturo, vlažnost zraka in veter približa ravnovesni vlažnosti.</li>
+    <li><b>DMC</b>: padavine nad 1,5 mm zmanjšajo kodo, sušenje je sorazmerno s temperaturo, primanjkljajem vlage in dolžino dneva za mesec.</li>
+    <li><b>DC</b>: padavine nad 2,8 mm jo zmanjšajo, sicer raste s temperaturo in faktorjem sušenja za mesec.</li>
+    <li><b>ISI</b> = 0,208 × f(veter) × f(FFMC): vpliv vetra in tanke stelje na začetno širjenje.</li>
+    <li><b>BUI</b>: iz DMC in DC, razpoložljivo gorivo.</li>
+    <li><b>FWI</b> iz ISI in BUI; razvrstitev na stopnje: nizka (do 5,2), zmerna (do 11,2), visoka (do 21,3), zelo visoka (do 38), ekstremna.</li>
+  </ol>
+  <h3>Izračunan primer (izmišljen vroč, suh dan v juliju, ne meritev)</h3>
+  <p>Vhod: včerajšnje kode FFMC {ex_prev["ffmc"]:.0f}, DMC {ex_prev["dmc"]:.0f}, DC {ex_prev["dc"]:.0f}; danes
+  {ex_in["T"]:.0f} °C, najnižja relativna vlažnost {ex_in["H"]:.0f} %, veter {ex_in["W"]:.0f} km/h, padavine {ex_in["r"]:.0f} mm, mesec julij.</p>
+  <div class="table-scroll" tabindex="0"><table class="data-table">
+    <thead><tr><th>FFMC</th><th>DMC</th><th>DC</th><th>ISI</th><th>BUI</th><th>FWI</th><th>Stopnja</th></tr></thead>
+    <tbody><tr><td>{ex["ffmc"]:.1f}</td><td>{ex["dmc"]:.1f}</td><td>{ex["dc"]:.1f}</td><td>{ex["isi"]:.1f}</td><td>{ex["bui"]:.1f}</td><td>{ex["fwi"]:.1f}</td><td>{ex_label}</td></tr></tbody>
+  </table></div>
+  <p class="muted-note">Naša izvedba uporablja dnevni najvišji veter in najnižjo relativno vlažnost iz napovedi Open-Meteo, standardni
+  kanadski postopek pa opoldanska opazovanja; vrednosti zato niso neposredno primerljive z uradnimi indeksi. Enaka koda v Pythonu in JavaScriptu
+  je odprta v repozitoriju (tools/gasilec_model.py).
+  Izvirna metoda: Van Wagner 1987 (Canadian Forest Fire Weather Index System), <a href="https://cwfis.cfs.nrcan.gc.ca/background/summary/fwi" target="_blank" rel="noopener">Natural Resources Canada</a>.</p>'''
+
     inner = f'''  <p class="post-meta">MeteoGasilec ni uradna napoved ARSO ali URSZR. Je dodatna, samostojno izračunana
   ocena, namenjena orientaciji — pri odločanju vedno velja uradna ocena in odlok pristojnega organa.</p>
   <h2>🧮 Kanadski Fire Weather Index (FWI)</h2>
@@ -1219,10 +1259,13 @@ def build_metodologija_page(payload):
     <li>Ni nadomestilo za uradni <a href="https://meteo.arso.gov.si/met/sl/agromet/" target="_blank" rel="noopener nofollow">ARSO indeks požarne ogroženosti</a>
     ali odloke lokalnih oblasti.</li>
     <li>Velja za eno točko (Rečica ob Savinji) — v drugih delih Slovenije se razmere lahko razlikujejo.</li>
-  </ul>'''
+  </ul>
+{steps_html}
+  <h2>Pogosta vprašanja</h2>
+{faq_vis}'''
     return subpage_shell("metodologija", "Metodologija",
-                          "Kako MeteoGasilec izračuna indeks FWI, kateri podatki ga poganjajo in kaj indeks ni.",
-                          inner)
+                          "Kako izračunam FWI: postopek v šestih korakih z izračunanim primerom in kaj indeks ni.",
+                          inner, extra_head=seo.faq_schema(faq_qa))
 
 
 def main():

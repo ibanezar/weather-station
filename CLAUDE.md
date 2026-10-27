@@ -2285,6 +2285,12 @@ entiteto (Person/Organization/Place `sameAs`) dodajaj v skupni register
 (`PLACE_SAMEAS` v `generate_monthly_post.py`), ne kot vtipkan niz na novem
 mestu — glej opombo pri registru, zakaj.
 
+**Načrt in prvi ukrepi (27. 10. 2026, `docs/geo-plan-2026-10.md`):** izhodišče 3 omembe od 21 poskusov (14 %), delež glasu 6 %;
+zmagamo tam, kjer je podatek samo naš (natančnost modelov za Rečico, termika), izgubimo na splošnih vprašanjih (ARSO, nevihtna karta, FWI).
+Narejeno: `/meteogasilec/metodologija/` ima razdelek »Kako izračunam FWI« (postopek + **izračunan** primer iz `calc_one_day_fwi`, ne vtipkan)
+in FAQ; `/nevihte/` ima FAQ »Kje lahko spremljam nevihtno karto Slovenije?« (brez številk preverjanja v besedilu, da ne zastarijo);
+`/klima/` kaže vidno »Posodobljeno«. Panel poganjaj 3× na asistenta (odgovori variirajo) in vključi Google AI Overview ter Claude.
+
 **Sledenje omembam** (`data/geo-mentions.json`, prazen seznam do prvega
 vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem. Panel 17 vprašanj
 (informativna, primerjalna, priporočilo, how-to — ne le ključne besede) in
