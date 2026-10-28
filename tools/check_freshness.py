@@ -41,8 +41,10 @@ UTC = datetime.timezone.utc
 #   način "maxkey"    — največji datumski ključ v objektu (history.json …)
 #   način "csvdate"   — datum v prvem stolpcu zadnje vrstice CSV
 REGISTER = [
-    ("Nevihtna karta Slovenije", "og/storm-map/latest.json", "date", "date", 36,
-     "storm-map.yml + tools/storm_map_gate.py (okno, GH_DISPATCH_TOKEN)"),
+    # Nevihtna karta in njeno preverjanje sta na pavzi do aprila 2027 (28. 10. 2026) -- vrstici vrni ob vklopu:
+    #   ("Nevihtna karta Slovenije", "og/storm-map/latest.json", "date", "date", 36,
+    #    "storm-map.yml + tools/storm_map_gate.py (okno, GH_DISPATCH_TOKEN)"),
+    #   ("Preverjanje nevihtne karte", "data/storm-map-verification.json", "ts", "generated_at", 36, "storm-verify.yml"),
     ("Padavinska karta Slovenije", "og/precip-map/latest.json", "date", "date", 36,
      "precip-map.yml: vrata + jutranji posnetek rr24h v workerju (/arso-rr24h, cron 06:30 UTC)"),
     # 168 h (22. 10. 2026, Filip): okno 6:00-7:00 (story_gate.py) + zamujanje GitHubovega crona
@@ -67,8 +69,6 @@ REGISTER = [
      "gasilec-forecast.yml"),
     ("Zima / Črnivec", "data/winter-data.json", "ts", "generated_at", 36,
      "zima-forecast.yml"),
-    ("Preverjanje nevihtne karte", "data/storm-map-verification.json", "ts", "generated_at", 36,
-     "storm-verify.yml"),
     ("Zgodovina meritev (history.json)", "history.json", "maxkey", None, 60,
      "update-history.yml (Ecowitt)"),
     ("Verifikacija napovedi", "forecast_verification.json", "maxkey", None, 72,
