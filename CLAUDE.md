@@ -418,6 +418,11 @@ ni).
   `generate_storm_map.py` zato karto poravna na vrh in prazen prostor pod njo
   (če ga je dovolj) zapolni s seznamom potenciala po mestih namesto praznine.
 
+**NA PAVZI do aprila 2027** (28. 10. 2026, Filip: pozimi je nevihta redka): posla v `storm-map.yml` in `storm-verify.yml` imata
+`if: ${{ false }}`, worker ne sproži `storm-map.yml` (`_cronDispatchScheduledWorkflows`), vrstici v `REGISTER` (`check_freshness.py`) sta
+zakomentirani. `/nevihte/` kaže zadnjo karto, označeno kot staro (`inject_storm_map.py`). Vklop aprila: odstrani `if`, odkomentiraj dispatch
+v workerju in obe vrstici v `REGISTER`. Kartice na FB/IG ne gredo ven.
+
 ### Preverjanje karte proti dejanskim strelam (1. 10. 2026)
 
 Karta je do zdaj trdila oceno, ne da bi kdo izmeril, ali drži. Zdaj jo vsak dan

@@ -28,6 +28,8 @@ on:
 
 jobs:
   karta:
+    # NA PAVZI do aprila 2027 (Filip, 28. 10. 2026): pozimi je nevihta redka. Vklop: odstrani `if`.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

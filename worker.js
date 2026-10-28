@@ -3050,7 +3050,8 @@ async function _cronSnapshotArsoRr24h(env) {
 async function _cronDispatchScheduledWorkflows(env) {
   const results = {
     cas: new Date().toISOString(),
-    "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
+    // storm-map.yml je na pavzi do aprila 2027 (28. 10. 2026) -- ob vklopu vrni:
+    // "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
     "vodostaj-forecast.yml": await _cronDispatchGithubWorkflow(env, "vodostaj-forecast.yml"),
   };
   const r2 = env?.PHOTOS_R2;
