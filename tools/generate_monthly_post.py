@@ -432,7 +432,30 @@ def thumb_src(slug):
     odrezano); sicer OG slika."""
     if os.path.exists(os.path.join(ROOT, "og", "thumb", f"{slug}.jpg")):
         return f"/og/thumb/{slug}.jpg"
+    small = _small_thumb(slug)
+    if small:
+        return small
     return f"/og/{slug}.jpg"
+
+
+def _small_thumb(slug):
+    """Pomanjšana OG slika (496x260, ~15 kB) za seznam: kartica jo kaže pri 130 px,
+    polna OG slika (1200x630, ~130 kB) pa je 144 kartic naredila za ~18 MB.
+    Vrne None, če slike ni ali Pillow manjka (potem velja polna OG slika)."""
+    src = os.path.join(ROOT, "og", f"{slug}.jpg")
+    dst = os.path.join(ROOT, "og", "t", f"{slug}.jpg")
+    if not os.path.exists(src):
+        return None
+    try:
+        if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src):
+            from PIL import Image
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            im = Image.open(src).convert("RGB")
+            im.thumbnail((496, 260), Image.LANCZOS)
+            im.save(dst, "JPEG", quality=72, optimize=True, progressive=True)
+    except Exception:
+        return None
+    return f"/og/t/{slug}.jpg"
 
 
 def rewrite_sitemap_and_index(posts):
