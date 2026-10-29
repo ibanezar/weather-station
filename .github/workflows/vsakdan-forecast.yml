@@ -22,6 +22,7 @@ jobs:
         run: |
           python3 tools/test_day_pages.py
           python3 tools/test_migrena.py
+          node tools/test_migrena_alarm.mjs
 
       # Vsaka stran posebej: izpad ene (npr. Open-Meteo) ne podre ostalih; stara stran ostane.
       - name: Generate strani

@@ -23,6 +23,9 @@ import generate_seo_pages as seo  # noqa: E402
 DROP_TH = (3, 5, 8)     # hPa v 24 h: pod 3 = 0, 3-5 = 1, 5-8 = 2, 8+ = 3
 DROP_MARK = 5           # na grafu poudarjen padec od te vrednosti
 LOW_P_TH = (1008, 1002, 995)
+WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
+# Meje praga alarma: podvojitev MIG_THR_ALLOWED v worker.js (test_migrena.py primerja).
+ALARM_THR = ((3, "občutljivo: padec za 3 hPa ali več"), (5, "običajno: padec za 5 hPa ali več"), (8, "samo izrazit padec: 8 hPa ali več"))
 TRIGGERS = {
     "tlak_pad": "hiter padec zračnega tlaka", "tlak_nizek": "nizek zračni tlak",
     "sprememba": "hitre spremembe temperature", "vrocina": "vročina in soparnost", "nevihta": "nevihte",
@@ -298,6 +301,41 @@ $('mig-analyze').addEventListener('click',function(){
   }).catch(function(){out.textContent='Podatkov postaje ni bilo mogoče naložiti. Poskusite znova.';});
 });
 renderDiary();
+/* Opozorilo na telefon (Web Push): strežnik shrani samo naslovnico naročnine in prag */
+(function(){
+  var box=$('mig-alarm');if(!box)return;
+  var onB=$('mig-alarm-on'),offB=$('mig-alarm-off'),thr=$('mig-alarm-thr'),msg=$('mig-alarm-msg'),ios=$('mig-alarm-ios'),AK='wx-migrena-alarm';
+  var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+  var isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var st=ls(AK,null);if(st&&st.thr)thr.value=String(st.thr);
+  function say(t){msg.textContent=t||'';}
+  function show(){offB.hidden=!st;onB.textContent=st?'Shrani nov prag':'Vklopi opozorilo';say(st?'Opozorilo je vklopljeno (prag '+st.thr+' hPa v 24 urah).':'');}
+  if(isIOS&&!standalone){box.hidden=false;ios.hidden=false;onB.disabled=true;return;}
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return;
+  box.hidden=false;show();
+  function b64(s){var p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+  function post(path,body){return fetch(D.api+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j;});});}
+  function getSub(){return navigator.serviceWorker.register('/sw.js').then(function(){return navigator.serviceWorker.ready;}).then(function(reg){return reg.pushManager.getSubscription().then(function(sub){return {reg:reg,sub:sub};});});}
+  onB.addEventListener('click',function(){
+    if(Notification.permission==='denied'){say('Obvestila so za to stran v brskalniku blokirana. Dovolite jih v nastavitvah strani.');return;}
+    Notification.requestPermission().then(function(p){
+      if(p!=='granted'){say('Brez dovoljenja za obvestila alarm ne more delovati.');return;}
+      onB.disabled=true;
+      return getSub().then(function(x){if(x.sub)return x.sub;
+        return fetch(D.api+'/push/vapid').then(function(r){return r.json();}).then(function(v){return x.reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(v.publicKey)});});})
+      .then(function(sub){return post('/push/subscribe',{site:'migrena',subscription:sub.toJSON(),thr:+thr.value});})
+      .then(function(r){st={thr:r.thr};sv(AK,st);show();})
+      .catch(function(e){say('Ni uspelo: '+(e&&e.message?e.message:'poskusite znova čez nekaj minut')+'.');})
+      .then(function(){onB.disabled=false;});
+    });
+  });
+  offB.addEventListener('click',function(){
+    offB.disabled=true;
+    getSub().then(function(x){return x.sub?post('/push/unsubscribe',{site:'migrena',endpoint:x.sub.endpoint}):null;})
+    .then(function(){st=null;try{localStorage.removeItem(AK);}catch(e){}show();say('Opozorilo je izklopljeno, naslovnica in prag sta izbrisana s strežnika.');})
+    .catch(function(e){say('Ni uspelo: '+(e&&e.message?e.message:'poskusite znova')+'.');}).then(function(){offB.disabled=false;});
+  });
+})();
 """
 
 
@@ -305,7 +343,7 @@ def client_script(cfg, days):
     payload = {
         "days": [{"pts": d["pts"], "detail": d["detail"]} for d in days],
         "th": list(cfg["th"]), "floor": D.FLOOR_PTS, "floorLevel": D.FLOOR_LEVEL, "levels": cfg["levels"],
-        "weight": 2, "top": D.top_of(cfg), "names": TRIGGERS,
+        "weight": 2, "top": D.top_of(cfg), "names": TRIGGERS, "api": WORKER_BASE,
     }
     return ("<script>\n(function(){\n" + D.JS_CORE + "\n" + MIG_ANALYZE_JS + "\nvar D=" + json.dumps(payload, ensure_ascii=False) + ";\n"
             + CLIENT_JS + "\n})();\n</script>")
@@ -338,6 +376,16 @@ def sections(cfg, c, days, today):
   <div class="dv-trig" id="mig-trig" role="group" aria-label="Moji sprožilci">{trigger_boxes()}</div>
   <div class="dv-actions"><button type="button" class="dv-btn dv-btn-p" id="mig-apply">Uporabi moje sprožilce</button><button type="button" class="dv-btn" id="mig-reset">Ponastavi</button></div>
   <p class="dv-status" id="mig-trig-status" role="status" aria-live="polite">Brez osebnih sprožilcev: vsi dejavniki štejejo enako.</p>'''
+    opts = "".join(f'<option value="{v}"{" selected" if v == 5 else ""}>{esc(t)}</option>' for v, t in ALARM_THR)
+    alarm = f'''  <div id="mig-alarm" hidden>
+  <h2>Opozorilo na telefon ob padcu tlaka</h2>
+  <p class="archive-intro">Če vklopite obvestilo, vam javimo, ko model napove padec zračnega tlaka čez izbrani prag v naslednjih 24 urah. Preverja se enkrat na uro, med 22.00 in 7.00 miruje. Vsak padec sporočimo enkrat. Strežnik shrani samo naslovnico naročnine in prag; dnevnika napadov ne vidi.</p>
+  <div class="dv-card"><div class="dv-form"><label>Prag <select id="mig-alarm-thr" class="dv-btn">{opts}</select></label>
+    <div class="dv-actions"><button type="button" class="dv-btn dv-btn-p" id="mig-alarm-on">Vklopi opozorilo</button><button type="button" class="dv-btn" id="mig-alarm-off" hidden>Izklopi</button></div>
+    <p class="dv-status" id="mig-alarm-msg" role="status" aria-live="polite"></p>
+    <p class="muted-note" id="mig-alarm-ios" hidden><b>iPhone in iPad:</b> obvestila delujejo samo v nameščeni aplikaciji. V Safariju tapnite »Deli« in »Dodaj na začetni zaslon«, odprite Meteorec z začetnega zaslona in alarm vklopite tam.</p>
+    <p class="muted-note">Napoved je modelska (Open-Meteo), ne zdravniški nasvet; alarm ne napove napada.</p></div></div>
+  </div>'''
     diary = '''  <h2 id="dnevnik">Moj dnevnik napadov</h2>
   <p class="archive-intro">Vpišite dneve napadov. Dnevnik je <strong>samo v vašem brskalniku</strong> (localStorage): ne gre na strežnik, ne pošilja se nikamor in ga brez vašega izvoza nihče ne vidi. Če izbrišete podatke brskalnika, ga izgubite, zato ga občasno izvozite.</p>
   <div class="dv-card"><form class="dv-form" id="mig-form" onsubmit="return false">
@@ -360,7 +408,7 @@ def sections(cfg, c, days, today):
     red = ('  <div class="dv-red"><strong>Kdaj nujno k zdravniku (112):</strong> nenaden, izredno hud glavobol (»najhujši v življenju«), '
            'glavobol z oslabelostjo ali motnjami govora in vida, zmedenostjo, krči, vročino s togim tilnikom ali po poškodbi glave. '
            'Tudi če se vaš običajni napad bistveno spremeni, se posvetujte z zdravnikom.</div>')
-    return {"after_cards": chart + "\n" + red + "\n" + personal + "\n" + diary}
+    return {"after_cards": chart + "\n" + red + "\n" + personal + "\n" + alarm + "\n" + diary}
 
 
 CFG = {

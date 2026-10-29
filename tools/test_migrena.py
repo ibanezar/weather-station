@@ -152,4 +152,13 @@ if script:
     os.unlink(f.name)
     check("odjemalski skript je veljaven JS", r.returncode == 0)
 check("naslov ≤ 60 znakov", len(M.CFG["title"]) <= 60)
+# alarm: izbirnik praga ↔ worker.js (namerna podvojitev)
+wsrc = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "worker.js"), encoding="utf-8").read()
+m = re.search(r"const MIG_THR_ALLOWED = \[([0-9, ]+)\]", wsrc)
+check("prag alarma: izbirnik ↔ MIG_THR_ALLOWED v worker.js", m and [int(x) for x in m.group(1).split(",")] == [v for v, _ in M.ALARM_THR])
+check("privzeti prag je med dovoljenimi", f"const MIG_THR_DEFAULT = 5;" in wsrc and 5 in [v for v, _ in M.ALARM_THR])
+for i in ("mig-alarm", "mig-alarm-on", "mig-alarm-off", "mig-alarm-thr", "mig-alarm-msg", "mig-alarm-ios"):
+    check(f"alarm: element #{i}", f'id="{i}"' in body)
+check("alarm: strežnik hrani samo naslovnico in prag (besedilo)", "samo naslovnico naročnine in prag" in body)
+check("alarm: odjemalec pošilja site:'migrena'", "site:'migrena'" in body)
 sys.exit(1 if fails else 0)

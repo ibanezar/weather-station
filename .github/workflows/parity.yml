@@ -76,6 +76,7 @@ jobs:
         run: |
           python3 tools/test_day_pages.py
           python3 tools/test_migrena.py
+          node tools/test_migrena_alarm.mjs
 
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py
