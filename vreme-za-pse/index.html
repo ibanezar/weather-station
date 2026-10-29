@@ -52,6 +52,7 @@
 .dv-adv{margin:.6rem 0 0;font-size:.92rem;color:var(--dv-ink)}
 .dv-meta{margin:.7rem 0 0;font-size:.76rem;color:var(--dv-ink2)}
 .dv-meta a{color:inherit;text-decoration:underline}
+.dv-art{float:right;width:64px;height:64px;margin:0 0 .5rem .8rem;padding:6px;border-radius:16px;background:rgba(255,255,255,.1)}
 .dv-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
 .dv-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .65rem;border-radius:999px;font-size:.8rem;border:1px solid var(--dv-grid);color:var(--dv-ink)}
 .dv-chip .dv-ic{color:var(--gc)}
@@ -116,23 +117,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Vreme za sprehod s psom: kdaj na pot</h1>
-  <p class="post-meta">Vročina, asfalt, mraz, dež in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 29. 10. 2026 ob 11.03</p>
+  <p class="post-meta">Vročina, asfalt, mraz, dež in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 29. 10. 2026 ob 11.17</p>
 <div class="dv-viz">
-  <div class="dv-hero" style="--c:var(--l-0)">
-    <svg class="dv-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: 0 točk, odlično"><path d="M22.0 108.2A88 88 0 0 1 37.7 59.8" fill="none" stroke="var(--l-0)" stroke-width="16"/><path d="M39.9 56.8A88 88 0 0 1 81.1 26.9" fill="none" stroke="var(--l-1)" stroke-width="16"/><path d="M84.6 25.8A88 88 0 0 1 135.4 25.8" fill="none" stroke="var(--l-2)" stroke-width="16"/><path d="M138.9 26.9A88 88 0 0 1 198.0 108.2" fill="none" stroke="var(--l-3)" stroke-width="16"/><text x="5.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">0</text><text x="25.1" y="51.3" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">2</text><text x="77.6" y="13.1" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">4</text><text x="142.4" y="13.1" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">6</text><text x="215.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">10+</text><g transform="rotate(0.0 110 110)"><path d="M40 110L110 106.5L110 113.5z" fill="var(--dv-ink)"/></g><circle cx="110" cy="110" r="7" fill="var(--dv-ink)"/><circle cx="110" cy="110" r="3" fill="var(--dv-surface)"/><text x="110" y="134" text-anchor="middle" font-size="12" fill="var(--dv-ink2)">0 točk (manj je bolje)</text></svg>
-    <div><div class="dv-k">Sprehod s psom danes · Zgornja Savinjska dolina</div><div class="dv-l">odlično</div><p class="dv-sum">Danes ni izrazitih ovir.</p><div class="dv-chips"><span class="dv-chip">brez izrazitih ovir</span></div><p class="dv-adv">Odlični pogoji za dolg sprehod.</p><p class="dv-meta">Izračunano 29. 10. 2026 ob 11.03 · modelska napoved, ne meritev · <a href="#metodologija">kako je ocena izračunana</a></p></div>
+  <div class="dv-hero" id="dv-hero" style="--c:var(--l-0)">
+    <svg class="dv-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: 0 točk, odlično"><path d="M22.0 108.2A88 88 0 0 1 37.7 59.8" fill="none" stroke="var(--l-0)" stroke-width="16"/><path d="M39.9 56.8A88 88 0 0 1 81.1 26.9" fill="none" stroke="var(--l-1)" stroke-width="16"/><path d="M84.6 25.8A88 88 0 0 1 135.4 25.8" fill="none" stroke="var(--l-2)" stroke-width="16"/><path d="M138.9 26.9A88 88 0 0 1 198.0 108.2" fill="none" stroke="var(--l-3)" stroke-width="16"/><text x="5.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">0</text><text x="25.1" y="51.3" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">2</text><text x="77.6" y="13.1" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">4</text><text x="142.4" y="13.1" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">6</text><text x="215.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">10+</text><g id="dv-needle" transform="rotate(0.0 110 110)"><path d="M40 110L110 106.5L110 113.5z" fill="var(--dv-ink)"/></g><circle cx="110" cy="110" r="7" fill="var(--dv-ink)"/><circle cx="110" cy="110" r="3" fill="var(--dv-surface)"/><text x="110" y="134" text-anchor="middle" font-size="12" fill="var(--dv-ink2)" id="dv-gauge-sc">0 točk (manj je bolje)</text></svg>
+    <div><div class="dv-k">Sprehod s psom danes · Zgornja Savinjska dolina</div><div class="dv-l" id="dv-hero-l">odlično</div><p class="dv-sum">Danes ni izrazitih ovir.</p><div class="dv-chips"><span class="dv-chip">brez izrazitih ovir</span></div><p class="dv-adv">Odlični pogoji za dolg sprehod.</p><p class="dv-meta">Izračunano 29. 10. 2026 ob 11.17 · modelska napoved, ne meritev · <a href="#metodologija">kako je ocena izračunana</a></p></div>
   </div>
   <p class="archive-intro"><strong>Kdaj je primeren čas za sprehod s psom?</strong> Zmerna temperatura brez izrazite vročine, mraza in neviht; poleti zgodaj zjutraj ali pozno zvečer, pozimi sredi dneva. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: <strong>odlično</strong> (0 točk, manj je bolje). Danes ni izrazitih ovir.</p>
   <p class="muted-note"><strong>Ocena je pripomoček, ne veterinarski nasvet.</strong> Ob znakih pregrevanja (težko dihanje, ohlapnost, bruhanje) ali podhladitve pokličite veterinarja.</p>
+
   <h2>Naslednjih 5 dni</h2>
   <p class="archive-intro">Najugodnejši dan je danes (odlično), najmanj ugoden nedelja (dobro). Raven je vedno zapisana tudi z besedo.</p>
-  <div class="dv-days">
+  <div class="dv-days" id="dv-days">
     <div class="dv-day dv-today" style="--c:var(--l-0)"><h3>Danes</h3><div class="dv-lvl">odlično</div><div class="dv-sc">0 točk</div><ul><li>brez izrazitih ovir</li></ul></div>
     <div class="dv-day" style="--c:var(--l-0)"><h3>Jutri</h3><div class="dv-lvl">odlično</div><div class="dv-sc">0 točk</div><ul><li>brez izrazitih ovir</li></ul></div>
     <div class="dv-day" style="--c:var(--l-0)"><h3>sob</h3><div class="dv-lvl">odlično</div><div class="dv-sc">0 točk</div><ul><li>brez izrazitih ovir</li></ul></div>
     <div class="dv-day" style="--c:var(--l-1)"><h3>ned</h3><div class="dv-lvl">dobro</div><div class="dv-sc">2 točki</div><ul><li>padavine 2,0 mm, verjetnost do 67 %</li></ul></div>
     <div class="dv-day" style="--c:var(--l-1)"><h3>pon</h3><div class="dv-lvl">dobro</div><div class="dv-sc">2 točki</div><ul><li>padavine 1,6 mm, verjetnost do 63 %</li></ul></div>
   </div>
+
   <h2>Čas za sprehod po urah</h2>
   <p class="archive-intro">Ocena po urah od 6.00 do 22.00. Barva celice je raven ure: odlično, dobro, previdno, odsvetovano.</p>
   <div class="dv-card">
@@ -189,7 +192,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <ul class="dv-lim">
     <li><strong>Pasma, starost in zdravje:</strong> ravno kratkodlaki, brahicefalni (sploščeni obraz), starejši, mladi in bolni psi so občutljivejši kot kaže ocena.</li>
     <li><strong>Temperatura tal</strong> je ocena iz zraka in sevanja; prosto preverite z dlanjo, ki jo za 5 sekund položite na tla.</li>
-    <li><strong>Modelska napoved, ne meritev:</strong> podatki so iz Open-Meteo za Rečico ob Savinji, stran se izračuna enkrat na dan (29. 10. 2026 ob 11.03); mreža modela ne razloči posameznih dolin in lokalnih razlik.</li>
+    <li><strong>Modelska napoved, ne meritev:</strong> podatki so iz Open-Meteo za Rečico ob Savinji, stran se izračuna enkrat na dan (29. 10. 2026 ob 11.17); mreža modela ne razloči posameznih dolin in lokalnih razlik.</li>
   </ul>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
@@ -209,6 +212,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
 </div>
+
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>

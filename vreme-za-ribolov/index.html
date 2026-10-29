@@ -52,6 +52,7 @@
 .dv-adv{margin:.6rem 0 0;font-size:.92rem;color:var(--dv-ink)}
 .dv-meta{margin:.7rem 0 0;font-size:.76rem;color:var(--dv-ink2)}
 .dv-meta a{color:inherit;text-decoration:underline}
+.dv-art{float:right;width:64px;height:64px;margin:0 0 .5rem .8rem;padding:6px;border-radius:16px;background:rgba(255,255,255,.1)}
 .dv-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
 .dv-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .65rem;border-radius:999px;font-size:.8rem;border:1px solid var(--dv-grid);color:var(--dv-ink)}
 .dv-chip .dv-ic{color:var(--gc)}
@@ -116,23 +117,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Vreme za ribolov na Savinji: pogoji za 5 dni</h1>
-  <p class="post-meta">Tlak, dež, veter, temperatura in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 29. 10. 2026 ob 11.03</p>
+  <p class="post-meta">Tlak, dež, veter, temperatura in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 29. 10. 2026 ob 11.17</p>
 <div class="dv-viz">
-  <div class="dv-hero" style="--c:var(--l-0)">
-    <svg class="dv-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: 1 točka, ugodno"><path d="M22.0 108.2A88 88 0 0 1 35.0 64.0" fill="none" stroke="var(--l-0)" stroke-width="16"/><path d="M37.0 60.9A88 88 0 0 1 71.8 30.7" fill="none" stroke="var(--l-1)" stroke-width="16"/><path d="M75.1 29.2A88 88 0 0 1 144.9 29.2" fill="none" stroke="var(--l-2)" stroke-width="16"/><path d="M148.2 30.7A88 88 0 0 1 198.0 108.2" fill="none" stroke="var(--l-3)" stroke-width="16"/><text x="5.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">0</text><text x="21.7" y="56.2" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">2</text><text x="66.4" y="17.5" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">4</text><text x="153.6" y="17.5" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">7</text><text x="215.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">11+</text><g transform="rotate(16.4 110 110)"><path d="M40 110L110 106.5L110 113.5z" fill="var(--dv-ink)"/></g><circle cx="110" cy="110" r="7" fill="var(--dv-ink)"/><circle cx="110" cy="110" r="3" fill="var(--dv-surface)"/><text x="110" y="134" text-anchor="middle" font-size="12" fill="var(--dv-ink2)">1 točka (manj je bolje)</text></svg>
-    <div><div class="dv-k">Ribolov danes · Savinja in Zgornja Savinjska dolina</div><div class="dv-l">ugodno</div><p class="dv-sum">Glavne ovire: zrak 3 dni povprečno 8 °C.</p><div class="dv-chips"><span class="dv-chip" style="--gc:var(--g-1)"><svg class="dv-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M9 20l1-2M13 20l1-2"/></svg>zrak 3 dni povprečno 8 °C</span></div><p class="dv-adv">Vreme je ugodno; vodostaj in barvo vode preverite sami.</p><p class="dv-meta">Izračunano 29. 10. 2026 ob 11.03 · modelska napoved, ne meritev · <a href="#metodologija">kako je ocena izračunana</a></p></div>
+  <div class="dv-hero" id="dv-hero" style="--c:var(--l-0)">
+    <svg class="dv-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: 1 točka, ugodno"><path d="M22.0 108.2A88 88 0 0 1 35.0 64.0" fill="none" stroke="var(--l-0)" stroke-width="16"/><path d="M37.0 60.9A88 88 0 0 1 71.8 30.7" fill="none" stroke="var(--l-1)" stroke-width="16"/><path d="M75.1 29.2A88 88 0 0 1 144.9 29.2" fill="none" stroke="var(--l-2)" stroke-width="16"/><path d="M148.2 30.7A88 88 0 0 1 198.0 108.2" fill="none" stroke="var(--l-3)" stroke-width="16"/><text x="5.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">0</text><text x="21.7" y="56.2" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">2</text><text x="66.4" y="17.5" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">4</text><text x="153.6" y="17.5" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">7</text><text x="215.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--dv-ink2)">11+</text><g id="dv-needle" transform="rotate(16.4 110 110)"><path d="M40 110L110 106.5L110 113.5z" fill="var(--dv-ink)"/></g><circle cx="110" cy="110" r="7" fill="var(--dv-ink)"/><circle cx="110" cy="110" r="3" fill="var(--dv-surface)"/><text x="110" y="134" text-anchor="middle" font-size="12" fill="var(--dv-ink2)" id="dv-gauge-sc">1 točka (manj je bolje)</text></svg>
+    <div><div class="dv-k">Ribolov danes · Savinja in Zgornja Savinjska dolina</div><div class="dv-l" id="dv-hero-l">ugodno</div><p class="dv-sum">Glavne ovire: zrak 3 dni povprečno 8 °C.</p><div class="dv-chips"><span class="dv-chip" style="--gc:var(--g-1)"><svg class="dv-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M9 20l1-2M13 20l1-2"/></svg>zrak 3 dni povprečno 8 °C</span></div><p class="dv-adv">Vreme je ugodno; vodostaj in barvo vode preverite sami.</p><p class="dv-meta">Izračunano 29. 10. 2026 ob 11.17 · modelska napoved, ne meritev · <a href="#metodologija">kako je ocena izračunana</a></p></div>
   </div>
   <p class="archive-intro"><strong>Kakšno vreme je dobro za ribolov na Savinji?</strong> Najbolj ugodno je stabilno, ne preveč vetrovno vreme brez neviht in brez izrazitih padavin v zadnjih dneh, ko voda ne narašča in ni motna. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: <strong>ugodno</strong> (1 točka, manj je bolje). Glavne ovire: zrak 3 dni povprečno 8 °C.</p>
   <p class="muted-note"><strong>Ocena je pripomoček, ne ribiški ali varnostni nasvet.</strong> Ob vodi upoštevajte opozorila ARSO in ribiške družine; ob nevihti in naraščajoči vodi se umaknite od brega.</p>
+
   <h2>Naslednjih 5 dni</h2>
   <p class="archive-intro">Najugodnejši dan je jutri (ugodno), najmanj ugoden ponedeljek (težavno). Raven je vedno zapisana tudi z besedo.</p>
-  <div class="dv-days">
+  <div class="dv-days" id="dv-days">
     <div class="dv-day dv-today" style="--c:var(--l-0)"><h3>Danes</h3><div class="dv-lvl">ugodno</div><div class="dv-sc">1 točka</div><ul><li>zrak 3 dni povprečno 8 °C</li></ul></div>
     <div class="dv-day" style="--c:var(--l-0)"><h3>Jutri</h3><div class="dv-lvl">ugodno</div><div class="dv-sc">0 točk</div><ul><li>brez izrazitih ovir</li></ul></div>
     <div class="dv-day" style="--c:var(--l-0)"><h3>sob</h3><div class="dv-lvl">ugodno</div><div class="dv-sc">0 točk</div><ul><li>brez izrazitih ovir</li></ul></div>
     <div class="dv-day" style="--c:var(--l-1)"><h3>ned</h3><div class="dv-lvl">povprečno</div><div class="dv-sc">3 točke</div><ul><li>padavine 2,0 mm, verjetnost do 67 %</li><li>zrak 3 dni povprečno 7 °C</li></ul></div>
     <div class="dv-day" style="--c:var(--l-2)"><h3>pon</h3><div class="dv-lvl">težavno</div><div class="dv-sc">5 točk</div><ul><li>padavine 1,9 mm, verjetnost do 65 %</li><li>tlak −2,1 hPa glede na včeraj</li></ul></div>
   </div>
+
 
   <h2>Skupna ocena po dnevih</h2>
   <div class="dv-card">
@@ -181,7 +184,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <ul class="dv-lim">
     <li><strong>Stran ne meri vode:</strong> vodostaj in pretok Savinje so na strani Vodostaj Savinje (ARSO); temperature vode ne poznamo.</li>
     <li><strong>Ribolovni režim:</strong> dovoljenja, revirje, čas in količine določa ribiška družina; stran o tem ne svetuje.</li>
-    <li><strong>Modelska napoved, ne meritev:</strong> podatki so iz Open-Meteo za Rečico ob Savinji, stran se izračuna enkrat na dan (29. 10. 2026 ob 11.03); mreža modela ne razloči posameznih dolin in lokalnih razlik.</li>
+    <li><strong>Modelska napoved, ne meritev:</strong> podatki so iz Open-Meteo za Rečico ob Savinji, stran se izračuna enkrat na dan (29. 10. 2026 ob 11.17); mreža modela ne razloči posameznih dolin in lokalnih razlik.</li>
   </ul>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
@@ -201,6 +204,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
 </div>
+
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
