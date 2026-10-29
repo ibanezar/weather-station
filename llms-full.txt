@@ -523,11 +523,11 @@ Ocena tveganja po vrsti cvetnega prahu za naslednjih 5 dni. Vir: Copernicus CAMS
 
 ## Biovreme — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/biovreme/
-> Biovreme danes: zmerno. Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka za Rečico ob Savinji — informativna ocena, ne zdravniško priporočilo.
+> Biovreme danes: ugodno. Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka za Rečico ob Savinji — informativna ocena, ne zdravniško priporočilo.
 
-Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka · osvežuje se dnevno · 2026-10-28
+Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka · osvežuje se dnevno · 2026-10-29
 
-Današnje biovreme za Rečico ob Savinji je ZMERNO — vsaj en dejavnik je danes izrazitejši. Ocena združuje zračni tlak, toplotno obremenitev, UV indeks in kakovost zraka — nazadnje posodobljeno 2026-10-28.
+Današnje biovreme za Rečico ob Savinji je UGODNO — nič od štirih dejavnikov trenutno ne izstopa. Ocena združuje zračni tlak, toplotno obremenitev, UV indeks in kakovost zraka — nazadnje posodobljeno 2026-10-29.
 
 Biovreme je uveljavljen pojem slovenske meteorologije — dnevna ocena, kako lahko vreme vpliva na počutje. Med prvimi je podnebne razlike na Slovenskem opisal Janez Vajkard Valvasor že leta 1689, zdraviliški turizem s poudarkom na podnebju pa je v drugi polovici 19. stoletja na Bledu utemeljil Arnold Rikli. Danes tovrstne napovedi (toplotna obremenitev, kakovost zraka, cvetni prah, UV indeks od leta 2001) redno objavlja ARSO; Slovenija je leta 1996 gostila tudi mednarodni kongres biometeorologov (ISB).
 
@@ -693,10 +693,6 @@ ARSO vs. Open-Meteo vs. ECMWF AIFS vs. WeatherNext 2 vs. MTR v1 vs. dejanska mer
 
 Na kratko: v zadnjih 30 dneh, v katerih so napovedovali vsi viri (25 dni), je bil za Rečico ob Savinji najbolj natančen pri najvišji temperaturi MTR v1 (±0,9 °C); za njim Open-Meteo ±1,5 °C, ECMWF AIFS ±2,3 °C, WeatherNext 2 ±3,2 °C, ARSO ±4,4 °C; pri najnižji temperaturi MTR v1 (±1,1 °C); za njim Open-Meteo ±2,0 °C, ECMWF AIFS ±2,2 °C, WeatherNext 2 ±2,8 °C, ARSO ±2,9 °C.
 
-Povprečna absolutna napaka napovedi za jutri proti meritvi IREICA1. Pri majhnem vzorcu se vrstni red hitro zamenja; iz enega meseca ne sklepajte. Pri virih ARSO, ECMWF AIFS, WeatherNext 2 je večina napake stalna pristranskost, ne naključno zgrešeni dnevi: najvišja temperatura je pri njih povprečno 4,4 °C pod meritvijo, 2,1 °C pod meritvijo, 3,2 °C pod meritvijo (v istem vrstnem redu). Posodobljeno: 29. oktobra 2026.
-
-Postaja IREICA1 je tega dne izmerila najvišjo temperaturo 12,5 °C . Dan prej so viri napovedali:
-
 ## Test napovedi — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/test-napovedi/
 > Kateri vremenski model najbolje napove vreme v Zgornji Savinjski dolini? Primerjava šestih virov (ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE, ARSO) z dejansko meritvijo postaje IREICA1 po dnevih vnaprej — 882 razrešenih dni, javni podatki.
@@ -727,11 +723,11 @@ https://meteorec.si/klima/
 
 Klimatološki povzetek meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n. m., Zgornja Savinjska dolina) na osnovi 6 let meritev (2019–2026). Mesečna povprečja temperature in padavin, absolutni rekordi ter fenološki kazalniki. Posodobljeno: 29. oktobra 2026.
 
+Na kratko: v 6 polnih letih meritev (2020–2025) pade v Rečici ob Savinji povprečno 1377 mm padavin na leto; dni z mrazom (najnižja ≤ 0 °C) je povprečno 108, vročih dni (najvišja ≥ 30 °C) 30. Najtopleje je v juliju (povprečna dnevna temperatura 20,9 °C), najhladneje v januarju (1,0 °C). Meritev postaje IREICA1, ne modelska ocena. Posodobljeno: 29. oktobra 2026.
+
 Rečica ob Savinji (366 m n. m., Zgornja Savinjska dolina) ima zmerno celinsko klimo. Najtoplejši mesec je julij s povprečno temperaturo 20,9 °C, najhladnejši pa januar s 1,0 °C. Letno pade povprečno 1377 mm padavin.
 
 Najtopleje je v juliju, ko dnevni maksimumi v povprečju dosežejo 28,4 °C, povprečna dnevna temperatura pa je 20,9 °C.
-
-Zmrzal (min. temperatura ≤ 0 °C) je najpogostejša od novembra do marca. Največ mrzlih dni je v januarju, ko jih je v povprečju 25 na mesec. Na leto postaja IREICA1 zabeleži povprečno 108 dni z mrazom.
 
 ## Padavine Rečica ob Savinji — letni in mesečni podatki
 https://meteorec.si/padavine/
@@ -739,11 +735,11 @@ https://meteorec.si/padavine/
 
 Klimatološki pregled padavin meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n. m.). Letne skupne vrednosti, mesečne norme in rekordi na osnovi meritev od novembra 2019.
 
+Na kratko: v Rečici ob Savinji pade povprečno 1377 mm padavin na leto (najbolj mokro 2023: 1711 mm, najbolj suho 2022: 1110 mm). Najdeževnejši mesec je september (povprečno 165 mm). Letos je do 28. oktobra 2026 padlo 914 mm, to je 82 % povprečja za to obdobje leta. Posodobljeno: 29. oktobra 2026.
+
 Do 28. oktobra 2026 je postaja IREICA1 letos zabeležila 914 mm padavin. To je 82 % povprečne količine za to obdobje leta.
 
 Postaja IREICA1 v Rečici ob Savinji (366 m n. m.) beleži povprečno 1377 mm padavin na leto (povprečje 2019–2026). Največ je padlo leta 2023 (1711 mm), najmanj pa leta 2022 (1110 mm).
-
-Padavine so precej enakomerno razporejene skozi celo leto, z rahlim viškom v toplejši polovici leta. Julij in avgust sta meseca z intenzivnimi plohami in nevihtami, jesen pa prinaša dolgotrajnejše deževje.
 
 ## Temperatura Rečica ob Savinji — mesečna povprečja in trendi
 https://meteorec.si/temperatura/
@@ -751,11 +747,11 @@ https://meteorec.si/temperatura/
 
 Klimatološki pregled temperature meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n. m., Zgornja Savinjska dolina). Mesečni profili, trend mrzlih in vročih dni ter absolutni rekordi od novembra 2019.
 
+Na kratko: najtopleje je v Rečici ob Savinji v juliju (povprečni dnevni maksimum 28,4 °C), najhladneje v januarju (povprečni dnevni minimum -3,4 °C). Na leto je povprečno 108 dni z mrazom (najnižja ≤ 0 °C) in 30 vročih dni (najvišja ≥ 30 °C). Rekordi postaje: 37,8 °C (5. avgusta 2026) in -16,5 °C (8. januarja 2026). Posodobljeno: 29. oktobra 2026.
+
 V Rečici ob Savinji (366 m n. m., Zgornja Savinjska dolina) so povprečne dnevne temperature od 1,0 °C v januarju do 20,9 °C v juliju. Letno povprečje znaša ok. 10,9 °C.
 
 Najtopleje je v juliju in avgustu. Julijski dnevni maksimumi v povprečju dosežejo 28,4 °C, absolutni rekord pa je 37,2 °C.
-
-Temperature pod 0 °C se pojavljajo pretežno od novembra do marca. Na leto postaja IREICA1 zabeleži povprečno 108 dni z mrazom, največ v januarju (25 dni).
 
 ## Vreme ta teden v Rečici ob Savinji | Meteorec
 https://meteorec.si/teden/
@@ -774,6 +770,8 @@ https://meteorec.si/rekord/
 > Kdaj je bilo v Rečici ob Savinji najbolj vroče in mrzlo? Rekordi IREICA1 od 2019: 37,8 °C / -16,5 °C, dež 89,9 mm/dan, veter 115,6 km/h.
 
 Postaja IREICA1 · Rečica ob Savinji · meritve od novembra 2019
+
+Na kratko: od novembra 2019 je postaja IREICA1 v Rečici ob Savinji izmerila najvišjo temperaturo 37,8 °C (5. avgusta 2026), najnižjo -16,5 °C (8. januarja 2026), največ padavin v enem dnevu 89,9 mm (12. septembra 2024) in najmočnejši izmerjeni sunek vetra 115,6 km/h (1. aprila 2024). Posodobljeno: 29. oktobra 2026.
 
 Vir: meteorološka postaja IREICA1, Rečica ob Savinji, Savinjska dolina (366 m n. m.). Rekordi so izračunani iz vseh razpoložljivih dnevnih meritev. Zadnja posodobitev: 29. oktobra 2026.
 
