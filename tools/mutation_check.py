@@ -130,6 +130,8 @@ MUTACIJE = [
     ("avtorizacija: push/send skrivnost [30.10.]", "worker.js", "if (!secret || !_safeEq(body.secret, secret)) return pj({ error: \"Nedovoljeno\" }, 401);", "", "test_worker_auth.mjs"),
     ("avtorizacija: gobe/alarm-notify [30.10.]", "worker.js", "if (!secret || !_safeEq(auth, `Bearer ${secret}`)) return j({ error: \"Nedovoljeno\" }, 401);", "", "test_worker_auth.mjs"),
     ("avtorizacija: premium/subscribers [30.10.]", "worker.js", "const auth = await _galleryAdminAuthed(request, env);\n          if (!auth.ok) return _json({ error: auth.error }, auth.status);\n          const cursor", "const cursor", "test_worker_auth.mjs"),
+    ("lektura_scan: odstotek [30.10.]", "tools/lektura_scan.py", 'r"(?<![\\w.,])\\d+(?:,\\d+)?%"', 'r"(?<![\\w.,])\\d+(?:,\\d+)?%%"', "test_lektura_scan.py"),
+    ("lektura_scan: izrez skript [30.10.]", "tools/lektura_scan.py", 'body = re.sub(r"<(script|style|svg|noscript|template|code|pre)\\b.*?</\\1>", " ", body, flags=re.S | re.I)', 'pass', "test_lektura_scan.py"),
     ("vrata pozebe: sezona [30.10.]", "tools/frost_gate.py", "SEASON_MONTHS = (3, 4, 5)", "SEASON_MONTHS = (3, 4, 5, 6)", "test_gates_daily.py"),
     ("vrata pozebe: popoldansko okno [30.10.]", "tools/frost_gate.py", '"afternoon": (14, 17)', '"afternoon": (14, 18)', "test_gates_daily.py"),
     ("vrata pozebe: stanje po terminu [30.10.]", "tools/frost_gate.py", "if state.get(slot, {}).get(\"lastRun\") == today and not force:", "if state.get(\"lastRun\") == today and not force:", "test_gates_daily.py"),

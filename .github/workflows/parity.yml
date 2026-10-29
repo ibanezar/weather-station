@@ -118,6 +118,12 @@ jobs:
       - name: Test varovalk javnih vnosov (push naslovi, omejitve po IP, zgornje meje)
         run: node tools/test_worker_abuse.mjs
 
+      - name: Test pravil slogovnega pregleda (lektura_scan)
+        run: python3 tools/test_lektura_scan.py
+
+      - name: Test avtorizacije končnih točk (premium, webhook, admin, skrivnosti)
+        run: node tools/test_worker_auth.mjs
+
       - name: Test vrat pozebe, igre, povzetka in zgodovine
         run: python3 tools/test_gates_daily.py
 

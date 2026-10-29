@@ -1907,6 +1907,21 @@ barometer, kumulonimbus. Zato so vsebina in številke s postaje preseljene na sl
   članek se ne prepiše (`--force`). Na FB/IG **ne gre samodejno** (nova vrsta vsebine) —
   po pregledu ga pošlji s `social-repost.yml`.
 
+## Lokalni slogovni pregled (`tools/lektura_scan.py`, 30. 10. 2026)
+
+Ker je `lektura.yml` izklopljena, `python3 tools/lektura_scan.py [-v] [--md POROČILO]` brez API-ja najde verjetne slogovne pasti iz `docs/slog-pisanja.md`: odstotek in enota brez presledka
+(`52,6%`, `33,6°C`), decimalna pika, ura z dvopičjem (`ob 8:04`), ravni narekovaji `"…"` in `„…”`, vezaj namesto pomišljaja, vezaj v obsegu (`18-19`), podvojena beseda, števniki, znani anglicizmi.
+**To ni lektura**: pravila najdejo kandidate (npr. »je je« je pravilno), odločitev je človekova. Prvi pregled (161 člankov, 125 mest): `docs/lektura-scan-2026-10.md`. Objavljenih člankov se
+ne popravlja na debelo (datum objave, FB/IG, shema); popravek posameznega članka gre skozi `touch_existing()`. Pravila preverja `tools/test_lektura_scan.py` (v `parity.yml`).
+Narekovaji „…“ so pravopisno dovoljeni, vodnik predpisuje »…«: pravilo je samo informativno.
+
+## Avtorizacija končnih točk (30. 10. 2026)
+
+`tools/test_worker_auth.mjs` (v `parity.yml`, 8 mutacij) zaklene: sync ključ `/premium/data`, Paddle podpis `/premium/webhook` (503 brez skrivnosti, 401 brez/s tujim podpisom, naročnina samo po veljavnem),
+žeton in potek naročnine, admin skrivnost z zaklepom po IP (`/premium/subscribers`, `/gallery/pending`, moderacija poročil), skrivnosti `/push/send`, `/blog-subscribe/notify`, `/gobe/alarm-notify`.
+Vse primerjave skrivnosti gredo skozi `_safeEq()` (konstanten čas). **Ni narejeno:** preverjanje `ts` pri Paddle webhooku (ponovitev ujetega zahtevka bi naročniku samo podaljšala rok; zavrnitev
+legitimnega ponovnega poskusa bi pomenila plačilo brez dostopa), omejitev `/ai-debug` (javno bere ARSO) in `/debug-headers`. Časovna vrata brez testa so zdaj pokrita s `tools/test_gates_daily.py`.
+
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
 Ločeno od `/tocnost-napovedi/` (ta meri samo ARSO+Open-Meteo+MTR pri D+1, dan za
