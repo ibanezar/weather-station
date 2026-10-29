@@ -235,6 +235,48 @@ def _patch_span(html, elem_id, value_text, drop_shimmer=True):
     return pattern.subn(repl, html, count=1)
 
 
+# Ikona stanja na junaški kartici je LCP element. JS jo je vstavil šele na koncu
+# applyObs() (2,4 s po dokumentu), zato jo zapišemo tudi v statični HTML.
+# Pravilo je kopija getCondition() + _COND_ICON v app.js (brez _wxCond, ki ga
+# JS doda pozneje: sneg/megla/vročina/nevihta). Če se ikona razlikuje, jo JS zamenja.
+HERO_ICON_BY_LABEL = {
+    "Jasno sončno": "clear-day", "Pretežno sončno": "partly-cloudy-day",
+    "Delno oblačno": "partly-cloudy-day", "Pretežno oblačno": "overcast-day",
+    "Oblačno": "overcast", "Jasna noč": "clear-night",
+    "Oblačna noč": "overcast-night", "Rahel dež": "drizzle", "Dež": "rain",
+    "Močan dež": "overcast-rain",
+}
+
+
+def hero_condition_label(obs):
+    m = obs.get("metric", {})
+    pr = m.get("precipRate") or 0
+    sr = m.get("solarRadiation") or obs.get("solarRadiation") or 0
+    try:
+        h = int((obs.get("obsTimeLocal") or "")[11:13])
+    except ValueError:
+        h = 12
+    night = h < 5 or h > 22
+    if pr > 7: return "Močan dež"
+    if pr > 2.5: return "Dež"
+    if pr > 0: return "Rahel dež"
+    if night and sr < 10: return "Jasna noč"
+    if night: return "Oblačna noč"
+    if sr > 700: return "Jasno sončno"
+    if sr > 300: return "Pretežno sončno"
+    if sr > 80: return "Delno oblačno"
+    if sr > 10: return "Pretežno oblačno"
+    return "Oblačno"
+
+
+def patch_hero_icon(html, obs):
+    label = hero_condition_label(obs)
+    img = (f'<img src="icons/weather/{HERO_ICON_BY_LABEL[label]}.svg" width="108" '
+           f'height="108" class="wx-icon" alt="{label}" fetchpriority="high">')
+    return re.sub(r'(<div class="hero-icon" id="hero-icon">)(?:<img [^>]*>)?(</div>)',
+                  lambda mo: mo.group(1) + img + mo.group(2), html, count=1)
+
+
 def patch_hero(html, obs):
     """Fill the hero card's number spans with the live observation so the
     LCP element (the big temperature) paints from static HTML instead of
@@ -284,6 +326,7 @@ def patch_hero(html, obs):
         lambda mo: mo.group(1) + f"trenutno {num(rr, 1)} mm/h" + mo.group(2),
         html, count=1,
     )
+    html = patch_hero_icon(html, obs)
     return html
 
 
