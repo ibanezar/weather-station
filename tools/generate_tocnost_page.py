@@ -208,6 +208,8 @@ CHART_CSS = """<style>
 .tnc-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.3rem;vertical-align:middle}
 .tnc-msg{font-size:.85rem;color:var(--muted)}
 .best-val{color:var(--green);font-weight:700}
+.tnc-answer{border-left:3px solid var(--green,#34d399);padding:.1rem 0 .1rem .9rem;margin:1rem 0 1.2rem}
+.tnc-answer p{margin:.3rem 0}
 </style>"""
 
 
@@ -309,6 +311,68 @@ def latest_day_block(verification, labels):
             f'  <p>Postaja IREICA1 je tega dne izmerila najvišjo temperaturo '
             f'<strong>{seo.num(a_tmax)} °C</strong>. Dan prej so viri napovedali:</p>\n'
             f'  <table class="stats">\n' + "\n".join(rows) + '\n  </table>')
+
+
+def answer_block(verification, labels):
+    """»Na kratko«: odgovor na vprašanje, ki ga zastavljajo iskalniki in AI povzetki (kateri vir je za Rečico
+    najbolj natančen), v prvih dveh stavkih in s številko. Primerja samo dneve, ko so napovedovali VSI vključeni
+    viri (sicer bi ARSO in AIFS merila različne dni). Razliko med prvim in drugim označi za zanesljivo le, če
+    interval ±1,96 SE parjenih dnevnih napak ne vključuje ničle."""
+    dates = sorted(verification)
+    keys = [k for k, _ in labels]
+    name = dict(labels)
+
+    def common(window):
+        out = []
+        for d in window:
+            rec = verification[d]
+            if all(rec.get(k) and rec[k].get("err_tmax") is not None and rec[k].get("err_tmin") is not None for k in keys):
+                out.append(d)
+        return out
+
+    def rank(days, field):
+        vals = {k: [verification[d][k][field] for d in days] for k in keys}
+        mae = {k: st.mean(v) for k, v in vals.items()}
+        order = sorted(keys, key=lambda k: mae[k])
+        reliable = False
+        if len(days) >= 10 and len(order) >= 2:
+            diff = [b - a for a, b in zip(vals[order[0]], vals[order[1]])]
+            se = st.stdev(diff) / (len(diff) ** 0.5) if len(diff) > 1 else 0
+            reliable = st.mean(diff) - 1.96 * se > 0
+        return order, mae, reliable
+
+    days_all = common(dates)
+    if len(days_all) < 10 or len(keys) < 2:
+        return ""
+    days_30 = common(dates[-30:])
+    use, label = (days_30, "zadnjih 30 dneh") if len(days_30) >= 15 else (days_all, "razrešenih dneh od " + seo.fmtd(days_all[0]))
+    parts = []
+    for field, what in (("err_tmax", "najvišji"), ("err_tmin", "najnižji")):
+        order, mae, reliable = rank(use, field)
+        rest = ", ".join(f'{name[k]} ±{seo.num(mae[k])} °C' for k in order[1:])
+        verdict = "" if reliable else " (razlika do drugega ni statistično zanesljiva)"
+        parts.append(f'pri {what} temperaturi {name[order[0]]} (±{seo.num(mae[order[0]])} °C){verdict}; za njim {rest}')
+    # Napaka, ki je skoraj vsa stalna pristranskost (npr. ARSO za Ljubno proti postaji v Rečici), ni naključno
+    # zgrešen dan: to povemo, sicer bi bralec lestvico bral kot kakovost napovedovalca.
+    biased = []
+    for k in keys:
+        signed = [verification[d][k]["tmax"] - verification[d]["actual"]["tmax"] for d in use
+                  if verification[d][k].get("tmax") is not None and verification[d].get("actual", {}).get("tmax") is not None]
+        if len(signed) >= 10:
+            b, m = st.mean(signed), st.mean(abs(x) for x in signed)
+            if m >= 2 and abs(b) >= 0.8 * m:
+                biased.append((name[k], b))
+    bias_txt = ''
+    if biased:
+        bias_txt = (' Pri virih ' + ", ".join(n for n, _ in biased) + ' je večina napake stalna pristranskost, ne naključno zgrešeni dnevi: '
+                    'najvišja temperatura je pri njih povprečno ' + ", ".join(f'{seo.num(abs(b))} °C {"pod" if b < 0 else "nad"} meritvijo' for _, b in biased)
+                    + ' (v istem vrstnem redu).')
+    return (f'  <div class="tnc-answer">\n'
+            f'  <p><strong>Na kratko:</strong> v {label}, v katerih so napovedovali vsi viri ({len(use)} dni), '
+            f'je bil za Rečico ob Savinji najbolj natančen ' + "; ".join(parts) + '.</p>\n'
+            f'  <p class="muted-note">Povprečna absolutna napaka napovedi za jutri proti meritvi IREICA1. '
+            f'Pri majhnem vzorcu se vrstni red hitro zamenja; iz enega meseca ne sklepajte.{bias_txt} '
+            f'Posodobljeno: {seo.fmtd(TODAY.isoformat())}.</p>\n  </div>')
 
 
 def build_body(verification):
@@ -645,10 +709,18 @@ def build_body(verification):
         + ([("meteorec", mtr_label)] if has_mos else [])
     ))
 
+    answer_html = answer_block(verification, (
+        [("arso", "ARSO"), ("open_meteo", "Open-Meteo")]
+        + ([("aifs", "ECMWF AIFS")] if has_aifs else [])
+        + ([("wn2", "WeatherNext 2")] if has_wn2 else [])
+        + ([("meteorec", mtr_label)] if has_mos else [])
+    ))
+
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Točnost napovedi", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Točnost vremenske napovedi — Rečica ob Savinji</h1>
   <p class="post-meta">{" vs. ".join(["ARSO", "Open-Meteo"] + (["ECMWF AIFS"] if has_aifs else []) + (["WeatherNext 2"] if has_wn2 else []) + ([mtr_label] if has_mos else []) + ["dejanska meritev"])} · {n_days} razrešenih dni · {TODAY.isoformat()}</p>
+{answer_html}
 {latest_block}
 {intro_block}
 {status}

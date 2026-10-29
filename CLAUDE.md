@@ -21,6 +21,11 @@ Zgodilo se je 30. 7. 2026: dnevni članek je objavil notranjo temperaturo in
 občuteno temperaturo v hiši, ker je surov Ecowitt odgovor romal naravnost v
 model. Odstavek je odstranjen, obe zarezi sta postavljeni.
 
+**Dopolnitev 29. 10. 2026:** `test_privacy.py` zdaj pregleda **vse** javne datoteke v repozitoriju (ne samo seznama) za ključe `indoor`/`tempinf`
+in za besedilo z meritvijo iz hiše (»notranji senzor«, »v hiši … 25 °C«), ter preverja, da worker od Ecowitta sploh ne zahteva `indoor` (tudi
+`/ecowitt-history`). Pri tem je našel članek iz julija (`blog/vroc-julijski-dan-…-0712.html`), ki je navajal izmerjeno notranjo temperaturo in vlago
+(pred pravilom z 30. 7.); odstavek je odstranjen. Nasvet (»notranja temperatura naj bo 24 °C«) ni meritev in ni prepovedan.
+
 **To preverja stroj** (od 1. 10. 2026): `python3 tools/test_privacy.py`, workflow
 `privacy.yml`. Test požene pravi `worker.js` z lažnim Ecowittom in Varpoljem, ki
 vrneta blok `indoor`, in preveri, da ga ne vrne nobena javna točka; da ga režejo
@@ -649,6 +654,20 @@ Kaj velja naprej:
 - Workers AI ostaja pri 10.000 brezplačnih Neuronih/dan, nad tem se obračuna —
   zato `IDENTIFY_DAILY_CAP` ni več trda nujnost, ampak izbira stroška.
 
+## Javni vnosi: omejitve po IP in zgornje meje (29. 10. 2026)
+
+Pregled `worker.js` je našel javne POST-e brez zaščite; popravljeno, preizkus `tools/test_worker_abuse.mjs` (v `parity.yml`, 23 mutacij v `mutation_check.py`).
+
+- **`/push/subscribe`** (vse štiri veje: meteorec, crnivec, migrena, gobe) sprejme samo **https naslov znanih push strežnikov** (`PUSH_HOST_OK`: FCM,
+  Mozilla, Windows, Apple; brez vrat). Prej je bil sprejet poljuben URL, worker pa je nanj pošiljal POST z VAPID podpisom (odboj) in lažne naročnine so
+  lahko zapolnile seznam (5000) in izrinile prave. **Nov push ponudnik = nov vzorec v `PUSH_HOST_OK`**, sicer njegovi naročniki dobijo 400. Prijave: 30/uro/IP.
+- **`_ipLimited(env, request, ime, max, ttl)`** je skupni blag ščit (KV ni atomaren, vzporedni klici mejo malo presežejo): `/napovej/vnos` 10/dan (brez
+  tega bi mreža napovedi zasedla vrh lestvice), `/igra/rezultat` in `/crnivec/igra/rezultat` 60/uro, `/blog-comments` 15/uro (vsak komentar pošlje
+  e-pošto in šteje v oceno), `/observations` 10/uro. Lestvice iger: slovar igralcev največ 1000 (`_capPlayers`), sicer ga napolnijo naključni id-ji.
+- Telo, ki ni objekt, in polja, ki niso nizi, dajo 400/ne 500; globalni `catch` ne vrača več `e.message`.
+- **Ni narejeno:** časovno neodvisna primerjava skrivnosti (`===` pri Bearer), preverjanje `ts` pri Paddle webhooku (ponovitev ujetega zahtevka;
+  Paddle ob ponovnih poskusih morda podpiše znova, zato brez dokaza ne spreminjam), nov atomaren števec (Durable Object).
+
 ## Napoved na pristajalni strani
 
 `tools/inject_forecast.py` piše 7-dnevno napoved (`WX-FC7`) in napoved po urah
@@ -778,6 +797,12 @@ Pravi CLS smo prvič izmerili s **pravimi podatki pod omejitvijo omrežja** (Pla
   neocenjeno v PageSpeedu.
 
 ## Snežna karta (`/zima/snezna-karta/`, 20. 10. 2026)
+
+**Generalka na sintetični zimi (29. 10. 2026):** `tools/test_winter_scenario.py` (v `parity.yml`) podtakne `winter_engine.fetch_open_meteo()` sintetično
+napoved (topel začetek → snežna fronta → žled → mraz), požene pravi `main()` in generatorje strani v kopiji repozitorija ter preveri smer izračunov
+(meja sneženja, sneg po pasovih, žled, poledica, gore) in da v strani ne pride `None`/`NaN`. `tools/test_snezna_karta.mjs` (ročno, Playwright) požene
+`karta.js` v brskalniku na sintetičnem `/sneg-karta.json`. Našel je napako: ura, za katero ICON-D2 nima podatka (sega 48 h od svojega teka), je
+pisala »model nikjer ne napoveduje sneženja« -- zdaj »za izbrano uro model nima podatkov«. Živega Open-Meteo odgovora to še vedno ne nadomešča.
 
 Ideja po Neurje.si »Snow Map« (sneženje po urah, meja sneženja, skupni novi sneg na eni karti). Izvedba je naša, po vzorcu `/primerjava-modelov/`:
 
@@ -2296,6 +2321,13 @@ Narejeno: `/meteogasilec/metodologija/` ima razdelek »Kako izračunam FWI« (po
 in FAQ; `/nevihte/` ima FAQ »Kje lahko spremljam nevihtno karto Slovenije?« (brez številk preverjanja v besedilu, da ne zastarijo);
 `/klima/` kaže vidno »Posodobljeno«. Panel poganjaj 3× na asistenta (odgovori variirajo) in vključi Google AI Overview ter Claude.
 
+**Narejeno 29. 10. 2026:** `/tocnost-napovedi/` ima blok **»Na kratko«** (`answer_block()` v `generate_tocnost_page.py`): kateri vir je za Rečico
+najbolj natančen pri Tmax in Tmin v zadnjih 30 dneh (samo dnevi, ko so napovedovali VSI viri), razlika označena kot nezanesljiva, če interval ±1,96 SE
+parjenih napak vključuje ničlo, in stalna pristranskost povedana naglas. **Odkrito pri tem:** ARSO je pri Tmax tri mesece zapored ~4,4 °C pod meritvijo
+(Ljubno, `txsyn`; brez zamika datuma), AIFS 2,1 °C, WN2 3,2 °C, Open-Meteo 1,2 °C -- postaja je verjetno topla proti vsem modelom. Zato je lestvica
+tudi mera pristranskosti, ne samo kakovosti. **`llms-full.txt`** (`tools/generate_llms_full.py`, dnevno v `seo-smart-routine.yml`) je uvodno besedilo
+vseh strani iz `CORE`, izrezano iz objavljenih HTML; Bing (faza 4.1), panel ×3 in Wikidata ostanejo ročno.
+
 **Sledenje omembam** (`data/geo-mentions.json`, prazen seznam do prvega
 vnosa) — ročen, mesečni dnevnik, ne avtomatiziran sistem. Panel 17 vprašanj
 (informativna, primerjalna, priporočilo, how-to — ne le ključne besede) in
@@ -2349,7 +2381,7 @@ meritve DRSI in oznake dni.
   generatorju, regeneriraj stran (ali isto spremembo ročno prenesi v committano
   stran), sicer test še vidi staro kopijo.
 - **Mutacijski preizkus** (`tools/mutation_check.py`, `mutation-check.yml`, ročno/mesečno, ~6 min):
-  vnese 65 majhnih napak (prag, konstanta, obrnjen pogoj, odstranjena varovalka) in preveri, da
+  vnese 90 majhnih napak (prag, konstanta, obrnjen pogoj, odstranjena varovalka) in preveri, da
   PRIPADAJOČI test pade — `test_parity`, `test_gates`, `test_stale_inputs`, `test_storm_verify`,
   `test_lightning_logger`, `test_freshness`, `test_precip_snapshot`, `test_valley_profile`,
   `test_privacy`. Prvi zagon (1. 10. 2026): 60/65 ujetih, **5 preživelih = 5 lukenj v testih**

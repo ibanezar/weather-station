@@ -565,7 +565,7 @@ def build_body(l, svez_opomba):
   <div class="pg-lb" id="pg-lb">
     <h2 class="pg-lb-h2">Lestvica</h2>
     <p class="muted-note">Vzdevek za lestvico (neobvezno):
-      <input id="pg-lb-ime" type="text" maxlength="24" placeholder="Anonimni" autocomplete="nickname">
+      <input id="pg-lb-ime" aria-label="Vzdevek na lestvici" type="text" maxlength="24" placeholder="Anonimni" autocomplete="nickname">
       — prikazan je samo tvoj najboljši prelet, ne vsak poskus.</p>
     <div class="pg-lb-tabs" role="group" aria-label="Lestvica">
       <button type="button" class="pg-lb-tab" data-obdobje="dan" aria-pressed="true">Danes</button>

@@ -7,7 +7,7 @@ Kratek odgovor: prvi vikend po dežju je za jurčka po našem modelu prezgodaj. 
 
 01 — KOLEDAR -- Koledar
 
-Poznate takšen teden? V petek vsa dolina dežuje, v soboto zjutraj greste v gozd, pa so tla mokra in klobukov ni. V torek vas sosed vpraša, ali ste že bili, v soboto pa se pohvali s košaro. Zgleda, kot da gobe rastejo takrat, ko ste v službi ali drugje.
+Poznate takšen teden? V petek vsa dolina dežuje, v soboto zjutraj greste v gozd, pa so tla mokra in klobukov ni. V torek vas sosed vpraša, ali ste že bili, v soboto pa se pohvali s košaro. Zdi se, kot da gobe rastejo takrat, ko ste v službi ali drugje.
 
 Model za mikorizne vrste računa, da po sprožilnem dežju mine 8–16 dni, preden zraste trosnjak (jurček), za lisičko pa 4–14 dni. Okno jurčka je torej 9 dni dolgo in vedno vsebuje vsaj eno soboto in eno nedeljo. Prvi vikend po dežju pa pade v prvih 1–7 dneh, zato je pri jurčku vedno pred oknom. To je čisti koledarski račun, brez podatkov postaje:
 
@@ -35,7 +35,7 @@ V Rečici je 10. septembra padlo 85,1 mm, 11. septembra še 35,6 mm, skupaj 120,
 
 Pregledal sem padavine postaje IREICA1 od avgusta do novembra v letih 2020–2026. Dogodek dežja je skupina dni z vsaj 3 mm (vrzel največ en dan), skupaj vsaj 20 mm. Takih dogodkov je bilo 53. Pri vsakem sem preveril, ali vsaj en dan prvega oziroma drugega vikenda po zadnjem deževnem dnevu pade v okno vrste.
 
-Pri jurčku noben dan prvega vikenda po dežju ni bil v oknu 8–16 dni v nobenem od 53 dogodkov. Vsaj en dan drugega vikenda je bil v oknu v vseh 53. To sicer sledi iz koledarja, a vidno je tudi, da se gobar brez tega znanja ob vsakem dežju odpravi prvi vikend.
+Pri jurčku noben dan prvega vikenda po dežju ni bil v oknu 8–16 dni v nobenem od 53 dogodkov. Vsaj en dan drugega vikenda je bil v oknu v vseh 53. To sledi iz koledarja; številka le pokaže, da prvi vikend ni redka izjema, ampak pravilo.
 
 Pri lisički je bil vsaj en dan prvega vikenda v oknu 4–14 dni v 28 od 53 dogodkov, torej v okoli 53 %. Če dežuje v petek ali četrtek, je za lisičko prvi vikend prezgodaj; če dežuje na začetku tedna, je večinoma ravno prav.
 

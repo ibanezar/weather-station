@@ -331,7 +331,7 @@ CSS = """<style>
 .as-reasons ul{margin:.5rem 0 0;padding-left:1.1rem}
 .as-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin:.4rem 0}
 .as-btn{min-height:44px;padding:.5rem 1rem;border-radius:8px;border:1px solid var(--as-grid);background:transparent;color:var(--as-ink);font:inherit;cursor:pointer}
-.as-btn-p{background:var(--g-zrak);border-color:var(--g-zrak);color:#fff;font-weight:700}
+.as-btn-p{background:#2a6fcf;border-color:#2a6fcf;color:#fff;font-weight:700}
 .as-status{font-size:.88rem;color:var(--as-ink);margin:.4rem 0}
 .as-trig{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
 .as-trig label{display:flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border:1px solid var(--as-grid);border-radius:8px;cursor:pointer;min-height:44px;font-size:.88rem}

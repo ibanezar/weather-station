@@ -5032,7 +5032,7 @@ def opazovanje_section_html(indexed, area_names):
         style="position:absolute;left:-9999px" aria-hidden="true">
       <div class="gp-diary-row">
         <div class="gp-opz-ac">
-          <input type="text" id="gp-opz-vrsta" placeholder="Katera vrsta?" autocomplete="off"
+          <input type="text" id="gp-opz-vrsta" aria-label="Vrsta gobe" placeholder="Katera vrsta?" autocomplete="off"
             maxlength="60" required>
           <datalist id="gp-opz-vrsta-list">{sp_options}</datalist>
           <div class="gp-opz-ac-menu" id="gp-opz-vrsta-menu" hidden></div>
@@ -5050,7 +5050,7 @@ def opazovanje_section_html(indexed, area_names):
           <option value="obilo">Obilo</option>
           <option value="nic">Nič (iskal sem, a nisem našel)</option>
         </select>
-        <input type="text" id="gp-opz-opomba" placeholder="Opomba (neobvezno)" maxlength="200">
+        <input type="text" id="gp-opz-opomba" aria-label="Opomba (neobvezno)" placeholder="Opomba (neobvezno)" maxlength="200">
       </div>
       <button type="submit" class="gp-cta gp-diary-submit">Oddaj opažanje</button>
     </form>
@@ -6052,7 +6052,7 @@ def build_body(rules, premium, free):
     <div class="gp-diary-row">
       <input type="text" id="gp-freeauth-website" name="website" autocomplete="off" tabindex="-1"
         style="position:absolute;left:-9999px" aria-hidden="true">
-      <input type="email" id="gp-freeauth-email" placeholder="tvoj@e-naslov.si" autocomplete="email"
+      <input type="email" id="gp-freeauth-email" aria-label="E-naslov" placeholder="tvoj@e-naslov.si" autocomplete="email"
         style="flex:1;min-width:200px">
       <button type="button" class="gp-cta" id="gp-freeauth-btn">Pošlji brezplačno povezavo</button>
     </div>
@@ -6304,8 +6304,8 @@ def build_body(rules, premium, free):
     <div id="gp-diary-sync" class="gp-msg" hidden></div>
     <form id="gp-diary-form">
       <div class="gp-diary-row">
-        <input type="date" id="gp-d-date" required>
-        <input type="text" id="gp-d-species" list="gp-d-species-list" placeholder="Vrsta (neobvezno)">
+        <input type="date" id="gp-d-date" aria-label="Datum" required>
+        <input type="text" id="gp-d-species" aria-label="Vrsta (neobvezno)" list="gp-d-species-list" placeholder="Vrsta (neobvezno)">
         <datalist id="gp-d-species-list">{species_options}</datalist>
       </div>
       <div class="gp-diary-row">
@@ -6319,7 +6319,7 @@ def build_body(rules, premium, free):
         <img id="gp-d-photo-preview" class="gp-d-photo-preview" alt="">
       </div>
       <div class="gp-diary-row">
-        <textarea id="gp-d-notes" placeholder="Opombe — količina, mesto, opažanja …"></textarea>
+        <textarea id="gp-d-notes" aria-label="Opombe: količina, mesto, opažanja" placeholder="Opombe — količina, mesto, opažanja …"></textarea>
       </div>
       <button type="submit" class="gp-cta gp-diary-submit">💾 Shrani najdbo</button>
     </form>

@@ -839,6 +839,39 @@ async function _encryptPush(payload, p256dhB64, authB64) {
   const header = _cat(salt, new Uint8Array([0, 0, 0x10, 0x00]), new Uint8Array([65]), as_pub);
   return _cat(header, ct);
 }
+// ── Zaščita javnih vnosov ───────────────────────────────────
+// Push endpoint mora biti pravi naslov brskalniškega push strežnika: worker nanj pošilja POST z VAPID podpisom,
+// poljuben URL bi bil odboj (reflection) in izrinil prave naročnike (seznam je omejen na 5000).
+const PUSH_HOST_OK = [/^fcm\.googleapis\.com$/, /^android\.googleapis\.com$/, /(^|\.)push\.services\.mozilla\.com$/,
+  /(^|\.)notify\.windows\.com$/, /(^|\.)push\.apple\.com$/];
+function _pushSubOk(s) {
+  try {
+    if (!s || typeof s.endpoint !== "string" || s.endpoint.length > 1000 || !s.keys) return false;
+    if (typeof s.keys.p256dh !== "string" || typeof s.keys.auth !== "string"
+        || s.keys.p256dh.length > 200 || s.keys.auth.length > 100) return false;
+    const u = new URL(s.endpoint);
+    return u.protocol === "https:" && !u.port && PUSH_HOST_OK.some(r => r.test(u.hostname));
+  } catch (_) { return false; }
+}
+// Omejitev po IP: vrne true, ko je meja presežena. KV ni atomaren (vzporedni klici lahko mejo malo presežejo) -- za
+// blag ščit pred skriptami to zadošča, za kaj strožjega bi bil potreben Durable Object.
+async function _ipLimited(env, request, name, max, ttl) {
+  const kv = env?.COUNTER_KV; if (!kv) return false;
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const key = name + ":" + ip;
+  const n = parseInt((await kv.get(key)) || "0") || 0;
+  if (n >= max) return true;
+  await kv.put(key, String(n + 1), { expirationTtl: ttl });
+  return false;
+}
+// Slovar igralcev na lestvici ima zgornjo mejo: sicer bi ga skripta z naključnimi id-ji napihnila do meje KV.
+function _capPlayers(obj, max, better) {
+  const keys = Object.keys(obj);
+  if (keys.length <= max) return obj;
+  keys.sort((a, b) => better(obj[a], obj[b]));
+  const out = {}; for (const k of keys.slice(0, max)) out[k] = obj[k];
+  return out;
+}
 async function _sendPush(env, sub, payloadObj) {
   const url = new URL(sub.endpoint);
   const jwt = await _vapidJWT(url.origin, env.VAPID_PRIVATE);  // env.VAPID_PRIVATE = skrivnost (d)
@@ -4506,10 +4539,11 @@ export default {
           if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _json({ error: "Napačni podatki" }, 400);
           if (body.website) return _json({ ok: true }); // honeypot — boti izpolnijo skrito polje
 
           const zona = CRN_ZONE_IDS.includes(body.zona) ? body.zona : null;
-          const opomba = (body.opomba || "").trim().slice(0, 140);
+          const opomba = String(body.opomba || "").trim().slice(0, 140);
           const porocevalec = (body.porocevalec || "").trim();
           // Prazen niz šteje kot "brez vzdevka" -- pusti "Anonimni" spodaj,
           // ne prazno vrstico na lestvici.
@@ -4733,6 +4767,11 @@ export default {
           return new Response(JSON.stringify({ error: "lestvica trenutno ni na voljo" }),
             { status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
         }
+        // Brez omejitve bi skripta z mrežo napovedi (vsaka z drugim id-jem) vedno zadela blizu meritve in zasedla vrh.
+        if (await _ipLimited(env, request, "napovej_vnos_rl", 10, 86400)) {
+          return new Response(JSON.stringify({ error: "preveč napovedi z tega naslova danes" }),
+            { status: 429, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
         const p = url.searchParams;
         const datum = p.get("datum") || "";
         const igralec = p.get("igralec") || "";
@@ -4830,6 +4869,10 @@ export default {
           return new Response(JSON.stringify({ error: "lestvica trenutno ni na voljo" }),
             { status: 503, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
         }
+        if (await _ipLimited(env, request, "igra_rez_rl", 60, 3600)) {
+          return new Response(JSON.stringify({ error: "preveč rezultatov v kratkem času" }),
+            { status: 429, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        }
         const p = url.searchParams;
         const koridor = p.get("koridor") || "";
         const datum = p.get("datum") || "";
@@ -4876,6 +4919,7 @@ export default {
           const prej = obstojeci[igralec];
           if (!prej || kmR > prej.km) {
             obstojeci[igralec] = { ime, km: kmR, datum, koridor };
+            obstojeci = _capPlayers(obstojeci, 1000, (a, b) => b.km - a.km);
             await kv.put(kljuc, JSON.stringify(obstojeci), ttl ? { expirationTtl: ttl } : undefined);
           }
         }
@@ -4929,6 +4973,9 @@ export default {
         const kv = env?.COUNTER_KV;
         const hdr = { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" };
         if (!kv) return new Response(JSON.stringify({ error: "lestvica trenutno ni na voljo" }), { status: 503, headers: hdr });
+        if (await _ipLimited(env, request, "crn_igra_rl", 60, 3600)) {
+          return new Response(JSON.stringify({ error: "preveč rezultatov v kratkem času" }), { status: 429, headers: hdr });
+        }
         const p = url.searchParams;
         const datum = p.get("datum") || "";
         const igralec = p.get("igralec") || "";
@@ -4951,6 +4998,7 @@ export default {
         const prej = obstojeci[igralec];
         if (!prej || casR < prej.cas) {
           obstojeci[igralec] = { ime, cas: casR, verige: p.get("verige") === "1" };
+          obstojeci = _capPlayers(obstojeci, 1000, (a, b) => a.cas - b.cas);
           await kv.put(kljuc, JSON.stringify(obstojeci), { expirationTtl: 60 * 86400 });
         }
         return new Response(JSON.stringify({ ok: true }), { headers: hdr });
@@ -6791,8 +6839,12 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           try { body = await request.json(); } catch (_) {
             return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
-          if (!OBS_TYPES.includes(body.type)) {
+          if (!body || typeof body !== "object" || !OBS_TYPES.includes(body.type)) {
             return new Response(JSON.stringify({ error: "Neznana vrsta opazovanja" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          // Opažanja so javna in štejejo v števce na strani: brez omejitve po IP bi jih en naslov izrinil (shramba hrani 500).
+          if (await _ipLimited(env, request, "obs_rl", 10, 3600)) {
+            return new Response(JSON.stringify({ error: "Preveč opažanj v kratkem času — poskusi kasneje" }), { status: 429, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
           const coord = _obsCoord(body);
           const all   = await _obsRead();
@@ -6870,12 +6922,13 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _json({ error: "Napačni podatki" }, 400);
           if (body.website) return _json({ ok: true }); // honeypot — boti izpolnijo skrito polje
 
-          const vrsta = (body.vrsta || "").trim().slice(0, 60);
-          const obmocje = (body.obmocje || "").trim().slice(0, 80);
+          const vrsta = String(body.vrsta || "").trim().slice(0, 60);
+          const obmocje = String(body.obmocje || "").trim().slice(0, 80);
           const kolicina = KOLICINE.includes(body.kolicina) ? body.kolicina : null;
-          const opomba = (body.opomba || "").trim().slice(0, 200);
+          const opomba = String(body.opomba || "").trim().slice(0, 200);
           if (!vrsta || !obmocje || !kolicina) {
             return _json({ error: "Izberi vrsto, območje in količino" }, 400);
           }
@@ -6940,6 +6993,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _json({ error: "Napačni podatki" }, 400);
           if (body.website) return _json({ ok: true }); // honeypot
           const q1 = ANKETA_Q1.includes(body.q1) ? body.q1 : undefined;
           const q2 = ANKETA_Q2.includes(body.q2) ? body.q2 : undefined;
@@ -7058,11 +7112,12 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _json({ error: "Napačni podatki" }, 400);
           if (body.website) return _json({ ok: true }); // honeypot
           const tip = NP_TIPI.includes(body.tip) ? body.tip : null;
           const regija = NP_REGIJE.includes(body.regija) ? body.regija : null;
-          const kraj = (body.kraj || "").trim().slice(0, 60);
-          const opis = (body.opis || "").trim().slice(0, 300);
+          const kraj = String(body.kraj || "").trim().slice(0, 60);
+          const opis = String(body.opis || "").trim().slice(0, 300);
           if (!tip || !regija || !kraj) return _json({ error: "Izberi pojav, regijo in vpiši kraj" }, 400);
 
           const kv = env?.COUNTER_KV;
@@ -7430,7 +7485,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           try { body = await request.json(); } catch (_) {
             return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
-          const slug = (body.slug || "").trim();
+          if (!body || typeof body !== "object") {
+            return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const slug = String(body.slug || "").trim();
           if (!SLUG_RE.test(slug)) {
             return new Response(JSON.stringify({ error: "Neznan članek" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
@@ -7438,7 +7496,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (body.website) {
             return new Response(JSON.stringify({ ok: true }), { headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
-          const comment = (body.comment || "").trim();
+          const comment = String(body.comment || "").trim();
           const rating  = body.rating ? parseInt(body.rating) : null;
           if (!comment && !rating) {
             return new Response(JSON.stringify({ error: "Napiši komentar ali oddaj oceno" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
@@ -7448,6 +7506,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           }
           if (rating !== null && (rating < 1 || rating > 5)) {
             return new Response(JSON.stringify({ error: "Ocena mora biti med 1 in 5" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          // Vsak komentar pošlje lastniku e-pošto (Resend) in šteje v oceno članka: brez omejitve po IP bi ga skripta zasula.
+          if (await _ipLimited(env, request, "blog_comment_rl", 15, 3600)) {
+            return new Response(JSON.stringify({ error: "Preveč komentarjev v kratkem času — poskusi kasneje" }), { status: 429, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
           const items = await _cRead(slug);
           // Preprosta zaščita pred podvajanjem: isti komentar v zadnji minuti
@@ -7460,7 +7522,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const entry = {
             id: crypto.randomUUID().split("-")[0],
             ts: new Date().toISOString(),
-            author: (body.author || "Anonimno").slice(0, 60).trim() || "Anonimno",
+            author: String(body.author || "Anonimno").slice(0, 60).trim() || "Anonimno",
             comment: comment.slice(0, 1500),
             rating: rating,
           };
@@ -7563,6 +7625,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _json({ error: "Napačni podatki" }, 400);
           if (body.website) return _json({ ok: true }); // honeypot
           const email = (body.email || "").trim().toLowerCase();
           if (!EMAIL_RE.test(email) || email.length > 120) return _json({ error: "Neveljaven e-naslov" }, 400);
@@ -7898,6 +7961,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (path === "/premium/login" && request.method === "POST") {
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _json({ error: "Napačni podatki" }, 400);
           if (body.website) return _json({ ok: true }); // honeypot
           const email = (body.email || "").trim().toLowerCase();
           if (!EMAIL_RE.test(email) || email.length > 120) return _json({ error: "Neveljaven e-naslov" }, 400);
@@ -8479,6 +8543,10 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
 
         if (request.method !== "POST") return pj({ error: "Nedovoljena metoda" }, 405);
         let body; try { body = await request.json(); } catch (_) { return pj({ error: "Napačni podatki" }, 400); }
+        if (!body || typeof body !== "object") return pj({ error: "Napačni podatki" }, 400);
+        if (path === "/push/subscribe" && await _ipLimited(env, request, "push_sub_rl", 30, 3600)) {
+          return pj({ error: "Preveč prijav v kratkem času — poskusi kasneje" }, 429);
+        }
 
         // crnivec.si ima svoj seznam (glej CRN_PUSH_KEY): brez vasi in
         // povzetka, samo opozorila s prelaza.
@@ -8489,7 +8557,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           if (path === "/push/subscribe") {
             if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
             const s = body.subscription || body;
-            if (!s || !s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+            if (!_pushSubOk(s)) return pj({ error: "Neveljavna naročnina" }, 400);
             if (!subs.some(x => x.endpoint === s.endpoint)) {
               subs.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, ts: new Date().toISOString() });
               await cWrite(subs.slice(0, 5000));
@@ -8535,7 +8603,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           if (path === "/push/subscribe") {
             if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
             const s = body.subscription || {};
-            if (!s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+            if (!_pushSubOk(s)) return pj({ error: "Neveljavna naročnina" }, 400);
             const thr = _migThr(body.thr), old = subs.find(x => x.endpoint === s.endpoint);
             const rest = subs.filter(x => x.endpoint !== s.endpoint);
             rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, thr, st: old ? old.st || { over: false, last: 0 } : { over: false, last: 0 }, ts: old ? old.ts : new Date().toISOString() });
@@ -8556,7 +8624,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           if (path === "/push/subscribe") {
             if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
             const s = body.subscription || {};
-            if (!s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+            if (!_pushSubOk(s)) return pj({ error: "Neveljavna naročnina" }, 400);
             const picker = await _gobePicker();
             if (!picker) return pj({ error: "Seznam vrst trenutno ni dosegljiv" }, 503);
             const rules = _gobeAlarmClean(picker, body.rules);
@@ -8578,7 +8646,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
         if (path === "/push/subscribe") {
           if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
           const s = body.subscription || body;
-          if (!s || !s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+          if (!_pushSubOk(s)) return pj({ error: "Neveljavna naročnina" }, 400);
           // Vas je edini podatek o lokaciji, ki ga hranimo — izbrana s seznama,
           // ne iz GPS. Neznan id zavržemo, da v shrambo ne pride poljuben niz.
           const vas = NOWCAST_VASI.some(v => v.id === body.vas) ? body.vas : null;
@@ -8678,8 +8746,9 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
       });
 
     } catch (e) {
+      console.error("fetch:", e && e.stack || e);
       return new Response(
-        JSON.stringify({ error: e.message }),
+        JSON.stringify({ error: "interna napaka" }),
         { status: 500, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
       );
     }

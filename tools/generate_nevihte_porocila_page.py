@@ -79,8 +79,8 @@ def build_body():
         style="position:absolute;left:-9999px" aria-hidden="true">
       <select id="np-tip" required aria-label="Kaj si opazil?"><option value="">Kaj si opazil?</option>{tip_opts}</select>
       <select id="np-regija" required aria-label="Regija"><option value="">Katera regija?</option>{reg_opts}</select>
-      <input type="text" id="np-kraj" placeholder="Kraj (naselje)" maxlength="60" required>
-      <input type="text" id="np-opis" placeholder="Kratek opis, npr. velikost toče (neobvezno)" maxlength="300">
+      <input type="text" id="np-kraj" aria-label="Kraj (naselje)" placeholder="Kraj (naselje)" maxlength="60" required>
+      <input type="text" id="np-opis" aria-label="Kratek opis (neobvezno)" placeholder="Kratek opis, npr. velikost toče (neobvezno)" maxlength="300">
       <button type="submit" class="mtn-avk-link" style="justify-self:start">Pošlji poročilo</button>
     </form>
     <div id="np-msg" aria-live="polite" style="margin-top:.5rem;font-size:.85rem"></div>

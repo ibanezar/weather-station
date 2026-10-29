@@ -60,11 +60,16 @@ def test_worker():
     except ValueError:
         check(False, "worker se ne zažene", (p.stdout + p.stderr)[:400])
         return
+    reqs = out.pop("__ecowitt_requests", [])
+    check(len(reqs) >= 3, "worker je poklical Ecowitt (history, real_time)", f"{len(reqs)} zahtev")
+    check(not any("indoor" in u.lower() for u in reqs), "worker ne zahteva notranjih podatkov od Ecowitta",
+          next((u for u in reqs if "indoor" in u.lower()), ""))
     for path, r in out.items():
         check(r["status"] == 200, f"worker {path}: odgovor", f"status={r['status']} {r['body'][:120]}")
         check(not leaks(r["body"]), f"worker {path}: notranje meritve", ", ".join(leaks(r["body"])))
     # lažni odgovor mora res vsebovati zunanje podatke, sicer test nič ne dokazuje
     check('"12.3"' in out["/ecowitt-current"]["body"], "worker /ecowitt-current: zunanja temperatura je prisotna")
+    check("tempHigh" in out["/ecowitt-history?start=2026-10-01&end=2026-10-02"]["body"], "worker /ecowitt-history: zunanja temperatura je prisotna")
     check("11.9" in out["/varpolje-current"]["body"], "worker /varpolje-current: zunanja temperatura je prisotna")
 
 
@@ -136,19 +141,37 @@ def test_new_clients():
         check(f in found, f"KNOWN_CLIENTS: {f} ne kliče več /ecowitt-current", "odstrani iz seznama")
 
 
+PUBLIC_EXT = (".html", ".json", ".js", ".css", ".xml", ".txt", ".csv", ".svg")
+# Mesta, ki indoor smejo omeniti (koda, ki ga režejo, navodila, testi): ne javne strani.
+PUBLIC_SKIP = ("tools/", "docs/", ".github/", "node_modules/", "wrf/", ".claude/")
+PUBLIC_SKIP_FILES = ("worker.js", "CLAUDE.md")
+# Surovi ključi in besedilo, ki objavi MERITEV iz hiše (nasvet »notranja temperatura naj bo 24 °C« ni meritev).
+LEAK_PATTERNS = [
+    re.compile(r"indoor", re.I),
+    re.compile(r"tempinf|humidityin|temp_in\b", re.I),
+    re.compile(r"notranj\w*\s+(senzor|merilnik|termometer)\w*", re.I),
+    re.compile(r"(znotraj|v hiši|v stanovanju|v prostorih|v dnevni sobi)\b[^.<>]{0,50}\d+[,.]?\d*\s?°C", re.I),
+]
+
+
 def test_public_files():
-    section("Javne datoteke ne omenjajo `indoor`")
-    must_be_clean = ["app.js", "index.html", "style.css", "tools/inject_current_weather.py", "history.json",
-                     "blog.json", "napoved-modela.json", "napoved-modela-live.json", "forecast_verification.json", "meteogasilec/index.json",
-                     "og/story/latest.json", "llms.txt", "manifest.json", "sw.js"]
-    for f in must_be_clean:
-        p = os.path.join(ROOT, f)
-        if not os.path.exists(p):
+    section("Vse javne datoteke ne omenjajo notranjih meritev (ključi in besedilo)")
+    files = subprocess.run(["git", "ls-files"], capture_output=True, text=True, cwd=ROOT).stdout.split()
+    scanned = 0
+    for f in files:
+        if (not f.endswith(PUBLIC_EXT) or f.startswith(PUBLIC_SKIP) or f in PUBLIC_SKIP_FILES or f.endswith(".min.js")):
             continue
-        with open(p, encoding="utf-8", errors="replace") as fh:
-            text = fh.read()
-        check("indoor" not in text.lower(), f"{f}: ne vsebuje `indoor`",
-              f"{len(re.findall('indoor', text, re.I))} omemb")
+        try:
+            with open(os.path.join(ROOT, f), encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            continue
+        scanned += 1
+        for pat in LEAK_PATTERNS:
+            m = pat.search(text)
+            check(m is None, f"{f}: brez notranjih meritev ({pat.pattern[:30]})",
+                  text[max(0, m.start() - 60):m.end() + 60].replace("\n", " ") if m else "")
+    check(scanned > 500, f"pregledanih javnih datotek je dovolj ({scanned})")
 
 
 def main():

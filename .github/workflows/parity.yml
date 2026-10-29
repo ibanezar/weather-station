@@ -115,6 +115,18 @@ jobs:
       - name: Test končne točke /anketa (pravi worker.js, lažen R2/KV)
         run: node tools/test_anketa.mjs
 
+      - name: Test varovalk javnih vnosov (push naslovi, omejitve po IP, zgornje meje)
+        run: node tools/test_worker_abuse.mjs
+
+      - name: Test llms-full.txt
+        run: python3 tools/test_llms_full.py
+
+      - name: Test bloka »Na kratko« na /tocnost-napovedi/
+        run: python3 tools/test_tocnost_answer.py
+
+      - name: Test zimskega cevovoda na sintetični zimi (sneg, žled, gore, strani)
+        run: python3 tools/test_winter_scenario.py
+
       - name: Test potrošnikov datotek drugih workflowov (zastareli vhodi)
         run: python3 tools/test_stale_inputs.py
 

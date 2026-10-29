@@ -57,7 +57,7 @@ MUTACIJE = [
     ("starost meritve DRSI (worker)", "worker.js", "/ 60000 <= 40) ? st : null", "/ 60000 <= 41) ? st : null"),
     ("prag sunkov (worker)", "worker.js", "CRN_SUNKI_KMH = 70", "CRN_SUNKI_KMH = 71"),
     ("značka: konstanta (worker)", "worker.js", "const SNOW_OFFSET = 250, SNOW_HALFWIDTH = 100;", "const SNOW_OFFSET = 260, SNOW_HALFWIDTH = 100;"),
-    ("značka: cona (worker)", "worker.js", 'else if (tempC != null && tempC > 5) { zoneLabel = "suho"', 'else if (tempC != null && tempC > 6) { zoneLabel = "suho"'),
+    ("značka: cona (worker)", "worker.js", 'else if (tempC != null && tempC > 5) {\n              // Ob megli', 'else if (tempC != null && tempC > 6) {\n              // Ob megli'),
     ("prag mokrega dne (napovej.js)", "napovej/napovej.js", "var MOKER_MM = 0.2;", "var MOKER_MM = 0.3;"),
     # ── časovna vrata kart (test_gates.py) ────────────────────────────────────
     ("vrata: konec okna (nevihtna)", "tools/storm_map_gate.py", "WINDOW_END = 8 ", "WINDOW_END = 9 ", "test_gates.py"),
@@ -65,7 +65,7 @@ MUTACIJE = [
     ("vrata: pozni tek brez zgornje meje (padavinska)", "tools/precip_map_gate.py", "LATE_END = 20", "LATE_END = 24", "test_gates.py"),
     ("vrata: okno pred meritvijo ARSO (padavinska)", "tools/precip_map_gate.py", "WINDOW_START = 7 ", "WINDOW_START = 6 ", "test_gates.py"),
     # ── zastareli vhodi (test_stale_inputs.py) ────────────────────────────────
-    ("zastareli vhod: zgodba po lead", "tools/generate_story_card.py", 'if d.get("date") == tomorrow_iso), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
+    ("zastareli vhod: zgodba po lead", "tools/generate_story_card.py", 'if d.get("date") == date_iso), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
     ("zastareli vhod: članek po lead", "tools/generate_daily_post.py", 'if d.get("date") == tomorrow), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
     ("zastareli vhod: gasilska karta brez datuma", "tools/generate_gasilec_page.py", 'storm.get("date") != TODAY.isoformat()', 'False', "test_stale_inputs.py"),
     ("zastareli vhod: povzetek po lead", "tools/send_morning_digest.py", 'if d.get("date") == today), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
@@ -98,6 +98,30 @@ MUTACIJE = [
     ("zasebnost: dnevni članek", "tools/generate_daily_post.py", 'current["data"].pop("indoor", None)', "pass", "test_privacy.py"),
     ("zasebnost: zmrzal", "tools/calculate_frost_risk.py", 'current["data"].pop("indoor", None)', "pass", "test_privacy.py"),
     ("zasebnost: korenska kopija članka", "generate_daily_post.py", 'current["data"].pop("indoor", None)', "pass", "test_privacy.py"),
+    # ── varovalke javnih vnosov in zimski cevovod (29. 10. 2026) ──────────────
+    ("push: dovoljeni naslovi [29.10.]", "worker.js", 'return u.protocol === "https:" && !u.port && PUSH_HOST_OK.some(r => r.test(u.hostname));', 'return u.protocol === "https:";', "test_worker_abuse.mjs"),
+    ("push: omejitev prijav [29.10.]", "worker.js", '"push_sub_rl", 30, 3600', '"push_sub_rl", 3000, 3600', "test_worker_abuse.mjs"),
+    ("push: telo ni objekt [29.10.]", "worker.js", 'if (!body || typeof body !== "object") return pj({ error: "Napačni podatki" }, 400);', "", "test_worker_abuse.mjs"),
+    ("napovej: omejitev po IP [29.10.]", "worker.js", '"napovej_vnos_rl", 10, 86400', '"napovej_vnos_rl", 10000, 86400', "test_worker_abuse.mjs"),
+    ("igra: omejitev po IP [29.10.]", "worker.js", '"igra_rez_rl", 60, 3600', '"igra_rez_rl", 6000, 3600', "test_worker_abuse.mjs"),
+    ("igra: zgornja meja slovarja [29.10.]", "worker.js", "obstojeci = _capPlayers(obstojeci, 1000, (a, b) => b.km - a.km);", "", "test_worker_abuse.mjs"),
+    ("črnivec igra: omejitev po IP [29.10.]", "worker.js", '"crn_igra_rl", 60, 3600', '"crn_igra_rl", 6000, 3600', "test_worker_abuse.mjs"),
+    ("komentarji: omejitev po IP [29.10.]", "worker.js", '"blog_comment_rl", 15, 3600', '"blog_comment_rl", 1500, 3600', "test_worker_abuse.mjs"),
+    ("opažanja vremena: omejitev po IP [29.10.]", "worker.js", '"obs_rl", 10, 3600', '"obs_rl", 1000, 3600', "test_worker_abuse.mjs"),
+    ("snežna karta: ura brez podatkov [29.10.]", "zima/snezna-karta/karta.js", "if(!arr.some(function(x){ return x!=null; })){", "if(false){", "test_snezna_karta.mjs"),
+    ("točnost: zanesljivost razlike [29.10.]", "tools/generate_tocnost_page.py", "reliable = st.mean(diff) - 1.96 * se > 0", "reliable = True", "test_tocnost_answer.py"),
+    ("točnost: stalna pristranskost [29.10.]", "tools/generate_tocnost_page.py", "if m >= 2 and abs(b) >= 0.8 * m:", "if False:", "test_tocnost_answer.py"),
+    ("točnost: najmanj skupnih dni [29.10.]", "tools/generate_tocnost_page.py", "if len(days_all) < 10 or len(keys) < 2:", "if False:", "test_tocnost_answer.py"),
+    ("llms-full: brez praznih vnosov [29.10.]", "tools/generate_llms_full.py", "    if not paras and not desc:\n        return None", "    pass", "test_llms_full.py"),
+    ("zimski scenarij: topla plast žleda [29.10.]", "tools/winter_engine.py", "FREEZING_RAIN_WARM_MIN_C = 0.5 ", "FREEZING_RAIN_WARM_MIN_C = 3.0 ", "test_winter_scenario.py"),
+    ("zimski scenarij: mraz pri tleh [29.10.]", "tools/winter_engine.py", "FREEZING_RAIN_T2M_MAX_C = 0.0 ", "FREEZING_RAIN_T2M_MAX_C = -5.0 ", "test_winter_scenario.py"),
+    ("zimski scenarij: padavine žleda [29.10.]", "tools/winter_engine.py", "FREEZING_RAIN_PRECIP_MIN_MM = 0.1 ", "FREEZING_RAIN_PRECIP_MIN_MM = 1.0 ", "test_winter_scenario.py"),
+    ("zimski scenarij: meja sneženja [29.10.]", "tools/winter_engine.py", "    effective = freezing_level_m - SNOW_LEVEL_OFFSET_M\n", "    effective = freezing_level_m + SNOW_LEVEL_OFFSET_M\n", "test_winter_scenario.py"),
+    ("zimski scenarij: razmerje snega [29.10.]", "tools/winter_engine.py", "SNOW_RATIO_CM_PER_MM = 1", "SNOW_RATIO_CM_PER_MM = 0", "test_winter_scenario.py"),
+    ("stratosfera: SSW samo pozimi [29.10.]", "tools/generate_stratosfera_page.py", "if winter and u < 0:", "if u < 0:", "test_atmos.py"),
+    ("dnevne strani: veto vsote dežja [29.10.]", "tools/day_score_common.py", "def rain_pts(c, d, h0=8, h1=18, cap=3, sum_veto=0.5):", "def rain_pts(c, d, h0=8, h1=18, cap=3, sum_veto=5.0):", "test_day_pages.py"),
+    ("zasebnost: članek z notranjo meritvijo [29.10.]", "blog/vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712.html", "<p>Sončno obsevanje", "<p>Notranji senzor kaže 25,1 °C. Sončno obsevanje", "test_privacy.py"),
+    ("zasebnost: ecowitt-history [29.10.]", "worker.js", 'call_back: "outdoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily,pressure.relative",', 'call_back: "outdoor.temperature,indoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily,pressure.relative",', "test_privacy.py"),
 ]
 
 
@@ -108,6 +132,16 @@ def clear_bytecode():
             if d == "__pycache__":
                 subprocess.run(["rm", "-rf", os.path.join(dirpath, d)])
                 dirs.remove(d)
+
+
+def pw_path():
+    """Pot do Playwright za preizkuse v brskalniku (test_snezna_karta.mjs); PW iz okolja ima prednost."""
+    if os.environ.get("PW"):
+        return os.environ["PW"]
+    try:
+        return os.path.join(subprocess.run(["npm", "root", "-g"], capture_output=True, text=True).stdout.strip(), "playwright")
+    except OSError:
+        return "playwright"
 
 
 def git(*a):
@@ -132,8 +166,9 @@ def main():
             continue
         try:
             open(path, "w", encoding="utf-8").write(src.replace(old, new, 1))
-            r = subprocess.run([sys.executable, "-B", os.path.join(ROOT, "tools", test)], cwd=ROOT,
-                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+            cmd = (["node", os.path.join(ROOT, "tools", test)] if test.endswith(".mjs")
+                   else [sys.executable, "-B", os.path.join(ROOT, "tools", test)])
+            r = subprocess.run(cmd, cwd=ROOT, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PW": pw_path()},
                                capture_output=True, text=True, timeout=300)
         finally:
             git("checkout", "--", rel)
