@@ -19,13 +19,15 @@ jobs:
           python-version: '3.12'
 
       - name: Test strani
-        run: python3 tools/test_day_pages.py
+        run: |
+          python3 tools/test_day_pages.py
+          python3 tools/test_migrena.py
 
       # Vsaka stran posebej: izpad ene (npr. Open-Meteo) ne podre ostalih; stara stran ostane.
       - name: Generate strani
         run: |
           rc=0
-          for g in susenje_perila vreme_za_kolesarje vreme_za_cebelarje vreme_za_ribolov vreme_za_pse; do
+          for g in susenje_perila vreme_za_kolesarje vreme_za_cebelarje vreme_za_ribolov vreme_za_pse migrena; do
             python3 tools/generate_${g}_page.py || rc=1
           done
           exit $rc
@@ -35,7 +37,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add susenje-perila/ vreme-za-kolesarje/ vreme-za-cebelarje/ vreme-za-ribolov/ vreme-za-pse/ || true
+          git add susenje-perila/ vreme-za-kolesarje/ vreme-za-cebelarje/ vreme-za-ribolov/ vreme-za-pse/ migrena/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi strani vreme za … $(date -u +%Y-%m-%d) [skip ci]"
           git push

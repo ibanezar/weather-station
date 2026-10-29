@@ -73,7 +73,9 @@ jobs:
         run: python3 tools/test_astma.py
 
       - name: Test strani »vreme za …« (točkovanje, veto, okno po urah, izris)
-        run: python3 tools/test_day_pages.py
+        run: |
+          python3 tools/test_day_pages.py
+          python3 tools/test_migrena.py
 
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py

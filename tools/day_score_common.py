@@ -82,6 +82,12 @@ def mean_dir(degs, speeds):
     return math.degrees(math.atan2(x, y)) % 360
 
 
+# JS kopija level_index()/score_for() za strani z osebnimi sprožilci (test_migrena.py ju primerja z Nodom).
+JS_CORE = """function dvScore(pts,w){var s=0;for(var k in pts){s+=pts[k]*(w&&w[k]!=null?w[k]:1);}return s;}
+function dvLevel(pts,w,th,floor,floorLevel){var s=dvScore(pts,w),m=0;for(var k in pts){if(pts[k]>m)m=pts[k];}
+var l=s<th[0]?0:s<th[1]?1:s<th[2]?2:3;if(m>=floor&&l<floorLevel)l=floorLevel;return l;}"""
+
+
 def score_for(pts):
     return sum(pts.values())
 
@@ -288,6 +294,7 @@ CSS = """<style>
 .dv-adv{margin:.6rem 0 0;font-size:.92rem;color:var(--dv-ink)}
 .dv-meta{margin:.7rem 0 0;font-size:.76rem;color:var(--dv-ink2)}
 .dv-meta a{color:inherit;text-decoration:underline}
+.dv-art{float:right;width:64px;height:64px;margin:0 0 .5rem .8rem;padding:6px;border-radius:16px;background:rgba(255,255,255,.1)}
 .dv-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
 .dv-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .65rem;border-radius:999px;font-size:.8rem;border:1px solid var(--dv-grid);color:var(--dv-ink)}
 .dv-chip .dv-ic{color:var(--gc)}
@@ -358,9 +365,9 @@ def gauge_svg(cfg, day):
     deg = gauge_deg(day["score"], top)
     return (f'<svg class="dv-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: {tocke(day["score"])}, {cfg["levels"][day["lvl"]]}">'
             + "".join(arcs) + ticks +
-            f'<g transform="rotate({deg:.1f} {cx} {cy})"><path d="M{cx - 70} {cy}L{cx} {cy - 3.5}L{cx} {cy + 3.5}z" fill="var(--dv-ink)"/></g>'
+            f'<g id="dv-needle" transform="rotate({deg:.1f} {cx} {cy})"><path d="M{cx - 70} {cy}L{cx} {cy - 3.5}L{cx} {cy + 3.5}z" fill="var(--dv-ink)"/></g>'
             f'<circle cx="{cx}" cy="{cy}" r="7" fill="var(--dv-ink)"/><circle cx="{cx}" cy="{cy}" r="3" fill="var(--dv-surface)"/>'
-            f'<text x="{cx}" y="{cy + 24}" text-anchor="middle" font-size="12" fill="var(--dv-ink2)">{tocke(day["score"])} (manj je bolje)</text></svg>')
+            f'<text x="{cx}" y="{cy + 24}" text-anchor="middle" font-size="12" fill="var(--dv-ink2)" id="dv-gauge-sc">{tocke(day["score"])} (manj je bolje)</text></svg>')
 
 
 def group_of(cfg):
@@ -380,8 +387,8 @@ def hero_html(cfg, days):
         f'<span class="dv-chip" style="--gc:var(--g-{g[k]})">{icon(cfg["group_icons"][g[k] - 1], 16)}{esc(d["detail"][k])}</span>'
         for _, k in rs) or '<span class="dv-chip">brez izrazitih ovir</span>'
     summ = ("Glavne ovire: " + "; ".join(reasons(d, 2)) + ".") if reasons(d, 2) else "Danes ni izrazitih ovir."
-    return (f'  <div class="dv-hero" style="--c:var(--l-{d["lvl"]})">\n    {gauge_svg(cfg, d)}\n'
-            f'    <div><div class="dv-k">{esc(cfg["kicker"])}</div><div class="dv-l">{esc(lvls[d["lvl"]])}</div>'
+    return (f'  <div class="dv-hero" id="dv-hero" style="--c:var(--l-{d["lvl"]})">\n    {gauge_svg(cfg, d)}\n'
+            f'    <div>{cfg.get("hero_art", "")}<div class="dv-k">{esc(cfg["kicker"])}</div><div class="dv-l" id="dv-hero-l">{esc(lvls[d["lvl"]])}</div>'
             f'<p class="dv-sum">{esc(summ)}</p><div class="dv-chips">{chips}</div>'
             f'<p class="dv-adv">{esc(cfg["advice"][d["lvl"]])}</p>'
             f'<p class="dv-meta">Izračunano {esc(updated_text())} · modelska napoved, ne meritev · '
@@ -405,7 +412,7 @@ def day_cards_html(cfg, days):
         cls = "dv-day dv-today" if i == 0 else "dv-day"
         out.append(f'    <div class="{cls}" style="--c:var(--l-{d["lvl"]})"><h3>{esc(d["label"])}</h3>'
                    f'<div class="dv-lvl">{esc(cfg["levels"][d["lvl"]])}</div><div class="dv-sc">{tocke(d["score"])}</div><ul>{li}</ul></div>')
-    return '  <div class="dv-days">\n' + "\n".join(out) + "\n  </div>"
+    return '  <div class="dv-days" id="dv-days">\n' + "\n".join(out) + "\n  </div>"
 
 
 def legend_html(cfg):
@@ -553,6 +560,8 @@ def build_body(cfg, c, days, today=None):
     ext = ' target="_blank" rel="noopener"'
     links = "".join('      <a href="%s" class="mtn-avk-link"%s>%s</a>\n' % (u, ext if u.startswith("http") else "", esc(t))
                     for u, t in cfg["links"])
+    sec = cfg["sections"](cfg, c, days, today) if cfg.get("sections") else {}
+    script = cfg["script"](cfg, days) if cfg.get("script") else ""
     return f'''{seo.crumbs_html([("Meteorec", "/"), (cfg["crumb"], None)])}
 {seo.stn_badge()}
   <h1 class="page-title">{esc(cfg["h1"])}</h1>
@@ -561,9 +570,11 @@ def build_body(cfg, c, days, today=None):
 {hero_html(cfg, days)}
 {answer}
   <p class="muted-note"><strong>{esc(cfg["disclaimer_lead"])}</strong> {esc(cfg["disclaimer"])}</p>
+{sec.get("after_hero", "")}
   <h2>Naslednjih 5 dni</h2>
   <p class="archive-intro">{esc(days_summary(cfg, days))} Raven je vedno zapisana tudi z besedo.</p>
 {day_cards_html(cfg, days)}
+{sec.get("after_cards", "")}
 {strips_block(cfg, c, today)}
   <h2>Skupna ocena po dnevih</h2>
 {stacked_block(cfg, days)}
@@ -590,7 +601,8 @@ def build_body(cfg, c, days, today=None):
 {links}    </div>
   </div>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
-</div>'''
+</div>
+{script}'''
 
 
 def build_page(cfg, c, today=None):

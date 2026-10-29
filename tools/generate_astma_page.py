@@ -683,6 +683,7 @@ def build_body(days):
     <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem">
       <a href="/kakovost-zraka/" class="mtn-avk-link">Kakovost zraka in cvetni prah →</a>
       <a href="/biovreme/" class="mtn-avk-link">Biovreme →</a>
+      <a href="/migrena/" class="mtn-avk-link">Vreme in migrena →</a>
       <a href="/susenje-perila/" class="mtn-avk-link">Sušenje perila →</a>
       <a href="/vreme-za-kolesarje/" class="mtn-avk-link">Vreme za kolesarje →</a>
       <a href="/vreme-za-pse/" class="mtn-avk-link">Vreme za sprehod s psom →</a>

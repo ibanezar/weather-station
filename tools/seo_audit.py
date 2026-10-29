@@ -106,6 +106,8 @@ CORE = {
     "vreme-za-cebelarje/":       ("daily",   "0.6"),
     "vreme-za-ribolov/":         ("daily",   "0.6"),
     "vreme-za-pse/":             ("daily",   "0.6"),
+    # Vreme in migrena: napoved sprožilcev + dnevnik napadov v brskalniku (tools/generate_migrena_page.py).
+    "migrena/":                  ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
     # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
     # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.

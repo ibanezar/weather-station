@@ -26,6 +26,7 @@
 - [Vreme za čebelarje](https://meteorec.si/vreme-za-cebelarje/): 5-dnevna ocena letalnih pogojev čebel in dela ob panjih (temperatura, sonce, veter, dež, nevihte). Splošen približek, ni čebelarski nasvet.
 - [Vreme za ribolov na Savinji](https://meteorec.si/vreme-za-ribolov/): 5-dnevna vremenska ocena za ribolov (padavine zadnjih dni, tlak, veter, nevihte). Ne meri vode; vodostaj je na strani Vodostaj Savinje.
 - [Vreme za sprehod s psom](https://meteorec.si/vreme-za-pse/): 5-dnevna ocena sprehoda s psom (občutena vročina, vroč asfalt, mraz, dež, nevihte) z najboljšim časom po urah. Ni veterinarski nasvet.
+- [Vreme in migrena](https://meteorec.si/migrena/): 5-dnevna napoved vremenskih sprožilcev migrene (padec zračnega tlaka, nevihte, vročina, veter, vlaga, svetloba), graf tlaka za −24…+72 ur in dnevnik napadov, ki ostane samo v brskalniku, z analizo po meritvah postaje IREICA1. Ni zdravniški nasvet.
 - [Žled](https://meteorec.si/zima/zled/): modelski pokazatelj dežja, ki zmrzuje, z vertikalno sondažo ARSO.
 - [Toča](https://meteorec.si/toca/), [Vodostaj Savinje](https://meteorec.si/vodostaj-savinje/), [Ekstremno vreme](https://meteorec.si/ekstremno-vreme/)
 - [Termika — igra](https://meteorec.si/igra/): igra jadralnega padalca z Golt po Zgornji Savinjski dolini. Nivo se vsak dan sestavi iz dejanske napovedi (strop termike, baza oblakov, moč dvigov, veter po višini), zato je isti za vse igralce tistega dne. Ni pripomoček za odločanje o letenju — za to je [Vreme za padalce](https://meteorec.si/vreme-za-padalce/).
