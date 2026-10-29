@@ -330,6 +330,22 @@ v radiju 200 km, daljna nevihta nad Jadranom da tisoče strel. Stran združi str
 Test: `tools/test_storm_events.py`. Na FB/IG **ne gre** (nova vrsta vsebine; ARSO-izkušnja iz
 razdelka zgoraj). Šest septembrskih dni je bilo ustvarjenih za nazaj ob uvedbi.
 
+## Zimska opozorila na telefon (29. 10. 2026)
+
+Štiri ocene (**poledica**, **sneg v dolini**, **žled**, **nad meglo**) imajo isti gradnik »Opozorilo na telefon« kot strani »vreme za …« (razdelek »Strani »vreme za …« in migrena«, opozorila po ocenah).
+Obiskovalec si sam izbere raven in dan (danes/jutri), worker pa obvestilo pošlje enkrat na pravilo in ciljni dan. Gradnik je na `/zima/poledica/`, `/zima/meja-snezenja/`, `/zima/zled/` in `/zima/nad-meglo/`; hub `/zima/` ima povezave nanje.
+
+- **Ocene piše Python, worker jih samo bere.** `zima_ocene()` v `tools/generate_zima_page.py` iz `data/winter-data.json` (`black_ice_outlook`, `freezing_rain`, `snow_line.daily`, `fog.daily`) zapiše `data/zima-ocene.json`
+  (`write_zima_ocene()`, v koraku `zima-forecast.yml`, isti `git add`). **Ločena datoteka od `data/vsakdan-ocene.json`**, ker ju pišeta različna workflowa (`astma-forecast.yml` je bil ukinjen prav zaradi dvojnega pisanja).
+  Worker (`_oceneData()`) obe datoteki združi in **svežino presoja po strani** (36 h od `generated` datoteke strani): zimska stran, ki je poleti ni, ne zavre ostalih, stara stran ne sproži ničesar.
+- **Ravni** (`ZIMA_ALERTS`): poledica in žled nizko/srednje/visoko (kot na straneh); sneg po dnevni količini novega snega v dolini (`SNEG_CM_BANDS`: od 0,2 / 1 / 5 cm; model, ne meritev, postaja snega ne meri);
+  nad meglo po zgornji meji jutranje inverzije (`MEGLA_TOP_BANDS`: do 500 m, 500–900 m, nad 900 m). Razlog v obvestilu so meja megle in vrhovi nad njo (Golte, Menina planina, Smrekovec, Raduha, `elevation_m ≥ 1000`).
+  Ponoči (22–7) se ne pošilja; ocena za »jutri« je dnevna, ne samo jutranja (poledica je najslabša čez dan in kraje).
+- Sprožitev je po **dnevni oceni**, ne po uri: obvestilo »jutri raven visoko« lahko pride že popoldne ali zvečer prej, ko ga model prvič napove. Če se napoved obrne, drugega obvestila ni (stanje je po ciljnem dnevu).
+- Naročnine in pravila so v `push/ocene-subs.json` (skupaj z ostalimi stranmi, največ 5 pravil na napravo). `zasebnost.html` zimske strani omenja.
+- **Nova zimska ocena** = vnos v `ZIMA_ALERTS` + izračun v `zima_ocene()` + `with_alert()` v `main()`. Test: `tools/test_zima_alarm.py` (pragovi, razlogi, možnosti obrazca ↔ ravni, veljaven JS), `tools/test_ocene.mjs` (združitev datotek in svežina po strani); mutacije v `mutation_check.py`; vrstica v `REGISTER` (`check_freshness.py`).
+- **Ni narejeno:** zgodba/FB kartica za »nad meglo« (jutranje teme zgodbe imajo stroga časovna okna, glej dnevno zgodbo), napoved po urah za poledico (ocena je dnevna).
+
 ## Žled (`/zima/zled/`, 7. 10. 2026)
 
 Ideja po neurje.si (njihova stran o žledenju in sondaži). Naša je ločena od `/zima/poledica/`:

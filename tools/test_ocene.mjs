@@ -19,13 +19,15 @@ const block = src.slice(a, b);
 const store = {};
 const r2 = { get: async k => (k in store ? { text: async () => store[k] } : null), put: async (k, v) => { store[k] = v; } };
 const sent = [];
+const files = {};
 let code = 201;
 const ctx = vm.createContext({
   console, JSON, Math, Date, Promise, Set, Array, Object, String, Number, Map, parseInt, Number,
+  fetch: async url => { const f = files[url]; return f === undefined ? { ok: false } : { ok: true, json: async () => f }; },
   _sendPush: async (_env, sub, payload) => { sent.push({ ep: sub.endpoint, payload }); return code; },
 });
-vm.runInContext(block + '\nthis._clean=_oceneClean; this._notify=_oceneNotify; this._dates=_oceneDates; this.C={OCENE_PUSH_KEY, OCENE_MAX_RULES, OCENE_MAX_AGE_H};', ctx);
-const { _clean, _notify, _dates, C } = ctx;
+vm.runInContext(block + '\nthis._clean=_oceneClean; this._data=_oceneData; this._notify=_oceneNotify; this._dates=_oceneDates; this.C={OCENE_PUSH_KEY, OCENE_MAX_RULES, OCENE_MAX_AGE_H};', ctx);
+const { _clean, _notify, _dates, _data, C } = ctx;
 const env = { PHOTOS_R2: r2, VAPID_PRIVATE: 'x' };
 
 const NOW = Date.UTC(2026, 5, 10, 10);        // 10. 6. 2026 12.00 po naši uri
@@ -117,6 +119,43 @@ r = await _notify(env, data, NOW);
 assert.equal(r.pruned, 1); assert.equal(JSON.parse(store[C.OCENE_PUSH_KEY]).length, 0);
 code = 201;
 assert.equal((await _notify({ PHOTOS_R2: r2 }, data, NOW)).skipped, 'ni shrambe ali VAPID');
+
+// 2b. dve datoteki ocen (strani »vreme za …« + zimska opozorila): združitev in svežina po strani
+const U_VSAKDAN = 'https://meteorec.si/data/vsakdan-ocene.json', U_ZIMA = 'https://meteorec.si/data/zima-ocene.json';
+const zimaPage = { naslov: 'Poledica', url: '/zima/poledica/', levels: ['nizko', 'srednje', 'visoko'], days: [{ date: '2026-06-11', lvl: 2, reasons: [] }] };
+files[U_VSAKDAN] = { generated: data.generated, pages: { astma: data.pages.astma } };
+files[U_ZIMA] = { generated: new Date(NOW - 2 * 3600e3).toISOString(), pages: { 'zima-poledica': zimaPage } };
+const merged = await _data();
+assert.deepEqual(Object.keys(merged.pages).sort(), ['astma', 'zima-poledica'], 'strani obeh datotek');
+assert.equal(merged.pages['zima-poledica'].generated, files[U_ZIMA].generated, 'vsaka stran nosi čas svoje datoteke');
+assert.deepEqual(_clean(merged, [{ page: 'zima-poledica', op: 'ge', lvl: 2, when: 'jutri' }]).length, 1, 'pravilo za zimsko stran je veljavno');
+// izpad ene datoteke druge ne zavre (poleti zimske ni)
+delete files[U_ZIMA];
+assert.deepEqual(Object.keys((await _data()).pages), ['astma']);
+delete files[U_VSAKDAN];
+assert.equal(await _data(), null, 'brez datotek ni podatkov');
+// zimska stran je stara, ostale sveže: stara ne sproži nič, sveža sproži
+sent.length = 0;
+const mixed = { generated: data.generated, pages: {
+  astma: { ...data.pages.astma, generated: data.generated },
+  'zima-poledica': { ...zimaPage, generated: new Date(NOW - 40 * 3600e3).toISOString() } } };
+store[C.OCENE_PUSH_KEY] = JSON.stringify([
+  sub('https://push/ledena', [{ page: 'zima-poledica', op: 'ge', lvl: 2, when: 'jutri' }]),
+  sub('https://push/astma2', [{ page: 'astma', op: 'ge', lvl: 3, when: 'jutri' }])]);
+r = await _notify(env, mixed, NOW);
+assert.deepEqual(sent.map(x => x.ep.replace('https://push/', '')), ['astma2'], 'stara stran ne sproži, sveža sproži');
+// ista zimska stran, sveža: obvestilo z naslovom in povezavo
+sent.length = 0;
+mixed.pages['zima-poledica'].generated = data.generated;
+await _notify(env, mixed, NOW);
+assert.deepEqual(sent.map(x => x.ep.replace('https://push/', '')), ['ledena']);
+assert.match(sent[0].payload.body, /^Poledica: jutri \(četrtek\) raven »visoko«\./);
+assert.equal(sent[0].payload.url, 'https://meteorec.si/zima/poledica/');
+// vse strani stare: preskok
+sent.length = 0;
+for (const k of Object.keys(mixed.pages)) mixed.pages[k].generated = new Date(NOW - 40 * 3600e3).toISOString();
+store[C.OCENE_PUSH_KEY] = JSON.stringify([sub('https://push/st', [{ page: 'astma', op: 'ge', lvl: 1, when: 'danes' }])]);
+assert.equal((await _notify(env, mixed, NOW)).skipped, 'ocene so stare'); assert.equal(sent.length, 0);
 
 // 3. endpoint in cron obstajata
 assert(src.includes('body.site === "ocene"'), 'endpoint za site:"ocene"');

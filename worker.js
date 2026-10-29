@@ -930,13 +930,25 @@ const OCENE_MAX_AGE_H = 36;
 const OCENE_EVERY_MS = 55 * 60 * 1000;
 const OCENE_TIHO_OD = 22, OCENE_TIHO_DO = 7;
 
+// Dve datoteki ocen: strani »vreme za …« (vsakdan-forecast.yml) in zimska opozorila (zima-forecast.yml). Ločeni sta zato, ker ju
+// pišeta različna workflowa; vsaka stran dobi `generated` svoje datoteke, svežino pa presojamo po strani. Izpad ene datoteke
+// druge ne zavre (zima pozimi, ostalo vse leto).
+const OCENE_URLS = ["https://meteorec.si/data/vsakdan-ocene.json", "https://meteorec.si/data/zima-ocene.json"];
+
 async function _oceneData() {
-  try {
-    const r = await fetch(OCENE_URL, { cf: { cacheTtl: 1800, cacheEverything: true } });
-    if (!r.ok) return null;
-    const d = await r.json();
-    return d && d.pages && d.generated ? d : null;
-  } catch (_) { return null; }
+  const files = await Promise.all(OCENE_URLS.map(async url => {
+    try {
+      const r = await fetch(url, { cf: { cacheTtl: 1800, cacheEverything: true } });
+      if (!r.ok) return null;
+      const d = await r.json();
+      return d && d.pages && d.generated ? d : null;
+    } catch (_) { return null; }
+  }));
+  const ok = files.filter(Boolean);
+  if (!ok.length) return null;
+  const pages = {};
+  for (const f of ok) for (const k of Object.keys(f.pages)) pages[k] = { ...f.pages[k], generated: f.generated };
+  return { generated: ok.map(f => f.generated).sort()[0], pages };
 }
 
 // Vrne očiščen seznam pravil ali null, če katero ni veljavno (neznana stran, raven, dan).
@@ -964,14 +976,15 @@ function _oceneDates(now) {
 // Preveri pravila vsake naročnine proti ocenam in pošlje največ eno obvestilo na napravo (ostala pravila se omenijo).
 async function _oceneNotify(env, data, now) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { checked: 0, sent: 0, skipped: "ni shrambe ali VAPID" };
-  if (!(now - Date.parse(data.generated) <= OCENE_MAX_AGE_H * 3600 * 1000)) return { checked: 0, sent: 0, skipped: "ocene so stare" };
+  const fresh = page => now - Date.parse(page.generated || data.generated) <= OCENE_MAX_AGE_H * 3600 * 1000;
+  if (!Object.values(data.pages).some(fresh)) return { checked: 0, sent: 0, skipped: "ocene so stare" };
   let subs = []; try { const o = await r2.get(OCENE_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
   const dates = _oceneDates(now);
   let sent = 0, changed = false; const dead = [];
   for (const sub of subs) {
     const st = sub.st || (sub.st = {}), hits = [];
     for (const rule of sub.rules || []) {
-      const page = data.pages[rule.page]; if (!page) continue;
+      const page = data.pages[rule.page]; if (!page || !fresh(page)) continue;   // stara stran ne sproži nič
       const target = dates[rule.when];
       const day = (page.days || []).find(d => d.date === target); if (!day) continue;
       const hit = rule.op === "le" ? day.lvl <= rule.lvl : day.lvl >= rule.lvl;

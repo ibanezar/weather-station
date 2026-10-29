@@ -669,9 +669,10 @@ ALERT_CSS = """<style>
 </style>"""
 
 
-def alert_html(slug, short, levels):
-    """Gradnik »Moje opozorilo«; skrit, dokler brskalnik ne podpira Web Push (izpisan v JS)."""
-    ops = "".join(f'<option value="{v}">{esc(t)}</option>' for v, t in alert_options(levels))
+def alert_html(slug, short, levels, opts=None):
+    """Gradnik »Moje opozorilo«; skrit, dokler brskalnik ne podpira Web Push (izpisan v JS).
+    opts = [(vrednost, besedilo)] za strani z drugačnim naborom ravni (zimska opozorila); privzeto alert_options(levels)."""
+    ops = "".join(f'<option value="{v}">{esc(t)}</option>' for v, t in (opts or alert_options(levels)))
     return (f'  <div class="ov-alert" id="ov-alert" hidden>\n'
             f'  <h2>Opozorilo na telefon</h2>\n'
             f'  <p class="archive-intro">Sami nastavite, kdaj želite obvestilo: izberite raven in dan, mi pa ga pošljemo, ko ocena za »{esc(short)}« ustreza. '
