@@ -631,7 +631,9 @@ async function fetchEcowittAsWuObs(env) {
   return {
     stationID: STATION,
     obsTimeUtc: now.toISOString(),
-    obsTimeLocal: fmtDate(now) + " " + now.toTimeString().slice(0, 8),
+    // Worker teče v UTC: getHours()/toTimeString() bi dala UTC uro, ki jo app.js
+    // prebere kot lokalno (1 h zamika pozimi, 2 h poleti → »podatki stari 1 h«).
+    obsTimeLocal: now.toLocaleString("sv-SE", { timeZone: "Europe/Ljubljana" }),
     lat: 46.3258, lon: 14.9211,
     humidity: v(d.outdoor?.humidity),
     winddir: v(d.wind?.wind_direction) ?? 0,
