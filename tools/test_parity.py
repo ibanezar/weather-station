@@ -586,6 +586,25 @@ def valovi_temperatura():
 
 
 @test
+def hero_ikona():
+    """Statična ikona junaške kartice (inject_current_weather.hero_condition_label +
+    HERO_ICON_BY_LABEL) = getCondition() + _COND_ICON v app.js (brez _wxCond)."""
+    import inject_current_weather as ic
+    cases = []
+    for pr in (0, 0.5, 3, 8):
+        for sr in (0, 5, 50, 200, 500, 800):
+            for h in (3, 12, 23):
+                cases.append((pr, sr, h))
+    calls = [{"expr": "(function(){var D=Date;Date=function(){return new D(2026,9,29,%d,0,0)};var r=getCondition({metric:{precipRate:%s,solarRadiation:%s}}).label;Date=D;return r;})()" % (h, pr, sr)} for pr, sr, h in cases]
+    labels = js("app.js", ["getCondition"], calls)
+    icons = js("app.js", ["_COND_ICON"], [{"expr": "_COND_ICON"}])[0]
+    for (pr, sr, h), lab in zip(cases, labels):
+        obs = {"obsTimeLocal": "2026-10-29 %02d:00:00" % h, "metric": {"precipRate": pr, "solarRadiation": sr}}
+        check(ic.hero_condition_label(obs) == lab, "hero ikona: stanje", f"{pr} {sr} {h}: py={ic.hero_condition_label(obs)} js={lab}")
+    check(ic.HERO_ICON_BY_LABEL == icons, "hero ikona: preslikava ikon", f"{ic.HERO_ICON_BY_LABEL} != {icons}")
+
+
+@test
 def valovi_vlaga():
     """ramp() in airHumFit() na /valovi/ = gobe_model.ramp in zračna vlaga v eval_species
     (rh_low/rh_full, dvig na 1 ob razliki temperatura - rosišče <= dewpoint_spread_full)."""

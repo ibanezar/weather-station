@@ -2292,25 +2292,23 @@ function buildTicker(){
   inner.style.animationDuration=Math.max(20,Math.round(chars*0.28))+'s';
 }
 
+let _pulseSeen=false;
+function _restartClass(el,cls){
+  // Brez `void el.offsetWidth` (vsiljena postavitev, 13x ob vsaki osvežitvi): razred se vrne v naslednji sličici.
+  el.classList.remove(cls);
+  requestAnimationFrame(()=>{el.classList.add(cls);el.addEventListener('animationend',()=>el.classList.remove(cls),{once:true});});
+}
 function triggerLivePulse(){
-  // Hero metric cards
+  // Prvi izris ni sprememba: utrip bi ob nalaganju zagnal ~12 animacij senc in vsiljeno postavitev.
+  if(!_pulseSeen){_pulseSeen=true;return;}
   ['hm-humidity','hm-pressure','hm-wind','hm-rain','hm-range'].forEach(id=>{
-    const el=document.getElementById(id);if(!el)return;
-    el.classList.remove('pulse-live');void el.offsetWidth;
-    el.classList.add('pulse-live');
-    el.addEventListener('animationend',()=>el.classList.remove('pulse-live'),{once:true});
+    const el=document.getElementById(id);if(el)_restartClass(el,'pulse-live');
   });
-  // Temperature glow
   const tv=document.getElementById('temp-val');
-  if(tv){tv.classList.remove('pulse-live');void tv.offsetWidth;tv.classList.add('pulse-live');
-    tv.addEventListener('animationend',()=>tv.classList.remove('pulse-live'),{once:true});}
-  // Small data cards — pulse the parent .card
+  if(tv)_restartClass(tv,'pulse-live');
   ['rain-rate','uv-val','pressure-val','wind-speed','fog-now-val','bio-humidex'].forEach(id=>{
     const el=document.getElementById(id);if(!el)return;
-    const card=el.closest('.card');if(!card)return;
-    card.classList.remove('pulse-card');void card.offsetWidth;
-    card.classList.add('pulse-card');
-    card.addEventListener('animationend',()=>card.classList.remove('pulse-card'),{once:true});
+    const card=el.closest('.card');if(card)_restartClass(card,'pulse-card');
   });
 }
 
@@ -2676,7 +2674,7 @@ function applyObs(obs){
   setWeatherArt(obs);
   updateBgFromObs(obs);
   // Update hero icon now that _wxCond is set (icons use it for snow/fog/hot/storm)
-  _liveIconHtml=_condImg(cond.label,108);const iconEl=document.getElementById('hero-icon');if(iconEl&&!_sliderActive)iconEl.innerHTML=_liveIconHtml;
+  _liveIconHtml=_condImg(cond.label,108);const iconEl=document.getElementById('hero-icon');if(iconEl&&!_sliderActive)_setHeroIcon(iconEl,_liveIconHtml);
   // Refresh astro moon phase
   try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
@@ -6729,6 +6727,8 @@ const _YR_ICON={clearsky:'clear-day',clearsky_night:'clear-night',fair:'partly-c
 function _wmoIconName(c,isDay=true){const map=isDay?_WMO_ICON_DAY:_WMO_ICON_NIGHT;return map[c]||_WMO_ICON_DAY[c]||_WMO_ICON_DAY[Math.floor((c||0)/10)*10]||'partly-cloudy-day';}
 function _wmoImg(c,isDay=true,size=36){const n=_wmoIconName(c,isDay);return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${_wmoTxt(c)}">`;}
 function _yrImg(sym,size=32){const base=(sym||'').replace(/_polartwilight/g,'');const n=_YR_ICON[base]||_YR_ICON[base.replace('_night','')]||(/_night/.test(base)?'partly-cloudy-night':'partly-cloudy-day');return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${sym}">`;}
+// Ikona je LCP element: če je statična že enaka, je ne zamenjaj (nov element = nov LCP kandidat, mig).
+function _setHeroIcon(el,html){const cur=el.firstElementChild,m=/src="([^"]+)"/.exec(html);if(cur&&cur.tagName==='IMG'&&m&&cur.getAttribute('src')===m[1]){const a=/alt="([^"]*)"/.exec(html);if(a&&cur.alt!==a[1])cur.alt=a[1];return;}el.innerHTML=html;}
 function _condImg(label,size=100){const wc=typeof _wxCond==='string'?_wxCond:'';const n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
 function _wmoTxt(c){return _WMO_SL[c]||_WMO_SL[Math.floor((c||0)/10)*10]||'Spremenljivo';}
 function _wmoEmoji(c){return _WMO_EMOJI[c]||_WMO_EMOJI[Math.floor((c||0)/10)*10]||'🌤';}
@@ -17350,7 +17350,8 @@ function _revealCards(){
   if(!('IntersectionObserver' in window)||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;
   const cards=[...document.querySelectorAll('.chart-card')];
   const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.remove('rv-pre');io.unobserve(e.target);}}),{rootMargin:'0px 0px -40px 0px'});
-  cards.forEach(c=>{const r=c.getBoundingClientRect();if(r.top>innerHeight||r.height===0){c.classList.add('rv-pre');io.observe(c);}});
+  // najprej vsa branja, potem pisanja: izmenjevanje je pri vsaki kartici vsililo novo postavitev
+  cards.map(c=>[c,c.getBoundingClientRect()]).forEach(([c,r])=>{if(r.top>innerHeight||r.height===0){c.classList.add('rv-pre');io.observe(c);}});
   setTimeout(()=>document.querySelectorAll('.rv-pre').forEach(c=>c.classList.remove('rv-pre')),8000);
 }
 async function init(){
