@@ -90,5 +90,15 @@ check(r.status < 500, 'nevihte/porocilo: polje, ki ni niz, ni 500 (' + r.status 
 r = await call('/anketa', 'POST', 'null');
 check(r.status === 400, 'anketa: telo null je 400');
 
+// ── opažanja in komentarji: omejitev po IP ──
+for (let i = 0; i < 11; i++) last = await call('/observations', 'POST', { type: 'soncno' }, '3.3.3.3');
+check(last.status === 429, 'opažanja vremena omejena po IP (429)');
+r = await call('/observations', 'POST', 'null');
+check(r.status === 400, 'opažanja: telo null je 400');
+for (let i = 0; i < 16; i++) last = await call('/blog-comments', 'POST', { slug: 'test-clanek', comment: 'komentar ' + i }, '2.2.2.2');
+check(last.status === 429, 'komentarji omejeni po IP (429)');
+r = await call('/blog-comments', 'POST', { slug: 'test-clanek', comment: { x: 1 } });
+check(r.status < 500, 'komentar, ki ni niz, ni 500 (' + r.status + ')');
+
 fs.rmSync(dir, { recursive: true, force: true });
 process.exit(fails ? 1 : 0);

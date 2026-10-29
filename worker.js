@@ -6742,8 +6742,12 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           try { body = await request.json(); } catch (_) {
             return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
-          if (!OBS_TYPES.includes(body.type)) {
+          if (!body || typeof body !== "object" || !OBS_TYPES.includes(body.type)) {
             return new Response(JSON.stringify({ error: "Neznana vrsta opazovanja" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          // Opažanja so javna in štejejo v števce na strani: brez omejitve po IP bi jih en naslov izrinil (shramba hrani 500).
+          if (await _ipLimited(env, request, "obs_rl", 10, 3600)) {
+            return new Response(JSON.stringify({ error: "Preveč opažanj v kratkem času — poskusi kasneje" }), { status: 429, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
           const coord = _obsCoord(body);
           const all   = await _obsRead();
@@ -7384,7 +7388,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           try { body = await request.json(); } catch (_) {
             return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
-          const slug = (body.slug || "").trim();
+          if (!body || typeof body !== "object") {
+            return new Response(JSON.stringify({ error: "Napačni podatki" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          const slug = String(body.slug || "").trim();
           if (!SLUG_RE.test(slug)) {
             return new Response(JSON.stringify({ error: "Neznan članek" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
@@ -7392,7 +7399,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (body.website) {
             return new Response(JSON.stringify({ ok: true }), { headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
-          const comment = (body.comment || "").trim();
+          const comment = String(body.comment || "").trim();
           const rating  = body.rating ? parseInt(body.rating) : null;
           if (!comment && !rating) {
             return new Response(JSON.stringify({ error: "Napiši komentar ali oddaj oceno" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
@@ -7402,6 +7409,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           }
           if (rating !== null && (rating < 1 || rating > 5)) {
             return new Response(JSON.stringify({ error: "Ocena mora biti med 1 in 5" }), { status: 400, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+          }
+          // Vsak komentar pošlje lastniku e-pošto (Resend) in šteje v oceno članka: brez omejitve po IP bi ga skripta zasula.
+          if (await _ipLimited(env, request, "blog_comment_rl", 15, 3600)) {
+            return new Response(JSON.stringify({ error: "Preveč komentarjev v kratkem času — poskusi kasneje" }), { status: 429, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
           }
           const items = await _cRead(slug);
           // Preprosta zaščita pred podvajanjem: isti komentar v zadnji minuti
@@ -7414,7 +7425,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const entry = {
             id: crypto.randomUUID().split("-")[0],
             ts: new Date().toISOString(),
-            author: (body.author || "Anonimno").slice(0, 60).trim() || "Anonimno",
+            author: String(body.author || "Anonimno").slice(0, 60).trim() || "Anonimno",
             comment: comment.slice(0, 1500),
             rating: rating,
           };
