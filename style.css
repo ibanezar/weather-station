@@ -115,9 +115,10 @@ html{scroll-behavior:smooth;overflow-x:hidden}
 body{background:var(--bg);color:var(--text);font-family:'Inter','Inter Fallback',sans-serif;font-weight:400;font-variant-numeric:tabular-nums;min-height:calc(100vh + 1px);min-height:calc(100lvh + 1px);overflow-x:hidden;transition:background .35s,color .35s}
 
 /* Background blobs */
+/* Brez filter:blur(130px): pet velikih animiranih elementov se je ob vsaki sličici znova zameglilo (namizje: TBT 4,1 s v PageSpeed). Že so radialni prehodi v prosojno; will-change daje vsakemu svoj sloj, animacija teče na kompozitorju. */
 #bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:var(--bg);transition:background .35s}
 
-.blob{position:absolute;border-radius:50%;filter:blur(130px);pointer-events:none;transition:background 1.2s}
+.blob{position:absolute;border-radius:50%;pointer-events:none;will-change:transform;transition:background 1.2s}
 .b1{width:960px;height:960px;background:radial-gradient(circle,var(--blob-1),transparent 70%);top:-20%;left:-15%;animation:blob-drift 22s ease-in-out infinite}
 .b2{width:780px;height:780px;background:radial-gradient(circle,var(--blob-2),transparent 70%);top:15%;right:-12%;animation:blob-drift 28s ease-in-out infinite reverse 4s}
 .b3{width:680px;height:680px;background:radial-gradient(circle,var(--blob-3),transparent 70%);bottom:-5%;left:5%;animation:blob-drift 19s ease-in-out infinite 8s}
