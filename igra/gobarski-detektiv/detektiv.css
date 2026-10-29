@@ -42,8 +42,8 @@
   cursor: pointer;
 }
 .gd-btn:hover { background: rgba(255, 255, 255, .12); }
-.gd-btn-main { background: #2f8f62; border-color: #34d399; color: #fff; }
-.gd-btn-main:hover { background: #38a574; }
+.gd-btn-main { background: #277a54; border-color: #34d399; color: #fff; }
+.gd-btn-main:hover { background: #1f6b49; }
 .gd-btn:focus-visible,
 .gd-clue-btn:focus-visible,
 .gd-tab:focus-visible,

@@ -10,7 +10,7 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   --card-bg:#ffffff; --card-border:rgba(10,22,40,.08);
   --card-shadow:0 6px 28px rgba(10,60,110,.08);
   --border:rgba(10,22,40,.10);
-  --blue:#0284c7; --cyan:#0e7490; --green:#059669; --amber:#b45309;
+  --blue:#0369a1; --cyan:#0e7490; --green:#059669; --amber:#b45309;
   --chip-bg:rgba(2,132,199,.08); --chip-border:rgba(2,132,199,.22);
   --hero-overlay:linear-gradient(180deg,rgba(4,10,20,.15) 0%,rgba(4,10,20,.55) 100%);
 }
@@ -112,10 +112,10 @@ li{margin-bottom:.5rem}
 
 /* ── gumb za prenos ── */
 .sola-cta{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
-  background:var(--blue);color:#fff;font:inherit;font-weight:700;font-size:1.05rem;
+  background:#0369a1;color:#fff;font:inherit;font-weight:700;font-size:1.05rem;
   padding:.95rem 1.6rem;border-radius:14px;text-decoration:none;border:0;cursor:pointer;
   box-shadow:0 6px 20px rgba(2,132,199,.3)}
-.sola-cta:hover{background:var(--cyan)}
+.sola-cta:hover{background:#075985}
 .sola-cta-note{font-size:.85rem;color:var(--muted);margin-top:.7rem}
 
 /* ── živi podatki blok ── */
