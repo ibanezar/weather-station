@@ -1,0 +1,41 @@
+name: Vreme za … (sušenje perila, kolesarji, čebelarji, ribolov, psi)
+
+on:
+  schedule:
+    - cron: '30 6 * * *'   # 6:30 UTC daily, po astma-forecast.yml
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Test strani
+        run: python3 tools/test_day_pages.py
+
+      # Vsaka stran posebej: izpad ene (npr. Open-Meteo) ne podre ostalih; stara stran ostane.
+      - name: Generate strani
+        run: |
+          rc=0
+          for g in susenje_perila vreme_za_kolesarje vreme_za_cebelarje vreme_za_ribolov vreme_za_pse; do
+            python3 tools/generate_${g}_page.py || rc=1
+          done
+          exit $rc
+        continue-on-error: true
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add susenje-perila/ vreme-za-kolesarje/ vreme-za-cebelarje/ vreme-za-ribolov/ vreme-za-pse/ || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi strani vreme za … $(date -u +%Y-%m-%d) [skip ci]"
+          git push

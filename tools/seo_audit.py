@@ -100,6 +100,12 @@ CORE = {
     "biovreme/":                 ("daily",   "0.7"),
     # Tveganje za astmatike po dnevih (tools/generate_astma_page.py, astma-forecast.yml).
     "astma/":                    ("daily",   "0.7"),
+    # Strani »vreme za …« (tools/day_score_common.py + generate_{susenje_perila,vreme_za_*}_page.py, vsakdan-forecast.yml).
+    "susenje-perila/":           ("daily",   "0.6"),
+    "vreme-za-kolesarje/":       ("daily",   "0.6"),
+    "vreme-za-cebelarje/":       ("daily",   "0.6"),
+    "vreme-za-ribolov/":         ("daily",   "0.6"),
+    "vreme-za-pse/":             ("daily",   "0.6"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
     # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
     # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.

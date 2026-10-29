@@ -72,6 +72,9 @@ jobs:
       - name: Test strani Vreme in astma (točkovanje, JS kopija, brez notranjih meritev)
         run: python3 tools/test_astma.py
 
+      - name: Test strani »vreme za …« (točkovanje, veto, okno po urah, izris)
+        run: python3 tools/test_day_pages.py
+
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py
 
