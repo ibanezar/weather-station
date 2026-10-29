@@ -57,7 +57,7 @@ MUTACIJE = [
     ("starost meritve DRSI (worker)", "worker.js", "/ 60000 <= 40) ? st : null", "/ 60000 <= 41) ? st : null"),
     ("prag sunkov (worker)", "worker.js", "CRN_SUNKI_KMH = 70", "CRN_SUNKI_KMH = 71"),
     ("značka: konstanta (worker)", "worker.js", "const SNOW_OFFSET = 250, SNOW_HALFWIDTH = 100;", "const SNOW_OFFSET = 260, SNOW_HALFWIDTH = 100;"),
-    ("značka: cona (worker)", "worker.js", 'else if (tempC != null && tempC > 5) { zoneLabel = "suho"', 'else if (tempC != null && tempC > 6) { zoneLabel = "suho"'),
+    ("značka: cona (worker)", "worker.js", 'else if (tempC != null && tempC > 5) {\n              // Ob megli', 'else if (tempC != null && tempC > 6) {\n              // Ob megli'),
     ("prag mokrega dne (napovej.js)", "napovej/napovej.js", "var MOKER_MM = 0.2;", "var MOKER_MM = 0.3;"),
     # ── časovna vrata kart (test_gates.py) ────────────────────────────────────
     ("vrata: konec okna (nevihtna)", "tools/storm_map_gate.py", "WINDOW_END = 8 ", "WINDOW_END = 9 ", "test_gates.py"),
@@ -65,7 +65,7 @@ MUTACIJE = [
     ("vrata: pozni tek brez zgornje meje (padavinska)", "tools/precip_map_gate.py", "LATE_END = 20", "LATE_END = 24", "test_gates.py"),
     ("vrata: okno pred meritvijo ARSO (padavinska)", "tools/precip_map_gate.py", "WINDOW_START = 7 ", "WINDOW_START = 6 ", "test_gates.py"),
     # ── zastareli vhodi (test_stale_inputs.py) ────────────────────────────────
-    ("zastareli vhod: zgodba po lead", "tools/generate_story_card.py", 'if d.get("date") == tomorrow_iso), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
+    ("zastareli vhod: zgodba po lead", "tools/generate_story_card.py", 'if d.get("date") == date_iso), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
     ("zastareli vhod: članek po lead", "tools/generate_daily_post.py", 'if d.get("date") == tomorrow), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
     ("zastareli vhod: gasilska karta brez datuma", "tools/generate_gasilec_page.py", 'storm.get("date") != TODAY.isoformat()', 'False', "test_stale_inputs.py"),
     ("zastareli vhod: povzetek po lead", "tools/send_morning_digest.py", 'if d.get("date") == today), None)', 'if d.get("lead") == 1), None)', "test_stale_inputs.py"),
