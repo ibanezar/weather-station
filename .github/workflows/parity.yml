@@ -78,6 +78,7 @@ jobs:
           python3 tools/test_migrena.py
           node tools/test_migrena_alarm.mjs
           node tools/test_ocene.mjs
+          python3 tools/test_zima_alarm.py
 
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py

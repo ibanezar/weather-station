@@ -69,6 +69,8 @@ REGISTER = [
      "gasilec-forecast.yml"),
     ("Zima / Črnivec", "data/winter-data.json", "ts", "generated_at", 36,
      "zima-forecast.yml"),
+    ("Zimska opozorila (ocene za push)", "data/zima-ocene.json", "ts", "generated", 36,
+     "zima-forecast.yml"),
     ("Zgodovina meritev (history.json)", "history.json", "maxkey", None, 60,
      "update-history.yml (Ecowitt)"),
     ("Verifikacija napovedi", "forecast_verification.json", "maxkey", None, 72,

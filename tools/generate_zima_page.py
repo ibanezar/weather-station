@@ -40,6 +40,7 @@ import datetime, json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
+import day_score_common as D  # noqa: E402 — gradnik »Opozorilo na telefon« in zapis ocen (isti kot strani »vreme za …«)
 
 ROOT = seo.ROOT
 SITE = seo.SITE
@@ -856,6 +857,7 @@ def build_hub_body(data):
 {passes_html}
 {nav_cards}
 {season_html}
+{hub_alerts_html()}
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
@@ -864,6 +866,123 @@ def build_hub_body(data):
   naselja, brez notranjih meritev. Dejansko stanje prelazov je ročno vzdrževano polje — preveri tudi
   promet.si, AMZS ali DARS pred vožnjo.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>''', faq
+
+
+# ── Zimska opozorila na telefon ───────────────────────────────────────────
+# Isti mehanizem kot »Opozorila po ocenah« na straneh »vreme za …« (worker.js, _cronCheckOcene): obiskovalec si sam nastavi
+# raven in dan, worker pa dnevne ocene prebere iz datoteke, ki jo piše Python. Ločena datoteka (ne data/vsakdan-ocene.json),
+# ker jo piše zima-forecast.yml, vsakdan-forecast.yml pa svojo -- dva workflowa v isti datoteki sta se že enkrat tepla
+# (astma-forecast.yml). Ocene računa Python, worker jih samo bere. Modelska napoved, ne uradno opozorilo.
+ZIMA_OCENE_FILE = os.path.join(seo.ROOT, "data", "zima-ocene.json")
+SNEG_LEVELS = ["brez snega", "do 1 cm", "1–5 cm", "več kot 5 cm"]
+SNEG_CM_BANDS = (0.2, 1.0, 5.0)           # spodnje meje ravni 1, 2, 3 (cm novega snega v dolini v enem dnevu)
+MEGLA_LEVELS = ["brez inverzije", "nizka (do 500 m)", "srednja (500–900 m)", "visoka (nad 900 m)"]
+MEGLA_TOP_BANDS = (500, 900)              # zgornja meja inverzije: pod 500 m, 500–900 m, nad 900 m
+HAZARD_LEVELS = ["nizko", "srednje", "visoko"]
+ZIMA_ALERTS = {
+    "zima-poledica": {"short": "Poledica", "url": "/zima/poledica/", "levels": HAZARD_LEVELS,
+                       "opts": [("ge1", "srednje ali visoko"), ("ge2", "visoko")]},
+    "zima-sneg": {"short": "Sneg v dolini", "url": "/zima/meja-snezenja/", "levels": SNEG_LEVELS,
+                   "opts": [("ge1", "kakršen koli sneg (od 0,2 cm)"), ("ge2", "1 cm ali več"), ("ge3", "več kot 5 cm")]},
+    "zima-zled": {"short": "Žled", "url": "/zima/zled/", "levels": HAZARD_LEVELS,
+                   "opts": [("ge1", "srednje ali visoko"), ("ge2", "visoko")]},
+    "zima-megla": {"short": "Nad meglo", "url": "/zima/nad-meglo/", "levels": MEGLA_LEVELS,
+                    "opts": [("ge1", "inverzija (dolina v megli, vrhovi na soncu)"), ("ge2", "megla seže nad 500 m"),
+                             ("ge3", "megla seže nad 900 m")]},
+}
+
+
+def _rank(level):
+    return RANK_ORDER.index(level) if level in RANK_ORDER else 0
+
+
+def sneg_level(cm):
+    """Raven novega snega v dolini po dnevni količini (cm); None = ni podatka."""
+    if cm is None:
+        return None
+    return sum(1 for b in SNEG_CM_BANDS if cm >= b)
+
+
+def megla_level(top_m, has_inversion):
+    """Raven jutranje inverzije po zgornji meji megle; brez inverzije 0."""
+    if not has_inversion or top_m is None:
+        return 0
+    return 1 + sum(1 for b in MEGLA_TOP_BANDS if top_m >= b)
+
+
+def _oklepaj(names):
+    return ", ".join(names[:-1]) + " in " + names[-1] if len(names) > 1 else (names[0] if names else "")
+
+
+def zima_ocene(data):
+    """{slug: [{date, lvl, reasons}]} za štiri zimska opozorila iz data/winter-data.json (čista funkcija, preizkusi jo
+    test_zima_alarm.py). Dan brez podatka izpustimo -- worker ga ne more oceniti in obvestila ne pošlje."""
+    out = {k: [] for k in ZIMA_ALERTS}
+    for d in (data.get("black_ice_outlook") or {}).get("daily") or []:
+        out["zima-poledica"].append({"date": d["date"], "lvl": _rank(d["level"]), "reasons": []})
+    for d in (data.get("freezing_rain") or {}).get("daily") or []:
+        out["zima-zled"].append({"date": d["date"], "lvl": _rank(d["level"]), "reasons": []})
+    for d in (data.get("snow_line") or {}).get("daily") or []:
+        lvl = sneg_level(d.get("cm_at_station"))
+        if lvl is None:
+            continue
+        why = []
+        if lvl:
+            why.append(f"v dolini po oceni {num(d['cm_at_station'], 1)} cm novega snega")
+            if d.get("line_m") is not None:
+                why.append(f"meja sneženja do {d['line_m']} m")
+        out["zima-sneg"].append({"date": d["date"], "lvl": lvl, "reasons": why})
+    fog = data.get("fog") or {}
+    locs = fog.get("locations") or []
+    for d in fog.get("daily") or []:
+        top = d.get("top_m")
+        lvl = megla_level(top, d.get("has_inversion"))
+        why = []
+        if lvl:
+            above = [l["name"] for l in locs if l["elevation_m"] >= 1000 and l["elevation_m"] > top]
+            why.append(f"megla do približno {top} m")
+            if above:
+                why.append(f"nad njo: {_oklepaj(above)}")
+        out["zima-megla"].append({"date": d["date"], "lvl": lvl, "reasons": why})
+    return out
+
+
+def write_zima_ocene(data, path=None):
+    """Zapiše data/zima-ocene.json, ki ga bere worker; vrne število zapisanih strani."""
+    path = path or ZIMA_OCENE_FILE
+    try:
+        os.remove(path)                    # datoteka je izpeljana v celoti iz winter-data.json, ostanki starih strani nimajo smisla
+    except OSError:
+        pass
+    n = 0
+    for slug, days in zima_ocene(data).items():
+        if not days:
+            continue
+        c = ZIMA_ALERTS[slug]
+        D.write_summary(slug, c["short"], c["url"], c["levels"], days, path=path)
+        n += 1
+    return n
+
+
+def alert_block(slug):
+    """CSS + gradnik + skript opozorila za eno od zimskih strani."""
+    c = ZIMA_ALERTS[slug]
+    return D.ALERT_CSS + "\n" + D.alert_html(slug, c["short"], c["levels"], c["opts"]) + "\n" + D.alert_script(slug)
+
+
+def with_alert(body, slug):
+    """Gradnik opozorila vstavi tik pred povezavo »Nazaj« (ob nezanesljivih podatkih strani ne podira)."""
+    marker = '  <a class="back-link"'
+    i = body.rfind(marker)
+    return body if i < 0 else body[:i] + alert_block(slug) + "\n" + body[i:]
+
+
+def hub_alerts_html():
+    items = "".join(f'<li><a href="{c["url"]}#ov-alert">{c["short"]}</a></li>' for c in ZIMA_ALERTS.values())
+    return ('  <h2>Opozorila na telefon</h2>\n'
+            '  <p class="archive-intro">Sami nastavite, kdaj želite obvestilo: na straneh spodaj izberete raven in dan, '
+            'mi pa vam ga pošljemo, ko ocena ustreza. Modelska napoved, ne uradno opozorilo.</p>\n'
+            f'  <ul>{items}</ul>')
 
 
 # ── /zima/meja-snezenja/ ─────────────────────────────────────────────────
@@ -1377,6 +1496,7 @@ def main():
 
     # ── meja-snezenja ──
     body, faq = build_snow_line_body(data)
+    body = with_alert(body, "zima-sneg")
     schema = "\n".join([
         seo.webpage_schema("/zima/meja-snezenja/", "Meja sneženja — Zgornja Savinjska dolina",
                             "Trenutna in 24-urna napoved meje sneženja po višinskih pasovih za Zgornjo "
@@ -1393,6 +1513,7 @@ def main():
 
     # ── poledica ──
     body, faq = build_black_ice_body(data)
+    body = with_alert(body, "zima-poledica")
     schema = "\n".join([
         seo.webpage_schema("/zima/poledica/", "Tveganje poledice — Zgornja Savinjska dolina",
                             "Ocena tveganja poledice po krajih Zgornje Savinjske doline, iz meritev "
@@ -1409,6 +1530,7 @@ def main():
 
     # ── zled ──
     body, faq = build_zled_body(data)
+    body = with_alert(body, "zima-zled")
     schema = "\n".join([
         seo.webpage_schema("/zima/zled/", "Žled: kdaj dež zmrzuje in ali ga bo v dolini",
                             "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana "
@@ -1443,6 +1565,7 @@ def main():
 
     # ── nad-meglo ──
     body, faq = build_fog_body(data)
+    body = with_alert(body, "zima-megla")
     schema = "\n".join([
         seo.webpage_schema("/zima/nad-meglo/", "Nad meglo — Zgornja Savinjska dolina",
                             "Kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj po oceni nad "
@@ -1491,6 +1614,7 @@ def main():
     seo.write_page("zima/prevoznost-prelazov/index.html", html, force=True)
     print("  → zima/prevoznost-prelazov/index.html")
 
+    print(f"  → data/zima-ocene.json ({write_zima_ocene(data)} strani)")
     return 0
 
 
