@@ -37,5 +37,12 @@ check(not re.search(r"\bNone\b|\bnan\b|undefined|\{\{", text), "brez None/nan/un
 check("llms-full.txt" in open(os.path.join(g.ROOT, "llms.txt"), encoding="utf-8").read(), "llms.txt povezuje na llms-full.txt")
 # določenost: dvakrat zaporedoma isto
 check(g.build()[0] == text, "izpis je deterministična")
+# razčlenjevanje: stran brez opisa in besedila ni vnos; stran z odstavkom je
+check(g.entry_from_html("<html><title>X</title><body><h1>A</h1><nav><p>" + "x" * 80 + "</p></nav></body></html>", "/a/") is None,
+      "stran brez opisa in odstavkov ni vnos (navigacija se ne šteje)")
+e = g.entry_from_html("<html><title>Naslov</title><meta name=\"description\" content=\"Opis\"><body><h1>A</h1><p>" + "Besedilo odstavka. " * 6 + "</p></body></html>", "/a/")
+check(e and e["desc"] == "Opis" and len(e["paras"]) == 1 and e["url"] == "https://meteorec.si/a/", "stran z opisom in odstavkom je vnos")
+e = g.entry_from_html("<html><title>T</title><body><h1>A</h1><!-- WX-STATIC:START x --><p>" + "Meritev 12 °C. " * 8 + "</p><!-- WX-STATIC:END --></body></html>", "/a/")
+check(e is None, "blok živih meritev (WX-STATIC) je izpuščen")
 print(f"\n{fails} razhajanj")
 sys.exit(1 if fails else 0)

@@ -60,6 +60,10 @@ def test_worker():
     except ValueError:
         check(False, "worker se ne zažene", (p.stdout + p.stderr)[:400])
         return
+    reqs = out.pop("__ecowitt_requests", [])
+    check(len(reqs) >= 3, "worker je poklical Ecowitt (history, real_time)", f"{len(reqs)} zahtev")
+    check(not any("indoor" in u.lower() for u in reqs), "worker ne zahteva notranjih podatkov od Ecowitta",
+          next((u for u in reqs if "indoor" in u.lower()), ""))
     for path, r in out.items():
         check(r["status"] == 200, f"worker {path}: odgovor", f"status={r['status']} {r['body'][:120]}")
         check(not leaks(r["body"]), f"worker {path}: notranje meritve", ", ".join(leaks(r["body"])))

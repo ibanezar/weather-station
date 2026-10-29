@@ -40,8 +40,10 @@ const history = { code: 0, data: {
   indoor: { temperature: { list: { '1760000000': '23.47' } }, humidity: { list: { '1760000000': '47.3' } } },
   wind: { wind_speed: { list: { '1760000000': '2' } } }, rainfall: { daily: { list: { '1760000000': '0.0' } } } } };
 
+const ecowittRequests = [];
 globalThis.fetch = async (url) => {
   const u = String(url);
+  if (u.includes('api.ecowitt.net')) ecowittRequests.push(u);
   const j = (o) => new Response(JSON.stringify(o), { status: 200, headers: { 'Content-Type': 'application/json' } });
   if (u.includes('device/history')) return j(history);
   if (u.includes('api.ecowitt.net')) return j(real);
@@ -59,6 +61,7 @@ for (const p of ['/ecowitt-current', '/varpolje-current', '/current', '/ecowitt-
     out[p] = { status: r.status, body: await r.text() };
   } catch (e) { out[p] = { status: -1, body: 'IZJEMA ' + e }; }
 }
+out.__ecowitt_requests = ecowittRequests;
 fs.rmSync(dir, { recursive: true, force: true });
 process.stdout.write(JSON.stringify(out));
 process.exit(0);

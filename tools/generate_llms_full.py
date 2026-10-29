@@ -48,7 +48,11 @@ def page_entry(path):
     f = os.path.join(ROOT, f + "/index.html" if not f.endswith(".html") else f)
     if not os.path.exists(f):
         return None
-    raw = open(f, encoding="utf-8").read()
+    return entry_from_html(open(f, encoding="utf-8").read(), path)
+
+
+def entry_from_html(raw, path):
+    """Vnos iz HTML strani; None, če stran nima ne opisa ne uvodnega besedila (prazen vnos modelu ne koristi)."""
     title = text_of((re.search(r"<title>(.*?)</title>", raw, re.S) or [None, ""])[1])
     desc = ""
     m = re.search(r'<meta\s+name="description"\s+content="([^"]*)"', raw)

@@ -69,6 +69,12 @@ for c in CFGS:
     check(f"nevihta in dež: {c['slug']} vsaj raven 2", d["lvl"] >= 2)
 
 check("perilo: dež ≥ 0,5 mm = veto", D.build_days(P1.CFG, synth(precipitation=0.6, precipitation_probability=0), TODAY)[0]["pts"]["dez"] == 3)
+# meja vsote: 10 ur × 0,06 mm = 0,6 mm >= 0,5 (veto), 10 × 0,04 = 0,4 mm < 0,5 (brez vetoja); verjetnost 0, da odloča samo vsota
+check("perilo: vsota dežja 0,6 mm = veto (privzeti prag)", D.build_days(P1.CFG, synth(precipitation=0.06, precipitation_probability=0), TODAY)[0]["pts"]["dez"] == 3)
+check("perilo: vsota dežja 0,4 mm brez vetoja", D.build_days(P1.CFG, synth(precipitation=0.04, precipitation_probability=0), TODAY)[0]["pts"]["dez"] < 3)
+check("kolesarji: vsota dežja 0,6 mm = veto, 0,4 mm ne",
+      D.build_days(P2.CFG, synth(precipitation=0.05, precipitation_probability=0), TODAY)[0]["pts"]["dez"] == 3
+      and D.build_days(P2.CFG, synth(precipitation=0.03, precipitation_probability=0), TODAY)[0]["pts"]["dez"] < 3)
 check("perilo: premalo vetra je slabo", D.build_days(P1.CFG, synth(wind_speed_10m=2), TODAY)[0]["pts"]["veter"] == 2)
 check("perilo: sonce največ 2", max(D.build_days(P1.CFG, synth(shortwave_radiation=0), TODAY)[0]["pts"]["sonce"], 0) == 2)
 check("perilo: zmrzal = 3 za temperaturo", D.build_days(P1.CFG, synth(temperature_2m=-3), TODAY)[0]["pts"]["temp"] == 3)
