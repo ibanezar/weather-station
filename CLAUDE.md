@@ -346,6 +346,24 @@ Obiskovalec si sam izbere raven in dan (danes/jutri), worker pa obvestilo pošlj
 - **Nova zimska ocena** = vnos v `ZIMA_ALERTS` + izračun v `zima_ocene()` + `with_alert()` v `main()`. Test: `tools/test_zima_alarm.py` (pragovi, razlogi, možnosti obrazca ↔ ravni, veljaven JS), `tools/test_ocene.mjs` (združitev datotek in svežina po strani); mutacije v `mutation_check.py`; vrstica v `REGISTER` (`check_freshness.py`).
 - **Ni narejeno:** zgodba/FB kartica za »nad meglo« (jutranje teme zgodbe imajo stroga časovna okna, glej dnevno zgodbo), napoved po urah za poledico (ocena je dnevna).
 
+## MeteoZima: hub `/zima/` (prenova 29. 10. 2026)
+
+`build_hub_body()` v `tools/generate_zima_page.py`. Vrstni red: glava s prerezom doline → **Razmere v dolini** (6 kartic) → 48 ur → snežna karta → ceste →
+opozorila na telefon → zima v številkah → še več o zimi → FAQ. Samo videz in razporeditev; indeksi in podatki so isti (`winter-data.json`).
+
+- **Prerez doline v glavi** (`valley_profile_svg()`): višine v merilu (200–2300 m), vodoravne razdalje NE — tako piše pod njim. Vrhovi so `HIGH_POINTS`,
+  postaja 366 m. Riše mejo sneženja danes (črtkano), jutrišnjo meglo (pas v zraku doline, teren jo prekrije) in snežno odejo od najnižjega pasu z
+  `depth_cm > 0`. Napisi imajo temen obris (berljivi na beli odeji). Ne riši ga kot karto in ne dodajaj vrhov brez preverjene višine.
+- **Kartice** imajo vrednost, en stavek in trak 7 dni. Ravni (nizko/srednje/visoko) so **`CHART_COLOR`** — ista preverjena paleta kot grafi na podstraneh;
+  ne uvajaj druge. Raven je vedno pika + beseda, v traku `title` + legenda pod karticami. Meja sneženja in megla sta zaporedni lestvici ene barve
+  (izrazitejše = nižje). Kartica je povezava na podstran; nova zimska stran = nova kartica ali vnos v »Še več o zimi«.
+- **Brez emojijev** na hubu: ikone so `INDEX_ICONS`/`HUB_ICONS` (24×24, `currentColor`). Podstrani jih še imajo (ni prenovljeno).
+- **48 ur**: temperatura in padavine sta dva grafa na isti časovni osi (ne druga os). Vsak graf ima dve različici (`.zx-wide`/`.zx-narrow`, preklop v CSS
+  pri 640 px), ker bi se en viewBox na telefonu stisnil. Ničla je vidna, ko gre temperatura pod 5 °C. Dotik/miška pokaže uro, temperaturo in padavine
+  (`HUB_JS`, `textContent`). Ob nič padavinah je namesto grafa stavek.
+- Širina strani: `.wrap:has(.zima-card,.zx-hero)` (hub nima več `.zima-card`). Preverjeno na 320, 390 in 1280 px brez vodoravnega drsenja ter na
+  sintetični zimi (sneg v dolini, nizka meja, visoke ravni, padavine).
+
 ## Žled (`/zima/zled/`, 7. 10. 2026)
 
 Ideja po neurje.si (njihova stran o žledenju in sondaži). Naša je ločena od `/zima/poledica/`:

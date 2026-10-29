@@ -176,35 +176,6 @@ def card_style(key, extra="margin-bottom:1.2rem"):
 # `prefers-reduced-motion` obe animaciji izklopi, isto kot na /crnivec/ in
 # /igra/.
 
-# Subtilen zimski ambient za ozadje hero-ja -- statičen (ni podatkovno odvisen,
-# zato konstanta, ne funkcija): nebesni prelivi, tri plasti topografskih
-# kontur in silhueta gora, izrisano kot ena SVG (position:absolute, glej
-# .zima-hero-bg v ZIMA_CSS spodaj). NAMENOMA brez letečih snežink -- uporabnik
-# je to eksplicitno izključil ("ne snežink, ki letijo po ekranu"), samo mirna
-# dekoracija. Ni "risan" motiv nobene resnične gore (isto načelo kot
-# storm_threat_score -- vizualni jezik, ne trditev o geografiji).
-ZIMA_AMBIENT_BG = '''
-      <svg class="zima-hero-bg" viewBox="0 0 1150 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-        <defs>
-          <linearGradient id="zimaSkyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0c1c33" stop-opacity=".6"/>
-            <stop offset="100%" stop-color="#04070e" stop-opacity="0"/>
-          </linearGradient>
-          <radialGradient id="zimaHalo" cx="80%" cy="12%" r="50%">
-            <stop offset="0%" stop-color="#38bdf8" stop-opacity=".2"/>
-            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="1150" height="300" fill="url(#zimaSkyGrad)"/>
-        <rect width="1150" height="300" fill="url(#zimaHalo)"/>
-        <path d="M-20 235 Q 200 205 420 232 T 900 220 T 1180 240" fill="none" stroke="#1e293b" stroke-width="1"/>
-        <path d="M-20 253 Q 220 224 440 250 T 920 240 T 1180 258" fill="none" stroke="#1e293b" stroke-width="1"/>
-        <path d="M-20 270 Q 240 244 460 266 T 940 258 T 1180 274" fill="none" stroke="#1e293b" stroke-width="1"/>
-        <path d="M-20 300 L110 170 L215 235 L340 105 L455 220 L610 70 L755 205 L890 135 L1015 225 L1150 165 L1180 190 L1180 300 Z"
-              fill="#0a1120" fill-opacity=".62"/>
-      </svg>
-'''
-
 ZIMA_CSS = '''
 <style>
 .zima-icon{display:inline-flex;align-items:center;justify-content:center;width:2.15rem;height:2.15rem;
@@ -231,20 +202,20 @@ ZIMA_CSS = '''
    je na vseh sedmih straneh (hub + 6 spoke), .zima-hero samo na hubu -- prvi
    poskus je pomotoma zožil samo hub, spoke strani so ostale na 720px.
    Brskalnik brez podpore :has() preprosto obdrži 720px, varno degradiranje. */
-.wrap:has(.zima-card){max-width:1150px}
+.wrap:has(.zima-card,.zx-hero){max-width:1150px}
 /* Accordion vizual za FAQ (native <details>/<summary>, glej faq v vsakem
    build_*_body). SAMO tu, ne globalno v blog.css -- isti <div class="faq">
    vzorec uporabljajo desetine drugih generiranih strani in bi jih nehoteno
    spremenili. */
-.wrap:has(.zima-card) .faq details{background:var(--card-bg);border:1px solid var(--card-border);
+.wrap:has(.zima-card,.zx-hero) .faq details{background:var(--card-bg);border:1px solid var(--card-border);
   border-radius:14px;padding:.9rem 1.1rem;margin-bottom:.7rem}
-.wrap:has(.zima-card) .faq summary{cursor:pointer;font-weight:650;color:var(--text);
+.wrap:has(.zima-card,.zx-hero) .faq summary{cursor:pointer;font-weight:650;color:var(--text);
   list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
-.wrap:has(.zima-card) .faq summary::-webkit-details-marker{display:none}
-.wrap:has(.zima-card) .faq summary::after{content:"+";color:var(--cyan);font-size:1.25rem;
+.wrap:has(.zima-card,.zx-hero) .faq summary::-webkit-details-marker{display:none}
+.wrap:has(.zima-card,.zx-hero) .faq summary::after{content:"+";color:var(--cyan);font-size:1.25rem;
   font-weight:400;flex:0 0 auto;transition:transform .2s;line-height:1}
-.wrap:has(.zima-card) .faq details[open] summary::after{transform:rotate(45deg)}
-.wrap:has(.zima-card) .faq details p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
+.wrap:has(.zima-card,.zx-hero) .faq details[open] summary::after{transform:rotate(45deg)}
+.wrap:has(.zima-card,.zx-hero) .faq details p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
 .zima-fog-ladder{display:flex;flex-direction:column;gap:.35rem;margin:1rem 0}
 .zima-fog-row{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem .9rem;border-radius:10px;
   background:rgba(255,255,255,.03);border:1px solid var(--card-border);font-size:.88rem}
@@ -252,59 +223,11 @@ ZIMA_CSS = '''
 .zima-fog-elev{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);white-space:nowrap}
 .zima-fog-line{text-align:center;font-size:.76rem;color:#94a3b8;padding:.4rem 0;
   border-top:1px dashed var(--card-border);border-bottom:1px dashed var(--card-border);margin:.15rem 0}
-.zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
-  border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
-.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;z-index:2;
-  background:linear-gradient(90deg,#38bdf8,#2dd4bf,#fbbf24,#a78bfa,#f472b6)}
-/* ZIMA_AMBIENT_BG (glej konstanto zgoraj) -- position:absolute čez cel hero,
-   za besedilom (.zh-content nosi position:relative;z-index:1, glej spodaj). */
-/* Fiksna višina (ne inset:0 čez cel hero) -- na ozkem/visokem mobilnem heroju
-   (skladi CTA/stat kartic naredijo hero visok) bi raztegnjena celotna višina
-   silhueto gora popačila v navpično konico. Fiksnih 220px + preserveAspectRatio
-   "slice" pomeni: obreže robove na ozkih zaslonih, ne raztegne proporcev. */
-.zima-hero-bg{position:absolute;left:0;right:0;bottom:0;width:100%;height:220px;z-index:0;pointer-events:none;display:block}
-.zh-content{position:relative;z-index:1}
-.zima-hero .page-title{margin:.1rem 0 .15rem}
-.zima-hero .zh-sub{color:var(--muted);font-size:.95rem;margin:0 0 1.1rem}
-.zima-hero .zh-verdict{font-size:1.12rem;font-weight:600;line-height:1.6;margin:0 0 1.3rem;max-width:44rem}
-/* Utripajoča piko ob statusu ("bolj animiran status", glej uporabnikov predlog)
-   -- barva po stanju (isto besedišče kot RISK_ICON/RANK_ORDER: visoko/srednje/
-   nizko + snow za snežno odejo, ki prevlada nad tveganji). Izklopljeno pod
-   prefers-reduced-motion, isto načelo kot .zima-bar/.zima-line zgoraj. */
-.zh-status{display:inline-flex;align-items:center;gap:.5rem}
 .zh-dot{width:.6rem;height:.6rem;border-radius:50%;flex:0 0 auto;animation:zhPulse 2.2s ease-out infinite}
-.zh-status-visoko .zh-dot{background:#f87171;--dot-glow:rgba(248,113,113,.55)}
-.zh-status-srednje .zh-dot{background:var(--amber);--dot-glow:rgba(245,158,11,.5)}
-.zh-status-nizko .zh-dot{background:#34d399;--dot-glow:rgba(52,211,153,.5)}
-.zh-status-snow .zh-dot{background:#e2e8f0;--dot-glow:rgba(226,232,240,.5)}
 @keyframes zhPulse{0%{box-shadow:0 0 0 0 var(--dot-glow,rgba(148,163,184,.5))}
   70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion: reduce){.zh-dot{animation:none}}
-.zh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.4rem}
-.zh-stat{background:rgba(255,255,255,.035);border:1px solid var(--card-border);border-radius:14px;padding:.85rem 1rem}
-.zh-stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
-  font-family:'JetBrains Mono',monospace}
-.zh-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
-  margin:.25rem 0 0;line-height:1.1}
-.zh-cta{display:flex;gap:.7rem;flex-wrap:wrap}
-.zh-cta a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.15rem;border-radius:10px;
-  border:1px solid var(--card-border);background:rgba(255,255,255,.035);color:var(--text);
-  text-decoration:none;font-size:.87rem;font-weight:650;transition:border-color .18s,color .18s}
-.zh-cta a:hover{border-color:var(--cyan);color:var(--cyan)}
 .zima-section-title{display:flex;align-items:center;gap:.5rem}
-/* Mreža 5 stanj namesto prejšnjega enega stolpca -- glej card_style() klice v
-   build_hub_body(), ki za to mrežo pošljejo prazen extra="" (brez privzetega
-   margin-bottom, ker razmik zdaj dela grid gap). zima-card-wide (kurilni
-   semafor) zavzame celo širino vrstice, da je vidno večji od ostalih štirih. */
-.zima-conditions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.2rem}
-.zima-conditions-grid .zima-card-wide{grid-column:1/-1}
-.zima-meter-svg{width:100%;height:auto;display:block}
-.zima-passes-list{display:grid;gap:.7rem;margin:1rem 0 1.2rem}
-.zima-pass-row{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
-  padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-.zima-pass-name{font-weight:700;color:var(--text)}
-.zima-pass-meta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
-.zima-pass-status{font-size:.82rem;font-weight:650;white-space:nowrap}
 </style>'''
 
 
@@ -465,113 +388,498 @@ def daily_line_chart_svg(days, values, unit="", color=CHART_LINE_COLOR):
             f'aria-label="Sedemdnevni trend">' + lines + dots + gaps + y_lbl + labels + '</svg>')
 
 
-def hourly_temp_chart_svg(hourly_48h):
-    """Temperatura na postaji za naslednjih ~48 ur (+ 6 ur nazaj za kontekst,
-    glej compute_hourly_48h v winter_engine.py) — isti 'draw-in' CSS trik
-    (zima-line) kot daily_line_chart_svg, a z urno osjo namesto dnevne in
-    navpično črto pri trenutni uri (now_idx, izračunan že v winter_engine.py,
-    da ga tu ni treba znova iskati po času)."""
-    if not hourly_48h:
-        return None
-    times = hourly_48h.get("times") or []
-    temps = hourly_48h.get("temp_c") or []
-    now_idx = hourly_48h.get("now_idx")
+# ── Hub /zima/: prenova 29. 10. 2026 ─────────────────────────────────────
+# Kar velja (glej tudi CLAUDE.md, razdelek »MeteoZima: hub«):
+#  - Brez emojijev v prikazu: ikone so risane (INDEX_ICONS/HUB_ICONS), stanje nosi barvna pika + beseda.
+#  - Barve ravni so CHART_COLOR (preverjene z validate_palette.js), iste kot grafi na podstraneh -- ne uvajaj
+#    druge palete za iste ravni. Raven nikoli samo z barvo: ob vsaki piki je beseda, v traku dni `title` + legenda.
+#  - Prerez doline v glavi je shematski: višine v merilu, vodoravne razdalje ne (tako piše pod njim).
+#  - Grafi so statični SVG v dveh različicah (namizje/telefon, preklop v CSS): en viewBox bi se na telefonu stisnil
+#    in pisava bi padla pod 5 px (isto pravilo kot pri MTR grafu, glej CLAUDE.md).
+#  - Temperatura in padavine sta DVA grafa na skupni časovni osi, ne ena slika z dvema osema.
+
+WEEKDAY_SL = ["pon", "tor", "sre", "čet", "pet", "sob", "ned"]
+WEEKDAY_SL_LONG = ["ponedeljek", "torek", "sreda", "četrtek", "petek", "sobota", "nedelja"]
+LEVEL_WORD = {"nizko": "Nizko", "srednje": "Srednje", "visoko": "Visoko"}
+HEAT_WORD = {"nizko": "Dobra prevetrenost", "srednje": "Zmerna inverzija", "visoko": "Močna inverzija"}
+PRECIP_COLOR = "#60a5fa"   # en sam niz na svojem grafu (padavine), ločen od temperature
+FOG_FILL = "#cbd5e1"
+SNOW_CAP = "#e2e8f0"
+
+# Ikone za seznam strani in opozorila (24×24, obris currentColor, isti jezik kot INDEX_ICONS).
+HUB_ICONS = {
+    "map": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+            '<path d="M3 6.2 L9 4 L15 6.2 L21 4 V17.8 L15 20 L9 17.8 L3 20 Z" fill="currentColor" fill-opacity=".12" '
+            'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+            '<path d="M9 4 V17.8 M15 6.2 V20" stroke="currentColor" stroke-width="1.4"/></svg>'),
+    "zled": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+             '<path d="M12 2.8 C9.6 6.4 8 8.6 8 10.9 a4 4 0 0 0 8 0 C16 8.6 14.4 6.4 12 2.8 Z" fill="currentColor" '
+             'fill-opacity=".16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+             '<path d="M4 19 H20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'
+             '<path d="M7 19 V21.5 M11 19 V22 M15 19 V21 M18 19 V21.8" stroke="currentColor" stroke-width="1.3" '
+             'stroke-linecap="round"/></svg>'),
+    "article": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+                '<rect x="5" y="3" width="14" height="18" rx="2" fill="currentColor" fill-opacity=".12" '
+                'stroke="currentColor" stroke-width="1.6"/>'
+                '<path d="M8.5 8 H15.5 M8.5 11.5 H15.5 M8.5 15 H13" stroke="currentColor" stroke-width="1.4" '
+                'stroke-linecap="round"/></svg>'),
+    "peaks": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+              '<path d="M2 19.5 L8.5 9 L11.5 13.5 L15.5 6 L22 19.5 Z" fill="currentColor" fill-opacity=".13" '
+              'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+              '<path d="M13.6 9.6 L15.5 6 L17.4 9.6 L16 9 L15.5 9.8 L14.8 9 Z" fill="currentColor"/></svg>'),
+    "road": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+             '<path d="M8.5 21 L10.8 3 M15.5 21 L13.2 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+             '<path d="M12 5 V7.5 M12 10.5 V13.5 M12 16.5 V20" stroke="currentColor" stroke-width="1.4" '
+             'stroke-linecap="round"/></svg>'),
+    "bell": ('<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+             '<path d="M6 16.5 V11 a6 6 0 0 1 12 0 V16.5 L19.5 18.5 H4.5 Z" fill="currentColor" fill-opacity=".14" '
+             'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'
+             '<path d="M10 20.6 a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'),
+}
+
+
+INDEX_ICONS["zled"] = HUB_ICONS["zled"]
+ZIMA_ACCENT["zled"] = "#67e8f9"
+
+
+def hub_icon(key, size=22):
+    svg = HUB_ICONS.get(key) or INDEX_ICONS[key].replace("<svg ", f'<svg width="{size}" height="{size}" ', 1)
+    return f'<span class="zx-ico" aria-hidden="true">{svg}</span>'
+
+
+def _date(iso):
+    return datetime.date(int(iso[:4]), int(iso[5:7]), int(iso[8:10]))
+
+
+def day_short(iso):
+    """'danes', 'jutri' ali kratko ime dneva (»čet«)."""
+    d = _date(iso)
+    if d == TODAY:
+        return "danes"
+    if d == TODAY + datetime.timedelta(days=1):
+        return "jutri"
+    return WEEKDAY_SL[d.weekday()]
+
+
+def day_long(iso):
+    d = _date(iso)
+    return f"{WEEKDAY_SL_LONG[d.weekday()]} {d.day}. {d.month}."
+
+
+def lvl_dot(level, word=None):
+    """Raven kot pika + beseda (nikoli samo barva)."""
+    color = CHART_COLOR.get(level, "#64748b")
+    return (f'<span class="zx-lvl" style="--lc:{color}"><i aria-hidden="true"></i>'
+            f'{word or LEVEL_WORD.get(level, "ni podatka")}</span>')
+
+
+def week_strip(cells, label):
+    """Trak dni: cells = [(date, fill, text_or_None, title)]. Prazen seznam -> ''."""
+    if not cells:
+        return ""
+    items = []
+    for date, fill, text, title in cells:
+        inner = f'<span class="zx-dv">{text}</span>' if text else ""
+        style = f"background:{fill}" if fill else ""
+        cls = "zx-dc" + ("" if fill else " zx-dc-none")
+        items.append(f'<li title="{title}"><span class="zx-dn">{day_short(date)}</span>'
+                     f'<span class="{cls}" style="{style}">{inner}</span>'
+                     f'<span class="sr-only">{title}</span></li>')
+    return f'<ul class="zx-week" aria-label="{label}">{"".join(items)}</ul>'
+
+
+def level_cells(daily, what):
+    return [(d["date"], CHART_COLOR.get(d.get("level"), None), None,
+             f'{day_long(d["date"])}: {what} {d.get("level", "ni podatka")}') for d in daily or []]
+
+
+def snow_line_cells(daily):
+    """Meja sneženja po dnevih: nižja meja = izrazitejša modra (zaporedna lestvica ene barve)."""
+    out = []
+    for d in daily or []:
+        m = d.get("line_m")
+        if m is None:
+            out.append((d["date"], None, "—", f'{day_long(d["date"])}: ni podatka'))
+            continue
+        a = ".14" if m >= 1700 else ".3" if m >= 1200 else ".5" if m >= 800 else ".75"
+        snow = d.get("cm_at_station") or 0
+        title = f'{day_long(d["date"])}: najnižja meja sneženja {m} m' + (
+            f', v dolini do {num(snow, 1)} cm snega' if snow >= 0.2 else "")
+        out.append((d["date"], _rgba(CHART_LINE_COLOR, a), f"{m:d}", title))
+    return out
+
+
+def fog_cells(daily):
+    out = []
+    for d in daily or []:
+        top = d.get("top_m")
+        if not d.get("has_inversion") or top is None:
+            out.append((d["date"], None, "—", f'{day_long(d["date"])} zjutraj: brez izrazite inverzije'))
+            continue
+        a = ".22" if top < 500 else ".4" if top < 900 else ".62"
+        out.append((d["date"], _rgba("#a78bfa", a), f"{top:d}",
+                    f'{day_long(d["date"])} zjutraj: megla oziroma nizka oblačnost do približno {top} m'))
+    return out
+
+
+# ── Prerez doline (glava) ──────────────────────────────────────────────────
+# Shematski profil: točke so izmišljene razdalje, višine pa prave (Rečica = postaja, vrhovi iz HIGH_POINTS
+# v winter_engine.py, ki so ročno preverjeni). Ne riši ga kot karto.
+PROFILE_RIDGE = [(0.0, 1180), (0.05, 1650), (0.09, 2062), (0.14, 1700), (0.2, 1380), (0.26, 1577), (0.32, 1150),
+                 (0.38, 760), (0.44, 450), (0.5, 366), (0.56, 430), (0.62, 820), (0.69, 1400), (0.75, 1210),
+                 (0.82, 1500), (0.9, 1290), (0.96, 1360), (1.0, 1240)]
+PROFILE_BACK = [(0.0, 1500), (0.08, 1900), (0.18, 1650), (0.3, 1850), (0.42, 1300), (0.52, 1100), (0.62, 1350),
+                (0.72, 1650), (0.85, 1700), (1.0, 1550)]
+PROFILE_PEAKS = [(0.09, "Raduha", 2062), (0.26, "Smrekovec", 1577), (0.69, "Golte", 1400), (0.82, "Menina planina", 1500)]
+PROFILE_Y = (200, 2300)
+
+
+def valley_profile_svg(snow_line_m, fog_top_m, snow_cover_from_m, narrow=False):
+    w, h = (360, 250) if narrow else (560, 300)
+    pl, pr, pt, pb = (48, 8, 18, 10) if narrow else (52, 10, 22, 12)
+    lo, hi = PROFILE_Y
+    fs = 11 if narrow else 11.5
+
+    def x(f):
+        return pl + (w - pl - pr) * f
+
+    def y(m):
+        return pt + (h - pt - pb) * (1 - (min(max(m, lo), hi) - lo) / (hi - lo))
+
+    def poly(pts):
+        return " ".join(f"{x(f):.1f},{y(m):.1f}" for f, m in pts)
+
+    ground = f"{x(1):.1f},{h} {x(0):.1f},{h}"
+    parts = [f'<svg viewBox="0 0 {w} {h}" class="zx-prof-svg {"zx-narrow" if narrow else "zx-wide"}" role="img" '
+             f'aria-labelledby="zx-prof-cap">',
+             '<defs><linearGradient id="zxTerr{n}" x1="0" y1="0" x2="0" y2="1">'
+             '<stop offset="0" stop-color="#1e2b3f"/><stop offset="1" stop-color="#0a111d"/></linearGradient>'
+             '<linearGradient id="zxFog{n}" x1="0" y1="0" x2="0" y2="1">'
+             f'<stop offset="0" stop-color="{FOG_FILL}" stop-opacity="0"/>'
+             f'<stop offset=".22" stop-color="{FOG_FILL}" stop-opacity=".26"/>'
+             f'<stop offset="1" stop-color="{FOG_FILL}" stop-opacity=".34"/></linearGradient>'
+             '<clipPath id="zxClip{n}"><polygon points="{ridge} {ground}"/></clipPath></defs>'
+             .format(n="N" if narrow else "W", ridge=poly(PROFILE_RIDGE), ground=ground)]
+    # mreža višin
+    for m in (500, 1000, 1500, 2000):
+        parts.append(f'<line x1="{pl}" x2="{w - pr}" y1="{y(m):.1f}" y2="{y(m):.1f}" stroke="#1a2436" stroke-width="1"/>'
+                     f'<text x="{pl - 6}" y="{y(m) + 4:.1f}" text-anchor="end" font-size="{fs - 1}" fill="#8193ad">'
+                     f'{m} m</text>')
+    parts.append(f'<polygon points="{poly(PROFILE_BACK)} {ground}" fill="#121d30"/>')
+    # megla: pas od dna do zgornje meje, nato ga teren prekrije (ostane v zraku doline)
+    if fog_top_m:
+        top_y = y(fog_top_m) - 10
+        parts.append(f'<rect x="{pl}" y="{top_y:.1f}" width="{w - pl - pr}" height="{h - top_y:.1f}" '
+                     f'fill="url(#zxFog{"N" if narrow else "W"})"/>')
+    parts.append(f'<polygon points="{poly(PROFILE_RIDGE)} {ground}" fill="url(#zxTerr{"N" if narrow else "W"})" '
+                 f'stroke="#3b4d68" stroke-width="1.4" stroke-linejoin="round"/>')
+    if snow_cover_from_m is not None and snow_cover_from_m < hi:
+        parts.append(f'<rect x="0" y="0" width="{w}" height="{y(snow_cover_from_m):.1f}" fill="{SNOW_CAP}" '
+                     f'fill-opacity=".62" clip-path="url(#zxClip{"N" if narrow else "W"})"/>')
+    # vrhovi
+    for f, name, m in PROFILE_PEAKS:
+        if narrow and name == "Smrekovec":
+            continue
+        lbl = name.replace(" planina", "") if narrow else name
+        parts.append(f'<circle cx="{x(f):.1f}" cy="{y(m):.1f}" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/>'
+                     f'<text x="{x(f):.1f}" y="{y(m) - 9:.1f}" text-anchor="middle" font-size="{fs}" '
+                     f'fill="#e2e8f0" font-weight="600">{lbl}</text>'
+                     f'<text x="{x(f):.1f}" y="{y(m) + 15:.1f}" text-anchor="middle" font-size="{fs - 1.5}" '
+                     f'fill="#8193ad">{m} m</text>')
+    # postaja na dnu doline
+    sx, sy = x(0.5), y(366)
+    parts.append(f'<circle cx="{sx:.1f}" cy="{sy:.1f}" r="4.5" fill="#22d3ee" stroke="#0b111e" stroke-width="2"/>'
+                 f'<text x="{sx:.1f}" y="{sy - 10:.1f}" text-anchor="middle" font-size="{fs}" fill="#e8edf8" '
+                 f'font-weight="700">Rečica 366 m</text>')
+    # zgornja meja megle: napis sredi doline, kjer je zrak; ob plitvi megli (napis bi trčil v »Rečica«) desno
+    if fog_top_m:
+        fy = y(fog_top_m)
+        if fog_top_m - 366 > 230:
+            parts.append(f'<text x="{x(0.5):.1f}" y="{fy - 5:.1f}" text-anchor="middle" font-size="{fs - 0.5}" '
+                         f'fill="#e2e8f0">megla jutri do ~{fog_top_m} m</text>')
+        else:
+            parts.append(f'<text x="{w - pr - 4}" y="{fy - 4:.1f}" text-anchor="end" font-size="{fs - 0.5}" '
+                         f'fill="#e2e8f0">megla jutri do ~{fog_top_m} m</text>')
+    # meja sneženja
+    if snow_line_m is not None:
+        above = snow_line_m > hi
+        ly = y(snow_line_m) if not above else pt + 2
+        parts.append(f'<line x1="{pl}" x2="{w - pr}" y1="{ly:.1f}" y2="{ly:.1f}" stroke="#e0f2fe" stroke-width="1.6" '
+                     f'stroke-dasharray="6 4"/>'
+                     f'<text x="{w - pr - 4}" y="{ly - 5:.1f}" text-anchor="end" font-size="{fs - 0.5}" fill="#e0f2fe" font-weight="600">'
+                     f'meja sneženja {"nad " + str(hi) if above else snow_line_m} m</text>')
+    parts.append("</svg>")
+    # temen obris pod vsakim napisom: berljiv tudi na beli snežni odeji in na pasu megle
+    return "".join(parts).replace("<text ", '<text paint-order="stroke" stroke="#0b111e" stroke-width="3" '
+                                  'stroke-linejoin="round" ')
+
+
+# ── 48 ur: temperatura + padavine (dva grafa, ena časovna os) ─────────────
+def _hour_index(times):
+    out = []
+    for t in times:
+        try:
+            out.append(datetime.datetime.strptime(t[:16], "%Y-%m-%dT%H:%M"))
+        except ValueError:
+            out.append(None)
+    return out
+
+
+def temp48_svg(h48, narrow=False):
+    times = h48.get("times") or []
+    temps = h48.get("temp_c") or []
+    now = h48.get("now_idx")
     n = len(times)
     known = [(i, v) for i, v in enumerate(temps) if v is not None]
-    if len(known) < 2 or now_idx is None or n < 2:
+    if len(known) < 2 or now is None or n < 2:
         return None
-    w, h, pad_l, pad_r, pad_t, pad_b = 640, 190, 34, 10, 22, 28
+    w, h = (360, 210) if narrow else (960, 240)
+    pl, pr, pt, pb = (30, 8, 26, 24) if narrow else (40, 14, 28, 26)
+    fs = 11.5 if narrow else 11.5
     vals = [v for _, v in known]
     lo, hi = min(vals), max(vals)
+    if lo <= 5:                       # pozimi mora biti ničla vidna, ko je blizu
+        lo = min(lo, -1)
+    step = 2 if hi - lo <= 12 else 5
+    lo = step * (lo // step)
+    hi = step * (-(-hi // step))
     if hi == lo:
-        hi, lo = hi + 1, lo - 1
-    pad = (hi - lo) * 0.18
-    lo, hi = lo - pad, hi + pad
-    plot_w, plot_h = w - pad_l - pad_r, h - pad_t - pad_b
+        hi += step
 
-    def x_of(i):
-        return pad_l + plot_w * (i / (n - 1))
+    def x(i):
+        return pl + (w - pl - pr) * i / (n - 1)
 
-    def y_of(v):
-        return pad_t + plot_h * (1 - (v - lo) / (hi - lo))
+    def y(v):
+        return pt + (h - pt - pb) * (1 - (v - lo) / (hi - lo))
 
-    pts = " ".join(f"{x_of(i):.1f},{y_of(v):.1f}" for i, v in known)
-    line = (f'<polyline class="zima-line" points="{pts}" fill="none" stroke="{CHART_LINE_COLOR}" '
-            f'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>')
-    now_x = x_of(now_idx)
-    now_line = (f'<line x1="{now_x:.1f}" y1="{pad_t}" x2="{now_x:.1f}" y2="{h - pad_b}" '
-                f'stroke="#64748b" stroke-width="1" stroke-dasharray="3 3"/>'
-                f'<text x="{now_x:.1f}" y="{pad_t - 6}" text-anchor="middle" font-size="9.5" '
-                f'fill="#94a3b8">zdaj</text>')
-
-    dividers, labels = [], []
-    for i, t in enumerate(times):
-        try:
-            dt = datetime.datetime.strptime(t[:16], "%Y-%m-%dT%H:%M")
-        except ValueError:
+    dts = _hour_index(times)
+    p = [f'<svg viewBox="0 0 {w} {h}" class="zx-chart {"zx-narrow" if narrow else "zx-wide"}" '
+         f'data-pl="{pl / w:.4f}" data-pr="{pr / w:.4f}" role="img" '
+         f'aria-label="Temperatura po urah, {n} ur, od {num(min(vals), 1)} do {num(max(vals), 1)} °C">']
+    v = lo
+    while v <= hi + 1e-9:
+        stroke = "#4b5d78" if v == 0 else "#1a2436"
+        p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{y(v):.1f}" y2="{y(v):.1f}" stroke="{stroke}" stroke-width="1"/>'
+                 f'<text x="{pl - 6}" y="{y(v) + 4:.1f}" text-anchor="end" font-size="{fs - 1}" fill="#8193ad">'
+                 f'{num(v, 0)}°</text>')
+        v += step
+    if lo < 0 < hi:
+        p.append(f'<rect x="{pl}" y="{y(0):.1f}" width="{w - pl - pr}" height="{y(lo) - y(0):.1f}" '
+                 f'fill="#38bdf8" fill-opacity=".05"/>'
+                 f'<text x="{w - pr - 4}" y="{y(0) + 13:.1f}" text-anchor="end" font-size="{fs - 1}" fill="#8193ad">'
+                 f'pod lediščem</text>')
+    # dnevi: ločnica ob polnoči, ime dneva v pasu nad grafom
+    for i, dt in enumerate(dts):
+        if dt is None:
             continue
-        if dt.hour == 0:
-            dividers.append(f'<line x1="{x_of(i):.1f}" y1="{pad_t}" x2="{x_of(i):.1f}" y2="{h - pad_b}" '
-                             f'stroke="#1e293b" stroke-width="1"/>')
-        if dt.hour % 6 == 0:
-            labels.append(f'<text x="{x_of(i):.1f}" y="{h - 8}" text-anchor="middle" font-size="9" '
-                          f'fill="#94a3b8">{dt.strftime("%H")}h</text>')
-    y_lbl = (f'<text x="{pad_l - 6}" y="{y_of(hi) + 3:.1f}" text-anchor="end" font-size="9" '
-             f'fill="#94a3b8">{num(hi, 0)}°C</text>'
-             f'<text x="{pad_l - 6}" y="{y_of(lo) + 3:.1f}" text-anchor="end" font-size="9" '
-             f'fill="#94a3b8">{num(lo, 0)}°C</text>')
+        if dt.hour == 0 and 0 < i < n - 1:
+            p.append(f'<line x1="{x(i):.1f}" x2="{x(i):.1f}" y1="{pt - 18}" y2="{h - pb}" stroke="#26344b" stroke-width="1"/>')
+        every = 12 if narrow else 6
+        if dt.hour % every == 0 and dt.hour != 0:
+            p.append(f'<text x="{x(i):.1f}" y="{h - 7}" text-anchor="middle" font-size="{fs - 1}" fill="#8193ad">'
+                     f'{dt.hour}.00</text>')
+    seen = set()
+    for i, dt in enumerate(dts):
+        if dt is None or dt.date() in seen:
+            continue
+        seen.add(dt.date())
+        last = max(j for j, d2 in enumerate(dts) if d2 and d2.date() == dt.date())
+        if last - i < (5 if narrow else 3):
+            continue
+        name = day_short(dt.date().isoformat())
+        if not narrow and name not in ("danes", "jutri"):
+            name = WEEKDAY_SL_LONG[dt.weekday()]
+        p.append(f'<text x="{x(i) + 5:.1f}" y="{pt - 8}" font-size="{fs}" fill="#cbd5e1" font-weight="600">{name}</text>')
+    past = [(i, t) for i, t in known if i <= now]
+    fut = [(i, t) for i, t in known if i >= now]
+    if fut:
+        area = " ".join(f"{x(i):.1f},{y(t):.1f}" for i, t in fut)
+        p.append(f'<polygon points="{x(fut[0][0]):.1f},{h - pb} {area} {x(fut[-1][0]):.1f},{h - pb}" '
+                 f'fill="{CHART_LINE_COLOR}" fill-opacity=".09"/>')
+    if len(past) > 1:
+        p.append(f'<polyline points="{" ".join(f"{x(i):.1f},{y(t):.1f}" for i, t in past)}" fill="none" '
+                 f'stroke="{CHART_LINE_COLOR}" stroke-opacity=".4" stroke-width="2" stroke-linecap="round" '
+                 f'stroke-linejoin="round"/>')
+    if len(fut) > 1:
+        p.append(f'<polyline class="zima-line" points="{" ".join(f"{x(i):.1f},{y(t):.1f}" for i, t in fut)}" '
+                 f'fill="none" stroke="{CHART_LINE_COLOR}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>')
+    nx = x(now)
+    p.append(f'<line x1="{nx:.1f}" x2="{nx:.1f}" y1="{pt}" y2="{h - pb}" stroke="#94a3b8" stroke-width="1" '
+             f'stroke-dasharray="3 3"/><text x="{nx + 4:.1f}" y="{pt + 11}" font-size="{fs - 1}" fill="#cbd5e1" '
+             f'font-weight="600">zdaj</text>')
+    # neposredni oznaki: najnižja in najvišja napovedana vrednost
+    if fut:
+        for (i, t), tag in ((min(fut, key=lambda a: a[1]), "min"), (max(fut, key=lambda a: a[1]), "max")):
+            ty = y(t) + (16 if tag == "min" else -9)
+            anchor = "end" if x(i) > w - 60 else "start" if x(i) < pl + 40 else "middle"
+            p.append(f'<circle cx="{x(i):.1f}" cy="{y(t):.1f}" r="4" fill="{CHART_LINE_COLOR}" stroke="#0b111e" '
+                     f'stroke-width="2"/><text x="{x(i):.1f}" y="{ty:.1f}" text-anchor="{anchor}" font-size="{fs}" '
+                     f'fill="#e8edf8" font-weight="700">{num(t, 1)} °C</text>')
+    p.append("</svg>")
+    return "".join(p)
 
-    return (f'<svg viewBox="0 0 {w} {h}" class="frost-chart" role="img" '
-            f'aria-label="Temperatura naslednjih 48 ur">'
-            + "".join(dividers) + line + now_line + y_lbl + "".join(labels) + '</svg>')
 
-
-def snow_line_meter_svg(line_m, station_elev=None, scale_max=2500):
-    """Vodoravna lestvica 0–scale_max m z označeno postajo in trikotnim
-    kazalcem pri trenutni meji sneženja — razlaga številke, ki jo hero že
-    pove kot besedilo (glej build_hub_body), grafično: kaj je pod mejo (dež,
-    modri konec lestvice) in kaj nad njo (sneg, svetli konec). Vrednost nad
-    scale_max se prikaže s puščico ob desnem robu in ">X m" napisom, namesto
-    da bi kazalec pobegnil iz slike."""
-    if line_m is None:
+def precip48_svg(h48, narrow=False):
+    times = h48.get("times") or []
+    pr_ = h48.get("precip_mm") or []
+    n = len(times)
+    if n < 2 or not any((v or 0) > 0 for v in pr_):
         return None
-    station_elev = station_elev if station_elev is not None else seo.ELEV
-    w, h, pad_l, pad_r = 640, 96, 16, 16
-    bar_y, bar_h = 46, 10
-    plot_w = w - pad_l - pad_r
-
-    def x_at(v):
-        return pad_l + plot_w * (max(0, min(v, scale_max)) / scale_max)
-
-    ticks_m = [0, 500, 1000, 1500, 2000, scale_max]
-    ticks = "".join(
-        f'<line x1="{x_at(t):.1f}" y1="{bar_y - 4}" x2="{x_at(t):.1f}" y2="{bar_y + bar_h + 4}" '
-        f'stroke="#334155" stroke-width="1"/>'
-        f'<text x="{x_at(t):.1f}" y="{bar_y + bar_h + 18}" text-anchor="middle" font-size="9.5" '
-        f'fill="#94a3b8">{t} m</text>'
-        for t in ticks_m
-    )
-    grad = ('<defs><linearGradient id="zimaMeterGrad" x1="0" y1="0" x2="1" y2="0">'
-            '<stop offset="0%" stop-color="#0369a1"/><stop offset="55%" stop-color="#38bdf8"/>'
-            '<stop offset="100%" stop-color="#e2e8f0"/></linearGradient></defs>')
-    bar = f'<rect x="{pad_l}" y="{bar_y}" width="{plot_w}" height="{bar_h}" rx="5" fill="url(#zimaMeterGrad)"/>'
-    station_x = x_at(station_elev)
-    station = (f'<circle cx="{station_x:.1f}" cy="{bar_y + bar_h / 2:.1f}" r="4.5" fill="#fff" '
-               f'stroke="#04070e" stroke-width="1.5"/>'
-               f'<text x="{station_x:.1f}" y="{bar_y - 10}" text-anchor="middle" font-size="9.5" '
-               f'fill="#94a3b8">Rečica {station_elev} m</text>')
-    line_x = x_at(line_m)
-    marker_label = f'>{scale_max} m' if line_m > scale_max else f'{line_m} m'
-    marker = (f'<path d="M{line_x:.1f} {bar_y - 3} l-7 -12 h14 Z" fill="{CHART_LINE_COLOR}"/>'
-              f'<text x="{line_x:.1f}" y="{bar_y - 19}" text-anchor="middle" font-size="11" '
-              f'font-weight="700" fill="#e8edf8">{marker_label}</text>')
-
-    return (f'<svg viewBox="0 0 {w} {h}" class="frost-chart zima-meter-svg" role="img" '
-            f'aria-label="Meja sneženja na lestvici 0 do {scale_max} m">'
-            + grad + bar + ticks + station + marker + '</svg>')
+    w, h = (360, 64) if narrow else (960, 70)
+    pl, pr, pt, pb = (30, 8, 14, 6) if narrow else (40, 14, 14, 6)
+    top = max(1.0, max(v or 0 for v in pr_))
+    slot = (w - pl - pr) / (n - 1)
+    bw = max(1.5, min(24, slot - 2))
+    p = [f'<svg viewBox="0 0 {w} {h}" class="zx-chart zx-precip {"zx-narrow" if narrow else "zx-wide"}" '
+         f'role="img" aria-label="Padavine po urah, največ {num(max(v or 0 for v in pr_), 1)} mm na uro">',
+         f'<line x1="{pl}" x2="{w - pr}" y1="{h - pb}" y2="{h - pb}" stroke="#26344b" stroke-width="1"/>']
+    best = max(range(n), key=lambda i: pr_[i] or 0)
+    for i, v in enumerate(pr_):
+        if not v:
+            continue
+        bh = max(1.5, (h - pt - pb) * v / top)
+        cx = pl + slot * i
+        p.append(f'<rect x="{cx - bw / 2:.1f}" y="{h - pb - bh:.1f}" width="{bw:.1f}" height="{bh:.1f}" rx="1.5" '
+                 f'fill="{PRECIP_COLOR}"><title>{times[i][11:13]}.00: {num(v, 1)} mm</title></rect>')
+    bx = pl + slot * best
+    p.append(f'<text x="{bx:.1f}" y="{pt - 3}" text-anchor="{"end" if bx > w - 60 else "middle"}" font-size="11" '
+             f'fill="#cbd5e1">{num(pr_[best], 1)} mm</text></svg>')
+    return "".join(p)
 
 
-# ── /zima/ hub ────────────────────────────────────────────────────────────
+HUB_JS = r"""<script>(function(){
+  var fig=document.querySelector('.zx-48');if(!fig)return;
+  var T=JSON.parse(fig.getAttribute('data-times')),V=JSON.parse(fig.getAttribute('data-t')),P=JSON.parse(fig.getAttribute('data-p'));
+  var plot=fig.querySelector('.zx-48-plot'),tip=fig.querySelector('.zx-tip'),bar=fig.querySelector('.zx-cross');
+  var D=['ned','pon','tor','sre','čet','pet','sob'];
+  function svg(){var s=plot.querySelectorAll('svg.zx-chart:not(.zx-precip)');for(var i=0;i<s.length;i++)if(s[i].getBoundingClientRect().width>0)return s[i];return null;}
+  function f1(x){return (Math.round(x*10)/10).toFixed(1).replace('.',',');}
+  function show(e){var s=svg();if(!s)return;var r=s.getBoundingClientRect(),pr=plot.getBoundingClientRect();
+    var pl=+s.getAttribute('data-pl')*r.width,prr=+s.getAttribute('data-pr')*r.width,w=r.width-pl-prr;
+    var f=(e.clientX-r.left-pl)/w;if(f<0||f>1){hide();return;}
+    var i=Math.round(f*(T.length-1)),t=T[i],d=new Date(t+':00');
+    var x=r.left-pr.left+pl+w*i/(T.length-1);
+    bar.style.left=x+'px';bar.hidden=false;
+    tip.innerHTML='';var b=document.createElement('b');b.textContent=D[d.getDay()]+' '+d.getHours()+'.00';tip.appendChild(b);
+    var l1=document.createElement('span');l1.textContent=V[i]==null?'ni podatka':f1(V[i])+' °C';tip.appendChild(l1);
+    var l2=document.createElement('span');l2.textContent='padavine '+f1(P[i]||0)+' mm';tip.appendChild(l2);
+    tip.hidden=false;var tw=tip.offsetWidth;tip.style.left=Math.max(0,Math.min(pr.width-tw,x-tw/2))+'px';}
+  function hide(){tip.hidden=true;bar.hidden=true;}
+  plot.addEventListener('pointermove',show);plot.addEventListener('pointerdown',show);plot.addEventListener('pointerleave',hide);
+})();</script>"""
+
+
+HUB_CSS = """<style>
+.zx-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1.6rem;align-items:center;
+  background:radial-gradient(120% 90% at 85% 0%,rgba(56,189,248,.10),transparent 60%),var(--card-bg);
+  border:1px solid var(--card-border);border-radius:22px;padding:1.9rem 2rem 1.6rem;margin:1rem 0 2.2rem;box-shadow:var(--card-shadow)}
+.zx-kicker{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#7dd3fc;margin:0 0 .5rem}
+.zx-hero .page-title{margin:0 0 1rem;font-size:clamp(1.9rem,4.2vw,2.7rem);line-height:1.08;letter-spacing:-.01em}
+.zx-status{display:inline-flex;align-items:center;gap:.55rem;padding:.38rem .8rem .38rem .65rem;border-radius:999px;
+  background:rgba(255,255,255,.05);border:1px solid var(--card-border);font-weight:700;font-size:.82rem;letter-spacing:.02em;margin:0 0 .85rem}
+.zx-status .zh-dot{background:var(--lc);--dot-glow:color-mix(in srgb,var(--lc) 55%,transparent)}
+.zx-verdict{font-size:1.08rem;line-height:1.6;margin:0 0 1.1rem;color:var(--text);max-width:34rem}
+.zx-updated{font-size:.8rem;color:var(--muted);margin:0 0 1.1rem}
+.zx-jump{display:flex;flex-wrap:wrap;gap:.45rem}
+.zx-jump a{font-size:.8rem;font-weight:650;color:var(--text);text-decoration:none;padding:.42rem .8rem;border-radius:999px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.03);transition:border-color .18s,color .18s}
+.zx-jump a:hover{border-color:var(--cyan);color:var(--cyan)}
+.zx-prof{margin:0}
+.zx-prof-svg{width:100%;height:auto;display:block}
+.zx-prof figcaption{display:flex;flex-wrap:wrap;gap:.35rem 1rem;font-size:.75rem;color:var(--muted);margin-top:.55rem}
+.zx-key{display:inline-flex;align-items:center;gap:.4rem}
+.zx-key i{display:inline-block;width:18px;height:10px;border-radius:2px}
+.zx-key .k-line{height:0;border-top:2px dashed #e0f2fe;border-radius:0}
+.zx-key .k-fog{background:rgba(203,213,225,.35)}
+.zx-key .k-snow{background:#e2e8f0}
+.zx-key .k-stn{width:10px;height:10px;border-radius:50%;background:#22d3ee}
+.zx-note{flex-basis:100%;font-size:.72rem;opacity:.85}
+svg.zx-narrow{display:none}
+@media (max-width:640px){svg.zx-wide{display:none}svg.zx-narrow{display:block}}
+.zx-sec{margin:2.4rem 0 1rem;scroll-margin-top:1rem}
+.zx-sec h2{margin:0 0 .25rem;font-size:1.45rem}
+.zx-sec p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.55}
+.zx-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.zx-card{position:relative;display:flex;flex-direction:column;gap:.55rem;text-decoration:none;color:inherit;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.05rem 1.15rem 1.1rem;
+  overflow:hidden;transition:border-color .18s,transform .18s}
+.zx-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa)}
+.zx-card:hover{border-color:var(--fa);transform:translateY(-2px)}
+.zx-card-head{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:.95rem}
+.zx-card-head .zima-icon{margin:0;vertical-align:0}
+.zx-go{margin-left:auto;color:var(--muted);font-weight:400;transition:color .18s,transform .18s}
+.zx-card:hover .zx-go{color:var(--fa);transform:translateX(2px)}
+.zx-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.65rem;line-height:1.1;color:#fff}
+.zx-val small{font-family:Inter,sans-serif;font-size:.78rem;font-weight:500;color:var(--muted);margin-left:.35rem}
+.zx-lvl{display:inline-flex;align-items:center;gap:.5rem}
+.zx-lvl i{width:.7rem;height:.7rem;border-radius:50%;background:var(--lc);box-shadow:0 0 0 3px color-mix(in srgb,var(--lc) 22%,transparent)}
+.zx-card p{margin:0;font-size:.88rem;line-height:1.55;color:var(--muted)}
+.zx-week{list-style:none;margin:auto 0 0;padding:.55rem 0 0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.zx-week li{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0}
+.zx-dn{font-size:.62rem;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.zx-dc{display:flex;align-items:center;justify-content:center;height:22px;border-radius:4px}
+.zx-dc-none{background:transparent;border:1px dashed #26344b}
+.zx-dv{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#e8edf8;letter-spacing:-.02em}
+.zx-dc-none .zx-dv{color:#64748b}
+.zx-bands{display:grid;gap:5px;margin:auto 0 0;padding-top:.4rem}
+.zx-band{display:grid;grid-template-columns:3.6rem 1fr 3.2rem;align-items:center;gap:.5rem;font-size:.72rem;color:var(--muted)}
+.zx-band b{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text);text-align:right}
+.zx-bar{height:8px;border-radius:4px;background:#141d2c;overflow:hidden}
+.zx-bar i{display:block;height:100%;background:#e2e8f0;border-radius:4px}
+.zx-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.76rem;color:var(--muted);margin:.85rem 0 0}
+.zx-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:.4rem;vertical-align:-1px}
+.zx-48{position:relative;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1rem 1rem .9rem;margin:0}
+.zx-48-plot{position:relative;touch-action:pan-y;cursor:crosshair}
+.zx-chart{width:100%;height:auto;display:block}
+.zx-precip{margin-top:.2rem}
+.zx-48-lbl{font-size:.72rem;color:var(--muted);margin:.7rem 0 0 .2rem}
+.zx-tip[hidden],.zx-cross[hidden]{display:none}
+.zx-cross{position:absolute;top:0;bottom:0;width:1px;background:rgba(226,232,240,.45);pointer-events:none}
+.zx-tip{position:absolute;top:.1rem;display:flex;flex-direction:column;gap:.1rem;
+  background:#111a2b;border:1px solid #2a3a55;border-radius:10px;padding:.45rem .65rem;font-size:.78rem;color:var(--text);
+  pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:3}
+.zx-tip b{font-size:.72rem;color:#7dd3fc}
+.zx-48 figcaption{font-size:.78rem;color:var(--muted);margin:.6rem .2rem 0;line-height:1.5}
+.zx-passes{display:grid;gap:.7rem}
+.zx-pass{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) auto;align-items:center;gap:1rem;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem 1.15rem}
+.zx-pass-name{font-weight:700;font-size:1rem}
+.zx-pass-name span{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:500;color:var(--muted);margin-left:.35rem}
+.zx-pass-meta{font-size:.78rem;color:var(--muted);margin-top:.15rem}
+.zx-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.zx-chip{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.3rem .6rem;border-radius:8px;
+  background:rgba(255,255,255,.04);border:1px solid var(--card-border);white-space:nowrap}
+.zx-chip .zx-lvl i{width:.55rem;height:.55rem}
+.zx-pass-side{display:flex;flex-direction:column;align-items:flex-end;gap:.25rem;font-size:.76rem;color:var(--muted);text-align:right}
+.zx-pass-side a{color:var(--cyan);font-weight:650;text-decoration:none}
+.zx-pass-side a:hover{text-decoration:underline}
+.zx-more{display:inline-flex;margin-top:.8rem;font-size:.85rem;font-weight:650;color:var(--cyan);text-decoration:none}
+.zx-more:hover{text-decoration:underline}
+.zx-alerts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem}
+.zx-alert{display:flex;flex-direction:column;gap:.45rem;text-decoration:none;color:inherit;background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:14px;padding:.95rem 1rem;transition:border-color .18s}
+.zx-alert:hover{border-color:var(--fa)}
+.zx-alert b{display:flex;align-items:center;gap:.55rem;font-size:.92rem}
+.zx-alert b .zima-icon{margin:0;width:1.9rem;height:1.9rem;vertical-align:0}
+.zx-alert span{font-size:.8rem;color:var(--muted);line-height:1.45}
+.zx-alert em{font-style:normal;font-size:.8rem;font-weight:650;color:var(--fa);margin-top:auto}
+.zx-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.6rem}
+.zx-link{display:flex;align-items:center;gap:.8rem;text-decoration:none;color:inherit;padding:.75rem .9rem;border-radius:12px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.02);transition:border-color .18s,background .18s}
+.zx-link:hover{border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.04)}
+.zx-ico{display:inline-flex;align-items:center;justify-content:center;width:2.2rem;height:2.2rem;flex:0 0 auto;border-radius:10px;
+  background:rgba(125,211,252,.1);color:#7dd3fc}
+.zx-link b{display:block;font-size:.9rem}
+.zx-link small{display:block;font-size:.76rem;color:var(--muted);margin-top:.1rem}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media (max-width:980px){.zx-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.zx-alerts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.zx-hero{grid-template-columns:1fr;padding:1.4rem 1.2rem 1.2rem;gap:1.2rem}
+  .zx-pass{grid-template-columns:1fr}.zx-pass-side{align-items:flex-start;text-align:left}}
+@media (max-width:620px){.zx-cards{grid-template-columns:1fr}}
+@media (max-width:420px){.zx-alerts{grid-template-columns:1fr}.zx-hero{border-radius:18px}}
+@media (prefers-reduced-motion: reduce){.zx-card,.zx-go{transition:none}.zx-card:hover{transform:none}}
+</style>"""
+
 
 def build_hub_body(data):
     snow = data["snow_line"]
@@ -592,240 +900,199 @@ def build_hub_body(data):
         else:
             snow_verdict = f"Meja sneženja je pri {line_m} m, a v naslednjih 24 h ni pričakovanih pomembnejših padavin."
 
-    ice_verdict = (f"V naslednjih 36 h ni povečanega tveganja poledice v dolini."
-                   if worst_level == "nizko" else
-                   f"V naslednjih 36 h je najbolj izpostavljen kraj {worst_loc['name']} — {risk_badge(worst_level)}.")
-
     heating = data.get("heating_index") or {}
     heating_level = heating.get("level")
-    zled_level = (data.get("freezing_rain") or {}).get("level")
-    heating_verdict = (f"Zrak se dobro prevetri, posebnih omejitev za kurjenje ni."
-                        if heating_level == "nizko" else
-                        f"{heating.get('advice', '')}" if heating.get("advice")
-                        else "Ocena kurilnega semaforja trenutno ni na voljo.")
-
+    zled = data.get("freezing_rain") or {}
+    zled_level = zled.get("level")
     fog = data.get("fog")
-    if not fog:
-        fog_verdict = "Ocena megle trenutno ni na voljo."
-    elif not fog.get("has_inversion"):
-        fog_verdict = "Jutri zjutraj ni pričakovane pomembne inverzije — megla v dolini ni verjetna."
-    else:
-        above = [l["name"] for l in fog["locations"] if l["above"]]
-        fog_verdict = (f"Jutri zjutraj pričakovana megla/nizka oblačnost do ~{fog['top_m']} m — "
-                        + (f"nad njo bi lahko bili: {', '.join(above)}." if above
-                           else "noben spremljan kraj v dolini danes ne bi bil nad njo."))
-
+    fog_top = fog["top_m"] if fog and fog.get("has_inversion") else None
     snowpack = data.get("snowpack") or {}
-    station_depth = next((b["depth_cm"] for b in snowpack.get("by_elevation", []) if b["elevation_m"] == seo.ELEV), None)
-
+    bands = snowpack.get("by_elevation") or []
+    station_depth = next((b["depth_cm"] for b in bands if b["elevation_m"] == seo.ELEV), None)
+    snow_from = next((b["elevation_m"] for b in sorted(bands, key=lambda b: b["elevation_m"]) if (b["depth_cm"] or 0) > 0), None)
     passes = data.get("passes") or []
 
-    # ── Hero: en glavni status namesto pet enakovrednih kartic druga pod
-    # drugo (glej uporabnikov predlog) — snežna odeja je edino stanje, ki
-    # upravičeno prevlada nad tveganji (fizično dejstvo, ne ocena), sicer
-    # zmaga najslabši od poledice/kurjenja. hero_verdict je NAMENOMA isto
-    # besedilo kot snow_verdict v "brez razmer" primeru -- eno besedilo o
-    # trenutni meji sneženja, ne dve različici, ki bi se sčasoma razšli.
+    # ── Glavno stanje: snežna odeja prevlada (dejstvo modela, ne ocena tveganja), sicer najslabši od
+    # poledice/kurjenja. Kadar kurilni semafor edini preseže poledico, glava govori o prevetrenosti, ne o
+    # »zimskem tveganju« (opomba uporabnika 22. 9. 2026; isto načelo kot »primernost, ne tveganje« pri agrometeu).
     ice_rank = RANK_ORDER.index(worst_level)
     heat_rank = RANK_ORDER.index(heating_level) if heating_level in RANK_ORDER else -1
     overall_rank = max(ice_rank, heat_rank)
     overall_level = RANK_ORDER[overall_rank] if overall_rank >= 0 else None
-    # Kurilni semafor meri prevetrenost/inverzijo -- pojav, ki ni vezan na
-    # sneg/led/zimo (jasna mirna noč ga sproži tudi sredi jeseni, glej opombo
-    # uporabnika 22. 9. 2026: hero je javil "POVEČANO ZIMSKO TVEGANJE", ker je
-    # bil edini presežen indeks kurilni semafor, poledica pa je bila le
-    # srednja). Zato, kadar kurilni semafor edini preseže poledico, hero
-    # poroča o PREVETRENOSTI, ne o "zimskem tveganju" -- isto načelo kot
-    # "primernost, ne tveganje %" pri agrometeo (glej CLAUDE.md).
     heating_only = heat_rank > ice_rank
-    has_snow = station_depth is not None and station_depth > 0
-    if has_snow:
-        hero_icon, hero_label, status_cls = "⚪", "SNEŽNA ODEJA V DOLINI", "snow"
-        hero_verdict = (f"V dolini trenutno po oceni leži <strong>{num(station_depth, 0)} cm</strong> "
-                         f"snežne odeje (modelirano, ni meritev).")
+    if station_depth:
+        status_color, label = "#e2e8f0", "Snežna odeja v dolini"
+        verdict = (f"V dolini po oceni leži <strong>{num(station_depth, 0)} cm</strong> snežne odeje "
+                   f"(modelirano, ni meritev).")
     elif heating_only and overall_level in ("visoko", "srednje"):
-        hero_icon = "🔴" if overall_level == "visoko" else "🟡"
-        hero_label = ("KURILNI SEMAFOR: SLABA PREVETRENOST" if overall_level == "visoko"
-                       else "KURILNI SEMAFOR: ZMERNA PREVETRENOST")
-        status_cls = overall_level
-        hero_verdict = heating.get("advice") or "Ocena kurilnega semaforja trenutno ni na voljo."
+        status_color = CHART_COLOR[overall_level]
+        label = "Slaba prevetrenost doline" if overall_level == "visoko" else "Zmerna prevetrenost doline"
+        verdict = heating.get("advice") or "Ocena kurilnega semaforja trenutno ni na voljo."
     elif overall_level == "visoko":
-        hero_icon, hero_label, status_cls = "🔴", "POVEČANO ZIMSKO TVEGANJE", "visoko"
-        hero_verdict = "Danes je vsaj eden od zimskih indeksov na visoki stopnji — poglej razmere spodaj."
+        status_color, label = CHART_COLOR["visoko"], "Povečano zimsko tveganje"
+        verdict = "Vsaj eden od zimskih kazalnikov je danes na visoki stopnji. Kateri, pokažejo kartice spodaj."
     elif overall_level == "srednje":
-        hero_icon, hero_label, status_cls = "🟡", "DELNO ZIMSKO TVEGANJE", "srednje"
-        hero_verdict = "Danes je vsaj eden od zimskih indeksov na srednji stopnji — poglej razmere spodaj."
+        status_color, label = CHART_COLOR["srednje"], "Delno zimsko tveganje"
+        verdict = "Vsaj eden od zimskih kazalnikov je danes na srednji stopnji. Kateri, pokažejo kartice spodaj."
     else:
-        hero_icon, hero_label, status_cls = "🟢", "BREZ ZIMSKIH RAZMER", "nizko"
-        hero_verdict = snow_verdict
+        status_color, label = CHART_COLOR["nizko"], "Brez zimskih razmer"
+        verdict = snow_verdict
 
-    # ── Subtilen zimski ambient v ozadju hero-ja: nebesni prelivi + topografske
-    # konture + silhueta gora, glej ZIMA_AMBIENT_BG. NAMENOMA brez snežink, ki
-    # bi letele čez zaslon (uporabnik je to izrecno izključil) — samo statična
-    # dekoracija za .zh-content (glej ZIMA_CSS za z-index sklad). Živ status
-    # dobi utripajočo piko (isti prefers-reduced-motion izklop kot zima-bar/
-    # zima-line zgoraj), da hero deluje kot "živ" nadzorni center, ne statičen
-    # posnetek. ──
-    hero_html = f'''  <div class="zima-hero">
-{ZIMA_AMBIENT_BG}
-    <div class="zh-content">
-    <h1 class="page-title">❄️ Zimski nadzorni center</h1>
-    <p class="zh-sub">Zgornja Savinjska dolina · MeteoZima</p>
-    <p class="zh-verdict"><span class="zh-status zh-status-{status_cls}"><span class="zh-dot"></span>{hero_icon} <strong>{hero_label}</strong></span><br>{hero_verdict}</p>
-    <div class="zh-stats">
-      <div class="zh-stat"><div class="zh-stat-label">Sneg zdaj</div>
-        <div class="zh-stat-val">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></div>
-      <div class="zh-stat"><div class="zh-stat-label">Meja sneženja</div>
-        <div class="zh-stat-val">{num(line_m, 0) + " m" if line_m is not None else "—"}</div></div>
-      <div class="zh-stat"><div class="zh-stat-label">Tveganje poledice</div>
-        <div class="zh-stat-val" style="font-size:1.05rem">{risk_badge(worst_level)}</div></div>
+    fig_keys = ['<span class="zx-key"><i class="k-stn"></i>postaja IREICA1</span>']
+    if line_m is not None:
+        fig_keys.append('<span class="zx-key"><i class="k-line"></i>meja sneženja danes</span>')
+    if fog_top:
+        fig_keys.append('<span class="zx-key"><i class="k-fog"></i>megla jutri zjutraj</span>')
+    if snow_from is not None:
+        fig_keys.append('<span class="zx-key"><i class="k-snow"></i>snežna odeja (ocena)</span>')
+    hero_html = f'''  <section class="zx-hero">
+    <div>
+      <p class="zx-kicker">MeteoZima · Zgornja Savinjska dolina</p>
+      <h1 class="page-title">Zimski nadzorni center</h1>
+      <p class="zx-status" style="--lc:{status_color}"><span class="zh-dot"></span>{label}</p>
+      <p class="zx-verdict">{verdict}</p>
+      <p class="zx-updated">Posodobljeno {data.get("generated_at_local", "—")} · ocena iz napovedi Open-Meteo, ne meritev</p>
+      <nav class="zx-jump" aria-label="Na tej strani">
+        <a href="#razmere">Razmere</a><a href="#48-ur">48 ur</a><a href="#snezna-karta">Snežna karta</a>
+        <a href="#zimske-ceste">Ceste</a><a href="#opozorila">Opozorila na telefon</a>
+      </nav>
     </div>
-    <div class="zh-cta">
-      <a href="/">🌡️ Trenutno vreme</a>
-      <a href="#zimski-pogoji">❄️ Zimske razmere</a>
-      <a href="#zimske-ceste">🚗 Zimske ceste</a>
-    </div>
-    <p class="post-meta" style="margin:.9rem 0 0">Posodobljeno {data.get("generated_at_local", "—")}</p>
-    </div>
-  </div>'''
+    <figure class="zx-prof">
+      {valley_profile_svg(line_m, fog_top, snow_from)}
+      {valley_profile_svg(line_m, fog_top, snow_from, narrow=True)}
+      <figcaption id="zx-prof-cap">{"".join(fig_keys)}
+        <span class="zx-note">Shematski prerez doline: višine so v merilu, vodoravne razdalje niso.</span></figcaption>
+    </figure>
+  </section>'''
 
-    # ── 48-urni graf temperature (glej compute_hourly_48h v winter_engine.py) ──
-    hourly_svg = hourly_temp_chart_svg(data.get("hourly_48h"))
+    # ── Razmere: šest enakih kartic, vsaka z vrednostjo, stavkom in trakom dni ──
+    def card(key, href, title, value, text, foot, extra_cls=""):
+        return (f'    <a class="zx-card{extra_cls}" href="{href}" style="{card_style(key, "")}">\n'
+                f'      <div class="zx-card-head">{icon_html(key, 22)}{title}<span class="zx-go" aria-hidden="true">→</span></div>\n'
+                f'      <div class="zx-val">{value}</div>\n      <p>{text}</p>\n      {foot}\n    </a>')
+
+    ice_text = ("V dolini ni povečanega tveganja." if worst_level == "nizko"
+                else f"Najbolj izpostavljen kraj: {worst_loc['name']}. Previdno na mostovih in v senci.")
+    zled_hours = zled.get("hours") or []
+    zled_text = ("Model ne kaže dežja, ki bi zmrzoval." if zled_level in (None, "nizko") or not zled_hours
+                 else f"Možen v {len(zled_hours)} urah, prvič {fmt_hour(zled_hours[0])}.")
+    if fog_top:
+        peaks = [l["name"] for l in fog["locations"] if l["above"] and l["elevation_m"] >= 1000]
+        fog_val, fog_text = (f"do ~{fog_top} m<small>jutri zjutraj</small>",
+                             (f"Nad meglo: {', '.join(peaks)}." if peaks else "Megla bo segala nad spremljane vrhove."))
+    else:
+        fog_val, fog_text = ("Brez megle<small>jutri zjutraj</small>",
+                             "Izrazite inverzije ni, megla v dolini ni verjetna.")
+    maxd = max([b["depth_cm"] or 0 for b in bands] + [1])
+    band_rows = "".join(
+        f'<div class="zx-band"><span class="zx-bl">{b["elevation_m"]} m</span>'
+        f'<span class="zx-bar"><i style="width:{100 * (b["depth_cm"] or 0) / maxd:.0f}%"></i></span><b>{num(b["depth_cm"], 0)} cm</b></div>'
+        for b in bands)
+    pack_text = ("Na nobeni spremljani višini ni ocenjene snežne odeje." if not snow_from
+                 else f"Snežna odeja od približno {snow_from} m navzgor.")
+    cards = [
+        card("snow_line", "/zima/meja-snezenja/", "Meja sneženja",
+             f"{num(line_m, 0)} m<small>danes</small>" if line_m is not None else "—",
+             snow_verdict.split(" — ")[-1].capitalize() if " — " in snow_verdict else snow_verdict,
+             week_strip(snow_line_cells(snow.get("daily")), "Najnižja meja sneženja po dnevih")),
+        card("black_ice", "/zima/poledica/", "Poledica",
+             f'{lvl_dot(worst_level)}<small>36 h</small>', ice_text,
+             week_strip(level_cells((data.get("black_ice_outlook") or {}).get("daily"), "poledica"),
+                        "Tveganje poledice po dnevih")),
+        card("zled", "/zima/zled/", "Žled",
+             f'{lvl_dot(zled_level)}<small>48 h</small>', zled_text,
+             week_strip(level_cells(zled.get("daily"), "žled"), "Pokazatelj žleda po dnevih")),
+        card("heating_index", "/zima/kurilni-semafor/", "Kurilni semafor",
+             lvl_dot(heating_level, HEAT_WORD.get(heating_level)),
+             "Zrak se dobro prevetri." if heating_level == "nizko"
+             else ((heating.get("advice") or "Ocena ni na voljo.").split(" — ", 1)[-1].capitalize()),
+             week_strip(level_cells(heating.get("daily"), "inverzija"), "Kurilni semafor po dnevih")),
+        card("fog", "/zima/nad-meglo/", "Nad meglo", fog_val, fog_text,
+             week_strip(fog_cells((fog or {}).get("daily")), "Zgornja meja jutranje megle po dnevih")),
+        card("snowpack", "/zima/snezna-odeja/", "Snežna odeja",
+             f'{num(station_depth, 0)} cm<small>v dolini</small>' if station_depth is not None else "—",
+             pack_text, f'<div class="zx-bands" aria-label="Snežna odeja po višinah">{band_rows}</div>'),
+    ]
+    legend = "".join(f'<span><i style="background:{CHART_COLOR[k]}"></i>{LEVEL_WORD[k].lower()}</span>' for k in RANK_ORDER)
+    conditions_html = f'''  <div class="zx-sec" id="razmere"><h2>Razmere v dolini</h2>
+    <p>Ocena za danes in trak za naslednjih sedem dni. Kartica vodi na podrobno stran.</p></div>
+  <div class="zx-cards">
+{chr(10).join(cards)}
+  </div>
+  <div class="zx-legend" aria-label="Legenda ravni">{legend}<span><i style="background:{_rgba(CHART_LINE_COLOR, ".5")}"></i>meja sneženja, megla: izrazitejše = nižje</span></div>'''
+
+    # ── 48 ur ──
+    h48 = data.get("hourly_48h") or {}
+    tw, tn = temp48_svg(h48), temp48_svg(h48, narrow=True)
     chart_html = ""
-    if hourly_svg:
-        chart_html = f'''  <h2 class="zima-section-title">🌡️ Naslednjih 48 ur</h2>
-  <div class="card zima-card" style="{card_style("snow_line", "")}">
-    <div class="frost-chart-wrap">{hourly_svg}</div>
-    <p class="muted-note" style="margin-top:.3rem">Temperatura na postaji IREICA1, urna napoved Open-Meteo.
-    Navpična črta označuje trenutno uro.</p>
-  </div>'''
+    if tw:
+        pw, pn = precip48_svg(h48), precip48_svg(h48, narrow=True)
+        precip_html = (f'<div class="zx-48-lbl">Padavine po urah (mm)</div>{pw}{pn}' if pw
+                       else '<div class="zx-48-lbl">V tem obdobju model ne napoveduje padavin.</div>')
+        chart_html = f'''  <div class="zx-sec" id="48-ur"><h2>Naslednjih 48 ur</h2>
+    <p>Temperatura in padavine za Rečico po urni napovedi. Dotaknite se grafa za vrednost ob uri.</p></div>
+  <figure class="zx-48" data-times='{json.dumps(h48.get("times") or [])}' data-t='{json.dumps(h48.get("temp_c") or [])}' data-p='{json.dumps(h48.get("precip_mm") or [])}'>
+    <div class="zx-48-plot">{tw}{tn}{precip_html}<div class="zx-cross" hidden></div><div class="zx-tip" hidden></div></div>
+    <figcaption>Napoved Open-Meteo za postajo IREICA1. Bledi del črte je preteklih nekaj ur, črtkana navpičnica je trenutna ura.</figcaption>
+  </figure>'''
 
-    # ── Zimski pogoji: mreža namesto enega stolpca -- kurilni semafor
-    # (zima-card-wide) zavzame celo vrstico, glej opombo uporabnika, da je bil
-    # prej "osamljen" med petimi enako velikimi kartami. ──
-    conditions_html = f'''  <h2 id="zimski-pogoji" class="zima-section-title">❄️ Zimski pogoji</h2>
-  <div class="zima-conditions-grid">
-    <div class="card zima-card" style="{card_style("snow_line", "")}">
-      <div class="clabel">{icon_html("snow_line")}Meja sneženja</div>
-      <p class="fh-sub">{snow_verdict}</p>
-    </div>
-    <div class="card zima-card" style="{card_style("black_ice", "")}">
-      <div class="clabel">{icon_html("black_ice")}Poledica</div>
-      <p class="fh-sub">{ice_verdict}</p>
-    </div>
-    <div class="card zima-card zima-card-wide" style="{card_style("heating_index", "")}">
-      <div class="clabel">{icon_html("heating_index")}Kurilni semafor</div>
-      <p class="fh-sub">{heating_verdict}</p>
-    </div>
-    <div class="card zima-card" style="{card_style("fog", "")}">
-      <div class="clabel">{icon_html("fog")}Nad meglo</div>
-      <p class="fh-sub">{fog_verdict}</p>
-    </div>
-    <div class="card zima-card" style="{card_style("snowpack", "")}">
-      <div class="clabel">{icon_html("snowpack")}Snežna odeja</div>
-      <p class="fh-sub">{f"Tekoča ocena na postaji: <strong>{num(station_depth, 0)} cm</strong> (modelirano, ni meritev)." if station_depth is not None else "Ocena trenutno ni na voljo."}</p>
-    </div>
-  </div>'''
+    snow_map_html = '''  <div class="zx-sec" id="snezna-karta"><h2>Snežna karta Slovenije</h2>
+    <p>Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).</p></div>
+  <div id="sk-app" data-compact="1" data-view="s" data-hours="24" aria-live="polite">Nalagam snežno karto …</div>'''
 
-    # ── Snežna meja kot vizualni meter (glej snow_line_meter_svg) — razlaga
-    # številke iz hero/kartice grafično, ne samo kot besedilo. ──
-    meter_svg = snow_line_meter_svg(line_m)
-    meter_html = ""
-    if meter_svg:
-        meter_html = f'''  <div class="card zima-card" style="{card_style("snow_line", "")}margin-bottom:1.2rem">
-    <div class="clabel">{icon_html("snow_line")}Snežna meja na lestvici</div>
-    {meter_svg}
-  </div>'''
-
-    # ── Zimske ceste: bivša ena vrstica ("2 prelaza") postane pravi seznam s
-    # stanjem — glej uporabnikov predlog za povečan modul prelazov. ──
-    def pass_status_chip(p):
-        status = p.get("status")
-        if not status:
-            return '<span class="zima-pass-status" style="color:var(--muted)">⚪ ni ročno preverjeno</span>'
-        low = status.lower()
-        if any(k in low for k in ("zaprt", "sneg", "zimsk")):
-            return f'<span class="zima-pass-status" style="color:#f87171">🔴 {status}</span>'
-        if any(k in low for k in ("previd", "delno", "omej")):
-            return f'<span class="zima-pass-status" style="color:var(--amber)">🟡 {status}</span>'
-        return f'<span class="zima-pass-status" style="color:var(--green)">🟢 {status}</span>'
-
+    # ── Ceste ──
     pass_rows = []
     for p in passes:
         w = p.get("weather") or {}
-        weather_txt = (f'{num(w.get("temp_c"), 1)} °C · do {num(w.get("expected_snow_cm_24h"), 1)} cm snega/24h'
-                       if w.get("temp_c") is not None else "vreme na tej višini ni na voljo")
-        # Črnivec ima svojo stran s kamero in meritvami DRSI (crnivec.si) --
-        # povezava s huba je tudi notranja povezava za SEO nove domene.
-        name_html = (f'<a href="https://crnivec.si/">{p["name"]} ({p["elevation_m"]} m)</a>'
-                     if p["id"] == "crnivec" else f'{p["name"]} ({p["elevation_m"]} m)')
-        pass_rows.append(f'''    <div class="zima-pass-row">
-      <div><div class="zima-pass-name">{name_html}</div>
-      <div class="zima-pass-meta">{p["connects"]} · {weather_txt}</div></div>
-      {pass_status_chip(p)}
+        chips = []
+        if w.get("temp_c") is not None:
+            chips.append(f'<span class="zx-chip">{num(w["temp_c"], 0)} °C</span>')
+            chips.append(f'<span class="zx-chip">sneg 24 h: {num(w.get("expected_snow_cm_24h"), 0)} cm</span>')
+        ice = (w.get("now") or {}).get("black_ice")
+        if ice:
+            chips.append(f'<span class="zx-chip">poledica {lvl_dot(ice, LEVEL_WORD[ice].lower())}</span>')
+        status = p.get("status")
+        side = (f'<span>stanje: {status}</span>' if status else '<span>stanje ceste ni ročno preverjeno</span>')
+        if p["id"] == "crnivec":
+            side += '<a href="https://crnivec.si/">kamera in meritve →</a>'
+        pass_rows.append(f'''    <div class="zx-pass">
+      <div><div class="zx-pass-name">{p["name"]}<span>{p["elevation_m"]} m</span></div>
+        <div class="zx-pass-meta">{p["connects"]}</div></div>
+      <div class="zx-chips">{"".join(chips) or '<span class="zx-chip">vreme na tej višini ni na voljo</span>'}</div>
+      <div class="zx-pass-side">{side}</div>
     </div>''')
-    passes_html = f'''  <h2 id="zimske-ceste" class="zima-section-title">🚗 Zimske ceste</h2>
-  <div class="zima-passes-list">
+    passes_html = f'''  <div class="zx-sec" id="zimske-ceste"><h2>Zimske ceste in prelazi</h2>
+    <p>Vreme na višini prelaza je ocena modela, ni uradna prometna informacija. Pred vožnjo preverite promet.si, AMZS ali DARS.</p></div>
+  <div class="zx-passes">
 {chr(10).join(pass_rows)}
   </div>
-  <p class="muted-note">Stanje je ročno vzdrževano polje, NI uradna prometna informacija. Pred vožnjo
-  preveri tudi promet.si, AMZS ali DARS.</p>
-  <a class="mtn-avk-link" href="/zima/prevoznost-prelazov/">Vse podrobnosti o prelazih →</a>'''
+  <a class="zx-more" href="/zima/prevoznost-prelazov/">Vse o prelazih →</a>'''
 
-    snow_map_html = '''  <h2 class="zima-section-title">❄️ Snežna karta Slovenije</h2>
-  <p class="muted-note">Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).</p>
-  <div id="sk-app" data-compact="1" data-view="s" data-hours="24" aria-live="polite">Nalagam snežno karto …</div>'''
-
-    nav_cards = f'''  <h2 class="zima-section-title">📚 Podrobno po temah</h2>
-  <div class="card-grid">
-    <a class="phenom-card zima-phenom" href="/zima/meja-snezenja/" style="{card_style("snow_line", "")}">
-      <span class="ph-icon">{icon_html("snow_line", 30)}</span>Meja sneženja
-      <div class="ph-count">{num(line_m, 0) if line_m is not None else "—"} m n. m.</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/snezna-karta/" style="{card_style("snow_line", "")}">
-      <span class="ph-icon">{icon_html("snow_line", 30)}</span>Snežna karta
-      <div class="ph-count">sneženje in meja, +48 h</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/poledica/" style="{card_style("black_ice", "")}">
-      <span class="ph-icon">{icon_html("black_ice", 30)}</span>Tveganje poledice
-      <div class="ph-count">{RISK_ICON.get(worst_level, "⚪")} {RISK_LABEL.get(worst_level, "ni podatka")}</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/zled/" style="{card_style("black_ice", "")}">
-      <span class="ph-icon">{icon_html("black_ice", 30)}</span>Žled
-      <div class="ph-count">{RISK_ICON.get(zled_level, "⚪")} {RISK_LABEL.get(zled_level, "ni podatka")}</div></a>
-    <a class="phenom-card zima-phenom" href="/blog/zima-2026-2027-el-nino-napoved.html" style="{card_style("snow_line", "")}">
-      <span class="ph-icon">{icon_html("snow_line", 30)}</span>Zima 2026/27
-      <div class="ph-count">El Niño: kaj čaka dolino</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/kurilni-semafor/" style="{card_style("heating_index", "")}">
-      <span class="ph-icon">{icon_html("heating_index", 30)}</span>Kurilni semafor
-      <div class="ph-count">{RISK_ICON.get(heating_level, "⚪")} {RISK_LABEL.get(heating_level, "ni podatka")}</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/nad-meglo/" style="{card_style("fog", "")}">
-      <span class="ph-icon">{icon_html("fog", 30)}</span>Nad meglo
-      <div class="ph-count">{f"~{fog['top_m']} m" if fog and fog.get("has_inversion") else "brez megle"}</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/snezna-odeja/" style="{card_style("snowpack", "")}">
-      <span class="ph-icon">{icon_html("snowpack", 30)}</span>Snežna odeja
-      <div class="ph-count">{num(station_depth, 0) + " cm" if station_depth is not None else "—"}</div></a>
-    <a class="phenom-card zima-phenom" href="/vreme-v-gorah/" style="{card_style("passes", "")}">
-      <span class="ph-icon">{icon_html("passes", 30)}</span>Vreme v gorah
-      <div class="ph-count">Golte, Menina, Smrekovec, Raduha</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/prevoznost-prelazov/" style="{card_style("passes", "")}">
-      <span class="ph-icon">{icon_html("passes", 30)}</span>Prevoznost prelazov
-      <div class="ph-count">{prelazi_n(len(passes))}</div></a>
-  </div>'''
+    links = [
+        ("map", "/zima/snezna-karta/", "Snežna karta", "sneženje po urah, +48 ur"),
+        ("peaks", "/vreme-v-gorah/", "Vreme v gorah", "Golte, Menina, Smrekovec, Raduha"),
+        ("road", "https://crnivec.si/", "Črnivec in Lipa", "kamera, meritve DRSI, vozišče"),
+        ("passes", "/zima/prevoznost-prelazov/", "Prevoznost prelazov", prelazi_n(len(passes))),
+        ("zled", "/zima/zled/", "Žled", "kdaj dež zmrzuje"),
+        ("article", "/blog/zima-2026-2027-el-nino-napoved.html", "Zima 2026/27", "El Niño: kaj čaka dolino"),
+    ]
+    links_html = "".join(f'<a class="zx-link" href="{u}">{hub_icon(k)}<span><b>{t}</b><small>{d}</small></span></a>'
+                         for k, u, t, d in links)
+    topics_html = f'''  <div class="zx-sec"><h2>Še več o zimi</h2></div>
+  <div class="zx-links">{links_html}</div>'''
 
     season = data.get("season") or {}
     season_html = ""
     if season.get("days_logged"):
         y, m, d = season["start_date"][:4], int(season["start_date"][5:7]), int(season["start_date"][8:10])
         start_fmt = f"{d}. {m}. {y}"
-        # "Zima v številkah" -- glej uporabnikov predlog: štiri velike kartice
-        # namesto enega stavka, isti .stat-grid/.stat-card/sc-* vzorec kot
-        # black_ice_outlook zgoraj v tej datoteki in stat-card v blog.css, ne
-        # nov razred. Vsi štirje šteti so DEJANSKI dnevi iz zabeleženega
-        # dnevnika (glej compute_season_stats), ne modelirana ocena.
-        season_html = f'''  <h2 class="zima-section-title">📊 Zima v številkah</h2>
-  <p class="muted-note" style="margin-top:-.6rem">Od {start_fmt}, {season["days_logged"]} zabeleženih dni.</p>
+        # Štirje šteti so dejanski dnevi iz zabeleženega dnevnika (compute_season_stats), ne modelirana ocena.
+        season_html = f'''  <div class="zx-sec"><h2>Zima v številkah</h2>
+    <p>Od {start_fmt}, {season["days_logged"]} zabeleženih dni.</p></div>
   <div class="stat-grid">
     <div class="stat-card"><div class="sc-label">Dni z visoko inverzijo</div>
       <div class="sc-val">{season["heating_high_days"]}</div>
-      <div class="sc-sub">kurilni semafor 🔴</div></div>
+      <div class="sc-sub">kurilni semafor: visoko</div></div>
     <div class="stat-card"><div class="sc-label">Dni z visokim tveganjem poledice</div>
       <div class="sc-val">{season["black_ice_high_days"]}</div>
       <div class="sc-sub">vsaj en kraj v dolini</div></div>
@@ -846,26 +1113,25 @@ def build_hub_body(data):
          "<a href=\"/kakovost-zraka/\">/kakovost-zraka/</a>."),
     ]
 
-    return f'''{BRAND_SWAP}{ZIMA_CSS}
+    return f'''{BRAND_SWAP}{ZIMA_CSS}{HUB_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
-{seo.stn_badge()}
 {hero_html}
-{snow_map_html}
-{chart_html}
 {conditions_html}
-{meter_html}
+{chart_html}
+{snow_map_html}
 {passes_html}
-{nav_cards}
-{season_html}
 {hub_alerts_html()}
-  <h2>Pogosta vprašanja</h2>
+{season_html}
+{topics_html}
+  <div class="zx-sec"><h2>Pogosta vprašanja</h2></div>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
   </div>
   <p class="muted-note">Podatki izhajajo iz javne napovedi Open-Meteo za postajo IREICA1 in okoliška
   naselja, brez notranjih meritev. Dejansko stanje prelazov je ročno vzdrževano polje — preveri tudi
   promet.si, AMZS ali DARS pred vožnjo.</p>
-  <a class="back-link" href="/">← Nazaj na trenutno vreme</a>''', faq
+  <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+{HUB_JS}''', faq
 
 
 # ── Zimska opozorila na telefon ───────────────────────────────────────────
@@ -977,12 +1243,24 @@ def with_alert(body, slug):
     return body if i < 0 else body[:i] + alert_block(slug) + "\n" + body[i:]
 
 
+ZIMA_ALERT_TEXT = {
+    "zima-poledica": ("black_ice", "ko je tveganje poledice srednje ali visoko"),
+    "zima-sneg": ("snow_line", "ko model napove sneg v dolini"),
+    "zima-zled": ("zled", "ko je pokazatelj žleda srednji ali visok"),
+    "zima-megla": ("fog", "ko bo dolina v megli, vrhovi pa na soncu"),
+}
+
+
 def hub_alerts_html():
-    items = "".join(f'<li><a href="{c["url"]}#ov-alert">{c["short"]}</a></li>' for c in ZIMA_ALERTS.values())
-    return ('  <h2>Opozorila na telefon</h2>\n'
-            '  <p class="archive-intro">Sami nastavite, kdaj želite obvestilo: na straneh spodaj izberete raven in dan, '
-            'mi pa vam ga pošljemo, ko ocena ustreza. Modelska napoved, ne uradno opozorilo.</p>\n'
-            f'  <ul>{items}</ul>')
+    cards = []
+    for slug, c in ZIMA_ALERTS.items():
+        key, text = ZIMA_ALERT_TEXT[slug]
+        cards.append(f'<a class="zx-alert" href="{c["url"]}#ov-alert" style="{card_style(key, "")}">'
+                     f'<b>{icon_html(key, 20)}{c["short"]}</b><span>Obvestilo, {text}.</span><em>Nastavi opozorilo →</em></a>')
+    return ('  <div class="zx-sec" id="opozorila"><h2>Opozorila na telefon</h2>\n'
+            '    <p>Na vsaki od teh strani izberete raven in dan, mi pa vam pošljemo obvestilo, ko ocena ustreza. '
+            'Modelska napoved, ne uradno opozorilo.</p></div>\n'
+            f'  <div class="zx-alerts">{"".join(cards)}</div>')
 
 
 # ── /zima/meja-snezenja/ ─────────────────────────────────────────────────

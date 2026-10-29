@@ -92,20 +92,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
    je na vseh sedmih straneh (hub + 6 spoke), .zima-hero samo na hubu -- prvi
    poskus je pomotoma zožil samo hub, spoke strani so ostale na 720px.
    Brskalnik brez podpore :has() preprosto obdrži 720px, varno degradiranje. */
-.wrap:has(.zima-card){max-width:1150px}
+.wrap:has(.zima-card,.zx-hero){max-width:1150px}
 /* Accordion vizual za FAQ (native <details>/<summary>, glej faq v vsakem
    build_*_body). SAMO tu, ne globalno v blog.css -- isti <div class="faq">
    vzorec uporabljajo desetine drugih generiranih strani in bi jih nehoteno
    spremenili. */
-.wrap:has(.zima-card) .faq details{background:var(--card-bg);border:1px solid var(--card-border);
+.wrap:has(.zima-card,.zx-hero) .faq details{background:var(--card-bg);border:1px solid var(--card-border);
   border-radius:14px;padding:.9rem 1.1rem;margin-bottom:.7rem}
-.wrap:has(.zima-card) .faq summary{cursor:pointer;font-weight:650;color:var(--text);
+.wrap:has(.zima-card,.zx-hero) .faq summary{cursor:pointer;font-weight:650;color:var(--text);
   list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
-.wrap:has(.zima-card) .faq summary::-webkit-details-marker{display:none}
-.wrap:has(.zima-card) .faq summary::after{content:"+";color:var(--cyan);font-size:1.25rem;
+.wrap:has(.zima-card,.zx-hero) .faq summary::-webkit-details-marker{display:none}
+.wrap:has(.zima-card,.zx-hero) .faq summary::after{content:"+";color:var(--cyan);font-size:1.25rem;
   font-weight:400;flex:0 0 auto;transition:transform .2s;line-height:1}
-.wrap:has(.zima-card) .faq details[open] summary::after{transform:rotate(45deg)}
-.wrap:has(.zima-card) .faq details p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
+.wrap:has(.zima-card,.zx-hero) .faq details[open] summary::after{transform:rotate(45deg)}
+.wrap:has(.zima-card,.zx-hero) .faq details p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem;line-height:1.6}
 .zima-fog-ladder{display:flex;flex-direction:column;gap:.35rem;margin:1rem 0}
 .zima-fog-row{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem .9rem;border-radius:10px;
   background:rgba(255,255,255,.03);border:1px solid var(--card-border);font-size:.88rem}
@@ -113,202 +113,225 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 .zima-fog-elev{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--muted);white-space:nowrap}
 .zima-fog-line{text-align:center;font-size:.76rem;color:#94a3b8;padding:.4rem 0;
   border-top:1px dashed var(--card-border);border-bottom:1px dashed var(--card-border);margin:.15rem 0}
-.zima-hero{position:relative;overflow:hidden;background:var(--card-bg);border:1px solid var(--card-border);
-  border-radius:22px;padding:1.8rem 2rem;margin:1rem 0 1.4rem;box-shadow:var(--card-shadow)}
-.zima-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;z-index:2;
-  background:linear-gradient(90deg,#38bdf8,#2dd4bf,#fbbf24,#a78bfa,#f472b6)}
-/* ZIMA_AMBIENT_BG (glej konstanto zgoraj) -- position:absolute čez cel hero,
-   za besedilom (.zh-content nosi position:relative;z-index:1, glej spodaj). */
-/* Fiksna višina (ne inset:0 čez cel hero) -- na ozkem/visokem mobilnem heroju
-   (skladi CTA/stat kartic naredijo hero visok) bi raztegnjena celotna višina
-   silhueto gora popačila v navpično konico. Fiksnih 220px + preserveAspectRatio
-   "slice" pomeni: obreže robove na ozkih zaslonih, ne raztegne proporcev. */
-.zima-hero-bg{position:absolute;left:0;right:0;bottom:0;width:100%;height:220px;z-index:0;pointer-events:none;display:block}
-.zh-content{position:relative;z-index:1}
-.zima-hero .page-title{margin:.1rem 0 .15rem}
-.zima-hero .zh-sub{color:var(--muted);font-size:.95rem;margin:0 0 1.1rem}
-.zima-hero .zh-verdict{font-size:1.12rem;font-weight:600;line-height:1.6;margin:0 0 1.3rem;max-width:44rem}
-/* Utripajoča piko ob statusu ("bolj animiran status", glej uporabnikov predlog)
-   -- barva po stanju (isto besedišče kot RISK_ICON/RANK_ORDER: visoko/srednje/
-   nizko + snow za snežno odejo, ki prevlada nad tveganji). Izklopljeno pod
-   prefers-reduced-motion, isto načelo kot .zima-bar/.zima-line zgoraj. */
-.zh-status{display:inline-flex;align-items:center;gap:.5rem}
 .zh-dot{width:.6rem;height:.6rem;border-radius:50%;flex:0 0 auto;animation:zhPulse 2.2s ease-out infinite}
-.zh-status-visoko .zh-dot{background:#f87171;--dot-glow:rgba(248,113,113,.55)}
-.zh-status-srednje .zh-dot{background:var(--amber);--dot-glow:rgba(245,158,11,.5)}
-.zh-status-nizko .zh-dot{background:#34d399;--dot-glow:rgba(52,211,153,.5)}
-.zh-status-snow .zh-dot{background:#e2e8f0;--dot-glow:rgba(226,232,240,.5)}
 @keyframes zhPulse{0%{box-shadow:0 0 0 0 var(--dot-glow,rgba(148,163,184,.5))}
   70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion: reduce){.zh-dot{animation:none}}
-.zh-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.4rem}
-.zh-stat{background:rgba(255,255,255,.035);border:1px solid var(--card-border);border-radius:14px;padding:.85rem 1rem}
-.zh-stat-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
-  font-family:'JetBrains Mono',monospace}
-.zh-stat-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
-  margin:.25rem 0 0;line-height:1.1}
-.zh-cta{display:flex;gap:.7rem;flex-wrap:wrap}
-.zh-cta a{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.15rem;border-radius:10px;
-  border:1px solid var(--card-border);background:rgba(255,255,255,.035);color:var(--text);
-  text-decoration:none;font-size:.87rem;font-weight:650;transition:border-color .18s,color .18s}
-.zh-cta a:hover{border-color:var(--cyan);color:var(--cyan)}
 .zima-section-title{display:flex;align-items:center;gap:.5rem}
-/* Mreža 5 stanj namesto prejšnjega enega stolpca -- glej card_style() klice v
-   build_hub_body(), ki za to mrežo pošljejo prazen extra="" (brez privzetega
-   margin-bottom, ker razmik zdaj dela grid gap). zima-card-wide (kurilni
-   semafor) zavzame celo širino vrstice, da je vidno večji od ostalih štirih. */
-.zima-conditions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.2rem}
-.zima-conditions-grid .zima-card-wide{grid-column:1/-1}
-.zima-meter-svg{width:100%;height:auto;display:block}
-.zima-passes-list{display:grid;gap:.7rem;margin:1rem 0 1.2rem}
-.zima-pass-row{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;
-  padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-.zima-pass-name{font-weight:700;color:var(--text)}
-.zima-pass-meta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
-.zima-pass-status{font-size:.82rem;font-weight:650;white-space:nowrap}
+</style><style>
+.zx-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1.6rem;align-items:center;
+  background:radial-gradient(120% 90% at 85% 0%,rgba(56,189,248,.10),transparent 60%),var(--card-bg);
+  border:1px solid var(--card-border);border-radius:22px;padding:1.9rem 2rem 1.6rem;margin:1rem 0 2.2rem;box-shadow:var(--card-shadow)}
+.zx-kicker{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#7dd3fc;margin:0 0 .5rem}
+.zx-hero .page-title{margin:0 0 1rem;font-size:clamp(1.9rem,4.2vw,2.7rem);line-height:1.08;letter-spacing:-.01em}
+.zx-status{display:inline-flex;align-items:center;gap:.55rem;padding:.38rem .8rem .38rem .65rem;border-radius:999px;
+  background:rgba(255,255,255,.05);border:1px solid var(--card-border);font-weight:700;font-size:.82rem;letter-spacing:.02em;margin:0 0 .85rem}
+.zx-status .zh-dot{background:var(--lc);--dot-glow:color-mix(in srgb,var(--lc) 55%,transparent)}
+.zx-verdict{font-size:1.08rem;line-height:1.6;margin:0 0 1.1rem;color:var(--text);max-width:34rem}
+.zx-updated{font-size:.8rem;color:var(--muted);margin:0 0 1.1rem}
+.zx-jump{display:flex;flex-wrap:wrap;gap:.45rem}
+.zx-jump a{font-size:.8rem;font-weight:650;color:var(--text);text-decoration:none;padding:.42rem .8rem;border-radius:999px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.03);transition:border-color .18s,color .18s}
+.zx-jump a:hover{border-color:var(--cyan);color:var(--cyan)}
+.zx-prof{margin:0}
+.zx-prof-svg{width:100%;height:auto;display:block}
+.zx-prof figcaption{display:flex;flex-wrap:wrap;gap:.35rem 1rem;font-size:.75rem;color:var(--muted);margin-top:.55rem}
+.zx-key{display:inline-flex;align-items:center;gap:.4rem}
+.zx-key i{display:inline-block;width:18px;height:10px;border-radius:2px}
+.zx-key .k-line{height:0;border-top:2px dashed #e0f2fe;border-radius:0}
+.zx-key .k-fog{background:rgba(203,213,225,.35)}
+.zx-key .k-snow{background:#e2e8f0}
+.zx-key .k-stn{width:10px;height:10px;border-radius:50%;background:#22d3ee}
+.zx-note{flex-basis:100%;font-size:.72rem;opacity:.85}
+svg.zx-narrow{display:none}
+@media (max-width:640px){svg.zx-wide{display:none}svg.zx-narrow{display:block}}
+.zx-sec{margin:2.4rem 0 1rem;scroll-margin-top:1rem}
+.zx-sec h2{margin:0 0 .25rem;font-size:1.45rem}
+.zx-sec p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.55}
+.zx-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.zx-card{position:relative;display:flex;flex-direction:column;gap:.55rem;text-decoration:none;color:inherit;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1.05rem 1.15rem 1.1rem;
+  overflow:hidden;transition:border-color .18s,transform .18s}
+.zx-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--fa)}
+.zx-card:hover{border-color:var(--fa);transform:translateY(-2px)}
+.zx-card-head{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:.95rem}
+.zx-card-head .zima-icon{margin:0;vertical-align:0}
+.zx-go{margin-left:auto;color:var(--muted);font-weight:400;transition:color .18s,transform .18s}
+.zx-card:hover .zx-go{color:var(--fa);transform:translateX(2px)}
+.zx-val{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.65rem;line-height:1.1;color:#fff}
+.zx-val small{font-family:Inter,sans-serif;font-size:.78rem;font-weight:500;color:var(--muted);margin-left:.35rem}
+.zx-lvl{display:inline-flex;align-items:center;gap:.5rem}
+.zx-lvl i{width:.7rem;height:.7rem;border-radius:50%;background:var(--lc);box-shadow:0 0 0 3px color-mix(in srgb,var(--lc) 22%,transparent)}
+.zx-card p{margin:0;font-size:.88rem;line-height:1.55;color:var(--muted)}
+.zx-week{list-style:none;margin:auto 0 0;padding:.55rem 0 0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.zx-week li{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0}
+.zx-dn{font-size:.62rem;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.zx-dc{display:flex;align-items:center;justify-content:center;height:22px;border-radius:4px}
+.zx-dc-none{background:transparent;border:1px dashed #26344b}
+.zx-dv{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#e8edf8;letter-spacing:-.02em}
+.zx-dc-none .zx-dv{color:#64748b}
+.zx-bands{display:grid;gap:5px;margin:auto 0 0;padding-top:.4rem}
+.zx-band{display:grid;grid-template-columns:3.6rem 1fr 3.2rem;align-items:center;gap:.5rem;font-size:.72rem;color:var(--muted)}
+.zx-band b{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text);text-align:right}
+.zx-bar{height:8px;border-radius:4px;background:#141d2c;overflow:hidden}
+.zx-bar i{display:block;height:100%;background:#e2e8f0;border-radius:4px}
+.zx-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.76rem;color:var(--muted);margin:.85rem 0 0}
+.zx-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:.4rem;vertical-align:-1px}
+.zx-48{position:relative;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;padding:1rem 1rem .9rem;margin:0}
+.zx-48-plot{position:relative;touch-action:pan-y;cursor:crosshair}
+.zx-chart{width:100%;height:auto;display:block}
+.zx-precip{margin-top:.2rem}
+.zx-48-lbl{font-size:.72rem;color:var(--muted);margin:.7rem 0 0 .2rem}
+.zx-tip[hidden],.zx-cross[hidden]{display:none}
+.zx-cross{position:absolute;top:0;bottom:0;width:1px;background:rgba(226,232,240,.45);pointer-events:none}
+.zx-tip{position:absolute;top:.1rem;display:flex;flex-direction:column;gap:.1rem;
+  background:#111a2b;border:1px solid #2a3a55;border-radius:10px;padding:.45rem .65rem;font-size:.78rem;color:var(--text);
+  pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:3}
+.zx-tip b{font-size:.72rem;color:#7dd3fc}
+.zx-48 figcaption{font-size:.78rem;color:var(--muted);margin:.6rem .2rem 0;line-height:1.5}
+.zx-passes{display:grid;gap:.7rem}
+.zx-pass{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) auto;align-items:center;gap:1rem;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.9rem 1.15rem}
+.zx-pass-name{font-weight:700;font-size:1rem}
+.zx-pass-name span{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:500;color:var(--muted);margin-left:.35rem}
+.zx-pass-meta{font-size:.78rem;color:var(--muted);margin-top:.15rem}
+.zx-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.zx-chip{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.3rem .6rem;border-radius:8px;
+  background:rgba(255,255,255,.04);border:1px solid var(--card-border);white-space:nowrap}
+.zx-chip .zx-lvl i{width:.55rem;height:.55rem}
+.zx-pass-side{display:flex;flex-direction:column;align-items:flex-end;gap:.25rem;font-size:.76rem;color:var(--muted);text-align:right}
+.zx-pass-side a{color:var(--cyan);font-weight:650;text-decoration:none}
+.zx-pass-side a:hover{text-decoration:underline}
+.zx-more{display:inline-flex;margin-top:.8rem;font-size:.85rem;font-weight:650;color:var(--cyan);text-decoration:none}
+.zx-more:hover{text-decoration:underline}
+.zx-alerts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem}
+.zx-alert{display:flex;flex-direction:column;gap:.45rem;text-decoration:none;color:inherit;background:var(--card-bg);
+  border:1px solid var(--card-border);border-radius:14px;padding:.95rem 1rem;transition:border-color .18s}
+.zx-alert:hover{border-color:var(--fa)}
+.zx-alert b{display:flex;align-items:center;gap:.55rem;font-size:.92rem}
+.zx-alert b .zima-icon{margin:0;width:1.9rem;height:1.9rem;vertical-align:0}
+.zx-alert span{font-size:.8rem;color:var(--muted);line-height:1.45}
+.zx-alert em{font-style:normal;font-size:.8rem;font-weight:650;color:var(--fa);margin-top:auto}
+.zx-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.6rem}
+.zx-link{display:flex;align-items:center;gap:.8rem;text-decoration:none;color:inherit;padding:.75rem .9rem;border-radius:12px;
+  border:1px solid var(--card-border);background:rgba(255,255,255,.02);transition:border-color .18s,background .18s}
+.zx-link:hover{border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.04)}
+.zx-ico{display:inline-flex;align-items:center;justify-content:center;width:2.2rem;height:2.2rem;flex:0 0 auto;border-radius:10px;
+  background:rgba(125,211,252,.1);color:#7dd3fc}
+.zx-link b{display:block;font-size:.9rem}
+.zx-link small{display:block;font-size:.76rem;color:var(--muted);margin-top:.1rem}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media (max-width:980px){.zx-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.zx-alerts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.zx-hero{grid-template-columns:1fr;padding:1.4rem 1.2rem 1.2rem;gap:1.2rem}
+  .zx-pass{grid-template-columns:1fr}.zx-pass-side{align-items:flex-start;text-align:left}}
+@media (max-width:620px){.zx-cards{grid-template-columns:1fr}}
+@media (max-width:420px){.zx-alerts{grid-template-columns:1fr}.zx-hero{border-radius:18px}}
+@media (prefers-reduced-motion: reduce){.zx-card,.zx-go{transition:none}.zx-card:hover{transform:none}}
 </style>
   <nav class="crumbs" aria-label="Drobtine">
     <a href="/">Meteorec</a> › <span aria-current="page">MeteoZima</span>
   </nav>
-  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
-  <div class="zima-hero">
-
-      <svg class="zima-hero-bg" viewBox="0 0 1150 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-        <defs>
-          <linearGradient id="zimaSkyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0c1c33" stop-opacity=".6"/>
-            <stop offset="100%" stop-color="#04070e" stop-opacity="0"/>
-          </linearGradient>
-          <radialGradient id="zimaHalo" cx="80%" cy="12%" r="50%">
-            <stop offset="0%" stop-color="#38bdf8" stop-opacity=".2"/>
-            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="1150" height="300" fill="url(#zimaSkyGrad)"/>
-        <rect width="1150" height="300" fill="url(#zimaHalo)"/>
-        <path d="M-20 235 Q 200 205 420 232 T 900 220 T 1180 240" fill="none" stroke="#1e293b" stroke-width="1"/>
-        <path d="M-20 253 Q 220 224 440 250 T 920 240 T 1180 258" fill="none" stroke="#1e293b" stroke-width="1"/>
-        <path d="M-20 270 Q 240 244 460 266 T 940 258 T 1180 274" fill="none" stroke="#1e293b" stroke-width="1"/>
-        <path d="M-20 300 L110 170 L215 235 L340 105 L455 220 L610 70 L755 205 L890 135 L1015 225 L1150 165 L1180 190 L1180 300 Z"
-              fill="#0a1120" fill-opacity=".62"/>
-      </svg>
-
-    <div class="zh-content">
-    <h1 class="page-title">❄️ Zimski nadzorni center</h1>
-    <p class="zh-sub">Zgornja Savinjska dolina · MeteoZima</p>
-    <p class="zh-verdict"><span class="zh-status zh-status-srednje"><span class="zh-dot"></span>🟡 <strong>DELNO ZIMSKO TVEGANJE</strong></span><br>Danes je vsaj eden od zimskih indeksov na srednji stopnji — poglej razmere spodaj.</p>
-    <div class="zh-stats">
-      <div class="zh-stat"><div class="zh-stat-label">Sneg zdaj</div>
-        <div class="zh-stat-val">0 cm</div></div>
-      <div class="zh-stat"><div class="zh-stat-label">Meja sneženja</div>
-        <div class="zh-stat-val">2100 m</div></div>
-      <div class="zh-stat"><div class="zh-stat-label">Tveganje poledice</div>
-        <div class="zh-stat-val" style="font-size:1.05rem"><span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span></div></div>
+  <section class="zx-hero">
+    <div>
+      <p class="zx-kicker">MeteoZima · Zgornja Savinjska dolina</p>
+      <h1 class="page-title">Zimski nadzorni center</h1>
+      <p class="zx-status" style="--lc:#d97706"><span class="zh-dot"></span>Delno zimsko tveganje</p>
+      <p class="zx-verdict">Vsaj eden od zimskih kazalnikov je danes na srednji stopnji. Kateri, pokažejo kartice spodaj.</p>
+      <p class="zx-updated">Posodobljeno 29. 10. 2026 ob 18:00 · ocena iz napovedi Open-Meteo, ne meritev</p>
+      <nav class="zx-jump" aria-label="Na tej strani">
+        <a href="#razmere">Razmere</a><a href="#48-ur">48 ur</a><a href="#snezna-karta">Snežna karta</a>
+        <a href="#zimske-ceste">Ceste</a><a href="#opozorila">Opozorila na telefon</a>
+      </nav>
     </div>
-    <div class="zh-cta">
-      <a href="/">🌡️ Trenutno vreme</a>
-      <a href="#zimski-pogoji">❄️ Zimske razmere</a>
-      <a href="#zimske-ceste">🚗 Zimske ceste</a>
-    </div>
-    <p class="post-meta" style="margin:.9rem 0 0">Posodobljeno 29. 10. 2026 ob 18:00</p>
-    </div>
+    <figure class="zx-prof">
+      <svg viewBox="0 0 560 300" class="zx-prof-svg zx-wide" role="img" aria-labelledby="zx-prof-cap"><defs><linearGradient id="zxTerrW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e2b3f"/><stop offset="1" stop-color="#0a111d"/></linearGradient><linearGradient id="zxFogW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cbd5e1" stop-opacity="0"/><stop offset=".22" stop-color="#cbd5e1" stop-opacity=".26"/><stop offset="1" stop-color="#cbd5e1" stop-opacity=".34"/></linearGradient><clipPath id="zxClipW"><polygon points="52.0,163.9 76.9,104.3 96.8,52.1 121.7,98.0 151.6,138.5 181.5,113.6 211.4,167.7 241.2,217.1 271.1,256.3 301.0,267.0 330.9,258.9 360.8,209.5 395.6,136.0 425.5,160.1 460.4,123.3 500.2,149.9 530.1,141.1 550.0,156.3 550.0,300 52.0,300"/></clipPath></defs><line x1="52" x2="550" y1="250.0" y2="250.0" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="46" y="254.0" text-anchor="end" font-size="10.5" fill="#8193ad">500 m</text><line x1="52" x2="550" y1="186.7" y2="186.7" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="46" y="190.7" text-anchor="end" font-size="10.5" fill="#8193ad">1000 m</text><line x1="52" x2="550" y1="123.3" y2="123.3" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="46" y="127.3" text-anchor="end" font-size="10.5" fill="#8193ad">1500 m</text><line x1="52" x2="550" y1="60.0" y2="60.0" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="46" y="64.0" text-anchor="end" font-size="10.5" fill="#8193ad">2000 m</text><polygon points="52.0,123.3 91.8,72.7 141.6,104.3 201.4,79.0 261.2,148.7 311.0,174.0 360.8,142.3 410.6,104.3 475.3,98.0 550.0,117.0 550.0,300 52.0,300" fill="#121d30"/><rect x="52" y="194.5" width="498" height="105.5" fill="url(#zxFogW)"/><polygon points="52.0,163.9 76.9,104.3 96.8,52.1 121.7,98.0 151.6,138.5 181.5,113.6 211.4,167.7 241.2,217.1 271.1,256.3 301.0,267.0 330.9,258.9 360.8,209.5 395.6,136.0 425.5,160.1 460.4,123.3 500.2,149.9 530.1,141.1 550.0,156.3 550.0,300 52.0,300" fill="url(#zxTerrW)" stroke="#3b4d68" stroke-width="1.4" stroke-linejoin="round"/><circle cx="96.8" cy="52.1" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="96.8" y="43.1" text-anchor="middle" font-size="11.5" fill="#e2e8f0" font-weight="600">Raduha</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="96.8" y="67.1" text-anchor="middle" font-size="10.0" fill="#8193ad">2062 m</text><circle cx="181.5" cy="113.6" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="181.5" y="104.6" text-anchor="middle" font-size="11.5" fill="#e2e8f0" font-weight="600">Smrekovec</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="181.5" y="128.6" text-anchor="middle" font-size="10.0" fill="#8193ad">1577 m</text><circle cx="395.6" cy="136.0" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="395.6" y="127.0" text-anchor="middle" font-size="11.5" fill="#e2e8f0" font-weight="600">Golte</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="395.6" y="151.0" text-anchor="middle" font-size="10.0" fill="#8193ad">1400 m</text><circle cx="460.4" cy="123.3" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="460.4" y="114.3" text-anchor="middle" font-size="11.5" fill="#e2e8f0" font-weight="600">Menina planina</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="460.4" y="138.3" text-anchor="middle" font-size="10.0" fill="#8193ad">1500 m</text><circle cx="301.0" cy="267.0" r="4.5" fill="#22d3ee" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="301.0" y="257.0" text-anchor="middle" font-size="11.5" fill="#e8edf8" font-weight="700">Rečica 366 m</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="301.0" y="199.5" text-anchor="middle" font-size="11.0" fill="#e2e8f0">megla jutri do ~859 m</text><line x1="52" x2="550" y1="47.3" y2="47.3" stroke="#e0f2fe" stroke-width="1.6" stroke-dasharray="6 4"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="546" y="42.3" text-anchor="end" font-size="11.0" fill="#e0f2fe" font-weight="600">meja sneženja 2100 m</text></svg>
+      <svg viewBox="0 0 360 250" class="zx-prof-svg zx-narrow" role="img" aria-labelledby="zx-prof-cap"><defs><linearGradient id="zxTerrN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e2b3f"/><stop offset="1" stop-color="#0a111d"/></linearGradient><linearGradient id="zxFogN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cbd5e1" stop-opacity="0"/><stop offset=".22" stop-color="#cbd5e1" stop-opacity=".26"/><stop offset="1" stop-color="#cbd5e1" stop-opacity=".34"/></linearGradient><clipPath id="zxClipN"><polygon points="48.0,136.4 63.2,86.7 75.4,43.2 90.6,81.4 108.8,115.3 127.0,94.4 145.3,139.6 163.5,180.8 181.8,213.6 200.0,222.5 218.2,215.7 236.5,174.5 257.8,113.1 276.0,133.2 297.3,102.6 321.6,124.8 339.8,117.4 352.0,130.1 352.0,250 48.0,250"/></clipPath></defs><line x1="48" x2="352" y1="208.3" y2="208.3" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="42" y="212.3" text-anchor="end" font-size="10" fill="#8193ad">500 m</text><line x1="48" x2="352" y1="155.4" y2="155.4" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="42" y="159.4" text-anchor="end" font-size="10" fill="#8193ad">1000 m</text><line x1="48" x2="352" y1="102.6" y2="102.6" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="42" y="106.6" text-anchor="end" font-size="10" fill="#8193ad">1500 m</text><line x1="48" x2="352" y1="49.7" y2="49.7" stroke="#1a2436" stroke-width="1"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="42" y="53.7" text-anchor="end" font-size="10" fill="#8193ad">2000 m</text><polygon points="48.0,102.6 72.3,60.3 102.7,86.7 139.2,65.6 175.7,123.7 206.1,144.9 236.5,118.4 266.9,86.7 306.4,81.4 352.0,97.3 352.0,250 48.0,250" fill="#121d30"/><rect x="48" y="160.3" width="304" height="89.7" fill="url(#zxFogN)"/><polygon points="48.0,136.4 63.2,86.7 75.4,43.2 90.6,81.4 108.8,115.3 127.0,94.4 145.3,139.6 163.5,180.8 181.8,213.6 200.0,222.5 218.2,215.7 236.5,174.5 257.8,113.1 276.0,133.2 297.3,102.6 321.6,124.8 339.8,117.4 352.0,130.1 352.0,250 48.0,250" fill="url(#zxTerrN)" stroke="#3b4d68" stroke-width="1.4" stroke-linejoin="round"/><circle cx="75.4" cy="43.2" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="75.4" y="34.2" text-anchor="middle" font-size="11" fill="#e2e8f0" font-weight="600">Raduha</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="75.4" y="58.2" text-anchor="middle" font-size="9.5" fill="#8193ad">2062 m</text><circle cx="257.8" cy="113.1" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="257.8" y="104.1" text-anchor="middle" font-size="11" fill="#e2e8f0" font-weight="600">Golte</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="257.8" y="128.1" text-anchor="middle" font-size="9.5" fill="#8193ad">1400 m</text><circle cx="297.3" cy="102.6" r="3" fill="#e2e8f0" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="297.3" y="93.6" text-anchor="middle" font-size="11" fill="#e2e8f0" font-weight="600">Menina</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="297.3" y="117.6" text-anchor="middle" font-size="9.5" fill="#8193ad">1500 m</text><circle cx="200.0" cy="222.5" r="4.5" fill="#22d3ee" stroke="#0b111e" stroke-width="2"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="200.0" y="212.5" text-anchor="middle" font-size="11" fill="#e8edf8" font-weight="700">Rečica 366 m</text><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="200.0" y="165.3" text-anchor="middle" font-size="10.5" fill="#e2e8f0">megla jutri do ~859 m</text><line x1="48" x2="352" y1="39.1" y2="39.1" stroke="#e0f2fe" stroke-width="1.6" stroke-dasharray="6 4"/><text paint-order="stroke" stroke="#0b111e" stroke-width="3" stroke-linejoin="round" x="348" y="34.1" text-anchor="end" font-size="10.5" fill="#e0f2fe" font-weight="600">meja sneženja 2100 m</text></svg>
+      <figcaption id="zx-prof-cap"><span class="zx-key"><i class="k-stn"></i>postaja IREICA1</span><span class="zx-key"><i class="k-line"></i>meja sneženja danes</span><span class="zx-key"><i class="k-fog"></i>megla jutri zjutraj</span>
+        <span class="zx-note">Shematski prerez doline: višine so v merilu, vodoravne razdalje niso.</span></figcaption>
+    </figure>
+  </section>
+  <div class="zx-sec" id="razmere"><h2>Razmere v dolini</h2>
+    <p>Ocena za danes in trak za naslednjih sedem dni. Kartica vodi na podrobno stran.</p></div>
+  <div class="zx-cards">
+    <a class="zx-card" href="/zima/meja-snezenja/" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);">
+      <div class="zx-card-head"><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span>Meja sneženja<span class="zx-go" aria-hidden="true">→</span></div>
+      <div class="zx-val">2100 m<small>danes</small></div>
+      <p>Nad vsemi spremljanimi višinami v dolini, sneg ni pričakovan.</p>
+      <ul class="zx-week" aria-label="Najnižja meja sneženja po dnevih"><li title="četrtek 29. 10.: najnižja meja sneženja 2060 m"><span class="zx-dn">danes</span><span class="zx-dc" style="background:rgba(56,189,248,.14)"><span class="zx-dv">2060</span></span><span class="sr-only">četrtek 29. 10.: najnižja meja sneženja 2060 m</span></li><li title="petek 30. 10.: najnižja meja sneženja 1940 m"><span class="zx-dn">jutri</span><span class="zx-dc" style="background:rgba(56,189,248,.14)"><span class="zx-dv">1940</span></span><span class="sr-only">petek 30. 10.: najnižja meja sneženja 1940 m</span></li><li title="sobota 31. 10.: najnižja meja sneženja 1390 m"><span class="zx-dn">sob</span><span class="zx-dc" style="background:rgba(56,189,248,.3)"><span class="zx-dv">1390</span></span><span class="sr-only">sobota 31. 10.: najnižja meja sneženja 1390 m</span></li><li title="nedelja 1. 11.: najnižja meja sneženja 1200 m"><span class="zx-dn">ned</span><span class="zx-dc" style="background:rgba(56,189,248,.3)"><span class="zx-dv">1200</span></span><span class="sr-only">nedelja 1. 11.: najnižja meja sneženja 1200 m</span></li><li title="ponedeljek 2. 11.: najnižja meja sneženja 1610 m"><span class="zx-dn">pon</span><span class="zx-dc" style="background:rgba(56,189,248,.3)"><span class="zx-dv">1610</span></span><span class="sr-only">ponedeljek 2. 11.: najnižja meja sneženja 1610 m</span></li><li title="torek 3. 11.: najnižja meja sneženja 1220 m"><span class="zx-dn">tor</span><span class="zx-dc" style="background:rgba(56,189,248,.3)"><span class="zx-dv">1220</span></span><span class="sr-only">torek 3. 11.: najnižja meja sneženja 1220 m</span></li><li title="sreda 4. 11.: najnižja meja sneženja 990 m"><span class="zx-dn">sre</span><span class="zx-dc" style="background:rgba(56,189,248,.5)"><span class="zx-dv">990</span></span><span class="sr-only">sreda 4. 11.: najnižja meja sneženja 990 m</span></li></ul>
+    </a>
+    <a class="zx-card" href="/zima/poledica/" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16);">
+      <div class="zx-card-head"><span class="zima-icon" aria-hidden="true" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Poledica<span class="zx-go" aria-hidden="true">→</span></div>
+      <div class="zx-val"><span class="zx-lvl" style="--lc:#d97706"><i aria-hidden="true"></i>Srednje</span><small>36 h</small></div>
+      <p>Najbolj izpostavljen kraj: Rečica ob Savinji. Previdno na mostovih in v senci.</p>
+      <ul class="zx-week" aria-label="Tveganje poledice po dnevih"><li title="četrtek 29. 10.: poledica nizko"><span class="zx-dn">danes</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">četrtek 29. 10.: poledica nizko</span></li><li title="petek 30. 10.: poledica nizko"><span class="zx-dn">jutri</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">petek 30. 10.: poledica nizko</span></li><li title="sobota 31. 10.: poledica srednje"><span class="zx-dn">sob</span><span class="zx-dc" style="background:#d97706"></span><span class="sr-only">sobota 31. 10.: poledica srednje</span></li><li title="nedelja 1. 11.: poledica nizko"><span class="zx-dn">ned</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">nedelja 1. 11.: poledica nizko</span></li><li title="ponedeljek 2. 11.: poledica nizko"><span class="zx-dn">pon</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">ponedeljek 2. 11.: poledica nizko</span></li><li title="torek 3. 11.: poledica nizko"><span class="zx-dn">tor</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">torek 3. 11.: poledica nizko</span></li><li title="sreda 4. 11.: poledica nizko"><span class="zx-dn">sre</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">sreda 4. 11.: poledica nizko</span></li></ul>
+    </a>
+    <a class="zx-card" href="/zima/zled/" style="--fa:#67e8f9;--fa-soft:rgba(103,232,249,.16);">
+      <div class="zx-card-head"><span class="zima-icon" aria-hidden="true" style="--fa:#67e8f9;--fa-soft:rgba(103,232,249,.16)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.8 C9.6 6.4 8 8.6 8 10.9 a4 4 0 0 0 8 0 C16 8.6 14.4 6.4 12 2.8 Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 19 H20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M7 19 V21.5 M11 19 V22 M15 19 V21 M18 19 V21.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>Žled<span class="zx-go" aria-hidden="true">→</span></div>
+      <div class="zx-val"><span class="zx-lvl" style="--lc:#0284c7"><i aria-hidden="true"></i>Nizko</span><small>48 h</small></div>
+      <p>Model ne kaže dežja, ki bi zmrzoval.</p>
+      <ul class="zx-week" aria-label="Pokazatelj žleda po dnevih"><li title="četrtek 29. 10.: žled nizko"><span class="zx-dn">danes</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">četrtek 29. 10.: žled nizko</span></li><li title="petek 30. 10.: žled nizko"><span class="zx-dn">jutri</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">petek 30. 10.: žled nizko</span></li><li title="sobota 31. 10.: žled nizko"><span class="zx-dn">sob</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">sobota 31. 10.: žled nizko</span></li><li title="nedelja 1. 11.: žled nizko"><span class="zx-dn">ned</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">nedelja 1. 11.: žled nizko</span></li><li title="ponedeljek 2. 11.: žled nizko"><span class="zx-dn">pon</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">ponedeljek 2. 11.: žled nizko</span></li><li title="torek 3. 11.: žled nizko"><span class="zx-dn">tor</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">torek 3. 11.: žled nizko</span></li><li title="sreda 4. 11.: žled nizko"><span class="zx-dn">sre</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">sreda 4. 11.: žled nizko</span></li></ul>
+    </a>
+    <a class="zx-card" href="/zima/kurilni-semafor/" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16);">
+      <div class="zx-card-head"><span class="zima-icon" aria-hidden="true" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="13.5" width="6" height="7.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M8 13.5 V9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 9.5 Q11 6.8 8 4.8 Q6 3.5 8 1.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><line x1="3" y1="8.5" x2="21" y2="8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1 3.2"/></svg></span>Kurilni semafor<span class="zx-go" aria-hidden="true">→</span></div>
+      <div class="zx-val"><span class="zx-lvl" style="--lc:#d97706"><i aria-hidden="true"></i>Zmerna inverzija</span></div>
+      <p>Po možnosti uporabi suha, dobro osušena drva in ne kuri več, kot je nujno.</p>
+      <ul class="zx-week" aria-label="Kurilni semafor po dnevih"><li title="četrtek 29. 10.: inverzija nizko"><span class="zx-dn">danes</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">četrtek 29. 10.: inverzija nizko</span></li><li title="petek 30. 10.: inverzija srednje"><span class="zx-dn">jutri</span><span class="zx-dc" style="background:#d97706"></span><span class="sr-only">petek 30. 10.: inverzija srednje</span></li><li title="sobota 31. 10.: inverzija srednje"><span class="zx-dn">sob</span><span class="zx-dc" style="background:#d97706"></span><span class="sr-only">sobota 31. 10.: inverzija srednje</span></li><li title="nedelja 1. 11.: inverzija srednje"><span class="zx-dn">ned</span><span class="zx-dc" style="background:#d97706"></span><span class="sr-only">nedelja 1. 11.: inverzija srednje</span></li><li title="ponedeljek 2. 11.: inverzija nizko"><span class="zx-dn">pon</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">ponedeljek 2. 11.: inverzija nizko</span></li><li title="torek 3. 11.: inverzija nizko"><span class="zx-dn">tor</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">torek 3. 11.: inverzija nizko</span></li><li title="sreda 4. 11.: inverzija nizko"><span class="zx-dn">sre</span><span class="zx-dc" style="background:#0284c7"></span><span class="sr-only">sreda 4. 11.: inverzija nizko</span></li></ul>
+    </a>
+    <a class="zx-card" href="/zima/nad-meglo/" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16);">
+      <div class="zx-card-head"><span class="zima-icon" aria-hidden="true" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17.5" cy="5" r="2.1" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M4 14.5 L10 6 L14 12 L17 8 L21 14.5 Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17 Q6 15.2 10 17 T18 17 T22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 20.3 Q6 18.5 10 20.3 T18 20.3 T22 20.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Nad meglo<span class="zx-go" aria-hidden="true">→</span></div>
+      <div class="zx-val">do ~859 m<small>jutri zjutraj</small></div>
+      <p>Nad meglo: Golte, Menina planina, Smrekovec, Raduha.</p>
+      <ul class="zx-week" aria-label="Zgornja meja jutranje megle po dnevih"><li title="četrtek 29. 10. zjutraj: brez izrazite inverzije"><span class="zx-dn">danes</span><span class="zx-dc zx-dc-none" style=""><span class="zx-dv">—</span></span><span class="sr-only">četrtek 29. 10. zjutraj: brez izrazite inverzije</span></li><li title="petek 30. 10. zjutraj: megla oziroma nizka oblačnost do približno 863 m"><span class="zx-dn">jutri</span><span class="zx-dc" style="background:rgba(167,139,250,.4)"><span class="zx-dv">863</span></span><span class="sr-only">petek 30. 10. zjutraj: megla oziroma nizka oblačnost do približno 863 m</span></li><li title="sobota 31. 10. zjutraj: megla oziroma nizka oblačnost do približno 859 m"><span class="zx-dn">sob</span><span class="zx-dc" style="background:rgba(167,139,250,.4)"><span class="zx-dv">859</span></span><span class="sr-only">sobota 31. 10. zjutraj: megla oziroma nizka oblačnost do približno 859 m</span></li><li title="nedelja 1. 11. zjutraj: brez izrazite inverzije"><span class="zx-dn">ned</span><span class="zx-dc zx-dc-none" style=""><span class="zx-dv">—</span></span><span class="sr-only">nedelja 1. 11. zjutraj: brez izrazite inverzije</span></li><li title="ponedeljek 2. 11. zjutraj: brez izrazite inverzije"><span class="zx-dn">pon</span><span class="zx-dc zx-dc-none" style=""><span class="zx-dv">—</span></span><span class="sr-only">ponedeljek 2. 11. zjutraj: brez izrazite inverzije</span></li><li title="torek 3. 11. zjutraj: brez izrazite inverzije"><span class="zx-dn">tor</span><span class="zx-dc zx-dc-none" style=""><span class="zx-dv">—</span></span><span class="sr-only">torek 3. 11. zjutraj: brez izrazite inverzije</span></li><li title="sreda 4. 11. zjutraj: brez izrazite inverzije"><span class="zx-dn">sre</span><span class="zx-dc zx-dc-none" style=""><span class="zx-dv">—</span></span><span class="sr-only">sreda 4. 11. zjutraj: brez izrazite inverzije</span></li></ul>
+    </a>
+    <a class="zx-card" href="/zima/snezna-odeja/" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16);">
+      <div class="zx-card-head"><span class="zima-icon" aria-hidden="true" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 18.5 Q7 16.5 11 18.5 T21 18.5" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 14.5 Q7 12.5 11 14.5 T21 14.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="17" y1="3.5" x2="17" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="14.7" y1="6.5" x2="17" y2="6.5" stroke="currentColor" stroke-width="1.3"/><line x1="14.7" y1="10.5" x2="17" y2="10.5" stroke="currentColor" stroke-width="1.3"/></svg></span>Snežna odeja<span class="zx-go" aria-hidden="true">→</span></div>
+      <div class="zx-val">0 cm<small>v dolini</small></div>
+      <p>Na nobeni spremljani višini ni ocenjene snežne odeje.</p>
+      <div class="zx-bands" aria-label="Snežna odeja po višinah"><div class="zx-band"><span class="zx-bl">366 m</span><span class="zx-bar"><i style="width:0%"></i></span><b>0 cm</b></div><div class="zx-band"><span class="zx-bl">600 m</span><span class="zx-bar"><i style="width:0%"></i></span><b>0 cm</b></div><div class="zx-band"><span class="zx-bl">900 m</span><span class="zx-bar"><i style="width:0%"></i></span><b>0 cm</b></div><div class="zx-band"><span class="zx-bl">1200 m</span><span class="zx-bar"><i style="width:0%"></i></span><b>0 cm</b></div><div class="zx-band"><span class="zx-bl">1600 m</span><span class="zx-bar"><i style="width:0%"></i></span><b>0 cm</b></div></div>
+    </a>
   </div>
-  <h2 class="zima-section-title">❄️ Snežna karta Slovenije</h2>
-  <p class="muted-note">Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).</p>
+  <div class="zx-legend" aria-label="Legenda ravni"><span><i style="background:#0284c7"></i>nizko</span><span><i style="background:#d97706"></i>srednje</span><span><i style="background:#e11d48"></i>visoko</span><span><i style="background:rgba(56,189,248,.5)"></i>meja sneženja, megla: izrazitejše = nižje</span></div>
+  <div class="zx-sec" id="48-ur"><h2>Naslednjih 48 ur</h2>
+    <p>Temperatura in padavine za Rečico po urni napovedi. Dotaknite se grafa za vrednost ob uri.</p></div>
+  <figure class="zx-48" data-times='["2026-10-29T12:00", "2026-10-29T13:00", "2026-10-29T14:00", "2026-10-29T15:00", "2026-10-29T16:00", "2026-10-29T17:00", "2026-10-29T18:00", "2026-10-29T19:00", "2026-10-29T20:00", "2026-10-29T21:00", "2026-10-29T22:00", "2026-10-29T23:00", "2026-10-30T00:00", "2026-10-30T01:00", "2026-10-30T02:00", "2026-10-30T03:00", "2026-10-30T04:00", "2026-10-30T05:00", "2026-10-30T06:00", "2026-10-30T07:00", "2026-10-30T08:00", "2026-10-30T09:00", "2026-10-30T10:00", "2026-10-30T11:00", "2026-10-30T12:00", "2026-10-30T13:00", "2026-10-30T14:00", "2026-10-30T15:00", "2026-10-30T16:00", "2026-10-30T17:00", "2026-10-30T18:00", "2026-10-30T19:00", "2026-10-30T20:00", "2026-10-30T21:00", "2026-10-30T22:00", "2026-10-30T23:00", "2026-10-31T00:00", "2026-10-31T01:00", "2026-10-31T02:00", "2026-10-31T03:00", "2026-10-31T04:00", "2026-10-31T05:00", "2026-10-31T06:00", "2026-10-31T07:00", "2026-10-31T08:00", "2026-10-31T09:00", "2026-10-31T10:00", "2026-10-31T11:00", "2026-10-31T12:00", "2026-10-31T13:00", "2026-10-31T14:00", "2026-10-31T15:00", "2026-10-31T16:00", "2026-10-31T17:00"]' data-t='[13.7, 14.2, 14.2, 13.2, 13.0, 11.7, 10.6, 10.3, 9.4, 8.7, 8.5, 7.9, 7.3, 7.0, 6.7, 6.3, 5.9, 5.4, 5.1, 4.8, 6.0, 8.4, 10.3, 12.4, 13.3, 13.5, 13.1, 12.7, 11.7, 9.9, 8.7, 8.0, 7.9, 8.2, 7.8, 7.3, 6.4, 5.7, 5.3, 4.9, 4.5, 4.2, 4.0, 4.2, 5.0, 7.8, 11.1, 12.2, 12.4, 12.6, 12.1, 12.0, 11.0, 8.8]' data-p='[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]'>
+    <div class="zx-48-plot"><svg viewBox="0 0 960 240" class="zx-chart zx-wide" data-pl="0.0417" data-pr="0.0146" role="img" aria-label="Temperatura po urah, 54 ur, od 4,0 do 14,2 °C"><line x1="40" x2="946" y1="214.0" y2="214.0" stroke="#1a2436" stroke-width="1"/><text x="34" y="218.0" text-anchor="end" font-size="10.5" fill="#8193ad">-5°</text><line x1="40" x2="946" y1="167.5" y2="167.5" stroke="#4b5d78" stroke-width="1"/><text x="34" y="171.5" text-anchor="end" font-size="10.5" fill="#8193ad">0°</text><line x1="40" x2="946" y1="121.0" y2="121.0" stroke="#1a2436" stroke-width="1"/><text x="34" y="125.0" text-anchor="end" font-size="10.5" fill="#8193ad">5°</text><line x1="40" x2="946" y1="74.5" y2="74.5" stroke="#1a2436" stroke-width="1"/><text x="34" y="78.5" text-anchor="end" font-size="10.5" fill="#8193ad">10°</text><line x1="40" x2="946" y1="28.0" y2="28.0" stroke="#1a2436" stroke-width="1"/><text x="34" y="32.0" text-anchor="end" font-size="10.5" fill="#8193ad">15°</text><rect x="40" y="167.5" width="906" height="46.5" fill="#38bdf8" fill-opacity=".05"/><text x="942" y="180.5" text-anchor="end" font-size="10.5" fill="#8193ad">pod lediščem</text><text x="40.0" y="233" text-anchor="middle" font-size="10.5" fill="#8193ad">12.00</text><text x="142.6" y="233" text-anchor="middle" font-size="10.5" fill="#8193ad">18.00</text><line x1="245.1" x2="245.1" y1="10" y2="214" stroke="#26344b" stroke-width="1"/><text x="347.7" y="233" text-anchor="middle" font-size="10.5" fill="#8193ad">6.00</text><text x="450.3" y="233" text-anchor="middle" font-size="10.5" fill="#8193ad">12.00</text><text x="552.8" y="233" text-anchor="middle" font-size="10.5" fill="#8193ad">18.00</text><line x1="655.4" x2="655.4" y1="10" y2="214" stroke="#26344b" stroke-width="1"/><text x="758.0" y="233" text-anchor="middle" font-size="10.5" fill="#8193ad">6.00</text><text x="860.5" y="233" text-anchor="middle" font-size="10.5" fill="#8193ad">12.00</text><text x="45.0" y="20" font-size="11.5" fill="#cbd5e1" font-weight="600">danes</text><text x="250.1" y="20" font-size="11.5" fill="#cbd5e1" font-weight="600">jutri</text><text x="660.4" y="20" font-size="11.5" fill="#cbd5e1" font-weight="600">sobota</text><polygon points="142.6,214 142.6,68.9 159.7,71.7 176.8,80.1 193.8,86.6 210.9,88.4 228.0,94.0 245.1,99.6 262.2,102.4 279.3,105.2 296.4,108.9 313.5,112.6 330.6,117.3 347.7,120.1 364.8,122.9 381.9,111.7 399.0,89.4 416.1,71.7 433.2,52.2 450.3,43.8 467.4,41.9 484.5,45.7 501.5,49.4 518.6,58.7 535.7,75.4 552.8,86.6 569.9,93.1 587.0,94.0 604.1,91.2 621.2,95.0 638.3,99.6 655.4,108.0 672.5,114.5 689.6,118.2 706.7,121.9 723.8,125.7 740.9,128.4 758.0,130.3 775.1,128.4 792.2,121.0 809.2,95.0 826.3,64.3 843.4,54.0 860.5,52.2 877.6,50.3 894.7,55.0 911.8,55.9 928.9,65.2 946.0,85.7 946.0,214" fill="#38bdf8" fill-opacity=".09"/><polyline points="40.0,40.1 57.1,35.4 74.2,35.4 91.3,44.7 108.4,46.6 125.5,58.7 142.6,68.9" fill="none" stroke="#38bdf8" stroke-opacity=".4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline class="zima-line" points="142.6,68.9 159.7,71.7 176.8,80.1 193.8,86.6 210.9,88.4 228.0,94.0 245.1,99.6 262.2,102.4 279.3,105.2 296.4,108.9 313.5,112.6 330.6,117.3 347.7,120.1 364.8,122.9 381.9,111.7 399.0,89.4 416.1,71.7 433.2,52.2 450.3,43.8 467.4,41.9 484.5,45.7 501.5,49.4 518.6,58.7 535.7,75.4 552.8,86.6 569.9,93.1 587.0,94.0 604.1,91.2 621.2,95.0 638.3,99.6 655.4,108.0 672.5,114.5 689.6,118.2 706.7,121.9 723.8,125.7 740.9,128.4 758.0,130.3 775.1,128.4 792.2,121.0 809.2,95.0 826.3,64.3 843.4,54.0 860.5,52.2 877.6,50.3 894.7,55.0 911.8,55.9 928.9,65.2 946.0,85.7" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="142.6" x2="142.6" y1="28" y2="214" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/><text x="146.6" y="39" font-size="10.5" fill="#cbd5e1" font-weight="600">zdaj</text><circle cx="758.0" cy="130.3" r="4" fill="#38bdf8" stroke="#0b111e" stroke-width="2"/><text x="758.0" y="146.3" text-anchor="middle" font-size="11.5" fill="#e8edf8" font-weight="700">4,0 °C</text><circle cx="467.4" cy="41.9" r="4" fill="#38bdf8" stroke="#0b111e" stroke-width="2"/><text x="467.4" y="32.9" text-anchor="middle" font-size="11.5" fill="#e8edf8" font-weight="700">13,5 °C</text></svg><svg viewBox="0 0 360 210" class="zx-chart zx-narrow" data-pl="0.0833" data-pr="0.0222" role="img" aria-label="Temperatura po urah, 54 ur, od 4,0 do 14,2 °C"><line x1="30" x2="352" y1="186.0" y2="186.0" stroke="#1a2436" stroke-width="1"/><text x="24" y="190.0" text-anchor="end" font-size="10.5" fill="#8193ad">-5°</text><line x1="30" x2="352" y1="146.0" y2="146.0" stroke="#4b5d78" stroke-width="1"/><text x="24" y="150.0" text-anchor="end" font-size="10.5" fill="#8193ad">0°</text><line x1="30" x2="352" y1="106.0" y2="106.0" stroke="#1a2436" stroke-width="1"/><text x="24" y="110.0" text-anchor="end" font-size="10.5" fill="#8193ad">5°</text><line x1="30" x2="352" y1="66.0" y2="66.0" stroke="#1a2436" stroke-width="1"/><text x="24" y="70.0" text-anchor="end" font-size="10.5" fill="#8193ad">10°</text><line x1="30" x2="352" y1="26.0" y2="26.0" stroke="#1a2436" stroke-width="1"/><text x="24" y="30.0" text-anchor="end" font-size="10.5" fill="#8193ad">15°</text><rect x="30" y="146.0" width="322" height="40.0" fill="#38bdf8" fill-opacity=".05"/><text x="348" y="159.0" text-anchor="end" font-size="10.5" fill="#8193ad">pod lediščem</text><text x="30.0" y="203" text-anchor="middle" font-size="10.5" fill="#8193ad">12.00</text><line x1="102.9" x2="102.9" y1="8" y2="186" stroke="#26344b" stroke-width="1"/><text x="175.8" y="203" text-anchor="middle" font-size="10.5" fill="#8193ad">12.00</text><line x1="248.7" x2="248.7" y1="8" y2="186" stroke="#26344b" stroke-width="1"/><text x="321.6" y="203" text-anchor="middle" font-size="10.5" fill="#8193ad">12.00</text><text x="35.0" y="18" font-size="11.5" fill="#cbd5e1" font-weight="600">danes</text><text x="107.9" y="18" font-size="11.5" fill="#cbd5e1" font-weight="600">jutri</text><text x="253.7" y="18" font-size="11.5" fill="#cbd5e1" font-weight="600">sob</text><polygon points="66.5,186 66.5,61.2 72.5,63.6 78.6,70.8 84.7,76.4 90.8,78.0 96.8,82.8 102.9,87.6 109.0,90.0 115.1,92.4 121.1,95.6 127.2,98.8 133.3,102.8 139.4,105.2 145.4,107.6 151.5,98.0 157.6,78.8 163.7,63.6 169.7,46.8 175.8,39.6 181.9,38.0 188.0,41.2 194.0,44.4 200.1,52.4 206.2,66.8 212.3,76.4 218.3,82.0 224.4,82.8 230.5,80.4 236.6,83.6 242.6,87.6 248.7,94.8 254.8,100.4 260.9,103.6 266.9,106.8 273.0,110.0 279.1,112.4 285.2,114.0 291.2,112.4 297.3,106.0 303.4,83.6 309.5,57.2 315.5,48.4 321.6,46.8 327.7,45.2 333.8,49.2 339.8,50.0 345.9,58.0 352.0,75.6 352.0,186" fill="#38bdf8" fill-opacity=".09"/><polyline points="30.0,36.4 36.1,32.4 42.2,32.4 48.2,40.4 54.3,42.0 60.4,52.4 66.5,61.2" fill="none" stroke="#38bdf8" stroke-opacity=".4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline class="zima-line" points="66.5,61.2 72.5,63.6 78.6,70.8 84.7,76.4 90.8,78.0 96.8,82.8 102.9,87.6 109.0,90.0 115.1,92.4 121.1,95.6 127.2,98.8 133.3,102.8 139.4,105.2 145.4,107.6 151.5,98.0 157.6,78.8 163.7,63.6 169.7,46.8 175.8,39.6 181.9,38.0 188.0,41.2 194.0,44.4 200.1,52.4 206.2,66.8 212.3,76.4 218.3,82.0 224.4,82.8 230.5,80.4 236.6,83.6 242.6,87.6 248.7,94.8 254.8,100.4 260.9,103.6 266.9,106.8 273.0,110.0 279.1,112.4 285.2,114.0 291.2,112.4 297.3,106.0 303.4,83.6 309.5,57.2 315.5,48.4 321.6,46.8 327.7,45.2 333.8,49.2 339.8,50.0 345.9,58.0 352.0,75.6" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="66.5" x2="66.5" y1="26" y2="186" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3"/><text x="70.5" y="37" font-size="10.5" fill="#cbd5e1" font-weight="600">zdaj</text><circle cx="285.2" cy="114.0" r="4" fill="#38bdf8" stroke="#0b111e" stroke-width="2"/><text x="285.2" y="130.0" text-anchor="middle" font-size="11.5" fill="#e8edf8" font-weight="700">4,0 °C</text><circle cx="181.9" cy="38.0" r="4" fill="#38bdf8" stroke="#0b111e" stroke-width="2"/><text x="181.9" y="29.0" text-anchor="middle" font-size="11.5" fill="#e8edf8" font-weight="700">13,5 °C</text></svg><div class="zx-48-lbl">V tem obdobju model ne napoveduje padavin.</div><div class="zx-cross" hidden></div><div class="zx-tip" hidden></div></div>
+    <figcaption>Napoved Open-Meteo za postajo IREICA1. Bledi del črte je preteklih nekaj ur, črtkana navpičnica je trenutna ura.</figcaption>
+  </figure>
+  <div class="zx-sec" id="snezna-karta"><h2>Snežna karta Slovenije</h2>
+    <p>Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).</p></div>
   <div id="sk-app" data-compact="1" data-view="s" data-hours="24" aria-live="polite">Nalagam snežno karto …</div>
-  <h2 class="zima-section-title">🌡️ Naslednjih 48 ur</h2>
-  <div class="card zima-card" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);">
-    <div class="frost-chart-wrap"><svg viewBox="0 0 640 190" class="frost-chart" role="img" aria-label="Temperatura naslednjih 48 ur"><line x1="168.9" y1="22" x2="168.9" y2="162" stroke="#1e293b" stroke-width="1"/><line x1="438.8" y1="22" x2="438.8" y2="162" stroke="#1e293b" stroke-width="1"/><polyline class="zima-line" points="34.0,45.6 45.2,40.5 56.5,40.5 67.7,50.6 79.0,52.6 90.2,65.8 101.5,76.9 112.7,79.9 124.0,89.0 135.2,96.0 146.5,98.1 157.7,104.1 168.9,110.2 180.2,113.2 191.4,116.2 202.7,120.3 213.9,124.3 225.2,129.3 236.4,132.4 247.7,135.4 258.9,123.3 270.2,99.1 281.4,79.9 292.6,58.7 303.9,49.6 315.1,47.6 326.4,51.6 337.6,55.7 348.9,65.8 360.1,83.9 371.4,96.0 382.6,103.1 393.8,104.1 405.1,101.1 416.3,105.1 427.6,110.2 438.8,119.2 450.1,126.3 461.3,130.4 472.6,134.4 483.8,138.4 495.1,141.5 506.3,143.5 517.5,141.5 528.8,133.4 540.0,105.1 551.3,71.8 562.5,60.7 573.8,58.7 585.0,56.7 596.3,61.7 607.5,62.7 618.8,72.8 630.0,95.0" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><line x1="101.5" y1="22" x2="101.5" y2="162" stroke="#64748b" stroke-width="1" stroke-dasharray="3 3"/><text x="101.5" y="16" text-anchor="middle" font-size="9.5" fill="#94a3b8">zdaj</text><text x="28" y="25.0" text-anchor="end" font-size="9" fill="#94a3b8">16°C</text><text x="28" y="165.0" text-anchor="end" font-size="9" fill="#94a3b8">2°C</text><text x="34.0" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">12h</text><text x="101.5" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">18h</text><text x="168.9" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">00h</text><text x="236.4" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">06h</text><text x="303.9" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">12h</text><text x="371.4" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">18h</text><text x="438.8" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">00h</text><text x="506.3" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">06h</text><text x="573.8" y="182" text-anchor="middle" font-size="9" fill="#94a3b8">12h</text></svg></div>
-    <p class="muted-note" style="margin-top:.3rem">Temperatura na postaji IREICA1, urna napoved Open-Meteo.
-    Navpična črta označuje trenutno uro.</p>
-  </div>
-  <h2 id="zimski-pogoji" class="zima-section-title">❄️ Zimski pogoji</h2>
-  <div class="zima-conditions-grid">
-    <div class="card zima-card" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);">
-      <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span>Meja sneženja</div>
-      <p class="fh-sub">Meja sneženja je danes pri 2100 m — nad vsemi spremljanimi višinami v dolini, sneg ni pričakovan.</p>
+  <div class="zx-sec" id="zimske-ceste"><h2>Zimske ceste in prelazi</h2>
+    <p>Vreme na višini prelaza je ocena modela, ni uradna prometna informacija. Pred vožnjo preverite promet.si, AMZS ali DARS.</p></div>
+  <div class="zx-passes">
+    <div class="zx-pass">
+      <div><div class="zx-pass-name">Črnivec<span>902 m</span></div>
+        <div class="zx-pass-meta">Kamniška Bistrica (Kamnik) ↔ Gornji Grad</div></div>
+      <div class="zx-chips"><span class="zx-chip">7 °C</span><span class="zx-chip">sneg 24 h: 0 cm</span><span class="zx-chip">poledica <span class="zx-lvl" style="--lc:#0284c7"><i aria-hidden="true"></i>nizko</span></span></div>
+      <div class="zx-pass-side"><span>stanje ceste ni ročno preverjeno</span><a href="https://crnivec.si/">kamera in meritve →</a></div>
     </div>
-    <div class="card zima-card" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16);">
-      <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Poledica</div>
-      <p class="fh-sub">V naslednjih 36 h je najbolj izpostavljen kraj Rečica ob Savinji — <span class="badge-risk badge-risk-srednje">🟡 Srednje tveganje</span>.</p>
+    <div class="zx-pass">
+      <div><div class="zx-pass-name">Pavličevo sedlo<span>1339 m</span></div>
+        <div class="zx-pass-meta">Logarska dolina ↔ Bela pri Črni (Avstrija) — mejni prehod</div></div>
+      <div class="zx-chips"><span class="zx-chip">4 °C</span><span class="zx-chip">sneg 24 h: 0 cm</span><span class="zx-chip">poledica <span class="zx-lvl" style="--lc:#0284c7"><i aria-hidden="true"></i>nizko</span></span></div>
+      <div class="zx-pass-side"><span>stanje ceste ni ročno preverjeno</span></div>
     </div>
-    <div class="card zima-card zima-card-wide" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16);">
-      <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="13.5" width="6" height="7.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M8 13.5 V9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 9.5 Q11 6.8 8 4.8 Q6 3.5 8 1.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><line x1="3" y1="8.5" x2="21" y2="8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1 3.2"/></svg></span>Kurilni semafor</div>
-      <p class="fh-sub">Zmerna inverzija — po možnosti uporabi suha, dobro osušena drva in ne kuri več, kot je nujno.</p>
-    </div>
-    <div class="card zima-card" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16);">
-      <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17.5" cy="5" r="2.1" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M4 14.5 L10 6 L14 12 L17 8 L21 14.5 Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17 Q6 15.2 10 17 T18 17 T22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 20.3 Q6 18.5 10 20.3 T18 20.3 T22 20.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Nad meglo</div>
-      <p class="fh-sub">Jutri zjutraj pričakovana megla/nizka oblačnost do ~859 m — nad njo bi lahko bili: Golte, Menina planina, Smrekovec, Raduha.</p>
-    </div>
-    <div class="card zima-card" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16);">
-      <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 18.5 Q7 16.5 11 18.5 T21 18.5" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 14.5 Q7 12.5 11 14.5 T21 14.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="17" y1="3.5" x2="17" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="14.7" y1="6.5" x2="17" y2="6.5" stroke="currentColor" stroke-width="1.3"/><line x1="14.7" y1="10.5" x2="17" y2="10.5" stroke="currentColor" stroke-width="1.3"/></svg></span>Snežna odeja</div>
-      <p class="fh-sub">Tekoča ocena na postaji: <strong>0 cm</strong> (modelirano, ni meritev).</p>
+    <div class="zx-pass">
+      <div><div class="zx-pass-name">Lipa<span>723 m</span></div>
+        <div class="zx-pass-meta">Vransko ↔ Šmartno ob Dreti (Zadrečka dolina)</div></div>
+      <div class="zx-chips"><span class="zx-chip">8 °C</span><span class="zx-chip">sneg 24 h: 0 cm</span><span class="zx-chip">poledica <span class="zx-lvl" style="--lc:#0284c7"><i aria-hidden="true"></i>nizko</span></span></div>
+      <div class="zx-pass-side"><span>stanje ceste ni ročno preverjeno</span></div>
     </div>
   </div>
-  <div class="card zima-card" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);margin-bottom:1.2rem">
-    <div class="clabel"><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span>Snežna meja na lestvici</div>
-    <svg viewBox="0 0 640 96" class="frost-chart zima-meter-svg" role="img" aria-label="Meja sneženja na lestvici 0 do 2500 m"><defs><linearGradient id="zimaMeterGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0369a1"/><stop offset="55%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#e2e8f0"/></linearGradient></defs><rect x="16" y="46" width="608" height="10" rx="5" fill="url(#zimaMeterGrad)"/><line x1="16.0" y1="42" x2="16.0" y2="60" stroke="#334155" stroke-width="1"/><text x="16.0" y="74" text-anchor="middle" font-size="9.5" fill="#94a3b8">0 m</text><line x1="137.6" y1="42" x2="137.6" y2="60" stroke="#334155" stroke-width="1"/><text x="137.6" y="74" text-anchor="middle" font-size="9.5" fill="#94a3b8">500 m</text><line x1="259.2" y1="42" x2="259.2" y2="60" stroke="#334155" stroke-width="1"/><text x="259.2" y="74" text-anchor="middle" font-size="9.5" fill="#94a3b8">1000 m</text><line x1="380.8" y1="42" x2="380.8" y2="60" stroke="#334155" stroke-width="1"/><text x="380.8" y="74" text-anchor="middle" font-size="9.5" fill="#94a3b8">1500 m</text><line x1="502.4" y1="42" x2="502.4" y2="60" stroke="#334155" stroke-width="1"/><text x="502.4" y="74" text-anchor="middle" font-size="9.5" fill="#94a3b8">2000 m</text><line x1="624.0" y1="42" x2="624.0" y2="60" stroke="#334155" stroke-width="1"/><text x="624.0" y="74" text-anchor="middle" font-size="9.5" fill="#94a3b8">2500 m</text><circle cx="105.0" cy="51.0" r="4.5" fill="#fff" stroke="#04070e" stroke-width="1.5"/><text x="105.0" y="36" text-anchor="middle" font-size="9.5" fill="#94a3b8">Rečica 366 m</text><path d="M526.7 43 l-7 -12 h14 Z" fill="#38bdf8"/><text x="526.7" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="#e8edf8">2100 m</text></svg>
-  </div>
-  <h2 id="zimske-ceste" class="zima-section-title">🚗 Zimske ceste</h2>
-  <div class="zima-passes-list">
-    <div class="zima-pass-row">
-      <div><div class="zima-pass-name"><a href="https://crnivec.si/">Črnivec (902 m)</a></div>
-      <div class="zima-pass-meta">Kamniška Bistrica (Kamnik) ↔ Gornji Grad · 7,1 °C · do 0,0 cm snega/24h</div></div>
-      <span class="zima-pass-status" style="color:var(--muted)">⚪ ni ročno preverjeno</span>
-    </div>
-    <div class="zima-pass-row">
-      <div><div class="zima-pass-name">Pavličevo sedlo (1339 m)</div>
-      <div class="zima-pass-meta">Logarska dolina ↔ Bela pri Črni (Avstrija) — mejni prehod · 4,3 °C · do 0,0 cm snega/24h</div></div>
-      <span class="zima-pass-status" style="color:var(--muted)">⚪ ni ročno preverjeno</span>
-    </div>
-    <div class="zima-pass-row">
-      <div><div class="zima-pass-name">Lipa (723 m)</div>
-      <div class="zima-pass-meta">Vransko ↔ Šmartno ob Dreti (Zadrečka dolina) · 8,3 °C · do 0,0 cm snega/24h</div></div>
-      <span class="zima-pass-status" style="color:var(--muted)">⚪ ni ročno preverjeno</span>
-    </div>
-  </div>
-  <p class="muted-note">Stanje je ročno vzdrževano polje, NI uradna prometna informacija. Pred vožnjo
-  preveri tudi promet.si, AMZS ali DARS.</p>
-  <a class="mtn-avk-link" href="/zima/prevoznost-prelazov/">Vse podrobnosti o prelazih →</a>
-  <h2 class="zima-section-title">📚 Podrobno po temah</h2>
-  <div class="card-grid">
-    <a class="phenom-card zima-phenom" href="/zima/meja-snezenja/" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span></span>Meja sneženja
-      <div class="ph-count">2100 m n. m.</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/snezna-karta/" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span></span>Snežna karta
-      <div class="ph-count">sneženje in meja, +48 h</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/poledica/" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span></span>Tveganje poledice
-      <div class="ph-count">🟡 Srednje tveganje</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/zled/" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span></span>Žled
-      <div class="ph-count">🟢 Nizko tveganje</div></a>
-    <a class="phenom-card zima-phenom" href="/blog/zima-2026-2027-el-nino-napoved.html" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span></span>Zima 2026/27
-      <div class="ph-count">El Niño: kaj čaka dolino</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/kurilni-semafor/" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#fb923c;--fa-soft:rgba(251,146,60,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="13.5" width="6" height="7.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M8 13.5 V9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 9.5 Q11 6.8 8 4.8 Q6 3.5 8 1.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><line x1="3" y1="8.5" x2="21" y2="8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1 3.2"/></svg></span></span>Kurilni semafor
-      <div class="ph-count">🟡 Srednje tveganje</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/nad-meglo/" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17.5" cy="5" r="2.1" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M4 14.5 L10 6 L14 12 L17 8 L21 14.5 Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17 Q6 15.2 10 17 T18 17 T22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 20.3 Q6 18.5 10 20.3 T18 20.3 T22 20.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></span>Nad meglo
-      <div class="ph-count">~859 m</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/snezna-odeja/" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#f472b6;--fa-soft:rgba(244,114,182,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 18.5 Q7 16.5 11 18.5 T21 18.5" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 14.5 Q7 12.5 11 14.5 T21 14.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="17" y1="3.5" x2="17" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="14.7" y1="6.5" x2="17" y2="6.5" stroke="currentColor" stroke-width="1.3"/><line x1="14.7" y1="10.5" x2="17" y2="10.5" stroke="currentColor" stroke-width="1.3"/></svg></span></span>Snežna odeja
-      <div class="ph-count">0 cm</div></a>
-    <a class="phenom-card zima-phenom" href="/vreme-v-gorah/" style="--fa:#fbbf24;--fa-soft:rgba(251,191,36,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#fbbf24;--fa-soft:rgba(251,191,36,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 19 L8.5 6 L11.5 12 L14.5 5 L21 19 Z" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 11 Q7 13.3 10 15.3 Q13 17.3 10.5 19.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></span></span>Vreme v gorah
-      <div class="ph-count">Golte, Menina, Smrekovec, Raduha</div></a>
-    <a class="phenom-card zima-phenom" href="/zima/prevoznost-prelazov/" style="--fa:#fbbf24;--fa-soft:rgba(251,191,36,.16);">
-      <span class="ph-icon"><span class="zima-icon" aria-hidden="true" style="--fa:#fbbf24;--fa-soft:rgba(251,191,36,.16)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 19 L8.5 6 L11.5 12 L14.5 5 L21 19 Z" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 11 Q7 13.3 10 15.3 Q13 17.3 10.5 19.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></span></span>Prevoznost prelazov
-      <div class="ph-count">3 prelazi</div></a>
-  </div>
-  <h2 class="zima-section-title">📊 Zima v številkah</h2>
-  <p class="muted-note" style="margin-top:-.6rem">Od 1. 11. 2025, 40 zabeleženih dni.</p>
+  <a class="zx-more" href="/zima/prevoznost-prelazov/">Vse o prelazih →</a>
+  <div class="zx-sec" id="opozorila"><h2>Opozorila na telefon</h2>
+    <p>Na vsaki od teh strani izberete raven in dan, mi pa vam pošljemo obvestilo, ko ocena ustreza. Modelska napoved, ne uradno opozorilo.</p></div>
+  <div class="zx-alerts"><a class="zx-alert" href="/zima/poledica/#ov-alert" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16);"><b><span class="zima-icon" aria-hidden="true" style="--fa:#2dd4bf;--fa-soft:rgba(45,212,191,.16)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 17 Q12 13 22 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M2 20.5 Q12 16.5 22 20.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 4.5 L15.2 10.5 L12 16 L8.8 10.5 Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>Poledica</b><span>Obvestilo, ko je tveganje poledice srednje ali visoko.</span><em>Nastavi opozorilo →</em></a><a class="zx-alert" href="/zima/meja-snezenja/#ov-alert" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16);"><b><span class="zima-icon" aria-hidden="true" style="--fa:#38bdf8;--fa-soft:rgba(56,189,248,.16)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 19 L9.5 8.5 L12.5 13 L15.5 8 L21 19 Z" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><g stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><line x1="15.5" y1="4.4" x2="15.5" y2="7.8"/><line x1="13.8" y1="5.2" x2="17.2" y2="7"/><line x1="17.2" y1="5.2" x2="13.8" y2="7"/></g></svg></span>Sneg v dolini</b><span>Obvestilo, ko model napove sneg v dolini.</span><em>Nastavi opozorilo →</em></a><a class="zx-alert" href="/zima/zled/#ov-alert" style="--fa:#67e8f9;--fa-soft:rgba(103,232,249,.16);"><b><span class="zima-icon" aria-hidden="true" style="--fa:#67e8f9;--fa-soft:rgba(103,232,249,.16)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.8 C9.6 6.4 8 8.6 8 10.9 a4 4 0 0 0 8 0 C16 8.6 14.4 6.4 12 2.8 Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 19 H20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M7 19 V21.5 M11 19 V22 M15 19 V21 M18 19 V21.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>Žled</b><span>Obvestilo, ko je pokazatelj žleda srednji ali visok.</span><em>Nastavi opozorilo →</em></a><a class="zx-alert" href="/zima/nad-meglo/#ov-alert" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16);"><b><span class="zima-icon" aria-hidden="true" style="--fa:#a78bfa;--fa-soft:rgba(167,139,250,.16)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="17.5" cy="5" r="2.1" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.3"/><path d="M4 14.5 L10 6 L14 12 L17 8 L21 14.5 Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17 Q6 15.2 10 17 T18 17 T22 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 20.3 Q6 18.5 10 20.3 T18 20.3 T22 20.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Nad meglo</b><span>Obvestilo, ko bo dolina v megli, vrhovi pa na soncu.</span><em>Nastavi opozorilo →</em></a></div>
+  <div class="zx-sec"><h2>Zima v številkah</h2>
+    <p>Od 1. 11. 2025, 40 zabeleženih dni.</p></div>
   <div class="stat-grid">
     <div class="stat-card"><div class="sc-label">Dni z visoko inverzijo</div>
       <div class="sc-val">22</div>
-      <div class="sc-sub">kurilni semafor 🔴</div></div>
+      <div class="sc-sub">kurilni semafor: visoko</div></div>
     <div class="stat-card"><div class="sc-label">Dni z visokim tveganjem poledice</div>
       <div class="sc-val">2</div>
       <div class="sc-sub">vsaj en kraj v dolini</div></div>
@@ -319,10 +342,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="sc-val">40</div>
       <div class="sc-sub">od 1. 11. 2025</div></div>
   </div>
-  <h2>Opozorila na telefon</h2>
-  <p class="archive-intro">Sami nastavite, kdaj želite obvestilo: na straneh spodaj izberete raven in dan, mi pa vam ga pošljemo, ko ocena ustreza. Modelska napoved, ne uradno opozorilo.</p>
-  <ul><li><a href="/zima/poledica/#ov-alert">Poledica</a></li><li><a href="/zima/meja-snezenja/#ov-alert">Sneg v dolini</a></li><li><a href="/zima/zled/#ov-alert">Žled</a></li><li><a href="/zima/nad-meglo/#ov-alert">Nad meglo</a></li></ul>
-  <h2>Pogosta vprašanja</h2>
+  <div class="zx-sec"><h2>Še več o zimi</h2></div>
+  <div class="zx-links"><a class="zx-link" href="/zima/snezna-karta/"><span class="zx-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6.2 L9 4 L15 6.2 L21 4 V17.8 L15 20 L9 17.8 L3 20 Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4 V17.8 M15 6.2 V20" stroke="currentColor" stroke-width="1.4"/></svg></span><span><b>Snežna karta</b><small>sneženje po urah, +48 ur</small></span></a><a class="zx-link" href="/vreme-v-gorah/"><span class="zx-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 19.5 L8.5 9 L11.5 13.5 L15.5 6 L22 19.5 Z" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13.6 9.6 L15.5 6 L17.4 9.6 L16 9 L15.5 9.8 L14.8 9 Z" fill="currentColor"/></svg></span><span><b>Vreme v gorah</b><small>Golte, Menina, Smrekovec, Raduha</small></span></a><a class="zx-link" href="https://crnivec.si/"><span class="zx-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.5 21 L10.8 3 M15.5 21 L13.2 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 5 V7.5 M12 10.5 V13.5 M12 16.5 V20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span><b>Črnivec in Lipa</b><small>kamera, meritve DRSI, vozišče</small></span></a><a class="zx-link" href="/zima/prevoznost-prelazov/"><span class="zx-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 19 L8.5 6 L11.5 12 L14.5 5 L21 19 Z" fill="currentColor" fill-opacity=".13" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 11 Q7 13.3 10 15.3 Q13 17.3 10.5 19.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></span><span><b>Prevoznost prelazov</b><small>3 prelazi</small></span></a><a class="zx-link" href="/zima/zled/"><span class="zx-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.8 C9.6 6.4 8 8.6 8 10.9 a4 4 0 0 0 8 0 C16 8.6 14.4 6.4 12 2.8 Z" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 19 H20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M7 19 V21.5 M11 19 V22 M15 19 V21 M18 19 V21.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span><span><b>Žled</b><small>kdaj dež zmrzuje</small></span></a><a class="zx-link" href="/blog/zima-2026-2027-el-nino-napoved.html"><span class="zx-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="3" width="14" height="18" rx="2" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8 H15.5 M8.5 11.5 H15.5 M8.5 15 H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span><b>Zima 2026/27</b><small>El Niño: kaj čaka dolino</small></span></a></div>
+  <div class="zx-sec"><h2>Pogosta vprašanja</h2></div>
   <div class="faq">
     <details><summary>Katere kraje pokriva MeteoZima?</summary><p>Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob Savinji, Gornji Grad, Luče in Solčavo — ista naselja kot na straneh »Vreme po krajih v dolini«.</p></details>
     <details><summary>Ali je to uradno opozorilo?</summary><p>Ne. Vsi indeksi so ocena Meteoreca iz javnih napovednih virov (Open-Meteo), ne uradno opozorilo ARSO. Za uradna opozorila glej <a href="/nevihte/">stran opozoril</a>, za dejansko kakovost zraka pa <a href="/kakovost-zraka/">/kakovost-zraka/</a>.</p></details>
@@ -331,6 +353,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   naselja, brez notranjih meritev. Dejansko stanje prelazov je ročno vzdrževano polje — preveri tudi
   promet.si, AMZS ali DARS pred vožnjo.</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+<script>(function(){
+  var fig=document.querySelector('.zx-48');if(!fig)return;
+  var T=JSON.parse(fig.getAttribute('data-times')),V=JSON.parse(fig.getAttribute('data-t')),P=JSON.parse(fig.getAttribute('data-p'));
+  var plot=fig.querySelector('.zx-48-plot'),tip=fig.querySelector('.zx-tip'),bar=fig.querySelector('.zx-cross');
+  var D=['ned','pon','tor','sre','čet','pet','sob'];
+  function svg(){var s=plot.querySelectorAll('svg.zx-chart:not(.zx-precip)');for(var i=0;i<s.length;i++)if(s[i].getBoundingClientRect().width>0)return s[i];return null;}
+  function f1(x){return (Math.round(x*10)/10).toFixed(1).replace('.',',');}
+  function show(e){var s=svg();if(!s)return;var r=s.getBoundingClientRect(),pr=plot.getBoundingClientRect();
+    var pl=+s.getAttribute('data-pl')*r.width,prr=+s.getAttribute('data-pr')*r.width,w=r.width-pl-prr;
+    var f=(e.clientX-r.left-pl)/w;if(f<0||f>1){hide();return;}
+    var i=Math.round(f*(T.length-1)),t=T[i],d=new Date(t+':00');
+    var x=r.left-pr.left+pl+w*i/(T.length-1);
+    bar.style.left=x+'px';bar.hidden=false;
+    tip.innerHTML='';var b=document.createElement('b');b.textContent=D[d.getDay()]+' '+d.getHours()+'.00';tip.appendChild(b);
+    var l1=document.createElement('span');l1.textContent=V[i]==null?'ni podatka':f1(V[i])+' °C';tip.appendChild(l1);
+    var l2=document.createElement('span');l2.textContent='padavine '+f1(P[i]||0)+' mm';tip.appendChild(l2);
+    tip.hidden=false;var tw=tip.offsetWidth;tip.style.left=Math.max(0,Math.min(pr.width-tw,x-tw/2))+'px';}
+  function hide(){tip.hidden=true;bar.hidden=true;}
+  plot.addEventListener('pointermove',show);plot.addEventListener('pointerdown',show);plot.addEventListener('pointerleave',hide);
+})();</script>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
