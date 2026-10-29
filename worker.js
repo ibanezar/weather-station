@@ -853,6 +853,13 @@ function _pushSubOk(s) {
     return u.protocol === "https:" && !u.port && PUSH_HOST_OK.some(r => r.test(u.hostname));
   } catch (_) { return false; }
 }
+// Primerjava skrivnosti v konstantnem času (ne razkrije dolžine ujemajočega se predpona prek časa odgovora).
+function _safeEq(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
+}
 // Omejitev po IP: vrne true, ko je meja presežena. KV ni atomaren (vzporedni klici lahko mejo malo presežejo) -- za
 // blag ščit pred skriptami to zadošča, za kaj strožjega bi bil potreben Durable Object.
 async function _ipLimited(env, request, name, max, ttl) {
@@ -6866,7 +6873,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const secret = env.PREMIUM_SYNC_KEY;
         const auth = request.headers.get("Authorization") || "";
         const j = (o, st) => new Response(JSON.stringify(o), { status: st || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
-        if (!secret || auth !== `Bearer ${secret}`) return j({ error: "Nedovoljeno" }, 401);
+        if (!secret || !_safeEq(auth, `Bearer ${secret}`)) return j({ error: "Nedovoljeno" }, 401);
         const digest = await env.COUNTER_KV?.get("premium:today", { type: "json" });
         if (!digest) return j({ error: "Ni podatkov" }, 503);
         return j({ ok: true, ...(await _gobeAlarmNotify(env, digest)) });
@@ -7032,10 +7039,10 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
             if (kv) {
               const fails = parseInt((await kv.get(lockKey)) || "0") || 0;
               if (fails < 8) {
-                if (auth === "Bearer " + secret) { await kv.delete(lockKey); okAdmin = true; }
+                if (_safeEq(auth, "Bearer " + secret)) { await kv.delete(lockKey); okAdmin = true; }
                 else await kv.put(lockKey, String(fails + 1), { expirationTtl: 900 });
               }
-            } else okAdmin = auth === "Bearer " + secret;
+            } else okAdmin = _safeEq(auth, "Bearer " + secret);
           }
           if (!okAdmin) return _json({ error: "Nepooblaščen dostop" }, 401);
           return _json({ odgovori: await _anRead() });
@@ -7090,11 +7097,11 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (kv) {
             const fails = parseInt((await kv.get(lockKey)) || "0") || 0;
             if (fails >= 8) return false;
-            if (auth !== "Bearer " + secret) { await kv.put(lockKey, String(fails + 1), { expirationTtl: 900 }); return false; }
+            if (!_safeEq(auth, "Bearer " + secret)) { await kv.put(lockKey, String(fails + 1), { expirationTtl: 900 }); return false; }
             await kv.delete(lockKey);
             return true;
           }
-          return auth === "Bearer " + secret;
+          return _safeEq(auth, "Bearer " + secret);
         }
 
         if (path === "/nevihte/porocila" && request.method === "GET") {
@@ -7179,14 +7186,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (fails >= GALLERY_ADMIN_LOCKOUT_MAX) {
             return { ok: false, status: 429, error: "Preveč neuspešnih poskusov, poskusi kasneje." };
           }
-          if (auth !== "Bearer " + secret) {
+          if (!_safeEq(auth, "Bearer " + secret)) {
             await env.COUNTER_KV.put(lockKey, String(fails + 1), { expirationTtl: GALLERY_ADMIN_LOCKOUT_TTL });
             return { ok: false, status: 401, error: "Nepooblaščen dostop" };
           }
           await env.COUNTER_KV.delete(lockKey);
           return { ok: true };
         }
-        if (auth !== "Bearer " + secret) return { ok: false, status: 401, error: "Nepooblaščen dostop" };
+        if (!_safeEq(auth, "Bearer " + secret)) return { ok: false, status: 401, error: "Nepooblaščen dostop" };
         return { ok: true };
       }
 
@@ -7685,7 +7692,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
           const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
-          if (!secret || body.secret !== secret) return _json({ error: "Nedovoljeno" }, 401);
+          if (!secret || !_safeEq(body.secret, secret)) return _json({ error: "Nedovoljeno" }, 401);
 
           // Metapodatke lahko podamo neposredno (body.post) — tako ni odvisnosti
           // od že objavljenega blog.json (npr. tik po objavi, pred osvežitvijo Pages).
@@ -8400,7 +8407,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
         if (path === "/daily-post/proposals" && request.method === "POST") {
           let body;
           try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
-          if (!secret || body.secret !== secret) return _json({ error: "Nedovoljeno" }, 401);
+          if (!secret || !_safeEq(body.secret, secret)) return _json({ error: "Nedovoljeno" }, 401);
           const date = String(body.date || "");
           if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return _json({ error: "Neveljaven datum" }, 400);
           const proposals = (Array.isArray(body.proposals) ? body.proposals : [])
@@ -8685,7 +8692,7 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
         }
         if (path === "/push/send") {
           const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
-          if (!secret || body.secret !== secret) return pj({ error: "Nedovoljeno" }, 401);
+          if (!secret || !_safeEq(body.secret, secret)) return pj({ error: "Nedovoljeno" }, 401);
           if (!env.VAPID_PRIVATE) return pj({ error: "VAPID_PRIVATE ni nastavljen" }, 503);
           const payload = { title: (body.title || "Meteorec").slice(0, 100), body: (body.body || "").slice(0, 300), url: body.url || "/", tag: body.tag || "meteorec" };
           // audience:"digest" cilja samo naročnike, ki so vklopili jutranji

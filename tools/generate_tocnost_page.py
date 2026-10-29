@@ -361,12 +361,13 @@ def answer_block(verification, labels):
         if len(signed) >= 10:
             b, m = st.mean(signed), st.mean(abs(x) for x in signed)
             if m >= 2 and abs(b) >= 0.8 * m:
-                biased.append((name[k], b))
+                biased.append((name[k], b, st.mean(abs(x - b) for x in signed)))
     bias_txt = ''
     if biased:
-        bias_txt = (' Pri virih ' + ", ".join(n for n, _ in biased) + ' je večina napake stalna pristranskost, ne naključno zgrešeni dnevi: '
-                    'najvišja temperatura je pri njih povprečno ' + ", ".join(f'{seo.num(abs(b))} °C {"pod" if b < 0 else "nad"} meritvijo' for _, b in biased)
-                    + ' (v istem vrstnem redu).')
+        bias_txt = (' Pri nekaterih virih je večina napake stalna pristranskost pri najvišji temperaturi, ne naključno zgrešeni dnevi: '
+                    + "; ".join(f'{n} je povprečno {seo.num(abs(b))} °C {"pod" if b < 0 else "nad"} meritvijo (brez tega odmika bi bila napaka ±{seo.num(r)} °C)'
+                                for n, b, r in biased)
+                    + '. Odmik ni nujno napaka vira: pri vseh modelih je najvišja temperatura pod, najnižja pa nad meritvijo, kar kaže, da dnevnega razpona dna doline ne ujamejo (glej Test napovedi).')
     return (f'  <div class="tnc-answer">\n'
             f'  <p><strong>Na kratko:</strong> v {label}, v katerih so napovedovali vsi viri ({len(use)} dni), '
             f'je bil za Rečico ob Savinji najbolj natančen ' + "; ".join(parts) + '.</p>\n'
