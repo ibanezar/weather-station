@@ -126,6 +126,8 @@ jobs:
 
       - name: Test vrat pozebe, igre, povzetka in zgodovine
         run: python3 tools/test_gates_daily.py
+      - name: Navedba vira ARSO
+        run: python3 tools/test_arso_vir.py
 
       - name: Test bloka »Na kratko« na hub straneh (klima, padavine, temperatura, rekord)
         run: python3 tools/test_hub_kratko.py
