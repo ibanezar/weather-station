@@ -1,0 +1,31 @@
+name: Vreme in astma
+
+on:
+  schedule:
+    - cron: '20 6 * * *'   # 6:20 UTC daily, po kakovost-zraka-forecast.yml
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Generate astma stran
+        run: python3 tools/generate_astma_page.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add astma/ || true
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "seo: posodobi astma $(date -u +%Y-%m-%d) [skip ci]"
+          git push
