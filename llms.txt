@@ -72,6 +72,10 @@
 - [napoved-modela.json](https://meteorec.si/napoved-modela.json): trenutna napoved poskusnega modela MTR za Rečico ob Savinji (modelska napoved, ne meritev).
 - Citiraj kot: »Meteorec (meteorec.si), postaja IREICA1, Rečica ob Savinji« in navedi datum dostopa. Modelske ocene (napoved, gobarski indeks, požarni indeks FWI, snežna karta, vodostaj po modelu GloFAS) označi kot modelske, ne kot meritve.
 
+## Celotno besedilo
+
+- [llms-full.txt](https://meteorec.si/llms-full.txt): uvodno besedilo vseh ključnih strani na enem mestu (naslov, URL, opis, prvi odstavki), izrezano iz objavljenih strani; osvežuje se vsak dan. Uporabi, kadar potrebuješ več strani naenkrat.
+
 ## Opombe
 
 - Vse meritve so iz ene same postaje (IREICA1, Rečica ob Savinji) — za širše območje glej Open-Meteo/ARSO, ne ekstrapoliraj te postaje na drugo lokacijo.

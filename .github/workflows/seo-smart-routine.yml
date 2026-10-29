@@ -31,11 +31,17 @@ jobs:
         continue-on-error: true
         run: python3 tools/generate_sezona_page.py
 
+      # llms-full.txt: uvodno besedilo ključnih strani na enem mestu (GEO). Izrezano iz objavljenih HTML strani, zato teče
+      # za vsemi generatorji strani; napaka ne sme podreti hub strani.
+      - name: llms-full.txt
+        continue-on-error: true
+        run: python3 tools/generate_llms_full.py
+
       - name: Commit & push če je kaj novega
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ || true
+          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ llms-full.txt || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi hub strani in novosti $(date -u +%Y-%m-%d) [skip ci]"
           # Ob hkratnem pushu drugega workflowa (npr. takoj po mergu) rebase in ponovi.
