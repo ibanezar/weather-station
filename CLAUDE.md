@@ -1922,6 +1922,11 @@ Narekovaji „…“ so pravopisno dovoljeni, vodnik predpisuje »…«: pravilo
 Vse primerjave skrivnosti gredo skozi `_safeEq()` (konstanten čas). **Ni narejeno:** preverjanje `ts` pri Paddle webhooku (ponovitev ujetega zahtevka bi naročniku samo podaljšala rok; zavrnitev
 legitimnega ponovnega poskusa bi pomenila plačilo brez dostopa), omejitev `/ai-debug` (javno bere ARSO) in `/debug-headers`. Časovna vrata brez testa so zdaj pokrita s `tools/test_gates_daily.py`.
 
+## Navedba vira ARSO (29. 10. 2026)
+
+Pogoji ponovne uporabe (`meteo.arso.gov.si/uploads/meteo/help/sl/copyright.html`, 14. člen ZDMHS): kdor objavi ali povzame ARSO informacije, navede »Vir: Agencija Republike Slovenije za okolje« ali »Vir: ARSO«.
+Formulacija »Javne informacije Slovenije«, ARSO - met iz neuradnih ovojev ni predpisana. Vrstica z virom je zdaj tudi na `/tocnost-napovedi/`, `/test-napovedi/` in `/meteogasilec/vodotoki/`; `tools/test_arso_vir.py` (v `parity.yml`) zahteva navedbo na straneh s podatki ARSO -- novo tako stran dodaj v `PAGES`.
+
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
 Ločeno od `/tocnost-napovedi/` (ta meri samo ARSO+Open-Meteo+MTR pri D+1, dan za

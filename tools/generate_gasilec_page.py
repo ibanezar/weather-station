@@ -1100,6 +1100,7 @@ def build_vodotoki_page():
   <p class="gf-note"><b>Vodostaj postaje ne pove, ali je vodotok dostopen z vozilom</b> — pove le, koliko vode teče
   mimo merilne točke. Za dejanski dostop (breg, globina, pretok na odjemnem mestu) vedno preveri stanje na terenu.
   »Povečan«/»opozorilo«/»alarm« so orientacijski pragovi (postaja Letuš), ne uradna klasifikacija ARSO/URSZR.</p>
+  <p class="gf-note">Vir meritev: Agencija Republike Slovenije za okolje (<a href="https://www.arso.gov.si/vode/podatki/" target="_blank" rel="noopener">ARSO</a>).</p>
   <p class="gf-note">Polna slika — 7-dnevna napoved pretoka (GloFAS) in zgodovina poplav Savinje — je na
   <a href="/vodostaj-savinje/">strani Vodostaj Savinje</a>.</p>'''
     return subpage_shell("vodotoki", "Vodotoki",

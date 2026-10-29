@@ -743,6 +743,7 @@ def build_body(verification):
   najnižjo temperaturo v Rečici ob Savinji; ko dan mine, ju primerjamo z dejansko dnevno meritvijo postaje
   IREICA1. Napaka je absolutna razlika v °C. Nobena pretekla napoved se ne popravlja ali briše; kadar
   arhiv postaje naknadno dopolni meritev za pretekli dan, napako preračunamo na dopolnjeno meritev.{arso_note}{aifs_method}{wn2_method}</p>
+  <p class="muted-note">Vir napovedi ARSO: Agencija Republike Slovenije za okolje (<a href="https://meteo.arso.gov.si" target="_blank" rel="noopener">ARSO</a>).</p>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
     return body

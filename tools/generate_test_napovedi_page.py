@@ -326,7 +326,7 @@ def precip_section(data):
         f'  <p class="muted-note">Primerjava proti meritvi IREICA1, {n_all} razrešenih dni; '
         + (f'pri {models[ai]} je vzorec krajši ({n_ai} dni). ' if n_ai and n_all and n_ai != n_all else '')
         + 'Dni z izdatnim dežjem je bistveno manj kot dni z dežjem nasploh, zato so vrednosti za 5 mm manj zanesljive. '
-        'ARSO in Yr tu nista vključena: beležimo ju šele od uvedbe strani, zato imata za padavine premalo dni.</p>')
+        'ARSO in Yr tu nista vključena: beležimo ju šele od uvedbe strani, zato imata za padavine premalo dni. Vir napovedi ARSO: Agencija Republike Slovenije za okolje (ARSO).</p>')
 
 
 def build_body(data, n_csv_rows):
