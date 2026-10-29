@@ -2327,6 +2327,9 @@ parjenih napak vključuje ničlo, in stalna pristranskost povedana naglas. **Odk
 (Ljubno, `txsyn`; brez zamika datuma), AIFS 2,1 °C, WN2 3,2 °C, Open-Meteo 1,2 °C -- postaja je verjetno topla proti vsem modelom. Zato je lestvica
 tudi mera pristranskosti, ne samo kakovosti. **`llms-full.txt`** (`tools/generate_llms_full.py`, dnevno v `seo-smart-routine.yml`) je uvodno besedilo
 vseh strani iz `CORE`, izrezano iz objavljenih HTML; Bing (faza 4.1), panel ×3 in Wikidata ostanejo ročno.
+**Hub strani (29. 10. 2026):** `/klima/`, `/padavine/`, `/temperatura/` (`kratko_html()` v `seo_smart_routine.py`) in `/rekord/` (`gen_records_page`) imajo blok **»Na kratko«**
+z vidnim »Posodobljeno«: stavek je izračunan iz istih spremenljivk kot FAQ in tabele (ista številka na isti strani), nič ni vtipkano. Test: `tools/test_hub_kratko.py`
+(v `parity.yml`). Nova hub stran naj dobi isto. `tools/test_stale_inputs.py` ni več odvisen od prave `.forecast_pending.json` (je bil vzrok rdečega `parity` 29. 10.).
 **Pristranskost postaje ali modelov (29. 10. 2026, `tools/ai/eval_station_bias.py` → `docs/analiza-pristranskost-postaje.md`):** senzor IREICA1 ni topel (opoldne +0,3 °C
 proti Varpolju); vsi modeli imajo Tmax pod in Tmin nad meritvijo v skoraj vseh mesecih (tudi pozimi), torej ne ujamejo dnevnega razpona dna doline. ARSO je pri Tmax
 −4,4 °C, a po odštetem odmiku ±1,6 °C (Open-Meteo ±1,3): to je odmik, ne šum; vzrok (`txsyn` ali kraj Ljubno) je nerazrešen. Blok »Na kratko« to pove in navede napako brez odmika.
