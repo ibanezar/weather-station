@@ -38,16 +38,50 @@
 {"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Kako je izra\u010dunana ocena?","acceptedAnswer":{"@type":"Answer","text":"Za vsak dan se\u0161tejemo to\u010dke (0\u20133) devetih dejavnikov: cvetni prah, PM2,5, ozon, NO\u2082, mrzel zrak, vro\u010dina, nevihta, hitra sprememba vremena in vlaga. Ocena 0\u20131 je nizko, 2\u20133 zmerno, 4\u20135 povi\u0161ano, 6 ali ve\u010d visoko; en sam dejavnik s tremi to\u010dkami da vsaj povi\u0161ano. Pragovi so na\u0161a delitev po znanih spro\u017eilcih in niso klini\u010dna lestvica."}},{"@type":"Question","name":"Je ocena verjetnost astmati\u010dnega napada?","acceptedAnswer":{"@type":"Answer","text":"Ne. Je pregled spro\u017eilcev, ki jih napovedujeta vreme in zrak. Kako se posameznik odzove, je zelo razli\u010dno in odvisno od zdravljenja, zato ocene ne uporabljajte za odlo\u010danje o zdravilih."}},{"@type":"Question","name":"Kaj je nevihtna astma?","acceptedAnswer":{"@type":"Answer","text":"Redek pojav, ko nevihta v \u010dasu cvetenja trav v zrak dvigne drobne delce cvetnega prahu in jih tudi ljudje brez znane astme vdihnejo globlje. Stran ga ozna\u010di samo, kadar sta napovedana hkrati nevihta in cvetenje trav."}},{"@type":"Question","name":"Zakaj mrzel zrak in vro\u010dina?","acceptedAnswer":{"@type":"Answer","text":"Mrzel in suh zrak lahko pri nekaterih zo\u017ei dihalne poti, zlasti ob naporu; vro\u010dina in soparnost obremenita dihanje, poleti pa ju spremlja \u0161e ozon. Zato se pri teh dejavnikih upo\u0161teva ob\u010dutena temperatura."}},{"@type":"Question","name":"Ali stran shranjuje moje podatke?","acceptedAnswer":{"@type":"Answer","text":"Ne. Izbira spro\u017eilcev ostane v va\u0161em brskalniku (localStorage) in se ne po\u0161lje na stre\u017enik. Strani ne vodita ne ra\u010duna ne dnevnika simptomov."}}]}
 </script>
 <style>
-.as-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin:1rem 0 1.4rem}
-.as-day{border:1px solid rgba(255,255,255,.1);border-top:4px solid var(--c,#059669);border-radius:10px;padding:.75rem .85rem;background:rgba(255,255,255,.03)}
-.as-day h3{margin:0;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.as-viz{--as-surface:#0e1624;--as-ink:var(--text,#e8edf5);--as-ink2:var(--muted,#9aa7bb);--as-grid:rgba(255,255,255,.1);
+  --g-zrak:#3987e5;--g-pelod:#d95926;--g-temp:#199e70;--g-vreme:#c98500;
+  --l-nizko:#059669;--l-zmerno:#eab308;--l-povisano:#f97316;--l-visoko:#ef4444}
+[data-theme="light"] .as-viz{--as-surface:#ffffff;--as-grid:rgba(0,0,0,.12);
+  --g-zrak:#2a78d6;--g-pelod:#eb6834;--g-temp:#1baf7a;--g-vreme:#eda100}
+.as-hero{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:1.4rem;align-items:center;margin:1rem 0 1.6rem;
+  padding:1.2rem 1.3rem;border:1px solid var(--as-grid);border-radius:16px;
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--c,#059669) 18%,transparent),transparent 60%),var(--as-surface)}
+.as-gauge{width:100%;height:auto;display:block}
+.as-gauge .as-needle{transform-origin:110px 110px;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.as-hero-k{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--as-ink2)}
+.as-hero-l{font-size:2.3rem;font-weight:800;line-height:1.1;color:var(--c,#059669);margin:.1rem 0 .3rem}
+.as-hero-adv{margin:.6rem 0 0;font-size:.92rem;color:var(--as-ink)}
+.as-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+.as-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .65rem;border-radius:999px;font-size:.8rem;
+  border:1px solid var(--as-grid);color:var(--as-ink)}
+.as-chip .as-ic{color:var(--gc)}
+.as-days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;margin:1rem 0 1.4rem}
+.as-day{border:1px solid var(--as-grid);border-top:4px solid var(--c,#059669);border-radius:12px;padding:.75rem .85rem;background:var(--as-surface)}
+.as-day h3{margin:0;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--as-ink2)}
 .as-day .as-lvl{font-size:1.25rem;font-weight:800;color:var(--c,#059669);margin:.15rem 0}
-.as-day .as-sc{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)}
+.as-day .as-sc{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--as-ink2)}
 .as-day ul{margin:.5rem 0 0;padding-left:1rem;font-size:.8rem}
-.as-heat td{text-align:center}
+.as-card{border:1px solid var(--as-grid);border-radius:14px;padding:1rem 1.1rem;background:var(--as-surface);margin:1rem 0 1.6rem}
+.as-svg{width:100%;height:auto;display:block}
+.as-svg text{font-family:inherit}
+.as-legend{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.6rem;font-size:.8rem;color:var(--as-ink2)}
+.as-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.as-legend i{width:10px;height:10px;border-radius:2px;background:var(--gc);display:inline-block}
+.as-prof{display:grid;gap:.45rem}
+.as-row{display:grid;grid-template-columns:minmax(120px,170px) 1fr;gap:.8rem;align-items:center;font-size:.85rem}
+.as-row .as-name{display:flex;align-items:center;gap:.4rem;color:var(--as-ink)}
+.as-row .as-name .as-ic{color:var(--gc)}
+.as-track{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:.15rem}
+.as-track i{height:10px;border-radius:3px;background:var(--as-grid)}
+.as-track i.on{background:var(--gc)}
+.as-det{font-size:.76rem;color:var(--as-ink2)}
+.as-heat td{text-align:center;font-weight:700}
+.as-heat .as-g{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:.4rem;background:var(--gc)}
 .as-trig{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
-.as-trig label{display:flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border:1px solid rgba(255,255,255,.18);border-radius:8px;cursor:pointer;min-height:44px;font-size:.88rem}
+.as-trig label{display:flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border:1px solid var(--as-grid);border-radius:8px;cursor:pointer;min-height:44px;font-size:.88rem}
 .as-trig input{width:18px;height:18px}
+@media (max-width:640px){.as-days{grid-template-columns:repeat(2,minmax(0,1fr))}.as-hero{grid-template-columns:1fr}.as-hero-l{font-size:1.9rem}.as-row{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.as-gauge .as-needle{transition:none}}
 </style>
 <link rel="stylesheet" href="/fonts/fonts.css?v=c490d62a">
 <link rel="stylesheet" href="/blog/blog.css?v=6352b4f1">
@@ -77,31 +111,54 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Vreme in astma: napoved tveganja za 5 dni</h1>
   <p class="post-meta">Cvetni prah, onesnažen zrak, mraz, vročina, nevihte in hitre spremembe · Zgornja Savinjska dolina · 2026-10-29</p>
+<div class="as-viz">
+  <div class="as-hero" id="as-hero" style="--c:var(--l-nizko)">
+    <svg class="as-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: ocena 0, tveganje nizko"><path d="M22.0 108.2A88 88 0 0 1 37.7 59.8" fill="none" stroke="var(--l-nizko)" stroke-width="16" stroke-linecap="butt"/><path d="M39.9 56.8A88 88 0 0 1 81.1 26.9" fill="none" stroke="var(--l-zmerno)" stroke-width="16" stroke-linecap="butt"/><path d="M84.6 25.8A88 88 0 0 1 135.4 25.8" fill="none" stroke="var(--l-povisano)" stroke-width="16" stroke-linecap="butt"/><path d="M138.9 26.9A88 88 0 0 1 198.0 108.2" fill="none" stroke="var(--l-visoko)" stroke-width="16" stroke-linecap="butt"/><text x="5.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--as-ink2)">0</text><text x="25.1" y="51.3" text-anchor="middle" font-size="9" fill="var(--as-ink2)">2</text><text x="77.6" y="13.1" text-anchor="middle" font-size="9" fill="var(--as-ink2)">4</text><text x="142.4" y="13.1" text-anchor="middle" font-size="9" fill="var(--as-ink2)">6</text><text x="215.0" y="113.0" text-anchor="middle" font-size="9" fill="var(--as-ink2)">10+</text><g class="as-needle" id="as-needle" style="transform:rotate(0.0deg)"><path d="M40 110L110 106.5L110 113.5z" fill="var(--as-ink)"/></g><circle cx="110" cy="110" r="7" fill="var(--as-ink)"/><circle cx="110" cy="110" r="3" fill="var(--as-surface)"/><text x="110" y="134" text-anchor="middle" font-size="12" fill="var(--as-ink2)" id="as-gauge-sc">ocena 0</text></svg>
+    <div><div class="as-hero-k">Danes · Zgornja Savinjska dolina</div><div class="as-hero-l" id="as-hero-l">nizko</div><div class="as-chips" id="as-chips"><span class="as-chip">brez izrazitih sprožilcev</span></div><p class="as-hero-adv">Vreme in zrak niso izrazit sprožilec. Ravnajte po svojem načrtu zdravljenja.</p></div>
+  </div>
   <p class="archive-intro" id="as-answer">Tveganje za ljudi z astmo v Zgornji Savinjski dolini je danes <strong>nizko</strong> (ocena 0 od 27). Danes ni izrazitih sprožilcev. Vreme in zrak niso izrazit sprožilec. Ravnajte po svojem načrtu zdravljenja. Osvežitev 2026-10-29.</p>
   <p class="muted-note"><strong>To ni zdravniški nasvet.</strong> Ocena prikazuje sprožilce, ki jih napovedujeta vreme in zrak,
   ne verjetnosti napada. Za zdravljenje in ukrepe veljajo navodila vašega zdravnika; v nujnem primeru pokličite 112.</p>
   <h2>Naslednjih 5 dni</h2>
-  <p class="archive-intro">Danes je najugodnejši dan v napovedi. Karte so barvane po oceni, raven pa je vedno zapisana tudi z besedo.</p>
+  <p class="archive-intro">Danes je najugodnejši dan v napovedi. Raven je vedno zapisana tudi z besedo.</p>
   <div class="as-days" id="as-days">
-    <div class="as-day" style="--c:#059669" data-i="0"><h3>Danes</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
-    <div class="as-day" style="--c:#059669" data-i="1"><h3>Jutri</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
-    <div class="as-day" style="--c:#059669" data-i="2"><h3>sob</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
-    <div class="as-day" style="--c:#059669" data-i="3"><h3>ned</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
-    <div class="as-day" style="--c:#059669" data-i="4"><h3>pon</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
+    <div class="as-day" style="--c:var(--l-nizko)" data-i="0"><h3>Danes</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
+    <div class="as-day" style="--c:var(--l-nizko)" data-i="1"><h3>Jutri</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
+    <div class="as-day" style="--c:var(--l-nizko)" data-i="2"><h3>sob</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
+    <div class="as-day" style="--c:var(--l-nizko)" data-i="3"><h3>ned</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
+    <div class="as-day" style="--c:var(--l-nizko)" data-i="4"><h3>pon</h3><div class="as-lvl">nizko</div><div class="as-sc">ocena 0 od 27</div><ul><li>brez izrazitih sprožilcev</li></ul></div>
   </div>
-  <h2>Kateri dejavniki so v igri</h2>
-  <p class="archive-intro">Najvišji dnevni vpliv posameznega dejavnika. Pomik nad celico pokaže razlog.</p>
+  <div class="as-card">
+    <svg class="as-svg" viewBox="0 0 640 270" role="img" aria-label="Skupna ocena po dnevih, razrezana po skupinah dejavnikov"><rect x="34" y="194.8" width="532" height="45.2" fill="var(--l-nizko)" opacity=".09"/><text x="574" y="220.4" font-size="10" fill="var(--as-ink2)">nizko</text><rect x="34" y="149.6" width="532" height="45.2" fill="var(--l-zmerno)" opacity=".09"/><text x="574" y="175.2" font-size="10" fill="var(--as-ink2)">zmerno</text><rect x="34" y="104.4" width="532" height="45.2" fill="var(--l-povisano)" opacity=".09"/><text x="574" y="130.0" font-size="10" fill="var(--as-ink2)">povišano</text><rect x="34" y="14.0" width="532" height="90.4" fill="var(--l-visoko)" opacity=".09"/><text x="574" y="62.2" font-size="10" fill="var(--as-ink2)">visoko</text><line x1="34" x2="566" y1="240.0" y2="240.0" stroke="var(--as-grid)" stroke-width="1"/><text x="28" y="243.0" text-anchor="end" font-size="10" fill="var(--as-ink2)">0</text><line x1="34" x2="566" y1="194.8" y2="194.8" stroke="var(--as-grid)" stroke-width="1"/><text x="28" y="197.8" text-anchor="end" font-size="10" fill="var(--as-ink2)">2</text><line x1="34" x2="566" y1="149.6" y2="149.6" stroke="var(--as-grid)" stroke-width="1"/><text x="28" y="152.6" text-anchor="end" font-size="10" fill="var(--as-ink2)">4</text><line x1="34" x2="566" y1="104.4" y2="104.4" stroke="var(--as-grid)" stroke-width="1"/><text x="28" y="107.4" text-anchor="end" font-size="10" fill="var(--as-ink2)">6</text><line x1="34" x2="566" y1="59.2" y2="59.2" stroke="var(--as-grid)" stroke-width="1"/><text x="28" y="62.2" text-anchor="end" font-size="10" fill="var(--as-ink2)">8</text><line x1="34" x2="566" y1="14.0" y2="14.0" stroke="var(--as-grid)" stroke-width="1"/><text x="28" y="17.0" text-anchor="end" font-size="10" fill="var(--as-ink2)">10</text><text x="87.2" y="234.0" text-anchor="middle" font-size="12" font-weight="700" fill="var(--as-ink)">0</text><text x="87.2" y="260" text-anchor="middle" font-size="11" fill="var(--as-ink2)">Danes</text><text x="193.6" y="234.0" text-anchor="middle" font-size="12" font-weight="700" fill="var(--as-ink)">0</text><text x="193.6" y="260" text-anchor="middle" font-size="11" fill="var(--as-ink2)">Jutri</text><text x="300.0" y="234.0" text-anchor="middle" font-size="12" font-weight="700" fill="var(--as-ink)">0</text><text x="300.0" y="260" text-anchor="middle" font-size="11" fill="var(--as-ink2)">sob</text><text x="406.4" y="234.0" text-anchor="middle" font-size="12" font-weight="700" fill="var(--as-ink)">0</text><text x="406.4" y="260" text-anchor="middle" font-size="11" fill="var(--as-ink2)">ned</text><text x="512.8" y="234.0" text-anchor="middle" font-size="12" font-weight="700" fill="var(--as-ink)">0</text><text x="512.8" y="260" text-anchor="middle" font-size="11" fill="var(--as-ink2)">pon</text></svg>
+    <div class="as-legend"><span style="--gc:var(--g-zrak)"><i></i><svg class="as-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10a3 3 0 1 0-3-3M3 12h14a3 3 0 1 1-3 3M3 16h6"/></svg>Zrak</span><span style="--gc:var(--g-pelod)"><i></i><svg class="as-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V5a2.5 2.5 0 0 1 5 0c0 2-2.5 4.5-5 4.5zM14.5 12H19a2.5 2.5 0 0 1 0 5c-2 0-4.5-2.5-4.5-5zM12 14.5V19a2.5 2.5 0 0 1-5 0c0-2 2.5-4.5 5-4.5zM9.5 12H5a2.5 2.5 0 0 1 0-5c2 0 4.5 2.5 4.5 5z" transform="scale(.9) translate(1.3 1.3)"/></svg>Cvetni prah</span><span style="--gc:var(--g-temp)"><i></i><svg class="as-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4a2 2 0 0 1 4 0v9.2a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></svg>Temperatura</span><span style="--gc:var(--g-vreme)"><i></i><svg class="as-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M12 12l-2 4h3l-2 4"/></svg>Vreme</span></div>
+    <p class="muted-note">Graf prikazuje privzeto oceno brez osebnih sprožilcev. Pomik nad stolpec pokaže razloge.</p>
+  </div>
+  <h2>Danes po dejavnikih</h2>
+  <p class="archive-intro">Vsak dejavnik ima tri stopnje: blago, zmerno, visoko.</p>
+  <div class="as-card"><div class="as-prof">
+    <div class="as-row" style="--gc:var(--g-pelod)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V5a2.5 2.5 0 0 1 5 0c0 2-2.5 4.5-5 4.5zM14.5 12H19a2.5 2.5 0 0 1 0 5c-2 0-4.5-2.5-4.5-5zM12 14.5V19a2.5 2.5 0 0 1-5 0c0-2 2.5-4.5 5-4.5zM9.5 12H5a2.5 2.5 0 0 1 0-5c2 0 4.5 2.5 4.5 5z" transform="scale(.9) translate(1.3 1.3)"/></svg>Cvetni prah</div><div><div class="as-track" role="img" aria-label="Cvetni prah: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">ni pomembnega cvetnega prahu</div></div></div>
+    <div class="as-row" style="--gc:var(--g-zrak)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10a3 3 0 1 0-3-3M3 12h14a3 3 0 1 1-3 3M3 16h6"/></svg>Drobni delci PM2,5</div><div><div class="as-track" role="img" aria-label="Drobni delci PM2,5: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">PM2,5 povprečno 6 µg/m³</div></div></div>
+    <div class="as-row" style="--gc:var(--g-zrak)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10a3 3 0 1 0-3-3M3 12h14a3 3 0 1 1-3 3M3 16h6"/></svg>Ozon</div><div><div class="as-track" role="img" aria-label="Ozon: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">ozon do 62 µg/m³</div></div></div>
+    <div class="as-row" style="--gc:var(--g-zrak)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10a3 3 0 1 0-3-3M3 12h14a3 3 0 1 1-3 3M3 16h6"/></svg>Dušikov dioksid</div><div><div class="as-track" role="img" aria-label="Dušikov dioksid: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">NO₂ do 6 µg/m³</div></div></div>
+    <div class="as-row" style="--gc:var(--g-temp)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4a2 2 0 0 1 4 0v9.2a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></svg>Mrzel zrak</div><div><div class="as-track" role="img" aria-label="Mrzel zrak: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">občutena do 5 °C</div></div></div>
+    <div class="as-row" style="--gc:var(--g-temp)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4a2 2 0 0 1 4 0v9.2a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></svg>Vročina</div><div><div class="as-track" role="img" aria-label="Vročina: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">občutena do 12 °C</div></div></div>
+    <div class="as-row" style="--gc:var(--g-vreme)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M12 12l-2 4h3l-2 4"/></svg>Nevihta</div><div><div class="as-track" role="img" aria-label="Nevihta: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">brez neviht</div></div></div>
+    <div class="as-row" style="--gc:var(--g-vreme)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M12 12l-2 4h3l-2 4"/></svg>Hitra sprememba vremena</div><div><div class="as-track" role="img" aria-label="Hitra sprememba vremena: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">stabilno</div></div></div>
+    <div class="as-row" style="--gc:var(--g-vreme)"><div class="as-name"><svg class="as-ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M12 12l-2 4h3l-2 4"/></svg>Zračna vlaga</div><div><div class="as-track" role="img" aria-label="Zračna vlaga: —"><i class=""></i><i class=""></i><i class=""></i></div><div class="as-det">vlaga povprečno 88 %</div></div></div>
+  </div></div>
+  <h2>Vsi dnevi in dejavniki</h2>
+  <p class="archive-intro">Najvišji dnevni vpliv posameznega dejavnika; pomik nad celico pokaže razlog.</p>
   <div class="table-scroll" tabindex="0"><table class="stats as-heat">
     <tr><th></th><th>Danes</th><th>Jutri</th><th>sob</th><th>ned</th><th>pon</th></tr>
-    <tr><th>Cvetni prah</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Drobni delci PM2,5</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Ozon</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Dušikov dioksid</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Mrzel zrak</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Vročina</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Nevihta</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Hitra sprememba vremena</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-    <tr><th>Zračna vlaga</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-pelod)"><th><span class="as-g"></span>Cvetni prah</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-zrak)"><th><span class="as-g"></span>Drobni delci PM2,5</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-zrak)"><th><span class="as-g"></span>Ozon</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-zrak)"><th><span class="as-g"></span>Dušikov dioksid</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-temp)"><th><span class="as-g"></span>Mrzel zrak</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-temp)"><th><span class="as-g"></span>Vročina</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-vreme)"><th><span class="as-g"></span>Nevihta</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-vreme)"><th><span class="as-g"></span>Hitra sprememba vremena</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr style="--gc:var(--g-vreme)"><th><span class="as-g"></span>Zračna vlaga</th><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
   </table></div>
   <h2>Moji sprožilci</h2>
   <p class="archive-intro">Označite, kaj občutite pri sebi. Izbrani dejavniki bodo pri oceni šteli dvojno.</p>
@@ -140,12 +197,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+</div>
 <script>
 (function(){
 function astmaScore(pts,w){var s=0;for(var k in pts){s+=pts[k]*(w&&w[k]!=null?w[k]:1);}return s;}
 function astmaLevel(pts,w,th,floor,levels){var s=astmaScore(pts,w),m=0;for(var k in pts){if(pts[k]>m)m=pts[k];}
 var l=s<th[0]?0:s<th[1]?1:s<th[2]?2:3;if(m>=floor&&l<2)l=2;return levels[l];}
-var D={"days": [{"label": "Danes", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 6 µg/m³", "ozon": "ozon do 62 µg/m³", "no2": "NO₂ do 6 µg/m³", "mraz": "občutena do 5 °C", "vrocina": "občutena do 12 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 88 %"}}, {"label": "Jutri", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 8 µg/m³", "ozon": "ozon do 68 µg/m³", "no2": "NO₂ do 6 µg/m³", "mraz": "občutena do 3 °C", "vrocina": "občutena do 11 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 84 %"}}, {"label": "sob", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 9 µg/m³", "ozon": "ozon do 71 µg/m³", "no2": "NO₂ do 5 µg/m³", "mraz": "občutena do 1 °C", "vrocina": "občutena do 9 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 68 %"}}, {"label": "ned", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 8 µg/m³", "ozon": "ozon do 53 µg/m³", "no2": "NO₂ do 3 µg/m³", "mraz": "občutena do 0 °C", "vrocina": "občutena do 4 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 78 %"}}, {"label": "pon", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "ni podatka", "ozon": "ni podatka", "no2": "ni podatka", "mraz": "občutena do 3 °C", "vrocina": "občutena do 7 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 72 %"}}], "th": [2, 4, 6], "floor": 3, "levels": ["nizko", "zmerno", "povišano", "visoko"], "colors": {"nizko": "#059669", "zmerno": "#eab308", "povišano": "#f97316", "visoko": "#ef4444"}, "weight": 2, "keys": ["pelod", "pm", "ozon", "no2", "mraz", "vrocina", "nevihta", "sprememba", "vlaga"]},KEY='wx-astma-sprozilci';
+var D={"days": [{"label": "Danes", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 6 µg/m³", "ozon": "ozon do 62 µg/m³", "no2": "NO₂ do 6 µg/m³", "mraz": "občutena do 5 °C", "vrocina": "občutena do 12 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 88 %"}}, {"label": "Jutri", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 8 µg/m³", "ozon": "ozon do 68 µg/m³", "no2": "NO₂ do 6 µg/m³", "mraz": "občutena do 3 °C", "vrocina": "občutena do 11 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 84 %"}}, {"label": "sob", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 9 µg/m³", "ozon": "ozon do 71 µg/m³", "no2": "NO₂ do 5 µg/m³", "mraz": "občutena do 1 °C", "vrocina": "občutena do 9 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 68 %"}}, {"label": "ned", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "PM2,5 povprečno 8 µg/m³", "ozon": "ozon do 53 µg/m³", "no2": "NO₂ do 3 µg/m³", "mraz": "občutena do 0 °C", "vrocina": "občutena do 4 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 78 %"}}, {"label": "pon", "pts": {"pelod": 0, "pm": 0, "ozon": 0, "no2": 0, "mraz": 0, "vrocina": 0, "nevihta": 0, "sprememba": 0, "vlaga": 0}, "detail": {"pelod": "ni pomembnega cvetnega prahu", "pm": "ni podatka", "ozon": "ni podatka", "no2": "ni podatka", "mraz": "občutena do 3 °C", "vrocina": "občutena do 7 °C", "nevihta": "brez neviht", "sprememba": "stabilno", "vlaga": "vlaga povprečno 72 %"}}], "th": [2, 4, 6], "floor": 3, "levels": ["nizko", "zmerno", "povišano", "visoko"], "colors": {"nizko": "#059669", "zmerno": "#eab308", "povišano": "#f97316", "visoko": "#ef4444"}, "max": 10, "weight": 2, "keys": ["pelod", "pm", "ozon", "no2", "mraz", "vrocina", "nevihta", "sprememba", "vlaga"]},KEY='wx-astma-sprozilci';
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')||[];}catch(e){return [];}}
 function save(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}}
 function weights(sel){var w={};if(sel.length){sel.forEach(function(k){w[k]=D.weight;});}return w;}
@@ -164,10 +222,15 @@ function render(sel){
     (r.length?r:['brez izrazitih sprožilcev']).forEach(function(t){var li=document.createElement('li');li.textContent=t;ul.appendChild(li);});
   });
 }
+function hero(sel){var w=weights(sel),d=D.days[0],lvl=astmaLevel(d.pts,w,D.th,D.floor,D.levels),sc=astmaScore(d.pts,w);
+  var h=document.getElementById('as-hero');if(!h)return;h.style.setProperty('--c',D.colors[lvl]);
+  document.getElementById('as-hero-l').textContent=lvl;
+  var n=document.getElementById('as-needle');if(n)n.style.transform='rotate('+(180*Math.min(sc,D.max)/D.max)+'deg)';
+  var t=document.getElementById('as-gauge-sc');if(t)t.textContent='ocena '+sc;}
 var boxes=document.querySelectorAll('#as-trig input'),sel=load();
 boxes.forEach(function(b){b.checked=sel.indexOf(b.value)>=0;
-  b.addEventListener('change',function(){sel=[].filter.call(boxes,function(x){return x.checked;}).map(function(x){return x.value;});save(sel);render(sel);});});
-if(sel.length)render(sel);
+  b.addEventListener('change',function(){sel=[].filter.call(boxes,function(x){return x.checked;}).map(function(x){return x.value;});save(sel);render(sel);hero(sel);});});
+if(sel.length){render(sel);hero(sel);}
 })();
 </script>
   <footer class="site-foot">
