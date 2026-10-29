@@ -25,6 +25,7 @@ Usage:
   python3 tools/generate_astma_page.py
 """
 import datetime, html, json, math, os, sys, urllib.request, urllib.parse, urllib.error
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402
@@ -56,6 +57,26 @@ FACTORS = [
     ("vlaga", "Zračna vlaga", "zelo vlažen ali zelo suh zrak"),
 ]
 FACTOR_KEYS = [k for k, _, _ in FACTORS]
+
+# Kratka razlaga za bralca: zakaj je dejavnik pomemben (ne zdravniška trditev).
+WHY = {
+    "pelod": "Cvetni prah lahko draži dihalne poti, zlasti pri alergijski astmi.",
+    "pm": "Drobni delci segajo globoko v pljuča in lahko dražijo dihala.",
+    "ozon": "Ozon poleti draži dihala, zlasti ob naporu na prostem.",
+    "no2": "Dušikov dioksid nastaja pri prometu in kurjenju ter lahko draži dihala.",
+    "mraz": "Mrzel in suh zrak lahko pri nekaterih zoži dihalne poti, predvsem ob naporu.",
+    "vrocina": "Vročina in soparnost obremenita dihanje.",
+    "nevihta": "Nevihta lahko dvigne cvetni prah in prah; ob cvetenju trav je to nevihtna astma.",
+    "sprememba": "Hitre spremembe temperature in tlaka so pri nekaterih znan sprožilec.",
+    "vlaga": "Zelo vlažen zrak spodbuja plesni in pršice, zelo suh pa draži sluznico.",
+}
+
+
+def updated_text():
+    """Čas izračuna po naši uri: »29. 10. 2026 ob 9.20« (ura s piko, Pravopis § 255)."""
+    n = datetime.datetime.now(ZoneInfo("Europe/Ljubljana"))
+    return f"{n.day}. {n.month}. {n.year} ob {n.hour}.{n.minute:02d}"
+
 
 HOURLY_WX = "temperature_2m,apparent_temperature,relative_humidity_2m,pressure_msl,weather_code"
 
@@ -168,20 +189,20 @@ def day_factors(aq, wx, date_iso):
 
     pm = _mean(g("pm2_5"))
     pts["pm"] = pts_by_thresholds(pm, (15, 25, 50))
-    det["pm"] = f"PM2,5 povprečno {n(pm, 0)} µg/m³" if pm is not None else "ni podatka"
+    det["pm"] = f"PM2,5 povprečno {n(pm, 0)} µg/m³" if pm is not None else "model ne vrača podatka"
     oz = max(g("ozone"), default=None)
     pts["ozon"] = pts_by_thresholds(oz, (100, 120, 180))
-    det["ozon"] = f"ozon do {n(oz, 0)} µg/m³" if oz is not None else "ni podatka"
+    det["ozon"] = f"ozon do {n(oz, 0)} µg/m³" if oz is not None else "model ne vrača podatka"
     no2 = max(g("nitrogen_dioxide"), default=None)
     pts["no2"] = pts_by_thresholds(no2, (100, 200, 400))
-    det["no2"] = f"NO₂ do {n(no2, 0)} µg/m³" if no2 is not None else "ni podatka"
+    det["no2"] = f"NO₂ do {n(no2, 0)} µg/m³" if no2 is not None else "model ne vrača podatka"
 
     app = w("apparent_temperature")
     amin, amax = min(app, default=None), max(app, default=None)
     pts["mraz"] = pts_cold(amin)
-    det["mraz"] = f"občutena do {n(amin, 0)} °C" if amin is not None else "ni podatka"
+    det["mraz"] = f"občutena do {n(amin, 0)} °C" if amin is not None else "model ne vrača podatka"
     pts["vrocina"] = pts_heat(amax)
-    det["vrocina"] = f"občutena do {n(amax, 0)} °C" if amax is not None else "ni podatka"
+    det["vrocina"] = f"občutena do {n(amax, 0)} °C" if amax is not None else "model ne vrača podatka"
 
     storm = any(c >= 95 for c in w("weather_code"))
     pts["nevihta"] = pts_storm(storm, grass_max)
@@ -203,7 +224,7 @@ def day_factors(aq, wx, date_iso):
 
     rh = _mean(w("relative_humidity_2m"))
     pts["vlaga"] = pts_humidity(rh)
-    det["vlaga"] = f"vlaga povprečno {n(rh, 0)} %" if rh is not None else "ni podatka"
+    det["vlaga"] = f"vlaga povprečno {n(rh, 0)} %" if rh is not None else "model ne vrača podatka"
     return pts, det
 
 
@@ -296,6 +317,21 @@ CSS = """<style>
 .as-det{font-size:.76rem;color:var(--as-ink2)}
 .as-heat td{text-align:center;font-weight:700}
 .as-heat .as-g{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:.4rem;background:var(--gc)}
+.as-today{box-shadow:0 0 0 2px var(--c,#059669)}
+.as-hero-sum{margin:.2rem 0 0;font-size:1rem;color:var(--as-ink)}
+.as-hero-meta{margin:.7rem 0 0;font-size:.76rem;color:var(--as-ink2)}
+.as-hero-meta a{color:inherit;text-decoration:underline}
+.as-grp{margin-bottom:1rem}
+.as-grp h3{display:flex;align-items:center;gap:.45rem;margin:.2rem 0 .5rem;font-size:.95rem;color:var(--as-ink)}
+.as-grp h3 .as-ic{color:var(--gc)}
+.as-why{font-size:.76rem;color:var(--as-ink2);margin-top:.1rem;opacity:.9}
+.as-none{color:var(--as-ink2);font-weight:400!important;font-size:.78rem}
+.as-reasons{margin:.6rem 0 1rem;font-size:.86rem}
+.as-reasons ul{margin:.5rem 0 0;padding-left:1.1rem}
+.as-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin:.4rem 0}
+.as-btn{min-height:44px;padding:.5rem 1rem;border-radius:8px;border:1px solid var(--as-grid);background:transparent;color:var(--as-ink);font:inherit;cursor:pointer}
+.as-btn-p{background:var(--g-zrak);border-color:var(--g-zrak);color:#fff;font-weight:700}
+.as-status{font-size:.88rem;color:var(--as-ink);margin:.4rem 0}
 .as-trig{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
 .as-trig label{display:flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border:1px solid var(--as-grid);border-radius:8px;cursor:pointer;min-height:44px;font-size:.88rem}
 .as-trig input{width:18px;height:18px}
@@ -335,16 +371,23 @@ def gauge_svg(day):
         f'text-anchor="middle" font-size="9" fill="var(--as-ink2)">{b}{"+" if b == MAX_BAND else ""}</text>'
         for b in bounds)
     deg = gauge_deg(day["score"])
-    return (f'<svg class="as-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: ocena {day["score"]}, tveganje {day["level"]}">'
+    return (f'<svg class="as-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: obremenitev {day["score"]} točk, raven {day["level"]}">'
             + "".join(arcs) + ticks +
             f'<g class="as-needle" id="as-needle" style="transform:rotate({deg:.1f}deg)">'
             f'<path d="M{cx - 70} {cy}L{cx} {cy - 3.5}L{cx} {cy + 3.5}z" fill="var(--as-ink)"/></g>'
             f'<circle cx="{cx}" cy="{cy}" r="7" fill="var(--as-ink)"/><circle cx="{cx}" cy="{cy}" r="3" fill="var(--as-surface)"/>'
-            f'<text x="{cx}" y="{cy + 24}" text-anchor="middle" font-size="12" fill="var(--as-ink2)" id="as-gauge-sc">ocena {day["score"]}</text></svg>')
+            f'<text x="{cx}" y="{cy + 24}" text-anchor="middle" font-size="12" fill="var(--as-ink2)" id="as-gauge-sc">obremenitev {day["score"]}</text></svg>')
 
 
 def lvl_var(level):
     return f'var(--l-{level.replace("š", "s").replace("č", "c")})'
+
+
+def hero_summary(day):
+    rs = reasons(day, 2)
+    if not rs:
+        return "Danes vreme in zrak nista izrazit sprožilec."
+    return "Danes obremenjuje predvsem: " + "; ".join(rs) + "."
 
 
 def hero_html(days):
@@ -355,10 +398,24 @@ def hero_html(days):
         for _, k in rs) or '<span class="as-chip">brez izrazitih sprožilcev</span>'
     return (f'  <div class="as-hero" id="as-hero" style="--c:{lvl_var(d["level"])}">\n'
             f'    {gauge_svg(d)}\n'
-            f'    <div><div class="as-hero-k">Danes · Zgornja Savinjska dolina</div>'
+            f'    <div><div class="as-hero-k">Okoljska obremenitev danes · Zgornja Savinjska dolina</div>'
             f'<div class="as-hero-l" id="as-hero-l">{d["level"]}</div>'
+            f'<p class="as-hero-sum">{esc(hero_summary(d))}</p>'
             f'<div class="as-chips" id="as-chips">{chips}</div>'
-            f'<p class="as-hero-adv">{esc(level_advice(d["level"]))}</p></div>\n  </div>')
+            f'<p class="as-hero-adv">{esc(level_advice(d["level"]))}</p>'
+            f'<p class="as-hero-meta">Izračunano {esc(updated_text())} · modelska napoved, ne meritev · '
+            f'<a href="#metodologija">kako je ocena izračunana</a></p></div>\n  </div>')
+
+
+def days_summary(days):
+    """En stavek namesto ponavljanja enakih ocen."""
+    levels = {d["level"] for d in days}
+    if len(levels) == 1:
+        return f"Vseh {len(days)} dni je raven enaka: {days[0]['level']}."
+    worst = max(days, key=lambda d: (d["score"], -days.index(d)))
+    best = min(days, key=lambda d: (d["score"], days.index(d)))
+    return (f"Najbolj obremenjujoč je {worst['label'].lower()} ({worst['level']}), "
+            f"najugodnejši {best['label'].lower()} ({best['level']}).")
 
 
 def day_cards_html(days):
@@ -366,10 +423,23 @@ def day_cards_html(days):
     for i, d in enumerate(days):
         rs = reasons(d)
         li = "".join(f"<li>{esc(r)}</li>" for r in rs) or "<li>brez izrazitih sprožilcev</li>"
-        out.append(f'    <div class="as-day" style="--c:{lvl_var(d["level"])}" data-i="{i}">'
+        cls = "as-day as-today" if i == 0 else "as-day"
+        out.append(f'    <div class="{cls}" style="--c:{lvl_var(d["level"])}" data-i="{i}">'
                    f'<h3>{esc(d["label"])}</h3><div class="as-lvl">{d["level"]}</div>'
-                   f'<div class="as-sc">ocena {d["score"]} od 27</div><ul>{li}</ul></div>')
+                   f'<div class="as-sc">obremenitev {d["score"]} točk</div><ul>{li}</ul></div>')
     return '  <div class="as-days" id="as-days">\n' + "\n".join(out) + "\n  </div>"
+
+
+def reasons_by_day_html(days):
+    """Razlogi kot vidno besedilo: deluje s tipkovnico in na dotik (ne le ob pomiku miške)."""
+    items = []
+    for d in days:
+        rs = [f'{dict((k2, l2) for k2, l2, _ in FACTORS)[k]}: {d["detail"][k]}'
+              for k, p in sorted(d["pts"].items(), key=lambda kv: -kv[1]) if p >= 1]
+        items.append(f'<li><strong>{esc(d["label"])}</strong> ({d["level"]}): '
+                     f'{esc("; ".join(rs) if rs else "brez izrazitih sprožilcev")}</li>')
+    return ('  <details class="as-reasons"><summary>Razlogi po dnevih (besedilo)</summary><ul>'
+            + "".join(items) + '</ul></details>')
 
 
 def legend_html():
@@ -423,16 +493,23 @@ def stacked_block(days):
 
 
 def profile_html(day):
-    """Današnji profil: za vsak dejavnik tri polja (blago/zmerno/visoko) in razlog."""
-    rows = []
-    for key, lbl, _ in FACTORS:
-        g = GROUP_OF[key]
-        p = day["pts"][key]
-        track = "".join(f'<i class="{"on" if j < p else ""}"></i>' for j in range(3))
-        rows.append(f'    <div class="as-row" style="--gc:var(--g-{g})"><div class="as-name">{icon(g, 16)}{esc(lbl)}</div>'
-                    f'<div><div class="as-track" role="img" aria-label="{esc(lbl)}: {PTS_WORD[p]}">{track}</div>'
-                    f'<div class="as-det">{esc(PTS_WORD[p] + " · " + day["detail"][key] if p else day["detail"][key])}</div></div></div>')
-    return '  <div class="as-card"><div class="as-prof">\n' + "\n".join(rows) + "\n  </div></div>"
+    """Današnji profil po skupinah: stopnja, vrednost in kratek razlog, zakaj je dejavnik pomemben.
+    Vse vrednosti so modelske napovedi (CAMS, Open-Meteo), ne meritve."""
+    blocks = []
+    for g, glabel, keys in GROUPS:
+        rows = []
+        for key in keys:
+            lbl = dict((k, l) for k, l, _ in FACTORS)[key]
+            p = day["pts"][key]
+            track = "".join(f'<i class="{"on" if j < p else ""}"></i>' for j in range(3))
+            word = PTS_WORD[p] if p else "ni vpliva"
+            rows.append(f'      <div class="as-row"><div class="as-name">{esc(lbl)}</div>'
+                        f'<div><div class="as-track" role="img" aria-label="{esc(lbl)}: {word}">{track}</div>'
+                        f'<div class="as-det"><strong>{word}</strong> · {esc(day["detail"][key])} (modelska napoved)</div>'
+                        f'<div class="as-why">{esc(WHY[key])}</div></div></div>')
+        blocks.append(f'    <div class="as-grp" style="--gc:var(--g-{g})"><h3>{icon(g, 18)}{esc(glabel)}</h3>\n'
+                      + "\n".join(rows) + "\n    </div>")
+    return '  <div class="as-card"><div class="as-prof">\n' + "\n".join(blocks) + "\n  </div></div>"
 
 
 def heatmap_html(days):
@@ -445,7 +522,7 @@ def heatmap_html(days):
         for d in days:
             p = d["pts"][key]
             if p == 0:
-                cells.append("<td>—</td>")
+                cells.append('<td class="as-none">ni vpliva</td>')
             else:
                 cells.append(f'<td title="{esc(d["detail"][key])}" style="background:color-mix(in srgb,var(--g-{g}) {int(alpha[p] * 100)}%,transparent);'
                              f'color:{"#04070e" if p == 3 else "inherit"}">{PTS_WORD[p]}</td>')
@@ -458,14 +535,17 @@ def triggers_html():
     boxes = "".join(
         f'<label><input type="checkbox" value="{k}"> {esc(desc)}</label>' for k, _, desc in FACTORS)
     return (f'  <div class="as-trig" id="as-trig" role="group" aria-label="Moji sprožilci">{boxes}</div>\n'
-            '  <p class="muted-note" id="as-trig-note">Izbira se shrani samo v tem brskalniku in se nikamor ne pošlje.</p>')
+            '  <div class="as-actions"><button type="button" class="as-btn as-btn-p" id="as-apply">Uporabi moje sprožilce</button>'
+            '<button type="button" class="as-btn" id="as-reset">Ponastavi</button></div>\n'
+            '  <p class="as-status" id="as-trig-status" role="status" aria-live="polite">Brez osebnih sprožilcev: vsi dejavniki štejejo enako.</p>\n'
+            '  <p class="muted-note">Izbira se shrani samo v tem brskalniku in se nikamor ne pošlje. Ista okoljska situacija ne vpliva enako na vse ljudi.</p>')
 
 
 def client_js(days):
     payload = {
         "days": [{"label": d["label"], "pts": d["pts"], "detail": d["detail"]} for d in days],
         "th": list(SCORE_TH), "floor": FLOOR_PTS, "levels": LEVELS,
-        "colors": {k: v for k, v in LEVEL_COLORS.items()}, "max": MAX_BAND, "weight": TRIGGER_WEIGHT, "keys": FACTOR_KEYS,
+        "colors": {k: v for k, v in LEVEL_COLORS.items()}, "names": {k: l for k, l, _ in FACTORS}, "max": MAX_BAND, "weight": TRIGGER_WEIGHT, "keys": FACTOR_KEYS,
     }
     return ("<script>\n(function(){\n" + ASTMA_JS_CORE + "\n"
             "var D=" + json.dumps(payload, ensure_ascii=False) + ",KEY='wx-astma-sprozilci';\n"
@@ -479,7 +559,7 @@ function render(sel){
     var lvl=astmaLevel(d.pts,w,D.th,D.floor,D.levels),sc=astmaScore(d.pts,w);
     c.style.setProperty('--c',D.colors[lvl]);
     c.querySelector('.as-lvl').textContent=lvl;
-    c.querySelector('.as-sc').textContent='ocena '+sc+(sel.length?' (moji sprožilci štejejo dvojno)':' od 27');
+    c.querySelector('.as-sc').textContent='obremenitev '+sc+' točk'+(sel.length?' (z mojimi sprožilci)':'');
     var r=Object.keys(d.pts).filter(function(k){return d.pts[k]>0;})
       .sort(function(a,b){return (d.pts[b]*(w[b]||1))-(d.pts[a]*(w[a]||1));}).slice(0,2)
       .map(function(k){return d.detail[k];});
@@ -491,11 +571,16 @@ function hero(sel){var w=weights(sel),d=D.days[0],lvl=astmaLevel(d.pts,w,D.th,D.
   var h=document.getElementById('as-hero');if(!h)return;h.style.setProperty('--c',D.colors[lvl]);
   document.getElementById('as-hero-l').textContent=lvl;
   var n=document.getElementById('as-needle');if(n)n.style.transform='rotate('+(180*Math.min(sc,D.max)/D.max)+'deg)';
-  var t=document.getElementById('as-gauge-sc');if(t)t.textContent='ocena '+sc;}
-var boxes=document.querySelectorAll('#as-trig input'),sel=load();
-boxes.forEach(function(b){b.checked=sel.indexOf(b.value)>=0;
-  b.addEventListener('change',function(){sel=[].filter.call(boxes,function(x){return x.checked;}).map(function(x){return x.value;});save(sel);render(sel);hero(sel);});});
-if(sel.length){render(sel);hero(sel);}
+  var t=document.getElementById('as-gauge-sc');if(t)t.textContent='obremenitev '+sc;}
+var boxes=document.querySelectorAll('#as-trig input'),sel=load(),st=document.getElementById('as-trig-status');
+var NAMES=D.names;
+function status(){if(!st)return;st.textContent=sel.length?'Uporabljeni sprožilci (štejejo dvojno): '+sel.map(function(k){return NAMES[k];}).join(', ')+'.':'Brez osebnih sprožilcev: vsi dejavniki štejejo enako.';}
+function checked(){return [].filter.call(boxes,function(x){return x.checked;}).map(function(x){return x.value;});}
+boxes.forEach(function(b){b.checked=sel.indexOf(b.value)>=0;});
+var ap=document.getElementById('as-apply'),rs=document.getElementById('as-reset');
+if(ap)ap.addEventListener('click',function(){sel=checked();save(sel);render(sel);hero(sel);status();});
+if(rs)rs.addEventListener('click',function(){boxes.forEach(function(b){b.checked=false;});sel=[];save(sel);render(sel);hero(sel);status();});
+if(sel.length){render(sel);hero(sel);}status();
 })();
 </script>""")
 
@@ -533,13 +618,10 @@ def build_body(days):
     today = days[0]
     rs = reasons(today, 3)
     why = (" Glavni razlogi: " + "; ".join(rs) + ".") if rs else " Danes ni izrazitih sprožilcev."
-    answer = (f'  <p class="archive-intro" id="as-answer">Tveganje za ljudi z astmo v Zgornji Savinjski dolini je danes '
-              f'<strong>{today["level"]}</strong> (ocena {today["score"]} od 27).{esc(why)} '
-              f'{esc(level_advice(today["level"]))} Osvežitev {TODAY.isoformat()}.</p>')
-
-    best = min(days, key=lambda d: (d["score"], d["date"]))
-    outlook = (f'Najugodnejši je {esc(best["label"].lower())} (ocena {best["score"]}).'
-               if best["score"] < today["score"] else "Danes je najugodnejši dan v napovedi.")
+    answer = (f'  <p class="archive-intro" id="as-answer"><strong>Kako vreme in kakovost zraka vplivata na astmo?</strong> '
+              f'Cvetni prah, drobni delci, ozon, mraz, vročina, nevihte in hitre spremembe vremena so pri nekaterih ljudeh znani sprožilci. '
+              f'Ocena obremenitve zaradi okoljskih sprožilcev v Rečici ob Savinji in Zgornji Savinjski dolini je danes '
+              f'<strong>{today["level"]}</strong> ({today["score"]} točk od največ 27).{esc(why)}</p>')
 
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
         f"    <details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>" for q, a in FAQ) + "\n  </div>"
@@ -559,33 +641,42 @@ def build_body(days):
 
     return f'''{seo.crumbs_html([("Meteorec", "/"), ("Vreme in astma", None)])}
 {seo.stn_badge()}
-  <h1 class="page-title">Vreme in astma: napoved tveganja za 5 dni</h1>
-  <p class="post-meta">Cvetni prah, onesnažen zrak, mraz, vročina, nevihte in hitre spremembe · Zgornja Savinjska dolina · {TODAY.isoformat()}</p>
+  <h1 class="page-title">Vreme in astma: napoved okoljskih sprožilcev za 5 dni</h1>
+  <p class="post-meta">Okoljski sprožilci za astmo · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano {esc(updated_text())}</p>
 <div class="as-viz">
 {hero_html(days)}
-{answer}
-  <p class="muted-note"><strong>To ni zdravniški nasvet.</strong> Ocena prikazuje sprožilce, ki jih napovedujeta vreme in zrak,
-  ne verjetnosti napada. Za zdravljenje in ukrepe veljajo navodila vašega zdravnika; v nujnem primeru pokličite 112.</p>
+  <p class="muted-note"><strong>To ni zdravniški nasvet.</strong> Ocena prikazuje okoljske sprožilce, ki jih napovedujeta vreme in zrak,
+  in ne verjetnosti astmatičnega napada ali nadomestila za osebni načrt zdravljenja. Za zdravljenje in ukrepe veljajo navodila vašega
+  zdravnika; v nujnem primeru pokličite 112.</p>
   <h2>Naslednjih 5 dni</h2>
-  <p class="archive-intro">{outlook} Raven je vedno zapisana tudi z besedo.</p>
+  <p class="archive-intro">{esc(days_summary(days))} Raven je vedno zapisana tudi z besedo.</p>
 {day_cards_html(days)}
+  <h2>Moji sprožilci</h2>
+  <p class="archive-intro">Označite, kaj občutite pri sebi, in pritisnite »Uporabi moje sprožilce«. Izbrani dejavniki bodo pri oceni šteli dvojno.</p>
+{triggers_html()}
+  <h2>Skupna obremenitev po dnevih</h2>
 {stacked_block(days)}
+{reasons_by_day_html(days)}
   <h2>Danes po dejavnikih</h2>
-  <p class="archive-intro">Vsak dejavnik ima tri stopnje: blago, zmerno, visoko.</p>
+  <p class="archive-intro">Dejavniki so razvrščeni v skupine. Vsak ima tri stopnje (blago, zmerno, visoko), vrednost in razlog, zakaj je pomemben.</p>
 {profile_html(days[0])}
   <h2>Vsi dnevi in dejavniki</h2>
-  <p class="archive-intro">Najvišji dnevni vpliv posameznega dejavnika; pomik nad celico pokaže razlog.</p>
+  <p class="archive-intro">Najvišji dnevni vpliv posameznega dejavnika. Razlogi so zapisani tudi v besedilu zgoraj.</p>
 {heatmap_html(days)}
-  <h2>Moji sprožilci</h2>
-  <p class="archive-intro">Označite, kaj občutite pri sebi. Izbrani dejavniki bodo pri oceni šteli dvojno.</p>
-{triggers_html()}
-  <h2>Kako je ocena sestavljena</h2>
+  <h2 id="metodologija">Kako je ocena sestavljena</h2>
+  <p class="archive-intro">Gre za informativni model, ki sešteje točke devetih dejavnikov (0–3 na dejavnik, skupaj največ 27). Točkovanje in pragovi so naša
+  delitev po splošno znanih sprožilcih, ne klinična lestvica.</p>
   <table class="stats">
     <tr><th>Dejavnik</th><td>Pragovi (blago / zmerno / visoko)</td><td>Opomba</td></tr>
 {rule_rows}
   </table>
-  <p class="muted-note">Podatki: Copernicus CAMS Europe (zrak, cvetni prah) in Open-Meteo (temperatura, vlaga, tlak, nevihte) za Rečico ob
-  Savinji. Gre za modelsko napoved, ne za meritev; mreža modela ne razloči dolin in lokalnih virov.</p>
+  <ul class="as-lim">
+    <li><strong>Modelske napovedi, ne meritve:</strong> zrak in cvetni prah prihajata iz modela Copernicus CAMS Europe, vreme iz Open-Meteo. Postaja Meteorec teh dejavnikov ne meri.</li>
+    <li><strong>Prostorska ločljivost:</strong> mreža modela je približno 10 km, zato ne razloči dolin, ceste ob hiši ali lokalnih virov kurjenja.</li>
+    <li><strong>Čas:</strong> stran se izračuna enkrat na dan ({esc(updated_text())}); urne vrednosti se čez dan lahko spremenijo.</li>
+    <li><strong>Ni enako za vse:</strong> ista okoljska situacija ne vpliva enako na vse ljudi; ocena je zato le izhodišče, ne napoved vašega počutja.</li>
+  </ul>
+  <p class="muted-note">Podatki: Copernicus CAMS Europe (zrak, cvetni prah) in Open-Meteo (temperatura, vlaga, tlak, nevihte).</p>
 {faq_html}
   <div class="card" style="margin-bottom:1rem">
     <div class="clabel">Povezave</div>
@@ -593,6 +684,7 @@ def build_body(days):
       <a href="/kakovost-zraka/" class="mtn-avk-link">Kakovost zraka in cvetni prah →</a>
       <a href="/biovreme/" class="mtn-avk-link">Biovreme →</a>
       <a href="https://www.arso.gov.si/zrak/" target="_blank" rel="noopener" class="mtn-avk-link">ARSO — kakovost zraka</a>
+      <a href="https://www.nlzoh.si/" target="_blank" rel="noopener" class="mtn-avk-link">NLZOH — cvetni prah</a>
       <a href="https://www.nijz.si/" target="_blank" rel="noopener" class="mtn-avk-link">NIJZ</a>
     </div>
   </div>
@@ -611,15 +703,15 @@ def main():
         sys.exit(1)
 
     days = build_days(aq, wx)
-    if not any(sum(d["pts"].values()) or d["detail"]["pm"] != "ni podatka" for d in days):
+    if not any(sum(d["pts"].values()) or d["detail"]["pm"] != "model ne vrača podatka" for d in days):
         print("✗ Podatkov ni (vsi dnevi brez vrednosti)", file=sys.stderr)
         sys.exit(1)
 
     url = "/astma/"
-    title = "Vreme in astma: napoved tveganja za 5 dni"
+    title = "Vreme in astma: napoved okoljskih sprožilcev za 5 dni"
     t = days[0]
-    desc = (f"Tveganje za ljudi z astmo danes: {t['level']}. Pelod, PM2,5, ozon, mraz, vročina, nevihte in hitre "
-            f"spremembe vremena za 5 dni v Zgornji Savinjski dolini.")
+    desc = (f"Okoljska obremenitev za ljudi z astmo danes: {t['level']}. Pelod, PM2,5, ozon, mraz, vročina, nevihte in hitre "
+            f"spremembe vremena za 5 dni v Rečici ob Savinji in Zgornji Savinjski dolini.")
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-10-29"),
         seo.crumbs_schema([("Meteorec", "/"), ("Vreme in astma", None)]),
@@ -627,7 +719,7 @@ def main():
     ]) + "\n" + CSS
     page = seo.page_shell(title, desc, url, schema, build_body(days))
     seo.write_page("astma/index.html", page, force=True)
-    print(f"  → astma/index.html (danes {t['level']}, ocena {t['score']})")
+    print(f"  → astma/index.html (danes {t['level']}, {t['score']} točk)")
 
 
 if __name__ == "__main__":
