@@ -875,6 +875,99 @@ async function _pushAll(env, payload, filter, key = "push/subs.json") {
   return { sent: target.length - dead.length, pruned: dead.length };
 }
 
+// ── Migrenski alarm (Web Push, /migrena/) ──────────────────
+// Ločen seznam naročnin (kot crnivec.si in gobe): kdor se naroči na padec tlaka, ne dobi vročine ali dežja
+// v Rečici in obratno. Naročnina nosi samo prag (3, 5 ali 8 hPa v 24 h) in stanje alarma -- nobenega
+// zdravstvenega podatka, dnevnik napadov ostane v brskalniku. Obvestilo gre ob PREHODU čez prag
+// (histereza MIG_RESET_HPA, hladilna doba MIG_COOLDOWN_MS), ne ob vsaki uri napovedanega padca.
+// Vir: Open-Meteo pressure_msl za Rečico; ocena, ne zdravniški nasvet -- besedilo to pove.
+const MIG_PUSH_KEY = "push/migrena-subs.json";
+const MIG_PUSH_STATE = "push/migrena_state.json";
+const MIG_PAGE_URL = "https://meteorec.si/migrena/";
+const MIG_THR_ALLOWED = [3, 5, 8];   // hPa v 24 h; ↔ izbirnik na /migrena/ (test_parity.konstante_workerja)
+const MIG_THR_DEFAULT = 5;
+const MIG_RESET_HPA = 1;
+const MIG_COOLDOWN_MS = 12 * 3600 * 1000;
+const MIG_EVERY_MS = 55 * 60 * 1000;
+const MIG_HORIZON_H = 24;
+const MIG_TIHO_OD = 22, MIG_TIHO_DO = 7;
+
+function _migThr(x) { const v = Number(x); return MIG_THR_ALLOWED.indexOf(v) >= 0 ? v : MIG_THR_DEFAULT; }
+
+// Najstrmejši 24-urni padec za konce intervalov v naslednjih MIG_HORIZON_H urah.
+// `h` = hourly Open-Meteo (časi UTC) z past_days >= 1; vrne {drop, at, pressure} ali null.
+function _migDrop(h, now) {
+  const t = (h && h.time) || [], p = (h && h.pressure_msl) || [], HOUR = 3600 * 1000;
+  const idx = new Map(); for (let i = 0; i < t.length; i++) idx.set(Date.parse(t[i] + "Z"), i);
+  let best = null;
+  for (let i = 0; i < t.length; i++) {
+    const ts = Date.parse(t[i] + "Z");
+    if (ts <= now || ts > now + MIG_HORIZON_H * HOUR) continue;
+    const j = idx.get(ts - 24 * HOUR);
+    if (j == null || p[i] == null || p[j] == null) continue;
+    const drop = p[j] - p[i];
+    if (!best || drop > best.drop) best = { drop, at: ts, pressure: p[i] };
+  }
+  return best;
+}
+
+function _migText(best, thr) {
+  const TZ = "Europe/Ljubljana", d = new Date(best.at);
+  const wd = d.toLocaleDateString("sl-SI", { weekday: "long", timeZone: TZ });
+  const hh = Number(d.toLocaleString("en-GB", { hour: "2-digit", hour12: false, timeZone: TZ })) % 24;
+  return "Napovedan padec zračnega tlaka za " + best.drop.toFixed(1).replace(".", ",") + " hPa v 24 urah (do " + wd + " ob " + hh + ".00, tvoj prag "
+    + thr + " hPa). Veliko ljudi z migreno to omenja kot sprožilec. Modelska napoved, ne zdravniški nasvet.";
+}
+
+// Preveri prag vsake naročnine proti najstrmejšemu napovedanemu padcu in pošlje obvestila.
+async function _migNotify(env, h, now) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { checked: 0, sent: 0, skipped: "ni shrambe ali VAPID" };
+  let subs = []; try { const o = await r2.get(MIG_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const best = _migDrop(h, now);
+  if (!best) return { checked: subs.length, sent: 0, skipped: "ni podatkov o tlaku" };
+  let sent = 0, changed = false; const dead = [];
+  for (const sub of subs) {
+    const thr = _migThr(sub.thr), st = sub.st || (sub.st = { over: false, last: 0 });
+    if (best.drop >= thr) {
+      if (!st.over) {
+        if (now - (st.last || 0) > MIG_COOLDOWN_MS) {
+          try {
+            const code = await _sendPush(env, sub, { title: "🧠 Migrena: padec tlaka", body: _migText(best, thr), url: MIG_PAGE_URL, tag: "migrena-tlak", icon: "/icon-192.png" });
+            if (code === 404 || code === 410) dead.push(sub.endpoint); else { sent++; st.last = now; }
+          } catch (_) {}
+        }
+        st.over = true; changed = true;
+      }
+    } else if (st.over && best.drop < thr - MIG_RESET_HPA) { st.over = false; changed = true; }
+  }
+  if (dead.length || changed) {
+    await r2.put(MIG_PUSH_KEY, JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
+  }
+  return { checked: subs.length, sent, pruned: dead.length, drop: best.drop };
+}
+
+async function _cronCheckMigrena(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI >= MIG_TIHO_OD || hourSI < MIG_TIHO_DO) return;
+  // Brez naročnikov vira ne kličemo.
+  let subs = []; try { const o = await r2.get(MIG_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  if (!subs.length) return;
+  let state = {}; try { const o = await r2.get(MIG_PUSH_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  if (now - (state._lastRun || 0) < MIG_EVERY_MS) return;   // enkrat na uro; izpadel tik ne izgubi ure
+  let data;
+  try {
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=46.3329&longitude=14.9158&hourly=pressure_msl&past_days=1&forecast_days=3&timezone=UTC", { signal: ctrl.signal }).finally(() => clearTimeout(tid));
+    if (!res.ok) return { ok: false, reason: "Open-Meteo HTTP " + res.status };
+    data = await res.json();
+  } catch (e) { return { ok: false, reason: "Open-Meteo: " + String((e && e.message) || e) }; }
+  const out = await _migNotify(env, data.hourly, now);
+  await r2.put(MIG_PUSH_STATE, JSON.stringify({ _lastRun: now }), { httpMetadata: { contentType: "application/json" } });
+  return out && out.skipped ? { ok: false, reason: out.skipped } : true;
+}
+
 // ── Gobji alarm (Web Push, brezplačni del) ─────────────────
 // Ločen seznam naročnin (kot crnivec.si): kdor si nastavi alarm za jurčka
 // nad Ljubnim, ne dobi vročine v Rečici in obratno. Pravila so omejena na
@@ -2954,7 +3047,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 // ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
 // 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
-  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20,
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20,
   lightning: 20, radar_composite: 20, icon_cells: 20,
   score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
@@ -3738,6 +3831,7 @@ export default {
     ctx.waitUntil(_cronBeat(env, "fc_thresholds", () => _cronCheckForecastThresholds(env)));   // sam se omeji na enkrat na uro
     ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
     ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
+    ctx.waitUntil(_cronBeat(env, "migrena", () => _cronCheckMigrena(env)));   // sam se omeji na enkrat na uro
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
     // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
     // izgubljen zapis, ki ga ni mogoče dobiti za nazaj — okvir radarja doriše
@@ -8308,6 +8402,27 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
           const next = subs.filter(x => x.endpoint !== ep);
           if (r2 && next.length !== subs.length) await cWrite(next);
+          return pj({ ok: true });
+        }
+
+        // Migrenski alarm: lasten seznam (MIG_PUSH_KEY), naročnina nosi samo prag padca tlaka.
+        // Odjava tu NE odjavi brskalnika: ta je lahko hkrati naročen na druga opozorila.
+        if (body.site === "migrena" && path !== "/push/send") {
+          let subs = []; if (r2) { try { const o = await r2.get(MIG_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {} }
+          const mWrite = a => r2.put(MIG_PUSH_KEY, JSON.stringify(a), { httpMetadata: { contentType: "application/json" } });
+          if (path === "/push/subscribe") {
+            if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+            const s = body.subscription || {};
+            if (!s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+            const thr = _migThr(body.thr), old = subs.find(x => x.endpoint === s.endpoint);
+            const rest = subs.filter(x => x.endpoint !== s.endpoint);
+            rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, thr, st: old ? old.st || { over: false, last: 0 } : { over: false, last: 0 }, ts: old ? old.ts : new Date().toISOString() });
+            await mWrite(rest.slice(0, 5000));
+            return pj({ ok: true, thr });
+          }
+          const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
+          const next = subs.filter(x => x.endpoint !== ep);
+          if (r2 && next.length !== subs.length) await mWrite(next);
           return pj({ ok: true });
         }
 

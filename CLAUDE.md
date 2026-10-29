@@ -2678,6 +2678,30 @@ Samo videz (`style.css`, `index.html`, malo `app.js`); logika in id-ji so nedota
 - **Nowcast (`#nowcast-wrap`, »Naslednjih 45 minut«) ostane nad hero kartico po Filipovi odločitvi** (26. 10. 2026), čeprav ob prihodu radarja ob dežju zraste za ~340 px in da CLS 0,07–0,17. Možna rešitev, če bo treba: premik pod hero kartico. Ne rezerviraj prostora za mirno vreme (prazna luknja).
 - **Merjenje CLS:** Playwright + CDP (`Network.emulateNetworkConditions` 200 kB/s, 150 ms; `Emulation.setCPUThrottlingRate` 4×), `PerformanceObserver('layout-shift')`. Posamezni teki so zelo nestanovitni (osnovna različica 0,02–0,10 v 5 s): primerjaj vsaj 3 teke. Open-Meteo vrne ob veliko meritvah 429/503 in kartice (obeti) ostanejo prazne — ne zamenjaj za napako v kodi.
 
+## Strani »vreme za …« in migrena (29. 10. 2026)
+
+Šest strani po istem vzorcu, brez lastnih podatkov: `/astma/` (`generate_astma_page.py`, samostojen, ima tudi JS za osebne sprožilce),
+`/susenje-perila/`, `/vreme-za-kolesarje/`, `/vreme-za-cebelarje/`, `/vreme-za-ribolov/`, `/vreme-za-pse/` in `/migrena/`
+(skupni pogon `tools/day_score_common.py` + po ena konfiguracija `generate_*_page.py`; `vsakdan-forecast.yml`, dnevno 6:30 UTC).
+
+- **Ocena = točke slabosti 0-3 na dejavnik, vsota, manj je bolje** (štiri ravni; en dejavnik s 3 točkami da vsaj raven 2, »veto«).
+  Pragovi so naši, ne klinični in ne fizikalni; vsaka stran to pove in ima opozorilo (ni zdravniški/veterinarski/čebelarski nasvet).
+  Samo modelska napoved Open-Meteo za Rečico, **brez meritev postaje**; analiza dnevnika na `/migrena/` bere samo ZUNANJA polja
+  iz `history.json` (nikoli notranjih; velja pravilo z vrha dokumenta).
+- **Barve skupin** (največ 4) so sloti 1-4 preverjene palete (`validate_palette.js`, dataviz): ne menjaj jih na oko. Nova stran = nova
+  konfiguracija (dejavniki, skupine, pragovi, FAQ), ne nov izris; vpis v `CORE` v `seo_audit.py`, `llms.txt`, `vsakdan-forecast.yml`.
+- **Open-Meteo klic se deli** med strani (`fetch_ctx()`, predpomnilnik 30 min v začasni datoteki): pet generatorjev zapored je sicer dobilo 429.
+- Test: `test_day_pages.py` (pragovi, veto, okno po urah, izris, usklajenost konfiguracij), `test_migrena.py` (točke, graf tlaka,
+  `dvLevel` ↔ `level_index`, `migAnalyze` na sintetičnih podatkih, ID-ji za JS), `test_migrena_alarm.mjs` (prava koda iz `worker.js`).
+- **`/migrena/`: dnevnik napadov je samo v brskalniku** (`wx-migrena-dnevnik`, `wx-migrena-sprozilci`), na strežnik ne gre nič; izvoz CSV je
+  za zdravnika. `migAnalyze()` primerja dneve napada z ostalimi dnevi (brez dni ±1 ob napadu) po Welchu in označi samo razliko > 1,96 SE;
+  pod 5 napadov ali 10 primerjalnih dni **ne trdi nič**. Ne dodajaj zdravil ali odmerkov; rdeče zastavice in 112 ostanejo vidne.
+- **Migrenski alarm** (`worker.js`, blok »Migrenski alarm«): ločen seznam `push/migrena-subs.json` (`site:"migrena"` v `/push/subscribe`,
+  odjava ne odjavi brskalnika), naročnina nosi samo prag (3/5/8 hPa v 24 h, `MIG_THR_ALLOWED` ↔ `ALARM_THR` v generatorju) in stanje.
+  Cron `_cronCheckMigrena` (enkrat na uro, tiho 22-7, brez naročnikov ne kliče vira) pošlje obvestilo ob PREHODU čez prag (histereza 1 hPa,
+  hladilna doba 12 h). Besedilo pove, da je modelska napoved. Opisano na `zasebnost.html`.
+- Ikona glave z bliskom (`img/migrena/glava-blisk.png`) je Filipova slika; ime izvirnika (`3998088.png`) kaže na Flaticon, licenco/navedbo preveri on.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
