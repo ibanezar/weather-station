@@ -404,7 +404,7 @@ def art_sneg(c):
         f"{dlong(crn[2021])} 2021 in {dlong(crn[2023])} 2023.",
         f"V Rečici sem v istih petih zimah našel prvi hladen padavinski dan {dlong(rec[2025])} 2025, {dlong(rec[2024])} 2024, {dlong(rec[2022])} 2022, {dlong(rec[2021])} 2021 in {dlong(rec[2023])} 2023. "
         "Razlika do Črnivca je v štirih od petih zim največ tri dni. Izjema je zima 2022/23: na Črnivcu je sneg padel 23. novembra, v dolini pa je bila prva hladna padavina šele 11. decembra, 18 dni pozneje.",
-        "Dolina in postaja skoraj 500 m više torej prvi hladen val pogosto doživita skoraj hkrati. Zakaj je bilo pozimi 2022/23 drugače, iz teh podatkov ne morem reči.",
+        "Dolina in Črnivec, ki leži skoraj 500 m više, torej prvi hladni val pogosto doživita skoraj hkrati. Zakaj je bilo pozimi 2022/23 drugače, iz teh podatkov ne morem reči.",
     ]
     s3 = [
         f"Letos je 23. oktobra postaja prvič izmerila temperaturo pod ničlo: –0,1 °C. Hladnega padavinskega dne od 1. oktobra še ni bilo. "
@@ -736,7 +736,7 @@ def art_hribi(c):
         ("1", "cm", "novega snega na Goltah 31. oktobra po modelu.", False),
         ("0", "cm", "novega snega do 900 m v naslednjih sedmih dneh.", True),
     ])
-    lead = ("Sneg v hribih nad Zgornjo Savinjsko dolino se približuje: model za <strong>31. oktobra</strong> napoveduje prve centimetre na Goltah (približno 1 cm), "
+    lead = ("Sneg v hribih nad Zgornjo Savinjsko dolino se približuje: model za <strong>31. oktobra</strong> napoveduje prvi sneg na Goltah (približno 1 cm), "
             "meja sneženja pa naj bi se do 2. novembra spustila z 2660 na 1210 m. Do 900 m, tudi v Solčavi in Logarski dolini, model v naslednjem tednu ne napoveduje snega. "
             "Na najbližji izmerjeni točki, Črnivcu (848 m), je ARSO prvi nov sneg v petih zimah izmeril med 18. in 30. novembrom.")
     s1 = [

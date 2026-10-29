@@ -154,7 +154,7 @@ def build_article(H):
     lead = ('<strong>Kratek odgovor: prvi vikend po dežju je za jurčka po našem modelu prezgodaj.</strong> '
             'Ni slaba sreča in ni sosedova skrivnost, ampak koledar. Drugi vikend je po istem modelu za jurčka v oknu.')
     intro = ('Poznate takšen teden? V petek vsa dolina dežuje, v soboto zjutraj greste v gozd, pa so tla mokra in klobukov ni. '
-             'V torek vas sosed vpraša, ali ste že bili, v soboto pa se pohvali s košaro. Zgleda, kot da gobe rastejo takrat, '
+             'V torek vas sosed vpraša, ali ste že bili, v soboto pa se pohvali s košaro. Zdi se, kot da gobe rastejo takrat, '
              'ko ste v službi ali drugje.')
     p1 = [
         intro,
@@ -174,7 +174,7 @@ def build_article(H):
         f'{num(DAY_MM, 0)} mm (vrzel največ en dan), skupaj vsaj {num(EVENT_MM, 0)} mm. Takih dogodkov je bilo {n}. Pri vsakem sem '
         'preveril, ali vsaj en dan prvega oziroma drugega vikenda po zadnjem deževnem dnevu pade v okno vrste.',
         f'<ul><li>Pri <strong>jurčku</strong> noben dan prvega vikenda po dežju ni bil v oknu 8–16 dni v nobenem od {n} dogodkov. Vsaj en dan drugega vikenda je bil '
-        f'v oknu v vseh {n}. To sicer sledi iz koledarja, a vidno je tudi, da se gobar brez tega znanja ob vsakem dežju odpravi prvi vikend.</li>'
+        f'v oknu v vseh {n}. To sledi iz koledarja; številka le pokaže, da prvi vikend ni redka izjema, ampak pravilo.</li>'
         f'<li>Pri <strong>lisički</strong> je bil vsaj en dan prvega vikenda v oknu 4–14 dni v {l1} od {n} dogodkov, torej v okoli {pct_l} %. '
         'Če dežuje v petek ali četrtek, je za lisičko prvi vikend prezgodaj; če dežuje na začetku tedna, je večinoma ravno prav.</li></ul>',
         f'Dež sam na dan v tednu ne gleda. Dogodki so se začeli v vseh dnevih tedna, najpogosteje v '
