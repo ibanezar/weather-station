@@ -561,6 +561,8 @@ def build_body(cfg, c, days, today=None):
     links = "".join('      <a href="%s" class="mtn-avk-link"%s>%s</a>\n' % (u, ext if u.startswith("http") else "", esc(t))
                     for u, t in cfg["links"])
     sec = cfg["sections"](cfg, c, days, today) if cfg.get("sections") else {}
+    alert = "" if cfg.get("no_ocene") else alert_html(cfg["slug"], cfg["short"], cfg["levels"])
+    alert_js = "" if cfg.get("no_ocene") else alert_script(cfg["slug"])
     script = cfg["script"](cfg, days) if cfg.get("script") else ""
     return f'''{seo.crumbs_html([("Meteorec", "/"), (cfg["crumb"], None)])}
 {seo.stn_badge()}
@@ -574,6 +576,7 @@ def build_body(cfg, c, days, today=None):
   <h2>Naslednjih 5 dni</h2>
   <p class="archive-intro">{esc(days_summary(cfg, days))} Raven je vedno zapisana tudi z besedo.</p>
 {day_cards_html(cfg, days)}
+{alert}
 {sec.get("after_cards", "")}
 {strips_block(cfg, c, today)}
   <h2>Skupna ocena po dnevih</h2>
@@ -602,7 +605,8 @@ def build_body(cfg, c, days, today=None):
   </div>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
 </div>
-{script}'''
+{script}
+{alert_js}'''
 
 
 def build_page(cfg, c, today=None):
@@ -614,9 +618,117 @@ def build_page(cfg, c, today=None):
         seo.webpage_schema(cfg["url"], cfg["title"], desc, date_published="2026-10-29"),
         seo.crumbs_schema([("Meteorec", "/"), (cfg["crumb"], None)]),
         seo.faq_schema(cfg["faq"]),
-    ]) + "\n" + CSS
+    ]) + "\n" + CSS + "\n" + ("" if cfg.get("no_ocene") else ALERT_CSS)
     page = seo.page_shell(cfg["title"], desc, cfg["url"], schema, build_body(cfg, c, days, today))
     return page, days
+
+
+# ── Opozorila po ocenah ──────────────────────────────────────────────────────
+ALERT_MAX_RULES = 5        # ↔ OCENE_MAX_RULES v worker.js (test_day_pages.py primerja)
+OCENE_FILE = os.path.join(seo.ROOT, "data", "vsakdan-ocene.json")
+WORKER_BASE = "https://weatherireica1.filip-eremita.workers.dev"
+
+
+def write_summary(slug, short, url, levels, days, path=None):
+    """Zapiše ocene strani v skupni data/vsakdan-ocene.json, ki ga bere worker (opozorila po ocenah).
+    days = [{"date", "lvl" (indeks), "reasons" [besedila]}]. Ostale strani v datoteki ostanejo; časi so UTC.
+    Strani poganjajo zaporedno (vsakdan-forecast.yml), zato branje-spreminjanje-pisanje ne tekmuje."""
+    path = path or OCENE_FILE
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        if not isinstance(data, dict) or not isinstance(data.get("pages"), dict):
+            data = {"pages": {}}
+    except (OSError, json.JSONDecodeError):
+        data = {"pages": {}}
+    data["generated"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    data["pages"][slug] = {"naslov": short, "url": url, "levels": list(levels),
+                           "days": [{"date": d["date"], "lvl": int(d["lvl"]), "reasons": list(d.get("reasons") or [])[:2]} for d in days]}
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        f.write("\n")
+
+
+def alert_options(levels):
+    """(vrednost, besedilo) izbir za »Obvesti me, ko je raven …«: skrajni ravni točno, vmesni z »ali boljše/slabše«."""
+    return [("le0", f"{levels[0]}"), ("le1", f"{levels[1]} ali boljše"), ("ge2", f"{levels[2]} ali slabše"), ("ge3", f"{levels[3]}")]
+
+
+ALERT_CSS = """<style>
+.ov-alert{border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:1rem 1.1rem;margin:1rem 0 1.6rem}
+[data-theme="light"] .ov-alert{border-color:rgba(0,0,0,.14)}
+.ov-alert h2{margin-top:0}
+.ov-row{display:flex;flex-wrap:wrap;gap:.7rem;align-items:flex-end;margin:.6rem 0}
+.ov-row label{display:flex;flex-direction:column;gap:.25rem;font-size:.85rem}
+.ov-row select{min-height:44px;padding:.4rem .6rem;border-radius:8px;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:inherit}
+.ov-btn{min-height:44px;padding:.5rem 1rem;border-radius:8px;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:inherit;cursor:pointer}
+.ov-btn-p{background:#2a78d6;border-color:#2a78d6;color:#fff;font-weight:700}
+.ov-btn:disabled{opacity:.45;cursor:not-allowed}
+.ov-msg{font-size:.88rem;margin:.4rem 0}
+</style>"""
+
+
+def alert_html(slug, short, levels):
+    """Gradnik »Moje opozorilo«; skrit, dokler brskalnik ne podpira Web Push (izpisan v JS)."""
+    ops = "".join(f'<option value="{v}">{esc(t)}</option>' for v, t in alert_options(levels))
+    return (f'  <div class="ov-alert" id="ov-alert" hidden>\n'
+            f'  <h2>Opozorilo na telefon</h2>\n'
+            f'  <p class="archive-intro">Sami nastavite, kdaj želite obvestilo: izberite raven in dan, mi pa ga pošljemo, ko ocena za »{esc(short)}« ustreza. '
+            f'Vsako pravilo sproži obvestilo enkrat na ciljni dan. Strežnik shrani samo naslovnico naročnine in vaša pravila (največ {ALERT_MAX_RULES} na napravi, za vse strani skupaj).</p>\n'
+            f'  <div class="ov-row"><label>Obvesti me, ko je raven <select id="ov-op">{ops}</select></label>'
+            f'<label>za dan <select id="ov-when"><option value="jutri">jutri</option><option value="danes">danes</option></select></label></div>\n'
+            f'  <div class="ov-row"><button type="button" class="ov-btn ov-btn-p" id="ov-on">Vklopi opozorilo</button>'
+            f'<button type="button" class="ov-btn" id="ov-off" hidden>Izklopi opozorilo za to stran</button></div>\n'
+            f'  <p class="ov-msg" id="ov-msg" role="status" aria-live="polite"></p>\n'
+            f'  <p class="ov-msg" id="ov-ios" hidden><b>iPhone in iPad:</b> obvestila delujejo samo v nameščeni aplikaciji. V Safariju tapnite »Deli« in »Dodaj na začetni zaslon«, odprite Meteorec z začetnega zaslona in opozorilo vklopite tam.</p>\n'
+            f'  <p class="muted-note">Modelska napoved Open-Meteo, ne meritev ali uradno opozorilo. Opozorilo lahko kadar koli izklopite tukaj.</p>\n  </div>')
+
+
+ALERT_JS = r"""(function(){
+  var SLUG=__SLUG__,API=__API__,MAX=__MAX__,RK='wx-ocene-pravila',box=document.getElementById('ov-alert');if(!box)return;
+  var op=document.getElementById('ov-op'),when=document.getElementById('ov-when'),onB=document.getElementById('ov-on'),offB=document.getElementById('ov-off'),msg=document.getElementById('ov-msg'),ios=document.getElementById('ov-ios');
+  function say(t){msg.textContent=t||'';}
+  function load(){try{var r=JSON.parse(localStorage.getItem(RK));return Array.isArray(r)?r:[];}catch(e){return [];}}
+  function save(r){try{localStorage.setItem(RK,JSON.stringify(r));}catch(e){}}
+  var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+  var isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  function mine(rs){return rs.filter(function(x){return x.page===SLUG;})[0];}
+  function show(){var m=mine(load());offB.hidden=!m;onB.textContent=m?'Shrani novo pravilo':'Vklopi opozorilo';
+    if(m){op.value=m.op+m.lvl;when.value=m.when;say('Opozorilo je vklopljeno za to stran.');}else say('');}
+  if(isIOS&&!standalone){box.hidden=false;ios.hidden=false;onB.disabled=true;return;}
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return;
+  box.hidden=false;show();
+  function b64(s){var p='='.repeat((4-s.length%4)%4),b=(s+p).replace(/-/g,'+').replace(/_/g,'/'),r=atob(b),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+  function post(path,body){return fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j;});});}
+  function reg(){return navigator.serviceWorker.register('/sw.js').then(function(){return navigator.serviceWorker.ready;});}
+  // Strežnik hrani celoten seznam pravil te naprave; prazen seznam = odjava (brskalnika ne odjavimo).
+  function sync(rules,ok){
+    onB.disabled=true;offB.disabled=true;
+    return reg().then(function(r){return r.pushManager.getSubscription().then(function(sub){
+      if(!rules.length){return sub?post('/push/unsubscribe',{site:'ocene',endpoint:sub.endpoint}):null;}
+      if(sub)return sub;
+      return fetch(API+'/push/vapid').then(function(x){return x.json();}).then(function(v){return r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(v.publicKey)});});
+    }).then(function(sub){if(rules.length&&sub)return post('/push/subscribe',{site:'ocene',subscription:sub.toJSON(),rules:rules});});})
+    .then(function(){save(rules);show();say(ok);}).catch(function(e){say('Ni uspelo: '+(e&&e.message?e.message:'poskusite znova čez nekaj minut')+'.');})
+    .then(function(){onB.disabled=false;offB.disabled=false;});
+  }
+  onB.addEventListener('click',function(){
+    if(Notification.permission==='denied'){say('Obvestila so za to stran v brskalniku blokirana. Dovolite jih v nastavitvah strani.');return;}
+    var all=load().filter(function(x){return x.page!==SLUG;});
+    if(all.length>=MAX){say('Največ '+MAX+' pravil na napravi (za vse strani skupaj). Eno izklopite na drugi strani.');return;}
+    var v=op.value;all.push({page:SLUG,op:v.slice(0,2),lvl:+v.slice(2),when:when.value});
+    Notification.requestPermission().then(function(p){
+      if(p!=='granted'){say('Brez dovoljenja za obvestila opozorilo ne more delovati.');return;}
+      return sync(all,'Opozorilo je vklopljeno: '+op.options[op.selectedIndex].text+', za dan: '+when.value+'.');});
+  });
+  offB.addEventListener('click',function(){sync(load().filter(function(x){return x.page!==SLUG;}),'Opozorilo za to stran je izklopljeno.');});
+})();"""
+
+
+def alert_script(slug, api=WORKER_BASE):
+    return "<script>\n" + (ALERT_JS.replace("__SLUG__", json.dumps(slug)).replace("__API__", json.dumps(api))
+                           .replace("__MAX__", str(ALERT_MAX_RULES))) + "\n</script>"
 
 
 def main(cfg):
@@ -631,4 +743,7 @@ def main(cfg):
         sys.exit(1)
     page, days = build_page(cfg, c)
     seo.write_page(cfg["url"].strip("/") + "/index.html", page, force=True)
+    if not cfg.get("no_ocene"):
+        write_summary(cfg["slug"], cfg["short"], cfg["url"], cfg["levels"],
+                      [{"date": d["date"], "lvl": d["lvl"], "reasons": reasons(d)} for d in days])
     print(f"  → {cfg['url']} (danes {cfg['levels'][days[0]['lvl']]}, {tocke(days[0]['score'])})")

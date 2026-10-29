@@ -875,6 +875,102 @@ async function _pushAll(env, payload, filter, key = "push/subs.json") {
   return { sent: target.length - dead.length, pruned: dead.length };
 }
 
+// ── Opozorila po ocenah (Web Push; strani »vreme za …« in /astma/) ──────────
+// Obiskovalec si na strani izbere, KDAJ želi obvestilo: raven (npr. »odlično« ali »slabo ali slabše«) in dan (danes/jutri).
+// Strežnik hrani samo naslovnico naročnine in pravila {page, op, lvl, when} -- do OCENE_MAX_RULES na napravo. Ocene dni
+// piše Python (tools/day_score_common.py → data/vsakdan-ocene.json); worker jih samo bere, računa ne podvaja. Obvestilo
+// gre ENKRAT na pravilo in ciljni dan (st[ključ] = datum), ne ob vsaki uri. Podatki, starejši od OCENE_MAX_AGE_H, ne sprožijo
+// nič (cron javi napako prek _cronBeat). Ločen seznam kot migrena/gobe/crnivec; odjava ne odjavi brskalnika.
+const OCENE_PUSH_KEY = "push/ocene-subs.json";
+const OCENE_STATE = "push/ocene_state.json";
+const OCENE_URL = "https://meteorec.si/data/vsakdan-ocene.json";
+const OCENE_SITE = "https://meteorec.si";
+const OCENE_MAX_RULES = 5;               // ↔ ALERT_MAX_RULES v tools/day_score_common.py (test_day_pages.py primerja)
+const OCENE_MAX_AGE_H = 36;
+const OCENE_EVERY_MS = 55 * 60 * 1000;
+const OCENE_TIHO_OD = 22, OCENE_TIHO_DO = 7;
+
+async function _oceneData() {
+  try {
+    const r = await fetch(OCENE_URL, { cf: { cacheTtl: 1800, cacheEverything: true } });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d && d.pages && d.generated ? d : null;
+  } catch (_) { return null; }
+}
+
+// Vrne očiščen seznam pravil ali null, če katero ni veljavno (neznana stran, raven, dan).
+function _oceneClean(data, rules) {
+  if (!Array.isArray(rules)) return null;
+  const out = [], seen = new Set();
+  for (const r of rules.slice(0, OCENE_MAX_RULES)) {
+    if (!r || typeof r !== "object") return null;
+    const page = String(r.page || ""), op = r.op === "le" || r.op === "ge" ? r.op : null;
+    const when = r.when === "danes" || r.when === "jutri" ? r.when : null, lvl = Number(r.lvl);
+    if (!data.pages[page] || !op || !when || !Number.isInteger(lvl) || lvl < 0 || lvl > 3) return null;
+    const key = page + "|" + op + lvl + "|" + when;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ page, op, lvl, when });
+  }
+  return out;
+}
+
+function _oceneDates(now) {
+  const today = new Date(now).toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+  return { danes: today, jutri: new Date(Date.parse(today + "T12:00:00Z") + 864e5).toISOString().slice(0, 10) };
+}
+
+// Preveri pravila vsake naročnine proti ocenam in pošlje največ eno obvestilo na napravo (ostala pravila se omenijo).
+async function _oceneNotify(env, data, now) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { checked: 0, sent: 0, skipped: "ni shrambe ali VAPID" };
+  if (!(now - Date.parse(data.generated) <= OCENE_MAX_AGE_H * 3600 * 1000)) return { checked: 0, sent: 0, skipped: "ocene so stare" };
+  let subs = []; try { const o = await r2.get(OCENE_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const dates = _oceneDates(now);
+  let sent = 0, changed = false; const dead = [];
+  for (const sub of subs) {
+    const st = sub.st || (sub.st = {}), hits = [];
+    for (const rule of sub.rules || []) {
+      const page = data.pages[rule.page]; if (!page) continue;
+      const target = dates[rule.when];
+      const day = (page.days || []).find(d => d.date === target); if (!day) continue;
+      const hit = rule.op === "le" ? day.lvl <= rule.lvl : day.lvl >= rule.lvl;
+      const key = rule.page + "|" + rule.op + rule.lvl + "|" + rule.when;
+      if (hit && st[key] !== target) hits.push({ rule, page, day, target, key });
+    }
+    if (!hits.length) continue;
+    const h = hits[0];
+    const wd = new Date(h.target + "T12:00:00Z").toLocaleDateString("sl-SI", { weekday: "long", timeZone: "UTC" });
+    const why = (h.day.reasons || []).slice(0, 2).join("; ");
+    const body = h.page.naslov + ": " + h.rule.when + " (" + wd + ") raven »" + h.page.levels[h.day.lvl] + "«" + (why ? ": " + why : "")
+      + (hits.length > 1 ? ". In še " + (hits.length - 1) + (hits.length === 2 ? " tvoje opozorilo" : " tvojih opozoril") : "")
+      + ". Modelska napoved, ne meritev.";
+    try {
+      const code = await _sendPush(env, sub, { title: "Meteorec · opozorilo", body, url: OCENE_SITE + h.page.url, tag: "ocene-" + h.rule.page, icon: "/icon-192.png" });
+      if (code === 404 || code === 410) dead.push(sub.endpoint);
+      else { sent++; for (const x of hits) st[x.key] = x.target; changed = true; }
+    } catch (_) {}
+  }
+  if (dead.length || changed) await r2.put(OCENE_PUSH_KEY, JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
+  return { checked: subs.length, sent, pruned: dead.length };
+}
+
+async function _cronCheckOcene(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI >= OCENE_TIHO_OD || hourSI < OCENE_TIHO_DO) return;
+  let subs = []; try { const o = await r2.get(OCENE_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  if (!subs.length) return;                                   // brez naročnikov vira ne beremo
+  let state = {}; try { const o = await r2.get(OCENE_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  if (now - (state._lastRun || 0) < OCENE_EVERY_MS) return;
+  const data = await _oceneData();
+  if (!data) return { ok: false, reason: "vsakdan-ocene.json ni dosegljiv" };
+  const out = await _oceneNotify(env, data, now);
+  await r2.put(OCENE_STATE, JSON.stringify({ _lastRun: now }), { httpMetadata: { contentType: "application/json" } });
+  return out && out.skipped ? { ok: false, reason: out.skipped } : true;
+}
+
 // ── Migrenski alarm (Web Push, /migrena/) ──────────────────
 // Ločen seznam naročnin (kot crnivec.si in gobe): kdor se naroči na padec tlaka, ne dobi vročine ali dežja
 // v Rečici in obratno. Naročnina nosi samo prag (3, 5 ali 8 hPa v 24 h) in stanje alarma -- nobenega
@@ -3047,7 +3143,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 // ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
 // 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
-  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20,
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20, ocene: 20,
   lightning: 20, radar_composite: 20, icon_cells: 20,
   score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
@@ -3831,7 +3927,8 @@ export default {
     ctx.waitUntil(_cronBeat(env, "fc_thresholds", () => _cronCheckForecastThresholds(env)));   // sam se omeji na enkrat na uro
     ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
     ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
-    ctx.waitUntil(_cronBeat(env, "migrena", () => _cronCheckMigrena(env)));   // sam se omeji na enkrat na uro
+    ctx.waitUntil(_cronBeat(env, "migrena", () => _cronCheckMigrena(env)));
+    ctx.waitUntil(_cronBeat(env, "ocene", () => _cronCheckOcene(env)));        // sam se omeji na enkrat na uro   // sam se omeji na enkrat na uro
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
     // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
     // izgubljen zapis, ki ga ni mogoče dobiti za nazaj — okvir radarja doriše
@@ -8402,6 +8499,31 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
           const next = subs.filter(x => x.endpoint !== ep);
           if (r2 && next.length !== subs.length) await cWrite(next);
+          return pj({ ok: true });
+        }
+
+        // Opozorila po ocenah: lasten seznam (OCENE_PUSH_KEY), pravila so veljavna samo za strani iz vsakdan-ocene.json.
+        // Prazen seznam pravil = odjava; brskalnika NE odjavimo (lahko je naročen tudi na druga opozorila).
+        if (body.site === "ocene" && path !== "/push/send") {
+          let subs = []; if (r2) { try { const o = await r2.get(OCENE_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {} }
+          const oWrite = a => r2.put(OCENE_PUSH_KEY, JSON.stringify(a), { httpMetadata: { contentType: "application/json" } });
+          if (path === "/push/subscribe") {
+            if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+            const s = body.subscription || {};
+            if (!s.endpoint || !s.keys || !s.keys.p256dh || !s.keys.auth) return pj({ error: "Neveljavna naročnina" }, 400);
+            const data = await _oceneData();
+            if (!data) return pj({ error: "Seznam strani trenutno ni dosegljiv" }, 503);
+            const rules = _oceneClean(data, body.rules);
+            if (rules === null) return pj({ error: "Neznana stran, raven ali dan" }, 422);
+            const old = subs.find(x => x.endpoint === s.endpoint);
+            const rest = subs.filter(x => x.endpoint !== s.endpoint);
+            if (rules.length) rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, rules, st: old ? old.st || {} : {}, ts: old ? old.ts : new Date().toISOString() });
+            await oWrite(rest.slice(0, 5000));
+            return pj({ ok: true, rules: rules.length });
+          }
+          const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
+          const next = subs.filter(x => x.endpoint !== ep);
+          if (r2 && next.length !== subs.length) await oWrite(next);
           return pj({ ok: true });
         }
 

@@ -52,6 +52,7 @@ def hour_fn(c, h):
 
 CFG = {
     "url": "/vreme-za-kolesarje/", "slug": "vreme-za-kolesarje", "crumb": "Vreme za kolesarje",
+    "short": "Vreme za kolesarje",
     "title": "Vreme za kolesarje: napoved za 5 dni",
     "h1": "Vreme za kolesarje: kdaj je dobro kolesariti",
     "meta": "Dež, veter, temperatura, poledica in UV",

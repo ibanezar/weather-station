@@ -34,6 +34,7 @@ def day_fn(c, d):
 
 CFG = {
     "url": "/vreme-za-ribolov/", "slug": "vreme-za-ribolov", "crumb": "Vreme za ribolov",
+    "short": "Vreme za ribolov",
     "title": "Vreme za ribolov na Savinji: napoved za 5 dni",
     "h1": "Vreme za ribolov na Savinji: pogoji za 5 dni",
     "meta": "Tlak, dež, veter, temperatura in nevihte",

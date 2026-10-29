@@ -98,7 +98,7 @@ CORE = {
     # sitemap.xml v crnivec-site/), na meteorec.si pa je samo preusmeritev.
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
-    # Tveganje za astmatike po dnevih (tools/generate_astma_page.py, astma-forecast.yml).
+    # Tveganje za astmatike po dnevih (tools/generate_astma_page.py, vsakdan-forecast.yml).
     "astma/":                    ("daily",   "0.7"),
     # Strani »vreme za …« (tools/day_score_common.py + generate_{susenje_perila,vreme_za_*}_page.py, vsakdan-forecast.yml).
     "susenje-perila/":           ("daily",   "0.6"),
