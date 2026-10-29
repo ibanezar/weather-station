@@ -1809,10 +1809,19 @@ def gen_records_page(hist, sitemap_urls):
             distribution=HISTORY_DISTRIBUTION,
         ),
     ])
+    rekord_kratko = ""
+    if tmax_d and tmin_d and prec_d and wind_d:
+        rekord_kratko = (
+            f'  <p class="archive-intro"><strong>Na kratko:</strong> od novembra 2019 je postaja IREICA1 v Rečici ob Savinji izmerila '
+            f'najvišjo temperaturo {num(tmax_v)} °C ({fmtd(tmax_d)}), najnižjo {num(tmin_v)} °C ({fmtd(tmin_d)}), '
+            f'največ padavin v enem dnevu {num(prec_v)} mm ({fmtd(prec_d)}) in {wind_label[0].lower()}{wind_label[1:]} {num(wind_v)} km/h ({fmtd(wind_d)}). '
+            f'<span class="muted-note">Posodobljeno: {fmtd(lastmod)}.</span></p>')
+
     body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vremenski rekordi</h1>
   <p class="post-meta">Postaja IREICA1 · Rečica ob Savinji · meritve od novembra 2019</p>
+{rekord_kratko}
 
   <h2>Temperatura</h2>
   <table class="stats">

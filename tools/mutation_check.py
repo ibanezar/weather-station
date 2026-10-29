@@ -122,6 +122,9 @@ MUTACIJE = [
     ("dnevne strani: veto vsote dežja [29.10.]", "tools/day_score_common.py", "def rain_pts(c, d, h0=8, h1=18, cap=3, sum_veto=0.5):", "def rain_pts(c, d, h0=8, h1=18, cap=3, sum_veto=5.0):", "test_day_pages.py"),
     ("zasebnost: članek z notranjo meritvijo [29.10.]", "blog/vroc-julijski-dan-v-zgornji-savinjski-dolini-kaj-pravijo-ste-0712.html", "<p>Sončno obsevanje", "<p>Notranji senzor kaže 25,1 °C. Sončno obsevanje", "test_privacy.py"),
     ("zasebnost: ecowitt-history [29.10.]", "worker.js", 'call_back: "outdoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily,pressure.relative",', 'call_back: "outdoor.temperature,indoor.temperature,outdoor.humidity,wind.wind_speed,rainfall.daily,pressure.relative",', "test_privacy.py"),
+    ("hub Na kratko: povprečne padavine [29.10.]", "tools/seo_smart_routine.py", 'f"{num(avg_ann_prec, 0)} mm padavin na leto; dni z mrazom', 'f"{num(avg_ann_prec, 1)} mm padavin na leto; dni z mrazom', "test_hub_kratko.py"),
+    ("hub Na kratko: najbolj suho leto [29.10.]", "tools/seo_smart_routine.py", "najbolj suho {min_year}: {num(ann_prec_full[min_year], 0)} mm", "najbolj suho {min_year}: {num(ann_prec_full[max_year], 0)} mm", "test_hub_kratko.py"),
+    ("hub Na kratko: rekord temperature [29.10.]", "tools/seo_smart_routine.py", "Rekordi postaje: {num(abs_max[1])} °C", "Rekordi postaje: {num(abs_min[1])} °C", "test_hub_kratko.py"),
 ]
 
 

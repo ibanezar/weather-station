@@ -739,6 +739,12 @@ def save_novosti_catalog(events):
 
 # ── Generatorji strani ─────────────────────────────────────────────────────
 
+def kratko_html(text, lastmod):
+    """Odgovor v prvih stavkih strani (GEO, načrt 27. 10. 2026): izračunano iz meritev, z vidnim datumom osvežitve."""
+    return (f'  <p class="archive-intro"><strong>Na kratko:</strong> {text}\n'
+            f'  <span class="muted-note">Posodobljeno: {fmtd(lastmod)}.</span></p>')
+
+
 def gen_klima(normals, annual_precip, annual_frost, annual_hot, full_years, last_date, sitemap_urls):
     """Generiraj /klima/index.html — mesečne klimatološke norme."""
     url = "/klima/"
@@ -828,6 +834,14 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, full_years, last
     coldest = min(range(1, 13), key=lambda m: normals.get(m, {}).get("tempAvg") or 99)
     wettest = max(range(1, 13), key=lambda m: normals.get(m, {}).get("precip_monthly") or -1)
 
+    kratko_klima = kratko_html(
+        f"v {years_span} polnih letih meritev ({full_years[0]}–{full_years[-1]}) pade v Rečici ob Savinji povprečno "
+        f"{num(avg_ann_prec, 0)} mm padavin na leto; dni z mrazom (najnižja ≤ 0 °C) je povprečno {num(avg_ann_frost, 0)}, "
+        f"vročih dni (najvišja ≥ 30 °C) {num(avg_ann_hot, 0)}. Najtopleje je v {MES_LOC[warmest]} "
+        f"(povprečna dnevna temperatura {num(normals[warmest].get('tempAvg'))} °C), najhladneje v {MES_LOC[coldest]} "
+        f"({num(normals[coldest].get('tempAvg'))} °C). Meritev postaje IREICA1, ne modelska ocena.",
+        lastmod) if (full_years and avg_ann_prec is not None) else ""
+
     faq_qa = [
         (
             "Kakšna je klima v Rečici ob Savinji?",
@@ -886,7 +900,7 @@ def gen_klima(normals, annual_precip, annual_frost, annual_hot, full_years, last
   ({ELEV} m n. m., Zgornja Savinjska dolina) na osnovi {years_span} let meritev (2019–{TODAY.year}).
   Mesečna povprečja temperature in padavin, absolutni rekordi ter fenološki kazalniki.
   <span class="muted-note">Posodobljeno: {fmtd(lastmod)}.</span></p>
-
+{kratko_klima}
 {summary_html}
 {table_html}
 {records_html}
@@ -938,6 +952,7 @@ def gen_padavine(normals, annual_precip, full_years, last_date, sitemap_urls):
     ytd_month = int(last_date[5:7])
     ytd_day = int(last_date[8:10])
     ytd_total = annual_precip.get(ytd_year)
+    pct = None
     ytd_html = ""
     if ytd_total is not None:
         days_in_month = calendar.monthrange(ytd_year, ytd_month)[1]
@@ -1041,6 +1056,18 @@ def gen_padavine(normals, annual_precip, full_years, last_date, sitemap_urls):
         ),
     ]
 
+    wettest_p = max(range(1, 13), key=lambda m: normals.get(m, {}).get("precip_monthly") or -1)
+    kratko_padavine = ""
+    if avg_ann is not None and max_year is not None:
+        ytd_txt = ""
+        if ytd_total is not None and pct is not None:
+            ytd_txt = f" Letos je do {fmtd(last_date)} padlo {num(ytd_total, 0)} mm, to je {num(pct, 0)} % povprečja za to obdobje leta."
+        kratko_padavine = kratko_html(
+            f"v Rečici ob Savinji pade povprečno {num(avg_ann, 0)} mm padavin na leto (najbolj mokro {max_year}: "
+            f"{num(ann_prec_full[max_year], 0)} mm, najbolj suho {min_year}: {num(ann_prec_full[min_year], 0)} mm). "
+            f"Najdeževnejši mesec je {MES_NOM[wettest_p]} (povprečno {num(normals[wettest_p].get('precip_monthly'), 0)} mm)."
+            + ytd_txt, lastmod)
+
     faq_html = "\n".join(f'    <h3>{q}</h3>\n    <p class="hub-intro">{a}</p>'
                           for q, a in faq_qa)
 
@@ -1063,6 +1090,7 @@ def gen_padavine(normals, annual_precip, full_years, last_date, sitemap_urls):
   <p class="archive-intro">Klimatološki pregled padavin meteorološke postaje IREICA1
   v Rečici ob Savinji ({ELEV} m n. m.). Letne skupne vrednosti, mesečne norme in rekordi
   na osnovi meritev od novembra 2019.</p>
+{kratko_padavine}
 {ytd_html}
 {bars_html}
 {month_bars_html}
@@ -1193,6 +1221,18 @@ def gen_temperatura(normals, annual_frost, annual_hot, full_years, last_date, si
     faq_html = "\n".join(f'    <h3>{q}</h3>\n    <p class="hub-intro">{a}</p>'
                           for q, a in faq_qa)
 
+    warm_t = max(range(1, 13), key=lambda m: normals.get(m, {}).get("tempAvg") or -99)
+    cold_t = min(range(1, 13), key=lambda m: normals.get(m, {}).get("tempAvg") or 99)
+    abs_max = max((normals[m]["abs_max"] for m in range(1, 13) if normals.get(m, {}).get("abs_max")), key=lambda t: t[1], default=None)
+    abs_min = min((normals[m]["abs_min"] for m in range(1, 13) if normals.get(m, {}).get("abs_min")), key=lambda t: t[1], default=None)
+    kratko_temperatura = ""
+    if avg_ann_frost is not None and abs_max and abs_min:
+        kratko_temperatura = kratko_html(
+            f"najtopleje je v Rečici ob Savinji v {MES_LOC[warm_t]} (povprečni dnevni maksimum {num(normals[warm_t].get('tempHigh'))} °C), "
+            f"najhladneje v {MES_LOC[cold_t]} (povprečni dnevni minimum {num(normals[cold_t].get('tempLow'))} °C). "
+            f"Na leto je povprečno {num(avg_ann_frost, 0)} dni z mrazom (najnižja ≤ 0 °C) in {num(avg_ann_hot, 0)} vročih dni (najvišja ≥ 30 °C). "
+            f"Rekordi postaje: {num(abs_max[1])} °C ({fmtd(abs_max[0])}) in {num(abs_min[1])} °C ({fmtd(abs_min[0])}).", lastmod)
+
     title = "Temperatura Rečica ob Savinji — mesečna povprečja in trendi"
     desc  = (f"Klimatologija temperature za Rečico ob Savinji: mesečna povprečja in ekstremi, "
              f"trend mrzlih in vročih dni — podatki meteorološke postaje IREICA1 od 2019.")
@@ -1209,6 +1249,7 @@ def gen_temperatura(normals, annual_frost, annual_hot, full_years, last_date, si
   <p class="archive-intro">Klimatološki pregled temperature meteorološke postaje IREICA1
   v Rečici ob Savinji ({ELEV} m n. m., Zgornja Savinjska dolina).
   Mesečni profili, trend mrzlih in vročih dni ter absolutni rekordi od novembra 2019.</p>
+{kratko_temperatura}
 
 {profile_html}
 {trends_html}
