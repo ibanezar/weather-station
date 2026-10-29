@@ -72,6 +72,8 @@
     if(S.v==="l"){ el.hidden=true; return; }
     var arr=field(S.v,S.k), has=arr.some(function(x){ return x!=null&&x>=0.1; });
     if(has){ el.hidden=true; return; }
+    if(!arr.some(function(x){ return x!=null; })){ // model te ure nima (ICON-D2 sega 48 ur od svojega teka): to ni »ni sneženja«
+      el.textContent="Za izbrano uro model nima podatkov (ICON-D2 sega 48 ur od svojega zadnjega teka). Izberi zgodnejšo uro."; el.hidden=false; return; }
     var fs=firstSnow(), msg=S.v==="s"?"V izbranem obdobju model nikjer na karti ne napoveduje sneženja.":"V tej uri model nikjer na karti ne napoveduje sneženja.";
     msg+=fs<0?" V naslednjih 48 urah sneženja ni.":" Prvo sneženje v naslednjih 48 urah: "+when(fs)+".";
     el.textContent=msg; el.hidden=false;
