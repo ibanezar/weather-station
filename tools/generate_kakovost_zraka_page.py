@@ -348,6 +348,7 @@ def build_body(data):
   </div>
 {faq_html}
   <div style="margin-bottom:1rem">
+    <a href="/astma/" class="mtn-avk-link">🫁 Vreme in astma — tveganje za 5 dni →</a>
     <a href="/biovreme/" class="mtn-avk-link">📖 Biovreme — kako se kakovost zraka pozna pri počutju →</a>
   </div>
   <p class="muted-note">Model uporablja iste vhodne podatke (Open-Meteo Air Quality API, CAMS Europe) kot živi

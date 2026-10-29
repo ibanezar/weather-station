@@ -69,6 +69,9 @@ jobs:
           pip install netCDF4 --quiet
           python3 tools/test_wrf.py
 
+      - name: Test strani Vreme in astma (točkovanje, JS kopija, brez notranjih meritev)
+        run: python3 tools/test_astma.py
+
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py
 

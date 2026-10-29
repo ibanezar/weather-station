@@ -238,6 +238,7 @@ def build_body(fc_data, aq_data):
       <a href="/slovar/uv-indeks/" class="mtn-avk-link">☀️ UV indeks — slovar</a>
       <a href="/slovar/hladna-fronta/" class="mtn-avk-link">🌬 Hladna fronta — slovar</a>
       <a href="/slovar/biovreme/" class="mtn-avk-link">📖 Biovreme — slovar</a>
+      <a href="/astma/" class="mtn-avk-link">🫁 Vreme in astma</a>
     </div>
   </div>'''
 

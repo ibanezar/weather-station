@@ -98,6 +98,8 @@ CORE = {
     # sitemap.xml v crnivec-site/), na meteorec.si pa je samo preusmeritev.
     "kakovost-zraka/":           ("daily",   "0.7"),
     "biovreme/":                 ("daily",   "0.7"),
+    # Tveganje za astmatike po dnevih (tools/generate_astma_page.py, astma-forecast.yml).
+    "astma/":                    ("daily",   "0.7"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
     # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
     # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.
