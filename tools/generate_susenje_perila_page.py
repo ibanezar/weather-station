@@ -51,6 +51,7 @@ def hour_fn(c, h):
 
 CFG = {
     "url": "/susenje-perila/", "slug": "susenje-perila", "crumb": "Sušenje perila",
+    "short": "Sušenje perila",
     "title": "Sušenje perila na prostem: napoved za 5 dni",
     "h1": "Sušenje perila na prostem: kdaj se bo posušilo",
     "meta": "Dež, vlaga, temperatura, veter in sonce",

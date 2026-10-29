@@ -99,5 +99,34 @@ for c in CFGS:
           {k for _, _, ks in c["groups"] for k in ks} == {k for k, _, _ in c["factors"]}
           and set(c["day_fn"](synth(), "2026-06-10")[0]) == {k for k, _, _ in c["factors"]}
           and len(c["groups"]) <= 4 and len(c["levels"]) == 4 == len(c["advice"]))
+# ── opozorila po ocenah ──
+import json as _json, subprocess, tempfile
+with tempfile.TemporaryDirectory() as td:
+    pth = os.path.join(td, "ocene.json")
+    D.write_summary("a-stran", "A stran", "/a/", ["x", "y", "z", "w"], [{"date": "2026-06-10", "lvl": 2, "reasons": ["r1", "r2", "r3"]}], path=pth)
+    D.write_summary("b-stran", "B stran", "/b/", ["x", "y", "z", "w"], [{"date": "2026-06-11", "lvl": 0}], path=pth)
+    D.write_summary("a-stran", "A stran", "/a/", ["x", "y", "z", "w"], [{"date": "2026-06-12", "lvl": 3, "reasons": []}], path=pth)
+    o = _json.load(open(pth, encoding="utf-8"))
+    check("write_summary: strani se ohranijo, posamezna se prepiše", set(o["pages"]) == {"a-stran", "b-stran"} and o["pages"]["a-stran"]["days"][0]["lvl"] == 3)
+    check("write_summary: razlogov največ 2 in časovni žig UTC", len(_json.loads(_json.dumps(o))["pages"]["b-stran"]["days"][0]["reasons"]) == 0 and o["generated"].endswith("Z"))
+    D.write_summary("a-stran", "A stran", "/a/", ["x", "y", "z", "w"], [{"date": "d", "lvl": 1, "reasons": ["1", "2", "3"]}], path=pth)
+    check("write_summary: največ 2 razloga", len(_json.load(open(pth))["pages"]["a-stran"]["days"][0]["reasons"]) == 2)
+wsrc = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "worker.js"), encoding="utf-8").read()
+m = re.search(r"const OCENE_MAX_RULES = (\d+);", wsrc)
+check("opozorila: največ pravil ↔ OCENE_MAX_RULES v worker.js", m and int(m.group(1)) == D.ALERT_MAX_RULES)
+check("opozorila: možnosti ravni (le0, le1, ge2, ge3)", [v for v, _ in D.alert_options(["a", "b", "c", "d"])] == ["le0", "le1", "ge2", "ge3"])
+for c in CFGS:
+    page, _days = D.build_page(c, synth(), TODAY)
+    body = page.split("</head>")[1]
+    check(f"{c['slug']}: gradnik opozorila in skript", 'id="ov-alert"' in body and 'id="ov-op"' in body and "site:'ocene'" in body and c["short"] in body)
+    check(f"{c['slug']}: ima kratko ime za obvestila", bool(c.get("short")))
+    m2 = re.search(r"<script>\n(\(function\(\)\{\n  var SLUG=.*?)</script>", body, re.S)
+    ok2 = False
+    if m2:
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
+            f.write(m2.group(1))
+        ok2 = subprocess.run(["node", "--check", f.name], capture_output=True).returncode == 0
+        os.unlink(f.name)
+    check(f"{c['slug']}: skript opozoril je veljaven JS", ok2)
 check("barve skupin: največ 4", all(len(c["groups"]) <= 4 for c in CFGS))
 sys.exit(1 if fails else 0)

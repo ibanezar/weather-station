@@ -413,6 +413,7 @@ def sections(cfg, c, days, today):
 
 CFG = {
     "url": "/migrena/", "slug": "migrena", "crumb": "Vreme in migrena",
+    "short": "Vreme in migrena", "no_ocene": True,   # ima svoj alarm (padec tlaka), brez splošnega gradnika
     "title": "Vreme in migrena: sprožilci in dnevnik napadov",
     "h1": "Vreme in migrena: napoved sprožilcev in dnevnik napadov",
     "meta": "Tlak, temperatura, nevihte, veter, vlaga in svetloba",

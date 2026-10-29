@@ -29,6 +29,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402
+import day_score_common as DS  # noqa: E402 — opozorila po ocenah (gradnik, zapis ocen)
 from generate_kakovost_zraka_page import fetch_air_quality, POLLEN_TYPES  # noqa: E402 — ne forkaj klica
 
 TODAY = seo.TODAY
@@ -651,6 +652,7 @@ def build_body(days):
   <h2>Naslednjih 5 dni</h2>
   <p class="archive-intro">{esc(days_summary(days))} Raven je vedno zapisana tudi z besedo.</p>
 {day_cards_html(days)}
+{DS.alert_html('astma', 'Vreme in astma', LEVELS)}
   <h2>Moji sprožilci</h2>
   <p class="archive-intro">Označite, kaj občutite pri sebi, in pritisnite »Uporabi moje sprožilce«. Izbrani dejavniki bodo pri oceni šteli dvojno.</p>
 {triggers_html()}
@@ -694,7 +696,8 @@ def build_body(days):
   </div>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
 </div>
-{client_js(days)}'''
+{client_js(days)}
+{DS.alert_script('astma')}'''
 
 
 def main():
@@ -720,9 +723,11 @@ def main():
         seo.webpage_schema(url, title, desc, date_published="2026-10-29"),
         seo.crumbs_schema([("Meteorec", "/"), ("Vreme in astma", None)]),
         seo.faq_schema(FAQ),
-    ]) + "\n" + CSS
+    ]) + "\n" + CSS + "\n" + DS.ALERT_CSS
     page = seo.page_shell(title, desc, url, schema, build_body(days))
     seo.write_page("astma/index.html", page, force=True)
+    DS.write_summary("astma", "Vreme in astma", url, LEVELS,
+                     [{"date": d["date"], "lvl": LEVELS.index(d["level"]), "reasons": reasons(d)} for d in days])
     print(f"  → astma/index.html (danes {t['level']}, {t['score']} točk)")
 
 

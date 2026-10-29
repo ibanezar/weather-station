@@ -2700,6 +2700,17 @@ Samo videz (`style.css`, `index.html`, malo `app.js`); logika in id-ji so nedota
   odjava ne odjavi brskalnika), naročnina nosi samo prag (3/5/8 hPa v 24 h, `MIG_THR_ALLOWED` ↔ `ALARM_THR` v generatorju) in stanje.
   Cron `_cronCheckMigrena` (enkrat na uro, tiho 22-7, brez naročnikov ne kliče vira) pošlje obvestilo ob PREHODU čez prag (histereza 1 hPa,
   hladilna doba 12 h). Besedilo pove, da je modelska napoved. Opisano na `zasebnost.html`.
+- **Opozorila po ocenah (29. 10. 2026, obiskovalec si jih nastavi sam)**: na vsaki strani »vreme za …« in na `/astma/` je gradnik »Opozorilo na telefon«
+  (`alert_html()`/`alert_script()` v `day_score_common.py`; `/migrena/` ga nima, ker ima svoj alarm za padec tlaka — `no_ocene`). Obiskovalec izbere
+  raven (`le0` »odlično«, `le1` »dobro ali boljše«, `ge2` »slabo ali slabše«, `ge3` »neprimerno«; imena iz `cfg["levels"]`) in dan (danes/jutri).
+  **Ocene dni piše Python, worker jih samo bere**: vsak generator zapiše svojo stran v `data/vsakdan-ocene.json` (`write_summary()`: `naslov`, `url`,
+  `levels`, `days[{date, lvl, reasons≤2}]`, `generated` UTC); računa se ne podvaja v JS. `_cronCheckOcene` (worker, enkrat na uro, tiho 22–7, brez
+  naročnikov ne bere vira) pošlje **največ eno obvestilo na napravo** (ostala pravila se omenijo) in **enkrat na pravilo in ciljni dan** (`st[ključ] =
+  datum`; neuspeh pošiljanja stanja ne zapiše). Ocene starejše od 36 h ne sprožijo nič, cron javi napako prek `_cronBeat` (vidno v `/health`).
+  Ločen seznam `push/ocene-subs.json` (`site:"ocene"`, prazen seznam pravil = odjava, brskalnika ne odjavi); do 5 pravil na napravo za vse strani skupaj
+  (`OCENE_MAX_RULES` ↔ `ALERT_MAX_RULES`, test primerja). Pravila so tudi v `localStorage` (`wx-ocene-pravila`). Test: `test_ocene.mjs` (prava koda iz
+  `worker.js`), `test_day_pages.py` (gradnik, zapis ocen, JS). Opisano na `zasebnost.html`. **Nova stran prek `D.main()` dobi opozorila sama** (potrebuje `short`).
+  `astma-forecast.yml` je ukinjen: `/astma/` teče v `vsakdan-forecast.yml`, ker oba piše isto datoteko ocen.
 - Ikona glave z bliskom (`img/migrena/glava-blisk.png`) je Filipova slika; ime izvirnika (`3998088.png`) kaže na Flaticon, licenco/navedbo preveri on.
 
 ## Razvoj
