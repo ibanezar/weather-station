@@ -24,7 +24,7 @@ score_for() -- tools/test_astma.py ju primerja z Node.
 Usage:
   python3 tools/generate_astma_page.py
 """
-import datetime, html, json, os, sys, urllib.request, urllib.parse, urllib.error
+import datetime, html, json, math, os, sys, urllib.request, urllib.parse, urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402
@@ -230,19 +230,77 @@ def reasons(day, k=2):
 # ── Izris ────────────────────────────────────────────────────────────────────
 
 PTS_WORD = {0: "—", 1: "blago", 2: "zmerno", 3: "visoko"}
-PTS_COLOR = {1: "#eab308", 2: "#f97316", 3: "#ef4444"}
+
+# Skupine dejavnikov = 4 kategorije barv (paleta preverjena z validate_palette.js, dataviz skill:
+# slot 1-4, svetlo #2a78d6 #eb6834 #1baf7a #eda100, temno #3987e5 #d95926 #199e70 #c98500).
+GROUPS = [
+    ("zrak", "Zrak", ["pm", "ozon", "no2"]),
+    ("pelod", "Cvetni prah", ["pelod"]),
+    ("temp", "Temperatura", ["mraz", "vrocina"]),
+    ("vreme", "Vreme", ["nevihta", "sprememba", "vlaga"]),
+]
+GROUP_OF = {k: g for g, _, ks in GROUPS for k in ks}
+GROUP_LABEL = {g: l for g, l, _ in GROUPS}
+MAX_BAND = 10  # merilnik in graf: vse nad tem je »visoko«
+
+ICONS = {
+    "zrak": '<path d="M3 8h10a3 3 0 1 0-3-3M3 12h14a3 3 0 1 1-3 3M3 16h6"/>',
+    "pelod": '<circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V5a2.5 2.5 0 0 1 5 0c0 2-2.5 4.5-5 4.5zM14.5 12H19a2.5 2.5 0 0 1 0 5c-2 0-4.5-2.5-4.5-5zM12 14.5V19a2.5 2.5 0 0 1-5 0c0-2 2.5-4.5 5-4.5zM9.5 12H5a2.5 2.5 0 0 1 0-5c2 0 4.5 2.5 4.5 5z" transform="scale(.9) translate(1.3 1.3)"/>',
+    "temp": '<path d="M10 4a2 2 0 0 1 4 0v9.2a4 4 0 1 1-4 0z"/><path d="M12 9v7"/>',
+    "vreme": '<path d="M7 17a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7"/><path d="M12 12l-2 4h3l-2 4"/>',
+}
+
+
+def icon(group, size=18):
+    return (f'<svg class="as-ic" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            f'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICONS[group]}</svg>')
+
 
 CSS = """<style>
-.as-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin:1rem 0 1.4rem}
-.as-day{border:1px solid rgba(255,255,255,.1);border-top:4px solid var(--c,#059669);border-radius:10px;padding:.75rem .85rem;background:rgba(255,255,255,.03)}
-.as-day h3{margin:0;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.as-viz{--as-surface:#0e1624;--as-ink:var(--text,#e8edf5);--as-ink2:var(--muted,#9aa7bb);--as-grid:rgba(255,255,255,.1);
+  --g-zrak:#3987e5;--g-pelod:#d95926;--g-temp:#199e70;--g-vreme:#c98500;
+  --l-nizko:#059669;--l-zmerno:#eab308;--l-povisano:#f97316;--l-visoko:#ef4444}
+[data-theme="light"] .as-viz{--as-surface:#ffffff;--as-grid:rgba(0,0,0,.12);
+  --g-zrak:#2a78d6;--g-pelod:#eb6834;--g-temp:#1baf7a;--g-vreme:#eda100}
+.as-hero{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:1.4rem;align-items:center;margin:1rem 0 1.6rem;
+  padding:1.2rem 1.3rem;border:1px solid var(--as-grid);border-radius:16px;
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--c,#059669) 18%,transparent),transparent 60%),var(--as-surface)}
+.as-gauge{width:100%;height:auto;display:block}
+.as-gauge .as-needle{transform-origin:110px 110px;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.as-hero-k{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--as-ink2)}
+.as-hero-l{font-size:2.3rem;font-weight:800;line-height:1.1;color:var(--c,#059669);margin:.1rem 0 .3rem}
+.as-hero-adv{margin:.6rem 0 0;font-size:.92rem;color:var(--as-ink)}
+.as-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+.as-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .65rem;border-radius:999px;font-size:.8rem;
+  border:1px solid var(--as-grid);color:var(--as-ink)}
+.as-chip .as-ic{color:var(--gc)}
+.as-days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;margin:1rem 0 1.4rem}
+.as-day{border:1px solid var(--as-grid);border-top:4px solid var(--c,#059669);border-radius:12px;padding:.75rem .85rem;background:var(--as-surface)}
+.as-day h3{margin:0;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--as-ink2)}
 .as-day .as-lvl{font-size:1.25rem;font-weight:800;color:var(--c,#059669);margin:.15rem 0}
-.as-day .as-sc{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)}
+.as-day .as-sc{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--as-ink2)}
 .as-day ul{margin:.5rem 0 0;padding-left:1rem;font-size:.8rem}
-.as-heat td{text-align:center}
+.as-card{border:1px solid var(--as-grid);border-radius:14px;padding:1rem 1.1rem;background:var(--as-surface);margin:1rem 0 1.6rem}
+.as-svg{width:100%;height:auto;display:block}
+.as-svg text{font-family:inherit}
+.as-legend{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.6rem;font-size:.8rem;color:var(--as-ink2)}
+.as-legend span{display:inline-flex;align-items:center;gap:.35rem}
+.as-legend i{width:10px;height:10px;border-radius:2px;background:var(--gc);display:inline-block}
+.as-prof{display:grid;gap:.45rem}
+.as-row{display:grid;grid-template-columns:minmax(120px,170px) 1fr;gap:.8rem;align-items:center;font-size:.85rem}
+.as-row .as-name{display:flex;align-items:center;gap:.4rem;color:var(--as-ink)}
+.as-row .as-name .as-ic{color:var(--gc)}
+.as-track{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:.15rem}
+.as-track i{height:10px;border-radius:3px;background:var(--as-grid)}
+.as-track i.on{background:var(--gc)}
+.as-det{font-size:.76rem;color:var(--as-ink2)}
+.as-heat td{text-align:center;font-weight:700}
+.as-heat .as-g{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:.4rem;background:var(--gc)}
 .as-trig{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
-.as-trig label{display:flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border:1px solid rgba(255,255,255,.18);border-radius:8px;cursor:pointer;min-height:44px;font-size:.88rem}
+.as-trig label{display:flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border:1px solid var(--as-grid);border-radius:8px;cursor:pointer;min-height:44px;font-size:.88rem}
 .as-trig input{width:18px;height:18px}
+@media (max-width:640px){.as-days{grid-template-columns:repeat(2,minmax(0,1fr))}.as-hero{grid-template-columns:1fr}.as-hero-l{font-size:1.9rem}.as-row{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.as-gauge .as-needle{transition:none}}
 </style>"""
 
 
@@ -250,31 +308,148 @@ def esc(s):
     return html.escape(str(s))
 
 
+def _pt(cx, cy, r, d):
+    """Točka na loku; d = 0..180 stopinj od leve proti desni čez vrh."""
+    rad = math.radians(d)
+    return cx - r * math.cos(rad), cy - r * math.sin(rad)
+
+
+def gauge_deg(score):
+    return 180 * min(max(score, 0), MAX_BAND) / MAX_BAND
+
+
+def gauge_svg(day):
+    """Polkrožni merilnik: štirje loki (ravni nizko…visoko) in kazalec na današnji oceni."""
+    cx = cy = 110
+    r = 88
+    bounds = [0, SCORE_TH[0], SCORE_TH[1], SCORE_TH[2], MAX_BAND]
+    arcs = []
+    for i, lvl in enumerate(LEVELS):
+        d1, d2 = gauge_deg(bounds[i]) + 1.2, gauge_deg(bounds[i + 1]) - 1.2
+        x1, y1 = _pt(cx, cy, r, d1)
+        x2, y2 = _pt(cx, cy, r, d2)
+        arcs.append(f'<path d="M{x1:.1f} {y1:.1f}A{r} {r} 0 0 1 {x2:.1f} {y2:.1f}" fill="none" '
+                    f'stroke="var(--l-{lvl.replace("š", "s").replace("č", "c")})" stroke-width="16" stroke-linecap="butt"/>')
+    ticks = "".join(
+        f'<text x="{_pt(cx, cy, r + 17, gauge_deg(b))[0]:.1f}" y="{_pt(cx, cy, r + 17, gauge_deg(b))[1] + 3:.1f}" '
+        f'text-anchor="middle" font-size="9" fill="var(--as-ink2)">{b}{"+" if b == MAX_BAND else ""}</text>'
+        for b in bounds)
+    deg = gauge_deg(day["score"])
+    return (f'<svg class="as-gauge" viewBox="0 0 220 138" role="img" aria-label="Merilnik: ocena {day["score"]}, tveganje {day["level"]}">'
+            + "".join(arcs) + ticks +
+            f'<g class="as-needle" id="as-needle" style="transform:rotate({deg:.1f}deg)">'
+            f'<path d="M{cx - 70} {cy}L{cx} {cy - 3.5}L{cx} {cy + 3.5}z" fill="var(--as-ink)"/></g>'
+            f'<circle cx="{cx}" cy="{cy}" r="7" fill="var(--as-ink)"/><circle cx="{cx}" cy="{cy}" r="3" fill="var(--as-surface)"/>'
+            f'<text x="{cx}" y="{cy + 24}" text-anchor="middle" font-size="12" fill="var(--as-ink2)" id="as-gauge-sc">ocena {day["score"]}</text></svg>')
+
+
+def lvl_var(level):
+    return f'var(--l-{level.replace("š", "s").replace("č", "c")})'
+
+
+def hero_html(days):
+    d = days[0]
+    rs = sorted(((p, k) for k, p in d["pts"].items() if p >= 1), reverse=True)[:3]
+    chips = "".join(
+        f'<span class="as-chip" style="--gc:var(--g-{GROUP_OF[k]})">{icon(GROUP_OF[k], 16)}{esc(d["detail"][k])}</span>'
+        for _, k in rs) or '<span class="as-chip">brez izrazitih sprožilcev</span>'
+    return (f'  <div class="as-hero" id="as-hero" style="--c:{lvl_var(d["level"])}">\n'
+            f'    {gauge_svg(d)}\n'
+            f'    <div><div class="as-hero-k">Danes · Zgornja Savinjska dolina</div>'
+            f'<div class="as-hero-l" id="as-hero-l">{d["level"]}</div>'
+            f'<div class="as-chips" id="as-chips">{chips}</div>'
+            f'<p class="as-hero-adv">{esc(level_advice(d["level"]))}</p></div>\n  </div>')
+
+
 def day_cards_html(days):
     out = []
-    for d in days:
-        col = LEVEL_COLORS[d["level"]]
+    for i, d in enumerate(days):
         rs = reasons(d)
         li = "".join(f"<li>{esc(r)}</li>" for r in rs) or "<li>brez izrazitih sprožilcev</li>"
-        out.append(f'    <div class="as-day" style="--c:{col}" data-i="{days.index(d)}">'
+        out.append(f'    <div class="as-day" style="--c:{lvl_var(d["level"])}" data-i="{i}">'
                    f'<h3>{esc(d["label"])}</h3><div class="as-lvl">{d["level"]}</div>'
                    f'<div class="as-sc">ocena {d["score"]} od 27</div><ul>{li}</ul></div>')
     return '  <div class="as-days" id="as-days">\n' + "\n".join(out) + "\n  </div>"
 
 
-def heatmap_html(days):
-    head = "<th></th>" + "".join(f"<th>{esc(d['label'])}</th>" for d in days)
+def legend_html():
+    return '<div class="as-legend">' + "".join(
+        f'<span style="--gc:var(--g-{g})"><i></i>{icon(g, 14)}{esc(l)}</span>' for g, l, _ in GROUPS) + "</div>"
+
+
+def stacked_chart_svg(days):
+    """Naloženi stolpci: skupna ocena dneva, razrezana po skupinah dejavnikov, na ozadju ravni.
+    Dnevi so ločeni, med segmenti 2 px rež; skupna ocena je napisana nad stolpcem."""
+    W, H = 640, 270
+    pl, pr, pt, pb = 34, 74, 14, 30
+    pw, ph = W - pl - pr, H - pt - pb
+    top = max(MAX_BAND, max(d["score"] for d in days) + 1)
+    y = lambda v: pt + ph * (1 - v / top)
+    bounds = [0, SCORE_TH[0], SCORE_TH[1], SCORE_TH[2], top]
+    out = [f'<svg class="as-svg" viewBox="0 0 {W} {H}" role="img" aria-label="Skupna ocena po dnevih, razrezana po skupinah dejavnikov">']
+    for i, lvl in enumerate(LEVELS):
+        y0, y1 = y(bounds[i + 1]), y(bounds[i])
+        out.append(f'<rect x="{pl}" y="{y0:.1f}" width="{pw}" height="{y1 - y0:.1f}" fill="{lvl_var(lvl)}" opacity=".09"/>')
+        out.append(f'<text x="{W - pr + 8}" y="{(y0 + y1) / 2 + 3:.1f}" font-size="10" fill="var(--as-ink2)">{lvl}</text>')
+    for v in range(0, int(top) + 1, 2):
+        out.append(f'<line x1="{pl}" x2="{pl + pw}" y1="{y(v):.1f}" y2="{y(v):.1f}" stroke="var(--as-grid)" stroke-width="1"/>')
+        out.append(f'<text x="{pl - 6}" y="{y(v) + 3:.1f}" text-anchor="end" font-size="10" fill="var(--as-ink2)">{v}</text>')
+    n = len(days)
+    slot = pw / n
+    bw = slot * 0.5
+    for i, d in enumerate(days):
+        x = pl + slot * i + (slot - bw) / 2
+        acc = 0
+        for g, lbl, keys in GROUPS:
+            v = sum(d["pts"][k] for k in keys)
+            if v == 0:
+                continue
+            y_top, y_bot = y(acc + v), y(acc)
+            tip = f'{d["label"]} · {lbl}: {v} točk' + "".join(
+                f' · {dict((k2, l2) for k2, l2, _ in FACTORS)[k]}: {d["detail"][k]}' for k in keys if d["pts"][k])
+            out.append(f'<rect x="{x:.1f}" y="{y_top:.1f}" width="{bw:.1f}" height="{max(y_bot - y_top, 0):.1f}" rx="3" '
+                       f'fill="var(--g-{g})" stroke="var(--as-surface)" stroke-width="2"><title>{esc(tip)}</title></rect>')
+            acc += v
+        out.append(f'<text x="{x + bw / 2:.1f}" y="{y(acc) - 6:.1f}" text-anchor="middle" font-size="12" font-weight="700" '
+                   f'fill="var(--as-ink)">{acc}</text>')
+        out.append(f'<text x="{x + bw / 2:.1f}" y="{H - 10}" text-anchor="middle" font-size="11" fill="var(--as-ink2)">{esc(d["label"])}</text>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+def stacked_block(days):
+    return ('  <div class="as-card">\n    ' + stacked_chart_svg(days) + "\n    " + legend_html() +
+            '\n    <p class="muted-note">Graf prikazuje privzeto oceno brez osebnih sprožilcev. Pomik nad stolpec pokaže razloge.</p>\n  </div>')
+
+
+def profile_html(day):
+    """Današnji profil: za vsak dejavnik tri polja (blago/zmerno/visoko) in razlog."""
     rows = []
     for key, lbl, _ in FACTORS:
+        g = GROUP_OF[key]
+        p = day["pts"][key]
+        track = "".join(f'<i class="{"on" if j < p else ""}"></i>' for j in range(3))
+        rows.append(f'    <div class="as-row" style="--gc:var(--g-{g})"><div class="as-name">{icon(g, 16)}{esc(lbl)}</div>'
+                    f'<div><div class="as-track" role="img" aria-label="{esc(lbl)}: {PTS_WORD[p]}">{track}</div>'
+                    f'<div class="as-det">{esc(PTS_WORD[p] + " · " + day["detail"][key] if p else day["detail"][key])}</div></div></div>')
+    return '  <div class="as-card"><div class="as-prof">\n' + "\n".join(rows) + "\n  </div></div>"
+
+
+def heatmap_html(days):
+    head = "<th></th>" + "".join(f"<th>{esc(d['label'])}</th>" for d in days)
+    alpha = {1: .35, 2: .65, 3: 1.0}
+    rows = []
+    for key, lbl, _ in FACTORS:
+        g = GROUP_OF[key]
         cells = []
         for d in days:
             p = d["pts"][key]
             if p == 0:
                 cells.append("<td>—</td>")
             else:
-                cells.append(f'<td title="{esc(d["detail"][key])}" style="background:{PTS_COLOR[p]};'
-                             f'color:#04070e;font-weight:700">{PTS_WORD[p]}</td>')
-        rows.append(f"<tr><th>{esc(lbl)}</th>{''.join(cells)}</tr>")
+                cells.append(f'<td title="{esc(d["detail"][key])}" style="background:color-mix(in srgb,var(--g-{g}) {int(alpha[p] * 100)}%,transparent);'
+                             f'color:{"#04070e" if p == 3 else "inherit"}">{PTS_WORD[p]}</td>')
+        rows.append(f'<tr style="--gc:var(--g-{g})"><th><span class="as-g"></span>{esc(lbl)}</th>{"".join(cells)}</tr>')
     return ('  <div class="table-scroll" tabindex="0"><table class="stats as-heat">\n'
             f'    <tr>{head}</tr>\n    ' + "\n    ".join(rows) + "\n  </table></div>")
 
@@ -290,7 +465,7 @@ def client_js(days):
     payload = {
         "days": [{"label": d["label"], "pts": d["pts"], "detail": d["detail"]} for d in days],
         "th": list(SCORE_TH), "floor": FLOOR_PTS, "levels": LEVELS,
-        "colors": LEVEL_COLORS, "weight": TRIGGER_WEIGHT, "keys": FACTOR_KEYS,
+        "colors": {k: v for k, v in LEVEL_COLORS.items()}, "max": MAX_BAND, "weight": TRIGGER_WEIGHT, "keys": FACTOR_KEYS,
     }
     return ("<script>\n(function(){\n" + ASTMA_JS_CORE + "\n"
             "var D=" + json.dumps(payload, ensure_ascii=False) + ",KEY='wx-astma-sprozilci';\n"
@@ -312,10 +487,15 @@ function render(sel){
     (r.length?r:['brez izrazitih sprožilcev']).forEach(function(t){var li=document.createElement('li');li.textContent=t;ul.appendChild(li);});
   });
 }
+function hero(sel){var w=weights(sel),d=D.days[0],lvl=astmaLevel(d.pts,w,D.th,D.floor,D.levels),sc=astmaScore(d.pts,w);
+  var h=document.getElementById('as-hero');if(!h)return;h.style.setProperty('--c',D.colors[lvl]);
+  document.getElementById('as-hero-l').textContent=lvl;
+  var n=document.getElementById('as-needle');if(n)n.style.transform='rotate('+(180*Math.min(sc,D.max)/D.max)+'deg)';
+  var t=document.getElementById('as-gauge-sc');if(t)t.textContent='ocena '+sc;}
 var boxes=document.querySelectorAll('#as-trig input'),sel=load();
 boxes.forEach(function(b){b.checked=sel.indexOf(b.value)>=0;
-  b.addEventListener('change',function(){sel=[].filter.call(boxes,function(x){return x.checked;}).map(function(x){return x.value;});save(sel);render(sel);});});
-if(sel.length)render(sel);
+  b.addEventListener('change',function(){sel=[].filter.call(boxes,function(x){return x.checked;}).map(function(x){return x.value;});save(sel);render(sel);hero(sel);});});
+if(sel.length){render(sel);hero(sel);}
 })();
 </script>""")
 
@@ -381,14 +561,20 @@ def build_body(days):
 {seo.stn_badge()}
   <h1 class="page-title">Vreme in astma: napoved tveganja za 5 dni</h1>
   <p class="post-meta">Cvetni prah, onesnažen zrak, mraz, vročina, nevihte in hitre spremembe · Zgornja Savinjska dolina · {TODAY.isoformat()}</p>
+<div class="as-viz">
+{hero_html(days)}
 {answer}
   <p class="muted-note"><strong>To ni zdravniški nasvet.</strong> Ocena prikazuje sprožilce, ki jih napovedujeta vreme in zrak,
   ne verjetnosti napada. Za zdravljenje in ukrepe veljajo navodila vašega zdravnika; v nujnem primeru pokličite 112.</p>
   <h2>Naslednjih 5 dni</h2>
-  <p class="archive-intro">{outlook} Karte so barvane po oceni, raven pa je vedno zapisana tudi z besedo.</p>
+  <p class="archive-intro">{outlook} Raven je vedno zapisana tudi z besedo.</p>
 {day_cards_html(days)}
-  <h2>Kateri dejavniki so v igri</h2>
-  <p class="archive-intro">Najvišji dnevni vpliv posameznega dejavnika. Pomik nad celico pokaže razlog.</p>
+{stacked_block(days)}
+  <h2>Danes po dejavnikih</h2>
+  <p class="archive-intro">Vsak dejavnik ima tri stopnje: blago, zmerno, visoko.</p>
+{profile_html(days[0])}
+  <h2>Vsi dnevi in dejavniki</h2>
+  <p class="archive-intro">Najvišji dnevni vpliv posameznega dejavnika; pomik nad celico pokaže razlog.</p>
 {heatmap_html(days)}
   <h2>Moji sprožilci</h2>
   <p class="archive-intro">Označite, kaj občutite pri sebi. Izbrani dejavniki bodo pri oceni šteli dvojno.</p>
@@ -411,6 +597,7 @@ def build_body(days):
     </div>
   </div>
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+</div>
 {client_js(days)}'''
 
 
