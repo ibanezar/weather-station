@@ -160,6 +160,81 @@ def ld(obj):
             + json.dumps(obj, ensure_ascii=False, separators=(",", ":")) + "\n</script>\n")
 
 
+ICONS = {
+    "snow": "M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M9 4.5l3 2.5 3-2.5M9 19.5l3-2.5 3 2.5",
+    "wind": "M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8",
+    "hail": "M7 14a4 4 0 1 1 1.2-7.8A5 5 0 0 1 18 8a3.5 3.5 0 0 1-.5 6M8 17v2M12 17v3M16 17v2",
+    "drop": "M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3z",
+    "bolt": "M13 2L5 14h6l-1 8 8-12h-6l1-8z",
+    "flame": "M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z",
+    "thermo": "M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0zM12 9v7",
+    "sprout": "M12 21v-9M12 12c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2-5-6-5 0 3 2 5 6 5z",
+    "tent": "M3 20L12 5l9 15zM12 5v15M9 20l3-6 3 6",
+    "hardhat": "M3 17h18M5 17a7 7 0 0 1 14 0M12 6v4M9 8l1 2.5M15 8l-1 2.5",
+    "landmark": "M3 20h18M5 20V10M9 20V10M15 20V10M19 20V10M2 10l10-6 10 6z",
+    "wifi": "M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01",
+    "signal": "M5 20v-4M10 20v-8M15 20V8M20 20V4",
+    "bell": "M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4",
+    "calendar": "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
+    "refresh": "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7",
+    "pin": "M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM9.5 10a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0",
+    "tool": "M14.5 5.5a4 4 0 0 0-5 5L3 17l4 4 6.5-6.5a4 4 0 0 0 5-5l-3 3-2.5-.5-.5-2.5z",
+    "sliders": "M4 7h10M18 7h2M4 17h2M10 17h10M16 4v6M8 14v6",
+    "check": "M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0M8 12l3 3 5-6",
+    "headset": "M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v5H4zM17 14h3v5h-3zM20 19c0 2-2 2-5 2",
+}
+TAG_ICON = {"Pozeba": "snow", "Toča": "hail", "Vlaga tal": "drop", "Nevihte": "bolt", "Višina vode": "drop", "Veter": "wind",
+            "Dež": "hail", "Temperatura": "thermo", "Požarna ogroženost": "flame", "Neurja": "bolt", "Vtičnik": "dash"}
+ICONS["dash"] = "M3 4h18v12H3zM8 20h8M12 16v4M7 12l3-3 3 2 4-4"
+CASE_ICON = {"kmetija": "sprout", "kamp": "tent", "gradbenistvo": "hardhat", "obcina": "landmark"}
+STEP_ICON = ["pin", "tool", "sliders", "check", "headset"]
+PHOTO = "podjetja/img/postaja.jpg"   # prava fotografija IREICA1; ko obstaja, nadomesti ilustracijo
+PHOTO_ALT = "Vremenska postaja IREICA1 v Rečici ob Savinji"
+
+
+def ic(name, cls="ic"):
+    return (f'<svg class="{cls}" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="{ICONS[name]}" '
+            f'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>')
+
+
+STATS = [("calendar", "Od 2019", "lastna postaja IREICA1"), ("refresh", "Vsakih 5 minut", "nova meritev na strani"),
+         ("signal", "WiFi ali mobilni internet", "kjer koli stoji postaja"), ("bell", "Opozorila na telefon", "pozeba, veter, nevihta (Pro)")]
+
+
+def stats_html():
+    return "".join(f'<li>{ic(i)}<span><strong>{e(t)}</strong>{e(d)}</span></li>' for i, t, d in STATS)
+
+
+def photo_html():
+    full = os.path.join(ROOT, PHOTO)
+    if os.path.exists(full):
+        w, h = 1200, 800
+        try:
+            from PIL import Image
+            w, h = Image.open(full).size
+        except Exception:
+            pass
+        art = f'<img src="/{PHOTO}" alt="{e(PHOTO_ALT)}" width="{w}" height="{h}" loading="lazy">'
+        cap = "Postaja IREICA1, Rečica ob Savinji, 366 m"
+    else:
+        art = STATION_SVG
+        cap = "Ilustracija vremenske postaje"
+    return f'''<section class="band band-dark photo" aria-labelledby="h-foto">
+  <div class="wrap photo-grid">
+    <figure class="photo-art">{art}<figcaption>{e(cap)}</figcaption></figure>
+    <div class="photo-text">
+      <h2 id="h-foto">Postaja, ki stoji od leta 2019</h2>
+      <p>IREICA1 stoji v Rečici ob Savinji od leta 2019. Njene meritve vidite zgoraj v živo. Isti pristop prenesemo na vašo lokacijo: pravi senzorji na pravem mestu in podatki, ki jih lahko primerjate z napovedjo.</p>
+      <ul class="facts">
+        <li>{ic("pin")}<span>Postavitev na mesto, ki ga izberemo skupaj</span></li>
+        <li>{ic("dash")}<span>Meritve na nadzorni plošči ali v aplikaciji</span></li>
+        <li>{ic("bell")}<span>Opozorila, ko vrednost preseže vašo mejo</span></li>
+      </ul>
+    </div>
+  </div>
+</section>'''
+
+
 def price_block(p):
     if not SHOW_PRICES:
         return '<div class="price"><span class="price-note">Cena po ogledu lokacije</span></div>'
@@ -183,9 +258,10 @@ def package_card(p):
 
 
 def case_card(c):
-    tags = "".join(f"<li>{e(t)}</li>" for t in c["tags"])
+    tags = "".join(f'<li>{ic(TAG_ICON[t], "ic-s")}{e(t)}</li>' for t in c["tags"])
     return f'''      <article class="card case" id="{c["id"]}" data-dej="{e(c["dej"])}" tabindex="-1">
         <span class="case-flag" hidden>Ponudba za vas</span>
+        <span class="tile">{ic(CASE_ICON[c["id"]])}</span>
         <h3>{e(c["title"])}</h3>
         <p>{e(c["text"])}</p>
         <ul class="tags" aria-label="Kaj spremljate">{tags}</ul>
@@ -308,17 +384,17 @@ def build_main():
     </div>
   </div>
 </section>
+<div class="stats"><ul class="wrap stats-list">{stats_html()}</ul></div>
 
-<div class="wrap stack">
-  <section class="sec" id="primeri" aria-labelledby="h-primeri">
+  <section class="band"><div class="wrap sec" id="primeri" aria-labelledby="h-primeri">
     <h2 id="h-primeri">Za koga je postaja</h2>
     <p>Izberite dejavnost, ki je najbližja vaši. Postajo prilagodimo tistemu, kar morate spremljati.</p>
     <div class="grid cases">
 {chr(10).join(case_card(c) for c in CASES)}
     </div>
-  </section>
+  </div></section>
 
-  <section class="sec proof" id="dokaz" aria-labelledby="h-dokaz">
+  <section class="band band-alt"><div class="wrap sec proof" id="dokaz" aria-labelledby="h-dokaz">
     <h2 id="h-dokaz">Zakaj nam zaupati</h2>
     <div class="proof-grid">
       <div class="proof-text">
@@ -339,9 +415,11 @@ def build_main():
         <p class="live-time" id="lw-time" aria-live="polite">Nalagam zadnjo meritev.</p>
       </aside>
     </div>
-  </section>
+  </div></section>
 
-  <section class="sec" id="paketi" aria-labelledby="h-paketi">
+  {photo_html()}
+
+  <section class="band"><div class="wrap sec" id="paketi" aria-labelledby="h-paketi">
     <h2 id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
     <p>Najprej povezava: postaja potrebuje pot do interneta. Kjer imate WiFi, je preprosto. Kjer ga nimate, uporabimo mobilni internet.</p>
     <fieldset class="seg">
@@ -354,23 +432,23 @@ def build_main():
 {chr(10).join(package_card(p) for p in PACKAGES)}
     </div>
     {vat}{sim_note}
-  </section>
+  </div></section>
 
-  <section class="sec" id="kako" aria-labelledby="h-kako">
+  <section class="band band-alt"><div class="wrap sec" id="kako" aria-labelledby="h-kako">
     <h2 id="h-kako">Kako poteka</h2>
     <ol class="steps">
-{chr(10).join(f'      <li><strong>{e(t)}</strong><span>{e(d)}</span></li>' for t, d in STEPS)}
+{chr(10).join(f'      <li>{ic(STEP_ICON[i])}<strong>{e(t)}</strong><span>{e(d)}</span></li>' for i, (t, d) in enumerate(STEPS))}
     </ol>
-  </section>
+  </div></section>
 
-  <section class="sec" id="faq" aria-labelledby="h-faq">
+  <section class="band"><div class="wrap sec" id="faq" aria-labelledby="h-faq">
     <h2 id="h-faq">Pogosta vprašanja</h2>
     <div class="faq">
 {faq_items()}
     </div>
-  </section>
+  </div></section>
 
-  <section class="sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
+  <section class="band"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
     <span id="po-meri"></span>
     <h2 id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
     <p>Izpolnite vprašalnik. Iz odgovorov sestavimo ponudbo po ogledu lokacije.</p>
@@ -400,9 +478,8 @@ def build_main():
       <div class="f wide"><button class="btn" type="submit" id="send">Pošljite povpraševanje</button></div>
       <noscript><p class="err">Za oddajo obrazca potrebujete vklopljen JavaScript.</p></noscript>
     </form>
-  </section>
+  </div></section>
 </main>
-</div>
 <footer class="foot">
   <div class="wrap">
     <span>Meteorec, Zgornja Savinjska dolina · <a href="/">meteorec.si</a></span>
