@@ -321,24 +321,22 @@ def schema_blocks():
     return ld(page) + ld(service) + ld(faq) + ld(crumbs)
 
 
-PHONE_SVG = '''<svg class="phone" viewBox="0 0 240 440" role="img" aria-label="Primer obvestila o pozebi na telefonu">
-        <rect x="10" y="6" width="220" height="428" rx="36" fill="#18232B" stroke="#3B4C58" stroke-width="4"/>
-        <rect x="88" y="18" width="64" height="10" rx="5" fill="#3B4C58"/>
-        <rect x="26" y="52" width="188" height="92" rx="20" fill="#223340"/>
-        <circle cx="52" cy="82" r="14" fill="#E4572E"/>
-        <rect x="76" y="70" width="104" height="9" rx="4.5" fill="#E8EEF2"/>
-        <rect x="76" y="88" width="126" height="7" rx="3.5" fill="#9FB0BB"/>
-        <rect x="76" y="104" width="86" height="7" rx="3.5" fill="#9FB0BB"/>
-        <rect x="26" y="160" width="188" height="64" rx="20" fill="#1B2F2B"/>
-        <rect x="42" y="176" width="70" height="9" rx="4.5" fill="#5CC2BC"/>
-        <rect x="42" y="194" width="130" height="7" rx="3.5" fill="#9FB0BB"/>
-        <rect x="26" y="240" width="88" height="84" rx="18" fill="#223340"/>
-        <rect x="126" y="240" width="88" height="84" rx="18" fill="#223340"/>
-        <path d="M40 304 L58 286 L74 296 L98 266" fill="none" stroke="#5CC2BC" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="140" y="256" width="60" height="8" rx="4" fill="#9FB0BB"/>
-        <rect x="140" y="276" width="40" height="22" rx="6" fill="#FFD84D"/>
-        <rect x="26" y="340" width="188" height="64" rx="20" fill="#223340"/>
-      </svg>'''
+PHONE_HTML = '''<div class="phone" role="img" aria-label="Primer prikaza na telefonu: živa meritev postaje IREICA1 in primer opozorila">
+        <span class="ph-notch"></span>
+        <div class="ph-screen">
+          <div class="ph-head"><span class="ph-brand">Meteo<em>rec</em></span><span class="ph-stn">IREICA1 · Rečica</span></div>
+          <div class="ph-hero"><span class="ph-lbl">Zdaj</span><strong id="ph-temp">–</strong><span class="ph-sub" id="ph-time">Nalagam meritev</span></div>
+          <div class="ph-grid">
+            <div class="ph-t t-hum"><span>Vlaga</span><b id="ph-hum">–</b></div>
+            <div class="ph-t t-pres"><span>Tlak</span><b id="ph-pres">–</b></div>
+            <div class="ph-t t-wind"><span>Veter</span><b id="ph-wind">–</b></div>
+            <div class="ph-t t-rain"><span>Dež danes</span><b id="ph-rain">–</b></div>
+            <div class="ph-t t-dew"><span>Rosišče</span><b id="ph-dew">–</b></div>
+            <div class="ph-t t-gust"><span>Sunki</span><b id="ph-gust">–</b></div>
+          </div>
+          <div class="ph-alert"><span class="ph-tag">Primer opozorila</span><b>Pozeba ponoči</b><span>Temperatura bo padla pod vašo mejo. Ukrepajte pravočasno.</span></div>
+        </div>
+      </div>'''
 
 STATION_SVG = '''<svg class="station" viewBox="0 0 200 360" aria-hidden="true" focusable="false">
         <rect x="94" y="150" width="12" height="190" rx="4" fill="#6B7A84"/>
@@ -393,9 +391,9 @@ def build_main():
       </div>
     </div>
     <div class="hero-art" aria-hidden="false">
-      {PHONE_SVG}
-      <div class="chip chip-a" aria-hidden="true"><span class="dot"></span>Primer: opozorilo pred pozebo</div>
-      <div class="chip chip-b" aria-hidden="true">Primer: veter pri delu na višini</div>
+      {PHONE_HTML}
+      <div class="chip chip-a" aria-hidden="true"><span class="dot live-dot"></span>V živo z IREICA1</div>
+      <div class="chip chip-b" aria-hidden="true">Opozorila na telefon</div>
     </div>
   </div>
 </section>
