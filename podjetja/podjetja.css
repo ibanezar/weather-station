@@ -235,3 +235,38 @@ input[aria-invalid=true],select[aria-invalid=true]{border-color:var(--strike)}
 .live h3::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:#2fbf71;margin-right:10px;vertical-align:middle}
 @media (prefers-reduced-motion:no-preference){.live h3::before{animation:pulse 2s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(47,191,113,.22)}}}
 .photo-art img.illus{width:auto;max-width:100%;height:clamp(280px,38vw,440px);margin:0 auto;padding:24px;object-fit:contain}
+
+/* ── popravki po pregledu (30. 10.) ───────────────────────────────────────── */
+/* glava poravnana z vsebino */
+.top{display:block;padding:0}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+/* razmiki vrstic */
+h3{line-height:1.2}
+.case h3{display:flex;align-items:flex-end}
+@media (min-width:900px){.case h3{min-height:2.4em}}
+.card p,.lead,.faq p,.steps span{line-height:1.6}
+.steps li{gap:8px}
+.steps strong{line-height:1.3}
+.card{gap:16px}
+.tags{margin-top:auto;gap:8px 8px}
+.case .link{margin-top:4px}
+.sec>.link,.proof-text>.link,.card>.link{align-self:flex-start}
+/* paketi: poravnane cene in gumbi */
+.pack .btn{align-self:stretch;white-space:nowrap}
+.pack .price{margin-top:auto;padding-top:12px}
+/* slika postaje: manjša, brez težkega okvirja */
+.photo-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(24px,6vw,88px)}
+.photo-art{background:transparent;border:0;border-radius:0;overflow:visible;align-items:center}
+.photo-art img.illus{height:auto;max-height:400px;width:auto;max-width:min(100%,340px);padding:0;margin:0 auto;filter:drop-shadow(0 24px 40px rgba(0,0,0,.45))}
+.photo-art>img:not(.illus){border-radius:24px}
+.photo-art figcaption{border:0;padding:16px 0 0;text-align:center}
+@media (max-width:760px){.photo-art img.illus{max-height:300px}}
+/* obrazec: dva stolpca na namizju, polno besedilo v poljih */
+form{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px 24px;padding:clamp(20px,3vw,36px)}
+.consent label{font-weight:500;line-height:1.5}
+.f>label>span,legend{display:block;margin-bottom:2px}
+select{text-overflow:ellipsis}
+.tags{margin-top:6px}
+.case .link{margin-top:auto;padding-top:6px}
+@media (min-width:820px){form{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:819px){form{grid-template-columns:1fr}}

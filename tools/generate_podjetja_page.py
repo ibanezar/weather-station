@@ -260,7 +260,7 @@ def package_card(p):
         <div class="conn" data-conn>Povezava: WiFi</div>
         <ul>{items}</ul>
         {price_block(p)}
-        <a class="btn btn-ghost" href="#povprasevanje" data-paket="{p["id"]}">Izberem paket {e(p["name"])}</a>
+        <a class="btn btn-ghost" href="#povprasevanje" data-paket="{p["id"]}" aria-label="Izberem paket {e(p["name"])}">Izberem paket</a>
       </article>'''
 
 
@@ -367,10 +367,10 @@ def build_main():
     sim_note = ""
     return head + f'''<body>
 <a class="skip" href="#vsebina">Preskoči na vsebino</a>
-<header class="top">
+<header class="top"><div class="wrap top-in">
   <a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a>
   <nav aria-label="Razdelki"><a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#faq">Vprašanja</a><a class="btn btn-sm" href="#povprasevanje">Ponudba</a></nav>
-</header>
+</div></header>
 <main id="vsebina">
 <section class="hero" aria-labelledby="h1">
   <div class="wrap hero-grid">
@@ -455,7 +455,7 @@ def build_main():
     </div>
   </div></section>
 
-  <section class="band"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
+  <section class="band band-alt"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
     <span id="po-meri"></span>
     <h2 id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
     <p>Izpolnite vprašalnik. Iz odgovorov sestavimo ponudbo po ogledu lokacije.</p>
@@ -508,7 +508,7 @@ def build_hvala():
     head = page_head("Hvala za povpraševanje", "Prejeli smo vaše povpraševanje. Odgovorimo po ogledu lokacije.",
                      URL + "hvala/", "noindex, follow")
     return head + '''<body>
-<header class="top"><a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a></header>
+<header class="top"><div class="wrap top-in"><a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a></div></header>
 <main class="wrap thanks">
   <h1>Hvala, prejeli smo povpraševanje.</h1>
   <p class="lead">Odgovorimo vam na e-naslov ali telefon, ki ste ga vpisali, in se dogovorimo za ogled lokacije. Ponudbo pripravimo po ogledu.</p>
