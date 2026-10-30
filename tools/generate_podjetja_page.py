@@ -8,6 +8,7 @@ spremeni. Po spremembi generator poženi ročno in commitaj (ni v nobenem workfl
 
 Stran ne bere nobene meritve postaje; živi gradnik v brskalniku bere samo zunanje vrednosti.
 """
+import hashlib
 import html
 import json
 import os
@@ -111,6 +112,13 @@ ARROW = ('<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><pa
 e = html.escape
 
 
+def ver(rel):
+    """Pečat vsebine za ?v= : Cloudflare in brskalnik hranita datoteke leto dni (max-age=31536000),
+    zato brez njega sprememba CSS/JS ostane nevidna. Pečat se izračuna iz datoteke, ne piše ročno."""
+    with open(os.path.join(ROOT, rel), "rb") as f:
+        return hashlib.md5(f.read()).hexdigest()[:8]
+
+
 def eur(n):
     return f"{n:,}".replace(",", ".") + " €"
 
@@ -150,7 +158,7 @@ def page_head(title, desc, canonical, robots, og_title=None, extra=""):
 <meta name="twitter:image" content="{SITE}/og/podjetja.jpg">
 <link rel="preload" href="/podjetja/fonts/Bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/podjetja/fonts/DMSans-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/podjetja/podjetja.css">
+<link rel="stylesheet" href="/podjetja/podjetja.css?v={ver("podjetja/podjetja.css")}">
 {extra}</head>
 '''
 
@@ -498,7 +506,7 @@ def build_main():
   <div class="row"><button class="btn btn-sm" type="button" data-consent="accepted">Sprejmem</button><button class="btn btn-sm btn-ghost" type="button" data-consent="declined">Zavrnem</button></div>
 </div>
 <script>window.PODJETJA_CFG={json.dumps(cfg, ensure_ascii=False)};</script>
-<script src="/podjetja/podjetja.js" defer></script>
+<script src="/podjetja/podjetja.js?v={ver("podjetja/podjetja.js")}" defer></script>
 </body>
 </html>
 '''
@@ -515,10 +523,10 @@ def build_hvala():
   <div class="row"><a class="btn" href="/podjetja/">Nazaj na paket</a><a class="btn btn-ghost" href="/">Na vreme v živo</a></div>
 </main>
 <script>window.PODJETJA_CFG={"pixel":%s};</script>
-<script src="/podjetja/podjetja.js" defer></script>
+<script src="/podjetja/podjetja.js?v=%s" defer></script>
 </body>
 </html>
-''' % json.dumps(META_PIXEL_ID)
+''' % (json.dumps(META_PIXEL_ID), ver("podjetja/podjetja.js"))
 
 
 def write(rel, content):
