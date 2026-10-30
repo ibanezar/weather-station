@@ -270,3 +270,38 @@ select{text-overflow:ellipsis}
 .case .link{margin-top:auto;padding-top:6px}
 @media (min-width:820px){form{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:819px){form{grid-template-columns:1fr}}
+
+/* ── telefon z dejanskimi elementi Meteorec (30. 10.) ─────────────────────── */
+.phone{position:relative;width:clamp(230px,24vw,290px);height:auto;aspect-ratio:9/18;border-radius:40px;padding:12px;background:#0B1217;border:4px solid #3B4C58;box-shadow:0 30px 60px rgba(0,0,0,.5);filter:none;color:#E8EEF2;font-family:var(--body)}
+.ph-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:70px;height:8px;border-radius:5px;background:#2B3A45}
+.ph-screen{height:100%;border-radius:28px;background:linear-gradient(180deg,#14212A,#0E181F);padding:26px 14px 14px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.ph-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ph-brand{font:800 15px var(--display)}
+.ph-brand em{font-style:normal;color:#5CC2BC}
+.ph-stn{font-size:11px;color:#9FB0BB}
+.ph-hero{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:18px;background:#18232B;border:1px solid #2B3A45}
+.ph-lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9FB0BB}
+.ph-hero strong{font:800 clamp(34px,3.6vw,44px)/1.05 var(--display);letter-spacing:-.02em}
+.ph-sub{font-size:11px;color:#9FB0BB}
+.ph-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ph-t{position:relative;display:flex;flex-direction:column;gap:2px;padding:9px 10px 9px 14px;border-radius:14px;background:#18232B;border:1px solid #2B3A45;overflow:hidden}
+.ph-t::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,#5CC2BC)}
+.ph-t span{font-size:11px;color:#9FB0BB}
+.ph-t b{font:800 15px var(--display)}
+.t-hum{--c:#38bdf8}.t-pres{--c:#a78bfa}.t-wind{--c:#34d399}.t-rain{--c:#60a5fa}
+.ph-alert{margin-top:auto;display:flex;flex-direction:column;gap:3px;padding:11px 12px;border-radius:16px;background:#2A1C18;border:1px solid #6A3B2C;font-size:12px;line-height:1.4;color:#E8EEF2}
+.ph-alert b{font:800 14px var(--display);color:#FF8A66}
+.ph-tag{align-self:flex-start;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#B4C3CD;background:#10181E;border-radius:999px;padding:2px 8px;margin-bottom:2px}
+.live-dot{background:#2fbf71!important}
+.chip-a{left:-14%;top:16%}
+.chip-b{right:-10%;bottom:18%}
+@media (max-width:1100px){.chip-a{left:-6%}.chip-b{right:-4%}}
+.t-dew{--c:#fbbf24}.t-gust{--c:#f472b6}
+.chip-a{left:-16%;top:58%}
+.chip-b{right:-12%;top:14%;bottom:auto}
+@media (max-width:1100px){.chip-a{left:-8%}.chip-b{right:-6%}}
+.chip-a{left:-4%;top:65%;bottom:auto}
+.chip-b{right:-6%;top:9%}
+@media (max-width:1100px){.chip-a{left:-2%}.chip-b{right:-3%}}
+.chip-b{right:0;top:-4%}
+@media (max-width:1100px){.chip-b{right:0}}
