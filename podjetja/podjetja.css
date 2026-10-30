@@ -234,3 +234,4 @@ input[aria-invalid=true],select[aria-invalid=true]{border-color:var(--strike)}
 .live{background:linear-gradient(160deg,var(--surface),var(--soft))}
 .live h3::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:#2fbf71;margin-right:10px;vertical-align:middle}
 @media (prefers-reduced-motion:no-preference){.live h3::before{animation:pulse 2s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(47,191,113,.22)}}}
+.photo-art img.illus{width:auto;max-width:100%;height:clamp(280px,38vw,440px);margin:0 auto;padding:24px;object-fit:contain}
