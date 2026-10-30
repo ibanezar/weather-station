@@ -190,6 +190,8 @@ CASE_ICON = {"kmetija": "sprout", "kamp": "tent", "gradbenistvo": "hardhat", "ob
 STEP_ICON = ["pin", "tool", "sliders", "check", "headset"]
 PHOTO = "podjetja/img/postaja.jpg"   # prava fotografija IREICA1; ko obstaja, nadomesti ilustracijo
 PHOTO_ALT = "Vremenska postaja IREICA1 v Rečici ob Savinji"
+ILLUS = "podjetja/img/postaja-ilustracija.webp"   # splošna ilustracija, ne IREICA1; velja, dokler ni prave fotografije
+ILLUS_ALT = "Ilustracija vremenske postaje s senzorji vetra, dežja in temperature ter sončno celico"
 
 
 def ic(name, cls="ic"):
@@ -216,6 +218,11 @@ def photo_html():
             pass
         art = f'<img src="/{PHOTO}" alt="{e(PHOTO_ALT)}" width="{w}" height="{h}" loading="lazy">'
         cap = "Postaja IREICA1, Rečica ob Savinji, 366 m"
+    elif os.path.exists(os.path.join(ROOT, ILLUS)):
+        from PIL import Image
+        w, h = Image.open(os.path.join(ROOT, ILLUS)).size
+        art = f'<img class="illus" src="/{ILLUS}" alt="{e(ILLUS_ALT)}" width="{w}" height="{h}" loading="lazy">'
+        cap = "Ilustracija: primer postaje (ni naša postaja IREICA1)"
     else:
         art = STATION_SVG
         cap = "Ilustracija vremenske postaje"
