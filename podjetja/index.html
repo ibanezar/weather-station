@@ -43,10 +43,10 @@
 </head>
 <body>
 <a class="skip" href="#vsebina">Preskoči na vsebino</a>
-<header class="top">
+<header class="top"><div class="wrap top-in">
   <a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a>
   <nav aria-label="Razdelki"><a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#faq">Vprašanja</a><a class="btn btn-sm" href="#povprasevanje">Ponudba</a></nav>
-</header>
+</div></header>
 <main id="vsebina">
 <section class="hero" aria-labelledby="h1">
   <div class="wrap hero-grid">
@@ -179,7 +179,7 @@
         <div class="conn" data-conn>Povezava: WiFi</div>
         <ul><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Vremenska postaja in namestitev</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Osnovne nastavitve</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Javna stran ali vtičnik za vašo spletno stran</span></li></ul>
         <div class="price"><div class="price-once"><strong>od 990 €</strong> <span>enkratno</span></div><div class="price-month">29 € <span>na mesec</span></div><div class="sim-add" data-sim-add hidden>Brez WiFi: + 390 € enkratno, + 19 € na mesec</div></div>
-        <a class="btn btn-ghost" href="#povprasevanje" data-paket="osnovni">Izberem paket Osnovni</a>
+        <a class="btn btn-ghost" href="#povprasevanje" data-paket="osnovni" aria-label="Izberem paket Osnovni">Izberem paket</a>
       </article>
       <article class="card pack" id="paket-pro">
         <h3>Pro</h3>
@@ -187,7 +187,7 @@
         <div class="conn" data-conn>Povezava: WiFi</div>
         <ul><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Vse iz paketa Osnovni</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Nadzorna plošča ali aplikacija</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Opozorila na telefon (pozeba, veter, nevihta)</span></li></ul>
         <div class="price"><div class="price-once"><strong>1.290 €</strong> <span>enkratno</span></div><div class="price-month">49 € <span>na mesec</span></div><div class="sim-add" data-sim-add hidden>Brez WiFi: + 390 € enkratno, + 19 € na mesec</div></div>
-        <a class="btn btn-ghost" href="#povprasevanje" data-paket="pro">Izberem paket Pro</a>
+        <a class="btn btn-ghost" href="#povprasevanje" data-paket="pro" aria-label="Izberem paket Pro">Izberem paket</a>
       </article>
       <article class="card pack" id="paket-premium">
         <h3>Premium</h3>
@@ -195,7 +195,7 @@
         <div class="conn" data-conn>Povezava: WiFi</div>
         <ul><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Vse iz paketa Pro</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Senzor strel in dva senzorja vlage tal</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Lokalna napoved, popravljena z vašimi podatki</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Mesečno poročilo o natančnosti</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Prednostna podpora</span></li></ul>
         <div class="price"><div class="price-once"><strong>1.790 €</strong> <span>enkratno</span></div><div class="price-month">99 € <span>na mesec</span></div><div class="sim-add" data-sim-add hidden>Brez WiFi: + 390 € enkratno, + 19 € na mesec</div></div>
-        <a class="btn btn-ghost" href="#povprasevanje" data-paket="premium">Izberem paket Premium</a>
+        <a class="btn btn-ghost" href="#povprasevanje" data-paket="premium" aria-label="Izberem paket Premium">Izberem paket</a>
       </article>
       <article class="card pack custom" id="paket-po-meri">
         <h3>Po meri</h3>
@@ -203,7 +203,7 @@
         <div class="conn" data-conn>Povezava: WiFi</div>
         <ul><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Dodatni senzorji</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Več postaj na več lokacijah</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Nadzorna plošča in opozorila po vaših pravilih</span></li><li><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Vse iz drugih paketov, kar potrebujete</span></li></ul>
         <div class="price"><div class="price-once"><strong>od 2.290 €</strong> <span>enkratno</span></div><div class="price-month">od 149 € <span>na mesec</span></div><div class="sim-add" data-sim-add hidden>Brez WiFi: + 390 € enkratno, + 19 € na mesec</div></div>
-        <a class="btn btn-ghost" href="#povprasevanje" data-paket="po-meri">Izberem paket Po meri</a>
+        <a class="btn btn-ghost" href="#povprasevanje" data-paket="po-meri" aria-label="Izberem paket Po meri">Izberem paket</a>
       </article>
     </div>
     <p class="fine">Vse cene so brez DDV; obračunamo ga po stopnji 22 %. Končno ceno določimo po ogledu lokacije.</p>
@@ -232,7 +232,7 @@
     </div>
   </div></section>
 
-  <section class="band"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
+  <section class="band band-alt"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
     <span id="po-meri"></span>
     <h2 id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
     <p>Izpolnite vprašalnik. Iz odgovorov sestavimo ponudbo po ogledu lokacije.</p>
