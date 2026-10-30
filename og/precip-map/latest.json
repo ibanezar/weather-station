@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-29",
-  "issued": "29.10.2026 7:00 CET",
-  "issued_at": "2026-10-29T07:30:39.108327+01:00",
-  "top_station": "Lisca",
+  "date": "2026-10-30",
+  "issued": "30.10.2026 7:00 CET",
+  "issued_at": "2026-10-30T07:30:37.476228+01:00",
+  "top_station": "Kredarica",
   "top_mm": 1,
-  "n_stations": 20,
+  "n_stations": 19,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-10-29.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-10-29-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-10-30.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-10-30-story.jpg"
 }
