@@ -10,6 +10,8 @@ on:
     paths:
       - 'app.js'
       - 'worker.js'
+      - 'podjetja/**'
+      - 'tools/generate_podjetja_page.py'
       - 'igra/**'
       - 'napovej/**'
       - 'crnivec-igra/**'
@@ -115,6 +117,11 @@ jobs:
 
       - name: Test končne točke /anketa (pravi worker.js, lažen R2/KV)
         run: node tools/test_anketa.mjs
+
+      - name: Test strani /podjetja/ in končne točke /api/povprasevanje
+        run: |
+          python3 tools/test_podjetja.py
+          node tools/test_podjetja_worker.mjs
 
       - name: Test varovalk javnih vnosov (push naslovi, omejitve po IP, zgornje meje)
         run: node tools/test_worker_abuse.mjs

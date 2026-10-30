@@ -163,6 +163,8 @@ CORE = {
     # seznam, nosi posamezne strani po vrstah (glej SITEMAPS spodaj).
     "makro/":                     ("weekly",  "0.4"),
     # Meteorec Šola — gradiva o vremenu za osnovno šolo, glej CLAUDE.md.
+    # Meteorec za podjetja: pristajalna stran za oglase (tools/generate_podjetja_page.py). /podjetja/hvala/ je noindex.
+    "podjetja/":                          ("monthly", "0.7"),
     "sola/":                              ("weekly",  "0.7"),
     "sola/naravoslovni-dan-vreme/":       ("monthly", "0.6"),
     "sola/dezni-dnevnik/":                ("monthly", "0.6"),

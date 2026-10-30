@@ -7064,6 +7064,130 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Povpraševanja podjetij (/podjetja/, 30. 10. 2026) ──────
+      // Obrazec »Zahtevajte ponudbo po meri«. Vsebuje osebne podatke (kontakt), zato:
+      // brez IP in user-agenta v zapisu, branje samo z Bearer DELETE_SECRET (zaklep po IP),
+      // e-obvestilo lastniku prek Resend (isti vzorec kot /blog-comments).
+      //   POST /api/povprasevanje  { firma, kraj, dejavnost, postaj, spremljati[], wifi, opomba?,
+      //                              kontakt, soglasje:true, t (ms od izrisa), website (honeypot),
+      //                              paket?, povezava?, segment?, utm_*?, fbclid? }
+      //   GET  /api/povprasevanje  → admin
+      // POV_* so namerna podvojitev z obrazcem (tools/generate_podjetja_page.py); preverja jih
+      // tools/test_podjetja.py.
+      if (path === "/api/povprasevanje") {
+        const r2 = env?.PHOTOS_R2;
+        function _json(obj, status) {
+          return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" } });
+        }
+        const POV_KEY = "feedback/povprasevanja.json";
+        const POV_STORE_CAP = 500;
+        const POV_MIN_MS = 3000;     // hitrejše oddaje so boti
+        const POV_DEJAVNOSTI = ["Kmetijstvo, sadjarstvo, vinogradništvo", "Gradbeništvo", "Turizem in gostinstvo",
+          "Prireditve in šport", "Občina ali javna ustanova", "Drugo"];
+        const POV_POSTAJ = ["1", "2 do 3", "4 ali več"];
+        const POV_SPREMLJATI = ["pozeba", "veter", "dež in toča", "vlaga tal", "strele", "požarna ogroženost", "temperatura in megla"];
+        const POV_WIFI = ["Da, WiFi je na voljo", "Ne, potreben je mobilni internet", "Ne vem, preverite z mano"];
+        const POV_PAKETI = ["osnovni", "pro", "premium", "po-meri"];
+        const POV_POVEZAVE = ["wifi", "sim"];
+        const POV_SEGMENTI = ["kmetija", "kamp", "gradbenistvo", "obcina"];
+
+        async function _povRead() {
+          if (!r2) return [];
+          try {
+            const obj = await r2.get(POV_KEY);
+            if (!obj) return [];
+            return JSON.parse(await obj.text());
+          } catch (_) { return []; }
+        }
+
+        if (request.method === "POST") {
+          if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object" || Array.isArray(body)) return _json({ error: "Napačni podatki" }, 400);
+          if (body.website) return _json({ ok: true });                              // honeypot
+          const t = Number(body.t);
+          if (!Number.isFinite(t) || t < POV_MIN_MS) return _json({ ok: true });     // prehitro = bot
+
+          const str = (v, n) => (typeof v === "string" ? v : "").replace(/[\u0000-\u001f\u007f]+/g, " ").trim().slice(0, n);
+          const firma = str(body.firma, 120);
+          const kraj = str(body.kraj, 160);
+          const opomba = str(body.opomba, 1000);
+          const kontakt = str(body.kontakt, 120);
+          if (!firma) return _json({ error: "Vpišite podjetje ali kmetijo" }, 400);
+          if (!kraj) return _json({ error: "Vpišite kraj in lokacijo postaje" }, 400);
+          const jeEposta = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]{2,}$/.test(kontakt);
+          const jeTel = /^[+()\d\s/.-]{6,}$/.test(kontakt) && (kontakt.match(/\d/g) || []).length >= 6;
+          if (!jeEposta && !jeTel) return _json({ error: "Vpišite veljaven e-naslov ali telefonsko številko" }, 400);
+          if (body.soglasje !== true) return _json({ error: "Potrebna je privolitev v obdelavo podatkov" }, 400);
+          if (!POV_DEJAVNOSTI.includes(body.dejavnost)) return _json({ error: "Izberite dejavnost" }, 400);
+          if (!POV_POSTAJ.includes(body.postaj)) return _json({ error: "Izberite število postaj" }, 400);
+          if (!POV_WIFI.includes(body.wifi)) return _json({ error: "Izberite, ali je na lokaciji WiFi" }, 400);
+          const spremljati = (Array.isArray(body.spremljati) ? body.spremljati : []).filter(x => POV_SPREMLJATI.includes(x));
+          const meta = {};
+          for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_content"]) { const s = str(body[k], 100); if (s) meta[k] = s; }
+          const fbclid = str(body.fbclid, 300); if (fbclid) meta.fbclid = fbclid;
+          if (POV_PAKETI.includes(body.paket)) meta.paket = body.paket;
+          if (POV_POVEZAVE.includes(body.povezava)) meta.povezava = body.povezava;
+          if (POV_SEGMENTI.includes(body.segment)) meta.segment = body.segment;
+
+          if (await _ipLimited(env, request, "povprasevanje_rl", 5, 3600))
+            return _json({ error: "Preveč oddaj v kratkem času – poskusite pozneje" }, 429);
+
+          const all = await _povRead();
+          const now = Date.now();
+          if (all.some(i => i.firma === firma && i.kontakt === kontakt && (now - new Date(i.ts).getTime()) < 60000))
+            return _json({ ok: true });
+          const entry = { id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(),
+            firma, kraj, dejavnost: body.dejavnost, postaj: body.postaj, spremljati, wifi: body.wifi, opomba, kontakt, ...meta };
+          all.unshift(entry);
+          await r2.put(POV_KEY, JSON.stringify(all.slice(0, POV_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
+
+          if (env?.RESEND_API_KEY) {
+            const esc = s => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const vrstice = [["Podjetje", entry.firma], ["Lokacija", entry.kraj], ["Dejavnost", entry.dejavnost],
+              ["Število postaj", entry.postaj], ["Spremljati", spremljati.join(", ") || "-"], ["WiFi", entry.wifi],
+              ["Kontakt", entry.kontakt], ["Opombe", entry.opomba || "-"],
+              ["Paket / povezava / segment", [meta.paket, meta.povezava, meta.segment].filter(Boolean).join(" / ") || "-"],
+              ["Oglas", [meta.utm_source, meta.utm_campaign, meta.utm_content].filter(Boolean).join(" / ") || "-"]];
+            const html = "<p><strong>Novo povpraševanje (Meteorec za podjetja)</strong></p>" +
+              vrstice.map(([k, v]) => `<p style="margin:.2rem 0"><strong>${esc(k)}:</strong> ${esc(v)}</p>`).join("");
+            ctx.waitUntil(fetch("https://api.resend.com/emails", {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                from: env.NOTIFY_FROM || "Meteorec povpraševanja <onboarding@resend.dev>",
+                to: env.NOTIFY_EMAIL || "filip.eremita@gmail.com",
+                subject: `Povpraševanje: ${entry.firma}`.slice(0, 120),
+                html,
+              }),
+            }).catch(() => {}));
+          }
+          return _json({ ok: true });
+        }
+
+        if (request.method === "GET") {
+          // Isti zaklep kot galerija in anketa (gal_admin_fail:<ip>).
+          const secret = env.DELETE_SECRET;
+          const auth = request.headers.get("Authorization") || "";
+          let okAdmin = false;
+          if (secret) {
+            const kv = env.COUNTER_KV;
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+            const lockKey = "gal_admin_fail:" + ip;
+            if (kv) {
+              const fails = parseInt((await kv.get(lockKey)) || "0") || 0;
+              if (fails < 8) {
+                if (_safeEq(auth, "Bearer " + secret)) { await kv.delete(lockKey); okAdmin = true; }
+                else await kv.put(lockKey, String(fails + 1), { expirationTtl: 900 });
+              }
+            } else okAdmin = _safeEq(auth, "Bearer " + secret);
+          }
+          if (!okAdmin) return _json({ error: "Nepooblaščen dostop" }, 401);
+          return _json({ povprasevanja: await _povRead() });
+        }
+      }
+
       // ── Poročila o neurjih (moderirana, javna) ────────────────
       // Ideja po neurje.si (prijavljanje toče, nalivov, vetra …), narejena po
       // našem vzorcu: isti R2/feedback kot /gobe/opazovanje, a z MODERACIJO —
