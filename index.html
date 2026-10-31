@@ -460,7 +460,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <p class="station-intro" aria-hidden="false">Meteorec je zasebna meteorološka postaja <strong>IREICA1</strong> na Rečici ob Savinji (366 m n.&thinsp;m.) v Zgornji Savinjski dolini. Postaja v realnem času meri temperaturo, vlago, padavine, tlak in hitrost vetra ter podatke posreduje vsakih 5 minut — tam, kjer ARSO nima lastne postaje. Podrobneje: <a href="/vreme-recica-ob-savinji/">vreme v Rečici ob Savinji po urah in za 7 dni</a> z lokalno mikroklimo, ali pa preglejte <a href="/vreme/">vremenski arhiv od leta 2019</a>, <a href="/vreme/mesec/">povprečno vreme po mesecih</a>, <a href="/rekord/">vremenske rekorde Savinjske doline</a> ali strnjen pregled na strani <a href="/podatki/">/podatki/</a>.</p>
 
   <div class="status">
-    <span><span class="dot loading" id="dot"></span><span id="status-text"><span class="skel-inline" aria-hidden="true"></span><span class="visually-hidden">Nalaganje …</span></span></span>
+    <span class="live-pill" id="live-pill" data-fresh="loading"><span class="dot loading" id="dot"></span><span id="status-text"><span class="skel-inline" aria-hidden="true"></span><span class="visually-hidden">Nalaganje …</span></span></span>
     <span>Posodobljeno: <span id="updated">—</span></span>
     <span id="local-time">—</span>
     <button class="share-btn" onclick="shareWeather()" title="Deli" aria-label="Deli"><svg class="ic" aria-hidden="true"><use href="#i-share-2"/></svg></button>
@@ -713,40 +713,46 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
         <span class="hm-val" id="hs-humidity">59<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
-        <span class="hm-lbl">Relativna vlažnost</span>
+        <span class="hm-scale hm-scale-hum" id="hsc-hum" aria-hidden="true"><i></i></span>
+        <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-droplet"/></svg></span><span>Relativna vlažnost</span></span>
         <span class="hm-sub" id="hs-humidity-range" hidden>danes <span id="hs-hum-min">—</span>–<span id="hs-hum-max">—</span> %</span>
       </div>
       <div class="hm hm-wind" id="hm-wind">
         <span class="hm-val" id="hs-wind">4,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
-        <span class="hm-lbl">Veter<span id="hs-wind-dir" class="hm-sub-inline"></span></span>
+        <span class="hm-scale hm-scale-wind" id="hsc-wind" aria-hidden="true"><i></i><b></b></span>
+        <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-wind"/></svg></span><span>Veter<span id="hs-wind-dir" class="hm-sub-inline"></span></span></span>
         <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">5,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
         <span class="hm-sub" id="hs-gust-max-line" hidden>danes najmočnejši <span id="hs-gust-max">—</span><span id="hs-gust-max-time"></span></span>
       </div>
       <div class="hm hm-rain" id="hm-rain">
         <span class="hm-val" id="hs-rain-today">0,0<span style="font-size:.7rem;color:var(--muted)"> mm</span></span>
-        <span class="hm-lbl">Padlo danes</span>
+        <span class="hm-scale hm-scale-rain" id="hsc-rain" aria-hidden="true"><i></i></span>
+        <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-cloud-rain"/></svg></span><span>Padlo danes</span></span>
         <span id="hs-rain-rate" style="font-size:.65rem;color:var(--muted)">trenutno 0,0 mm/h</span>
         <span class="hm-sub" id="hs-rain-fc" hidden></span>
         <span class="hm-sub" id="hs-rain-mtr" hidden></span>
       </div>
       <div class="hm hm-pres" id="hm-pressure">
         <span class="hm-val" id="hs-pressure">1022,3<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
-        <span class="hm-lbl">Zračni tlak</span>
+        <span class="hm-scale hm-scale-pres" id="hsc-pres" aria-hidden="true"><i></i></span>
+        <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-waves"/></svg></span><span>Zračni tlak</span></span>
         <span class="hm-sub" id="hs-pressure-trend" hidden></span>
       </div>
       <div class="hm hm-range hm-secondary" id="hm-range">
         <span class="hm-val" id="hs-range"><span id="hs-range-min">18,2</span>–<span id="hs-range-max">28,0</span><span style="font-size:.7rem;color:var(--muted)">°C</span></span>
-        <span class="hm-lbl">Danes min–maks</span>
+        <span class="hm-scale hm-scale-range" id="hsc-range" aria-hidden="true"><i></i></span>
+        <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-thermometer"/></svg></span><span>Danes min–maks</span></span>
       </div>
       <div class="hm hm-uv hm-secondary" id="hm-uv">
         <span class="hm-val" id="hs-uv">—</span>
-        <span class="hm-lbl">UV indeks</span>
+        <span class="hm-scale hm-scale-uv" id="hsc-uv" aria-hidden="true"><i></i></span>
+        <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-sun"/></svg></span><span>UV indeks</span></span>
         <span id="hs-uv-label" style="font-size:.62rem;opacity:.7;margin-top:.05rem"></span>
         <span class="hm-sub" id="hs-uv-max-line" hidden>danes najvišji <span id="hs-uv-max">—</span><span id="hs-uv-max-time"></span></span>
       </div>
       <div class="hm hm-pm hm-secondary" id="hm-pm" title="Meritev sosednje postaje Varpolje (IREICA7, ~1,6 km); Rečica (IREICA1) PM ne meri">
         <span class="hm-val" id="hs-pm">—</span>
-        <span class="hm-lbl">PM₂,₅ · Varpolje</span>
+        <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-cloud"/></svg></span><span>PM₂,₅ · Varpolje</span></span>
         <span class="hm-sub" id="hs-pm-sub">sosednja postaja</span>
       </div>
     </div>
@@ -858,13 +864,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="radar-controls">
       <button class="radar-btn" id="mrad-play" onclick="toggleMeteorecRadarPlay()"><svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg> Pavza</button>
       <span class="radar-time" id="mrad-time">—</span>
-      <div class="radar-track" id="mrad-track" onclick="meteorecRadarSeek(event)"><div class="radar-track-fill" id="mrad-track-fill"></div><div class="radar-track-split" id="mrad-track-split" hidden></div></div>
+      <div class="radar-scrub">
+        <div class="radar-track" id="mrad-track" role="slider" tabindex="0" aria-label="Čas radarske slike" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" onpointerdown="meteorecRadarScrubStart(event)" onkeydown="meteorecRadarKey(event)"><div class="radar-track-fill" id="mrad-track-fill"></div><div class="radar-track-split" id="mrad-track-split" hidden></div><span class="radar-thumb" id="mrad-thumb"></span></div>
+        <div class="radar-scrub-ticks" id="mrad-scrub-ticks" aria-hidden="true"></div>
+      </div>
     </div>
     <div class="mrad-views">
       <button class="radar-btn active" data-mrad-view="sirok" onclick="switchMeteorecRadarView('sirok')">Širše</button>
       <button class="radar-btn" data-mrad-view="savinja" onclick="switchMeteorecRadarView('savinja')">Zgornja Savinjska</button>
     </div>
-    <small class="mrad-hint">V pogledu "Zgornja Savinjska" se trak po zadnji uri radarja nadaljuje s 6-urno ICON napovedjo. Obarvane pike so sledene nevihtne celice, vidne v obeh pogledih — dotakni se pike za smer in hitrost. Stalno oznako ima le celica, ki prihaja proti Rečici.</small>
+    <small class="mrad-hint">V pogledu "Zgornja Savinjska" se trak po zadnji uri radarja nadaljuje s 6-urno ICON napovedjo. Obarvane pike so sledene nevihtne celice, vidne v obeh pogledih — dotakni se pike za smer in hitrost. Dotik na prazen del zemljevida odpre modelsko napoved padavin za tisto točko (ni radar). Stalno oznako ima le celica, ki prihaja proti Rečici.</small>
     <div class="radar-legend">
       <div class="mrad-legend">
         <div class="mrad-bar" id="mrad-scale"></div>

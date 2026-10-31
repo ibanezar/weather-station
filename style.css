@@ -3939,3 +3939,81 @@ a.tab-btn{text-decoration:none}
 /* Ploščice meseca se na 320 px ne smejo razlezti čez kartico (1fr se ne skrči pod vsebino; minmax(0,1fr) ja) */
 @media (max-width:560px){#month-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#month-card-grid .yr-item{min-width:0}#month-card-grid .yr-val{overflow-wrap:anywhere}}
 @media (max-width:360px){#month-card-grid .yr-item>div:first-child{letter-spacing:.03em!important;font-size:.66rem!important;gap:.3rem!important}}
+
+/* ── Ploščice hero kartice: glava z ikono, lestvica z oznako položaja, hero po vremenu (31. 10. 2026) ───────
+   Po referencah (komplet kartic, merilniki UV/vetra/tlaka): oznaka z ikono je zgoraj, pod vrednostjo je lestvica, ki pokaže,
+   kje na razponu je vrednost. Lestvica ima stalno višino (rezervirana v HTML), oznaka se pojavi šele ob podatku -- brez CLS.
+   Samo prikaz: id-ji in struktura (numOf(), hs-rain-rate) so nedotaknjeni. DOM ostane vrednost → oznaka, vrstni red na zaslonu
+   pa postavi `order` (bralnik zaslona bere kot prej). */
+.hm-lbl{order:-1;display:flex;align-items:center;gap:.45rem;margin-bottom:.1rem}
+.hm-ic{flex:none;display:inline-grid;place-items:center;width:1.45rem;height:1.45rem;border-radius:50%;
+  background:color-mix(in srgb,var(--hm-accent,var(--blue)) 16%,transparent);color:var(--hm-accent,var(--blue))}
+.hm-ic .ic{width:.82rem;height:.82rem;stroke-width:2}
+.hm-scale{position:relative;display:block;height:6px;margin:.15rem 0 .1rem;border-radius:99px;
+  background:var(--sc-bg,color-mix(in srgb,var(--text) 14%,transparent))}
+.hm-scale>i,.hm-scale>b{position:absolute;top:50%;opacity:0;transition:left .8s cubic-bezier(.2,.7,.2,1),opacity .4s}
+.hm-scale>i{left:var(--p,0%);width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 2px rgba(10,22,40,.6),0 1px 4px rgba(0,0,0,.35)}
+.hm-scale>b{left:var(--p2,0%);width:2px;height:12px;margin:-6px 0 0 -1px;border-radius:2px;background:var(--text);opacity:0}
+.hm-scale[data-on]>i{opacity:1}
+.hm-scale[data-on="2"]>b{opacity:.75}
+.hm-scale-hum{--sc-bg:linear-gradient(90deg,color-mix(in srgb,var(--amber) 70%,transparent),color-mix(in srgb,var(--c-cool) 85%,transparent))}
+.hm-scale-wind{--sc-bg:linear-gradient(90deg,#22c55e,#f59e0b 55%,#ef4444)}
+.hm-scale-uv{--sc-bg:linear-gradient(90deg,#22c55e,#d97706 40%,#ea580c 65%,#ef4444)}
+.hm-scale-range{--sc-bg:linear-gradient(90deg,var(--c-cool),var(--amber) 60%,var(--red))}
+.hm-scale-pres{--sc-bg:linear-gradient(90deg,color-mix(in srgb,var(--purple) 30%,transparent),color-mix(in srgb,var(--purple) 75%,transparent))}
+.hm-scale-pres::after{content:'';position:absolute;left:55%;top:-2px;bottom:-2px;width:1px;background:var(--text);opacity:.45}
+/* Dež: lestvica je polnilo (intenziteta zdaj), ne oznaka */
+.hm-scale-rain>i{left:0;top:0;width:var(--p,0%);height:100%;margin:0;border-radius:99px;box-shadow:none;background:var(--c-cool);
+  transition:width .8s cubic-bezier(.2,.7,.2,1),opacity .4s}
+.hm-scale-rain[data-on]>i{opacity:1}
+@media (prefers-reduced-motion:reduce){.hm-scale>i,.hm-scale>b,.hm-scale-rain>i{transition:none}}
+@media (max-width:420px){.hm-lbl{letter-spacing:.03em;font-size:.58rem;gap:.35rem}}
+@media (max-width:360px){.hm-ic{width:1.3rem;height:1.3rem}}
+html[data-mode="simple"] .hero .hm-scale{display:none}
+
+/* Hero kartica je rahlo obarvana po trenutnem vremenu (`data-wx` postavi applyObs()). Brez atributa je videz nespremenjen.
+   Samo žarenje v zgornjem desnem kotu (kjer je ikona), največ ~14 % barve, da kontrast besedila ostane. */
+.hero[data-wx]::before{background:
+  radial-gradient(120% 95% at 88% 0%,color-mix(in srgb,var(--wx-c) var(--wx-a,14%),transparent),transparent 72%),
+  linear-gradient(135deg,rgba(37,99,235,.05) 0%,rgba(124,58,237,.03) 60%,transparent 100%)}
+.hero[data-wx="clear"]{--wx-c:#f59e0b}
+.hero[data-wx="cloud"]{--wx-c:#64748b;--wx-a:13%}
+.hero[data-wx="rain"]{--wx-c:#0284c7;--wx-a:16%}
+.hero[data-wx="storm"]{--wx-c:#7c3aed;--wx-a:20%}
+.hero[data-wx="snow"]{--wx-c:#7dd3fc;--wx-a:18%}
+.hero[data-wx="night"]{--wx-c:#4f46e5;--wx-a:20%}
+[data-theme="light"] .hero[data-wx="clear"]{--wx-a:20%}
+[data-theme="light"] .hero[data-wx="snow"]{--wx-c:#38bdf8;--wx-a:22%}
+
+/* ── Radar: drsnik z ročico in časovnimi oznakami, napoved za točko (31. 10. 2026) ──────────────────────────────
+   Po referenci IMSS (časovni trak s predvajanjem): večja površina za prst, ročica, oznake ur pod trakom, vlečenje in tipkovnica.
+   Višina oznak je rezervirana, da se karta ob prihodu okvirjev ne premakne. */
+.radar-scrub{flex:1;min-width:140px}
+#mrad-track{height:24px;background:transparent;touch-action:none;cursor:pointer;border-radius:12px}
+#mrad-track::before{content:'';position:absolute;left:0;right:0;top:50%;height:5px;margin-top:-2.5px;border-radius:3px;background:var(--rain-track)}
+#mrad-track .radar-track-fill{position:absolute;left:0;top:50%;height:5px;margin-top:-2.5px;transition:width .2s}
+#mrad-track .radar-track-split{top:4px;bottom:4px}
+#mrad-track:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.radar-thumb{position:absolute;top:50%;left:0;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 3px var(--blue),0 2px 6px rgba(0,0,0,.35);transition:left .2s}
+#mrad-track.drag .radar-thumb,#mrad-track.drag .radar-track-fill{transition:none}
+.radar-scrub-ticks{position:relative;height:14px;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)}
+.radar-scrub-ticks span{position:absolute;top:1px;white-space:nowrap}
+.radar-old-badge{font-size:.62rem;padding:1px 7px;border-radius:10px;background:rgba(245,158,11,.16);color:var(--amber);font-weight:600}
+@media (prefers-reduced-motion:reduce){.radar-thumb,#mrad-track .radar-track-fill{transition:none}}
+.leaflet-popup.mrad-pt-popup .leaflet-popup-content-wrapper,.leaflet-popup.mrad-pt-popup .leaflet-popup-tip{background:var(--c-surface);color:var(--text)}
+.mrad-pt-popup .leaflet-popup-content{margin:.7rem .8rem;font-family:inherit;font-size:.78rem;line-height:1.35}
+.mrad-pt-popup .leaflet-popup-close-button{color:var(--muted)}
+.mrad-pt b{font-weight:600}
+.mrad-pt p{margin:.35rem 0 0;color:var(--muted)}
+.mrad-pt-row{display:flex;justify-content:space-between;gap:1rem;margin-top:.25rem}
+.mrad-pt-row span{color:var(--muted)}
+.mrad-pt svg{display:block;margin:.5rem 0 .2rem;color:var(--text)}
+.mrad-pt small{display:block;font-size:.64rem;color:var(--muted);line-height:1.35}
+
+/* Pilula stanja podatka (zeleno / jantarno / rdeče po starosti zadnje meritve; zeleno tudi v nalaganju je napačno, zato jantarno) */
+.live-pill{display:inline-flex;align-items:center;padding:.18rem .65rem .18rem .5rem;border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--green) 45%,transparent);background:color-mix(in srgb,var(--green) 12%,transparent)}
+.live-pill[data-fresh="loading"],.live-pill[data-fresh="stale"]{border-color:color-mix(in srgb,var(--amber) 55%,transparent);background:color-mix(in srgb,var(--amber) 13%,transparent)}
+.live-pill[data-fresh="old"],.live-pill[data-fresh="error"]{border-color:color-mix(in srgb,var(--red) 55%,transparent);background:color-mix(in srgb,var(--red) 12%,transparent)}
