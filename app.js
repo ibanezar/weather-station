@@ -2064,6 +2064,7 @@ function applyDayStats(observations){
   set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/tempCount,1));
   if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
   set('hs-range-min',fmt(minT,1));set('hs-range-max',fmt(maxT,1));
+  _hsc.tmin=minT;_hsc.tmax=maxT;renderHeroScales();
   todayObs.forEach(o=>{
     const t=new Date(o.obsTimeLocal.replace(' ','T'));
     // Urni zapis WU loči najmočnejši sunek (`windgustHigh`) od najvišjega
@@ -2603,6 +2604,36 @@ function renderHeroBriefing(){
   wrap.hidden=false;
 }
 
+// ── Lestvice na ploščicah junaške kartice ─────────────────
+// Kje na razponu je vrednost (vlaga 0–100 %, veter 0–50 km/h s sunkom kot črtico, tlak 980–1040 hPa s črtico pri 1013, UV 0–11,
+// intenziteta dežja po korenu do 10 mm/h, današnji razpon min–maks). Samo prikaz: številke ostanejo v ploščici.
+const _hsc={};
+function _hscPos(id,p,p2){
+  const el=document.getElementById(id);if(!el)return;
+  if(p==null||!isFinite(p)){el.removeAttribute('data-on');return;}
+  const c=v=>Math.max(0,Math.min(100,v));
+  el.style.setProperty('--p',c(p).toFixed(1)+'%');
+  if(p2!=null&&isFinite(p2))el.style.setProperty('--p2',c(p2).toFixed(1)+'%');
+  el.setAttribute('data-on',(p2!=null&&isFinite(p2))?'2':'1');
+}
+function renderHeroScales(){
+  const s=_hsc,n=v=>(v!=null&&isFinite(v))?v:null;
+  _hscPos('hsc-hum',n(s.hum));
+  _hscPos('hsc-wind',n(s.wind)!=null?s.wind/50*100:null,n(s.gust)!=null?s.gust/50*100:null);
+  _hscPos('hsc-pres',n(s.pres)!=null?(s.pres-980)/60*100:null);
+  _hscPos('hsc-uv',n(s.uv)!=null?s.uv/11*100:null);
+  _hscPos('hsc-rain',n(s.rr)!=null?Math.sqrt(Math.max(0,s.rr)/10)*100:null);
+  const rg=(n(s.tmax)!=null&&n(s.tmin)!=null)?s.tmax-s.tmin:null;
+  _hscPos('hsc-range',(n(s.temp)!=null&&rg!=null&&rg>0.2)?(s.temp-s.tmin)/rg*100:null);
+}
+// Hero kartica se rahlo obarva po vremenu (CSS `.hero[data-wx]`): dež, sneg ob ≤ 1 °C, nevihta ob > 7 mm/h, sicer po sončnem sevanju in uri.
+function setHeroWx(m,obs){
+  const hero=document.querySelector('.hero');if(!hero)return;
+  const rr=m.precipRate??0,sr=m.solarRadiation??obs.solarRadiation??0,h=new Date().getHours();
+  const wx=rr>7?'storm':rr>0?((m.temp!=null&&m.temp<=1)?'snow':'rain'):((h<6||h>=20)&&sr<10)?'night':sr>300?'clear':'cloud';
+  if(hero.getAttribute('data-wx')!==wx)hero.setAttribute('data-wx',wx);
+}
+
 function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
@@ -2630,6 +2661,8 @@ function applyObs(obs){
   set('hs-uv-label',uvLabel(uv));
   document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);
   noteTodayUv(uv,_lastObsTime??new Date());renderTodayUv();}
+  Object.assign(_hsc,{hum:obs.humidity,wind:m.windSpeed,gust:m.windGust??m.windSpeed,pres:m.pressure,uv:obs.uv??0,rr:m.precipRate??0,temp:m.temp});
+  renderHeroScales();setHeroWx(m,obs);
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
   countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit"> km/h</span>',900);
   set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');

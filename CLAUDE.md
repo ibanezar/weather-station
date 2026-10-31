@@ -2752,6 +2752,15 @@ Samo videz (`style.css`, `index.html`, malo `app.js`); logika in id-ji so nedota
 - **Nowcast (`#nowcast-wrap`, »Naslednjih 45 minut«) ostane nad hero kartico po Filipovi odločitvi** (26. 10. 2026), čeprav ob prihodu radarja ob dežju zraste za ~340 px in da CLS 0,07–0,17. Možna rešitev, če bo treba: premik pod hero kartico. Ne rezerviraj prostora za mirno vreme (prazna luknja).
 - **Merjenje CLS:** Playwright + CDP (`Network.emulateNetworkConditions` 200 kB/s, 150 ms; `Emulation.setCPUThrottlingRate` 4×), `PerformanceObserver('layout-shift')`. Posamezni teki so zelo nestanovitni (osnovna različica 0,02–0,10 v 5 s): primerjaj vsaj 3 teke. Open-Meteo vrne ob veliko meritvah 429/503 in kartice (obeti) ostanejo prazne — ne zamenjaj za napako v kodi.
 
+### Ploščice hero kartice: glava z ikono, lestvica, barva po vremenu (31. 10. 2026)
+
+Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris). Samo prikaz; id-ji in pravila `numOf()`/`hs-rain-rate` veljajo naprej.
+
+- **Anatomija ploščice**: oznaka z ikono v barvnem čipu (`.hm-ic`, ikone iz sklada) je zgoraj, vrednost pod njo. Vrstni red postavi CSS `order`, DOM ostane vrednost → lestvica → oznaka, da se `.hm-lbl+.hm-sub` in branje ne spremenita.
+- **Lestvica z oznako položaja** (`.hm-scale`, `renderHeroScales()` v `app.js`): vlaga 0–100 %, veter 0–50 km/h (črtica = sunek), tlak 980–1040 hPa (črtica pri 1013), UV 0–11, današnji razpon min–maks (oznaka = trenutna temperatura), dež je polnilo po korenu do 10 mm/h. Višina je rezervirana v HTML, oznaka se pokaže šele ob podatku (`data-on`): brez CLS. Na preprostem pogledu skrito. **Meje lestvic so izbira za prikaz, ne pragovi opozoril.**
+- **Barva hero kartice po vremenu**: `setHeroWx()` postavi `data-wx` (`clear`/`cloud`/`rain`/`storm`/`snow`/`night`), CSS rahlo obarva kot žarenje v zgornjem desnem kotu (≤ 22 %). Brez atributa je videz nespremenjen. Nov `data-wx` = tudi barva v obeh temah in preveri kontrast besedila.
+- Nov kritični CSS in `style.min.css` naredi `minify-assets.yml` po mergu; do takrat se lestvice pred celotnim CSS kratko pokažejo brez oblike.
+
 ## Strani »vreme za …« in migrena (29. 10. 2026)
 
 Šest strani po istem vzorcu, brez lastnih podatkov: `/astma/` (`generate_astma_page.py`, samostojen, ima tudi JS za osebne sprožilce),

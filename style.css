@@ -3939,3 +3939,49 @@ a.tab-btn{text-decoration:none}
 /* Ploščice meseca se na 320 px ne smejo razlezti čez kartico (1fr se ne skrči pod vsebino; minmax(0,1fr) ja) */
 @media (max-width:560px){#month-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#month-card-grid .yr-item{min-width:0}#month-card-grid .yr-val{overflow-wrap:anywhere}}
 @media (max-width:360px){#month-card-grid .yr-item>div:first-child{letter-spacing:.03em!important;font-size:.66rem!important;gap:.3rem!important}}
+
+/* ── Ploščice hero kartice: glava z ikono, lestvica z oznako položaja, hero po vremenu (31. 10. 2026) ───────
+   Po referencah (komplet kartic, merilniki UV/vetra/tlaka): oznaka z ikono je zgoraj, pod vrednostjo je lestvica, ki pokaže,
+   kje na razponu je vrednost. Lestvica ima stalno višino (rezervirana v HTML), oznaka se pojavi šele ob podatku -- brez CLS.
+   Samo prikaz: id-ji in struktura (numOf(), hs-rain-rate) so nedotaknjeni. DOM ostane vrednost → oznaka, vrstni red na zaslonu
+   pa postavi `order` (bralnik zaslona bere kot prej). */
+.hm-lbl{order:-1;display:flex;align-items:center;gap:.45rem;margin-bottom:.1rem}
+.hm-ic{flex:none;display:inline-grid;place-items:center;width:1.45rem;height:1.45rem;border-radius:50%;
+  background:color-mix(in srgb,var(--hm-accent,var(--blue)) 16%,transparent);color:var(--hm-accent,var(--blue))}
+.hm-ic .ic{width:.82rem;height:.82rem;stroke-width:2}
+.hm-scale{position:relative;display:block;height:6px;margin:.15rem 0 .1rem;border-radius:99px;
+  background:var(--sc-bg,color-mix(in srgb,var(--text) 14%,transparent))}
+.hm-scale>i,.hm-scale>b{position:absolute;top:50%;opacity:0;transition:left .8s cubic-bezier(.2,.7,.2,1),opacity .4s}
+.hm-scale>i{left:var(--p,0%);width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 2px rgba(10,22,40,.6),0 1px 4px rgba(0,0,0,.35)}
+.hm-scale>b{left:var(--p2,0%);width:2px;height:12px;margin:-6px 0 0 -1px;border-radius:2px;background:var(--text);opacity:0}
+.hm-scale[data-on]>i{opacity:1}
+.hm-scale[data-on="2"]>b{opacity:.75}
+.hm-scale-hum{--sc-bg:linear-gradient(90deg,color-mix(in srgb,var(--amber) 70%,transparent),color-mix(in srgb,var(--c-cool) 85%,transparent))}
+.hm-scale-wind{--sc-bg:linear-gradient(90deg,#22c55e,#f59e0b 55%,#ef4444)}
+.hm-scale-uv{--sc-bg:linear-gradient(90deg,#22c55e,#d97706 40%,#ea580c 65%,#ef4444)}
+.hm-scale-range{--sc-bg:linear-gradient(90deg,var(--c-cool),var(--amber) 60%,var(--red))}
+.hm-scale-pres{--sc-bg:linear-gradient(90deg,color-mix(in srgb,var(--purple) 30%,transparent),color-mix(in srgb,var(--purple) 75%,transparent))}
+.hm-scale-pres::after{content:'';position:absolute;left:55%;top:-2px;bottom:-2px;width:1px;background:var(--text);opacity:.45}
+/* Dež: lestvica je polnilo (intenziteta zdaj), ne oznaka */
+.hm-scale-rain>i{left:0;top:0;width:var(--p,0%);height:100%;margin:0;border-radius:99px;box-shadow:none;background:var(--c-cool);
+  transition:width .8s cubic-bezier(.2,.7,.2,1),opacity .4s}
+.hm-scale-rain[data-on]>i{opacity:1}
+@media (prefers-reduced-motion:reduce){.hm-scale>i,.hm-scale>b,.hm-scale-rain>i{transition:none}}
+@media (max-width:420px){.hm-lbl{letter-spacing:.03em;font-size:.58rem;gap:.35rem}}
+@media (max-width:360px){.hm-ic{width:1.3rem;height:1.3rem}}
+html[data-mode="simple"] .hero .hm-scale{display:none}
+
+/* Hero kartica je rahlo obarvana po trenutnem vremenu (`data-wx` postavi applyObs()). Brez atributa je videz nespremenjen.
+   Samo žarenje v zgornjem desnem kotu (kjer je ikona), največ ~14 % barve, da kontrast besedila ostane. */
+.hero[data-wx]::before{background:
+  radial-gradient(120% 95% at 88% 0%,color-mix(in srgb,var(--wx-c) var(--wx-a,14%),transparent),transparent 72%),
+  linear-gradient(135deg,rgba(37,99,235,.05) 0%,rgba(124,58,237,.03) 60%,transparent 100%)}
+.hero[data-wx="clear"]{--wx-c:#f59e0b}
+.hero[data-wx="cloud"]{--wx-c:#64748b;--wx-a:13%}
+.hero[data-wx="rain"]{--wx-c:#0284c7;--wx-a:16%}
+.hero[data-wx="storm"]{--wx-c:#7c3aed;--wx-a:20%}
+.hero[data-wx="snow"]{--wx-c:#7dd3fc;--wx-a:18%}
+.hero[data-wx="night"]{--wx-c:#4f46e5;--wx-a:20%}
+[data-theme="light"] .hero[data-wx="clear"]{--wx-a:20%}
+[data-theme="light"] .hero[data-wx="snow"]{--wx-c:#38bdf8;--wx-a:22%}
