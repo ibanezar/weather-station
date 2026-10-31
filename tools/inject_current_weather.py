@@ -26,7 +26,8 @@ Wired into:
 Usage:
   python3 tools/inject_current_weather.py [--live]
 """
-import json, os, re, sys, urllib.request
+import json
+import math, os, re, sys, urllib.request
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -330,6 +331,55 @@ def patch_hero(html, obs):
     return html
 
 
+def hero_scale_positions(obs, tmin=None, tmax=None):
+    """Položaji oznak na lestvicah hero ploščic v % — Python kopija heroScalePos() v app.js.
+    Vrne {id: (p, p2|None)}; ključ manjka, če vrednosti ni. Preverja ga tools/test_parity.py (hero_lestvice)."""
+    m = obs.get("metric", {})
+    def ok(v):
+        return v is not None and isinstance(v, (int, float)) and math.isfinite(v)
+    out = {}
+    hum = obs.get("humidity")
+    if ok(hum):
+        out["hum"] = (hum, None)
+    wind, gust = m.get("windSpeed"), m.get("windGust")
+    if gust is None:
+        gust = wind
+    if ok(wind):
+        out["wind"] = (wind / 50 * 100, gust / 50 * 100 if ok(gust) else None)
+    pres = m.get("pressure")
+    if ok(pres):
+        out["pres"] = ((pres - 980) / 60 * 100, None)
+    uv = obs.get("uv") or 0
+    if ok(uv):
+        out["uv"] = (uv / 11 * 100, None)
+    rr = m.get("precipRate") or 0
+    if ok(rr):
+        out["rain"] = (math.sqrt(max(0, rr) / 10) * 100, None)
+    temp = m.get("temp")
+    if ok(temp) and ok(tmin) and ok(tmax) and tmax - tmin > 0.2:
+        out["range"] = ((temp - tmin) / (tmax - tmin) * 100, None)
+    return out
+
+
+def patch_hero_scales(html, pos):
+    """V predizrisanem HTML zapiše položaj oznak (`--p`, `--p2`, `data-on`), da se ne pojavijo šele po JS-ju."""
+    for key in ("hum", "wind", "pres", "uv", "rain", "range"):
+        tag_re = re.compile(r'<span class="hm-scale hm-scale-%s"[^>]*id="hsc-%s"[^>]*>' % (key, key))
+        if key not in pos:
+            continue
+        p, p2 = pos[key]
+        clamp = lambda v: max(0.0, min(100.0, v))
+        style = "--p:%.1f%%" % clamp(p)
+        if p2 is not None:
+            style += ";--p2:%.1f%%" % clamp(p2)
+        tag = '<span class="hm-scale hm-scale-%s" id="hsc-%s" aria-hidden="true" style="%s" data-on="%s">' % (
+            key, key, style, "2" if p2 is not None else "1")
+        html, n = tag_re.subn(tag, html, count=1)
+        if n == 0:
+            print(f"OPOZORILO: lestvica #hsc-{key} ni najdena — preskočeno.", file=sys.stderr)
+    return html
+
+
 def fetch_hourly_wu():
     """Return the last 7 days of hourly WU observations for IREICA1, or None
     on any failure (network error, malformed response)."""
@@ -514,13 +564,16 @@ def main():
         new = re.sub(re.escape(START) + r".*?" + re.escape(END), block, html, flags=re.S)
 
         if path == INDEX:
+            stats = build_day_stats(hourly) if hourly else None
             if obs:
                 new = patch_hero(new, obs)
+                if obs.get("metric", {}).get("temp") is not None:
+                    new = patch_hero_scales(new, hero_scale_positions(
+                        obs, stats["low"] if stats else None, stats["high"] if stats else None))
             if hourly:
                 daily = build_daily_summaries(hourly)
                 if daily:
                     new = patch_history_table(new, daily)
-                stats = build_day_stats(hourly)
                 if stats:
                     new = patch_day_summary(new, stats)
 
