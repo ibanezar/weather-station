@@ -147,6 +147,9 @@ MUTACIJE = [
     ("hub Na kratko: povprečne padavine [29.10.]", "tools/seo_smart_routine.py", 'f"{num(avg_ann_prec, 0)} mm padavin na leto; dni z mrazom', 'f"{num(avg_ann_prec, 1)} mm padavin na leto; dni z mrazom', "test_hub_kratko.py"),
     ("hub Na kratko: najbolj suho leto [29.10.]", "tools/seo_smart_routine.py", "najbolj suho {min_year}: {num(ann_prec_full[min_year], 0)} mm", "najbolj suho {min_year}: {num(ann_prec_full[max_year], 0)} mm", "test_hub_kratko.py"),
     ("hub Na kratko: rekord temperature [29.10.]", "tools/seo_smart_routine.py", "Rekordi postaje: {num(abs_max[1])} °C", "Rekordi postaje: {num(abs_min[1])} °C", "test_hub_kratko.py"),
+    ("hero lestvice: veter (app.js) [31.10.]", "app.js", "wind:n(s.wind)!=null?[s.wind/50*100", "wind:n(s.wind)!=null?[s.wind/60*100"),
+    ("hero lestvice: tlak (Python) [31.10.]", "tools/inject_current_weather.py", "((pres - 980) / 60 * 100, None)", "((pres - 990) / 60 * 100, None)"),
+    ("hero lestvice: dež (app.js) [31.10.]", "app.js", "Math.sqrt(Math.max(0,s.rr)/10)*100", "Math.sqrt(Math.max(0,s.rr)/12)*100"),
 ]
 
 

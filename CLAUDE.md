@@ -2761,6 +2761,15 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Barva hero kartice po vremenu**: `setHeroWx()` postavi `data-wx` (`clear`/`cloud`/`rain`/`storm`/`snow`/`night`), CSS rahlo obarva kot žarenje v zgornjem desnem kotu (≤ 22 %). Brez atributa je videz nespremenjen. Nov `data-wx` = tudi barva v obeh temah in preveri kontrast besedila.
 - Nov kritični CSS in `style.min.css` naredi `minify-assets.yml` po mergu; do takrat se lestvice pred celotnim CSS kratko pokažejo brez oblike.
 
+### Drugi krog: predizrisane lestvice, luna, rosišče, sparkline, kartice dni (31. 10. 2026)
+
+- **Lestvice v predizrisanem HTML**: `heroScalePos()` (app.js, čista funkcija) in `hero_scale_positions()` + `patch_hero_scales()` (`tools/inject_current_weather.py`) zapišeta `--p`/`--p2`/`data-on` v `#hsc-*`, da oznake ne čakajo na JS. Podvojitev preverja `test_parity.hero_lestvice` (+ 3 mutacije). Lestvica lune (`hsc-moon`) je samo JS (datum, ne meritev).
+- **Ploščica Luna** (`renderHeroMoon()`, `calcMoon()`): faza, osvetljenost in dni do polne lune/mlaja, računano lokalno. Glif (`moonGlyph()`) je namenoma brez `<defs>`/id-jev, ker ima velika risba v kartici Astro (`moonPhaseSVG`) id-je in bi se podvajali. Sekundarna vrstica ima zdaj 4 ploščice (span 3), na telefonu je Luna čez dva stolpca.
+- **Rosišče pod vlago** (`hs-dew-line`, `dewLabel()`); **sparkline** 24 h za tlak in vlago (`renderTileSpark()`, urne meritve; razpon osi je najmanj 4 hPa oz. 25 %, da šum ne izgleda kot sprememba). Samo prikaz, v preprostem pogledu skrito.
+- **Ta mesec / Rekordi leta**: glava ploščice je ikonski čip kot na hero (`_yrHead()`); padavine imajo **segmentirano vrstico** (`_segBar()`, 10 polj po 20 % običajnega za isto obdobje, sredina označena; običajno = povprečje prejšnjih let iz `buildClimateCard`, `_climRain`). Naslovi kartic na `#tab-current` imajo ikono v čipu (`.clabel>.ic:first-child`).
+- **Kartice dni v obetih**: `data-wx` iz WMO kode (`_wmoCat()`), CSS da barvo in preprosto sceno (dež, sneg, megla, oblaki, sonce, nevihta) kot ozadje v zgornji polovici; emojiji pri padavinah so zamenjani z ikonami iz sklada.
+- **Kritični CSS je bil zastarel** (ugotovljeno 31. 10.): korak v `minify-assets.yml` je `continue-on-error` in je trajal ~20 s (najverjetneje pade pri nameščanju Playwrighta), zato `index.html` ni dobil novih pravil. Izmerjeno (Playwright, CDP omejitev 200 kB/s + 150 ms + CPU 4×, 3 teki): **CLS na telefonu 0,36 pri zastarelem kritičnem CSS, 0,043 s svežim** (namizje 0,036 → 0,015). Po večjih spremembah `style.css` zato poženi `npm run minify && node tools/critical_css.mjs` in commitaj `index.html`; ne zanašaj se na CI.
+
 ### Radar: drsnik, napoved za točko; pilula stanja podatka (31. 10. 2026)
 
 Po referenci IMSS (časovni trak s predvajanjem, klik na točko) in pilulah »Live« iz ostalih referenc. Samo `app.js`/`style.css`/`index.html`, workerja ni bilo treba spreminjati.

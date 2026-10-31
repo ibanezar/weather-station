@@ -936,6 +936,46 @@ def modelske_karte():
     check(cz == [0xf7, 0xf7, 0xf7], "lestvica: razlika 0 je nevtralna", cz)
 
 
+@test
+def hero_lestvice():
+    """Položaji oznak na lestvicah hero ploščic: heroScalePos() v app.js ↔ hero_scale_positions() v inject_current_weather.py."""
+    import inject_current_weather as ic
+    rnd = random.Random(23)
+    cases = []
+    for _ in range(40):
+        tmin = rnd.uniform(-8, 25)
+        cases.append(dict(hum=rnd.uniform(15, 100), wind=rnd.uniform(0, 70), gust=rnd.uniform(0, 90),
+                          pres=rnd.uniform(960, 1050), uv=rnd.choice([0, 0, rnd.uniform(0, 12)]),
+                          rr=rnd.choice([0, 0, rnd.uniform(0, 14)]), temp=tmin + rnd.uniform(-1, 15),
+                          tmin=tmin, tmax=tmin + rnd.choice([0.1, rnd.uniform(0.5, 14)])))
+    calls = [{"fn": "heroScalePos", "args": [c]} for c in cases]
+    got = js("app.js", ["heroScalePos"], calls)
+    for c, g in zip(cases, got):
+        obs = {"humidity": c["hum"], "uv": c["uv"],
+               "metric": {"windSpeed": c["wind"], "windGust": c["gust"], "pressure": c["pres"],
+                          "precipRate": c["rr"], "temp": c["temp"]}}
+        py = ic.hero_scale_positions(obs, c["tmin"], c["tmax"])
+        for key in ("hum", "wind", "pres", "uv", "rain", "range"):
+            a, b = g.get(key), py.get(key)
+            if a is None or b is None:
+                check(a is None and b is None, f"lestvica {key}: obe prazni", f"{a} {b} {c}")
+                continue
+            check(close(a[0], b[0], 1e-9), f"lestvica {key}: oznaka", f"{a} {b}")
+            check((a[1] is None) == (b[1] is None) and (a[1] is None or close(a[1], b[1], 1e-9)),
+                  f"lestvica {key}: črtica", f"{a} {b}")
+    # manjkajoči podatki: brez oznake
+    g = js("app.js", ["heroScalePos"], [{"fn": "heroScalePos", "args": [{"hum": None, "pres": None}]}])[0]
+    check(g["hum"] is None and g["pres"] is None and g["range"] is None, "lestvica: brez podatka ni oznake", g)
+    # predizrisan HTML nosi enak položaj
+    html = '<span class="hm-scale hm-scale-wind" id="hsc-wind" aria-hidden="true"><i></i><b></b></span>'
+    out = ic.patch_hero_scales(html, {"wind": (18.04, 44.0)})
+    check('style="--p:18.0%;--p2:44.0%"' in out and 'data-on="2"' in out and "<i></i><b></b>" in out,
+          "lestvica: patch_hero_scales", out)
+    # ponoven zagon ne podvoji atributov
+    out2 = ic.patch_hero_scales(out, {"wind": (30.0, None)})
+    check(out2.count("style=") == 1 and 'data-on="1"' in out2 and "--p2" not in out2, "lestvica: ponoven patch", out2)
+
+
 def main():
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
     for t in TESTS:
