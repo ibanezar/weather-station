@@ -663,10 +663,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="hero-top">
       <div class="hero-left">
         <div class="condition-badge"><span id="cond-icon" class="skel-shimmer">—</span><span id="cond-label" class="skel-shimmer">—</span></div>
-        <div class="temp-huge"><span id="temp-val">7,0</span><span class="temp-unit-sup"> °C</span></div>
+        <div class="temp-huge"><span id="temp-val">3,0</span><span class="temp-unit-sup"> °C</span></div>
         <div class="feels">
           <span id="feels-pill" class="feels-pill"></span>
-          <span>Občutek <strong id="feels-val">7,0</strong>°C</span>
+          <span>Občutek <strong id="feels-val">3,0</strong>°C</span>
         </div>
         <div class="hero-chips">
         <div class="yesterday-delta" id="yesterday-delta"></div>
@@ -675,7 +675,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- WX-DAILY-FACT:START (auto: tools/generate_daily_fact.py) -->
         <div class="daily-fact-card" id="daily-fact-card" data-date="2026-10-29"><span class="dfc-icon" aria-hidden="true">❄️</span><span class="dfc-text">29. 10. letos <strong>3. najhladnejši</strong> v 7 letih meritev (14,8 °C)</span></div>
         <!-- WX-DAILY-FACT:END -->
-        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">6,0</strong>°C<span id="dew-desc"></span></div>
+        <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">3,0</strong>°C<span id="dew-desc"></span></div>
         </div>
         <!-- "Our forecast, graded daily against ARSO" is the site's
              strongest trust signal (/tocnost-napovedi/), but it lived only
@@ -684,7 +684,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
              placeholder or shows a stale claim. -->
         <div class="mtr-trust-badge" id="mtr-trust-badge" hidden></div>
       </div>
-      <div class="hero-icon" id="hero-icon"><img src="icons/weather/overcast.svg" width="108" height="108" class="wx-icon" alt="Oblačno" fetchpriority="high"></div>
+      <div class="hero-icon" id="hero-icon"><img src="icons/weather/clear-night.svg" width="108" height="108" class="wx-icon" alt="Jasna noč" fetchpriority="high"></div>
     </div>
     <div class="hero-briefing" id="hero-briefing" hidden>
       <span class="hb-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-cloud-sun"/></svg></span>
@@ -712,14 +712,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
-        <span class="hm-val" id="hs-humidity">94<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
+        <span class="hm-val" id="hs-humidity">99<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
         <span class="hm-lbl">Relativna vlažnost</span>
         <span class="hm-sub" id="hs-humidity-range" hidden>danes <span id="hs-hum-min">—</span>–<span id="hs-hum-max">—</span> %</span>
       </div>
       <div class="hm hm-wind" id="hm-wind">
-        <span class="hm-val" id="hs-wind">1,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
+        <span class="hm-val" id="hs-wind">0,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span>
         <span class="hm-lbl">Veter<span id="hs-wind-dir" class="hm-sub-inline"></span></span>
-        <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">2,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
+        <span class="hm-sub" id="hs-gust-line">sunki <span id="hs-gust">0,0<span style="font-size:.7rem;color:var(--muted)"> km/h</span></span></span>
         <span class="hm-sub" id="hs-gust-max-line" hidden>danes najmočnejši <span id="hs-gust-max">—</span><span id="hs-gust-max-time"></span></span>
       </div>
       <div class="hm hm-rain" id="hm-rain">
@@ -730,7 +730,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span class="hm-sub" id="hs-rain-mtr" hidden></span>
       </div>
       <div class="hm hm-pres" id="hm-pressure">
-        <span class="hm-val" id="hs-pressure">1025,7<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hm-val" id="hs-pressure">1025,9<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
         <span class="hm-lbl">Zračni tlak</span>
         <span class="hm-sub" id="hs-pressure-trend" hidden></span>
       </div>
@@ -793,7 +793,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
-  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-10-30T21:54">21:54</time>, 30. oktobra 2026): temperatura 7,0 °C, rosišče 6,0 °C, relativna vlažnost 94 %, veter 1,0 km/h (sunki 2,0 km/h), zračni tlak 1026 hPa, padavine danes 0,0 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
+  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-10-31T01:53">01:53</time>, 31. oktobra 2026): temperatura 3,0 °C, rosišče 3,0 °C, relativna vlažnost 99 %, veter 0,0 km/h (sunki 0,0 km/h), zračni tlak 1026 hPa, padavine danes 0,0 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
   <!-- WX-STATIC:END -->
 
   <!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->
@@ -802,10 +802,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- Day summary -->
   <div class="day-summary card--wide simple-keep">
-    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">12,2</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">12:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
-    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">3,7</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">06:59</span></span></div>
+    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">3,2</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">00:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
+    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">2,7</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">01:49</span></span></div>
     <div class="ds-item ds-rain"><span class="ds-arrow"><svg class="ic" aria-hidden="true"><use href="#i-cloud-rain"/></svg> Dež danes</span><span class="ds-temp"><span id="day-rain" class="skel-shimmer">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
-    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">7,4</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
+    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">3,0</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
 
   <!-- Dolina zdaj: shematski prerez z izmerjenimi temperaturami (app.js fetchHeroValley); samo napredni pogled -->
@@ -1556,13 +1556,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </tr>
           </thead>
           <tbody id="history-tbody">
-<tr><td>30. okt. 2026</td><td class="td-high">13,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">3,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>7,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">13,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>93<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>31. okt. 2026</td><td class="td-high">4,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">2,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>3,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>0,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">2,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>99<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>30. okt. 2026</td><td class="td-high">13,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">3,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>7,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">13,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>94<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>29. okt. 2026</td><td class="td-high">14,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">5,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>9,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">14,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>92<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>28. okt. 2026</td><td class="td-high">12,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>6,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">1,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>0,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">6,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>94<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>27. okt. 2026</td><td class="td-high">16,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">-0,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>5,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">7,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>91<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>26. okt. 2026</td><td class="td-high">16,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">0,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>6,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">9,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>89<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
-<tr><td>25. okt. 2026</td><td class="td-high">10,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">1,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>5,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">30,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>91<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
-<tr><td>24. okt. 2026</td><td class="td-high">9,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">3,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>7,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">8,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>0,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">11,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>97<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>25. okt. 2026</td><td class="td-high">10,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">1,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>5,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">30,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>91<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
           </tbody>
         </table>
       </div>
