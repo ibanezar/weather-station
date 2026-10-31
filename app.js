@@ -1673,62 +1673,21 @@ async function fetchComingUp(){
     try{renderStormTeaser();}catch(_){}
     const stripHours=hours.filter((_,i)=>i===0||i%2===0).slice(0,13);
 
-    // Urni trak: kartice po 2 h + krivulja temperature nad njimi (SVG, isti korak 70 px = kartica 64 px + vrzel 6 px, zato se pomika skupaj s karticami),
-    // nočni pas (sončni vzhod/zahod iz sunTimes(), ne iz urnega `is_day`) in stolpec padavin v oknu 2 h. Samo prikaz; številke ostanejo na karticah.
+    // Hourly cells
     const strip=document.getElementById('cu-hourly');
     if(strip){
       strip.innerHTML='';
-      const PITCH=70,CARD=64,CH=56;
-      const n=stripHours.length,W=n*PITCH-(PITCH-CARD);
-      strip.style.setProperty('--cu-hw',W+'px');
-      const t0=stripHours[0].t.getTime();
-      const xOf=ms=>(ms-t0)/(2*3600000)*PITCH+CARD/2;
       stripHours.forEach((x,i)=>{
         const hr=x.t.getHours();
-        const gi=hours.indexOf(x);
-        const mmWin=(x.mm||0)+((hours[gi+1]&&hours[gi+1].mm)||0);
         const div=document.createElement('div');
-        div.className='cu-hour'+(i===0?' cu-now':'')+(x.isDay?'':' cu-night');
+        div.className='cu-hour'+(i===0?' cu-now':'');
         div.innerHTML=
           '<span class="cu-ht">'+(i===0?'zdaj':(hr<10?'0':'')+hr+':00')+'</span>'+
           '<span class="cu-he">'+_wmoImg(x.wmo,x.isDay,40)+'</span>'+
           '<span class="cu-htemp" style="color:'+tempColor(x.temp)+'">'+Math.round(x.temp)+'°</span>'+
-          (x.prob>=15?'<span class="cu-hprob">'+x.prob+'%</span>':'<span class="cu-hprob" style="opacity:.25">—</span>')+
-          '<span class="cu-hbar" title="'+(mmWin>=0.05?fmt(mmWin,1)+' mm v 2 h (model)':'brez padavin (model)')+'"><i style="width:'+(mmWin>=0.05?Math.max(8,Math.min(100,Math.sqrt(mmWin/3)*100)).toFixed(0):0)+'%"></i></span>';
+          (x.prob>=15?'<span class="cu-hprob">'+x.prob+'%</span>':'<span class="cu-hprob" style="opacity:.25">—</span>');
         strip.appendChild(div);
       });
-      // krivulja
-      try{
-        const temps=stripHours.map(x=>x.temp);
-        let lo=Math.min(...temps),hi=Math.max(...temps);
-        if(hi-lo<4){const mid=(hi+lo)/2;lo=mid-2;hi=mid+2;}
-        const pts=stripHours.map((x,i)=>({x:i*PITCH+CARD/2,y:8+(hi-x.temp)/(hi-lo)*(CH-26)}));
-        const line=smoothPath(pts);
-        // noč: [zahod dneva k, vzhod dneva k+1] za tri zaporedne dni okoli prve ure
-        const d0=new Date(t0);let nights='',marks='';
-        const tEnd=t0+(n-1)*2*3600000;
-        for(let k=-1;k<=2;k++){
-          const dd=new Date(d0.getFullYear(),d0.getMonth(),d0.getDate()+k);
-          const sA=sunTimes(LAT,LON,dd),sB=sunTimes(LAT,LON,new Date(dd.getFullYear(),dd.getMonth(),dd.getDate()+1));
-          const nx0=Math.max(0,xOf(sA.sunset.getTime())),nx1=Math.min(W,xOf(sB.sunrise.getTime()));
-          if(nx1>nx0)nights+='<rect x="'+nx0.toFixed(1)+'" y="0" width="'+(nx1-nx0).toFixed(1)+'" height="'+CH+'" fill="currentColor" opacity=".08"/>';
-          [[sA.sunrise,'vzh.'],[sA.sunset,'zah.']].forEach(([dt,lbl])=>{
-            const ms=dt.getTime();if(ms<t0||ms>tEnd+3600000)return;
-            const mx=xOf(ms),anchor=mx<24?'start':mx>W-24?'end':'middle';
-            marks+='<line x1="'+mx.toFixed(1)+'" y1="2" x2="'+mx.toFixed(1)+'" y2="'+(CH-14)+'" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3" opacity=".35"/>'+
-              '<text x="'+mx.toFixed(1)+'" y="'+(CH-3)+'" font-size="9" text-anchor="'+anchor+'" fill="currentColor" opacity=".7" font-family="JetBrains Mono,monospace">'+lbl+' '+fmtTime(dt)+'</text>';
-          });
-        }
-        const gid='cuHg'+(Date.now()%1e6);
-        const stops=pts.map((p,i)=>'<stop offset="'+(p.x/W*100).toFixed(1)+'%" stop-color="'+tempColor(stripHours[i].temp)+'"/>').join('');
-        const area=line+' L '+pts[n-1].x.toFixed(1)+' '+(CH-16)+' L '+pts[0].x.toFixed(1)+' '+(CH-16)+' Z';
-        const dots=pts.map((p,i)=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(i===0?4:2.6)+'" fill="'+tempColor(stripHours[i].temp)+'" stroke="var(--card-bg)" stroke-width="1.5"/>').join('');
-        strip.insertAdjacentHTML('afterbegin','<svg class="cu-hcurve" viewBox="0 0 '+W+' '+CH+'" width="'+W+'" height="'+CH+'" aria-hidden="true" focusable="false">'+
-          '<defs><linearGradient id="'+gid+'" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="'+W+'" y2="0">'+stops+'</linearGradient></defs>'+
-          nights+marks+
-          '<path d="'+area+'" fill="url(#'+gid+')" opacity=".16"/>'+
-          '<path d="'+line+'" fill="none" stroke="url(#'+gid+')" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'+dots+'</svg>');
-      }catch(_){}
     }
 
     // Next 7 days — was next 3; the homepage now leans on this strip as
@@ -1828,7 +1787,7 @@ async function fetchComingUp(){
     }
 
     const upd=document.getElementById('cu-updated');
-    if(upd){upd.textContent='posod. '+now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});markFresh(upd,now,90,240,upd.textContent);}
+    if(upd)upd.textContent='posod. '+now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }catch(e){console.warn('ComingUp:',e);}
 }
 
@@ -2713,25 +2672,6 @@ function setHeroWx(m,obs){
   const wx=rr>7?'storm':rr>0?((m.temp!=null&&m.temp<=1)?'snow':'rain'):((h<6||h>=20)&&sr<10)?'night':sr>300?'clear':'cloud';
   if(hero.getAttribute('data-wx')!==wx)hero.setAttribute('data-wx',wx);
 }
-
-// Pilula svežine na karticah z lastnim virom (isti jezik kot #live-pill): zeleno do okMin, jantarno do staleMin (»zamuda«), nato rdeče (»staro«).
-// Besedilo ostane (base) in se samo dopolni; starega podatka ne skrivamo. Ponovni izračun na 60 s, ker starost raste.
-function renderFresh(el){
-  const base=el.dataset.base||'',ts=+el.dataset.ts;
-  if(!ts){el.dataset.fresh='old';el.textContent=base;return;}
-  const mins=Math.max(0,Math.round((Date.now()-ts)/60000));
-  const st=mins<=+el.dataset.ok?'ok':mins<=+el.dataset.stale?'stale':'old';
-  el.dataset.fresh=st;
-  el.textContent=base+(st==='stale'?' · zamuda':st==='old'?' · staro':'');
-}
-function markFresh(el,ts,okMin,staleMin,base){
-  if(!el)return;
-  el.classList.add('fresh-pill');
-  el.dataset.ts=ts?String(ts instanceof Date?ts.getTime():ts):'';
-  el.dataset.ok=okMin;el.dataset.stale=staleMin;el.dataset.base=base??el.textContent;
-  renderFresh(el);
-}
-setInterval(()=>{if(!document.hidden)document.querySelectorAll('.fresh-pill[data-base]').forEach(renderFresh);},60000);
 
 // Pilula stanja podatka: zelena do 20 min, jantarna do 90 min (»Zamuda«), nato rdeča. Starega podatka ne skrijemo, samo ga označimo.
 function renderLivePill(force){
@@ -4028,22 +3968,6 @@ const _PD_DAYS=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
 const _PD_DAYS_FULL=['Nedelja','Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota'];
 let _pdActiveDate=null;
 
-// Kategorija dneva iz meritev za sceno kartice: padavine in temperatura odločajo, sicer največje sončno sevanje glede na pričakovani vrh v tem mesecu.
-// To je ocena po sevanju, ne opazovanje oblakov, in tako piše v `title` ikone; brez solarHigh scene ni.
-function _pdScene(date,m){
-  if(!m)return null;
-  const r=m.precipTotal||0,t=m.tempAvg??m.tempHigh??0;
-  if(r>0&&t<=0.5)return{cat:'snow',icon:'snow',txt:'Sneg'};
-  if(r>15)return{cat:'storm',icon:'thunderstorms-day-rain',txt:'Močan dež'};
-  if(r>1)return{cat:'rain',icon:'rain',txt:'Dež'};
-  if(r>0)return{cat:'rain',icon:'drizzle',txt:'Rahel dež'};
-  if(m.solarHigh==null)return null;
-  const mo=new Date(date+'T12:00:00').getMonth();
-  const q=m.solarHigh/(640+400*Math.cos((mo-5.5)*Math.PI/6));
-  if(q>0.7)return{cat:'clear',icon:'clear-day',txt:'Sončno'};
-  if(q>0.35)return{cat:'partly',icon:'partly-cloudy-day',txt:'Delno oblačno'};
-  return{cat:'cloud',icon:'overcast-day',txt:'Oblačno'};
-}
 function renderPastDays(){
   const wrap=document.getElementById('past-days-scroll');
   if(!wrap)return;
@@ -4075,21 +3999,19 @@ function renderPastDays(){
     const isWindy=(w!=null&&w===maxWind&&maxWind>0&&!isHot&&!isWet);
     const barLeft=Math.round(((l??globalLow)-globalLow)/tempRange*100);
     const barW=Math.max(8,Math.round(((h??globalHigh)-(l??globalLow))/tempRange*100));
-    const badge=isHot?'thermometer':isWet?'droplet':isWindy?'wind':'';
-    const sc=_pdScene(d.date,d.data);
-    const icon=sc?'<img class="pd-wxi wx-icon" src="icons/weather/'+sc.icon+'.svg" width="38" height="38" alt="'+sc.txt+'" title="'+sc.txt+' (ocena po padavinah in največjem sončnem sevanju)">':'<span class="pd-wxi pd-nowx" title="Ni podatkov za oceno">—</span>';
-    const barBg=(h!=null&&l!=null)?'background:linear-gradient(90deg,'+tempColor(l)+','+tempColor(h)+');':'';
-    return`<div class="pd-card${isHot?' pd-hot':''}${isWet?' pd-wet':''}${isWindy?' pd-windy':''}"${sc?' data-wx="'+sc.cat+'"':''} data-date="${d.date}" onclick="togglePdDetail('${d.date}',this)">
-      <span class="cu-scene" aria-hidden="true"></span>
-      ${badge?`<span class="pd-badge" aria-hidden="true">${_ico(badge)}</span>`:''}
+    const badge=isHot?'🌡':isWet?'💧':isWindy?'💨':'';
+    const cond=metricToCondition(d.data);
+    return`<div class="pd-card${isHot?' pd-hot':''}${isWet?' pd-wet':''}${isWindy?' pd-windy':''}" data-date="${d.date}" onclick="togglePdDetail('${d.date}',this)">
+      ${badge?`<span class="pd-badge">${badge}</span>`:''}
       <div class="pd-day">${dn}</div>
       <div class="pd-date">${dm}</div>
-      <div class="pd-icon">${icon}</div>
-      <div class="pd-temps"><span class="pd-temp-high"${h!=null?' style="color:'+tempColor(h)+'"':''}>${h!=null?h.toFixed(1):'—'}°</span><span class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</span></div>
-      <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%;${barBg}"></div></div>
+      <div class="pd-icon" title="${cond.desc}">${cond.emoji}</div>
+      <div class="pd-temp-high">${h!=null?h.toFixed(1):'—'}°</div>
+      <div class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</div>
+      <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%"></div></div>
       <div class="pd-meta">
-        <span class="pd-m">${_ico('droplet')} ${r!=null&&r>0?r.toFixed(1)+' mm':'—'}</span>
-        <span class="pd-m">${_ico('wind')} ${w!=null&&w>0?Math.round(w)+' km/h':'—'}</span>
+        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span>💧 —</span>'}</span>
+        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span>💨 —</span>'}</span>
       </div>
     </div>`;
   }).join('');
@@ -6446,10 +6368,8 @@ function connectLightning(){
     const wsHost=wsHosts[(_ltgRetry||0)%wsHosts.length];
     _ltgRetry=(_ltgRetry||0)+1;
     _ltgWs=new WebSocket('wss://'+wsHost);
-    _ltgWs.onopen=()=>{_ltgBackoff=10000;_ltgWs.send('{"a":111}');applyLightning();markFresh(document.getElementById('ltg-updated'),Date.now(),2,6,'V živo');};
+    _ltgWs.onopen=()=>{_ltgBackoff=10000;_ltgWs.send('{"a":111}');applyLightning();};
     _ltgWs.onmessage=e=>{
-      // Blitzortung pošilja strele z vsega sveta: sporočilo (tudi tuje) pomeni živo povezavo, tišina > 2 min mrtvo.
-      {const lu=document.getElementById('ltg-updated');if(lu)lu.dataset.ts=String(Date.now());}
       try{
         const d=JSON.parse(_ltgDecode(e.data));
         if(!('lat' in d)||!('lon' in d))return;
@@ -6466,7 +6386,7 @@ function connectLightning(){
         applyLightning();
       }catch(_){}
     };
-    _ltgWs.onerror=_ltgWs.onclose=ev=>{markFresh(document.getElementById('ltg-updated'),null,0,0,'brez povezave');_ltgRetrySoon(ev);};
+    _ltgWs.onerror=_ltgWs.onclose=_ltgRetrySoon;
   }catch(e){_ltgRetrySoon();}
 }
 // Ponovni poskus z eksponentnim zamikom (10 s → 5 min), en časovnik naenkrat (onerror in onclose sta
@@ -7608,7 +7528,7 @@ async function fetchMosForecast(){
       const days=document.getElementById(idp+'days');
       if(days)days.innerHTML='<div class="mtr-empty">Napoved MTR trenutno ni na voljo.</div>';
       const upd=document.getElementById(idp+'updated');
-      if(upd){upd.textContent='ni na voljo';markFresh(upd,null,0,0,'ni na voljo');}
+      if(upd)upd.textContent='ni na voljo';
     });
     console.warn('MTR:',e);
   }
@@ -7660,7 +7580,6 @@ function _renderMtrMount(idp){
     const t=new Date(st.data.generated_at);
     upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
       +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    markFresh(upd,t,540,1440,upd.textContent);   // živa napoved MTR se osvežuje 4× na dan
   }
   const leg=document.getElementById(idp+'legend');
   if(leg)leg.innerHTML=
@@ -10649,7 +10568,7 @@ async function fetchValleyDuel(){
         'vir <a href="'+DUEL_NEIGHBOUR.url+'" target="_blank" rel="noopener">varpolje.si</a>. '+
         'Arhiv, model MTR in semafor točnosti ostajajo na meritvah IREICA1.</div>';
 
-    if(upd){const vt=data.updated_utc?new Date(data.updated_utc):null,ok=vt&&!isNaN(vt);markFresh(upd,ok?vt:null,20,45,ok?'Varpolje '+vt.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'Varpolje');}
+    if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }catch(e){
     if(body)body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';
     console.warn('Dvoboj Varpolje:',e);
