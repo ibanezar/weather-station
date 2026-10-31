@@ -37,6 +37,7 @@ Usage:
   python3 tools/generate_zima_page.py
 """
 import datetime, json, os, sys
+from html import escape as html_escape
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402 — shared template helpers
@@ -305,6 +306,12 @@ ZIMA_CSS = '''
 .zima-pass-name{font-weight:700;color:var(--text)}
 .zima-pass-meta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
 .zima-pass-status{font-size:.82rem;font-weight:650;white-space:nowrap}
+.zima-guides{list-style:none;margin:.8rem 0 1.4rem;padding:0;display:grid;gap:.6rem;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.zima-guides li{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.8rem 1rem}
+.zima-guides a{font-weight:650;color:var(--text);text-decoration:none}
+.zima-guides a:hover{text-decoration:underline}
+.zima-guides span{display:block;font-size:.82rem;color:var(--muted);margin-top:.25rem;line-height:1.45}
 </style>'''
 
 
@@ -313,6 +320,80 @@ def load_json(path, default=None):
         return json.load(open(path, encoding="utf-8"))
     except Exception:
         return default
+
+
+# Zimski članki (27. 10. 2026). Naslove in povzetke bere iz blog.json (en vir:
+# ob lektorskem popravku naslova se pri nas posodobita sama), zato tukaj ni
+# vtipkanih naslovov. Slug, ki ga v blog.json ni, se tiho izpusti -- hub ne
+# sme pasti zaradi umaknjenega članka.
+GUIDE_SLUGS = [
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
+    "prvi-sneg-golte-solcava-menina-1027",
+    "bela-bozic-zgornja-savinjska-dolina-1027",
+    "kdaj-menjati-zimske-gume-recica-1027",
+    "zled-ali-poledica-razlika-1027",
+    "crnivec-pozimi-sneg-verige-1027",
+    "kdaj-se-dvigne-jutranja-megla-dolina-1027",
+    "stopinjski-dnevi-recica-koliko-kuriti-1027",
+]
+# Katere članke ponuja posamezna stran pod »Preberi tudi« (sledi bralčevemu namenu).
+SPOKE_GUIDES = {
+    "meja-snezenja": ["kdaj-pade-prvi-sneg-v-dolini-recica-1027", "prvi-sneg-golte-solcava-menina-1027",
+                      "bela-bozic-zgornja-savinjska-dolina-1027"],
+    "poledica": ["zled-ali-poledica-razlika-1027", "kdaj-menjati-zimske-gume-recica-1027",
+                 "crnivec-pozimi-sneg-verige-1027"],
+    "zled": ["zled-ali-poledica-razlika-1027", "kdaj-menjati-zimske-gume-recica-1027"],
+    "kurilni-semafor": ["stopinjski-dnevi-recica-koliko-kuriti-1027", "kdaj-se-dvigne-jutranja-megla-dolina-1027"],
+    "nad-meglo": ["kdaj-se-dvigne-jutranja-megla-dolina-1027"],
+    "snezna-odeja": ["prvi-sneg-golte-solcava-menina-1027", "bela-bozic-zgornja-savinjska-dolina-1027",
+                     "crnivec-pozimi-sneg-verige-1027"],
+    "prevoznost-prelazov": ["crnivec-pozimi-sneg-verige-1027", "kdaj-menjati-zimske-gume-recica-1027"],
+}
+
+
+# Povzetek članka, ki je vezan na en dan (»za 31. oktobra«), bi na hubu čez noč zastarel.
+# Tam je namesto njega časovno nevtralen opis.
+SUMMARY_OVERRIDE = {
+    "prvi-sneg-golte-solcava-menina-1027": "Kdaj pričakovati prvi sneg na višjih legah: modelska ocena za Golte "
+                                           "in izmerjeni prvi sneg na Črnivcu; za Solčavo meritev ni.",
+}
+
+
+def _summary(p):
+    return SUMMARY_OVERRIDE.get(p.get("slug"), p.get("summary", ""))
+
+
+def _blog_index():
+    posts = load_json(os.path.join(ROOT, "blog.json"), []) or []
+    return {p.get("slug"): p for p in posts if isinstance(p, dict)}
+
+
+def guides_html(slugs, heading, intro=""):
+    """Seznam povezav na zimske članke; prazen niz, če nobenega ni v blog.json."""
+    idx = _blog_index()
+    items = []
+    for sl in slugs:
+        p = idx.get(sl)
+        if not p:
+            continue
+        items.append(f'    <li><a href="{p["url"]}">{html_escape(p["title"])}</a>'
+                     f'<span>{html_escape(_summary(p))}</span></li>')
+    if not items:
+        return ""
+    intro_html = f'\n  <p class="muted-note" style="margin-top:-.6rem">{intro}</p>' if intro else ""
+    return (f'  <h2 class="zima-section-title">{heading}</h2>{intro_html}\n'
+            f'  <ul class="zima-guides">\n' + "\n".join(items) + "\n  </ul>")
+
+
+def with_guides(body, key):
+    """Vstavi »Preberi tudi« tik pred povezavo nazaj (vsi spoke body-ji se končajo z njo)."""
+    block = guides_html(SPOKE_GUIDES.get(key, []), "Preberi tudi",
+                        "Članki s podatki postaje IREICA1 in ARSO Črnivec za zadnje zime.")
+    marker = '  <a class="back-link"'
+    if not block or marker not in body:
+        return body
+    i = body.rindex(marker)
+    return body[:i] + block + "\n" + body[i:]
 
 
 def num(x, d=1):
@@ -845,6 +926,25 @@ def build_hub_body(data):
          "<a href=\"/nevihte/\">stran opozoril</a>, za dejansko kakovost zraka pa "
          "<a href=\"/kakovost-zraka/\">/kakovost-zraka/</a>."),
     ]
+    # Vprašanja, ki jih ljudje pozimi res iščejo; odgovor je povzetek članka iz
+    # blog.json (isto besedilo kot v seznamu člankov, torej se številke ne razhajajo)
+    # + povezava na članek s podatki.
+    _idx = _blog_index()
+    for q, sl in [
+        ("Kdaj v Zgornji Savinjski dolini navadno zapade prvi sneg?", "kdaj-pade-prvi-sneg-v-dolini-recica-1027"),
+        ("Kdaj menjati zimske gume v Rečici ob Savinji?", "kdaj-menjati-zimske-gume-recica-1027"),
+        ("Kakšna je razlika med žledom in poledico?", "zled-ali-poledica-razlika-1027"),
+        ("Kdaj sneži na Črnivcu in kdaj so potrebne verige?", "crnivec-pozimi-sneg-verige-1027"),
+        ("Do kdaj zjutraj traja megla v dolini?", "kdaj-se-dvigne-jutranja-megla-dolina-1027"),
+    ]:
+        post = _idx.get(sl)
+        if post and _summary(post):
+            faq.append((q, f'{html_escape(_summary(post))} Podrobnosti: '
+                           f'<a href="{post["url"]}">{html_escape(post["title"])}</a>.'))
+
+    guides_block = guides_html(
+        GUIDE_SLUGS, "📖 Zimski vodnik: kaj kažejo meritve iz doline",
+        "Članki s podatki postaje IREICA1, ARSO Črnivec in javno napovedjo — vsak odgovarja na eno zimsko vprašanje.")
 
     return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
@@ -856,6 +956,7 @@ def build_hub_body(data):
 {meter_html}
 {passes_html}
 {nav_cards}
+{guides_block}
 {season_html}
 {hub_alerts_html()}
   <h2>Pogosta vprašanja</h2>
@@ -1471,6 +1572,54 @@ def build_passes_body(data):
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
 
 
+# Naslov (≤ 49 znakov, da s pripono » | Meteorec« ostane znotraj 60) in opis
+# (120–160 znakov) vsake strani. Naslovi so oblikovani po iskalnem namenu
+# (»meja sneženja danes«, »poledica danes«, »megla jutri«); to je presoja, ne
+# meritev -- GSC za zimske izraze še nima podatkov, preveri jih ob prvem izvozu
+# po 15. 11. (glej docs/seo-zima-2026-10.md).
+HUB_TITLE = "MeteoZima: sneg, poledica in žled v dolini"
+HUB_DESC = ("Zimski nadzorni center za Zgornjo Savinjsko dolino: meja sneženja, snežna karta, poledica, žled, "
+            "megla in prelazi. Meritve IREICA1 in napoved, dnevno.")
+
+# (ključ, pot, naslov, opis, datum objave, oznaka v drobtinicah, builder, slug opozorila)
+SPOKE_PAGES = [
+    ("meja-snezenja", "Meja sneženja danes in jutri v dolini",
+     "Do kod danes sneži: meja sneženja in pričakovan sneg po višinskih pasovih za Zgornjo Savinjsko dolino. "
+     "Modelska ocena iz javne napovedi, dnevno.",
+     "2026-09-20", "Meja sneženja", build_snow_line_body, "zima-sneg"),
+    ("poledica", "Poledica danes in jutri: tveganje po krajih",
+     "Ocena tveganja poledice po krajih Zgornje Savinjske doline: Rečica, Mozirje, Nazarje, Ljubno, Gornji "
+     "Grad, Luče, Solčava. Iz meritev IREICA1 in napovedi.",
+     "2026-09-20", "Poledica", build_black_ice_body, "zima-poledica"),
+    ("zled", "Žled: kdaj dež zmrzuje in ali ga bo v dolini",
+     "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana (ARSO) in "
+     "razlaga, kako nastane žled in po čem se loči od poledice.",
+     "2026-10-07", "Žled", build_zled_body, "zima-zled"),
+    ("kurilni-semafor", "Kurilni semafor: prevetrenost in inverzija",
+     "Ali je danes dobro kuriti? Ocena prevetrenosti doline po temperaturni inverziji: ali se dim "
+     "zadržuje nad dolino. Modelska ocena, dnevno.",
+     "2026-09-20", "Kurilni semafor", build_heating_index_body, None),
+    ("nad-meglo", "Megla jutri: kateri kraji so nad njo",
+     "Kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj po oceni nad meglo ali nizko oblačnostjo, "
+     "in do kod sega jutranja inverzija. Modelska ocena, dnevno.",
+     "2026-09-20", "Nad meglo", build_fog_body, "zima-megla"),
+    ("snezna-odeja", "Snežna odeja po višini: ocena za dolino",
+     "Koliko snega leži v dolini in na gorah? Modelirana ocena snežne odeje po višinskih pasovih za Zgornjo "
+     "Savinjsko dolino. Postaja snega ne meri; ocena, dnevno.",
+     "2026-09-20", "Snežna odeja", build_snowpack_body, None),
+    ("prevoznost-prelazov", "Prelazi: vreme na Črnivcu in Pavličevem sedlu",
+     "Vreme na višini gorskih prelazov okoli Zgornje Savinjske doline: Črnivec in Pavličevo sedlo. "
+     "Temperatura, sneg, poledica; modelska ocena, preveri promet.si.",
+     "2026-09-20", "Prevoznost prelazov", build_passes_body, None),
+]
+
+
+# Varovalka: predolg opis Google odreže, prekratek pa ne nosi iskalnega namena.
+for _k, _t, _d, *_ in SPOKE_PAGES:
+    assert 100 <= len(_d) <= 160, (_k, len(_d))
+assert 100 <= len(HUB_DESC) <= 160, len(HUB_DESC)
+
+
 def main():
     data = load_json(DATA_PATH)
     if not data:
@@ -1480,139 +1629,29 @@ def main():
     # ── hub ──
     body, faq = build_hub_body(data)
     schema = "\n".join([
-        seo.webpage_schema("/zima/", "MeteoZima — Zgornja Savinjska dolina",
-                            "MeteoZima — zimski nadzorni center: meja sneženja in tveganje poledice za "
-                            "Zgornjo Savinjsko dolino, iz meritev IREICA1 in javne napovedi.",
-                            date_published="2026-09-20"),
+        seo.webpage_schema("/zima/", HUB_TITLE, HUB_DESC, date_published="2026-09-20"),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", None)]),
         seo.faq_schema(faq),
     ])
-    html = seo.page_shell("MeteoZima — Zgornja Savinjska dolina",
-                           "MeteoZima: meja sneženja in tveganje poledice za Zgornjo Savinjsko dolino, "
-                           "posodobljeno dnevno.",
-                           "/zima/", schema + "\n" + snow_map_assets(), body)
+    html = seo.page_shell(HUB_TITLE, HUB_DESC, "/zima/", schema + "\n" + snow_map_assets(), body)
     seo.write_page("zima/index.html", html, force=True)
     print("  → zima/index.html")
 
-    # ── meja-snezenja ──
-    body, faq = build_snow_line_body(data)
-    body = with_alert(body, "zima-sneg")
-    schema = "\n".join([
-        seo.webpage_schema("/zima/meja-snezenja/", "Meja sneženja — Zgornja Savinjska dolina",
-                            "Trenutna in 24-urna napoved meje sneženja po višinskih pasovih za Zgornjo "
-                            "Savinjsko dolino.",
-                            date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)]),
-        seo.faq_schema(faq),
-    ])
-    html = seo.page_shell("Meja sneženja — Zgornja Savinjska dolina",
-                           "Trenutna meja sneženja in pričakovan sneg po višinskih pasovih, posodobljeno dnevno.",
-                           "/zima/meja-snezenja/", schema, body)
-    seo.write_page("zima/meja-snezenja/index.html", html, force=True)
-    print("  → zima/meja-snezenja/index.html")
-
-    # ── poledica ──
-    body, faq = build_black_ice_body(data)
-    body = with_alert(body, "zima-poledica")
-    schema = "\n".join([
-        seo.webpage_schema("/zima/poledica/", "Tveganje poledice — Zgornja Savinjska dolina",
-                            "Ocena tveganja poledice po krajih Zgornje Savinjske doline, iz meritev "
-                            "IREICA1 in javne napovedi.",
-                            date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Poledica", None)]),
-        seo.faq_schema(faq),
-    ])
-    html = seo.page_shell("Tveganje poledice — Zgornja Savinjska dolina",
-                           "Ocena tveganja poledice po krajih Zgornje Savinjske doline, posodobljeno dnevno.",
-                           "/zima/poledica/", schema, body)
-    seo.write_page("zima/poledica/index.html", html, force=True)
-    print("  → zima/poledica/index.html")
-
-    # ── zled ──
-    body, faq = build_zled_body(data)
-    body = with_alert(body, "zima-zled")
-    schema = "\n".join([
-        seo.webpage_schema("/zima/zled/", "Žled: kdaj dež zmrzuje in ali ga bo v dolini",
-                            "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana "
-                            "(ARSO) in razlaga, kako nastane žled.",
-                            date_published="2026-10-07"),
-        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Žled", None)]),
-        seo.faq_schema(faq),
-    ])
-    html = seo.page_shell("Žled: kdaj dež zmrzuje in ali ga bo v dolini",
-                           "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana in "
-                           "razlaga, kako nastane žled.",
-                           "/zima/zled/", schema, body)
-    seo.write_page("zima/zled/index.html", html, force=True)
-    print("  → zima/zled/index.html")
-
-    # ── kurilni-semafor ──
-    body, faq = build_heating_index_body(data)
-    schema = "\n".join([
-        seo.webpage_schema("/zima/kurilni-semafor/", "Kurilni semafor — Zgornja Savinjska dolina",
-                            "Ocena prevetrenosti za kurjenje na podlagi temperaturne inverzije v Zgornji "
-                            "Savinjski dolini.",
-                            date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Kurilni semafor", None)]),
-        seo.faq_schema(faq),
-    ])
-    html = seo.page_shell("Kurilni semafor — Zgornja Savinjska dolina",
-                           "Ocena prevetrenosti za kurjenje (temperaturna inverzija) za Zgornjo Savinjsko "
-                           "dolino, posodobljeno dnevno.",
-                           "/zima/kurilni-semafor/", schema, body)
-    seo.write_page("zima/kurilni-semafor/index.html", html, force=True)
-    print("  → zima/kurilni-semafor/index.html")
-
-    # ── nad-meglo ──
-    body, faq = build_fog_body(data)
-    body = with_alert(body, "zima-megla")
-    schema = "\n".join([
-        seo.webpage_schema("/zima/nad-meglo/", "Nad meglo — Zgornja Savinjska dolina",
-                            "Kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj po oceni nad "
-                            "pričakovano meglo/nizko oblačnostjo.",
-                            date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Nad meglo", None)]),
-        seo.faq_schema(faq),
-    ])
-    html = seo.page_shell("Nad meglo — Zgornja Savinjska dolina",
-                           "Ocena, kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj nad pričakovano "
-                           "meglo, posodobljeno dnevno.",
-                           "/zima/nad-meglo/", schema, body)
-    seo.write_page("zima/nad-meglo/index.html", html, force=True)
-    print("  → zima/nad-meglo/index.html")
-
-    # ── snezna-odeja ──
-    body, faq = build_snowpack_body(data)
-    schema = "\n".join([
-        seo.webpage_schema("/zima/snezna-odeja/", "Snežna odeja — Zgornja Savinjska dolina",
-                            "Tekoča modelirana ocena snežne odeje po višinskih pasovih za Zgornjo Savinjsko "
-                            "dolino.",
-                            date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snežna odeja", None)]),
-        seo.faq_schema(faq),
-    ])
-    html = seo.page_shell("Snežna odeja — Zgornja Savinjska dolina",
-                           "Tekoča modelirana ocena snežne odeje po višinskih pasovih, posodobljeno dnevno.",
-                           "/zima/snezna-odeja/", schema, body)
-    seo.write_page("zima/snezna-odeja/index.html", html, force=True)
-    print("  → zima/snezna-odeja/index.html")
-
-    # ── prevoznost-prelazov ──
-    body, faq = build_passes_body(data)
-    schema = "\n".join([
-        seo.webpage_schema("/zima/prevoznost-prelazov/", "Prevoznost prelazov — Zgornja Savinjska dolina",
-                            "Vreme na višini gorskih prelazov (Črnivec, Pavličevo sedlo) okoli Zgornje "
-                            "Savinjske doline.",
-                            date_published="2026-09-20"),
-        seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Prevoznost prelazov", None)]),
-        seo.faq_schema(faq),
-    ])
-    html = seo.page_shell("Prevoznost prelazov — Zgornja Savinjska dolina",
-                           "Vreme na višini gorskih prelazov okoli Zgornje Savinjske doline, posodobljeno "
-                           "dnevno.",
-                           "/zima/prevoznost-prelazov/", schema, body)
-    seo.write_page("zima/prevoznost-prelazov/index.html", html, force=True)
-    print("  → zima/prevoznost-prelazov/index.html")
+    # ── spoke strani ──
+    for key, title, desc, published, crumb, builder, alert in SPOKE_PAGES:
+        path = f"/zima/{key}/"
+        body, faq = builder(data)
+        if alert:
+            body = with_alert(body, alert)
+        body = with_guides(body, key)
+        schema = "\n".join([
+            seo.webpage_schema(path, title, desc, date_published=published),
+            seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), (crumb, None)]),
+            seo.faq_schema(faq),
+        ])
+        html = seo.page_shell(title, desc, path, schema, body)
+        seo.write_page(f"zima/{key}/index.html", html, force=True)
+        print(f"  → zima/{key}/index.html")
 
     print(f"  → data/zima-ocene.json ({write_zima_ocene(data)} strani)")
     return 0

@@ -346,6 +346,12 @@ Obiskovalec si sam izbere raven in dan (danes/jutri), worker pa obvestilo pošlj
 - **Nova zimska ocena** = vnos v `ZIMA_ALERTS` + izračun v `zima_ocene()` + `with_alert()` v `main()`. Test: `tools/test_zima_alarm.py` (pragovi, razlogi, možnosti obrazca ↔ ravni, veljaven JS), `tools/test_ocene.mjs` (združitev datotek in svežina po strani); mutacije v `mutation_check.py`; vrstica v `REGISTER` (`check_freshness.py`).
 - **Ni narejeno:** zgodba/FB kartica za »nad meglo« (jutranje teme zgodbe imajo stroga časovna okna, glej dnevno zgodbo), napoved po urah za poledico (ocena je dnevna).
 
+## Zimski SEO: naslovi, vodnik in povezave (31. 10. 2026)
+
+Hub `/zima/` in sedem spoke strani imajo naslov po iskalnem namenu in opis 100–160 znakov (`HUB_TITLE`, `SPOKE_PAGES` v `generate_zima_page.py`, `assert` na dolžino). Izrazi so **presoja**, GSC za zimo še nima podatkov.
+Hub ima razdelek »Zimski vodnik« in vprašanja v FAQ, spoke strani »Preberi tudi« (`GUIDE_SLUGS`, `SPOKE_GUIDES`): naslovi in povzetki člankov so iz `blog.json`, ne vtipkani. Povzetek, vezan na en dan, dobi nadomestek v `SUMMARY_OVERRIDE`.
+**Nov zimski članek = slug v `GUIDE_SLUGS` (+ `SPOKE_GUIDES`) in ponovni zagon generatorja** (`zima-forecast.yml`). Načrt in kaj preveriti po 15. 11.: `docs/seo-zima-2026-10.md`.
+
 ## Žled (`/zima/zled/`, 7. 10. 2026)
 
 Ideja po neurje.si (njihova stran o žledenju in sondaži). Naša je ločena od `/zima/poledica/`:
