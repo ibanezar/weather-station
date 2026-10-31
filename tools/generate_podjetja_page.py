@@ -134,6 +134,7 @@ def page_head(title, desc, canonical, robots, og_title=None, extra=""):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js');</script>
 <script>(function(){{try{{var t=localStorage.getItem('wx-theme');if(t)document.documentElement.dataset.theme=t;}}catch(e){{}}}})();</script>
 <title>{t}</title>
 <link rel="canonical" href="{full}">
@@ -236,9 +237,9 @@ def photo_html():
         cap = "Ilustracija vremenske postaje"
     return f'''<section class="band band-dark photo" aria-labelledby="h-foto">
   <div class="wrap photo-grid">
-    <figure class="photo-art">{art}<figcaption>{e(cap)}</figcaption></figure>
-    <div class="photo-text">
-      <h2 id="h-foto">Postaja, ki stoji od leta 2019</h2>
+    <figure class="photo-art rz">{art}<figcaption>{e(cap)}</figcaption></figure>
+    <div class="photo-text rz">
+      <h2 class="rz" id="h-foto">Postaja, ki stoji od leta 2019</h2>
       <p>IREICA1 stoji v Rečici ob Savinji od leta 2019. Njene meritve vidite zgoraj v živo. Isti pristop prenesemo na vašo lokacijo: pravi senzorji na pravem mestu in podatki, ki jih lahko primerjate z napovedjo.</p>
       <ul class="facts">
         <li>{ic("pin")}<span>Postavitev na mesto, ki ga izberemo skupaj</span></li>
@@ -261,7 +262,7 @@ def price_block(p):
 
 def package_card(p):
     items = "".join(f"<li>{CHECK}<span>{e(i)}</span></li>" for i in p["items"])
-    cls = "card pack" + (" custom" if p.get("custom") else "")
+    cls = "card pack rz" + (" custom" if p.get("custom") else "")
     return f'''      <article class="{cls}" id="paket-{p["id"]}">
         <h3>{e(p["name"])}</h3>
         <p class="for">{e(p["who"])}</p>
@@ -274,7 +275,7 @@ def package_card(p):
 
 def case_card(c):
     tags = "".join(f'<li>{ic(TAG_ICON[t], "ic-s")}{e(t)}</li>' for t in c["tags"])
-    return f'''      <article class="card case" id="{c["id"]}" data-dej="{e(c["dej"])}" tabindex="-1">
+    return f'''      <article class="card case rz" id="{c["id"]}" data-dej="{e(c["dej"])}" tabindex="-1">
         <span class="case-flag" hidden>Ponudba za vas</span>
         <span class="tile">{ic(CASE_ICON[c["id"]])}</span>
         <h3>{e(c["title"])}</h3>
@@ -284,9 +285,21 @@ def case_card(c):
       </article>'''
 
 
+PLUS = ('<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" '
+        'stroke-width="2.2" stroke-linecap="round"/></svg>')
+
+MARQUEE = ["Kmetije", "Sadovnjaki", "Vinogradi", "Hmeljarji", "Čebelarji", "Kampi", "Turizem", "Gostinstvo",
+           "Gradbeništvo", "Občine", "Prireditve", "Športni klubi"]
+
+
+def marquee_html():
+    one = "".join(f"<span>{e(m)}</span>" for m in MARQUEE)
+    return one + one.replace("<span>", '<span aria-hidden="true">')
+
+
 def faq_items():
     return "\n".join(
-        f'      <details><summary>{e(q)}</summary><p>{e(a)}</p></details>' for q, a in FAQ)
+        f'      <details class="rz"><summary><span>{e(q)}</span><i>{PLUS}</i></summary><div class="odg"><div><p>{e(a)}</p></div></div></details>' for q, a in FAQ)
 
 
 def schema_blocks():
@@ -334,7 +347,7 @@ PHONE_HTML = '''<div class="phone" role="img" aria-label="Primer prikaza na tele
             <div class="ph-t t-dew"><span>Rosišče</span><b id="ph-dew">–</b></div>
             <div class="ph-t t-gust"><span>Sunki</span><b id="ph-gust">–</b></div>
           </div>
-          <div class="ph-alert"><span class="ph-tag">Primer opozorila</span><b>Pozeba ponoči</b><span>Temperatura bo padla pod vašo mejo. Ukrepajte pravočasno.</span></div>
+          <div class="ph-alert" id="ph-alert"><span class="ph-tag">Primer opozorila</span><b id="ph-al-t">Pozeba ponoči</b><span id="ph-al-b">Temperatura bo padla pod vašo mejo. Ukrepajte pravočasno.</span></div>
         </div>
       </div>'''
 
@@ -376,14 +389,20 @@ def build_main():
 <header class="top"><div class="wrap top-in">
   <a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a>
   <nav aria-label="Razdelki"><a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#faq">Vprašanja</a><a class="btn btn-sm" href="#povprasevanje">Ponudba</a></nav>
+  <button class="burger" id="burger" type="button" aria-label="Odpri meni" aria-expanded="false" aria-controls="mob"><i></i><i></i></button>
 </div></header>
+<nav class="mob" id="mob" aria-label="Meni">
+  <a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#kako">Kako poteka</a><a href="#faq">Vprašanja</a>
+  <a class="btn btn-hero" href="#povprasevanje">Zahtevajte ponudbo</a>
+</nav>
 <main id="vsebina">
 <section class="hero" aria-labelledby="h1">
+  <div class="aurora" aria-hidden="true"><i></i><i></i></div>
   <div class="wrap hero-grid">
     <div class="hero-text">
       <p class="tag">METEOREC ZA PODJETJA</p>
       <p class="old">Vreme v sosednji dolini.</p>
-      <h1 id="h1">Vreme na <mark>vašem polju.</mark></h1>
+      <h1 id="h1"><span class="rv"><span style="--i:0">Vreme</span></span> <span class="rv"><span style="--i:1">na</span></span> <mark><span class="rv"><span style="--i:2">vašem</span></span> <span class="rv"><span style="--i:3">polju.</span></span></mark></h1>
       <p class="lead">Postavimo vremensko postajo, nastavimo vse in vam predamo nadzorno ploščo ali aplikacijo. Naj vaš posel ne trpi zaradi napačne napovedi.</p>
       <div class="row">
         <a class="btn btn-hero" href="#povprasevanje" data-cta="hero">Zahtevajte ponudbo po meri</a>
@@ -399,8 +418,10 @@ def build_main():
 </section>
 <div class="stats"><ul class="wrap stats-list">{stats_html()}</ul></div>
 
+  <div class="trak" aria-label="Za koga"><div class="trak-in">{marquee_html()}</div></div>
+
   <section class="band"><div class="wrap sec" id="primeri" aria-labelledby="h-primeri">
-    <h2 id="h-primeri">Za koga je postaja</h2>
+    <h2 class="rz" id="h-primeri">Za koga je postaja</h2>
     <p>Izberite dejavnost, ki je najbližja vaši. Postajo prilagodimo tistemu, kar morate spremljati.</p>
     <div class="grid cases">
 {chr(10).join(case_card(c) for c in CASES)}
@@ -408,7 +429,7 @@ def build_main():
   </div></section>
 
   <section class="band band-alt"><div class="wrap sec proof" id="dokaz" aria-labelledby="h-dokaz">
-    <h2 id="h-dokaz">Zakaj nam zaupati</h2>
+    <h2 class="rz" id="h-dokaz">Zakaj nam zaupati</h2>
     <div class="proof-grid">
       <div class="proof-text">
         <ul class="facts">
@@ -418,7 +439,7 @@ def build_main():
         </ul>
         <a class="link" href="/tocnost-napovedi/">Oglejte si primerjavo napovedi z meritvami {ARROW}</a>
       </div>
-      <aside class="live" aria-labelledby="live-h">
+      <aside class="live rz" aria-labelledby="live-h">
         <h3 id="live-h">Zdaj na postaji IREICA1</h3>
         <dl class="live-grid">
           <div><dt>Temperatura</dt><dd id="lw-temp">…</dd></div>
@@ -433,7 +454,7 @@ def build_main():
   {photo_html()}
 
   <section class="band"><div class="wrap sec" id="paketi" aria-labelledby="h-paketi">
-    <h2 id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
+    <h2 class="rz" id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
     <p>Najprej povezava: postaja potrebuje pot do interneta. Kjer imate WiFi, je preprosto. Kjer ga nimate, uporabimo mobilni internet.</p>
     <fieldset class="seg">
       <legend>Povezava postaje</legend>
@@ -448,14 +469,14 @@ def build_main():
   </div></section>
 
   <section class="band band-alt"><div class="wrap sec" id="kako" aria-labelledby="h-kako">
-    <h2 id="h-kako">Kako poteka</h2>
+    <h2 class="rz" id="h-kako">Kako poteka</h2>
     <ol class="steps">
-{chr(10).join(f'      <li>{ic(STEP_ICON[i])}<strong>{e(t)}</strong><span>{e(d)}</span></li>' for i, (t, d) in enumerate(STEPS))}
+{chr(10).join(f'      <li class="rz">{ic(STEP_ICON[i])}<strong>{e(t)}</strong><span>{e(d)}</span></li>' for i, (t, d) in enumerate(STEPS))}
     </ol>
   </div></section>
 
   <section class="band"><div class="wrap sec" id="faq" aria-labelledby="h-faq">
-    <h2 id="h-faq">Pogosta vprašanja</h2>
+    <h2 class="rz" id="h-faq">Pogosta vprašanja</h2>
     <div class="faq">
 {faq_items()}
     </div>
@@ -463,9 +484,9 @@ def build_main():
 
   <section class="band band-alt"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
     <span id="po-meri"></span>
-    <h2 id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
+    <h2 class="rz" id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
     <p>Izpolnite vprašalnik. Iz odgovorov sestavimo ponudbo po ogledu lokacije.</p>
-    <form id="q" novalidate autocomplete="on">
+    <form class="rz" id="q" novalidate autocomplete="on">
       <p class="chosen" id="chosen" hidden></p>
       <div class="f"><label for="f-firma"><span>Podjetje ali kmetija</span></label><input type="text" id="f-firma" name="firma" autocomplete="organization" maxlength="120" required></div>
       <div class="f"><label for="f-kraj"><span>Kraj in lokacija postaje</span></label><input type="text" id="f-kraj" name="kraj" placeholder="npr. sadovnjak nad vasjo" maxlength="160" required></div>

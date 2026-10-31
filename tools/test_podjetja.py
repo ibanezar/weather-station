@@ -42,7 +42,7 @@ blocks = [json.loads(b) for b in re.findall(r'<script type="application/ld\+json
 types = {b["@type"] for b in blocks}
 check({"WebPage", "Service", "FAQPage", "BreadcrumbList"} <= types, "JSON-LD: WebPage, Service, FAQPage, BreadcrumbList")
 faq = next(b for b in blocks if b["@type"] == "FAQPage")
-vis = re.findall(r"<summary>(.*?)</summary><p>(.*?)</p>", page)
+vis = re.findall(r'<summary><span>(.*?)</span><i>.*?</i></summary><div class="odg"><div><p>(.*?)</p>', page)
 import html as H
 check([(H.unescape(q), H.unescape(a)) for q, a in vis] == [(q["name"], q["acceptedAnswer"]["text"]) for q in faq["mainEntity"]],
       "FAQPage se ujema z vidnim besedilom")
