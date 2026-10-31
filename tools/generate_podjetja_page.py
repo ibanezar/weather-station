@@ -8,6 +8,7 @@ spremeni. Po spremembi generator poženi ročno in commitaj (ni v nobenem workfl
 
 Stran ne bere nobene meritve postaje; živi gradnik v brskalniku bere samo zunanje vrednosti.
 """
+import datetime
 import hashlib
 import html
 import json
@@ -216,39 +217,202 @@ def stats_html():
     return "".join(f'<li>{ic(i)}<span><strong>{e(t)}</strong>{e(d)}</span></li>' for i, t, d in STATS)
 
 
-def photo_html():
+# ── Resnični podatki: postaja IREICA1 proti napovedi ─────────────────────────────────────
+def sl(x, d=1, plus=False):
+    t = f"{x:+.{d}f}" if plus else f"{x:.{d}f}"
+    return t.replace("-", "−").replace(".", ",")
+
+
+def noci(n):
+    return f"{n} noč" if n % 100 == 1 else f"{n} noči"
+
+
+def dnevi_s(n):
+    return f"{n} dan" if n % 100 == 1 else (f"{n} dneva" if n % 100 == 2 else (f"{n} dni" if n % 100 in (3, 4) else f"{n} dni"))
+
+
+def fmt_date(iso):
+    d = datetime.date.fromisoformat(iso)
+    return f"{d.day}. {d.month}."
+
+
+def load_data():
+    """Samo ZUNANJE meritve postaje (tempLow) in napoved Open-Meteo izdana dan prej. Brez notranjih meritev."""
+    with open(os.path.join(ROOT, "history.json"), encoding="utf-8") as f:
+        hist = json.load(f)
+    with open(os.path.join(ROOT, "forecast_verification.json"), encoding="utf-8") as f:
+        ver_ = json.load(f)
+    meas = {d: v["tempLow"] for d, v in hist.items() if v.get("src") in ("station", "wu") and v.get("tempLow") is not None}
+    last = max(meas)
+    end = datetime.date.fromisoformat(last)
+    days = [(end - datetime.timedelta(days=i)).isoformat() for i in range(364, -1, -1)]
+    series = [(d, meas.get(d)) for d in days]
+    errs = []
+    for d in sorted(ver_):
+        r = ver_[d]
+        a = (r.get("actual") or {}).get("tmin")
+        f_ = (r.get("open_meteo") or {}).get("tmin")
+        if a is not None and f_ is not None:
+            errs.append((d, round(f_ - a, 2), f_, a))
+    return series, errs
+
+
+def stats(errs):
+    n = len(errs)
+    mean = sum(e for _, e, _, _ in errs) / n
+    hi = sum(1 for _, e, _, _ in errs if e >= 2)
+    lo = sum(1 for _, e, _, _ in errs if e <= -2)
+    return dict(n=n, mean=mean, hi=hi, lo=lo, d0=errs[0][0], d1=errs[-1][0])
+
+
+def error_svg(errs, st_):
+    W, H, L, R, T, B = 760, 270, 46, 92, 16, 30
+    plot_h = H - T - B
+    zero = T + plot_h / 2
+    sc = (plot_h / 2) / 6.0
+    n = len(errs)
+    bw = (W - L - R) / n
+    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" aria-label="{e(error_alt(st_))}" preserveAspectRatio="xMidYMid meet">']
+    for v in (-4, -2, 0, 2, 4):
+        y = zero - v * sc
+        out.append(f'<line x1="{L}" x2="{W - R}" y1="{y:.1f}" y2="{y:.1f}" class="{"z" if v == 0 else "g"}"/>'
+                   f'<text x="{L - 8}" y="{y + 4:.1f}" text-anchor="end" class="t">{sl(v, 0, True) if v else "0"} °C</text>')
+    for i, (d, err, f_, a) in enumerate(errs):
+        c = max(-6.0, min(6.0, err))
+        h = abs(c) * sc
+        x = L + i * bw
+        y = zero - h if c >= 0 else zero
+        cls = "up" if err > 0 else "dn"
+        tip = f"{fmt_date(d)}: napoved {sl(f_)} °C, meritev {sl(a)} °C"
+        out.append(f'<rect x="{x + .6:.2f}" y="{y:.2f}" width="{max(bw - 1.2, .8):.2f}" height="{max(h, .6):.2f}" class="{cls}"><title>{e(tip)}</title></rect>')
+    ym = zero - max(-6, min(6, st_["mean"])) * sc
+    out.append(f'<line x1="{L}" x2="{W - R}" y1="{ym:.1f}" y2="{ym:.1f}" class="m"/>')
+    out.append(f'<text x="{W - R + 8}" y="{ym - 2:.1f}" class="t m">povprečje</text><text x="{W - R + 8}" y="{ym + 13:.1f}" class="t m">{sl(st_["mean"], 1, True)}\u00a0°C</text>')
+    out.append(f'<text x="{L}" y="{H - 8}" class="t d">{fmt_date(errs[0][0])}</text>'
+               f'<text x="{W - R}" y="{H - 8}" text-anchor="end" class="t d">{fmt_date(errs[-1][0])}</text>')
+    out.append('</svg>')
+    return "".join(out)
+
+
+def error_alt(st_):
+    smer = "previsoka" if st_["mean"] > 0 else "prenizka"
+    return (f"Razlika med napovedjo in meritvijo najnižje temperature za {st_['n']} noči. Povprečno je bila napoved "
+            f"{sl(abs(st_['mean']))} °C {smer}.")
+
+
+def napoved_html(errs):
+    st_ = stats(errs)
+    smer = "previsoka" if st_["mean"] > 0 else "prenizka"
+    return f'''<section class="band" id="pozeba" aria-labelledby="h-pozeba"><div class="wrap sec">
+    <h2 class="rz" id="h-pozeba">Napoved je za dolino. Vi imate polje.</h2>
+    <p class="rz">Napoved, ki jo vidite v aplikaciji, velja za celico na zemljevidu, ne za vaš nasad ali gradbišče. Spodaj je primerjava z našo pravo meritvijo.</p>
+    <div class="data-grid">
+      <div class="bignum rz">
+        <b>{sl(abs(st_["mean"]), 1, True) if st_["mean"] > 0 else sl(st_["mean"], 1, True)} °C</b>
+        <span>Povprečna napaka napovedi najnižje nočne temperature: napoved je bila {smer}. Obdobje: {fmt_date(st_["d0"])} do {fmt_date(st_["d1"])}, {noci(st_["n"])}.</span>
+        <ul>
+          <li><strong>{st_["hi"]}</strong> od {st_["n"]} noči: napoved za več kot 2 °C previsoka</li>
+          <li><strong>{st_["lo"]}</strong> od {st_["n"]} noči: napoved za več kot 2 °C prenizka</li>
+        </ul>
+      </div>
+      <figure class="rz">
+        {error_svg(errs, st_)}
+        <figcaption><span class="lg up"></span>napoved toplejša od meritve <span class="lg dn"></span>napoved hladnejša od meritve. Vsak stolpec je ena noč. Vir: napoved Open-Meteo, izdana dan prej, in meritev postaje IREICA1 v Rečici ob Savinji. <a href="/tocnost-napovedi/">Primerjava več virov</a>.</figcaption>
+      </figure>
+    </div>
+  </div></section>'''
+
+
+def prag_html(series):
+    vals = [t for _, t in series if t is not None]
+    n = len(vals)
+    lo, hi = min(vals), max(vals)
+    bars = []
+    for d, t in series:
+        if t is None:
+            bars.append('<i class="na"></i>')
+        else:
+            h = 14 + (t - lo) / (hi - lo) * 86
+            bars.append(f'<i style="--h:{h:.0f}%" data-t="{t}" title="{fmt_date(d)}: {sl(t)} °C"></i>')
+    cnt = sum(1 for t in vals if t <= 0)
+    coldest = min(series, key=lambda x: 99 if x[1] is None else x[1])
+    return f'''<div class="calc rz" id="prag-kalk" data-n="{n}">
+      <div class="calc-head"><h3>Koliko noči bi vas lani opozorila postaja?</h3>
+      <p>Nastavite mejo, pod katero želite opozorilo. Vsaka črtica je en dan zadnjih 12 mesecev, obarvani so dnevi, ko je postaja izmerila toliko ali manj.</p></div>
+      <div class="calc-ctl"><label for="prag">Opozori me, ko temperatura pade na</label>
+        <output id="prag-v" for="prag">0 °C</output>
+        <input type="range" id="prag" min="-10" max="5" step="1" value="0" aria-describedby="prag-t"></div>
+      <div class="calc-res" aria-live="polite"><b id="prag-n">{cnt}</b><span id="prag-t">{"noč" if cnt % 100 == 1 else "noči"} od {n} z meritvijo, ko je postaja izmerila 0 °C ali manj.</span></div>
+      <div class="noci" id="noci" aria-hidden="true">{"".join(bars)}</div>
+      <div class="noci-os"><span>{fmt_date(series[0][0])}</span><span>najhladnejša: {sl(min(vals))} °C ({fmt_date(coldest[0])})</span><span>{fmt_date(series[-1][0])}</span></div>
+      <p class="fine">Meritev postaje IREICA1 v Rečici ob Savinji (dnevni minimum). Na vašem polju bo drugače, ravno zato je smiselna lastna postaja. Brez meritve na lokaciji tega ne veste.</p>
+    </div>'''
+
+
+NOC = [("21.00", "moon", "Večer", "Napoved obeta jasno noč, najnižja temperatura naj bi ostala nad ničlo."),
+       ("00.40", "thermo", "Ohlajanje", "Postaja na vašem polju beleži, da zrak pada hitreje, kot je napovedano."),
+       ("02.10", "bell", "Opozorilo", "Temperatura doseže mejo, ki ste jo nastavili. Telefon zavibrira."),
+       ("02.25", "flame", "Ukrep", "Zaščito (škropljenje, ogrevanje, kritje) vklopite, ko je še čas."),
+       ("07.30", "dash", "Pregled", "Zjutraj vidite, kdaj je padlo in kako dolgo je trajalo.")]
+ICONS["moon"] = "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"
+
+
+def noc_html():
+    items = "".join(
+        f'<li style="--i:{i}"><span class="cas">{t}</span><span class="pika">{ic(icon)}</span><h3>{e(h)}</h3><p>{e(txt)}</p></li>'
+        for i, (t, icon, h, txt) in enumerate(NOC))
+    return f'''<section class="band band-dark" id="noc" aria-labelledby="h-noc"><div class="wrap sec">
+    <p class="oz rz">PRIMER</p>
+    <h2 class="rz" id="h-noc">Ena noč na vašem polju</h2>
+    <p class="rz">Izmišljen primer, kako lahko poteka noč s pozebo. Ure in vrednosti so ponazoritev, ne meritev.</p>
+    <ol class="noc" id="noc-list">{items}</ol>
+  </div></section>'''
+
+
+PARTS = [
+    dict(id="veter", name="Merilnik vetra", x=52, y=5, text="Meri hitrost in smer vetra ter sunke. Za delo na višini, nanos sredstev in prireditve na prostem."),
+    dict(id="dez", name="Dežemer", x=89, y=41, text="Meri količino in jakost padavin. Za betoniranje, košnjo, obiranje in odločitve o termenu del."),
+    dict(id="temp", name="Temperatura in vlaga", x=71, y=70, text="Senzor v zaščitnem ohišju meri temperaturo in vlago zraka. Iz tega izračunamo tudi rosišče, osnovo za opozorilo pred pozebo."),
+    dict(id="sonce", name="Sončna celica", x=27, y=38, text="Napaja postajo tam, kjer ni vtičnice. Način napajanja izberemo po ogledu lokacije."),
+    dict(id="zbiralnik", name="Zbiralnik podatkov", x=53, y=86, text="Zbira meritve in jih pošlje prek WiFi ali mobilnega interneta na nadzorno ploščo ali v aplikacijo."),
+]
+
+
+def shema_html():
     full = os.path.join(ROOT, PHOTO)
+    pins = ""
     if os.path.exists(full):
-        w, h = 1200, 800
-        try:
-            from PIL import Image
-            w, h = Image.open(full).size
-        except Exception:
-            pass
+        from PIL import Image
+        w, h = Image.open(full).size
         art = f'<img src="/{PHOTO}" alt="{e(PHOTO_ALT)}" width="{w}" height="{h}" loading="lazy">'
         cap = "Postaja IREICA1, Rečica ob Savinji, 366 m"
-    elif os.path.exists(os.path.join(ROOT, ILLUS)):
+    else:
         from PIL import Image
         w, h = Image.open(os.path.join(ROOT, ILLUS)).size
         art = f'<img class="illus" src="/{ILLUS}" alt="{e(ILLUS_ALT)}" width="{w}" height="{h}" loading="lazy">'
         cap = "Ilustracija: primer postaje (ni naša postaja IREICA1)"
-    else:
-        art = STATION_SVG
-        cap = "Ilustracija vremenske postaje"
-    return f'''<section class="band band-dark photo" aria-labelledby="h-foto">
+        pins = "".join(
+            f'<button class="pin" type="button" data-part="{p["id"]}" style="left:{p["x"]}%;top:{p["y"]}%" aria-label="{e(p["name"])}"><span>{i}</span></button>'
+            for i, p in enumerate(PARTS, 1))
+    lst = "".join(
+        f'<li><button class="part" type="button" data-part="{p["id"]}" data-text="{e(p["text"])}" aria-pressed="false"><span class="num">{i}</span><span>{e(p["name"])}</span></button></li>'
+        for i, p in enumerate(PARTS, 1))
+    return f'''<section class="band band-dark photo" id="shema" aria-labelledby="h-shema">
   <div class="wrap photo-grid">
-    <figure class="photo-art rz">{art}<figcaption>{e(cap)}</figcaption></figure>
+    <figure class="photo-art rz"><div class="art-wrap">{art}{pins}</div><figcaption>{e(cap)}</figcaption></figure>
     <div class="photo-text rz">
-      <h2 class="rz" id="h-foto">Postaja, ki stoji od leta 2019</h2>
-      <p>IREICA1 stoji v Rečici ob Savinji od leta 2019. Njene meritve vidite zgoraj v živo. Isti pristop prenesemo na vašo lokacijo: pravi senzorji na pravem mestu in podatki, ki jih lahko primerjate z napovedjo.</p>
-      <ul class="facts">
-        <li>{ic("pin")}<span>Postavitev na mesto, ki ga izberemo skupaj</span></li>
-        <li>{ic("dash")}<span>Meritve na nadzorni plošči ali v aplikaciji</span></li>
-        <li>{ic("bell")}<span>Opozorila, ko vrednost preseže vašo mejo</span></li>
-      </ul>
+      <h2 class="rz" id="h-shema">Kaj meri postaja</h2>
+      <p>Izberite del postaje in poglejte, kaj meri ter za kaj ga uporabite.</p>
+      <ul class="parts">{lst}</ul>
+      <div class="part-info" id="part-info" aria-live="polite"><b id="part-name">{e(PARTS[0]["name"])}</b><p id="part-text">{e(PARTS[0]["text"])}</p></div>
+      <p class="fine">Vlaga tal, senzor strel in drugi senzorji so po dogovoru (paket Premium ali Po meri).</p>
     </div>
   </div>
 </section>'''
+
+
+def izjava_html():
+    return '''<section class="band band-yellow" aria-label="Sporočilo"><div class="wrap"><p class="izjava rz">Napoved ne pozna vašega polja. <span>Postaja ga pozna.</span></p></div></section>'''
 
 
 def price_block(p):
@@ -384,6 +548,7 @@ def build_main():
     vat = (f'<p class="fine">Vse cene so brez DDV; obračunamo ga po stopnji {VAT_PCT} %. '
            f'Končno ceno določimo po ogledu lokacije.</p>') if SHOW_PRICES else ""
     sim_note = ""
+    series, errs = load_data()
     return head + f'''<body>
 <a class="skip" href="#vsebina">Preskoči na vsebino</a>
 <header class="top"><div class="wrap top-in">
@@ -428,6 +593,14 @@ def build_main():
     </div>
   </div></section>
 
+  {izjava_html()}
+
+  {napoved_html(errs)}
+
+  <section class="band band-alt" id="prag-sekcija"><div class="wrap sec">{prag_html(series)}</div></section>
+
+  {noc_html()}
+
   <section class="band band-alt"><div class="wrap sec proof" id="dokaz" aria-labelledby="h-dokaz">
     <h2 class="rz" id="h-dokaz">Zakaj nam zaupati</h2>
     <div class="proof-grid">
@@ -451,7 +624,7 @@ def build_main():
     </div>
   </div></section>
 
-  {photo_html()}
+  {shema_html()}
 
   <section class="band"><div class="wrap sec" id="paketi" aria-labelledby="h-paketi">
     <h2 class="rz" id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>

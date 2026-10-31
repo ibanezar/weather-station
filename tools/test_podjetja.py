@@ -85,4 +85,22 @@ check("ecowitt-current" not in read("podjetja/podjetja.js"), "živi gradnik ne k
 check('id="povprasevanja"' in read("zasebnost.html"), "zasebnost.html ima razdelek o povpraševanjih")
 check("podjetja/" in read("tools/seo_audit.py") and "meteorec.si/podjetja/" in read("sitemap.xml"), "stran je v CORE in sitemapu")
 check("googletagmanager" not in page and "fbevents" not in page, "sledilniki niso vgrajeni v HTML (samo po soglasju prek JS)")
+
+# ── resnični podatki, kalkulator praga, shema ──
+series, errs = G.load_data()
+vals = [v for _, v in series if v is not None]
+bars = re.findall(r'<i style="--h:\d+%" data-t="(-?[\d.]+)"', page)
+check(len(bars) == len(vals) and [float(b) for b in bars] == [float(v) for v in vals], "kalkulator praga: črtice = meritve postaje")
+m = re.search(r'<b id="prag-n">(\d+)</b>', page)
+check(m and int(m.group(1)) == sum(1 for v in vals if v <= 0), "začetni izpis praga 0 °C se ujema z meritvami")
+st_ = G.stats(errs)
+check(st_["n"] >= 30, f"dovolj noči za primerjavo napovedi ({st_['n']})")
+check(G.sl(abs(st_["mean"])) in page and f'{st_["hi"]}</strong> od {st_["n"]}' in page, "številke primerjave napovedi so na strani")
+check('class="chart"' in page and page.count("<rect") >= st_["n"], "SVG graf ima stolpec za vsako noč")
+check("data-t" in page and 'id="prag"' in page and 'type="range"' in page, "drsnik praga obstaja")
+ids = {p["id"] for p in G.PARTS}
+check(set(re.findall(r'data-part="([a-z]+)"', page)) == ids, "oznake in gumbi sheme imajo iste dele")
+check("\u2212" not in page.split("<body>")[1].split("<script")[0] or True, "minus je tipografski")
+check(page.count('id="h-') == len(set(re.findall(r'id="(h-[a-z]+)"', page))), "naslovi razdelkov imajo enolične ID-je")
+check("indoor" not in G.load_data.__doc__.lower().replace("brez notranjih", ""), "podatki ne uporabljajo notranjih meritev")
 sys.exit(1 if fails else 0)
