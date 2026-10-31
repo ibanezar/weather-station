@@ -2787,6 +2787,19 @@ Samo videz (`style.css`, `index.html`, malo `app.js`); logika in id-ji so nedota
   `astma-forecast.yml` je ukinjen: `/astma/` teče v `vsakdan-forecast.yml`, ker oba piše isto datoteko ocen.
 - Ikona glave z bliskom (`img/migrena/glava-blisk.png`) je Filipova slika; ime izvirnika (`3998088.png`) kaže na Flaticon, licenco/navedbo preveri on.
 
+## Stran za podjetja (`/podjetja/`, 30.–31. 10. 2026)
+
+Pristajalna stran za oglase (kmetije, turizem, gradbeništvo, občine) z obrazcem za povpraševanje. Generator `tools/generate_podjetja_page.py`, ročno pisana `podjetja/podjetja.css` in `podjetja.js`; **ni v nobenem workflowu**.
+
+- **Podatki na strani so posnetek na dan generiranja** (`load_data()`: zunanji `tempLow` iz `history.json`, zadnjih 365 dni, in napoved Open-Meteo, izdana dan prej, iz `forecast_verification.json`). Datumi obdobja so izpisani na strani. Ob osvežitvi: `python3 tools/generate_podjetja_page.py` in commit. Notranjih meritev ne bere (velja pravilo z vrha dokumenta); `test_podjetja.py` preverja, da se številke na strani ujemajo z viri.
+- **Besedilo o napovedi se sestavi iz izračunanih številk** (smer »previsoka/prenizka« sledi predznaku povprečne napake). Če se razmerje obrne, se obrne tudi besedilo; trditev v naslovih (»Napoved je za dolino. Vi imate polje.«) pa je presoja, ne meritev, in jo je treba po osvežitvi prebrati.
+- **Cene**: stikalo `SHOW_PRICES`; ob `False` izgine vsak znesek, tudi iz JSON-LD. **`META_PIXEL_ID` je prazen**: Pixel se ne naloži, dokler ni vpisan. Google tag in Pixel se naložita šele po soglasju (`wx-cookie-consent`).
+- **Obrazec** gre na `POST /api/povprasevanje` v `worker.js` (honeypot, čas oddaje ≥ 3 s, 5 oddaj/uro po IP, R2 `feedback/povprasevanja.json`, e-obvestilo prek Resend). `POV_*` seznami v workerju so podvojitev z generatorjem (preverja `test_podjetja.py`); `tools/test_podjetja_worker.mjs` poganja pravi worker.
+- **CSS/JS imata `?v=<hash>`** (`ver()` v generatorju): Cloudflare in brskalnik hranita datoteke leto dni, brez pečata sprememba ni vidna.
+- **Ilustracija postaje (`podjetja/img/postaja-ilustracija.webp`) NI IREICA1** in je tako označena. Prava fotografija `podjetja/img/postaja.jpg` ima prednost (pri njej se oznake delov sheme skrijejo, ker so umerjene na ilustracijo).
+- **Primer noči je izmišljen** in označen kot primer; ne spreminjaj ga v trditev o referenci. Izmišljenih ocen, števila strank in citatov na strani ni in jih ne dodajaj.
+- Pisave (Bricolage Grotesque, DM Sans) so gostovane lokalno v `podjetja/fonts/`; ne nalagaj jih od Googla.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

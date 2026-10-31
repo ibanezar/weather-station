@@ -111,6 +111,43 @@
   var det = $$('.faq details');
   det.forEach(function (d) { d.addEventListener('toggle', function () { if (d.open) det.forEach(function (o) { if (o !== d) o.open = false; }); }); });
 
+  /* ── kalkulator praga: katere noči bi sprožile opozorilo ─────────────── */
+  var prag = $('#prag');
+  if (prag) {
+    var bars = $$('#noci i[data-t]'), total = bars.length, prvic = true;
+    var znak = function (th) { return (th > 0 ? '+' : th < 0 ? '\u2212' : '') + Math.abs(th) + '\u00a0°C'; };
+    var osvezi = function () {
+      var th = +prag.value, c = 0;
+      bars.forEach(function (b) { var on = +b.getAttribute('data-t') <= th; b.classList.toggle('on', on); if (on) c++; });
+      $('#prag-v').textContent = znak(th); $('#prag-n').textContent = c;
+      $('#prag-t').textContent = (c % 100 === 1 ? 'noč' : 'noči') + ' od ' + total + ' z meritvijo, ko je postaja izmerila ' + znak(th) + ' ali manj.';
+    };
+    prag.addEventListener('input', function () { osvezi(); if (prvic) { prvic = false; track('use_calculator', { threshold: +prag.value }); } });
+    osvezi();
+  }
+
+  /* ── noč na polju: koraki se prižgejo zaporedno ─────────────────────── */
+  var noc = $('#noc-list');
+  if (noc) {
+    if ('IntersectionObserver' in window && !malo) {
+      var ion = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { noc.classList.add('on'); ion.disconnect(); } }, { threshold: .3 });
+      ion.observe(noc);
+    } else noc.classList.add('on');
+  }
+
+  /* ── shema postaje: klik na oznako ali gumb ───────────────────────── */
+  var delGumbi = $$('.part'), pini = $$('.pin');
+  function izberiDel(id) {
+    delGumbi.forEach(function (b) {
+      var on = b.getAttribute('data-part') === id; b.setAttribute('aria-pressed', on);
+      if (on) { $('#part-name').textContent = b.querySelector('span:last-child').textContent; $('#part-text').textContent = b.getAttribute('data-text'); }
+    });
+    pini.forEach(function (p) { p.classList.toggle('on', p.getAttribute('data-part') === id); });
+  }
+  delGumbi.forEach(function (b) { b.addEventListener('click', function () { izberiDel(b.getAttribute('data-part')); }); });
+  pini.forEach(function (p) { p.addEventListener('click', function () { izberiDel(p.getAttribute('data-part')); }); });
+  if (delGumbi.length) izberiDel(delGumbi[0].getAttribute('data-part'));
+
   /* ── povezava postaje ───────────────────────────────────── */
   var NOTES = {
     wifi: 'Postaja se poveže na vaš WiFi usmerjevalnik. Pred postavitvijo preverimo moč signala na mestu postaje.',
