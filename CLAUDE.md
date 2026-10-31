@@ -2761,6 +2761,16 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Barva hero kartice po vremenu**: `setHeroWx()` postavi `data-wx` (`clear`/`cloud`/`rain`/`storm`/`snow`/`night`), CSS rahlo obarva kot žarenje v zgornjem desnem kotu (≤ 22 %). Brez atributa je videz nespremenjen. Nov `data-wx` = tudi barva v obeh temah in preveri kontrast besedila.
 - Nov kritični CSS in `style.min.css` naredi `minify-assets.yml` po mergu; do takrat se lestvice pred celotnim CSS kratko pokažejo brez oblike.
 
+### Radar: drsnik, napoved za točko; pilula stanja podatka (31. 10. 2026)
+
+Po referenci IMSS (časovni trak s predvajanjem, klik na točko) in pilulah »Live« iz ostalih referenc. Samo `app.js`/`style.css`/`index.html`, workerja ni bilo treba spreminjati.
+
+- **Drsnik `#mrad-track`**: ročica, vlečenje (pointer events, `touch-action:none`), tipkovnica (puščice, Home, End; `role="slider"`, `aria-valuetext` je ura okvirja) in tri časovne oznake pod trakom (prvi, srednji, zadnji okvir). Stari `onclick` je zamenjal `onpointerdown`; `meteorecRadarSeek()` je ostal. Prvi okvir, ki ni naložen, se preskoči na najbližjega naloženega (kot prej).
+- **Značka zadnjega okvirja**: »zdaj« samo, če je okvir mlajši od 20 min, sicer »pred N min« (jantarno). Starega okvirja ne skrijemo.
+- **Klik na prazen del karte** odpre okno z **modelsko napovedjo Open-Meteo za tisto točko** (padavine 6 h nazaj in 18 h naprej, temperatura zdaj, vsoti 6 h/18 h). **Ni radar in ni meritev** in tako piše v oknu; radarskih vrednosti iz slike ne beremo (ni CORS-a ne preslikave barv). Točka je zaokrožena na 0,01°, rezultat se 10 min hrani po točki; klik na celico, okno ali kontrolnik ga ne sproži. Brez podatka okno pove, da napovedi ni bilo mogoče prebrati.
+- **Pilula `#live-pill` v vrstici stanja**: zelena do 20 min od zadnje meritve (`_lastObsTime`), jantarna do 90 min (»Zamuda N min«), nato rdeča (»Meritev stara …«); osvežuje se na 30 s. Med nalaganjem in ob napaki je časovnik ne prepiše (`data-fresh="loading|error"`). Prej je vrstica ne glede na starost pisala »V živo«.
+- Preizkus je bil v brskalniku z lažnim odgovorom workerja in Open-Meteo; **živega odgovora Open-Meteo za `past_hours` + `forecast_hours` ni bilo mogoče preveriti** (peskovnik), po deployu preveri klik na karto.
+
 ## Strani »vreme za …« in migrena (29. 10. 2026)
 
 Šest strani po istem vzorcu, brez lastnih podatkov: `/astma/` (`generate_astma_page.py`, samostojen, ima tudi JS za osebne sprožilce),

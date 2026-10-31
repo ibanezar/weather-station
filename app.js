@@ -424,7 +424,7 @@ function attachScrub(svg,onMove,onLeave){
 
 let _tempData=[],_rainData=[],_hourlyObs=[],_forecastHours=[],_cuDailyData=null;
 let _climAnomalyT=null,_climAnomalyYears=null;
-let _lastObsTime=null;
+let _lastObsTime=null,_livePillTimer=null;
 let _sliderActive=false,_liveTemp=null,_liveTempColor='',_liveIconHtml='';
 let _lastComfortLabel=null,_lastDewLabel=null,_lastDeltaPhrase=null;
 function drawTempChart(data){
@@ -2634,6 +2634,17 @@ function setHeroWx(m,obs){
   if(hero.getAttribute('data-wx')!==wx)hero.setAttribute('data-wx',wx);
 }
 
+// Pilula stanja podatka: zelena do 20 min, jantarna do 90 min (»Zamuda«), nato rdeča. Starega podatka ne skrijemo, samo ga označimo.
+function renderLivePill(force){
+  const pill=document.getElementById('live-pill');if(!pill||!_lastObsTime)return;
+  if(!force&&(pill.dataset.fresh==='loading'||pill.dataset.fresh==='error'))return;
+  const mins=Math.max(0,Math.round((Date.now()-_lastObsTime.getTime())/60000));
+  const st=mins<=20?'ok':mins<=90?'stale':'old';
+  pill.dataset.fresh=st;
+  const dot=document.getElementById('dot');if(dot)dot.className='dot'+(st==='ok'?'':st==='stale'?' loading':' error');
+  set('status-text',st==='ok'?'V živo':st==='stale'?'Zamuda '+mins+' min':'Meritev stara '+(mins>=120?Math.floor(mins/60)+' h':mins+' min'));
+}
+
 function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
@@ -2687,6 +2698,7 @@ function applyObs(obs){
   const sol=m.solarRadiation??obs.solarRadiation;set('solar-val',sol!=null?Math.round(sol):'—');set('solar-label',solarLabel(sol));
   set('snap-sw',obs.softwareType||'—');set('snap-qc',obs.qcStatus===1?'✓ Uspešno':'—');
   document.getElementById('dot').className='dot';set('status-text','V živo');set('updated',fmtTime(new Date(obs.obsTimeUtc)));
+  renderLivePill(true);if(!_livePillTimer)_livePillTimer=setInterval(()=>{if(!document.hidden)renderLivePill();},30000);
   const h=new Date().getHours();if(rr>0)setBgEffect('rain');else if(h<5||h>22)setBgEffect('night');else setBgEffect('clear');
   showStarfield((h<5||h>22)&&rr<0.05&&(m.solarRadiation??obs.solarRadiation??0)<15);
   updateSunArc(obs.lat,obs.lon);checkAlerts(obs);evaluateLiveEvent(obs);
@@ -4615,6 +4627,7 @@ async function initMeteorecRadar(){
     .addTo(_mradMap)
     .bindTooltip('Rečica ob Savinji',{permanent:true,direction:'right',offset:[8,0],className:'mrad-label'});
 
+  _mradBindPointClick();
   await refreshMeteorecRadar();
   refreshMeteorecRadarCells();
   // Nov posnetek je vsakih 5 minut; ko je zavihek skrit, ne osvežujemo.
@@ -4671,6 +4684,7 @@ async function refreshMeteorecRadar(){
         splitEl.hidden=true;
       }
     }
+    renderMeteorecRadarScrub();
 
     // Najprej zadnji okvir, da uporabnik takoj nekaj vidi; ostale zatem po
     // vrsti, da workerja ne zasujemo s trinajstimi izrisi hkrati.
@@ -4736,12 +4750,31 @@ function showMeteorecRadarFrame(i){
   const tEl=document.getElementById('mrad-time');
   if(tEl){
     const zdaj=i===_mradFrames.length-1&&f.kind!=='icon';
+    // Zadnji okvir je »zdaj« samo, če je res svež; sicer pove starost (nikoli ne skrivamo stare slike, samo jo označimo).
+    const age=zdaj?Math.round((Date.now()-new Date(f.cas).getTime())/60000):0;
     const badge=f.kind==='icon'?' <span class="radar-fc-badge">napoved</span>'
-      :zdaj?' <span class="radar-now-badge">zdaj</span>':'';
+      :zdaj?(age>20?' <span class="radar-old-badge">pred '+age+' min</span>':' <span class="radar-now-badge">zdaj</span>'):'';
     tEl.innerHTML=new Date(f.cas).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+badge;
   }
-  const fill=document.getElementById('mrad-track-fill');
-  if(fill)fill.style.width=((i+1)/_mradFrames.length*100)+'%';
+  const fill=document.getElementById('mrad-track-fill'),thumb=document.getElementById('mrad-thumb'),trk=document.getElementById('mrad-track');
+  const pos=((i+.5)/_mradFrames.length*100).toFixed(1)+'%';
+  if(fill)fill.style.width=pos;
+  if(thumb)thumb.style.left=pos;
+  if(trk){trk.setAttribute('aria-valuenow',i);trk.setAttribute('aria-valuetext',new Date(f.cas).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+(f.kind==='icon'?' (napoved)':''));}
+}
+
+// Časovne oznake pod drsnikom: prvi, srednji in zadnji okvir (tri, da se na telefonu ne prekrivajo).
+function renderMeteorecRadarScrub(){
+  const n=_mradFrames.length,box=document.getElementById('mrad-scrub-ticks'),trk=document.getElementById('mrad-track');
+  if(trk)trk.setAttribute('aria-valuemax',Math.max(0,n-1));
+  if(!box)return;
+  if(!n){box.innerHTML='';return;}
+  const idx=[...new Set([0,Math.round((n-1)/2),n-1])];
+  box.innerHTML=idx.map(k=>{
+    const t=new Date(_mradFrames[k].cas).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    const tr=k===0?'0%':k===n-1?'-100%':'-50%';
+    return '<span style="left:'+((k+.5)/n*100).toFixed(1)+'%;transform:translateX('+tr+')">'+t+'</span>';
+  }).join('');
 }
 
 function startMeteorecRadarAnim(){
@@ -4789,12 +4822,11 @@ function toggleMeteorecRadarPlay(){
   else{clearInterval(_mradTimer);_mradTimer=null;if(btn)btn.innerHTML=_ico('play')+' Predvajaj';}
 }
 
-function meteorecRadarSeek(e){
-  track('radar_engagement',{action:'seek'},true);
-  const track=document.getElementById('mrad-track');
-  if(!track||!_mradFrames.length)return;
-  const rect=track.getBoundingClientRect();
-  const pct=(e.clientX-rect.left)/rect.width;
+function _mradSeekX(clientX){
+  const trk=document.getElementById('mrad-track');
+  if(!trk||!_mradFrames.length)return;
+  const rect=trk.getBoundingClientRect();
+  const pct=(clientX-rect.left)/rect.width;
   let i=Math.max(0,Math.min(_mradFrames.length-1,Math.floor(pct*_mradFrames.length)));
   // Če izbrani okvir še ni naložen, poiščemo najbližjega, ki je.
   if(!_mradFrames[i].ready){
@@ -4803,8 +4835,93 @@ function meteorecRadarSeek(e){
     if(best<0)return; i=best;
   }
   showMeteorecRadarFrame(i);
+  _mradPause();
+}
+function _mradPause(){
   _mradPlaying=false;clearInterval(_mradTimer);_mradTimer=null;
   const btn=document.getElementById('mrad-play');if(btn)btn.innerHTML=_ico('play')+' Predvajaj';
+}
+function meteorecRadarSeek(e){track('radar_engagement',{action:'seek'},true);_mradSeekX(e.clientX);}
+
+// Drsnik: dotik/klik in vlečenje (pointer events), na tipkovnici puščice, Home in End.
+function meteorecRadarScrubStart(e){
+  if(e.button>0)return;
+  const trk=e.currentTarget;
+  track('radar_engagement',{action:'seek'},true);
+  try{trk.setPointerCapture(e.pointerId);}catch(_){}
+  trk.classList.add('drag');
+  const move=ev=>_mradSeekX(ev.clientX);
+  const up=()=>{trk.classList.remove('drag');trk.removeEventListener('pointermove',move);trk.removeEventListener('pointerup',up);trk.removeEventListener('pointercancel',up);};
+  trk.addEventListener('pointermove',move);trk.addEventListener('pointerup',up);trk.addEventListener('pointercancel',up);
+  _mradSeekX(e.clientX);
+}
+function meteorecRadarKey(e){
+  const k=e.key;if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(k))return;
+  e.preventDefault();
+  const n=_mradFrames.length;if(!n)return;
+  const dir=(k==='ArrowLeft'||k==='ArrowDown')?-1:1;
+  let i=k==='Home'?0:k==='End'?n-1:_mradIdx+dir;
+  i=Math.max(0,Math.min(n-1,i));
+  // Naslednji naložen okvir v isto smer.
+  const st=k==='Home'?1:k==='End'?-1:dir;
+  while(i>=0&&i<n&&!_mradFrames[i].ready)i+=st;
+  if(i<0||i>=n)return;
+  showMeteorecRadarFrame(i);_mradPause();
+}
+
+// ── Klik na točko: modelska napoved padavin za 6 ur nazaj in 18 ur naprej ──
+// To NI radarska meritev in ne postajna meritev (klic Open-Meteo za izbrano točko, 0,01° ≈ 1 km), in tako tudi piše.
+// Rezultat se 10 minut hrani po točki, da ponovni klik ne sproži novega klica.
+const _mradPtCache=new Map();let _mradPtTok=0;
+function _mradBindPointClick(){
+  _mradMap.on('click',e=>{
+    const t=e.originalEvent&&e.originalEvent.target;
+    if(t&&t.closest&&t.closest('.leaflet-interactive,.leaflet-popup,.leaflet-control'))return;
+    mradPointForecast(e.latlng);
+  });
+}
+function mradPointSvg(P,T,now){
+  const W=260,H=84,base=66,n=P.length,step=W/n,mx=Math.max(2,...P);
+  const bars=P.map((v,i)=>{const h=Math.max(v>0?1.5:0,v/mx*(base-6));
+    return '<rect x="'+(i*step+1).toFixed(1)+'" y="'+(base-h).toFixed(1)+'" width="'+(step-2).toFixed(1)+'" height="'+h.toFixed(1)+'" rx="1.5" fill="var(--c-cool)" opacity="'+(i<now?'.4':'.95')+'"/>';}).join('');
+  const nx=(now*step).toFixed(1);
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Padavine po urah, 6 ur nazaj in 18 ur naprej, največ '+fmt(Math.max(...P),1)+' mm na uro">'
+    +'<line x1="0" y1="'+base+'" x2="'+W+'" y2="'+base+'" stroke="currentColor" opacity=".25"/>'+bars
+    +'<line x1="'+nx+'" y1="2" x2="'+nx+'" y2="'+base+'" stroke="currentColor" stroke-dasharray="3 3" opacity=".6"/>'
+    +'<text x="2" y="'+(H-4)+'" font-size="9" fill="currentColor" opacity=".7">−6 h</text>'
+    +'<text x="'+nx+'" y="'+(H-4)+'" font-size="9" text-anchor="middle" fill="currentColor" opacity=".9">zdaj</text>'
+    +'<text x="'+(W-2)+'" y="'+(H-4)+'" font-size="9" text-anchor="end" fill="currentColor" opacity=".7">+18 h</text>'
+    +'<text x="'+(W-2)+'" y="10" font-size="9" text-anchor="end" fill="currentColor" opacity=".7">'+fmt(mx,1)+' mm/h</text></svg>';
+}
+async function mradPointForecast(ll){
+  const lat=Math.round(ll.lat*100)/100,lon=Math.round(ll.lng*100)/100,key=lat+','+lon,tok=++_mradPtTok;
+  track('radar_engagement',{action:'point'},true);
+  // Širina sledi zemljevidu: na ozkem telefonu (~300 px) mora okno stati poleg gumbov za povečavo.
+  const pw=Math.max(170,Math.min(250,_mradMap.getSize().x-110));
+  const pop=L.popup({className:'mrad-pt-popup',maxWidth:pw,minWidth:pw,keepInView:true,autoPanPaddingTopLeft:[50,12],autoPanPaddingBottomRight:[12,12]}).setLatLng([lat,lon])
+    .setContent('<div class="mrad-pt"><b>'+fmt(lat,2)+'° S, '+fmt(lon,2)+'° V</b><p>Berem napoved za točko …</p></div>').openOn(_mradMap);
+  try{
+    let d=_mradPtCache.get(key);
+    if(!d||Date.now()-d.ts>10*60000){
+      const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=temperature_2m,precipitation&past_hours=6&forecast_hours=19&timezone=Europe%2FLjubljana');
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const j=await r.json();
+      const P=(j.hourly?.precipitation||[]).map(v=>v==null?0:v),T=j.hourly?.temperature_2m||[];
+      if(P.length<20)throw new Error('premalo podatkov');
+      d={ts:Date.now(),P,T};_mradPtCache.set(key,d);
+    }
+    if(tok!==_mradPtTok)return;
+    const now=6,next6=d.P.slice(now+1,now+7).reduce((a,b)=>a+b,0),next18=d.P.slice(now+1).reduce((a,b)=>a+b,0);
+    const t=d.T[now];
+    pop.setContent('<div class="mrad-pt"><b>'+fmt(lat,2)+'° S, '+fmt(lon,2)+'° V</b>'
+      +'<div class="mrad-pt-row"><span>Zdaj (model)</span><b>'+(t!=null?fmt(t,1)+' °C':'—')+'</b></div>'
+      +'<div class="mrad-pt-row"><span>Padavine čez 6 h</span><b>'+fmt(next6,1)+' mm</b></div>'
+      +'<div class="mrad-pt-row"><span>Padavine čez 18 h</span><b>'+fmt(next18,1)+' mm</b></div>'
+      +mradPointSvg(d.P,d.T,now)
+      +'<small>Modelska napoved Open-Meteo za to točko, ne radar in ne meritev. Stolpci pred »zdaj« so modelski izračun.</small></div>');
+  }catch(e){
+    if(tok===_mradPtTok)pop.setContent('<div class="mrad-pt"><b>'+fmt(lat,2)+'° S, '+fmt(lon,2)+'° V</b><p>Napovedi za to točko ni bilo mogoče prebrati.</p></div>');
+  }
 }
 
 // Legendo rišemo iz odgovora in ne iz prepisane lestvice, da se ob spremembi
@@ -12314,9 +12431,9 @@ setInterval(tickClock,1000);tickClock();
 window.addEventListener('resize',()=>{if(_artCtx){resizeWeatherArtCanvas();_artParticles=[];}});
 
 async function fetchCurrent(){
-  const dot=document.getElementById('dot');dot.className='dot loading';set('status-text','Posodabljanje…');
+  const dot=document.getElementById('dot');dot.className='dot loading';set('status-text','Posodabljanje…');{const pl=document.getElementById('live-pill');if(pl)pl.dataset.fresh='loading';}
   try{const res=await fetch(PROXY+'/');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();const obs=data.observations?.[0];if(!obs)throw new Error('Ni podatkov');applyObs(obs);}
-  catch(e){dot.className='dot error';set('status-text','Napaka: '+e.message);}
+  catch(e){dot.className='dot error';set('status-text','Napaka: '+e.message);const pl=document.getElementById('live-pill');if(pl)pl.dataset.fresh='error';}
 }
 async function fetchHourly(){
   try{const res=await fetch(PROXY+'/hourly');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();if(data.observations?.length)applyHourly(data.observations);}

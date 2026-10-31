@@ -460,7 +460,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <p class="station-intro" aria-hidden="false">Meteorec je zasebna meteorološka postaja <strong>IREICA1</strong> na Rečici ob Savinji (366 m n.&thinsp;m.) v Zgornji Savinjski dolini. Postaja v realnem času meri temperaturo, vlago, padavine, tlak in hitrost vetra ter podatke posreduje vsakih 5 minut — tam, kjer ARSO nima lastne postaje. Podrobneje: <a href="/vreme-recica-ob-savinji/">vreme v Rečici ob Savinji po urah in za 7 dni</a> z lokalno mikroklimo, ali pa preglejte <a href="/vreme/">vremenski arhiv od leta 2019</a>, <a href="/vreme/mesec/">povprečno vreme po mesecih</a>, <a href="/rekord/">vremenske rekorde Savinjske doline</a> ali strnjen pregled na strani <a href="/podatki/">/podatki/</a>.</p>
 
   <div class="status">
-    <span><span class="dot loading" id="dot"></span><span id="status-text"><span class="skel-inline" aria-hidden="true"></span><span class="visually-hidden">Nalaganje …</span></span></span>
+    <span class="live-pill" id="live-pill" data-fresh="loading"><span class="dot loading" id="dot"></span><span id="status-text"><span class="skel-inline" aria-hidden="true"></span><span class="visually-hidden">Nalaganje …</span></span></span>
     <span>Posodobljeno: <span id="updated">—</span></span>
     <span id="local-time">—</span>
     <button class="share-btn" onclick="shareWeather()" title="Deli" aria-label="Deli"><svg class="ic" aria-hidden="true"><use href="#i-share-2"/></svg></button>
@@ -864,13 +864,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="radar-controls">
       <button class="radar-btn" id="mrad-play" onclick="toggleMeteorecRadarPlay()"><svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg> Pavza</button>
       <span class="radar-time" id="mrad-time">—</span>
-      <div class="radar-track" id="mrad-track" onclick="meteorecRadarSeek(event)"><div class="radar-track-fill" id="mrad-track-fill"></div><div class="radar-track-split" id="mrad-track-split" hidden></div></div>
+      <div class="radar-scrub">
+        <div class="radar-track" id="mrad-track" role="slider" tabindex="0" aria-label="Čas radarske slike" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" onpointerdown="meteorecRadarScrubStart(event)" onkeydown="meteorecRadarKey(event)"><div class="radar-track-fill" id="mrad-track-fill"></div><div class="radar-track-split" id="mrad-track-split" hidden></div><span class="radar-thumb" id="mrad-thumb"></span></div>
+        <div class="radar-scrub-ticks" id="mrad-scrub-ticks" aria-hidden="true"></div>
+      </div>
     </div>
     <div class="mrad-views">
       <button class="radar-btn active" data-mrad-view="sirok" onclick="switchMeteorecRadarView('sirok')">Širše</button>
       <button class="radar-btn" data-mrad-view="savinja" onclick="switchMeteorecRadarView('savinja')">Zgornja Savinjska</button>
     </div>
-    <small class="mrad-hint">V pogledu "Zgornja Savinjska" se trak po zadnji uri radarja nadaljuje s 6-urno ICON napovedjo. Obarvane pike so sledene nevihtne celice, vidne v obeh pogledih — dotakni se pike za smer in hitrost. Stalno oznako ima le celica, ki prihaja proti Rečici.</small>
+    <small class="mrad-hint">V pogledu "Zgornja Savinjska" se trak po zadnji uri radarja nadaljuje s 6-urno ICON napovedjo. Obarvane pike so sledene nevihtne celice, vidne v obeh pogledih — dotakni se pike za smer in hitrost. Dotik na prazen del zemljevida odpre modelsko napoved padavin za tisto točko (ni radar). Stalno oznako ima le celica, ki prihaja proti Rečici.</small>
     <div class="radar-legend">
       <div class="mrad-legend">
         <div class="mrad-bar" id="mrad-scale"></div>
