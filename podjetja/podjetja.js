@@ -63,6 +63,54 @@
   /* ── hvala: konverzija je bila poslana na obrazcu ─────────── */
   if (!$('#q')) return;
 
+  /* ── učinki: razkrivanje, nagib telefona, menjava opozoril, meni, FAQ ───── */
+  var malo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var rz = $$('.rz');
+  if ('IntersectionObserver' in window && !malo) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -6% 0px' });
+    rz.forEach(function (el, i) { el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
+  } else { rz.forEach(function (el) { el.classList.add('on'); }); }
+
+  var art = $('.hero-art'), heroVisible = true;
+  if (art && 'IntersectionObserver' in window) new IntersectionObserver(function (es) { heroVisible = es[0].isIntersecting; }).observe(art);
+  if (art && !malo && window.matchMedia('(hover: hover)').matches) {
+    var raf = 0, ev = null;
+    addEventListener('pointermove', function (e) {
+      ev = e; if (raf || !heroVisible) return;
+      raf = requestAnimationFrame(function () {
+        raf = 0; var nx = ev.clientX / innerWidth * 2 - 1, ny = ev.clientY / innerHeight * 2 - 1;
+        art.style.setProperty('--ry', (-12 + nx * 10).toFixed(2) + 'deg'); art.style.setProperty('--rx', (5 - ny * 7).toFixed(2) + 'deg');
+        art.style.setProperty('--px', nx.toFixed(3)); art.style.setProperty('--py', ny.toFixed(3));
+        var ph = art.querySelector('.phone'); if (ph) { ph.style.setProperty('--ry', (-12 + nx * 10).toFixed(2) + 'deg'); ph.style.setProperty('--rx', (5 - ny * 7).toFixed(2) + 'deg'); }
+      });
+    }, { passive: true });
+    var cards = $$('.card');
+    addEventListener('pointermove', function (e) {
+      cards.forEach(function (c) { var r = c.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); });
+    }, { passive: true });
+  }
+
+  var ALERTS = [['Pozeba ponoči', 'Temperatura bo padla pod vašo mejo. Ukrepajte pravočasno.'],
+    ['Veter nad mejo', 'Sunki presegajo vrednost, ki ste jo nastavili.'],
+    ['Nevihta se bliža', 'Opozorilo pred strelami in točo na vaši lokaciji.']];
+  var al = $('#ph-alert'), ai = 0;
+  if (al && !malo) setInterval(function () {
+    if (!heroVisible || document.hidden) return;
+    ai = (ai + 1) % ALERTS.length; $('#ph-al-t').textContent = ALERTS[ai][0]; $('#ph-al-b').textContent = ALERTS[ai][1];
+    al.classList.remove('in'); void al.offsetWidth; al.classList.add('in');
+  }, 4200);
+
+  var burger = $('#burger');
+  function meni(odpri) { document.body.classList.toggle('meni-odprt', odpri); if (burger) { burger.setAttribute('aria-expanded', odpri); burger.setAttribute('aria-label', odpri ? 'Zapri meni' : 'Odpri meni'); } }
+  if (burger) {
+    burger.addEventListener('click', function () { meni(!document.body.classList.contains('meni-odprt')); });
+    $$('#mob a').forEach(function (a) { a.addEventListener('click', function () { meni(false); }); });
+    addEventListener('keydown', function (e) { if (e.key === 'Escape') meni(false); });
+  }
+
+  var det = $$('.faq details');
+  det.forEach(function (d) { d.addEventListener('toggle', function () { if (d.open) det.forEach(function (o) { if (o !== d) o.open = false; }); }); });
+
   /* ── povezava postaje ───────────────────────────────────── */
   var NOTES = {
     wifi: 'Postaja se poveže na vaš WiFi usmerjevalnik. Pred postavitvijo preverimo moč signala na mestu postaje.',

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js');</script>
 <script>(function(){try{var t=localStorage.getItem('wx-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 <title>Vremenska postaja za kmetijo in podjetje | Meteorec</title>
 <link rel="canonical" href="https://meteorec.si/podjetja/">
@@ -27,7 +28,7 @@
 <meta name="twitter:image" content="https://meteorec.si/og/podjetja.jpg">
 <link rel="preload" href="/podjetja/fonts/Bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/podjetja/fonts/DMSans-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/podjetja/podjetja.css?v=f1cfc7ee">
+<link rel="stylesheet" href="/podjetja/podjetja.css?v=bcb68089">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/podjetja/","name":"Vremenska postaja za kmetijo in podjetje","description":"Vremensko postajo postavimo, nastavimo in predamo z nadzorno ploščo ter opozorili na telefon. Za kmetije, turizem, gradbeništvo in občine.","url":"https://meteorec.si/podjetja/","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"image":"https://meteorec.si/og/podjetja.jpg"}
 </script>
@@ -46,14 +47,20 @@
 <header class="top"><div class="wrap top-in">
   <a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a>
   <nav aria-label="Razdelki"><a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#faq">Vprašanja</a><a class="btn btn-sm" href="#povprasevanje">Ponudba</a></nav>
+  <button class="burger" id="burger" type="button" aria-label="Odpri meni" aria-expanded="false" aria-controls="mob"><i></i><i></i></button>
 </div></header>
+<nav class="mob" id="mob" aria-label="Meni">
+  <a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#kako">Kako poteka</a><a href="#faq">Vprašanja</a>
+  <a class="btn btn-hero" href="#povprasevanje">Zahtevajte ponudbo</a>
+</nav>
 <main id="vsebina">
 <section class="hero" aria-labelledby="h1">
+  <div class="aurora" aria-hidden="true"><i></i><i></i></div>
   <div class="wrap hero-grid">
     <div class="hero-text">
       <p class="tag">METEOREC ZA PODJETJA</p>
       <p class="old">Vreme v sosednji dolini.</p>
-      <h1 id="h1">Vreme na <mark>vašem polju.</mark></h1>
+      <h1 id="h1"><span class="rv"><span style="--i:0">Vreme</span></span> <span class="rv"><span style="--i:1">na</span></span> <mark><span class="rv"><span style="--i:2">vašem</span></span> <span class="rv"><span style="--i:3">polju.</span></span></mark></h1>
       <p class="lead">Postavimo vremensko postajo, nastavimo vse in vam predamo nadzorno ploščo ali aplikacijo. Naj vaš posel ne trpi zaradi napačne napovedi.</p>
       <div class="row">
         <a class="btn btn-hero" href="#povprasevanje" data-cta="hero">Zahtevajte ponudbo po meri</a>
@@ -74,7 +81,7 @@
             <div class="ph-t t-dew"><span>Rosišče</span><b id="ph-dew">–</b></div>
             <div class="ph-t t-gust"><span>Sunki</span><b id="ph-gust">–</b></div>
           </div>
-          <div class="ph-alert"><span class="ph-tag">Primer opozorila</span><b>Pozeba ponoči</b><span>Temperatura bo padla pod vašo mejo. Ukrepajte pravočasno.</span></div>
+          <div class="ph-alert" id="ph-alert"><span class="ph-tag">Primer opozorila</span><b id="ph-al-t">Pozeba ponoči</b><span id="ph-al-b">Temperatura bo padla pod vašo mejo. Ukrepajte pravočasno.</span></div>
         </div>
       </div>
       <div class="chip chip-a" aria-hidden="true"><span class="dot live-dot"></span>V živo z IREICA1</div>
@@ -84,11 +91,13 @@
 </section>
 <div class="stats"><ul class="wrap stats-list"><li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Od 2019</strong>lastna postaja IREICA1</span></li><li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Vsakih 5 minut</strong>nova meritev na strani</span></li><li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M5 20v-4M10 20v-8M15 20V8M20 20V4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>WiFi ali mobilni internet</strong>kjer koli stoji postaja</span></li><li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Opozorila na telefon</strong>pozeba, veter, nevihta (Pro)</span></li></ul></div>
 
+  <div class="trak" aria-label="Za koga"><div class="trak-in"><span>Kmetije</span><span>Sadovnjaki</span><span>Vinogradi</span><span>Hmeljarji</span><span>Čebelarji</span><span>Kampi</span><span>Turizem</span><span>Gostinstvo</span><span>Gradbeništvo</span><span>Občine</span><span>Prireditve</span><span>Športni klubi</span><span aria-hidden="true">Kmetije</span><span aria-hidden="true">Sadovnjaki</span><span aria-hidden="true">Vinogradi</span><span aria-hidden="true">Hmeljarji</span><span aria-hidden="true">Čebelarji</span><span aria-hidden="true">Kampi</span><span aria-hidden="true">Turizem</span><span aria-hidden="true">Gostinstvo</span><span aria-hidden="true">Gradbeništvo</span><span aria-hidden="true">Občine</span><span aria-hidden="true">Prireditve</span><span aria-hidden="true">Športni klubi</span></div></div>
+
   <section class="band"><div class="wrap sec" id="primeri" aria-labelledby="h-primeri">
-    <h2 id="h-primeri">Za koga je postaja</h2>
+    <h2 class="rz" id="h-primeri">Za koga je postaja</h2>
     <p>Izberite dejavnost, ki je najbližja vaši. Postajo prilagodimo tistemu, kar morate spremljati.</p>
     <div class="grid cases">
-      <article class="card case" id="kmetija" data-dej="Kmetijstvo, sadjarstvo, vinogradništvo" tabindex="-1">
+      <article class="card case rz" id="kmetija" data-dej="Kmetijstvo, sadjarstvo, vinogradništvo" tabindex="-1">
         <span class="case-flag" hidden>Ponudba za vas</span>
         <span class="tile"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 21v-9M12 12c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2-5-6-5 0 3 2 5 6 5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <h3>Kmetija in sadovnjak</h3>
@@ -96,7 +105,7 @@
         <ul class="tags" aria-label="Kaj spremljate"><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M9 4.5l3 2.5 3-2.5M9 19.5l3-2.5 3 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Pozeba</li><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M7 14a4 4 0 1 1 1.2-7.8A5 5 0 0 1 18 8a3.5 3.5 0 0 1-.5 6M8 17v2M12 17v3M16 17v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Toča</li><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Vlaga tal</li></ul>
         <a class="link" href="#povprasevanje" data-segment="kmetija">Zahtevajte ponudbo <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </article>
-      <article class="card case" id="kamp" data-dej="Turizem in gostinstvo" tabindex="-1">
+      <article class="card case rz" id="kamp" data-dej="Turizem in gostinstvo" tabindex="-1">
         <span class="case-flag" hidden>Ponudba za vas</span>
         <span class="tile"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 20L12 5l9 15zM12 5v15M9 20l3-6 3 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <h3>Kamp in turizem</h3>
@@ -104,7 +113,7 @@
         <ul class="tags" aria-label="Kaj spremljate"><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 2L5 14h6l-1 8 8-12h-6l1-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Nevihte</li><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Višina vode</li><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Veter</li></ul>
         <a class="link" href="#povprasevanje" data-segment="kamp">Zahtevajte ponudbo <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </article>
-      <article class="card case" id="gradbenistvo" data-dej="Gradbeništvo" tabindex="-1">
+      <article class="card case rz" id="gradbenistvo" data-dej="Gradbeništvo" tabindex="-1">
         <span class="case-flag" hidden>Ponudba za vas</span>
         <span class="tile"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 6v4M9 8l1 2.5M15 8l-1 2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <h3>Gradbeništvo</h3>
@@ -112,7 +121,7 @@
         <ul class="tags" aria-label="Kaj spremljate"><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Veter</li><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M7 14a4 4 0 1 1 1.2-7.8A5 5 0 0 1 18 8a3.5 3.5 0 0 1-.5 6M8 17v2M12 17v3M16 17v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Dež</li><li><svg class="ic-s" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M10 14.5V5a2 2 0 1 1 4 0v9.5a4 4 0 1 1-4 0zM12 9v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Temperatura</li></ul>
         <a class="link" href="#povprasevanje" data-segment="gradbenistvo">Zahtevajte ponudbo <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </article>
-      <article class="card case" id="obcina" data-dej="Občina ali javna ustanova" tabindex="-1">
+      <article class="card case rz" id="obcina" data-dej="Občina ali javna ustanova" tabindex="-1">
         <span class="case-flag" hidden>Ponudba za vas</span>
         <span class="tile"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 20h18M5 20V10M9 20V10M15 20V10M19 20V10M2 10l10-6 10 6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <h3>Občina</h3>
@@ -124,7 +133,7 @@
   </div></section>
 
   <section class="band band-alt"><div class="wrap sec proof" id="dokaz" aria-labelledby="h-dokaz">
-    <h2 id="h-dokaz">Zakaj nam zaupati</h2>
+    <h2 class="rz" id="h-dokaz">Zakaj nam zaupati</h2>
     <div class="proof-grid">
       <div class="proof-text">
         <ul class="facts">
@@ -134,7 +143,7 @@
         </ul>
         <a class="link" href="/tocnost-napovedi/">Oglejte si primerjavo napovedi z meritvami <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
-      <aside class="live" aria-labelledby="live-h">
+      <aside class="live rz" aria-labelledby="live-h">
         <h3 id="live-h">Zdaj na postaji IREICA1</h3>
         <dl class="live-grid">
           <div><dt>Temperatura</dt><dd id="lw-temp">…</dd></div>
@@ -148,9 +157,9 @@
 
   <section class="band band-dark photo" aria-labelledby="h-foto">
   <div class="wrap photo-grid">
-    <figure class="photo-art"><img class="illus" src="/podjetja/img/postaja-ilustracija.webp" alt="Ilustracija vremenske postaje s senzorji vetra, dežja in temperature ter sončno celico" width="807" height="900" loading="lazy"><figcaption>Ilustracija: primer postaje (ni naša postaja IREICA1)</figcaption></figure>
-    <div class="photo-text">
-      <h2 id="h-foto">Postaja, ki stoji od leta 2019</h2>
+    <figure class="photo-art rz"><img class="illus" src="/podjetja/img/postaja-ilustracija.webp" alt="Ilustracija vremenske postaje s senzorji vetra, dežja in temperature ter sončno celico" width="807" height="900" loading="lazy"><figcaption>Ilustracija: primer postaje (ni naša postaja IREICA1)</figcaption></figure>
+    <div class="photo-text rz">
+      <h2 class="rz" id="h-foto">Postaja, ki stoji od leta 2019</h2>
       <p>IREICA1 stoji v Rečici ob Savinji od leta 2019. Njene meritve vidite zgoraj v živo. Isti pristop prenesemo na vašo lokacijo: pravi senzorji na pravem mestu in podatki, ki jih lahko primerjate z napovedjo.</p>
       <ul class="facts">
         <li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM9.5 10a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Postavitev na mesto, ki ga izberemo skupaj</span></li>
@@ -162,7 +171,7 @@
 </section>
 
   <section class="band"><div class="wrap sec" id="paketi" aria-labelledby="h-paketi">
-    <h2 id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
+    <h2 class="rz" id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
     <p>Najprej povezava: postaja potrebuje pot do interneta. Kjer imate WiFi, je preprosto. Kjer ga nimate, uporabimo mobilni internet.</p>
     <fieldset class="seg">
       <legend>Povezava postaje</legend>
@@ -171,7 +180,7 @@
     </fieldset>
     <p class="note" id="conn-note" aria-live="polite"></p>
     <div class="grid packs">
-      <article class="card pack" id="paket-osnovni">
+      <article class="card pack rz" id="paket-osnovni">
         <h3>Osnovni</h3>
         <p class="for">Za podjetja, ki želijo samo zanesljive podatke za svojo lokacijo.</p>
         <div class="conn" data-conn>Povezava: WiFi</div>
@@ -179,7 +188,7 @@
         <div class="price"><div class="price-once"><strong>od 990 €</strong> <span>enkratno</span></div><div class="price-month">29 € <span>na mesec</span></div><div class="sim-add" data-sim-add hidden>Brez WiFi: + 390 € enkratno, + 19 € na mesec</div></div>
         <a class="btn btn-ghost" href="#povprasevanje" data-paket="osnovni" aria-label="Izberem paket Osnovni">Izberem paket</a>
       </article>
-      <article class="card pack" id="paket-pro">
+      <article class="card pack rz" id="paket-pro">
         <h3>Pro</h3>
         <p class="for">Za tiste, ki morajo pravočasno ukrepati.</p>
         <div class="conn" data-conn>Povezava: WiFi</div>
@@ -187,7 +196,7 @@
         <div class="price"><div class="price-once"><strong>1.290 €</strong> <span>enkratno</span></div><div class="price-month">49 € <span>na mesec</span></div><div class="sim-add" data-sim-add hidden>Brez WiFi: + 390 € enkratno, + 19 € na mesec</div></div>
         <a class="btn btn-ghost" href="#povprasevanje" data-paket="pro" aria-label="Izberem paket Pro">Izberem paket</a>
       </article>
-      <article class="card pack" id="paket-premium">
+      <article class="card pack rz" id="paket-premium">
         <h3>Premium</h3>
         <p class="for">Za podjetja, ki jim vreme neposredno določa dohodek.</p>
         <div class="conn" data-conn>Povezava: WiFi</div>
@@ -195,7 +204,7 @@
         <div class="price"><div class="price-once"><strong>1.790 €</strong> <span>enkratno</span></div><div class="price-month">99 € <span>na mesec</span></div><div class="sim-add" data-sim-add hidden>Brez WiFi: + 390 € enkratno, + 19 € na mesec</div></div>
         <a class="btn btn-ghost" href="#povprasevanje" data-paket="premium" aria-label="Izberem paket Premium">Izberem paket</a>
       </article>
-      <article class="card pack custom" id="paket-po-meri">
+      <article class="card pack rz custom" id="paket-po-meri">
         <h3>Po meri</h3>
         <p class="for">Vi povejte, kaj potrebujete. Mi sestavimo ostalo.</p>
         <div class="conn" data-conn>Povezava: WiFi</div>
@@ -208,33 +217,33 @@
   </div></section>
 
   <section class="band band-alt"><div class="wrap sec" id="kako" aria-labelledby="h-kako">
-    <h2 id="h-kako">Kako poteka</h2>
+    <h2 class="rz" id="h-kako">Kako poteka</h2>
     <ol class="steps">
-      <li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM9.5 10a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Ogled lokacije</strong><span>Pogledamo, kje bo postaja stala, in preverimo povezavo (WiFi ali mobilni internet).</span></li>
-      <li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M14.5 5.5a4 4 0 0 0-5 5L3 17l4 4 6.5-6.5a4 4 0 0 0 5-5l-3 3-2.5-.5-.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Postavitev postaje</strong><span>Namestimo postajo in senzorje na dogovorjeno mesto.</span></li>
-      <li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M16 4v6M8 14v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Nastavitve</strong><span>Nastavimo meritve, nadzorno ploščo in opozorila po vaših pravilih.</span></li>
-      <li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Predaja in usposabljanje</strong><span>Pokažemo, kako berete podatke in kaj sprožijo opozorila.</span></li>
-      <li><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v5H4zM17 14h3v5h-3zM20 19c0 2-2 2-5 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Podpora</strong><span>Spremljamo delovanje postaje in vam svetujemo, kadar je treba.</span></li>
+      <li class="rz"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM9.5 10a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Ogled lokacije</strong><span>Pogledamo, kje bo postaja stala, in preverimo povezavo (WiFi ali mobilni internet).</span></li>
+      <li class="rz"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M14.5 5.5a4 4 0 0 0-5 5L3 17l4 4 6.5-6.5a4 4 0 0 0 5-5l-3 3-2.5-.5-.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Postavitev postaje</strong><span>Namestimo postajo in senzorje na dogovorjeno mesto.</span></li>
+      <li class="rz"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M16 4v6M8 14v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Nastavitve</strong><span>Nastavimo meritve, nadzorno ploščo in opozorila po vaših pravilih.</span></li>
+      <li class="rz"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Predaja in usposabljanje</strong><span>Pokažemo, kako berete podatke in kaj sprožijo opozorila.</span></li>
+      <li class="rz"><svg class="ic" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v5H4zM17 14h3v5h-3zM20 19c0 2-2 2-5 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><strong>Podpora</strong><span>Spremljamo delovanje postaje in vam svetujemo, kadar je treba.</span></li>
     </ol>
   </div></section>
 
   <section class="band"><div class="wrap sec" id="faq" aria-labelledby="h-faq">
-    <h2 id="h-faq">Pogosta vprašanja</h2>
+    <h2 class="rz" id="h-faq">Pogosta vprašanja</h2>
     <div class="faq">
-      <details><summary>Kaj, če na lokaciji ni WiFi?</summary><p>Postaja se poveže prek mobilnega interneta. Pred postavitvijo preverimo pokritost na lokaciji. Za povezavo brez WiFi velja pribitek, naročnina za mobilni internet pa je dodaten strošek.</p></details>
-      <details><summary>Koliko časa traja postavitev?</summary><p>Rok je odvisen od lokacije, povezave in izbranih senzorjev. Dogovorimo ga po ogledu lokacije in ga zapišemo v ponudbo.</p></details>
-      <details><summary>Kdo vzdržuje postajo, če senzor izpade?</summary><p>Podpora je vključena v mesečno naročnino. Kako hitro se odzovemo in kaj zajema zamenjava senzorja, zapišemo v ponudbo; paket Premium ima prednostno podporo.</p></details>
-      <details><summary>Ali lahko podatke pokažem na svoji spletni strani?</summary><p>Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran. Za občine pripravimo vtičnik za občinsko spletno stran.</p></details>
-      <details><summary>Ali je napoved zanesljiva?</summary><p>Napoved je informativna. Popolne natančnosti ne jamčimo, nobena vremenska napoved je ne more. Zato v paketu Premium vsak mesec dobite poročilo o natančnosti, ki napoved primerja z meritvami vaše postaje.</p></details>
-      <details><summary>Kaj pomeni paket po meri?</summary><p>Vi povejte, kaj morate spremljati. Mi sestavimo postajo, senzorje, nadzorno ploščo in opozorila po vaših pravilih. Izpolnite vprašalnik spodaj, ponudbo pripravimo po ogledu lokacije.</p></details>
+      <details class="rz"><summary><span>Kaj, če na lokaciji ni WiFi?</span><i><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i></summary><div class="odg"><div><p>Postaja se poveže prek mobilnega interneta. Pred postavitvijo preverimo pokritost na lokaciji. Za povezavo brez WiFi velja pribitek, naročnina za mobilni internet pa je dodaten strošek.</p></div></div></details>
+      <details class="rz"><summary><span>Koliko časa traja postavitev?</span><i><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i></summary><div class="odg"><div><p>Rok je odvisen od lokacije, povezave in izbranih senzorjev. Dogovorimo ga po ogledu lokacije in ga zapišemo v ponudbo.</p></div></div></details>
+      <details class="rz"><summary><span>Kdo vzdržuje postajo, če senzor izpade?</span><i><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i></summary><div class="odg"><div><p>Podpora je vključena v mesečno naročnino. Kako hitro se odzovemo in kaj zajema zamenjava senzorja, zapišemo v ponudbo; paket Premium ima prednostno podporo.</p></div></div></details>
+      <details class="rz"><summary><span>Ali lahko podatke pokažem na svoji spletni strani?</span><i><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i></summary><div class="odg"><div><p>Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran. Za občine pripravimo vtičnik za občinsko spletno stran.</p></div></div></details>
+      <details class="rz"><summary><span>Ali je napoved zanesljiva?</span><i><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i></summary><div class="odg"><div><p>Napoved je informativna. Popolne natančnosti ne jamčimo, nobena vremenska napoved je ne more. Zato v paketu Premium vsak mesec dobite poročilo o natančnosti, ki napoved primerja z meritvami vaše postaje.</p></div></div></details>
+      <details class="rz"><summary><span>Kaj pomeni paket po meri?</span><i><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i></summary><div class="odg"><div><p>Vi povejte, kaj morate spremljati. Mi sestavimo postajo, senzorje, nadzorno ploščo in opozorila po vaših pravilih. Izpolnite vprašalnik spodaj, ponudbo pripravimo po ogledu lokacije.</p></div></div></details>
     </div>
   </div></section>
 
   <section class="band band-alt"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
     <span id="po-meri"></span>
-    <h2 id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
+    <h2 class="rz" id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
     <p>Izpolnite vprašalnik. Iz odgovorov sestavimo ponudbo po ogledu lokacije.</p>
-    <form id="q" novalidate autocomplete="on">
+    <form class="rz" id="q" novalidate autocomplete="on">
       <p class="chosen" id="chosen" hidden></p>
       <div class="f"><label for="f-firma"><span>Podjetje ali kmetija</span></label><input type="text" id="f-firma" name="firma" autocomplete="organization" maxlength="120" required></div>
       <div class="f"><label for="f-kraj"><span>Kraj in lokacija postaje</span></label><input type="text" id="f-kraj" name="kraj" placeholder="npr. sadovnjak nad vasjo" maxlength="160" required></div>
@@ -281,6 +290,6 @@
   <div class="row"><button class="btn btn-sm" type="button" data-consent="accepted">Sprejmem</button><button class="btn btn-sm btn-ghost" type="button" data-consent="declined">Zavrnem</button></div>
 </div>
 <script>window.PODJETJA_CFG={"worker": "https://weatherireica1.filip-eremita.workers.dev", "pixel": "", "email": "filip.eremita@gmail.com", "showPrices": true, "sim": {"once": 390, "month": 19}};</script>
-<script src="/podjetja/podjetja.js?v=c5012bcb" defer></script>
+<script src="/podjetja/podjetja.js?v=acc4a06d" defer></script>
 </body>
 </html>

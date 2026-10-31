@@ -305,3 +305,88 @@ select{text-overflow:ellipsis}
 @media (max-width:1100px){.chip-a{left:-2%}.chip-b{right:-3%}}
 .chip-b{right:0;top:-4%}
 @media (max-width:1100px){.chip-b{right:0}}
+
+/* ══ Navdih: animirano ozadje, besede naslova, 3D telefon, trak, sij kartic, meni (31. 10.) ══ */
+@property --kot{syntax:'<angle>';inherits:false;initial-value:0deg}
+
+/* aurora v herou */
+.aurora{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.aurora i{position:absolute;border-radius:50%;will-change:transform}
+.aurora i:nth-child(1){width:60vmax;height:60vmax;right:-14vmax;top:-26vmax;background:radial-gradient(circle,rgba(92,194,188,.30),rgba(92,194,188,.08) 40%,transparent 68%);animation:pl1 24s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:46vmax;height:46vmax;left:-14vmax;bottom:-22vmax;background:radial-gradient(circle,rgba(255,216,77,.16),rgba(255,216,77,.04) 40%,transparent 66%);animation:pl2 30s ease-in-out infinite alternate}
+@keyframes pl1{to{transform:translate(-14vw,12vh) scale(1.12)}}
+@keyframes pl2{to{transform:translate(16vw,-14vh) scale(.9)}}
+
+/* naslov: besede se dvignejo */
+.rv{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+.rv>span{display:inline-block;transform:translateY(108%);animation:gor .9s cubic-bezier(.16,1,.3,1) forwards;animation-delay:calc(.08s + var(--i) * .07s)}
+@keyframes gor{to{transform:none}}
+
+/* 3D telefon z vrtečim obročem, opozorilo se menja */
+.hero-art{perspective:1400px}
+.hero-art::before{content:"";position:absolute;width:min(480px,92%);aspect-ratio:1;border-radius:50%;z-index:0;
+  background:conic-gradient(from var(--kot),transparent 0 62%,rgba(255,216,77,.55) 78%,transparent 92%);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - 1px));
+  animation:vrti 10s linear infinite}
+@keyframes vrti{to{--kot:360deg}}
+.hero-art .phone{z-index:1;transform:rotateY(var(--ry,-12deg)) rotateX(var(--rx,5deg));transition:transform .8s cubic-bezier(.16,1,.3,1);transform-style:preserve-3d}
+.chip{z-index:2;translate:calc(var(--px,0) * 16px) calc(var(--py,0) * 12px);transition:translate .8s cubic-bezier(.16,1,.3,1)}
+.ph-alert.in{animation:alin .6s cubic-bezier(.16,1,.3,1)}
+@keyframes alin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* trak panog */
+.trak{overflow:hidden;background:var(--bg);padding:26px 0 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.trak-in{display:flex;gap:12px;width:max-content;padding-right:12px;animation:tece 46s linear infinite}
+.trak-in span{white-space:nowrap;font-weight:700;font-size:15px;color:var(--muted);padding:10px 18px;border-radius:999px;border:2px solid var(--line);background:var(--surface)}
+.trak:hover .trak-in{animation-play-state:paused}
+@keyframes tece{to{transform:translateX(-50%)}}
+
+/* sij ob robu kartic, ki sledi miški */
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(31,111,107,.13),transparent 62%)}
+.card:hover::after{opacity:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card::after{background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(92,194,188,.14),transparent 62%)}}
+:root[data-theme="dark"] .card::after{background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(92,194,188,.14),transparent 62%)}
+
+/* razkrivanje ob pomikanju (samo če teče JS) */
+.js .rz{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+.js .rz.on{opacity:1;transform:none}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.js .card.rz.on:hover{transform:translateY(-4px);transition-duration:.25s}}
+
+/* FAQ: ikona plus, animiran odgovor */
+.faq summary{display:flex;align-items:center;justify-content:space-between;gap:16px;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary i{width:32px;height:32px;flex:none;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;transition:transform .4s cubic-bezier(.16,1,.3,1),background .3s,border-color .3s}
+.faq details[open] summary i{transform:rotate(45deg);background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.faq .odg{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.16,1,.3,1)}
+.faq details[open] .odg{grid-template-rows:1fr}
+.faq .odg>div{overflow:hidden}
+.faq .odg p{padding-bottom:16px}
+
+/* mobilni meni čez cel zaslon */
+.burger{display:none;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.25);position:relative;background:transparent;cursor:pointer}
+.burger i{position:absolute;left:12px;right:12px;height:2px;border-radius:2px;background:#E8EEF2;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.burger i:first-child{top:16px}.burger i:last-child{top:25px}
+.meni-odprt .burger i:first-child{transform:translateY(4.5px) rotate(45deg)}
+.meni-odprt .burger i:last-child{transform:translateY(-4.5px) rotate(-45deg)}
+.mob{position:fixed;inset:0;z-index:45;background:rgba(11,18,23,.97);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);display:flex;flex-direction:column;justify-content:center;gap:6px;padding:90px 24px 40px;
+  clip-path:circle(0 at calc(100% - 40px) 34px);visibility:hidden;transition:clip-path .55s cubic-bezier(.16,1,.3,1),visibility 0s .55s}
+.meni-odprt .mob{clip-path:circle(150vmax at calc(100% - 40px) 34px);visibility:visible;transition:clip-path .55s cubic-bezier(.16,1,.3,1),visibility 0s}
+.mob a:not(.btn){color:#E8EEF2;text-decoration:none;font:800 clamp(30px,9vw,42px)/1.2 var(--display);letter-spacing:-.03em;padding:6px 0;opacity:0;transform:translateY(18px);transition:opacity .4s,transform .5s cubic-bezier(.16,1,.3,1)}
+.meni-odprt .mob a:not(.btn){opacity:1;transform:none}
+.mob a:nth-child(2){transition-delay:.04s}.mob a:nth-child(3){transition-delay:.08s}.mob a:nth-child(4){transition-delay:.12s}
+.mob .btn{align-self:flex-start;margin-top:20px}
+.meni-odprt{overflow:hidden}
+@media (max-width:640px){.burger{display:block}.top .btn-sm{display:none}}
+
+/* mirovanje: brez gibanja za tiste, ki ga ne želijo */
+@media (prefers-reduced-motion:reduce){
+  .aurora i,.hero-art::before,.trak-in,.chip,.live h3::before{animation:none!important}
+  .rv>span{transform:none;animation:none}
+  .js .rz{opacity:1;transform:none;transition:none}
+  .hero-art .phone,.chip{transition:none}
+  .trak-in{flex-wrap:wrap;width:auto;justify-content:center;padding:0 16px}
+  .trak-in span[aria-hidden]{display:none}
+  .mob,.mob a,.faq .odg,.burger i{transition:none!important}
+}
+.chip-a{left:-12%}
