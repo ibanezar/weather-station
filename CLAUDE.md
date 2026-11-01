@@ -939,6 +939,16 @@ Kako je narejeno:
   in se izvede šele ob preklopu na napredni pogled. Novo tako delo dodajaj
   enako.
 
+### Naslovnica: nad pregibom samo bistvo (1. 11. 2026)
+
+Zavihek »Zdaj« je imel ~37 kartic. Zdaj je nad pregibom: hero, obeti, »Zakaj je danes takšno vreme«, dnevni povzetek, Dolina zdaj, radar, kamere in MTR (graf z 14 dnevi + 3 dnevi napovedi). Vse ostalo je v `#more-wrap` pod gumbom **»Pokaži podrobnosti«** (`initMoreToggle()` v `app.js`, izbira v `localStorage` `wx-more-open`).
+
+- **Ovoj je zložen z višino 0 + `overflow:hidden` + `visibility:hidden` + `inert`, NE z `display:none` ali `<details>`**: grafi tako še merijo širino, IntersectionObserver pa jih ne šteje za vidne. Elementi in id-ji ostanejo v DOM-u (JS, pajki). Brez prehoda višine (CLS). Ob odprtju se sproži `resize`.
+- **Nova kartica na naslovnici gre privzeto v `#more-wrap`**; nad pregib sodi samo, če je odgovor na »kakšno je vreme zdaj in kaj sledi«. Preprosti pogled ostane allowlist (`simple-keep`); ovoj nima `simple-keep`, torej je v njem skrit sam.
+- Kakovost zraka + Agrometeo in Pelod na naslovnici sta `hidden` (podvojeno z zavihkoma Okolje); elementi so ostali, ker jih polni JS.
+- Nič ni združeno v nove kartice (Dolinski dvoboj, grafi 24 h, sonce/luna …): to je nadaljnji korak, ki zahteva spremembe v `app.js`.
+- Po spremembi zgornjega dela strani: `npm run minify && node tools/critical_css.mjs` in commitaj `index.html`.
+
 ### Ponudba izbire pogleda se pokaže pred prvim izrisom (CLS, 1. 10. 2026)
 
 `#mode-intro` je prej odkril `initModeUI()` v `app.js` po nalaganju — nov obiskovalec
