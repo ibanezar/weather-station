@@ -1,9 +1,9 @@
 {
   "model_version": "1.0",
-  "trained_at": "2026-10-24T20:55:49Z",
+  "trained_at": "2026-11-01T08:18:00Z",
   "train_range": {
     "from": "2024-01-01",
-    "to": "2026-10-23"
+    "to": "2026-10-31"
   },
   "station": {
     "lat": 46.325779,
@@ -132,67 +132,67 @@
   "ridge_lambda": 2.0,
   "leads": {
     "1": {
-      "n_samples": 1004,
+      "n_samples": 1012,
       "date_range": {
         "from": "2024-01-20",
-        "to": "2026-10-23"
+        "to": "2026-10-31"
       },
       "skill": {
         "tmax": {
-          "n": 353,
+          "n": 361,
           "mae_open_meteo": 1.43,
           "mae_meteorec": 1.05,
           "rmse_open_meteo": 1.83,
-          "rmse_meteorec": 1.39,
-          "improvement_pct": 26.7,
+          "rmse_meteorec": 1.38,
+          "improvement_pct": 26.4,
           "per_month": {
             "2025-11": {
               "n": 26,
               "lambda": 2.0,
-              "open_meteo": 1.5,
-              "meteorec": 0.9
+              "open_meteo": 1.48,
+              "meteorec": 0.92
             },
             "2025-12": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 1.79,
-              "meteorec": 1.55
+              "open_meteo": 1.76,
+              "meteorec": 1.56
             },
             "2026-01": {
               "n": 31,
-              "lambda": 0.5,
+              "lambda": 2.0,
               "open_meteo": 1.83,
-              "meteorec": 1.47
+              "meteorec": 1.46
             },
             "2026-02": {
               "n": 28,
-              "lambda": 2.0,
+              "lambda": 4.0,
               "open_meteo": 1.3,
-              "meteorec": 1.0
+              "meteorec": 1.01
             },
             "2026-03": {
               "n": 31,
               "lambda": 0.5,
               "open_meteo": 1.17,
-              "meteorec": 0.5
+              "meteorec": 0.52
             },
             "2026-04": {
               "n": 30,
-              "lambda": 8.0,
+              "lambda": 16.0,
               "open_meteo": 1.85,
               "meteorec": 0.96
             },
             "2026-05": {
               "n": 31,
-              "lambda": 4.0,
-              "open_meteo": 1.06,
-              "meteorec": 1.72
+              "lambda": 1.0,
+              "open_meteo": 1.04,
+              "meteorec": 1.74
             },
             "2026-06": {
               "n": 30,
               "lambda": 16.0,
-              "open_meteo": 0.82,
-              "meteorec": 0.62
+              "open_meteo": 0.83,
+              "meteorec": 0.65
             },
             "2026-07": {
               "n": 31,
@@ -209,1139 +209,1139 @@
             "2026-09": {
               "n": 30,
               "lambda": 0.5,
-              "open_meteo": 2.03,
-              "meteorec": 1.2
+              "open_meteo": 2.05,
+              "meteorec": 1.19
             },
             "2026-10": {
-              "n": 23,
+              "n": 31,
               "lambda": 1.0,
-              "open_meteo": 1.68,
-              "meteorec": 0.97
+              "open_meteo": 1.6,
+              "meteorec": 0.89
             }
           },
           "per_season": {
             "jesen": {
-              "n": 79,
-              "mae_open_meteo": 1.76,
-              "mae_meteorec": 1.04,
-              "rmse_open_meteo": 2.11,
-              "rmse_meteorec": 1.25,
-              "improvement_pct": 41.0
+              "n": 87,
+              "mae_open_meteo": 1.72,
+              "mae_meteorec": 1.0,
+              "rmse_open_meteo": 2.09,
+              "rmse_meteorec": 1.21,
+              "improvement_pct": 41.7
             },
             "zima": {
               "n": 90,
-              "mae_open_meteo": 1.65,
-              "mae_meteorec": 1.35,
+              "mae_open_meteo": 1.64,
+              "mae_meteorec": 1.36,
               "rmse_open_meteo": 2.13,
-              "rmse_meteorec": 1.69,
-              "improvement_pct": 18.2
+              "rmse_meteorec": 1.7,
+              "improvement_pct": 17.5
             },
             "pomlad": {
               "n": 92,
               "mae_open_meteo": 1.35,
-              "mae_meteorec": 1.06,
-              "rmse_open_meteo": 1.65,
-              "rmse_meteorec": 1.39,
-              "improvement_pct": 21.7
+              "mae_meteorec": 1.08,
+              "rmse_open_meteo": 1.63,
+              "rmse_meteorec": 1.4,
+              "improvement_pct": 20.0
             },
             "poletje": {
               "n": 92,
               "mae_open_meteo": 1.02,
-              "mae_meteorec": 0.76,
+              "mae_meteorec": 0.77,
               "rmse_open_meteo": 1.36,
-              "rmse_meteorec": 1.14,
-              "improvement_pct": 25.4
+              "rmse_meteorec": 1.15,
+              "improvement_pct": 24.7
             }
           }
         },
         "tmin": {
-          "n": 353,
-          "mae_open_meteo": 1.71,
-          "mae_meteorec": 1.2,
-          "rmse_open_meteo": 2.26,
-          "rmse_meteorec": 1.59,
-          "improvement_pct": 29.7,
+          "n": 361,
+          "mae_open_meteo": 1.67,
+          "mae_meteorec": 1.19,
+          "rmse_open_meteo": 2.23,
+          "rmse_meteorec": 1.57,
+          "improvement_pct": 28.7,
           "per_month": {
             "2025-11": {
               "n": 26,
               "lambda": 16.0,
-              "open_meteo": 2.01,
-              "meteorec": 1.55
+              "open_meteo": 1.87,
+              "meteorec": 1.44
             },
             "2025-12": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 1.04,
-              "meteorec": 1.0
+              "open_meteo": 1.03,
+              "meteorec": 1.01
             },
             "2026-01": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 1.88,
+              "open_meteo": 1.87,
               "meteorec": 1.72
             },
             "2026-02": {
               "n": 28,
               "lambda": 16.0,
-              "open_meteo": 0.95,
+              "open_meteo": 0.97,
               "meteorec": 0.78
             },
             "2026-03": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 2.03,
+              "open_meteo": 2.0,
               "meteorec": 1.31
             },
             "2026-04": {
               "n": 30,
-              "lambda": 0.5,
-              "open_meteo": 2.62,
-              "meteorec": 1.44
+              "lambda": 16.0,
+              "open_meteo": 2.61,
+              "meteorec": 1.41
             },
             "2026-05": {
               "n": 31,
               "lambda": 0.5,
-              "open_meteo": 1.35,
+              "open_meteo": 1.28,
               "meteorec": 1.39
             },
             "2026-06": {
               "n": 30,
               "lambda": 0.5,
-              "open_meteo": 1.09,
-              "meteorec": 0.88
+              "open_meteo": 1.03,
+              "meteorec": 0.85
             },
             "2026-07": {
               "n": 31,
-              "lambda": 0.5,
-              "open_meteo": 1.37,
-              "meteorec": 1.11
+              "lambda": 16.0,
+              "open_meteo": 1.32,
+              "meteorec": 1.13
             },
             "2026-08": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 1.39,
-              "meteorec": 1.01
+              "open_meteo": 1.35,
+              "meteorec": 1.03
             },
             "2026-09": {
               "n": 30,
-              "lambda": 0.5,
-              "open_meteo": 1.97,
-              "meteorec": 0.84
+              "lambda": 8.0,
+              "open_meteo": 1.81,
+              "meteorec": 0.82
             },
             "2026-10": {
-              "n": 23,
+              "n": 31,
               "lambda": 8.0,
-              "open_meteo": 3.13,
-              "meteorec": 1.39
+              "open_meteo": 2.85,
+              "meteorec": 1.35
             }
           },
           "per_season": {
             "jesen": {
-              "n": 79,
-              "mae_open_meteo": 2.32,
-              "mae_meteorec": 1.24,
-              "rmse_open_meteo": 2.95,
-              "rmse_meteorec": 1.76,
-              "improvement_pct": 46.7
+              "n": 87,
+              "mae_open_meteo": 2.2,
+              "mae_meteorec": 1.19,
+              "rmse_open_meteo": 2.84,
+              "rmse_meteorec": 1.67,
+              "improvement_pct": 45.7
             },
             "zima": {
               "n": 90,
               "mae_open_meteo": 1.3,
               "mae_meteorec": 1.18,
-              "rmse_open_meteo": 1.68,
-              "rmse_meteorec": 1.53,
-              "improvement_pct": 9.4
+              "rmse_open_meteo": 1.67,
+              "rmse_meteorec": 1.54,
+              "improvement_pct": 8.7
             },
             "pomlad": {
               "n": 92,
-              "mae_open_meteo": 1.99,
-              "mae_meteorec": 1.38,
-              "rmse_open_meteo": 2.59,
+              "mae_open_meteo": 1.96,
+              "mae_meteorec": 1.37,
+              "rmse_open_meteo": 2.57,
               "rmse_meteorec": 1.77,
-              "improvement_pct": 30.7
+              "improvement_pct": 30.0
             },
             "poletje": {
               "n": 92,
-              "mae_open_meteo": 1.28,
-              "mae_meteorec": 1.0,
-              "rmse_open_meteo": 1.65,
+              "mae_open_meteo": 1.24,
+              "mae_meteorec": 1.01,
+              "rmse_open_meteo": 1.61,
               "rmse_meteorec": 1.27,
-              "improvement_pct": 21.9
+              "improvement_pct": 18.8
             }
           }
         },
         "pop": {
-          "n": 1004,
+          "n": 1012,
           "brier": 0.159,
           "brier_climatology": 0.254,
-          "skill_score": 0.373
+          "skill_score": 0.375
         },
         "pop1": {
-          "n": 1004,
-          "brier": 0.095,
+          "n": 1012,
+          "brier": 0.093,
           "brier_climatology": 0.212,
-          "skill_score": 0.552
+          "skill_score": 0.563
         },
         "pop5": {
-          "n": 1004,
-          "brier": 0.072,
+          "n": 1012,
+          "brier": 0.069,
           "brier_climatology": 0.14,
-          "skill_score": 0.486
+          "skill_score": 0.512
         }
       },
       "coefficients": {
         "tmax": [
-          3.28125,
-          1.002953,
-          0.004026,
-          -0.01352,
-          0.005314,
-          -0.20709,
-          0.118516,
-          -0.011398,
-          0.00561,
-          0.031769,
-          -0.025134,
-          0.000568,
-          -0.8928,
-          0.016218,
-          0.004166,
-          0.048706,
-          0.242118,
-          0.136794,
-          0.986557,
-          -0.101248,
-          0.252844,
-          -0.044062
+          3.472458,
+          1.006649,
+          0.001821,
+          -0.012839,
+          0.003745,
+          -0.20091,
+          0.105187,
+          -0.01183,
+          0.005555,
+          0.005394,
+          -0.029162,
+          0.011432,
+          -0.958377,
+          -0.117356,
+          0.003754,
+          0.050588,
+          0.240831,
+          0.141162,
+          0.913962,
+          -0.100911,
+          0.239009,
+          -0.044981
         ],
         "tmin": [
-          -10.905753,
-          0.209206,
-          0.711616,
-          0.005596,
-          0.010959,
-          0.444812,
-          0.137296,
-          0.095169,
-          -0.014165,
-          -0.201713,
-          -0.028625,
-          0.177409,
-          0.344135,
-          0.186549,
-          0.003577,
-          -0.164347,
-          -0.018569,
-          0.128979,
-          0.032727,
-          -0.520605,
-          -0.093346,
-          -0.102803,
-          -0.162083,
-          -0.030097,
-          0.147369
+          -10.878042,
+          0.195887,
+          0.72753,
+          0.004769,
+          0.011608,
+          0.418475,
+          0.177419,
+          0.095906,
+          -0.01456,
+          0.028627,
+          -0.030434,
+          0.189031,
+          0.342936,
+          0.194546,
+          0.005898,
+          -0.170151,
+          -0.004007,
+          0.105295,
+          0.047763,
+          -0.446104,
+          -0.088978,
+          -0.314507,
+          -0.177917,
+          -0.032387,
+          0.151823
         ],
         "pop": [
-          -2.531251,
-          1.25985,
-          1.131498,
-          2.338482,
-          0.502028,
-          -0.218207,
-          -0.40389,
-          -0.233739,
-          0.097748
+          -2.629871,
+          1.247438,
+          1.204755,
+          2.443906,
+          0.539546,
+          -0.204815,
+          -0.435796,
+          -0.228454,
+          0.069725
         ],
         "pop1": [
-          -4.570636,
-          1.221962,
-          1.678523,
-          1.302398,
-          1.809831,
-          -0.341519,
-          0.593821,
-          0.202368,
-          -0.467912
+          -4.660621,
+          1.287713,
+          1.567936,
+          1.442388,
+          1.825623,
+          -0.315826,
+          0.462413,
+          0.191574,
+          -0.520362
         ],
         "pop5": [
-          -5.25619,
-          0.953579,
-          1.593967,
-          0.341087,
-          1.233411,
-          -0.567974,
-          1.670993,
-          -0.110064,
-          0.044644
+          -5.30782,
+          1.072871,
+          1.244808,
+          0.469549,
+          1.188707,
+          -0.522198,
+          1.435919,
+          -0.12642,
+          -0.014147
         ]
       },
       "residual_sd": {
         "tmax": 1.26,
-        "tmin": 1.5
+        "tmin": 1.47
       },
       "residual_sd_regime": {
         "tmax": {
           "clear_calm": 0.97,
           "overcast": 1.38,
-          "mixed": 1.24
+          "mixed": 1.26
         }
       },
       "lambda": {
-        "tmax": 4.0,
+        "tmax": 1.0,
         "tmin": 8.0
       },
       "wind": {
         "mean": {
           "method": "scalar",
-          "ratio": 0.4846,
+          "ratio": 0.4863,
           "skill": {
-            "n": 353,
-            "mae_open_meteo": 2.16,
+            "n": 361,
+            "mae_open_meteo": 2.15,
             "mae_scalar": 0.55,
             "mae_meteorec": 0.55,
             "improvement_pct": 74.6,
             "bias_open_meteo": 2.12,
-            "bias_meteorec": -0.04
+            "bias_meteorec": -0.03
           }
         },
         "gust": {
           "method": "ridge_log1p",
           "coefficients": [
-            1.130892,
-            0.168041,
-            0.180034,
-            0.060722,
-            0.099273,
-            0.151657,
-            0.085139,
-            -0.117552,
-            -0.12688,
-            0.002232,
-            -0.025435,
-            0.035032,
-            -0.062465,
-            -0.011581,
-            0.145771
+            1.118291,
+            0.180699,
+            0.178222,
+            0.068546,
+            0.088126,
+            0.160571,
+            0.076066,
+            -0.116526,
+            -0.125478,
+            0.008839,
+            -0.026635,
+            0.036978,
+            -0.062084,
+            -0.013634,
+            0.145254
           ],
           "lambda": 32.0,
           "skill": {
-            "n": 353,
-            "mae_open_meteo": 7.08,
-            "mae_scalar": 4.52,
-            "mae_meteorec": 3.78,
-            "improvement_pct": 46.7,
-            "bias_open_meteo": 5.07,
-            "bias_meteorec": -0.0
+            "n": 361,
+            "mae_open_meteo": 7.07,
+            "mae_scalar": 4.55,
+            "mae_meteorec": 3.74,
+            "improvement_pct": 47.1,
+            "bias_open_meteo": 5.02,
+            "bias_meteorec": -0.02
           }
         }
       }
     },
     "2": {
-      "n_samples": 1003,
+      "n_samples": 1011,
       "date_range": {
         "from": "2024-01-21",
-        "to": "2026-10-23"
+        "to": "2026-10-31"
       },
       "skill": {
         "tmax": {
-          "n": 353,
-          "mae_open_meteo": 1.77,
+          "n": 361,
+          "mae_open_meteo": 1.76,
           "mae_meteorec": 1.23,
-          "rmse_open_meteo": 2.19,
-          "rmse_meteorec": 1.61,
-          "improvement_pct": 30.6,
+          "rmse_open_meteo": 2.17,
+          "rmse_meteorec": 1.6,
+          "improvement_pct": 30.1,
           "per_month": {
             "2025-11": {
               "n": 26,
               "lambda": 2.0,
-              "open_meteo": 1.51,
-              "meteorec": 1.04
+              "open_meteo": 1.5,
+              "meteorec": 1.03
             },
             "2025-12": {
               "n": 31,
-              "lambda": 2.0,
+              "lambda": 0.5,
               "open_meteo": 1.74,
-              "meteorec": 1.82
+              "meteorec": 1.8
             },
             "2026-01": {
               "n": 31,
               "lambda": 0.5,
-              "open_meteo": 1.57,
-              "meteorec": 1.49
+              "open_meteo": 1.56,
+              "meteorec": 1.47
             },
             "2026-02": {
               "n": 28,
               "lambda": 0.5,
               "open_meteo": 1.85,
-              "meteorec": 1.29
+              "meteorec": 1.3
             },
             "2026-03": {
               "n": 31,
-              "lambda": 0.5,
+              "lambda": 2.0,
               "open_meteo": 1.57,
-              "meteorec": 0.83
+              "meteorec": 0.84
             },
             "2026-04": {
               "n": 30,
               "lambda": 16.0,
               "open_meteo": 2.16,
-              "meteorec": 1.07
+              "meteorec": 1.1
             },
             "2026-05": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 1.35,
-              "meteorec": 1.99
+              "open_meteo": 1.32,
+              "meteorec": 1.93
             },
             "2026-06": {
               "n": 30,
               "lambda": 16.0,
-              "open_meteo": 1.53,
-              "meteorec": 0.82
+              "open_meteo": 1.54,
+              "meteorec": 0.78
             },
             "2026-07": {
               "n": 31,
               "lambda": 16.0,
               "open_meteo": 2.2,
-              "meteorec": 1.3
+              "meteorec": 1.29
             },
             "2026-08": {
               "n": 31,
-              "lambda": 16.0,
+              "lambda": 0.5,
               "open_meteo": 1.58,
-              "meteorec": 0.72
+              "meteorec": 0.73
             },
             "2026-09": {
               "n": 30,
               "lambda": 0.5,
-              "open_meteo": 2.47,
+              "open_meteo": 2.46,
               "meteorec": 1.28
             },
             "2026-10": {
-              "n": 23,
+              "n": 31,
               "lambda": 0.5,
-              "open_meteo": 1.66,
-              "meteorec": 0.98
+              "open_meteo": 1.62,
+              "meteorec": 1.15
             }
           },
           "per_season": {
             "jesen": {
-              "n": 79,
-              "mae_open_meteo": 1.92,
-              "mae_meteorec": 1.12,
-              "rmse_open_meteo": 2.32,
-              "rmse_meteorec": 1.36,
-              "improvement_pct": 41.8
+              "n": 87,
+              "mae_open_meteo": 1.87,
+              "mae_meteorec": 1.16,
+              "rmse_open_meteo": 2.26,
+              "rmse_meteorec": 1.38,
+              "improvement_pct": 38.1
             },
             "zima": {
               "n": 90,
-              "mae_open_meteo": 1.72,
-              "mae_meteorec": 1.54,
+              "mae_open_meteo": 1.71,
+              "mae_meteorec": 1.53,
               "rmse_open_meteo": 2.13,
               "rmse_meteorec": 1.96,
-              "improvement_pct": 10.2
+              "improvement_pct": 10.4
             },
             "pomlad": {
               "n": 92,
-              "mae_open_meteo": 1.69,
-              "mae_meteorec": 1.3,
-              "rmse_open_meteo": 2.04,
-              "rmse_meteorec": 1.6,
-              "improvement_pct": 23.1
+              "mae_open_meteo": 1.68,
+              "mae_meteorec": 1.29,
+              "rmse_open_meteo": 2.02,
+              "rmse_meteorec": 1.58,
+              "improvement_pct": 23.0
             },
             "poletje": {
               "n": 92,
-              "mae_open_meteo": 1.77,
-              "mae_meteorec": 0.95,
+              "mae_open_meteo": 1.78,
+              "mae_meteorec": 0.93,
               "rmse_open_meteo": 2.27,
-              "rmse_meteorec": 1.4,
-              "improvement_pct": 46.5
+              "rmse_meteorec": 1.39,
+              "improvement_pct": 47.5
             }
           }
         },
         "tmin": {
-          "n": 353,
-          "mae_open_meteo": 2.67,
-          "mae_meteorec": 1.29,
-          "rmse_open_meteo": 3.21,
-          "rmse_meteorec": 1.77,
-          "improvement_pct": 51.7,
+          "n": 361,
+          "mae_open_meteo": 2.62,
+          "mae_meteorec": 1.28,
+          "rmse_open_meteo": 3.17,
+          "rmse_meteorec": 1.75,
+          "improvement_pct": 50.9,
           "per_month": {
             "2025-11": {
               "n": 26,
-              "lambda": 4.0,
-              "open_meteo": 3.75,
-              "meteorec": 1.79
+              "lambda": 8.0,
+              "open_meteo": 3.65,
+              "meteorec": 1.67
             },
             "2025-12": {
               "n": 31,
               "lambda": 8.0,
-              "open_meteo": 2.62,
-              "meteorec": 1.42
+              "open_meteo": 2.57,
+              "meteorec": 1.44
             },
             "2026-01": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 2.61,
-              "meteorec": 2.18
+              "open_meteo": 2.59,
+              "meteorec": 2.17
             },
             "2026-02": {
               "n": 28,
               "lambda": 16.0,
-              "open_meteo": 1.87,
-              "meteorec": 1.28
+              "open_meteo": 1.86,
+              "meteorec": 1.3
             },
             "2026-03": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 3.33,
-              "meteorec": 0.95
+              "open_meteo": 3.3,
+              "meteorec": 0.94
             },
             "2026-04": {
               "n": 30,
               "lambda": 16.0,
-              "open_meteo": 3.69,
-              "meteorec": 1.39
+              "open_meteo": 3.64,
+              "meteorec": 1.45
             },
             "2026-05": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 2.51,
-              "meteorec": 1.19
+              "open_meteo": 2.4,
+              "meteorec": 1.24
             },
             "2026-06": {
               "n": 30,
               "lambda": 16.0,
-              "open_meteo": 1.48,
+              "open_meteo": 1.42,
               "meteorec": 0.87
             },
             "2026-07": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 1.68,
-              "meteorec": 0.93
+              "open_meteo": 1.6,
+              "meteorec": 0.89
             },
             "2026-08": {
               "n": 31,
               "lambda": 16.0,
-              "open_meteo": 2.81,
-              "meteorec": 1.1
+              "open_meteo": 2.79,
+              "meteorec": 1.12
             },
             "2026-09": {
               "n": 30,
               "lambda": 16.0,
-              "open_meteo": 2.95,
-              "meteorec": 0.92
+              "open_meteo": 2.86,
+              "meteorec": 0.89
             },
             "2026-10": {
-              "n": 23,
+              "n": 31,
               "lambda": 16.0,
-              "open_meteo": 2.91,
-              "meteorec": 1.61
+              "open_meteo": 2.83,
+              "meteorec": 1.48
             }
           },
           "per_season": {
             "jesen": {
-              "n": 79,
-              "mae_open_meteo": 3.2,
-              "mae_meteorec": 1.41,
-              "rmse_open_meteo": 3.69,
-              "rmse_meteorec": 2.04,
-              "improvement_pct": 56.0
+              "n": 87,
+              "mae_open_meteo": 3.09,
+              "mae_meteorec": 1.34,
+              "rmse_open_meteo": 3.57,
+              "rmse_meteorec": 1.91,
+              "improvement_pct": 56.7
             },
             "zima": {
               "n": 90,
-              "mae_open_meteo": 2.38,
-              "mae_meteorec": 1.64,
-              "rmse_open_meteo": 3.02,
+              "mae_open_meteo": 2.36,
+              "mae_meteorec": 1.65,
+              "rmse_open_meteo": 2.99,
               "rmse_meteorec": 2.14,
-              "improvement_pct": 31.3
+              "improvement_pct": 30.2
             },
             "pomlad": {
               "n": 92,
-              "mae_open_meteo": 3.17,
-              "mae_meteorec": 1.17,
-              "rmse_open_meteo": 3.64,
-              "rmse_meteorec": 1.56,
-              "improvement_pct": 63.1
+              "mae_open_meteo": 3.1,
+              "mae_meteorec": 1.2,
+              "rmse_open_meteo": 3.6,
+              "rmse_meteorec": 1.58,
+              "improvement_pct": 61.2
             },
             "poletje": {
               "n": 92,
-              "mae_open_meteo": 1.99,
-              "mae_meteorec": 0.97,
-              "rmse_open_meteo": 2.41,
-              "rmse_meteorec": 1.25,
-              "improvement_pct": 51.4
+              "mae_open_meteo": 1.94,
+              "mae_meteorec": 0.96,
+              "rmse_open_meteo": 2.37,
+              "rmse_meteorec": 1.26,
+              "improvement_pct": 50.4
             }
           }
         },
         "pop": {
-          "n": 1003,
-          "brier": 0.17,
+          "n": 1011,
+          "brier": 0.171,
           "brier_climatology": 0.254,
-          "skill_score": 0.33
+          "skill_score": 0.328
         },
         "pop1": {
-          "n": 1003,
-          "brier": 0.105,
-          "brier_climatology": 0.213,
-          "skill_score": 0.504
+          "n": 1011,
+          "brier": 0.104,
+          "brier_climatology": 0.212,
+          "skill_score": 0.509
         },
         "pop5": {
-          "n": 1003,
-          "brier": 0.082,
-          "brier_climatology": 0.141,
-          "skill_score": 0.418
+          "n": 1011,
+          "brier": 0.081,
+          "brier_climatology": 0.14,
+          "skill_score": 0.425
         }
       },
       "coefficients": {
         "tmax": [
-          1.487747,
-          0.944063,
-          0.052841,
-          -0.007465,
-          0.001463,
-          -0.177252,
-          0.245728,
-          -0.000872,
-          0.026183,
-          0.265707,
-          -0.017035,
-          0.26102,
-          -1.197727,
-          -0.815295,
-          -0.010282,
-          0.052729,
-          0.271049,
-          0.084823,
-          0.012626,
-          -0.190267,
-          0.499505,
-          -0.001075
+          1.244289,
+          0.953861,
+          0.044448,
+          -0.007036,
+          0.002435,
+          -0.177161,
+          0.238863,
+          -0.000991,
+          0.026643,
+          0.298833,
+          -0.010517,
+          0.254809,
+          -1.139444,
+          -0.213125,
+          -0.010792,
+          0.052627,
+          0.374381,
+          0.193427,
+          -1.034411,
+          -0.090517,
+          -0.04226,
+          0.024038
         ],
         "tmin": [
-          -9.153214,
-          0.034325,
-          0.83094,
-          0.002195,
-          0.016639,
-          0.347682,
-          -0.045938,
-          0.074719,
-          -0.026998,
-          0.278112,
-          -0.024971,
-          -0.078537,
-          -0.106985,
-          2.178007,
-          -0.006849,
-          -0.233053,
-          0.06765,
-          -0.119995,
-          0.154226,
-          -1.502004,
-          -0.035721,
-          -0.480738,
-          0.012378,
-          -0.007684,
-          0.2177
+          -9.074507,
+          0.011809,
+          0.855347,
+          0.001776,
+          0.015671,
+          0.273111,
+          -0.019277,
+          0.075609,
+          -0.02532,
+          0.195673,
+          -0.020906,
+          -0.086764,
+          -0.138674,
+          2.172772,
+          -0.00852,
+          -0.222882,
+          0.048913,
+          -0.104211,
+          0.151173,
+          -1.588006,
+          -0.010636,
+          -0.34398,
+          0.030352,
+          -0.003951,
+          0.209101
         ],
         "pop": [
-          -2.064959,
-          1.020761,
-          1.071573,
-          1.851028,
-          0.492754,
-          -0.264244,
-          -0.595974,
-          -0.302004,
-          0.183576
+          -2.123702,
+          1.040335,
+          1.034052,
+          1.926232,
+          0.484339,
+          -0.233613,
+          -0.631362,
+          -0.293429,
+          0.150739
         ],
         "pop1": [
-          -4.611856,
-          1.137875,
-          0.835182,
-          1.51411,
-          2.003147,
-          -0.383899,
-          0.107575,
-          0.09796,
-          -0.454759
+          -4.611299,
+          1.208025,
+          0.653802,
+          1.59338,
+          1.967745,
+          -0.33563,
+          -0.047109,
+          0.097542,
+          -0.521171
         ],
         "pop5": [
-          -5.47744,
-          0.816469,
-          1.076292,
-          0.879754,
-          1.625882,
-          -0.646106,
-          1.201128,
-          -0.190911,
-          -0.110602
+          -5.439849,
+          0.880784,
+          0.876246,
+          0.909064,
+          1.62385,
+          -0.602741,
+          1.01229,
+          -0.202248,
+          -0.162715
         ]
       },
       "residual_sd": {
-        "tmax": 1.45,
-        "tmin": 1.59
+        "tmax": 1.44,
+        "tmin": 1.58
       },
       "residual_sd_regime": {
         "tmax": {
-          "clear_calm": 1.08,
-          "overcast": 1.66,
-          "mixed": 1.28
+          "clear_calm": 1.07,
+          "overcast": 1.64,
+          "mixed": 1.3
         }
       },
       "lambda": {
-        "tmax": 0.5,
+        "tmax": 4.0,
         "tmin": 0.5
       },
       "wind": {
         "mean": {
           "method": "scalar",
-          "ratio": 0.4113,
+          "ratio": 0.4091,
           "skill": {
-            "n": 353,
-            "mae_open_meteo": 2.72,
+            "n": 361,
+            "mae_open_meteo": 2.71,
             "mae_scalar": 0.54,
             "mae_meteorec": 0.54,
             "improvement_pct": 80.1,
-            "bias_open_meteo": 2.7,
-            "bias_meteorec": -0.13
-          }
-        },
-        "gust": {
-          "method": "ridge_log1p",
-          "coefficients": [
-            0.906034,
-            0.129244,
-            0.16492,
-            0.007553,
-            0.171356,
-            0.176918,
-            0.15503,
-            -0.102242,
-            -0.002968,
-            0.046913,
-            -0.025152,
-            0.003982,
-            -0.065335,
-            0.005396,
-            0.053323
-          ],
-          "lambda": 32.0,
-          "skill": {
-            "n": 353,
-            "mae_open_meteo": 8.37,
-            "mae_scalar": 4.69,
-            "mae_meteorec": 4.33,
-            "improvement_pct": 48.3,
-            "bias_open_meteo": 6.61,
-            "bias_meteorec": -0.1
-          }
-        }
-      }
-    },
-    "3": {
-      "n_samples": 1002,
-      "date_range": {
-        "from": "2024-01-22",
-        "to": "2026-10-23"
-      },
-      "skill": {
-        "tmax": {
-          "n": 353,
-          "mae_open_meteo": 1.93,
-          "mae_meteorec": 1.4,
-          "rmse_open_meteo": 2.44,
-          "rmse_meteorec": 1.81,
-          "improvement_pct": 27.4,
-          "per_month": {
-            "2025-11": {
-              "n": 26,
-              "lambda": 0.5,
-              "open_meteo": 1.58,
-              "meteorec": 1.04
-            },
-            "2025-12": {
-              "n": 31,
-              "lambda": 2.0,
-              "open_meteo": 1.71,
-              "meteorec": 1.76
-            },
-            "2026-01": {
-              "n": 31,
-              "lambda": 1.0,
-              "open_meteo": 1.79,
-              "meteorec": 1.71
-            },
-            "2026-02": {
-              "n": 28,
-              "lambda": 1.0,
-              "open_meteo": 1.9,
-              "meteorec": 1.44
-            },
-            "2026-03": {
-              "n": 31,
-              "lambda": 0.5,
-              "open_meteo": 1.66,
-              "meteorec": 1.05
-            },
-            "2026-04": {
-              "n": 30,
-              "lambda": 2.0,
-              "open_meteo": 2.52,
-              "meteorec": 1.33
-            },
-            "2026-05": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 1.22,
-              "meteorec": 1.91
-            },
-            "2026-06": {
-              "n": 30,
-              "lambda": 16.0,
-              "open_meteo": 1.41,
-              "meteorec": 1.04
-            },
-            "2026-07": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 2.62,
-              "meteorec": 1.65
-            },
-            "2026-08": {
-              "n": 31,
-              "lambda": 8.0,
-              "open_meteo": 1.86,
-              "meteorec": 0.9
-            },
-            "2026-09": {
-              "n": 30,
-              "lambda": 0.5,
-              "open_meteo": 2.87,
-              "meteorec": 1.6
-            },
-            "2026-10": {
-              "n": 23,
-              "lambda": 1.0,
-              "open_meteo": 1.98,
-              "meteorec": 1.24
-            }
-          },
-          "per_season": {
-            "jesen": {
-              "n": 79,
-              "mae_open_meteo": 2.19,
-              "mae_meteorec": 1.31,
-              "rmse_open_meteo": 2.6,
-              "rmse_meteorec": 1.68,
-              "improvement_pct": 40.1
-            },
-            "zima": {
-              "n": 90,
-              "mae_open_meteo": 1.8,
-              "mae_meteorec": 1.64,
-              "rmse_open_meteo": 2.19,
-              "rmse_meteorec": 2.07,
-              "improvement_pct": 8.6
-            },
-            "pomlad": {
-              "n": 92,
-              "mae_open_meteo": 1.79,
-              "mae_meteorec": 1.43,
-              "rmse_open_meteo": 2.27,
-              "rmse_meteorec": 1.77,
-              "improvement_pct": 20.1
-            },
-            "poletje": {
-              "n": 92,
-              "mae_open_meteo": 1.97,
-              "mae_meteorec": 1.2,
-              "rmse_open_meteo": 2.67,
-              "rmse_meteorec": 1.67,
-              "improvement_pct": 39.0
-            }
-          }
-        },
-        "tmin": {
-          "n": 353,
-          "mae_open_meteo": 2.68,
-          "mae_meteorec": 1.41,
-          "rmse_open_meteo": 3.22,
-          "rmse_meteorec": 1.84,
-          "improvement_pct": 47.4,
-          "per_month": {
-            "2025-11": {
-              "n": 26,
-              "lambda": 16.0,
-              "open_meteo": 3.43,
-              "meteorec": 1.81
-            },
-            "2025-12": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 2.85,
-              "meteorec": 1.53
-            },
-            "2026-01": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 2.69,
-              "meteorec": 2.11
-            },
-            "2026-02": {
-              "n": 28,
-              "lambda": 16.0,
-              "open_meteo": 1.95,
-              "meteorec": 1.3
-            },
-            "2026-03": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 3.21,
-              "meteorec": 1.04
-            },
-            "2026-04": {
-              "n": 30,
-              "lambda": 16.0,
-              "open_meteo": 3.77,
-              "meteorec": 1.4
-            },
-            "2026-05": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 2.29,
-              "meteorec": 1.38
-            },
-            "2026-06": {
-              "n": 30,
-              "lambda": 16.0,
-              "open_meteo": 1.53,
-              "meteorec": 1.13
-            },
-            "2026-07": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 1.56,
-              "meteorec": 1.17
-            },
-            "2026-08": {
-              "n": 31,
-              "lambda": 16.0,
-              "open_meteo": 3.04,
-              "meteorec": 1.1
-            },
-            "2026-09": {
-              "n": 30,
-              "lambda": 0.5,
-              "open_meteo": 2.98,
-              "meteorec": 1.17
-            },
-            "2026-10": {
-              "n": 23,
-              "lambda": 16.0,
-              "open_meteo": 3.05,
-              "meteorec": 2.01
-            }
-          },
-          "per_season": {
-            "jesen": {
-              "n": 79,
-              "mae_open_meteo": 3.15,
-              "mae_meteorec": 1.62,
-              "rmse_open_meteo": 3.64,
-              "rmse_meteorec": 2.16,
-              "improvement_pct": 48.4
-            },
-            "zima": {
-              "n": 90,
-              "mae_open_meteo": 2.51,
-              "mae_meteorec": 1.66,
-              "rmse_open_meteo": 3.11,
-              "rmse_meteorec": 2.1,
-              "improvement_pct": 34.1
-            },
-            "pomlad": {
-              "n": 92,
-              "mae_open_meteo": 3.08,
-              "mae_meteorec": 1.27,
-              "rmse_open_meteo": 3.53,
-              "rmse_meteorec": 1.59,
-              "improvement_pct": 58.9
-            },
-            "poletje": {
-              "n": 92,
-              "mae_open_meteo": 2.05,
-              "mae_meteorec": 1.13,
-              "rmse_open_meteo": 2.53,
-              "rmse_meteorec": 1.45,
-              "improvement_pct": 44.6
-            }
-          }
-        },
-        "pop": {
-          "n": 1002,
-          "brier": 0.178,
-          "brier_climatology": 0.254,
-          "skill_score": 0.3
-        },
-        "pop1": {
-          "n": 1002,
-          "brier": 0.117,
-          "brier_climatology": 0.213,
-          "skill_score": 0.45
-        },
-        "pop5": {
-          "n": 1002,
-          "brier": 0.088,
-          "brier_climatology": 0.141,
-          "skill_score": 0.373
-        }
-      },
-      "coefficients": {
-        "tmax": [
-          1.509591,
-          0.972087,
-          0.049168,
-          -0.008175,
-          0.002723,
-          -0.119249,
-          0.254652,
-          -0.003113,
-          0.035703,
-          0.109787,
-          -0.025898,
-          0.108529,
-          -1.246923,
-          0.936003,
-          0.004371,
-          0.06213,
-          0.53371,
-          0.219733,
-          -2.017554,
-          0.075059,
-          -0.23781,
-          -0.109284
-        ],
-        "tmin": [
-          -9.203437,
-          0.076241,
-          0.762478,
-          0.005097,
-          0.015516,
-          0.345678,
-          -0.065595,
-          0.077297,
-          -0.025312,
-          -0.602973,
-          -0.036133,
-          0.119227,
-          -0.745621,
-          3.219539,
-          -0.02445,
-          -0.181323,
-          0.078596,
-          -0.180648,
-          0.183716,
-          -1.90231,
-          0.004934,
-          0.255761,
-          -0.023947,
-          -0.007373,
-          0.172912
-        ],
-        "pop": [
-          -1.842265,
-          0.901418,
-          0.116881,
-          1.500942,
-          0.737771,
-          -0.304332,
-          -0.639098,
-          -0.286183,
-          0.120687
-        ],
-        "pop1": [
-          -4.208975,
-          1.007589,
-          0.304486,
-          1.404087,
-          1.746697,
-          -0.439118,
-          0.093756,
-          0.12089,
-          -0.487587
-        ],
-        "pop5": [
-          -5.372604,
-          0.750419,
-          0.899515,
-          1.172453,
-          1.273753,
-          -0.646684,
-          1.235689,
-          -0.120619,
-          -0.109834
-        ]
-      },
-      "residual_sd": {
-        "tmax": 1.64,
-        "tmin": 1.71
-      },
-      "residual_sd_regime": {
-        "tmax": {
-          "clear_calm": 1.21,
-          "overcast": 1.85,
-          "mixed": 1.49
-        }
-      },
-      "lambda": {
-        "tmax": 1.0,
-        "tmin": 0.5
-      },
-      "wind": {
-        "mean": {
-          "method": "scalar",
-          "ratio": 0.4124,
-          "skill": {
-            "n": 353,
-            "mae_open_meteo": 2.75,
-            "mae_scalar": 0.56,
-            "mae_meteorec": 0.56,
-            "improvement_pct": 79.6,
-            "bias_open_meteo": 2.72,
+            "bias_open_meteo": 2.69,
             "bias_meteorec": -0.11
           }
         },
         "gust": {
           "method": "ridge_log1p",
           "coefficients": [
-            0.961764,
-            0.125541,
-            0.165756,
-            0.010003,
-            0.112045,
-            0.227605,
-            0.137584,
-            -0.083389,
-            -0.025847,
-            0.04305,
-            -0.063629,
-            -0.002815,
-            -0.067158,
-            0.005722,
-            0.04204
+            0.87196,
+            0.124044,
+            0.171945,
+            0.018392,
+            0.154824,
+            0.190176,
+            0.157766,
+            -0.096261,
+            -0.002839,
+            0.050358,
+            -0.021819,
+            -0.000155,
+            -0.060942,
+            0.003322,
+            0.048475
           ],
           "lambda": 32.0,
           "skill": {
-            "n": 353,
-            "mae_open_meteo": 8.6,
+            "n": 361,
+            "mae_open_meteo": 8.25,
             "mae_scalar": 4.66,
-            "mae_meteorec": 4.44,
-            "improvement_pct": 48.3,
-            "bias_open_meteo": 6.92,
-            "bias_meteorec": 0.12
+            "mae_meteorec": 4.33,
+            "improvement_pct": 47.5,
+            "bias_open_meteo": 6.48,
+            "bias_meteorec": -0.15
+          }
+        }
+      }
+    },
+    "3": {
+      "n_samples": 1010,
+      "date_range": {
+        "from": "2024-01-22",
+        "to": "2026-10-31"
+      },
+      "skill": {
+        "tmax": {
+          "n": 361,
+          "mae_open_meteo": 1.9,
+          "mae_meteorec": 1.4,
+          "rmse_open_meteo": 2.42,
+          "rmse_meteorec": 1.81,
+          "improvement_pct": 26.5,
+          "per_month": {
+            "2025-11": {
+              "n": 26,
+              "lambda": 0.5,
+              "open_meteo": 1.55,
+              "meteorec": 1.05
+            },
+            "2025-12": {
+              "n": 31,
+              "lambda": 8.0,
+              "open_meteo": 1.7,
+              "meteorec": 1.8
+            },
+            "2026-01": {
+              "n": 31,
+              "lambda": 1.0,
+              "open_meteo": 1.77,
+              "meteorec": 1.75
+            },
+            "2026-02": {
+              "n": 28,
+              "lambda": 2.0,
+              "open_meteo": 1.9,
+              "meteorec": 1.43
+            },
+            "2026-03": {
+              "n": 31,
+              "lambda": 0.5,
+              "open_meteo": 1.65,
+              "meteorec": 1.04
+            },
+            "2026-04": {
+              "n": 30,
+              "lambda": 16.0,
+              "open_meteo": 2.51,
+              "meteorec": 1.33
+            },
+            "2026-05": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 1.22,
+              "meteorec": 1.9
+            },
+            "2026-06": {
+              "n": 30,
+              "lambda": 16.0,
+              "open_meteo": 1.41,
+              "meteorec": 1.05
+            },
+            "2026-07": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 2.62,
+              "meteorec": 1.64
+            },
+            "2026-08": {
+              "n": 31,
+              "lambda": 8.0,
+              "open_meteo": 1.89,
+              "meteorec": 0.91
+            },
+            "2026-09": {
+              "n": 30,
+              "lambda": 0.5,
+              "open_meteo": 2.84,
+              "meteorec": 1.62
+            },
+            "2026-10": {
+              "n": 31,
+              "lambda": 1.0,
+              "open_meteo": 1.78,
+              "meteorec": 1.23
+            }
+          },
+          "per_season": {
+            "jesen": {
+              "n": 87,
+              "mae_open_meteo": 2.08,
+              "mae_meteorec": 1.31,
+              "rmse_open_meteo": 2.5,
+              "rmse_meteorec": 1.69,
+              "improvement_pct": 36.8
+            },
+            "zima": {
+              "n": 90,
+              "mae_open_meteo": 1.79,
+              "mae_meteorec": 1.67,
+              "rmse_open_meteo": 2.19,
+              "rmse_meteorec": 2.1,
+              "improvement_pct": 6.6
+            },
+            "pomlad": {
+              "n": 92,
+              "mae_open_meteo": 1.78,
+              "mae_meteorec": 1.43,
+              "rmse_open_meteo": 2.26,
+              "rmse_meteorec": 1.77,
+              "improvement_pct": 20.1
+            },
+            "poletje": {
+              "n": 92,
+              "mae_open_meteo": 1.98,
+              "mae_meteorec": 1.2,
+              "rmse_open_meteo": 2.7,
+              "rmse_meteorec": 1.67,
+              "improvement_pct": 39.5
+            }
+          }
+        },
+        "tmin": {
+          "n": 361,
+          "mae_open_meteo": 2.63,
+          "mae_meteorec": 1.42,
+          "rmse_open_meteo": 3.18,
+          "rmse_meteorec": 1.86,
+          "improvement_pct": 45.8,
+          "per_month": {
+            "2025-11": {
+              "n": 26,
+              "lambda": 16.0,
+              "open_meteo": 3.35,
+              "meteorec": 1.77
+            },
+            "2025-12": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 2.81,
+              "meteorec": 1.51
+            },
+            "2026-01": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 2.63,
+              "meteorec": 2.06
+            },
+            "2026-02": {
+              "n": 28,
+              "lambda": 16.0,
+              "open_meteo": 1.94,
+              "meteorec": 1.3
+            },
+            "2026-03": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 3.21,
+              "meteorec": 1.03
+            },
+            "2026-04": {
+              "n": 30,
+              "lambda": 16.0,
+              "open_meteo": 3.75,
+              "meteorec": 1.41
+            },
+            "2026-05": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 2.2,
+              "meteorec": 1.38
+            },
+            "2026-06": {
+              "n": 30,
+              "lambda": 16.0,
+              "open_meteo": 1.48,
+              "meteorec": 1.09
+            },
+            "2026-07": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 1.54,
+              "meteorec": 1.19
+            },
+            "2026-08": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 2.95,
+              "meteorec": 1.14
+            },
+            "2026-09": {
+              "n": 30,
+              "lambda": 16.0,
+              "open_meteo": 2.9,
+              "meteorec": 1.21
+            },
+            "2026-10": {
+              "n": 31,
+              "lambda": 16.0,
+              "open_meteo": 2.86,
+              "meteorec": 2.03
+            }
+          },
+          "per_season": {
+            "jesen": {
+              "n": 87,
+              "mae_open_meteo": 3.02,
+              "mae_meteorec": 1.67,
+              "rmse_open_meteo": 3.54,
+              "rmse_meteorec": 2.22,
+              "improvement_pct": 44.6
+            },
+            "zima": {
+              "n": 90,
+              "mae_open_meteo": 2.48,
+              "mae_meteorec": 1.63,
+              "rmse_open_meteo": 3.08,
+              "rmse_meteorec": 2.09,
+              "improvement_pct": 34.1
+            },
+            "pomlad": {
+              "n": 92,
+              "mae_open_meteo": 3.04,
+              "mae_meteorec": 1.27,
+              "rmse_open_meteo": 3.51,
+              "rmse_meteorec": 1.6,
+              "improvement_pct": 58.2
+            },
+            "poletje": {
+              "n": 92,
+              "mae_open_meteo": 2.0,
+              "mae_meteorec": 1.14,
+              "rmse_open_meteo": 2.49,
+              "rmse_meteorec": 1.46,
+              "improvement_pct": 43.0
+            }
+          }
+        },
+        "pop": {
+          "n": 1010,
+          "brier": 0.178,
+          "brier_climatology": 0.254,
+          "skill_score": 0.299
+        },
+        "pop1": {
+          "n": 1010,
+          "brier": 0.116,
+          "brier_climatology": 0.213,
+          "skill_score": 0.455
+        },
+        "pop5": {
+          "n": 1010,
+          "brier": 0.087,
+          "brier_climatology": 0.141,
+          "skill_score": 0.381
+        }
+      },
+      "coefficients": {
+        "tmax": [
+          1.575296,
+          0.97456,
+          0.047176,
+          -0.007389,
+          0.000387,
+          -0.112751,
+          0.243987,
+          -0.002446,
+          0.036197,
+          0.120398,
+          -0.023502,
+          0.139866,
+          -1.195125,
+          0.406717,
+          0.002801,
+          0.059454,
+          0.462061,
+          0.154127,
+          -0.103003,
+          0.006974,
+          0.104032,
+          -0.11378
+        ],
+        "tmin": [
+          -9.006006,
+          0.058573,
+          0.77692,
+          0.002035,
+          0.016741,
+          0.30791,
+          -0.048099,
+          0.078125,
+          -0.023141,
+          -0.494269,
+          -0.032901,
+          0.068142,
+          -0.839018,
+          3.072139,
+          -0.02441,
+          -0.177749,
+          0.082747,
+          -0.210378,
+          0.208098,
+          -1.941212,
+          0.022302,
+          0.115875,
+          -0.020859,
+          -0.000795,
+          0.160384
+        ],
+        "pop": [
+          -1.848193,
+          0.915765,
+          0.160551,
+          1.5486,
+          0.691497,
+          -0.286108,
+          -0.677223,
+          -0.289582,
+          0.099635
+        ],
+        "pop1": [
+          -4.21729,
+          1.016996,
+          0.378349,
+          1.483388,
+          1.725434,
+          -0.412595,
+          -0.023588,
+          0.106118,
+          -0.540329
+        ],
+        "pop5": [
+          -5.358243,
+          0.795828,
+          0.796826,
+          1.161695,
+          1.281537,
+          -0.619397,
+          1.121918,
+          -0.133688,
+          -0.148655
+        ]
+      },
+      "residual_sd": {
+        "tmax": 1.65,
+        "tmin": 1.72
+      },
+      "residual_sd_regime": {
+        "tmax": {
+          "clear_calm": 1.23,
+          "overcast": 1.87,
+          "mixed": 1.49
+        }
+      },
+      "lambda": {
+        "tmax": 2.0,
+        "tmin": 0.5
+      },
+      "wind": {
+        "mean": {
+          "method": "scalar",
+          "ratio": 0.4117,
+          "skill": {
+            "n": 361,
+            "mae_open_meteo": 2.75,
+            "mae_scalar": 0.56,
+            "mae_meteorec": 0.56,
+            "improvement_pct": 79.7,
+            "bias_open_meteo": 2.72,
+            "bias_meteorec": -0.1
+          }
+        },
+        "gust": {
+          "method": "ridge_log1p",
+          "coefficients": [
+            0.944042,
+            0.126839,
+            0.169919,
+            0.022003,
+            0.098446,
+            0.235329,
+            0.138704,
+            -0.07561,
+            -0.028443,
+            0.042559,
+            -0.063867,
+            -0.00759,
+            -0.064713,
+            0.005339,
+            0.035694
+          ],
+          "lambda": 32.0,
+          "skill": {
+            "n": 361,
+            "mae_open_meteo": 8.54,
+            "mae_scalar": 4.66,
+            "mae_meteorec": 4.39,
+            "improvement_pct": 48.6,
+            "bias_open_meteo": 6.82,
+            "bias_meteorec": 0.08
           }
         }
       }
