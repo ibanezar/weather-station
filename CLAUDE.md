@@ -2752,6 +2752,17 @@ Samo videz (`style.css`, `index.html`, malo `app.js`); logika in id-ji so nedota
 - **Nowcast (`#nowcast-wrap`, »Naslednjih 45 minut«) ostane nad hero kartico po Filipovi odločitvi** (26. 10. 2026), čeprav ob prihodu radarja ob dežju zraste za ~340 px in da CLS 0,07–0,17. Možna rešitev, če bo treba: premik pod hero kartico. Ne rezerviraj prostora za mirno vreme (prazna luknja).
 - **Merjenje CLS:** Playwright + CDP (`Network.emulateNetworkConditions` 200 kB/s, 150 ms; `Emulation.setCPUThrottlingRate` 4×), `PerformanceObserver('layout-shift')`. Posamezni teki so zelo nestanovitni (osnovna različica 0,02–0,10 v 5 s): primerjaj vsaj 3 teke. Open-Meteo vrne ob veliko meritvah 429/503 in kartice (obeti) ostanejo prazne — ne zamenjaj za napako v kodi.
 
+### Hero B: ploščice namesto ene škatle (1. 11. 2026)
+
+Filip je hero kartico imel za »veliko zmedo« (pred prvo meritvijo devet blokov petih slogov, podvojene informacije). Izbral je varianto B iz štirih predlogov. Samo videz in razporeditev, id-ji so ostali:
+
+- `.hero.hero-b` je mreža brez lastne podlage; vsaka ploščica (`.hb-tile`, `.hm`) nosi svojo. Zaporedje: vrstica postaje → glavna (temperatura, ikona + stanje, en čip »od včeraj«) → **»Danes«** (krepek stavek + graf + drsnik) → 4 meritve (2×2; na ≥ 760 px v desnem stolpcu) → `<details class="hb-more">` »Več podrobnosti« (razpon dneva, UV, PM₂,₅, luna) → podnožje (dnevno dejstvo + točnost MTR) → zvok/deli.
+- **»Občutek« je čip samo, če se od temperature razlikuje ≥ 1 °C** (`applyObs`); sicer ponavlja številko. **Rosišče** je samo še v ploščici vlage (`hs-dew-line`); `#dew-line` je v HTML skrit zaradi `inject_current_weather.py` (`dewpt-hero`). Vrstica »danes 74–97 %« pri vlagi in sparklini 24 h v ploščicah tlaka/vlage so skriti (podatki ostanejo v DOM).
+- Stavek v »Danes« ima prvi del krepek (`renderHeroBriefing()` sestavi `<strong>`, ne `textContent`); `hero-briefing` in `hero-spark-wrap` imata v skritem stanju rezerviran prostor (brez CLS). **Oblaček »ZDAJ« je pozicioniran glede na rob `.hero-spark-wrap`, zato je prostor nad grafom `margin-top`, ne `padding-top`.**
+- `#hero-canvas` je zdaj v glavni ploščici (`_heroCanvas.parentElement`), ne v `.hero`.
+- Nova ploščica na hero kartici = vnos v `.hero-metrics` ali `.hb-more`; na ≥ 760 px potrebuje `grid-area`.
+- Po spremembi: `npm run minify` + `node tools/critical_css.mjs` (kritični CSS je izpeljan).
+
 ### Ploščice hero kartice: glava z ikono, lestvica, barva po vremenu (31. 10. 2026)
 
 Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris). Samo prikaz; id-ji in pravila `numOf()`/`hs-rain-rate` veljajo naprej.
