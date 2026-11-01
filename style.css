@@ -4123,3 +4123,16 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 [data-theme="light"] .cu-day[data-wx="snow"] .cu-scene::before{filter:drop-shadow(0 0 1px rgba(2,132,199,.55))}
 @media(max-width:420px){.cu-day{flex-basis:120px;min-width:120px;padding:.75rem .45rem .65rem}.cu-dhi{font-size:1.3rem}.cu-drain{font-size:.62rem;white-space:nowrap;gap:.2rem}.cu-drain .ic{display:none}}
 .cu-drain{white-space:nowrap}
+
+/* Zložen ovoj podrobnosti (1. 11. 2026). Višina 0 + overflow:hidden, NE display:none:
+   elementi ostanejo postavljeni (grafi merijo širino), IntersectionObserver pa jih
+   ne šteje za vidne, dokler ovoj ni odprt. Brez prehoda višine (CLS). */
+.more-wrap{height:0;overflow:hidden;visibility:hidden}
+.more-wrap.is-open{height:auto;overflow:visible;visibility:visible}
+.g2[hidden]{display:none}
+.more-toggle{flex:0 1 auto;display:flex;flex-direction:column;align-items:center;gap:.15rem;min-height:48px;padding:.55rem 1.1rem;border:1px solid var(--border);border-radius:999px;background:var(--card,transparent);color:var(--text,inherit);font:inherit;cursor:pointer;text-align:center}
+.more-toggle:hover{border-color:var(--blue)}
+.more-toggle:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.more-toggle-lbl{font-size:.82rem;font-weight:600}
+.more-toggle-sub{font-size:.66rem;color:var(--muted)}
+.more-toggle[aria-expanded="true"] .more-toggle-sub{display:none}

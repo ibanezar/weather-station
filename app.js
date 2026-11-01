@@ -17628,10 +17628,27 @@ function _revealCards(){
   cards.map(c=>[c,c.getBoundingClientRect()]).forEach(([c,r])=>{if(r.top>innerHeight||r.height===0){c.classList.add('rv-pre');io.observe(c);}});
   setTimeout(()=>document.querySelectorAll('.rv-pre').forEach(c=>c.classList.remove('rv-pre')),8000);
 }
+function initMoreToggle(){
+  const b=document.getElementById('more-toggle'),w=document.getElementById('more-wrap');
+  if(!b||!w)return;
+  const set=(open,save)=>{
+    w.classList.toggle('is-open',open);
+    if(open)w.removeAttribute('inert');else w.setAttribute('inert','');
+    b.setAttribute('aria-expanded',open?'true':'false');
+    b.querySelector('.more-toggle-lbl').textContent=open?'Skrij podrobnosti':'Pokaži podrobnosti';
+    if(save){try{localStorage.setItem('wx-more-open',open?'1':'0');}catch(_){}}
+    // grafi, ki so se izrisali ob višini 0, naj se prilagodijo
+    if(open)setTimeout(()=>window.dispatchEvent(new Event('resize')),50);
+  };
+  b.addEventListener('click',()=>set(!w.classList.contains('is-open'),true));
+  let saved=null;try{saved=localStorage.getItem('wx-more-open');}catch(_){}
+  if(saved==='1')set(true,false);
+}
 async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
   try{initModeUI();}catch(_){}
+  try{initMoreToggle();}catch(_){}
   try{_skelWatch();}catch(_){}
   try{_revealCards();}catch(_){}
   try{applyStationOnThisDay();}catch(_){}
