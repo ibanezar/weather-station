@@ -555,6 +555,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/test-napovedi-2026-10.html</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/test-napovedi-2026-10.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/vremenski-povzetek-oktober-2026.html</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>monthly</changefreq>

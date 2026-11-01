@@ -1,5 +1,17 @@
 [
   {
+    "title": "Test napovedi: oktober 2026 — zmagal ICON",
+    "slug": "test-napovedi-2026-10",
+    "url": "/blog/test-napovedi-2026-10.html",
+    "date": "2026-11-01",
+    "summary": "Mesečni pregled natančnosti vremenske napovedi za Zgornjo Savinjsko dolino v oktobru 2026: primerjava ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE in best_match proti postaji IREICA1.",
+    "tags": [
+      "test-napovedi",
+      "mesecni-pregled",
+      "2026"
+    ]
+  },
+  {
     "title": "Vremenski povzetek — oktober 2026",
     "slug": "vremenski-povzetek-oktober-2026",
     "url": "/blog/vremenski-povzetek-oktober-2026.html",
