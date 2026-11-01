@@ -3167,14 +3167,22 @@ html.cookie-need #cookie-banner{display:flex}
    validatorjem palete proti dejanskima podlagama strani (svetla #f8fcfe,
    temna #0a0e1b), ordinalni način: vse kontrole PASS. */
 .nowcast{
-  --nc-b1:#86b6ef; --nc-b2:#5598e7; --nc-b3:#2a78d6; --nc-b4:#1c5cab; --nc-b5:#0d366b;
+  --nc-k:var(--rain-col); --nc-tint:16%;
   --nc-track:rgba(11,11,11,.07); --nc-hair:var(--card-border);
-  max-width:1400px;margin:0 auto 1rem;padding:1rem 1.15rem 1.1rem;
-  background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;
+  position:relative;overflow:hidden;
+  max-width:1400px;margin:0 auto 1rem;padding:1.15rem 1.25rem 1.1rem;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:22px;
   box-shadow:var(--card-shadow)}
-[data-theme="dark"] .nowcast{
-  --nc-b1:#184f95; --nc-b2:#256abf; --nc-b3:#3987e5; --nc-b4:#86b6ef; --nc-b5:#cde2fb;
-  --nc-track:rgba(255,255,255,.08)}
+/* Podlaga se rahlo obarva po resnosti (dež / nevihta / toča); brez color-mix ostane ravna. */
+@supports (background:color-mix(in srgb,red,blue)){
+  .nowcast{background:
+    radial-gradient(110% 70% at 100% 0%,color-mix(in srgb,var(--nc-k) var(--nc-tint),transparent),transparent 62%),
+    radial-gradient(90% 60% at 0% 100%,color-mix(in srgb,var(--blue) 10%,transparent),transparent 65%),
+    var(--card-bg)}
+}
+.nowcast[data-kind="storm"]{--nc-k:var(--amber)}
+.nowcast[data-kind="hail"]{--nc-k:var(--red)}
+[data-theme="dark"] .nowcast{--nc-tint:30%;--nc-track:rgba(255,255,255,.08)}
 
 .nowcast-head{display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap;margin:0 0 .75rem}
 .nowcast-title{margin:0;font-size:.82rem;font-weight:600;letter-spacing:.06em;
@@ -3191,7 +3199,8 @@ html.cookie-need #cookie-banner{display:flex}
 
 /* Junak: značka (ikona + beseda) nosi resnost, število nosi čas. Besedilo
    ostane v barvi črnila — barva je na znački, ne na besedah. */
-.nowcast-lead{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;min-height:2.6rem}
+.nc-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.nowcast-lead{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;min-width:0}
 .nc-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .6rem;
   border-radius:999px;font-size:.78rem;font-weight:700;letter-spacing:.02em;
   border:1px solid transparent;white-space:nowrap}
@@ -3201,43 +3210,62 @@ html.cookie-need #cookie-banner{display:flex}
 .nc-badge-rain{background:rgba(42,120,214,.14);color:var(--rain-col);border-color:rgba(42,120,214,.32)}
 .nc-badge-storm{background:rgba(250,178,25,.18);color:var(--amber);border-color:rgba(250,178,25,.4)}
 .nc-badge-hail{background:rgba(208,59,59,.15);color:var(--red);border-color:rgba(208,59,59,.38)}
-.nc-hero{font-size:1.9rem;font-weight:700;line-height:1.05;color:var(--text);letter-spacing:-.02em}
-.nc-hero .nc-unit{font-size:.55em;font-weight:600;color:var(--muted);margin-left:.15rem}
+.nc-hero{display:block;margin-top:.3rem;font-size:4.2rem;font-weight:800;line-height:.9;color:var(--text);
+  letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.nc-hero:empty{display:none}
+.nc-hero .nc-unit{font-size:.25em;font-weight:600;color:var(--muted);margin-left:.35rem;letter-spacing:0}
+.nc-cap{font-size:.78rem;color:var(--muted)}
+.nc-cap:empty{display:none}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .nc-hero{background:linear-gradient(180deg,var(--text) 20%,color-mix(in srgb,var(--nc-k) 70%,var(--text)) 130%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .nc-hero .nc-unit{-webkit-text-fill-color:var(--muted)}
+}
+/* Radarski krog: krogi 15/30/45 min, celica pulzira na strani prihoda. */
+.nc-radar{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.nc-disc{position:relative;width:112px;height:112px;border-radius:50%;overflow:hidden;
+  border:1px solid var(--nc-hair);
+  background:radial-gradient(circle,rgba(127,127,127,.06),transparent 70%)}
+.nc-ring{position:absolute;border-radius:50%;border:1px dashed var(--nc-hair)}
+.nc-r1{inset:33.3%}.nc-r2{inset:16.6%}
+.nc-xh{position:absolute;background:var(--nc-hair)}
+.nc-xh-h{left:0;right:0;top:50%;height:1px}.nc-xh-v{top:0;bottom:0;left:50%;width:1px}
+.nc-sweep{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0 290deg,rgba(127,127,127,.28) 360deg);animation:nc-spin 5s linear infinite}
+@supports (background:color-mix(in srgb,red,blue)){
+  .nc-sweep{background:conic-gradient(from 0deg,transparent 0 290deg,color-mix(in srgb,var(--nc-k) 38%,transparent) 360deg)}
+}
+.nc-me{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:var(--text);
+  box-shadow:0 0 0 3px rgba(127,127,127,.28)}
+.nc-blob{position:absolute;left:50%;top:50%;width:30px;height:17px;border-radius:50%;
+  background:radial-gradient(closest-side,var(--nc-k),transparent);
+  transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) rotate(var(--rot,0deg));
+  animation:nc-pulse 2.6s ease-in-out infinite}
+.nc-disc-note{font:500 .58rem ui-monospace,Menlo,Consolas,monospace;color:var(--muted);text-align:center;letter-spacing:.03em;white-space:nowrap}
+@keyframes nc-spin{to{transform:rotate(360deg)}}
+@keyframes nc-pulse{50%{opacity:.6}}
 .nowcast-sub{margin:.3rem 0 0;font-size:.9rem;line-height:1.45;color:var(--text)}
 
-/* Trak približevanja: 9 polj po 5 minut. Med polji 2 px podlage (razmik,
-   ne obroba). Zadetna površina je večja od pisave zaradi dotika. */
+/* Graf jakosti: gladka krivulja devetih 5-minutnih vrednosti (korenska lestvica do 60 mm/h,
+   da se tudi šibek dež vidi). Desno od črtkane črte (po 30 min) je zasenčeno: manj zanesljivo.
+   Barve nosijo razredi, ne atributi, zato sledijo temi sami. */
 .nowcast-fig{margin:.95rem 0 0}
-.nc-fig-cap{font-size:.72rem;color:var(--muted);margin-bottom:.3rem}
-.nc-strip{display:flex;gap:2px;list-style:none;margin:0;padding:0}
-.nc-cell{flex:1 1 0;height:30px;border-radius:5px;background:var(--nc-track);
-  position:relative;cursor:default;transition:transform .12s ease}
-.nc-cell:hover,.nc-cell:focus-visible{transform:scaleY(1.16);outline:none}
-.nc-cell:focus-visible{box-shadow:0 0 0 2px var(--card-bg),0 0 0 4px var(--blue)}
-.nc-cell.nc-b1{background:var(--nc-b1)}
-.nc-cell.nc-b2{background:var(--nc-b2)}
-.nc-cell.nc-b3{background:var(--nc-b3)}
-.nc-cell.nc-b4{background:var(--nc-b4)}
-.nc-cell.nc-b5{background:var(--nc-b5)}
-/* Meja zanesljivosti: po 30 minutah signal za nevihto opazno oslabi. */
-.nc-cell.nc-beyond::after{content:"";position:absolute;inset:0;border-radius:5px;
-  background:repeating-linear-gradient(135deg,transparent 0 4px,var(--card-bg) 4px 5px);opacity:.38}
-/* Os leži na isti devetstolpčni mreži kot trak, da oznaka stoji točno pod
-   svojim poljem (razmik enak razmiku med polji). */
-.nc-axis{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;margin-top:.3rem;
-  font-size:.68rem;color:var(--muted)}
-.nc-axis span{white-space:nowrap}
-.nc-axis .nc-t1{grid-column:1;text-align:left}
-.nc-axis .nc-t4{grid-column:4;text-align:center}
-.nc-axis .nc-t7{grid-column:7;text-align:center}
-.nc-axis .nc-t9{grid-column:9;text-align:right}
-.nc-scale{display:flex;font-size:.68rem;color:var(--muted);align-items:center;gap:3px;margin-top:.5rem}
-.nc-scale-lbl{font-size:.68rem}
-.nc-sw{width:14px;height:7px;border-radius:2px;display:inline-block}
-.nc-scale .nc-b1{background:var(--nc-b1)}.nc-scale .nc-b2{background:var(--nc-b2)}
-.nc-scale .nc-b3{background:var(--nc-b3)}.nc-scale .nc-b4{background:var(--nc-b4)}
-.nc-scale .nc-b5{background:var(--nc-b5)}
-.nc-scale-lbl:last-child{margin-left:.1rem}
+.nc-fig-cap{font-size:.72rem;color:var(--muted);margin-bottom:.35rem}
+.nc-chart svg{display:block;width:100%;height:auto;overflow:visible}
+.nc-base{stroke:var(--nc-hair)}
+.nc-g0{stop-color:var(--nc-k);stop-opacity:.55}.nc-g1{stop-color:var(--nc-k);stop-opacity:0}
+.nc-line{fill:none;stroke:var(--nc-k);stroke-width:2.2;stroke-linecap:round}
+.nc-shade{fill:var(--card-bg);opacity:.5}
+.nc-30{stroke:var(--muted);stroke-dasharray:2 3;opacity:.6}
+.nc-pk{fill:var(--card-bg);stroke:var(--nc-k);stroke-width:2.2}
+.nc-hit{fill:transparent}
+/* Os: oznake stojijo na enakih položajih kot točke grafa (9 točk, razmik 12,5 %). */
+.nc-axis{position:relative;height:1rem;margin-top:.3rem;font-size:.68rem;color:var(--muted)}
+.nc-axis span{position:absolute;top:0;white-space:nowrap;transform:translateX(-50%)}
+.nc-axis .nc-t1{left:0;transform:none}
+.nc-axis .nc-t4{left:37.5%}
+.nc-axis .nc-t7{left:75%}
+.nc-axis .nc-t9{left:100%;transform:translateX(-100%)}
 
 .nowcast-foot{margin:.75rem 0 0;padding-top:.6rem;border-top:1px solid var(--nc-hair);
   color:var(--muted);font-size:.72rem;line-height:1.5}
@@ -3256,11 +3284,18 @@ html.cookie-need #cookie-banner{display:flex}
   .nowcast{padding:.85rem .9rem}
   .nowcast-pick{margin-left:0;width:100%}
   .nowcast-pick select{flex:1}
-  .nc-hero{font-size:1.6rem}
-  .nc-cell{height:26px}
+  .nc-hero{font-size:3.7rem}
+  .nc-disc{width:102px;height:102px}
 }
 @media (prefers-reduced-motion:reduce){
-  .nc-cell{transition:none}.nc-cell:hover,.nc-cell:focus-visible{transform:none}
+  .nc-sweep,.nc-blob{animation:none}
+}
+/* Široko: besedilo levo, graf desno, da kartica na namizju ni raztegnjena trak. */
+@media (min-width:900px){
+  .nowcast:not([hidden]){display:grid;column-gap:2.2rem;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);
+    grid-template-areas:"head head" "top fig" "sub fig" "foot foot";align-items:start}
+  .nowcast-head{grid-area:head}.nc-top{grid-area:top}.nowcast-sub{grid-area:sub}
+  .nowcast-fig{grid-area:fig;margin-top:0}.nowcast-foot{grid-area:foot}
 }
 
 /* ══ PREPROST ⇄ NAPREDNI POGLED ═══════════════════════════════════════════
