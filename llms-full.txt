@@ -31,13 +31,13 @@ Meteorec temelji na osebni meteorološki postaji Ecowitt , ki neprekinjeno bele�
 
 ## Gobarska napoved — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/gobarska-napoved/
-> Gobarski indeks danes: 91/100 (Odlično). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.
+> Gobarski indeks danes: 88/100 (Odlično). Napoved rasti gob po vrstah za Zgornjo Savinjsko dolino, baza 300 vrst in nevarne dvojnice.
 
 Model rasti gob po vrstah · lokalna baza 300 vrst · osvežuje se dnevno
 
 Napoved po vrstah in prepoznava gob: brezplačno z e-pošto, brez gesla in plačila.
 
-Na kratko: gobarski indeks za Rečica ob Savinji je danes 91 od 100 (Odlično). Najbolj obetavno območje je Dobrovlje – Čreta (100 od 100). Podatki so bili osveženi 30. 10. 2026 ob 12.17. Indeks je ocena, kako ugodno je vreme za rast gob, ne verjetnost najdbe. Vir: model MeteoGobar iz napovedi Open-Meteo in pravil rasti za 300 vrst.
+Na kratko: gobarski indeks za Rečica ob Savinji je danes 88 od 100 (Odlično). Najbolj obetavno območje je Črnivec – severna stran prelaza (100 od 100). Podatki so bili osveženi 31. 10. 2026 ob 11.50. Indeks je ocena, kako ugodno je vreme za rast gob, ne verjetnost najdbe. Vir: model MeteoGobar iz napovedi Open-Meteo in pravil rasti za 300 vrst.
 
 5 najpogostejših vrst za naslednjih 7 dni in 12 osrednjih območij doline — brez prijave.
 
@@ -147,9 +147,9 @@ https://meteorec.si/gobarska-napoved/danes/
 
 Si danes v gozdu res našel gobo? Povej katero, kje (samo območje, brez natančne lokacije) in koliko — brez prijave. Tudi »nič« je koristen podatek: če si iskal in nisi našel ničesar, izberi »Nič«, saj model brez tega ne more preveriti, kdaj se moti. Opažanje je javno in pomaga do bolj zanesljivih napovedi za vse (drugače od dnevnika spodaj, ki ostane samo v tvojem brskalniku).
 
-Gobarski indeks za nabiralna območja Zgornje Savinjske doline za 2026-10-30. Izračunan je iz vlage in temperature tal, kumulativnih padavin (lokalno iz postaje IREICA1), zračne vlage in nočne ohladitve — po vrstah in po geologiji terena.
+Gobarski indeks za nabiralna območja Zgornje Savinjske doline za 2026-10-31. Izračunan je iz vlage in temperature tal, kumulativnih padavin (lokalno iz postaje IREICA1), zračne vlage in nočne ohladitve — po vrstah in po geologiji terena.
 
-Danes v Rečici ob Savinji: 91/100 · Odlično . Indeks je ocena ugodnosti pogojev za rast, ne obljuba najdbe — gozd ima vedno zadnjo besedo.
+Danes v Rečici ob Savinji: 88/100 · Odlično . Indeks je ocena ugodnosti pogojev za rast, ne obljuba najdbe — gozd ima vedno zadnjo besedo.
 
 ## Geološki tereni Zgornje Savinjske doline — Gobarska napoved
 https://meteorec.si/gobarska-napoved/tereni/
@@ -191,13 +191,13 @@ Zabeleži najdbo z datumom, vrsto, lokacijo in fotografijo. Vse ostane v tvojem 
 
 ## MeteoGasilec — požarna ogroženost, Rečica ob Savinji
 https://meteorec.si/meteogasilec/
-> Indeks požarne ogroženosti FWI danes: 2.3 (Nizka). Veter za intervencije, aktivna opozorila ARSO in zaznana požarišča NASA FIRMS za Rečico ob Savinji.
+> Indeks požarne ogroženosti FWI danes: 4.7 (Nizka). Veter za intervencije, aktivna opozorila ARSO in zaznana požarišča NASA FIRMS za Rečico ob Savinji.
 
-Uradna opozorila ARSO in lokalni indeks FWI za Rečico ob Savinji · osvežuje se dnevno · 2026-10-30
+Uradna opozorila ARSO in lokalni indeks FWI za Rečico ob Savinji · osvežuje se dnevno · 2026-10-31
 
-Uradna vremenska opozorila ARSO — ločeno od MeteoGasilec lastnih ocen (FWI, obrat vetra) spodaj na tej strani. Preverjeno 30. 10. ob 11:15, sproti se osvežuje v brskalniku. Vsa opozorila za Slovenijo: stran ARSO .
+Uradna vremenska opozorila ARSO — ločeno od MeteoGasilec lastnih ocen (FWI, obrat vetra) spodaj na tej strani. Preverjeno 31. 10. ob 10:47, sproti se osvežuje v brskalniku. Vsa opozorila za Slovenijo: stran ARSO .
 
-Na kratko: lokalni indeks požarne ogroženosti FWI za Rečico ob Savinji je 30. 10. 2026 2,3 (nizka ogroženost). To je izračun modela MeteoGasilec iz napovedi Open-Meteo, ne uradna ocena ARSO ali URSZR; uradna opozorila so na tej strani zgoraj.
+Na kratko: lokalni indeks požarne ogroženosti FWI za Rečico ob Savinji je 31. 10. 2026 4,7 (nizka ogroženost). To je izračun modela MeteoGasilec iz napovedi Open-Meteo, ne uradna ocena ARSO ali URSZR; uradna opozorila so na tej strani zgoraj.
 
 Ni uradna ocena ARSO ali URSZR — kanadski/EFFIS indeks požarne ogroženosti za Rečico ob Savinji, izračunan iz napovedi Open-Meteo. Uradni status je zgoraj — glej metodologijo .
 
@@ -271,11 +271,11 @@ DMC — vlažnost srednje globoke organske plasti (odziv na teden).
 
 ## Vodostaj Savinje danes: Nazarje, Letuš, Solčava | Meteorec
 https://meteorec.si/vodostaj-savinje/
-> Pretok Savinje danes: 4,8 m³/s, izmerjeno na najbližji postaji ARSO. Nazarje, Letuš, Solčava, napoved za 7 dni in zgodovina poplav.
+> Pretok Savinje danes: 4,5 m³/s, izmerjeno na najbližji postaji ARSO. Nazarje, Letuš, Solčava, napoved za 7 dni in zgodovina poplav.
 
-GloFAS napoved (Open-Meteo) + meritve ARSO · osvežuje se dnevno · 2026-10-31
+GloFAS napoved (Open-Meteo) + meritve ARSO · osvežuje se dnevno · 2026-11-01
 
-Na kratko: Savinja pri Rečici ob Savinji ima danes izmerjen pretok 4,8 m³/s in vodostaj 43 cm — najbližja merilna postaja ARSO je Savinja - Nazarje (mali pretok). Modelska napoved GloFAS za današnji dan je 4,0 m³/s (normalen pretok, 100 % tipične vrednosti 4,0 m³/s); v ozki dolini pretok podceni, zato je merodajna meritev. Podatki se osvežujejo dnevno — nazadnje 2026-10-31. Vir: meritve ARSO in modelska napoved GloFAS (Open-Meteo); to ni uradno opozorilo, za ukrepanje veljata ARSO in URSZR.
+Na kratko: Savinja pri Rečici ob Savinji ima danes izmerjen pretok 4,5 m³/s in vodostaj 42 cm — najbližja merilna postaja ARSO je Savinja - Nazarje (mali pretok). Modelska napoved GloFAS za današnji dan je 3,3 m³/s (normalen pretok, 100 % tipične vrednosti 3,3 m³/s); v ozki dolini pretok podceni, zato je merodajna meritev. Podatki se osvežujejo dnevno — nazadnje 2026-11-01. Vir: meritve ARSO in modelska napoved GloFAS (Open-Meteo); to ni uradno opozorilo, za ukrepanje veljata ARSO in URSZR.
 
 Trenutno izmerjeni vodostaj, pretok in ocena stanja na postajah ARSO od izvira proti dolvodno — od Solčave do Celja.
 
@@ -283,11 +283,11 @@ Največje zabeležene poplave Savinje po ocenjenem vršnem pretoku pri postaji L
 
 ## Nevihtna napoved — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/nevihte/
-> Nevihtni potencial danes: nizko. Verjetnost toče 12 %, verjetnost močnih sunkov vetra 3 %. Indeksi nestabilnosti (CAPE, CIN, Lifted Index, Total Totals) za Rečico ob Savinji.
+> Nevihtni potencial danes: nizko. Verjetnost toče 16 %, verjetnost močnih sunkov vetra 2 %. Indeksi nestabilnosti (CAPE, CIN, Lifted Index, Total Totals) za Rečico ob Savinji.
 
-Model atmosferske nestabilnosti iz podatkov Open-Meteo · osvežuje se dnevno · 2026-10-30
+Model atmosferske nestabilnosti iz podatkov Open-Meteo · osvežuje se dnevno · 2026-10-31
 
-Trenutni nevihtni potencial za Rečico ob Savinji je NIZKO . Majhen potencial. Ob zadostnem sprožilcu posamezne nevihte niso povsem izključene. CAPE 0 J/kg, indeks dviga 6,3 K, Total Totals 43, striženje vetra 0–5,5 km 20 km/h. Verjetnost toče je 12 % (nizko), verjetnost močnejših sunkov vetra pa 3 % (brez) — nazadnje posodobljeno 2026-10-30.
+Trenutni nevihtni potencial za Rečico ob Savinji je NIZKO . Majhen potencial. Ob zadostnem sprožilcu posamezne nevihte niso povsem izključene. CAPE 0 J/kg, indeks dviga 10,7 K, Total Totals 36, striženje vetra 0–5,5 km 50 km/h. Verjetnost toče je 16 % (nizko), verjetnost močnejših sunkov vetra pa 2 % (brez) — nazadnje posodobljeno 2026-10-31.
 
 Najvišji nevihtni potencial za 2026-10-28 je ZMERNO , pričakovan bliže Nova Gorica. Karta prikazuje oceno po vsej Sloveniji iz iste formule kot zgornji indeksi (Open-Meteo) — ni uradno opozorilo ARSO, ob običajnem teku izdana do 7:00 zjutraj.
 
@@ -303,11 +303,11 @@ Si opazil točo, naliv, močan veter, strele ali tornado? Sporoči, kje — poma
 
 ## Padavinska karta Slovenije — zadnjih 24 ur | Meteorec
 https://meteorec.si/padavine-karta/
-> Izmerjene padavine zadnjih 24 ur na 20 samodejnih postajah ARSO po vsej Sloveniji — največ danes Bilje (0 mm). Dnevno osvežena karta.
+> Izmerjene padavine zadnjih 24 ur na 19 samodejnih postajah ARSO po vsej Sloveniji — največ danes Lesce (3 mm). Dnevno osvežena karta.
 
-Izmerjene padavine na samodejnih postajah ARSO · osvežuje se dnevno · 2026-10-31
+Izmerjene padavine na samodejnih postajah ARSO · osvežuje se dnevno · 2026-11-01
 
-V zadnjih 24 urah je največ dežja po meritvah ARSO padlo v Bilje — 0 mm. Karta prikazuje izmerjeno (ne napovedano) 24-urno kumulativo padavin na 20 samodejnih postajah ARSO po vsej Sloveniji, izdano 31.10.2026 7:00 CET.
+V zadnjih 24 urah je največ dežja po meritvah ARSO padlo v Lesce — 3 mm. Karta prikazuje izmerjeno (ne napovedano) 24-urno kumulativo padavin na 19 samodejnih postajah ARSO po vsej Sloveniji, izdano 01.11.2026 7:00 CET.
 
 Vir podatkov: ARSO , samodejne vremenske postaje. Karta ni uradno opozorilo ARSO — za opozorila glej /nevihte/ .
 
@@ -315,9 +315,9 @@ Vir podatkov: ARSO , samodejne vremenske postaje. Karta ni uradno opozorilo ARSO
 https://meteorec.si/toca/
 > Toča danes v Savinjski dolini: ARSO opozorila v živo, skupnostni arhiv prijav s fotografijo po krajih (Mozirje, Nazarje, Ljubno, Rečica ob Savinji) in dnevi z izrazito nevihtno aktivnostjo.
 
-ARSO opozorila v živo · skupnostne prijave s fotografijo · še ni prijav · 2026-10-31
+ARSO opozorila v živo · skupnostne prijave s fotografijo · še ni prijav · 2026-11-01
 
-Trenutno ni aktivnega uradnega opozorila pred točo, a nevihtna sezona (maj–september) v Zgornji Savinjski dolini vsako leto prinese nekaj epizod toče. Urno napoved tveganja za naslednjih 12 ur najdeš na domači strani (zavihek Nevihte) . Spodaj je arhiv prijav uporabnikov iz doline (fotografija + lokacija) in orientacijski pregled dni z izrazito nevihtno aktivnostjo po meritvah postaje IREICA1. Zadnja osvežitev: 2026-10-31.
+Trenutno ni aktivnega uradnega opozorila pred točo, a nevihtna sezona (maj–september) v Zgornji Savinjski dolini vsako leto prinese nekaj epizod toče. Urno napoved tveganja za naslednjih 12 ur najdeš na domači strani (zavihek Nevihte) . Spodaj je arhiv prijav uporabnikov iz doline (fotografija + lokacija) in orientacijski pregled dni z izrazito nevihtno aktivnostjo po meritvah postaje IREICA1. Zadnja osvežitev: 2026-11-01.
 
 Orientacijski seznam toplih dni z močnim nalivom in visokimi sunki vetra — pogoji, v katerih je bila toča v dolini verjetna. Postaja nima senzorja za točo, zato to ni potrditev dogodka.
 
@@ -327,7 +327,7 @@ Pileus nad Rečico: kapa nad rastočim nevihtnim stolpom — 2026-08-31
 https://meteorec.si/ekstremno-vreme/
 > Vročina, mraz, nalivi, toča, poplave, veter in suša v Zgornji Savinjski dolini — arhivi, rekordi in opozorila, izmerjeni na postaji IREICA1 od 7. novembra 2019.
 
-Ta stran je razdelilnik: po posameznih vrstah izrednega vremena vodi do arhivov, rekordov in opozoril, ki jih Meteorec že vodi. Podatki izhajajo iz 2535 dni meritev postaje IREICA1 v Rečici ob Savinji od 7. novembra 2019, opozorila in vodostaj pa iz uradnih virov.
+Ta stran je razdelilnik: po posameznih vrstah izrednega vremena vodi do arhivov, rekordov in opozoril, ki jih Meteorec že vodi. Podatki izhajajo iz 2536 dni meritev postaje IREICA1 v Rečici ob Savinji od 7. novembra 2019, opozorila in vodostaj pa iz uradnih virov.
 
 Postaja je doslej zabeležila 233 vročih dni . Absolutni rekord znaša 37,8 °C.
 
@@ -337,11 +337,11 @@ Arhiv vročih dni · Najvišja izmerjena temperatura · Najbolj vroč mesec
 
 ## Agrometeo — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/agrometeo/
-> Agrometeo za Zgornjo Savinjsko dolino iz meritev postaje: razvoj hmelja, alarm pred pozebo, primernost za škropljenje in sušenje sena, vodna bilanca. GDD₅ 2714, GDD₁₀ 1585.
+> Agrometeo za Zgornjo Savinjsko dolino iz meritev postaje: razvoj hmelja, alarm pred pozebo, primernost za škropljenje in sušenje sena, vodna bilanca. GDD₅ 2718, GDD₁₀ 1585.
 
-GDD, vodna bilanca in fenologija iz meritev IREICA1 + napoved Open-Meteo · osvežuje se dnevno · 2026-10-30
+GDD, vodna bilanca in fenologija iz meritev IREICA1 + napoved Open-Meteo · osvežuje se dnevno · 2026-10-31
 
-Na kratko: vsota efektivnih temperatur za Zgornjo Savinjsko dolino je danes GDD₅ 2714 in GDD₁₀ 1585 (od 1. januarja 2026). Modelirani razvoj hmelja je po vsoti GDD₁₀ v fazi tehnološka zrelost / obiranje . Danes: ET₀ 1,1 mm, sonce 8,4 h, vodna bilanca -1,1 mm — nazadnje posodobljeno 2026-10-30. Vir: meritve postaje IREICA1 in napoved Open-Meteo; faza hmelja je modelirana ocena iz temperature, ne ugotovitev o tehnološki zrelosti (glej IHPS).
+Na kratko: vsota efektivnih temperatur za Zgornjo Savinjsko dolino je danes GDD₅ 2718 in GDD₁₀ 1585 (od 1. januarja 2026). Modelirani razvoj hmelja je po vsoti GDD₁₀ v fazi tehnološka zrelost / obiranje . Danes: ET₀ 1,4 mm, sonce 9,0 h, vodna bilanca -1,4 mm — nazadnje posodobljeno 2026-10-31. Vir: meritve postaje IREICA1 in napoved Open-Meteo; faza hmelja je modelirana ocena iz temperature, ne ugotovitev o tehnološki zrelosti (glej IHPS).
 
 Model po vsoti temperatur kaže fazo tehnološka zrelost / obiranje (GDD₁₀ 1585). To je dolinsko povprečje iz enega samega dejavnika (temperature) — ne pove dejanske tehnološke zrelosti , ki je odvisna tudi od sorte, tehnoloških ukrepov, časa rezi in napeljave, gnojenja, tal in lokacije parcele.
 
@@ -363,19 +363,19 @@ Prag poškodb je odvisen od razvojne faze — isto drevo je sredi cvetenja velik
 https://meteorec.si/zima/
 > MeteoZima: meja sneženja in tveganje poledice za Zgornjo Savinjsko dolino, posodobljeno dnevno.
 
-🔴 POVEČANO ZIMSKO TVEGANJE Danes je vsaj eden od zimskih indeksov na visoki stopnji — poglej razmere spodaj.
+🟡 DELNO ZIMSKO TVEGANJE Danes je vsaj eden od zimskih indeksov na srednji stopnji — poglej razmere spodaj.
 
 Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).
 
 Temperatura na postaji IREICA1, urna napoved Open-Meteo. Navpična črta označuje trenutno uro.
 
-Meja sneženja je danes pri 2090 m — nad vsemi spremljanimi višinami v dolini, sneg ni pričakovan.
+Meja sneženja je pri 1620 m — nad 1200 m n. m. je v naslednjih 24 h pričakovanih do 0,6 cm snega.
 
 ## Meja sneženja — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/zima/meja-snezenja/
 > Trenutna meja sneženja in pričakovan sneg po višinskih pasovih, posodobljeno dnevno.
 
-Trenutna meja sneženja je pri 2090 m n. m. . V naslednjih 24 h se pričakuje premik na 1668 m (spust).
+Trenutna meja sneženja je pri 1620 m n. m. (srednja zanesljivost). V naslednjih 24 h se pričakuje premik na 1290 m (spust).
 
 Nižja črta = meja sneženja se spusti niže = sneg je verjetnejši na nižjih legah tisti dan.
 
@@ -387,7 +387,7 @@ Sami nastavite, kdaj želite obvestilo: izberite raven in dan, mi pa ga pošljem
 https://meteorec.si/zima/poledica/
 > Ocena tveganja poledice po krajih Zgornje Savinjske doline, posodobljeno dnevno.
 
-V naslednjih 36 h je najbolj izpostavljen kraj Rečica ob Savinji — 🔴 Visoko tveganje .
+V naslednjih 36 h je najbolj izpostavljen kraj Ljubno ob Savinji — 🟡 Srednje tveganje .
 
 Rečica ob Savinji: Dno doline pri postaji IREICA1 — referenčna lokacija za ostale.
 
@@ -433,13 +433,13 @@ Ni uradna napoved. Pred turo preveri ARSO , razmere pri koči in svojo pripravlj
 https://meteorec.si/sinopticna/
 > Izobare, tlak, T850 in višina 500 hPa nad Evropo za 4 dni iz ECMWF IFS. Izris enega teka, ne uradna napoved.
 
-ECMWF IFS, tek 30. 10. 2026 ob 00 UTC · stran osvežena 30. 10. 2026 ob 17:12
+ECMWF IFS, tek 31. 10. 2026 ob 00 UTC · stran osvežena 31. 10. 2026 ob 16:29
 
 Izobare, območja visokega in nizkega tlaka, temperatura na višini 1500 m in višinske doline in grebeni nad Evropo za naslednje štiri dni. To je izris enega teka modela (odprti podatki ECMWF, 0,25°), ne analiza in ne uradna napoved. Rdeča pika je Rečica ob Savinji. Za Slovenijo glej primerjavo modelov za Rečico in nevihtno karto .
 
 Črne črte (izobare) so tlak v hPa na vsake 4 hPa, debelejši sta 1000 in 1020. H in L sta središči visokega in nizkega tlaka z vrednostjo. Barve na prvi karti so temperatura na 850 hPa (okoli 1500 m), na drugi geopotencialna višina ploskve 500 hPa v dekametrih. Na višinski karti hladne doline (modro) pogosto spremljajo dež, sneg in veter.
 
-Fronte niso narisane: model jih ne računa, sinoptiki jih vrišejo po analizi. Ločljivost 0,25° (okoli 20 km) ne razloči doline, zato za Rečico uporabi napoved za točko. Zadnja osvežitev: tek 30. 10. 2026 ob 1:00 (naša ura). Podatke je pripravil ECMWF in jih objavlja pod licenco CC BY 4.0 ; izris je naš.
+Fronte niso narisane: model jih ne računa, sinoptiki jih vrišejo po analizi. Ločljivost 0,25° (okoli 20 km) ne razloči doline, zato za Rečico uporabi napoved za točko. Zadnja osvežitev: tek 31. 10. 2026 ob 1:00 (naša ura). Podatke je pripravil ECMWF in jih objavlja pod licenco CC BY 4.0 ; izris je naš.
 
 ## Stratosfera in polarni vrtinec: veter na 10 hPa, SSW
 https://meteorec.si/stratosfera/
@@ -459,9 +459,9 @@ https://meteorec.si/indeksi/
 
 Trije kazalniki, ki jih meteorologi spremljajo ob sezonskem pregledu: Arktična oscilacija (polarni vrtinec), Severnoatlantska oscilacija (zahodnik čez Atlantik) in ENSO (El Niño, La Niña). Podatki so iz NOAA, napoved indeksov iz ansambla GEFS. To ni napoved vremena za Rečico : povezava s slovenskim vremenom je statistična in šibka. Za polarni vrtinec glej tudi stratosfero , za razmere nad Evropo sinoptično karto .
 
-AO je bil 28. 10. +0,9 (pozitiven), povprečje zadnjih sedmih dni +0,9. Ansambel GEFS za 14. 11. kaže povprečje −1,3 (razpon 10.–90. percentila −2,5 do +0,1) — razpon je velik, zato je napoved za 2 tedna le smer, ne podatek. Pozitiven AO pomeni, da je polarni vrtinec močan in hladen zrak ostaja nad Arktiko; v srednji Evropi to običajno pomeni milejše vreme.
+AO je bil 29. 10. +0,8 (pozitiven), povprečje zadnjih sedmih dni +0,9. Ansambel GEFS za 15. 11. kaže povprečje −1,0 (razpon 10.–90. percentila −2,8 do +0,8) — razpon je velik, zato je napoved za 2 tedna le smer, ne podatek. Pozitiven AO pomeni, da je polarni vrtinec močan in hladen zrak ostaja nad Arktiko; v srednji Evropi to običajno pomeni milejše vreme.
 
-NAO je bil 28. 10. +0,4 (blizu nevtralnega), povprečje zadnjih sedmih dni −0,1. Ansambel GEFS za 14. 11. kaže povprečje −0,9 (razpon 10.–90. percentila −1,7 do −0,1) — razpon je velik, zato je napoved za 2 tedna le smer, ne podatek.
+NAO je bil 29. 10. +0,6 (pozitiven), povprečje zadnjih sedmih dni +0,1. Ansambel GEFS za 15. 11. kaže povprečje −0,8 (razpon 10.–90. percentila −1,6 do 0,0) — razpon je velik, zato je napoved za 2 tedna le smer, ne podatek.
 
 ## Saharski prah nad Evropo in Slovenijo: napoved | Meteorec
 https://meteorec.si/prah/
@@ -479,7 +479,7 @@ Vir: Copernicus Atmosphere Monitoring Service (CAMS) prek Open-Meteo, licenca CC
 https://meteorec.si/zima/kurilni-semafor/
 > Ocena prevetrenosti za kurjenje (temperaturna inverzija) za Zgornjo Savinjsko dolino, posodobljeno dnevno.
 
-🟡 Srednje tveganje — Zmerna inverzija — po možnosti uporabi suha, dobro osušena drva in ne kuri več, kot je nujno. (ocenjena jakost inverzije 0,4 °C, veter 3,1 km/h v najslabši uri). Ure z največjim tveganjem: —.
+🟢 Nizko tveganje — Ni posebnih omejitev za kurjenje — zrak se dobro prevetri. (ocenjena jakost inverzije 0,0 °C, veter 6,2 km/h v najslabši uri). Ure z največjim tveganjem: —.
 
 Višji stolpec = močnejša inverzija tisti dan (izven poldanskih ur) — 🟢 nizko · 🟡 srednje · 🔴 visoko tveganje.
 
@@ -489,13 +489,13 @@ Ocena Meteoreca iz javne napovedi Open-Meteo, ne uradno opozorilo ali predpis o 
 https://meteorec.si/zima/nad-meglo/
 > Ocena, kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj nad pričakovano meglo, posodobljeno dnevno.
 
-Jutri zjutraj je pričakovana zgornja meja megle/nizke oblačnosti pri približno 862 m n. m.
-
-Za dejanske razmere v gorah preveri tudi uradno gorsko napoved ARSO .
+Jutri zjutraj ni pričakovane pomembne temperaturne inverzije — megla v dolini ni verjetna.
 
 Ocena Meteoreca iz javne napovedi Open-Meteo (temperaturni profil), ne meritev megle. Za živo sliko preveri spletne kamere na naslovni strani.
 
 Sami nastavite, kdaj želite obvestilo: izberite raven in dan, mi pa ga pošljemo, ko ocena za »Nad meglo« ustreza. Vsako pravilo sproži obvestilo enkrat na ciljni dan. Strežnik shrani samo naslovnico naročnine in vaša pravila (največ 5 na napravi, za vse strani skupaj).
+
+iPhone in iPad: obvestila delujejo samo v nameščeni aplikaciji. V Safariju tapnite »Deli« in »Dodaj na začetni zaslon«, odprite Meteorec z začetnega zaslona in opozorilo vklopite tam.
 
 ## Snežna odeja — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/zima/snezna-odeja/
@@ -509,17 +509,17 @@ Modelirana ocena Meteoreca (degree-day model iz javne napovedi Open-Meteo), NI m
 https://meteorec.si/zima/prevoznost-prelazov/
 > Vreme na višini gorskih prelazov okoli Zgornje Savinjske doline, posodobljeno dnevno.
 
-3 spremljani prelazi. Največ snega v naslednjih 24 h je pričakovanih na Črnivec (902 m) — do 0,0 cm.
+3 spremljani prelazi. Največ snega v naslednjih 24 h je pričakovanih na Pavličevo sedlo (1339 m) — do 0,6 cm.
 
 Vreme na višini prelaza je ocena Meteoreca iz javne napovedi Open-Meteo — NI uradna prometna informacija in ne pove, ali je cesta dejansko odprta. Pred vožnjo čez prelaz vedno preveri promet.si, AMZS ali DARS.
 
 ## Kakovost zraka in cvetni prah — Zgornja Savinjska dolina
 https://meteorec.si/kakovost-zraka/
-> EU AQI danes: 23 (dobro). Onesnaževala (PM2,5, PM10, ozon, NO₂), 5-dnevna napoved cvetnega prahu in zdravstvena priporočila za Rečico ob Savinji.
+> EU AQI danes: 25 (dobro). Onesnaževala (PM2,5, PM10, ozon, NO₂), 5-dnevna napoved cvetnega prahu in zdravstvena priporočila za Rečico ob Savinji.
 
-EU AQI, onesnaževala in pelodna napoved (Open-Meteo / CAMS Europe) · osvežuje se dnevno · 2026-10-30
+EU AQI, onesnaževala in pelodna napoved (Open-Meteo / CAMS Europe) · osvežuje se dnevno · 2026-10-31
 
-Trenutna kakovost zraka v Rečici ob Savinji je DOBRO (EU AQI 23) — sprejemljiv zrak, možni blagi vplivi na zelo občutljive posameznike. PM2,5 5,5 µg/m³, PM10 7 µg/m³ — nazadnje posodobljeno 2026-10-30.
+Trenutna kakovost zraka v Rečici ob Savinji je DOBRO (EU AQI 25) — sprejemljiv zrak, možni blagi vplivi na zelo občutljive posameznike. PM2,5 5,1 µg/m³, PM10 7 µg/m³ — nazadnje posodobljeno 2026-10-31.
 
 Najvišji dnevni EU AQI (worst-case ura tistega dne) — pove, kdaj bo teden zraka najslabši, ne le kakšen je zdaj.
 
@@ -529,9 +529,9 @@ Ocena tveganja po vrsti cvetnega prahu za naslednjih 5 dni. Vir: Copernicus CAMS
 https://meteorec.si/biovreme/
 > Biovreme danes: ugodno. Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka za Rečico ob Savinji — informativna ocena, ne zdravniško priporočilo.
 
-Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka · osvežuje se dnevno · 2026-10-30
+Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka · osvežuje se dnevno · 2026-10-31
 
-Današnje biovreme za Rečico ob Savinji je UGODNO — nič od štirih dejavnikov trenutno ne izstopa. Ocena združuje zračni tlak, toplotno obremenitev, UV indeks in kakovost zraka — nazadnje posodobljeno 2026-10-30.
+Današnje biovreme za Rečico ob Savinji je UGODNO — nič od štirih dejavnikov trenutno ne izstopa. Ocena združuje zračni tlak, toplotno obremenitev, UV indeks in kakovost zraka — nazadnje posodobljeno 2026-10-31.
 
 Biovreme je uveljavljen pojem slovenske meteorologije — dnevna ocena, kako lahko vreme vpliva na počutje. Med prvimi je podnebne razlike na Slovenskem opisal Janez Vajkard Valvasor že leta 1689, zdraviliški turizem s poudarkom na podnebju pa je v drugi polovici 19. stoletja na Bledu utemeljil Arnold Rikli. Danes tovrstne napovedi (toplotna obremenitev, kakovost zraka, cvetni prah, UV indeks od leta 2001) redno objavlja ARSO; Slovenija je leta 1996 gostila tudi mednarodni kongres biometeorologov (ISB).
 
@@ -541,57 +541,57 @@ To ni zdravniško priporočilo. Biovreme je splošna, informativna ocena na podl
 https://meteorec.si/astma/
 > Okoljska obremenitev za ljudi z astmo danes: nizko. Pelod, PM2,5, ozon, mraz, vročina, nevihte in hitre spremembe vremena za 5 dni v Rečici ob Savinji in Zgornji Savinjski dolini.
 
-Okoljski sprožilci za astmo · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 30. 10. 2026 ob 14.23
+Okoljski sprožilci za astmo · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 31. 10. 2026 ob 13.57
 
 Vreme in zrak niso izrazit sprožilec. Ravnajte po svojem načrtu zdravljenja.
 
-Izračunano 30. 10. 2026 ob 14.23 · modelska napoved, ne meritev · kako je ocena izračunana
+Izračunano 31. 10. 2026 ob 13.57 · modelska napoved, ne meritev · kako je ocena izračunana
 
 To ni zdravniški nasvet. Ocena prikazuje okoljske sprožilce, ki jih napovedujeta vreme in zrak, in ne verjetnosti astmatičnega napada ali nadomestila za osebni načrt zdravljenja. Za zdravljenje in ukrepe veljajo navodila vašega zdravnika; v nujnem primeru pokličite 112.
 
 ## Sušenje perila na prostem: napoved za 5 dni | Meteorec
 https://meteorec.si/susenje-perila/
-> Sušenje perila na prostem danes: slabo. Dež, vlaga, veter in sonce za 5 dni ter najboljše okno po urah v Rečici ob Savinji.
+> Sušenje perila na prostem danes: dobro. Dež, vlaga, veter in sonce za 5 dni ter najboljše okno po urah v Rečici ob Savinji.
 
-Dež, vlaga, temperatura, veter in sonce · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 30. 10. 2026 ob 14.22
+Dež, vlaga, temperatura, veter in sonce · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 31. 10. 2026 ob 13.57
 
-Glavne ovire: vlaga povprečno 78 %; temperatura povprečno 10 °C.
+Glavne ovire: temperatura povprečno 9 °C; vlaga povprečno 68 %.
 
-Sušenje bo počasno ali tvegano; razmislite o sušenju v zaprtem prostoru.
+Izračunano 31. 10. 2026 ob 13.57 · modelska napoved, ne meritev · kako je ocena izračunana
 
-Izračunano 30. 10. 2026 ob 14.22 · modelska napoved, ne meritev · kako je ocena izračunana
+Kdaj je dobro sušiti perilo na prostem? Najbolje je ob suhem, vetrovnem in toplem vremenu z nizko zračno vlago; dež in vlaga nad približno 85 % sušenje onemogočita. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: dobro (4 točke, manj je bolje). Glavne ovire: temperatura povprečno 9 °C; vlaga povprečno 68 %; veter povprečno 7 km/h, sunki do 34 km/h, prevladuje V.
 
 ## Vreme za kolesarje: napoved za 5 dni | Meteorec
 https://meteorec.si/vreme-za-kolesarje/
-> Kolesarjenje po Savinjski dolini danes: odlično. Dež, veter, temperatura, poledica in UV za 5 dni ter najboljše okno po urah.
+> Kolesarjenje po Savinjski dolini danes: dobro. Dež, veter, temperatura, poledica in UV za 5 dni ter najboljše okno po urah.
 
-Dež, veter, temperatura, poledica in UV · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 30. 10. 2026 ob 14.22
+Dež, veter, temperatura, poledica in UV · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 31. 10. 2026 ob 13.57
 
-Izračunano 30. 10. 2026 ob 14.22 · modelska napoved, ne meritev · kako je ocena izračunana
+Glavne ovire: občutena temperatura povprečno 7 °C; jutro najnižje 3 °C.
 
-Kdaj je dobro kolesariti po Savinjski dolini? Najboljši so suhi dnevi z blagim vetrom in občuteno temperaturo med približno 12 in 26 °C; dež, močan veter, poledica in nevihte kolesarjenje otežijo ali onemogočijo. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: odlično (1 točka, manj je bolje). Glavne ovire: občutena temperatura povprečno 9 °C.
+Dobri pogoji; oblecite se po temperaturi in veter vzemite v poštev.
 
-Ocena je pripomoček, ne varnostna garancija. Za tvegane in dolge ture upoštevajte še uradne napovedi in opozorila ARSO ter svojo izkušnjo.
+Izračunano 31. 10. 2026 ob 13.57 · modelska napoved, ne meritev · kako je ocena izračunana
 
 ## Vreme za čebelarje: letalni pogoji za 5 dni | Meteorec
 https://meteorec.si/vreme-za-cebelarje/
 > Letalni pogoji čebel danes: dobri. Temperatura, sonce, veter, dež in nevihte za 5 dni ter okno za delo ob panjih v Rečici ob Savinji.
 
-Temperatura, sonce, veter, dež in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 30. 10. 2026 ob 14.22
+Temperatura, sonce, veter, dež in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 31. 10. 2026 ob 13.57
 
-Glavne ovire: popoldne do 12 °C; sončno sevanje povprečno 298 W/m².
+Glavne ovire: popoldne do 12 °C; sončno sevanje povprečno 379 W/m².
 
 Letenje bo dobro, a ne povsem ugodno; delo ob panjih opravite v toplejših urah.
 
-Izračunano 30. 10. 2026 ob 14.22 · modelska napoved, ne meritev · kako je ocena izračunana
+Izračunano 31. 10. 2026 ob 13.57 · modelska napoved, ne meritev · kako je ocena izračunana
 
 ## Vreme za ribolov na Savinji: napoved za 5 dni | Meteorec
 https://meteorec.si/vreme-za-ribolov/
 > Ribolov na Savinji danes: ugodno. Tlak, dež zadnjih dni, veter in nevihte za 5 dni; vodo preverite na strani Vodostaj Savinje.
 
-Tlak, dež, veter, temperatura in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 30. 10. 2026 ob 14.22
+Tlak, dež, veter, temperatura in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 31. 10. 2026 ob 13.57
 
-Izračunano 30. 10. 2026 ob 14.22 · modelska napoved, ne meritev · kako je ocena izračunana
+Izračunano 31. 10. 2026 ob 13.57 · modelska napoved, ne meritev · kako je ocena izračunana
 
 Kakšno vreme je dobro za ribolov na Savinji? Najbolj ugodno je stabilno, ne preveč vetrovno vreme brez neviht in brez izrazitih padavin v zadnjih dneh, ko voda ne narašča in ni motna. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: ugodno (0 točk, manj je bolje). Danes ni izrazitih ovir.
 
@@ -601,9 +601,9 @@ Ocena je pripomoček, ne ribiški ali varnostni nasvet. Ob vodi upoštevajte opo
 https://meteorec.si/vreme-za-pse/
 > Sprehod s psom danes: odlično. Vročina, asfalt, mraz, dež in nevihte za 5 dni ter najboljši čas za sprehod v Rečici ob Savinji.
 
-Vročina, asfalt, mraz, dež in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 30. 10. 2026 ob 14.22
+Vročina, asfalt, mraz, dež in nevihte · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 31. 10. 2026 ob 13.57
 
-Izračunano 30. 10. 2026 ob 14.22 · modelska napoved, ne meritev · kako je ocena izračunana
+Izračunano 31. 10. 2026 ob 13.57 · modelska napoved, ne meritev · kako je ocena izračunana
 
 Kdaj je primeren čas za sprehod s psom? Zmerna temperatura brez izrazite vročine, mraza in neviht; poleti zgodaj zjutraj ali pozno zvečer, pozimi sredi dneva. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: odlično (0 točk, manj je bolje). Danes ni izrazitih ovir.
 
@@ -613,21 +613,21 @@ Ocena je pripomoček, ne veterinarski nasvet. Ob znakih pregrevanja (težko diha
 https://meteorec.si/migrena/
 > Migrenski sprožilci danes: nizko. Padec tlaka, nevihte, vročina, veter in svetloba za 5 dni, graf tlaka ter dnevnik napadov samo v vašem brskalniku.
 
-Tlak, temperatura, nevihte, veter, vlaga in svetloba · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 30. 10. 2026 ob 14.23
+Tlak, temperatura, nevihte, veter, vlaga in svetloba · Rečica ob Savinji in Zgornja Savinjska dolina · izračunano 31. 10. 2026 ob 13.57
 
 Vreme danes ni izrazit sprožilec. Ravnajte po svojem načrtu zdravljenja.
 
-Izračunano 30. 10. 2026 ob 14.23 · modelska napoved, ne meritev · kako je ocena izračunana
+Izračunano 31. 10. 2026 ob 13.57 · modelska napoved, ne meritev · kako je ocena izračunana
 
-Ali vreme sproži migreno? Veliko ljudi z migreno poroča o sprožilcih, kot so hiter padec zračnega tlaka, nevihte, vročina in močna svetloba; raziskave so mešane in je zelo osebno. Zato stran poleg napovedi ponuja dnevnik, ki pokaže vaš lasten vzorec. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: nizko (0 točk, manj je bolje). Danes ni izrazitih ovir.
+Ali vreme sproži migreno? Veliko ljudi z migreno poroča o sprožilcih, kot so hiter padec zračnega tlaka, nevihte, vročina in močna svetloba; raziskave so mešane in je zelo osebno. Zato stran poleg napovedi ponuja dnevnik, ki pokaže vaš lasten vzorec. Ocena za danes v Rečici ob Savinji in Zgornji Savinjski dolini: nizko (1 točka, manj je bolje). Glavne ovire: tlak pade do 3,9 hPa v 24 h.
 
 ## Vreme za padalce — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/vreme-za-padalce/
 > Ocena primernosti za jadralno padalstvo danes: 100 %, 10 ur ugodnega okna. Konvekcijski strop, veter, CAPE in 7-dnevni pregled za Zgornjo Savinjsko dolino.
 
-Ocena primernosti za jadralno padalstvo iz podatkov Open-Meteo · osvežuje se dnevno · 2026-10-30
+Ocena primernosti za jadralno padalstvo iz podatkov Open-Meteo · osvežuje se dnevno · 2026-10-31
 
-Ocena primernosti za letenje danes v Rečici / Savinjski dolini je 100 % . Odlični pogoji za letenje — okno kakovostne termike predvidoma 10 h. Konvekcijski strop (BL) doseže do 1110 m, veter do 9 km/h, CAPE do 0 J/kg — nazadnje posodobljeno 2026-10-30.
+Ocena primernosti za letenje danes v Rečici / Savinjski dolini je 100 % . Odlični pogoji za letenje — okno kakovostne termike predvidoma 10 h. Konvekcijski strop (BL) doseže do 1400 m, veter do 16 km/h, CAPE do 10 J/kg — nazadnje posodobljeno 2026-10-31.
 
 Ocena (0–100 %) upošteva veter na 10 m, verjetnost padavin, CAPE (nevihtni potencial) in višino konvekcijskega sloja. Nizek veter, malo padavin, zmeren CAPE (brez nevihtnega tveganja) in visok konvekcijski strop dajejo najvišjo oceno. Ocena ≥ 70 pomeni dobre pogoje za letenje, 40–69 mejne pogoje, pod 40 pa let odsvetuje.
 
@@ -635,11 +635,11 @@ Iste številke, ki jih bereš zgoraj, poganjajo tudi igro jadralnega padalca : v
 
 ## Termika — igra jadralnega padalca nad Savinjsko dolino
 https://meteorec.si/igra/
-> Igra jadralnega padalca nad Zgornjo Savinjsko dolino: vzleti z Golt in preleti čim več. Nivo se vsak dan sestavi iz dejanske napovedi — danes strop 1125 m, dvigi 1,7 m/s.
+> Igra jadralnega padalca nad Zgornjo Savinjsko dolino: vzleti z Golt in preleti čim več. Nivo se vsak dan sestavi iz dejanske napovedi — danes strop 1575 m, dvigi 2,8 m/s.
 
-Vzleti z Golt in preleti Savinjsko dolino. Nivo se vsak dan sestavi iz dejanske vremenske napovedi · 2026-10-30
+Vzleti z Golt in preleti Savinjsko dolino. Nivo se vsak dan sestavi iz dejanske vremenske napovedi · 2026-10-31
 
-Konvekcija seže le do 1125 m, to je pod vzletiščem na Goltah (1400 m). Z Golt boš najprej samo padal; loviti se začne šele nižje, kjer je zrak sploh premešan. Baza kumulusov je na 1125 m, zato oblaki kažejo, kje so dvigi. Veter na višini nosi po dolini navzdol (8 km/h v hrbet) — med kroženjem te zanaša proti Celju, kar je zastonj razdalja, a stebri se pri tem nagnejo in jih je težje zadržati.
+Soliden dan. Dolina je odprta, Letuš je realen cilj. Baza kumulusov je na 1575 m, zato oblaki kažejo, kje so dvigi. Veter na višini nosi po dolini navzdol (29 km/h v hrbet) — med kroženjem te zanaša proti Celju, kar je zastonj razdalja, a stebri se pri tem nagnejo in jih je težje zadržati.
 
 Smer dneva Čez Gornji Grad in Menino proti Kamniku izbral jo je veter na 1500 m
 
@@ -659,15 +659,15 @@ Vsak par je resničen. Med njimi so jurček in žolčasti goban, navadna in laž
 
 ## Prehiti model — napovej jutrišnje vreme | Meteorec
 https://meteorec.si/napovej/
-> Napovej jutrišnjo najvišjo in najnižjo temperaturo za Rečico ob Savinji in se pomeri z ARSO, Open-Meteo, MTR in ECMWF AIFS. Oceni te meritev postaje — po istem pravilu kot njih. Krog za 1. 11. 2026.
+> Napovej jutrišnjo najvišjo in najnižjo temperaturo za Rečico ob Savinji in se pomeri z ARSO, Open-Meteo, MTR in ECMWF AIFS. Oceni te meritev postaje — po istem pravilu kot njih. Krog za 2. 11. 2026.
 
-Napovej jutrišnje vreme za Rečico ob Savinji in se pomeri z ARSO, Open-Meteo, MTR in ECMWF AIFS · krog za 1. 11. 2026
+Napovej jutrišnje vreme za Rečico ob Savinji in se pomeri z ARSO, Open-Meteo, MTR in ECMWF AIFS · krog za 2. 11. 2026
 
-Jutri naj bi bilo občutno hladneje od običajnega za ta datum (mediana 15,4 °C). Modeli si niso enotni: med najhladnejšim in najtoplejšim je 3,8 °C razlike. Takrat ima človek, ki pozna dolino, največ možnosti — vsaj eden od njih se bo zmotil.
+Jutri naj bi bilo občutno hladneje od običajnega za ta datum (mediana 15,0 °C). Modeli si niso enotni: med najhladnejšim in najtoplejšim je 3,6 °C razlike. Takrat ima človek, ki pozna dolino, največ možnosti — vsaj eden od njih se bo zmotil.
 
 Najboljši rezultat vsakega igralca — ocenjen na strežniku, ne v tvojem brskalniku, zato ga ni mogoče prirediti. Šteje samo napoved, oddana pred zaklepom.
 
-🟢 Krog za 1. 11. 2026 · 4 nasprotnikov · napovedi zabeležene 31. 10. 2026
+🟢 Krog za 2. 11. 2026 · 4 nasprotnikov · napovedi zabeležene 1. 11. 2026
 
 ## Jesen v Rečici ob Savinji: kaj se zdaj dogaja v dolini
 https://meteorec.si/sezona/
@@ -677,7 +677,7 @@ Kaj se jeseni dogaja v Zgornji Savinjski dolini, kaj pravijo meritve postaje iz 
 
 Prva jesenska zmrzal (najnižja temperatura ≤ 0 °C) je v Rečici ob Savinji običajno okoli 15. oktobra — najzgodneje 3. oktobra 2025, najpozneje 20. novembra 2022 (6 let meritev). Letos je bila prva zmrzal 23. oktobra 2026.
 
-Najnižja napovedana temperatura v naslednjih dneh (model MTR ): 3,4 °C, 3. novembra 2026.
+Najnižja napovedana temperatura v naslednjih dneh (model MTR ): 3,2 °C, 4. novembra 2026.
 
 Gobarska napoved — jesen je glavna gobarska sezona — indeks po območjih in vrstah
 
@@ -691,17 +691,17 @@ Kako natančen je naš poskusni model MTR v primerjavi s surovim Open-Meteo — 
 
 ## Točnost vremenske napovedi — Rečica ob Savinji | Meteorec
 https://meteorec.si/tocnost-napovedi/
-> Koliko točna je vremenska napoved za Zgornjo Savinjsko dolino? Dnevni scoreboard ARSO, Open-Meteo, MTR ter AI modelov ECMWF AIFS in Google WeatherNext 2 proti meritvam IREICA1 — 108 razrešenih dni.
+> Koliko točna je vremenska napoved za Zgornjo Savinjsko dolino? Dnevni scoreboard ARSO, Open-Meteo, MTR ter AI modelov ECMWF AIFS in Google WeatherNext 2 proti meritvam IREICA1 — 109 razrešenih dni.
 
-ARSO vs. Open-Meteo vs. ECMWF AIFS vs. WeatherNext 2 vs. MTR v1 vs. dejanska meritev · 108 razrešenih dni · 2026-10-31
+ARSO vs. Open-Meteo vs. ECMWF AIFS vs. WeatherNext 2 vs. MTR v1 vs. dejanska meritev · 109 razrešenih dni · 2026-11-01
 
-Na kratko: v zadnjih 30 dneh, v katerih so napovedovali vsi viri (25 dni), je bil za Rečico ob Savinji najbolj natančen pri najvišji temperaturi MTR v1 (±0,9 °C) (razlika do drugega ni statistično zanesljiva); za njim Open-Meteo ±1,4 °C, ECMWF AIFS ±2,1 °C, WeatherNext 2 ±3,0 °C, ARSO ±4,2 °C; pri najnižji temperaturi MTR v1 (±1,1 °C); za njim Open-Meteo ±2,0 °C, ECMWF AIFS ±2,1 °C, WeatherNext 2 ±2,5 °C, ARSO ±2,7 °C.
+Na kratko: v zadnjih 30 dneh, v katerih so napovedovali vsi viri (25 dni), je bil za Rečico ob Savinji najbolj natančen pri najvišji temperaturi MTR v1 (±0,9 °C) (razlika do drugega ni statistično zanesljiva); za njim Open-Meteo ±1,4 °C, ECMWF AIFS ±2,1 °C, WeatherNext 2 ±3,0 °C, ARSO ±4,1 °C; pri najnižji temperaturi MTR v1 (±1,1 °C); za njim Open-Meteo ±2,0 °C, ECMWF AIFS ±2,0 °C, WeatherNext 2 ±2,3 °C, ARSO ±2,5 °C.
 
 ## Test napovedi — Zgornja Savinjska dolina | Meteorec
 https://meteorec.si/test-napovedi/
-> Kateri vremenski model najbolje napove vreme v Zgornji Savinjski dolini? Primerjava šestih virov (ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE, ARSO) z dejansko meritvijo postaje IREICA1 po dnevih vnaprej — 883 razrešenih dni, javni podatki.
+> Kateri vremenski model najbolje napove vreme v Zgornji Savinjski dolini? Primerjava šestih virov (ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE, ARSO) z dejansko meritvijo postaje IREICA1 po dnevih vnaprej — 884 razrešenih dni, javni podatki.
 
-Pet virov vs. dejanska meritev IREICA1 · 883 razrešenih dni · 2026-10-30
+Pet virov vs. dejanska meritev IREICA1 · 884 razrešenih dni · 2026-10-31
 
 ICON ima pri napovedi za jutri (D+1) najmanjšo povprečno napako najvišje temperature: ±1,4 °C. Največjo pristranskost pri jutranjem minimumu ima ARPEGE (precenjuje za 3,1 °C v povprečju) — znak, da model ne ujame nočnega hladnega zraka na dnu doline.
 
@@ -719,15 +719,15 @@ Isti kraj, isti čas, pet izhodov modelov. Kjer se črte ujemajo, je napoved zan
 
 Isti trenutek na štirih kartah hkrati: povleci drsnik, preklopi spremenljivko ali se dotakni karte in preberi vrednost vseh modelov na isti točki. Padavine so skupne od zdaj do izbrane ure.
 
-Povprečna napaka napovedi za jutri (D+1) proti meritvi postaje IREICA1, 883 razrešenih dni. ICON-D2 in AROME v tem arhivu še nista, zato za njiju ocene ni, dokler je ne naberemo sproti. Celotna lestvica: test napovedi .
+Povprečna napaka napovedi za jutri (D+1) proti meritvi postaje IREICA1, 884 razrešenih dni. ICON-D2 in AROME v tem arhivu še nista, zato za njiju ocene ni, dokler je ne naberemo sproti. Celotna lestvica: test napovedi .
 
 ## Klima in podnebje Rečice ob Savinji — norme in rekordi
 https://meteorec.si/klima/
 > Klimatološke norme za Rečico ob Savinji (366 m n. m.): mesečna povprečja temperature in padavin, absolutni rekordi, mrzli in vroči dnevi — podatki postaje IREICA1 od 2019.
 
-Klimatološki povzetek meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n. m., Zgornja Savinjska dolina) na osnovi 6 let meritev (2019–2026). Mesečna povprečja temperature in padavin, absolutni rekordi ter fenološki kazalniki. Posodobljeno: 31. oktobra 2026.
+Klimatološki povzetek meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n. m., Zgornja Savinjska dolina) na osnovi 6 let meritev (2019–2026). Mesečna povprečja temperature in padavin, absolutni rekordi ter fenološki kazalniki. Posodobljeno: 1. novembra 2026.
 
-Na kratko: v 6 polnih letih meritev (2020–2025) pade v Rečici ob Savinji povprečno 1377 mm padavin na leto; dni z mrazom (najnižja ≤ 0 °C) je povprečno 108, vročih dni (najvišja ≥ 30 °C) 30. Najtopleje je v juliju (povprečna dnevna temperatura 20,9 °C), najhladneje v januarju (1,0 °C). Meritev postaje IREICA1, ne modelska ocena. Posodobljeno: 31. oktobra 2026.
+Na kratko: v 6 polnih letih meritev (2020–2025) pade v Rečici ob Savinji povprečno 1377 mm padavin na leto; dni z mrazom (najnižja ≤ 0 °C) je povprečno 108, vročih dni (najvišja ≥ 30 °C) 30. Najtopleje je v juliju (povprečna dnevna temperatura 20,9 °C), najhladneje v januarju (1,0 °C). Meritev postaje IREICA1, ne modelska ocena. Posodobljeno: 1. novembra 2026.
 
 Rečica ob Savinji (366 m n. m., Zgornja Savinjska dolina) ima zmerno celinsko klimo. Najtoplejši mesec je julij s povprečno temperaturo 20,9 °C, najhladnejši pa januar s 1,0 °C. Letno pade povprečno 1377 mm padavin.
 
@@ -735,13 +735,13 @@ Najtopleje je v juliju, ko dnevni maksimumi v povprečju dosežejo 28,4 °C, pov
 
 ## Padavine Rečica ob Savinji — letni in mesečni podatki
 https://meteorec.si/padavine/
-> Koliko je letos deževalo v Rečici ob Savinji? 915 mm do 30. okt. 2026. Letne in mesečne količine, rekordi — podatki postaje IREICA1 od 2019.
+> Koliko je letos deževalo v Rečici ob Savinji? 915 mm do 31. okt. 2026. Letne in mesečne količine, rekordi — podatki postaje IREICA1 od 2019.
 
 Klimatološki pregled padavin meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n. m.). Letne skupne vrednosti, mesečne norme in rekordi na osnovi meritev od novembra 2019.
 
-Na kratko: v Rečici ob Savinji pade povprečno 1377 mm padavin na leto (najbolj mokro 2023: 1711 mm, najbolj suho 2022: 1110 mm). Najdeževnejši mesec je september (povprečno 165 mm). Letos je do 30. oktobra 2026 padlo 915 mm, to je 81 % povprečja za to obdobje leta. Posodobljeno: 31. oktobra 2026.
+Na kratko: v Rečici ob Savinji pade povprečno 1377 mm padavin na leto (najbolj mokro 2023: 1711 mm, najbolj suho 2022: 1110 mm). Najdeževnejši mesec je september (povprečno 165 mm). Letos je do 31. oktobra 2026 padlo 915 mm, to je 81 % povprečja za to obdobje leta. Posodobljeno: 1. novembra 2026.
 
-Do 30. oktobra 2026 je postaja IREICA1 letos zabeležila 915 mm padavin. To je 81 % povprečne količine za to obdobje leta.
+Do 31. oktobra 2026 je postaja IREICA1 letos zabeležila 915 mm padavin. To je 81 % povprečne količine za to obdobje leta.
 
 Postaja IREICA1 v Rečici ob Savinji (366 m n. m.) beleži povprečno 1377 mm padavin na leto (povprečje 2019–2026). Največ je padlo leta 2023 (1711 mm), najmanj pa leta 2022 (1110 mm).
 
@@ -751,7 +751,7 @@ https://meteorec.si/temperatura/
 
 Klimatološki pregled temperature meteorološke postaje IREICA1 v Rečici ob Savinji (366 m n. m., Zgornja Savinjska dolina). Mesečni profili, trend mrzlih in vročih dni ter absolutni rekordi od novembra 2019.
 
-Na kratko: najtopleje je v Rečici ob Savinji v juliju (povprečni dnevni maksimum 28,4 °C), najhladneje v januarju (povprečni dnevni minimum -3,4 °C). Na leto je povprečno 108 dni z mrazom (najnižja ≤ 0 °C) in 30 vročih dni (najvišja ≥ 30 °C). Rekordi postaje: 37,8 °C (5. avgusta 2026) in -16,5 °C (8. januarja 2026). Posodobljeno: 31. oktobra 2026.
+Na kratko: najtopleje je v Rečici ob Savinji v juliju (povprečni dnevni maksimum 28,4 °C), najhladneje v januarju (povprečni dnevni minimum -3,4 °C). Na leto je povprečno 108 dni z mrazom (najnižja ≤ 0 °C) in 30 vročih dni (najvišja ≥ 30 °C). Rekordi postaje: 37,8 °C (5. avgusta 2026) in -16,5 °C (8. januarja 2026). Posodobljeno: 1. novembra 2026.
 
 V Rečici ob Savinji (366 m n. m., Zgornja Savinjska dolina) so povprečne dnevne temperature od 1,0 °C v januarju do 20,9 °C v juliju. Letno povprečje znaša ok. 10,9 °C.
 
@@ -759,13 +759,13 @@ Najtopleje je v juliju in avgustu. Julijski dnevni maksimumi v povprečju dosež
 
 ## Vreme ta teden v Rečici ob Savinji | Meteorec
 https://meteorec.si/teden/
-> Vremenski povzetek zadnjih 7 dni v Rečici ob Savinji: temp. -0,5–16,7 °C, padavine 10,9 mm (24. okt. 2026 – 30. okt. 2026).
+> Vremenski povzetek zadnjih 7 dni v Rečici ob Savinji: temp. -0,5–16,7 °C, padavine 2,0 mm (25. okt. 2026 – 31. okt. 2026).
 
-24. oktobra 2026 — 30. oktobra 2026 · postaja IREICA1 · 366 m n. m.
+25. oktobra 2026 — 31. oktobra 2026 · postaja IREICA1 · 366 m n. m.
 
-Med 24. oktobra 2026 in 30. oktobra 2026 je temperatura na postaji IREICA1 nihala med -0,5 in 16,7 °C, padavin je skupaj padlo 10,9 mm.
+Med 25. oktobra 2026 in 31. oktobra 2026 je temperatura na postaji IREICA1 nihala med -0,5 in 16,7 °C, padavin je skupaj padlo 2,0 mm.
 
-Povprečna temperatura tega tedna je od klimatološke normale za ta del leta odstopala za -4,4 °C.
+Povprečna temperatura tega tedna je od klimatološke normale za ta del leta odstopala za -4,5 °C.
 
 Tedenski povzetek se samodejno osveži vsak ponedeljek na podlagi meritev postaje IREICA1.
 
@@ -775,9 +775,9 @@ https://meteorec.si/rekord/
 
 Postaja IREICA1 · Rečica ob Savinji · meritve od novembra 2019
 
-Na kratko: od novembra 2019 je postaja IREICA1 v Rečici ob Savinji izmerila najvišjo temperaturo 37,8 °C (5. avgusta 2026), najnižjo -16,5 °C (8. januarja 2026), največ padavin v enem dnevu 89,9 mm (12. septembra 2024) in najmočnejši izmerjeni sunek vetra 115,6 km/h (1. aprila 2024). Posodobljeno: 30. oktobra 2026.
+Na kratko: od novembra 2019 je postaja IREICA1 v Rečici ob Savinji izmerila najvišjo temperaturo 37,8 °C (5. avgusta 2026), najnižjo -16,5 °C (8. januarja 2026), največ padavin v enem dnevu 89,9 mm (12. septembra 2024) in najmočnejši izmerjeni sunek vetra 115,6 km/h (1. aprila 2024). Posodobljeno: 31. oktobra 2026.
 
-Vir: meteorološka postaja IREICA1, Rečica ob Savinji, Savinjska dolina (366 m n. m.). Rekordi so izračunani iz vseh razpoložljivih dnevnih meritev. Zadnja posodobitev: 30. oktobra 2026.
+Vir: meteorološka postaja IREICA1, Rečica ob Savinji, Savinjska dolina (366 m n. m.). Rekordi so izračunani iz vseh razpoložljivih dnevnih meritev. Zadnja posodobitev: 31. oktobra 2026.
 
 ## Vremenski pojavi — Rečica ob Savinji | Meteorec
 https://meteorec.si/pojavi/
@@ -815,7 +815,7 @@ https://meteorec.si/vreme-recica-ob-savinji/
 
 Meritve v živo · postaja IREICA1 · Zgornja Savinjska dolina · 366 m n. m.
 
-Rečica ob Savinji leži na dnu Zgornje Savinjske doline na približno 366 m nadmorske višine. Meteorološka postaja IREICA1 tu neprekinjeno meri vreme od 7. novembra 2019 — skupaj že 2535 dni podatkov o temperaturi, padavinah, vlagi in vetru. Za razliko od splošnih napovedi, ki za to območje ponujajo le model, so spodnji podatki dejanske meritve z lokacije — prav zato lahko vsak dan preverimo, kako točna je bila napoved ARSO, Open-Meteo in drugih virov za našo dolino.
+Rečica ob Savinji leži na dnu Zgornje Savinjske doline na približno 366 m nadmorske višine. Meteorološka postaja IREICA1 tu neprekinjeno meri vreme od 7. novembra 2019 — skupaj že 2536 dni podatkov o temperaturi, padavinah, vlagi in vetru. Za razliko od splošnih napovedi, ki za to območje ponujajo le model, so spodnji podatki dejanske meritve z lokacije — prav zato lahko vsak dan preverimo, kako točna je bila napoved ARSO, Open-Meteo in drugih virov za našo dolino.
 
 Dno alpske doline ima izrazito kotlinsko mikroklimo . Hladen zrak se ob jasnih nočeh nabira na dnu doline, zato so jutra pogosto hladnejša od okoliških pobočij. Postaja IREICA1 je doslej zabeležila 729 dni z zmrzaljo (najnižja dnevna temperatura ≤ 0 °C), povprečna letna temperatura pa znaša 10,9 °C . Absolutni temperaturni razpon sega od -16,5 °C ( 8. januarja 2026 ) do 37,8 °C ( 5. avgusta 2026 ).
 
@@ -825,7 +825,7 @@ https://meteorec.si/vreme-kamp-menina/
 
 Postaja IREICA1 · 1,8 km severovzhodno · isto dolinsko dno · Rečica ob Savinji
 
-Kamp Menina leži ob reki Savinji v Rečici ob Savinji, na istem dolinskem dnu Zgornje Savinjske doline kot meteorološka postaja IREICA1 — le 1,8 km severovzhodno. Ker gre za isto nadmorsko višino iste doline, tukajšnje meritve ne potrebujejo višinske korekcije, kot jo uporabljamo za oddaljenejše kraje: spodaj so dejanske meritve , ne ocena. Postaja meri neprekinjeno od 7. novembra 2019 — skupaj 2535 dni podatkov o temperaturi, padavinah, vlagi in vetru.
+Kamp Menina leži ob reki Savinji v Rečici ob Savinji, na istem dolinskem dnu Zgornje Savinjske doline kot meteorološka postaja IREICA1 — le 1,8 km severovzhodno. Ker gre za isto nadmorsko višino iste doline, tukajšnje meritve ne potrebujejo višinske korekcije, kot jo uporabljamo za oddaljenejše kraje: spodaj so dejanske meritve , ne ocena. Postaja meri neprekinjeno od 7. novembra 2019 — skupaj 2536 dni podatkov o temperaturi, padavinah, vlagi in vetru.
 
 Dno doline ima izrazito kotlinsko mikroklimo : hladen zrak se ob jasnih nočeh nabira na dnu doline, zato so lahko jutra v šotoru ali prikolici opazno hladnejša, kot bi pričakoval glede na dnevno temperaturo. Postaja je doslej zabeležila 729 dni z zmrzaljo (najnižja dnevna temperatura ≤ 0 °C) — večina teh je zunaj sezone kampiranja, a zgodnja pomlad in pozna jesen lahko presenetita. Povprečna letna temperatura na postaji znaša 10,9 °C , absolutni razpon pa od -16,5 °C ( 8. januarja 2026 ) do 37,8 °C ( 5. avgusta 2026 ).
 
@@ -883,7 +883,7 @@ https://meteorec.si/vreme-mozirje/
 
 Najbližja postaja IREICA1 · 3,1 km jugozahodno · 340 m n. m. · Zgornja Savinjska dolina
 
-Mozirje je največji kraj in upravno središče spodnjega dela Zgornje Savinjske doline, na najširšem in najbolj odprtem delu dolinskega dna (Mozirsko polje), znan tudi po botaničnem parku Mozirski gaj. Postaja IREICA1 (3 km jugozahodno, 340 m n. m. v Mozirju proti 366 m pri postaji) ponuja 2535 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Mozirje leži nekoliko niže in na širšem, bolj odprtem delu doline kot postaja IREICA1, zato je manj podvrženo nočnemu zbiranju hladnega zraka kot ožji, više ležeči kraji gorvodno — jutranje temperaturne inverzije so tu praviloma šibkejše.
+Mozirje je največji kraj in upravno središče spodnjega dela Zgornje Savinjske doline, na najširšem in najbolj odprtem delu dolinskega dna (Mozirsko polje), znan tudi po botaničnem parku Mozirski gaj. Postaja IREICA1 (3 km jugozahodno, 340 m n. m. v Mozirju proti 366 m pri postaji) ponuja 2536 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Mozirje leži nekoliko niže in na širšem, bolj odprtem delu doline kot postaja IREICA1, zato je manj podvrženo nočnemu zbiranju hladnega zraka kot ožji, više ležeči kraji gorvodno — jutranje temperaturne inverzije so tu praviloma šibkejše.
 
 Temperaturna ocena uporablja standardni vertikalni temperaturni gradient (0,65 °C/100 m) za prilagoditev dejanskih meritev postaje IREICA1 nadmorski višini Mozirja. To je fizikalno utemeljena ocena, ne meritev na kraju samem.
 
@@ -893,7 +893,7 @@ https://meteorec.si/vreme-nazarje/
 
 Najbližja postaja IREICA1 · 2,5 km zahodno · 387 m n. m. · Zgornja Savinjska dolina
 
-Nazarje je kraj ob sotočju Drete in Savinje, na vhodu v Zadrečko dolino. Postaja IREICA1 (3 km zahodno, 387 m n. m. v Nazarjah proti 366 m pri postaji) ponuja 2535 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Nazarje leži na sotočju dveh rek (Drete in Savinje), kjer se stikata dve dolinski veji — to lokalno poveča vlažnost zraka in pogostost jutranje megle glede na bolj enodolinsko lego postaje IREICA1.
+Nazarje je kraj ob sotočju Drete in Savinje, na vhodu v Zadrečko dolino. Postaja IREICA1 (3 km zahodno, 387 m n. m. v Nazarjah proti 366 m pri postaji) ponuja 2536 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Nazarje leži na sotočju dveh rek (Drete in Savinje), kjer se stikata dve dolinski veji — to lokalno poveča vlažnost zraka in pogostost jutranje megle glede na bolj enodolinsko lego postaje IREICA1.
 
 Temperaturna ocena uporablja standardni vertikalni temperaturni gradient (0,65 °C/100 m) za prilagoditev dejanskih meritev postaje IREICA1 nadmorski višini Nazarij. To je fizikalno utemeljena ocena, ne meritev na kraju samem.
 
@@ -903,7 +903,7 @@ https://meteorec.si/vreme-ljubno-ob-savinji/
 
 Najbližja postaja IREICA1 · 7,2 km vzhodno · 434 m n. m. · Zgornja Savinjska dolina
 
-Ljubno ob Savinji je kraj v ožjem, više ležečem zahodnem delu Zgornje Savinjske doline, gorvodno ob Savinji. Postaja IREICA1 (7 km vzhodno, 434 m n. m. v Ljubnem ob Savinji proti 366 m pri postaji) ponuja 2535 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Dolina se pri Ljubnem opazno zoži in strmi pobočji senčita dno doline dlje v jutro kot pri postaji — v kombinaciji z višjo nadmorsko višino to pomeni hladnejša zimska jutra in izrazitejšo temperaturno inverzijo.
+Ljubno ob Savinji je kraj v ožjem, više ležečem zahodnem delu Zgornje Savinjske doline, gorvodno ob Savinji. Postaja IREICA1 (7 km vzhodno, 434 m n. m. v Ljubnem ob Savinji proti 366 m pri postaji) ponuja 2536 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Dolina se pri Ljubnem opazno zoži in strmi pobočji senčita dno doline dlje v jutro kot pri postaji — v kombinaciji z višjo nadmorsko višino to pomeni hladnejša zimska jutra in izrazitejšo temperaturno inverzijo.
 
 Temperaturna ocena uporablja standardni vertikalni temperaturni gradient (0,65 °C/100 m) za prilagoditev dejanskih meritev postaje IREICA1 nadmorski višini Ljubnega ob Savinji. To je fizikalno utemeljena ocena, ne meritev na kraju samem.
 
@@ -913,7 +913,7 @@ https://meteorec.si/vreme-luce/
 
 Najbližja postaja IREICA1 · 14,0 km vzhodno · 522 m n. m. · Zgornja Savinjska dolina
 
-Luče je kraj na sotočju Savinje in Lučnice, med Raduho (2062 m) in Dleskovško planoto. Postaja IREICA1 (14 km vzhodno, 522 m n. m. v Lučah proti 366 m pri postaji) ponuja 2535 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Luče ležijo bistveno više in globlje v dolini kot postaja IREICA1, tik pod visokogorjem (Raduha, Dleskovška planota). Bližina visokih gora praviloma pomeni več orografskih padavin in hladnejše razmere, kot jih kaže postaja — glej temperaturno oceno spodaj.
+Luče je kraj na sotočju Savinje in Lučnice, med Raduho (2062 m) in Dleskovško planoto. Postaja IREICA1 (14 km vzhodno, 522 m n. m. v Lučah proti 366 m pri postaji) ponuja 2536 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Luče ležijo bistveno više in globlje v dolini kot postaja IREICA1, tik pod visokogorjem (Raduha, Dleskovška planota). Bližina visokih gora praviloma pomeni več orografskih padavin in hladnejše razmere, kot jih kaže postaja — glej temperaturno oceno spodaj.
 
 Temperaturna ocena uporablja standardni vertikalni temperaturni gradient (0,65 °C/100 m) za prilagoditev dejanskih meritev postaje IREICA1 nadmorski višini Luč. To je fizikalno utemeljena ocena, ne meritev na kraju samem.
 
@@ -923,7 +923,7 @@ https://meteorec.si/vreme-solcava/
 
 Najbližja postaja IREICA1 · 20,5 km jugovzhodno · 644 m n. m. · Zgornja Savinjska dolina
 
-Solčava je najvišje ležeč in najbolj alpski kraj v Zgornji Savinjski dolini, na vhodu v Logarsko dolino. Postaja IREICA1 (20 km jugovzhodno, 644 m n. m. v Solčavi proti 366 m pri postaji) ponuja 2535 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Solčava leži skoraj 280 m više kot postaja IREICA1, globoko v ozki alpski dolini na robu Kamniško-Savinjskih Alp. To je klimatsko najbolj različen kraj v tem pregledu: pričakuj precej hladnejše in bolj namočeno vreme ter močne, dolgotrajne zimske inverzije — v mrzlih jasnih nočeh se lahko dno doline ohladi bistveno bolj kot pri postaji.
+Solčava je najvišje ležeč in najbolj alpski kraj v Zgornji Savinjski dolini, na vhodu v Logarsko dolino. Postaja IREICA1 (20 km jugovzhodno, 644 m n. m. v Solčavi proti 366 m pri postaji) ponuja 2536 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Solčava leži skoraj 280 m više kot postaja IREICA1, globoko v ozki alpski dolini na robu Kamniško-Savinjskih Alp. To je klimatsko najbolj različen kraj v tem pregledu: pričakuj precej hladnejše in bolj namočeno vreme ter močne, dolgotrajne zimske inverzije — v mrzlih jasnih nočeh se lahko dno doline ohladi bistveno bolj kot pri postaji.
 
 Temperaturna ocena uporablja standardni vertikalni temperaturni gradient (0,65 °C/100 m) za prilagoditev dejanskih meritev postaje IREICA1 nadmorski višini Solčave. To je fizikalno utemeljena ocena, ne meritev na kraju samem.
 
@@ -933,7 +933,7 @@ https://meteorec.si/vreme-gornji-grad/
 
 Najbližja postaja IREICA1 · 9,3 km vzhodno · 431 m n. m. · Zgornja Savinjska dolina
 
-Gornji Grad je središče Zadrečke doline — stranske, bolj zaprte rečne doline reke Drete, ločene od glavne Savinjske doline. Postaja IREICA1 (9 km vzhodno, 431 m n. m. v Gornjem Gradu proti 366 m pri postaji) ponuja 2535 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Gornji Grad leži v Zadrečki dolini, ki je ožja in bolj zaprta stranska dolina kot glavna dolina Savinje pri postaji IREICA1. Take zaprte stranske doline so klasično bolj nagnjene k nabiranju hladnega zraka — pričakuj izrazitejše in dlje trajajoče jutranje temperaturne inverzije, zlasti pozimi.
+Gornji Grad je središče Zadrečke doline — stranske, bolj zaprte rečne doline reke Drete, ločene od glavne Savinjske doline. Postaja IREICA1 (9 km vzhodno, 431 m n. m. v Gornjem Gradu proti 366 m pri postaji) ponuja 2536 dni realnih meritev — za razliko od splošnih napovedi, ki za to območje računajo le iz modela. Gornji Grad leži v Zadrečki dolini, ki je ožja in bolj zaprta stranska dolina kot glavna dolina Savinje pri postaji IREICA1. Take zaprte stranske doline so klasično bolj nagnjene k nabiranju hladnega zraka — pričakuj izrazitejše in dlje trajajoče jutranje temperaturne inverzije, zlasti pozimi.
 
 Temperaturna ocena uporablja standardni vertikalni temperaturni gradient (0,65 °C/100 m) za prilagoditev dejanskih meritev postaje IREICA1 nadmorski višini Gornjega Grada. To je fizikalno utemeljena ocena, ne meritev na kraju samem.
 
@@ -943,7 +943,7 @@ https://meteorec.si/vreme-zgornja-savinjska-dolina/
 
 Rečica ob Savinji · Mozirje · Nazarje · Ljubno ob Savinji · Gornji Grad · Luče · Solčava
 
-Zgornja Savinjska dolina se razteza od Nazarij in Mozirja na vzhodu do Solčave in Logarske doline na zahodu, ob reki Savinji pod Kamniško-Savinjskimi Alpami. Edina postaja z neprekinjenimi meritvami v dolini je IREICA1 v Rečici ob Savinji (366 m n. m.), ki od 7. novembra 2019 meri temperaturo, padavine, vlago in veter — skupaj že 2535 dni podatkov. Spodaj je vreme in ocena razmer za vseh sedem krajev doline na enem mestu.
+Zgornja Savinjska dolina se razteza od Nazarij in Mozirja na vzhodu do Solčave in Logarske doline na zahodu, ob reki Savinji pod Kamniško-Savinjskimi Alpami. Edina postaja z neprekinjenimi meritvami v dolini je IREICA1 v Rečici ob Savinji (366 m n. m.), ki od 7. novembra 2019 meri temperaturo, padavine, vlago in veter — skupaj že 2536 dni podatkov. Spodaj je vreme in ocena razmer za vseh sedem krajev doline na enem mestu.
 
 Povprečna letna temperatura na postaji IREICA1 znaša 10,9 °C , povprečno pade 1377 mm padavin na leto, dolina pa se po podatkih postaje segreva za približno +0,29 °C na leto (obdobje 2020–2025). Absolutni temperaturni razpon sega od -16,5 °C do 37,8 °C. Podrobneje: klima Rečice ob Savinji , vsi rekordi postaje .
 
