@@ -6652,6 +6652,52 @@ function _ncSetBadge(vrsta,ikona,beseda){
   b.className='nc-badge nc-badge-'+vrsta;
   b.querySelector('.nc-badge-ic').innerHTML=_ico(ikona);
   t.textContent=beseda;
+  const w=document.getElementById('nowcast-wrap');
+  if(w)w.dataset.kind=vrsta;                        // barva podlage kartice (dež / nevihta / toča)
+}
+const _ncFmt=n=>String(n).replace('.',',');
+// Radarski krog: celica stoji na strani, od koder prihaja (nasprotno od smeri premika), in na
+// razdalji, ki ustreza času prihoda (krogi so 15/30/45 min). Brez smeri premika celice ne kažemo.
+function _ncRadar(etaMin,premik){
+  const blob=document.getElementById('nowcast-blob'),note=document.getElementById('nowcast-disc-note');
+  if(!blob||!note)return;
+  const R=48,deg=premik&&premik.smer!=null?premik.smer:null;
+  if(etaMin==null){                                  // že nad vasjo
+    blob.style.setProperty('--dx','0px');blob.style.setProperty('--dy','0px');blob.style.setProperty('--rot','0deg');
+    blob.hidden=false;note.textContent='nad vasjo · 15 / 30 / 45 min';return;
+  }
+  if(deg==null){blob.hidden=true;note.textContent='15 / 30 / 45 min';return;}
+  const from=(deg+180)%360,rad=from*Math.PI/180,d=Math.min(etaMin,45)/45*R;
+  const dx=Math.sin(rad)*d,dy=-Math.cos(rad)*d;
+  blob.style.setProperty('--dx',dx.toFixed(1)+'px');blob.style.setProperty('--dy',dy.toFixed(1)+'px');
+  blob.style.setProperty('--rot',(Math.atan2(dy,dx)*180/Math.PI).toFixed(0)+'deg');
+  blob.hidden=false;note.textContent='od '+_smerIme(from)+' · 15 / 30 / 45 min';
+}
+// Graf jakosti: gladka krivulja devetih 5-minutnih vrednosti (mm/h, korenska lestvica do 60).
+function _ncChart(potek){
+  const n=potek.length,W=320,H=66;
+  const x=k=>k*W/(n-1),y=m=>H-4-(H-16)*Math.sqrt(Math.min(m,60)/60);
+  const mm=potek.map(s=>parseFloat(s.mmh)||0);
+  const p=mm.map((m,k)=>[x(k),y(m)]);
+  let d='M'+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
+  for(let k=1;k<n;k++){const cx=((p[k-1][0]+p[k][0])/2).toFixed(1);
+    d+=' C'+cx+','+p[k-1][1].toFixed(1)+' '+cx+','+p[k][1].toFixed(1)+' '+p[k][0].toFixed(1)+','+p[k][1].toFixed(1);}
+  const area=d+' L'+W+','+H+' L0,'+H+' Z';
+  const peak=Math.max(...mm),pk=mm.indexOf(peak);
+  const i30=potek.findIndex(s=>s.t>=30),x30=i30>=0?x(i30):null;
+  const opis=s=>'čez '+s.t+' min: '+(parseFloat(s.mmh)?'~'+_ncFmt(s.mmh)+' mm/h':'brez padavin')+(s.t>30?' (izven zanesljivega obsega)':'');
+  const wet=potek.filter(s=>parseFloat(s.mmh)).map(s=>'čez '+s.t+' min ~'+_ncFmt(s.mmh)+' mm/h').join('; ');
+  const aria='Jakost padavin v naslednjih 45 minutah: '+(wet||'brez padavin')+'.';
+  const hw=W/(n-1);
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+aria+'">'+
+    '<defs><linearGradient id="nc-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="nc-g0"/><stop offset="1" class="nc-g1"/></linearGradient></defs>'+
+    '<line class="nc-base" x1="0" x2="'+W+'" y1="'+(H-1)+'" y2="'+(H-1)+'"/>'+
+    '<path d="'+area+'" fill="url(#nc-grad)"/><path class="nc-line" d="'+d+'"/>'+
+    (x30!=null?'<rect class="nc-shade" x="'+x30.toFixed(1)+'" y="0" width="'+(W-x30).toFixed(1)+'" height="'+H+'"/>'+
+      '<line class="nc-30" x1="'+x30.toFixed(1)+'" x2="'+x30.toFixed(1)+'" y1="2" y2="'+H+'"/>':'')+
+    (peak>0?'<circle class="nc-pk" cx="'+p[pk][0].toFixed(1)+'" cy="'+p[pk][1].toFixed(1)+'" r="4"/>':'')+
+    potek.map((s,k)=>'<rect class="nc-hit" x="'+(x(k)-hw/2).toFixed(1)+'" y="0" width="'+hw.toFixed(1)+'" height="'+H+'"><title>'+opis(s)+'</title></rect>').join('')+
+    '</svg>';
 }
 async function loadNowcast(){
   const wrap=document.getElementById('nowcast-wrap');
@@ -6683,53 +6729,48 @@ async function loadNowcast(){
   if(nicNaVidiku){wrap.hidden=true;return;}
   wrap.hidden=false;
 
-  // Junak je čas do dogodka; resnost nosi značka, ne barva besedila.
+  // Junak je čas do dogodka (ali jakost, ko že pada); resnost nosi značka, ne barva besedila.
   // Dogodek štejemo za prihajajoč le, če vas te jakosti še nima nad sabo —
   // sicer bi ob dežju pisalo "dež čez ~5 min", medtem ko že lije.
-  const eta=(min)=>{hero.innerHTML='čez ~'+min+'<span class="nc-unit">min</span>';};
+  const capEl=document.getElementById('nowcast-cap');
+  const fm=_ncFmt,potek=v.potek||[];
+  let etaMin=null;
+  const eta=(min,cap)=>{etaMin=min;hero.innerHTML=min+'<span class="nc-unit">min</span>';if(capEl)capEl.textContent=cap;};
+  const zdajMm=()=>{hero.innerHTML=fm(v.zdajMmh)+'<span class="nc-unit">mm/h</span>';if(capEl)capEl.textContent='zdaj nad vasjo';};
+  const mmh=potek.map(s=>parseFloat(s.mmh)||0),peak=Math.max(0,...mmh);
+  const peakTxt=peak>0?' Višek ~'+fm(peak)+' mm/h čez ~'+potek[mmh.indexOf(peak)].t+' min.':'';
+  const endI=potek.findIndex(s=>!s.l);
   const zeDez=v.zdaj>=6, zeNevihta=v.zdaj>=10, zeJedro=v.zdaj>=12;
   if(v.toca&&!zeJedro){
-    _ncSetBadge('hail','thermometer-snowflake','Možnost toče'); eta(v.jedro);
+    _ncSetBadge('hail','thermometer-snowflake','Možnost toče'); eta(v.jedro,'do močnega jedra');
     sub.textContent='Radar kaže močno jedro na poti proti vasi. Toče od močnega naliva ne loči zanesljivo — pripravi se, a ne paniči.';
   }else if(v.nevihta!=null&&!zeNevihta){
-    _ncSetBadge('storm','cloud-lightning','Nevihta'); eta(v.nevihta);
-    sub.textContent=zeDez?'Nad vasjo že dežuje (~'+v.zdajMmh+' mm/h), jakost pa naj bi še narasla.'
-                         :'Radar kaže nevihtno celico na poti proti vasi.';
+    _ncSetBadge('storm','cloud-lightning','Nevihta'); eta(v.nevihta,'do nevihtne celice');
+    sub.textContent=(zeDez?'Nad vasjo že dežuje (~'+fm(v.zdajMmh)+' mm/h), jakost pa naj bi še narasla.'
+                         :'Radar kaže nevihtno celico na poti proti vasi.')+peakTxt;
   }else if(zeNevihta){
-    _ncSetBadge('storm','cloud-lightning','Nevihta nad vasjo'); hero.textContent='';
-    sub.textContent='Nevihta je nad vasjo (~'+v.zdajMmh+' mm/h).';
+    _ncSetBadge('storm','cloud-lightning','Nevihta nad vasjo'); zdajMm();
+    sub.textContent='Nevihta je nad vasjo (~'+fm(v.zdajMmh)+' mm/h).';
   }else if(v.dez!=null&&!zeDez){
-    _ncSetBadge('rain','cloud-rain','Dež'); eta(v.dez);
-    sub.textContent='Padavine se približujejo z radarske slike.';
+    _ncSetBadge('rain','cloud-rain','Dež'); eta(v.dez,'do prvih padavin');
+    sub.textContent='Padavine se približujejo z radarske slike.'+peakTxt;
   }else{
-    _ncSetBadge('rain','cloud-rain','Dež nad vasjo'); hero.textContent='';
-    sub.textContent='Nad vasjo dežuje (~'+v.zdajMmh+' mm/h).';
+    _ncSetBadge('rain','cloud-rain','Dež nad vasjo'); zdajMm();
+    sub.textContent='Nad vasjo dežuje (~'+fm(v.zdajMmh)+' mm/h).'+
+      (endI>=0?' Po radarju poneha čez ~'+potek[endI].t+' min.':' Po radarju v naslednjih 45 minutah ne poneha.');
   }
+  _ncRadar(etaMin,d.premik);
 
-  // Trak približevanja. Vsako polje ima besedilno ustreznico (aria-label),
-  // da vrednost ni dosegljiva samo prek namiga ob prehodu miške.
-  const potek=v.potek||[];
+  // Graf približevanja. Vsako polje ima besedilno ustreznico (aria-label + namig ob prehodu miške).
   if(fig&&strip){
-    if(!potek.length){fig.hidden=true;}
-    else{
-      fig.hidden=false;
-      strip.innerHTML=potek.map(s=>{
-        const b=_ncBand(s.l);
-        const opis=s.l?('~'+s.mmh+' mm/h'):'brez padavin';
-        const cez=(s.t>30?' (izven zanesljivega obsega)':'');
-        // Šrafura označi manj zanesljiv del obzorja, zato ima smisel le tam,
-        // kjer polje sploh kaj kaže — prazna polja pustimo pri miru.
-        return '<li class="nc-cell'+(b?' nc-b'+b:'')+(b&&s.t>30?' nc-beyond':'')+'" tabindex="0"'+
-          ' title="čez '+s.t+' min: '+opis+'"'+
-          ' aria-label="Čez '+s.t+' minut: '+opis+cez+'"></li>';
-      }).join('');
-    }
+    if(potek.length<2){fig.hidden=true;}
+    else{fig.hidden=false;strip.innerHTML=_ncChart(potek);}
   }
   if(foot){
     const p=d.premik||{};
     foot.textContent='Radar ARSO, star '+(d.starost_min??'?')+' min · celice se premikajo '+
       (p.kmh!=null?p.kmh+' km/h':'—')+' proti '+_smerIme(p.smer)+
-      ' · nowcast iz radarske slike, ne napoved — po ~30 minutah zanesljivost opazno pade.';
+      ' · nowcast iz radarske slike, ne napoved — po ~30 minutah zanesljivost opazno pade (zasenčeno na grafu).';
   }
 }
 function _smerIme(deg){
