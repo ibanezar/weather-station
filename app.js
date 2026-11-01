@@ -10571,7 +10571,7 @@ async function fetchValleyDuel(){
     const res=await fetch(PROXY+'/varpolje-current');
     const data=await res.json();
     const vp=data&&data.current;
-    if(!res.ok||!vp){body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';return;}
+    if(!res.ok||!vp){body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';const se=document.getElementById('duel-sum');if(se)se.textContent='ni dosegljiva';return;}
 
     // Domača postaja: zadnja meritev, ki jo je prikazal hero (applyObs).
     const obs=_lastBriefObs;
@@ -10590,6 +10590,8 @@ async function fetchValleyDuel(){
 
     const dCol=diff==null?'var(--muted)':Math.abs(diff)<0.3?'var(--muted)':diff>0?'var(--red)':'var(--blue)';
     const dSign=diff==null?'':diff>0?'+':'−';
+    const sumEl=document.getElementById('duel-sum');
+    if(sumEl)sumEl.textContent=diff==null?'ni primerjave':(Math.abs(diff)<0.05?'enako':dSign+_duelNum(Math.abs(diff),1)+' °C')+(stale?' (staro)':'');
 
     body.innerHTML=
       '<div class="duel-row">'+
@@ -10618,6 +10620,7 @@ async function fetchValleyDuel(){
     if(upd)upd.textContent=new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }catch(e){
     if(body)body.innerHTML='<div class="duel-offline">Sosednja postaja ni dosegljiva.</div>';
+    const se=document.getElementById('duel-sum');if(se)se.textContent='ni dosegljiva';
     console.warn('Dvoboj Varpolje:',e);
   }
 }

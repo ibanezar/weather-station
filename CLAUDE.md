@@ -946,7 +946,7 @@ Zavihek »Zdaj« je imel ~37 kartic. Zdaj je nad pregibom: hero, obeti, »Zakaj 
 - **Ovoj je zložen z višino 0 + `overflow:hidden` + `visibility:hidden` + `inert`, NE z `display:none` ali `<details>`**: grafi tako še merijo širino, IntersectionObserver pa jih ne šteje za vidne. Elementi in id-ji ostanejo v DOM-u (JS, pajki). Brez prehoda višine (CLS). Ob odprtju se sproži `resize`.
 - **Nova kartica na naslovnici gre privzeto v `#more-wrap`**; nad pregib sodi samo, če je odgovor na »kakšno je vreme zdaj in kaj sledi«. Preprosti pogled ostane allowlist (`simple-keep`); ovoj nima `simple-keep`, torej je v njem skrit sam.
 - Kakovost zraka + Agrometeo in Pelod na naslovnici sta `hidden` (podvojeno z zavihkoma Okolje); elementi so ostali, ker jih polni JS.
-- Nič ni združeno v nove kartice (Dolinski dvoboj, grafi 24 h, sonce/luna …): to je nadaljnji korak, ki zahteva spremembe v `app.js`.
+- Dolinski dvoboj je od istega dne zložen del kartice »Dolina zdaj«. Nič ni združeno v nove kartice (grafi 24 h, sonce/luna …): to je nadaljnji korak, ki zahteva spremembe v `app.js`.
 - Po spremembi zgornjega dela strani: `npm run minify && node tools/critical_css.mjs` in commitaj `index.html`.
 
 ### Ponudba izbire pogleda se pokaže pred prvim izrisom (CLS, 1. 10. 2026)
@@ -1311,7 +1311,7 @@ Kje je vključena:
   zato `Cache-Control: max-age=120`. **Zasebnost velja tudi za sosedovo hišo**:
   blok notranjih meritev se izbriše pri viru, čeprav ga trenutni odgovor nima
   (glej pravilo na vrhu tega dokumenta).
-- `app.js`, `fetchValleyDuel()` + kartica `#duel-card` v `index.html` —
+- `app.js`, `fetchValleyDuel()` + zložen `<details id="duel-card">` na dnu kartice »Dolina zdaj« (od 1. 11. 2026; prej samostojna kartica; povzetek razlike je v `#duel-sum`, višina povzetka je stalna zaradi CLS) —
   obe temperaturi, razlika in razlaga. Kartica ni `simple-keep`, torej je v
   preprostem pogledu skrita; klic gre skozi `runAdvancedOnly()`, interval pa se
   sproži samo v naprednem pogledu (drugače bi se klici kopičili v vrsti).
