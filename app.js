@@ -1807,7 +1807,7 @@ async function fetchTrustBadge(){
       .filter(v=>v!=null);
     if(!errs.length)return;
     const mae=errs.reduce((a,b)=>a+b,0)/errs.length;
-    el.innerHTML='<a href="/tocnost-napovedi/">🎯 MTR napoved: povp. napaka ±'+fmt(mae,1)+' °C na '+errs.length+' dneh · glej točnost napovedi →</a>';
+    el.innerHTML='<a href="/tocnost-napovedi/">'+_ico('target')+' MTR napoved: povp. napaka ±'+fmt(mae,1)+' °C na '+errs.length+' dneh · glej točnost napovedi →</a>';
     el.hidden=false;
   }catch(e){console.warn('TrustBadge:',e);}
 }
@@ -2074,6 +2074,7 @@ function applyDayStats(observations){
   set('day-high',fmt(maxT,1));set('day-low',fmt(minT,1));set('day-rain',fmt(totalRain,1));set('day-avg',fmt(tempSum/tempCount,1));
   if(maxTime)set('day-hi-time',fmtTime(maxTime));if(minTime)set('day-lo-time',fmtTime(minTime));
   set('hs-range-min',fmt(minT,1));set('hs-range-max',fmt(maxT,1));
+  set('hb-rmin',fmt(minT,1));set('hb-rmax',fmt(maxT,1));{const hr=document.getElementById('hb-range');if(hr)hr.hidden=false;}
   _hsc.tmin=minT;_hsc.tmax=maxT;renderHeroScales();
   todayObs.forEach(o=>{
     const t=new Date(o.obsTimeLocal.replace(' ','T'));
@@ -2609,8 +2610,11 @@ function renderHeroBriefing(){
   if(!wrap||!textEl||!_lastComfortLabel)return;
   const comfort=_lastComfortLabel,dew=_lastDewLabel;
   let s=(dew&&comfort.toLowerCase()!==dew.toLowerCase())?comfort+' in '+dew.toLowerCase()+'.':comfort+'.';
-  const fc=forecastPhrase();if(fc)s+=' '+fc;
-  textEl.textContent=s;
+  const fc=forecastPhrase();
+  // Prvi stavek (stanje) je krepek, nadaljevanje (napoved do konca dneva) navaden; besedilo ostane en niz za bralnik in kartico za deljenje.
+  textEl.textContent='';
+  const lead=document.createElement('strong');lead.textContent=s;
+  textEl.appendChild(lead);if(fc)textEl.appendChild(document.createTextNode(' '+fc));
   wrap.hidden=false;
 }
 
@@ -2693,6 +2697,8 @@ function applyObs(obs){
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
+  // Hero B: »Občutek« je čip samo, kadar se od izmerjene temperature razlikuje za vsaj 1 °C (sicer ponavlja številko nad njim).
+  {const fb=document.querySelector('.hero .feels');if(fb)fb.hidden=!(m.temp!=null&&feelsVal!=null&&Math.abs(feelsVal-m.temp)>=1);}
   if(m.dewpt!=null){const dl=dewLabel(m.dewpt);_lastDewLabel=dl;set('dew-desc',' · '+dl.toLowerCase());}
   _lastComfortLabel=fs.label;renderHeroBriefing();
   countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)"> %</span>',1000);

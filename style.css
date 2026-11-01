@@ -4136,3 +4136,119 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 .more-toggle-lbl{font-size:.82rem;font-weight:600}
 .more-toggle-sub{font-size:.66rem;color:var(--muted)}
 .more-toggle[aria-expanded="true"] .more-toggle-sub{display:none}
+/* ── Hero B: ploščice namesto ene škatle (1. 11. 2026) ─────────────────────────────────────────────────────────
+   Prej je bilo pred prvo meritvijo devet blokov petih različnih slogov (stanje, temperatura, čip občutka, čip včeraj, čip rosišča,
+   okvir dnevnega dejstva, povezava MTR, okvir povzetka, graf). Zdaj so ploščice enake oblike: glavna (temperatura + ikona + en čip),
+   »Danes« (stavek + graf + drsnik), 2×2 meritve, »Več podrobnosti« (razpon dneva, UV, PM₂,₅, luna), podnožje (rekord dneva + točnost MTR).
+   Samo videz in razporeditev: id-ji, `numOf()`, `hs-rain-rate` in pravilo z vrha CLAUDE.md (brez notranjih meritev) so nedotaknjeni.
+   `.hero` je zdaj samo mreža brez lastne podlage; vsaka ploščica nosi svojo. »Občutek« je čip samo, če se razlikuje ≥ 1 °C (applyObs),
+   rosišče je v ploščici vlage (`#dew-line` ostane v HTML za tools/inject_current_weather.py). */
+.hero.hero-b{display:grid;grid-template-columns:minmax(0,1fr);gap:.5rem;padding:0;background:none;border:0;border-radius:0;box-shadow:none;overflow:visible}
+.hero.hero-b::before{display:none}
+.hero-b .hb-tile{background:var(--hero-bg);border:1px solid var(--hero-border);border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+.hero-b .hero-station{position:static;max-width:none;text-align:left;font:500 .75rem/1.4 'Inter','Inter Fallback',sans-serif;letter-spacing:0;color:var(--muted);padding:0 .3rem}
+.hero-b .hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
+
+/* glavna ploščica */
+.hero-b .hero-top{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.8rem .75rem;align-items:start;margin:0;padding:1.15rem 1.15rem 1.05rem}
+.hero-b .hero-top::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(120% 95% at 88% 0%,color-mix(in srgb,var(--wx-c,var(--blue)) var(--wx-a,14%),transparent),transparent 72%)}
+.hero-b .hero-top>:not(canvas){position:relative;z-index:1}
+.hero-b .hero-left>*{position:relative;z-index:1}
+.hero-b .hero-left{display:contents}
+.hero-b .temp-huge{grid-column:1;grid-row:1;font-size:clamp(4.6rem,22vw,6.6rem);line-height:.9}
+.hero-b .hero-chips{grid-column:1/-1;grid-row:2;margin:0;gap:.45rem;align-items:center;min-height:2rem}
+.hero-b .yesterday-delta,.hero-b .feels{margin:0;display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border:0;border-radius:16px;
+  font-size:.8rem;line-height:1.3;color:var(--text);background:color-mix(in srgb,var(--blue) 16%,transparent)}
+.hero-b .yesterday-delta:not(:empty){display:block;max-width:100%}
+.hero-b .yesterday-delta:empty{display:none}
+.hero-b .yesterday-delta .dv{font-family:inherit;font-size:.8rem}
+.hero-b .feels{background:color-mix(in srgb,var(--text) 8%,transparent)}
+.hero-b .feels[hidden]{display:none}
+.hero-b .feels-pill{font-size:.7rem;padding:1px 8px}
+.hero-b .dew-line{display:none}
+.hero-b .hero-right{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:center;gap:.25rem;margin:0}
+.hero-b .hero-icon{flex:none;margin:0}
+.hero-b .hero-icon .wx-icon,.hero-b .hero-icon svg{width:5rem;height:5rem}
+.hero-b .condition-badge{background:none;border:0;padding:0;margin:0;width:auto;font-size:.8rem;letter-spacing:0;color:var(--muted);text-align:center}
+.hero-b #cond-icon{display:none}
+
+/* »Danes«: stavek, graf, drsnik */
+.hero-b .hb-day{display:flex;flex-direction:column;gap:.55rem;padding:.9rem 1.1rem 1rem}
+.hb-day-hdr{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;font-size:.82rem;color:var(--muted)}
+.hb-day-hdr strong{color:var(--text);font-weight:600}
+.hb-day-hdr .hb-range[hidden]{display:inline}
+.hb-day-hdr .hb-range[hidden]{visibility:hidden}
+.hero-b .hero-briefing{display:block;margin:0;padding:0;background:none;border:0;min-height:2.9rem}
+.hero-b .hero-briefing[hidden]{display:block;visibility:hidden}
+.hero-b .hb-icon{display:none}
+.hero-b .hero-briefing p{font-size:.98rem;line-height:1.45}
+.hero-b .hero-briefing p strong{font-weight:700}
+.hero-b .fc-slider-wrap{padding:0;gap:.3rem}
+.hero-b .hero-spark-wrap{margin:1.5rem 0 .2rem;box-sizing:border-box}
+.hero-b .hero-spark-wrap[hidden]{display:block;visibility:hidden;height:56px}
+.hero-b .fc-slider{margin-top:.55rem}
+
+/* meritve */
+.hero.hero-b .hero-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;padding:0;border:0}
+.hero.hero-b .hero-metrics>.hm,.hero.hero-b .hero-metrics>.hm.hm-secondary,.hero.hero-b .hero-metrics>.hm.hm-range,
+.hero.hero-b .hero-metrics>.hm.hm-moon,.hero.hero-b .hero-metrics>.hm.hm-uv,.hero.hero-b .hero-metrics>.hm.hm-pm{grid-column:auto}
+.hero-b .hm,.hero-b .hm.hm-secondary{background:var(--hero-bg);border:1px solid var(--hero-border);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:.85rem .9rem;gap:.4rem;min-height:8.6rem}
+.hero-b .hm::before{display:none}
+.hero-b .hm-val,.hero-b .hm-secondary .hm-val{font-family:'Inter','Inter Fallback',sans-serif;font-weight:700;font-size:clamp(1.35rem,6.4vw,1.75rem);letter-spacing:-.02em;line-height:1.05;color:var(--text)}
+.hero-b .hm-val>span[style]{font-size:.78rem!important;font-weight:400;letter-spacing:0}
+.hero-b .hm-moon .hm-val{font-size:1.05rem;min-height:1.75rem}
+.hero-b .hm-lbl{text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:500;gap:.4rem;opacity:1}
+.hero-b .hm-sub{font-size:.75rem;line-height:1.35;opacity:1}
+.hero-b #hs-rain-rate,.hero-b #hs-uv-label{font-size:.75rem!important;opacity:1!important;margin-top:0!important}
+.hero-b #hs-humidity-range{display:none!important}
+.hero-b .hm-spark{display:none}
+
+/* »Več podrobnosti« */
+.hb-more>summary{list-style:none;display:flex;align-items:center;gap:.6rem;min-height:3rem;padding:.7rem 1.1rem;cursor:pointer;
+  background:var(--hero-bg);border:1px solid var(--hero-border);border-radius:var(--r-lg);box-shadow:var(--sh-1);font-size:.85rem;font-weight:600;color:var(--text)}
+.hb-more>summary::-webkit-details-marker{display:none}
+.hb-more>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.hb-more-hint{flex:1;min-width:0;font-weight:400;font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.hb-more-chev{flex:none;width:.5rem;height:.5rem;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.hb-more[open] .hb-more-chev{transform:rotate(-135deg) translateY(-2px)}
+.hb-more[open]>summary{margin-bottom:.5rem}
+@media (prefers-reduced-motion:reduce){.hb-more-chev{transition:none}}
+
+/* podnožje: rekord dneva + točnost modela */
+.hero-b .hb-foot{padding:.1rem 1.1rem}
+.hero-b .hb-foot:not(:has(.daily-fact-card)):has(#mtr-trust-badge[hidden]){display:none}
+.hero-b .daily-fact-card{margin:0;padding:.75rem 0;min-height:3rem;border:0;border-radius:0;background:none;gap:.7rem;font-size:.85rem;line-height:1.4;color:var(--text)}
+.hero-b .dfc-icon{display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;font-size:.95rem;background:color-mix(in srgb,var(--amber) 16%,transparent)}
+.hero-b .mtr-trust-badge{margin:0;padding:.7rem 0;font-size:.8rem}
+.hero-b .mtr-trust-badge[hidden]{display:none}
+.hero-b .daily-fact-card+.mtr-trust-badge:not([hidden]){border-top:1px solid var(--border)}
+.hero-b .mtr-trust-badge a{display:flex;align-items:center;gap:.6rem;padding:0;border:0;background:none;border-radius:0;font-size:.8rem;color:var(--muted)}
+.hero-b .mtr-trust-badge a .ic{width:1.1rem;height:1.1rem;color:var(--green)}
+.hero-b .sc-bar{margin:0;padding:.15rem .3rem 0;border-top:0;flex-wrap:wrap;gap:.5rem}
+.hero-b .sc-desc{flex-basis:100%;order:3}
+.hero-b .sc-desc:empty{display:none}
+.hero-b .qa-bar{margin:.2rem 0 0}
+
+/* preprosti pogled: brez podrobnosti, tri ploščice (tlak je skrit) */
+html[data-mode="simple"] .hero-b .hb-more{display:none}
+html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column:1/-1}
+
+@media (max-width:360px){.hero-b .hm,.hero-b .hm.hm-secondary{padding:.7rem .7rem}.hero-b .hero-top{padding:1rem .95rem}.hb-more-hint{display:none}}
+@media (min-width:760px){
+  .hero.hero-b{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:.6rem;
+    grid-template-areas:"st st" "main met" "day met" "more more" "foot foot" "sc sc" "qa qa"}
+  .hero-b .hero-station{grid-area:st}
+  .hero-b .hero-top{grid-area:main;padding:1.5rem 1.5rem 1.3rem}
+  .hero-b .hb-day{grid-area:day}
+  .hero.hero-b>.hero-metrics{grid-area:met;grid-auto-rows:1fr}
+  .hero-b .hb-more{grid-area:more}
+  .hero-b .hb-foot{grid-area:foot}
+  .hero-b .sc-bar{grid-area:sc}
+  .hero-b .qa-bar{grid-area:qa}
+  .hero-b .temp-huge{font-size:clamp(5rem,9vw,7rem)}
+  .hero-b .hero-icon .wx-icon,.hero-b .hero-icon svg{width:6.5rem;height:6.5rem}
+  .hero-b .hm-val,.hero-b .hm-secondary .hm-val{font-size:1.75rem}
+  .hero-b .hb-more .hero-metrics-2{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .hb-more-hint{text-align:left}
+}
