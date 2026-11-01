@@ -4252,3 +4252,16 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
   .hero-b .hb-more .hero-metrics-2{grid-template-columns:repeat(4,minmax(0,1fr))}
   .hb-more-hint{text-align:left}
 }
+
+/* Dvoboj kot zložen del kartice »Dolina zdaj« (1. 11. 2026). Povzetek ima stalno višino,
+   da vrednost ob prihodu podatkov ne premakne strani. */
+.duel-fold{margin-top:.8rem;border-top:1px solid var(--border);padding-top:.2rem}
+.duel-fold>summary{display:flex;align-items:center;justify-content:space-between;gap:.6rem;min-height:44px;cursor:pointer;list-style:none;font-size:.78rem}
+.duel-fold>summary::-webkit-details-marker{display:none}
+.duel-fold>summary::after{content:"▾";color:var(--muted);flex-shrink:0;transition:transform .15s}
+.duel-fold[open]>summary::after{transform:rotate(180deg)}
+.duel-sum-lbl{display:flex;align-items:center;gap:.35rem;font-weight:600}
+.duel-sum-lbl .ic{width:14px;height:14px}
+.duel-sum-val{margin-left:auto;font-family:'JetBrains Mono',monospace;color:var(--muted);text-align:right}
+.duel-fold>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media(max-width:420px){.duel-sum-lbl{font-size:.74rem}.duel-sum-val{font-size:.72rem}}
