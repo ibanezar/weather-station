@@ -736,7 +736,7 @@ def art_hribi(c):
         ("1", "cm", "novega snega na Goltah 31. oktobra po modelu.", False),
         ("0", "cm", "novega snega do 900 m v naslednjih sedmih dneh.", True),
     ])
-    lead = ("Sneg v hribih nad Zgornjo Savinjsko dolino se približuje: model za <strong>31. oktobra</strong> napoveduje prvi sneg na Goltah (približno 1 cm), "
+    lead = ("Modelski posnetek z <strong>27. oktobra</strong> je za 31. oktobra napovedoval prvi sneg na Goltah (približno 1 cm), "
             "meja sneženja pa naj bi se do 2. novembra spustila z 2660 na 1210 m. Do 900 m, tudi v Solčavi in Logarski dolini, model v naslednjem tednu ne napoveduje snega. "
             "Na najbližji izmerjeni točki, Črnivcu (848 m), je ARSO prvi nov sneg v petih zimah izmeril med 18. in 30. novembrom.")
     s1 = [
@@ -767,7 +767,7 @@ def art_hribi(c):
         USE_NOTE,
     ]
     title = "Prvi sneg na Goltah in v Solčavi: kdaj ga pričakovati"
-    desc = "Model za 31. oktobra napoveduje prvi sneg na Goltah (1 cm). Za Solčavo ni meritev; na Črnivcu je prvi sneg padel med 18. in 30. novembrom."
+    desc = "Kdaj pričakovati prvi sneg na Goltah in v Solčavi: modelski posnetek z 27. oktobra in izmerjen prvi sneg na Črnivcu med 18. in 30. novembrom."
     return dict(
         slug="prvi-sneg-golte-solcava-menina-1027", title=title, desc=desc, og_title="Prvi sneg na Goltah\nin v Solčavi",
         tags=["Golte", "Solčava", "Logarska dolina", "sneg", "zima"], og_photo="misty-valley", accent="#22d3ee", lead=lead,

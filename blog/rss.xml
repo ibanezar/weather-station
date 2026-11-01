@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Tue, 27 Oct 2026 17:34:06 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Nov 2026 07:40:30 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Prvi sneg na Goltah in v Solčavi: kdaj ga pričakovati</title>
+      <link>https://meteorec.si/blog/prvi-sneg-golte-solcava-menina-1027.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/prvi-sneg-golte-solcava-menina-1027.html</guid>
+      <pubDate>Sun, 01 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Kdaj pričakovati prvi sneg na Goltah in v Solčavi: modelski posnetek z 27. oktobra in izmerjen prvi sneg na Črnivcu med 18. in 30. novembrom.</description>
+      <category>Golte</category>
+      <category>Solčava</category>
+      <category>Logarska dolina</category>
+      <category>sneg</category>
+      <category>zima</category>
+    </item>
     <item>
       <title>Kdaj se dvigne jutranja megla v dolini? Izmerjeno</title>
       <link>https://meteorec.si/blog/kdaj-se-dvigne-jutranja-megla-dolina-1027.html</link>
@@ -30,18 +42,6 @@
       <category>zima</category>
       <category>ogrevanje</category>
       <category>podatki</category>
-    </item>
-    <item>
-      <title>Prvi sneg na Goltah in v Solčavi: kdaj ga pričakovati</title>
-      <link>https://meteorec.si/blog/prvi-sneg-golte-solcava-menina-1027.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/prvi-sneg-golte-solcava-menina-1027.html</guid>
-      <pubDate>Tue, 27 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Model za 31. oktobra napoveduje prvi sneg na Goltah (1 cm). Za Solčavo ni meritev; na Črnivcu je prvi sneg padel med 18. in 30. novembrom.</description>
-      <category>Golte</category>
-      <category>Solčava</category>
-      <category>Logarska dolina</category>
-      <category>sneg</category>
-      <category>zima</category>
     </item>
     <item>
       <title>Črnivec pozimi: kdaj sneg, kdaj verige</title>
