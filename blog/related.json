@@ -1,7 +1,12 @@
 {
+  "vremenski-povzetek-oktober-2026": [
+    "vremenski-povzetek-julij-2026",
+    "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-september-2026"
+  ],
   "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
-    "reke-megle-temperaturna-inverzija-recica-savinji",
     "zakaj-gobe-rastejo-do-meje-megle",
+    "reke-megle-temperaturna-inverzija-recica-savinji",
     "dve-nevihte-hladno-jutro"
   ],
   "stopinjski-dnevi-recica-koliko-kuriti-1027": [
@@ -50,8 +55,8 @@
     "napoved-avgust-2026-zgornja-savinjska-dolina"
   ],
   "16-noci-pod-5-c-slane-se-ni-1021": [
-    "kdaj-menjati-zimske-gume-recica-1027",
     "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
+    "kdaj-menjati-zimske-gume-recica-1027",
     "slana-gobarska-sezona-1018"
   ],
   "slana-gobarska-sezona-1018": [
@@ -151,8 +156,8 @@
   ],
   "lenartovo-pregovor-vreme-do-bozica": [
     "16-noci-pod-5-c-slane-se-ni-1021",
-    "slana-gobarska-sezona-1018",
-    "kdaj-menjati-zimske-gume-recica-1027"
+    "vremenski-povzetek-oktober-2026",
+    "slana-gobarska-sezona-1018"
   ],
   "lenartov-sejem-vreme-nedelja-1004": [
     "indijansko-poletje-suh-soncen-teden-0925",
@@ -162,7 +167,7 @@
   "krajsanje-dneva-recica-ob-savinji-1005": [
     "koliko-sonca-smo-dejansko-ujeli-v-zgornji-savinjski-dolini-t-0722",
     "poplave-2023-kaj-je-izmerila-postaja",
-    "naslednji-teden-konec-poletja-0904"
+    "vremenski-povzetek-oktober-2026"
   ],
   "dez-8-9-oktobra-koliko-ga-bo-padlo-1007": [
     "gobe-se-ena-priloznost-modeli-dez-1017",
@@ -226,8 +231,8 @@
   ],
   "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001": [
     "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
-    "temperaturni-trend-ireica1-2020-2025",
-    "16-noci-pod-5-c-slane-se-ni-1021"
+    "vremenski-povzetek-oktober-2026",
+    "temperaturni-trend-ireica1-2020-2025"
   ],
   "invazivka-tedenski-pregled-20260920": [
     "invazivka-tedenski-pregled-20260815",
@@ -446,8 +451,8 @@
   ],
   "reke-megle-temperaturna-inverzija-recica-savinji": [
     "zakaj-gobe-rastejo-do-meje-megle",
-    "tropske-noci-inverzija-savinjska-dolina",
-    "kdaj-se-dvigne-jutranja-megla-dolina-1027"
+    "kdaj-se-dvigne-jutranja-megla-dolina-1027",
+    "tropske-noci-inverzija-savinjska-dolina"
   ],
   "vrocina-se-stopnjuje-do-34-c-ze-v-cetrtek-0727": [
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
@@ -495,8 +500,8 @@
     "vodna-bilanca-koliko-od-dezja-zadnjih-dni-je-dejansko-ostalo-0712"
   ],
   "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720": [
-    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
     "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804",
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
     "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
   ],
   "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719": [
