@@ -1703,25 +1703,35 @@ async function fetchComingUp(){
       try{((await _mtrFetch().catch(()=>null))?.days||[]).forEach(x=>{
         if(x.date&&Number.isFinite(x.tmax)&&Number.isFinite(x.tmin))mtrDays[x.date]=x;
       });}catch(_){}
+      // Razpon tedna za vrstico razpona na vsaki kartici (isti vir kot številke: MTR, kjer ga ima dan, sicer Open-Meteo).
+      const wk=[];
+      for(let i=1;i<=7&&i<d.time.length;i++){
+        const m0=mtrDays[d.time[i]];
+        wk.push({hi:m0?m0.tmax:d.temperature_2m_max[i],lo:m0?m0.tmin:d.temperature_2m_min[i]});
+      }
+      const wkMin=Math.min(...wk.map(x=>x.lo)),wkSpan=Math.max(6,Math.max(...wk.map(x=>x.hi))-wkMin);
       for(let i=1;i<=7&&i<d.time.length;i++){
         const mt=mtrDays[d.time[i]];
-        const tHi=mt?mt.tmax:d.temperature_2m_max[i],tLo=mt?mt.tmin:d.temperature_2m_min[i];
+        const tHi=wk[i-1].hi,tLo=wk[i-1].lo;
         const date=new Date(d.time[i]+'T12:00:00');
         const lbl=i===1?'Jutri':SL[date.getDay()]+' '+date.getDate()+'.';
         const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
         const div=document.createElement('div');
-        div.className='cu-day';div.dataset.wx=_wmoCat(d.weather_code[i]);
+        div.className='cu-day'+((date.getDay()===0||date.getDay()===6)?' cu-we':'');div.dataset.wx=_wmoCat(d.weather_code[i]);
         const accent=rain>5?'#3b82f6':rain>0.3?'#60a5fa':prob>50?'#60a5fa':'var(--border)';
         div.style.setProperty('--cu-accent',accent);
+        const l0=Math.max(0,Math.min(100,(tLo-wkMin)/wkSpan*100)),l1=Math.max(l0+6,Math.min(100,(tHi-wkMin)/wkSpan*100));
         div.innerHTML=
+          '<span class="cu-scene" aria-hidden="true"></span>'+
           '<span class="cu-dlbl">'+lbl+'</span>'+
-          '<span class="cu-demo">'+_wmoImg(d.weather_code[i],true,40)+'</span>'+
+          '<span class="cu-demo">'+_wmoImg(d.weather_code[i],true,48)+'</span>'+
           '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+(d.wind_speed_10m_max[i]>=30?' · '+Math.round(d.wind_speed_10m_max[i])+' km/h':'')+'</span>'+
           '<div class="cu-dtemp"'+(mt?' title="Temperatura po MTR, našem modelu. Open-Meteo: '+Math.round(d.temperature_2m_max[i])+'° / '+Math.round(d.temperature_2m_min[i])+'°"':'')+'>'
-            +'<span style="color:'+tempColor(tHi)+'">'+Math.round(tHi)+'°</span>'+
-            '<span class="cu-dtl"> / '+Math.round(tLo)+'°</span></div>'+
+            +'<span class="cu-dhi" style="color:'+tempColor(tHi)+'">'+Math.round(tHi)+'°</span>'+
+            '<span class="cu-dtl">'+Math.round(tLo)+'°</span></div>'+
+          '<div class="cu-range" aria-hidden="true"><i style="left:'+l0.toFixed(1)+'%;width:'+(l1-l0).toFixed(1)+'%;background:linear-gradient(90deg,'+tempColor(tLo)+','+tempColor(tHi)+')"></i></div>'+
           (rain>0.3
-            ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+rain.toFixed(1)+' mm'+(prob?' · '+prob+'%':'')+'</span>'
+            ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+rain.toFixed(1)+' mm'+(prob?' · '+prob+' %':'')+'</span>'
             :'<span class="cu-drain cu-dry">'+_ico('sun')+' suho</span>')+
           '<div class="cu-prob-bar"><div class="cu-prob-fill" style="width:'+prob+'%"></div></div>';
         daysEl.appendChild(div);
