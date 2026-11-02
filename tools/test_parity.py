@@ -976,6 +976,42 @@ def hero_lestvice():
     check(out2.count("style=") == 1 and 'data-on="1"' in out2 and "--p2" not in out2, "lestvica: ponoven patch", out2)
 
 
+@test
+def hero_vceraj():
+    """Čip »od včeraj« pod temperaturo: predizris (inject_current_weather.py) ↔ besedila in pragovi iz applyYesterdayDelta() v app.js."""
+    import inject_current_weather as ic
+    src = open(os.path.join(ROOT, "app.js"), encoding="utf-8").read()
+    for w in ("topleje kot včeraj ob tem času", "hladneje kot včeraj ob tem času", "podobno kot včeraj ob tem času"):
+        check(w in src, "app.js: besedilo čipa", w)
+    check("d>0.5" in src and "d<-0.5" in src, "app.js: prag ±0,5 °C")
+
+    def hour(ts, temp):
+        return {"obsTimeLocal": ts, "metric": {"tempAvg": temp, "temp": temp}}
+    obs = {"obsTimeLocal": "2026-11-02 12:05:00", "metric": {"temp": 10.0}}
+    hourly = [hour("2026-11-01 11:00:00", 7.0), hour("2026-11-01 12:00:00", 7.8), hour("2026-11-02 11:00:00", 9.0)]
+    r = ic.yesterday_delta(obs, hourly)
+    check(r and r[0] == "up" and close(r[1], 2.2, 1e-9), "topleje: izbere uro ob istem času včeraj", r)
+    r = ic.yesterday_delta(dict(obs, metric={"temp": 7.5}), hourly)
+    check(r and r[0] == "same", "razlika −0,3 °C: podobno", r)
+    r = ic.yesterday_delta(dict(obs, metric={"temp": 7.2}), hourly)
+    check(r and r[0] == "down", "razlika −0,6 °C: hladneje", r)
+    r = ic.yesterday_delta(dict(obs, metric={"temp": 12.0}), [hour("2026-11-01 12:00:00", 14.0)])
+    check(r and r[0] == "down", "hladneje", r)
+    check(ic.yesterday_delta(obs, [hour("2026-11-01 06:00:00", 5.0)]) is None, "luknja > 2 h: ne trdi nič")
+    check(ic.yesterday_delta({"obsTimeLocal": "2026-11-02 12:05:00", "metric": {}}, hourly) is None, "brez temperature: nič")
+    check(ic.yesterday_delta(obs, []) is None and ic.yesterday_delta(obs, None) is None, "brez zgodovine: nič")
+    html = '<div class="hero-chips"><div class="yesterday-delta" id="yesterday-delta"></div><div class="feels" hidden></div></div>'
+    out = ic.patch_yesterday_delta(html, obs, hourly)
+    check('↑ 2.2°C</span> <span style="color:var(--muted)">topleje kot včeraj ob tem času</span></div>' in out
+          and '<div class="feels" hidden>' in out, "predizris čipa", out)
+    out2 = ic.patch_yesterday_delta(out, dict(obs, metric={"temp": 12.0}), [hour("2026-11-01 12:00:00", 14.0)])
+    check(out2.count('id="yesterday-delta"') == 1 and "↓ 2.0°C" in out2 and "↑" not in out2, "ponoven zagon prepiše čip", out2)
+    check(ic.patch_yesterday_delta(out, obs, [hour("2026-11-01 06:00:00", 5.0)]) == out, "brez primerjave ostane stari izris")
+    # notranjih meritev čip nikoli ne bere
+    check("indoor" not in open(ic.__file__, encoding="utf-8").read().split("def yesterday_delta")[1].split("def hero_scale_positions")[0],
+          "čip ne omenja indoor")
+
+
 def main():
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
     for t in TESTS:

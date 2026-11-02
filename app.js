@@ -2693,7 +2693,10 @@ function applyObs(obs){
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   if(obs.obsTimeLocal){const t=new Date(obs.obsTimeLocal.replace(' ','T'));if(!isNaN(t)){_lastObsTime=t;updateHeroStationTime();}}
   const tempEl=document.getElementById('temp-val');
-  if(tempEl&&m.temp!=null){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}}
+  if(tempEl&&m.temp!=null){_lastTemp=m.temp;_liveTemp=m.temp;_liveTempColor=tempColor(m.temp);if(!_sliderActive){tempEl.style.color=_liveTempColor;countUp('temp-val',m.temp,1,'',1200);}
+    // Urna zgodovina je lahko prispela PRED živo meritvijo (applyYesterdayDelta takrat ni imel _lastTemp in je čip pustil praznega
+    // do naslednje osvežitve čez 5 min) -- čip »od včeraj« zato izpolnimo tudi tukaj.
+    if(_hourlyObs.length){try{applyYesterdayDelta(_hourlyObs);}catch(_){}}}
   const feelsVal=m.heatIndex??m.windChill??m.temp;set('feels-val',fmt(feelsVal,1));set('dewpt-hero',fmt(m.dewpt,1));
   const fs=feelsStyle(feelsVal),pill=document.getElementById('feels-pill');
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
@@ -4502,7 +4505,8 @@ function applyYesterdayDelta(observations){
   const target=new Date(Date.now()-24*3600*1000);
   let closest=null,minDiff=Infinity;
   observations.forEach(o=>{const t=new Date(o.obsTimeLocal.replace(' ','T'));const df=Math.abs(t-target);if(df<minDiff){minDiff=df;closest=o;}});
-  if(!closest||_lastTemp===null)return;
+  // Brez ujemajoče meritve (luknja v urnih podatkih > 2 h) primerjave ne trdimo: čip ostane, kot je (statični izris ali prazen).
+  if(!closest||_lastTemp===null||minDiff>2*3600*1000)return;
   const ty=closest.metric?.tempAvg??closest.metric?.temp;if(ty==null)return;
   const d=_lastTemp-ty,absD=Math.abs(d).toFixed(1);
   const arrow=d>0.5?'↑':d<-0.5?'↓':'→';
