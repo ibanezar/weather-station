@@ -1653,6 +1653,19 @@ function checkAlerts(obs){
 
 // ── Kaj prihaja — urni strip + 3 dni ─────────────────────
 // Ponovni poskusi (4 s, 10 s, 10 s): Open-Meteo ob 429 vrne JSON z napako, brez ponovitve pa obeti in hitra vprašanja ostanejo prazni do osvežitve strani.
+// Napoved za obete/hero: prenos z rokom, brez skupne vrste; odgovor brez hourly/daily (npr. 429) šteje kot neuspeh.
+async function _cuGet(u,ms){
+  const ac=typeof AbortController!=='undefined'?new AbortController():null;
+  const tm=ac?setTimeout(()=>ac.abort(),ms):0;
+  try{const r=await fetch(u,ac?{signal:ac.signal}:undefined);const j=await r.json();return j&&j.hourly&&j.daily?j:null;}
+  catch(_){return null;}finally{clearTimeout(tm);}
+}
+function _cuCached(){
+  try{const o=JSON.parse(localStorage.getItem('wx-cu-v1')||'null');
+    if(o&&o.ts&&o.data&&o.data.hourly&&o.data.daily)return{data:o.data,age:Date.now()-o.ts};}catch(_){}
+  return null;
+}
+function _cuStore(d){try{localStorage.setItem('wx-cu-v1',JSON.stringify({ts:Date.now(),data:d}));}catch(_){}}
 let _cuTries=0,_cuRetryTimer=null;
 async function fetchComingUp(){
   clearTimeout(_cuRetryTimer);
@@ -1667,12 +1680,17 @@ async function _fetchComingUpOnce(){
       +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day'
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,uv_index_max,wind_speed_10m_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=8';
-    // Neposreden klic Open-Meteo iz brskalnika ob 429 (omejitev po IP, npr. mobilno omrežje) ne uspe: graf na heroju, 7 dni in obeti
-    // potem ostanejo prazni. Rezerva je naš worker (/napoved-om): isti klic, rob ga drži 10 min, zato Open-Meteo dobi en klic na 10 min za vse obiskovalce.
-    let data=null;
-    try{data=await _archFetch(url);}catch(_){}
-    if(!(data&&data.hourly&&data.daily)){
-      try{const r=await fetch(PROXY+'/napoved-om');const j=await r.json();if(j&&j.hourly&&j.daily)data=j;}catch(_){}
+    // Brez skupne vrste _archFetch (ta streže tudi arhivske klice, vsak z do 20 s roka): napoved je prva, ki jo stran potrebuje.
+    // Najprej worker (/napoved-om: ista napoved, rob jo drži 10 min, zato je hiter in nima omejitve po IP obiskovalca),
+    // nato neposredno Open-Meteo. Prejšnji prenos je v localStorage (wx-cu-v1): do 20 min star se uporabi brez klica,
+    // do 3 h star pa ob neuspehu, da stran ni prazna.
+    const cached=_cuCached();
+    let data=null,stale=false;
+    if(cached&&cached.age<20*60000)data=cached.data;
+    else{
+      data=await _cuGet(PROXY+'/napoved-om',8000)||await _cuGet(url,10000);
+      if(data)_cuStore(data);
+      else if(cached&&cached.age<3*3600000){data=cached.data;stale=true;}
     }
     if(!data)return false;
     const h=data.hourly,d=data.daily;
@@ -1812,7 +1830,7 @@ async function _fetchComingUpOnce(){
 
     const upd=document.getElementById('cu-updated');
     if(upd)upd.textContent='posod. '+now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-    return true;
+    return !stale;
   }catch(e){console.warn('ComingUp:',e);return false;}
 }
 
