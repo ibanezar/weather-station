@@ -17643,6 +17643,7 @@ const _QA_CARET='<svg class="qa-car" viewBox="0 0 24 24" aria-hidden="true"><pat
 function _qaTileHtml(m){
   const load=m.state==='load';
   return `<button type="button" class="qa-tile" data-qa="${m.id}" data-state="${m.state}" aria-expanded="${_qaOpen===m.id}" aria-controls="qa-detail"${load?' disabled':''}>
+    <span class="qa-art" aria-hidden="true"><svg class="ic"><use href="#${m.icon}"/></svg></span>
     <span class="qa-th"><span class="qa-chip"><svg class="ic" aria-hidden="true"><use href="#${m.icon}"/></svg></span><span class="qa-pill">${load?'':m.pill}</span></span>
     <span class="qa-tl">${m.label}</span><span class="qa-tv${load?' skel-shimmer':''}">${load?'—':m.val}</span>
     <span class="qa-ts">${load?'nalagam':m.sub}</span><span class="qa-tm">${m.meta||'&nbsp;'}</span>${load?'':_QA_CARET}</button>`;
