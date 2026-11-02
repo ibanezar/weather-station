@@ -91,6 +91,11 @@ MUTACIJE = [
     # ── dolinski profil (test_valley_profile.py) ──────────────────────────────
     ("profil: prag inverzije", "app.js", "if(lapse>0){kind='inversion'", "if(lapse>0.5){kind='inversion'", "test_valley_profile.py"),
     ("profil: prag običajnega gradienta", "app.js", "else if(lapse>-0.9){kind='normal'", "else if(lapse>-1.2){kind='normal'", "test_valley_profile.py"),
+    # ── napoved ur zasidrana na meritev (test_anchor.py) ──────────────────────
+    ("sidro: izzvenevanje", "app.js", "const w=Math.max(0,1-(h.t.getTime()-nowMs)/(ANCHOR_HOURS*3600000));", "const w=1;", "test_anchor.py"),
+    ("sidro: omejitev popravka", "app.js", "Math.max(-ANCHOR_MAX_C,Math.min(ANCHOR_MAX_C,obsT-modelNow))", "obsT-modelNow", "test_anchor.py"),
+    ("sidro: starost meritve", "app.js", "!(obsAgeMin<=ANCHOR_MAX_AGE_MIN)", "false", "test_anchor.py"),
+    ("sidro: interpolacija modela", "app.js", "modelNow+=(nx.temp-modelNow)*(nowMs-ti)/(tn-ti);", "", "test_anchor.py"),
     # ── zasebnost (test_privacy.py) ───────────────────────────────────────────
     ("zasebnost: worker /ecowitt-current", "worker.js", "if (ewData && ewData.data) delete ewData.data.indoor;", "", "test_privacy.py"),
     ("zasebnost: worker /varpolje-current", "worker.js", "          delete vpData.indoor;\n", "", "test_privacy.py"),
