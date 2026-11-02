@@ -4342,3 +4342,38 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
 .cu-day.otd-empty{opacity:.65;justify-content:center;min-height:6rem}
 .cu-ex{font-size:.66rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center}
 .sea-cu,.mtn-cu{margin-top:.65rem}
+
+/* ── Vremenski obeti na namizju: večje kartice (2. 11. 2026) ─────────────────────────────────────────────
+   Pas ur in sedem dnevnih kartic je bil na namizju drobiž (ikona 40/48 px, 0,56–0,7 rem besedila) v stolpcu širine ~860 px.
+   Širine kartic ne moremo povečati (sedem se jih že natančno prilega), zato se poveča vse znotraj: ikone, številke, besedilo,
+   blok MTR in scena. Samo `.cu-card` (Vremenski obeti): isti .cu-day na drugih mestih (otd, AI napoved) ostane, kot je.
+   Samo ≥ 900 px; telefon in tablica se ne spremenita. */
+@media (min-width:900px){
+  .cu-card .cu-section-lbl{font-size:.74rem;margin-bottom:.6rem}
+  .cu-card .cu-strip{gap:.5rem}
+  .cu-card .cu-hour{flex:1 1 0;min-width:0;gap:.4rem;padding:.8rem .2rem .75rem;border-radius:14px}
+  .cu-card .cu-ht{font-size:.8rem}
+  .cu-card .cu-he .wx-icon{width:54px;height:54px}
+  .cu-card .cu-htemp{font-size:1.3rem}
+  .cu-card .cu-hprob{font-size:.78rem}
+  .cu-card .cu-day{padding:1rem .6rem .85rem;gap:.3rem}
+  .cu-card .cu-scene{height:13rem}
+  .cu-card .cu-dlbl{font-size:.88rem}
+  .cu-card .cu-demo .wx-icon{width:68px;height:68px}
+  .cu-card .cu-ddesc{font-size:.84rem;min-height:2.6em}
+  .cu-card .cu-dhi{font-size:1.85rem}
+  .cu-card .cu-dtl{font-size:1.1rem}
+  .cu-card .cu-range{height:6px;margin:.3rem .1rem .15rem}
+  .cu-card .cu-drain{font-size:.76rem}
+  .cu-card .cu-prob-bar{height:5px}
+  .cu-card .cu-mtr{padding:.55rem .5rem .6rem;gap:.3rem;border-radius:12px}
+  .cu-card .cu-mtr-hd{font-size:.7rem}
+  .cu-card .cu-mtr-hd{gap:.25rem}
+  .cu-card .cu-mtr-hd b{font-size:.86rem}
+  .cu-card .cu-mtr .rain-row{grid-template-columns:2.1rem 1fr 1.8rem;gap:.3rem;font-size:.7rem}
+  .cu-card .cu-mtr .rain-t{height:6px}
+  .cu-card .mtr-pill{font-size:.66rem;padding:.2rem .5rem}
+  .cu-card .cu-confidence{font-size:.7rem;line-height:1.35}
+  .cu-card .txfc-source{font-size:.76rem}
+}
+@media (min-width:900px) and (max-width:1099px){.cu-card .cu-drain{font-size:.7rem;gap:.2rem}.cu-card .cu-drain .ic{display:none}}
