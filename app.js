@@ -129,7 +129,14 @@ function _archDrain(){
   if(!_archQ.length){_archRunning=false;return;}
   _archRunning=true;
   const{url,res,rej}=_archQ.shift();
-  fetch(url).then(r=>r.json()).then(d=>{_archCache[url]=d;res(d);}).catch(rej).finally(()=>setTimeout(_archDrain,650));
+  // Rok 20 s: zahteva brez odgovora je prej držala vrsto in vse za njo (kartice obetov in hitra vprašanja so ostale v nalaganju).
+  const ac=typeof AbortController!=='undefined'?new AbortController():null;
+  const tm=ac?setTimeout(()=>ac.abort(),20000):0;
+  fetch(url,ac?{signal:ac.signal}:undefined).then(r=>r.json()).then(d=>{
+    // Odgovor z napako (npr. 429 »Too many requests«) NI podatek: v predpomnilnik ne sme, sicer ponovni klic do konca seje dobi isto napako.
+    if(!(d&&d.error))_archCache[url]=d;
+    res(d);
+  }).catch(rej).finally(()=>{clearTimeout(tm);setTimeout(_archDrain,650);});
 }
 
 // SVG ikona iz sprite-a v index.html (tools/emoji_to_icons.py); samo za nize, ki gredo v innerHTML
@@ -1645,7 +1652,15 @@ function checkAlerts(obs){
 }
 
 // ── Kaj prihaja — urni strip + 3 dni ─────────────────────
+// Ponovni poskusi (4 s, 10 s, 10 s): Open-Meteo ob 429 vrne JSON z napako, brez ponovitve pa obeti in hitra vprašanja ostanejo prazni do osvežitve strani.
+let _cuTries=0,_cuRetryTimer=null;
 async function fetchComingUp(){
+  clearTimeout(_cuRetryTimer);
+  const ok=await _fetchComingUpOnce();
+  if(ok){_cuTries=0;return;}
+  if(_cuTries<3){_cuTries++;_cuRetryTimer=setTimeout(fetchComingUp,_cuTries===1?4000:10000);}
+}
+async function _fetchComingUpOnce(){
   try{
     const url='https://api.open-meteo.com/v1/forecast'
       +'?latitude='+LAT+'&longitude='+LON
@@ -1654,7 +1669,7 @@ async function fetchComingUp(){
       +'&timezone=Europe%2FLjubljana&forecast_days=8';
     const data=await _archFetch(url);
     const h=data.hourly,d=data.daily;
-    if(!h||!d)return;
+    if(!h||!d)return false;
 
     // Find current hour index
     const now=new Date(),nowMs=now.getTime();
@@ -1666,6 +1681,7 @@ async function fetchComingUp(){
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,mm:h.precipitation?.[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
     _cuDailyData=d;
+    try{localStorage.setItem('wx-qa-hours-v1',JSON.stringify({ts:Date.now(),h:hours.map(x=>[x.t.getTime(),x.temp,x.prob,x.mm,x.wmo])}));}catch(_){}
     try{renderQa();}catch(_){}
     {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
     drawHeroSparkline();
@@ -1789,7 +1805,8 @@ async function fetchComingUp(){
 
     const upd=document.getElementById('cu-updated');
     if(upd)upd.textContent='posod. '+now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
-  }catch(e){console.warn('ComingUp:',e);}
+    return true;
+  }catch(e){console.warn('ComingUp:',e);return false;}
 }
 
 // Trust badge near the hero: "our forecast, graded daily, against ARSO" is
@@ -17699,10 +17716,20 @@ function _qaFallback(){
   return _qaPlan([]).map(id=>({id,label:_QA_LABEL[id][0],icon:_QA_LABEL[id][1],state:'none',pill:'—',val:'—',sub:'ni podatka',meta:'',
     head:'Podatki trenutno niso na voljo.',chart:'',facts:[],src:'Poskusi znova čez trenutek.'}));
 }
+// Zadnji uspešen prenos (do 3 h star): hitra vprašanja se pokažejo takoj, ko je Open-Meteo počasen ali odpove; svež odgovor jih prepiše.
+function _qaCached(){
+  try{
+    const c=JSON.parse(localStorage.getItem('wx-qa-hours-v1')||'null');
+    if(!c||!Array.isArray(c.h)||Date.now()-c.ts>3*3600*1000)return null;
+    const hours=c.h.filter(x=>x[0]>=Date.now()-1800000).map(x=>({t:new Date(x[0]),temp:x[1],prob:x[2],mm:x[3],wmo:x[4],isDay:true}));
+    return hours.length>=8?{hours,ageMin:Math.round((Date.now()-c.ts)/60000)}:null;
+  }catch(_){return null;}
+}
 function renderQa(failed){
   const grid=document.getElementById('qa-tiles');
   if(!grid||!document.getElementById('qa-detail'))return;
-  const hrs=_forecastHours;
+  let hrs=_forecastHours,stale=null;
+  if(!hrs.length){const c=_qaCached();if(c){hrs=c.hours;stale=c.ageMin;}}
   let models;
   try{
     models=hrs.length?_qaPlan(hrs).map(id=>_QA[id](hrs))
@@ -17712,6 +17739,7 @@ function renderQa(failed){
     console.warn('QA:',e);
     models=_qaFallback();
   }
+  if(stale!=null)models.forEach(m=>{if(m.src)m.src+=' Prikazan je zadnji prenos (pred '+stale+' min), osvežitev poteka.';});
   _qaModels=models;
   const foc=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#qa-tiles')?document.activeElement.dataset.qa:null;
   grid.innerHTML=models.map(_qaTileHtml).join('');
