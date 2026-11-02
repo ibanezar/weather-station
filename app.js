@@ -2522,6 +2522,8 @@ let _sparkByHour=null,_sparkW=320,_sparkChip=null;
 
 function _sparkFmt(t){return Number(t).toFixed(1).replace('.',',');}
 function _sparkClockLabel(d){return String(d.getHours()).padStart(2,'0')+':00';}
+// »jutri 13:00« namesto golega »13:00«, kadar ura ni današnja (zvečer je najtoplejša ura že jutri)
+function _sparkDayWord(d){const t=new Date(),a=new Date(t.getFullYear(),t.getMonth(),t.getDate()),b=new Date(d.getFullYear(),d.getMonth(),d.getDate()),diff=Math.round((b-a)/864e5);return diff===1?'jutri ':diff===-1?'včeraj ':'';}
 
 function drawHeroSparkline(){
   const wrap=document.getElementById('hero-spark-wrap');
@@ -2556,7 +2558,9 @@ function drawHeroSparkline(){
   // Meriti je treba na nadrejenem #fc-slider-wrap, NE na samem svg elementu:
   // #hero-spark-wrap ima na prvi izris še `display:none`, zato bi getBoundingClientRect()
   // na svg-ju vrnil 0 in padel nazaj na privzetih 320. #fc-slider-wrap nima `hidden`.
-  const W=Math.round(wrap.parentElement?.getBoundingClientRect().width||svg.getBoundingClientRect().width)||320,H=SPARK_H,minH=-6,maxH=pts[pts.length-1].h;
+  const W=Math.round(wrap.parentElement?.getBoundingClientRect().width||svg.getBoundingClientRect().width)||320,H=SPARK_H,minH=pts[0].h,maxH=pts[pts.length-1].h;
+  // Brez urnih meritev (še niso naložene ali jih ni) graf začne pri »zdaj«, ne pusti praznega pasu levo; drsnik mora imeti isto skalo.
+  {const sl=document.getElementById('fc-slider');if(sl&&+sl.min!==minH){sl.min=minH;if(+sl.value<minH)sl.value=minH;}}
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
   const temps=pts.map(p=>p.t),tMin=Math.min(...temps),tMax=Math.max(...temps);
   const pad=Math.max(1,(tMax-tMin)*.15),lo=tMin-pad,hi=tMax+pad;
@@ -2572,7 +2576,7 @@ function drawHeroSparkline(){
   let chipSvg='';_sparkChip=null;
   const ahead=pts.filter(p=>p.h>=0),aMax=Math.max(...ahead.map(p=>p.t));
   const ties=ahead.filter(p=>p.t===aMax),tp=ties[Math.floor((ties.length-1)/2)];
-  const txt='↑ '+_sparkFmt(aMax)+'° · '+_sparkClockLabel(tp.when);
+  const txt='↑ '+_sparkFmt(aMax)+'° · '+_sparkDayWord(tp.when)+_sparkClockLabel(tp.when);
   const cw=txt.length*6.2+20,ccx=Math.min(Math.max(px(avgH(ties)),cw/2+4),W-cw/2-4),cy=Math.max(2,py(aMax)-34);
   chipSvg='<g class="hspark-chip" id="hero-spark-chip"><rect class="hspark-chip-bg" x="'+(ccx-cw/2).toFixed(1)+'" y="'+cy.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="22" rx="11"/>'+
     '<text class="hspark-chip-tx" x="'+ccx.toFixed(1)+'" y="'+(cy+14.4).toFixed(1)+'" text-anchor="middle">'+txt+'</text></g>';
@@ -2657,7 +2661,7 @@ function moveHeroSparkMarker(v){
   guide.setAttribute('x1',pt.x.toFixed(1));guide.setAttribute('x2',pt.x.toFixed(1));
   guide.setAttribute('y2',Math.max(0,pt.y-8).toFixed(1));
   if(pill){
-    pill.textContent=(best===0?'ZDAJ':_sparkClockLabel(pt.when))+' · '+_sparkFmt(pt.t)+'°';
+    pill.textContent=(best===0?'ZDAJ':_sparkDayWord(pt.when)+_sparkClockLabel(pt.when))+' · '+_sparkFmt(pt.t)+'°';
     // oznaka ostane znotraj kartice: pri robu se ne poravna na piko, puščice ni
     const pw=pill.offsetWidth||70;
     pill.style.left=Math.min(Math.max(pt.x-pw/2,0),Math.max(0,_sparkW-pw)).toFixed(1)+'px';

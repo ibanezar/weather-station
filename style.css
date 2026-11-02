@@ -4254,7 +4254,7 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 .hero-b .fc-slider-wrap{padding:0;gap:.3rem;position:relative}
 /* Graf »poteka dneva« (1. 11. 2026): črta + stolpci po 3 ure; graf sam premika uro, pravi drsnik je skrit (tipkovnica, bralniki zaslona) */
 .hero-b .hero-spark-wrap{margin:2.2rem 0 .2rem;box-sizing:border-box;touch-action:pan-y;cursor:ew-resize;-webkit-user-select:none;user-select:none;border-radius:14px}
-.hero-b .hero-spark-wrap[hidden]{display:block;visibility:hidden;height:196px}
+.hero-b .hero-spark-wrap[hidden]{display:block;visibility:hidden;height:184px}
 .hero-b #hero-spark-svg{height:110px;overflow:visible}
 .hero-b .fc-slider-info{display:none}
 .hero-b .fc-slider{position:absolute;left:0;bottom:0;width:1px;height:1px;margin:0;padding:0;opacity:0;overflow:hidden;pointer-events:none}
@@ -4272,8 +4272,8 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 .hero-b .hero-spark-now::after{display:none}
 [data-theme="dark"] .hero-b .hero-spark-now{background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 /* stolpci vsake 3 ure */
-.hero-spark-cols{position:relative;height:84px;margin-top:2px;pointer-events:none}
-.hsc-col{position:absolute;top:0;width:38px;height:82px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:6px;border-radius:16px;transition:background .15s}
+.hero-spark-cols{position:relative;height:72px;margin-top:2px;pointer-events:none}
+.hsc-col{position:absolute;top:0;width:38px;height:70px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:6px;border-radius:16px;transition:background .15s}
 .hsc-col img{width:28px;height:28px;display:block}
 .hsc-col b{font-size:.7rem;line-height:1.2;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
 .hsc-col i{font-style:normal;font-size:.66rem;line-height:1.2;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
