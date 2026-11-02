@@ -1706,6 +1706,7 @@ async function _fetchComingUpOnce(){
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,mm:h.precipitation?.[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
     _cuDailyData=d;
+    _cuFull=data;
     try{localStorage.setItem('wx-qa-hours-v1',JSON.stringify({ts:Date.now(),h:hours.map(x=>[x.t.getTime(),x.temp,x.prob,x.mm,x.wmo])}));}catch(_){}
     try{renderQa();}catch(_){}
     {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
@@ -1751,6 +1752,8 @@ async function _fetchComingUpOnce(){
         const m0=mtrDays[d.time[i]];
         wk.push({hi:m0?m0.tmax:d.temperature_2m_max[i],lo:m0?m0.tmin:d.temperature_2m_min[i]});
       }
+      _cuMtrDays=mtrDays;
+      _cuBindDetail(daysEl);
       const wkMin=Math.min(...wk.map(x=>x.lo)),wkSpan=Math.max(6,Math.max(...wk.map(x=>x.hi))-wkMin);
       for(let i=1;i<=7&&i<d.time.length;i++){
         const mt=mtrDays[d.time[i]];
@@ -1759,7 +1762,10 @@ async function _fetchComingUpOnce(){
         const lbl=i===1?'Jutri':SL[date.getDay()]+' '+date.getDate()+'.';
         const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
         const div=document.createElement('div');
-        div.className='cu-day'+((date.getDay()===0||date.getDay()===6)?' cu-we':'');div.dataset.wx=_wmoCat(d.weather_code[i]);
+        div.className='cu-day cu-click'+((date.getDay()===0||date.getDay()===6)?' cu-we':'');div.dataset.wx=_wmoCat(d.weather_code[i]);
+        // Klik / Enter / presledek odpre podrobnosti dneva (toggleCuDetail, ploščo #cu-detail pod karticami)
+        div.dataset.date=d.time[i];div.tabIndex=0;
+        div.setAttribute('role','button');div.setAttribute('aria-expanded','false');div.setAttribute('aria-controls','cu-detail');
         const accent=rain>5?'#3b82f6':rain>0.3?'#60a5fa':prob>50?'#60a5fa':'var(--border)';
         div.style.setProperty('--cu-accent',accent);
         const l0=Math.max(0,Math.min(100,(tLo-wkMin)/wkSpan*100)),l1=Math.max(l0+6,Math.min(100,(tHi-wkMin)/wkSpan*100));
@@ -1778,6 +1784,8 @@ async function _fetchComingUpOnce(){
           '<div class="cu-prob-bar"><div class="cu-prob-fill" style="width:'+prob+'%"></div></div>';
         daysEl.appendChild(div);
       }
+      // Osvežitev napovedi zgradi kartice na novo: odprt dan se obnovi (ali zapre, če ga ni več med karticami)
+      if(_cuOpenDate&&!_cuShowDetail(false))closeCuDetail();
       // Confidence note across the whole strip, not just "Jutri": MTR's
       // own D+1..D+3 training uncertainty (tmax_sd) is the most authoritative
       // signal where it exists; for days it doesn't cover, fall back to how
@@ -1832,6 +1840,126 @@ async function _fetchComingUpOnce(){
     if(upd)upd.textContent='posod. '+now.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
     return !stale;
   }catch(e){console.warn('ComingUp:',e);return false;}
+}
+
+// ── Podrobnosti dneva v »Naslednjih 7 dni« (klik na kartico) ──────────────
+// Vse je iz že prenesene napovedi (_cuFull: urni in dnevni podatki Open-Meteo za 8 dni, isti odgovor kot za kartice):
+// nobenega novega klica. Urna krivulja, številke in 3-urni trak so Open-Meteo; MTR (naš model) je ločena vrstica,
+// kjer ima dan — vira se ne zlivata (isto kot na kartici). Vse je modelska napoved, ne meritev.
+let _cuFull=null,_cuMtrDays={},_cuOpenDate=null;
+function _cuDetailHtml(date){
+  const d=_cuFull&&_cuFull.daily,h=_cuFull&&_cuFull.hourly;
+  if(!d||!h)return'';
+  const i=d.time.indexOf(date);
+  if(i<0)return'';
+  const idx=[];
+  for(let k=0;k<h.time.length;k++)if(h.time[k].slice(0,10)===date)idx.push(k);
+  const dt=new Date(date+'T12:00:00');
+  const title=_PD_DAYS_FULL[dt.getDay()]+', '+dt.getDate()+'. '+(dt.getMonth()+1)+'.';
+  const code=d.weather_code[i];
+  const tHi=d.temperature_2m_max[i],tLo=d.temperature_2m_min[i];
+  const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
+  const wind=d.wind_speed_10m_max?d.wind_speed_10m_max[i]:null;
+  const uv=d.uv_index_max?d.uv_index_max[i]:null;
+  const mt=_cuMtrDays[date];
+
+  // Urni graf (24 h) — enak kot pri »Zadnjih 7 dni«
+  let chart='';
+  if(idx.length>=2){
+    const ch=_dayChartSvg(idx.map(k=>h.time[k].slice(11,16)),idx.map(k=>h.temperature_2m[k]),idx.map(k=>h.precipitation?h.precipitation[k]:null),'Urna napoved temperature in padavin');
+    if(ch)chart=ch.svg;
+  }
+  // 3-urni trak: ikona, temperatura, verjetnost padavin (isti videz kot »Naslednjih 24 ur«)
+  const strip=idx.filter(k=>+h.time[k].slice(11,13)%3===0).map(k=>{
+    const t=h.temperature_2m[k],p=h.precipitation_probability?(h.precipitation_probability[k]||0):0;
+    return '<div class="cu-hour"><span class="cu-ht">'+h.time[k].slice(11,16)+'</span>'
+      +'<span class="cu-he">'+_wmoImg(h.weather_code[k]||0,h.is_day?h.is_day[k]!==0:true,40)+'</span>'
+      +'<span class="cu-htemp"'+(t!=null?' style="color:'+tempColor(t)+'"':'')+'>'+(t!=null?Math.round(t)+'°':'—')+'</span>'
+      +(p>=15?'<span class="cu-hprob">'+p+'%</span>':'<span class="cu-hprob" style="opacity:.25">—</span>')+'</div>';
+  }).join('');
+
+  const stat=(ic,txt)=>'<span>'+_ico(ic)+' '+txt+'</span>';
+  const stats=[
+    stat('thermometer','Najvišja <b>'+Math.round(tHi)+' °C</b>'),
+    stat('thermometer-snowflake','Najnižja <b>'+Math.round(tLo)+' °C</b>'),
+    stat('cloud-rain','Padavine <b>'+(rain>0.3?rain.toFixed(1).replace('.',',')+' mm':'suho')+'</b>'+(prob?' · verjetnost do '+prob+' %':'')),
+    wind!=null?stat('wind','Veter do <b>'+Math.round(wind)+' km/h</b>'):'',
+    uv!=null?stat('sun','UV do <b>'+Math.round(uv)+'</b> ('+uvLabel(Math.round(uv)).toLowerCase()+')'):''
+  ].join('');
+
+  // MTR: samo kjer ima dan; številke so MTR, kar je zgoraj, je Open-Meteo
+  let mtr='';
+  if(mt){
+    const fz=mtrFrostPct(mt.p_frost);
+    mtr='<div class="cu-detail-mtr"><span class="mtr-pill">MTR</span> naš model: najvišja <b>'+Math.round(mt.tmax)+'°</b>'
+      +(Number.isFinite(mt.tmax_sd)?' ± '+fmt(mt.tmax_sd,1):'')
+      +', najnižja <b>'+Math.round(mt.tmin)+'°</b>'+(Number.isFinite(mt.tmin_sd)?' ± '+fmt(mt.tmin_sd,1):'')
+      +(fz!=null?' · zmrzal '+fz+' %':'')+'</div>';
+  }
+  return '<div class="pd-detail-hdr">'
+      +'<span class="pd-detail-title cu-detail-title">'+_wmoImg(code,true,32)+' '+title+' · '+_wmoTxt(code)+'</span>'
+      +'<button type="button" class="pd-detail-close" data-cu-close aria-label="Zapri podrobnosti dneva">✕</button>'
+    +'</div>'
+    +chart
+    +(strip?'<div class="cu-strip cu-detail-strip" role="group" aria-label="Napoved po 3 ure">'+strip+'</div>':'')
+    +'<div class="pd-detail-stats">'+stats+'</div>'
+    +mtr
+    +'<div class="cu-detail-src">Open-Meteo · modelska napoved, ne meritev.'+(mt?' Graf, trak in številke zgoraj so Open-Meteo, vrstica MTR je naš model — vira se ne zlivata.':'')+'</div>';
+}
+// Odpre ploščo za izbrani dan in označi kartico; false, če dneva (več) ni.
+function _cuShowDetail(scroll){
+  const panel=document.getElementById('cu-detail'),days=document.getElementById('cu-days');
+  if(!panel||!days||!_cuFull||!_cuOpenDate)return false;
+  const card=days.querySelector('.cu-day[data-date="'+_cuOpenDate+'"]');
+  const html=card?_cuDetailHtml(_cuOpenDate):'';
+  if(!html)return false;
+  days.querySelectorAll('.cu-day[data-date]').forEach(c=>{
+    const on=c===card;
+    c.classList.toggle('active',on);
+    c.setAttribute('aria-expanded',on?'true':'false');
+  });
+  panel.innerHTML=html;
+  panel.classList.add('open');
+  if(scroll){
+    const r=panel.getBoundingClientRect();
+    if(r.bottom>window.innerHeight||r.top<0){
+      const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+      panel.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});
+    }
+  }
+  return true;
+}
+function toggleCuDetail(date){
+  if(_cuOpenDate===date){closeCuDetail();return;}
+  _cuOpenDate=date;
+  if(!_cuShowDetail(true))closeCuDetail();
+}
+function closeCuDetail(focusCard){
+  const date=_cuOpenDate;
+  _cuOpenDate=null;
+  const panel=document.getElementById('cu-detail');
+  if(panel){panel.classList.remove('open');panel.innerHTML='';}
+  document.querySelectorAll('#cu-days .cu-day.active').forEach(c=>{c.classList.remove('active');c.setAttribute('aria-expanded','false');});
+  if(focusCard&&date){const c=document.querySelector('#cu-days .cu-day[data-date="'+date+'"]');if(c)c.focus();}
+}
+// Dogodki so vezani enkrat (kartice se ob vsaki osvežitvi napovedi zgradijo na novo, vsebnik ostane).
+function _cuBindDetail(daysEl){
+  if(daysEl.dataset.cuBound)return;
+  daysEl.dataset.cuBound='1';
+  daysEl.addEventListener('click',e=>{
+    const c=e.target.closest&&e.target.closest('.cu-day[data-date]');
+    if(c)toggleCuDetail(c.dataset.date);
+  });
+  daysEl.addEventListener('keydown',e=>{
+    if(e.target.classList&&e.target.classList.contains('cu-day')&&e.target.dataset.date&&(e.key==='Enter'||e.key===' ')){
+      e.preventDefault();toggleCuDetail(e.target.dataset.date);
+    }else if(e.key==='Escape'&&_cuOpenDate)closeCuDetail(true);
+  });
+  const panel=document.getElementById('cu-detail');
+  if(panel){
+    panel.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-cu-close]'))closeCuDetail(true);});
+    panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&_cuOpenDate)closeCuDetail(true);});
+  }
 }
 
 // Trust badge near the hero: "our forecast, graded daily, against ARSO" is
@@ -4249,6 +4377,45 @@ function _pdCondition(m){
   return{wx,icon,desc:c.desc};
 }
 
+// Urni graf dneva: temperatura (črta) in padavine (stolpci). Skupen za pretekle dni (arhiv, togglePdDetail)
+// in za napoved dneva (toggleCuDetail). Vrne null, če ni nobene veljavne temperature.
+function _dayChartSvg(hrs,temps,prec,label){
+  const validTemps=temps.filter(x=>x!=null);
+  if(!validTemps.length)return null;
+  const tMin=Math.min(...validTemps), tMax=Math.max(...validTemps);
+  const tRange=Math.max(0.5,tMax-tMin);
+  const W=400,H=100,px=8,py=10;
+  const n=hrs.length;
+  const pts=temps.map((t,i)=>t!=null?[px+(i/(n-1))*(W-px*2),H-py-((t-tMin)/tRange)*(H-py*2)]:null).filter(Boolean);
+  const polyline=pts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const maxPrec=Math.max(...prec.filter(x=>x!=null),0.1);
+  const rainBars=prec.map((p,i)=>{
+    if(!p||p<=0)return'';
+    const bw=Math.max(3,(W-px*2)/n*0.7);
+    const x=px+(i/(n-1))*(W-px*2)-bw/2;
+    const bh=(p/maxPrec)*(H-py*2)*0.35;
+    return`<rect x="${x.toFixed(1)}" y="${(H-py-bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="rgba(96,165,250,.4)" rx="1"/>`;
+  }).join('');
+  // x labels every 6h
+  const xlbls=[0,6,12,18].map(h=>{
+    const idx=hrs.findIndex(t=>t===`${String(h).padStart(2,'0')}:00`);
+    if(idx<0)return'';
+    const x=px+(idx/(n-1))*(W-px*2);
+    return`<text x="${x.toFixed(1)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${hrs[idx]}</text>`;
+  }).join('');
+  // y labels
+  const ylbls=[tMin,tMax].map(t=>{
+    const y=H-py-((t-tMin)/tRange)*(H-py*2);
+    return`<text x="${(W-2).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="7" fill="var(--muted)" text-anchor="end">${t.toFixed(1)}°</text>`;
+  }).join('');
+  const svg=`<svg class="pd-detail-svg" viewBox="0 0 ${W} ${H}"${label?` role="img" aria-label="${label}"`:''}>
+        ${rainBars}
+        <polyline points="${polyline}" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        ${xlbls}${ylbls}
+      </svg>`;
+  return{svg,tMin,tMax};
+}
+
 async function togglePdDetail(date,el){
   const panel=document.getElementById('pd-detail');
   if(_pdActiveDate===date){
@@ -4272,46 +4439,17 @@ async function togglePdDetail(date,el){
     const temps=j.hourly.temperature_2m;
     const prec=j.hourly.precipitation;
     const wind=j.hourly.windspeed_10m;
-    const validTemps=temps.filter(x=>x!=null);
-    const tMin=Math.min(...validTemps), tMax=Math.max(...validTemps);
-    const tRange=Math.max(0.5,tMax-tMin);
+    const ch=_dayChartSvg(hrs,temps,prec);
+    if(!ch)throw new Error('ni urnih temperatur');
+    const {tMin,tMax}=ch;
     const totalRain=prec.reduce((a,b)=>(a||0)+(b||0),0);
     const maxWindVal=Math.max(...wind.filter(x=>x!=null));
-    // SVG
-    const W=400,H=100,px=8,py=10;
-    const n=hrs.length;
-    const pts=temps.map((t,i)=>t!=null?[px+(i/(n-1))*(W-px*2),H-py-((t-tMin)/tRange)*(H-py*2)]:null).filter(Boolean);
-    const polyline=pts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-    const maxPrec=Math.max(...prec.filter(x=>x!=null),0.1);
-    const rainBars=prec.map((p,i)=>{
-      if(!p||p<=0)return'';
-      const bw=Math.max(3,(W-px*2)/n*0.7);
-      const x=px+(i/(n-1))*(W-px*2)-bw/2;
-      const bh=(p/maxPrec)*(H-py*2)*0.35;
-      return`<rect x="${x.toFixed(1)}" y="${(H-py-bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="rgba(96,165,250,.4)" rx="1"/>`;
-    }).join('');
-    // x labels every 6h
-    const xlbls=[0,6,12,18].map(h=>{
-      const idx=hrs.findIndex(t=>t===`${String(h).padStart(2,'0')}:00`);
-      if(idx<0)return'';
-      const x=px+(idx/(n-1))*(W-px*2);
-      return`<text x="${x.toFixed(1)}" y="${H-1}" font-size="7.5" fill="var(--muted)" text-anchor="middle">${hrs[idx]}</text>`;
-    }).join('');
-    // y labels
-    const ylbls=[tMin,tMax].map(t=>{
-      const y=H-py-((t-tMin)/tRange)*(H-py*2);
-      return`<text x="${(W-2).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="7" fill="var(--muted)" text-anchor="end">${t.toFixed(1)}°</text>`;
-    }).join('');
     panel.innerHTML=`
       <div class="pd-detail-hdr">
         <span class="pd-detail-title">📅 ${title}</span>
         <button class="pd-detail-close" onclick="closePdDetail()">✕</button>
       </div>
-      <svg class="pd-detail-svg" viewBox="0 0 ${W} ${H}">
-        ${rainBars}
-        <polyline points="${polyline}" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-        ${xlbls}${ylbls}
-      </svg>
+      ${ch.svg}
       <div class="pd-detail-stats">
         <span>🌡 Najvišja <b>${tMax.toFixed(1)} °C</b></span>
         <span>❄ Najnižja <b>${tMin.toFixed(1)} °C</b></span>
