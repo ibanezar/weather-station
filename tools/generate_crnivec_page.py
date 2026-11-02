@@ -186,6 +186,9 @@ UI_ICONS = {
             'stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 21M16 3l4 18M12 5v2M12 11v2M12 17v2"/></svg>',
     "cam":  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
             'stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3l2-3h8l2 3h3v13H3Z"/><circle cx="12" cy="13" r="4"/></svg>',
+    # Poročanje (govorni oblaček z vzklicajem).
+    "report": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" '
+              'stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H9l-5 4Z"/><path d="M12 8v3M12 13.5v.01"/></svg>',
 }
 
 # Izvirni citati v duhu šale (glej opombo zgoraj) — NISO navedki resničnih
@@ -1333,6 +1336,19 @@ CSS = '''
     box-shadow:3px 3px 0 #111;gap:6px}
   .crn-cta-btn svg{width:18px;height:18px;flex:0 0 auto}
   .crn-cta-note{font-size:12px;font-weight:600;margin:6px auto 0;max-width:480px;opacity:.85}
+  /* Gumb »Poročaj« je prvo, kar se vidi pod naslovom (telefon in računalnik):
+     rdeč, čez vso širino, z obročem, ki trikrat utripne (potem miruje). Je
+     povezava na #crn-report; panel odkrije JS, zato ga ob nepodprtem fetch
+     JS skrije (glej blok Poročanje). */
+  .crn-rep-cta{display:flex;justify-content:center;margin:0 0 var(--s3)}
+  .crn-rep-cta .crn-btn-primary{margin-top:0;max-width:420px;min-height:54px;font-size:17px;font-weight:800;
+    text-transform:none;letter-spacing:.01em;text-align:center;line-height:1.2;padding:6px var(--s3);
+    box-shadow:5px 5px 0 #111;animation:crnRepPulse 1.6s ease-out 3}
+  .crn-rep-cta .crn-btn-primary svg{width:24px;height:24px;flex:0 0 auto}
+  @keyframes crnRepPulse{0%{box-shadow:5px 5px 0 #111,0 0 0 0 rgba(220,38,38,.65)}
+    70%,100%{box-shadow:5px 5px 0 #111,0 0 0 16px rgba(220,38,38,0)}}
+  .crn-report.crn-flash{animation:crnRepFlash 1.4s ease-out}
+  @keyframes crnRepFlash{0%,35%{background:#fef08a}100%{background:var(--card)}}
   .crn-now{background:#fff;color:var(--ink);border:3px solid #111;border-radius:14px;
     box-shadow:4px 4px 0 #111;padding:var(--s2) var(--s3);margin:var(--s3) auto 0;max-width:480px;text-align:left}
   .crn-now-h{font-family:inherit;line-height:1.3;color:inherit;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:0 0 4px}
@@ -1692,7 +1708,8 @@ CSS = '''
     .crn-col .crn-zones{grid-template-columns:1fr 1fr}
   }
   @media (prefers-reduced-motion:reduce){
-    .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop,.crn-icon:hover{animation:none}
+    .crn-cam-badge i,.crn-cam-loading,.crn-skel,.crn-quote-pop,.crn-icon:hover,
+    .crn-rep-cta .crn-btn-primary,.crn-report.crn-flash{animation:none}
     .crn-needle{animation:none;transition:none;transform:rotate(var(--rot))}
     .crn-status,.crn-btn,.crn-vote-bar span{transition:none}
   }
@@ -3016,6 +3033,28 @@ SHARE_JS_TEMPLATE = '''
     loadFeed();
   }
 
+  // Gumb »Poročaj, kako je na cesti« na vrhu (#crn-rep-cta): drsi do panela
+  // #crn-report in ga za hip označi. Ko poročanje ni na voljo (brez fetch ali
+  // panela), gumb ne vodi nikamor, zato ga skrijemo. Na Lipi ga ni.
+  var repCta = document.getElementById("crn-rep-cta");
+  if (repCta) {
+    if (!(repBox && window.fetch)) {
+      repCta.hidden = true;
+      repCta.style.display = "none";
+    } else {
+      repCta.addEventListener("click", function(e){
+        e.preventDefault();
+        var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+        repBox.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+        repBox.classList.remove("crn-flash");
+        void repBox.offsetWidth;
+        repBox.classList.add("crn-flash");
+        setTimeout(function(){ repBox.classList.remove("crn-flash"); }, 1500);
+        try { history.replaceState(null, "", "#crn-report"); } catch (_) {}
+      });
+    }
+  }
+
   // Javna lestvica poročevalcev (glej GET /crnivec/lestvica v worker.js) --
   // ista, ki jo osveži oddaja zgoraj (loadBoard po uspešni oddaji). Ločen
   // blok, da deluje tudi, če je crn-report panel iz kakšnega razloga izpuščen.
@@ -3777,6 +3816,12 @@ def build_body(data):
           <h1 class="crn-title" id="crn-h1">Kako je čez Črnivec?</h1>
           <p id="crn-mascot-msg" class="crn-mascot-msg" role="status" hidden></p>
         </div>
+      </div>
+
+      <!-- Poročanje takoj na vrhu (od 2. 11. 2026, Filip): vidno že ob prvem
+           izrisu na telefonu in računalniku. Vodi na panel #crn-report. -->
+      <div class="crn-rep-cta" id="crn-rep-cta">
+        <a class="crn-btn crn-btn-primary" id="crn-rep-cta-btn" href="#crn-report">{UI_ICONS['report']}Poročaj, kako je na cesti</a>
       </div>
 
       <p id="crn-strike-banner" class="crn-strike" role="status" hidden></p>
