@@ -2973,25 +2973,19 @@ function applyStationOnThisDay(){
   if(!grid){applyDayClimatology();return;}
   const today=new Date();
   const titleEl=document.getElementById('otd-station-title');
-  if(titleEl)titleEl.textContent='📡 '+today.toLocaleDateString('sl',{day:'numeric',month:'long'})+' — postaja IREICA1';
+  if(titleEl)titleEl.innerHTML=_ico('radio-tower')+' '+today.toLocaleDateString('sl',{day:'numeric',month:'long'})+' — postaja IREICA1';
   const results=getStationOnThisDay();
-  grid.innerHTML='';
-  results.forEach(r=>{
-    const item=document.createElement('div');item.className='otd-item';
-    if(!r.metric){
-      item.innerHTML='<div class="otd-year">'+r.year+'</div><div class="otd-emoji" style="font-size:1.1rem;color:var(--muted)">—</div><div class="otd-desc" style="font-size:.72rem">Ni podatkov</div>';
-    }else{
-      const c=metricToCondition(r.metric);
-      item.innerHTML=
-        '<div class="otd-year">'+r.year+'</div>'+
-        '<div class="otd-emoji">'+c.emoji+'</div>'+
-        '<div class="otd-desc">'+c.desc+'</div>'+
-        '<div class="otd-temps"><span class="th">'+(r.metric.tempHigh!=null?r.metric.tempHigh.toFixed(1):'—')+'°</span><span style="color:var(--muted)">/</span><span class="tl">'+(r.metric.tempLow!=null?r.metric.tempLow.toFixed(1):'—')+'°</span></div>'+
-        (r.metric.precipTotal>0?'<div class="otd-rain">🌧 '+r.metric.precipTotal.toFixed(1)+' mm</div>':'')+
-        (r.metric.windspeedHigh!=null?'<div class="otd-wind">💨 '+r.metric.windspeedHigh.toFixed(1)+' km/h</div>':'');
-    }
-    grid.appendChild(item);
-  });
+  // Isti videz kot »Zadnjih 7 dni« in obeti (.cu-day); razpon je znotraj prikazanih let.
+  grid.className='cu-days otd-cu';
+  const hs=results.filter(r=>r.metric&&r.metric.tempHigh!=null).map(r=>r.metric.tempHigh);
+  const ls=results.filter(r=>r.metric&&r.metric.tempLow!=null).map(r=>r.metric.tempLow);
+  const gMin=ls.length?Math.min(...ls):0,gSpan=hs.length&&ls.length?Math.max(6,Math.max(...hs)-gMin):0;
+  grid.innerHTML=results.map(r=>{
+    if(!r.metric)return'<div class="cu-day otd-empty"><span class="cu-dlbl">'+r.year+'</span><span class="cu-ddesc">Ni podatkov</span></div>';
+    const m=r.metric,c=_pdCondition(m),w=m.windspeedHigh;
+    return _dayCardHtml({wx:c.wx,lbl:r.year,icon:'<img src="icons/weather/'+c.icon+'.svg" width="48" height="48" class="wx-icon" alt="'+c.desc+'">',
+      desc:c.desc+(w!=null&&w>=30?' · '+Math.round(w)+' km/h':''),hi:m.tempHigh,lo:m.tempLow,min:gMin,span:gSpan,rain:m.precipTotal||0});
+  }).join('');
   const filled=results.filter(r=>r.metric).length;
   const src=document.getElementById('otd-station-source');
   if(src)src.textContent=filled>0?filled+'/5 let podatkov':'Shramba prazna — zbira se z obiski';
@@ -4027,6 +4021,53 @@ function renderPastDays(){
   wrap.querySelectorAll('.pd-card').forEach(c=>c.addEventListener('keydown',e=>{
     if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click();}
   }));
+}
+
+// Skupna kartica dneva (.cu-day), enaka kot pri »Naslednjih 7 dni«: scena po vremenu, ikona, opis, temperatura, vrstica
+// razpona in padavine. o: {cls,attrs,wx,lbl,icon,desc,hi,lo,min,span,rain,extra}. rain===null: vrstice padavin ni.
+function _dayCardHtml(o){
+  const hi=o.hi,lo=o.lo;
+  let range='';
+  if(hi!=null&&lo!=null&&o.span){
+    const l0=Math.max(0,Math.min(100,(lo-o.min)/o.span*100)),l1=Math.max(l0+6,Math.min(100,(hi-o.min)/o.span*100));
+    range='<div class="cu-range" aria-hidden="true"><i style="left:'+l0.toFixed(1)+'%;width:'+(l1-l0).toFixed(1)+'%;background:linear-gradient(90deg,'+tempColor(lo)+','+tempColor(hi)+')"></i></div>';
+  }
+  const temp=(hi!=null?'<span class="cu-dhi" style="color:'+tempColor(hi)+'">'+Math.round(hi)+'°</span>':'')+(lo!=null?'<span class="cu-dtl">'+Math.round(lo)+'°</span>':'');
+  const rain=o.rain==null?'':(o.rain>0.3
+    ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+o.rain.toFixed(1)+' mm</span>'
+    :'<span class="cu-drain cu-dry">'+_ico('sun')+' suho</span>');
+  return '<div class="cu-day'+(o.cls?' '+o.cls:'')+'"'+(o.wx?' data-wx="'+o.wx+'"':'')+(o.attrs||'')+'>'
+    +'<span class="cu-scene" aria-hidden="true"></span>'
+    +'<span class="cu-dlbl">'+o.lbl+'</span>'
+    +'<span class="cu-demo">'+o.icon+'</span>'
+    +'<span class="cu-ddesc">'+o.desc+'</span>'
+    +'<div class="cu-dtemp">'+temp+'</div>'+range+rain+(o.extra||'')+'</div>';
+}
+
+// Yr simbol → kategorija ozadja kartice in slovensko ime (ista kategorija kot _wmoCat pri Open-Meteo).
+function _yrCat(sym){
+  const b=(sym||'').replace(/_day|_night|_polartwilight/g,'');
+  if(/thunder/.test(b))return'storm';
+  if(/snow|sleet/.test(b))return'snow';
+  if(b==='fog')return'fog';
+  if(/rain/.test(b))return'rain';
+  if(b==='cloudy')return'cloud';
+  if(b==='partlycloudy')return'partly';
+  return'clear';
+}
+function _yrTxt(sym){
+  const b=(sym||'').replace(/_day|_night|_polartwilight/g,'');
+  if(/thunder/.test(b))return'Nevihta';
+  if(/sleet/.test(b))return'Dež s snegom';
+  if(/heavysnow/.test(b))return'Močno sneženje';
+  if(/snowshowers/.test(b))return'Snežne plohe';
+  if(/snow/.test(b))return b==='lightsnow'?'Rahlo sneženje':'Sneg';
+  if(/heavyrainshowers/.test(b))return'Močne plohe';
+  if(/rainshowers/.test(b))return b.startsWith('light')?'Rahle plohe':'Plohe';
+  if(/heavyrain/.test(b))return'Močan dež';
+  if(/lightrain/.test(b))return'Rahel dež';
+  if(/rain/.test(b))return'Dež';
+  return({clearsky:'Jasno',fair:'Pretežno jasno',partlycloudy:'Delno oblačno',cloudy:'Oblačno',fog:'Megla'})[b]||'Spremenljivo';
 }
 
 // Videz kartice dneva iz meritev postaje (postaja oblačnosti ne meri): isti pragovi kot metricToCondition(),
@@ -7332,26 +7373,17 @@ function _renderAIFC(data){
     const his=week.map(s=>s.tmax).filter(v=>v!=null);
     const weekMin=los.length?Math.min(...los):null;
     const weekRange=(weekMin!=null&&his.length)?Math.max(Math.max(...his)-weekMin,1):null;
+    daysEl.className='cu-days aifc-cu';
     daysEl.innerHTML=week.map(s=>{
       const dt=new Date(s.date+'T12:00:00');
       // Oznaka iz datuma, ne iz indeksa: tik pred polnočjo yr.no vrne kot prvi
       // dan že jutrišnjega, in "Danes" bi pristalo na napačni ploščici.
       // s.partial = dnevni vrh je že mimo, zato max ni več smiseln in
       // ploščica pokaže samo nocojšnji minimum.
-      const lbl=s.partial?'Nocoj':s.date===today?'Danes':s.date===tomorrow?'Jutri':SL_DS[dt.getDay()];
-      const temps=s.partial
-        ?`<span class="aifc-day-tlo">${s.tmin!=null?Math.round(s.tmin)+'°':'—'}</span>`
-        :`${s.tmax!=null?Math.round(s.tmax)+'°':''}<span class="aifc-day-tlo">${s.tmin!=null?' /'+Math.round(s.tmin)+'°':''}</span>`;
-      const bar=(!s.partial&&weekRange&&s.tmin!=null&&s.tmax!=null)
-        ?`<div class="aifc-day-bar"><span class="aifc-day-bar-fill" style="left:${((s.tmin-weekMin)/weekRange*100).toFixed(0)}%;width:${Math.max((s.tmax-s.tmin)/weekRange*100,8).toFixed(0)}%"></span></div>`
-        :'';
-      return`<div class="aifc-day${s.date===today?' today':''}">
-<div class="aifc-day-name">${lbl}</div>
-<div class="aifc-day-icon">${_yrImg(s.symbol,36)}</div>
-<div class="aifc-day-t">${temps}</div>
-${bar}
-${s.rain>0.3?`<div class="aifc-day-rain">💧${s.rain}</div>`:''}
-</div>`;
+      const lbl=s.partial?'Nocoj':s.date===today?'Danes':s.date===tomorrow?'Jutri':SL_DS[dt.getDay()]+' '+dt.getDate()+'.';
+      return _dayCardHtml({cls:(s.date===today?'cu-today':'')+((dt.getDay()===0||dt.getDay()===6)?' cu-we':''),wx:_yrCat(s.symbol),lbl,
+        icon:_yrImg(s.symbol,48),desc:_yrTxt(s.symbol),hi:s.partial?null:s.tmax,lo:s.tmin,min:weekMin,span:weekRange,
+        rain:s.rain!=null?s.rain:null});
     }).join('');
   }
   const arsoEl=document.getElementById('aifc-arso');
@@ -9698,28 +9730,17 @@ async function initForecast2(){
     // ── Daily summary grid ─────────────────────────────
     const dailyEl=document.getElementById('fc2-daily-grid');
     if(dailyEl&&d?.time){
-      dailyEl.innerHTML='';
-      d.time.forEach((dt,i)=>{
-        const date=new Date(dt+'T12:00:00');
-        const isToday=i===0;
-        const lbl=isToday?'Danes':date.toLocaleDateString('sl',{weekday:'short',day:'numeric',month:'short'});
-        const card=document.createElement('div');card.className='nt-card';
-        card.innerHTML=
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">'+
-            '<div style="font-size:.72rem;font-weight:600">'+(isToday?'<span style="color:var(--blue)">Danes</span>':lbl)+'</div>'+
-            '<div>'+_wmoImg(d.weather_code[i],true,40)+'</div>'+
-          '</div>'+
-          '<div style="display:flex;gap:.75rem;font-family:\'JetBrains Mono\',monospace;font-size:.88rem">'+
-            '<span style="color:var(--red)">↑ '+(d.temperature_2m_max[i]||0).toFixed(1)+'°</span>'+
-            '<span style="color:var(--blue)">↓ '+(d.temperature_2m_min[i]||0).toFixed(1)+'°</span>'+
-          '</div>'+
-          '<div style="font-size:.76rem;color:var(--muted);margin-top:.3rem">'+
-            (d.precipitation_sum[i]>0.1?'🌧 '+(d.precipitation_sum[i]).toFixed(1)+' mm  ':'')+
-            'UV max: '+(d.uv_index_max[i]||0).toFixed(0)+'  '+
-            '💨 '+(d.wind_speed_10m_max[i]||0).toFixed(0)+' km/h'+
-          '</div>';
-        dailyEl.appendChild(card);
-      });
+      // Isti videz kot »Naslednjih 7 dni« na naslovnici (.cu-day); razpon je znotraj prikazanih dni.
+      dailyEl.className='cu-days fc2-cu';
+      const SL2=['ned','pon','tor','sre','čet','pet','sob'];
+      const dMin=Math.min(...d.temperature_2m_min),dSpan=Math.max(6,Math.max(...d.temperature_2m_max)-dMin);
+      dailyEl.innerHTML=d.time.map((dt,i)=>{
+        const date=new Date(dt+'T12:00:00'),w=d.wind_speed_10m_max[i]||0;
+        return _dayCardHtml({cls:(i===0?'cu-today':'')+((date.getDay()===0||date.getDay()===6)?' cu-we':''),wx:_wmoCat(d.weather_code[i]),
+          lbl:i===0?'Danes':SL2[date.getDay()]+' '+date.getDate()+'.',icon:_wmoImg(d.weather_code[i],true,48),
+          desc:_wmoTxt(d.weather_code[i])+(w>=30?' · '+Math.round(w)+' km/h':''),hi:d.temperature_2m_max[i],lo:d.temperature_2m_min[i],
+          min:dMin,span:dSpan,rain:d.precipitation_sum[i]||0,extra:'<span class="cu-uv">UV največ '+Math.round(d.uv_index_max[i]||0)+'</span>'});
+      }).join('');
     }
   }catch(e){console.warn('Forecast2:',e);}
 }
