@@ -2682,6 +2682,23 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .pd-detail-stats{display:flex;gap:1.1rem;flex-wrap:wrap;margin-top:.7rem;font-size:.72rem;color:var(--muted)}
 .pd-detail-stats b{color:var(--text)}
 .pd-detail-loading{text-align:center;color:var(--muted);font-size:.78rem;padding:1.5rem 0}
+/* Podrobnosti dneva pri »Naslednjih 7 dni« (app.js toggleCuDetail): isti slog plošče kot pri »Zadnjih 7 dni« */
+.cu-hint{text-transform:none;letter-spacing:0;opacity:.8}
+.cu-day.cu-click{cursor:pointer;transition:border-color .2s,transform .15s,box-shadow .2s}
+.cu-day.cu-click:hover{border-color:rgba(77,159,248,.5);transform:translateY(-2px)}
+.cu-day.cu-click:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.cu-day.cu-click.active{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 40%,transparent)}
+.cu-detail{margin:.75rem 0 0}
+.cu-detail-title{display:flex;align-items:center;gap:.5rem;font-size:.85rem}
+.cu-detail-title .wx-icon{flex:none}
+.cu-detail .pd-detail-svg{height:auto;max-width:560px;margin:0 auto}
+.cu-detail-strip{margin-top:.6rem}
+.cu-detail .pd-detail-stats span{display:inline-flex;align-items:center;gap:.3rem}
+.cu-detail .pd-detail-stats .ic{width:1em;height:1em}
+.cu-detail-mtr{margin-top:.7rem;font-size:.74rem;color:var(--muted)}
+.cu-detail-mtr b{color:var(--text)}
+.cu-detail-src{margin-top:.6rem;font-size:.66rem;color:var(--muted);opacity:.8}
+@media(prefers-reduced-motion:reduce){.cu-day.cu-click:hover{transform:none}}
 @media(max-width:380px){
   .hero{grid-template-columns:1fr auto}
   .hero-icon svg,.hero-icon .wx-icon{width:76px;height:76px}
