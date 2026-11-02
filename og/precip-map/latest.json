@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-01",
-  "issued": "01.11.2026 7:00 CET",
-  "issued_at": "2026-11-01T07:30:35.652398+01:00",
-  "top_station": "Lesce",
-  "top_mm": 3,
-  "n_stations": 19,
+  "date": "2026-11-02",
+  "issued": "02.11.2026 7:00 CET",
+  "issued_at": "2026-11-02T07:30:39.678379+01:00",
+  "top_station": "Kočevje",
+  "top_mm": 19,
+  "n_stations": 20,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-01.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-01-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-11-02.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-02-story.jpg"
 }
