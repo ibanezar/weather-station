@@ -2377,7 +2377,8 @@ function _fcSliderUpdate(){
     const hr=h.t.getHours();
     const timeStr=(hr<10?'0':'')+hr+':00';
     if(lbl){lbl.textContent=timeStr+' · +'+v+'h';lbl.classList.add('vis');}
-    if(tv){tv.textContent=h.temp.toFixed(1);tv.style.color=tempColor(h.temp);}
+    const ht=_anchoredTemps()[idx]??h.temp;
+    if(tv){tv.textContent=ht.toFixed(1);tv.style.color=tempColor(ht);}
     if(iconEl)iconEl.innerHTML=_wmoImg(h.wmo,h.isDay,108);
   }else{
     _sliderActive=true;
@@ -2428,6 +2429,47 @@ function _catmullRomPath(P){
   return d;
 }
 
+// ── Napoved ur zasidrana na zadnjo meritev (2. 11. 2026) ──
+// Po zgledu meteoblue mLM (napoved izhaja iz trenutne meritve) in popravka na Črnivcu
+// (generate_crnivec_page.py, NEXT_BIAS_HOURS): razlika meritev − model ob »zdaj« se prenese v
+// naslednje ure in linearno izzveni. Brez tega krivulja skoči z izmerjenih 6,2 °C na modelskih 4,1 °C
+// že prvo uro. Velja SAMO za temperaturo v krivulji in drsniku na junaški kartici; obeti, ploščice
+// »hitra vprašanja« in stavek »Danes« berejo nespremenjeno modelsko napoved (_forecastHours[].temp).
+// Čas izzvenevanja (6 h) je po zgledu Črnivca in NI izmerjen na Rečici: ni urnega arhiva napovedi.
+// Orodje za merjenje: tools/ai/eval_anchor.py (poganja se na GitHubovem tekaču, ima omrežje).
+const ANCHOR_HOURS=6;
+const ANCHOR_MAX_C=4;
+const ANCHOR_MAX_AGE_MIN=30;
+
+// Čista funkcija (preizkus: tools/test_anchor.py). hours = [{t:Date, temp}], urejene po času.
+function anchorHours(hours,nowMs,obsT,obsAgeMin){
+  const raw=hours.map(h=>h.temp);
+  if(!hours.length||typeof obsT!=='number'||!isFinite(obsT)||!(obsAgeMin<=ANCHOR_MAX_AGE_MIN))
+    return{offset:0,temps:raw};
+  // Modelska temperatura ob »zdaj«: linearno med sosednjima urama; pred prvo uro prva vrednost.
+  let modelNow=hours[0].temp;
+  for(let i=0;i<hours.length;i++){
+    const ti=hours[i].t.getTime();
+    if(ti<=nowMs){
+      modelNow=hours[i].temp;
+      const nx=hours[i+1];
+      if(nx&&nx.t.getTime()>nowMs){const tn=nx.t.getTime();modelNow+=(nx.temp-modelNow)*(nowMs-ti)/(tn-ti);}
+    }
+  }
+  const offset=Math.max(-ANCHOR_MAX_C,Math.min(ANCHOR_MAX_C,obsT-modelNow));
+  const temps=hours.map(h=>{
+    const w=Math.max(0,1-(h.t.getTime()-nowMs)/(ANCHOR_HOURS*3600000));
+    return h.temp+offset*Math.min(1,w);
+  });
+  return{offset,temps};
+}
+
+// Zasidrane temperature za _forecastHours; brez sveže meritve so enake modelskim.
+function _anchoredTemps(){
+  const age=_lastObsTime?(Date.now()-_lastObsTime.getTime())/60000:Infinity;
+  return anchorHours(_forecastHours,Date.now(),_liveTemp??_lastTemp,age).temps;
+}
+
 let _sparkByHour=null,_sparkW=320;
 
 function drawHeroSparkline(){
@@ -2447,7 +2489,8 @@ function drawHeroSparkline(){
   // Brez umetne omejitve na 24 ur: slider.max je nastavljen na _forecastHours.length
   // (glej fetchComingUp) in mora predstavljati isto skalo kot krivulja tukaj, sicer
   // se piko "zdaj" (in oznaka pod drsnikom) rahlo razideta z dejansko lego drsnika.
-  const future=_forecastHours.map((f,i)=>({h:i+1,t:f.temp}));
+  const anch=_anchoredTemps();
+  const future=_forecastHours.map((f,i)=>({h:i+1,t:anch[i]}));
   const pts=[...past,{h:0,t:nowT},...future];
   if(pts.length<4){wrap.hidden=true;return;}
 

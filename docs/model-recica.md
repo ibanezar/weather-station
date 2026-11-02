@@ -412,3 +412,40 @@ Open-Meteo (**razmerje 0,50**, korelacija 0,75); največji sunek postaje je 18,0
   **»umerjeno na postajo«**, surov Open-Meteo ob strani in napaka sunkov. Skrita, kadar polj ni.
 - Test: `tools/test_mtr_wind.py` (v `parity.yml`). **Veter zaživi šele po ponovnem učenju** (`mos-train.yml`, ročno ali 1. v mesecu):
   do takrat model v `model/recica-mos.json` nima `wind` in kartica je skrita.
+
+## Poskusi 2. 11. 2026: izbirnik modela po meteoblue mLM in zasidranje ur na meritev
+
+Povod: meteoblue Learning MultiModel ([mLM](https://content.meteoblue.com/en/research-education/specifications/data-sources/post-processing/meteoblue-learning-multimodel-mlm/))
+iz skupine modelov izbere tistega, ki je najbolje simuliral zadnje meritve, in nadaljuje z njim. Njihova navedba (september–oktober 2018,
+več kot 30 000 postaj po svetu): napaka temperature 1,2 K pri 24 h in 2,0 K pri 6 dneh, 0,8 K bolje kot surovi modeli. Veljavno samo za temperaturo, rosišče in veter.
+Ta številka za Rečico nič ne pove (drugo obdobje, globalno povprečje, drug nabor modelov), zato smo idejo preizkusili na lastnih podatkih.
+
+**Izbirnik na IREICA1** (`tools/ai/eval_selector.py`, brez omrežja; `data/forecast-archive.csv` + `history.json`, dnevi `station`/`wu`, pravi `previous_dayN`).
+Napoved vodilnega časa L za dan D je izdana na D−L, zato okno napak seže do D−L−1. Modeli: IFS, GFS, ICON, ARPEGE; okno 2025-10 → 2026-10, n = 392 dni, uparjen 7-dnevni blokovni bootstrap.
+MAE v °C (MTR je iz tega dokumenta, drugo obdobje in drugi dnevi, zato **samo za red velikosti**, ne uparjeno):
+
+| | fiksni najboljši (ICON) | izbirnik 7 d | izbirnik 30 d | izbirnik 30 d + popravek | povprečje + popravek 30 d | MTR |
+|---|---|---|---|---|---|---|
+| Tmax D+1 | 1,39 | 1,50 (slabše) | 1,46 (slabše) | 1,30 (šum) | 1,25 (boljše) | 1,04 |
+| Tmin D+1 | 1,53 | 1,64 (slabše) | 1,59 (šum) | 1,41 (šum) | 1,65 (šum) | 1,24 |
+| Tmax D+2 | 1,75 | 1,89 (slabše) | 1,83 (šum) | 1,53 (boljše) | 1,45 (boljše) | 1,24 |
+| Tmin D+2 | 2,15 | 2,23 (šum) | 2,20 (šum) | 1,74 (boljše) | 1,82 (boljše) | 1,33 |
+| Tmax D+3 | 1,89 | 2,01 (slabše) | 1,85 (šum) | 1,70 (šum) | 1,58 (boljše) | 1,40 |
+| Tmin D+3 | 2,22 | 2,34 (slabše) | 2,25 (šum) | 1,87 (boljše) | 1,89 (boljše) | 1,44 |
+
+- **Čisti izbor modela ne pomaga.** Model, ki je bil v zadnjih 3–30 dneh najboljši, ni boljši napovednik jutrišnjega kot model, ki je bil najboljši na vseh dosedanjih dneh (ICON). Pri Tmax D+1 je celo značilno slabši pri vseh štirih oknih (3, 7, 14, 30 dni; celotno obdobje od 2024-07, n = 849).
+  Uteženo povprečje po 1/MAE je še slabše. Uspešnost modelov se čez dneve ne ohranja dovolj, da bi se izbira splačala.
+- **Koristi popravek, ne izbira.** Ko izbranemu modelu odštejemo njegovo povprečno napako v oknu (`sel30+bc`) ali odštejemo napako povprečja štirih modelov (`mean4+bc30`), se MAE zmanjša za 0,2–0,4 °C pri D+2 in D+3 (interval zaupanja ne zajema 0) in za 0,15 °C pri Tmax D+1.
+  To je ista informacija kot `err_lag1/ma3/ma7` v MTR (`build_bias_series`), ki jo ima MTR že vgrajeno.
+- **MTR je pri vsaki celici boljši od vseh variant** (1,04 proti 1,25 pri Tmax D+1; 1,33 proti 1,74 pri Tmin D+2). Uparjene primerjave nismo naredili (zahteva urni predpomnilnik Open-Meteo, v peskovniku ni omrežja); razlika je tolikšna, da za MTR ni mogoče trditi, da bi izbirnik karkoli dodal.
+- **Sklep: izbirnika ne uvajamo.** Ostane merilo, ki ga lahko ponovimo (`python3 tools/ai/eval_selector.py 2025-10-01`).
+
+**Zasidranje napovedi ur na zadnjo meritev** (`anchorHours()` v `app.js`, preizkus `tools/test_anchor.py`, mutacije v `mutation_check.py`). To je tisti del mLM, ki ga imamo za koristen: napoved izhaja iz trenutne meritve.
+Krivulja v junaški kartici je prej povezala izmerjene zadnje ure z modelskimi vrednostmi in skočila, če se je model ob »zdaj« razlikoval od postaje. Zdaj se razlika meritev − model ob »zdaj«
+(model interpoliran med urama) prišteje naslednjim uram in linearno izzveni v `ANCHOR_HOURS` = 6 urah, omejena na ±`ANCHOR_MAX_C` = 4 °C; meritev, starejša od 30 min, ne zasidra ničesar.
+
+- Velja **samo** za krivuljo in drsnik na junaški kartici (`drawHeroSparkline()`, `_fcSliderUpdate()`). Obeti, ploščice »hitra vprašanja« (zmrzal, vročina), stavek »Danes« in MTR berejo nespremenjeno modelsko napoved (`_forecastHours[].temp`): tam ura ni pomembna toliko kot ekstrem.
+- **Čas izzvenevanja (6 h) ni izmerjen na Rečici.** Prevzet je s Črnivca (`NEXT_BIAS_HOURS`), kjer tudi ni bil izmerjen. Pošten urni arhiv napovedi, izdanih »pred nekaj urami«, ne obstaja.
+  `tools/ai/eval_anchor.py` oceni obstojnost napake po urah iz napovedi `previous_day1` proti `data/hourly-observations.csv` (ocena iz sintetičnih podatkov je preverjena: iz AR(1) z φ = 0,85 dobi w_k = 0,85^k).
+  Potrebuje omrežje (Open-Meteo, ni v peskovniku): poženi ga na GitHubovem tekaču ali doma in šele nato spremeni `ANCHOR_HOURS`. Napaka napovedi izpred dneva ni enaka napaki napovedi, izdane pred nekaj urami, zato je rezultat ocena zgornje meje obstojnosti.
+- Ni na semaforju in ni vpisano nikamor kot točnost: je prikaz.

@@ -1383,6 +1383,11 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
   osvežitev v razredu ur z zamrznjeno napovedjo na istih dneh (uparjen blokovni bootstrap); pod 20 dni na razred sklepa ni.
   Do takrat ne trdi, da so poznejše osvežitve boljše.
 
+### Izbirnik modela (mLM) in zasidranje ur na meritev (2. 11. 2026)
+
+Po meteoblue mLM (izbere model, ki je najbolje simuliral zadnje meritve) smo na lastnih podatkih preizkusili izbirnik (`tools/ai/eval_selector.py`): **čisti izbor modela ne pomaga**, koristi odštevanje nedavne napake, ki jo MTR že ima; MTR je boljši od vseh variant. Ne uvajaj izbirnika brez novega dokaza; podrobnosti v `docs/model-recica.md`.
+Obdržana je ena ideja: krivulja in drsnik na junaški kartici sta zasidrana na zadnjo meritev (`anchorHours()` v `app.js`, popravek meritev − model izzveni v 6 urah, omejen na 4 °C, meritev starejša od 30 min ne zasidra). **Čas izzvenevanja ni izmerjen** (ni urnega arhiva napovedi): `tools/ai/eval_anchor.py` ga oceni, a potrebuje omrežje (GitHubov tekač). Obeti, hitra vprašanja in stavek »Danes« ostanejo na surovi modelski napovedi. Test: `tools/test_anchor.py` (v `parity.yml`).
+
 ### Veter in sunki v dolini (24. 10. 2026)
 
 Postaja stoji na zavetrnem dnu doline: Open-Meteo povprečni veter precenjuje ~2× (razmerje postaja/model 0,50, korelacija 0,75;
