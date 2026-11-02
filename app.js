@@ -1666,6 +1666,7 @@ async function fetchComingUp(){
       hours.push({t:new Date(h.time[i]),temp:h.temperature_2m[i]??15,prob:h.precipitation_probability[i]??0,mm:h.precipitation?.[i]??0,wmo:h.weather_code[i]??0,isDay:h.is_day?h.is_day[i]!==0:true});
     _forecastHours=hours;
     _cuDailyData=d;
+    try{renderQa();}catch(_){}
     {const sl=document.getElementById('fc-slider');if(sl)sl.max=hours.length;}
     drawHeroSparkline();
     renderHeroBriefing();
@@ -17443,180 +17444,216 @@ async function initVisitorCounter(){
 // največji porabnik zahtev na workerju, endpoint /online pa je poleg tega ob
 // vsakem klicu naredil KV put + KV list.
 
-// ── Vprašanja o vremenu na hero kartici (nabor se prilagaja mesecu) ──
-// Vsak odgovor ima več besedilnih različic (isto načelo kot pri temah
-// dnevne zgodbe v generate_story_card.py) — različica se izbere
-// deterministično po datumu, da ni vsak dan/klik enaka kalupljena fraza.
-function _qaPick(seed,arr){
-  const day=new Date().toDateString();
-  let h=0;const s=day+'|'+seed;
-  for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;
-  return arr[Math.abs(h)%arr.length];
+// ── Hitra vprašanja na hero kartici (zmrzal, dež, megla/sneg/nevihta/vročina) ──
+// Tri ploščice stalne višine. Odgovor (stanje, številka, čas) je viden že v ploščici, tap pod njimi odpre podrobnosti z grafom.
+// Vir je urna napoved Open-Meteo (_forecastHours, ista, ki jo že naloži fetchComingUp: noben nov klic); pri zmrzali je poleg nje
+// ločeno prikazana verjetnost MTR (p_frost), vira se ne zlivata. Vse je modelska napoved, ne meritev.
+// Urna vrednost z žigom T velja za T-1h..T (padavine, verjetnost): začetek dežja je zato T-1, konec T.
+const _QA_SNOW=[71,73,75,77,85,86],_QA_FOG=[45,48],_QA_STORM=[95,96,99];
+let _qaMtr=null,_qaMtrAsked=false,_qaOpen=null,_qaModels=[];
+const _qaNum=(v,d=1)=>Number(v).toFixed(d).replace('.',',').replace('-','−');
+const _qaH=(t,off)=>(((t.getHours()+(off||0))%24)+24)%24+':00';
+const _qaKey=t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+const _qaWhen=t=>_qaKey(t)===_qaKey(new Date())?'danes':'jutri';
+function _qaRuns(hrs,test){
+  const runs=[];
+  hrs.forEach((h,i)=>{
+    if(!test(h))return;
+    const last=runs[runs.length-1];
+    if(last&&last.to===i-1)last.to=i;else runs.push({from:i,to:i});
+  });
+  return runs;
 }
-const QA_TOPICS=[
-  {id:'storm',icon:'⛈',q:'Bo nevihta?',priority:90,eligible:mo=>mo>=5&&mo<=9,answer(){
-    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const hit=_forecastHours.find(h=>[95,96,99].includes(h.wmo));
-    if(!hit)return _qaPick('storm:no',[
-      'V naslednjih ~24 urah ne kaže na nevihte.',
-      'V naslednjem dnevu ne bo neviht.',
-      'Za zdaj ne kaže na nevihte.'
-    ]);
-    const t=hit.t.getHours()+':00';
-    return _qaPick('storm:yes',[
-      'Da, okoli '+t+' je možna nevihta.',
-      'Okoli '+t+' so možne nevihte.',
-      'Kaže na nevihto okoli '+t+'.'
-    ]);
-  }},
-  {id:'snow',icon:'❄️',q:'Bo sneg?',priority:90,eligible:mo=>mo<=2||mo>=11,answer(){
-    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const hit=_forecastHours.find(h=>[71,73,75,77,85,86].includes(h.wmo));
-    if(!hit)return _qaPick('snow:no',[
-      'V naslednjih ~24 urah ne kaže na sneg.',
-      'V naslednjem dnevu ne bo snežilo.',
-      'Za zdaj ne kaže na sneženje.'
-    ]);
-    const t=hit.t.getHours()+':00';
-    return _qaPick('snow:yes',[
-      'Da, okoli '+t+' lahko začne snežiti.',
-      'Okoli '+t+' bo lahko snežilo.',
-      'Kaže na sneženje okoli '+t+'.'
-    ]);
-  }},
-  {id:'heat',icon:'🌡',q:'Bo danes vroče?',priority:85,eligible:mo=>mo>=6&&mo<=8,answer(){
-    const tmax=_cuDailyData?.temperature_2m_max?.[0];
-    if(tmax==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const t=tmax.toFixed(0).replace('.',',')+' °C';
-    if(tmax>=30)return _qaPick('heat:hot',[
-      'Da, vroče bo — do '+t+'.',
-      'Danes bo vroče, do '+t+'.',
-      'Pripravi se na vročino — do '+t+'.'
-    ]);
-    if(tmax>=25)return _qaPick('heat:warm',[
-      'Toplo bo, do '+t+'.',
-      'Danes bo prijetno toplo, okoli '+t+'.',
-      'Danes bo precej toplo, do '+t+'.'
-    ]);
-    return _qaPick('heat:mild',[
-      'Ne bo posebej vroče — do '+t+'.',
-      'Danes bo zmerno toplo, do '+t+'.',
-      'Danes ne bo prave vročine — do '+t+'.'
-    ]);
-  }},
-  {id:'frost',icon:'🧊',q:'Bo zmrzal?',priority:85,eligible:mo=>mo<=5||mo>=10,answer(){
-    let tmin=_forecastHours.length?Math.min(..._forecastHours.map(h=>h.temp)):null;
-    if(tmin==null)tmin=_cuDailyData?.temperature_2m_min?.[0]??null;
-    if(tmin==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const t=tmin.toFixed(1).replace('.',',')+' °C';
-    if(tmin<=0)return _qaPick('frost:yes',[
-      'Da, ponoči ali zjutraj lahko temperatura pade do '+t+'.',
-      'Zjutraj je možna zmrzal — do '+t+'.',
-      'Zjutraj lahko zmrzuje, temperature pa lahko padejo do '+t+'.'
-    ]);
-    if(tmin<=3)return _qaPick('frost:close',[
-      'Zelo blizu — najnižja temperatura bo okoli '+t+'.',
-      'Blizu ledišča — okoli '+t+', zato je možna rahla zmrzal.',
-      'Skoraj pri ničli — okoli '+t+'. Rahla zmrzal je možna.'
-    ]);
-    return _qaPick('frost:no',[
-      'Ne, najnižja temperatura bo okoli '+t+'.',
-      'Zmrzali ne kaže — najnižja temperatura bo '+t+'.',
-      'Ne bo zmrzovalo — okoli '+t+'.'
-    ]);
-  }},
-  {id:'fog',icon:'🌫',q:'Bo megla?',priority:80,eligible:mo=>mo>=10||mo<=2,answer(){
-    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const hit=_forecastHours.find(h=>[45,48].includes(h.wmo));
-    if(!hit)return _qaPick('fog:no',[
-      'V naslednjih ~24 urah ne kaže na meglo.',
-      'Za zdaj ne kaže na meglo.',
-      'Vidljivost naj bi bila dobra.'
-    ]);
-    const t=hit.t.getHours()+':00';
-    return _qaPick('fog:yes',[
-      'Da, okoli '+t+' je možna megla.',
-      'Okoli '+t+' bo lahko megla.',
-      'Okoli '+t+' se lahko zaradi megle poslabša vidljivost.'
-    ]);
-  }},
-  {id:'uv',icon:'☀️',q:'Kako visok bo danes UV?',priority:60,eligible:mo=>mo>=5&&mo<=8,answer(){
-    const uv=_cuDailyData?.uv_index_max?.[0];
-    if(uv==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    let lbl='nizek';
-    if(uv>=11)lbl='ekstremen';else if(uv>=8)lbl='zelo visok';else if(uv>=6)lbl='visok';else if(uv>=3)lbl='zmeren';
-    const v=uv.toFixed(0);
-    return _qaPick('uv',[
-      'Danes bo UV-indeks dosegel '+v+' ('+lbl+').',
-      'UV bo danes do '+v+' — '+lbl+'.',
-      'Danes bo UV-indeks '+v+', kar pomeni '+lbl+'.'
-    ]);
-  }},
-  {id:'rain-timing',icon:'🌧',q:'Kdaj bo dež?',priority:20,eligible:()=>true,answer(){
-    if(!_forecastHours.length)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    const hit=_forecastHours.find(h=>h.prob>=50);
-    if(!hit)return _qaPick('rain:no',[
-      'V naslednjih 24 urah ne kaže na dež.',
-      'V naslednjih 24 urah ne bo deževalo.',
-      'Naslednjih 24 ur naj bi ostalo suho.'
-    ]);
-    const today=new Date().toDateString()===hit.t.toDateString();
-    const when=today?'Danes':'Jutri',t=hit.t.getHours()+':00';
-    return _qaPick('rain:yes',[
-      when+' okoli '+t+' bo deževalo.',
-      when+' bo okoli '+t+' lahko deževalo.',
-      when+' okoli '+t+' kaže na dež.'
-    ]);
-  }},
-  {id:'clothing',icon:'🧥',q:'Kaj naj oblečem?',priority:15,eligible:()=>true,answer(){
-    const tmax=_cuDailyData?.temperature_2m_max?.[0],tmin=_cuDailyData?.temperature_2m_min?.[0];
-    if(tmax==null||tmin==null)return 'Podatki se še nalagajo — poskusi znova čez trenutek.';
-    let base;
-    if(tmax<5)base=_qaPick('cloth:cold',['Topla jakna in kapa.','Obleci se toplo — vzemi jakno in kapo.','Zunaj bo mrzlo, zato vzemi toplo jakno in kapo.']);
-    else if(tmax<12)base=_qaPick('cloth:cool',['Jakna ali topel pulover.','Vzemi jakno ali topel pulover.','Toplejša jakna ali pulover ti bo prišel prav.']);
-    else if(tmax<20)base=_qaPick('cloth:mild',['Lahka jakna bo dovolj.','Tanjša jakna bo čisto dovolj.','Lahka jakna ali pulover bo ravno prav.']);
-    else base=_qaPick('cloth:warm',['Kratki rokavi bodo čisto v redu.','Lahka oblačila bodo dovolj.','Obleci se poletno — kratki rokavi bodo super.']);
-    const extras=[];
-    const rainSoon=_forecastHours.length&&_forecastHours.slice(0,6).some(h=>h.prob>=50);
-    if(rainSoon)extras.push(_qaPick('cloth:rain',['vzemi dežnik','ne pozabi dežnika']));
-    const windMax=_cuDailyData?.wind_speed_10m_max?.[0]??0;
-    if(windMax>=40)extras.push(_qaPick('cloth:wind',['precej bo pihalo','pričakuj močnejši veter']));
-    const range='Danes od '+tmin.toFixed(0).replace('.',',')+' do '+tmax.toFixed(0).replace('.',',')+' °C — ';
-    return range+base+(extras.length?' Poleg tega: '+extras.join(', ')+'.':'');
-  }}
-];
 
-function selectQaQuestions(){
+/* Grafi: barve prek CSS razredov (.qa-*), zato jih menjava teme ne zahteva ponovnega izrisa. */
+function _qaTicks(hrs,x,y){
+  return hrs.map((h,i)=>h.t.getHours()%3===0?`<text class="qa-tx" x="${x(i).toFixed(1)}" y="${y}" text-anchor="middle">${h.t.getHours()}:00</text>`:'').join('');
+}
+function _qaNight(hrs,x,bw,y0,y1){
+  return hrs.map((h,i)=>{const hh=h.t.getHours();return(hh>=20||hh<7)?`<rect class="qa-night" x="${(x(i)-bw/2).toFixed(1)}" y="${y0}" width="${bw.toFixed(1)}" height="${y1-y0}"/>`:'';}).join('');
+}
+function _qaTempChart(hrs,o){
+  const W=320,H=132,pl=26,pr=10,pt=18,pb=20,n=hrs.length;
+  const T=hrs.map(h=>h.temp),mn=Math.min(...T),mx=Math.max(...T);
+  const lo=Math.min(o.thr==null?mn:Math.min(o.thr,mn)-1.5,mn-1),hi=Math.max(o.thr==null?mx:Math.max(o.thr,mx)+1.5,mx+1);
+  const step=(W-pl-pr)/Math.max(1,n-1);
+  const x=i=>pl+i*step,y=t=>pt+(hi-t)/(hi-lo)*(H-pt-pb);
+  const pts=T.map((t,i)=>[x(i),y(t)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  let extra='';
+  if(o.thr!=null){
+    const z=y(o.thr);
+    if(o.fillBelow){
+      const area=`M${x(0).toFixed(1)} ${z.toFixed(1)} `+pts.map(p=>'L'+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')+` L${x(n-1).toFixed(1)} ${z.toFixed(1)} Z`;
+      extra+=`<defs><clipPath id="qa-cz"><rect x="0" y="${z.toFixed(1)}" width="${W}" height="${H}"/></clipPath></defs><path class="qa-ice" d="${area}" clip-path="url(#qa-cz)"/>`;
+    }
+    extra+=`<line class="qa-zero" x1="${pl}" x2="${W-pr}" y1="${z.toFixed(1)}" y2="${z.toFixed(1)}"/><text class="qa-tx" x="${pl-5}" y="${(z+3).toFixed(1)}" text-anchor="end">${_qaNum(o.thr,0)}</text>`;
+  }
+  const mi=o.markMax?T.indexOf(mx):T.indexOf(mn),mxp=pts[mi];
+  const anchor=mxp[0]>W-70?'end':mxp[0]<60?'start':'middle';
+  const below=o.markMax?-8:14;
+  return `<svg class="qa-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.aria}">${_qaNight(hrs,x,step,pt,H-pb)}${extra}
+    <path class="qa-line" d="${line}"/>
+    <circle class="qa-dot0" cx="${pts[0][0].toFixed(1)}" cy="${pts[0][1].toFixed(1)}" r="3"/><text class="qa-tx" x="${(pts[0][0]+6).toFixed(1)}" y="${(pts[0][1]-6).toFixed(1)}">zdaj</text>
+    <circle class="qa-dot" cx="${mxp[0].toFixed(1)}" cy="${mxp[1].toFixed(1)}" r="4"/>
+    <text class="qa-lb" x="${mxp[0].toFixed(1)}" y="${(mxp[1]+below).toFixed(1)}" text-anchor="${anchor}">${_qaNum(T[mi])} °C · ${hrs[mi].t.getHours()}:00</text>
+    ${_qaTicks(hrs,x,H-5)}</svg>`;
+}
+function _qaRainChart(hrs){
+  const W=320,H=124,pl=26,pr=10,pt=16,pb=20,n=hrs.length;
+  const mxv=Math.max(1,...hrs.map(h=>h.mm));
+  const bw=(W-pl-pr)/n,x=i=>pl+(i+.5)*bw,y=v=>pt+(1-v/mxv)*(H-pt-pb);
+  const bars=hrs.map((h,i)=>h.mm>0?`<rect class="qa-rb" x="${(x(i)-bw/2+1).toFixed(1)}" y="${y(h.mm).toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${(H-pb-y(h.mm)).toFixed(1)}" rx="2"/>`:'').join('');
+  const dry=hrs.every(h=>h.mm<0.05)?`<text class="qa-tx" x="${W/2}" y="${H/2-4}" text-anchor="middle">Količina pod 0,1 mm na uro</text>`:'';
+  return `<svg class="qa-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Padavine po urah v naslednjih 24 urah">${_qaNight(hrs,x,bw,pt,H-pb)}
+    <line class="qa-axis" x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}"/>${bars}${dry}
+    <text class="qa-tx" x="${pl-5}" y="${pt+3}" text-anchor="end">${_qaNum(mxv,0)}</text><text class="qa-tx" x="${pl-5}" y="${H-pb+3}" text-anchor="end">0</text>
+    <text class="qa-tx" x="${W-pr}" y="${pt-5}" text-anchor="end">mm na uro</text>${_qaTicks(hrs,x,H-5)}</svg>`;
+}
+function _qaStrip(hrs,test,aria){
+  const W=320,H=60,pl=8,pr=8,n=hrs.length,bw=(W-pl-pr)/n,x=i=>pl+(i+.5)*bw;
+  const cells=hrs.map((h,i)=>`<rect class="${test(h)?'qa-cell on':'qa-cell'}" x="${(x(i)-bw/2+1).toFixed(1)}" y="8" width="${(bw-2).toFixed(1)}" height="24" rx="3"/>`).join('');
+  return `<svg class="qa-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${aria}">${cells}${_qaTicks(hrs,x,H-6)}</svg>`;
+}
+
+/* Vsak odgovor vrne model ploščice: stanje (hit|near|none), kratek odgovor in vsebino podrobnosti. */
+const _QA={
+  frost(hrs){
+    // jutranji okvir 0:00–9:00: prvo jutro z vsaj 4 urami (ob 8:00 je današnje jutro že mimo), sicer zadnje
+    const mr=_qaRuns(hrs,h=>h.t.getHours()<=9),pick=mr.find(r=>r.to-r.from>=3)||mr[mr.length-1];
+    const cand=pick?hrs.slice(pick.from,pick.to+1):hrs;
+    const m=cand.reduce((a,h)=>h.temp<a.temp?h:a,cand[0]),tmin=m.temp;
+    const state=tmin<=0?'hit':tmin<=3?'near':'none';
+    const when=_qaWhen(m.t),tv=_qaNum(tmin)+' °C';
+    const mtr=(_qaMtr&&_qaMtr.days||[]).find(d=>d.date===_qaKey(m.t)&&Number.isFinite(d.p_frost));
+    const pct=mtr?mtrFrostPct(mtr.p_frost):null;
+    const mi=hrs.indexOf(m),run=_qaRuns(hrs,h=>h.temp<=0).find(r=>r.from<=mi&&mi<=r.to);   // ledena ura okoli najnižje točke, ne druge noči
+    const head=state==='hit'?`Zmrzal je verjetna: <em>${tv}</em> ${when} ob ${_qaH(m.t)}`
+      :state==='near'?`Blizu ledišča: <em>${tv}</em> ${when} ob ${_qaH(m.t)}`
+      :`Zmrzali ne kaže: najnižja <em>${tv}</em> ${when} ob ${_qaH(m.t)}`;
+    const facts=[['Pod 0 °C',run?_qaH(hrs[run.from].t)+' do '+_qaH(hrs[run.to].t,1):'ne'],['Open-Meteo, najnižja',tv]];
+    if(mtr)facts.splice(1,0,['MTR, zmrzal',pct!=null?pct+' %':'pod 10 %']);
+    return{id:'frost',label:'Zmrzal',icon:'i-thermometer-snowflake',state,pill:{hit:'Da',near:'Blizu',none:'Ne'}[state],
+      val:tv,sub:when+' ob '+_qaH(m.t),meta:mtr?(pct!=null?'MTR '+pct+' %':'MTR pod 10 %'):'',
+      head,chart:_qaTempChart(hrs,{thr:0,fillBelow:true,aria:'Temperatura v naslednjih 24 urah, najnižja '+tv+' ob '+_qaH(m.t)}),facts,
+      src:'Modelska napoved za dno doline, ne meritev. Jutranji okvir 0:00 do 9:00. Open-Meteo in MTR sta prikazana ločeno.'};
+  },
+  rain(hrs){
+    const maxP=Math.max(...hrs.map(h=>h.prob));
+    const i0=hrs.findIndex(h=>h.prob>=50);
+    if(i0<0)return{id:'rain',label:'Dež',icon:'i-cloud-rain',state:'none',pill:'Ne',val:'Ne kaže',sub:'v 24 h',meta:'verjetnost '+maxP+' %',
+      head:'Naslednjih 24 ur <em>ostane suho</em>',chart:_qaRainChart(hrs),facts:[['Največja verjetnost',maxP+' %'],['Naslednji dež','čez 24 h ali več']],
+      src:'Modelska napoved Open-Meteo, ne radarska meritev. Pod 50 % verjetnosti ne štejemo za dež.'};
+    let i1=i0;
+    while(i1+1<hrs.length&&(hrs[i1+1].prob>=40||hrs[i1+1].mm>=0.1))i1++;
+    const run=hrs.slice(i0,i1+1),mm=run.reduce((a,h)=>a+h.mm,0),p=Math.max(...run.map(h=>h.prob));
+    const wet=run.reduce((a,h)=>h.mm>a.mm?h:a,run[0]);
+    const when=_qaWhen(hrs[i0].t),end=_qaH(hrs[i1].t);
+    const sameDay=_qaKey(hrs[i0].t)===_qaKey(hrs[i1].t);
+    const start=i0===0?'Zdaj':_qaH(hrs[i0].t,-1);
+    const mmTxt=mm<1?'pod 1 mm':'~'+Math.round(mm)+' mm';
+    return{id:'rain',label:'Dež',icon:'i-cloud-rain',state:'hit',pill:'Da',val:start,
+      sub:(when==='danes'?'':'jutri ')+'do '+(sameDay?'':'jutri ')+end,meta:mm>=0.1?mmTxt:'verjetnost '+p+' %',
+      head:(i0===0?`Dež je verjeten že zdaj, do <em>${end}</em>`:`Dež od <em>${start} do ${end}</em>`)+(mm>=0.1?`, skupaj ${mmTxt}`:''),
+      chart:_qaRainChart(hrs),
+      facts:[['Najmočneje',wet.mm>0?'okoli '+_qaH(wet.t,-1):'—'],['Verjetnost',p+' %'],['Trajanje',(i1-i0+1)+' h']],
+      src:'Modelska napoved Open-Meteo. Količina je napoved za dolino, ni radarska meritev.'};
+  },
+  fog(hrs){return _qaCodeTopic(hrs,'fog','Megla','i-cloud-fog',_QA_FOG,'near','Možna','slaba vidnost','vidljivost dobra',
+    'Megla je možna','Megle ne kaže','Vidljivosti nihče ne meri: ocena je iz modelske vlage in vetra za dno doline.');},
+  snow(hrs){return _qaCodeTopic(hrs,'snow','Sneg','i-snowflake',_QA_SNOW,'hit','Da','sneženje','v 24 h',
+    'Možno sneženje','Sneženja ne kaže','Modelska napoved. Postaja snega ne meri; višina snežne odeje ni napovedana.');},
+  storm(hrs){return _qaCodeTopic(hrs,'storm','Nevihta','i-cloud-lightning',_QA_STORM,'near','Možna','možna nevihta','v 24 h',
+    'Možna nevihta','Neviht ne kaže','Modelska napoved, ne opozorilo. Za ukrepanje velja ARSO.');},
+  heat(hrs){
+    const d=_cuDailyData&&_cuDailyData.temperature_2m_max&&_cuDailyData.temperature_2m_max[0];
+    const tmax=Number.isFinite(d)?d:Math.max(...hrs.map(h=>h.temp));
+    const state=tmax>=30?'hit':tmax>=25?'near':'none',tv=_qaNum(tmax,0)+' °C';
+    const mi=hrs.reduce((a,h,i)=>h.temp>hrs[a].temp?i:a,0);
+    return{id:'heat',label:'Vročina',icon:'i-thermometer',state,pill:{hit:'Da',near:'Toplo',none:'Ne'}[state],val:tv,sub:'danes, najvišja',meta:'',
+      head:state==='hit'?`Vroče bo: do <em>${tv}</em>`:state==='near'?`Toplo bo: do <em>${tv}</em>`:`Ne bo posebej vroče: do <em>${tv}</em>`,
+      chart:_qaTempChart(hrs,{thr:30,markMax:true,aria:'Temperatura v naslednjih 24 urah, najvišja '+_qaNum(hrs[mi].temp)+' °C'}),
+      facts:[['Dnevna najvišja',tv],['Najtopleje v naslednjih 24 h',_qaH(hrs[mi].t)]],
+      src:'Modelska napoved za dolino. Črtkana črta je 30 °C.'};
+  }
+};
+function _qaCodeTopic(hrs,id,label,icon,codes,yesState,yesPill,yesMeta,noSub,yes,no,src){
+  const test=h=>codes.includes(h.wmo),runs=_qaRuns(hrs,test);
+  const aria=label+' po urah v naslednjih 24 urah';
+  if(!runs.length)return{id,label,icon,state:'none',pill:'Ne',val:'Ne kaže',sub:noSub,meta:'',head:`${no} v naslednjih 24 urah`,
+    chart:_qaStrip(hrs,test,aria),facts:[],src};
+  const r=runs[0],a=hrs[r.from].t,b=hrs[r.to].t;
+  const span=r.from===r.to?'okoli '+_qaH(a):a.getHours()+'–'+_qaH(b);
+  return{id,label,icon,state:yesState,pill:yesPill,val:r.from===r.to?'ob '+_qaH(a):span,sub:_qaWhen(a),meta:yesMeta,
+    head:`${yes} <em>${span}</em>`,chart:_qaStrip(hrs,test,aria),facts:[['Trajanje',(r.to-r.from+1)+' h']],src};
+}
+function _qaPlan(hrs){
   const mo=new Date().getMonth()+1;
-  return QA_TOPICS.filter(t=>t.eligible(mo)).sort((a,b)=>b.priority-a.priority).slice(0,3);
+  const a=(mo>=6&&mo<=9)?'heat':'frost';
+  let c;
+  if(mo>=5&&mo<=9)c='storm';
+  else if(mo>=11||mo<=2)c=hrs.some(h=>_QA_SNOW.includes(h.wmo))?'snow':'fog';
+  else c='fog';
+  return[a,'rain',c];
 }
-
-let _qaSelected=[];
+const _QA_LABEL={frost:['Zmrzal','i-thermometer-snowflake'],rain:['Dež','i-cloud-rain'],fog:['Megla','i-cloud-fog'],snow:['Sneg','i-snowflake'],storm:['Nevihta','i-cloud-lightning'],heat:['Vročina','i-thermometer']};
+const _QA_CARET='<svg class="qa-car" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+function _qaTileHtml(m){
+  const load=m.state==='load';
+  return `<button type="button" class="qa-tile" data-qa="${m.id}" data-state="${m.state}" aria-expanded="${_qaOpen===m.id}" aria-controls="qa-detail"${load?' disabled':''}>
+    <span class="qa-th"><span class="qa-chip"><svg class="ic" aria-hidden="true"><use href="#${m.icon}"/></svg></span><span class="qa-pill">${load?'':m.pill}</span></span>
+    <span class="qa-tl">${m.label}</span><span class="qa-tv${load?' skel-shimmer':''}">${load?'—':m.val}</span>
+    <span class="qa-ts">${load?'nalagam':m.sub}</span><span class="qa-tm">${m.meta||'&nbsp;'}</span>${load?'':_QA_CARET}</button>`;
+}
+function _qaDetailHtml(m){
+  const facts=m.facts.map(f=>`<div class="qa-fact"><span>${f[0]}</span><b>${f[1]}</b></div>`).join('');
+  return `<p class="qa-dh">${m.head}</p>${m.chart}${facts?`<div class="qa-facts">${facts}</div>`:''}<p class="qa-src">${m.src}</p>`;
+}
+function _qaFallback(){
+  return _qaPlan([]).map(id=>({id,label:_QA_LABEL[id][0],icon:_QA_LABEL[id][1],state:'none',pill:'—',val:'—',sub:'ni podatka',meta:'',
+    head:'Podatki trenutno niso na voljo.',chart:'',facts:[],src:'Poskusi znova čez trenutek.'}));
+}
+function renderQa(failed){
+  const grid=document.getElementById('qa-tiles');
+  if(!grid||!document.getElementById('qa-detail'))return;
+  const hrs=_forecastHours;
+  let models;
+  try{
+    models=hrs.length?_qaPlan(hrs).map(id=>_QA[id](hrs))
+      :failed?_qaFallback()
+      :_qaPlan([]).map(id=>({id,label:_QA_LABEL[id][0],icon:_QA_LABEL[id][1],state:'load'}));
+  }catch(e){
+    console.warn('QA:',e);
+    models=_qaFallback();
+  }
+  _qaModels=models;
+  const foc=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#qa-tiles')?document.activeElement.dataset.qa:null;
+  grid.innerHTML=models.map(_qaTileHtml).join('');
+  if(foc){const b=grid.querySelector('.qa-tile[data-qa="'+foc+'"]');if(b)b.focus();}
+  _qaShowDetail();
+  if(!_qaMtrAsked&&hrs.length&&models.some(m=>m.id==='frost')){
+    _qaMtrAsked=true;
+    _mtrFetch().then(j=>{_qaMtr=j;renderQa();}).catch(()=>{});
+  }
+}
+function _qaShowDetail(){
+  const det=document.getElementById('qa-detail');if(!det)return;
+  const m=_qaModels.find(x=>x.id===_qaOpen&&x.state!=='load');
+  if(!m){det.hidden=true;det.innerHTML='';_qaOpen=null;return;}
+  det.dataset.qa=m.id;det.innerHTML=_qaDetailHtml(m);det.hidden=false;
+}
+function _qaToggle(id){
+  _qaOpen=_qaOpen===id?null:id;
+  document.querySelectorAll('#qa-tiles .qa-tile').forEach(b=>b.setAttribute('aria-expanded',String(b.dataset.qa===_qaOpen)));
+  _qaShowDetail();
+}
 function initWeatherQA(){
-  _qaSelected=selectQaQuestions();
   const bar=document.getElementById('qa-bar');
-  if(!bar||!_qaSelected.length)return;
-  bar.innerHTML=_qaSelected.map(t=>
-    `<button class="qa-btn" onclick="openQaModal('${t.id}')"><span class="qa-icon">${t.icon}</span><span class="qa-lbl">${t.q}</span></button>`
-  ).join('');
-  bar.hidden=false;
-}
-
-function openQaModal(id){
-  const t=_qaSelected.find(x=>x.id===id);
-  if(!t)return;
-  let answer;
-  try{ answer=t.answer(); }catch(_){ answer='Podatki trenutno niso na voljo, poskusi znova čez trenutek.'; }
-  const qEl=document.getElementById('qa-modal-q'),aEl=document.getElementById('qa-modal-a'),modal=document.getElementById('qa-modal');
-  if(qEl)qEl.textContent=t.icon+' '+t.q;
-  if(aEl)aEl.textContent=answer;
-  if(modal){modal.classList.add('open');document.body.style.overflow='hidden';}
-}
-function closeQaModal(e){
-  if(e&&e.target!==document.getElementById('qa-modal'))return;
-  const modal=document.getElementById('qa-modal');
-  if(modal)modal.classList.remove('open');
-  document.body.style.overflow='';
+  if(!bar)return;
+  bar.addEventListener('click',e=>{const b=e.target.closest('.qa-tile');if(b&&!b.disabled)_qaToggle(b.dataset.qa);});
+  bar.addEventListener('keydown',e=>{if(e.key==='Escape'&&_qaOpen){const id=_qaOpen;_qaToggle(id);const b=bar.querySelector('.qa-tile[data-qa="'+id+'"]');if(b)b.focus();}});
+  renderQa();
+  setTimeout(()=>{if(!_forecastHours.length)renderQa(true);},20000);   // vir ne odgovori: ploščice ne ostanejo večno v nalaganju
 }
 
 // Leno nalaganje: fn steče enkrat, ko element `id` prvič pride v vidno polje (rootMargin 400 px nad/pod zaslonom).
