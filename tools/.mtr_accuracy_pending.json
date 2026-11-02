@@ -43,5 +43,23 @@
     "mtr_tmin": 3.5,
     "om_tmax": 8.6,
     "om_tmin": 5.4
+  },
+  {
+    "target_date": "2026-11-03",
+    "lead": 1,
+    "made_at": "2026-11-02",
+    "mtr_tmax": 9.2,
+    "mtr_tmin": 3.7,
+    "om_tmax": 8.7,
+    "om_tmin": 5.3
+  },
+  {
+    "target_date": "2026-11-04",
+    "lead": 2,
+    "made_at": "2026-11-02",
+    "mtr_tmax": 7.4,
+    "mtr_tmin": 1.8,
+    "om_tmax": 6.9,
+    "om_tmin": 4.8
   }
 ]
