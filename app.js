@@ -12913,9 +12913,26 @@ async function fetchCurrent(){
   try{const res=await fetch(PROXY+'/');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();const obs=data.observations?.[0];if(!obs)throw new Error('Ni podatkov');applyObs(obs);}
   catch(e){dot.className='dot error';set('status-text','Napaka: '+e.message);const pl=document.getElementById('live-pill');if(pl)pl.dataset.fresh='error';}
 }
+// Grafi urnih meritev so ob prvem nalaganju »Nalaganje…«. Če urnih podatkov ni (vir odpove), naj to povedo,
+// ne pa v nedogled kazali nalaganja. Graf, ki že ima podatke (_tempData/_hourlyObs), ostane nedotaknjen.
+let _hourlyRetry=0;
+function _hourlyFailed(){
+  if(!_hourlyObs.length){
+    [['hourly-svg',80],['temp-svg',100],['rain-svg',75]].forEach(([id,y])=>{
+      const svg=document.getElementById(id);
+      if(svg&&/Nalaganje/.test(svg.textContent))svg.innerHTML='<text x="440" y="'+y+'" text-anchor="middle" font-size="13" fill="rgba(128,128,128,.55)" font-family="Inter,sans-serif">Urnih meritev trenutno ni mogoče naložiti</text>';
+    });
+  }
+  if(_hourlyRetry<3)setTimeout(fetchHourly,(++_hourlyRetry)*60*1000);
+}
 async function fetchHourly(){
-  try{const res=await fetch(PROXY+'/hourly');if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();if(data.observations?.length)applyHourly(data.observations);}
-  catch(e){console.warn('Hourly:',e);}
+  try{
+    const res=await fetch(PROXY+'/hourly');if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(!data.observations?.length)throw new Error('Ni urnih podatkov');
+    _hourlyRetry=0;applyHourly(data.observations);
+  }
+  catch(e){console.warn('Hourly:',e);_hourlyFailed();}
 }
 // ══════════════════════════════════════════════════════════
 // ── STORM CHASER TAB ──────────────────────────────────────
