@@ -19289,23 +19289,22 @@ function _buildMorjeFc({fc,marine}){
   const el=document.getElementById('sea-fc-body'); if(!el)return;
   const d=fc.daily||{};
   const dm=marine.daily||{};
-  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
+  const days=['ned','pon','tor','sre','čet','pet','sob'];
   const n=Math.min(7,(d.time||[]).length);
-  let html='<div class="sea-fc-row">';
+  // Isti videz kartice dneva kot »Naslednjih 7 dni« (.cu-day, app.js _dayCardHtml); razpon znotraj prikazanih dni.
+  const his=[],los=[];
+  for(let i=0;i<n;i++){if(d.temperature_2m_max?.[i]!=null)his.push(d.temperature_2m_max[i]);if(d.temperature_2m_min?.[i]!=null)los.push(d.temperature_2m_min[i]);}
+  const lo0=los.length?Math.min(...los):0,span=his.length&&los.length?Math.max(6,Math.max(...his)-lo0):0;
+  let html='<div class="cu-days sea-cu">';
   for(let i=0;i<n;i++){
-    const dt=new Date(d.time[i]); const dn=days[dt.getDay()];
+    const dt=new Date(d.time[i]+'T12:00:00');
     const wmo=d.weather_code?.[i]??0;
-    const tmax=d.temperature_2m_max?.[i]!=null?Math.round(d.temperature_2m_max[i])+'°':'—';
-    const tmin=d.temperature_2m_min?.[i]!=null?Math.round(d.temperature_2m_min[i])+'°':'—';
-    const wh=dm.wave_height_max?.[i]!=null?dm.wave_height_max[i].toFixed(1)+' m':'—';
-    const rain=d.precipitation_sum?.[i]!=null?d.precipitation_sum[i].toFixed(0):'0';
-    const wind=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i])+' km/h':'—';
-    html+=`<div class="sea-fc-day">
-      <div class="sea-fc-name">${dn}</div>
-      <div class="sea-fc-icon">${_wmoImg(wmo,true,34)}</div>
-      <div class="sea-fc-t">${tmax}/${tmin}</div>
-      <div class="sea-fc-sub">🌊 ${wh}<br>💨 ${wind}<br>🌧 ${rain}mm</div>
-    </div>`;
+    const wh=dm.wave_height_max?.[i];
+    const gust=d.wind_gusts_10m_max?.[i];
+    html+=_dayCardHtml({cls:(dt.getDay()===0||dt.getDay()===6)?'cu-we':'',wx:_wmoCat(wmo),lbl:days[dt.getDay()]+' '+dt.getDate()+'.',
+      icon:_wmoImg(wmo,true,48),desc:_wmoTxt(wmo),hi:d.temperature_2m_max?.[i]??null,lo:d.temperature_2m_min?.[i]??null,min:lo0,span,
+      rain:d.precipitation_sum?.[i]!=null?d.precipitation_sum[i]:null,
+      extra:'<span class="cu-ex">valovi '+(wh!=null?wh.toFixed(1)+' m':'—')+'</span><span class="cu-ex">sunki '+(gust!=null?Math.round(gust)+' km/h':'—')+'</span>'});
   }
   html+='</div>';
   el.innerHTML=html;
@@ -19559,27 +19558,29 @@ function _buildGoreFreeze({triglav}){
     +'<span style="opacity:.6">Stolpci = min–maks višina meje ledišča</span>';
 }
 
+// Kartice dni za vrhove (Triglav, Krvavec): isti .cu-day kot pri »Naslednjih 7 dni«; padavin ni (samo sneg), zato brez vrstice dežja.
+function _mtnDayCards(d){
+  const days=['ned','pon','tor','sre','čet','pet','sob'];
+  const n=Math.min(7,(d.time||[]).length);
+  const his=[],los=[];
+  for(let i=0;i<n;i++){if(d.temperature_2m_max?.[i]!=null)his.push(d.temperature_2m_max[i]);if(d.temperature_2m_min?.[i]!=null)los.push(d.temperature_2m_min[i]);}
+  const lo0=los.length?Math.min(...los):0,span=his.length&&los.length?Math.max(6,Math.max(...his)-lo0):0;
+  let html='<div class="cu-days mtn-cu">';
+  for(let i=0;i<n;i++){
+    const dt=new Date(d.time[i]+'T12:00:00');
+    const wmo=d.weather_code?.[i]??0;
+    const sn=d.snowfall_sum?.[i],gust=d.wind_gusts_10m_max?.[i];
+    html+=_dayCardHtml({cls:(dt.getDay()===0||dt.getDay()===6)?'cu-we':'',wx:_wmoCat(wmo),lbl:days[dt.getDay()]+' '+dt.getDate()+'.',
+      icon:_wmoImg(wmo,true,48),desc:_wmoTxt(wmo),hi:d.temperature_2m_max?.[i]??null,lo:d.temperature_2m_min?.[i]??null,min:lo0,span,rain:null,
+      extra:'<span class="cu-ex">'+(sn!=null&&sn>0?'sneg '+sn.toFixed(0)+' cm':'brez snega')+'</span><span class="cu-ex">sunki '+(gust!=null?Math.round(gust)+' km/h':'—')+'</span>'});
+  }
+  return html+'</div>';
+}
+
 function _buildGoreTriglav({triglav}){
   const el=document.getElementById('mtn-triglav-body'); if(!el)return;
   const d=triglav.daily||{};
-  const n=Math.min(7,(d.time||[]).length);
-  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
-  let html='<div class="mtn-fc-row">';
-  for(let i=0;i<n;i++){
-    const dt=new Date(d.time[i]);
-    const wmo=d.weather_code?.[i]??0;
-    const tmaxT=d.temperature_2m_max?.[i]??null;
-    const tminT=d.temperature_2m_min?.[i]??null;
-    const snow=d.snowfall_sum?.[i]!=null&&d.snowfall_sum[i]>0?d.snowfall_sum[i].toFixed(0)+' cm':'—';
-    const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
-    html+=`<div class="mtn-fc-day">
-      <div class="mtn-fc-name">${days[dt.getDay()]}</div>
-      <div class="mtn-fc-icon">${_wmoImg(wmo,true,34)}</div>
-      <div class="mtn-fc-t">${tmaxT!=null?tmaxT.toFixed(0)+'°':'—'}/${tminT!=null?tminT.toFixed(0)+'°':'—'}</div>
-      <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
-    </div>`;
-  }
-  html+='</div>';
+  let html=_mtnDayCards(d);
   html+=`<div class="mtn-summit-info">
     <b>Opomba:</b> Temperature so modelsko prilagojene na višino vrha Triglava (2864 m) z metodo statističnega zniževanja (Open-Meteo). Za operativno planinarjenje vedno preveri
     <a href="https://meteo.arso.gov.si/met/sl/weather/bulletin/mountain/" target="_blank" style="color:var(--blue)">ARSO planinsko napoved</a>.
@@ -19589,26 +19590,7 @@ function _buildGoreTriglav({triglav}){
 
 function _buildGoreKrvavec({krvavec}){
   const el=document.getElementById('mtn-krvavec-body'); if(!el)return;
-  const d=krvavec.daily||{};
-  const n=Math.min(7,(d.time||[]).length);
-  const days=['Ned','Pon','Tor','Sre','Čet','Pet','Sob'];
-  let html='<div class="mtn-fc-row">';
-  for(let i=0;i<n;i++){
-    const dt=new Date(d.time[i]);
-    const wmo=d.weather_code?.[i]??0;
-    const tmaxK=d.temperature_2m_max?.[i]??null;
-    const tminK=d.temperature_2m_min?.[i]??null;
-    const snow=d.snowfall_sum?.[i]!=null&&d.snowfall_sum[i]>0?d.snowfall_sum[i].toFixed(0)+' cm':'—';
-    const gust=d.wind_gusts_10m_max?.[i]!=null?Math.round(d.wind_gusts_10m_max[i]):'—';
-    html+=`<div class="mtn-fc-day">
-      <div class="mtn-fc-name">${days[dt.getDay()]}</div>
-      <div class="mtn-fc-icon">${_wmoImg(wmo,true,34)}</div>
-      <div class="mtn-fc-t">${tmaxK!=null?tmaxK.toFixed(0)+'°':'—'}/${tminK!=null?tminK.toFixed(0)+'°':'—'}</div>
-      <div class="mtn-fc-sub">❄️ ${snow}<br>💨 ${gust} km/h</div>
-    </div>`;
-  }
-  html+='</div>';
-  el.innerHTML=html;
+  el.innerHTML=_mtnDayCards(krvavec.daily||{});
 }
 // ═══ end GORE ══════════════════════════════════════════════
 

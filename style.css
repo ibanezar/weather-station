@@ -4311,3 +4311,5 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
 .cu-day.cu-today .cu-dlbl{color:var(--blue)}
 .cu-uv{font-size:.66rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center}
 .cu-day.otd-empty{opacity:.65;justify-content:center;min-height:6rem}
+.cu-ex{font-size:.66rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center}
+.sea-cu,.mtn-cu{margin-top:.65rem}
