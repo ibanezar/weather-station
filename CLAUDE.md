@@ -2773,6 +2773,17 @@ Filip je hero kartico imel za »veliko zmedo« (pred prvo meritvijo devet blokov
 - Nova ploščica na hero kartici = vnos v `.hero-metrics` ali `.hb-more`; na ≥ 760 px potrebuje `grid-area`.
 - Po spremembi: `npm run minify` + `node tools/critical_css.mjs` (kritični CSS je izpeljan).
 
+### Hitra vprašanja: ploščice z odgovorom (2. 11. 2026)
+
+Vrstica pod hero kartico (`#qa-bar`) ni več treh emoji gumbov z odgovorom v temnem pojavnem oknu. Tri ploščice stalne višine (10,8 rem, rezervirano že v HTML: brez CLS) kažejo odgovor same: značka (Da, Blizu, Ne, Možna), ključna številka in čas (»−1,2 °C · jutri ob 5:00«). Tap odpre podrobnosti (graf, dejstva, vir) pod ploščicami, ne čez zaslon.
+
+- **Izbor ploščic** (`_qaPlan()`): vedno **dež** v sredini; jun–sep vročina + nevihta, ostalo zmrzal (mar–maj, okt–feb) + megla ali, ob napovedani snežni kodi (nov–feb), sneg, maj tudi nevihta. Prej je »Kdaj bo dež?« zaradi prioritete 20 v praksi izpadel; vprašanji »UV« in »Kaj naj oblečem?« sta odstranjeni (UV je ploščica na heroju, obleka v stavku »Danes«). Nova tema = vnos v `_QA` + `_QA_LABEL` + izbor v `_qaPlan()`.
+- **Podatki**: urna napoved Open-Meteo (`_forecastHours`, ista kot za obete, nobenega novega klica). Zmrzal poleg tega kaže **MTR `p_frost`** (`_mtrFetch()`, po datumu jutra z najnižjo točko), ločeno od Open-Meteo (vira se ne zlivata); brez MTR ploščica deluje naprej brez te vrstice. Jutranji okvir je prvo jutro (0:00–9:00) z vsaj štirimi urami, sicer naslednje.
+- **Urna vrednost z žigom T velja za T-1h..T**: začetek dežja je T-1, konec T; prva ura (T = zdaj) se izpiše kot »Zdaj«. Dež šteje od verjetnosti ≥ 50 % (kot prej), trajanje se razširi, dokler je verjetnost ≥ 40 % ali padavine ≥ 0,1 mm.
+- Vse je **modelska napoved, ne meritev** in tako piše pod grafom. Za meglo piše, da vidljivosti nihče ne meri; za sneg, da postaja snega ne meri.
+- Grafi so SVG z barvami v CSS razredih (`.qa-*`, barva pojava je `--qh`), zato menjava teme ne zahteva ponovnega izrisa. Ikone so iz sklada (`#i-…`), ne emoji. Ob izpadu podatkov se po 20 s pokaže »ni podatka«, ne večno nalaganje.
+- Po spremembi: `npm run minify && node tools/critical_css.mjs` in commit `index.html`.
+
 ### Ploščice hero kartice: glava z ikono, lestvica, barva po vremenu (31. 10. 2026)
 
 Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris). Samo prikaz; id-ji in pravila `numOf()`/`hs-rain-rate` veljajo naprej.
