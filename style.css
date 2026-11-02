@@ -4303,3 +4303,11 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
 .duel-sum-val{margin-left:auto;font-family:'JetBrains Mono',monospace;color:var(--muted);text-align:right}
 .duel-fold>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 @media(max-width:420px){.duel-sum-lbl{font-size:.74rem}.duel-sum-val{font-size:.72rem}}
+
+/* Kartice dni na ostalih mestih (otd, AI napoved, Napoved 2) uporabljajo isti .cu-day kot obeti (app.js _dayCardHtml) */
+.aifc-cu{margin-top:1.1rem}
+.otd-cu{margin-top:.2rem}
+.cu-day.cu-today{border-color:rgba(96,165,250,.55)}
+.cu-day.cu-today .cu-dlbl{color:var(--blue)}
+.cu-uv{font-size:.66rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center}
+.cu-day.otd-empty{opacity:.65;justify-content:center;min-height:6rem}
