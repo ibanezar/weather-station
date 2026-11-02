@@ -3996,35 +3996,56 @@ function renderPastDays(){
   const maxHigh=Math.max(...days.map(d=>d.data.tempHigh??-99));
   const maxRain=Math.max(...days.map(d=>d.data.precipTotal??0));
   const maxWind=Math.max(...days.map(d=>d.data.windspeedHigh??0));
+  // Razpon tedna za vrstico razpona na kartici (isto kot pri »Naslednjih 7 dni«, samo iz meritev postaje).
   const globalLow=Math.min(...days.map(d=>d.data.tempLow??99));
   const globalHigh=Math.max(...days.map(d=>d.data.tempHigh??-99));
-  const tempRange=Math.max(1,globalHigh-globalLow);
+  const tempRange=Math.max(6,globalHigh-globalLow);
   wrap.innerHTML=days.map(d=>{
     const dt=new Date(d.date+'T12:00:00');
     const dn=_PD_DAYS[dt.getDay()];
-    const dm=dt.getDate()+'. '+(dt.getMonth()+1)+'.';
+    const lbl=dn+' '+dt.getDate()+'.';
     const{tempHigh:h,tempLow:l,precipTotal:r,windspeedHigh:w}=d.data;
     const isHot=(h!=null&&h===maxHigh&&maxHigh>-99);
     const isWet=(r!=null&&r===maxRain&&maxRain>0);
     const isWindy=(w!=null&&w===maxWind&&maxWind>0&&!isHot&&!isWet);
-    const barLeft=Math.round(((l??globalLow)-globalLow)/tempRange*100);
-    const barW=Math.max(8,Math.round(((h??globalHigh)-(l??globalLow))/tempRange*100));
-    const badge=isHot?'🌡':isWet?'💧':isWindy?'💨':'';
-    const cond=metricToCondition(d.data);
-    return`<div class="pd-card${isHot?' pd-hot':''}${isWet?' pd-wet':''}${isWindy?' pd-windy':''}" data-date="${d.date}" onclick="togglePdDetail('${d.date}',this)">
-      ${badge?`<span class="pd-badge">${badge}</span>`:''}
-      <div class="pd-day">${dn}</div>
-      <div class="pd-date">${dm}</div>
-      <div class="pd-icon" title="${cond.desc}">${cond.emoji}</div>
-      <div class="pd-temp-high">${h!=null?h.toFixed(1):'—'}°</div>
-      <div class="pd-temp-low">${l!=null?l.toFixed(1):'—'}°</div>
-      <div class="pd-bar-wrap"><div class="pd-bar" style="left:${barLeft}%;width:${barW}%"></div></div>
-      <div class="pd-meta">
-        <span>${r!=null&&r>0?'💧 '+r.toFixed(1)+' mm':'<span>💧 —</span>'}</span>
-        <span>${w!=null&&w>0?'💨 '+Math.round(w)+' km/h':'<span>💨 —</span>'}</span>
-      </div>
+    const hi=h!=null?h:l, lo=l!=null?l:h;
+    const l0=Math.max(0,Math.min(100,((lo??globalLow)-globalLow)/tempRange*100));
+    const l1=Math.max(l0+6,Math.min(100,((hi??globalHigh)-globalLow)/tempRange*100));
+    const cond=_pdCondition(d.data);
+    const mark=isHot?'najtoplejši dan tedna':isWet?'največ dežja v tednu':isWindy?'najbolj vetroven dan tedna':'';
+    const rain=r||0;
+    return`<div class="cu-day pd-card${(dt.getDay()===0||dt.getDay()===6)?' cu-we':''}${isHot?' pd-hot':''}${isWet?' pd-wet':''}${isWindy?' pd-windy':''}" data-wx="${cond.wx}" data-date="${d.date}" onclick="togglePdDetail('${d.date}',this)" role="button" tabindex="0"${mark?' title="'+mark+'"':''}>
+      <span class="cu-scene" aria-hidden="true"></span>
+      <span class="cu-dlbl">${lbl}</span>
+      <span class="cu-demo"><img src="icons/weather/${cond.icon}.svg" width="48" height="48" class="wx-icon" alt="${cond.desc}"></span>
+      <span class="cu-ddesc">${cond.desc}${w!=null&&w>=30?' · '+Math.round(w)+' km/h':''}</span>
+      <div class="cu-dtemp"><span class="cu-dhi" style="color:${h!=null?tempColor(h):'inherit'}">${h!=null?Math.round(h)+'°':'—'}</span><span class="cu-dtl">${l!=null?Math.round(l)+'°':'—'}</span></div>
+      <div class="cu-range" aria-hidden="true"><i style="left:${l0.toFixed(1)}%;width:${(l1-l0).toFixed(1)}%;background:linear-gradient(90deg,${tempColor(lo??0)},${tempColor(hi??0)})"></i></div>
+      ${rain>0.3?`<span class="cu-drain">${_ico('cloud-rain')} ${rain.toFixed(1)} mm</span>`:`<span class="cu-drain cu-dry">${_ico('sun')} suho</span>`}
     </div>`;
   }).join('');
+  wrap.querySelectorAll('.pd-card').forEach(c=>c.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click();}
+  }));
+}
+
+// Videz kartice dneva iz meritev postaje (postaja oblačnosti ne meri): isti pragovi kot metricToCondition(),
+// samo da vrne še kategorijo ozadja (data-wx) in ime ikone. Samo prikaz, ni nova meritev.
+function _pdCondition(m){
+  const r=m.precipTotal||0, t=m.tempAvg??m.tempHigh??0, w=m.windspeedHigh||0;
+  const c=metricToCondition(m);
+  let wx='partly',icon='partly-cloudy-day';
+  if(t<=0&&r>0){wx='snow';icon='snow';}
+  else if(t<=0){wx='cloud';icon='overcast';}
+  else if(r>15){wx='storm';icon='thunderstorms-day-rain';}
+  else if(r>5){wx='rain';icon='overcast-rain';}
+  else if(r>1){wx='rain';icon='partly-cloudy-day-rain';}
+  else if(r>0){wx='rain';icon='drizzle';}
+  else if(w>50){wx='cloud';icon='overcast';}
+  else if(t>24){wx='clear';icon='clear-day';}
+  else if(t>12){wx='partly';icon='partly-cloudy-day';}
+  else{wx='cloud';icon='overcast';}
+  return{wx,icon,desc:c.desc};
 }
 
 async function togglePdDetail(date,el){
