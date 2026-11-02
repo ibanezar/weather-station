@@ -4073,6 +4073,30 @@ export default {
 
     try {
 
+      // ── /napoved-om ────────────────────────────────────────
+      // Rezerva za klic Open-Meteo iz brskalnika (app.js fetchComingUp): ob 429 zaradi omejitve po IP
+      // ostanejo graf na heroju, 7 dni in obeti prazni. URL je STALEN (brez parametrov obiskovalca),
+      // rob ga drži 10 min; odgovor z napako se ne predpomni.
+      if (path === "/napoved-om") {
+        const u = "https://api.open-meteo.com/v1/forecast?latitude=46.325779&longitude=14.921137"
+          + "&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day"
+          + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,uv_index_max,wind_speed_10m_max"
+          + "&timezone=Europe%2FLjubljana&forecast_days=8";
+        try {
+          const r = await fetch(u, { cf: { cacheEverything: true, cacheTtlByStatus: { "200-299": 600, "400-599": 0 } } });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const j = await r.json();
+          if (!j || !j.hourly || !j.daily) throw new Error("neznana oblika");
+          return new Response(JSON.stringify(j), {
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ error: true, reason: "open_meteo_unreachable" }), {
+            status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" }
+          });
+        }
+      }
+
       // ── /arso-toca ─────────────────────────────────────────
       // Trenutna verjetnost toče po pokrajinah (ARSO radar). Pokrajine vzporedno, rob predpomni
       // 5 min (ARSO osvežuje na ~10 min), tako da ARSO dobi največ en krog klicev na 5 min.
