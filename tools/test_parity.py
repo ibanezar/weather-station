@@ -1002,10 +1002,10 @@ def hero_vceraj():
     check(ic.yesterday_delta(obs, []) is None and ic.yesterday_delta(obs, None) is None, "brez zgodovine: nič")
     html = '<div class="hero-chips"><div class="yesterday-delta" id="yesterday-delta"></div><div class="feels" hidden></div></div>'
     out = ic.patch_yesterday_delta(html, obs, hourly)
-    check('↑ 2.2°C</span> <span style="color:var(--muted)">topleje kot včeraj ob tem času</span></div>' in out
+    check('↑ 2,2 °C</span> <span style="color:var(--muted)">topleje kot včeraj ob tem času</span></div>' in out
           and '<div class="feels" hidden>' in out, "predizris čipa", out)
     out2 = ic.patch_yesterday_delta(out, dict(obs, metric={"temp": 12.0}), [hour("2026-11-01 12:00:00", 14.0)])
-    check(out2.count('id="yesterday-delta"') == 1 and "↓ 2.0°C" in out2 and "↑" not in out2, "ponoven zagon prepiše čip", out2)
+    check(out2.count('id="yesterday-delta"') == 1 and "↓ 2,0 °C" in out2 and "↑" not in out2, "ponoven zagon prepiše čip", out2)
     check(ic.patch_yesterday_delta(out, obs, [hour("2026-11-01 06:00:00", 5.0)]) == out, "brez primerjave ostane stari izris")
     # notranjih meritev čip nikoli ne bere
     check("indoor" not in open(ic.__file__, encoding="utf-8").read().split("def yesterday_delta")[1].split("def hero_scale_positions")[0],

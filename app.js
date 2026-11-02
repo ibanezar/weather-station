@@ -4508,12 +4508,12 @@ function applyYesterdayDelta(observations){
   // Brez ujemajoče meritve (luknja v urnih podatkih > 2 h) primerjave ne trdimo: čip ostane, kot je (statični izris ali prazen).
   if(!closest||_lastTemp===null||minDiff>2*3600*1000)return;
   const ty=closest.metric?.tempAvg??closest.metric?.temp;if(ty==null)return;
-  const d=_lastTemp-ty,absD=Math.abs(d).toFixed(1);
+  const d=_lastTemp-ty,absD=fmt(Math.abs(d),1);   // vejica, kot povsod na kartici
   const arrow=d>0.5?'↑':d<-0.5?'↓':'→';
   const word=d>0.5?'topleje kot včeraj ob tem času':d<-0.5?'hladneje kot včeraj ob tem času':'podobno kot včeraj ob tem času';
   const col=d>0.5?'var(--red)':d<-0.5?'var(--blue)':'var(--muted)';
   const el=document.getElementById('yesterday-delta');
-  if(el)el.innerHTML=`<span class="dv" style="color:${col}">${arrow} ${absD}°C</span> <span style="color:var(--muted)">${word}</span>`;
+  if(el)el.innerHTML=`<span class="dv" style="color:${col}">${arrow} ${absD} °C</span> <span style="color:var(--muted)">${word}</span>`;
   _lastDeltaPhrase=Math.abs(d)<0.5?null:'Danes je za '+absD+' °C '+(d>0?'topleje':'hladneje')+' kot ob istem času včeraj.';
   renderHeroBriefing();
 }
