@@ -653,6 +653,106 @@ async function fetchEcowittAsWuObs(env) {
   };
 }
 
+// Rezerva za /hourly: WU hourly/7day je 2. 11. 2026 vračal 401 (issue
+// »Napaka pri pridobivanju podatkov IREICA1«), zato so ostali grafi »Urni
+// temperaturni profil«, »Temperatura« in »Padavine« v večnem »Nalaganje…«.
+// Zgradi WU-oblikovane urne zapise iz Ecowitt device/history (30-min korak,
+// zadnjih 7 koledarskih dni) — app.js (applyHourly in vse, kar bere
+// observations) in Python odjemalci ostanejo nespremenjeni. Bere SAMO zunanje
+// kanale (notranjih ne zahteva: pravilo z vrha CLAUDE.md). Vrne [] ali null,
+// če Ecowitt ne odgovori.
+async function fetchEcowittHourlyAsWuObs(env) {
+  const app = env?.EW_APP || EW_APP_FALLBACK;
+  const api = env?.EW_API || EW_API_FALLBACK;
+  if (!app || !api) return null;
+  const dayStr = d => d.toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+  const now = new Date();
+  const qs = new URLSearchParams({
+    application_key: app, api_key: api, mac: EW_MAC,
+    start_date: dayStr(new Date(now - 6 * 864e5)) + " 00:00:00",
+    end_date: dayStr(now) + " 23:59:59",
+    cycle_type: "30min",
+    call_back: "outdoor.temperature,outdoor.humidity,outdoor.dew_point,wind.wind_speed,wind.wind_gust,wind.wind_direction,rainfall.daily,rainfall.rain_rate,pressure.relative,solar_and_uvi.solar,solar_and_uvi.uvi",
+    temp_unitid: "1", pressure_unitid: "3", wind_speed_unitid: "7",
+    rainfall_unitid: "12", solar_irradiance_unitid: "16",
+  });
+  let json;
+  try {
+    const res = await fetch("https://api.ecowitt.net/api/v3/device/history?" + qs.toString(), {
+      headers: { "Accept": "application/json" },
+      cf: { cacheTtl: 300, cacheEverything: true },   // klici iz brskalnikov ne smejo vsi na Ecowitt
+    });
+    json = await res.json();
+  } catch (_) { return null; }
+  if (json?.code !== 0 || !json.data) return null;
+  const data = json.data;
+  const series = (...p) => { let c = data; for (const k of p) { c = c?.[k]; if (c == null) return {}; } return c?.list || {}; };
+  const val = v => (v && typeof v === "object") ? num(v.avg ?? v.value ?? Object.values(v)[0]) : num(v);
+
+  const hourKeys = {};
+  const hourOf = ts => hourKeys[ts] ||
+    (hourKeys[ts] = new Date(parseInt(ts) * 1000).toLocaleString("sv-SE", { timeZone: "Europe/Ljubljana" }).slice(0, 13));
+  const buckets = {};
+  const add = (field, path) => {
+    for (const [ts, v] of Object.entries(series(...path))) {
+      const x = val(v);
+      if (x == null) continue;
+      const k = hourOf(ts);
+      const b = buckets[k] || (buckets[k] = { last: 0 });
+      (b[field] || (b[field] = [])).push(x);
+      b.last = Math.max(b.last, parseInt(ts));
+    }
+  };
+  add("t", ["outdoor", "temperature"]);
+  add("h", ["outdoor", "humidity"]);
+  add("dp", ["outdoor", "dew_point"]);
+  add("w", ["wind", "wind_speed"]);
+  add("g", ["wind", "wind_gust"]);
+  add("wd", ["wind", "wind_direction"]);
+  add("r", ["rainfall", "daily"]);
+  add("rr", ["rainfall", "rain_rate"]);
+  add("p", ["pressure", "relative"]);
+  add("s", ["solar_and_uvi", "solar"]);
+  add("uv", ["solar_and_uvi", "uvi"]);
+
+  const mean = a => a && a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const mx = a => a && a.length ? Math.max(...a) : null;
+  const mn = a => a && a.length ? Math.min(...a) : null;
+  const circ = a => {
+    if (!a || !a.length) return null;
+    const s = a.reduce((x, d) => x + Math.sin(d * Math.PI / 180), 0), c = a.reduce((x, d) => x + Math.cos(d * Math.PI / 180), 0);
+    return Math.round(((Math.atan2(s, c) * 180 / Math.PI) + 360) % 360);
+  };
+  const r1 = x => x == null ? null : Math.round(x * 10) / 10;
+
+  return Object.keys(buckets).sort().filter(k => buckets[k].t && buckets[k].t.length).map(k => {
+    const b = buckets[k];
+    return {
+      stationID: STATION,
+      // WU žigosa urni zapis na konec ure (HH:59) — app.js to pričakuje.
+      obsTimeLocal: k + ":59:00",
+      obsTimeUtc: new Date(b.last * 1000).toISOString(),
+      epoch: b.last,
+      lat: 46.3258, lon: 14.9211,
+      solarRadiationHigh: mx(b.s),
+      uvHigh: mx(b.uv),
+      winddirAvg: circ(b.wd),
+      humidityHigh: mx(b.h), humidityLow: mn(b.h), humidityAvg: r1(mean(b.h)),
+      qcStatus: 1,
+      metric: {
+        tempHigh: mx(b.t), tempLow: mn(b.t), tempAvg: r1(mean(b.t)),
+        dewptAvg: r1(mean(b.dp)),
+        windspeedHigh: mx(b.w), windspeedLow: mn(b.w), windspeedAvg: r1(mean(b.w)),
+        windgustHigh: mx(b.g),
+        pressureMax: mx(b.p), pressureMin: mn(b.p),
+        precipRate: mx(b.rr),
+        // kumulativa od polnoči na koncu ure, kot jo piše WU
+        precipTotal: mx(b.r) ?? 0,
+      },
+    };
+  });
+}
+
 const tsToDate = ts => new Date(parseInt(ts)*1000).toISOString().slice(0,10);
 const pf = v => v==null?null:typeof v==="object"?parseFloat(v.avg??v.max??Object.values(v)[0])||null:parseFloat(v)||null;
 // Ecowitt vrača vrednosti kot skalarje ("19.2") ALI objekte {max,min,avg};
@@ -8872,8 +8972,39 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
         }
       }
 
-      // ── /current ali /hourly ──────────────────────────────
-      const apiUrl = path === "/hourly" ? HOURLY_URL : CURRENT_URL;
+      // ── /hourly: WU, ob napaki/zastarelosti Ecowitt ───────
+      if (path === "/hourly") {
+        let wuRes = null, wuText = "", good = false;
+        try {
+          wuRes = await fetch(HOURLY_URL, { headers: { "Accept": "application/json" } });
+          wuText = await wuRes.text();
+          if (wuRes.ok) {
+            const p = JSON.parse(wuText);
+            const last = p?.observations?.[p.observations.length - 1];
+            const ageMin = last?.obsTimeUtc ? (Date.now() - new Date(last.obsTimeUtc).getTime()) / 60000 : Infinity;
+            good = ageMin <= 180;   // WU upload ugasnjen/zastal → zadnji urni zapis je star
+          }
+        } catch (_) { /* WU nedosegljiv ali neveljaven JSON → rezerva */ }
+        if (!good) {
+          const fb = await fetchEcowittHourlyAsWuObs(env);
+          if (fb && fb.length) {
+            return new Response(JSON.stringify({ observations: fb }), {
+              status: 200,
+              headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+            });
+          }
+        }
+        if (wuRes) {
+          return new Response(wuText, {
+            status: wuRes.status,
+            headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-cache" }
+          });
+        }
+        throw new Error("hourly: WU nedosegljiv, Ecowitt rezerva prazna");
+      }
+
+      // ── /current ──────────────────────────────────────────
+      const apiUrl = CURRENT_URL;
       const res = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
       const bodyText = await res.text();
 

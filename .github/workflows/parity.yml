@@ -132,6 +132,9 @@ jobs:
       - name: Test avtorizacije končnih točk (premium, webhook, admin, skrivnosti)
         run: node tools/test_worker_auth.mjs
 
+      - name: Test rezerve za /hourly (WU 401 → Ecowitt, grafi ne obstanejo v »Nalaganje…«)
+        run: node tools/test_hourly_fallback.mjs
+
       - name: Test vrat pozebe, igre, povzetka in zgodovine
         run: python3 tools/test_gates_daily.py
       - name: Navedba vira ARSO
