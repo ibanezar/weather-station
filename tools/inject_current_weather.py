@@ -376,7 +376,7 @@ def patch_yesterday_delta(html, obs, hourly):
     kind, d, word = res
     arrow = {"up": "↑", "down": "↓", "same": "→"}[kind]
     col = {"up": "var(--red)", "down": "var(--blue)", "same": "var(--muted)"}[kind]
-    chip = (f'<span class="dv" style="color:{col}">{arrow} {abs(d):.1f}°C</span> '
+    chip = (f'<span class="dv" style="color:{col}">{arrow} {num(abs(d), 1)} °C</span> '
             f'<span style="color:var(--muted)">{word}</span>')
     new, n = re.subn(r'(<div class="yesterday-delta" id="yesterday-delta">)[^<]*(?:<(?!/div>)[^>]*>[^<]*)*(</div>)',
                      lambda mo: mo.group(1) + chip + mo.group(2), html, count=1)
