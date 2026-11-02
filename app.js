@@ -1667,7 +1667,14 @@ async function _fetchComingUpOnce(){
       +'&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day'
       +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,uv_index_max,wind_speed_10m_max'
       +'&timezone=Europe%2FLjubljana&forecast_days=8';
-    const data=await _archFetch(url);
+    // Neposreden klic Open-Meteo iz brskalnika ob 429 (omejitev po IP, npr. mobilno omrežje) ne uspe: graf na heroju, 7 dni in obeti
+    // potem ostanejo prazni. Rezerva je naš worker (/napoved-om): isti klic, rob ga drži 10 min, zato Open-Meteo dobi en klic na 10 min za vse obiskovalce.
+    let data=null;
+    try{data=await _archFetch(url);}catch(_){}
+    if(!(data&&data.hourly&&data.daily)){
+      try{const r=await fetch(PROXY+'/napoved-om');const j=await r.json();if(j&&j.hourly&&j.daily)data=j;}catch(_){}
+    }
+    if(!data)return false;
     const h=data.hourly,d=data.daily;
     if(!h||!d)return false;
 
