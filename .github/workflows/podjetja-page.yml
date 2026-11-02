@@ -1,0 +1,77 @@
+name: Stran /podjetja/ (osvežitev podatkov)
+
+# Stran je posnetek: zunanji tempLow iz history.json + napoved Open-Meteo iz
+# forecast_verification.json (tools/generate_podjetja_page.py). Ta dva vira pišeta DVA
+# workflowa, katerih vrstni red ni zagotovljen (GitHubov cron zamuja po več ur), zato se
+# stran osveži ob koncu vsakega od njiju, enkrat dnevno pa kot rezerva. Idempotentno:
+# brez spremembe vhodov ni commita. Brez tega je test_podjetja.py (parity) rdeč vsak dan,
+# ker committana stran zaostaja za history.json (31. 10.-2. 11. 2026: trikrat zapored).
+on:
+  workflow_run:
+    workflows: ["Posodobi history.json", "Verifikacija napovedi"]
+    types: [completed]
+  schedule:
+    - cron: '50 6 * * *'
+  workflow_dispatch: {}
+
+# Ena osvežitev naenkrat: dva proizvajalca lahko končata skoraj hkrati.
+concurrency:
+  group: podjetja-page
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    # workflow_run sproži tudi neuspešen tek; takrat podatkov ni, kar bi osvežili.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Smer napake pred osvežitvijo
+        id: before
+        run: |
+          echo "dir=$(grep -o 'napoved je bila [a-zšžč]*' podjetja/index.html | head -1)" >> "$GITHUB_OUTPUT"
+
+      - name: Generiraj stran
+        run: python3 tools/generate_podjetja_page.py
+
+      # Naslovi na strani (»Napoved je za dolino. Vi imate polje.«) so presoja, ne meritev: če se
+      # razmerje obrne (napoved »previsoka« → »prenizka«), jih mora prebrati človek. Ne commitamo,
+      # tek pade (viden v Actions in v rdečem parity), dokler besedila nihče ne pregleda.
+      - name: Preveri, da se smer napake ni obrnila
+        run: |
+          AFTER=$(grep -o 'napoved je bila [a-zšžč]*' podjetja/index.html | head -1)
+          if [ "$AFTER" != "${{ steps.before.outputs.dir }}" ]; then
+            git checkout -- podjetja/
+            echo "::error::Smer napake se je obrnila (»${{ steps.before.outputs.dir }}« → »$AFTER«). Preberi besedilo na /podjetja/ in ročno poženi python3 tools/generate_podjetja_page.py."
+            exit 1
+          fi
+
+      - name: Preizkus strani
+        run: python3 tools/test_podjetja.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add podjetja/
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "chore: osveži /podjetja/ (podatki za $(date -u +%Y-%m-%d)) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1
