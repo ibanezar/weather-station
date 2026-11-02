@@ -2802,6 +2802,16 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Barva hero kartice po vremenu**: `setHeroWx()` postavi `data-wx` (`clear`/`cloud`/`rain`/`storm`/`snow`/`night`), CSS rahlo obarva kot žarenje v zgornjem desnem kotu (≤ 22 %). Brez atributa je videz nespremenjen. Nov `data-wx` = tudi barva v obeh temah in preveri kontrast besedila.
 - Nov kritični CSS in `style.min.css` naredi `minify-assets.yml` po mergu; do takrat se lestvice pred celotnim CSS kratko pokažejo brez oblike.
 
+### Graf »Danes«: črta + stolpci po 3 ure, graf sam premika uro (1. 11. 2026)
+
+Filip je izbral varianto C izmed štirih predlogov (kapsule, žareča črta, črta in ikone, nebo). Samo prikaz; podatki in `_fcSliderUpdate()` so nespremenjeni.
+
+- **Pod črto je stolpec na vsake 3 ure** (`#hero-spark-cols`, `.hsc-col`): ikona vremena (Meteocons, ista kot v obetih), temperatura, ura na steni. Prihodnje ure so iz `_forecastHours` (`_wmoIconName`), pretekle iz urnih meritev (`_COND_ICON[_getConditionLabelFromObs]`; **ne `_condImg()`**, ta bere trenutno stanje `_wxCond` in bi vsem preteklim stolpcem dal današnjo ikono). Pod 27 px razmika (ozek zaslon) so stolpci na 6 ur, sicer se temperature prekrivajo.
+- **Ločenega drsnika ni več na zaslonu**: vlečenje po `#hero-spark-wrap` (pointer events, `touch-action:pan-y`) nastavi vrednost skritega `#fc-slider` in sproži `input`; ta ostane za tipkovnico in bralnike zaslona (Escape ali dvojni dotik vrneta na »zdaj«). Skriti drsnik ima `position:absolute;1px;opacity:0`, ne `display:none`, da ga tipkovnica doseže. Vlečenje velja samo ob pritisku (tudi z miško), ne ob lebdenju: hero številka bi se sicer spreminjala ob vsakem premiku miške.
+- Oznaka (`#hero-spark-now`) kaže uro in temperaturo (`05:00 · 6,9°`, z vejico) in ostane znotraj kartice; oznaka najvišje temperature (↑ vrednost · ura, od zdaj naprej) se umakne, če bi jo prekrila.
+- **Višina je rezervirana** (`.hero-b .hero-spark-wrap[hidden]{height:196px}` = SVG 110 + stolpci 84 + 2): pri spremembi višin popravi obe mesti, sicer je CLS. Po spremembi: `npm run minify && node tools/critical_css.mjs`.
+- Podatek o izmerjeni uri v stolpcu je zaokrožen na polno uro (meritev je lahko ob :16), samo za oznako.
+
 ### Drugi krog: predizrisane lestvice, luna, rosišče, sparkline, kartice dni (31. 10. 2026)
 
 - **Lestvice v predizrisanem HTML**: `heroScalePos()` (app.js, čista funkcija) in `hero_scale_positions()` + `patch_hero_scales()` (`tools/inject_current_weather.py`) zapišeta `--p`/`--p2`/`data-on` v `#hsc-*`, da oznake ne čakajo na JS. Podvojitev preverja `test_parity.hero_lestvice` (+ 3 mutacije). Lestvica lune (`hsc-moon`) je samo JS (datum, ne meritev).
