@@ -2512,75 +2512,139 @@ function _anchoredTemps(){
   return anchorHours(_forecastHours,Date.now(),_liveTemp??_lastTemp,age).temps;
 }
 
-let _sparkByHour=null,_sparkW=320;
+// ── Junaška kartica: graf »poteka dneva« (1. 11. 2026, varianta C: črta + stolpci po 3 ure) ──
+// Črta teče skozi zadnjih 6 ur izmerjenih vrednosti, trenutno meritev in napoved (_forecastHours);
+// pod njo je stolpec na vsake 3 ure (ikona vremena, temperatura, ura). Ločenega drsnika ni več na
+// zaslonu: graf se premika s prstom/miško, pravi #fc-slider ostane skrit (tipkovnica, bralniki zaslona)
+// in ga graf upravlja prek dogodka input, zato _fcSliderUpdate() ostane edina pot do hero številke.
+const SPARK_H=110,SPARK_PT=30,SPARK_INSET=19;
+let _sparkByHour=null,_sparkW=320,_sparkChip=null;
+
+function _sparkFmt(t){return Number(t).toFixed(1).replace('.',',');}
+function _sparkClockLabel(d){return String(d.getHours()).padStart(2,'0')+':00';}
 
 function drawHeroSparkline(){
   const wrap=document.getElementById('hero-spark-wrap');
   const g=document.getElementById('hero-spark-g');
   const svg=document.getElementById('hero-spark-svg');
+  const colsEl=document.getElementById('hero-spark-cols');
   if(!wrap||!g||!svg)return;
   const nowT=_liveTemp??_lastTemp;
   if(nowT==null||!_forecastHours.length){wrap.hidden=true;return;}
+  _sparkBindScrub();
 
   const past=[];
   for(let h=6;h>=1;h--){
     const obs=_histObsAtHoursAgo(h);
     const t=obs?.metric?.tempAvg??obs?.metric?.temp;
-    if(t!=null)past.push({h:-h,t});
+    if(t==null)continue;
+    const ot=new Date(obs.obsTimeLocal.replace(' ','T')).getTime();
+    // ura meritve zaokrožena na polno uro (meritev je lahko ob :16), samo za oznako stolpca
+    past.push({h:-h,t,when:new Date(Math.round(ot/36e5)*36e5),icon:_COND_ICON[_getConditionLabelFromObs(obs)]||'partly-cloudy-day'});
   }
   // Brez umetne omejitve na 24 ur: slider.max je nastavljen na _forecastHours.length
   // (glej fetchComingUp) in mora predstavljati isto skalo kot krivulja tukaj, sicer
   // se piko "zdaj" (in oznaka pod drsnikom) rahlo razideta z dejansko lego drsnika.
   const anch=_anchoredTemps();
-  const future=_forecastHours.map((f,i)=>({h:i+1,t:anch[i]}));
-  const pts=[...past,{h:0,t:nowT},...future];
+  const future=_forecastHours.map((f,i)=>({h:i+1,t:anch[i],when:f.t,icon:_wmoIconName(f.wmo,f.isDay)}));
+  const pts=[...past,{h:0,t:nowT,when:new Date()},...future];
   if(pts.length<4){wrap.hidden=true;return;}
 
   // viewBox mora slediti dejanski širini kartice v CSS pikslih: SVG ima
-  // preserveAspectRatio="none" (raztegne se čez celo širino), zato je bila
-  // krivulja na širokih (namizje) zaslonih vodoravno raztegnjena/sploščena, ko je
-  // ostajal viewBox trdo kodiran na 320 — na mobilnem se to skoraj ni poznalo,
-  // ker je bila širina kartice blizu 320px.
+  // preserveAspectRatio="none" (raztegne se čez celo širino), zato bi bila krivulja
+  // na širokih zaslonih vodoravno raztegnjena, če bi viewBox ostal trdo kodiran.
   // Meriti je treba na nadrejenem #fc-slider-wrap, NE na samem svg elementu:
-  // #hero-spark-wrap ima na prvi izris (preden se par vrstic nižje odstrani
-  // `hidden`) še `display:none`, zato bi getBoundingClientRect() na svg-ju
-  // vrnil 0 in padel nazaj na privzetih 320 — natanko ista napaka kot prej,
-  // samo da bi jo popravil šele naslednji izris (osvežitev podatkov / resize).
-  // #fc-slider-wrap nima `hidden`, zato ima pravo širino že ob prvem klicu.
-  const W=Math.round(wrap.parentElement?.getBoundingClientRect().width||svg.getBoundingClientRect().width)||320,H=56,minH=-6,maxH=pts[pts.length-1].h;
+  // #hero-spark-wrap ima na prvi izris še `display:none`, zato bi getBoundingClientRect()
+  // na svg-ju vrnil 0 in padel nazaj na privzetih 320. #fc-slider-wrap nima `hidden`.
+  const W=Math.round(wrap.parentElement?.getBoundingClientRect().width||svg.getBoundingClientRect().width)||320,H=SPARK_H,minH=-6,maxH=pts[pts.length-1].h;
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
   const temps=pts.map(p=>p.t),tMin=Math.min(...temps),tMax=Math.max(...temps);
   const pad=Math.max(1,(tMax-tMin)*.15),lo=tMin-pad,hi=tMax+pad;
-  const px=h=>((h-minH)/(maxH-minH))*W;
-  const py=t=>H-((t-lo)/(hi-lo))*H;
+  const px=h=>SPARK_INSET+((h-minH)/(maxH-minH))*(W-2*SPARK_INSET);
+  const py=t=>SPARK_PT+((hi-t)/(hi-lo))*(H-SPARK_PT);
   const P=pts.map(p=>({x:px(p.h),y:py(p.t)}));
 
   const d=_catmullRomPath(P);
-  const last=P[P.length-1];
-  const area=d+' L'+last.x.toFixed(1)+','+H+' L0,'+H+' Z';
+  const last=P[P.length-1],first=P[0];
+  const area=d+' L'+last.x.toFixed(1)+','+H+' L'+first.x.toFixed(1)+','+H+' Z';
+
+  // Oznaka najvišje temperature od zdaj naprej (vrednost + ura): pove, kdaj bo najtopleje
+  let chipSvg='';_sparkChip=null;
+  const ahead=pts.filter(p=>p.h>=0),aMax=Math.max(...ahead.map(p=>p.t));
+  const ties=ahead.filter(p=>p.t===aMax),tp=ties[Math.floor((ties.length-1)/2)];
+  const txt='↑ '+_sparkFmt(aMax)+'° · '+_sparkClockLabel(tp.when);
+  const cw=txt.length*6.2+20,ccx=Math.min(Math.max(px(avgH(ties)),cw/2+4),W-cw/2-4),cy=Math.max(2,py(aMax)-34);
+  chipSvg='<g class="hspark-chip" id="hero-spark-chip"><rect class="hspark-chip-bg" x="'+(ccx-cw/2).toFixed(1)+'" y="'+cy.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="22" rx="11"/>'+
+    '<text class="hspark-chip-tx" x="'+ccx.toFixed(1)+'" y="'+(cy+14.4).toFixed(1)+'" text-anchor="middle">'+txt+'</text></g>';
+  _sparkChip={cx:ccx,w:cw};
 
   g.innerHTML=
-    '<line class="hspark-base" x1="0" y1="'+H+'" x2="'+W+'" y2="'+H+'" stroke-width="1"/>'+
-    '<line class="hspark-guide" id="hero-spark-guide" x1="0" y1="0" x2="0" y2="'+H+'" stroke-width="1" stroke-dasharray="2,3"/>'+
     '<path d="'+area+'" fill="url(#heroSparkFill)"/>'+
-    '<path class="hspark-line" d="'+d+'" stroke-width="2.25" stroke-linecap="round"/>'+
-    '<circle class="hspark-dot" id="hero-spark-dot" cx="0" cy="0" r="4.5" stroke-width="2.5"/>';
+    '<path class="hspark-line" d="'+d+'" stroke-width="3" stroke-linecap="round"/>'+
+    chipSvg+
+    '<line class="hspark-guide" id="hero-spark-guide" x1="0" y1="-4" x2="0" y2="'+H+'" stroke-width="1" stroke-dasharray="2,3"/>'+
+    '<circle class="hspark-halo" id="hero-spark-halo" cx="0" cy="0" r="10"/>'+
+    '<circle class="hspark-dot" id="hero-spark-dot" cx="0" cy="0" r="4.8" stroke-width="2.5"/>';
 
-  _sparkByHour=new Map(pts.map((p,i)=>[p.h,{x:P[i].x,y:P[i].y,t:p.t}]));
+  // stolpci na vsake 3 ure (ura na steni): ikona, temperatura, ura
+  if(colsEl){
+    // na ozkih zaslonih (razmik med stolpci < 27 px) so stolpci na vsakih 6 ur, sicer se temperature prekrivajo
+    const step=(W-2*SPARK_INSET)/(maxH-minH)*3<27?6:3;
+    const seen=new Set();let html='';
+    pts.forEach(p=>{
+      if(p.h===0||!p.when||p.h<minH)return;
+      const hr=p.when.getHours();
+      if(hr%step)return;
+      const key=p.when.getTime();
+      if(seen.has(key))return;seen.add(key);
+      html+='<div class="hsc-col'+(p.h<0?' past':'')+'" data-h="'+p.h+'" style="left:'+(px(p.h)/W*100).toFixed(2)+'%">'+
+        '<img src="icons/weather/'+p.icon+'.svg" width="28" height="28" alt="" decoding="async">'+
+        '<b>'+_sparkFmt(p.t)+'°</b><i>'+String(hr).padStart(2,'0')+'</i></div>';
+    });
+    colsEl.innerHTML=html;
+  }
+
+  _sparkByHour=new Map(pts.map((p,i)=>[p.h,{x:P[i].x,y:P[i].y,t:p.t,when:p.when}]));
   _sparkW=W;
   wrap.hidden=false;
   moveHeroSparkMarker(_sliderActive?+((document.getElementById('fc-slider')||{}).value||0):0);
 }
+function avgH(a){return a.reduce((s,p)=>s+p.h,0)/a.length;}
 // Okno se lahko preseže (širši zaslon, obrat naprave) precej prej, kot se
 // krivulja naslednjič nariše ob osvežitvi podatkov (~5 min) — brez tega bi
 // ostala raztegnjena do takrat.
 window.addEventListener('resize',()=>{if(!document.getElementById('hero-spark-wrap')?.hidden)drawHeroSparkline();},{passive:true});
+
+// Vlečenje po grafu premika skriti #fc-slider (isti dogodek input kot prej): hero številka, ikona in
+// oznaka ostanejo v _fcSliderUpdate(). Dvojni dotik ali Escape vrneta na »zdaj«.
+function _sparkBindScrub(){
+  const wrap=document.getElementById('hero-spark-wrap'),sl=document.getElementById('fc-slider');
+  if(!wrap||!sl||wrap._sparkBound)return;
+  wrap._sparkBound=true;
+  const set=v=>{v=Math.max(+sl.min,Math.min(+sl.max,v));if(+sl.value===v)return;sl.value=v;sl.dispatchEvent(new Event('input',{bubbles:true}));};
+  const fromX=e=>{
+    const r=wrap.getBoundingClientRect(),min=+sl.min,max=+sl.max;
+    return Math.round((e.clientX-r.left-SPARK_INSET)/Math.max(1,r.width-2*SPARK_INSET)*(max-min)+min);
+  };
+  let drag=false;
+  wrap.addEventListener('pointerdown',e=>{
+    if(e.button>0)return;
+    drag=true;try{wrap.setPointerCapture(e.pointerId);}catch(_){}
+    set(fromX(e));
+  });
+  wrap.addEventListener('pointermove',e=>{if(drag)set(fromX(e));});
+  const end=()=>{drag=false;};
+  wrap.addEventListener('pointerup',end);wrap.addEventListener('pointercancel',end);
+  wrap.addEventListener('dblclick',()=>set(0));
+  sl.addEventListener('keydown',e=>{if(e.key==='Escape')set(0);});
+}
 
 // Premakne piko/vodilno črto/oznako na krivulji na uro, ki jo drsnik trenutno
 // kaže — prej je krivulja ob vlečenju drsnika ostala popolnoma nespremenjena
 // ("statična"), čeprav se je število pod njo spreminjalo.
 function moveHeroSparkMarker(v){
   const dot=document.getElementById('hero-spark-dot');
+  const halo=document.getElementById('hero-spark-halo');
   const guide=document.getElementById('hero-spark-guide');
   const pill=document.getElementById('hero-spark-now');
   if(!dot||!guide||!_sparkByHour||!_sparkByHour.size)return;
@@ -2589,12 +2653,19 @@ function moveHeroSparkMarker(v){
   if(best==null)return;
   const pt=_sparkByHour.get(best);
   dot.setAttribute('cx',pt.x.toFixed(1));dot.setAttribute('cy',pt.y.toFixed(1));
+  if(halo){halo.setAttribute('cx',pt.x.toFixed(1));halo.setAttribute('cy',pt.y.toFixed(1));}
   guide.setAttribute('x1',pt.x.toFixed(1));guide.setAttribute('x2',pt.x.toFixed(1));
+  guide.setAttribute('y2',Math.max(0,pt.y-8).toFixed(1));
   if(pill){
-    pill.style.left=(pt.x/_sparkW*100).toFixed(1)+'%';
-    const hLbl=best===0?'ZDAJ':(best>0?'+':'−')+Math.abs(best)+'h';
-    pill.textContent=hLbl+' · '+Number(pt.t).toFixed(1)+'°';
+    pill.textContent=(best===0?'ZDAJ':_sparkClockLabel(pt.when))+' · '+_sparkFmt(pt.t)+'°';
+    // oznaka ostane znotraj kartice: pri robu se ne poravna na piko, puščice ni
+    const pw=pill.offsetWidth||70;
+    pill.style.left=Math.min(Math.max(pt.x-pw/2,0),Math.max(0,_sparkW-pw)).toFixed(1)+'px';
   }
+  // stolpec ob izbrani uri je poudarjen; oznaka maksimuma se umakne, če bi jo prekrila oznaka ure
+  document.querySelectorAll('#hero-spark-cols .hsc-col').forEach(c=>c.classList.toggle('on',Math.abs(+c.dataset.h-best)<=1.5));
+  const chip=document.getElementById('hero-spark-chip');
+  if(chip&&_sparkChip)chip.style.opacity=Math.abs(pt.x-_sparkChip.cx)<_sparkChip.w/2+34?0:1;
 }
 
 // Diskreten napis "IREICA1 · pred X min" v kotu junaške kartice — relativen

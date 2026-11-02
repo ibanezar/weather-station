@@ -4251,10 +4251,37 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 .hero-b .hb-icon{display:none}
 .hero-b .hero-briefing p{font-size:.98rem;line-height:1.45}
 .hero-b .hero-briefing p strong{font-weight:700}
-.hero-b .fc-slider-wrap{padding:0;gap:.3rem}
-.hero-b .hero-spark-wrap{margin:1.5rem 0 .2rem;box-sizing:border-box}
-.hero-b .hero-spark-wrap[hidden]{display:block;visibility:hidden;height:56px}
-.hero-b .fc-slider{margin-top:.55rem}
+.hero-b .fc-slider-wrap{padding:0;gap:.3rem;position:relative}
+/* Graf »poteka dneva« (1. 11. 2026): črta + stolpci po 3 ure; graf sam premika uro, pravi drsnik je skrit (tipkovnica, bralniki zaslona) */
+.hero-b .hero-spark-wrap{margin:2.2rem 0 .2rem;box-sizing:border-box;touch-action:pan-y;cursor:ew-resize;-webkit-user-select:none;user-select:none;border-radius:14px}
+.hero-b .hero-spark-wrap[hidden]{display:block;visibility:hidden;height:196px}
+.hero-b #hero-spark-svg{height:110px;overflow:visible}
+.hero-b .fc-slider-info{display:none}
+.hero-b .fc-slider{position:absolute;left:0;bottom:0;width:1px;height:1px;margin:0;padding:0;opacity:0;overflow:hidden;pointer-events:none}
+.hero-b .fc-slider-wrap:focus-within .hero-spark-wrap{outline:2px solid var(--blue);outline-offset:3px}
+.hero-b .hspark-line{stroke-width:3}
+.hero-b .hspark-dot{fill:#fff}
+.hero-b .hspark-halo{fill:var(--blue);opacity:.22}
+.hero-b .hspark-chip-bg{fill:rgba(10,22,40,.05);stroke:rgba(10,22,40,.12);transition:opacity .15s}
+.hero-b .hspark-chip-tx{fill:var(--text);font-family:inherit;font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.hero-b .hspark-chip{transition:opacity .15s}
+[data-theme="dark"] .hero-b .hspark-chip-bg{fill:rgba(255,255,255,.08);stroke:rgba(255,255,255,.16)}
+/* steklena oznaka ure in vrednosti nad grafom */
+.hero-b .hero-spark-now{top:-34px;transform:none;background:rgba(10,22,40,.92);color:#fff;font-family:inherit;font-weight:700;font-size:.74rem;line-height:1;letter-spacing:0;
+  padding:7px 11px;border-radius:999px;font-variant-numeric:tabular-nums;border:1px solid rgba(255,255,255,.12);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.hero-b .hero-spark-now::after{display:none}
+[data-theme="dark"] .hero-b .hero-spark-now{background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+/* stolpci vsake 3 ure */
+.hero-spark-cols{position:relative;height:84px;margin-top:2px;pointer-events:none}
+.hsc-col{position:absolute;top:0;width:38px;height:82px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:6px;border-radius:16px;transition:background .15s}
+.hsc-col img{width:28px;height:28px;display:block}
+.hsc-col b{font-size:.7rem;line-height:1.2;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hsc-col i{font-style:normal;font-size:.66rem;line-height:1.2;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.hsc-col.past{opacity:.55}
+:root:not([data-theme="dark"]) .hsc-col img{filter:drop-shadow(0 1px 1.5px rgba(10,22,40,.3))}
+.hsc-col.on{background:rgba(2,132,199,.14)}
+[data-theme="dark"] .hsc-col.on{background:rgba(77,159,248,.2)}
+@media (prefers-reduced-motion:reduce){.hsc-col,.hero-b .hspark-chip{transition:none}}
 
 /* meritve */
 .hero.hero-b .hero-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;padding:0;border:0}
