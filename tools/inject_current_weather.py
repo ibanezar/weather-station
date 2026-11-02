@@ -331,6 +331,60 @@ def patch_hero(html, obs):
     return html
 
 
+def yesterday_delta(obs, hourly):
+    """Primerjava z včerajšnjo uro (čip »od včeraj« pod temperaturo) -- Python kopija applyYesterdayDelta() v app.js.
+    Vrne (smer, razlika, besedilo) ali None. Čas primerjave je čas MERITVE (ne ure izvajanja skripte): predizris mora
+    ostati skladen s številko, ki stoji nad njim. Notranjih meritev ne bere (samo metric.temp / tempAvg).
+    Preverja jo tools/test_parity.py (hero_vceraj)."""
+    from datetime import datetime, timedelta
+    t_now = (obs.get("metric") or {}).get("temp")
+    if t_now is None or not hourly:
+        return None
+    try:
+        target = datetime.fromisoformat((obs.get("obsTimeLocal") or "").replace(" ", "T")) - timedelta(hours=24)
+    except ValueError:
+        return None
+    best, best_diff = None, None
+    for o in hourly:
+        try:
+            t = datetime.fromisoformat((o.get("obsTimeLocal") or "").replace(" ", "T"))
+        except ValueError:
+            continue
+        diff = abs((t - target).total_seconds())
+        if best_diff is None or diff < best_diff:
+            best, best_diff = o, diff
+    if best is None or best_diff > 2 * 3600:
+        return None
+    bm = best.get("metric") or {}
+    ty = bm.get("tempAvg") if bm.get("tempAvg") is not None else bm.get("temp")
+    if ty is None:
+        return None
+    d = t_now - ty
+    if d > 0.5:
+        return ("up", d, "topleje kot včeraj ob tem času")
+    if d < -0.5:
+        return ("down", d, "hladneje kot včeraj ob tem času")
+    return ("same", d, "podobno kot včeraj ob tem času")
+
+
+def patch_yesterday_delta(html, obs, hourly):
+    """Zapiše čip »od včeraj« v statični HTML, da je viden takoj, ne šele po prihodu /hourly v brskalniku.
+    Isti znaki in razredi kot v applyYesterdayDelta(), da JS ob hidraciji ne spremeni videza."""
+    res = yesterday_delta(obs, hourly)
+    if res is None:
+        return html
+    kind, d, word = res
+    arrow = {"up": "↑", "down": "↓", "same": "→"}[kind]
+    col = {"up": "var(--red)", "down": "var(--blue)", "same": "var(--muted)"}[kind]
+    chip = (f'<span class="dv" style="color:{col}">{arrow} {abs(d):.1f}°C</span> '
+            f'<span style="color:var(--muted)">{word}</span>')
+    new, n = re.subn(r'(<div class="yesterday-delta" id="yesterday-delta">)[^<]*(?:<(?!/div>)[^>]*>[^<]*)*(</div>)',
+                     lambda mo: mo.group(1) + chip + mo.group(2), html, count=1)
+    if n == 0:
+        print("OPOZORILO: #yesterday-delta ni najden — preskočeno.", file=sys.stderr)
+    return new
+
+
 def hero_scale_positions(obs, tmin=None, tmax=None):
     """Položaji oznak na lestvicah hero ploščic v % — Python kopija heroScalePos() v app.js.
     Vrne {id: (p, p2|None)}; ključ manjka, če vrednosti ni. Preverja ga tools/test_parity.py (hero_lestvice)."""
@@ -570,6 +624,8 @@ def main():
                 if obs.get("metric", {}).get("temp") is not None:
                     new = patch_hero_scales(new, hero_scale_positions(
                         obs, stats["low"] if stats else None, stats["high"] if stats else None))
+            if obs and hourly:
+                new = patch_yesterday_delta(new, obs, hourly)
             if hourly:
                 daily = build_daily_summaries(hourly)
                 if daily:
