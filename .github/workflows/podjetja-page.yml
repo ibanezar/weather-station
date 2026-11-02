@@ -34,6 +34,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Generator prebere velikost slike postaje (shema_html), zato rabi Pillow; na GitHubovem
+      # runnerju ga ni (prvi tek 2. 11. 2026: ModuleNotFoundError: PIL). Lokalno ga razvijalec ima.
+      - name: Namesti Pillow
+        run: pip install Pillow --quiet
+
       - name: Smer napake pred osvežitvijo
         id: before
         run: |
