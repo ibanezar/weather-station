@@ -7957,6 +7957,7 @@ function renderMtrCard(){
   const st=_mtrState;if(!st)return;
   _mtrNarrow=(window.innerWidth||880)<620;
   _mtrMounts().forEach(_renderMtrMount);
+  renderMtrPending();
 }
 
 /* Ena montaža kartice. Kar v njej ni (KPI-ji in dvoboj na naslovni strani),
@@ -8432,6 +8433,52 @@ function renderMtrReliability(idp){
 }
 
 /* Dnevnik zgrešitev: pet največjih napak MTR v zadnjih 30 razrešenih dneh (Tmax ali Tmin), z ARSO ob strani. */
+/* Kuhinja »Čaka na podatke«: števci iz data/mtr-pending.json (tools/mtr_pending.py, piše ga mtr-live.yml).
+   Vrstice imajo besedilo že v HTML; tu se samo dodajo števila in vrstice napredka. Brez datoteke ostane
+   besedilo, števcev ni (nikoli izmišljenih). Pragovi so v JSON-u, ne tu. */
+let _mtrPendP=null;
+function renderMtrPending(){
+  const root=document.getElementById('mos-pend');if(!root)return;
+  if(!_mtrPendP)_mtrPendP=fetch('/data/mtr-pending.json?_='+Math.floor(Date.now()/36e5))
+    .then(r=>r.ok?r.json():null).catch(()=>null);
+  _mtrPendP.then(d=>{
+    if(!d)return;
+    const bar=(key,n,target,txt)=>{
+      const el=root.querySelector('[data-pend="'+key+'"]');
+      if(!el||!(target>0)||!Number.isFinite(n))return;
+      const pct=Math.max(0,Math.min(100,Math.round(n/target*100)));
+      const tr=el.querySelector('.mtr-pend-track');
+      tr.style.setProperty('--p',pct+'%');
+      tr.setAttribute('aria-valuenow',String(pct));
+      tr.setAttribute('aria-valuetext',txt);
+      el.querySelector('small').textContent=txt;
+      el.hidden=false;
+    };
+    const L=d.live;
+    if(L&&L.classes){
+      const v=Object.values(L.classes);
+      if(v.length){
+        const lo=Math.min(...v),hi=Math.max(...v);
+        bar('live',L.best,L.target,'Najbolj zapolnjen razred: '+L.best+' od '+L.target+' dni'
+          +(lo!==hi?' (razredi: '+lo+'–'+hi+')':''));
+      }
+    }
+    const P=d.profile;
+    if(P){
+      bar('profile',P.winter_days,P.target,'Zimskih dni (nov–feb) v dnevniku: '+P.winter_days+' od '+P.target
+        +' · dni zajema skupaj: '+P.days);
+      const sn=root.querySelector('[data-pend="snow"]');
+      if(sn&&Number.isFinite(P.snow_days))sn.textContent='Dni s snegom nad 1 cm v dnevniku doslej: '+P.snow_days+'.';
+    }
+    const note=document.getElementById('mos-pend-note');
+    if(note&&d.generated_at){
+      const t=new Date(d.generated_at);
+      if(!isNaN(t))note.textContent='Števci so izračunani iz dnevnikov v repozitoriju, stanje '
+        +t.toLocaleDateString('sl',{day:'numeric',month:'numeric'});
+    }
+  });
+}
+
 function renderMtrMisses(idp){
   const st=_mtrState;if(!st)return;
   const el=document.getElementById(idp+'miss');if(!el)return;

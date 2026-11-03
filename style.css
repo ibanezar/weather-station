@@ -3924,6 +3924,19 @@ html[data-mode="simple"] .hero .hm-pm,html[data-mode="simple"] .hero .hm-moon{di
 .mtr-neg-row b small{font-weight:400;font-size:.75rem;color:var(--muted);margin-left:.5rem}
 .mtr-neg-row span{display:block;color:var(--muted)}
 @media(max-width:520px){.mtr-neg-row{grid-template-columns:1fr}}
+.mtr-chip.c-grn{--c:#34d399}
+/* čaka na podatke (3. 11. 2026): naslov + oznaka, opis, vrstica napredka (samo ob podatku) */
+.mtr-pend-row{padding:.7rem 0;border-top:1px solid var(--border,rgba(128,128,128,.2));font-size:.85rem;line-height:1.45}
+.mtr-pend-row:first-child{border-top:0}
+.mtr-pend-hd{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-bottom:.2rem}
+.mtr-pend-hd b{color:var(--text)}
+.mtr-pend-row>span{display:block;color:var(--muted)}
+.mtr-pend-row em{font-style:normal;color:var(--text);white-space:nowrap}
+.mtr-pend-bar{margin-top:.55rem}
+.mtr-pend-bar[hidden]{display:none}
+.mtr-pend-track{height:6px;border-radius:3px;background:rgba(128,128,128,.22);overflow:hidden}
+.mtr-pend-track i{display:block;height:100%;width:var(--p,0%);min-width:3px;border-radius:3px;background:#34d399}
+.mtr-pend-bar small{display:block;margin-top:.3rem;font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
 
 /* ═══ MTR junak: steklene ploščice z ikonami (23. 10. 2026) ═══ */
 .mtr-hero-sub{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-top:.4rem}
