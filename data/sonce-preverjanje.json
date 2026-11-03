@@ -1,0 +1,20 @@
+{
+ "generated": "2026-11-03",
+ "dni_v_zapisu": 85,
+ "jutro": {
+  "n": 65,
+  "mediana_min": 125.5,
+  "mad_min": 30.0,
+  "min_min": 29.5,
+  "max_min": 204.5
+ },
+ "vecer": {
+  "n": 73,
+  "mediana_min": -46.5,
+  "mad_min": 19.0,
+  "min_min": -172.5,
+  "max_min": -9.5
+ },
+ "min_dni": 15,
+ "opomba": "izmerjeno − model; pozitivno = sonce pride pozneje, kot pravi model"
+}
