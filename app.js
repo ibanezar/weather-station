@@ -3128,12 +3128,13 @@ function buildDailySummaries(observations){
 
 // Sparkline v ploščici: zadnjih 24 h iz urnih meritev (tlak, vlaga). Os je prilagojena podatkom, a razpon je najmanj `minSpan`,
 // da šum meritve ne izgleda kot dramatična sprememba. Samo prikaz; številka in trend ostaneta v ploščici.
-function renderTileSpark(id,vals,minSpan){
+function renderTileSpark(id,vals,minSpan,zeroBase){
   const el=document.getElementById(id);if(!el)return;
   const v=vals.filter(x=>x!=null&&isFinite(x));
   if(v.length<4){el.innerHTML='';el.removeAttribute('data-on');return;}
   let lo=Math.min(...v),hi=Math.max(...v);
-  if(hi-lo<minSpan){const mid=(hi+lo)/2;lo=mid-minSpan/2;hi=mid+minSpan/2;}
+  if(zeroBase){lo=0;if(hi<minSpan)hi=minSpan;} // dež: ničla je dno grafa, suh dan je ravna črta ob dnu
+  else if(hi-lo<minSpan){const mid=(hi+lo)/2;lo=mid-minSpan/2;hi=mid+minSpan/2;}
   const n=v.length,d='M'+v.map((x,i)=>(i/(n-1)*100).toFixed(1)+' '+(22-(x-lo)/(hi-lo)*20).toFixed(1)).join(' L');
   el.innerHTML='<path d="'+d+' L100 24 L0 24Z" fill="currentColor" opacity=".14"/><path d="'+d+'" fill="none" stroke="currentColor" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>';
   el.setAttribute('data-on','1');
@@ -3149,7 +3150,7 @@ function applyHourly(observations){
       const m=o.metric||{};if(m.precipTotal==null||i===0)return null;
       const p=arr[i-1].metric||{},sameDay=o.obsTimeLocal.slice(0,10)===arr[i-1].obsTimeLocal.slice(0,10);
       return sameDay?Math.max(0,m.precipTotal-(p.precipTotal??0)):m.precipTotal;
-    }),1);
+    }),1,true);
   }catch(_){}
   // Ura brez meritve (glej applyDayStats) se pri risanju grafa izpusti,
   // sicer privzeta vrednost 0 ustvari navidezen padec na grafu.
