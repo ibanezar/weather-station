@@ -202,8 +202,10 @@ def validation_html():
                 f'z izračunanim prvim žarkom. Mediana razlike je <strong>{ac.num(j["mediana_min"], 0)} min</strong> '
                 f'(izmerjeno minus model; pozitivno pomeni, da sonce pride pozneje, kot pravi model), tipično odstopanje '
                 f'{ac.num(j["mad_min"], 0)} min, razpon {ac.num(j["min_min"], 0)} do {ac.num(j["max_min"], 0)} min.{extra} '
-                f'Pri nizkem soncu je skok majhen, drevesa blizu postaje pa model ne vidi, zato to ni dokaz natančnosti, '
-                f'ampak preizkus.</p>')
+                f'Razlika je sistematična in prevelika za šum. Skok se pojavi, ko je sonce že visoko (~25° in več), kar ni '
+                f'hrib, ampak senca nečesa, kar je blizu: najverjetneje senzor stoji v senci bližnjega objekta ali drevesa. '
+                f'To je domneva, ne dokaz. Izračun obzorja torej velja za odprt teren v Rečici in ga s to postajo ni mogoče '
+                f'potrditi ali ovreči; za senzor IREICA1 je sonce zjutraj pozneje in zvečer prej, kot je izračunano.</p>')
     n = (v or {}).get("jutro", {}).get("n", 0)
     return ('  <p class="archive-intro">Čas prvega žarka s postajo <strong>še nisem preveril</strong>. Urni zapis sevanja '
             'IREICA1 (113 dni, od 13. 7. 2026) je za to pregrob: ura je daljša od zamika, ki ga iščem, jutra pa pogosto '
