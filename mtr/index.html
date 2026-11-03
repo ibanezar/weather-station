@@ -128,7 +128,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <li><div class="mk-row"><b>Sneg in vlaga tal</b><i class="mk-chip c-vio">Čaka na zimo</i></div><span class="t">V zadnjem letu je bilo samo 20 dni s snegom nad 1&nbsp;cm od 779, kar ne zadošča za sklep. Prag ni določen: ocena je mogoča, ko bo snega dovolj za primerjavo. <em data-pend="snow"></em></span></li>
     <li><div class="mk-row"><b>Pas negotovosti Tmax ob jasnih nočeh</b><i class="mk-chip c-gray">Brez roka</i></div><span class="t">Pri D+3 pokritost pasu P10–P90 ob jasnih nočeh je 72&nbsp;% namesto 80&nbsp;%, razred ima le 74 dni (stanje 23. 10.). Ponovitev, ko se razred poveča.</span></li>
     <li><div class="mk-row"><b>Ali se postaja skozi leta premika?</b><i class="mk-chip c-gray">2027</i></div><span class="t">Rast drevja, gradnja ali staranje senzorja bi lahko spreminjali povprečni ostanek. Za zdaj dokaza ni; poskus z utežjo novejših dni ponovimo po dveh letih meritev.</span></li>
-    <li><div class="mk-row"><b>Čas izzvenevanja zasidranja (6 ur)</b><i class="mk-chip c-amb">Ni zagnano</i></div><span class="t">Vrednost je prevzeta s Črnivca in na Rečici ni izmerjena. Oceno da <code>tools/ai/eval_anchor.py</code>, a potrebuje omrežje: poganja se na GitHubovem tekaču ali doma.</span></li>
+    <li><div class="mk-row"><b>Čas izzvenevanja zasidranja (6 ur)</b><i class="mk-chip c-amb">Ročni zagon</i></div><span class="t">Vrednost je prevzeta s Črnivca in na Rečici ni izmerjena. Oceno da delovni tok <code>mtr-anchor-eval.yml</code> (<code>tools/ai/eval_anchor.py</code>), ki ga je treba zagnati ročno na GitHubovem tekaču, ker potrebuje omrežje. Rezultata na strani še ni.</span></li>
   </ul>
   <p class="muted-note" id="mk-pend-note"></p>
   <h2>Ponovi sam</h2>
@@ -145,7 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <tr><td>Višinski nivoji, sončni čas, mejna plast, sneg (24. 10.)</td><td class="mk-cmd">eval_mtr4.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
       <tr><td>Utež novejših dni, krčenje popravka (24. 10.)</td><td class="mk-cmd">eval_mtr5_recency.py, eval_mtr6_shrink.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
       <tr><td>Veter in sunki (24. 10.)</td><td class="mk-cmd">eval_mtr7_wind.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
-      <tr><td>Čas izzvenevanja zasidranja (2. 11.)</td><td class="mk-cmd">python3 tools/ai/eval_anchor.py --from 2026-07-13 --lead 1</td><td>omrežje (Open-Meteo) in data/hourly-observations.csv; poganjaj na GitHubovem tekaču</td></tr>
+      <tr><td>Čas izzvenevanja zasidranja (2. 11.)</td><td class="mk-cmd">python3 tools/ai/eval_anchor.py --from 2026-07-13 --lead 1</td><td>omrežje (Open-Meteo) in data/hourly-observations.csv; na GitHubovem tekaču kot delovni tok mtr-anchor-eval.yml (ročni zagon)</td></tr>
     </tbody>
   </table></div>
   <p>Kontrolo uhajanja informacije, uparjeni blokovni bootstrap in vse številke najdete v <a href="https://github.com/ibanezar/weather-station/blob/main/docs/model-recica.md">docs/model-recica.md</a>.</p>

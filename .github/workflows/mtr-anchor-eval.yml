@@ -1,0 +1,71 @@
+name: MTR — izmeri izzvenevanje zasidranja (eval_anchor)
+
+# Ročni zagon. Krivulja na junaški kartici (app.js, anchorHours) zasidra napoved ur na zadnjo meritev in
+# popravek »meritev − model« linearno izzveni v ANCHOR_HOURS = 6 urah; ta številka je prevzeta s Črnivca in
+# na Rečici NI izmerjena (docs/model-recica.md, »Poskusi 2. 11. 2026«). tools/ai/eval_anchor.py oceni obstojnost
+# napake po urah iz napovedi previous_dayN (Open-Meteo) proti urnim meritvam IREICA1 (data/hourly-observations.csv)
+# in primerja oblike izzvenevanja (brez, linearno čez 3/6/9/12 h, optimalna utež).
+# Potrebuje omrežje (Open-Meteo): iz razvojne seje z deljenim IP-jem skoraj stalno vrača 429, zato tekač.
+# Nič ne zapisuje v repozitorij: rezultat je v povzetku teka (in kot artefakt). ANCHOR_HOURS se ne spreminja
+# samodejno -- ocena je persistence napake izpred dneva, ne dokaz koristi (omejitve izpiše sam skript).
+# Ponovi, ko se nabere več urnih meritev (hourly-backfill.yml jih dopolnjuje), in šele nato razmisli o spremembi.
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        description: 'Začetek ocenjevalnega okna (YYYY-MM-DD; urne meritve so od ~13. 7. 2026)'
+        required: false
+        default: '2026-07-13'
+      lead:
+        description: 'Vodilni čas napovedi previous_dayN (1–7)'
+        required: false
+        default: '1'
+
+permissions:
+  contents: read
+
+jobs:
+  anchor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Namesti odvisnosti (samo za to orodje)
+        run: pip install numpy
+
+      - name: Poženi eval
+        env:
+          # Vhodi gredo prek okolja, ne v ukazno vrstico (brez vrivanja ukazov), in so preverjeni.
+          SINCE: ${{ github.event.inputs.since || '2026-07-13' }}
+          LEAD: ${{ github.event.inputs.lead || '1' }}
+        run: |
+          set -euo pipefail
+          [[ "$SINCE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "::error::since mora biti YYYY-MM-DD"; exit 1; }
+          [[ "$LEAD" =~ ^[1-7]$ ]] || { echo "::error::lead mora biti 1–7"; exit 1; }
+          out="$RUNNER_TEMP/eval_anchor.txt"
+          python3 -I tools/ai/eval_anchor.py --from "$SINCE" --lead "$LEAD" 2>&1 | grep -v Warning | tee "$out"
+          {
+            echo '## MTR: izzvenevanje zasidranja ur na zadnjo meritev'
+            echo
+            echo "Okno od \`$SINCE\`, vodilni čas D+$LEAD. Trenutna vrednost v \`app.js\`: \`ANCHOR_HOURS\` = 6 (prevzeta s Črnivca)."
+            echo
+            echo '```'
+            cat "$out"
+            echo '```'
+            echo
+            echo '**Branje:** `w_opt` je optimalna utež popravka po k urah (1 = napaka se v celoti obdrži, 0 = izgine). '
+            echo 'Stolpci `lin3`…`lin12` so MAE napovedi z linearnim izzvenevanjem čez toliko ur; »Povprečje čez k« pove, katera oblika je najbližja izmerjeni.'
+            echo 'To je ocena obstojnosti napake IZPRED DNEVA (ne napake, izdane ob t0), na ~110 dneh in enem kraju: **ni dokaz koristi**. '
+            echo '`ANCHOR_HOURS` ne spreminjaj brez ponovitve, ko je več meritev.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-anchor
+          path: ${{ runner.temp }}/eval_anchor.txt
+          retention-days: 30
