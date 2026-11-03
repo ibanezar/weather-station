@@ -5088,24 +5088,24 @@
     "date": "2026-11-01",
     "made_at": "2026-10-31",
     "actual": {
-      "tmax": 8.0,
-      "tmin": 2.3,
-      "precip": 4.0
+      "tmax": 8.3,
+      "tmin": 4.8,
+      "precip": 3.1
     },
     "arso": {
       "tmax": 5,
       "tmin": 2,
       "loc": "Ljubno ob Savinji",
-      "err_tmax": 3.0,
-      "err_tmin": 0.3
+      "err_tmax": 3.3,
+      "err_tmin": 2.8
     },
     "open_meteo": {
       "tmax": 8.8,
       "tmin": 3.8,
       "precip": 2.95,
-      "err_tmax": 0.8,
-      "err_tmin": 1.5,
-      "err_precip": 1.0
+      "err_tmax": 0.5,
+      "err_tmin": 1.0,
+      "err_precip": 0.1
     },
     "aifs": {
       "tmax": 8.0,
@@ -5113,9 +5113,9 @@
       "precip": 1.7,
       "model": "ecmwf_aifs025_single",
       "src": "live",
-      "err_tmax": 0.0,
-      "err_tmin": 1.8,
-      "err_precip": 2.3
+      "err_tmax": 0.3,
+      "err_tmin": 0.7,
+      "err_precip": 1.4
     },
     "wn2": {
       "tmax": 6.2,
@@ -5123,9 +5123,9 @@
       "precip": 2.0,
       "model": "google_weathernext2_ensemble_mean",
       "src": "live",
-      "err_tmax": 1.8,
-      "err_tmin": 0.2,
-      "err_precip": 2.0
+      "err_tmax": 2.1,
+      "err_tmin": 2.3,
+      "err_precip": 1.1
     },
     "meteorec": {
       "tmax": 7.2,
@@ -5133,10 +5133,65 @@
       "pop": 0.9,
       "lead": 1,
       "model_version": "1.0",
-      "err_tmax": 0.8,
-      "err_tmin": 2.2,
+      "err_tmax": 1.1,
+      "err_tmin": 0.3,
       "wet": 1.0,
       "brier": 0.01
+    }
+  },
+  "2026-11-02": {
+    "date": "2026-11-02",
+    "made_at": "2026-11-01",
+    "actual": {
+      "tmax": 9.8,
+      "tmin": 5.4,
+      "precip": 0.0
+    },
+    "arso": {
+      "tmax": 6,
+      "tmin": 3,
+      "loc": "Ljubno ob Savinji",
+      "err_tmax": 3.8,
+      "err_tmin": 2.4
+    },
+    "open_meteo": {
+      "tmax": 9.3,
+      "tmin": 6.6,
+      "precip": 1.35,
+      "err_tmax": 0.5,
+      "err_tmin": 1.2,
+      "err_precip": 1.4
+    },
+    "aifs": {
+      "tmax": 8.0,
+      "tmin": 6.2,
+      "precip": 6.4,
+      "model": "ecmwf_aifs025_single",
+      "src": "live",
+      "err_tmax": 1.8,
+      "err_tmin": 0.8,
+      "err_precip": 6.4
+    },
+    "wn2": {
+      "tmax": 6.9,
+      "tmin": 4.8,
+      "precip": 4.5,
+      "model": "google_weathernext2_ensemble_mean",
+      "src": "live",
+      "err_tmax": 2.9,
+      "err_tmin": 0.6,
+      "err_precip": 4.5
+    },
+    "meteorec": {
+      "tmax": 9.6,
+      "tmin": 6.3,
+      "pop": 0.81,
+      "lead": 1,
+      "model_version": "1.0",
+      "err_tmax": 0.2,
+      "err_tmin": 0.9,
+      "wet": 0.0,
+      "brier": 0.656
     }
   }
 }
