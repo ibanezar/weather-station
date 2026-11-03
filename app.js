@@ -7655,7 +7655,54 @@ async function fetchAIForecast(force=false){
   }
 }
 
-function _renderAIFC(data){
+// Temperature na kartici yr.no so MTR (naš model), kjer ima dan (D+1..D+3), sicer yr.no — isto kot »Naslednjih 7 dni« na
+// naslovnici, da si kartici ne nasprotujeta (3. 11. 2026). Padavine, ikona in opis ostanejo yr.no; kartica to pove v meta vrstici.
+async function _aifcMtrDays(){
+  const m={};
+  try{((await _mtrFetch().catch(()=>null))?.days||[]).forEach(x=>{
+    if(x.date&&Number.isFinite(x.tmax)&&Number.isFinite(x.tmin))m[x.date]=x;
+  });}catch(_){}
+  return m;
+}
+// Vodilni odstavek iz istih polj kot v workerju (/ai-forecast, `local`), a z MTR temperaturami; namerna podvojitev besedila.
+function _aifcLead(sm){
+  const parts=[],s0=sm[0],s1=sm[1];
+  if(s0){
+    if(s0.partial){
+      let p='Nocoj bo na Rečici ob Savinji '+s0.symbolText;
+      if(s0.tmin!=null)p+=', najnižja temperatura okoli '+s0.tmin+' °C';
+      if(s0.rain>=0.5)p+=', skupaj okoli '+s0.rain+' mm padavin';
+      parts.push(p+'.');
+    }else{
+      let p='Danes bo na Rečici ob Savinji '+s0.symbolText+', s temperaturo med '+s0.tmin+' in '+s0.tmax+' °C';
+      if(s0.rain>=0.5)p+=', skupaj okoli '+s0.rain+' mm padavin';
+      if(s0.windMax>=30)p+=', veter v sunkih do '+s0.windMax+' km/h';
+      parts.push(p+'.');
+    }
+  }
+  if(s1){
+    let p='Jutri '+s1.symbolText+', '+s1.tmin+'–'+s1.tmax+' °C';
+    if(s1.rain>=0.5)p+=', dež '+s1.rain+' mm';
+    parts.push(p+'.');
+  }
+  const rest=sm.slice(2,5);
+  if(rest.length)parts.push('V nadaljevanju: '+rest.map(x=>x.dayName+' '+x.symbolText+' ('+x.tmax+'°)').join(', ')+'.');
+  return parts.join(' ');
+}
+
+async function _renderAIFC(data){
+  // Povozi temperature z MTR (kopija, da predpomnjen odgovor ostane nespremenjen)
+  const mtrDays=await _aifcMtrDays();
+  let nMtr=0;
+  if(data.summaries?.length){
+    data={...data,summaries:data.summaries.map(s=>{
+      const m=mtrDays[s.date];
+      if(!m||s.partial)return s;
+      nMtr++;
+      return {...s,tmax:Math.round(m.tmax),tmin:Math.round(m.tmin)};
+    })};
+    if(nMtr&&data.summaries.every(s=>s.symbolText))data.local=_aifcLead(data.summaries);
+  }
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
@@ -7716,8 +7763,7 @@ function _renderAIFC(data){
   if(metaEl){
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
     const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
-    // Drug model kot kartica »Naslednjih 7 dni« na naslovnici (Open-Meteo + MTR): številke se zato lahko razlikujejo.
-    metaEl.textContent=src+(t?' · 🕐 '+t:'')+' · drug model kot MTR in Open-Meteo na naslovnici';
+    metaEl.textContent=src+(t?' · 🕐 '+t:'')+(nMtr?' · temperature: MTR (naš model) za '+nMtr+(nMtr===1?' dan':' dni')+', drugje yr.no':'');
   }
 }
 
