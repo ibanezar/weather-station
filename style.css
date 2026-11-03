@@ -4341,6 +4341,7 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 .hero-b #hs-rain-rate,.hero-b #hs-uv-label{font-size:.75rem!important;opacity:1!important;margin-top:0!important}
 .hero-b #hs-humidity-range{display:none!important}
 .hero-b .hm-spark{display:none}
+.hm-spark-cap{display:none}
 
 /* »Več podrobnosti« */
 .hb-more>summary{list-style:none;display:flex;align-items:center;gap:.6rem;min-height:3rem;padding:.7rem 1.1rem;cursor:pointer;
@@ -4387,6 +4388,11 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
   .hero-b .temp-huge{font-size:clamp(5rem,9vw,7rem)}
   .hero-b .hero-icon .wx-icon,.hero-b .hero-icon svg{width:6.5rem;height:6.5rem}
   .hero-b .hm-val,.hero-b .hm-secondary .hm-val{font-size:1.75rem}
+  /* Ploščice meritev se na namizju raztegnejo na višino levega stolpca (~270 px), vsebina pa je visoka ~130 px: spodnja polovica je bila prazna (3. 11. 2026).
+     Namesto praznine kažejo graf zadnjih 24 h (tlak, vlaga, veter, dež), prilepljen na dno ploščice; višina je rezervirana, ploščice se ne spremenijo. */
+  .hero-b .hero-metrics:not(.hero-metrics-2) .hm-spark{display:block;height:46px;margin-top:auto;padding-top:.5rem}
+  .hero-b .hm-spark-cap{font-size:.68rem;line-height:1.2;color:var(--muted);margin-top:.15rem}
+  .hero-b .hero-metrics:not(.hero-metrics-2) .hm-spark[data-on]+.hm-spark-cap{display:block}
   .hero-b .hb-more .hero-metrics-2{grid-template-columns:repeat(4,minmax(0,1fr))}
   .hb-more-hint{text-align:left}
 }

@@ -3143,6 +3143,13 @@ function applyHourly(observations){
   try{
     renderTileSpark('hsp-pres',raw.map(o=>{const m=o.metric||{};return(m.pressureMax!=null&&m.pressureMin!=null)?(m.pressureMax+m.pressureMin)/2:(m.pressure??null);}),4);
     renderTileSpark('hsp-hum',raw.map(o=>o.humidityAvg??o.humidity??null),25);
+    renderTileSpark('hsp-wind',raw.map(o=>{const m=o.metric||{};return m.windspeedAvg??m.windSpeed??null;}),10);
+    // Dež po urah: prirastek kumulative od polnoči (ista logika kot drawRainChart spodaj; prva ura nima primerjave).
+    renderTileSpark('hsp-rain',raw.map((o,i,arr)=>{
+      const m=o.metric||{};if(m.precipTotal==null||i===0)return null;
+      const p=arr[i-1].metric||{},sameDay=o.obsTimeLocal.slice(0,10)===arr[i-1].obsTimeLocal.slice(0,10);
+      return sameDay?Math.max(0,m.precipTotal-(p.precipTotal??0)):m.precipTotal;
+    }),1);
   }catch(_){}
   // Ura brez meritve (glej applyDayStats) se pri risanju grafa izpusti,
   // sicer privzeta vrednost 0 ustvari navidezen padec na grafu.
