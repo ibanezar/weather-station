@@ -47,10 +47,17 @@ jobs:
       - name: Namesti Pillow
         # Za dnevno OG kartico /crnivec/ (generate_crnivec_og.py, glej opombo
         # tam) — isti vzorec kot v padalci-forecast.yml/daily-story.yml.
-        run: pip install Pillow --quiet
+        run: pip install Pillow numpy --quiet
 
       - name: Sestavi /vreme-v-gorah/
         run: python3 tools/generate_gore_page.py
+
+      - name: Sestavi /jutro-v-dolini/ (zamik od prvega žarka do ogrevanja doline, statistika iz urnih meritev)
+        # Ne sme podreti ostalih strani: brez te strani zima/ in crnivec.si delujeta naprej.
+        continue-on-error: true
+        run: |
+          python3 tools/eval_jutro.py
+          python3 tools/generate_jutro_page.py
 
       - name: Sestavi /crnivec/
         run: python3 tools/generate_crnivec_page.py
@@ -67,7 +74,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/winter-data.json data/zima-ocene.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json data/crnivec-arso.json zima/ vreme-v-gorah/ crnivec/ crnivec-site/ og/crnivec/
+          git add data/winter-data.json data/zima-ocene.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json data/crnivec-arso.json zima/ vreme-v-gorah/ jutro-v-dolini/ data/jutro-zamik.json data/jutro-napovedi.csv crnivec/ crnivec-site/ og/crnivec/
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             exit 0

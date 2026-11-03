@@ -1175,6 +1175,46 @@ def compute_fog_daily(hourly, times, idx_now):
     return out
 
 
+WARMUP_MORNINGS = 3          # koliko jutr naprej (od danes, če je jutro še v teku)
+WARMUP_TODAY_LAST_HOUR = 10  # danes jutra ne kažemo več, ko je ura 10 ali več
+
+
+def compute_warmup_inputs(hourly, times, idx_now):
+    """Surovi vhodi za /jutro-v-dolini/ (kdaj se dolina ogreje po prvem žarku): za vsako od naslednjih jutr
+    modelska temperatura po urah 0–12, najnižja ura (0–9), povprečna oblačnost 3–10 h, povprečni veter 0–7 h in
+    padavine 0–10 h. Čas prvega žarka in napoved zamika računa generator strani (terena ta modul ne pozna),
+    tu so samo modelski podatki. Model precenjuje veter na tej postaji ~2× (glej MTR, Veter v dolini)."""
+    if idx_now is None or not times:
+        return None
+    now_date = times[idx_now][:10]
+    now_hour = int(times[idx_now][11:13])
+    by_date = {}
+    for i, t in enumerate(times):
+        by_date.setdefault(t[:10], {})[int(t[11:13])] = i
+    out = []
+    for date in sorted(by_date):
+        if date < now_date or (date == now_date and now_hour >= WARMUP_TODAY_LAST_HOUR):
+            continue
+        h = by_date[date]
+        if not all(x in h for x in range(0, 11)):
+            continue
+        temps = [hval(hourly, "temperature_2m", h[x]) for x in range(0, 13) if x in h]
+        if any(t is None for t in temps[:10]):
+            continue
+        cloud = [hval(hourly, "cloud_cover", h[x]) for x in range(3, 11)]
+        wind = [hval(hourly, "wind_speed_10m", h[x]) for x in range(0, 8)]
+        prec = [hval(hourly, "precipitation", h[x]) or 0 for x in range(0, 11)]
+        if any(c is None for c in cloud) or any(w is None for w in wind):
+            continue
+        mh = min(range(0, 10), key=lambda x: temps[x])
+        out.append({"date": date, "tmin_c": round(temps[mh], 1), "tmin_hour": mh,
+                    "cloud_pct": round(sum(cloud) / len(cloud)), "wind_kmh": round(sum(wind) / len(wind), 1),
+                    "precip_mm": round(sum(prec), 1), "temps_c": [round(t, 1) if t is not None else None for t in temps]})
+        if len(out) >= WARMUP_MORNINGS:
+            break
+    return out
+
+
 # ── Sezonski dnevnik ──────────────────────────────────────────────────────
 # Enostaven arhivski dnevnik (isti upsert/prune vzorec kot
 # calculate_frost_risk.py) — BREZ verifikacije proti meritvi (ni je, s čim bi
@@ -1288,6 +1328,8 @@ def main():
                       "peaks": compute_mountains(hourly, times, idx_now)},
         "freezing_rain": {**compute_freezing_rain(hourly, times, idx_now),
                           "generated_at_local": now_local.strftime("%-d. %-m. %Y ob %H:%M")},
+        "warmup": {"generated_at_local": now_local.strftime("%-d. %-m. %Y ob %H:%M"),
+                   "mornings": compute_warmup_inputs(hourly, times, idx_now)},
         "locations": locations,
     }
 
