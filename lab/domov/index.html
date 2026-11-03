@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/lab/domov/domov.css">
 <script src="/lab/lab.js" defer></script>
 <script src="/lab/domov/domov.js" defer></script>
+<script src="/lab/domov/radar.js" defer></script>
 </head>
 <body class="lab dv" data-mode="simple">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -64,7 +65,7 @@
       <dl class="dv-sec">
         <div><dt>Občutek</dt><dd id="t-feel">–</dd></div>
         <div><dt>Rosišče</dt><dd id="t-dew">–</dd></div>
-        <div><dt>Danes</dt><dd id="t-range">–</dd></div>
+        <div><dt id="t-range-l">Danes</dt><dd id="t-range">–</dd></div>
       </dl>
     </section>
 
@@ -95,7 +96,7 @@
 
   <section id="napoved" class="dv-sect" aria-labelledby="h-h">
     <h2 id="h-h" class="dv-h2">Naslednjih 24 ur <em class="dv-tag">MODEL</em></h2>
-    <p class="dv-muted" id="h-src">Open-Meteo, model se osvežuje na uro. Veter po urah ni prikazan: vir ga v tem klicu ne vrača.</p>
+    <p class="dv-muted" id="h-src">Open-Meteo, model se osvežuje na uro. Veter po urah namenoma ni prikazan: surov model ga za zavetrno dno doline precenjuje ~2×. Umerjen veter (MTR) je dnevni in je v podrobnostih 7 dni.</p>
     <div class="dv-scroll" id="h-list" role="region" aria-label="Urna napoved, pomikaj vodoravno" tabindex="0"></div>
     <p id="h-detail" class="dv-detail" aria-live="polite"></p>
   </section>
@@ -109,11 +110,21 @@
 
   <div id="radar" class="dv-two">
     <section class="dv-card" aria-labelledby="h-r">
-      <h2 id="h-r" class="dv-h2">Radar <em class="dv-tag">RADAR</em></h2>
-      <div class="dv-radar" role="img" aria-label="Označba mesta za radar">
-        <p><b>Radar v prototipu še ni priklopljen.</b><br>Obstoječi radar (kompozit ARSO + OPERA, animacija zadnje ure, klik na točko) ostane nespremenjen in se prestavi v ta blok pri vgradnji v produkcijo. Rezerviran je prostor 4:3, da se stran ob nalaganju ne premika.</p>
-        <a class="dv-btn" href="/#radar">Odpri radar na meteorec.si</a>
+      <h2 id="h-r" class="dv-h2">Radar padavin</h2>
+      <p id="rd-eta" class="dv-eta" role="status" hidden></p>
+      <div class="rd-ctl">
+        <button id="rd-play" class="dv-btn2" type="button" aria-pressed="true">Pavza</button>
+        <span class="rd-t"><b id="rd-time">–</b><em id="rd-badge" class="dv-tag" hidden></em></span>
+        <span class="lab-seg" role="group" aria-label="Pogled radarja"><button type="button" data-rd-view="sirok" aria-pressed="true">Širše</button><button type="button" data-rd-view="savinja" aria-pressed="false">Zgornja Savinjska</button></span>
       </div>
+      <div class="rd-scrub">
+        <div class="rd-track" id="rd-track" role="slider" tabindex="0" aria-label="Čas radarske slike" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"><div class="rd-fill" id="rd-fill"></div><div class="rd-split" id="rd-split" hidden title="Od tu naprej je modelska napoved"></div><div class="rd-thumb" id="rd-thumb"></div></div>
+        <div class="rd-ticks" id="rd-ticks" aria-hidden="true"></div>
+      </div>
+      <p id="rd-mode" class="dv-mode">Radar se naloži, ko pride na zaslon.</p>
+      <div id="rd-wrap" class="rd-wrap"><div id="rd-map" role="region" aria-label="Zemljevid radarja padavin"></div><span class="rd-ribbon" aria-hidden="true">MODEL</span></div>
+      <div class="rd-legend"><div class="rd-scale" id="rd-scale" role="img" aria-label="Lestvica jakosti padavin v milimetrih na uro, od rahlih (modro) do zelo močnih"></div><div class="rd-lticks" id="rd-lticks" aria-hidden="true"></div><span>mm/h</span></div>
+      <p class="dv-foot">V pogledu »Zgornja Savinjska« se trak po zadnji uri radarja nadaljuje s 6-urno napovedjo ICON (označeno MODEL). Obarvane pike so sledene nevihtne celice. Dotik na prazen del zemljevida pokaže modelsko napoved za točko, ne radarske meritve. Padavine: <a href="https://meteo.arso.gov.si/met/sl/weather/observ/radar/" rel="noopener nofollow">ARSO</a>, <a href="https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/" rel="noopener nofollow">EUMETNET OPERA</a> (CC BY 4.0) · napoved <a href="https://open-meteo.com/" rel="noopener nofollow">Open-Meteo</a> (DWD ICON) · zemljevid <a href="https://www.openstreetmap.org/copyright" rel="noopener nofollow">OpenStreetMap</a>.</p>
     </section>
     <section class="dv-card" aria-labelledby="h-v">
       <h2 id="h-v" class="dv-h2">Vreme v dolini</h2>

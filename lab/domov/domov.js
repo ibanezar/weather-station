@@ -35,8 +35,22 @@
   document.addEventListener('DOMContentLoaded', function () {
     var saved = get('wx-lab-mode'); setMode(saved === 'advanced' ? 'advanced' : 'simple');
     document.querySelectorAll('[data-dv-mode]').forEach(function (b) { b.addEventListener('click', function () { setMode(b.getAttribute('data-dv-mode')); }); });
-    loadObs(); loadForecast(); loadNowcast(); loadValley(); loadBlog();
-    setInterval(loadObs, 5 * 60000); setInterval(loadNowcast, 5 * 60000); setInterval(tickAge, 30000);
+    loadObs(); loadToday(); loadForecast(); loadNowcast(); loadValley(); loadBlog();
+    setInterval(loadObs, 5 * 60000); setInterval(loadToday, 15 * 60000); setInterval(loadNowcast, 5 * 60000); setInterval(tickAge, 30000);
+  });
+
+  // ── aktivna točka navigacije glede na vidni razdelek (4.2); poleg barve ima tudi podčrtaj/indikator ──
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!('IntersectionObserver' in window)) return;
+    var ids = ['vreme', 'napoved', 'radar'], vis = {};
+    function mark() {
+      var cur = ids.filter(function (i) { return vis[i]; }).pop() || 'vreme';
+      document.querySelectorAll('.dv-nav a[href^="#"],.dv-bottom a[href^="#"]').forEach(function (a) {
+        if (a.getAttribute('href') === '#' + cur) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      });
+    }
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { vis[e.target.id] = e.isIntersecting; }); mark(); }, { rootMargin: '-30% 0px -50% 0px' });
+    ids.forEach(function (i) { var n = $(i); if (n) io.observe(n); });
   });
 
   // ── vremenske kode (WMO) → ikona + besedilo ─────────────
@@ -96,6 +110,25 @@
   }
   function dirName(deg) { return ['S', 'SV', 'V', 'JV', 'J', 'JZ', 'Z', 'SZ'][Math.round(deg / 45) % 8]; }
 
+  // ── današnji razpon: izmerjeno do zdaj (ločeno od napovedi) ──
+  var measuredRange = false, modelRange = null;
+  function setRange() {
+    if (!measuredRange && modelRange) { $('t-range-l').textContent = 'Danes (napoved)'; $('t-range').textContent = modelRange; }
+  }
+  function loadToday() {
+    jget(PROXY + '/hourly', 15000).then(function (d) {
+      var today = new Intl.DateTimeFormat('sv-SE', { timeZone: TZ }).format(new Date()), hi = null, lo = null;
+      (d.observations || []).forEach(function (o) {
+        if (!o.obsTimeLocal || o.obsTimeLocal.slice(0, 10) !== today || !o.metric) return;
+        var h = o.metric.tempHigh != null ? o.metric.tempHigh : o.metric.tempAvg, l = o.metric.tempLow != null ? o.metric.tempLow : o.metric.tempAvg;
+        if (h != null && (hi == null || h > hi)) hi = h; if (l != null && (lo == null || l < lo)) lo = l;
+      });
+      if (lastTemp != null) { hi = hi == null ? lastTemp : Math.max(hi, lastTemp); lo = lo == null ? lastTemp : Math.min(lo, lastTemp); }
+      if (hi == null || lo == null) throw new Error('prazno');
+      measuredRange = true; $('t-range-l').textContent = 'Danes, izmerjeno do zdaj'; $('t-range').textContent = txt(lo, 1, '°') + ' do ' + txt(hi, 1, '°');
+    }).catch(function () { setRange(); });
+  }
+
   // ── napoved (Open-Meteo prek workerja) + MTR ────────────
   function localHourKey() {
     var p = new Intl.DateTimeFormat('sv-SE', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' }).format(new Date());
@@ -107,10 +140,10 @@
       var H = j.hourly, D = j.daily, i0 = H.time.indexOf(localHourKey()); if (i0 < 0) i0 = 0;
       var ic = wmo(H.weather_code[i0], H.is_day[i0]);
       $('c-ic').setAttribute('href', '#' + ic[0]); $('c-txt').textContent = ic[1];
-      $('t-range').textContent = txt(D.temperature_2m_min[0], 0, '°') + ' do ' + txt(D.temperature_2m_max[0], 0, '°') + ' (napoved)';
+      modelRange = txt(D.temperature_2m_min[0], 0, '°') + ' do ' + txt(D.temperature_2m_max[0], 0, '°'); setRange();
       renderHourly(H, i0); renderDaily(D, mtr);
     }).catch(function () {
-      $('c-txt').textContent = 'Razmere niso na voljo'; $('t-range').textContent = 'Ni podatka';
+      $('c-txt').textContent = 'Razmere niso na voljo'; if (!measuredRange) $('t-range').textContent = 'Ni podatka';
       $('h-list').textContent = ''; $('h-list').appendChild(el('p', 'dv-muted', 'Podatek trenutno ni na voljo.'));
       $('d-list').textContent = ''; $('d-list').appendChild(el('p', 'dv-muted', 'Podatek trenutno ni na voljo.'));
     });
@@ -153,7 +186,12 @@
         var s = dt.toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', timeZone: TZ }) + ': ' + ic[1] +
           '. Open-Meteo: ' + txt(D.temperature_2m_max[i], 1, '°C') + ' / ' + txt(D.temperature_2m_min[i], 1, '°C') + ', padavine ' + txt(D.precipitation_sum[i], 1, 'mm') +
           ', največ ' + txt(D.wind_speed_10m_max[i], 0, 'km/h') + ' vetra, UV do ' + txt(D.uv_index_max[i], 0) + '.';
-        if (mt) s += ' MTR (lastni model Meteorec): ' + txt(mt.tmax, 1, '°C') + ' / ' + txt(mt.tmin, 1, '°C') + '.';
+        if (mt) {
+          s += ' MTR (lastni model Meteorec): ' + txt(mt.tmax, 1, '°C') + ' / ' + txt(mt.tmin, 1, '°C') + '.';
+          // Veter: MTR je umerjen na zavetrno dno doline, surov model je tam ~2× previsok (zato ju vedno označimo).
+          if (mt.wind != null) s += ' Veter v dolini (MTR, umerjen na postajo): povprečje ' + txt(mt.wind, 0, 'km/h') + (mt.gust != null ? ', sunki do ' + txt(mt.gust, 0, 'km/h') : '') +
+            (mt.om_wind != null ? '; surov Open-Meteo: ' + txt(mt.om_wind, 0, 'km/h') + (mt.om_gust != null ? ', sunki ' + txt(mt.om_gust, 0, 'km/h') : '') : '') + '.';
+        }
         else s += ' MTR za ta dan ni na voljo.';
         $('d-detail').textContent = s;
       });

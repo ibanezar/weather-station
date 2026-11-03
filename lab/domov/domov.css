@@ -138,3 +138,40 @@ body[data-mode="advanced"] .dv-adv{display:block}
   .dv-bottom a[aria-current="page"]{color:var(--c-accent)!important;font-weight:700;box-shadow:inset 0 3px 0 var(--c-accent)}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* radar (7.6): kontrolniki nad zemljevidom, legenda pod njim */
+.dv-btn2{font:inherit;font-weight:600;color:var(--c-on-accent);background:var(--c-accent);border:0;border-radius:var(--r-sm);padding:.5rem 1rem;min-height:44px;min-width:104px;cursor:pointer}
+.rd-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-2)}
+.rd-t{display:inline-flex;align-items:center;gap:var(--sp-2);font-size:1.15rem;min-width:7.5rem}
+.rd-b-old{color:var(--c-warn);border-color:var(--c-warn)}.rd-b-fc{color:var(--c-accent);border-color:var(--c-accent)}
+.rd-ctl .lab-seg{margin-left:auto}
+.rd-scrub{position:relative;padding-bottom:1.1rem;margin-bottom:var(--sp-1)}
+.rd-track{position:relative;height:28px;cursor:pointer;touch-action:none;border-radius:var(--r-sm)}
+.rd-track::before{content:"";position:absolute;left:0;right:0;top:12px;height:4px;border-radius:2px;background:var(--c-line)}
+.rd-fill{position:absolute;left:0;top:12px;height:4px;border-radius:2px;background:var(--c-accent);pointer-events:none}
+.rd-thumb{position:absolute;top:5px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:var(--c-accent);border:3px solid var(--c-surface);box-shadow:var(--sh-1);pointer-events:none}
+.rd-split{position:absolute;top:6px;bottom:6px;width:0;border-left:2px dashed var(--c-ink-soft);pointer-events:none}
+.rd-ticks{position:absolute;left:0;right:0;bottom:0;height:1rem;font-size:.75rem;color:var(--c-ink-soft)}
+.rd-ticks span{position:absolute;top:0}
+.dv-mode{font-size:var(--fs-small);font-weight:600;margin:var(--sp-1) 0 var(--sp-2)}
+.dv-eta{margin:0 0 var(--sp-2);padding:.6rem .8rem;border-radius:var(--r-sm);border:1px solid var(--c-danger);color:var(--c-danger);font-weight:600;font-size:var(--fs-small)}
+.rd-wrap{position:relative;border-radius:var(--r-md);overflow:hidden;border:2px solid var(--c-line)}
+.rd-wrap[data-kind="model"]{border:2px dashed var(--c-accent)}
+.rd-ribbon{display:none;position:absolute;z-index:500;top:8px;left:8px;background:var(--c-accent);color:var(--c-on-accent);font-weight:700;font-size:.72rem;letter-spacing:.06em;padding:.15rem .5rem;border-radius:var(--r-pill);pointer-events:none}
+.rd-wrap[data-kind="model"] .rd-ribbon{display:block}
+#rd-map{aspect-ratio:4/3;width:100%;background:var(--c-bg)}
+@media (min-width:1024px){#rd-map{aspect-ratio:16/11}}
+.rd-legend{display:grid;grid-template-columns:1fr auto;gap:2px var(--sp-2);align-items:center;margin-top:var(--sp-2);font-size:.78rem;color:var(--c-ink-soft)}
+.rd-scale{display:grid;height:10px;border-radius:5px;overflow:hidden}.rd-scale i{display:block}
+.rd-lticks{display:grid;grid-column:1;font-size:.72rem}.rd-legend>span{grid-row:1;grid-column:2}
+[data-theme="dark"] .rd-tiles{filter:brightness(.78) saturate(.85) contrast(1.05)}
+.leaflet-tooltip.rd-label{background:rgba(255,255,255,.93);border:0;box-shadow:none;color:#111827;font-weight:600;font-size:.72rem;padding:2px 7px}
+.leaflet-tooltip.rd-label::before{display:none}
+[data-theme="dark"] .leaflet-tooltip.rd-label{background:rgba(15,20,32,.88);color:#fff}
+.leaflet-tooltip.rd-cell{font-size:.62rem;padding:1px 6px}
+.leaflet-tooltip.rd-eta{background:rgba(192,20,60,.93)!important;color:#fff!important}
+.leaflet-popup.rd-pop .leaflet-popup-content-wrapper,.leaflet-popup.rd-pop .leaflet-popup-tip{background:var(--c-surface);color:var(--c-ink)}
+.rd-pop .leaflet-popup-content{margin:.7rem .8rem;font-family:inherit;font-size:.78rem;line-height:1.35}
+.rd-pt p{margin:.35rem 0 0;color:var(--c-ink-soft)}.rd-row{display:flex;justify-content:space-between;gap:1rem;margin-top:.25rem}.rd-row span{color:var(--c-ink-soft)}
+.rd-pt svg{display:block;margin:.5rem 0 .2rem;color:var(--c-accent)}.rd-pt small{display:block;font-size:.68rem;color:var(--c-ink-soft)}
+@media (prefers-reduced-motion:reduce){.leaflet-fade-anim .leaflet-popup{transition:none}}
