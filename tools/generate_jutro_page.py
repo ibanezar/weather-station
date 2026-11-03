@@ -193,6 +193,10 @@ def build_body(recs, stats, generated):
   <p class="archive-intro">Zamik sem izmeril na {n_total} jasnih in mirnih jutrih ({fmt_iso(per[0])} do {fmt_iso(per[1])}). Jutro štejem za jasno in
   mirno, če je bil dnevni razpon temperature vsaj 10 °C in povprečni veter od polnoči do 7. ure pod 3 km/h. Jutranji minimum je
   najnižje urno povprečje do 10. ure, dvig je prvi trenutek, ko urno povprečje preseže minimum za 3 °C.</p>
+  <p class="archive-intro">Zamik merim od izračunanega prvega žarka (teren, odprt kraj v Rečici). Sevanje na postaji pa skoči
+  približno dve uri pozneje, kot pravi izračun (glej <a href="/sonce-v-dolini/">Sonce v dolini</a>): senzor je zjutraj najverjetneje
+  v senci bližnjega objekta ali drevesa. Izmerjeni zamik zato to senco že vsebuje in velja za to postajo; drugje v dolini
+  bi bil lahko krajši.</p>
 {stats_table(stats)}
   <p class="muted-note">Zamik za posamezni mesec zberem iz sosednjih mesecev, šele ko je skupaj vsaj {stats.get("min_n", ej.MIN_N)}
   jutr. Zimskih meritev še ni (podatke imam od 13. julija 2026), zato za december, januar in februar časa ne napovedujem.</p>
