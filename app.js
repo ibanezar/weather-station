@@ -1667,6 +1667,23 @@ function _cuCached(){
 }
 function _cuStore(d){try{localStorage.setItem('wx-cu-v1',JSON.stringify({ts:Date.now(),data:d}));}catch(_){}}
 let _cuTries=0,_cuRetryTimer=null;
+// Koda vremena za dan v »Naslednjih 7 dni«. Dnevna koda WMO je NAJHUJŠI pojav dneva, zato jutranja megla naredi »Megla«
+// (ikona sonca z vodoravnimi črtami) iz celega dne, čeprav je od dopoldneva jasno (3. 11. 2026: štirje dnevi zapored »Megla«,
+// yr.no pa jasno). Če je dnevna koda megla, jo nadomesti najhujša koda med dnevnimi urami (9–18); megla ostane, če je
+// tudi čez dan res megla.
+function _cuDayCode(d,h,i){
+  const c=d.weather_code[i];
+  if(c!==45&&c!==48)return c;
+  let worst=null;
+  for(let k=0;k<h.time.length;k++){
+    if(h.time[k].slice(0,10)!==d.time[i])continue;
+    const hr=+h.time[k].slice(11,13);
+    if(hr<9||hr>18)continue;
+    const w=h.weather_code[k];
+    if(w!=null&&(worst==null||w>worst))worst=w;
+  }
+  return worst==null?c:worst;
+}
 async function fetchComingUp(){
   clearTimeout(_cuRetryTimer);
   const ok=await _fetchComingUpOnce();
@@ -1762,7 +1779,7 @@ async function _fetchComingUpOnce(){
         const lbl=i===1?'Jutri':SL[date.getDay()]+' '+date.getDate()+'.';
         const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
         const div=document.createElement('div');
-        div.className='cu-day cu-click'+((date.getDay()===0||date.getDay()===6)?' cu-we':'');div.dataset.wx=_wmoCat(d.weather_code[i]);
+        div.className='cu-day cu-click'+((date.getDay()===0||date.getDay()===6)?' cu-we':'');const code=_cuDayCode(d,h,i);div.dataset.wx=_wmoCat(code);
         // Klik / Enter / presledek odpre podrobnosti dneva (toggleCuDetail, ploščo #cu-detail pod karticami)
         div.dataset.date=d.time[i];div.tabIndex=0;
         div.setAttribute('role','button');div.setAttribute('aria-expanded','false');div.setAttribute('aria-controls','cu-detail');
@@ -1772,8 +1789,8 @@ async function _fetchComingUpOnce(){
         div.innerHTML=
           '<span class="cu-scene" aria-hidden="true"></span>'+
           '<span class="cu-dlbl">'+lbl+'</span>'+
-          '<span class="cu-demo">'+_wmoImg(d.weather_code[i],true,48)+'</span>'+
-          '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+(d.wind_speed_10m_max[i]>=30?' · '+Math.round(d.wind_speed_10m_max[i])+' km/h':'')+'</span>'+
+          '<span class="cu-demo">'+_wmoImg(code,true,48)+'</span>'+
+          '<span class="cu-ddesc">'+_wmoTxt(code)+(d.wind_speed_10m_max[i]>=30?' · '+Math.round(d.wind_speed_10m_max[i])+' km/h':'')+'</span>'+
           '<div class="cu-dtemp"'+(mt?' title="Temperatura po MTR, našem modelu. Open-Meteo: '+Math.round(d.temperature_2m_max[i])+'° / '+Math.round(d.temperature_2m_min[i])+'°"':'')+'>'
             +'<span class="cu-dhi" style="color:'+tempColor(tHi)+'">'+Math.round(tHi)+'°</span>'+
             '<span class="cu-dtl">'+Math.round(tLo)+'°</span></div>'+
@@ -1856,7 +1873,7 @@ function _cuDetailHtml(date){
   for(let k=0;k<h.time.length;k++)if(h.time[k].slice(0,10)===date)idx.push(k);
   const dt=new Date(date+'T12:00:00');
   const title=_PD_DAYS_FULL[dt.getDay()]+', '+dt.getDate()+'. '+(dt.getMonth()+1)+'.';
-  const code=d.weather_code[i];
+  const code=_cuDayCode(d,h,i);
   const tHi=d.temperature_2m_max[i],tLo=d.temperature_2m_min[i];
   const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
   const wind=d.wind_speed_10m_max?d.wind_speed_10m_max[i]:null;
@@ -7699,7 +7716,8 @@ function _renderAIFC(data){
   if(metaEl){
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
     const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
-    metaEl.textContent=src+(t?' · 🕐 '+t:'');
+    // Drug model kot kartica »Naslednjih 7 dni« na naslovnici (Open-Meteo + MTR): številke se zato lahko razlikujejo.
+    metaEl.textContent=src+(t?' · 🕐 '+t:'')+' · drug model kot MTR in Open-Meteo na naslovnici';
   }
 }
 

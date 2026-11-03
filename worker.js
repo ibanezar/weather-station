@@ -5458,7 +5458,9 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           const det = ts.data.instant.details;
           days[date].temps.push(det.air_temperature);
           days[date].winds.push(det.wind_speed * 3.6);
-          const p = ts.data.next_1_hours?.details?.precipitation_amount;
+          // Po ~60 h yr.no podatke da samo še na 6 ur (brez next_1_hours): brez rezerve bi bili tisti dnevi vedno »suho«.
+          const p = ts.data.next_1_hours?.details?.precipitation_amount
+            ?? ts.data.next_6_hours?.details?.precipitation_amount;
           if (p != null) days[date].rain += p;
           const sym = ts.data.next_1_hours?.summary?.symbol_code || ts.data.next_6_hours?.summary?.symbol_code;
           if (sym) {
@@ -5511,7 +5513,17 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           .slice(0, 7)
           .map(([date, d]) => {
             const dt = new Date(date + 'T12:00:00');
-            const rawSym = d.noonSym || d.syms[Math.floor(d.syms.length/2)] || 'partlycloudy_day';
+            let rawSym = d.noonSym || d.syms[Math.floor(d.syms.length/2)] || 'partlycloudy_day';
+            // Opoldanski simbol je lahko suh, čeprav dan prinese dež (3. 11. 2026: »oblačno« z 1,5 mm): ob ≥ 1 mm
+            // vzemi najpogostejši mokri simbol dneva.
+            if (d.rain >= 1 && !/rain|sleet|snow|thunder/.test(rawSym)) {
+              const wet = d.syms.filter(x => /rain|sleet|snow|thunder/.test(x));
+              if (wet.length) {
+                const cnt = {};
+                for (const x of wet) cnt[x] = (cnt[x] || 0) + 1;
+                rawSym = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+              }
+            }
             const isToday = date === todayKey;
             const isPartial = isToday && partialToday;
             return {
