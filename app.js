@@ -383,7 +383,7 @@ function sunTimes(lat,lon,date){
   const ha=deg*Math.acos(cosHA),noon=720-4*lon-eqtime;
   return{sunrise:new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,Math.round(noon-4*ha))),sunset:new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate(),0,Math.round(noon+4*ha)))};
 }
-function fmtTime(d){return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function fmtTime(d){return d.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});}
 function updateSunArc(lat,lon){
   const now=new Date(),st=sunTimes(lat,lon,now);if(!st)return;
   set('sunrise-time',fmtTime(st.sunrise));set('sunset-time',fmtTime(st.sunset));
@@ -6777,7 +6777,7 @@ function connectLightning(){
         if(dist>200)return;
         const ts=Date.now();
         const t=new Date(ts);
-        _ltgStrikes.unshift({dist:dist.toFixed(0),ts,time:t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}),source:'Blitzortung'});
+        _ltgStrikes.unshift({dist:dist.toFixed(0),ts,time:t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),source:'Blitzortung'});
         _ltgStrikes=_ltgStrikes.filter(s=>s.ts>Date.now()-3600000).slice(0,80);
         applyLightning();
       }catch(_){}
