@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Predloga · Laboratorij</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/lab/lab.css">
+<script src="/lab/lab.js" defer></script>
+</head>
+<body class="lab">
+<div class="lab-bar" role="toolbar" aria-label="Orodja laboratorija">
+  <span class="lab-title"><a href="/lab/">Laboratorij</a> · Predloga</span>
+  <span class="lab-seg" role="group" aria-label="Tema"><button type="button" data-lab-theme="light" aria-pressed="false">Svetla</button><button type="button" data-lab-theme="dark" aria-pressed="false">Temna</button></span>
+  <span class="lab-seg" role="group" aria-label="Širina"><button type="button" data-lab-w="phone" aria-pressed="false">Telefon</button><button type="button" data-lab-w="tablet" aria-pressed="false">Tablica</button><button type="button" data-lab-w="full" aria-pressed="false">Polno</button></span>
+</div>
+<main class="lab-main"><div class="lab-frame" data-w="full">
+<h1 class="lab-h1">Predloga poskusa</h1>
+<p class="lab-note">Izhodišče za nov poskus. Podatki so <strong>primer</strong>, ne meritev. Zunanje meritve ali napoved dodaj iz <code>/history.json</code> ali <code>/napoved-modela-live.json</code>, nikoli iz bloka notranjih meritev (pravilo z vrha <code>CLAUDE.md</code>).</p>
+
+<h2 class="lab-h2">Varianta A</h2>
+<div class="lab-grid">
+  <article class="lab-card" aria-label="Primer ploščice">
+    <p class="lab-note" style="margin:0">Temperatura · primer</p>
+    <p style="font-size:var(--fs-hero);line-height:1;font-weight:700;margin:var(--sp-2) 0">3,4°</p>
+    <div role="img" aria-label="Danes od 1 do 9 stopinj" style="height:8px;border-radius:var(--r-pill);background:var(--c-line);position:relative">
+      <i style="position:absolute;inset:0 55% 0 10%;border-radius:inherit;background:var(--c-accent)"></i>
+    </div>
+    <p class="lab-note" style="margin:var(--sp-2) 0 0">Danes 1° do 9°</p>
+  </article>
+</div>
+</div></main>
+</body>
+</html>

@@ -1,0 +1,29 @@
+/* Laboratorij za nove designe (/lab/). Skrita stran: noindex, ni v CORE/sitemapu, nikjer povezana.
+   Uporablja PRAVE tokene iz /style.css (--c-*, --r-*, --sh-*, --sp-*), tako da poskus izgleda enako kot bo na produkciji.
+   Tu so samo pripomočki laboratorija (orodna vrstica, okvir širine), ne komponente strani. */
+body.lab{background:var(--c-bg);color:var(--c-ink);font-family:'Inter','Inter Fallback',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.lab-bar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);align-items:center;
+  padding:var(--sp-2) var(--sp-4);background:var(--c-surface);border-bottom:1px solid var(--c-line);font-size:var(--fs-small)}
+.lab-bar a{color:var(--c-accent);text-decoration:none;font-weight:600}
+.lab-bar .lab-title{margin-right:auto;font-weight:700}
+.lab-seg{display:inline-flex;border:1px solid var(--c-line-strong);border-radius:var(--r-pill);overflow:hidden}
+.lab-seg button{font:inherit;color:var(--c-ink);background:transparent;border:0;padding:.45rem .8rem;min-height:36px;cursor:pointer}
+.lab-seg button[aria-pressed="true"]{background:var(--c-accent);color:var(--c-on-accent);font-weight:600}
+.lab-seg button:focus-visible{outline:2px solid var(--c-accent);outline-offset:-2px}
+.lab-main{padding:var(--sp-5) var(--sp-4) var(--sp-8)}
+.lab-frame{margin:0 auto;max-width:var(--lab-w,1100px);transition:max-width .2s}
+.lab-frame[data-w="phone"]{--lab-w:390px;border-inline:1px dashed var(--c-line-strong);padding-inline:var(--sp-3)}
+.lab-frame[data-w="tablet"]{--lab-w:768px;border-inline:1px dashed var(--c-line-strong);padding-inline:var(--sp-3)}
+.lab-h1{font-size:var(--fs-h1);margin:0 0 var(--sp-2)}
+.lab-h2{font-size:var(--fs-h2);margin:var(--sp-6) 0 var(--sp-3)}
+.lab-note{color:var(--c-ink-soft);font-size:var(--fs-small);max-width:60ch}
+.lab-grid{display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+.lab-card{display:block;background:var(--c-surface);border:1px solid var(--c-line);border-radius:var(--r-md);padding:var(--sp-4);
+  box-shadow:var(--sh-1);color:inherit;text-decoration:none}
+a.lab-card:hover{box-shadow:var(--sh-2)}
+.lab-card h3{margin:0 0 var(--sp-1);font-size:1.05rem}
+.lab-tag{display:inline-block;font-size:.75rem;padding:.1rem .55rem;border-radius:var(--r-pill);border:1px solid var(--c-line-strong);color:var(--c-ink-soft);margin-top:var(--sp-2)}
+.lab-sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:var(--sp-3)}
+.lab-sw div{border:1px solid var(--c-line);border-radius:var(--r-sm);overflow:hidden;font-size:.78rem;background:var(--c-surface)}
+.lab-sw i{display:block;height:48px}
+.lab-sw span{display:block;padding:var(--sp-2)}

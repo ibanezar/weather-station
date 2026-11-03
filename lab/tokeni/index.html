@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Tokeni · Laboratorij</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/lab/lab.css">
+<script src="/lab/lab.js" defer></script>
+</head>
+<body class="lab">
+<div class="lab-bar" role="toolbar" aria-label="Orodja laboratorija">
+  <span class="lab-title"><a href="/lab/">Laboratorij</a> · Tokeni</span>
+  <span class="lab-seg" role="group" aria-label="Tema"><button type="button" data-lab-theme="light" aria-pressed="false">Svetla</button><button type="button" data-lab-theme="dark" aria-pressed="false">Temna</button></span>
+  <span class="lab-seg" role="group" aria-label="Širina"><button type="button" data-lab-w="phone" aria-pressed="false">Telefon</button><button type="button" data-lab-w="tablet" aria-pressed="false">Tablica</button><button type="button" data-lab-w="full" aria-pressed="false">Polno</button></span>
+</div>
+<main class="lab-main"><div class="lab-frame" data-w="full">
+<h1 class="lab-h1">Tokeni in barve</h1>
+<p class="lab-note">Žive vrednosti iz <code>style.css</code>; preklopi temo v vrstici zgoraj.</p>
+<h2 class="lab-h2">Barve</h2>
+<div class="lab-sw">
+  <div><i style="background:var(--c-bg)"></i><span>--c-bg</span></div>
+  <div><i style="background:var(--c-surface)"></i><span>--c-surface</span></div>
+  <div><i style="background:var(--c-ink)"></i><span>--c-ink</span></div>
+  <div><i style="background:var(--c-ink-soft)"></i><span>--c-ink-soft</span></div>
+  <div><i style="background:var(--c-accent)"></i><span>--c-accent</span></div>
+  <div><i style="background:var(--c-warm)"></i><span>--c-warm (samo polnila)</span></div>
+  <div><i style="background:var(--c-warm-text)"></i><span>--c-warm-text</span></div>
+  <div><i style="background:var(--c-cool)"></i><span>--c-cool</span></div>
+  <div><i style="background:var(--c-line)"></i><span>--c-line</span></div>
+  <div><i style="background:var(--c-line-strong)"></i><span>--c-line-strong</span></div>
+</div>
+<h2 class="lab-h2">Obline in sence</h2>
+<div class="lab-sw">
+  <div style="border-radius:var(--r-sm)"><i></i><span>--r-sm</span></div>
+  <div style="border-radius:var(--r-md)"><i></i><span>--r-md</span></div>
+  <div style="border-radius:var(--r-lg)"><i></i><span>--r-lg</span></div>
+  <div style="box-shadow:var(--sh-1)"><i></i><span>--sh-1</span></div>
+  <div style="box-shadow:var(--sh-2)"><i></i><span>--sh-2</span></div>
+</div>
+<h2 class="lab-h2">Pisava</h2>
+<p style="font-size:var(--fs-hero);line-height:1;font-weight:700;margin:0">−1,2°</p>
+<p style="font-size:var(--fs-h1);margin:var(--sp-3) 0 0">Naslov h1 · Č š ž ć đ</p>
+<p style="font-size:var(--fs-h2);margin:var(--sp-2) 0 0">Naslov h2</p>
+<p style="font-size:var(--fs-body);margin:var(--sp-2) 0 0">Telo besedila: navadno vreme v dolini.</p>
+<p style="font-size:var(--fs-small);margin:var(--sp-2) 0 0;color:var(--c-ink-soft)">Majhno besedilo (pomožne oznake).</p>
+</div></main>
+</body>
+</html>
