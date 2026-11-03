@@ -448,7 +448,15 @@ Krivulja v junaški kartici je prej povezala izmerjene zadnje ure z modelskimi v
 (model interpoliran med urama) prišteje naslednjim uram in linearno izzveni v `ANCHOR_HOURS` = 6 urah, omejena na ±`ANCHOR_MAX_C` = 4 °C; meritev, starejša od 30 min, ne zasidra ničesar.
 
 - Velja **samo** za krivuljo in drsnik na junaški kartici (`drawHeroSparkline()`, `_fcSliderUpdate()`). Obeti, ploščice »hitra vprašanja« (zmrzal, vročina), stavek »Danes« in MTR berejo nespremenjeno modelsko napoved (`_forecastHours[].temp`): tam ura ni pomembna toliko kot ekstrem.
-- **Čas izzvenevanja (6 h) ni izmerjen na Rečici.** Prevzet je s Črnivca (`NEXT_BIAS_HOURS`), kjer tudi ni bil izmerjen. Pošten urni arhiv napovedi, izdanih »pred nekaj urami«, ne obstaja.
+- **Čas izzvenevanja (6 h) je prevzet s Črnivca** (`NEXT_BIAS_HOURS`), kjer ni bil izmerjen; na Rečici je prvič izmerjen 3. 11. 2026 (spodaj). Pošten urni arhiv napovedi, izdanih »pred nekaj urami«, ne obstaja.
   `tools/ai/eval_anchor.py` oceni obstojnost napake po urah iz napovedi `previous_day1` proti `data/hourly-observations.csv` (ocena iz sintetičnih podatkov je preverjena: iz AR(1) z φ = 0,85 dobi w_k = 0,85^k).
   Potrebuje omrežje (Open-Meteo, ni v peskovniku): poganja ga delovni tok `mtr-anchor-eval.yml` (ročni zagon na GitHubovem tekaču, rezultat v povzetku teka, nič se ne zapiše v repozitorij) ali ga poženi doma, in šele nato spremeni `ANCHOR_HOURS`. Napaka napovedi izpred dneva ni enaka napaki napovedi, izdane pred nekaj urami, zato je rezultat ocena zgornje meje obstojnosti.
+
+**Prvi rezultat (3. 11. 2026, `mtr-anchor-eval.yml`, run 41604153367)**: okno 13. 7.–1. 11. 2026, napoved D+1, 2611 ur s parom napak (~108 dni, poletje in jesen, en kraj).
+Optimalna utež napake `w_k` (najmanjši kvadrati skozi izhodišče): k = 1: 0,88; 2: 0,75; 3: 0,62; 4: 0,52; 5: 0,43; 6: 0,34; 7: 0,27; 8: 0,21; 9: 0,17; 10: 0,15; 11 in 12: 0,14.
+Povprečna MAE čez k = 1…12 (°C): brez zasidranja 1,690; linearno čez 3 h 1,592; čez 6 h 1,518; čez 9 h 1,500; čez 12 h 1,513; optimalna `w_k` 1,503.
+- Zasidranje pomaga: že 6 h odpravi okoli 0,17 °C od 0,19 °C, ki jih je mogoče pridobiti.
+- Izmerjena krivulja izzveni počasneje od 6 h; najbližja linearna oblika je 9 h (uteži 0,89; 0,78; 0,67; 0,56; 0,44; 0,33; 0,22 proti izmerjenim). Razlika 6 h proti 9 h je **0,018 °C** povprečne MAE, v mejah, ki jih ~108 dni iz ene sezone ne loči.
+- Ostanek `w_k` ≈ 0,14 čez 10 h je trajna dnevna pristranskost, ki je nobena od linearnih oblik ne zajame.
+- **`ANCHOR_HOURS` ostaja 6.** Ponovi po zimi 2026/27 (inverzije trajajo dlje, pričakovano je počasnejše izzvenevanje); šele takrat razmisli o 9 h.
 - Ni na semaforju in ni vpisano nikamor kot točnost: je prikaz.

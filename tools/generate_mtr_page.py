@@ -42,7 +42,8 @@ HIST = [
     ("h-v", "23. 10. 2026", "Živa osvežitev: kartice na strani berejo napoved, osveženo štirikrat na dan ob novih tekih Open-Meteo. Semafor točnosti meri naprej samo zamrznjeno jutranjo napoved. Ali so poznejše osvežitve boljše, še ne vemo: dnevnik teče, za sklep je treba vsaj 20 dni na razred."),
     ("h-a", "24. 10. 2026", "Veter in sunki, umerjeni na postajo. Postaja stoji na zavetrnem dnu doline, zato Open-Meteo povprečni veter precenjuje za polovico (razmerje 0,50). Povprečni veter popravi že skala; pri sunkih je napaka D+1 3,9 proti 7,1&nbsp;km/h pri surovem modelu. Na semaforju ga ni, ker tam veter ni merjen."),
     ("h-a", "24. 10. 2026", "Začetek beleženja pravih napovedi višinskega profila, oblačnosti po slojih in snega (D+1 do D+3). Open-Meteo za te spremenljivke nima arhiva, zato jih zbiramo sproti. Ocena koristi je mogoča šele po zimi 2026/27."),
-    ("h-t", "2. 11. 2026", "Krivulja na junaški kartici je zasidrana na zadnjo meritev: razlika meritev – model izzveni v 6 urah. To je samo prikaz in ne vpliva na točnost; čas izzvenevanja na Rečici še ni izmerjen."),
+    ("h-t", "2. 11. 2026", "Krivulja na junaški kartici je zasidrana na zadnjo meritev: razlika meritev – model izzveni v 6 urah. To je samo prikaz in ne vpliva na točnost."),
+    ("h-t", "3. 11. 2026", "Čas izzvenevanja zasidranja je prvič izmerjen (13. 7.–1. 11., okoli 108 dni, napoved izpred dneva): utež napake pade z 0,88 po 1 uri na 0,34 po 6 urah in 0,14 po 12 urah, kar je bližje linearnemu izzvenevanju čez 9 ur kot čez 6. Povprečna MAE čez 1–12 ur: brez zasidranja 1,69&nbsp;°C, 6 ur 1,52&nbsp;°C, 9 ur 1,50&nbsp;°C. Razlika med 6 in 9 urami (0,02&nbsp;°C) je v mejah šuma, zato ostaja 6 ur."),
 ]
 
 CHIPS = {"slabse": ("Slabše", "c-red"), "brez": ("Brez dobitka", "c-gray"),
@@ -84,8 +85,8 @@ PEND = [
      "Pri D+3 pokritost pasu P10–P90 ob jasnih nočeh je 72&nbsp;% namesto 80&nbsp;%, razred ima le 74 dni (stanje 23. 10.). Ponovitev, ko se razred poveča.", None),
     ("Ali se postaja skozi leta premika?", "2027", "c-gray",
      "Rast drevja, gradnja ali staranje senzorja bi lahko spreminjali povprečni ostanek. Za zdaj dokaza ni; poskus z utežjo novejših dni ponovimo po dveh letih meritev.", None),
-    ("Čas izzvenevanja zasidranja (6 ur)", "Ročni zagon", "c-amb",
-     "Vrednost je prevzeta s Črnivca in na Rečici ni izmerjena. Oceno da delovni tok <code>mtr-anchor-eval.yml</code> (<code>tools/ai/eval_anchor.py</code>), ki ga je treba zagnati ročno na GitHubovem tekaču, ker potrebuje omrežje. Rezultata na strani še ni.", None),
+    ("Čas izzvenevanja zasidranja (6 ur)", "Ponovi po zimi", "c-vio",
+     "Prvi tek delovnega toka <code>mtr-anchor-eval.yml</code> (3. 11.) kaže počasnejše izzvenevanje od 6 ur, najbližje je 9 ur, a je razlika v MAE le 0,02&nbsp;°C in v mejah šuma. Meri obstojnost napake napovedi izpred dneva, ne napovedi, izdane ob meritvi, in zajame samo poletje in jesen. Ponovitev po zimi 2026/27, ko bo meritev več; do takrat ostaja 6 ur.", None),
 ]
 
 # »Ponovi sam«: (poskus, ukaz, kaj potrebuje). Skripte so v tools/ai/ in niso v nobenem workflowu.
@@ -106,7 +107,7 @@ REPRO_CACHE = [
 ]
 REPRO_NET = [
     ("Čas izzvenevanja zasidranja (2. 11.)", "python3 tools/ai/eval_anchor.py --from 2026-07-13 --lead 1",
-     "omrežje (Open-Meteo) in data/hourly-observations.csv; na GitHubovem tekaču kot delovni tok mtr-anchor-eval.yml (ročni zagon)"),
+     "omrežje (Open-Meteo) in data/hourly-observations.csv; na GitHubovem tekaču kot delovni tok mtr-anchor-eval.yml (ročni zagon, prvi rezultat 3. 11.)"),
 ]
 DATA_FILES = [
     ("data/mtr-live-log.csv", "dnevnik živih osvežitev MTR (od 24. 10. 2026)"),
