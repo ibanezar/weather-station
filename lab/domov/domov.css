@@ -279,3 +279,111 @@ body.dv-lock{overflow:hidden}
 }
 @media (min-width:641px){.dv-sheet{display:none!important}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* ── iteracija 3 ─────────────────────────────────────── */
+/* info ikone: pojasnila modelov v podrobnostih, ne v teku besedila */
+.dv-info{font:inherit;font-size:.8rem;font-weight:700;font-style:italic;width:28px;height:28px;min-width:28px;border-radius:50%;border:1.5px solid var(--c-line-strong);background:transparent;color:var(--c-ink-soft);cursor:pointer;display:inline-grid;place-items:center;vertical-align:middle;margin-left:var(--sp-1);position:relative}
+.dv-info::after{content:"";position:absolute;inset:-8px}
+.dv-info[aria-expanded="true"]{background:var(--c-accent);border-color:var(--c-accent);color:var(--c-on-accent)}
+.dv-hero .dv-info{border-color:#D6E2EE99;color:#D6E2EE}
+.dv-hero .dv-info[aria-expanded="true"]{background:#fff;color:var(--c-navy);border-color:#fff}
+.dv-infotext{margin:var(--sp-2) 0;padding:.65rem .8rem;border-left:3px solid var(--c-accent);background:var(--c-bg);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--fs-small);color:var(--c-ink)}
+.dv-hero .dv-infotext{background:#ffffff14;color:#E4ECF4;border-left-color:#CDBEFF}
+
+/* hero: razmerje temperatura / čas / razmere */
+.dv-hero{min-height:260px}
+.dv-hero-lab{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--sp-1) var(--sp-3);margin:0 0 var(--sp-2);font-size:.78rem;font-weight:600;letter-spacing:.06em;color:#C7D6E6}
+.dv-fresh{font-weight:700;letter-spacing:.02em;padding:.1rem .55rem;border-radius:var(--r-pill);border:1px solid currentColor;font-size:.78rem}
+.dv-fresh[data-s="fresh"]{color:#8EE6C0}.dv-fresh[data-s="stale"]{color:#F6C46B}.dv-fresh[data-s="unavailable"]{color:#FFA3A3}.dv-fresh[data-s="loading"]{color:#C7D6E6}
+.dv-meas{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2);margin:var(--sp-1) 0 var(--sp-3);font-size:var(--fs-small);color:#D6E2EE}
+.dv-tag.q{border:0;padding:0;font-size:.68rem;opacity:.9}
+.dv-tag.q::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:1px}
+.dv-hero .dv-tag.q[data-src="meas"]{color:#8EE6C0}.dv-hero .dv-tag.q[data-src="model"]{color:#CDBEFF}
+.dv-stale{margin:0 0 var(--sp-2);padding:.5rem .7rem;border:1px solid #F6C46B;border-radius:var(--r-sm);color:#F6C46B;font-size:var(--fs-small);font-weight:600}
+.dv-cond{font-size:1.3rem;font-weight:600;gap:var(--sp-3)}
+.dv-wic-xl{width:2.6rem;height:2.6rem;stroke-width:1.5}
+.dv-modelnote{margin:var(--sp-1) 0 var(--sp-4);font-size:.8125rem;color:#C7D6E6}
+.dv-hero-note{display:none}
+
+/* nowcast: tri stanja (besedilo + ikona + barva) */
+.dv-nc{border-left:5px solid var(--c-line-strong);min-height:260px}
+.dv-nc[data-state="dry"]{border-left-color:var(--src-meas)}
+.dv-nc[data-state="near"]{border-left-color:var(--c-warn)}
+.dv-nc[data-state="over"]{border-left-color:var(--src-radar)}
+.dv-nc[data-state="storm"],.dv-nc[data-state="error"]{border-left-color:var(--c-danger)}
+.dv-ncstate{display:inline-flex;align-items:center;gap:.4rem;margin:var(--sp-2) 0 0;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c-ink-soft)}
+.dv-nc[data-state="dry"] .dv-ncstate{color:var(--src-meas)}.dv-nc[data-state="near"] .dv-ncstate{color:var(--c-warn)}.dv-nc[data-state="over"] .dv-ncstate{color:var(--src-radar)}.dv-nc[data-state="storm"] .dv-ncstate,.dv-nc[data-state="error"] .dv-ncstate{color:var(--c-danger)}
+.dv-nc-main{font-size:1.45rem;line-height:1.25}
+.dv-ncchart i{background:var(--src-radar)}
+.dv-nc[data-state="near"] .dv-ncchart i{background:var(--c-warn)}
+.dv-nc[data-state="storm"] .dv-ncchart i{background:var(--c-danger)}
+
+/* več meritev: vizualna mreža */
+.dv-tiles{grid-template-columns:repeat(2,1fr)}
+@media (min-width:768px){.dv-tiles,.dv-more2 .dv-tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
+.dv-tile{padding:14px 16px;min-height:104px;border:1px solid var(--c-line)}
+.dv-tile span{font-size:.8125rem;font-weight:600}
+.dv-tile b{font-size:1.7rem;line-height:1.1;margin-top:4px;font-weight:700}
+.dv-tile b em{font-style:normal;font-size:.85rem;font-weight:500;color:var(--c-ink-soft);margin-left:.25rem}
+.dv-tile small{display:block;font-size:.8125rem;color:var(--c-ink-soft);min-height:1.2em}
+
+/* 7 dni */
+.dv-day .none{color:var(--c-ink-soft);font-size:.75rem;white-space:pre-line;line-height:1.25}
+.dv-cmp{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin:var(--sp-3) 0 0}
+.dv-cmp>div{border:1px solid var(--c-line);border-radius:var(--r-sm);padding:12px}
+.dv-cmp>div[data-src="mtr"]{border-style:dashed;border-color:var(--src-model)}
+.dv-cmp h4{margin:0 0 var(--sp-2);font-size:.8125rem;display:flex;gap:6px;align-items:center}
+.dv-cmp b{font-size:1.25rem}
+.dv-cmp .dv-muted{margin:2px 0}
+.dv-delta{margin:var(--sp-2) 0 0;font-size:var(--fs-small);font-weight:600;color:var(--src-model)}
+
+/* dolina kot zgodba */
+.dv-live{margin-left:var(--sp-1);font-size:.75rem;font-weight:800;letter-spacing:.08em;padding:.15rem .6rem;border-radius:var(--r-pill);border:1px solid currentColor}
+.dv-live[data-s="fresh"]{color:var(--src-meas)}.dv-live[data-s="stale"]{color:var(--c-warn)}.dv-live[data-s="loading"]{color:var(--c-ink-soft)}
+.dv-vtiles{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-3);margin:0 0 var(--sp-3)}
+.dv-vt{border:1px solid var(--c-line);border-radius:var(--r-md);padding:14px;background:var(--c-bg)}
+.dv-vt.warm{border-color:var(--src-meas);box-shadow:inset 0 0 0 1px var(--src-meas)}
+.dv-vt h3{margin:0;font-size:.95rem}.dv-vt .el{font-size:.8125rem;color:var(--c-ink-soft)}
+.dv-vt b{display:block;font-size:2.1rem;line-height:1.1;margin:6px 0 2px}
+.dv-vt small{display:block;font-size:.8125rem;color:var(--c-ink-soft)}
+.dv-vt .wm{font-size:.72rem;font-weight:700;letter-spacing:.06em;color:var(--src-meas)}
+.dv-vdiff{font-size:1.05rem;font-weight:700;margin:0 0 var(--sp-3)}
+@media (min-width:768px){.dv-vtiles{grid-template-columns:repeat(4,1fr)}}
+.dv-vchart{max-width:640px}
+
+/* nadomestna stanja */
+.dv-fail{margin:var(--sp-2) 0;display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);align-items:center;color:var(--c-ink-soft);font-size:var(--fs-small)}
+.dv-retry{font:inherit;font-weight:600;font-size:var(--fs-small);color:var(--c-accent);background:transparent;border:1.5px solid var(--c-accent);border-radius:var(--r-sm);padding:.45rem .9rem;min-height:44px;cursor:pointer}
+.dv-hero .dv-retry{color:#fff;border-color:#fff9}
+.dv-simnote{margin:0 0 var(--sp-2);font-size:.75rem;color:var(--c-warn);font-weight:600}
+
+/* rezervirane višine: komponente ob prihodu podatkov ne smejo premakniti strani (specifikacija 10.3, CLS) */
+.dv-dpanel{min-height:330px}
+@media (min-width:768px){.dv-dpanel{min-height:250px}}
+.dv-vtiles{min-height:330px}
+@media (min-width:768px){.dv-vtiles{min-height:150px}}
+.dv-vchart{aspect-ratio:320/176}
+.dv-verdict{min-height:1.3em}
+#v-sub{min-height:2.6em}
+.dv-nc{min-height:300px}
+
+.dv-modelnote{min-height:2.6em}
+.dv-meas{min-height:1.5em;align-items:flex-start}
+.dv-cond{min-height:2.9rem}
+.dv-nc-main{min-height:2.55em}
+#nc-sub{min-height:2.6em}
+.dv-ncstate{min-height:1.2rem}
+@media (max-width:640px){.dv-status{min-height:76px;align-content:flex-start}.dv-hero{min-height:360px}.dv-nc{min-height:318px}}
+/* vrstica nad temperaturo se ne sme prelomiti (menjava pisave bi sicer premaknila celoten hero) */
+.dv-hero-lab{flex-wrap:nowrap;align-items:center}
+.dv-hero-lab>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv-fresh{white-space:nowrap;flex:none}
+
+/* primerjava Open-Meteo / MTR: na telefonu en pod drugim, vrstica = oznaka levo, vrednost desno */
+.dv-cmp{grid-template-columns:1fr}
+.dv-cmp p{display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;margin:4px 0}
+.dv-cmp b{font-size:1rem;text-align:right}
+@media (min-width:768px){.dv-cmp{grid-template-columns:1fr 1fr}}
+.dv-top{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1024px){.dv-top{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}}
+.dv-hero,.dv-nc{min-width:0}

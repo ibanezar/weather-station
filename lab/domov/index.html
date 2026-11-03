@@ -57,21 +57,25 @@
 
 <main class="dv-wrap" id="vreme">
   <h1 class="dv-h1">Vreme v Rečici ob Savinji v živo</h1>
+  <noscript><p class="dv-muted">Za prikaz živih podatkov je potreben JavaScript. Trenutne meritve in napoved so na strani <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a>.</p></noscript>
 
   <section class="dv-status" aria-label="Status postaje">
     <span>IREICA1 · 366 m</span>
     <span id="st-pill" class="dv-pill" data-s="loading"><svg class="dv-ic" aria-hidden="true"><use href="#i-clock"/></svg><span id="st-txt">Nalagam</span></span>
-    <span id="st-time" class="dv-muted"></span>
+    <span id="st-time" class="dv-muted">Izmerjeno ob --:-- · star – min</span>
   </section>
   <p id="mode-desc" class="dv-modedesc" aria-live="polite"></p>
 
   <div class="dv-top">
     <section class="dv-card dv-hero" id="hero" data-wx="" aria-labelledby="h-now">
       <h2 id="h-now" class="dv-vh">Trenutne razmere</h2>
-      <p class="dv-hero-lab"><em class="dv-tag" data-src="meas">MERITEV</em><span id="hero-when">IREICA1</span></p>
+      <p class="dv-hero-lab"><span>REČICA OB SAVINJI · IREICA1</span><span id="hero-fresh" class="dv-fresh" data-s="loading">Nalagam</span></p>
       <div class="dv-temp"><span id="t-now" class="dv-bignum">–</span><span class="dv-unit">°C</span></div>
-      <p class="dv-cond"><svg class="dv-wic" aria-hidden="true"><use id="c-ic" href="#w-cloud"/></svg><span id="c-txt">Razmere se nalagajo</span><em class="dv-tag" data-src="model">MODEL</em></p>
-      <p class="dv-hero-note">Temperatura je izmerjena na postaji, opis razmer je iz modelske napovedi za to uro.</p>
+      <p class="dv-meas"><em class="dv-tag q" data-src="meas">MERITEV</em><span id="hero-when">izmerjeno ob --:-- · star – min</span></p>
+      <p id="hero-stale" class="dv-stale" role="status" hidden>Podatek ni svež: kaže zadnjo znano meritev, ne trenutnega stanja.</p>
+      <p class="dv-cond"><svg class="dv-wic dv-wic-xl" aria-hidden="true"><use id="c-ic" href="#w-cloud"/></svg><span id="c-txt">Razmere se nalagajo</span><em class="dv-tag q" data-src="model">MODEL</em><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-hero" aria-label="Pojasnilo: opis razmer">i</button></p>
+      <p id="i-hero" class="dv-infotext" hidden>Temperatura je izmerjena na postaji IREICA1. Opis razmer (ikona in besedilo) izhaja iz modelske napovedi Open-Meteo za to uro, ker postaja razmer ne opisuje.</p>
+      <p class="dv-modelnote" id="hero-model">Vremenski opis: modelski podatek (Open-Meteo) · prenos ob --:--</p>
       <dl class="dv-sec">
         <div><dt>Občutek</dt><dd id="t-feel">–</dd></div>
         <div><dt>Rosišče</dt><dd id="t-dew">–</dd></div>
@@ -79,8 +83,10 @@
       </dl>
     </section>
 
-    <section class="dv-card dv-nc" aria-labelledby="h-nc">
-      <h2 id="h-nc" class="dv-h2">Naslednjih 45 minut <em class="dv-tag" data-src="radar">RADAR</em></h2>
+    <section class="dv-card dv-nc" id="nc-card" data-state="loading" aria-labelledby="h-nc">
+      <h2 id="h-nc" class="dv-h2">Naslednjih 45 minut <em class="dv-tag" data-src="radar">RADAR</em><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-nc" aria-label="Pojasnilo: nowcast">i</button></h2>
+      <p id="i-nc" class="dv-infotext" hidden>Nowcast je ekstrapolacija zadnjih radarskih slik ARSO (premik padavinskih območij), ne modelska napoved. Po ~30 minutah zanesljivost opazno pade. Radar ne zazna vsega (npr. rosenja), zato ni jamstvo, da padavin ne bo.</p>
+      <p id="nc-state" class="dv-ncstate"><svg class="dv-ic" aria-hidden="true"><use id="nc-ic" href="#i-clock"/></svg><span id="nc-st">Nalagam</span></p>
       <p id="nc-main" class="dv-nc-main">Nalagam</p>
       <p id="nc-sub" class="dv-muted"></p>
       <div id="nc-chart" class="dv-ncchart" hidden></div>
@@ -99,19 +105,19 @@
   <section class="dv-adv dv-card" aria-labelledby="h-more">
     <h2 id="h-more" class="dv-h2">Več meritev <em class="dv-tag" data-src="meas">MERITEV</em></h2>
     <div class="dv-tiles">
-      <div class="dv-tile"><span>UV indeks</span><b id="a-uv">–</b></div>
-      <div class="dv-tile"><span>Veter in sunki</span><b id="a-ws">–</b></div>
-      <div class="dv-tile"><span>Smer vetra</span><b id="a-dir">–</b></div>
-      <div class="dv-tile"><span>Rosišče</span><b id="a-dew">–</b></div>
-      <div class="dv-tile"><span>Sončno sevanje</span><b id="a-sol">–</b></div>
+      <div class="dv-tile"><span>UV indeks</span><b id="a-uv">–</b><small id="a-uv-s"></small></div>
+      <div class="dv-tile"><span>Veter</span><b id="a-ws">–</b><small id="a-ws-s"></small></div>
+      <div class="dv-tile"><span>Smer vetra</span><b id="a-dir">–</b><small id="a-dir-s"></small></div>
+      <div class="dv-tile"><span>Rosišče</span><b id="a-dew">–</b><small id="a-dew-s"></small></div>
+      <div class="dv-tile"><span>Sevanje</span><b id="a-sol">–</b><small id="a-sol-s"></small></div>
     </div>
     <details class="dv-more2">
       <summary>Dodatne meritve</summary>
       <div class="dv-tiles">
-        <div class="dv-tile"><span>Občutena temperatura</span><b id="a-feel">–</b></div>
-        <div class="dv-tile"><span>Ohladitev vetra</span><b id="a-chill">–</b></div>
-        <div class="dv-tile"><span>Toplotni indeks</span><b id="a-heat">–</b></div>
-        <div class="dv-tile"><span>Intenziteta padavin</span><b id="a-rate">–</b></div>
+        <div class="dv-tile"><span>Občutena temperatura</span><b id="a-feel">–</b><small></small></div>
+        <div class="dv-tile"><span>Ohladitev vetra</span><b id="a-chill">–</b><small></small></div>
+        <div class="dv-tile"><span>Toplotni indeks</span><b id="a-heat">–</b><small></small></div>
+        <div class="dv-tile"><span>Intenziteta padavin</span><b id="a-rate">–</b><small></small></div>
       </div>
       <p class="dv-foot">Evapotranspiracije in zgodovinskih primerjav postaja ne meri neposredno; zgodovina je na straneh Trendi in Klima.</p>
     </details>
@@ -120,16 +126,18 @@
 
   <section id="napoved" class="dv-sect" aria-labelledby="h-h">
     <h2 id="h-h" class="dv-h2">Naslednjih 24 ur <em class="dv-tag" data-src="model">MODEL</em><small class="dv-upd" id="u-h"></small></h2>
-    <p class="dv-muted">Open-Meteo. Veter po urah namenoma ni prikazan: surov model ga za zavetrno dno doline precenjuje ~2×. Umerjen veter (MTR) je dnevni in je v podrobnostih 7 dni.</p>
+    <p class="dv-muted">Open-Meteo, po urah. Veter po urah ni prikazan.<button type="button" class="dv-info" aria-expanded="false" aria-controls="i-h" aria-label="Pojasnilo: veter po urah">i</button></p>
+    <p id="i-h" class="dv-infotext" hidden>Surov model veter za zavetrno dno doline precenjuje ~2×, zato ga po urah ne kažemo. Umerjen veter (MTR) je dnevni in je v podrobnostih posameznega dne pri 7 dneh.</p>
     <div class="dv-fade"><div class="dv-scroll" id="h-list" role="region" aria-label="Urna napoved, pomikaj vodoravno" tabindex="0"></div></div>
     <p id="h-detail" class="dv-detail" aria-live="polite"></p>
   </section>
 
   <section class="dv-sect" aria-labelledby="h-d">
     <h2 id="h-d" class="dv-h2">7 dni <em class="dv-tag" data-src="model">MODEL</em><small class="dv-upd" id="u-d"></small></h2>
-    <p class="dv-muted">Open-Meteo in MTR (<em class="dv-tag" data-src="mtr">MTR</em> lastni statistični model Meteorec, samo dnevi, za katere je naučen) sta ločena, ne povprečena. Tapni dan za podrobnosti.</p>
+    <p class="dv-muted">Open-Meteo in <em class="dv-tag" data-src="mtr">MTR</em> sta ločena, ne povprečena. Tapni dan za podrobnosti.<button type="button" class="dv-info" aria-expanded="false" aria-controls="i-d" aria-label="Pojasnilo: MTR">i</button></p>
+    <p id="i-d" class="dv-infotext" hidden>MTR je lastni statistični model Meteorec, naučen na meritvah postaje IREICA1; napoved izdaja samo za dneve, za katere je naučen. Open-Meteo je splošni model. Vira ne povprečimo: razlika med njima je podatek.</p>
     <div class="dv-fade"><div class="dv-days" id="d-list" role="group" aria-label="Napoved za 7 dni"></div></div>
-    <div id="d-detail" class="dv-dpanel" aria-live="polite" hidden></div>
+    <div id="d-detail" class="dv-dpanel" aria-live="polite"><p class="dv-muted">Nalagam podrobnosti …</p></div>
   </section>
 
   <section id="radar" class="dv-sect" aria-labelledby="h-r">
@@ -149,20 +157,20 @@
       <p id="rd-mode" class="dv-mode">Radar se naloži, ko pride na zaslon.</p>
       <div id="rd-wrap" class="rd-wrap"><div id="rd-map" role="region" aria-label="Zemljevid radarja padavin"></div><span class="rd-ribbon" aria-hidden="true">NAPOVED</span></div>
       <div class="rd-legend"><div class="rd-scale" id="rd-scale" role="img" aria-label="Lestvica jakosti padavin v milimetrih na uro, od rahlih (modro) do zelo močnih"></div><div class="rd-lticks" id="rd-lticks" aria-hidden="true"></div><span>mm/h</span></div>
-      <p class="dv-foot">V pogledu »Zgornja Savinjska« se trak po zadnji uri radarja nadaljuje s 6-urno napovedjo ICON (označeno »Napoved«). Obarvane pike so sledene nevihtne celice. Dotik na prazen del zemljevida pokaže modelsko napoved za točko, ne radarske meritve. Padavine: <a href="https://meteo.arso.gov.si/met/sl/weather/observ/radar/" rel="noopener nofollow">ARSO</a>, <a href="https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/" rel="noopener nofollow">EUMETNET OPERA</a> (CC BY 4.0) · napoved <a href="https://open-meteo.com/" rel="noopener nofollow">Open-Meteo</a> (DWD ICON) · zemljevid <a href="https://www.openstreetmap.org/copyright" rel="noopener nofollow">OpenStreetMap</a>.</p>
+      <p class="dv-foot">Radar in napoved: <a href="https://meteo.arso.gov.si/met/sl/weather/observ/radar/" rel="noopener nofollow">ARSO</a>, <a href="https://www.eumetnet.eu/activities/observations-programme/current-activities/opera/" rel="noopener nofollow">EUMETNET OPERA</a> (CC BY 4.0), napoved <a href="https://open-meteo.com/" rel="noopener nofollow">Open-Meteo</a> (DWD ICON) · zemljevid <a href="https://www.openstreetmap.org/copyright" rel="noopener nofollow">OpenStreetMap</a>. <button type="button" class="dv-info" aria-expanded="false" aria-controls="i-r" aria-label="Pojasnilo: kako brati radar">i</button></p>
+      <p id="i-r" class="dv-infotext" hidden>V pogledu »Zgornja Savinjska« se trak po zadnji uri radarja nadaljuje s 6-urno napovedjo ICON (označeno »Napoved«). Obarvane pike so sledene nevihtne celice. Dotik na prazen del zemljevida pokaže modelsko napoved za točko, ne radarske meritve.</p>
     </div>
   </section>
 
   <section id="dolina" class="dv-sect" aria-labelledby="h-v">
     <div class="dv-card dv-valleycard">
-      <h2 id="h-v" class="dv-h2">Dolina zdaj <em class="dv-tag" data-src="meas">MERITEV</em></h2>
+      <h2 id="h-v" class="dv-h2">Dolina zdaj <em class="dv-tag" data-src="meas">MERITEV</em><span id="v-live" class="dv-live" data-s="loading">Nalagam</span><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-v" aria-label="Pojasnilo: dolina">i</button></h2>
+      <p id="i-v" class="dv-infotext" hidden>Temperature so izmerjene na postajah, vir in čas sta ob vsaki vrednosti. Črtkana črta je običajen padec (−0,65 °C na 100 m), ne preračun za današnji dan. Varpolje je na istem dnu doline kot Rečica in nima objavljene višine, zato ni na grafu.</p>
       <p id="v-verdict" class="dv-verdict">Nalagam</p>
       <p id="v-sub" class="dv-muted"></p>
-      <div class="dv-valleygrid">
-        <div id="v-chart" class="dv-vchart" role="img" aria-label="Temperatura po nadmorski višini"></div>
-        <ul class="dv-valley" id="v-list"><li class="dv-muted">Nalagam</li></ul>
-      </div>
-      <p class="dv-foot">Temperature so izmerjene na postajah, vir in čas sta ob vsaki vrstici. Črtkana črta je običajen padec (−0,65 °C na 100 m), ne preračun za današnji dan. Varpolje je na istem dnu doline kot Rečica in nima objavljene višine, zato ni na grafu.</p>
+      <div id="v-tiles" class="dv-vtiles"></div>
+      <p id="v-diff" class="dv-vdiff"></p>
+      <div id="v-chart" class="dv-vchart" role="img" aria-label="Temperatura po nadmorski višini"></div>
       <a class="dv-link" href="/#duel-card">Poglej celotno mikroklimo doline →</a>
     </div>
   </section>

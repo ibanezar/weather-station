@@ -32,20 +32,28 @@
   }
 
   // ── inicializacija šele ob prihodu v vidno območje ──────
+  // Samo IntersectionObserver ni dovolj: ko vsebina nad radarjem po pomiku na sidro še zraste, radar uide iz območja
+  // in se ne bi naložil. Zato še preverjanje ob pomiku/spremembi velikosti in takojšen zagon ob kliku na povezavo #radar.
+  var started = false;
+  function start() { if (started) return; started = true; init(); }
   document.addEventListener('DOMContentLoaded', function () {
     var box = $('rd-map'); if (!box) return;
     $('rd-play').addEventListener('click', togglePlay);
     document.querySelectorAll('[data-rd-view]').forEach(function (b) { b.addEventListener('click', function () { switchView(b.getAttribute('data-rd-view')); }); });
     var trk = $('rd-track'); trk.addEventListener('pointerdown', scrubStart); trk.addEventListener('keydown', onKey);
     setPlayLabel();
-    if (!('IntersectionObserver' in window)) { init(); return; }
-    var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); init(); } }, { rootMargin: '300px' });
-    io.observe(box);
+    function near() { if (!started && box.getBoundingClientRect().top < window.innerHeight + 600) start(); }
+    ['scroll', 'resize'].forEach(function (ev) { window.addEventListener(ev, near, { passive: true }); });
+    document.querySelectorAll('a[href="#radar"]').forEach(function (a) { a.addEventListener('click', start); });
+    if (location.hash === '#radar') start();
+    if ('IntersectionObserver' in window) { var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); start(); } }, { rootMargin: '600px' }); io.observe(box); }
+    else start();
   });
 
   function init() {
     loadLeaflet().then(function () {
       var mobile = L.Browser.mobile;
+      $('rd-map').setAttribute('data-drag', String(!mobile));   // na telefonu en prst premika stran, ne karte
       map = L.map('rd-map', { zoomControl: true, attributionControl: false, minZoom: 6, maxZoom: 10, dragging: !mobile, scrollWheelZoom: false }).setView([LAT, LON], 7);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 10, maxNativeZoom: 19, subdomains: 'abc', className: 'rd-tiles' }).addTo(map);
       L.circleMarker([LAT, LON], { radius: 6, color: '#fff', fillColor: '#2563eb', fillOpacity: 1, weight: 2 }).addTo(map)
@@ -57,7 +65,7 @@
       });
       refresh().then(refreshCells);
       poll = setInterval(function () { if (!document.hidden) { refresh(); refreshCells(); } }, 5 * 60000);
-    }).catch(function () { setTime('Radar trenutno ni na voljo', ''); noteMode(null); });
+    }).catch(function () { setTime('Radar trenutno ni na voljo', ''); noteMode(null); retryBtn(init); });
   }
 
   // ── okvirji ─────────────────────────────────────────────
@@ -83,12 +91,17 @@
         var c2 = Promise.resolve(); frames.forEach(function (f, i) { if (retry(f)) c2 = c2.then(function () { return loadFrame(i); }); });
         return c2;
       }).then(function () { if (playing) anim(); });
-    }).catch(function () { if (idx < 0) { setTime('Radar ni dosegljiv', ''); noteMode(null); } });
+    }).catch(function () { if (idx < 0) { setTime('Radar ni dosegljiv', ''); noteMode(null); retryBtn(function () { refresh().then(refreshCells); }); } });
   }
   function range(list, ic) {
     var a = list[0].cas, b = list[list.length - 1].cas, age = Math.round((Date.now() - new Date(b).getTime()) / 60000);
     $('rd-range').textContent = 'Prikazano: radar ' + hhmm(a) + '–' + hhmm(b) + (ic.length ? ', nato napoved ICON do ' + hhmm(ic[ic.length - 1].cas) : '') + '.';
     $('u-r').textContent = 'Zadnja radarska slika ob ' + hhmm(b) + ' (star ' + age + ' min)';
+  }
+  function retryBtn(fn) {      // nadomestno stanje z ponovnim poskusom (specifikacija 10.3)
+    if ($('rd-retry')) return;
+    var b = document.createElement('button'); b.id = 'rd-retry'; b.type = 'button'; b.className = 'dv-retry'; b.textContent = 'Poskusi znova';
+    b.addEventListener('click', function () { b.remove(); fn(); }); $('rd-mode').insertAdjacentElement('afterend', b);
   }
   function retry(f) { return !!f && !f.ready && !f.layer && (f.napak || 0) < RETRIES; }
   function ready() { return frames.filter(function (f) { return f.ready; }); }
