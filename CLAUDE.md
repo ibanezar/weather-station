@@ -1386,7 +1386,7 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
 ### Izbirnik modela (mLM) in zasidranje ur na meritev (2. 11. 2026)
 
 Po meteoblue mLM (izbere model, ki je najbolje simuliral zadnje meritve) smo na lastnih podatkih preizkusili izbirnik (`tools/ai/eval_selector.py`): **čisti izbor modela ne pomaga**, koristi odštevanje nedavne napake, ki jo MTR že ima; MTR je boljši od vseh variant. Ne uvajaj izbirnika brez novega dokaza; podrobnosti v `docs/model-recica.md`.
-Obdržana je ena ideja: krivulja in drsnik na junaški kartici sta zasidrana na zadnjo meritev (`anchorHours()` v `app.js`, popravek meritev − model izzveni v 6 urah, omejen na 4 °C, meritev starejša od 30 min ne zasidra). **Čas izzvenevanja ni izmerjen** (ni urnega arhiva napovedi): `tools/ai/eval_anchor.py` ga oceni, a potrebuje omrežje (GitHubov tekač). Obeti, hitra vprašanja in stavek »Danes« ostanejo na surovi modelski napovedi. Test: `tools/test_anchor.py` (v `parity.yml`).
+Obdržana je ena ideja: krivulja in drsnik na junaški kartici sta zasidrana na zadnjo meritev (`anchorHours()` v `app.js`, popravek meritev − model izzveni v 6 urah, omejen na 4 °C, meritev starejša od 30 min ne zasidra). **Čas izzvenevanja ni izmerjen** (ni urnega arhiva napovedi): `tools/ai/eval_anchor.py` ga oceni, a potrebuje omrežje: poganja ga delovni tok **`mtr-anchor-eval.yml`** (ročni zagon, vhoda `since` in `lead`, rezultat v povzetku teka in artefaktu, nič ne zapiše v repozitorij; `ANCHOR_HOURS` se ne spreminja samodejno). Obeti, hitra vprašanja in stavek »Danes« ostanejo na surovi modelski napovedi. Test: `tools/test_anchor.py` (v `parity.yml`).
 
 ### Kuhinja v zavihku MTR (3. 11. 2026): časovnica, poskusi, čaka na podatke
 

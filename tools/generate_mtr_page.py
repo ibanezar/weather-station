@@ -84,8 +84,8 @@ PEND = [
      "Pri D+3 pokritost pasu P10–P90 ob jasnih nočeh je 72&nbsp;% namesto 80&nbsp;%, razred ima le 74 dni (stanje 23. 10.). Ponovitev, ko se razred poveča.", None),
     ("Ali se postaja skozi leta premika?", "2027", "c-gray",
      "Rast drevja, gradnja ali staranje senzorja bi lahko spreminjali povprečni ostanek. Za zdaj dokaza ni; poskus z utežjo novejših dni ponovimo po dveh letih meritev.", None),
-    ("Čas izzvenevanja zasidranja (6 ur)", "Ni zagnano", "c-amb",
-     "Vrednost je prevzeta s Črnivca in na Rečici ni izmerjena. Oceno da <code>tools/ai/eval_anchor.py</code>, a potrebuje omrežje: poganja se na GitHubovem tekaču ali doma.", None),
+    ("Čas izzvenevanja zasidranja (6 ur)", "Ročni zagon", "c-amb",
+     "Vrednost je prevzeta s Črnivca in na Rečici ni izmerjena. Oceno da delovni tok <code>mtr-anchor-eval.yml</code> (<code>tools/ai/eval_anchor.py</code>), ki ga je treba zagnati ročno na GitHubovem tekaču, ker potrebuje omrežje. Rezultata na strani še ni.", None),
 ]
 
 # »Ponovi sam«: (poskus, ukaz, kaj potrebuje). Skripte so v tools/ai/ in niso v nobenem workflowu.
@@ -106,7 +106,7 @@ REPRO_CACHE = [
 ]
 REPRO_NET = [
     ("Čas izzvenevanja zasidranja (2. 11.)", "python3 tools/ai/eval_anchor.py --from 2026-07-13 --lead 1",
-     "omrežje (Open-Meteo) in data/hourly-observations.csv; poganjaj na GitHubovem tekaču"),
+     "omrežje (Open-Meteo) in data/hourly-observations.csv; na GitHubovem tekaču kot delovni tok mtr-anchor-eval.yml (ročni zagon)"),
 ]
 DATA_FILES = [
     ("data/mtr-live-log.csv", "dnevnik živih osvežitev MTR (od 24. 10. 2026)"),
