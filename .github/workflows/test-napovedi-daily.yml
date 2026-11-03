@@ -44,6 +44,16 @@ jobs:
       - name: Zabeleži urne meritve (za bodočo analizo pristranskosti)
         run: python3 tools/log_hourly_observations.py
 
+      # 5-minutno sevanje in temperatura ob vzhodu/zahodu: preverjanje modela obzorja (/sonce-v-dolini/).
+      # Ecowitt hrani polno ločljivost ~90 dni, zato samo sproti (backfill: hourly-backfill.yml).
+      - name: Zabeleži 5-minutno sevanje ob vzhodu in zahodu, preveri model obzorja
+        continue-on-error: true
+        run: |
+          pip install numpy --quiet
+          python3 tools/log_solar_5min.py
+          python3 tools/eval_sonce.py
+          python3 tools/generate_sonce_page.py
+
       - name: Izračunaj metrike
         run: python3 tools/compute_forecast_test_metrics.py
 
@@ -58,7 +68,7 @@ jobs:
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           git add data/forecast-archive.csv data/forecast-forward-log.csv \
-                  data/hourly-observations.csv data/ensemble-forward-log.csv data/profile-forward-log.csv data/test-napovedi.json test-napovedi/ primerjava-modelov/
+                  data/hourly-observations.csv data/ensemble-forward-log.csv data/profile-forward-log.csv data/solar-5min.csv data/sonce-preverjanje.json sonce-v-dolini/ data/test-napovedi.json test-napovedi/ primerjava-modelov/
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "test-napovedi: dnevni zajem $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do

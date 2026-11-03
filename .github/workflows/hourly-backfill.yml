@@ -31,11 +31,23 @@ jobs:
           EW_MAC: ${{ secrets.EW_MAC }}
         run: python3 tools/log_hourly_observations.py --backfill "${{ github.event.inputs.days || '85' }}"
 
+      # 5-minutno sevanje ob vzhodu in zahodu za nazaj (preverjanje modela obzorja, /sonce-v-dolini/).
+      - name: Dopolni 5-minutno sevanje za nazaj in preveri model obzorja
+        env:
+          EW_APP: ${{ secrets.EW_APP }}
+          EW_API: ${{ secrets.EW_API }}
+          EW_MAC: ${{ secrets.EW_MAC }}
+        run: |
+          pip install numpy --quiet
+          python3 tools/log_solar_5min.py --backfill "${{ github.event.inputs.days || '85' }}"
+          python3 tools/eval_sonce.py
+          python3 tools/generate_sonce_page.py
+
       - name: Commit & push if changed
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/hourly-observations.csv
+          git add data/hourly-observations.csv data/solar-5min.csv data/sonce-preverjanje.json sonce-v-dolini/
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "test-napovedi: urni backfill zunanjih polj $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do

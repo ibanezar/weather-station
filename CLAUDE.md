@@ -396,6 +396,25 @@ za `HIGH_POINTS` (Golte, Menina planina, Smrekovec, Raduha) → `winter-data.jso
   ne jemlji iz DEM.
 - Test: `tools/test_gore.py`. Stran je v `CORE`, `llms.txt` in na hubu `/zima/`.
 
+## Sonce v dolini in jutro v dolini (`/sonce-v-dolini/`, `/jutro-v-dolini/`, 3. 11. 2026)
+
+Dve strani, ki ju drugje ni: koliko sonca dolina ZARES dobi (hribi zakrijejo koledarski vzhod) in kdaj se po jasni noči ogreje.
+
+- **Obzorje** (`data/horizons.json`, enkraten `tools/build_horizons.py`, vir Copernicus GLO-30): za Rečico in `NEARBY_TOWNS` po 360 azimutih do 30 km, z ukrivljenostjo Zemlje. **DEM je površinski model (gozd je vključen)**; prvih 150 m žarka je preskočenih (hiše, najbližja drevesa).
+  Zato je ob vsaki številki razpon za ±1,5° obzorja (`OFFSET_DEG`): v Gornjem Gradu pozimi sonce komaj preseže greben in razpon je 1,2–4,7 h. Brez razpona številke ne objavljaj.
+  Položaj sonca je NOAA/Meeus (`tools/sonce_horizont.py`, test proti znanim vzhodom/zahodom). Referenčno leto 2027; zamik med leti < 1 min.
+- **`/sonce-v-dolini/`** (`generate_sonce_page.py`, ročno, ni v workflowu; ob spremembi `horizons.json` ga poženi in commitaj; osvežuje ga tudi `test-napovedi-daily.yml` zaradi rezultata preverjanja): orodje (kraj + dan, podatki `dnevi.json`; brez JS stran pove, da ga rabi), ključni dnevi, graf, dnevi brez sonca, ure po mesecih.
+  Solčava ima po izračunu 60 dni (22. 11.–20. 1.) brez sonca; ni izmerjeno. **To je geometrija ob jasnem nebu, ne vremenska napoved.**
+- **Preverjanje s postajo še ni končano** (iskreno napisano na strani): urni zapis sevanja je pregrob (megla izgleda kot hrib, privzeti model čistega neba je pri nizkem soncu preradodaren; RMSE z obzorjem 56,1 proti 57,1 W/m² brez njega, torej ju ne loči).
+  Zato `tools/log_solar_5min.py` zapisuje 5-minutno sevanje in temperaturo ob vzhodu/zahodu v `data/solar-5min.csv` (korak v `test-napovedi-daily.yml`; **backfill do 85 dni: ročno poženi `hourly-backfill.yml`, okno Ecowitta se vsak dan krči**),
+  `tools/eval_sonce.py` zazna hiter skok sevanja (prvi žarek) in ga primerja z modelom → `data/sonce-preverjanje.json`; stran prikaže rezultat, ko je ≥ 15 jasnih jutr. Detektor skoka je heuristika (pragovi `JUMP_*` niso umerjeni).
+- **`/jutro-v-dolini/`** (`generate_jutro_page.py`, `zima-forecast.yml`, `continue-on-error`): napoved = prvi žarek (teren) + **izmerjen** zamik do dviga za 3 °C nad jutranjim minimumom (`tools/eval_jutro.py` → `data/jutro-zamik.json`).
+  Izmerjeno na 87 jasnih, mirnih jutrih (13. 7.–2. 11. 2026): povprečno ~1,5 h, odstopanje ~0,5 h. Jasno in mirno za statistiko = dnevni razpon ≥ 10 °C in veter 0–7 h < 3 km/h (izmerjeno); za napoved oblačnost 3–10 h < 30 % in modelski veter < 6 km/h (model precenjuje veter ~2×).
+- **Brez napovedi, kadar pravilo ne velja**: jutro ni jasno/mirno (stran pove, zakaj) ali v mesecu (m−1…m+1 skupaj) ni ≥ 8 izmerjenih jutr. **Pozimi zamika ne izposojaj iz poletja** (zimskih meritev ni; december–februar zdaj brez napovedi). Ni napoved zmrzali ali megle.
+- Napovedi se beležijo v `data/jutro-napovedi.csv` (samo jutra po današnjem; zadnja izdaja pred dnem prepiše), `eval_jutro.py` jih ocenjuje proti meritvi; rezultat na strani od 10 ocenjenih. `winter_engine.compute_warmup_inputs()` piše vhode v `winter-data.json` → `warmup`.
+- Notranjih meritev tu ni (zunanja polja, `test_privacy.py` zeleno). Test: `tools/test_sonce.py` (v `parity.yml`). Vrstica v `REGISTER` (`check_freshness.py`), kartici na hubu `/zima/` (v generatorju; stran se osveži ob naslednjem teku), `CORE`, `llms.txt`.
+- **Ni narejeno:** zimski zamik (potrebuje zimo), obzorje za poljubno točko, upoštevanje megle, ločena napoved za Varpolje. **Živega Open-Meteo odgovora za `warmup` ni bilo mogoče preizkusiti** (peskovnik): oblika je preizkušena na sintetičnih podatkih; po prvem teku `zima-forecast.yml` preveri `jutro-v-dolini/`.
+
 ## Nevihtna karta Slovenije (WX-STORMMAP)
 
 Vsak dan mora biti do 7:00 zjutraj po naši uri pripravljena nova karta (zahteva

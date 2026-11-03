@@ -73,6 +73,8 @@ REGISTER = [
      "zima-forecast.yml"),
     ("Zimska opozorila (ocene za push)", "data/zima-ocene.json", "ts", "generated", 36,
      "zima-forecast.yml"),
+    ("Jutro v dolini (zamik prvi žarek → ogrevanje)", "data/jutro-zamik.json", "date", "generated", 60,
+     "zima-forecast.yml (korak je continue-on-error)"),
     ("Zgodovina meritev (history.json)", "history.json", "maxkey", None, 60,
      "update-history.yml (Ecowitt)"),
     ("Verifikacija napovedi", "forecast_verification.json", "maxkey", None, 72,
