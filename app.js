@@ -1667,6 +1667,23 @@ function _cuCached(){
 }
 function _cuStore(d){try{localStorage.setItem('wx-cu-v1',JSON.stringify({ts:Date.now(),data:d}));}catch(_){}}
 let _cuTries=0,_cuRetryTimer=null;
+// Koda vremena za dan v »Naslednjih 7 dni«. Dnevna koda WMO je NAJHUJŠI pojav dneva, zato jutranja megla naredi »Megla«
+// (ikona sonca z vodoravnimi črtami) iz celega dne, čeprav je od dopoldneva jasno (3. 11. 2026: štirje dnevi zapored »Megla«,
+// yr.no pa jasno). Če je dnevna koda megla, jo nadomesti najhujša koda med dnevnimi urami (9–18); megla ostane, če je
+// tudi čez dan res megla.
+function _cuDayCode(d,h,i){
+  const c=d.weather_code[i];
+  if(c!==45&&c!==48)return c;
+  let worst=null;
+  for(let k=0;k<h.time.length;k++){
+    if(h.time[k].slice(0,10)!==d.time[i])continue;
+    const hr=+h.time[k].slice(11,13);
+    if(hr<9||hr>18)continue;
+    const w=h.weather_code[k];
+    if(w!=null&&(worst==null||w>worst))worst=w;
+  }
+  return worst==null?c:worst;
+}
 async function fetchComingUp(){
   clearTimeout(_cuRetryTimer);
   const ok=await _fetchComingUpOnce();
@@ -1762,7 +1779,7 @@ async function _fetchComingUpOnce(){
         const lbl=i===1?'Jutri':SL[date.getDay()]+' '+date.getDate()+'.';
         const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
         const div=document.createElement('div');
-        div.className='cu-day cu-click'+((date.getDay()===0||date.getDay()===6)?' cu-we':'');div.dataset.wx=_wmoCat(d.weather_code[i]);
+        div.className='cu-day cu-click'+((date.getDay()===0||date.getDay()===6)?' cu-we':'');const code=_cuDayCode(d,h,i);div.dataset.wx=_wmoCat(code);
         // Klik / Enter / presledek odpre podrobnosti dneva (toggleCuDetail, ploščo #cu-detail pod karticami)
         div.dataset.date=d.time[i];div.tabIndex=0;
         div.setAttribute('role','button');div.setAttribute('aria-expanded','false');div.setAttribute('aria-controls','cu-detail');
@@ -1772,8 +1789,8 @@ async function _fetchComingUpOnce(){
         div.innerHTML=
           '<span class="cu-scene" aria-hidden="true"></span>'+
           '<span class="cu-dlbl">'+lbl+'</span>'+
-          '<span class="cu-demo">'+_wmoImg(d.weather_code[i],true,48)+'</span>'+
-          '<span class="cu-ddesc">'+_wmoTxt(d.weather_code[i])+(d.wind_speed_10m_max[i]>=30?' · '+Math.round(d.wind_speed_10m_max[i])+' km/h':'')+'</span>'+
+          '<span class="cu-demo">'+_wmoImg(code,true,48)+'</span>'+
+          '<span class="cu-ddesc">'+_wmoTxt(code)+(d.wind_speed_10m_max[i]>=30?' · '+Math.round(d.wind_speed_10m_max[i])+' km/h':'')+'</span>'+
           '<div class="cu-dtemp"'+(mt?' title="Temperatura po MTR, našem modelu. Open-Meteo: '+Math.round(d.temperature_2m_max[i])+'° / '+Math.round(d.temperature_2m_min[i])+'°"':'')+'>'
             +'<span class="cu-dhi" style="color:'+tempColor(tHi)+'">'+Math.round(tHi)+'°</span>'+
             '<span class="cu-dtl">'+Math.round(tLo)+'°</span></div>'+
@@ -1856,7 +1873,7 @@ function _cuDetailHtml(date){
   for(let k=0;k<h.time.length;k++)if(h.time[k].slice(0,10)===date)idx.push(k);
   const dt=new Date(date+'T12:00:00');
   const title=_PD_DAYS_FULL[dt.getDay()]+', '+dt.getDate()+'. '+(dt.getMonth()+1)+'.';
-  const code=d.weather_code[i];
+  const code=_cuDayCode(d,h,i);
   const tHi=d.temperature_2m_max[i],tLo=d.temperature_2m_min[i];
   const rain=d.precipitation_sum[i]||0,prob=d.precipitation_probability_max[i]||0;
   const wind=d.wind_speed_10m_max?d.wind_speed_10m_max[i]:null;
@@ -7638,7 +7655,54 @@ async function fetchAIForecast(force=false){
   }
 }
 
-function _renderAIFC(data){
+// Temperature na kartici yr.no so MTR (naš model), kjer ima dan (D+1..D+3), sicer yr.no — isto kot »Naslednjih 7 dni« na
+// naslovnici, da si kartici ne nasprotujeta (3. 11. 2026). Padavine, ikona in opis ostanejo yr.no; kartica to pove v meta vrstici.
+async function _aifcMtrDays(){
+  const m={};
+  try{((await _mtrFetch().catch(()=>null))?.days||[]).forEach(x=>{
+    if(x.date&&Number.isFinite(x.tmax)&&Number.isFinite(x.tmin))m[x.date]=x;
+  });}catch(_){}
+  return m;
+}
+// Vodilni odstavek iz istih polj kot v workerju (/ai-forecast, `local`), a z MTR temperaturami; namerna podvojitev besedila.
+function _aifcLead(sm){
+  const parts=[],s0=sm[0],s1=sm[1];
+  if(s0){
+    if(s0.partial){
+      let p='Nocoj bo na Rečici ob Savinji '+s0.symbolText;
+      if(s0.tmin!=null)p+=', najnižja temperatura okoli '+s0.tmin+' °C';
+      if(s0.rain>=0.5)p+=', skupaj okoli '+s0.rain+' mm padavin';
+      parts.push(p+'.');
+    }else{
+      let p='Danes bo na Rečici ob Savinji '+s0.symbolText+', s temperaturo med '+s0.tmin+' in '+s0.tmax+' °C';
+      if(s0.rain>=0.5)p+=', skupaj okoli '+s0.rain+' mm padavin';
+      if(s0.windMax>=30)p+=', veter v sunkih do '+s0.windMax+' km/h';
+      parts.push(p+'.');
+    }
+  }
+  if(s1){
+    let p='Jutri '+s1.symbolText+', '+s1.tmin+'–'+s1.tmax+' °C';
+    if(s1.rain>=0.5)p+=', dež '+s1.rain+' mm';
+    parts.push(p+'.');
+  }
+  const rest=sm.slice(2,5);
+  if(rest.length)parts.push('V nadaljevanju: '+rest.map(x=>x.dayName+' '+x.symbolText+' ('+x.tmax+'°)').join(', ')+'.');
+  return parts.join(' ');
+}
+
+async function _renderAIFC(data){
+  // Povozi temperature z MTR (kopija, da predpomnjen odgovor ostane nespremenjen)
+  const mtrDays=await _aifcMtrDays();
+  let nMtr=0;
+  if(data.summaries?.length){
+    data={...data,summaries:data.summaries.map(s=>{
+      const m=mtrDays[s.date];
+      if(!m||s.partial)return s;
+      nMtr++;
+      return {...s,tmax:Math.round(m.tmax),tmin:Math.round(m.tmin)};
+    })};
+    if(nMtr&&data.summaries.every(s=>s.symbolText))data.local=_aifcLead(data.summaries);
+  }
   const textEl=document.getElementById('aifc-text');
   const daysEl=document.getElementById('aifc-days');
   const metaEl=document.getElementById('aifc-meta');
@@ -7699,7 +7763,7 @@ function _renderAIFC(data){
   if(metaEl){
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
     const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
-    metaEl.textContent=src+(t?' · 🕐 '+t:'');
+    metaEl.textContent=src+(t?' · 🕐 '+t:'')+(nMtr?' · temperature: MTR (naš model) za '+nMtr+(nMtr===1?' dan':' dni')+', drugje yr.no':'');
   }
 }
 
