@@ -1390,9 +1390,12 @@ Obdržana je ena ideja: krivulja in drsnik na junaški kartici sta zasidrana na 
 
 ### Kuhinja v zavihku MTR (3. 11. 2026): časovnica, poskusi, čaka na podatke
 
-Razdelek »03 · Kuhinja« (`index.html`, `#tab-mtr`) ima tri kartice, ročno pisane po `docs/model-recica.md`: **»Kako je nastal«** (`#mos-hist`, vrstica na vsako vgrajeno spremembo),
-**»Poskusi, ki niso uspeli«** (`#mos-neg`, izid: slabše / brez dobitka / uhajanje / premalo podatkov, vsak z datumom in številko) in **»Čaka na podatke«** (`#mos-pend`).
-**Nov poskus ali vgrajena sprememba modela = vrstica tu IN poglavje v dokumentu.** Negativnega rezultata se ne skriva; pri uhajanju in premalo podatkov se ne trdi ne uspeh ne neuspeh.
+Razdelek »03 · Kuhinja« (`index.html`, `#tab-mtr`) ima tri kartice: **»Kako je nastal«** (`#mos-hist`, vrstica na vsako vgrajeno spremembo), **»Poskusi, ki niso uspeli«** (`#mos-neg`, izid: slabše / brez dobitka /
+uhajanje / premalo podatkov, vsak z datumom in številko) in **»Čaka na podatke«** (`#mos-pend`). **Vsebina je zapisana na enem mestu, v `tools/generate_mtr_page.py`** (`HIST`, `NEG`, `PEND`, `REPRO_*`), po `docs/model-recica.md`:
+generator iz nje naredi kartice v `index.html` (med markerjema `MTR-KUHINJA:START/END`, **ne urejaj ročno**) in samostojno stran **`/mtr/`** (»Kako nastaja MTR«: na kratko, časovnica, poskusi, čaka na podatke, tabela »Ponovi sam«
+z ukazi, podatki, FAQ; je v `CORE`, sitemapu in `llms.txt`). **Nov poskus ali vgrajena sprememba modela = vnos v generator + poglavje v dokumentu, nato `python3 tools/generate_mtr_page.py`, `MODIFIED` v generatorju popravi ročno,
+in commit** (ni v workflowu). Negativnega rezultata se ne skriva; pri uhajanju in premalo podatkih se ne trdi ne uspeh ne neuspeh. Test: `tools/test_mtr_page.py` (v `parity.yml`: committano = izhod generatorja, vse skripte iz
+»Ponovi sam« obstajajo, številke v »Na kratko« so v dokumentu, JS števcev na strani in v `app.js` imata ista besedila: to je namerna podvojitev).
 
 - Števce za »Čaka na podatke« piše `tools/mtr_pending.py` → `data/mtr-pending.json` (korak v `mtr-live.yml`, `continue-on-error`; vrstica v `REGISTER`). Razrešene dni po razredih šteje **uvožen** `analyze()` iz
   `tools/ai/eval_live_refresh.py` (razred »že teče« se ne šteje); prag 20 dni je `MIN_DAYS` tam, 120 zimskih dni (nov–feb) je v dokumentu. `renderMtrPending()` v `app.js` doda števila in vrstice napredka;

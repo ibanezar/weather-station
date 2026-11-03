@@ -161,6 +161,9 @@ jobs:
       - name: Test števcev odprtih poskusov MTR (Čaka na podatke)
         run: python3 tools/test_mtr_pending.py
 
+      - name: Test strani /mtr/ in kartic Kuhinja (generator = committano, skripte obstajajo)
+        run: python3 tools/test_mtr_page.py
+
       - name: Test sezonskega vodiča in uvrstitve meseca
         run: python3 tools/test_sezona.py
 
