@@ -12,7 +12,7 @@
   var LEAF = 'https://unpkg.com/leaflet@1.9.4/dist/';
   var SRI_CSS = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=', SRI_JS = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
   var $ = function (id) { return document.getElementById(id); };
-  var map = null, frames = [], idx = -1, timer = null, poll = null, bounds = null, last = '', view = 'sirok', applied = '';
+  var map = null, frames = [], idx = -1, timer = null, poll = null, bounds = null, last = '', view = 'savinja', applied = '';
   var playing = !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   var cellMk = new Map(), cellTr = new Map(), ptCache = new Map(), ptTok = 0;
 
@@ -76,7 +76,7 @@
       frames = full.map(function (f) { return old.get(f.zig) || { zig: f.zig, cas: f.cas, kind: f.kind, layer: null, ready: false }; });
       var si = frames.findIndex(function (f) { return f.kind === 'icon'; }), sp = $('rd-split');
       if (si > 0) { sp.style.left = (si / frames.length * 100) + '%'; sp.hidden = false; } else sp.hidden = true;
-      ticks();
+      ticks(); range(list, ic);
       var chain = loadFrame(frames.length - 1).then(function () { show(frames.length - 1); });
       frames.slice(0, -1).forEach(function (_, i) { chain = chain.then(function () { return loadFrame(i); }).then(function () { if (playing && !timer && ready().length > 2) anim(); }); });
       return chain.then(function () {
@@ -84,6 +84,11 @@
         return c2;
       }).then(function () { if (playing) anim(); });
     }).catch(function () { if (idx < 0) { setTime('Radar ni dosegljiv', ''); noteMode(null); } });
+  }
+  function range(list, ic) {
+    var a = list[0].cas, b = list[list.length - 1].cas, age = Math.round((Date.now() - new Date(b).getTime()) / 60000);
+    $('rd-range').textContent = 'Prikazano: radar ' + hhmm(a) + '–' + hhmm(b) + (ic.length ? ', nato napoved ICON do ' + hhmm(ic[ic.length - 1].cas) : '') + '.';
+    $('u-r').textContent = 'Zadnja radarska slika ob ' + hhmm(b) + ' (star ' + age + ' min)';
   }
   function retry(f) { return !!f && !f.ready && !f.layer && (f.napak || 0) < RETRIES; }
   function ready() { return frames.filter(function (f) { return f.ready; }); }
@@ -102,7 +107,7 @@
     frames.forEach(function (x) { if (x.layer) x.layer.setOpacity(x === f ? OPACITY : 0); });
     idx = i;
     var isLast = i === frames.length - 1 && f.kind !== 'icon', age = isLast ? Math.round((Date.now() - new Date(f.cas).getTime()) / 60000) : 0;
-    var badge = f.kind === 'icon' ? 'napoved' : isLast ? (age > STALE_MIN ? 'pred ' + age + ' min' : 'zdaj') : '';
+    var badge = f.kind === 'icon' ? 'Napoved' : isLast ? (age > STALE_MIN ? 'Pred ' + age + ' min' : 'Zdaj') : '';
     setTime(hhmm(f.cas), badge, isLast && age > STALE_MIN ? 'old' : f.kind === 'icon' ? 'fc' : 'now');
     noteMode(f.kind);
     var pos = ((i + 0.5) / frames.length * 100).toFixed(1) + '%', trk = $('rd-track');
