@@ -243,6 +243,9 @@ Skripte so v `tools/ai/` in niso v nobenem workflowu.
 | Kazalnik zaupanja iz razhajanja modelov (`eval_confidence.py`) | Spearman 0,04–0,19; pri Tmin D+1/D+3 brez učinka → ne objavljaj |
 | Verjetnost padavin: LightGBM / povprečje z v1 (`eval_mtr_calibration.py`) | D+1 Brier 0,172 → 0,165; D+2, D+3 brez dobitka |
 
+**Verjetnost zmrzali** (`tools/ai/eval_frost.py`, 366 dni, 99 zmrzalnih noči; P(Tmin ≤ 0 °C) iz normalne aproksimacije, sd iz učne množice × `FROST_SD_K` = 1,15): Brierjeva ocena 0,066–0,077
+(po mesecih) proti 0,197 pri klimatologiji. V srednjem območju 30–70 % je zmrzal pogostejša od napovedi. To ni poskus, ki ni uspel, ampak preverjanje vgrajene funkcije (6. 10. 2026).
+
 Edino ponovljivo izboljšanje je več-modelni Tmax pri D+2 in D+3 (~0,1 °C). **Vgrajeno 6. 10. 2026**
 kot `--multi-tmax` v `train_recica_mos.py` (glej razdelek spodaj); za tmin ni vklopljeno.
 Ko bodo na voljo urni arhivi vseh modelov in dovolj zbranih ansamblov, ponovi `eval_mtr2_models.py`

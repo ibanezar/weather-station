@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-N2B38HHG');</script>
+<!-- End Google Tag Manager -->
+<meta charset="UTF-8">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LE8PJ1HR8B"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LE8PJ1HR8B');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTR: kako nastaja napovedni model za Rečico | Meteorec</title>
+<link rel="canonical" href="https://meteorec.si/mtr/">
+<link rel="alternate" hreflang="sl" href="https://meteorec.si/mtr/">
+<link rel="alternate" hreflang="x-default" href="https://meteorec.si/mtr/">
+<meta name="description" content="Kako je nastal MTR, Meteorec napovedni model za dno doline pri Rečici: časovnica, poskusi, ki niso uspeli, odprta vprašanja in ukazi za ponovitev.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="author" content="Filip Eremita">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://meteorec.si/mtr/">
+<meta property="og:site_name" content="Meteorec">
+<meta property="og:title" content="MTR: kako nastaja napovedni model za Rečico">
+<meta property="og:description" content="Kako je nastal MTR, Meteorec napovedni model za dno doline pri Rečici: časovnica, poskusi, ki niso uspeli, odprta vprašanja in ukazi za ponovitev.">
+<meta property="og:image" content="https://meteorec.si/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="sl_SI">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MTR: kako nastaja napovedni model za Rečico">
+<meta name="twitter:description" content="Kako je nastal MTR, Meteorec napovedni model za dno doline pri Rečici: časovnica, poskusi, ki niso uspeli, odprta vprašanja in ukazi za ponovitev.">
+<meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/mtr/","name":"MTR: kako nastaja napovedni model za Re\u010dico","description":"Kako je nastal MTR, Meteorec napovedni model za dno doline pri Re\u010dici: \u010dasovnica, poskusi, ki niso uspeli, odprta vpra\u0161anja in ukazi za ponovitev.","url":"https://meteorec.si/mtr/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-11-03","dateModified":"2026-11-03","speakable":{"@type":"SpeakableSpecification","cssSelector":["#mk-kratko"]}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"MTR"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Je MTR uradna napoved?","acceptedAnswer":{"@type":"Answer","text":"Ne. MTR je poskusni statisti\u010dni model za eno to\u010dko, Re\u010dico ob Savinji. Uradne napovedi in opozorila izdaja Agencija Republike Slovenije za okolje (ARSO)."}},{"@type":"Question","name":"Kako natan\u010den je MTR?","acceptedAnswer":{"@type":"Answer","text":"V walk-forward preizkusu od 26. 5. 2024 do 5. 10. 2026 je povpre\u010dna absolutna napaka najvi\u0161je temperature 1,04 \u00b0C pri D+1, 1,24 \u00b0C pri D+2 in 1,40 \u00b0C pri D+3. Sprotno primerjavo z ARSO, Open-Meteo, ECMWF AIFS in WeatherNext 2 ka\u017ee stran To\u010dnost napovedi, ki meri vsak dan proti meritvam postaje IREICA1."}},{"@type":"Question","name":"Zakaj objavljate poskuse, ki niso uspeli?","acceptedAnswer":{"@type":"Answer","text":"Ker bi sicer bilo videti, kot da vsaka zamisel deluje. Poskus, ki je v mejah \u0161uma, ne dokazuje, da zamisel ne dr\u017ei, dokazuje pa, da je na teh podatkih ne moremo uporabiti. Ob vsakem poskusu je \u0161tevilka in izid; pri uhajanju informacije in premalo podatkih ne trdimo ne uspeha ne neuspeha."}},{"@type":"Question","name":"Ali lahko poskuse ponovim sam?","acceptedAnswer":{"@type":"Answer","text":"Da. Skripte so v mapi tools/ai/ v repozitoriju, vhodne datoteke so javne, tabela \u00bbPonovi sam\u00ab pa pove, kaj posamezen poskus potrebuje. Pri poskusih iz urnih arhivov je treba najprej prenesti predpomnilnik z Open-Meteo; zaradi omejitev API-ja to priporo\u010damo na GitHubovem teka\u010du."}}]}
+</script>
+<style>
+.mk-lead{font-size:1.05rem;line-height:1.6;margin:.2rem 0 1.4rem}
+.mk-hist,.mk-neg,.mk-pend{list-style:none;margin:0 0 1.6rem;padding:0}
+.mk-hist li,.mk-neg li,.mk-pend li{padding:.75rem 0;border-top:1px solid var(--border);line-height:1.55}
+.mk-hist li:first-child,.mk-neg li:first-child,.mk-pend li:first-child{border-top:0}
+.mk-hist b,.mk-neg b,.mk-pend b{color:var(--text)}
+.mk-hist .d{display:inline-block;min-width:7.5rem;font-weight:700}
+.mk-hist .d::before{content:'';display:inline-block;width:.55rem;height:.55rem;border-radius:50%;margin-right:.5rem;background:var(--green)}
+.mk-hist .h-b .d::before{background:#38bdf8}.mk-hist .h-v .d::before{background:#a78bfa}
+.mk-hist .h-a .d::before{background:#fbbf24}.mk-hist .h-t .d::before{background:#5eead4}
+.mk-hist span.t,.mk-neg span.t,.mk-pend span.t{color:var(--muted)}
+.mk-row{display:flex;gap:.6rem 1rem;flex-wrap:wrap;align-items:baseline}
+.mk-chip{display:inline-block;font-style:normal;font-size:.74rem;font-weight:600;line-height:1.3;padding:.1rem .55rem;border-radius:999px;border:1px solid var(--c,#94a3b8);background:rgba(128,128,128,.12);color:var(--text);white-space:nowrap}
+.mk-chip.c-red{--c:#f87171}.mk-chip.c-gray{--c:#94a3b8}.mk-chip.c-amb{--c:#fbbf24}.mk-chip.c-vio{--c:#a78bfa}.mk-chip.c-grn{--c:#34d399}
+.mk-neg small{margin-left:.5rem;color:var(--muted);font-weight:400}
+.mk-key{font-size:.82rem;color:var(--muted);line-height:2;margin:0 0 .6rem}
+.mk-bar{margin-top:.5rem}.mk-bar[hidden]{display:none}
+.mk-track{height:6px;border-radius:3px;background:rgba(128,128,128,.28);overflow:hidden}
+.mk-track i{display:block;height:100%;width:var(--p,0%);min-width:3px;border-radius:3px;background:#34d399}
+.mk-bar small{display:block;margin-top:.3rem;font-size:.78rem;color:var(--muted)}
+.mk-cmd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;word-break:break-word}
+.mk-tbl{width:100%;border-collapse:collapse;margin:.6rem 0 1.4rem;font-size:.9rem}
+.mk-tbl th,.mk-tbl td{text-align:left;vertical-align:top;padding:.6rem .8rem;border-bottom:1px solid var(--border)}
+.mk-tbl th{color:var(--muted);font-weight:600;font-size:.8rem}
+.mk-data li{margin:.3rem 0;line-height:1.5}
+</style>
+<link rel="stylesheet" href="/fonts/fonts.css?v=c490d62a">
+<link rel="stylesheet" href="/blog/blog.css?v=6352b4f1">
+<link rel="stylesheet" href="/vreme/vreme.css?v=a32fe9ac">
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N2B38HHG"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<div id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="wrap">
+  <header class="site-head">
+    <a class="brand" href="/">
+      <img class="brand-logo" src="/logo.svg" alt="" width="42" height="42">
+      <span class="brand-name">Meteo<em>rec</em></span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">Vreme v živo</a>
+      <a href="/blog/">Blog</a>
+      <a href="/vreme/">Arhiv</a>
+    </nav>
+  </header>
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <span aria-current="page">MTR</span>
+  </nav>
+  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
+  <h1>MTR: kako nastaja napovedni model za Rečico</h1>
+  <p class="muted-note">Posodobljeno: 3. 11. 2026. Model: model/recica-mos.json. Postaja: IREICA1.</p>
+  <p class="mk-lead" id="mk-kratko"><strong>Na kratko:</strong> MTR (Meteorec napovedni model) je statistični popravek napovedi Open-Meteo za dno doline pri Rečici ob Savinji, naučen na meritvah postaje IREICA1. Popravlja najvišjo in najnižjo dnevno temperaturo, računa verjetnost zmrzali in pas negotovosti P10–P90 ter umerja veter in sunke. V walk-forward preizkusu od 26. 5. 2024 do 5. 10. 2026 je povprečna absolutna napaka najvišje temperature 1,04&nbsp;°C pri D+1, 1,24&nbsp;°C pri D+2 in 1,40&nbsp;°C pri D+3. Ta stran pokaže, kako je nastal, kaj smo poskusili in zavrgli, kaj še čaka na podatke in kako vse ponoviti sami.</p>
+  <h2>Kako je nastal</h2>
+  <ol class="mk-hist">
+    <li class=""><span class="d">v1</span><span class="t">Ridge popravek Open-Meteo na meritvah IREICA1 (od 2024). Tmax/Tmin, verjetnost padavin, zmrzal, pas P10–P90.</span></li>
+    <li class="h-b"><span class="d">6. 10. 2026</span><span class="t">Več-modelni Tmax (IFS, GFS, ICON, ARPEGE): D+1 1,11→1,04, D+2 1,34→1,24, D+3 1,53→1,40&nbsp;°C. Pri Tmin je dobitek šum, zato tam ni vklopljeno.</span></li>
+    <li class="h-b"><span class="d">6. 10. 2026</span><span class="t">Verjetnost zmrzali in razlog za popravek (jasna in mirna noč, oblačno). Backtest 366 dni, 99 zmrzalnih noči: Brierjeva ocena 0,07 proti 0,20 pri klimatologiji (manj je bolje). V srednjem območju (30–70&nbsp;%) je zmrzal pogostejša od napovedi.</span></li>
+    <li class="h-v"><span class="d">23. 10. 2026</span><span class="t">Ločen pas negotovosti Tmax po vrsti noči (jasna / oblačna): pokritost 72–81&nbsp;% v vseh razredih.</span></li>
+    <li class="h-v"><span class="d">23. 10. 2026</span><span class="t">Živa osvežitev: kartice na strani berejo napoved, osveženo štirikrat na dan ob novih tekih Open-Meteo. Semafor točnosti meri naprej samo zamrznjeno jutranjo napoved. Ali so poznejše osvežitve boljše, še ne vemo: dnevnik teče, za sklep je treba vsaj 20 dni na razred.</span></li>
+    <li class="h-a"><span class="d">24. 10. 2026</span><span class="t">Veter in sunki, umerjeni na postajo. Postaja stoji na zavetrnem dnu doline, zato Open-Meteo povprečni veter precenjuje za polovico (razmerje 0,50). Povprečni veter popravi že skala; pri sunkih je napaka D+1 3,9 proti 7,1&nbsp;km/h pri surovem modelu. Na semaforju ga ni, ker tam veter ni merjen.</span></li>
+    <li class="h-a"><span class="d">24. 10. 2026</span><span class="t">Začetek beleženja pravih napovedi višinskega profila, oblačnosti po slojih in snega (D+1 do D+3). Open-Meteo za te spremenljivke nima arhiva, zato jih zbiramo sproti. Ocena koristi je mogoča šele po zimi 2026/27.</span></li>
+    <li class="h-t"><span class="d">2. 11. 2026</span><span class="t">Krivulja na junaški kartici je zasidrana na zadnjo meritev: razlika meritev – model izzveni v 6 urah. To je samo prikaz in ne vpliva na točnost; čas izzvenevanja na Rečici še ni izmerjen.</span></li>
+  </ol>
+  <h2>Poskusi, ki niso uspeli</h2>
+  <p>Vsi poskusi so walk-forward po mesecih na zadnjem letu (366–392 dni), razlika je preverjena z uparjenim blokovnim bootstrapom. Neuspeh objavljamo enako kot uspeh: v model niso prišli, ker ne držijo.</p>
+  <p class="mk-key"><i class="mk-chip c-red">Slabše</i> slabši od osnove · <i class="mk-chip c-gray">Brez dobitka</i> razlika v mejah šuma · <i class="mk-chip c-amb">Uhajanje</i> dobitek razloži informacija, ki je ob napovedi ni bilo · <i class="mk-chip c-vio">Premalo podatkov</i> ni preizkušljivo</p>
+  <ul class="mk-neg">
+    <li><div class="mk-row"><b>LightGBM nad arhivom več modelov<small>6. 10.</small></b><i class="mk-chip c-red">Slabše</i></div><span class="t">Slabši od v1: Tmin D+2 1,40 proti 1,27&nbsp;°C.</span></li>
+    <li><div class="mk-row"><b>Predhodno učenje na 7 letih ERA5<small>6. 10.</small></b><i class="mk-chip c-gray">Brez dobitka</i></div><span class="t">Dobitek največ 0,007&nbsp;°C čez prejšnjo vrstico.</span></li>
+    <li><div class="mk-row"><b>Kazalnik zaupanja iz razhajanja modelov<small>6. 10.</small></b><i class="mk-chip c-gray">Brez dobitka</i></div><span class="t">Povezava med razhajanjem in napako je šibka (Spearman 0,04–0,19), pri Tmin D+1 in D+3 je ni. Semafor, ki ne napove napake, bi bil laž, zato ga ni.</span></li>
+    <li><div class="mk-row"><b>Verjetnost padavin: LightGBM in povprečje z v1<small>6. 10.</small></b><i class="mk-chip c-gray">Brez dobitka</i></div><span class="t">Brierjeva ocena D+1 0,172→0,165, D+2 in D+3 brez dobitka.</span></li>
+    <li><div class="mk-row"><b>Značilke po režimu noči<small>23. 10.</small></b><i class="mk-chip c-gray">Brez dobitka</i></div><span class="t">Jasna in mirna noč, mokri dnevi, razlika temperatura – rosišče: razlika MAE od –0,023 do +0,013&nbsp;°C, interval zaupanja vedno zajema 0.</span></li>
+    <li><div class="mk-row"><b>Ločen pas negotovosti za Tmin in zmrzal<small>23. 10.</small></b><i class="mk-chip c-gray">Brez dobitka</i></div><span class="t">Brierjeva ocena zmrzali 0,0632 proti 0,0631. Pri Tmax pomaga, zato je tam vgrajen.</span></li>
+    <li><div class="mk-row"><b>Sončni čas in mejna plast<small>24. 10.</small></b><i class="mk-chip c-gray">Brez dobitka</i></div><span class="t">Razlike MAE pod 0,01&nbsp;°C pri obeh. Sončni čas je prava napoved, ne zlepljena serija.</span></li>
+    <li><div class="mk-row"><b>Višinski nivoji in sloji oblačnosti<small>24. 10.</small></b><i class="mk-chip c-amb">Uhajanje</i></div><span class="t">Navidezni dobitek narašča z vodilnim časom, kontrola z zlepljenim »nowcastom« ga pri Tmax preseže: razložen je z uhajanjem informacije. Pri Tmin (stabilnost T925 – T2m) dobitka 0,16&nbsp;°C ni mogoče ločiti od uhajanja (strop 0,22–0,30&nbsp;°C).</span></li>
+    <li><div class="mk-row"><b>Višina snega in vlaga tal<small>24. 10.</small></b><i class="mk-chip c-vio">Premalo podatkov</i></div><span class="t">V vzorcu je samo 20 dni s snegom nad 1&nbsp;cm od 779. Ni ovrženo, ni preizkušljivo.</span></li>
+    <li><div class="mk-row"><b>Utež novejših dni<small>24. 10.</small></b><i class="mk-chip c-red">Slabše</i></div><span class="t">Polčas 90, 180 in 365 dni nikjer ne pomaga, pri 90 dneh je Tmax slabši za 0,06–0,09&nbsp;°C. Dokaza za drift postaje ni.</span></li>
+    <li><div class="mk-row"><b>Krčenje popravka po režimu noči<small>24. 10.</small></b><i class="mk-chip c-gray">Brez dobitka</i></div><span class="t">Naučena utež je 1,0–1,2, ne pod 1: popravek nikjer ni prestrog. Slabši Tmin v »vmesnih« dnevih je lastnost teh dni, ne napaka popravka.</span></li>
+    <li><div class="mk-row"><b>Izbirnik modela po meteoblue mLM<small>2. 11.</small></b><i class="mk-chip c-red">Slabše</i></div><span class="t">Model, ki je bil zadnjih 3–30 dni najboljši, ni boljši napovednik jutrišnjega: Tmax D+1 1,46&nbsp;°C proti 1,39&nbsp;°C pri stalnem ICON. Koristi odštevanje nedavne napake, ki jo MTR že ima.</span></li>
+  </ul>
+  <h2>Čaka na podatke</h2>
+  <p>Odprti poskusi, ki jih zdaj ni mogoče pošteno oceniti. Vsak ima prag iz dokumentacije modela; dokler ni dosežen, ne trdimo nič.</p>
+  <ul class="mk-pend" id="mk-pend">
+    <li><div class="mk-row"><b>Ali so poznejše osvežitve boljše od jutranje napovedi?</b><i class="mk-chip c-grn">Zbiramo</i></div><span class="t">Živo osvežitev (štirikrat na dan) primerjamo z zamrznjeno jutranjo napovedjo na istih dneh. Sklep je mogoč šele pri vsaj 20 razrešenih dneh na razred ur do začetka dneva. Do takrat ne trdimo, da so poznejše osvežitve boljše.</span><div class="mk-bar" data-pend="live" hidden><div class="mk-track" role="progressbar" aria-valuemin="0" aria-valuenow="0" aria-valuemax="100" aria-label="Napredek zbiranja podatkov"><i></i></div><small></small></div></li>
+    <li><div class="mk-row"><b>Ali višinski profil izboljša Tmin?</b><i class="mk-chip c-grn">Zbiramo</i></div><span class="t">Stabilnost med T925 in T2m je edini kandidat s fizikalnim razlogom (nočna inverzija). Pošten odgovor terja prave napovedi izpred 1–3 dni in meritve za iste dneve, zato ga ni pred koncem zime 2026/27.</span><div class="mk-bar" data-pend="profile" hidden><div class="mk-track" role="progressbar" aria-valuemin="0" aria-valuenow="0" aria-valuemax="100" aria-label="Napredek zbiranja podatkov"><i></i></div><small></small></div></li>
+    <li><div class="mk-row"><b>Sneg in vlaga tal</b><i class="mk-chip c-vio">Čaka na zimo</i></div><span class="t">V zadnjem letu je bilo samo 20 dni s snegom nad 1&nbsp;cm od 779, kar ne zadošča za sklep. Prag ni določen: ocena je mogoča, ko bo snega dovolj za primerjavo. <em data-pend="snow"></em></span></li>
+    <li><div class="mk-row"><b>Pas negotovosti Tmax ob jasnih nočeh</b><i class="mk-chip c-gray">Brez roka</i></div><span class="t">Pri D+3 pokritost pasu P10–P90 ob jasnih nočeh je 72&nbsp;% namesto 80&nbsp;%, razred ima le 74 dni (stanje 23. 10.). Ponovitev, ko se razred poveča.</span></li>
+    <li><div class="mk-row"><b>Ali se postaja skozi leta premika?</b><i class="mk-chip c-gray">2027</i></div><span class="t">Rast drevja, gradnja ali staranje senzorja bi lahko spreminjali povprečni ostanek. Za zdaj dokaza ni; poskus z utežjo novejših dni ponovimo po dveh letih meritev.</span></li>
+    <li><div class="mk-row"><b>Čas izzvenevanja zasidranja (6 ur)</b><i class="mk-chip c-amb">Ni zagnano</i></div><span class="t">Vrednost je prevzeta s Črnivca in na Rečici ni izmerjena. Oceno da <code>tools/ai/eval_anchor.py</code>, a potrebuje omrežje: poganja se na GitHubovem tekaču ali doma.</span></li>
+  </ul>
+  <p class="muted-note" id="mk-pend-note"></p>
+  <h2>Ponovi sam</h2>
+  <p>Skripte so v mapi <code>tools/ai/</code> v repozitoriju in niso v nobenem delovnem toku. Poženite jih iz korena repozitorija; argumenti so v glavi vsake skripte. Brez omrežja delujejo prve tri vrstice, ostale potrebujejo urne arhive napovedi iz Open-Meteo, ki jih naredi <code>tools/ai/fetch_hourly_cache.py</code> (za profile <code>fetch_profile_cache.py</code>, za veter <code>fetch_wind_cache.py</code>). Iz razvojne seje z deljenim IP-jem Open-Meteo skoraj stalno vrača napako 429, zato predpomnilnik naredi na GitHubovem tekaču (primer: delovni tok <code>mtr2-eval.yml</code>).</p>
+  <div class="tbl-x" tabindex="0"><table class="mk-tbl">
+    <thead><tr><th scope="col">Poskus</th><th scope="col">Ukaz ali skripta</th><th scope="col">Potrebuje</th></tr></thead>
+    <tbody>
+      <tr><td>Izbirnik modela (2. 11.)</td><td class="mk-cmd">python3 tools/ai/eval_selector.py 2025-10-01</td><td>data/forecast-archive.csv in history.json (obe v repozitoriju), brez omrežja</td></tr>
+      <tr><td>Živa osvežitev proti zamrznjeni (od 24. 10.)</td><td class="mk-cmd">python3 tools/ai/eval_live_refresh.py</td><td>data/mtr-live-log.csv in forecast_verification.json, brez omrežja; do 20 dni na razred izpiše »premalo dni«</td></tr>
+      <tr><td>Števci »Čaka na podatke«</td><td class="mk-cmd">python3 tools/mtr_pending.py</td><td>iste datoteke kot zgoraj in data/profile-forward-log.csv</td></tr>
+      <tr><td>LightGBM nad arhivom, več-modelni Tmax (6. 10.)</td><td class="mk-cmd">eval_mtr2.py, eval_mtr2_hourly.py, eval_mtr2_models.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
+      <tr><td>Kazalnik zaupanja, zmrzal, padavine (6. 10.)</td><td class="mk-cmd">eval_confidence.py, eval_frost.py, eval_mtr_calibration.py, eval_significance.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
+      <tr><td>Značilke po režimu noči, pas negotovosti (23. 10.)</td><td class="mk-cmd">eval_mtr3.py, eval_mtr_sd.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
+      <tr><td>Višinski nivoji, sončni čas, mejna plast, sneg (24. 10.)</td><td class="mk-cmd">eval_mtr4.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
+      <tr><td>Utež novejših dni, krčenje popravka (24. 10.)</td><td class="mk-cmd">eval_mtr5_recency.py, eval_mtr6_shrink.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
+      <tr><td>Veter in sunki (24. 10.)</td><td class="mk-cmd">eval_mtr7_wind.py</td><td>predpomnilnik urnih arhivov (glej zgoraj)</td></tr>
+      <tr><td>Čas izzvenevanja zasidranja (2. 11.)</td><td class="mk-cmd">python3 tools/ai/eval_anchor.py --from 2026-07-13 --lead 1</td><td>omrežje (Open-Meteo) in data/hourly-observations.csv; poganjaj na GitHubovem tekaču</td></tr>
+    </tbody>
+  </table></div>
+  <p>Kontrolo uhajanja informacije, uparjeni blokovni bootstrap in vse številke najdete v <a href="https://github.com/ibanezar/weather-station/blob/main/docs/model-recica.md">docs/model-recica.md</a>.</p>
+  <h2>Podatki</h2>
+  <ul class="mk-data">
+    <li><a href="/data/mtr-live-log.csv">data/mtr-live-log.csv</a>: dnevnik živih osvežitev MTR (od 24. 10. 2026)</li>
+    <li><a href="/data/profile-forward-log.csv">data/profile-forward-log.csv</a>: prave napovedi višinskega profila, oblačnosti in snega (od 24. 10. 2026)</li>
+    <li><a href="/data/forecast-archive.csv">data/forecast-archive.csv</a>: dnevni arhiv napovedi več modelov po vodilnem času (od 26. 5. 2024)</li>
+    <li><a href="/data/mtr-pending.json">data/mtr-pending.json</a>: števci odprtih poskusov (osvežuje se štirikrat na dan)</li>
+    <li><a href="/model/recica-mos.json">model/recica-mos.json</a>: koeficienti modela in izmerjena veščina</li>
+    <li><a href="/test-napovedi/podatki.csv">test-napovedi/podatki.csv</a>: razrešeni dnevi primerjave modelov proti IREICA1 (CC BY 4.0)</li>
+  </ul>
+  <p class="muted-note"><strong>Uporaba vsebine:</strong> povzemanje je dovoljeno z navedbo avtorja (Meteorec) in povezavo na to stran. Za prepis ali vdelavo grafov vprašajte. Dokaz o prvenstvu: datum objave in zgodovina sprememb v repozitoriju.</p>
+  <p class="muted-note">Sorodno: <a href="/tocnost-napovedi/">Točnost napovedi (semafor)</a> · <a href="/test-napovedi/">Test napovedi: pet virov proti postaji</a> · <a href="/trendi/">Trendi</a> · <a href="/primerjava-modelov/">Primerjava modelov</a> · <a href="/vreme-recica-ob-savinji/">Vreme v Rečici</a></p>
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+    <details><summary>Je MTR uradna napoved?</summary><p>Ne. MTR je poskusni statistični model za eno točko, Rečico ob Savinji. Uradne napovedi in opozorila izdaja Agencija Republike Slovenije za okolje (ARSO).</p></details>
+    <details><summary>Kako natančen je MTR?</summary><p>V walk-forward preizkusu od 26. 5. 2024 do 5. 10. 2026 je povprečna absolutna napaka najvišje temperature 1,04 °C pri D+1, 1,24 °C pri D+2 in 1,40 °C pri D+3. Sprotno primerjavo z ARSO, Open-Meteo, ECMWF AIFS in WeatherNext 2 kaže stran Točnost napovedi, ki meri vsak dan proti meritvam postaje IREICA1.</p></details>
+    <details><summary>Zakaj objavljate poskuse, ki niso uspeli?</summary><p>Ker bi sicer bilo videti, kot da vsaka zamisel deluje. Poskus, ki je v mejah šuma, ne dokazuje, da zamisel ne drži, dokazuje pa, da je na teh podatkih ne moremo uporabiti. Ob vsakem poskusu je številka in izid; pri uhajanju informacije in premalo podatkih ne trdimo ne uspeha ne neuspeha.</p></details>
+    <details><summary>Ali lahko poskuse ponovim sam?</summary><p>Da. Skripte so v mapi tools/ai/ v repozitoriju, vhodne datoteke so javne, tabela »Ponovi sam« pa pove, kaj posamezen poskus potrebuje. Pri poskusih iz urnih arhivov je treba najprej prenesti predpomnilnik z Open-Meteo; zaradi omejitev API-ja to priporočamo na GitHubovem tekaču.</p></details>
+  </div>
+  <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
+<script>
+(function(){
+  fetch('/data/mtr-pending.json?_='+Math.floor(Date.now()/36e5)).then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(d){
+    if(!d)return;
+    var root=document.getElementById('mk-pend');if(!root)return;
+    function bar(key,n,target,txt){
+      var el=root.querySelector('[data-pend="'+key+'"]');
+      if(!el||!(target>0)||!isFinite(n))return;
+      var pct=Math.max(0,Math.min(100,Math.round(n/target*100)));
+      var tr=el.querySelector('.mk-track');
+      tr.style.setProperty('--p',pct+'%');tr.setAttribute('aria-valuenow',String(pct));tr.setAttribute('aria-valuetext',txt);
+      el.querySelector('small').textContent=txt;el.hidden=false;
+    }
+    var L=d.live;
+    if(L&&L.classes){var v=Object.keys(L.classes).map(function(k){return L.classes[k]});
+      if(v.length){var lo=Math.min.apply(null,v),hi=Math.max.apply(null,v);
+        bar('live',L.best,L.target,'Najbolj zapolnjen razred: '+L.best+' od '+L.target+' dni'+(lo!==hi?' (razredi: '+lo+'–'+hi+')':''));}}
+    var P=d.profile;
+    if(P){bar('profile',P.winter_days,P.target,'Zimskih dni (nov–feb) v dnevniku: '+P.winter_days+' od '+P.target+' · dni zajema skupaj: '+P.days);
+      var sn=root.querySelector('[data-pend="snow"]');
+      if(sn&&isFinite(P.snow_days))sn.textContent='Dni s snegom nad 1 cm v dnevniku doslej: '+P.snow_days+'.';}
+    var note=document.getElementById('mk-pend-note');
+    if(note&&d.generated_at){var t=new Date(d.generated_at);
+      if(!isNaN(t))note.textContent='Števci so izračunani iz dnevnikov v repozitoriju, stanje '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'});}
+  });
+})();
+</script>
+  <footer class="site-foot">
+    <span>© 2026 Meteorec · Rečica ob Savinji</span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
+  </footer>
+</div>
+<nav class="app-bottomnav" aria-label="Glavna navigacija"><a href="/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11 12 4l8 7v7a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-7Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>Domov</a><a href="/klima/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 4.5a1.5 1.5 0 0 0-3 0v9.6a3.5 3.5 0 1 0 3 0V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"/></svg></span>Klima</a><a href="/rekord/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10 13.5v2.5h4v-2.5M8.5 20h7l-1-2.5h-5L8.5 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>Rekordi</a><a href="/trendi/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16.5 10 10l3.5 3.5L20 6.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 6.5H20v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Trendi</a><a href="/blog/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H17a2 2 0 0 1 2 2v14.5a.5.5 0 0 1-.7.46L15 18.5H6.5A1.5 1.5 0 0 1 5 17V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="8" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="11.5" x2="13" y2="11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>Blog</a><a href="/vreme/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="5" width="17" height="4" rx="1" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 9.5V18a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V9.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="10" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Arhiv</a><a href="/gobarska-napoved/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11.5C4 7.36 7.58 4 12 4s8 3.36 8 7.5c0 .83-.9 1.5-2 1.5H6c-1.1 0-2-.67-2-1.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 13v3.7a2.5 2.5 0 0 0 5 0V13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Gobe</a><a href="/o-postaji.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8.3" r="1" fill="currentColor"/><line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>O postaji</a></nav>
+</body>
+</html>

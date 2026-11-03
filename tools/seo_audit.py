@@ -85,6 +85,8 @@ CORE = {
     "zima/zled/":                ("daily",   "0.7"),
     "zima/snezna-karta/":        ("daily",   "0.7"),
     "vreme-v-gorah/":            ("daily",   "0.7"),
+    # /mtr/ »Kako nastaja MTR«: kuhinja modela (tools/generate_mtr_page.py, ročno; vsebina je tam).
+    "mtr/":                      ("weekly",  "0.6"),
     # Širša slika ozračja (tools/generate_{sinopticna,stratosfera,indeksi,prah}_page.py, atmos-forecast.yml).
     "sinopticna/":               ("daily",   "0.7"),
     "stratosfera/":              ("daily",   "0.6"),

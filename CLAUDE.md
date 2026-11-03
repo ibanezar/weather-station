@@ -1388,6 +1388,21 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
 Po meteoblue mLM (izbere model, ki je najbolje simuliral zadnje meritve) smo na lastnih podatkih preizkusili izbirnik (`tools/ai/eval_selector.py`): **čisti izbor modela ne pomaga**, koristi odštevanje nedavne napake, ki jo MTR že ima; MTR je boljši od vseh variant. Ne uvajaj izbirnika brez novega dokaza; podrobnosti v `docs/model-recica.md`.
 Obdržana je ena ideja: krivulja in drsnik na junaški kartici sta zasidrana na zadnjo meritev (`anchorHours()` v `app.js`, popravek meritev − model izzveni v 6 urah, omejen na 4 °C, meritev starejša od 30 min ne zasidra). **Čas izzvenevanja ni izmerjen** (ni urnega arhiva napovedi): `tools/ai/eval_anchor.py` ga oceni, a potrebuje omrežje (GitHubov tekač). Obeti, hitra vprašanja in stavek »Danes« ostanejo na surovi modelski napovedi. Test: `tools/test_anchor.py` (v `parity.yml`).
 
+### Kuhinja v zavihku MTR (3. 11. 2026): časovnica, poskusi, čaka na podatke
+
+Razdelek »03 · Kuhinja« (`index.html`, `#tab-mtr`) ima tri kartice: **»Kako je nastal«** (`#mos-hist`, vrstica na vsako vgrajeno spremembo), **»Poskusi, ki niso uspeli«** (`#mos-neg`, izid: slabše / brez dobitka /
+uhajanje / premalo podatkov, vsak z datumom in številko) in **»Čaka na podatke«** (`#mos-pend`). **Vsebina je zapisana na enem mestu, v `tools/generate_mtr_page.py`** (`HIST`, `NEG`, `PEND`, `REPRO_*`), po `docs/model-recica.md`:
+generator iz nje naredi kartice v `index.html` (med markerjema `MTR-KUHINJA:START/END`, **ne urejaj ročno**) in samostojno stran **`/mtr/`** (»Kako nastaja MTR«: na kratko, časovnica, poskusi, čaka na podatke, tabela »Ponovi sam«
+z ukazi, podatki, FAQ; je v `CORE`, sitemapu in `llms.txt`). **Nov poskus ali vgrajena sprememba modela = vnos v generator + poglavje v dokumentu, nato `python3 tools/generate_mtr_page.py`, `MODIFIED` v generatorju popravi ročno,
+in commit** (ni v workflowu). Negativnega rezultata se ne skriva; pri uhajanju in premalo podatkih se ne trdi ne uspeh ne neuspeh. Test: `tools/test_mtr_page.py` (v `parity.yml`: committano = izhod generatorja, vse skripte iz
+»Ponovi sam« obstajajo, številke v »Na kratko« so v dokumentu, JS števcev na strani in v `app.js` imata ista besedila: to je namerna podvojitev).
+
+- Števce za »Čaka na podatke« piše `tools/mtr_pending.py` → `data/mtr-pending.json` (korak v `mtr-live.yml`, `continue-on-error`; vrstica v `REGISTER`). Razrešene dni po razredih šteje **uvožen** `analyze()` iz
+  `tools/ai/eval_live_refresh.py` (razred »že teče« se ne šteje); prag 20 dni je `MIN_DAYS` tam, 120 zimskih dni (nov–feb) je v dokumentu. `renderMtrPending()` v `app.js` doda števila in vrstice napredka;
+  brez datoteke ostane samo besedilo. Test: `tools/test_mtr_pending.py` (v `parity.yml`).
+- Vrstice brez števca (pas negotovosti ob jasnih nočeh, drift 2027, čas izzvenevanja) imajo stanje zapisano v besedilu: ob spremembi ga popravi ročno.
+- **Ne dodajaj MAE osvežitve proti zamrznjeni napovedi na stran, dokler razred nima 20 dni** (`eval_live_refresh.py` to že zahteva).
+
 ### Veter in sunki v dolini (24. 10. 2026)
 
 Postaja stoji na zavetrnem dnu doline: Open-Meteo povprečni veter precenjuje ~2× (razmerje postaja/model 0,50, korelacija 0,75;
