@@ -10,7 +10,7 @@ on:
 
 jobs:
   minify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Playwright 1.56.1 ne podpira ubuntu-latest (26.04)
     permissions:
       contents: write
 
