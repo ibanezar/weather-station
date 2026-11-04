@@ -59,6 +59,9 @@ jobs:
       - name: Test tipografske lestvice hero kartice
         run: python3 tools/test_hero_tipografija.py
 
+      - name: Test barvne skale temperature (podatkovna barva ≠ znamčni cian)
+        run: python3 tools/test_temp_barve.py
+
       - name: Test preverjanja nevihtne karte
         run: python3 tools/test_storm_verify.py
 

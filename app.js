@@ -278,20 +278,22 @@ function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'
 function solarLabel(w){if(!w&&w!==0)return'—';if(w<20)return'Noč/temno';if(w<100)return'Oblačno';if(w<300)return'Delno oblačno';if(w<600)return'Pretežno sončno';return'Jasno sončno';}
 function dewLabel(d){if(d<5)return'Zelo suho';if(d<10)return'Suho';if(d<15)return'Prijetno';if(d<20)return'Rahlo vlažno';return'Soparno';}
 
+// Temperaturna skala je PODATKOVNA barva: nobena stopnja ne sme biti blizu znamčnemu cianu (logotip »rec«, --cyan), sicer ista barva
+// hkrati pomeni »znamka« in »hladno« (4. 11. 2026: #67e8f9 je bil 10 ΔE od #22d3ee). Preverja tools/test_temp_barve.py.
 function tempColor(t){
   if(isDark()){
     // Bright, saturated colours — all high contrast on dark navy
     if(t<0)  return '#bae6fd';  // bright sky blue
-    if(t<8)  return '#67e8f9';  // bright cyan
+    if(t<8)  return '#8ab4ff';  // periwinkle blue (ne cian: ta je znamka)
     if(t<15) return '#6ee7b7';  // bright mint
     if(t<22) return '#f1f5f9';  // bright white
     if(t<28) return '#fcd34d';  // bright amber
     if(t<35) return '#fb923c';  // bright orange
     return '#f87171';
   } else {
-    if(t<0)  return '#1d4ed8';
-    if(t<8)  return '#0369a1';
-    if(t<15) return '#0f766e';
+    if(t<0)  return '#1e3a8a';
+    if(t<8)  return '#1d4ed8';
+    if(t<15) return '#15803d';  // zelena (prej teal #0f766e: 23 ΔE od cianovega »rec« v svetli temi)
     if(t<22) return '#0f172a';
     if(t<28) return '#b45309';
     if(t<35) return '#c2410c';
@@ -300,16 +302,16 @@ function tempColor(t){
 }
 function feelsStyle(t){
   if(isDark()){
-    if(t<0)  return{label:'Zmrzuje',   c:'#93c5fd',bg:'rgba(147,197,253,.1)',b:'rgba(147,197,253,.25)'};
-    if(t<8)  return{label:'Mrzlo',       c:'#7dd3fc',bg:'rgba(125,211,252,.1)',b:'rgba(125,211,252,.25)'};
+    if(t<0)  return{label:'Zmrzuje',   c:'#bae6fd',bg:'rgba(186,230,253,.1)',b:'rgba(186,230,253,.25)'};
+    if(t<8)  return{label:'Mrzlo',       c:'#8ab4ff',bg:'rgba(138,180,255,.1)',b:'rgba(138,180,255,.25)'};
     if(t<15) return{label:'Hladno',       c:'#6ee7b7',bg:'rgba(110,231,183,.1)',b:'rgba(110,231,183,.25)'};
     if(t<22) return{label:'Prijetno',c:'#34d399',bg:'rgba(52,211,153,.1)', b:'rgba(52,211,153,.25)'};
     if(t<28) return{label:'Toplo',       c:'#fcd34d',bg:'rgba(252,211,77,.1)', b:'rgba(252,211,77,.25)'};
     return         {label:'Vroče',        c:'#f87171',bg:'rgba(248,113,113,.1)',b:'rgba(248,113,113,.25)'};
   } else {
-    if(t<0)  return{label:'Zmrzuje',   c:'#1d4ed8',bg:'rgba(29,78,216,.08)', b:'rgba(29,78,216,.2)'};
-    if(t<8)  return{label:'Mrzlo',       c:'#0369a1',bg:'rgba(3,105,161,.08)', b:'rgba(3,105,161,.2)'};
-    if(t<15) return{label:'Hladno',       c:'#0f766e',bg:'rgba(15,118,110,.08)',b:'rgba(15,118,110,.2)'};
+    if(t<0)  return{label:'Zmrzuje',   c:'#1e3a8a',bg:'rgba(30,58,138,.08)', b:'rgba(30,58,138,.2)'};
+    if(t<8)  return{label:'Mrzlo',       c:'#1d4ed8',bg:'rgba(29,78,216,.08)', b:'rgba(29,78,216,.2)'};
+    if(t<15) return{label:'Hladno',       c:'#15803d',bg:'rgba(21,128,61,.08)',b:'rgba(21,128,61,.2)'};
     if(t<22) return{label:'Prijetno',c:'#059669',bg:'rgba(5,150,105,.08)', b:'rgba(5,150,105,.2)'};
     if(t<28) return{label:'Toplo',       c:'#b45309',bg:'rgba(180,83,9,.08)',  b:'rgba(180,83,9,.2)'};
     return         {label:'Vroče',        c:'#dc2626',bg:'rgba(220,38,38,.08)', b:'rgba(220,38,38,.2)'};
@@ -9878,7 +9880,7 @@ function initAnalysisCharts(){
   mk('an-seasons',{type:'line',data:{labels:yr,datasets:Object.entries(AN.seasonTemps).map(([k,v])=>({label:k,data:v,borderColor:sColors[k],backgroundColor:sColors[k]+'18',tension:.4,fill:false,pointRadius:3,pointHoverRadius:5}))},options:base});
 
   // Monthly temp
-  mk('an-monthly-temp',{type:'bar',data:{labels:AN.months,datasets:[{label:'°C',data:AN.monthlyTemp,backgroundColor:AN.monthlyTemp.map(t=>t<2?'#38bdf8':t<10?'#67e8f9':t<18?'#4ade80':t<23?'#fbbf24':'#f87171'),borderRadius:4}]},options:{...base,plugins:{legend:{display:false}},scales:{...base.scales,y:{...base.scales.y,ticks:{...base.scales.y.ticks,callback:v=>v+'°'}}}}});
+  mk('an-monthly-temp',{type:'bar',data:{labels:AN.months,datasets:[{label:'°C',data:AN.monthlyTemp,backgroundColor:AN.monthlyTemp.map(t=>t<2?'#38bdf8':t<10?'#8ab4ff':t<18?'#4ade80':t<23?'#fbbf24':'#f87171'),borderRadius:4}]},options:{...base,plugins:{legend:{display:false}},scales:{...base.scales,y:{...base.scales.y,ticks:{...base.scales.y.ticks,callback:v=>v+'°'}}}}});
 
   // Frost + hot days
   mk('an-extremes',{type:'bar',data:{labels:yr,datasets:[
@@ -21125,7 +21127,7 @@ function generateWeatherCard() {
   // Temperature colour (always dark-palette)
   const t = parseFloat(temp);
   const tColor = isNaN(t) ? '#e8edf8'
-    : t < 0  ? '#bae6fd' : t < 8  ? '#67e8f9' : t < 15 ? '#6ee7b7'
+    : t < 0  ? '#bae6fd' : t < 8  ? '#8ab4ff' : t < 15 ? '#6ee7b7'
     : t < 22 ? '#f1f5f9' : t < 28 ? '#fcd34d' : t < 35 ? '#fb923c' : '#f87171';
 
   // ── Header ──

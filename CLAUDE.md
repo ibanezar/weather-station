@@ -2871,6 +2871,13 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Posledica 12 px:** najširša temperatura v stolpcu grafa je ~24 px (»−12,3°« ~37 px), zato `renderHeroSpark` stolpce **izmeri** in jih pri premajhnem razmiku zloži na vsakih 6 ur (na 390 px ostane 3 h, od ~360 px navzdol 6 h). Prej fiksen prag 27 px. Širina oznake najvišje temperature je `7,1 px × znaki` (prej 6,2 pri 10,5 px).
 - **Ni narejeno:** preprost pogled (`html[data-mode="simple"]`) ima svoje velikosti in ni preslikan na lestvico; ostali deli naslovnice (kartice pod hero kartico) so izven obsega.
 
+### Barvna skala temperature je podatkovna barva, ne znamčna (4. 11. 2026, audit točka 7)
+
+- Hladni pas skale (`tempColor()`, 0–8 °C) je bil cian `#67e8f9`, **10 ΔE od znamčnega ciana** (`--cyan` `#22d3ee`, »rec« v logotipu): ista barva je hkrati pomenila »znamka« in »hladno« (in številka ima še žarenje). Zdaj: temna tema <0 `#bae6fd`, 0–8 **`#8ab4ff`** (periwinkle), svetla <0 `#1e3a8a`, 0–8 `#1d4ed8`, 8–15 `#15803d` (prej teal `#0f766e`, 23 ΔE od svetlega ciana `#0e7490`). `feelsStyle()` (hladni stopnji, v svetli še »Hladno«), kartica za deljenje in stolpčni graf mesečnih temperatur (`an-monthly-temp`) imajo iste barve.
+- **Pravilo:** nobena stopnja skale ni bliže znamčnemu cianu kot 25 ΔE (CIE Lab), sosednji stopnji sta ≥ 12 ΔE narazen, kontrast na podlagi kartice ≥ 4,5:1. Test: `tools/test_temp_barve.py` (v `parity.yml`). Če se znamčni cian spremeni, test pade na preverjanju `--cyan`: posodobi `BRAND_CYAN` in preveri ΔE znova. **Znamčni cian ne sme postati barva podatka** (vrednost, stolpec, črta) na kartici, ki ima ob sebi logotip.
+- Legende skale ni (nobena stopnja ni edini nosilec pomena: številka je izpisana, barva je podkrepitev). Žarenje (`#temp-val`, `text-shadow … currentColor`) je samo na glavni številki; drobne podatkovne številke (stolpci, pas, hitra vprašanja) ga nimajo, tako naj ostane.
+- **Ni narejeno:** zelena stopnja 8–15 °C v temni temi (`#6ee7b7`) je 17 ΔE od UI-akcenta `#6FBF95` (zavihek »Zdaj«); `.mtr-st.st-frost` (`#67e8f9`) in ploščica »Zmrzal« med hitrimi vprašanji (`--cyan`) so ostala v ciano družini (pojav, ne temperatura).
+
 ### Graf »Danes«: črta + stolpci po 3 ure, graf sam premika uro (1. 11. 2026)
 
 Filip je izbral varianto C izmed štirih predlogov (kapsule, žareča črta, črta in ikone, nebo). Samo prikaz; podatki in `_fcSliderUpdate()` so nespremenjeni.
