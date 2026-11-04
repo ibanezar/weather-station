@@ -2867,6 +2867,17 @@ function forecastPhrase(){
    tekočem dnevu polja še ni — takrat vrstice ni (ničesar ne izmišljamo). Ločen sosednji element, ne
    znotraj hs-rain-today/hs-rain-rate (glej opombo o junaški kartici). */
 let _heroMtrP=null;
+// Prag mokrega dne: isti kot WET_DAY_MM v verify_forecasts.py in MOKER_MM v napovej.js (preverja test_parity.prag mokrega dne).
+const HERO_WET_MM=0.2;
+// Besedilo MTR vrstice na ploščici dežja. MTR je zamrznjena napoved za CEL današnji dan (ne za preostanek dneva kot vrstica »napoved«
+// nad njo), zato ima okno v besedilu: dokler danes še ni padlo, je »za cel dan«; ko je že padlo (izmerjeno ≥ HERO_WET_MM), je v preteklem
+// času (»je napovedal«), da ne trdi nasprotja z napovedjo za preostanek dneva in je vidno, kaj je napovedal proti izmerjenemu.
+function _heroMtrText(t,measuredMm){
+  const r5=v=>Math.round(v*20)*5,mm=_mtrMm(t.mm),padlo=Number.isFinite(measuredMm)&&measuredMm>=HERO_WET_MM;
+  let txt=(padlo?'MTR je napovedal: dež ':'MTR za cel dan: dež ')+r5(t.pop)+'\u00A0%'+(mm?' · '+mm:'');
+  if(!padlo&&Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥\u00A05\u00A0mm\u00A0'+r5(t.pop5)+'\u00A0%';
+  return txt;
+}
 async function renderHeroRainMtr(){
   const el=document.getElementById('hs-rain-mtr');if(!el)return;
   try{
@@ -2875,10 +2886,7 @@ async function renderHeroRainMtr(){
     const t=j&&j.today;
     const todayIso=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
     if(!t||t.date!==todayIso||!Number.isFinite(t.pop)){el.hidden=true;return;}
-    const r5=v=>Math.round(v*20)*5;
-    let txt='MTR: dež '+r5(t.pop)+'\u00A0%'+(_mtrMm(t.mm)?' · '+_mtrMm(t.mm):'');
-    if(Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥\u00A05\u00A0mm\u00A0'+r5(t.pop5)+'\u00A0%';
-    el.textContent=txt;
+    el.textContent=_heroMtrText(t,_hsc.rt);
     el.title='Verjetnost padavin po MTR, našem modelu (včerajšnja napoved za današnji dan). Količina (~ mm) je grobo povprečje petih modelov.';
     el.hidden=false;
   }catch(_){el.hidden=true;}
@@ -2927,7 +2935,7 @@ function renderHeroBriefing(){
 
 // ── Lestvice na ploščicah junaške kartice ─────────────────
 // Kje na razponu je vrednost (vlaga 0–100 %, veter 0–50 km/h s sunkom kot črtico, tlak 980–1040 hPa s črtico pri 1013, UV 0–11,
-// intenziteta dežja po korenu do 10 mm/h, današnji razpon min–maks). Samo prikaz: številke ostanejo v ploščici.
+// količina dežja danes po korenu do 30 mm, današnji razpon min–maks). Samo prikaz: številke ostanejo v ploščici.
 const _hsc={};
 function _hscPos(id,p,p2){
   const el=document.getElementById(id);if(!el)return;
@@ -2947,7 +2955,8 @@ function heroScalePos(s){
     wind:n(s.wind)!=null?[s.wind/50*100,n(s.gust)!=null?s.gust/50*100:null]:null,
     pres:n(s.pres)!=null?[(s.pres-980)/60*100,null]:null,
     uv:n(s.uv)!=null?[s.uv/11*100,null]:null,
-    rain:n(s.rr)!=null?[Math.sqrt(Math.max(0,s.rr)/10)*100,null]:null,
+    // Dež: polnilo kaže KOLIČINO danes (številka nad lestvico), ne intenzitete: prazna proga pod »6,3 mm« se je brala kot »skoraj nič«. Polno = 30 mm, koren, da so majhne količine vidne.
+    rain:n(s.rt)!=null?[Math.sqrt(Math.min(30,Math.max(0,s.rt))/30)*100,null]:null,
     range:(n(s.temp)!=null&&rg!=null&&rg>0.2)?[(s.temp-s.tmin)/rg*100,null]:null
   };
 }
@@ -3027,7 +3036,7 @@ function applyObs(obs){
   set('hs-uv-label',uvLabel(uv));
   document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);
   noteTodayUv(uv,_lastObsTime??new Date());renderTodayUv();}
-  Object.assign(_hsc,{hum:obs.humidity,wind:m.windSpeed,gust:m.windGust??m.windSpeed,pres:m.pressure,uv:obs.uv??0,rr:m.precipRate??0,temp:m.temp});
+  Object.assign(_hsc,{hum:obs.humidity,wind:m.windSpeed,gust:m.windGust??m.windSpeed,pres:m.pressure,uv:obs.uv??0,rt:m.precipTotal??0,temp:m.temp});
   renderHeroScales();setHeroWx(m,obs);renderHeroMoon();
   {const dl=document.getElementById('hs-dew-line');if(dl&&m.dewpt!=null){set('hs-dew',fmt(m.dewpt,1));set('hs-dew-lbl',dewLabel(m.dewpt).toLowerCase());dl.hidden=false;}}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);

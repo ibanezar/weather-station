@@ -371,6 +371,8 @@ def napovej():
     moker = js("napovej/napovej.js", ["MOKER_MM"], [{"expr": "MOKER_MM"}])[0]
     check(moker == vf.WET_DAY_MM == tr.WET_DAY_MM, "prag mokrega dne (0,2 mm)",
           f"napovej.js={moker} verify_forecasts={vf.WET_DAY_MM} train_recica_mos={tr.WET_DAY_MM}")
+    hero = js("app.js", ["HERO_WET_MM"], [{"expr": "HERO_WET_MM"}])[0]
+    check(hero == vf.WET_DAY_MM, "prag mokrega dne: ploščica dežja na naslovnici", f"app.js={hero} verify_forecasts={vf.WET_DAY_MM}")
 
 
 # ── Konstante, podvojene med worker.js in preostankom ────────────────────────
@@ -630,6 +632,24 @@ def hero_ikona_noc_in_megla():
     check(r[8] == "Rahel dež", "oznaka: dež ostane", r[8])
     check(r[9] == "Oblačno", "oznaka: brez megle nespremenjena", r[9])
     check(r[10] == [True, False, True], "noč brez koordinat: rezerva po uri", r[10])
+
+
+@test
+def hero_mtr_vrstica():
+    """Ploščica »Padlo danes«: MTR vrstica ima časovno okno (cel dan / je napovedal), da ne nasprotuje napovedi za preostanek dneva."""
+    names = ["_mtrMm", "HERO_WET_MM", "_heroMtrText"]
+    t = {"pop": 0.85, "mm": 2.04, "pop5": 0.05}
+    calls = [{"fn": "_heroMtrText", "args": [t, 0]}, {"fn": "_heroMtrText", "args": [t, 0.1]},
+             {"fn": "_heroMtrText", "args": [t, 0.2]}, {"fn": "_heroMtrText", "args": [t, 6.3]},
+             {"fn": "_heroMtrText", "args": [t, None]}, {"fn": "_heroMtrText", "args": [{"pop": 0.2, "mm": 0.05}, 0]}]
+    r = js("app.js", names, calls)
+    nb = "\u00a0"
+    check(r[0] == f"MTR za cel dan: dež 85{nb}% · ~2,0{nb}mm · ≥{nb}5{nb}mm{nb}5{nb}%", "MTR vrstica: dokler ni padlo, cel dan", r[0])
+    check(r[1] == r[0], "MTR vrstica: pod pragom (0,1 mm) še ni »padlo«", r[1])
+    check(r[2] == f"MTR je napovedal: dež 85{nb}% · ~2,0{nb}mm", "MTR vrstica: ob 0,2 mm preteklik, brez ≥ 5 mm", r[2])
+    check(r[3] == r[2], "MTR vrstica: ob 6,3 mm preteklik", r[3])
+    check(r[4] == r[0], "MTR vrstica: brez meritve = cel dan", r[4])
+    check(r[5] == f"MTR za cel dan: dež 20{nb}% · < 0,2{nb}mm", "MTR vrstica: majhna količina", r[5])
 
 
 @test
@@ -995,14 +1015,14 @@ def hero_lestvice():
         tmin = rnd.uniform(-8, 25)
         cases.append(dict(hum=rnd.uniform(15, 100), wind=rnd.uniform(0, 70), gust=rnd.uniform(0, 90),
                           pres=rnd.uniform(960, 1050), uv=rnd.choice([0, 0, rnd.uniform(0, 12)]),
-                          rr=rnd.choice([0, 0, rnd.uniform(0, 14)]), temp=tmin + rnd.uniform(-1, 15),
+                          rt=rnd.choice([0, 0, rnd.uniform(0, 12), rnd.uniform(25, 60)]), temp=tmin + rnd.uniform(-1, 15),
                           tmin=tmin, tmax=tmin + rnd.choice([0.1, rnd.uniform(0.5, 14)])))
     calls = [{"fn": "heroScalePos", "args": [c]} for c in cases]
     got = js("app.js", ["heroScalePos"], calls)
     for c, g in zip(cases, got):
         obs = {"humidity": c["hum"], "uv": c["uv"],
                "metric": {"windSpeed": c["wind"], "windGust": c["gust"], "pressure": c["pres"],
-                          "precipRate": c["rr"], "temp": c["temp"]}}
+                          "precipTotal": c["rt"], "temp": c["temp"]}}
         py = ic.hero_scale_positions(obs, c["tmin"], c["tmax"])
         for key in ("hum", "wind", "pres", "uv", "rain", "range"):
             a, b = g.get(key), py.get(key)
