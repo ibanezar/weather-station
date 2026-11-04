@@ -43,6 +43,14 @@
     if (n != null && unit) b.appendChild(el('em', null, unit));
     var s = $(id + '-s'); if (s) s.textContent = sub || '';
   }
+  // temperaturna lestvica (samo polnila, robovi in grafi; besedilo ostane ink zaradi kontrasta)
+  var TSTOPS = [[-10, [106, 92, 240]], [-5, [75, 141, 245]], [0, [61, 181, 240]], [5, [44, 198, 168]], [10, [122, 212, 90]], [15, [226, 216, 58]], [20, [246, 166, 35]], [25, [242, 107, 58]], [30, [217, 58, 58]]];
+  function tempColor(t) {
+    if (t == null || isNaN(t)) return '#9AA9B8';
+    var s = TSTOPS; if (t <= s[0][0]) return 'rgb(' + s[0][1].join(',') + ')'; if (t >= s[s.length - 1][0]) return 'rgb(' + s[s.length - 1][1].join(',') + ')';
+    for (var i = 1; i < s.length; i++) if (t <= s[i][0]) { var a = s[i - 1], b = s[i], f = (t - a[0]) / (b[0] - a[0]); return 'rgb(' + [0, 1, 2].map(function (k) { return Math.round(a[1][k] + (b[1][k] - a[1][k]) * f); }).join(',') + ')'; }
+  }
+  function setW(id, pct) { var e = $(id); if (e && pct != null && !isNaN(pct)) e.style.setProperty('--w', Math.max(0, Math.min(100, pct)).toFixed(1) + '%'); }
   function uvLevel(u) { return u == null ? '' : u <= 2 ? 'nizek' : u <= 5 ? 'zmeren' : u <= 7 ? 'visok' : u <= 10 ? 'zelo visok' : 'ekstremen'; }
 
   // ── tema, način prikaza, meni Več, info ikone ───────────
@@ -153,6 +161,8 @@
       $('m-rain').textContent = num(m.precipTotal, 1) || '–';
       $('m-rate').textContent = 'intenziteta ' + txt(m.precipRate, 1, 'mm/h');
       $('m-pres').textContent = num(m.pressure, 0) || '–';
+      setW('mb-hum', o.humidity); setW('mb-wind', m.windSpeed / 40 * 100); setW('mb-rain', m.precipTotal / 20 * 100); setW('mb-pres', (m.pressure - 980) / 60 * 100);
+      if (o.winddir != null) $('m-arrow').style.transform = 'rotate(' + ((o.winddir + 180) % 360) + 'deg)';   // puščica kaže, kam piha
       // več meritev, 1. raven (vizualna mreža)
       tile('a-uv', o.uv, 0, '', uvLevel(o.uv));
       tile('a-ws', m.windSpeed, 0, 'km/h', 'sunki ' + txt(m.windGust, 0, 'km/h'));
@@ -224,8 +234,8 @@
     Promise.all([jget(PROXY + '/napoved-om'), jget('/napoved-modela-live.json').catch(function () { return null; })]).then(function (r) {
       var j = r[0], mtr = r[1]; if (!j || !j.hourly || !j.daily) throw new Error('oblika');
       var H = j.hourly, D = j.daily, i0 = H.time.indexOf(localHourKey()); if (i0 < 0) i0 = 0;
-      var ic = wmo(H.weather_code[i0], H.is_day[i0]);
-      $('c-ic').setAttribute('href', '#' + ic[0]); $('c-txt').textContent = ic[1]; $('hero').setAttribute('data-wx', ic[2]);
+      var ic = wmo(H.weather_code[i0], H.is_day[i0]), simWx = (location.search.match(/[?&]wx=(clear|cloud|rain|storm|snow|fog|night)/) || [])[1];
+      $('c-ic').setAttribute('href', '#' + ic[0]); $('c-txt').textContent = ic[1]; $('hero').setAttribute('data-wx', simWx || ic[2]); $('hero').setAttribute('data-day', H.is_day[i0] === 0 && !simWx ? '0' : '1');
       $('hero-model').textContent = 'Vremenski opis: modelski podatek (Open-Meteo) · prenos ob ' + hhmm(Date.now());
       modelRange = txt(D.temperature_2m_min[0], 0, '°') + ' do ' + txt(D.temperature_2m_max[0], 0, '°'); setRangeModel();
       var got = 'Preneseno ob ' + hhmm(Date.now());
@@ -251,6 +261,8 @@
       b.appendChild(icon(ic[0]));
       b.appendChild(el('b', null, txt(H.temperature_2m[i], 0, '°')));
       b.appendChild(el('span', null, H.precipitation_probability[i] == null ? '' : Math.round(H.precipitation_probability[i]) + ' %'));
+      var pb = el('span', 'pb'), pi = el('i'); pi.style.setProperty('--w', (H.precipitation_probability[i] || 0) + '%'); pb.appendChild(pi); b.appendChild(pb);
+      b.style.setProperty('--tc', tempColor(H.temperature_2m[i]));
       b.appendChild(el('span', 'dv-advonly', txt(H.precipitation[i], 1, 'mm')));
       b.addEventListener('click', function () {
         box.querySelectorAll('.dv-hr').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
@@ -298,6 +310,8 @@
   function renderDaily(D, mtr) {
     var box = $('d-list'); box.textContent = '';
     var mtrBy = {}; if (mtr && mtr.days) mtr.days.forEach(function (d) { mtrBy[d.date] = d; });
+    var gmin = 99, gmax = -99; for (var q = 0; q < 7 && q < D.time.length; q++) { gmin = Math.min(gmin, D.temperature_2m_min[q]); gmax = Math.max(gmax, D.temperature_2m_max[q]); }
+    var span = Math.max(1, gmax - gmin);
     for (var i = 0; i < 7 && i < D.time.length; i++) (function (i) {
       var date = D.time[i], dt = new Date(date + 'T12:00:00');
       var b = el('button', 'dv-day'); b.type = 'button'; b.setAttribute('aria-pressed', 'false');
@@ -307,6 +321,9 @@
       b.appendChild(icon(ic[0]));
       b.appendChild(el('div', 'mx', txt(D.temperature_2m_max[i], 0, '°')));
       b.appendChild(el('div', 'mn', txt(D.temperature_2m_min[i], 0, '°')));
+      var rb = el('span', 'rb'), ri = el('i'); ri.style.setProperty('--l', ((D.temperature_2m_min[i] - gmin) / span * 100).toFixed(1) + '%'); ri.style.setProperty('--w', Math.max(10, (D.temperature_2m_max[i] - D.temperature_2m_min[i]) / span * 100).toFixed(1) + '%');
+      ri.style.setProperty('--c1', tempColor(D.temperature_2m_min[i])); ri.style.setProperty('--c2', tempColor(D.temperature_2m_max[i])); rb.appendChild(ri); b.appendChild(rb);
+      b.style.setProperty('--tc', tempColor((D.temperature_2m_max[i] + D.temperature_2m_min[i]) / 2));
       b.appendChild(el('small', null, txt(D.precipitation_probability_max[i], 0, '%')));
       b.appendChild(el('small', null, txt(D.precipitation_sum[i], 1, 'mm')));
       if (mt) b.appendChild(el('small', 'mt', 'MTR\n' + txt(mt.tmax, 0, '°') + '/' + txt(mt.tmin, 0, '°')));
@@ -415,10 +432,13 @@
     [400, 600, 800].forEach(function (e) { g += '<text x="' + x(e).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="middle" font-size="11" fill="currentColor" opacity=".7">' + e + ' m</text>'; });
     var ref = s[0], ref1 = ref.t - 0.0065 * (e1 - ref.elev);
     g += '<line x1="' + x(ref.elev).toFixed(1) + '" y1="' + y(ref.t).toFixed(1) + '" x2="' + x(e1).toFixed(1) + '" y2="' + y(ref1).toFixed(1) + '" stroke="currentColor" opacity=".45" stroke-dasharray="4 4"/>';
-    g += '<polyline fill="none" stroke="var(--src-meas)" stroke-width="2.5" points="' + s.map(function (p) { return x(p.elev).toFixed(1) + ',' + y(p.t).toFixed(1); }).join(' ') + '"/>';
+    var poly = s.map(function (p) { return x(p.elev).toFixed(1) + ',' + y(p.t).toFixed(1); });
+    g = '<defs><linearGradient id="vgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--src-meas)" stop-opacity=".38"/><stop offset="1" stop-color="var(--src-meas)" stop-opacity="0"/></linearGradient></defs>' + g +
+      '<polygon fill="url(#vgA)" points="' + x(s[0].elev).toFixed(1) + ',' + (H - pb) + ' ' + poly.join(' ') + ' ' + x(s[s.length - 1].elev).toFixed(1) + ',' + (H - pb) + '"/>';
+    g += '<polyline fill="none" stroke="var(--src-meas)" stroke-width="3" stroke-linejoin="round" points="' + s.map(function (p) { return x(p.elev).toFixed(1) + ',' + y(p.t).toFixed(1); }).join(' ') + '"/>';
     s.forEach(function (p, i) {
       var cx = x(p.elev).toFixed(1), cy = y(p.t).toFixed(1);
-      g += '<circle cx="' + cx + '" cy="' + cy + '" r="5.5" fill="var(--src-meas)" stroke="var(--c-surface)" stroke-width="2"/>' +
+      g += '<circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + tempColor(p.t) + '" stroke="var(--c-surface)" stroke-width="2"/>' +
         '<text x="' + cx + '" y="' + (y(p.t) + (i % 2 ? 20 : -10)).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">' + txt(p.t, 1).replace(NBSP, '') + '°</text>' +
         '<text x="' + cx + '" y="' + (H - pb + 14 + (i % 2) * 12) + '" text-anchor="middle" font-size="11" fill="currentColor" opacity=".85">' + p.name + '</text>';
     });
@@ -433,7 +453,7 @@
     // od najvišje postaje navzdol (Črnivec, Gornji Grad, Rečica), Varpolje brez višine na koncu
     all.slice().sort(function (a, b) { return (b.elev == null ? -1 : b.elev) - (a.elev == null ? -1 : a.elev); }).forEach(function (s) {
       var d = el('div', 'dv-vt' + (warm && warm.id === s.id ? ' warm' : '')), age = s.ts ? ageMin(s.ts) : null;
-      d.appendChild(el('h3', null, s.long)); d.appendChild(el('span', 'el', (s.elev != null ? s.elev + ' m' : 'višina ni objavljena') + ' · ' + s.src));
+      d.style.setProperty('--tc', tempColor(s.t)); d.appendChild(el('h3', null, s.long)); d.appendChild(el('span', 'el', (s.elev != null ? s.elev + ' m' : 'višina ni objavljena') + ' · ' + s.src));
       d.appendChild(el('b', null, txt(s.t, 1, '°C')));
       if (warm && warm.id === s.id) d.appendChild(el('small', 'wm', 'NAJTOPLEJE'));
       if (home && s.id !== 'home' && !s.stale && !home.stale) { var df = s.t - home.t; d.appendChild(el('small', null, (df > 0 ? '+' : df < 0 ? '−' : '') + num(Math.abs(df), 1) + ' °C glede na Rečico')); }
