@@ -102,4 +102,4 @@ V razširjenem delu ploščica »PM₂,₅ · Varpolje **215,0** µg/m³, Nevarn
 
 ## Stanje popravkov (4. 11. 2026)
 
-Narejeno: točke 1, 2, 3, 4, 5, 6 in 7 (commiti na veji `claude/vigilant-carson-lm96r2`; opis v `CLAUDE.md`, razdelki »Ikona stanja …«, »Ploščica »Padlo danes« …« in »Tipografska lestvica hero kartice«). Odprto: 8–16.
+Narejeno: točke 1–9 (commiti na veji `claude/vigilant-carson-lm96r2`; opis v `CLAUDE.md`, razdelki »Ikona stanja …«, »Ploščica »Padlo danes« …« in »Tipografska lestvica hero kartice«). Odprto: 10–16.
