@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - 'app.js'
+      - 'style.css'
       - 'worker.js'
       - 'podjetja/**'
       - 'tools/generate_podjetja_page.py'
@@ -24,6 +25,7 @@ on:
     branches: [main]
     paths:
       - 'app.js'
+      - 'style.css'
       - 'worker.js'
       - 'igra/**'
       - 'napovej/**'
@@ -53,6 +55,12 @@ jobs:
 
       - name: Test usklajenosti kopij
         run: python3 tools/test_parity.py
+
+      - name: Test tipografske lestvice hero kartice
+        run: python3 tools/test_hero_tipografija.py
+
+      - name: Test barvne skale temperature (podatkovna barva ≠ znamčni cian)
+        run: python3 tools/test_temp_barve.py
 
       - name: Test preverjanja nevihtne karte
         run: python3 tools/test_storm_verify.py

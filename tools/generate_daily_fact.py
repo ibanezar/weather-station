@@ -64,7 +64,7 @@ def dm_short(iso):
 def wrap(icon, text, date):
     return (f'{START}\n'
             f'        <div class="daily-fact-card" id="daily-fact-card" data-date="{date}">'
-            f'<span class="dfc-icon" aria-hidden="true">{icon}</span>'
+            f'<span class="dfc-icon" aria-hidden="true"><svg class="ic"><use href="#i-{icon}"/></svg></span>'
             f'<span class="dfc-text">{text}</span></div>\n'
             f'        {END}')
 
@@ -111,25 +111,25 @@ def fact_record(hist, last, mmdd, param, label, unit, superlative):
         score = 120  # bolj zanimivo od navadnega dnevnega rekorda -- naj med kandidati vedno zmaga
         text = (f'{word} <strong>absolutni rekord postaje</strong>: {label} '
                  f'<strong>{num(today_v)}{unit}</strong> (prej {num(abs_val)}{unit}, {abs_date[:4]})')
-        icon = "🥇"
+        icon = "medal"
     elif is_new:
         score = 100
         text = (f'{word} rekord za {day}: {label} <strong>{num(today_v)}{unit}</strong> '
                  f'(prej {num(rec_val)}{unit}, {rec_date[:4]})')
-        icon = "🏆"
+        icon = "trophy"
     elif diff < 0.05:
         # Zaokroženo na eno decimalko bi razlika pokazala kot "0,0 °C", kar bi
         # bralcu povedalo, da je rekord SKORAJ padel -- v resnici je izenačen.
         score = 90
         text = (f'{word} izenačen rekord za {day}: {label} <strong>{num(today_v)}{unit}</strong> '
                  f'(kot {rec_date[:4]})')
-        icon = "🤝"
+        icon = "target"
     elif diff < 1.0:
         score = 80
         side = "pod" if superlative == "max" else "nad"
         text = (f'{word} le <strong>{num(diff)}{unit}</strong> {side} rekordom za {day} '
                  f'({num(today_v)}; rekord {num(rec_val)}{unit}, {rec_date[:4]})')
-        icon = "📈"
+        icon = "trending-up"
     else:
         return None
     return (score, icon, text)
@@ -157,11 +157,11 @@ def fact_streak(hist, last):
     if wet_today:
         score = 60 + min(streak, 20)
         text = f'Dežuje že <strong>{streak}. dan zapored</strong>'
-        icon = "🌧️"
+        icon = "cloud-rain"
     else:
         score = 60 + min(streak, 20)
         text = f'Brez dežja že <strong>{streak} dni zapored</strong>'
-        icon = "☀️"
+        icon = "sun"
     return (score, icon, text)
 
 
@@ -184,13 +184,13 @@ def fact_percentile(hist, last, mmdd):
         score = 50
         text = (f'{dm_short(last)} letos <strong>{rank}. najtoplejši</strong> '
                  f'v {years} letih meritev ({num(today_v)} °C)')
-        icon = "🌡️"
+        icon = "thermometer"
     else:
         rank_from_bottom = years - rank + 1
         score = 50
         text = (f'{dm_short(last)} letos <strong>{rank_from_bottom}. najhladnejši</strong> '
                  f'v {years} letih meritev ({num(today_v)} °C)')
-        icon = "❄️"
+        icon = "thermometer-snowflake"
     return (score, icon, text)
 
 
@@ -208,19 +208,19 @@ def fact_year_ago(hist, last):
     day = dm_short(last)
     if abs(diff) < 0.05:
         text = f'{day} enako toplo kot lani (<strong>{num(today_v)} °C</strong>)'
-        icon = "🔁"
+        icon = "refresh-cw"
     elif abs(diff) < 0.2:
         text = (f'{day} skoraj enako toplo kot lani '
                  f'(<strong>{num(today_v)}</strong> proti {num(prev_temp)} °C)')
-        icon = "🔁"
+        icon = "refresh-cw"
     elif diff > 0:
         text = (f'{day} <strong>{num(diff)} °C topleje</strong> kot lani '
                  f'({num(today_v)} proti {num(prev_temp)} °C)')
-        icon = "📊"
+        icon = "chart-column"
     else:
         text = (f'{day} <strong>{num(-diff)} °C hladneje</strong> kot lani '
                  f'({num(today_v)} proti {num(prev_temp)} °C)')
-        icon = "📊"
+        icon = "chart-column"
     return (10, icon, text)
 
 

@@ -406,9 +406,10 @@ def hero_scale_positions(obs, tmin=None, tmax=None):
     uv = obs.get("uv") or 0
     if ok(uv):
         out["uv"] = (uv / 11 * 100, None)
-    rr = m.get("precipRate") or 0
-    if ok(rr):
-        out["rain"] = (math.sqrt(max(0, rr) / 10) * 100, None)
+    # Dež: polnilo = količina danes (isto kot številka nad lestvico), polno = 30 mm; kopija heroScalePos() v app.js.
+    rt = _strip_rain_test_offset(m.get("precipTotal") or 0, (obs.get("obsTimeLocal") or "")[:10]) or 0
+    if ok(rt):
+        out["rain"] = (math.sqrt(min(30, max(0, rt)) / 30) * 100, None)
     temp = m.get("temp")
     if ok(temp) and ok(tmin) and ok(tmax) and tmax - tmin > 0.2:
         out["range"] = ((temp - tmin) / (tmax - tmin) * 100, None)

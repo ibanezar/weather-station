@@ -371,6 +371,8 @@ def napovej():
     moker = js("napovej/napovej.js", ["MOKER_MM"], [{"expr": "MOKER_MM"}])[0]
     check(moker == vf.WET_DAY_MM == tr.WET_DAY_MM, "prag mokrega dne (0,2 mm)",
           f"napovej.js={moker} verify_forecasts={vf.WET_DAY_MM} train_recica_mos={tr.WET_DAY_MM}")
+    hero = js("app.js", ["HERO_WET_MM"], [{"expr": "HERO_WET_MM"}])[0]
+    check(hero == vf.WET_DAY_MM, "prag mokrega dne: ploščica dežja na naslovnici", f"app.js={hero} verify_forecasts={vf.WET_DAY_MM}")
 
 
 # ── Konstante, podvojene med worker.js in preostankom ────────────────────────
@@ -602,6 +604,73 @@ def hero_ikona():
         obs = {"obsTimeLocal": "2026-10-29 %02d:00:00" % h, "metric": {"precipRate": pr, "solarRadiation": sr}}
         check(ic.hero_condition_label(obs) == lab, "hero ikona: stanje", f"{pr} {sr} {h}: py={ic.hero_condition_label(obs)} js={lab}")
     check(ic.HERO_ICON_BY_LABEL == icons, "hero ikona: preslikava ikon", f"{ic.HERO_ICON_BY_LABEL} != {icons}")
+
+
+@test
+def hero_ikona_noc_in_megla():
+    """Ikona stanja: megla/nevihta imata nočno različico (po pravem sončnem zahodu, ne po uri 23-5), oznaka pod
+    ikono pa je ista odločitev kot ikona (4. 11. 2026: ob 21. uri je bila ob oznaki »Oblačno« ikona fog-day)."""
+    names = ["sunTimes", "_isNightAt", "_WXCOND_ICON", "_WXCOND_ICON_NIGHT", "_COND_ICON", "_condLabelShown", "_condImg"]
+    pre = "var _wxCond='';var _lastBriefObs={lat:46.33,lon:14.92};"
+    def at(h, m, wc):
+        return {"expr": "(function(){_wxCond='%s';return _condImg('Oblačno',108,new Date(2026,10,4,%d,%d)).match(/icons\\/weather\\/([a-z-]+)\\.svg/)[1];})()" % (wc, h, m)}
+    calls = [at(12, 0, "fog"), at(16, 45, "fog"), at(21, 0, "fog"), at(12, 0, "storm"), at(21, 0, "storm"),
+             at(21, 0, "snow"), at(21, 0, "night"),
+             {"expr": "(function(){_wxCond='fog';return _condLabelShown('Oblačno');})()"},
+             {"expr": "(function(){_wxCond='fog';return _condLabelShown('Rahel dež');})()"},
+             {"expr": "(function(){_wxCond='';return _condLabelShown('Oblačno');})()"},
+             {"expr": "(function(){_lastBriefObs=null;return [new Date(2026,10,4,3,0),new Date(2026,10,4,12,0),new Date(2026,10,4,23,30)].map(_isNightAt);})()"}]
+    r = js("app.js", names, calls, prelude=pre)
+    check(r[0] == "fog-day", "ikona: megla opoldne je dnevna", r[0])
+    check(r[1] == "fog-night", "ikona: megla po zahodu (16.45) je nočna", r[1])
+    check(r[2] == "fog-night", "ikona: megla ob 21. uri je nočna", r[2])
+    check(r[3] == "thunderstorms-day-rain", "ikona: nevihta opoldne", r[3])
+    check(r[4] == "thunderstorms-night-rain", "ikona: nevihta ponoči", r[4])
+    check(r[5] == "snow", "ikona: sneg nima nočne različice", r[5])
+    check(r[6] == "clear-night", "ikona: stanje night", r[6])
+    check(r[7] == "Možna megla", "oznaka: megla preglasi nebo", r[7])
+    check(r[8] == "Rahel dež", "oznaka: dež ostane", r[8])
+    check(r[9] == "Oblačno", "oznaka: brez megle nespremenjena", r[9])
+    check(r[10] == [True, False, True], "noč brez koordinat: rezerva po uri", r[10])
+
+
+@test
+def hero_mtr_vrstica():
+    """Ploščica »Padlo danes«: MTR vrstica ima časovno okno (cel dan / je napovedal), da ne nasprotuje napovedi za preostanek dneva."""
+    names = ["_mtrMm", "HERO_WET_MM", "_heroMtrText"]
+    t = {"pop": 0.85, "mm": 2.04, "pop5": 0.05}
+    calls = [{"fn": "_heroMtrText", "args": [t, 0]}, {"fn": "_heroMtrText", "args": [t, 0.1]},
+             {"fn": "_heroMtrText", "args": [t, 0.2]}, {"fn": "_heroMtrText", "args": [t, 6.3]},
+             {"fn": "_heroMtrText", "args": [t, None]}, {"fn": "_heroMtrText", "args": [{"pop": 0.2, "mm": 0.05}, 0]}]
+    r = js("app.js", names, calls)
+    nb = "\u00a0"
+    check(r[0] == f"MTR za cel dan: dež 85{nb}% · ~2,0{nb}mm · ≥{nb}5{nb}mm{nb}5{nb}%", "MTR vrstica: dokler ni padlo, cel dan", r[0])
+    check(r[1] == r[0], "MTR vrstica: pod pragom (0,1 mm) še ni »padlo«", r[1])
+    check(r[2] == f"MTR je napovedal: dež 85{nb}% · ~2,0{nb}mm", "MTR vrstica: ob 0,2 mm preteklik, brez ≥ 5 mm", r[2])
+    check(r[3] == r[2], "MTR vrstica: ob 6,3 mm preteklik", r[3])
+    check(r[4] == r[0], "MTR vrstica: brez meritve = cel dan", r[4])
+    check(r[5] == f"MTR za cel dan: dež 20{nb}% · < 0,2{nb}mm", "MTR vrstica: majhna količina", r[5])
+
+
+@test
+def hero_pas_brez_emoji():
+    """Pas nad junaško kartico (buildTicker) in dnevno dejstvo v nogi: ikone iz sklada, ne emoji; decimalna vejica."""
+    import re
+    src = js_src("app.js")
+    a = src.index("function buildTicker(){")
+    blk = src[a:src.index("let _pulseSeen", a)]
+    emoji = re.findall(r"[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B50\uFE0F]", blk)
+    check(not emoji, "buildTicker: brez emoji", repr(emoji[:5]))
+    check(len(re.findall(r"toFixed\(", blk)) == 1, "buildTicker: toFixed samo v pomočniku z vejico", str(len(re.findall(r"toFixed\(", blk))))
+    check(not re.search(r"[\d}]%|[\w})]°C", blk), "buildTicker: presledek pred % in °C")
+    import generate_daily_fact as gdf
+    html = js_src("index.html")
+    ids = set(re.findall(r'icon = "([a-z0-9-]+)"', js_src("tools/generate_daily_fact.py")))
+    check(len(ids) >= 8, "dnevno dejstvo: ikone so imena iz sklada", str(ids))
+    for i in sorted(ids):
+        check(f'id="i-{i}"' in html, "dnevno dejstvo: ikona obstaja v spritu", i)
+    out = gdf.wrap("trophy", "x", "2026-11-04")
+    check("<svg" in out and "#i-trophy" in out, "dnevno dejstvo: izpis je SVG", out[:160])
 
 
 @test
@@ -946,14 +1015,14 @@ def hero_lestvice():
         tmin = rnd.uniform(-8, 25)
         cases.append(dict(hum=rnd.uniform(15, 100), wind=rnd.uniform(0, 70), gust=rnd.uniform(0, 90),
                           pres=rnd.uniform(960, 1050), uv=rnd.choice([0, 0, rnd.uniform(0, 12)]),
-                          rr=rnd.choice([0, 0, rnd.uniform(0, 14)]), temp=tmin + rnd.uniform(-1, 15),
+                          rt=rnd.choice([0, 0, rnd.uniform(0, 12), rnd.uniform(25, 60)]), temp=tmin + rnd.uniform(-1, 15),
                           tmin=tmin, tmax=tmin + rnd.choice([0.1, rnd.uniform(0.5, 14)])))
     calls = [{"fn": "heroScalePos", "args": [c]} for c in cases]
     got = js("app.js", ["heroScalePos"], calls)
     for c, g in zip(cases, got):
         obs = {"humidity": c["hum"], "uv": c["uv"],
                "metric": {"windSpeed": c["wind"], "windGust": c["gust"], "pressure": c["pres"],
-                          "precipRate": c["rr"], "temp": c["temp"]}}
+                          "precipTotal": c["rt"], "temp": c["temp"]}}
         py = ic.hero_scale_positions(obs, c["tmin"], c["tmax"])
         for key in ("hum", "wind", "pres", "uv", "rain", "range"):
             a, b = g.get(key), py.get(key)

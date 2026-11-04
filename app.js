@@ -278,20 +278,22 @@ function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'
 function solarLabel(w){if(!w&&w!==0)return'—';if(w<20)return'Noč/temno';if(w<100)return'Oblačno';if(w<300)return'Delno oblačno';if(w<600)return'Pretežno sončno';return'Jasno sončno';}
 function dewLabel(d){if(d<5)return'Zelo suho';if(d<10)return'Suho';if(d<15)return'Prijetno';if(d<20)return'Rahlo vlažno';return'Soparno';}
 
+// Temperaturna skala je PODATKOVNA barva: nobena stopnja ne sme biti blizu znamčnemu cianu (logotip »rec«, --cyan), sicer ista barva
+// hkrati pomeni »znamka« in »hladno« (4. 11. 2026: #67e8f9 je bil 10 ΔE od #22d3ee). Preverja tools/test_temp_barve.py.
 function tempColor(t){
   if(isDark()){
     // Bright, saturated colours — all high contrast on dark navy
     if(t<0)  return '#bae6fd';  // bright sky blue
-    if(t<8)  return '#67e8f9';  // bright cyan
+    if(t<8)  return '#8ab4ff';  // periwinkle blue (ne cian: ta je znamka)
     if(t<15) return '#6ee7b7';  // bright mint
     if(t<22) return '#f1f5f9';  // bright white
     if(t<28) return '#fcd34d';  // bright amber
     if(t<35) return '#fb923c';  // bright orange
     return '#f87171';
   } else {
-    if(t<0)  return '#1d4ed8';
-    if(t<8)  return '#0369a1';
-    if(t<15) return '#0f766e';
+    if(t<0)  return '#1e3a8a';
+    if(t<8)  return '#1d4ed8';
+    if(t<15) return '#15803d';  // zelena (prej teal #0f766e: 23 ΔE od cianovega »rec« v svetli temi)
     if(t<22) return '#0f172a';
     if(t<28) return '#b45309';
     if(t<35) return '#c2410c';
@@ -300,16 +302,16 @@ function tempColor(t){
 }
 function feelsStyle(t){
   if(isDark()){
-    if(t<0)  return{label:'Zmrzuje',   c:'#93c5fd',bg:'rgba(147,197,253,.1)',b:'rgba(147,197,253,.25)'};
-    if(t<8)  return{label:'Mrzlo',       c:'#7dd3fc',bg:'rgba(125,211,252,.1)',b:'rgba(125,211,252,.25)'};
+    if(t<0)  return{label:'Zmrzuje',   c:'#bae6fd',bg:'rgba(186,230,253,.1)',b:'rgba(186,230,253,.25)'};
+    if(t<8)  return{label:'Mrzlo',       c:'#8ab4ff',bg:'rgba(138,180,255,.1)',b:'rgba(138,180,255,.25)'};
     if(t<15) return{label:'Hladno',       c:'#6ee7b7',bg:'rgba(110,231,183,.1)',b:'rgba(110,231,183,.25)'};
     if(t<22) return{label:'Prijetno',c:'#34d399',bg:'rgba(52,211,153,.1)', b:'rgba(52,211,153,.25)'};
     if(t<28) return{label:'Toplo',       c:'#fcd34d',bg:'rgba(252,211,77,.1)', b:'rgba(252,211,77,.25)'};
     return         {label:'Vroče',        c:'#f87171',bg:'rgba(248,113,113,.1)',b:'rgba(248,113,113,.25)'};
   } else {
-    if(t<0)  return{label:'Zmrzuje',   c:'#1d4ed8',bg:'rgba(29,78,216,.08)', b:'rgba(29,78,216,.2)'};
-    if(t<8)  return{label:'Mrzlo',       c:'#0369a1',bg:'rgba(3,105,161,.08)', b:'rgba(3,105,161,.2)'};
-    if(t<15) return{label:'Hladno',       c:'#0f766e',bg:'rgba(15,118,110,.08)',b:'rgba(15,118,110,.2)'};
+    if(t<0)  return{label:'Zmrzuje',   c:'#1e3a8a',bg:'rgba(30,58,138,.08)', b:'rgba(30,58,138,.2)'};
+    if(t<8)  return{label:'Mrzlo',       c:'#1d4ed8',bg:'rgba(29,78,216,.08)', b:'rgba(29,78,216,.2)'};
+    if(t<15) return{label:'Hladno',       c:'#15803d',bg:'rgba(21,128,61,.08)',b:'rgba(21,128,61,.2)'};
     if(t<22) return{label:'Prijetno',c:'#059669',bg:'rgba(5,150,105,.08)', b:'rgba(5,150,105,.2)'};
     if(t<28) return{label:'Toplo',       c:'#b45309',bg:'rgba(180,83,9,.08)',  b:'rgba(180,83,9,.2)'};
     return         {label:'Vroče',        c:'#dc2626',bg:'rgba(220,38,38,.08)', b:'rgba(220,38,38,.2)'};
@@ -2441,36 +2443,37 @@ function buildTicker(){
   const obs=_lastBriefObs,m=obs?.metric||{};
   const fc=_fcDailyData;
   const items=[];
+  const ic=_ico,dc=n=>n.toFixed(1).replace('.',','); // ikone iz sklada (ne emoji), decimalna vejica
 
   // ── Trenutne razmere ──────────────────────────────────────
-  if(m.temp!=null)items.push(`🌡 Zdaj: <strong style="color:${tempColor(m.temp)}">${m.temp.toFixed(1)}°C</strong>`);
-  if(obs?.humidity!=null)items.push(`💧 Vlažnost: ${Math.round(obs.humidity)}%`);
+  if(m.temp!=null)items.push(`${ic('thermometer')} Zdaj: <strong style="color:${tempColor(m.temp)}">${dc(m.temp)} °C</strong>`);
+  if(obs?.humidity!=null)items.push(`${ic('droplet')} Vlažnost: ${Math.round(obs.humidity)} %`);
   if(m.pressure!=null){
     const pt=m.pressure>1015?'↑ visok':m.pressure<1005?'↓ nizek':'→ normalen';
-    items.push(`📊 Tlak: ${Math.round(m.pressure)} hPa <span style="color:var(--muted);font-size:.68rem">${pt}</span>`);
+    items.push(`${ic('waves')} Tlak: ${Math.round(m.pressure)} hPa <span style="color:var(--muted);font-size:.68rem">${pt}</span>`);
   }
   if(m.windSpeed>2){
     const gust=m.windGust??m.windSpeed;
-    items.push(`💨 Veter: ${m.windSpeed.toFixed(1)} km/h${gust>m.windSpeed+3?' · sunki '+gust.toFixed(1)+' km/h':''}`);
+    items.push(`${ic('wind')} Veter: ${dc(m.windSpeed)} km/h${gust>m.windSpeed+3?' · sunki '+dc(gust)+' km/h':''}`);
   }
-  if(m.precipTotal>0.1)items.push(`🌧 Padavine danes: ${m.precipTotal.toFixed(1)} mm`);
+  if(m.precipTotal>0.1)items.push(`${ic('cloud-rain')} Padavine danes: ${dc(m.precipTotal)} mm`);
 
   // ── Napoved za danes ──────────────────────────────────────
   if(fc){
     const tmax=fc.temperature_2m_max[0],tmin=fc.temperature_2m_min[0];
     const rain=fc.precipitation_sum[0]??0,prob=fc.precipitation_probability_max[0]??0;
     const wind=fc.wind_speed_10m_max[0]??0,uv=fc.uv_index_max[0]??0;
-    if(tmax!=null&&tmin!=null)items.push(`📅 Danes: ${Math.round(tmax)}° / ${Math.round(tmin)}°C`);
-    if(rain>=0.5)items.push(`🌦 Pričakovane padavine: ${rain.toFixed(1)} mm (${prob}%)`);
-    else if(prob>=30)items.push(`🌦 Možne padavine: ${prob}% verjetnost`);
-    else items.push(`☀️ Suho — padavine malo verjetne`);
-    if(wind>=30)items.push(`🌬 Sunki vetra do ${Math.round(wind)} km/h`);
-    if(uv>=6)items.push(`☀️ UV indeks ${Math.round(uv)} — <span style="color:var(--amber)">priporočljiva zaščita</span>`);
-    else if(uv>=3)items.push(`🌤 UV indeks: ${Math.round(uv)}`);
+    if(tmax!=null&&tmin!=null)items.push(`${ic('calendar')} Danes: ${Math.round(tmax)} / ${Math.round(tmin)} °C`);
+    if(rain>=0.5)items.push(`${ic('cloud-rain')} Pričakovane padavine: ${dc(rain)} mm (${prob} %)`);
+    else if(prob>=30)items.push(`${ic('cloud-rain')} Možne padavine: ${prob} % verjetnost`);
+    else items.push(`${ic('sun')} Suho — padavine malo verjetne`);
+    if(wind>=30)items.push(`${ic('wind')} Sunki vetra do ${Math.round(wind)} km/h`);
+    if(uv>=6)items.push(`${ic('sun')} UV indeks ${Math.round(uv)} — <span style="color:var(--amber)">priporočljiva zaščita</span>`);
+    else if(uv>=3)items.push(`${ic('cloud-sun')} UV indeks: ${Math.round(uv)}`);
     // Jutri preview
     if(fc.temperature_2m_max[1]!=null){
       const tm1=fc.temperature_2m_max[1],tn1=fc.temperature_2m_min[1];
-      items.push(`📆 Jutri: ${Math.round(tm1)}° / ${Math.round(tn1)}°C`);
+      items.push(`${ic('calendar')} Jutri: ${Math.round(tm1)} / ${Math.round(tn1)} °C`);
     }
   }
 
@@ -2579,7 +2582,7 @@ function _fcSliderUpdate(){
     const temp=obs.metric.tempAvg??obs.metric.temp??null;
     if(tv){tv.textContent=temp!=null?(+temp).toFixed(1):'—';tv.style.color=temp!=null?tempColor(temp):'var(--muted)';}
     const condLabel=_getConditionLabelFromObs(obs);
-    if(iconEl)iconEl.innerHTML=_condImg(condLabel,108);
+    if(iconEl)iconEl.innerHTML=_condImg(condLabel,108,t);
   }
 }
 
@@ -2722,9 +2725,9 @@ function drawHeroSparkline(){
   const ahead=pts.filter(p=>p.h>=0),aMax=Math.max(...ahead.map(p=>p.t));
   const ties=ahead.filter(p=>p.t===aMax),tp=ties[Math.floor((ties.length-1)/2)];
   const txt='↑ '+_sparkFmt(aMax)+'° · '+_sparkDayWord(tp.when)+_sparkClockLabel(tp.when);
-  const cw=txt.length*6.2+20,ccx=Math.min(Math.max(px(avgH(ties)),cw/2+4),W-cw/2-4),cy=Math.max(2,py(aMax)-34);
+  const cw=txt.length*7.1+20,ccx=Math.min(Math.max(px(avgH(ties)),cw/2+4),W-cw/2-4),cy=Math.max(2,py(aMax)-34);
   chipSvg='<g class="hspark-chip" id="hero-spark-chip"><rect class="hspark-chip-bg" x="'+(ccx-cw/2).toFixed(1)+'" y="'+cy.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="22" rx="11"/>'+
-    '<text class="hspark-chip-tx" x="'+ccx.toFixed(1)+'" y="'+(cy+14.4).toFixed(1)+'" text-anchor="middle">'+txt+'</text></g>';
+    '<text class="hspark-chip-tx" x="'+ccx.toFixed(1)+'" y="'+(cy+15.2).toFixed(1)+'" text-anchor="middle">'+txt+'</text></g>';
   _sparkChip={cx:ccx,w:cw};
 
   g.innerHTML=
@@ -2737,20 +2740,26 @@ function drawHeroSparkline(){
 
   // stolpci na vsake 3 ure (ura na steni): ikona, temperatura, ura
   if(colsEl){
-    // na ozkih zaslonih (razmik med stolpci < 27 px) so stolpci na vsakih 6 ur, sicer se temperature prekrivajo
-    const step=(W-2*SPARK_INSET)/(maxH-minH)*3<27?6:3;
-    const seen=new Set();let html='';
-    pts.forEach(p=>{
-      if(p.h===0||!p.when||p.h<minH)return;
-      const hr=p.when.getHours();
-      if(hr%step)return;
-      const key=p.when.getTime();
-      if(seen.has(key))return;seen.add(key);
-      html+='<div class="hsc-col'+(p.h<0?' past':'')+'" data-h="'+p.h+'" style="left:'+(px(p.h)/W*100).toFixed(2)+'%">'+
-        '<img src="icons/weather/'+p.icon+'.svg" width="28" height="28" alt="" decoding="async">'+
-        '<b>'+_sparkFmt(p.t)+'°</b><i>'+String(hr).padStart(2,'0')+'</i></div>';
-    });
-    colsEl.innerHTML=html;
+    const build=step=>{
+      const seen=new Set();let html='';
+      pts.forEach(p=>{
+        if(p.h===0||!p.when||p.h<minH)return;
+        const hr=p.when.getHours();
+        if(hr%step)return;
+        const key=p.when.getTime();
+        if(seen.has(key))return;seen.add(key);
+        html+='<div class="hsc-col'+(p.h<0?' past':'')+'" data-h="'+p.h+'" style="left:'+(px(p.h)/W*100).toFixed(2)+'%">'+
+          '<img src="icons/weather/'+p.icon+'.svg" width="28" height="28" alt="" decoding="async">'+
+          '<b>'+_sparkFmt(p.t)+'°</b><i>'+String(hr).padStart(2,'0')+'</i></div>';
+      });
+      return html;
+    };
+    // Najprej stolpci na vsake 3 ure; če se najširša temperatura (pri 12 px »5,8°« ~27 px, »−12,3°« ~37 px) ne prilega v razmik, na vsakih 6 ur,
+    // sicer se besedila prekrivajo. Merimo dejansko širino; če je element še skrit (širina 0), velja varna meja 31 px.
+    const sp3=(W-2*SPARK_INSET)/(maxH-minH)*3;
+    colsEl.innerHTML=build(3);
+    const wMax=Math.max(0,...[...colsEl.querySelectorAll('b')].map(b=>b.getBoundingClientRect().width));
+    if(wMax>0?wMax+2>sp3:sp3<31)colsEl.innerHTML=build(6);
   }
 
   _sparkByHour=new Map(pts.map((p,i)=>[p.h,{x:P[i].x,y:P[i].y,t:p.t,when:p.when}]));
@@ -2866,6 +2875,17 @@ function forecastPhrase(){
    tekočem dnevu polja še ni — takrat vrstice ni (ničesar ne izmišljamo). Ločen sosednji element, ne
    znotraj hs-rain-today/hs-rain-rate (glej opombo o junaški kartici). */
 let _heroMtrP=null;
+// Prag mokrega dne: isti kot WET_DAY_MM v verify_forecasts.py in MOKER_MM v napovej.js (preverja test_parity.prag mokrega dne).
+const HERO_WET_MM=0.2;
+// Besedilo MTR vrstice na ploščici dežja. MTR je zamrznjena napoved za CEL današnji dan (ne za preostanek dneva kot vrstica »napoved«
+// nad njo), zato ima okno v besedilu: dokler danes še ni padlo, je »za cel dan«; ko je že padlo (izmerjeno ≥ HERO_WET_MM), je v preteklem
+// času (»je napovedal«), da ne trdi nasprotja z napovedjo za preostanek dneva in je vidno, kaj je napovedal proti izmerjenemu.
+function _heroMtrText(t,measuredMm){
+  const r5=v=>Math.round(v*20)*5,mm=_mtrMm(t.mm),padlo=Number.isFinite(measuredMm)&&measuredMm>=HERO_WET_MM;
+  let txt=(padlo?'MTR je napovedal: dež ':'MTR za cel dan: dež ')+r5(t.pop)+'\u00A0%'+(mm?' · '+mm:'');
+  if(!padlo&&Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥\u00A05\u00A0mm\u00A0'+r5(t.pop5)+'\u00A0%';
+  return txt;
+}
 async function renderHeroRainMtr(){
   const el=document.getElementById('hs-rain-mtr');if(!el)return;
   try{
@@ -2874,10 +2894,7 @@ async function renderHeroRainMtr(){
     const t=j&&j.today;
     const todayIso=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
     if(!t||t.date!==todayIso||!Number.isFinite(t.pop)){el.hidden=true;return;}
-    const r5=v=>Math.round(v*20)*5;
-    let txt='MTR: dež '+r5(t.pop)+'\u00A0%'+(_mtrMm(t.mm)?' · '+_mtrMm(t.mm):'');
-    if(Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥\u00A05\u00A0mm\u00A0'+r5(t.pop5)+'\u00A0%';
-    el.textContent=txt;
+    el.textContent=_heroMtrText(t,_hsc.rt);
     el.title='Verjetnost padavin po MTR, našem modelu (včerajšnja napoved za današnji dan). Količina (~ mm) je grobo povprečje petih modelov.';
     el.hidden=false;
   }catch(_){el.hidden=true;}
@@ -2926,7 +2943,7 @@ function renderHeroBriefing(){
 
 // ── Lestvice na ploščicah junaške kartice ─────────────────
 // Kje na razponu je vrednost (vlaga 0–100 %, veter 0–50 km/h s sunkom kot črtico, tlak 980–1040 hPa s črtico pri 1013, UV 0–11,
-// intenziteta dežja po korenu do 10 mm/h, današnji razpon min–maks). Samo prikaz: številke ostanejo v ploščici.
+// količina dežja danes po korenu do 30 mm, današnji razpon min–maks). Samo prikaz: številke ostanejo v ploščici.
 const _hsc={};
 function _hscPos(id,p,p2){
   const el=document.getElementById(id);if(!el)return;
@@ -2946,7 +2963,8 @@ function heroScalePos(s){
     wind:n(s.wind)!=null?[s.wind/50*100,n(s.gust)!=null?s.gust/50*100:null]:null,
     pres:n(s.pres)!=null?[(s.pres-980)/60*100,null]:null,
     uv:n(s.uv)!=null?[s.uv/11*100,null]:null,
-    rain:n(s.rr)!=null?[Math.sqrt(Math.max(0,s.rr)/10)*100,null]:null,
+    // Dež: polnilo kaže KOLIČINO danes (številka nad lestvico), ne intenzitete: prazna proga pod »6,3 mm« se je brala kot »skoraj nič«. Polno = 30 mm, koren, da so majhne količine vidne.
+    rain:n(s.rt)!=null?[Math.sqrt(Math.min(30,Math.max(0,s.rt))/30)*100,null]:null,
     range:(n(s.temp)!=null&&rg!=null&&rg>0.2)?[(s.temp-s.tmin)/rg*100,null]:null
   };
 }
@@ -3026,7 +3044,7 @@ function applyObs(obs){
   set('hs-uv-label',uvLabel(uv));
   document.getElementById('hm-uv')?.style.setProperty('--hm-accent',uvC);
   noteTodayUv(uv,_lastObsTime??new Date());renderTodayUv();}
-  Object.assign(_hsc,{hum:obs.humidity,wind:m.windSpeed,gust:m.windGust??m.windSpeed,pres:m.pressure,uv:obs.uv??0,rr:m.precipRate??0,temp:m.temp});
+  Object.assign(_hsc,{hum:obs.humidity,wind:m.windSpeed,gust:m.windGust??m.windSpeed,pres:m.pressure,uv:obs.uv??0,rt:m.precipTotal??0,temp:m.temp});
   renderHeroScales();setHeroWx(m,obs);renderHeroMoon();
   {const dl=document.getElementById('hs-dew-line');if(dl&&m.dewpt!=null){set('hs-dew',fmt(m.dewpt,1));set('hs-dew-lbl',dewLabel(m.dewpt).toLowerCase());dl.hidden=false;}}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
@@ -3075,6 +3093,7 @@ function applyObs(obs){
   updateBgFromObs(obs);
   // Update hero icon now that _wxCond is set (icons use it for snow/fog/hot/storm)
   _liveIconHtml=_condImg(cond.label,108);const iconEl=document.getElementById('hero-icon');if(iconEl&&!_sliderActive)_setHeroIcon(iconEl,_liveIconHtml);
+  set('cond-label',_condLabelShown(cond.label));
   // Refresh astro moon phase
   try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
@@ -6584,7 +6603,7 @@ function loadBlogTicker(){
     if(freshDays>3)return; // ni več "svež" — v tickerju se ne prikaže
     const isUpdated=!!top.updated&&top.updated!==top.date;
     _latestBlogPost={
-      icon: isUpdated?'☁️':'✨',
+      icon: _ico(isUpdated?'refresh-cw':'sparkles'),
       label: isUpdated?'Posodobljen prispevek':'Nov prispevek na blogu',
       title: esc(top.title),
       url: esc(top.url)
@@ -7388,7 +7407,17 @@ function _wmoImg(c,isDay=true,size=36){const n=_wmoIconName(c,isDay);return`<img
 function _yrImg(sym,size=32){const base=(sym||'').replace(/_polartwilight/g,'');const n=_YR_ICON[base]||_YR_ICON[base.replace('_night','')]||(/_night/.test(base)?'partly-cloudy-night':'partly-cloudy-day');return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${sym}">`;}
 // Ikona je LCP element: če je statična že enaka, je ne zamenjaj (nov element = nov LCP kandidat, mig).
 function _setHeroIcon(el,html){const cur=el.firstElementChild,m=/src="([^"]+)"/.exec(html);if(cur&&cur.tagName==='IMG'&&m&&cur.getAttribute('src')===m[1]){const a=/alt="([^"]*)"/.exec(html);if(a&&cur.alt!==a[1])cur.alt=a[1];return;}el.innerHTML=html;}
-function _condImg(label,size=100){const wc=typeof _wxCond==='string'?_wxCond:'';const n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
+// Dan/noč za izbiro ikone: pravi sončni vzhod/zahod na postaji (sunTimes), ne ura 23-5 (ob 21. uri novembra je že tema).
+function _isNightAt(when){
+  const d=when||new Date();let o=null;try{o=_lastBriefObs;}catch(e){}
+  if(o&&o.lat!=null&&o.lon!=null){try{const st=sunTimes(o.lat,o.lon,d);if(st&&st.sunrise&&st.sunset)return d<st.sunrise||d>st.sunset;}catch(e){}}
+  const h=d.getHours();return h<5||h>22;
+}
+// Stanja, ki imajo nočno različico ikone (_WXCOND_ICON je dnevna).
+const _WXCOND_ICON_NIGHT={fog:'fog-night',storm:'thunderstorms-night-rain'};
+// Oznaka pod ikono: megla je sklep iz vlage in vetra (vidljivosti nihče ne meri), zato »možna«; ikona in oznaka sta tako ista odločitev.
+function _condLabelShown(label){return(_wxCond==='fog'&&!/dež/i.test(label))?'Možna megla':label;}
+function _condImg(label,size=100,when){const wc=typeof _wxCond==='string'?_wxCond:'';let n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';if(_WXCOND_ICON_NIGHT[wc]&&_isNightAt(when))n=_WXCOND_ICON_NIGHT[wc];if(!when)label=_condLabelShown(label);return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
 // Kategorija vremena za barvo/sceno kartice dneva (WMO koda → clear/partly/cloud/fog/rain/snow/storm); samo videz.
 function _wmoCat(c){
   c=c||0;
@@ -9851,7 +9880,7 @@ function initAnalysisCharts(){
   mk('an-seasons',{type:'line',data:{labels:yr,datasets:Object.entries(AN.seasonTemps).map(([k,v])=>({label:k,data:v,borderColor:sColors[k],backgroundColor:sColors[k]+'18',tension:.4,fill:false,pointRadius:3,pointHoverRadius:5}))},options:base});
 
   // Monthly temp
-  mk('an-monthly-temp',{type:'bar',data:{labels:AN.months,datasets:[{label:'°C',data:AN.monthlyTemp,backgroundColor:AN.monthlyTemp.map(t=>t<2?'#38bdf8':t<10?'#67e8f9':t<18?'#4ade80':t<23?'#fbbf24':'#f87171'),borderRadius:4}]},options:{...base,plugins:{legend:{display:false}},scales:{...base.scales,y:{...base.scales.y,ticks:{...base.scales.y.ticks,callback:v=>v+'°'}}}}});
+  mk('an-monthly-temp',{type:'bar',data:{labels:AN.months,datasets:[{label:'°C',data:AN.monthlyTemp,backgroundColor:AN.monthlyTemp.map(t=>t<2?'#38bdf8':t<10?'#8ab4ff':t<18?'#4ade80':t<23?'#fbbf24':'#f87171'),borderRadius:4}]},options:{...base,plugins:{legend:{display:false}},scales:{...base.scales,y:{...base.scales.y,ticks:{...base.scales.y.ticks,callback:v=>v+'°'}}}}});
 
   // Frost + hot days
   mk('an-extremes',{type:'bar',data:{labels:yr,datasets:[
@@ -21098,7 +21127,7 @@ function generateWeatherCard() {
   // Temperature colour (always dark-palette)
   const t = parseFloat(temp);
   const tColor = isNaN(t) ? '#e8edf8'
-    : t < 0  ? '#bae6fd' : t < 8  ? '#67e8f9' : t < 15 ? '#6ee7b7'
+    : t < 0  ? '#bae6fd' : t < 8  ? '#8ab4ff' : t < 15 ? '#6ee7b7'
     : t < 22 ? '#f1f5f9' : t < 28 ? '#fcd34d' : t < 35 ? '#fb923c' : '#f87171';
 
   // ── Header ──
