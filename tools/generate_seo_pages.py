@@ -2623,16 +2623,18 @@ def gen_valley_hub_page(hist, sitemap_urls):
     trend_txt = (f"+{num(trend, 2)} °C na leto" if trend and trend > 0
                  else f"{num(trend, 2)} °C na leto")
 
-    title = "Vreme Zgornja Savinjska dolina — vsi kraji na enem mestu"
-    desc = (f"Vreme za Zgornjo Savinjsko dolino: Rečica ob Savinji, Mozirje, Nazarje, "
-             f"Ljubno ob Savinji, Gornji Grad, Luče in Solčava. Meritve postaje IREICA1 "
-             f"in ocene za vsak kraj v dolini.")
+    title = "Vreme Savinjska: Zgornja Savinjska dolina, danes in 7 dni"
+    desc = (f"Vreme Savinjska (Zgornja Savinjska dolina): meritev v živo, napoved po urah in "
+             f"za 7 dni. Rečica ob Savinji, Mozirje, Nazarje, Ljubno, Gornji Grad, Luče in "
+             f"Solčava. Postaja IREICA1.")
 
     crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", None)]
 
     intro = f'''  <p class="archive-intro">
   <strong>Zgornja Savinjska dolina</strong> se razteza od Nazarij in Mozirja na vzhodu do
   Solčave in Logarske doline na zahodu, ob reki Savinji pod Kamniško-Savinjskimi Alpami.
+  Če iščeš <em>vreme Savinjska</em>, je to stran za zgornji del doline: spodaj sta meritev v
+  živo in napoved, nižje pa pojasnilo, katere dele Savinjske regije pokrivamo in katerih ne.
   Edina postaja z neprekinjenimi meritvami v dolini je <strong>IREICA1</strong> v Rečici ob
   Savinji ({ELEV} m n. m.), ki od {fmtd(f["first_date"])} meri temperaturo, padavine, vlago
   in veter — skupaj že <strong>{f["n_days"]} dni</strong> podatkov. Spodaj je vreme in ocena
@@ -2663,6 +2665,24 @@ def gen_valley_hub_page(hist, sitemap_urls):
                   '  <p>Naprej proti Kamniško-Savinjskim Alpam: '
                   '<a href="/vreme-logarska-dolina/">Vreme Logarska dolina</a>.</p>')
 
+    # Meritev v živo in napoved sta glavni odgovor na poizvedbo »vreme …«. Podatki so s
+    # postaje na dolinskem dnu (Rečica), kraj/»kje je postaja« pa zapišemo kot atributa,
+    # da ju urni tools/inject_current_weather.py prepozna (isti vzorec kot krajevne strani).
+    from inject_current_weather import build_block_history as _bbh, TAIL_TOWN, CLS_RECICA
+    wx_now = _bbh(TAIL_TOWN, CLS_RECICA, (
+        "Zgornji Savinjski dolini", "edina postaja v dolini, na dolinskem dnu"))
+    fch_m, fc7_m = _forecast_markers("Zgornja Savinjska dolina")
+
+    regija = '''  <h2>Savinjska: katera Savinjska je mišljena?</h2>
+  <p>»Savinjska« je v vsakdanjem govoru lahko Zgornja Savinjska dolina (od Nazarij do Solčave),
+  Spodnja Savinjska dolina (Žalec, Polzela, Prebold) ali cela Savinjska statistična regija
+  (z Velenjem in Celjem). <strong>Meteorec pokriva zgornji del doline</strong>: edina postaja,
+  IREICA1, stoji v Rečici ob Savinji, zato meritev in napoved na tej strani veljata za dno
+  Zgornje Savinjske doline. Za Žalec, Celje ali Velenje te postaje ne smeš jemati kot meritve
+  v njihovem kraju: razdalje so deset do trideset kilometrov in lege so drugačne. Za tiste kraje
+  uporabi uradno napoved <a href="https://meteo.arso.gov.si/" rel="noopener">Agencije
+  Republike Slovenije za okolje (ARSO)</a>.</p>'''
+
     cta = '''  <div class="stat-grid" style="margin-top:1.5rem">
     <a class="stat-card c-temp" href="/vreme-recica-ob-savinji/" style="text-decoration:none">
       <div class="sc-label">Trenutno vreme</div>
@@ -2682,6 +2702,11 @@ def gen_valley_hub_page(hist, sitemap_urls):
   </div>'''
 
     qa = [
+        ("Kakšno je vreme v Savinjski dolini danes?",
+         "Trenutno vreme za zgornji del Savinjske doline je na vrhu te strani: meritev postaje "
+         "IREICA1 v Rečici ob Savinji, ki se osveži vsako uro, ter napoved po urah in za 7 dni. "
+         "Za Spodnjo Savinjsko dolino (Žalec, Celje) te postaje ne uporabljaj kot meritve v "
+         "kraju; za tiste kraje je pravi vir ARSO."),
         ("Kateri kraji sodijo v Zgornjo Savinjsko dolino?",
          "Zgornja Savinjska dolina zajema Rečico ob Savinji, Mozirje, Nazarje, Ljubno ob "
          "Savinji, Gornji Grad, Luče in Solčavo, ob reki Savinji pod Kamniško-Savinjskimi "
@@ -2714,9 +2739,13 @@ def gen_valley_hub_page(hist, sitemap_urls):
   <h1 class="page-title">Vreme Zgornja Savinjska dolina</h1>
   <p class="post-meta">Rečica ob Savinji · Mozirje · Nazarje · Ljubno ob Savinji · Gornji Grad · Luče · Solčava</p>
 {intro}
+{wx_now}
 {cta}
+{fch_m}
+{fc7_m}
 {climate}
 {towns_html}
+{regija}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.).
   Za kraje brez lastne postaje so vrednosti ocene, izpeljane iz meritev IREICA1.

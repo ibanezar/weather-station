@@ -2920,6 +2920,13 @@ Pristajalna stran za oglase (kmetije, turizem, gradbeništvo, občine) z obrazce
 - **Primer noči je izmišljen** in označen kot primer; ne spreminjaj ga v trditev o referenci. Izmišljenih ocen, števila strank in citatov na strani ni in jih ne dodajaj.
 - Pisave (Bricolage Grotesque, DM Sans) so gostovane lokalno v `podjetja/fonts/`; ne nalagaj jih od Googla.
 
+## Poizvedba »vreme savinjska« (4. 11. 2026)
+
+Cilj je rang za »vreme savinjska«, a **ločene strani nismo naredili**: `/vreme-zgornja-savinjska-dolina/` že obstaja in druga stran z isto namero bi se kanibalizirala (isti vzorec kot `/pojmi/`, glej zgoraj).
+Stran je zato okrepljena: naslov »Vreme Savinjska: Zgornja Savinjska dolina, danes in 7 dni«, meritev v živo (`WX-STATIC`, atributa `data-loc`/`data-where` kot pri krajevnih straneh), napoved po urah in za 7 dni (`WX-FCH`/`WX-FC7`, Open-Meteo za postajne koordinate, **brez MTR stolpca**, drug naslov kot na `/vreme-recica-ob-savinji/`)
+in razdelek »katera Savinjska je mišljena?«. **Pokrivamo samo zgornji del doline**; za Žalec, Celje, Velenje stran napoti na ARSO in ne trdi, da postaja velja tam. Pot strani je v `PATHS` v `prerender-current.yml`.
+**Podatkov o poizvedbi ni**: izvoza GSC (`docs/gsc-2026-10*.md`) ne vsebujeta niti prikazov niti položaja za ta izraz; učinek preveri v GSC čez 2–3 tedne in šele nato odloči o nadaljnjih korakih (npr. povezave z naslovnice, članek).
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

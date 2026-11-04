@@ -50,6 +50,10 @@ from datetime import datetime, timezone
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATION_PAGE = os.path.join(ROOT, "vreme-recica-ob-savinji", "index.html")
 MOS = os.path.join(ROOT, "napoved-modela.json")
+# Pregled doline (poizvedba »vreme savinjska«): napoved za koordinate postaje, a brez
+# MTR stolpca in z drugim naslovom, da dve strani ne kažeta iste tabele pod istim imenom.
+HUB_PAGE = os.path.join(ROOT, "vreme-zgornja-savinjska-dolina", "index.html")
+HUB_NAME = "Zgornja Savinjska dolina"
 
 LAT, LON = 46.325779, 14.921137  # IREICA1
 
@@ -276,7 +280,7 @@ def build_fc7_station(om, mos, mos_label):
             f'  {FC7_END}')
 
 
-def build_fc7_town(om, town):
+def build_fc7_town(om, town, subject=None):
     """7-dnevna tabela za vaško stran — samo Open-Meteo, za koordinate kraja
     samega (ne postaje), zato brez MTR stolpca (glej opombo na vrhu datoteke)."""
     d = om["daily"]
@@ -300,7 +304,7 @@ def build_fc7_town(om, town):
             f'{precip_chart}\n'
             f'  <div class="table-scroll" tabindex="0">\n'
             f'  <table class="data-table">\n'
-            f'    <caption>Open-Meteo napoved za koordinate kraja {town} — modelska ocena, '
+            f'    <caption>Open-Meteo napoved za {subject or "koordinate kraja " + town} — modelska ocena, '
             f'ne meritev postaje IREICA1. Najvišja/najnižja temperatura (°C), padavine (mm), '
             f'verjetnost padavin in najmočnejši veter (km/h). Osveženo vsako uro.</caption>\n'
             f'    <thead><tr><th>Dan</th><th>Temperatura (°C)</th>'
@@ -377,6 +381,15 @@ def main():
     # ── Postaja: nespremenjeno vedenje (MTR stolpec, lastne koordinate) ──
     om = fetch_open_meteo(LAT, LON)
     if om is not None:
+        # Pregled doline dobi isto Open-Meteo napoved za dno doline (postajne koordinate).
+        hub_fc7 = build_fc7_town(om, HUB_NAME, "dno doline pri Rečici ob Savinji")
+        hub_fch = build_fch(om, f"Vreme po urah, {HUB_NAME}",
+                            "Za dno doline pri Rečici ob Savinji (koordinate postaje IREICA1), "
+                            "modelska ocena, ne meritev.")
+        if dry:
+            print(f"--dry-run: {HUB_PAGE} bi se posodobil.")
+        elif inject_page(HUB_PAGE, hub_fc7, hub_fch) == "no-markers":
+            exit_code = 1
         mos, mos_label = load_mos()
         fc7 = build_fc7_station(om, mos, mos_label)
         fch = build_fch(om, "Vreme po urah za Rečico ob Savinji",
