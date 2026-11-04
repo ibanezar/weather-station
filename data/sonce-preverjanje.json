@@ -1,10 +1,10 @@
 {
- "generated": "2026-11-03",
- "dni_v_zapisu": 85,
+ "generated": "2026-11-04",
+ "dni_v_zapisu": 86,
  "jutro": {
-  "n": 65,
-  "mediana_min": 125.5,
-  "mad_min": 30.0,
+  "n": 66,
+  "mediana_min": 130.5,
+  "mad_min": 32.0,
   "min_min": 29.5,
   "max_min": 204.5
  },
