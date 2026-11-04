@@ -1997,6 +1997,17 @@ legitimnega ponovnega poskusa bi pomenila plačilo brez dostopa), omejitev `/ai-
 Pogoji ponovne uporabe (`meteo.arso.gov.si/uploads/meteo/help/sl/copyright.html`, 14. člen ZDMHS): kdor objavi ali povzame ARSO informacije, navede »Vir: Agencija Republike Slovenije za okolje« ali »Vir: ARSO«.
 Formulacija »Javne informacije Slovenije«, ARSO - met iz neuradnih ovojev ni predpisana. Vrstica z virom je zdaj tudi na `/tocnost-napovedi/`, `/test-napovedi/` in `/meteogasilec/vodotoki/`; `tools/test_arso_vir.py` (v `parity.yml`) zahteva navedbo na straneh s podatki ARSO -- novo tako stran dodaj v `PAGES`.
 
+## Izgled `/tocnost-napovedi/` (4. 11. 2026)
+
+Stran je bila zid besedila s petimi črtami čez 30 dni in tabelami, ki so na telefonu uhajale čez rob. Zdaj je vse **strežniško izrisano** (HTML/CSS + inline SVG, brez JS; `forecast_verification.json` ne
+nalaga več brskalnik): lestvica po napaki (Tmax/Tmin), včerajšnji dan na temperaturni osi (meritev = bela črta, napoved = pika), stalna pristranskost (napaka s predznakom), drseče 7-dnevno povprečje, MTR proti
+Open-Meteo po vodilnem času (stolpci) ter toplotni tabeli (meseci, zadnji dnevi). `answer_block()` ostaja nespremenjen (test `test_tocnost_answer.py`, GEO).
+
+- **Barve virov so preverjene z `validate_palette.js` (dark, podlaga #0a0f1c) in veljajo za vso stran**: ARSO `#c98500`, Open-Meteo `#3987e5`, AIFS `#d55181`, WN2 `#9085e9`, MTR `#199e70` (`SRC_DEFS`, CSS `--s-<ključ>`).
+  Prejšnja paleta je padla (AIFS `#a78bfa` ob Open-Meteo `#60a5fa`: ΔE 0,3 pri barvni slepoti). **Vrstni red je del preverjanja** (sosednji pari); nov vir = nov vnos na koncu in nov zagon validatorja. Barva pripada viru, besedilo je vedno v barvi besedila.
+- Primerja se samo na dnevih, ko so napovedovali VSI viri (`_common_days()`); vrstica »Skupaj« v mesečni tabeli tega ne zagotavlja in je tako označena.
+- Nov graf na tej strani: strežniški izris + `aria-label` s številkami; legenda in oznake ob koncu črt, ne samo barva.
+
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
 Ločeno od `/tocnost-napovedi/` (ta meri samo ARSO+Open-Meteo+MTR pri D+1, dan za
