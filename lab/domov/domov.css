@@ -387,3 +387,206 @@ body.dv-lock{overflow:hidden}
 .dv-top{grid-template-columns:minmax(0,1fr)}
 @media (min-width:1024px){.dv-top{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}}
 .dv-hero,.dv-nc{min-width:0}
+
+/* ═══ iteracija 4: živahnejša podoba (struktura nespremenjena) ═══════════════════════
+   Smer »alpsko nebo«: bolj nasičen modri akcent, hero je nebo, ki sledi razmeram, kartice meritev imajo vsaka svojo barvo
+   in mini vizualizacijo, temperature so barvno kodirane (samo polnila in robovi; besedilo ostane ink, kontrast ≥ 4,5:1). */
+:root{
+  --c-accent:#1D6FE0; --src-radar:#1D5FD8; --src-model:#6B46D6;
+  --k-hum:#0B7A96; --k-hum-bg:#E3F6FB; --k-wind:#5B3CC4; --k-wind-bg:#ECE9FE; --k-rain:#1D5FD8; --k-rain-bg:#E4EEFF; --k-pres:#9A5B00; --k-pres-bg:#FFF2DC;
+  --pg1:#DCEBFF; --pg2:#E4F7EE; --pg3:#F3E8FF;
+}
+[data-theme="dark"]{
+  --c-accent:#5AB0FF; --src-radar:#6DB4FF; --src-model:#B9A6FF;
+  --k-hum:#4FD1EE; --k-hum-bg:#0F2B36; --k-wind:#B3A1FF; --k-wind-bg:#1E1A3B; --k-rain:#6DA8FF; --k-rain-bg:#10223F; --k-pres:#F0B14A; --k-pres-bg:#352A12;
+  --pg1:#12305A; --pg2:#0E3A33; --pg3:#2A1D52;
+}
+/* ozadje strani: mehke barvne lise namesto ravne sive */
+body.dv{background:
+  radial-gradient(900px 520px at 88% -8%,var(--pg1),transparent 62%),
+  radial-gradient(760px 460px at -8% 22%,var(--pg2),transparent 60%),
+  radial-gradient(800px 500px at 100% 62%,var(--pg3),transparent 62%),
+  var(--c-bg);background-attachment:fixed,fixed,fixed,scroll}
+.dv-head{background:linear-gradient(100deg,#0B1B33 0%,#12315E 55%,#1B4C8F 100%);box-shadow:0 2px 14px rgba(8,22,45,.28)}
+.dv-card{box-shadow:0 1px 2px rgba(16,36,58,.06),0 8px 24px rgba(30,80,160,.10)}
+[data-theme="dark"] .dv-card{background:linear-gradient(160deg,#17283A,#112031)}
+
+/* naslovi razdelkov: barvna ikona + poudarek */
+.dv-h2{font-size:clamp(1.2rem,2.2vw,1.4rem);font-weight:800;letter-spacing:-.01em}
+.dv-hi{width:34px;height:34px;border-radius:11px;display:inline-grid;place-items:center;flex:none;color:#fff;box-shadow:0 3px 10px rgba(30,80,160,.25)}
+.dv-hi .dv-ic{width:19px;height:19px}
+.dv-hi[data-c="blue"]{background:linear-gradient(135deg,#3B8CFF,#1D5FD8)}
+.dv-hi[data-c="amber"]{background:linear-gradient(135deg,#FFB13B,#E0780A)}
+.dv-hi[data-c="violet"]{background:linear-gradient(135deg,#9B7BFF,#5B3CC4)}
+.dv-hi[data-c="green"]{background:linear-gradient(135deg,#2FCB8B,#128A5A)}
+.dv-hi[data-c="rose"]{background:linear-gradient(135deg,#FF7A9C,#D43D6B)}
+.dv-hi[data-c="teal"]{background:linear-gradient(135deg,#25C5D9,#0B7A96)}
+
+/* ── HERO = nebo ───────────────────────────────────────────── */
+.dv-hero{position:relative;overflow:hidden;isolation:isolate;
+  background:linear-gradient(168deg,var(--s1,#2A7FE3) 0%,var(--s2,#1456B0) 55%,var(--s3,#0E3D86) 100%);
+  box-shadow:0 14px 40px rgba(14,61,134,.35),inset 0 1px 0 rgba(255,255,255,.25)}
+.dv-hero>*:not(.dv-sky){position:relative;z-index:1}
+.dv-hero:not([data-wx]),.dv-hero[data-wx=""]{--s1:#2A7FE3;--s2:#1456B0;--s3:#0E3D86}
+.dv-hero[data-wx="clear"]{--s1:#2F8CF0;--s2:#1A62C6;--s3:#0E3D86}
+.dv-hero[data-wx="cloud"]{--s1:#4C6A8C;--s2:#34506F;--s3:#1D2F48}
+.dv-hero[data-wx="rain"]{--s1:#3A6BAA;--s2:#244B82;--s3:#122A52}
+.dv-hero[data-wx="storm"]{--s1:#4B3A8A;--s2:#2E2260;--s3:#150F33}
+.dv-hero[data-wx="snow"]{--s1:#5A86B5;--s2:#456F9C;--s3:#2B4A70}
+.dv-hero[data-wx="fog"]{--s1:#66809A;--s2:#506A82;--s3:#364A5E}
+.dv-hero[data-wx="night"]{--s1:#13296A;--s2:#0C1B4A;--s3:#060E2A}
+.dv-sky{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.dv-sky i{position:absolute;display:block;opacity:0;transition:opacity .8s}
+.sk-sun{width:240px;height:240px;right:-70px;top:26%;border-radius:50%;background:radial-gradient(circle,#FFF3C4 0%,#FFD66B 22%,rgba(255,200,80,.38) 46%,transparent 70%)}
+.sk-moon{width:70px;height:70px;right:34px;top:34%;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFFFFF,#DDE6F7 60%,#B5C4E0);box-shadow:0 0 40px 12px rgba(190,210,255,.35)}
+.sk-stars{inset:0;background-image:radial-gradient(1.4px 1.4px at 12% 18%,#fff,transparent),radial-gradient(1px 1px at 30% 8%,#fff,transparent),radial-gradient(1.6px 1.6px at 55% 22%,#fff,transparent),radial-gradient(1px 1px at 72% 12%,#fff,transparent),radial-gradient(1.4px 1.4px at 88% 30%,#fff,transparent),radial-gradient(1px 1px at 20% 60%,#fff,transparent),radial-gradient(1.2px 1.2px at 64% 70%,#fff,transparent),radial-gradient(1px 1px at 92% 78%,#fff,transparent)}
+.sk-cloud{height:44px;border-radius:44px;background:rgba(255,255,255,.22);filter:blur(1.5px)}
+.sk-cloud::before,.sk-cloud::after{content:"";position:absolute;background:inherit;border-radius:50%}
+.sk-cloud::before{width:56%;height:150%;left:14%;bottom:30%}
+.sk-cloud::after{width:42%;height:120%;right:12%;bottom:32%}
+.sk-cloud.c1{width:190px;right:-30px;top:20%;animation:sk-drift 38s linear infinite}
+.sk-cloud.c2{width:140px;right:44%;top:52%;animation:sk-drift 52s linear infinite reverse}
+.sk-cloud.c3{width:170px;right:6%;top:70%;animation:sk-drift 46s linear infinite}
+@keyframes sk-drift{0%{transform:translateX(0)}50%{transform:translateX(-28px)}100%{transform:translateX(0)}}
+.sk-rain{inset:-20% 0 0 0;background:repeating-linear-gradient(104deg,transparent 0 11px,rgba(190,220,255,.55) 11px 12px,transparent 12px 23px);background-size:46px 80px;animation:sk-fall .7s linear infinite;-webkit-mask-image:linear-gradient(transparent,#000 25%,#000 75%,transparent);mask-image:linear-gradient(transparent,#000 25%,#000 75%,transparent)}
+@keyframes sk-fall{to{background-position:-12px 80px}}
+.sk-snow{inset:0;background-image:radial-gradient(3px 3px at 15% 20%,#fff,transparent),radial-gradient(2.4px 2.4px at 40% 55%,#fff,transparent),radial-gradient(3px 3px at 62% 25%,#fff,transparent),radial-gradient(2px 2px at 85% 60%,#fff,transparent),radial-gradient(2.6px 2.6px at 25% 80%,#fff,transparent),radial-gradient(2px 2px at 75% 88%,#fff,transparent);background-size:100% 160px;animation:sk-snowfall 9s linear infinite}
+@keyframes sk-snowfall{to{background-position:0 160px}}
+.sk-fog{inset:0;background:linear-gradient(180deg,transparent 18%,rgba(255,255,255,.16) 38%,transparent 50%,rgba(255,255,255,.14) 68%,transparent 84%)}
+.sk-bolt{inset:0;background:radial-gradient(260px 200px at 72% 12%,rgba(210,190,255,.7),transparent 70%);animation:sk-flash 6s infinite}
+@keyframes sk-flash{0%,86%,100%{opacity:0}88%{opacity:.9}90%{opacity:.1}92%{opacity:.8}96%{opacity:0}}
+.dv-hero[data-wx="clear"] .sk-sun{opacity:1}
+.dv-hero[data-wx="clear"] .sk-cloud.c2{opacity:.5}
+.dv-hero[data-wx="cloud"] .sk-cloud{opacity:1}.dv-hero[data-wx="cloud"] .sk-sun{opacity:.35}
+.dv-hero[data-wx="rain"] .sk-cloud,.dv-hero[data-wx="rain"] .sk-rain{opacity:1}
+.dv-hero[data-wx="storm"] .sk-cloud,.dv-hero[data-wx="storm"] .sk-rain{opacity:1}.dv-hero[data-wx="storm"] .sk-bolt{opacity:1}
+.dv-hero[data-wx="snow"] .sk-cloud,.dv-hero[data-wx="snow"] .sk-snow{opacity:1}
+.dv-hero[data-wx="fog"] .sk-fog{opacity:1}.dv-hero[data-wx="fog"] .sk-cloud.c2{opacity:.8}
+.dv-hero[data-wx="night"] .sk-stars,.dv-hero[data-wx="night"] .sk-moon{opacity:1}
+.dv-hero:not([data-wx]) .sk-sun,.dv-hero[data-wx=""] .sk-sun{opacity:.55}
+.dv-bignum{font-size:clamp(4.4rem,16vw,7rem);text-shadow:0 4px 24px rgba(0,20,60,.35);letter-spacing:-.03em}
+.dv-unit{font-size:2rem;font-weight:600}
+.dv-wic-xl{width:3rem;height:3rem;filter:drop-shadow(0 3px 10px rgba(0,20,60,.35))}
+.dv-fresh,.dv-hero .dv-stale{background:rgba(6,18,40,.45);backdrop-filter:blur(4px)}
+.dv-hero .dv-sec{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:var(--r-md);padding:12px 14px;backdrop-filter:blur(6px)}
+.dv-hero .dv-info{background:rgba(255,255,255,.12)}
+.dv-hero .dv-modelnote,.dv-hero .dv-meas{text-shadow:0 1px 6px rgba(0,20,60,.35)}
+@media (prefers-reduced-motion:reduce){.sk-cloud,.sk-rain,.sk-snow,.sk-bolt{animation:none!important}}
+
+/* ── nowcast: podlaga stanja ───────────────────────────────── */
+.dv-nc[data-state="dry"]{background:linear-gradient(160deg,#E6F7EE 0%,var(--c-surface) 62%)}
+.dv-nc[data-state="near"]{background:linear-gradient(160deg,#FFF1D6 0%,var(--c-surface) 62%)}
+.dv-nc[data-state="over"]{background:linear-gradient(160deg,#E3EEFF 0%,var(--c-surface) 62%)}
+.dv-nc[data-state="storm"],.dv-nc[data-state="error"]{background:linear-gradient(160deg,#FDE7E7 0%,var(--c-surface) 62%)}
+[data-theme="dark"] .dv-nc[data-state="dry"]{background:linear-gradient(160deg,#0F3328,#112031 62%)}
+[data-theme="dark"] .dv-nc[data-state="near"]{background:linear-gradient(160deg,#3A2C0F,#112031 62%)}
+[data-theme="dark"] .dv-nc[data-state="over"]{background:linear-gradient(160deg,#10294F,#112031 62%)}
+[data-theme="dark"] .dv-nc[data-state="storm"],[data-theme="dark"] .dv-nc[data-state="error"]{background:linear-gradient(160deg,#3D1717,#112031 62%)}
+.dv-ncstate{font-size:.8rem}
+.dv-nc-main{font-weight:800}
+.dv-ncchart i{background:linear-gradient(180deg,#5AA8FF,#1D5FD8);border-radius:4px 4px 0 0}
+.dv-nc[data-state="near"] .dv-ncchart i{background:linear-gradient(180deg,#FFC25A,#D9780A)}
+.dv-nc[data-state="storm"] .dv-ncchart i{background:linear-gradient(180deg,#FF7B7B,#C23030)}
+
+/* ── kartice meritev: vsaka svoja barva + mini vizualizacija ── */
+.dv-m{position:relative;overflow:hidden;--kc:var(--c-accent);--kb:var(--c-surface);background:linear-gradient(160deg,var(--kb) 0%,var(--c-surface) 78%);border-color:color-mix(in srgb,var(--kc) 22%,var(--c-line));min-height:150px}
+.dv-m[data-k="hum"]{--kc:var(--k-hum);--kb:var(--k-hum-bg)}
+.dv-m[data-k="wind"]{--kc:var(--k-wind);--kb:var(--k-wind-bg)}
+.dv-m[data-k="rain"]{--kc:var(--k-rain);--kb:var(--k-rain-bg)}
+.dv-m[data-k="pres"]{--kc:var(--k-pres);--kb:var(--k-pres-bg)}
+.dv-m::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:var(--kc)}
+.dv-m h3{color:var(--c-ink);font-weight:700}
+.mi{width:26px;height:26px;border-radius:9px;display:inline-grid;place-items:center;background:var(--kc);color:#fff}
+[data-theme="dark"] .mi{color:#0B1520}
+.mi .dv-ic{width:15px;height:15px;stroke-width:2}
+.dv-m p{font-size:2.3rem;font-weight:800;margin-top:.45rem}
+.dv-m b{color:var(--c-ink)}
+.mbar{height:7px;border-radius:4px;background:color-mix(in srgb,var(--kc) 16%,transparent);margin:8px 0 6px;overflow:hidden;position:relative}
+.mbar i{position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);border-radius:4px;background:linear-gradient(90deg,color-mix(in srgb,var(--kc) 70%,#fff),var(--kc));transition:width .6s}
+.mbar.pres{overflow:visible}
+.mbar.pres i{width:12px;height:12px;top:-2.5px;bottom:auto;left:var(--w,50%);margin-left:-6px;border-radius:50%;background:var(--kc);border:2px solid var(--c-surface)}
+.mbar.pres::after{content:"";position:absolute;left:55%;top:-2px;bottom:-2px;width:2px;background:color-mix(in srgb,var(--kc) 45%,transparent)}
+.mcomp{position:absolute;right:12px;top:40px;width:52px;height:52px}
+.mcomp .rim{fill:color-mix(in srgb,var(--kc) 10%,transparent);stroke:var(--kc);stroke-width:2;opacity:.9}
+.mcomp .n{font-size:8px;font-weight:800;fill:var(--kc)}
+.mcomp .ar{fill:var(--kc)}
+.mcomp g{transform-origin:24px 24px;transition:transform .6s}
+
+/* ── več meritev ─────────────────────────────────────────── */
+.dv-tile{background:var(--c-surface);border:1px solid var(--c-line);border-left:5px solid var(--tc,var(--c-accent))}
+.dv-tile:nth-child(1){--tc:#F2B01E}.dv-tile:nth-child(2){--tc:#5B3CC4}.dv-tile:nth-child(3){--tc:#1D6FE0}.dv-tile:nth-child(4){--tc:#0B9EBF}.dv-tile:nth-child(5){--tc:#F26B3A}
+.dv-tile b{font-weight:800}
+
+/* ── urne in dnevne kartice: temperaturna barva ──────────── */
+.dv-hr{border-top:5px solid var(--tc,var(--c-line));padding-top:8px;background:linear-gradient(180deg,color-mix(in srgb,var(--tc,#888) 12%,var(--c-surface)),var(--c-surface) 70%)}
+.dv-hr .pb{display:block;height:5px;border-radius:3px;margin:6px 6px 0;background:color-mix(in srgb,var(--src-radar) 14%,transparent);position:relative;overflow:hidden}
+.dv-hr .pb i{position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);background:var(--src-radar);border-radius:3px}
+.dv-hr[aria-pressed="true"]{box-shadow:0 0 0 2px var(--c-accent),0 6px 18px rgba(30,80,160,.2)}
+.dv-day{border-top:5px solid var(--tc,var(--c-line));background:linear-gradient(180deg,color-mix(in srgb,var(--tc,#888) 12%,var(--c-surface)),var(--c-surface) 66%)}
+.dv-day .rb{display:block;height:6px;border-radius:3px;margin:6px 4px 4px;background:color-mix(in srgb,var(--c-ink) 10%,transparent);position:relative}
+.dv-day .rb i{position:absolute;top:0;bottom:0;border-radius:3px;left:var(--l,0%);width:var(--w,100%);background:linear-gradient(90deg,var(--c1,#3DB5F0),var(--c2,#F6A623))}
+.dv-day .mx{font-weight:800}
+.dv-dpanel{border-top:4px solid var(--c-accent)}
+
+/* ── dolina: temperaturno obarvane ploščice ──────────────── */
+.dv-vt{border:1px solid color-mix(in srgb,var(--tc,#888) 35%,var(--c-line));border-top:5px solid var(--tc,#888);background:linear-gradient(165deg,color-mix(in srgb,var(--tc,#888) 20%,var(--c-surface)),var(--c-surface) 72%)}
+.dv-vt.warm{box-shadow:0 6px 20px color-mix(in srgb,var(--tc,#888) 35%,transparent);border-color:var(--tc,#888)}
+.dv-vt b{font-weight:800;font-size:2.3rem}
+.dv-vt .wm{display:inline-block;background:var(--tc,#888);color:#fff;padding:.05rem .5rem;border-radius:var(--r-pill);width:max-content}
+.dv-vdiff{display:inline-block;padding:.5rem .9rem;border-radius:var(--r-pill);background:linear-gradient(90deg,color-mix(in srgb,var(--src-meas) 18%,var(--c-surface)),color-mix(in srgb,var(--c-accent) 14%,var(--c-surface)));border:1px solid color-mix(in srgb,var(--src-meas) 40%,var(--c-line))}
+.dv-live[data-s="fresh"]{background:color-mix(in srgb,var(--src-meas) 14%,transparent)}
+
+/* ── blog + projekti ─────────────────────────────────────── */
+.dv-post .cat{background:color-mix(in srgb,var(--c-accent) 14%,transparent);padding:.12rem .55rem;border-radius:var(--r-pill)}
+.dv-post.feat{box-shadow:0 10px 30px rgba(30,80,160,.18)}
+.dv-proj{--pg-a:var(--pc);position:relative;overflow:hidden;color:#fff!important;border:0;min-height:168px;box-shadow:0 10px 26px color-mix(in srgb,var(--pc) 40%,transparent)}
+.dv-proj[data-p="gobar"]{background:linear-gradient(145deg,#7A4509,#A8620F)}
+.dv-proj[data-p="crnivec"]{background:linear-gradient(145deg,#8F2523,#C2413A)}
+.dv-proj[data-p="zima"]{background:linear-gradient(145deg,#0F3F7A,#2570C0)}
+.dv-proj[data-p="gasilec"]{background:linear-gradient(145deg,#92300D,#C2410C)}
+[data-theme="dark"] .dv-proj{background-blend-mode:normal}
+.dv-proj::after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;right:-40px;bottom:-50px;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 68%)}
+.dv-proj .dv-pic{color:#fff;width:40px;height:40px;padding:7px;border-radius:12px;background:rgba(255,255,255,.18);box-sizing:content-box;width:26px;height:26px}
+.dv-proj h3,.dv-proj p,.dv-proj span{color:#fff!important}
+.dv-proj p{opacity:.92}
+.dv-proj span{font-weight:800;text-decoration:underline;text-underline-offset:3px}
+
+/* radar in profil: barvni poudarki */
+.dv-radarcard{border-top:4px solid var(--src-radar)}
+.dv-valleycard{border-top:4px solid var(--src-meas)}
+.dv-btn,.dv-btn2{background:linear-gradient(135deg,#3B8CFF,#1D5FD8);box-shadow:0 4px 14px rgba(29,95,216,.35)}
+[data-theme="dark"] .dv-btn,[data-theme="dark"] .dv-btn2{color:#06121F!important;background:linear-gradient(135deg,#8FC8FF,#5AB0FF)}
+.dv-bottom [aria-current="page"]{color:var(--c-accent)!important}
+
+/* rezervirane višine po dodanih vizualizacijah */
+.dv-hr{min-height:124px}.dv-scroll{min-height:140px}
+.dv-day{min-height:186px}
+
+/* ── popravki iteracije 4 ── */
+/* naslovi razdelkov: ikona + naslov + značka + ⓘ v eni vrstici na telefonu */
+.dv-h2{flex-wrap:nowrap}
+.dv-h2:has(.dv-upd){flex-wrap:wrap}
+.dv-h2 .dv-tag,.dv-h2 .dv-info,.dv-h2 .dv-hi,.dv-h2 .dv-live{flex:none}
+@media (max-width:640px){.dv-h2{font-size:1.12rem;gap:6px}.dv-hi{width:30px;height:30px}.dv-h2 .dv-info{margin-left:0}}
+/* oblaki: bolj prosojni in stran od besedila; bogatejša »oblačna« paleta */
+.sk-cloud{background:rgba(255,255,255,.13)}
+.sk-cloud.c1{top:3%;right:-50px}
+.sk-cloud.c2{right:-70px;top:44%}
+.sk-cloud.c3{right:-30px;top:78%}
+.dv-hero[data-wx="cloud"]{--s1:#4F739F;--s2:#37588A;--s3:#213B66}
+.sk-rain{background:repeating-linear-gradient(104deg,transparent 0 13px,rgba(190,220,255,.32) 13px 14px,transparent 14px 27px);background-size:54px 90px}
+/* noč: zatemnitev, brez sonca, zvezde */
+.dv-sky::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(5,10,38,.5),rgba(5,10,38,.6));opacity:0;transition:opacity .8s}
+.dv-hero[data-day="0"] .dv-sky::after{opacity:1}
+.dv-hero[data-day="0"] .sk-sun{opacity:0!important}
+.dv-hero[data-day="0"] .sk-stars{opacity:.9}
+.dv-hero[data-day="0"][data-wx="rain"] .sk-stars,.dv-hero[data-day="0"][data-wx="storm"] .sk-stars,.dv-hero[data-day="0"][data-wx="cloud"] .sk-stars{opacity:.35}
+
+/* hero: stabilna višina med nalaganjem (brez premikov) */
+.dv-cond{flex-wrap:nowrap}.dv-cond #c-txt{min-width:0}
+@media (max-width:640px){.dv-hero .dv-sec{min-height:100px;align-content:flex-start}}
+@media (min-width:641px){.dv-hero .dv-sec{min-height:70px}}
+/* dekorativni sloji so pritrjeni v px (ne v %), da jih sprememba višine herota ne premika (CLS) */
+.sk-sun{top:120px}.sk-moon{top:140px}
+.sk-cloud.c1{top:14px}.sk-cloud.c2{top:210px}.sk-cloud.c3{top:340px}
+.dv-h2:has(.dv-live){flex-wrap:wrap}

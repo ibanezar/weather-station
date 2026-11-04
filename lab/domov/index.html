@@ -27,6 +27,13 @@
   <symbol id="i-off" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></symbol>
   <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></symbol>
   <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.2c3.4 4.1 6 7.2 6 10.6a6 6 0 0 1-12 0c0-3.4 2.6-6.5 6-10.6z"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 9h10.5a2.5 2.5 0 1 0-2.4-3.1M3 14h14.5a2.8 2.8 0 1 1-2.6 3.8M3 19h6"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 13.5l3.6-4.4"/><circle cx="12" cy="14" r="1.2"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5zM4 5.5V21.5"/><path d="M8.5 7.5h7M8.5 11h7"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></symbol>
   <symbol id="p-gobar" viewBox="0 0 24 24"><path d="M3.5 12.5a8.5 8.5 0 0 1 17 0z"/><path d="M10 12.5v5.5a2 2 0 0 0 4 0v-5.5"/></symbol>
   <symbol id="p-crnivec" viewBox="0 0 24 24"><path d="M2.5 19.5l6.5-12 4 7 2.5-4 6 9z"/><path d="M7.4 10.5l1.6 1.5 1.6-1.5"/></symbol>
   <symbol id="p-zima" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M9.5 4.5L12 6.5l2.5-2M9.5 19.5L12 17.5l2.5 2"/></symbol>
@@ -68,23 +75,24 @@
 
   <div class="dv-top">
     <section class="dv-card dv-hero" id="hero" data-wx="" aria-labelledby="h-now">
+      <div class="dv-sky" aria-hidden="true"><i class="sk-sun"></i><i class="sk-moon"></i><i class="sk-stars"></i><i class="sk-cloud c1"></i><i class="sk-cloud c2"></i><i class="sk-cloud c3"></i><i class="sk-rain"></i><i class="sk-snow"></i><i class="sk-fog"></i><i class="sk-bolt"></i></div>
       <h2 id="h-now" class="dv-vh">Trenutne razmere</h2>
       <p class="dv-hero-lab"><span>REČICA OB SAVINJI · IREICA1</span><span id="hero-fresh" class="dv-fresh" data-s="loading">Nalagam</span></p>
       <div class="dv-temp"><span id="t-now" class="dv-bignum">–</span><span class="dv-unit">°C</span></div>
       <p class="dv-meas"><em class="dv-tag q" data-src="meas">MERITEV</em><span id="hero-when">izmerjeno ob --:-- · star – min</span></p>
       <p id="hero-stale" class="dv-stale" role="status" hidden>Podatek ni svež: kaže zadnjo znano meritev, ne trenutnega stanja.</p>
-      <p class="dv-cond"><svg class="dv-wic dv-wic-xl" aria-hidden="true"><use id="c-ic" href="#w-cloud"/></svg><span id="c-txt">Razmere se nalagajo</span><em class="dv-tag q" data-src="model">MODEL</em><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-hero" aria-label="Pojasnilo: opis razmer">i</button></p>
+      <p class="dv-cond"><svg class="dv-wic dv-wic-xl" aria-hidden="true"><use id="c-ic" href="#w-cloud"/></svg><span id="c-txt">Nalagam</span><em class="dv-tag q" data-src="model">MODEL</em><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-hero" aria-label="Pojasnilo: opis razmer">i</button></p>
       <p id="i-hero" class="dv-infotext" hidden>Temperatura je izmerjena na postaji IREICA1. Opis razmer (ikona in besedilo) izhaja iz modelske napovedi Open-Meteo za to uro, ker postaja razmer ne opisuje.</p>
       <p class="dv-modelnote" id="hero-model">Vremenski opis: modelski podatek (Open-Meteo) · prenos ob --:--</p>
       <dl class="dv-sec">
         <div><dt>Občutek</dt><dd id="t-feel">–</dd></div>
         <div><dt>Rosišče</dt><dd id="t-dew">–</dd></div>
-        <div><dt id="t-range-l">Danes</dt><dd id="t-range">–</dd></div>
+        <div><dt id="t-range-l">Danes, izmerjeno do zdaj</dt><dd id="t-range">–</dd></div>
       </dl>
     </section>
 
     <section class="dv-card dv-nc" id="nc-card" data-state="loading" aria-labelledby="h-nc">
-      <h2 id="h-nc" class="dv-h2">Naslednjih 45 minut <em class="dv-tag" data-src="radar">RADAR</em><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-nc" aria-label="Pojasnilo: nowcast">i</button></h2>
+      <h2 id="h-nc" class="dv-h2"><span class="dv-hi" data-c="blue"><svg class="dv-ic" aria-hidden="true"><use href="#w-rain"/></svg></span>Naslednjih 45 minut <em class="dv-tag" data-src="radar">RADAR</em><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-nc" aria-label="Pojasnilo: nowcast">i</button></h2>
       <p id="i-nc" class="dv-infotext" hidden>Nowcast je ekstrapolacija zadnjih radarskih slik ARSO (premik padavinskih območij), ne modelska napoved. Po ~30 minutah zanesljivost opazno pade. Radar ne zazna vsega (npr. rosenja), zato ni jamstvo, da padavin ne bo.</p>
       <p id="nc-state" class="dv-ncstate"><svg class="dv-ic" aria-hidden="true"><use id="nc-ic" href="#i-clock"/></svg><span id="nc-st">Nalagam</span></p>
       <p id="nc-main" class="dv-nc-main">Nalagam</p>
@@ -96,14 +104,16 @@
   </div>
 
   <section class="dv-grid4" aria-label="Ključne meritve">
-    <article class="dv-card dv-m"><h3>Vlaga <em class="dv-tag" data-src="meas">MERITEV</em></h3><p><b id="m-hum">–</b><span>%</span></p><small id="m-hum-s"></small></article>
-    <article class="dv-card dv-m"><h3>Veter <em class="dv-tag" data-src="meas">MERITEV</em></h3><p><b id="m-wind">–</b><span>km/h</span></p><small id="m-gust">sunki –</small></article>
-    <article class="dv-card dv-m"><h3>Padavine danes <em class="dv-tag" data-src="meas">MERITEV</em></h3><p><b id="m-rain">–</b><span>mm</span></p><small id="m-rate">intenziteta –</small></article>
-    <article class="dv-card dv-m"><h3>Tlak <em class="dv-tag" data-src="meas">MERITEV</em></h3><p><b id="m-pres">–</b><span>hPa</span></p><small id="m-pres-s"></small></article>
+    <article class="dv-card dv-m" data-k="hum"><h3><span class="mi"><svg class="dv-ic" aria-hidden="true"><use href="#i-drop"/></svg></span>Vlaga <em class="dv-tag" data-src="meas">MERITEV</em></h3><p><b id="m-hum">–</b><span>%</span></p><div class="mbar" aria-hidden="true"><i id="mb-hum"></i></div><small id="m-hum-s"></small></article>
+    <article class="dv-card dv-m" data-k="wind"><h3><span class="mi"><svg class="dv-ic" aria-hidden="true"><use href="#i-wind"/></svg></span>Veter <em class="dv-tag" data-src="meas">MERITEV</em></h3>
+      <svg class="mcomp" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" class="rim"/><text x="24" y="9.5" text-anchor="middle" class="n">S</text><g id="m-arrow"><path d="M24 12l5 15-5-3.2-5 3.2z" class="ar"/></g></svg>
+      <p><b id="m-wind">–</b><span>km/h</span></p><div class="mbar" aria-hidden="true"><i id="mb-wind"></i></div><small id="m-gust">sunki –</small></article>
+    <article class="dv-card dv-m" data-k="rain"><h3><span class="mi"><svg class="dv-ic" aria-hidden="true"><use href="#w-rain"/></svg></span>Padavine danes <em class="dv-tag" data-src="meas">MERITEV</em></h3><p><b id="m-rain">–</b><span>mm</span></p><div class="mbar" aria-hidden="true"><i id="mb-rain"></i></div><small id="m-rate">intenziteta –</small></article>
+    <article class="dv-card dv-m" data-k="pres"><h3><span class="mi"><svg class="dv-ic" aria-hidden="true"><use href="#i-gauge"/></svg></span>Tlak <em class="dv-tag" data-src="meas">MERITEV</em></h3><p><b id="m-pres">–</b><span>hPa</span></p><div class="mbar pres" aria-hidden="true"><i id="mb-pres"></i></div><small id="m-pres-s"></small></article>
   </section>
 
   <section class="dv-adv dv-card" aria-labelledby="h-more">
-    <h2 id="h-more" class="dv-h2">Več meritev <em class="dv-tag" data-src="meas">MERITEV</em></h2>
+    <h2 id="h-more" class="dv-h2"><span class="dv-hi" data-c="teal"><svg class="dv-ic" aria-hidden="true"><use href="#i-pulse"/></svg></span>Več meritev <em class="dv-tag" data-src="meas">MERITEV</em></h2>
     <div class="dv-tiles">
       <div class="dv-tile"><span>UV indeks</span><b id="a-uv">–</b><small id="a-uv-s"></small></div>
       <div class="dv-tile"><span>Veter</span><b id="a-ws">–</b><small id="a-ws-s"></small></div>
@@ -125,7 +135,7 @@
   </section>
 
   <section id="napoved" class="dv-sect" aria-labelledby="h-h">
-    <h2 id="h-h" class="dv-h2">Naslednjih 24 ur <em class="dv-tag" data-src="model">MODEL</em><small class="dv-upd" id="u-h"></small></h2>
+    <h2 id="h-h" class="dv-h2"><span class="dv-hi" data-c="amber"><svg class="dv-ic" aria-hidden="true"><use href="#i-clock"/></svg></span>Naslednjih 24 ur <em class="dv-tag" data-src="model">MODEL</em><small class="dv-upd" id="u-h"></small></h2>
     <p class="dv-muted">Open-Meteo, po urah. Veter po urah ni prikazan.<button type="button" class="dv-info" aria-expanded="false" aria-controls="i-h" aria-label="Pojasnilo: veter po urah">i</button></p>
     <p id="i-h" class="dv-infotext" hidden>Surov model veter za zavetrno dno doline precenjuje ~2×, zato ga po urah ne kažemo. Umerjen veter (MTR) je dnevni in je v podrobnostih posameznega dne pri 7 dneh.</p>
     <div class="dv-fade"><div class="dv-scroll" id="h-list" role="region" aria-label="Urna napoved, pomikaj vodoravno" tabindex="0"></div></div>
@@ -133,7 +143,7 @@
   </section>
 
   <section class="dv-sect" aria-labelledby="h-d">
-    <h2 id="h-d" class="dv-h2">7 dni <em class="dv-tag" data-src="model">MODEL</em><small class="dv-upd" id="u-d"></small></h2>
+    <h2 id="h-d" class="dv-h2"><span class="dv-hi" data-c="violet"><svg class="dv-ic" aria-hidden="true"><use href="#i-cal"/></svg></span>7 dni <em class="dv-tag" data-src="model">MODEL</em><small class="dv-upd" id="u-d"></small></h2>
     <p class="dv-muted">Open-Meteo in <em class="dv-tag" data-src="mtr">MTR</em> sta ločena, ne povprečena. Tapni dan za podrobnosti.<button type="button" class="dv-info" aria-expanded="false" aria-controls="i-d" aria-label="Pojasnilo: MTR">i</button></p>
     <p id="i-d" class="dv-infotext" hidden>MTR je lastni statistični model Meteorec, naučen na meritvah postaje IREICA1; napoved izdaja samo za dneve, za katere je naučen. Open-Meteo je splošni model. Vira ne povprečimo: razlika med njima je podatek.</p>
     <div class="dv-fade"><div class="dv-days" id="d-list" role="group" aria-label="Napoved za 7 dni"></div></div>
@@ -142,7 +152,7 @@
 
   <section id="radar" class="dv-sect" aria-labelledby="h-r">
     <div class="dv-card dv-radarcard">
-      <h2 id="h-r" class="dv-h2">Radar padavin <small class="dv-upd" id="u-r"></small></h2>
+      <h2 id="h-r" class="dv-h2"><span class="dv-hi" data-c="blue"><svg class="dv-ic" aria-hidden="true"><use href="#w-rain"/></svg></span>Radar padavin <small class="dv-upd" id="u-r"></small></h2>
       <p id="rd-eta" class="dv-eta" role="status" hidden></p>
       <div class="rd-ctl">
         <button id="rd-play" class="dv-btn2" type="button" aria-pressed="true">Pavza</button>
@@ -164,7 +174,7 @@
 
   <section id="dolina" class="dv-sect" aria-labelledby="h-v">
     <div class="dv-card dv-valleycard">
-      <h2 id="h-v" class="dv-h2">Dolina zdaj <em class="dv-tag" data-src="meas">MERITEV</em><span id="v-live" class="dv-live" data-s="loading">Nalagam</span><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-v" aria-label="Pojasnilo: dolina">i</button></h2>
+      <h2 id="h-v" class="dv-h2"><span class="dv-hi" data-c="green"><svg class="dv-ic" aria-hidden="true"><use href="#p-crnivec"/></svg></span>Dolina zdaj <em class="dv-tag" data-src="meas">MERITEV</em><span id="v-live" class="dv-live" data-s="loading">Nalagam</span><button type="button" class="dv-info" aria-expanded="false" aria-controls="i-v" aria-label="Pojasnilo: dolina">i</button></h2>
       <p id="i-v" class="dv-infotext" hidden>Temperature so izmerjene na postajah, vir in čas sta ob vsaki vrednosti. Črtkana črta je običajen padec (−0,65 °C na 100 m), ne preračun za današnji dan. Varpolje je na istem dnu doline kot Rečica in nima objavljene višine, zato ni na grafu.</p>
       <p id="v-verdict" class="dv-verdict">Nalagam</p>
       <p id="v-sub" class="dv-muted"></p>
@@ -176,12 +186,12 @@
   </section>
 
   <section class="dv-sect" aria-labelledby="h-b">
-    <h2 id="h-b" class="dv-h2">Iz bloga</h2>
+    <h2 id="h-b" class="dv-h2"><span class="dv-hi" data-c="rose"><svg class="dv-ic" aria-hidden="true"><use href="#i-book"/></svg></span>Iz bloga</h2>
     <div class="dv-blog" id="b-list"></div>
   </section>
 
   <section class="dv-sect" aria-labelledby="h-p">
-    <h2 id="h-p" class="dv-h2">Projekti Meteorec</h2>
+    <h2 id="h-p" class="dv-h2"><span class="dv-hi" data-c="teal"><svg class="dv-ic" aria-hidden="true"><use href="#i-grid"/></svg></span>Projekti Meteorec</h2>
     <div class="dv-grid4">
       <a class="dv-card dv-proj" data-p="gobar" href="/gobarska-napoved/"><svg class="dv-pic" aria-hidden="true"><use href="#p-gobar"/></svg><h3>MeteoGobar</h3><p>Dnevni indeks gobarske sezone po območjih.</p><span>Odpri →</span></a>
       <a class="dv-card dv-proj" data-p="crnivec" href="/crnivec/"><svg class="dv-pic" aria-hidden="true"><use href="#p-crnivec"/></svg><h3>Črnivec</h3><p>Kamera, vreme in stanje ceste čez prelaz.</p><span>Odpri →</span></a>
