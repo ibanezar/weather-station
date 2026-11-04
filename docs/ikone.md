@@ -108,7 +108,7 @@ Ikone so Lucide (ISC, `tools/icons/LICENSE-lucide.txt`), vdelane kot inline spri
 - Skupnostni/uporabniški vnosi: `.community-*`, `.feel-poll-emoji`.
 - Taksonomski čipi `.inat-filter` (🐸 🦎 🐦 …): Lucide nima ustreznih živali.
 - Tipografske puščice (↑ ↓ ↔ →) v besedilu.
-- Tabele v `app.js`: vremenske kode (`cond.icon`), fenologija, cvetovi, `sc-risk-icon`, `.dfc-icon` (generator).
+- Tabele v `app.js`: vremenske kode (`cond.icon`), fenologija, cvetovi, `sc-risk-icon`. (`.dfc-icon` je od 4. 11. 2026 SVG iz sklada: `generate_daily_fact.py` zapiše ime ikone, ne emoji.)
 - Podstrani z lastnimi generatorji (ne nalagajo `style.css` in spritea).
 
 ## Dodajanje ikone

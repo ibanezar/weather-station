@@ -2852,6 +2852,12 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Barva hero kartice po vremenu**: `setHeroWx()` postavi `data-wx` (`clear`/`cloud`/`rain`/`storm`/`snow`/`night`), CSS rahlo obarva kot žarenje v zgornjem desnem kotu (≤ 22 %). Brez atributa je videz nespremenjen. Nov `data-wx` = tudi barva v obeh temah in preveri kontrast besedila.
 - Nov kritični CSS in `style.min.css` naredi `minify-assets.yml` po mergu; do takrat se lestvice pred celotnim CSS kratko pokažejo brez oblike.
 
+### Ikona stanja, kontrast v svetli temi in pas brez emoji (4. 11. 2026, audit `docs/audit-grafika-hero-2026-11.md`)
+
+- **Ikona stanja ponoči:** `_condImg()` izbere nočno različico (`_WXCOND_ICON_NIGHT`: megla, nevihta) po **pravem sončnem zahodu na postaji** (`_isNightAt()` prek `sunTimes()`, rezerva ura 23–5), ne po uri. Ob 21. uri novembra je bila ob oznaki »Oblačno« ikona `fog-day` (sonce). Kadar je `_wxCond === 'fog'`, je oznaka pod ikono **»Možna megla«** (`_condLabelShown()`; megla je sklep iz vlage in vetra, vidljivosti nihče ne meri): ikona in oznaka sta ista odločitev. Statična ikona v `inject_current_weather.py` megle ne pozna (JS jo po nalaganju zamenja). Test: `test_parity.hero_ikona_noc_in_megla`.
+- **Pretekle ure v grafu »Danes«** so utišane z barvo in težo (`.hsc-col.past`), **ne z `opacity` celega stolpca** (prej 2,3:1 in 3,5:1 v svetli temi). Gumba »Poslušaj vreme«/»Deli karto« imata v `.hero-b` podlago kartice (v svetli temi je stran živo modra, prosojen gumb je imel 2,0:1). axe na `.hero-b`: 0 kršitev v obeh temah.
+- **Pas nad hero kartico (`buildTicker()`) in `.dfc-icon` v nogi:** ikone iz sklada (`_ico()`, `generate_daily_fact.py` zapiše ime ikone), decimalna vejica (`dc()`), presledek pred `%` in `°C`. Test: `test_parity.hero_pas_brez_emoji`.
+
 ### Graf »Danes«: črta + stolpci po 3 ure, graf sam premika uro (1. 11. 2026)
 
 Filip je izbral varianto C izmed štirih predlogov (kapsule, žareča črta, črta in ikone, nebo). Samo prikaz; podatki in `_fcSliderUpdate()` so nespremenjeni.

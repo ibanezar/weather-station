@@ -2441,36 +2441,37 @@ function buildTicker(){
   const obs=_lastBriefObs,m=obs?.metric||{};
   const fc=_fcDailyData;
   const items=[];
+  const ic=_ico,dc=n=>n.toFixed(1).replace('.',','); // ikone iz sklada (ne emoji), decimalna vejica
 
   // ── Trenutne razmere ──────────────────────────────────────
-  if(m.temp!=null)items.push(`🌡 Zdaj: <strong style="color:${tempColor(m.temp)}">${m.temp.toFixed(1)}°C</strong>`);
-  if(obs?.humidity!=null)items.push(`💧 Vlažnost: ${Math.round(obs.humidity)}%`);
+  if(m.temp!=null)items.push(`${ic('thermometer')} Zdaj: <strong style="color:${tempColor(m.temp)}">${dc(m.temp)} °C</strong>`);
+  if(obs?.humidity!=null)items.push(`${ic('droplet')} Vlažnost: ${Math.round(obs.humidity)} %`);
   if(m.pressure!=null){
     const pt=m.pressure>1015?'↑ visok':m.pressure<1005?'↓ nizek':'→ normalen';
-    items.push(`📊 Tlak: ${Math.round(m.pressure)} hPa <span style="color:var(--muted);font-size:.68rem">${pt}</span>`);
+    items.push(`${ic('waves')} Tlak: ${Math.round(m.pressure)} hPa <span style="color:var(--muted);font-size:.68rem">${pt}</span>`);
   }
   if(m.windSpeed>2){
     const gust=m.windGust??m.windSpeed;
-    items.push(`💨 Veter: ${m.windSpeed.toFixed(1)} km/h${gust>m.windSpeed+3?' · sunki '+gust.toFixed(1)+' km/h':''}`);
+    items.push(`${ic('wind')} Veter: ${dc(m.windSpeed)} km/h${gust>m.windSpeed+3?' · sunki '+dc(gust)+' km/h':''}`);
   }
-  if(m.precipTotal>0.1)items.push(`🌧 Padavine danes: ${m.precipTotal.toFixed(1)} mm`);
+  if(m.precipTotal>0.1)items.push(`${ic('cloud-rain')} Padavine danes: ${dc(m.precipTotal)} mm`);
 
   // ── Napoved za danes ──────────────────────────────────────
   if(fc){
     const tmax=fc.temperature_2m_max[0],tmin=fc.temperature_2m_min[0];
     const rain=fc.precipitation_sum[0]??0,prob=fc.precipitation_probability_max[0]??0;
     const wind=fc.wind_speed_10m_max[0]??0,uv=fc.uv_index_max[0]??0;
-    if(tmax!=null&&tmin!=null)items.push(`📅 Danes: ${Math.round(tmax)}° / ${Math.round(tmin)}°C`);
-    if(rain>=0.5)items.push(`🌦 Pričakovane padavine: ${rain.toFixed(1)} mm (${prob}%)`);
-    else if(prob>=30)items.push(`🌦 Možne padavine: ${prob}% verjetnost`);
-    else items.push(`☀️ Suho — padavine malo verjetne`);
-    if(wind>=30)items.push(`🌬 Sunki vetra do ${Math.round(wind)} km/h`);
-    if(uv>=6)items.push(`☀️ UV indeks ${Math.round(uv)} — <span style="color:var(--amber)">priporočljiva zaščita</span>`);
-    else if(uv>=3)items.push(`🌤 UV indeks: ${Math.round(uv)}`);
+    if(tmax!=null&&tmin!=null)items.push(`${ic('calendar')} Danes: ${Math.round(tmax)} / ${Math.round(tmin)} °C`);
+    if(rain>=0.5)items.push(`${ic('cloud-rain')} Pričakovane padavine: ${dc(rain)} mm (${prob} %)`);
+    else if(prob>=30)items.push(`${ic('cloud-rain')} Možne padavine: ${prob} % verjetnost`);
+    else items.push(`${ic('sun')} Suho — padavine malo verjetne`);
+    if(wind>=30)items.push(`${ic('wind')} Sunki vetra do ${Math.round(wind)} km/h`);
+    if(uv>=6)items.push(`${ic('sun')} UV indeks ${Math.round(uv)} — <span style="color:var(--amber)">priporočljiva zaščita</span>`);
+    else if(uv>=3)items.push(`${ic('cloud-sun')} UV indeks: ${Math.round(uv)}`);
     // Jutri preview
     if(fc.temperature_2m_max[1]!=null){
       const tm1=fc.temperature_2m_max[1],tn1=fc.temperature_2m_min[1];
-      items.push(`📆 Jutri: ${Math.round(tm1)}° / ${Math.round(tn1)}°C`);
+      items.push(`${ic('calendar')} Jutri: ${Math.round(tm1)} / ${Math.round(tn1)} °C`);
     }
   }
 
@@ -2579,7 +2580,7 @@ function _fcSliderUpdate(){
     const temp=obs.metric.tempAvg??obs.metric.temp??null;
     if(tv){tv.textContent=temp!=null?(+temp).toFixed(1):'—';tv.style.color=temp!=null?tempColor(temp):'var(--muted)';}
     const condLabel=_getConditionLabelFromObs(obs);
-    if(iconEl)iconEl.innerHTML=_condImg(condLabel,108);
+    if(iconEl)iconEl.innerHTML=_condImg(condLabel,108,t);
   }
 }
 
@@ -3075,6 +3076,7 @@ function applyObs(obs){
   updateBgFromObs(obs);
   // Update hero icon now that _wxCond is set (icons use it for snow/fog/hot/storm)
   _liveIconHtml=_condImg(cond.label,108);const iconEl=document.getElementById('hero-icon');if(iconEl&&!_sliderActive)_setHeroIcon(iconEl,_liveIconHtml);
+  set('cond-label',_condLabelShown(cond.label));
   // Refresh astro moon phase
   try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
@@ -6584,7 +6586,7 @@ function loadBlogTicker(){
     if(freshDays>3)return; // ni več "svež" — v tickerju se ne prikaže
     const isUpdated=!!top.updated&&top.updated!==top.date;
     _latestBlogPost={
-      icon: isUpdated?'☁️':'✨',
+      icon: _ico(isUpdated?'refresh-cw':'sparkles'),
       label: isUpdated?'Posodobljen prispevek':'Nov prispevek na blogu',
       title: esc(top.title),
       url: esc(top.url)
@@ -7388,7 +7390,17 @@ function _wmoImg(c,isDay=true,size=36){const n=_wmoIconName(c,isDay);return`<img
 function _yrImg(sym,size=32){const base=(sym||'').replace(/_polartwilight/g,'');const n=_YR_ICON[base]||_YR_ICON[base.replace('_night','')]||(/_night/.test(base)?'partly-cloudy-night':'partly-cloudy-day');return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${sym}">`;}
 // Ikona je LCP element: če je statična že enaka, je ne zamenjaj (nov element = nov LCP kandidat, mig).
 function _setHeroIcon(el,html){const cur=el.firstElementChild,m=/src="([^"]+)"/.exec(html);if(cur&&cur.tagName==='IMG'&&m&&cur.getAttribute('src')===m[1]){const a=/alt="([^"]*)"/.exec(html);if(a&&cur.alt!==a[1])cur.alt=a[1];return;}el.innerHTML=html;}
-function _condImg(label,size=100){const wc=typeof _wxCond==='string'?_wxCond:'';const n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
+// Dan/noč za izbiro ikone: pravi sončni vzhod/zahod na postaji (sunTimes), ne ura 23-5 (ob 21. uri novembra je že tema).
+function _isNightAt(when){
+  const d=when||new Date();let o=null;try{o=_lastBriefObs;}catch(e){}
+  if(o&&o.lat!=null&&o.lon!=null){try{const st=sunTimes(o.lat,o.lon,d);if(st&&st.sunrise&&st.sunset)return d<st.sunrise||d>st.sunset;}catch(e){}}
+  const h=d.getHours();return h<5||h>22;
+}
+// Stanja, ki imajo nočno različico ikone (_WXCOND_ICON je dnevna).
+const _WXCOND_ICON_NIGHT={fog:'fog-night',storm:'thunderstorms-night-rain'};
+// Oznaka pod ikono: megla je sklep iz vlage in vetra (vidljivosti nihče ne meri), zato »možna«; ikona in oznaka sta tako ista odločitev.
+function _condLabelShown(label){return(_wxCond==='fog'&&!/dež/i.test(label))?'Možna megla':label;}
+function _condImg(label,size=100,when){const wc=typeof _wxCond==='string'?_wxCond:'';let n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';if(_WXCOND_ICON_NIGHT[wc]&&_isNightAt(when))n=_WXCOND_ICON_NIGHT[wc];if(!when)label=_condLabelShown(label);return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
 // Kategorija vremena za barvo/sceno kartice dneva (WMO koda → clear/partly/cloud/fog/rain/snow/storm); samo videz.
 function _wmoCat(c){
   c=c||0;

@@ -4321,7 +4321,9 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 .hsc-col img{width:28px;height:28px;display:block}
 .hsc-col b{font-size:.7rem;line-height:1.2;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
 .hsc-col i{font-style:normal;font-size:.66rem;line-height:1.2;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
-.hsc-col.past{opacity:.55}
+.hsc-col.past img{opacity:.72}
+.hsc-col.past b{font-weight:500;color:var(--muted)}
+/* Pretekle ure so utišane z barvo in težo, ne z opacity celega stolpca: opacity .55 je spustil kontrast pod 4,5:1 (svetla tema 2,3 in 3,5). */
 :root:not([data-theme="dark"]) .hsc-col img{filter:drop-shadow(0 1px 1.5px rgba(10,22,40,.3))}
 .hsc-col.on{background:rgba(2,132,199,.14)}
 [data-theme="dark"] .hsc-col.on{background:rgba(77,159,248,.2)}
@@ -4358,13 +4360,17 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
 .hero-b .hb-foot{padding:.1rem 1.1rem}
 .hero-b .hb-foot:not(:has(.daily-fact-card)):has(#mtr-trust-badge[hidden]){display:none}
 .hero-b .daily-fact-card{margin:0;padding:.75rem 0;min-height:3rem;border:0;border-radius:0;background:none;gap:.7rem;font-size:.85rem;line-height:1.4;color:var(--text)}
-.hero-b .dfc-icon{display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;font-size:.95rem;background:color-mix(in srgb,var(--amber) 16%,transparent)}
+.hero-b .dfc-icon{display:grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;font-size:.95rem;background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+.hero-b .dfc-icon .ic{width:1.05rem;height:1.05rem}
 .hero-b .mtr-trust-badge{margin:0;padding:.7rem 0;font-size:.8rem}
 .hero-b .mtr-trust-badge[hidden]{display:none}
 .hero-b .daily-fact-card+.mtr-trust-badge:not([hidden]){border-top:1px solid var(--border)}
 .hero-b .mtr-trust-badge a{display:flex;align-items:center;gap:.6rem;padding:0;border:0;background:none;border-radius:0;font-size:.8rem;color:var(--muted)}
 .hero-b .mtr-trust-badge a .ic{width:1.1rem;height:1.1rem;color:var(--green)}
 .hero-b .sc-bar{margin:0;padding:.15rem .3rem 0;border-top:0;flex-wrap:wrap;gap:.5rem}
+/* Gumba sta v svetli temi stala na živo modri podlagi strani (#0ea5e9) s prosojnim ozadjem: kontrast 2,0. Podlaga kartice ju loči od ozadja v obeh temah. */
+.hero-b .sc-btn{background:var(--card-bg);border-color:var(--card-border)}
+.hero-b .sc-btn.sc-on{background:linear-gradient(rgba(52,211,153,.12),rgba(52,211,153,.12)),var(--card-bg)}
 .hero-b .sc-desc{flex-basis:100%;order:3}
 .hero-b .sc-desc:empty{display:none}
 .hero-b .qa-bar{margin:0}

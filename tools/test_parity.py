@@ -605,6 +605,55 @@ def hero_ikona():
 
 
 @test
+def hero_ikona_noc_in_megla():
+    """Ikona stanja: megla/nevihta imata nočno različico (po pravem sončnem zahodu, ne po uri 23-5), oznaka pod
+    ikono pa je ista odločitev kot ikona (4. 11. 2026: ob 21. uri je bila ob oznaki »Oblačno« ikona fog-day)."""
+    names = ["sunTimes", "_isNightAt", "_WXCOND_ICON", "_WXCOND_ICON_NIGHT", "_COND_ICON", "_condLabelShown", "_condImg"]
+    pre = "var _wxCond='';var _lastBriefObs={lat:46.33,lon:14.92};"
+    def at(h, m, wc):
+        return {"expr": "(function(){_wxCond='%s';return _condImg('Oblačno',108,new Date(2026,10,4,%d,%d)).match(/icons\\/weather\\/([a-z-]+)\\.svg/)[1];})()" % (wc, h, m)}
+    calls = [at(12, 0, "fog"), at(16, 45, "fog"), at(21, 0, "fog"), at(12, 0, "storm"), at(21, 0, "storm"),
+             at(21, 0, "snow"), at(21, 0, "night"),
+             {"expr": "(function(){_wxCond='fog';return _condLabelShown('Oblačno');})()"},
+             {"expr": "(function(){_wxCond='fog';return _condLabelShown('Rahel dež');})()"},
+             {"expr": "(function(){_wxCond='';return _condLabelShown('Oblačno');})()"},
+             {"expr": "(function(){_lastBriefObs=null;return [new Date(2026,10,4,3,0),new Date(2026,10,4,12,0),new Date(2026,10,4,23,30)].map(_isNightAt);})()"}]
+    r = js("app.js", names, calls, prelude=pre)
+    check(r[0] == "fog-day", "ikona: megla opoldne je dnevna", r[0])
+    check(r[1] == "fog-night", "ikona: megla po zahodu (16.45) je nočna", r[1])
+    check(r[2] == "fog-night", "ikona: megla ob 21. uri je nočna", r[2])
+    check(r[3] == "thunderstorms-day-rain", "ikona: nevihta opoldne", r[3])
+    check(r[4] == "thunderstorms-night-rain", "ikona: nevihta ponoči", r[4])
+    check(r[5] == "snow", "ikona: sneg nima nočne različice", r[5])
+    check(r[6] == "clear-night", "ikona: stanje night", r[6])
+    check(r[7] == "Možna megla", "oznaka: megla preglasi nebo", r[7])
+    check(r[8] == "Rahel dež", "oznaka: dež ostane", r[8])
+    check(r[9] == "Oblačno", "oznaka: brez megle nespremenjena", r[9])
+    check(r[10] == [True, False, True], "noč brez koordinat: rezerva po uri", r[10])
+
+
+@test
+def hero_pas_brez_emoji():
+    """Pas nad junaško kartico (buildTicker) in dnevno dejstvo v nogi: ikone iz sklada, ne emoji; decimalna vejica."""
+    import re
+    src = js_src("app.js")
+    a = src.index("function buildTicker(){")
+    blk = src[a:src.index("let _pulseSeen", a)]
+    emoji = re.findall(r"[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B50\uFE0F]", blk)
+    check(not emoji, "buildTicker: brez emoji", repr(emoji[:5]))
+    check(len(re.findall(r"toFixed\(", blk)) == 1, "buildTicker: toFixed samo v pomočniku z vejico", str(len(re.findall(r"toFixed\(", blk))))
+    check(not re.search(r"[\d}]%|[\w})]°C", blk), "buildTicker: presledek pred % in °C")
+    import generate_daily_fact as gdf
+    html = js_src("index.html")
+    ids = set(re.findall(r'icon = "([a-z0-9-]+)"', js_src("tools/generate_daily_fact.py")))
+    check(len(ids) >= 8, "dnevno dejstvo: ikone so imena iz sklada", str(ids))
+    for i in sorted(ids):
+        check(f'id="i-{i}"' in html, "dnevno dejstvo: ikona obstaja v spritu", i)
+    out = gdf.wrap("trophy", "x", "2026-11-04")
+    check("<svg" in out and "#i-trophy" in out, "dnevno dejstvo: izpis je SVG", out[:160])
+
+
+@test
 def valovi_vlaga():
     """ramp() in airHumFit() na /valovi/ = gobe_model.ramp in zračna vlaga v eval_species
     (rh_low/rh_full, dvig na 1 ob razliki temperatura - rosišče <= dewpoint_spread_full)."""
