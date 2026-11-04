@@ -99,3 +99,7 @@ V razširjenem delu ploščica »PM₂,₅ · Varpolje **215,0** µg/m³, Nevarn
 - Je temperatura v ciana z žarenjem namerna znamčna poteza, ali naj postane podatkovna barva (točka 7)?
 - Ali naj `MTR: dež …` ostane na ploščici dežja čez dan, ali samo zjutraj (točka 2)?
 - Pila MeteoGobar / Črnivec / MeteoZima: so pred hero kartico po sili ali po izbiri (točka 13)?
+
+## Stanje popravkov (4. 11. 2026)
+
+Narejeno: točke 1, 2, 3, 4, 5 in 6 (commiti na veji `claude/vigilant-carson-lm96r2`; opis v `CLAUDE.md`, razdelki »Ikona stanja …«, »Ploščica »Padlo danes« …« in »Tipografska lestvica hero kartice«). Odprto: 7 (barvna vloga temperature, odločitev Filipa), 8–16.

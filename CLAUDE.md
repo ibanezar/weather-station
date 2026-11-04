@@ -2864,6 +2864,13 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Tri vrstice, tri okna, vsako poimenovano:** »napoved: … do polnoči« (Open-Meteo, **preostanek dneva**; »do polnoči« je zdaj viden tudi na telefonu, ploščica je v mreži 2 stolpcev), MTR (zamrznjena napoved za **cel dan**) in izmerjeno nad njima. `_heroMtrText()`: dokler danes ni padlo (izmerjeno < `HERO_WET_MM` = 0,2 mm, isti prag kot `WET_DAY_MM`, test `prag mokrega dne`), piše **»MTR za cel dan: dež 85 % …«**; ko je že padlo, v preteklem času **»MTR je napovedal: dež 85 % · ~2,0 mm«** (brez »≥ 5 mm«), da ne trdi nasprotja z napovedjo za preostanek dneva in je viden napovedano proti izmerjenemu. MTR vrstice **ne skrivaj**, ko se je zmotil: to je odgovornost, ne hrup. Test: `test_parity.hero_mtr_vrstica`.
 - Pravili z vrha razdelka ostajata: pred številko v `hs-rain-today` ni elementa, `hs-rain-rate` je `<span id>` brez vgnezdenega elementa.
 
+### Tipografska lestvica hero kartice (4. 11. 2026, audit točka 6)
+
+- **Pet stopenj + prikazna številka** (`style.css`, takoj pred temo »dark«): `--fs-xs` 12 px (oznake, ure, drobni podatki, gumbi), `--fs-sm` 13 px (sekundarno besedilo, enote, oznake ploščic), `--fs-md` 16 px (stavek »Danes«), `--fs-lg` 20 px (vrednost hitrega vprašanja na telefonu, fluidno do 17 px na 320 px), `--fs-val` 24 px / `--fs-val-wide` 28 px od 760 px (vrednosti meritev), `--fs-xl` 32 px (hitro vprašanje v širokem prikazu). Prej 18 velikosti, deset med 10 in 14 px in ~40 besedil pod 12 px; zdaj 7 vrednosti in **nič pod 12 px**. Temperatura (`.temp-huge`) in ikone so prikazne in so zunaj lestvice.
+- **Nov rem v hero kartici ni dovoljen** (`.hero-b …`, `.hsc-col`, `.qa-…`, `.sc-btn`): vzemi spremenljivko. `tools/test_hero_tipografija.py` (v `parity.yml`) pade na vsaki drugi vrednosti. Enote z vgrajenim `font-size:.7rem` (HTML in JS) preglasita `.hero-b .hm-val>span[style]` in `.hero-b .hm-sub [style*="font-size"]`.
+- **Posledica 12 px:** najširša temperatura v stolpcu grafa je ~24 px (»−12,3°« ~37 px), zato `renderHeroSpark` stolpce **izmeri** in jih pri premajhnem razmiku zloži na vsakih 6 ur (na 390 px ostane 3 h, od ~360 px navzdol 6 h). Prej fiksen prag 27 px. Širina oznake najvišje temperature je `7,1 px × znaki` (prej 6,2 pri 10,5 px).
+- **Ni narejeno:** preprost pogled (`html[data-mode="simple"]`) ima svoje velikosti in ni preslikan na lestvico; ostali deli naslovnice (kartice pod hero kartico) so izven obsega.
+
 ### Graf »Danes«: črta + stolpci po 3 ure, graf sam premika uro (1. 11. 2026)
 
 Filip je izbral varianto C izmed štirih predlogov (kapsule, žareča črta, črta in ikone, nebo). Samo prikaz; podatki in `_fcSliderUpdate()` so nespremenjeni.

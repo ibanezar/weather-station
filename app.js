@@ -2723,9 +2723,9 @@ function drawHeroSparkline(){
   const ahead=pts.filter(p=>p.h>=0),aMax=Math.max(...ahead.map(p=>p.t));
   const ties=ahead.filter(p=>p.t===aMax),tp=ties[Math.floor((ties.length-1)/2)];
   const txt='↑ '+_sparkFmt(aMax)+'° · '+_sparkDayWord(tp.when)+_sparkClockLabel(tp.when);
-  const cw=txt.length*6.2+20,ccx=Math.min(Math.max(px(avgH(ties)),cw/2+4),W-cw/2-4),cy=Math.max(2,py(aMax)-34);
+  const cw=txt.length*7.1+20,ccx=Math.min(Math.max(px(avgH(ties)),cw/2+4),W-cw/2-4),cy=Math.max(2,py(aMax)-34);
   chipSvg='<g class="hspark-chip" id="hero-spark-chip"><rect class="hspark-chip-bg" x="'+(ccx-cw/2).toFixed(1)+'" y="'+cy.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="22" rx="11"/>'+
-    '<text class="hspark-chip-tx" x="'+ccx.toFixed(1)+'" y="'+(cy+14.4).toFixed(1)+'" text-anchor="middle">'+txt+'</text></g>';
+    '<text class="hspark-chip-tx" x="'+ccx.toFixed(1)+'" y="'+(cy+15.2).toFixed(1)+'" text-anchor="middle">'+txt+'</text></g>';
   _sparkChip={cx:ccx,w:cw};
 
   g.innerHTML=
@@ -2738,20 +2738,26 @@ function drawHeroSparkline(){
 
   // stolpci na vsake 3 ure (ura na steni): ikona, temperatura, ura
   if(colsEl){
-    // na ozkih zaslonih (razmik med stolpci < 27 px) so stolpci na vsakih 6 ur, sicer se temperature prekrivajo
-    const step=(W-2*SPARK_INSET)/(maxH-minH)*3<27?6:3;
-    const seen=new Set();let html='';
-    pts.forEach(p=>{
-      if(p.h===0||!p.when||p.h<minH)return;
-      const hr=p.when.getHours();
-      if(hr%step)return;
-      const key=p.when.getTime();
-      if(seen.has(key))return;seen.add(key);
-      html+='<div class="hsc-col'+(p.h<0?' past':'')+'" data-h="'+p.h+'" style="left:'+(px(p.h)/W*100).toFixed(2)+'%">'+
-        '<img src="icons/weather/'+p.icon+'.svg" width="28" height="28" alt="" decoding="async">'+
-        '<b>'+_sparkFmt(p.t)+'°</b><i>'+String(hr).padStart(2,'0')+'</i></div>';
-    });
-    colsEl.innerHTML=html;
+    const build=step=>{
+      const seen=new Set();let html='';
+      pts.forEach(p=>{
+        if(p.h===0||!p.when||p.h<minH)return;
+        const hr=p.when.getHours();
+        if(hr%step)return;
+        const key=p.when.getTime();
+        if(seen.has(key))return;seen.add(key);
+        html+='<div class="hsc-col'+(p.h<0?' past':'')+'" data-h="'+p.h+'" style="left:'+(px(p.h)/W*100).toFixed(2)+'%">'+
+          '<img src="icons/weather/'+p.icon+'.svg" width="28" height="28" alt="" decoding="async">'+
+          '<b>'+_sparkFmt(p.t)+'°</b><i>'+String(hr).padStart(2,'0')+'</i></div>';
+      });
+      return html;
+    };
+    // Najprej stolpci na vsake 3 ure; če se najširša temperatura (pri 12 px »5,8°« ~27 px, »−12,3°« ~37 px) ne prilega v razmik, na vsakih 6 ur,
+    // sicer se besedila prekrivajo. Merimo dejansko širino; če je element še skrit (širina 0), velja varna meja 31 px.
+    const sp3=(W-2*SPARK_INSET)/(maxH-minH)*3;
+    colsEl.innerHTML=build(3);
+    const wMax=Math.max(0,...[...colsEl.querySelectorAll('b')].map(b=>b.getBoundingClientRect().width));
+    if(wMax>0?wMax+2>sp3:sp3<31)colsEl.innerHTML=build(6);
   }
 
   _sparkByHour=new Map(pts.map((p,i)=>[p.h,{x:P[i].x,y:P[i].y,t:p.t,when:p.when}]));
