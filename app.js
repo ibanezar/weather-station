@@ -9107,29 +9107,29 @@ function applyPhotographyWidget(obs){
       ind.style.left=(nowH/24*100)+'%';tl.appendChild(ind);
     }
 
-    // ── Current phase
-    let phase='☀️ Dan',phaseColor='var(--blue)';
-    if(nowH<pt.nautAMh||nowH>pt.nautPMh)          {phase='🌙 Noč';         phaseColor='var(--muted)';}
-    else if(nowH<pt.blueAMh)                       {phase='🌌 Somrak';      phaseColor='#475569';}
-    else if(nowH<pt.sunriseH)                      {phase='💙 Modra ura ↑'; phaseColor='#3b82f6';}
-    else if(nowH<pt.goldAMh)                       {phase='🌅 Zlata ura ↑'; phaseColor='#f97316';}
-    else if(nowH>pt.goldPMh&&nowH<pt.sunsetH)      {phase='🌇 Zlata ura ↓'; phaseColor='#f97316';}
-    else if(nowH>pt.sunsetH&&nowH<pt.bluePMh)      {phase='💙 Modra ura ↓'; phaseColor='#3b82f6';}
-    else if(nowH>pt.bluePMh&&nowH<pt.nautPMh)      {phase='🌌 Somrak';      phaseColor='#475569';}
+    // ── Current phase (ikone iz sklada, brez emoji; besede Zlata/Modra/Noč/Somrak so ključ za oceno svetlobe spodaj)
+    let phase='Dan',phaseIc='sun',phaseColor='var(--blue)';
+    if(nowH<pt.nautAMh||nowH>pt.nautPMh)          {phase='Noč';         phaseIc='moon';      phaseColor='var(--muted)';}
+    else if(nowH<pt.blueAMh)                       {phase='Somrak';      phaseIc='moon-star'; phaseColor='#94a3b8';}
+    else if(nowH<pt.sunriseH)                      {phase='Modra ura ↑'; phaseIc='sparkles';  phaseColor='#3b82f6';}
+    else if(nowH<pt.goldAMh)                       {phase='Zlata ura ↑'; phaseIc='sunrise';   phaseColor='#f97316';}
+    else if(nowH>pt.goldPMh&&nowH<pt.sunsetH)      {phase='Zlata ura ↓'; phaseIc='sunrise';   phaseColor='#f97316';}
+    else if(nowH>pt.sunsetH&&nowH<pt.bluePMh)      {phase='Modra ura ↓'; phaseIc='sparkles';  phaseColor='#3b82f6';}
+    else if(nowH>pt.bluePMh&&nowH<pt.nautPMh)      {phase='Somrak';      phaseIc='moon-star'; phaseColor='#94a3b8';}
     const phEl=document.getElementById('photo-phase-lbl');
-    if(phEl){phEl.textContent=phase;phEl.style.color=phaseColor;}
+    if(phEl){phEl.innerHTML='<span class="ph-ic" style="color:'+phaseColor+'">'+_ico(phaseIc)+'</span>'+phase;phEl.classList.add('photo-phase-pill');}
 
-    // ── Event labels
+    // ── Event labels: čas + oznaka, barvna pika ustreza odseku časovnice
     const ev=document.getElementById('photo-events');
     if(ev)ev.innerHTML=[
-      {h:pt.blueAMh,  l:'💙 '+pt.blueAM},
-      {h:pt.sunriseH, l:'☀️ '+pt.sunrise},
-      {h:pt.goldAMh,  l:'🌅 '+pt.goldAM},
-      {h:pt.noonH,    l:'🌞 '+pt.noon},
-      {h:pt.goldPMh,  l:'🌇 '+pt.goldPM},
-      {h:pt.sunsetH,  l:'🌆 '+pt.sunset},
-      {h:pt.bluePMh,  l:'💙 '+pt.bluePM},
-    ].filter(p=>p.h!=null).map(p=>`<span style="color:${Math.abs(p.h-nowH)<0.5?'var(--amber)':'var(--muted)'}">${p.l}</span>`).join('');
+      {h:pt.blueAMh,  t:pt.blueAM,  l:'Modra',  c:'#3b82f6'},
+      {h:pt.sunriseH, t:pt.sunrise, l:'Vzhod',  c:'#f59e0b'},
+      {h:pt.goldAMh,  t:pt.goldAM,  l:'Zlata',  c:'#f97316'},
+      {h:pt.noonH,    t:pt.noon,    l:'Poldne', c:'#38bdf8'},
+      {h:pt.goldPMh,  t:pt.goldPM,  l:'Zlata',  c:'#f97316'},
+      {h:pt.sunsetH,  t:pt.sunset,  l:'Zahod',  c:'#f59e0b'},
+      {h:pt.bluePMh,  t:pt.bluePM,  l:'Modra',  c:'#3b82f6'},
+    ].filter(p=>p.h!=null).map(p=>'<span class="ph-ev'+(Math.abs(p.h-nowH)<0.5?' is-near':'')+'"><i style="background:'+p.c+'"></i><b>'+p.t+'</b><small>'+p.l+'</small></span>').join('');
 
     // ── Macro scores
     const m=obs?.metric||{};
@@ -9139,25 +9139,27 @@ function applyPhotographyWidget(obs){
     const ws=Math.max(0,Math.round(100-W*3.5));
     const mg=document.getElementById('photo-macro-grid');
     if(mg)mg.innerHTML=[
-      {n:ms,          l:'Makro pogoji', c:ms>=70?'var(--green)':ms>=45?'var(--amber)':'var(--red)',    s:'%'},
-      {n:ls,          l:'Svetloba',     c:ls>=80?'var(--amber)':ls>=50?'var(--blue)':'var(--muted)',   s:'%'},
-      {n:ws,          l:'Mirnost vetra',c:ws>=80?'var(--green)':ws>=50?'var(--amber)':'var(--red)',    s:'%'},
-      {n:T.toFixed(1),l:'Temperatura',  c:T>=16&&T<=26?'var(--green)':T>=10?'var(--amber)':'var(--blue)',s:'°C'},
-    ].map(it=>`<div class="photo-macro-item"><div class="photo-macro-score" style="color:${it.c}">${it.n}${it.s}</div><div class="photo-macro-lbl">${it.l}</div></div>`).join('');
+      {n:ms,       l:'Makro pogoji', ic:'bug',         c:ms>=70?'var(--green)':ms>=45?'var(--amber)':'var(--red)',    s:' %',pos:ms},
+      {n:ls,       l:'Svetloba',     ic:'sun',         c:ls>=80?'var(--amber)':ls>=50?'var(--blue)':'var(--muted)',   s:' %',pos:ls},
+      {n:ws,       l:'Mirnost vetra',ic:'wind',        c:ws>=80?'var(--green)':ws>=50?'var(--amber)':'var(--red)',    s:' %',pos:ws},
+      {n:fmt(T,1), l:'Temperatura',  ic:'thermometer', c:T>=16&&T<=26?'var(--green)':T>=10?'var(--amber)':'var(--blue)',s:' °C',pos:null},
+    ].map(it=>'<div class="photo-macro-item" style="--hm-accent:'+it.c+'"><div class="photo-macro-lbl"><span class="hm-ic">'+_ico(it.ic)+'</span>'+it.l+'</div>'
+      +'<div class="photo-macro-score">'+it.n+it.s+'</div>'
+      +(it.pos!=null?'<span class="hm-scale hm-scale-range" data-on="1" style="--p:'+it.pos+'%"><i></i></span>':'')+'</div>').join('');
 
-    // ── Subjects
+    // ── Subjects (pika stanja namesto emoji: zelena = ugodno, tiha = manj ugodno)
     const subjects=[
-      {e:'🦋',n:'Metulji',      a:T>=18&&T<=30&&W<15&&R<0.1},
-      {e:'🐝',n:'Čebele',       a:T>=15&&W<20&&R<0.1},
-      {e:'🦗',n:'Kobilice',     a:T>=22&&W<20&&R<0.1},
-      {e:'🐛',n:'Hrošči',       a:T>=14&&T<=28},
-      {e:'🕷',n:'Pajki',        a:T>=10&&T<=24},
-      {e:'🐉',n:'Kačji pastirji',a:T>=20&&W<20&&R<0.1},
-      {e:'🌸',n:'Cvetlice',     a:true},
-      {e:'🍄',n:'Gobe',         a:R>0||H>=85},
+      {n:'Metulji',      a:T>=18&&T<=30&&W<15&&R<0.1},
+      {n:'Čebele',       a:T>=15&&W<20&&R<0.1},
+      {n:'Kobilice',     a:T>=22&&W<20&&R<0.1},
+      {n:'Hrošči',       a:T>=14&&T<=28},
+      {n:'Pajki',        a:T>=10&&T<=24},
+      {n:'Kačji pastirji',a:T>=20&&W<20&&R<0.1},
+      {n:'Cvetlice',     a:true},
+      {n:'Gobe',         a:R>0||H>=85},
     ];
     const sEl=document.getElementById('photo-subjects');
-    if(sEl)sEl.innerHTML=subjects.map(s=>`<div class="photo-subject ${s.a?'active':'low'}">${s.e} ${s.n}</div>`).join('');
+    if(sEl)sEl.innerHTML=subjects.map(s=>'<div class="photo-subject '+(s.a?'active':'low')+'"><i></i>'+s.n+'</div>').join('');
 
     // ── Tip
     const tips=[];
@@ -9167,7 +9169,7 @@ function applyPhotographyWidget(obs){
     if(R<0.1&&T>=18&&W<10)          tips.push('Idealni pogoji za žuželke — mirno in toplo.');
     if(W>20)                        tips.push('Preveč vetra za makro. Poiščite zavetje.');
     const tipEl=document.getElementById('photo-tip');
-    if(tipEl)tipEl.textContent=tips[0]||'';
+    if(tipEl)tipEl.innerHTML=tips[0]?'<span class="hm-ic">'+_ico('sparkles')+'</span><span>'+tips[0]+'</span>':'';
   }catch(e){console.warn('PhotoWidget:',e);}
 }
 
