@@ -61,6 +61,9 @@ jobs:
         run: |
           python3 tools/log_varpolje_solar.py
           python3 tools/eval_sonce_varpolje.py
+          # stran /sonce-v-dolini/ pokaže razsodbo soseda (data/sonce-varpolje.json), ko je izdana; brez tega bi zaostala dan
+          pip install numpy --quiet
+          python3 tools/generate_sonce_page.py
 
       - name: Izračunaj metrike
         run: python3 tools/compute_forecast_test_metrics.py

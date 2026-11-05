@@ -234,6 +234,29 @@ ev_res = ej.evaluate_predictions({"2026-10-01": morning(warm_from=9)}, gj.PRED_P
 check(ev_res["n"] == 1 and ev_res["v_razponu"] in (0, 1), f"ocena napovedi: {ev_res}")
 check(ej.evaluate_predictions({}, gj.PRED_PATH)["n"] == 0, "brez izmerjenega dne ni ocene")
 
+# razdelek o sosednji postaji: brez razsodbe prazen, z razsodbo opiše smer in ne trdi vzroka
+vp_tmp = os.path.join(tempfile.mkdtemp(), "sonce-varpolje.json")
+gs.VARPOLJE_PATH = vp_tmp
+check(gs.varpolje_html() == "", "brez datoteke ni razdelka o sosedu")
+def vp_write(verdict, n, med):
+    with open(vp_tmp, "w", encoding="utf-8") as f:
+        json.dump({"jutro": {"n": n, "mediana_min": med, "mad_min": 5, "min_min": med - 20, "max_min": med + 20},
+                   "min_dni": 15, "prag_min": 30.0, "razsodba": verdict}, f)
+vp_write(None, 3, 50)
+check(gs.varpolje_html() == "", "razsodba null: stran o sosedu ne trdi nič")
+vp_write("ireica1_pozneje", 10, 50)
+check(gs.varpolje_html() == "", "premalo dni: brez razdelka, tudi če je razsodba vpisana")
+vp_write("ireica1_pozneje", 20, 50)
+h = gs.varpolje_html()
+check("lokalna" in h and "sosednja postaja vidi sonce prej" in h and "ne dokazuje vzroka" in h, "pozneje: lokalna senca, brez dokaza")
+vp_write("podobno", 20, 4)
+h = gs.varpolje_html()
+check("ni lokalna" in h and "ne drži" in h, "podobno: senca ni lokalna")
+vp_write("ireica1_prej", 20, -45)
+h = gs.varpolje_html()
+check("senca je torej pri postaji Varpolje" in h, "prej: senca pri Varpolju")
+check("indoor" not in h.lower() and "notranj" not in h.lower(), "razdelek ne omenja notranjih meritev")
+
 if fails:
     print(f"\n{fails} preverjanj ni uspelo.")
     sys.exit(1)
