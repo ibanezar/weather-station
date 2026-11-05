@@ -769,6 +769,13 @@ PageSpeed (mobile) je za `/` javil 1,9 s zadržanega prvega izrisa (`style.min.c
   Lighthouse) se zaradi tega ni premaknil (2,56 s s preloadi in brez; brez preloadov 2,85 s) —
   merilo je PageSpeed na živi strani.
 
+### Zavihki se na širokem zaslonu ne lomijo (CLS na namizju, 5. 11. 2026)
+
+Živa stran je imela na namizju (1280 px) CLS 0,16–0,21 (v avditu 0,11–0,40): ob ~2,1 s je `.tab-nav-wrap` skočil z 84 na 49 px in potisnil vse pod seboj (`ticker-wrap`, hero) za 34 px navzgor. Vzrok: z rezervno pisavo (`Inter Fallback`) so bili gumbi vseh 11 zavihkov skupaj ~2 px preširoki, zadnji se je zalomil v drugo vrstico; po prihodu Interja in polnega CSS je vse stalo v eno. Popravek: `@media(min-width:75em){.tab-nav{flex-wrap:nowrap}}` (`style.css`, tudi v kritičnem CSS). Presežek pade v odmik ovoja (.5rem). Enota je `em`, ne `px`: pri večji privzeti pisavi brskalnika se meja premakne skupaj z gumbi. Pod 1200 px zavihki še vedno prehajajo v drugo vrstico (končno stanje je tam 2 vrstici, ni skoka). CLS na namizju: 0,158 → 0,005.
+
+- **Merjenje namiznega CLS je mogoče samo s stisnjenimi odgovori**: `python3 -m http.server` brez gzip/brotli ne reproducira premika (HTML se naloži prepozno, polni CSS in pisave so že tu). Uporabi strežnik z gzipom/brotlijem ali živo stran (Playwright, CDP omejitev 200 kB/s, 150 ms, CPU 4×, `PerformanceObserver('layout-shift')` z `sources`).
+- **Nov zavihek ali daljša oznaka** lahko na ≥ 1200 px preseže vrstico (`flex-wrap:nowrap` tam ne lomi): preveri `scrollWidth` proti `clientWidth` na `.tab-nav` pri 1200 px; če je zavihkov preveč, jih je treba prestaviti v spustni meni, ne vrniti prelom.
+
 ### Delo glavne niti in prvi izris naslovne strani (6. 10. 2026, drugi krog)
 
 Profil (Chromium, CPU 4× počasnejši, brez omrežja): skript je bil < 1 s od ~11 s dela glavne niti — ostalo

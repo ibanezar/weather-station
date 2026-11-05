@@ -1649,6 +1649,10 @@ footer{margin-top:2.5rem;border:1px solid var(--card-border);border-radius:16px;
 .tab-btn:active:not(.active){transform:scale(.97)}
 /* Desktop: kompaktnejši gumbi, da se glavni meni (10 gumbov) ujame v eno vrstico */
 @media(min-width:769px){.tab-nav{gap:.2rem}.tab-nav .tab-btn{padding:.46rem .5rem;gap:.3rem;letter-spacing:.02em}}
+/* Na širokem zaslonu (vsebina je tam fiksnih 1120 px) vseh 11 zavihkov z Interjem stane v eno vrstico. Z rezervno pisavo, ki jo brskalnik uporabi do prihoda Interja,
+   so gumbi skupaj ~2 px preširoki: zadnji se je zalomil (nav 84 px) in ob prihodu pisav skočil nazaj (49 px), vse pod njim pa 34 px navzgor (CLS 0,16 na namizju, 5. 11. 2026).
+   Brez preloma ta presežek pade v notranji odmik ovoja (.5rem). Enota em, ne px: pri večji privzeti pisavi brskalnika se meja premakne skupaj z gumbi. */
+@media(min-width:75em){.tab-nav{flex-wrap:nowrap}}
 .tab-pane{display:none}.tab-pane.active{display:block}
 
 /* History table */
