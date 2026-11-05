@@ -2878,6 +2878,25 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - Legende skale ni (nobena stopnja ni edini nosilec pomena: številka je izpisana, barva je podkrepitev). Žarenje (`#temp-val`, `text-shadow … currentColor`) je samo na glavni številki; drobne podatkovne številke (stolpci, pas, hitra vprašanja) ga nimajo, tako naj ostane.
 - **Ni narejeno:** zelena stopnja 8–15 °C v temni temi (`#6ee7b7`) je 17 ΔE od UI-akcenta `#6FBF95` (zavihek »Zdaj«); `.mtr-st.st-frost` (`#67e8f9`) in ploščica »Zmrzal« med hitrimi vprašanji (`--cyan`) so ostala v ciano družini (pojav, ne temperatura).
 
+### Hierarhija ploščic in lestvice vrednosti (4. 11. 2026, audit točki 8 in 9)
+
+- **Dve ravni ploščic** (`--hb-bg1/bd1/sh1` in `--hb-bg2/bd2/sh2` na `.hero-b`, svetla tema v `:root:not([data-theme="dark"]) .hero-b`): **raven 1** = glavna ploščica (`.hero-top`) in »Danes« (`.hb-day`): močnejša podlaga, svetel rob, senca. **Raven 2** = meritve (`.hm`), »Več podrobnosti«, noga, hitra vprašanja (`.hb-tile`): ravno, brez sence. Prej so imele vse enako podlago, rob in senco (`--hero-bg`, `--sh-1`), hierarhijo je nosila samo velikost. Nova ploščica v hero kartici izbere raven, ne piše lastne podlage.
+- **Svetla raven 2 je `.93`, ne manj**: pri `.8` zasije modra podlaga strani skozi in kontrast mutiranega besedila pade na ~4,2:1 (axe ga je ujel kot napako na povezavi MTR v nogi).
+- **Pravila ravni stojijo PRED spremenljivkami**: clean-css 5.3.3 (level 1) je ob obratnem vrstnem redu tiho izpustil `.hero-b .hb-tile` iz `style.min.css` (hb-foot in hitra vprašanja bi izgubila podlago in rob, `style.css` pa bi izgledal pravilno). Test `test_hero_ploscice.py` preverja tudi minificiran CSS.
+- **Lestvice vrednosti:** vlaga, veter, tlak in razpon dneva so **ena nevtralna sekvenčna lestvica** (`--sc-bg` iz barve besedila, 10 → 42 %), brez barvnega pomena. Prej pet različnih gradientov (rdeč konec pri vetru je zvenel kot nevarnost, meje so izbira prikaza). **Semantične barve samo tam, kjer obstaja prag: UV** (zeleno → rdeče). Dež je polnilo količine (ena barva), luna upodobitev (temno → osvetljeno). Nova lestvica mora biti v `SCALES` v `tools/test_hero_ploscice.py`.
+- Ni narejeno: višina hero kartice na telefonu (~1,6 zaslona); ploščice so enako visoke kot prej.
+
+### Graf »Danes«, PM₂,₅, megla, tap-cilji, polmeri (5. 11. 2026, audit točke 10–16)
+
+- **Črta grafa nosi barvo temperaturne skale** (`tempColor()` po točkah, vodoravni `linearGradient` `heroSparkLine`), polnilo pod njo je barva zdajšnje temperature (kot številka v glavni ploščici); pika, vodilo in sij prevzamejo barvo izbrane ure (`moveHeroSparkMarker`). Prej: črta modra, številka cian, oznake bele. CSS `.hspark-line` NE sme imeti `stroke` (pravilo bi preglasilo atribut). Graf se ob menjavi teme prerisuje prek `_themeRedraw`.
+- **Stavek pod »Danes«** (`forecastPhrase()`): kadar je vrh naslednjih 24 ur (zaokroženo) višji od današnjega in je jutri, se začne z »V naslednjih 24 urah do približno N °C«, dež dobi besedo »jutri«; sicer ostane »Danes do približno …«. Razlog: zvečer je oznaka grafa pokazala »↑ 8,1° · jutri 13:00« pod »Danes do približno 6 °C«. Test: `test_parity.hero_stavek_danes_ali_24_ur`.
+- **PM₂,₅ Varpolje** ima lestvico (`.hm-scale-pm`, razredi EAQI 10/20/25/50/75 µg/m³ na korenski skali do 100, `pmScalePos()`; meje v CSS so `sqrt(meja/100)`, preverja `test_pm_tile.py`), vrstico vira in časa (`hs-pm-src`: »sosednja postaja IREICA7 · pred N min«) in **nevtralno številko** (barvo razreda nosita lestvica in besedna oznaka; prej je bila cela številka vijolična). Je gost, ne referenca: IREICA1 ostaja podpis kartice.
+- **Meglene proge** na glavni ploščici (`#hero-canvas`, tip `wisp`): trde elipse so zamenjali mehki radialni prelivi (`_wispGrad`); ostre vodoravne proge ob robu so izgledale kot napaka izrisa.
+- **Tap-cilji ≥ 44 px** (`.hero-b .sc-btn`, povezava MTR), na ≤ 420 px gumba delita vrstico (`flex:1 1 0`), na ≤ 360 px je prvi širši; besedilo se ne prelomi (preverjeno na 320 px).
+- **Polmeri hero kartice so žetoni** `--r-sm` 8 / `--r-md` 14 / `--r-lg` 20 / `--r-pill`: ploščice 20, notranji bloki 14, čipi in gumbi pilula (prej 10, 13, 14, 16, 50px, 99px).
+- **`%` je vezan s številko** (`\u00A0%` v obetih, hitrih vprašanjih in kartici MTR): »verjetnost 0 %« se na 320 px ne lomi.
+- Po spremembi `app.js` ali `style.css`: `npm run minify && node tools/critical_css.mjs`.
+
 ### Graf »Danes«: črta + stolpci po 3 ure, graf sam premika uro (1. 11. 2026)
 
 Filip je izbral varianto C izmed štirih predlogov (kapsule, žareča črta, črta in ikone, nebo). Samo prikaz; podatki in `_fcSliderUpdate()` so nespremenjeni.

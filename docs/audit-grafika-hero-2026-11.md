@@ -102,4 +102,7 @@ V razširjenem delu ploščica »PM₂,₅ · Varpolje **215,0** µg/m³, Nevarn
 
 ## Stanje popravkov (4. 11. 2026)
 
-Narejeno: točke 1, 2, 3, 4, 5, 6 in 7 (commiti na veji `claude/vigilant-carson-lm96r2`; opis v `CLAUDE.md`, razdelki »Ikona stanja …«, »Ploščica »Padlo danes« …« in »Tipografska lestvica hero kartice«). Odprto: 8–16.
+Narejeno: točke 1–16 (commiti na veji `claude/vigilant-carson-lm96r2`; opis v `CLAUDE.md`, razdelki »Ikona stanja …«, »Ploščica »Padlo danes« …«, »Tipografska lestvica hero kartice« in »Graf »Danes«, PM₂,₅, megla, tap-cilji, polmeri«).
+
+- **13 delno:** glava je 16 px nižja (po izbiri pogleda je podnapis gumbov skrit na ≤ 560 px), preklopnik pogleda in vrstica obvestil nista združena (to je odločitev o postavitvi, ne popravek). Temperatura začne pri ~519 px (390 px) oz. ~543 px (320 px) namesto ~535 px.
+- **Ugotovljeno ob merjenju, ni popravljeno:** na 1280 px CLS niha 0,11 ali 0,35–0,40 (`ticker-wrap` skoči za ~36 px navzgor ob ~1,1 s, `title-row` 102→100 px). Enako na neprilagojeni različici (preverjeno s `git stash`), torej ni posledica teh popravkov; vzrok je v glavi na namizju (verjetno zamenjava pisave ali prihod celotnega CSS).
