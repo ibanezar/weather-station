@@ -16,7 +16,7 @@ Za sedem popravljenih člankov sta `dateModified` (JSON-LD) in `updated` v `blog
 | crnivec-pozimi | »Snežne odeje je bilo v zimi 22–57 dni« → »Snežna odeja je v posamezni zimi ležala 22–57 dni« (tudi ploščica) | dvoumno »v zimi« |
 | prvi-sneg-golte-solcava | »Več o razmerah: o razmerah na Goltah najdete več v članku …« → »Razmere na Goltah: več v članku …« | ponavljanje |
 | stopinjski-dnevi | »V zadnjih petih kurilnih sezonah« → »V petih popolnih kurilnih sezonah« | zadnja sezona (2025/26) je izpuščena, torej niso »zadnjih pet« |
-| kdaj-se-dvigne-jutranja-megla | dodan pogoj »veter pod 3 km/h« v uvod, ploščico in omejitve (jutro ob 7. uri) | kodа (`at7 = sat(h[7]) and wind < 3`) pogoj ima, besedilo ga je zamolčalo: število 23 od 25 je z njim |
+| kdaj-se-dvigne-jutranja-megla | dodan pogoj »veter pod 3 km/h« v uvod, ploščico in omejitve (jutro ob 7. uri) | koda (`at7 = sat(h[7]) and wind < 3`) pogoj ima, besedilo ga je zamolčalo: število 23 od 25 je z njim |
 | isti | »Samo ena jesen« → »Samo ena sezona«; »ki ga ugotavljam« → »ki ga računam« | zapis sega od julija; leksika |
 | kdaj-menjati-zimske-gume | brez sprememb | |
 
