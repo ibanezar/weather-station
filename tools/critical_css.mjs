@@ -83,6 +83,15 @@ function collect(reach) {
         if (el.getBoundingClientRect().top < limit) return true;
         continue;
       }
+      // display:contents nima lastne škatle (getClientRects je prazen), a njegovi otroci so v toku strani in pravilo
+      // določa njihovo postavitev: `.hero-b .hero-left{display:contents}` je manjkal v kritičnem CSS, zato je bila
+      // glavna ploščica hero kartice do prihoda celotnega CSS flex (159 px), potem mreža (180 px): CLS 0,17 na telefonu.
+      if (getComputedStyle(el).display === 'contents') {
+        const kid = [...el.children].find(c => c.getClientRects().length);
+        const ref = kid || el.parentElement;
+        if (ref && ref.getClientRects().length && ref.getBoundingClientRect().top < limit) return true;
+        continue;
+      }
       // Element brez postavitve: vključimo ga samo, če ga skriva LASTNO pravilo (display:none,
       // [hidden]) in je starš viden nad pregibom. Brez tega pravilo, ki skriva pasico/gumb,
       // manjka v kritičnem delu in se pasica pred prihodom celotnega CSS pokaže neoblikovana.

@@ -212,3 +212,15 @@ jobs:
 
       - name: Test Gobjega alarma (pravila, histereza, hladilna doba)
         run: node tools/test_gobe_alarm.mjs
+
+      - name: Test odločitvene logike čuvaja videza
+        run: node tools/test_visual_watch.mjs
+
+      - name: Test beleženja sevanja soseda in primerjave prvega žarka
+        run: python3 tools/test_varpolje_solar.py
+
+      - name: Test izvoza podatkov (CSV), objave na Zenodo in sheme Dataset
+        run: python3 tools/test_dataset_export.py
+
+      - name: Test analize »dvig megle po sevanju« (negativen rezultat)
+        run: python3 tools/test_megla_sevanje.py

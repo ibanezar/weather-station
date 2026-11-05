@@ -54,6 +54,22 @@ RECICA_SAMEAS_JSON = json.dumps(RECICA_SAMEAS, ensure_ascii=False)
 HISTORY_DISTRIBUTION = {"@type": "DataDownload", "encodingFormat": "application/json",
                          "contentUrl": f"{SITE}/history.json"}
 HISTORY_DISTRIBUTION_JSON = json.dumps(HISTORY_DISTRIBUTION, ensure_ascii=False, separators=(",", ":"))
+# Dnevni izvoz kot CSV (tools/export_dataset.py): oblika, ki jo razumejo Dataset Search, Zenodo in raziskovalci.
+DAILY_CSV_DISTRIBUTION = {"@type": "DataDownload", "encodingFormat": "text/csv",
+                          "contentUrl": f"{SITE}/podatki/ireica1-dnevni-podatki.csv"}
+
+
+def _dataset_doi_url():
+    """DOI zapisa na Zenodo iz data/dataset-metadata.json (tools/zenodo_publish.py ga vpiše po objavi); brez njega None."""
+    try:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "dataset-metadata.json"), encoding="utf-8") as f:
+            d = json.load(f).get("doi")
+    except (OSError, ValueError):
+        return None
+    return f"https://doi.org/{d}" if d else None
+
+
+_DATASET_DOI_URL = _dataset_doi_url()
 
 MES_NOM = {1:"januar",2:"februar",3:"marec",4:"april",5:"maj",6:"junij",
            7:"julij",8:"avgust",9:"september",10:"oktober",11:"november",12:"december"}
@@ -369,7 +385,7 @@ def archive_dataset_schema(first_date, last_date):
         "description": ("Dnevni arhiv temperature, padavin, relativne vlage in vetra "
                          f"meteorološke postaje {STATION_ID} v Rečici ob Savinji od {fmtd(first_date)}."),
         "url": f"{SITE}/vreme/",
-        "identifier": STATION_ID,
+        "identifier": [STATION_ID] + ([_DATASET_DOI_URL] if _DATASET_DOI_URL else []),
         "inLanguage": "sl",
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "isAccessibleForFree": True,
@@ -378,7 +394,6 @@ def archive_dataset_schema(first_date, last_date):
         "temporalCoverage": f"{first_date}/..",
         "creator": {"@id": f"{SITE}/#person"},
         "publisher": {"@type": "Organization", "name": "Meteorec", "url": SITE + "/"},
-        "distribution": HISTORY_DISTRIBUTION,
         "spatialCoverage": {
             "@type": "Place",
             "name": "Rečica ob Savinji",
@@ -391,12 +406,12 @@ def archive_dataset_schema(first_date, last_date):
             {"@type": "PropertyValue", "name": "Relativna vlažnost", "unitText": "%"},
             {"@type": "PropertyValue", "name": "Hitrost vetra", "unitText": "km/h"},
         ],
-        "distribution": {
-            "@type": "DataDownload",
-            "encodingFormat": "application/json",
-            "contentUrl": f"{SITE}/history.json",
-        },
+        # Prej je bil ključ »distribution« v tem slovarju dvakrat (drugi je prepisal prvega): zdaj en seznam, JSON + CSV.
+        "distribution": [HISTORY_DISTRIBUTION, DAILY_CSV_DISTRIBUTION],
+        "measurementTechnique": "Amaterska vremenska postaja Ecowitt (senzorji na prostem), dnevni povzetek",
     }
+    if _DATASET_DOI_URL:
+        data["sameAs"] = _DATASET_DOI_URL
     return (f'<script type="application/ld+json">\n'
             f'{json.dumps(data, ensure_ascii=False, separators=(",", ":"))}\n</script>')
 

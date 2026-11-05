@@ -1,0 +1,79 @@
+name: Čuvaj videza žive strani
+
+# Dimni test (smoke-test.yml) pove, da stran obstaja, varuh svežine, da so podatki sveži. Nobeden ne vidi, ali se stran
+# VIDI prav: CLS na namizju je bil 0,16–0,21 teden dni (zavihki so se ob prihodu pisav skrčili z 84 na 49 px) in
+# 0,17 na telefonu (kritični CSS brez `display:contents` pravil), ne da bi kdo opazil. tools/visual_watch.mjs meri na ŽIVI
+# strani CLS (telefon + namizje, mediana treh tekov), vodoravni razliv pri 360 px in axe na hero kartici;
+# ob preseženi meji odpre issue `visual-fail`, ko je spet v redu, ga zapre. Teče po vsaki objavi Pages in enkrat dnevno.
+
+on:
+  workflow_run:
+    workflows: ["pages-build-deployment"]
+    types: [completed]
+  schedule:
+    - cron: '50 8 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: visual-watch
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # Pages po koncu builda potrebuje še trenutek, da CDN postreže novo različico.
+      - name: Počakaj na CDN
+        if: github.event_name == 'workflow_run'
+        run: sleep 90
+
+      - name: Namesti Playwright in axe-core
+        run: |
+          npm i --no-save playwright@1.56.1 axe-core@4.10.2
+          npx playwright install --with-deps chromium
+
+      - name: Čuvaj videza
+        id: visual
+        run: node tools/visual_watch.mjs --report visual-report.md
+
+      - name: Pripravi oznako
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "visual-fail" --repo ${{ github.repository }} \
+            --color "F59E0B" --description "Živa stran ne prestane preverjanja videza (CLS, razliv, axe)" --force
+
+      - name: Odpri ali posodobi opozorilo
+        if: steps.visual.outputs.fail != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          N="${{ steps.visual.outputs.fail }}"
+          OPEN=$(gh issue list --repo ${{ github.repository }} --label visual-fail --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -z "$OPEN" ]; then
+            gh issue create --repo ${{ github.repository }} --label visual-fail \
+              --title "Videz žive strani: ${N} napak" --body-file visual-report.md
+          else
+            gh issue edit "$OPEN" --repo ${{ github.repository }} \
+              --title "Videz žive strani: ${N} napak" --body-file visual-report.md
+          fi
+
+      - name: Zapri opozorilo, ko je vse v redu
+        if: steps.visual.outputs.fail == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for NUM in $(gh issue list --repo ${{ github.repository }} --label visual-fail --state open --json number --jq '.[].number'); do
+            gh issue close "$NUM" --repo ${{ github.repository }} --comment "Videz spet v redu."
+          done

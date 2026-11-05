@@ -35,7 +35,7 @@
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Podatki"}]}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Dataset","@id":"https://meteorec.si/#dataset","name":"Vremenske meritve — Rečica ob Savinji (IREICA1)","alternateName":"Meteorec IREICA1 Weather Dataset","description":"Dnevni arhiv temperature, padavin, relativne vlage in vetra meteorološke postaje IREICA1 v Rečici ob Savinji od 7. novembra 2019.","url":"https://meteorec.si/vreme/","identifier":"IREICA1","inLanguage":"sl","license":"https://creativecommons.org/licenses/by/4.0/","isAccessibleForFree":true,"keywords":["vreme Rečica ob Savinji","vreme Zgornja Savinjska dolina","vremenska postaja Savinjska dolina"],"temporalCoverage":"2019-11-07/..","creator":{"@id":"https://meteorec.si/#person"},"publisher":{"@type":"Organization","name":"Meteorec","url":"https://meteorec.si/"},"distribution":{"@type":"DataDownload","encodingFormat":"application/json","contentUrl":"https://meteorec.si/history.json"},"spatialCoverage":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326","https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"variableMeasured":[{"@type":"PropertyValue","name":"Temperatura zraka","unitText":"°C"},{"@type":"PropertyValue","name":"Padavine","unitText":"mm"},{"@type":"PropertyValue","name":"Relativna vlažnost","unitText":"%"},{"@type":"PropertyValue","name":"Hitrost vetra","unitText":"km/h"}]}
+{"@context":"https://schema.org","@type":"Dataset","@id":"https://meteorec.si/#dataset","name":"Vremenske meritve — Rečica ob Savinji (IREICA1)","alternateName":"Meteorec IREICA1 Weather Dataset","description":"Dnevni arhiv temperature, padavin, relativne vlage in vetra meteorološke postaje IREICA1 v Rečici ob Savinji od 7. novembra 2019.","url":"https://meteorec.si/vreme/","identifier":["IREICA1"],"inLanguage":"sl","license":"https://creativecommons.org/licenses/by/4.0/","isAccessibleForFree":true,"keywords":["vreme Rečica ob Savinji","vreme Zgornja Savinjska dolina","vremenska postaja Savinjska dolina"],"temporalCoverage":"2019-11-07/..","creator":{"@id":"https://meteorec.si/#person"},"publisher":{"@type":"Organization","name":"Meteorec","url":"https://meteorec.si/"},"spatialCoverage":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326","https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"variableMeasured":[{"@type":"PropertyValue","name":"Temperatura zraka","unitText":"°C"},{"@type":"PropertyValue","name":"Padavine","unitText":"mm"},{"@type":"PropertyValue","name":"Relativna vlažnost","unitText":"%"},{"@type":"PropertyValue","name":"Hitrost vetra","unitText":"km/h"}],"distribution":[{"@type":"DataDownload","encodingFormat":"application/json","contentUrl":"https://meteorec.si/history.json"},{"@type":"DataDownload","encodingFormat":"text/csv","contentUrl":"https://meteorec.si/podatki/ireica1-dnevni-podatki.csv"}],"measurementTechnique":"Amaterska vremenska postaja Ecowitt (senzorji na prostem), dnevni povzetek"}
 </script>
 <link rel="stylesheet" href="/fonts/fonts.css?v=c490d62a">
 <link rel="stylesheet" href="/blog/blog.css?v=6352b4f1">
@@ -116,18 +116,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <li>Dnevni rekord padavin na postaji IREICA1 znaša 89,9 mm (12. septembra 2024).</li>
     <li>Povprečna letna količina padavin v Rečici ob Savinji je približno 1377 mm.</li>
     <li>Meteorološka postaja IREICA1 v Rečici ob Savinji (366 m n. m., 46,325779° S, 14,921137° V) neprekinjeno meri vreme od 7. novembra 2019.</li>
-    <li>Do 4. novembra 2026 je postaja IREICA1 zabeležila 2541 dni meritev.</li>
+    <li>Do 4. novembra 2026 je postaja IREICA1 zabeležila 2536 dni meritev (dnevi, ki jih history.json dopolni iz reanalize ERA5, niso všteti).</li>
   </ul>
 
   <h2>Prenosi</h2>
   <p class="archive-intro">Vse datoteke so javne in brez registracije, licenca CC BY 4.0 — navedi
   »Meteorec (meteorec.si), postaja IREICA1«.</p>
   <div class="tbl-x" tabindex="0"><table class="stats">
+    <tr><th><a href="/podatki/ireica1-dnevni-podatki.csv">podatki/ireica1-dnevni-podatki.csv</a></th><td>dnevne zunanje meritve postaje IREICA1 od 2019 kot CSV (samo meritve postaje, brez dni iz reanalize)</td><td>CSV</td></tr>
     <tr><th><a href="/history.json">history.json</a></th><td>dnevne meritve postaje IREICA1 od 2019 (temperatura, padavine, vlaga, veter, tlak)</td><td>JSON</td></tr>
     <tr><th><a href="/test-napovedi/podatki.csv">test-napovedi/podatki.csv</a></th><td>napovedi šestih modelov za D+1 do D+7 in izmerjene vrednosti</td><td>CSV</td></tr>
     <tr><th><a href="/forecast_verification.json">forecast_verification.json</a></th><td>dnevna primerjava napovedi ARSO, Open-Meteo, MTR, ECMWF AIFS in Google WeatherNext 2 z meritvijo</td><td>JSON</td></tr>
     <tr><th><a href="/napoved-modela.json">napoved-modela.json</a></th><td>trenutna napoved lokalnega modela MTR za Rečico ob Savinji</td><td>JSON</td></tr>
   </table></div>
+
+  <h2>Kako citirati</h2>
+  <p class="archive-intro">Eremita, F. (2026). <em>Meteorec IREICA1: dnevne meritve vremenske postaje Rečica ob Savinji</em>
+  [nabor podatkov, CC BY 4.0]. URL: <a href="https://meteorec.si/podatki/">https://meteorec.si/podatki/</a> (trajni DOI še ni objavljen). Navedite različico (zadnji dan v datoteki) ali datum dostopa. Datoteka ima samo zunanje
+  meritve; postaja je amaterska (senzorji Ecowitt, brez uradne kalibracije in presoje lokacije), ni ARSO-va merilna mreža.</p>
 
   <h2>O postaji in podatkih</h2>
   <div class="tbl-x" tabindex="0"><table class="stats">
