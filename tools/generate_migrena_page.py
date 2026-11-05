@@ -466,7 +466,7 @@ CFG = {
         ("Kdaj moram takoj k zdravniku?", "Ob nenadnem izredno hudem glavobolu, ob oslabelosti, motnjah govora ali vida, zmedenosti, krčih, vročini s togim tilnikom ali po poškodbi glave pokličite 112. Ob bistveni spremembi običajnih napadov se posvetujte z zdravnikom."),
     ],
     "links": [("/biovreme/", "Biovreme →"), ("/vreme-recica-ob-savinji/", "Vreme Rečica ob Savinji →"),
-              ("/kakovost-zraka/", "Kakovost zraka →"), ("/astma/", "Vreme in astma →"), ("https://www.arso.gov.si/", "ARSO")],
+              ("/kakovost-zraka/", "Kakovost zraka →"), ("/astma/", "Vreme in astma →"), ("/adhd/", "Vreme in ADHD →"), ("https://www.arso.gov.si/", "ARSO")],
     "desc": lambda lvl: f"Migrenski sprožilci danes: {lvl}. Padec tlaka, nevihte, vročina, veter in svetloba za 5 dni, graf tlaka ter dnevnik napadov samo v vašem brskalniku.",
     "sections": sections, "script": client_script,
 }

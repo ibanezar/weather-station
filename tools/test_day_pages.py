@@ -9,6 +9,7 @@ import generate_vreme_za_kolesarje_page as P2  # noqa: E402
 import generate_vreme_za_cebelarje_page as P3  # noqa: E402
 import generate_vreme_za_ribolov_page as P4  # noqa: E402
 import generate_vreme_za_pse_page as P5  # noqa: E402
+import generate_adhd_page as P6  # noqa: E402
 
 fails = []
 
@@ -20,7 +21,7 @@ def check(name, cond):
 
 
 TODAY = datetime.date(2026, 6, 10)
-CFGS = [P1.CFG, P2.CFG, P3.CFG, P4.CFG, P5.CFG]
+CFGS = [P1.CFG, P2.CFG, P3.CFG, P4.CFG, P5.CFG, P6.CFG]
 
 
 def synth(**o):
@@ -89,6 +90,58 @@ check("pes: vročina 33 °C občutena = 3", D.build_days(P5.CFG, synth(apparent_
 check("pes: vroč asfalt ob 31 °C in 700 W/m²",
       D.build_days(P5.CFG, synth(temperature_2m=31, shortwave_radiation=700), TODAY)[0]["pts"]["asfalt"] == 3)
 check("pes: mraz −12 °C občutena = 2", D.build_days(P5.CFG, synth(apparent_temperature=-12), TODAY)[0]["pts"]["mraz"] == 2)
+
+# ── ADHD: ocena meri pogoje za navade, ne simptomov ──
+A = lambda **o: D.build_days(P6.CFG, synth(**o), TODAY)
+# sintetičnih 20 °C čez noč je tropska noč, zato topel suh dan s hladno nočjo
+check("adhd: topel suh dan s hladno nočjo ugodno/dobro", A(temperature_2m=14)[0]["lvl"] <= 1)
+check("adhd: tropska noč (22 °C) = 3 točke za spanje", A(temperature_2m=22)[0]["pts"]["noc"] == 3)
+check("adhd: tropska noč da vsaj raven »zahtevno« (veto)", A(temperature_2m=22)[0]["lvl"] >= 2)
+check("adhd: hladna noč (10 °C) brez ovire", A(temperature_2m=10)[0]["pts"]["noc"] == 0)
+check("adhd: noč 17 °C = 1, 19 °C = 2",
+      A(temperature_2m=17)[0]["pts"]["noc"] == 1 and A(temperature_2m=19)[0]["pts"]["noc"] == 2)
+last = A(temperature_2m=22)[4]
+check("adhd: zadnji dan nima noči v napovedi, ocena je 0 in to piše", last["pts"]["noc"] == 0 and "še ni na voljo" in last["detail"]["noc"])
+check("adhd: noč danes uporabi jutro jutri",
+      P6.night_min(synth(temperature_2m=12), "2026-06-10") == 12 and P6.night_min(synth(temperature_2m=12), "2026-06-14") is None)
+check("adhd: mraz −12 °C občutena = 3", A(apparent_temperature=-12)[0]["pts"]["mraz"] == 3)
+check("adhd: občutena 33 °C = 2 točki za vročino", A(apparent_temperature=33)[0]["pts"]["vrocina"] == 2)
+check("adhd: veter največ 2 točki", A(wind_speed_10m=60, wind_gusts_10m=100)[0]["pts"]["veter"] == 2)
+check("adhd: dež največ 2 točki", A(precipitation=3, precipitation_probability=100)[0]["pts"]["dez"] == 2)
+check("adhd: nevihta = 3", A(weather_code=95)[0]["pts"]["nevihta"] == 3)
+check("adhd: temen dan = 1 točka, svetel 0 in največ 1",
+      A(shortwave_radiation=20)[0]["pts"]["svetloba"] == 1 and A(shortwave_radiation=450)[0]["pts"]["svetloba"] == 0)
+check("adhd: ura v temi je zmerna ovira, ura na svetlem brez ovir",
+      P6.hour_fn(synth(shortwave_radiation=0), "2026-06-10T07:00") == 2 and P6.hour_fn(synth(), "2026-06-10T12:00") == 0)
+check("adhd: nevihta ob uri = 3", P6.hour_fn(synth(weather_code=96), "2026-06-10T12:00") == 3)
+_pg, _dy = D.build_page(P6.CFG, synth(), TODAY)
+_body = _pg.split("</head>")[1]
+check("adhd: stran ne trdi, da vreme sproži simptome",
+      "Trdnih dokazov" in _body and "ne napoveduje simptomov" in _body
+      and not re.search(r"sproži\w*\s+(simptom|napad|nemir)", _body.lower()))
+check("adhd: navedek raziskave in nobenih zdravil z odmerki",
+      "Journal of Attention Disorders" in _body and not re.search(r"\bmg\b|odmer", _body))
+# starši: pot v šolo in okno po pouku
+_d = "2026-06-10"
+w = P6.school_walk(synth(), _d)
+check("adhd/starši: pot v šolo v lepem vremenu", w and w[0] == 0 and "občutena 20 °C" in w[1] and "temno" not in w[1])
+w = P6.school_walk(synth(shortwave_radiation=0), _d)
+check("adhd/starši: tema na poti v šolo je opomba, ne dvig ravni", w and w[0] == 0 and "še temno" in w[1])
+check("adhd/starši: tema v oknu po urah ostane zmerna ovira, na poti v šolo ne",
+      P6.hour_fn(synth(shortwave_radiation=0), "2026-06-10T07:00") == 2 and P6.hour_fn(synth(shortwave_radiation=0), "2026-06-10T07:00", dark_counts=False) == 0)
+check("adhd/starši: dež na poti v šolo še vedno dvigne raven",
+      P6.school_walk(synth(precipitation=0.6, precipitation_probability=90), _d)[0] >= 2)
+w = P6.school_walk(synth(precipitation_probability=80), _d)
+check("adhd/starši: verjeten dež na poti v šolo", w and "dež verjeten (80 %)" in w[1])
+check("adhd/starši: po 8. uri je pot v šolo že mimo, ob 8. uri šteje samo ura 8",
+      P6.school_walk(synth(), _d, 9) is None and P6.school_walk(synth(), _d, 8) is not None)
+check("adhd/starši: okno po pouku v lepem vremenu 13.00–20.00", P6.after_school(synth(), _d) == "13.00–20.00")
+check("adhd/starši: ob močnem dežju po pouku ni dobrega okna", P6.after_school(synth(precipitation=2, precipitation_probability=90), _d) == "ni dobrega okna")
+check("adhd/starši: po 19. uri je okno že mimo, okno se začne ob trenutni uri",
+      P6.after_school(synth(), _d, 20) is None and P6.after_school(synth(), _d, 16) == "16.00–20.00")
+_pgp, _ = D.build_page(P6.CFG, synth(), TODAY)
+check("adhd/starši: razdelek v strani, brez NaN", "Pot v šolo" in _pgp and "Najboljše okno po pouku" in _pgp and "Za starše" in _pgp)
+check("adhd: opis ≤ 160 znakov", all(len(P6.CFG["desc"](l)) <= 160 for l in P6.CFG["levels"]))
 
 # ── izris ──
 for c in CFGS:

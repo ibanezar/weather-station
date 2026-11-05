@@ -112,6 +112,8 @@ CORE = {
     "vreme-za-pse/":             ("daily",   "0.6"),
     # Vreme in migrena: napoved sprožilcev + dnevnik napadov v brskalniku (tools/generate_migrena_page.py).
     "migrena/":                  ("daily",   "0.7"),
+    # Vreme in ADHD: pogoji za gibanje, spanje, vročino (tools/generate_adhd_page.py; ne trdi vpliva na simptome).
+    "adhd/":                     ("daily",   "0.6"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
     # Igra jadralnega padalca; nivo in strežniško izrisan opis razmer se
     # spremenita vsak dan (glej tools/generate_igra_page.py), zato daily.

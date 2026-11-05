@@ -240,6 +240,7 @@ def build_body(fc_data, aq_data):
       <a href="/slovar/biovreme/" class="mtn-avk-link">📖 Biovreme — slovar</a>
       <a href="/astma/" class="mtn-avk-link">🫁 Vreme in astma</a>
       <a href="/migrena/" class="mtn-avk-link">🧠 Vreme in migrena</a>
+      <a href="/adhd/" class="mtn-avk-link">🧭 Vreme in ADHD</a>
       <a href="/vreme-za-pse/" class="mtn-avk-link">🐕 Vreme za sprehod s psom</a>
       <a href="/vreme-za-kolesarje/" class="mtn-avk-link">🚴 Vreme za kolesarje</a>
     </div>
