@@ -300,6 +300,12 @@ function tempColor(t){
     return '#dc2626';
   }
 }
+// Barva ČRTE/POLNILA grafa: kot tempColor(), le da pas 15–22 °C ni barva besedila (#f1f5f9 / #0f172a: črta je izgledala kot os,
+// polnilo kot bela/siva lisa), ampak limeta med mentino (<15) in jantarjem (22–28). Številka v glavni ploščici ostane tempColor().
+function tempColorChart(t){
+  if(t>=15&&t<22)return isDark()?'#bef264':'#4d7c0f';
+  return tempColor(t);
+}
 function feelsStyle(t){
   if(isDark()){
     if(t<0)  return{label:'Zmrzuje',   c:'#bae6fd',bg:'rgba(186,230,253,.1)',b:'rgba(186,230,253,.25)'};
@@ -336,9 +342,11 @@ function countUp(id,target,dec,unitHTML,dur){
 }
 
 // ── Condition & icons ─────────────────────────────────────
-function getCondition(obs){
+// `when` samo za teste (privzeto zdaj). Noč = pod sončnim zahodom/vzhodom na postaji (_isNightAt), ne ura 23-5:
+// novembra je ob 17. uri že tema, a je oznaka rekla »Oblačno« in ikona oblak (4. 11. 2026, avdit; pregled kode).
+function getCondition(obs,when){
   const pr=obs.metric.precipRate||0,sr=obs.metric.solarRadiation||obs.solarRadiation||0;
-  const h=new Date().getHours(),night=h<5||h>22;
+  const night=_isNightAt(when,obs);
   if(pr>7)   return{icon:'⛈',label:'Močan dež'};if(pr>2.5)return{icon:'🌧',label:'Dež'};
   if(pr>0)   return{icon:'🌦',label:'Rahel dež'};if(night&&sr<10)return{icon:'🌙',label:'Jasna noč'};
   if(night)  return{icon:'☁',label:'Oblačna noč'};if(sr>700)return{icon:'☀',label:'Jasno sončno'};
@@ -2527,7 +2535,7 @@ function _histObsAtHoursAgo(hoursAgo){
 
 function _getConditionLabelFromObs(obs){
   const pr=obs.metric?.precipRate||0,sr=obs.metric?.solarRadiation||obs.solarRadiation||0;
-  const h=new Date(obs.obsTimeLocal.replace(' ','T')).getHours(),night=h<5||h>22;
+  const night=_isNightAt(new Date(obs.obsTimeLocal.replace(' ','T')),obs);
   if(pr>7)return'Močan dež';if(pr>2.5)return'Dež';if(pr>0)return'Rahel dež';
   if(night&&sr<10)return'Jasna noč';if(night)return'Oblačna noč';
   if(sr>700)return'Jasno sončno';if(sr>300)return'Pretežno sončno';
@@ -2582,7 +2590,7 @@ function _fcSliderUpdate(){
     const temp=obs.metric.tempAvg??obs.metric.temp??null;
     if(tv){tv.textContent=temp!=null?(+temp).toFixed(1):'—';tv.style.color=temp!=null?tempColor(temp):'var(--muted)';}
     const condLabel=_getConditionLabelFromObs(obs);
-    if(iconEl)iconEl.innerHTML=_condImg(condLabel,108,t);
+    if(iconEl)iconEl.innerHTML=_condImg(condLabel,108,true);
   }
 }
 
@@ -2731,8 +2739,8 @@ function drawHeroSparkline(){
   _sparkChip={cx:ccx,w:cw};
 
   // Črta in polnilo nosita barvo temperaturne skale (ista kot številka v glavni ploščici), ne ločene modre: isti podatek je bil v treh barvah.
-  const nowC=tempColor(nowT);
-  const stops=pts.map((p,i)=>'<stop offset="'+(P[i].x/W*100).toFixed(2)+'%" stop-color="'+tempColor(p.t)+'"/>').join('');
+  const nowC=tempColorChart(nowT);
+  const stops=pts.map((p,i)=>'<stop offset="'+(P[i].x/W*100).toFixed(2)+'%" stop-color="'+tempColorChart(p.t)+'"/>').join('');
   g.innerHTML=
     '<defs><linearGradient id="heroSparkLine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="'+W+'" y2="0">'+stops+'</linearGradient>'+
     '<linearGradient id="heroSparkFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+nowC+'" stop-opacity=".30"/><stop offset="100%" stop-color="'+nowC+'" stop-opacity="0"/></linearGradient></defs>'+
@@ -2816,7 +2824,7 @@ function moveHeroSparkMarker(v){
   for(const h of _sparkByHour.keys()){const diff=Math.abs(h-v);if(diff<bestDiff){bestDiff=diff;best=h;}}
   if(best==null)return;
   const pt=_sparkByHour.get(best);
-  {const c=tempColor(pt.t);dot.style.stroke=c;if(halo)halo.style.fill=c;guide.style.stroke=c;}
+  {const c=tempColorChart(pt.t);dot.style.stroke=c;if(halo)halo.style.fill=c;guide.style.stroke=c;}
   dot.setAttribute('cx',pt.x.toFixed(1));dot.setAttribute('cy',pt.y.toFixed(1));
   if(halo){halo.setAttribute('cx',pt.x.toFixed(1));halo.setAttribute('cy',pt.y.toFixed(1));}
   guide.setAttribute('x1',pt.x.toFixed(1));guide.setAttribute('x2',pt.x.toFixed(1));
@@ -2858,11 +2866,12 @@ function forecastPhrase(){
   if(!_forecastHours||!_forecastHours.length)return '';
   const todayStr=new Date().toDateString();
   const todayHours=_forecastHours.filter(x=>x.t.toDateString()===todayStr);
-  if(!todayHours.length)return '';
   const maxOf=a=>Math.max(...a.map(x=>x.temp));
   // Zvečer je najtoplejša ura že jutri (oznaka na grafu: »↑ 8,1° · jutri 13:00«): stavek »Danes do 6 °C« bi bil ob njej videti kot
   // nasprotje. Kadar je vrh naslednjih 24 ur (zaokroženo) višji in zunaj današnjega dne, stavek govori o naslednjih 24 urah.
   const next24=_forecastHours.slice(0,24);
+  // Po zadnji današnji uri (okoli 23:00) današnjih ur ni več: stavek mora ostati, govori o naslednjih 24 urah.
+  // (maxOf([]) je -Infinity, zato je brez današnjih ur vrh vedno »jutri«.)
   const nMax=maxOf(next24),tMaxToday=maxOf(todayHours);
   const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&next24.some(x=>x.temp===nMax&&x.t.toDateString()!==todayStr);
   const hrs=tomorrowPeak?next24:todayHours;
@@ -7423,8 +7432,9 @@ function _yrImg(sym,size=32){const base=(sym||'').replace(/_polartwilight/g,'');
 // Ikona je LCP element: če je statična že enaka, je ne zamenjaj (nov element = nov LCP kandidat, mig).
 function _setHeroIcon(el,html){const cur=el.firstElementChild,m=/src="([^"]+)"/.exec(html);if(cur&&cur.tagName==='IMG'&&m&&cur.getAttribute('src')===m[1]){const a=/alt="([^"]*)"/.exec(html);if(a&&cur.alt!==a[1])cur.alt=a[1];return;}el.innerHTML=html;}
 // Dan/noč za izbiro ikone: pravi sončni vzhod/zahod na postaji (sunTimes), ne ura 23-5 (ob 21. uri novembra je že tema).
-function _isNightAt(when){
-  const d=when||new Date();let o=null;try{o=_lastBriefObs;}catch(e){}
+function _isNightAt(when,obs){
+  const d=when||new Date();let o=(obs&&obs.lat!=null&&obs.lon!=null)?obs:null;
+  if(!o){try{o=_lastBriefObs;}catch(e){}}
   if(o&&o.lat!=null&&o.lon!=null){try{const st=sunTimes(o.lat,o.lon,d);if(st&&st.sunrise&&st.sunset)return d<st.sunrise||d>st.sunset;}catch(e){}}
   const h=d.getHours();return h<5||h>22;
 }
@@ -7432,7 +7442,15 @@ function _isNightAt(when){
 const _WXCOND_ICON_NIGHT={fog:'fog-night',storm:'thunderstorms-night-rain'};
 // Oznaka pod ikono: megla je sklep iz vlage in vetra (vidljivosti nihče ne meri), zato »možna«; ikona in oznaka sta tako ista odločitev.
 function _condLabelShown(label){return(_wxCond==='fog'&&!/dež/i.test(label))?'Možna megla':label;}
-function _condImg(label,size=100,when){const wc=typeof _wxCond==='string'?_wxCond:'';let n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';if(_WXCOND_ICON_NIGHT[wc]&&_isNightAt(when))n=_WXCOND_ICON_NIGHT[wc];if(!when)label=_condLabelShown(label);return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
+// Ime ikone iz oznake, stanja (_wxCond) in dneva/noči. Čista funkcija (test_parity.hero_ikona_noc_in_megla).
+function _condIconName(label,wc,night){let n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';if(night&&_WXCOND_ICON_NIGHT[wc])n=_WXCOND_ICON_NIGHT[wc];return n;}
+// `past`: ikona pretekle ure na drsniku. _wxCond (megla, nevihta, sneg ...) opisuje ZDAJ, ne tiste ure, zato se tam ne uporabi:
+// sicer bi ob oznaki »Jasno sončno« za −6 h stala ikona megle, če je megla zdaj.
+function _condImg(label,size=100,past){
+  const wc=(!past&&typeof _wxCond==='string')?_wxCond:'';
+  const n=_condIconName(label,wc,!past&&_isNightAt());
+  if(!past)label=_condLabelShown(label);
+  return`<img src="icons/weather/${n}.svg" width="${size}" height="${size}" class="wx-icon" alt="${label}">`;}
 // Kategorija vremena za barvo/sceno kartice dneva (WMO koda → clear/partly/cloud/fog/rain/snow/storm); samo videz.
 function _wmoCat(c){
   c=c||0;

@@ -28,7 +28,8 @@ Usage:
 """
 import json
 import math, os, re, sys, urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, "index.html")
@@ -236,6 +237,9 @@ def _patch_span(html, elem_id, value_text, drop_shimmer=True):
     return pattern.subn(repl, html, count=1)
 
 
+TZ_LJ = ZoneInfo("Europe/Ljubljana")
+
+
 # Ikona stanja na junaški kartici je LCP element. JS jo je vstavil šele na koncu
 # applyObs() (2,4 s po dokumentu), zato jo zapišemo tudi v statični HTML.
 # Pravilo je kopija getCondition() + _COND_ICON v app.js (brez _wxCond, ki ga
@@ -249,15 +253,44 @@ HERO_ICON_BY_LABEL = {
 }
 
 
+def sun_times_utc(lat, lon, d):
+    """Vzhod in zahod sonca (UTC) za lokalni datum `d` -- kopija sunTimes() v app.js (NOAA poenostavljeno; razlika do minute)."""
+    rad, deg = math.pi / 180, 180 / math.pi
+    leap = d.year % 4 == 0 and (d.year % 100 != 0 or d.year % 400 == 0)
+    g = 2 * math.pi / (366 if leap else 365) * (d.timetuple().tm_yday - 1)
+    eqtime = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g)
+                       - 0.014615 * math.cos(2 * g) - 0.04089 * math.sin(2 * g))
+    decl = (0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g)
+            + 0.000907 * math.sin(2 * g) - 0.002697 * math.cos(3 * g) + 0.00148 * math.sin(3 * g))
+    cos_ha = (math.cos(90.833 * rad) - math.sin(lat * rad) * math.sin(decl)) / (math.cos(lat * rad) * math.cos(decl))
+    if abs(cos_ha) > 1:
+        return None
+    ha, noon = deg * math.acos(cos_ha), 720 - 4 * lon - eqtime
+    base = datetime(d.year, d.month, d.day, tzinfo=timezone.utc)
+    return (base + timedelta(minutes=math.floor(noon - 4 * ha + 0.5)),
+            base + timedelta(minutes=math.floor(noon + 4 * ha + 0.5)))
+
+
+def hero_is_night(obs):
+    """Noč na postaji ob času meritve: pod sončnim vzhodom ali nad zahodom (kopija _isNightAt() v app.js), ne ura 23-5.
+    Brez koordinat ali časa meritve rezerva po uri, kot v JS."""
+    try:
+        local = datetime.strptime((obs.get("obsTimeLocal") or "")[:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=TZ_LJ)
+    except ValueError:
+        return False  # brez časa meritve ni ocene (prej je rezerva h = 12 pomenila dan)
+    lat, lon = obs.get("lat"), obs.get("lon")
+    if lat is not None and lon is not None:
+        st = sun_times_utc(lat, lon, local.date())
+        if st:
+            return local < st[0] or local > st[1]
+    return local.hour < 5 or local.hour > 22
+
+
 def hero_condition_label(obs):
     m = obs.get("metric", {})
     pr = m.get("precipRate") or 0
     sr = m.get("solarRadiation") or obs.get("solarRadiation") or 0
-    try:
-        h = int((obs.get("obsTimeLocal") or "")[11:13])
-    except ValueError:
-        h = 12
-    night = h < 5 or h > 22
+    night = hero_is_night(obs)
     if pr > 7: return "Močan dež"
     if pr > 2.5: return "Dež"
     if pr > 0: return "Rahel dež"

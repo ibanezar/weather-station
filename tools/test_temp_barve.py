@@ -88,6 +88,23 @@ for theme, cols in bands.items():
         d = de(c1, c2)
         check(d >= MIN_DE_ADJACENT, f"sosednji stopnji nista razločljivi ({theme}):", f"{t1} °C {c1} / {t2} °C {c2} ΔE {d:.1f}")
 
+# barva ČRTE/POLNILA grafa (tempColorChart): enaka kot skala povsod razen v pasu 15–22 °C, kjer skala vrne barvo besedila (črta bi bila os, polnilo lisa)
+CHART_SAMPLES = SAMPLES + [15, 21.9, 22]
+for theme in ("dark", "light"):
+    dk = "true" if theme == "dark" else "false"
+    pre_c = pre
+    calls = [{"expr": f"(function(){{_dark={dk};return [tempColor({t}),tempColorChart({t})];}})()"} for t in CHART_SAMPLES]
+    got = js("app.js", ["tempColor", "tempColorChart"], calls, prelude=pre_c)
+    for t, (base, chart) in zip(CHART_SAMPLES, got):
+        if 15 <= t < 22:
+            check(chart != base, f"graf ({theme}) {t} °C: pas 15–22 ne sme biti barva besedila", f"{chart}")
+            for nb in (bands[theme][2], bands[theme][4]):  # sosednji stopnji: <15 in 22–28
+                check(de(chart, nb) >= MIN_DE_ADJACENT, f"graf ({theme}): 15–22 °C preblizu sosednji stopnji", f"{chart} / {nb} ΔE {de(chart, nb):.1f}")
+            check(de(chart, BRAND_CYAN[theme]) >= MIN_DE_BRAND, f"graf ({theme}): 15–22 °C preblizu znamčnemu cianu", chart)
+            check(contrast(chart, CARD_BG[theme]) >= 3.0, f"graf ({theme}): črta 15–22 °C ima premajhen kontrast (nebesedilo, 3:1)", f"{chart} {contrast(chart, CARD_BG[theme]):.1f}:1")
+        else:
+            check(chart == base, f"graf ({theme}) {t} °C: izven pasu 15–22 mora biti kot tempColor", f"{chart} != {base}")
+
 # feelsStyle (oznaka občutka) ima hladni stopnji v isti barvi kot skala
 for theme in ("dark", "light"):
     calls = [{"expr": f"(function(){{_dark={'true' if theme == 'dark' else 'false'};return feelsStyle({t}).c;}})()"} for t in (-5, 4)]
