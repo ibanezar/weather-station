@@ -212,3 +212,6 @@ jobs:
 
       - name: Test Gobjega alarma (pravila, histereza, hladilna doba)
         run: node tools/test_gobe_alarm.mjs
+
+      - name: Test odločitvene logike čuvaja videza
+        run: node tools/test_visual_watch.mjs

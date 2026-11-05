@@ -776,6 +776,13 @@ PageSpeed (mobile) je za `/` javil 1,9 s zadržanega prvega izrisa (`style.min.c
 - **Merjenje namiznega CLS je mogoče samo s stisnjenimi odgovori**: `python3 -m http.server` brez gzip/brotli ne reproducira premika (HTML se naloži prepozno, polni CSS in pisave so že tu). Uporabi strežnik z gzipom/brotlijem ali živo stran (Playwright, CDP omejitev 200 kB/s, 150 ms, CPU 4×, `PerformanceObserver('layout-shift')` z `sources`).
 - **Nov zavihek ali daljša oznaka** lahko na ≥ 1200 px preseže vrstico (`flex-wrap:nowrap` tam ne lomi): preveri `scrollWidth` proti `clientWidth` na `.tab-nav` pri 1200 px; če je zavihkov preveč, jih je treba prestaviti v spustni meni, ne vrniti prelom.
 
+### Čuvaj videza žive strani (`visual-watch.yml`, 5. 11. 2026) in `display:contents` v kritičnem CSS
+
+Smoke test pove, da stran obstaja, varuh svežine, da so podatki sveži; **videza ni gledal nihče** in je CLS 0,16–0,21 na namizju (zavihki, glej zgoraj) visel teden dni. `tools/visual_watch.mjs` meri na ŽIVI strani (Playwright, CDP 200 kB/s + 150 ms + CPU 4×): CLS na 390 in 1280 px (**mediana treh tekov**, meja 0,10), vodoravni razliv pri 360 px na šestih ključnih straneh in axe (serious/critical) na `.hero-b` v obeh temah. Ob preseženi meji workflow odpre issue `visual-fail` (osveži opis, brez komentarja ob vsakem teku), ko je spet v redu, ga zapre. Teče po vsaki objavi Pages in dnevno ob 08:50 UTC. Odločitveno logiko (mediana, meje) preverja `tools/test_visual_watch.mjs` (v `parity.yml`).
+
+- **Prvi zagon je takoj našel drugo napako: CLS 0,172 na telefonu.** Vzrok je `critical_css.mjs`: `.hero-b .hero-left{display:contents}` nima škatle (`getClientRects()` je prazen), zato ga je generator štel za neprikazanega in pravilo je manjkalo v kritičnem CSS. Do prihoda celotnega CSS je bila glavna ploščica flex (159 px), potem mreža z `grid-area` (180 px); čip »od včeraj« je skočil 38 px, vse pod njim tudi. Zdaj `visible()` šteje `display:contents` element za viden, če je viden njegov prvi otrok (**pravilo velja za vsak nov `display:contents` element nad pregibom**). CLS na telefonu: 0,172 → 0,011–0,040. Test: `test_hero_ploscice.py` zahteva obe pravili tudi v kritičnem CSS.
+- Čuvaj je namerno **samo živa stran** (lokalni strežnik brez stiskanja ne reproducira premikov). Meja 0,10 je Core Web Vitals »dobro«; ob dežju in prihodu radarja (nowcast nad hero kartico, Filipova odločitev) lahko telefon preseže mejo za en dan: to je vsebina, ne napaka v kodi, in se issue zapre sam.
+
 ### Delo glavne niti in prvi izris naslovne strani (6. 10. 2026, drugi krog)
 
 Profil (Chromium, CPU 4× počasnejši, brez omrežja): skript je bil < 1 s od ~11 s dela glavne niti — ostalo

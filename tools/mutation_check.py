@@ -160,6 +160,8 @@ MUTACIJE = [
     ("hero noč: zahod namesto ure (Python)", "tools/inject_current_weather.py", "return local < st[0] or local > st[1]", "return local.hour < 5 or local.hour > 22"),
     ("hero ikona: pretekla ura prevzame _wxCond", "app.js", "const wc=(!past&&typeof _wxCond==='string')?_wxCond:'';", "const wc=typeof _wxCond==='string'?_wxCond:'';"),
     ("hero graf: pas 15–22 °C ni barva besedila", "app.js", "if(t>=15&&t<22)return isDark()?'#bef264':'#4d7c0f';", "if(false)return '';", "test_temp_barve.py"),
+    ("čuvaj videza: meja CLS", "tools/visual_watch.mjs", "export const CLS_MAX = 0.10;", "export const CLS_MAX = 0.60;", "test_visual_watch.mjs"),
+    ("čuvaj videza: mediana teh tekov", "tools/visual_watch.mjs", "const m = median(v);", "const m = Math.max(...v);", "test_visual_watch.mjs"),
     ("hero stavek: vrh jutri (24 ur)", "app.js", "const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&", "const tomorrowPeak=false&&"),
 ]
 

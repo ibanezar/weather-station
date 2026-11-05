@@ -75,6 +75,18 @@ check(".hero-b .hb-tile{background:var(--hb-bg2)" in MIN, "style.min.css: manjka
 check("background:var(--hb-bg1)" in MIN and "hb-day.hb-tile" in MIN, "style.min.css: manjka raven 1")
 check("--hb-bg2:rgba(255,255,255" in MIN and "--hb-bg2:rgba(12,18,32" in MIN, "style.min.css: manjkajo spremenljivke ravni")
 
+# ---- kritični CSS: display:contents (5. 11. 2026) ----
+# `.hero-b .hero-left{display:contents}` nima lastne škatle, zato ga je critical_css.mjs izpustil in je bila glavna ploščica do prihoda
+# celotnega CSS flex (159 px), potem mreža (180 px): CLS 0,17 na telefonu. Vsako hero pravilo z display:contents mora biti tudi v kritičnem CSS.
+HTML = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+_m = re.search(r'<style id="critical-css">(.*?)</style>', HTML, re.S)
+CRIT = _m.group(1) if _m else ""
+check(bool(CRIT), "kritični CSS ni najden v index.html")
+for sel in (".hero .hero-left", ".hero-b .hero-left"):
+    full = [b for b in rules_with(CSS, sel) if "display:contents" in b.replace(" ", "")]
+    crit = [b for b in rules_with(CRIT, sel) if "display:contents" in b.replace(" ", "")]
+    check(bool(full) and bool(crit), f"{sel}{{display:contents}} manjka v kritičnem CSS (poženi node tools/critical_css.mjs)", f"celoten={len(full)} kritičen={len(crit)}")
+
 # ---- 9: lestvice ----
 SCALES = {"hum": "seq", "wind": "seq", "pres": "seq", "range": "seq", "uv": "semantic", "pm": "semantic", "rain": "fill", "moon": "depiction"}
 found = set(re.findall(r"\.hm-scale-([a-z]+)\s*[{,>:]", CSS))
