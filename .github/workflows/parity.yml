@@ -221,3 +221,6 @@ jobs:
 
       - name: Test izvoza podatkov (CSV), objave na Zenodo in sheme Dataset
         run: python3 tools/test_dataset_export.py
+
+      - name: Test analize »dvig megle po sevanju« (negativen rezultat)
+        run: python3 tools/test_megla_sevanje.py

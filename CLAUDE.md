@@ -2762,6 +2762,7 @@ obseg preveri v Ahrefsu ali iz GSC čez 2–3 tedne): zimske gume (`kdaj-menjati
   »Nasičen zrak« (temperatura − rosišče ≤ 0,5 °C) ni megla -- vidljivosti nihče ne meri.
 - Stopinjski dnevi so 12/20 °C (moja definicija, ni za obračun). Zimska oprema 15. 11.–15. 3.: članki vedno napotijo na AMZS, pravil ne razlagajo na dolgo.
 - Članki so posnetek na dan objave. Lektura po `lektura.yml` še ni opravljena (izklopljena od 2. 10. 2026); na FB/IG ne gredo samodejno. Po mergu: IndexNow.
+- **Dvig megle po sevanju je preizkušen in NE deluje** (5. 11. 2026, `docs/analiza-megla-sevanje.md`, `tools/ai/eval_megla_sevanje.py`): čas, ko sevanje IREICA1 preseže delež jasnega neba, ni povezan s koncem nasičenosti zraka (Spearman −0,12 … 0,25), se pri pragu 0,3 → 0,7 pomakne za 1 h 20 min in je jeseni na nemeglenih jutrih enak ali poznejši kot na meglenih (10.30 proti 10.05). Določata ga višina sonca in senca pred senzorjem (glej »Sonce v dolini«), ne megla. Članek o megli ostane pri »nasičenem zraku«; **ne dodajaj »izmerjenega dviga megle« iz sevanja**, dokler analiza po zimi ali na drugi postaji tega ne obrne.
 
 ## Veliko vreme: sinoptika, stratosfera, indeksi, prah (22. 10. 2026)
 
