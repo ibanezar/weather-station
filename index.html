@@ -670,20 +670,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="hero-top hb-tile">
       <canvas id="hero-canvas"></canvas>
       <div class="hero-left">
-        <div class="temp-huge"><span id="temp-val">5,0</span><span class="temp-unit-sup"> °C</span></div>
+        <div class="temp-huge"><span id="temp-val">7,0</span><span class="temp-unit-sup"> °C</span></div>
         <div class="hero-chips">
-          <div class="yesterday-delta" id="yesterday-delta"><span class="dv" style="color:var(--muted)">→ 0,1 °C</span> <span style="color:var(--muted)">podobno kot včeraj ob tem času</span></div>
+          <div class="yesterday-delta" id="yesterday-delta"><span class="dv" style="color:var(--red)">↑ 1,5 °C</span> <span style="color:var(--muted)">topleje kot včeraj ob tem času</span></div>
           <!-- »Občutek« se pokaže samo, kadar se od temperature razlikuje za ≥ 1 °C (applyObs). -->
           <div class="feels" hidden>
             <span id="feels-pill" class="feels-pill"></span>
-            <span>Občutek <strong id="feels-val">5,0</strong>°C</span>
+            <span>Občutek <strong id="feels-val">7,0</strong>°C</span>
           </div>
           <!-- Rosišče je v ploščici vlage; ta element ostane zaradi tools/inject_current_weather.py (dewpt-hero). -->
-          <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">5,0</strong>°C<span id="dew-desc"></span></div>
+          <div class="dew-line" id="dew-line">Rosišče <strong id="dewpt-hero">6,0</strong>°C<span id="dew-desc"></span></div>
         </div>
       </div>
       <div class="hero-right">
-        <div class="hero-icon" id="hero-icon"><img src="icons/weather/clear-night.svg" width="108" height="108" class="wx-icon" alt="Jasna noč" fetchpriority="high"></div>
+        <div class="hero-icon" id="hero-icon"><img src="icons/weather/partly-cloudy-day.svg" width="108" height="108" class="wx-icon" alt="Delno oblačno" fetchpriority="high"></div>
         <div class="condition-badge"><span id="cond-icon" class="skel-shimmer">—</span><span id="cond-label" class="skel-shimmer">—</span></div>
       </div>
     </div>
@@ -717,8 +717,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <div class="hero-metrics">
       <div class="hm hm-hum" id="hm-humidity">
-        <span class="hm-val" id="hs-humidity">99<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
-        <span class="hm-scale hm-scale-hum" id="hsc-hum" aria-hidden="true" style="--p:99.0%" data-on="1"><i></i></span>
+        <span class="hm-val" id="hs-humidity">95<span style="font-size:.7rem;color:var(--muted)"> %</span></span>
+        <span class="hm-scale hm-scale-hum" id="hsc-hum" aria-hidden="true" style="--p:95.0%" data-on="1"><i></i></span>
         <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-droplet"/></svg></span><span>Relativna vlažnost</span></span>
         <span class="hm-sub" id="hs-humidity-range" hidden>danes <span id="hs-hum-min">—</span>–<span id="hs-hum-max">—</span> %</span>
         <span class="hm-sub" id="hs-dew-line" hidden>rosišče <span id="hs-dew">—</span> °C · <span id="hs-dew-lbl"></span></span>
@@ -742,8 +742,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <svg class="hm-spark" id="hsp-rain" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"></svg><span class="hm-spark-cap" aria-hidden="true">padavine po urah, zadnjih 24 h</span>
       </div>
       <div class="hm hm-pres" id="hm-pressure">
-        <span class="hm-val" id="hs-pressure">1028,6<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
-        <span class="hm-scale hm-scale-pres" id="hsc-pres" aria-hidden="true" style="--p:81.0%" data-on="1"><i></i></span>
+        <span class="hm-val" id="hs-pressure">1029,0<span style="font-size:.7rem;color:var(--muted)"> hPa</span></span>
+        <span class="hm-scale hm-scale-pres" id="hsc-pres" aria-hidden="true" style="--p:81.7%" data-on="1"><i></i></span>
         <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-waves"/></svg></span><span>Zračni tlak</span></span>
         <span class="hm-sub" id="hs-pressure-trend" hidden></span>
         <svg class="hm-spark" id="hsp-pres" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true"></svg><span class="hm-spark-cap" aria-hidden="true">zadnjih 24 h</span>
@@ -754,7 +754,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="hero-metrics hero-metrics-2">
       <div class="hm hm-range hm-secondary" id="hm-range">
         <span class="hm-val" id="hs-range"><span id="hs-range-min">18,2</span>–<span id="hs-range-max">28,0</span><span style="font-size:.7rem;color:var(--muted)">°C</span></span>
-        <span class="hm-scale hm-scale-range" id="hsc-range" aria-hidden="true" style="--p:68.7%" data-on="1"><i></i></span>
+        <span class="hm-scale hm-scale-range" id="hsc-range" aria-hidden="true" style="--p:100.0%" data-on="1"><i></i></span>
         <span class="hm-lbl"><span class="hm-ic" aria-hidden="true"><svg class="ic"><use href="#i-thermometer"/></svg></span><span>Danes min–maks</span></span>
       </div>
       <div class="hm hm-uv hm-secondary" id="hm-uv">
@@ -837,7 +837,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <!-- WX-STATIC:START (auto: tools/inject_current_weather.py) -->
-  <p class="wx-static" id="wx-static">Zadnja znana dnevna meritev meteorološke postaje IREICA1 na Rečici ob Savinji (<time datetime="2026-11-04">4. novembra 2026</time>): povprečna temperatura 5,5 °C, najvišja 6,7 °C, najnižja 4,8 °C — 6,3 mm padavin, relativna vlažnost 99 %, najmočnejši sunek vetra 5,8 km/h. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
+  <p class="wx-static" id="wx-static">Trenutno vreme na Rečici ob Savinji (meritev postaje IREICA1 ob <time datetime="2026-11-05T12:14">12:14</time>, 5. novembra 2026): temperatura 7,0 °C, rosišče 6,0 °C, relativna vlažnost 95 %, veter 0,0 km/h (sunki 0,0 km/h), zračni tlak 1029 hPa, padavine danes 0,0 mm. Vrednosti v živo se posodabljajo zgoraj; pretekli dnevi so v <a href="/vreme/">vremenskem arhivu</a>, <a href="/vreme-recica-ob-savinji/#napoved">napoved za prihodnje dni</a> pa na strani Vreme Rečica ob Savinji.</p>
   <!-- WX-STATIC:END -->
 
   <!-- WX-RECORD-WATCH:START (auto: tools/inject_record_watch.py) -->
@@ -846,10 +846,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- Day summary -->
   <div class="day-summary card--wide simple-keep">
-    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">5,6</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">00:59</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
-    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">5,5</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">01:59</span></span></div>
+    <div class="ds-item ds-high"><span class="ds-arrow">↑ Najvišja temperatura</span><span class="ds-temp"><span id="day-high">6,9</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-hi-time">12:09</span></span><span class="ds-percentile" id="day-high-percentile"></span></div>
+    <div class="ds-item ds-low"><span class="ds-arrow">↓ Najnižja temperatura</span><span class="ds-temp"><span id="day-low">5,2</span><span class="ds-unit"> °C</span></span><span class="ds-lbl">ob <span class="ds-time" id="day-lo-time">06:59</span></span></div>
     <div class="ds-item ds-rain"><span class="ds-arrow"><svg class="ic" aria-hidden="true"><use href="#i-cloud-rain"/></svg> Dež danes</span><span class="ds-temp"><span id="day-rain" class="skel-shimmer">—</span><span class="ds-unit"> mm</span></span><span class="ds-lbl">skupaj</span></div>
-    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">5,5</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
+    <div class="ds-item ds-avg"><span class="ds-arrow">~ Dnevno povprečje</span><span class="ds-temp"><span id="day-avg">5,7</span><span class="ds-unit"> °C</span></span><span class="ds-lbl"></span></div>
   </div>
 
   <!-- Dolina zdaj: shematski prerez z izmerjenimi temperaturami (app.js fetchHeroValley); samo napredni pogled -->
@@ -1617,7 +1617,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </tr>
           </thead>
           <tbody id="history-tbody">
-<tr><td>5. nov. 2026</td><td class="td-high">5,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">5,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>5,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>0,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">3,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>99<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
+<tr><td>5. nov. 2026</td><td class="td-high">7,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">5,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>5,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>0,2<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">3,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>98<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>4. nov. 2026</td><td class="td-high">6,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">4,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>5,5<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">6,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">9,7<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>99<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>3. nov. 2026</td><td class="td-high">7,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">4,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>5,9<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>1,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">10,1<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>90<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
 <tr><td>2. nov. 2026</td><td class="td-high">9,8<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-low">5,4<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td>7,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">°C</span></td><td class="td-rain">0,0<span style="font-size:.74rem;color:var(--muted);margin-left:1px">mm</span></td><td>2,3<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td style="color:var(--purple)">21,6<span style="font-size:.74rem;color:var(--muted);margin-left:1px">km/h</span></td><td>84<span style="font-size:.74rem;color:var(--muted);margin-left:1px">%</span></td></tr>
