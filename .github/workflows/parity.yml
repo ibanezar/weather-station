@@ -65,6 +65,9 @@ jobs:
       - name: Test hierarhije ploščic in lestvic hero kartice
         run: python3 tools/test_hero_ploscice.py
 
+      - name: Test kartice »Zakaj je danes takšno vreme?« (tri ploščice, pogoji, brez emoji)
+        run: python3 tools/test_why_card.py
+
       - name: Test preverjanja nevihtne karte
         run: python3 tools/test_storm_verify.py
 

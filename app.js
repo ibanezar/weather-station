@@ -5091,7 +5091,7 @@ function drawWindRose(observations){
 
   // Update card title to reflect data source
   const titleEl=svg.closest('.wind-rose-card')?.querySelector('.clabel');
-  if(titleEl)titleEl.innerHTML=usingClimo?'🌹 Roža vetrov — klimatologija':'🌹 Roža vetrov — zadnjih 7 dni';
+  if(titleEl)titleEl.innerHTML=_ico('flower-2')+(usingClimo?' Roža vetrov — klimatologija':' Roža vetrov — zadnjih 7 dni');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -6678,6 +6678,7 @@ function computeMonthStats(){
 // Podatki iz computeMonthStats(), v hitro berljivi mreži — za pregled na prvi pogled
 // pod kartico "Zadnjih 7 dni". Uporabi obstoječ .yr-grid/.yr-item vzorec
 // (glej applyYearRecords), da ne uvaja novega vizualnega jezika kartic.
+const _fmtN=(n,d=1)=>Number(n).toFixed(d).replace('.',',').replace('-','\u2212'); // decimalna vejica in pravi minus (Pravopis)
 function renderMonthCard(){
   const wrap=document.getElementById('month-card-grid');
   if(!wrap)return;
@@ -6689,13 +6690,13 @@ function renderMonthCard(){
   let anomHtml='';
   if(_climAnomalyT!=null){
     const col=Math.abs(_climAnomalyT)<1?'var(--muted)':_climAnomalyT>0?'var(--red)':'var(--blue)';
-    anomHtml=' <span style="font-size:.68rem;color:'+col+'">('+(_climAnomalyT>=0?'+':'')+_climAnomalyT.toFixed(1)+'° vs. '+_climAnomalyYears+'l)</span>';
+    anomHtml=' <span style="font-size:.68rem;color:'+col+'">('+(_climAnomalyT>=0?'+':'')+_fmtN(_climAnomalyT)+'° vs. '+_climAnomalyYears+'l)</span>';
   }
   const items=[
-    {icon:'thermometer',lbl:'Povp. temperatura',val:s.avgT.toFixed(1)+'°C'+anomHtml,col:'var(--text)'},
-    {icon:'droplet',lbl:'Padavine skupaj',val:s.totR.toFixed(1)+' mm',sub:(_climRain?Math.round(s.totR/_climRain.avg*100)+' % običajnega · ':'')+s.rainyDays+' deževnih dni',col:'var(--rain-col)',seg:_climRain?s.totR/_climRain.avg:null},
-    {icon:'flame',lbl:'Najtoplejši dan',val:s.maxT.toFixed(1)+'°C',sub:s.maxDate?fmtD(s.maxDate):'',col:'var(--red)'},
-    {icon:'thermometer-snowflake',lbl:'Najhladnejši dan',val:s.minT.toFixed(1)+'°C',sub:s.minDate?fmtD(s.minDate):'',col:'var(--blue)'},
+    {icon:'thermometer',lbl:'Povp. temperatura',val:_fmtN(s.avgT)+'\u00A0°C'+anomHtml,col:'var(--text)'},
+    {icon:'droplet',lbl:'Padavine skupaj',val:_fmtN(s.totR)+'\u00A0mm',sub:(_climRain?Math.round(s.totR/_climRain.avg*100)+' % običajnega · ':'')+s.rainyDays+' deževnih dni',col:'var(--rain-col)',seg:_climRain?s.totR/_climRain.avg:null},
+    {icon:'flame',lbl:'Najtoplejši dan',val:_fmtN(s.maxT)+'\u00A0°C',sub:s.maxDate?fmtD(s.maxDate):'',col:'var(--red)'},
+    {icon:'thermometer-snowflake',lbl:'Najhladnejši dan',val:_fmtN(s.minT)+'\u00A0°C',sub:s.minDate?fmtD(s.minDate):'',col:'var(--blue)'},
   ];
   if(s.frostDays>0)items.push({icon:'snowflake',lbl:'Zmrzujoči dnevi',val:s.frostDays,col:'var(--blue)'});
   wrap.innerHTML=items.map(it=>
@@ -6717,10 +6718,10 @@ function applyYearRecords(){
     if(entries.length<3){const g=document.getElementById('yr-grid');if(g)g.innerHTML='<div style="color:var(--muted);font-size:.75rem">Zbiranje podatkov za '+y+'…</div>';return;}
     const fmtD=k=>new Date(k+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'});
     const recs=[
-      {icon:'thermometer',lbl:'Najvišja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempHigh!=null).reduce((m,c)=>parseFloat(c[1].tempHigh)>parseFloat(m[1].tempHigh)?c:m);return{v:parseFloat(e[1].tempHigh).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--red)'},
-      {icon:'thermometer-snowflake',lbl:'Najnižja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempLow!=null).reduce((m,c)=>parseFloat(c[1].tempLow)<parseFloat(m[1].tempLow)?c:m);return{v:parseFloat(e[1].tempLow).toFixed(1)+'°C',d:fmtD(e[0])};},col:'var(--blue)'},
-      {icon:'cloud-rain',lbl:'Največ padavin',val:()=>{const e=entries.filter(([,v])=>(v.precipTotal||0)>0).sort((a,b)=>b[1].precipTotal-a[1].precipTotal)[0];return e?{v:parseFloat(e[1].precipTotal).toFixed(1)+' mm',d:fmtD(e[0])}:{v:'0 mm',d:'—'};},col:'var(--rain-col)'},
-      {icon:'wind',lbl:'Najmočnejši sunek',val:()=>{const e=entries.filter(([,v])=>v.windspeedHigh!=null).reduce((m,c)=>parseFloat(c[1].windspeedHigh)>parseFloat(m[1].windspeedHigh)?c:m);return{v:parseFloat(e[1].windspeedHigh).toFixed(1)+' km/h',d:fmtD(e[0])};},col:'var(--purple)'},
+      {icon:'thermometer',lbl:'Najvišja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempHigh!=null).reduce((m,c)=>parseFloat(c[1].tempHigh)>parseFloat(m[1].tempHigh)?c:m);return{v:_fmtN(parseFloat(e[1].tempHigh))+'\u00A0°C',d:fmtD(e[0])};},col:'var(--red)'},
+      {icon:'thermometer-snowflake',lbl:'Najnižja temp.',val:()=>{const e=entries.filter(([,v])=>v.tempLow!=null).reduce((m,c)=>parseFloat(c[1].tempLow)<parseFloat(m[1].tempLow)?c:m);return{v:_fmtN(parseFloat(e[1].tempLow))+'\u00A0°C',d:fmtD(e[0])};},col:'var(--blue)'},
+      {icon:'cloud-rain',lbl:'Največ padavin',val:()=>{const e=entries.filter(([,v])=>(v.precipTotal||0)>0).sort((a,b)=>b[1].precipTotal-a[1].precipTotal)[0];return e?{v:_fmtN(parseFloat(e[1].precipTotal))+'\u00A0mm',d:fmtD(e[0])}:{v:'0 mm',d:'—'};},col:'var(--rain-col)'},
+      {icon:'wind',lbl:'Najmočnejši sunek',val:()=>{const e=entries.filter(([,v])=>v.windspeedHigh!=null).reduce((m,c)=>parseFloat(c[1].windspeedHigh)>parseFloat(m[1].windspeedHigh)?c:m);return{v:_fmtN(parseFloat(e[1].windspeedHigh))+'\u00A0km/h',d:fmtD(e[0])};},col:'var(--purple)'},
     ];
     const g=document.getElementById('yr-grid');if(!g)return;g.innerHTML='';
     recs.forEach(r=>{
@@ -8918,7 +8919,7 @@ async function fetchForecastTrust(){
   const dateKey=_trustYesterdayKey();
   const actual=_trustActualFor(dateKey);
   if(!actual||actual.tempHigh==null||actual.tempLow==null){
-    _omxSet('omx-trust','<div class="omx-head"><div class="omx-title">✅ Zaupanje napovedi</div><span class="omx-badge">IREICA1</span></div><div class="omx-sub">Za oceno potrebujem zaključen včerajšnji dan iz postaje. Podatek se prikaže, ko se naloži zgodovina.</div>');
+    _omxSet('omx-trust','<div class="omx-head"><div class="omx-title">'+_ico('shield')+' Zaupanje napovedi</div><span class="omx-badge">IREICA1</span></div><div class="omx-sub">Za oceno potrebujem zaključen včerajšnji dan iz postaje. Podatek se prikaže, ko se naloži zgodovina.</div>');
     return;
   }
   try{
@@ -8946,7 +8947,7 @@ async function fetchForecastTrust(){
     score=Math.max(0,Math.round(score));
     const [grade,col]=_trustGrade(score);
     _omxSet('omx-trust',
-      '<div class="omx-head"><div class="omx-title">✅ Zaupanje napovedi</div><span class="omx-badge">včeraj</span></div>'+
+      '<div class="omx-head"><div class="omx-title">'+_ico('shield')+' Zaupanje napovedi</div><span class="omx-badge">včeraj</span></div>'+
       '<div class="omx-main" style="color:'+col+'">'+score+'/100</div>'+
       '<div class="omx-sub">'+grade+' ujemanje modela z meritvami IREICA1 za '+new Date(dateKey+'T12:00:00').toLocaleDateString('sl',{day:'numeric',month:'short'})+'.</div>'+
       '<div class="omx-kpis">'+
@@ -8955,7 +8956,7 @@ async function fetchForecastTrust(){
         '<div class="omx-kpi"><b>'+windErr.toFixed(0)+' km/h</b>napaka sunkov</div>'+
         '<div class="omx-kpi"><b>'+Math.round(f.tempHigh)+'/'+Math.round(actual.tempHigh)+'°</b>max model/postaja</div>'+
       '</div>');
-  }catch(e){console.warn('ForecastTrust:',e);_omxLoadingError('omx-trust','✅ Zaupanje napovedi');}
+  }catch(e){console.warn('ForecastTrust:',e);_omxLoadingError('omx-trust',_ico('shield')+' Zaupanje napovedi');}
 }
 
 async function fetchEnsembleConfidence(){
@@ -8978,8 +8979,8 @@ async function fetchEnsembleConfidence(){
     const disagreement=Math.min(rainProb,100-rainProb);
     const confidence=tempSpread<=2.2&&disagreement<=20?'Visoka':tempSpread<=4&&disagreement<=35?'Srednja':'Nizka';
     const ccol=confidence==='Visoka'?'var(--green)':confidence==='Srednja'?'var(--amber)':'var(--red)';
-    _omxSet('omx-ensemble','<div class="omx-head"><div class="omx-title">🎲 Zanesljivost napovedi</div><span class="omx-badge">ICON-EU EPS</span></div><div class="omx-main" style="color:'+ccol+'">'+confidence+'</div><div class="omx-sub">Razpon med člani ansambla za naslednjih 24 ur. Nižja zanesljivost pomeni, da so možni hitri lokalni obrati.</div><div class="omx-kpis"><div class="omx-kpi"><b>'+tempSpread.toFixed(1)+'°C</b>razpon Tmax</div><div class="omx-kpi"><b>'+Math.round(rainProb)+'%</b>člani z dežjem</div><div class="omx-kpi"><b>'+Math.round(heavyProb)+'%</b>močnejši dež</div><div class="omx-kpi"><b>'+Math.round(gustP90)+' km/h</b>p90 sunki</div></div>');
-  }catch(e){console.warn('Ensemble:',e);_omxLoadingError('omx-ensemble','🎲 Zanesljivost napovedi');}
+    _omxSet('omx-ensemble','<div class="omx-head"><div class="omx-title">'+_ico('target')+' Zanesljivost napovedi</div><span class="omx-badge">ICON-EU EPS</span></div><div class="omx-main" style="color:'+ccol+'">'+confidence+'</div><div class="omx-sub">Razpon med člani ansambla za naslednjih 24 ur. Nižja zanesljivost pomeni, da so možni hitri lokalni obrati.</div><div class="omx-kpis"><div class="omx-kpi"><b>'+tempSpread.toFixed(1)+'°C</b>razpon Tmax</div><div class="omx-kpi"><b>'+Math.round(rainProb)+'%</b>člani z dežjem</div><div class="omx-kpi"><b>'+Math.round(heavyProb)+'%</b>močnejši dež</div><div class="omx-kpi"><b>'+Math.round(gustP90)+' km/h</b>p90 sunki</div></div>');
+  }catch(e){console.warn('Ensemble:',e);_omxLoadingError('omx-ensemble',_ico('target')+' Zanesljivost napovedi');}
 }
 
 async function fetchMinuteNowcast(){
@@ -8997,9 +8998,9 @@ async function fetchMinuteNowcast(){
     const maxCape=Math.max(0,..._omxNums(cape));
     const msg=firstWet<0?'Naslednje 4 ure večinoma suho':(firstWet===0?'Padavine zdaj':('Prve padavine okoli '+new Date(m.time[firstWet]).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})));
     const bars=rain.map((v,i)=>{const h=Math.max(6,Math.min(100,(v||0)/Math.max(1,total,2)*100));const cls=[95,96,99].includes(wmo[i])?' storm':(v>0.1?' hit':'');return '<div class="omx-bar'+cls+'" title="'+new Date(m.time[i]).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'})+' · '+(v||0).toFixed(1)+' mm" style="height:'+h+'%"></div>';}).join('');
-    _omxSet('omx-nowcast','<div class="omx-head"><div class="omx-title">⏱ 15-minutni potek</div><span class="omx-badge">4 ure</span></div><div class="omx-main">'+msg+'</div><div class="omx-bars">'+bars+'</div><div class="omx-kpis"><div class="omx-kpi"><b>'+total.toFixed(1)+' mm</b>skupaj</div><div class="omx-kpi"><b>'+Math.round(maxGust)+' km/h</b>najvišji sunek</div><div class="omx-kpi"><b>'+Math.round(maxCape)+'</b>CAPE</div><div class="omx-kpi"><b>'+(stormIdx>=0?'možna':'ne')+'</b>nevihta</div></div>');
+    _omxSet('omx-nowcast','<div class="omx-head"><div class="omx-title">'+_ico('timer')+' 15-minutni potek</div><span class="omx-badge">4 ure</span></div><div class="omx-main">'+msg+'</div><div class="omx-bars">'+bars+'</div><div class="omx-kpis"><div class="omx-kpi"><b>'+total.toFixed(1)+' mm</b>skupaj</div><div class="omx-kpi"><b>'+Math.round(maxGust)+' km/h</b>najvišji sunek</div><div class="omx-kpi"><b>'+Math.round(maxCape)+'</b>CAPE</div><div class="omx-kpi"><b>'+(stormIdx>=0?'možna':'ne')+'</b>nevihta</div></div>');
     updateStormMode({nowcast:{message:msg,rain:total,gust:maxGust,cape:maxCape,storm:stormIdx>=0},active:_stormMode.active||stormIdx>=0||maxGust>=60||maxCape>=1000,level:_stormMode.level||((stormIdx>=0||maxGust>=70||maxCape>=1500)?'orange':'yellow')});
-  }catch(e){console.warn('15-min forecast:',e);_omxLoadingError('omx-nowcast','⏱ 15-minutni potek');}
+  }catch(e){console.warn('15-min forecast:',e);_omxLoadingError('omx-nowcast',_ico('timer')+' 15-minutni potek');}
 }
 
 async function fetchSoilForecast(){
@@ -9015,8 +9016,8 @@ async function fetchSoilForecast(){
     const status=root<0.09?'Zelo suho':root<0.16?'Suho':root<0.28?'V redu':'Mokro';
     const scol=status==='V redu'?'var(--green)':status==='Mokro'?'var(--blue)':status==='Suho'?'var(--amber)':'var(--red)';
     const note=status==='Zelo suho'||status==='Suho'?'Tla imajo malo vode v zgornji plasti; za vrt je smiselno spremljati padavine.':status==='Mokro'?'Zgornje plasti so dobro namočene; po nalivih pričakuj počasnejše sušenje.':'Vlaga v zgornjih plasteh je trenutno ugodna.';
-    _omxSet('omx-soil','<div class="omx-head"><div class="omx-title">🌱 Tla in vlaga</div><span class="omx-badge">0–9 cm</span></div><div class="omx-main" style="color:'+scol+'">'+status+'</div><div class="omx-sub">'+note+'</div><div class="omx-kpis"><div class="omx-kpi"><b>'+Number(t0).toFixed(1)+'°C</b>površina</div><div class="omx-kpi"><b>'+Number(t6).toFixed(1)+'°C</b>6 cm</div><div class="omx-kpi"><b>'+Number(m1).toFixed(3)+'</b>0–1 cm</div><div class="omx-kpi"><b>'+root.toFixed(3)+'</b>1–9 cm</div></div>');
-  }catch(e){console.warn('Soil forecast:',e);_omxLoadingError('omx-soil','🌱 Tla in vlaga');}
+    _omxSet('omx-soil','<div class="omx-head"><div class="omx-title">'+_ico('sprout')+' Tla in vlaga</div><span class="omx-badge">0–9 cm</span></div><div class="omx-main" style="color:'+scol+'">'+status+'</div><div class="omx-sub">'+note+'</div><div class="omx-kpis"><div class="omx-kpi"><b>'+Number(t0).toFixed(1)+'°C</b>površina</div><div class="omx-kpi"><b>'+Number(t6).toFixed(1)+'°C</b>6 cm</div><div class="omx-kpi"><b>'+Number(m1).toFixed(3)+'</b>0–1 cm</div><div class="omx-kpi"><b>'+root.toFixed(3)+'</b>1–9 cm</div></div>');
+  }catch(e){console.warn('Soil forecast:',e);_omxLoadingError('omx-soil',_ico('sprout')+' Tla in vlaga');}
 }
 
 
@@ -11689,11 +11690,31 @@ function updateBgFromObs(obs){
 }
 
 
+// ── Zakaj je danes takšno vreme? (5. 11. 2026) ───────────────────────────────────────────────
+// Prej en odstavek treh blokov. Zdaj tri ploščice v jeziku hero kartice (ikona v čipu, naslov, kratek stavek,
+// številke in lestvica): tlačni sistem, zrak v dolini, kaj sledi. POGOJI so nespremenjeni (isti pragovi kot v
+// odstavku); spremenila sta se samo oblika in dolžina besedila. Vse je izpeljano iz meritve postaje, ne iz
+// napovedi — zato nota pod ploščicami. Besedilo je vstavljeno prek innerHTML samo iz nizov v tej funkciji
+// (številke so lokalne spremenljivke), brez uporabniškega vnosa.
+function _whyTile(o){
+  const chips=(o.chips||[]).map(c=>'<span class="why-chip">'+c+'</span>').join('');
+  const scale=o.scale?'<span class="hm-scale hm-scale-'+o.scale.k+'" data-on="1" style="--p:'+o.scale.p.toFixed(1)+'%"><i></i></span>'
+    +'<span class="why-scale-cap"><span>'+o.scale.a+'</span><span>'+o.scale.b+'</span></span>':'';
+  return '<div class="why-tile" data-tone="'+(o.tone||'info')+'">'
+    +'<div class="why-tile-hd"><span class="hm-ic">'+_ico(o.ic)+'</span><span class="why-tile-lbl">'+o.lbl+'</span></div>'
+    +'<div class="why-tile-title">'+o.title+'</div>'
+    +'<p class="why-tile-text">'+o.text+'</p>'
+    +scale
+    +(chips?'<div class="why-chips">'+chips+'</div>':'')
+    +'</div>';
+}
+
 function generateWhyWeather(obs){
   const el=document.getElementById('why-text');
   const upd=document.getElementById('why-updated');
   if(!el)return;
 
+  const dcm=n=>String(n).replace('.',',').replace('-','−');
   const m=obs.metric||{};
   const T=+(m.temp??15).toFixed(1), Td=+(m.dewpt??T-5).toFixed(1);
   const hum=obs.humidity??70, wind=+(m.windSpeed??0).toFixed(0);
@@ -11704,66 +11725,74 @@ function generateWhyWeather(obs){
   const now3h=Date.now()-3*3600000;
   const old=_pressureHistory.find(x=>x.t>=now3h);
   const pTrend=old?+(pres-old.p).toFixed(1):0;
+  const trendTxt=old?((pTrend>0?'+':'')+dcm(pTrend)+' hPa / 3 h'):'trend se še zbira';
 
-  // ── Blok 1: Tlačni sistem ─────────────────────────────
-  let b1='';
+  // ── 1. Tlačni sistem ─────────────────────────────────
+  let p;
   if(pres>1022&&Math.abs(pTrend)<0.8){
-    b1=`Nad regijo vlada <em>anticiklon</em> – zračni tlak je visok (${pres} hPa) in stabilen. Zrak se v ozračju počasi poseda, kar preprečuje nastajanje oblakov in padavin.`;
+    p={tone:'ok',title:'Anticiklon',text:'Zrak se v ozračju poseda in preprečuje nastajanje oblakov in padavin.'};
   } else if(pTrend<-2.5){
-    b1=`Zračni tlak <em>hitro pada</em> (${pTrend} hPa/3 h) – nezadržno se približuje hladna fronta. Pred nami je občutno poslabšanje vremena.`;
+    p={tone:'alert',title:'Tlak hitro pada',text:'Približuje se hladna fronta, pred nami je občutno poslabšanje vremena.'};
   } else if(pTrend<-1){
-    b1=`Zračni tlak <em>postopno pada</em> (${pTrend} hPa/3 h) – z zahoda se počasi približuje ciklon. Vreme bo v prihodnjih urah vse bolj nestanovitno.`;
+    p={tone:'warn',title:'Tlak postopno pada',text:'Z zahoda se počasi približuje ciklon, vreme bo vse bolj nestanovitno.'};
   } else if(pTrend>1.5){
-    b1=`Zračni tlak <em>narašča</em> (+${pTrend} hPa/3 h) – vpliv anticiklona se krepi. Vreme se bo predvidoma izboljšalo.`;
+    p={tone:'ok',title:'Tlak narašča',text:'Vpliv anticiklona se krepi, vreme se bo predvidoma izboljšalo.'};
   } else if(pres<1005){
-    b1=`Nad regijo se zadržuje območje <em>nizkega zračnega tlaka</em> (${pres} hPa) – ciklon. Zrak se dviga in ohlaja, vlaga v njem pa kondenzira, kar povzroča nastanek oblakov in padavin.`;
+    p={tone:'warn',title:'Območje nizkega tlaka',text:'Zrak se dviga in ohlaja, vlaga kondenzira in ustvarja oblake in padavine.'};
   } else if(pres>1018){
-    b1=`Visok zračni tlak (${pres} hPa) ohranja <em>stabilne vremenske razmere</em>. Ozračje je umirjeno, brez izrazitih vertikalnih gibanj.`;
+    p={tone:'ok',title:'Stabilno ozračje',text:'Visok tlak ohranja umirjeno ozračje brez izrazitih vertikalnih gibanj.'};
   } else {
-    b1=`Zračni tlak je v mejah povprečja (${pres} hPa) in brez izrazitih sprememb – prevladuje <em>prehodno stanje</em> med anticiklonom in ciklonom.`;
+    p={tone:'info',title:'Prehodno stanje',text:'Tlak je povprečen in brez sprememb, med anticiklonom in ciklonom.'};
   }
+  p.ic='waves';p.lbl='Tlačni sistem';
+  p.chips=[dcm(pres)+' hPa',trendTxt];
+  p.scale={k:'pres',p:Math.max(0,Math.min(100,(pres-980)/60*100)),a:'nizek',b:'visok'};
 
-  // ── Blok 2: Vlaga, zrak, dolinski efekt ──────────────
-  let b2='';
+  // ── 2. Zrak v dolini ─────────────────────────────────
+  let a;
   if(dep<1.5&&wind<5){
-    b2=`Ker je rosišče le <em>${dep} °C</em> nižje od temperature zraka, veter pa je zelo šibek (${wind} km/h), se ozračje v dolini ne meša. Vlažen nočni zrak se zadržuje pri tleh – nastanek megle je zelo verjeten, še posebej ob reki Savinji.`;
+    a={tone:'warn',ic:'cloud-fog',title:'Pogoji za meglo',text:'Zrak je skoraj nasičen in se ne meša. Vlaga se zadržuje pri tleh, ob Savinji najprej.'};
   } else if(dep<3&&hum>80){
-    b2=`Zrak je <em>nasičen z vlago</em> (${hum} %, rosišče ${Td} °C). Savinjska dolina zadržuje vlago z reke in travnikov – na hladnih površinah je pričakovati kondenzacijo.`;
+    a={tone:'info',ic:'droplets',title:'Zrak je nasičen z vlago',text:'Dolina zadržuje vlago z reke in travnikov, na hladnih površinah je pričakovati kondenzacijo.'};
   } else if(T<2&&dep<4){
-    b2=`Pri temperaturi <em>${T} °C</em> in rosišču ${Td} °C so izpolnjeni pogoji za nastanek <em>slane ali ivja</em>. Mirno ozračje v dolini preprečuje mešanje temperaturnih plasti – nočno ohlajanje je zato izrazitejše kot na okoliških pobočjih.`;
+    a={tone:'warn',ic:'snowflake',title:'Možna slana ali ivje',text:'Mirno ozračje preprečuje mešanje plasti, nočno ohlajanje je izrazitejše kot na pobočjih.'};
   } else if(wind<5&&pres>1015&&(hour<9||hour>19)){
-    b2=`Mirno ozračje (${wind} km/h) in dolinska <em>lega Rečice (366 m n. v.)</em> pogosto privedeta do nastanka <em>temperaturne inverzije</em>: hladnejši in težji zrak se steka v dno kotline, medtem ko je na višjeležečih pobočjih (npr. nad Šoštanjem ali nad Logarsko dolino) topleje.`;
+    a={tone:'info',ic:'mountain',title:'Temperaturna inverzija',text:'Hladnejši, težji zrak se steka na dno kotline (366 m), na pobočjih je topleje.'};
   } else if(rain>0.5){
-    b2=`Savinjska dolina je s treh strani obdana z gorami – vlažen zrak v <em>jugozahodnih tokovih</em> se ob pobočjih dviga in ohlaja, vlaga v njem pa kondenzira, kar prinaša tudi do dvakrat več padavin kot na štajerski ravnini.`;
+    a={tone:'info',ic:'cloud-rain',title:'Dvig ob pobočjih',text:'Vlažni jugozahodni tokovi se ob gorah dvigajo, zato je v dolini do dvakrat več padavin kot na ravnini.'};
   } else if(hum>70){
-    b2=`Reka Savinja in mokrotni travniki prispevajo k <em>višji zračni vlažnosti</em> (${hum} %) v dolini glede na okoliška višjeležeča območja, kar je značilno za zaprte doline.`;
+    a={tone:'info',ic:'droplets',title:'Vlažna dolina',text:'Reka Savinja in travniki dvigajo zračno vlago nad vrednosti na višjih legah.'};
   } else if(wind>25){
-    b2=`Močan veter (${wind} km/h) <em>intenzivno premeša</em> ozračje v dolini. Temperaturne razlike med dnom doline in okoliškimi pobočji so v takšnih razmerah minimalne.`;
+    a={tone:'info',ic:'wind',title:'Veter premeša ozračje',text:'Temperaturne razlike med dnom doline in pobočji so zato majhne.'};
   } else {
-    b2=`Razmerje med temperaturo (${T} °C) in rosiščem (${Td} °C) kaže na <em>razmeroma suh zrak</em> za Savinjsko dolino – to je za omenjeno območje neznačilno.`;
+    a={tone:'info',ic:'sun',title:'Razmeroma suh zrak',text:'Za Savinjsko dolino je to neznačilno.'};
   }
+  a.lbl='Zrak v dolini';
+  a.chips=['do rosišča '+dcm(dep)+' °C',dcm(hum)+' % vlage','veter '+wind+' km/h'];
+  a.scale={k:'dew',p:Math.max(0,Math.min(100,dep/8*100)),a:'nasičeno',b:'suho'};
 
-  // ── Blok 3: Napoved za preostanek dneva ──────────────
-  let b3='';
+  // ── 3. Kaj sledi ─────────────────────────────────────
+  let s;
   const isAM=hour<13, isPM=hour>=13&&hour<20, isEvening=hour>=20;
   if(dep<2&&wind<5&&pres>1015&&isAM){
-    b3=`Čez dan bo <em>sončna toplota postopno razkrojila</em> vlažno zračno plast – megla se navadno dvigne med 9. in 11. uro. Popoldne bo sončno in prijetno.`;
+    s={tone:'ok',ic:'sunrise',title:'Megla se dvigne dopoldne',text:'Sonce bo vlažno plast počasi razkrojilo, običajno med 9. in 11. uro. Popoldne sončno in prijetno.'};
   } else if(pTrend<-2&&rain<0.5){
-    b3=`V prihodnjih urah pričakujemo <em>poslabšanje vremena</em> – oblačnost se bo gostila, pojavile se bodo padavine, lokalno pa so možni tudi močnejši sunki vetra.`;
+    s={tone:'alert',ic:'cloud-lightning',title:'Poslabšanje vremena',text:'Oblačnost se bo gostila, pojavile se bodo padavine, lokalno so možni močnejši sunki vetra.'};
   } else if(pres>1020&&hum<65&&wind<15&&rain<0.1){
-    b3=`<em>Stabilne vremenske razmere</em> se bodo nadaljevale do večera. Pred nami je idealen dan za aktivnosti na prostem.`;
+    s={tone:'ok',ic:'sun',title:'Stabilno do večera',text:'Idealen dan za aktivnosti na prostem.'};
   } else if(isEvening&&T<10&&wind<5){
-    b3=`Noč bo <em>hladna in mirna</em> – to so idealni pogoji za nastanek <em>jutranje temperaturne inverzije</em>. Na vegetaciji lahko pričakujete ${T-3>0?'roso':'slano'}.`;
+    s={tone:'info',ic:'moon',title:'Hladna in mirna noč',text:'Pogoji za jutranjo temperaturno inverzijo. Na vegetaciji lahko pričakujete '+(T-3>0?'roso':'slano')+'.'};
   } else if(rain>0.5){
-    b3=`Padavine bodo <em>postopno slabele in ponehavale</em> – za natančnejši čas razjasnitve spremljajte radarske slike padavin.`;
+    s={tone:'info',ic:'cloud-rain',title:'Padavine slabijo',text:'Za natančnejši čas razjasnitve spremljajte radar padavin.'};
   } else if(isPM&&T>22&&hum>60){
-    b3=`Popoldne je v Savinjski dolini <em>možna termična konvekcija</em> – nad okoliškimi pobočji se bodo razvile lokalne popoldanske plohe ali nevihte.`;
+    s={tone:'warn',ic:'cloud-lightning',title:'Možne popoldanske plohe',text:'Nad okoliškimi pobočji se lahko razvijejo lokalne plohe ali nevihte (termična konvekcija).'};
   } else {
-    b3=`Vreme se v prihodnjih urah ne bo bistveno spremenilo.`;
+    s={tone:'info',ic:'clock',title:'Brez bistvenih sprememb',text:'Vreme se v prihodnjih urah ne bo bistveno spremenilo.'};
   }
+  s.lbl='Kaj sledi';
 
-  // Combine into flowing text
-  el.innerHTML=b1+' '+b2+' '+b3;
+  el.innerHTML='<div class="why-tiles">'+_whyTile(p)+_whyTile(a)+_whyTile(s)+'</div>'
+    +'<p class="why-note">Razlaga je izpeljana iz meritev postaje (tlak, rosišče, veter, vlaga), ni napoved.</p>';
   if(upd)upd.textContent='posod. '+new Date().toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
 }
 

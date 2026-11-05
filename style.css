@@ -4120,7 +4120,7 @@ a.tab-btn{text-decoration:none}
 .hm-scale[data-on="2"]>b{opacity:.75}
 /* Lestvice vrednosti (4. 11. 2026, audit točka 9): prej pet različnih gradientov v petih ploščicah (rdeč konec pri vetru je zvenel kot nevarnost, a meje so izbira prikaza).
    Zdaj ENA nevtralna sekvenčna lestvica (prazno → polno, barva nima pomena); semantične barve samo tam, kjer obstaja prag (UV). Dež je polnilo količine (ena barva), luna je upodobitev. */
-.hm-scale-hum,.hm-scale-wind,.hm-scale-pres,.hm-scale-range{--sc-bg:linear-gradient(90deg,color-mix(in srgb,var(--text) 10%,transparent),color-mix(in srgb,var(--text) 42%,transparent))}
+.hm-scale-hum,.hm-scale-wind,.hm-scale-pres,.hm-scale-range,.hm-scale-dew{--sc-bg:linear-gradient(90deg,color-mix(in srgb,var(--text) 10%,transparent),color-mix(in srgb,var(--text) 42%,transparent))}
 .hm-scale-uv{--sc-bg:linear-gradient(90deg,#22c55e,#d97706 40%,#ea580c 65%,#ef4444)}
 .hm-scale-pres::after{content:'';position:absolute;left:55%;top:-2px;bottom:-2px;width:1px;background:var(--text);opacity:.45}
 /* Dež: lestvica je polnilo (količina danes, polno = 30 mm), ne oznaka */
@@ -4493,3 +4493,96 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
   .cu-card .txfc-source{font-size:.76rem}
 }
 @media (min-width:900px) and (max-width:1099px){.cu-card .cu-drain{font-size:.7rem;gap:.2rem}.cu-card .cu-drain .ic{display:none}}
+
+/* ═══ Poenotena podoba kartic na naslovnici (5. 11. 2026) ═══
+   Referenca sta hero kartica in »Vremenski obeti«: kartica z ikono v čipu v glavi, znotraj ploščice z lastno podlago, krepka vrednost,
+   tiha pojasnila. Spodnje kartice so imele drugačne odmike (22/25 px proti 16/19 px), polmere (16, 18, 20), robove (levi barvni rob) in
+   emoji naslove; zdaj imajo vse en žeton za odmik, en polmer in en slog ploščic. Samo podoba: id-ji in JS so nedotaknjeni. */
+#tab-current{
+  --u-pad:1rem 1.2rem 1.1rem;
+  --tile-bg:var(--fc-bg);--tile-bd:var(--fc-border);--tile-r:var(--r-md);
+  --tile-solo-bg:rgba(12,18,32,.62);--tile-solo-bd:rgba(255,255,255,.07);   /* ploščica neposredno na podlagi strani (kot meritve v hero) */
+}
+:root:not([data-theme="dark"]) #tab-current{--tile-solo-bg:rgba(255,255,255,.93);--tile-solo-bd:rgba(255,255,255,.6)}
+
+/* kartica: en odmik, en polmer */
+#tab-current .card:not(.hero):not(.weather-art-wrap),#tab-current .insight-card{padding:var(--u-pad);border-radius:var(--r-lg);box-shadow:none}
+#tab-current .card.ca-green{border-left-width:1px}
+#tab-current .insight-card{min-height:0}
+#tab-current .clabel,#tab-current .insight-card .ic-head,#tab-current .omx-title{margin-bottom:.8rem}
+#tab-current .chart-hdr{margin-bottom:.8rem}
+#tab-current .chart-hdr>.clabel{margin-bottom:0}
+
+/* naslov v insight karticah (ikona v span-u) in omx karticah: isti čip kot .clabel */
+#tab-current .insight-card .ic-head>span:first-child{display:flex;align-items:center;gap:.45rem;font-weight:600}
+#tab-current .insight-card .ic-head>span:first-child>.ic,#tab-current .omx-title>.ic{box-sizing:content-box;flex:none;width:.95em;height:.95em;padding:.3em;border-radius:50%;
+  color:var(--c-cool);background:color-mix(in srgb,var(--c-cool) 15%,transparent)}
+#tab-current .omx-title{display:flex;align-items:center;gap:.45rem;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;opacity:.85}
+#tab-current .omx-head{margin-bottom:.8rem}
+#tab-current .omx-grid{gap:1rem}
+#tab-current .omx-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--r-lg);padding:var(--u-pad);min-height:0}
+
+/* ploščica v kartici: ena podlaga, en rob, en polmer */
+#tab-current .mtr-day,#tab-current .yr-item,#tab-current #month-card-grid>*{background:var(--tile-bg);border:1px solid var(--tile-bd);border-radius:var(--tile-r)}
+
+/* Povzetek dneva: štiri ploščice kot meritve v hero (prej ena temna škatla s črtami in puščicami) */
+#tab-current .day-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;background:none;border:0;box-shadow:none;border-radius:0;padding:0}
+@media (min-width:760px){#tab-current .day-summary{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#tab-current .ds-item{flex:none;box-sizing:border-box;padding:.85rem .9rem;gap:.3rem;background:var(--tile-solo-bg);border:1px solid var(--tile-solo-bd);border-radius:var(--r-lg)}
+#tab-current .ds-item::before{display:none}
+#tab-current .ds-high{--hm-accent:var(--red)}#tab-current .ds-low{--hm-accent:var(--c-cool)}#tab-current .ds-rain{--hm-accent:var(--rain-col)}#tab-current .ds-avg{--hm-accent:var(--green)}
+#tab-current .ds-arrow{display:flex;align-items:center;gap:.4rem;min-height:0;font-size:var(--fs-sm);font-weight:500;letter-spacing:0;text-transform:none;color:var(--text)}
+#tab-current .ds-temp{font-family:'Inter','Inter Fallback',sans-serif;font-weight:700;font-size:clamp(1.35rem,6.4vw,var(--fs-val));letter-spacing:-.02em;line-height:1.05;white-space:nowrap}
+#tab-current .ds-unit{font-size:var(--fs-sm);font-weight:400;letter-spacing:0}
+#tab-current .ds-lbl{font-size:var(--fs-xs);letter-spacing:0;text-transform:none;line-height:1.35;min-height:1.35em}
+#tab-current .ds-time{font-family:inherit;font-weight:500}
+#tab-current .ds-percentile{font-size:var(--fs-xs)}
+
+/* Na namizju sta kartici »Zakaj …« in povzetek dneva čez vso širino (prej vsaka v polovici, ploščice povzetka so bile ozke in visoke) */
+#tab-current.active>.why-card,#tab-current.active>.day-summary{grid-column:1/-1}
+
+/* Zakaj je danes takšno vreme? Tri ploščice namesto odstavka (prej ~900 znakov brez strukture) */
+.why-card{padding:var(--u-pad,1rem 1.2rem 1.1rem)}
+.why-text{max-width:none;min-height:0;line-height:1.4;font-size:inherit}
+.why-tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem}
+@media (min-width:760px){.why-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}}
+.why-tile{--hm-accent:var(--c-cool);display:flex;flex-direction:column;gap:.4rem;padding:.9rem 1rem;box-sizing:border-box;
+  background:var(--tile-bg,var(--fc-bg));border:1px solid var(--tile-bd,var(--fc-border));border-radius:var(--r-md)}
+.why-tile[data-tone="ok"]{--hm-accent:var(--c-accent)}
+.why-tile[data-tone="warn"]{--hm-accent:var(--c-warm-text)}
+.why-tile[data-tone="alert"]{--hm-accent:#f87171}
+:root:not([data-theme="dark"]) .why-tile[data-tone="alert"]{--hm-accent:#b91c1c}
+.why-tile-hd{display:flex;align-items:center;gap:.5rem}
+.why-tile-lbl{font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.why-tile-title{font-size:1.1rem;font-weight:700;line-height:1.25;letter-spacing:-.015em;color:var(--text)}
+.why-tile-text{margin:0;font-size:var(--fs-sm);line-height:1.5;color:var(--muted)}
+.why-tile .hm-scale{margin-top:.35rem}
+.why-scale-cap{display:flex;justify-content:space-between;margin-top:-.05rem;font-size:var(--fs-xs);color:var(--muted)}
+.why-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto;padding-top:.45rem}
+.why-chip{font-size:var(--fs-xs);line-height:1;padding:.35rem .6rem;border-radius:var(--r-pill);white-space:nowrap;color:var(--text);font-variant-numeric:tabular-nums;
+  background:color-mix(in srgb,var(--text) 8%,transparent)}
+.why-note{margin:.8rem 0 0;font-size:var(--fs-xs);color:var(--muted);line-height:1.4}
+.why-skel .why-tile{justify-content:center;min-height:8.5rem}
+@media (min-width:760px){.why-skel .why-tile{min-height:12rem}}
+
+/* Ploščice v karticah: ena podlaga, en rob, en polmer; brez levih barvnih robov (pomen nosi ikona ali oznaka, ne rob) */
+#tab-current :is(.anom-item,.bio-item,.ms-item,.photo-macro-item,.streak-item,.mtr-why){background:var(--tile-bg);border:1px solid var(--tile-bd);border-radius:var(--tile-r)}
+#tab-current :is(.mc-item,.streak-item){border-left-width:1px;border-color:var(--tile-bd);border-radius:var(--tile-r)}
+#tab-current .mtr-why-tile{border-radius:var(--r-sm)}
+#tab-current .mtr-jump-card{background:var(--tile-bg);border:1px solid var(--tile-bd);border-radius:var(--tile-r);padding:.8rem .9rem;box-shadow:none}
+#tab-current .mtr-jump-card .clabel{text-transform:none;letter-spacing:0;font-size:var(--fs-sm);font-weight:600;opacity:1;line-height:1.3}
+#tab-current .mtr-jump-card>span:last-child{font-size:var(--fs-xs)!important;line-height:1.4}
+#tab-current .mtn-avk-link{border-radius:var(--tile-r);padding:.55rem .8rem;font-size:var(--fs-sm);line-height:1.35}
+
+/* Vrednosti v karticah: ista pisava kot v hero (Inter, krepko, tabelarične števke) namesto tankega monospace */
+#tab-current :is(.cval,.ws-big,.yr-val,.anom-val,.mtr-day-val,.mtr-why-val,.photo-macro-score,.streak-count,.bio-val,.score-n,.omx-main){
+  font-family:'Inter','Inter Fallback',sans-serif;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+#tab-current :is(.cval,.ws-big) .unit,#tab-current :is(.cval,.ws-big) .ws-unit{font-weight:400;letter-spacing:0}
+
+/* Prijava na novičke in noga: ista kartica (podlaga, rob, polmer, odmik) in naslov z ikono v čipu kot ostale kartice naslovnice */
+main .subscribe-box{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--r-lg);padding:1rem 1.2rem 1.1rem;box-shadow:none;margin:1.5rem 0}
+main .subscribe-box .sub-title{font-size:.72rem;margin:0 0 .8rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;opacity:.85}
+main .subscribe-box .sub-title>.ic{box-sizing:content-box;flex:none;width:.95em;height:.95em;padding:.3em;border-radius:50%;color:var(--c-cool);background:color-mix(in srgb,var(--c-cool) 15%,transparent)}
+main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
+.ft-brand{display:flex;align-items:center;gap:.5rem}
+.ft-brand>.ic{box-sizing:content-box;flex:none;width:.95em;height:.95em;padding:.3em;border-radius:50%;color:var(--c-cool);background:color-mix(in srgb,var(--c-cool) 15%,transparent)}

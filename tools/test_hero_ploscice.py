@@ -88,7 +88,7 @@ for sel in (".hero .hero-left", ".hero-b .hero-left"):
     check(bool(full) and bool(crit), f"{sel}{{display:contents}} manjka v kritičnem CSS (poženi node tools/critical_css.mjs)", f"celoten={len(full)} kritičen={len(crit)}")
 
 # ---- 9: lestvice ----
-SCALES = {"hum": "seq", "wind": "seq", "pres": "seq", "range": "seq", "uv": "semantic", "pm": "semantic", "rain": "fill", "moon": "depiction"}
+SCALES = {"hum": "seq", "wind": "seq", "pres": "seq", "range": "seq", "dew": "seq", "uv": "semantic", "pm": "semantic", "rain": "fill", "moon": "depiction"}
 found = set(re.findall(r"\.hm-scale-([a-z]+)\s*[{,>:]", CSS))
 check(found <= set(SCALES), "nova lestvica brez odločitve (dodaj v SCALES v testu):", str(sorted(found - set(SCALES))))
 seq_rule = None
