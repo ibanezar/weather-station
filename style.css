@@ -4693,3 +4693,9 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
   #tab-current .wr-rose .wr-side{flex:0 0 auto}
   #tab-current .wr-rose .wind-rose-legend{align-items:center}
 }
+
+/* Napoved: legenda grafa 24 ur z ikonami iz sklada, ne z emoji (5. 11. 2026) */
+#tab-forecast2 .sky-lg{display:inline-flex;align-items:center;gap:.3rem}
+#tab-forecast2 .sky-lg .ic{width:1em;height:1em}
+#tab-forecast2 .aifc-title .ic{width:1.1em;height:1.1em;vertical-align:-.15em;margin-right:.2rem}
+#tab-forecast2 .aifc-meta{font-size:var(--fs-xs)}
