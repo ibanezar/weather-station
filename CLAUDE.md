@@ -2999,6 +2999,28 @@ noč (spanje; zunanja napoved, ne spalnica), svetloba je 1 točka. Pragovi so na
 - Dnevnik/analiza (kot na `/migrena/`) **ni narejena**; možen naslednji korak (za starše: zapis otrokovega dne, samo v brskalniku). Ker ima stran gradnik opozoril, je v `zasebnost.html` ADHD naveden skupaj z ostalimi stranmi.
 - Prva stran nastane ob prvem teku `vsakdan-forecast.yml` (ročno poženi po mergu); do takrat je v CORE, a `adhd/index.html` še ne obstaja.
 
+## Vreme za vrtnarje (`/vreme-za-vrtnarje/`, 5. 11. 2026)
+
+Stran po vzorcu »vreme za …« (`tools/generate_vreme_za_vrtnarje_page.py`). **Raven ni »kako lep je dan«, ampak koliko ukrepanja vreme zahteva** (brez skrbi, pozorno, ukrepajte, nujno; `th` = 1/2/3): zmrzal ponoči, vročina, suša, veter, močan dež, toča/nevihta.
+Zato je gradnik opozoril na telefon tu posebej uporaben (»jutri ukrepajte«). Okno po urah je okno za delo na vrtu.
+
+- **Zmrzal je edini dejavnik, ki ne gre samo iz Open-Meteo**: modeli so ob jasnih mirnih nočeh na dnu doline običajno previsoki (glej MTR). Za prve tri noči se uporabi **MTR `p_frost` in `tmin`** iz `napoved-modela.json` (zamrznjena dnevna napoved),
+  za ostale noči Open-Meteo; vir je vedno naveden v besedilu dejavnika (vira se ne zlivata). **Noč, ki se začne zvečer dneva d, šteje jutro d+1: MTR dan se izbere po datumu `d+1`, ne po `lead`** (test to zaklene). Brez MTR in za zadnji dan napovedi noči ni (0 točk, piše »še ni na voljo«).
+  Jasna mirna noč (`night_regime == clear_calm`) in najnižja ≤ 3 °C = vsaj 1 točka (slana). Pragovi `FROST_P_TH` 15/40/70 % so naša izbira.
+- **Suša** je ocena iz **modelskih** padavin zadnjih 7 dni in temperature (zato `past_days: 7` v konfiguraciji, en dodaten klic Open-Meteo); vlage tal ne meri in tako piše.
+- Od `/opozorilo-pred-pozebo/` se razlikuje: tista ocenjuje pozebo sadnega drevja v marcu–maju, ta velja vse leto za vrt (FAQ to pove, povezava je na strani).
+- Ne obravnava škropljenja in sredstev (etiketa, FITO-INFO). Pragovi so naši in veljajo za občutljive vrtnine.
+
+## Vreme in sklepi (`/sklepi/`, 5. 11. 2026)
+
+Stran po vzoru `/migrena/` (`tools/generate_sklepi_page.py`, test `tools/test_sklepi.py`): 5-dnevna ocena dejavnikov (padec in nizek tlak, vlaga, veter, mraz), graf tlaka (isti `pressure_chart()` kot migrena, stavek ob njem je parameter `tail`) in **dnevnik bolečine samo v brskalniku**
+(`wx-sklepi-dnevnik`: datum, 0–10, opomba; izvoz CSV). **Dokazi o vplivu vremena so mešani, zato ocena ne napoveduje bolečine in ne trdi vzroka**; dejavniki so tisti, ki jih ljudje najpogosteje omenjajo (projekt Cloudy with a Chance of Pain, Dixon in sod., 2019: majhne povprečne povezave
+z vlago, tlakom in vetrom). **Dež in nevihta nista dejavnika** (ni dokaza). Ne dodajaj dejavnikov in trditev brez vira.
+
+- **Analiza `sklAnalyze()` (JS, samo v tej datoteki)**: Spearmanova korelacija bolečine z 10 dejavniki po meritvah IREICA1 (`history.json`, **samo zunanja polja; dnevi z `src == "era5"` so reanaliza in se ne štejejo**). Pod `MIN_DAYS` = 14 zapisov stran ne trdi nič;
+  merilo »izstopa« je strožje od 1,96 (`Z_CRIT` = 2,58, Fisherjev z), ker se primerja več dejavnikov hkrati, in stran pove, da je kakšna povezava lahko še naključna ter da je bolečina sosednjih dni podobna. Test primerja JS s Python referenco Spearmana (vezi, povprečni ranki).
+- Rdeče zastavice (nenadno otekel, rdeč, topel sklep, vročina, poškodba …) in 112 morajo ostati vidne (test). Ne dodajaj zdravil ali odmerkov. Dnevnik na strežnik ne gre; opisano na `zasebnost.html`. Gradnik opozoril po ocenah je na strani (ne svoj alarm kot pri migreni).
+
 ## Stran za podjetja (`/podjetja/`, 30.–31. 10. 2026)
 
 Pristajalna stran za oglase (kmetije, turizem, gradbeništvo, občine) z obrazcem za povpraševanje. Generator `tools/generate_podjetja_page.py`, ročno pisana `podjetja/podjetja.css` in `podjetja.js`. **Podatke osvežuje `podjetja-page.yml`** (od 2. 11. 2026, glej spodaj).

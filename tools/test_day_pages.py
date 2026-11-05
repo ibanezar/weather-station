@@ -10,6 +10,10 @@ import generate_vreme_za_cebelarje_page as P3  # noqa: E402
 import generate_vreme_za_ribolov_page as P4  # noqa: E402
 import generate_vreme_za_pse_page as P5  # noqa: E402
 import generate_adhd_page as P6  # noqa: E402
+import generate_vreme_za_vrtnarje_page as P7  # noqa: E402
+import generate_sklepi_page as P8  # noqa: E402
+
+P7._MTR = {}   # hermetično: brez prave napoved-modela.json
 
 fails = []
 
@@ -21,7 +25,7 @@ def check(name, cond):
 
 
 TODAY = datetime.date(2026, 6, 10)
-CFGS = [P1.CFG, P2.CFG, P3.CFG, P4.CFG, P5.CFG, P6.CFG]
+CFGS = [P1.CFG, P2.CFG, P3.CFG, P4.CFG, P5.CFG, P6.CFG, P7.CFG, P8.CFG]
 
 
 def synth(**o):
@@ -142,6 +146,47 @@ check("adhd/starši: po 19. uri je okno že mimo, okno se začne ob trenutni uri
 _pgp, _ = D.build_page(P6.CFG, synth(), TODAY)
 check("adhd/starši: razdelek v strani, brez NaN", "Pot v šolo" in _pgp and "Najboljše okno po pouku" in _pgp and "Za starše" in _pgp)
 check("adhd: opis ≤ 160 znakov", all(len(P6.CFG["desc"](l)) <= 160 for l in P6.CFG["levels"]))
+
+# ── vrtnarji: zmrzal po datumu iz MTR, rezerva Open-Meteo, suša, toča ──
+DAY0 = "2026-06-10"
+V = lambda c_, d=DAY0: P7.day_fn(c_, d)
+P7._MTR = {"2026-06-11": {"date": "2026-06-11", "p_frost": 0.80, "tmin": -1.0, "night_regime": "clear_calm"}}
+pv, dv = V(synth())
+check("vrtnarji: MTR zmrzal 80 % = 3 točke, vir naveden", pv["zmrzal"] == 3 and "MTR" in dv["zmrzal"] and "80" in dv["zmrzal"])
+check("vrtnarji: zmrzal da vsaj raven »ukrepajte«", D.build_days(P7.CFG, synth(), TODAY)[0]["lvl"] >= 2)
+for pf, exp in ((0.05, 0), (0.15, 1), (0.39, 1), (0.40, 2), (0.69, 2), (0.70, 3)):
+    P7._MTR = {"2026-06-11": {"date": "2026-06-11", "p_frost": pf, "tmin": 4.0, "night_regime": "mixed"}}
+    check(f"vrtnarji: MTR p_frost {pf} → {exp} točk", V(synth())[0]["zmrzal"] == exp)
+P7._MTR = {"2026-06-11": {"date": "2026-06-11", "p_frost": 0.05, "tmin": 2.0, "night_regime": "clear_calm"}}
+pv, dv = V(synth())
+check("vrtnarji: jasna mirna noč ≤ 3 °C = vsaj 1 točka (slana), pod 10 % brez številke",
+      pv["zmrzal"] == 1 and "slana" in dv["zmrzal"] and "pod 10 %" in dv["zmrzal"])
+P7._MTR = {"2026-06-10": {"date": "2026-06-10", "p_frost": 0.95, "tmin": -3.0, "night_regime": "clear_calm"}}
+check("vrtnarji: MTR dan se izbere po datumu JUTRA po noči (d+1), ne po datumu dneva", V(synth())[0]["zmrzal"] != 3)
+P7._MTR = {}
+for t, exp in ((-1, 3), (1, 2), (3, 1), (10, 0)):
+    pv, dv = V(synth(temperature_2m=t))
+    check(f"vrtnarji: brez MTR Open-Meteo najnižja {t} °C → {exp}", pv["zmrzal"] == exp and "Open-Meteo" in dv["zmrzal"])
+pv, dv = V(synth(temperature_2m=-5), "2026-06-14")
+check("vrtnarji: zadnji dan noči ni v napovedi (0 točk in piše)", pv["zmrzal"] == 0 and "še ni na voljo" in dv["zmrzal"])
+LAST = "2026-06-14"
+check("vrtnarji: suša (7 suhih dni, 28 °C) = 3", V(synth(temperature_2m=28), LAST)[0]["susa"] == 3)
+check("vrtnarji: hladno (10 °C) ni suše, dež odpravi sušo",
+      V(synth(temperature_2m=10), LAST)[0]["susa"] == 0 and V(synth(temperature_2m=28, precipitation=1), LAST)[0]["susa"] == 0)
+check("vrtnarji: premalo dni zgodovine = brez ocene suše", V(synth(temperature_2m=28))[0]["susa"] == 0)
+check("vrtnarji: vročina 36 °C = 3", V(synth(temperature_2m=36))[0]["vrocina"] == 3)
+check("vrtnarji: toča = 3, nevihta = 2", V(synth(weather_code=96))[0]["nevihta"] == 3 and V(synth(weather_code=95))[0]["nevihta"] == 2)
+check("vrtnarji: dež 24 mm = 2, 9,6 mm = 1, 0 = 0",
+      [V(synth(precipitation=x))[0]["dez"] for x in (1.0, 0.4, 0.0)] == [2, 1, 0])
+check("vrtnarji: močan veter = 3", V(synth(wind_speed_10m=50, wind_gusts_10m=90))[0]["veter"] == 3)
+check("vrtnarji: okno po urah (dež, hlad, tema, vročina)",
+      P7.hour_fn(synth(precipitation=1), "2026-06-10T12:00") == 3
+      and P7.hour_fn(synth(apparent_temperature=2), "2026-06-10T12:00") == 2
+      and P7.hour_fn(synth(shortwave_radiation=0), "2026-06-10T12:00") == 2
+      and P7.hour_fn(synth(apparent_temperature=33), "2026-06-10T12:00") == 2 and P7.hour_fn(synth(), "2026-06-10T12:00") == 0)
+check("vrtnarji: zahteva 7 dni zgodovine za sušo", P7.CFG.get("past_days") == 7)
+_pg7, _ = D.build_page(P7.CFG, synth(), TODAY)
+check("vrtnarji: stran pove vir zmrzali, ni agronomski nasvet, FITO-INFO", "MTR" in _pg7 and "Ocena je pripomoček, ne agronomski nasvet." in _pg7 and "FITO-INFO" in _pg7)
 
 # ── izris ──
 for c in CFGS:
