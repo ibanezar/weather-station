@@ -4656,3 +4656,22 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
   background:var(--tile-bg,var(--fc-bg));border:1px solid var(--tile-bd,var(--fc-border));border-radius:var(--tile-r,var(--r-md))}
 #tab-current .photo-tip:empty{display:none}
 .photo-tip{--hm-accent:var(--c-warm-text)}
+
+/* Emoji v podatkovnih seznamih → ikone v čipu (nizi, mikroklima, mejniki, sezona, značaj, rekord dneva, aktivnosti); barva čipa je pomen (nevarnost, toplo, hladno) */
+#tab-current .streak-item{--hm-accent:var(--st-accent,var(--c-cool))}
+#tab-current .streak-icon,#tab-current .ms-icon,#tab-current .mc-icon{flex:none;font-size:inherit}
+#tab-current .mc-item{--hm-accent:var(--c-cool)}
+#tab-current .mc-item-alert{--hm-accent:var(--red)}#tab-current .mc-item-warn{--hm-accent:var(--c-warm-text)}#tab-current .mc-item-good{--hm-accent:var(--c-accent)}
+#tab-current .mc-head{display:flex;align-items:center;gap:.5rem}
+#tab-current .season-name{display:flex;align-items:center;gap:.5rem}
+#tab-current .season-name .hm-ic{--hm-accent:var(--c-accent)}
+#tab-current .season-pace .ic,#tab-current .otd-clim-val .ic{width:1em;height:1em;vertical-align:-.15em;margin-right:.15em}
+#tab-current .mood-emoji.hm-ic{--hm-accent:var(--c-accent);width:3rem;height:3rem;font-size:inherit}
+#tab-current .mood-emoji .ic{width:1.5rem;height:1.5rem}
+#tab-current .act{gap:.4rem;padding:.3rem .8rem .3rem .35rem;font-size:var(--fs-sm);color:var(--text)}
+#tab-current .act .hm-ic{--hm-accent:var(--c-accent);width:1.3rem;height:1.3rem}
+#tab-current .act .hm-ic .ic{width:.75rem;height:.75rem}
+#tab-current .moon-big{width:3.4rem;height:3.4rem;font-size:0;filter:none}
+#tab-current .moon-big .hm-moon-svg{display:block;width:100%;height:100%}
+#tab-current :is(.p-rate,.beaufort-badge){font-family:'Inter','Inter Fallback',sans-serif;font-variant-numeric:tabular-nums}
+#tab-current .p-rate{font-size:var(--fs-xs);line-height:1.4}
