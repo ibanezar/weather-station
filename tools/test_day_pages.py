@@ -126,7 +126,11 @@ _d = "2026-06-10"
 w = P6.school_walk(synth(), _d)
 check("adhd/starši: pot v šolo v lepem vremenu", w and w[0] == 0 and "občutena 20 °C" in w[1] and "temno" not in w[1])
 w = P6.school_walk(synth(shortwave_radiation=0), _d)
-check("adhd/starši: pot v šolo v temi je zmerna ovira in piše »še temno«", w and w[0] >= 2 and "še temno" in w[1])
+check("adhd/starši: tema na poti v šolo je opomba, ne dvig ravni", w and w[0] == 0 and "še temno" in w[1])
+check("adhd/starši: tema v oknu po urah ostane zmerna ovira, na poti v šolo ne",
+      P6.hour_fn(synth(shortwave_radiation=0), "2026-06-10T07:00") == 2 and P6.hour_fn(synth(shortwave_radiation=0), "2026-06-10T07:00", dark_counts=False) == 0)
+check("adhd/starši: dež na poti v šolo še vedno dvigne raven",
+      P6.school_walk(synth(precipitation=0.6, precipitation_probability=90), _d)[0] >= 2)
 w = P6.school_walk(synth(precipitation_probability=80), _d)
 check("adhd/starši: verjeten dež na poti v šolo", w and "dež verjeten (80 %)" in w[1])
 check("adhd/starši: po 8. uri je pot v šolo že mimo, ob 8. uri šteje samo ura 8",

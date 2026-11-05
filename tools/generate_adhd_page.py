@@ -53,8 +53,8 @@ def day_fn(c, d):
     return pts, det
 
 
-def hour_fn(c, h):
-    """Ocena ure za gibanje na prostem (0–3). Temne ure štejejo kot zmerna ovira."""
+def hour_fn(c, h, dark_counts=True):
+    """Ocena ure za gibanje na prostem (0–3). Temne ure štejejo kot zmerna ovira (razen dark_counts=False)."""
     a = c.at("apparent_temperature", h)
     prob = c.at("precipitation_probability", h) or 0
     pr = c.at("precipitation", h) or 0
@@ -65,7 +65,7 @@ def hour_fn(c, h):
         s = max(bands(a, HEAT_TH), bands_desc(a, COLD_TH))
     s = max(s, 3 if pr >= 0.5 else 2 if (pr >= 0.2 or prob >= 60) else 1 if prob >= 30 else 0)
     s = max(s, 2 if gust >= 55 else 1 if gust >= 40 else 0)
-    if rad is not None and rad < 10:
+    if dark_counts and rad is not None and rad < 10:
         s = max(s, 2)
     if (c.at("weather_code", h) or 0) >= 95:
         s = 3
@@ -83,7 +83,7 @@ def school_walk(c, d, from_hour=0):
     if not hrs:
         return None
     keys = [f"{d}T{h:02d}:00" for h in hrs]
-    lvl = max(hour_fn(c, k) for k in keys)
+    lvl = max(hour_fn(c, k, dark_counts=False) for k in keys)   # tema je ločena opomba, sicer bi bilo vsako zimsko jutro »zahtevno«
     app = [c.at("apparent_temperature", k) for k in keys if c.at("apparent_temperature", k) is not None]
     prob = max((c.at("precipitation_probability", k) or 0 for k in keys), default=0)
     dark = any((c.at("shortwave_radiation", k) is not None and c.at("shortwave_radiation", k) < 10) for k in keys)
@@ -120,7 +120,7 @@ def parent_html(c, today):
     <tr><th></th><td>Pot v šolo (7.00–8.00)</td><td>Najboljše okno po pouku</td></tr>
 {chr(10).join(rows)}
   </table></div>
-  <p class="muted-note">Modelska napoved. Raven poti v šolo je enaka kot pri oknu po urah; »še temno« pomeni, da zunaj ob tisti uri še ni dnevne svetlobe (poskrbite za odsevnike).</p>'''
+  <p class="muted-note">Modelska napoved. Raven poti v šolo šteje samo vreme (dež, mraz, vročina, veter, nevihta). »Še temno« je ločena opomba: ob tisti uri zunaj še ni dnevne svetlobe, zato poskrbite za odsevnike.</p>'''
 
 
 def sections(cfg, c, days, today):
