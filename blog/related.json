@@ -1,18 +1,8 @@
 {
-  "test-napovedi-2026-10": [
-    "test-napovedi-2026-09",
-    "test-napovedi-2026-07",
-    "test-napovedi-2026-08"
-  ],
-  "vremenski-povzetek-oktober-2026": [
-    "vremenski-povzetek-julij-2026",
-    "vremenski-povzetek-avgust-2026",
-    "vremenski-povzetek-september-2026"
-  ],
-  "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
-    "zakaj-gobe-rastejo-do-meje-megle",
-    "reke-megle-temperaturna-inverzija-recica-savinji",
-    "dve-nevihte-hladno-jutro"
+  "zled-ali-poledica-razlika-1027": [
+    "prvi-sneg-golte-solcava-menina-1027",
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
+    "crnivec-pozimi-sneg-verige-1027"
   ],
   "stopinjski-dnevi-recica-koliko-kuriti-1027": [
     "temperaturni-trend-ireica1-2020-2025",
@@ -24,25 +14,35 @@
     "crnivec-pozimi-sneg-verige-1027",
     "vreme-golte-sneg-razmere"
   ],
+  "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
+    "zakaj-gobe-rastejo-do-meje-megle",
+    "reke-megle-temperaturna-inverzija-recica-savinji",
+    "dve-nevihte-hladno-jutro"
+  ],
+  "kdaj-pade-prvi-sneg-v-dolini-recica-1027": [
+    "crnivec-pozimi-sneg-verige-1027",
+    "prvi-sneg-golte-solcava-menina-1027",
+    "bela-bozic-zgornja-savinjska-dolina-1027"
+  ],
   "crnivec-pozimi-sneg-verige-1027": [
     "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
     "prvi-sneg-golte-solcava-menina-1027",
     "bela-bozic-zgornja-savinjska-dolina-1027"
-  ],
-  "zled-ali-poledica-razlika-1027": [
-    "prvi-sneg-golte-solcava-menina-1027",
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
-    "crnivec-pozimi-sneg-verige-1027"
   ],
   "bela-bozic-zgornja-savinjska-dolina-1027": [
     "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
     "crnivec-pozimi-sneg-verige-1027",
     "prvi-sneg-golte-solcava-menina-1027"
   ],
-  "kdaj-pade-prvi-sneg-v-dolini-recica-1027": [
-    "crnivec-pozimi-sneg-verige-1027",
-    "prvi-sneg-golte-solcava-menina-1027",
-    "bela-bozic-zgornja-savinjska-dolina-1027"
+  "test-napovedi-2026-10": [
+    "test-napovedi-2026-09",
+    "test-napovedi-2026-07",
+    "test-napovedi-2026-08"
+  ],
+  "vremenski-povzetek-oktober-2026": [
+    "vremenski-povzetek-julij-2026",
+    "vremenski-povzetek-avgust-2026",
+    "vremenski-povzetek-september-2026"
   ],
   "kdaj-menjati-zimske-gume-recica-1027": [
     "16-noci-pod-5-c-slane-se-ni-1021",
@@ -85,8 +85,8 @@
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
-    "trije-vali-gob-po-dezju-0911",
     "jurcki-preverba-napovedi-1015",
+    "trije-vali-gob-po-dezju-0911",
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
   ],
   "jurcki-preverba-napovedi-1015": [
@@ -97,7 +97,7 @@
   "zime-nekoc-in-zdaj-1012": [
     "zima-2026-2027-el-nino-napoved",
     "crnivec-pozimi-sneg-verige-1027",
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
+    "bela-bozic-zgornja-savinjska-dolina-1027"
   ],
   "naslednji-teden-konec-poletja-0904": [
     "tedenska-napoved-24-28-avgust-2026",
@@ -220,14 +220,14 @@
     "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni"
   ],
   "vremensko-leto-2025-2026": [
-    "vremenski-povzetek-september-2026",
     "vremenski-povzetek-oktober-2026",
+    "vremenski-povzetek-september-2026",
     "vremenski-povzetek-avgust-2026"
   ],
   "test-napovedi-2026-09": [
+    "test-napovedi-2026-10",
     "test-napovedi-2026-07",
-    "test-napovedi-2026-08",
-    "test-napovedi-2026-10"
+    "test-napovedi-2026-08"
   ],
   "vremenski-povzetek-september-2026": [
     "vremenski-povzetek-julij-2026",
@@ -251,8 +251,8 @@
   ],
   "test-napovedi-2026-08": [
     "test-napovedi-2026-07",
-    "test-napovedi-2026-09",
-    "test-napovedi-2026-10"
+    "test-napovedi-2026-10",
+    "test-napovedi-2026-09"
   ],
   "vremenski-povzetek-avgust-2026": [
     "vremenski-povzetek-julij-2026",
@@ -281,8 +281,8 @@
   ],
   "test-napovedi-2026-07": [
     "test-napovedi-2026-08",
-    "test-napovedi-2026-09",
-    "test-napovedi-2026-10"
+    "test-napovedi-2026-10",
+    "test-napovedi-2026-09"
   ],
   "nevihtni-opazovalec-2026-08-25-0236": [
     "nevihtni-opazovalec-2026-07-17-1205",
@@ -306,8 +306,8 @@
   ],
   "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
-    "tedenska-napoved-24-28-avgust-2026",
-    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907"
+    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907",
+    "tedenska-napoved-24-28-avgust-2026"
   ],
   "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819": [
     "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916",
@@ -326,8 +326,8 @@
   ],
   "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816": [
     "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730",
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
-    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714"
+    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714",
+    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
   ],
   "invazivka-tedenski-pregled-20260815": [
     "invazivka-tedenski-pregled-20260830",

@@ -154,7 +154,13 @@ MUTACIJE = [
     ("hub Na kratko: rekord temperature [29.10.]", "tools/seo_smart_routine.py", "Rekordi postaje: {num(abs_max[1])} °C", "Rekordi postaje: {num(abs_min[1])} °C", "test_hub_kratko.py"),
     ("hero lestvice: veter (app.js) [31.10.]", "app.js", "wind:n(s.wind)!=null?[s.wind/50*100", "wind:n(s.wind)!=null?[s.wind/60*100"),
     ("hero lestvice: tlak (Python) [31.10.]", "tools/inject_current_weather.py", "((pres - 980) / 60 * 100, None)", "((pres - 990) / 60 * 100, None)"),
-    ("hero lestvice: dež (app.js) [31.10.]", "app.js", "Math.sqrt(Math.max(0,s.rr)/10)*100", "Math.sqrt(Math.max(0,s.rr)/12)*100"),
+    ("hero lestvice: dež (app.js) [31.10., od 4.11. količina]", "app.js", "Math.sqrt(Math.min(30,Math.max(0,s.rt))/30)*100", "Math.sqrt(Math.min(30,Math.max(0,s.rt))/32)*100"),
+    # ── hero ikona: noč po sončnem zahodu, ikona pretekle ure, barva grafa (5. 11. 2026) ──
+    ("hero noč: zahod namesto ure (app.js)", "app.js", "const night=_isNightAt(when,obs);", "const night=(when||new Date()).getHours()>22;"),
+    ("hero noč: zahod namesto ure (Python)", "tools/inject_current_weather.py", "return local < st[0] or local > st[1]", "return local.hour < 5 or local.hour > 22"),
+    ("hero ikona: pretekla ura prevzame _wxCond", "app.js", "const wc=(!past&&typeof _wxCond==='string')?_wxCond:'';", "const wc=typeof _wxCond==='string'?_wxCond:'';"),
+    ("hero graf: pas 15–22 °C ni barva besedila", "app.js", "if(t>=15&&t<22)return isDark()?'#bef264':'#4d7c0f';", "if(false)return '';", "test_temp_barve.py"),
+    ("hero stavek: vrh jutri (24 ur)", "app.js", "const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&", "const tomorrowPeak=false&&"),
 ]
 
 

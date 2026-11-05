@@ -590,20 +590,31 @@ def valovi_temperatura():
 @test
 def hero_ikona():
     """Statična ikona junaške kartice (inject_current_weather.hero_condition_label +
-    HERO_ICON_BY_LABEL) = getCondition() + _COND_ICON v app.js (brez _wxCond)."""
+    HERO_ICON_BY_LABEL) = getCondition() + _COND_ICON v app.js (brez _wxCond).
+    Noč je po sončnem zahodu na postaji (ne ura 23-5): ob 19. uri novembra je že tema. Brez koordinat velja rezerva po uri."""
     import inject_current_weather as ic
     cases = []
     for pr in (0, 0.5, 3, 8):
         for sr in (0, 5, 50, 200, 500, 800):
-            for h in (3, 12, 23):
-                cases.append((pr, sr, h))
-    calls = [{"expr": "(function(){var D=Date;Date=function(){return new D(2026,9,29,%d,0,0)};var r=getCondition({metric:{precipRate:%s,solarRadiation:%s}}).label;Date=D;return r;})()" % (h, pr, sr)} for pr, sr, h in cases]
-    labels = js("app.js", ["getCondition"], calls)
+            for h in (3, 12, 17, 19, 23):
+                for coords in (False, True):
+                    cases.append((pr, sr, h, coords))
+    def call(pr, sr, h, coords):
+        # z/koordinatami: trenutek po Ljubljani (CET, 29. 10. po preklopu ure) kot UTC; brez: lokalna ura izvajalca (rezerva getHours)
+        if coords:
+            return {"expr": "getCondition({lat:46.326,lon:14.921,metric:{precipRate:%s,solarRadiation:%s}},new Date(Date.UTC(2026,9,29,%d,0,0))).label" % (pr, sr, h - 1)}
+        return {"expr": "getCondition({metric:{precipRate:%s,solarRadiation:%s}},new Date(2026,9,29,%d,0,0)).label" % (pr, sr, h)}
+    labels = js("app.js", ["getCondition", "_isNightAt", "sunTimes"], [call(*c) for c in cases], prelude="var _lastBriefObs=null;")
     icons = js("app.js", ["_COND_ICON"], [{"expr": "_COND_ICON"}])[0]
-    for (pr, sr, h), lab in zip(cases, labels):
+    for (pr, sr, h, coords), lab in zip(cases, labels):
         obs = {"obsTimeLocal": "2026-10-29 %02d:00:00" % h, "metric": {"precipRate": pr, "solarRadiation": sr}}
-        check(ic.hero_condition_label(obs) == lab, "hero ikona: stanje", f"{pr} {sr} {h}: py={ic.hero_condition_label(obs)} js={lab}")
+        if coords:
+            obs.update(lat=46.326, lon=14.921)
+        check(ic.hero_condition_label(obs) == lab, "hero ikona: stanje", f"{pr} {sr} {h} koordinate={coords}: py={ic.hero_condition_label(obs)} js={lab}")
     check(ic.HERO_ICON_BY_LABEL == icons, "hero ikona: preslikava ikon", f"{ic.HERO_ICON_BY_LABEL} != {icons}")
+    # ob 19. uri s koordinatami je noč (jasna ali oblačna), brez njih (rezerva po uri) še dan
+    i19 = cases.index((0, 0, 19, True)); i19n = cases.index((0, 0, 19, False))
+    check(labels[i19] == "Jasna noč" and labels[i19n] == "Oblačno", "hero ikona: 19. ura s koordinatami je noč", f"{labels[i19]} / {labels[i19n]}")
 
 
 @test
@@ -618,38 +629,51 @@ def hero_stavek_danes_ali_24_ur():
     eve = [(0, h, 6, 0) for h in (20, 21, 22, 23)] + [(1, h, 3 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(0, 24)]
     eve_rain = [(0, 20, 6, 0), (0, 21, 6, 0), (1, 1, 5, 0), (1, 9, 7, 60), (1, 13, 8.1, 60)]
     morning = [(0, h, 4 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(8, 24)] + [(1, h, 3, 0) for h in range(0, 8)]
-    r = js("app.js", ["forecastPhrase"], [run(eve), run(eve_rain), run(morning)], prelude=pre)
+    late = [(1, h, 3 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(0, 24)]  # po 23:00 današnjih ur ni več
+    r = js("app.js", ["forecastPhrase"], [run(eve), run(eve_rain), run(morning), run(late)], prelude=pre)
     check(r[0].startswith("V naslednjih 24 urah do približno 8 °C"), "zvečer vrh jutri: stavek govori o 24 urah", r[0])
     check("jutri dopoldne možnost dežja" in r[1], "dež jutri ima besedo »jutri«", r[1])
     check(r[2].startswith("Danes do približno 9 °C"), "zjutraj vrh danes: stavek ostane »Danes«", r[2])
+    check(r[3].startswith("V naslednjih 24 urah do približno 8 °C"), "brez današnjih ur (po 23:00) stavek ne izgine", r[3])
 
 
 @test
 def hero_ikona_noc_in_megla():
     """Ikona stanja: megla/nevihta imata nočno različico (po pravem sončnem zahodu, ne po uri 23-5), oznaka pod
-    ikono pa je ista odločitev kot ikona (4. 11. 2026: ob 21. uri je bila ob oznaki »Oblačno« ikona fog-day)."""
-    names = ["sunTimes", "_isNightAt", "_WXCOND_ICON", "_WXCOND_ICON_NIGHT", "_COND_ICON", "_condLabelShown", "_condImg"]
+    ikono pa je ista odločitev kot ikona (4. 11. 2026: ob 21. uri je bila ob oznaki »Oblačno« ikona fog-day).
+    Ikona pretekle ure na drsniku NE sme prevzeti današnjega stanja (megla zdaj ≠ megla pred 6 urami)."""
+    names = ["sunTimes", "_isNightAt", "_WXCOND_ICON", "_WXCOND_ICON_NIGHT", "_COND_ICON", "_condLabelShown", "_condIconName", "_condImg"]
     pre = "var _wxCond='';var _lastBriefObs={lat:46.33,lon:14.92};"
-    def at(h, m, wc):
-        return {"expr": "(function(){_wxCond='%s';return _condImg('Oblačno',108,new Date(2026,10,4,%d,%d)).match(/icons\\/weather\\/([a-z-]+)\\.svg/)[1];})()" % (wc, h, m)}
-    calls = [at(12, 0, "fog"), at(16, 45, "fog"), at(21, 0, "fog"), at(12, 0, "storm"), at(21, 0, "storm"),
-             at(21, 0, "snow"), at(21, 0, "night"),
+    def name(wc, night):
+        return {"expr": "_condIconName('Oblačno','%s',%s)" % (wc, "true" if night else "false")}
+    def past(wc):
+        return {"expr": "(function(){_wxCond='%s';return _condImg('Jasno sončno',108,true).match(/icons\\/weather\\/([a-z-]+)\\.svg/)[1];})()" % wc}
+    # trenutki: Ljubljana (CET) kot UTC, da test ne zavisi od časovnega pasu izvajalca; sončni zahod 4. 11. ~16.20, vzhod ~6.40
+    def night_at(h, m=0):
+        return "_isNightAt(new Date(Date.UTC(2026,10,4,%d,%d)),{lat:46.33,lon:14.92})" % (h - 1, m)
+    calls = [name("fog", False), name("fog", True), name("storm", False), name("storm", True), name("snow", True), name("night", True),
              {"expr": "(function(){_wxCond='fog';return _condLabelShown('Oblačno');})()"},
              {"expr": "(function(){_wxCond='fog';return _condLabelShown('Rahel dež');})()"},
              {"expr": "(function(){_wxCond='';return _condLabelShown('Oblačno');})()"},
-             {"expr": "(function(){_lastBriefObs=null;return [new Date(2026,10,4,3,0),new Date(2026,10,4,12,0),new Date(2026,10,4,23,30)].map(_isNightAt);})()"}]
+             {"expr": "(function(){_lastBriefObs=null;return [new Date(2026,10,4,3,0),new Date(2026,10,4,12,0),new Date(2026,10,4,23,30)].map(function(d){return _isNightAt(d)});})()"},
+             {"expr": "[%s]" % ",".join(night_at(h, m) for h, m in ((12, 0), (16, 0), (17, 0), (19, 0), (21, 0), (23, 30)))},
+             {"expr": "(function(){_lastBriefObs=null;return _isNightAt(new Date(Date.UTC(2026,10,4,18,0)),{lat:46.33,lon:14.92});})()"},
+             past("fog"), past("storm"), past("")]
     r = js("app.js", names, calls, prelude=pre)
-    check(r[0] == "fog-day", "ikona: megla opoldne je dnevna", r[0])
-    check(r[1] == "fog-night", "ikona: megla po zahodu (16.45) je nočna", r[1])
-    check(r[2] == "fog-night", "ikona: megla ob 21. uri je nočna", r[2])
-    check(r[3] == "thunderstorms-day-rain", "ikona: nevihta opoldne", r[3])
-    check(r[4] == "thunderstorms-night-rain", "ikona: nevihta ponoči", r[4])
-    check(r[5] == "snow", "ikona: sneg nima nočne različice", r[5])
-    check(r[6] == "clear-night", "ikona: stanje night", r[6])
-    check(r[7] == "Možna megla", "oznaka: megla preglasi nebo", r[7])
-    check(r[8] == "Rahel dež", "oznaka: dež ostane", r[8])
-    check(r[9] == "Oblačno", "oznaka: brez megle nespremenjena", r[9])
-    check(r[10] == [True, False, True], "noč brez koordinat: rezerva po uri", r[10])
+    check(r[0] == "fog-day", "ikona: megla podnevi je dnevna", r[0])
+    check(r[1] == "fog-night", "ikona: megla ponoči je nočna", r[1])
+    check(r[2] == "thunderstorms-day-rain", "ikona: nevihta podnevi", r[2])
+    check(r[3] == "thunderstorms-night-rain", "ikona: nevihta ponoči", r[3])
+    check(r[4] == "snow", "ikona: sneg nima nočne različice", r[4])
+    check(r[5] == "clear-night", "ikona: stanje night", r[5])
+    check(r[6] == "Možna megla", "oznaka: megla preglasi nebo", r[6])
+    check(r[7] == "Rahel dež", "oznaka: dež ostane", r[7])
+    check(r[8] == "Oblačno", "oznaka: brez megle nespremenjena", r[8])
+    check(r[9] == [True, False, True], "noč brez koordinat: rezerva po uri", r[9])
+    check(r[10] == [False, False, True, True, True, True], "noč po sončnem zahodu (postaja): 12 in 16 (CET) dan, od 17 noč", r[10])
+    check(r[11] is True, "noč: obs s koordinatami ima prednost pred _lastBriefObs=null", r[11])
+    check(r[12] == "clear-day" and r[13] == "clear-day" and r[14] == "clear-day",
+          "ikona pretekle ure ne prevzame današnjega _wxCond (megla/nevihta)", f"{r[12]} {r[13]} {r[14]}")
 
 
 @test

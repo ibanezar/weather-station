@@ -33,6 +33,15 @@ def rule(css, selector_start):
     return None
 
 
+def rules_with(css, selector):
+    """Telesa VSEH pravil, v katerih je `selector` natanko eden od selektorjev (tudi v skupnem pravilu `a,b,c{...}`)."""
+    out = []
+    for m in re.finditer(r"([^{}]+)\{([^{}]*)\}", css):
+        if selector in [x.strip() for x in m.group(1).split(",")]:
+            out.append(m.group(2))
+    return out
+
+
 # ---- 8: ravni ploščic ----
 for tok in ("--hb-bg1", "--hb-bd1", "--hb-sh1", "--hb-bg2", "--hb-bd2", "--hb-sh2"):
     check(len(re.findall(re.escape(tok) + r":", CSS)) >= 2, "raven ploščic: spremenljivka ni definirana za obe temi", tok)
@@ -41,8 +50,18 @@ base = rule(CSS, ".hero-b .hb-tile") or ""
 check("var(--hb-bg2)" in base and "var(--hb-bd2)" in base and "var(--hb-sh2)" in base, "`.hero-b .hb-tile` ni raven 2", base)
 l1 = rule(CSS, ".hero-b .hero-top.hb-tile") or ""
 check("var(--hb-bg1)" in l1 and "var(--hb-bd1)" in l1 and "var(--hb-sh1)" in l1, "glavna ploščica ni raven 1", l1)
-l1b = rule(CSS, ".hero-b .hb-day.hb-tile") or ""
-check(l1b == l1, "»Danes« nima enakega sloga kot glavna ploščica", l1b)
+# »Danes« je raven 1 kot glavna ploščica: VSAKO pravilo, ki ga zadene in nastavlja podlago, rob ali senco, mora uporabiti spremenljivke ravni 1
+# (prej: rule() je za oba selektorja vrnil isto skupno pravilo in je bila primerjava vedno resnična).
+for sel in (".hero-b .hero-top.hb-tile", ".hero-b .hb-day.hb-tile"):
+    found = rules_with(CSS, sel)
+    check(len(found) >= 1, "raven 1: pravilo ni najdeno", sel)
+    for body in found:
+        for prop, var in (("background", "--hb-bg1"), ("border-color", "--hb-bd1"), ("box-shadow", "--hb-sh1")):
+            if re.search(r"(^|;)\s*" + prop + r"\s*:", body):
+                check(f"var({var})" in body, f"{sel}: `{prop}` ne uporablja {var}", body)
+# in obe sta v istem pravilu (sicer se lahko ena razide)
+check(any(".hero-b .hero-top.hb-tile" in m.group(1) and ".hero-b .hb-day.hb-tile" in m.group(1)
+          for m in re.finditer(r"([^{}]+)\{([^{}]*)\}", CSS)), "»Danes« in glavna ploščica nista v istem pravilu ravni 1")
 hm = rule(CSS, ".hero-b .hm") or ""
 check("var(--hb-bg2)" in hm and "var(--hero-bg)" not in hm and "var(--sh-1)" not in hm, "`.hero-b .hm` ni raven 2", hm)
 summ = rule(CSS, ".hb-more>summary") or ""
@@ -76,9 +95,14 @@ if seq_rule:
 uv = rule(CSS, ".hm-scale-uv") or ""
 check("#22c55e" in uv and "#ef4444" in uv, "UV ima semantične barve (prag)", uv)
 for k in ("hum", "wind", "pres", "range"):
-    # nobeno drugo pravilo ne sme lestvici vsiliti drugačnega ozadja
-    others = [m.group(0) for m in re.finditer(r"[^{}]*\.hm-scale-" + k + r"\s*\{[^{}]*--sc-bg:[^{}]*\}", CSS)]
-    check(len(others) <= 1, f"lestvica {k} ima več pravil za --sc-bg", str(len(others)))
+    # nobeno drugo pravilo ne sme lestvici vsiliti drugačnega ozadja: pravil z --sc-bg, ki zadenejo selektor `.hm-scale-<k>`
+    # (tudi v skupnem pravilu), je natanko eno -- skupno nevtralno. Prej je regex ujel samo zadnji selektor v seznamu (range).
+    over = [b for b in rules_with(CSS, f".hm-scale-{k}") if "--sc-bg" in b]
+    check(len(over) == 1, f"lestvica {k}: pravil z --sc-bg je {len(over)}, mora biti natanko eno (skupno nevtralno)", str(over))
+    # tudi sestavljeni selektorji (`.hm-scale-<k>.x`, `[data-…] .hm-scale-<k>`), ki bi ozadje prepisali
+    extra = [sel.strip() for m in re.finditer(r"([^{}]+)\{([^{}]*)\}", CSS) if "--sc-bg" in m.group(2)
+             for sel in m.group(1).split(",") if re.search(r"\.hm-scale-" + k + r"(?![a-z-])", sel) and sel.strip() != f".hm-scale-{k}"]
+    check(not extra, f"lestvica {k}: sestavljen selektor z --sc-bg", str(extra))
 
 print(f"{checks} preverjanj, {len(fails)} napak")
 for f in fails:
