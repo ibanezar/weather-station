@@ -537,7 +537,7 @@ function drawRainChart(data){
   mkSVG(svg,'rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
   const tip=document.getElementById('chart-tip');
   attachScrub(svg,(sx,clientX,clientY)=>{if(!_rainData.length)return;const idx=Math.max(0,Math.min(_rainData.length-1,Math.round((sx-pad.l)/cw*(_rainData.length-1))));const d=_rainData[idx];if(!d)return;const px=xS(idx),py=pad.t+ch-(d.rain/maxR)*ch;tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',Math.max(pad.t+4,py));tipDot.setAttribute('opacity','1');tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tip.innerHTML='<span style="color:'+CC.rainBar+';font-weight:600">'+d.rain.toFixed(2)+' mm</span>&ensp;'+d.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});tip.style.opacity='1';tip.style.left=Math.min(clientX+14,window.innerWidth-120)+'px';tip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipDot.setAttribute('opacity','0');tipLine.setAttribute('opacity','0');tip.style.opacity='0';});
-  set('rain-range','Skupaj: '+total.toFixed(1)+' mm');
+  set('rain-range','Skupaj: '+fmt(total,1)+'\u00A0mm');
 }
 
 // ── Alerts ────────────────────────────────────────────────
@@ -9377,23 +9377,29 @@ function drawHourlyProfile(observations){
   const tipDot=mk('circle',{cx:0,cy:0,r:'5',fill:CC.tempLine,stroke:'white','stroke-width':'2',opacity:'0',style:'pointer-events:none'});
   mk('rect',{x:pad.l,y:pad.t,width:cw,height:ch,fill:'transparent'});
   const htip=document.getElementById('chart-tip');
-  attachScrub(svg,(sx,clientX,clientY)=>{if(!htip)return;const h=Math.max(0,Math.min(23,Math.round((sx-pad.l)/cw*23)));const a=filled[h];if(!a)return;const px=xS(a.h),py=yS(a.avg);tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');htip.innerHTML='<span style="color:'+CC.tempLine+';font-weight:600">'+a.avg.toFixed(1)+'°C</span>&ensp;'+(a.h<10?'0':'')+a.h+':00';htip.style.opacity='1';htip.style.left=Math.min(clientX+14,window.innerWidth-120)+'px';htip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipLine.setAttribute('opacity','0');tipDot.setAttribute('opacity','0');if(htip)htip.style.opacity='0';});
+  attachScrub(svg,(sx,clientX,clientY)=>{if(!htip)return;const h=Math.max(0,Math.min(23,Math.round((sx-pad.l)/cw*23)));const a=filled[h];if(!a)return;const px=xS(a.h),py=yS(a.avg);tipLine.setAttribute('x1',px);tipLine.setAttribute('x2',px);tipLine.setAttribute('opacity','1');tipDot.setAttribute('cx',px);tipDot.setAttribute('cy',py);tipDot.setAttribute('opacity','1');htip.innerHTML='<span style="color:'+CC.tempLine+';font-weight:600">'+fmt(a.avg,1)+'°C</span>&ensp;'+(a.h<10?'0':'')+a.h+':00';htip.style.opacity='1';htip.style.left=Math.min(clientX+14,window.innerWidth-120)+'px';htip.style.top=Math.max(8,clientY-28)+'px';},()=>{tipLine.setAttribute('opacity','0');tipDot.setAttribute('opacity','0');if(htip)htip.style.opacity='0';});
   const peaks=document.getElementById('hourly-peaks');
-  if(peaks)peaks.innerHTML='<div class="hourly-peak-item">🔴 Najtopleje ob <b>'+(maxA.h<10?'0':'')+maxA.h+':00 ('+maxA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">🔵 Najhladneje ob <b>'+(minA.h<10?'0':'')+minA.h+':00 ('+minA.avg.toFixed(1)+'°C)</b></div><div class="hourly-peak-item">Amplituda: <b>'+(maxA.avg-minA.avg).toFixed(1)+'°C</b></div>';
+  if(peaks){
+    const hh=h=>(h<10?'0':'')+h+':00';
+    const hp=(ic,lbl,val,sub,acc)=>'<div class="hp-tile" style="--hm-accent:'+acc+'"><div class="hp-lbl"><span class="hm-ic">'+_ico(ic)+'</span>'+lbl+'</div><div class="hp-val">'+val+'</div><div class="hp-sub">'+sub+'</div></div>';
+    peaks.innerHTML=hp('thermometer','Najtopleje',fmt(maxA.avg,1)+'\u00A0°C','ob '+hh(maxA.h),'var(--red)')
+      +hp('thermometer-snowflake','Najhladneje',fmt(minA.avg,1)+'\u00A0°C','ob '+hh(minA.h),'var(--c-cool)')
+      +hp('chart-column','Amplituda',fmt(maxA.avg-minA.avg,1)+'\u00A0°C','razlika med vrhoma','var(--green)');
+  }
 }
 
 // ── Phenological calendar ─────────────────────────────────
 const PHENO=[
-  {gdd:[20,90],doy:[35,85],icon:'🌳',name:'Leska / dren cveti',note:'zgodnja pomlad, zelo odvisno od mikrolokacije'},
-  {gdd:[80,170],doy:[65,105],icon:'🌼',name:'Regrat in prve travniške cvetlice',note:'prisojni travniki prej, dolina kasneje'},
-  {gdd:[140,260],doy:[85,120],icon:'🌸',name:'Koščičasto sadje cveti',note:'sliva, češnja; pozeba je še pomembno tveganje'},
-  {gdd:[220,380],doy:[105,140],icon:'🍎',name:'Jablane in hruške cvetijo',note:'sadovnjakarsko najobčutljivejše okno'},
-  {gdd:[360,560],doy:[125,160],icon:'🌿',name:'Polno olistanje gozda',note:'bukev/hrast na pobočjih, dolina z zamikom'},
-  {gdd:[520,760],doy:[145,175],icon:'🌺',name:'Bezeg in akacija',note:'močan lokalni signal pozne pomladi'},
-  {gdd:[700,980],doy:[160,195],icon:'🌾',name:'Prva košnja / travni vrh',note:'odvisno od padavin in rasti trav'},
-  {gdd:[950,1350],doy:[185,230],icon:'🦋',name:'Poletni insekti in suhi travniki',note:'metulji, kobilice, kačji pastirji'},
-  {gdd:[1350,1850],doy:[225,275],icon:'🍄',name:'Pozno poletje: rosa, pajki, gobe po dežju',note:'vlaga in padavine sta pomembnejši od GDD'},
-  {gdd:[0,9999],doy:[276,330],icon:'🍂',name:'Jesensko obarvanje in prva slana',note:'vodijo nočne temperature in dolinska inverzija'},
+  {gdd:[20,90],doy:[35,85],icon:'tree-pine',name:'Leska / dren cveti',note:'zgodnja pomlad, zelo odvisno od mikrolokacije'},
+  {gdd:[80,170],doy:[65,105],icon:'flower',name:'Regrat in prve travniške cvetlice',note:'prisojni travniki prej, dolina kasneje'},
+  {gdd:[140,260],doy:[85,120],icon:'flower-2',name:'Koščičasto sadje cveti',note:'sliva, češnja; pozeba je še pomembno tveganje'},
+  {gdd:[220,380],doy:[105,140],icon:'sprout',name:'Jablane in hruške cvetijo',note:'sadovnjakarsko najobčutljivejše okno'},
+  {gdd:[360,560],doy:[125,160],icon:'leafy-green',name:'Polno olistanje gozda',note:'bukev/hrast na pobočjih, dolina z zamikom'},
+  {gdd:[520,760],doy:[145,175],icon:'flower',name:'Bezeg in akacija',note:'močan lokalni signal pozne pomladi'},
+  {gdd:[700,980],doy:[160,195],icon:'wheat',name:'Prva košnja / travni vrh',note:'odvisno od padavin in rasti trav'},
+  {gdd:[950,1350],doy:[185,230],icon:'bug',name:'Poletni insekti in suhi travniki',note:'metulji, kobilice, kačji pastirji'},
+  {gdd:[1350,1850],doy:[225,275],icon:'cloud-rain',name:'Pozno poletje: rosa, pajki, gobe po dežju',note:'vlaga in padavine sta pomembnejši od GDD'},
+  {gdd:[0,9999],doy:[276,330],icon:'leaf',name:'Jesensko obarvanje in prva slana',note:'vodijo nočne temperature in dolinska inverzija'},
 ];
 async function applyPheno(){
   const y=new Date().getFullYear();
@@ -9447,13 +9453,18 @@ async function applyPheno(){
         const st=statusFor(p);
         const reached=Object.entries(gddByDate).find(([,g])=>g>=p.gdd[0]);
         const dateStr=st.txt==='mimo'&&reached?fmtD(new Date(reached[0]+'T12:00:00')):fmtDoy(p.doy[0])+'–'+fmtDoy(p.doy[1]);
+        // položaj v oknu GDD5 (0 = okno se še ni začelo, 100 = mimo); zadnji vnos (jesen) nima GDD okna, zato brez lestvice
+        const hasBar=p.gdd[1]<9999;
+        const pos=hasBar?Math.max(0,Math.min(100,(totalGdd-p.gdd[0])/(p.gdd[1]-p.gdd[0])*100)):0;
         const row=document.createElement('div');
         row.className='pheno-row '+st.cls;
+        row.style.setProperty('--hm-accent',st.col);
         row.innerHTML=
-          '<div class="pheno-icon">'+p.icon+'</div>'+
-          '<div class="pheno-name"><span>'+p.name+'</span><div style="font-size:.67rem;color:var(--muted);line-height:1.35;margin-top:.1rem">'+p.note+'</div></div>'+
-          '<div class="pheno-gdd">'+p.gdd[0]+'–'+p.gdd[1]+' GDD5</div>'+
-          '<div class="pheno-date" style="color:'+st.col+'"><span>'+dateStr+'</span> <span class="pheno-status">'+st.txt+'</span></div>';
+          '<span class="hm-ic">'+_ico(p.icon)+'</span>'+
+          '<div class="pheno-name"><b>'+p.name+'</b><small>'+p.note+'</small></div>'+
+          '<span class="pheno-status">'+st.txt+'</span>'+
+          (hasBar?'<span class="hm-scale hm-scale-range pheno-bar" data-on="1" style="--p:'+pos.toFixed(1)+'%"><i></i></span>':'')+
+          '<div class="pheno-meta"><span class="pheno-date">'+dateStr+'</span>'+(hasBar?'<span class="pheno-gdd">'+p.gdd[0]+'–'+p.gdd[1]+' GDD5</span>':'')+'</div>';
         el.appendChild(row);
       });
     };
@@ -9461,7 +9472,7 @@ async function applyPheno(){
     renderList(sortedPheno.slice(half),'pheno-list-right');
     const next=PHENO.find(p=>statusFor(p).txt==='aktivno')||PHENO.find(p=>statusFor(p).txt==='kmalu');
     const note=document.getElementById('pheno-note');
-    if(note&&next)note.textContent='Fenološki koledar je ocena za dolinsko lego Rečice: GDD5 + sezonsko okno. Trenutni signal: '+next.icon+' '+next.name+'. To ni točen datum cvetenja, ampak lokalno verjetnostno okno.';
+    if(note&&next)note.textContent='Fenološki koledar je ocena za dolinsko lego Rečice: GDD5 + sezonsko okno. Trenutni signal: '+next.name+'. To ni točen datum cvetenja, ampak lokalno verjetnostno okno.';
   }catch(e){console.warn('Pheno:',e);}
 }
 
