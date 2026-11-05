@@ -5,6 +5,7 @@ Zaženi:  python3 tools/test_pm_tile.py
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -23,7 +24,7 @@ def check(ok, name, detail=""):
 
 def js(calls):
     p = subprocess.run(["node", os.path.join(HERE, "_parity_js.mjs")], capture_output=True, text=True, cwd=ROOT,
-                       input=json.dumps({"file": "app.js", "names": ["PM_MAX_AGE_MIN", "pmBand", "pmTileModel"], "calls": calls}))
+                       input=json.dumps({"file": "app.js", "names": ["PM_MAX_AGE_MIN", "pmBand", "pmScalePos", "pmTileModel"], "calls": calls}))
     out = json.loads(p.stdout)
     assert "results" in out, out
     return out["results"]
@@ -50,5 +51,16 @@ check(res[4]["value"] == "12,0", "model: točno 45 min še velja", str(res[4]))
 check(res[5]["value"] == "12,0" and "24 h" not in res[5]["sub"], "model: brez 24 h povprečja", str(res[5]))
 check(res[6]["value"] is None and res[7]["value"] is None and res[8]["value"] is None, "model: manjkajoči podatki = brez vrednosti")
 check(all("NaN" not in json.dumps(r) and "undefined" not in json.dumps(r) for r in res), "model: brez NaN in undefined")
+# lestvica: oznaka na korenski skali do 100, razredne meje EAQI se ujemajo z gradientom v style.css
+pos = js([{"fn": "pmScalePos", "args": [v]} for v in (0, 10, 20, 25, 50, 75, 100, 215, -3)])
+check([round(x, 1) for x in pos] == [0, 31.6, 44.7, 50, 70.7, 86.6, 100, 100, 0], "pmScalePos: korenska skala, omejena na 0–100", str(pos))
+css = open(os.path.join(ROOT, "style.css"), encoding="utf-8").read()
+m = re.search(r"\.hm-scale-pm\{--sc-bg:linear-gradient\(90deg,([^}]*)\)\}", css)
+check(m is not None, "style.css: .hm-scale-pm ni najden")
+if m:
+    edges = [float(x) for x in re.findall(r"(\d+(?:\.\d+)?)%", m.group(1))]
+    check(sorted(set(edges)) == [31.6, 44.7, 50.0, 70.7, 86.6, 100.0], "style.css: meje razredov na lestvici = sqrt(meja/100)", str(edges))
+check("sosednja postaja IREICA7" in res[0]["src"] and "pred 5 min" in res[0]["src"], "model: vir in čas posnetka", str(res[0].get("src")))
+check(js([{"fn": "pmTileModel", "args": [mk(7, 8, 0), NOW]}])[0]["src"].endswith("zdaj"), "model: svež posnetek = zdaj")
 print(f"\n{CHECKS} preverjanj, {len(FAILS)} napak")
 sys.exit(1 if FAILS else 0)

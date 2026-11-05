@@ -3,7 +3,7 @@
 
 8: ploščice imajo dve ravni (`--hb-bg1/bd1/sh1` = glavna ploščica in »Danes«, `--hb-bg2/bd2/sh2` = meritve, podrobnosti, noga, hitra vprašanja);
    nobena ploščica v `.hero-b` ne sme več uporabljati skupne `--hero-bg`/`--sh-1`.
-9: lestvice vrednosti (vlaga, veter, tlak, razpon dneva) so ENA nevtralna sekvenčna lestvica brez barvnega pomena; semantične barve ima samo UV,
+9: lestvice vrednosti (vlaga, veter, tlak, razpon dneva) so ENA nevtralna sekvenčna lestvica brez barvnega pomena; semantične barve imata samo UV in PM₂,₅ (razredi EAQI so pragovi),
    dež je polnilo količine, luna je upodobitev. Nova lestvica mora biti v seznamu SCALES, da je odločitev zavestna.
 
 Tudi: pravila ravni so v minificiranem `style.min.css` (clean-css 5.3.3 je ob drugačnem vrstnem redu tiho izpustil `.hero-b .hb-tile`).
@@ -57,7 +57,7 @@ check("background:var(--hb-bg1)" in MIN and "hb-day.hb-tile" in MIN, "style.min.
 check("--hb-bg2:rgba(255,255,255" in MIN and "--hb-bg2:rgba(12,18,32" in MIN, "style.min.css: manjkajo spremenljivke ravni")
 
 # ---- 9: lestvice ----
-SCALES = {"hum": "seq", "wind": "seq", "pres": "seq", "range": "seq", "uv": "semantic", "rain": "fill", "moon": "depiction"}
+SCALES = {"hum": "seq", "wind": "seq", "pres": "seq", "range": "seq", "uv": "semantic", "pm": "semantic", "rain": "fill", "moon": "depiction"}
 found = set(re.findall(r"\.hm-scale-([a-z]+)\s*[{,>:]", CSS))
 check(found <= set(SCALES), "nova lestvica brez odločitve (dodaj v SCALES v testu):", str(sorted(found - set(SCALES))))
 seq_rule = None

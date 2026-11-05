@@ -1798,7 +1798,7 @@ async function _fetchComingUpOnce(){
             '<span class="cu-dtl">'+Math.round(tLo)+'°</span></div>'+
           '<div class="cu-range" aria-hidden="true"><i style="left:'+l0.toFixed(1)+'%;width:'+(l1-l0).toFixed(1)+'%;background:linear-gradient(90deg,'+tempColor(tLo)+','+tempColor(tHi)+')"></i></div>'+
           (rain>0.3
-            ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+rain.toFixed(1)+' mm'+(prob?' · '+prob+' %':'')+'</span>'
+            ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+rain.toFixed(1)+' mm'+(prob?' · '+prob+'\u00A0%':'')+'</span>'
             :'<span class="cu-drain cu-dry">'+_ico('sun')+' suho</span>')+
           '<div class="cu-prob-bar"><div class="cu-prob-fill" style="width:'+prob+'%"></div></div>';
         daysEl.appendChild(div);
@@ -1901,7 +1901,7 @@ function _cuDetailHtml(date){
   const stats=[
     stat('thermometer','Najvišja <b>'+Math.round(tHi)+' °C</b>'),
     stat('thermometer-snowflake','Najnižja <b>'+Math.round(tLo)+' °C</b>'),
-    stat('cloud-rain','Padavine <b>'+(rain>0.3?rain.toFixed(1).replace('.',',')+' mm':'suho')+'</b>'+(prob?' · verjetnost do '+prob+' %':'')),
+    stat('cloud-rain','Padavine <b>'+(rain>0.3?rain.toFixed(1).replace('.',',')+' mm':'suho')+'</b>'+(prob?' · verjetnost do '+prob+'\u00A0%':'')),
     wind!=null?stat('wind','Veter do <b>'+Math.round(wind)+' km/h</b>'):'',
     uv!=null?stat('sun','UV do <b>'+Math.round(uv)+'</b> ('+uvLabel(Math.round(uv)).toLowerCase()+')'):''
   ].join('');
@@ -1913,7 +1913,7 @@ function _cuDetailHtml(date){
     mtr='<div class="cu-detail-mtr"><span class="mtr-pill">MTR</span> naš model: najvišja <b>'+Math.round(mt.tmax)+'°</b>'
       +(Number.isFinite(mt.tmax_sd)?' ± '+fmt(mt.tmax_sd,1):'')
       +', najnižja <b>'+Math.round(mt.tmin)+'°</b>'+(Number.isFinite(mt.tmin_sd)?' ± '+fmt(mt.tmin_sd,1):'')
-      +(fz!=null?' · zmrzal '+fz+' %':'')+'</div>';
+      +(fz!=null?' · zmrzal '+fz+'\u00A0%':'')+'</div>';
   }
   return '<div class="pd-detail-hdr">'
       +'<span class="pd-detail-title cu-detail-title">'+_wmoImg(code,true,32)+' '+title+' · '+_wmoTxt(code)+'</span>'
@@ -2730,9 +2730,14 @@ function drawHeroSparkline(){
     '<text class="hspark-chip-tx" x="'+ccx.toFixed(1)+'" y="'+(cy+15.2).toFixed(1)+'" text-anchor="middle">'+txt+'</text></g>';
   _sparkChip={cx:ccx,w:cw};
 
+  // Črta in polnilo nosita barvo temperaturne skale (ista kot številka v glavni ploščici), ne ločene modre: isti podatek je bil v treh barvah.
+  const nowC=tempColor(nowT);
+  const stops=pts.map((p,i)=>'<stop offset="'+(P[i].x/W*100).toFixed(2)+'%" stop-color="'+tempColor(p.t)+'"/>').join('');
   g.innerHTML=
-    '<path d="'+area+'" fill="url(#heroSparkFill)"/>'+
-    '<path class="hspark-line" d="'+d+'" stroke-width="3" stroke-linecap="round"/>'+
+    '<defs><linearGradient id="heroSparkLine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="'+W+'" y2="0">'+stops+'</linearGradient>'+
+    '<linearGradient id="heroSparkFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+nowC+'" stop-opacity=".30"/><stop offset="100%" stop-color="'+nowC+'" stop-opacity="0"/></linearGradient></defs>'+
+    '<path d="'+area+'" fill="url(#heroSparkFade)"/>'+
+    '<path class="hspark-line" d="'+d+'" stroke="url(#heroSparkLine)" stroke-width="3" stroke-linecap="round"/>'+
     chipSvg+
     '<line class="hspark-guide" id="hero-spark-guide" x1="0" y1="-4" x2="0" y2="'+H+'" stroke-width="1" stroke-dasharray="2,3"/>'+
     '<circle class="hspark-halo" id="hero-spark-halo" cx="0" cy="0" r="10"/>'+
@@ -2772,6 +2777,7 @@ function avgH(a){return a.reduce((s,p)=>s+p.h,0)/a.length;}
 // krivulja naslednjič nariše ob osvežitvi podatkov (~5 min) — brez tega bi
 // ostala raztegnjena do takrat.
 window.addEventListener('resize',()=>{if(!document.getElementById('hero-spark-wrap')?.hidden)drawHeroSparkline();},{passive:true});
+_themeRedraw.add(()=>{if(!document.getElementById('hero-spark-wrap')?.hidden)drawHeroSparkline();});
 
 // Vlečenje po grafu premika skriti #fc-slider (isti dogodek input kot prej): hero številka, ikona in
 // oznaka ostanejo v _fcSliderUpdate(). Dvojni dotik ali Escape vrneta na »zdaj«.
@@ -2810,6 +2816,7 @@ function moveHeroSparkMarker(v){
   for(const h of _sparkByHour.keys()){const diff=Math.abs(h-v);if(diff<bestDiff){bestDiff=diff;best=h;}}
   if(best==null)return;
   const pt=_sparkByHour.get(best);
+  {const c=tempColor(pt.t);dot.style.stroke=c;if(halo)halo.style.fill=c;guide.style.stroke=c;}
   dot.setAttribute('cx',pt.x.toFixed(1));dot.setAttribute('cy',pt.y.toFixed(1));
   if(halo){halo.setAttribute('cx',pt.x.toFixed(1));halo.setAttribute('cy',pt.y.toFixed(1));}
   guide.setAttribute('x1',pt.x.toFixed(1));guide.setAttribute('x2',pt.x.toFixed(1));
@@ -2852,12 +2859,20 @@ function forecastPhrase(){
   const todayStr=new Date().toDateString();
   const todayHours=_forecastHours.filter(x=>x.t.toDateString()===todayStr);
   if(!todayHours.length)return '';
-  const maxT=Math.max(...todayHours.map(x=>x.temp));
-  const rainHour=todayHours.find(x=>x.prob>=50);
-  let s='Danes do približno '+Math.round(maxT)+' °C';
+  const maxOf=a=>Math.max(...a.map(x=>x.temp));
+  // Zvečer je najtoplejša ura že jutri (oznaka na grafu: »↑ 8,1° · jutri 13:00«): stavek »Danes do 6 °C« bi bil ob njej videti kot
+  // nasprotje. Kadar je vrh naslednjih 24 ur (zaokroženo) višji in zunaj današnjega dne, stavek govori o naslednjih 24 urah.
+  const next24=_forecastHours.slice(0,24);
+  const nMax=maxOf(next24),tMaxToday=maxOf(todayHours);
+  const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&next24.some(x=>x.temp===nMax&&x.t.toDateString()!==todayStr);
+  const hrs=tomorrowPeak?next24:todayHours;
+  const maxT=tomorrowPeak?nMax:tMaxToday;
+  const rainHour=hrs.find(x=>x.prob>=50);
+  let s=(tomorrowPeak?'V naslednjih 24 urah do približno ':'Danes do približno ')+Math.round(maxT)+' °C';
   if(rainHour){
     const hh=rainHour.t.getHours();
-    s+=', '+(hh>=18?'zvečer':hh>=12?'popoldne':'dopoldne')+' možnost dežja.';
+    const dw=rainHour.t.toDateString()===todayStr?'':'jutri ';
+    s+=', '+dw+(hh>=18?'zvečer':hh>=12?'popoldne':hh>=6?'dopoldne':'ponoči')+' možnost dežja.';
   }else s+='.';
   return s;
 }
@@ -7930,7 +7945,7 @@ function rainDayHTML(d){
     amt='<div class="rain-amt"><b>'+mmTxt+'</b><i>grobo</i></div>';
   }
   const aria=name+' '+dt.getDate()+'. '+(dt.getMonth()+1)+'.: '
-    +rows.map(x=>'verjetnost '+x[0]+' '+x[1]+' %').join(', ')+(mmTxt?', količina '+mmTxt+' (grobo)':'');
+    +rows.map(x=>'verjetnost '+x[0]+' '+x[1]+'\u00A0%').join(', ')+(mmTxt?', količina '+mmTxt+' (grobo)':'');
   return '<div class="rain-day" role="img" aria-label="'+aria+'"'+(mmTxt?' title="'+MTR_MM_HINT+'"':'')+'>'
     +'<div class="rain-hd">'+name+'<span>'+dt.getDate()+'. '+(dt.getMonth()+1)+'.</span></div>'
     +(mmTxt?'<div class="rain-main">'+gauge+amt+'</div>':'')
@@ -7946,7 +7961,7 @@ function rainMiniHTML(m){
   const rows=[['≥0,2',r5(m.pop),.6],['≥1',r5(m.pop1),.8],['≥5',r5(m.pop5),1]].filter(x=>x[1]!==null);
   if(!rows.length)return '';
   const mmTxt=_mtrMm(m.mm);
-  const aria='MTR: '+rows.map(x=>'verjetnost '+x[0]+' mm '+x[1]+' %').join(', ')+(mmTxt?', količina '+mmTxt+' (grobo)':'');
+  const aria='MTR: '+rows.map(x=>'verjetnost '+x[0]+' mm '+x[1]+'\u00A0%').join(', ')+(mmTxt?', količina '+mmTxt+' (grobo)':'');
   return '<div class="cu-mtr" role="img" aria-label="'+aria+'" title="'+(mmTxt?MTR_MM_HINT+' ':'')+'Verjetnost padavin po MTR, našem modelu (≥ 0,2 / ≥ 1 / ≥ 5 mm).">'
     +'<div class="cu-mtr-hd"><span class="mtr-pill">MTR</span>'+(mmTxt?' <b>'+mmTxt+'</b>':'')+'</div>'
     +rows.map(x=>'<div class="rain-row"><span class="rain-l">'+x[0]+'</span>'
@@ -7962,7 +7977,7 @@ function renderMtrRain(idp){
   const st=_mtrState;
   const days=st?st.days.filter(d=>Number.isFinite(d.pop)):[];
   if(!days.length){el.hidden=true;el.innerHTML='';return;}
-  const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':'—';
+  const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+'\u00A0%':'—';
   el.hidden=false;
   el.innerHTML='<div class="mtr-why-hd">Verjetnost padavin · MTR</div>'
     +'<div class="rain-g">'+days.map(rainDayHTML).join('')+'</div>'
@@ -7978,7 +7993,7 @@ async function fetchAiRain(){
     const data=await _mtrFetch();
     const days=(data.days||[]).filter(d=>Number.isFinite(d.pop));
     if(!days.length)throw new Error('brez dni');
-    const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+' %':'—';
+    const pct=v=>Number.isFinite(v)?(Math.round(v*20)*5)+'\u00A0%':'—';
     grid.className='rain-g';
     grid.innerHTML=days.map(rainDayHTML).join('');
     const rng=document.getElementById('ai-rain-range');
@@ -8287,7 +8302,7 @@ function drawMtrChart(idp){
       html='<b>'+dateTxt+'</b>&ensp;MTR <b style="color:'+MTR_CC.mtr+'">'+fmt(f.mtr,1)+' °C</b>'
         +(Number.isFinite(f.om)?'&ensp;·&ensp;Open-Meteo <b style="color:'+MTR_CC.om+'">'+fmt(f.om,1)+' °C</b>':'')
         +(Number.isFinite(f.sd)?'<br>razpon '+fmt(f.mtr-MTR_Z80*f.sd,1)+' – '+fmt(f.mtr+MTR_Z80*f.sd,1)+' °C':'')
-        +(Number.isFinite(f.pop)?'&ensp;·&ensp;dež '+Math.round(f.pop*100)+' %':'');
+        +(Number.isFinite(f.pop)?'&ensp;·&ensp;dež '+Math.round(f.pop*100)+'\u00A0%':'');
     }
     vline.setAttribute('x1',best.x.toFixed(1));vline.setAttribute('x2',best.x.toFixed(1));
     vline.setAttribute('opacity','1');
@@ -8338,7 +8353,7 @@ function renderMtrDays(idp){
     const pop=Number.isFinite(d.pop)?Math.round(d.pop*100):null;
     /* Verjetnosti pragov (≥ 1 in ≥ 5 mm): MTR-ova, ne količina. Pod 5 % se ne izpišeta. */
     const pr=[[d.pop1,'1'],[d.pop5,'5']].filter(a=>Number.isFinite(a[0])&&a[0]>=0.05)
-      .map(a=>'≥ '+a[1]+' mm '+(Math.round(a[0]*20)*5)+' %').join(' · ');
+      .map(a=>'≥ '+a[1]+' mm '+(Math.round(a[0]*20)*5)+'\u00A0%').join(' · ');
     const fz=st.metric==='tmin'?mtrFrostPct(d.p_frost):null;
     const wmo=_mtrWmoForDate(d.date);
     const icon=wmo!=null?_wmoImg(wmo,true,26):'';
@@ -8349,7 +8364,7 @@ function renderMtrDays(idp){
       +(Number.isFinite(om)?'<div class="mtr-day-base">Open-Meteo '+fmt(om,1)+' °C '+chip+'</div>':'')
       +'<div class="mtr-day-meta">'
         +(Number.isFinite(sd)?'razpon ±'+fmt(MTR_Z80*sd,1)+' °C':'')
-        +(pop!==null?(Number.isFinite(sd)?' · ':'')+'dež '+pop+' %':'')
+        +(pop!==null?(Number.isFinite(sd)?' · ':'')+'dež '+pop+'\u00A0%':'')
         +(pr?' · <span title="Verjetnost, da bo dnevna vsota padavin dosegla prag; MTR-ov model, naučen na meritvah postaje.">'+pr+'</span>':'')
         +(fz!==null?' · <span title="Verjetnost, da bo najnižja temperatura ≤ 0 °C; iz razpršenosti napake modela, preverjeno na zadnjem letu.">zmrzal '+fz+' %</span>':'')
       +'</div></div>';
@@ -8441,11 +8456,11 @@ function renderMtrHero(idp){
     const tile=(cls,icon,val,lbl,extra)=>'<div class="mtr-st '+cls+'"><div class="mtr-st-ic">'+icon+'</div><b>'+val+'</b><em>'+lbl+'</em>'+(extra||'')+'</div>';
     const parts=[];
     const popP=Number.isFinite(d.pop)?Math.round(d.pop*20)*5:null,mmT=_mtrMm(d.mm);
-    if(popP!==null||mmT)parts.push(tile('st-rain',I.drop,mmT||(popP+' %'),'dež'+(mmT&&popP!==null?' · verjetnost '+popP+' %':''),
+    if(popP!==null||mmT)parts.push(tile('st-rain',I.drop,mmT||(popP+'\u00A0%'),'dež'+(mmT&&popP!==null?' · verjetnost '+popP+'\u00A0%':''),
       popP!==null?'<span class="mtr-st-bar"><u style="width:'+popP+'%"></u></span>':''));
     if(half!==null)parts.push(tile('st-range',I.range,fmt(d.tmax-half,1)+' – '+fmt(d.tmax+half,1)+' °C','razpon P10–P90'));
     if(Number.isFinite(d.tmin))parts.push(tile('st-night',I.moon,fmt(d.tmin,1)+' °C','najnižja noč'));
-    parts.push(tile('st-frost',I.snow,(fz===null?'&lt;10':fz)+' %','zmrzal'));
+    parts.push(tile('st-frost',I.snow,(fz===null?'&lt;10':fz)+'\u00A0%','zmrzal'));
     if(Number.isFinite(d.d_tmax)){const r=Math.round(d.d_tmax*10)/10;
       parts.push(tile('st-corr',I.delta,(r>0?'+':(r<0?'−':'±'))+fmt(Math.abs(r),1)+' °C','proti Open-Meteo'));}
     sub.innerHTML=parts.join('');
@@ -10994,6 +11009,9 @@ function pmBand(v){
   for(const x of b)if(v<=x[0])return{label:x[1],color:x[2]};
   return{label:'Nevarno',color:'#9333ea'};
 }
+// Lestvica pod številko: koren do 100 µg/m³ (isto kot dež), da so nizki razredi dovolj široki; razredne meje (10/20/25/50/75) so v CSS
+// `.hm-scale-pm` na istih mestih (sqrt(meja/100)). Nad 100 oznaka obstane na desnem robu, številka pa pove dejansko vrednost.
+function pmScalePos(v){return Math.sqrt(Math.min(100,Math.max(0,v))/100)*100;}
 // Čista funkcija (tools/test_pm_tile.py): odgovor /varpolje-current + trenutni čas → vsebina ploščice.
 function pmTileModel(vp,nowMs){
   const cur=vp&&vp.current,upd=vp&&vp.updated_utc?new Date(vp.updated_utc).getTime():NaN;
@@ -11002,7 +11020,7 @@ function pmTileModel(vp,nowMs){
   if(age==null||age>PM_MAX_AGE_MIN)return{value:null,band:null,sub:'posnetek je star '+(age==null?'?':age)+' min',age};
   const v=Number(cur.pm25_ugm3),avg=cur.pm25_24h_avg_ugm3,f=x=>(Math.round(x*10)/10).toFixed(1).replace('.',',');
   const band=pmBand(v);
-  return{value:f(v),band,sub:band.label+(avg!=null&&isFinite(avg)?' · 24 h povpr. '+f(avg):''),age};
+  return{value:f(v),band,sub:band.label+(avg!=null&&isFinite(avg)?' · 24 h povpr. '+f(avg):''),age,pos:pmScalePos(v),src:'sosednja postaja IREICA7 · '+(age<1?'zdaj':'pred '+age+' min')};
 }
 let _pmCache={ts:0,data:null};
 async function fetchHeroPm(){
@@ -11014,8 +11032,10 @@ async function fetchHeroPm(){
     }
     const m=pmTileModel(_pmCache.data,Date.now());
     val.innerHTML=m.value==null?'—':m.value+'<span style="font-size:.7rem;color:var(--muted)"> µg/m³</span>';
-    val.style.color=m.band?m.band.color:'';if(m.band)val.dataset.pm=m.band.color;else delete val.dataset.pm;
+    // Vrednost je nevtralna kot pri vseh ploščicah; barvo razreda nosi lestvica in oznaka razreda (besedilo), ne cela številka.
+    _hscPos('hsc-pm',m.pos);
     if(sub)sub.textContent=m.sub;
+    const src=document.getElementById('hs-pm-src');if(src)src.textContent=m.value==null?'':m.src;
     val.classList.remove('skel-shimmer');
   }catch(e){if(sub)sub.textContent='meritev ni dosegljiva';console.warn('PM2,5 Varpolje:',e);}
 }
@@ -11451,7 +11471,7 @@ window.addEventListener('load',()=>setTimeout(()=>{_decoReady=true;_resumeAnims(
 if(_reducedMotionMQ&&_reducedMotionMQ.addEventListener)_reducedMotionMQ.addEventListener('change',()=>{if(_motionReduced()){_heroAnimId=_meshAnimId=_artAnim=_sfAnim=null;}else _resumeAnims();});
 
 // ── Hero canvas particles ─────────────────────────────────
-let _heroCtx=null,_heroCanvas=null,_heroParticles=[],_heroAnimId=null,_heroCond='',_heroFrame=0;
+let _wispGrad=null,_heroCtx=null,_heroCanvas=null,_heroParticles=[],_heroAnimId=null,_heroCond='',_heroFrame=0;
 function initHeroCanvas(){
   _heroCanvas=document.getElementById('hero-canvas');
   if(!_heroCanvas)return;
@@ -11517,8 +11537,10 @@ function animateHero(){
     }
     if(p.type==='wisp'){
       p.x+=p.vx;if(p.x>W+p.w/2)p.x=-p.w/2;
-      ctx.beginPath();ctx.ellipse(p.x,p.y,p.w,p.h,0,0,Math.PI*2);
-      ctx.fillStyle=`rgba(203,213,225,${p.op})`;ctx.fill();
+      // Mehek rob (radialni prelivi iz sredine v prosojno), ne trda elipsa: ostre vodoravne proge ob robu kartice so izgledale kot napaka izrisa.
+      if(!_wispGrad){_wispGrad=ctx.createRadialGradient(0,0,0,0,0,1);_wispGrad.addColorStop(0,'rgba(203,213,225,1)');_wispGrad.addColorStop(1,'rgba(203,213,225,0)');}
+      ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.w,p.h);ctx.globalAlpha=Math.min(1,p.op*2.2);
+      ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);ctx.fillStyle=_wispGrad;ctx.fill();ctx.restore();
     }
   });
   // Replenish
@@ -18037,17 +18059,17 @@ const _QA={
       :state==='near'?`Blizu ledišča: <em>${tv}</em> ${when} ob ${_qaH(m.t)}`
       :`Zmrzali ne kaže: najnižja <em>${tv}</em> ${when} ob ${_qaH(m.t)}`;
     const facts=[['Pod 0 °C',run?_qaH(hrs[run.from].t)+' do '+_qaH(hrs[run.to].t,1):'ne'],['Open-Meteo, najnižja',tv]];
-    if(mtr)facts.splice(1,0,['MTR, zmrzal',pct!=null?pct+' %':'pod 10 %']);
+    if(mtr)facts.splice(1,0,['MTR, zmrzal',pct!=null?pct+'\u00A0%':'pod 10\u00A0%']);
     return{id:'frost',label:'Zmrzal',icon:'i-thermometer-snowflake',state,pill:{hit:'Da',near:'Blizu',none:'Ne'}[state],
-      val:tv,sub:when+' ob '+_qaH(m.t),meta:mtr?(pct!=null?'MTR '+pct+' %':'MTR pod 10 %'):'',
+      val:tv,sub:when+' ob '+_qaH(m.t),meta:mtr?(pct!=null?'MTR '+pct+'\u00A0%':'MTR pod 10\u00A0%'):'',
       head,chart:_qaTempChart(hrs,{thr:0,fillBelow:true,aria:'Temperatura v naslednjih 24 urah, najnižja '+tv+' ob '+_qaH(m.t)}),facts,
       src:'Modelska napoved za dno doline, ne meritev. Jutranji okvir 0:00 do 9:00. Open-Meteo in MTR sta prikazana ločeno.'};
   },
   rain(hrs){
     const maxP=Math.max(...hrs.map(h=>h.prob));
     const i0=hrs.findIndex(h=>h.prob>=50);
-    if(i0<0)return{id:'rain',label:'Dež',icon:'i-cloud-rain',state:'none',pill:'Ne',val:'Ne kaže',sub:'v 24 h',meta:'verjetnost '+maxP+' %',
-      head:'Naslednjih 24 ur <em>ostane suho</em>',chart:_qaRainChart(hrs),facts:[['Največja verjetnost',maxP+' %'],['Naslednji dež','čez 24 h ali več']],
+    if(i0<0)return{id:'rain',label:'Dež',icon:'i-cloud-rain',state:'none',pill:'Ne',val:'Ne kaže',sub:'v 24 h',meta:'verjetnost '+maxP+'\u00A0%',
+      head:'Naslednjih 24 ur <em>ostane suho</em>',chart:_qaRainChart(hrs),facts:[['Največja verjetnost',maxP+'\u00A0%'],['Naslednji dež','čez 24 h ali več']],
       src:'Modelska napoved Open-Meteo, ne radarska meritev. Pod 50 % verjetnosti ne štejemo za dež.'};
     let i1=i0;
     while(i1+1<hrs.length&&(hrs[i1+1].prob>=40||hrs[i1+1].mm>=0.1))i1++;
@@ -18058,10 +18080,10 @@ const _QA={
     const start=i0===0?'Zdaj':_qaH(hrs[i0].t,-1);
     const mmTxt=mm<1?'pod 1 mm':'~'+Math.round(mm)+' mm';
     return{id:'rain',label:'Dež',icon:'i-cloud-rain',state:'hit',pill:'Da',val:start,
-      sub:(when==='danes'?'':'jutri ')+'do '+(sameDay?'':'jutri ')+end,meta:mm>=0.1?mmTxt:'verjetnost '+p+' %',
+      sub:(when==='danes'?'':'jutri ')+'do '+(sameDay?'':'jutri ')+end,meta:mm>=0.1?mmTxt:'verjetnost '+p+'\u00A0%',
       head:(i0===0?`Dež je verjeten že zdaj, do <em>${end}</em>`:`Dež od <em>${start} do ${end}</em>`)+(mm>=0.1?`, skupaj ${mmTxt}`:''),
       chart:_qaRainChart(hrs),
-      facts:[['Najmočneje',wet.mm>0?'okoli '+_qaH(wet.t,-1):'—'],['Verjetnost',p+' %'],['Trajanje',(i1-i0+1)+' h']],
+      facts:[['Najmočneje',wet.mm>0?'okoli '+_qaH(wet.t,-1):'—'],['Verjetnost',p+'\u00A0%'],['Trajanje',(i1-i0+1)+' h']],
       src:'Modelska napoved Open-Meteo. Količina je napoved za dolino, ni radarska meritev.'};
   },
   fog(hrs){return _qaCodeTopic(hrs,'fog','Megla','i-cloud-fog',_QA_FOG,'near','Možna','slaba vidnost','vidljivost dobra',

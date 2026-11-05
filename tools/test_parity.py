@@ -607,6 +607,24 @@ def hero_ikona():
 
 
 @test
+def hero_stavek_danes_ali_24_ur():
+    """Stavek pod »Danes«: zvečer je najtoplejša ura že jutri (oznaka na grafu »jutri 13:00«), zato stavek ne sme trditi »Danes do 6 °C«
+    ob oznaki 8,1 °C (4. 11. 2026, audit točka 10). Ura teče od danes 20:00 naprej, vrednost je prob (%) in temp."""
+    pre = ("var _forecastHours=[];function mk(day,h,temp,prob){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+day);"
+           "d.setHours(h);return {t:d,temp:temp,prob:prob||0};}")
+    def run(rows):
+        body = ";".join("_forecastHours.push(mk(%d,%d,%s,%s))" % r for r in rows)
+        return {"expr": "(function(){_forecastHours=[];%s;return forecastPhrase();})()" % body}
+    eve = [(0, h, 6, 0) for h in (20, 21, 22, 23)] + [(1, h, 3 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(0, 24)]
+    eve_rain = [(0, 20, 6, 0), (0, 21, 6, 0), (1, 1, 5, 0), (1, 9, 7, 60), (1, 13, 8.1, 60)]
+    morning = [(0, h, 4 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(8, 24)] + [(1, h, 3, 0) for h in range(0, 8)]
+    r = js("app.js", ["forecastPhrase"], [run(eve), run(eve_rain), run(morning)], prelude=pre)
+    check(r[0].startswith("V naslednjih 24 urah do približno 8 °C"), "zvečer vrh jutri: stavek govori o 24 urah", r[0])
+    check("jutri dopoldne možnost dežja" in r[1], "dež jutri ima besedo »jutri«", r[1])
+    check(r[2].startswith("Danes do približno 9 °C"), "zjutraj vrh danes: stavek ostane »Danes«", r[2])
+
+
+@test
 def hero_ikona_noc_in_megla():
     """Ikona stanja: megla/nevihta imata nočno različico (po pravem sončnem zahodu, ne po uri 23-5), oznaka pod
     ikono pa je ista odločitev kot ikona (4. 11. 2026: ob 21. uri je bila ob oznaki »Oblačno« ikona fog-day)."""

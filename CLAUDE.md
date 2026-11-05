@@ -2886,6 +2886,17 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Lestvice vrednosti:** vlaga, veter, tlak in razpon dneva so **ena nevtralna sekvenčna lestvica** (`--sc-bg` iz barve besedila, 10 → 42 %), brez barvnega pomena. Prej pet različnih gradientov (rdeč konec pri vetru je zvenel kot nevarnost, meje so izbira prikaza). **Semantične barve samo tam, kjer obstaja prag: UV** (zeleno → rdeče). Dež je polnilo količine (ena barva), luna upodobitev (temno → osvetljeno). Nova lestvica mora biti v `SCALES` v `tools/test_hero_ploscice.py`.
 - Ni narejeno: višina hero kartice na telefonu (~1,6 zaslona); ploščice so enako visoke kot prej.
 
+### Graf »Danes«, PM₂,₅, megla, tap-cilji, polmeri (5. 11. 2026, audit točke 10–16)
+
+- **Črta grafa nosi barvo temperaturne skale** (`tempColor()` po točkah, vodoravni `linearGradient` `heroSparkLine`), polnilo pod njo je barva zdajšnje temperature (kot številka v glavni ploščici); pika, vodilo in sij prevzamejo barvo izbrane ure (`moveHeroSparkMarker`). Prej: črta modra, številka cian, oznake bele. CSS `.hspark-line` NE sme imeti `stroke` (pravilo bi preglasilo atribut). Graf se ob menjavi teme prerisuje prek `_themeRedraw`.
+- **Stavek pod »Danes«** (`forecastPhrase()`): kadar je vrh naslednjih 24 ur (zaokroženo) višji od današnjega in je jutri, se začne z »V naslednjih 24 urah do približno N °C«, dež dobi besedo »jutri«; sicer ostane »Danes do približno …«. Razlog: zvečer je oznaka grafa pokazala »↑ 8,1° · jutri 13:00« pod »Danes do približno 6 °C«. Test: `test_parity.hero_stavek_danes_ali_24_ur`.
+- **PM₂,₅ Varpolje** ima lestvico (`.hm-scale-pm`, razredi EAQI 10/20/25/50/75 µg/m³ na korenski skali do 100, `pmScalePos()`; meje v CSS so `sqrt(meja/100)`, preverja `test_pm_tile.py`), vrstico vira in časa (`hs-pm-src`: »sosednja postaja IREICA7 · pred N min«) in **nevtralno številko** (barvo razreda nosita lestvica in besedna oznaka; prej je bila cela številka vijolična). Je gost, ne referenca: IREICA1 ostaja podpis kartice.
+- **Meglene proge** na glavni ploščici (`#hero-canvas`, tip `wisp`): trde elipse so zamenjali mehki radialni prelivi (`_wispGrad`); ostre vodoravne proge ob robu so izgledale kot napaka izrisa.
+- **Tap-cilji ≥ 44 px** (`.hero-b .sc-btn`, povezava MTR), na ≤ 420 px gumba delita vrstico (`flex:1 1 0`), na ≤ 360 px je prvi širši; besedilo se ne prelomi (preverjeno na 320 px).
+- **Polmeri hero kartice so žetoni** `--r-sm` 8 / `--r-md` 14 / `--r-lg` 20 / `--r-pill`: ploščice 20, notranji bloki 14, čipi in gumbi pilula (prej 10, 13, 14, 16, 50px, 99px).
+- **`%` je vezan s številko** (`\u00A0%` v obetih, hitrih vprašanjih in kartici MTR): »verjetnost 0 %« se na 320 px ne lomi.
+- Po spremembi `app.js` ali `style.css`: `npm run minify && node tools/critical_css.mjs`.
+
 ### Graf »Danes«: črta + stolpci po 3 ure, graf sam premika uro (1. 11. 2026)
 
 Filip je izbral varianto C izmed štirih predlogov (kapsule, žareča črta, črta in ikone, nebo). Samo prikaz; podatki in `_fcSliderUpdate()` so nespremenjeni.
