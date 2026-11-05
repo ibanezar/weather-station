@@ -167,6 +167,9 @@ MUTACIJE = [
     ("zenodo: osnutek brez --publish", "tools/zenodo_publish.py", "    if do_publish:\n", "    if True:\n", "test_dataset_export.py"),
     ("čuvaj videza: meja CLS", "tools/visual_watch.mjs", "export const CLS_MAX = 0.10;", "export const CLS_MAX = 0.60;", "test_visual_watch.mjs"),
     ("čuvaj videza: mediana teh tekov", "tools/visual_watch.mjs", "const m = median(v);", "const m = Math.max(...v);", "test_visual_watch.mjs"),
+    ("čuvaj videza: meja INP", "tools/visual_watch.mjs", "export const INP_MAX = 800;", "export const INP_MAX = 5000;", "test_visual_watch.mjs"),
+    ("čuvaj videza: dotik šteje največji dogodek", "tools/visual_watch.mjs", "Math.max(by.get(e.id) || 0, e.d)", "e.d", "test_visual_watch.mjs"),
+    ("čuvaj videza: dogodki brez interactionId", "tools/visual_watch.mjs", "if (e && e.id) by.set", "if (e) by.set", "test_visual_watch.mjs"),
     ("hero stavek: vrh jutri (24 ur)", "app.js", "const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&", "const tomorrowPeak=false&&"),
 ]
 

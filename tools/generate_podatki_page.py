@@ -61,6 +61,14 @@ DOWNLOADS = [
 ]
 
 
+def dataset_meta():
+    try:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "dataset-metadata.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
 def doi_url():
     """DOI zapisa na Zenodo (data/dataset-metadata.json → doi), ali None, dokler zapisa ni (tools/zenodo_publish.py)."""
     try:
@@ -75,7 +83,10 @@ def cite_html(last_date):
     """Kako citirati: trajni DOI, kadar obstaja; sicer naslov strani in datum dostopa. Izmišljenega DOI ni."""
     year = last_date.year if hasattr(last_date, "year") else str(last_date)[:4]
     doi = doi_url()
-    where = f'DOI: <a href="{doi}">{doi}</a>' if doi else 'URL: <a href="https://meteorec.si/podatki/">https://meteorec.si/podatki/</a> (trajni DOI še ni objavljen)'
+    meta = dataset_meta()
+    ver = meta.get("version") or str(last_date)
+    concept = f"https://doi.org/{meta['concept_doi']}" if meta.get("concept_doi") else None
+    where = (f'DOI: <a href="{doi}">{doi}</a>' + (f' (različica {ver}; <a href="{concept}">DOI vseh različic</a>)' if concept else "")) if doi else 'URL: <a href="https://meteorec.si/podatki/">https://meteorec.si/podatki/</a> (trajni DOI še ni objavljen)'
     return f'''  <h2>Kako citirati</h2>
   <p class="archive-intro">Eremita, F. ({year}). <em>Meteorec IREICA1: dnevne meritve vremenske postaje Rečica ob Savinji</em>
   [nabor podatkov, CC BY 4.0]. {where}. Navedite različico (zadnji dan v datoteki) ali datum dostopa. Datoteka ima samo zunanje

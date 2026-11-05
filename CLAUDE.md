@@ -213,7 +213,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   kartica ni šla ven); okno je bilo zato razširjeno do 15:00.
 - Ker FB/IG sliko poberata prek javnega URL-ja, workflow po push-u počaka, da jo
   GitHub Pages res postreže (do 10 minut), preden objavi.
-- **Dnevna zgodba gre ven samo med 6:00 in 7:00** (19. 10. 2026, Filip): napoved dneva popoldne laže (kartica »danes hladneje« ob 11:44). `story_gate.py` `WINDOW_END = 7`; zamujen cron = danes ni kartice. Ker GitHubov cron zamuja 5–7 ur, bo kartica brez `GH_DISPATCH_TOKEN`/Cloudflare sprožilca večinoma izpadla.
+- **Dnevna zgodba gre ven samo med 6:00 in 7:00** (19. 10. 2026, Filip): napoved dneva popoldne laže (kartica »danes hladneje« ob 11:44). `story_gate.py` `WINDOW_END = 7`; zamujen cron = danes ni kartice. Ker GitHubov cron zamuja 5–7 ur, bo kartica brez Cloudflare sprožilca večinoma izpadla. **Žeton `GH_DISPATCH_TOKEN` JE nastavljen (ugotovljeno 5. 11. 2026), a worker sproži samo `vodostaj-forecast.yml`: `daily-story.yml` v `_cronDispatchScheduledWorkflows` ni, zato izpad zgodbe ostaja** (glej razdelek »Zakaj cron zamuja«).
 - **Jutranje teme gredo ven samo zjutraj, večerna kartica pa dan prej** (13. 10. 2026): FROST,
   COLD_MORNING in FOG_MORNING (`MORNING_TOPICS`) so čez dan lagale -- cron zamuja ure in opoldne je
   kartica »Hladno jutro danes« povedala nekaj, kar je že mimo. Zdaj so dovoljene samo pred 10:00
@@ -225,7 +225,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   svežine jutranje zgodbe ne zmoti). Testi: `tools/test_gates.py`.
 - **Izpad zgodbe je pričakovan** (22. 10. 2026, issue #1224): zadnja zgodba je 19. 10., ker okno 6–7 in zamujanje crona
   brez `GH_DISPATCH_TOKEN` dnevni tek zgrešita. Filip je izpade sprejel; prag svežine zgodbe v `check_freshness.py` je
-  zato 168 h (7 dni). Vrnitev rednosti: nastavi `GH_DISPATCH_TOKEN` ali razširi `WINDOW_END`.
+  zato 168 h (7 dni). Vrnitev rednosti: dodaj `daily-story.yml` v `_cronDispatchScheduledWorkflows` (žeton obstaja) ali razširi `WINDOW_END`.
 - **VS_YESTERDAY samo do 7:00** (19. 10. 2026): kartica »Danes bo hladneje kot včeraj« je šla ven ob 11:44, ohladitev pa je bila šele popoldne. Po 7:00 tema odpade (`VS_YESTERDAY_LAST_HOUR`), zgodbo dobi druga tema.
 
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
@@ -412,7 +412,7 @@ Dve strani, ki ju drugje ni: koliko sonca dolina ZARES dobi (hribi zakrijejo kol
   (−173 do −10). Primeri 12. 8., 12. 9., 13. 10.: sevanje raste postopoma, nato skoči ob 8.40, 9.45, 9.20 (model 6.53, 7.19, 7.44). **Ni napaka detektorja in ni gozd na pobočju**: pri `SKIP_M` 30, 60, 90 in 150 m je obzorje Rečice enako, skok pa pride, ko je sonce
   ~25° in več, kar hrib ne naredi. **Domneva (ni dokazana): senzor stoji v senci bližnjega objekta ali drevesa.** Zato `horizons.json` velja za odprt teren, s to postajo ga ni mogoče ne potrditi ne ovreči; stran to pove. Če kdo preveri okolico senzorja (ali
   izmeri sevanje drugje), je to prvi korak. **Ne popravljaj obzorja po tej razliki** (bi bila umerjanje na lokalno senco, ne na dolino).
-- **Neodvisna priča: sosednja postaja Varpolje (5. 11. 2026).** IREICA7 (~1,6 km, isto dno doline) v `station.json` objavlja `solar_radiation_wm2`, a samo TRENUTNO vrednost. Worker zato vsakič v 5-minutnem cronu (`_cronVarpoljeSolar`, 4.–21. ura, `/health` ime `varpolje_solar`) zapiše [čas, sevanje, UV, °C] v R2 (`feedback/varpolje-solar.json`, zadnjih 72 h; `_vpsAppend()` zavrne posnetke, starejše od 15 min, in neveljavne vrednosti), javno `GET /varpolje-solar.json`. `tools/log_varpolje_solar.py` ga enkrat na dan prenese v `data/varpolje-solar-5min.csv` (zadnjih 120 dni), `tools/eval_sonce_varpolje.py` pa z ISTIM detektorjem (`eval_sonce.detect_first_ray`) primerja čas prvega žarka in zapiše `data/sonce-varpolje.json` (`razsodba` šele od 15 dni z obema zapisoma; korak v `test-napovedi-daily.yml`, `continue-on-error`). **Branje razlike IREICA1 − IREICA7:** ≥ +30 min = IREICA1 vidi sonce pozneje, lokalna senca se podpre (model obzorja za odprt teren je lahko pravilen); pod 30 min = obe vidita sonce ob istem času, senca ni lokalna in model obzorja (DEM) ne drži za to dolino; ≤ −30 min = senca je pri Varpolju. Ne dokazuje vzroka (drevo, streha, napaka senzorja). **Sosed je gost**: podatek gre samo v to primerjavo (ne v `history.json`, MTR, semafor), berejo se samo sevanje, UV in temperatura, notranjega bloka worker ne prebere in ne shrani. **Ker je zgodovina šele od uvedbe, rezultat pride po ~15 jasnih jutrih (okoli konca novembra, odvisno od vremena); stran `/sonce-v-dolini/` ga še ne prikazuje** (dodaj blok, ko `razsodba` ni `null`). Test: `tools/test_varpolje_solar.py` (v `parity.yml`, 3 mutacije); vrstica v `REGISTER`.
+- **Neodvisna priča: sosednja postaja Varpolje (5. 11. 2026).** IREICA7 (~1,6 km, isto dno doline) v `station.json` objavlja `solar_radiation_wm2`, a samo TRENUTNO vrednost. Worker zato vsakič v 5-minutnem cronu (`_cronVarpoljeSolar`, 4.–21. ura, `/health` ime `varpolje_solar`) zapiše [čas, sevanje, UV, °C] v R2 (`feedback/varpolje-solar.json`, zadnjih 72 h; `_vpsAppend()` zavrne posnetke, starejše od 15 min, in neveljavne vrednosti), javno `GET /varpolje-solar.json`. `tools/log_varpolje_solar.py` ga enkrat na dan prenese v `data/varpolje-solar-5min.csv` (zadnjih 120 dni), `tools/eval_sonce_varpolje.py` pa z ISTIM detektorjem (`eval_sonce.detect_first_ray`) primerja čas prvega žarka in zapiše `data/sonce-varpolje.json` (`razsodba` šele od 15 dni z obema zapisoma; korak v `test-napovedi-daily.yml`, `continue-on-error`). **Branje razlike IREICA1 − IREICA7:** ≥ +30 min = IREICA1 vidi sonce pozneje, lokalna senca se podpre (model obzorja za odprt teren je lahko pravilen); pod 30 min = obe vidita sonce ob istem času, senca ni lokalna in model obzorja (DEM) ne drži za to dolino; ≤ −30 min = senca je pri Varpolju. Ne dokazuje vzroka (drevo, streha, napaka senzorja). **Sosed je gost**: podatek gre samo v to primerjavo (ne v `history.json`, MTR, semafor), berejo se samo sevanje, UV in temperatura, notranjega bloka worker ne prebere in ne shrani. **Stran `/sonce-v-dolini/` razsodbo že zna prikazati** (`varpolje_html()` v `generate_sonce_page.py`; prazno, dokler `razsodba` ni izdana, besedilo za vse tri izide, brez trditve o vzroku; `test_sonce.py`); generator teče znova takoj za `eval_sonce_varpolje.py` v `test-napovedi-daily.yml`, da razsodba ne zaostane dan. **Ker je zgodovina šele od uvedbe, rezultat pride po ~15 jasnih jutrih (okoli konca novembra, odvisno od vremena).** Test: `tools/test_varpolje_solar.py` (v `parity.yml`, 3 mutacije); vrstica v `REGISTER`.
 - **Zamik na `/jutro-v-dolini/` je izmerjen na isti postaji, zato vsebuje to senco** (zamik od izračunanega prvega žarka do +3 °C); velja za IREICA1, drugje bi bil lahko krajši. Stran to pove.
 - **`/jutro-v-dolini/`** (`generate_jutro_page.py`, `zima-forecast.yml`, `continue-on-error`): napoved = prvi žarek (teren) + **izmerjen** zamik do dviga za 3 °C nad jutranjim minimumom (`tools/eval_jutro.py` → `data/jutro-zamik.json`).
   Izmerjeno na 87 jasnih, mirnih jutrih (13. 7.–2. 11. 2026): povprečno ~1,5 h, odstopanje ~0,5 h. Jasno in mirno za statistiko = dnevni razpon ≥ 10 °C in veter 0–7 h < 3 km/h (izmerjeno); za napoved oblačnost 3–10 h < 30 % in modelski veter < 6 km/h (model precenjuje veter ~2×).
@@ -498,8 +498,8 @@ po polnoči preveri `tools/verify_storm_map.py` (`storm-verify.yml`, 01:20 UTC):
 urniku šele 11:00–12:00 UTC (= 13:00–14:00 po naši uri), gate pa spusti samo
 6:00–8:00, zato vsak dan »uspe« brez dela; zadnja karta je `2026-08-31`. Varovalka v
 workerju (`_cronDispatchScheduledWorkflows`) ne naredi nič: `workflow_dispatch` ni
-bilo od 31. 8. niti enega, torej **secret `GH_DISPATCH_TOKEN` ni nastavljen**
-(`wrangler secret put GH_DISPATCH_TOKEN`, fine-grained PAT, Actions: read & write).
+bilo od 31. 8. niti enega, torej **secret `GH_DISPATCH_TOKEN` takrat ni bil nastavljen**
+(`wrangler secret put GH_DISPATCH_TOKEN`, fine-grained PAT, Actions: read & write). **Zdaj je nastavljen** (5. 11. 2026: `/health` → `dispatch` ok, `vodostaj-forecast.yml` se sproži na 30 min od ≥ 2. 10.).
 Hkrati so bili njeni termini napačni (6:10–7:40 **UTC** je 7:10–9:40 po naši uri,
 poleti vsi zunaj okna) — popravljeno na 4:10/4:40/5:10/5:40 UTC. Brez žetona se
 ne bo spremenilo nič: preverjanje dobi napoved šele, ko karta nastane v svojem oknu.
@@ -782,6 +782,7 @@ PageSpeed (mobile) je za `/` javil 1,9 s zadržanega prvega izrisa (`style.min.c
 Smoke test pove, da stran obstaja, varuh svežine, da so podatki sveži; **videza ni gledal nihče** in je CLS 0,16–0,21 na namizju (zavihki, glej zgoraj) visel teden dni. `tools/visual_watch.mjs` meri na ŽIVI strani (Playwright, CDP 200 kB/s + 150 ms + CPU 4×): CLS na 390 in 1280 px (**mediana treh tekov**, meja 0,10), vodoravni razliv pri 360 px na šestih ključnih straneh in axe (serious/critical) na `.hero-b` v obeh temah. Ob preseženi meji workflow odpre issue `visual-fail` (osveži opis, brez komentarja ob vsakem teku), ko je spet v redu, ga zapre. Teče po vsaki objavi Pages in dnevno ob 08:50 UTC. Odločitveno logiko (mediana, meje) preverja `tools/test_visual_watch.mjs` (v `parity.yml`).
 
 - **Prvi zagon je takoj našel drugo napako: CLS 0,172 na telefonu.** Vzrok je `critical_css.mjs`: `.hero-b .hero-left{display:contents}` nima škatle (`getClientRects()` je prazen), zato ga je generator štel za neprikazanega in pravilo je manjkalo v kritičnem CSS. Do prihoda celotnega CSS je bila glavna ploščica flex (159 px), potem mreža z `grid-area` (180 px); čip »od včeraj« je skočil 38 px, vse pod njim tudi. Zdaj `visible()` šteje `display:contents` element za viden, če je viden njegov prvi otrok (**pravilo velja za vsak nov `display:contents` element nad pregibom**). CLS na telefonu: 0,172 → 0,011–0,040. Test: `test_hero_ploscice.py` zahteva obe pravili tudi v kritičnem CSS.
+- **Odzivnost (INP, 5. 11. 2026)**: četrta meritev v čuvaju. Štirje dotiki pod CPU 4× (`INP_STEPS`: »Pokaži podrobnosti«, zavihka MTR in Zdaj, spet podrobnosti), najdaljši dotik (`worstInteraction()`: dogodki z istim `interactionId` so en dotik), mediana treh tekov. **Prvi izmerek: telefon 352–528 ms, namizje 568–640 ms; zavihek MTR je najpočasnejši (~560 ms)**, kar je po CWV »slabo« (> 500 ms), čeprav je pod 4× omejitvijo (srednji telefon). Meja issue-ja `INP_MAX` = 800 ms je zato **varovalka pred poslabšanjem, ne cilj**; nad `INP_POOR` = 500 ms poročilo samo opozori. Zmanjšanje (npr. odlog dela ob preklopu zavihka) je ločena naloga: najprej profil `switchTab()`. Ob izboljšavi spusti `INP_MAX`.
 - Čuvaj je namerno **samo živa stran** (lokalni strežnik brez stiskanja ne reproducira premikov). Meja 0,10 je Core Web Vitals »dobro«; ob dežju in prihodu radarja (nowcast nad hero kartico, Filipova odločitev) lahko telefon preseže mejo za en dan: to je vsebina, ne napaka v kodi, in se issue zapre sam.
 
 ### Delo glavne niti in prvi izris naslovne strani (6. 10. 2026, drugi krog)
@@ -1411,7 +1412,7 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
   strani (`inject_forecast.py` …) še vedno berejo zamrznjeno** — namerno.
 - **Računa se v Pythonu, zato Cloudflare cron ne more nadomestiti GitHubovega** (druga kopija modela v workerju
   bi se razšla, kot opozarja `daily_features`). Cloudflare bi lahko le sprožil workflow, to pa terja
-  `GH_DISPATCH_TOKEN`, ki ni nastavljen. GitHubov cron združuje teke, razmik med osvežitvami je torej neenakomeren.
+  `GH_DISPATCH_TOKEN` (nastavljen, a se zdaj uporablja samo za `vodostaj-forecast.yml`; živa osvežitev MTR bi terjala nov vnos v worker). GitHubov cron združuje teke, razmik med osvežitvami je torej neenakomeren.
 - Model je naučen na jutranjem zajemu D+1; popoldanski vhodi so svežji, a **točnosti po poznejših osvežitvah ne
   merimo**. Če bi jo želeli, bi bilo treba živo napoved posebej beležiti (ne na semafor).
 - Varuh svežine ima vrstico »Napoved MTR (živa)«, test: `tools/test_mtr_live.py` (v `parity.yml`).
@@ -2581,9 +2582,7 @@ Kar je zdaj narejeno:
   posnetkom** (cron `30 6-7 * * *`: `_cronSnapshotArsoRr24h`, nato dispatch
   `precip-map.yml`, beat `dispatch_precip`), ne skupni dispatch ob 4:10–5:40 UTC.
 - **Cloudflare varovalka** (`_cronDispatchScheduledWorkflows`) kliče `storm-map.yml` in
-  `vodostaj-forecast.yml` (padavinske karte ne več — glej zgoraj). Še vedno rabi `GH_DISPATCH_TOKEN` — brez njega ne naredi nič (od
-  31. 8. ni bilo niti enega `workflow_dispatch`); pozni tek zato ni olajšava, ampak
-  obvezno dopolnilo, dokler žeton ni nastavljen.
+  `vodostaj-forecast.yml` (padavinske karte ne več — glej zgoraj). Rabi `GH_DISPATCH_TOKEN`; ta je od ≥ 2. 10. nastavljen (5. 11. 2026 preverjeno), `storm-map.yml` je na pavzi, zato dejansko teče samo `vodostaj-forecast.yml`. Pozni tek ostaja dopolnilo za delovne tokove, ki jih worker ne sproži (npr. `daily-story.yml`).
 - **Varuh svežine** `tools/check_freshness.py` (`freshness-watch.yml`, 06:40 in 18:40
   UTC): gleda sam izdelek (`REGISTER`: datoteka, polje s časom, največja starost) in
   ob zastarelem odpre issue z oznako `stale-output`, ko je spet vse sveže, ga zapre.
@@ -2631,8 +2630,8 @@ Vsako opravilo v `scheduled()` teče prek `_cronBeat()`, ki zapiše KV `cron:hea
 opravilo zastara (`CRON_JOBS`: 20 min za petminutna, 30 h za dnevna) ali javi napako.
 Opravilo, ki ob napaki samo vrne, mora vrniti `{ok:false, reason}` (ali `false`) — prazen
 `catch (_) {}` je ravno to, kar je skrilo manjkajoči `GH_DISPATCH_TOKEN`. Nov cron =
-vnos v `CRON_JOBS` + `_cronBeat` v `scheduled()`. Prikazano: `dispatch` bo javil »manjka
-GH_DISPATCH_TOKEN«, dokler žeton ni nastavljen.
+vnos v `CRON_JOBS` + `_cronBeat` v `scheduled()`. Prikazano: `dispatch` javi »manjka
+GH_DISPATCH_TOKEN«, kadar žeton ni nastavljen (zdaj je).
 
 ### Vrstni red workflowov ni zagotovljen — datoteko drugega workflowa preberi po datumu (1. 10. 2026)
 

@@ -182,6 +182,38 @@ def chart(places):
 
 
 VERIF_PATH = os.path.join(seo.ROOT, "data", "sonce-preverjanje.json")
+VARPOLJE_PATH = os.path.join(seo.ROOT, "data", "sonce-varpolje.json")
+
+
+def varpolje_html():
+    """Primerjava s sosednjo postajo Varpolje (IREICA7, ~1,6 km). Prazno, dokler razsodba ni izdana (`razsodba` = null):
+    brez dovolj dni z obema zapisoma stran o sosedu ne trdi nič."""
+    try:
+        with open(VARPOLJE_PATH, encoding="utf-8") as f:
+            v = json.load(f)
+    except (OSError, ValueError):
+        return ""
+    j = v.get("jutro", {})
+    verdict = v.get("razsodba")
+    if verdict not in ("ireica1_pozneje", "podobno", "ireica1_prej") or j.get("n", 0) < v.get("min_dni", 15):
+        return ""
+    prag = ac.num(v.get("prag_min", 30), 0)
+    stat = (f'Na {j["n"]} jasnih jutrih sem čas prvega hitrega skoka sevanja na postaji IREICA1 primerjal s sosednjo postajo '
+            f'Varpolje (IREICA7, približno 1,6 km stran, isto dno doline). Mediana razlike je '
+            f'<strong>{ac.num(j["mediana_min"], 0)} min</strong> (IREICA1 minus Varpolje; pozitivno pomeni, da sonce na IREICA1 posije pozneje), '
+            f'razpon {ac.num(j["min_min"], 0)} do {ac.num(j["max_min"], 0)} min.')
+    if verdict == "ireica1_pozneje":
+        branje = (f'Razlika je večja od {prag} min: sosednja postaja vidi sonce prej, torej je senca pri IREICA1 najverjetneje lokalna '
+                  f'(drevo, streha ali drug bližnji objekt), izračun obzorja za odprt teren pa je lahko pravilen.')
+    elif verdict == "ireica1_prej":
+        branje = (f'Razlika je pod −{prag} min: sonce prej posije na IREICA1, senca je torej pri postaji Varpolje. '
+                  f'Zamik na IREICA1 zato ni lokalna senca te postaje.')
+    else:
+        branje = (f'Razlika je manjša od {prag} min: obe postaji vidita sonce ob približno istem času, senca torej ni lokalna za IREICA1, '
+                  f'izračun obzorja iz digitalnega modela pa za to dolino ne drži.')
+    return (f'  <p class="archive-intro">{stat} {branje} Primerjava ne dokazuje vzroka in ni umerjanje obzorja. '
+            f'Sosednja postaja je gost: njene meritve uporabljam samo za to primerjavo, ne v zgodovini, modelu ali semaforju točnosti. '
+            f'Hvala prijatelju iz Varpolja, ki svoje podatke objavlja.</p>')
 
 
 def validation_html():
@@ -300,6 +332,7 @@ def build_body(places, data_ref):
 
   <h2>Preverjanje</h2>
 {validation_html()}
+{varpolje_html()}
   <p class="muted-note">Nadaljevanje: <a href="/jutro-v-dolini/">kdaj se po prvem žarku dolina ogreje</a> ·
   <a href="/zima/">MeteoZima</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a>.</p>'''
 
