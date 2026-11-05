@@ -54,6 +54,14 @@ jobs:
           python3 tools/eval_sonce.py
           python3 tools/generate_sonce_page.py
 
+      # Sevanje sosednje postaje (IREICA7, Varpolje): worker ga vsakih 5 min zapiše v R2 (72 h), tu ga prenesemo in primerjamo
+      # čas prvega žarka z IREICA1 (domneva »senzor stoji v senci«, CLAUDE.md). Sosed je gost: samo ta primerjava.
+      - name: Prenesi sevanje soseda in primerjaj prvi žarek obeh postaj
+        continue-on-error: true
+        run: |
+          python3 tools/log_varpolje_solar.py
+          python3 tools/eval_sonce_varpolje.py
+
       - name: Izračunaj metrike
         run: python3 tools/compute_forecast_test_metrics.py
 
@@ -68,7 +76,7 @@ jobs:
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           git add data/forecast-archive.csv data/forecast-forward-log.csv \
-                  data/hourly-observations.csv data/ensemble-forward-log.csv data/profile-forward-log.csv data/solar-5min.csv data/sonce-preverjanje.json sonce-v-dolini/ data/test-napovedi.json test-napovedi/ primerjava-modelov/
+                  data/hourly-observations.csv data/ensemble-forward-log.csv data/profile-forward-log.csv data/solar-5min.csv data/sonce-preverjanje.json data/varpolje-solar-5min.csv data/sonce-varpolje.json sonce-v-dolini/ data/test-napovedi.json test-napovedi/ primerjava-modelov/
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "test-napovedi: dnevni zajem $(date -u +%Y-%m-%d) [skip ci]"
           for i in 1 2 3 4 5; do

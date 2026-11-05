@@ -65,6 +65,8 @@ REGISTER = [
      "forecast-verify.yml"),
     ("Test napovedi", "data/test-napovedi.json", "ts", "generated_at", 36,
      "test-napovedi-daily.yml"),
+    ("Sevanje soseda (primerjava prvega žarka)", "data/sonce-varpolje.json", "date", "generated", 72,
+     "test-napovedi-daily.yml → log_varpolje_solar.py (vir: worker cron varpolje_solar)"),
     ("Gobarska napoved", "gobarska-napoved/index.json", "ts", "generated", 36,
      "gobe-forecast.yml"),
     ("MeteoGasilec", "meteogasilec/index.json", "ts", "generated", 36,

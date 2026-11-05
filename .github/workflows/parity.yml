@@ -215,3 +215,6 @@ jobs:
 
       - name: Test odločitvene logike čuvaja videza
         run: node tools/test_visual_watch.mjs
+
+      - name: Test beleženja sevanja soseda in primerjave prvega žarka
+        run: python3 tools/test_varpolje_solar.py

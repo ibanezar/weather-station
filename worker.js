@@ -1110,6 +1110,42 @@ async function _oceneNotify(env, data, now) {
   return { checked: subs.length, sent, pruned: dead.length };
 }
 
+// ── Sevanje sosednje postaje (IREICA7, Varpolje): priča za preizkus »senzor IREICA1 stoji v senci« ──
+// Model obzorja se na IREICA1 ne ujema (sevanje skoči mediano +126 min po izračunanem prvem žarku; CLAUDE.md, »Sonce v dolini«).
+// Domneva je senca bližnjega objekta. Varpolje (~1,6 km, isto dno doline) objavlja sončno sevanje, a samo TRENUTNO vrednost,
+// zato ga vsakih 5 minut zapišemo sami in `tools/eval_sonce_varpolje.py` primerja čas prvega žarka obeh postaj.
+// Sosed je GOST: podatek gre samo v to primerjavo, ne v history.json, ne v učenje, ne na semafor. Berejo se TRIJE ključi
+// (sevanje, UV, temperatura); notranjega bloka ne preberemo in ne shranimo (pravilo z vrha CLAUDE.md).
+const VPS_KEY = "feedback/varpolje-solar.json";
+const VPS_HOLD_MS = 72 * 3600000;            // worker hrani zadnje 3 dni; dnevni tek v repozitoriju jih prenese
+const VPS_MAX_AGE_MS = 15 * 60000;           // posnetek, starejši od 15 min, ni meritev ob tem času
+const VPS_HOUR_FROM = 4, VPS_HOUR_TO = 21;   // lokalna ura; ponoči sevanja ni, zapisov ne kopičimo
+// Čista funkcija (tools/test_varpolje_solar.py): doda posnetek na konec seznama [t_unix, W/m², UV, °C] ali vrne null (ni novega).
+function _vpsAppend(list, vp, nowMs) {
+  const cur = vp && vp.current, upd = vp && vp.updated_utc ? Date.parse(vp.updated_utc) : NaN;
+  if (!cur || !isFinite(upd) || nowMs - upd > VPS_MAX_AGE_MS) return null;
+  const sol = Number(cur.solar_radiation_wm2);
+  if (cur.solar_radiation_wm2 == null || !isFinite(sol) || sol < 0 || sol > 1600) return null;
+  const t = Math.round(upd / 1000);
+  const arr = Array.isArray(list) ? list.slice() : [];
+  if (arr.length && arr[arr.length - 1][0] >= t) return null;       // isti (ali starejši) posnetek
+  const uv = Number(cur.uv_index), tc = Number(cur.temp_c);
+  arr.push([t, Math.round(sol * 10) / 10, cur.uv_index == null || !isFinite(uv) ? null : uv, cur.temp_c == null || !isFinite(tc) ? null : Math.round(tc * 10) / 10]);
+  const from = Math.round((nowMs - VPS_HOLD_MS) / 1000);
+  return arr.filter(x => x[0] >= from);
+}
+async function _cronVarpoljeSolar(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2) return { ok: false, reason: "ni shrambe" };
+  const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI < VPS_HOUR_FROM || hourSI >= VPS_HOUR_TO) return;
+  const res = await fetch(VARPOLJE_URL, { headers: { "Accept": "application/json" }, cf: { cacheTtl: 120 } });
+  if (!res.ok) return { ok: false, reason: "Varpolje HTTP " + res.status };
+  const vp = await res.json();
+  let list = []; try { const o = await r2.get(VPS_KEY); list = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const next = _vpsAppend(list, vp, Date.now());
+  if (next) await r2.put(VPS_KEY, JSON.stringify(next), { httpMetadata: { contentType: "application/json" } });
+}
+
 async function _cronCheckOcene(env) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
   const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
@@ -3299,7 +3335,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 // 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
   thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20, ocene: 20,
-  lightning: 20, radar_composite: 20, icon_cells: 20,
+  lightning: 20, radar_composite: 20, icon_cells: 20, varpolje_solar: 20,
   score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
 const CRON_BEAT_WRITE_MS = 15 * 60000;
@@ -4083,6 +4119,7 @@ export default {
     ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
     ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
     ctx.waitUntil(_cronBeat(env, "migrena", () => _cronCheckMigrena(env)));
+    ctx.waitUntil(_cronBeat(env, "varpolje_solar", () => _cronVarpoljeSolar(env)));
     ctx.waitUntil(_cronBeat(env, "ocene", () => _cronCheckOcene(env)));        // sam se omeji na enkrat na uro   // sam se omeji na enkrat na uro
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
     // teh opravil (en klic v Durable Object) in edino, katerega izpad pomeni
@@ -5232,6 +5269,16 @@ export default {
             { status: 502, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } }
           );
         }
+      }
+
+      // ── /varpolje-solar.json ─────────────────────────────────
+      // Zadnjih 72 h sevanja sosednje postaje (zapisuje _cronVarpoljeSolar), samo sevanje/UV/temperatura. Bere ga
+      // tools/log_varpolje_solar.py (dnevni korak v test-napovedi-daily.yml). Navedba vira: varpolje.si (IREICA7).
+      if (path === "/varpolje-solar.json") {
+        let rows = []; try { const o = env?.PHOTOS_R2 ? await env.PHOTOS_R2.get(VPS_KEY) : null; rows = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+        return new Response(JSON.stringify({ ok: true, source: "varpolje.si (IREICA7)", cols: ["t_unix", "solar_wm2", "uv", "temp_c"], rows }), {
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+        });
       }
 
       // ── /modeli-karta.json ───────────────────────────────────

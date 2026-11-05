@@ -1,0 +1,14 @@
+{
+ "generated": "2026-11-05",
+ "dni_z_obema": 0,
+ "jutro": {
+  "n": 0
+ },
+ "vecer": {
+  "n": 0
+ },
+ "min_dni": 15,
+ "prag_min": 30.0,
+ "razsodba": null,
+ "opomba": "IREICA1 − IREICA7 (čas prvega žarka); pozitivno = IREICA1 vidi sonce pozneje"
+}
