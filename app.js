@@ -480,7 +480,7 @@ function drawTempChart(data){
   for(let i=0;i<=5;i++){const y=pad.t+i/5*ch,val=yMax-(i/5*(yMax-yMin));
     mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1','stroke-dasharray':'4,4'});
     const t=mkSVG(svg,'text',{x:pad.l-6,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
-    t.textContent=val.toFixed(1)+'°';}
+    t.textContent=fmt(val,1)+'°';}
   data.forEach((d,i)=>{if(d.time.getHours()%4===0){const h=d.time.getHours(),t=mkSVG(svg,'text',{x:xS(i),y:VH-4,'text-anchor':'middle','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=(h<10?'0':'')+h+':00';}});
 
   const pts=data.map((d,i)=>({x:xS(i),y:yS(d.temp)})),lp=smoothPath(pts);
@@ -523,7 +523,7 @@ function drawRainChart(data){
     `<filter id="rblur"><feGaussianBlur stdDeviation="0.8"/></filter>`;
   for(let i=0;i<=3;i++){const y=pad.t+i/3*ch,val=maxR*(1-i/3);
     mkSVG(svg,'line',{x1:pad.l,x2:VW-pad.r,y1:y,y2:y,stroke:CC.grid,'stroke-width':'1','stroke-dasharray':'4,4'});
-    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=val.toFixed(1);}}
+    if(val>0){const t=mkSVG(svg,'text',{x:pad.l-5,y:y+4,'text-anchor':'end','font-size':'9',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=fmt(val,1);}}
   const bw=Math.max(3,(cw/data.length)*.72),xS=i=>pad.l+i/data.length*cw;
   const tipDot=mkSVG(svg,'circle',{cx:0,cy:0,r:'4',fill:CC.rainBar,stroke:'white','stroke-width':'1.5',opacity:'0',style:'pointer-events:none'});
   const tipLine=mkSVG(svg,'line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
@@ -780,7 +780,7 @@ function renderClimateAnomaly(){
     const d=val-norm;
     const cls=Math.abs(d)<(unit==='mm'?2:0.4)?'anom-zero':(d>0?(invert?'anom-neg':'anom-pos'):(invert?'anom-pos':'anom-neg'));
     const sign=d>0?'+':'';
-    return{bad:false,d,cls,sign,txt:sign+d.toFixed(dec)};
+    return{bad:false,d,cls,sign,txt:(d>0?'+':d<0?'\u2212':'')+Math.abs(d).toFixed(dec).replace('.',',')};
   };
   const mkItemHtml=(it,lbl,unit)=>it.bad
     ?'<div class="anom-item"><div class="anom-val anom-zero">—</div><div class="anom-lbl">ni podatka</div></div>'
@@ -792,9 +792,9 @@ function renderClimateAnomaly(){
   html+=mkItemHtml(it3,'Padavine glede na normalo','mm');
   html+='</div>';
   const warmer=!it1.bad&&it1.d>0;
-  html+='<div class="anom-note">Normala za '+new Date().toLocaleDateString('sl',{day:'numeric',month:'long'})+' (±3 dni, '+yrs+' let): <b style="color:var(--text)">'+normTHi.toFixed(1)+'°C</b> Tmax, <b style="color:var(--text)">'+normRain.toFixed(1)+' mm</b> dež.'+(it1.bad?'':' Danes je '+(Math.abs(it1.d)<0.4?'skoraj točno povprečno':(warmer?'topleje':'hladneje'))+'.')+'</div>';
+  html+='<div class="anom-note">Normala za '+new Date().toLocaleDateString('sl',{day:'numeric',month:'long'})+' (±3 dni, '+yrs+' let): <b style="color:var(--text)">'+fmt(normTHi,1)+'\u00A0°C</b> Tmax, <b style="color:var(--text)">'+fmt(normRain,1)+'\u00A0mm</b> dež.'+(it1.bad?'':' Danes je '+(Math.abs(it1.d)<0.4?'skoraj točno povprečno':(warmer?'topleje':'hladneje'))+'.')+'</div>';
   body.innerHTML=html;
-  badge.textContent=it1.bad?'—':(it1.d>0?'+':'')+it1.d.toFixed(1)+'°C';
+  badge.textContent=it1.bad?'—':(it1.d>0?'+':it1.d<0?'\u2212':'')+fmt(Math.abs(it1.d),1)+'\u00A0°C';
 }
 
 // ── 2. Streak tracker ────────────────────────────────────
@@ -1811,7 +1811,7 @@ async function _fetchComingUpOnce(){
             '<span class="cu-dtl">'+Math.round(tLo)+'°</span></div>'+
           '<div class="cu-range" aria-hidden="true"><i style="left:'+l0.toFixed(1)+'%;width:'+(l1-l0).toFixed(1)+'%;background:linear-gradient(90deg,'+tempColor(tLo)+','+tempColor(tHi)+')"></i></div>'+
           (rain>0.3
-            ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+rain.toFixed(1)+' mm'+(prob?' · '+prob+'\u00A0%':'')+'</span>'
+            ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+fmt(rain,1)+'\u00A0mm'+(prob?' · '+prob+'\u00A0%':'')+'</span>'
             :'<span class="cu-drain cu-dry">'+_ico('sun')+' suho</span>')+
           '<div class="cu-prob-bar"><div class="cu-prob-fill" style="width:'+prob+'%"></div></div>';
         daysEl.appendChild(div);
@@ -4376,7 +4376,7 @@ function renderPastDays(){
       <span class="cu-ddesc">${cond.desc}${w!=null&&w>=30?' · '+Math.round(w)+' km/h':''}</span>
       <div class="cu-dtemp"><span class="cu-dhi" style="color:${h!=null?tempColor(h):'inherit'}">${h!=null?Math.round(h)+'°':'—'}</span><span class="cu-dtl">${l!=null?Math.round(l)+'°':'—'}</span></div>
       <div class="cu-range" aria-hidden="true"><i style="left:${l0.toFixed(1)}%;width:${(l1-l0).toFixed(1)}%;background:linear-gradient(90deg,${tempColor(lo??0)},${tempColor(hi??0)})"></i></div>
-      ${rain>0.3?`<span class="cu-drain">${_ico('cloud-rain')} ${rain.toFixed(1)} mm</span>`:`<span class="cu-drain cu-dry">${_ico('sun')} suho</span>`}
+      ${rain>0.3?`<span class="cu-drain">${_ico('cloud-rain')} ${fmt(rain,1)}\u00A0mm</span>`:`<span class="cu-drain cu-dry">${_ico('sun')} suho</span>`}
     </div>`;
   }).join('');
   wrap.querySelectorAll('.pd-card').forEach(c=>c.addEventListener('keydown',e=>{
@@ -4395,7 +4395,7 @@ function _dayCardHtml(o){
   }
   const temp=(hi!=null?'<span class="cu-dhi" style="color:'+tempColor(hi)+'">'+Math.round(hi)+'°</span>':'')+(lo!=null?'<span class="cu-dtl">'+Math.round(lo)+'°</span>':'');
   const rain=o.rain==null?'':(o.rain>0.3
-    ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+o.rain.toFixed(1)+' mm</span>'
+    ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+fmt(o.rain,1)+'\u00A0mm</span>'
     :'<span class="cu-drain cu-dry">'+_ico('sun')+' suho</span>');
   return '<div class="cu-day'+(o.cls?' '+o.cls:'')+'"'+(o.wx?' data-wx="'+o.wx+'"':'')+(o.attrs||'')+'>'
     +'<span class="cu-scene" aria-hidden="true"></span>'
@@ -4964,7 +4964,8 @@ function drawWindTrend(observations){
   const days=Object.values(byDay).sort((a,b)=>a.day.localeCompare(b.day)).slice(-7);
   if(!days.length)return;
   svg.innerHTML='';
-  const VW=220,VH=90,pad={t:10,r:8,b:28,l:8};
+  const VW=Math.max(240,Math.min(480,Math.round(svg.clientWidth||300))),VH=Math.round(VW*0.42),pad={t:16,r:8,b:26,l:8};
+  svg.setAttribute('viewBox','0 0 '+VW+' '+VH);
   const cw=VW-pad.l-pad.r,ch=VH-pad.t-pad.b;
   const maxV=Math.max(...days.map(d=>d.max),5);
   const bw=Math.max(4,(cw/days.length)*0.55);
@@ -4977,11 +4978,11 @@ function drawWindTrend(observations){
     const col=d.max<10?'#60a5fa':d.max<30?'#4d9ff8':'#a78bfa';
     mk('rect',{x:(x-bw/2).toFixed(1),y:(pad.t+ch-h).toFixed(1),width:bw.toFixed(1),height:h.toFixed(1),fill:col,rx:'2',opacity:'.85'});
     // Value label on top
-    if(d.max>0){const t=mk('text',{x:x.toFixed(1),y:(pad.t+ch-h-3).toFixed(1),'text-anchor':'middle','font-size':'7',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=d.max.toFixed(0);}
+    if(d.max>0){const t=mk('text',{x:x.toFixed(1),y:(pad.t+ch-h-3).toFixed(1),'text-anchor':'middle','font-size':'10',fill:CC.label,'font-family':'JetBrains Mono,monospace'});t.textContent=d.max.toFixed(0);}
     // Day label
     const date=new Date(d.day+'T12:00:00');
     const lbl=date.toLocaleDateString('sl',{weekday:'short'}).slice(0,2);
-    const t2=mk('text',{x:x.toFixed(1),y:VH-10,'text-anchor':'middle','font-size':'8',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
+    const t2=mk('text',{x:x.toFixed(1),y:VH-8,'text-anchor':'middle','font-size':'10',fill:CC.label,'font-family':'JetBrains Mono,monospace'});
     t2.textContent=lbl;
   });
 }
@@ -5003,13 +5004,13 @@ function drawWindDist(observations){
   cats.forEach(c=>{
     const pct=Math.round(c.n/total*100);
     const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:.4rem;font-size:.74rem';
+    row.style.cssText='display:flex;align-items:center;gap:.5rem;font-size:var(--fs-sm)';
     row.innerHTML=
-      '<div style="width:60px;color:var(--muted);flex-shrink:0">'+c.lbl+'</div>'+
+      '<div style="width:7.6rem;color:var(--muted);flex-shrink:0;white-space:nowrap">'+c.lbl+'</div>'+
       '<div style="flex:1;height:5px;background:var(--rain-track);border-radius:3px;overflow:hidden">'+
         '<div style="height:100%;width:'+pct+'%;background:'+c.col+';border-radius:3px;transition:width .8s ease"></div>'+
       '</div>'+
-      '<div style="width:28px;text-align:right;font-family:JetBrains Mono,monospace;color:var(--muted)">'+pct+'%</div>';
+      '<div style="width:3.2rem;text-align:right;font-family:Inter,sans-serif;font-variant-numeric:tabular-nums;color:var(--muted)">'+pct+'\u00A0%</div>';
     el.appendChild(row);
   });
 }
@@ -5089,8 +5090,8 @@ function drawWindRose(observations){
   const calm=usingClimo?null:Math.round(observations.filter(o=>(o.metric?.windspeedAvg??o.metric?.windSpeed??0)<2).length/(observations.length||1)*100);
   const el=document.getElementById('wind-rose-stats');
   if(el){
-    el.innerHTML=`Prevladujoča smer: <strong style="color:var(--text)">${labels[dom]}</strong> (${domPct}% časa)`
-      +(calm!=null?`<br>Mirno: ${calm}% časa`:'')
+    el.innerHTML=`Prevladujoča smer: <strong style="color:var(--text)">${labels[dom]}</strong> (${domPct}\u00A0% časa)`
+      +(calm!=null?`<br>Mirno: ${calm}\u00A0% časa`:'')
       +(usingClimo?`<br><span style="font-size:.64rem;opacity:.8">📊 Klimatologija 2019–2026 (premalo svežih meritev)</span>`:'');
   }
 
@@ -6044,7 +6045,7 @@ function calcMoon(date=new Date()){
 }
 function applyMoon(){
   const m=calcMoon();
-  {const me=document.getElementById('moon-emoji');if(me)me.innerHTML=moonGlyph(+m.age);}set('moon-phase',m.phase);set('moon-illum',m.illum);set('moon-age',m.age);
+  {const me=document.getElementById('moon-emoji');if(me)me.innerHTML=moonGlyph(+m.age);}set('moon-phase',m.phase);set('moon-illum',m.illum);set('moon-age',fmt(m.age,1));
   const nx=document.getElementById('moon-next');
   if(nx)nx.innerHTML='Polna čez <b>'+m.toFull+'</b> dni · Mlaj čez <b>'+m.toNew+'</b> dni';
 }
@@ -6569,11 +6570,11 @@ async function fetchClimateComparison(){
     // Stats row
     let statsHtml='<div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1rem">';
     if(curAvgT!=null&&histAvgT!=null){
-      const dT=(curAvgT-histAvgT),sT=dT>=0?'+':'';
+      const dT=(curAvgT-histAvgT),sT=dT>=0?'+':'\u2212';
       const col=Math.abs(dT)<1?'var(--muted)':dT>0?'var(--red)':'var(--blue)';
       statsHtml+='<div><div class="chart-range">Povp. temp. (1.–'+endDay+'.)</div>'
-        +'<div style="font-size:1.1rem;font-family:JetBrains Mono,monospace;color:var(--text)">'+curAvgT.toFixed(1)+'°C'
-        +' <span style="font-size:.78rem;color:'+col+'">'+sT+dT.toFixed(1)+'° vs. povp.</span></div></div>';
+        +'<div style="font-size:1.1rem;font-family:JetBrains Mono,monospace;color:var(--text)">'+fmt(curAvgT,1)+'\u00A0°C'
+        +' <span style="font-size:.78rem;color:'+col+'">'+sT+fmt(Math.abs(dT),1)+'° vs. povp.</span></div></div>';
       // Kartica "Ta mesec" (renderMonthCard) nima lastnega vira za odstopanje
       // od povprečja — ponovno uporabi izračun te funkcije.
       _climAnomalyT=dT;_climAnomalyYears=histOk.length;
@@ -6584,7 +6585,7 @@ async function fetchClimateComparison(){
       const dR=((curR-histAvgR)/histAvgR*100),sR=dR>=0?'+':'';
       const colR=Math.abs(dR)<10?'var(--muted)':dR>0?'var(--blue)':'var(--amber)';
       statsHtml+='<div><div class="chart-range">Padavine</div>'
-        +'<div style="font-size:1.1rem;font-family:JetBrains Mono,monospace;color:var(--text)">'+curR.toFixed(1)+' mm'
+        +'<div style="font-size:1.1rem;font-family:JetBrains Mono,monospace;color:var(--text)">'+fmt(curR,1)+'\u00A0mm'
         +' <span style="font-size:.78rem;color:'+colR+'">'+sR+dR.toFixed(0)+'% vs. povp.</span></div></div>';
     }
     statsHtml+='</div>';
@@ -6608,7 +6609,7 @@ async function fetchClimateComparison(){
           +'<div style="flex:1;height:'+hR+'%;background:'+rCol+';border-radius:3px 3px 0 0;min-height:3px;transition:height .8s"></div>'
           +'</div>'
           +'<div style="font-size:.72rem;color:'+(isCur?'var(--blue)':'var(--muted)')+';font-family:JetBrains Mono,monospace;font-weight:'+(isCur?'600':'400')+'">'+r.yr+'</div>'
-          +(r.avgT!=null?'<div style="font-size:.7rem;color:var(--muted)">'+r.avgT.toFixed(1)+'°</div>':'')
+          +(r.avgT!=null?'<div style="font-size:.7rem;color:var(--muted)">'+fmt(r.avgT,1)+'°</div>':'')
           +'</div>';
       }).join('')
       +'</div>'
@@ -9256,7 +9257,7 @@ function applyBiometeo(obs){
     hx<40?['Precejšnje neudobje','#f97316','Izogibaj se fizičnemu naporu']:
     hx<46?['Vroče — nevarnost','var(--red)','Možna toplotna izčrpanost']:
     ['NEVARNO','#9333ea','Toplotni udar — ostani v senci!'];
-  set('bio-humidex',hx+'°');set('bio-humidex-cat',hCat);set('bio-humidex-tip',hTip);
+  set('bio-humidex',fmt(hx,1)+'°');set('bio-humidex-cat',hCat);set('bio-humidex-tip',hTip);
   const hBox=document.getElementById('bio-humidex-box');
   if(hBox)hBox.style.borderColor='color-mix(in srgb,'+hCol+' 40%,transparent)'; // prej hCol+'55' = »var(--green)55« (neveljavno, rob je ostal bel)
   document.getElementById('bio-humidex')?.style&&(document.getElementById('bio-humidex').style.color=hCol);
@@ -9272,7 +9273,7 @@ function applyBiometeo(obs){
       wc>-28?['Zelo hladno','#3b82f6','Možnost ozeblin po 30+ min']:
       wc>-40?['Nevarno hladno','var(--purple)','Ozebline v 10–30 min']:
       ['EKSTREMNO','#9333ea','Ozebline v manj kot 5 min!'];
-    set('bio-chill',wc+'°');set('bio-chill-cat',wcCat);set('bio-chill-tip',wcTip);
+    set('bio-chill',fmt(wc,1)+'°');set('bio-chill-cat',wcCat);set('bio-chill-tip',wcTip);
     if(wcEl)wcEl.style.color=wcCol;
     const cBox=document.getElementById('bio-chill-box');if(cBox)cBox.style.borderColor=wcCol+'55';
     document.getElementById('bio-chill-cat')&&(document.getElementById('bio-chill-cat').style.color=wcCol);
@@ -9378,8 +9379,8 @@ function drawHourlyProfile(observations){
   const minA=filled.reduce((m,a)=>a.avg<m.avg?a:m);
   mk('circle',{cx:xS(maxA.h),cy:yS(maxA.avg),r:'5',fill:'#f87171',stroke:'white','stroke-width':'2'});
   mk('circle',{cx:xS(minA.h),cy:yS(minA.avg),r:'5',fill:CC.tempLine,stroke:'white','stroke-width':'2'});
-  mk('text',{x:xS(maxA.h),y:yS(maxA.avg)-9,'text-anchor':'middle','font-size':'8',fill:'#f87171','font-family':'JetBrains Mono,monospace'},maxA.avg.toFixed(1)+'°');
-  mk('text',{x:xS(minA.h),y:yS(minA.avg)+16,'text-anchor':'middle','font-size':'8',fill:CC.tempLine,'font-family':'JetBrains Mono,monospace'},minA.avg.toFixed(1)+'°');
+  mk('text',{x:xS(maxA.h),y:yS(maxA.avg)-9,'text-anchor':'middle','font-size':'8',fill:'#f87171','font-family':'JetBrains Mono,monospace'},fmt(maxA.avg,1)+'°');
+  mk('text',{x:xS(minA.h),y:yS(minA.avg)+16,'text-anchor':'middle','font-size':'8',fill:CC.tempLine,'font-family':'JetBrains Mono,monospace'},fmt(minA.avg,1)+'°');
   // Interactive crosshair — scrub through hourly averages with mouse or finger
   const tipLine=mk('line',{x1:0,x2:0,y1:pad.t,y2:VH-pad.b,stroke:CC.now,'stroke-width':'1','stroke-dasharray':'3,2',opacity:'0',style:'pointer-events:none'});
   const tipDot=mk('circle',{cx:0,cy:0,r:'5',fill:CC.tempLine,stroke:'white','stroke-width':'2',opacity:'0',style:'pointer-events:none'});
@@ -11841,8 +11842,8 @@ function analyzeLocalMicroclimate(obs){
     const prob=dep<0.8?'zelo verjetna':dep<1.5?'verjetna':'možna';
     conditions.push({
       type:'fog',cls:'mc-item-info',icon:'🌫',name:'Megleni kotel',
-      text:`Rosišče je le ${dep} °C pod temperaturo zraka, hitrost vetra pa znaša ${wind.toFixed(0)} km/h. Vlažen zrak se zadržuje v Savinjski dolini – nastanek megle je ${prob}, še posebej ob reki in v nižjih legah.`,
-      data:[`T ${T.toFixed(1)}°C`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`,`Vlaga ${hum}%`,`V ${wind.toFixed(0)} km/h`],
+      text:`Rosišče je le ${_fmtN(dep,1)} °C pod temperaturo zraka, hitrost vetra pa znaša ${wind.toFixed(0)} km/h. Vlažen zrak se zadržuje v Savinjski dolini – nastanek megle je ${prob}, še posebej ob reki in v nižjih legah.`,
+      data:[`T ${_fmtN(T,1)} °C`,`Td ${_fmtN(Td,1)} °C`,`Dep. ${_fmtN(dep,1)} °C`,`Vlaga ${hum} %`,`V ${wind.toFixed(0)} km/h`],
     });
   }
 
@@ -11860,14 +11861,14 @@ function analyzeLocalMicroclimate(obs){
     const speed=pTrend<-3?'hitro':'počasi';
     conditions.push({
       type:'front',cls:'mc-item-alert',icon:'⛈',name:'Prihaja fronta',
-      text:`Zračni tlak je v zadnjih treh urah ${speed} padel za ${Math.abs(pTrend).toFixed(1)} hPa. Savinjska dolina je ob prehodih hladnih front pogosto tarča močnejših neviht, zato je možna povečana nevarnost toče in močnih vetrovnih sunkov.`,
-      data:[`Trend ${pTrend>0?'+':''}${pTrend} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
+      text:`Zračni tlak je v zadnjih treh urah ${speed} padel za ${_fmtN(Math.abs(pTrend),1)} hPa. Savinjska dolina je ob prehodih hladnih front pogosto tarča močnejših neviht, zato je možna povečana nevarnost toče in močnih vetrovnih sunkov.`,
+      data:[`Trend ${pTrend>0?'+':''}${_fmtN(pTrend,1)} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   } else if(pTrend>1.5){
     conditions.push({
       type:'clearing',cls:'mc-item-good',icon:'🌤',name:'Vremenska razjasnitev',
-      text:`Zračni tlak je v zadnjih treh urah narasel za ${pTrend.toFixed(1)} hPa – vpliv anticiklona se krepi. Vreme se bo predvidoma stabiliziralo in izboljšalo.`,
-      data:[`Trend +${pTrend} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
+      text:`Zračni tlak je v zadnjih treh urah narasel za ${_fmtN(pTrend,1)} hPa – vpliv anticiklona se krepi. Vreme se bo predvidoma stabiliziralo in izboljšalo.`,
+      data:[`Trend +${_fmtN(pTrend,1)} hPa/3h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   }
 
@@ -11876,17 +11877,17 @@ function analyzeLocalMicroclimate(obs){
     conditions.push({
       type:'anticyclone',cls:'mc-item-good',icon:'☀️',name:'Anticiklonalno stabilno vreme',
       text:`Zračni tlak znaša ${pres.toFixed(0)} hPa, vlaga je ${hum} %, ozračje pa je mirno – tipične anticiklonalne razmere. Savinjska dolina ima v takšnem vremenu pogosto jasnejše vreme kot višje ležeči predeli, ki jih nerazpujena oblačnost lahko zavije v meglo.`,
-      data:[`Tlak ${pres.toFixed(0)} hPa`,`Vlaga ${hum}%`,`V ${wind.toFixed(0)} km/h`],
+      data:[`Tlak ${pres.toFixed(0)} hPa`,`Vlaga ${hum} %`,`V ${wind.toFixed(0)} km/h`],
     });
   }
 
   // ── 5. Rosa / slana / poledica
   if(T<4&&dep<3){
-    const risk=T<-1?{n:'Nevarnost poledice',t:`Temperatura ${T.toFixed(1)} °C ob visoki zračni vlagi prinaša tveganje za nastanek poledice ali slane. Pozor na cestah in mostovih v bližini Savinje!`,c:'mc-item-alert',i:'🧊'}:
+    const risk=T<-1?{n:'Nevarnost poledice',t:`Temperatura ${_fmtN(T,1)} °C ob visoki zračni vlagi prinaša tveganje za nastanek poledice ali slane. Pozor na cestah in mostovih v bližini Savinje!`,c:'mc-item-alert',i:'🧊'}:
                T<1?{n:'Možna slana ali ivje',t:`Temperatura je blizu rosišča, ki se giblje okoli 0 °C. Na travnikih in rastlinah se lahko pojavi slana – izjemna priložnost za makro fotografijo rose in ledenih kristalov.`,c:'mc-item-warn',i:'🌨'}:
-                   {n:'Rosa bo padla',t:`Temperatura zraka (${T.toFixed(1)} °C) je blizu rosišča (${Td.toFixed(1)} °C). Pred sončnim vzhodom bodo rastline prekrile rosne kapljice – idealni pogoji za makro fotografijo.`,c:'mc-item-info',i:'💧'};
+                   {n:'Rosa bo padla',t:`Temperatura zraka (${_fmtN(T,1)} °C) je blizu rosišča (${_fmtN(Td,1)} °C). Pred sončnim vzhodom bodo rastline prekrile rosne kapljice – idealni pogoji za makro fotografijo.`,c:'mc-item-info',i:'💧'};
     conditions.push({type:'dew',cls:risk.c,icon:risk.i,name:risk.n,text:risk.t,
-      data:[`T ${T.toFixed(1)}°C`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`]});
+      data:[`T ${_fmtN(T,1)} °C`,`Td ${_fmtN(Td,1)} °C`,`Dep. ${_fmtN(dep,1)} °C`]});
   }
 
   // ── 6. Vlažen dolinski zrak (ko ni drugega)
@@ -11894,7 +11895,7 @@ function analyzeLocalMicroclimate(obs){
     conditions.push({
       type:'moist',cls:'mc-item-info',icon:'💦',name:'Vlažen dolinski zrak',
       text:`Zračna vlaga je visoka (${hum} %), kar je značilno za dno Savinjske doline. Reka in mokrotni travniki stalno vzdržujejo visoko vlažnost, ki je na okoliških pobočjih običajno ne zaznamo.`,
-      data:[`Vlaga ${hum}%`,`Td ${Td.toFixed(1)}°C`,`Dep. ${dep}°C`],
+      data:[`Vlaga ${hum} %`,`Td ${_fmtN(Td,1)} °C`,`Dep. ${_fmtN(dep,1)} °C`],
     });
   }
 
@@ -11903,7 +11904,7 @@ function analyzeLocalMicroclimate(obs){
     conditions.push({
       type:'cold_pool',cls:'mc-item-info',icon:'🌡',name:'Mrzli dolinski žep',
       text:`Zaradi mirnega ozračja in specifične dolinske lege (366 m n. v.) se hladen zrak steka in zbira na dnu doline. Okoliška pobočja in višje ležeči kraji (smeri proti Šoštanju ali Logarski dolini) so v takšnih razmerah praviloma za 2–4 °C toplejši.`,
-      data:[`T ${T.toFixed(1)}°C`,`V ${wind.toFixed(0)} km/h`,`Tlak ${pres.toFixed(0)} hPa`],
+      data:[`T ${_fmtN(T,1)} °C`,`V ${wind.toFixed(0)} km/h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   }
 
@@ -11912,7 +11913,7 @@ function analyzeLocalMicroclimate(obs){
     conditions.push({
       type:'orographic',cls:'mc-item-warn',icon:'🌧',name:'Orografske padavine',
       text:`Območje nizkega zračnega tlaka prinaša padavine. Ker je Savinjska dolina izrazito zaprta, vlažni jugozahodni vetrovi trkajo ob gorske pregrade, se ob njih dvigajo in kondenzirajo, to pa ob zahodnih pobočjih prinaša obilne padavine (tudi do dvakrat več kot na štajerski ravnini).`,
-      data:[`Dež ${rain.toFixed(1)} mm/h`,`Tlak ${pres.toFixed(0)} hPa`],
+      data:[`Dež ${_fmtN(rain,1)} mm/h`,`Tlak ${pres.toFixed(0)} hPa`],
     });
   }
 
@@ -17176,7 +17177,7 @@ function buildArsoNormals(curMonthT, curMonthR){
       `<div class="norm-anom-title">${mName} – anomalija glede na normalo ${N.period}</div>`+
       '<div class="norm-anom-row">'+
       (curMonthT!=null?
-        `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthT.toFixed(1)}°C<span class="norm-delta ${Tcls}">${dT>=0?'+':''}${dT.toFixed(1)}°</span></div><div class="norm-anom-lbl">Srednja T (normala ${normT.toFixed(1).replace('.',',')} °C)</div></div>`:'')  +
+        `<div class="norm-anom-item"><div class="norm-anom-val">${_fmtN(curMonthT,1)}\u00A0°C<span class="norm-delta ${Tcls}">${dT>=0?'+':'\u2212'}${_fmtN(Math.abs(dT),1)}°</span></div><div class="norm-anom-lbl">Srednja T (normala ${_fmtN(normT,1)} °C)</div></div>`:'')  +
       (curMonthR!=null?
         `<div class="norm-anom-item"><div class="norm-anom-val">${curMonthR.toFixed(0)} mm<span class="norm-delta ${Pcls}">${dP>=0?'+':''}${dP.toFixed(0)} mm</span></div><div class="norm-anom-lbl">Padavine (normala ${normP} mm)</div></div>`:'')  +
       '</div>'+
@@ -17184,7 +17185,7 @@ function buildArsoNormals(curMonthT, curMonthR){
   } else {
     anomHtml=`<div class="norm-anom"><div class="norm-anom-title">${mName} – normala ${N.period}</div>`+
       `<div class="norm-anom-row">`+
-      `<div class="norm-anom-item"><div class="norm-anom-val">${normT.toFixed(1)}°C</div><div class="norm-anom-lbl">Srednja T (normala)</div></div>`+
+      `<div class="norm-anom-item"><div class="norm-anom-val">${_fmtN(normT,1)}\u00A0°C</div><div class="norm-anom-lbl">Srednja T (normala)</div></div>`+
       `<div class="norm-anom-item"><div class="norm-anom-val">${normP} mm</div><div class="norm-anom-lbl">Padavine (normala)</div></div>`+
       `</div></div>`;
   }
