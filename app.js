@@ -156,6 +156,10 @@ function _skelWatch(){
   });
 }
 const _ico=n=>'<svg class="ic" aria-hidden="true"><use href="#i-'+n+'"/></svg>';
+// emoji iz podatkovnih seznamov → ikona iz sklada (emoji se med napravami razlikujejo in se ne dajo prebarvati); neznan emoji pade na »sparkles«
+const _EMO_IC={'☀️':'sun','☀':'sun','🌡':'thermometer','🌡️':'thermometer','🥵':'flame','🔥':'flame','🌧':'cloud-rain','🌧️':'cloud-rain','❄️':'snowflake','❄':'snowflake','🧊':'snowflake','🌨':'snowflake',
+  '🌬️':'wind','🌬':'wind','🌷':'flower','🌫':'cloud-fog','🔄':'refresh-cw','⛈':'cloud-lightning','🌤':'cloud-sun','💧':'droplet','💦':'droplets'};
+const _emoIco=e=>_ico(_EMO_IC[e]||'sparkles');
 // ── Theme ─────────────────────────────────────────────────
 const isDark = () => document.documentElement.dataset.theme === 'dark';
 // Mrežna plast je risana v temnih odtenkih — v svetli temi jo močno zbledimo,
@@ -818,34 +822,35 @@ function renderStreaks(){
   const yr=new Date().getFullYear();
   let maxDryYr=0,cur=0;
   recent.filter(k=>+k.slice(0,4)===yr).forEach(k=>{if(_rain(store[k])<0.2){cur++;maxDryYr=Math.max(maxDryYr,cur);}else cur=0;});
-  if(dry>0)streaks.push({icon:'☀️',accent:'var(--amber)',count:dry,unit:'dni',desc:'zaporedoma brez dežja',rec:(dry>=maxDryYr&&dry>=5)?'najdaljši letos':null});
-  if(warm>0)streaks.push({icon:'🌡️',accent:'var(--red)',count:warm,unit:'dni',desc:'zapored Tmax ≥ 25°C',rec:warm>=7?'vročinski val':null});
-  if(hot>0)streaks.push({icon:'🥵',accent:'var(--red)',count:hot,unit:'dni',desc:'zapored Tmax ≥ 30°C',rec:hot>=3?'vroči dnevi':null});
-  if(wet>0)streaks.push({icon:'🌧️',accent:'var(--blue)',count:wet,unit:'dni',desc:'zaporedoma deževno',rec:wet>=5?'dolg moker niz':null});
-  if(frost>0)streaks.push({icon:'❄️',accent:'var(--cyan)',count:frost,unit:'noči',desc:'zapored zmrzal',rec:frost>=5?'mrzlo obdobje':null});
+  if(dry>0)streaks.push({icon:'☀️',accent:'var(--amber)',count:dry,unit:_unitD(dry),desc:'zaporedoma brez dežja',rec:(dry>=maxDryYr&&dry>=5)?'najdaljši letos':null});
+  if(warm>0)streaks.push({icon:'🌡️',accent:'var(--red)',count:warm,unit:_unitD(warm),desc:'zapored Tmax ≥ 25°C',rec:warm>=7?'vročinski val':null});
+  if(hot>0)streaks.push({icon:'🥵',accent:'var(--red)',count:hot,unit:_unitD(hot),desc:'zapored Tmax ≥ 30°C',rec:hot>=3?'vroči dnevi':null});
+  if(wet>0)streaks.push({icon:'🌧️',accent:'var(--blue)',count:wet,unit:_unitD(wet),desc:'zaporedoma deževno',rec:wet>=5?'dolg moker niz':null});
+  if(frost>0)streaks.push({icon:'❄️',accent:'var(--cyan)',count:frost,unit:(frost===1?'noč':'noči'),desc:'zapored zmrzal',rec:frost>=5?'mrzlo obdobje':null});
   if(!streaks.length){body.innerHTML='<div class="streak-empty">Trenutno ni izrazitih nizov — vreme je raznoliko zadnje dni.</div>';badge.textContent='0';return;}
   streaks.sort((a,b)=>b.count-a.count);
   body.innerHTML='<div class="streak-list">'+streaks.map(s=>
-    '<div class="streak-item" style="--st-accent:'+s.accent+'"><span class="streak-icon">'+s.icon+'</span><div class="streak-body"><div class="streak-count">'+s.count+' '+s.unit+'</div><div class="streak-desc">'+s.desc+'</div></div>'+(s.rec?'<span class="streak-rec">'+s.rec+'</span>':'')+'</div>'
+    '<div class="streak-item" style="--st-accent:'+s.accent+'"><span class="streak-icon hm-ic">'+_emoIco(s.icon)+'</span><div class="streak-body"><div class="streak-count">'+s.count+' '+s.unit+'</div><div class="streak-desc">'+s.desc+'</div></div>'+(s.rec?'<span class="streak-rec">'+s.rec+'</span>':'')+'</div>'
   ).join('')+'</div>';
   badge.textContent=streaks.length+' aktivnih';
 }
 
 // ── 3. Season progress ───────────────────────────────────
+const _unitD=n=>n===1?'dan':n===2?'dneva':'dni'; // 1 dan, 2 dneva, 3+ dni
 function renderSeasonProgress(){
   const body=document.getElementById('season-body'),badge=document.getElementById('season-badge');
   if(!body)return;
   const now=new Date(),y=now.getFullYear();
   // Meteorological seasons
   const seasons=[
-    {name:'Zima',emoji:'❄️',start:new Date(y,11,1),end:new Date(y+1,2,1)},
-    {name:'Pomlad',emoji:'🌸',start:new Date(y,2,1),end:new Date(y,5,1)},
-    {name:'Poletje',emoji:'☀️',start:new Date(y,5,1),end:new Date(y,8,1)},
-    {name:'Jesen',emoji:'🍂',start:new Date(y,8,1),end:new Date(y,11,1)},
+    {name:'Zima',emoji:'snowflake',start:new Date(y,11,1),end:new Date(y+1,2,1)},
+    {name:'Pomlad',emoji:'flower-2',start:new Date(y,2,1),end:new Date(y,5,1)},
+    {name:'Poletje',emoji:'sun',start:new Date(y,5,1),end:new Date(y,8,1)},
+    {name:'Jesen',emoji:'leaf',start:new Date(y,8,1),end:new Date(y,11,1)},
   ];
   let cur=null;
   for(const s of seasons){if(now>=s.start&&now<s.end){cur=s;break;}}
-  if(!cur){cur={name:'Zima',emoji:'❄️',start:new Date(now.getMonth()<2?y-1:y,11,1),end:new Date(now.getMonth()<2?y:y+1,2,1)};}
+  if(!cur){cur={name:'Zima',emoji:'snowflake',start:new Date(now.getMonth()<2?y-1:y,11,1),end:new Date(now.getMonth()<2?y:y+1,2,1)};}
   const total=cur.end-cur.start, elapsed=now-cur.start;
   const pct=Math.max(0,Math.min(1,elapsed/total));
   const daysLeft=Math.ceil((cur.end-now)/864e5);
@@ -873,12 +878,12 @@ function renderSeasonProgress(){
   if(gNow&&gLast){
     const dd=gNow.sum-gLast.sum;
     const pace=dd>30?'pace-ahead':dd<-30?'pace-behind':'pace-ontrack';
-    const lbl=dd>30?'⏩ pred lanskim ('+(dd>0?'+':'')+Math.round(dd)+' GDD)':dd<-30?'⏪ za lanskim ('+Math.round(dd)+' GDD)':'≈ kot lani';
+    const lbl=dd>30?_ico('trending-up')+' pred lanskim (+'+Math.round(dd)+' GDD)':dd<-30?_ico('trending-down')+' za lanskim (\u2212'+Math.abs(Math.round(dd))+' GDD)':'≈ kot lani';
     paceHtml='<span class="season-pace '+pace+'">'+lbl+'</span>';
   }
   body.innerHTML='<div class="season-wrap">'+ring+
-    '<div class="season-info"><div class="season-name">'+cur.emoji+' '+cur.name+'</div>'+
-    '<div class="season-sub">Meteorološka sezona: '+cur.start.toLocaleDateString('sl',{day:'numeric',month:'short'})+' – '+new Date(cur.end-864e5).toLocaleDateString('sl',{day:'numeric',month:'short'})+'.'+
+    '<div class="season-info"><div class="season-name"><span class="hm-ic">'+_ico(cur.emoji)+'</span>'+cur.name+'</div>'+
+    '<div class="season-sub">Meteorološka sezona: '+cur.start.toLocaleDateString('sl',{day:'numeric',month:'short'})+' – '+new Date(cur.end-864e5).toLocaleDateString('sl',{day:'numeric',month:'short'}).replace(/\.?$/,'.')+
     (gNow?' Akumulirano '+Math.round(gNow.sum)+' GDD letos.':'')+'</div>'+paceHtml+'</div></div>';
   badge.textContent=Math.round(pct*100)+'%';
 }
@@ -901,16 +906,16 @@ function renderStationMood(){
   // Volatility index 0-100
   const vi=Math.min(100,Math.round((range/15)*35+(pSwing/12)*35+(maxGust/60)*30));
   let word,emoji,sub;
-  if(vi<20){word='Umirjeno';emoji='😌';sub='Stabilen zrak, malo nihanj.';}
-  else if(vi<45){word='Mirno';emoji='🙂';sub='Blaga dinamika, nič posebnega.';}
-  else if(vi<70){word='Nemirno';emoji='🌬️';sub='Opazna nihanja tlaka in temperature.';}
-  else{word='Razburkano';emoji='⚡';sub='Močna dinamika — fronta ali nevihtni režim.';}
+  if(vi<20){word='Umirjeno';emoji='leaf';sub='Stabilen zrak, malo nihanj.';}
+  else if(vi<45){word='Mirno';emoji='cloud-sun';sub='Blaga dinamika, nič posebnega.';}
+  else if(vi<70){word='Nemirno';emoji='wind';sub='Opazna nihanja tlaka in temperature.';}
+  else{word='Razburkano';emoji='cloud-lightning';sub='Močna dinamika — fronta ali nevihtni režim.';}
   // Sparkline of temps
   const sw=240,sh=34,n=temps.length;
   const mn=Math.min(...temps),mx=Math.max(...temps),rg=(mx-mn)||1;
   const pts=temps.map((t,i)=>(i/(n-1)*sw).toFixed(1)+','+(sh-((t-mn)/rg)*(sh-6)-3).toFixed(1)).join(' ');
   const spark='<svg class="mood-spark" viewBox="0 0 '+sw+' '+sh+'" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  body.innerHTML='<div class="mood-wrap"><div class="mood-emoji">'+emoji+'</div><div class="mood-info"><div class="mood-word">'+word+'</div><div class="mood-sub">'+sub+' ΔT '+range.toFixed(1)+'°C · Δtlak '+pSwing.toFixed(1)+' hPa · sunki '+Math.round(maxGust)+' km/h</div></div></div>'+spark;
+  body.innerHTML='<div class="mood-wrap"><div class="mood-emoji hm-ic">'+_ico(emoji)+'</div><div class="mood-info"><div class="mood-word">'+word+'</div><div class="mood-sub">'+sub+' ΔT '+fmt(range,1)+'°C · Δtlak '+fmt(pSwing,1)+' hPa · sunki '+Math.round(maxGust)+' km/h</div></div></div>'+spark;
   badge.textContent='index '+vi;
 }
 
@@ -1182,7 +1187,7 @@ function renderMilestones(){
       else if(diff<0)deltaHtml='<span class="ms-delta ms-early">'+Math.abs(diff)+' dni prej</span>';
       else deltaHtml='<span class="ms-delta ms-late">'+diff+' dni pozneje</span>';
     }
-    return'<div class="ms-item"><span class="ms-icon">'+ms.icon+'</span><div class="ms-body"><div class="ms-title">'+ms.title+'</div><div class="ms-date">'+dd(ms.date)+' '+yr+(ms.lastDate?' · lani '+dd(ms.lastDate):'')+'</div></div>'+deltaHtml+'</div>';
+    return'<div class="ms-item"><span class="ms-icon hm-ic" style="--hm-accent:'+({'☀️':'var(--amber)','🔥':'var(--red)'}[ms.icon]||'var(--c-cool)')+'">'+_emoIco(ms.icon)+'</span><div class="ms-body"><div class="ms-title">'+ms.title+'</div><div class="ms-date">'+dd(ms.date)+' '+yr+(ms.lastDate?' · lani '+dd(ms.lastDate):'')+'</div></div>'+deltaHtml+'</div>';
   }).join('')+'</div>';
   badge.textContent=milestones.length+' mejnikov';
 }
@@ -2420,7 +2425,7 @@ function applyPressureTrend(observations){
   else if(diff>-3) {arrow='↓'; label='Pada';     cls='t-dn';  desc='Razmere se bodo morda poslabšale';}
   else             {arrow='↓↓';label='Hitro pada';cls='t-dn';  desc='Možna nevihta ali močan dež';}
   const pEl=document.getElementById('p-trend');if(pEl){pEl.className='p-trend '+cls;pEl.textContent=arrow+' '+label;}
-  const rEl=document.getElementById('p-rate');if(rEl)rEl.textContent=(diff>=0?'+':'')+diff.toFixed(1)+' hPa / 3 h · '+desc;
+  const rEl=document.getElementById('p-rate');if(rEl)rEl.textContent=(diff>=0?'+':'\u2212')+fmt(Math.abs(diff),1)+'\u00A0hPa / 3\u00A0h · '+desc;
 }
 
 // ── Apply observation ─────────────────────────────────────
@@ -3309,9 +3314,9 @@ function applyDayClimatology(){
         ' <span class="otd-clim-n">('+clim.years+' let)</span></span></div>';
   if(clim.recHigh||clim.recLow){
     html+='<div class="otd-clim-row"><span class="otd-clim-lbl">Rekord</span><span class="otd-clim-val">';
-    if(clim.recHigh)html+='🔥 <strong style="color:var(--red)">'+f1(clim.recHigh.v)+'°</strong> ('+clim.recHigh.year+')';
+    if(clim.recHigh)html+=_ico('flame')+' <strong style="color:var(--red)">'+f1(clim.recHigh.v)+'°</strong> ('+clim.recHigh.year+')';
     if(clim.recHigh&&clim.recLow)html+=' · ';
-    if(clim.recLow)html+='❄️ <strong style="color:var(--blue)">'+f1(clim.recLow.v)+'°</strong> ('+clim.recLow.year+')';
+    if(clim.recLow)html+=_ico('snowflake')+' <strong style="color:var(--blue)">'+f1(clim.recLow.v)+'°</strong> ('+clim.recLow.year+')';
     html+='</span></div>';
   }
   if(typeof _liveTemp==='number'&&isFinite(_liveTemp)&&clim.meanAvg!=null){
@@ -6039,7 +6044,7 @@ function calcMoon(date=new Date()){
 }
 function applyMoon(){
   const m=calcMoon();
-  set('moon-emoji',m.emoji);set('moon-phase',m.phase);set('moon-illum',m.illum);set('moon-age',m.age);
+  {const me=document.getElementById('moon-emoji');if(me)me.innerHTML=moonGlyph(+m.age);}set('moon-phase',m.phase);set('moon-illum',m.illum);set('moon-age',m.age);
   const nx=document.getElementById('moon-next');
   if(nx)nx.innerHTML='Polna čez <b>'+m.toFull+'</b> dni · Mlaj čez <b>'+m.toNew+'</b> dni';
 }
@@ -6060,19 +6065,20 @@ function calcScore(obs){
   const [label,color]=sc>=90?['Odlično 🌟','#22c55e']:sc>=75?['Lepo ☀️','#84cc16']:sc>=60?['Prijetno 🌤','#eab308']:sc>=45?['Zmerno ⛅','#f97316']:sc>=30?['Slabo 🌦','#ef4444']:['Neurje ⛈','#9333ea'];
   return{score:sc,label,color};
 }
+const _ACT_IC={'Kolesarjenje':'compass','Planinarjenje':'mountain','Žar & piknik':'flame','Vrtnarjenje':'sprout','Kopanje':'waves','Gobarjenje':'leaf','Doma je lepo':'book-open','Kite/jadralec':'wind','Sprehod':'footprints'};
 function getActivities(obs){
   if(!obs)return[];
   const m=obs.metric,temp=m.temp??15,rain=m.precipRate??0,wind=m.windSpeed??0,uv=obs.uv??0;
   const sc=calcScore(obs).score;
   const acts=[];
-  if(sc>=82&&temp>=14&&rain<0.1){if(temp>=17)acts.push('🚴 Kolesarjenje');acts.push('🏔 Planinarjenje');}
-  if(sc>=75&&temp>=22&&rain<0.1)acts.push('🔥 Žar & piknik');
-  if(sc>=70&&rain<0.1)acts.push('🌱 Vrtnarjenje');
-  if(sc>=85&&temp>=24&&rain<0.1)acts.push('🏊 Kopanje');
-  if(rain>0&&wind<15)acts.push('🍄 Gobarjenje');
-  if(rain>5||sc<35)acts.push('📚 Doma je lepo');
-  if(wind>=25&&wind<50&&rain<0.1)acts.push('🪁 Kite/jadralec');
-  if(acts.length===0)acts.push('🚶 Sprehod');
+  if(sc>=82&&temp>=14&&rain<0.1){if(temp>=17)acts.push('Kolesarjenje');acts.push('Planinarjenje');}
+  if(sc>=75&&temp>=22&&rain<0.1)acts.push('Žar & piknik');
+  if(sc>=70&&rain<0.1)acts.push('Vrtnarjenje');
+  if(sc>=85&&temp>=24&&rain<0.1)acts.push('Kopanje');
+  if(rain>0&&wind<15)acts.push('Gobarjenje');
+  if(rain>5||sc<35)acts.push('Doma je lepo');
+  if(wind>=25&&wind<50&&rain<0.1)acts.push('Kite/jadralec');
+  if(acts.length===0)acts.push('Sprehod');
   return acts.slice(0,3);
 }
 function applyScore(obs){
@@ -6083,7 +6089,7 @@ function applyScore(obs){
   const desc=document.getElementById('score-desc');
   if(desc)desc.textContent=score>=75?'Dobro vreme za aktivnosti zunaj':score>=50?'Zmerno vreme':'Slabe razmere';
   const actEl=document.getElementById('activities');
-  if(actEl){actEl.innerHTML='';getActivities(obs).forEach(a=>{const d=document.createElement('div');d.className='act';d.textContent=a;actEl.appendChild(d);});}
+  if(actEl){actEl.innerHTML='';getActivities(obs).forEach(a=>{const d=document.createElement('div');d.className='act';d.innerHTML='<span class="hm-ic">'+_ico(_ACT_IC[a]||'sparkles')+'</span>'+a;actEl.appendChild(d);});}
 }
 
 // ── Air Quality ───────────────────────────────────────────
@@ -9107,29 +9113,29 @@ function applyPhotographyWidget(obs){
       ind.style.left=(nowH/24*100)+'%';tl.appendChild(ind);
     }
 
-    // ── Current phase
-    let phase='☀️ Dan',phaseColor='var(--blue)';
-    if(nowH<pt.nautAMh||nowH>pt.nautPMh)          {phase='🌙 Noč';         phaseColor='var(--muted)';}
-    else if(nowH<pt.blueAMh)                       {phase='🌌 Somrak';      phaseColor='#475569';}
-    else if(nowH<pt.sunriseH)                      {phase='💙 Modra ura ↑'; phaseColor='#3b82f6';}
-    else if(nowH<pt.goldAMh)                       {phase='🌅 Zlata ura ↑'; phaseColor='#f97316';}
-    else if(nowH>pt.goldPMh&&nowH<pt.sunsetH)      {phase='🌇 Zlata ura ↓'; phaseColor='#f97316';}
-    else if(nowH>pt.sunsetH&&nowH<pt.bluePMh)      {phase='💙 Modra ura ↓'; phaseColor='#3b82f6';}
-    else if(nowH>pt.bluePMh&&nowH<pt.nautPMh)      {phase='🌌 Somrak';      phaseColor='#475569';}
+    // ── Current phase (ikone iz sklada, brez emoji; besede Zlata/Modra/Noč/Somrak so ključ za oceno svetlobe spodaj)
+    let phase='Dan',phaseIc='sun',phaseColor='var(--blue)';
+    if(nowH<pt.nautAMh||nowH>pt.nautPMh)          {phase='Noč';         phaseIc='moon';      phaseColor='var(--muted)';}
+    else if(nowH<pt.blueAMh)                       {phase='Somrak';      phaseIc='moon-star'; phaseColor='#94a3b8';}
+    else if(nowH<pt.sunriseH)                      {phase='Modra ura ↑'; phaseIc='sparkles';  phaseColor='#3b82f6';}
+    else if(nowH<pt.goldAMh)                       {phase='Zlata ura ↑'; phaseIc='sunrise';   phaseColor='#f97316';}
+    else if(nowH>pt.goldPMh&&nowH<pt.sunsetH)      {phase='Zlata ura ↓'; phaseIc='sunrise';   phaseColor='#f97316';}
+    else if(nowH>pt.sunsetH&&nowH<pt.bluePMh)      {phase='Modra ura ↓'; phaseIc='sparkles';  phaseColor='#3b82f6';}
+    else if(nowH>pt.bluePMh&&nowH<pt.nautPMh)      {phase='Somrak';      phaseIc='moon-star'; phaseColor='#94a3b8';}
     const phEl=document.getElementById('photo-phase-lbl');
-    if(phEl){phEl.textContent=phase;phEl.style.color=phaseColor;}
+    if(phEl){phEl.innerHTML='<span class="ph-ic" style="color:'+phaseColor+'">'+_ico(phaseIc)+'</span>'+phase;phEl.classList.add('photo-phase-pill');}
 
-    // ── Event labels
+    // ── Event labels: čas + oznaka, barvna pika ustreza odseku časovnice
     const ev=document.getElementById('photo-events');
     if(ev)ev.innerHTML=[
-      {h:pt.blueAMh,  l:'💙 '+pt.blueAM},
-      {h:pt.sunriseH, l:'☀️ '+pt.sunrise},
-      {h:pt.goldAMh,  l:'🌅 '+pt.goldAM},
-      {h:pt.noonH,    l:'🌞 '+pt.noon},
-      {h:pt.goldPMh,  l:'🌇 '+pt.goldPM},
-      {h:pt.sunsetH,  l:'🌆 '+pt.sunset},
-      {h:pt.bluePMh,  l:'💙 '+pt.bluePM},
-    ].filter(p=>p.h!=null).map(p=>`<span style="color:${Math.abs(p.h-nowH)<0.5?'var(--amber)':'var(--muted)'}">${p.l}</span>`).join('');
+      {h:pt.blueAMh,  t:pt.blueAM,  l:'Modra',  c:'#3b82f6'},
+      {h:pt.sunriseH, t:pt.sunrise, l:'Vzhod',  c:'#f59e0b'},
+      {h:pt.goldAMh,  t:pt.goldAM,  l:'Zlata',  c:'#f97316'},
+      {h:pt.noonH,    t:pt.noon,    l:'Poldne', c:'#38bdf8'},
+      {h:pt.goldPMh,  t:pt.goldPM,  l:'Zlata',  c:'#f97316'},
+      {h:pt.sunsetH,  t:pt.sunset,  l:'Zahod',  c:'#f59e0b'},
+      {h:pt.bluePMh,  t:pt.bluePM,  l:'Modra',  c:'#3b82f6'},
+    ].filter(p=>p.h!=null).map(p=>'<span class="ph-ev'+(Math.abs(p.h-nowH)<0.5?' is-near':'')+'"><i style="background:'+p.c+'"></i><b>'+p.t+'</b><small>'+p.l+'</small></span>').join('');
 
     // ── Macro scores
     const m=obs?.metric||{};
@@ -9139,25 +9145,27 @@ function applyPhotographyWidget(obs){
     const ws=Math.max(0,Math.round(100-W*3.5));
     const mg=document.getElementById('photo-macro-grid');
     if(mg)mg.innerHTML=[
-      {n:ms,          l:'Makro pogoji', c:ms>=70?'var(--green)':ms>=45?'var(--amber)':'var(--red)',    s:'%'},
-      {n:ls,          l:'Svetloba',     c:ls>=80?'var(--amber)':ls>=50?'var(--blue)':'var(--muted)',   s:'%'},
-      {n:ws,          l:'Mirnost vetra',c:ws>=80?'var(--green)':ws>=50?'var(--amber)':'var(--red)',    s:'%'},
-      {n:T.toFixed(1),l:'Temperatura',  c:T>=16&&T<=26?'var(--green)':T>=10?'var(--amber)':'var(--blue)',s:'°C'},
-    ].map(it=>`<div class="photo-macro-item"><div class="photo-macro-score" style="color:${it.c}">${it.n}${it.s}</div><div class="photo-macro-lbl">${it.l}</div></div>`).join('');
+      {n:ms,       l:'Makro pogoji', ic:'bug',         c:ms>=70?'var(--green)':ms>=45?'var(--amber)':'var(--red)',    s:' %',pos:ms},
+      {n:ls,       l:'Svetloba',     ic:'sun',         c:ls>=80?'var(--amber)':ls>=50?'var(--blue)':'var(--muted)',   s:' %',pos:ls},
+      {n:ws,       l:'Mirnost vetra',ic:'wind',        c:ws>=80?'var(--green)':ws>=50?'var(--amber)':'var(--red)',    s:' %',pos:ws},
+      {n:fmt(T,1), l:'Temperatura',  ic:'thermometer', c:T>=16&&T<=26?'var(--green)':T>=10?'var(--amber)':'var(--blue)',s:' °C',pos:null},
+    ].map(it=>'<div class="photo-macro-item" style="--hm-accent:'+it.c+'"><div class="photo-macro-lbl"><span class="hm-ic">'+_ico(it.ic)+'</span>'+it.l+'</div>'
+      +'<div class="photo-macro-score">'+it.n+it.s+'</div>'
+      +(it.pos!=null?'<span class="hm-scale hm-scale-range" data-on="1" style="--p:'+it.pos+'%"><i></i></span>':'')+'</div>').join('');
 
-    // ── Subjects
+    // ── Subjects (pika stanja namesto emoji: zelena = ugodno, tiha = manj ugodno)
     const subjects=[
-      {e:'🦋',n:'Metulji',      a:T>=18&&T<=30&&W<15&&R<0.1},
-      {e:'🐝',n:'Čebele',       a:T>=15&&W<20&&R<0.1},
-      {e:'🦗',n:'Kobilice',     a:T>=22&&W<20&&R<0.1},
-      {e:'🐛',n:'Hrošči',       a:T>=14&&T<=28},
-      {e:'🕷',n:'Pajki',        a:T>=10&&T<=24},
-      {e:'🐉',n:'Kačji pastirji',a:T>=20&&W<20&&R<0.1},
-      {e:'🌸',n:'Cvetlice',     a:true},
-      {e:'🍄',n:'Gobe',         a:R>0||H>=85},
+      {n:'Metulji',      a:T>=18&&T<=30&&W<15&&R<0.1},
+      {n:'Čebele',       a:T>=15&&W<20&&R<0.1},
+      {n:'Kobilice',     a:T>=22&&W<20&&R<0.1},
+      {n:'Hrošči',       a:T>=14&&T<=28},
+      {n:'Pajki',        a:T>=10&&T<=24},
+      {n:'Kačji pastirji',a:T>=20&&W<20&&R<0.1},
+      {n:'Cvetlice',     a:true},
+      {n:'Gobe',         a:R>0||H>=85},
     ];
     const sEl=document.getElementById('photo-subjects');
-    if(sEl)sEl.innerHTML=subjects.map(s=>`<div class="photo-subject ${s.a?'active':'low'}">${s.e} ${s.n}</div>`).join('');
+    if(sEl)sEl.innerHTML=subjects.map(s=>'<div class="photo-subject '+(s.a?'active':'low')+'"><i></i>'+s.n+'</div>').join('');
 
     // ── Tip
     const tips=[];
@@ -9167,7 +9175,7 @@ function applyPhotographyWidget(obs){
     if(R<0.1&&T>=18&&W<10)          tips.push('Idealni pogoji za žuželke — mirno in toplo.');
     if(W>20)                        tips.push('Preveč vetra za makro. Poiščite zavetje.');
     const tipEl=document.getElementById('photo-tip');
-    if(tipEl)tipEl.textContent=tips[0]||'';
+    if(tipEl)tipEl.innerHTML=tips[0]?'<span class="hm-ic">'+_ico('sparkles')+'</span><span>'+tips[0]+'</span>':'';
   }catch(e){console.warn('PhotoWidget:',e);}
 }
 
@@ -9250,7 +9258,7 @@ function applyBiometeo(obs){
     ['NEVARNO','#9333ea','Toplotni udar — ostani v senci!'];
   set('bio-humidex',hx+'°');set('bio-humidex-cat',hCat);set('bio-humidex-tip',hTip);
   const hBox=document.getElementById('bio-humidex-box');
-  if(hBox)hBox.style.borderColor=hCol+'55';
+  if(hBox)hBox.style.borderColor='color-mix(in srgb,'+hCol+' 40%,transparent)'; // prej hCol+'55' = »var(--green)55« (neveljavno, rob je ostal bel)
   document.getElementById('bio-humidex')?.style&&(document.getElementById('bio-humidex').style.color=hCol);
   document.getElementById('bio-humidex-cat')&&(document.getElementById('bio-humidex-cat').style.color=hCol);
   // Wind Chill
@@ -11924,7 +11932,7 @@ function analyzeLocalMicroclimate(obs){
     const div=document.createElement('div');
     div.className='mc-item '+c.cls;
     div.innerHTML=
-      '<div class="mc-head"><span class="mc-icon">'+c.icon+'</span><span class="mc-name">'+c.name+'</span></div>'+
+      '<div class="mc-head"><span class="mc-icon hm-ic">'+_emoIco(c.icon)+'</span><span class="mc-name">'+c.name+'</span></div>'+
       '<div class="mc-text">'+c.text+'</div>'+
       '<div class="mc-data">'+c.data.map(d=>'<span class="mc-datum">'+d+'</span>').join('')+'</div>';
     list.appendChild(div);
@@ -12066,7 +12074,7 @@ function setWeatherArt(obs){
   }
 
   _artCondition=cond;
-  const labels={sunny:'Sončno ☀️',hot:'Vroče 🌡',cloudy:'Oblačno ☁️',fog:'Megla 🌫',rain:'Dež 🌧',heavy_rain:'Plohe 🌧',snow:'Sneg ❄️',storm:'Nevihta ⛈',night:'Noč 🌙'};
+  const labels={sunny:'Sončno',hot:'Vroče',cloudy:'Oblačno',fog:'Megla',rain:'Dež',heavy_rain:'Plohe',snow:'Sneg',storm:'Nevihta',night:'Noč'};
   const lbl=document.getElementById('art-label');
   if(lbl)lbl.textContent=labels[cond]||'';
   initWeatherArt();

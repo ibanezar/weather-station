@@ -4623,3 +4623,55 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #tab-current .pheno-date{font-family:inherit;font-size:inherit;text-align:left;grid-column:auto;grid-row:auto;color:var(--text);font-weight:500}
 #tab-current .pheno-gdd{font-family:inherit;font-size:inherit;text-align:right;grid-column:auto;grid-row:auto}
 #tab-current #pheno-gdd-total{font-weight:700}
+
+/* ═══ Fotografski pomočnik (5. 11. 2026, nadaljevanje poenotenja kartic) ═══
+   Emoji (faza dneva, dogodki, subjekti) zamenjajo ikone iz sklada in barvne pike; ploščice vrednosti imajo glavo z ikono kot meritve v hero;
+   stavek »nasvet« je ploščica, ne ležeč zapis. Besede Zlata/Modra/Noč/Somrak v JS ostanejo (po njih se računa ocena svetlobe). */
+#tab-current .photo-phase-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .65rem;border-radius:var(--r-pill);font-size:var(--fs-xs);font-weight:600;
+  color:var(--text)!important;background:color-mix(in srgb,var(--text) 8%,transparent)}
+.ph-ic{display:inline-grid;place-items:center;width:1.1rem;height:1.1rem}
+.ph-ic .ic{width:100%;height:100%}
+#tab-current .photo-timeline{height:14px;border-radius:var(--r-pill);margin:.2rem 0 .6rem}
+#tab-current .photo-events{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.15rem;font-family:inherit;margin-bottom:.9rem}
+.ph-ev{display:flex;flex-direction:column;align-items:center;gap:.1rem;min-width:0;padding:.35rem .1rem;border-radius:var(--r-sm);font-size:var(--fs-xs);color:var(--muted)}
+.ph-ev i{width:7px;height:7px;border-radius:50%;margin-bottom:.15rem}
+.ph-ev b{font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
+.ph-ev small{font-size:var(--fs-xs);line-height:1.1}
+.ph-ev.is-near{background:color-mix(in srgb,var(--c-warm) 16%,transparent)}
+@media (max-width:420px){.ph-ev b{font-size:11.5px;letter-spacing:-.02em}}
+#tab-current .photo-macro-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin:.2rem 0 .9rem}
+@media (min-width:760px){#tab-current .photo-macro-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#tab-current .photo-macro-item{--hm-accent:var(--c-cool);display:flex;flex-direction:column;gap:.4rem;padding:.75rem .85rem}
+#tab-current .photo-macro-lbl{order:-1;display:flex;align-items:center;gap:.45rem;margin:0;font-size:var(--fs-sm);font-weight:500;letter-spacing:0;text-transform:none;color:var(--text)}
+#tab-current .photo-macro-score{font-size:clamp(1.35rem,6.4vw,var(--fs-val));line-height:1.05;white-space:nowrap}
+#tab-current .photo-macro-item .hm-scale{margin:0}
+#tab-current .photo-sub-lbl{margin:.2rem 0 .5rem;font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+#tab-current .photo-subjects{margin-top:0;gap:.4rem}
+#tab-current .photo-subject{gap:.45rem;padding:.4rem .75rem;border-radius:var(--r-pill);font-size:var(--fs-sm);color:var(--text)}
+.photo-subject i{width:7px;height:7px;border-radius:50%;background:var(--muted);opacity:.55}
+#tab-current .photo-subject.active{border-color:color-mix(in srgb,var(--c-accent) 40%,var(--fc-border));color:var(--text)}
+.photo-subject.active i{background:var(--c-accent);opacity:1}
+#tab-current .photo-subject.low{opacity:.72}
+#tab-current .photo-tip{display:flex;align-items:center;gap:.65rem;margin-top:.9rem;padding:.7rem .85rem;font-size:var(--fs-sm);line-height:1.4;color:var(--text);
+  background:var(--tile-bg,var(--fc-bg));border:1px solid var(--tile-bd,var(--fc-border));border-radius:var(--tile-r,var(--r-md))}
+#tab-current .photo-tip:empty{display:none}
+.photo-tip{--hm-accent:var(--c-warm-text)}
+
+/* Emoji v podatkovnih seznamih → ikone v čipu (nizi, mikroklima, mejniki, sezona, značaj, rekord dneva, aktivnosti); barva čipa je pomen (nevarnost, toplo, hladno) */
+#tab-current .streak-item{--hm-accent:var(--st-accent,var(--c-cool))}
+#tab-current .streak-icon,#tab-current .ms-icon,#tab-current .mc-icon{flex:none;font-size:inherit}
+#tab-current .mc-item{--hm-accent:var(--c-cool)}
+#tab-current .mc-item-alert{--hm-accent:var(--red)}#tab-current .mc-item-warn{--hm-accent:var(--c-warm-text)}#tab-current .mc-item-good{--hm-accent:var(--c-accent)}
+#tab-current .mc-head{display:flex;align-items:center;gap:.5rem}
+#tab-current .season-name{display:flex;align-items:center;gap:.5rem}
+#tab-current .season-name .hm-ic{--hm-accent:var(--c-accent)}
+#tab-current .season-pace .ic,#tab-current .otd-clim-val .ic{width:1em;height:1em;vertical-align:-.15em;margin-right:.15em}
+#tab-current .mood-emoji.hm-ic{--hm-accent:var(--c-accent);width:3rem;height:3rem;font-size:inherit}
+#tab-current .mood-emoji .ic{width:1.5rem;height:1.5rem}
+#tab-current .act{gap:.4rem;padding:.3rem .8rem .3rem .35rem;font-size:var(--fs-sm);color:var(--text)}
+#tab-current .act .hm-ic{--hm-accent:var(--c-accent);width:1.3rem;height:1.3rem}
+#tab-current .act .hm-ic .ic{width:.75rem;height:.75rem}
+#tab-current .moon-big{width:3.4rem;height:3.4rem;font-size:0;filter:none}
+#tab-current .moon-big .hm-moon-svg{display:block;width:100%;height:100%}
+#tab-current :is(.p-rate,.beaufort-badge){font-family:'Inter','Inter Fallback',sans-serif;font-variant-numeric:tabular-nums}
+#tab-current .p-rate{font-size:var(--fs-xs);line-height:1.4}
