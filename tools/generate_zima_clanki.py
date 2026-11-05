@@ -385,12 +385,12 @@ def art_sneg(c):
                  "Oranžne pike: prvi dan z novim snegom, ki ga je izmerila padavinska postaja ARSO Črnivec (848 m). Za Črnivec imam podatke od aprila 2021.")
     tl = tiles([
         ("25. 11.", "", "mediana prvega hladnega padavinskega dne v Rečici v zadnjih sedmih zimah. Razpon je od 19. 11. do 11. 12.", False),
-        ("18.–30. 11.", "", "izmerjen prvi nov sneg na Črnivcu v petih zimah. Zunaj tega razpona ga v teh zimah ni bilo.", False),
+        ("18.–30. 11.", "", "izmerjen prvi nov sneg na Črnivcu v petih zimah. Pred 18. novembrom v teh zimah nov sneg ni padel.", False),
         ("23. 10.", "", "letošnja prva noč z 0 °C ali manj (–0,1 °C). Hladnega padavinskega dne letos še ni bilo.", True),
     ])
     lead = ("Postaja v Rečici ob Savinji snega ne meri, hladne padavine pa so vidne v podatkih. "
             "Prvi dan s padavinami in povprečno dnevno temperaturo do 1 °C je v zadnjih sedmih zimah nastopil med <strong>19. novembrom in 11. decembrom</strong>, mediana je 25. november. "
-            "Na Črnivcu, na 848 m, je ARSO prvi nov sneg v petih zimah izmeril med 18. in 30. novembrom. Hladne padavine v dolini torej običajno pridejo ob koncu novembra, datum pa se spreminja za približno tri tedne.")
+            "Na Črnivcu, na 848 m, je ARSO prvi nov sneg v petih zimah izmeril med 18. in 30. novembrom. Hladne padavine v dolini torej običajno pridejo ob koncu novembra, datum pa niha v razponu približno treh tednov.")
     s1 = [
         "<strong>Kratek odgovor:</strong> prvi možen sneg v dolini je po podatkih zadnjih sedmih zim običajno ob koncu novembra (merim hladne padavine, ne snega). "
         "V štirih od sedmih zim se je prvi hladen padavinski dan zgodil pred 1. decembrom, v treh pa 1. decembra ali pozneje, enkrat šele 11. decembra.",
@@ -483,7 +483,7 @@ def art_bozic(c):
             "v Rečici ob Savinji pa je bil hladen padavinski dan med 24. in 26. decembrom v dveh od sedmih. "
             "V štirih od sedmih let je temperatura v teh treh dneh dosegla vsaj 10 °C.")
     s1 = [
-        "<strong>Kratek odgovor:</strong> v dolini je bel božič redek, na Črnivcu (848 m) je bil v dveh od petih let. Rečica snežne odeje ne meri, zato za dolino uporabljam približek, za višje lege pa izmerjene podatke ARSO s Črnivca. Obeh številk ne smete neposredno primerjati: merita različni stvari.",
+        "<strong>Kratek odgovor:</strong> v dolini je bel božič redek, na Črnivcu (848 m) je bil v dveh od petih let. Rečica snežne odeje ne meri, zato za dolino uporabljam približek, za višje lege pa izmerjene podatke ARSO s Črnivca. Obeh številk ni mogoče neposredno primerjati: merita različni stvari.",
         tl,
         tbl,
     ]
@@ -492,12 +492,13 @@ def art_bozic(c):
         "Na Črnivcu je ARSO izmeril snežno odejo: 4 cm na sveti večer, 15 cm na božič in 12 cm na štefanovo.",
         "Leta 2024 je bila slika drugačna: na Črnivcu je 24. decembra ležalo 14 cm snega, v dolini pa je bilo suho in hladno (najnižja dnevna temperatura je od 24. do 26. decembra padla z 2,4 °C na –7,3 °C). "
         "Za dolino je to pomenilo mraz brez snega, za višje lege bel božič.",
-        "Štirje božiči (2019, 2020, 2022 in 2023) so bili topli: čez dan se je temperatura dvignila na 11–14 °C. Takrat sneg ni bil blizu.",
+        "Leta 2021 je bil v dolini hladen padavinski dan (9,2 mm padavin, najnižja temperatura –1,0 °C), na Črnivcu pa snežne odeje od 24. do 26. decembra ni bilo.",
+        "Štirje božiči (2019, 2020, 2022 in 2023) so bili topli: čez dan se je temperatura dvignila na 11–14 °C. V dolini takrat ni bilo hladnih padavin.",
     ]
     s3 = [
         "Za napoved božiča je še prezgodaj, tudi za modele. Nobeden vir danes ne more zanesljivo napovedati, ali bo 25. decembra sneg. "
         "Splošni sezonski signal za zimo 2026/27 sem opisal v članku " + a("/blog/zima-2026-2027-el-nino-napoved.html", "o El Niñu") +
-        ": kaže na nadpovprečno toplo zimo, kar snegu v dolini ne daje prednosti. Najbližji lokalni analog, zima 2023/24, je bil topel in mokar.",
+        ": kaže na nadpovprečno toplo zimo, kar snegu v dolini ne daje prednosti. Najbližji lokalni analog je zima 2023/24, ki je bila topla in mokra.",
         "Smiselno je spremljati napoved približno teden dni pred božičem. Takrat bodo uporabni " + a("/zima/meja-snezenja/", "meja sneženja") + ", " + a("/zima/snezna-odeja/", "ocena snežne odeje") +
         " in " + a("/zima/snezna-karta/", "snežna karta") + ".",
         "Za primerjavo z daljšimi nizi: v Ljubljani so se ledeni dnevi in snežna odeja v zadnjih desetletjih močno zmanjšali, kot sem pokazal v članku "
@@ -519,7 +520,7 @@ def art_bozic(c):
         tags=["bel božič", "božič", "sneg", "zima", "podatki"], og_photo="misty-valley", accent="#22d3ee", lead=lead,
         sections=[
             {"label": "01 — odgovor", "heading": "Bel božič: v dolini redek, na Črnivcu v dveh od petih let", "id": "odgovor", "paragraphs": s1},
-            {"label": "02 — primeri", "heading": "Trije božiči, tri različne zgodbe", "id": "primeri", "paragraphs": s2},
+            {"label": "02 — primeri", "heading": "Božiči so bili zelo različni", "id": "primeri", "paragraphs": s2},
             {"label": "03 — letos", "heading": "Ali bo letos bel božič?", "id": "letos", "paragraphs": s3},
             {"label": "04 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": s4},
         ],
@@ -571,7 +572,7 @@ def art_zled(c):
     s2 = [
         zled_schema() and fig("Kako nastane žled", zled_schema(),
                              "Sneg v oblaku se na poti navzdol stopi v topli plasti, nato pa dež pada v plast zraka s temperaturo 0 °C ali manj. Kaplje se podhladijo in zmrznejo šele ob stiku s tlemi ali predmeti."),
-        "Žled nastane, kadar je v višini toplejša plast zraka (nad 0 °C), pri tleh pa hladnejša (0 °C ali manj). Kaplje skozi hladno plast padejo prehitro, da bi zmrznile v zraku. "
+        "Žled nastane, kadar je v višini toplejša plast zraka (nad 0 °C), pri tleh pa hladnejša (0 °C ali manj). Kaplje se v hladni plasti podhladijo in v zraku ne zmrznejo. "
         "Zmrznejo šele, ko zadenejo tla, žico ali vejo, in tam naredijo prozorno ledeno skorjo.",
         "Taka razporeditev je mogoča, kadar se topel zrak pomika nad dolino, v kateri se je zadržal mrzel zrak. Žled je kljub temu redek pojav.",
         "Modelski pokazatelj na strani " + a("/zima/zled/", "Žled") + " označi uro kot možen žled, kadar so hkrati izpolnjeni trije pogoji: temperatura pri tleh 0 °C ali manj, "
@@ -664,11 +665,11 @@ def art_crnivec(c):
                    "Delež dni v mesecu, ko je na postaji Črnivec ležalo vsaj nekaj snega. Sešteti so vsi dnevi zim od 2021/22 do 2025/26. V oktobru in maju snega v teh petih zimah ni bilo.")
     t_tiles = tiles([
         ("18.–30. 11.", "", "izmerjen prvi nov sneg v petih zimah.", False),
-        ("22–57", "dni", f"snežne odeje v zimi (mediana {int(med)} dni). Najdlje je ležala pozimi 2022/23.", False),
+        ("22–57", "dni", f"snežne odeje v posamezni zimi (mediana {int(med)} dni). Najdlje je ležala pozimi 2022/23.", False),
         ("65", "cm", "največja izmerjena višina snega: 24. januarja 2023.", True),
     ])
     lead = ("Na Črnivcu, na 848 m, je ARSO v petih zimah prvi nov sneg izmeril med <strong>18. in 30. novembrom</strong>. "
-            "Snežne odeje je bilo v zimi 22–57 dni, največ snega pa je ležalo 24. januarja 2023: 65 cm. "
+            "Snežna odeja je v posamezni zimi ležala 22–57 dni, največ snega pa je ležalo 24. januarja 2023: 65 cm. "
             "Zimske razmere na prelazu torej običajno nastopijo ob koncu novembra, najbolj zanesljivo pa trajajo od decembra do februarja.")
     s1 = [
         "<strong>Kratek odgovor:</strong> na Črnivcu sneg v petih zimah ni padel pred 18. novembrom, v oktobru pa ga sploh ni bilo. Najbolj zasnežen je december (31 % dni s snežno odejo), nato januar (28 %) in februar (27 %). Marca in aprila je odeja redka.",
@@ -755,7 +756,7 @@ def art_hribi(c):
             "<strong>Golte:</strong> o obratovanju smučišča in stanju prog se pozanimajte pri upravljavcu. Iz teh podatkov tega ne morem reči.",
             "<strong>Veter in občutek mraza:</strong> na grebenu je hladneje, kot kaže temperatura zraka. Ocene so na strani " + a("/vreme-v-gorah/", "Vreme v gorah") + ".",
             "<strong>Solčava in Logarska dolina:</strong> sproti spremljajte " + a("/vreme-solcava/", "vreme v Solčavi") + " in " + a("/zima/snezna-karta/", "snežno karto") + ".",
-            "<strong>Več o razmerah:</strong> o razmerah na Goltah najdete več v članku " + a("/blog/vreme-golte-sneg-razmere.html", "Vreme na Golteh") + ".",
+            "<strong>Razmere na Goltah:</strong> več v članku " + a("/blog/vreme-golte-sneg-razmere.html", "Vreme na Golteh") + ".",
         ]),
     ]
     s4 = [
@@ -826,7 +827,7 @@ def art_hdd(c):
         ("28", "%", "več stopinjskih dni je imela najhladnejša sezona (3281) kot najtoplejša (2565).", False),
         ("3. od 7", "", "po hladnosti: letošnji oktober do 26. 10. (212 stopinjskih dni). Hladnejša sta bila le 2025 (239) in 2021 (234).", True),
     ])
-    lead = ("V zadnjih petih kurilnih sezonah (1. oktober–30. april) je Rečica imela v povprečju <strong>2920 stopinjskih dni</strong>, "
+    lead = ("V petih popolnih kurilnih sezonah (1. oktober–30. april) je Rečica imela v povprečju <strong>2920 stopinjskih dni</strong>, "
             "najhladnejša sezona (2021/22) jih je imela 28 % več kot najtoplejša (2023/24). "
             "Če je vaša poraba sorazmerna z ogrevanjem, takšno razliko med zimama opazite na računu ali na skladovnici drv.")
     s1 = [
@@ -915,11 +916,11 @@ def art_megla(c):
                            ticks=[0, 6, 12], fmt=lambda v: num(v, 1 if abs(v - round(v)) > .01 else 0)),
                 "Mediana zadnje ure (do poldneva), ko je bil zrak še nasičen, na dneh z nasičenim zrakom ob 7. uri. Ura se nanaša na lokalni čas (po 25. oktobru je zimski čas).")
     t_tiles = tiles([
-        ("92", "%", "oktobrskih jutr je imelo ob 7. uri nasičen zrak (23 od 25 dni).", False),
+        ("92", "%", "oktobrskih jutr je imelo ob 7. uri nasičen zrak ob mirnem vetru (23 od 25 dni).", False),
         ("9", "", "mediana zadnje ure z nasičenim zrakom v oktobru (julija 7).", False),
         ("2", "dni", "je bil zrak še ob 12. uri nasičen (9. in 24. oktobra). Merim samo do poldneva.", True),
     ])
-    lead = ("Oktobra 2026 je bil zrak v Rečici ob 7. uri v <strong>23 od 25 dni</strong> nasičen z vlago (razlika med temperaturo in rosiščem 0,5 °C ali manj). "
+    lead = ("Oktobra 2026 je bil zrak v Rečici ob 7. uri v <strong>23 od 25 dni</strong> nasičen z vlago (razlika med temperaturo in rosiščem 0,5 °C ali manj, veter pod 3 km/h). "
             "Mediana ure, do katere je nasičenost trajala, se je od julija do oktobra pomaknila s 7. na 9. uro. "
             "Jutra z nasičenim zrakom se jeseni podaljšujejo; kako bo pozimi, urni zapis še ne pove.")
     s1 = [
@@ -942,8 +943,8 @@ def art_megla(c):
     ]
     s4 = [
         ul([
-            "<strong>Samo ena jesen.</strong> Urni zapis imam od 13. julija 2026. Zimskih mesecev v njem še ni, zato ne trdim, kdaj se megla dviguje pozimi.",
-            "<strong>Nasičen zrak ni megla.</strong> Razlika med temperaturo in rosiščem 0,5 °C ali manj je približek, ki ga ugotavljam ob celih urah. Vidljivosti in debeline megle ne merim.",
+            "<strong>Samo ena sezona.</strong> Urni zapis imam od 13. julija 2026. Zimskih mesecev v njem še ni, zato ne trdim, kdaj se megla dviguje pozimi.",
+            "<strong>Nasičen zrak ni megla.</strong> Razlika med temperaturo in rosiščem 0,5 °C ali manj (za jutro ob 7. uri še veter pod 3 km/h) je približek, ki ga računam ob celih urah. Vidljivosti in debeline megle ne merim.",
             "<strong>Ena postaja.</strong> Postaja stoji na dnu doline. Na pobočjih in v višjih legah je lahko drugače.",
             "<strong>Modelska ocena inverzije je napoved.</strong> Ocena za jutro 28. oktobra velja na dan objave in se z novimi teki modela spreminja.",
         ]),
