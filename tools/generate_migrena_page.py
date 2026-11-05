@@ -117,7 +117,7 @@ def pressure_summary(series, now_key):
     return {"drop": worst[2] - worst[1], "drop_at": worst[0], "low": low[1], "low_at": low[0]}
 
 
-def pressure_chart(c, today):
+def pressure_chart(c, today, tail="ki ga veliko ljudi z migreno omenja kot sprožilec"):
     now = datetime.datetime.now(ZoneInfo("Europe/Ljubljana")).replace(minute=0, second=0, microsecond=0, tzinfo=None)
     series, now_key = pressure_series(c, now)
     if len(series) < 24:
@@ -176,7 +176,7 @@ def pressure_chart(c, today):
             txt = (f"V naslednjih 72 urah ni izrazitega padca tlaka (največ {seo.num(max(sm['drop'], 0), 1)} hPa v 24 urah). "
                    f"Najnižji tlak: {seo.num(sm['low'], 0)} hPa ({when_text(sm['low_at'])}).")
     return ('  <h2>Zračni tlak: 24 ur nazaj, 72 ur naprej</h2>\n'
-            f'  <p class="archive-intro">{esc(txt)} Oranžen pas označuje padec za {DROP_MARK} hPa ali več v 24 urah, ki ga veliko ljudi z migreno omenja kot sprožilec.</p>\n'
+            f'  <p class="archive-intro">{esc(txt)} Oranžen pas označuje padec za {DROP_MARK} hPa ali več v 24 urah, {tail}.</p>\n'
             '  <div class="dv-card">' + "".join(out) +
             '\n    <p class="muted-note">Modelska napoved Open-Meteo za Rečico (tlak na morski gladini). Črtkana črta je trenutek izračuna.</p></div>')
 
@@ -466,7 +466,7 @@ CFG = {
         ("Kdaj moram takoj k zdravniku?", "Ob nenadnem izredno hudem glavobolu, ob oslabelosti, motnjah govora ali vida, zmedenosti, krčih, vročini s togim tilnikom ali po poškodbi glave pokličite 112. Ob bistveni spremembi običajnih napadov se posvetujte z zdravnikom."),
     ],
     "links": [("/biovreme/", "Biovreme →"), ("/vreme-recica-ob-savinji/", "Vreme Rečica ob Savinji →"),
-              ("/kakovost-zraka/", "Kakovost zraka →"), ("/astma/", "Vreme in astma →"), ("/adhd/", "Vreme in ADHD →"), ("https://www.arso.gov.si/", "ARSO")],
+              ("/kakovost-zraka/", "Kakovost zraka →"), ("/astma/", "Vreme in astma →"), ("/adhd/", "Vreme in ADHD →"), ("/sklepi/", "Vreme in sklepi →"), ("https://www.arso.gov.si/", "ARSO")],
     "desc": lambda lvl: f"Migrenski sprožilci danes: {lvl}. Padec tlaka, nevihte, vročina, veter in svetloba za 5 dni, graf tlaka ter dnevnik napadov samo v vašem brskalniku.",
     "sections": sections, "script": client_script,
 }

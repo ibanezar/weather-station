@@ -48,6 +48,7 @@ LINKS = {
         ("/meteohmeljar/", "MeteoHmeljar", "po obiranju: stanje hmeljišč in agrometeorologija"),
         ("/vreme-za-padalce/", "Vreme za padalce", "mirni jesenski dnevi z inverzijo in meglo v dolini"),
         ("/opozorilo-pred-pozebo/", "Opozorilo pred pozebo", "ob prvi zmrzali: vrt in rože na balkonu"),
+        ("/vreme-za-vrtnarje/", "Vreme za vrtnarje", "zmrzal po noči, suša in veter za vrt, 5 dni naprej"),
     ],
     "zima": [
         ("https://crnivec.si/", "Črnivec", "poledica, sneg in kamera na prelazu"),

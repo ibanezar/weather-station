@@ -112,6 +112,10 @@ CORE = {
     "vreme-za-pse/":             ("daily",   "0.6"),
     # Vreme in migrena: napoved sprožilcev + dnevnik napadov v brskalniku (tools/generate_migrena_page.py).
     "migrena/":                  ("daily",   "0.7"),
+    # Vreme in sklepi: dejavniki + dnevnik bolečine v brskalniku (tools/generate_sklepi_page.py).
+    "sklepi/":                   ("daily",   "0.7"),
+    # Vreme za vrtnarje: zmrzal (MTR), vročina, suša, veter, toča (tools/generate_vreme_za_vrtnarje_page.py).
+    "vreme-za-vrtnarje/":        ("daily",   "0.6"),
     # Vreme in ADHD: pogoji za gibanje, spanje, vročino (tools/generate_adhd_page.py; ne trdi vpliva na simptome).
     "adhd/":                     ("daily",   "0.6"),
     "vreme-za-padalce/":         ("daily",   "0.6"),

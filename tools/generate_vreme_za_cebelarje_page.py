@@ -84,7 +84,7 @@ CFG = {
         ("Kdaj je primerno odpirati panje?", "Najbolje ob toplem, mirnem in suhem vremenu čez dan; ob mrazu, vetru in pred nevihto odpiranja po možnosti odložite."),
         ("Ali stran svetuje glede zdravljenja čebel?", "Ne. Stran ocenjuje samo vreme; navodila za zdravljenje in krmljenje so naloga čebelarske organizacije in veterinarja."),
     ],
-    "links": [("/vreme-recica-ob-savinji/", "Vreme Rečica ob Savinji →"), ("/agrometeo/", "Agrometeo →"),
+    "links": [("/vreme-recica-ob-savinji/", "Vreme Rečica ob Savinji →"), ("/agrometeo/", "Agrometeo →"), ("/vreme-za-vrtnarje/", "Vreme za vrtnarje →"),
               ("/vreme-za-kolesarje/", "Vreme za kolesarje →"), ("https://www.czs.si/", "Čebelarska zveza Slovenije")],
     "desc": lambda lvl: f"Letalni pogoji čebel danes: {lvl}. Temperatura, sonce, veter, dež in nevihte za 5 dni ter okno za delo ob panjih v Rečici ob Savinji.",
 }
