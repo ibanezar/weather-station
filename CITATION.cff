@@ -10,10 +10,12 @@ authors:
     given-names: Filip
 license: CC-BY-4.0
 url: "https://meteorec.si/podatki/"
+version: "2026-11-04"
+date-released: "2026-11-05"
 repository-code: "https://github.com/ibanezar/weather-station"
 keywords:
   - weather station
   - meteorology
   - Slovenia
   - Savinja
-# Po objavi na Zenodo (tools/zenodo_publish.py --publish) dodaj:  doi: "10.5281/zenodo.XXXXXXX"
+doi: "10.5281/zenodo.23979571"   # različica 2026-11-04; DOI vseh različic: 10.5281/zenodo.23979570
