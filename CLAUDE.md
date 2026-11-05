@@ -2995,7 +2995,8 @@ noč (spanje; zunanja napoved, ne spalnica), svetloba je 1 točka. Pragovi so na
 
 - Noč za zadnji dan napovedi ni na voljo (jutra po njem ni v napovedi): ocena 0 točk z besedilom »še ni na voljo«, ne ugibanje (`night_min()`).
 - Raziskava v razdelku (Faber Taylor in Kuo, 2009, 17 otrok) je navedena kot majhna; novih trditev o ADHD ne dodajaj brez vira in brez omilitve. Zdravil zaradi vremena stran ne svetuje spreminjati.
-- Dnevnik/analiza (kot na `/migrena/`) **ni narejena**; možen naslednji korak. Ker ima stran gradnik opozoril, je v `zasebnost.html` ADHD naveden skupaj z ostalimi stranmi.
+- **Ciljna publika so starši otrok z ADHD** (5. 11. 2026, Filip): naslov »Vreme in ADHD pri otrocih«, razdelek **»Za starše«** (`parent_html()`: pot v šolo 7.00–8.00 in najboljše okno po pouku 13.00–19.00, danes in jutri). Računa se **cel dan, ne od trenutne ure**: stran je posnetek, ki ga cron zgradi ob poljubni uri, zato »že mimo« ne sme biti odvisen od ure generiranja. »Še temno« je izpeljano iz sevanja (< 10 W/m², kot pri oknu po urah), sončnega vzhoda se ne računa na novo.
+- Dnevnik/analiza (kot na `/migrena/`) **ni narejena**; možen naslednji korak (za starše: zapis otrokovega dne, samo v brskalniku). Ker ima stran gradnik opozoril, je v `zasebnost.html` ADHD naveden skupaj z ostalimi stranmi.
 - Prva stran nastane ob prvem teku `vsakdan-forecast.yml` (ročno poženi po mergu); do takrat je v CORE, a `adhd/index.html` še ne obstaja.
 
 ## Stran za podjetja (`/podjetja/`, 30.–31. 10. 2026)

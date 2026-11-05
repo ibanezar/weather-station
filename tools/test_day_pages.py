@@ -121,6 +121,22 @@ check("adhd: stran ne trdi, da vreme sproži simptome",
       and not re.search(r"sproži\w*\s+(simptom|napad|nemir)", _body.lower()))
 check("adhd: navedek raziskave in nobenih zdravil z odmerki",
       "Journal of Attention Disorders" in _body and not re.search(r"\bmg\b|odmer", _body))
+# starši: pot v šolo in okno po pouku
+_d = "2026-06-10"
+w = P6.school_walk(synth(), _d)
+check("adhd/starši: pot v šolo v lepem vremenu", w and w[0] == 0 and "občutena 20 °C" in w[1] and "temno" not in w[1])
+w = P6.school_walk(synth(shortwave_radiation=0), _d)
+check("adhd/starši: pot v šolo v temi je zmerna ovira in piše »še temno«", w and w[0] >= 2 and "še temno" in w[1])
+w = P6.school_walk(synth(precipitation_probability=80), _d)
+check("adhd/starši: verjeten dež na poti v šolo", w and "dež verjeten (80 %)" in w[1])
+check("adhd/starši: po 8. uri je pot v šolo že mimo, ob 8. uri šteje samo ura 8",
+      P6.school_walk(synth(), _d, 9) is None and P6.school_walk(synth(), _d, 8) is not None)
+check("adhd/starši: okno po pouku v lepem vremenu 13.00–20.00", P6.after_school(synth(), _d) == "13.00–20.00")
+check("adhd/starši: ob močnem dežju po pouku ni dobrega okna", P6.after_school(synth(precipitation=2, precipitation_probability=90), _d) == "ni dobrega okna")
+check("adhd/starši: po 19. uri je okno že mimo, okno se začne ob trenutni uri",
+      P6.after_school(synth(), _d, 20) is None and P6.after_school(synth(), _d, 16) == "16.00–20.00")
+_pgp, _ = D.build_page(P6.CFG, synth(), TODAY)
+check("adhd/starši: razdelek v strani, brez NaN", "Pot v šolo" in _pgp and "Najboljše okno po pouku" in _pgp and "Za starše" in _pgp)
 check("adhd: opis ≤ 160 znakov", all(len(P6.CFG["desc"](l)) <= 160 for l in P6.CFG["levels"]))
 
 # ── izris ──

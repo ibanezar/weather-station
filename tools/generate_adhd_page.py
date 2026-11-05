@@ -72,9 +72,61 @@ def hour_fn(c, h):
     return s
 
 
+SCHOOL_WALK_HOURS = (7, 8)        # urna vrednost z žigom T velja za T-1..T: zajame pot med 6.00 in 8.00
+AFTER_SCHOOL = (13, 19)
+
+
+def school_walk(c, d, from_hour=0):
+    """Pot v šolo: najslabša ura med 7.00 in 8.00 (raven kot pri oknu po urah) + občutena temperatura, dež in tema.
+    Vrne (raven, besedilo) ali None, če je čas že mimo."""
+    hrs = [h for h in SCHOOL_WALK_HOURS if h >= from_hour]
+    if not hrs:
+        return None
+    keys = [f"{d}T{h:02d}:00" for h in hrs]
+    lvl = max(hour_fn(c, k) for k in keys)
+    app = [c.at("apparent_temperature", k) for k in keys if c.at("apparent_temperature", k) is not None]
+    prob = max((c.at("precipitation_probability", k) or 0 for k in keys), default=0)
+    dark = any((c.at("shortwave_radiation", k) is not None and c.at("shortwave_radiation", k) < 10) for k in keys)
+    parts = [f"občutena {seo.num(min(app), 0)} °C"] if app else []
+    if prob >= 50:
+        parts.append(f"dež verjeten ({seo.num(prob, 0)} %)")
+    if dark:
+        parts.append("še temno")
+    return lvl, ", ".join(parts) or "model ne vrača podatka"
+
+
+def after_school(c, d, from_hour=0):
+    """Najboljše okno po pouku (13.00–19.00) ali besedilo, zakaj ga ni. None = že mimo."""
+    sc = D.hour_scores(CFG, c, d, AFTER_SCHOOL[0], AFTER_SCHOOL[1], max(from_hour, AFTER_SCHOOL[0]))
+    if not sc:
+        return None
+    win = D.best_window(sc)
+    return D.fmt_hours(*win) if win else "ni dobrega okna"
+
+
+def parent_html(c, today):
+    """Cel dan, ne od trenutne ure: stran je posnetek, ki ga cron zgradi ob poljubni uri (zamuja tudi po več ur),
+    »že mimo« bi bil pogosto napačen. Zato from_hour tu ni uporabljen (funkciji ga znata zaradi testov)."""
+    rows = []
+    for i, label in enumerate(("Danes", "Jutri")):
+        d = (today + datetime.timedelta(days=i)).isoformat()
+        w = school_walk(c, d)
+        walk = f"<strong>{esc(CFG['levels'][w[0]])}</strong> · {esc(w[1])}"
+        a = after_school(c, d)
+        rows.append(f"    <tr><th>{label}</th><td>{walk}</td><td>{esc(a)}</td></tr>")
+    return f'''  <h2>Za starše: pot v šolo in čas po pouku</h2>
+  <p class="archive-intro">Dva praktična trenutka dneva: kako bo na poti v šolo (med 7.00 in 8.00) in kdaj je po pouku (13.00–19.00) najboljše okno za gibanje na prostem. Za šolske dni; ob vikendih in počitnicah glejte okno po urah spodaj.</p>
+  <div class="table-scroll" tabindex="0"><table class="stats">
+    <tr><th></th><td>Pot v šolo (7.00–8.00)</td><td>Najboljše okno po pouku</td></tr>
+{chr(10).join(rows)}
+  </table></div>
+  <p class="muted-note">Modelska napoved. Raven poti v šolo je enaka kot pri oknu po urah; »še temno« pomeni, da zunaj ob tisti uri še ni dnevne svetlobe (poskrbite za odsevnike).</p>'''
+
+
 def sections(cfg, c, days, today):
     """Razdelek »Kaj vemo in česa ne«: brez tega bi stran delovala, kot da vreme dokazano vpliva na ADHD."""
-    return {"after_cards": f'''  <h2>Kaj o vremenu in ADHD vemo – in česa ne</h2>
+    return {"after_hero": parent_html(c, today),
+            "after_cards": f'''  <h2>Kaj o vremenu in ADHD vemo – in česa ne</h2>
   <div class="dv-card" style="font-size:.92rem">
     <div class="dv-grp" style="--gc:var(--g-1)"><h3>{D.icon("b", 18)}Česa ne vemo</h3>
       <p>Trdnih dokazov, da bi vreme (tlak, veter, vlaga, temperatura) samo po sebi poslabšalo simptome ADHD, ni. Zato ocena ne napoveduje simptomov in vremena ne obravnava kot sprožilca.</p></div>
@@ -91,10 +143,10 @@ def sections(cfg, c, days, today):
 CFG = {
     "url": "/adhd/", "slug": "adhd", "crumb": "Vreme in ADHD",
     "short": "Vreme in ADHD",
-    "title": "Vreme in ADHD: gibanje, spanje in vročina za 5 dni",
-    "h1": "Vreme in ADHD: gibanje, spanje in vročina",
-    "meta": "Dež, mraz, vročina, veter, nevihte, topla noč in svetloba",
-    "kicker": "Gibanje in spanje danes · Zgornja Savinjska dolina",
+    "title": "Vreme in ADHD pri otrocih: gibanje in spanje, 5 dni",
+    "h1": "Vreme in ADHD pri otrocih: gibanje, spanje in vročina",
+    "meta": "Za starše otrok z ADHD: dež, mraz, vročina, veter, nevihte, topla noč in svetloba",
+    "kicker": "Za starše: gibanje in spanje danes · Zgornja Savinjska dolina",
     "levels": ["ugodno", "dobro", "zahtevno", "težavno"],
     "advice": [
         "Ugodni pogoji za gibanje na prostem in spanje. Izkoristite dnevno svetlobo.",
@@ -140,12 +192,14 @@ CFG = {
         ("Zakaj stran ocenjuje gibanje na prostem?", "Pri otrocih z ADHD so v majhni raziskavi (17 otrok; Faber Taylor in Kuo, 2009) po sprehodu v parku bolje reševali nalogo pozornosti kot po sprehodu po mestu. Vzorec je majhen, zato je to spodbuda za preizkus, ne zagotovilo."),
         ("Ali vročina vpliva na zdravila za ADHD?", "Nekatera zdravila lahko vplivajo na potenje, žejo in apetit, zato je v vročini smiselno piti več in iskati senco. Zdravil zaradi vremena ne spreminjajte sami; vprašajte zdravnika ali lekarnika."),
         ("Zakaj ocena upošteva toplo noč?", "Težave s spanjem so pri ADHD pogoste, tople noči pa spanje dodatno motijo. Ocena uporablja napoved zunanje najnižje temperature (od 20 °C naprej je tropska noč); temperature v spalnici ne pozna."),
+        ("Ali naj otroka ob slabem vremenu pustim brez gibanja?", "Ne nujno. Ob dežju ali mrazu poskusite krajši odmor na prostem v ugodnejšem delu dneva ali gibanje v zaprtem prostoru (stopnice, raztezanje, kratki odmori med nalogami). Stran ne trdi, da je gibanje zdravilo; je le pogoj, ki ga vreme olajša ali otežuje."),
+        ("Za koga je stran namenjena?", "Predvsem za starše otrok z ADHD, ki načrtujejo pot v šolo, čas po pouku in popoldanske dejavnosti. Uporabna je tudi za odrasle, a oceno razlagajte enako: kot pogoje za navade, ne kot napoved simptomov."),
         ("Ali je stran zdravniški nasvet?", "Ne. Je pregled vremenskih pogojev iz modelske napovedi. Za diagnozo, zdravljenje in zdravila se obrnite na zdravnika."),
     ],
     "links": [("/vreme-recica-ob-savinji/", "Vreme Rečica ob Savinji →"), ("/biovreme/", "Biovreme →"),
               ("/astma/", "Vreme in astma →"), ("/migrena/", "Vreme in migrena →"),
               ("/vreme-za-kolesarje/", "Vreme za kolesarje →"), ("https://www.arso.gov.si/", "ARSO")],
-    "desc": lambda lvl: f"Vreme in ADHD danes: {lvl}. Ocena za 5 dni, kako vreme olajša ali otežuje gibanje na prostem, spanje in vročino, z oknom za gibanje po urah.",
+    "desc": lambda lvl: f"Vreme in ADHD pri otrocih danes: {lvl}. Za starše: pot v šolo, okno za gibanje po pouku, spanje in vročina za 5 dni.",
     "sections": sections,
 }
 
