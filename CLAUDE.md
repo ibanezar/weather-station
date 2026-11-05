@@ -2987,6 +2987,17 @@ Po referenci IMSS (časovni trak s predvajanjem, klik na točko) in pilulah »Li
   `astma-forecast.yml` je ukinjen: `/astma/` teče v `vsakdan-forecast.yml`, ker oba piše isto datoteko ocen.
 - Ikona glave z bliskom (`img/migrena/glava-blisk.png`) je Filipova slika; ime izvirnika (`3998088.png`) kaže na Flaticon, licenco/navedbo preveri on.
 
+## Vreme in ADHD (`/adhd/`, 5. 11. 2026)
+
+Stran po vzorcu »vreme za …« (`tools/generate_adhd_page.py` na `day_score_common.py`, `vsakdan-forecast.yml`, opozorila po ocenah dobi sama). **Razlika od `/migrena/` in `/astma/`: za vpliv vremena NA SIMPTOME ADHD ni
+trdnih dokazov, zato stran ocene ne piše kot »sprožilce simptomov«.** Meri pogoje za navade, ki jih vreme res spreminja: gibanje na prostem (dež, mraz, veter, nevihta), vročino (in zdravila: samo splošna opomba, brez imen in odmerkov) in toplo
+noč (spanje; zunanja napoved, ne spalnica), svetloba je 1 točka. Pragovi so naši, ne klinični (`th` = 1/2/5). **Ne dodajaj dejavnikov tipa »tlak/veter/vlaga sproži nemir« brez dokaza**; test (`test_day_pages.py`) zavrne besede »sproži simptome/napad/nemir«.
+
+- Noč za zadnji dan napovedi ni na voljo (jutra po njem ni v napovedi): ocena 0 točk z besedilom »še ni na voljo«, ne ugibanje (`night_min()`).
+- Raziskava v razdelku (Faber Taylor in Kuo, 2009, 17 otrok) je navedena kot majhna; novih trditev o ADHD ne dodajaj brez vira in brez omilitve. Zdravil zaradi vremena stran ne svetuje spreminjati.
+- Dnevnik/analiza (kot na `/migrena/`) **ni narejena**; možen naslednji korak. Ker ima stran gradnik opozoril, je v `zasebnost.html` ADHD naveden skupaj z ostalimi stranmi.
+- Prva stran nastane ob prvem teku `vsakdan-forecast.yml` (ročno poženi po mergu); do takrat je v CORE, a `adhd/index.html` še ne obstaja.
+
 ## Stran za podjetja (`/podjetja/`, 30.–31. 10. 2026)
 
 Pristajalna stran za oglase (kmetije, turizem, gradbeništvo, občine) z obrazcem za povpraševanje. Generator `tools/generate_podjetja_page.py`, ročno pisana `podjetja/podjetja.css` in `podjetja.js`. **Podatke osvežuje `podjetja-page.yml`** (od 2. 11. 2026, glej spodaj).
