@@ -78,6 +78,11 @@ jobs:
         run: |
           python3 tools/validate_history.py "${{ steps.month.outputs.month }}" "${{ steps.before.outputs.count }}"
 
+      # CSV z dnevnimi meritvami (citiranje, Dataset Search, Zenodo): izpeljan iz history.json, brez dni iz reanalize in brez notranjih meritev.
+      - name: Izvozi dnevne meritve kot CSV
+        if: steps.gate.outputs.proceed == 'true'
+        run: python3 tools/export_dataset.py
+
       - name: Pre-renderiraj zadnjo meritev v index.html
         if: steps.gate.outputs.proceed == 'true'
         run: python3 tools/inject_current_weather.py
@@ -95,11 +100,11 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet history.json index.html; then
+          if git diff --quiet history.json index.html podatki/ireica1-dnevni-podatki.csv; then
             echo "Ni novih podatkov."
           else
             MONTH="${{ steps.month.outputs.month }}"
-            git add history.json index.html
+            git add history.json index.html podatki/ireica1-dnevni-podatki.csv
             git commit -m "chore: posodobi history.json + statično meritev za $MONTH [skip ci]"
             # index.html pišejo tudi drugi pogosti delovni tokovi (prerender-current.yml
             # na 15-20 min, ARSO opozorila, storm-map …) — navaden "git push" je zato tu

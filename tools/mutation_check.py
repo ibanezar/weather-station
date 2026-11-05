@@ -163,6 +163,8 @@ MUTACIJE = [
     ("sevanje soseda: starost posnetka", "worker.js", "const VPS_MAX_AGE_MS = 15 * 60000;", "const VPS_MAX_AGE_MS = 150 * 60000;", "test_varpolje_solar.py"),
     ("sevanje soseda: zadrževanje", "worker.js", "const VPS_HOLD_MS = 72 * 3600000;", "const VPS_HOLD_MS = 720 * 3600000;", "test_varpolje_solar.py"),
     ("sevanje soseda: prag razlike", "tools/eval_sonce_varpolje.py", "BIG_DIFF_MIN = 30.0", "BIG_DIFF_MIN = 130.0", "test_varpolje_solar.py"),
+    ("izvoz podatkov: dnevi iz reanalize", "tools/export_dataset.py", 'EXCLUDE_SRC = {"era5"}', 'EXCLUDE_SRC = set()', "test_dataset_export.py"),
+    ("zenodo: osnutek brez --publish", "tools/zenodo_publish.py", "    if do_publish:\n", "    if True:\n", "test_dataset_export.py"),
     ("čuvaj videza: meja CLS", "tools/visual_watch.mjs", "export const CLS_MAX = 0.10;", "export const CLS_MAX = 0.60;", "test_visual_watch.mjs"),
     ("čuvaj videza: mediana teh tekov", "tools/visual_watch.mjs", "const m = median(v);", "const m = Math.max(...v);", "test_visual_watch.mjs"),
     ("hero stavek: vrh jutri (24 ur)", "app.js", "const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&", "const tomorrowPeak=false&&"),

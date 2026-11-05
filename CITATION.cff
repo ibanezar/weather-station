@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "Če uporabljate podatke ali kodo, navedite avtorja in vir (CC BY 4.0). If you use the data or code, please cite as below."
+type: dataset
+title: "Meteorec IREICA1: dnevne meritve vremenske postaje Rečica ob Savinji"
+abstract: >-
+  Dnevne zunanje meritve postaje IREICA1 v Rečici ob Savinji (Zgornja Savinjska dolina, Slovenija) od 7. 11. 2019:
+  temperatura, padavine, veter, vlaga. Datoteka podatki/ireica1-dnevni-podatki.csv, izpeljana iz history.json.
+authors:
+  - family-names: Eremita
+    given-names: Filip
+license: CC-BY-4.0
+url: "https://meteorec.si/podatki/"
+repository-code: "https://github.com/ibanezar/weather-station"
+keywords:
+  - weather station
+  - meteorology
+  - Slovenia
+  - Savinja
+# Po objavi na Zenodo (tools/zenodo_publish.py --publish) dodaj:  doi: "10.5281/zenodo.XXXXXXX"

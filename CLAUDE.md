@@ -2023,6 +2023,15 @@ Open-Meteo po vodilnem času (stolpci) ter toplotni tabeli (meseci, zadnji dnevi
 - Primerja se samo na dnevih, ko so napovedovali VSI viri (`_common_days()`); vrstica »Skupaj« v mesečni tabeli tega ne zagotavlja in je tako označena.
 - Nov graf na tej strani: strežniški izris + `aria-label` s številkami; legenda in oznake ob koncu črt, ne samo barva.
 
+## Podatki kot citirljiv nabor (`/podatki/`, Zenodo, 5. 11. 2026)
+
+Cilj (GEO, `docs/geo-plan-2026-10.md`: 14 % omemb, zmagamo tam, kjer je podatek samo naš): desetletni niz postaje naj bo **citirljiv vir**, ne samo JSON na strani.
+
+- `tools/export_dataset.py` → `podatki/ireica1-dnevni-podatki.csv` (v `update-history.yml`, isti commit kot `history.json`): **samo zunanje meritve**, dnevi z `src == "era5"` (reanaliza, ne meritev postaje) so izpuščeni, prazno polje je prazno (ne 0), enote v imenih stolpcev. Stran `/podatki/` šteje dni po istem pravilu (prej je v »2541 dni meritev« tiho štela tudi 5 dni reanalize).
+- Shema `#dataset` (`archive_dataset_schema()`): `distribution` je zdaj **seznam JSON + CSV** (ključ je bil v slovarju dvakrat, drugi je prepisal prvega); `identifier`/`sameAs` dobita DOI, **šele ko obstaja** (`data/dataset-metadata.json` → `doi`). DOI se ne izmišlja nikjer; `/podatki/` ima razdelek »Kako citirati« (brez DOI: URL + datum dostopa). `CITATION.cff` v korenu repozitorija.
+- **`tools/zenodo_publish.py` je ROČNO orodje in ni bilo nikoli pognano** (potrebuje `ZENODO_TOKEN`; zapisa z DOI ni mogoče umakniti). Privzeto naredi samo OSNUTEK na Zenodo (pregled na spletu), objava šele z `--publish`, preizkus z `--sandbox`; nova različica z `--new-version ID` (DOI koncepta ostane). Po objavi skript zapiše `doi` v `data/dataset-metadata.json`; nato `python3 tools/generate_podatki_page.py` in `doi:` v `CITATION.cff`. Zapis je **posnetek na datum izdaje** (različica = zadnji dan v CSV); ponovno objavi občasno (npr. ob koncu leta), ne dnevno.
+- Postaja je amaterska (Ecowitt, brez uradne kalibracije in presoje lokacije; domneva o senci senzorja, glej »Sonce v dolini«): to piše na strani in v opisu zapisa, ne olepšuj. Test: `tools/test_dataset_export.py` (v `parity.yml`: izvoz, lažen Zenodo odjemalec, shema).
+
 ## Test napovedi (`/test-napovedi/`) — primerjava modelov proti IREICA1
 
 Ločeno od `/tocnost-napovedi/` (ta meri samo ARSO+Open-Meteo+MTR pri D+1, dan za

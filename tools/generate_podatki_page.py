@@ -15,7 +15,7 @@ the site's GEO/AEO surface.
 Usage:
   python3 tools/generate_podatki_page.py
 """
-import os, statistics as st, sys
+import json, os, statistics as st, sys
 from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -53,11 +53,33 @@ def monthly_normals(hist):
 # Javni izvozi — (pot, kaj vsebuje, format). Samo datoteke, ki jih repozitorij
 # objavlja na GitHub Pages; test_sezona.py preveri, da vsaka obstaja.
 DOWNLOADS = [
+    ("/podatki/ireica1-dnevni-podatki.csv", "dnevne zunanje meritve postaje IREICA1 od 2019 kot CSV (samo meritve postaje, brez dni iz reanalize)", "CSV"),
     ("/history.json", "dnevne meritve postaje IREICA1 od 2019 (temperatura, padavine, vlaga, veter, tlak)", "JSON"),
     ("/test-napovedi/podatki.csv", "napovedi šestih modelov za D+1 do D+7 in izmerjene vrednosti", "CSV"),
     ("/forecast_verification.json", "dnevna primerjava napovedi ARSO, Open-Meteo, MTR, ECMWF AIFS in Google WeatherNext 2 z meritvijo", "JSON"),
     ("/napoved-modela.json", "trenutna napoved lokalnega modela MTR za Rečico ob Savinji", "JSON"),
 ]
+
+
+def doi_url():
+    """DOI zapisa na Zenodo (data/dataset-metadata.json → doi), ali None, dokler zapisa ni (tools/zenodo_publish.py)."""
+    try:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "dataset-metadata.json"), encoding="utf-8") as f:
+            d = json.load(f).get("doi")
+    except (OSError, ValueError):
+        return None
+    return f"https://doi.org/{d}" if d else None
+
+
+def cite_html(last_date):
+    """Kako citirati: trajni DOI, kadar obstaja; sicer naslov strani in datum dostopa. Izmišljenega DOI ni."""
+    year = last_date.year if hasattr(last_date, "year") else str(last_date)[:4]
+    doi = doi_url()
+    where = f'DOI: <a href="{doi}">{doi}</a>' if doi else 'URL: <a href="https://meteorec.si/podatki/">https://meteorec.si/podatki/</a> (trajni DOI še ni objavljen)'
+    return f'''  <h2>Kako citirati</h2>
+  <p class="archive-intro">Eremita, F. ({year}). <em>Meteorec IREICA1: dnevne meritve vremenske postaje Rečica ob Savinji</em>
+  [nabor podatkov, CC BY 4.0]. {where}. Navedite različico (zadnji dan v datoteki) ali datum dostopa. Datoteka ima samo zunanje
+  meritve; postaja je amaterska (senzorji Ecowitt, brez uradne kalibracije in presoje lokacije), ni ARSO-va merilna mreža.</p>'''
 
 
 def downloads_html():
@@ -119,7 +141,8 @@ def build_body(hist, facts):
          f'{seo.num(facts["annual_precip"], 0)} mm.' if facts.get("annual_precip") is not None else ""),
         (f'Meteorološka postaja IREICA1 v Rečici ob Savinji (366 m n. m., 46,325779° S, 14,921137° V) '
          f'neprekinjeno meri vreme od {seo.fmtd(first_date)}.'),
-        (f'Do {seo.fmtd(last_date)} je postaja IREICA1 zabeležila {facts["n_days"]} dni meritev.'),
+        (f'Do {seo.fmtd(last_date)} je postaja IREICA1 zabeležila {sum(1 for r in hist.values() if r.get("src") != "era5")} dni meritev '
+         f'(dnevi, ki jih history.json dopolni iz reanalize ERA5, niso všteti).'),
     ]
     facts_list = [f for f in facts_list if f]
     facts_html = "  <ul class=\"muted-note\" style=\"list-style:disc;padding-left:1.2rem;line-height:1.8\">\n" + "\n".join(
@@ -154,6 +177,8 @@ def build_body(hist, facts):
   <p class="archive-intro">Vse datoteke so javne in brez registracije, licenca CC BY 4.0 — navedi
   »Meteorec (meteorec.si), postaja IREICA1«.</p>
 {downloads_html()}
+
+{cite_html(last_date)}
 
   <h2>O postaji in podatkih</h2>
   <table class="stats">

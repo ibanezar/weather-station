@@ -218,3 +218,6 @@ jobs:
 
       - name: Test beleženja sevanja soseda in primerjave prvega žarka
         run: python3 tools/test_varpolje_solar.py
+
+      - name: Test izvoza podatkov (CSV), objave na Zenodo in sheme Dataset
+        run: python3 tools/test_dataset_export.py
