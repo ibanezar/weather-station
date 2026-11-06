@@ -4699,3 +4699,37 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #tab-forecast2 .sky-lg .ic{width:1em;height:1em}
 #tab-forecast2 .aifc-title .ic{width:1.1em;height:1.1em;vertical-align:-.15em;margin-right:.2rem}
 #tab-forecast2 .aifc-meta{font-size:var(--fs-xs)}
+
+/* Kartica MTR na naslovnici v isti podobi kot Obeti in hero (5. 11. 2026): glava s čipom, žig časa desno, pilula za preklop,
+   ploščice brez monospace in brez ugnezdene škatle »Kaj model popravi« */
+#tab-current #hmos-updated{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);white-space:nowrap;margin-left:auto}
+#tab-current .card:has(#hmos-chart) .chart-hdr{flex-wrap:nowrap;align-items:center;gap:.6rem}
+#tab-current .card:has(#hmos-chart) .chart-hdr>span:first-child{min-width:0;flex-wrap:wrap;row-gap:.3rem}
+#tab-current .mtr-seg{border-radius:var(--r-pill);background:var(--tile-bg);border-color:var(--tile-bd);margin:.1rem 0 .8rem}
+#tab-current .mtr-seg-btn{font-family:Inter,'Inter Fallback',sans-serif;font-size:var(--fs-sm);border-radius:var(--r-pill);padding:.4rem .9rem;min-height:36px}
+#tab-current .mtr-seg-btn.is-on{background:color-mix(in srgb,var(--text) 14%,transparent);box-shadow:none}
+#tab-current .mtr-legend{font-size:var(--fs-xs);gap:.3rem 1rem;margin-bottom:.5rem}
+#tab-current .mtr-days{gap:.6rem;margin-top:.8rem}
+#tab-current .mtr-day{padding:.8rem .9rem}
+#tab-current .mtr-day-hd{font-size:var(--fs-sm);font-weight:700}
+#tab-current .mtr-day-date,#tab-current .mtr-day-meta{font-family:Inter,'Inter Fallback',sans-serif;font-variant-numeric:tabular-nums}
+#tab-current .mtr-day-date{font-size:var(--fs-xs)}
+#tab-current .mtr-day-val{font-size:var(--fs-val)}
+#tab-current .mtr-day-unit{font-size:var(--fs-sm)}
+#tab-current .mtr-day-base{font-size:var(--fs-sm)}
+#tab-current .mtr-chip{font-size:var(--fs-xs);padding:.2rem .55rem}
+#tab-current .mtr-day-meta{font-size:var(--fs-xs);line-height:1.45;opacity:1;margin-top:.4rem}
+#tab-current .mtr-why{background:none;border:0;border-radius:0;padding:0;margin-top:.8rem}
+#tab-current .mtr-why-hd{font-size:var(--fs-xs);letter-spacing:.08em;margin-bottom:.5rem}
+#tab-current .mtr-why-tiles{gap:.6rem;margin:.5rem 0 .7rem}
+#tab-current .mtr-why-tile{background:var(--tile-bg);border:1px solid var(--tile-bd);border-radius:var(--tile-r);padding:.7rem .8rem}
+#tab-current .mtr-why-lbl{font-size:var(--fs-xs)}
+#tab-current .mtr-why-val{font-size:var(--fs-val)}
+#tab-current .mtr-why-sub{font-size:var(--fs-xs)}
+#tab-current .mtr-why-txt{font-size:var(--fs-sm)}
+#tab-current .mtr-jump-card{margin-top:.8rem!important}
+@media(max-width:520px){
+  #tab-current .card:has(#hmos-chart) .chart-hdr{flex-wrap:wrap;gap:.3rem .6rem}
+  #tab-current #hmos-updated{margin-left:0;width:100%}
+}
+#tab-current .mtr-chip{font-family:Inter,'Inter Fallback',sans-serif;font-variant-numeric:tabular-nums}

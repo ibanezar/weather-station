@@ -8124,8 +8124,8 @@ function _renderMtrMount(idp){
   const upd=document.getElementById(idp+'updated');
   if(upd&&st.data.generated_at){
     const t=new Date(st.data.generated_at);
-    upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
-      +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    upd.textContent='posod. '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
+      +' '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }
   const leg=document.getElementById(idp+'legend');
   if(leg)leg.innerHTML=
