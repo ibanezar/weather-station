@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-05",
-  "issued": "05.11.2026 7:00 CET",
-  "issued_at": "2026-11-05T07:30:35.570763+01:00",
-  "top_station": "Cerklje - Letališče",
-  "top_mm": 2,
+  "date": "2026-11-06",
+  "issued": "06.11.2026 7:00 CET",
+  "issued_at": "2026-11-06T07:30:36.453921+01:00",
+  "top_station": "Bilje",
+  "top_mm": 0,
   "n_stations": 20,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-05.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-05-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-11-06.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-06-story.jpg"
 }
