@@ -110,9 +110,9 @@ check("indoor" not in G.load_data.__doc__.lower().replace("brez notranjih", ""),
 import html as _H
 # fotografije so AI-ilustracije: vsaka je označena, pod primeri je opozorilo, nobena ni predstavljena kot referenca
 imgs = re.findall(r'<img src="/podjetja/img/([a-z-]+)\.webp" alt="([^"]*)"', page)
-check({n for n, _ in imgs} >= {"primer-kmetija", "primer-kamp", "primer-gradbenistvo", "primer-obcina"}, "primeri imajo fotografije")
+check({n for n, _ in imgs} >= {c["img"] for c in G.CASES if c["img"]}, "primeri imajo fotografije")
 check(all(a.strip() and a.startswith("Ilustracija") for n, a in imgs), "vsaka fotografija ima alt, ki se začne z »Ilustracija«")
-check(page.count("<figcaption>Ilustracija</figcaption>") == 5, "vsaka od petih fotografij ima vidno oznako »Ilustracija«")
+check(page.count("<figcaption>Ilustracija</figcaption>") == 1 + sum(1 for c in G.CASES if c["img"]), "vsaka fotografija (hero + primeri) ima vidno oznako »Ilustracija«")
 check(_H.escape(G.ILLUS_NOTE) in page and "ustvarjene z umetno inteligenco" in page, "opozorilo, da so fotografije ilustrativne, je na strani")
 check(not re.search(r"naše stranke|naši kupci|referenc\w* (kupc|stran)|zaupajo nam", page, re.I), "brez izmišljenih referenc")
 for f in ("primer-kmetija", "primer-kamp", "primer-gradbenistvo", "primer-obcina", "postaja-detajl"):
