@@ -2864,6 +2864,17 @@ Referenca sta hero in »Vremenski obeti« (kartica z ikono v čipu, znotraj plo�
 - **Ni narejeno (pregled `tabs2.mjs`, 5. 11. 2026):** naslovnica (`#tab-current`) je čista (DOM sken: ni emoji in decimalnih pik, razen datumov in licence); ostali zavihki imajo še ~400 emoji in decimalnih pik, največ v »Po meri«, »Življenje«, »Podnebje«, »Dolgoročna«, »AI«, »Analiza« (vsi poimenovani v pregledu). Vsak zavihek je svoj krog dela; vrstni red po obiskanosti: Po meri, Dolgoročna, AI, Podnebje.
 - Po spremembi: `npm run minify && node tools/critical_css.mjs` in commit `index.html` (kritični CSS je izpeljan).
 
+### Naslovnica na telefonu: temperatura nad pregibom (6. 11. 2026)
+
+Filip: zgornji del je »natrpan, preveč vsega namesto vremenskih podatkov«. Pred spremembo je bila temperatura na telefonu (390 × 844) pri 591–644 px (~76 % višine), po njej pri ~174 px (~21 %). Samo ≤ 560 px (blok »Naslovnica na telefonu« na koncu `style.css`); širši zasloni so pikselsko enaki kot prej.
+
+- **Glava je ena vrstica** (logotip levo, Meni desno, levo od fiksnega gumba teme). Pilula postaje (`.stn-badge`) odpade (isto piše vrstica v hero), MeteoGobar/Črnivec/MeteoZima in preklop Preprosto/Napredno so **v meniju** (`.qn-mob`, `.qn-mode` v `index.html`; stanje preklopa sledi `dataset.mode` ob odprtju menija). Na ≤ 360 px je Meni samo ikona.
+- **Statusna vrstica je ena vrstica stalne višine** (`min-height:40px`, pilula »V živo« + ikone Deli, Osveži, Obvestila, Moja opozorila, Namesti; besedila gumbov so skrita s `font-size:0`, imena ostanejo). »Posodobljeno: čas« (`.st-upd`) in lokalni čas sta na telefonu skrita: hero piše »pred N min«. Nov gumb v tej vrstici mora biti ikona 38 px, sicer se vrstica prelomi (CLS).
+- **Tekoči trak (`#ticker-wrap`) je na telefonu skrit** (ostane v DOM, JS ga polni). Vrnitev: odstrani `.ticker-wrap` iz bloka.
+- **Hero je pred zavihki.** `main` je stolpec z `order`, `#tab-current.active` je `display:contents`, da je `.hero` neposreden element in lahko stoji pred `.tab-nav-wrap`. Vrstni red: 0 ponudba pogleda, status, odštevalnik, živi dogodek, **nowcast (ostane nad herom, Filipova odločitev 26. 10.)** → 1 hero → 2 zavihki → 3 vse ostalo (teaserji, kartice, ostali zavihki). Na drugih zavihkih hera ni (ni aktiven), zavihki so tam takoj pod statusom. JS ne bere škatle `#tab-current` (samo `classList`), zato `display:contents` ne moti. **Nov element nad herom naj dobi `order:0` samo, če odgovarja na »kakšno je vreme zdaj«**; privzeto `order:3`.
+- Posledica: zavihki Napoved/MTR … so pod herom (~1,6 zaslona). Če se pokaže, da jih obiskovalci iščejo, jih je mogoče vrniti nad hero z enim pravilom (`main>.tab-nav-wrap{order:-1}`) ali dodati spodnji navigaciji.
+- Po spremembi: `npm run minify && node tools/critical_css.mjs` in commit `index.html`.
+
 ### Hero B: ploščice namesto ene škatle (1. 11. 2026)
 
 Filip je hero kartico imel za »veliko zmedo« (pred prvo meritvijo devet blokov petih slogov, podvojene informacije). Izbral je varianto B iz štirih predlogov. Samo videz in razporeditev, id-ji so ostali:

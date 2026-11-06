@@ -4733,3 +4733,69 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
   #tab-current #hmos-updated{margin-left:0;width:100%}
 }
 #tab-current .mtr-chip{font-family:Inter,'Inter Fallback',sans-serif;font-variant-numeric:tabular-nums}
+
+/* ── Naslovnica na telefonu: temperatura nad pregibom (6. 11. 2026) ───────────────────────────────────────
+   Nad hero kartico je bilo 12 elementov (temperatura pri ~76 % višine zaslona), od tega podvojeni: pilula postaje
+   (isto piše vrstica v hero), »Zdaj: 5,4 °C« v tekočem traku (isto kot hero), »Posodobljeno« (hero piše »pred N min«).
+   Zdaj (samo ≤ 560 px; širši zasloni so nespremenjeni):
+   · glava je ena vrstica: logotip levo, Meni desno (levo od fiksnega gumba za temo); MeteoGobar/Črnivec/MeteoZima in
+     preklop Preprosto/Napredno so v meniju (HTML: .qn-mob, .qn-mode); pilula postaje in podnaslov odpadeta;
+   · statusna vrstica je ena vrstica (pilula »V živo« + ikone Deli, Osveži, Obvestila, Moja opozorila); višina je stalna (CLS);
+   · tekoči trak je skrit (ostane v DOM);
+   · HERO JE PRED ZAVIHKI: main je stolpec z `order`; #tab-current je med aktivnim zavihkom `display:contents`, da je
+     hero njegov neposreden element in ga lahko postavimo pred .tab-nav-wrap. Na drugih zavihkih hera ni (ni
+     aktiven), zavihki so tam takoj pod statusom kot prej. Nowcast (Filipova odločitev 26. 10.) ostane nad herom.
+   Nova stvar nad herom naj dobi `order:0` samo, če je odgovor na »kakšno je vreme zdaj«; sicer ostane privzeti `order:3`. */
+.qn-mob,.qn-mob-sep,.qn-mode{display:none}
+@media (max-width:560px){
+  .wrap{padding-top:0}
+  header{flex-direction:row;flex-wrap:wrap;justify-content:space-between;align-items:center;text-align:left;padding:1rem 0 .55rem}
+  .title-row{justify-content:flex-start;gap:.5rem}
+  .station-logo{width:34px;height:34px}
+  .title-row h1{font-size:1.55rem}
+  header .stn-badge,header .sub-loc{display:none}
+  header .sskj-entry{flex:1 0 100%;order:9;margin-top:0}
+  header .sskj-entry.open{margin-top:.45rem}
+  /* desno ostane prostor za fiksni gumb teme (40 px + 1 rem od roba, wrap ima 1,25 rem odmika) */
+  .quick-nav{margin:0 2.75rem 0 0;flex:none;flex-wrap:nowrap}
+  .quick-nav>a{display:none}
+  .qn-drop-menu{left:auto;right:0}
+  .menu-hint{left:auto;right:0}
+  .menu-hint::before{left:auto;right:1.1rem}
+  a.qn-mob{display:flex}
+  .qn-mob-sep{display:block}
+  .qn-mode{display:flex;align-items:center;gap:.35rem;padding:.3rem .7rem .4rem}
+  .qn-mode-lbl{margin-right:auto;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .qn-mode-btn{border:1px solid var(--card-border);background:none;color:var(--muted);border-radius:999px;padding:.32rem .72rem;font:600 .78rem 'Inter','Inter Fallback',sans-serif;cursor:pointer}
+  .qn-mode-btn[aria-pressed="true"]{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;border-color:transparent}
+
+  .mode-switch-wrap,.ticker-wrap{display:none}
+
+  /* statusna vrstica: ena vrstica, stalna višina */
+  .status{min-height:40px;flex-wrap:nowrap;justify-content:flex-start;align-content:center;gap:.35rem;padding:.1rem 0 .5rem;font-size:.7rem}
+  .status .st-upd,.status #local-time{display:none}
+  .status>.live-pill{order:1;margin-right:auto;min-width:0;overflow:hidden}
+  .status #status-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}  /* dolgo stanje (»Meritev stara …«) ne sme prelomiti vrstice: skok vsega pod njo */
+  .status>.share-btn{order:2}
+  .status>.status-actions{order:3;flex:0 0 auto;justify-content:flex-end;gap:.35rem}
+  .status>.share-btn,.status-actions .share-btn,.status-actions .install-btn,.status-actions .notif-btn.labeled{
+    width:38px;height:38px;padding:0;gap:0;border-radius:50%;font-size:0;justify-content:center}
+  .status>.share-btn .ic,.status-actions .ic{width:18px;height:18px}
+  .status-actions .notif-group{gap:.35rem}
+  .notif-hint{left:auto;right:-.2rem;transform:none}
+  .notif-hint::before{left:auto;right:1.1rem;transform:rotate(45deg)}
+  .countdown-wrap{margin:0 0 .75rem}
+
+  /* hero pred zavihki */
+  main{display:flex;flex-direction:column}
+  main>*{order:3}
+  main>.mode-intro,main>.status,main>.countdown-wrap,main>.live-event-wrap,main>.nowcast{order:0}
+  main>.tab-nav-wrap{order:2}
+  #tab-current.active{display:contents}
+  #tab-current>*{order:3}
+  #tab-current>.hero{order:1}
+}
+@media (max-width:360px){
+  .title-row h1{font-size:1.4rem}
+  .qn-drop summary .qn-txt{display:none}
+}
