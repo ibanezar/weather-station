@@ -175,6 +175,11 @@ CORE = {
     # Meteorec Šola — gradiva o vremenu za osnovno šolo, glej CLAUDE.md.
     # Meteorec za podjetja: pristajalna stran za oglase (tools/generate_podjetja_page.py). /podjetja/hvala/ je noindex.
     "podjetja/":                          ("monthly", "0.7"),
+    # Podstrani po dejavnostih (generate_podjetja_page.py: SEG_PAGES): vsaka je svoj iskalni cilj.
+    "podjetja/kmetije/":                  ("monthly", "0.6"),
+    "podjetja/turizem/":                  ("monthly", "0.6"),
+    "podjetja/gradbenistvo/":             ("monthly", "0.6"),
+    "podjetja/obcine/":                   ("monthly", "0.6"),
     "sola/":                              ("weekly",  "0.7"),
     "sola/naravoslovni-dan-vreme/":       ("monthly", "0.6"),
     "sola/dezni-dnevnik/":                ("monthly", "0.6"),

@@ -58,19 +58,19 @@ PACKAGES = [
 ]
 
 CASES = [
-    dict(id="kmetija", dej="Kmetijstvo, sadjarstvo, vinogradništvo", title="Kmetija in sadovnjak",
+    dict(id="kmetija", page="kmetije", dej="Kmetijstvo, sadjarstvo, vinogradništvo", title="Kmetija in sadovnjak",
          text="Pozeba, toča in vlaga tal na vašem nasadu, ne v sosednji dolini. Opozorilo dobite, ko je še čas za ukrep.",
          tags=["Pozeba", "Toča", "Vlaga tal"], img="primer-kmetija", w=1200, h=800,
          alt="Ilustracija: vremenska postaja v sadovnjaku z jabolki ob jutranji megli"),
-    dict(id="kamp", dej="Turizem in gostinstvo", title="Kamp in turizem",
+    dict(id="kamp", page="turizem", dej="Turizem in gostinstvo", title="Kamp in turizem",
          text="Nevihte, višina vode in veter za goste na prostem. Odločitev o terasi ali prireditvi temelji na meritvi pri vas.",
          tags=["Nevihte", "Višina vode", "Veter"], img="primer-kamp", w=800, h=450,
          alt="Ilustracija: vremenska postaja ob glamping šotorih in lesenih kočah v hribovitem okolju"),
-    dict(id="gradbenistvo", dej="Gradbeništvo", title="Gradbeništvo",
+    dict(id="gradbenistvo", page="gradbenistvo", dej="Gradbeništvo", title="Gradbeništvo",
          text="Veter pri delu na višini ter dež in temperatura pri vgrajevanju betona. Beton ne čaka na napačno napoved.",
          tags=["Veter", "Dež", "Temperatura"], img="primer-gradbenistvo", w=800, h=450,
          alt="Ilustracija: vremenska postaja na gradbišču z dvigalom in delavcema v zaščitni opremi"),
-    dict(id="obcina", dej="Občina ali javna ustanova", title="Občina in prireditve",
+    dict(id="obcina", page="obcine", dej="Občina ali javna ustanova", title="Občina in prireditve",
          text="Požarna ogroženost in neurja za prebivalce ter odločitve o prireditvah na prostem, vtičnik za občinsko spletno stran.",
          tags=["Požarna ogroženost", "Neurja", "Vtičnik"], img="primer-obcina", w=800, h=450,
          alt="Ilustracija: vremenska postaja na mestnem trgu med pripravo prireditve"),
@@ -572,7 +572,8 @@ def case_card(c):
           <h3>{ic(CASE_ICON[c["id"]], "ic-t")}{e(c["title"])}</h3>
           <p>{e(c["text"])}</p>
           <ul class="tags" aria-label="Kaj spremljate">{tags}</ul>
-          <a class="link" href="#povprasevanje" data-segment="{c["id"]}">Pridobite ponudbo {ARROW}</a>
+          <div class="case-links"><a class="link" href="{seg_url(SEG_BY_SLUG[c["page"]])}">Več za {e(SEG_BY_SLUG[c["page"]]["nav"].lower())} {ARROW}</a>
+          <a class="link link-sec" href="#povprasevanje" data-segment="{c["id"]}">Pridobite ponudbo</a></div>
         </div>
       </article>'''
 
@@ -589,24 +590,27 @@ def marquee_html():
     return "".join(f"<li>{e(m)}</li>" for m in MARQUEE)
 
 
-def faq_items():
+def faq_items(items=None):
     return "\n".join(
-        f'      <details class="rz"><summary><span>{e(q)}</span><i>{PLUS}</i></summary><div class="odg"><div><p>{e(a)}</p></div></div></details>' for q, a in faq_list())
+        f'      <details class="rz"><summary><span>{e(q)}</span><i>{PLUS}</i></summary><div class="odg"><div><p>{e(a)}</p></div></div></details>'
+        for q, a in (items or faq_list()))
 
 
-def schema_blocks():
-    page = {"@context": "https://schema.org", "@type": "WebPage", "@id": SITE + URL, "name": TITLE,
-            "description": DESC, "url": SITE + URL, "inLanguage": "sl",
+def schema_blocks(url=URL, title=TITLE, desc=DESC, audience="Kmetije, turizem, gradbeništvo, občine", faq=None,
+                  crumbs=None):
+    faq = faq or faq_list()
+    page = {"@context": "https://schema.org", "@type": "WebPage", "@id": SITE + url, "name": title,
+            "description": desc, "url": SITE + url, "inLanguage": "sl",
             "isPartOf": {"@id": SITE + "/#website"}, "image": SITE + "/og/podjetja.jpg"}
     service = {
-        "@context": "https://schema.org", "@type": "Service", "@id": SITE + URL + "#storitev",
+        "@context": "https://schema.org", "@type": "Service", "@id": SITE + url + "#storitev",
         "name": "Vremenska postaja za podjetja z nadzorno ploščo in opozorili",
         "serviceType": "Postavitev in vzdrževanje vremenske postaje",
-        "description": DESC,
+        "description": desc,
         "provider": {"@type": "Organization", "name": "Meteorec", "url": SITE + "/",
                      "founder": {"@id": SITE + "/#person"}},
         "areaServed": {"@type": "AdministrativeArea", "name": "Zgornja Savinjska dolina"},
-        "audience": {"@type": "BusinessAudience", "name": "Kmetije, turizem, gradbeništvo, občine"},
+        "audience": {"@type": "BusinessAudience", "name": audience},
     }
     if SHOW_PRICES:
         service["hasOfferCatalog"] = {
@@ -617,13 +621,18 @@ def schema_blocks():
                                        "priceCurrency": "EUR", "valueAddedTaxIncluded": False},
                 "description": "; ".join(p["items"]),
             } for p in PACKAGES]}
-    faq = {"@context": "https://schema.org", "@type": "FAQPage",
-           "mainEntity": [{"@type": "Question", "name": q,
-                           "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq_list()]}
-    crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Meteorec", "item": SITE + "/"},
-        {"@type": "ListItem", "position": 2, "name": "Za podjetja"}]}
-    return ld(page) + ld(service) + ld(faq) + ld(crumbs)
+    faqld = {"@context": "https://schema.org", "@type": "FAQPage",
+             "mainEntity": [{"@type": "Question", "name": q,
+                             "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}
+    crumbs = crumbs or [("Meteorec", SITE + "/"), ("Za podjetja", None)]
+    items = []
+    for i, (name, item) in enumerate(crumbs, 1):
+        d = {"@type": "ListItem", "position": i, "name": name}
+        if item:
+            d["item"] = item
+        items.append(d)
+    bc = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items}
+    return ld(page) + ld(service) + ld(faqld) + ld(bc)
 
 
 # Vzorčne vrednosti (SAMPLE): dokler se prava meritev ne naloži, telefon nikoli ni prazen. Označene so kot
@@ -673,71 +682,89 @@ FIELD = {
 }
 
 
-def build_main():
+def cfg_json(segment=None, dej=None):
     cfg = {"worker": WORKER, "pixel": META_PIXEL_ID, "email": CONTACT_EMAIL, "showPrices": SHOW_PRICES,
            "sim": {"once": SIM_ONCE, "month": SIM_MONTH}}
-    head = page_head(TITLE, DESC, URL, "index, follow, max-image-preview:large", og_title="Vreme na vašem polju",
-                     extra=schema_blocks())
-    vat = (f'<p class="fine">Vse cene so izhodiščne in brez DDV; obračunamo ga po stopnji {VAT_PCT} %. '
-           f'Končno ceno določimo po ogledu lokacije. Skupaj v prvem letu = enkratna investicija + 12 mesečnih naročnin. Pri mobilnem internetu podatkovni paket (SIM) plačate posebej.</p>') if SHOW_PRICES else ""
-    sim_note = ""
-    series, errs = load_data()
-    return head + f'''<body>
-<a class="skip" href="#vsebina">Preskoči na vsebino</a>
+    if segment:
+        cfg["segment"] = segment      # podstran dejavnosti: obrazec dobi dejavnost vnaprej
+        cfg["dej"] = dej
+    return json.dumps(cfg, ensure_ascii=False)
+
+
+def top_html(nav, mob):
+    """Glava + mobilni meni. nav/mob: seznami (href, besedilo); gumb »Pridobite ponudbo« je vedno zadnji."""
+    links = "".join(f'<a href="{h}">{e(t)}</a>' for h, t in nav)
+    mlinks = "".join(f'<a href="{h}">{e(t)}</a>' for h, t in mob)
+    return f'''<a class="skip" href="#vsebina">Preskoči na vsebino</a>
 <header class="top"><div class="wrap top-in">
   <a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a>
-  <nav aria-label="Razdelki"><a href="#primeri">Primeri</a><a href="#pozeba">Dokaz</a><a href="#paketi">Paketi</a><a href="#faq">Vprašanja</a><a class="btn btn-sm" href="#povprasevanje" data-cta="nav">Pridobite ponudbo</a></nav>
+  <nav aria-label="Razdelki">{links}<a class="btn btn-sm" href="#povprasevanje" data-cta="nav">Pridobite ponudbo</a></nav>
   <button class="burger" id="burger" type="button" aria-label="Odpri meni" aria-expanded="false" aria-controls="mob"><i></i><i></i></button>
 </div></header>
 <nav class="mob" id="mob" aria-label="Meni">
-  <a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#kako">Kako poteka</a><a href="#faq">Vprašanja</a>
+  {mlinks}
   <a class="btn btn-hero" href="#povprasevanje" data-cta="meni">Pridobite ponudbo</a>
 </nav>
-<main id="vsebina">
-<section class="hero" aria-labelledby="h1">
-  <div class="aurora" aria-hidden="true"><i></i><i></i></div>
-  <div class="wrap hero-grid">
-    <div class="hero-text">
-      <p class="tag">METEOREC ZA PODJETJA</p>
-      <p class="old">Vreme v sosednji dolini.</p>
-      <h1 id="h1"><span class="rv"><span style="--i:0">Vreme</span></span> <span class="rv"><span style="--i:1">na</span></span> <mark><span class="rv"><span style="--i:2">vašem</span></span> <span class="rv"><span style="--i:3">polju.</span></span></mark></h1>
-      <p class="lead">Vaša lastna vremenska postaja z meritvami na vaši lokaciji in opozorili na telefon. Postavimo jo, nastavimo in predamo. Manj tveganja, boljše odločitve.</p>
-      <div class="row">
-        <a class="btn btn-hero" href="#povprasevanje" data-cta="hero">Pridobite ponudbo</a>
-        <a class="btn btn-line" href="#paketi" data-cta="hero-paketi">Oglejte si pakete</a>
-      </div>
-      <ul class="trust" aria-label="Zakaj Meteorec">{trust_html()}</ul>
-    </div>
-    <div class="hero-art" aria-hidden="false">
-      <figure class="hero-ph"><img src="/podjetja/img/primer-kmetija.webp" alt="{e(CASES[0]["alt"])}" width="{CASES[0]["w"]}" height="{CASES[0]["h"]}" fetchpriority="high" decoding="async"><figcaption>Ilustracija</figcaption></figure>
-      {PHONE_HTML}
-      <div class="chip chip-a" id="chip-live" aria-hidden="true"><span class="dot"></span><span id="chip-live-t">Primer prikaza</span></div>
-      <div class="chip chip-b" aria-hidden="true">Opozorila na telefon</div>
-    </div>
-  </div>
-</section>
-<div class="stats"><ul class="wrap stats-list">{stats_html()}</ul></div>
+'''
 
-  <div class="dej"><div class="wrap"><p class="dej-lbl">Za koga</p><ul class="dej-list" aria-label="Za koga je postaja">{marquee_html()}</ul></div></div>
 
-  <section class="band"><div class="wrap sec" id="primeri" aria-labelledby="h-primeri">
-    <h2 class="rz" id="h-primeri">Kaj vam postaja pove v vaši dejavnosti</h2>
-    <p>Izberite dejavnost, ki je najbližja vaši. Postajo prilagodimo tistemu, kar morate spremljati, izbira pa gre v povpraševanje.</p>
-    <div class="grid cases">
-{chr(10).join(case_card(c) for c in CASES)}
+def vat_note():
+    if not SHOW_PRICES:
+        return ""
+    return (f'<p class="fine">Vse cene so izhodiščne in brez DDV; obračunamo ga po stopnji {VAT_PCT} %. '
+            f'Končno ceno določimo po ogledu lokacije. Skupaj v prvem letu = enkratna investicija + 12 mesečnih naročnin. '
+            f'Pri mobilnem internetu podatkovni paket (SIM) plačate posebej.</p>')
+
+
+def packages_html(intro=None):
+    intro = intro or ("Najprej povezava: postaja potrebuje pot do interneta. Kjer imate WiFi, je preprosto. Kjer ga nimate, "
+                      "uporabimo mobilni internet. Spremembe se takoj vidijo v vseh paketih.")
+    return f'''  <section class="band"><div class="wrap sec" id="paketi" aria-labelledby="h-paketi">
+    <h2 class="rz" id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
+    <p>{e(intro)}</p>
+    <fieldset class="seg">
+      <legend>Povezava postaje</legend>
+      <label for="c-wifi"><input type="radio" name="conn" id="c-wifi" value="wifi" checked>Z WiFi signalom</label>
+      <label for="c-sim"><input type="radio" name="conn" id="c-sim" value="sim">Brez WiFi (mobilni internet)</label>
+    </fieldset>
+    <p class="note" id="conn-note" aria-live="polite"></p>
+    <div class="grid packs">
+{chr(10).join(package_card(p) for p in PACKAGES)}
     </div>
-    <p class="fine illus-note">{e(ILLUS_NOTE)}</p>
+    {vat_note()}
   </div></section>
 
-  {izjava_html()}
+'''
 
-  {napoved_html(errs)}
 
-  <section class="band band-alt" id="prag-sekcija"><div class="wrap sec">{prag_html(series)}</div></section>
+def steps_html():
+    return f'''  <section class="band band-alt"><div class="wrap sec" id="kako" aria-labelledby="h-kako">
+    <h2 class="rz" id="h-kako">Od povpraševanja do delujoče postaje v petih korakih</h2>
+    <ol class="steps">
+{chr(10).join(f'      <li class="rz">{ic(STEP_ICON[i])}<strong>{e(t)}</strong><span>{e(d)}</span></li>' for i, (t, d) in enumerate(STEPS))}
+    </ol>
+    <p class="steps-note rz"><strong>Vi spremljate svoje delo.</strong> Za delovanje vremenske postaje poskrbimo mi.</p>
+  </div></section>
 
-  {noc_html()}
+'''
 
-  <section class="band band-alt"><div class="wrap sec proof" id="dokaz" aria-labelledby="h-dokaz">
+
+def faq_html(items=None):
+    return f'''  <section class="band"><div class="wrap sec" id="faq" aria-labelledby="h-faq">
+    <h2 class="rz" id="h-faq">Pogosta vprašanja</h2>
+    <div class="faq">
+{faq_items(items)}
+    </div>
+    <div class="faq-cta rz"><h3>Še vedno niste prepričani, kateri paket potrebujete?</h3>
+      <p>Povejte nam, kaj potrebujete. Pomagali vam bomo izbrati pravo rešitev.</p>
+      <a class="btn" href="#povprasevanje" data-cta="faq">Pogovorimo se o vaši lokaciji</a></div>
+  </div></section>
+
+'''
+
+
+def proof_html():
+    return f'''  <section class="band band-alt"><div class="wrap sec proof" id="dokaz" aria-labelledby="h-dokaz">
     <h2 class="rz" id="h-dokaz">Zakaj nam zaupati</h2>
     <div class="proof-grid">
       <div class="proof-text">
@@ -760,42 +787,11 @@ def build_main():
     </div>
   </div></section>
 
-  {shema_html()}
+'''
 
-  <section class="band"><div class="wrap sec" id="paketi" aria-labelledby="h-paketi">
-    <h2 class="rz" id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
-    <p>Najprej povezava: postaja potrebuje pot do interneta. Kjer imate WiFi, je preprosto. Kjer ga nimate, uporabimo mobilni internet. Spremembe se takoj vidijo v vseh paketih.</p>
-    <fieldset class="seg">
-      <legend>Povezava postaje</legend>
-      <label for="c-wifi"><input type="radio" name="conn" id="c-wifi" value="wifi" checked>Z WiFi signalom</label>
-      <label for="c-sim"><input type="radio" name="conn" id="c-sim" value="sim">Brez WiFi (mobilni internet)</label>
-    </fieldset>
-    <p class="note" id="conn-note" aria-live="polite"></p>
-    <div class="grid packs">
-{chr(10).join(package_card(p) for p in PACKAGES)}
-    </div>
-    {vat}{sim_note}
-  </div></section>
 
-  <section class="band band-alt"><div class="wrap sec" id="kako" aria-labelledby="h-kako">
-    <h2 class="rz" id="h-kako">Od povpraševanja do delujoče postaje v petih korakih</h2>
-    <ol class="steps">
-{chr(10).join(f'      <li class="rz">{ic(STEP_ICON[i])}<strong>{e(t)}</strong><span>{e(d)}</span></li>' for i, (t, d) in enumerate(STEPS))}
-    </ol>
-    <p class="steps-note rz"><strong>Vi spremljate svoje delo.</strong> Za delovanje vremenske postaje poskrbimo mi.</p>
-  </div></section>
-
-  <section class="band"><div class="wrap sec" id="faq" aria-labelledby="h-faq">
-    <h2 class="rz" id="h-faq">Pogosta vprašanja</h2>
-    <div class="faq">
-{faq_items()}
-    </div>
-    <div class="faq-cta rz"><h3>Še vedno niste prepričani, kateri paket potrebujete?</h3>
-      <p>Povejte nam, kaj potrebujete. Pomagali vam bomo izbrati pravo rešitev.</p>
-      <a class="btn" href="#povprasevanje" data-cta="faq">Pogovorimo se o vaši lokaciji</a></div>
-  </div></section>
-
-  <section class="band band-alt"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
+def form_html():
+    return f'''  <section class="band band-alt"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
     <span id="po-meri"></span>
     <h2 class="rz" id="h-vprasalnik">Pridobite ponudbo za svojo lokacijo</h2>
     <p>Povejte nam nekaj osnovnih informacij. Pripravili bomo predlog vremenske postaje glede na vaše potrebe. Ponudbo oblikujemo po ogledu lokacije.</p>
@@ -831,8 +827,11 @@ def build_main():
       <noscript><p class="err">Za oddajo obrazca potrebujete vklopljen JavaScript.</p></noscript>
     </form>
   </div></section>
-</main>
-<footer class="foot">
+'''
+
+
+def bottom_html(cfg):
+    return f'''<footer class="foot">
   <div class="wrap">
     <span>Meteorec, Zgornja Savinjska dolina · <a href="/">meteorec.si</a></span>
     <span><a href="/zasebnost.html">Zasebnost</a> · <a href="/o-postaji.html">O postaji</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
@@ -846,11 +845,235 @@ def build_main():
   <p>Z vašim soglasjem merimo obisk in uspeh oglasov (Google, Meta). Brez soglasja se ti sledilniki ne naložijo. <a href="/zasebnost.html">Več</a></p>
   <div class="row"><button class="btn btn-sm" type="button" data-consent="accepted">Sprejmem</button><button class="btn btn-sm btn-ghost" type="button" data-consent="declined">Zavrnem</button></div>
 </div>
-<script>window.PODJETJA_CFG={json.dumps(cfg, ensure_ascii=False)};</script>
+<script>window.PODJETJA_CFG={cfg};</script>
 <script src="/podjetja/podjetja.js?v={ver("podjetja/podjetja.js")}" defer></script>
 </body>
 </html>
 '''
+
+
+def hero_html(tag, old, words, lead, cta2, img, w, h, alt, crumb=None):
+    """Hero. words = (navadni del, označeni del); H1 se animira po besedah, kot na glavni strani."""
+    plain, marked = words
+    i = 0
+    spans = []
+    for wd in plain.split():
+        spans.append(f'<span class="rv"><span style="--i:{i}">{e(wd)}</span></span>')
+        i += 1
+    mk = []
+    for wd in marked.split():
+        mk.append(f'<span class="rv"><span style="--i:{i}">{e(wd)}</span></span>')
+        i += 1
+    h1 = " ".join(spans) + " <mark>" + " ".join(mk) + "</mark>"
+    return f'''<section class="hero" aria-labelledby="h1">
+  <div class="aurora" aria-hidden="true"><i></i><i></i></div>
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      {f'<p class="crumbs"><a href="{URL}">Za podjetja</a> <span aria-hidden="true">/</span> {e(crumb)}</p>' if crumb else ""}
+      <p class="tag">{e(tag)}</p>
+      <p class="old">{e(old)}</p>
+      <h1 id="h1">{h1}</h1>
+      <p class="lead">{e(lead)}</p>
+      <div class="row">
+        <a class="btn btn-hero" href="#povprasevanje" data-cta="hero">Pridobite ponudbo</a>
+        <a class="btn btn-line" href="{cta2[0]}" data-cta="hero-paketi">{e(cta2[1])}</a>
+      </div>
+      <ul class="trust" aria-label="Zakaj Meteorec">{trust_html()}</ul>
+    </div>
+    <div class="hero-art" aria-hidden="false">
+      <figure class="hero-ph"><img src="/podjetja/img/{img}.webp" alt="{e(alt)}" width="{w}" height="{h}" fetchpriority="high" decoding="async"><figcaption>Ilustracija</figcaption></figure>
+      {PHONE_HTML}
+      <div class="chip chip-a" id="chip-live" aria-hidden="true"><span class="dot"></span><span id="chip-live-t">Primer prikaza</span></div>
+      <div class="chip chip-b" aria-hidden="true">Opozorila na telefon</div>
+    </div>
+  </div>
+</section>
+'''
+
+
+def build_main():
+    cfg = cfg_json()
+    head = page_head(TITLE, DESC, URL, "index, follow, max-image-preview:large", og_title="Vreme na vašem polju",
+                     extra=schema_blocks())
+    series, errs = load_data()
+    c0 = CASES[0]
+    return head + "<body>\n" + top_html(
+        [("#primeri", "Primeri"), ("#pozeba", "Dokaz"), ("#paketi", "Paketi"), ("#faq", "Vprašanja")],
+        [("#primeri", "Primeri"), ("#paketi", "Paketi"), ("#kako", "Kako poteka"), ("#faq", "Vprašanja")]) + f'''<main id="vsebina">
+''' + hero_html("METEOREC ZA PODJETJA", "Vreme v sosednji dolini.", ("Vreme na", "vašem polju."),
+                  "Vaša lastna vremenska postaja z meritvami na vaši lokaciji in opozorili na telefon. Postavimo jo, nastavimo in predamo. Manj tveganja, boljše odločitve.",
+                  ("#paketi", "Oglejte si pakete"), c0["img"], c0["w"], c0["h"], c0["alt"]) + f'''<div class="stats"><ul class="wrap stats-list">{stats_html()}</ul></div>
+
+  <div class="dej"><div class="wrap"><p class="dej-lbl">Za koga</p><ul class="dej-list" aria-label="Za koga je postaja">{marquee_html()}</ul></div></div>
+
+  <section class="band"><div class="wrap sec" id="primeri" aria-labelledby="h-primeri">
+    <h2 class="rz" id="h-primeri">Kaj vam postaja pove v vaši dejavnosti</h2>
+    <p>Izberite dejavnost, ki je najbližja vaši. Postajo prilagodimo tistemu, kar morate spremljati, izbira pa gre v povpraševanje.</p>
+    <div class="grid cases">
+{chr(10).join(case_card(c) for c in CASES)}
+    </div>
+    <p class="fine illus-note">{e(ILLUS_NOTE)}</p>
+  </div></section>
+
+  {izjava_html()}
+
+  {napoved_html(errs)}
+
+  <section class="band band-alt" id="prag-sekcija"><div class="wrap sec">{prag_html(series)}</div></section>
+
+  {noc_html()}
+
+''' + proof_html() + shema_html() + "\n" + packages_html() + steps_html() + faq_html() + form_html() + "</main>\n" + bottom_html(cfg)
+
+
+# ── Podstrani po dejavnostih (/podjetja/kmetije/ …) ───────────────────────────────────────────
+# Vsebina je ZAPISANA TUKAJ in uporablja samo trditve, ki jih že nosi glavna stran (paketi, deli postaje, FAQ).
+# Brez izmišljenih strank, števil, rokov in certifikatov. Ob nejasni trditvi je besedilo omiljeno ali izpuščeno.
+FAQ_WIFI, FAQ_ROK = "@wifi", "@rok"   # skupni vprašanji iz faq_list() (en vir besedila; zneski ob SHOW_PRICES)
+SEG_PAGES = [
+    dict(slug="kmetije", seg="kmetija", nav="Kmetije", case=0,
+         title="Vremenska postaja za kmetijo in sadovnjak",
+         desc="Lastna vremenska postaja za kmetijo, sadovnjak in vinograd: pozeba, veter, dež in vlaga tal na vaši lokaciji, opozorilo na telefon.",
+         audience="Kmetije, sadjarji, vinogradniki",
+         tag="METEOREC ZA KMETIJE IN SADOVNJAKE", old="Napoved za dolino.", words=("Vreme na", "vašem nasadu."),
+         lead="Lastna vremenska postaja na njivi, v sadovnjaku ali vinogradu: pozeba, veter, dež in vlaga tal na vaši lokaciji, ne v sosednji dolini. Opozorilo na telefon, ko temperatura doseže vašo mejo.",
+         h2="Kaj vam postaja pove na kmetiji",
+         intro="Pozeba je lokalna: kotanja je lahko hladnejša od bližnjega pobočja. Zato odločitev o zaščiti temelji na meritvi pri vas.",
+         odl=[("snow", "Pozeba", "Opozorilo, ko temperatura na vašem nasadu pade na mejo, ki ste jo nastavili. Zaščito (škropljenje, ogrevanje, kritje) vklopite, dokler je še čas.", "Pro"),
+              ("hail", "Nevihte in veter", "Opozorilo na telefon za veter in nevihto (Pro), senzor strel (Premium). Toče postaja ne zazna in je ne napove.", "Pro, Premium"),
+              ("drop", "Vlaga tal", "Dva senzorja vlage tal sta del paketa Premium. Pomagata pri odločitvah o namakanju in vstopu na zemljišče.", "Premium"),
+              ("wind", "Veter in dež pri delu", "Meteorološko okno za nanos sredstev, košnjo in obiranje: veter in padavine na vaši lokaciji. Etiketa sredstva in navodila ostajajo vaša odgovornost.", "Osnovni, Pro")],
+         dokaz=True,
+         faq=[("Ali postaja napove pozebo?",
+               "Postaja meri temperaturo in rosišče na vaši lokaciji in vas opozori, ko dosežete mejo, ki jo nastavite. Napovedi pozebe ne nadomešča: je meritev tam, kjer napoved zgreši. Primerjavo napovedi z meritvijo vidite na tej strani."),
+              ("Kje naj stoji postaja v sadovnjaku?",
+               "Mesto določimo ob ogledu lokacije. Pomembno je, da meri reprezentativno za nasad: višina, hladne kotanje in bližina dreves lahko spremenijo meritev."),
+              ("Ali lahko opozorila nastavim po svojih mejah?",
+               "Opozorila na telefon (pozeba, veter, nevihta) so v paketu Pro, mejo nastavite vi. Paket Po meri doda opozorila po vaših pravilih."),
+              ("Ali postaja nadomešča uradna opozorila ARSO?",
+               "Ne. Uradna opozorila izdaja ARSO. Naša postaja je meritev na vaši lokaciji; skupaj dasta boljšo sliko."),
+              FAQ_WIFI, FAQ_ROK]),
+    dict(slug="turizem", seg="kamp", nav="Turizem", case=1,
+         title="Vremenska postaja za kamp, turizem in gostinstvo",
+         desc="Vremenska postaja za kamp, glamping in gostinstvo: nevihta, veter in dež na vaši lokaciji, opozorilo na telefon in vreme na vaši spletni strani.",
+         audience="Kampi, turistične kmetije, gostinstvo",
+         tag="METEOREC ZA TURIZEM IN GOSTINSTVO", old="Vreme po občutku.", words=("Vreme v", "vašem kampu."),
+         lead="Vremenska postaja v vašem kampu, na terasi ali ob prizorišču: veter, dež in nevihte na lokaciji, opozorilo na telefon in trenutno vreme na vaši spletni strani.",
+         h2="Kaj vam postaja pove pri turizmu",
+         intro="Za gosta ni pomembno vreme v dolini, ampak pri vas. Odločitev o terasi, izletu ali prireditvi temelji na meritvi na vaši lokaciji.",
+         odl=[("bolt", "Nevihte", "Opozorilo na telefon (Pro) in senzor strel (Premium): odločitev o umiku gostov s terase, bazena ali prireditve temelji na meritvi pri vas.", "Pro, Premium"),
+              ("wind", "Veter in sunki", "Senčniki, šotori in oprema na prostem: veter in sunki na vaši lokaciji, ne v dolini.", "Osnovni, Pro"),
+              ("drop", "Dež", "Količina in jakost padavin na lokaciji: odločitev o terasi, izletu ali prireditvi na prostem.", "Osnovni"),
+              ("dash", "Vreme za goste", "Javna stran ali vtičnik za vašo spletno stran: gost vidi trenutno vreme na vaši lokaciji.", "Osnovni")],
+         dokaz=False,
+         faq=[("Ali lahko meritve pokažem gostom?",
+               "Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran, na katerem gost vidi trenutno vreme na vaši lokaciji."),
+              ("Ali postaja zazna strele?",
+               "Senzor strel je del paketa Premium (ali Po meri). Kako vas opozorimo pred nevihto na vaši lokaciji, dogovorimo ob ogledu."),
+              ("Ali postaja odloči o umiku gostov?",
+               "Ne. Postaja pokaže meritev in pošlje opozorilo ob meji, ki jo nastavite. Odločitev in varnost gostov ostajata vaši, uradna opozorila izdaja ARSO."),
+              FAQ_WIFI, FAQ_ROK]),
+    dict(slug="gradbenistvo", seg="gradbenistvo", nav="Gradbeništvo", case=2,
+         title="Vremenska postaja za gradbišče",
+         desc="Vremenska postaja za gradbišče: veter, dež, temperatura in mraz na lokaciji, opozorilo na telefon, napajanje s sončno celico.",
+         audience="Gradbena podjetja, izvajalci del",
+         tag="METEOREC ZA GRADBENIŠTVO", old="Vreme z druge strani doline.", words=("Vreme na", "vašem gradbišču."),
+         lead="Vremenska postaja na gradbišču: veter, dež in temperatura tam, kjer delate, in opozorilo na telefon, ko dosežete mejo, ki jo določite. Beton ne čaka na napačno napoved.",
+         h2="Kaj vam postaja pove na gradbišču",
+         intro="Gradbišče je pogosto na izpostavljeni točki, kjer se vreme razlikuje od napovedi za mesto. Postaja pokaže, kaj se dogaja pri vas.",
+         odl=[("wind", "Veter pri delu na višini", "Meritev vetra in sunkov na gradbišču ter opozorilo ob meji. Mejo za delo na višini in z dvigalom določite po navodilih proizvajalca in svojem načrtu varnosti.", "Osnovni, Pro"),
+              ("drop", "Dež in beton", "Padavine in temperatura med vgrajevanjem betona, izmerjene na gradbišču. Pogoje vgrajevanja določa vaš projekt in standard.", "Osnovni"),
+              ("thermo", "Mraz ponoči", "Opozorilo, ko temperatura pade na vašo mejo, na primer za zaščito sveže vgrajenega betona.", "Pro"),
+              ("dash", "Pregled na telefonu", "Nadzorna plošča ali aplikacija: vodja gradbišča vidi razmere brez obiska lokacije.", "Pro")],
+         dokaz=False,
+         faq=[("Ali postaja deluje brez vtičnice?",
+               "Postaja ima sončno celico. Način napajanja izberemo po ogledu lokacije."),
+              ("Ali postaja nadomešča meritve, ki jih zahteva projekt?",
+               "Ne. Postaja je lokalni vir razmer za odločanje, ne uradna meritev. Za meritve, ki jih predpisuje projekt ali standard, upoštevajte zahteve odgovorne osebe."),
+              ("Ali lahko postavite več postaj na več gradbišč?",
+               "Paket Po meri vključuje več postaj na več lokacijah. Število in mesta dogovorimo ob ogledu."),
+              FAQ_WIFI, FAQ_ROK]),
+    dict(slug="obcine", seg="obcina", nav="Občine", case=3,
+         title="Vremenska postaja za občino in javne ustanove",
+         desc="Vremenska postaja za občino: neurja, veter, dež in požarna ogroženost, opozorilo na telefon in vtičnik za občinsko spletno stran.",
+         audience="Občine, javne ustanove, organizatorji prireditev",
+         tag="METEOREC ZA OBČINE IN PRIREDITVE", old="Vreme za celo regijo.", words=("Vreme v", "vaši občini."),
+         lead="Vremenska postaja za občino ali javno ustanovo: neurja, veter in dež na vašem območju, opozorilo na telefon in vtičnik z vremenom za občinsko spletno stran.",
+         h2="Kaj vam postaja pove v občini",
+         intro="Prebivalci in služba, ki odloča o prireditvah in zaščiti, potrebujejo meritev za svoj kraj, ne za regijo. Uradna opozorila ostanejo pri ARSO in URSZR, postaja pa pokaže razmere pri vas.",
+         odl=[("flame", "Požarna ogroženost", "Meteorec že dnevno računa indeks požarne ogroženosti (FWI) za Rečico ob Savinji. Podobno rešitev za vašo občino dogovorimo skupaj.", "Po meri"),
+              ("bolt", "Neurja", "Opozorilo na telefon in meritve vetra ter dežja, ob paketu Premium tudi senzor strel: hitrejši odziv službe, ki odloča.", "Pro, Premium"),
+              ("tent", "Prireditve na prostem", "Odločitev o prireditvi (nevihta, veter, dež) na podlagi meritve na prizorišču.", "Osnovni, Pro"),
+              ("dash", "Vtičnik za občinsko stran", "Prebivalci vidijo trenutno vreme v svoji občini na občinski spletni strani.", "Osnovni")],
+         dokaz=False, primer=("/meteogasilec/", "Primer naše rešitve: MeteoGasilec (indeks požarne ogroženosti za Rečico)"),
+         faq=[("Ali je to uradno opozorilo za prebivalce?",
+               "Ne. Uradna opozorila izdajata ARSO in URSZR. Meritve in opozorila Meteorec so dopolnilo, ki kaže razmere pri vas."),
+              ("Ali lahko postaje postavite na več krajev v občini?",
+               "Paket Po meri vključuje več postaj na več lokacijah. Število in mesta dogovorimo ob ogledu."),
+              ("Ali lahko podatke pokažemo na občinski spletni strani?",
+               "Da. Za občine pripravimo vtičnik za občinsko spletno stran; javna stran ali vtičnik je že del paketa Osnovni."),
+              FAQ_WIFI, FAQ_ROK]),
+]
+SEG_BY_SLUG = {s_["slug"]: s_ for s_ in SEG_PAGES}
+
+
+def seg_url(s_):
+    return f"{URL}{s_['slug']}/"
+
+
+def decisions_html(sg):
+    cards = "".join(
+        f'<article class="card dec rz"><span class="tile">{ic(icon)}</span><h3>{e(t)}</h3><p>{e(txt)}</p>'
+        f'<span class="dec-pkg">Paket: {e(pk)}</span></article>' for icon, t, txt, pk in sg["odl"])
+    primer = ""
+    if sg.get("primer"):
+        primer = f'<p class="rz"><a class="link" href="{sg["primer"][0]}">{e(sg["primer"][1])} {ARROW}</a></p>'
+    return f'''  <section class="band"><div class="wrap sec" id="odlocitve" aria-labelledby="h-odlocitve">
+    <h2 class="rz" id="h-odlocitve">{e(sg["h2"])}</h2>
+    <p>{e(sg["intro"])}</p>
+    <div class="grid decs">{cards}</div>
+    {primer}
+    <p class="fine illus-note">Pri vsakem področju je navedeno, v katerem paketu je. Opozorila so pomoč pri odločanju, ne uradno opozorilo.</p>
+  </div></section>
+
+'''
+
+
+def others_html(sg):
+    links = "".join(f'<li><a href="{seg_url(o)}">{e(o["nav"])}</a></li>' for o in SEG_PAGES if o is not sg)
+    return (f'  <section class="band"><div class="wrap sec" aria-labelledby="h-druge"><h2 class="rz" id="h-druge">Druge dejavnosti</h2>'
+            f'<ul class="dej-list" aria-label="Druge dejavnosti">{links}'
+            f'<li><a href="{URL}">Vse dejavnosti</a></li></ul></div></section>\n\n')
+
+
+def build_segment(sg):
+    url = seg_url(sg)
+    case = CASES[sg["case"]]
+    shared = {FAQ_WIFI: faq_list()[0], FAQ_ROK: faq_list()[1]}
+    faq = [shared.get(x, x) for x in sg["faq"]]
+    head = page_head(sg["title"], sg["desc"], url, "index, follow, max-image-preview:large",
+                     og_title=sg["title"],
+                     extra=schema_blocks(url, sg["title"], sg["desc"], sg["audience"], faq,
+                                         [("Meteorec", SITE + "/"), ("Za podjetja", SITE + URL), (sg["nav"], None)]))
+    dok = ""
+    if sg.get("dokaz"):
+        series, errs = load_data()
+        dok = napoved_html(errs) + f'''
+
+  <section class="band band-alt" id="prag-sekcija"><div class="wrap sec">{prag_html(series)}</div></section>
+
+  ''' + noc_html() + "\n"
+    nav = [(URL, "Za podjetja"), ("#odlocitve", "Kaj spremljate")] + ([("#pozeba", "Dokaz")] if sg.get("dokaz") else []) + \
+        [("#paketi", "Paketi"), ("#faq", "Vprašanja")]
+    body = ("<body>\n" + top_html(nav, nav) + '<main id="vsebina">\n'
+            + hero_html(sg["tag"], sg["old"], sg["words"], sg["lead"], ("#paketi", "Oglejte si pakete"),
+                        case["img"], case["w"], case["h"], case["alt"], crumb=sg["nav"])
+            + decisions_html(sg) + dok
+            + proof_html() + (shema_html() + "\n" if sg.get("dokaz") else "")
+            + f'  <p class="wrap fine illus-note">{e(ILLUS_NOTE)}</p>\n\n'
+            + packages_html() + steps_html() + faq_html(faq) + others_html(sg) + form_html() + "</main>\n"
+            + bottom_html(cfg_json(sg["seg"], case["dej"])))
+    return head + body
 
 
 def build_hvala():
@@ -888,6 +1111,8 @@ def write(rel, content):
 def main():
     write("podjetja/index.html", build_main())
     write("podjetja/hvala/index.html", build_hvala())
+    for sg in SEG_PAGES:
+        write(f"podjetja/{sg['slug']}/index.html", build_segment(sg))
 
 
 if __name__ == "__main__":

@@ -168,4 +168,57 @@ check("track(" in jsq and "consent() === 'accepted'" in jsq, "dogodki gredo samo
 check("Ilustrativna shema" in page and "Primer obvestila, ne meritev" in page and 'class="noc-svg"' in page, "noč: graf in obvestilo sta označena kot ponazoritev")
 check("Kako brati graf" in page and "Želim spremljati vreme na svoji lokaciji" in page and "Želim takšna opozorila na svoji lokaciji" in page, "primerjava napovedi in kalkulator imata razlago in CTA")
 check("Pogovorimo se o vaši lokaciji" in page and "Vi spremljate svoje delo." in page, "FAQ in koraki imajo sklepni poudarek")
+# ── podstrani po dejavnostih (/podjetja/kmetije/ …) ──
+seg_pages = {}
+for sg in G.SEG_PAGES:
+    seg_pages[sg["slug"]] = read(f"podjetja/{sg['slug']}/index.html")
+check(all(seg_pages[sg["slug"]] == G.build_segment(sg) for sg in G.SEG_PAGES), "committane podstrani so enake izhodu generatorja (poženi generator)")
+check(len(G.SEG_PAGES) == len(G.CASES) and [sg["seg"] for sg in G.SEG_PAGES] == [c["id"] for c in G.CASES],
+      "vsaka dejavnost z glavne strani ima podstran (isti vrstni red in segment)")
+core = read("tools/seo_audit.py"); sm = read("sitemap.xml"); llms = read("llms.txt")
+for sg in G.SEG_PAGES:
+    pg = seg_pages[sg["slug"]]
+    u = f"/podjetja/{sg['slug']}/"
+    t = re.search(r"<title>(.*?)</title>", pg).group(1)
+    d = re.search(r'name="description" content="(.*?)"', pg).group(1)
+    check(len(t) <= 60, f"{sg['slug']}: <title> ≤ 60 znakov ({len(t)})")
+    check(len(d) <= 155, f"{sg['slug']}: meta description ≤ 155 znakov ({len(d)})")
+    check(len(re.findall(r"<h1[ >]", pg)) == 1, f"{sg['slug']}: natanko en <h1>")
+    check(f'rel="canonical" href="https://meteorec.si{u}"' in pg and "noindex" not in pg, f"{sg['slug']}: kanonični URL, brez noindex")
+    check(f'"{u[1:]}"' in core and f"https://meteorec.si{u}</loc>" in sm and f"https://meteorec.si{u}" in llms,
+          f"{sg['slug']}: v CORE, sitemapu in llms.txt")
+    check(u in page, f"{sg['slug']}: glavna stran povezuje na podstran")
+    bl = [json.loads(b) for b in re.findall(r'<script type="application/ld\+json">\n(.*?)\n</script>', pg, re.S)]
+    check({"WebPage", "Service", "FAQPage", "BreadcrumbList"} <= {b["@type"] for b in bl}, f"{sg['slug']}: JSON-LD")
+    fq = next(b for b in bl if b["@type"] == "FAQPage")
+    vis2 = re.findall(r'<summary><span>(.*?)</span><i>.*?</i></summary><div class="odg"><div><p>(.*?)</p>', pg)
+    check([(H.unescape(q), H.unescape(a)) for q, a in vis2] == [(q["name"], q["acceptedAnswer"]["text"]) for q in fq["mainEntity"]],
+          f"{sg['slug']}: FAQPage se ujema z vidnim besedilom")
+    check(len(re.findall(r"<details", pg)) >= 6 and 'id="povprasevanje"' in pg and 'id="q"' in pg, f"{sg['slug']}: FAQ in obrazec")
+    cfgm = re.search(r"window.PODJETJA_CFG=(\{.*?\});</script>", pg)
+    cj = json.loads(cfgm.group(1))
+    check(cj.get("segment") == sg["seg"] and cj.get("dej") == G.CASES[sg["case"]]["dej"], f"{sg['slug']}: obrazec dobi dejavnost vnaprej")
+    check(cj["dej"] in G.DEJAVNOSTI, f"{sg['slug']}: dejavnost je veljavna za worker")
+    ids2 = re.findall(r'\bid="([^"]+)"', pg)
+    check(len(ids2) == len(set(ids2)), f"{sg['slug']}: ID-ji so enolični")
+    check(all(l_ in set(ids2) for l_ in re.findall(r'<label for="([^"]+)"', pg)), f"{sg['slug']}: vsak label ima polje")
+    req2 = re.findall(r'<(?:input|select)[^>]*\bid="([^"]+)"[^>]*\brequired', pg.split('<form class="rz" id="q"')[1])
+    check(sorted(req2) == sorted(["f-firma", "f-kraj", "f-panoga", "f-kontakt", "f-soglasje"]), f"{sg['slug']}: ista obvezna polja kot na glavni strani")
+    check(pg.count("<figcaption>Ilustracija</figcaption>") >= 1 and _H.escape(G.ILLUS_NOTE) in pg, f"{sg['slug']}: fotografija je označena kot ilustracija")
+    check(not re.search(r"indoor|tempinf|notranj\w*\s+(senzor|merilnik)", pg, re.I), f"{sg['slug']}: brez notranjih meritev")
+    check(not re.search(r"naše stranke|naši kupci|zaupajo nam|\d+\+? (zadovoljnih|strank)|certificiran", pg, re.I), f"{sg['slug']}: brez izmišljenih referenc in certifikatov")
+    check("googletagmanager" not in pg and "fbevents" not in pg, f"{sg['slug']}: sledilniki samo po soglasju")
+    check("ni uradno" in pg or "ARSO" in pg, f"{sg['slug']}: pove, da ne nadomešča uradnih opozoril ARSO")
+    # cene so samo ob SHOW_PRICES (podstran deli cenik z glavno stranjo)
+check("Napoved je za dolino" in seg_pages["kmetije"] and 'id="prag"' in seg_pages["kmetije"] and 'id="noc-list"' in seg_pages["kmetije"],
+      "kmetije: primerjava napovedi, kalkulator pozebe in noč na polju so na podstrani")
+check('id="prag"' not in seg_pages["turizem"] and 'id="prag"' not in seg_pages["gradbenistvo"] and 'id="prag"' not in seg_pages["obcine"],
+      "kalkulator pozebe je samo na podstrani za kmetije")
+check("/meteogasilec/" in seg_pages["obcine"], "občine: primer lastne rešitve (MeteoGasilec) je povezan")
+old = G.SHOW_PRICES
+G.SHOW_PRICES = False
+for sg in G.SEG_PAGES:
+    pf = G.build_segment(sg)
+    check(not re.search(r"\d[\d.]*\u00a0?€", pf) and "hasOfferCatalog" not in pf, f"{sg['slug']}: SHOW_PRICES=False skrije vse zneske, tudi v FAQ in JSON-LD")
+G.SHOW_PRICES = old
 sys.exit(1 if fails else 0)
