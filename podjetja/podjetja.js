@@ -134,7 +134,7 @@
       var th = +prag.value, c = 0;
       bars.forEach(function (b) { var on = +b.getAttribute('data-t') <= th; b.classList.toggle('on', on); if (on) c++; });
       $('#prag-v').textContent = znak(th); tween(c);
-      $('#prag-t').textContent = (c % 100 === 1 ? 'noč' : 'noči') + ' od ' + total + ' z meritvijo, ko je postaja izmerila ' + znak(th) + ' ali manj.';
+      $('#prag-t').textContent = (c % 100 === 1 ? 'dan' : c % 100 === 2 ? 'dneva' : 'dni') + ' od ' + total + ' dni z meritvijo, ko je postaja izmerila ' + znak(th) + ' ali manj.';
       $('#prag-hint').textContent = HINT(th);
     };
     prag.addEventListener('input', function () { osvezi(); if (prvic) { prvic = false; track('use_calculator', { threshold: +prag.value }); } });

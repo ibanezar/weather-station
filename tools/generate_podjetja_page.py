@@ -243,6 +243,12 @@ def noci(n):
     return f"{n} noč" if n % 100 == 1 else f"{n} noči"
 
 
+def dan_word(n):
+    """Samostalnik »dan« ob številu (1 dan, 2 dneva, 3+ dni); isto pravilo je v podjetja.js."""
+    m = n % 100
+    return "dan" if m == 1 else ("dneva" if m == 2 else "dni")
+
+
 def dnevi_s(n):
     return f"{n} dan" if n % 100 == 1 else (f"{n} dneva" if n % 100 == 2 else (f"{n} dni" if n % 100 in (3, 4) else f"{n} dni"))
 
@@ -293,7 +299,7 @@ def error_svg(errs, st_):
     sc = (plot_h / 2) / 6.0
     n = len(errs)
     bw = (W - L - R) / n
-    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" aria-label="{e(error_alt(st_))}" preserveAspectRatio="xMidYMid meet">']
+    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" aria-label="{e(error_alt(st_))}" preserveAspectRatio="none">']
     for v in (-4, -2, 0, 2, 4):
         y = zero - v * sc
         out.append(f'<line x1="{L}" x2="{W - R}" y1="{y:.1f}" y2="{y:.1f}" class="{"z" if v == 0 else "g"}"/>'
@@ -364,13 +370,13 @@ def prag_html(series):
     cnt = sum(1 for t in vals if t <= 0)
     coldest = min(series, key=lambda x: 99 if x[1] is None else x[1])
     return f'''<div class="calc rz" id="prag-kalk" data-n="{n}">
-      <div class="calc-head"><h3>Koliko noči bi vas lani opozorila postaja?</h3>
-      <p>Nastavite mejo, pod katero želite opozorilo. Vsaka črtica je en dan zadnjih 12 mesecev, obarvani so dnevi, ko je postaja izmerila toliko ali manj.</p></div>
+      <div class="calc-head"><h3>Kolikokrat bi vas postaja opozorila v zadnjih 12 mesecih?</h3>
+      <p>Nastavite mejo, pod katero želite opozorilo. Vsaka črtica predstavlja en dan. Obarvani so dnevi, ko je temperatura dosegla nastavljeno mejo ali padla pod njo.</p></div>
       <div class="calc-ctl"><label for="prag">Opozori me, ko temperatura pade na</label>
         <output id="prag-v" for="prag">0 °C</output>
         <input type="range" id="prag" min="-10" max="5" step="1" value="0" aria-describedby="prag-t prag-hint"></div>
       <p class="calc-hint" id="prag-hint">Ničla: zmrzal. Osnovna meja za pozebo pri cvetju in mladih poganjkih (okvirno, odvisno od vrste in faze rasti).</p>
-      <div class="calc-res" aria-live="polite"><b id="prag-n">{cnt}</b><span id="prag-t">{"noč" if cnt % 100 == 1 else "noči"} od {n} z meritvijo, ko je postaja izmerila 0 °C ali manj.</span></div>
+      <div class="calc-res" aria-live="polite"><b id="prag-n">{cnt}</b><span id="prag-t">{dan_word(cnt)} od {n} dni z meritvijo, ko je postaja izmerila 0 °C ali manj.</span></div>
       <div class="noci" id="noci" aria-hidden="true">{"".join(bars)}</div>
       <div class="noci-os"><span>{fmt_date(series[0][0])}</span><span>najhladnejša: {sl(min(vals))} °C ({fmt_date(coldest[0])})</span><span>{fmt_date(series[-1][0])}</span></div>
       <p class="fine">Meritev postaje IREICA1 v Rečici ob Savinji (dnevni minimum, {fmt_date_y(series[0][0])} do {fmt_date_y(series[-1][0])}, {n} dni z meritvijo). To je zgodovina ene konkretne postaje: na vašem polju bo število opozoril drugačno, ravno zato je smiselna lastna postaja. Brez meritve na lokaciji tega ne veste.</p>
@@ -829,7 +835,7 @@ def build_main():
   </div>
 </footer>
 <div class="sticky-cta" id="sticky" hidden>
-  <span class="sticky-t"><strong>Meteorec za podjetja</strong><span>Meritve za vašo lokacijo</span></span>
+  <span class="sticky-t"><strong>Vremenska postaja za vaše podjetje</strong><span>Ponudba po meri vaše lokacije</span></span>
   <a class="btn btn-hero" href="#povprasevanje" data-cta="sticky">Pridobite ponudbo</a>
 </div>
 <div class="cookie" id="cookie" role="region" aria-label="Piškotki in merjenje obiska" hidden>
