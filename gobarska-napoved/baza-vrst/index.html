@@ -34,6 +34,9 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Gobarska napoved","item":"https://meteorec.si/gobarska-napoved/"},{"@type":"ListItem","position":3,"name":"Baza vrst"}]}
 </script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Koliko vrst gob je v bazi in kako je razdeljena?","acceptedAnswer":{"@type":"Answer","text":"300 vrst: 129 u\u017eitnih, 50 pogojno u\u017eitnih, 41 strupenih, 79 neu\u017eitnih, za\u0161\u010ditenih: 1. Vsaka skupina ima svojo stran."}},{"@type":"Question","name":"Kaj pomeni oznaka \u00bbni terensko preverjeno\u00ab?","acceptedAnswer":{"@type":"Answer","text":"Vrsta z oznako \u25cc je dodana iz raz\u0161irjenega seznama: izbrana je po dejanskih zapisih o pojavljanju v Sloveniji (GBIF), opis pa je povzet po literaturi in v dolini ni terensko preverjen. Gobarski indeks take vrste praviloma ne dobijo."}},{"@type":"Question","name":"Katere gobe so zdaj v sezoni?","acceptedAnswer":{"@type":"Answer","text":"Ta mesec (november) je v sezoni 142 od 300 vrst. Sezona je pri vsaki vrsti zapisana na kartici; kje so razmere za rast ugodne, poka\u017ee gobarski indeks po obmo\u010djih."}},{"@type":"Question","name":"Kako preverim, ali je goba u\u017eitna?","acceptedAnswer":{"@type":"Answer","text":"Pri gobarskem dru\u0161tvu ali gobarski posvetovalnici v bli\u017eini. Baza vrst je pomo\u010d pri u\u010denju, ne zamenjava za strokovni pregled. Ob dvomu gobe ne u\u017eivajte."}}]}
+</script>
 <link rel="manifest" href="/gobarska-napoved/manifest.json">
 <meta name="theme-color" content="#183B2C">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -644,6 +647,9 @@ body{
 /* FAQ <details> otherwise rely on bare UA defaults — too short a tap target
    on mobile. Padding (not margin) grows the hit area without widening the
    row's footprint or spacing against its neighbours. */
+.gp-answer{margin:.2rem 0 1.1rem;padding:.75rem 1rem;border-left:3px solid #78A95F;
+  background:rgba(120,169,95,.09);border-radius:0 12px 12px 0;line-height:1.6;font-size:.95rem}
+.gp-answer a{color:var(--blue)}
 .faq details{border-bottom:1px solid var(--border)}
 .faq details:last-child{border-bottom:0}
 .faq summary{cursor:pointer;min-height:2.75rem;display:flex;align-items:center;
@@ -1014,6 +1020,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </nav>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Baza 300 vrst gob — užitnost in nevarne dvojnice</h1>
+  <p class="gp-answer"><b>Na kratko:</b> baza ima 300 vrst gob Zgornje Savinjske doline: 129 užitnih, 50 pogojno užitnih, 41 strupenih, 79 neužitnih, zaščitenih: 1. Pri vsaki je sezona, užitnost in, kjer obstaja, nevarna dvojnica. Jedro baze (145 vrst) je terensko preverjeno, ostale so iz literature in so označene z ◌. Gobo uživajte samo, če jo poznate 100 %.</p>
   <figure class="gp-banner">
     <img src="/gobarska-napoved/img/foto/megla-jutro-banner.jpg" loading="lazy" width="1400" height="600"
       alt="Jutranja megla nad gozdovi Zgornje Savinjske doline">
@@ -5851,6 +5858,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
   <div class="gp-sp-more"><button type="button" id="gp-sp-more" hidden>Pokaži več vrst</button></div>
+  <h2 class="gp-h2" id="faq">Pogosta vprašanja</h2>
+  <div class="faq">
+    <details><summary>Koliko vrst gob je v bazi in kako je razdeljena?</summary><p>300 vrst: 129 užitnih, 50 pogojno užitnih, 41 strupenih, 79 neužitnih, zaščitenih: 1. Vsaka skupina ima svojo stran.</p></details>
+    <details><summary>Kaj pomeni oznaka »ni terensko preverjeno«?</summary><p>Vrsta z oznako ◌ je dodana iz razširjenega seznama: izbrana je po dejanskih zapisih o pojavljanju v Sloveniji (GBIF), opis pa je povzet po literaturi in v dolini ni terensko preverjen. Gobarski indeks take vrste praviloma ne dobijo.</p></details>
+    <details><summary>Katere gobe so zdaj v sezoni?</summary><p>Ta mesec (november) je v sezoni 142 od 300 vrst. Sezona je pri vsaki vrsti zapisana na kartici; kje so razmere za rast ugodne, pokaže gobarski indeks po območjih.</p></details>
+    <details><summary>Kako preverim, ali je goba užitna?</summary><p>Pri gobarskem društvu ali gobarski posvetovalnici v bližini. Baza vrst je pomoč pri učenju, ne zamenjava za strokovni pregled. Ob dvomu gobe ne uživajte.</p></details>
+  </div>
+
   <details class="gp-collapse">
     <summary>Viri fotografij <small>(298)</small></summary>
     <p class="archive-intro">Fotografije so iz Wikimedia Commons, objavljene pod prostimi licencami (CC BY, CC BY-SA ali javna domena). Hvala vsem fotografinjam in fotografom.</p>
@@ -6296,7 +6311,7 @@ derivative work: Ak ccm (talk)</td><td>CC BY-SA 3.0</td><td><a href="https://com
 </script>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
-    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
+    <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/vreme-mozirje/">Vreme Mozirje</a> · <a href="/vreme-nazarje/">Vreme Nazarje</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
   </footer>
 </div>
 <nav class="app-bottomnav" aria-label="Glavna navigacija"><a href="/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11 12 4l8 7v7a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-7Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>Domov</a><a href="/klima/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 4.5a1.5 1.5 0 0 0-3 0v9.6a3.5 3.5 0 1 0 3 0V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="11.5" cy="17.5" r="1.3" fill="currentColor"/></svg></span>Klima</a><a href="/rekord/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4h10v4a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M5 5H3v2a3 3 0 0 0 3 3M19 5h2v2a3 3 0 0 1-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10 13.5v2.5h4v-2.5M8.5 20h7l-1-2.5h-5L8.5 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></span>Rekordi</a><a href="/trendi/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16.5 10 10l3.5 3.5L20 6.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 6.5H20v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Trendi</a><a href="/blog/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H17a2 2 0 0 1 2 2v14.5a.5.5 0 0 1-.7.46L15 18.5H6.5A1.5 1.5 0 0 1 5 17V4.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="8" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="8" y1="11.5" x2="13" y2="11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>Blog</a><a href="/vreme/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3.5" y="5" width="17" height="4" rx="1" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 9.5V18a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V9.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="10" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Arhiv</a><a href="/gobarska-napoved/"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 11.5C4 7.36 7.58 4 12 4s8 3.36 8 7.5c0 .83-.9 1.5-2 1.5H6c-1.1 0-2-.67-2-1.5Z" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 13v3.7a2.5 2.5 0 0 0 5 0V13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Gobe</a><a href="/o-postaji.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8.25" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8.3" r="1" fill="currentColor"/><line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>O postaji</a></nav>

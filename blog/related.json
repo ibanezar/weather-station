@@ -1,4 +1,24 @@
 {
+  "vpliv-lune-na-rast-gob-0921": [
+    "trije-vali-gob-po-dezju-0911",
+    "zakaj-sosed-vedno-najde-gobe",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
+  "koliko-dni-po-dezju-rastejo-gobe": [
+    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
+    "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
+  "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
+    "gobarska-sezona-julij-2026-kje-nabirati",
+    "koliko-dni-po-dezju-rastejo-gobe",
+    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
+  ],
+  "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
+    "gobarska-sezona-julij-2026-kje-nabirati",
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+  ],
   "zled-ali-poledica-razlika-1027": [
     "prvi-sneg-golte-solcava-menina-1027",
     "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
@@ -77,12 +97,7 @@
   "smrdljivci-inaturalist-vreme-1011": [
     "vrh-gobarske-sezone-oktober-1014",
     "slana-gobarska-sezona-1018",
-    "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni"
-  ],
-  "vpliv-lune-na-rast-gob-0921": [
-    "trije-vali-gob-po-dezju-0911",
-    "zakaj-sosed-vedno-najde-gobe",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
+    "koliko-dni-po-dezju-rastejo-gobe"
   ],
   "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
     "jurcki-preverba-napovedi-1015",
@@ -106,8 +121,8 @@
   ],
   "gobarska-sezona-julij-2026-kje-nabirati": [
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715"
+    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822"
   ],
   "trije-vali-gob-po-dezju-0911": [
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
@@ -133,16 +148,6 @@
     "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
     "najhladnejsa-julijska-jutra-recica",
     "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001"
-  ],
-  "kdaj-po-tednu-dezja-zrastejo-gobe-0822": [
-    "gobarska-sezona-julij-2026-kje-nabirati",
-    "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
-    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
-  ],
-  "zakaj-po-dezju-gobe-ne-zrastejo-takoj": [
-    "gobarska-sezona-julij-2026-kje-nabirati",
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
-    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
   ],
   "jesenski-vrh-gob-2026-savinjska-dolina-0922": [
     "trije-vali-gob-po-dezju-0911",
@@ -187,7 +192,7 @@
   "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009": [
     "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
     "trije-vali-gob-po-dezju-0911",
-    "koliko-dni-po-dezju-rastejo-gobe"
+    "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004": [
     "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
@@ -205,19 +210,14 @@
     "zakaj-sosed-vedno-najde-gobe"
   ],
   "zakaj-sosed-vedno-najde-gobe": [
+    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
     "koliko-dni-po-dezju-rastejo-gobe",
-    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
-    "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
-  ],
-  "koliko-dni-po-dezju-rastejo-gobe": [
-    "gobe-po-dezju-8-10-oktobra-kdaj-in-kje-1007",
-    "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni",
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
   ],
   "vrh-gobarske-sezone-oktober-1014": [
     "smrdljivci-inaturalist-vreme-1011",
     "slana-gobarska-sezona-1018",
-    "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni"
+    "koliko-dni-po-dezju-rastejo-gobe"
   ],
   "vremensko-leto-2025-2026": [
     "vremenski-povzetek-oktober-2026",
@@ -326,8 +326,8 @@
   ],
   "kdaj-popusti-vrocina-po-vrhuncu-35-6-c-0816": [
     "vrocinski-val-se-stopnjuje-v-zgornji-savinjski-dolini-jutri-0730",
-    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714",
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
+    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
+    "31-1-c-danes-na-recici-vrocina-se-vraca-a-le-za-kratek-cas-0714"
   ],
   "invazivka-tedenski-pregled-20260815": [
     "invazivka-tedenski-pregled-20260830",
@@ -506,8 +506,8 @@
   ],
   "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720": [
     "ohladitev-v-petek-konec-vrocinskega-vala-dez-do-sobote-0804",
-    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719",
-    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717"
+    "danes-vrh-vrocine-32-4-c-v-zgornji-savinjski-dolini-nato-ohl-0717",
+    "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719": [
     "zakaj-je-zjutraj-tako-toplo-v-recici-ob-savinji-0828",
@@ -540,8 +540,8 @@
     "susa-v-zgornji-savinjski-dolini-kaj-pove-nicelna-dnevna-koli-0720"
   ],
   "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715": [
-    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
     "gobarska-sezona-julij-2026-kje-nabirati",
+    "kdaj-po-tednu-dezja-zrastejo-gobe-0822",
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "zakaj-ni-bilo-neurja-14-julij-2026": [

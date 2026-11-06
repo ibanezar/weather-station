@@ -100,6 +100,7 @@ jobs:
           node tools/test_ocene.mjs
           python3 tools/test_zima_alarm.py
           python3 tools/test_zima_vodniki.py
+          python3 tools/test_gobe_faq.py
 
       - name: Test žleda
         run: python3 tools/test_freezing_rain.py

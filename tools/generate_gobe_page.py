@@ -982,6 +982,9 @@ body{
 /* FAQ <details> otherwise rely on bare UA defaults — too short a tap target
    on mobile. Padding (not margin) grows the hit area without widening the
    row's footprint or spacing against its neighbours. */
+.gp-answer{margin:.2rem 0 1.1rem;padding:.75rem 1rem;border-left:3px solid #78A95F;
+  background:rgba(120,169,95,.09);border-radius:0 12px 12px 0;line-height:1.6;font-size:.95rem}
+.gp-answer a{color:var(--blue)}
 .faq details{border-bottom:1px solid var(--border)}
 .faq details:last-child{border-bottom:0}
 .faq summary{cursor:pointer;min-height:2.75rem;display:flex;align-items:center;
@@ -4777,6 +4780,111 @@ BAZA_INTRO = (
     'niso preverjeni. Gobarski indeks te vrste praviloma ne dobijo.</p>\n')
 
 
+_MESEC_IME = ["januar", "februar", "marec", "april", "maj", "junij", "julij", "avgust",
+              "september", "oktober", "november", "december"]
+
+
+def baza_cat_text(key, subset, all_species):
+    """Odgovor »Na kratko« (HTML) in vprašanja za FAQ (golo besedilo) na strani skupine v bazi vrst.
+
+    Zakaj (GSC/AI, 6. 11. 2026): /baza-vrst/strupene/ je bila z 158 prikazi v AI odgovorih najbolj
+    prikazana stran, a je bila samo mreža kartic brez povedanega odgovora. Vse številke so izpeljane iz
+    species_rules.yaml (užitnost, `verified`, `doubles`, sezona), nobene nove trditve o užitnosti.
+    Vprašanja ne podvajajo vodnika /strupene-gobe/ (smrtno strupene, zamik simptomov, mit o kuhanju)."""
+    ed = lambda x: (x.get("edibility") or "").lower().strip()
+    n = len(subset)
+    ver = sum(1 for x in subset if x.get("verified", True))
+    dbl = sum(1 for x in subset if x.get("doubles"))
+    mon = _MESEC_IME[TODAY.month - 1]
+    k = sum(1 for x in subset if TODAY.month in season_months(x))
+    rule = "Gobo uživajte samo, če jo poznate 100 %."
+    sezona = (f"Ta mesec ({mon}) je v sezoni {k} od {n} vrst. Sezona je pri vsaki vrsti zapisana na kartici; "
+              "kje so razmere za rast ugodne, pokaže gobarski indeks po območjih.")
+    zamenjava = f"Pri {dbl} vrstah baza navaja podobno vrsto, s katero jo je mogoče zamenjati."
+    unver = ("Vrsta z oznako ◌ je dodana iz razširjenega seznama: izbrana je po dejanskih zapisih o pojavljanju "
+             "v Sloveniji (GBIF), opis pa je povzet po literaturi in v dolini ni terensko preverjen. "
+             "Gobarski indeks take vrste praviloma ne dobijo.")
+    if key == "strupena":
+        lethal = [x for x in subset if ed(x) in LETHAL_LEVELS]
+        lethal.sort(key=lambda x: (LETHAL_LEVELS.index(ed(x)), x["name_sl"]))
+        names = _fmt_list(x["name_sl"] for x in lethal)
+        in_l = [x["name_sl"] for x in lethal if TODAY.month in season_months(x)]
+        ans = (f"<b>Na kratko:</b> v bazi je {n} strupenih vrst, od tega {len(lethal)} smrtno ali zelo strupenih "
+               f"({_esc(names)}). {zamenjava} Ključna razlika je na kartici. {rule} Ob sumu zastrupitve pokličite 112. "
+               '<a href="/gobarska-napoved/strupene-gobe/">Vodnik: katere so smrtno strupene in kam po pomoč</a>.')
+        qa = [
+            ("Koliko strupenih gob je v bazi vrst?",
+             f"{n} vrst: {len(lethal)} smrtno ali zelo strupenih in {n - len(lethal)} strupenih. {ver} jih je terensko "
+             f"preverjenih v dolini, ostale so povzete po literaturi. To ni popoln seznam vseh strupenih gob v Sloveniji."),
+            ("Katere strupene gobe so zdaj v sezoni?",
+             f"Ta mesec ({mon}) je v sezoni {k} od {n} strupenih vrst" +
+             (f"; med smrtno in zelo strupenimi: {_fmt_list(in_l)}." if in_l else ", med smrtno in zelo strupenimi pa nobena.")),
+            ("Kako ločim strupeno gobo od užitne?",
+             "Podobnost ni dokaz. Pri vsaki vrsti z znano zamenjavo je na kartici zapisana ključna razlika do užitne "
+             "dvojnice, primerjave s fotografijami so na strani nevarne dvojnice. Gobo izpulite celo in poglejte dno beta, "
+             "ne odrežite je. Če niste prepričani, je ne uživajte."),
+            ("Kaj storiti ob sumu zastrupitve z gobami?",
+             f"Pokličite 112, za posvet pa Center za zastrupitve UKC Ljubljana, {STRUP_PHONE} (24 ur). Shranite ostanke "
+             "gobe in ne čakajte na simptome."),
+        ]
+    elif key == "uzitna":
+        ans = (f"<b>Na kratko:</b> v bazi je {n} užitnih vrst gob, {k} jih je ta mesec ({mon}) v sezoni. {zamenjava} "
+               f"Zato užitnost sama ni dovolj za varno nabiranje. {rule} "
+               '<a href="/gobarska-napoved/dvojnice/">Primerjave z nevarnimi dvojnicami</a>.')
+        qa = [
+            ("Koliko užitnih gob je v bazi vrst?",
+             f"{n} vrst, od tega {ver} terensko preverjenih v Zgornji Savinjski dolini. Ostale so izbrane po zapisih o "
+             "pojavljanju v Sloveniji in opisane po literaturi; označene so z ◌."),
+            ("Ali je užitna goba vedno varna?",
+             f"Ne. Pri {dbl} od {n} užitnih vrst baza navaja podobno vrsto, s katero jo je mogoče zamenjati. Pri večini parov "
+             "je podobna vrsta strupena ali neužitna, ponekod pa prav tako užitna. Gobo uživajte samo, če jo popolnoma "
+             "poznate; ob dvomu je ne uživajte."),
+            ("Katere užitne gobe so zdaj v sezoni?", sezona),
+        ]
+    elif key == "pogojno":
+        ans = (f"<b>Na kratko:</b> v bazi je {n} pogojno užitnih vrst. To so gobe, ki so surove strupene ali težko "
+               f"prebavljive. {k} jih je ta mesec ({mon}) v sezoni. {zamenjava} {rule} "
+               '<a href="/gobarska-napoved/nasveti/">Pravila nabiranja</a>.')
+        qa = [
+            ("Kaj pomeni pogojno užitna goba?",
+             "V bazi je to oznaka za vrste, ki so surove strupene ali težko prebavljive. Pogojno užitna goba ni varna "
+             "samo zato, ker je v bazi: vrsto morate zanesljivo določiti, pri vsaki pa je na kartici zapisana tudi podobna "
+             "vrsta, s katero jo je mogoče zamenjati. Ob dvomu gobe ne uživajte."),
+            ("Koliko pogojno užitnih gob je v bazi vrst?",
+             f"{n} vrst, od tega {ver} terensko preverjenih v dolini. {unver}"),
+            ("Katere pogojno užitne gobe so zdaj v sezoni?", sezona),
+        ]
+    elif key == "neuzitna":
+        ans = (f"<b>Na kratko:</b> v bazi je {n} neužitnih vrst. Niso strupene, a na krožnik ne sodijo; pogosto so "
+               f"dvojnice užitnih vrst. {zamenjava} {k} jih je ta mesec ({mon}) v sezoni. {rule} "
+               '<a href="/gobarska-napoved/baza-vrst/strupene/">Strupene vrste so na posebni strani</a>.')
+        qa = [
+            ("Ali so neužitne gobe strupene?",
+             "V bazi ne: oznaka neužitna pomeni, da goba na krožnik ne sodi, ne da je strupena. Strupene vrste imajo "
+             "svojo skupino. Ker so neužitne gobe pogosto dvojnice užitnih vrst, jih pri nabiranju ne smete zamenjati z užitnimi."),
+            ("Koliko neužitnih gob je v bazi vrst?",
+             f"{n} vrst, od tega {ver} terensko preverjenih v dolini. {unver}"),
+            ("Katere neužitne gobe so zdaj v sezoni?", sezona),
+        ]
+    else:  # cela baza
+        cnt = _collections.Counter(EDIB_FILTER.get(ed(x), "drugo") for x in all_species)
+        zasc = f", zaščitenih: {cnt['zascitena']}" if cnt.get("zascitena") else ""
+        razdelitev = (f"{cnt['uzitna']} užitnih, {cnt['pogojno']} pogojno užitnih, {cnt['strupena']} strupenih, "
+                      f"{cnt['neuzitna']} neužitnih{zasc}")
+        ans = (f"<b>Na kratko:</b> baza ima {n} vrst gob Zgornje Savinjske doline: {razdelitev}. Pri vsaki je sezona, "
+               f"užitnost in, kjer obstaja, nevarna dvojnica. Jedro baze ({ver} vrst) je terensko preverjeno, ostale so "
+               f"iz literature in so označene z ◌. {rule}")
+        qa = [
+            ("Koliko vrst gob je v bazi in kako je razdeljena?", f"{n} vrst: {razdelitev}. Vsaka skupina ima svojo stran."),
+            ("Kaj pomeni oznaka »ni terensko preverjeno«?", unver),
+            ("Katere gobe so zdaj v sezoni?", sezona),
+            ("Kako preverim, ali je goba užitna?",
+             "Pri gobarskem društvu ali gobarski posvetovalnici v bližini. Baza vrst je pomoč pri učenju, ne zamenjava za "
+             "strokovni pregled. Ob dvomu gobe ne uživajte."),
+        ]
+    return ans, qa
+
+
 def build_baza_vrst_pages(species, vrste_credits_html):
     """Celotna baza na /baza-vrst/ in ena stran na skupino užitnosti pod njo.
     Vrne število zgrajenih strani."""
@@ -4793,12 +4901,17 @@ def build_baza_vrst_pages(species, vrste_credits_html):
         # navajala tudi avtorje slik, ki jih ta stran ne prikaže.
         guide = ('  <p class="archive-intro">👉 <a href="/gobarska-napoved/strupene-gobe/">Vodnik: smrtno strupene gobe, '
                  's čim jih zamenjamo in kam po pomoč</a></p>\n' if path == "strupene" else "")
-        body = BAZA_INTRO + guide + species_section_html(subset, species, current=path) + \
-            ("\n" + vrste_credits_html if not path else "")
+        ans, qa = baza_cat_text(key, subset, species)
+        faq_html = ('  <h2 class="gp-h2" id="faq">Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
+            f'    <details><summary>{_esc(q)}</summary><p>{_esc(a)}</p></details>' for q, a in qa) + "\n  </div>\n")
+        body = (f'  <p class="gp-answer">{ans}</p>\n' + BAZA_INTRO + guide +
+                species_section_html(subset, species, current=path) + "\n" + faq_html +
+                ("\n" + vrste_credits_html if not path else ""))
         subpage_shell(slug, title, desc_t.format(n=len(subset)),
                       "Baza vrst" if not path else label, body, extra_js=SP_JS,
                       parent=None if not path else
-                      ("Baza vrst", "/gobarska-napoved/baza-vrst/", "bazo vrst"))
+                      ("Baza vrst", "/gobarska-napoved/baza-vrst/", "bazo vrst"),
+                      extra_schema=seo.faq_schema(qa))
         made += 1
     return made
 

@@ -5,8 +5,53 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Thu, 05 Nov 2026 07:23:04 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 06 Nov 2026 10:51:08 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
+      <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</guid>
+      <pubDate>Fri, 06 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.</description>
+      <category>gobe</category>
+      <category>luna</category>
+      <category>gobarski indeks</category>
+      <category>mit ali resnica</category>
+    </item>
+    <item>
+      <title>Koliko dni po dežju rastejo gobe? Podatki po vrstah</title>
+      <link>https://meteorec.si/blog/koliko-dni-po-dezju-rastejo-gobe.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/koliko-dni-po-dezju-rastejo-gobe.html</guid>
+      <pubDate>Fri, 06 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Po dežju gobe ne zrastejo čez noč. Mediana je 6–12 dni, lisička je hitrejša, jurček počasnejši. Podatki iz več kot 2.000 opažanj in meritev postaje.</description>
+      <category>gobe</category>
+      <category>gobarski-indeks</category>
+      <category>analiza</category>
+      <category>zgornja savinjska dolina</category>
+    </item>
+    <item>
+      <title>Zakaj po dežju gobe ne zrastejo takoj</title>
+      <link>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</guid>
+      <pubDate>Fri, 06 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Med dežjem in prvimi gobami v mahu praviloma mine 7 do 14 dni. Razložimo, kaj se v tem času dogaja pod zemljo, in na primeru julija 2026 (dež 11. julija, indeks 83 % devet dni kasneje) pokažemo, kako zamik dejansko deluje.</description>
+      <category>gobe</category>
+      <category>gobarski indeks</category>
+      <category>IREICA1</category>
+      <category>agrometeo</category>
+      <category>vlaga tal</category>
+    </item>
+    <item>
+      <title>Kdaj po tednu dežja zrastejo gobe?</title>
+      <link>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</guid>
+      <pubDate>Fri, 06 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Teden je v Zgornji Savinjski dolini prinesel 68,3 mm dežja in visoko vlažnost. Koliko časa mine, preden gobe dejansko zrastejo, in kaj kaže napoved naprej?</description>
+      <category>gobe</category>
+      <category>IREICA1</category>
+      <category>Zgornja Savinjska dolina</category>
+      <category>Savinja</category>
+    </item>
     <item>
       <title>Žled ali poledica: kakšna je razlika?</title>
       <link>https://meteorec.si/blog/zled-ali-poledica-razlika-1027.html</link>
@@ -196,17 +241,6 @@
       <category>2026</category>
     </item>
     <item>
-      <title>Ali luna vpliva na rast gob? Kaj pravi znanost – in od kod izvira prepričanje</title>
-      <link>https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/vpliv-lune-na-rast-gob-0921.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Gobarji od nekdaj verjamejo, da polna luna prinese gobe. Švicarska študija 1.715 zapisov je preverila trditev. Kaj so ugotovili in kaj rast dejansko poganja.</description>
-      <category>gobe</category>
-      <category>luna</category>
-      <category>gobarski indeks</category>
-      <category>mit ali resnica</category>
-    </item>
-    <item>
       <title>Zakaj po 120 mm dežja v gozdu ni jurčkov</title>
       <link>https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</link>
       <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-120-mm-dezja-ni-jurckov-0918.html</guid>
@@ -326,29 +360,6 @@
       <category>mraz</category>
       <category>inverzija</category>
       <category>IREICA1</category>
-    </item>
-    <item>
-      <title>Kdaj po tednu dežja zrastejo gobe?</title>
-      <link>https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/kdaj-po-tednu-dezja-zrastejo-gobe-0822.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Teden je v Zgornji Savinjski dolini prinesel 68,3 mm dežja in visoko vlažnost. Koliko časa mine, preden gobe dejansko zrastejo, in kaj kaže napoved naprej?</description>
-      <category>gobe</category>
-      <category>IREICA1</category>
-      <category>Zgornja Savinjska dolina</category>
-      <category>Savinja</category>
-    </item>
-    <item>
-      <title>Zakaj po dežju gobe ne zrastejo takoj</title>
-      <link>https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/zakaj-po-dezju-gobe-ne-zrastejo-takoj.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Med dežjem in prvimi gobami v mahu praviloma mine 7 do 14 dni. Razložimo, kaj se v tem času dogaja pod zemljo, in na primeru julija 2026 (dež 11. julija, indeks 83 % devet dni kasneje) pokažemo, kako zamik dejansko deluje.</description>
-      <category>gobe</category>
-      <category>gobarski indeks</category>
-      <category>IREICA1</category>
-      <category>agrometeo</category>
-      <category>vlaga tal</category>
     </item>
     <item>
       <title>Jesenski vrh gob 2026: kaj pravijo številke iz petih let</title>
@@ -503,17 +514,6 @@
       <category>gobe</category>
       <category>gobarski-indeks</category>
       <category>nasveti</category>
-      <category>zgornja savinjska dolina</category>
-    </item>
-    <item>
-      <title>Koliko dni po dežju rastejo gobe? Podatki po vrstah</title>
-      <link>https://meteorec.si/blog/koliko-dni-po-dezju-rastejo-gobe.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/koliko-dni-po-dezju-rastejo-gobe.html</guid>
-      <pubDate>Thu, 15 Oct 2026 08:00:00 +0000</pubDate>
-      <description>Po dežju gobe ne zrastejo čez noč. Mediana je 6–12 dni, lisička je hitrejša, jurček počasnejši. Podatki iz več kot 2.000 opažanj in meritev postaje.</description>
-      <category>gobe</category>
-      <category>gobarski-indeks</category>
-      <category>analiza</category>
       <category>zgornja savinjska dolina</category>
     </item>
     <item>
