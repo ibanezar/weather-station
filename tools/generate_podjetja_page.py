@@ -74,16 +74,18 @@ CASES = [
          text="Neurja, veter in dež za prebivalce ter odločitve o prireditvah na prostem, vtičnik za občinsko spletno stran.",
          tags=["Neurja", "Veter", "Vtičnik"], img="primer-obcina", w=800, h=450,
          alt="Ilustracija: vremenska postaja na mestnem trgu med pripravo prireditve"),
-    # Brez lastne ilustracije (img=None): kartica na glavni strani je brez slike, hero podstrani uporabi splošno ilustracijo postaje.
     dict(id="hmelj", page="hmeljarji", dej="Kmetijstvo, sadjarstvo, vinogradništvo", title="Hmeljišče",
          text="Pozeba spomladi, veter na visokih žičnicah in nevihte: meritve na vašem hmeljišču, ne v sosednji dolini.",
-         tags=["Pozeba", "Veter", "Nevihte"], img=None, w=None, h=None, alt=None),
+         tags=["Pozeba", "Veter", "Nevihte"], img="primer-hmelj", w=1200, h=800,
+         alt="Ilustracija: vremenska postaja med vrstami hmeljišča z visokimi žičnicami ob jutranji megli"),
     dict(id="komunala", page="komunala", dej="Komunala in javne službe", title="Komunala in javne službe",
          text="Neurja, veter in dež za službe, ki skrbijo za javne površine, vodo in ceste. Opozorilo na telefon, ko dosežete mejo.",
-         tags=["Neurja", "Veter", "Dež"], img=None, w=None, h=None, alt=None),
+         tags=["Neurja", "Veter", "Dež"], img="primer-komunala", w=1200, h=800,
+         alt="Ilustracija: komunalni delavec ob odtoku po nalivu in vremenska postaja ob cesti v alpskem kraju"),
     dict(id="zimska", page="zimska-sluzba", dej="Zimska služba in vzdrževanje cest", title="Zimska služba",
          text="Temperatura, rosišče in padavine na vašem odseku ter opozorilo na telefon. Postaja meri zrak, ne cestišča.",
-         tags=["Mraz", "Padavine", "Veter"], img=None, w=None, h=None, alt=None),
+         tags=["Mraz", "Padavine", "Veter"], img="primer-zimska", w=1200, h=800,
+         alt="Ilustracija: plug s posipalnikom ob zori na gorski cesti in vremenska postaja ob cestišču pozimi"),
 ]
 ILLUS_NOTE = ("Fotografije so ilustrativne (ustvarjene z umetno inteligenco). Prikazana oprema je splošna ponazoritev: "
               "ni fotografija naše opreme, konkretne postavitve ali stranke.")
@@ -591,7 +593,7 @@ def case_card(c):
           <h3>{ic(CASE_ICON[c["id"]], "ic-t")}{e(c["title"])}</h3>
           <p>{e(c["text"])}</p>
           <ul class="tags" aria-label="Kaj spremljate">{tags}</ul>
-          <div class="case-links"><a class="link" href="{seg_url(SEG_BY_SLUG[c["page"]])}">Več za {e(SEG_BY_SLUG[c["page"]]["nav"].lower())} {ARROW}</a>
+          <div class="case-links"><a class="link" href="{seg_url(SEG_BY_SLUG[c["page"]])}">Več za {e(SEG_BY_SLUG[c["page"]].get("za") or SEG_BY_SLUG[c["page"]]["nav"].lower())} {ARROW}</a>
           <a class="link link-sec" href="#povprasevanje" data-segment="{c["id"]}">Pridobite ponudbo</a></div>
         </div>
       </article>'''
@@ -1032,7 +1034,7 @@ SEG_PAGES = [
               ("Ali lahko podatke pokažemo na občinski spletni strani?",
                "Da. Za občine pripravimo vtičnik za občinsko spletno stran; javna stran ali vtičnik je že del paketa Osnovni."),
               FAQ_WIFI, FAQ_ROK]),
-    dict(slug="hmeljarji", seg="hmelj", nav="Hmeljarji", case=4,
+    dict(slug="hmeljarji", seg="hmelj", nav="Hmeljarji", za="hmeljarje", case=4,
          title="Vremenska postaja za hmeljišče",
          desc="Vremenska postaja za hmeljišče: pozeba, veter na žičnicah, dež, vlaga in nevihte na vaši lokaciji, opozorilo na telefon.",
          audience="Hmeljarji, pridelovalci hmelja",
@@ -1055,7 +1057,7 @@ SEG_PAGES = [
               ("Ali postaja nadomešča uradna opozorila ARSO?",
                "Ne. Uradna opozorila izdaja ARSO. Naša postaja je meritev na vaši lokaciji; skupaj dasta boljšo sliko."),
               FAQ_WIFI, FAQ_ROK]),
-    dict(slug="komunala", seg="komunala", nav="Komunala", case=5,
+    dict(slug="komunala", seg="komunala", nav="Komunala", za="komunalo", case=5,
          title="Vremenska postaja za komunalo in javne službe",
          desc="Vremenska postaja za komunalo in javne službe: neurja, veter, dež in mraz v kraju, opozorilo na telefon, vreme na spletni strani.",
          audience="Komunalna podjetja, javne službe, vzdrževalci",
@@ -1077,7 +1079,7 @@ SEG_PAGES = [
               ("Ali je to uradno opozorilo za prebivalce?",
                "Ne. Uradna opozorila izdajata ARSO in URSZR. Meritve in opozorila Meteorec so dopolnilo, ki kaže razmere pri vas."),
               FAQ_WIFI, FAQ_ROK]),
-    dict(slug="zimska-sluzba", seg="zimska", nav="Zimska služba", case=6,
+    dict(slug="zimska-sluzba", seg="zimska", nav="Zimska služba", za="zimsko službo", case=6,
          title="Vremenska postaja za zimsko službo in ceste",
          desc="Vremenska postaja za zimsko službo in vzdrževanje cest: temperatura, rosišče, padavine in veter na odseku, opozorilo na telefon.",
          audience="Izvajalci zimske službe, vzdrževalci cest",
