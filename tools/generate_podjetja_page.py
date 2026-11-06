@@ -74,6 +74,16 @@ CASES = [
          text="Neurja, veter in dež za prebivalce ter odločitve o prireditvah na prostem, vtičnik za občinsko spletno stran.",
          tags=["Neurja", "Veter", "Vtičnik"], img="primer-obcina", w=800, h=450,
          alt="Ilustracija: vremenska postaja na mestnem trgu med pripravo prireditve"),
+    # Brez lastne ilustracije (img=None): kartica na glavni strani je brez slike, hero podstrani uporabi splošno ilustracijo postaje.
+    dict(id="hmelj", page="hmeljarji", dej="Kmetijstvo, sadjarstvo, vinogradništvo", title="Hmeljišče",
+         text="Pozeba spomladi, veter na visokih žičnicah in nevihte: meritve na vašem hmeljišču, ne v sosednji dolini.",
+         tags=["Pozeba", "Veter", "Nevihte"], img=None, w=None, h=None, alt=None),
+    dict(id="komunala", page="komunala", dej="Komunala in javne službe", title="Komunala in javne službe",
+         text="Neurja, veter in dež za službe, ki skrbijo za javne površine, vodo in ceste. Opozorilo na telefon, ko dosežete mejo.",
+         tags=["Neurja", "Veter", "Dež"], img=None, w=None, h=None, alt=None),
+    dict(id="zimska", page="zimska-sluzba", dej="Zimska služba in vzdrževanje cest", title="Zimska služba",
+         text="Temperatura, rosišče in padavine na vašem odseku ter opozorilo na telefon. Postaja meri zrak, ne cestišča.",
+         tags=["Mraz", "Padavine", "Veter"], img=None, w=None, h=None, alt=None),
 ]
 ILLUS_NOTE = ("Fotografije so ilustrativne (ustvarjene z umetno inteligenco). Prikazana oprema je splošna ponazoritev: "
               "ni fotografija naše opreme, konkretne postavitve ali stranke.")
@@ -111,10 +121,13 @@ def faq_list():
     ]
 
 DEJAVNOSTI = ["Kmetijstvo, sadjarstvo, vinogradništvo", "Gradbeništvo", "Turizem in gostinstvo",
-              "Prireditve in šport", "Občina ali javna ustanova", "Drugo"]
+              "Prireditve in šport", "Občina ali javna ustanova", "Komunala in javne službe",
+              "Zimska služba in vzdrževanje cest", "Drugo"]
 POSTAJ = ["1", "2 do 3", "4 ali več"]
-SPREMLJATI = ["pozeba", "veter", "dež in toča", "vlaga tal", "strele", "požarna ogroženost", "temperatura in megla"]
-SPREMLJATI_LBL = ["Pozeba", "Veter", "Dež in toča", "Vlaga tal", "Strele", "Požarna ogroženost", "Temperatura in megla"]
+SPREMLJATI = ["pozeba", "veter", "dež in toča", "vlaga tal", "strele", "požarna ogroženost", "višina vode", "mraz in poledica",
+              "temperatura in megla"]
+SPREMLJATI_LBL = ["Pozeba", "Veter", "Dež in toča", "Vlaga tal", "Strele", "Požarna ogroženost", "Višina vode", "Mraz in poledica",
+                  "Temperatura in megla"]
 WIFI = ["Da, WiFi je na voljo", "Ne, potreben je mobilni internet", "Ne vem, preverite z mano"]
 WIFI_LBL = ["Da", "Ne", "Ne vem"]
 
@@ -207,9 +220,11 @@ ICONS = {
     "headset": "M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v5H4zM17 14h3v5h-3zM20 19c0 2-2 2-5 2",
 }
 TAG_ICON = {"Pozeba": "snow", "Toča": "hail", "Vlaga tal": "drop", "Nevihte": "bolt", "Višina vode": "drop", "Veter": "wind",
-            "Dež": "hail", "Temperatura": "thermo", "Požarna ogroženost": "flame", "Neurja": "bolt", "Vtičnik": "dash"}
+            "Dež": "hail", "Temperatura": "thermo", "Mraz": "snow", "Padavine": "hail", "Požarna ogroženost": "flame", "Neurja": "bolt", "Vtičnik": "dash"}
 ICONS["dash"] = "M3 4h18v12H3zM8 20h8M12 16v4M7 12l3-3 3 2 4-4"
-CASE_ICON = {"kmetija": "sprout", "kamp": "tent", "gradbenistvo": "hardhat", "obcina": "landmark"}
+ICONS["truck"] = "M2 16V6h11v10M13 9h4l4 4v3M8 16h5M2 16h2M19 16h2M4 18.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0M15 18.5a2 2 0 1 0 4 0 2 2 0 1 0-4 0"
+CASE_ICON = {"kmetija": "sprout", "kamp": "tent", "gradbenistvo": "hardhat", "obcina": "landmark", "hmelj": "sprout",
+             "komunala": "truck", "zimska": "snow"}
 STEP_ICON = ["pin", "tool", "sliders", "check", "headset"]
 PHOTO = "podjetja/img/postaja.jpg"   # prava fotografija IREICA1; ko obstaja, nadomesti ilustracijo
 PHOTO_ALT = "Vremenska postaja IREICA1 v Rečici ob Savinji"
@@ -567,8 +582,10 @@ def package_card(p):
 
 def case_card(c):
     tags = "".join(f'<li>{ic(TAG_ICON[t], "ic-s")}{e(t)}</li>' for t in c["tags"])
+    fig = (f'<figure class="case-ph"><img src="/podjetja/img/{c["img"]}.webp" alt="{e(c["alt"])}" width="{c["w"]}" height="{c["h"]}" '
+           f'loading="lazy" decoding="async"><figcaption>Ilustracija</figcaption></figure>') if c["img"] else ""
     return f'''      <article class="card case rz" id="{c["id"]}" data-dej="{e(c["dej"])}" tabindex="-1">
-        <figure class="case-ph"><img src="/podjetja/img/{c["img"]}.webp" alt="{e(c["alt"])}" width="{c["w"]}" height="{c["h"]}" loading="lazy" decoding="async"><figcaption>Ilustracija</figcaption></figure>
+        {fig}
         <span class="case-flag" hidden>Ponudba za vas</span>
         <div class="case-body">
           <h3>{ic(CASE_ICON[c["id"]], "ic-t")}{e(c["title"])}</h3>
@@ -584,7 +601,7 @@ PLUS = ('<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><pat
         'stroke-width="2.2" stroke-linecap="round"/></svg>')
 
 MARQUEE = ["Kmetije", "Sadovnjaki", "Vinogradi", "Hmeljarji", "Čebelarji", "Kampi", "Turizem", "Gostinstvo",
-           "Gradbeništvo", "Občine", "Prireditve", "Športni klubi"]
+           "Gradbeništvo", "Občine", "Komunala", "Zimska služba", "Prireditve", "Športni klubi"]
 
 
 def marquee_html():
@@ -1015,6 +1032,74 @@ SEG_PAGES = [
               ("Ali lahko podatke pokažemo na občinski spletni strani?",
                "Da. Za občine pripravimo vtičnik za občinsko spletno stran; javna stran ali vtičnik je že del paketa Osnovni."),
               FAQ_WIFI, FAQ_ROK]),
+    dict(slug="hmeljarji", seg="hmelj", nav="Hmeljarji", case=4,
+         title="Vremenska postaja za hmeljišče",
+         desc="Vremenska postaja za hmeljišče: pozeba, veter na žičnicah, dež, vlaga in nevihte na vaši lokaciji, opozorilo na telefon.",
+         audience="Hmeljarji, pridelovalci hmelja",
+         tag="METEOREC ZA HMELJARJE", old="Napoved za dolino.", words=("Vreme na", "vašem hmeljišču."),
+         lead="Lastna vremenska postaja na hmeljišču: pozeba, veter, dež in vlaga tam, kjer rastejo vaši hmeljevi nasadi, ne v sosednji dolini. Opozorilo na telefon, ko dosežete mejo, ki jo nastavite.",
+         h2="Kaj vam postaja pove na hmeljišču",
+         intro="Hmeljišče je visoko in razpotegnjeno, vreme pa se od parcele do parcele razlikuje. Odločitev o ukrepu temelji na meritvi pri vas.",
+         odl=[("snow", "Pozeba spomladi", "Opozorilo, ko temperatura na vašem hmeljišču pade na mejo, ki ste jo nastavili. Kotanja je lahko hladnejša od bližnjega pobočja.", "Pro"),
+              ("wind", "Veter na visokih žičnicah", "Meritev vetra in sunkov na vaši lokaciji ter opozorilo na telefon, ko dosežete mejo. Visoke žičnice so izpostavljene vetru in nevihtam.", "Osnovni, Pro"),
+              ("hail", "Nevihte", "Opozorilo na telefon za veter in nevihto (Pro), senzor strel (Premium). Toče postaja ne zazna in je ne napove.", "Pro, Premium"),
+              ("drop", "Dež, vlaga in okno za delo", "Padavine, zračna vlaga in veter na vaši lokaciji kažejo, kdaj je delo ali nanos sredstva mogoč. Etiketa sredstva, priporočila stroke in odločitev ostanejo vaši.", "Osnovni, Pro")],
+         primer=("/agrometeo/", "Primer: agrometeo za našo dolino (modelska ocena, ne meritev vašega hmeljišča)"),
+         dokaz=False,
+         faq=[("Ali postaja pove, kdaj škropiti hmelj?",
+               "Ne. Postaja meri veter, padavine, temperaturo in vlago na vašem hmeljišču; to so vhodni podatki za presojo, kdaj je nanos meteorološko mogoč. Kdaj in s čim škropiti, določajo etiketa sredstva, priporočila stroke in vaša presoja."),
+              ("Ali postaja zazna točo?",
+               "Ne. Postaja meri padavine, toče ne zazna in je ne napove. Za nevihto opozori senzor strel (Premium) in opozorilo ob vetru (Pro)."),
+              ("Kje naj stoji postaja v hmeljišču?",
+               "Mesto določimo ob ogledu lokacije. Visoke žičnice in sosednje parcele vplivajo na veter in temperaturo, zato mora biti postaja na mestu, ki je reprezentativno za vaše hmeljišče."),
+              ("Ali postaja nadomešča uradna opozorila ARSO?",
+               "Ne. Uradna opozorila izdaja ARSO. Naša postaja je meritev na vaši lokaciji; skupaj dasta boljšo sliko."),
+              FAQ_WIFI, FAQ_ROK]),
+    dict(slug="komunala", seg="komunala", nav="Komunala", case=5,
+         title="Vremenska postaja za komunalo in javne službe",
+         desc="Vremenska postaja za komunalo in javne službe: neurja, veter, dež in mraz v kraju, opozorilo na telefon, vreme na spletni strani.",
+         audience="Komunalna podjetja, javne službe, vzdrževalci",
+         tag="METEOREC ZA KOMUNALO IN JAVNE SLUŽBE", old="Vreme za celo regijo.", words=("Vreme v", "vašem kraju."),
+         lead="Vremenska postaja za komunalno podjetje ali javno službo: neurja, veter, dež in mraz v kraju, kjer delate, in opozorilo na telefon, ko dosežete mejo, ki jo določite.",
+         h2="Kaj vam postaja pove v komunali",
+         intro="Služba, ki odloča o odzivu, potrebuje meritev za svoj kraj, ne za regijo. Uradna opozorila ostanejo pri ARSO in URSZR, postaja pa pokaže razmere pri vas.",
+         odl=[("bolt", "Neurja", "Opozorilo na telefon ob vetru in nevihti (Pro), senzor strel (Premium): služba, ki odloča o odzivu, vidi razmere v kraju, ne v regiji.", "Pro, Premium"),
+              ("wind", "Veter na javnih površinah", "Meritev vetra in sunkov kot opora pri odločitvah o delu na drevesih, odrih in javnih površinah. Mejo določite po svojih navodilih.", "Osnovni, Pro"),
+              ("drop", "Dež in odvodnjavanje", "Količina in jakost padavin v kraju kot opora pri presoji, kdaj preveriti prepuste in odvodnike. Pretoka in zapolnjenosti kanalov postaja ne meri; višina vode v potoku je dodatni senzor po dogovoru.", "Osnovni, Po meri"),
+              ("thermo", "Mraz", "Opozorilo, ko temperatura pade na vašo mejo, na primer za zaščito opreme in priključkov na prostem.", "Pro")],
+         dokaz=False,
+         faq=[("Ali postaja meri pretok ali stanje kanalizacije?",
+               "Ne. Postaja meri vreme: veter, padavine, temperaturo in vlago. Višina vode ob potoku je dodatni senzor po dogovoru (paket Po meri); pretoka in zapolnjenosti kanalov ne merimo."),
+              ("Ali lahko postavite več postaj na območju komunale?",
+               "Paket Po meri vključuje več postaj na več lokacijah. Število in mesta dogovorimo ob ogledu."),
+              ("Ali lahko vreme pokažemo na naši spletni strani?",
+               "Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran."),
+              ("Ali je to uradno opozorilo za prebivalce?",
+               "Ne. Uradna opozorila izdajata ARSO in URSZR. Meritve in opozorila Meteorec so dopolnilo, ki kaže razmere pri vas."),
+              FAQ_WIFI, FAQ_ROK]),
+    dict(slug="zimska-sluzba", seg="zimska", nav="Zimska služba", case=6,
+         title="Vremenska postaja za zimsko službo in ceste",
+         desc="Vremenska postaja za zimsko službo in vzdrževanje cest: temperatura, rosišče, padavine in veter na odseku, opozorilo na telefon.",
+         audience="Izvajalci zimske službe, vzdrževalci cest",
+         tag="METEOREC ZA ZIMSKO SLUŽBO", old="Poledica brez opozorila.", words=("Mraz in padavine na", "vašem odseku."),
+         lead="Vremenska postaja ob cesti, ki jo vzdržujete: temperatura, rosišče, padavine in veter na odseku in opozorilo na telefon, ko dosežete mejo, ki jo določite. Postaja meri zrak, ne cestišča.",
+         h2="Kaj vam postaja pove pri zimski službi",
+         intro="Razmere se z višino in lego odseka razlikujejo. Postaja pokaže, kaj meri na izbrani točki; odločitev o posipu in pluženju ostaja vaša.",
+         odl=[("snow", "Mraz in poledica", "Opozorilo na telefon, ko temperatura zraka pade na mejo, ki jo nastavite. Postaja meri zrak, vlago in rosišče; temperature cestišča ne meri.", "Pro"),
+              ("hail", "Padavine okoli ničle", "Meritev padavin skupaj s temperaturo kaže, kdaj dežuje ob ničli. Dežemer meri padavine v tekoči obliki; novega snega in snežne odeje ne meri zanesljivo.", "Osnovni"),
+              ("wind", "Veter in zameti", "Meritev vetra in sunkov na vašem odseku ter opozorilo ob meji. Močan veter lahko po snegu povzroča zamete: mejo in odločitev določite vi.", "Osnovni, Pro"),
+              ("pin", "Več odsekov", "Razmere se z višino razlikujejo. Več postaj na različnih odsekih omogoča paket Po meri; število in mesta dogovorimo ob ogledu.", "Po meri")],
+         primer=("/zima/poledica/", "Primer: ocena poledice za našo dolino (modelska ocena, ne meritev vašega odseka)"),
+         dokaz=False,
+         faq=[("Ali postaja meri temperaturo cestišča?",
+               "Ne. Postaja meri temperaturo in vlago zraka ter izračuna rosišče. Temperatura cestišča se lahko od zraka razlikuje; odločitev o posipu temelji na vaših pravilih in presoji, ne samo na postaji."),
+              ("Ali postaja izmeri višino snega?",
+               "Ne. Dežemer meri padavine v tekoči obliki, snega in snežne odeje ne meri zanesljivo."),
+              ("Kdaj dobim opozorilo na telefon?",
+               "Opozorila na telefon (Pro) pridejo, ko postaja doseže mejo, ki jo nastavite, na primer temperaturo zraka. Mejo določite vi."),
+              ("Ali postaja nadomešča uradna opozorila ARSO?",
+               "Ne. Uradna opozorila izdaja ARSO. Naša postaja je meritev na vaši lokaciji; skupaj dasta boljšo sliko."),
+              FAQ_WIFI, FAQ_ROK]),
 ]
 SEG_BY_SLUG = {s_["slug"]: s_ for s_ in SEG_PAGES}
 
@@ -1048,6 +1133,13 @@ def others_html(sg):
             f'<li><a href="{URL}">Vse dejavnosti</a></li></ul></div></section>\n\n')
 
 
+def hero_img(case):
+    """Dejavnost brez lastne ilustracije dobi splošno ilustracijo postaje (označeno kot ilustracija)."""
+    if case["img"]:
+        return case["img"], case["w"], case["h"], case["alt"]
+    return "postaja-detajl", 760, 1333, ILLUS_ALT
+
+
 def build_segment(sg):
     url = seg_url(sg)
     case = CASES[sg["case"]]
@@ -1069,7 +1161,7 @@ def build_segment(sg):
         [("#paketi", "Paketi"), ("#faq", "Vprašanja")]
     body = ("<body>\n" + top_html(nav, nav) + '<main id="vsebina">\n'
             + hero_html(sg["tag"], sg["old"], sg["words"], sg["lead"], ("#paketi", "Oglejte si pakete"),
-                        case["img"], case["w"], case["h"], case["alt"], crumb=sg["nav"])
+                        *hero_img(case), crumb=sg["nav"])
             + decisions_html(sg) + dok
             + proof_html() + (shema_html() + "\n" if sg.get("dokaz") else "")
             + f'  <p class="wrap fine illus-note">{e(ILLUS_NOTE)}</p>\n\n'

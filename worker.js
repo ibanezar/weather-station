@@ -7266,13 +7266,15 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         const POV_STORE_CAP = 500;
         const POV_MIN_MS = 3000;     // hitrejše oddaje so boti
         const POV_DEJAVNOSTI = ["Kmetijstvo, sadjarstvo, vinogradništvo", "Gradbeništvo", "Turizem in gostinstvo",
-          "Prireditve in šport", "Občina ali javna ustanova", "Drugo"];
+          "Prireditve in šport", "Občina ali javna ustanova", "Komunala in javne službe",
+          "Zimska služba in vzdrževanje cest", "Drugo"];
         const POV_POSTAJ = ["1", "2 do 3", "4 ali več"];
-        const POV_SPREMLJATI = ["pozeba", "veter", "dež in toča", "vlaga tal", "strele", "požarna ogroženost", "temperatura in megla"];
+        const POV_SPREMLJATI = ["pozeba", "veter", "dež in toča", "vlaga tal", "strele", "požarna ogroženost", "višina vode", "mraz in poledica",
+          "temperatura in megla"];
         const POV_WIFI = ["Da, WiFi je na voljo", "Ne, potreben je mobilni internet", "Ne vem, preverite z mano"];
         const POV_PAKETI = ["osnovni", "pro", "premium", "po-meri"];
         const POV_POVEZAVE = ["wifi", "sim"];
-        const POV_SEGMENTI = ["kmetija", "kamp", "gradbenistvo", "obcina"];
+        const POV_SEGMENTI = ["kmetija", "kamp", "gradbenistvo", "obcina", "hmelj", "komunala", "zimska"];
 
         async function _povRead() {
           if (!r2) return [];

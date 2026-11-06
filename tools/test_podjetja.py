@@ -218,6 +218,13 @@ check("ožarn" not in seg_pages["obcine"].split('id="povprasevanje"')[0] and "/m
       "občine: požarne ogroženosti ne ponujamo (ni narejena za druge občine)")
 check("Višina vode" in seg_pages["turizem"] and "po dogovoru" in seg_pages["turizem"] and any(p_["id"] == "voda" and p_["kind"] == "dodatno" for p_ in G.PARTS),
       "turizem: višina vode je dodatni senzor po dogovoru")
+check("cestišča ne meri" in seg_pages["zimska-sluzba"] and "snega in snežne odeje ne meri" in seg_pages["zimska-sluzba"],
+      "zimska služba: pove, da postaja ne meri temperature cestišča in snega")
+check("Toče postaja ne zazna" in seg_pages["hmeljarji"], "hmeljarji: toče ne obljubljamo")
+check("Mozirje" not in seg_pages["komunala"], "komunala: brez imena konkretnega podjetja (ni reference)")
+check("pretoka in zapolnjenosti kanalov" in seg_pages["komunala"], "komunala: pove, da pretoka in kanalov ne merimo")
+check(all("ožarn" not in seg_pages[k].split('id="povprasevanje"')[0] for k in ("hmeljarji", "komunala", "zimska-sluzba")),
+      "nove dejavnosti: požarne ogroženosti ne ponujamo")
 old = G.SHOW_PRICES
 G.SHOW_PRICES = False
 for sg in G.SEG_PAGES:
