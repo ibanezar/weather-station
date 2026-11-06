@@ -10,7 +10,14 @@
 
 - [Domača stran](https://meteorec.si/): trenutne meritve, dnevni povzetek, 7-dnevna napoved, radar, nevihtna karta Slovenije.
 - [Vreme Rečica ob Savinji](https://meteorec.si/vreme-recica-ob-savinji/): trenutna meritev, 7-dnevna napoved in napoved po urah za osrednji kraj, s primerjavo Open-Meteo in poskusnega modela MTR (dno doline).
-- [Meteorec za podjetja](https://meteorec.si/podjetja/): postavitev vremenske postaje za kmetije, turizem, gradbeništvo in občine, z nadzorno ploščo, opozorili na telefon in pregledom paketov.
+- [Meteorec za podjetja](https://meteorec.si/podjetja/): postavitev vremenske postaje za kmetije, hmeljarje, turizem, gradbeništvo, občine, komunalo in zimsko službo, z nadzorno ploščo, opozorili na telefon in pregledom paketov.
+- [Vremenska postaja za kmetijo in sadovnjak](https://meteorec.si/podjetja/kmetije/): pozeba, veter, dež in vlaga tal na vaši lokaciji, opozorilo na telefon, primerjava napovedi z meritvami postaje IREICA1.
+- [Vremenska postaja za kamp, turizem in gostinstvo](https://meteorec.si/podjetja/turizem/): nevihte, veter, dež in višina vode na lokaciji, opozorilo na telefon in vreme na spletni strani podjetja.
+- [Vremenska postaja za gradbišče](https://meteorec.si/podjetja/gradbenistvo/): veter, dež, temperatura in mraz na gradbišču, opozorilo na telefon, napajanje s sončno celico.
+- [Vremenska postaja za občino in javne ustanove](https://meteorec.si/podjetja/obcine/): neurja, veter in dež, opozorilo na telefon in vtičnik za občinsko spletno stran.
+- [Vremenska postaja za hmeljišče](https://meteorec.si/podjetja/hmeljarji/): pozeba, veter na žičnicah, dež, vlaga in nevihte na hmeljišču, opozorilo na telefon.
+- [Vremenska postaja za komunalo in javne službe](https://meteorec.si/podjetja/komunala/): neurja, veter, dež in mraz v kraju, opozorilo na telefon, vreme na spletni strani.
+- [Vremenska postaja za zimsko službo in ceste](https://meteorec.si/podjetja/zimska-sluzba/): temperatura, rosišče, padavine in veter na odseku, opozorilo na telefon; temperature cestišča postaja ne meri.
 - [Točnost napovedi](https://meteorec.si/tocnost-napovedi/): sprotna primerjava napovedi (ARSO, Open-Meteo, MTR, ECMWF AIFS) z dejansko izmerjenim vremenom.
 - [MTR: kako nastaja napovedni model](https://meteorec.si/mtr/): časovnica modela MTR za Rečico, 12 poskusov, ki niso uspeli (s številkami), odprta vprašanja s števci in ukazi za ponovitev poskusov.
 - [Primerjava vremenskih modelov](https://meteorec.si/primerjava-modelov/): napoved ICON-D2, ICON-EU, ECMWF IFS in AROME (GeoSphere Austria, z ansamblom) za Rečico ob Savinji drugo nad drugo — temperatura, padavine, sunki, oblačnost po urah in razpon med modeli. Neposredni izhodi modelov, ne uradna napoved.

@@ -229,6 +229,11 @@
     if (scroll) { var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; c.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); }
   }
   $$('[data-segment]').forEach(function (a) { a.addEventListener('click', function () { var id = a.getAttribute('data-segment'); applySegment(id, false); track('industry_select', { industry: id }); }); });
+  /* podstran dejavnosti (/podjetja/kmetije/ …): dejavnost in segment sta znana že ob prihodu */
+  if (CFG.segment) {
+    var hs = $('#h-segment'); if (hs) hs.value = CFG.segment;
+    var psel = $('#f-panoga'); if (psel && CFG.dej) psel.value = CFG.dej;
+  }
   var qs = new URLSearchParams(location.search);
   var seg = qs.get('segment') || location.hash.replace('#', '');
   if (SEG[seg]) applySegment(seg, !!qs.get('segment'));
@@ -251,7 +256,7 @@
      Telefon v herou se začne z VZORČNIMI vrednostmi (označene kot primer), da nikoli ni prazen. Ob uspešnem
      branju se zamenjajo z meritvijo in oznaka postane »v živo«; ob napaki ostanejo vzorčne in tako označene. */
   (function live() {
-    var tEl = $('#lw-temp'); if (!tEl) return;
+    var tEl = $('#lw-temp'); if (!tEl && !$('#ph-temp')) return;
     var ph = $('#phone');
     function put(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
     function fail() {
@@ -262,14 +267,12 @@
     function num(v, d) { return v == null || isNaN(v) ? '–' : Number(v).toFixed(d).replace('.', ',').replace('-', '\u2212'); }
     fetch(CFG.worker + '/').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) {
       var o = d && d.observations && d.observations[0], m = o && o.metric; if (!m) throw 0;
-      tEl.textContent = num(m.temp, 1) + ' °C';
-      $('#lw-wind').textContent = num(m.windSpeed, 0) + ' km/h';
-      $('#lw-rain').textContent = num(m.precipTotal, 1) + ' mm';
+      put('lw-temp', num(m.temp, 1) + ' °C'); put('lw-wind', num(m.windSpeed, 0) + ' km/h'); put('lw-rain', num(m.precipTotal, 1) + ' mm');
       put('ph-temp', num(m.temp, 1) + '\u00a0°C'); put('ph-hum', num(o.humidity, 0) + '\u00a0%');
       put('ph-pres', num(m.pressure, 0) + '\u00a0hPa'); put('ph-wind', num(m.windSpeed, 0) + '\u00a0km/h');
       put('ph-dew', num(m.dewpt, 1) + '\u00a0°C'); put('ph-gust', num(m.windGust, 0) + '\u00a0km/h');
       put('ph-rain', num(m.precipTotal, 1) + '\u00a0mm');
-      var t = o.obsTimeLocal ? new Date(o.obsTimeLocal.replace(' ', 'T')) : null, el = $('#lw-time');
+      var t = o.obsTimeLocal ? new Date(o.obsTimeLocal.replace(' ', 'T')) : null, el = $('#lw-time') || document.createElement('p');
       if (ph) {
         ph.classList.remove('is-sample'); ph.classList.add('is-live');
         ph.setAttribute('aria-label', 'Prikaz na telefonu: živa meritev postaje IREICA1 in primer opozorila');
