@@ -573,6 +573,20 @@ def snow_line_meter_svg(line_m, station_elev=None, scale_max=2500):
 
 # ── /zima/ hub ────────────────────────────────────────────────────────────
 
+# (slug, naslov kartice, podnaslov, vrsta ikone) -- blog/<slug>.html; izbira in vrstni red sta
+# ročna. Vsi slugi morajo obstajati v blog.json (preverja tools/test_zima_vodniki.py).
+WINTER_GUIDES = [
+    ("kdaj-menjati-zimske-gume-recica-1027", "Kdaj menjati zimske gume?", "jutra pod 7 °C v Rečici", "black_ice"),
+    ("kdaj-pade-prvi-sneg-v-dolini-recica-1027", "Kdaj pade prvi sneg v dolini?", "sedem zim v Rečici", "snow_line"),
+    ("prvi-sneg-golte-solcava-menina-1027", "Prvi sneg na Goltah in v Solčavi", "kdaj ga pričakovati", "snow_line"),
+    ("bela-bozic-zgornja-savinjska-dolina-1027", "Bel božič v dolini", "kako pogost je", "snowpack"),
+    ("crnivec-pozimi-sneg-verige-1027", "Črnivec pozimi", "kdaj sneg, kdaj verige", "passes"),
+    ("zled-ali-poledica-razlika-1027", "Žled ali poledica", "kakšna je razlika", "black_ice"),
+    ("kdaj-se-dvigne-jutranja-megla-dolina-1027", "Kdaj se dvigne megla", "izmerjeno v dolini", "fog"),
+    ("stopinjski-dnevi-recica-koliko-kuriti-1027", "Koliko kuriti?", "stopinjski dnevi zadnjih zim", "heating_index"),
+]
+
+
 def build_hub_body(data):
     snow = data["snow_line"]
     locations = data["locations"]
@@ -816,6 +830,20 @@ def build_hub_body(data):
       <div class="ph-count">{prelazi_n(len(passes))}</div></a>
   </div>'''
 
+    # Zimski vodniki iz podatkov postaje (blog, 27. 10. 2026): do 6. 11. 2026 so imeli
+    # dohodne povezave samo iz bloga (index, teme, sorodni) -- ne z /zima/ ne z
+    # naslovnice, osem člankov pa ob objavi ni imelo skoraj nobenega prikaza.
+    guide_cards = "".join(
+        f'''
+    <a class="phenom-card zima-phenom" href="/blog/{slug}.html" style="{card_style(kind, "")}">
+      <span class="ph-icon">{icon_html(kind, 30)}</span>{title}
+      <div class="ph-count">{hint}</div></a>'''
+        for slug, title, hint, kind in WINTER_GUIDES)
+    guides_html = f'''  <h2 class="zima-section-title">📖 Zima v podatkih postaje</h2>
+  <p class="muted-note" style="margin-top:-.6rem">Odgovori na pogosta zimska vprašanja iz meritev postaje IREICA1 (od 2019) in ARSO Črnivec.</p>
+  <div class="card-grid">{guide_cards}
+  </div>'''
+
     season = data.get("season") or {}
     season_html = ""
     if season.get("days_logged"):
@@ -862,6 +890,7 @@ def build_hub_body(data):
 {meter_html}
 {passes_html}
 {nav_cards}
+{guides_html}
 {season_html}
 {hub_alerts_html()}
   <h2>Pogosta vprašanja</h2>

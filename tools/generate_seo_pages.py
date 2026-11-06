@@ -428,6 +428,8 @@ def footer_html(year=None):
             f' · <a href="/podatki/">Podatki</a>'
             f' · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a>'
             f' · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a>'
+            f' · <a href="/vreme-mozirje/">Vreme Mozirje</a>'
+            f' · <a href="/vreme-nazarje/">Vreme Nazarje</a>'
             f' · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>\n  </footer>')
 
 def page_shell(title, desc, canonical, head_extras, body_content, year=None, og_image=None):

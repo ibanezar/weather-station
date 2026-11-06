@@ -558,6 +558,11 @@ DATA_LINKS = [
     ("/padavine/", "Padavine"),
     ("/rekord/", "Rekordi"),
     ("/vreme-zgornja-savinjska-dolina/", "Vreme Zgornja Savinjska dolina"),
+    # 6. 11. 2026 (GSC): »vreme mozirje« (1204 prikazov) in »vreme nazarje« (211) obtičita na
+    # položaju 11-12, na obe strani pa je vodilo ~16 povezav (na Rečico ~3000). Natančen sidrni
+    # tekst iz člankov (ne le iz menija naslovnice) je najcenejši dokaz pomembnosti strani.
+    ("/vreme-mozirje/", "Vreme Mozirje"),
+    ("/vreme-nazarje/", "Vreme Nazarje"),
     ("/tocnost-napovedi/", "Točnost napovedi"),
 ]
 
