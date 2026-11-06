@@ -166,10 +166,10 @@
   /* ── povezava postaje ───────────────────────────────────── */
   var NOTES = {
     wifi: 'Postaja se poveže na vaš WiFi usmerjevalnik. Pred postavitvijo preverimo moč signala na mestu postaje.',
-    sim: 'Postaja se poveže prek mobilnega interneta. Preverimo pokritost na lokaciji, naročnina za mobilni internet pa je dodaten strošek.'
+    sim: 'Postaja se poveže prek mobilnega interneta. Preverimo pokritost na lokaciji. Podatkovni paket (SIM) plačate posebej, po tarifi svojega operaterja.'
   };
   var LABELS = { wifi: 'Povezava: WiFi', sim: 'Povezava: mobilni internet' };
-  var BASIS = { wifi: 'Brez DDV · povezava WiFi', sim: 'Brez DDV · mobilni internet' };
+  var BASIS = { wifi: 'Brez DDV · povezava WiFi', sim: 'Brez DDV · mobilni internet, brez SIM' };
   function eur(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '\u00a0€'; }
   var conn = 'wifi';
   /* skupaj v prvem letu = enkratno + 12 mesečnih naročnin (+ pribitek za mobilni internet) */
@@ -188,7 +188,7 @@
   function setConn(v, fromUser) {
     conn = v;
     var note = NOTES[v];
-    if (v === 'sim' && CFG.showPrices && CFG.sim) note += ' Pribitek: ' + eur(CFG.sim.once) + ' enkratno in ' + eur(CFG.sim.month) + ' na mesec.';
+    if (v === 'sim' && CFG.showPrices && CFG.sim) note += ' Naš pribitek: ' + eur(CFG.sim.once) + ' enkratno in ' + eur(CFG.sim.month) + ' na mesec (brez podatkovnega paketa).';
     $('#conn-note').textContent = note;
     $$('[data-conn]').forEach(function (el) { el.textContent = LABELS[v]; });
     $$('[data-sim-add]').forEach(function (el) { el.hidden = v !== 'sim'; });

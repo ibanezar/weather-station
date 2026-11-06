@@ -86,25 +86,29 @@ STEPS = [
     ("Podpora", "Spremljamo delovanje postaje in vam svetujemo, kadar je treba."),
 ]
 
-FAQ = [
-    ("Kaj, če na lokaciji ni WiFi?",
-     "Postaja se poveže prek mobilnega interneta. Pred postavitvijo preverimo pokritost na lokaciji. "
-     "Za povezavo brez WiFi velja pribitek, naročnina za mobilni internet pa je dodaten strošek."),
-    ("Koliko časa traja postavitev?",
-     "Rok je odvisen od lokacije, povezave in izbranih senzorjev. Dogovorimo ga po ogledu lokacije in ga zapišemo v ponudbo."),
-    ("Kdo vzdržuje postajo, če senzor izpade?",
-     "Podpora je vključena v mesečno naročnino. Kako hitro se odzovemo in kaj zajema zamenjava senzorja, "
-     "zapišemo v ponudbo; paket Premium ima prednostno podporo."),
-    ("Ali lahko podatke pokažem na svoji spletni strani?",
-     "Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran. "
-     "Za občine pripravimo vtičnik za občinsko spletno stran."),
-    ("Ali je napoved zanesljiva?",
-     "Napoved je informativna. Popolne natančnosti ne jamčimo, nobena vremenska napoved je ne more. "
-     "Zato v paketu Premium vsak mesec dobite poročilo o natančnosti, ki napoved primerja z meritvami vaše postaje."),
-    ("Kaj pomeni paket po meri?",
-     "Vi povejte, kaj morate spremljati. Mi sestavimo postajo, senzorje, nadzorno ploščo in opozorila po vaših pravilih. "
-     "Izpolnite vprašalnik spodaj, ponudbo pripravimo po ogledu lokacije."),
-]
+def faq_list():
+    """Vprašanja se sestavijo ob gradnji: odgovor o mobilni povezavi vsebuje zneske samo, če je SHOW_PRICES."""
+    return [
+        ("Kaj, če na lokaciji ni WiFi?",
+         "Postaja se poveže prek mobilnega interneta. Pred postavitvijo preverimo pokritost na lokaciji. "
+         + ("Za povezavo brez WiFi velja pribitek: 390\u00a0€ enkratno in 19\u00a0€ na mesec (brez DDV). " if SHOW_PRICES
+            else "Za povezavo brez WiFi velja pribitek. ")
+         + "Mobilni podatkovni paket (SIM) plačate posebej, po tarifi svojega operaterja: v pribitek ni vštet."),
+        ("Koliko časa traja postavitev?",
+         "Rok je odvisen od lokacije, povezave in izbranih senzorjev. Dogovorimo ga po ogledu lokacije in ga zapišemo v ponudbo."),
+        ("Kdo vzdržuje postajo, če senzor izpade?",
+         "Podpora je vključena v mesečno naročnino. Kako hitro se odzovemo in kaj zajema zamenjava senzorja, "
+         "zapišemo v ponudbo; paket Premium ima prednostno podporo."),
+        ("Ali lahko podatke pokažem na svoji spletni strani?",
+         "Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran. "
+         "Za občine pripravimo vtičnik za občinsko spletno stran."),
+        ("Ali je napoved zanesljiva?",
+         "Napoved je informativna. Popolne natančnosti ne jamčimo, nobena vremenska napoved je ne more. "
+         "Zato v paketu Premium vsak mesec dobite poročilo o natančnosti, ki napoved primerja z meritvami vaše postaje."),
+        ("Kaj pomeni paket po meri?",
+         "Vi povejte, kaj morate spremljati. Mi sestavimo postajo, senzorje, nadzorno ploščo in opozorila po vaših pravilih. "
+         "Izpolnite vprašalnik spodaj, ponudbo pripravimo po ogledu lokacije."),
+    ]
 
 DEJAVNOSTI = ["Kmetijstvo, sadjarstvo, vinogradništvo", "Gradbeništvo", "Turizem in gostinstvo",
               "Prireditve in šport", "Občina ali javna ustanova", "Drugo"]
@@ -534,7 +538,7 @@ def price_block(p):
         return '<div class="price"><span class="price-note">Cena po ogledu lokacije</span></div>'
     od = "od " if p["from_"] else ""
     od_m = "od " if p["id"] == "po-meri" else ""
-    sim = (f'<div class="sim-add" data-sim-add hidden>Brez WiFi: + {eur(SIM_ONCE)} enkratno, + {eur(SIM_MONTH)} na mesec</div>')
+    sim = (f'<div class="sim-add" data-sim-add hidden>Brez WiFi: + {eur(SIM_ONCE)} enkratno, + {eur(SIM_MONTH)} na mesec. Podatkovni paket (SIM) ni vštet.</div>')
     return (f'<div class="price" data-once="{p["once"]}" data-month="{p["month"]}">'
             f'<div class="price-row"><span class="price-lbl">Enkratna investicija</span>'
             f'<span class="price-once"><strong>{od}{eur(p["once"])}</strong></span></div>'
@@ -587,7 +591,7 @@ def marquee_html():
 
 def faq_items():
     return "\n".join(
-        f'      <details class="rz"><summary><span>{e(q)}</span><i>{PLUS}</i></summary><div class="odg"><div><p>{e(a)}</p></div></div></details>' for q, a in FAQ)
+        f'      <details class="rz"><summary><span>{e(q)}</span><i>{PLUS}</i></summary><div class="odg"><div><p>{e(a)}</p></div></div></details>' for q, a in faq_list())
 
 
 def schema_blocks():
@@ -615,7 +619,7 @@ def schema_blocks():
             } for p in PACKAGES]}
     faq = {"@context": "https://schema.org", "@type": "FAQPage",
            "mainEntity": [{"@type": "Question", "name": q,
-                           "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]}
+                           "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq_list()]}
     crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": "Meteorec", "item": SITE + "/"},
         {"@type": "ListItem", "position": 2, "name": "Za podjetja"}]}
@@ -675,7 +679,7 @@ def build_main():
     head = page_head(TITLE, DESC, URL, "index, follow, max-image-preview:large", og_title="Vreme na vašem polju",
                      extra=schema_blocks())
     vat = (f'<p class="fine">Vse cene so izhodiščne in brez DDV; obračunamo ga po stopnji {VAT_PCT} %. '
-           f'Končno ceno določimo po ogledu lokacije. Skupaj v prvem letu = enkratna investicija + 12 mesečnih naročnin.</p>') if SHOW_PRICES else ""
+           f'Končno ceno določimo po ogledu lokacije. Skupaj v prvem letu = enkratna investicija + 12 mesečnih naročnin. Pri mobilnem internetu podatkovni paket (SIM) plačate posebej.</p>') if SHOW_PRICES else ""
     sim_note = ""
     series, errs = load_data()
     return head + f'''<body>
