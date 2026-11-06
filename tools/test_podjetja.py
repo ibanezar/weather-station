@@ -214,7 +214,10 @@ check("Napoved je za dolino" in seg_pages["kmetije"] and 'id="prag"' in seg_page
       "kmetije: primerjava napovedi, kalkulator pozebe in noč na polju so na podstrani")
 check('id="prag"' not in seg_pages["turizem"] and 'id="prag"' not in seg_pages["gradbenistvo"] and 'id="prag"' not in seg_pages["obcine"],
       "kalkulator pozebe je samo na podstrani za kmetije")
-check("/meteogasilec/" in seg_pages["obcine"], "občine: primer lastne rešitve (MeteoGasilec) je povezan")
+check("ožarn" not in seg_pages["obcine"].split('id="povprasevanje"')[0] and "/meteogasilec/" not in seg_pages["obcine"] and "ožarn" not in "".join(c["text"] + "".join(c["tags"]) for c in G.CASES if c["id"] == "obcina"),
+      "občine: požarne ogroženosti ne ponujamo (ni narejena za druge občine)")
+check("Višina vode" in seg_pages["turizem"] and "po dogovoru" in seg_pages["turizem"] and any(p_["id"] == "voda" and p_["kind"] == "dodatno" for p_ in G.PARTS),
+      "turizem: višina vode je dodatni senzor po dogovoru")
 old = G.SHOW_PRICES
 G.SHOW_PRICES = False
 for sg in G.SEG_PAGES:
