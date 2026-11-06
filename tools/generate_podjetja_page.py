@@ -7,6 +7,9 @@ Cene: SHOW_PRICES = False skrije vse zneske (kartice kažejo »Cena po ogledu lo
 spremeni. Po spremembi generator poženi ročno in commitaj (ni v nobenem workflowu).
 
 Stran ne bere nobene meritve postaje; živi gradnik v brskalniku bere samo zunanje vrednosti.
+
+Fotografije v podjetja/img/primer-*.webp in postaja-detajl.webp so AI-generirane ILUSTRACIJE (ne naša
+oprema, ne stranke): vsaka je na strani označena, pod primeri je opozorilo (ILLUS_NOTE).
 """
 import datetime
 import hashlib
@@ -57,17 +60,23 @@ PACKAGES = [
 CASES = [
     dict(id="kmetija", dej="Kmetijstvo, sadjarstvo, vinogradništvo", title="Kmetija in sadovnjak",
          text="Pozeba, toča in vlaga tal na vašem nasadu, ne v sosednji dolini. Opozorilo dobite, ko je še čas za ukrep.",
-         tags=["Pozeba", "Toča", "Vlaga tal"]),
+         tags=["Pozeba", "Toča", "Vlaga tal"], img="primer-kmetija", w=1200, h=800,
+         alt="Ilustracija: vremenska postaja v sadovnjaku z jabolki ob jutranji megli"),
     dict(id="kamp", dej="Turizem in gostinstvo", title="Kamp in turizem",
          text="Nevihte, višina vode in veter za goste na prostem. Odločitev o terasi ali prireditvi temelji na meritvi pri vas.",
-         tags=["Nevihte", "Višina vode", "Veter"]),
+         tags=["Nevihte", "Višina vode", "Veter"], img="primer-kamp", w=800, h=450,
+         alt="Ilustracija: vremenska postaja ob glamping šotorih in lesenih kočah v hribovitem okolju"),
     dict(id="gradbenistvo", dej="Gradbeništvo", title="Gradbeništvo",
          text="Veter pri delu na višini ter dež in temperatura pri vgrajevanju betona. Beton ne čaka na napačno napoved.",
-         tags=["Veter", "Dež", "Temperatura"]),
-    dict(id="obcina", dej="Občina ali javna ustanova", title="Občina",
-         text="Požarna ogroženost in neurja za prebivalce, vtičnik za občinsko spletno stran.",
-         tags=["Požarna ogroženost", "Neurja", "Vtičnik"]),
+         tags=["Veter", "Dež", "Temperatura"], img="primer-gradbenistvo", w=800, h=450,
+         alt="Ilustracija: vremenska postaja na gradbišču z dvigalom in delavcema v zaščitni opremi"),
+    dict(id="obcina", dej="Občina ali javna ustanova", title="Občina in prireditve",
+         text="Požarna ogroženost in neurja za prebivalce ter odločitve o prireditvah na prostem, vtičnik za občinsko spletno stran.",
+         tags=["Požarna ogroženost", "Neurja", "Vtičnik"], img="primer-obcina", w=800, h=450,
+         alt="Ilustracija: vremenska postaja na mestnem trgu med pripravo prireditve"),
 ]
+ILLUS_NOTE = ("Fotografije so ilustrativne (ustvarjene z umetno inteligenco). Prikazana oprema je splošna ponazoritev: "
+              "ni fotografija naše opreme, konkretne postavitve ali stranke.")
 
 STEPS = [
     ("Ogled lokacije", "Pogledamo, kje bo postaja stala, in preverimo povezavo (WiFi ali mobilni internet)."),
@@ -200,8 +209,8 @@ CASE_ICON = {"kmetija": "sprout", "kamp": "tent", "gradbenistvo": "hardhat", "ob
 STEP_ICON = ["pin", "tool", "sliders", "check", "headset"]
 PHOTO = "podjetja/img/postaja.jpg"   # prava fotografija IREICA1; ko obstaja, nadomesti ilustracijo
 PHOTO_ALT = "Vremenska postaja IREICA1 v Rečici ob Savinji"
-ILLUS = "podjetja/img/postaja-ilustracija.webp"   # splošna ilustracija, ne IREICA1; velja, dokler ni prave fotografije
-ILLUS_ALT = "Ilustracija vremenske postaje s senzorji vetra, dežja in temperature ter sončno celico"
+ILLUS = "podjetja/img/postaja-detajl.webp"   # AI-ilustracija splošne postaje, ne IREICA1; velja, dokler ni prave fotografije
+ILLUS_ALT = "Ilustracija: bližnji prikaz vremenske postaje z merilnikom vetra, zaščito za temperaturo in vlago, dežemerom in sončno celico"
 
 
 def ic(name, cls="ic"):
@@ -211,6 +220,13 @@ def ic(name, cls="ic"):
 
 STATS = [("calendar", "Od 2019", "lastna postaja IREICA1"), ("refresh", "Vsakih 5 minut", "nova meritev na strani"),
          ("signal", "WiFi ali mobilni internet", "kjer koli stoji postaja"), ("bell", "Opozorila na telefon", "pozeba, veter, nevihta (Pro)")]
+
+
+TRUST = ["Lastna postaja IREICA1 od 2019", "Postavitev, nastavitev in predaja", "Podpora v mesečni naročnini"]
+
+
+def trust_html():
+    return "".join(f'<li>{CHECK}<span>{e(t)}</span></li>' for t in TRUST)
 
 
 def stats_html():
@@ -229,6 +245,11 @@ def noci(n):
 
 def dnevi_s(n):
     return f"{n} dan" if n % 100 == 1 else (f"{n} dneva" if n % 100 == 2 else (f"{n} dni" if n % 100 in (3, 4) else f"{n} dni"))
+
+
+def fmt_date_y(iso):
+    d = datetime.date.fromisoformat(iso)
+    return f"{d.day}. {d.month}. {d.year}"
 
 
 def fmt_date(iso):
@@ -303,23 +324,29 @@ def error_alt(st_):
 def napoved_html(errs):
     st_ = stats(errs)
     smer = "previsoka" if st_["mean"] > 0 else "prenizka"
+    n = st_["n"]
+
+    def pc(k):
+        return sl(100 * k / n, 1)
     return f'''<section class="band" id="pozeba" aria-labelledby="h-pozeba"><div class="wrap sec">
     <h2 class="rz" id="h-pozeba">Napoved je za dolino. Vi imate polje.</h2>
     <p class="rz">Napoved, ki jo vidite v aplikaciji, velja za celico na zemljevidu, ne za vaš nasad ali gradbišče. Spodaj je primerjava z našo pravo meritvijo.</p>
     <div class="data-grid">
       <div class="bignum rz">
-        <b>{sl(abs(st_["mean"]), 1, True) if st_["mean"] > 0 else sl(st_["mean"], 1, True)} °C</b>
-        <span>Povprečna napaka napovedi najnižje nočne temperature: napoved je bila {smer}. Obdobje: {fmt_date(st_["d0"])} do {fmt_date(st_["d1"])}, {noci(st_["n"])}.</span>
+        <b>{sl(abs(st_["mean"]), 1, True) if st_["mean"] > 0 else sl(st_["mean"], 1, True)} °C</b>
+        <span>Povprečna napaka napovedi najnižje nočne temperature: napoved je bila {smer}. Obdobje: {fmt_date(st_["d0"])} do {fmt_date(st_["d1"])}, {noci(n)}.</span>
         <ul>
-          <li><strong>{st_["hi"]}</strong> od {st_["n"]} noči: napoved za več kot 2 °C previsoka</li>
-          <li><strong>{st_["lo"]}</strong> od {st_["n"]} noči: napoved za več kot 2 °C prenizka</li>
+          <li><strong>{pc(st_["hi"])}\u00a0%</strong> noči: napoved za več kot 2 °C previsoka <small>({st_["hi"]} od {n})</small></li>
+          <li><strong>{pc(st_["lo"])}\u00a0%</strong> noči: napoved za več kot 2 °C prenizka <small>({st_["lo"]} od {n})</small></li>
         </ul>
       </div>
       <figure class="rz">
         {error_svg(errs, st_)}
-        <figcaption><span class="lg up"></span>napoved toplejša od meritve <span class="lg dn"></span>napoved hladnejša od meritve. Vsak stolpec je ena noč. Vir: napoved Open-Meteo, izdana dan prej, in meritev postaje IREICA1 v Rečici ob Savinji. <a href="/tocnost-napovedi/">Primerjava več virov</a>.</figcaption>
+        <figcaption><span class="lg up"></span>napoved toplejša od meritve <span class="lg dn"></span>napoved hladnejša od meritve. <strong>Kako brati graf:</strong> vsak stolpec je ena noč, višji stolpec pomeni večje odstopanje napovedi od meritve. Vir: napoved Open-Meteo, izdana dan prej, in meritev postaje IREICA1 v Rečici ob Savinji. <a href="/tocnost-napovedi/">Primerjava več virov</a>.</figcaption>
       </figure>
     </div>
+    <div class="cta-line rz"><p>Na vaši lokaciji so lahko odstopanja drugačna. Zato je smiselno spremljati dejanske meritve.</p>
+      <a class="btn" href="#povprasevanje" data-cta="napoved">Želim spremljati vreme na svoji lokaciji</a></div>
   </div></section>'''
 
 
@@ -341,11 +368,13 @@ def prag_html(series):
       <p>Nastavite mejo, pod katero želite opozorilo. Vsaka črtica je en dan zadnjih 12 mesecev, obarvani so dnevi, ko je postaja izmerila toliko ali manj.</p></div>
       <div class="calc-ctl"><label for="prag">Opozori me, ko temperatura pade na</label>
         <output id="prag-v" for="prag">0 °C</output>
-        <input type="range" id="prag" min="-10" max="5" step="1" value="0" aria-describedby="prag-t"></div>
+        <input type="range" id="prag" min="-10" max="5" step="1" value="0" aria-describedby="prag-t prag-hint"></div>
+      <p class="calc-hint" id="prag-hint">Ničla: zmrzal. Osnovna meja za pozebo pri cvetju in mladih poganjkih (okvirno, odvisno od vrste in faze rasti).</p>
       <div class="calc-res" aria-live="polite"><b id="prag-n">{cnt}</b><span id="prag-t">{"noč" if cnt % 100 == 1 else "noči"} od {n} z meritvijo, ko je postaja izmerila 0 °C ali manj.</span></div>
       <div class="noci" id="noci" aria-hidden="true">{"".join(bars)}</div>
       <div class="noci-os"><span>{fmt_date(series[0][0])}</span><span>najhladnejša: {sl(min(vals))} °C ({fmt_date(coldest[0])})</span><span>{fmt_date(series[-1][0])}</span></div>
-      <p class="fine">Meritev postaje IREICA1 v Rečici ob Savinji (dnevni minimum). Na vašem polju bo drugače, ravno zato je smiselna lastna postaja. Brez meritve na lokaciji tega ne veste.</p>
+      <p class="fine">Meritev postaje IREICA1 v Rečici ob Savinji (dnevni minimum, {fmt_date_y(series[0][0])} do {fmt_date_y(series[-1][0])}, {n} dni z meritvijo). To je zgodovina ene konkretne postaje: na vašem polju bo število opozoril drugačno, ravno zato je smiselna lastna postaja. Brez meritve na lokaciji tega ne veste.</p>
+      <div><a class="btn" href="#povprasevanje" data-cta="kalkulator">Želim takšna opozorila na svoji lokaciji</a></div>
     </div>'''
 
 
@@ -357,6 +386,61 @@ NOC = [("21.00", "moon", "Večer", "Napoved obeta jasno noč, najnižja temperat
 ICONS["moon"] = "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"
 
 
+# Ilustrativna krivulja noči (ni meritev): ura od 21.00 (h) in temperatura (°C). Napoved ostane nad ničlo,
+# meritev na polju pade pod mejo ob 02.10.
+NOC_MERITEV = [(0, 4.2), (2.0, 3.0), (3.67, 2.0), (5.17, 0.0), (6.8, -1.6), (8.5, -2.4), (9.8, -1.2), (10.5, 0.2)]
+NOC_NAPOVED = [(0, 4.4), (2.0, 3.6), (3.67, 3.0), (5.17, 2.4), (6.8, 1.9), (8.5, 1.5), (9.8, 1.9), (10.5, 2.4)]
+
+
+def _smooth(pts):
+    """Catmull-Rom → kubični Bézier (nežna krivulja skozi točke)."""
+    d = f"M{pts[0][0]:.1f},{pts[0][1]:.1f}"
+    for i in range(len(pts) - 1):
+        p0, p1, p2, p3 = pts[max(i - 1, 0)], pts[i], pts[i + 1], pts[min(i + 2, len(pts) - 1)]
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        d += f" C{c1[0]:.1f},{c1[1]:.1f} {c2[0]:.1f},{c2[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}"
+    return d
+
+
+def noc_svg():
+    W, H, L, R, T, B = 640, 250, 44, 16, 14, 34
+    tmin, tmax, hmax = -4.0, 6.0, 10.5
+    X = lambda h: L + h / hmax * (W - L - R)
+    Y = lambda t: T + (tmax - t) / (tmax - tmin) * (H - T - B)
+    act = [(X(h), Y(t)) for h, t in NOC_MERITEV]
+    fc = [(X(h), Y(t)) for h, t in NOC_NAPOVED]
+    out = [f'<svg class="noc-svg" viewBox="0 0 {W} {H}" role="img" aria-label="Ilustrativen potek temperature od 21.00 do 7.30: '
+           f'napoved ostane nad ničlo, meritev na polju pade pod nastavljeno mejo ob 2.10 in doseže najnižjo vrednost okoli 5.30.">']
+    for t in (-4, -2, 0, 2, 4, 6):
+        out.append(f'<line x1="{L}" x2="{W - R}" y1="{Y(t):.1f}" y2="{Y(t):.1f}" class="{"nz" if t == 0 else "ng"}"/>'
+                   f'<text x="{L - 8}" y="{Y(t) + 4:.1f}" text-anchor="end" class="nt">{sl(t, 0, True) if t else "0"}</text>')
+    # območje pod mejo (od presečišča do 07.30), samo ponazoritev
+    x0 = X(5.17)
+    area = f"M{x0:.1f},{Y(0):.1f} " + " ".join(f"L{x:.1f},{min(y, Y(0)):.1f}" for x, y in act[3:]) + f" L{act[-1][0]:.1f},{Y(0):.1f} Z"
+    out.append(f'<path d="{area}" class="na"/>')
+    out.append(f'<path d="{_smooth(fc)}" class="nf"/>')
+    out.append(f'<path d="{_smooth(act)}" class="nm"/>')
+    for h, lab in ((0, "21.00"), (3.67, "00.40"), (5.17, "02.10"), (10.5, "07.30")):
+        out.append(f'<text x="{X(h):.1f}" y="{H - 10}" text-anchor="{"end" if h == 10.5 else ("start" if h == 0 else "middle")}" class="nt">{lab}</text>')
+    out.append(f'<circle cx="{X(3.67):.1f}" cy="{Y(2.0):.1f}" r="5" class="nd"/>')
+    out.append(f'<circle cx="{X(5.17):.1f}" cy="{Y(0):.1f}" r="9" class="nb"/><circle cx="{X(5.17):.1f}" cy="{Y(0):.1f}" r="4.5" class="nb2"/>')
+    out.append(f'<text x="{X(5.17) + 14:.1f}" y="{Y(0) - 12:.1f}" class="nl">02.10 opozorilo</text>')
+    out.append(f'<text x="{W - R}" y="{Y(NOC_NAPOVED[-1][1]) - 8:.1f}" text-anchor="end" class="nl nlf">napoved</text>')
+    out.append(f'<text x="{X(8.5):.1f}" y="{Y(-2.4) + 20:.1f}" text-anchor="middle" class="nl nlm">meritev na polju</text>')
+    out.append(f'<text x="{L + 4}" y="{Y(0) + 15:.1f}" class="nt nmeja">vaša meja 0\u00a0°C</text>')
+    out.append('</svg>')
+    return "".join(out)
+
+
+NOTIF_HTML = '''<div class="notif" role="img" aria-label="Primer obvestila na zaslonu telefona: opozorilo pred pozebo">
+      <span class="notif-app"><img src="/logo.svg" alt="" width="18" height="18">Meteorec <i>zdaj</i></span>
+      <b>Opozorilo: pozeba</b>
+      <span>Temperatura na vašem polju je padla na 0,0\u00a0°C, vaša meja je 0\u00a0°C. Zaščito vklopite, dokler je še čas.</span>
+      <small>Primer obvestila, ne meritev</small>
+    </div>'''
+
+
 def noc_html():
     items = "".join(
         f'<li style="--i:{i}"><span class="cas">{t}</span><span class="pika">{ic(icon)}</span><h3>{e(h)}</h3><p>{e(txt)}</p></li>'
@@ -365,47 +449,66 @@ def noc_html():
     <p class="oz rz">PRIMER</p>
     <h2 class="rz" id="h-noc">Ena noč na vašem polju</h2>
     <p class="rz">Izmišljen primer, kako lahko poteka noč s pozebo. Ure in vrednosti so ponazoritev, ne meritev.</p>
+    <div class="noc-top rz">
+      <figure class="noc-fig">{noc_svg()}<figcaption>Ilustrativna shema: napoved pravi, da bo noč ostala nad ničlo, postaja na polju pa izmeri drugače.</figcaption></figure>
+      {NOTIF_HTML}
+    </div>
     <ol class="noc" id="noc-list">{items}</ol>
+    <div class="cta-line rz"><p>Takšno obvestilo dobite na telefon v paketu Pro.</p><a class="btn btn-hero" href="#paketi" data-cta="noc">Poglejte pakete</a></div>
   </div></section>'''
 
 
+# x, y = položaj oznake v % slike postaja-detajl.webp (992 × 1740 izvirnik). Del brez x/y na sliki ni viden.
 PARTS = [
-    dict(id="veter", name="Merilnik vetra", x=52, y=5, text="Meri hitrost in smer vetra ter sunke. Za delo na višini, nanos sredstev in prireditve na prostem."),
-    dict(id="dez", name="Dežemer", x=89, y=41, text="Meri količino in jakost padavin. Za betoniranje, košnjo, obiranje in odločitve o termenu del."),
-    dict(id="temp", name="Temperatura in vlaga", x=71, y=70, text="Senzor v zaščitnem ohišju meri temperaturo in vlago zraka. Iz tega izračunamo tudi rosišče, osnovo za opozorilo pred pozebo."),
-    dict(id="sonce", name="Sončna celica", x=27, y=38, text="Napaja postajo tam, kjer ni vtičnice. Način napajanja izberemo po ogledu lokacije."),
-    dict(id="zbiralnik", name="Zbiralnik podatkov", x=53, y=86, text="Zbira meritve in jih pošlje prek WiFi ali mobilnega interneta na nadzorno ploščo ali v aplikacijo."),
+    dict(id="veter", name="Merilnik vetra", x=30, y=16, kind="osnovno",
+         text="Meri hitrost in smer vetra ter sunke. Za delo na višini, nanos sredstev in prireditve na prostem."),
+    dict(id="dez", name="Dežemer", x=74, y=53, kind="osnovno",
+         text="Meri količino in jakost padavin. Za betoniranje, košnjo, obiranje in odločitve o termenu del."),
+    dict(id="temp", name="Temperatura in vlaga", x=28, y=44, kind="osnovno",
+         text="Senzor v zaščitnem ohišju meri temperaturo in vlago zraka. Iz tega izračunamo tudi rosišče, osnovo za opozorilo pred pozebo."),
+    dict(id="sonce", name="Sončna celica", x=48, y=75, kind="osnovno",
+         text="Napaja postajo tam, kjer ni vtičnice. Način napajanja izberemo po ogledu lokacije."),
+    dict(id="zbiralnik", name="Zbiralnik podatkov", x=None, y=None, kind="osnovno",
+         text="Zbira meritve in jih pošlje prek WiFi ali mobilnega interneta na nadzorno ploščo ali v aplikacijo. Na tej ilustraciji ni vidno."),
+    dict(id="tla", name="Vlaga tal", x=None, y=None, kind="dodatno",
+         text="Meri vlažnost tal na izbrani globini. Za odločitve o namakanju in vstopu na zemljišče. Paket Premium ali Po meri."),
+    dict(id="strele", name="Senzor strel", x=None, y=None, kind="dodatno",
+         text="Zazna strele v okolici. Za zgodnejše opozorilo pri delu in prireditvah na prostem. Paket Premium ali Po meri."),
 ]
 
 
 def shema_html():
     full = os.path.join(ROOT, PHOTO)
     pins = ""
+    from PIL import Image
     if os.path.exists(full):
-        from PIL import Image
         w, h = Image.open(full).size
         art = f'<img src="/{PHOTO}" alt="{e(PHOTO_ALT)}" width="{w}" height="{h}" loading="lazy">'
         cap = "Postaja IREICA1, Rečica ob Savinji, 366 m"
     else:
-        from PIL import Image
         w, h = Image.open(os.path.join(ROOT, ILLUS)).size
-        art = f'<img class="illus" src="/{ILLUS}" alt="{e(ILLUS_ALT)}" width="{w}" height="{h}" loading="lazy">'
-        cap = "Ilustracija: primer postaje (ni naša postaja IREICA1)"
+        art = f'<img class="foto" src="/{ILLUS}" alt="{e(ILLUS_ALT)}" width="{w}" height="{h}" loading="lazy">'
+        cap = "Ilustracija: primer postaje (ni naša postaja IREICA1). Kliknite oznako."
         pins = "".join(
             f'<button class="pin" type="button" data-part="{p["id"]}" style="left:{p["x"]}%;top:{p["y"]}%" aria-label="{e(p["name"])}"><span>{i}</span></button>'
-            for i, p in enumerate(PARTS, 1))
-    lst = "".join(
-        f'<li><button class="part" type="button" data-part="{p["id"]}" data-text="{e(p["text"])}" aria-pressed="false"><span class="num">{i}</span><span>{e(p["name"])}</span></button></li>'
-        for i, p in enumerate(PARTS, 1))
+            for i, p in enumerate(PARTS, 1) if p["x"] is not None)
+
+    def li(i, p):
+        return (f'<li><button class="part" type="button" data-part="{p["id"]}" data-text="{e(p["text"])}" aria-pressed="false">'
+                f'<span class="num">{i}</span><span>{e(p["name"])}</span></button></li>')
+    base = "".join(li(i, p) for i, p in enumerate(PARTS, 1) if p["kind"] == "osnovno")
+    extra = "".join(li(i, p) for i, p in enumerate(PARTS, 1) if p["kind"] == "dodatno")
     return f'''<section class="band band-dark photo" id="shema" aria-labelledby="h-shema">
   <div class="wrap photo-grid">
     <figure class="photo-art rz"><div class="art-wrap">{art}{pins}</div><figcaption>{e(cap)}</figcaption></figure>
     <div class="photo-text rz">
-      <h2 class="rz" id="h-shema">Kaj meri postaja</h2>
+      <h2 class="rz" id="h-shema">Kaj meri postaja in za katero odločitev</h2>
       <p>Izberite del postaje in poglejte, kaj meri ter za kaj ga uporabite.</p>
-      <ul class="parts">{lst}</ul>
+      <p class="grp">Osnovna postaja</p>
+      <ul class="parts">{base}</ul>
+      <p class="grp">Dodatni senzorji (po dogovoru)</p>
+      <ul class="parts">{extra}</ul>
       <div class="part-info" id="part-info" aria-live="polite"><b id="part-name">{e(PARTS[0]["name"])}</b><p id="part-text">{e(PARTS[0]["text"])}</p></div>
-      <p class="fine">Vlaga tal, senzor strel in drugi senzorji so po dogovoru (paket Premium ali Po meri).</p>
     </div>
   </div>
 </section>'''
@@ -415,37 +518,52 @@ def izjava_html():
     return '''<section class="band band-yellow" aria-label="Sporočilo"><div class="wrap"><p class="izjava rz">Napoved ne pozna vašega polja. <span>Postaja ga pozna.</span></p></div></section>'''
 
 
+def first_year(p):
+    """Enkratna cena + 12 mesečnih naročnin (brez DDV, povezava WiFi). Sim pribitek doda JS."""
+    return p["once"] + 12 * p["month"]
+
+
 def price_block(p):
     if not SHOW_PRICES:
         return '<div class="price"><span class="price-note">Cena po ogledu lokacije</span></div>'
-    once = ("od " if p["from_"] else "") + eur(p["once"])
+    od = "od " if p["from_"] else ""
+    od_m = "od " if p["id"] == "po-meri" else ""
     sim = (f'<div class="sim-add" data-sim-add hidden>Brez WiFi: + {eur(SIM_ONCE)} enkratno, + {eur(SIM_MONTH)} na mesec</div>')
-    return (f'<div class="price"><div class="price-once"><strong>{once}</strong> <span>enkratno</span></div>'
-            f'<div class="price-month">{"od " if p["id"] == "po-meri" else ""}{eur(p["month"])} <span>na mesec</span></div>{sim}</div>')
+    return (f'<div class="price" data-once="{p["once"]}" data-month="{p["month"]}">'
+            f'<div class="price-row"><span class="price-lbl">Enkratna investicija</span>'
+            f'<span class="price-once"><strong>{od}{eur(p["once"])}</strong></span></div>'
+            f'<div class="price-row"><span class="price-lbl">Mesečna storitev</span>'
+            f'<span class="price-month"><strong>{od_m}{eur(p["month"])}</strong> <span>na mesec</span></span></div>'
+            f'<div class="price-row price-sum"><span class="price-lbl">Skupaj v prvem letu</span>'
+            f'<span><strong data-year>{od}{eur(first_year(p))}</strong></span></div>'
+            f'<span class="price-basis" data-basis>Brez DDV · povezava WiFi</span>{sim}</div>')
 
 
 def package_card(p):
     items = "".join(f"<li>{CHECK}<span>{e(i)}</span></li>" for i in p["items"])
-    cls = "card pack rz" + (" custom" if p.get("custom") else "")
+    cls = "card pack rz" + (" custom" if p.get("custom") else "") + (" feat" if p["id"] == "pro" else "")
+    flag = '<span class="feat-flag">Za podjetja, ki potrebujejo opozorila</span>' if p["id"] == "pro" else ""
     return f'''      <article class="{cls}" id="paket-{p["id"]}">
-        <h3>{e(p["name"])}</h3>
+        {flag}<h3>{e(p["name"])}</h3>
         <p class="for">{e(p["who"])}</p>
         <div class="conn" data-conn>Povezava: WiFi</div>
         <ul>{items}</ul>
         {price_block(p)}
-        <a class="btn btn-ghost" href="#povprasevanje" data-paket="{p["id"]}" aria-label="Izberem paket {e(p["name"])}">Izberem paket</a>
+        <a class="btn {"" if p["id"] == "pro" else "btn-ghost"}" href="#povprasevanje" data-paket="{p["id"]}" aria-label="Izberem paket {e(p["name"])}">Izberem paket {e(p["name"])}</a>
       </article>'''
 
 
 def case_card(c):
     tags = "".join(f'<li>{ic(TAG_ICON[t], "ic-s")}{e(t)}</li>' for t in c["tags"])
     return f'''      <article class="card case rz" id="{c["id"]}" data-dej="{e(c["dej"])}" tabindex="-1">
+        <figure class="case-ph"><img src="/podjetja/img/{c["img"]}.webp" alt="{e(c["alt"])}" width="{c["w"]}" height="{c["h"]}" loading="lazy" decoding="async"><figcaption>Ilustracija</figcaption></figure>
         <span class="case-flag" hidden>Ponudba za vas</span>
-        <span class="tile">{ic(CASE_ICON[c["id"]])}</span>
-        <h3>{e(c["title"])}</h3>
-        <p>{e(c["text"])}</p>
-        <ul class="tags" aria-label="Kaj spremljate">{tags}</ul>
-        <a class="link" href="#povprasevanje" data-segment="{c["id"]}">Zahtevajte ponudbo {ARROW}</a>
+        <div class="case-body">
+          <h3>{ic(CASE_ICON[c["id"]], "ic-t")}{e(c["title"])}</h3>
+          <p>{e(c["text"])}</p>
+          <ul class="tags" aria-label="Kaj spremljate">{tags}</ul>
+          <a class="link" href="#povprasevanje" data-segment="{c["id"]}">Pridobite ponudbo {ARROW}</a>
+        </div>
       </article>'''
 
 
@@ -457,8 +575,8 @@ MARQUEE = ["Kmetije", "Sadovnjaki", "Vinogradi", "Hmeljarji", "Čebelarji", "Kam
 
 
 def marquee_html():
-    one = "".join(f"<span>{e(m)}</span>" for m in MARQUEE)
-    return one + one.replace("<span>", '<span aria-hidden="true">')
+    """Statičen nabor dejavnosti (drseči trak je bil odstranjen: gibanje brez prodajne vrednosti, na telefonu moteče)."""
+    return "".join(f"<li>{e(m)}</li>" for m in MARQUEE)
 
 
 def faq_items():
@@ -498,18 +616,23 @@ def schema_blocks():
     return ld(page) + ld(service) + ld(faq) + ld(crumbs)
 
 
-PHONE_HTML = '''<div class="phone" role="img" aria-label="Primer prikaza na telefonu: živa meritev postaje IREICA1 in primer opozorila">
+# Vzorčne vrednosti (SAMPLE): dokler se prava meritev ne naloži, telefon nikoli ni prazen. Označene so kot
+# »primer«; JS jih ob uspešnem branju zamenja z živo meritvijo (razred is-live) in spremeni oznako.
+SAMPLE = dict(temp="−1,2\u00a0°C", hum="86\u00a0%", pres="1018\u00a0hPa", wind="8\u00a0km/h", rain="0,0\u00a0mm",
+              dew="−3,1\u00a0°C", gust="14\u00a0km/h")
+
+PHONE_HTML = f'''<div class="phone is-sample" id="phone" role="img" aria-label="Primer prikaza na telefonu z vzorčnimi vrednostmi in primerom opozorila">
         <span class="ph-notch"></span>
         <div class="ph-screen">
-          <div class="ph-head"><span class="ph-brand">Meteo<em>rec</em></span><span class="ph-stn">IREICA1 · Rečica</span></div>
-          <div class="ph-hero"><span class="ph-lbl">Zdaj</span><strong id="ph-temp">–</strong><span class="ph-sub" id="ph-time">Nalagam meritev</span></div>
+          <div class="ph-head"><span class="ph-brand">Meteo<em>rec</em></span><span class="ph-stn" id="ph-stn">Primer prikaza</span></div>
+          <div class="ph-hero"><span class="ph-lbl">Zdaj</span><strong id="ph-temp">{SAMPLE["temp"]}</strong><span class="ph-sub" id="ph-time">Vzorčne vrednosti, ne meritev</span></div>
           <div class="ph-grid">
-            <div class="ph-t t-hum"><span>Vlaga</span><b id="ph-hum">–</b></div>
-            <div class="ph-t t-pres"><span>Tlak</span><b id="ph-pres">–</b></div>
-            <div class="ph-t t-wind"><span>Veter</span><b id="ph-wind">–</b></div>
-            <div class="ph-t t-rain"><span>Dež danes</span><b id="ph-rain">–</b></div>
-            <div class="ph-t t-dew"><span>Rosišče</span><b id="ph-dew">–</b></div>
-            <div class="ph-t t-gust"><span>Sunki</span><b id="ph-gust">–</b></div>
+            <div class="ph-t t-hum"><span>Vlaga</span><b id="ph-hum">{SAMPLE["hum"]}</b></div>
+            <div class="ph-t t-pres"><span>Tlak</span><b id="ph-pres">{SAMPLE["pres"]}</b></div>
+            <div class="ph-t t-wind"><span>Veter</span><b id="ph-wind">{SAMPLE["wind"]}</b></div>
+            <div class="ph-t t-rain"><span>Dež danes</span><b id="ph-rain">{SAMPLE["rain"]}</b></div>
+            <div class="ph-t t-dew"><span>Rosišče</span><b id="ph-dew">{SAMPLE["dew"]}</b></div>
+            <div class="ph-t t-gust"><span>Sunki</span><b id="ph-gust">{SAMPLE["gust"]}</b></div>
           </div>
           <div class="ph-alert" id="ph-alert"><span class="ph-tag">Primer opozorila</span><b id="ph-al-t">Pozeba ponoči</b><span id="ph-al-b">Temperatura bo padla pod vašo mejo. Ukrepajte pravočasno.</span></div>
         </div>
@@ -545,20 +668,20 @@ def build_main():
            "sim": {"once": SIM_ONCE, "month": SIM_MONTH}}
     head = page_head(TITLE, DESC, URL, "index, follow, max-image-preview:large", og_title="Vreme na vašem polju",
                      extra=schema_blocks())
-    vat = (f'<p class="fine">Vse cene so brez DDV; obračunamo ga po stopnji {VAT_PCT} %. '
-           f'Končno ceno določimo po ogledu lokacije.</p>') if SHOW_PRICES else ""
+    vat = (f'<p class="fine">Vse cene so izhodiščne in brez DDV; obračunamo ga po stopnji {VAT_PCT} %. '
+           f'Končno ceno določimo po ogledu lokacije. Skupaj v prvem letu = enkratna investicija + 12 mesečnih naročnin.</p>') if SHOW_PRICES else ""
     sim_note = ""
     series, errs = load_data()
     return head + f'''<body>
 <a class="skip" href="#vsebina">Preskoči na vsebino</a>
 <header class="top"><div class="wrap top-in">
   <a class="brand" href="/" aria-label="Meteorec, domača stran"><img src="/logo.svg" alt="" width="32" height="32"><span>Meteo<em>rec</em></span></a>
-  <nav aria-label="Razdelki"><a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#faq">Vprašanja</a><a class="btn btn-sm" href="#povprasevanje">Ponudba</a></nav>
+  <nav aria-label="Razdelki"><a href="#primeri">Primeri</a><a href="#pozeba">Dokaz</a><a href="#paketi">Paketi</a><a href="#faq">Vprašanja</a><a class="btn btn-sm" href="#povprasevanje" data-cta="nav">Pridobite ponudbo</a></nav>
   <button class="burger" id="burger" type="button" aria-label="Odpri meni" aria-expanded="false" aria-controls="mob"><i></i><i></i></button>
 </div></header>
 <nav class="mob" id="mob" aria-label="Meni">
   <a href="#primeri">Primeri</a><a href="#paketi">Paketi</a><a href="#kako">Kako poteka</a><a href="#faq">Vprašanja</a>
-  <a class="btn btn-hero" href="#povprasevanje">Zahtevajte ponudbo</a>
+  <a class="btn btn-hero" href="#povprasevanje" data-cta="meni">Pridobite ponudbo</a>
 </nav>
 <main id="vsebina">
 <section class="hero" aria-labelledby="h1">
@@ -568,29 +691,32 @@ def build_main():
       <p class="tag">METEOREC ZA PODJETJA</p>
       <p class="old">Vreme v sosednji dolini.</p>
       <h1 id="h1"><span class="rv"><span style="--i:0">Vreme</span></span> <span class="rv"><span style="--i:1">na</span></span> <mark><span class="rv"><span style="--i:2">vašem</span></span> <span class="rv"><span style="--i:3">polju.</span></span></mark></h1>
-      <p class="lead">Postavimo vremensko postajo, nastavimo vse in vam predamo nadzorno ploščo ali aplikacijo. Naj vaš posel ne trpi zaradi napačne napovedi.</p>
+      <p class="lead">Vaša lastna vremenska postaja z meritvami na vaši lokaciji in opozorili na telefon. Postavimo jo, nastavimo in predamo. Manj tveganja, boljše odločitve.</p>
       <div class="row">
-        <a class="btn btn-hero" href="#povprasevanje" data-cta="hero">Zahtevajte ponudbo po meri</a>
-        <a class="btn btn-line" href="#paketi">Poglejte pakete</a>
+        <a class="btn btn-hero" href="#povprasevanje" data-cta="hero">Pridobite ponudbo</a>
+        <a class="btn btn-line" href="#paketi" data-cta="hero-paketi">Oglejte si pakete</a>
       </div>
+      <ul class="trust" aria-label="Zakaj Meteorec">{trust_html()}</ul>
     </div>
     <div class="hero-art" aria-hidden="false">
+      <figure class="hero-ph"><img src="/podjetja/img/primer-kmetija.webp" alt="{e(CASES[0]["alt"])}" width="{CASES[0]["w"]}" height="{CASES[0]["h"]}" fetchpriority="high" decoding="async"><figcaption>Ilustracija</figcaption></figure>
       {PHONE_HTML}
-      <div class="chip chip-a" aria-hidden="true"><span class="dot live-dot"></span>V živo z IREICA1</div>
+      <div class="chip chip-a" id="chip-live" aria-hidden="true"><span class="dot"></span><span id="chip-live-t">Primer prikaza</span></div>
       <div class="chip chip-b" aria-hidden="true">Opozorila na telefon</div>
     </div>
   </div>
 </section>
 <div class="stats"><ul class="wrap stats-list">{stats_html()}</ul></div>
 
-  <div class="trak" aria-label="Za koga"><div class="trak-in">{marquee_html()}</div></div>
+  <div class="dej"><div class="wrap"><p class="dej-lbl">Za koga</p><ul class="dej-list" aria-label="Za koga je postaja">{marquee_html()}</ul></div></div>
 
   <section class="band"><div class="wrap sec" id="primeri" aria-labelledby="h-primeri">
-    <h2 class="rz" id="h-primeri">Za koga je postaja</h2>
-    <p>Izberite dejavnost, ki je najbližja vaši. Postajo prilagodimo tistemu, kar morate spremljati.</p>
+    <h2 class="rz" id="h-primeri">Kaj vam postaja pove v vaši dejavnosti</h2>
+    <p>Izberite dejavnost, ki je najbližja vaši. Postajo prilagodimo tistemu, kar morate spremljati, izbira pa gre v povpraševanje.</p>
     <div class="grid cases">
 {chr(10).join(case_card(c) for c in CASES)}
     </div>
+    <p class="fine illus-note">{e(ILLUS_NOTE)}</p>
   </div></section>
 
   {izjava_html()}
@@ -615,9 +741,9 @@ def build_main():
       <aside class="live rz" aria-labelledby="live-h">
         <h3 id="live-h">Zdaj na postaji IREICA1</h3>
         <dl class="live-grid">
-          <div><dt>Temperatura</dt><dd id="lw-temp">…</dd></div>
-          <div><dt>Veter</dt><dd id="lw-wind">…</dd></div>
-          <div><dt>Dež danes</dt><dd id="lw-rain">…</dd></div>
+          <div><dt>Temperatura</dt><dd id="lw-temp"><span class="skel" aria-hidden="true"></span><span class="sr">Nalagam</span></dd></div>
+          <div><dt>Veter</dt><dd id="lw-wind"><span class="skel" aria-hidden="true"></span><span class="sr">Nalagam</span></dd></div>
+          <div><dt>Dež danes</dt><dd id="lw-rain"><span class="skel" aria-hidden="true"></span><span class="sr">Nalagam</span></dd></div>
         </dl>
         <p class="live-time" id="lw-time" aria-live="polite">Nalagam zadnjo meritev.</p>
       </aside>
@@ -628,7 +754,7 @@ def build_main():
 
   <section class="band"><div class="wrap sec" id="paketi" aria-labelledby="h-paketi">
     <h2 class="rz" id="h-paketi">Izberite paket ali ga sestavimo skupaj</h2>
-    <p>Najprej povezava: postaja potrebuje pot do interneta. Kjer imate WiFi, je preprosto. Kjer ga nimate, uporabimo mobilni internet.</p>
+    <p>Najprej povezava: postaja potrebuje pot do interneta. Kjer imate WiFi, je preprosto. Kjer ga nimate, uporabimo mobilni internet. Spremembe se takoj vidijo v vseh paketih.</p>
     <fieldset class="seg">
       <legend>Povezava postaje</legend>
       <label for="c-wifi"><input type="radio" name="conn" id="c-wifi" value="wifi" checked>Z WiFi signalom</label>
@@ -642,10 +768,11 @@ def build_main():
   </div></section>
 
   <section class="band band-alt"><div class="wrap sec" id="kako" aria-labelledby="h-kako">
-    <h2 class="rz" id="h-kako">Kako poteka</h2>
+    <h2 class="rz" id="h-kako">Od povpraševanja do delujoče postaje v petih korakih</h2>
     <ol class="steps">
 {chr(10).join(f'      <li class="rz">{ic(STEP_ICON[i])}<strong>{e(t)}</strong><span>{e(d)}</span></li>' for i, (t, d) in enumerate(STEPS))}
     </ol>
+    <p class="steps-note rz"><strong>Vi spremljate svoje delo.</strong> Za delovanje vremenske postaje poskrbimo mi.</p>
   </div></section>
 
   <section class="band"><div class="wrap sec" id="faq" aria-labelledby="h-faq">
@@ -653,36 +780,44 @@ def build_main():
     <div class="faq">
 {faq_items()}
     </div>
+    <div class="faq-cta rz"><h3>Še vedno niste prepričani, kateri paket potrebujete?</h3>
+      <p>Povejte nam, kaj potrebujete. Pomagali vam bomo izbrati pravo rešitev.</p>
+      <a class="btn" href="#povprasevanje" data-cta="faq">Pogovorimo se o vaši lokaciji</a></div>
   </div></section>
 
   <section class="band band-alt"><div class="wrap sec" id="povprasevanje" aria-labelledby="h-vprasalnik">
     <span id="po-meri"></span>
-    <h2 class="rz" id="h-vprasalnik">Povejte nam, kaj potrebujete</h2>
-    <p>Izpolnite vprašalnik. Iz odgovorov sestavimo ponudbo po ogledu lokacije.</p>
+    <h2 class="rz" id="h-vprasalnik">Pridobite ponudbo za svojo lokacijo</h2>
+    <p>Povejte nam nekaj osnovnih informacij. Pripravili bomo predlog vremenske postaje glede na vaše potrebe. Ponudbo oblikujemo po ogledu lokacije.</p>
     <form class="rz" id="q" novalidate autocomplete="on">
       <p class="chosen" id="chosen" hidden></p>
-      <div class="f"><label for="f-firma"><span>Podjetje ali kmetija</span></label><input type="text" id="f-firma" name="firma" autocomplete="organization" maxlength="120" required></div>
-      <div class="f"><label for="f-kraj"><span>Kraj in lokacija postaje</span></label><input type="text" id="f-kraj" name="kraj" placeholder="npr. sadovnjak nad vasjo" maxlength="160" required></div>
-      <div class="f"><label for="f-panoga"><span>Dejavnost</span></label><select id="f-panoga" name="dejavnost">{FIELD["dej"]}</select></div>
-      <div class="f"><label for="f-st"><span>Število postaj</span></label><select id="f-st" name="postaj">{FIELD["postaj"]}</select></div>
-      <fieldset class="f wide"><legend>Kaj morate spremljati?</legend>
-        <div class="chips">
+      <div class="f"><label for="f-firma"><span>Podjetje ali kmetija *</span></label><input type="text" id="f-firma" name="firma" autocomplete="organization" placeholder="Ime podjetja ali kmetije" maxlength="120" required></div>
+      <div class="f"><label for="f-kraj"><span>Lokacija postaje *</span></label><input type="text" id="f-kraj" name="kraj" placeholder="Kraj, naselje ali območje" maxlength="160" required></div>
+      <div class="f"><label for="f-panoga"><span>Vaša dejavnost *</span></label><select id="f-panoga" name="dejavnost" required><option value="" selected disabled>Izberite dejavnost</option>{FIELD["dej"]}</select></div>
+      <div class="f"><label for="f-kontakt"><span>E-pošta ali telefonska številka *</span></label><input type="text" id="f-kontakt" name="kontakt" autocomplete="email" inputmode="email" placeholder="Kako vas lahko kontaktiramo?" maxlength="120" required aria-describedby="kontakt-help"><small id="kontakt-help">Vpišite enega od obeh. Na ta naslov ali številko odgovorimo.</small></div>
+      <details class="more" id="dodatno">
+        <summary><span>Dodatne informacije (neobvezno)</span><i>{PLUS}</i></summary>
+        <div class="more-in">
+          <div class="f"><label for="f-st"><span>Koliko postaj potrebujete?</span></label><select id="f-st" name="postaj">{FIELD["postaj"]}</select></div>
+          <fieldset class="f wide"><legend>Kaj želite spremljati?</legend>
+            <div class="chips">
 {FIELD["chips_m"]}
-        </div>
-      </fieldset>
-      <fieldset class="f wide"><legend>Je na lokaciji WiFi signal?</legend>
-        <div class="chips">
+            </div>
+          </fieldset>
+          <fieldset class="f wide"><legend>Ali imate WiFi?</legend>
+            <div class="chips">
 {FIELD["chips_w"]}
+            </div>
+          </fieldset>
+          <div class="f wide"><label for="f-opomba"><span>Opombe in posebne želje</span></label><textarea id="f-opomba" name="opomba" rows="3" maxlength="1000"></textarea></div>
         </div>
-      </fieldset>
-      <div class="f wide"><label for="f-opomba"><span>Opombe in posebne želje (neobvezno)</span></label><textarea id="f-opomba" name="opomba" rows="3" maxlength="1000"></textarea></div>
-      <div class="f wide"><label for="f-kontakt"><span>E-naslov ali telefonska številka</span></label><input type="text" id="f-kontakt" name="kontakt" autocomplete="email" inputmode="email" maxlength="120" required aria-describedby="kontakt-help"><small id="kontakt-help">Vpišite enega od obeh. Na ta naslov ali številko odgovorimo.</small></div>
+      </details>
       <div class="f wide hp" aria-hidden="true"><label for="f-web">Spletna stran</label><input type="text" id="f-web" name="website" tabindex="-1" autocomplete="off"></div>
       <input type="hidden" name="paket" id="h-paket"><input type="hidden" name="povezava" id="h-povezava"><input type="hidden" name="segment" id="h-segment">
       <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium"><input type="hidden" name="utm_campaign"><input type="hidden" name="utm_content"><input type="hidden" name="fbclid">
       <div class="f wide consent"><label for="f-soglasje"><input type="checkbox" id="f-soglasje" name="soglasje" required><span>Strinjam se, da Meteorec obdela moje podatke za pripravo ponudbe, kot piše v <a href="/zasebnost.html#povprasevanja">politiki zasebnosti</a>.</span></label></div>
       <p class="err" id="form-err" role="alert" hidden></p>
-      <div class="f wide"><button class="btn" type="submit" id="send">Pošljite povpraševanje</button></div>
+      <div class="f wide"><button class="btn" type="submit" id="send">Pripravite mi ponudbo</button><small class="req">* obvezna polja</small></div>
       <noscript><p class="err">Za oddajo obrazca potrebujete vklopljen JavaScript.</p></noscript>
     </form>
   </div></section>
@@ -693,6 +828,10 @@ def build_main():
     <span><a href="/zasebnost.html">Zasebnost</a> · <a href="/o-postaji.html">O postaji</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
   </div>
 </footer>
+<div class="sticky-cta" id="sticky" hidden>
+  <span class="sticky-t"><strong>Meteorec za podjetja</strong><span>Meritve za vašo lokacijo</span></span>
+  <a class="btn btn-hero" href="#povprasevanje" data-cta="sticky">Pridobite ponudbo</a>
+</div>
 <div class="cookie" id="cookie" role="region" aria-label="Piškotki in merjenje obiska" hidden>
   <p>Z vašim soglasjem merimo obisk in uspeh oglasov (Google, Meta). Brez soglasja se ti sledilniki ne naložijo. <a href="/zasebnost.html">Več</a></p>
   <div class="row"><button class="btn btn-sm" type="button" data-consent="accepted">Sprejmem</button><button class="btn btn-sm btn-ghost" type="button" data-consent="declined">Zavrnem</button></div>
@@ -712,6 +851,13 @@ def build_hvala():
 <main class="wrap thanks">
   <h1>Hvala, prejeli smo povpraševanje.</h1>
   <p class="lead">Odgovorimo vam na e-naslov ali telefon, ki ste ga vpisali, in se dogovorimo za ogled lokacije. Ponudbo pripravimo po ogledu.</p>
+  <h2 class="next-h">Kaj sledi</h2>
+  <ol class="next">
+    <li><strong>Povpraševanje smo prejeli.</strong><span>Vaše podatke obdelamo samo za pripravo ponudbe.</span></li>
+    <li><strong>Pregledamo lokacijo in zahteve.</strong><span>Preverimo, kaj morate spremljati in kje bo postaja stala.</span></li>
+    <li><strong>Dogovorimo povezavo in postavitev.</strong><span>WiFi ali mobilni internet, napajanje in mesto postaje.</span></li>
+    <li><strong>Pripravimo predlog rešitve.</strong><span>Ponudbo oblikujemo po ogledu lokacije.</span></li>
+  </ol>
   <div class="row"><a class="btn" href="/podjetja/">Nazaj na paket</a><a class="btn btn-ghost" href="/">Na vreme v živo</a></div>
 </main>
 <script>window.PODJETJA_CFG={"pixel":%s};</script>
