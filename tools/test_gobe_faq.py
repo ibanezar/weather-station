@@ -3,6 +3,8 @@
 
 (1) Štiri objave: FAQPage v JSON-LD = vidna vprašanja in odgovori (isto besedilo), odgovor na vrhu obstaja,
     dateModified = polje `updated` v blog.json.
+(3) Osem zimskih člankov (27. 10. 2026): FAQPage = vidni FAQ, ISTI vir (WINTER_FAQ v generatorju) in vsaka številka
+    v odgovoru se pojavi tudi v besedilu članka zunaj FAQ (preprečuje izmišljene vrednosti).
 (2) Strani skupin v bazi vrst: committana stran vsebuje izhod baza_cat_text() (odgovor, vidni FAQ in shemo),
     številke v odgovoru so izpeljane iz species_rules.yaml, v besedilu vprašanj ni HTML-ja."""
 import html, json, os, re, sys
@@ -37,6 +39,31 @@ for slug in POSTS:
     check(("Kratek odgovor:" in h) or ("Na kratko:" in h), f"{slug}: ni odgovora na vrhu")
     bp = next((d for d in ld if d.get("@type") == "BlogPosting"), {})
     check(bp.get("dateModified") == upd[slug], f"{slug}: dateModified {bp.get('dateModified')} != updated {upd[slug]}")
+
+import generate_zima_clanki as zc
+NBSP = "\u00a0"
+for slug, qa in zc.WINTER_FAQ.items():
+    h = read(f"blog/{slug}.html")
+    ld = [json.loads(b) for b in re.findall(r'<script type="application/ld\+json">\s*(.*?)</script>', h, re.S)]
+    faq = [d for d in ld if d.get("@type") == "FAQPage"]
+    check(len(faq) == 1, f"{slug}: pričakovan natanko 1 FAQPage, najdenih {len(faq)}")
+    check(h.count(zc.FAQ_START) == 1, f"{slug}: FAQ blok ni natanko enkrat (poženi generate_zima_clanki.py --add-faq)")
+    if faq:
+        check([(e["name"], e["acceptedAnswer"]["text"]) for e in faq[0]["mainEntity"]] == qa,
+              f"{slug}: shema FAQPage ni enaka WINTER_FAQ")
+    vis = [(html.unescape(q), html.unescape(a)) for q, a in
+           re.findall(r'<div class="faq-item">\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>', h, re.S)]
+    check(vis == qa, f"{slug}: vidni FAQ ni enak WINTER_FAQ")
+    check("Kratek odgovor:" in h, f"{slug}: članek nima »Kratek odgovor«")
+    # besedilo članka brez FAQ, shem, skript in slik
+    src = re.sub(re.escape(zc.FAQ_START) + r".*?" + re.escape(zc.FAQ_END), "", h, flags=re.S)
+    src = re.sub(r"<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<head>.*?</head>", " ", src, flags=re.S)
+    src = html.unescape(re.sub(r"<[^>]+>", " ", src)).replace(NBSP, " ")
+    for q, a in qa:
+        check(len(a) <= 600, f"{slug}: predolg odgovor ({len(a)} znakov): {q}")
+        for tok in re.findall(r"\d+(?:[.,]\d+)?", a):
+            check(re.search(r"(?<![\d,.])" + re.escape(tok) + r"(?![\d])", src) is not None,
+                  f"{slug}: številka {tok} iz odgovora »{q}« je ni v besedilu članka")
 
 rules = gm.load_rules()
 sp = rules["species"]

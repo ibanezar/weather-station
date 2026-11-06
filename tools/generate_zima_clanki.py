@@ -19,6 +19,7 @@ Usage:
 """
 import csv
 import datetime
+import html as html_mod
 import json
 import os
 import re
@@ -964,6 +965,175 @@ def art_megla(c):
         sources="Viri: postaja IREICA1 (urni zapis temperature, rosišča in vetra zunanjega senzorja od 13. 7. do 26. 10. 2026); modelski posnetek Open-Meteo z dne 27. 10. 2026 (inverzija).")
 
 
+
+# ───────────────────────── FAQ (6. 11. 2026) ─────────────────────────
+# GSC »Generative AI« (7. 10.–3. 11. 2026): AI funkcije citirajo strani z neposrednim odgovorom.
+# Članki že imajo »Kratek odgovor« v razdelku 01; manjkal je FAQ z vprašanji v obliki, v kateri jih
+# ljudje postavljajo. VSAKA številka je iz besedila članka (tools/test_gobe_faq.py to preveri); v FAQ ni
+# modelskih napovedi z dne objave (zastarajo), samo izmerjeno, definicije in omejitve.
+# Pravilo: nobene nove trditve, ki je ni v članku. Odgovori so golo besedilo (shema = vidno besedilo).
+WINTER_FAQ = {
+    "kdaj-menjati-zimske-gume-recica-1027": [
+        ("Kdaj morate imeti zimske gume v Sloveniji?",
+         "Zimska oprema je obvezna od 15. novembra do 15. marca, v zimskih razmerah (sneg, led, žled) pa tudi zunaj tega "
+         "obdobja. Natančna pravila preverite pri AMZS ali v veljavnih predpisih."),
+        ("Kdaj je v Rečici pravi čas za zamenjavo zimskih gum?",
+         "Po podatkih postaje IREICA1 je zamenjava med drugo polovico oktobra in začetkom novembra smiselna, 15. november pa je "
+         "skrajni rok. Sedemdnevno povprečje dnevne temperature je v zadnjih šestih jesenih prvič padlo pod 7 °C med 15. oktobrom "
+         "in 20. novembrom, najpogosteje okoli 9. novembra. Kdor vozi zgodaj zjutraj ali v hribe, naj ne čaka na prvi sneg."),
+        ("Ali je 7 °C zakonska meja za zimske gume?",
+         "Ne. Priporočilo, da gume zamenjate, ko se temperatura stalno spusti pod 7 °C, je praktično pravilo, ne zakonska meja. "
+         "Jutra so hladnejša od povprečnega dneva: najnižja dnevna temperatura je bila v oktobrih med letoma 2020 in 2026 pod 7 °C "
+         "v 58 % dni, v novembru v 92 %."),
+        ("Kdaj spomladi snemati zimske gume?",
+         "Zimska oprema je obvezna do 15. marca, a v nobenem od šestih let sedemdnevno povprečje do 15. marca ni bilo trajno nad "
+         "7 °C; najzgodneje je to postalo 25. marca 2025. Jutra z 0 °C ali manj so se v vseh letih pojavila še po 15. marcu, zadnje "
+         "najzgodneje 11. aprila. V aprilu je zamenjava po podatkih varnejša kot sredi marca, v hribih in na prelazih pa lahko "
+         "zimske razmere trajajo še dlje."),
+    ],
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027": [
+        ("Kdaj pade prvi sneg v Savinjski dolini?",
+         "Postaja v Rečici snega ne meri, zato štejem prvi hladen padavinski dan (vsaj 0,2 mm padavin in povprečna dnevna "
+         "temperatura do 1 °C). V zadnjih sedmih zimah je nastopil med 19. novembrom in 11. decembrom, mediana je 25. november. "
+         "V štirih od sedmih zim je bil pred 1. decembrom."),
+        ("Kdaj je prvi sneg na Črnivcu?",
+         "Padavinska postaja ARSO Črnivec (848 m) je prvi nov sneg v petih zimah izmerila 18. novembra 2025, 22. novembra 2024, "
+         "23. novembra 2022, 27. novembra 2021 in 30. novembra 2023. Pred 18. novembrom v teh zimah nov sneg ni padel."),
+        ("Ali dolina prvi sneg dobi pozneje kot Črnivec?",
+         "V štirih od petih zim je bila razlika največ tri dni. Izjema je zima 2022/23: na Črnivcu je sneg padel 23. novembra, "
+         "v dolini pa je bila prva hladna padavina šele 11. decembra, 18 dni pozneje. Zakaj je bilo takrat drugače, iz teh "
+         "podatkov ne morem reči."),
+        ("Zakaj članek govori o hladnem padavinskem dnevu in ne o prvem snegu?",
+         "Padavine ob povprečni temperaturi do 1 °C so lahko sneg, dež s snegom ali podhlajen dež. Postaja ne razlikuje vrste "
+         "padavin in ne meri višine snežne odeje. Prag 1 °C in 0,2 mm je moja izbira za primerjavo med leti."),
+    ],
+    "prvi-sneg-golte-solcava-menina-1027": [
+        ("Kdaj je prvi sneg na Goltah in Menini planini?",
+         "Za višje lege nimam izmerjenih podatkov. Najbližja izmerjena točka je padavinska postaja ARSO Črnivec (848 m), kjer je "
+         "prvi nov sneg v petih zimah padel med 18. in 30. novembrom. Golte in Menina planina ležita na 1400 m in več, zato sneg tam "
+         "običajno pride prej; koliko prej, iz teh meritev ne vem."),
+        ("Kdaj lahko pričakujem prvi sneg v Solčavi in Logarski dolini?",
+         "Za Solčavo (644 m) in Logarsko dolino (okoli 800 m) nimam izmerjenega datuma prvega snega. Ležita nekoliko nižje od "
+         "Črnivca, zato bi lahko pričakovali podobne ali nekoliko poznejše datume (Črnivec: 18.–30. 11.), a to je sklep, ne meritev."),
+        ("Kaj je meja sneženja?",
+         "V tem članku je to približek: višina ničte izoterme, zmanjšana za 250 m. Kaže, kje bi dež prešel v sneg, ne pove pa, ali "
+         "bo sneg obležal."),
+        ("Ali so temperature na Goltah izmerjene?",
+         "Ne. Temperature na Goltah in drugih vrhovih so preračunane iz doline z gradientom in ne pomenijo, da je tam res tako "
+         "hladno. To ni uradna gorska napoved; za razmere v gorah in nevarnost snega spremljajte ARSO in lokalne službe."),
+    ],
+    "bela-bozic-zgornja-savinjska-dolina-1027": [
+        ("Ali je v Savinjski dolini pogosto bel božič?",
+         "Ne, v dolini je redek. V Rečici je bil hladen padavinski dan med 24. in 26. decembrom v dveh od sedmih let (2021 in 2025), "
+         "v štirih od sedmih let pa je najvišja temperatura v teh treh dneh dosegla vsaj 10 °C. Rečica snežne odeje ne meri, zato "
+         "je to približek."),
+        ("Kako pogost je bel božič na Črnivcu?",
+         "Na Črnivcu (848 m) je ARSO na božični dan izmeril snežno odejo v dveh od petih let: 2024 (4 cm) in 2025 (15 cm). Arhiv "
+         "imam od aprila 2021, zato je v primerjavi samo pet božičev."),
+        ("Kakšen je bil božič 2025?",
+         "Najbolj zimski: od 24. do 26. decembra 2025 je v Rečici padlo skupaj 13,5 mm padavin, najvišja dnevna temperatura pa je "
+         "bila med 1,5 in 2,5 °C. Na Črnivcu je ARSO izmeril snežno odejo 4 cm na sveti večer, 15 cm na božič in 12 cm na štefanovo."),
+        ("Ali bo letos bel božič?",
+         "Za napoved je še prezgodaj in nobeden vir danes ne more zanesljivo napovedati, ali bo 25. decembra sneg. Smiselno je "
+         "spremljati napoved približno teden dni pred božičem; takrat bodo uporabni meja sneženja, ocena snežne odeje in snežna karta."),
+    ],
+    "crnivec-pozimi-sneg-verige-1027": [
+        ("Kdaj zapade prvi sneg na Črnivcu?",
+         "Na Črnivcu (848 m) je ARSO v petih zimah prvi nov sneg izmeril med 18. in 30. novembrom. Pred 18. novembrom sneg ni padel, "
+         "v oktobru ga sploh ni bilo."),
+        ("Kateri mesec je na Črnivcu najbolj zasnežen?",
+         "December: 31 % dni je imelo snežno odejo, nato januar (28 %) in februar (27 %). Marca in aprila je odeja redka. Sešteti "
+         "so vsi dnevi zim od 2021/22 do 2025/26."),
+        ("Koliko dni leži sneg na Črnivcu in koliko ga je?",
+         "Snežna odeja je v posamezni zimi ležala 22–57 dni (mediana 30 dni), najdlje pozimi 2022/23. Največ snega je ležalo 24. "
+         "januarja 2023: 65 cm. V štirih zimah je bila največja višina 19–25 cm, torej so velike odeje redke."),
+        ("Kje preverim stanje ceste pred vožnjo čez Črnivec?",
+         "Uradni vir za stanje ceste in zapore je promet.si. Izmerjeno temperaturo in veter meri postaja DRSI na prelazu, ocena "
+         "vozišča in kamera pa sta na crnivec.si; stanje vozišča je ocena, ne meritev. Zimska oprema je obvezna od 15. novembra do "
+         "15. marca, ob snegu in ledu pa tudi zunaj tega obdobja."),
+    ],
+    "zled-ali-poledica-razlika-1027": [
+        ("Kakšna je razlika med žledom in poledico?",
+         "Žled je pojav v ozračju: dež ali pršenje, ki zmrzne ob stiku s hladno površino. Poledica je stanje površine: led na "
+         "cestišču ali poti, ki ga povzroči kateri koli vzrok. Žled povzroči poledico, poledica pa ni nujno žled."),
+        ("Kako nastane žled?",
+         "Žled nastane, kadar je v višini toplejša plast zraka (nad 0 °C), pri tleh pa hladnejša (0 °C ali manj). Sneg v oblaku se "
+         "stopi v topli plasti, kaplje se v hladni plasti podhladijo in zmrznejo šele ob stiku s tlemi, žico ali vejo, kjer naredijo "
+         "prozorno ledeno skorjo. Žled je redek pojav."),
+        ("Kako nastane poledica?",
+         "Poledica nastane, kjer se površina ohladi pod 0 °C: ob jasni noči, mrazu ali ko zmrzne mokra cesta, lahko tudi brez dežja. "
+         "Najprej zmrznejo mostovi, senčni odseki, kraji ob gozdu in mrazišča. Sevalno ohlajanje je pogost razlog, da je poledica "
+         "možna že pri pozitivni temperaturi zraka."),
+        ("Kako na terenu ločim žled od poledice in kaj naj storim?",
+         "Žled: dež pada, ko je zunaj okoli 0 °C ali pod njo, površine se bleščijo kot steklo, veje in avtomobili so prekriti z "
+         "ledom; vožnji se izogibajte. Poledica: vreme je suho ali vlažno, jutro jasno, zrak pri tleh blizu ničle, cesta pa je lahko "
+         "drsna, čeprav je temperatura zraka nad 0 °C. Ob nesreči ali nevarnem stanju na cesti pokličite 112."),
+    ],
+    "stopinjski-dnevi-recica-koliko-kuriti-1027": [
+        ("Kaj je stopinjski dan?",
+         "Za vsak dan s povprečno dnevno temperaturo pod 12 °C seštejem razliko do 20 °C. Dan s povprečjem 2 °C prispeva 18 "
+         "stopinjskih dni, dan s povprečjem 13 °C nič. Moji izračuni niso primerni za obračun toplote; zanj veljajo pravila "
+         "distributerja oziroma upravljavca."),
+        ("Koliko stopinjskih dni ima kurilna sezona v Rečici?",
+         "V petih popolnih kurilnih sezonah (1. oktober–30. april) v povprečju 2920. Najtoplejša je bila 2023/24 (2565), najhladnejša "
+         "2021/22 (3281), ki je imela 28 % več stopinjskih dni."),
+        ("Kdaj je največ ogrevanja?",
+         "Največ ogrevanja je decembra in januarja, najmanj oktobra in aprila (povprečje petih sezon od 2020/21 do 2024/25)."),
+        ("Kako ocenim letošnjo porabo ogrevanja?",
+         "Poraba je približno sorazmerna s številom stopinjskih dni: poraba letos ≈ poraba lani × (stopinjski dnevi letos / "
+         "stopinjski dnevi lani). Primer, ne meritev: če ste v sezoni 2024/25 (2817) porabili 10 enot, bi v sezoni, kakršna je bila "
+         "2021/22 (3281), porabili približno 11,6 enote, torej 16 % več. Račun velja le, če se hiša, način ogrevanja in navade "
+         "niso spremenili."),
+    ],
+    "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
+        ("Kdaj se dvigne jutranja megla v dolini?",
+         "Oktobra se zrak v Rečici običajno posuši okoli 9. ali 10. ure: mediana zadnje ure z nasičenim zrakom je oktobra 9, julija 7. "
+         "Izjemi sta bila 9. in 24. oktobra, ko je bil zrak nasičen še ob 12. uri (merim samo do poldneva). Urni zapis je od 13. julija "
+         "2026, zato pozimi še ne vem, kdaj se megla dviguje."),
+        ("Kako pogosta je jutranja megla v Rečici?",
+         "Oktobra 2026 je bil zrak ob 7. uri nasičen v 23 od 25 dni (92 %). Delež jutr z nasičenim zrakom je narasel z 32 % julija "
+         "na 40 % avgusta in 96 % septembra. Nasičen zrak ni nujno megla, saj postaja vidljivosti ne meri."),
+        ("Ali nasičen zrak pomeni meglo?",
+         "Ne nujno. Nasičen zrak (razlika med temperaturo in rosiščem 0,5 °C ali manj ob vetru pod 3 km/h) je pogoj za meglo ali "
+         "roso. Če je zrak pri tleh nasičen in vreme mirno, je megla zelo verjetna, potrdi pa jo šele pogled skozi okno ali kamera."),
+        ("Kje je jasno, ko je v dolini megla?",
+         "Če je nad dolino temperaturna inverzija, je nad plastjo megle pogosto jasno. Do zgornje meje inverzije temperatura z višino "
+         "ne pada."),
+    ],
+}
+
+FAQ_START = "<!-- faq:start -->"
+FAQ_END = "<!-- faq:end -->"
+FAQ_ANCHOR = '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong>'
+
+
+def faq_visible(qa):
+    items = "".join(
+        f'      <div class="faq-item">\n        <h3>{html_mod.escape(q, quote=False)}</h3>\n'
+        f'        <p>{html_mod.escape(a, quote=False)}</p>\n      </div>\n' for q, a in qa)
+    return (f'{FAQ_START}\n    <span class="section-label">pogosta vprašanja</span>\n'
+            f'    <h2 id="faq">Pogosta vprašanja</h2>\n    <div class="faq-block">\n{items}    </div>\n    {FAQ_END}\n')
+
+
+def faq_jsonld(qa):
+    ents = ",\n".join("    " + json.dumps({"@type": "Question", "name": q,
+                                           "acceptedAnswer": {"@type": "Answer", "text": a}}, ensure_ascii=False)
+                      for q, a in qa)
+    return ('<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "FAQPage",\n'
+            f'  "mainEntity": [\n{ents}\n  ]\n}}\n</script>\n')
+
+
+def add_faq(page_html, qa):
+    """Vstavi vidni FAQ (pred »Uporaba vsebine«) in FAQPage shemo (pred </head>). Idempotentno: že vstavljen FAQ
+    se zamenja, ne podvoji."""
+    if FAQ_START in page_html:
+        page_html = re.sub(re.escape(FAQ_START) + r".*?" + re.escape(FAQ_END) + r"\n", "", page_html, flags=re.S)
+        page_html = re.sub(r'<script type="application/ld\+json">\s*\{\s*"@context": "https://schema.org",\s*'
+                           r'"@type": "FAQPage".*?</script>\n', "", page_html, flags=re.S)
+    assert page_html.count(FAQ_ANCHOR) == 1, "sidro »Uporaba vsebine« ni najdeno natanko enkrat"
+    page_html = page_html.replace(FAQ_ANCHOR, faq_visible(qa) + FAQ_ANCHOR, 1)
+    return page_html.replace("</head>", faq_jsonld(qa) + "</head>", 1)
+
 # ───────────────────────── gradnja ─────────────────────────
 
 ARTICLES = {f.__name__.replace("art_", ""): f for f in (art_gume, art_sneg, art_bozic, art_zled, art_crnivec, art_hribi, art_hdd, art_megla)}
@@ -1001,6 +1171,20 @@ def main():
     args = sys.argv[1:]
     only = args[args.index("--only") + 1] if "--only" in args else None
     dry, wire, force = "--dry-run" in args, "--wire" in args, "--force" in args
+    if "--add-faq" in args:
+        # Obstoječim objavljenim člankom doda FAQ iz WINTER_FAQ (podatki za članke se ne generirajo znova:
+        # generator zahteva svežo history.json). Idempotentno.
+        for slug_, qa_ in WINTER_FAQ.items():
+            pth = os.path.join(ROOT, "blog", f"{slug_}.html")
+            with open(pth, encoding="utf-8") as f_:
+                h_ = f_.read()
+            h_ = add_faq(h_, qa_)
+            h_, n_ = re.subn(r'("dateModified":\s*")[^"]*(")', rf'\g<1>{datetime.date.today().isoformat()}\g<2>', h_, count=1)
+            assert n_ == 1, slug_
+            with open(pth, "w", encoding="utf-8") as f_:
+                f_.write(h_)
+            print(f"✓ FAQ: blog/{slug_}.html ({len(qa_)} vprašanj)")
+        return 0
     c = Ctx()
     for key, fn in ARTICLES.items():
         art = fn(c)
@@ -1030,6 +1214,8 @@ def main():
         lead = f'<p class="lead">{article["lead"]}</p>'
         assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"
         html = html.replace(lead, STYLE + "\n" + lead, 1)
+        if slug in WINTER_FAQ:
+            html = add_faq(html, WINTER_FAQ[slug])
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
         print(f"✓ zapisano: blog/{slug}.html")

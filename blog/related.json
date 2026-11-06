@@ -1,4 +1,44 @@
 {
+  "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
+    "zakaj-gobe-rastejo-do-meje-megle",
+    "reke-megle-temperaturna-inverzija-recica-savinji",
+    "dve-nevihte-hladno-jutro"
+  ],
+  "stopinjski-dnevi-recica-koliko-kuriti-1027": [
+    "temperaturni-trend-ireica1-2020-2025",
+    "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001",
+    "kdaj-menjati-zimske-gume-recica-1027"
+  ],
+  "zled-ali-poledica-razlika-1027": [
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
+    "prvi-sneg-golte-solcava-menina-1027",
+    "crnivec-pozimi-sneg-verige-1027"
+  ],
+  "crnivec-pozimi-sneg-verige-1027": [
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
+    "prvi-sneg-golte-solcava-menina-1027",
+    "bela-bozic-zgornja-savinjska-dolina-1027"
+  ],
+  "bela-bozic-zgornja-savinjska-dolina-1027": [
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
+    "crnivec-pozimi-sneg-verige-1027",
+    "prvi-sneg-golte-solcava-menina-1027"
+  ],
+  "prvi-sneg-golte-solcava-menina-1027": [
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
+    "crnivec-pozimi-sneg-verige-1027",
+    "vreme-golte-sneg-razmere"
+  ],
+  "kdaj-pade-prvi-sneg-v-dolini-recica-1027": [
+    "crnivec-pozimi-sneg-verige-1027",
+    "prvi-sneg-golte-solcava-menina-1027",
+    "bela-bozic-zgornja-savinjska-dolina-1027"
+  ],
+  "kdaj-menjati-zimske-gume-recica-1027": [
+    "16-noci-pod-5-c-slane-se-ni-1021",
+    "slana-gobarska-sezona-1018",
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
+  ],
   "vpliv-lune-na-rast-gob-0921": [
     "trije-vali-gob-po-dezju-0911",
     "zakaj-sosed-vedno-najde-gobe",
@@ -19,41 +59,6 @@
     "gobarska-napoved-za-zgornjo-savinjsko-dolino-kaj-pravita-vla-0715",
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
-  "zled-ali-poledica-razlika-1027": [
-    "prvi-sneg-golte-solcava-menina-1027",
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
-    "crnivec-pozimi-sneg-verige-1027"
-  ],
-  "stopinjski-dnevi-recica-koliko-kuriti-1027": [
-    "temperaturni-trend-ireica1-2020-2025",
-    "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001",
-    "kdaj-menjati-zimske-gume-recica-1027"
-  ],
-  "prvi-sneg-golte-solcava-menina-1027": [
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
-    "crnivec-pozimi-sneg-verige-1027",
-    "vreme-golte-sneg-razmere"
-  ],
-  "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
-    "zakaj-gobe-rastejo-do-meje-megle",
-    "reke-megle-temperaturna-inverzija-recica-savinji",
-    "dve-nevihte-hladno-jutro"
-  ],
-  "kdaj-pade-prvi-sneg-v-dolini-recica-1027": [
-    "crnivec-pozimi-sneg-verige-1027",
-    "prvi-sneg-golte-solcava-menina-1027",
-    "bela-bozic-zgornja-savinjska-dolina-1027"
-  ],
-  "crnivec-pozimi-sneg-verige-1027": [
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
-    "prvi-sneg-golte-solcava-menina-1027",
-    "bela-bozic-zgornja-savinjska-dolina-1027"
-  ],
-  "bela-bozic-zgornja-savinjska-dolina-1027": [
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
-    "crnivec-pozimi-sneg-verige-1027",
-    "prvi-sneg-golte-solcava-menina-1027"
-  ],
   "test-napovedi-2026-10": [
     "test-napovedi-2026-09",
     "test-napovedi-2026-07",
@@ -63,11 +68,6 @@
     "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-september-2026"
-  ],
-  "kdaj-menjati-zimske-gume-recica-1027": [
-    "16-noci-pod-5-c-slane-se-ni-1021",
-    "slana-gobarska-sezona-1018",
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
   ],
   "el-nino-2026": [
     "zima-2026-2027-el-nino-napoved",
@@ -81,8 +81,8 @@
   ],
   "16-noci-pod-5-c-slane-se-ni-1021": [
     "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
-    "kdaj-menjati-zimske-gume-recica-1027",
-    "slana-gobarska-sezona-1018"
+    "slana-gobarska-sezona-1018",
+    "kdaj-menjati-zimske-gume-recica-1027"
   ],
   "slana-gobarska-sezona-1018": [
     "vrh-gobarske-sezone-oktober-1014",
@@ -112,7 +112,7 @@
   "zime-nekoc-in-zdaj-1012": [
     "zima-2026-2027-el-nino-napoved",
     "crnivec-pozimi-sneg-verige-1027",
-    "bela-bozic-zgornja-savinjska-dolina-1027"
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
   ],
   "naslednji-teden-konec-poletja-0904": [
     "tedenska-napoved-24-28-avgust-2026",
