@@ -647,3 +647,26 @@ select:required:invalid{color:var(--muted)}
 .hero-art .ph-hero strong{font-size:32px}
 .hero-art .ph-screen{gap:9px;padding-top:24px}
 @media (max-width:760px){.hero-art .phone{aspect-ratio:9/18}}
+
+/* ── mobilna izvedba (369 px): Pro prvi, graf z višino, krajša slika postaje, koraki kot časovnica ── */
+@media (max-width:760px){
+  .pack.feat{order:-1}
+  .photo-art img.foto{max-width:min(100%,270px)}
+}
+@media (max-width:640px){
+  .chart{height:165px}
+  .chart text{display:none}
+  .chart line,.chart .m{vector-effect:non-scaling-stroke}
+  .data-grid figure{padding:12px}
+  .steps{gap:0}
+  .steps li{background:transparent;border:0;border-radius:0;padding:0 0 22px 54px;min-height:56px}
+  .steps li>.ic{display:none}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:0;right:auto;width:38px;height:38px;border-radius:50%;opacity:1;
+    background:var(--brand);color:var(--brand-ink);font-size:18px;display:grid;place-items:center}
+  .steps li:not(:last-child)::after{content:"";position:absolute;left:18px;top:42px;bottom:4px;width:2px;background:var(--line)}
+}
+@media (max-width:640px){
+  .calc-res{flex-wrap:nowrap;align-items:center;gap:12px}
+  .calc-res b{font-size:64px;min-width:0}
+  .calc-res span{flex:1;font-size:16px}
+}

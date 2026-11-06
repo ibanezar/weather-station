@@ -86,25 +86,29 @@ STEPS = [
     ("Podpora", "Spremljamo delovanje postaje in vam svetujemo, kadar je treba."),
 ]
 
-FAQ = [
-    ("Kaj, če na lokaciji ni WiFi?",
-     "Postaja se poveže prek mobilnega interneta. Pred postavitvijo preverimo pokritost na lokaciji. "
-     "Za povezavo brez WiFi velja pribitek, naročnina za mobilni internet pa je dodaten strošek."),
-    ("Koliko časa traja postavitev?",
-     "Rok je odvisen od lokacije, povezave in izbranih senzorjev. Dogovorimo ga po ogledu lokacije in ga zapišemo v ponudbo."),
-    ("Kdo vzdržuje postajo, če senzor izpade?",
-     "Podpora je vključena v mesečno naročnino. Kako hitro se odzovemo in kaj zajema zamenjava senzorja, "
-     "zapišemo v ponudbo; paket Premium ima prednostno podporo."),
-    ("Ali lahko podatke pokažem na svoji spletni strani?",
-     "Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran. "
-     "Za občine pripravimo vtičnik za občinsko spletno stran."),
-    ("Ali je napoved zanesljiva?",
-     "Napoved je informativna. Popolne natančnosti ne jamčimo, nobena vremenska napoved je ne more. "
-     "Zato v paketu Premium vsak mesec dobite poročilo o natančnosti, ki napoved primerja z meritvami vaše postaje."),
-    ("Kaj pomeni paket po meri?",
-     "Vi povejte, kaj morate spremljati. Mi sestavimo postajo, senzorje, nadzorno ploščo in opozorila po vaših pravilih. "
-     "Izpolnite vprašalnik spodaj, ponudbo pripravimo po ogledu lokacije."),
-]
+def faq_list():
+    """Vprašanja se sestavijo ob gradnji: odgovor o mobilni povezavi vsebuje zneske samo, če je SHOW_PRICES."""
+    return [
+        ("Kaj, če na lokaciji ni WiFi?",
+         "Postaja se poveže prek mobilnega interneta. Pred postavitvijo preverimo pokritost na lokaciji. "
+         + ("Za povezavo brez WiFi velja pribitek: 390\u00a0€ enkratno in 19\u00a0€ na mesec (brez DDV). " if SHOW_PRICES
+            else "Za povezavo brez WiFi velja pribitek. ")
+         + "Mobilni podatkovni paket (SIM) plačate posebej, po tarifi svojega operaterja: v pribitek ni vštet."),
+        ("Koliko časa traja postavitev?",
+         "Rok je odvisen od lokacije, povezave in izbranih senzorjev. Dogovorimo ga po ogledu lokacije in ga zapišemo v ponudbo."),
+        ("Kdo vzdržuje postajo, če senzor izpade?",
+         "Podpora je vključena v mesečno naročnino. Kako hitro se odzovemo in kaj zajema zamenjava senzorja, "
+         "zapišemo v ponudbo; paket Premium ima prednostno podporo."),
+        ("Ali lahko podatke pokažem na svoji spletni strani?",
+         "Da. Že paket Osnovni vključuje javno stran ali vtičnik za vašo spletno stran. "
+         "Za občine pripravimo vtičnik za občinsko spletno stran."),
+        ("Ali je napoved zanesljiva?",
+         "Napoved je informativna. Popolne natančnosti ne jamčimo, nobena vremenska napoved je ne more. "
+         "Zato v paketu Premium vsak mesec dobite poročilo o natančnosti, ki napoved primerja z meritvami vaše postaje."),
+        ("Kaj pomeni paket po meri?",
+         "Vi povejte, kaj morate spremljati. Mi sestavimo postajo, senzorje, nadzorno ploščo in opozorila po vaših pravilih. "
+         "Izpolnite vprašalnik spodaj, ponudbo pripravimo po ogledu lokacije."),
+    ]
 
 DEJAVNOSTI = ["Kmetijstvo, sadjarstvo, vinogradništvo", "Gradbeništvo", "Turizem in gostinstvo",
               "Prireditve in šport", "Občina ali javna ustanova", "Drugo"]
@@ -243,6 +247,12 @@ def noci(n):
     return f"{n} noč" if n % 100 == 1 else f"{n} noči"
 
 
+def dan_word(n):
+    """Samostalnik »dan« ob številu (1 dan, 2 dneva, 3+ dni); isto pravilo je v podjetja.js."""
+    m = n % 100
+    return "dan" if m == 1 else ("dneva" if m == 2 else "dni")
+
+
 def dnevi_s(n):
     return f"{n} dan" if n % 100 == 1 else (f"{n} dneva" if n % 100 == 2 else (f"{n} dni" if n % 100 in (3, 4) else f"{n} dni"))
 
@@ -293,7 +303,7 @@ def error_svg(errs, st_):
     sc = (plot_h / 2) / 6.0
     n = len(errs)
     bw = (W - L - R) / n
-    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" aria-label="{e(error_alt(st_))}" preserveAspectRatio="xMidYMid meet">']
+    out = [f'<svg class="chart" viewBox="0 0 {W} {H}" role="img" aria-label="{e(error_alt(st_))}" preserveAspectRatio="none">']
     for v in (-4, -2, 0, 2, 4):
         y = zero - v * sc
         out.append(f'<line x1="{L}" x2="{W - R}" y1="{y:.1f}" y2="{y:.1f}" class="{"z" if v == 0 else "g"}"/>'
@@ -364,13 +374,13 @@ def prag_html(series):
     cnt = sum(1 for t in vals if t <= 0)
     coldest = min(series, key=lambda x: 99 if x[1] is None else x[1])
     return f'''<div class="calc rz" id="prag-kalk" data-n="{n}">
-      <div class="calc-head"><h3>Koliko noči bi vas lani opozorila postaja?</h3>
-      <p>Nastavite mejo, pod katero želite opozorilo. Vsaka črtica je en dan zadnjih 12 mesecev, obarvani so dnevi, ko je postaja izmerila toliko ali manj.</p></div>
+      <div class="calc-head"><h3>Kolikokrat bi vas postaja opozorila v zadnjih 12 mesecih?</h3>
+      <p>Nastavite mejo, pod katero želite opozorilo. Vsaka črtica predstavlja en dan. Obarvani so dnevi, ko je temperatura dosegla nastavljeno mejo ali padla pod njo.</p></div>
       <div class="calc-ctl"><label for="prag">Opozori me, ko temperatura pade na</label>
         <output id="prag-v" for="prag">0 °C</output>
         <input type="range" id="prag" min="-10" max="5" step="1" value="0" aria-describedby="prag-t prag-hint"></div>
       <p class="calc-hint" id="prag-hint">Ničla: zmrzal. Osnovna meja za pozebo pri cvetju in mladih poganjkih (okvirno, odvisno od vrste in faze rasti).</p>
-      <div class="calc-res" aria-live="polite"><b id="prag-n">{cnt}</b><span id="prag-t">{"noč" if cnt % 100 == 1 else "noči"} od {n} z meritvijo, ko je postaja izmerila 0 °C ali manj.</span></div>
+      <div class="calc-res" aria-live="polite"><b id="prag-n">{cnt}</b><span id="prag-t">{dan_word(cnt)} od {n} dni z meritvijo, ko je postaja izmerila 0 °C ali manj.</span></div>
       <div class="noci" id="noci" aria-hidden="true">{"".join(bars)}</div>
       <div class="noci-os"><span>{fmt_date(series[0][0])}</span><span>najhladnejša: {sl(min(vals))} °C ({fmt_date(coldest[0])})</span><span>{fmt_date(series[-1][0])}</span></div>
       <p class="fine">Meritev postaje IREICA1 v Rečici ob Savinji (dnevni minimum, {fmt_date_y(series[0][0])} do {fmt_date_y(series[-1][0])}, {n} dni z meritvijo). To je zgodovina ene konkretne postaje: na vašem polju bo število opozoril drugačno, ravno zato je smiselna lastna postaja. Brez meritve na lokaciji tega ne veste.</p>
@@ -528,7 +538,7 @@ def price_block(p):
         return '<div class="price"><span class="price-note">Cena po ogledu lokacije</span></div>'
     od = "od " if p["from_"] else ""
     od_m = "od " if p["id"] == "po-meri" else ""
-    sim = (f'<div class="sim-add" data-sim-add hidden>Brez WiFi: + {eur(SIM_ONCE)} enkratno, + {eur(SIM_MONTH)} na mesec</div>')
+    sim = (f'<div class="sim-add" data-sim-add hidden>Brez WiFi: + {eur(SIM_ONCE)} enkratno, + {eur(SIM_MONTH)} na mesec. Podatkovni paket (SIM) ni vštet.</div>')
     return (f'<div class="price" data-once="{p["once"]}" data-month="{p["month"]}">'
             f'<div class="price-row"><span class="price-lbl">Enkratna investicija</span>'
             f'<span class="price-once"><strong>{od}{eur(p["once"])}</strong></span></div>'
@@ -581,7 +591,7 @@ def marquee_html():
 
 def faq_items():
     return "\n".join(
-        f'      <details class="rz"><summary><span>{e(q)}</span><i>{PLUS}</i></summary><div class="odg"><div><p>{e(a)}</p></div></div></details>' for q, a in FAQ)
+        f'      <details class="rz"><summary><span>{e(q)}</span><i>{PLUS}</i></summary><div class="odg"><div><p>{e(a)}</p></div></div></details>' for q, a in faq_list())
 
 
 def schema_blocks():
@@ -609,7 +619,7 @@ def schema_blocks():
             } for p in PACKAGES]}
     faq = {"@context": "https://schema.org", "@type": "FAQPage",
            "mainEntity": [{"@type": "Question", "name": q,
-                           "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]}
+                           "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq_list()]}
     crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": "Meteorec", "item": SITE + "/"},
         {"@type": "ListItem", "position": 2, "name": "Za podjetja"}]}
@@ -669,7 +679,7 @@ def build_main():
     head = page_head(TITLE, DESC, URL, "index, follow, max-image-preview:large", og_title="Vreme na vašem polju",
                      extra=schema_blocks())
     vat = (f'<p class="fine">Vse cene so izhodiščne in brez DDV; obračunamo ga po stopnji {VAT_PCT} %. '
-           f'Končno ceno določimo po ogledu lokacije. Skupaj v prvem letu = enkratna investicija + 12 mesečnih naročnin.</p>') if SHOW_PRICES else ""
+           f'Končno ceno določimo po ogledu lokacije. Skupaj v prvem letu = enkratna investicija + 12 mesečnih naročnin. Pri mobilnem internetu podatkovni paket (SIM) plačate posebej.</p>') if SHOW_PRICES else ""
     sim_note = ""
     series, errs = load_data()
     return head + f'''<body>
@@ -829,7 +839,7 @@ def build_main():
   </div>
 </footer>
 <div class="sticky-cta" id="sticky" hidden>
-  <span class="sticky-t"><strong>Meteorec za podjetja</strong><span>Meritve za vašo lokacijo</span></span>
+  <span class="sticky-t"><strong>Vremenska postaja za vaše podjetje</strong><span>Ponudba po meri vaše lokacije</span></span>
   <a class="btn btn-hero" href="#povprasevanje" data-cta="sticky">Pridobite ponudbo</a>
 </div>
 <div class="cookie" id="cookie" role="region" aria-label="Piškotki in merjenje obiska" hidden>
