@@ -1059,7 +1059,7 @@ function renderInversion(){
     '<circle cx="20" cy="58" r="6" fill="var(--blue)"/><text x="20" y="72" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="JetBrains Mono,monospace">'+valleyT.toFixed(0)+'°</text>'+
     '<circle cx="52" cy="14" r="6" fill="'+(actualDiff>=0?'var(--amber)':'var(--cyan)')+'"/><text x="52" y="9" text-anchor="middle" font-size="7" fill="var(--muted)" font-family="JetBrains Mono,monospace">'+upperT.toFixed(0)+'°</text></svg>';
   body.innerHTML='<div class="inv-wrap">'+vis+'<div class="inv-info"><div class="inv-status '+cls+'"><svg class="ic" aria-hidden="true"><use href="#i-'+emoji+'"/></svg> '+status+'</div><div class="inv-sub">'+sub+'</div></div></div>';
-  badge.textContent=(actualDiff>=0?'+':'')+actualDiff.toFixed(1)+'°C @1500m';
+  badge.textContent=(actualDiff>=0?'+':'\u2212')+fmt(Math.abs(actualDiff),1)+'\u00A0°C @1500\u00A0m';
 }
 
 // ── Moon phase SVG renderer (mathematical) ───────────────
@@ -7841,7 +7841,7 @@ async function _renderAIFC(data){
   if(metaEl){
     const t=data.ts?new Date(data.ts).toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
     const src=(data.source||'yr.no')+(data.arso?' + ARSO':'');
-    metaEl.textContent=src+(t?' · 🕐 '+t:'')+(nMtr?' · temperature: MTR (naš model) za '+nMtr+(nMtr===1?' dan':' dni')+', drugje yr.no':'');
+    metaEl.textContent=src+(t?' · '+t:'')+(nMtr?' · temperature: MTR (naš model) za '+nMtr+(nMtr===1?' dan':' dni')+', drugje yr.no':'');
   }
 }
 
@@ -8124,8 +8124,8 @@ function _renderMtrMount(idp){
   const upd=document.getElementById(idp+'updated');
   if(upd&&st.data.generated_at){
     const t=new Date(st.data.generated_at);
-    upd.textContent='izračunano '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
-      +' ob '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
+    upd.textContent='posod. '+t.toLocaleDateString('sl',{day:'numeric',month:'numeric'})
+      +' '+t.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'});
   }
   const leg=document.getElementById(idp+'legend');
   if(leg)leg.innerHTML=
