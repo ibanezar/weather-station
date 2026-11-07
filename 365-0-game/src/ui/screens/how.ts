@@ -1,3 +1,4 @@
+import { THRESHOLDS } from '../../engine/thresholds.ts';
 import type { App } from '../../app/app.ts';
 import { button } from '../components/button.ts';
 import { backButton } from '../components/backButton.ts';
@@ -13,7 +14,12 @@ export function renderHow(app: App, root: HTMLElement, options: { first?: boolea
   const { t } = app.i18n;
   const first = options.first === true;
   const lines = [
-    { icon: 'perfect', text: t('onboarding.perfect', { range: app.fmt.range(19, 28) }) },
+    {
+      icon: 'perfect',
+      text: t('onboarding.perfect', {
+        range: app.fmt.range(THRESHOLDS.perfect.tmaxCMin, THRESHOLDS.perfect.tmaxCMax),
+      }),
+    },
     { icon: 'storm', text: t('onboarding.bad') },
     { icon: 'check', text: t('onboarding.pick') },
   ] as const;

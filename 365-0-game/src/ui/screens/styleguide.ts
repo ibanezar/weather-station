@@ -150,9 +150,10 @@ export function renderStyleguide(root: HTMLElement): void {
   const prog = progress({
     total: 12,
     roundText: (c, t) => `Round ${String(c)} of ${String(t)}`,
+    chancesText: (n) => `${String(n)} second chances`,
     scoutsText: (n) => `${String(n)} scouts left`,
   });
-  prog.update(3, 2);
+  prog.update(3, 2, 1);
 
   const frames = h(
     'div',

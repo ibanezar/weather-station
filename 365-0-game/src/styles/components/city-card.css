@@ -173,3 +173,32 @@
     width: 18px;
   }
 }
+
+/* Risk: free information on every card, how much this month varies over the stored years. */
+.city-card__foot {
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.city-card__risk {
+  font-size: var(--text-small);
+  text-align: right;
+  line-height: 1.25;
+}
+
+.city-card__risk strong {
+  color: var(--ink);
+}
+
+.city-card__combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: 2px 10px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  font-size: var(--text-small);
+  font-weight: 600;
+}

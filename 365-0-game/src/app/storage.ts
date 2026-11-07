@@ -22,6 +22,8 @@ export interface Settings {
 
 export interface DailyResult {
   picks: string[];
+  /** Rounds that used a second chance, in order (absent in results saved before they existed). */
+  rerolls?: number[];
   record: DayRecord;
   grade: GradeId;
 }
@@ -170,6 +172,13 @@ export class Store {
       if (s.daily[date]) return; // one attempt per day: the first result stands
       s.daily[date] = result;
       s.streak = completeDaily(s.streak, date);
+    });
+  }
+
+  /** A second chance changes the day's result (the streak is untouched: the day was already played). */
+  updateDaily(date: string, result: DailyResult): void {
+    this.update((s) => {
+      if (s.daily[date]) s.daily[date] = result;
     });
   }
 

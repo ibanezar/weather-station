@@ -23,7 +23,14 @@ export async function startRun(
     if (mode === 'daily') {
       const done = app.store.state.daily[today];
       if (done) {
-        app.session = restoreSession('daily', data, dailySeed(today), today, done.picks);
+        app.session = restoreSession(
+          'daily',
+          data,
+          dailySeed(today),
+          today,
+          done.picks,
+          done.rerolls ?? [],
+        );
         app.go('result');
         return;
       }
