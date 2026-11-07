@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -18,7 +18,10 @@ function stripComments(source: string): string {
 }
 
 describe('engine purity', () => {
-  const files = readdirSync(ENGINE_DIR).filter((f) => f.endsWith('.ts'));
+  // Git does not track empty folders, so the engine folder may not exist in a fresh clone.
+  const files = existsSync(ENGINE_DIR)
+    ? readdirSync(ENGINE_DIR).filter((f) => f.endsWith('.ts'))
+    : [];
 
   it('finds no DOM, clock or ambient randomness in src/engine', () => {
     for (const file of files) {
