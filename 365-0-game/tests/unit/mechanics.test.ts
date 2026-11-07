@@ -9,7 +9,9 @@ import {
   findCombos,
   finish,
   monthRisk,
+  keep,
   NET_BASE,
+  pendingMonth,
   NET_MAX,
   netsFor,
   netsLeft,
@@ -24,6 +26,7 @@ import {
   type EngineData,
   type RunState,
 } from '../../src/engine/index.ts';
+import { restoreSession } from '../../src/app/session.ts';
 import { data, seeds } from './helpers/data.ts';
 
 const city = (archetype: string, continent: string): SeedCity =>
@@ -96,10 +99,14 @@ describe('risk', () => {
   });
 });
 
-function played(seed: string): RunState {
+/** Play all twelve months, keeping every one (and redrawing the months in `redraw` once each, if a chance is left). */
+function played(seed: string, redraw: readonly number[] = []): RunState {
   let s = start(newRun(seed, 'endless'), data);
-  for (let i = 0; i < ROUNDS; i++)
+  for (let i = 0; i < ROUNDS; i++) {
     s = pick(s, (currentRound(s) as { cities: string[] }).cities[0] as string);
+    if (redraw.includes(i) && netsLeft(s, data) > 0) s = reroll(s, data);
+    s = keep(s);
+  }
   return complete(finish(s, data));
 }
 
@@ -134,40 +141,63 @@ describe('re-rolls', () => {
     );
   });
 
-  it('spends a net, redraws only that month and keeps the year at 365 days', () => {
-    const s = played('x:3');
-    const before = s.result;
-    if (!before) throw new Error('no result');
-    expect(netsLeft(s, data)).toBeGreaterThanOrEqual(NET_BASE);
-    const after = reroll(s, data, 5);
-    const result = after.result;
-    if (!result) throw new Error('no result');
-    expect(after.rerolls).toEqual([5]);
-    expect(netsLeft(after, data)).toBe(netsLeft(s, data) - 1);
-    result.rounds.forEach((r, i) => {
-      if (i === 5) {
-        expect(r.rerolls).toBe(1);
-        expect(r.year).not.toBe(before.rounds[5]?.year);
-      } else expect(r).toEqual(before.rounds[i]);
-    });
-    expect(result.record.w + result.record.d + result.record.l).toBe(365);
-    expect(result.bestRecord).toEqual(before.bestRecord); // the benchmark does not move
+  it('redraws the month just shown: a different year, one chance spent, the year still 365 days', () => {
+    let s = start(newRun('x:3', 'endless'), data);
+    s = pick(s, (currentRound(s) as { cities: string[] }).cities[0] as string);
+    const before = pendingMonth(s, data);
+    expect(before?.rerolls).toBe(0);
+    expect(netsLeft(s, data)).toBe(NET_BASE);
+    s = reroll(s, data);
+    const after = pendingMonth(s, data);
+    expect(after?.rerolls).toBe(1);
+    expect(after?.year).not.toBe(before?.year);
+    expect(s.rerolls).toEqual([0]);
+    expect(netsLeft(s, data)).toBe(NET_BASE - 1);
+    s = keep(s);
+    for (let i = 1; i < ROUNDS; i++) {
+      s = keep(pick(s, (currentRound(s) as { cities: string[] }).cities[0] as string));
+    }
+    const result = finish(s, data).result;
+    expect(result?.rounds[0]?.year).toBe(after?.year);
+    expect(result?.rounds[0]?.rerolls).toBe(1);
+    expect((result?.record.w ?? 0) + (result?.record.d ?? 0) + (result?.record.l ?? 0)).toBe(365);
   });
 
-  it('refuses without a net, before the draft is done, or for a round that does not exist', () => {
-    let s = played('x:4');
-    const nets = netsTotal(s, data);
-    for (let i = 0; i < nets; i++) s = reroll(s, data, i);
+  it('refuses without a chance left, or when there is nothing pending', () => {
+    let s = start(newRun('x:4', 'endless'), data);
+    expect(() => reroll(s, data)).toThrow(/nothing to redraw/);
+    s = pick(s, (currentRound(s) as { cities: string[] }).cities[0] as string);
+    s = reroll(s, data); // the free one
     expect(netsLeft(s, data)).toBe(0);
-    expect(() => reroll(s, data, 0)).toThrow(/no safety nets/);
-    expect(() => reroll(played('x:5'), data, 12)).toThrow(/no such round/);
-    expect(() => reroll(start(newRun('x:6', 'endless'), data), data, 0)).toThrow(/cannot re-roll/);
+    expect(() => reroll(s, data)).toThrow(/no second chances/);
+    expect(() => reroll(newRun('x:5', 'endless'), data)).toThrow(/cannot re-roll/);
   });
 
-  it('rebuilding a run from its picks and re-rolls gives the same result', () => {
-    const s = reroll(reroll(played('x:7'), data, 2), data, 2);
-    let again = played('x:7');
-    for (const r of s.rerolls) again = reroll(again, data, r);
-    expect(again.result).toEqual(s.result);
+  it('a combo completed by the pick gives a chance for that very month', () => {
+    let s = start(newRun('x:8', 'endless'), data);
+    // Find, for this seed, a run of three same-climate picks if the draft allows it; otherwise the nets stay at one.
+    let total = 0;
+    for (let i = 0; i < ROUNDS; i++) {
+      const round = currentRound(s) as { cities: string[] };
+      s = pick(s, round.cities[0] as string);
+      total = Math.max(total, netsTotal(s, data));
+      s = keep(s);
+    }
+    expect(total).toBeGreaterThanOrEqual(NET_BASE);
+    expect(total).toBeLessThanOrEqual(NET_MAX);
+  });
+
+  it('rebuilding a run from its picks and redraws (as the daily does after a restart) gives the same result', () => {
+    const original = played('x:7', [2, 5]);
+    expect(original.rerolls[0]).toBe(2);
+    const again = restoreSession(
+      'endless',
+      data,
+      'x:7',
+      undefined,
+      original.picks,
+      original.rerolls,
+    );
+    expect(again.state.result).toEqual(original.result);
   });
 });

@@ -2,42 +2,31 @@ import { expect, test, type Page } from '@playwright/test';
 import { openReturning, seriousViolations } from './helpers.ts';
 
 test.describe('the Android back gesture', () => {
-  test('steps back through the picks, then asks before leaving the run', async ({ page }) => {
+  test('asks before leaving the run, at any point of a month', async ({ page }) => {
     await openReturning(page);
     await page.getByRole('button', { name: 'Play endless' }).click();
     await page.locator('.city-card').first().waitFor();
-    await page.locator('.city-card__pick').first().click();
-    await page.locator('.city-card__pick').first().click();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('March');
 
-    await page.goBack();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('February');
-    await page.goBack();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('January');
-
-    // No picks left: back asks before abandoning the run.
+    // Before a pick.
     await page.goBack();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText('Leave this run?');
     await dialog.getByRole('button', { name: 'Keep playing' }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('January');
+    await expect(page.locator('.city-card')).toHaveCount(3);
+
+    // After a pick, while its month is shown: the pick is not taken back, there is no undo.
+    await page.locator('.city-card__pick').first().click();
+    await expect(page.locator('.month-result')).toBeVisible();
+    await page.goBack();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: 'Keep playing' }).click();
+    await expect(page.locator('.month-result')).toBeVisible();
 
     await page.goBack();
     await page.getByRole('dialog').getByRole('button', { name: 'Leave' }).click();
     await expect(page.getByRole('button', { name: 'Play endless' })).toBeVisible();
-  });
-
-  test('back during the two seconds before the reveal takes the last pick back', async ({
-    page,
-  }) => {
-    await openReturning(page);
-    await page.getByRole('button', { name: 'Play endless' }).click();
-    for (let i = 0; i < 12; i++) await page.locator('.city-card__pick').first().click();
-    await page.goBack();
-    await page.waitForTimeout(2500);
-    await expect(page.locator('.screen--reveal')).toHaveCount(0);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('December');
   });
 });
 
@@ -88,15 +77,22 @@ test.describe('keyboard only', () => {
       expect(ring.style).not.toBe('none');
       expect(ring.width).toBeGreaterThanOrEqual(3);
       await page.keyboard.press('Enter');
-      await expect
-        .poll(() =>
-          page.evaluate(() =>
-            [...document.querySelectorAll<HTMLElement>('.progress__step')].findIndex(
-              (e) => e.dataset['state'] === 'current',
+      // The month plays out, then focus lands on its Next month button.
+      await expect(page.locator('.month-result__actions button').first()).toBeFocused({
+        timeout: 4000,
+      });
+      await page.keyboard.press('Enter');
+      if (round < 11) {
+        await expect
+          .poll(() =>
+            page.evaluate(() =>
+              [...document.querySelectorAll<HTMLElement>('.progress__step')].findIndex(
+                (e) => e.dataset['state'] === 'current',
+              ),
             ),
-          ),
-        )
-        .toBe(Math.min(round + 1, 11));
+          )
+          .toBe(round + 1);
+      }
     }
 
     // The reveal can be skipped with the keyboard, and focus lands on the next action.

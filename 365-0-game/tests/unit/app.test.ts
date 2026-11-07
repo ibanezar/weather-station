@@ -7,7 +7,15 @@ import {
   msUntilTomorrow,
 } from '../../src/app/dates.ts';
 import { createFormatter } from '../../src/app/format.ts';
-import { restoreSession, newSession, doPick, doFinish, doComplete } from '../../src/app/session.ts';
+import {
+  restoreSession,
+  newSession,
+  doPick,
+  doKeep,
+  doReroll,
+  doFinish,
+  doComplete,
+} from '../../src/app/session.ts';
 import {
   defaultSettings,
   defaultUnit,
@@ -218,10 +226,19 @@ describe('sessions', () => {
       const round = currentRound(played.state);
       if (!round) break;
       doPick(played, round.cities[1]);
+      if (played.state.picks.length === 4) doReroll(played); // one redraw, as a player might
+      doKeep(played);
     }
     doFinish(played);
     doComplete(played);
-    const restored = restoreSession('daily', data, dailySeed(date), date, played.state.picks);
+    const restored = restoreSession(
+      'daily',
+      data,
+      dailySeed(date),
+      date,
+      played.state.picks,
+      played.state.rerolls,
+    );
     expect(restored.state.result).toEqual(played.state.result);
     expect(restored.state.phase).toBe('done');
   });

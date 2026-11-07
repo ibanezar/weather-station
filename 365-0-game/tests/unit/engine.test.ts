@@ -15,6 +15,9 @@ import {
   gradeFor,
   GRADE_TIERS,
   isScouted,
+  keep,
+  pendingMonth,
+  reroll,
   makeRng,
   monthSquares,
   newRun,
@@ -29,8 +32,6 @@ import {
   shareImageModel,
   SQUARES,
   start,
-  stepBack,
-  undo,
   validateDraft,
   type DayType,
   type EngineData,
@@ -45,7 +46,7 @@ function play(seed: string, choose: (round: number) => number): RunState {
   for (let i = 0; i < ROUNDS; i++) {
     const round = currentRound(s);
     if (!round) throw new Error('no round');
-    s = pick(s, round.cities[choose(i)] as string);
+    s = keep(pick(s, round.cities[choose(i)] as string));
   }
   return finish(s, data);
 }
@@ -298,37 +299,32 @@ describe('run state machine', () => {
     expect(() => finish(s, data)).toThrow();
   });
 
-  it('undoes only the most recent pick', () => {
+  it('shows the month at once, and makes the pick final only when it is kept', () => {
     let s = fresh();
     const first = currentRound(s)?.cities[0] as string;
+    expect(pendingMonth(s, data)).toBeUndefined();
     s = pick(s, first);
-    expect(s.picks).toEqual([first]);
-    s = undo(s);
-    expect(s.picks).toEqual([]);
-    expect(() => undo(s)).toThrow();
-    s = pick(s, first);
-    s = pick(s, currentRound(s)?.cities[1] as string);
-    s = undo(s);
-    expect(s.picks).toEqual([first]);
-    expect(() => undo(s)).toThrow();
+    const month = pendingMonth(s, data);
+    expect(month?.cityId).toBe(first);
+    expect(month?.days.length).toBe(31); // January
+    expect(s.settled).toBe(0);
+    // No second pick until the first is kept or redrawn
+    expect(() => pick(s, currentRound(s)?.cities[0] as string)).toThrow(/keep or redraw/);
+    expect(() => finish(s, data)).toThrow();
+    s = keep(s);
+    expect(s.settled).toBe(1);
+    expect(pendingMonth(s, data)).toBeUndefined();
+    expect(() => keep(s)).toThrow(/nothing to keep/);
+    expect(() => reroll(s, data)).toThrow(/nothing to redraw/);
   });
 
-  it('steps back through every pick for the back gesture, and keeps used scouts used', () => {
+  it('has no undo: after a pick the only ways on are keep and redraw, and used scouts stay used', () => {
     let s = fresh();
     const [a] = currentRound(s)?.cities as [string, string, string];
     s = scout(s, a);
     s = pick(s, a);
-    s = pick(s, currentRound(s)?.cities[0] as string);
-    s = pick(s, currentRound(s)?.cities[1] as string);
-    expect(s.picks).toHaveLength(3);
-    s = stepBack(s);
-    s = stepBack(s);
-    s = stepBack(s);
-    expect(s.picks).toEqual([]);
-    expect(s.scoutsLeft).toBe(SCOUTS_PER_RUN - 1); // no refund
-    expect(isScouted(s, a)).toBe(true);
-    expect(() => stepBack(s)).toThrow(/nothing to step back/);
-    expect(() => stepBack(newRun('x', 'endless'))).toThrow();
+    expect(s.scoutsLeft).toBe(SCOUTS_PER_RUN - 1);
+    expect(() => keep(newRun('x', 'endless'))).toThrow();
   });
 
   it('has three scouts, charges once per card and refuses a fourth', () => {
@@ -341,7 +337,7 @@ describe('run state machine', () => {
     s = scout(s, b);
     s = scout(s, c);
     expect(s.scoutsLeft).toBe(0);
-    s = pick(s, a);
+    s = keep(pick(s, a));
     const next = currentRound(s)?.cities[0] as string;
     expect(() => scout(s, next)).toThrow(/no scouts left/);
   });

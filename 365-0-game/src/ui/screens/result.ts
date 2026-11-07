@@ -10,8 +10,7 @@ import { chip } from '../components/chip.ts';
 import { showToast } from '../components/toast.ts';
 import { h, mount } from '../dom.ts';
 import { isPatternMode } from '../settings.ts';
-import { doReroll, randomEntropy, newSession } from '../../app/session.ts';
-import { netsLeft } from '../../engine/run.ts';
+import { randomEntropy, newSession } from '../../app/session.ts';
 import { loadEngineData } from '../../app/data.ts';
 
 const cityById = (id: string): SeedCity => cities.find((c) => c.id === id) as SeedCity;
@@ -138,76 +137,6 @@ export function renderResult(app: App, root: HTMLElement): void {
   const observer = new ResizeObserver(paint);
   let timer: ReturnType<typeof setInterval> | undefined;
 
-  // Second chances: draw a month again. The new year stands, better or worse.
-  const chancesLeft = netsLeft(session.state, session.data);
-  const useChance = (i: number): void => {
-    const before = result.rounds[i]?.record.w ?? 0;
-    const y = window.scrollY;
-    doReroll(session, i);
-    const next = session.state.result;
-    if (!next) return;
-    const picks = [...session.state.picks];
-    if (session.mode === 'daily' && session.date !== undefined) {
-      app.store.updateDaily(session.date, {
-        picks,
-        rerolls: [...session.state.rerolls],
-        record: next.record,
-        grade: next.grade,
-      });
-    } else {
-      app.store.recordEndless(next.record);
-    }
-    showToast({
-      message: t('result.chances.done', {
-        month: fmt.month(result.rounds[i]?.month ?? 0),
-        before,
-        after: next.rounds[i]?.record.w ?? 0,
-      }),
-    });
-    observer.disconnect();
-    clearInterval(timer);
-    renderResult(app, root);
-    window.scrollTo(0, y);
-  };
-  const chanceButtons = result.rounds.map((r, i) =>
-    h(
-      'button',
-      {
-        type: 'button',
-        class: 'chances__btn',
-        disabled: chancesLeft <= 0,
-        onClick: () => {
-          useChance(i);
-        },
-      },
-      h('span', null, fmt.month(r.month).slice(0, 3)),
-      ' ',
-      h('span', { class: 'num' }, String(r.record.w)),
-      r.rerolls > 0
-        ? h('span', { class: 'chances__mark muted' }, ` ${t('result.chances.mark')}`)
-        : null,
-      h(
-        'span',
-        { class: 'visually-hidden' },
-        `, ${t('result.chances.month', { month: fmt.month(r.month) })}`,
-      ),
-    ),
-  );
-  const chancesBox = h(
-    'section',
-    { class: 'chances', 'aria-label': t('result.chances.title') },
-    h('h2', null, t('result.chances.title')),
-    h(
-      'p',
-      { class: 'muted' },
-      t('result.chances.intro', {
-        left: chancesLeft > 0 ? plural('draft.chancesLeft', chancesLeft) : t('result.chances.none'),
-      }),
-      chancesLeft <= 0 ? ` ${t('result.chances.gain')}` : '',
-    ),
-    h('div', { class: 'chances__grid' }, ...chanceButtons),
-  );
-
   // Actions.
   const status = h('p', { class: 'muted result__status', role: 'status', 'aria-live': 'polite' });
   const report = (outcome: Awaited<ReturnType<typeof shareResult>>): void => {
@@ -324,7 +253,6 @@ export function renderResult(app: App, root: HTMLElement): void {
         status,
         daily ? countdown : null,
       ),
-      chancesBox,
       well,
       listToggle,
       listBox,

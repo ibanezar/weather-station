@@ -65,9 +65,12 @@ export interface RunState {
   readonly scoutsLeft: number;
   /** Keys `${round}:${cityId}` of scouted cards. */
   readonly scouted: readonly string[];
-  /** True right after a pick, until it is undone or the picks are locked. */
-  readonly undoable: boolean;
-  /** Rounds that used a safety net, in order (a round can appear more than once). */
+  /**
+   * How many picks are final. A pick shows its month at once; until the player keeps it
+   * (or redraws it) it is the one pending pick, and no further pick can be made.
+   */
+  readonly settled: number;
+  /** Rounds that used a second chance, in order (a round can appear more than once). */
   readonly rerolls: readonly number[];
   readonly result: RunResult | undefined;
 }
@@ -82,7 +85,7 @@ export function newRun(seed: string, mode: Mode): RunState {
     picks: [],
     scoutsLeft: SCOUTS_PER_RUN,
     scouted: [],
-    undoable: false,
+    settled: 0,
     rerolls: [],
     result: undefined,
   };
@@ -108,30 +111,14 @@ export function currentRound(state: RunState): DraftRound | undefined {
 
 export function pick(state: RunState, cityId: string): RunState {
   need(state, 'drafting', 'pick');
+  if (state.picks.length !== state.settled)
+    throw new Error('keep or redraw the current month first');
   const round = currentRound(state);
   if (!round) throw new Error('all rounds are picked');
   if (!(round.cities as readonly string[]).includes(cityId)) {
     throw new Error(`${cityId} is not on offer this round`);
   }
-  return { ...state, picks: [...state.picks, cityId], undoable: true };
-}
-
-/** Free, and only for the most recent pick. */
-export function undo(state: RunState): RunState {
-  need(state, 'drafting', 'undo');
-  if (!state.undoable || state.picks.length === 0) throw new Error('nothing to undo');
-  return { ...state, picks: state.picks.slice(0, -1), undoable: false };
-}
-
-/**
- * The Android back gesture: take back the latest pick, whether or not its undo toast is still showing.
- * Outcomes stay hidden until the reveal, so going back gives no information advantage, and used scouts
- * stay used.
- */
-export function stepBack(state: RunState): RunState {
-  need(state, 'drafting', 'step back');
-  if (state.picks.length === 0) throw new Error('nothing to step back to');
-  return { ...state, picks: state.picks.slice(0, -1), undoable: false };
+  return { ...state, picks: [...state.picks, cityId] };
 }
 
 const scoutKey = (round: number, cityId: string): string => `${String(round)}:${cityId}`;
@@ -168,27 +155,36 @@ export function scoutInfo(
   return { perfect: city.sp[month] ?? 0, bad: city.sb[month] ?? 0 };
 }
 
+/** What one picked month turned out to be, given the second chances used on it. */
+export function monthOf(state: RunState, data: EngineData, i: number): PickedRound {
+  const best = state.best;
+  if (!best) throw new Error('run was not started');
+  const draftRound = state.draft[i] as DraftRound;
+  const cityId = state.picks[i];
+  if (cityId === undefined) throw new Error(`round ${String(i)} is not picked`);
+  const rerolls = state.rerolls.filter((r) => r === i).length;
+  const o = resolve(data, state.seed, i, cityId, draftRound.month, draftRound.event, rerolls);
+  return {
+    round: i,
+    month: draftRound.month,
+    cityId,
+    year: o.year,
+    days: o.days,
+    record: record(o.days),
+    rerolls,
+    best: (best.rounds[i] as { best: RoundOption }).best,
+  };
+}
+
 /** The result of the twelve picks, with the re-rolls applied. */
 function buildResult(state: RunState, data: EngineData): RunResult {
   const best = state.best;
   if (!best) throw new Error('run was not started');
   let total: DayRecord = emptyRecord();
-  const rounds = state.picks.map((cityId, i): PickedRound => {
-    const draftRound = state.draft[i] as DraftRound;
-    const rerolls = state.rerolls.filter((r) => r === i).length;
-    const o = resolve(data, state.seed, i, cityId, draftRound.month, draftRound.event, rerolls);
-    const rec = record(o.days);
-    total = addRecords(total, rec);
-    return {
-      round: i,
-      month: draftRound.month,
-      cityId,
-      year: o.year,
-      days: o.days,
-      record: rec,
-      rerolls,
-      best: (best.rounds[i] as { best: RoundOption }).best,
-    };
+  const rounds = state.picks.map((_, i) => {
+    const picked = monthOf(state, data, i);
+    total = addRecords(total, picked.record);
+    return picked;
   });
   const r = ratio(total.w, best.record.w);
   return { record: total, bestRecord: best.record, ratio: r, grade: gradeFor(r), rounds };
@@ -197,8 +193,9 @@ function buildResult(state: RunState, data: EngineData): RunResult {
 /** drafting to revealing: lock the twelve picks and work out the result. */
 export function finish(state: RunState, data: EngineData): RunState {
   need(state, 'drafting', 'finish');
-  if (state.picks.length !== ROUNDS) throw new Error('twelve picks are needed to finish');
-  return { ...state, phase: 'revealing', undoable: false, result: buildResult(state, data) };
+  if (state.picks.length !== ROUNDS || state.settled !== ROUNDS)
+    throw new Error('twelve final picks are needed to finish');
+  return { ...state, phase: 'revealing', result: buildResult(state, data) };
 }
 
 /** Safety nets earned so far: a free one, plus one for each combo the picks completed. */
@@ -211,16 +208,28 @@ export function netsLeft(state: RunState, data: Pick<EngineData, 'cities'>): num
   return Math.max(0, netsTotal(state, data) - state.rerolls.length);
 }
 
+/** The month just picked: what it turned out to be, given the second chances already used on it. */
+export function pendingMonth(state: RunState, data: EngineData): PickedRound | undefined {
+  if (state.phase !== 'drafting' || state.picks.length !== state.settled + 1) return undefined;
+  return monthOf(state, data, state.picks.length - 1);
+}
+
+/** Keep the month that was just shown: the pick becomes final. */
+export function keep(state: RunState): RunState {
+  need(state, 'drafting', 'keep');
+  if (state.picks.length !== state.settled + 1) throw new Error('nothing to keep');
+  return { ...state, settled: state.picks.length };
+}
+
 /**
- * Spend a safety net on one month: it is drawn again and shows a different year. The new year stands,
- * better or worse. Only after the reveal, so the player has seen the month they are giving up.
+ * Spend a second chance on the month that was just shown: it is drawn again and shows a different year.
+ * The new year stands, better or worse (it can be redrawn again while chances are left).
  */
-export function reroll(state: RunState, data: EngineData, round: number): RunState {
-  need(state, 'done', 're-roll');
-  if (!Number.isInteger(round) || round < 0 || round >= ROUNDS) throw new Error('no such round');
-  if (netsLeft(state, data) <= 0) throw new Error('no safety nets left');
-  const next = { ...state, rerolls: [...state.rerolls, round] };
-  return { ...next, result: buildResult(next, data) };
+export function reroll(state: RunState, data: Pick<EngineData, 'cities'>): RunState {
+  need(state, 'drafting', 're-roll');
+  if (state.picks.length !== state.settled + 1) throw new Error('nothing to redraw');
+  if (netsLeft(state, data) <= 0) throw new Error('no second chances left');
+  return { ...state, rerolls: [...state.rerolls, state.picks.length - 1] };
 }
 
 /** revealing to done: the reveal has played (or was skipped). */

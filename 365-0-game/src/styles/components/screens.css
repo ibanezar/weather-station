@@ -293,41 +293,6 @@
   font-size: var(--text-small);
 }
 
-/* Second chances on the result screen */
-.chances {
-  display: grid;
-  gap: var(--space-3);
-  margin-block: var(--space-4);
-}
-
-.chances__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
-  gap: var(--space-2);
-}
-
-.chances__btn {
-  min-height: 48px;
-  padding: var(--space-2) var(--space-3);
-  min-height: var(--tap);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-button);
-  background: var(--raised);
-  color: inherit;
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-}
-
-.chances__btn:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
-.chances__mark {
-  font-size: var(--text-small);
-}
-
 .home__install {
   display: grid;
   gap: var(--space-2);
@@ -354,4 +319,43 @@
 
 .result__explain {
   margin: 0;
+}
+
+/* The month that was just picked, played out under the grid */
+.month-result {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--raised);
+}
+
+.month-result__title {
+  margin: 0;
+  font-size: var(--text-large, 1.25rem);
+  outline: none;
+}
+
+.month-result__score {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  font-size: var(--text-large, 1.25rem);
+}
+
+.month-result__stat strong {
+  font-size: 1.6em;
+  font-variant-numeric: tabular-nums;
+}
+
+.month-result__actions {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.month-result__note {
+  margin: 0;
+  font-size: var(--text-small);
 }

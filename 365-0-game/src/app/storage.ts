@@ -175,13 +175,6 @@ export class Store {
     });
   }
 
-  /** A second chance changes the day's result (the streak is untouched: the day was already played). */
-  updateDaily(date: string, result: DailyResult): void {
-    this.update((s) => {
-      if (s.daily[date]) s.daily[date] = result;
-    });
-  }
-
   recordEndless(record: DayRecord): void {
     this.update((s) => {
       if (!s.bestEndless || record.w > s.bestEndless.w) s.bestEndless = record;

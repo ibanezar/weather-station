@@ -21,6 +21,15 @@ export async function openReturning(
   return errors;
 }
 
+/** After a pick the month plays out; keep it (the Next month or Finish the year button). */
+export async function keepMonth(page: Page): Promise<void> {
+  const next = page
+    .locator('.month-result__actions .btn--primary, .month-result__actions button')
+    .first();
+  await expect(next).toBeEnabled({ timeout: 4000 });
+  await next.click();
+}
+
 /** Pick one of the three cards in every round (0 = first card) and land on the reveal. */
 export async function draftTwelve(
   page: Page,
@@ -38,6 +47,7 @@ export async function draftTwelve(
       )
       .toBe(round);
     await page.locator('.city-card__pick').nth(choose(round)).click();
+    await keepMonth(page);
   }
   await page.locator('.screen--reveal').waitFor({ timeout: 6000 });
 }

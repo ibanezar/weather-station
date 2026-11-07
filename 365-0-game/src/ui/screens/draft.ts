@@ -1,13 +1,21 @@
 import type { App } from '../../app/app.ts';
 import { cities } from '../../app/data.ts';
-import { doFinish, doPick, doScout, doStepBack, doUndo, type Session } from '../../app/session.ts';
+import { doFinish, doKeep, doPick, doReroll, doScout, type Session } from '../../app/session.ts';
 import { DAYS_IN_MONTH, type SeedCity } from '../../data/types.ts';
 import { chainProgress, combosIfPicked, findCombos } from '../../engine/combos.ts';
 import { monthRisk } from '../../engine/risk.ts';
-import { currentRound, isScouted, netsTotal, scoutInfo } from '../../engine/run.ts';
+import {
+  isScouted,
+  monthOf,
+  netsTotal,
+  pendingMonth,
+  scoutInfo,
+  type PickedRound,
+} from '../../engine/run.ts';
 import type { DayType } from '../../engine/thresholds.ts';
 import type { MessageKey } from '../../i18n/index.ts';
 import { drawGrid, resolvePalette, type GridColumn } from '../canvas/grid.ts';
+import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
 import { cityCard, type CityCard } from '../components/cityCard.ts';
 import { confirmDialog } from '../components/confirm.ts';
@@ -16,7 +24,10 @@ import { showToast } from '../components/toast.ts';
 import { h, mount } from '../dom.ts';
 import { isPatternMode, isReducedMotion } from '../settings.ts';
 
-const FINISH_DELAY_MS = 1200;
+/** How a month plays out after the pick: one tile every STAGGER_MS, each flipping for FLIP_MS. */
+const STAGGER_MS = 24;
+const FLIP_MS = 120;
+const FLASH_MS = 200;
 const cityById = (id: string): SeedCity => cities.find((c) => c.id === id) as SeedCity;
 
 export function renderDraft(app: App, root: HTMLElement): void {
@@ -50,52 +61,48 @@ export function renderDraft(app: App, root: HTMLElement): void {
     'aria-label': t('draft.cities'),
   });
   let cardList: CityCard[] = [];
-  let finishTimer: ReturnType<typeof setTimeout> | undefined;
-  let locked = false;
-  let fade: { column: number; start: number } | undefined;
   let frame = 0;
+  /** The month being played out right now (set while a pick is pending). */
+  let playing:
+    { start: number; days: readonly DayType[]; offset: number; done: boolean } | undefined;
 
   const picks = (): number => s.state.picks.length;
   const pickedCities = (): SeedCity[] => s.state.picks.map(cityById);
   const chances = (): number => netsTotal(s.state, s.data) - s.state.rerolls.length;
 
-  function drawPreview(): void {
-    const columns: GridColumn[] = Array.from({ length: 12 }, (_, m) =>
-      m < picks()
-        ? { days: Array<DayType>(DAYS_IN_MONTH[m] ?? 30).fill('o'), claimed: true }
-        : { days: null },
-    );
-    const claimedAlpha = (col: number): number => {
-      if (!fade || fade.column !== col) return 1;
-      return Math.min(1, (performance.now() - fade.start) / 160);
-    };
+  const progressOf = (index: number, now: number): number => {
+    if (!playing) return 1;
+    const j = index - playing.offset;
+    if (j < 0) return 1; // a month that is already final
+    const x = (now - playing.start - j * STAGGER_MS) / FLIP_MS;
+    if (x <= 0) return 0;
+    if (x < 1) return x;
+    if ((playing.days[j] ?? 'o') !== 'p') return 1;
+    const f = (now - playing.start - j * STAGGER_MS - FLIP_MS) / FLASH_MS;
+    return f < 1 ? 1 + f : 2;
+  };
+
+  /** The grid: every final month in its real weather, the pending one flipping tile by tile. */
+  function drawPreview(now = performance.now()): void {
+    const settled = s.state.settled;
+    const columns: GridColumn[] = Array.from({ length: 12 }, (_, m) => {
+      if (m < settled) return { days: monthOf(s.state, s.data, m).days };
+      if (m === settled && playing) return { days: playing.days };
+      return { days: null };
+    });
     drawGrid(canvas, columns, resolvePalette(well), {
       pattern: isPatternMode(),
       compact: true,
-      claimedAlpha,
+      tileProgress: (i) => progressOf(i, now),
     });
     canvas.setAttribute('role', 'img');
-    canvas.setAttribute('aria-label', t('draft.gridAlt', { months: picks() }));
+    canvas.setAttribute('aria-label', t('draft.gridAlt', { months: settled }));
     labels.replaceChildren(
       ...columns.map((_, m) => {
         const id = s.state.picks[m];
         return h('span', null, id ? fmt.abbreviation(cityById(id)) : fmt.month(m).charAt(0));
       }),
     );
-  }
-
-  function animatePick(column: number): void {
-    if (isReducedMotion()) {
-      drawPreview();
-      return;
-    }
-    fade = { column, start: performance.now() };
-    const tick = (): void => {
-      drawPreview();
-      if (performance.now() - (fade?.start ?? 0) < 170) frame = requestAnimationFrame(tick);
-    };
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(tick);
   }
 
   function makeCard(id: string, monthIndex: number): CityCard {
@@ -137,15 +144,18 @@ export function renderDraft(app: App, root: HTMLElement): void {
   }
 
   function renderRound(): void {
-    const round = currentRound(s.state);
-    prog.update(Math.min(12, picks() + 1), s.state.scoutsLeft, chances());
-    drawPreview();
+    cancelAnimationFrame(frame);
+    const pending = pendingMonth(s.state, s.data);
+    const round = s.state.draft[s.state.settled];
+    prog.update(Math.min(12, s.state.settled + 1), s.state.scoutsLeft, chances());
     const chain = chainProgress(pickedCities());
     chainSlot.textContent =
-      chain && chain.length > 0 && picks() < 12
+      !pending && chain && chain.length > 0 && picks() < 12
         ? t('draft.chain', { type: t(key(`archetype.${chain.archetype}`)), n: chain.length })
         : '';
     if (!round) {
+      playing = undefined;
+      drawPreview();
       month.textContent = fmt.month(11);
       ask.textContent = '';
       eventSlot.replaceChildren();
@@ -156,7 +166,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
       return;
     }
     month.textContent = fmt.month(round.month);
-    ask.textContent = t('draft.ask', { month: fmt.month(round.month) });
+    ask.textContent = pending ? '' : t('draft.ask', { month: fmt.month(round.month) });
     if (round.event) {
       eventSlot.replaceChildren(
         h(
@@ -175,57 +185,196 @@ export function renderDraft(app: App, root: HTMLElement): void {
     } else {
       eventSlot.replaceChildren();
     }
+    if (pending) {
+      cardList = [];
+      showMonth(pending);
+      return;
+    }
+    playing = undefined;
+    drawPreview();
     cardList = round.cities.map((id) => makeCard(id, round.month));
     cardsBox.replaceChildren(...cardList.map((c) => c.el));
   }
 
-  function onScout(id: string, card: CityCard): void {
-    if (locked) return;
-    doScout(s, id);
-    app.feedback.haptic('medium');
-    app.feedback.sound('scout');
-    const round = currentRound(s.state);
-    card.showScout(scoutInfo(s.data, id, round?.month ?? 0));
-    prog.update(picks() + 1, s.state.scoutsLeft, chances());
-    if (s.state.scoutsLeft <= 0) for (const c of cardList) c.setScoutEnabled(false);
+  /** The month the player just picked plays out; then they keep it or spend a second chance on it. */
+  function showMonth(m: PickedRound): void {
+    const city = cityById(m.cityId);
+    const final = s.state.settled + 1 === 12;
+    const offset = s.state.draft
+      .slice(0, s.state.settled)
+      .reduce((n, r) => n + (DAYS_IN_MONTH[r.month] ?? 30), 0);
+    const total = (m.days.length - 1) * STAGGER_MS + FLIP_MS + FLASH_MS;
+    const reduced = isReducedMotion();
+    const start = performance.now();
+    playing = { start, days: m.days, offset, done: reduced };
+
+    const w = h('strong', null, '0');
+    const d = h('strong', null, '0');
+    const l = h('strong', null, '0');
+    const stat = (n: HTMLElement, label: string, kind: string): HTMLElement =>
+      h('span', { class: `month-result__stat month-result__stat--${kind}` }, n, ' ', label);
+    const announce = h('p', { class: 'visually-hidden', role: 'status', 'aria-live': 'polite' });
+    const heading = h(
+      'h2',
+      { class: 'month-result__title', tabindex: '-1' },
+      t('draft.monthOf', { city: fmt.cityName(city), year: m.year }),
+    );
+
+    const nextBtn = button({
+      label: t(final ? 'draft.finishYear' : 'draft.nextMonth'),
+      variant: 'primary',
+      full: true,
+      onClick: keepMonth,
+    });
+    const left = chances();
+    const redrawBtn = button({
+      label: t('draft.redraw', { n: left }),
+      variant: 'secondary',
+      icon: 'refresh',
+      full: true,
+      onClick: redrawMonth,
+    });
+    const note = h(
+      'p',
+      { class: 'muted month-result__note' },
+      left > 0 ? t('draft.redrawNote') : t('draft.noChances'),
+    );
+    const setEnabled = (on: boolean): void => {
+      nextBtn.disabled = !on;
+      redrawBtn.disabled = !on;
+    };
+
+    const panel = h(
+      'section',
+      { class: 'month-result', 'aria-label': t('draft.monthResult') },
+      heading,
+      h(
+        'p',
+        { class: 'month-result__score num', 'aria-hidden': 'true' },
+        stat(w, t('draft.m.perfect'), 'p'),
+        stat(d, t('draft.m.ok'), 'o'),
+        stat(l, t('draft.m.bad'), 'l'),
+      ),
+      announce,
+      h('div', { class: 'month-result__actions' }, nextBtn, left > 0 ? redrawBtn : null),
+      note,
+    );
+    cardsBox.replaceChildren(panel);
+
+    const setCounts = (now: number): void => {
+      let cw = 0;
+      let cd = 0;
+      let cl = 0;
+      m.days.forEach((type, j) => {
+        if (now - start - j * STAGGER_MS < FLIP_MS) return;
+        if (type === 'p') cw += 1;
+        else if (type === 'o') cd += 1;
+        else cl += 1;
+      });
+      w.textContent = String(cw);
+      d.textContent = String(cd);
+      l.textContent = String(cl);
+    };
+    const finishPlay = (): void => {
+      if (!playing || playing.done) {
+        if (playing) setCounts(Infinity);
+        setEnabled(true);
+        return;
+      }
+      cancelAnimationFrame(frame);
+      playing.done = true;
+      drawPreview(start + total + 1);
+      setCounts(Infinity);
+      setEnabled(true);
+      announce.textContent = t('draft.monthAnnounce', {
+        city: fmt.cityName(city),
+        year: m.year,
+        w: m.record.w,
+        d: m.record.d,
+        l: m.record.l,
+      });
+      app.feedback.haptic(m.record.w >= 15 ? 'success' : 'light');
+      nextBtn.focus();
+    };
+
+    if (reduced) {
+      setCounts(Infinity);
+      drawPreview(start + total + 1);
+      setEnabled(true);
+      announce.textContent = t('draft.monthAnnounce', {
+        city: fmt.cityName(city),
+        year: m.year,
+        w: m.record.w,
+        d: m.record.d,
+        l: m.record.l,
+      });
+      requestAnimationFrame(() => {
+        nextBtn.focus();
+      });
+      return;
+    }
+    setEnabled(false);
+    heading.focus({ preventScroll: true });
+    const tick = (): void => {
+      const now = performance.now();
+      if (now - start >= total) {
+        finishPlay();
+        return;
+      }
+      drawPreview(now);
+      setCounts(now);
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    // Tap the panel or the grid to skip the animation.
+    const skip = (): void => {
+      finishPlay();
+    };
+    panel.addEventListener('pointerdown', skip, { once: true });
+    well.addEventListener('pointerdown', skip, { once: true });
   }
 
-  function undoPick(): void {
-    clearTimeout(finishTimer);
-    finishTimer = undefined;
-    doUndo(s);
-    locked = false;
+  function keepMonth(): void {
+    doKeep(s);
+    app.feedback.haptic('light');
+    if (s.state.settled === 12) {
+      doFinish(s);
+      app.go('reveal');
+      return;
+    }
     app.transition(renderRound);
   }
 
+  function redrawMonth(): void {
+    doReroll(s);
+    app.feedback.haptic('medium');
+    app.feedback.sound('scout');
+    app.transition(renderRound);
+  }
+
+  function onScout(id: string, card: CityCard): void {
+    doScout(s, id);
+    app.feedback.haptic('medium');
+    app.feedback.sound('scout');
+    const round = s.state.draft[s.state.settled];
+    card.showScout(scoutInfo(s.data, id, round?.month ?? 0));
+    prog.update(s.state.settled + 1, s.state.scoutsLeft, chances());
+    if (s.state.scoutsLeft <= 0) for (const c of cardList) c.setScoutEnabled(false);
+  }
+
   function onPick(id: string): void {
-    if (locked) return;
     app.feedback.haptic('light');
     app.feedback.sound('pick');
     const combosBefore = findCombos(pickedCities()).length;
     doPick(s, id);
-    const placed = picks() - 1;
     const earned = findCombos(pickedCities()).slice(combosBefore);
-    showToast({
-      message: [
-        t('draft.picked', { city: fmt.cityName(cityById(id)) }),
-        ...earned.map((c) => t(key(`draft.comboEarned.${c.id}`))),
-      ].join(' '),
-      actionLabel: t('draft.undo'),
-      onAction: undoPick,
-      durationMs: FINISH_DELAY_MS,
-    });
-    if (picks() === 12) {
-      locked = true;
-      app.transition(renderRound);
-      finishTimer = setTimeout(() => {
-        doFinish(s);
-        app.go('reveal');
-      }, FINISH_DELAY_MS);
-    } else {
-      app.transition(renderRound);
+    if (earned.length > 0) {
+      showToast({
+        message: earned.map((c) => t(key(`draft.comboEarned.${c.id}`))).join(' · '),
+        durationMs: 3500,
+      });
     }
-    animatePick(placed);
+    app.transition(renderRound);
   }
 
   mount(
@@ -239,8 +388,9 @@ export function renderDraft(app: App, root: HTMLElement): void {
       cardsBox,
     ),
   );
-  // The Android back gesture (and the browser Back button): step back through the picks, and ask
-  // before abandoning a run with no picks. A guard entry in the history lets us catch the gesture.
+  // The Android back gesture (and the browser Back button) asks before abandoning the run: a pick
+  // shows its month at once, so there is no going back one pick. A guard entry in the history lets us
+  // catch the gesture.
   const armBackGuard = (): void => {
     if ((history.state as { draftGuard?: boolean } | null)?.draftGuard !== true) {
       history.pushState({ draftGuard: true }, '');
@@ -249,34 +399,28 @@ export function renderDraft(app: App, root: HTMLElement): void {
   const onPop = (): void => {
     if (location.hash !== '#/draft') return;
     armBackGuard();
-    if (locked) {
-      undoPick(); // back during the two seconds before the reveal takes the last pick back
-    } else if (picks() > 0) {
-      doStepBack(s);
-      app.transition(renderRound);
-    } else {
-      confirmDialog({
-        title: t('draft.leave'),
-        body: t('draft.leaveBody'),
-        confirmLabel: t('draft.leaveConfirm'),
-        cancelLabel: t('draft.leaveStay'),
-        onConfirm: () => {
-          app.session = undefined;
-          app.go('home');
-        },
-      });
-    }
+    confirmDialog({
+      title: t('draft.leave'),
+      body: t('draft.leaveBody'),
+      confirmLabel: t('draft.leaveConfirm'),
+      cancelLabel: t('draft.leaveStay'),
+      onConfirm: () => {
+        app.session = undefined;
+        app.go('home');
+      },
+    });
   };
   armBackGuard();
   window.addEventListener('popstate', onPop);
 
   renderRound();
-  const observer = new ResizeObserver(drawPreview);
+  const observer = new ResizeObserver(() => {
+    drawPreview();
+  });
   observer.observe(well);
   app.onLeave(() => {
     observer.disconnect();
     cancelAnimationFrame(frame);
-    clearTimeout(finishTimer);
     window.removeEventListener('popstate', onPop);
   });
 }

@@ -1,11 +1,21 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   draftTwelve,
+  keepMonth,
   openReturning,
   recordOf,
   seriousViolations,
   skipToResult,
 } from './helpers.ts';
+
+/** The eleven months after the first. */
+async function draftRest(page: Page): Promise<void> {
+  for (let i = 1; i < 12; i++) {
+    await page.locator('.city-card__pick').first().click();
+    await keepMonth(page);
+  }
+  await page.locator('.screen--reveal').waitFor({ timeout: 6000 });
+}
 
 test.describe('risk and second chances', () => {
   test('every card shows how much the month varies, and the counter starts at one second chance', async ({
@@ -21,34 +31,18 @@ test.describe('risk and second chances', () => {
     await expect(page.locator('.progress__chances')).toContainText('1 second chance');
   });
 
-  test('a month can be drawn again from the result screen; the new year stands and the record still adds up', async ({
+  test('a redraw is allowed once at first; the year still adds up to 365 days', async ({
     page,
   }) => {
     await openReturning(page);
     await page.getByRole('button', { name: 'Play endless' }).click();
-    await draftTwelve(page);
+    await page.locator('.city-card__pick').first().click();
+    await page.getByRole('button', { name: /Redraw this month/ }).click({ timeout: 4000 });
+    await keepMonth(page);
+    await draftRest(page);
     await skipToResult(page);
-
-    const buttons = page.locator('.chances__btn');
-    await expect(buttons).toHaveCount(12);
-    const chancesBefore = await buttons.evaluateAll(
-      (els) => els.filter((e) => !(e as HTMLButtonElement).disabled).length,
-    );
-    expect(chancesBefore).toBe(12); // enabled while a second chance is left
-
-    const before = await recordOf(page);
-    await buttons.nth(5).click();
-    await expect(page.locator('.toast')).toContainText('drawn again');
-    await expect(page.locator('.chances__mark')).toHaveCount(1);
-    const after = await recordOf(page);
-    expect(after.w + after.d + after.l).toBe(365);
-    expect(before.w + before.d + before.l).toBe(365);
-
-    // One free second chance: unless a combo earned more, the buttons are now off.
-    const left = await page.locator('.chances p').first().textContent();
-    if (left?.includes('No second chances left')) {
-      await expect(buttons.first()).toBeDisabled();
-    }
+    const record = await recordOf(page);
+    expect(record.w + record.d + record.l).toBe(365);
   });
 
   test('has no serious axe violations on the cards and on the result screen', async ({ page }) => {
@@ -61,12 +55,12 @@ test.describe('risk and second chances', () => {
     expect(await seriousViolations(page)).toEqual([]);
   });
 
-  test('the reveal takes about three seconds', async ({ page }) => {
+  test('the finale after the twelfth month is short', async ({ page }) => {
     await openReturning(page);
     await page.getByRole('button', { name: 'Play endless' }).click();
     await draftTwelve(page);
     const start = Date.now();
     await page.locator('.reveal__done button').waitFor({ state: 'visible', timeout: 6000 });
-    expect(Date.now() - start).toBeLessThan(4500);
+    expect(Date.now() - start).toBeLessThan(3000);
   });
 });
