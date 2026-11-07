@@ -1,6 +1,7 @@
 import { activeStreak, localDate } from '../../app/dates.ts';
 import type { App } from '../../app/app.ts';
 import { loadEngineData, prefetchWorld } from '../../app/data.ts';
+import { installMode, onInstallChange, promptInstall } from '../../app/install.ts';
 import { newSession, randomEntropy, restoreSession } from '../../app/session.ts';
 import { dailySeed } from '../../engine/run.ts';
 import { button } from '../components/button.ts';
@@ -75,6 +76,29 @@ export function renderHome(app: App, root: HTMLElement): void {
     onClick: () => void startRun(app, 'endless', { btn: endlessBtn, message }),
   });
 
+  // Install: the browser's own dialog where it offers one, the Share-menu steps on iPhone, nothing otherwise.
+  const installSlot = h('div', { class: 'home__install' });
+  const drawInstall = (): void => {
+    const mode = installMode();
+    if (mode === 'none') {
+      installSlot.replaceChildren();
+      return;
+    }
+    const hint = h('p', { class: 'muted home__install-hint', role: 'status' });
+    const installBtn = button({
+      label: t('home.install'),
+      variant: 'secondary',
+      icon: 'install',
+      full: true,
+      onClick: () => {
+        if (mode === 'prompt') void promptInstall();
+        else hint.textContent = t('home.installIos');
+      },
+    });
+    installSlot.replaceChildren(installBtn, hint);
+  };
+  drawInstall();
+
   mount(
     root,
     h(
@@ -96,6 +120,7 @@ export function renderHome(app: App, root: HTMLElement): void {
         message,
         dailyBtn,
         endlessBtn,
+        installSlot,
         best
           ? h(
               'p',
@@ -126,5 +151,6 @@ export function renderHome(app: App, root: HTMLElement): void {
       ),
     ),
   );
+  app.onLeave(onInstallChange(drawInstall));
   prefetchWorld();
 }

@@ -189,5 +189,7 @@
   "result.chances.month": "Draw {month} again",
   "result.chances.done": "{month} drawn again: {before} to {after} perfect days",
   "result.chances.mark": "drawn again",
-  "result.chances.gain": "A combo in the draft earns a second chance."
+  "result.chances.gain": "A combo in the draft earns a second chance.",
+  "home.install": "Install the game",
+  "home.installIos": "Tap Share, then Add to Home Screen."
 }

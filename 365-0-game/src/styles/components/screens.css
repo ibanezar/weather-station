@@ -327,3 +327,16 @@
 .chances__mark {
   font-size: var(--text-small);
 }
+
+.home__install {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.home__install:empty {
+  display: none;
+}
+
+.home__install-hint:empty {
+  display: none;
+}

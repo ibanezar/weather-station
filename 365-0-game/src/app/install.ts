@@ -45,3 +45,27 @@ export function onInstallChange(fn: () => void): () => void {
     listeners.delete(fn);
   };
 }
+
+/** True when the game already runs as an installed app. */
+export function isStandalone(): boolean {
+  const nav = navigator as Navigator & { standalone?: boolean };
+  return window.matchMedia('(display-mode: standalone)').matches || nav.standalone === true;
+}
+
+/** iPhone and iPad Safari never offer an install prompt; the player has to use the Share menu. */
+function isIosSafari(): boolean {
+  const ua = navigator.userAgent;
+  const ios =
+    /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+  return ios && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+}
+
+/**
+ * What the Install button should do: 'prompt' opens the browser's dialog, 'ios' shows how to add the game
+ * from the Share menu, 'none' hides the button (already installed, or the browser cannot install).
+ */
+export function installMode(): 'prompt' | 'ios' | 'none' {
+  if (isStandalone()) return 'none';
+  if (canInstall()) return 'prompt';
+  return isIosSafari() ? 'ios' : 'none';
+}
