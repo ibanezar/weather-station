@@ -168,5 +168,11 @@
   "error.title": "Nekaj je šlo narobe",
   "loading": "Nalaganje",
   "back": "Nazaj",
-  "draft.complete": "Vseh dvanajst mesecev je izbranih."
+  "draft.complete": "Vseh dvanajst mesecev je izbranih.",
+  "result.shareStory": "Deli kot sliko za zgodbo",
+  "result.downloaded": "Besedilo je kopirano, slika shranjena.",
+  "result.imageFailed": "Slike ni bilo mogoče ustvariti. Deljeno je bilo besedilo.",
+  "share.record": "Izid",
+  "share.bestToday": "Najboljši možni izid danes: {n}",
+  "share.bestRun": "Najboljši možni izid v tej igri: {n}"
 }

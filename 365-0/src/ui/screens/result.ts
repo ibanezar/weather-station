@@ -136,20 +136,30 @@ export function renderResult(app: App, root: HTMLElement): void {
 
   // Actions.
   const status = h('p', { class: 'muted result__status', role: 'status', 'aria-live': 'polite' });
+  const report = (outcome: Awaited<ReturnType<typeof shareResult>>): void => {
+    status.textContent =
+      outcome === 'shared'
+        ? t('result.shared')
+        : outcome === 'downloaded'
+          ? t('result.downloaded')
+          : outcome === 'copied'
+            ? t('result.copied')
+            : t('result.shareFailed');
+  };
   const shareBtn = button({
     label: t('result.share'),
     variant: 'primary',
     icon: 'share',
     full: true,
     onClick: () => {
-      void shareResult(app, session).then((outcome) => {
-        status.textContent =
-          outcome === 'shared'
-            ? t('result.shared')
-            : outcome === 'copied'
-              ? t('result.copied')
-              : t('result.shareFailed');
-      });
+      void shareResult(app, session, 'feed').then(report);
+    },
+  });
+  const storyBtn = button({
+    label: t('result.shareStory'),
+    variant: 'quiet',
+    onClick: () => {
+      void shareResult(app, session, 'story').then(report);
     },
   });
   const endlessBtn = button({
@@ -226,6 +236,7 @@ export function renderResult(app: App, root: HTMLElement): void {
         'div',
         { class: 'screen__actions' },
         shareBtn,
+        storyBtn,
         endlessBtn,
         status,
         daily ? countdown : null,

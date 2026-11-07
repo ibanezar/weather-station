@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import {
   draftTwelve,
@@ -466,5 +467,171 @@ test.describe('accessibility and layout', () => {
       .locator('.result__record')
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(box?.height).toBeLessThan(fontSize * 1.4);
+  });
+});
+
+/** Width and height from a PNG's header (the IHDR chunk). */
+const pngSize = (file: string): { width: number; height: number } => {
+  const bytes = readFileSync(file);
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+};
+
+test.describe('sharing', () => {
+  test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
+
+  test('without a share sheet it copies the text and downloads a 1080 x 1350 image', async ({
+    page,
+  }) => {
+    await openReturning(page);
+    await page.getByRole('button', { name: 'Play daily' }).click();
+    await draftTwelve(page);
+    await skipToResult(page);
+    const record = await recordOf(page);
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Share result' }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/^365-0-\d{4}-\d{2}-\d{2}\.png$/);
+    expect(pngSize(await download.path())).toEqual({ width: 1080, height: 1350 });
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Text copied and image saved.' }),
+    ).toBeVisible();
+
+    const text = await page.evaluate(() => navigator.clipboard.readText());
+    const lines = text.split('\n');
+    expect(lines).toHaveLength(4);
+    expect(lines[0]).toMatch(/^365-0 daily \d{4}-\d{2}-\d{2}$/);
+    expect(lines[1]).toMatch(new RegExp(`^Record ${record.text} \\(.+\\)$`));
+    expect(Array.from(lines[2] ?? '')).toHaveLength(12);
+    expect(lines[3]).toBe('https://meteorec.si/365-0/');
+  });
+
+  test('offers a 1080 x 1920 story image', async ({ page }) => {
+    await openReturning(page);
+    await page.getByRole('button', { name: 'Play endless' }).click();
+    await draftTwelve(page);
+    await skipToResult(page);
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Share as story image' }).click(),
+    ]);
+    expect(download.suggestedFilename()).toBe('365-0-endless-story.png');
+    expect(pngSize(await download.path())).toEqual({ width: 1080, height: 1920 });
+  });
+
+  test('uses the share sheet with the image and the text where files can be shared', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const shared: { files: { name: string; type: string; size: number }[]; text: string }[] = [];
+      (window as unknown as { __shared: typeof shared }).__shared = shared;
+      Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
+      Object.defineProperty(navigator, 'share', {
+        configurable: true,
+        value: (data: { files?: File[]; text?: string }) => {
+          shared.push({
+            files: (data.files ?? []).map((f) => ({ name: f.name, type: f.type, size: f.size })),
+            text: data.text ?? '',
+          });
+          return Promise.resolve();
+        },
+      });
+    });
+    await openReturning(page);
+    await page.getByRole('button', { name: 'Play endless' }).click();
+    await draftTwelve(page);
+    await skipToResult(page);
+    await page.getByRole('button', { name: 'Share result' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Shared' })).toBeVisible();
+    const shared = await page.evaluate(
+      () =>
+        (
+          window as unknown as {
+            __shared: { files: { name: string; type: string; size: number }[]; text: string }[];
+          }
+        ).__shared,
+    );
+    expect(shared).toHaveLength(1);
+    expect(shared[0]?.files).toHaveLength(1);
+    expect(shared[0]?.files[0]?.type).toBe('image/png');
+    expect(shared[0]?.files[0]?.size).toBeGreaterThan(20000);
+    expect(shared[0]?.text).toContain('365-0 endless');
+  });
+
+  test('shares the text in Slovene', async ({ browser }) => {
+    const ctx = await browser.newContext({
+      locale: 'sl-SI',
+      permissions: ['clipboard-read', 'clipboard-write'],
+    });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Igraj dnevno' }).click();
+    await draftTwelve(page);
+    await skipToResult(page);
+    await page.getByRole('button', { name: 'Deli izid' }).click();
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Besedilo je kopirano, slika shranjena.' }),
+    ).toBeVisible();
+    const text = await page.evaluate(() => navigator.clipboard.readText());
+    expect(text.split('\n')[0]).toMatch(/^365-0 dnevna \d{4}-\d{2}-\d{2}$/);
+    expect(text.split('\n')[1]).toMatch(/^Izid \d+-\d+-\d+ \(.+\)$/);
+    await ctx.close();
+  });
+});
+
+/** A local YYYY-MM-DD, `daysAgo` days before today. */
+const dateDaysAgo = (daysAgo: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  return `${String(d.getFullYear())}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+test.describe('the streak', () => {
+  test('shows from two days, grows when the daily is finished, and keeps the first result of the day', async ({
+    page,
+  }) => {
+    await openReturning(page, { streak: { count: 3, last: dateDaysAgo(1) } });
+    await expect(page.getByText('3 day streak')).toBeVisible();
+    await page.getByRole('button', { name: 'Play daily' }).click();
+    await draftTwelve(page);
+    await skipToResult(page);
+    await expect(page.getByText('4 day streak')).toBeVisible();
+
+    // The same day again does not add another day, and the result is the same.
+    const first = (await recordOf(page)).text;
+    await page.goto('/');
+    await expect(page.getByText('4 day streak')).toBeVisible();
+    await page.getByRole('button', { name: "See today's result" }).click();
+    await page.locator('.screen--result').waitFor();
+    expect((await recordOf(page)).text).toBe(first);
+    await expect(page.getByText('4 day streak')).toBeVisible();
+  });
+
+  test('is hidden after a missed day and shows the invitation instead', async ({ page }) => {
+    await openReturning(page, { streak: { count: 7, last: dateDaysAgo(3) } });
+    await expect(page.getByText(/day streak/)).toHaveCount(0);
+    await expect(page.getByText("Play today's daily to start a streak.")).toBeVisible();
+  });
+
+  test('is hidden at one day, and an endless run never changes it', async ({ page }) => {
+    await openReturning(page, { streak: { count: 1, last: dateDaysAgo(0) } });
+    await expect(page.getByText(/day streak/)).toHaveCount(0);
+    await page.getByRole('button', { name: 'Play endless' }).click();
+    await draftTwelve(page);
+    await skipToResult(page);
+    await expect(page.getByText(/day streak/)).toHaveCount(0);
+    const stored = await page.evaluate(() => localStorage.getItem('365-0:v1'));
+    const parsed = JSON.parse(stored ?? '{}') as { streak?: unknown };
+    expect(parsed.streak).toEqual({ count: 1, last: dateDaysAgo(0) });
+  });
+
+  test('uses the Slovene dual form for two days', async ({ browser }) => {
+    const ctx = await browser.newContext({ locale: 'sl-SI' });
+    const page = await ctx.newPage();
+    await openReturning(page, { streak: { count: 2, last: dateDaysAgo(1) } });
+    await expect(page.getByText('2 dneva zapored')).toBeVisible();
+    await ctx.close();
   });
 });

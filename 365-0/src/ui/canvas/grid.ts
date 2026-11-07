@@ -45,6 +45,8 @@ export interface GridOptions {
   claimedAlpha?: (column: number) => number;
   /** A short grid for the draft preview. */
   compact?: boolean;
+  /** Explicit tile height and gap in CSS pixels (the share image uses its own). */
+  metrics?: { tileH: number; gap: number };
   /** Device pixel ratio; defaults to the window's. */
   dpr?: number;
 }
@@ -57,11 +59,15 @@ export interface GridLayout {
   gap: number;
 }
 
-export function gridLayout(width: number, compact = false): GridLayout {
-  const gap = compact ? 1.5 : 2;
+export function gridLayout(
+  width: number,
+  compact = false,
+  metrics?: { tileH: number; gap: number },
+): GridLayout {
+  const gap = metrics?.gap ?? (compact ? 1.5 : 2);
   const tileW = (width - gap * (GRID_COLS - 1)) / GRID_COLS;
   // The compact preview (draft screen) keeps the grid short so the city cards stay in the thumb zone.
-  const tileH = compact ? 3.5 : Math.max(6, Math.floor(tileW * 0.36));
+  const tileH = metrics?.tileH ?? (compact ? 3.5 : Math.max(6, Math.floor(tileW * 0.36)));
   const height = GRID_ROWS * tileH + (GRID_ROWS - 1) * gap;
   return { width, height, tileW, tileH, gap };
 }
@@ -172,7 +178,7 @@ export function drawGrid(
   options: GridOptions,
 ): GridLayout {
   const cssWidth = canvas.clientWidth || canvas.width;
-  const layout = gridLayout(cssWidth, options.compact === true);
+  const layout = gridLayout(cssWidth, options.compact === true, options.metrics);
   const dpr = options.dpr ?? window.devicePixelRatio;
   canvas.width = Math.round(layout.width * dpr);
   canvas.height = Math.round(layout.height * dpr);

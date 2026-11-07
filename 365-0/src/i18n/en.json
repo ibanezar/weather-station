@@ -162,5 +162,11 @@
   "error.title": "Something went wrong",
   "loading": "Loading",
   "back": "Back",
-  "draft.complete": "All twelve months are picked."
+  "draft.complete": "All twelve months are picked.",
+  "result.shareStory": "Share as story image",
+  "result.downloaded": "Text copied and image saved.",
+  "result.imageFailed": "Could not create the image. The text was shared instead.",
+  "share.record": "Record",
+  "share.bestToday": "Best possible today: {n}",
+  "share.bestRun": "Best possible this run: {n}"
 }
