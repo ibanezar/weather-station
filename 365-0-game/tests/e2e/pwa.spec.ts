@@ -153,3 +153,64 @@ test.describe('install', () => {
     await expect(install).toHaveCount(0); // an offer can be used once
   });
 });
+
+test.describe('install button on Home', () => {
+  test('appears when the browser offers installation and opens its dialog', async ({ page }) => {
+    await openReturning(page);
+    await expect(page.getByRole('button', { name: 'Install the game' })).toHaveCount(0);
+    await page.evaluate(() => {
+      const event = new Event('beforeinstallprompt', { cancelable: true }) as Event & {
+        prompt: () => Promise<void>;
+        userChoice: Promise<{ outcome: string }>;
+      };
+      (window as unknown as { __prompted: boolean }).__prompted = false;
+      event.prompt = () => {
+        (window as unknown as { __prompted: boolean }).__prompted = true;
+        return Promise.resolve();
+      };
+      event.userChoice = Promise.resolve({ outcome: 'accepted' });
+      window.dispatchEvent(event);
+    });
+    const install = page.getByRole('button', { name: 'Install the game' });
+    await expect(install).toBeVisible();
+    await install.click();
+    expect(
+      await page.evaluate(() => (window as unknown as { __prompted: boolean }).__prompted),
+    ).toBe(true);
+    await expect(install).toHaveCount(0); // an offer can be used once
+  });
+
+  test('is hidden in the installed app', async ({ page }) => {
+    await page.emulateMedia({ media: 'screen' });
+    await page.addInitScript(() => {
+      const original = window.matchMedia.bind(window);
+      window.matchMedia = (q: string) =>
+        q.includes('display-mode: standalone')
+          ? ({
+              matches: true,
+              media: q,
+              addEventListener() {},
+              removeEventListener() {},
+            } as unknown as MediaQueryList)
+          : original(q);
+    });
+    await openReturning(page);
+    await page.evaluate(() => {
+      window.dispatchEvent(new Event('beforeinstallprompt', { cancelable: true }));
+    });
+    await expect(page.getByRole('button', { name: 'Install the game' })).toHaveCount(0);
+  });
+});
+
+test.describe('install button on an iPhone', () => {
+  test.use({
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+  });
+
+  test('shows the Share-menu steps, because Safari has no install prompt', async ({ page }) => {
+    await openReturning(page);
+    await page.getByRole('button', { name: 'Install the game' }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Add to Home Screen' })).toBeVisible();
+  });
+});
