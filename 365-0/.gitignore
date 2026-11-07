@@ -1,0 +1,8 @@
+node_modules
+dist
+playwright-report
+test-results
+# Raw API caches are never committed (CLAUDE.md).
+scripts/.cache
+*.env
+.DS_Store

@@ -1,0 +1,8 @@
+/* Design tokens. Phase 3 replaces these placeholders with the full OKLCH set from SPEC 6.3. */
+:root {
+  color-scheme: light dark;
+  --surface: light-dark(#edf1f4, #0e1624);
+  --ink: light-dark(#14202e, #e8eef5);
+  --font-display: 'Big Shoulders Display Variable', 'Arial Narrow', sans-serif;
+  --font-ui: 'Instrument Sans Variable', system-ui, sans-serif;
+}
