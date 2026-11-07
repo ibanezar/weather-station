@@ -355,6 +355,9 @@ test.describe('reduced motion', () => {
 });
 
 test.describe('when things go wrong', () => {
+  // The service worker would answer the world file from its cache, so the route below could not fail it.
+  test.use({ serviceWorkers: 'block' });
+
   test('shows a clear error and a retry when the weather data cannot load', async ({ page }) => {
     let fail = true;
     await page.route('**/data/world.v1.json', (route) => (fail ? route.abort() : route.continue()));
