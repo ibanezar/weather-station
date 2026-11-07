@@ -176,7 +176,7 @@ describe('buildWorld', () => {
       const wet = i; // 0 = no rain at all, 4 = very wet
       const years = [2017, 2018].map((y) =>
         parseYear(
-          fakeYear(y, (d) => (Number(d.slice(8, 10)) <= wet * 5 ? { precipitation_sum: 3 } : {})),
+          fakeYear(y, (d) => (Number(d.slice(8, 10)) <= wet * 5 ? { precipitation_sum: 8 } : {})),
           y,
           c.id,
         ),

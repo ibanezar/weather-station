@@ -1,5 +1,7 @@
 // Day-type thresholds and classifier (SPEC 1.4). Pure: used by the data build script and the engine.
-// These are starting values, to be tuned after reviewing the real data (see docs/data-report.md).
+// Tuned on the real data (scripts/tune.ts, 7 Nov 2026): the SPEC starting values gave 10% perfect and 48% bad
+// days, so a random run was Stormbound 72% of the time. These give about 32% perfect, 40% ok, 29% bad overall.
+// "Perfect" still needs under 1 mm of rain; only the rain *loss* starts at 5 mm (ERA5 drizzles on too many days).
 
 /** One character per day in the stored data. */
 export type DayType = 'p' | 'o' | 'r' | 's' | 'h' | 'f';
@@ -37,15 +39,15 @@ export const THRESHOLDS: Thresholds = {
     precipMmMin: 30,
   },
   freeze: { tmaxCMax: 3, snowCmMin: 1 },
-  heat: { tmaxCMin: 34 },
-  rain: { precipMmMin: 1 },
+  heat: { tmaxCMin: 36 },
+  rain: { precipMmMin: 5 },
   perfect: {
-    tmaxCMin: 19,
-    tmaxCMax: 28,
-    tminCMin: 9,
+    tmaxCMin: 16,
+    tmaxCMax: 32,
+    tminCMin: 5,
     precipMmMax: 1,
-    gustKmhMax: 40,
-    cloudPctMax: 65,
+    gustKmhMax: 50,
+    cloudPctMax: 90,
   },
 };
 
