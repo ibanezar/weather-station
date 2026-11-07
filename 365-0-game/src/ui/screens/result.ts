@@ -281,6 +281,15 @@ export function renderResult(app: App, root: HTMLElement): void {
           chip({ label: t('result.legend.loss'), swatch: 'loss' }),
           streak >= 2 ? chip({ label: plural('result.streak', streak), icon: 'streak' }) : null,
         ),
+        h(
+          'p',
+          { class: 'muted result__explain' },
+          t('result.recordExplain', {
+            w: result.record.w,
+            d: result.record.d,
+            l: result.record.l,
+          }),
+        ),
       ),
       h(
         'section',

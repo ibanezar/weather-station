@@ -340,3 +340,18 @@
 .home__install-hint:empty {
   display: none;
 }
+
+.home__tagline {
+  font-size: var(--text-large, 1.25rem);
+  font-weight: 600;
+}
+
+.draft__ask {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: 1.3;
+}
+
+.result__explain {
+  margin: 0;
+}
