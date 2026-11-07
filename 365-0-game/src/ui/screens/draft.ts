@@ -38,6 +38,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
     chancesText: (n) => plural('draft.chancesLeft', n),
   });
   const month = h('h1', { class: 'draft__month' });
+  const ask = h('p', { class: 'muted draft__ask' });
   const eventSlot = h('div', { class: 'draft__event' });
   const chainSlot = h('p', { class: 'muted draft__chain', 'aria-live': 'polite' });
   const labels = h('div', { class: 'grid-panel__labels', 'aria-hidden': 'true' });
@@ -146,6 +147,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
         : '';
     if (!round) {
       month.textContent = fmt.month(11);
+      ask.textContent = '';
       eventSlot.replaceChildren();
       cardList = [];
       cardsBox.replaceChildren(
@@ -154,6 +156,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
       return;
     }
     month.textContent = fmt.month(round.month);
+    ask.textContent = t('draft.ask', { month: fmt.month(round.month) });
     if (round.event) {
       eventSlot.replaceChildren(
         h(
@@ -230,7 +233,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
     h(
       'main',
       { class: 'screen screen--draft' },
-      h('header', { class: 'draft__head' }, prog.el, month, eventSlot, chainSlot),
+      h('header', { class: 'draft__head' }, prog.el, month, ask, eventSlot, chainSlot),
       well,
       h('div', { class: 'draft__spacer' }),
       cardsBox,

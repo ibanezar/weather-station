@@ -1,7 +1,7 @@
 {
   "app.title": "365-0",
-  "app.tagline": "Pick the right city for every month of the year.",
-  "app.goal": "365-0 is a year of perfect days and no bad ones. That is practically impossible. The real goal is to match today's best possible record.",
+  "app.tagline": "Plan a year of perfect weather.",
+  "app.goal": "Each month you pick one of three cities to live in. Then we play back the real weather those cities had. Get as many perfect days as you can.",
   "home.seedDate": "Daily seed for {date}",
   "home.playDaily": "Play daily",
   "home.playEndless": "Play endless",
@@ -13,9 +13,9 @@
   "home.streakEmpty": "Play today's daily to start a streak.",
   "home.bestEndless": "Best endless record: {record}",
   "onboarding.title": "How it works",
-  "onboarding.perfect": "A perfect day is {range}, dry and calm.",
-  "onboarding.bad": "Bad days are rain, storm, heat and freeze.",
-  "onboarding.pick": "Pick the right city for every month.",
+  "onboarding.perfect": "Each month, pick 1 of 3 cities. That is where you spend the month.",
+  "onboarding.bad": "Then watch a real year of weather play out in your 12 cities, day by day.",
+  "onboarding.pick": "Perfect days ({range}, dry and calm) win. Rain, storm, heat and freeze lose.",
   "onboarding.start": "Play daily",
   "about.title": "About 365-0",
   "about.attribution.title": "Data",
@@ -191,5 +191,8 @@
   "result.chances.mark": "drawn again",
   "result.chances.gain": "A combo in the draft earns a second chance.",
   "home.install": "Install the game",
-  "home.installIos": "Tap Share, then Add to Home Screen."
+  "home.installIos": "Tap Share, then Add to Home Screen.",
+  "draft.ask": "Where do you want to spend {month}? Pick the city with the best weather.",
+  "result.recordExplain": "{w} perfect days, {d} so-so days, {l} bad days. More perfect days is better.",
+  "onboarding.goal": "Your goal: collect as many perfect days as you can. At the end you see how close you got to the best possible year."
 }

@@ -108,6 +108,7 @@ export function renderHome(app: App, root: HTMLElement): void {
         'header',
         { class: 'home__head' },
         h('h1', { class: 'home__title' }, t('app.title')),
+        h('p', { class: 'home__tagline' }, t('app.tagline')),
         h('p', { class: 'muted num' }, t('home.seedDate', { date: app.fmt.date(today) })),
         streak >= 2
           ? chip({ label: plural('home.streak', streak), icon: 'streak' })

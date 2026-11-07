@@ -1,7 +1,7 @@
 {
   "app.title": "365-0",
-  "app.tagline": "Izberi pravo mesto za vsak mesec v letu.",
-  "app.goal": "365-0 je leto samih popolnih dni brez enega slabega. To je praktično nemogoče. Pravi cilj je doseči današnji najboljši možni izid.",
+  "app.tagline": "Načrtuj leto popolnega vremena.",
+  "app.goal": "Vsak mesec izbereš eno od treh mest, kjer ga preživiš. Nato predvajamo pravo vreme, ki so ga ta mesta imela. Zberi čim več popolnih dni.",
   "home.seedDate": "Dnevno zaporedje za {date}",
   "home.playDaily": "Igraj dnevno",
   "home.playEndless": "Igraj brez konca",
@@ -15,9 +15,9 @@
   "home.streakEmpty": "Igraj današnjo dnevno igro in začni niz.",
   "home.bestEndless": "Najboljši izid brez konca: {record}",
   "onboarding.title": "Kako deluje",
-  "onboarding.perfect": "Popoln dan ima {range}, je suh in miren.",
-  "onboarding.bad": "Slabi dnevi so dež, nevihta, vročina in zmrzal.",
-  "onboarding.pick": "Izberi pravo mesto za vsak mesec.",
+  "onboarding.perfect": "Vsak mesec izberi 1 od 3 mest. Tam preživiš mesec.",
+  "onboarding.bad": "Nato dan za dnem spremljaj pravo vreme leta v svojih 12 mestih.",
+  "onboarding.pick": "Popolni dnevi ({range}, suho in mirno) zmagajo. Dež, nevihta, vročina in zmrzal izgubijo.",
   "onboarding.start": "Igraj dnevno",
   "about.title": "O igri 365-0",
   "about.attribution.title": "Podatki",
@@ -199,5 +199,8 @@
   "result.chances.mark": "znova izžrebano",
   "result.chances.gain": "Kombinacija pri izbiri prinese drugo priložnost.",
   "home.install": "Namesti igro",
-  "home.installIos": "Tapnite Deli, nato Dodaj na začetni zaslon."
+  "home.installIos": "Tapnite Deli, nato Dodaj na začetni zaslon.",
+  "draft.ask": "Kje želiš preživeti {month}? Izberi mesto z najboljšim vremenom.",
+  "result.recordExplain": "{w} popolnih dni, {d} srednjih dni, {l} slabih dni. Več popolnih dni je bolje.",
+  "onboarding.goal": "Tvoj cilj: zberi čim več popolnih dni. Na koncu vidiš, kako blizu si prišel najboljšemu možnemu letu."
 }

@@ -13,15 +13,11 @@ import { startRun } from './home.ts';
 export function renderHow(app: App, root: HTMLElement, options: { first?: boolean } = {}): void {
   const { t } = app.i18n;
   const first = options.first === true;
+  const range = app.fmt.range(THRESHOLDS.perfect.tmaxCMin, THRESHOLDS.perfect.tmaxCMax);
   const lines = [
-    {
-      icon: 'perfect',
-      text: t('onboarding.perfect', {
-        range: app.fmt.range(THRESHOLDS.perfect.tmaxCMin, THRESHOLDS.perfect.tmaxCMax),
-      }),
-    },
-    { icon: 'storm', text: t('onboarding.bad') },
-    { icon: 'check', text: t('onboarding.pick') },
+    { icon: 'check', text: t('onboarding.perfect') },
+    { icon: 'ok', text: t('onboarding.bad') },
+    { icon: 'perfect', text: t('onboarding.pick', { range }) },
   ] as const;
   const message = h('p', { class: 'screen__error', role: 'alert' });
   const start = button({
@@ -54,7 +50,7 @@ export function renderHow(app: App, root: HTMLElement, options: { first?: boolea
           h('li', { class: 'how__line' }, icon(l.icon, { size: 32 }), h('span', null, l.text)),
         ),
       ),
-      h('p', { class: 'muted' }, t('app.goal')),
+      h('p', { class: 'muted' }, t('onboarding.goal')),
       h('div', { class: 'screen__actions' }, message, first ? start : null),
     ),
   );
