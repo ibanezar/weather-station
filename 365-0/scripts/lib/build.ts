@@ -34,6 +34,9 @@ export interface ApiResponse {
   daily: { time: string[] } & Record<DailyVariable, (number | null)[]>;
 }
 
+/** Daily precipitation levels (mm) used for the rain-threshold sensitivity table in the report. */
+export const WET_LEVELS_MM = [1, 2, 3, 5] as const;
+
 export interface ParsedYear {
   /** One string per month, one character per day, 29 February dropped. */
   months: string[];
@@ -41,6 +44,10 @@ export interface ParsedYear {
   tempSum: number[];
   /** Days with a cloud-cover value missing (the cloud condition was skipped for those). */
   cloudMissing: number;
+  /** Days with precipitation at or above each WET_LEVELS_MM level (29 February excluded). */
+  wetDays: number[];
+  /** Days counted (365). */
+  days: number;
 }
 
 function fail(where: string, msg: string): never {
@@ -59,6 +66,8 @@ export function parseYear(resp: ApiResponse, year: number, where: string): Parse
   const months: string[] = Array.from({ length: MONTHS_PER_YEAR }, () => '');
   const tempSum: number[] = Array.from({ length: MONTHS_PER_YEAR }, () => 0);
   let cloudMissing = 0;
+  const wetDays: number[] = WET_LEVELS_MM.map(() => 0);
+  let days = 0;
 
   daily.time.forEach((date, i) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) fail(where, `bad date ${date}`);
@@ -87,6 +96,10 @@ export function parseYear(resp: ApiResponse, year: number, where: string): Parse
       code: need('weather_code'),
       cloud: hasCloud ? cloud : undefined,
     };
+    days += 1;
+    WET_LEVELS_MM.forEach((level, k) => {
+      if (day.precip >= level) wetDays[k] = (wetDays[k] ?? 0) + 1;
+    });
     months[month] = (months[month] ?? '') + classifyDay(day);
     tempSum[month] = (tempSum[month] ?? 0) + need('temperature_2m_mean');
   });
@@ -100,7 +113,7 @@ export function parseYear(resp: ApiResponse, year: number, where: string): Parse
       );
     }
   });
-  return { months, tempSum, cloudMissing };
+  return { months, tempSum, cloudMissing, wetDays, days };
 }
 
 export interface CityDays {
@@ -108,6 +121,8 @@ export interface CityDays {
   d: string[][];
   /** Mean temperature per month in °C, one decimal. */
   t: number[];
+  /** Share of days (0-1) with precipitation at or above each WET_LEVELS_MM level. Report only. */
+  wetShare: number[];
 }
 
 /** Combine the parsed years (in year order) into one city's day strings and mean temperatures. */
@@ -120,7 +135,11 @@ export function combineYears(years: ParsedYear[]): CityDays {
     const days = years.length * (DAYS_IN_MONTH[m] ?? 1);
     t.push(Math.round((sum / days) * 10) / 10);
   }
-  return { d, t };
+  const allDays = years.reduce((acc, y) => acc + y.days, 0);
+  const wetShare = WET_LEVELS_MM.map(
+    (_, k) => years.reduce((acc, y) => acc + (y.wetDays[k] ?? 0), 0) / Math.max(1, allDays),
+  );
+  return { d, t, wetShare };
 }
 
 /** Share of the days in one city-month (all years) that satisfy `pick`. */

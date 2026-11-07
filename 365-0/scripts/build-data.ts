@@ -194,6 +194,7 @@ async function main(): Promise<void> {
     rawBytes: Buffer.byteLength(worldJson),
     gzBytes: gz.length,
     generated: new Date().toISOString().slice(0, 10),
+    wetShare: Object.fromEntries(Object.entries(cities).map(([id, c]) => [id, c.wetShare])),
   };
   writeFileSync(paths.report, renderReport(input));
 

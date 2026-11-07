@@ -1,7 +1,7 @@
 // Quality report for the generated data (SPEC 2.2 step 7), written to docs/data-report.md.
 import { DAY_TYPE_CHARS, isLoss, type DayType } from '../../src/engine/thresholds.ts';
 import { MONTHS_PER_YEAR, type SeedCity, type World } from '../../src/data/types.ts';
-import { monthShare } from './build.ts';
+import { monthShare, WET_LEVELS_MM } from './build.ts';
 import { PLANNED_YEARS } from './validate.ts';
 
 export const SIZE_BUDGET_GZ = 120_000;
@@ -21,7 +21,18 @@ export interface GridMeta {
  * Cities that are flagged by a rule but are correct, with the reason. Anything flagged and not
  * listed here is reported as unexplained.
  */
-export const EXPLAINED: Record<string, string> = {};
+export const EXPLAINED: Record<string, string> = {
+  singapore:
+    'Mean temperature 26-28 °C all year, so daily highs (about 30-31 °C) sit above the 28 °C ceiling of a perfect day. Expected for the equator.',
+  colombo:
+    'Mean temperature 27-29 °C all year, so daily highs sit above the 28 °C ceiling of a perfect day. Expected for the tropics.',
+  'la-paz':
+    'About 3,700 m up: mean temperature 8-12 °C, so daily highs stay below the 19 °C floor of a perfect day. Expected.',
+  ushuaia: 'Cold southern climate: mean temperature 1-11 °C, highs stay below 19 °C. Expected.',
+  longyearbyen: 'Arctic: mean temperature -12 to 8 °C, highs stay below 19 °C. Expected.',
+  'mcmurdo-station':
+    'Antarctica: mean temperature -33 to -6 °C, almost every day is a freeze. Expected.',
+};
 
 export function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const rad = Math.PI / 180;
@@ -46,6 +57,8 @@ export interface ReportInput {
   rawBytes: number;
   gzBytes: number;
   generated: string;
+  /** Per city: share of days at or above each WET_LEVELS_MM level. Optional. */
+  wetShare?: Record<string, number[]>;
 }
 
 export function findFlags(input: ReportInput): Flag[] {
@@ -168,6 +181,30 @@ export function renderReport(input: ReportInput): string {
     out(`| ${String(m + 1)} | ${count('sp')} | ${count('sb')} |`);
   }
   out();
+
+  if (input.wetShare) {
+    const levels = WET_LEVELS_MM.map((l) => `>= ${String(l)} mm`);
+    out('## Rain threshold sensitivity');
+    out();
+    out(
+      'Share of days with precipitation at or above each level. The current rain threshold is 1 mm. ' +
+        'ERA5 is known to produce many light-rain days (drizzle), which can overstate how often it rains in the tropics; ' +
+        'compare these columns to judge whether a higher threshold is needed.',
+    );
+    out();
+    const all = Object.values(input.wetShare);
+    const mean = WET_LEVELS_MM.map(
+      (_, k) => all.reduce((a, w) => a + (w[k] ?? 0), 0) / Math.max(1, all.length),
+    );
+    out(`| city | ${levels.join(' | ')} |`);
+    out(`| --- | ${levels.map(() => '---').join(' | ')} |`);
+    out(`| **all cities (mean)** | ${mean.map((x) => pct(x)).join('% | ')}% |`);
+    for (const c of seed) {
+      const w = input.wetShare[c.id];
+      if (w) out(`| ${c.id} | ${w.map((x) => pct(x)).join('% | ')}% |`);
+    }
+    out();
+  }
 
   out('## Per city');
   out();

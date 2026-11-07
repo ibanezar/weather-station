@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   buildWorld,
@@ -6,10 +8,11 @@ import {
   monthShare,
   parseYear,
   quintileBuckets,
+  WET_LEVELS_MM,
   type ApiResponse,
 } from '../../scripts/lib/build.ts';
 import { buildUrl, classifyLimit } from '../../scripts/lib/fetch.ts';
-import { distanceKm, findFlags } from '../../scripts/lib/report.ts';
+import { distanceKm, EXPLAINED, findFlags } from '../../scripts/lib/report.ts';
 import { DAYS_IN_MONTH, type SeedCity } from '../../src/data/types.ts';
 
 type Day = Partial<Record<(typeof DAILY_VARIABLES)[number], number | null>>;
@@ -91,6 +94,26 @@ describe('parseYear', () => {
     );
     expect(y.months[4]?.[4]).toBe('p');
     expect(y.cloudMissing).toBe(1);
+  });
+
+  it('counts wet days at each precipitation level and combines them into shares', () => {
+    const rainfall: Record<string, number> = {
+      '2018-03-01': 0.5,
+      '2018-03-02': 1.5,
+      '2018-03-03': 2.5,
+      '2018-03-04': 6,
+    };
+    const y = parseYear(
+      fakeYear(2018, (d) => (d in rainfall ? { precipitation_sum: rainfall[d] ?? 0 } : {})),
+      2018,
+      't',
+    );
+    expect(WET_LEVELS_MM).toEqual([1, 2, 3, 5]);
+    expect(y.days).toBe(365);
+    expect(y.wetDays).toEqual([3, 2, 1, 1]); // >=1mm: 1.5, 2.5, 6; >=2: 2.5, 6; >=3: 6; >=5: 6
+    const city = combineYears([y, parseYear(fakeYear(2019), 2019, 't')]);
+    expect(city.wetShare[0]).toBeCloseTo(3 / 730);
+    expect(city.wetShare[3]).toBeCloseTo(1 / 730);
   });
 
   it('throws on a missing required value', () => {
@@ -196,6 +219,17 @@ describe('fetch helpers', () => {
 });
 
 describe('report helpers', () => {
+  it('only explains cities that exist in the seed list', () => {
+    const ids = new Set(
+      (
+        JSON.parse(
+          readFileSync(join(import.meta.dirname, '../../data/cities.seed.json'), 'utf8'),
+        ) as SeedCity[]
+      ).map((c) => c.id),
+    );
+    for (const id of Object.keys(EXPLAINED)) expect(ids.has(id), id).toBe(true);
+  });
+
   it('measures distance in kilometres', () => {
     expect(distanceKm(46, 14, 46, 14)).toBe(0);
     expect(distanceKm(0, 0, 0, 1)).toBeCloseTo(111.2, 0);

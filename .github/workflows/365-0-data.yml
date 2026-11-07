@@ -11,15 +11,15 @@ name: 365-0 data
 # workflow_dispatch. Push triggers are limited to the development branch; on any other branch (including
 # main) the job only fills the cache and does not commit.
 #
-# Interim scope (agreed with the owner): the first run fetches 2021-2025 only, which fits roughly one day of
-# quota. The Actions cache is per year, so topping up to 2016-2025 later only fetches the missing years:
-# run the workflow with years=2016-2025.
+# Scope: the full ten years, 2016-2025 (SPEC 2.2). The first run fetched 2021-2025 as an interim step; the
+# whole 2021-2025 pull used only a few minutes of quota, so the rest fits in one run. The Actions cache is
+# per year, so a re-run only fetches what is missing.
 on:
   workflow_dispatch:
     inputs:
       years:
-        description: 'Year range to fetch and build, e.g. 2021-2025 or 2016-2025'
-        default: '2021-2025'
+        description: 'Year range to fetch and build, e.g. 2016-2025 or 2021-2025'
+        default: '2016-2025'
   push:
     branches: [ccr-e2eca649-o3xopb]
     paths:
@@ -65,7 +65,7 @@ jobs:
         # Exit code 75 means the rate limit stopped the run; that is expected and not a failure.
         timeout-minutes: 340
         env:
-          YEARS: ${{ inputs.years || '2021-2025' }}
+          YEARS: ${{ inputs.years || '2016-2025' }}
         run: |
           set +e
           node scripts/build-data.ts --years="$YEARS" --max-wait-hours=5
@@ -84,7 +84,7 @@ jobs:
       - name: Summary
         if: always()
         env:
-          YEARS: ${{ inputs.years || '2021-2025' }}
+          YEARS: ${{ inputs.years || '2016-2025' }}
         run: |
           from=${YEARS%-*}
           to=${YEARS#*-}
