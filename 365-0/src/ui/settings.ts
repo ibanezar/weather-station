@@ -21,12 +21,26 @@ function setOrClear(el: HTMLElement, attribute: string, value: string | undefine
   else el.setAttribute(attribute, value);
 }
 
+const THEME_COLOR = { light: '#edf1f4', dark: '#0e1624' } as const;
+
+/** Match the browser's status bar to the theme: both <meta name="theme-color"> tags follow the choice. */
+function updateThemeColor(theme: ThemeSetting): void {
+  const metas = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+  metas.forEach((meta) => {
+    const media = meta.getAttribute('media') ?? '';
+    const systemDefault = media.includes('dark') ? THEME_COLOR.dark : THEME_COLOR.light;
+    meta.setAttribute('content', theme === 'system' ? systemDefault : THEME_COLOR[theme]);
+  });
+}
+
 export function applyVisualSettings(
   s: Partial<VisualSettings>,
   root = document.documentElement,
 ): void {
-  if (s.theme !== undefined)
+  if (s.theme !== undefined) {
     setOrClear(root, 'data-theme', s.theme === 'system' ? undefined : s.theme);
+    updateThemeColor(s.theme);
+  }
   if (s.pattern !== undefined)
     setOrClear(root, 'data-pattern', s.pattern === 'auto' ? undefined : s.pattern);
   if (s.motion !== undefined)

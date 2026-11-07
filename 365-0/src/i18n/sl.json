@@ -174,5 +174,7 @@
   "result.imageFailed": "Slike ni bilo mogoče ustvariti. Deljeno je bilo besedilo.",
   "share.record": "Izid",
   "share.bestToday": "Najboljši možni izid danes: {n}",
-  "share.bestRun": "Najboljši možni izid v tej igri: {n}"
+  "share.bestRun": "Najboljši možni izid v tej igri: {n}",
+  "settings.install": "Namesti aplikacijo",
+  "settings.installHint": "Doda igro 365-0 na začetni zaslon in omogoči delovanje brez povezave."
 }

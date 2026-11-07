@@ -19,7 +19,8 @@
     "calibrate": "node scripts/calibrate.ts",
     "check": "npm run typecheck && npm run lint && npm run test && npm run data:validate && npm run contrast",
     "e2e": "playwright test --trace off",
-    "contrast": "node scripts/contrast.ts"
+    "contrast": "node scripts/contrast.ts",
+    "budget": "node scripts/budget.ts"
   },
   "dependencies": {
     "@fontsource-variable/big-shoulders-display": "^5.3.0",

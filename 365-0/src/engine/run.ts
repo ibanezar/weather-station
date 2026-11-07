@@ -116,6 +116,17 @@ export function undo(state: RunState): RunState {
   return { ...state, picks: state.picks.slice(0, -1), undoable: false };
 }
 
+/**
+ * The Android back gesture: take back the latest pick, whether or not its undo toast is still showing.
+ * Outcomes stay hidden until the reveal, so going back gives no information advantage, and used scouts
+ * stay used.
+ */
+export function stepBack(state: RunState): RunState {
+  need(state, 'drafting', 'step back');
+  if (state.picks.length === 0) throw new Error('nothing to step back to');
+  return { ...state, picks: state.picks.slice(0, -1), undoable: false };
+}
+
 const scoutKey = (round: number, cityId: string): string => `${String(round)}:${cityId}`;
 
 export function isScouted(state: RunState, cityId: string): boolean {

@@ -197,6 +197,17 @@ export function renderReveal(app: App, root: HTMLElement): void {
       },
       { once: true },
     );
+    // Keyboard users can skip too: Escape, Enter or Space.
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+        if (!finished) event.preventDefault();
+        finish(true);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    app.onLeave(() => {
+      document.removeEventListener('keydown', onKey);
+    });
     startTime = performance.now();
     frame = requestAnimationFrame(tick);
   } else {

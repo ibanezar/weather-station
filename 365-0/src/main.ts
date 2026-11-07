@@ -1,6 +1,7 @@
 import './styles/fonts.css';
 import './styles/index.css';
 import { App, routeFromHash } from './app/app.ts';
+import { initInstallPrompt } from './app/install.ts';
 import { renderAbout, renderPrivacy } from './ui/screens/about.ts';
 import { renderDraft } from './ui/screens/draft.ts';
 import { renderHome } from './ui/screens/home.ts';
@@ -37,4 +38,15 @@ if (root) {
   app.applySettings();
   window.addEventListener('hashchange', dispatch);
   dispatch();
+}
+
+// Offline support: register the service worker that the build emits (not in development, where it
+// would serve stale files).
+initInstallPrompt();
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Offline support is an extra: the game still works online without it.
+    });
+  });
 }

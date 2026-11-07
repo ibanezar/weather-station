@@ -35,6 +35,8 @@ jobs:
         run: npm run check
       - name: Build
         run: npm run build
+      - name: Size budget
+        run: npm run budget
       - name: Install Chromium for Playwright
         run: npx playwright install --with-deps chromium
       - name: End-to-end smoke test

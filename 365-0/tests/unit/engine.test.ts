@@ -29,6 +29,7 @@ import {
   shareImageModel,
   SQUARES,
   start,
+  stepBack,
   undo,
   validateDraft,
   type DayType,
@@ -310,6 +311,24 @@ describe('run state machine', () => {
     s = undo(s);
     expect(s.picks).toEqual([first]);
     expect(() => undo(s)).toThrow();
+  });
+
+  it('steps back through every pick for the back gesture, and keeps used scouts used', () => {
+    let s = fresh();
+    const [a] = currentRound(s)?.cities as [string, string, string];
+    s = scout(s, a);
+    s = pick(s, a);
+    s = pick(s, currentRound(s)?.cities[0] as string);
+    s = pick(s, currentRound(s)?.cities[1] as string);
+    expect(s.picks).toHaveLength(3);
+    s = stepBack(s);
+    s = stepBack(s);
+    s = stepBack(s);
+    expect(s.picks).toEqual([]);
+    expect(s.scoutsLeft).toBe(SCOUTS_PER_RUN - 1); // no refund
+    expect(isScouted(s, a)).toBe(true);
+    expect(() => stepBack(s)).toThrow(/nothing to step back/);
+    expect(() => stepBack(newRun('x', 'endless'))).toThrow();
   });
 
   it('has three scouts, charges once per card and refuses a fourth', () => {

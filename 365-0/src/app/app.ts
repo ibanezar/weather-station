@@ -38,7 +38,7 @@ export class App {
   route: Route = 'home';
   private rendered = false;
   private screens: Partial<Record<Route, ScreenRenderer>> = {};
-  private cleanup: (() => void) | undefined;
+  private cleanups: (() => void)[] = [];
 
   readonly root: HTMLElement;
 
@@ -57,7 +57,7 @@ export class App {
 
   /** Screens call this to run code when they are replaced (timers, animation frames). */
   onLeave(fn: () => void): void {
-    this.cleanup = fn;
+    this.cleanups.push(fn);
   }
 
   /** Apply language, unit and visual settings to the document. */
@@ -89,8 +89,8 @@ export class App {
     if (target === 'styleguide') return;
     this.route = target;
     const draw = (): void => {
-      this.cleanup?.();
-      this.cleanup = undefined;
+      for (const fn of this.cleanups) fn();
+      this.cleanups = [];
       this.root.replaceChildren();
       this.screens[target]?.(this, this.root);
       window.scrollTo(0, 0);

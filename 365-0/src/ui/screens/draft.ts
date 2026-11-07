@@ -1,6 +1,6 @@
 import type { App } from '../../app/app.ts';
 import { cities } from '../../app/data.ts';
-import { doFinish, doPick, doScout, doUndo, type Session } from '../../app/session.ts';
+import { doFinish, doPick, doScout, doStepBack, doUndo, type Session } from '../../app/session.ts';
 import { DAYS_IN_MONTH, type SeedCity } from '../../data/types.ts';
 import { currentRound, isScouted, scoutInfo } from '../../engine/run.ts';
 import type { DayType } from '../../engine/thresholds.ts';
@@ -8,6 +8,7 @@ import type { MessageKey } from '../../i18n/index.ts';
 import { drawGrid, resolvePalette, type GridColumn } from '../canvas/grid.ts';
 import { chip } from '../components/chip.ts';
 import { cityCard, type CityCard } from '../components/cityCard.ts';
+import { confirmDialog } from '../components/confirm.ts';
 import { progress } from '../components/progress.ts';
 import { showToast } from '../components/toast.ts';
 import { h, mount } from '../dom.ts';
@@ -209,6 +210,37 @@ export function renderDraft(app: App, root: HTMLElement): void {
       cardsBox,
     ),
   );
+  // The Android back gesture (and the browser Back button): step back through the picks, and ask
+  // before abandoning a run with no picks. A guard entry in the history lets us catch the gesture.
+  const armBackGuard = (): void => {
+    if ((history.state as { draftGuard?: boolean } | null)?.draftGuard !== true) {
+      history.pushState({ draftGuard: true }, '');
+    }
+  };
+  const onPop = (): void => {
+    if (location.hash !== '#/draft') return;
+    armBackGuard();
+    if (locked) {
+      undoPick(); // back during the two seconds before the reveal takes the last pick back
+    } else if (picks() > 0) {
+      doStepBack(s);
+      app.transition(renderRound);
+    } else {
+      confirmDialog({
+        title: t('draft.leave'),
+        body: t('draft.leaveBody'),
+        confirmLabel: t('draft.leaveConfirm'),
+        cancelLabel: t('draft.leaveStay'),
+        onConfirm: () => {
+          app.session = undefined;
+          app.go('home');
+        },
+      });
+    }
+  };
+  armBackGuard();
+  window.addEventListener('popstate', onPop);
+
   renderRound();
   const observer = new ResizeObserver(drawPreview);
   observer.observe(well);
@@ -216,5 +248,6 @@ export function renderDraft(app: App, root: HTMLElement): void {
     observer.disconnect();
     cancelAnimationFrame(frame);
     clearTimeout(finishTimer);
+    window.removeEventListener('popstate', onPop);
   });
 }

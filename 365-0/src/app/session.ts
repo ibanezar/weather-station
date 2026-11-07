@@ -8,6 +8,7 @@ import {
   pick,
   scout,
   start,
+  stepBack,
   undo,
   type Mode,
   type RunState,
@@ -53,6 +54,9 @@ export const doPick = (s: Session, cityId: string): void => {
 };
 export const doUndo = (s: Session): void => {
   s.state = undo(s.state);
+};
+export const doStepBack = (s: Session): void => {
+  s.state = stepBack(s.state);
 };
 export const doScout = (s: Session, cityId: string): void => {
   s.state = scout(s.state, cityId);

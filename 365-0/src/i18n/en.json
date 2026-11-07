@@ -168,5 +168,7 @@
   "result.imageFailed": "Could not create the image. The text was shared instead.",
   "share.record": "Record",
   "share.bestToday": "Best possible today: {n}",
-  "share.bestRun": "Best possible this run: {n}"
+  "share.bestRun": "Best possible this run: {n}",
+  "settings.install": "Install the app",
+  "settings.installHint": "Adds 365-0 to your home screen and lets it work offline."
 }

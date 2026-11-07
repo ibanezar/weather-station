@@ -1,4 +1,5 @@
 import type { App } from '../../app/app.ts';
+import { canInstall, onInstallChange, promptInstall } from '../../app/install.ts';
 import type { Unit } from '../../app/storage.ts';
 import type { Locale, MessageKey } from '../../i18n/index.ts';
 import type { MotionSetting, PatternSetting, ThemeSetting } from '../settings.ts';
@@ -168,6 +169,21 @@ export function renderSettings(app: App, root: HTMLElement): void {
           },
         }),
       ),
+      canInstall()
+        ? h(
+            'div',
+            { class: 'settings__install' },
+            button({
+              label: t('settings.install'),
+              variant: 'secondary',
+              full: true,
+              onClick: () => {
+                void promptInstall();
+              },
+            }),
+            h('p', { class: 'muted settings__hint' }, t('settings.installHint')),
+          )
+        : null,
       h('p', { class: 'muted settings__attribution' }, t('about.attribution')),
       button({
         label: t('settings.reset'),
@@ -186,5 +202,11 @@ export function renderSettings(app: App, root: HTMLElement): void {
         },
       }),
     ),
+  );
+  // The browser may offer installation after the page has loaded: show the button when it does.
+  app.onLeave(
+    onInstallChange(() => {
+      if (app.route === 'settings') app.render();
+    }),
   );
 }
