@@ -1,14 +1,14 @@
 // Generated at build time. Do not edit.
-const VERSION = 'a97fd738377d';
+const VERSION = '32ac28cb1e8a';
 const CACHE = '365-0-' + VERSION;
 const PRECACHE = [
   "./assets/big-shoulders-display-latin-ext-wght-normal-EP2r9iG4.woff2",
   "./assets/big-shoulders-display-latin-wght-normal-Bn_gnr7w.woff2",
-  "./assets/index-D2n2S94m.js",
-  "./assets/index-DpZ75lCd.css",
+  "./assets/index-CEnb9_lm.js",
+  "./assets/index-yT55dUeE.css",
   "./assets/instrument-sans-latin-ext-wght-normal-B5bTHO_g.woff2",
   "./assets/instrument-sans-latin-wght-normal-BbzFLZTg.woff2",
-  "./assets/styleguide-DLWmXd5r.js",
+  "./assets/styleguide-DV_FW3O_.js",
   "./data/world.v1.json",
   "./favicon.svg",
   "./icons/apple-touch-icon.png",
