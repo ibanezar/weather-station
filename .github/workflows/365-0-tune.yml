@@ -1,0 +1,33 @@
+name: 365-0 tune
+
+# One-off analysis: restores the cached Open-Meteo responses and prints the day-type shares for several
+# candidate threshold sets (scripts/tune.ts). Changes nothing. Start it by touching 365-0-game/.tune-trigger.
+on:
+  push:
+    branches: [ccr-e2eca649-o3xopb]
+    paths:
+      - '.github/workflows/365-0-tune.yml'
+      - '365-0-game/.tune-trigger'
+      - '365-0-game/scripts/tune.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  tune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: 365-0-game
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache/restore@v4
+        with:
+          path: 365-0-game/scripts/.cache
+          key: 365-0-openmeteo-v1-none
+          restore-keys: 365-0-openmeteo-v1-
+      - run: node scripts/tune.ts | tee "$GITHUB_STEP_SUMMARY"

@@ -11,10 +11,28 @@ export function isLoss(type: DayType): boolean {
   return type === 'r' || type === 's' || type === 'h' || type === 'f';
 }
 
-export const THRESHOLDS = {
+export interface Thresholds {
+  storm: { codes: readonly number[]; gustKmhMin: number; precipMmMin: number };
+  freeze: { tmaxCMax: number; snowCmMin: number };
+  heat: { tmaxCMin: number };
+  rain: { precipMmMin: number };
+  perfect: {
+    tmaxCMin: number;
+    tmaxCMax: number;
+    tminCMin: number;
+    /** Exclusive: "under this many mm". */
+    precipMmMax: number;
+    /** Exclusive: "under this many km/h". */
+    gustKmhMax: number;
+    /** Inclusive; skipped when cloud cover is unknown. */
+    cloudPctMax: number;
+  };
+}
+
+export const THRESHOLDS: Thresholds = {
   storm: {
     /** WMO thunderstorm codes. */
-    codes: [95, 96, 99] as readonly number[],
+    codes: [95, 96, 99],
     gustKmhMin: 70,
     precipMmMin: 30,
   },
@@ -25,11 +43,11 @@ export const THRESHOLDS = {
     tmaxCMin: 19,
     tmaxCMax: 28,
     tminCMin: 9,
-    precipMmMax: 1, // exclusive: "under 1 mm"
-    gustKmhMax: 40, // exclusive: "under 40 km/h"
-    cloudPctMax: 65, // inclusive: "at most 65 percent"; skipped when cloud cover is unknown
+    precipMmMax: 1,
+    gustKmhMax: 40,
+    cloudPctMax: 65,
   },
-} as const;
+};
 
 export interface DailyWeather {
   /** Daily maximum 2 m temperature, °C. */
@@ -49,8 +67,7 @@ export interface DailyWeather {
 }
 
 /** Precedence when several apply: storm, freeze, heat, rain, perfect, ok. */
-export function classifyDay(day: DailyWeather): DayType {
-  const t = THRESHOLDS;
+export function classifyDay(day: DailyWeather, t: Thresholds = THRESHOLDS): DayType {
   if (
     t.storm.codes.includes(day.code) ||
     day.gust >= t.storm.gustKmhMin ||
