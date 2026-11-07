@@ -14,6 +14,7 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run",
+    "data": "node scripts/build-data.ts",
     "data:validate": "node scripts/validate-data.ts",
     "check": "npm run typecheck && npm run lint && npm run test && npm run data:validate",
     "e2e": "playwright test --trace off"

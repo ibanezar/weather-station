@@ -1,14 +1,45 @@
-// Data validation entry point. Phase 0: no data exists yet, so this passes with a notice.
-// Phase 1 replaces this with the full checks from SPEC 2.3 and fails on any violation.
-import { existsSync } from 'node:fs';
+// `npm run data:validate`: fails if the curated list or the generated data break any rule in SPEC 2.3.
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { validateIndex, validateSeed, validateWorld } from './lib/validate.ts';
 
 const root = join(import.meta.dirname, '..');
-const worldPath = join(root, 'public/data/world.v1.json');
+const paths = {
+  seed: join(root, 'data/cities.seed.json'),
+  world: join(root, 'public/data/world.v1.json'),
+  index: join(root, 'src/data/cities.index.json'),
+};
 
-if (!existsSync(worldPath)) {
-  console.log('data:validate: no world data yet (expected before phase 1), nothing to check.');
+function load(path: string): unknown {
+  return JSON.parse(readFileSync(path, 'utf8'));
+}
+
+const errors: string[] = [];
+
+if (!existsSync(paths.seed)) {
+  errors.push('data/cities.seed.json is missing');
 } else {
-  console.error('data:validate: world data exists but validation is not implemented yet.');
+  const seed = load(paths.seed);
+  errors.push(...validateSeed(seed));
+
+  for (const [label, path] of [
+    ['world', paths.world],
+    ['index', paths.index],
+  ] as const) {
+    if (!existsSync(path)) {
+      errors.push(`${label} data is missing (${path}); run npm run data`);
+    } else if (label === 'world') {
+      errors.push(...validateWorld(load(path), seed));
+    } else {
+      errors.push(...validateIndex(load(path), seed));
+    }
+  }
+}
+
+if (errors.length > 0) {
+  console.error(`data:validate: ${String(errors.length)} problem(s)`);
+  for (const e of errors.slice(0, 50)) console.error(`  - ${e}`);
+  if (errors.length > 50) console.error(`  ... and ${String(errors.length - 50)} more`);
   process.exit(1);
 }
+console.log('data:validate: ok');

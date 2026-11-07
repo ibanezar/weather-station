@@ -44,6 +44,11 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
+    // Tests index into fixtures they have just built; a non-null assertion is clearer than a guard.
+    files: ['tests/**/*.ts'],
+    rules: { '@typescript-eslint/no-non-null-assertion': 'off' },
+  },
+  {
     files: ['eslint.config.js'],
     ...tseslint.configs.disableTypeChecked,
   },
