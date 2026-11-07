@@ -22,30 +22,6 @@ const YEARS = Array.from({ length: 10 }, (_, i) => 2016 + i);
 const base: Thresholds = THRESHOLDS;
 const candidates: Record<string, Thresholds> = {
   'current (rain 1, tmin 9, 19-28, cloud 65)': base,
-  'A: rain 2, tmin 7, 18-30, gust 45, cloud 75': {
-    ...base,
-    rain: { precipMmMin: 2 },
-    perfect: {
-      ...base.perfect,
-      tminCMin: 7,
-      tmaxCMin: 18,
-      tmaxCMax: 30,
-      gustKmhMax: 45,
-      cloudPctMax: 75,
-    },
-  },
-  'B: rain 3, tmin 6, 17-30, gust 45, cloud 80': {
-    ...base,
-    rain: { precipMmMin: 3 },
-    perfect: {
-      ...base.perfect,
-      tminCMin: 6,
-      tmaxCMin: 17,
-      tmaxCMax: 30,
-      gustKmhMax: 45,
-      cloudPctMax: 80,
-    },
-  },
   'C: rain 3, tmin 5, 16-30, gust 50, cloud 85': {
     ...base,
     rain: { precipMmMin: 3 },
@@ -70,6 +46,43 @@ const candidates: Record<string, Thresholds> = {
       cloudPctMax: 85,
     },
   },
+  'E: rain 5, tmin 4, 15-32, gust 55, cloud 90': {
+    ...base,
+    rain: { precipMmMin: 5 },
+    perfect: {
+      ...base.perfect,
+      tminCMin: 4,
+      tmaxCMin: 15,
+      tmaxCMax: 32,
+      gustKmhMax: 55,
+      cloudPctMax: 90,
+    },
+  },
+  'F: rain 4, tmin 6, 15-32, gust 50, cloud 85': {
+    ...base,
+    rain: { precipMmMin: 4 },
+    perfect: {
+      ...base.perfect,
+      tminCMin: 6,
+      tmaxCMin: 15,
+      tmaxCMax: 32,
+      gustKmhMax: 50,
+      cloudPctMax: 85,
+    },
+  },
+  'G: rain 5, tmin 5, 16-32, gust 50, cloud 90, heat 36': {
+    ...base,
+    rain: { precipMmMin: 5 },
+    heat: { tmaxCMin: 36 },
+    perfect: {
+      ...base.perfect,
+      tminCMin: 5,
+      tmaxCMin: 16,
+      tmaxCMax: 32,
+      gustKmhMax: 50,
+      cloudPctMax: 90,
+    },
+  },
 };
 
 // Load every cached city-year once.
@@ -79,6 +92,8 @@ const loaded = cities.map((city) => {
 });
 const missing = loaded.reduce((n, c) => n + c.years.filter((y) => !y).length, 0);
 console.log(`cities ${String(cities.length)}, missing city-years ${String(missing)}`);
+const gone = loaded.filter((c) => c.years.some((y) => !y)).map((c) => c.city.id);
+if (gone.length > 0) console.log(`incomplete: ${gone.join(', ')}`);
 
 function days(resp: ApiResponse): { month: number; day: DailyWeather }[] {
   const { daily } = resp;

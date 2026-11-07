@@ -30,4 +30,16 @@ jobs:
           path: 365-0-game/scripts/.cache
           key: 365-0-openmeteo-v1-none
           restore-keys: 365-0-openmeteo-v1-
+      # The full cache was saved under the folder's old name (365-0/); the path is part of a cache's identity.
+      - uses: actions/cache/restore@v4
+        with:
+          path: 365-0/scripts/.cache
+          key: 365-0-openmeteo-v1-none
+          restore-keys: 365-0-openmeteo-v1-
+      - run: |
+          if [ -d ../365-0/scripts/.cache ]; then
+            mkdir -p scripts/.cache
+            cp -rn ../365-0/scripts/.cache/. scripts/.cache/
+          fi
+          find scripts/.cache -name '*.json' | wc -l
       - run: node scripts/tune.ts | tee "$GITHUB_STEP_SUMMARY"
