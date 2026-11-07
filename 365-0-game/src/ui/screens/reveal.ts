@@ -11,8 +11,8 @@ import { isPatternMode, isReducedMotion } from '../settings.ts';
 import { cities } from '../../app/data.ts';
 
 /** Reveal timing (SPEC 6.6): months left to right, tiles top to bottom with an 8 ms stagger. */
-const MONTH_MS = 230;
-const STAGGER_MS = 5;
+const MONTH_MS = 110;
+const STAGGER_MS = 2;
 const FLIP_MS = 120;
 const FLASH_MS = 200;
 

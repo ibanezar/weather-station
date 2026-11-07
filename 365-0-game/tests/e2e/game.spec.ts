@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import {
   draftTwelve,
+  keepMonth,
   openReturning,
   recordOf,
   seriousViolations,
@@ -146,44 +147,73 @@ test.describe('the draft', () => {
       .click();
     await expect(page.locator('.progress__scouts')).toContainText('0 scouts left');
     await page.locator('.city-card__pick').first().click();
+    await keepMonth(page);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('February');
     await expect(page.locator('.city-card__scout').first()).toBeDisabled();
   });
 
-  test('undo takes back the last pick for free and keeps what was scouted', async ({ page }) => {
+  test('a pick shows its month at once; Next month makes it final and moves on', async ({
+    page,
+  }) => {
     await openReturning(page);
     await page.getByRole('button', { name: 'Play endless' }).click();
+    await page.locator('.city-card__pick').first().click();
+    const panel = page.locator('.month-result');
+    await expect(panel).toBeVisible();
+    await expect(page.locator('.city-card')).toHaveCount(0); // no second pick while this one is open
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('January');
+    const next = page.getByRole('button', { name: 'Next month' });
+    await expect(next).toBeEnabled({ timeout: 4000 });
+    // The three counts add up to the 31 days of January
+    const nums = await panel.locator('.month-result__stat strong').allTextContents();
+    expect(nums.map(Number).reduce((a, b) => a + b, 0)).toBe(31);
+    await next.click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('February');
     await expect(page.locator('.city-card')).toHaveCount(3);
-    const firstNames = await page.locator('.city-card__name').allTextContents();
+  });
+
+  test('tapping the grid while a month plays skips to its end', async ({ page }) => {
+    await openReturning(page);
+    await page.getByRole('button', { name: 'Play endless' }).click();
+    await page.locator('.city-card__pick').first().click();
+    await expect(page.getByRole('button', { name: 'Next month' })).toBeDisabled();
+    await page.locator('.grid-panel').click({ position: { x: 20, y: 20 } });
+    await expect(page.getByRole('button', { name: 'Next month' })).toBeEnabled();
+  });
+
+  test('a second chance redraws the month: a different year, then the chance is gone', async ({
+    page,
+  }) => {
+    await openReturning(page);
+    await page.getByRole('button', { name: 'Play endless' }).click();
+    await expect(page.locator('.progress__chances')).toContainText('1 second chance');
+    await page.locator('.city-card__pick').first().click();
+    const title = page.locator('.month-result__title');
+    const before = await title.textContent();
+    const redraw = page.getByRole('button', { name: /Redraw this month/ });
+    await expect(redraw).toBeEnabled({ timeout: 4000 });
+    await redraw.click();
+    await expect(page.locator('.progress__chances')).toContainText('0 second chances');
+    await expect(redraw).toHaveCount(0);
+    await expect(page.locator('.month-result__note')).toContainText('No second chances left');
+    expect(await title.textContent()).not.toBe(before);
+    await expect(page.getByRole('button', { name: 'Next month' })).toBeEnabled({ timeout: 4000 });
+  });
+
+  test('keeps what was scouted until the pick is made, and a used scout is not refunded', async ({
+    page,
+  }) => {
+    await openReturning(page);
+    await page.getByRole('button', { name: 'Play endless' }).click();
     await page
       .locator('.city-card')
       .first()
       .getByRole('button', { name: /^Scout/ })
       .click();
+    await expect(page.locator('.progress__scouts')).toContainText('2 scouts left');
     await page.locator('.city-card__pick').first().click();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('February');
-    await page.getByRole('button', { name: 'Undo' }).click();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('January');
-    expect(await page.locator('.city-card__name').allTextContents()).toEqual(firstNames);
-    await expect(page.locator('.city-card').first()).toHaveAttribute('data-flipped', 'true');
-    await expect(page.locator('.progress__scouts')).toContainText('2 scouts left'); // no refund, no second charge
-  });
-
-  test('the undo toast disappears after about two seconds', async ({ page }) => {
-    await openReturning(page);
-    await page.getByRole('button', { name: 'Play endless' }).click();
-    await page.locator('.city-card__pick').first().click();
-    await expect(page.locator('.toast')).toBeVisible();
-    await expect(page.locator('.toast')).toBeHidden({ timeout: 3500 });
-  });
-
-  test('undoing the twelfth pick cancels the reveal', async ({ page }) => {
-    await openReturning(page);
-    await page.getByRole('button', { name: 'Play endless' }).click();
-    for (let round = 0; round < 12; round++) await page.locator('.city-card__pick').first().click();
-    await page.getByRole('button', { name: 'Undo' }).click();
-    await page.waitForTimeout(2500);
-    await expect(page.locator('.screen--reveal')).toHaveCount(0);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('December');
+    await keepMonth(page);
+    await expect(page.locator('.progress__scouts')).toContainText('2 scouts left');
   });
 
   test('every round offers three cities with different climate icons from at least two countries', async ({
@@ -201,6 +231,7 @@ test.describe('the draft', () => {
       const countries = await page.locator('.city-card__country').allTextContents();
       expect(new Set(countries).size).toBeGreaterThanOrEqual(2);
       await page.locator('.city-card__pick').first().click();
+      await keepMonth(page);
     }
   });
 });

@@ -5,12 +5,11 @@ import {
   endlessSeed,
   finish,
   newRun,
+  keep,
   pick,
   reroll,
   scout,
   start,
-  stepBack,
-  undo,
   type Mode,
   type RunState,
 } from '../engine/run.ts';
@@ -46,20 +45,18 @@ export function restoreSession(
   rerolls: readonly number[] = [],
 ): Session {
   let state = start(newRun(seed, mode), data);
-  for (const id of picks) state = pick(state, id);
+  // Replay in the order it was played: each pick, the redraws it used, then keeping it.
+  picks.forEach((id, round) => {
+    state = pick(state, id);
+    for (const r of rerolls) if (r === round) state = reroll(state, data);
+    state = keep(state);
+  });
   state = complete(finish(state, data));
-  for (const round of rerolls) state = reroll(state, data, round);
   return { mode, date, data, state };
 }
 
 export const doPick = (s: Session, cityId: string): void => {
   s.state = pick(s.state, cityId);
-};
-export const doUndo = (s: Session): void => {
-  s.state = undo(s.state);
-};
-export const doStepBack = (s: Session): void => {
-  s.state = stepBack(s.state);
 };
 export const doScout = (s: Session, cityId: string): void => {
   s.state = scout(s.state, cityId);
@@ -67,8 +64,11 @@ export const doScout = (s: Session, cityId: string): void => {
 export const doFinish = (s: Session): void => {
   s.state = finish(s.state, s.data);
 };
-export const doReroll = (s: Session, round: number): void => {
-  s.state = reroll(s.state, s.data, round);
+export const doKeep = (s: Session): void => {
+  s.state = keep(s.state);
+};
+export const doReroll = (s: Session): void => {
+  s.state = reroll(s.state, s.data);
 };
 export const doComplete = (s: Session): void => {
   s.state = complete(s.state);
