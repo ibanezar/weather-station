@@ -50,7 +50,7 @@ TODAY = datetime.date.today().isoformat()
 
 LDJSON_RE = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
 # 365-0: ločen projekt (Vite aplikacija, ne del strani meteorec.si).
-SKIP_DIRS = {".git", "node_modules", "tools", ".github", "365-0"}
+SKIP_DIRS = {".git", "node_modules", "tools", ".github", "365-0", "365-0-game"}
 
 
 def read(path):
@@ -263,7 +263,7 @@ def check_content_vs_date_modified(notes):
     # None — preverjanje je tam tiho, smiselno je lokalno ali z globljim klonom.
     for path in glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True):
         rel = os.path.relpath(path, ROOT)
-        if rel.startswith(("vreme" + os.sep + "20", "i" + os.sep, "node_modules", "365-0" + os.sep)):
+        if rel.startswith(("vreme" + os.sep + "20", "i" + os.sep, "node_modules", "365-0" + os.sep, "365-0-game" + os.sep)):
             continue
         m = DATE_MOD_RE.search(read(path))
         if not m:

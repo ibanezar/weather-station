@@ -1,15 +1,15 @@
 name: 365-0 check
 
-# The 365-0 game lives in the 365-0/ subfolder of this repository and is independent of the
+# The 365-0 game lives in the 365-0-game/ subfolder of this repository and is independent of the
 # meteorec.si site. This workflow only runs when that folder changes.
 on:
   push:
     paths:
-      - '365-0/**'
+      - '365-0-game/**'
       - '.github/workflows/365-0.yml'
   pull_request:
     paths:
-      - '365-0/**'
+      - '365-0-game/**'
       - '.github/workflows/365-0.yml'
   workflow_dispatch:
 
@@ -18,7 +18,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: 365-0
+    working-directory: 365-0-game
 
 jobs:
   check:
@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: 365-0/package-lock.json
+          cache-dependency-path: 365-0-game/package-lock.json
       - run: npm ci
       - name: Typecheck, lint, unit tests, data validation
         run: npm run check

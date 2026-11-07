@@ -7,7 +7,7 @@ name: 365-0 data
 # needs roughly 19,000, so it takes more than one day. Raw responses are kept in the Actions cache (never
 # committed) and each run carries on from where the last one stopped.
 #
-# Start a run by pushing a change under the paths below (for example touching 365-0/.fetch-trigger) or with
+# Start a run by pushing a change under the paths below (for example touching 365-0-game/.fetch-trigger) or with
 # workflow_dispatch. Push triggers are limited to the development branch; on any other branch (including
 # main) the job only fills the cache and does not commit.
 #
@@ -24,10 +24,10 @@ on:
     branches: [ccr-e2eca649-o3xopb]
     paths:
       - '.github/workflows/365-0-data.yml'
-      - '365-0/.fetch-trigger'
-      - '365-0/scripts/**'
-      - '365-0/src/engine/thresholds.ts'
-      - '365-0/data/cities.seed.json'
+      - '365-0-game/.fetch-trigger'
+      - '365-0-game/scripts/**'
+      - '365-0-game/src/engine/thresholds.ts'
+      - '365-0-game/data/cities.seed.json'
 
 permissions:
   contents: write
@@ -38,7 +38,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: 365-0
+    working-directory: 365-0-game
 
 jobs:
   fetch:
@@ -50,13 +50,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: 365-0/package-lock.json
+          cache-dependency-path: 365-0-game/package-lock.json
       - run: npm ci
 
       - name: Restore the raw response cache
         uses: actions/cache/restore@v4
         with:
-          path: 365-0/scripts/.cache
+          path: 365-0-game/scripts/.cache
           key: 365-0-openmeteo-v1-${{ github.run_id }}
           restore-keys: 365-0-openmeteo-v1-
 
@@ -75,10 +75,10 @@ jobs:
           exit 0
 
       - name: Save the raw response cache
-        if: always() && hashFiles('365-0/scripts/.cache/**') != ''
+        if: always() && hashFiles('365-0-game/scripts/.cache/**') != ''
         uses: actions/cache/save@v4
         with:
-          path: 365-0/scripts/.cache
+          path: 365-0-game/scripts/.cache
           key: 365-0-openmeteo-v1-${{ github.run_id }}
 
       - name: Summary

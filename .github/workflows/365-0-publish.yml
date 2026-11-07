@@ -1,0 +1,58 @@
+name: 365-0 publish
+
+# The game's source lives in 365-0-game/. GitHub Pages serves this repository as plain files, so the
+# built app is committed to 365-0/ and appears at https://meteorec.si/365-0/ (the build uses relative
+# paths, see vite.config.ts). 365-0/ is generated: never edit it by hand, it is replaced on every run.
+#
+# Runs on main only, when the game's source (including its world data) changes, or by hand.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '365-0-game/**'
+      - '.github/workflows/365-0-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: 365-0-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: 365-0-game/package-lock.json
+      - name: Build and check the size budget
+        working-directory: 365-0-game
+        run: |
+          npm ci
+          npm run build
+          npm run budget
+      - name: Replace 365-0/ with the build
+        run: |
+          rm -rf 365-0
+          cp -r 365-0-game/dist 365-0
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A 365-0
+          if git diff --cached --quiet; then
+            echo "The published build is unchanged."
+          else
+            git commit -m "365-0: publish build"
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push origin HEAD:main && exit 0
+              sleep $((i * 5))
+            done
+            exit 1
+          fi
