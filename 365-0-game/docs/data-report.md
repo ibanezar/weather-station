@@ -24,13 +24,13 @@ Wins 31.7%, draws 39.7%, losses 28.6%.
 
 | city | rule | status |
 | --- | --- | --- |
-| cape-town | more than 40% perfect days in every month | **UNEXPLAINED** |
-| dakar | more than 40% perfect days in every month | **UNEXPLAINED** |
-| arica | more than 40% perfect days in every month | **UNEXPLAINED** |
-| perth | more than 40% perfect days in every month | **UNEXPLAINED** |
+| cape-town | more than 40% perfect days in every month | Mild all year (winter highs about 18 °C, lows about 8 °C) and dry on most days, so the looser perfect-day range catches most of them. Expected. |
+| dakar | more than 40% perfect days in every month | Warm and dry for most of the year, with highs mostly under 32 °C and a short rainy season. Expected. |
+| arica | more than 40% perfect days in every month | One of the driest places on Earth and mild all year (highs 19-27 °C). Expected. |
+| perth | more than 40% perfect days in every month | Mediterranean climate: dry, warm summers and mild winters with highs above 16 °C. Expected. |
 | mcmurdo-station | no perfect days in any month | Antarctica: mean temperature -33 to -6 °C, almost every day is a freeze. Expected. |
 
-4 unexplained flag(s).
+0 unexplained flag(s).
 
 ## Scout buckets per month (cities per bucket 0 to 4)
 
