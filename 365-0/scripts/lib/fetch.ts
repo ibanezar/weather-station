@@ -99,8 +99,10 @@ export async function getCityYear(
 
   for (;;) {
     let res: Response;
+    let text: string;
     try {
       res = await fetch(url, { signal: AbortSignal.timeout(60_000) });
+      text = await res.text(); // inside the try: a connection cut mid-body is transient too
     } catch (err) {
       if (transient >= backoff.length) throw err;
       const wait = backoff[transient++] ?? 16;
@@ -110,14 +112,28 @@ export async function getCityYear(
     }
 
     if (res.ok) {
-      const body: unknown = await res.json();
-      if (!isApiResponse(body))
-        throw new Error(`${city.id} ${String(year)}: unexpected response shape`);
-      writeCache(opts.cacheDir, city.id, year, body);
-      return { data: body, fromCache: false };
+      let body: unknown;
+      try {
+        body = JSON.parse(text);
+      } catch {
+        body = undefined;
+      }
+      if (isApiResponse(body)) {
+        writeCache(opts.cacheDir, city.id, year, body);
+        return { data: body, fromCache: false };
+      }
+      // HTTP 200 but not the JSON we expect (seen once: a plain-text body starting "Unexpected").
+      // Never cache it; retry like any other transient failure.
+      const snippet = JSON.stringify(text.slice(0, 120));
+      if (transient >= backoff.length) {
+        throw new Error(`${city.id} ${String(year)}: unusable response body ${snippet}`);
+      }
+      const wait = backoff[transient++] ?? 16;
+      opts.log(`  unusable response body ${snippet}, retrying in ${String(wait)} s`);
+      await sleep(wait * 1000);
+      continue;
     }
 
-    const text = await res.text();
     let reason = text.slice(0, 200);
     try {
       const parsed = JSON.parse(text) as { reason?: unknown };
