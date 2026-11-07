@@ -192,7 +192,7 @@
   "draft.comboEarned.passport": "Žig v potnem listu: +1 druga priložnost",
   "draft.chain": "Veriga: {type}, {n} od 3",
   "result.chances.title": "Druge priložnosti",
-  "result.chances.intro": "Mesec lahko znova izžrebaš. Novo leto obvelja, boljše ali slabše. {left}.",
+  "result.chances.intro": "Mesec lahko znova izžrebaš. Število je njegovih popolnih dni. Novo leto obvelja, boljše ali slabše. {left}.",
   "result.chances.none": "Drugih priložnosti ni več",
   "result.chances.month": "Znova izžrebaj: {month}",
   "result.chances.done": "{month} znova izžrebano: od {before} do {after} popolnih dni",

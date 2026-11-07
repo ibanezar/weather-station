@@ -15,7 +15,7 @@ test.describe('first visit', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: 'How it works' })).toBeVisible();
     await expect(page.locator('.how__line')).toHaveCount(3);
-    await expect(page.locator('.how__line').first()).toContainText('19–28 °C');
+    await expect(page.locator('.how__line').first()).toContainText('16–32 °C');
     await page.getByRole('button', { name: 'Play daily' }).click();
     await expect(page.locator('.city-card')).toHaveCount(3);
     expect(await page.evaluate(() => localStorage.getItem('365-0:v1'))).toContain(

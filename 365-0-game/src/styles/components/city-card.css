@@ -177,13 +177,16 @@
 /* Risk: free information on every card, how much this month varies over the stored years. */
 .city-card__foot {
   gap: var(--space-3);
-  justify-content: space-between;
 }
 
+/* Two short lines beside the icon, so the Scout button on the right never covers them. */
 .city-card__risk {
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100% - 9.5rem);
   font-size: var(--text-small);
-  text-align: right;
-  line-height: 1.25;
+  line-height: 1.2;
+  text-align: left;
 }
 
 .city-card__risk strong {

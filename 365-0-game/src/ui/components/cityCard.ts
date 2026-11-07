@@ -81,7 +81,9 @@ export function cityCard(o: CityCardOptions): CityCard {
             { class: 'city-card__risk', 'data-level': o.risk.level },
             h('strong', null, o.risk.label),
             ' ',
-            h('span', { class: 'muted' }, o.risk.detail),
+            o.risk.detail
+              ? h('span', { class: 'city-card__risk-detail muted' }, o.risk.detail)
+              : null,
           )
         : null,
     ),
