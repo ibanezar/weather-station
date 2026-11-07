@@ -17,14 +17,16 @@
     "data": "node scripts/build-data.ts",
     "data:validate": "node scripts/validate-data.ts",
     "calibrate": "node scripts/calibrate.ts",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run data:validate",
-    "e2e": "playwright test --trace off"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run data:validate && npm run contrast",
+    "e2e": "playwright test --trace off",
+    "contrast": "node scripts/contrast.ts"
   },
   "dependencies": {
     "@fontsource-variable/big-shoulders-display": "^5.3.0",
     "@fontsource-variable/instrument-sans": "^5.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.0",
     "@playwright/test": "^1.65.0",
     "@types/node": "^22.0.0",

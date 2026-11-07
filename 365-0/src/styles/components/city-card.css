@@ -1,0 +1,182 @@
+.city-card {
+  position: relative;
+  container-type: inline-size;
+}
+
+.city-card__pick {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  padding: 0;
+  text-align: left;
+  background: var(--raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  cursor: pointer;
+  perspective: 800px;
+  transition:
+    transform var(--dur-quick) var(--ease-spring),
+    border-color var(--dur-quick) var(--ease-out);
+}
+
+/* The one lifted state: the card being pressed. No blur shadows anywhere. */
+.city-card__pick:active {
+  transform: scale(1.02);
+  border-color: var(--ink);
+}
+
+.city-card__inner {
+  display: grid;
+  min-height: 96px;
+  transform-style: preserve-3d;
+  transition: transform var(--dur-flip) var(--ease-spring);
+}
+
+.city-card[data-flipped='true'] .city-card__inner {
+  transform: rotateY(180deg);
+}
+
+.city-card__face {
+  grid-area: 1 / 1;
+  padding: var(--space-3) var(--space-4);
+  backface-visibility: hidden;
+}
+
+.city-card__back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.city-card__front {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.city-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.city-card__title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.city-card__name {
+  font-size: var(--text-title);
+  font-weight: 650;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.city-card__country {
+  font-size: var(--text-small);
+}
+
+.city-card__temp {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+}
+
+.city-card__foot {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink-muted);
+}
+
+.city-card__scout {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-chip);
+  font-size: var(--text-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.city-card__scout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.city-card[data-flipped='true'] .city-card__scout {
+  visibility: hidden;
+}
+
+.city-card__scouted {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.city-card__scouted-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-caption);
+}
+
+.city-card__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-small);
+}
+
+.steps {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.steps__step {
+  width: 22px;
+  height: 14px;
+  border: 1.5px solid var(--ink-muted);
+  border-radius: var(--radius-tile);
+}
+
+.steps--perfect .steps__step--on {
+  background: var(--day-perfect);
+}
+
+.steps--bad .steps__step--on {
+  background: var(--ink-muted);
+}
+
+/* A 360 px phone: tighten the card so long names and the Scout button never collide. */
+@container (max-width: 340px) {
+  .city-card__face {
+    padding-inline: var(--space-3);
+  }
+  .city-card__temp {
+    font-size: var(--text-heading);
+  }
+  .city-card__scout {
+    padding: 0 var(--space-3);
+  }
+  .steps__step {
+    width: 18px;
+  }
+}
