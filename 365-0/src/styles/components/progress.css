@@ -7,8 +7,10 @@
 
 .progress__main {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .progress__count {
@@ -26,7 +28,8 @@
 }
 
 .progress__step {
-  width: 16px;
+  flex: 1 1 0;
+  max-width: 18px;
   height: 8px;
   border: 1.5px solid var(--ink-muted);
   border-radius: var(--radius-tile);
@@ -46,6 +49,8 @@
 }
 
 .progress__scouts {
+  flex: none;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 6px;

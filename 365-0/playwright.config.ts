@@ -11,6 +11,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     viewport: { width: 390, height: 844 },
+    locale: 'en-GB',
     ...(executablePath ? { launchOptions: { executablePath, args: ['--no-sandbox'] } } : {}),
   },
   webServer: {

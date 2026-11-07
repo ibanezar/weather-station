@@ -61,9 +61,8 @@ test('scouting flips a card and puts the scouted values in the pick button name'
   await card.getByRole('button', { name: 'Scout' }).click();
   await expect(card).toHaveAttribute('data-flipped', 'true');
   const pick = card.locator('.city-card__pick');
-  await expect(pick).toHaveAttribute(
-    'aria-label',
-    /^Reykjavik, Iceland, 11°.*Perfect days: 2 of 5.*Bad days: 3 of 5/,
+  await expect(pick).toHaveAccessibleName(
+    /^Pick this city\.\s*Reykjavik.*Perfect days 2 of 5.*Bad days 3 of 5/,
   );
   // The Scout button is gone and keyboard focus moved to the card instead of being lost.
   await expect(pick).toBeFocused();
@@ -88,22 +87,26 @@ test('the card can be operated with the keyboard alone', async ({ page }) => {
   await expect(page.locator('.city-card').first()).toHaveAttribute('data-flipped', 'true');
 });
 
+/** The flip duration token in milliseconds (the build writes 200ms as .2s, so read the unit). */
+const flipMs = (page: Page): Promise<number> =>
+  page.evaluate(() => {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--dur-flip').trim();
+    return raw.endsWith('ms') ? parseFloat(raw) : parseFloat(raw) * 1000;
+  });
+
 test('reduced motion removes the flip and press animations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await open(page);
-  const duration = await page
-    .locator('.city-card__inner')
-    .first()
-    .evaluate((el) => getComputedStyle(el).transitionDuration);
-  expect(duration).toBe('0s');
+  expect(await flipMs(page)).toBe(0);
 });
 
 test('the in-app motion override works without the system setting', async ({ page }) => {
   await open(page);
-  const inner = page.locator('.city-card__inner').first();
-  expect(await inner.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0.2s');
+  expect(await flipMs(page)).toBe(200);
   await page.getByRole('group', { name: 'Motion' }).getByRole('button', { name: 'reduce' }).click();
-  expect(await inner.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s');
+  expect(await flipMs(page)).toBe(0);
+  await page.getByRole('group', { name: 'Motion' }).getByRole('button', { name: 'full' }).click();
+  expect(await flipMs(page)).toBe(200);
 });
 
 test('pattern mode puts patterns on the four loss swatches and not on the others', async ({

@@ -15,9 +15,20 @@
 }
 
 .chip--event {
+  max-width: 100%;
+  padding-block: var(--space-2);
   background: var(--surface);
   border-color: var(--ink);
+  border-radius: var(--radius-button);
   font-weight: 650;
+  white-space: normal;
+  text-align: left;
+  align-items: flex-start;
+}
+
+.chip--event > .icon {
+  flex: none;
+  margin-top: 1px;
 }
 
 .legend {

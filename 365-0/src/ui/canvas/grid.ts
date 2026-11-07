@@ -8,6 +8,11 @@ export const GRID_ROWS = 31;
 /** One month column. `null` days draws the empty outline of a month that is not picked yet. */
 export interface GridColumn {
   days: readonly DayType[] | null;
+  /**
+   * A month the player has picked during the draft: its tiles are drawn as neutral blocks, so the
+   * draft preview shows what is claimed without revealing the weather before the reveal.
+   */
+  claimed?: boolean;
 }
 
 export interface GridPalette {
@@ -17,6 +22,8 @@ export interface GridPalette {
   pattern: Record<'r' | 's' | 'h' | 'f', string>;
   /** Outline of an empty or unresolved tile. */
   outline: string;
+  /** Neutral fill of a claimed month in the draft preview. */
+  claimed: string;
 }
 
 export interface GridOptions {
@@ -27,6 +34,17 @@ export interface GridOptions {
    * the tile being resolved. Defaults to everything.
    */
   revealed?: number;
+  /**
+   * Progress of each tile: 0 waiting, 0 to 1 flipping, 1 resolved. A value from 1 to 2 means resolved
+   * with a gold flash still fading (flash strength is 2 minus the value). Overrides `revealed`.
+   */
+  tileProgress?: (index: number) => number;
+  /** A column to highlight (the others are dimmed), e.g. the month tapped in the result list. */
+  highlightColumn?: number | null;
+  /** Opacity of a claimed column, for the quick fade-in when a pick lands. */
+  claimedAlpha?: (column: number) => number;
+  /** A short grid for the draft preview. */
+  compact?: boolean;
   /** Device pixel ratio; defaults to the window's. */
   dpr?: number;
 }
@@ -39,9 +57,11 @@ export interface GridLayout {
   gap: number;
 }
 
-export function gridLayout(width: number, gap = 2): GridLayout {
+export function gridLayout(width: number, compact = false): GridLayout {
+  const gap = compact ? 1.5 : 2;
   const tileW = (width - gap * (GRID_COLS - 1)) / GRID_COLS;
-  const tileH = Math.max(6, Math.floor(tileW * 0.36));
+  // The compact preview (draft screen) keeps the grid short so the city cards stay in the thumb zone.
+  const tileH = compact ? 3.5 : Math.max(6, Math.floor(tileW * 0.36));
   const height = GRID_ROWS * tileH + (GRID_ROWS - 1) * gap;
   return { width, height, tileW, tileH, gap };
 }
@@ -72,6 +92,7 @@ export function resolvePalette(el: Element): GridPalette {
       f: read('--pattern-on-freeze'),
     },
     outline: read('--on-well-muted'),
+    claimed: read('--on-well-muted'),
   };
   probe.remove();
   return palette;
@@ -151,7 +172,7 @@ export function drawGrid(
   options: GridOptions,
 ): GridLayout {
   const cssWidth = canvas.clientWidth || canvas.width;
-  const layout = gridLayout(cssWidth);
+  const layout = gridLayout(cssWidth, options.compact === true);
   const dpr = options.dpr ?? window.devicePixelRatio;
   canvas.width = Math.round(layout.width * dpr);
   canvas.height = Math.round(layout.height * dpr);
@@ -166,13 +187,20 @@ export function drawGrid(
   const revealed = options.revealed ?? total;
   const whole = Math.floor(revealed);
   const frac = revealed - whole;
+  const progressOf =
+    options.tileProgress ??
+    ((i: number): number => (i < whole ? 1 : i === whole && frac > 0 ? frac : 0));
   const { tileW, tileH, gap } = layout;
   const radius = 3;
+  const highlight = options.highlightColumn ?? null;
   let index = 0;
 
   for (let col = 0; col < GRID_COLS; col++) {
-    const days = columns[col]?.days ?? null;
+    const column = columns[col];
+    const days = column?.days ?? null;
     const x = col * (tileW + gap);
+    const dim = highlight !== null && highlight !== col;
+
     if (days === null) {
       // A month that is not picked yet: empty outlines.
       ctx.strokeStyle = palette.outline;
@@ -186,32 +214,56 @@ export function drawGrid(
       ctx.globalAlpha = 1;
       continue;
     }
+
+    if (column?.claimed) {
+      // Picked, weather not revealed yet: neutral blocks.
+      ctx.fillStyle = palette.claimed;
+      ctx.globalAlpha = 0.55 * (options.claimedAlpha ? options.claimedAlpha(col) : 1);
+      for (let row = 0; row < days.length; row++, index++) {
+        roundRect(ctx, x, row * (tileH + gap), tileW, tileH, radius);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      continue;
+    }
+
+    ctx.globalAlpha = dim ? 0.3 : 1;
     for (let row = 0; row < days.length; row++, index++) {
       const type = days[row] as DayType;
       const y = row * (tileH + gap);
-      if (index < whole) {
+      const p = progressOf(index);
+      if (p >= 1) {
         ctx.fillStyle = palette.fill[type];
         roundRect(ctx, x, y, tileW, tileH, radius);
         ctx.fill();
         if (options.pattern && type !== 'p' && type !== 'o') {
           drawPattern(ctx, type, x, y, tileW, tileH, palette.pattern[type]);
         }
-      } else if (index === whole && frac > 0) {
+        if (p > 1 && p < 2 && type === 'p') {
+          // A short gold flash on a perfect tile as it lands.
+          ctx.fillStyle = '#ffffff';
+          ctx.globalAlpha = (dim ? 0.3 : 1) * 0.6 * (2 - p);
+          roundRect(ctx, x, y, tileW, tileH, radius);
+          ctx.fill();
+          ctx.globalAlpha = dim ? 0.3 : 1;
+        }
+      } else if (p > 0) {
         // The tile being resolved: a short flip, scaling from the middle.
-        const h = Math.max(1, tileH * frac);
+        const h = Math.max(1, tileH * p);
         ctx.fillStyle = palette.fill[type];
         roundRect(ctx, x, y + (tileH - h) / 2, tileW, h, radius);
         ctx.fill();
       } else {
         // Waiting its turn.
         ctx.strokeStyle = palette.outline;
-        ctx.globalAlpha = 0.25;
+        ctx.globalAlpha = dim ? 0.1 : 0.25;
         ctx.lineWidth = 1;
         roundRect(ctx, x + 0.5, y + 0.5, tileW - 1, tileH - 1, radius);
         ctx.stroke();
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = dim ? 0.3 : 1;
       }
     }
+    ctx.globalAlpha = 1;
   }
   return layout;
 }

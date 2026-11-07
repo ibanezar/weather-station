@@ -68,6 +68,8 @@
   --text-heading: 28px;
   --text-display: 44px;
   --text-record: clamp(72px, 22vw, 120px);
+  /* For W-D-L records, which can be eleven characters (100-100-165) and must stay on one line. */
+  --text-record-fit: clamp(56px, 18vw, 96px);
   --leading-body: 1.5;
   --leading-display: 1.05;
 

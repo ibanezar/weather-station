@@ -27,24 +27,17 @@
 }
 
 .city-card__inner {
-  display: grid;
+  display: block;
   min-height: 96px;
-  transform-style: preserve-3d;
-  transition: transform var(--dur-flip) var(--ease-spring);
-}
-
-.city-card[data-flipped='true'] .city-card__inner {
-  transform: rotateY(180deg);
 }
 
 .city-card__face {
-  grid-area: 1 / 1;
+  display: block;
+  min-height: 96px;
   padding: var(--space-3) var(--space-4);
-  backface-visibility: hidden;
 }
 
 .city-card__back {
-  transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
   justify-content: center;

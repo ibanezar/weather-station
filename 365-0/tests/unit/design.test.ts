@@ -23,6 +23,7 @@ import {
 import { ARCHETYPES } from '../../src/data/types.ts';
 import { DAY_TYPE_CHARS } from '../../src/engine/thresholds.ts';
 import { ARCHETYPE_ICONS, DAY_ICONS, ICONS } from '../../src/ui/icons/index.ts';
+import { cssTimeToMs } from '../../src/ui/time.ts';
 
 const tokensCss = readFileSync(join(import.meta.dirname, '../../src/styles/tokens.css'), 'utf8');
 
@@ -125,5 +126,21 @@ describe('icon set', () => {
         }
       }
     }
+  });
+});
+
+describe('css time parsing', () => {
+  it("reads milliseconds and seconds, including the minifier's .2s for 200ms", () => {
+    expect(cssTimeToMs('200ms')).toBe(200);
+    expect(cssTimeToMs(' .2s ')).toBeCloseTo(200, 5);
+    expect(cssTimeToMs('0s')).toBe(0);
+    expect(cssTimeToMs('0ms')).toBe(0);
+    expect(cssTimeToMs('1.5s')).toBe(1500);
+  });
+
+  it('returns 0 for values that are not times', () => {
+    expect(cssTimeToMs('')).toBe(0);
+    expect(cssTimeToMs('fast')).toBe(0);
+    expect(cssTimeToMs('200')).toBe(0);
   });
 });

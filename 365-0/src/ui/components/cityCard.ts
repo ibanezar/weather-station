@@ -1,6 +1,8 @@
 import type { Archetype } from '../../data/types.ts';
 import { h } from '../dom.ts';
 import { icon } from '../icons/index.ts';
+import { isReducedMotion } from '../settings.ts';
+import { cssTimeToMs } from '../time.ts';
 import { steps } from './steps.ts';
 
 export interface ScoutInfo {
@@ -15,7 +17,7 @@ export interface CityCardOptions {
   temperature: string;
   archetype: Archetype;
   archetypeLabel: string;
-  /** The action part of the pick button's name, e.g. "Pick this city". */
+  /** Spoken before the card text, e.g. "Pick this city". Visually hidden. */
   pickAction: string;
   scoutLabel: string;
   /** Accessible name of the Scout button; must contain scoutLabel, e.g. "Scout Reykjavik". */
@@ -37,20 +39,26 @@ export interface CityCard {
   setScoutEnabled: (enabled: boolean) => void;
 }
 
+/** Duration of the flip in ms, from the motion token (0 when motion is reduced). */
+function flipMs(): number {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--dur-flip');
+  return isReducedMotion() ? 0 : cssTimeToMs(raw);
+}
+
 /**
  * A city card: one real button that picks the city, plus a separate Scout button on top of it.
- * The two are siblings, because a button cannot contain another button.
+ * The two are siblings, because a button cannot contain another button. The pick button has no
+ * aria-label: its name is its visible text, so what is read out is always what is shown.
  */
 export function cityCard(o: CityCardOptions): CityCard {
-  const back = h('div', { class: 'city-card__face city-card__back', 'aria-hidden': 'true' });
   const front = h(
-    'div',
+    'span',
     { class: 'city-card__face city-card__front' },
     h(
-      'div',
+      'span',
       { class: 'city-card__head' },
       h(
-        'div',
+        'span',
         { class: 'city-card__title' },
         h('span', { class: 'city-card__name' }, o.name),
         ' ', // real whitespace, so the visible text reads "Name Country Temperature"
@@ -60,24 +68,18 @@ export function cityCard(o: CityCardOptions): CityCard {
       h('span', { class: 'city-card__temp num' }, o.temperature),
     ),
     h(
-      'div',
+      'span',
       { class: 'city-card__foot' },
-      h(
-        'span',
-        { class: 'city-card__archetype', title: o.archetypeLabel },
-        icon(o.archetype, { label: o.archetypeLabel }),
-      ),
+      h('span', { class: 'city-card__archetype' }, icon(o.archetype, { label: o.archetypeLabel })),
     ),
   );
-
-  // The name starts with the visible text (name, country, temperature) so it contains what is shown.
-  const baseName = `${o.name}, ${o.country}, ${o.temperature}, ${o.archetypeLabel}. ${o.pickAction}.`;
+  const inner = h('span', { class: 'city-card__inner' }, front);
   const pick = h(
     'button',
-    { type: 'button', class: 'city-card__pick', 'aria-label': baseName, onClick: o.onPick },
-    h('span', { class: 'city-card__inner' }, front, back),
+    { type: 'button', class: 'city-card__pick', onClick: o.onPick },
+    h('span', { class: 'visually-hidden' }, `${o.pickAction}. `),
+    inner,
   );
-
   const scoutBtn = h(
     'button',
     {
@@ -89,46 +91,70 @@ export function cityCard(o: CityCardOptions): CityCard {
     icon('scout', { size: 20 }),
     h('span', null, o.scoutLabel),
   );
-
   const el = h('div', { class: 'city-card', 'data-flipped': 'false' }, pick, scoutBtn);
+
+  function backFace(info: ScoutInfo): HTMLElement {
+    return h(
+      'span',
+      { class: 'city-card__face city-card__back' },
+      h(
+        'span',
+        { class: 'city-card__scouted' },
+        h('span', { class: 'city-card__name' }, o.name),
+        ' ',
+        h(
+          'span',
+          { class: 'city-card__scouted-tag muted' },
+          icon('check', { size: 18 }),
+          o.scoutedLabel,
+        ),
+      ),
+      h(
+        'span',
+        { class: 'city-card__bar' },
+        h('span', { class: 'city-card__bar-label' }, o.perfectLabel),
+        ' ',
+        steps(info.perfect, o.stepText(info.perfect), 'perfect'),
+      ),
+      h(
+        'span',
+        { class: 'city-card__bar' },
+        h('span', { class: 'city-card__bar-label' }, o.badLabel),
+        ' ',
+        steps(info.bad, o.stepText(info.bad), 'bad'),
+      ),
+    );
+  }
 
   return {
     el,
     showScout(info) {
-      back.replaceChildren(
-        h(
-          'div',
-          { class: 'city-card__scouted' },
-          h('span', { class: 'city-card__name' }, o.name),
-          h(
-            'span',
-            { class: 'city-card__scouted-tag muted' },
-            icon('check', { size: 18 }),
-            o.scoutedLabel,
-          ),
-        ),
-        h(
-          'div',
-          { class: 'city-card__bar' },
-          h('span', { class: 'city-card__bar-label' }, o.perfectLabel),
-          steps(info.perfect, o.perfectLabel, o.stepText(info.perfect), 'perfect'),
-        ),
-        h(
-          'div',
-          { class: 'city-card__bar' },
-          h('span', { class: 'city-card__bar-label' }, o.badLabel),
-          steps(info.bad, o.badLabel, o.stepText(info.bad), 'bad'),
-        ),
-      );
-      // Screen readers get the scouted values as text on the pick button; the faces are visual.
-      pick.setAttribute(
-        'aria-label',
-        `${baseName} ${o.perfectLabel}: ${o.stepText(info.perfect)}. ${o.badLabel}: ${o.stepText(info.bad)}.`,
-      );
       // The Scout button is about to become hidden: keep keyboard focus on the card.
       if (document.activeElement === scoutBtn) pick.focus();
       el.dataset['flipped'] = 'true';
       scoutBtn.disabled = true;
+      const back = backFace(info);
+      const half = flipMs() / 2;
+      if (half <= 0 || typeof inner.animate !== 'function') {
+        inner.replaceChildren(back);
+        return;
+      }
+      // A flip in two halves: turn away, swap the face, turn back.
+      inner
+        .animate([{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(90deg)' }], {
+          duration: half,
+          easing: 'ease-in',
+        })
+        .finished.then(() => {
+          inner.replaceChildren(back);
+          inner.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0deg)' }], {
+            duration: half,
+            easing: 'ease-out',
+          });
+        })
+        .catch(() => {
+          inner.replaceChildren(back);
+        });
     },
     setScoutEnabled(enabled) {
       if (el.dataset['flipped'] !== 'true') scoutBtn.disabled = !enabled;
