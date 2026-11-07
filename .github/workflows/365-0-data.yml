@@ -10,8 +10,16 @@ name: 365-0 data
 # Start a run by pushing a change under the paths below (for example touching 365-0/.fetch-trigger) or with
 # workflow_dispatch. Push triggers are limited to the development branch; on any other branch (including
 # main) the job only fills the cache and does not commit.
+#
+# Interim scope (agreed with the owner): the first run fetches 2021-2025 only, which fits roughly one day of
+# quota. The Actions cache is per year, so topping up to 2016-2025 later only fetches the missing years:
+# run the workflow with years=2016-2025.
 on:
   workflow_dispatch:
+    inputs:
+      years:
+        description: 'Year range to fetch and build, e.g. 2021-2025 or 2016-2025'
+        default: '2021-2025'
   push:
     branches: [ccr-e2eca649-o3xopb]
     paths:
@@ -56,9 +64,11 @@ jobs:
         id: fetch
         # Exit code 75 means the rate limit stopped the run; that is expected and not a failure.
         timeout-minutes: 340
+        env:
+          YEARS: ${{ inputs.years || '2021-2025' }}
         run: |
           set +e
-          node scripts/build-data.ts --max-wait-hours=5
+          node scripts/build-data.ts --years="$YEARS" --max-wait-hours=5
           code=$?
           echo "code=$code" >> "$GITHUB_OUTPUT"
           if [ "$code" != 0 ] && [ "$code" != 75 ]; then exit "$code"; fi
@@ -73,13 +83,22 @@ jobs:
 
       - name: Summary
         if: always()
+        env:
+          YEARS: ${{ inputs.years || '2021-2025' }}
         run: |
-          n=$(find scripts/.cache -name '*.json' 2>/dev/null | wc -l)
+          from=${YEARS%-*}
+          to=${YEARS#*-}
+          n=0
+          for y in $(seq "$from" "$to"); do
+            n=$((n + $(find scripts/.cache -name "$y.json" 2>/dev/null | wc -l)))
+          done
           {
             echo "### 365-0 data"
-            echo "- City-years cached: $n of 720"
+            echo "- Years: $YEARS"
+            echo "- City-years cached: $n of $((72 * (to - from + 1)))"
             echo "- Build exit code: ${{ steps.fetch.outputs.code }} (0 = built, 75 = stopped by the rate limit)"
           } >> "$GITHUB_STEP_SUMMARY"
+          echo "City-years cached for $YEARS: $n"
 
       - name: Commit generated data
         if: steps.fetch.outputs.code == '0' && github.ref != 'refs/heads/main'

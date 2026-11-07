@@ -1,7 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { validateIndex, validateSeed, validateWorld } from '../../scripts/lib/validate.ts';
+import {
+  validateIndex,
+  validateSeed,
+  validateWorld,
+  yearsNotice,
+} from '../../scripts/lib/validate.ts';
 import { CONTINENTS, DAYS_IN_MONTH, type SeedCity, type World } from '../../src/data/types.ts';
 
 /** Six cities on every continent: the smallest valid seed. */
@@ -24,17 +29,21 @@ function validSeed(): SeedCity[] {
   return list;
 }
 
-function validWorld(seed: SeedCity[]): World {
+function validWorld(seed: SeedCity[], yearCount = 10): World {
   const cities: World['cities'] = {};
   for (const c of seed) {
     cities[c.id] = {
       t: Array<number>(12).fill(15),
       sp: Array<number>(12).fill(2),
       sb: Array<number>(12).fill(2),
-      d: DAYS_IN_MONTH.map((n) => Array.from({ length: 10 }, () => 'p'.repeat(n))),
+      d: DAYS_IN_MONTH.map((n) => Array.from({ length: yearCount }, () => 'p'.repeat(n))),
     };
   }
-  return { v: 1, years: Array.from({ length: 10 }, (_, i) => 2016 + i), cities };
+  return {
+    v: 1,
+    years: Array.from({ length: yearCount }, (_, i) => 2025 - yearCount + 1 + i),
+    cities,
+  };
 }
 
 const clone = <T>(x: T): T => structuredClone(x);
@@ -88,6 +97,28 @@ describe('validateWorld', () => {
 
   it('accepts valid data', () => {
     expect(validateWorld(validWorld(seed), seed)).toEqual([]);
+  });
+
+  it('accepts interim data with fewer than ten years and flags it as interim', () => {
+    const w = validWorld(seed, 5);
+    expect(w.years).toEqual([2021, 2022, 2023, 2024, 2025]);
+    expect(validateWorld(w, seed)).toEqual([]);
+    expect(yearsNotice(w)).toMatch(/INTERIM DATA: 5 of 10 planned years/);
+    expect(yearsNotice(validWorld(seed, 10))).toBeUndefined();
+  });
+
+  it('rejects a month whose number of year strings does not match the year list', () => {
+    const w = validWorld(seed, 5);
+    w.years = [2016, 2017, 2018, 2019, 2020, 2021];
+    expect(validateWorld(w, seed)).toContainEqual(expect.stringMatching(/needs 6 year strings/));
+  });
+
+  it('rejects an empty or non-ascending year list', () => {
+    const w = validWorld(seed, 3);
+    w.years = [2023, 2022, 2024];
+    expect(validateWorld(w, seed)).toContainEqual(expect.stringMatching(/strictly ascending/));
+    w.years = [];
+    expect(validateWorld(w, seed)).toContainEqual(expect.stringMatching(/strictly ascending/));
   });
 
   it('rejects a city missing from the world and one that is not in the seed', () => {

@@ -1,7 +1,7 @@
 // `npm run data:validate`: fails if the curated list or the generated data break any rule in SPEC 2.3.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { validateIndex, validateSeed, validateWorld } from './lib/validate.ts';
+import { validateIndex, validateSeed, validateWorld, yearsNotice } from './lib/validate.ts';
 
 const root = join(import.meta.dirname, '..');
 const paths = {
@@ -15,6 +15,7 @@ function load(path: string): unknown {
 }
 
 const errors: string[] = [];
+let notice: string | undefined;
 
 if (!existsSync(paths.seed)) {
   errors.push('data/cities.seed.json is missing');
@@ -29,7 +30,9 @@ if (!existsSync(paths.seed)) {
     if (!existsSync(path)) {
       errors.push(`${label} data is missing (${path}); run npm run data`);
     } else if (label === 'world') {
-      errors.push(...validateWorld(load(path), seed));
+      const world = load(path);
+      errors.push(...validateWorld(world, seed));
+      notice = yearsNotice(world);
     } else {
       errors.push(...validateIndex(load(path), seed));
     }
@@ -42,4 +45,5 @@ if (errors.length > 0) {
   if (errors.length > 50) console.error(`  ... and ${String(errors.length - 50)} more`);
   process.exit(1);
 }
+if (notice) console.warn(`data:validate: WARNING: ${notice}`);
 console.log('data:validate: ok');

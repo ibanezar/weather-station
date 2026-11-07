@@ -9,7 +9,8 @@ import {
 import { DAY_TYPE_CHARS } from '../../src/engine/thresholds.ts';
 
 export const MIN_CITIES_PER_CONTINENT = 6;
-export const YEARS_PER_CITY = 10;
+/** SPEC 2.2: ten full years per city. Data with fewer years is valid but interim (see yearsNotice). */
+export const PLANNED_YEARS = 10;
 
 type Json = unknown;
 
@@ -108,14 +109,18 @@ export function validateWorld(world: Json, seed: Json): string[] {
   if (!isRecord(world)) return ['world: must be an object'];
   if (world['v'] !== 1) errors.push('world: v must be 1');
 
+  // The number of years follows the file (interim data may hold fewer than PLANNED_YEARS); every
+  // month of every city must then carry exactly one string per listed year.
   const years = world['years'];
-  if (
-    !Array.isArray(years) ||
-    years.length !== YEARS_PER_CITY ||
-    !years.every((y) => Number.isInteger(y))
-  ) {
-    errors.push(`world: years must list ${String(YEARS_PER_CITY)} integers`);
-  }
+  const yearsOk =
+    Array.isArray(years) &&
+    years.length >= 1 &&
+    years.every(
+      (y, i) => Number.isInteger(y) && (i === 0 || (y as number) > (years[i - 1] as number)),
+    );
+  if (!yearsOk)
+    errors.push('world: years must be a non-empty, strictly ascending list of integers');
+  const yearCount = yearsOk ? years.length : PLANNED_YEARS;
 
   const cities = world['cities'];
   if (!isRecord(cities)) return [...errors, 'world: cities must be an object'];
@@ -163,8 +168,8 @@ export function validateWorld(world: Json, seed: Json): string[] {
     }
     d.forEach((month: Json, m) => {
       const where = `world ${id} month ${String(m + 1)}`;
-      if (!Array.isArray(month) || month.length !== YEARS_PER_CITY) {
-        errors.push(`${where}: needs ${String(YEARS_PER_CITY)} year strings`);
+      if (!Array.isArray(month) || month.length !== yearCount) {
+        errors.push(`${where}: needs ${String(yearCount)} year strings`);
         return;
       }
       const expected = DAYS_IN_MONTH[m] ?? 0;
@@ -199,4 +204,16 @@ export function validateIndex(index: Json, seed: Json): string[] {
     errors.push('index: cities.index.json is out of date with cities.seed.json (run npm run data)');
   }
   return errors;
+}
+
+/**
+ * A notice (not an error) when the world file holds fewer than the planned ten years. Returns
+ * undefined for a full dataset or when the file has no readable year list.
+ */
+export function yearsNotice(world: Json): string | undefined {
+  if (!isRecord(world) || !Array.isArray(world['years'])) return undefined;
+  const n = world['years'].length;
+  return n < PLANNED_YEARS
+    ? `INTERIM DATA: ${String(n)} of ${String(PLANNED_YEARS)} planned years. Fetch the remaining years before phase 1 is done.`
+    : undefined;
 }

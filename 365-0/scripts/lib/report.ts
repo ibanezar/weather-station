@@ -2,6 +2,7 @@
 import { DAY_TYPE_CHARS, isLoss, type DayType } from '../../src/engine/thresholds.ts';
 import { MONTHS_PER_YEAR, type SeedCity, type World } from '../../src/data/types.ts';
 import { monthShare } from './build.ts';
+import { PLANNED_YEARS } from './validate.ts';
 
 export const SIZE_BUDGET_GZ = 120_000;
 /** A city whose weather grid point is further than this from the real place is flagged. */
@@ -88,6 +89,12 @@ export function renderReport(input: ReportInput): string {
     `Generated ${input.generated} by \`npm run data\`. Source: Open-Meteo archive API, model ERA5 (0.25°).`,
   );
   out(`Years: ${world.years.join(', ')}. Cities: ${String(seed.length)}.`);
+  if (world.years.length < PLANNED_YEARS) {
+    out();
+    out(
+      `> **Interim data:** ${String(world.years.length)} of ${String(PLANNED_YEARS)} planned years. Statistics below are less stable until the remaining years are fetched.`,
+    );
+  }
   out();
   out('## Size');
   out();
@@ -166,7 +173,7 @@ export function renderReport(input: ReportInput): string {
   out();
   out(
     'Grid: kilometres from the city to the model grid point, and the grid cell height in metres. ' +
-      'Year columns are the share of days of each type over 10 years: perfect / ok / rain / storm / heat / freeze, in percent. ' +
+      'Type columns are the share of days of each type over all fetched years: perfect / ok / rain / storm / heat / freeze, in percent. ' +
       'Months are the perfect-day share per month, in percent.',
   );
   out();
