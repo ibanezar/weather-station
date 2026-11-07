@@ -23,15 +23,22 @@ export interface GridMeta {
  */
 export const EXPLAINED: Record<string, string> = {
   singapore:
-    'Mean temperature 26-28 °C all year, so daily highs (about 30-31 °C) sit above the 28 °C ceiling of a perfect day. Expected for the equator.',
+    'Equatorial: highs of 30-31 °C sit just under the 32 °C ceiling of a perfect day, but it rains (5 mm or more) on a third of days. Expected.',
   colombo:
-    'Mean temperature 27-29 °C all year, so daily highs sit above the 28 °C ceiling of a perfect day. Expected for the tropics.',
+    'Tropical: warm all year and wet in two monsoon seasons, so few days are both dry and under 32 °C. Expected.',
   'la-paz':
-    'About 3,700 m up: mean temperature 8-12 °C, so daily highs stay below the 19 °C floor of a perfect day. Expected.',
-  ushuaia: 'Cold southern climate: mean temperature 1-11 °C, highs stay below 19 °C. Expected.',
-  longyearbyen: 'Arctic: mean temperature -12 to 8 °C, highs stay below 19 °C. Expected.',
+    'About 3,700 m up: mean temperature 8-12 °C, so highs hover around the 16 °C floor of a perfect day. Expected.',
+  ushuaia: 'Cold southern climate: mean temperature 1-11 °C, highs stay below 16 °C. Expected.',
+  longyearbyen: 'Arctic: mean temperature -12 to 8 °C, highs stay below 16 °C. Expected.',
   'mcmurdo-station':
     'Antarctica: mean temperature -33 to -6 °C, almost every day is a freeze. Expected.',
+  'cape-town':
+    'Mild all year (winter highs about 18 °C, lows about 8 °C) and dry on most days, so the looser perfect-day range catches most of them. Expected.',
+  dakar:
+    'Warm and dry for most of the year, with highs mostly under 32 °C and a short rainy season. Expected.',
+  arica: 'One of the driest places on Earth and mild all year (highs 19-27 °C). Expected.',
+  perth:
+    'Mediterranean climate: dry, warm summers and mild winters with highs above 16 °C. Expected.',
 };
 
 export function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {

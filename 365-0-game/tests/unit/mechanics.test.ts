@@ -82,7 +82,7 @@ describe('risk', () => {
   });
   it('calls a wide range swingy, a middling one mixed and no perfect days none', () => {
     expect(monthRisk(world([year(0), year(20)]), 'x', 0).level).toBe('swingy');
-    expect(monthRisk(world([year(5), year(10)]), 'x', 0).level).toBe('mixed');
+    expect(monthRisk(world([year(3), year(12)]), 'x', 0).level).toBe('mixed');
     expect(monthRisk(world([year(0), year(0)]), 'x', 0).level).toBe('none');
   });
   it('works on the real data for every city and month', () => {

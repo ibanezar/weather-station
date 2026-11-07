@@ -11,9 +11,12 @@ export interface MonthRisk {
   level: RiskLevel;
 }
 
-/** A range of at most this many perfect days is "steady", at least SWINGY_RANGE is "swingy". */
-export const STEADY_RANGE = 3;
-export const SWINGY_RANGE = 9;
+/**
+ * A range of at most STEADY_RANGE perfect days is "steady", at least SWINGY_RANGE is "swingy". On the tuned data
+ * about a quarter of the months that have any perfect day fall in each of those two groups.
+ */
+export const STEADY_RANGE = 5;
+export const SWINGY_RANGE = 14;
 
 export function monthRisk(
   data: Pick<EngineData, 'world'>,
