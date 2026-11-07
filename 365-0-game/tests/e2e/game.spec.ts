@@ -151,6 +151,7 @@ test.describe('the draft', () => {
   test('undo takes back the last pick for free and keeps what was scouted', async ({ page }) => {
     await openReturning(page);
     await page.getByRole('button', { name: 'Play endless' }).click();
+    await expect(page.locator('.city-card')).toHaveCount(3);
     const firstNames = await page.locator('.city-card__name').allTextContents();
     await page
       .locator('.city-card')
