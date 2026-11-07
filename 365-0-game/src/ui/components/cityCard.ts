@@ -27,6 +27,10 @@ export interface CityCardOptions {
   badLabel: string;
   /** Text for a bucket value, e.g. "3 of 5". */
   stepText: (bucket: number) => string;
+  /** Free information on every card: how much this month varies from year to year. */
+  risk?: { level: string; label: string; detail: string };
+  /** Set when picking this city completes a combo, e.g. "Chain: +1 second chance". */
+  combo?: string;
   onPick: () => void;
   onScout: () => void;
 }
@@ -71,7 +75,19 @@ export function cityCard(o: CityCardOptions): CityCard {
       'span',
       { class: 'city-card__foot' },
       h('span', { class: 'city-card__archetype' }, icon(o.archetype, { label: o.archetypeLabel })),
+      o.risk
+        ? h(
+            'span',
+            { class: 'city-card__risk', 'data-level': o.risk.level },
+            h('strong', null, o.risk.label),
+            ' ',
+            o.risk.detail
+              ? h('span', { class: 'city-card__risk-detail muted' }, o.risk.detail)
+              : null,
+          )
+        : null,
     ),
+    o.combo ? h('span', { class: 'city-card__combo' }, icon('check', { size: 16 }), o.combo) : null,
   );
   const inner = h('span', { class: 'city-card__inner' }, front);
   const pick = h(

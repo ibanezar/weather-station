@@ -56,3 +56,22 @@ threshold being wrong: Colombo (always above the 28 °C ceiling), La Paz (about 
 - McMurdo Station is grouped under Oceania.
 - The daily mean temperature (`temperature_2m_mean`) is requested so the card shows a true monthly mean.
 - ERA5 is pinned (`models=era5`) for all years, so 2016 and 2025 come from the same model.
+
+## Threshold retune (7 November 2026)
+
+The SPEC 1.4 starting values gave 10% perfect days and 48% bad days over all 72 cities, so a random run was
+Stormbound 72% of the time and most city-months had no perfect day at all. `scripts/tune.ts` (run by the
+`365-0 tune` workflow on the cached responses) compared candidates; the chosen set is in `src/engine/thresholds.ts`:
+
+| rule             | SPEC value | now      |
+| ---------------- | ---------- | -------- |
+| rain (loss) from | 1 mm       | 5 mm     |
+| heat from        | 34 °C      | 36 °C    |
+| perfect tmax     | 19 to 28   | 16 to 32 |
+| perfect tmin     | 9          | 5        |
+| perfect gusts    | under 40   | under 50 |
+| perfect cloud    | up to 65   | up to 90 |
+
+A perfect day still needs under 1 mm of rain; a day with 1 to 5 mm is now "ok" rather than a loss (ERA5 drizzles on
+far too many days). Overall shares: about 32% perfect, 40% ok, 29% bad. Cold and wet places stay hard (Reykjavik
+46% bad, Singapore 52%), Sydney and Cairo are generous. Storm and freeze are unchanged.

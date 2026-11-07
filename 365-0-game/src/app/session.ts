@@ -6,6 +6,7 @@ import {
   finish,
   newRun,
   pick,
+  reroll,
   scout,
   start,
   stepBack,
@@ -42,10 +43,12 @@ export function restoreSession(
   seed: string,
   date: string | undefined,
   picks: readonly string[],
+  rerolls: readonly number[] = [],
 ): Session {
   let state = start(newRun(seed, mode), data);
   for (const id of picks) state = pick(state, id);
   state = complete(finish(state, data));
+  for (const round of rerolls) state = reroll(state, data, round);
   return { mode, date, data, state };
 }
 
@@ -63,6 +66,9 @@ export const doScout = (s: Session, cityId: string): void => {
 };
 export const doFinish = (s: Session): void => {
   s.state = finish(s.state, s.data);
+};
+export const doReroll = (s: Session, round: number): void => {
+  s.state = reroll(s.state, s.data, round);
 };
 export const doComplete = (s: Session): void => {
   s.state = complete(s.state);

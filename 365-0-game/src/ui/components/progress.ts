@@ -7,11 +7,13 @@ export interface ProgressOptions {
   roundText: (current: number, total: number) => string;
   /** "3 scouts left". */
   scoutsText: (left: number) => string;
+  /** "2 second chances". */
+  chancesText: (left: number) => string;
 }
 
 export interface Progress {
   el: HTMLElement;
-  update: (current: number, scoutsLeft: number) => void;
+  update: (current: number, scoutsLeft: number, chances: number) => void;
 }
 
 /** Twelve steps, left aligned, with the scouts remaining on the right (SPEC 6.5). */
@@ -20,16 +22,17 @@ export function progress(o: ProgressOptions): Progress {
   const list = h('ol', { class: 'progress__steps', 'aria-hidden': 'true' }, ...segs);
   const count = h('span', { class: 'progress__count num' });
   const scouts = h('span', { class: 'progress__scouts num' });
+  const chances = h('span', { class: 'progress__chances num' });
   const el = h(
     'div',
     { class: 'progress', role: 'group' },
     h('div', { class: 'progress__main' }, count, list),
-    scouts,
+    h('div', { class: 'progress__side' }, scouts, chances),
   );
 
   return {
     el,
-    update(current, scoutsLeft) {
+    update(current, scoutsLeft, chancesLeft) {
       const text = o.roundText(current, o.total);
       el.setAttribute('aria-label', text);
       count.textContent = text;
@@ -41,6 +44,10 @@ export function progress(o: ProgressOptions): Progress {
       scouts.replaceChildren(
         icon('scout', { size: 20 }),
         h('span', null, o.scoutsText(scoutsLeft)),
+      );
+      chances.replaceChildren(
+        icon('refresh', { size: 16 }),
+        h('span', null, o.chancesText(chancesLeft)),
       );
     },
   };

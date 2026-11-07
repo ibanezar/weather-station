@@ -1,6 +1,8 @@
 // The state machine of one run (SPEC 3): idle, drafting, revealing, done.
 // All functions are pure: they return a new state and throw on an illegal transition.
+import { findCombos, netsFor } from './combos.ts';
 import { generateDraft, ROUNDS } from './draft.ts';
+import { getCity } from './lookup.ts';
 import { gradeFor, ratio, type GradeId } from './grades.ts';
 import { resolve } from './outcome.ts';
 import {
@@ -37,6 +39,8 @@ export interface PickedRound {
   year: number;
   days: DayType[];
   record: DayRecord;
+  /** How many times this month was re-rolled (0 = the first draw stands). */
+  rerolls: number;
   /** The best option that round offered. */
   best: RoundOption;
 }
@@ -63,6 +67,8 @@ export interface RunState {
   readonly scouted: readonly string[];
   /** True right after a pick, until it is undone or the picks are locked. */
   readonly undoable: boolean;
+  /** Rounds that used a safety net, in order (a round can appear more than once). */
+  readonly rerolls: readonly number[];
   readonly result: RunResult | undefined;
 }
 
@@ -77,6 +83,7 @@ export function newRun(seed: string, mode: Mode): RunState {
     scoutsLeft: SCOUTS_PER_RUN,
     scouted: [],
     undoable: false,
+    rerolls: [],
     result: undefined,
   };
 }
@@ -161,17 +168,15 @@ export function scoutInfo(
   return { perfect: city.sp[month] ?? 0, bad: city.sb[month] ?? 0 };
 }
 
-/** drafting to revealing: lock the twelve picks and work out the result. */
-export function finish(state: RunState, data: EngineData): RunState {
-  need(state, 'drafting', 'finish');
-  if (state.picks.length !== ROUNDS) throw new Error('twelve picks are needed to finish');
+/** The result of the twelve picks, with the re-rolls applied. */
+function buildResult(state: RunState, data: EngineData): RunResult {
   const best = state.best;
   if (!best) throw new Error('run was not started');
-
   let total: DayRecord = emptyRecord();
   const rounds = state.picks.map((cityId, i): PickedRound => {
     const draftRound = state.draft[i] as DraftRound;
-    const o = resolve(data, state.seed, i, cityId, draftRound.month, draftRound.event);
+    const rerolls = state.rerolls.filter((r) => r === i).length;
+    const o = resolve(data, state.seed, i, cityId, draftRound.month, draftRound.event, rerolls);
     const rec = record(o.days);
     total = addRecords(total, rec);
     return {
@@ -181,18 +186,41 @@ export function finish(state: RunState, data: EngineData): RunState {
       year: o.year,
       days: o.days,
       record: rec,
+      rerolls,
       best: (best.rounds[i] as { best: RoundOption }).best,
     };
   });
   const r = ratio(total.w, best.record.w);
-  const result: RunResult = {
-    record: total,
-    bestRecord: best.record,
-    ratio: r,
-    grade: gradeFor(r),
-    rounds,
-  };
-  return { ...state, phase: 'revealing', undoable: false, result };
+  return { record: total, bestRecord: best.record, ratio: r, grade: gradeFor(r), rounds };
+}
+
+/** drafting to revealing: lock the twelve picks and work out the result. */
+export function finish(state: RunState, data: EngineData): RunState {
+  need(state, 'drafting', 'finish');
+  if (state.picks.length !== ROUNDS) throw new Error('twelve picks are needed to finish');
+  return { ...state, phase: 'revealing', undoable: false, result: buildResult(state, data) };
+}
+
+/** Safety nets earned so far: a free one, plus one for each combo the picks completed. */
+export function netsTotal(state: RunState, data: Pick<EngineData, 'cities'>): number {
+  const picked = state.picks.map((id) => getCity(data, id));
+  return netsFor(findCombos(picked).length);
+}
+
+export function netsLeft(state: RunState, data: Pick<EngineData, 'cities'>): number {
+  return Math.max(0, netsTotal(state, data) - state.rerolls.length);
+}
+
+/**
+ * Spend a safety net on one month: it is drawn again and shows a different year. The new year stands,
+ * better or worse. Only after the reveal, so the player has seen the month they are giving up.
+ */
+export function reroll(state: RunState, data: EngineData, round: number): RunState {
+  need(state, 'done', 're-roll');
+  if (!Number.isInteger(round) || round < 0 || round >= ROUNDS) throw new Error('no such round');
+  if (netsLeft(state, data) <= 0) throw new Error('no safety nets left');
+  const next = { ...state, rerolls: [...state.rerolls, round] };
+  return { ...next, result: buildResult(next, data) };
 }
 
 /** revealing to done: the reveal has played (or was skipped). */

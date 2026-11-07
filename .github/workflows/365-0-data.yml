@@ -60,6 +60,23 @@ jobs:
           key: 365-0-openmeteo-v1-${{ github.run_id }}
           restore-keys: 365-0-openmeteo-v1-
 
+      # The first full cache was saved when the folder was still called 365-0/; a cache's path is part of
+      # its identity, so restore that one too and merge it (existing files win).
+      - name: Restore the cache saved under the old folder name
+        uses: actions/cache/restore@v4
+        with:
+          path: 365-0/scripts/.cache
+          key: 365-0-openmeteo-v1-none
+          restore-keys: 365-0-openmeteo-v1-
+      - name: Merge the old cache
+        working-directory: .
+        run: |
+          if [ -d 365-0/scripts/.cache ]; then
+            mkdir -p 365-0-game/scripts/.cache
+            cp -rn 365-0/scripts/.cache/. 365-0-game/scripts/.cache/
+          fi
+          find 365-0-game/scripts/.cache -name '*.json' | wc -l
+
       - name: Fetch and build
         id: fetch
         # Exit code 75 means the rate limit stopped the run; that is expected and not a failure.

@@ -26,17 +26,18 @@ describe('classifyDay', () => {
 
   describe('perfect boundaries', () => {
     it.each([
-      [{ tmax: 19 }, 'p'],
-      [{ tmax: 18.9 }, 'o'],
-      [{ tmax: 28 }, 'p'],
-      [{ tmax: 28.1 }, 'o'],
-      [{ tmin: 9 }, 'p'],
-      [{ tmin: 8.9 }, 'o'],
+      [{ tmax: 16 }, 'p'],
+      [{ tmax: 15.9 }, 'o'],
+      [{ tmax: 32 }, 'p'],
+      [{ tmax: 32.1 }, 'o'],
+      [{ tmin: 5 }, 'p'],
+      [{ tmin: 4.9 }, 'o'],
       [{ precip: 0.9 }, 'p'],
-      [{ gust: 39.9 }, 'p'],
-      [{ gust: 40 }, 'o'],
-      [{ cloud: 65 }, 'p'],
-      [{ cloud: 65.1 }, 'o'],
+      [{ precip: 1 }, 'o'],
+      [{ gust: 49.9 }, 'p'],
+      [{ gust: 50 }, 'o'],
+      [{ cloud: 90 }, 'p'],
+      [{ cloud: 90.1 }, 'o'],
     ] as [Partial<DailyWeather>, string][])('%j is %s', (over, expected) => {
       expect(classifyDay(day(over))).toBe(expected);
     });
@@ -49,7 +50,8 @@ describe('classifyDay', () => {
 
   describe('loss types', () => {
     it.each([
-      [{ precip: 1 }, 'r'],
+      [{ precip: 5 }, 'r'],
+      [{ precip: 4.99 }, 'o'],
       [{ precip: 0.99 }, 'p'],
       [{ precip: 29.9 }, 'r'],
       [{ precip: 30 }, 's'],
@@ -63,8 +65,8 @@ describe('classifyDay', () => {
       [{ tmax: 3.1 }, 'o'],
       [{ snow: 1 }, 'f'],
       [{ snow: 0.9 }, 'p'],
-      [{ tmax: 34 }, 'h'],
-      [{ tmax: 33.9 }, 'o'],
+      [{ tmax: 36 }, 'h'],
+      [{ tmax: 35.9 }, 'o'],
     ] as [Partial<DailyWeather>, string][])('%j is %s', (over, expected) => {
       expect(classifyDay(day(over))).toBe(expected);
     });
@@ -72,20 +74,21 @@ describe('classifyDay', () => {
 
   describe('precedence: storm, freeze, heat, rain, perfect, ok', () => {
     it('storm beats freeze, heat and rain', () => {
-      expect(classifyDay(day({ code: 95, tmax: 1, snow: 5, precip: 5 }))).toBe('s');
-      expect(classifyDay(day({ gust: 80, tmax: 36 }))).toBe('s');
+      expect(classifyDay(day({ code: 95, tmax: 1, snow: 5, precip: 6 }))).toBe('s');
+      expect(classifyDay(day({ gust: 80, tmax: 38 }))).toBe('s');
     });
     it('freeze beats rain', () => {
-      expect(classifyDay(day({ tmax: 1, precip: 5 }))).toBe('f');
+      expect(classifyDay(day({ tmax: 1, precip: 6 }))).toBe('f');
     });
     it('snow makes a freeze even on a mild day', () => {
-      expect(classifyDay(day({ tmax: 12, snow: 2, precip: 3 }))).toBe('f');
+      expect(classifyDay(day({ tmax: 12, snow: 2, precip: 6 }))).toBe('f');
     });
     it('heat beats rain', () => {
-      expect(classifyDay(day({ tmax: 37, precip: 5 }))).toBe('h');
+      expect(classifyDay(day({ tmax: 37, precip: 6 }))).toBe('h');
     });
     it('rain beats a day that would otherwise be perfect', () => {
-      expect(classifyDay(day({ precip: 2 }))).toBe('r');
+      expect(classifyDay(day({ precip: 6 }))).toBe('r');
+      expect(classifyDay(day({ precip: 2 }))).toBe('o'); // drizzle spoils a perfect day but is not a loss
     });
   });
 
@@ -107,12 +110,14 @@ describe('isLoss', () => {
 });
 
 describe('thresholds', () => {
-  it('match the SPEC 1.4 starting values', () => {
+  it('are the values tuned on the real data (the SPEC 1.4 starting values gave 10% perfect days)', () => {
     expect(THRESHOLDS.storm.gustKmhMin).toBe(70);
     expect(THRESHOLDS.storm.precipMmMin).toBe(30);
     expect(THRESHOLDS.freeze.tmaxCMax).toBe(3);
-    expect(THRESHOLDS.heat.tmaxCMin).toBe(34);
-    expect(THRESHOLDS.perfect.tmaxCMin).toBe(19);
-    expect(THRESHOLDS.perfect.tmaxCMax).toBe(28);
+    expect(THRESHOLDS.heat.tmaxCMin).toBe(36);
+    expect(THRESHOLDS.rain.precipMmMin).toBe(5);
+    expect(THRESHOLDS.perfect.precipMmMax).toBe(1);
+    expect(THRESHOLDS.perfect.tmaxCMin).toBe(16);
+    expect(THRESHOLDS.perfect.tmaxCMax).toBe(32);
   });
 });
