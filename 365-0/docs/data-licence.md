@@ -13,12 +13,12 @@ Terms change; re-read them before shipping.
 
 ## What the terms say
 
-| Topic | Free API | Paid API |
-| --- | --- | --- |
-| Use | Non-commercial only | Commercial licence |
-| Limits | 10,000 calls/day, 5,000/hour, 600/minute, per IP | Unlimited per day |
-| Historical Weather API | Included | Professional plan or higher (not in Standard) |
-| Data licence | CC BY 4.0 | CC BY 4.0 |
+| Topic                  | Free API                                         | Paid API                                      |
+| ---------------------- | ------------------------------------------------ | --------------------------------------------- |
+| Use                    | Non-commercial only                              | Commercial licence                            |
+| Limits                 | 10,000 calls/day, 5,000/hour, 600/minute, per IP | Unlimited per day                             |
+| Historical Weather API | Included                                         | Professional plan or higher (not in Standard) |
+| Data licence           | CC BY 4.0                                        | CC BY 4.0                                     |
 
 - Non-commercial examples in the terms: private or non-profit sites and apps **without subscriptions or
   advertising**, research at public institutions, educational content. Voluntary donations are allowed.
@@ -45,7 +45,7 @@ tier no longer fits. Before shipping, do one of:
 2. Switch `scripts/lib/fetch.ts` to ERA5 straight from the Copernicus Climate Data Store, which permits
    commercial use with attribution, and keep the same output format.
 
-A grey area to be aware of: the terms restrict use of the free *service* to non-commercial purposes; they do
+A grey area to be aware of: the terms restrict use of the free _service_ to non-commercial purposes; they do
 not spell out whether a static dataset derived once from it and redistributed inside an app is covered. The
 data itself is CC BY 4.0, which allows commercial use with attribution. A free, ad-free game sits clearly
 inside the non-commercial definition, so the question does not arise today.

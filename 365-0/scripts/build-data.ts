@@ -1,11 +1,13 @@
 // `npm run data`: fetch 10 years of daily weather per city, classify every day, write the game data.
 //
 //   node scripts/build-data.ts [--only=id,id] [--offline] [--years=2016-2025] [--delay-ms=300]
+//                         [--max-wait-hours=0]
 //
 // Responses are cached in scripts/.cache/ (gitignored). The free API allows about 10,000 weighted
 // calls per day and this job needs more than one day's worth, so the script stops cleanly at the
 // limit (exit code 75) and a re-run carries on from the cache. In the Claude cloud sandbox run it
-// with NODE_USE_ENV_PROXY=1 so that fetch uses the session proxy.
+// with NODE_USE_ENV_PROXY=1 so that fetch uses the session proxy. With --max-wait-hours=N the script
+// sleeps through a rate limit that resets within N hours instead of stopping (used by the CI job).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -70,43 +72,61 @@ async function main(): Promise<void> {
   }
 
   const total = targets.length * years.length;
+  const maxWaitSec = Number(arg('max-wait-hours') ?? 0) * 3600;
   let have = 0;
   let fetched = 0;
-  const missing: string[] = [];
+  let missing: string[] = [];
   const responses = new Map<string, ApiResponse>();
-  let stoppedBy: RateLimitError | undefined;
 
-  outer: for (const city of targets) {
-    for (const year of years) {
-      const key = `${city.id}/${String(year)}`;
-      if (offline) {
-        // Cache only: never touches the network.
-        const cached = readCache(paths.cache, city.id, year);
-        if (cached) {
-          responses.set(key, cached);
+  /** One pass over every city-year. Returns the rate-limit error that stopped it, if any. */
+  const collect = async (): Promise<RateLimitError | undefined> => {
+    have = 0;
+    missing = [];
+    for (const city of targets) {
+      for (const year of years) {
+        const key = `${city.id}/${String(year)}`;
+        if (offline) {
+          // Cache only: never touches the network.
+          const cached = readCache(paths.cache, city.id, year);
+          if (cached) {
+            responses.set(key, cached);
+            have += 1;
+          } else {
+            missing.push(key);
+          }
+          continue;
+        }
+        try {
+          const { data, fromCache } = await getCityYear(city, year, { cacheDir: paths.cache, log });
+          responses.set(key, data);
           have += 1;
-        } else {
-          missing.push(key);
+          if (!fromCache) {
+            fetched += 1;
+            log(`fetched ${key} (${String(have)}/${String(total)})`);
+            await new Promise((r) => setTimeout(r, delayMs));
+          }
+        } catch (err) {
+          if (err instanceof RateLimitError) return err;
+          throw err;
         }
-        continue;
-      }
-      try {
-        const { data, fromCache } = await getCityYear(city, year, { cacheDir: paths.cache, log });
-        responses.set(key, data);
-        have += 1;
-        if (!fromCache) {
-          fetched += 1;
-          log(`fetched ${key} (${String(have)}/${String(total)})`);
-          await new Promise((r) => setTimeout(r, delayMs));
-        }
-      } catch (err) {
-        if (err instanceof RateLimitError) {
-          stoppedBy = err;
-          break outer;
-        }
-        throw err;
       }
     }
+    return undefined;
+  };
+
+  let stoppedBy: RateLimitError | undefined;
+  for (;;) {
+    stoppedBy = await collect();
+    const wait = stoppedBy?.retryAfterSec;
+    if (stoppedBy && wait !== undefined && wait <= maxWaitSec) {
+      log(
+        `${stoppedBy.kind} limit reached with ${String(have)}/${String(total)} cached; ` +
+          `waiting ${(wait / 3600).toFixed(2)} h for the reset.`,
+      );
+      await new Promise((r) => setTimeout(r, (wait + 30) * 1000));
+      continue;
+    }
+    break;
   }
 
   if (stoppedBy) {
