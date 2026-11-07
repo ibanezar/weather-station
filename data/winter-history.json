@@ -374,5 +374,13 @@
     "heating_level": "srednje",
     "black_ice_level": "visoko",
     "fog_top_m": 1537
+  },
+  {
+    "date": "2026-11-07",
+    "snow_line_m": 1210,
+    "snow_cm_at_station": 0.0,
+    "heating_level": "srednje",
+    "black_ice_level": "visoko",
+    "fog_top_m": 850
   }
 ]
