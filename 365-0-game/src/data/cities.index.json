@@ -1,0 +1,1148 @@
+[
+  {
+    "id": "nairobi",
+    "name": {
+      "en": "Nairobi"
+    },
+    "country": "KE",
+    "continent": "africa",
+    "lat": -1.286,
+    "lon": 36.817,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "equatorial"
+    ]
+  },
+  {
+    "id": "cape-town",
+    "name": {
+      "en": "Cape Town",
+      "sl": "Kapsko mesto"
+    },
+    "country": "ZA",
+    "continent": "africa",
+    "lat": -33.925,
+    "lon": 18.424,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean",
+      "maritime"
+    ]
+  },
+  {
+    "id": "marrakech",
+    "name": {
+      "en": "Marrakech",
+      "sl": "Marakeš"
+    },
+    "country": "MA",
+    "continent": "africa",
+    "lat": 31.629,
+    "lon": -7.981,
+    "archetype": "desert",
+    "tags": [
+      "desert",
+      "steppe",
+      "mediterranean"
+    ]
+  },
+  {
+    "id": "lagos",
+    "name": {
+      "en": "Lagos"
+    },
+    "country": "NG",
+    "continent": "africa",
+    "lat": 6.455,
+    "lon": 3.384,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "monsoon"
+    ]
+  },
+  {
+    "id": "cairo",
+    "name": {
+      "en": "Cairo",
+      "sl": "Kairo"
+    },
+    "country": "EG",
+    "continent": "africa",
+    "lat": 30.044,
+    "lon": 31.236,
+    "archetype": "desert",
+    "tags": [
+      "desert"
+    ]
+  },
+  {
+    "id": "addis-ababa",
+    "name": {
+      "en": "Addis Ababa",
+      "sl": "Adis Abeba"
+    },
+    "country": "ET",
+    "continent": "africa",
+    "lat": 9.03,
+    "lon": 38.74,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "tropical"
+    ]
+  },
+  {
+    "id": "dakar",
+    "name": {
+      "en": "Dakar"
+    },
+    "country": "SN",
+    "continent": "africa",
+    "lat": 14.716,
+    "lon": -17.467,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "savanna",
+      "maritime"
+    ]
+  },
+  {
+    "id": "windhoek",
+    "name": {
+      "en": "Windhoek"
+    },
+    "country": "NA",
+    "continent": "africa",
+    "lat": -22.56,
+    "lon": 17.083,
+    "archetype": "desert",
+    "tags": [
+      "desert",
+      "steppe",
+      "highland"
+    ]
+  },
+  {
+    "id": "dar-es-salaam",
+    "name": {
+      "en": "Dar es Salaam"
+    },
+    "country": "TZ",
+    "continent": "africa",
+    "lat": -6.792,
+    "lon": 39.208,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "savanna",
+      "maritime"
+    ]
+  },
+  {
+    "id": "johannesburg",
+    "name": {
+      "en": "Johannesburg"
+    },
+    "country": "ZA",
+    "continent": "africa",
+    "lat": -26.204,
+    "lon": 28.047,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "savanna",
+      "temperate"
+    ]
+  },
+  {
+    "id": "shillong",
+    "name": {
+      "en": "Shillong"
+    },
+    "country": "IN",
+    "continent": "asia",
+    "lat": 25.578,
+    "lon": 91.893,
+    "archetype": "monsoon",
+    "tags": [
+      "monsoon",
+      "highland"
+    ],
+    "note": "Stands in for Mawsynram, one of the wettest places on Earth. Weather data is for the nearest grid point, so extreme local rainfall is understated."
+  },
+  {
+    "id": "yakutsk",
+    "name": {
+      "en": "Yakutsk",
+      "sl": "Jakutsk"
+    },
+    "country": "RU",
+    "continent": "asia",
+    "lat": 62.035,
+    "lon": 129.675,
+    "archetype": "subarctic",
+    "tags": [
+      "subarctic",
+      "continental"
+    ]
+  },
+  {
+    "id": "dubai",
+    "name": {
+      "en": "Dubai",
+      "sl": "Dubaj"
+    },
+    "country": "AE",
+    "continent": "asia",
+    "lat": 25.205,
+    "lon": 55.271,
+    "archetype": "desert",
+    "tags": [
+      "desert"
+    ]
+  },
+  {
+    "id": "manila",
+    "name": {
+      "en": "Manila"
+    },
+    "country": "PH",
+    "continent": "asia",
+    "lat": 14.6,
+    "lon": 120.984,
+    "archetype": "monsoon",
+    "tags": [
+      "monsoon",
+      "tropical"
+    ]
+  },
+  {
+    "id": "singapore",
+    "name": {
+      "en": "Singapore",
+      "sl": "Singapur"
+    },
+    "country": "SG",
+    "continent": "asia",
+    "lat": 1.352,
+    "lon": 103.82,
+    "archetype": "tropical",
+    "tags": [
+      "equatorial",
+      "tropical",
+      "island"
+    ],
+    "note": "A small island in a large grid cell: the weather data is partly open sea."
+  },
+  {
+    "id": "tokyo",
+    "name": {
+      "en": "Tokyo",
+      "sl": "Tokio"
+    },
+    "country": "JP",
+    "continent": "asia",
+    "lat": 35.69,
+    "lon": 139.692,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "temperate",
+      "monsoon",
+      "maritime"
+    ]
+  },
+  {
+    "id": "mumbai",
+    "name": {
+      "en": "Mumbai",
+      "sl": "Mumbaj"
+    },
+    "country": "IN",
+    "continent": "asia",
+    "lat": 19.076,
+    "lon": 72.878,
+    "archetype": "monsoon",
+    "tags": [
+      "monsoon",
+      "tropical",
+      "maritime"
+    ]
+  },
+  {
+    "id": "kathmandu",
+    "name": {
+      "en": "Kathmandu",
+      "sl": "Katmandu"
+    },
+    "country": "NP",
+    "continent": "asia",
+    "lat": 27.717,
+    "lon": 85.324,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "monsoon"
+    ],
+    "note": "A valley city in rugged terrain: the grid point is a blend of valley floor and mountains."
+  },
+  {
+    "id": "ulaanbaatar",
+    "name": {
+      "en": "Ulaanbaatar",
+      "sl": "Ulan Bator"
+    },
+    "country": "MN",
+    "continent": "asia",
+    "lat": 47.886,
+    "lon": 106.906,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "steppe",
+      "subarctic"
+    ]
+  },
+  {
+    "id": "hanoi",
+    "name": {
+      "en": "Hanoi",
+      "sl": "Hanoj"
+    },
+    "country": "VN",
+    "continent": "asia",
+    "lat": 21.028,
+    "lon": 105.854,
+    "archetype": "monsoon",
+    "tags": [
+      "monsoon",
+      "temperate"
+    ]
+  },
+  {
+    "id": "seoul",
+    "name": {
+      "en": "Seoul",
+      "sl": "Seul"
+    },
+    "country": "KR",
+    "continent": "asia",
+    "lat": 37.567,
+    "lon": 126.978,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "monsoon",
+      "temperate"
+    ]
+  },
+  {
+    "id": "istanbul",
+    "name": {
+      "en": "Istanbul"
+    },
+    "country": "TR",
+    "continent": "asia",
+    "lat": 41.009,
+    "lon": 28.978,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean",
+      "temperate",
+      "maritime"
+    ]
+  },
+  {
+    "id": "tbilisi",
+    "name": {
+      "en": "Tbilisi"
+    },
+    "country": "GE",
+    "continent": "asia",
+    "lat": 41.715,
+    "lon": 44.827,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "temperate"
+    ]
+  },
+  {
+    "id": "riyadh",
+    "name": {
+      "en": "Riyadh",
+      "sl": "Rijad"
+    },
+    "country": "SA",
+    "continent": "asia",
+    "lat": 24.714,
+    "lon": 46.675,
+    "archetype": "desert",
+    "tags": [
+      "desert"
+    ]
+  },
+  {
+    "id": "colombo",
+    "name": {
+      "en": "Colombo"
+    },
+    "country": "LK",
+    "continent": "asia",
+    "lat": 6.927,
+    "lon": 79.861,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "monsoon",
+      "island",
+      "maritime"
+    ]
+  },
+  {
+    "id": "denpasar",
+    "name": {
+      "en": "Denpasar"
+    },
+    "country": "ID",
+    "continent": "asia",
+    "lat": -8.65,
+    "lon": 115.217,
+    "archetype": "island",
+    "tags": [
+      "island",
+      "tropical",
+      "monsoon"
+    ],
+    "note": "A small island in a large grid cell: the weather data is partly open sea."
+  },
+  {
+    "id": "almaty",
+    "name": {
+      "en": "Almaty",
+      "sl": "Almati"
+    },
+    "country": "KZ",
+    "continent": "asia",
+    "lat": 43.238,
+    "lon": 76.889,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "steppe",
+      "highland"
+    ],
+    "note": "At the foot of the Tien Shan: the grid point mixes city and mountain terrain."
+  },
+  {
+    "id": "bangkok",
+    "name": {
+      "en": "Bangkok"
+    },
+    "country": "TH",
+    "continent": "asia",
+    "lat": 13.756,
+    "lon": 100.502,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "monsoon"
+    ]
+  },
+  {
+    "id": "lhasa",
+    "name": {
+      "en": "Lhasa"
+    },
+    "country": "CN",
+    "continent": "asia",
+    "lat": 29.65,
+    "lon": 91.1,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "steppe"
+    ],
+    "note": "At about 3,650 m on the Tibetan Plateau; the grid point may sit at a different height."
+  },
+  {
+    "id": "reykjavik",
+    "name": {
+      "en": "Reykjavik"
+    },
+    "country": "IS",
+    "continent": "europe",
+    "lat": 64.147,
+    "lon": -21.942,
+    "archetype": "island",
+    "tags": [
+      "island",
+      "oceanic",
+      "subarctic"
+    ]
+  },
+  {
+    "id": "ljubljana",
+    "name": {
+      "en": "Ljubljana"
+    },
+    "country": "SI",
+    "continent": "europe",
+    "lat": 46.057,
+    "lon": 14.506,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "temperate"
+    ]
+  },
+  {
+    "id": "lisbon",
+    "name": {
+      "en": "Lisbon",
+      "sl": "Lizbona"
+    },
+    "country": "PT",
+    "continent": "europe",
+    "lat": 38.722,
+    "lon": -9.139,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean",
+      "maritime"
+    ]
+  },
+  {
+    "id": "athens",
+    "name": {
+      "en": "Athens",
+      "sl": "Atene"
+    },
+    "country": "GR",
+    "continent": "europe",
+    "lat": 37.984,
+    "lon": 23.728,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean"
+    ]
+  },
+  {
+    "id": "tromso",
+    "name": {
+      "en": "Tromsø"
+    },
+    "country": "NO",
+    "continent": "europe",
+    "lat": 69.649,
+    "lon": 18.956,
+    "archetype": "subarctic",
+    "tags": [
+      "subarctic",
+      "maritime",
+      "oceanic"
+    ]
+  },
+  {
+    "id": "edinburgh",
+    "name": {
+      "en": "Edinburgh",
+      "sl": "Edinburg"
+    },
+    "country": "GB",
+    "continent": "europe",
+    "lat": 55.953,
+    "lon": -3.189,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "maritime",
+      "temperate"
+    ]
+  },
+  {
+    "id": "seville",
+    "name": {
+      "en": "Seville",
+      "sl": "Sevilja"
+    },
+    "country": "ES",
+    "continent": "europe",
+    "lat": 37.389,
+    "lon": -5.984,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean"
+    ]
+  },
+  {
+    "id": "moscow",
+    "name": {
+      "en": "Moscow",
+      "sl": "Moskva"
+    },
+    "country": "RU",
+    "continent": "europe",
+    "lat": 55.756,
+    "lon": 37.617,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "temperate"
+    ]
+  },
+  {
+    "id": "bergen",
+    "name": {
+      "en": "Bergen"
+    },
+    "country": "NO",
+    "continent": "europe",
+    "lat": 60.391,
+    "lon": 5.324,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "maritime"
+    ]
+  },
+  {
+    "id": "longyearbyen",
+    "name": {
+      "en": "Longyearbyen"
+    },
+    "country": "NO",
+    "continent": "europe",
+    "lat": 78.223,
+    "lon": 15.627,
+    "archetype": "polar",
+    "tags": [
+      "polar",
+      "island",
+      "maritime"
+    ],
+    "note": "Arctic settlement on Svalbard, surrounded by fjords and glaciers; the grid point mixes land and sea."
+  },
+  {
+    "id": "zermatt",
+    "name": {
+      "en": "Zermatt"
+    },
+    "country": "CH",
+    "continent": "europe",
+    "lat": 46.021,
+    "lon": 7.749,
+    "archetype": "highland",
+    "tags": [
+      "highland"
+    ],
+    "note": "Zermatt area, in the Alps. The grid point is about 25 km wide and cannot resolve the valley, so it is a regional approximation."
+  },
+  {
+    "id": "madrid",
+    "name": {
+      "en": "Madrid"
+    },
+    "country": "ES",
+    "continent": "europe",
+    "lat": 40.417,
+    "lon": -3.704,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "mediterranean",
+      "steppe",
+      "highland"
+    ]
+  },
+  {
+    "id": "vienna",
+    "name": {
+      "en": "Vienna",
+      "sl": "Dunaj"
+    },
+    "country": "AT",
+    "continent": "europe",
+    "lat": 48.208,
+    "lon": 16.373,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "temperate"
+    ]
+  },
+  {
+    "id": "phoenix",
+    "name": {
+      "en": "Phoenix"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 33.449,
+    "lon": -112.074,
+    "archetype": "desert",
+    "tags": [
+      "desert"
+    ]
+  },
+  {
+    "id": "miami",
+    "name": {
+      "en": "Miami"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 25.762,
+    "lon": -80.192,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "maritime",
+      "monsoon"
+    ]
+  },
+  {
+    "id": "anchorage",
+    "name": {
+      "en": "Anchorage"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 61.218,
+    "lon": -149.9,
+    "archetype": "subarctic",
+    "tags": [
+      "subarctic",
+      "maritime"
+    ]
+  },
+  {
+    "id": "honolulu",
+    "name": {
+      "en": "Honolulu"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 21.307,
+    "lon": -157.858,
+    "archetype": "island",
+    "tags": [
+      "island",
+      "tropical",
+      "maritime"
+    ],
+    "note": "A small island in a large grid cell: the weather data is partly open sea."
+  },
+  {
+    "id": "vancouver",
+    "name": {
+      "en": "Vancouver"
+    },
+    "country": "CA",
+    "continent": "north-america",
+    "lat": 49.283,
+    "lon": -123.121,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "pacific-coast",
+      "maritime",
+      "temperate"
+    ]
+  },
+  {
+    "id": "mexico-city",
+    "name": {
+      "en": "Mexico City"
+    },
+    "country": "MX",
+    "continent": "north-america",
+    "lat": 19.433,
+    "lon": -99.133,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "tropical",
+      "temperate"
+    ]
+  },
+  {
+    "id": "denver",
+    "name": {
+      "en": "Denver"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 39.739,
+    "lon": -104.99,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "steppe",
+      "highland"
+    ]
+  },
+  {
+    "id": "new-orleans",
+    "name": {
+      "en": "New Orleans"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 29.951,
+    "lon": -90.072,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "temperate",
+      "maritime"
+    ]
+  },
+  {
+    "id": "yellowknife",
+    "name": {
+      "en": "Yellowknife"
+    },
+    "country": "CA",
+    "continent": "north-america",
+    "lat": 62.454,
+    "lon": -114.372,
+    "archetype": "subarctic",
+    "tags": [
+      "subarctic",
+      "continental"
+    ]
+  },
+  {
+    "id": "havana",
+    "name": {
+      "en": "Havana"
+    },
+    "country": "CU",
+    "continent": "north-america",
+    "lat": 23.114,
+    "lon": -82.366,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "island",
+      "maritime",
+      "savanna"
+    ]
+  },
+  {
+    "id": "san-francisco",
+    "name": {
+      "en": "San Francisco"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 37.775,
+    "lon": -122.419,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean",
+      "pacific-coast",
+      "maritime"
+    ]
+  },
+  {
+    "id": "chicago",
+    "name": {
+      "en": "Chicago"
+    },
+    "country": "US",
+    "continent": "north-america",
+    "lat": 41.878,
+    "lon": -87.63,
+    "archetype": "continental",
+    "tags": [
+      "continental",
+      "temperate"
+    ]
+  },
+  {
+    "id": "lima",
+    "name": {
+      "en": "Lima"
+    },
+    "country": "PE",
+    "continent": "south-america",
+    "lat": -12.046,
+    "lon": -77.043,
+    "archetype": "desert",
+    "tags": [
+      "desert",
+      "pacific-coast",
+      "maritime"
+    ]
+  },
+  {
+    "id": "arica",
+    "name": {
+      "en": "Arica"
+    },
+    "country": "CL",
+    "continent": "south-america",
+    "lat": -18.478,
+    "lon": -70.322,
+    "archetype": "desert",
+    "tags": [
+      "desert",
+      "pacific-coast"
+    ]
+  },
+  {
+    "id": "rio-de-janeiro",
+    "name": {
+      "en": "Rio de Janeiro"
+    },
+    "country": "BR",
+    "continent": "south-america",
+    "lat": -22.907,
+    "lon": -43.173,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "maritime"
+    ]
+  },
+  {
+    "id": "quito",
+    "name": {
+      "en": "Quito"
+    },
+    "country": "EC",
+    "continent": "south-america",
+    "lat": -0.18,
+    "lon": -78.468,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "equatorial"
+    ]
+  },
+  {
+    "id": "ushuaia",
+    "name": {
+      "en": "Ushuaia"
+    },
+    "country": "AR",
+    "continent": "south-america",
+    "lat": -54.802,
+    "lon": -68.303,
+    "archetype": "subarctic",
+    "tags": [
+      "subarctic",
+      "maritime",
+      "oceanic"
+    ]
+  },
+  {
+    "id": "buenos-aires",
+    "name": {
+      "en": "Buenos Aires"
+    },
+    "country": "AR",
+    "continent": "south-america",
+    "lat": -34.604,
+    "lon": -58.382,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "temperate",
+      "maritime"
+    ]
+  },
+  {
+    "id": "bogota",
+    "name": {
+      "en": "Bogotá"
+    },
+    "country": "CO",
+    "continent": "south-america",
+    "lat": 4.711,
+    "lon": -74.072,
+    "archetype": "highland",
+    "tags": [
+      "highland",
+      "equatorial"
+    ]
+  },
+  {
+    "id": "manaus",
+    "name": {
+      "en": "Manaus"
+    },
+    "country": "BR",
+    "continent": "south-america",
+    "lat": -3.119,
+    "lon": -60.022,
+    "archetype": "tropical",
+    "tags": [
+      "equatorial",
+      "tropical"
+    ]
+  },
+  {
+    "id": "la-paz",
+    "name": {
+      "en": "La Paz"
+    },
+    "country": "BO",
+    "continent": "south-america",
+    "lat": -16.5,
+    "lon": -68.15,
+    "archetype": "highland",
+    "tags": [
+      "highland"
+    ],
+    "note": "At about 3,600 m in a high basin; the grid point may sit at a different height."
+  },
+  {
+    "id": "santiago",
+    "name": {
+      "en": "Santiago"
+    },
+    "country": "CL",
+    "continent": "south-america",
+    "lat": -33.449,
+    "lon": -70.669,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean",
+      "temperate"
+    ]
+  },
+  {
+    "id": "sydney",
+    "name": {
+      "en": "Sydney"
+    },
+    "country": "AU",
+    "continent": "oceania",
+    "lat": -33.869,
+    "lon": 151.209,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "temperate",
+      "maritime"
+    ]
+  },
+  {
+    "id": "auckland",
+    "name": {
+      "en": "Auckland"
+    },
+    "country": "NZ",
+    "continent": "oceania",
+    "lat": -36.849,
+    "lon": 174.763,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "maritime",
+      "island"
+    ]
+  },
+  {
+    "id": "perth",
+    "name": {
+      "en": "Perth"
+    },
+    "country": "AU",
+    "continent": "oceania",
+    "lat": -31.951,
+    "lon": 115.861,
+    "archetype": "mediterranean",
+    "tags": [
+      "mediterranean",
+      "maritime"
+    ]
+  },
+  {
+    "id": "darwin",
+    "name": {
+      "en": "Darwin"
+    },
+    "country": "AU",
+    "continent": "oceania",
+    "lat": -12.463,
+    "lon": 130.846,
+    "archetype": "monsoon",
+    "tags": [
+      "monsoon",
+      "tropical",
+      "savanna"
+    ]
+  },
+  {
+    "id": "hobart",
+    "name": {
+      "en": "Hobart"
+    },
+    "country": "AU",
+    "continent": "oceania",
+    "lat": -42.883,
+    "lon": 147.328,
+    "archetype": "oceanic",
+    "tags": [
+      "oceanic",
+      "maritime",
+      "island"
+    ]
+  },
+  {
+    "id": "suva",
+    "name": {
+      "en": "Suva"
+    },
+    "country": "FJ",
+    "continent": "oceania",
+    "lat": -18.142,
+    "lon": 178.442,
+    "archetype": "island",
+    "tags": [
+      "island",
+      "tropical",
+      "maritime"
+    ]
+  },
+  {
+    "id": "mcmurdo-station",
+    "name": {
+      "en": "McMurdo Station",
+      "sl": "Postaja McMurdo"
+    },
+    "country": "AQ",
+    "continent": "oceania",
+    "lat": -77.846,
+    "lon": 166.668,
+    "archetype": "polar",
+    "tags": [
+      "polar",
+      "maritime"
+    ],
+    "note": "Antarctic research station on Ross Island. Grouped with Oceania because it is administered from there; the grid point mixes ice, rock and sea."
+  },
+  {
+    "id": "brisbane",
+    "name": {
+      "en": "Brisbane"
+    },
+    "country": "AU",
+    "continent": "oceania",
+    "lat": -27.47,
+    "lon": 153.026,
+    "archetype": "tropical",
+    "tags": [
+      "tropical",
+      "temperate",
+      "pacific-coast"
+    ]
+  }
+]

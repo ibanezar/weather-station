@@ -1,0 +1,132 @@
+// Sharing a finished run: a text message and an image (SPEC 6.8). The Web Share API is used with the
+// image where the browser can share files; otherwise the text is copied and the image is offered as a
+// download.
+import { shareImageModel, buildShareText } from '../engine/share.ts';
+import type { MessageKey } from '../i18n/index.ts';
+import { canvasToBlob, renderShareImage, type ShareFormat } from '../ui/canvas/shareImage.ts';
+import { isPatternMode } from '../ui/settings.ts';
+import type { App } from './app.ts';
+import { cities } from './data.ts';
+import type { Session } from './session.ts';
+
+/** Public address of the game. */
+export const GAME_URL = 'https://meteorec.si/365-0/';
+
+export type ShareOutcome = 'shared' | 'copied' | 'downloaded' | 'failed';
+
+export function shareText(app: App, session: Session): string {
+  const result = session.state.result;
+  if (!result) throw new Error('no result to share');
+  const { t } = app.i18n;
+  return buildShareText(result, {
+    title: t('app.title'),
+    modeLabel: t(`mode.${session.mode}` as MessageKey),
+    recordLabel: t('result.recordLabel'),
+    gradeTitle: t(`grade.${result.grade}` as MessageKey),
+    ...(session.mode === 'daily' && session.date !== undefined ? { date: session.date } : {}),
+    url: GAME_URL,
+  });
+}
+
+export function imageFileName(session: Session, format: ShareFormat): string {
+  const day = session.mode === 'daily' && session.date !== undefined ? session.date : 'endless';
+  return `365-0-${day}${format === 'story' ? '-story' : ''}.png`;
+}
+
+/** Render the share image for a finished session. */
+export async function createShareImage(
+  app: App,
+  session: Session,
+  format: ShareFormat,
+): Promise<Blob> {
+  const result = session.state.result;
+  if (!result) throw new Error('no result to share');
+  const { t } = app.i18n;
+  const model = shareImageModel(result, {
+    mode: session.mode,
+    ...(session.date !== undefined ? { date: session.date } : {}),
+  });
+  const daily = session.mode === 'daily';
+  const canvas = await renderShareImage(
+    model,
+    {
+      title: t('app.title'),
+      subtitle: [t(`mode.${session.mode}` as MessageKey), daily ? session.date : undefined]
+        .filter(Boolean)
+        .join(' '),
+      gradeTitle: t(`grade.${result.grade}` as MessageKey),
+      bestLine: t(daily ? 'share.bestToday' : 'share.bestRun', { n: result.bestRecord.w }),
+      youLine: t('result.yours', { n: result.record.w }),
+      abbreviations: result.rounds.map((r) => {
+        const city = cities.find((c) => c.id === r.cityId);
+        return city ? app.fmt.abbreviation(city) : '';
+      }),
+      url: GAME_URL.replace(/^https:\/\//, ''),
+    },
+    format,
+    isPatternMode(),
+  );
+  return canvasToBlob(canvas);
+}
+
+function download(blob: Blob, name: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 10000);
+}
+
+export async function shareResult(
+  app: App,
+  session: Session,
+  format: ShareFormat = 'feed',
+): Promise<ShareOutcome> {
+  const text = shareText(app, session);
+  let blob: Blob | undefined;
+  try {
+    blob = await createShareImage(app, session, format);
+  } catch {
+    blob = undefined;
+  }
+
+  // 1. The share sheet, with the image where files can be shared.
+  try {
+    if (typeof navigator.share === 'function') {
+      const file = blob
+        ? new File([blob], imageFileName(session, format), { type: 'image/png' })
+        : undefined;
+      if (
+        file &&
+        typeof navigator.canShare === 'function' &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({ files: [file], text });
+      } else {
+        await navigator.share({ text });
+      }
+      return 'shared';
+    }
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return 'failed';
+  }
+
+  // 2. No share sheet: copy the text and offer the image as a download.
+  let copied: boolean;
+  try {
+    await navigator.clipboard.writeText(text);
+    copied = true;
+  } catch {
+    copied = false;
+  }
+  if (blob) {
+    download(blob, imageFileName(session, format));
+    return copied ? 'downloaded' : 'failed';
+  }
+  return copied ? 'copied' : 'failed';
+}

@@ -3082,6 +3082,10 @@ Stran je zato okrepljena: naslov »Vreme Savinjska: Zgornja Savinjska dolina, da
 in razdelek »katera Savinjska je mišljena?«. **Pokrivamo samo zgornji del doline**; za Žalec, Celje, Velenje stran napoti na ARSO in ne trdi, da postaja velja tam. Pot strani je v `PATHS` v `prerender-current.yml`.
 **Podatkov o poizvedbi ni**: izvoza GSC (`docs/gsc-2026-10*.md`) ne vsebujeta niti prikazov niti položaja za ta izraz; učinek preveri v GSC čez 2–3 tedne in šele nato odloči o nadaljnjih korakih (npr. povezave z naslovnice, članek).
 
+## Igra 365-0 (`/365-0/`, 7. 11. 2026)
+
+Ločen projekt (Vite + TypeScript, brez povezave z ostalim delom strani). **Izvorna koda je v `365-0-game/`** (svoj `CLAUDE.md`, `SPEC.md`, testi); `365-0/` je **generiran izhod gradnje**, ki ga zapiše `365-0-publish.yml` ob spremembi `365-0-game/**` na `main` -- ne urejaj ga ročno. Pages streže repozitorij kot datoteke, zato izvorna mapa ne more biti na istem URL-ju kot izhod. Obe mapi sta v `SKIP_DIRS` v `check_links.py` in `geo_audit.py`. Podatke (vreme 2016-2025) osveži `365-0-data.yml`.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

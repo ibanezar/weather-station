@@ -1,0 +1,55 @@
+.toast-region {
+  position: fixed;
+  inset-inline: 0;
+  bottom: max(var(--space-5), env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  padding-inline: var(--gutter);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap);
+  max-width: var(--content-max);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  background: var(--ink);
+  color: var(--surface);
+  border-radius: var(--radius-button);
+  transition:
+    opacity var(--dur-quick) var(--ease-out),
+    transform var(--dur-quick) var(--ease-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.toast__message {
+  font-size: var(--text-small);
+}
+
+.toast__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-chip);
+  font-size: var(--text-small);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+/* On the inverted toast the focus ring takes the toast's text colour. */
+.toast :focus-visible {
+  --focus: var(--surface);
+}

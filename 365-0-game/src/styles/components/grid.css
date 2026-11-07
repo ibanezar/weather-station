@@ -1,0 +1,115 @@
+/*
+ * Day-type classes: .day-p .day-o .day-r .day-s .day-h .day-f set --day (the fill); the four loss types
+ * also set --p (the pattern line colour). Pattern mode then sets --pat, the pattern drawn over the tile.
+ * The gradients live on these selectors (not on :root) because they refer to --p, which only exists here.
+ */
+.day-p {
+  --day: var(--day-perfect);
+}
+.day-o {
+  --day: var(--day-ok);
+}
+.day-r {
+  --day: var(--day-rain);
+  --p: var(--pattern-on-rain);
+}
+.day-s {
+  --day: var(--day-storm);
+  --p: var(--pattern-on-storm);
+}
+.day-h {
+  --day: var(--day-heat);
+  --p: var(--pattern-on-heat);
+}
+.day-f {
+  --day: var(--day-freeze);
+  --p: var(--pattern-on-freeze);
+}
+
+/* Pattern mode is a setting, and automatic when the system asks for more contrast. The patterns make
+   meaning independent of colour: rain diagonal lines, storm crosshatch, heat dots, freeze verticals.
+   The two blocks below are the same rules for the two ways of switching the mode on. */
+:root[data-pattern='on'] .day-r {
+  --pat: repeating-linear-gradient(135deg, var(--p) 0 1.5px, transparent 1.5px 5px);
+}
+:root[data-pattern='on'] .day-s {
+  --pat:
+    repeating-linear-gradient(45deg, var(--p) 0 1.5px, transparent 1.5px 5px),
+    repeating-linear-gradient(135deg, var(--p) 0 1.5px, transparent 1.5px 5px);
+}
+:root[data-pattern='on'] .day-h {
+  --pat: radial-gradient(circle, var(--p) 1.3px, transparent 1.7px);
+  --pat-size: 5px 5px;
+}
+:root[data-pattern='on'] .day-f {
+  --pat: repeating-linear-gradient(90deg, var(--p) 0 1.5px, transparent 1.5px 5px);
+}
+@media (prefers-contrast: more) {
+  :root:not([data-pattern='off']) .day-r {
+    --pat: repeating-linear-gradient(135deg, var(--p) 0 1.5px, transparent 1.5px 5px);
+  }
+  :root:not([data-pattern='off']) .day-s {
+    --pat:
+      repeating-linear-gradient(45deg, var(--p) 0 1.5px, transparent 1.5px 5px),
+      repeating-linear-gradient(135deg, var(--p) 0 1.5px, transparent 1.5px 5px);
+  }
+  :root:not([data-pattern='off']) .day-h {
+    --pat: radial-gradient(circle, var(--p) 1.3px, transparent 1.7px);
+    --pat-size: 5px 5px;
+  }
+  :root:not([data-pattern='off']) .day-f {
+    --pat: repeating-linear-gradient(90deg, var(--p) 0 1.5px, transparent 1.5px 5px);
+  }
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-tile);
+  border: 1px solid var(--border-strong);
+  background-color: var(--day);
+  background-image: var(--pat, none);
+  background-size: var(--pat-size, auto);
+}
+
+.swatch--loss {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  padding: 0;
+  background: none;
+}
+.swatch__part {
+  background-color: var(--day);
+  background-image: var(--pat, none);
+  background-size: var(--pat-size, auto);
+}
+
+/* The scoreboard panel behind the year grid. */
+.well {
+  background: var(--well);
+  color: var(--on-well);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+}
+
+.grid-panel__labels {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-small);
+  line-height: 1;
+  color: var(--on-well-muted);
+  text-align: center;
+}
+
+.grid-panel canvas {
+  display: block;
+  width: 100%;
+}

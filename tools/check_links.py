@@ -27,7 +27,8 @@ from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LINK_RE = re.compile(r'''(?:href|src)\s*=\s*["']([^"'#?\s][^"'\s]*)["']''', re.I)
-SKIP_DIRS = ("node_modules", ".git", "makro-inbox")
+# 365-0: ločen projekt (Vite aplikacija, ne del strani meteorec.si).
+SKIP_DIRS = ("node_modules", ".git", "makro-inbox", "365-0", "365-0-game")
 # Strani, ki niso objavljene ali so namenoma predloge.
 SKIP_FILES = ("crnivec-brand/",)
 # Brskalniški UA: nekateri strežniki (npr. Weather Underground) robotom vrnejo 404.

@@ -1,0 +1,59 @@
+.progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.progress__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.progress__count {
+  font-size: var(--text-caption);
+  color: var(--ink-muted);
+  line-height: 1.2;
+}
+
+.progress__steps {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress__step {
+  flex: 1 1 0;
+  max-width: 18px;
+  height: 8px;
+  border: 1.5px solid var(--ink-muted);
+  border-radius: var(--radius-tile);
+}
+
+.progress__step[data-state='done'] {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* The current step is taller and gold, so it does not depend on colour alone. */
+.progress__step[data-state='current'] {
+  height: 14px;
+  background: var(--accent);
+  border-color: var(--ink);
+  align-self: center;
+}
+
+.progress__scouts {
+  flex: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-small);
+  font-weight: 600;
+}

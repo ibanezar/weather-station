@@ -1,0 +1,58 @@
+[
+  {
+    "id": "heatwave",
+    "name": "Heatwave",
+    "blurb": "Hot places run hotter.",
+    "tags": ["mediterranean", "continental", "desert", "temperate"],
+    "transforms": [{ "from": ["o", "p"], "to": "h", "p": 0.35 }]
+  },
+  {
+    "id": "polar-vortex",
+    "name": "Polar vortex",
+    "blurb": "Cold air spills south and freezes mild days.",
+    "tags": ["continental", "subarctic", "temperate"],
+    "transforms": [{ "from": ["o", "r"], "to": "f", "p": 0.4 }]
+  },
+  {
+    "id": "el-nino",
+    "name": "El Niño surge",
+    "blurb": "Wet spells hit the Pacific coasts and the tropics.",
+    "tags": ["pacific-coast", "tropical"],
+    "transforms": [{ "from": ["o"], "to": "r", "p": 0.3 }]
+  },
+  {
+    "id": "monsoon-surge",
+    "name": "Monsoon surge",
+    "blurb": "Monsoon rains arrive early and hard.",
+    "tags": ["monsoon", "tropical"],
+    "transforms": [{ "from": ["o", "p"], "to": "r", "p": 0.35 }]
+  },
+  {
+    "id": "dust-wind",
+    "name": "Dust and wind event",
+    "blurb": "Dry lands get dust and gale-force gusts.",
+    "tags": ["desert", "steppe"],
+    "transforms": [{ "from": ["p", "o"], "to": "s", "p": 0.25 }]
+  },
+  {
+    "id": "winter-storm-track",
+    "name": "Winter storm track",
+    "blurb": "Atlantic storms roll in.",
+    "tags": ["oceanic", "maritime"],
+    "transforms": [{ "from": ["o", "r"], "to": "s", "p": 0.3 }]
+  },
+  {
+    "id": "blocking-high",
+    "name": "Blocking high",
+    "blurb": "A stuck ridge of high pressure brings fine weather.",
+    "tags": ["oceanic", "temperate", "mediterranean"],
+    "transforms": [{ "from": ["o"], "to": "p", "p": 0.4 }]
+  },
+  {
+    "id": "clear-spell",
+    "name": "Clear spell",
+    "blurb": "Clear skies for everyone.",
+    "tags": "all",
+    "transforms": [{ "from": ["o"], "to": "p", "p": 0.25 }]
+  }
+]

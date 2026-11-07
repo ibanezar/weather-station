@@ -1,0 +1,150 @@
+/*
+ * Design tokens (SPEC 6.3 and 6.4). Colours are OKLCH; theme comes from light-dark() and follows
+ * color-scheme, which the data-theme attribute on <html> can override.
+ * `npm run contrast` parses this file and fails the build if a pair drops below its limit.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces and text. Hex targets from the SPEC are listed in docs/tokens.md. */
+  --surface: light-dark(oklch(0.956 0.006 239.8), oklch(0.2 0.031 261.2));
+  --raised: light-dark(oklch(1 0 0), oklch(0.258 0.047 262.6));
+  --ink: light-dark(oklch(0.239 0.032 252.9), oklch(0.947 0.011 252.1));
+  --ink-muted: light-dark(oklch(0.52 0.034 248.5), oklch(0.709 0.032 251.4));
+  --border: color-mix(in oklab, var(--ink) 12%, transparent);
+  --border-strong: color-mix(in oklab, var(--ink) 45%, transparent);
+
+  /* The year grid sits on a dark scoreboard panel in both themes, so the six colours always have
+     the same dark background and keep at least 3:1 against it. */
+  --well: light-dark(oklch(0.239 0.032 252.9), oklch(0.177 0.025 259.2));
+  --on-well: oklch(0.947 0.011 252.1);
+  --on-well-muted: oklch(0.709 0.032 251.4);
+
+  /* Day types. Used as tile fills and swatches, never as text colour on the surface. Lightness is
+     adjusted from the SPEC hex targets so all six stay apart under colour-blindness simulation. */
+  --day-perfect: oklch(0.825 0.17 80);
+  --day-ok: oklch(0.79 0.02 246);
+  --day-rain: oklch(0.56 0.18 261);
+  --day-storm: oklch(0.71 0.16 310);
+  --day-heat: oklch(0.648 0.2 34.4);
+  --day-freeze: oklch(0.9 0.075 205);
+
+  /* Pattern lines drawn over the four loss types in pattern mode. */
+  --pattern-on-rain: oklch(0.97 0.01 250);
+  --pattern-on-storm: oklch(0.239 0.032 252.9);
+  --pattern-on-heat: oklch(0.239 0.032 252.9);
+  --pattern-on-freeze: oklch(0.239 0.032 252.9);
+
+  /* Interaction. The label on the gold button is a fixed dark ink in both themes. */
+  --accent: var(--day-perfect);
+  --on-accent: oklch(0.239 0.032 252.9);
+  --focus: var(--ink);
+  --focus-width: 3px;
+  --focus-offset: 2px;
+
+  /* Spacing: 4 px base. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Shape: a radius hierarchy, not one radius for everything. */
+  --radius-tile: 3px;
+  --radius-chip: 999px;
+  --radius-button: 16px;
+  --radius-card: 20px;
+  --radius-sheet: 28px;
+
+  /* Type. Display is the scoreboard voice, UI is the friendly grotesque. */
+  --font-display:
+    'Big Shoulders Display Variable', 'Big Shoulders Display Fallback', 'Arial Narrow',
+    'Roboto Condensed', sans-serif;
+  --font-ui:
+    'Instrument Sans Variable', 'Instrument Sans Fallback', system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+  --text-caption: 13px;
+  --text-small: 15px;
+  --text-body: 17px;
+  --text-title: 20px;
+  --text-heading: 28px;
+  --text-display: 44px;
+  --text-record: clamp(72px, 22vw, 120px);
+  /* For W-D-L records, which can be eleven characters (100-100-165) and must stay on one line. */
+  --text-record-fit: clamp(56px, 18vw, 96px);
+  --leading-body: 1.5;
+  --leading-display: 1.05;
+
+  /* Touch targets. */
+  --tap: 56px;
+  --tap-small: 48px;
+
+  /* Motion. Only transform and opacity are animated. */
+  --dur-instant: 80ms;
+  --dur-quick: 160ms;
+  --dur-base: 240ms;
+  --dur-tile: 120ms;
+  --dur-flip: 200ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  /* A springy curve for presses and flips. */
+  --ease-spring: linear(
+    0,
+    0.009,
+    0.035 2.1%,
+    0.141,
+    0.281 6.7%,
+    0.723 12.9%,
+    0.938 16.7%,
+    1.017,
+    1.077,
+    1.121,
+    1.149 24.3%,
+    1.159,
+    1.163,
+    1.161,
+    1.154 29.9%,
+    1.129 32.8%,
+    1.051 39.6%,
+    1.017 43.1%,
+    0.991,
+    0.977 51%,
+    0.974 53.8%,
+    0.975 57.1%,
+    0.997 69.8%,
+    1.003 76.9%,
+    1
+  );
+
+  /* Layout. */
+  --content-max: 480px;
+  --gutter: var(--space-4);
+}
+
+/* A theme chosen in Settings wins over the system theme. */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* Reduced motion: one switch for the whole app. The system setting applies unless the player forces
+   full motion; the in-app override can force reduced motion on. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full']) {
+    --dur-instant: 0ms;
+    --dur-quick: 0ms;
+    --dur-base: 0ms;
+    --dur-tile: 0ms;
+    --dur-flip: 0ms;
+  }
+}
+:root[data-motion='reduce'] {
+  --dur-instant: 0ms;
+  --dur-quick: 0ms;
+  --dur-base: 0ms;
+  --dur-tile: 0ms;
+  --dur-flip: 0ms;
+}

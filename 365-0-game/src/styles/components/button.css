@@ -1,0 +1,47 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-small);
+  padding: 0 var(--space-5);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-button);
+  background: var(--raised);
+  color: var(--ink);
+  font-size: var(--text-body);
+  font-weight: 650;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--dur-quick) var(--ease-spring);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  min-height: var(--tap);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: color-mix(in oklab, var(--on-accent) 35%, transparent);
+}
+
+/* The label on gold is fixed dark ink, so the focus ring on it must be dark too. */
+.btn--primary:focus-visible {
+  --focus: var(--on-accent);
+}
+
+.btn--quiet {
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn--full {
+  width: 100%;
+}
