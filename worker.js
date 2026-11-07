@@ -3772,6 +3772,22 @@ function _mkPoints() {
 function _mkChunks(a, n) { const o = []; for (let i = 0; i < a.length; i += n) o.push(a.slice(i, i + n)); return o; }
 function _mkR(x, d) { return x == null || isNaN(x) ? null : +x.toFixed(d); }
 
+// Klic Open-Meteo s ponovitvijo: en spodleteli kos ne sme podreti cele karte. Ob 429 (minutna
+// omejitev, skupna z vsemi kartami) se počaka 20 s oziroma 40 s, drugače 1,5 s oziroma 3 s.
+async function _mkFetchOM(u) {
+  let r = null;
+  for (let a = 0; a < 3; a++) {
+    try { r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } }); if (r.ok) return r; } catch (_) { r = null; }
+    if (a < 2) await new Promise(res => setTimeout(res, r && r.status === 429 ? 20000 * (a + 1) : 1500 * (a + 1)));
+  }
+  throw new Error("open-meteo " + (r ? r.status : "povezava"));
+}
+// Model, ki nima nobene vrednosti (npr. GeoSphere vrne prazen seznam časov, ker je njegov tek star),
+// ni model: odjemalec bi ga štel za veljavnega in narisal prazne karte.
+function _mkHasData(m, fields) {
+  return fields.some(f => (m[f] || []).some(row => row.some(v => v != null)));
+}
+
 // hourly: po urah {p (mm v uri), t, g} na oznakah ts (ms, UTC). Korak k pokrije
 // (t0+3(k-1), t0+3k]; padavine so skupne od t0, sunek je največji v koraku.
 function _mkReduce(ts, hourly, t0) {
@@ -3803,8 +3819,7 @@ async function _mkOpenMeteo(t0, pts) {
       + "&longitude=" + ch.map(c => c[0][1]).join(",")
       + "&hourly=temperature_2m,precipitation,wind_gusts_10m&models=" + models.join(",")
       + "&forecast_days=3&timezone=UTC";
-    const r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } });
-    if (!r.ok) throw new Error("open-meteo " + r.status);
+    const r = await _mkFetchOM(u);
     let j = await r.json(); if (!Array.isArray(j)) j = [j];
     j.forEach((loc, n) => {
       const H = loc.hourly, ts = H.time.map(x => Date.parse(x + ":00Z"));
@@ -3829,6 +3844,7 @@ async function _mkArome(t0, pts) {
       if (!r.ok) throw new Error("geosphere " + r.status);
       const j = await r.json();
       runIso = j.reference_time;
+      if (!j.timestamps || !j.timestamps.length) throw new Error("geosphere: prazen tek " + runIso);
       const ts = j.timestamps.map(Date.parse);
       j.features.forEach((f, n) => {
         const P = f.properties.parameters, acc = P.rr_acc.data;
@@ -3856,9 +3872,10 @@ async function _mkBuild() {
     }
     return m;
   }
-  if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { out.models[k] = pack(labels[k], om.value[k]); });
-  if (ar.status === "fulfilled") out.models.arome = pack(labels.arome, ar.value.cells, ar.value.run);
+  if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { const m = pack(labels[k], om.value[k]); if (_mkHasData(m, ["p", "t", "g"])) out.models[k] = m; });
+  if (ar.status === "fulfilled") { const m = pack(labels.arome, ar.value.cells, ar.value.run); if (_mkHasData(m, ["p", "t", "g"])) out.models.arome = m; }
   out.failed = [om.status === "rejected" ? "open-meteo" : null, ar.status === "rejected" ? "geosphere" : null].filter(Boolean);
+  out.errors = [om.reason, ar.reason].filter(Boolean).map(e => String(e.message || e));
   if (!Object.keys(out.models).length) throw new Error("noben model ni dosegljiv: " + (om.reason || "") + " " + (ar.reason || ""));
   return out;
 }
@@ -3976,15 +3993,7 @@ async function _mk2OpenMeteo(t0, pts) {
       + "&longitude=" + ch.map(c => c[0][1]).join(",")
       + "&hourly=wind_speed_10m,wind_direction_10m,cloud_cover,pressure_msl,cape,freezing_level_height"
       + "&models=" + models.join(",") + "&forecast_days=3&timezone=UTC";
-    // En spodleteli kos ne sme podreti cele karte: do 3 poskusov. Ob 429 (minutna omejitev
-    // Open-Meteo, skupna z /modeli-karta.json in /sneg-karta.json) je kratek premor brez smisla,
-    // zato se počaka 20 s oziroma 40 s; drugače 1,5 s.
-    let r = null;
-    for (let a = 0; a < 3; a++) {
-      try { r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } }); if (r.ok) break; } catch (_) { r = null; }
-      if (a < 2) await new Promise(res => setTimeout(res, r && r.status === 429 ? 20000 * (a + 1) : 1500 * (a + 1)));
-    }
-    if (!r || !r.ok) throw new Error("open-meteo " + (r ? r.status : "povezava"));
+    const r = await _mkFetchOM(u);
     let j = await r.json(); if (!Array.isArray(j)) j = [j];
     j.forEach((loc, n) => {
       const L = loc.hourly, ts = L.time.map(x => Date.parse(x + ":00Z"));
@@ -4012,6 +4021,7 @@ async function _mk2Arome(t0, pts) {
       if (!r.ok) throw new Error("geosphere " + r.status);
       const j = await r.json();
       runIso = j.reference_time;
+      if (!j.timestamps || !j.timestamps.length) throw new Error("geosphere: prazen tek " + runIso);
       const ts = j.timestamps.map(Date.parse);
       j.features.forEach((f, n) => {
         const P = f.properties.parameters, U = P.u10m.data, V = P.v10m.data;
@@ -4042,9 +4052,10 @@ async function _mk2Build(t0Hint) {
     });
     return m;
   }
-  if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { out.models[k] = pack(labels[k], om.value[k]); });
-  if (ar.status === "fulfilled") out.models.arome = pack(labels.arome, ar.value.cells, ar.value.run);
+  if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { const m = pack(labels[k], om.value[k]); if (_mkHasData(m, MK2_VARS)) out.models[k] = m; });
+  if (ar.status === "fulfilled") { const m = pack(labels.arome, ar.value.cells, ar.value.run); if (_mkHasData(m, MK2_VARS)) out.models.arome = m; }
   out.failed = [om.status === "rejected" ? "open-meteo" : null, ar.status === "rejected" ? "geosphere" : null].filter(Boolean);
+  out.errors = [om.reason, ar.reason].filter(Boolean).map(e => String(e.message || e));
   if (!Object.keys(out.models).length) throw new Error("noben model ni dosegljiv: " + (om.reason || "") + " " + (ar.reason || ""));
   return out;
 }

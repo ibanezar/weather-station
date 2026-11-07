@@ -897,6 +897,7 @@ drug ob drugem ali razlika A − B (diverging lestvica); dotik karte pokaže vre
 - **Obremenitev Open-Meteo**: ena izdelava karte2 je 560 točk × 3 modeli (+ 6 kosov GeoSphere); gradi se samo ob obisku, največ
   enkrat na uro. Skupaj s `/modeli-karta.json` in `/sneg-karta.json` je to že blizu brezplačne dnevne kvote Open-Meteo — če se pojavi
   429, podaljšaj `MK2_TTL_MS`, ne dodajaj poskusov.
+- **7. 11. 2026: zavihek je kazal prazne karte, ker je GeoSphere (AROME) vrnil `timestamps: []` (`reference_time` star 3 dni, vir zastal).** Worker je to sprejel kot veljaven model s samimi `null`, `/modeli-karta.json` je imel samo ta prazen AROME (`failed:["open-meteo"]`), odjemalec ga je štel za vir in zgradil prazno ogrodje; `/modeli-karta2.json` je medtem visel >120 s (429 + čakanje). Popravek: prazen tek GeoSphere je napaka, model brez ene vrednosti se ne vrne (`_mkHasData`), prvi klic Open-Meteo ima ponovitve kot karta2 (`_mkFetchOM`), odgovor nosi `errors` z razlogom, odjemalec zavrže modele brez vrednosti in ima rok 70 s. Razlog napake Open-Meteo pri `/modeli-karta.json` (verjetno 429: vse tri karte delijo kvoto) se vidi šele v `errors` po deployu.
 - Živega Open-Meteo odgovora za celotno mrežo ob pisanju ni bilo mogoče preizkusiti do konca (429 iz skupnega izhoda peskovnika):
   oblika odgovora je preverjena na 140 točkah in AROME na vseh. Po deployu workerja preveri `/modeli-karta2.json`.
 

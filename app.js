@@ -22810,8 +22810,11 @@ async function initModelMaps(){
   const wait=document.createElement('p'); wait.className='mm-wait';
   wait.textContent='Nalagam modelske karte … prva izdelava lahko traja do minute.';
   root.appendChild(wait);
-  const get=(u,kind)=>fetch(PROXY+u).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
-    .then(d=>d&&d.models&&Object.keys(d.models).length?d:null)
+  // Model brez ene same vrednosti (npr. AROME ob praznem teku GeoSphere) ni vir: sicer bi se zavihek
+  // zgradil iz samih null in bi izgledal, kot da nič ne dela. Rok 70 s: prva izdelava karte2 traja do minute.
+  const hasVals=m=>Object.keys(m).some(f=>Array.isArray(m[f])&&Array.isArray(m[f][0])&&m[f].some(row=>row.some(v=>v!=null)));
+  const get=(u,kind)=>fetch(PROXY+u,{signal:AbortSignal.timeout?AbortSignal.timeout(70000):undefined}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+    .then(d=>{ if(!d||!d.models) return null; Object.keys(d.models).forEach(k=>{ if(!hasVals(d.models[k])) delete d.models[k]; }); return Object.keys(d.models).length?d:null; })
     .catch(e=>{ console.warn('modelske karte: vir ni dosegljiv',u,e); return null; });
   // Vsak vir se vgradi, ko prispe: zavihek se pokaže že s prvim, drugi se doda naknadno (stran ne čaka na počasnejšega).
   const take=(kind,d)=>{
