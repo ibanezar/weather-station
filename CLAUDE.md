@@ -3086,6 +3086,9 @@ in razdelek »katera Savinjska je mišljena?«. **Pokrivamo samo zgornji del dol
 
 Ločen projekt (Vite + TypeScript, brez povezave z ostalim delom strani). **Izvorna koda je v `365-0-game/`** (svoj `CLAUDE.md`, `SPEC.md`, testi); `365-0/` je **generiran izhod gradnje**, ki ga zapiše `365-0-publish.yml` ob spremembi `365-0-game/**` na `main` -- ne urejaj ga ročno. Pages streže repozitorij kot datoteke, zato izvorna mapa ne more biti na istem URL-ju kot izhod. Obe mapi sta v `SKIP_DIRS` v `check_links.py` in `geo_audit.py`. Podatke (vreme 2016-2025) osveži `365-0-data.yml`.
 
+- **Anonimno štetje iger** (8. 11. 2026): igra ob začetku in koncu igre pošlje `POST /365-0/stat` (`ev`, `mode`, `chase`, ob koncu `grade` in `rerolls`; `365-0-game/src/app/counts.ts`). Brez oznake igralca, brez IP v zapisu (IP je samo v KV števcu omejitve, 120/uro), strežnik hrani samo vsote za mesec v `COUNTER_KV` (`g365:YYYY-MM`). Vsote so **približne** (KV ni atomaren). Odjemalec pošilja **samo z `meteorec.si`** (`isLiveSite`), zato razvoj, e2e in predogledi ne onesnažijo števcev; v Nastavitvah ga igralec izklopi (`settings.counts`), zasebnost v igri to pove. Branje: `GET /365-0/stat?mesec=YYYY-MM` z `Bearer DELETE_SECRET` (isti zaklep po IP kot anketa). Namen je uravnoteženje (ali je tema pretežka, kje ljudje odnehajo: `start` proti `finish`, razporeditev ocen), ne sledenje. `G365_CHASES`/`G365_GRADES` v workerju sta namerna podvojitev `CHASE_IDS`/`GRADE_IDS`: preverja `tools/test_g365_stat.mjs` (v `parity.yml`, 3 mutacije). Nova tema ali ocena v igri = popravi tudi worker, sicer bo štetje zavrnjeno z 400.
+- **Statistika** (`#/stats`, `src/app/progress-stats.ts`) je izračunana iz shranjenega napredka v brskalniku (`daily`, `bestEndless`, `runs`), nič ne gre na strežnik.
+
 ## Razvoj
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija

@@ -2,12 +2,13 @@
 import { createI18n, resolveLocale, type I18n } from '../i18n/index.ts';
 import { applyVisualSettings, isReducedMotion } from '../ui/settings.ts';
 import { createFeedback, type Feedback } from './feedback.ts';
+import { sendCount, type CountEvent } from './counts.ts';
 import { createFormatter, type Formatter } from './format.ts';
 import type { Session } from './session.ts';
 import { browserStorage, defaultSettings, emptyStored, Store } from './storage.ts';
 
 export type Route =
-  'home' | 'how' | 'draft' | 'reveal' | 'result' | 'settings' | 'about' | 'privacy';
+  'home' | 'how' | 'draft' | 'reveal' | 'result' | 'settings' | 'about' | 'privacy' | 'stats';
 
 const HASHES: Record<Route, string> = {
   home: '#/',
@@ -18,6 +19,7 @@ const HASHES: Record<Route, string> = {
   settings: '#/settings',
   about: '#/about',
   privacy: '#/privacy',
+  stats: '#/stats',
 };
 
 export function routeFromHash(hash: string): Route | 'styleguide' {
@@ -49,6 +51,11 @@ export class App {
     this.i18n = createI18n(this.store.state.settings.language);
     this.fmt = createFormatter(this.i18n.locale, this.store.state.settings.unit);
     this.feedback = createFeedback(() => this.store.state.settings);
+  }
+
+  /** Tell the server, anonymously, that a game started or finished (see counts.ts). Off in Settings. */
+  count(event: CountEvent): void {
+    sendCount(this.store.state.settings.counts, event);
   }
 
   register(route: Route, render: ScreenRenderer): void {

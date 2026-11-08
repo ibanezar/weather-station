@@ -52,6 +52,7 @@ export function renderPrivacy(app: App, root: HTMLElement): void {
       h('p', null, t('privacy.p1')),
       h('p', null, t('privacy.p2')),
       h('p', null, t('privacy.p3')),
+      h('p', null, t('privacy.p4')),
     ),
   );
 }

@@ -51,6 +51,13 @@ export function renderReveal(app: App, root: HTMLElement): void {
     } else {
       app.store.recordEndless(result.record, session.chase);
     }
+    app.count({
+      ev: 'finish',
+      mode: session.mode,
+      chase: session.chase,
+      grade: result.grade,
+      rerolls: session.state.rerolls.length,
+    });
   }
 
   const chase = session.chase;

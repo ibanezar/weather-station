@@ -22,9 +22,12 @@ export const GRADE_TIERS: readonly { id: GradeId; min: number }[] = [
   { id: 'stormbound', min: 0 },
 ];
 
-/** Player perfect days divided by best possible perfect days (1 when nothing was possible). */
+/**
+ * Player wins divided by best possible wins (1 when nothing was possible). Capped at 1: the best possible
+ * is measured on the first draws, so a redraw can beat it, but 100 % is the top of the scale.
+ */
 export function ratio(playerWins: number, bestWins: number): number {
-  return bestWins <= 0 ? 1 : playerWins / bestWins;
+  return bestWins <= 0 ? 1 : Math.min(1, playerWins / bestWins);
 }
 
 export function gradeFor(r: number): GradeId {

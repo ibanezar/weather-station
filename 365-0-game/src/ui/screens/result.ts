@@ -179,6 +179,7 @@ export function renderResult(app: App, root: HTMLElement): void {
       void loadEngineData().then(
         (data) => {
           app.session = newSession('endless', data, { entropy: randomEntropy(), chase });
+          app.count({ ev: 'start', mode: 'endless', chase });
           app.go('draft');
         },
         () => {

@@ -139,6 +139,12 @@ export function renderSettings(app: App, root: HTMLElement): void {
           });
           if (v) app.feedback.sound('pick');
         }),
+        toggle(t('settings.counts'), s.counts, t('settings.on'), t('settings.off'), (v) => {
+          app.store.update(() => {
+            s.counts = v;
+          });
+        }),
+        h('p', { class: 'muted settings__hint' }, t('settings.counts.hint')),
       ),
       h(
         'nav',

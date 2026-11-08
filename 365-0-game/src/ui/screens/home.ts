@@ -49,6 +49,7 @@ export async function startRun(
       }
     }
     app.session = newSession(mode, data, { date: today, entropy: randomEntropy(), chase });
+    app.count({ ev: 'start', mode, chase });
     app.go('draft');
   } catch {
     ui.message.textContent = `${t('error.world')} `;
@@ -233,6 +234,14 @@ export function renderHome(app: App, root: HTMLElement): void {
           icon: 'settings',
           onClick: () => {
             app.go('settings');
+          },
+        }),
+        button({
+          label: t('home.stats'),
+          variant: 'quiet',
+          icon: 'stats',
+          onClick: () => {
+            app.go('stats');
           },
         }),
         button({
