@@ -1,5 +1,6 @@
 // Everything the game remembers lives under one versioned localStorage key (SPEC 5). Every read and
 // write is wrapped, and the game stays fully playable when storage is unavailable.
+import { DEFAULT_CHASE, isChaseId, type ChaseId } from '../engine/chase.ts';
 import type { GradeId } from '../engine/grades.ts';
 import type { DayRecord } from '../engine/types.ts';
 import type { Locale } from '../i18n/index.ts';
@@ -18,6 +19,8 @@ export interface Settings {
   pattern: PatternSetting;
   haptics: boolean;
   sound: boolean;
+  /** What the player is chasing: sunshine (the classic game), snow, rain, storms or heat. */
+  chase: ChaseId;
 }
 
 export interface DailyResult {
@@ -31,11 +34,17 @@ export interface DailyResult {
 export interface Stored {
   v: 1;
   settings: Settings;
-  /** Best endless record, by perfect days. */
-  bestEndless: DayRecord | null;
+  /** Best endless record for each chase, by wins. */
+  bestEndless: Partial<Record<ChaseId, DayRecord>>;
+  /** Keyed by date for sunshine and by `date:chase` for the other chases (see dailyKey). */
   daily: Record<string, DailyResult>;
   streak: Streak;
   onboarded: boolean;
+}
+
+/** Where a daily result is stored: the date for sunshine, `date:chase` for the other chases. */
+export function dailyKey(date: string, chase: ChaseId = DEFAULT_CHASE): string {
+  return chase === DEFAULT_CHASE ? date : `${date}:${chase}`;
 }
 
 /** Fahrenheit by default only where it is the local custom. */
@@ -52,6 +61,7 @@ export function defaultSettings(languageTag: string | undefined, locale: Locale)
     pattern: 'auto',
     haptics: true,
     sound: false,
+    chase: DEFAULT_CHASE,
   };
 }
 
@@ -59,7 +69,7 @@ export function emptyStored(settings: Settings): Stored {
   return {
     v: 1,
     settings,
-    bestEndless: null,
+    bestEndless: {},
     daily: {},
     streak: { count: 0, last: null },
     onboarded: false,
@@ -98,12 +108,19 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
       out.settings.pattern = s['pattern'];
     if (typeof s['haptics'] === 'boolean') out.settings.haptics = s['haptics'];
     if (typeof s['sound'] === 'boolean') out.settings.sound = s['sound'];
+    if (isChaseId(s['chase'])) out.settings.chase = s['chase'];
   }
-  if (isRecord(data['bestEndless'])) out.bestEndless = data['bestEndless'];
+  const best = data['bestEndless'];
+  if (isRecord(best)) {
+    out.bestEndless = { [DEFAULT_CHASE]: best }; // saved before chases existed: it was a sunshine record
+  } else if (isObject(best)) {
+    for (const [id, r] of Object.entries(best))
+      if (isChaseId(id) && isRecord(r)) out.bestEndless[id] = r;
+  }
   if (isObject(data['daily'])) {
     for (const [date, r] of Object.entries(data['daily'])) {
       if (
-        /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+        /^\d{4}-\d{2}-\d{2}(:[a-z]+)?$/.test(date) &&
         isObject(r) &&
         Array.isArray(r['picks']) &&
         r['picks'].every((p) => typeof p === 'string') &&
@@ -112,6 +129,9 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
       ) {
         out.daily[date] = {
           picks: r['picks'],
+          ...(Array.isArray(r['rerolls']) && r['rerolls'].every((n) => typeof n === 'number')
+            ? { rerolls: r['rerolls'] }
+            : {}),
           record: r['record'],
           grade: r['grade'] as GradeId,
         };
@@ -167,24 +187,26 @@ export class Store {
   }
 
   /** Record a finished daily run and move the streak on. */
-  recordDaily(date: string, result: DailyResult): void {
+  recordDaily(date: string, result: DailyResult, chase: ChaseId = DEFAULT_CHASE): void {
     this.update((s) => {
-      if (s.daily[date]) return; // one attempt per day: the first result stands
-      s.daily[date] = result;
-      s.streak = completeDaily(s.streak, date);
+      const key = dailyKey(date, chase);
+      if (s.daily[key]) return; // one attempt per day and chase: the first result stands
+      s.daily[key] = result;
+      s.streak = completeDaily(s.streak, date); // a daily of any chase keeps the streak
     });
   }
 
-  recordEndless(record: DayRecord): void {
+  recordEndless(record: DayRecord, chase: ChaseId = DEFAULT_CHASE): void {
     this.update((s) => {
-      if (!s.bestEndless || record.w > s.bestEndless.w) s.bestEndless = record;
+      const best = s.bestEndless[chase];
+      if (!best || record.w > best.w) s.bestEndless[chase] = record;
     });
   }
 
   /** Delete streak, results and best record; settings and the onboarding flag stay. */
   resetProgress(): void {
     this.update((s) => {
-      s.bestEndless = null;
+      s.bestEndless = {};
       s.daily = {};
       s.streak = { count: 0, last: null };
     });

@@ -1,6 +1,6 @@
 # World data report
 
-Generated 2026-11-07 by `npm run data`. Source: Open-Meteo archive API, model ERA5 (0.25°).
+Generated 2026-11-08 by `npm run data`. Source: Open-Meteo archive API, model ERA5 (0.25°).
 Years: 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025. Cities: 72.
 
 ## Size

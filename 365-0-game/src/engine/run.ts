@@ -3,6 +3,13 @@
 import { findCombos, netsFor } from './combos.ts';
 import { generateDraft, ROUNDS } from './draft.ts';
 import { getCity } from './lookup.ts';
+import {
+  DEFAULT_CHASE,
+  DRAFT_ATTEMPTS,
+  MIN_BEST_WINS,
+  chaseBuckets,
+  type ChaseId,
+} from './chase.ts';
 import { gradeFor, ratio, type GradeId } from './grades.ts';
 import { resolve } from './outcome.ts';
 import {
@@ -21,10 +28,13 @@ export type Mode = 'daily' | 'endless';
 
 export const SCOUTS_PER_RUN = 3;
 
-/** The daily seed uses the player's local date, e.g. 365-0:daily:2026-11-06. */
-export function dailySeed(date: string): string {
+/**
+ * The daily seed uses the player's local date, e.g. 365-0:daily:2026-11-06. The sunny game keeps that
+ * form; every other chase has its own draft for the day, e.g. 365-0:daily:2026-11-06:snow.
+ */
+export function dailySeed(date: string, chase: ChaseId = DEFAULT_CHASE): string {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error(`bad date ${date}`);
-  return `365-0:daily:${date}`;
+  return chase === DEFAULT_CHASE ? `365-0:daily:${date}` : `365-0:daily:${date}:${chase}`;
 }
 
 /** Endless runs get their entropy from the caller (the engine has no randomness of its own). */
@@ -57,6 +67,7 @@ export interface RunResult {
 export interface RunState {
   readonly phase: Phase;
   readonly mode: Mode;
+  readonly chase: ChaseId;
   readonly seed: string;
   readonly draft: readonly DraftRound[];
   /** Computed at the start of the run. */
@@ -75,10 +86,11 @@ export interface RunState {
   readonly result: RunResult | undefined;
 }
 
-export function newRun(seed: string, mode: Mode): RunState {
+export function newRun(seed: string, mode: Mode, chase: ChaseId = DEFAULT_CHASE): RunState {
   return {
     phase: 'idle',
     mode,
+    chase,
     seed,
     draft: [],
     best: undefined,
@@ -97,11 +109,24 @@ function need(state: RunState, phase: Phase, action: string): void {
   }
 }
 
-/** idle to drafting: build the draft and the best possible record. */
+/**
+ * idle to drafting: build the draft and the best possible record. A chase other than sunshine needs enough
+ * winnable months, so a draft that is too poor for it is replaced by the next attempt for the same seed.
+ */
 export function start(state: RunState, data: EngineData): RunState {
   need(state, 'idle', 'start');
-  const draft = generateDraft(state.seed, data);
-  return { ...state, phase: 'drafting', draft, best: bestPossible(data, state.seed, draft) };
+  let chosen: { draft: DraftRound[]; best: BestPossible } | undefined;
+  for (let attempt = 0; attempt < DRAFT_ATTEMPTS; attempt++) {
+    const draft = generateDraft(state.seed, data, attempt);
+    const best = bestPossible(data, state.seed, draft, state.chase);
+    if (!chosen || best.record.w > chosen.best.record.w) chosen = { draft, best };
+    if (best.record.w >= MIN_BEST_WINS[state.chase]) {
+      chosen = { draft, best };
+      break;
+    }
+  }
+  if (!chosen) throw new Error('no draft');
+  return { ...state, phase: 'drafting', draft: chosen.draft, best: chosen.best };
 }
 
 /** The round the player is choosing for, or undefined once all twelve picks are made. */
@@ -149,10 +174,13 @@ export function scoutInfo(
   data: Pick<EngineData, 'world'>,
   cityId: string,
   month: number,
-): { perfect: number; bad: number } {
+  chase: ChaseId = DEFAULT_CHASE,
+): { win: number; loss: number } {
   const city = data.world.cities[cityId];
   if (!city) throw new Error(`no world data for ${cityId}`);
-  return { perfect: city.sp[month] ?? 0, bad: city.sb[month] ?? 0 };
+  // The sunny game keeps the buckets stored in the world file; the other chases rank the same days again.
+  if (chase === DEFAULT_CHASE) return { win: city.sp[month] ?? 0, loss: city.sb[month] ?? 0 };
+  return chaseBuckets(data.world, chase, cityId, month);
 }
 
 /** What one picked month turned out to be, given the second chances used on it. */
@@ -170,7 +198,7 @@ export function monthOf(state: RunState, data: EngineData, i: number): PickedRou
     cityId,
     year: o.year,
     days: o.days,
-    record: record(o.days),
+    record: record(o.days, state.chase),
     rerolls,
     best: (best.rounds[i] as { best: RoundOption }).best,
   };

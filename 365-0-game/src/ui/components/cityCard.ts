@@ -6,8 +6,10 @@ import { cssTimeToMs } from '../time.ts';
 import { steps } from './steps.ts';
 
 export interface ScoutInfo {
-  perfect: number;
-  bad: number;
+  /** Bucket (0 to 4) of the winning days. */
+  win: number;
+  /** Bucket (0 to 4) of the losing days. */
+  loss: number;
 }
 
 export interface CityCardOptions {
@@ -23,8 +25,8 @@ export interface CityCardOptions {
   /** Accessible name of the Scout button; must contain scoutLabel, e.g. "Scout Reykjavik". */
   scoutFullLabel: string;
   scoutedLabel: string;
-  perfectLabel: string;
-  badLabel: string;
+  winLabel: string;
+  lossLabel: string;
   /** Text for a bucket value, e.g. "3 of 5". */
   stepText: (bucket: number) => string;
   /** Free information on every card: how much this month varies from year to year. */
@@ -128,16 +130,16 @@ export function cityCard(o: CityCardOptions): CityCard {
       h(
         'span',
         { class: 'city-card__bar' },
-        h('span', { class: 'city-card__bar-label' }, o.perfectLabel),
+        h('span', { class: 'city-card__bar-label' }, o.winLabel),
         ' ',
-        steps(info.perfect, o.stepText(info.perfect), 'perfect'),
+        steps(info.win, o.stepText(info.win), 'perfect'),
       ),
       h(
         'span',
         { class: 'city-card__bar' },
-        h('span', { class: 'city-card__bar-label' }, o.badLabel),
+        h('span', { class: 'city-card__bar-label' }, o.lossLabel),
         ' ',
-        steps(info.bad, o.stepText(info.bad), 'bad'),
+        steps(info.loss, o.stepText(info.loss), 'bad'),
       ),
     );
   }

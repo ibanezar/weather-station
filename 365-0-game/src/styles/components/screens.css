@@ -27,7 +27,8 @@
 
 /* Home */
 .screen--home {
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: var(--space-5);
 }
 
 .home__head {
@@ -35,12 +36,25 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
-  padding-top: var(--space-6);
+  padding-top: var(--space-4);
+}
+
+.home__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 }
 
 .home__title {
-  font-size: var(--text-record);
+  margin: 0;
+  font-size: clamp(56px, 18vw, 84px);
   font-weight: 900;
+  line-height: 0.9;
+}
+
+.logo-mark {
+  flex: none;
+  display: block;
 }
 
 .home__goal {
@@ -357,5 +371,165 @@
 
 .month-result__note {
   margin: 0;
+  font-size: var(--text-small);
+}
+
+.home__pitch {
+  margin: 0;
+  max-width: 38ch;
+  font-size: var(--text-body);
+  line-height: 1.4;
+}
+
+.home__steps {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.home__num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  font-weight: 800;
+}
+
+.home__step-title {
+  display: block;
+  font-size: var(--text-body);
+  line-height: 1.25;
+}
+
+.home__step-text {
+  margin: 2px 0 0;
+  font-size: var(--text-small);
+  line-height: 1.35;
+}
+
+.home__daily {
+  margin: calc(-1 * var(--space-2)) 0 0;
+  font-size: var(--text-small);
+  text-align: center;
+}
+
+.home__legend {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.home__legend-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.home__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.home__facts {
+  margin: 0;
+  font-size: var(--text-small);
+}
+
+/* What to chase: five radio options with an icon each */
+.chase-picker {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.chase-picker__legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.chase-picker__options {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+}
+
+.chase-opt {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.chase-opt__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.chase-opt__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: var(--space-2) 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-button);
+  background: var(--raised);
+  color: var(--ink);
+  text-align: center;
+  font-size: var(--text-caption, 13px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.chase-opt__name {
+  overflow-wrap: anywhere;
+}
+
+.chase-opt__input:checked + .chase-opt__box {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--surface);
+}
+
+.chase-opt__input:focus-visible + .chase-opt__box {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.chase-picker .home__chase-note {
+  margin: 0;
+  min-height: 2.6em;
+  font-size: var(--text-small);
+  line-height: 1.3;
+}
+
+.draft__invented {
+  margin: var(--space-1) 0 0;
   font-size: var(--text-small);
 }

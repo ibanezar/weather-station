@@ -49,7 +49,7 @@ test.describe('manifest and page head', () => {
     await expect(page.locator('meta[name="theme-color"]')).toHaveCount(2);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute(
       'content',
-      /twelve world cities/,
+      /weather game with real data/,
     );
     await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveCount(1);
     await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(

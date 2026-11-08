@@ -16,6 +16,8 @@ export interface WorldEvent {
   /** English source text; the UI reads the translated text from the i18n catalogs. */
   name: string;
   blurb: string;
+  /** An invented "what if" event (tornado, volcano, flood, blizzard): not in the weather data, and shown as such. */
+  fictional?: boolean;
   /** Cities with at least one of these tags are affected, or 'all'. */
   tags: readonly ClimateTag[] | 'all';
   transforms: readonly EventTransform[];

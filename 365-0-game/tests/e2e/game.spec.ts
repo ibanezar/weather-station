@@ -10,22 +10,30 @@ import {
 } from './helpers.ts';
 
 test.describe('first visit', () => {
-  test('shows the three-line introduction once, and its button starts the draft directly', async ({
+  test('the first page says what the game is, with a logo, three steps and the day types', async ({
     page,
   }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1, name: 'How it works' })).toBeVisible();
-    await expect(page.locator('.how__line')).toHaveCount(3);
-    await expect(page.locator('.how__line').first()).toContainText('Each month, pick 1 of 3');
-    await expect(page.locator('.how__line').nth(2)).toContainText('16–32 °C');
+    await expect(page.getByRole('heading', { level: 1, name: '365-0' })).toBeVisible();
+    await expect(page.locator('.logo-mark')).toBeVisible();
+    await expect(page.locator('.home__tagline')).toHaveText('Plan a year of the weather you want.');
+    await expect(page.locator('.home__pitch')).toContainText('weather game with real data');
+    const steps = page.locator('.home__step');
+    await expect(steps).toHaveCount(3);
+    await expect(steps.first()).toContainText('Pick a city for each month');
+    await expect(steps.nth(2)).toContainText('Collect perfect days');
+    await expect(page.locator('.home__chase-note')).toContainText('16–32 °C');
+    await expect(page.locator('.home__legend')).toContainText('Snow and frost');
+    await expect(page.getByRole('radio')).toHaveCount(5);
+    await expect(page.locator('.home__facts')).toContainText('72 cities');
+    // The buttons are in the first screen on a phone, no scrolling needed.
+    const box = await page.getByRole('button', { name: 'Play daily' }).boundingBox();
+    expect((box?.y ?? 9999) + (box?.height ?? 0)).toBeLessThan(844);
     await page.getByRole('button', { name: 'Play daily' }).click();
     await expect(page.locator('.city-card')).toHaveCount(3);
     expect(await page.evaluate(() => localStorage.getItem('365-0:v1'))).toContain(
       '"onboarded":true',
     );
-    // On the next visit it goes straight to Home.
-    await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1, name: '365-0' })).toBeVisible();
   });
 
   test('stays reachable from Home', async ({ page }) => {
@@ -319,7 +327,8 @@ test.describe('settings', () => {
     const ctx = await browser.newContext({ locale: 'sl-SI' });
     const page = await ctx.newPage();
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1, name: 'Kako deluje' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: '365-0' })).toBeVisible();
+    await expect(page.locator('.home__tagline')).toHaveText('Načrtuj leto vremena, ki ga želiš.');
     await expect(page.locator('html')).toHaveAttribute('lang', 'sl');
     await page.getByRole('button', { name: 'Igraj dnevno' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Januar' })).toBeVisible();
@@ -648,7 +657,7 @@ test.describe('the streak', () => {
   test('is hidden after a missed day and shows the invitation instead', async ({ page }) => {
     await openReturning(page, { streak: { count: 7, last: dateDaysAgo(3) } });
     await expect(page.getByText(/day streak/)).toHaveCount(0);
-    await expect(page.getByText("Play today's daily to start a streak.")).toBeVisible();
+    await expect(page.locator('.home__daily')).toHaveText("Today's draft, the same for everyone");
   });
 
   test('is hidden at one day, and an endless run never changes it', async ({ page }) => {

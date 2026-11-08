@@ -1,47 +1,29 @@
 import { THRESHOLDS } from '../../engine/thresholds.ts';
 import type { App } from '../../app/app.ts';
-import { button } from '../components/button.ts';
 import { backButton } from '../components/backButton.ts';
 import { h, mount } from '../dom.ts';
 import { icon } from '../icons/index.ts';
-import { startRun } from './home.ts';
 
 /**
- * The one-screen, three-line introduction (SPEC 1.10). Shown once before the first run, where its
- * button starts the draft directly; reachable again from Home and Settings.
+ * The three-line introduction (SPEC 1.10) with the goal. Home carries the same story for first-time
+ * visitors; this screen is the full version, reachable from Home and Settings.
  */
-export function renderHow(app: App, root: HTMLElement, options: { first?: boolean } = {}): void {
+export function renderHow(app: App, root: HTMLElement): void {
   const { t } = app.i18n;
-  const first = options.first === true;
   const range = app.fmt.range(THRESHOLDS.perfect.tmaxCMin, THRESHOLDS.perfect.tmaxCMax);
   const lines = [
     { icon: 'check', text: t('onboarding.perfect') },
     { icon: 'ok', text: t('onboarding.bad') },
     { icon: 'perfect', text: t('onboarding.pick', { range }) },
   ] as const;
-  const message = h('p', { class: 'screen__error', role: 'alert' });
-  const start = button({
-    label: t('onboarding.start'),
-    variant: 'primary',
-    full: true,
-    onClick: () => {
-      app.store.update((s) => {
-        s.onboarded = true;
-      });
-      void startRun(app, 'daily', { btn: start, message });
-    },
-  });
-
   mount(
     root,
     h(
       'main',
       { class: 'screen' },
-      first
-        ? null
-        : backButton(t('back'), () => {
-            app.go('home');
-          }),
+      backButton(t('back'), () => {
+        app.go('home');
+      }),
       h('h1', null, t('onboarding.title')),
       h(
         'ul',
@@ -51,7 +33,6 @@ export function renderHow(app: App, root: HTMLElement, options: { first?: boolea
         ),
       ),
       h('p', { class: 'muted' }, t('onboarding.goal')),
-      h('div', { class: 'screen__actions' }, message, first ? start : null),
     ),
   );
 }

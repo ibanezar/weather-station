@@ -102,13 +102,13 @@ function sampleCards(): HTMLElement[] {
       scoutLabel: 'Scout',
       scoutFullLabel: `Scout ${c.name.en}`,
       scoutedLabel: 'Scouted',
-      perfectLabel: 'Perfect days',
-      badLabel: 'Bad days',
+      winLabel: 'Perfect days',
+      lossLabel: 'Bad days',
       stepText: (b) => `${String(b + 1)} of 5`,
       onPick: () =>
         showToast({ message: `Picked ${c.name.en}`, actionLabel: 'Undo', durationMs: 2000 }),
       onScout: () => {
-        card.showScout({ perfect: [1, 0, 4][i] as number, bad: [2, 4, 0][i] as number });
+        card.showScout({ win: [1, 0, 4][i] as number, loss: [2, 4, 0][i] as number });
       },
     });
     return card.el;

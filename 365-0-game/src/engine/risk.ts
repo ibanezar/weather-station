@@ -1,10 +1,11 @@
 // How much a city's month varies from year to year: the risk of the pick, from the ten stored years.
+import { DEFAULT_CHASE, CHASES, type ChaseId } from './chase.ts';
 import type { EngineData } from './types.ts';
 
 export type RiskLevel = 'none' | 'steady' | 'mixed' | 'swingy';
 
 export interface MonthRisk {
-  /** Fewest and most perfect days in this month over the stored years. */
+  /** Fewest and most winning days in this month over the stored years. */
   min: number;
   max: number;
   mean: number;
@@ -22,10 +23,12 @@ export function monthRisk(
   data: Pick<EngineData, 'world'>,
   cityId: string,
   month: number,
+  chase: ChaseId = DEFAULT_CHASE,
 ): MonthRisk {
   const years = data.world.cities[cityId]?.d[month];
   if (!years) throw new Error(`no world data for ${cityId} month ${String(month)}`);
-  const wins = years.map((s) => s.split('').filter((c) => c === 'p').length);
+  const win = CHASES[chase].win as readonly string[];
+  const wins = years.map((s) => s.split('').filter((c) => win.includes(c)).length);
   const min = Math.min(...wins);
   const max = Math.max(...wins);
   const mean = wins.reduce((a, b) => a + b, 0) / wins.length;

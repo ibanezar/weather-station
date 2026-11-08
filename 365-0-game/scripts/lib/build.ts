@@ -6,6 +6,7 @@ import {
   type World,
   type WorldCity,
 } from '../../src/data/types.ts';
+import { quintileBuckets } from '../../src/engine/chase.ts';
 import {
   classifyDay,
   isLoss,
@@ -155,23 +156,7 @@ export function monthShare(strings: string[], pick: (t: DayType) => boolean): nu
   return total === 0 ? 0 : hit / total;
 }
 
-/**
- * Quintile bucket (0-4) of each value among all values, using midranks so equal values always share
- * a bucket. Higher value, higher bucket.
- */
-export function quintileBuckets(values: number[]): number[] {
-  const n = values.length;
-  return values.map((v) => {
-    let less = 0;
-    let equal = 0;
-    for (const x of values) {
-      if (x < v) less += 1;
-      else if (x === v) equal += 1;
-    }
-    const fraction = (less + equal / 2) / n;
-    return Math.min(4, Math.floor(fraction * 5));
-  });
-}
+export { quintileBuckets } from '../../src/engine/chase.ts';
 
 /** Assemble the world file. `cities` must hold every seed city. */
 export function buildWorld(

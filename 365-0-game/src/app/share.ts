@@ -2,6 +2,7 @@
 // image where the browser can share files; otherwise the text is copied and the image is offered as a
 // download.
 import { shareImageModel, buildShareText } from '../engine/share.ts';
+import { chaseKey, gradeKey } from './chase-text.ts';
 import type { MessageKey } from '../i18n/index.ts';
 import { canvasToBlob, renderShareImage, type ShareFormat } from '../ui/canvas/shareImage.ts';
 import { isPatternMode } from '../ui/settings.ts';
@@ -14,15 +15,24 @@ export const GAME_URL = 'https://meteorec.si/365-0/';
 
 export type ShareOutcome = 'shared' | 'copied' | 'downloaded' | 'failed';
 
+/** "Daily", or "Daily · Snow and frost" when the run chased something other than sunshine. */
+function modeLabel(app: App, session: Session): string {
+  const { t } = app.i18n;
+  const mode = t(`mode.${session.mode}` as MessageKey);
+  return session.chase === 'sun'
+    ? mode
+    : t('mode.chase', { mode, name: t(chaseKey(session.chase, 'name')) });
+}
+
 export function shareText(app: App, session: Session): string {
   const result = session.state.result;
   if (!result) throw new Error('no result to share');
   const { t } = app.i18n;
   return buildShareText(result, {
     title: t('app.title'),
-    modeLabel: t(`mode.${session.mode}` as MessageKey),
+    modeLabel: modeLabel(app, session),
     recordLabel: t('result.recordLabel'),
-    gradeTitle: t(`grade.${result.grade}` as MessageKey),
+    gradeTitle: t(gradeKey(session.chase, result.grade)),
     ...(session.mode === 'daily' && session.date !== undefined ? { date: session.date } : {}),
     url: GAME_URL,
   });
@@ -51,10 +61,10 @@ export async function createShareImage(
     model,
     {
       title: t('app.title'),
-      subtitle: [t(`mode.${session.mode}` as MessageKey), daily ? session.date : undefined]
+      subtitle: [modeLabel(app, session), daily ? session.date : undefined]
         .filter(Boolean)
         .join(' '),
-      gradeTitle: t(`grade.${result.grade}` as MessageKey),
+      gradeTitle: t(gradeKey(session.chase, result.grade)),
       bestLine: t(daily ? 'share.bestToday' : 'share.bestRun', { n: result.bestRecord.w }),
       youLine: t('result.yours', { n: result.record.w }),
       abbreviations: result.rounds.map((r) => {
