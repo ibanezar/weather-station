@@ -21,8 +21,9 @@ import {
   type ParsedYear,
 } from './lib/build.ts';
 import { getCityYear, RateLimitError, readCache } from './lib/fetch.ts';
+import { buildMystery } from './lib/mystery.ts';
 import { renderReport, findFlags, type GridMeta } from './lib/report.ts';
-import { validateIndex, validateSeed, validateWorld } from './lib/validate.ts';
+import { validateIndex, validateMystery, validateSeed, validateWorld } from './lib/validate.ts';
 
 const EXIT_TEMPFAIL = 75;
 
@@ -33,6 +34,7 @@ const paths = {
   world: join(root, 'public/data/world.v1.json'),
   index: join(root, 'src/data/cities.index.json'),
   report: join(root, 'docs/data-report.md'),
+  mystery: join(root, 'public/data/mystery.v1.json'),
 };
 
 function arg(name: string): string | undefined {
@@ -186,6 +188,16 @@ async function main(): Promise<void> {
   mkdirSync(join(root, 'docs'), { recursive: true });
   writeFileSync(paths.world, worldJson + '\n');
   writeFileSync(paths.index, JSON.stringify(seed, null, 2) + '\n');
+
+  // The daily mystery puzzles come from the same responses.
+  const mystery = buildMystery({ cities: seed, responses, years });
+  const mysteryErrors = validateMystery(mystery, seed);
+  if (mysteryErrors.length > 0) {
+    console.error(mysteryErrors.slice(0, 20).join('\n'));
+    process.exit(1);
+  }
+  writeFileSync(paths.mystery, JSON.stringify(mystery) + '\n');
+  log(`Mystery: ${String(mystery.puzzles.length)} puzzles from ${mystery.from}.`);
 
   const input = {
     seed,

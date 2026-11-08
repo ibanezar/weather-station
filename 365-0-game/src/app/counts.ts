@@ -7,15 +7,22 @@ import type { GradeId } from '../engine/grades.ts';
 
 export const COUNTS_URL = 'https://weatherireica1.filip-eremita.workers.dev/365-0/stat';
 
-export interface CountEvent {
-  ev: 'start' | 'finish';
-  mode: 'daily' | 'endless';
-  chase: ChaseId;
-  /** Only on a finish. */
-  grade?: GradeId;
-  /** Only on a finish: how many second chances were used. */
-  rerolls?: number;
-}
+export type CountEvent =
+  | {
+      ev: 'start' | 'finish';
+      mode: 'daily' | 'endless';
+      chase: ChaseId;
+      /** Only on a finish. */
+      grade?: GradeId;
+      /** Only on a finish: how many second chances were used. */
+      rerolls?: number;
+    }
+  | {
+      ev: 'start' | 'finish';
+      mode: 'mystery';
+      /** Only on a finish: 0 to 4. */
+      points?: number;
+    };
 
 export type CountSender = (url: string, body: string) => void;
 

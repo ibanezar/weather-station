@@ -17,9 +17,13 @@ export interface Formatter {
   abbreviation: (city: SeedCity) => string;
   /** "6 November" */
   date: (isoDate: string) => string;
+  /** "6 November 2018" */
+  fullDate: (isoDate: string) => string;
   record: (r: DayRecord) => string;
   /** "7 h 12 min" */
   duration: (ms: number) => string;
+  /** A decimal number in the player's language: "2,7". */
+  number: (n: number) => string;
 }
 
 const toF = (c: number): number => (c * 9) / 5 + 32;
@@ -28,7 +32,14 @@ const capitalize = (s: string): string => s.charAt(0).toLocaleUpperCase() + s.sl
 export function createFormatter(locale: Locale, unit: Unit): Formatter {
   const months = new Intl.DateTimeFormat(locale, { month: 'long', timeZone: 'UTC' });
   const dates = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', timeZone: 'UTC' });
+  const fullDates = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
   const regions = new Intl.DisplayNames([locale], { type: 'region' });
+  const decimals = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   const convert = (c: number): number => Math.round(unit === 'f' ? toF(c) : c);
   return {
     temperature: (c) => `${String(convert(c))}°`,
@@ -44,7 +55,12 @@ export function createFormatter(locale: Locale, unit: Unit): Formatter {
       const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
       return dates.format(Date.UTC(y, m - 1, d));
     },
+    fullDate: (iso) => {
+      const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
+      return fullDates.format(Date.UTC(y, m - 1, d));
+    },
     record: (r) => `${String(r.w)}-${String(r.d)}-${String(r.l)}`,
+    number: (n) => decimals.format(n),
     duration: (ms) => {
       const minutes = Math.max(0, Math.ceil(ms / 60000));
       return `${String(Math.floor(minutes / 60))} h ${String(minutes % 60)} min`;

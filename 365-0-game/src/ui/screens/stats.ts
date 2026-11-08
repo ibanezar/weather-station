@@ -25,7 +25,7 @@ export function renderStats(app: App, root: HTMLElement): void {
     r ? fmt.record(r) : dash;
 
   const body =
-    stats.runs === 0 && stats.dailies === 0
+    stats.runs === 0 && stats.dailies === 0 && stats.mystery.played === 0
       ? h('p', { class: 'muted' }, t('stats.empty'))
       : h(
           'div',
@@ -37,6 +37,15 @@ export function renderStats(app: App, root: HTMLElement): void {
             tile(String(streak), t('stats.streak')),
             tile(String(stats.longestStreak), t('stats.longestStreak')),
             tile(String(stats.dailies), t('stats.dailies')),
+            ...(stats.mystery.played > 0 && stats.mystery.averagePoints !== null
+              ? [
+                  tile(String(stats.mystery.played), t('stats.mysteries')),
+                  tile(
+                    fmt.number(Math.round(stats.mystery.averagePoints * 10) / 10),
+                    t('stats.mysteryAvg'),
+                  ),
+                ]
+              : []),
           ),
           h(
             'table',

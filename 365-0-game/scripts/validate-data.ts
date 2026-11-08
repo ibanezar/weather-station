@@ -1,13 +1,20 @@
 // `npm run data:validate`: fails if the curated list or the generated data break any rule in SPEC 2.3.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { validateIndex, validateSeed, validateWorld, yearsNotice } from './lib/validate.ts';
+import {
+  validateIndex,
+  validateMystery,
+  validateSeed,
+  validateWorld,
+  yearsNotice,
+} from './lib/validate.ts';
 
 const root = join(import.meta.dirname, '..');
 const paths = {
   seed: join(root, 'data/cities.seed.json'),
   world: join(root, 'public/data/world.v1.json'),
   index: join(root, 'src/data/cities.index.json'),
+  mystery: join(root, 'public/data/mystery.v1.json'),
 };
 
 function load(path: string): unknown {
@@ -37,6 +44,11 @@ if (!existsSync(paths.seed)) {
       errors.push(...validateIndex(load(path), seed));
     }
   }
+}
+
+// The mystery file is built by the data job; it is checked as soon as it exists.
+if (existsSync(paths.mystery) && existsSync(paths.seed)) {
+  errors.push(...validateMystery(load(paths.mystery), load(paths.seed)));
 }
 
 if (errors.length > 0) {

@@ -217,3 +217,81 @@ export function yearsNotice(world: Json): string | undefined {
     ? `INTERIM DATA: ${String(n)} of ${String(PLANNED_YEARS)} planned years. Fetch the remaining years before phase 1 is done.`
     : undefined;
 }
+
+/** Checks the mystery puzzle file against the city list. */
+export function validateMystery(file: Json, seed: Json): string[] {
+  if (!isRecord(file)) return ['mystery: must be an object'];
+  if (!Array.isArray(seed)) return ['mystery: cannot check, seed is invalid'];
+  const errors: string[] = [];
+  const ids = new Set(
+    seed.flatMap((c) => (isRecord(c) && typeof c['id'] === 'string' ? [c['id']] : [])),
+  );
+  if (file['v'] !== 1) errors.push('mystery: v must be 1');
+  if (typeof file['from'] !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(file['from']))
+    errors.push('mystery: from must be a YYYY-MM-DD date');
+  const years = file['years'];
+  const yearOk = (y: Json): y is number => typeof y === 'number' && Number.isInteger(y);
+  if (!Array.isArray(years) || years.length !== 2 || !years.every(yearOk))
+    errors.push('mystery: years must be [first, last]');
+  const puzzles = file['puzzles'];
+  if (!Array.isArray(puzzles) || puzzles.length === 0) {
+    errors.push('mystery: puzzles must be a non-empty array');
+    return errors;
+  }
+  const num = (v: Json, lo: number, hi: number): boolean =>
+    typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
+  puzzles.forEach((p, i) => {
+    const at = `mystery puzzle ${String(i)}`;
+    if (!isRecord(p)) {
+      errors.push(`${at}: must be an object`);
+      return;
+    }
+    const month = p['m'];
+    if (!num(month, 0, 11) || !Number.isInteger(month)) errors.push(`${at}: m must be 0-11`);
+    else if (!num(p['d'], 1, DAYS_IN_MONTH[month as number] ?? 28) || !Number.isInteger(p['d']))
+      errors.push(`${at}: d is not a day of that month`);
+    if (
+      yearOk(p['year']) &&
+      Array.isArray(years) &&
+      (p['year'] < (years[0] as number) || p['year'] > (years[1] as number))
+    )
+      errors.push(`${at}: year is outside the data years`);
+    const city = p['city'];
+    const decoys = p['decoys'];
+    if (typeof city !== 'string' || !ids.has(city)) errors.push(`${at}: unknown city`);
+    if (
+      !Array.isArray(decoys) ||
+      decoys.length !== 2 ||
+      !decoys.every((d) => typeof d === 'string' && ids.has(d)) ||
+      decoys[0] === decoys[1] ||
+      decoys.includes(city)
+    )
+      errors.push(`${at}: decoys must be two different known cities other than the answer`);
+    const w = p['w'];
+    if (
+      !isRecord(w) ||
+      !num(w['tx'], -90, 60) ||
+      !num(w['tn'], -90, 60) ||
+      (num(w['tx'], -90, 60) &&
+        num(w['tn'], -90, 60) &&
+        (w['tn'] as number) > (w['tx'] as number)) ||
+      !num(w['p'], 0, 2000) ||
+      !num(w['s'], 0, 500) ||
+      !num(w['g'], 0, 400) ||
+      !num(w['cl'], 0, 100)
+    )
+      errors.push(`${at}: w holds an impossible weather value`);
+    const typ = p['typ'];
+    if (!isRecord(typ)) {
+      errors.push(`${at}: typ must be an object`);
+    } else {
+      const named: Json[] = [city, ...(Array.isArray(decoys) ? (decoys as Json[]) : [])];
+      for (const id of named) {
+        const t = typeof id === 'string' ? typ[id] : undefined;
+        if (!Array.isArray(t) || t.length !== 5 || !t.every((v) => num(v, -100, 100)))
+          errors.push(`${at}: typ is missing or wrong for ${String(id)}`);
+      }
+    }
+  });
+  return errors;
+}

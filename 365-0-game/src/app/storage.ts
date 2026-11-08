@@ -5,6 +5,7 @@ import type { GradeId } from '../engine/grades.ts';
 import type { DayRecord } from '../engine/types.ts';
 import type { Locale } from '../i18n/index.ts';
 import type { MotionSetting, PatternSetting, ThemeSetting } from '../ui/settings.ts';
+import type { MysteryResult } from '../engine/mystery.ts';
 import { completeDaily, type Streak } from './dates.ts';
 
 export const STORAGE_KEY = '365-0:v1';
@@ -43,6 +44,8 @@ export interface Stored {
   streak: Streak;
   /** Finished games (daily and endless) for each chase. */
   runs: Partial<Record<ChaseId, number>>;
+  /** The daily mystery, by date: a puzzle in progress or a finished one. */
+  mystery: Record<string, MysteryResult>;
   onboarded: boolean;
 }
 
@@ -78,6 +81,7 @@ export function emptyStored(settings: Settings): Stored {
     daily: {},
     streak: { count: 0, last: null },
     runs: {},
+    mystery: {},
     onboarded: false,
   };
 }
@@ -159,6 +163,31 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
       if (isChaseId(id) && typeof n === 'number' && Number.isFinite(n) && n >= 0)
         out.runs[id] = Math.floor(n);
   }
+  if (isObject(data['mystery'])) {
+    for (const [date, r] of Object.entries(data['mystery'])) {
+      if (
+        /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+        isObject(r) &&
+        Array.isArray(r['guesses']) &&
+        r['guesses'].every((g) => typeof g === 'string') &&
+        r['guesses'].length <= 3 &&
+        Number.isInteger(r['revealed']) &&
+        (r['revealed'] as number) >= 1 &&
+        (r['revealed'] as number) <= 4 &&
+        Number.isInteger(r['points']) &&
+        (r['points'] as number) >= 0 &&
+        (r['points'] as number) <= 4 &&
+        typeof r['done'] === 'boolean'
+      ) {
+        out.mystery[date] = {
+          guesses: r['guesses'],
+          revealed: r['revealed'] as number,
+          points: r['points'] as number,
+          done: r['done'],
+        };
+      }
+    }
+  }
   if (typeof data['onboarded'] === 'boolean') out.onboarded = data['onboarded'];
   return out;
 }
@@ -210,6 +239,15 @@ export class Store {
     });
   }
 
+  /** Save the daily mystery as it stands. Finishing it keeps the streak; a finished one is never overwritten. */
+  recordMystery(date: string, result: MysteryResult): void {
+    this.update((s) => {
+      if (s.mystery[date]?.done) return;
+      s.mystery[date] = result;
+      if (result.done) s.streak = completeDaily(s.streak, date);
+    });
+  }
+
   recordEndless(record: DayRecord, chase: ChaseId = DEFAULT_CHASE): void {
     this.update((s) => {
       const best = s.bestEndless[chase];
@@ -225,6 +263,7 @@ export class Store {
       s.daily = {};
       s.streak = { count: 0, last: null };
       s.runs = {};
+      s.mystery = {};
     });
   }
 

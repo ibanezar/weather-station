@@ -28,6 +28,8 @@ export interface ProgressStats {
   /** Longest run of consecutive days with a daily (any chase). */
   longestStreak: number;
   perChase: ChaseStats[];
+  /** The daily mystery: puzzles finished and the average score (0-4), null before the first. */
+  mystery: { played: number; averagePoints: number | null };
   /** The latest dailies, newest first. */
   recent: RecentDaily[];
 }
@@ -79,11 +81,20 @@ export function computeStats(stored: Stored): ProgressStats {
   const recent = [...daily]
     .sort((a, b) => (a.date === b.date ? 0 : a.date < b.date ? 1 : -1))
     .slice(0, RECENT_LIMIT);
+  const mysteries = Object.entries(stored.mystery).filter(([, r]) => r.done);
+  const mysteryPoints = mysteries.reduce((n, [, r]) => n + r.points, 0);
   return {
     runs: perChase.reduce((n, c) => n + c.runs, 0),
     dailies: daily.length,
-    longestStreak: Math.max(longestStretch(daily.map((d) => d.date)), stored.streak.count),
+    longestStreak: Math.max(
+      longestStretch([...daily.map((d) => d.date), ...mysteries.map(([date]) => date)]),
+      stored.streak.count,
+    ),
     perChase,
+    mystery: {
+      played: mysteries.length,
+      averagePoints: mysteries.length > 0 ? mysteryPoints / mysteries.length : null,
+    },
     recent,
   };
 }
