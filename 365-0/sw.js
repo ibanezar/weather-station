@@ -1,14 +1,14 @@
 // Generated at build time. Do not edit.
-const VERSION = '2aedd6678bd4';
+const VERSION = 'd3199854ca80';
 const CACHE = '365-0-' + VERSION;
 const PRECACHE = [
   "./assets/big-shoulders-display-latin-ext-wght-normal-EP2r9iG4.woff2",
   "./assets/big-shoulders-display-latin-wght-normal-Bn_gnr7w.woff2",
   "./assets/index-C6MVOcRY.css",
-  "./assets/index-CUsxzW0m.js",
+  "./assets/index-Co_p5HYy.js",
   "./assets/instrument-sans-latin-ext-wght-normal-B5bTHO_g.woff2",
   "./assets/instrument-sans-latin-wght-normal-BbzFLZTg.woff2",
-  "./assets/styleguide-BjK_6ihB.js",
+  "./assets/styleguide-DBG3vA-M.js",
   "./data/world.v1.json",
   "./favicon.svg",
   "./icons/apple-touch-icon.png",
@@ -26,7 +26,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(PRECACHE))
+      // cache: 'reload' skips the browser's HTTP cache, so a fresh deploy is never precached from stale copies.
+      .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting()),
   );
 });
