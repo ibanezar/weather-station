@@ -285,7 +285,8 @@ export function validateMystery(file: Json, seed: Json): string[] {
     if (!isRecord(typ)) {
       errors.push(`${at}: typ must be an object`);
     } else {
-      for (const id of [city, ...(Array.isArray(decoys) ? decoys : [])]) {
+      const named: Json[] = [city, ...(Array.isArray(decoys) ? (decoys as Json[]) : [])];
+      for (const id of named) {
         const t = typeof id === 'string' ? typ[id] : undefined;
         if (!Array.isArray(t) || t.length !== 5 || !t.every((v) => num(v, -100, 100)))
           errors.push(`${at}: typ is missing or wrong for ${String(id)}`);

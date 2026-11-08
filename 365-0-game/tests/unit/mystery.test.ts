@@ -146,7 +146,7 @@ function fakeCities(): SeedCity[] {
     lon: 10,
     tags: [],
     archetype: 'oceanic',
-  })) as SeedCity[];
+  }));
 }
 
 function fakeResponse(id: string, year: number): ApiResponse {
