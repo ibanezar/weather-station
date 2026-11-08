@@ -205,3 +205,28 @@
   font-size: var(--text-small);
   font-weight: 600;
 }
+
+/* The picture of the month: ten thin bars, one per stored year, wins on the left. */
+.year-strip {
+  display: grid;
+  gap: 1px;
+}
+
+.year-strip__bar {
+  display: flex;
+  height: 4px;
+  gap: 0;
+}
+
+.year-strip__seg {
+  flex-basis: 0;
+  min-width: 0;
+  background-color: var(--day);
+  background-image: var(--pat, none);
+  background-size: var(--pat-size, auto);
+}
+
+.draft__strip-note {
+  margin: 0;
+  font-size: var(--text-small);
+}

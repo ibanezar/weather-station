@@ -189,3 +189,43 @@ describe('the daily mystery in storage and statistics', () => {
     expect(s.longestStreak).toBe(2);
   });
 });
+
+import { calendar, weekdayIndex } from '../../src/app/progress-stats.ts';
+
+describe('the calendar of the last twelve weeks', () => {
+  it('knows the day of the week', () => {
+    expect(weekdayIndex('2026-11-09')).toBe(0); // a Monday
+    expect(weekdayIndex('2026-11-15')).toBe(6); // a Sunday
+  });
+
+  it('runs Monday to Sunday for twelve weeks, ending with the current week, future days marked', () => {
+    const store = new Store(structuredClone(defaults), memory());
+    const days = calendar(store.state, '2026-11-11'); // a Wednesday
+    expect(days).toHaveLength(84);
+    expect(days[0]?.date).toBe('2026-08-24'); // the Monday eleven weeks before the current one
+    expect(weekdayIndex(days[0]?.date ?? '')).toBe(0);
+    expect(days.filter((d) => d.future).map((d) => d.date)).toEqual([
+      '2026-11-12',
+      '2026-11-13',
+      '2026-11-14',
+      '2026-11-15',
+    ]);
+    expect(days.every((d) => d.played === 0)).toBe(true);
+  });
+
+  it('counts the daily (any chase) and the mystery separately, up to two a day', () => {
+    const store = new Store(structuredClone(defaults), memory());
+    const r = { picks: [], record: { w: 1, d: 1, l: 1 }, grade: 'sun-chaser' as const };
+    store.recordDaily('2026-11-10', r);
+    store.recordDaily('2026-11-10', r, 'snow'); // two dailies on one day still count once
+    store.recordMystery('2026-11-10', { guesses: ['x'], revealed: 1, points: 4, done: true });
+    store.recordDaily('2026-11-09', r, 'rain');
+    store.recordMystery('2026-11-08', { guesses: [], revealed: 1, points: 0, done: false });
+    const byDate = Object.fromEntries(
+      calendar(store.state, '2026-11-11').map((d) => [d.date, d.played]),
+    );
+    expect(byDate['2026-11-10']).toBe(2);
+    expect(byDate['2026-11-09']).toBe(1);
+    expect(byDate['2026-11-08']).toBe(0); // an unfinished mystery does not count
+  });
+});

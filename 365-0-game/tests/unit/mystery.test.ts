@@ -264,3 +264,51 @@ describe('building the puzzles', () => {
     expect(() => buildMystery(one, '2026-11-09', 1)).toThrow(/no fair mystery/);
   });
 });
+
+import maskJson from '../../src/data/worldmask.json';
+import { isLand, project } from '../../src/engine/worldmap.ts';
+
+describe('the dot map', () => {
+  const mask = maskJson;
+  it('has a full grid of land and sea', () => {
+    expect(mask.rows).toHaveLength((mask.top * 2) / mask.step);
+    expect(mask.rows.every((r) => r.length === mask.cols && /^[01]+$/.test(r))).toBe(true);
+    const land = mask.rows.join('').replaceAll('0', '').length;
+    expect(land / (mask.cols * mask.rows.length)).toBeGreaterThan(0.15);
+    expect(land / (mask.cols * mask.rows.length)).toBeLessThan(0.4);
+  });
+
+  it('puts places where they belong', () => {
+    const at = (lat: number, lon: number): { col: number; row: number } => {
+      const p = project(mask, lat, lon);
+      return {
+        col: Math.min(mask.cols - 1, Math.floor(p.x * mask.cols)),
+        row: Math.min(mask.rows.length - 1, Math.floor(p.y * mask.rows.length)),
+      };
+    };
+    // Ljubljana, Cairo, Chicago and Alice Springs are on land; the middle of the Pacific and the South Atlantic are not.
+    for (const [lat, lon] of [
+      [46.05, 14.5],
+      [30.04, 31.24],
+      [41.88, -87.63],
+      [-23.7, 133.9],
+    ] as const) {
+      const { col, row } = at(lat, lon);
+      expect(isLand(mask, col, row), `${String(lat)},${String(lon)}`).toBe(true);
+    }
+    for (const [lat, lon] of [
+      [0, -150],
+      [-30, -15],
+    ] as const) {
+      const { col, row } = at(lat, lon);
+      expect(isLand(mask, col, row), `${String(lat)},${String(lon)}`).toBe(false);
+    }
+  });
+
+  it('puts the corners at the corners and keeps everything on the map', () => {
+    expect(project(mask, mask.top, -180)).toEqual({ x: 0, y: 0 });
+    expect(project(mask, -mask.top, 180)).toEqual({ x: 1, y: 1 });
+    expect(project(mask, 90, 200).y).toBe(0);
+    expect(project(mask, 0, 0)).toEqual({ x: 0.5, y: 0.5 });
+  });
+});

@@ -105,6 +105,14 @@ export class App {
     const target = routeFromHash(location.hash);
     if (target === 'styleguide') return;
     this.route = target;
+    // What the player is chasing colours the buttons: the run's own chase while one is on the screen.
+    const inRun = target === 'draft' || target === 'reveal' || target === 'result';
+    document.documentElement.dataset['chase'] =
+      target === 'mystery'
+        ? 'sun' // the mystery is not a chase: it keeps the classic gold
+        : inRun && this.session
+          ? this.session.chase
+          : this.store.state.settings.chase;
     const draw = (): void => {
       for (const fn of this.cleanups) fn();
       this.cleanups = [];

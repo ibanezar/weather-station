@@ -98,3 +98,37 @@ export function computeStats(stored: Stored): ProgressStats {
     recent,
   };
 }
+
+export interface CalendarDay {
+  date: string;
+  /** Daily games and mysteries finished that day: 0, 1 or 2 (any chase counts as the daily). */
+  played: 0 | 1 | 2;
+  /** After today (the rest of the current week). */
+  future: boolean;
+}
+
+/** Monday = 0 ... Sunday = 6 for a YYYY-MM-DD date. */
+export function weekdayIndex(date: string): number {
+  const [y, m, d] = date.split('-').map(Number) as [number, number, number];
+  return (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7;
+}
+
+/**
+ * The last `weeks` weeks, Monday to Sunday, oldest week first, ending with the week of `today`.
+ * Days after today are marked as future.
+ */
+export function calendar(stored: Stored, today: string, weeks = 12): CalendarDay[] {
+  const dailies = new Set(Object.keys(stored.daily).map((k) => k.slice(0, 10)));
+  const mysteries = new Set(
+    Object.entries(stored.mystery)
+      .filter(([, r]) => r.done)
+      .map(([date]) => date),
+  );
+  const monday = addDays(today, -weekdayIndex(today));
+  const first = addDays(monday, -(weeks - 1) * 7);
+  return Array.from({ length: weeks * 7 }, (_, i) => {
+    const date = addDays(first, i);
+    const played = (Number(dailies.has(date)) + Number(mysteries.has(date))) as 0 | 1 | 2;
+    return { date, played, future: date > today };
+  });
+}

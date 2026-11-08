@@ -368,5 +368,10 @@
   "mystery.shareText": "365-0 · Where was this? · {date}\n{n} of {max} points\n{url}",
   "mystery.loadError": "The puzzle could not be loaded.",
   "stats.mysteries": "Mysteries played",
-  "stats.mysteryAvg": "Mystery average"
+  "stats.mysteryAvg": "Mystery average",
+  "draft.stripNote": "The bars are ten real years of this month, one per year. What you are chasing is on the left.",
+  "mystery.mapLabel": "Map of the three cities: {list}",
+  "stats.calendar": "Last twelve weeks",
+  "stats.calendarLabel": "{n} of the last {days} days played",
+  "stats.calendarNote": "One square is one day. Filled when you finished the daily draft or the mystery, gold when you finished both."
 }

@@ -1,7 +1,7 @@
 import type { App } from '../../app/app.ts';
 import { CHASE_ICON, chaseKey, gradeKey } from '../../app/chase-text.ts';
 import { activeStreak, localDate } from '../../app/dates.ts';
-import { computeStats } from '../../app/progress-stats.ts';
+import { calendar, computeStats } from '../../app/progress-stats.ts';
 import { backButton } from '../components/backButton.ts';
 import { h, mount } from '../dom.ts';
 import { icon } from '../icons/index.ts';
@@ -23,6 +23,34 @@ export function renderStats(app: App, root: HTMLElement): void {
   const dash = '–';
   const record = (r: { w: number; d: number; l: number } | null): string =>
     r ? fmt.record(r) : dash;
+
+  const calendarSection = (): HTMLElement => {
+    const today = localDate();
+    const days = calendar(app.store.state, today);
+    const played = days.filter((d) => d.played > 0).length;
+    const shown = days.filter((d) => !d.future).length;
+    return h(
+      'section',
+      null,
+      h('h2', null, t('stats.calendar')),
+      h(
+        'div',
+        {
+          class: 'stats__cal',
+          role: 'img',
+          'aria-label': t('stats.calendarLabel', { n: played, days: shown }),
+        },
+        ...days.map((d) =>
+          h('span', {
+            class: 'stats__day',
+            'data-n': d.future ? 'future' : String(d.played),
+            title: d.future ? '' : fmt.date(d.date),
+          }),
+        ),
+      ),
+      h('p', { class: 'muted stats__note' }, t('stats.calendarNote')),
+    );
+  };
 
   const body =
     stats.runs === 0 && stats.dailies === 0 && stats.mystery.played === 0
@@ -86,6 +114,7 @@ export function renderStats(app: App, root: HTMLElement): void {
               ),
             ),
           ),
+          calendarSection(),
           stats.recent.length > 0
             ? h(
                 'section',

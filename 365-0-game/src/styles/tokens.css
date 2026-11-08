@@ -38,6 +38,13 @@
   /* Interaction. The label on the gold button is a fixed dark ink in both themes. */
   --accent: var(--day-perfect);
   --on-accent: oklch(0.239 0.032 252.9);
+  /* Each chase takes the colour of the day type it wins on (see the data-chase rules below), with a label
+     colour checked for it by npm run contrast. */
+  --on-day-perfect: oklch(0.239 0.032 252.9);
+  --on-day-freeze: oklch(0.239 0.032 252.9);
+  --on-day-rain: oklch(0.99 0.004 250);
+  --on-day-storm: oklch(0.239 0.032 252.9);
+  --on-day-heat: oklch(0.239 0.032 252.9);
   --focus: var(--ink);
   --focus-width: 3px;
   --focus-offset: 2px;
@@ -147,4 +154,22 @@
   --dur-base: 0ms;
   --dur-tile: 0ms;
   --dur-flip: 0ms;
+}
+
+/* What you are chasing sets the accent: buttons, the current step, the switch. The sunshine chase keeps gold. */
+:root[data-chase='snow'] {
+  --accent: var(--day-freeze);
+  --on-accent: var(--on-day-freeze);
+}
+:root[data-chase='rain'] {
+  --accent: var(--day-rain);
+  --on-accent: var(--on-day-rain);
+}
+:root[data-chase='storm'] {
+  --accent: var(--day-storm);
+  --on-accent: var(--on-day-storm);
+}
+:root[data-chase='heat'] {
+  --accent: var(--day-heat);
+  --on-accent: var(--on-day-heat);
 }

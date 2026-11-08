@@ -26,6 +26,7 @@ import {
 } from '../../src/engine/index.ts';
 import { parseStored, defaultSettings, emptyStored, dailyKey } from '../../src/app/storage.ts';
 import { data, seeds } from './helpers/data.ts';
+import { monthStrip } from '../../src/engine/strip.ts';
 
 describe('chases', () => {
   it('have disjoint win and loss types, and every day type is a win, draw or loss somewhere', () => {
@@ -208,5 +209,43 @@ describe('invented events', () => {
   it('are always valid chase ids in the type', () => {
     const id: ChaseId = 'heat';
     expect(CHASE_IDS).toContain(id);
+  });
+});
+
+describe('the picture of a month on a card', () => {
+  const world = {
+    v: 1,
+    years: [2020, 2021],
+    cities: {
+      x: {
+        t: Array.from({ length: 12 }, () => 10),
+        sp: Array.from({ length: 12 }, () => 0),
+        sb: Array.from({ length: 12 }, () => 0),
+        d: Array.from({ length: 12 }, (_, m) => {
+          const n = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m] ?? 30;
+          return [`${'p'.repeat(n - 2)}rr`, `${'o'.repeat(n - 3)}fff`];
+        }),
+      },
+    },
+  } as unknown as Parameters<typeof monthStrip>[0]['world'];
+
+  it('has one bar per year and every bar covers the whole month', () => {
+    const strip = monthStrip({ world }, 'x', 0, 'sun');
+    expect(strip).toHaveLength(2);
+    for (const bar of strip) expect(bar.reduce((n, s) => n + s.days, 0)).toBe(31);
+  });
+
+  it('puts the wins first, then the draws, then the losses, for the chosen chase', () => {
+    const sun = monthStrip({ world }, 'x', 0, 'sun');
+    expect(sun[0]?.map((s) => s.type)).toEqual(['p', 'r']);
+    expect(sun[1]?.map((s) => s.type)).toEqual(['o', 'f']);
+    const snow = monthStrip({ world }, 'x', 0, 'snow');
+    expect(snow[1]?.map((s) => s.type)).toEqual(['f', 'o']); // freeze wins, ok is a draw
+    expect(snow[0]?.map((s) => s.type)).toEqual(['r', 'p']); // rain draws, perfect loses
+    expect(sun[0]?.find((s) => s.type === 'r')?.days).toBe(2);
+  });
+
+  it('refuses a city that has no data', () => {
+    expect(() => monthStrip({ world }, 'nowhere', 0, 'sun')).toThrow();
   });
 });

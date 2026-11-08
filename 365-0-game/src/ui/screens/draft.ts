@@ -4,6 +4,7 @@ import { doFinish, doKeep, doPick, doReroll, doScout, type Session } from '../..
 import { DAYS_IN_MONTH, type SeedCity } from '../../data/types.ts';
 import { chaseKey } from '../../app/chase-text.ts';
 import { chainProgress, combosIfPicked, findCombos } from '../../engine/combos.ts';
+import { monthStrip } from '../../engine/strip.ts';
 import { monthRisk } from '../../engine/risk.ts';
 import {
   isScouted,
@@ -130,6 +131,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
       ...(combos.length > 0
         ? { combo: combos.map((c) => t(key(`draft.combo.${c}`))).join(' · ') }
         : {}),
+      strip: monthStrip(s.data, id, monthIndex, s.chase),
       name,
       country: fmt.country(city.country),
       temperature: fmt.temperature(world.cities[id]?.t[monthIndex] ?? 0),
@@ -212,7 +214,10 @@ export function renderDraft(app: App, root: HTMLElement): void {
     playing = undefined;
     drawPreview();
     cardList = round.cities.map((id) => makeCard(id, round.month));
-    cardsBox.replaceChildren(...cardList.map((c) => c.el));
+    cardsBox.replaceChildren(
+      ...cardList.map((c) => c.el),
+      h('p', { class: 'muted draft__strip-note' }, t('draft.stripNote')),
+    );
   }
 
   /** The month the player just picked plays out; then they keep it or spend a second chance on it. */
