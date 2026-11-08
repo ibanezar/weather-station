@@ -27,6 +27,7 @@ on:
       - '365-0-game/.fetch-trigger'
       - '365-0-game/scripts/**'
       - '365-0-game/src/engine/thresholds.ts'
+      - '365-0-game/src/engine/mystery.ts'
       - '365-0-game/data/cities.seed.json'
 
 permissions:
@@ -124,7 +125,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data/world.v1.json src/data/cities.index.json docs/data-report.md
+          git add public/data/world.v1.json public/data/mystery.v1.json src/data/cities.index.json docs/data-report.md
           if git diff --cached --quiet; then
             echo "Generated data is unchanged."
           else
