@@ -1,14 +1,14 @@
 // Generated at build time. Do not edit.
-const VERSION = '887486fd796f';
+const VERSION = '98d46d574631';
 const CACHE = '365-0-' + VERSION;
 const PRECACHE = [
   "./assets/big-shoulders-display-latin-ext-wght-normal-EP2r9iG4.woff2",
   "./assets/big-shoulders-display-latin-wght-normal-Bn_gnr7w.woff2",
-  "./assets/index-DIQwEWN0.js",
-  "./assets/index-WMdhxF_Y.css",
+  "./assets/index-Bsnk0VRz.css",
+  "./assets/index-g2VhyM7k.js",
   "./assets/instrument-sans-latin-ext-wght-normal-B5bTHO_g.woff2",
   "./assets/instrument-sans-latin-wght-normal-BbzFLZTg.woff2",
-  "./assets/styleguide-CJGm2KUh.js",
+  "./assets/styleguide-BBprod27.js",
   "./data/mystery.v1.json",
   "./data/world.v1.json",
   "./favicon.svg",
