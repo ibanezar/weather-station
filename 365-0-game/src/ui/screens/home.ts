@@ -172,6 +172,7 @@ export function renderHome(app: App, root: HTMLElement): void {
           checked: id === chase,
           onChange: () => {
             chase = id;
+            document.documentElement.dataset['chase'] = id;
             app.store.update((st) => {
               st.settings.chase = id;
             });

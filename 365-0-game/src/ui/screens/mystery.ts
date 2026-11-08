@@ -3,6 +3,7 @@ import type { App } from '../../app/app.ts';
 import { cities, loadMystery } from '../../app/data.ts';
 import { localDate, msUntilTomorrow } from '../../app/dates.ts';
 import { shareMystery } from '../../app/share.ts';
+import maskJson from '../../data/worldmask.json';
 import type { SeedCity } from '../../data/types.ts';
 import {
   candidateOrder,
@@ -23,7 +24,9 @@ import {
 } from '../../engine/mystery.ts';
 import type { IconName } from '../icons/index.ts';
 import { backButton } from '../components/backButton.ts';
+import { drawWorldMap } from '../canvas/worldmap.ts';
 import { button } from '../components/button.ts';
+import { dayDial, fillBar, rangeBar } from '../components/clueViz.ts';
 import { h, mount } from '../dom.ts';
 import { icon } from '../icons/index.ts';
 
@@ -96,24 +99,48 @@ export function renderMystery(app: App, root: HTMLElement): void {
       draw();
     };
 
-    const clueText = (clue: Clue): string[] => {
+    interface ClueLine {
+      text: string;
+      viz?: Element;
+      /** The picture goes beside the text instead of under it. */
+      side?: boolean;
+    }
+    const clueLines = (clue: Clue): ClueLine[] => {
       const w = puzzle.w;
       switch (clue) {
         case 'temp':
-          return [t('mystery.temp', { high: fmt.temperature(w.tx), low: fmt.temperature(w.tn) })];
+          return [
+            {
+              text: t('mystery.temp', { high: fmt.temperature(w.tx), low: fmt.temperature(w.tn) }),
+              viz: rangeBar(w.tn, w.tx),
+            },
+          ];
         case 'sky':
           return [
-            t('mystery.cloud', { n: w.cl }),
-            w.p > 0 ? t('mystery.rain', { mm: fmt.number(w.p) }) : t('mystery.dry'),
-            ...(w.s > 0 ? [t('mystery.snow', { cm: fmt.number(w.s) })] : []),
+            { text: t('mystery.cloud', { n: w.cl }), viz: fillBar('cloud', w.cl, 100) },
+            w.p > 0
+              ? { text: t('mystery.rain', { mm: fmt.number(w.p) }), viz: fillBar('rain', w.p, 30) }
+              : { text: t('mystery.dry') },
+            ...(w.s > 0
+              ? [
+                  {
+                    text: t('mystery.snow', { cm: fmt.number(w.s) }),
+                    viz: fillBar('snow', w.s, 20),
+                  },
+                ]
+              : []),
           ];
         case 'wind':
-          return [t('mystery.gust', { kmh: w.g })];
+          return [{ text: t('mystery.gust', { kmh: w.g }), viz: fillBar('wind', w.g, 120) }];
         case 'daylight': {
           const minutes = dayLengthMinutes(answer.lat, puzzle.m, puzzle.d);
-          if (minutes <= 0) return [t('mystery.polarNight')];
-          if (minutes >= 1440) return [t('mystery.polarDay')];
-          return [t('mystery.daylight', { time: fmt.duration(minutes * 60000) })];
+          const text =
+            minutes <= 0
+              ? t('mystery.polarNight')
+              : minutes >= 1440
+                ? t('mystery.polarDay')
+                : t('mystery.daylight', { time: fmt.duration(minutes * 60000) });
+          return [{ text, viz: dayDial(minutes), side: true }];
         }
       }
     };
@@ -125,15 +152,51 @@ export function renderMystery(app: App, root: HTMLElement): void {
         icon(CLUE_ICON[clue], { size: 28 }),
         h(
           'div',
-          null,
+          { class: 'mystery__clue-body' },
           h('strong', null, t(`mystery.clue.${clue}` as const)),
-          ...clueText(clue).map((line) => h('p', { class: 'num' }, line)),
+          ...clueLines(clue).map((line) =>
+            h(
+              'div',
+              { class: `mystery__line${line.side ? ' mystery__line--side' : ''}` },
+              h('p', { class: 'num' }, line.text),
+              line.viz ?? null,
+            ),
+          ),
         ),
       );
 
     const finished = (): boolean => isFinished(state);
     const wrong = (id: string): boolean => state.wrong.includes(id);
     const dayIso = `${String(puzzle.year)}-${String(puzzle.m + 1).padStart(2, '0')}-${String(puzzle.d).padStart(2, '0')}`;
+
+    // The dot map of the three cities, drawn once the panel is on the page (it needs its width).
+    const mapCanvas = h('canvas', {
+      class: 'mystery__map',
+      role: 'img',
+      'aria-label': t('mystery.mapLabel', {
+        list: order.map((c, i) => `${String(i + 1)} ${fmt.cityName(c)}`).join(', '),
+      }),
+    });
+    const paintMap = (): void => {
+      if (!mapCanvas.isConnected) return;
+      drawWorldMap(
+        mapCanvas,
+        maskJson,
+        order.map((c, i) => ({
+          latitude: c.lat,
+          longitude: c.lon,
+          n: i + 1,
+          answer: c.id === puzzle.city,
+        })),
+      );
+    };
+    const mapObserver = new ResizeObserver(paintMap);
+    const scheme = window.matchMedia('(prefers-color-scheme: dark)');
+    scheme.addEventListener('change', paintMap);
+    app.onLeave(() => {
+      mapObserver.disconnect();
+      scheme.removeEventListener('change', paintMap);
+    });
 
     const resultPanel = (): HTMLElement => {
       const pts = points(state);
@@ -155,15 +218,17 @@ export function renderMystery(app: App, root: HTMLElement): void {
             date: fmt.fullDate(dayIso),
           }),
         ),
+        mapCanvas,
         h('h3', null, t('mystery.explain', { month: fmt.month(puzzle.m) })),
         h(
           'ul',
           { class: 'mystery__usual' },
-          ...order.map((c) => {
+          ...order.map((c, i) => {
             const typ = puzzle.typ[c.id];
             return h(
               'li',
               { class: c.id === puzzle.city ? 'is-answer' : null },
+              h('span', { class: 'mystery__n num', 'aria-hidden': 'true' }, String(i + 1)),
               typ
                 ? t('mystery.usually', {
                     city: fmt.cityName(c),
@@ -271,6 +336,10 @@ export function renderMystery(app: App, root: HTMLElement): void {
           : null,
       ];
       holder.replaceChildren(...parts.filter((x): x is Node => x !== null));
+      if (done) {
+        mapObserver.observe(mapCanvas);
+        requestAnimationFrame(paintMap);
+      }
     }
     draw();
   };

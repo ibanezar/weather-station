@@ -46,6 +46,11 @@ The year grid sits on a dark panel (`--well`) in both themes, so all six day col
 | `--ink-muted` | `--surface` | secondary text on the page | 4.5:1 | 4.83:1 | 7.03:1 |
 | `--ink-muted` | `--raised` | secondary text on cards | 4.5:1 | 5.49:1 | 6.08:1 |
 | `--on-accent` | `--accent` | label on the gold button | 4.5:1 | 9.43:1 | 9.43:1 |
+| `--on-day-perfect` | `--day-perfect` | label on the perfect chase button | 4.5:1 | 9.43:1 | 9.43:1 |
+| `--on-day-freeze` | `--day-freeze` | label on the freeze chase button | 4.5:1 | 12.54:1 | 12.54:1 |
+| `--on-day-rain` | `--day-rain` | label on the rain chase button | 4.5:1 | 4.65:1 | 4.65:1 |
+| `--on-day-storm` | `--day-storm` | label on the storm chase button | 4.5:1 | 6.00:1 | 6.00:1 |
+| `--on-day-heat` | `--day-heat` | label on the heat chase button | 4.5:1 | 4.63:1 | 4.63:1 |
 | `--surface` | `--ink` | text on the inverted toast | 4.5:1 | 14.51:1 | 15.53:1 |
 | `--on-well` | `--well` | labels on the grid panel | 4.5:1 | 14.13:1 | 16.21:1 |
 | `--on-well-muted` | `--well` | month names on the grid panel | 4.5:1 | 6.40:1 | 7.34:1 |

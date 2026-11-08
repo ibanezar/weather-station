@@ -378,5 +378,10 @@
   "mystery.shareText": "365-0 · Kje je bilo to? · {date}\n{n} od {max} točk\n{url}",
   "mystery.loadError": "Uganke ni bilo mogoče naložiti.",
   "stats.mysteries": "Odigranih ugank",
-  "stats.mysteryAvg": "Povprečje ugank"
+  "stats.mysteryAvg": "Povprečje ugank",
+  "draft.stripNote": "Trakovi so deset pravih let tega meseca, po eden za vsako leto. Kar loviš, je na levi.",
+  "mystery.mapLabel": "Zemljevid treh mest: {list}",
+  "stats.calendar": "Zadnjih dvanajst tednov",
+  "stats.calendarLabel": "{n} od zadnjih {days} dni odigranih",
+  "stats.calendarNote": "En kvadrat je en dan. Zapolnjen, ko dokončaš dnevno igro ali uganko, zlat, ko dokončaš obe."
 }

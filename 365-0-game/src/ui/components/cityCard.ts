@@ -1,4 +1,5 @@
 import type { Archetype } from '../../data/types.ts';
+import type { StripSegment } from '../../engine/strip.ts';
 import { h } from '../dom.ts';
 import { icon } from '../icons/index.ts';
 import { isReducedMotion } from '../settings.ts';
@@ -31,6 +32,8 @@ export interface CityCardOptions {
   stepText: (bucket: number) => string;
   /** Free information on every card: how much this month varies from year to year. */
   risk?: { level: string; label: string; detail: string };
+  /** Ten real years of this month, one bar per year (decorative: the risk text says the same in words). */
+  strip?: StripSegment[][];
   /** Set when picking this city completes a combo, e.g. "Chain: +1 second chance". */
   combo?: string;
   onPick: () => void;
@@ -49,6 +52,26 @@ export interface CityCard {
 function flipMs(): number {
   const raw = getComputedStyle(document.documentElement).getPropertyValue('--dur-flip');
   return isReducedMotion() ? 0 : cssTimeToMs(raw);
+}
+
+/** One thin bar per year; each bar is split by day type (the day-type classes carry colour and patterns). */
+export function yearStrip(years: StripSegment[][]): HTMLElement {
+  return h(
+    'span',
+    { class: 'year-strip', 'aria-hidden': 'true' },
+    ...years.map((segments) =>
+      h(
+        'span',
+        { class: 'year-strip__bar' },
+        ...segments.map((seg) =>
+          h('span', {
+            class: `year-strip__seg day-${seg.type}`,
+            style: `flex-grow:${String(seg.days)}`,
+          }),
+        ),
+      ),
+    ),
+  );
 }
 
 /**
@@ -73,6 +96,7 @@ export function cityCard(o: CityCardOptions): CityCard {
       ' ',
       h('span', { class: 'city-card__temp num' }, o.temperature),
     ),
+    o.strip ? yearStrip(o.strip) : null,
     h(
       'span',
       { class: 'city-card__foot' },

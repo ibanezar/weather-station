@@ -36,6 +36,9 @@ export const PAIRS: readonly (readonly [string, string, number, string])[] = [
   ['--ink-muted', '--surface', TEXT_MIN, 'secondary text on the page'],
   ['--ink-muted', '--raised', TEXT_MIN, 'secondary text on cards'],
   ['--on-accent', '--accent', TEXT_MIN, 'label on the gold button'],
+  ...(['perfect', 'freeze', 'rain', 'storm', 'heat'] as const).map(
+    (t) => [`--on-day-${t}`, `--day-${t}`, TEXT_MIN, `label on the ${t} chase button`] as const,
+  ),
   ['--surface', '--ink', TEXT_MIN, 'text on the inverted toast'],
   ['--on-well', '--well', TEXT_MIN, 'labels on the grid panel'],
   ['--on-well-muted', '--well', TEXT_MIN, 'month names on the grid panel'],
