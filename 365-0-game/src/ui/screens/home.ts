@@ -6,8 +6,11 @@ import { newSession, randomEntropy, restoreSession } from '../../app/session.ts'
 import { dailySeed } from '../../engine/run.ts';
 import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
+import type { MessageKey } from '../../i18n/index.ts';
 import { h, mount } from '../dom.ts';
-import { renderHow } from './how.ts';
+import { THRESHOLDS } from '../../engine/thresholds.ts';
+import { cities } from '../../app/data.ts';
+import { logoMark } from '../components/logo.ts';
 
 /** Start (or reopen) a run. Shows the load error with a retry when the weather data cannot load. */
 export async function startRun(
@@ -19,6 +22,9 @@ export async function startRun(
   const today = localDate();
   ui.btn.disabled = true;
   ui.message.textContent = '';
+  app.store.update((st) => {
+    st.onboarded = true;
+  });
   try {
     const data = await loadEngineData();
     if (mode === 'daily') {
@@ -52,10 +58,6 @@ export async function startRun(
 }
 
 export function renderHome(app: App, root: HTMLElement): void {
-  if (!app.store.state.onboarded) {
-    renderHow(app, root, { first: true });
-    return;
-  }
   const { t, plural } = app.i18n;
   const today = localDate();
   const dailyDone = app.store.state.daily[today] !== undefined;
@@ -99,6 +101,25 @@ export function renderHome(app: App, root: HTMLElement): void {
   };
   drawInstall();
 
+  const range = app.fmt.range(THRESHOLDS.perfect.tmaxCMin, THRESHOLDS.perfect.tmaxCMax);
+  const steps = [1, 2, 3].map((n) =>
+    h(
+      'li',
+      { class: 'home__step' },
+      h('span', { class: 'home__num num', 'aria-hidden': 'true' }, String(n)),
+      h(
+        'div',
+        null,
+        h('strong', { class: 'home__step-title' }, t(`home.step${String(n)}.title` as MessageKey)),
+        h(
+          'p',
+          { class: 'muted home__step-text' },
+          t(`home.step${String(n)}.text` as MessageKey, { range }),
+        ),
+      ),
+    ),
+  );
+
   mount(
     root,
     h(
@@ -107,19 +128,27 @@ export function renderHome(app: App, root: HTMLElement): void {
       h(
         'header',
         { class: 'home__head' },
-        h('h1', { class: 'home__title' }, t('app.title')),
+        h(
+          'div',
+          { class: 'home__brand' },
+          logoMark(64),
+          h('h1', { class: 'home__title' }, t('app.title')),
+        ),
         h('p', { class: 'home__tagline' }, t('app.tagline')),
-        h('p', { class: 'muted num' }, t('home.seedDate', { date: app.fmt.date(today) })),
-        streak >= 2
-          ? chip({ label: plural('home.streak', streak), icon: 'streak' })
-          : h('p', { class: 'muted' }, t('home.streakEmpty')),
-        h('p', { class: 'home__goal' }, t('app.goal')),
+        h('p', { class: 'home__pitch' }, t('home.pitch')),
       ),
+      h('ol', { class: 'home__steps', 'aria-label': t('onboarding.title') }, ...steps),
       h(
         'div',
         { class: 'screen__actions' },
         message,
         dailyBtn,
+        h(
+          'p',
+          { class: 'muted home__daily num' },
+          t('home.dailyCaption'),
+          streak >= 2 ? ` · ${plural('home.streak', streak)}` : null,
+        ),
         endlessBtn,
         installSlot,
         best
@@ -129,26 +158,39 @@ export function renderHome(app: App, root: HTMLElement): void {
               t('home.bestEndless', { record: app.fmt.record(best) }),
             )
           : null,
+      ),
+      h(
+        'section',
+        { class: 'home__legend', 'aria-label': t('home.dayTypes') },
+        h('h2', { class: 'home__legend-title' }, t('home.dayTypes')),
         h(
-          'nav',
-          { class: 'home__links', 'aria-label': t('home.settings') },
-          button({
-            label: t('home.settings'),
-            variant: 'quiet',
-            icon: 'settings',
-            onClick: () => {
-              app.go('settings');
-            },
-          }),
-          button({
-            label: t('home.howItWorks'),
-            variant: 'quiet',
-            icon: 'info',
-            onClick: () => {
-              app.go('how');
-            },
-          }),
+          'div',
+          { class: 'home__chips' },
+          chip({ label: t('home.dayPerfect'), swatch: 'p' }),
+          chip({ label: t('home.dayOk'), swatch: 'o' }),
+          chip({ label: t('home.dayBad'), swatch: 'loss' }),
         ),
+        h('p', { class: 'muted home__facts' }, t('home.facts', { cities: cities.length })),
+      ),
+      h(
+        'nav',
+        { class: 'home__links', 'aria-label': t('home.settings') },
+        button({
+          label: t('home.settings'),
+          variant: 'quiet',
+          icon: 'settings',
+          onClick: () => {
+            app.go('settings');
+          },
+        }),
+        button({
+          label: t('home.howItWorks'),
+          variant: 'quiet',
+          icon: 'info',
+          onClick: () => {
+            app.go('how');
+          },
+        }),
       ),
     ),
   );

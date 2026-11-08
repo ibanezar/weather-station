@@ -204,5 +204,18 @@
   "draft.monthAnnounce": "{city}, {year}: {w} popolnih dni, {d} srednjih dni, {l} slabih dni.",
   "draft.m.perfect": "popolnih",
   "draft.m.ok": "srednjih",
-  "draft.m.bad": "slabih"
+  "draft.m.bad": "slabih",
+  "home.pitch": "Vremenska igra s pravimi podatki. Izberi, kje preživiš vsak mesec v letu, nato poglej, kakšno vreme je res bilo.",
+  "home.step1.title": "Izberi mesto za vsak mesec",
+  "home.step1.text": "Tri mesta na izbiro, dvanajst mesecev. Z izvidom pokukaš v vreme.",
+  "home.step2.title": "Spremljaj mesec, kako se odvije",
+  "home.step2.text": "Pravo vreme od 2016 do 2025, dan za dnem. Obdrži ga ali izžrebaj drugo leto.",
+  "home.step3.title": "Zberi popolne dni",
+  "home.step3.text": "{range}, suho in mirno. Premagaj današnje najboljše možno leto.",
+  "home.dayTypes": "Vsak dan je eden od teh",
+  "home.dayPerfect": "Popoln",
+  "home.dayOk": "Srednji",
+  "home.dayBad": "Dež, nevihta, vročina ali zmrzal",
+  "home.facts": "{cities} mest, deset let pravega vremena (od 2016 do 2025).",
+  "home.dailyCaption": "Današnji izbor, enak za vse"
 }

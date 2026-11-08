@@ -196,5 +196,18 @@
   "draft.monthAnnounce": "{city}, {year}: {w} perfect days, {d} so-so days, {l} bad days.",
   "draft.m.perfect": "perfect",
   "draft.m.ok": "so-so",
-  "draft.m.bad": "bad"
+  "draft.m.bad": "bad",
+  "home.pitch": "A weather game with real data. Choose where to spend each month of the year, then see what the weather was really like.",
+  "home.step1.title": "Pick a city for each month",
+  "home.step1.text": "Three cities to choose from, twelve months. Scout to peek at the weather.",
+  "home.step2.title": "Watch the month play out",
+  "home.step2.text": "Real weather from 2016 to 2025, day by day. Keep it or draw another year.",
+  "home.step3.title": "Collect perfect days",
+  "home.step3.text": "{range}, dry and calm. Beat today's best possible year.",
+  "home.dayTypes": "Every day is one of these",
+  "home.dayPerfect": "Perfect",
+  "home.dayOk": "So-so",
+  "home.dayBad": "Rain, storm, heat or freeze",
+  "home.facts": "{cities} cities, ten years of real weather (2016 to 2025).",
+  "home.dailyCaption": "Today's draft, the same for everyone"
 }

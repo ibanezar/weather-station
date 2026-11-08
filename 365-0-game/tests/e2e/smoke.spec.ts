@@ -8,8 +8,8 @@ test('the app loads with one h1 and no console errors', async ({ page }) => {
   page.on('pageerror', (err) => errors.push(err.message));
 
   await page.goto('/');
-  // A first visit shows the three-line introduction.
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('How it works');
+  // A first visit lands on Home, which already explains the game.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('365-0');
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   expect(errors).toEqual([]);
 });
