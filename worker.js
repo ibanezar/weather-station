@@ -7258,6 +7258,67 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Anonimno štetje iger 365-0 (/365-0/, 8. 11. 2026) ──
+      // Igra ob začetku in koncu igre pove, katera tema je bila, ali je dnevna ali poljubna in (ob koncu) ocena.
+      // Brez oznake igralca, brez IP (ta je samo v KV števcu omejitve, TTL 1 h), strežnik hrani samo vsote za mesec.
+      // Vsote so PRIBLIŽNE: KV ni atomaren, vzporedni zapisi izgubijo kak poziv. Namen je uravnoteženje igre, ne obračun.
+      //   POST /365-0/stat   { ev:"start"|"finish", mode:"daily"|"endless", chase, grade?, rerolls? }
+      //   GET  /365-0/stat?mesec=YYYY-MM  → admin (Bearer DELETE_SECRET): { mesec, stevci:{ "start.daily.sun": n, … } }
+      // G365_CHASES/G365_GRADES sta namerna podvojitev z 365-0-game/src/engine (chase.ts, grades.ts):
+      // preverja ju tools/test_g365_stat.mjs.
+      if (path === "/365-0/stat") {
+        const G365_CHASES = ["sun", "snow", "rain", "storm", "heat"];
+        const G365_GRADES = ["stormbound", "umbrella-carrier", "drizzle-dodger", "fair-weather-friend", "sun-chaser", "climate-sage", "perfect-forecast"];
+        const hdr = { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" };
+        const out = (obj, status) => new Response(JSON.stringify(obj), { status: status || 200, headers: hdr });
+        const kv = env?.COUNTER_KV;
+        if (!kv) return out({ error: "Shramba ni dosegljiva" }, 503);
+
+        if (request.method === "POST") {
+          let body;
+          try { body = JSON.parse(await request.text()); } catch (_) { return out({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object" || Array.isArray(body)) return out({ error: "Napačni podatki" }, 400);
+          const { ev, mode, chase } = body;
+          if ((ev !== "start" && ev !== "finish") || (mode !== "daily" && mode !== "endless") || !G365_CHASES.includes(chase)) {
+            return out({ error: "Napačni podatki" }, 400);
+          }
+          if (await _ipLimited(env, request, "g365_rl", 120, 3600)) return out({ error: "Preveč zahtev v kratkem času" }, 429);
+          const inc = { [ev + "." + mode + "." + chase]: 1 };
+          if (ev === "finish") {
+            if (G365_GRADES.includes(body.grade)) inc["grade." + mode + "." + chase + "." + body.grade] = 1;
+            const rr = Number(body.rerolls);
+            if (Number.isInteger(rr) && rr >= 0 && rr <= 12) inc["rerolls." + mode + "." + chase] = rr;
+          }
+          const key = "g365:" + _ljDatum().slice(0, 7);
+          let counts = {};
+          try { counts = JSON.parse((await kv.get(key)) || "{}") || {}; } catch (_) { counts = {}; }
+          for (const [k, n] of Object.entries(inc)) counts[k] = (counts[k] || 0) + n;
+          await kv.put(key, JSON.stringify(counts));
+          return out({ ok: true });
+        }
+
+        if (request.method === "GET") {
+          // Isti zaklep kot galerija, anketa in poročila o neurjih (gal_admin_fail:<ip>).
+          const secret = env.DELETE_SECRET;
+          const auth = request.headers.get("Authorization") || "";
+          let okAdmin = false;
+          if (secret) {
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+            const lockKey = "gal_admin_fail:" + ip;
+            const fails = parseInt((await kv.get(lockKey)) || "0") || 0;
+            if (fails < 8) {
+              if (_safeEq(auth, "Bearer " + secret)) { await kv.delete(lockKey); okAdmin = true; }
+              else await kv.put(lockKey, String(fails + 1), { expirationTtl: 900 });
+            }
+          }
+          if (!okAdmin) return out({ error: "Nepooblaščen dostop" }, 401);
+          const mesec = /^\d{4}-\d{2}$/.test(url.searchParams.get("mesec") || "") ? url.searchParams.get("mesec") : _ljDatum().slice(0, 7);
+          let stevci = {};
+          try { stevci = JSON.parse((await kv.get("g365:" + mesec)) || "{}") || {}; } catch (_) { stevci = {}; }
+          return out({ mesec, stevci });
+        }
+      }
+
       // ── Povpraševanja podjetij (/podjetja/, 30. 10. 2026) ──────
       // Obrazec »Zahtevajte ponudbo po meri«. Vsebuje osebne podatke (kontakt), zato:
       // brez IP in user-agenta v zapisu, branje samo z Bearer DELETE_SECRET (zaklep po IP),

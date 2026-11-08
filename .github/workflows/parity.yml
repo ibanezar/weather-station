@@ -11,6 +11,7 @@ on:
       - 'app.js'
       - 'style.css'
       - 'worker.js'
+      - '365-0-game/src/engine/**'
       - 'podjetja/**'
       - 'tools/generate_podjetja_page.py'
       - 'igra/**'
@@ -27,6 +28,7 @@ on:
       - 'app.js'
       - 'style.css'
       - 'worker.js'
+      - '365-0-game/src/engine/**'
       - 'igra/**'
       - 'napovej/**'
       - 'crnivec-igra/**'
@@ -228,3 +230,6 @@ jobs:
 
       - name: Test analize »dvig megle po sevanju« (negativen rezultat)
         run: python3 tools/test_megla_sevanje.py
+
+      - name: Test anonimnega štetja iger 365-0 (pravi worker.js, lažen KV)
+        run: node tools/test_g365_stat.mjs

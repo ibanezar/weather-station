@@ -21,6 +21,8 @@ export interface Settings {
   sound: boolean;
   /** What the player is chasing: sunshine (the classic game), snow, rain, storms or heat. */
   chase: ChaseId;
+  /** Send anonymous play counts (a game started or finished, which chase and grade). Nothing else leaves the device. */
+  counts: boolean;
 }
 
 export interface DailyResult {
@@ -39,6 +41,8 @@ export interface Stored {
   /** Keyed by date for sunshine and by `date:chase` for the other chases (see dailyKey). */
   daily: Record<string, DailyResult>;
   streak: Streak;
+  /** Finished games (daily and endless) for each chase. */
+  runs: Partial<Record<ChaseId, number>>;
   onboarded: boolean;
 }
 
@@ -62,6 +66,7 @@ export function defaultSettings(languageTag: string | undefined, locale: Locale)
     haptics: true,
     sound: false,
     chase: DEFAULT_CHASE,
+    counts: true,
   };
 }
 
@@ -72,6 +77,7 @@ export function emptyStored(settings: Settings): Stored {
     bestEndless: {},
     daily: {},
     streak: { count: 0, last: null },
+    runs: {},
     onboarded: false,
   };
 }
@@ -109,6 +115,7 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
     if (typeof s['haptics'] === 'boolean') out.settings.haptics = s['haptics'];
     if (typeof s['sound'] === 'boolean') out.settings.sound = s['sound'];
     if (isChaseId(s['chase'])) out.settings.chase = s['chase'];
+    if (typeof s['counts'] === 'boolean') out.settings.counts = s['counts'];
   }
   const best = data['bestEndless'];
   if (isRecord(best)) {
@@ -145,6 +152,12 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
     (typeof streak['last'] === 'string' || streak['last'] === null)
   ) {
     out.streak = { count: streak['count'], last: streak['last'] };
+  }
+  const runs = data['runs'];
+  if (isObject(runs)) {
+    for (const [id, n] of Object.entries(runs))
+      if (isChaseId(id) && typeof n === 'number' && Number.isFinite(n) && n >= 0)
+        out.runs[id] = Math.floor(n);
   }
   if (typeof data['onboarded'] === 'boolean') out.onboarded = data['onboarded'];
   return out;
@@ -192,6 +205,7 @@ export class Store {
       const key = dailyKey(date, chase);
       if (s.daily[key]) return; // one attempt per day and chase: the first result stands
       s.daily[key] = result;
+      s.runs[chase] = (s.runs[chase] ?? 0) + 1;
       s.streak = completeDaily(s.streak, date); // a daily of any chase keeps the streak
     });
   }
@@ -200,6 +214,7 @@ export class Store {
     this.update((s) => {
       const best = s.bestEndless[chase];
       if (!best || record.w > best.w) s.bestEndless[chase] = record;
+      s.runs[chase] = (s.runs[chase] ?? 0) + 1;
     });
   }
 
@@ -209,6 +224,7 @@ export class Store {
       s.bestEndless = {};
       s.daily = {};
       s.streak = { count: 0, last: null };
+      s.runs = {};
     });
   }
 

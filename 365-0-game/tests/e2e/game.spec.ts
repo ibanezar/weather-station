@@ -368,7 +368,7 @@ test.describe('settings', () => {
     await expect(page.getByText(/Weather data by Open-Meteo\.com \(CC BY 4\.0\)/)).toBeVisible();
     await page.getByRole('button', { name: 'Privacy' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Privacy' })).toBeVisible();
-    await expect(page.getByText(/no accounts and no tracking/)).toBeVisible();
+    await expect(page.getByText(/does not track you/)).toBeVisible();
   });
 });
 
