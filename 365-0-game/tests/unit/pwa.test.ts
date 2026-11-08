@@ -31,6 +31,7 @@ describe('service worker generation', () => {
   it('removes old caches of this app only, and takes control of open pages', () => {
     expect(SW_TEMPLATE).toContain("k.startsWith('365-0-')");
     expect(SW_TEMPLATE).toContain('clients.claim()');
+    expect(SW_TEMPLATE).toContain("cache: 'reload'");
   });
 
   it('gives a different cache name for a different version', () => {

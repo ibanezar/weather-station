@@ -44,6 +44,18 @@ if (root) {
 // would serve stale files).
 initInstallPrompt();
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  // A new deploy installs a new service worker in the background and takes the page over, but the page
+  // that is open keeps running the old code. When that happens, reload to the new version: at once on
+  // Home, otherwise the next time the player is back on Home (never in the middle of a game).
+  const hadController = navigator.serviceWorker.controller !== null;
+  let updated = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController) updated = true;
+    if (updated && routeFromHash(location.hash) === 'home') location.reload();
+  });
+  window.addEventListener('hashchange', () => {
+    if (updated && routeFromHash(location.hash) === 'home') location.reload();
+  });
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {
       // Offline support is an extra: the game still works online without it.
