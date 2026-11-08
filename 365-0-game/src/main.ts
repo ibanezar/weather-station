@@ -9,6 +9,7 @@ import { renderHow } from './ui/screens/how.ts';
 import { renderResult } from './ui/screens/result.ts';
 import { renderReveal } from './ui/screens/reveal.ts';
 import { renderSettings } from './ui/screens/settings.ts';
+import { renderMystery } from './ui/screens/mystery.ts';
 import { renderStats } from './ui/screens/stats.ts';
 
 const root = document.querySelector<HTMLDivElement>('#app');
@@ -31,6 +32,7 @@ if (root) {
   app.register('about', renderAbout);
   app.register('privacy', renderPrivacy);
   app.register('stats', renderStats);
+  app.register('mystery', renderMystery);
 
   /** #/styleguide is the design-system page; everything else is the game. */
   const dispatch = (): void => {

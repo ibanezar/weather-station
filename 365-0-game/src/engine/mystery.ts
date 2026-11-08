@@ -141,6 +141,8 @@ export interface MysteryResult {
   guesses: string[];
   revealed: number;
   points: number;
+  /** Solved, or two wrong guesses. A result that is not done is a puzzle in progress. */
+  done: boolean;
 }
 
 export function resultOf(state: MysteryState, puzzle: Puzzle): MysteryResult {
@@ -148,6 +150,7 @@ export function resultOf(state: MysteryState, puzzle: Puzzle): MysteryResult {
     guesses: state.solved ? [...state.wrong, puzzle.city] : [...state.wrong],
     revealed: state.revealed,
     points: points(state),
+    done: isFinished(state),
   };
 }
 

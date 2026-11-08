@@ -140,3 +140,33 @@ export async function shareResult(
   }
   return copied ? 'copied' : 'failed';
 }
+
+/** Share the daily mystery as text: the share sheet where there is one, otherwise the clipboard. */
+export async function shareMystery(
+  app: App,
+  date: string,
+  pointsEarned: number,
+  max: number,
+): Promise<ShareOutcome> {
+  const { t } = app.i18n;
+  const text = t('mystery.shareText', {
+    date: app.fmt.date(date),
+    n: pointsEarned,
+    max,
+    url: GAME_URL,
+  });
+  try {
+    if (typeof navigator.share === 'function') {
+      await navigator.share({ text });
+      return 'shared';
+    }
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return 'failed';
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    return 'copied';
+  } catch {
+    return 'failed';
+  }
+}

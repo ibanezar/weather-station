@@ -85,6 +85,20 @@ export function renderHome(app: App, root: HTMLElement): void {
     onClick: () => void startRun(app, 'endless', { btn: endlessBtn, message }),
   });
 
+  const mysteryDone = app.store.state.mystery[today]?.done === true;
+  const mysteryBtn = button({
+    label: mysteryDone ? t('home.mysterySee') : t('home.mystery'),
+    variant: 'secondary',
+    icon: 'pin',
+    full: true,
+    onClick: () => {
+      app.store.update((st) => {
+        st.onboarded = true;
+      });
+      app.go('mystery');
+    },
+  });
+
   // Install: the browser's own dialog where it offers one, the Share-menu steps on iPhone, nothing otherwise.
   const installSlot = h('div', { class: 'home__install' });
   const drawInstall = (): void => {
@@ -206,6 +220,8 @@ export function renderHome(app: App, root: HTMLElement): void {
         dailyBtn,
         dailyNote,
         endlessBtn,
+        mysteryBtn,
+        h('p', { class: 'muted home__mystery-note' }, t('home.mysteryNote')),
         installSlot,
         bestSlot,
       ),

@@ -598,3 +598,121 @@
 .stats__note {
   font-size: var(--text-small);
 }
+
+/* Daily mystery */
+.mystery__clues {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mystery__clue {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--raised);
+}
+
+.mystery__clue p {
+  margin: 0;
+}
+
+.mystery__more {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+}
+
+.mystery__more p {
+  margin: 0;
+  font-size: var(--text-small);
+}
+
+.mystery__which {
+  margin: var(--space-3) 0 0;
+}
+
+.mystery__choices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mystery__choice {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  min-height: var(--tap);
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--raised);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.mystery__choice:disabled {
+  cursor: default;
+}
+
+.mystery__choice.is-crossed {
+  opacity: 0.6;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.mystery__choice.is-answer {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.mystery__result h2,
+.mystery__result h3 {
+  margin: 0;
+}
+
+.mystery__score {
+  font-family: var(--font-display);
+  font-size: var(--text-heading);
+  margin: 0;
+}
+
+.mystery__usual {
+  margin: 0;
+  padding-left: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-small);
+}
+
+.mystery__usual .is-answer {
+  font-weight: 700;
+}
+
+.home__mystery-note {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-small);
+}
+
+.mystery__result {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  color: var(--on-well);
+}
+
+.mystery__result .muted {
+  color: var(--on-well-muted);
+}
+
+.mystery__holder {
+  display: grid;
+  gap: var(--space-4);
+}

@@ -8,7 +8,16 @@ import type { Session } from './session.ts';
 import { browserStorage, defaultSettings, emptyStored, Store } from './storage.ts';
 
 export type Route =
-  'home' | 'how' | 'draft' | 'reveal' | 'result' | 'settings' | 'about' | 'privacy' | 'stats';
+  | 'home'
+  | 'how'
+  | 'draft'
+  | 'reveal'
+  | 'result'
+  | 'settings'
+  | 'about'
+  | 'privacy'
+  | 'stats'
+  | 'mystery';
 
 const HASHES: Record<Route, string> = {
   home: '#/',
@@ -20,6 +29,7 @@ const HASHES: Record<Route, string> = {
   about: '#/about',
   privacy: '#/privacy',
   stats: '#/stats',
+  mystery: '#/mystery',
 };
 
 export function routeFromHash(hash: string): Route | 'styleguide' {

@@ -136,3 +136,56 @@ describe('anonymous play counts', () => {
     expect(isLiveSite('meteorec.si.evil.example')).toBe(false);
   });
 });
+
+describe('the daily mystery in storage and statistics', () => {
+  const done = (points: number, guesses: string[] = ['oslo']) => ({
+    guesses,
+    revealed: 5 - points,
+    points,
+    done: true,
+  });
+  it('saves progress, keeps the streak only when finished and never overwrites a finished one', () => {
+    const store = new Store(structuredClone(defaults), memory());
+    store.recordMystery('2026-11-09', { guesses: [], revealed: 1, points: 0, done: false });
+    expect(store.state.streak.count).toBe(0);
+    store.recordMystery('2026-11-09', done(3));
+    expect(store.state.streak).toEqual({ count: 1, last: '2026-11-09' });
+    store.recordMystery('2026-11-09', done(1));
+    expect(store.state.mystery['2026-11-09']?.points).toBe(3);
+    store.recordMystery('2026-11-10', done(2));
+    expect(store.state.streak.count).toBe(2);
+  });
+
+  it('survives a save and load, drops broken entries and is cleared by a reset', () => {
+    const store = new Store(structuredClone(defaults), memory());
+    store.recordMystery('2026-11-09', done(4));
+    const again = parseStored(JSON.stringify(store.state), defaults);
+    expect(again.mystery).toEqual(store.state.mystery);
+    const broken = parseStored(
+      JSON.stringify({
+        v: 1,
+        mystery: {
+          '2026-11-09': { guesses: [], revealed: 9, points: 1, done: true },
+          x: done(1),
+          '2026-11-10': { guesses: [1], revealed: 1, points: 0, done: false },
+          '2026-11-11': done(2),
+        },
+      }),
+      defaults,
+    );
+    expect(Object.keys(broken.mystery)).toEqual(['2026-11-11']);
+    store.resetProgress();
+    expect(store.state.mystery).toEqual({});
+  });
+
+  it('counts finished mysteries, their average, and the days in the longest streak', () => {
+    const store = new Store(structuredClone(defaults), memory());
+    expect(computeStats(store.state).mystery).toEqual({ played: 0, averagePoints: null });
+    store.recordMystery('2026-11-09', done(4));
+    store.recordMystery('2026-11-10', done(1));
+    store.recordMystery('2026-11-11', { guesses: [], revealed: 1, points: 0, done: false });
+    const s = computeStats(store.state);
+    expect(s.mystery).toEqual({ played: 2, averagePoints: 2.5 });
+    expect(s.longestStreak).toBe(2);
+  });
+});

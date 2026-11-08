@@ -46,6 +46,15 @@ check(s.stevci['finish.daily.snow'] === 1 && s.stevci['grade.daily.snow.sun-chas
 check(s.stevci['rerolls.daily.snow'] === 2 && s.stevci['rerolls.endless.sun'] === 0, 'druge priložnosti so seštete');
 check(/^\d{4}-\d{2}$/.test(s.mesec), 'odgovor pove mesec');
 
+// ── dnevna uganka: brez teme, točke 0-4 ──
+check((await call('/365-0/stat', 'POST', { ev: 'start', mode: 'mystery' })).status === 200, 'začetek uganke je sprejet brez teme');
+await call('/365-0/stat', 'POST', { ev: 'finish', mode: 'mystery', points: 3 });
+await call('/365-0/stat', 'POST', { ev: 'finish', mode: 'mystery', points: 3 });
+await call('/365-0/stat', 'POST', { ev: 'finish', mode: 'mystery', points: 9 });
+s = await stat();
+check(s.stevci['start.mystery'] === 1 && s.stevci['finish.mystery'] === 3, 'uganka je prešteta');
+check(s.stevci['points.mystery.3'] === 2 && !Object.keys(s.stevci).some(k => k === 'points.mystery.9'), 'točke so porazdeljene, nemogoče se prezrejo');
+
 // ── zavrnitve: nič se ne zapiše ──
 const before = JSON.stringify(await stat());
 const bad = [

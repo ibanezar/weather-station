@@ -109,6 +109,7 @@ MUTACIJE = [
     ("push: telo ni objekt [29.10.]", "worker.js", 'if (!body || typeof body !== "object") return pj({ error: "Napačni podatki" }, 400);', "", "test_worker_abuse.mjs"),
     ("365-0 štetje: omejitev po IP [8.11.]", "worker.js", '"g365_rl", 120, 3600', '"g365_rl", 120000, 3600', "test_g365_stat.mjs"),
     ("365-0 štetje: preverjanje teme [8.11.]", "worker.js", '|| !G365_CHASES.includes(chase)) {', ') {', "test_g365_stat.mjs"),
+    ("365-0 štetje: točke uganke [8.11.]", "worker.js", "if (Number.isInteger(pts) && pts >= 0 && pts <= 4)", "if (true)", "test_g365_stat.mjs"),
     ("365-0 štetje: preverjanje ocene [8.11.]", "worker.js", 'if (G365_GRADES.includes(body.grade))', 'if (body.grade)', "test_g365_stat.mjs"),
     ("napovej: omejitev po IP [29.10.]", "worker.js", '"napovej_vnos_rl", 10, 86400', '"napovej_vnos_rl", 10000, 86400', "test_worker_abuse.mjs"),
     ("igra: omejitev po IP [29.10.]", "worker.js", '"igra_rez_rl", 60, 3600', '"igra_rez_rl", 6000, 3600', "test_worker_abuse.mjs"),

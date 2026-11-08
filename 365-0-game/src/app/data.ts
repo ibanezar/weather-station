@@ -2,6 +2,7 @@
 import eventsJson from '../../data/events.json';
 import cityIndex from '../data/cities.index.json';
 import type { SeedCity, World } from '../data/types.ts';
+import type { MysteryFile } from '../engine/mystery.ts';
 import type { EngineData, WorldEvent } from '../engine/types.ts';
 
 export const cities = cityIndex as SeedCity[];
@@ -36,4 +37,23 @@ export function prefetchWorld(): void {
 
 export async function loadEngineData(): Promise<EngineData> {
   return { cities, events, world: await loadWorld() };
+}
+
+let mysteryPromise: Promise<MysteryFile> | undefined;
+
+/** Fetch mystery.v1.json once (only the daily mystery needs it); a failed load can be retried. */
+export function loadMystery(): Promise<MysteryFile> {
+  mysteryPromise ??= fetch(new URL('data/mystery.v1.json', document.baseURI))
+    .then(async (res) => {
+      if (!res.ok) throw new Error(`mystery data: HTTP ${String(res.status)}`);
+      const file = (await res.json()) as Partial<MysteryFile>;
+      if (file.v !== 1 || !Array.isArray(file.puzzles) || file.puzzles.length === 0)
+        throw new Error('mystery data: unexpected shape');
+      return file as MysteryFile;
+    })
+    .catch((err: unknown) => {
+      mysteryPromise = undefined;
+      throw err;
+    });
+  return mysteryPromise;
 }

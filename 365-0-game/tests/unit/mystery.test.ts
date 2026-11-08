@@ -65,7 +65,7 @@ describe('playing a mystery', () => {
     s = reveal(s);
     s = guess(s, puzzle, 'oslo');
     const stored = resultOf(s, puzzle);
-    expect(stored).toEqual({ guesses: ['lima', 'oslo'], revealed: 4, points: 1 });
+    expect(stored).toEqual({ guesses: ['lima', 'oslo'], revealed: 4, points: 1, done: true });
     expect(stateFrom(stored, puzzle)).toEqual(s);
     const lost = resultOf(guess(guess(newMystery(), puzzle, 'cairo'), puzzle, 'lima'), puzzle);
     expect(stateFrom(lost, puzzle).wrong).toEqual(['cairo', 'lima']);

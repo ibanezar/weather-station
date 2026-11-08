@@ -70,6 +70,8 @@ export const ICONS = {
   refresh: [p('M20 11a8 8 0 0 0-14.5-4M4 4v4h4'), p('M4 13a8 8 0 0 0 14.5 4M20 20v-4h-4')],
   back: [p('M15 5l-7 7 7 7')],
   stats: [p('M5 20V11M12 20V4M19 20v-6')],
+  wind: [p('M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8')],
+  pin: [p('M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z'), circle(12, 10, 2.5)],
   info: [circle(12, 12, 9), p('M12 11v5M12 7.5v.01')],
 } satisfies Record<string, Shape[]>;
 

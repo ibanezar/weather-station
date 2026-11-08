@@ -7263,6 +7263,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // Brez oznake igralca, brez IP (ta je samo v KV števcu omejitve, TTL 1 h), strežnik hrani samo vsote za mesec.
       // Vsote so PRIBLIŽNE: KV ni atomaren, vzporedni zapisi izgubijo kak poziv. Namen je uravnoteženje igre, ne obračun.
       //   POST /365-0/stat   { ev:"start"|"finish", mode:"daily"|"endless", chase, grade?, rerolls? }
+//                      ali { ev, mode:"mystery", points? } za dnevno uganko (brez teme)
       //   GET  /365-0/stat?mesec=YYYY-MM  → admin (Bearer DELETE_SECRET): { mesec, stevci:{ "start.daily.sun": n, … } }
       // G365_CHASES/G365_GRADES sta namerna podvojitev z 365-0-game/src/engine (chase.ts, grades.ts):
       // preverja ju tools/test_g365_stat.mjs.
@@ -7279,15 +7280,22 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           try { body = JSON.parse(await request.text()); } catch (_) { return out({ error: "Napačni podatki" }, 400); }
           if (!body || typeof body !== "object" || Array.isArray(body)) return out({ error: "Napačni podatki" }, 400);
           const { ev, mode, chase } = body;
-          if ((ev !== "start" && ev !== "finish") || (mode !== "daily" && mode !== "endless") || !G365_CHASES.includes(chase)) {
+          // Dnevna uganka (»Kje je to bilo?«) nima teme: štejeta se samo začetek/konec in točke 0-4.
+          const mystery = mode === "mystery";
+          if ((ev !== "start" && ev !== "finish") || (mode !== "daily" && mode !== "endless" && !mystery) || (!mystery && !G365_CHASES.includes(chase))) {
             return out({ error: "Napačni podatki" }, 400);
           }
           if (await _ipLimited(env, request, "g365_rl", 120, 3600)) return out({ error: "Preveč zahtev v kratkem času" }, 429);
-          const inc = { [ev + "." + mode + "." + chase]: 1 };
+          const inc = mystery ? { [ev + ".mystery"]: 1 } : { [ev + "." + mode + "." + chase]: 1 };
           if (ev === "finish") {
-            if (G365_GRADES.includes(body.grade)) inc["grade." + mode + "." + chase + "." + body.grade] = 1;
-            const rr = Number(body.rerolls);
-            if (Number.isInteger(rr) && rr >= 0 && rr <= 12) inc["rerolls." + mode + "." + chase] = rr;
+            if (mystery) {
+              const pts = Number(body.points);
+              if (Number.isInteger(pts) && pts >= 0 && pts <= 4) inc["points.mystery." + pts] = 1;
+            } else {
+              if (G365_GRADES.includes(body.grade)) inc["grade." + mode + "." + chase + "." + body.grade] = 1;
+              const rr = Number(body.rerolls);
+              if (Number.isInteger(rr) && rr >= 0 && rr <= 12) inc["rerolls." + mode + "." + chase] = rr;
+            }
           }
           const key = "g365:" + _ljDatum().slice(0, 7);
           let counts = {};
