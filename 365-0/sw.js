@@ -1,14 +1,14 @@
 // Generated at build time. Do not edit.
-const VERSION = '58b01990a84e';
+const VERSION = '2aedd6678bd4';
 const CACHE = '365-0-' + VERSION;
 const PRECACHE = [
   "./assets/big-shoulders-display-latin-ext-wght-normal-EP2r9iG4.woff2",
   "./assets/big-shoulders-display-latin-wght-normal-Bn_gnr7w.woff2",
-  "./assets/index-CmUi48xG.js",
-  "./assets/index-CuClib9U.css",
+  "./assets/index-C6MVOcRY.css",
+  "./assets/index-CUsxzW0m.js",
   "./assets/instrument-sans-latin-ext-wght-normal-B5bTHO_g.woff2",
   "./assets/instrument-sans-latin-wght-normal-BbzFLZTg.woff2",
-  "./assets/styleguide-CVImGmEr.js",
+  "./assets/styleguide-BjK_6ihB.js",
   "./data/world.v1.json",
   "./favicon.svg",
   "./icons/apple-touch-icon.png",
@@ -18,7 +18,8 @@ const PRECACHE = [
   "./icons/icon-maskable-512.png",
   "./icons/icon.svg",
   "./index.html",
-  "./manifest.webmanifest"
+  "./manifest.webmanifest",
+  "./og.png"
 ];
 
 self.addEventListener('install', (event) => {
