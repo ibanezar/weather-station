@@ -113,7 +113,7 @@ describe('storage', () => {
     expect(s.settings.language).toBe('sl');
     expect(s.settings.theme).toBe('system'); // "purple" is not a theme
     expect(s.settings.haptics).toBe(true); // "yes" is not a boolean
-    expect(s.bestEndless).toEqual({ w: 100, d: 150, l: 115 });
+    expect(s.bestEndless).toEqual({ sun: { w: 100, d: 150, l: 115 } }); // an old record was a sunshine record
     expect(Object.keys(s.daily)).toEqual(['2026-11-05']);
     expect(s.streak).toEqual({ count: 3, last: '2026-11-05' });
     expect(s.onboarded).toBe(true);
@@ -172,9 +172,12 @@ describe('storage', () => {
     store.recordEndless({ w: 50, d: 100, l: 215 });
     store.recordEndless({ w: 40, d: 100, l: 225 });
     store.recordEndless({ w: 70, d: 100, l: 195 });
-    expect(store.state.bestEndless?.w).toBe(70);
+    expect(store.state.bestEndless['sun']?.w).toBe(70);
+    store.recordEndless({ w: 30, d: 100, l: 235 }, 'snow'); // each chase keeps its own best
+    expect(store.state.bestEndless['snow']?.w).toBe(30);
+    expect(store.state.bestEndless['sun']?.w).toBe(70);
     store.resetProgress();
-    expect(store.state.bestEndless).toBeNull();
+    expect(store.state.bestEndless).toEqual({});
     expect(store.state.daily).toEqual({});
     expect(store.state.settings.unit).toBe('f');
   });

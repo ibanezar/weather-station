@@ -3,7 +3,6 @@ import { cities } from '../../app/data.ts';
 import { activeStreak, localDate, msUntilTomorrow } from '../../app/dates.ts';
 import { shareResult } from '../../app/share.ts';
 import type { SeedCity } from '../../data/types.ts';
-import type { MessageKey } from '../../i18n/index.ts';
 import { drawGrid, resolvePalette, type GridColumn } from '../canvas/grid.ts';
 import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
@@ -11,6 +10,7 @@ import { showToast } from '../components/toast.ts';
 import { h, mount } from '../dom.ts';
 import { isPatternMode } from '../settings.ts';
 import { randomEntropy, newSession } from '../../app/session.ts';
+import { CHASE_ICON, chaseKey, chaseSwatches, gradeKey } from '../../app/chase-text.ts';
 import { loadEngineData } from '../../app/data.ts';
 
 const cityById = (id: string): SeedCity => cities.find((c) => c.id === id) as SeedCity;
@@ -24,15 +24,20 @@ export function renderResult(app: App, root: HTMLElement): void {
   }
   const { t, plural } = app.i18n;
   const { fmt } = app;
-  const key = (k: string): MessageKey => k as MessageKey;
   const daily = session.mode === 'daily';
   const percent = Math.round(result.ratio * 100);
-  const gradeName = t(key(`grade.${result.grade}`));
+  const chase = session.chase;
+  const swatches = chaseSwatches(chase);
+  const gradeName = t(gradeKey(chase, result.grade));
   const streak = daily ? activeStreak(app.store.state.streak, localDate()) : 0;
 
   // The grid: highlight a month when its row in "What if" is tapped.
   const columns: GridColumn[] = result.rounds.map((r) => ({ days: r.days }));
-  const alt = t('result.gridAlt', { w: result.record.w, d: result.record.d, l: result.record.l });
+  const alt = t(chaseKey(chase, 'alt'), {
+    w: result.record.w,
+    d: result.record.d,
+    l: result.record.l,
+  });
   const labels = h(
     'div',
     { class: 'grid-panel__labels', 'aria-hidden': 'true' },
@@ -173,7 +178,7 @@ export function renderResult(app: App, root: HTMLElement): void {
       endlessBtn.disabled = true;
       void loadEngineData().then(
         (data) => {
-          app.session = newSession('endless', data, { entropy: randomEntropy() });
+          app.session = newSession('endless', data, { entropy: randomEntropy(), chase });
           app.go('draft');
         },
         () => {
@@ -205,19 +210,22 @@ export function renderResult(app: App, root: HTMLElement): void {
         h(
           'div',
           { class: 'legend' },
-          chip({ label: t('result.legend.win'), swatch: 'p' }),
-          chip({ label: t('result.legend.draw'), swatch: 'o' }),
-          chip({ label: t('result.legend.loss'), swatch: 'loss' }),
+          chip({ label: t('result.legend.win'), swatch: swatches.win }),
+          chip({ label: t('result.legend.draw'), swatch: swatches.draw }),
+          chip({ label: t('result.legend.loss'), swatch: swatches.loss }),
+          chase !== 'sun'
+            ? chip({ label: t(chaseKey(chase, 'name')), icon: CHASE_ICON[chase] })
+            : null,
           streak >= 2 ? chip({ label: plural('result.streak', streak), icon: 'streak' }) : null,
         ),
         h(
           'p',
           { class: 'muted result__explain' },
-          t('result.recordExplain', {
+          `${t(chaseKey(chase, 'alt'), {
             w: result.record.w,
             d: result.record.d,
             l: result.record.l,
-          }),
+          })}. ${t(chaseKey(chase, 'tail'))}`,
         ),
       ),
       h(
@@ -230,6 +238,7 @@ export function renderResult(app: App, root: HTMLElement): void {
           t(daily ? 'result.gradeLine.daily' : 'result.gradeLine.endless', {
             grade: gradeName,
             percent,
+            days: t(chaseKey(chase, 'winGen')),
           }),
         ),
         h(

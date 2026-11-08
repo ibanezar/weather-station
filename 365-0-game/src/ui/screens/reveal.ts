@@ -2,13 +2,14 @@ import type { App } from '../../app/app.ts';
 import { doComplete } from '../../app/session.ts';
 import { DAYS_IN_MONTH } from '../../data/types.ts';
 import type { DayType } from '../../engine/thresholds.ts';
-import type { MessageKey } from '../../i18n/index.ts';
 import { drawGrid, resolvePalette, type GridColumn } from '../canvas/grid.ts';
 import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
 import { h, mount } from '../dom.ts';
 import { isPatternMode, isReducedMotion } from '../settings.ts';
 import { cities } from '../../app/data.ts';
+import { chaseKey, chaseSwatches, gradeKey } from '../../app/chase-text.ts';
+import { CHASES } from '../../engine/chase.ts';
 
 /** Reveal timing (SPEC 6.6): months left to right, tiles top to bottom with an 8 ms stagger. */
 const MONTH_MS = 110;
@@ -30,7 +31,6 @@ export function renderReveal(app: App, root: HTMLElement): void {
   }
   const { t } = app.i18n;
   const { fmt } = app;
-  const key = (k: string): MessageKey => k as MessageKey;
 
   // The result is known as soon as the draft is locked: store it now, so closing the app mid-reveal
   // still counts the run (and a daily cannot be replayed).
@@ -38,16 +38,23 @@ export function renderReveal(app: App, root: HTMLElement): void {
   if (firstTime) {
     doComplete(session);
     if (session.mode === 'daily' && session.date !== undefined) {
-      app.store.recordDaily(session.date, {
-        picks: [...session.state.picks],
-        record: result.record,
-        grade: result.grade,
-      });
+      app.store.recordDaily(
+        session.date,
+        {
+          picks: [...session.state.picks],
+          rerolls: [...session.state.rerolls],
+          record: result.record,
+          grade: result.grade,
+        },
+        session.chase,
+      );
     } else {
-      app.store.recordEndless(result.record);
+      app.store.recordEndless(result.record, session.chase);
     }
   }
 
+  const chase = session.chase;
+  const swatches = chaseSwatches(chase);
   const columns: GridColumn[] = result.rounds.map((r) => ({ days: r.days }));
   const tiles: Tile[] = [];
   result.rounds.forEach((r, m) => {
@@ -78,7 +85,7 @@ export function renderReveal(app: App, root: HTMLElement): void {
   );
   const canvas = h('canvas', {
     role: 'img',
-    'aria-label': t('reveal.gridAlt', {
+    'aria-label': t(chaseKey(chase, 'alt'), {
       w: result.record.w,
       d: result.record.d,
       l: result.record.l,
@@ -95,7 +102,7 @@ export function renderReveal(app: App, root: HTMLElement): void {
       app.go('result');
     },
   });
-  const gradeTitle = h('h2', { class: 'reveal__grade' }, t(key(`grade.${result.grade}`)));
+  const gradeTitle = h('h2', { class: 'reveal__grade' }, t(gradeKey(chase, result.grade)));
   const done = h('div', { class: 'reveal__done' }, gradeTitle, seeResult);
   done.hidden = true;
 
@@ -108,7 +115,7 @@ export function renderReveal(app: App, root: HTMLElement): void {
     const x = (now - tile.start) / FLIP_MS;
     if (x <= 0) return 0;
     if (x < 1) return x;
-    if (tile.type !== 'p') return 1;
+    if (!CHASES[chase].win.includes(tile.type)) return 1;
     const f = (now - tile.start - FLIP_MS) / FLASH_MS;
     return f < 1 ? 1 + f : 2;
   };
@@ -117,15 +124,16 @@ export function renderReveal(app: App, root: HTMLElement): void {
     drawGrid(canvas, columns, resolvePalette(well), {
       pattern: isPatternMode(),
       tileProgress: (i) => progressOf(i, now),
+      flashTypes: CHASES[chase].win,
     });
     let wins = 0;
     let draws = 0;
     let losses = 0;
     for (const tile of tiles) {
       if (now < tile.start + FLIP_MS) break; // starts are in order, so nothing later is resolved
-      if (tile.type === 'p') wins += 1;
-      else if (tile.type === 'o') draws += 1;
-      else losses += 1;
+      if (CHASES[chase].win.includes(tile.type)) wins += 1;
+      else if (CHASES[chase].loss.includes(tile.type)) losses += 1;
+      else draws += 1;
     }
     w.textContent = String(wins);
     d.textContent = String(draws);
@@ -176,9 +184,9 @@ export function renderReveal(app: App, root: HTMLElement): void {
       h(
         'div',
         { class: 'legend' },
-        chip({ label: t('result.legend.win'), swatch: 'p' }),
-        chip({ label: t('result.legend.draw'), swatch: 'o' }),
-        chip({ label: t('result.legend.loss'), swatch: 'loss' }),
+        chip({ label: t('result.legend.win'), swatch: swatches.win }),
+        chip({ label: t('result.legend.draw'), swatch: swatches.draw }),
+        chip({ label: t('result.legend.loss'), swatch: swatches.loss }),
       ),
       well,
       hint,

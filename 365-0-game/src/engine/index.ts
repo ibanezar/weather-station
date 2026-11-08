@@ -9,5 +9,6 @@ export * from './risk.ts';
 export * from './run.ts';
 export * from './score.ts';
 export * from './share.ts';
+export * from './chase.ts';
 export * from './thresholds.ts';
 export * from './types.ts';

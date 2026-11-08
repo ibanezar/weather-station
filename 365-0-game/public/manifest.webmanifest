@@ -1,7 +1,7 @@
 {
   "name": "365-0",
   "short_name": "365-0",
-  "description": "A weather game with real data: pick a city for every month of the year, watch the real weather play out and collect perfect days.",
+  "description": "A weather game with real data: choose what to chase (sun, snow, rain, storms or heat), pick a city for every month, then watch the real weather play out.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

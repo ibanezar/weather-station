@@ -2,6 +2,7 @@ import type { App } from '../../app/app.ts';
 import { cities } from '../../app/data.ts';
 import { doFinish, doKeep, doPick, doReroll, doScout, type Session } from '../../app/session.ts';
 import { DAYS_IN_MONTH, type SeedCity } from '../../data/types.ts';
+import { chaseKey } from '../../app/chase-text.ts';
 import { chainProgress, combosIfPicked, findCombos } from '../../engine/combos.ts';
 import { monthRisk } from '../../engine/risk.ts';
 import {
@@ -12,6 +13,7 @@ import {
   scoutInfo,
   type PickedRound,
 } from '../../engine/run.ts';
+import { CHASES } from '../../engine/chase.ts';
 import type { DayType } from '../../engine/thresholds.ts';
 import type { MessageKey } from '../../i18n/index.ts';
 import { drawGrid, resolvePalette, type GridColumn } from '../canvas/grid.ts';
@@ -66,6 +68,8 @@ export function renderDraft(app: App, root: HTMLElement): void {
   let playing:
     { start: number; days: readonly DayType[]; offset: number; done: boolean } | undefined;
 
+  const isInvented = (id: string): boolean =>
+    s.data.events.some((e) => e.id === id && e.fictional === true);
   const picks = (): number => s.state.picks.length;
   const pickedCities = (): SeedCity[] => s.state.picks.map(cityById);
   const chances = (): number => netsTotal(s.state, s.data) - s.state.rerolls.length;
@@ -94,6 +98,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
       pattern: isPatternMode(),
       compact: true,
       tileProgress: (i) => progressOf(i, now),
+      flashTypes: CHASES[s.chase].win,
     });
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', t('draft.gridAlt', { months: settled }));
@@ -108,13 +113,19 @@ export function renderDraft(app: App, root: HTMLElement): void {
   function makeCard(id: string, monthIndex: number): CityCard {
     const city = cityById(id);
     const name = fmt.cityName(city);
-    const risk = monthRisk(s.data, id, monthIndex);
+    const risk = monthRisk(s.data, id, monthIndex, s.chase);
     const combos = combosIfPicked(pickedCities(), city);
     const card = cityCard({
       risk: {
         level: risk.level,
-        label: t(key(`draft.risk.${risk.level}`)),
-        detail: risk.level === 'none' ? '' : t('draft.riskRange', { min: risk.min, max: risk.max }),
+        label:
+          risk.level === 'none'
+            ? t(chaseKey(s.chase, 'rarely'))
+            : t(key(`draft.risk.${risk.level}`)),
+        detail:
+          risk.level === 'none'
+            ? ''
+            : t(chaseKey(s.chase, 'range'), { min: risk.min, max: risk.max }),
       },
       ...(combos.length > 0
         ? { combo: combos.map((c) => t(key(`draft.combo.${c}`))).join(' · ') }
@@ -128,8 +139,8 @@ export function renderDraft(app: App, root: HTMLElement): void {
       scoutLabel: t('draft.scout'),
       scoutFullLabel: t('draft.scoutCity', { city: name }),
       scoutedLabel: t('draft.scouted'),
-      perfectLabel: t('draft.perfectDays'),
-      badLabel: t('draft.badDays'),
+      winLabel: t(chaseKey(s.chase, 'winLabel')),
+      lossLabel: t(chaseKey(s.chase, 'lossLabel')),
       stepText: (b) => t('draft.stepOf', { n: b + 1 }),
       onPick: () => {
         onPick(id);
@@ -138,7 +149,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
         onScout(id, card);
       },
     });
-    if (isScouted(s.state, id)) card.showScout(scoutInfo(s.data, id, monthIndex));
+    if (isScouted(s.state, id)) card.showScout(scoutInfo(s.data, id, monthIndex, s.chase));
     if (s.state.scoutsLeft <= 0) card.setScoutEnabled(false);
     return card;
   }
@@ -166,7 +177,12 @@ export function renderDraft(app: App, root: HTMLElement): void {
       return;
     }
     month.textContent = fmt.month(round.month);
-    ask.textContent = pending ? '' : t('draft.ask', { month: fmt.month(round.month) });
+    ask.textContent = pending
+      ? ''
+      : t('draft.ask', {
+          month: fmt.month(round.month),
+          goal: t(chaseKey(s.chase, 'goal')),
+        });
     if (round.event) {
       eventSlot.replaceChildren(
         h(
@@ -175,11 +191,14 @@ export function renderDraft(app: App, root: HTMLElement): void {
           chip({
             tone: 'event',
             icon: 'info',
-            label: t('draft.event', {
+            label: t(isInvented(round.event) ? 'draft.eventInvented' : 'draft.event', {
               name: t(key(`event.${round.event}.name`)),
               blurb: t(key(`event.${round.event}.blurb`)),
             }),
           }),
+          isInvented(round.event)
+            ? h('p', { class: 'muted draft__invented' }, t('draft.eventInventedNote'))
+            : null,
         ),
       );
     } else {
@@ -251,9 +270,9 @@ export function renderDraft(app: App, root: HTMLElement): void {
       h(
         'p',
         { class: 'month-result__score num', 'aria-hidden': 'true' },
-        stat(w, t('draft.m.perfect'), 'p'),
-        stat(d, t('draft.m.ok'), 'o'),
-        stat(l, t('draft.m.bad'), 'l'),
+        stat(w, t(chaseKey(s.chase, 'statWin')), 'p'),
+        stat(d, t(chaseKey(s.chase, 'statDraw')), 'o'),
+        stat(l, t(chaseKey(s.chase, 'statLoss')), 'l'),
       ),
       announce,
       h('div', { class: 'month-result__actions' }, nextBtn, left > 0 ? redrawBtn : null),
@@ -267,9 +286,9 @@ export function renderDraft(app: App, root: HTMLElement): void {
       let cl = 0;
       m.days.forEach((type, j) => {
         if (now - start - j * STAGGER_MS < FLIP_MS) return;
-        if (type === 'p') cw += 1;
-        else if (type === 'o') cd += 1;
-        else cl += 1;
+        if (CHASES[s.chase].win.includes(type)) cw += 1;
+        else if (CHASES[s.chase].loss.includes(type)) cl += 1;
+        else cd += 1;
       });
       w.textContent = String(cw);
       d.textContent = String(cd);
@@ -292,6 +311,9 @@ export function renderDraft(app: App, root: HTMLElement): void {
         w: m.record.w,
         d: m.record.d,
         l: m.record.l,
+        win: t(chaseKey(s.chase, 'statWin')),
+        draw: t(chaseKey(s.chase, 'statDraw')),
+        loss: t(chaseKey(s.chase, 'statLoss')),
       });
       app.feedback.haptic(m.record.w >= 15 ? 'success' : 'light');
       nextBtn.focus();
@@ -307,6 +329,9 @@ export function renderDraft(app: App, root: HTMLElement): void {
         w: m.record.w,
         d: m.record.d,
         l: m.record.l,
+        win: t(chaseKey(s.chase, 'statWin')),
+        draw: t(chaseKey(s.chase, 'statDraw')),
+        loss: t(chaseKey(s.chase, 'statLoss')),
       });
       requestAnimationFrame(() => {
         nextBtn.focus();
@@ -357,7 +382,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
     app.feedback.haptic('medium');
     app.feedback.sound('scout');
     const round = s.state.draft[s.state.settled];
-    card.showScout(scoutInfo(s.data, id, round?.month ?? 0));
+    card.showScout(scoutInfo(s.data, id, round?.month ?? 0, s.chase));
     prog.update(s.state.settled + 1, s.state.scoutsLeft, chances());
     if (s.state.scoutsLeft <= 0) for (const c of cardList) c.setScoutEnabled(false);
   }

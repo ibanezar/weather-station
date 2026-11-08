@@ -36,16 +36,16 @@ h1{margin:0;font-family:D,sans-serif;font-weight:900;font-size:188px;line-height
 p{margin:0}
 .tag{font-size:44px;font-weight:650;margin-top:22px}
 .sub{font-size:28px;color:#A9B6C6;margin-top:14px;line-height:1.3}
-.legend{display:flex;gap:28px;margin-top:28px;font-size:26px;color:#D6DEE8}
+.legend{display:flex;gap:22px;margin-top:28px;font-size:26px;color:#D6DEE8}
 .legend span{display:flex;align-items:center;gap:12px}
 .legend i{display:block;width:34px;height:24px;border-radius:6px}
 </style></head><body>
 <div class="mark">${markSvg({ plate: 'rounded' })}</div>
 <div>
 <h1>365-0</h1>
-<p class="tag">Plan a year of perfect weather.</p>
-<p class="sub">Pick a city for every month, then watch the real weather play out.</p>
-<div class="legend"><span><i style="background:${BRAND.gold}"></i>Perfect</span><span><i style="background:#B1BCC7"></i>So-so</span><span><i style="background:#316EDC"></i>Bad</span></div>
+<p class="tag">Plan a year of the weather you want.</p>
+<p class="sub">Chase sun, snow, rain, storms or heat. Pick a city for every month, then watch the real weather play out.</p>
+<div class="legend"><span><i style="background:${BRAND.gold}"></i>Sun</span><span><i style="background:#A2EDF6"></i>Snow</span><span><i style="background:#316EDC"></i>Rain</span><span><i style="background:#C082EB"></i>Storms</span><span><i style="background:#EF512C"></i>Heat</span></div>
 </div>
 </body></html>`;
 

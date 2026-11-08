@@ -75,3 +75,25 @@ Stormbound 72% of the time and most city-months had no perfect day at all. `scri
 A perfect day still needs under 1 mm of rain; a day with 1 to 5 mm is now "ok" rather than a loss (ERA5 drizzles on
 far too many days). Overall shares: about 32% perfect, 40% ok, 29% bad. Cold and wet places stay hard (Reykjavik
 46% bad, Singapore 52%), Sydney and Cairo are generous. Storm and freeze are unchanged.
+
+## Chases and invented events (8 November 2026)
+
+The player chooses what to chase before a game: sunshine (the classic game, perfect days win), snow and frost, rain,
+storms or heat. The weather data is the same; only the scoring changes (`src/engine/chase.ts`):
+
+| chase | wins    | losses        | everything else |
+| ----- | ------- | ------------- | --------------- |
+| sun   | perfect | r s h f       | ok (draw)       |
+| snow  | freeze  | heat, perfect | draw            |
+| rain  | rain    | perfect, heat | draw            |
+| storm | storm   | perfect       | draw            |
+| heat  | heat    | freeze, rain  | draw            |
+
+"Snow and frost" is the freeze day type (a high of 3 °C or less, or at least 1 cm of snowfall); the data do not separate
+snow from cold dry days. Scout buckets for the non-sunny chases are ranked at runtime from the stored day strings (a place
+with none of those days is bucket 0). A draft whose best possible year holds too few wins for the chase is replaced by the
+next attempt for the same seed (`MIN_BEST_WINS`); every chase has its own daily seed, so the classic daily is unchanged.
+
+Four invented "what if" events join the eight data-based ones: tornado outbreak, volcanic ash cloud, flash floods and
+blizzard (`"fictional": true` in `data/events.json`). The weather data cannot show tornadoes or eruptions, so the game labels
+them "What if" and says they are invented; they work like the other events (a share of matching days change type).

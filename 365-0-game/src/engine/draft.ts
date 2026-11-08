@@ -33,15 +33,20 @@ function findTriple(order: readonly SeedCity[]): [SeedCity, SeedCity, SeedCity] 
   return undefined;
 }
 
+/**
+ * `attempt` 0 is the draft for the seed; a higher attempt is another draft for the same seed, used when a
+ * chase (snow, heat, storms) needs more winnable months than the first draft offers.
+ */
 export function generateDraft(
   seed: string,
   data: Pick<EngineData, 'cities' | 'events'>,
+  attempt = 0,
 ): DraftRound[] {
   const used = new Set<string>();
   const rounds: DraftRound[] = [];
 
   for (let r = 0; r < ROUNDS; r++) {
-    const rng = makeRng(seed, 'draft', r);
+    const rng = attempt === 0 ? makeRng(seed, 'draft', r) : makeRng(seed, 'draft', r, attempt);
     const order = shuffle(
       data.cities.filter((c) => !used.has(c.id)),
       rng,
@@ -56,7 +61,7 @@ export function generateDraft(
   const eventMonths = new Set(
     shuffle(
       Array.from({ length: ROUNDS }, (_, i) => i),
-      makeRng(seed, 'events'),
+      attempt === 0 ? makeRng(seed, 'events') : makeRng(seed, 'events', attempt),
     ).slice(0, EVENT_ROUNDS),
   );
   const usage = new Map<string, number>();
@@ -68,7 +73,12 @@ export function generateDraft(
     const pool = fresh.length > 0 ? fresh : affecting;
     if (pool.length === 0) continue;
     const event = pool[
-      randInt(makeRng(seed, 'event', round.month), pool.length)
+      randInt(
+        attempt === 0
+          ? makeRng(seed, 'event', round.month)
+          : makeRng(seed, 'event', round.month, attempt),
+        pool.length,
+      )
     ] as (typeof pool)[number];
     round.event = event.id;
     usage.set(event.id, (usage.get(event.id) ?? 0) + 1);

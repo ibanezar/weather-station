@@ -16,13 +16,15 @@ test.describe('first visit', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: '365-0' })).toBeVisible();
     await expect(page.locator('.logo-mark')).toBeVisible();
-    await expect(page.locator('.home__tagline')).toHaveText('Plan a year of perfect weather.');
+    await expect(page.locator('.home__tagline')).toHaveText('Plan a year of the weather you want.');
     await expect(page.locator('.home__pitch')).toContainText('weather game with real data');
     const steps = page.locator('.home__step');
     await expect(steps).toHaveCount(3);
     await expect(steps.first()).toContainText('Pick a city for each month');
-    await expect(steps.nth(2)).toContainText('16–32 °C');
-    await expect(page.locator('.home__legend')).toContainText('Rain, storm, heat or freeze');
+    await expect(steps.nth(2)).toContainText('Collect perfect days');
+    await expect(page.locator('.home__chase-note')).toContainText('16–32 °C');
+    await expect(page.locator('.home__legend')).toContainText('Snow and frost');
+    await expect(page.getByRole('radio')).toHaveCount(5);
     await expect(page.locator('.home__facts')).toContainText('72 cities');
     // The buttons are in the first screen on a phone, no scrolling needed.
     const box = await page.getByRole('button', { name: 'Play daily' }).boundingBox();
@@ -326,7 +328,7 @@ test.describe('settings', () => {
     const page = await ctx.newPage();
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: '365-0' })).toBeVisible();
-    await expect(page.locator('.home__tagline')).toHaveText('Načrtuj leto popolnega vremena.');
+    await expect(page.locator('.home__tagline')).toHaveText('Načrtuj leto vremena, ki ga želiš.');
     await expect(page.locator('html')).toHaveAttribute('lang', 'sl');
     await page.getByRole('button', { name: 'Igraj dnevno' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Januar' })).toBeVisible();

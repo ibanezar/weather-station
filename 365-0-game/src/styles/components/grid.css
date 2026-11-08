@@ -74,12 +74,16 @@
   background-size: var(--pat-size, auto);
 }
 
-.swatch--loss {
+.swatch--loss,
+.swatch--multi {
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
   padding: 0;
   background: none;
+}
+.swatch--n3 {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 .swatch__part {
   background-color: var(--day);

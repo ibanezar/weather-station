@@ -43,6 +43,8 @@ export interface GridOptions {
   highlightColumn?: number | null;
   /** Opacity of a claimed column, for the quick fade-in when a pick lands. */
   claimedAlpha?: (column: number) => number;
+  /** Day types that get the short flash as they land (the winning ones; perfect days by default). */
+  flashTypes?: readonly DayType[];
   /** A short grid for the draft preview. */
   compact?: boolean;
   /** Explicit tile height and gap in CSS pixels (the share image uses its own). */
@@ -245,8 +247,8 @@ export function drawGrid(
         if (options.pattern && type !== 'p' && type !== 'o') {
           drawPattern(ctx, type, x, y, tileW, tileH, palette.pattern[type]);
         }
-        if (p > 1 && p < 2 && type === 'p') {
-          // A short gold flash on a perfect tile as it lands.
+        if (p > 1 && p < 2 && (options.flashTypes ?? ['p']).includes(type)) {
+          // A short flash on a winning tile as it lands.
           ctx.fillStyle = '#ffffff';
           ctx.globalAlpha = (dim ? 0.3 : 1) * 0.6 * (2 - p);
           roundRect(ctx, x, y, tileW, tileH, radius);

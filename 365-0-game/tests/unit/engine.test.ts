@@ -344,8 +344,8 @@ describe('run state machine', () => {
 
   it('reports bucketed scout values from the world data', () => {
     const info = scoutInfo(data, 'dubai', 6);
-    expect(Number.isInteger(info.perfect) && info.perfect >= 0 && info.perfect <= 4).toBe(true);
-    expect(Number.isInteger(info.bad) && info.bad >= 0 && info.bad <= 4).toBe(true);
+    expect(Number.isInteger(info.win) && info.win >= 0 && info.win <= 4).toBe(true);
+    expect(Number.isInteger(info.loss) && info.loss >= 0 && info.loss <= 4).toBe(true);
   });
 });
 
