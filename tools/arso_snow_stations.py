@@ -311,34 +311,28 @@ def probe_archive_si(out_dir):
 
 
 def find_probase(out_dir):
-    """Kje je PROBASE? Izpiši vse `URL.X = ...` iz strani aplikacije in poišči `PROBASE_LANG` v knjižnici, ki jo
-    AcademaLoader.js nalaga kot oštevilčene datoteke bin/appNN.xml."""
-    st, page = get("/met/sl/app/webmet/")
-    print(f"[probase] stran aplikacije: HTTP {st}, {len(page)} znakov")
-    for m in re.finditer(r"[^\n]*(?:URL\.\w+\s*=|PROBASE|props\[)[^\n]*", page):
-        print("   page:", re.sub(r"\s+", " ", m.group(0))[:300])
-    found = 0
-    misses = 0
-    for n in range(0, 40):
-        path = f"/uploads/meteo/app/webmet/bin/app{n:02d}.xml"
+    """AcademaLoader nalaga knjižnico kot /uploads/meteo/app/webmet/bin/app/application_00.xml ... _08.xml (i = 9).
+    V njej iščemo PROBASE_LANG in kodo arhiva (od kod jemlje seznam postaj)."""
+    hits, seen = [], set()
+    for n in range(0, 9):
+        path = f"/uploads/meteo/app/webmet/bin/app/application_{n:02d}.xml"
         st, tx = get(path)
-        time.sleep(0.5)
+        time.sleep(0.6)
+        print(f"[lib] {path} -> HTTP {st}, {len(tx)} znakov")
         if st != 200 or not tx:
-            misses += 1
-            print(f"[probase] {path} -> HTTP {st}")
-            if misses >= 3 and n > 3:
-                break
             continue
-        misses = 0
-        print(f"[probase] {path} -> HTTP 200, {len(tx)} znakov")
-        with open(os.path.join(out_dir, f"app{n:02d}.xml.txt"), "w", encoding="utf-8") as f:
+        with open(os.path.join(out_dir, f"application_{n:02d}.xml.txt"), "w", encoding="utf-8") as f:
             f.write(tx)
-        for m in re.finditer(r"PROBASE|probase", tx):
-            a, b = max(0, m.start() - 120), min(len(tx), m.end() + 200)
-            print("   ~", re.sub(r"\s+", " ", tx[a:b]))
-            found += 1
-            if found > 25:
-                return
+        for m in re.finditer(r"PROBASE_LANG|PROBASE\s*=|archive_|AcademaArchive\s*=|locations?\.xml|\.xml\?|statUrl|STATIONS", tx):
+            a0, b0 = max(0, m.start() - 160), min(len(tx), m.end() + 260)
+            w = re.sub(r"\s+", " ", tx[a0:b0])
+            key = w[100:160]
+            if key in seen:
+                continue
+            seen.add(key)
+            hits.append((n, w))
+    for n, w in hits[:45]:
+        print(f"   ~ [application_{n:02d}] {w}")
 
 def data_xml(ids, d1, d2, vars_="85,88,89"):
     params = urllib.parse.urlencode({"lang": "si", "vars": vars_, "group": "dailyData0", "type": "daily",
@@ -460,7 +454,7 @@ def main():
                         if len(f2) > len(stations):
                             stations, used = f2, l
     if not stations:
-        dump_loader(a.out)
+        find_probase(a.out)
         stations, used = probe_ids(a.out)
     if not stations and a.crawl:
         crawl_ameba(a.out, [PUJS_ROOT + "/ameba/index.xml", PUJS_ROOT + "/ameba/default.xml", PUJS_ROOT + "/prog/default.xml",
