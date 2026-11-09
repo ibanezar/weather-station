@@ -1,0 +1,260 @@
+[
+ {
+  "id": "1651",
+  "r": 0.708,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 2314,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 78,
+   "new_snow_ge1_days": 32,
+   "winter_days_with_snow_field": {
+    "2020": 181,
+    "2021": 181,
+    "2022": 181,
+    "2023": 182,
+    "2024": 181,
+    "2025": 181
+   }
+  },
+  "vs_proxy_same_day": {
+   "n": 1082,
+   "tp": 17,
+   "fp": 118,
+   "fn": 15,
+   "tn": 932,
+   "hit_rate": 0.53,
+   "false_alarm_ratio": 0.87
+  },
+  "vs_proxy_prev_day": {
+   "n": 1082,
+   "tp": 18,
+   "fp": 117,
+   "fn": 14,
+   "tn": 933,
+   "hit_rate": 0.56,
+   "false_alarm_ratio": 0.87
+  }
+ },
+ {
+  "id": "2701",
+  "r": 0.697,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 0,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 0,
+   "new_snow_ge1_days": 0,
+   "winter_days_with_snow_field": {}
+  },
+  "vs_proxy_same_day": null,
+  "vs_proxy_prev_day": null
+ },
+ {
+  "id": "3002",
+  "r": 0.652,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 2277,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 57,
+   "new_snow_ge1_days": 23,
+   "winter_days_with_snow_field": {
+    "2020": 181,
+    "2021": 181,
+    "2022": 181,
+    "2023": 182,
+    "2024": 181,
+    "2025": 181
+   }
+  },
+  "vs_proxy_same_day": {
+   "n": 1082,
+   "tp": 15,
+   "fp": 120,
+   "fn": 7,
+   "tn": 940,
+   "hit_rate": 0.68,
+   "false_alarm_ratio": 0.89
+  },
+  "vs_proxy_prev_day": {
+   "n": 1082,
+   "tp": 12,
+   "fp": 123,
+   "fn": 10,
+   "tn": 937,
+   "hit_rate": 0.55,
+   "false_alarm_ratio": 0.91
+  }
+ },
+ {
+  "id": "1652",
+  "r": 0.635,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 2283,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 144,
+   "new_snow_ge1_days": 62,
+   "winter_days_with_snow_field": {
+    "2020": 181,
+    "2021": 181,
+    "2022": 181,
+    "2023": 182,
+    "2024": 181,
+    "2025": 181
+   }
+  },
+  "vs_proxy_same_day": {
+   "n": 1082,
+   "tp": 33,
+   "fp": 102,
+   "fn": 26,
+   "tn": 921,
+   "hit_rate": 0.56,
+   "false_alarm_ratio": 0.76
+  },
+  "vs_proxy_prev_day": {
+   "n": 1082,
+   "tp": 27,
+   "fp": 108,
+   "fn": 33,
+   "tn": 914,
+   "hit_rate": 0.45,
+   "false_alarm_ratio": 0.8
+  }
+ },
+ {
+  "id": "3152",
+  "r": 0.611,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 2283,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 47,
+   "new_snow_ge1_days": 15,
+   "winter_days_with_snow_field": {
+    "2020": 181,
+    "2021": 181,
+    "2022": 181,
+    "2023": 182,
+    "2024": 181,
+    "2025": 181
+   }
+  },
+  "vs_proxy_same_day": {
+   "n": 1082,
+   "tp": 11,
+   "fp": 124,
+   "fn": 4,
+   "tn": 943,
+   "hit_rate": 0.73,
+   "false_alarm_ratio": 0.92
+  },
+  "vs_proxy_prev_day": {
+   "n": 1082,
+   "tp": 8,
+   "fp": 127,
+   "fn": 7,
+   "tn": 940,
+   "hit_rate": 0.53,
+   "false_alarm_ratio": 0.94
+  }
+ },
+ {
+  "id": "1801",
+  "r": 0.576,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 2314,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 77,
+   "new_snow_ge1_days": 29,
+   "winter_days_with_snow_field": {
+    "2020": 181,
+    "2021": 181,
+    "2022": 181,
+    "2023": 182,
+    "2024": 181,
+    "2025": 181
+   }
+  },
+  "vs_proxy_same_day": {
+   "n": 1082,
+   "tp": 19,
+   "fp": 116,
+   "fn": 10,
+   "tn": 937,
+   "hit_rate": 0.66,
+   "false_alarm_ratio": 0.86
+  },
+  "vs_proxy_prev_day": {
+   "n": 1082,
+   "tp": 15,
+   "fp": 120,
+   "fn": 14,
+   "tn": 933,
+   "hit_rate": 0.52,
+   "false_alarm_ratio": 0.89
+  }
+ },
+ {
+  "id": "3001",
+  "r": 0.523,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 2307,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 1,
+   "new_snow_ge1_days": 1,
+   "winter_days_with_snow_field": {
+    "2020": 180,
+    "2021": 180,
+    "2022": 181,
+    "2023": 181,
+    "2024": 181,
+    "2025": 181
+   }
+  },
+  "vs_proxy_same_day": {
+   "n": 1079,
+   "tp": 1,
+   "fp": 133,
+   "fn": 0,
+   "tn": 945,
+   "hit_rate": 1.0,
+   "false_alarm_ratio": 0.99
+  },
+  "vs_proxy_prev_day": {
+   "n": 1080,
+   "tp": 0,
+   "fp": 135,
+   "fn": 1,
+   "tn": 944,
+   "hit_rate": 0.0,
+   "false_alarm_ratio": 1.0
+  }
+ },
+ {
+  "id": "2252",
+  "r": 0.451,
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 0,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 0,
+   "new_snow_ge1_days": 0,
+   "winter_days_with_snow_field": {}
+  },
+  "vs_proxy_same_day": null,
+  "vs_proxy_prev_day": null
+ }
+]
