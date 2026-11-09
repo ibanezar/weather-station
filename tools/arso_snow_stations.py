@@ -33,7 +33,8 @@ import xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = "https://meteo.arso.gov.si"
-UA = {"User-Agent": "Mozilla/5.0 (compatible; Meteorec-SnowCheck/1.0; +https://meteorec.si)"}
+UA = {"User-Agent": "Mozilla/5.0 (compatible; Meteorec-SnowCheck/1.0; +https://meteorec.si)",
+      "Referer": "https://meteo.arso.gov.si/met/sl/app/webmet/"}
 LAT, LON = 46.325779, 14.921137          # IREICA1
 FIRST_DATE = "2020-07-01"
 PAUSE_S = 1.0
@@ -45,9 +46,9 @@ LIST_CANDIDATES = [
     "/webmet/archive/locations.xml?lang=si&group=dailyData0&type=daily",
     "/webmet/archive/data.xml?lang=si&type=locations",
     "/met/sl/archive/",
-    "/webmet/archive/",
-    "/webmet/archive/index.html",
+    "/met/sl/app/webmet/",
 ]
+APP_JS_PATTERN = r"(?:archive|locations?|\.xml|station|postaj)"
 
 
 def get(path, timeout=60):
@@ -219,6 +220,22 @@ def main():
                     print("     ", re.sub(r"\s+", " ", t)[:220])
                 for m in re.finditer(r"[^\n]{0,160}(?:webmet|\.xml|locations|ajax|getJSON|XMLHttp)[^\n]{0,160}", text):
                     print("   ~", re.sub(r"\s+", " ", m.group(0))[:320])
+            if cand.endswith("/webmet/"):       # aplikacija arhiva: preberi njene skripte in izpiši, od kod jemlje postaje
+                srcs = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', text, flags=re.I)
+                srcs += re.findall(r'["\']([^"\']+\.js(?:\?[^"\']*)?)["\']', text)
+                for src in list(dict.fromkeys(srcs))[:25]:
+                    if src.startswith("//") and "arso" not in src:
+                        continue
+                    url = urllib.parse.urljoin(BASE + cand, src)
+                    if "arso.gov.si" not in url:
+                        continue
+                    stj, tj = get(url)
+                    print(f"   [js] {url} -> HTTP {stj}, {len(tj)} znakov")
+                    time.sleep(PAUSE_S)
+                    with open(os.path.join(a.out, "js-" + re.sub(r"\W+", "_", url)[-70:] + ".txt"), "w", encoding="utf-8") as fj:
+                        fj.write(tj)
+                    for m in re.finditer(r"[^\n;{}]{0,140}" + APP_JS_PATTERN + r"[^\n;{}]{0,200}", tj, flags=re.I):
+                        print("      ~", re.sub(r"\s+", " ", m.group(0))[:340])
             if cand.endswith("/archive/"):      # stran: poišči še XML/JS povezave, ki jih nalaga
                 links = sorted(set(re.findall(r'["\']([^"\']+\.(?:xml|js|json)[^"\']*)["\']', text)))
                 print("   povezave na strani:", links[:40])
