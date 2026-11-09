@@ -1,0 +1,178 @@
+Sneg v nižinah: četrtek še dež, odloča se v noči na soboto
+
+META OPIS: Četrtek in petek prineseta dež, sneg v nižinah pa je možen šele ob koncu padavin. Ura za uro, višine in zemljevid iz 143 članov ansamblov.
+
+UVOD
+V četrtek in petek bo v Rečici po modelih padlo okoli 45 mm dežja, ne snega: nad dolino je še topel zrak. Hladna fronta pride šele ob koncu padavin, zato je sneg v nižinah odvisen od tega, ali bo za njo še kaj padlo. Po 143 članih štirih ansamblov dobi dno doline do ponedeljka vsaj 1 cm snega v 16 % primerov, na 900 m pa v 59 %.
+
+01 — ODGOVOR -- Četrtek je dež, odločitev pade v noči na soboto
+
+Kratek odgovor: v četrtek je sneg v nižinah po modelih praktično izključen, v noči na soboto je možen, a manj verjeten kot ne. V četrtek in petek je temperatura na višini 850 hPa (približno 1,5 km) po modelih med 6 in 10 °C. Hladen zrak prihaja v valu, ki ga modeli postavijo na petek zvečer in soboto, ko je glavnina padavin že mimo.
+
+Podatki v številkah:
+
+45 mm
+dežja v Rečici v četrtek in petek (mediana ansambla; devet desetin članov napove od 24 do 71 mm)
+
+16 %
+članov ansamblov napove na dnu doline (366 m) vsaj 1 cm snega do ponedeljka
+
+59 %
+isto na 900 m, kot je Črnivec: tam je sneg bolj verjeten kot ne
+
+50 %
+članov: v nedeljo zjutraj v dolini 0 °C ali manj, tudi če sneg ne pride
+
+Številke izhajajo iz 143 članov štirih ansamblov: ECMWF ENS (51), ICON-EPS (40), GEFS (31) in GEM ENS (21). Član je ena možna različica vremena, delež članov je torej ocena verjetnosti, ne obljuba. Za »sneg« sem vzel padavino pri temperaturi zraka do 1,5 °C na višini kraja, med 0,5 in 2,5 °C je delež snega sorazmeren. Več o tem je v razdelku o omejitvah.
+
+02 — ČETRTEK IN PETEK -- Najprej pride dež, ne sneg
+
+Četrtek je še v toplem sektorju pred fronto. Temperatura na 850 hPa je med 6 in 10 °C, ničelna izoterma je blizu treh kilometrov, sneženja torej ni niti na višjih legah. Padavine se okrepijo v petek, ko prek doline potuje fronta.
+
+Dež v četrtek in petek: od kod do kod sežejo modeli
+
+četrtekpetekansambel: mediana in razpon 10.–90. percentila
+
+Vsak vodoravni stolpec je en model (en tek, Rečica, 366 m): svetlejši del so padavine v četrtek, temnejši v petek. Prikazani so ICON-EU, GFS, UKMO, ECMWF AIFS, ECMWF IFS, GEM. ARPEGE in nekateri drugi modeli ne segajo do konca petka, zato jih ni. Spodaj je ansambel s 143 člani: krog je mediana, črta pa razpon, v katerega pade devet desetin članov.
+
+Skupaj modeli napovedujejo za četrtek in petek od 37 do 95 mm. Mediana ansambla je 45 mm, devet desetin članov pa napove od 24 do 71 mm. To je veliko padavin za dva dni in za tla pomeni, da bodo mokra in topla, ko se ohladi. Ravno zato sneženje v dolini še ne pomeni bele podlage.
+
+Takšna količina dežja se bo poznala tudi na rekah. Stanje spremljajte na strani o vodostaju Savinje in pri ARSO; ta članek ni opozorilo.
+
+03 — URA ZA URO -- Kdaj se ohladi in ali takrat še pada
+
+Spodnji graf je jedro članka. Pokaže, kako se uro za uro menjata dež in sneg, kdaj pade temperatura in kaj o tem pravi vsak model posebej. Izberite višino in ansambel ter premaknite drsnik.
+
+Ura za uro: temperatura, padavine in vsi modeli
+
+Višina
+
+Ansambel
+
+snegdež s snegomdežsuhotemperatura
+
+Za ta graf je potreben JavaScript. Ključne številke so v besedilu pod grafom.
+
+Zgoraj je temperatura zraka na izbrani višini (črta je mediana članov izbranega ansambla, pas razpon od 10. do 90. percentila). V sredini je za vsako uro delež članov, pri katerih tedaj sneži (belo), dežuje s snegom (vijolično) ali dežuje (modro). Spodaj je sedem posameznih modelov, vsak z enim tekom. Premaknite drsnik ali se dotaknite grafa. Svetlo modro ozadje je noč na soboto, od petka ob 18. uri do sobote ob 8. uri.
+
+Kaj se vidi:
+
+Petek čez dan je dež. V petek opoldne dežuje v dolini 95 % članov, sneži pri nobenem.
+
+Mraz pride, ko padavine že pojenjajo. Mediana temperature v dolini pade pod 5 °C v petek ob 23. uri; v soboto ob 4. uri je suho že pri 59 % članov.
+
+Tudi v najugodnejši uri je sneg v dolini manjšina. V tej uri sneži ali dežuje s snegom v dolini 8 % članov, na 900 m pa 43 %.
+
+04 — VIŠINE -- Kdo ima prav: ansambli se razhajajo
+
+Ansambli se pri vprašanju o snegu v dolini razhajajo bolj, kot bi bilo udobno. Do ponedeljka vsaj 1 cm snega v dolini napove 29 % članov ansambla ECMWF ENS in le 2 % ansambla ICON-EPS. Po vrsti: 29 % ECMWF ENS, 19 % GEFS, 5 % GEM ENS, 2 % ICON-EPS. Spodnji graf pokaže te razlike za vsako višino in obdobje.
+
+Koliko članov napove sneg, glede na višino
+
+Obdobje
+
+Kaj šteje
+
+vsi člani skupajECMWF ENSICON-EPSGEFSGEM ENS
+
+Za ta graf je potreben JavaScript. Ključne številke so v besedilu pod grafom.
+
+Vsaka vrstica je ena višina nad Rečico; dotik vrstice izbere to višino tudi v grafu zgoraj. Stolpec je delež vseh 143 članov, liki pa pokažejo delež posameznega ansambla: razmik med njimi je mera, koliko se sistemi razhajajo. Višino sem popravil z običajnim temperaturnim gradientom, kar je poenostavitev.
+
+Z višino verjetnost hitro raste: pri 500 m je 27 %, pri 700 m 41 %, pri 900 m 59 % in pri 1200 m 80 %. Vsaj 5 cm snega napove na 900 m 30 % članov, na 1200 m pa 59 %.
+
+Razhajanje ima konkretno obliko: mediana ohladitve je pri ECMWF ENS v soboto ob 2. uri, pri ICON-EPS šele v soboto ob 21. uri. V 48 urah po ohladitvi pade po mediani 1,5 mm pri prvem in 0,0 mm pri drugem. Kdo ima prav, bo jasno šele z novimi teki modelov.
+
+05 — MEHANIZEM -- Kaj mora sovpasti za sneg v dolini
+
+Sneg v dolini potrebuje tri stvari hkrati: dovolj hladen zrak, padavine v tistem trenutku in dovolj padavin, da se karkoli nabere. Razsevni diagram spodaj pokaže prvi dve: kdaj se ohladi in koliko pade potem.
+
+Kaj mora sovpasti: ohladitev, ki ujame še kaj padavin
+
+ECMWF ENSICON-EPSGEFSGEM ENSpolno: vsaj 1 cm snegaprazno: manj
+
+Vsak lik je en član ansambla (143 jih je). Vodoravno je čas, ko se temperatura zraka v Rečici prvič spusti na 3 °C ali manj, navpično pa padavine v naslednjih 48 urah (korenska lestvica, da se vidijo tudi majhne vrednosti). Polni liki so člani, pri katerih do ponedeljka nastane vsaj 1 cm snega. V desnem stolpcu je število članov, pri katerih se temperatura do ponedeljka sploh ne spusti na 3 °C.
+
+Od 24 članov, ki v dolini naredijo vsaj 1 cm snega, jih 92 % po ohladitvi dobi vsaj 1 mm padavin, 92 % pa se ohladi do sobote opoldne. 10 od 143 članov se do ponedeljka sploh ne ohladi na 3 °C ali manj, ti sneg v dolini ne naredijo.
+
+06 — SLOVENIJA -- Po Sloveniji: kje ima sneg več možnosti
+
+Zemljevid pokaže iste podatke za 20 krajev. Vsak kraj je izračunan na svoji višini, kazalnik je delež vseh članov. Premaknite drsnik ali pritisnite predvajanje.
+
+Slovenija: kje ima sneg več možnosti
+
+Kazalnik
+
+Skoči na
+
+▶ Predvajaj
+0 %100 %
+
+Najvišji deleži
+
+Za zemljevid je potreben JavaScript.
+
+Barva in številka v krogu sta delež vseh 143 članov, pri katerih velja izbrani kazalnik za ta kraj. Vsak kraj je izračunan na svoji višini. Izberite kraj na zemljevidu ali v seznamu, spodaj pa se pokaže njegov potek po urah. Krogi niso merilna mesta, ampak točke modela.
+
+Najvišji deleži do ponedeljka (vsaj 1 cm): Kočevje (460 m) 47 %, Postojna (533 m) 37 %, Solčava (644 m) 24 %. Najmanj možnosti imajo Koper (0 %), Nova Gorica (1 %), Bovec (1 %). Zakaj je razporeditev takšna, iz teh podatkov ne morem zanesljivo ugotoviti: višina je pomembna, a sama ne razloži vsega, saj imata Kranj (385 m) in Velenje (390 m) več kot Bled (475 m).
+
+07 — SCENARIJI -- Trije poteki za dno doline
+
+Za dno doline vidim tri možne poteke. Deleži so seštevek članov, ne napoved, in se bodo z novimi teki spreminjali.
+
+69 %
+
+Dež, nato mraz
+
+Dež preneha, preden se ohladi. V nedeljo zjutraj je v dolini mrzlo, na mokrih cestah je poledica, snega ni.
+
+15 %
+
+Poprh ali dež s snegom
+
+Ob koncu padavin pade dež s snegom ali nekaj snežink, a manj kot 1 cm. Mokra tla ga pogoltnejo.
+
+16 %
+
+Bela podlaga
+
+Ohladitev ujame še padavine: vsaj 1 cm, pri 5 % članov vsaj 5 cm. Prej na višjih legah, v dolini zlasti v noči na soboto.
+
+Kdor bi stavil, bi stavil na prvo možnost. Druge dve nista zanemarljivi: najbolj snežni ansambel, ECMWF ENS, pripisuje vsaj 1 cm snega 29 % članov.
+
+08 — NEDELJA -- Če sneg ne pride, pride mraz
+
+Najbolj verjeten rezultat je tudi najmanj opazen: mraz. V nedeljo zjutraj je temperatura v dolini po 143 članih 0 °C ali manj pri 50 % članov, pri 500 m pri 61 %, pri 700 m pri 82 % in pri 900 m pri 94 %. Mediana nedeljske najnižje temperature v dolini je 0,2 °C, najhladnejša desetina članov pa napove –3,7 °C ali manj.
+
+To pomeni poledico na mokrih cestah, tudi kjer sneg ne pade. Oceno poledice za naslednje dni najdete na strani o poledici, razliko med žledom in poledico pa sem pojasnil v članku o žledu.
+
+09 — PRAKTIČNO -- Kaj lahko naredite
+
+Zimska oprema: če še niste menjali gum, je kritičen odsek od petka zvečer do nedelje zjutraj. Kdaj je to običajno smiselno in kaj velja po pravilih, sem zbral v članku o zimskih gumah; za pravila preverite AMZS.
+
+Čez prelaze: na 900 m (kot Črnivec) vsaj 1 cm snega napove 59 % članov. Stanje meritve na prelazu je na crnivec.si, več o snegu tam pa v članku o Črnivcu pozimi.
+
+Opozorilo na telefon: na strani meja sneženja si lahko nastavite obvestilo za sneg v dolini za danes ali jutri.
+
+Karta in gore: snežna karta bo z bližanjem petka pokazala tudi ta dan, vreme v gorah pa kaže ocene na vrhovih.
+
+Prvi sneg v dolini: kdaj je v zadnjih letih prvi sneg v dolini običajno padel, je v članku o prvem snegu.
+
+10 — OMEJITVE -- Česa podatki ne povedo
+
+Dež ali sneg je moja poenostavitev. Ansambli v Open-Meteo nimajo temperature mokrega termometra. Padavino štejem za sneg pri temperaturi zraka do 1,5 °C (v celoti do 0,5 °C), sorazmerno do 2,5 °C, 1 mm padavin je 1 cm snega. Z drugačno mejo se deleži premaknejo; polja snega, ki ga objavlja Open-Meteo sam, nisem uporabil.
+
+Sneži ni isto kot obleži. Model ne pozna temperature tal. Po več deset milimetrih dežja so tla mokra in topla, zato rahel sneg ob 1 °C v dolini običajno ne obleži.
+
+Višine so popravljene s standardnim gradientom. Temperatura na višjih legah je izračunana z običajnim zniževanjem s višino. V resnici je lahko pozimi drugače, zlasti pri inverziji.
+
+Člani niso neodvisni. 143 članov ni 143 neodvisnih mnenj; večji ansambel ima večjo težo v skupnem deležu (ECMWF ENS je 51 od 143). Zato so ob skupnem deležu posebej prikazani tudi ansambli.
+
+Metoda ni preverjena na preteklih primerih. Postaja IREICA1 snega ne meri; v teh dneh bo izmerila temperaturo, vlago in padavine, sneg bo treba oceniti s kamer in poročil.
+
+Članek je posnetek. Podatki so s prenosa 9. 11. 2026 ob 9.20. Do četrtka se bodo teki modelov večkrat spremenili in z njimi tudi deleži. Ta članek se ne posodablja samodejno. Za uradna opozorila spremljajte ARSO; nič v tem članku ni uradno vremensko opozorilo.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate samo z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Viri: Open-Meteo (modeli ECMWF IFS in AIFS, ICON-EU, GFS, ARPEGE, UKMO, GEM; ansambli ECMWF ENS, ICON-EPS, NCEP GEFS, GEM ENS), prenos z dne 9. 11. 2026. Weather data by Open-Meteo.com (CC BY 4.0). Obris Slovenije: Natural Earth / app.js. Podatki posnetka: data/sneg-nizine-1109.json.
