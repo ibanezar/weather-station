@@ -4283,8 +4283,9 @@ html[data-mode="simple"] .hero .hm-spark{display:none}
   --hb-bg2:rgba(12,18,32,.62);--hb-bd2:rgba(255,255,255,.07);--hb-sh2:none}
 :root:not([data-theme="dark"]) .hero-b{--hb-bg1:rgba(255,255,255,.99);--hb-bd1:rgba(255,255,255,.95);--hb-sh1:0 12px 32px rgba(0,50,100,.26);
   --hb-bg2:rgba(255,255,255,.93);--hb-bd2:rgba(255,255,255,.6);--hb-sh2:none}
-.hero-b .hero-station{position:static;max-width:none;text-align:left;font:500 var(--fs-xs)/1.4 'Inter','Inter Fallback',sans-serif;letter-spacing:0;color:var(--muted);padding:0 .3rem}
-.hero-b .hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
+/* Vrstica postaje je od 7. 11. 2026 neposreden otrok `main`, tik nad glavnim navbarjem (prej prva vrstica v hero kartici) */
+main>.hero-station{position:static;max-width:none;text-align:left;font:500 var(--fs-xs)/1.4 'Inter','Inter Fallback',sans-serif;letter-spacing:0;color:var(--muted);padding:0 .3rem;margin:0 0 .5rem}
+main>.hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
 
 /* glavna ploščica */
 .hero-b .hero-top{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.8rem .75rem;align-items:start;margin:0;padding:1.15rem 1.15rem 1.05rem}
@@ -4415,8 +4416,7 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
 @media (max-width:360px){.hero-b .hm,.hero-b .hm.hm-secondary{padding:.7rem .7rem}.hero-b .hero-top{padding:1rem .95rem}.hb-more-hint{display:none}}
 @media (min-width:760px){
   .hero.hero-b{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:.6rem;
-    grid-template-areas:"st st" "main met" "day met" "more more" "foot foot" "sc sc" "qa qa"}
-  .hero-b .hero-station{grid-area:st}
+    grid-template-areas:"main met" "day met" "more more" "foot foot" "sc sc" "qa qa"}
   .hero-b .hero-top{grid-area:main;padding:1.5rem 1.5rem 1.3rem}
   .hero-b .hb-day{grid-area:day}
   .hero.hero-b>.hero-metrics{grid-area:met;grid-auto-rows:1fr}
@@ -4788,12 +4788,14 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 
   /* hero pred zavihki */
   main{display:flex;flex-direction:column}
-  main>*{order:3}
+  main>*{order:4}
   main>.mode-intro,main>.status,main>.countdown-wrap,main>.live-event-wrap,main>.nowcast{order:0}
+  /* 7. 11. 2026: vrstica postaje → glavni navbar → hero */
+  main>.hero-station{order:1}
   main>.tab-nav-wrap{order:2}
   #tab-current.active{display:contents}
-  #tab-current>*{order:3}
-  #tab-current>.hero{order:1}
+  #tab-current>*{order:4}
+  #tab-current>.hero{order:3}
 }
 @media (max-width:360px){
   .title-row h1{font-size:1.4rem}
