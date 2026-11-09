@@ -261,10 +261,60 @@ def probe_locations():
     return found
 
 
+# Iz ameba/index.xml: url = ACADEMA.PUJS.PROBASE_LANG + "/archive/data/archive_si"; INDEX.archive[...].MAP = url + ".xml".
+# PROBASE_LANG ni v konfiguraciji izpisan, zato preizkusimo verjetne predpone (URL.PROBASE = /uploads/probase/www).
+ARCHIVE_SI_CANDIDATES = [
+    "/uploads/probase/www/plus/sl/archive/data/archive_si.xml",
+    "/uploads/probase/www/plus/archive/data/archive_si.xml",
+    "/uploads/probase/www/sl/archive/data/archive_si.xml",
+    "/uploads/probase/www/archive/data/archive_si.xml",
+    "/uploads/probase/www/plus/sl/archive_si.xml",
+    "/uploads/probase/www/plus/si/archive/data/archive_si.xml",
+]
+
+
+def parse_stations_keyed(text):
+    """Postaje kot JS objekti s ključem = id postaje: `_3391:{ name:"Črnivec", lon:14.9, lat:46.3, alt:848, type:1 }`
+    ali `"3391":{...}`. Oblika ni znana vnaprej, zato je razčlenjevanje ohlapno."""
+    out, seen = [], set()
+    for key, body in re.findall(r"[\"']?_?(\d{2,6})[\"']?\s*:\s*\{([^{}]*)\}", text):
+        pairs = {k: v for k, v in re.findall(r"[\"']?(\w+)[\"']?\s*:\s*\"([^\"]*)\"", body)}
+        pairs.update({k: v for k, v in re.findall(r"[\"']?(\w+)[\"']?\s*:\s*(-?\d+(?:\.\d+)?)\b", body)})
+        lat = num(pick(pairs, "lat", "latitude", "y"))
+        lon = num(pick(pairs, "lon", "lng", "longitude", "x"))
+        name = pick(pairs, "name", "title", "naziv", "ime", "n")
+        if key not in seen and lat is not None and lon is not None and 45 < lat < 47.5 and 13 < lon < 17 and name:
+            seen.add(key)
+            out.append({"id": key, "name": name, "lat": lat, "lon": lon,
+                        "elev": num(pick(pairs, "alt", "elev", "h", "visina", "z")), "attrs": pairs})
+    return out
+
+
+def probe_archive_si(out_dir):
+    best, used = [], None
+    for path in ARCHIVE_SI_CANDIDATES:
+        st, tx = get(path)
+        time.sleep(PAUSE_S)
+        print(f"[archive_si] {path} -> HTTP {st}, {len(tx)} znakov")
+        if st != 200 or not tx:
+            continue
+        with open(os.path.join(out_dir, "archive_si.txt"), "w", encoding="utf-8") as f:
+            f.write(tx)
+        print("   glava:", re.sub(r"\s+", " ", tx[:900]))
+        found = parse_stations_keyed(tx) or parse_stations(tx)
+        print(f"   razpoznanih postaj: {len(found)}; prvih 5: {[(x['id'], x['name'], x['elev']) for x in found[:5]]}")
+        if len(found) > len(best):
+            best, used = found, path
+        if found:
+            break
+    return best, used
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--radius", type=float, default=35.0)
     ap.add_argument("--out", default=os.path.join(ROOT, "arso-snow-out"))
+    ap.add_argument("--crawl", action="store_true", help="diagnostika: rekurzivno preberi verigo XML aplikacije")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     report = ["# ARSO snežne postaje blizu Rečice", ""]
@@ -334,6 +384,8 @@ def main():
                         if len(f2) > len(stations):
                             stations, used = f2, l
     if not stations:
+        stations, used = probe_archive_si(a.out)
+    if not stations and a.crawl:
         crawl_ameba(a.out, [PUJS_ROOT + "/ameba/index.xml", PUJS_ROOT + "/ameba/default.xml", PUJS_ROOT + "/prog/default.xml",
                             PUJS_ROOT + "/prog/init.xml", PUJS_ROOT + "/menu.xml"])
         for path, tx in probe_locations():
