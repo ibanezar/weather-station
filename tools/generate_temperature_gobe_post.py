@@ -159,9 +159,41 @@ def trapezoid(x, lo, opt_lo, opt_hi, hi):
 
 # ───────────────────────── grafi (inline SVG) ─────────────────────────
 
+def n1(x):
+    return num(x).replace("-", "–")
+
+
+def row_detail(r):
+    """Besedilo za podrobnosti vrste (isto vidijo tisti brez JS: privzeto je izbran jurček)."""
+    lo, ol, oh, hi = r["curve"]
+    cur = r["cur"]
+    what = "tla" if r["kind"] == "tla" else "zrak"
+    nm = r["ime"][0].upper() + r["ime"][1:]
+    base = f"{n1(cur)}{NBSP}°C ({what}, povprečje zadnjih sedmih dni)"
+    if r["f"] >= 1.0:
+        assert ol <= cur <= oh
+        d = f"Pri {base} je vrsta v optimalnem območju ({n1(ol)}–{n1(oh)}{NBSP}°C)."
+        e = (f"Do spodnjega roba optimalnega območja je še {n1(cur - ol)}{NBSP}°C, "
+             f"do spodnje meje razpona ({n1(lo)}{NBSP}°C) pa {n1(cur - lo)}{NBSP}°C.")
+    elif r["f"] > 0 and cur < ol:
+        d = (f"Pri {base} je vrsta pod optimalnim območjem ({n1(ol)}–{n1(oh)}{NBSP}°C), vendar nad spodnjo mejo razpona "
+             f"({n1(lo)}{NBSP}°C).")
+        e = f"Do spodnje meje razpona je še {n1(cur - lo)}{NBSP}°C."
+    elif r["f"] > 0:
+        assert oh < cur < hi, r["ime"]
+        d = (f"Pri {base} je vrsta že nad optimalnim območjem ({n1(ol)}–{n1(oh)}{NBSP}°C), vendar pod zgornjo mejo razpona "
+             f"({n1(hi)}{NBSP}°C).")
+        e = f"Do zgornje meje razpona je še {n1(hi - cur)}{NBSP}°C."
+    else:
+        assert cur <= lo, r["ime"]
+        d = f"Pri {base} je vrsta zunaj razpona ({n1(lo)}–{n1(hi)}{NBSP}°C)."
+        e = f"Za vstop v razpon bi moralo biti toplejše za {n1(lo - cur)}{NBSP}°C."
+    return {"t": nm, "d": d, "e": e + " Razpon je parameter modela, ne izmerjena meja rasti."}
+
+
 def windows_chart(rows, w=360):
     """rows = [dict(ime, kind, curve, cur, f)] -- temperaturno okno vrste (svetel trak: od najnižje do najvišje, temen: optimalno)
-    in trenutna temperatura (polna oznaka = v razponu, prazna = izven razpona)."""
+    in trenutna temperatura (polna oznaka = v razponu, prazna = izven razpona). Vsaka vrstica je izbirna (klik, dotik, tipkovnica)."""
     pl, pr, pt, pb = 128, 14, 14, 32
     rh = 30
     h = pt + pb + rh * len(rows)
@@ -169,8 +201,9 @@ def windows_chart(rows, w=360):
     lo, hi = -5, 25
     X = lambda t: pl + iw * (t - lo) / (hi - lo)
     base = pt + rh * len(rows)
-    p = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="Temperaturno okno vrst v gobarskem modelu in trenutna temperatura tal oziroma zraka" '
-         'xmlns="http://www.w3.org/2000/svg">']
+    sel0 = next(i for i, r in enumerate(rows) if r["id"] == "boletus_edulis")
+    p = [f'<svg viewBox="0 0 {w} {h}" role="group" aria-label="Temperaturno okno vrst v gobarskem modelu in trenutna temperatura tal oziroma zraka. '
+         'Vrstice so izbirne." xmlns="http://www.w3.org/2000/svg">']
     for t in (-5, 0, 5, 10, 15, 20, 25):
         x = X(t)
         zero = t == 0
@@ -182,20 +215,33 @@ def windows_chart(rows, w=360):
         col = GREEN if r["kind"] == "tla" else CYAN
         lo_, ol, oh, hi_ = r["curve"]
         nm = r["ime"][0].upper() + r["ime"][1:]
-        p.append(f'<text x="{pl - 10}" y="{cy + 4:.1f}" text-anchor="end" font-size="13" fill="{INK}">{nm}</text>')
+        inside = r["f"] > 0
+        state = "v razponu" if inside else "zunaj razpona"
+        p.append(f'<g class="vs-row" data-i="{i}" tabindex="0" role="button" aria-pressed="{"true" if i == sel0 else "false"}" '
+                 f'aria-label="{nm}: {state}. Podrobnosti">')
+        p.append(f'<rect class="vs-hit" x="2" y="{cy - rh / 2 + 1:.1f}" width="{w - 4}" height="{rh - 2}" rx="6"/>')
+        p.append(f'<text x="{pl - 10}" y="{cy + 4.5:.1f}" text-anchor="end" font-size="13" fill="{INK}">{nm}</text>')
         p.append(f'<rect x="{X(lo_):.1f}" y="{cy - 5:.1f}" width="{X(hi_) - X(lo_):.1f}" height="10" rx="5" fill="{col}" fill-opacity=".20"/>')
         p.append(f'<rect x="{X(ol):.1f}" y="{cy - 5:.1f}" width="{X(oh) - X(ol):.1f}" height="10" rx="3" fill="{col}" fill-opacity=".50"/>')
-        inside = r["f"] > 0
         fill, stroke = (INK, SURFACE) if inside else (SURFACE, AMBER)
-        tip = (f'{nm}: {"tla" if r["kind"] == "tla" else "zrak"} {num(r["cur"])} °C, razpon {num(lo_)}–{num(hi_)} °C, '
-               f'optimalno {num(ol)}–{num(oh)} °C; {"v razponu" if inside else "izven razpona"}').replace(" -", " –")
         x = X(r["cur"])
         if r["kind"] == "tla":
-            p.append(f'<circle cx="{x:.1f}" cy="{cy:.1f}" r="6" fill="{fill}" stroke="{stroke}" stroke-width="2"><title>{tip}</title></circle>')
+            p.append(f'<circle cx="{x:.1f}" cy="{cy:.1f}" r="6" fill="{fill}" stroke="{stroke}" stroke-width="2"/>')
         else:
-            p.append(f'<rect x="{x - 5.5:.1f}" y="{cy - 5.5:.1f}" width="11" height="11" rx="2" fill="{fill}" stroke="{stroke}" stroke-width="2"><title>{tip}</title></rect>')
+            p.append(f'<rect x="{x - 5.5:.1f}" y="{cy - 5.5:.1f}" width="11" height="11" rx="2" fill="{fill}" stroke="{stroke}" stroke-width="2"/>')
+        p.append("</g>")
     p.append("</svg>")
     return "".join(p)
+
+
+def windows_panel(rows):
+    """Podrobnosti izbrane vrste + podatki za JS (vse vnaprej izračunano v Pythonu, JS ne računa)."""
+    det = [row_detail(r) for r in rows]
+    sel0 = next(i for i, r in enumerate(rows) if r["id"] == "boletus_edulis")
+    d = det[sel0]
+    return ('<div class="vs-detail" id="vs-win-panel" aria-live="polite">'
+            f'<strong>{d["t"]}</strong> <span>{d["d"]}</span> <span class="vs-detail-note">{d["e"]}</span></div>'
+            '<script type="application/json" id="vs-win-data">' + json.dumps(det, ensure_ascii=False) + "</script>")
 
 
 def years_chart(rows, w=360):
@@ -228,9 +274,27 @@ def years_chart(rows, w=360):
     return "".join(p)
 
 
+def _soil_status(sv):
+    if sv is None:
+        return "Podatka o temperaturi tal za ta dan še ni (ERA5-Land zaostaja za dva dni)."
+    if sv >= THR_HI:
+        return f"Tla so nad pragom lisičke in marele ({n1(THR_HI)}{NBSP}°C) in nad pragom jurčka ({n1(THR_LO)}{NBSP}°C)."
+    if sv > THR_LO:
+        return f"Tla so pod pragom lisičke in marele ({n1(THR_HI)}{NBSP}°C), vendar nad pragom jurčka ({n1(THR_LO)}{NBSP}°C)."
+    return f"Tla so pod obema pragoma ({n1(THR_HI)} in {n1(THR_LO)}{NBSP}°C)."
+
+
+def _day_read(day):
+    sv = day["s"]
+    soil = f"tla {n1(sv)}{NBSP}°C · " if sv is not None else ""
+    frost = " · noč z mrazom" if day["l"] <= 0 else ""
+    return (f'<strong>{day["d"]}</strong> {soil}zrak, dnevno povprečje {n1(day["a"])}{NBSP}°C · '
+            f'najnižja zraka {n1(day["l"])}{NBSP}°C{frost}. {_soil_status(sv)}')
+
+
 def season_chart(H, soil, w=360):
     """Dnevna temperatura tal in povprečna temperatura zraka od 1. 10. do zadnjega dne, pragova 7,5 in 3,5 °C,
-    noči z 0 °C ali manj kot rombi na spodnji osi."""
+    noči z 0 °C ali manj kot rombi na spodnji osi. Vrne (svg, kontrole z drsnikom in podatki)."""
     pl, pr, pt, pb = 40, 14, 14, 34
     h = 230
     iw, ih = w - pl - pr, h - pt - pb
@@ -240,8 +304,8 @@ def season_chart(H, soil, w=360):
     lo, hi = 0, 17
     X = lambda d: pl + iw * (d - d0).days / span
     Y = lambda t: pt + ih * (1 - (t - lo) / (hi - lo))
-    p = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="Temperatura tal in zraka v Rečici od 1. oktobra do 8. novembra 2026" '
-         'xmlns="http://www.w3.org/2000/svg">']
+    p = [f'<svg viewBox="0 0 {w} {h}" id="vs-sea" role="img" aria-label="Temperatura tal in zraka v Rečici od 1. oktobra do 8. novembra 2026. '
+         'Izbran dan lahko spremenite z drsnikom pod grafom." xmlns="http://www.w3.org/2000/svg">']
     for t in (0, 4, 8, 12, 16):
         p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{Y(t):.1f}" y2="{Y(t):.1f}" stroke="{GRID}" stroke-width="1"/>')
         p.append(f'<text x="{pl - 6}" y="{Y(t) + 4:.1f}" text-anchor="end" font-size="13" fill="{MUTED}">{t}</text>')
@@ -252,18 +316,41 @@ def season_chart(H, soil, w=360):
         p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{Y(thr):.1f}" y2="{Y(thr):.1f}" stroke="{col}" stroke-width="1.6" stroke-dasharray="5 3"/>')
         p.append(f'<text x="{pl + 4}" y="{Y(thr) - 5:.1f}" font-size="13" font-weight="700" fill="{col}">{lab}</text>')
     air = [(D(k), v["tempAvg"]) for k, v in sorted(H.items()) if k >= f"{LAST}-10-01" and v.get("tempAvg") is not None]
-    p.append('<polyline fill="none" stroke="%s" stroke-width="1.4" stroke-opacity=".85" stroke-linejoin="round" points="%s"><title>zrak: dnevno povprečje, postaja IREICA1</title></polyline>'
+    p.append('<polyline fill="none" stroke="%s" stroke-width="1.4" stroke-opacity=".85" stroke-linejoin="round" points="%s"/>'
              % (GREY, " ".join(f"{X(d):.1f},{Y(v):.1f}" for d, v in air)))
     sl = [(D(k), v) for k, v in sorted(soil.items()) if k >= f"{LAST}-10-01"]
-    p.append('<polyline fill="none" stroke="%s" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" points="%s"><title>tla: dnevno povprečje, ERA5-Land</title></polyline>'
+    p.append('<polyline fill="none" stroke="%s" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" points="%s"/>'
              % (VIOLET, " ".join(f"{X(d):.1f},{Y(v):.1f}" for d, v in sl)))
     for k, v in sorted(H.items()):
         if k >= f"{LAST}-10-01" and v.get("tempLow") is not None and v["tempLow"] <= 0:
             x, y = X(D(k)), Y(0)
-            p.append(f'<path d="M{x:.1f},{y - 6.5:.1f} L{x + 5.5:.1f},{y:.1f} L{x:.1f},{y + 6.5:.1f} L{x - 5.5:.1f},{y:.1f} Z" fill="{CYAN}" stroke="{SURFACE}" stroke-width="1.5">'
-                     f'<title>{dm(D(k))}: najnižja temperatura {temp(v["tempLow"])}</title></path>')
+            p.append(f'<path d="M{x:.1f},{y - 6.5:.1f} L{x + 5.5:.1f},{y:.1f} L{x:.1f},{y + 6.5:.1f} L{x - 5.5:.1f},{y:.1f} Z" fill="{CYAN}" stroke="{SURFACE}" stroke-width="1.5"/>')
+    # podatki po dnevih za drsnik (koordinate izračunane tu, JS samo premika kazalec)
+    days = []
+    for i in range(span + 1):
+        d = d0 + datetime.timedelta(i)
+        k = d.isoformat()
+        hv = H.get(k)
+        if not hv or hv.get("tempAvg") is None or hv.get("tempLow") is None:
+            continue
+        sv = soil.get(k)
+        days.append({"i": i, "d": dm(d), "x": round(X(d), 1), "a": hv["tempAvg"], "ya": round(Y(hv["tempAvg"]), 1),
+                     "l": hv["tempLow"], "s": sv, "ys": round(Y(sv), 1) if sv is not None else None})
+    last = days[-1]
+    assert last["i"] == span
+    p.append(f'<line id="vs-cur" x1="{last["x"]}" x2="{last["x"]}" y1="{pt}" y2="{pt + ih}" stroke="{INK}" stroke-width="1.4" stroke-opacity=".75"/>')
+    p.append(f'<circle id="vs-ca" cx="{last["x"]}" cy="{last["ya"]}" r="4.5" fill="{GREY}" stroke="{SURFACE}" stroke-width="1.6"/>')
+    ys = last["ys"] if last["ys"] is not None else last["ya"]
+    p.append(f'<circle id="vs-cs" cx="{last["x"]}" cy="{ys}" r="5.5" fill="{VIOLET}" stroke="{SURFACE}" stroke-width="1.8"'
+             + ('' if last["s"] is not None else ' visibility="hidden"') + '/>')
+    p.append(f'<rect id="vs-ov" x="{pl}" y="{pt}" width="{iw}" height="{ih}" fill="transparent" style="touch-action:pan-y;cursor:ew-resize"/>')
     p.append("</svg>")
-    return "".join(p)
+    meta = {"pl": pl, "iw": iw, "span": span, "days": days}
+    controls = ('<div class="vs-scrub"><label for="vs-slider">Izberite dan</label>'
+                f'<input id="vs-slider" type="range" min="0" max="{len(days) - 1}" step="1" value="{len(days) - 1}">'
+                f'<div class="vs-read" id="vs-read" aria-live="polite">{_day_read(last)}</div></div>'
+                '<script type="application/json" id="vs-sea-data">' + json.dumps(meta, ensure_ascii=False) + "</script>")
+    return "".join(p), controls
 
 
 def legend(entries):
@@ -310,6 +397,20 @@ STYLE = """<style>
 .vs-gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
 .vs-gal-grid img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:12px}
 .vs-gal figcaption{color:var(--muted);font-size:.85rem;line-height:1.5;margin-top:.6rem}
+.vs-row{outline:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.vs-hit{fill:transparent}
+.vs-row:hover .vs-hit{fill:rgba(255,255,255,.04)}
+.vs-row[aria-pressed=true] .vs-hit{fill:rgba(52,211,153,.12)}
+.vs-row:focus-visible .vs-hit{stroke:#34d399;stroke-width:1.5}
+.vs-detail{margin:.8rem 0 0;padding:.7rem .85rem;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--card-border);font-size:.92rem;line-height:1.55;min-height:5.6em}
+.vs-detail strong{color:var(--text)}
+.vs-detail-note{display:block;margin-top:.3rem;color:var(--muted);font-size:.84rem}
+.vs-hint{margin:.5rem 0 0;font-size:.82rem;color:var(--muted)}
+.vs-scrub{margin:.6rem 0 0}
+.vs-scrub label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.2rem}
+.vs-scrub input[type=range]{width:100%;height:2.2rem;accent-color:#a78bfa;touch-action:pan-y}
+.vs-read{margin-top:.4rem;padding:.7rem .85rem;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--card-border);font-size:.92rem;line-height:1.55;min-height:6.2em}
+.vs-read strong{color:var(--text)}
 .vs-more{margin:.6rem 0 1.2rem}
 .vs-more summary{cursor:pointer;color:var(--blue);font-size:.9rem}
 h3.vs-h3,.post-body h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin:1.6rem 0 .4rem}
@@ -328,6 +429,77 @@ def gallery_html():
     imgs = "".join(f'<img src="/img/blog/{SLUG}/{f}" alt="{alt}" width="720" height="960" loading="lazy">' for f, alt in PHOTOS)
     return (f'<figure class="vs-gal"><div class="vs-gal-grid">{imgs}</div>'
             '<figcaption>Jurček in gozdna pot v jesenskem gozdu. Foto: Filip Eremita.</figcaption></figure>')
+
+
+JS = """<div class="vs-script"><script>
+(function(){
+function ready(f){document.readyState!=='loading'?f():document.addEventListener('DOMContentLoaded',f)}
+ready(function(){
+var NB='\\u00A0';
+var fmt=function(x){return x.toFixed(1).replace('.',',').replace('-','\\u2013')};
+function data(id){var e=document.getElementById(id);try{return e?JSON.parse(e.textContent):null}catch(_){return null}}
+/* 1. temperaturna okna: izbira vrste */
+var rows=data('vs-win-data'),pan=document.getElementById('vs-win-panel'),g=document.querySelectorAll('.vs-row');
+if(rows&&pan&&g.length===rows.length){
+  var pick=function(i,focus){
+    g.forEach(function(el,k){el.setAttribute('aria-pressed',k===i?'true':'false')});
+    pan.textContent='';
+    var t=document.createElement('strong');t.textContent=rows[i].t;
+    var d=document.createElement('span');d.textContent=' '+rows[i].d;
+    var e=document.createElement('span');e.className='vs-detail-note';e.textContent=rows[i].e;
+    pan.appendChild(t);pan.appendChild(d);pan.appendChild(e);
+    if(focus)g[i].focus();
+  };
+  g.forEach(function(el,k){
+    el.addEventListener('click',function(){pick(k,false)});
+    el.addEventListener('keydown',function(ev){
+      if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();pick(k,false)}
+      else if(ev.key==='ArrowDown'||ev.key==='ArrowUp'){ev.preventDefault();pick(Math.max(0,Math.min(g.length-1,k+(ev.key==='ArrowDown'?1:-1))),true)}
+    });
+  });
+  var h=document.createElement('p');h.className='vs-hint';
+  h.textContent='Dotaknite se vrstice (ali jo izberite s tipkami) za podrobnosti vrste.';
+  pan.parentNode.insertBefore(h,pan);
+}
+/* 2. drsnik po dnevih */
+var M=data('vs-sea-data'),sl=document.getElementById('vs-slider'),rd=document.getElementById('vs-read'),
+    cur=document.getElementById('vs-cur'),cs=document.getElementById('vs-cs'),ca=document.getElementById('vs-ca'),
+    ov=document.getElementById('vs-ov'),svg=document.getElementById('vs-sea');
+if(M&&sl&&rd&&cur&&cs&&ca&&ov&&svg){
+  var status=function(s){
+    if(s===null)return 'Podatka o temperaturi tal za ta dan \\u0161e ni (ERA5-Land zaostaja za dva dni).';
+    if(s>=7.5)return 'Tla so nad pragom lisi\\u010dke in marele (7,5'+NB+'\\u00B0C) in nad pragom jur\\u010dka (3,5'+NB+'\\u00B0C).';
+    if(s>3.5)return 'Tla so pod pragom lisi\\u010dke in marele (7,5'+NB+'\\u00B0C), vendar nad pragom jur\\u010dka (3,5'+NB+'\\u00B0C).';
+    return 'Tla so pod obema pragoma (7,5 in 3,5'+NB+'\\u00B0C).';
+  };
+  var show=function(k){
+    var d=M.days[k];
+    cur.setAttribute('x1',d.x);cur.setAttribute('x2',d.x);
+    ca.setAttribute('cx',d.x);ca.setAttribute('cy',d.ya);
+    if(d.s===null){cs.setAttribute('visibility','hidden')}else{cs.removeAttribute('visibility');cs.setAttribute('cx',d.x);cs.setAttribute('cy',d.ys)}
+    rd.textContent='';
+    var b=document.createElement('strong');b.textContent=d.d;rd.appendChild(b);
+    rd.appendChild(document.createTextNode(' '+(d.s!==null?'tla '+fmt(d.s)+NB+'\\u00B0C \\u00B7 ':'')+'zrak, dnevno povpre\\u010dje '+fmt(d.a)+NB+'\\u00B0C \\u00B7 najni\\u017eja zraka '+fmt(d.l)+NB+'\\u00B0C'+(d.l<=0?' \\u00B7 no\\u010d z mrazom':'')+'. '+status(d.s)));
+    sl.value=k;
+    sl.setAttribute('aria-valuetext',d.d);
+  };
+  sl.addEventListener('input',function(){show(+sl.value)});
+  var drag=false;
+  var fromEvent=function(ev){
+    var pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
+    var m=pt.matrixTransform(svg.getScreenCTM().inverse());
+    var day=Math.round((m.x-M.pl)/M.iw*M.span),best=0,bd=1e9;
+    M.days.forEach(function(d,k){var q=Math.abs(d.i-day);if(q<bd){bd=q;best=k}});
+    show(best);
+  };
+  ov.addEventListener('pointerdown',function(ev){drag=true;try{ov.setPointerCapture(ev.pointerId)}catch(_){}fromEvent(ev)});
+  ov.addEventListener('pointermove',function(ev){if(drag||ev.pointerType==='mouse')fromEvent(ev)});
+  ov.addEventListener('pointerup',function(){drag=false});
+  ov.addEventListener('pointercancel',function(){drag=false});
+}
+});
+})();
+</script></div>"""
 
 
 def fig(title, inner, caption):
@@ -478,14 +650,18 @@ def build_article(H, soil):
     f_win = fig("Pri kateri temperaturi model še dopušča rast",
                 legend([("temperatura tal (mikorizne vrste in razkrojevalke)", "dot", GREEN), ("temperatura zraka (lesne vrste)", "sq", CYAN),
                         ("trenutna temperatura je znotraj temperaturnega razpona vrste", "dot", INK), ("temperatura je zunaj razpona vrste", "hollow", AMBER)])
-                + windows_chart(chart_rows),
+                + windows_chart(chart_rows) + windows_panel(chart_rows),
                 f"Svetli pas prikazuje temperaturno območje, v katerem model dopušča rast, temni pa optimalno območje. Oznaka prikazuje povprečje zadnjih sedmih dni: "
                 f"temperatura tal {temp(soil_w)} (od 1. do 7. novembra), temperatura zraka {temp(air_w)} (od 2. do 8. novembra). "
                 "Pri lesnih vrstah odloča temperatura zraka, pri preostalih pa temperatura tal. "
                 "Temperaturni razponi in optimalna območja so parametri modela (species_rules.yaml), ne rezultati meritev.")
     ordered = lambda names: [n for n in (r["ime"] for r in chart_rows) if n in names]
+    part_low = [r["ime"] for r in rows if 0 < r["f"] < 1.0 and r["cur"] < r["curve"][1]]
+    part_high = [r["ime"] for r in rows if 0 < r["f"] < 1.0 and r["cur"] > r["curve"][2]]
+    assert part_high == ["zimska polževka"] and set(part_low) | set(part_high) == set(part), (part_low, part_high)
     t_full = (f"V optimalnem temperaturnem območju so po modelu {joined(ordered(full))}. "
-              f"Pod optimalnim območjem, vendar še nad spodnjo temperaturno mejo, so {joined(ordered(part))}. "
+              f"Pod optimalnim območjem, vendar še nad spodnjo temperaturno mejo, so {joined(ordered(part_low))}. "
+              "Zimska polževka je že nad optimalnim območjem (do 6,5 °C), a še znotraj razpona. "
               f"{cap1(joined(ordered(none)))} sta zunaj temperaturnega razpona, v katerem model dopušča rast.")
 
     p1 = [
@@ -493,7 +669,7 @@ def build_article(H, soil):
         f"Temperatura tal je že pod spodnjim pragom za navadno lisičko in marelo ({temp(THR_HI)}), "
         f"še vedno pa je nad pragom za jurčka in užitno sirovko ({temp(THR_LO)}).",
         cards,
-        f"Jurček je tik nad spodnjo mejo svojega optimalnega temperaturnega območja (6,5{NBSP}°C). Če se tla ohladijo še za več kot pol stopinje, "
+        f"Jurček je tik nad spodnjo mejo svojega optimalnega temperaturnega območja (6,5{NBSP}°C). Če se tla ohladijo še za pol stopinje ali več, "
         "bo model temperaturo uvrstil pod optimalno območje, vendar bo rast še vedno dopuščal.",
         f_win,
         t_full,
@@ -521,10 +697,11 @@ def build_article(H, soil):
         t_years,
     ]
 
+    _sea_svg, _sea_ctrl = season_chart(H, soil)
     f_season = fig("Temperatura tal in zraka od 1. oktobra",
                    legend([("temperatura tal (dnevno povprečje)", "line", VIOLET), ("temperatura zraka (dnevno povprečje)", "line", GREY),
-                           ("noč s temperaturo 0 °C ali manj", "dia", CYAN)]) + season_chart(H, soil),
-                   "Ohladitev 23. oktobra je prinesla največji enodnevni padec temperature tal od 1. oktobra.")
+                           ("noč s temperaturo 0 °C ali manj", "dia", CYAN)]) + _sea_svg + _sea_ctrl,
+                   "Ohladitev 23. oktobra je prinesla največji enodnevni padec temperature tal od 1. oktobra. Dan izberete z drsnikom ali z dotikom oziroma vlečenjem po grafu.")
     p3 = [
         f"Tla so se najbolj ohladila 23. oktobra: njihova povprečna temperatura je v enem dnevu padla z {num(soil['2026-10-22'])} na {temp(soil['2026-10-23'])}. "
         f"Dan prej je padlo {num(H['2026-10-22']['precipTotal'])} mm dežja, 23. oktobra pa je postaja izmerila {temp(H['2026-10-23']['tempLow'])}. "
@@ -588,6 +765,7 @@ def build_article(H, soil):
         'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se '
         'predhodno dogovorite z avtorjem.</p>',
     ]
+    p7.append(JS)
     title = "Tla imajo 7 °C: za jurčka še dovolj toplo, za lisičko ne več"
     assert len(title) <= 60, len(title)
     desc = "Tla v Rečici imajo 7 °C: dovolj za jurčka in sirovko, premalo za lisičko. Primerjava s šestimi leti, zimske vrste in napoved."
@@ -619,6 +797,7 @@ def plain_text(article):
     def clean(h):
         h = re.sub(r"<svg.*?</svg>", "", h, flags=re.S)
         h = re.sub(r"<style.*?</style>", "", h, flags=re.S)
+        h = re.sub(r"<script.*?</script>", "", h, flags=re.S)
         h = re.sub(r"</tr>", "\n", h)
         h = re.sub(r"</t[hd]>", " | ", h)
         h = re.sub(r"</?(h3|figcaption|li|p|div|b|span)[^>]*>", "\n", h)

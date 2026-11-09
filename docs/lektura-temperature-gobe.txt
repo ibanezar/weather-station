@@ -25,7 +25,7 @@ povprečna temperatura zraka od 25. oktobra do 8. novembra (postaja IREICA1)
 
 najnižja temperatura zraka od 1. do 8. novembra
 
-Jurček je tik nad spodnjo mejo svojega optimalnega temperaturnega območja (6,5 °C). Če se tla ohladijo še za več kot pol stopinje, bo model temperaturo uvrstil pod optimalno območje, vendar bo rast še vedno dopuščal.
+Jurček je tik nad spodnjo mejo svojega optimalnega temperaturnega območja (6,5 °C). Če se tla ohladijo še za pol stopinje ali več, bo model temperaturo uvrstil pod optimalno območje, vendar bo rast še vedno dopuščal.
 
 Pri kateri temperaturi model še dopušča rast
 
@@ -37,9 +37,14 @@ trenutna temperatura je znotraj temperaturnega razpona vrste
 
 temperatura je zunaj razpona vrste
 
+Jurček
+Pri 7,0 °C (tla, povprečje zadnjih sedmih dni) je vrsta v optimalnem območju (6,5–13,5 °C).
+
+Do spodnjega roba optimalnega območja je še 0,5 °C, do spodnje meje razpona (3,5 °C) pa 3,5 °C. Razpon je parameter modela, ne izmerjena meja rasti.
+
 Svetli pas prikazuje temperaturno območje, v katerem model dopušča rast, temni pa optimalno območje. Oznaka prikazuje povprečje zadnjih sedmih dni: temperatura tal 7,0 °C (od 1. do 7. novembra), temperatura zraka 6,0 °C (od 2. do 8. novembra). Pri lesnih vrstah odloča temperatura zraka, pri preostalih pa temperatura tal. Temperaturni razponi in optimalna območja so parametri modela (species_rules.yaml), ne rezultati meritev.
 
-V optimalnem temperaturnem območju so po modelu jurček, užitna sirovka, lijasta lisička, zimska kolobarnica, bukov ostrigar in zimska panjevka. Pod optimalnim območjem, vendar še nad spodnjo temperaturno mejo, so kostanjevka, rumeni ježek, zimska polževka in štorovka. Navadna lisička in marela sta zunaj temperaturnega razpona, v katerem model dopušča rast.
+V optimalnem temperaturnem območju so po modelu jurček, užitna sirovka, lijasta lisička, zimska kolobarnica, bukov ostrigar in zimska panjevka. Pod optimalnim območjem, vendar še nad spodnjo temperaturno mejo, so kostanjevka, rumeni ježek in štorovka. Zimska polževka je že nad optimalnim območjem (do 6,5 °C), a še znotraj razpona. Navadna lisička in marela sta zunaj temperaturnega razpona, v katerem model dopušča rast.
 
 02 — PRIMERJAVA -- Dnevi so hladni, noči pa ne posebej
 
@@ -79,7 +84,10 @@ temperatura zraka (dnevno povprečje)
 
 noč s temperaturo 0 °C ali manj
 
-Ohladitev 23. oktobra je prinesla največji enodnevni padec temperature tal od 1. oktobra.
+Izberite dan
+8. 11. zrak, dnevno povprečje 5,2 °C · najnižja zraka 0,4 °C. Podatka o temperaturi tal za ta dan še ni (ERA5-Land zaostaja za dva dni).
+
+Ohladitev 23. oktobra je prinesla največji enodnevni padec temperature tal od 1. oktobra. Dan izberete z drsnikom ali z dotikom oziroma vlečenjem po grafu.
 
 Od 23. oktobra se temperatura tal ne znižuje več: giblje se med 6,6 in 8,9 °C. Zrak se običajno ohladi hitreje kot tla, zato nekaj mrzlih noči še ne pomeni, da so se ohladila tudi tla.
 
@@ -131,6 +139,8 @@ Praktično sporočilo: temperatura v teh dneh večine gob ne bo omejevala, izjem
 Gobe nabirajte samo, če jih zanesljivo poznate. Tudi poznojesenske vrste imajo nevarne zamenjave. Več o njih si lahko preberete na strani Strupene gobe.
 
 Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+
 
 VIRI
 Viri: postaja IREICA1 (dnevna povprečja in skrajne vrednosti temperature zraka, zunanji senzor); Open-Meteo (ERA5-Land, temperatura tal, točka Rečica ob Savinji, podatki do 7. 11. 2026); model MTR (napoved, izdana 9. 11. 2026); baza vrst gobarskega modela Meteorec. Podatki: data/tla-temperatura-dnevna.json, history.json.
