@@ -441,129 +441,145 @@ def build_article(H, soil):
 
     nb = lambda h: re.sub(r"(\d) (°C|%)", lambda m: m.group(1) + NBSP + m.group(2), h)
 
-    lead = (f"V prvih sedmih dneh novembra je bila temperatura tal v Rečici v povprečju {temp(soil_w)}. "
-            "Po pragovih iz baze vrst gobarskega modela Meteorec to še zadošča za jurčka, užitno sirovko in zimske vrste, "
-            f"ne zadošča pa več za navadno lisičko in marelo ({temp(THR_HI)}). "
-            f"Tla so za ta čas najhladnejša v sedmih letih, vendar je do spodnjega praga jurčka ({temp(THR_LO)}) še več kot 3{NBSP}°C.")
+    cap1 = lambda s: s[0].upper() + s[1:]
+    assert all(d.startswith("2026-10-") for d in frost_since)
+    frost_days = [f"{int(d[8:])}." for d in frost_since]
+    frost_txt = ", ".join(frost_days[:-1]) + " in " + frost_days[-1] + " oktober"
+
+    lead = (f"V prvih sedmih dneh novembra je bila povprečna temperatura tal v Rečici {temp(soil_w)}. "
+            "Po temperaturnih pragovih iz baze vrst gobarskega modela Meteorec je to še dovolj za jurčka, užitno sirovko in nekatere zimske vrste, "
+            f"ne pa več za navadno lisičko in marelo, katerih spodnji temperaturni prag je {temp(THR_HI)}. "
+            f"Tla so za ta čas najhladnejša v zadnjih sedmih letih, vendar so še vedno več kot 3{NBSP}°C nad spodnjim pragom za jurčka ({temp(THR_LO)}).")
 
     cards = stat_cards([
-        (temp(soil_w), "tla, povprečje od 1. do 7. 11. (ERA5-Land)"),
-        (temp(air15[LAST]), "zrak, povprečje od 25. 10. do 8. 11. (postaja IREICA1)"),
-        (str(len(frost_since)), f"noči z 0{NBSP}°C ali manj od 1. 10.: {', '.join(dm(D(d)) for d in frost_since)}"),
-        (temp(lo8[LAST]), "najnižja temperatura zraka od 1. do 8. 11."),
+        (temp(soil_w), "povprečna temperatura tal od 1. do 7. novembra (ERA5-Land)"),
+        (temp(air15[LAST]), "povprečna temperatura zraka od 25. oktobra do 8. novembra (postaja IREICA1)"),
+        (f"{len(frost_since)} noči", f"število noči z 0{NBSP}°C ali manj od 1. oktobra: {frost_txt}"),
+        (temp(lo8[LAST]), "najnižja temperatura zraka od 1. do 8. novembra"),
     ])
     f_win = fig("Pri kateri temperaturi model še dopušča rast",
-                legend([("tla (mikorizne vrste in razkrojevalke)", "dot", GREEN), ("zrak (lesne vrste)", "sq", CYAN),
-                        ("trenutna temperatura je v razponu vrste", "dot", INK), ("izven razpona vrste", "hollow", AMBER)])
+                legend([("temperatura tal (mikorizne vrste in razkrojevalke)", "dot", GREEN), ("temperatura zraka (lesne vrste)", "sq", CYAN),
+                        ("trenutna temperatura je znotraj temperaturnega razpona vrste", "dot", INK), ("temperatura je zunaj razpona vrste", "hollow", AMBER)])
                 + windows_chart(chart_rows),
-                f"Svetel trak je razpon, v katerem model dopušča rast, temen trak optimalno okno. Oznaka je povprečje zadnjih sedmih dni: tla "
-                f"{temp(soil_w)} (od 1. do 7. 11.), zrak {temp(air_w)} (od 2. do 8. 11.). Pri lesnih vrstah odloča zrak, pri ostalih tla. "
-                "Razpone in optimalna okna so parametri modela (species_rules.yaml), ne rezultati meritev.")
+                f"Svetli pas prikazuje temperaturno območje, v katerem model dopušča rast, temni pa optimalno območje. Oznaka prikazuje povprečje zadnjih sedmih dni: "
+                f"temperatura tal {temp(soil_w)} (od 1. do 7. novembra), temperatura zraka {temp(air_w)} (od 2. do 8. novembra). "
+                "Pri lesnih vrstah odloča temperatura zraka, pri preostalih pa temperatura tal. "
+                "Temperaturni razponi in optimalna območja so parametri modela (species_rules.yaml), ne rezultati meritev.")
     ordered = lambda names: [n for n in (r["ime"] for r in chart_rows) if n in names]
-    t_full = (f"V optimalnem oknu so po modelu: {joined(ordered(full))}. "
-              f"Delno, pod optimalnim oknom, a nad najnižjo temperaturo: {joined(ordered(part))}. "
-              f"Izven razpona sta {joined(ordered(none))}.")
+    t_full = (f"V optimalnem temperaturnem območju so po modelu {joined(ordered(full))}. "
+              f"Pod optimalnim območjem, vendar še nad spodnjo temperaturno mejo, so {joined(ordered(part))}. "
+              f"{cap1(joined(ordered(none)))} sta zunaj temperaturnega razpona, v katerem model dopušča rast.")
 
     p1 = [
-        "<strong>Kratek odgovor: za večino pozno jesenskih vrst da, za vrste, ki potrebujejo toplejša tla, ne.</strong> "
-        f"Tla so pod spodnjim pragom navadne lisičke in marele ({temp(THR_HI)}), nad pragom jurčka in sirovke ({temp(THR_LO)}) pa ostajajo.",
+        "<strong>Kratek odgovor: za večino poznojesenskih vrst da, za vrste, ki potrebujejo toplejša tla, pa ne.</strong> "
+        f"Temperatura tal je že pod spodnjim pragom za navadno lisičko in marelo ({temp(THR_HI)}), "
+        f"še vedno pa je nad pragom za jurčka in užitno sirovko ({temp(THR_LO)}).",
         cards,
-        f"Jurček je tik nad spodnjim robom svojega optimalnega okna (6,5{NBSP}°C). Če se tla ohladijo še za več kot pol stopinje, "
-        "bo model temperaturo ocenil kot pod optimalnim oknom, rast pa bo še vedno dopuščal.",
+        f"Jurček je tik nad spodnjo mejo svojega optimalnega temperaturnega območja (6,5{NBSP}°C). Če se tla ohladijo še za več kot pol stopinje, "
+        "bo model temperaturo uvrstil pod optimalno območje, vendar bo rast še vedno dopuščal.",
         f_win,
         t_full,
     ]
 
-    t_years = table(["Leto", "Zrak, povprečje 25. 10.–8. 11.", "Najvišja zraka 1.–8. 11.", "Najnižja zraka 1.–8. 11.", "Tla, povprečje 1.–7. 11."],
+    t_years = table(["Leto", "Povprečna temperatura zraka, 25. 10.–8. 11.", "Najvišja temperatura zraka, 1.–8. 11.",
+                     "Najnižja temperatura zraka, 1.–8. 11.", "Povprečna temperatura tal, 1.–7. 11."],
                     [[str(y), temp(air15[y]), temp(hi8[y]), temp(lo8[y]), temp(s17[y])] for y in yrs],
-                    now_label=str(LAST), cap="Zrak in tla v prvem tednu novembra po letih",
-                    note="Zrak: postaja IREICA1, dnevna povprečja in skrajnosti. Tla: povprečje plasti od 0 do 7 cm in od 7 do 28 cm, Open-Meteo (ERA5-Land).")
+                    now_label=str(LAST), cap="Temperatura zraka in tal v prvem tednu novembra po letih",
+                    note="Podatki o zraku: postaja IREICA1, dnevna povprečja ter najvišje in najnižje dnevne temperature. "
+                         "Podatki o tleh: povprečje temperature plasti od 0 do 7 cm in od 7 do 28 cm, Open-Meteo (ERA5-Land).")
     t_years = '<details class="vs-more"><summary>Vse številke po letih (tabela)</summary>' + t_years + '</details>'
-    f_years = fig("Tla v prvem tednu novembra po letih",
+    f_years = fig("Temperatura tal v prvem tednu novembra po letih",
                   legend([("pod pragom navadne lisičke in marele (7,5 °C)", "dash", AMBER), ("nad pragom jurčka in sirovke (3,5 °C)", "dash", BLUE)])
                   + years_chart([(y, s17[y]) for y in yrs]),
-                  f"Povprečna temperatura tal od 1. do 7. novembra. Letos je {temp(s17[LAST])}, v drugih letih med {temp(min(s17[y] for y in YEARS))} in {temp(max(s17[y] for y in YEARS))}: "
-                  "najmanj v sedmih letih, a še vedno nad pragom jurčka.")
+                  f"Povprečna temperatura tal od 1. do 7. novembra. Letos je znašala {temp(s17[LAST])}, v preostalih šestih letih pa je bila med "
+                  f"{num(min(s17[y] for y in YEARS))} in {temp(max(s17[y] for y in YEARS))}. "
+                  "To je najnižja vrednost v sedmih letih, vendar je še vedno nad temperaturnim pragom za jurčka.")
     p2 = [
-        f"Povprečna temperatura zraka je bila od 25. oktobra do 8. novembra {temp(air15[LAST])}. V preostalih šestih letih je bila med "
-        f"{temp(min(others))} in {temp(max(others))}.",
-        f"Dnevi so bili hladni: najvišja temperatura od 1. do 8. novembra je dosegla le {temp(hi8[LAST])}, v drugih letih pa vsaj {temp(min(hi8[y] for y in YEARS))}. "
-        f"Noči niso bile posebej mrzle: najnižja temperatura je bila {temp(lo8[LAST])}, v {numg(len(colder_nights))} od preostalih šestih let pa je bila nižja.",
+        f"Povprečna temperatura zraka je bila od 25. oktobra do 8. novembra {temp(air15[LAST])}. V preostalih šestih letih je bila v istem obdobju med "
+        f"{num(min(others))} in {temp(max(others))}.",
+        f"Dnevi so bili hladni: najvišja temperatura je od 1. do 8. novembra dosegla le {temp(hi8[LAST])}, medtem ko je v drugih letih znašala vsaj {temp(min(hi8[y] for y in YEARS))}. "
+        f"Noči pa niso bile posebej mrzle. Najnižja temperatura je bila {temp(lo8[LAST])}, v {numg(len(colder_nights))} od preostalih šestih let pa je bila še nižja.",
         f_years,
         t_years,
     ]
 
-    f_season = fig("Tla in zrak od 1. oktobra",
-                   legend([("tla (dnevno povprečje)", "line", VIOLET), ("zrak (dnevno povprečje)", "line", GREY),
-                           ("noč z 0 °C ali manj", "dia", CYAN)]) + season_chart(H, soil),
-                   "Ohladitev 23. oktobra je bila največji enodnevni padec temperature tal od 1. oktobra.")
+    f_season = fig("Temperatura tal in zraka od 1. oktobra",
+                   legend([("temperatura tal (dnevno povprečje)", "line", VIOLET), ("temperatura zraka (dnevno povprečje)", "line", GREY),
+                           ("noč s temperaturo 0 °C ali manj", "dia", CYAN)]) + season_chart(H, soil),
+                   "Ohladitev 23. oktobra je prinesla največji enodnevni padec temperature tal od 1. oktobra.")
     p3 = [
-        f"Tla so se najbolj ohladila 23. oktobra: v enem dnevu z {temp(soil['2026-10-22'])} na {temp(soil['2026-10-23'])}. "
-        f"Dan prej je padlo {num(H['2026-10-22']['precipTotal'])} mm dežja, tisti dan pa je postaja izmerila {temp(H['2026-10-23']['tempLow'])}. "
-        'V <a href="/blog/slana-gobarska-sezona-1018.html" style="color:var(--blue)">članku o slani</a> sem 18. oktobra zapisal, da prve noči z 0 °C ali manj še ni bilo. '
-        "Prišla je pet dni pozneje.",
+        f"Tla so se najbolj ohladila 23. oktobra: njihova povprečna temperatura je v enem dnevu padla z {num(soil['2026-10-22'])} na {temp(soil['2026-10-23'])}. "
+        f"Dan prej je padlo {num(H['2026-10-22']['precipTotal'])} mm dežja, 23. oktobra pa je postaja izmerila {temp(H['2026-10-23']['tempLow'])}. "
+        'V <a href="/blog/slana-gobarska-sezona-1018.html" style="color:var(--blue)">članku o slani</a> sem 18. oktobra zapisal, '
+        "da prva noč s temperaturo 0 °C ali manj še ni nastopila. Dočakali smo jo pet dni pozneje.",
         f_season,
-        f"Od 23. oktobra tla ne padajo naprej: gibljejo se med {temp(min(since23))} in {temp(max(since23))}. "
-        "Zrak se običajno ohladi hitreje kot tla, zato nekaj noči z mrazom še ne pomeni mraza v tleh.",
-        f"Leta 2024 in 2025 so bile od 4. do 6. novembra tri zaporedne noči z 0 °C ali manj (najnižja temperatura {temp(low2425[2024])} oziroma {temp(low2425[2025])}), "
-        f"tla pa so bila 7. novembra še {temp(soil['2024-11-07'])} oziroma {temp(soil['2025-11-07'])}. "
-        "Dve leti sta premalo za pravilo, kažeta pa, da tri mrzle noči zapored tal še ne spustijo pod prag jurčka.",
+        f"Od 23. oktobra se temperatura tal ne znižuje več: giblje se med {num(min(since23))} in {temp(max(since23))}. "
+        "Zrak se običajno ohladi hitreje kot tla, zato nekaj mrzlih noči še ne pomeni, da so se ohladila tudi tla.",
+        f"Leta 2024 in 2025 so bile od 4. do 6. novembra tri zaporedne noči s temperaturo 0 °C ali manj. "
+        f"Najnižja temperatura je v teh nočeh znašala {num(low2425[2024])} oziroma {temp(low2425[2025])}, "
+        f"tla pa so bila 7. novembra še vedno na {num(soil['2024-11-07'])} oziroma {temp(soil['2025-11-07'])}. "
+        "Dve leti sta premalo za oblikovanje pravila, vendar kažeta, da niti tri zaporedne mrzle noči ne ohladijo tal nujno pod temperaturni prag za jurčka.",
     ]
 
-    t_cross = table(["Leto", "Tla pod 7,5 °C", "Tla pod 3,5 °C", "Dni med njima"],
+    t_cross = table(["Leto", "Tla pod 7,5 °C", "Tla pod 3,5 °C", "Število dni med datumoma"],
                     [[str(y), dm(cross[y][0]), dm(cross[y][1]), str(gaps[y])] for y in YEARS] + [[str(LAST), dm(c26), "še ne", "–"]],
-                    now_label=str(LAST), cap="Kdaj so tla padla pod pragova",
-                    note="Prvi dan od 1. oktobra, ko je sedemdnevno povprečje temperature tal padlo pod prag.")
+                    now_label=str(LAST), cap="Kdaj je temperatura tal padla pod pragova",
+                    note="Prikazan je prvi dan od 1. oktobra, ko je sedemdnevno povprečje temperature tal padlo pod posamezni prag.")
     p4 = [
-        f"Letos so tla pod {temp(THR_HI)} padla {dlong(c26)}. V preteklih letih je od tega praga do praga jurčka minilo od {min(gaps.values())} do {max(gaps.values())} dni. "
-        f"Razmik je tako velik, da iz njih ne morem napovedati, kdaj bodo tla padla pod {temp(THR_LO)}.",
+        f"Letos je temperatura tal {dlong(c26)} padla pod {temp(THR_HI)}. V preteklih letih je od padca pod ta prag do padca pod prag za jurčka "
+        f"minilo od {min(gaps.values())} do {max(gaps.values())} dni. "
+        f"Razpon je tako velik, da na podlagi teh podatkov ne morem napovedati, kdaj bodo tla padla pod {temp(THR_LO)}.",
         t_cross,
-        f"Vem le, da je sedemdnevno povprečje v vseh šestih letih ostalo nad tem pragom do 17. novembra. V {numg(len(by29))} od šestih let pa je do 29. novembra že padlo pod njega.",
+        "Vem le, da je sedemdnevno povprečje v vseh šestih preteklih letih ostalo nad pragom za jurčka vsaj do 17. novembra. "
+        f"V {numg(len(by29))} od šestih let pa je do 29. novembra že padlo pod ta prag.",
     ]
 
     p5 = [
-        f"Model MTR za Rečico za 10., 11. in 12. november napoveduje najnižjo temperaturo med {temp(fmin)} in {temp(fmax)}, verjetnost zmrzali je 0{NBSP}%. "
-        "Do četrtka temperatura po tej napovedi gobam ne bo omejitev.",
+        f"Model MTR za Rečico za 10., 11. in 12. november napoveduje najnižje temperature med {num(fmin)} in {temp(fmax)}. Verjetnost zmrzali je 0{NBSP}%. "
+        "Po tej napovedi temperatura do četrtka za rast gob ne bo omejitev.",
         'Ohladitev je napovedana ob koncu tedna. V <a href="/blog/sneg-v-nizinah-cetrtek-dez-sobota-1109.html" style="color:var(--blue)">članku o snegu v nižinah</a> '
-        "sem zapisal, da za nedeljsko jutro polovica članov ansamblov napoveduje 0 °C ali manj.",
-        "Za četrtek in petek ansambli v istem članku napovedujejo okoli 45 mm dežja (mediana). Če se to uresniči, bi po zamiku, ki ga za jurčka uporablja gobarski model "
-        "(8 do 16 dni), val rasti prišel med 20. in 29. novembrom. To so zadnji dnevi sezone jurčka v bazi (do 30. novembra) in hkrati čas, ko je sedemdnevno povprečje tal "
-        "v štirih od šestih let že padlo pod 3,5 °C. Za jurčka bo zato bolj kot ta teden odločilo vreme v drugi polovici novembra.",
+        "sem zapisal, da polovica članov ansamblov za nedeljsko jutro napoveduje temperaturo 0 °C ali manj.",
+        "Za četrtek in petek ansambli v istem članku napovedujejo okoli 45 mm dežja (mediana). Če se napoved uresniči, bi se ob upoštevanju časovnega zamika, "
+        "ki ga gobarski model uporablja za jurčka (8–16 dni), naslednji val rasti lahko pojavil med 20. in 29. novembrom. "
+        "To so zadnji dnevi sezone jurčka po koledarju v bazi vrst modela (do 30. novembra). "
+        "Hkrati je to obdobje, ko je sedemdnevno povprečje temperature tal v štirih od šestih preteklih let že padlo pod 3,5 °C.",
+        "Za jurčka bo zato pomembnejše vreme v drugi polovici novembra kot pa temperature v tem tednu.",
     ]
 
     omejitve = [
         "<ul>"
         "<li><strong>Temperatura tal je ocenjena, ne izmerjena.</strong> Podatke za Rečico prevzemam iz Open-Meteo (ERA5-Land), katerega mreža ima celice "
-        "velike okoli 10 km. V gozdu na pobočju, v senci ali višje je lahko drugače. Postaja IREICA1 temperature tal ne meri.</li>"
-        "<li><strong>Pragovi so parametri modela.</strong> Najnižja temperatura in optimalno okno vrste v bazi nista izmerjena meja rasti. "
-        "Navadno lisičko model pri 7,0 °C šteje za izven razpona, kar ne pomeni, da je v gozdu zagotovo ni.</li>"
-        "<li><strong>Članek govori samo o temperaturi.</strong> Ne pove, ali gobe zdaj rastejo: za to sta potrebna tudi dež in vlaga. "
-        "Števila opaženih gob zato ne uporabljam, podatkov iNaturalista za zadnje tedne pa tudi nisem osvežil.</li>"
-        "<li><strong>Sedem let je malo.</strong> Primerjava velja za Rečico in leta od 2020 do 2026. Razlika med 7,0 in 8,4 °C obstaja v teh podatkih, "
+        "velikosti približno 10 km. V gozdu na pobočju, v senci ali na višji nadmorski višini so lahko razmere drugačne. Postaja IREICA1 temperature tal ne meri.</li>"
+        "<li><strong>Temperaturni pragovi so parametri modela.</strong> Najnižja temperatura in optimalno temperaturno območje vrste v bazi nista izmerjeni meji rasti. "
+        "Model na primer navadno lisičko pri 7,0 °C uvršča zunaj njenega temperaturnega razpona. To pa ne pomeni, da je v gozdu zagotovo ni.</li>"
+        "<li><strong>Članek obravnava samo temperaturo.</strong> Ne pove, ali gobe trenutno rastejo. Za rast sta pomembna tudi dež in vlaga. "
+        "Zato ne uporabljam števila opaženih gob, podatkov iNaturalista za zadnje tedne pa tudi nisem osvežil.</li>"
+        "<li><strong>Sedem let je malo.</strong> Primerjava velja za Rečico in obdobje od leta 2020 do 2026. Razlika med 7,0 in 8,4 °C je razvidna iz teh podatkov, "
         "ne pove pa, da je letošnja jesen v dolgoročnem pogledu izjemna.</li>"
-        "<li><strong>Napoved je modelska.</strong> MTR je poskusni lokalni model, ansambli pa ocena verjetnosti, ne zagotovilo.</li>"
+        "<li><strong>Napoved je modelska.</strong> MTR je poskusni lokalni model, ansambelske napovedi pa prikazujejo možne scenarije in njihovo zastopanost, "
+        "ne zagotavljajo določenega izida.</li>"
         "</ul>",
     ]
     p7 = [
-        "Praktično sporočilo: temperatura te dni gobam ne bo omejitev, razen vrstam, ki jim ustrezajo toplejša tla. Pred odhodom v gozd preverite "
+        "Praktično sporočilo: temperatura v teh dneh večine gob ne bo omejevala, izjema so vrste, ki za rast potrebujejo toplejša tla. Pred odhodom v gozd preverite "
         f'<a href="{SITE}/gobarska-napoved/danes/" style="color:var(--blue)">gobarsko napoved za svoj kraj</a> '
         f'in <a href="{SITE}/gobarska-napoved/valovi/" style="color:var(--blue)">kalkulator rasti po dežju</a>.',
-        "Gobe nabirajte samo, če jih zanesljivo poznate. Tudi pozne jesenske vrste imajo nevarne zamenjave; več na strani "
+        "Gobe nabirajte samo, če jih zanesljivo poznate. Tudi poznojesenske vrste imajo nevarne zamenjave. Več o njih si lahko preberete na strani "
         f'<a href="{SITE}/gobarska-napoved/strupene-gobe/" style="color:var(--blue)">Strupene gobe</a>.',
         '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate le z '
         'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se '
         'predhodno dogovorite z avtorjem.</p>',
     ]
-    title = "Tla so 7 °C: za jurčka še toplo, za lisičko ne več"
+    title = "Tla imajo 7 °C: za jurčka še dovolj toplo, za lisičko ne več"
     assert len(title) <= 60, len(title)
-    desc = "Tla v Rečici so 7 °C: dovolj za jurčka in sirovko, premalo za lisičko. Primerjava s šestimi leti, zimske vrste in napoved."
+    desc = "Tla v Rečici imajo 7 °C: dovolj za jurčka in sirovko, premalo za lisičko. Primerjava s šestimi leti, zimske vrste in napoved."
     assert len(desc) <= 160, len(desc)
     sections = [
         {"label": "01 — odgovor", "heading": "Za jurčka je še dovolj toplo, za lisičko ne več", "id": "odgovor", "paragraphs": p1},
         {"label": "02 — primerjava", "heading": "Dnevi so hladni, noči pa ne posebej", "id": "primerjava", "paragraphs": p2},
-        {"label": "03 — tla", "heading": "Tla so se ohladila v enem dnevu in nato obstala", "id": "tla", "paragraphs": p3},
-        {"label": "04 — koliko časa še", "heading": "Kdaj bodo tla padla pod prag jurčka?", "id": "koliko", "paragraphs": p4},
-        {"label": "05 — prihodnji teden", "heading": "Ta teden temperatura ne omejuje, odloča druga polovica novembra", "id": "teden", "paragraphs": p5},
+        {"label": "03 — tla", "heading": "Tla so se ohladila v enem dnevu, nato pa se je ohlajanje ustavilo", "id": "tla", "paragraphs": p3},
+        {"label": "04 — koliko časa še", "heading": "Kdaj bodo tla padla pod temperaturni prag za jurčka?", "id": "koliko", "paragraphs": p4},
+        {"label": "05 — prihodnji teden", "heading": "Ta teden temperatura ne bo omejevala rasti, odločala bo druga polovica novembra", "id": "teden", "paragraphs": p5},
         {"label": "06 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": omejitve},
         {"label": "07 — nabiranje", "heading": "Kaj to pomeni za nabiranje?", "id": "nabiranje", "paragraphs": p7},
     ]
@@ -575,8 +591,8 @@ def build_article(H, soil):
         "tags": ["gobe", "temperatura", "november", "podatki"],
         "section_label": "Podatkovna analiza", "og_photo": "gobe-lastna", "og_accent_hex": "#34d399",
         "lead": lead, "sections": sections, "callout": None,
-        "sources_note": ("Viri: postaja IREICA1 (dnevna povprečja in skrajnosti temperature zraka, zunanji senzor); Open-Meteo (ERA5-Land, temperatura tal, "
-                         "točka Rečica ob Savinji, podatki do 7. 11. 2026); model MTR (napoved, 9. 11. 2026); baza vrst gobarskega modela Meteorec. "
+        "sources_note": ("Viri: postaja IREICA1 (dnevna povprečja in skrajne vrednosti temperature zraka, zunanji senzor); Open-Meteo (ERA5-Land, temperatura tal, "
+                         "točka Rečica ob Savinji, podatki do 7. 11. 2026); model MTR (napoved, izdana 9. 11. 2026); baza vrst gobarskega modela Meteorec. "
                          "Podatki: data/tla-temperatura-dnevna.json, history.json."),
     }
 
