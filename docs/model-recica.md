@@ -533,3 +533,15 @@ Zato samo intercept (b = 1). **Opozorila:** dve zimi (2024/25, 2025/26), 34 dogo
 suh mraz: 36 % in 5 % (padavine v osnovnem modelu premalo dušijo suhe dni: znana slabost).
 **Kartica pokaže `p_snow`.** Ker je ob napovedi za 10.–14. 11. (dež do petka, sobota T povp. 3,8 °C in < 1 mm) vsak dan pod 5 %, piše »merljiv sneg v okolici ni verjeten«; model ne vidi prehoda na sneg ob koncu dežja (dnevno povprečje), ki ga omenja članek.
 **Še ni narejeno:** imena in višine ID-jev; učenje neposredno na opazovanju po vodilnih časih (potrebuje več zim); sveže ARSO serije za preverjanje `p_snow` naprej; urna ločljivost (prehod dež → sneg).
+
+### Open-Meteo `snowfall` in `snow_depth` kot vhod za MTR sneg: preizkušeno, ne gre (9. 11. 2026)
+
+Preizkus v GitHub Actions (`tools/ai/eval_snowfall_openmeteo.py`, `sneg-snowfall-eval.yml`, rezultat `data/sneg-snowfall-eval.json`; previous-runs API iz peskovnika ni dosegljiv). Napovedi, izdane 1–5 dni prej, za Rečico, štirje modeli
+(best_match, IFS, GFS, ICON), oktober 2024–april 2026, proti opazovanemu novemu snegu ≥ 1 cm na petih ARSO postajah (2100 parov dan × postaja, 34 dogodkov).
+
+- **`snow_depth_previous_dayN` je povsod `null`** (0 vrednosti pri vseh modelih in vodilnih časih): za učenje neuporaben (potrjuje opombo 24. 10.). Živa napoved `snow_depth` obstaja, a brez zgodovine ni mogoče izmeriti koristi.
+- **`snowfall_previous_dayN` obstaja** (12–14 tisoč urnih vrednosti na model), a je neničelen le ~50 ur na model v dveh zimah.
+- **Sam po sebi je šibkejši od osnovnega logita**: AUC proti opazovanemu snegu 0,77 / 0,60 / 0,72 / 0,77 / 0,82 (D+1..D+5; nemonotono, torej šum) proti 0,92 / 0,92 / 0,90 / 0,92 / 0,90. Dnevna vsota > 0 na D+1: 19 zadetkov, 61 napačnih alarmov, 15 zgrešenih.
+- **V kombinaciji ne pomaga**: logit + zastavica »snowfall > 0« ima pri izpuščeni zimi skill −0,27 / +0,19 / −0,01 / −0,04 / +0,07 proti +0,04 / +0,21 / +0,08 / +0,24 / +0,16 pri sedanjem modelu (samo intercept na logitu); AUC pri D+1 pade z 0,92 na 0,86.
+  **Ne dodajaj `snowfall` v MTR sneg**, dokler ni več zim (na dveh zimah in 34 dogodkih je bolj šum kot signal).
+- Živa napoved za 9.–15. 11. 2026 (Rečica, best_match/IFS/GFS): `snowfall` = 0,0 cm in `snow_depth` = 0 vseh sedem dni, tudi v soboto/nedeljo (T povp. 1–4 °C, padavin < 2 mm); kartica kaže < 5 %. Neodvisna, a ne dokazana potrditev.
