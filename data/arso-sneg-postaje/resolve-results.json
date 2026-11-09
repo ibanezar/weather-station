@@ -1,0 +1,15 @@
+[
+ {
+  "form": "16036",
+  "key": "16036",
+  "coverage": {
+   "days": 2323,
+   "days_with_snow_field": 0,
+   "first": "2020-07-01",
+   "last": "2026-11-09",
+   "snow_depth_ge1_days": 0,
+   "new_snow_ge1_days": 0,
+   "winter_days_with_snow_field": {}
+  }
+ }
+]

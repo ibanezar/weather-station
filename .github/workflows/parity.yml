@@ -178,6 +178,11 @@ jobs:
       - name: Test žive napovedi MTR (zamrznjena ostane nedotaknjena)
         run: python3 tools/test_mtr_live.py
 
+      - name: Test MTR sneg (proksi) - značilke, učenje, sezona, dnevnik, preverjanje naprej
+        run: |
+          pip install numpy
+          python3 tools/test_sneg_mos.py
+
       - name: Test števcev odprtih poskusov MTR (Čaka na podatke)
         run: python3 tools/test_mtr_pending.py
 

@@ -1,0 +1,69 @@
+name: MTR sneg - napoved in beleženje (proksi)
+
+# Poskusni model MTR sneg: p_proxy = »mokri hladni dan« v Rečici (postaja snega ne meri), p_snow = možnost merljivega snega na ARSO postaji
+# Gornji Grad (od v0.4, preslikava meritev v sneg). Piše SAMO napoved-snega.json in dva dnevnika (data/sneg-forward-log.csv,
+# data/sneg-verification.json); napoved prikazuje kartica #snow-card (app.js). Serije postaj osvežuje arso-sneg-refresh.yml (CLAUDE.md, »MTR sneg«).
+# Termini sledijo novim tekom modelov kot mtr-live.yml; GitHubov cron zamuja in združuje teke.
+# Zunaj sezone (oktober-april) napoved zapiše prazno datoteko največ enkrat na dan (varuh svežine).
+on:
+  schedule:
+    - cron: '50 4,10,16,22 * * *'
+  workflow_dispatch:
+    inputs:
+      train:
+        description: 'Ponovno nauči model (model/sneg-mos.json) iz arhiva napovedi in history.json'
+        type: boolean
+        default: false
+
+concurrency:
+  group: sneg-forecast
+  cancel-in-progress: false
+
+jobs:
+  sneg:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Namesti numpy
+        run: pip install numpy
+
+      - name: Ponovno učenje (ročno)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.train }}
+        run: python3 tools/train_sneg_mos.py
+
+      - name: Test (brez omrežja)
+        run: python3 tools/test_sneg_mos.py
+
+      - name: Živa napoved MTR sneg
+        run: python3 tools/predict_sneg_mos.py
+
+      - name: Preverjanje naprej v času
+        continue-on-error: true
+        run: python3 tools/verify_sneg.py
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add napoved-snega.json data/sneg-forward-log.csv data/sneg-verification.json model/sneg-mos.json
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "chore: MTR sneg (proksi) $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push zavrnjen (poskus $i/5) -- rebase na najnovejši main in ponovni poskus …"
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+          echo "Push ni uspel po 5 poskusih." >&2
+          exit 1

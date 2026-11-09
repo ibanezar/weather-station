@@ -1,0 +1,50 @@
+name: ARSO postaji Gornji Grad in Radegunda (pregled)
+
+# Enkraten preizkus (CLAUDE.md, MTR sneg): kateri arhivski ID sta ARSO postaji Gornji Grad (GORNJ-GRA) in Radegunda
+# (METEO-16036)? meteo.arso.gov.si iz razvojnega peskovnika ni dosegljiv, zato teče tu. Rezultat: povzetek teka, artefakt
+# `arso-resolve-out` in dnevne serije v data/arso-sneg-postaje/ (commit [skip ci]). Notranjih meritev ne bere.
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/intelligent-mayer-q57y8j']
+    paths:
+      - 'tools/arso_resolve_stations.py'
+      - '.github/workflows/arso-resolve-stations.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  pregled:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Preizkus
+        run: python3 tools/arso_resolve_stations.py 2>&1 | tee arso-resolve.log
+      - name: Povzetek
+        if: always()
+        run: |
+          { echo '## ARSO Gornji Grad in Radegunda'; echo; cat arso-resolve-out/report.md 2>/dev/null || tail -80 arso-resolve.log; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Shrani serije v repozitorij
+        if: always()
+        run: |
+          mkdir -p data/arso-sneg-postaje
+          for f in arso-resolve-out/daily-*.json; do [ -e "$f" ] && cp "$f" "data/arso-sneg-postaje/$(basename "$f")"; done
+          [ -e arso-resolve-out/results.json ] && cp arso-resolve-out/results.json data/arso-sneg-postaje/resolve-results.json
+          [ -e arso-resolve-out/report.md ] && cp arso-resolve-out/report.md data/arso-sneg-postaje/resolve-report.md
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/arso-sneg-postaje
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "data: ARSO Gornji Grad in Radegunda, pregled $(date -u +%Y-%m-%d) [skip ci]"
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arso-resolve-out
+          path: |
+            arso-resolve-out/
+            arso-resolve.log

@@ -1,0 +1,55 @@
+name: ARSO snežne postaje blizu Rečice (pregled)
+
+# Enkraten pregled (CLAUDE.md, MTR sneg): ali ARSO arhiv ima opazovan sneg (višina odeje, novi sneg) za postajo v
+# Zgornji Savinjski dolini? meteo.arso.gov.si iz razvojnega peskovnika ni dosegljiv, zato teče tu.
+# Poročilo je v povzetku teka in v artefaktu `arso-snow-out`; dnevne serije izbranih postaj (višina snežne odeje, novi sneg,
+# padavine) in korelacije shrani v data/arso-sneg-postaje/ (commit [skip ci], poti ne sprožijo tega workflowa). Notranjih meritev ne bere.
+on:
+  workflow_dispatch:
+    inputs:
+      radius:
+        description: 'Radij okoli Rečice (km)'
+        default: '35'
+  push:
+    branches: ['claude/intelligent-mayer-q57y8j']
+    paths:
+      - 'tools/arso_snow_stations.py'
+      - '.github/workflows/arso-snow-stations.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  pregled:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Namesti numpy
+        run: pip install numpy
+      - name: Pregled ARSO postaj
+        run: python3 tools/arso_snow_stations.py --radius "${{ inputs.radius || '35' }}" 2>&1 | tee arso-snow.log
+      - name: Povzetek
+        if: always()
+        run: |
+          { echo '## ARSO snežne postaje'; echo; cat arso-snow-out/report.md 2>/dev/null || tail -80 arso-snow.log; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Shrani rezultate v repozitorij
+        if: always()
+        run: |
+          mkdir -p data/arso-sneg-postaje
+          cp arso-snow-out/daily-*.json arso-snow-out/results.json arso-snow-out/korelacije.json data/arso-sneg-postaje/ 2>/dev/null || true
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/arso-sneg-postaje
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "data: ARSO snežne postaje, pregled $(date -u +%Y-%m-%d) [skip ci]"
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arso-snow-out
+          path: |
+            arso-snow-out/
+            arso-snow.log

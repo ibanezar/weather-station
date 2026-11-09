@@ -1,0 +1,66 @@
+[
+ {
+  "id": "1651",
+  "r": 0.708,
+  "shift": 0,
+  "n": 151,
+  "snow_days": 4,
+  "snow_field": 151
+ },
+ {
+  "id": "2701",
+  "r": 0.697,
+  "shift": 1,
+  "n": 151,
+  "snow_days": 0,
+  "snow_field": 0
+ },
+ {
+  "id": "3002",
+  "r": 0.652,
+  "shift": 1,
+  "n": 151,
+  "snow_days": 3,
+  "snow_field": 151
+ },
+ {
+  "id": "1652",
+  "r": 0.635,
+  "shift": 0,
+  "n": 151,
+  "snow_days": 13,
+  "snow_field": 151
+ },
+ {
+  "id": "3152",
+  "r": 0.611,
+  "shift": 0,
+  "n": 151,
+  "snow_days": 12,
+  "snow_field": 151
+ },
+ {
+  "id": "1801",
+  "r": 0.576,
+  "shift": 1,
+  "n": 151,
+  "snow_days": 6,
+  "snow_field": 151
+ },
+ {
+  "id": "3001",
+  "r": 0.523,
+  "shift": 1,
+  "n": 151,
+  "snow_days": 0,
+  "snow_field": 151
+ },
+ {
+  "id": "2252",
+  "r": 0.451,
+  "shift": 0,
+  "n": 151,
+  "snow_days": 0,
+  "snow_field": 0
+ }
+]
