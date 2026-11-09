@@ -1,0 +1,146 @@
+Tla imajo 7 °C: za jurčka še dovolj toplo, za lisičko ne več
+
+META OPIS: Tla v Rečici imajo 7 °C: dovolj za jurčka in sirovko, premalo za lisičko. Primerjava s šestimi leti, zimske vrste in napoved.
+
+UVOD
+V prvih sedmih dneh novembra je bila povprečna temperatura tal v Rečici 7,0 °C. Po temperaturnih pragovih iz baze vrst gobarskega modela Meteorec je to še dovolj za jurčka, užitno sirovko in nekatere zimske vrste, ne pa več za navadno lisičko in marelo, katerih spodnji temperaturni prag je 7,5 °C. Tla so za ta čas najhladnejša v zadnjih sedmih letih, vendar so še vedno več kot 3 °C nad spodnjim pragom za jurčka (3,5 °C).
+
+01 — ODGOVOR -- Za jurčka je še dovolj toplo, za lisičko ne več
+
+Kratek odgovor: za večino poznojesenskih vrst da, za vrste, ki potrebujejo toplejša tla, pa ne. Temperatura tal je že pod spodnjim pragom za navadno lisičko in marelo (7,5 °C), še vedno pa je nad pragom za jurčka in užitno sirovko (3,5 °C).
+
+7,0 °C
+
+povprečna temperatura tal od 1. do 7. novembra (ERA5-Land)
+
+6,3 °C
+
+povprečna temperatura zraka od 25. oktobra do 8. novembra (postaja IREICA1)
+
+3 noči
+
+število noči z 0 °C ali manj od 1. oktobra: 23., 27. in 28. oktober
+
+0,4 °C
+
+najnižja temperatura zraka od 1. do 8. novembra
+
+Jurček je tik nad spodnjo mejo svojega optimalnega temperaturnega območja (6,5 °C). Če se tla ohladijo še za pol stopinje ali več, bo model temperaturo uvrstil pod optimalno območje, vendar bo rast še vedno dopuščal.
+
+Pri kateri temperaturi model še dopušča rast
+
+temperatura tal (mikorizne vrste in razkrojevalke)
+
+temperatura zraka (lesne vrste)
+
+trenutna temperatura je znotraj temperaturnega razpona vrste
+
+temperatura je zunaj razpona vrste
+
+Jurček
+Pri 7,0 °C (tla, povprečje zadnjih sedmih dni) je vrsta v optimalnem območju (6,5–13,5 °C).
+
+Do spodnjega roba optimalnega območja je še 0,5 °C, do spodnje meje razpona (3,5 °C) pa 3,5 °C. Razpon je parameter modela, ne izmerjena meja rasti.
+
+Svetli pas prikazuje temperaturno območje, v katerem model dopušča rast, temni pa optimalno območje. Oznaka prikazuje povprečje zadnjih sedmih dni: temperatura tal 7,0 °C (od 1. do 7. novembra), temperatura zraka 6,0 °C (od 2. do 8. novembra). Pri lesnih vrstah odloča temperatura zraka, pri preostalih pa temperatura tal. Temperaturni razponi in optimalna območja so parametri modela (species_rules.yaml), ne rezultati meritev.
+
+V optimalnem temperaturnem območju so po modelu jurček, užitna sirovka, lijasta lisička, zimska kolobarnica, bukov ostrigar in zimska panjevka. Pod optimalnim območjem, vendar še nad spodnjo temperaturno mejo, so kostanjevka, rumeni ježek in štorovka. Zimska polževka je že nad optimalnim območjem (do 6,5 °C), a še znotraj razpona. Navadna lisička in marela sta zunaj temperaturnega razpona, v katerem model dopušča rast.
+
+02 — PRIMERJAVA -- Dnevi so hladni, noči pa ne posebej
+
+Povprečna temperatura zraka je bila od 25. oktobra do 8. novembra 6,3 °C. V preostalih šestih letih je bila v istem obdobju med 6,6 in 11,4 °C.
+
+Dnevi so bili hladni: najvišja temperatura je od 1. do 8. novembra dosegla le 11,0 °C, medtem ko je v drugih letih znašala vsaj 15,4 °C. Noči pa niso bile posebej mrzle. Najnižja temperatura je bila 0,4 °C, v štirih od preostalih šestih let pa je bila še nižja.
+
+Temperatura tal v prvem tednu novembra po letih
+
+pod pragom navadne lisičke in marele (7,5 °C)
+
+nad pragom jurčka in sirovke (3,5 °C)
+
+Povprečna temperatura tal od 1. do 7. novembra. Letos je znašala 7,0 °C, v preostalih šestih letih pa je bila med 8,4 in 11,4 °C. To je najnižja vrednost v sedmih letih, vendar je še vedno nad temperaturnim pragom za jurčka.
+
+Vse številke po letih (tabela)
+Leto | Povprečna temperatura zraka, 25. 10.–8. 11. | Najvišja temperatura zraka, 1.–8. 11. | Najnižja temperatura zraka, 1.–8. 11. | Povprečna temperatura tal, 1.–7. 11. |
+2020 | 9,5 °C | 21,7 °C | –2,9 °C | 10,5 °C |
+2021 | 6,6 °C | 15,4 °C | 1,5 °C | 8,4 °C |
+2022 | 10,9 °C | 23,2 °C | 0,2 °C | 11,4 °C |
+2023 | 11,4 °C | 17,3 °C | 1,8 °C | 10,8 °C |
+2024 | 8,9 °C | 19,7 °C | –1,6 °C | 9,0 °C |
+2025 | 9,4 °C | 18,9 °C | –1,0 °C | 9,4 °C |
+2026 | 6,3 °C | 11,0 °C | 0,4 °C | 7,0 °C |
+
+Podatki o zraku: postaja IREICA1, dnevna povprečja ter najvišje in najnižje dnevne temperature. Podatki o tleh: povprečje temperature plasti od 0 do 7 cm in od 7 do 28 cm, Open-Meteo (ERA5-Land).
+
+03 — TLA -- Tla so se ohladila v enem dnevu, nato pa se je ohlajanje ustavilo
+
+Tla so se najbolj ohladila 23. oktobra: njihova povprečna temperatura je v enem dnevu padla z 11,4 na 8,5 °C. Dan prej je padlo 21,8 mm dežja, 23. oktobra pa je postaja izmerila –0,1 °C. V članku o slani sem 18. oktobra zapisal, da prva noč s temperaturo 0 °C ali manj še ni nastopila. Dočakali smo jo pet dni pozneje.
+
+Temperatura tal in zraka od 1. oktobra
+
+temperatura tal (dnevno povprečje)
+
+temperatura zraka (dnevno povprečje)
+
+noč s temperaturo 0 °C ali manj
+
+Izberite dan
+8. 11. zrak, dnevno povprečje 5,2 °C · najnižja zraka 0,4 °C. Podatka o temperaturi tal za ta dan še ni (ERA5-Land zaostaja za dva dni).
+
+Ohladitev 23. oktobra je prinesla največji enodnevni padec temperature tal od 1. oktobra. Dan izberete z drsnikom ali z dotikom oziroma vlečenjem po grafu.
+
+Od 23. oktobra se temperatura tal ne znižuje več: giblje se med 6,6 in 8,9 °C. Zrak se običajno ohladi hitreje kot tla, zato nekaj mrzlih noči še ne pomeni, da so se ohladila tudi tla.
+
+Leta 2024 in 2025 so bile od 4. do 6. novembra tri zaporedne noči s temperaturo 0 °C ali manj. Najnižja temperatura je v teh nočeh znašala -1,6 oziroma –1,0 °C, tla pa so bila 7. novembra še vedno na 6,2 oziroma 6,6 °C. Dve leti sta premalo za oblikovanje pravila, vendar kažeta, da niti tri zaporedne mrzle noči ne ohladijo tal nujno pod temperaturni prag za jurčka.
+
+04 — KOLIKO ČASA ŠE -- Kdaj bodo tla padla pod temperaturni prag za jurčka?
+
+Letos je temperatura tal 2. novembra padla pod 7,5 °C. V preteklih letih je od padca pod ta prag do padca pod prag za jurčka minilo od 7 do 27 dni. Razpon je tako velik, da na podlagi teh podatkov ne morem napovedati, kdaj bodo tla padla pod 3,5 °C.
+
+Leto | Tla pod 7,5 °C | Tla pod 3,5 °C | Število dni med datumoma |
+2020 | 12. 11. | 24. 11. | 12 |
+2021 | 29. 10. | 25. 11. | 27 |
+2022 | 22. 11. | 14. 12. | 22 |
+2023 | 22. 11. | 30. 11. | 8 |
+2024 | 10. 11. | 17. 11. | 7 |
+2025 | 10. 11. | 24. 11. | 14 |
+2026 | 2. 11. | še ne | – |
+
+Prikazan je prvi dan od 1. oktobra, ko je sedemdnevno povprečje temperature tal padlo pod posamezni prag.
+
+Vem le, da je sedemdnevno povprečje v vseh šestih preteklih letih ostalo nad pragom za jurčka vsaj do 17. novembra. V štirih od šestih let pa je do 29. novembra že padlo pod ta prag.
+
+05 — PRIHODNJI TEDEN -- Ta teden temperatura ne bo omejevala rasti, odločala bo druga polovica novembra
+
+Model MTR za Rečico za 10., 11. in 12. november napoveduje najnižje temperature med 5,6 in 8,9 °C. Verjetnost zmrzali je 0 %. Po tej napovedi temperatura do četrtka za rast gob ne bo omejitev.
+
+Ohladitev je napovedana ob koncu tedna. V članku o snegu v nižinah sem zapisal, da polovica članov ansamblov za nedeljsko jutro napoveduje temperaturo 0 °C ali manj.
+
+Za četrtek in petek ansambli v istem članku napovedujejo okoli 45 mm dežja (mediana). Če se napoved uresniči, bi se ob upoštevanju časovnega zamika, ki ga gobarski model uporablja za jurčka (8–16 dni), naslednji val rasti lahko pojavil med 20. in 29. novembrom. To so zadnji dnevi sezone jurčka po koledarju v bazi vrst modela (do 30. novembra). Hkrati je to obdobje, ko je sedemdnevno povprečje temperature tal v štirih od šestih preteklih let že padlo pod 3,5 °C.
+
+Za jurčka bo zato pomembnejše vreme v drugi polovici novembra kot pa temperature v tem tednu.
+
+06 — OMEJITVE -- Česa podatki ne povedo
+
+Temperatura tal je ocenjena, ne izmerjena. Podatke za Rečico prevzemam iz Open-Meteo (ERA5-Land), katerega mreža ima celice velikosti približno 10 km. V gozdu na pobočju, v senci ali na višji nadmorski višini so lahko razmere drugačne. Postaja IREICA1 temperature tal ne meri.
+
+Temperaturni pragovi so parametri modela. Najnižja temperatura in optimalno temperaturno območje vrste v bazi nista izmerjeni meji rasti. Model na primer navadno lisičko pri 7,0 °C uvršča zunaj njenega temperaturnega razpona. To pa ne pomeni, da je v gozdu zagotovo ni.
+
+Članek obravnava samo temperaturo. Ne pove, ali gobe trenutno rastejo. Za rast sta pomembna tudi dež in vlaga. Zato ne uporabljam števila opaženih gob, podatkov iNaturalista za zadnje tedne pa tudi nisem osvežil.
+
+Sedem let je malo. Primerjava velja za Rečico in obdobje od leta 2020 do 2026. Razlika med 7,0 in 8,4 °C je razvidna iz teh podatkov, ne pove pa, da je letošnja jesen v dolgoročnem pogledu izjemna.
+
+Napoved je modelska. MTR je poskusni lokalni model, ansambelske napovedi pa prikazujejo možne scenarije in njihovo zastopanost, ne zagotavljajo določenega izida.
+
+07 — NABIRANJE -- Kaj to pomeni za nabiranje?
+
+Praktično sporočilo: temperatura v teh dneh večine gob ne bo omejevala, izjema so vrste, ki za rast potrebujejo toplejša tla. Pred odhodom v gozd preverite gobarsko napoved za svoj kraj in kalkulator rasti po dežju.
+
+Gobe nabirajte samo, če jih zanesljivo poznate. Tudi poznojesenske vrste imajo nevarne zamenjave. Več o njih si lahko preberete na strani Strupene gobe.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+
+
+VIRI
+Viri: postaja IREICA1 (dnevna povprečja in skrajne vrednosti temperature zraka, zunanji senzor); Open-Meteo (ERA5-Land, temperatura tal, točka Rečica ob Savinji, podatki do 7. 11. 2026); model MTR (napoved, izdana 9. 11. 2026); baza vrst gobarskega modela Meteorec. Podatki: data/tla-temperatura-dnevna.json, history.json.
