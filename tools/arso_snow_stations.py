@@ -323,7 +323,7 @@ def find_probase(out_dir):
             continue
         with open(os.path.join(out_dir, f"application_{n:02d}.xml.txt"), "w", encoding="utf-8") as f:
             f.write(tx)
-        for m in re.finditer(r"PROBASE_LANG|PROBASE\s*=|archive_|AcademaArchive\s*=|locations?\.xml|\.xml\?|statUrl|STATIONS", tx):
+        for m in re.finditer(r"PROBASE_LANG|archive_si|\.PROBASE\b", tx):
             a0, b0 = max(0, m.start() - 160), min(len(tx), m.end() + 260)
             w = re.sub(r"\s+", " ", tx[a0:b0])
             key = w[100:160]
@@ -331,7 +331,8 @@ def find_probase(out_dir):
                 continue
             seen.add(key)
             hits.append((n, w))
-    for n, w in hits[:45]:
+    print(f"[lib] zadetkov: {len(hits)}")
+    for n, w in hits[:14]:
         print(f"   ~ [application_{n:02d}] {w}")
 
 def data_xml(ids, d1, d2, vars_="85,88,89"):
