@@ -26,7 +26,13 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from generate_slane_se_ni_post import (  # noqa: E402  (skupni pomočniki, ne podvojeni)
-    NBSP, STYLE as BASE_STYLE, num, temp, fig, tiles)
+    STYLE as BASE_STYLE, num, fig, tiles)
+
+NBSP = "\u00a0"    # nelomljiv presledek (v generate_slane_se_ni_post je NBSP navaden presledek)
+
+
+def temp(x, d=1):
+    return f"{num(x, d)}{NBSP}°C".replace("-", "–")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
@@ -253,6 +259,9 @@ WIDGET_CSS = """<style>
 .sn-sc h4{font-family:'Space Grotesk',sans-serif;font-size:.95rem;margin:.55rem 0 .3rem;color:var(--text)}
 .sn-sc p{font-size:.88rem;line-height:1.5;color:var(--muted);margin:0}
 .sn-sc .tag{display:inline-block;width:.8rem;height:.8rem;border-radius:3px;margin-right:.45rem;vertical-align:-.05rem}
+.sn-video{margin:1.4rem auto;max-width:360px;padding:.7rem .7rem .2rem}
+.sn-video video{display:block;width:100%;height:auto;border-radius:12px;background:#0a0f1c;aspect-ratio:9/16}
+.sn-video figcaption{font-size:.84rem}
 .sn-stack{display:flex;height:18px;border-radius:6px;overflow:hidden;margin:.9rem 0 .4rem;border:1px solid var(--card-border)}
 .sn-stack span{display:block;height:100%}
 @media(prefers-reduced-motion:no-preference){.sn-bar{transition:width .25s ease}}
@@ -471,7 +480,9 @@ var tmr;function rs(){clearTimeout(tmr);tmr=setTimeout(function(){drawHourly();d
 if(window.ResizeObserver){var last=hourBox.clientWidth;new ResizeObserver(function(){if(Math.abs(hourBox.clientWidth-last)>4){last=hourBox.clientWidth;rs();}}).observe(hourBox);}
 else window.addEventListener('resize',rs);
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+function vid(){var v=document.querySelector('.sn-video video');if(!v||!('IntersectionObserver' in window)||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;
+  new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){});}else v.pause();});},{threshold:.5}).observe(v);}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){init();vid();});else{init();vid();}
 })();
 """
 
@@ -536,6 +547,29 @@ def load_poly():
     m = re.search(r"const SLO_POLY=(\[\[.*?\]\]);", src, re.S)
     assert m, "SLO_POLY ni v app.js"
     return json.loads(m.group(1))
+
+
+VIDEO_DIR = f"/img/blog/{SLUG}"
+VIDEO_DAY = "2026-01-05"
+
+
+def video_html():
+    """Posnetek sneženja v Rečici (5. 1. 2026). Datoteka je stisnjena brez zvoka in brez metapodatkov (posnetek je imel vgrajeno GPS lokacijo)."""
+    for f in ("sneg-recica-2026-01-05.mp4", "sneg-recica-2026-01-05.jpg"):
+        assert os.path.exists(os.path.join(ROOT, VIDEO_DIR.lstrip("/"), f)), f
+    H = json.load(open(os.path.join(ROOT, "history.json"), encoding="utf-8"))
+    H = H.get("days", H)
+    day = H[VIDEO_DAY]
+    assert day.get("src") != "era5" and day["tempLow"] is not None and day["tempHigh"] is not None, day
+    lo, hi = temp(day["tempLow"]), temp(day["tempHigh"])
+    cap = (f"Sneženje v Rečici ob Savinji, 5. januarja 2026 ob 15.25. Postaja IREICA1 je tisti dan izmerila od {lo} do {hi}. "
+           "Posnetek je primer bele podlage v dolini, a ob precej nižji temperaturi, kot jo modeli napovedujejo za soboto: "
+           "pri ničli ali tik nad njo sneg na mokrih tleh običajno ne obleži. Posnetek iz arhiva Meteorca.")
+    return (f'<figure class="vs-fig sn-video"><h3>Tako izgleda bela podlaga v dolini</h3>'
+            f'<video src="{VIDEO_DIR}/sneg-recica-2026-01-05.mp4" poster="{VIDEO_DIR}/sneg-recica-2026-01-05.jpg" muted loop playsinline controls preload="metadata" '
+            'width="540" height="960" aria-label="Posnetek sneženja v Rečici ob Savinji, 5. januarja 2026: sneg pada na dvorišče in kozolce, tla so že bela.">'
+            f'<a href="{VIDEO_DIR}/sneg-recica-2026-01-05.mp4">Posnetek sneženja v Rečici (MP4)</a></video>'
+            f'<figcaption>{cap}</figcaption></figure>')
 
 
 def widgets_html(S):
@@ -781,6 +815,7 @@ def build_article(S):
     p7 = [
         "Za dno doline vidim tri možne poteke. Navedeni deleži predstavljajo delež članov ansamblov, ne zagotovljene verjetnosti. Z novimi izračuni modelov se bodo lahko spremenili.",
         scenarios,
+        video_html(),
         f"Najverjetneje se bo torej uresničil prvi scenarij. Drugi dve možnosti nista zanemarljivi: najbolj snežen ansambel, {SYS_NAME[hi_sys]}, vsaj 1 cm snega napoveduje pri {hi_v} % svojih članov.",
     ]
 
@@ -850,7 +885,7 @@ def build_article(S):
 
     lead = nb(lead)
     for sec in sections:
-        sec["paragraphs"] = [x if ("<script" in x or x.lstrip().startswith("<figure")) else nb(x) for x in sec["paragraphs"]]
+        sec["paragraphs"] = [x if x.lstrip().startswith("<script") else nb(x) for x in sec["paragraphs"]]
     # skript gre na konec prvega razdelka z gradnikom (podatki so vdelani samo enkrat)
     sections[2]["paragraphs"].append(script)
     return {
