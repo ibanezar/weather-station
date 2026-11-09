@@ -45,6 +45,8 @@ LIST_CANDIDATES = [
     "/webmet/archive/locations.xml?lang=si&group=dailyData0&type=daily",
     "/webmet/archive/data.xml?lang=si&type=locations",
     "/met/sl/archive/",
+    "/webmet/archive/",
+    "/webmet/archive/index.html",
 ]
 
 
@@ -209,6 +211,14 @@ def main():
             print(f"   -> razpoznanih postaj: {len(found)}")
             if len(found) > len(stations):
                 stations, used = found, cand
+            if "<html" in text.lower() or "<!doctype" in text.lower():
+                # diagnostika: kaj stran nalaga (iframe, skripte, obrazci, izbirniki, vse kar omenja webmet/xml)
+                tags = re.findall(r"<(?:iframe|script|form|select|option|input|a)\b[^>]*>", text, flags=re.I)
+                print(f"   oznake ({len(tags)}):")
+                for t in tags[:120]:
+                    print("     ", re.sub(r"\s+", " ", t)[:220])
+                for m in re.finditer(r"[^\n]{0,160}(?:webmet|\.xml|locations|ajax|getJSON|XMLHttp)[^\n]{0,160}", text):
+                    print("   ~", re.sub(r"\s+", " ", m.group(0))[:320])
             if cand.endswith("/archive/"):      # stran: poišči še XML/JS povezave, ki jih nalaga
                 links = sorted(set(re.findall(r'["\']([^"\']+\.(?:xml|js|json)[^"\']*)["\']', text)))
                 print("   povezave na strani:", links[:40])
