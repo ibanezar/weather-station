@@ -34,6 +34,7 @@ jobs:
           mkdir -p data/arso-sneg-postaje
           for f in arso-resolve-out/daily-*.json; do [ -e "$f" ] && cp "$f" "data/arso-sneg-postaje/$(basename "$f")"; done
           [ -e arso-resolve-out/results.json ] && cp arso-resolve-out/results.json data/arso-sneg-postaje/resolve-results.json
+          [ -e arso-resolve-out/report.md ] && cp arso-resolve-out/report.md data/arso-sneg-postaje/resolve-report.md
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
           git add data/arso-sneg-postaje

@@ -30,8 +30,48 @@ OBS_LISTS = [
     "/uploads/probase/www/observ/surface/text/sl/observationAms_METEO-16036_latest.html",
     "/uploads/probase/www/observ/surface/text/sl/observationAms_METEO-16036__history.html",
 ]
+STATION_IDS = ("GORNJ-GRA_", "RADEG-NDA_")
 NAMES = ("gornji grad", "radegunda", "gornj-gra", "16036")
 ID_FORMS = ["16036", "METEO-16036", "METEO-16036_", "GORNJ-GRA", "GORNJ-GRA_", "gornj-gra"]
+
+
+def show_fields(tx, sid, rep):
+    """Izpiše neprazna polja bloka <metData> postaje (kaj postaja sploh meri)."""
+    for blk in re.findall(r"<metData>(.*?)</metData>", tx, flags=re.S):
+        if f"<domain_meteosiId>{sid}</domain_meteosiId>" not in blk:
+            continue
+        fields = re.findall(r"<(\w+)>([^<]+)</\1>", blk)
+        keep = [(k, v) for k, v in fields if not k.endswith(("_desc", "_unit", "_RFC822", "_UTC")) and k not in
+                ("domain_title", "domain_shortTitle", "sunrise", "sunset")]
+        line = "; ".join(f"{k}={v}" for k, v in keep)
+        print(f"[polja {sid}] {line}")
+        rep += ["", f"### polja `{sid}`", "```", line[:3000], "```"]
+        return
+    print(f"[polja {sid}] ni bloka")
+
+
+def scan_range(lo, hi, batch, rep):
+    """Arhivski ID-ji nad 5500: poišči postaje s padavinami, skladnimi z IREICA1 (kot scan_by_correlation)."""
+    hist = json.load(open(os.path.join(a.ROOT, "history.json"), encoding="utf-8"))
+    ours = {d: v["precipTotal"] for d, v in hist.items() if v.get("src") != "era5" and v.get("precipTotal") is not None}
+    cands = []
+    for start in range(lo, hi, batch):
+        ids = ",".join(str(i) for i in range(start, min(start + batch, hi)))
+        st, tx = a.data_xml(ids, "2024-11-01", "2025-03-31", vars_="85,88,89")
+        time.sleep(a.PAUSE_S)
+        if st != 200 or not tx:
+            print(f"[razpon] {start}: HTTP {st}")
+            continue
+        for sid, series in a.parse_multi(tx).items():
+            vals = [v for v in series.values() if v[0] is not None]
+            if len(vals) < 60:
+                continue
+            r, shift, n = a.station_precip_corr(series, ours)
+            snow = sum(1 for v in series.values() if v[1] is not None or v[2] is not None)
+            print(f"[razpon] id {sid}: dni s padavinami {len(vals)}, r={r}, zamik {shift}, dni s poljem snega {snow}")
+            cands.append({"id": sid, "r": r, "shift": shift, "n": n, "snow_field": snow})
+    rep += ["", f"## Arhivski ID-ji {lo}..{hi}", "", f"postaj s podatkom: {len(cands)}", "```", json.dumps(cands, ensure_ascii=False)[:3000], "```"]
+    return cands
 
 
 def main():
@@ -46,6 +86,9 @@ def main():
             continue
         with open(os.path.join(OUT, re.sub(r"\W+", "_", p)[-80:] + ".txt"), "w", encoding="utf-8") as f:
             f.write(tx)
+        if p.endswith("observationAms_si_latest.xml"):
+            for sid in STATION_IDS:
+                show_fields(tx, sid, rep)
         low = tx.lower()
         for n in NAMES:
             for m in re.finditer(re.escape(n), low):
@@ -67,6 +110,7 @@ def main():
         for k, series in multi.items():
             if len(series) >= 30:
                 found.append((form, k))
+    scan_range(5500, 20000, 150, rep)
     results = []
     for form, k in dict.fromkeys(found):
         st, tx = a.data_xml(form, a.FIRST_DATE, dt.date.today().isoformat())
