@@ -381,6 +381,133 @@ def dump_loader(out_dir):
         a, b = max(0, m.start() - 500), min(len(page), m.end() + 500)
         print("   page okolica:", re.sub(r"\s+", " ", page[a:b]))
 
+def _brace_slice(text, start):
+    """Podniz od `{` pri `start` do ujemajočega `}`."""
+    depth = 0
+    for i in range(start, len(text)):
+        c = text[i]
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start:i + 1]
+    return text[start:]
+
+
+def parse_multi(text):
+    """data.xml z več postajami: `points:{_3390:{},_3391:{_<minute>:{p0:"..",p1:"..",p2:".."}}}` (JS objekt brez narekovajev
+    pri ključih). Vrne {id: {datum: [padavine, višina odeje, novi sneg]}} v vrstnem redu zahtevanih spremenljivk."""
+    i = text.find("points:")
+    if i < 0:
+        return {}
+    j = text.find("{", i)
+    body = _brace_slice(text, j)
+    body = re.sub(r"([{,]\s*)(_?\w+)\s*:", r'\1"\2":', body)
+    try:
+        raw = json.loads(body)
+    except json.JSONDecodeError:
+        return {}
+    base = dt.datetime(1800, 1, 1)
+    out = {}
+    for sid, days in raw.items():
+        series = {}
+        for key, vals in (days or {}).items():
+            try:
+                d = (base + dt.timedelta(minutes=int(key.lstrip("_")))).date().isoformat()
+            except ValueError:
+                continue
+            series[d] = [num(vals.get(k)) for k in ("p0", "p1", "p2")]
+        out[sid.lstrip("_")] = series
+    return out
+
+
+def pearson(a, b):
+    n = len(a)
+    if n < 5:
+        return None
+    ma, mb = sum(a) / n, sum(b) / n
+    va = sum((x - ma) ** 2 for x in a)
+    vb = sum((y - mb) ** 2 for y in b)
+    if va <= 0 or vb <= 0:
+        return None
+    return sum((x - ma) * (y - mb) for x, y in zip(a, b)) / math.sqrt(va * vb)
+
+
+def station_precip_corr(series, ours):
+    """Korelacija dnevnih padavin postaje ARSO (24 h do 7. ure, žig = dan odčitka) z IREICA1 (koledarski dan): preizkusi
+    isti dan in dan prej, vrne (r, zamik, n)."""
+    best = (None, None, 0)
+    for shift in (0, 1):
+        a, b = [], []
+        for d, vals in series.items():
+            if vals[0] is None:
+                continue
+            ref = (dt.date.fromisoformat(d) - dt.timedelta(days=shift)).isoformat()
+            if ref in ours:
+                a.append(vals[0])
+                b.append(ours[ref])
+        r = pearson(a, b)
+        if r is not None and (best[0] is None or r > best[0]):
+            best = (r, shift, len(a))
+    return best
+
+
+def scan_by_correlation(out_dir, max_id=5500, batch=150, top=12):
+    """Seznama postaj ni, zato lokacijo določimo iz podatkov: postaje blizu Rečice se po padavinah skladajo z IREICA1."""
+    hist = json.load(open(os.path.join(ROOT, "history.json"), encoding="utf-8"))
+    ours = {d: v["precipTotal"] for d, v in hist.items() if v.get("src") != "era5" and v.get("precipTotal") is not None}
+    d1, d2 = "2024-11-01", "2025-03-31"
+    cands = []
+    nonempty = 0
+    for start in range(1, max_id, batch):
+        ids = ",".join(str(i) for i in range(start, min(start + batch, max_id)))
+        st, tx = data_xml(ids, d1, d2)
+        time.sleep(PAUSE_S)
+        if st != 200 or not tx:
+            print(f"[skeniranje] {start}-{start + batch}: HTTP {st}")
+            continue
+        multi = parse_multi(tx)
+        for sid, series in multi.items():
+            if len(series) < 60:
+                continue
+            nonempty += 1
+            r, shift, n = station_precip_corr(series, ours)
+            snow_days = sum(1 for v in series.values() if (v[1] or 0) >= 1)
+            snow_field = sum(1 for v in series.values() if v[1] is not None or v[2] is not None)
+            if r is not None and n >= 60:
+                cands.append({"id": sid, "r": round(r, 3), "shift": shift, "n": n, "snow_days": snow_days, "snow_field": snow_field})
+    print(f"[skeniranje] postaj z vsaj 60 dnevi podatka v {d1}..{d2}: {nonempty}")
+    cands.sort(key=lambda c: -c["r"])
+    print("[skeniranje] najbolj skladne po padavinah z IREICA1:")
+    for c in cands[:25]:
+        print(f"   id {c['id']:>5}  r = {c['r']:.3f} (zamik {c['shift']}, n = {c['n']})  dni z odejo >= 1 cm: {c['snow_days']}, dni s poljem snega: {c['snow_field']}")
+    with open(os.path.join(out_dir, "korelacije.json"), "w", encoding="utf-8") as f:
+        json.dump(cands, f, ensure_ascii=False, indent=1)
+    # podrobnost za najbolj skladne: cel arhiv, pokritost in primerjava s proksijem
+    proxy = proxy_truth()
+    results = []
+    for c in cands[:top]:
+        st, tx = data_xml(c["id"], FIRST_DATE, dt.date.today().isoformat())
+        time.sleep(PAUSE_S)
+        multi = parse_multi(tx) if st == 200 else {}
+        series = multi.get(str(c["id"])) or {}
+        days = [[d, v[1], v[2], v[0]] for d, v in sorted(series.items())]
+        cov = coverage(days)
+        conf0 = confusion(days, proxy) if cov["days_with_snow_field"] else None
+        shifted = [[(dt.date.fromisoformat(d) - dt.timedelta(days=1)).isoformat(), a, b, c2] for d, a, b, c2 in days]
+        conf1 = confusion(shifted, proxy) if cov["days_with_snow_field"] else None
+        results.append({"id": c["id"], "r": c["r"], "coverage": cov, "vs_proxy_same_day": conf0, "vs_proxy_prev_day": conf1})
+        print(f"[postaja {c['id']}] r = {c['r']}, dni {cov['days']}, s poljem snega {cov['days_with_snow_field']}, nov sneg >= 1 cm {cov['new_snow_ge1_days']} dni,"
+              f" zime {cov['winter_days_with_snow_field']}; vs proksi (isti dan) {conf0}; (dan prej) {conf1}")
+        if days:
+            with open(os.path.join(out_dir, f"daily-{c['id']}.json"), "w", encoding="utf-8") as f:
+                json.dump({"fields": ["date", "snow_depth_cm", "new_snow_cm", "precip_mm"], "days": days}, f, ensure_ascii=False, separators=(",", ":"))
+    with open(os.path.join(out_dir, "results.json"), "w", encoding="utf-8") as f:
+        json.dump(results, f, ensure_ascii=False, indent=1)
+    return results
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--radius", type=float, default=35.0)
@@ -455,8 +582,8 @@ def main():
                         if len(f2) > len(stations):
                             stations, used = f2, l
     if not stations:
-        find_probase(a.out)
-        stations, used = probe_ids(a.out)
+        scan_by_correlation(a.out)
+        return 0
     if not stations and a.crawl:
         crawl_ameba(a.out, [PUJS_ROOT + "/ameba/index.xml", PUJS_ROOT + "/ameba/default.xml", PUJS_ROOT + "/prog/default.xml",
                             PUJS_ROOT + "/prog/init.xml", PUJS_ROOT + "/menu.xml"])
