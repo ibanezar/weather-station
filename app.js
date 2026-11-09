@@ -8079,6 +8079,60 @@ async function fetchMosForecast(){
   }
 }
 
+/* MTR sneg (9. 11. 2026): kartica `#snow-card` bere napoved-snega.json (tools/predict_sneg_mos.py). Verjetnost je za
+   PROKSI »snežni dan« (padavine in povprečna temperatura ≤ 1 °C), ne za opazovan sneg: postaja snega ne meri. Kartica
+   ima v HTML rezerviran prostor (brez CLS); zunaj sezone ali brez podatkov se skrije — nikoli ne piše »ni snega«,
+   če napovedi ni. Verjetnost se zaokroži na 5 %, pod 5 % piše »< 5 %«. */
+const SNOW_STALE_H=30;
+function _snowLevel(p){return p<.10?'malo verjetno':p<.35?'možno':p<.65?'verjetno':'zelo verjetno';}
+function _snowPct(p){const r=Math.round(p*20)*5;return r<=0?'< 5\u00A0%':r+'\u00A0%';}
+function _snowDay(d){
+  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
+  const diff=Math.round((Date.parse(d.date+'T12:00:00Z')-Date.parse(today+'T12:00:00Z'))/864e5);
+  const dt=new Date(d.date+'T12:00:00');
+  return {name:diff===0?'Danes':diff===1?'Jutri':MTR_SL_DAYS[dt.getDay()].slice(0,3),
+          long:diff===0?'danes':diff===1?'jutri':MTR_SL_DAYS[dt.getDay()],date:dt.getDate()+'. '+(dt.getMonth()+1)+'.'};
+}
+function renderSnowCard(j){
+  const card=document.getElementById('snow-card');if(!card)return;
+  const days=(j&&j.in_season&&Array.isArray(j.days)?j.days:[]).filter(d=>d&&d.date&&Number.isFinite(d.p_snow));
+  if(!days.length){card.hidden=true;return;}
+  card.hidden=false;
+  const box=document.getElementById('snow-days'),head=document.getElementById('snow-head'),upd=document.getElementById('snow-updated');
+  box.innerHTML=days.map(d=>{
+    const n=_snowDay(d),pc=_snowPct(d.p_snow),lv=_snowLevel(d.p_snow);
+    const tt=Number.isFinite(d.tavg)?_fmtN(d.tavg,1)+'\u00A0°C':'';
+    const mm=Number.isFinite(d.prec_mm)?(d.prec_mm<.2?'suho':_fmtN(d.prec_mm,1)+'\u00A0mm'):'';
+    const aria=n.long+', '+n.date+': snežni dan '+(d.p_snow<.05?'manj kot 5 %':Math.round(d.p_snow*20)*5+' %')+', '+lv+
+      '; povprečje modelov '+tt.replace('\u00A0',' ')+', padavine '+mm.replace('\u00A0',' ');
+    return '<div class="snow-day" role="listitem" aria-label="'+aria+'" data-lv="'+(d.p_snow<.10?0:d.p_snow<.35?1:d.p_snow<.65?2:3)+'">'
+      +'<div class="snow-day-hd"><b>'+n.name+'</b><span>'+n.date+'</span></div>'
+      +'<div class="snow-day-val">'+pc+'</div>'
+      +'<div class="snow-bar" aria-hidden="true"><i style="width:'+Math.max(2,Math.round(d.p_snow*100))+'%"></i></div>'
+      +'<div class="snow-day-lv">'+lv+'</div>'
+      +'<div class="snow-day-meta">'+(tt?'<span>'+tt+'</span>':'')+(mm?'<span>'+mm+'</span>':'')+'</div></div>';
+  }).join('');
+  const top=days.reduce((a,b)=>b.p_snow>a.p_snow?b:a);
+  const tn=_snowDay(top);
+  head.textContent=top.p_snow<.10
+    ?'Prihodnjih '+days.length+' dni sneg v dolini ni verjeten.'
+    :'Največ možnosti za sneg v dolini: '+tn.long+' ('+_snowPct(top.p_snow).replace('\u00A0',' ')+').';
+  const ageH=j.generated_at?(Date.now()-Date.parse(j.generated_at))/36e5:null;
+  if(ageH!==null&&Number.isFinite(ageH)){
+    const stale=ageH>SNOW_STALE_H;
+    upd.textContent=(stale?'podatki niso sveži: ':'posod. ')+(ageH<1.5?'pred '+Math.max(1,Math.round(ageH*60))+' min':'pred '+Math.round(ageH)+' h');
+    upd.classList.toggle('is-stale',stale);
+  }else upd.textContent='';
+}
+async function fetchSnowMtr(){
+  const card=document.getElementById('snow-card');if(!card)return;
+  try{
+    const r=await fetch('/napoved-snega.json?_='+Math.floor(Date.now()/36e5));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    renderSnowCard(await r.json());
+  }catch(e){card.hidden=true;console.warn('MTR sneg:',e);}
+}
+
 /* Preklopnik Tmax/Tmin. Poslušalci se pripnejo enkrat (dataset.bound), ker
    fetchMosForecast() teče znova ob vsakem preklopu na zavihek. */
 function _mtrBindSeg(idp){
@@ -18342,6 +18396,7 @@ async function init(){
     fetchForecastExtras();
     fetchComingUp();
     runAdvancedOnly(()=>fetchMosForecast());
+    runAdvancedOnly(()=>fetchSnowMtr());
     runAdvancedOnly(()=>fetchHeroValley());
     runAdvancedOnly(()=>fetchHeroPm());
   },800);

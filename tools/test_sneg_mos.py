@@ -75,7 +75,7 @@ for i in range(700):
                          for m in tsm.MODELS}
 by = {k: v for k, v in by.items()}
 model = tsm.train(truth, by)
-check("učenje: naučil je vse tri vodilne čase", set(model["leads"]) == {"1", "2", "3"})
+check("učenje: naučil je vse vodilne čase", set(model["leads"]) == {"1", "2", "3", "4", "5"})
 e = model["leads"]["1"]
 cold_wet = tsm.day_features({m: (-1.0, -5.0, 5.0) for m in tsm.MODELS})
 warm_wet = tsm.day_features({m: (12.0, 6.0, 5.0) for m in tsm.MODELS})
@@ -99,12 +99,12 @@ except FileNotFoundError:
 
 # --- napoved z lažnimi vnosi
 today = dt.date(2026, 11, 10)
-per_day = {(today + dt.timedelta(days=l)).isoformat(): {m: (-1.0, -5.0, 5.0) for m in tsm.MODELS} for l in (1, 2, 3)}
+per_day = {(today + dt.timedelta(days=l)).isoformat(): {m: (-1.0, -5.0, 5.0) for m in tsm.MODELS} for l in (1, 2, 3, 4, 5)}
 days = ps.predict_days(real, per_day, today)
-check("predict_days: tri dni v sezoni", [d["lead"] for d in days] == [1, 2, 3])
+check("predict_days: pet dni v sezoni", [d["lead"] for d in days] == [1, 2, 3, 4, 5])
 check("predict_days: visoka verjetnost ob mrazu in padavinah", all(d["p_snow"] > 0.3 for d in days))
 days_apr = ps.predict_days(real, {(dt.date(2027, 4, 29) + dt.timedelta(days=l)).isoformat():
-                                  {m: (-1.0, -5.0, 5.0) for m in tsm.MODELS} for l in (1, 2, 3)}, dt.date(2027, 4, 29))
+                                  {m: (-1.0, -5.0, 5.0) for m in tsm.MODELS} for l in (1, 2, 3, 4, 5)}, dt.date(2027, 4, 29))
 check("predict_days: dnevi zunaj sezone (maj) izpadejo", [d["lead"] for d in days_apr] == [1])
 check("predict_days: premalo modelov -> dan izpade",
       ps.predict_days(real, {(today + dt.timedelta(days=1)).isoformat(): {"best_match": (0.0, -3.0, 2.0)}}, today) == [])
@@ -116,7 +116,7 @@ payload = ps.build_payload(real, days, True, dt.datetime(2026, 11, 10, 4, 40, tz
 n1 = ps.append_log(payload, log)
 n2 = ps.append_log(payload, log)
 rows = list(csv.DictReader(open(log, encoding="utf-8")))
-check("dnevnik: prvi zapis doda 3 vrstice, ponovni nič", n1 == 3 and n2 == 0 and len(rows) == 3)
+check("dnevnik: prvi zapis doda 5 vrstic, ponovni nič", n1 == 5 and n2 == 0 and len(rows) == 5)
 hb = {int(r["lead_days"]): float(r["hours_before"]) for r in rows}
 check("dnevnik: hours_before = ure do začetka ciljnega dne (lokalni čas)", 18.0 < hb[1] < 20.0 and abs(hb[2] - hb[1] - 24) < 1.1)
 check("dnevnik: izdana datoteka ne vsebuje notranjih meritev", "indoor" not in json.dumps(payload).lower())

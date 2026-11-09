@@ -1462,13 +1462,17 @@ surovega modela (`tools/ai/eval_mtr7_wind.py`, docs/model-recica.md).
 
 ### MTR sneg (proksi, 9. 11. 2026)
 
-Poskusna verjetnost »snežnega dne« v Rečici za D+1..D+3 (`tools/train_sneg_mos.py` → `model/sneg-mos.json`, `predict_sneg_mos.py` → `napoved-snega.json` + `data/sneg-forward-log.csv`,
+Poskusna verjetnost »snežnega dne« v Rečici za **D+1..D+5** (`tools/train_sneg_mos.py` → `model/sneg-mos.json`, `predict_sneg_mos.py` → `napoved-snega.json` + `data/sneg-forward-log.csv`,
 `verify_sneg.py` → `data/sneg-verification.json`, `sneg-forecast.yml` 4×/dan, v sezoni oktober–april; zunaj nje utrip enkrat na dan). **Postaja snega ne meri: cilj je PROKSI**
 (padavine ≥ 0,2 mm in T povp. ≤ 1 °C = mokri hladni dan); model ne napoveduje debeline snega ne ali sneg obleži, in to mora pisati povsod, kjer se številka pokaže.
-Rezultat na arhivu (izpuščanje zime, 39 dogodkov): Brier skill +0,15..+0,20, surov Open-Meteo kot prag brez veščine; vzorec je majhen, podrobnosti in opozorila v `docs/model-recica.md`.
-**Nobena stran, kartica ali zgodba je še ne prikazuje** -- ne dodajaj, dokler `data/sneg-verification.json` nima ≥ 15 dogodkov na vodilni čas in ni brez dokaza boljše od klimatologije.
-Značilke, proksi in prileganje so v `train_sneg_mos.py` (ena kopija; `tools/ai/eval_sneg.py` jih uvaža). Test: `tools/test_sneg_mos.py` (v `parity.yml`); vrstica v `REGISTER`.
-Ko bo prava resnica (urni zapis z mokrim termometrom, ARSO snežne meritve), se spremeni samo `load_truth()`/`is_snow_day()`. Notranjih meritev model ne bere.
+Rezultat na arhivu (izpuščanje zime, 39 dogodkov): Brier skill +0,20 / +0,17 / +0,15 / +0,12 / +0,11 (D+1..D+5), surov Open-Meteo kot prag brez veščine (D+4 −0,07, D+5 −0,20); D+6 ni boljši od D+5.
+Vzorec je majhen, podrobnosti in opozorila v `docs/model-recica.md`. Značilke, proksi in prileganje so v `train_sneg_mos.py` (ena kopija; `tools/ai/eval_sneg.py` jih uvaža).
+
+- **Kartica na naslovnici** (`#snow-card`, takoj za kartico MTR, 9. 11. 2026, Filipova odločitev: kartica takoj, ne šele po preverjanju naprej): pet dni, verjetnost zaokrožena na 5 % (pod 5 % »< 5 %«), besedna ocena, T povp. modelov in padavine, značka »poskusno« in opomba, da je to približek.
+  `fetchSnowMtr()`/`renderSnowCard()` v `app.js`, klic v `runAdvancedOnly()`, kartica nima `simple-keep`. **Višina je rezervirana v CSS** (`min-height` 19,3 / 26 / 27,5 rem za namizje / ≤ 560 / ≤ 380 px, izmerjeno na dejanskih višinah 309 / 416 / 440 px): ob spremembi besedila ali ploščic izmeri znova (CLS).
+  Zunaj sezone in ob napaki se kartica skrije; nikoli ne piše »ni snega«, če napovedi ni. Datoteka starejša od 30 h je označena »podatki niso sveži«.
+- **Ne obljubljaj več, kot model zna:** kartica ne sme dobiti centimetrov, višine odeje ali besede »obleži«; brez prave resnice (urni zapis z mokrim termometrom, ARSO snežne meritve) ostane proksi. Stran/zgodbo za FB/IG **ne** dodajaj samodejno.
+- Test: `tools/test_sneg_mos.py` (v `parity.yml`); vrstica v `REGISTER`. Ko bo prava resnica, se spremeni samo `load_truth()`/`is_snow_day()`. Notranjih meritev model ne bere. `data/sneg-verification.json` bo zanesljiv šele s ≥ 15 dogodki na vodilni čas (čez zimo).
 
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
 

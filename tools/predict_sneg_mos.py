@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tools/predict_sneg_mos.py -- živa napoved MTR sneg (proksi) za D+1..D+3 in beleženje v dnevnik.
+tools/predict_sneg_mos.py -- živa napoved MTR sneg (proksi) za D+1..D+5 in beleženje v dnevnik.
 
 Vzame model/sneg-mos.json (tools/train_sneg_mos.py), živo napoved štirih modelov Open-Meteo
 (isti `fetch_live_multi` kot MTR) in zapiše:
@@ -47,7 +47,7 @@ def load_model(path=tsm.MODEL_PATH):
 def fetch_models(models):
     """{datum: {model: (tmax, tmin, padavine)}} iz žive napovedi (kot MTR: dnevni ekstrem po lokalnem času)."""
     import predict_recica_mos as pm   # uvoz šele tu: potegne train_recica_mos, test ga ne rabi
-    raw = pm.fetch_live_multi(models)
+    raw = pm.fetch_live_multi(models, forecast_days=max(tsm.LEADS) + 2)   # +2: danes in rezerva
     out = {}
     for day, e in raw.items():
         for m in models:

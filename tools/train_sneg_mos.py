@@ -5,7 +5,7 @@ tools/train_sneg_mos.py -- MTR sneg (v0.x): verjetnost »snežnega dne« v dolin
 POMEMBNO -- cilj je PROKSI. Postaja IREICA1 snega ne meri. Snežni dan (proksi) = dnevna vsota padavin
 >= WET_MM IN dnevno povprečje temperature zraka <= PRAG_T_AVG. To je »mokri hladni dan«, ne opazovan sneg.
 Model zato NE napoveduje debeline snega, ne ali sneg obleži in ne razlikuje dežja pri 1 °C od snega pri 2 °C.
-Povsod, kjer se številka pokaže, mora to pisati. Ko bo na voljo prava resnica (urni zapis z mokrim
+Povsod, kjer se številka pokaže, mora to pisati. Vodilni časi D+1..D+5 (pri D+6 skill ni boljši od D+5). Ko bo na voljo prava resnica (urni zapis z mokrim
 termometrom, ARSO snežne meritve), se spremeni samo `load_truth()`.
 
 Vhod (brez omrežja, vse v repozitoriju):
@@ -41,10 +41,10 @@ MODEL_PATH = os.path.join(ROOT, "model", "sneg-mos.json")
 ARCHIVE_PATH = os.path.join(ROOT, "data", "forecast-archive.csv")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 
-MODEL_VERSION = "0.1"
+MODEL_VERSION = "0.2"
 MODELS = ["best_match", "ecmwf_ifs025", "gfs_seamless", "icon_seamless"]
 MIN_MODELS = 3
-LEADS = (1, 2, 3)
+LEADS = (1, 2, 3, 4, 5)   # D+4/D+5: skill +0,12/+0,10, surov prag pod klimatologijo (eval_sneg.py)
 WET_MM = 0.2          # isti prag kot WET_DAY_MM v verify_forecasts.py
 PRAG_T_AVG = 1.0      # naša izbira; občutljivost je v tools/ai/eval_sneg.py
 SEASON = (10, 11, 12, 1, 2, 3, 4)
