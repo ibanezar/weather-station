@@ -225,7 +225,11 @@ def main():
                 srcs += re.findall(r'["\']([^"\']+\.js(?:\?[^"\']*)?)["\']', text)
                 # glavni modul aplikacije in nastavitve (v strani zapisani kot '/uploads/meteo/app/webmet/bin/app' ...)
                 srcs += ["/uploads/meteo/app/webmet/bin/app.js", "/uploads/meteo/app/webmet/bin/app",
-                         "/uploads/meteo/app/webmet/pujs/settings.xml"]
+                         "/uploads/meteo/app/webmet/pujs/settings.xml",
+                         # PUJS.ARCHIVE.INIT = PUJS.AMEBA + "/init.xml"; PUJS.AMEBA = PUJS.ROOT + "/ameba"
+                         "/uploads/meteo/app/webmet/pujs/ameba/init.xml",
+                         "/uploads/meteo/app/webmet/pujs/ameba/settings.xml",
+                         "/uploads/meteo/app/webmet/pujs/default.xml"]
                 srcs += re.findall(r'["\'](/uploads/meteo/app/webmet/[^"\']+)["\']', text)
                 for src in list(dict.fromkeys(srcs))[:40]:
                     if src.startswith("//") and "arso" not in src:
@@ -239,7 +243,9 @@ def main():
                     with open(os.path.join(a.out, "js-" + re.sub(r"\W+", "_", url)[-70:] + ".txt"), "w", encoding="utf-8") as fj:
                         fj.write(tj)
                     if url.endswith(".xml"):
-                        print("      xml:", re.sub(r"\s+", " ", tj[:1800]))
+                        print("      xml:", re.sub(r"\s+", " ", tj[:4500]))
+                    if len(tj) < 400:
+                        print("      celoten odgovor:", re.sub(r"\s+", " ", tj))
                     if len(tj) > 150000:
                         continue    # knjižnice (jquery, highcharts) preskoči
                     for m in re.finditer(r"[^\n;{}]{0,200}" + APP_JS_PATTERN + r"[^\n;{}]{0,260}", tj, flags=re.I):
