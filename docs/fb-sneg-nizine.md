@@ -22,6 +22,8 @@ isti posnetek in iste varovalke kot kartice). Zgodbe nimajo podpisa, zato je vse
 1. Foto: »BO V NIŽINAH SNEG?« čez fotografijo sneženja, 16 % in 59 %.
 2. Bloki: ČETRTEK dež, PETEK dež, SOBOTA sneg? (16 % v dolini, 59 % na 900 m).
 3. Lestev: delež članov z vsaj 1 cm snega po višinah 366–1200 m in vprašanje »Na kateri višini živite?« (tu dodajte vprašalno nalepko, odgovori so dober signal).
+4. **Animirana različica zgodbe 2** (`og/sneg-v-nizinah-cetrtek-dez-sobota-1109-zgodba-animirana.mp4`, 1080×1920, 10,5 s, 30 sl./s, 2,2 MB, brez zvoka;
+   izdela jo `python3 tools/generate_sneg_nizine_story_video.py`): udarni naslov, drsenje blokov z dežjem, »SNEG?« z utripom in snežinkami, naštevanje številk, znamka.
 Povezave v zgodbah IG ne podpira prek API-ja: obiskovalec pride prek povezave v bio ali FB objave.
 
 Če se po novem prenosu podatkov številke spremenijo, kartice znova izdelajte (in popravite besedila), ne mešajte starih kartic z novimi številkami.
