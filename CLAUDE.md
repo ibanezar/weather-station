@@ -1472,6 +1472,7 @@ Vzorec je majhen, podrobnosti in opozorila v `docs/model-recica.md`. Značilke, 
   `fetchSnowMtr()`/`renderSnowCard()` v `app.js`, klic v `runAdvancedOnly()`, kartica nima `simple-keep`. **Višina je rezervirana v CSS** (`min-height` 19,3 / 26 / 27,5 rem za namizje / ≤ 560 / ≤ 380 px, izmerjeno na dejanskih višinah 309 / 416 / 440 px): ob spremembi besedila ali ploščic izmeri znova (CLS).
   Zunaj sezone in ob napaki se kartica skrije; nikoli ne piše »ni snega«, če napovedi ni. Datoteka starejša od 30 h je označena »podatki niso sveži«.
 - **Ne obljubljaj več, kot model zna:** kartica ne sme dobiti centimetrov, višine odeje ali besede »obleži«; brez prave resnice (urni zapis z mokrim termometrom, ARSO snežne meritve) ostane proksi. Stran/zgodbo za FB/IG **ne** dodajaj samodejno.
+- **ARSO gradiva (normale 1971–2000 na `agromet/period/snow/`, zimska podnebna poročila 2022–2026) niso dnevna resnica za dolino** (normale in besedilo); pregled in velikostni red proti proksiju: `docs/model-recica.md`, razdelek »Zunanji viri resnice za sneg«. Prva prava resnica bi bila ARSO arhiv višine snežne odeje za postajo v Zg. Savinjski dolini na < 600 m (ni preverjeno).
 - Test: `tools/test_sneg_mos.py` (v `parity.yml`); vrstica v `REGISTER`. Ko bo prava resnica, se spremeni samo `load_truth()`/`is_snow_day()`. Notranjih meritev model ne bere. `data/sneg-verification.json` bo zanesljiv šele s ≥ 15 dogodki na vodilni čas (čez zimo).
 
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)

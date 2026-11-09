@@ -491,3 +491,18 @@ pa za vsak ciljni dan vzame najzgodnejšo izdajo v razredu vodilnega časa (mode
 (`data/hourly-observations.csv` teče od julija 2026, to bo prva zima), ARSO snežne meritve, poročila obiskovalcev
 (`snezi`). Višinski podatki (meja sneženja, T850) niso vključeni: za njih ni arhiva napovedi (glej poskuse 24. 10.).
 Količine snega (cm) ni; 1 mm ≈ 1 cm (10:1) v `winter_engine.py` ostaja ločena, nepreverjena ocena.
+
+### Zunanji viri resnice za sneg: kaj ARSO da in česa ne (9. 11. 2026)
+
+Preverjeno, ali ARSO-va gradiva dajo opazovan sneg za dolino (da bi proksi nadomestili s pravo resnico). **Ne dajo.**
+
+- **Povezava `meteo.arso.gov.si/met/sl/agromet/period/snow/`** so *normale* 1971–2000 (dni s snežno odejo ≥ 1 cm ob 7. uri in največja debelina po mesecih, ~35 postaj), ne tekoče meritve. Najbližji postaji Rečici (366 m)
+  sta Velenje (390 m) in Celje (241 m); Mozirja ni. Dni s snežno odejo na leto: Celje 47, Velenje 43, Šmartno pri Slovenj Gradcu 74; po mesecih (nov–apr) Celje 5/12/15/11/5/1, Velenje 4/9/14/10/5/1.
+- **Zimska podnebna poročila 2022–2026** (PDF, ARSO) so besedilna: kvalitativne ocene snega (zime 2021/22 do 2025/26 so po nižinah vse skromne s snegom; 2025/26: Ljubljana 10 dni s snežno odejo proti normali 32, severovzhod 25–45 dni) in
+  nobene tabele po postajah. Za proksi in kartico niso uporabna kot podatek, samo kot kontekst.
+- **Primerjava velikosti reda** (ni validacija): proksi (padavine ≥ 0,2 mm in T povp. ≤ 1 °C) da v Rečici v sedmih zimah povprečno 21 dni na zimo (nov 2,1; dec 9,1; jan 7,4; feb 1,4; mar 0,7; apr 0,3), ARSO-va normala za dni s snežno
+  odejo je 43–47. To sta različni količini (snežna odeja vztraja še dneve po sneženju; proksi šteje samo dneve s padavinami) in različni obdobji (1971–2000 proti 2019–2026, ko se je zima po poročilih ogrela za ~1,5–3 °C).
+  Oblika ujame december/januar kot vrh; februar je v zadnjih zimah dosti redkejši kot v normalah (februar 2026 je bil 6. najtoplejši od 1950).
+- **Če se ARSO normale kdaj pokažejo na strani**, je obvezna navedba »Vir: Agencija Republike Slovenije za okolje« (glej razdelek o navedbi vira ARSO v CLAUDE.md); vrednosti so prepisane s posnetka zaslona, ne iz strojno berljivega vira.
+- **Kje bi prava resnica bila:** ARSO arhiv dnevnih meritev (`webmet/archive/data.xml`, že v uporabi za Črnivec 848 m) vsebuje tudi višino snežne odeje in novi sneg za druge padavinske postaje; če katera stoji v Zgornji Savinjski dolini na < 600 m,
+  bi bila to prva prava resnica za nižino. Iz peskovnika `meteo.arso.gov.si` ni dosegljiv, zato seznama postaj nisem mogel pregledati; preveri ga v GitHub Actions.
