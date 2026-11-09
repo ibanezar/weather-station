@@ -8079,6 +8079,63 @@ async function fetchMosForecast(){
   }
 }
 
+/* MTR sneg (9. 11. 2026): kartica `#snow-card` bere napoved-snega.json (tools/predict_sneg_mos.py). p_snow je možnost
+   MERLJIVEGA snega (nov sneg ≥ 1 cm) na tipični od petih ARSO postaj v okolici (model je umerjen na njihova opazovanja);
+   postaja Meteorec snega ne meri, lege ARSO postaj pa ne poznamo, zato je to ocena za okolico. Kartica
+   ima v HTML rezerviran prostor (brez CLS); zunaj sezone ali brez podatkov se skrije — nikoli ne piše »ni snega«,
+   če napovedi ni. Verjetnost se zaokroži na 5 %, pod 5 % piše »< 5 %«. */
+const SNOW_STALE_H=30;
+/* p je možnost MERLJIVEGA snega (>= 1 cm novega snega na tipični ARSO postaji), zato so pragovi nižji kot pri proksiju */
+function _snowLv(p){return p<.05?0:p<.15?1:p<.35?2:3;}
+function _snowLevel(p){return ['malo verjetno','možno','verjetno','zelo verjetno'][_snowLv(p)];}
+function _snowPct(p){const r=Math.round(p*20)*5;return r<=0?'< 5\u00A0%':r+'\u00A0%';}
+function _snowDay(d){
+  const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Ljubljana'});
+  const diff=Math.round((Date.parse(d.date+'T12:00:00Z')-Date.parse(today+'T12:00:00Z'))/864e5);
+  const dt=new Date(d.date+'T12:00:00');
+  return {name:diff===0?'Danes':diff===1?'Jutri':MTR_SL_DAYS[dt.getDay()].slice(0,3),
+          long:diff===0?'danes':diff===1?'jutri':MTR_SL_DAYS[dt.getDay()],date:dt.getDate()+'. '+(dt.getMonth()+1)+'.'};
+}
+function renderSnowCard(j){
+  const card=document.getElementById('snow-card');if(!card)return;
+  const days=(j&&j.in_season&&Array.isArray(j.days)?j.days:[]).filter(d=>d&&d.date&&Number.isFinite(d.p_snow));
+  if(!days.length){card.hidden=true;return;}
+  card.hidden=false;
+  const box=document.getElementById('snow-days'),head=document.getElementById('snow-head'),upd=document.getElementById('snow-updated');
+  box.innerHTML=days.map(d=>{
+    const n=_snowDay(d),pc=_snowPct(d.p_snow),lv=_snowLevel(d.p_snow);
+    const tt=Number.isFinite(d.tavg)?_fmtN(d.tavg,1)+'\u00A0°C':'';
+    const mm=Number.isFinite(d.prec_mm)?(d.prec_mm<.2?'suho':_fmtN(d.prec_mm,1)+'\u00A0mm'):'';
+    const aria=n.long+', '+n.date+': merljiv sneg '+(d.p_snow<.05?'manj kot 5 %':Math.round(d.p_snow*20)*5+' %')+', '+lv+
+      '; povprečje modelov '+tt.replace('\u00A0',' ')+', padavine '+mm.replace('\u00A0',' ');
+    return '<div class="snow-day" role="listitem" aria-label="'+aria+'" data-lv="'+_snowLv(d.p_snow)+'">'
+      +'<div class="snow-day-hd"><b>'+n.name+'</b><span>'+n.date+'</span></div>'
+      +'<div class="snow-day-val">'+pc+'</div>'
+      +'<div class="snow-bar" aria-hidden="true"><i style="width:'+Math.max(2,Math.round(d.p_snow*100))+'%"></i></div>'
+      +'<div class="snow-day-lv">'+lv+'</div>'
+      +'<div class="snow-day-meta">'+(tt?'<span>'+tt+'</span>':'')+(mm?'<span>'+mm+'</span>':'')+'</div></div>';
+  }).join('');
+  const top=days.reduce((a,b)=>b.p_snow>a.p_snow?b:a);
+  const tn=_snowDay(top);
+  head.textContent=top.p_snow<.05
+    ?'Prihodnjih '+days.length+' dni merljiv sneg v okolici ni verjeten.'
+    :'Največ možnosti za merljiv sneg v okolici: '+tn.long+' ('+_snowPct(top.p_snow).replace('\u00A0',' ')+').';
+  const ageH=j.generated_at?(Date.now()-Date.parse(j.generated_at))/36e5:null;
+  if(ageH!==null&&Number.isFinite(ageH)){
+    const stale=ageH>SNOW_STALE_H;
+    upd.textContent=(stale?'podatki niso sveži: ':'posod. ')+(ageH<1.5?'pred '+Math.max(1,Math.round(ageH*60))+' min':'pred '+Math.round(ageH)+' h');
+    upd.classList.toggle('is-stale',stale);
+  }else upd.textContent='';
+}
+async function fetchSnowMtr(){
+  const card=document.getElementById('snow-card');if(!card)return;
+  try{
+    const r=await fetch('/napoved-snega.json?_='+Math.floor(Date.now()/36e5));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    renderSnowCard(await r.json());
+  }catch(e){card.hidden=true;console.warn('MTR sneg:',e);}
+}
+
 /* Preklopnik Tmax/Tmin. Poslušalci se pripnejo enkrat (dataset.bound), ker
    fetchMosForecast() teče znova ob vsakem preklopu na zavihek. */
 function _mtrBindSeg(idp){
@@ -18342,6 +18399,7 @@ async function init(){
     fetchForecastExtras();
     fetchComingUp();
     runAdvancedOnly(()=>fetchMosForecast());
+    runAdvancedOnly(()=>fetchSnowMtr());
     runAdvancedOnly(()=>fetchHeroValley());
     runAdvancedOnly(()=>fetchHeroPm());
   },800);

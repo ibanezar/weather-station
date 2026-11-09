@@ -1460,6 +1460,23 @@ surovega modela (`tools/ai/eval_mtr7_wind.py`, docs/model-recica.md).
 - **Zaživi šele po ponovnem učenju** (`mos-train.yml`): model brez `wind` v `leads.<N>` pusti polja `None` in kartica je skrita.
   Test: `tools/test_mtr_wind.py` (v `parity.yml`).
 
+### MTR sneg (v0.3, 9. 11. 2026)
+
+Poskusna napoved snega za **D+1..D+5** (`tools/train_sneg_mos.py` → `model/sneg-mos.json`, `predict_sneg_mos.py` → `napoved-snega.json` + `data/sneg-forward-log.csv`, `verify_sneg.py` → `data/sneg-verification.json`,
+`sneg-forecast.yml` 4×/dan, v sezoni oktober–april; zunaj nje utrip enkrat na dan). **Postaja snega ne meri.** Dva sloja, ki ju ne zamenjuj:
+
+1. **Osnovni model (proksi, `p_proxy`)**: verjetnost »mokrega hladnega dne« v Rečici (padavine ≥ 0,2 mm in T povp. ≤ 1 °C), logit na T, padavinah in deležu mokrih modelov iz štirih modelov (arhiv napovedi, 39 dogodkov, izpuščanje zime: Brier skill +0,20..+0,11 za D+1..D+5; surov prag brez veščine).
+2. **Kalibracija na opazovanja (`p_snow`, to kaže kartica)**: možnost **merljivega snega** (nov sneg ≥ 1 cm ob jutranjem odčitku) na tipični od petih ARSO postaj (ID 1651, 1652, 1801, 3002, 3152; `OBS_STATIONS`), `p_snow = sigmoid(a + z)` (samo intercept: z dvema parametroma je bil skill pri izpuščeni zimi nestabilen,
+   s samo interceptom +0,04..+0,24, AUC 0,90–0,92; 34 dogodkov v dveh zimah). **Postaj ne znamo preslikati v kraje in ne poznamo njihove višine** (izbrane po korelaciji padavin z IREICA1, r ≤ 0,71): verjetnost velja za okolico, ne za točko v Rečici. Podatki: `data/arso-sneg-postaje/` (Vir: Agencija Republike Slovenije za okolje).
+   Proksi je proti opazovanemu snegu precenjeval 3–7× (F1 0,23; najboljši prag T ≤ 0,5 °C in P ≥ 1 mm F1 0,32, a ima v arhivu napovedi 8 dogodkov, za učenje premalo) — zato sloj 2; podrobnosti in poskusi v `docs/model-recica.md`.
+
+- **Kartica `#snow-card`** (»Sneg v okolici — MTR«, za kartico MTR, Filipova odločitev 9. 11. 2026): pet dni, `p_snow` zaokrožen na 5 % (pod 5 % »< 5 %«), besedna ocena (pragovi 5/15/35 %), T povp. modelov in padavine, značka »poskusno«, opomba o postajah in o tem, da ne pove količine ali obleži. `fetchSnowMtr()`/`renderSnowCard()` v `app.js`, klic v `runAdvancedOnly()`,
+  brez `simple-keep`. **Višina je rezervirana v CSS** (19,3 / 28,4 / 30,8 rem za namizje / ≤ 560 / ≤ 380 px, izmerjeno 309 / 454 / 490 px): ob spremembi besedila izmeri znova (CLS). Zunaj sezone ali ob napaki se skrije, ob starosti > 30 h piše »podatki niso sveži«.
+- **Ne dodajaj** centimetrov, višine odeje ali besede »obleži«; zgodbe/FB/IG samodejno ne. `verify_sneg.py` preverja samo `p_proxy` (edina resnica postaje); preverjanja `p_snow` proti ARSO bi zahtevalo sveže dnevne serije (`data.xml` zamuja ~2 dni) — ni narejeno. `data/sneg-verification.json` bo smiseln s ≥ 15 dogodki na vodilni čas (čez zimo).
+- **ARSO**: seznama postaj arhiva ni (`locations.xml` 500, vir `archive_si.xml` je v knjižnici aplikacije sestavljen dinamično); `webmet/archive/data.xml` sprejme več ID-jev in vrne samo vrednosti (85 padavine, 88 višina odeje, 89 novi sneg), brez imen in koordinat. Pregled: `tools/arso_snow_stations.py`, `arso-snow-stations.yml` (ročno/ob spremembi skripta; iz peskovnika `meteo.arso.gov.si` ni dosegljiv).
+  Normale 1971–2000 in zimska poročila 2022–2026 niso dnevna resnica. **Naslednji korak:** poiskati imena/višine ID-jev in izbrati postajo v Zg. Savinjski dolini, nato ponovno učiti.
+- Značilke, proksi in prileganje so v `train_sneg_mos.py` (ena kopija; `tools/ai/eval_sneg.py` jih uvaža). Test: `tools/test_sneg_mos.py` (v `parity.yml`); vrstica v `REGISTER`. Notranjih meritev model ne bere.
+
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
 
 `predict_recica_mos.py` poleg napovedi zapiše za vsak dan še `p_frost` (P(Tmin ≤ 0 °C),

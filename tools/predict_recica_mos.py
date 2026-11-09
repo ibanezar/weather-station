@@ -114,7 +114,7 @@ def fetch_wn2_spread():
     return out
 
 
-def fetch_live_forecast(model_id=None, variables=None):
+def fetch_live_forecast(model_id=None, variables=None, forecast_days=4):
     """Živa napoved Open-Meteo, urno, za danes + 3 dni naprej. Brez `model_id`
     je to privzeti seamless; z njim en sam imenovan model (AIFS), kadar se je
     model učil z drugim vhodom. `variables` (privzeto HOURLY_VARS) doda dodatne
@@ -124,7 +124,7 @@ def fetch_live_forecast(model_id=None, variables=None):
         "latitude": mos.LAT, "longitude": mos.LON,
         "hourly": ",".join(variables),
         "timezone": mos.TZ,
-        "forecast_days": 4,
+        "forecast_days": forecast_days,
     }
     if model_id:
         params["models"] = model_id
@@ -170,14 +170,14 @@ def frost_probability(tmin, sd, k=FROST_SD_K):
     return 0.5 * (1 + math.erf((0.0 - tmin) / (k * sd) / math.sqrt(2)))
 
 
-def fetch_live_multi(models):
+def fetch_live_multi(models, forecast_days=4):
     """{day: {"tmax": {model: v}, "tmin": {model: v}}} iz žive napovedi drugih modelov.
     Dnevni ekstrem iz urnih vrednosti po lokalnem času (kot arhiv napovedi); model, ki
     ga ni mogoče prebrati, preprosto manjka (multi_vector ga obravnava kot nevtralnega)."""
     out = {}
     for m in models:
         try:
-            rows = fetch_live_forecast(m)
+            rows = fetch_live_forecast(m, forecast_days=forecast_days)
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError,
                 json.JSONDecodeError, OSError) as e:
             print(f"  ⚠ model {m} ni dosegljiv ({e}) — izpuščen", file=sys.stderr)
