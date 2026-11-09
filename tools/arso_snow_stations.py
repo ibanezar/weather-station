@@ -310,6 +310,36 @@ def probe_archive_si(out_dir):
     return best, used
 
 
+def find_probase(out_dir):
+    """Kje je PROBASE? Izpiši vse `URL.X = ...` iz strani aplikacije in poišči `PROBASE_LANG` v knjižnici, ki jo
+    AcademaLoader.js nalaga kot oštevilčene datoteke bin/appNN.xml."""
+    st, page = get("/met/sl/app/webmet/")
+    print(f"[probase] stran aplikacije: HTTP {st}, {len(page)} znakov")
+    for m in re.finditer(r"[^\n]*(?:URL\.\w+\s*=|PROBASE|props\[)[^\n]*", page):
+        print("   page:", re.sub(r"\s+", " ", m.group(0))[:300])
+    found = 0
+    misses = 0
+    for n in range(0, 40):
+        path = f"/uploads/meteo/app/webmet/bin/app{n:02d}.xml"
+        st, tx = get(path)
+        time.sleep(0.5)
+        if st != 200 or not tx:
+            misses += 1
+            print(f"[probase] {path} -> HTTP {st}")
+            if misses >= 3 and n > 3:
+                break
+            continue
+        misses = 0
+        print(f"[probase] {path} -> HTTP 200, {len(tx)} znakov")
+        with open(os.path.join(out_dir, f"app{n:02d}.xml.txt"), "w", encoding="utf-8") as f:
+            f.write(tx)
+        for m in re.finditer(r"PROBASE|probase", tx):
+            a, b = max(0, m.start() - 120), min(len(tx), m.end() + 200)
+            print("   ~", re.sub(r"\s+", " ", tx[a:b]))
+            found += 1
+            if found > 25:
+                return
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--radius", type=float, default=35.0)
@@ -384,6 +414,7 @@ def main():
                         if len(f2) > len(stations):
                             stations, used = f2, l
     if not stations:
+        find_probase(a.out)
         stations, used = probe_archive_si(a.out)
     if not stations and a.crawl:
         crawl_ameba(a.out, [PUJS_ROOT + "/ameba/index.xml", PUJS_ROOT + "/ameba/default.xml", PUJS_ROOT + "/prog/default.xml",
