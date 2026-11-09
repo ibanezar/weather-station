@@ -1,0 +1,45 @@
+name: ARSO sneg v živo (dnevnik postaj v okolici)
+
+# MTR sneg: višina snežne odeje (`snow`) avtomatskih ARSO postaj v okolici Rečice (npr. Gornji Grad 428 m, Radegunda 794 m)
+# iz živega vira observationAms_si_latest.xml. Dnevnik: data/arso-snow-live.csv (commit [skip ci]). Zaradi zamud GitHubovega
+# crona je izvedenih manj tekov kot terminov; vrstica se doda samo, če je opazovanje novo. Notranjih meritev ne bere.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 5,11,17,22 * * *'
+  push:
+    branches: ['claude/intelligent-mayer-q57y8j']
+    paths:
+      - 'tools/log_arso_snow_live.py'
+      - '.github/workflows/arso-snow-live.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arso-snow-live
+  cancel-in-progress: false
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Zapiši opazovanja
+        run: python3 tools/log_arso_snow_live.py 2>&1 | tee arso-snow-live.log
+      - name: Povzetek
+        if: always()
+        run: |
+          { echo '## ARSO sneg v živo'; echo '```'; cat arso-snow-live.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Shrani dnevnik
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/arso-snow-live.csv
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "data: ARSO sneg v živo $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+          for i in 1 2 3; do git pull --rebase -q origin "${GITHUB_REF_NAME}" && git push && exit 0; sleep 5; done
+          exit 1
