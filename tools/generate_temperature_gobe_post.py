@@ -159,11 +159,11 @@ def trapezoid(x, lo, opt_lo, opt_hi, hi):
 
 # ───────────────────────── grafi (inline SVG) ─────────────────────────
 
-def windows_chart(rows, w=460):
+def windows_chart(rows, w=360):
     """rows = [dict(ime, kind, curve, cur, f)] -- temperaturno okno vrste (svetel trak: od najnižje do najvišje, temen: optimalno)
     in trenutna temperatura (polna oznaka = v razponu, prazna = izven razpona)."""
-    pl, pr, pt, pb = 118, 14, 14, 32
-    rh = 28
+    pl, pr, pt, pb = 128, 14, 14, 32
+    rh = 30
     h = pt + pb + rh * len(rows)
     iw = w - pl - pr
     lo, hi = -5, 25
@@ -176,13 +176,13 @@ def windows_chart(rows, w=460):
         zero = t == 0
         p.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{pt}" y2="{base}" stroke="{MUTED if zero else GRID}" stroke-width="{1.4 if zero else 1}"'
                  + (' stroke-dasharray="4 3" stroke-opacity=".7"' if zero else "") + "/>")
-        p.append(f'<text x="{x:.1f}" y="{base + 16}" text-anchor="middle" font-size="10.5" fill="{MUTED}">{str(t).replace("-", "–")}{NBSP}°C</text>')
+        p.append(f'<text x="{x:.1f}" y="{base + 16}" text-anchor="middle" font-size="13" fill="{MUTED}">{str(t).replace("-", "–")}{NBSP}°C</text>')
     for i, r in enumerate(rows):
         cy = pt + rh * i + rh / 2
         col = GREEN if r["kind"] == "tla" else CYAN
         lo_, ol, oh, hi_ = r["curve"]
         nm = r["ime"][0].upper() + r["ime"][1:]
-        p.append(f'<text x="{pl - 10}" y="{cy + 4:.1f}" text-anchor="end" font-size="11.5" fill="{INK}">{nm}</text>')
+        p.append(f'<text x="{pl - 10}" y="{cy + 4:.1f}" text-anchor="end" font-size="13" fill="{INK}">{nm}</text>')
         p.append(f'<rect x="{X(lo_):.1f}" y="{cy - 5:.1f}" width="{X(hi_) - X(lo_):.1f}" height="10" rx="5" fill="{col}" fill-opacity=".20"/>')
         p.append(f'<rect x="{X(ol):.1f}" y="{cy - 5:.1f}" width="{X(oh) - X(ol):.1f}" height="10" rx="3" fill="{col}" fill-opacity=".50"/>')
         inside = r["f"] > 0
@@ -198,7 +198,7 @@ def windows_chart(rows, w=460):
     return "".join(p)
 
 
-def years_chart(rows, w=460):
+def years_chart(rows, w=360):
     """rows = [(leto, tla 1.-7. 11.)] -- stolpec na leto, navpični črti pri pragovih 7,5 in 3,5 °C."""
     pl, pr, pt, pb = 40, 40, 22, 28
     rh = 26
@@ -212,23 +212,23 @@ def years_chart(rows, w=460):
     for t in (0, 4, 8, 12):
         x = X(t)
         p.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{pt}" y2="{base}" stroke="{GRID}" stroke-width="1"/>')
-        p.append(f'<text x="{x:.1f}" y="{base + 16}" text-anchor="middle" font-size="10.5" fill="{MUTED}">{t}{NBSP}°C</text>')
+        p.append(f'<text x="{x:.1f}" y="{base + 16}" text-anchor="middle" font-size="13" fill="{MUTED}">{t}{NBSP}°C</text>')
     for thr, col, lab, anchor in ((THR_LO, BLUE, "3,5", "end"), (THR_HI, AMBER, "7,5", "start")):
         x = X(thr)
         p.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{pt - 6}" y2="{base}" stroke="{col}" stroke-width="1.8" stroke-dasharray="5 3"/>')
-        p.append(f'<text x="{x + (-4 if anchor == "end" else 4):.1f}" y="{pt - 9}" text-anchor="{anchor}" font-size="10.5" font-weight="700" fill="{col}">{lab}{NBSP}°C</text>')
+        p.append(f'<text x="{x + (-4 if anchor == "end" else 4):.1f}" y="{pt - 9}" text-anchor="{anchor}" font-size="13" font-weight="700" fill="{col}">{lab}{NBSP}°C</text>')
     for i, (y, v) in enumerate(rows):
         y0 = pt + rh * i
         now = y == LAST
-        p.append(f'<text x="{pl - 8}" y="{y0 + rh / 2 + 4:.1f}" text-anchor="end" font-size="11.5" font-weight="{700 if now else 400}" fill="{INK}">{y}</text>')
+        p.append(f'<text x="{pl - 8}" y="{y0 + rh / 2 + 4:.1f}" text-anchor="end" font-size="13" font-weight="{700 if now else 400}" fill="{INK}">{y}</text>')
         p.append(f'<rect x="{pl}" y="{y0 + 5:.1f}" width="{X(v) - pl:.1f}" height="{rh - 10}" rx="3" fill="{GREEN if now else GREY}" fill-opacity="{1 if now else .65}">'
                  f'<title>{y}: tla 1.–7. 11., povprečje {num(v)} °C</title></rect>')
-        p.append(f'<text x="{X(v) + 5:.1f}" y="{y0 + rh / 2 + 4:.1f}" font-size="10.5" font-weight="{700 if now else 400}" fill="{INK}">{num(v)}</text>')
+        p.append(f'<text x="{X(v) + 5:.1f}" y="{y0 + rh / 2 + 4:.1f}" font-size="13" font-weight="{700 if now else 400}" fill="{INK}">{num(v)}</text>')
     p.append("</svg>")
     return "".join(p)
 
 
-def season_chart(H, soil, w=460):
+def season_chart(H, soil, w=360):
     """Dnevna temperatura tal in povprečna temperatura zraka od 1. 10. do zadnjega dne, pragova 7,5 in 3,5 °C,
     noči z 0 °C ali manj kot rombi na spodnji osi."""
     pl, pr, pt, pb = 40, 14, 14, 34
@@ -244,13 +244,13 @@ def season_chart(H, soil, w=460):
          'xmlns="http://www.w3.org/2000/svg">']
     for t in (0, 4, 8, 12, 16):
         p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{Y(t):.1f}" y2="{Y(t):.1f}" stroke="{GRID}" stroke-width="1"/>')
-        p.append(f'<text x="{pl - 6}" y="{Y(t) + 4:.1f}" text-anchor="end" font-size="10.5" fill="{MUTED}">{t}</text>')
+        p.append(f'<text x="{pl - 6}" y="{Y(t) + 4:.1f}" text-anchor="end" font-size="13" fill="{MUTED}">{t}</text>')
     for m, d, lab in ((10, 1, "1. 10."), (10, 15, "15. 10."), (11, 1, "1. 11.")):
         x = X(datetime.date(LAST, m, d))
-        p.append(f'<text x="{x:.1f}" y="{h - 8}" text-anchor="middle" font-size="10.5" fill="{MUTED}">{lab}</text>')
+        p.append(f'<text x="{x:.1f}" y="{h - 8}" text-anchor="middle" font-size="13" fill="{MUTED}">{lab}</text>')
     for thr, col, lab in ((THR_HI, AMBER, "7,5 °C: lisička, marela"), (THR_LO, BLUE, "3,5 °C: jurček, sirovka")):
         p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{Y(thr):.1f}" y2="{Y(thr):.1f}" stroke="{col}" stroke-width="1.6" stroke-dasharray="5 3"/>')
-        p.append(f'<text x="{pl + 4}" y="{Y(thr) - 5:.1f}" font-size="10.5" font-weight="700" fill="{col}">{lab}</text>')
+        p.append(f'<text x="{pl + 4}" y="{Y(thr) - 5:.1f}" font-size="13" font-weight="700" fill="{col}">{lab}</text>')
     air = [(D(k), v["tempAvg"]) for k, v in sorted(H.items()) if k >= f"{LAST}-10-01" and v.get("tempAvg") is not None]
     p.append('<polyline fill="none" stroke="%s" stroke-width="1.4" stroke-opacity=".85" stroke-linejoin="round" points="%s"><title>zrak: dnevno povprečje, postaja IREICA1</title></polyline>'
              % (GREY, " ".join(f"{X(d):.1f},{Y(v):.1f}" for d, v in air)))
@@ -286,7 +286,7 @@ STYLE = """<style>
 .vs-fig{margin:1.4rem 0;padding:1rem 1rem .8rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px}
 .vs-fig figcaption{color:var(--muted);font-size:.88rem;line-height:1.55;margin-top:.6rem}
 .vs-fig h3{font-family:'Space Grotesk',sans-serif;font-size:.95rem;margin:0 0 .4rem;color:var(--text)}
-.vs-fig svg{display:block;width:100%;height:auto;max-width:560px;margin:0 auto}
+.vs-fig svg{display:block;width:100%;height:auto;max-width:460px;margin:0 auto}
 .vs-leg{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.85rem;color:var(--muted);margin:.2rem 0 .6rem}
 .vs-leg i{display:inline-block;width:.8rem;height:.8rem;border-radius:3px;margin-right:.4rem;vertical-align:-.1rem}
 .vs-leg i.vs-dot{border-radius:50%}
