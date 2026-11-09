@@ -31,12 +31,13 @@ import train_sneg_mos as tsm  # noqa: E402
 ROOT = tsm.ROOT
 OUT_PATH = os.path.join(ROOT, "napoved-snega.json")
 LOG_PATH = os.path.join(ROOT, "data", "sneg-forward-log.csv")
-LOG_FIELDS = ["issued_at", "valid_at", "lead_days", "hours_before", "p_snow", "tavg", "prec_mm",
+LOG_FIELDS = ["issued_at", "valid_at", "lead_days", "hours_before", "p_snow", "p_proxy", "tavg", "prec_mm",
               "n_models", "model_version"]
 LJ = ZoneInfo("Europe/Ljubljana")
-NOTE = ("MTR sneg -- POSKUSNI model. Verjetnost »snežnega dne« je proksi: padavine in povprečna "
-        "temperatura <= 1 °C v Rečici. Postaja snega ne meri; to ni napoved debeline snega in ne ve, "
-        "ali sneg obleži. Ni uradno opozorilo.")
+NOTE = ("MTR sneg -- POSKUSNI model. p_snow = možnost merljivega snega (nov sneg >= 1 cm) na tipični od petih ARSO postaj "
+        "v širši okolici Rečice (Vir: Agencija Republike Slovenije za okolje); postaje niso v Rečici in njihove lege ne poznamo. "
+        "p_proxy = verjetnost »mokrega hladnega dne« v Rečici (padavine >= 0,2 mm in T povp. <= 1 °C), na katerem je naučen osnovni model. "
+        "Postaja Meteorec snega ne meri; ni napoved debeline snega, ni uradno opozorilo.")
 
 
 def load_model(path=tsm.MODEL_PATH):
@@ -66,9 +67,12 @@ def predict_days(model, per_day, today):
         f = tsm.day_features(per_day.get(target.isoformat()) or {})
         if f is None:
             continue
+        pp = tsm.predict_p(entry, f)
+        po = tsm.predict_obs(entry, f)
         days.append({
             "date": target.isoformat(), "lead": lead,
-            "p_snow": round(tsm.predict_p(entry, f), 2),
+            "p_snow": round(po if po is not None else pp, 3), "p_proxy": round(pp, 2),
+            "basis": "observed" if po is not None else "proxy",
             "tavg": round(f["tavg"], 1), "prec_mm": round(f["prec"], 1), "n_models": f["n_models"],
         })
     return days
@@ -80,7 +84,14 @@ def append_log(payload, path=LOG_PATH, now=None):
     seen = set()
     if os.path.exists(path):
         with open(path, encoding="utf-8", newline="") as f:
-            seen = {(r["issued_at"], r["valid_at"]) for r in csv.DictReader(f)}
+            old_rows = list(csv.DictReader(f))
+        seen = {(r["issued_at"], r["valid_at"]) for r in old_rows}
+        if old_rows and set(old_rows[0].keys()) != set(LOG_FIELDS):      # nov stolpec (p_proxy): preseli star zapis
+            with open(path, "w", encoding="utf-8", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=LOG_FIELDS)
+                w.writeheader()
+                for r in old_rows:
+                    w.writerow({k: r.get(k, "") for k in LOG_FIELDS})
     rows = []
     for d in payload["days"]:
         if (issued, d["date"]) in seen:
@@ -88,7 +99,7 @@ def append_log(payload, path=LOG_PATH, now=None):
         start = dt.datetime.combine(dt.date.fromisoformat(d["date"]), dt.time(0, 0), tzinfo=LJ)
         rows.append({"issued_at": issued, "valid_at": d["date"], "lead_days": d["lead"],
                      "hours_before": round((start - now).total_seconds() / 3600, 1),
-                     "p_snow": d["p_snow"], "tavg": d["tavg"], "prec_mm": d["prec_mm"],
+                     "p_snow": d["p_snow"], "p_proxy": d["p_proxy"], "tavg": d["tavg"], "prec_mm": d["prec_mm"],
                      "n_models": d["n_models"], "model_version": payload["model_version"]})
     if not rows:
         return 0
@@ -162,7 +173,7 @@ def main():
         return 0
     payload = build_payload(model, days, True, now)
     for d in days:
-        print(f"  {d['date']} (D+{d['lead']}): snežni dan (proksi) {int(round(d['p_snow'] * 100))} % "
+        print(f"  {d['date']} (D+{d['lead']}): merljiv sneg {int(round(d['p_snow'] * 100))} % (proksi {int(round(d['p_proxy'] * 100))} %) "
               f"[T povp. modelov {d['tavg']} °C, padavine {d['prec_mm']} mm, modelov {d['n_models']}]")
     if args.no_write:
         print("(--no-write)")

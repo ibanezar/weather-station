@@ -513,3 +513,23 @@ Preverjeno, ali ARSO-va gradiva dajo opazovan sneg za dolino (da bi proksi nadom
   torej primerljivo samo z najbolj zasneženo postajo (1652), drugje je proksi višji. **Izjava na kartici »sneg v dolini« velja torej kot zgornja meja možnosti sneženja, ne kot verjetnost ≥ 1 cm.** Opozorilo: postaje niso v Rečici, nepoznana višina in lokacija mešata napako proksija z razliko v legi.
 - **Naslednji koraki (ni narejeno):** (1) ponovno učenje modela na strožjem proksiju (T ≤ 0,5 °C, P ≥ 1 mm) ali neposredno na opazovanem novem snegu ≥ 1 cm; (2) ugotoviti imena/lokacije ID-jev (npr. s primerjavo z urnimi podatki sosednjih postaj ali ročno prek aplikacije arhiva) in izbrati postajo v Zg. Savinjski dolini;
   (3) višina postaj (ni v odgovoru `data.xml`). Navedba vira pri vsakem javnem prikazu: »Vir: Agencija Republike Slovenije za okolje«.
+
+### MTR sneg v0.3: kalibracija na opazovan sneg (9. 11. 2026)
+
+Po pregledu ARSO arhiva (zgoraj) je proksi precenjeval dneve z merljivim snegom 3–7×. **Strožji proksi (T ≤ 0,5 °C, P ≥ 1 mm; F1 0,32) ima v arhivu napovedi (maj 2024–nov 2026) samo 8 dogodkov**, (T ≤ 0,5, P ≥ 0,5) 12: premalo za učenje modela po vodilnih časih.
+Zato osnovni model (proksi T ≤ 1 °C, P ≥ 0,2 mm, 39 dogodkov) ostane in dobi **drugi sloj**: `p_snow = sigmoid(a + z)`, kjer je z surov logit osnovnega modela, `a` pa naučen na parih (dan, postaja) z opazovanim novim snegom ≥ 1 cm na petih ARSO postajah
+(2162 parov, 34 dogodkov, delež 1,6 %; a ≈ −2,4..−2,7).
+
+| vodilni čas | skill (zima izpuščena) intercept | skill prosta (a, b) | AUC intercept |
+|---|---|---|---|
+| D+1 | +0,04 | −0,11 | 0,92 |
+| D+2 | +0,21 | +0,17 | 0,92 |
+| D+3 | +0,08 | −0,04 | 0,90 |
+| D+4 | +0,24 | +0,19 | 0,92 |
+| D+5 | +0,16 | +0,06 | 0,90 |
+
+Zato samo intercept (b = 1). **Opozorila:** dve zimi (2024/25, 2025/26), 34 dogodkov, izpuščanje zime ima torej dva pregiba; postaje so izbrane po korelaciji padavin (r ≤ 0,71) in niso nujno v dolini; opazovanje je jutranji odčitek ob 7. uri istega dne
+(poravnava »isti dan« je bila boljša od »dan prej«); preverjanje je znotraj istih zim (kalibracija je prilagojena tem podatkom). Tipični izhodi: hladen mokri dan (T −1 °C, 6 mm) D+1: proksi 68 %, merljiv sneg 25 %; rahlo nad ničlo (1,5 °C, 3 mm): 19 % in 2 %;
+suh mraz: 36 % in 5 % (padavine v osnovnem modelu premalo dušijo suhe dni: znana slabost).
+**Kartica pokaže `p_snow`.** Ker je ob napovedi za 10.–14. 11. (dež do petka, sobota T povp. 3,8 °C in < 1 mm) vsak dan pod 5 %, piše »merljiv sneg v okolici ni verjeten«; model ne vidi prehoda na sneg ob koncu dežja (dnevno povprečje), ki ga omenja članek.
+**Še ni narejeno:** imena in višine ID-jev; učenje neposredno na opazovanju po vodilnih časih (potrebuje več zim); sveže ARSO serije za preverjanje `p_snow` naprej; urna ločljivost (prehod dež → sneg).

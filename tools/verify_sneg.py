@@ -9,7 +9,8 @@ ta skript meri samo napovedi, nastale po uvedbi.
 Za vsak (ciljni dan, vodilni čas) vzame najzgodnejšo izdajo v svojem razredu (vodilni čas = ceil(hours_before/24)),
 ker je model učen na napovedi izpred N dni (previous_dayN), ne na napovedi tik pred dogodkom.
 
-Rezultat: data/sneg-verification.json. Do MIN_EVENTS dogodkov na vodilni čas je rezultat »zgoden« in se NE
+NAPOVEDI SO PROKSIJA (p_proxy, »mokri hladni dan« v Rečici): nanj se nanaša edina resnica, ki jo ima postaja. Kalibracija na opazovan sneg (p_snow)
+se tu ne preverja; potrebovala bi sveže ARSO dnevne serije (data.xml ima zamik ~2 dni). Rezultat: data/sneg-verification.json. Do MIN_EVENTS dogodkov na vodilni čas je rezultat »zgoden« in se NE
 tolmači. Primerjava je z deležem snežnih dni v učnem obdobju (klimatologija modela).
 
 Uporaba:
@@ -39,9 +40,9 @@ def pick_issues(rows):
     for r in rows:
         try:
             hb = float(r["hours_before"])
-            p = float(r["p_snow"])
+            p = float(r.get("p_proxy") or "")      # proksi je merljiv z meritvami postaje; p_snow (opazovanja ARSO) ne
         except (ValueError, TypeError, KeyError):
-            continue
+            continue                               # starejše vrstice (pred v0.3) nimajo p_proxy
         if hb <= 0:
             continue    # dan že teče: ni napoved za ta vodilni čas
         lead = math.ceil(hb / 24)

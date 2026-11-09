@@ -1,6 +1,6 @@
 {
-  "model_version": "0.2",
-  "trained_at": "2026-11-09T09:44:33Z",
+  "model_version": "0.3",
+  "trained_at": "2026-11-09T10:42:22Z",
   "train_range": {
     "from": "2024-10-01",
     "to": "2026-11-08"
@@ -8,7 +8,19 @@
   "target": {
     "name": "snežni dan (proksi)",
     "definition": "padavine >= 0.2 mm IN povprečna temperatura zraka <= 1.0 °C",
-    "caveat": "Postaja snega ne meri; to je mokri hladni dan, ne opazovan sneg."
+    "caveat": "Postaja snega ne meri; osnovni model napoveduje mokri hladni dan (proksi)."
+  },
+  "observed_target": {
+    "name": "merljiv sneg (opazovanje)",
+    "definition": "nov sneg >= 1 cm ob jutranjem odčitku na tipični od 5 ARSO postaj",
+    "caveat": "Postaje niso v Rečici (imena in višine niso znane); verjetnost velja za tipično izmed njih, ne za točko v Rečici.",
+    "stations": [
+      "1651",
+      "1652",
+      "1801",
+      "3002",
+      "3152"
+    ]
   },
   "season_months": [
     10,
@@ -58,6 +70,28 @@
         "skill_cal": 0.202,
         "auc": 0.875,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      },
+      "obs_calibration": {
+        "a": -2.7423,
+        "b": 1.0,
+        "n": 2162,
+        "events": 34,
+        "prevalence": 0.0157,
+        "stations": [
+          "1651",
+          "1652",
+          "1801",
+          "3002",
+          "3152"
+        ],
+        "cv": {
+          "brier_clim": 0.0155,
+          "brier": 0.0149,
+          "skill": 0.041,
+          "auc": 0.923,
+          "n": 2162,
+          "events": 34
+        }
       }
     },
     "2": {
@@ -89,6 +123,28 @@
         "skill_cal": 0.169,
         "auc": 0.856,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      },
+      "obs_calibration": {
+        "a": -2.3738,
+        "b": 1.0,
+        "n": 2162,
+        "events": 34,
+        "prevalence": 0.0157,
+        "stations": [
+          "1651",
+          "1652",
+          "1801",
+          "3002",
+          "3152"
+        ],
+        "cv": {
+          "brier_clim": 0.0155,
+          "brier": 0.0123,
+          "skill": 0.208,
+          "auc": 0.918,
+          "n": 2162,
+          "events": 34
+        }
       }
     },
     "3": {
@@ -120,6 +176,28 @@
         "skill_cal": 0.151,
         "auc": 0.846,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      },
+      "obs_calibration": {
+        "a": -2.5052,
+        "b": 1.0,
+        "n": 2162,
+        "events": 34,
+        "prevalence": 0.0157,
+        "stations": [
+          "1651",
+          "1652",
+          "1801",
+          "3002",
+          "3152"
+        ],
+        "cv": {
+          "brier_clim": 0.0155,
+          "brier": 0.0142,
+          "skill": 0.082,
+          "auc": 0.903,
+          "n": 2162,
+          "events": 34
+        }
       }
     },
     "4": {
@@ -151,6 +229,28 @@
         "skill_cal": 0.122,
         "auc": 0.829,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      },
+      "obs_calibration": {
+        "a": -2.5004,
+        "b": 1.0,
+        "n": 2162,
+        "events": 34,
+        "prevalence": 0.0157,
+        "stations": [
+          "1651",
+          "1652",
+          "1801",
+          "3002",
+          "3152"
+        ],
+        "cv": {
+          "brier_clim": 0.0155,
+          "brier": 0.0118,
+          "skill": 0.239,
+          "auc": 0.917,
+          "n": 2162,
+          "events": 34
+        }
       }
     },
     "5": {
@@ -182,6 +282,28 @@
         "skill_cal": 0.11,
         "auc": 0.796,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      },
+      "obs_calibration": {
+        "a": -2.4385,
+        "b": 1.0,
+        "n": 2162,
+        "events": 34,
+        "prevalence": 0.0157,
+        "stations": [
+          "1651",
+          "1652",
+          "1801",
+          "3002",
+          "3152"
+        ],
+        "cv": {
+          "brier_clim": 0.0155,
+          "brier": 0.013,
+          "skill": 0.163,
+          "auc": 0.899,
+          "n": 2162,
+          "events": 34
+        }
       }
     }
   }
