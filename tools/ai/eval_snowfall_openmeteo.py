@@ -93,7 +93,7 @@ def main():
         rows = tsm.samples_for(lead, truth, by)
         z_oof, _, idx = tsm.oof_logits(rows)
         zmap = {rows[i]["date"]: z for z, i in zip(z_oof, idx)}
-        zs, sf_mean, sf_max, ys = [], [], [], []
+        zs, sf_mean, sf_max, ys, ws = [], [], [], [], []
         for date, z in zmap.items():
             vals = [daily[(m, lead)].get(date) for m in MODELS if (m, lead) in daily]
             vals = [v for v in vals if v is not None]
@@ -107,6 +107,7 @@ def main():
                 sf_mean.append(float(np.mean(vals)))
                 sf_max.append(float(max(vals)))
                 ys.append(1 if v >= tsm.OBS_NEW_SNOW_CM else 0)
+                ws.append(tsm.season_year(date))
         ys_a = np.array(ys)
         res = {"n": len(ys), "events": int(ys_a.sum()),
                "auc_osnovni_logit": auc(zs, ys), "auc_snowfall_povprecje": auc(sf_mean, ys), "auc_snowfall_max": auc(sf_max, ys),
@@ -114,6 +115,26 @@ def main():
         pred = np.array(sf_mean) > 0.05
         res["snowfall>0: zadetkov/napacnih alarmov/zgresenih"] = [int((pred & (ys_a == 1)).sum()), int((pred & (ys_a == 0)).sum()),
                                                                   int((~pred & (ys_a == 1)).sum())]
+        # kombinacija: osnovni logit (samo intercept, kot v produkciji) proti logit + zastavica snowfall > 0 (izpuščena zima)
+        z_a, f_a, w_a = np.array(zs), (np.array(sf_mean) > 0.05).astype(float), np.array(ws)
+        pa, pb, tr, base = [], [], [], []
+        for w in sorted(set(ws)):
+            te, trn = w_a == w, w_a != w
+            if ys_a[trn].sum() < 5 or not te.any():
+                continue
+            a, _ = tsm.fit_obs_calibration(z_a[trn], ys_a[trn])
+            X = np.column_stack([np.ones(trn.sum()), z_a[trn], f_a[trn]])
+            pen = np.eye(3) * 0.5
+            pen[0, 0] = 0.0
+            wb = tsm._newton(X, ys_a[trn].astype(float), pen, np.array([0.0, 1.0, 0.0]))
+            pa += list(tsm._sigmoid(a + z_a[te]))
+            pb += list(tsm._sigmoid(wb[0] + wb[1] * z_a[te] + wb[2] * f_a[te]))
+            tr += list(ys_a[te])
+            base += [float(ys_a[trn].mean())] * int(te.sum())
+        if tr:
+            b0 = tsm.brier(base, tr)
+            res["izpuscena_zima"] = {"skill_osnovni": round(1 - tsm.brier(pa, tr) / b0, 3), "skill_z_snowfall": round(1 - tsm.brier(pb, tr) / b0, 3),
+                                     "auc_osnovni": round(auc(pa, tr), 3), "auc_z_snowfall": round(auc(pb, tr), 3)}
         out["skill"][f"D+{lead}"] = res
         print(f"D+{lead}:", json.dumps(res, ensure_ascii=False))
     os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
