@@ -130,10 +130,10 @@ def fig_rain(S):
     leg = (f'<p class="vs-leg"><span><i style="background:{C_THU}"></i>četrtek</span><span><i style="background:{C_FRI}"></i>petek</span>'
            f'<span><i style="background:{INK};border-radius:50%"></i>ansambel: mediana in razpon 10.–90. percentila</span></p>')
     names = ", ".join(r[0] for r in rows)
-    return fig("Dež v četrtek in petek: od kod do kod sežejo modeli", leg + "".join(g),
-               f"Vsak vodoravni stolpec je en model (en tek, Rečica, 366 m): svetlejši del so padavine v četrtek, temnejši v petek. Prikazani so {names}. "
-               "ARPEGE in nekateri drugi modeli ne segajo do konca petka, zato jih ni. Spodaj je ansambel s 143 člani: krog je mediana, "
-               "črta pa razpon, v katerega pade devet desetin članov.")
+    return fig("Dež v četrtek in petek – razpon napovedi posameznih modelov", leg + "".join(g),
+               f"Vsak vodoravni stolpec predstavlja en model oziroma njegov posamezni izračun za Rečico (366 m). Svetlejši del prikazuje napovedano količino padavin v četrtek, temnejši pa v petek. "
+               f"Prikazani so modeli {names}. Modela ARPEGE in nekateri drugi ne segajo do konca petka, zato niso vključeni. "
+               "Spodaj je prikazan ansambel s 143 člani: krog označuje mediano, črta pa razpon, v katerega se uvršča 80 % članov (od 10. do 90. percentila).")
 
 
 def shape(kind, x, y, r, color, filled):
@@ -199,11 +199,10 @@ def fig_scatter(S, pts):
         f'<span><svg class="sn-ico" viewBox="0 0 14 14" width="14" height="14">'
         f'{shape(SHAPES[sid], 7, 7, 3.6, SYS_COL[sid], True)}</svg>{SYS_NAME[sid]}</span>' for sid in S.ids)
         + '<span>polno: vsaj 1 cm snega</span><span>prazno: manj</span></p>')
-    return fig("Kaj mora sovpasti: ohladitev, ki ujame še kaj padavin", leg + "".join(g),
-               "Vsak lik je en član ansambla (143 jih je). Vodoravno je čas, ko se temperatura zraka v Rečici prvič spusti na 3 °C ali manj, "
-               "navpično pa padavine v naslednjih 48 urah (korenska lestvica, da se vidijo tudi majhne vrednosti). "
-               "Polni liki so člani, pri katerih do ponedeljka nastane vsaj 1 cm snega. V desnem stolpcu je število članov, "
-               "pri katerih se temperatura do ponedeljka sploh ne spusti na 3 °C.")
+    return fig("Kaj mora sovpasti – ohladitev, ki ujame še nekaj padavin", leg + "".join(g),
+               "Vsaka točka predstavlja enega od 143 članov ansamblov. Na vodoravni osi je prikazan čas, ko temperatura zraka v Rečici prvič pade na 3 °C ali manj, na navpični pa količina padavin v naslednjih 48 urah. "
+               "Uporabljena je korenska lestvica, da so vidne tudi majhne količine. Polne točke označujejo člane, pri katerih do ponedeljka zapade vsaj 1 cm snega. "
+               "V desnem stolpcu je prikazano število članov, pri katerih se temperatura do ponedeljka sploh ne spusti na 3 °C ali manj.")
 
 
 # ───────────────────────── interaktivni gradniki ─────────────────────────
@@ -546,7 +545,7 @@ def widgets_html(S):
               f'<span><i style="background:{C_RAIN}"></i>dež</span><span><i style="background:rgba(255,255,255,.12)"></i>suho</span>'
               f'<span><i style="background:#fbbf24"></i>temperatura</span></p>')
     hourly = (
-        '<figure class="vs-fig sn-wide"><h3>Ura za uro: temperatura, padavine in vsi modeli</h3>'
+        '<figure class="vs-fig sn-wide"><h3>Ura za uro – temperatura, padavine in vsi modeli</h3>'
         '<div class="sn-ctl"><div class="sn-grp"><span class="sn-lab">Višina</span><div class="sn-seg" id="sn-seg-el"></div></div>'
         '<div class="sn-grp"><span class="sn-lab">Ansambel</span><div class="sn-seg" id="sn-seg-sys"></div></div></div>'
         + legend +
@@ -554,11 +553,12 @@ def widgets_html(S):
         '<input class="sn-range" id="sn-hour-range" type="range" min="0" max="119" step="1" value="0" aria-label="Izberite uro od četrtka do ponedeljka">'
         '<div class="sn-read" id="sn-hour-read" aria-live="off"></div>'
         '<noscript><p class="vs-note">Za ta graf je potreben JavaScript. Ključne številke so v besedilu pod grafom.</p></noscript>'
-        '<figcaption>Zgoraj je temperatura zraka na izbrani višini (črta je mediana članov izbranega ansambla, pas razpon od 10. do 90. percentila). V sredini je za vsako uro '
-        'delež članov, pri katerih tedaj sneži (belo), dežuje s snegom (vijolično) ali dežuje (modro). Spodaj je sedem posameznih modelov, vsak z enim tekom. '
-        'Premaknite drsnik ali se dotaknite grafa. Svetlo modro ozadje je noč na soboto, od petka ob 18. uri do sobote ob 8. uri.</figcaption></figure>')
+        '<figcaption>Zgornji graf prikazuje temperaturo zraka na izbrani višini. Črta predstavlja mediano članov izbranega ansambla, obarvani pas pa razpon med 10. in 90. percentilom. '
+        'Srednji graf prikazuje delež članov, pri katerih v posamezni uri sneži (belo), pada dež s snegom (vijolično) ali dežuje (modro). '
+        'Spodaj je prikazanih sedem posameznih modelov, vsak z enim izračunom. Premaknite drsnik ali se dotaknite grafa. '
+        'Svetlo modro ozadje označuje noč na soboto, od petka ob 18. uri do sobote ob 8. uri.</figcaption></figure>')
     elev = (
-        '<figure class="vs-fig sn-wide"><h3>Koliko članov napove sneg, glede na višino</h3>'
+        '<figure class="vs-fig sn-wide"><h3>Koliko članov napoveduje sneg glede na nadmorsko višino</h3>'
         '<div class="sn-ctl"><div class="sn-grp"><span class="sn-lab">Obdobje</span><div class="sn-seg" id="sn-seg-win"></div></div>'
         '<div class="sn-grp"><span class="sn-lab">Kaj šteje</span><div class="sn-seg" id="sn-seg-met"></div></div></div>'
         '<p class="vs-leg"><span><i style="background:linear-gradient(90deg,#9db8e6,#f1f5f9)"></i>vsi člani skupaj</span>'
@@ -566,11 +566,11 @@ def widgets_html(S):
                   f'{shape(SHAPES[sid], 7, 7, 3.6, SYS_COL[sid], True)}</svg>{SYS_NAME[sid]}</span>' for sid in S.ids) + '</p>'
         '<div id="sn-elev"></div><p class="sn-read" id="sn-elev-note" aria-live="polite" style="margin-top:.7rem"></p>'
         '<noscript><p class="vs-note">Za ta graf je potreben JavaScript. Ključne številke so v besedilu pod grafom.</p></noscript>'
-        '<figcaption>Vsaka vrstica je ena višina nad Rečico; dotik vrstice izbere to višino tudi v grafu zgoraj. Stolpec je delež vseh 143 članov, '
-        'liki pa pokažejo delež posameznega ansambla: razmik med njimi je mera, koliko se sistemi razhajajo. '
-        'Višino sem popravil z običajnim temperaturnim gradientom, kar je poenostavitev.</figcaption></figure>')
+        '<figcaption>Vsaka vrstica predstavlja eno nadmorsko višino nad Rečico. Če se dotaknete vrstice, izberete to višino tudi v zgornjem grafu. '
+        'Stolpec prikazuje delež vseh 143 članov, posamezni simboli pa deleže članov vsakega ansambla. Večji razmik med simboli pomeni večje razhajanje med napovedmi. '
+        'Temperaturo na posameznih višinah sem ocenil s pomočjo običajnega temperaturnega gradienta, kar je poenostavitev.</figcaption></figure>')
     maps = (
-        '<figure class="vs-fig sn-wide"><h3>Slovenija: kje ima sneg več možnosti</h3>'
+        '<figure class="vs-fig sn-wide"><h3>Slovenija – kje ima sneg več možnosti</h3>'
         '<div class="sn-ctl"><div class="sn-grp"><span class="sn-lab">Kazalnik</span><div class="sn-seg" id="sn-map-mode"></div></div>'
         '<div class="sn-grp"><span class="sn-lab">Skoči na</span><div class="sn-jumps" id="sn-map-jumps" style="display:flex;flex-wrap:wrap;gap:.35rem"></div></div></div>'
         '<div class="sn-map-wrap"><div><div class="sn-chart" id="sn-map"></div>'
@@ -581,8 +581,8 @@ def widgets_html(S):
         '<div><p class="sn-lab" id="sn-rank-t" style="margin-bottom:.4rem">Najvišji deleži</p><ol class="sn-rank" id="sn-rank"></ol>'
         '<div class="sn-read" id="sn-town"></div></div></div>'
         '<noscript><p class="vs-note">Za zemljevid je potreben JavaScript.</p></noscript>'
-        '<figcaption>Barva in številka v krogu sta delež vseh 143 članov, pri katerih velja izbrani kazalnik za ta kraj. Vsak kraj je izračunan na svoji višini. '
-        'Izberite kraj na zemljevidu ali v seznamu, spodaj pa se pokaže njegov potek po urah. Krogi niso merilna mesta, ampak točke modela.</figcaption></figure>')
+        '<figcaption>Barva in številka v krogu prikazujeta delež vseh 143 članov, pri katerih je za izbrani kraj izpolnjen izbrani pogoj. Vsak kraj je obravnavan na svoji nadmorski višini. '
+        'Izberite kraj na zemljevidu ali v seznamu, spodaj pa se prikaže njegov potek po urah. Krogi ne označujejo merilnih mest, temveč lokacije, za katere so prikazani modelni podatki.</figcaption></figure>')
     script = f"<script>window.SN_D={js_data};</script><script>{WIDGET_JS}</script>"
     return hourly, elev, maps, script
 
@@ -680,80 +680,88 @@ def build_article(S):
 
     # --- ploščice ---
     t_tiles = tiles([
-        (f'{TF["mm50"]}', "mm", f'dežja v Rečici v četrtek in petek (mediana ansambla; devet desetin članov napove od {TF["mm10"]} do {TF["mm90"]} mm)', False),
-        (f"{C1}", "%", "članov ansamblov napove na dnu doline (366 m) vsaj 1 cm snega do ponedeljka", True),
-        (f"{C1_900}", "%", "isto na 900 m, kot je Črnivec: tam je sneg bolj verjeten kot ne", False),
-        (f'{FROST_SUN[366]}', "%", "članov: v nedeljo zjutraj v dolini 0 °C ali manj, tudi če sneg ne pride", False),
+        (f'{TF["mm50"]}', "mm", f'pričakovana količina dežja v Rečici v četrtek in petek (mediana ansambla; 80 % članov napoveduje od {TF["mm10"]} do {TF["mm90"]} mm).', False),
+        (f"{C1}", "%", "delež članov ansamblov, ki na dnu doline (366 m) do ponedeljka napovedujejo vsaj 1 cm snega.", True),
+        (f"{C1_900}", "%", "enak kazalnik za nadmorsko višino 900 m, kot jo ima Črnivec. Tam je sneg verjetnejši kot ne.", False),
+        (f'{FROST_SUN[366]}', "%", "delež članov, ki za nedeljsko jutro v dolini napovedujejo temperaturo 0 °C ali manj, tudi če snega ne bo.", False),
     ])
+    members = {sid: d["systems"]["366"][sid]["all"]["n"] for sid in S.ids}
 
-    lead = (f"V četrtek in petek bo v Rečici po modelih padlo okoli <strong>{TF['mm50']} mm dežja</strong>, ne snega: nad dolino je še topel zrak. "
-            f"Hladna fronta pride šele ob koncu padavin, zato je sneg v nižinah odvisen od tega, ali bo za njo še kaj padlo. "
-            f"Po {n_mem} članih štirih ansamblov dobi dno doline do ponedeljka <strong>vsaj 1 cm snega v {C1} %</strong> primerov, na 900 m pa v {C1_900} %.")
+    lead = (f"V četrtek in petek bo po modelskih napovedih v Rečici padlo okoli <strong>{TF['mm50']} mm dežja</strong>, snega pa še ne bo: nad dolino bo zrak pretopel. "
+            f"Hladna fronta bo prispela šele ob koncu padavin, zato je možnost snega v nižinah odvisna predvsem od tega, ali bo po ohladitvi padlo še kaj padavin. "
+            f"Na podlagi {n_mem} članov štirih ansamblov bo do ponedeljka <strong>vsaj 1 cm snega</strong> na dnu doline v {C1} % scenarijev, na nadmorski višini 900 m pa v {C1_900} %.")
 
     p1 = [
-        "<strong>Kratek odgovor: v četrtek je sneg v nižinah po modelih praktično izključen, v noči na soboto je možen, a manj verjeten kot ne.</strong> "
-        f"V četrtek in petek je temperatura na višini 850 hPa (približno 1,5 km) po modelih med {t850_lo} in {t850_hi} °C. "
-        "Hladen zrak prihaja v valu, ki ga modeli postavijo na petek zvečer in soboto, ko je glavnina padavin že mimo.",
+        "<strong>Kratek odgovor: v četrtek je sneg v nižinah po modelskih napovedih praktično izključen.</strong> V noči na soboto je sicer možen, vendar manj verjeten kot ne. "
+        f"V četrtek in petek bo temperatura na višini 850 hPa (približno 1,5 km) po napovedih znašala od {t850_lo} do {t850_hi} °C. "
+        "Hladen zrak bo pritekal šele v petek zvečer in soboto, ko bo glavnina padavin že mimo.",
         "Podatki v številkah:",
         t_tiles,
-        f"Številke izhajajo iz {n_mem} članov štirih ansamblov: ECMWF ENS ({d['systems']['366']['ecmwf_ifs025']['all']['n']}), ICON-EPS ({d['systems']['366']['icon_seamless']['all']['n']}), "
-        f"GEFS ({d['systems']['366']['gfs025']['all']['n']}) in GEM ENS ({d['systems']['366']['gem_global']['all']['n']}). Član je ena možna različica vremena, "
-        "delež članov je torej ocena verjetnosti, ne obljuba. "
-        "Za »sneg« sem vzel padavino pri temperaturi zraka do 1,5 °C na višini kraja, med 0,5 in 2,5 °C je delež snega sorazmeren. Več o tem je v razdelku o omejitvah.",
+        f"Številke temeljijo na {n_mem} članih štirih ansamblov: ECMWF ENS ({members['ecmwf_ifs025']}), ICON-EPS ({members['icon_seamless']}), GEFS ({members['gfs025']}) in GEM ENS ({members['gem_global']}). "
+        "Vsak član predstavlja eno od možnih različic vremena. Delež članov zato razumemo kot oceno verjetnosti, ne kot zagotovilo.",
+        "Za izračun snega sem upošteval padavine pri temperaturi zraka do 1,5 °C na višini posameznega kraja. Med 0,5 in 2,5 °C delež snega upoštevam sorazmerno. "
+        "Več o tej poenostavitvi je v razdelku o omejitvah.",
     ]
 
     p2 = [
-        f"Četrtek je še v toplem sektorju pred fronto. Temperatura na 850 hPa je med {t850_lo} in {t850_hi} °C, ničelna izoterma je blizu treh kilometrov, "
-        "sneženja torej ni niti na višjih legah. Padavine se okrepijo v petek, ko prek doline potuje fronta.",
+        f"Četrtek bo še v toplem sektorju pred hladno fronto. Temperatura na višini 850 hPa bo znašala od {t850_lo} do {t850_hi} °C, ničelna izoterma pa bo blizu treh kilometrov. "
+        "Sneženja torej ni pričakovati niti v višjih legah. Padavine se bodo okrepile v petek, ko bo fronta prešla dolino.",
         fig_rain(S),
-        f"Skupaj modeli napovedujejo za četrtek in petek od {rain_lo} do {rain_hi} mm. Mediana ansambla je <strong>{TF['mm50']} mm</strong>, "
-        f"devet desetin članov pa napove od {TF['mm10']} do {TF['mm90']} mm. To je veliko padavin za dva dni in za tla pomeni, da bodo mokra in topla, "
-        "ko se ohladi. Ravno zato sneženje v dolini še ne pomeni bele podlage.",
+        f"Posamezni modeli za četrtek in petek skupaj napovedujejo od {rain_lo} do {rain_hi} mm padavin. Mediana ansambla znaša <strong>{TF['mm50']} mm</strong>, "
+        f"80 % njegovih članov pa napoveduje od {TF['mm10']} do {TF['mm90']} mm.",
+        "To je precejšnja količina padavin za samo dva dni. Tla bodo zato ob prihodu ohladitve mokra in razmeroma topla. "
+        "Tudi če bo v dolini snežilo, to še ne pomeni, da se bo sneg obdržal.",
         "Takšna količina dežja se bo poznala tudi na rekah. Stanje spremljajte na "
-        f'{a("/vodostaj-savinje/", "strani o vodostaju Savinje")} in pri ARSO; ta članek ni opozorilo.',
+        f'{a("/vodostaj-savinje/", "strani o vodostaju Savinje")} in pri ARSO. Ta članek ni vremensko ali hidrološko opozorilo.',
     ]
 
     p3 = [
-        f"Spodnji graf je jedro članka. Pokaže, kako se uro za uro menjata dež in sneg, kdaj pade temperatura in kaj o tem pravi vsak model posebej. "
-        "Izberite višino in ansambel ter premaknite drsnik.",
+        "Spodnji graf je jedro članka. Prikazuje, kako se iz ure v uro spreminjajo temperatura in padavine, kdaj nastopi ohladitev ter kaj napoveduje vsak posamezni model. "
+        "Izberite nadmorsko višino in ansambel ter premaknite drsnik.",
         hourly_w,
-        "Kaj se vidi:",
+        "Kaj pokaže graf?",
         "<ul>"
-        f"<li><strong>Petek čez dan je dež.</strong> V petek opoldne dežuje v dolini {rain_fri12} % članov, sneži pri nobenem.</li>"
-        f"<li><strong>Mraz pride, ko padavine že pojenjajo.</strong> Mediana temperature v dolini pade pod 5 °C {S.ob(h_t5)}; v soboto ob 4. uri je suho že pri {dry_sat4} % članov.</li>"
-        f"<li><strong>Tudi v najugodnejši uri je sneg v dolini manjšina.</strong> V tej uri sneži ali dežuje s snegom v dolini {peak_snow} % članov, na 900 m pa {peak_snow_900} %.</li>"
+        f"<li><strong>Petek čez dan bo deževen.</strong> V petek opoldne napoveduje dež v dolini {rain_fri12} % članov, sneženja pa ne napoveduje nobeden.</li>"
+        f"<li><strong>Ohladitev pride, ko padavine že ponehajo.</strong> Mediana temperature v dolini pade pod 5 °C {S.ob(h_t5)}. V soboto ob 4. uri pa je po napovedih že suho pri {dry_sat4} % članov.</li>"
+        f"<li><strong>Tudi v najugodnejši uri je sneg v dolini malo verjeten.</strong> V tej uri sneži ali pada dež s snegom v dolini pri {peak_snow} % članov, na nadmorski višini 900 m pa pri {peak_snow_900} %.</li>"
         "</ul>",
     ]
 
-    ranked = ", ".join(f"{c1_by[sid]} % {SYS_NAME[sid]}" for sid in order)
+    ranked = ", ".join(f"{SYS_NAME[sid]} {c1_by[sid]} %" for sid in order[:-1]) + f" in {SYS_NAME[order[-1]]} {c1_by[order[-1]]} %"
     p4 = [
-        f"Ansambli se pri vprašanju o snegu v dolini razhajajo bolj, kot bi bilo udobno. Do ponedeljka vsaj 1 cm snega v dolini napove "
-        f"<strong>{hi_v} %</strong> članov ansambla {SYS_NAME[hi_sys]} in le {lo_v} % ansambla {SYS_NAME[lo_sys]}. Po vrsti: {ranked}. "
-        "Spodnji graf pokaže te razlike za vsako višino in obdobje.",
+        f"Ansambli se glede možnosti snega v dolini razhajajo precej bolj, kot bi si želeli. Da bo do ponedeljka zapadlo vsaj 1 cm snega, napoveduje "
+        f"<strong>{hi_v} %</strong> članov ansambla {SYS_NAME[hi_sys]}, medtem ko je pri ansamblu {SYS_NAME[lo_sys]} takšnih le {lo_v} %. "
+        f"Po posameznih ansamblih so deleži naslednji: {ranked}.",
+        "Spodnji graf prikazuje razlike med ansambli za posamezne nadmorske višine in obdobja.",
         elev_w,
-        f"Z višino verjetnost hitro raste: pri 500 m je {C1_500} %, pri 700 m {C1_700} %, pri 900 m {C1_900} % in pri 1200 m {C1_1200} %. "
-        f"Vsaj 5 cm snega napove na 900 m {C5_900} % članov, na 1200 m pa {C5_1200} %.",
-        f"Razhajanje ima konkretno obliko: mediana ohladitve je pri {SYS_NAME[early_s]} {when_early}, pri {SYS_NAME[late_s]} šele {when_late}. "
-        f"V 48 urah po ohladitvi pade po mediani {num(bm_early)} mm pri prvem in {num(bm_late)} mm pri drugem. "
-        "Kdo ima prav, bo jasno šele z novimi teki modelov.",
+        f"Z nadmorsko višino možnost snega hitro narašča: pri 500 m znaša {C1_500} %, pri 700 m {C1_700} %, pri 900 m {C1_900} % in pri 1200 m {C1_1200} %. "
+        f"Vsaj 5 cm snega na nadmorski višini 900 m napoveduje {C5_900} % članov, na 1200 m pa {C5_1200} %.",
+        f"Razlike med ansambli so vidne tudi pri času ohladitve. Mediana ohladitve nastopi pri {SYS_NAME[early_s]} {when_early}, pri {SYS_NAME[late_s]} pa šele {when_late}. "
+        f"V 48 urah po ohladitvi prvi ansambel po mediani napoveduje še {num(bm_early)} mm padavin, drugi pa {num(bm_late)} mm. "
+        "Kateri bo bližje resničnosti, bo pokazalo šele nadaljevanje napovedi in novejši izračuni modelov.",
     ]
 
     p5 = [
-        "Sneg v dolini potrebuje tri stvari hkrati: dovolj hladen zrak, padavine v tistem trenutku in dovolj padavin, da se karkoli nabere. "
-        "Razsevni diagram spodaj pokaže prvi dve: kdaj se ohladi in koliko pade potem.",
+        "Za sneg v dolini morajo hkrati sovpadati trije pogoji: dovolj hladen zrak, padavine v času ohladitve in dovolj velika količina padavin, da se sneg lahko nabere. "
+        "Razsevni diagram spodaj prikazuje predvsem prva dva pogoja: kdaj se zrak ohladi in koliko padavin pade po tem.",
         fig_scatter(S, pts),
-        f"Od {len(snowy)} članov, ki v dolini naredijo vsaj 1 cm snega, jih {share_wet} % po ohladitvi dobi vsaj 1 mm padavin, "
-        f"{share_early} % pa se ohladi do sobote opoldne. {no_front} od {len(pts)} članov se do ponedeljka sploh ne ohladi na 3 °C ali manj, ti sneg v dolini ne naredijo.",
+        f"Med {len(snowy)} člani, ki v dolini napovedujejo vsaj 1 cm snega, jih {share_wet} % po ohladitvi napoveduje še vsaj 1 mm padavin. "
+        f"Prav tako se pri {share_early} % teh članov zrak ohladi do sobote opoldne.",
+        f"Pri {no_front} od {len(pts)} članov se temperatura do ponedeljka sploh ne spusti na 3 °C ali manj. V teh scenarijih sneg v dolini ne zapade.",
     ]
 
-    town_txt = ", ".join(f"{k} ({v['elev']} m) {v['pooled_all']['cm1']} %" for k, v in top)
+    ACC = {"Murska Sobota": "Mursko Soboto", "Rečica ob Savinji": "Rečico ob Savinji", "Solčava": "Solčavo", "Ljubljana": "Ljubljano",
+           "Nova Gorica": "Novo Gorico", "Postojna": "Postojno"}
+    tt = [f"{ACC.get(k, k)} ({v['elev']} m; {v['pooled_all']['cm1']} %)" for k, v in top]
+    town_txt = ", ".join(tt[:-1]) + " in " + tt[-1]
+    low_txt = ", ".join(f"{k} ({v} %)" for k, v in low[:-1]) + f" in {low[-1][0]} ({low[-1][1]} %)"
     p6 = [
-        "Zemljevid pokaže iste podatke za 20 krajev. Vsak kraj je izračunan na svoji višini, kazalnik je delež vseh članov. "
-        "Premaknite drsnik ali pritisnite predvajanje.",
+        "Zemljevid prikazuje enake podatke za 20 krajev po Sloveniji. Za vsak kraj je izračun prilagojen njegovi nadmorski višini, kazalnik pa predstavlja delež vseh članov. "
+        "Premaknite drsnik ali pritisnite gumb za predvajanje.",
         map_w,
-        f"Najvišji deleži do ponedeljka (vsaj 1 cm): {town_txt}. "
-        f"Najmanj možnosti imajo {low_txt}. "
-        "Zakaj je razporeditev takšna, iz teh podatkov ne morem zanesljivo ugotoviti: višina je pomembna, a sama ne razloži vsega, saj imata Kranj (385 m) in Velenje (390 m) več kot Bled (475 m).",
+        f"Najvišji deleži za vsaj 1 cm snega do ponedeljka so napovedani za {town_txt}. Najmanj možnosti imajo {low_txt}.",
+        "Zakaj je razporeditev takšna, iz teh podatkov ne morem zanesljivo ugotoviti. Nadmorska višina je pomembna, vendar sama ne pojasni vsega. "
+        "Kranj (385 m) in Velenje (390 m) imata na primer več možnosti za sneg kot Bled (475 m).",
     ]
 
     scen_a = 100 - ANY
@@ -764,70 +772,77 @@ def build_article(S):
         f'<span style="width:{scen_a}%;background:{C_RAIN}"></span><span style="width:{scen_b}%;background:{C_MIX}"></span><span style="width:{scen_c}%;background:{C_SNOW}"></span></div>'
         '<div class="sn-scen">'
         f'<div class="sn-sc"><b class="big">{scen_a} %</b><h4><span class="tag" style="background:{C_RAIN}"></span>Dež, nato mraz</h4>'
-        "<p>Dež preneha, preden se ohladi. V nedeljo zjutraj je v dolini mrzlo, na mokrih cestah je poledica, snega ni.</p></div>"
+        "<p>Dež preneha, preden se zrak ohladi. V nedeljo zjutraj bo v dolini hladno, na mokrih cestah pa lahko nastane poledica. Snežne odeje ne bo.</p></div>"
         f'<div class="sn-sc"><b class="big">{scen_b} %</b><h4><span class="tag" style="background:{C_MIX}"></span>Poprh ali dež s snegom</h4>'
-        "<p>Ob koncu padavin pade dež s snegom ali nekaj snežink, a manj kot 1 cm. Mokra tla ga pogoltnejo.</p></div>"
+        "<p>Ob koncu padavin začne padati dež s snegom ali nekaj snežink, vendar se nabere manj kot 1 cm snega. Mokra tla ga hitro stopijo.</p></div>"
         f'<div class="sn-sc"><b class="big">{scen_c} %</b><h4><span class="tag" style="background:{C_SNOW}"></span>Bela podlaga</h4>'
-        f"<p>Ohladitev ujame še padavine: vsaj 1 cm, pri {C5} % članov vsaj 5 cm. Prej na višjih legah, v dolini zlasti v noči na soboto.</p></div></div>"
+        f"<p>Ohladitev ujame še padavine in zapade vsaj 1 cm snega. Pri {C5} % članov ansamblov je napovedanih vsaj 5 cm. Najprej bi snežilo na višjih legah, v dolini pa predvsem v noči na soboto.</p></div></div>"
     )
     p7 = [
-        "Za dno doline vidim tri možne poteke. Deleži so seštevek članov, ne napoved, in se bodo z novimi teki spreminjali.",
+        "Za dno doline vidim tri možne poteke. Navedeni deleži predstavljajo delež članov ansamblov, ne zagotovljene verjetnosti. Z novimi izračuni modelov se bodo lahko spremenili.",
         scenarios,
-        f"Kdor bi stavil, bi stavil na prvo možnost. Druge dve nista zanemarljivi: najbolj snežni ansambel, {SYS_NAME[hi_sys]}, pripisuje vsaj 1 cm snega {hi_v} % članov.",
+        f"Najverjetneje se bo torej uresničil prvi scenarij. Drugi dve možnosti nista zanemarljivi: najbolj snežen ansambel, {SYS_NAME[hi_sys]}, vsaj 1 cm snega napoveduje pri {hi_v} % svojih članov.",
     ]
 
     p8 = [
-        f"Najbolj verjeten rezultat je tudi najmanj opazen: mraz. V nedeljo zjutraj je temperatura v dolini po {n_mem} članih 0 °C ali manj pri <strong>{FROST_SUN[366]} %</strong> članov, "
-        f"pri 500 m pri {FROST_SUN[500]} %, pri 700 m pri {FROST_SUN[700]} % in pri 900 m pri {FROST_SUN[900]} %. "
-        f"Mediana nedeljske najnižje temperature v dolini je {temp(SUN['tmin50'])}, najhladnejša desetina članov pa napove {temp(SUN['tmin10'])} ali manj.",
-        "To pomeni poledico na mokrih cestah, tudi kjer sneg ne pade. Oceno poledice za naslednje dni najdete na "
-        f'{a("/zima/poledica/", "strani o poledici")}, razliko med žledom in poledico pa sem pojasnil {a("/blog/zled-ali-poledica-razlika-1027.html", "v članku o žledu")}.',
+        f"Najverjetnejši izid je tudi najmanj opazen: mraz. V nedeljo zjutraj po napovedih {FROST_SUN[366]} % od {n_mem} članov za dolino kaže temperaturo 0 °C ali manj. "
+        f"Pri 500 m je takšnih članov {FROST_SUN[500]} %, pri 700 m {FROST_SUN[700]} %, pri 900 m pa že {FROST_SUN[900]} %.",
+        f"Mediana najnižje nedeljske temperature v dolini znaša {temp(SUN['tmin50'])}, najhladnejša desetina članov pa napoveduje {temp(SUN['tmin10'])} ali manj.",
+        "To pomeni povečano možnost poledice na mokrih cestah, tudi tam, kjer snega ne bo. Napoved poledice za naslednje dni najdete na "
+        f'{a("/zima/poledica/", "strani o poledici")}, razliko med žledom in poledico pa sem pojasnil v {a("/blog/zled-ali-poledica-razlika-1027.html", "posebnem članku o žledu")}.',
     ]
 
     p9 = [
         "<ul>"
-        f'<li><strong>Zimska oprema:</strong> če še niste menjali gum, je kritičen odsek od petka zvečer do nedelje zjutraj. Kdaj je to običajno smiselno in kaj velja po pravilih, '
-        f'sem zbral {a("/blog/kdaj-menjati-zimske-gume-recica-1027.html", "v članku o zimskih gumah")}; za pravila preverite AMZS.</li>'
-        f'<li><strong>Čez prelaze:</strong> na 900 m (kot Črnivec) vsaj 1 cm snega napove {C1_900} % članov. Stanje meritve na prelazu je na {a("https://crnivec.si/", "crnivec.si")}, '
-        f'več o snegu tam pa {a("/blog/crnivec-pozimi-sneg-verige-1027.html", "v članku o Črnivcu pozimi")}.</li>'
-        f'<li><strong>Opozorilo na telefon:</strong> na strani {a("/zima/meja-snezenja/", "meja sneženja")} si lahko nastavite obvestilo za sneg v dolini za danes ali jutri.</li>'
-        f'<li><strong>Karta in gore:</strong> {a("/zima/snezna-karta/", "snežna karta")} bo z bližanjem petka pokazala tudi ta dan, {a("/vreme-v-gorah/", "vreme v gorah")} pa kaže ocene na vrhovih.</li>'
-        f'<li><strong>Prvi sneg v dolini:</strong> kdaj je v zadnjih letih prvi sneg v dolini običajno padel, je v {a("/blog/kdaj-pade-prvi-sneg-v-dolini-recica-1027.html", "članku o prvem snegu")}.</li>'
+        f'<li><strong>Zimska oprema:</strong> če še niste zamenjali pnevmatik, bo najbolj kritično obdobje od petka zvečer do nedelje zjutraj. '
+        f'Kdaj je smiselno zamenjati pnevmatike, sem zbral v {a("/blog/kdaj-menjati-zimske-gume-recica-1027.html", "članku o zimskih gumah")}. Za veljavna pravila preverite AMZS.</li>'
+        f'<li><strong>Vožnja čez prelaze:</strong> na nadmorski višini 900 m, kot jo ima Črnivec, vsaj 1 cm snega napoveduje {C1_900} % članov. '
+        f'Meritve in trenutno stanje na prelazu spremljajte na {a("https://crnivec.si/", "crnivec.si")}, '
+        f'več o zimskih razmerah tam pa v {a("/blog/crnivec-pozimi-sneg-verige-1027.html", "članku o Črnivcu pozimi")}.</li>'
+        f'<li><strong>Obvestilo na telefon:</strong> na strani z {a("/zima/meja-snezenja/", "mejo sneženja")} si lahko nastavite obvestilo o možnosti snega v dolini za danes ali jutri.</li>'
+        f'<li><strong>Snežna karta in gore:</strong> {a("/zima/snezna-karta/", "snežna karta")} bo z bližanjem petka prikazovala tudi napoved za ta dan, '
+        f'razmere v gorah pa lahko spremljate z ocenami za posamezne vrhove na strani {a("/vreme-v-gorah/", "vreme v gorah")}.</li>'
+        f'<li><strong>Prvi sneg v dolini:</strong> kdaj je v zadnjih letih v dolini običajno zapadel prvi sneg, si lahko preberete v {a("/blog/kdaj-pade-prvi-sneg-v-dolini-recica-1027.html", "članku o prvem snegu")}.</li>'
         "</ul>",
     ]
 
     omejitve = [
         "<ul>"
-        f"<li><strong>Dež ali sneg je moja poenostavitev.</strong> Ansambli v Open-Meteo nimajo temperature mokrega termometra. Padavino štejem za sneg pri temperaturi zraka do 1,5 °C (v celoti do 0,5 °C), "
-        "sorazmerno do 2,5 °C, 1 mm padavin je 1 cm snega. Z drugačno mejo se deleži premaknejo; polja snega, ki ga objavlja Open-Meteo sam, nisem uporabil.</li>"
-        "<li><strong>Sneži ni isto kot obleži.</strong> Model ne pozna temperature tal. Po več deset milimetrih dežja so tla mokra in topla, zato rahel sneg ob 1 °C v dolini običajno ne obleži.</li>"
-        "<li><strong>Višine so popravljene s standardnim gradientom.</strong> Temperatura na višjih legah je izračunana z običajnim zniževanjem s višino. V resnici je lahko pozimi drugače, zlasti pri inverziji.</li>"
-        "<li><strong>Člani niso neodvisni.</strong> 143 članov ni 143 neodvisnih mnenj; večji ansambel ima večjo težo v skupnem deležu (ECMWF ENS je 51 od 143). Zato so ob skupnem deležu posebej prikazani tudi ansambli.</li>"
-        "<li><strong>Metoda ni preverjena na preteklih primerih.</strong> Postaja IREICA1 snega ne meri; v teh dneh bo izmerila temperaturo, vlago in padavine, sneg bo treba oceniti s kamer in poročil.</li>"
-        f"<li><strong>Članek je posnetek.</strong> Podatki so s prenosa {S.fetched.day}. {S.fetched.month}. {S.fetched.year} ob {S.fetched.hour}.{S.fetched.minute:02d}. "
-        "Do četrtka se bodo teki modelov večkrat spremenili in z njimi tudi deleži. Ta članek se ne posodablja samodejno. "
-        'Za uradna opozorila spremljajte <a href="https://vreme.arso.gov.si/napoved" style="color:var(--blue)">ARSO</a>; nič v tem članku ni uradno vremensko opozorilo.</li>'
+        "<li><strong>Razlikovanje med dežjem in snegom je poenostavljeno.</strong> Ansambli v Open-Meteo ne vključujejo temperature mokrega termometra. "
+        "Za sneg štejem padavine pri temperaturi zraka do 1,5 °C na višini posameznega kraja. Pri temperaturi do 0,5 °C vse padavine štejem kot sneg, med 0,5 in 2,5 °C pa delež snega zmanjšujem sorazmerno. "
+        "Predpostavljam tudi, da 1 mm padavin pomeni 1 cm snega. Pri drugače izbrani temperaturni meji bi se deleži spremenili. Modelskih podatkov o snegu, ki jih objavlja Open-Meteo, nisem uporabil.</li>"
+        "<li><strong>To, da sneži, še ne pomeni, da se bo sneg obdržal.</strong> Model ne upošteva temperature tal. Po več deset milimetrih dežja bodo tla mokra in razmeroma topla, "
+        "zato rahel sneg pri temperaturi okoli 1 °C v dolini običajno ne obleži.</li>"
+        "<li><strong>Nadmorske višine so prilagojene s standardnim temperaturnim gradientom.</strong> Temperatura na višjih legah je izračunana ob predpostavki običajnega padanja temperature z višino. "
+        "V resnici je lahko zlasti ob temperaturni inverziji drugače.</li>"
+        f"<li><strong>Člani ansamblov niso neodvisni.</strong> {n_mem} članov ne pomeni {n_mem} neodvisnih napovedi. Večji ansambel ima v skupnem deležu večjo težo; "
+        f"ECMWF ENS na primer predstavlja {members['ecmwf_ifs025']} od {n_mem} članov. Zato poleg skupnega deleža posebej prikazujem tudi rezultate posameznih ansamblov.</li>"
+        "<li><strong>Metoda še ni preverjena na preteklih primerih.</strong> Postaja IREICA1 ne meri višine snežne odeje. V teh dneh bo merila temperaturo, vlago in padavine, "
+        "dejansko sneženje pa bo treba oceniti s pomočjo kamer in poročil.</li>"
+        f"<li><strong>Članek je posnetek trenutnega stanja.</strong> Podatki temeljijo na prenosu z dne {S.fetched.day}. {S.fetched.month}. {S.fetched.year} ob {S.fetched.hour}.{S.fetched.minute:02d}. "
+        "Do četrtka se bodo izračuni modelov še večkrat spremenili, z njimi pa tudi prikazani deleži. Članek se ne posodablja samodejno. "
+        'Za uradna vremenska opozorila spremljajte <a href="https://vreme.arso.gov.si/napoved" style="color:var(--blue)">ARSO</a>. Nobena informacija v tem članku ni uradno vremensko opozorilo.</li>'
         "</ul>",
         '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate samo z '
         'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se '
         'predhodno dogovorite z avtorjem.</p>',
     ]
 
-    title = "Sneg v nižinah: četrtek še dež, odloča se v noči na soboto"
+    title = "Sneg v nižinah: četrtek še dež, odločitev v noči na soboto"
     assert len(title) <= 60, len(title)
-    desc = (f"Četrtek in petek prineseta dež, sneg v nižinah pa je možen šele ob koncu padavin. Ura za uro, višine in zemljevid iz {n_mem} članov ansamblov.")
+    desc = (f"V četrtek in petek bo deževalo, sneg v nižinah pa bo možen šele ob koncu padavin. Ura za uro, različne nadmorske višine in napovedi {n_mem} članov ansamblov.")
     assert len(desc) <= 160, len(desc)
     sections = [
-        {"label": "01 — odgovor", "heading": "Četrtek je dež, odločitev pade v noči na soboto", "id": "odgovor", "paragraphs": p1},
+        {"label": "01 — odgovor", "heading": "Četrtek bo deževen, odločitev pade v noči na soboto", "id": "odgovor", "paragraphs": p1},
         {"label": "02 — četrtek in petek", "heading": "Najprej pride dež, ne sneg", "id": "dez", "paragraphs": p2},
-        {"label": "03 — ura za uro", "heading": "Kdaj se ohladi in ali takrat še pada", "id": "ura", "paragraphs": p3},
-        {"label": "04 — višine", "heading": "Kdo ima prav: ansambli se razhajajo", "id": "visine", "paragraphs": p4},
-        {"label": "05 — mehanizem", "heading": "Kaj mora sovpasti za sneg v dolini", "id": "mehanizem", "paragraphs": p5},
-        {"label": "06 — Slovenija", "heading": "Po Sloveniji: kje ima sneg več možnosti", "id": "zemljevid", "paragraphs": p6},
-        {"label": "07 — scenariji", "heading": "Trije poteki za dno doline", "id": "scenariji", "paragraphs": p7},
+        {"label": "03 — ura za uro", "heading": "Kdaj se bo ohladilo in ali bodo takrat še padavine?", "id": "ura", "paragraphs": p3},
+        {"label": "04 — višine", "heading": "Kdo ima prav? Ansambli se razhajajo", "id": "visine", "paragraphs": p4},
+        {"label": "05 — mehanizem", "heading": "Kaj mora sovpasti, da bo v dolini snežilo?", "id": "mehanizem", "paragraphs": p5},
+        {"label": "06 — Slovenija", "heading": "Po Sloveniji: kje ima sneg več možnosti?", "id": "zemljevid", "paragraphs": p6},
+        {"label": "07 — scenariji", "heading": "Trije možni scenariji za dno doline", "id": "scenariji", "paragraphs": p7},
         {"label": "08 — nedelja", "heading": "Če sneg ne pride, pride mraz", "id": "nedelja", "paragraphs": p8},
-        {"label": "09 — praktično", "heading": "Kaj lahko naredite", "id": "prakticno", "paragraphs": p9},
-        {"label": "10 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": omejitve},
+        {"label": "09 — praktično", "heading": "Kaj lahko naredite?", "id": "prakticno", "paragraphs": p9},
+        {"label": "10 — omejitve", "heading": "Česa podatki ne povedo?", "id": "omejitve", "paragraphs": omejitve},
     ]
 
     def nb(h):
