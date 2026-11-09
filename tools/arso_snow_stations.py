@@ -340,6 +340,42 @@ def find_probase(out_dir):
             if found > 25:
                 return
 
+def data_xml(ids, d1, d2, vars_="85,88,89"):
+    params = urllib.parse.urlencode({"lang": "si", "vars": vars_, "group": "dailyData0", "type": "daily",
+                                     "id": ids, "d1": d1, "d2": d2})
+    return get(f"/webmet/archive/data.xml?{params}", timeout=90)
+
+
+def probe_ids(out_dir, max_id=6000, batch=100):
+    """Seznam postaj ni dosegljiv, zato ga sestavimo iz data.xml: odgovor nosi atribute postaj (ime, lon, lat, alt).
+    Najprej en ID in tri ID-ji (izpis glave), nato po paketih čez vse ID-je z enodnevnim obdobjem."""
+    day = "2025-01-10"
+    for ids in ("3391", "3390,3391,3392"):
+        st, tx = data_xml(ids, day, day)
+        time.sleep(PAUSE_S)
+        print(f"[ids] id={ids} -> HTTP {st}, {len(tx)} znakov")
+        print("   glava:", re.sub(r"\s+", " ", tx[:1500]))
+        with open(os.path.join(out_dir, f"data-ids-{ids.replace(',', '_')}.txt"), "w", encoding="utf-8") as f:
+            f.write(tx)
+        found = parse_stations_keyed(tx) or parse_stations(tx)
+        print(f"   razpoznanih postaj: {len(found)}: {[(x['id'], x['name'], x['elev']) for x in found[:5]]}")
+    if not found or len(found) < 2:
+        return [], None
+    stations = {}
+    for start in range(1, max_id, batch):
+        ids = ",".join(str(i) for i in range(start, min(start + batch, max_id)))
+        st, tx = data_xml(ids, day, day)
+        time.sleep(PAUSE_S)
+        if st != 200 or not tx:
+            print(f"[ids] {start}-{start + batch}: HTTP {st}")
+            continue
+        for x in (parse_stations_keyed(tx) or parse_stations(tx)):
+            stations[x["id"]] = x
+        if start % 1000 == 1:
+            print(f"[ids] do {start + batch}: postaj {len(stations)}")
+    return list(stations.values()), f"data.xml (skeniranje id 1..{max_id})"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--radius", type=float, default=35.0)
@@ -414,8 +450,7 @@ def main():
                         if len(f2) > len(stations):
                             stations, used = f2, l
     if not stations:
-        find_probase(a.out)
-        stations, used = probe_archive_si(a.out)
+        stations, used = probe_ids(a.out)
     if not stations and a.crawl:
         crawl_ameba(a.out, [PUJS_ROOT + "/ameba/index.xml", PUJS_ROOT + "/ameba/default.xml", PUJS_ROOT + "/prog/default.xml",
                             PUJS_ROOT + "/prog/init.xml", PUJS_ROOT + "/menu.xml"])
