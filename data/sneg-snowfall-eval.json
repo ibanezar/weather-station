@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09T13:03:23Z",
+ "generated": "2026-11-09T13:08:41Z",
  "range": [
   "2024-10-01",
   "2026-04-30"
@@ -226,7 +226,13 @@
     19,
     61,
     15
-   ]
+   ],
+   "izpuscena_zima": {
+    "skill_osnovni": 0.04,
+    "skill_z_snowfall": -0.27,
+    "auc_osnovni": 0.92,
+    "auc_z_snowfall": 0.861
+   }
   },
   "D+2": {
    "n": 2100,
@@ -239,7 +245,13 @@
     6,
     24,
     28
-   ]
+   ],
+   "izpuscena_zima": {
+    "skill_osnovni": 0.208,
+    "skill_z_snowfall": 0.187,
+    "auc_osnovni": 0.915,
+    "auc_z_snowfall": 0.908
+   }
   },
   "D+3": {
    "n": 2100,
@@ -252,7 +264,13 @@
     11,
     59,
     23
-   ]
+   ],
+   "izpuscena_zima": {
+    "skill_osnovni": 0.082,
+    "skill_z_snowfall": -0.006,
+    "auc_osnovni": 0.901,
+    "auc_z_snowfall": 0.858
+   }
   },
   "D+4": {
    "n": 2100,
@@ -265,7 +283,13 @@
     19,
     51,
     15
-   ]
+   ],
+   "izpuscena_zima": {
+    "skill_osnovni": 0.239,
+    "skill_z_snowfall": -0.038,
+    "auc_osnovni": 0.915,
+    "auc_z_snowfall": 0.899
+   }
   },
   "D+5": {
    "n": 2100,
@@ -278,7 +302,13 @@
     24,
     191,
     10
-   ]
+   ],
+   "izpuscena_zima": {
+    "skill_osnovni": 0.162,
+    "skill_z_snowfall": 0.07,
+    "auc_osnovni": 0.897,
+    "auc_z_snowfall": 0.899
+   }
   }
  }
 }
