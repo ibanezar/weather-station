@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-08",
-  "issued": "08.11.2026 7:00 CET",
-  "issued_at": "2026-11-08T07:30:35.458186+01:00",
-  "top_station": "Vojsko",
-  "top_mm": 7,
+  "date": "2026-11-09",
+  "issued": "09.11.2026 7:00 CET",
+  "issued_at": "2026-11-09T07:30:36.247475+01:00",
+  "top_station": "Celje",
+  "top_mm": 0,
   "n_stations": 19,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-08.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-08-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-11-09.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-09-story.jpg"
 }
