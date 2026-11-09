@@ -223,7 +223,11 @@ def main():
             if cand.endswith("/webmet/"):       # aplikacija arhiva: preberi njene skripte in izpiši, od kod jemlje postaje
                 srcs = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', text, flags=re.I)
                 srcs += re.findall(r'["\']([^"\']+\.js(?:\?[^"\']*)?)["\']', text)
-                for src in list(dict.fromkeys(srcs))[:25]:
+                # glavni modul aplikacije in nastavitve (v strani zapisani kot '/uploads/meteo/app/webmet/bin/app' ...)
+                srcs += ["/uploads/meteo/app/webmet/bin/app.js", "/uploads/meteo/app/webmet/bin/app",
+                         "/uploads/meteo/app/webmet/pujs/settings.xml"]
+                srcs += re.findall(r'["\'](/uploads/meteo/app/webmet/[^"\']+)["\']', text)
+                for src in list(dict.fromkeys(srcs))[:40]:
                     if src.startswith("//") and "arso" not in src:
                         continue
                     url = urllib.parse.urljoin(BASE + cand, src)
@@ -234,7 +238,11 @@ def main():
                     time.sleep(PAUSE_S)
                     with open(os.path.join(a.out, "js-" + re.sub(r"\W+", "_", url)[-70:] + ".txt"), "w", encoding="utf-8") as fj:
                         fj.write(tj)
-                    for m in re.finditer(r"[^\n;{}]{0,140}" + APP_JS_PATTERN + r"[^\n;{}]{0,200}", tj, flags=re.I):
+                    if url.endswith(".xml"):
+                        print("      xml:", re.sub(r"\s+", " ", tj[:1800]))
+                    if len(tj) > 150000:
+                        continue    # knjižnice (jquery, highcharts) preskoči
+                    for m in re.finditer(r"[^\n;{}]{0,200}" + APP_JS_PATTERN + r"[^\n;{}]{0,260}", tj, flags=re.I):
                         print("      ~", re.sub(r"\s+", " ", m.group(0))[:340])
             if cand.endswith("/archive/"):      # stran: poišči še XML/JS povezave, ki jih nalaga
                 links = sorted(set(re.findall(r'["\']([^"\']+\.(?:xml|js|json)[^"\']*)["\']', text)))
