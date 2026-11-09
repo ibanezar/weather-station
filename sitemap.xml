@@ -633,6 +633,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/temperature-za-gobe-se-ustrezajo-1109.html</loc>
+    <lastmod>2026-11-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/temperature-za-gobe-se-ustrezajo-1109.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/sneg-v-nizinah-cetrtek-dez-sobota-1109.html</loc>
     <lastmod>2026-11-09</lastmod>
     <changefreq>monthly</changefreq>

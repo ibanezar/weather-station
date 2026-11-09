@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 09 Nov 2026 08:39:51 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 09 Nov 2026 10:35:38 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Tla so 7 °C: za jurčka še toplo, za lisičko ne več</title>
+      <link>https://meteorec.si/blog/temperature-za-gobe-se-ustrezajo-1109.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/temperature-za-gobe-se-ustrezajo-1109.html</guid>
+      <pubDate>Mon, 09 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Tla v Rečici so 7 °C: dovolj za jurčka in sirovko, premalo za lisičko. Primerjava s šestimi leti, zimske vrste in napoved.</description>
+      <category>gobe</category>
+      <category>temperatura</category>
+      <category>november</category>
+      <category>podatki</category>
+    </item>
     <item>
       <title>Sneg v nižinah: četrtek še dež, odločitev v noči na soboto</title>
       <link>https://meteorec.si/blog/sneg-v-nizinah-cetrtek-dez-sobota-1109.html</link>
