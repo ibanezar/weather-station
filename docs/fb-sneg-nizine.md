@@ -17,6 +17,13 @@ Besedilo vedno pove, da gre za modelsko oceno in ne za uradno opozorilo. Priporo
 | 2 | B | ansambli se ne strinjajo: 29 % : 2 %, stolpci po ansamblih in skupni delež 16 % |
 | 3 | C | ura za uro (temperatura in dež/sneg, 12.–16. 11.), 50 % članov z 0 °C ali manj v nedeljo zjutraj |
 
+**Zgodbe 1080×1920** (`og/sneg-v-nizinah-cetrtek-dez-sobota-1109-zgodba-N.jpg`, izdela jih `python3 tools/generate_sneg_nizine_story_variants.py`;
+isti posnetek in iste varovalke kot kartice). Zgodbe nimajo podpisa, zato je vse na sliki; pomembno je med y = 250 in 1600 (zgoraj in spodaj prekrije vmesnik).
+1. Foto: »BO V NIŽINAH SNEG?« čez fotografijo sneženja, 16 % in 59 %.
+2. Bloki: ČETRTEK dež, PETEK dež, SOBOTA sneg? (16 % v dolini, 59 % na 900 m).
+3. Lestev: delež članov z vsaj 1 cm snega po višinah 366–1200 m in vprašanje »Na kateri višini živite?« (tu dodajte vprašalno nalepko, odgovori so dober signal).
+Povezave v zgodbah IG ne podpira prek API-ja: obiskovalec pride prek povezave v bio ali FB objave.
+
 Če se po novem prenosu podatkov številke spremenijo, kartice znova izdelajte (in popravite besedila), ne mešajte starih kartic z novimi številkami.
 
 ---
