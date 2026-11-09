@@ -8080,12 +8080,12 @@ async function fetchMosForecast(){
 }
 
 /* MTR sneg (9. 11. 2026): kartica `#snow-card` bere napoved-snega.json (tools/predict_sneg_mos.py). p_snow je možnost
-   MERLJIVEGA snega (nov sneg ≥ 1 cm) na tipični od petih ARSO postaj v okolici (model je umerjen na njihova opazovanja);
-   postaja Meteorec snega ne meri, lege ARSO postaj pa ne poznamo, zato je to ocena za okolico. Kartica
+   MERLJIVEGA snega (nov sneg ≥ 1 cm) na ARSO postaji Gornji Grad (428 m, 9 km od Rečice; model je naučen na njena opazovanja
+   2019–2026); postaja Meteorec snega ne meri, zato je to ocena za Gornji Grad, ne za točko v Rečici. Kartica
    ima v HTML rezerviran prostor (brez CLS); zunaj sezone ali brez podatkov se skrije — nikoli ne piše »ni snega«,
    če napovedi ni. Verjetnost se zaokroži na 5 %, pod 5 % piše »< 5 %«. */
 const SNOW_STALE_H=30;
-/* p je možnost MERLJIVEGA snega (>= 1 cm novega snega na tipični ARSO postaji), zato so pragovi nižji kot pri proksiju */
+/* p je možnost MERLJIVEGA snega (>= 1 cm novega snega na postaji Gornji Grad), zato so pragovi nižji kot pri proksiju */
 function _snowLv(p){return p<.05?0:p<.15?1:p<.35?2:3;}
 function _snowLevel(p){return ['malo verjetno','možno','verjetno','zelo verjetno'][_snowLv(p)];}
 function _snowPct(p){const r=Math.round(p*20)*5;return r<=0?'< 5\u00A0%':r+'\u00A0%';}
@@ -8118,8 +8118,8 @@ function renderSnowCard(j){
   const top=days.reduce((a,b)=>b.p_snow>a.p_snow?b:a);
   const tn=_snowDay(top);
   head.textContent=top.p_snow<.05
-    ?'Prihodnjih '+days.length+' dni merljiv sneg v okolici ni verjeten.'
-    :'Največ možnosti za merljiv sneg v okolici: '+tn.long+' ('+_snowPct(top.p_snow).replace('\u00A0',' ')+').';
+    ?'Prihodnjih '+days.length+' dni merljiv sneg v dolini ni verjeten.'
+    :'Največ možnosti za merljiv sneg v dolini: '+tn.long+' ('+_snowPct(top.p_snow).replace('\u00A0',' ')+').';
   const ageH=j.generated_at?(Date.now()-Date.parse(j.generated_at))/36e5:null;
   if(ageH!==null&&Number.isFinite(ageH)){
     const stale=ageH>SNOW_STALE_H;

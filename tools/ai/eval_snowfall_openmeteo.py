@@ -86,7 +86,7 @@ def main():
         out["availability"][m] = av
         print(m, {k: (v["non_null"], v["non_zero"]) for k, v in av.items() if k.endswith("d1") or k.endswith("d3")})
 
-    observed = tsm.load_observed()
+    observed = tsm.load_observed(stations=tsm.OBS_STATIONS_LEGACY)
     truth = tsm.load_truth()
     by = tsm.load_archive()
     for lead in LEADS:

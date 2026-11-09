@@ -1,8 +1,8 @@
 name: MTR sneg - napoved in beleženje (proksi)
 
-# Poskusni model »snežni dan v dolini« (proksi: mokri hladni dan; postaja snega ne meri).
-# Piše SAMO napoved-snega.json in dva dnevnika (data/sneg-forward-log.csv, data/sneg-verification.json).
-# Nobena stran ali kartica ju ne prikazuje, dokler preverjanje naprej v času ni na voljo (CLAUDE.md, »MTR sneg«).
+# Poskusni model MTR sneg: p_proxy = »mokri hladni dan« v Rečici (postaja snega ne meri), p_snow = možnost merljivega snega na ARSO postaji
+# Gornji Grad (od v0.4, preslikava meritev v sneg). Piše SAMO napoved-snega.json in dva dnevnika (data/sneg-forward-log.csv,
+# data/sneg-verification.json); napoved prikazuje kartica #snow-card (app.js). Serije postaj osvežuje arso-sneg-refresh.yml (CLAUDE.md, »MTR sneg«).
 # Termini sledijo novim tekom modelov kot mtr-live.yml; GitHubov cron zamuja in združuje teke.
 # Zunaj sezone (oktober-april) napoved zapiše prazno datoteko največ enkrat na dan (varuh svežine).
 on:

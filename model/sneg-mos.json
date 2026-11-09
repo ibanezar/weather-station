@@ -1,6 +1,6 @@
 {
-  "model_version": "0.3",
-  "trained_at": "2026-11-09T10:42:22Z",
+  "model_version": "0.4",
+  "trained_at": "2026-11-09T16:16:34Z",
   "train_range": {
     "from": "2024-10-01",
     "to": "2026-11-08"
@@ -12,15 +12,27 @@
   },
   "observed_target": {
     "name": "merljiv sneg (opazovanje)",
-    "definition": "nov sneg >= 1 cm ob jutranjem odčitku na tipični od 5 ARSO postaj",
-    "caveat": "Postaje niso v Rečici (imena in višine niso znane); verjetnost velja za tipično izmed njih, ne za točko v Rečici.",
-    "stations": [
-      "1651",
-      "1652",
-      "1801",
-      "3002",
-      "3152"
-    ]
+    "definition": "nov sneg >= 1 cm ob jutranjem odčitku na ARSO postaji (glavna: Gornji Grad)",
+    "caveat": "Postaja ni v Rečici; verjetnost velja za njeno lego, ne za točko v Rečici. Postaja Meteorec snega ne meri.",
+    "primary": "1748",
+    "stations": {
+      "1748": {
+        "name": "Gornji Grad",
+        "alt_m": 428
+      },
+      "1749": {
+        "name": "Luče",
+        "alt_m": null
+      },
+      "1747": {
+        "name": "Radegunda",
+        "alt_m": 794
+      },
+      "1750": {
+        "name": "Solčava",
+        "alt_m": null
+      }
+    }
   },
   "season_months": [
     10,
@@ -71,26 +83,137 @@
         "auc": 0.875,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
-      "obs_calibration": {
-        "a": -2.7423,
-        "b": 1.0,
-        "n": 2162,
-        "events": 34,
-        "prevalence": 0.0157,
-        "stations": [
-          "1651",
-          "1652",
-          "1801",
-          "3002",
-          "3152"
-        ],
-        "cv": {
-          "brier_clim": 0.0155,
-          "brier": 0.0149,
-          "skill": 0.041,
-          "auc": 0.923,
-          "n": 2162,
-          "events": 34
+      "obs_pp": {
+        "1748": {
+          "coefficients": [
+            -4.03456,
+            -0.40446,
+            1.58728,
+            -0.25505
+          ],
+          "n": 1473,
+          "events": 52,
+          "prevalence": 0.0353,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Gornji Grad",
+          "shrink": 0.742,
+          "cv": {
+            "n": 451,
+            "events": 10,
+            "brier": 0.016,
+            "brier_clim": 0.0219,
+            "skill": 0.272,
+            "auc": 0.976,
+            "mean_pred": 0.0174,
+            "mean_obs": 0.0222
+          }
+        },
+        "1749": {
+          "coefficients": [
+            -3.34063,
+            -0.30484,
+            1.43319,
+            -0.28212
+          ],
+          "n": 1473,
+          "events": 72,
+          "prevalence": 0.0489,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Luče",
+          "shrink": 0.742,
+          "cv": {
+            "n": 451,
+            "events": 14,
+            "brier": 0.0235,
+            "brier_clim": 0.0306,
+            "skill": 0.232,
+            "auc": 0.95,
+            "mean_pred": 0.0276,
+            "mean_obs": 0.031
+          }
+        },
+        "1747": {
+          "coefficients": [
+            -2.70026,
+            -0.26687,
+            1.31002,
+            -0.27724
+          ],
+          "n": 1473,
+          "events": 102,
+          "prevalence": 0.0692,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Radegunda",
+          "shrink": 0.742,
+          "cv": {
+            "n": 451,
+            "events": 21,
+            "brier": 0.034,
+            "brier_clim": 0.0451,
+            "skill": 0.247,
+            "auc": 0.945,
+            "mean_pred": 0.0432,
+            "mean_obs": 0.0466
+          }
+        },
+        "1750": {
+          "coefficients": [
+            -3.412,
+            -0.28598,
+            1.42767,
+            -0.27247
+          ],
+          "n": 1442,
+          "events": 69,
+          "prevalence": 0.0479,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "name": "Solčava",
+          "shrink": 0.742,
+          "cv": {
+            "n": 420,
+            "events": 13,
+            "brier": 0.0237,
+            "brier_clim": 0.0304,
+            "skill": 0.222,
+            "auc": 0.938,
+            "mean_pred": 0.0288,
+            "mean_obs": 0.031
+          }
         }
       }
     },
@@ -124,26 +247,137 @@
         "auc": 0.856,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
-      "obs_calibration": {
-        "a": -2.3738,
-        "b": 1.0,
-        "n": 2162,
-        "events": 34,
-        "prevalence": 0.0157,
-        "stations": [
-          "1651",
-          "1652",
-          "1801",
-          "3002",
-          "3152"
-        ],
-        "cv": {
-          "brier_clim": 0.0155,
-          "brier": 0.0123,
-          "skill": 0.208,
-          "auc": 0.918,
-          "n": 2162,
-          "events": 34
+      "obs_pp": {
+        "1748": {
+          "coefficients": [
+            -4.03456,
+            -0.40446,
+            1.58728,
+            -0.25505
+          ],
+          "n": 1473,
+          "events": 52,
+          "prevalence": 0.0353,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Gornji Grad",
+          "shrink": 0.7694,
+          "cv": {
+            "n": 451,
+            "events": 10,
+            "brier": 0.016,
+            "brier_clim": 0.0219,
+            "skill": 0.271,
+            "auc": 0.975,
+            "mean_pred": 0.0142,
+            "mean_obs": 0.0222
+          }
+        },
+        "1749": {
+          "coefficients": [
+            -3.34063,
+            -0.30484,
+            1.43319,
+            -0.28212
+          ],
+          "n": 1473,
+          "events": 72,
+          "prevalence": 0.0489,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Luče",
+          "shrink": 0.7694,
+          "cv": {
+            "n": 451,
+            "events": 14,
+            "brier": 0.0225,
+            "brier_clim": 0.0306,
+            "skill": 0.263,
+            "auc": 0.961,
+            "mean_pred": 0.0237,
+            "mean_obs": 0.031
+          }
+        },
+        "1747": {
+          "coefficients": [
+            -2.70026,
+            -0.26687,
+            1.31002,
+            -0.27724
+          ],
+          "n": 1473,
+          "events": 102,
+          "prevalence": 0.0692,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Radegunda",
+          "shrink": 0.7694,
+          "cv": {
+            "n": 451,
+            "events": 21,
+            "brier": 0.0333,
+            "brier_clim": 0.0451,
+            "skill": 0.262,
+            "auc": 0.955,
+            "mean_pred": 0.0383,
+            "mean_obs": 0.0466
+          }
+        },
+        "1750": {
+          "coefficients": [
+            -3.412,
+            -0.28598,
+            1.42767,
+            -0.27247
+          ],
+          "n": 1442,
+          "events": 69,
+          "prevalence": 0.0479,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "name": "Solčava",
+          "shrink": 0.7694,
+          "cv": {
+            "n": 420,
+            "events": 13,
+            "brier": 0.0227,
+            "brier_clim": 0.0304,
+            "skill": 0.254,
+            "auc": 0.949,
+            "mean_pred": 0.0248,
+            "mean_obs": 0.031
+          }
         }
       }
     },
@@ -177,26 +411,137 @@
         "auc": 0.846,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
-      "obs_calibration": {
-        "a": -2.5052,
-        "b": 1.0,
-        "n": 2162,
-        "events": 34,
-        "prevalence": 0.0157,
-        "stations": [
-          "1651",
-          "1652",
-          "1801",
-          "3002",
-          "3152"
-        ],
-        "cv": {
-          "brier_clim": 0.0155,
-          "brier": 0.0142,
-          "skill": 0.082,
-          "auc": 0.903,
-          "n": 2162,
-          "events": 34
+      "obs_pp": {
+        "1748": {
+          "coefficients": [
+            -4.03456,
+            -0.40446,
+            1.58728,
+            -0.25505
+          ],
+          "n": 1473,
+          "events": 52,
+          "prevalence": 0.0353,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Gornji Grad",
+          "shrink": 0.6937,
+          "cv": {
+            "n": 451,
+            "events": 10,
+            "brier": 0.0173,
+            "brier_clim": 0.0219,
+            "skill": 0.212,
+            "auc": 0.969,
+            "mean_pred": 0.0158,
+            "mean_obs": 0.0222
+          }
+        },
+        "1749": {
+          "coefficients": [
+            -3.34063,
+            -0.30484,
+            1.43319,
+            -0.28212
+          ],
+          "n": 1473,
+          "events": 72,
+          "prevalence": 0.0489,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Luče",
+          "shrink": 0.6937,
+          "cv": {
+            "n": 451,
+            "events": 14,
+            "brier": 0.0245,
+            "brier_clim": 0.0306,
+            "skill": 0.197,
+            "auc": 0.95,
+            "mean_pred": 0.0257,
+            "mean_obs": 0.031
+          }
+        },
+        "1747": {
+          "coefficients": [
+            -2.70026,
+            -0.26687,
+            1.31002,
+            -0.27724
+          ],
+          "n": 1473,
+          "events": 102,
+          "prevalence": 0.0692,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Radegunda",
+          "shrink": 0.6937,
+          "cv": {
+            "n": 451,
+            "events": 21,
+            "brier": 0.036,
+            "brier_clim": 0.0451,
+            "skill": 0.201,
+            "auc": 0.942,
+            "mean_pred": 0.0408,
+            "mean_obs": 0.0466
+          }
+        },
+        "1750": {
+          "coefficients": [
+            -3.412,
+            -0.28598,
+            1.42767,
+            -0.27247
+          ],
+          "n": 1442,
+          "events": 69,
+          "prevalence": 0.0479,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "name": "Solčava",
+          "shrink": 0.6937,
+          "cv": {
+            "n": 420,
+            "events": 13,
+            "brier": 0.0247,
+            "brier_clim": 0.0304,
+            "skill": 0.186,
+            "auc": 0.937,
+            "mean_pred": 0.0267,
+            "mean_obs": 0.031
+          }
         }
       }
     },
@@ -230,26 +575,137 @@
         "auc": 0.829,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
-      "obs_calibration": {
-        "a": -2.5004,
-        "b": 1.0,
-        "n": 2162,
-        "events": 34,
-        "prevalence": 0.0157,
-        "stations": [
-          "1651",
-          "1652",
-          "1801",
-          "3002",
-          "3152"
-        ],
-        "cv": {
-          "brier_clim": 0.0155,
-          "brier": 0.0118,
-          "skill": 0.239,
-          "auc": 0.917,
-          "n": 2162,
-          "events": 34
+      "obs_pp": {
+        "1748": {
+          "coefficients": [
+            -4.03456,
+            -0.40446,
+            1.58728,
+            -0.25505
+          ],
+          "n": 1473,
+          "events": 52,
+          "prevalence": 0.0353,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Gornji Grad",
+          "shrink": 0.6649,
+          "cv": {
+            "n": 451,
+            "events": 10,
+            "brier": 0.0166,
+            "brier_clim": 0.0219,
+            "skill": 0.243,
+            "auc": 0.961,
+            "mean_pred": 0.0176,
+            "mean_obs": 0.0222
+          }
+        },
+        "1749": {
+          "coefficients": [
+            -3.34063,
+            -0.30484,
+            1.43319,
+            -0.28212
+          ],
+          "n": 1473,
+          "events": 72,
+          "prevalence": 0.0489,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Luče",
+          "shrink": 0.6649,
+          "cv": {
+            "n": 451,
+            "events": 14,
+            "brier": 0.0221,
+            "brier_clim": 0.0306,
+            "skill": 0.278,
+            "auc": 0.965,
+            "mean_pred": 0.0276,
+            "mean_obs": 0.031
+          }
+        },
+        "1747": {
+          "coefficients": [
+            -2.70026,
+            -0.26687,
+            1.31002,
+            -0.27724
+          ],
+          "n": 1473,
+          "events": 102,
+          "prevalence": 0.0692,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Radegunda",
+          "shrink": 0.6649,
+          "cv": {
+            "n": 451,
+            "events": 21,
+            "brier": 0.0331,
+            "brier_clim": 0.0451,
+            "skill": 0.267,
+            "auc": 0.957,
+            "mean_pred": 0.0429,
+            "mean_obs": 0.0466
+          }
+        },
+        "1750": {
+          "coefficients": [
+            -3.412,
+            -0.28598,
+            1.42767,
+            -0.27247
+          ],
+          "n": 1442,
+          "events": 69,
+          "prevalence": 0.0479,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "name": "Solčava",
+          "shrink": 0.6649,
+          "cv": {
+            "n": 420,
+            "events": 13,
+            "brier": 0.0236,
+            "brier_clim": 0.0304,
+            "skill": 0.222,
+            "auc": 0.953,
+            "mean_pred": 0.0288,
+            "mean_obs": 0.031
+          }
         }
       }
     },
@@ -283,26 +739,137 @@
         "auc": 0.796,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
-      "obs_calibration": {
-        "a": -2.4385,
-        "b": 1.0,
-        "n": 2162,
-        "events": 34,
-        "prevalence": 0.0157,
-        "stations": [
-          "1651",
-          "1652",
-          "1801",
-          "3002",
-          "3152"
-        ],
-        "cv": {
-          "brier_clim": 0.0155,
-          "brier": 0.013,
-          "skill": 0.163,
-          "auc": 0.899,
-          "n": 2162,
-          "events": 34
+      "obs_pp": {
+        "1748": {
+          "coefficients": [
+            -4.03456,
+            -0.40446,
+            1.58728,
+            -0.25505
+          ],
+          "n": 1473,
+          "events": 52,
+          "prevalence": 0.0353,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Gornji Grad",
+          "shrink": 0.6394,
+          "cv": {
+            "n": 451,
+            "events": 10,
+            "brier": 0.0173,
+            "brier_clim": 0.0219,
+            "skill": 0.211,
+            "auc": 0.959,
+            "mean_pred": 0.0207,
+            "mean_obs": 0.0222
+          }
+        },
+        "1749": {
+          "coefficients": [
+            -3.34063,
+            -0.30484,
+            1.43319,
+            -0.28212
+          ],
+          "n": 1473,
+          "events": 72,
+          "prevalence": 0.0489,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Luče",
+          "shrink": 0.6394,
+          "cv": {
+            "n": 451,
+            "events": 14,
+            "brier": 0.0227,
+            "brier_clim": 0.0306,
+            "skill": 0.259,
+            "auc": 0.946,
+            "mean_pred": 0.031,
+            "mean_obs": 0.031
+          }
+        },
+        "1747": {
+          "coefficients": [
+            -2.70026,
+            -0.26687,
+            1.31002,
+            -0.27724
+          ],
+          "n": 1473,
+          "events": 102,
+          "prevalence": 0.0692,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ],
+          "name": "Radegunda",
+          "shrink": 0.6394,
+          "cv": {
+            "n": 451,
+            "events": 21,
+            "brier": 0.034,
+            "brier_clim": 0.0451,
+            "skill": 0.246,
+            "auc": 0.943,
+            "mean_pred": 0.0468,
+            "mean_obs": 0.0466
+          }
+        },
+        "1750": {
+          "coefficients": [
+            -3.412,
+            -0.28598,
+            1.42767,
+            -0.27247
+          ],
+          "n": 1442,
+          "events": 69,
+          "prevalence": 0.0479,
+          "winters": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "name": "Solčava",
+          "shrink": 0.6394,
+          "cv": {
+            "n": 420,
+            "events": 13,
+            "brier": 0.0248,
+            "brier_clim": 0.0304,
+            "skill": 0.183,
+            "auc": 0.924,
+            "mean_pred": 0.0324,
+            "mean_obs": 0.031
+          }
         }
       }
     }

@@ -41,7 +41,7 @@ MODEL_PATH = os.path.join(ROOT, "model", "sneg-mos.json")
 ARCHIVE_PATH = os.path.join(ROOT, "data", "forecast-archive.csv")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 
-MODEL_VERSION = "0.3"
+MODEL_VERSION = "0.4"
 MODELS = ["best_match", "ecmwf_ifs025", "gfs_seamless", "icon_seamless"]
 MIN_MODELS = 3
 LEADS = (1, 2, 3, 4, 5)   # D+4/D+5: skill +0,12/+0,10, surov prag pod klimatologijo (eval_sneg.py)
@@ -52,10 +52,20 @@ RIDGE = 0.1           # ob 0,01 / 0,1 / 1 je OOF skill enak na 0,003; zima ima ~
 CAL_PRIOR = 2.0       # moč stiskanja kalibracijskega naklona b proti 1
 MIN_TRAIN_EVENTS = 5
 
-# Opazovan sneg (9. 11. 2026, v0.3): ARSO postaje z neprekinjenim zapisom novega snega 2020-2025, izbrane po korelaciji
-# dnevnih padavin z IREICA1 (tools/arso_snow_stations.py; imena in višine postaj niso znane). Podatki so v
-# data/arso-sneg-postaje/daily-<id>.json (Vir: Agencija Republike Slovenije za okolje).
-OBS_STATIONS = ("1651", "1652", "1801", "3002", "3152")
+# Opazovan sneg (9. 11. 2026, v0.4): dnevne serije ARSO padavinskih postaj v Zgornji Savinjski dolini (arhivski ID-ji iz
+# izvoza iz ARSO arhiva meritev: Filip). Podatki so v data/arso-sneg-postaje/daily-<id>.json, septembra 2019 do danes,
+# ki jih osvežuje tools/refresh_arso_sneg.py (Vir: Agencija Republike Slovenije za okolje).
+# Višina je zapisana samo, kjer jo je mogoče preveriti v ARSO viru (observationAms_si_latest.xml): Gornji Grad 428 m, Radegunda 794 m.
+# Gornji Grad je glavna postaja: dolina, 9 km od Rečice (366 m), najbližja po višini.
+VALLEY_STATIONS = {
+    "1748": {"name": "Gornji Grad", "alt_m": 428},
+    "1749": {"name": "Luče", "alt_m": None},
+    "1747": {"name": "Radegunda", "alt_m": 794},
+    "1750": {"name": "Solčava", "alt_m": None},
+}
+OBS_PRIMARY = "1748"
+# Prejšnja izbira (v0.3): pet postaj brez znanih imen, izbranih po korelaciji padavin; ostaja samo za eval_snowfall_openmeteo.py.
+OBS_STATIONS_LEGACY = ("1651", "1652", "1801", "3002", "3152")
 OBS_DIR = os.path.join(ROOT, "data", "arso-sneg-postaje")
 OBS_NEW_SNOW_CM = 1.0     # »merljiv sneg«: nov sneg >= 1 cm ob jutranjem odčitku istega dne
 
@@ -72,7 +82,7 @@ def is_snow_day(precip_mm, tavg, prag=PRAG_T_AVG):
 
 
 # ---------------------------------------------------------------------------------------------- podatki
-def load_observed(directory=OBS_DIR, stations=OBS_STATIONS):
+def load_observed(directory=OBS_DIR, stations=tuple(VALLEY_STATIONS)):
     """{postaja: {datum: novi sneg (cm)}} iz shranjenih ARSO dnevnih serij. Manjka postaja -> izpuščena; brez nobene -> {}."""
     out = {}
     for sid in stations:
@@ -216,45 +226,67 @@ def fit_obs_calibration(z, y, **_):
     return float(a), 1.0
 
 
-def obs_pairs(rows, z, idx, observed):
-    """Pari (surov logit, opazovan sneg 0/1, zima) za vsak dan in postajo, kjer postaja ima odčitek."""
-    zs, ys, ws = [], [], []
-    for zi, i in zip(z, idx):
-        d = rows[i]["date"]
-        for series in observed.values():
-            v = series.get(d)
-            if v is None:
-                continue
-            zs.append(zi)
-            ys.append(1.0 if v >= OBS_NEW_SNOW_CM else 0.0)
-            ws.append(rows[i]["winter"])
-    return np.array(zs), np.array(ys), np.array(ws)
+def obs_x(precip_mm, tavg):
+    """Vektor značilk za OPAZOVAN dan: isti `vector()` kot pri napovedi, delež mokrih modelov je 0 ali 1."""
+    return vector({"tavg": float(tavg), "prec": float(precip_mm), "wetfrac": 1.0 if precip_mm >= WET_MM else 0.0})
 
 
-def obs_calibration(rows, observed):
-    """Kalibracija osnovnega modela na opazovan sneg + preverjanje z izpuščanjem zime (zima = nepodvojena enota)."""
-    z, _, idx = oof_logits(rows)
-    zs, ys, ws = obs_pairs(rows, z, idx, observed)
-    if len(ys) < 100 or ys.sum() < 2 * MIN_TRAIN_EVENTS:
-        return None
-    a, b = fit_obs_calibration(zs, ys)
-    pred, truth, clim = [], [], []
-    for w in sorted(set(ws)):
-        te, tr = ws == w, ws != w
-        if ys[tr].sum() < MIN_TRAIN_EVENTS or not te.any():
+def obs_rows(series, truth):
+    """Opazovalni nabor: dnevi sezone, ko imamo meritev IREICA1 (padavine, T povp.) IN odčitek postaje (nov sneg, cm)."""
+    out = []
+    for d, (p, ta, _) in truth.items():
+        v = series.get(d)
+        if v is None or int(d[5:7]) not in SEASON:
             continue
-        a2, b2 = fit_obs_calibration(zs[tr], ys[tr])
-        pred += list(_sigmoid(a2 + b2 * zs[te]))
-        truth += list(ys[te])
-        clim += [float(ys[tr].mean())] * int(te.sum())
-    cv = {}
-    if truth:
-        base = brier(clim, truth)
-        cv = {"brier_clim": round(base, 4), "brier": round(brier(pred, truth), 4),
-              "skill": round(1 - brier(pred, truth) / base, 3) if base > 0 else None,
-              "auc": round(auc(pred, truth), 3), "n": len(truth), "events": int(sum(truth))}
-    return {"a": round(a, 4), "b": round(b, 4), "n": int(len(ys)), "events": int(ys.sum()),
-            "prevalence": round(float(ys.mean()), 4), "stations": sorted(observed), "cv": cv}
+        out.append({"date": d, "winter": season_year(d), "x": obs_x(p, ta), "y": 1.0 if v >= OBS_NEW_SNOW_CM else 0.0})
+    return out
+
+
+def shrink_logit(z, shrink, prevalence):
+    """Logit skrčen proti pogostosti snega na postaji: z' = z_klim + shrink · (z − z_klim). Preslikava meritev → sneg ne ve,
+    da so napovedi z vodilnim časom slabše; naklon kalibracije osnovnega modela (proksi, isti vodilni čas) to pove, zato se
+    napoved proti D+5 krči proti klimatologiji (brez krčenja je bil razred >= 50 % pri D+5 napovedan 77 %, dejansko 44 %)."""
+    zc = math.log(prevalence / (1 - prevalence))
+    return zc + shrink * (z - zc)
+
+
+def fit_obs_pp(series, truth):
+    """Preslikava meritev v Rečici (T povp., padavine) v »nov sneg >= 1 cm na postaji«, naučena na VSEH zimah opazovanj
+    (v0.4). Prej (v0.3) je bila kalibracija prilagojena na ~2 zimi arhiva napovedi (34 dogodkov); opazovanj je sedem zim.
+    Vrne None, kadar je dogodkov premalo."""
+    rows = obs_rows(series, truth)
+    y = np.array([r["y"] for r in rows], float)
+    if len(rows) < 100 or y.sum() < 2 * MIN_TRAIN_EVENTS:
+        return None
+    w = fit_logit(np.array([r["x"] for r in rows]), y)
+    return {"coefficients": [round(float(x), 5) for x in w], "n": int(len(rows)), "events": int(y.sum()),
+            "prevalence": round(float(y.mean()), 4), "winters": sorted({r["winter"] for r in rows})}
+
+
+def obs_pp_cv(series, truth, lead_rows, shrink=1.0):
+    """Preverjanje z izpuščanjem zime: preslikava, naučena na opazovanjih OSTALIH zim, napove sneg iz NAPOVEDANIH vhodov
+    (modeli, vodilni čas) izpuščene zime. Napoved je torej ocenjena na vhodih, kot jih bo imela v živo, ne na meritvah."""
+    rows = obs_rows(series, truth)
+    P, Y, C = [], [], []
+    for w in sorted({r["winter"] for r in lead_rows}):
+        tr = [r for r in rows if r["winter"] != w]
+        y_tr = np.array([r["y"] for r in tr], float)
+        if y_tr.sum() < MIN_TRAIN_EVENTS:
+            continue
+        wts = fit_logit(np.array([r["x"] for r in tr]), y_tr)
+        for r in lead_rows:
+            v = series.get(r["date"])
+            if r["winter"] != w or v is None:
+                continue
+            P.append(float(_sigmoid(shrink_logit(float(np.array(vector(r)) @ wts), shrink, float(y_tr.mean())))))
+            Y.append(1.0 if v >= OBS_NEW_SNOW_CM else 0.0)
+            C.append(float(y_tr.mean()))
+    if not Y or sum(Y) == 0:
+        return {}
+    base = brier(C, Y)
+    return {"n": len(Y), "events": int(sum(Y)), "brier": round(brier(P, Y), 4), "brier_clim": round(base, 4),
+            "skill": round(1 - brier(P, Y) / base, 3) if base > 0 else None, "auc": round(auc(P, Y), 3),
+            "mean_pred": round(float(np.mean(P)), 4), "mean_obs": round(float(np.mean(Y)), 4)}
 
 
 def auc(p, y):
@@ -286,14 +318,16 @@ def oof_logits(rows):
     return np.array(z), np.array(ys, float), idx
 
 
+def predict_obs_stations(entry, f):
+    """{id postaje: verjetnost, da bo na njej zapadlo >= 1 cm novega snega}. Prazno, kadar model opazovanj ni imel."""
+    z_vec = np.array(vector(f))
+    return {sid: float(_sigmoid(shrink_logit(float(np.array(m["coefficients"]) @ z_vec), m.get("shrink", 1.0), m["prevalence"])))
+            for sid, m in (entry.get("obs_pp") or {}).items()}
+
+
 def predict_obs(entry, f):
-    """Verjetnost, da bo na tipični od izbranih ARSO postaj zapadlo >= 1 cm novega snega (iz osnovnega modela + kalibracije
-    na opazovanja). None, kadar model opazovanj ni imel (stari model ali ni podatkov)."""
-    oc = entry.get("obs_calibration")
-    if not oc:
-        return None
-    z = float(np.array(entry["coefficients"]) @ np.array(vector(f)))
-    return float(_sigmoid(oc["a"] + oc["b"] * z))
+    """Verjetnost merljivega snega na glavni postaji (Gornji Grad). None, kadar je model nima (stari model ali ni podatkov)."""
+    return predict_obs_stations(entry, f).get(OBS_PRIMARY)
 
 
 def predict_p(entry, f):
@@ -308,6 +342,8 @@ def train(truth=None, by=None, observed=None):
     truth = truth if truth is not None else load_truth()
     observed = observed if observed is not None else load_observed()
     by = by if by is not None else load_archive()
+    obs_models = {sid: fit_obs_pp(series, truth) for sid, series in observed.items() if sid in VALLEY_STATIONS}
+    obs_models = {sid: m for sid, m in obs_models.items() if m}
     leads, dates = {}, []
     for lead in LEADS:
         rows = samples_for(lead, truth, by)
@@ -335,9 +371,11 @@ def train(truth=None, by=None, observed=None):
             "n": int(len(rows)), "events": int(y.sum()), "prevalence": round(clim, 4),
             "cv": cv,
         }
-        oc = obs_calibration(rows, observed) if observed else None
-        if oc:
-            leads[str(lead)]["obs_calibration"] = oc
+        if obs_models:
+            shrink = round(min(1.0, max(0.3, b)), 4)      # b = naklon kalibracije osnovnega modela za ta vodilni čas
+            leads[str(lead)]["obs_pp"] = {
+                sid: dict(m, name=VALLEY_STATIONS[sid]["name"], shrink=shrink, cv=obs_pp_cv(observed[sid], truth, rows, shrink))
+                for sid, m in obs_models.items()}
         dates += [r["date"] for r in rows]
     return {
         "model_version": MODEL_VERSION,
@@ -350,9 +388,10 @@ def train(truth=None, by=None, observed=None):
         },
         "observed_target": {
             "name": "merljiv sneg (opazovanje)",
-            "definition": f"nov sneg >= {OBS_NEW_SNOW_CM:g} cm ob jutranjem odčitku na tipični od {len(OBS_STATIONS)} ARSO postaj",
-            "caveat": "Postaje niso v Rečici (imena in višine niso znane); verjetnost velja za tipično izmed njih, ne za točko v Rečici.",
-            "stations": list(OBS_STATIONS),
+            "definition": f"nov sneg >= {OBS_NEW_SNOW_CM:g} cm ob jutranjem odčitku na ARSO postaji (glavna: {VALLEY_STATIONS[OBS_PRIMARY]['name']})",
+            "caveat": "Postaja ni v Rečici; verjetnost velja za njeno lego, ne za točko v Rečici. Postaja Meteorec snega ne meri.",
+            "primary": OBS_PRIMARY,
+            "stations": {sid: {"name": VALLEY_STATIONS[sid]["name"], "alt_m": VALLEY_STATIONS[sid]["alt_m"]} for sid in obs_models},
         },
         "season_months": list(SEASON), "models": MODELS, "min_models": MIN_MODELS,
         "ridge": RIDGE, "cal_prior": CAL_PRIOR,
@@ -373,11 +412,11 @@ def main():
         print(f"  D+{k}: n = {e['n']}, dogodkov {e['events']}, koef {e['coefficients']}, kalibracija "
               f"a = {e['calibration']['a']}, b = {e['calibration']['b']}; OOF Brier {cv.get('brier_cal')} "
               f"proti klim. {cv.get('brier_clim')} (skill {cv.get('skill_cal')}, AUC {cv.get('auc')})")
-        oc = e.get("obs_calibration")
-        if oc:
-            c2 = oc["cv"]
-            print(f"       opazovanja: a = {oc['a']}, b = {oc['b']}, n = {oc['n']}, dogodkov {oc['events']} ({oc['prevalence']:.3f}); "
-                  f"zima izpuščena: Brier {c2.get('brier')} proti klim. {c2.get('brier_clim')} (skill {c2.get('skill')}, AUC {c2.get('auc')})")
+        for sid, m in (e.get("obs_pp") or {}).items():
+            c2 = m["cv"]
+            print(f"       sneg {m['name']} ({sid}): n = {m['n']}, dogodkov {m['events']} ({m['prevalence']:.3f}); zima izpuščena na napovedanih vhodih: "
+                  f"Brier {c2.get('brier')} proti klim. {c2.get('brier_clim')} (skill {c2.get('skill')}, AUC {c2.get('auc')}, "
+                  f"povpr. napoved {c2.get('mean_pred')} proti dejanski {c2.get('mean_obs')}, dogodkov {c2.get('events')})")
     if a.no_write:
         print("(--no-write)")
         return 0

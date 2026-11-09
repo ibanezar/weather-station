@@ -34,8 +34,9 @@ LOG_PATH = os.path.join(ROOT, "data", "sneg-forward-log.csv")
 LOG_FIELDS = ["issued_at", "valid_at", "lead_days", "hours_before", "p_snow", "p_proxy", "tavg", "prec_mm",
               "n_models", "model_version"]
 LJ = ZoneInfo("Europe/Ljubljana")
-NOTE = ("MTR sneg -- POSKUSNI model. p_snow = možnost merljivega snega (nov sneg >= 1 cm) na tipični od petih ARSO postaj "
-        "v širši okolici Rečice (Vir: Agencija Republike Slovenije za okolje); postaje niso v Rečici in njihove lege ne poznamo. "
+NOTE = ("MTR sneg -- POSKUSNI model. p_snow = možnost merljivega snega (nov sneg >= 1 cm ob jutranjem odčitku) na ARSO postaji Gornji Grad "
+        "(428 m, 9 km od Rečice); model je naučen na opazovanjih te postaje 2019-2026 (Vir: Agencija Republike Slovenije za okolje). "
+        "stations = enaka ocena za druge postaje v dolini (Luče, Radegunda 794 m, Solčava). "
         "p_proxy = verjetnost »mokrega hladnega dne« v Rečici (padavine >= 0,2 mm in T povp. <= 1 °C), na katerem je naučen osnovni model. "
         "Postaja Meteorec snega ne meri; ni napoved debeline snega, ni uradno opozorilo.")
 
@@ -69,10 +70,12 @@ def predict_days(model, per_day, today):
             continue
         pp = tsm.predict_p(entry, f)
         po = tsm.predict_obs(entry, f)
+        stations = {tsm.VALLEY_STATIONS[sid]["name"]: round(p, 3)
+                    for sid, p in tsm.predict_obs_stations(entry, f).items() if sid in tsm.VALLEY_STATIONS}
         days.append({
             "date": target.isoformat(), "lead": lead,
             "p_snow": round(po if po is not None else pp, 3), "p_proxy": round(pp, 2),
-            "basis": "observed" if po is not None else "proxy",
+            "basis": "observed" if po is not None else "proxy", "stations": stations,
             "tavg": round(f["tavg"], 1), "prec_mm": round(f["prec"], 1), "n_models": f["n_models"],
         })
     return days

@@ -62,6 +62,12 @@ REGISTER = [
     # MTR sneg (proksi): zunaj sezone (maj-sept) se datoteka zapiše enkrat na dan s praznim seznamom (utrip).
     ("MTR sneg (proksi)", "napoved-snega.json", "ts", "generated_at", 36,
      "sneg-forecast.yml → predict_sneg_mos.py"),
+    # Resnica za MTR sneg: dnevne serije ARSO postaj v dolini (arhiv zaostaja nekaj dni; osvezeno.json piše vsak tek).
+    ("ARSO sneg - serije postaj v dolini", "data/arso-sneg-postaje/osvezeno.json", "ts", "generated_at", 72,
+     "arso-sneg-refresh.yml → refresh_arso_sneg.py"),
+    # Resnica za MTR sneg: dnevne serije ARSO postaj v dolini (arhiv zaostaja nekaj dni; osvezeno.json piše vsak tek).
+    ("ARSO sneg: serije postaj v dolini", "data/arso-sneg-postaje/osvezeno.json", "ts", "generated_at", 72,
+     "arso-sneg-refresh.yml → refresh_arso_sneg.py"),
     ("MTR: števci odprtih poskusov", "data/mtr-pending.json", "ts", "generated_at", 36,
      "mtr-live.yml → tools/mtr_pending.py"),
     ("Točnost MTR", "data/mtr-accuracy.json", "ts", "generated_at", 36,

@@ -534,6 +534,28 @@ suh mraz: 36 % in 5 % (padavine v osnovnem modelu premalo dušijo suhe dni: znan
 **Kartica pokaže `p_snow`.** Ker je ob napovedi za 10.–14. 11. (dež do petka, sobota T povp. 3,8 °C in < 1 mm) vsak dan pod 5 %, piše »merljiv sneg v okolici ni verjeten«; model ne vidi prehoda na sneg ob koncu dežja (dnevno povprečje), ki ga omenja članek.
 **Še ni narejeno:** imena in višine ID-jev; učenje neposredno na opazovanju po vodilnih časih (potrebuje več zim); sveže ARSO serije za preverjanje `p_snow` naprej; urna ločljivost (prehod dež → sneg).
 
+### MTR sneg v0.4: preslikava meritev v sneg na imenovani postaji (9. 11. 2026)
+
+**Kaj se je spremenilo.** Filip je iz ARSO arhiva izvozil dnevne serije (višina odeje, novi sneg) za Gornji Grad (ID 1748), Radegundo (1747), Luče (1749), Solčavo (1750) in Gomilsko (3145), od 1. 9. 2019. Doslej (v0.3) smo ciljali »tipično od petih postaj« brez znanih imen, kalibracija pa je bila prilagojena na ~2 zimi arhiva napovedi (34 dogodkov). Zdaj so postaje imenovane in opazovanj je sedem zim, zato ima v0.4 drugačno zasnovo (perfect-prognosis): preslikavo (T povp., padavine v Rečici) → »nov sneg ≥ 1 cm na postaji« naučimo na VSEH zimah, v živo pa ji podamo napovedane vhode.
+
+**Podatki.** Dni z ≥ 1 cm novega snega (sezona oktober–april, 2019/20–2025/26): Gornji Grad 52, Luče 74, Solčava 72, Radegunda 106, Gomilsko 40. Datum v arhivu je dan, ko je sneg padel (odčitek ob 7. uri naslednjega dne je pripisan prejšnjemu): proksi na isti datum zadene 38 od 52 dogodkov v Gornjem Gradu, na D−1 26, na D+1 34. Od 148 proksi dni (padavine ≥ 0,2 mm, T povp. ≤ 1 °C) jih ima ≥ 1 cm novega snega v Gornjem Gradu 38 (26 %), v Radegundi 57 (39 %): proksi precenjuje 2,5–4×.
+
+**Preverjanje.** Za vsako izpuščeno zimo (2024/25, 2025/26 imata arhiv napovedi) se preslikava nauči na opazovanjih OSTALIH zim in napove sneg iz NAPOVEDANIH vhodov (štirje modeli, vodilni čas D+1..D+5); skill je Brier proti pogostosti snega v učnih zimah. Primerjava s staro kalibracijo proksija na istih dneh (Gornji Grad, brez krčenja): intercept-kalibracija +0,09 / +0,04 / −0,02 (D+1..D+3) proti +0,31 / +0,35 / +0,22 pri preslikavi. Razlog je statističen: preslikava uporablja 52 dogodkov namesto 10, kalibracija pa le dogodke iz arhiva napovedi.
+
+| Gornji Grad (10 dogodkov v dveh zimah) | D+1 | D+2 | D+3 | D+4 | D+5 |
+| --- | --- | --- | --- | --- | --- |
+| skill brez krčenja | +0,31 | +0,35 | +0,22 | +0,23 | +0,08 |
+| skill s krčenjem (v0.4) | +0,27 | +0,27 | +0,21 | +0,24 | +0,21 |
+| AUC (s krčenjem) | 0,98 | 0,98 | 0,97 | 0,96 | 0,96 |
+
+Luče (14 dogodkov), Radegunda (21) in Solčava (13) dajo s krčenjem +0,19..+0,28 pri vseh petih vodilnih časih (D+5: +0,18..+0,26); AUC 0,92–0,97. Med postajami razlike niso statistično razločljive (10–21 dogodkov).
+
+**Krčenje proti klimatologiji.** Preslikava ne ve, da napovedi z vodilnim časom izgubljajo zanesljivost, zato je bil `p_snow` pri enakih vhodih enak za vse vodilne čase. Zanesljivost po razredih (štiri postaje skupaj, ki so korelirane, dve zimi): pri D+5 je bil razred napovedi ≥ 0,5 napovedan v povprečju 0,77, dejansko pa 0,44 (n = 34); pri D+1 0,73 proti 0,67 (n = 18). Logit se zato skrči proti pogostosti snega na postaji z naklonom kalibracije osnovnega modela za isti vodilni čas (0,64–0,77; ta naklon se je naučil na proksiju, ne na snegu, torej ni dodatna prostost glede na sneg). Posledica: D+5 +0,17 → +0,23 (vse štiri postaje), razred ≥ 0,5 se ujame (0,64 proti 0,71, n = 14); D+1 izgubi 0,03 (znotraj šuma, dogodkov je 10).
+
+**Omejitve (ne tolmači preveč).** (1) Dve zimi napovedanih vhodov in 10 dogodkov v Gornjem Gradu: skill ima velik interval, zanesljivost po razredih pri visokih verjetnostih je ocena na 14–34 primerih. (2) Preslikava predpostavlja, da so napovedani vhodi podobni meritvam; ansambel štirih modelov je za dolino v povprečju (Tmax pod, Tmin nad meritvijo) pristranski in to krčenje le delno popravi. (3) Zima za učenje in preverjanje deli iste postaje (nepodvojena enota je zima, ne dan). (4) Gornji Grad (428 m) ni Rečica (366 m): verjetnost velja za njegovo lego. (5) Preverjanje naprej v času (`verify_sneg.py`, ključ `snow`) še nima podatkov; do prvih 15 dogodkov na vodilni čas ne trdi nič.
+
+**Česa nismo naredili.** Dvoparametrična kalibracija (a, b) na snegu ostaja nestabilna (glej v0.3). Nismo dodajali višine, vlage tal ali Open-Meteo `snowfall` (zadnje: poskus spodaj). Živi vir `snow` (ARSO `observationAms`, polje višine odeje za avtomatske postaje) se beleži (`data/arso-snow-live.csv`), a v model in preverjanje še ne vstopa.
+
 ### Open-Meteo `snowfall` in `snow_depth` kot vhod za MTR sneg: preizkušeno, ne gre (9. 11. 2026)
 
 Preizkus v GitHub Actions (`tools/ai/eval_snowfall_openmeteo.py`, `sneg-snowfall-eval.yml`, rezultat `data/sneg-snowfall-eval.json`; previous-runs API iz peskovnika ni dosegljiv). Napovedi, izdane 1–5 dni prej, za Rečico, štirje modeli
