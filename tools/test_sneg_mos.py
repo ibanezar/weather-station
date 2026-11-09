@@ -77,33 +77,47 @@ by = {k: v for k, v in by.items()}
 model = tsm.train(truth, by, observed={})
 check("učenje: naučil je vse vodilne čase", set(model["leads"]) == {"1", "2", "3", "4", "5"})
 e = model["leads"]["1"]
-obs_cal = {"a": -2.5, "b": 1.0}
 cold_wet = tsm.day_features({m: (-1.0, -5.0, 5.0) for m in tsm.MODELS})
 warm_wet = tsm.day_features({m: (12.0, 6.0, 5.0) for m in tsm.MODELS})
 cold_dry = tsm.day_features({m: (-1.0, -5.0, 0.0) for m in tsm.MODELS})
 pw, pwarm, pdry = tsm.predict_p(e, cold_wet), tsm.predict_p(e, warm_wet), tsm.predict_p(e, cold_dry)
 check("napoved: mokro in mrzlo >> toplo in mokro", pw > 0.5 and pwarm < 0.1)
 check("napoved: mrzlo a suho < mrzlo in mokro", pdry < pw)
-e_obs = dict(e, obs_calibration=obs_cal)
-po_wet, po_warm = tsm.predict_obs(e_obs, cold_wet), tsm.predict_obs(e_obs, warm_wet)
-z_wet = float(np.array(e["coefficients"]) @ np.array(tsm.vector(cold_wet)))
-check("opazovanja: p(merljiv sneg) = sigmoid(a + surov logit) in sledi vremenu", abs(po_wet - 1 / (1 + np.exp(-(-2.5 + z_wet)))) < 1e-9 and po_wet > po_warm)
-check("opazovanja: brez kalibracije predict_obs vrne None", tsm.predict_obs(e, cold_wet) is None)
-a_fit, b_fit = tsm.fit_obs_calibration(np.array([0.0] * 100), np.array([1.0] * 5 + [0.0] * 95))
-check("opazovanja: intercept = logit(delež dogodkov), naklon 1", abs(a_fit - np.log(0.05 / 0.95)) < 1e-3 and b_fit == 1.0)
+check("opazovanja: brez obs_pp predict_obs vrne None", tsm.predict_obs(e, cold_wet) is None and tsm.predict_obs_stations(e, cold_wet) == {})
 check("napoved: verjetnost je v [0, 1]", all(0.0 <= v <= 1.0 for v in (pw, pwarm, pdry)))
 check("model: cilj in opozorilo o proksiju sta zapisana",
       "proksi" in model["target"]["name"] and "ne meri" in model["target"]["caveat"])
 
-# --- kalibracija na opazovanja (sintetična postaja: sneg >= 1 cm, kadar je dan hladen in moker)
-observed = {"S1": {d: (3.0 if truth[d][2] and rng.random() < 0.5 else 0.0) for d in truth}}
+# --- preslikava meritev v sneg na postaji (sintetična postaja: sneg >= 1 cm, kadar je dan hladen in moker, v polovici primerov)
+observed = {"1748": {d: (3.0 if truth[d][2] and rng.random() < 0.5 else 0.0) for d in truth}}
+check("obs_x: opazovan mokri dan = vector z deležem mokrih modelov 1", tsm.obs_x(5.0, -2.0) == tsm.vector({"tavg": -2.0, "prec": 5.0, "wetfrac": 1.0})
+      and tsm.obs_x(0.0, -2.0)[3] == 0.0)
+pp = tsm.fit_obs_pp(observed["1748"], truth)
+check("fit_obs_pp: koeficienti za vse značilke, dogodki in zime so zapisani", pp is not None and len(pp["coefficients"]) == 4 and pp["events"] >= 10 and pp["winters"])
+check("fit_obs_pp: brez dogodkov None", tsm.fit_obs_pp({d: 0.0 for d in truth}, truth) is None)
 rows1 = tsm.samples_for(1, truth, by)
-oc = tsm.obs_calibration(rows1, observed)
-check("obs_calibration: vrne kalibracijo z naklonom 1 in CV", oc is not None and oc["b"] == 1.0 and "skill" in oc["cv"])
-check("obs_calibration: brez opazovanj ali z malo dogodki None", tsm.obs_calibration(rows1, {"S1": {d: 0.0 for d in truth}}) is None)
+cv = tsm.obs_pp_cv(observed["1748"], truth, rows1)
+check("obs_pp_cv: zima izpuščena na napovedanih vhodih, skill in AUC sta zapisana", cv and cv["skill"] is not None and cv["auc"] > 0.7 and cv["events"] > 0)
 mod_obs = tsm.train(truth, by, observed=observed)
-check("train: obs_calibration je zapisana po vodilnih časih", all("obs_calibration" in v for v in mod_obs["leads"].values()))
-check("train: brez opazovanj obs_calibration ni", all("obs_calibration" not in v for v in tsm.train(truth, by, observed={}).get("leads").values()) or True)
+check("train: obs_pp je zapisan po vodilnih časih z imenom postaje",
+      all(v["obs_pp"]["1748"]["name"] == "Gornji Grad" for v in mod_obs["leads"].values()))
+check("train: observed_target ima glavno postajo in njeno ime", mod_obs["observed_target"]["primary"] == "1748"
+      and mod_obs["observed_target"]["stations"]["1748"]["name"] == "Gornji Grad")
+e_obs = mod_obs["leads"]["1"]
+po_wet, po_warm = tsm.predict_obs(e_obs, cold_wet), tsm.predict_obs(e_obs, warm_wet)
+check("opazovanja: merljiv sneg sledi vremenu (mrzlo in mokro >> toplo in mokro)", po_wet > 0.2 and po_warm < 0.05 and po_wet > po_warm)
+check("opazovanja: predict_obs_stations vrne vse naučene postaje", set(tsm.predict_obs_stations(e_obs, cold_wet)) == {"1748"})
+check("train: brez opazovanj obs_pp ni", all("obs_pp" not in v for v in model["leads"].values()))
+check("postaje: glavna je Gornji Grad, višini sta samo preverjeni", tsm.VALLEY_STATIONS[tsm.OBS_PRIMARY]["name"] == "Gornji Grad"
+      and tsm.VALLEY_STATIONS["1748"]["alt_m"] == 428 and tsm.VALLEY_STATIONS["1747"]["alt_m"] == 794
+      and tsm.VALLEY_STATIONS["1749"]["alt_m"] is None)
+check("shrink_logit: shrink 1 ohrani logit, shrink 0 da klimatologijo", abs(tsm.shrink_logit(1.3, 1.0, 0.05) - 1.3) < 1e-12
+      and abs(tsm.shrink_logit(1.3, 0.0, 0.05) - np.log(0.05 / 0.95)) < 1e-12)
+check("shrink_logit: shrink 0,5 je med logitom in klimatologijo", np.log(0.05 / 0.95) < tsm.shrink_logit(1.3, 0.5, 0.05) < 1.3)
+check("train: krčenje je naklon kalibracije osnovnega modela, omejen na (0,3 .. 1)",
+      all(0.3 <= v["obs_pp"]["1748"]["shrink"] <= 1.0 for v in mod_obs["leads"].values()))
+a_fit, b_fit = tsm.fit_obs_calibration(np.array([0.0] * 100), np.array([1.0] * 5 + [0.0] * 95))
+check("legacy: fit_obs_calibration (eval_snowfall) deluje še naprej", abs(a_fit - np.log(0.05 / 0.95)) < 1e-3 and b_fit == 1.0)
 
 # --- model v repozitoriju (oblika)
 try:
@@ -112,9 +126,13 @@ try:
              for vec in [tsm.vector({"tavg": 0, "prec": 0, "wetfrac": 0})])
     check("model/sneg-mos.json: število koeficientov = število značilk", ok and real["leads"])
     check("model/sneg-mos.json: cilj je označen kot proksi", "proksi" in real["target"]["name"])
-    check("model/sneg-mos.json: vsak vodilni čas ima kalibracijo na opazovanja (a, b = 1)",
-          all(v.get("obs_calibration", {}).get("b") == 1.0 for v in real["leads"].values()))
-    check("model/sneg-mos.json: opazovani cilj omenja postaje in opozorilo o legi", len(real["observed_target"]["stations"]) == 5 and "Rečici" in real["observed_target"]["caveat"])
+    check("model/sneg-mos.json: vsak vodilni čas ima model snega za glavno postajo (Gornji Grad)",
+          all(len(v.get("obs_pp", {}).get("1748", {}).get("coefficients", [])) == 4 for v in real["leads"].values()))
+    check("model/sneg-mos.json: opazovani cilj ima glavno postajo, imena postaj in opozorilo o legi",
+          real["observed_target"]["primary"] == "1748" and real["observed_target"]["stations"]["1748"]["name"] == "Gornji Grad"
+          and "Rečici" in real["observed_target"]["caveat"])
+    check("model/sneg-mos.json: veščina na napovedanih vhodih je pri D+1..D+3 pozitivna (Gornji Grad)",
+          all(real["leads"][k]["obs_pp"]["1748"]["cv"].get("skill", -1) > 0 for k in ("1", "2", "3")))
 except FileNotFoundError:
     check("model/sneg-mos.json obstaja", False)
 
@@ -125,7 +143,11 @@ days = ps.predict_days(real, per_day, today)
 check("predict_days: pet dni v sezoni", [d["lead"] for d in days] == [1, 2, 3, 4, 5])
 check("predict_days: ob mrazu in padavinah je p_proxy visok, p_snow (merljiv sneg) manjši a nad 5 %",
       all(d["p_proxy"] > 0.3 and 0.05 < d["p_snow"] < d["p_proxy"] for d in days))
-check("predict_days: osnova je opazovanje (kalibracija je v modelu)", all(d["basis"] == "observed" for d in days))
+check("predict_days: osnova je opazovanje (preslikava je v modelu)", all(d["basis"] == "observed" for d in days))
+check("predict_days: p_snow se z vodilnim časom krči proti klimatologiji (D+1 > D+5 pri enakih vhodih)", days[0]["p_snow"] > days[4]["p_snow"])
+check("predict_days: višja Radegunda ima ob mrazu in dežju večjo možnost snega kot Gornji Grad", all(d["stations"]["Radegunda"] > d["stations"]["Gornji Grad"] for d in days))
+check("predict_days: poleg glavne postaje so napovedane druge postaje v dolini po imenu",
+      all(set(d["stations"]) == {"Gornji Grad", "Luče", "Radegunda", "Solčava"} and d["stations"]["Gornji Grad"] == d["p_snow"] for d in days))
 days_apr = ps.predict_days(real, {(dt.date(2027, 4, 29) + dt.timedelta(days=l)).isoformat():
                                   {m: (-1.0, -5.0, 5.0) for m in tsm.MODELS} for l in (1, 2, 3, 4, 5)}, dt.date(2027, 4, 29))
 check("predict_days: dnevi zunaj sezone (maj) izpadejo", [d["lead"] for d in days_apr] == [1])
@@ -177,6 +199,24 @@ res = vs.evaluate(best, {"2026-12-05": (3.0, -1.0, 1)}, real)
 check("verify: Brier D+1 = (0,9 - 1)^2", abs(res["1"]["brier"] - 0.01) < 1e-9)
 check("verify: malo dogodkov = zgodno", res["1"]["preliminary"] and res["1"]["events"] == 1)
 check("verify: vodilni čas brez podatkov ima n = 0", res["3"]["n"] == 0)
+
+# --- preverjanje p_snow proti snegu na Gornjem Gradu (samo različica >= 0,4)
+rows_s = [
+    {"issued_at": "a", "valid_at": "2026-12-05", "hours_before": "18.0", "p_snow": "0.6", "p_proxy": "0.8", "model_version": "0.4"},   # D+1, sneg 3 cm
+    {"issued_at": "b", "valid_at": "2026-12-06", "hours_before": "18.0", "p_snow": "0.2", "p_proxy": "0.5", "model_version": "0.4"},   # D+1, brez snega
+    {"issued_at": "c", "valid_at": "2026-12-07", "hours_before": "18.0", "p_snow": "0.9", "p_proxy": "0.9", "model_version": "0.3"},   # stara različica: preskoči
+    {"issued_at": "d", "valid_at": "2026-12-08", "hours_before": "18.0", "p_snow": "0.4", "p_proxy": "0.6", "model_version": "0.4"},   # arhiv še nima dneva
+]
+best_s = vs.pick_issues(rows_s)
+gg_series = {"2026-12-05": 3.0, "2026-12-06": 0.0, "2026-12-07": 5.0}
+snow_model = {"leads": {"1": {"obs_pp": {tsm.OBS_PRIMARY: {"prevalence": 0.1}}}}}
+ev_s = vs.evaluate_snow(best_s, gg_series, snow_model)
+check("verify snow: upošteva samo različico >= 0,4 in dneve, ki jih arhiv že ima", ev_s["1"]["n"] == 2 and ev_s["1"]["events"] == 1)
+check("verify snow: Brier D+1 = ((0,6 - 1)^2 + 0,2^2) / 2", abs(ev_s["1"]["brier"] - ((0.4 ** 2 + 0.2 ** 2) / 2)) < 1e-4)
+check("verify snow: klimatologija iz modela in veščina", ev_s["1"]["brier_clim"] == round(((0.1 - 1) ** 2 + 0.1 ** 2) / 2, 4) and ev_s["1"]["skill"] is not None)
+check("verify snow: malo dogodkov = zgodno, vodilni čas brez podatkov n = 0", ev_s["1"]["preliminary"] and ev_s["3"]["n"] == 0)
+check("verify snow: stolpec model_version manjka -> vrstica se preskoči", vs.evaluate_snow(vs.pick_issues([
+    {"issued_at": "z", "valid_at": "2026-12-05", "hours_before": "18.0", "p_snow": "0.6", "p_proxy": "0.8"}]), gg_series, snow_model)["1"]["n"] == 0)
 
 print("\n" + ("VSE V REDU" if not fails else f"{fails} NAPAK"))
 sys.exit(1 if fails else 0)

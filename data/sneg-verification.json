@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-11-09T10:49:45Z",
-  "model_version": "0.3",
+  "generated_at": "2026-11-09T16:19:31Z",
+  "model_version": "0.4",
   "target": {
     "name": "snežni dan (proksi)",
     "definition": "padavine >= 0.2 mm IN povprečna temperatura zraka <= 1.0 °C",
     "caveat": "Postaja snega ne meri; osnovni model napoveduje mokri hladni dan (proksi)."
   },
   "min_events": 15,
-  "note": "Meri se proksi (mokri hladni dan), ne opazovan sneg. Pod min_events dogodki na vodilni čas je rezultat zgoden in se ne tolmači.",
+  "note": "leads: proksi (mokri hladni dan, resnica IREICA1). snow: p_snow proti novemu snegu na ARSO postaji Gornji Grad. Pod min_events dogodki na vodilni čas je rezultat zgoden in se ne tolmači.",
   "leads": {
     "1": {
       "n": 0,
@@ -33,6 +33,39 @@
       "n": 0,
       "events": 0,
       "preliminary": true
+    }
+  },
+  "snow": {
+    "station": "Gornji Grad",
+    "id": "1748",
+    "definition": "nov sneg >= 1 cm ob jutranjem odčitku (ARSO arhiv)",
+    "min_model_version": 0.4,
+    "leads": {
+      "1": {
+        "n": 0,
+        "events": 0,
+        "preliminary": true
+      },
+      "2": {
+        "n": 0,
+        "events": 0,
+        "preliminary": true
+      },
+      "3": {
+        "n": 0,
+        "events": 0,
+        "preliminary": true
+      },
+      "4": {
+        "n": 0,
+        "events": 0,
+        "preliminary": true
+      },
+      "5": {
+        "n": 0,
+        "events": 0,
+        "preliminary": true
+      }
     }
   }
 }

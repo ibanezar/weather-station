@@ -1,0 +1,35 @@
+name: MTR sneg - ali je Open-Meteo snowfall uporaben (enkratni preizkus)
+
+# Previous-runs API iz razvojnega peskovnika ni dosegljiv; preizkus teče tu in rezultat shrani v data/sneg-snowfall-eval.json
+# (commit [skip ci]; pot ne sproži tega workflowa). Notranjih meritev ne bere.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ['claude/intelligent-mayer-q57y8j']
+    paths:
+      - 'tools/ai/eval_snowfall_openmeteo.py'
+      - '.github/workflows/sneg-snowfall-eval.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install numpy
+      - name: Preizkus
+        run: python3 tools/ai/eval_snowfall_openmeteo.py
+      - name: Shrani rezultat
+        if: always()
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/sneg-snowfall-eval.json
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "data: preizkus Open-Meteo snowfall za MTR sneg $(date -u +%Y-%m-%d) [skip ci]"
+          git push

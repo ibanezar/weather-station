@@ -1,0 +1,47 @@
+name: ARSO sneg - osvežitev serij postaj v dolini
+
+# MTR sneg (v0.4): dnevne serije novega snega in višine odeje ARSO postaj Gornji Grad, Luče, Radegunda, Solčava (+ Gomilsko) iz arhiva
+# meritev. So učni niz in resnica za preverjanje naprej v času (verify_sneg.py). Arhiv zaostaja nekaj dni. meteo.arso.gov.si iz razvojnega
+# peskovnika ni dosegljiv, zato teče tu. Commit [skip ci]. Notranjih meritev ne bere.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 6 * * *'
+  push:
+    branches: ['claude/intelligent-mayer-q57y8j']
+    paths:
+      - 'tools/refresh_arso_sneg.py'
+      - '.github/workflows/arso-sneg-refresh.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arso-sneg-refresh
+  cancel-in-progress: false
+
+jobs:
+  osvezi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Namesti numpy
+        run: pip install numpy
+      - name: Osveži serije
+        run: python3 tools/refresh_arso_sneg.py 2>&1 | tee arso-sneg-refresh.log
+      - name: Povzetek
+        if: always()
+        run: |
+          { echo '## ARSO sneg - osvežitev'; echo '```'; cat arso-sneg-refresh.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Shrani serije
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/arso-sneg-postaje
+          git diff --cached --quiet && echo "Ni sprememb." && exit 0
+          git commit -m "data: ARSO sneg, osvežitev serij postaj $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3; do git pull --rebase -q origin "${GITHUB_REF_NAME}" && git push && exit 0; sleep 5; done
+          exit 1
