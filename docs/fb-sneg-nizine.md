@@ -8,6 +8,17 @@ Vsako ima svojo `utm_campaign`, da GA4 loči, katera prinese klike. Članek ni n
 `python3 tools/sneg_nizine_data.py` in primerjajte z besedilom; če se je napoved obrnila, članek in objave prenovite, ne popravljajte številk na pamet.
 Besedilo vedno pove, da gre za modelsko oceno in ne za uradno opozorilo. Priporočen vrstni red: **A** zdaj, **B** v sredo, **C** v četrtek zjutraj (če številke še držijo).
 
+**Kartice 1080×1350** (`og/sneg-v-nizinah-cetrtek-dez-sobota-1109-kartica-N.jpg`, izdela jih `python3 tools/generate_sneg_nizine_card_variants.py`;
+številke so iz istega posnetka kot članek in generator pade, če posnetek ni današnji ali zgodba ne drži več). Vsaka paše k enemu besedilu:
+
+| Kartica | Besedilo | Kaj je na njej |
+|---|---|---|
+| 1 | A | fotografija sneženja v Rečici (5. 1. 2026, arhiv), »Bo v nižinah sneg?«, 16 % v dolini in 59 % na 900 m |
+| 2 | B | ansambli se ne strinjajo: 29 % : 2 %, stolpci po ansamblih in skupni delež 16 % |
+| 3 | C | ura za uro (temperatura in dež/sneg, 12.–16. 11.), 50 % članov z 0 °C ali manj v nedeljo zjutraj |
+
+Če se po novem prenosu podatkov številke spremenijo, kartice znova izdelajte (in popravite besedila), ne mešajte starih kartic z novimi številkami.
+
 ---
 
 ## A — »Četrtek še dež, sneg se odloča v soboto«
