@@ -214,6 +214,8 @@ def crawl_ameba(out_dir, start, max_files=40):
             continue
         with open(os.path.join(out_dir, "crawl-" + re.sub(r"\W+", "_", path)[-70:] + ".txt"), "w", encoding="utf-8") as f:
             f.write(tx)
+        if len(tx) <= 5000:     # majhne konfiguracijske datoteke verige izpišemo v celoti
+            print(f"[celoten] {path}: {re.sub(r'\s+', ' ', tx)}")
         for m in re.finditer(KEYWORDS, tx, flags=re.I):
             a, b = max(0, m.start() - 160), min(len(tx), m.end() + 220)
             hits.append((path, re.sub(r"\s+", " ", tx[a:b])))
@@ -245,7 +247,7 @@ def crawl_ameba(out_dir, start, max_files=40):
 def probe_locations():
     """Mreža možnih naslovov seznama postaj (sicer 500): ime datoteke x vrsta postaje x skupina."""
     found = []
-    for name in ("locations.xml", "stations.xml", "location.xml", "station.xml", "list.xml"):
+    for name in ("locations.xml",):
         for typ in ("1", "2", "3", "4"):
             for extra in ("", "&group=dailyData0&type=daily"):
                 path = f"/webmet/archive/{name}?lang=si&type={typ}{extra}" if not extra else \
