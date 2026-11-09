@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-11-09T09:38:57Z",
+  "model_version": "0.1",
+  "trained_at": "2026-11-09T09:37:55Z",
+  "in_season": true,
+  "target": {
+    "name": "snežni dan (proksi)",
+    "definition": "padavine >= 0.2 mm IN povprečna temperatura zraka <= 1.0 °C",
+    "caveat": "Postaja snega ne meri; to je mokri hladni dan, ne opazovan sneg."
+  },
+  "note": "MTR sneg -- POSKUSNI model. Verjetnost »snežnega dne« je proksi: padavine in povprečna temperatura <= 1 °C v Rečici. Postaja snega ne meri; to ni napoved debeline snega in ne ve, ali sneg obleži. Ni uradno opozorilo.",
+  "days": [
+    {
+      "date": "2026-11-10",
+      "lead": 1,
+      "p_snow": 0.0,
+      "tavg": 9.9,
+      "prec_mm": 1.3,
+      "n_models": 3
+    },
+    {
+      "date": "2026-11-11",
+      "lead": 2,
+      "p_snow": 0.0,
+      "tavg": 10.1,
+      "prec_mm": 2.0,
+      "n_models": 3
+    },
+    {
+      "date": "2026-11-12",
+      "lead": 3,
+      "p_snow": 0.0,
+      "tavg": 12.2,
+      "prec_mm": 18.8,
+      "n_models": 3
+    }
+  ]
+}

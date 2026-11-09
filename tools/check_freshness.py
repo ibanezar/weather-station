@@ -59,6 +59,9 @@ REGISTER = [
     # Živa osvežitev za kartice (mtr-live.yml, 4 termini/dan); radodaren prag zaradi zamud crona.
     ("Napoved MTR (živa)", "napoved-modela-live.json", "ts", "generated_at", 36,
      "mtr-live.yml → predict_recica_mos.py --live"),
+    # MTR sneg (proksi): zunaj sezone (maj-sept) se datoteka zapiše enkrat na dan s praznim seznamom (utrip).
+    ("MTR sneg (proksi)", "napoved-snega.json", "ts", "generated_at", 36,
+     "sneg-forecast.yml → predict_sneg_mos.py"),
     ("MTR: števci odprtih poskusov", "data/mtr-pending.json", "ts", "generated_at", 36,
      "mtr-live.yml → tools/mtr_pending.py"),
     ("Točnost MTR", "data/mtr-accuracy.json", "ts", "generated_at", 36,

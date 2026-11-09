@@ -1460,6 +1460,16 @@ surovega modela (`tools/ai/eval_mtr7_wind.py`, docs/model-recica.md).
 - **Zaživi šele po ponovnem učenju** (`mos-train.yml`): model brez `wind` v `leads.<N>` pusti polja `None` in kartica je skrita.
   Test: `tools/test_mtr_wind.py` (v `parity.yml`).
 
+### MTR sneg (proksi, 9. 11. 2026)
+
+Poskusna verjetnost »snežnega dne« v Rečici za D+1..D+3 (`tools/train_sneg_mos.py` → `model/sneg-mos.json`, `predict_sneg_mos.py` → `napoved-snega.json` + `data/sneg-forward-log.csv`,
+`verify_sneg.py` → `data/sneg-verification.json`, `sneg-forecast.yml` 4×/dan, v sezoni oktober–april; zunaj nje utrip enkrat na dan). **Postaja snega ne meri: cilj je PROKSI**
+(padavine ≥ 0,2 mm in T povp. ≤ 1 °C = mokri hladni dan); model ne napoveduje debeline snega ne ali sneg obleži, in to mora pisati povsod, kjer se številka pokaže.
+Rezultat na arhivu (izpuščanje zime, 39 dogodkov): Brier skill +0,15..+0,20, surov Open-Meteo kot prag brez veščine; vzorec je majhen, podrobnosti in opozorila v `docs/model-recica.md`.
+**Nobena stran, kartica ali zgodba je še ne prikazuje** -- ne dodajaj, dokler `data/sneg-verification.json` nima ≥ 15 dogodkov na vodilni čas in ni brez dokaza boljše od klimatologije.
+Značilke, proksi in prileganje so v `train_sneg_mos.py` (ena kopija; `tools/ai/eval_sneg.py` jih uvaža). Test: `tools/test_sneg_mos.py` (v `parity.yml`); vrstica v `REGISTER`.
+Ko bo prava resnica (urni zapis z mokrim termometrom, ARSO snežne meritve), se spremeni samo `load_truth()`/`is_snow_day()`. Notranjih meritev model ne bere.
+
 ### Verjetnost zmrzali in razlog za popravek (6. 10. 2026)
 
 `predict_recica_mos.py` poleg napovedi zapiše za vsak dan še `p_frost` (P(Tmin ≤ 0 °C),

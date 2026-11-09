@@ -15,105 +15,37 @@ zato je izpuščanje zime edino pošteno merilo.
 Primerja:
   klim   -- delež snežnih dni v učni zimi (brez znanja o vremenu)
   pravilo -- surov best_match: padavine >= 0,5 mm IN povprečna temperatura <= PRAG_PRAVILO (enostaven prag)
-  logit2 -- logistična regresija na [popravljena T povp. modelov, log1p(povpr. padavine)]
-  logit3 -- isto + delež modelov z >= 0,2 mm
+  logit2 -- logistična regresija na [T povp. modelov, log1p(povpr. padavine)] (osnovna dva)
+  logit3 -- model v produkciji (tools/train_sneg_mos.py): + temperatura × delež modelov z dežjem
+Značilke, proksi in prileganje so v tools/train_sneg_mos.py (ena kopija); tu je samo primerjava.
 
 usage: eval_sneg.py [--prag 1.0] [--leads 1 2 3]
 """
 import argparse
-import csv
-import json
-import math
 import os
-from collections import defaultdict
+import sys
 
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MODELS = ["best_match", "ecmwf_ifs025", "gfs_seamless", "icon_seamless"]
-MIN_MODELS = 3
-WET_MM = 0.2          # isti prag kot WET_DAY_MM v verify_forecasts.py
-SEASON = {10, 11, 12, 1, 2, 3, 4}
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import train_sneg_mos as tsm  # noqa: E402  (značilke, proksi in prileganje so skupni z modelom)
 
-
-def season_year(d):
-    """Zima 2024/25 -> 2024."""
-    y, m = int(d[:4]), int(d[5:7])
-    return y if m >= 7 else y - 1
+WET_MM = tsm.WET_MM
+auc, brier, fit_logit = tsm.auc, tsm.brier, tsm.fit_logit
 
 
 def load(prag_t):
-    hist = json.load(open(os.path.join(ROOT, "history.json"), encoding="utf-8"))
-    truth = {}
-    for d, v in hist.items():
-        if v.get("src") == "era5" or v.get("precipTotal") is None or v.get("tempAvg") is None:
-            continue
-        truth[d] = (v["precipTotal"], v["tempAvg"], 1 if (v["precipTotal"] >= WET_MM and v["tempAvg"] <= prag_t) else 0)
-    by = defaultdict(lambda: defaultdict(dict))   # lead -> date -> model -> (tmax,tmin,prec)
-    with open(os.path.join(ROOT, "data", "forecast-archive.csv"), encoding="utf-8", newline="") as f:
-        for r in csv.DictReader(f):
-            if r["model"] not in MODELS:
-                continue
-            try:
-                by[int(r["lead_days"])][r["valid_at"]][r["model"]] = (float(r["tmax_c"]), float(r["tmin_c"]), float(r["precip_mm"]))
-            except (ValueError, TypeError):
-                continue
-    return truth, by
+    return tsm.load_truth(prag_t), tsm.load_archive()
 
 
 def samples_for(lead, truth, by):
-    out = []
-    for d, models in sorted(by[lead].items()):
-        if d not in truth or int(d[5:7]) not in SEASON or len(models) < MIN_MODELS:
-            continue
-        tavg = float(np.mean([(a + b) / 2 for a, b, _ in models.values()]))
-        precs = [p for _, _, p in models.values()]
-        out.append({
-            "date": d, "winter": season_year(d), "tavg": tavg,
-            "prec": float(np.mean(precs)), "wetfrac": sum(p >= WET_MM for p in precs) / len(precs),
-            "bm_tavg": (models["best_match"][0] + models["best_match"][1]) / 2 if "best_match" in models else tavg,
-            "bm_prec": models["best_match"][2] if "best_match" in models else float(np.mean(precs)),
-            "y": truth[d][2], "obs_t": truth[d][1],
-        })
-    return out
+    return tsm.samples_for(lead, truth, by)
 
 
 def design(rows, kind):
-    cols = [[1.0] * len(rows), [r["tavg"] for r in rows], [math.log1p(r["prec"]) for r in rows]]
-    if kind == "logit3":
-        cols.append([r["wetfrac"] for r in rows])
-    return np.array(cols, dtype=float).T
-
-
-def fit_logit(X, y, ridge=1.0, it=60):
-    """Logistična regresija z L2 (brez presečišča), Newton. Ridge je pomemben: zima ima ~20 dogodkov."""
-    w = np.zeros(X.shape[1])
-    pen = np.eye(X.shape[1]) * ridge
-    pen[0, 0] = 0.0
-    for _ in range(it):
-        z = X @ w
-        p = 1 / (1 + np.exp(-np.clip(z, -30, 30)))
-        g = X.T @ (p - y) + pen @ w
-        H = (X.T * (p * (1 - p))) @ X + pen + np.eye(X.shape[1]) * 1e-6
-        step = np.linalg.solve(H, g)
-        w -= step
-        if np.max(np.abs(step)) < 1e-8:
-            break
-    return w
-
-
-def auc(p, y):
-    p, y = np.asarray(p), np.asarray(y)
-    pos, neg = p[y == 1], p[y == 0]
-    if len(pos) == 0 or len(neg) == 0:
-        return float("nan")
-    gt = (pos[:, None] > neg[None, :]).sum() + 0.5 * (pos[:, None] == neg[None, :]).sum()
-    return gt / (len(pos) * len(neg))
-
-
-def brier(p, y):
-    p, y = np.asarray(p), np.asarray(y)
-    return float(np.mean((p - y) ** 2))
+    X = np.array([tsm.vector(r) for r in rows], dtype=float)
+    return X if kind == "logit3" else X[:, :3]    # logit2 = osnovni dve značilki, logit3 = model v produkciji
 
 
 def evaluate(rows, pravilo_t):

@@ -460,3 +460,33 @@ Povprečna MAE čez k = 1…12 (°C): brez zasidranja 1,690; linearno čez 3 h 1
 - Ostanek `w_k` ≈ 0,14 čez 10 h je trajna dnevna pristranskost, ki je nobena od linearnih oblik ne zajame.
 - **`ANCHOR_HOURS` ostaja 6.** Ponovi po zimi 2026/27 (inverzije trajajo dlje, pričakovano je počasnejše izzvenevanje); šele takrat razmisli o 9 h.
 - Ni na semaforju in ni vpisano nikamor kot točnost: je prikaz.
+
+## MTR sneg (proksi), 9. 11. 2026
+
+**Kaj je.** Verjetnost »snežnega dne« v Rečici za D+1..D+3. **Postaja snega ne meri**, zato je cilj proksi:
+padavine ≥ 0,2 mm IN dnevno povprečje temperature zraka ≤ 1,0 °C (»mokri hladni dan«). Dež pri 1 °C in sneg pri 2 °C
+proksi zgreši; model ne napoveduje debeline snega in ne ali sneg obleži. Definicija je na enem mestu
+(`train_sneg_mos.is_snow_day`), prag 1,0 °C je izbira (občutljivost 0,5 / 1,5 °C v `tools/ai/eval_sneg.py`: skill podoben).
+
+**Model.** Ločena logistična regresija (L2) za vsak vodilni čas na treh značilkah iz štirih modelov arhiva
+napovedi (best_match, IFS, GFS, ICON; vsaj 3): povprečje (Tmax+Tmin)/2, log1p(povprečne padavine) in
+temperatura × delež modelov z dežjem. Nato kalibracijska premica na izpuščenih zimah (b ≈ 0,7–0,77, ker je surov logit
+preveč samozavesten). Skripti: `tools/train_sneg_mos.py` (učenje, offline), `predict_sneg_mos.py` (živo),
+`verify_sneg.py` (preverjanje naprej), `sneg-forecast.yml` (4 termini/dan). Model: `model/sneg-mos.json`.
+
+**Rezultat na arhivu** (izpuščanje cele zime; 459 dni, 39 dogodkov, zime 2024/25, 2025/26 in jesen 2026):
+Brierjev skill proti klimatologiji +0,20 (D+1), +0,17 (D+2), +0,15 (D+3); AUC 0,87 / 0,86 / 0,85. Surov best_match z
+enostavnim pragom skoraj brez veščine (+0,07 / +0,01 / −0,01). **Opozorila:** (1) 39 dogodkov, dve in pol zime: razlike
+med variantami so znotraj šuma; (2) obliko (interakcija) sem izbral med petimi variantami, dobitek +0,02..0,04 skilla;
+(3) kalibracija je prilagojena na istih OOF napovedih, zato je skill rahlo optimističen; (4) resnica je odvisna od
+iste temperature, ki jo model napoveduje (skupaj z padavinami je to vse, kar »sneg« tu pomeni).
+
+**Pošteno preverjanje je naprej v času.** Vsaka živa osvežitev gre v `data/sneg-forward-log.csv`, `verify_sneg.py`
+pa za vsak ciljni dan vzame najzgodnejšo izdajo v razredu vodilnega časa (model je učen na previous_dayN) in zapiše
+`data/sneg-verification.json`. Pod 15 dogodki na vodilni čas je rezultat zgoden in se ne tolmači.
+
+**Še ni narejeno / odprto.** Nobena stran, kartica ali zgodba ne prikazuje te napovedi (isto načelo kot za druge
+nove modele: brez dokaza ne nastane stran). Prava resnica bi izboljšala vse: urni zapis postaje z mokrim termometrom
+(`data/hourly-observations.csv` teče od julija 2026, to bo prva zima), ARSO snežne meritve, poročila obiskovalcev
+(`snezi`). Višinski podatki (meja sneženja, T850) niso vključeni: za njih ni arhiva napovedi (glej poskuse 24. 10.).
+Količine snega (cm) ni; 1 mm ≈ 1 cm (10:1) v `winter_engine.py` ostaja ločena, nepreverjena ocena.

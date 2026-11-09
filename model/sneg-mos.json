@@ -1,0 +1,126 @@
+{
+  "model_version": "0.1",
+  "trained_at": "2026-11-09T09:37:55Z",
+  "train_range": {
+    "from": "2024-10-01",
+    "to": "2026-11-08"
+  },
+  "target": {
+    "name": "snežni dan (proksi)",
+    "definition": "padavine >= 0.2 mm IN povprečna temperatura zraka <= 1.0 °C",
+    "caveat": "Postaja snega ne meri; to je mokri hladni dan, ne opazovan sneg."
+  },
+  "season_months": [
+    10,
+    11,
+    12,
+    1,
+    2,
+    3,
+    4
+  ],
+  "models": [
+    "best_match",
+    "ecmwf_ifs025",
+    "gfs_seamless",
+    "icon_seamless"
+  ],
+  "min_models": 3,
+  "ridge": 0.1,
+  "cal_prior": 2.0,
+  "leads": {
+    "1": {
+      "names": [
+        "1",
+        "tavg_modelov",
+        "log1p_padavine_modelov",
+        "tavg_x_delez_mokrih_modelov"
+      ],
+      "coefficients": [
+        -1.06658,
+        -0.3054,
+        0.71815,
+        -0.55276
+      ],
+      "calibration": {
+        "a": -0.4557,
+        "b": 0.742
+      },
+      "n": 459,
+      "events": 39,
+      "prevalence": 0.085,
+      "cv": {
+        "n": 459,
+        "events": 39,
+        "brier_clim": 0.0777,
+        "brier_raw": 0.0631,
+        "brier_cal": 0.062,
+        "skill_cal": 0.202,
+        "auc": 0.875,
+        "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      }
+    },
+    "2": {
+      "names": [
+        "1",
+        "tavg_modelov",
+        "log1p_padavine_modelov",
+        "tavg_x_delez_mokrih_modelov"
+      ],
+      "coefficients": [
+        -0.96483,
+        -0.27881,
+        0.74583,
+        -0.48768
+      ],
+      "calibration": {
+        "a": -0.4059,
+        "b": 0.7694
+      },
+      "n": 459,
+      "events": 39,
+      "prevalence": 0.085,
+      "cv": {
+        "n": 459,
+        "events": 39,
+        "brier_clim": 0.0777,
+        "brier_raw": 0.0656,
+        "brier_cal": 0.0646,
+        "skill_cal": 0.169,
+        "auc": 0.856,
+        "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      }
+    },
+    "3": {
+      "names": [
+        "1",
+        "tavg_modelov",
+        "log1p_padavine_modelov",
+        "tavg_x_delez_mokrih_modelov"
+      ],
+      "coefficients": [
+        -0.96369,
+        -0.29015,
+        0.51282,
+        -0.34999
+      ],
+      "calibration": {
+        "a": -0.5143,
+        "b": 0.6937
+      },
+      "n": 459,
+      "events": 39,
+      "prevalence": 0.085,
+      "cv": {
+        "n": 459,
+        "events": 39,
+        "brier_clim": 0.0777,
+        "brier_raw": 0.0676,
+        "brier_cal": 0.066,
+        "skill_cal": 0.151,
+        "auc": 0.846,
+        "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
+      }
+    }
+  }
+}
