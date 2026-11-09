@@ -194,7 +194,7 @@ PUJS_ROOT = "/uploads/meteo/app/webmet/pujs"
 PUJS_MAP = {"ACADEMA.PUJS.AMEBA": PUJS_ROOT + "/ameba", "ACADEMA.PUJS.ROOT": PUJS_ROOT, "PUJS.ROOT": PUJS_ROOT,
             "ACADEMA.PUJS.PROG": PUJS_ROOT + "/prog", "PUJS.PROG": PUJS_ROOT + "/prog", "PUJS.AMEBA": PUJS_ROOT + "/ameba",
             "ACADEMA.LANG": "sl"}
-KEYWORDS = r"(?:archive|locations?|stations?|data\.xml|snow|\?lang|type=|dailyData)"
+KEYWORDS = r"(?:ARCHIVE\.ROOT|URL\.ARCHIVE|locations?|stations?\.xml|\.xml\?|lang=|data\.xml|\.ROOT\s*\+)"
 
 
 def crawl_ameba(out_dir, start, max_files=40):
@@ -225,13 +225,20 @@ def crawl_ameba(out_dir, start, max_files=40):
         for lit in re.findall(r"src:\s*\"([^\"]+\.xml)\"", tx):
             if lit not in seen:
                 todo.append(lit)
-    shown = set()
+    # kratek seznam datotek, nato samo zares pomembna mesta (generatorske funkcije izpustimo: izris tabel)
+    print("[crawl] datoteke:", ", ".join(sorted(x.rsplit("/", 1)[-1] for x in seen)))
+    shown, count = {}, 0
     for path, w in hits:
-        key = w[:120]
+        if "generators" in path or count >= 70:
+            continue
+        if not re.search(r"(?:ARCHIVE\.ROOT|URL\.ARCHIVE|locations?|stations?\.xml|\.xml\?|lang=|data\.xml|\.ROOT\s*\+)", w, flags=re.I):
+            continue
+        key = (path, w[:60])
         if key in shown:
             continue
-        shown.add(key)
-        print(f"   ~ [{path.rsplit('/', 1)[-1]}] {w[:380]}")
+        shown[key] = 1
+        count += 1
+        print(f"   ~ [{path.rsplit('/', 1)[-1]}] {w[:420]}")
     return seen
 
 
