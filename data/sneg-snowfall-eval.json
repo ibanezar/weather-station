@@ -1,0 +1,284 @@
+{
+ "generated": "2026-11-09T13:03:23Z",
+ "range": [
+  "2024-10-01",
+  "2026-04-30"
+ ],
+ "availability": {
+  "best_match": {
+   "snowfall_d1": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 71
+   },
+   "snow_depth_d1": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d2": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 18
+   },
+   "snow_depth_d2": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d3": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 47
+   },
+   "snow_depth_d3": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d4": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 76
+   },
+   "snow_depth_d4": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d5": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 305
+   },
+   "snow_depth_d5": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   }
+  },
+  "ecmwf_ifs025": {
+   "snowfall_d1": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snow_depth_d1": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d2": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snow_depth_d2": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d3": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snow_depth_d3": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d4": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snow_depth_d4": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d5": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snow_depth_d5": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   }
+  },
+  "gfs_seamless": {
+   "snowfall_d1": {
+    "non_null": 12245,
+    "of": 13848,
+    "non_zero": 43
+   },
+   "snow_depth_d1": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d2": {
+    "non_null": 12221,
+    "of": 13848,
+    "non_zero": 59
+   },
+   "snow_depth_d2": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d3": {
+    "non_null": 12197,
+    "of": 13848,
+    "non_zero": 52
+   },
+   "snow_depth_d3": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d4": {
+    "non_null": 12173,
+    "of": 13848,
+    "non_zero": 59
+   },
+   "snow_depth_d4": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d5": {
+    "non_null": 12149,
+    "of": 13848,
+    "non_zero": 54
+   },
+   "snow_depth_d5": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   }
+  },
+  "icon_seamless": {
+   "snowfall_d1": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 56
+   },
+   "snow_depth_d1": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d2": {
+    "non_null": 13813,
+    "of": 13848,
+    "non_zero": 18
+   },
+   "snow_depth_d2": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d3": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 47
+   },
+   "snow_depth_d3": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d4": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 76
+   },
+   "snow_depth_d4": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   },
+   "snowfall_d5": {
+    "non_null": 13848,
+    "of": 13848,
+    "non_zero": 305
+   },
+   "snow_depth_d5": {
+    "non_null": 0,
+    "of": 13848,
+    "non_zero": 0
+   }
+  }
+ },
+ "skill": {
+  "D+1": {
+   "n": 2100,
+   "events": 34,
+   "auc_osnovni_logit": 0.915765047548545,
+   "auc_snowfall_povprecje": 0.7689553556175617,
+   "auc_snowfall_max": 0.7684926826490519,
+   "dni_snowfall_nad_0": 80,
+   "snowfall>0: zadetkov/napacnih alarmov/zgresenih": [
+    19,
+    61,
+    15
+   ]
+  },
+  "D+2": {
+   "n": 2100,
+   "events": 34,
+   "auc_osnovni_logit": 0.9191105290131542,
+   "auc_snowfall_povprecje": 0.5956665337964808,
+   "auc_snowfall_max": 0.5958088947098684,
+   "dni_snowfall_nad_0": 30,
+   "snowfall>0: zadetkov/napacnih alarmov/zgresenih": [
+    6,
+    24,
+    28
+   ]
+  },
+  "D+3": {
+   "n": 2100,
+   "events": 34,
+   "auc_osnovni_logit": 0.9036643699105974,
+   "auc_snowfall_povprecje": 0.7179545583964466,
+   "auc_snowfall_max": 0.7191646261602415,
+   "dni_snowfall_nad_0": 70,
+   "snowfall>0: zadetkov/napacnih alarmov/zgresenih": [
+    11,
+    59,
+    23
+   ]
+  },
+  "D+4": {
+   "n": 2100,
+   "events": 34,
+   "auc_osnovni_logit": 0.9147685211548318,
+   "auc_snowfall_povprecje": 0.7693824383577245,
+   "auc_snowfall_max": 0.7685282728773988,
+   "dni_snowfall_nad_0": 70,
+   "snowfall>0: zadetkov/napacnih alarmov/zgresenih": [
+    19,
+    51,
+    15
+   ]
+  },
+  "D+5": {
+   "n": 2100,
+   "events": 34,
+   "auc_osnovni_logit": 0.895193895564034,
+   "auc_snowfall_povprecje": 0.8223406981379192,
+   "auc_snowfall_max": 0.822838961334776,
+   "dni_snowfall_nad_0": 215,
+   "snowfall>0: zadetkov/napacnih alarmov/zgresenih": [
+    24,
+    191,
+    10
+   ]
+  }
+ }
+}
