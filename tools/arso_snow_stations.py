@@ -190,6 +190,68 @@ def confusion(days, proxy):
             "false_alarm_ratio": round(fp / (tp + fp), 2) if tp + fp else None}
 
 
+PUJS_ROOT = "/uploads/meteo/app/webmet/pujs"
+PUJS_MAP = {"ACADEMA.PUJS.AMEBA": PUJS_ROOT + "/ameba", "ACADEMA.PUJS.ROOT": PUJS_ROOT, "PUJS.ROOT": PUJS_ROOT,
+            "ACADEMA.PUJS.PROG": PUJS_ROOT + "/prog", "PUJS.PROG": PUJS_ROOT + "/prog", "PUJS.AMEBA": PUJS_ROOT + "/ameba",
+            "ACADEMA.LANG": "sl"}
+KEYWORDS = r"(?:archive|locations?|stations?|data\.xml|snow|\?lang|type=|dailyData)"
+
+
+def crawl_ameba(out_dir, start, max_files=40):
+    """Rekurzivno prebere verigo XML-jev aplikacije arhiva (`AcademaPUJS.queue({src: ...})`) in izpiše vse, kar omenja
+    arhiv, postaje, lokacije ali parametre zahtevkov. Struktura je neformalna (Academa), zato se naslovi sestavijo
+    iz konstant, ki jih zapiše settings.xml."""
+    todo, seen, hits = list(start), set(), []
+    while todo and len(seen) < max_files:
+        path = todo.pop(0)
+        if path in seen:
+            continue
+        seen.add(path)
+        st, tx = get(path)
+        time.sleep(PAUSE_S)
+        print(f"[crawl] {path} -> HTTP {st}, {len(tx)} znakov")
+        if st != 200 or not tx:
+            continue
+        with open(os.path.join(out_dir, "crawl-" + re.sub(r"\W+", "_", path)[-70:] + ".txt"), "w", encoding="utf-8") as f:
+            f.write(tx)
+        for m in re.finditer(KEYWORDS, tx, flags=re.I):
+            a, b = max(0, m.start() - 160), min(len(tx), m.end() + 220)
+            hits.append((path, re.sub(r"\s+", " ", tx[a:b])))
+        for pre, rest in re.findall(r"src:\s*([A-Za-z_.]+)\s*\+\s*\"([^\"]+)\"", tx):
+            if pre in PUJS_MAP:
+                nxt = PUJS_MAP[pre] + rest
+                if nxt not in seen:
+                    todo.append(nxt)
+        for lit in re.findall(r"src:\s*\"([^\"]+\.xml)\"", tx):
+            if lit not in seen:
+                todo.append(lit)
+    shown = set()
+    for path, w in hits:
+        key = w[:120]
+        if key in shown:
+            continue
+        shown.add(key)
+        print(f"   ~ [{path.rsplit('/', 1)[-1]}] {w[:380]}")
+    return seen
+
+
+def probe_locations():
+    """Mreža možnih naslovov seznama postaj (sicer 500): ime datoteke x vrsta postaje x skupina."""
+    found = []
+    for name in ("locations.xml", "stations.xml", "location.xml", "station.xml", "list.xml"):
+        for typ in ("1", "2", "3", "4"):
+            for extra in ("", "&group=dailyData0&type=daily"):
+                path = f"/webmet/archive/{name}?lang=si&type={typ}{extra}" if not extra else \
+                       f"/webmet/archive/{name}?lang=si&stype={typ}{extra}"
+                st, tx = get(path, timeout=30)
+                time.sleep(0.4)
+                if st == 200 and tx:
+                    print(f"[mreža] {path} -> HTTP 200, {len(tx)} znakov: {re.sub(chr(10), ' ', tx[:200])}")
+                    found.append((path, tx))
+    print(f"[mreža] zadetkov: {len(found)}")
+    return found
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--radius", type=float, default=35.0)
@@ -262,6 +324,14 @@ def main():
                         time.sleep(PAUSE_S)
                         if len(f2) > len(stations):
                             stations, used = f2, l
+    if not stations:
+        crawl_ameba(a.out, [PUJS_ROOT + "/ameba/index.xml", PUJS_ROOT + "/ameba/default.xml", PUJS_ROOT + "/prog/default.xml",
+                            PUJS_ROOT + "/prog/init.xml", PUJS_ROOT + "/menu.xml"])
+        for path, tx in probe_locations():
+            found = parse_stations(tx)
+            print(f"   {path}: razpoznanih postaj {len(found)}")
+            if len(found) > len(stations):
+                stations, used = found, path
     report += ["", f"Seznam postaj: **{used or 'NI NAJDEN'}**, postaj: {len(stations)}", ""]
     with open(os.path.join(a.out, "stations.json"), "w", encoding="utf-8") as f:
         json.dump(stations, f, ensure_ascii=False, indent=1)
