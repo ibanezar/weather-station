@@ -376,6 +376,16 @@ def probe_ids(out_dir, max_id=6000, batch=100):
     return list(stations.values()), f"data.xml (skeniranje id 1..{max_id})"
 
 
+def dump_loader(out_dir):
+    """AcademaLoader.js v celoti + okolica mesta v strani, kjer se nalagajo datoteke aplikacije (bin/app ...)."""
+    st, tj = get("/uploads/meteo/app/webmet/bin/js/AcademaLoader.js")
+    print(f"[loader] AcademaLoader.js HTTP {st}, {len(tj)} znakov")
+    print("   ", re.sub(r"\s+", " ", tj))
+    st, page = get("/met/sl/app/webmet/")
+    for m in re.finditer(r"webmet/bin/app", page):
+        a, b = max(0, m.start() - 500), min(len(page), m.end() + 500)
+        print("   page okolica:", re.sub(r"\s+", " ", page[a:b]))
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--radius", type=float, default=35.0)
@@ -450,6 +460,7 @@ def main():
                         if len(f2) > len(stations):
                             stations, used = f2, l
     if not stations:
+        dump_loader(a.out)
         stations, used = probe_ids(a.out)
     if not stations and a.crawl:
         crawl_ameba(a.out, [PUJS_ROOT + "/ameba/index.xml", PUJS_ROOT + "/ameba/default.xml", PUJS_ROOT + "/prog/default.xml",
