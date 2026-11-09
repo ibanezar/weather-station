@@ -306,10 +306,28 @@ STYLE = """<style>
 .vs-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.7rem .8rem}
 .vs-card b{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.45rem;line-height:1.15;color:var(--text);font-weight:700;white-space:nowrap}
 .vs-card span{display:block;margin-top:.3rem;font-size:.78rem;line-height:1.35;color:var(--muted)}
+.vs-gal{margin:1.4rem 0}
+.vs-gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
+.vs-gal-grid img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:12px}
+.vs-gal figcaption{color:var(--muted);font-size:.85rem;line-height:1.5;margin-top:.6rem}
 .vs-more{margin:.6rem 0 1.2rem}
 .vs-more summary{cursor:pointer;color:var(--blue);font-size:.9rem}
 h3.vs-h3,.post-body h3{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;margin:1.6rem 0 .4rem}
 </style>"""
+
+
+# Fotografije so Filipove (img/blog/<slug>/foto-N.jpg, 720 × 960, brez EXIF; originala 3072 × 4096 v repozitorij ne gresta).
+# Datum in kraj posnetka nista znana, zato podpis ju ne navaja.
+PHOTOS = [
+    ("foto-1.jpg", "Jurček z rjavim klobukom, zelenkasto cevkasto trosovnico in belim betom v dlani, v ozadju jesenski gozd."),
+    ("foto-2.jpg", "Gozdna pot, posuta z bukovim listjem, med rumeno obarvanimi drevesi jeseni."),
+]
+
+
+def gallery_html():
+    imgs = "".join(f'<img src="/img/blog/{SLUG}/{f}" alt="{alt}" width="720" height="960" loading="lazy">' for f, alt in PHOTOS)
+    return (f'<figure class="vs-gal"><div class="vs-gal-grid">{imgs}</div>'
+            '<figcaption>Jurček in gozdna pot v jesenskem gozdu. Foto: Filip Eremita.</figcaption></figure>')
 
 
 def fig(title, inner, caption):
@@ -644,7 +662,7 @@ def main():
         nav_label="O postaji", nav_href="/o-postaji.html")
     lead = f'<p class="lead">{article["lead"]}</p>'
     assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"
-    html = html.replace(lead, STYLE + "\n" + lead, 1)
+    html = html.replace(lead, STYLE + "\n" + lead + "\n" + gallery_html(), 1)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"✓ zapisano: blog/{slug}.html")
