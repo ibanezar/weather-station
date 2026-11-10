@@ -12,6 +12,7 @@ import { isPatternMode } from '../settings.ts';
 import { randomEntropy, newSession } from '../../app/session.ts';
 import { CHASE_ICON, chaseKey, chaseSwatches, gradeKey } from '../../app/chase-text.ts';
 import { loadEngineData } from '../../app/data.ts';
+import { contractProgress } from '../../app/contracts.ts';
 
 const cityById = (id: string): SeedCity => cities.find((c) => c.id === id) as SeedCity;
 
@@ -178,7 +179,7 @@ export function renderResult(app: App, root: HTMLElement): void {
       endlessBtn.disabled = true;
       void loadEngineData().then(
         (data) => {
-          app.session = newSession('endless', data, { entropy: randomEntropy(), chase });
+          app.session = newSession('endless', data, { entropy: randomEntropy(), chase, contract: session.contract });
           app.count({ ev: 'start', mode: 'endless', chase });
           app.go('draft');
         },
@@ -253,6 +254,22 @@ export function renderResult(app: App, root: HTMLElement): void {
           ' ',
           h('span', { class: 'muted' }, t('result.yours', { n: result.record.w })),
         ),
+      ),
+      h(
+        'section',
+        { class: 'contract-result', 'aria-label': t('contract.title') },
+        h('h2', null, t(`contract.${session.contract}.name` as import('../../i18n/index.ts').MessageKey)),
+        h('p', { class: 'num' }, t(`contract.${session.contract}.progress` as import('../../i18n/index.ts').MessageKey, {
+          current: contractProgress(session.contract, result.rounds, result.bestRecord.w, true).current,
+          target: contractProgress(session.contract, result.rounds, result.bestRecord.w, true).target,
+          months: 12,
+        })),
+        h('p', { class: 'muted', role: 'status' }, t(
+          contractProgress(session.contract, result.rounds, result.bestRecord.w, true).passed
+            ? 'contract.result.pass'
+            : 'contract.result.miss',
+          { name: t(`contract.${session.contract}.name` as import('../../i18n/index.ts').MessageKey) },
+        )),
       ),
       h(
         'div',

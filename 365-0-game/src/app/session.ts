@@ -14,11 +14,13 @@ import {
   type RunState,
 } from '../engine/run.ts';
 import { DEFAULT_CHASE, type ChaseId } from '../engine/chase.ts';
+import { DEFAULT_CONTRACT, type ContractId } from './contracts.ts';
 import type { EngineData } from '../engine/types.ts';
 
 export interface Session {
   mode: Mode;
   chase: ChaseId;
+  contract: ContractId;
   /** Local date for a daily run. */
   date: string | undefined;
   data: EngineData;
@@ -28,14 +30,15 @@ export interface Session {
 export function newSession(
   mode: Mode,
   data: EngineData,
-  options: { date?: string; entropy?: string; chase?: ChaseId },
+  options: { date?: string; entropy?: string; chase?: ChaseId; contract?: ContractId },
 ): Session {
   const chase = options.chase ?? DEFAULT_CHASE;
+  const contract = options.contract ?? DEFAULT_CONTRACT;
   const seed =
     mode === 'daily'
       ? dailySeed(options.date ?? '', chase)
       : endlessSeed(options.entropy ?? String(Math.random()));
-  return { mode, chase, date: options.date, data, state: start(newRun(seed, mode, chase), data) };
+  return { mode, chase, contract, date: options.date, data, state: start(newRun(seed, mode, chase), data) };
 }
 
 /** Rebuild a finished run from its seed and picks, e.g. "See today's result" after a restart. */
@@ -47,6 +50,7 @@ export function restoreSession(
   picks: readonly string[],
   rerolls: readonly number[] = [],
   chase: ChaseId = DEFAULT_CHASE,
+  contract: ContractId = DEFAULT_CONTRACT,
 ): Session {
   let state = start(newRun(seed, mode, chase), data);
   // Replay in the order it was played: each pick, the redraws it used, then keeping it.
@@ -56,7 +60,7 @@ export function restoreSession(
     state = keep(state);
   });
   state = complete(finish(state, data));
-  return { mode, chase, date, data, state };
+  return { mode, chase, contract, date, data, state };
 }
 
 export const doPick = (s: Session, cityId: string): void => {

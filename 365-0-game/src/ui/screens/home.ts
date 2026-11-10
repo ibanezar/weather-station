@@ -7,6 +7,7 @@ import { dailySeed } from '../../engine/run.ts';
 import { CHASE_IDS, type ChaseId } from '../../engine/chase.ts';
 import { CHASE_ICON, chaseKey } from '../../app/chase-text.ts';
 import { dailyKey } from '../../app/storage.ts';
+import { CONTRACT_IDS, DEFAULT_CONTRACT, type ContractId } from '../../app/contracts.ts';
 import { icon } from '../icons/index.ts';
 import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
@@ -25,6 +26,7 @@ export async function startRun(
   const { t } = app.i18n;
   const today = localDate();
   const chase = app.store.state.settings.chase;
+  const contract = app.store.state.settings.contract ?? DEFAULT_CONTRACT;
   ui.btn.disabled = true;
   ui.message.textContent = '';
   app.store.update((st) => {
@@ -43,12 +45,13 @@ export async function startRun(
           done.picks,
           done.rerolls ?? [],
           chase,
+          done.contract ?? DEFAULT_CONTRACT,
         );
         app.go('result');
         return;
       }
     }
-    app.session = newSession(mode, data, { date: today, entropy: randomEntropy(), chase });
+    app.session = newSession(mode, data, { date: today, entropy: randomEntropy(), chase, contract });
     app.count({ ev: 'start', mode, chase });
     app.go('draft');
   } catch {
@@ -70,6 +73,7 @@ export function renderHome(app: App, root: HTMLElement): void {
   const streak = activeStreak(app.store.state.streak, today);
   const message = h('p', { class: 'screen__error', role: 'alert' });
   let chase: ChaseId = app.store.state.settings.chase;
+  let contract: ContractId = app.store.state.settings.contract ?? DEFAULT_CONTRACT;
   const range = app.fmt.range(THRESHOLDS.perfect.tmaxCMin, THRESHOLDS.perfect.tmaxCMax);
 
   const dailyBtn = button({
@@ -158,6 +162,43 @@ export function renderHome(app: App, root: HTMLElement): void {
     bestSlot.textContent = best ? t('home.bestEndless', { record: app.fmt.record(best) }) : '';
     dailyNote.textContent = `${t('home.dailyCaption')}${streak >= 2 ? ` · ${plural('home.streak', streak)}` : ''}`;
   };
+  const contractPicker = h(
+    'fieldset',
+    { class: 'contract-picker' },
+    h('legend', { class: 'chase-picker__legend' }, t('contract.title')),
+    h(
+      'div',
+      { class: 'contract-picker__options' },
+      ...CONTRACT_IDS.map((id) => {
+        const input = h('input', {
+          type: 'radio',
+          name: 'contract',
+          value: id,
+          class: 'contract-opt__input',
+          checked: id === contract,
+          onChange: () => {
+            contract = id;
+            app.store.update((st) => {
+              st.settings.contract = id;
+            });
+            applyChase();
+          },
+        });
+        return h(
+          'label',
+          { class: 'contract-opt' },
+          input,
+          h(
+            'span',
+            { class: 'contract-opt__box' },
+            h('strong', { class: 'contract-opt__name' }, t(`contract.${id}.name` as MessageKey)),
+            h('span', { class: 'contract-opt__description muted' }, t(`contract.${id}.description` as MessageKey)),
+          ),
+        );
+      }),
+    ),
+  );
+
   const picker = h(
     'fieldset',
     { class: 'chase-picker' },
@@ -216,6 +257,7 @@ export function renderHome(app: App, root: HTMLElement): void {
         h('p', { class: 'home__pitch' }, t('home.pitch')),
       ),
       picker,
+      contractPicker,
       h('ol', { class: 'home__steps', 'aria-label': t('onboarding.title') }, ...steps),
       h(
         'div',

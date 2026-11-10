@@ -26,6 +26,7 @@ import { progress } from '../components/progress.ts';
 import { showToast } from '../components/toast.ts';
 import { h, mount } from '../dom.ts';
 import { isPatternMode, isReducedMotion } from '../settings.ts';
+import { contractProgress } from '../../app/contracts.ts';
 
 /** How a month plays out after the pick: one tile every STAGGER_MS, each flipping for FLIP_MS. */
 const STAGGER_MS = 24;
@@ -55,6 +56,13 @@ export function renderDraft(app: App, root: HTMLElement): void {
   const ask = h('p', { class: 'muted draft__ask' });
   const eventSlot = h('div', { class: 'draft__event' });
   const chainSlot = h('p', { class: 'muted draft__chain', 'aria-live': 'polite' });
+  const contractLabel = h('p', { class: 'contract-progress__label', 'aria-live': 'polite' });
+  const contractMeter = h('progress', { class: 'contract-progress__meter', max: 100, value: 0, 'aria-label': t('contract.progressLabel') });
+  const contractPanel = h('section', { class: 'contract-progress', 'aria-label': t('contract.title') },
+    h('strong', { class: 'contract-progress__title' }, t(`contract.${s.contract}.name` as MessageKey)),
+    contractLabel,
+    contractMeter,
+  );
   const labels = h('div', { class: 'grid-panel__labels', 'aria-hidden': 'true' });
   const canvas = h('canvas');
   const well = h('div', { class: 'well grid-panel' }, labels, canvas);
@@ -161,6 +169,11 @@ export function renderDraft(app: App, root: HTMLElement): void {
     const pending = pendingMonth(s.state, s.data);
     const round = s.state.draft[s.state.settled];
     prog.update(Math.min(12, s.state.settled + 1), s.state.scoutsLeft, chances());
+    const objective = contractProgress(s.contract, s.state.picks.slice(0, s.state.settled).map((_, i) => monthOf(s.state, s.data, i)), s.state.best?.record.w ?? 0, s.state.settled === 12);
+    contractLabel.textContent = t(`contract.${s.contract}.progress` as MessageKey, { current: objective.current, target: objective.target, months: objective.months });
+    contractMeter.value = objective.percent;
+    contractMeter.setAttribute('aria-valuenow', String(objective.percent));
+    contractMeter.setAttribute('aria-valuetext', contractLabel.textContent);
     const chain = chainProgress(pickedCities());
     chainSlot.textContent =
       !pending && chain && chain.length > 0 && picks() < 12
@@ -413,7 +426,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
     h(
       'main',
       { class: 'screen screen--draft' },
-      h('header', { class: 'draft__head' }, prog.el, month, ask, eventSlot, chainSlot),
+      h('header', { class: 'draft__head' }, prog.el, contractPanel, month, ask, eventSlot, chainSlot),
       well,
       h('div', { class: 'draft__spacer' }),
       cardsBox,
