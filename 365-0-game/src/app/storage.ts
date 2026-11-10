@@ -149,6 +149,7 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
           ...(Array.isArray(r['rerolls']) && r['rerolls'].every((n) => typeof n === 'number')
             ? { rerolls: r['rerolls'] }
             : {}),
+          ...(isContractId(r['contract']) ? { contract: r['contract'] } : {}),
           record: r['record'],
           grade: r['grade'] as GradeId,
         };

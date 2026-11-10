@@ -50,7 +50,7 @@ export function contractProgress(
       months: rounds.length,
       passed: losses <= target,
       complete,
-      percent: Math.max(0, Math.min(100, Math.round(((target - losses) / target) * 100))),
+      percent: Math.round((rounds.length / 12) * 100),
     };
   }
 
@@ -61,9 +61,6 @@ export function contractProgress(
     months: rounds.length,
     passed: complete && rounds.length === 12 && worstMonth <= target,
     complete,
-    percent: Math.max(
-      0,
-      Math.min(100, Math.round((rounds.length / 12) * 70 + ((target - worstMonth) / target) * 30)),
-    ),
+    percent: Math.round((rounds.length / 12) * 100),
   };
 }

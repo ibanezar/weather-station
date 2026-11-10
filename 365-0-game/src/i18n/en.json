@@ -379,9 +379,8 @@
   "chase.rain.rules": "Win: a rainy day. So-so days count as neither a win nor a loss. Loss: a dry perfect or hot day.",
   "chase.storm.rules": "Win: a stormy day. So-so days count as neither a win nor a loss. Loss: a perfect day.",
   "chase.heat.rules": "Win: a hot day. So-so days count as neither a win nor a loss. Loss: snow and frost or rain.",
-  "draft.scoutHelp": "Each Scout uses one of your three per run. It compares this city's winning and losing days with other cities (1–5 of 5), not the exact number of days."
-,
-"contract.title": "Choose a contract",
+  "draft.scoutHelp": "Each Scout uses one of your three per run. It compares this city's winning and losing days with other cities (1–5 of 5), not the exact number of days.",
+  "contract.title": "Choose a contract",
   "contract.record.name": "Most winning days",
   "contract.record.description": "Reach at least 90% of the best possible winning days.",
   "contract.record.progress": "{current} of {target} winning days",

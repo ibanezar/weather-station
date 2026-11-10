@@ -389,9 +389,8 @@
   "chase.rain.rules": "Zmaga: deževen dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: suh popoln ali vroč dan.",
   "chase.storm.rules": "Zmaga: nevihten dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: popoln dan.",
   "chase.heat.rules": "Zmaga: vroč dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: sneg in mraz ali dež.",
-  "draft.scoutHelp": "Gumb »Izvidi« porabi enega od treh izvidov v igri. Pokaže primerjavo z drugimi mesti za zmagovalne in porazne dni (1–5 od 5), ne pa njihovega natančnega števila."
-,
-"contract.title": "Izberi pogodbo",
+  "draft.scoutHelp": "Gumb »Izvidi« porabi enega od treh izvidov v igri. Pokaže primerjavo z drugimi mesti za zmagovalne in porazne dni (1–5 od 5), ne pa njihovega natančnega števila.",
+  "contract.title": "Izberi pogodbo",
   "contract.record.name": "Največ zmagovalnih dni",
   "contract.record.description": "Dosezi vsaj 90 % najboljših možnih zmagovalnih dni.",
   "contract.record.progress": "{current} od {target} zmagovalnih dni",
