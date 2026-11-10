@@ -217,6 +217,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
     cardsBox.replaceChildren(
       ...cardList.map((c) => c.el),
       h('p', { class: 'muted draft__strip-note' }, t('draft.stripNote')),
+      h('p', { class: 'muted draft__scout-note' }, t('draft.scoutHelp')),
     );
   }
 
