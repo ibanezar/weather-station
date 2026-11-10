@@ -182,9 +182,7 @@ export function renderDraft(app: App, root: HTMLElement): void {
     prog.update(Math.min(12, s.state.settled + 1), s.state.scoutsLeft, chances());
     const objective = contractProgress(
       s.contract,
-      s.state.picks
-        .slice(0, s.state.settled)
-        .map((_, i) => monthOf(s.state, s.data, i)),
+      s.state.picks.slice(0, s.state.settled).map((_, i) => monthOf(s.state, s.data, i)),
       s.state.best?.record ?? { w: 0, d: 0, l: 0 },
       s.state.settled === 12,
     );
