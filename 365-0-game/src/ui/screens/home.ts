@@ -7,7 +7,12 @@ import { dailySeed } from '../../engine/run.ts';
 import { CHASE_IDS, type ChaseId } from '../../engine/chase.ts';
 import { CHASE_ICON, chaseKey } from '../../app/chase-text.ts';
 import { dailyKey } from '../../app/storage.ts';
-import { CONTRACT_IDS, DEFAULT_CONTRACT, isContractId, type ContractId } from '../../app/contracts.ts';
+import {
+  CONTRACT_IDS,
+  DEFAULT_CONTRACT,
+  isContractId,
+  type ContractId,
+} from '../../app/contracts.ts';
 import { icon } from '../icons/index.ts';
 import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
