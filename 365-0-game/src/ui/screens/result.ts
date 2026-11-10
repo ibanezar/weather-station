@@ -225,7 +225,7 @@ export function renderResult(app: App, root: HTMLElement): void {
           chase !== 'sun'
             ? chip({ label: t(chaseKey(chase, 'name')), icon: CHASE_ICON[chase] })
             : null,
-          streak >= 1 ? chip({ label: plural('result.streak', streak), icon: 'streak' }) : null,
+          streak >= 2 ? chip({ label: plural('result.streak', streak), icon: 'streak' }) : null,
         ),
         h(
           'p',

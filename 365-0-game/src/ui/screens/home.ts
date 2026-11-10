@@ -170,7 +170,7 @@ export function renderHome(app: App, root: HTMLElement): void {
     step3Title.textContent = t(chaseKey(chase, 'step3'));
     const best = app.store.state.bestEndless[chase];
     bestSlot.textContent = best ? t('home.bestEndless', { record: app.fmt.record(best) }) : '';
-    dailyNote.textContent = `${t('home.dailyCaption', { date: app.fmt.date(today) })}${streak >= 1 ? ` · ${plural('home.streak', streak)}` : ''}`;
+    dailyNote.textContent = `${t('home.dailyCaption', { date: app.fmt.date(today) })}${streak >= 2 ? ` · ${plural('home.streak', streak)}` : ''}`;
   };
   const contractSummary = h('summary', { class: 'contract-picker__summary' });
   const contractDescription = h('p', { class: 'contract-picker__description muted' });
