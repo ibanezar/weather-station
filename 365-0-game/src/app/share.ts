@@ -25,7 +25,10 @@ function modeLabel(app: App, session: Session): string {
     : t('mode.chase', { mode, name: t(chaseKey(session.chase, 'name')) });
 }
 
-function contractShareLines(app: App, session: Session): {
+function contractShareLines(
+  app: App,
+  session: Session,
+): {
   text: string;
   badge: string;
 } {
