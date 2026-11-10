@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-09",
-  "issued": "09.11.2026 7:00 CET",
-  "issued_at": "2026-11-09T07:30:36.247475+01:00",
-  "top_station": "Celje",
-  "top_mm": 0,
-  "n_stations": 19,
-  "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-09.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-09-story.jpg"
+  "date": "2026-11-10",
+  "issued": "10.11.2026 7:00 CET",
+  "issued_at": "2026-11-10T07:30:36.806674+01:00",
+  "top_station": "Vogel",
+  "top_mm": 40,
+  "n_stations": 20,
+  "should_post": true,
+  "image": "https://meteorec.si/og/precip-map/2026-11-10.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-10-story.jpg"
 }

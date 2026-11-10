@@ -158,6 +158,11 @@ check("predict_days: premalo modelov -> dan izpade",
 tmp = tempfile.mkdtemp()
 log = os.path.join(tmp, "data", "log.csv")
 payload = ps.build_payload(real, days, True, dt.datetime(2026, 11, 10, 4, 40, tzinfo=dt.timezone.utc))
+# --- podatki za podrobnosti dneva na kartici (station_meta: višina samo, kjer je preverjena)
+check("payload: glavna postaja in meta postaj za kartico", payload["main_station"] == "Gornji Grad"
+      and payload["station_meta"]["Gornji Grad"]["alt_m"] == 428 and payload["station_meta"]["Radegunda"]["alt_m"] == 794
+      and payload["station_meta"]["Luče"]["alt_m"] is None and payload["station_meta"]["Solčava"]["alt_m"] is None)
+
 n1 = ps.append_log(payload, log)
 n2 = ps.append_log(payload, log)
 rows = list(csv.DictReader(open(log, encoding="utf-8")))

@@ -8096,30 +8096,134 @@ function _snowDay(d){
   return {name:diff===0?'Danes':diff===1?'Jutri':MTR_SL_DAYS[dt.getDay()].slice(0,3),
           long:diff===0?'danes':diff===1?'jutri':MTR_SL_DAYS[dt.getDay()],date:dt.getDate()+'. '+(dt.getMonth()+1)+'.'};
 }
+/* Podrobnosti dneva (kot pri »Naslednjih 7 dni«: toggleCuDetail): klik, Enter ali presledek na dnevu odpre ploščo #snow-detail
+   pod ploščicami, Esc ali ✕ jo zapre. Plošča kaže isto oceno po postajah v dolini in kaj vidijo modeli; vse so modelske ocene. */
+const SNOW_MAIN='Gornji Grad';
+let _snowCur=null,_snowOpen=null;
+function _snowCap(t){return t.charAt(0).toUpperCase()+t.slice(1);}
+/* Kratka razlaga iz vhodov, ki jih zares imamo (povprečna T modelov, padavine); brez trditev o količini ali obleži. */
+function _snowWhy(d){
+  const t=d.tavg,T=Number.isFinite(t)?_fmtN(t,1)+' °C':'';
+  let s='';
+  if(Number.isFinite(d.prec_mm)&&d.prec_mm<.2)s='Modeli napovedujejo suho vreme, zato je možnost snega minimalna.';
+  else if(!Number.isFinite(t))s='';
+  else if(t>=4)s='Povprečje modelov je okoli '+T+': padavine bodo večinoma dež.';
+  else if(t>1)s='Povprečje modelov je okoli '+T+', blizu meje: v dolini je bolj verjeten dež ali moker sneg, više (Radegunda) sneg.';
+  else s='Povprečje modelov je okoli '+T+' in padavine so napovedane: sneg v dolini je možen. Količine model ne napove.';
+  if(d.lead>=4)s+=(s?' ':'')+'Pri napovedi '+d.lead+' dni vnaprej se ocena skrči proti običajni pogostosti snega, ker so napovedi manj zanesljive.';
+  return s;
+}
+function _snowDetailHtml(d,meta){
+  const n=_snowDay(d),lv=_snowLv(d.p_snow);
+  const rows=Object.entries(d.stations||{}).map(([name,p])=>{
+    const alt=meta&&meta[name]&&Number.isFinite(meta[name].alt_m)?meta[name].alt_m:null;
+    const main=name===SNOW_MAIN;
+    return '<div class="snow-st-row'+(main?' is-main':'')+'" data-lv="'+_snowLv(p)+'" title="'+name+': '+_snowLevel(p)+'">'
+      +'<span class="snow-st-n">'+name+(alt!==null?'<small>'+alt+' m</small>':'')+'</span>'
+      +'<span class="snow-bar" aria-hidden="true"><i style="width:'+Math.max(2,Math.round(p*100))+'%"></i></span>'
+      +'<span class="snow-st-v">'+_snowPct(p)+'</span></div>';
+  }).join('');
+  const mm=Number.isFinite(d.prec_mm)?(d.prec_mm<.2?'suho':_fmtN(d.prec_mm,1)+' mm'):'';
+  const stats=(Number.isFinite(d.tavg)?'<span>'+_ico('thermometer')+'povprečje modelov <b>'+_fmtN(d.tavg,1)+' °C</b></span>':'')
+    +(mm?'<span>'+_ico('droplets')+'padavine <b>'+mm+'</b></span>':'')
+    +(d.n_models?'<span>'+_ico('chart-column')+'modelov <b>'+d.n_models+'</b></span>':'')
+    +(Number.isFinite(d.p_proxy)?'<span title="Padavine ≥ 0,2 mm in povprečna temperatura ≤ 1 °C v Rečici. Proksi precenjuje sneg 3–4×, zato ni ocena snega.">'
+      +_ico('cloud-rain')+'mokri hladni dan v Rečici <b>'+_snowPct(d.p_proxy)+'</b></span>':'');
+  const why=_snowWhy(d);
+  return '<div class="pd-detail-hdr">'
+      +'<span class="pd-detail-title snow-detail-title">'+_ico('snowflake')+' '+_snowCap(n.long)+', '+n.date
+        +'<span class="snow-lead">napoved '+d.lead+' '+(d.lead===1?'dan':d.lead===2?'dneva':'dni')+' vnaprej</span></span>'
+      +'<button type="button" class="pd-detail-close" data-snow-close aria-label="Zapri podrobnosti dneva">✕</button>'
+    +'</div>'
+    +'<div class="snow-d-top" data-lv="'+lv+'">'
+      +'<div class="snow-d-big"><span class="snow-d-pct">'+_snowPct(d.p_snow)+'</span><span class="snow-d-lv">'+_snowLevel(d.p_snow)+'</span></div>'
+      +'<p class="snow-d-why"><b>Merljiv sneg v Gornjem Gradu.</b> '+why+'</p>'
+    +'</div>'
+    +(rows?'<div class="snow-d-lbl">Po postajah v dolini</div><div class="snow-st">'+rows+'</div>':'')
+    +(stats?'<div class="snow-d-lbl">Kaj vidijo modeli</div><div class="pd-detail-stats">'+stats+'</div>':'')
+    +'<div class="cu-detail-src">MTR · modelska ocena možnosti, da bo zapadlo vsaj 1 cm novega snega. Ne pove količine in ne, ali bo obležal. Ni uradno opozorilo.</div>';
+}
+function _snowShowDetail(scroll){
+  const panel=document.getElementById('snow-detail'),box=document.getElementById('snow-days');
+  if(!panel||!box||!_snowCur||!_snowOpen)return false;
+  const d=_snowCur.days.find(x=>x.date===_snowOpen);
+  if(!d)return false;
+  box.querySelectorAll('.snow-day[data-date]').forEach(c=>{
+    const on=c.dataset.date===_snowOpen;
+    c.classList.toggle('active',on);
+    c.setAttribute('aria-expanded',on?'true':'false');
+  });
+  panel.innerHTML=_snowDetailHtml(d,_snowCur.meta);
+  panel.classList.add('open');
+  if(scroll){
+    const r=panel.getBoundingClientRect();
+    if(r.bottom>window.innerHeight||r.top<0){
+      const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+      panel.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});
+    }
+  }
+  return true;
+}
+function toggleSnowDetail(date){
+  if(_snowOpen===date){closeSnowDetail();return;}
+  _snowOpen=date;
+  if(!_snowShowDetail(true))closeSnowDetail();
+}
+function closeSnowDetail(focusTile){
+  const date=_snowOpen;
+  _snowOpen=null;
+  const panel=document.getElementById('snow-detail');
+  if(panel){panel.classList.remove('open');panel.innerHTML='';}
+  document.querySelectorAll('#snow-days .snow-day.active').forEach(c=>{c.classList.remove('active');c.setAttribute('aria-expanded','false');});
+  if(focusTile&&date){const c=document.querySelector('#snow-days .snow-day[data-date="'+date+'"]');if(c)c.focus();}
+}
+/* Dogodki so vezani enkrat: ploščice se ob osvežitvi napovedi zgradijo na novo, vsebnik ostane. */
+function _snowBindDetail(box){
+  if(box.dataset.snowBound)return;
+  box.dataset.snowBound='1';
+  box.addEventListener('click',e=>{
+    const c=e.target.closest&&e.target.closest('.snow-day[data-date]');
+    if(c)toggleSnowDetail(c.dataset.date);
+  });
+  box.addEventListener('keydown',e=>{
+    if(e.target.classList&&e.target.classList.contains('snow-day')&&e.target.dataset.date&&(e.key==='Enter'||e.key===' ')){
+      e.preventDefault();toggleSnowDetail(e.target.dataset.date);
+    }else if(e.key==='Escape'&&_snowOpen)closeSnowDetail(true);
+  });
+  const panel=document.getElementById('snow-detail');
+  if(panel){
+    panel.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-snow-close]'))closeSnowDetail(true);});
+    panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&_snowOpen)closeSnowDetail(true);});
+  }
+}
 function renderSnowCard(j){
   const card=document.getElementById('snow-card');if(!card)return;
   const days=(j&&j.in_season&&Array.isArray(j.days)?j.days:[]).filter(d=>d&&d.date&&Number.isFinite(d.p_snow));
-  if(!days.length){card.hidden=true;return;}
+  if(!days.length){card.hidden=true;_snowCur=null;closeSnowDetail();return;}
   card.hidden=false;
+  _snowCur={days,meta:j.station_meta||null};
   const box=document.getElementById('snow-days'),head=document.getElementById('snow-head'),upd=document.getElementById('snow-updated');
   box.innerHTML=days.map(d=>{
     const n=_snowDay(d),pc=_snowPct(d.p_snow),lv=_snowLevel(d.p_snow);
-    const tt=Number.isFinite(d.tavg)?_fmtN(d.tavg,1)+'\u00A0°C':'';
-    const mm=Number.isFinite(d.prec_mm)?(d.prec_mm<.2?'suho':_fmtN(d.prec_mm,1)+'\u00A0mm'):'';
+    const tt=Number.isFinite(d.tavg)?_fmtN(d.tavg,1)+' °C':'';
+    const mm=Number.isFinite(d.prec_mm)?(d.prec_mm<.2?'suho':_fmtN(d.prec_mm,1)+' mm'):'';
     const aria=n.long+', '+n.date+': merljiv sneg '+(d.p_snow<.05?'manj kot 5 %':Math.round(d.p_snow*20)*5+' %')+', '+lv+
-      '; povprečje modelov '+tt.replace('\u00A0',' ')+', padavine '+mm.replace('\u00A0',' ');
-    return '<div class="snow-day" role="listitem" aria-label="'+aria+'" data-lv="'+_snowLv(d.p_snow)+'">'
+      '; povprečje modelov '+tt.replace(' ',' ')+', padavine '+mm.replace(' ',' ')+'. Podrobnosti';
+    return '<div class="snow-day snow-click" role="button" tabindex="0" aria-expanded="false" aria-controls="snow-detail" aria-label="'+aria+'"'
+      +' data-date="'+d.date+'" data-lv="'+_snowLv(d.p_snow)+'">'
       +'<div class="snow-day-hd"><b>'+n.name+'</b><span>'+n.date+'</span></div>'
       +'<div class="snow-day-val">'+pc+'</div>'
       +'<div class="snow-bar" aria-hidden="true"><i style="width:'+Math.max(2,Math.round(d.p_snow*100))+'%"></i></div>'
       +'<div class="snow-day-lv">'+lv+'</div>'
       +'<div class="snow-day-meta">'+(tt?'<span>'+tt+'</span>':'')+(mm?'<span>'+mm+'</span>':'')+'</div></div>';
   }).join('');
+  _snowBindDetail(box);
+  if(_snowOpen&&!_snowShowDetail(false))closeSnowDetail();
   const top=days.reduce((a,b)=>b.p_snow>a.p_snow?b:a);
   const tn=_snowDay(top);
   head.textContent=top.p_snow<.05
     ?'Prihodnjih '+days.length+' dni merljiv sneg v dolini ni verjeten.'
-    :'Največ možnosti za merljiv sneg v dolini: '+tn.long+' ('+_snowPct(top.p_snow).replace('\u00A0',' ')+').';
+    :'Največ možnosti za merljiv sneg v dolini: '+tn.long+' ('+_snowPct(top.p_snow).replace(' ',' ')+').';
   const ageH=j.generated_at?(Date.now()-Date.parse(j.generated_at))/36e5:null;
   if(ageH!==null&&Number.isFinite(ageH)){
     const stale=ageH>SNOW_STALE_H;

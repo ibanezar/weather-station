@@ -1,6 +1,7 @@
 // Everything the game remembers lives under one versioned localStorage key (SPEC 5). Every read and
 // write is wrapped, and the game stays fully playable when storage is unavailable.
 import { DEFAULT_CHASE, isChaseId, type ChaseId } from '../engine/chase.ts';
+import { DEFAULT_CONTRACT, isContractId, type ContractId } from './contracts.ts';
 import type { GradeId } from '../engine/grades.ts';
 import type { DayRecord } from '../engine/types.ts';
 import type { Locale } from '../i18n/index.ts';
@@ -22,6 +23,8 @@ export interface Settings {
   sound: boolean;
   /** What the player is chasing: sunshine (the classic game), snow, rain, storms or heat. */
   chase: ChaseId;
+  /** Daily and endless objective selected on the home screen. */
+  contract?: ContractId;
   /** Send anonymous play counts (a game started or finished, which chase and grade). Nothing else leaves the device. */
   counts: boolean;
 }
@@ -30,6 +33,7 @@ export interface DailyResult {
   picks: string[];
   /** Rounds that used a second chance, in order (absent in results saved before they existed). */
   rerolls?: number[];
+  contract?: ContractId;
   record: DayRecord;
   grade: GradeId;
 }
@@ -69,6 +73,7 @@ export function defaultSettings(languageTag: string | undefined, locale: Locale)
     haptics: true,
     sound: false,
     chase: DEFAULT_CHASE,
+    contract: DEFAULT_CONTRACT,
     counts: true,
   };
 }
@@ -119,6 +124,7 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
     if (typeof s['haptics'] === 'boolean') out.settings.haptics = s['haptics'];
     if (typeof s['sound'] === 'boolean') out.settings.sound = s['sound'];
     if (isChaseId(s['chase'])) out.settings.chase = s['chase'];
+    if (isContractId(s['contract'])) out.settings.contract = s['contract'];
     if (typeof s['counts'] === 'boolean') out.settings.counts = s['counts'];
   }
   const best = data['bestEndless'];
@@ -143,6 +149,7 @@ export function parseStored(raw: string | null, defaults: Stored): Stored {
           ...(Array.isArray(r['rerolls']) && r['rerolls'].every((n) => typeof n === 'number')
             ? { rerolls: r['rerolls'] }
             : {}),
+          ...(isContractId(r['contract']) ? { contract: r['contract'] } : {}),
           record: r['record'],
           grade: r['grade'] as GradeId,
         };
