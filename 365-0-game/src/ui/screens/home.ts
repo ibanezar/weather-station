@@ -51,7 +51,12 @@ export async function startRun(
         return;
       }
     }
-    app.session = newSession(mode, data, { date: today, entropy: randomEntropy(), chase, contract });
+    app.session = newSession(mode, data, {
+      date: today,
+      entropy: randomEntropy(),
+      chase,
+      contract,
+    });
     app.count({ ev: 'start', mode, chase });
     app.go('draft');
   } catch {
@@ -192,7 +197,11 @@ export function renderHome(app: App, root: HTMLElement): void {
             'span',
             { class: 'contract-opt__box' },
             h('strong', { class: 'contract-opt__name' }, t(`contract.${id}.name` as MessageKey)),
-            h('span', { class: 'contract-opt__description muted' }, t(`contract.${id}.description` as MessageKey)),
+            h(
+              'span',
+              { class: 'contract-opt__description muted' },
+              t(`contract.${id}.description` as MessageKey),
+            ),
           ),
         );
       }),

@@ -66,7 +66,11 @@ export function renderDraft(app: App, root: HTMLElement): void {
   const contractPanel = h(
     'section',
     { class: 'contract-progress', 'aria-label': t('contract.title') },
-    h('strong', { class: 'contract-progress__title' }, t(`contract.${s.contract}.name` as MessageKey)),
+    h(
+      'strong',
+      { class: 'contract-progress__title' },
+      t(`contract.${s.contract}.name` as MessageKey),
+    ),
     contractLabel,
     contractMeter,
   );
@@ -444,7 +448,16 @@ export function renderDraft(app: App, root: HTMLElement): void {
     h(
       'main',
       { class: 'screen screen--draft' },
-      h('header', { class: 'draft__head' }, prog.el, contractPanel, month, ask, eventSlot, chainSlot),
+      h(
+        'header',
+        { class: 'draft__head' },
+        prog.el,
+        contractPanel,
+        month,
+        ask,
+        eventSlot,
+        chainSlot,
+      ),
       well,
       h('div', { class: 'draft__spacer' }),
       cardsBox,

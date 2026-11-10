@@ -877,15 +877,18 @@
   border: 0;
   min-width: 0;
 }
+
 .contract-picker__options {
   display: grid;
   gap: var(--space-2);
 }
+
 .contract-opt {
   position: relative;
   display: block;
   cursor: pointer;
 }
+
 .contract-opt__input {
   position: absolute;
   inset: 0;
@@ -895,6 +898,7 @@
   opacity: 0;
   cursor: pointer;
 }
+
 .contract-opt__box {
   display: grid;
   gap: 2px;
@@ -905,23 +909,47 @@
   background: var(--raised);
   color: var(--ink);
 }
-.contract-opt__name { font-size: var(--text-small); }
-.contract-opt__description { font-size: var(--text-caption, 13px); line-height: 1.25; }
+
+.contract-opt__name {
+  font-size: var(--text-small);
+}
+
+.contract-opt__description {
+  font-size: var(--text-caption, 13px);
+  line-height: 1.25;
+}
+
 .contract-opt__input:checked + .contract-opt__box {
   border-color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--ink);
 }
+
 .contract-opt__input:focus-visible + .contract-opt__box {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
-.contract-progress, .contract-result {
+
+.contract-progress,
+.contract-result {
   display: grid;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
 }
-.contract-progress__title { font-size: var(--text-small); }
-.contract-progress__label, .contract-result p { margin: 0; font-size: var(--text-small); }
-.contract-progress__meter { width: 100%; height: 8px; accent-color: var(--accent); }
+
+.contract-progress__title {
+  font-size: var(--text-small);
+}
+
+.contract-progress__label,
+.contract-result p {
+  margin: 0;
+  font-size: var(--text-small);
+}
+
+.contract-progress__meter {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--accent);
+}
