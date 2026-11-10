@@ -133,6 +133,8 @@ def build_payload(model, days, in_season, now):
         "in_season": in_season,
         "target": model.get("target"),
         "note": NOTE,
+        "main_station": tsm.VALLEY_STATIONS[tsm.OBS_PRIMARY]["name"],
+        "station_meta": {v["name"]: {"alt_m": v["alt_m"]} for v in tsm.VALLEY_STATIONS.values()},
         "days": days,
     }
 

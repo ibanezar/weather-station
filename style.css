@@ -4806,13 +4806,12 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
    Verjetnost je za PROKSI (mokri hladni dan), ne za opazovan sneg; kartica to piše v opombi. Višina je
    rezervirana, da ob prihodu podatkov ne skoči stran (CLS). Moč barve nosi stopnja (data-lv), številka in
    besedna ocena pa ostaneta v barvi besedila: barva ni edini nosilec pomena. */
-.snow-card{min-height:19.3rem}
 .snow-head{font-size:var(--fs-md,1rem);font-weight:700;color:var(--text);line-height:1.35;min-height:1.35em;margin:.2rem 0 .8rem}
 .snow-days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem}
 .snow-day{background:var(--tile-bg,var(--fc-bg));border:1px solid var(--tile-bd,var(--fc-border));border-radius:var(--tile-r,var(--r-md,14px));padding:.65rem .55rem;text-align:center;min-width:0;--snow-c:#60a5fa}
-.snow-day[data-lv="0"]{--snow-c:#94a3b8}
-.snow-day[data-lv="2"]{--snow-c:#3b82f6}
-.snow-day[data-lv="3"]{--snow-c:#1d4ed8}
+.snow-day[data-lv="0"],.snow-d-top[data-lv="0"],.snow-st-row[data-lv="0"]{--snow-c:#94a3b8}
+.snow-day[data-lv="2"],.snow-d-top[data-lv="2"],.snow-st-row[data-lv="2"]{--snow-c:#3b82f6}
+.snow-day[data-lv="3"],.snow-d-top[data-lv="3"],.snow-st-row[data-lv="3"]{--snow-c:#1d4ed8}
 .snow-day-hd{display:flex;flex-direction:column;gap:.1rem;font-size:var(--fs-xs);color:var(--muted);line-height:1.25}
 .snow-day-hd b{color:var(--text);font-size:var(--fs-sm,.8125rem);font-weight:700}
 .snow-day-val{font-family:Inter,'Inter Fallback',sans-serif;font-variant-numeric:tabular-nums;font-weight:800;font-size:1.25rem;letter-spacing:-.02em;color:var(--text);margin:.45rem 0 .35rem;white-space:nowrap}
@@ -4824,13 +4823,59 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 .snow-note{margin:.85rem 0 0;font-size:var(--fs-xs);line-height:1.5;color:var(--muted)}
 .snow-note b{color:var(--text)}
 #snow-updated.is-stale{color:var(--amber,#f59e0b)}
-[data-theme="light"] .snow-day[data-lv="0"]{--snow-c:#64748b}
-[data-theme="light"] .snow-day[data-lv="1"]{--snow-c:#2563eb}
-[data-theme="light"] .snow-day[data-lv="2"]{--snow-c:#1d4ed8}
-[data-theme="light"] .snow-day[data-lv="3"]{--snow-c:#1e3a8a}
+[data-theme="light"] .snow-day[data-lv="0"],[data-theme="light"] .snow-d-top[data-lv="0"],[data-theme="light"] .snow-st-row[data-lv="0"]{--snow-c:#64748b}
+[data-theme="light"] .snow-day[data-lv="1"],[data-theme="light"] .snow-d-top[data-lv="1"],[data-theme="light"] .snow-st-row[data-lv="1"]{--snow-c:#2563eb}
+[data-theme="light"] .snow-day[data-lv="2"],[data-theme="light"] .snow-d-top[data-lv="2"],[data-theme="light"] .snow-st-row[data-lv="2"]{--snow-c:#1d4ed8}
+[data-theme="light"] .snow-day[data-lv="3"],[data-theme="light"] .snow-d-top[data-lv="3"],[data-theme="light"] .snow-st-row[data-lv="3"]{--snow-c:#1e3a8a}
+/* Podrobnosti dneva (app.js toggleSnowDetail): ploščica je gumb, plošča pod njimi je ista kot pri »Naslednjih 7 dni« (.pd-detail-wrap) */
+.snow-d-top,.snow-st-row{--snow-c:#60a5fa}
+.snow-hint{margin:-.45rem 0 .65rem;font-size:var(--fs-xs);color:var(--muted);line-height:1.3}
+.snow-day.snow-click{cursor:pointer;transition:border-color .2s,transform .15s,box-shadow .2s}
+.snow-day.snow-click:hover{border-color:color-mix(in srgb,var(--snow-c) 60%,transparent);transform:translateY(-2px)}
+.snow-day.snow-click:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.snow-day.snow-click.active{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 40%,transparent)}
+.snow-detail{margin:.75rem 0 0}
+.snow-detail-title{display:flex;align-items:center;flex-wrap:wrap;gap:.2rem .5rem;font-size:.85rem}
+.snow-detail-title .ic{width:1.15em;height:1.15em;flex:none;color:var(--blue)}
+.snow-lead{font-size:var(--fs-xs);font-weight:500;color:var(--muted)}
+.snow-d-top{display:flex;align-items:center;gap:1rem;padding:.8rem .95rem;background:var(--tile-bg,var(--fc-bg));border:1px solid var(--tile-bd,var(--fc-border));border-radius:var(--tile-r,var(--r-md,14px));
+  box-shadow:inset 3px 0 0 var(--snow-c)}
+.snow-d-big{display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;flex:none;min-width:5.2rem}
+.snow-d-pct{font-family:Inter,'Inter Fallback',sans-serif;font-variant-numeric:tabular-nums;font-weight:800;font-size:1.75rem;letter-spacing:-.02em;line-height:1.05;color:var(--text);white-space:nowrap}
+.snow-d-lv{font-size:var(--fs-xs);font-weight:700;color:var(--text);line-height:1.25}
+.snow-d-why{margin:0;font-size:var(--fs-sm,.8125rem);line-height:1.5;color:var(--muted)}
+.snow-d-why b{color:var(--text)}
+.snow-d-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:.9rem 0 .5rem}
+.snow-st{display:flex;flex-direction:column;gap:.5rem;max-width:34rem}
+.snow-st-row{display:grid;grid-template-columns:minmax(6rem,8.5rem) minmax(0,1fr) 3.4rem;align-items:center;gap:.65rem}
+.snow-st-n{font-size:var(--fs-sm,.8125rem);font-weight:600;color:var(--text);line-height:1.2;min-width:0}
+.snow-st-n small{display:block;font-size:var(--fs-xs);font-weight:400;color:var(--muted)}
+.snow-st-row.is-main .snow-st-n{font-weight:800}
+.snow-st-v{text-align:right;font-family:Inter,'Inter Fallback',sans-serif;font-variant-numeric:tabular-nums;font-weight:800;font-size:var(--fs-sm,.8125rem);color:var(--text);white-space:nowrap}
+.snow-detail .pd-detail-stats{gap:.4rem 1.1rem}
+.snow-detail .pd-detail-stats span{display:inline-flex;align-items:center;gap:.3rem}
+.snow-detail .pd-detail-stats .ic{width:1em;height:1em;flex:none}
+@media(prefers-reduced-motion:reduce){.snow-day.snow-click:hover{transform:none}.snow-detail{animation:none}}
+/* Rezervirana višina zaprte kartice (brez CLS): izmerjena naravna višina po širinah (Playwright, 9. 11. 2026, z vrstico namiga), vsaka stopnja malo
+   konzervativna. Višina se spreminja stopničasto, ker se besedilo (naslov, ploščice) lomi različno; ob spremembi besedila izmeri znova. */
+.snow-card{min-height:20.4rem}
+@media(max-width:1024px){.snow-card{min-height:21.5rem}}
+@media(max-width:712px){.snow-card{min-height:22.7rem}}
+@media(max-width:595px){.snow-card{min-height:23.6rem}}
+@media(max-width:545px){.snow-card{min-height:24.7rem}}
+@media(max-width:541px){.snow-card{min-height:25.6rem}}
+@media(max-width:458px){.snow-card{min-height:26.7rem}}
+@media(max-width:446px){.snow-card{min-height:28.2rem}}
+@media(max-width:395px){.snow-card{min-height:29.4rem}}
+@media(max-width:380px){.snow-card{min-height:27.2rem}}
+@media(max-width:348px){.snow-card{min-height:28.3rem}}
+@media(max-width:343px){.snow-card{min-height:29.2rem}}
+@media(max-width:327px){.snow-card{min-height:30.8rem}}
 @media (max-width:560px){
+  .snow-d-top{flex-direction:column;align-items:flex-start;gap:.5rem}
+  .snow-d-pct{font-size:1.5rem}
+  .snow-st-row{grid-template-columns:minmax(5.2rem,7rem) minmax(0,1fr) 3.1rem;gap:.5rem}
   .snow-head{min-height:2.7em}
-  .snow-card{min-height:28.4rem}
   .snow-days{gap:.3rem}
   .snow-day{padding:.55rem .25rem}
   .snow-day-val{font-size:1.02rem}
@@ -4838,5 +4883,4 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 }
 @media (max-width:380px){
   .snow-day-meta{display:none}
-  .snow-card{min-height:30.8rem}
 }
