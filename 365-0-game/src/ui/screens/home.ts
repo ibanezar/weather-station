@@ -167,6 +167,7 @@ export function renderHome(app: App, root: HTMLElement): void {
     bestSlot.textContent = best ? t('home.bestEndless', { record: app.fmt.record(best) }) : '';
     dailyNote.textContent = `${t('home.dailyCaption')}${streak >= 2 ? ` · ${plural('home.streak', streak)}` : ''}`;
   };
+  const contractOptions: HTMLButtonElement[] = [];
   const contractPicker = h(
     'fieldset',
     { class: 'contract-picker' },
@@ -175,24 +176,23 @@ export function renderHome(app: App, root: HTMLElement): void {
       'div',
       { class: 'contract-picker__options' },
       ...CONTRACT_IDS.map((id) => {
-        const input = h('input', {
-          type: 'radio',
-          name: 'contract',
-          value: id,
-          class: 'contract-opt__input',
-          checked: id === contract,
-          onChange: () => {
-            contract = id;
-            app.store.update((st) => {
-              st.settings.contract = id;
-            });
-            applyChase();
+        const option = h(
+          'button',
+          {
+            type: 'button',
+            class: 'contract-opt',
+            'data-contract': id,
+            'aria-pressed': String(id === contract),
+            onClick: () => {
+              contract = id;
+              app.store.update((st) => {
+                st.settings.contract = id;
+              });
+              for (const other of contractOptions) {
+                other.setAttribute('aria-pressed', String(other.dataset['contract'] === id));
+              }
+            },
           },
-        });
-        return h(
-          'label',
-          { class: 'contract-opt' },
-          input,
           h(
             'span',
             { class: 'contract-opt__box' },
@@ -204,6 +204,8 @@ export function renderHome(app: App, root: HTMLElement): void {
             ),
           ),
         );
+        contractOptions.push(option);
+        return option;
       }),
     ),
   );
