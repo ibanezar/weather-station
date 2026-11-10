@@ -193,11 +193,7 @@ export function renderHome(app: App, root: HTMLElement): void {
       },
     },
     ...CONTRACT_IDS.map((id) =>
-      h(
-        'option',
-        { value: id, selected: id === contract },
-        t(`contract.${id}.name` as MessageKey),
-      ),
+      h('option', { value: id, selected: id === contract }, t(`contract.${id}.name` as MessageKey)),
     ),
   );
   const currentContractName = t(`contract.${contract}.name` as MessageKey);
