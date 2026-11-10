@@ -871,16 +871,23 @@
 /* A run objective adds a clear target without crowding the city draft. */
 .contract-picker {
   display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
+  gap: var(--space-1);
   min-width: 0;
+}
+
+.contract-picker__summary {
+  min-height: var(--tap-small);
+  display: flex;
+  align-items: center;
+  font-size: var(--text-small);
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .contract-picker__select {
   width: 100%;
   min-height: var(--tap);
+  margin-top: var(--space-1);
   padding: 0 var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-button);

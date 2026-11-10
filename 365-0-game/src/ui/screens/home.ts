@@ -172,6 +172,7 @@ export function renderHome(app: App, root: HTMLElement): void {
     bestSlot.textContent = best ? t('home.bestEndless', { record: app.fmt.record(best) }) : '';
     dailyNote.textContent = `${t('home.dailyCaption')}${streak >= 2 ? ` · ${plural('home.streak', streak)}` : ''}`;
   };
+  const contractSummary = h('summary', { class: 'contract-picker__summary' });
   const contractDescription = h('p', { class: 'contract-picker__description muted' });
   const contractSelect = h(
     'select',
@@ -185,6 +186,9 @@ export function renderHome(app: App, root: HTMLElement): void {
         app.store.update((st) => {
           st.settings.contract = selected;
         });
+        contractSummary.textContent = t('contract.selected', {
+          name: t(`contract.${selected}.name` as MessageKey),
+        });
         contractDescription.textContent = t(`contract.${selected}.description` as MessageKey);
       },
     },
@@ -196,12 +200,13 @@ export function renderHome(app: App, root: HTMLElement): void {
       ),
     ),
   );
+  const currentContractName = t(`contract.${contract}.name` as MessageKey);
+  contractSummary.textContent = t('contract.selected', { name: currentContractName });
   contractDescription.textContent = t(`contract.${contract}.description` as MessageKey);
   const contractPicker = h(
-    'fieldset',
-    { class: 'contract-picker' },
-    h('legend', { class: 'chase-picker__legend' }, t('contract.title')),
-    contractSelect,
+    'section',
+    { class: 'contract-picker', 'aria-label': t('contract.title') },
+    h('details', { class: 'contract-picker__details' }, contractSummary, contractSelect),
     contractDescription,
   );
 

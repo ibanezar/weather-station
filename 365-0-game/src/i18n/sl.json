@@ -402,5 +402,6 @@
   "contract.clean-months.progress": "Najslabši mesec nad najboljšim: {current} porazov · meja {target} · {months}/12 mesecev",
   "contract.progressLabel": "Napredek pogodbe",
   "contract.result.pass": "Pogodba izpolnjena: {name}.",
-  "contract.result.miss": "Pogodba ni izpolnjena: {name}."
+  "contract.result.miss": "Pogodba ni izpolnjena: {name}.",
+  "contract.selected": "Pogodba: {name}"
 }

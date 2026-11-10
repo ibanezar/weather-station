@@ -392,5 +392,6 @@
   "contract.clean-months.progress": "Worst month over best: {current} losses · limit {target} · {months}/12 months",
   "contract.progressLabel": "Contract progress",
   "contract.result.pass": "Contract complete: {name}.",
-  "contract.result.miss": "Contract missed: {name}."
+  "contract.result.miss": "Contract missed: {name}.",
+  "contract.selected": "Contract: {name}"
 }
