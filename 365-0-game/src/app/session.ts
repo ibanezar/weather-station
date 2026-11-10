@@ -38,7 +38,14 @@ export function newSession(
     mode === 'daily'
       ? dailySeed(options.date ?? '', chase)
       : endlessSeed(options.entropy ?? String(Math.random()));
-  return { mode, chase, contract, date: options.date, data, state: start(newRun(seed, mode, chase), data) };
+  return {
+    mode,
+    chase,
+    contract,
+    date: options.date,
+    data,
+    state: start(newRun(seed, mode, chase), data),
+  };
 }
 
 /** Rebuild a finished run from its seed and picks, e.g. "See today's result" after a restart. */

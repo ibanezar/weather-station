@@ -13,6 +13,7 @@ import { randomEntropy, newSession } from '../../app/session.ts';
 import { CHASE_ICON, chaseKey, chaseSwatches, gradeKey } from '../../app/chase-text.ts';
 import { loadEngineData } from '../../app/data.ts';
 import { contractProgress } from '../../app/contracts.ts';
+import type { MessageKey } from '../../i18n/index.ts';
 
 const cityById = (id: string): SeedCity => cities.find((c) => c.id === id) as SeedCity;
 
@@ -30,6 +31,8 @@ export function renderResult(app: App, root: HTMLElement): void {
   const chase = session.chase;
   const swatches = chaseSwatches(chase);
   const gradeName = t(gradeKey(chase, result.grade));
+  const objective = contractProgress(session.contract, result.rounds, result.bestRecord, true);
+  const contractName = t(`contract.${session.contract}.name` as MessageKey);
   const streak = daily ? activeStreak(app.store.state.streak, localDate()) : 0;
 
   // The grid: highlight a month when its row in "What if" is tapped.
@@ -179,7 +182,11 @@ export function renderResult(app: App, root: HTMLElement): void {
       endlessBtn.disabled = true;
       void loadEngineData().then(
         (data) => {
-          app.session = newSession('endless', data, { entropy: randomEntropy(), chase, contract: session.contract });
+          app.session = newSession('endless', data, {
+            entropy: randomEntropy(),
+            chase,
+            contract: session.contract,
+          });
           app.count({ ev: 'start', mode: 'endless', chase });
           app.go('draft');
         },
@@ -258,18 +265,23 @@ export function renderResult(app: App, root: HTMLElement): void {
       h(
         'section',
         { class: 'contract-result', 'aria-label': t('contract.title') },
-        h('h2', null, t(`contract.${session.contract}.name` as import('../../i18n/index.ts').MessageKey)),
-        h('p', { class: 'num' }, t(`contract.${session.contract}.progress` as import('../../i18n/index.ts').MessageKey, {
-          current: contractProgress(session.contract, result.rounds, result.bestRecord.w, true).current,
-          target: contractProgress(session.contract, result.rounds, result.bestRecord.w, true).target,
-          months: 12,
-        })),
-        h('p', { class: 'muted', role: 'status' }, t(
-          contractProgress(session.contract, result.rounds, result.bestRecord.w, true).passed
-            ? 'contract.result.pass'
-            : 'contract.result.miss',
-          { name: t(`contract.${session.contract}.name` as import('../../i18n/index.ts').MessageKey) },
-        )),
+        h('h2', null, contractName),
+        h(
+          'p',
+          { class: 'num' },
+          t(`contract.${session.contract}.progress` as MessageKey, {
+            current: objective.current,
+            target: objective.target,
+            months: objective.months,
+          }),
+        ),
+        h(
+          'p',
+          { class: 'muted', role: 'status' },
+          t(objective.passed ? 'contract.result.pass' : 'contract.result.miss', {
+            name: contractName,
+          }),
+        ),
       ),
       h(
         'div',

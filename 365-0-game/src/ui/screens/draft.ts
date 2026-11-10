@@ -57,8 +57,15 @@ export function renderDraft(app: App, root: HTMLElement): void {
   const eventSlot = h('div', { class: 'draft__event' });
   const chainSlot = h('p', { class: 'muted draft__chain', 'aria-live': 'polite' });
   const contractLabel = h('p', { class: 'contract-progress__label', 'aria-live': 'polite' });
-  const contractMeter = h('progress', { class: 'contract-progress__meter', max: 100, value: 0, 'aria-label': t('contract.progressLabel') });
-  const contractPanel = h('section', { class: 'contract-progress', 'aria-label': t('contract.title') },
+  const contractMeter = h('progress', {
+    class: 'contract-progress__meter',
+    max: 100,
+    value: 0,
+    'aria-label': t('contract.progressLabel'),
+  });
+  const contractPanel = h(
+    'section',
+    { class: 'contract-progress', 'aria-label': t('contract.title') },
     h('strong', { class: 'contract-progress__title' }, t(`contract.${s.contract}.name` as MessageKey)),
     contractLabel,
     contractMeter,
@@ -169,8 +176,19 @@ export function renderDraft(app: App, root: HTMLElement): void {
     const pending = pendingMonth(s.state, s.data);
     const round = s.state.draft[s.state.settled];
     prog.update(Math.min(12, s.state.settled + 1), s.state.scoutsLeft, chances());
-    const objective = contractProgress(s.contract, s.state.picks.slice(0, s.state.settled).map((_, i) => monthOf(s.state, s.data, i)), s.state.best?.record.w ?? 0, s.state.settled === 12);
-    contractLabel.textContent = t(`contract.${s.contract}.progress` as MessageKey, { current: objective.current, target: objective.target, months: objective.months });
+    const objective = contractProgress(
+      s.contract,
+      s.state.picks
+        .slice(0, s.state.settled)
+        .map((_, i) => monthOf(s.state, s.data, i)),
+      s.state.best?.record ?? { w: 0, d: 0, l: 0 },
+      s.state.settled === 12,
+    );
+    contractLabel.textContent = t(`contract.${s.contract}.progress` as MessageKey, {
+      current: objective.current,
+      target: objective.target,
+      months: objective.months,
+    });
     contractMeter.value = objective.percent;
     contractMeter.setAttribute('aria-valuenow', String(objective.percent));
     contractMeter.setAttribute('aria-valuetext', contractLabel.textContent);

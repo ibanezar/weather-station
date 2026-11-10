@@ -17,21 +17,24 @@ export interface ContractProgress {
   percent: number;
 }
 
-type RoundScore = { record: DayRecord };
+type RoundScore = { record: DayRecord; best: { record: DayRecord } };
 
 /** Calculate an objective from the finalized months only; a pending month is not counted yet. */
 export function contractProgress(
   id: ContractId,
   rounds: readonly RoundScore[],
-  bestWins: number,
+  bestRecord: DayRecord,
   complete = rounds.length === 12,
 ): ContractProgress {
   const wins = rounds.reduce((sum, round) => sum + round.record.w, 0);
   const losses = rounds.reduce((sum, round) => sum + round.record.l, 0);
-  const worstMonth = rounds.reduce((worst, round) => Math.max(worst, round.record.l), 0);
+  const worstMonthOverBest = rounds.reduce(
+    (worst, round) => Math.max(worst, Math.max(0, round.record.l - round.best.record.l)),
+    0,
+  );
 
   if (id === 'record') {
-    const target = Math.ceil(bestWins * 0.9);
+    const target = Math.ceil(bestRecord.w * 0.9);
     return {
       current: wins,
       target,
@@ -43,7 +46,7 @@ export function contractProgress(
   }
 
   if (id === 'steady') {
-    const target = 50;
+    const target = bestRecord.l + 40;
     return {
       current: losses,
       target,
@@ -56,10 +59,10 @@ export function contractProgress(
 
   const target = 8;
   return {
-    current: worstMonth,
+    current: worstMonthOverBest,
     target,
     months: rounds.length,
-    passed: complete && rounds.length === 12 && worstMonth <= target,
+    passed: complete && rounds.length === 12 && worstMonthOverBest <= target,
     complete,
     percent: Math.round((rounds.length / 12) * 100),
   };
