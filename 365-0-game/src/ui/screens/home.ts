@@ -7,7 +7,7 @@ import { dailySeed } from '../../engine/run.ts';
 import { CHASE_IDS, type ChaseId } from '../../engine/chase.ts';
 import { CHASE_ICON, chaseKey } from '../../app/chase-text.ts';
 import { dailyKey } from '../../app/storage.ts';
-import { CONTRACT_IDS, DEFAULT_CONTRACT, type ContractId } from '../../app/contracts.ts';
+import { CONTRACT_IDS, DEFAULT_CONTRACT, isContractId, type ContractId } from '../../app/contracts.ts';
 import { icon } from '../icons/index.ts';
 import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
@@ -167,47 +167,37 @@ export function renderHome(app: App, root: HTMLElement): void {
     bestSlot.textContent = best ? t('home.bestEndless', { record: app.fmt.record(best) }) : '';
     dailyNote.textContent = `${t('home.dailyCaption')}${streak >= 2 ? ` · ${plural('home.streak', streak)}` : ''}`;
   };
-  const contractOptions: HTMLButtonElement[] = [];
+  const contractDescription = h('p', { class: 'contract-picker__description muted' });
+  const contractSelect = h(
+    'select',
+    {
+      class: 'contract-picker__select',
+      'aria-label': t('contract.title'),
+      onChange: (event: Event) => {
+        const selected = (event.currentTarget as HTMLSelectElement).value;
+        if (!isContractId(selected)) return;
+        contract = selected;
+        app.store.update((st) => {
+          st.settings.contract = selected;
+        });
+        contractDescription.textContent = t(`contract.${selected}.description` as MessageKey);
+      },
+    },
+    ...CONTRACT_IDS.map((id) =>
+      h(
+        'option',
+        { value: id, selected: id === contract },
+        t(`contract.${id}.name` as MessageKey),
+      ),
+    ),
+  );
+  contractDescription.textContent = t(`contract.${contract}.description` as MessageKey);
   const contractPicker = h(
     'fieldset',
     { class: 'contract-picker' },
     h('legend', { class: 'chase-picker__legend' }, t('contract.title')),
-    h(
-      'div',
-      { class: 'contract-picker__options' },
-      ...CONTRACT_IDS.map((id) => {
-        const option = h(
-          'button',
-          {
-            type: 'button',
-            class: 'contract-opt',
-            'data-contract': id,
-            'aria-pressed': String(id === contract),
-            onClick: () => {
-              contract = id;
-              app.store.update((st) => {
-                st.settings.contract = id;
-              });
-              for (const other of contractOptions) {
-                other.setAttribute('aria-pressed', String(other.dataset['contract'] === id));
-              }
-            },
-          },
-          h(
-            'span',
-            { class: 'contract-opt__box' },
-            h('strong', { class: 'contract-opt__name' }, t(`contract.${id}.name` as MessageKey)),
-            h(
-              'span',
-              { class: 'contract-opt__description muted' },
-              t(`contract.${id}.description` as MessageKey),
-            ),
-          ),
-        );
-        contractOptions.push(option);
-        return option;
-      }),
-    ),
+    contractSelect,
+    contractDescription,
   );
 
   const picker = h(
