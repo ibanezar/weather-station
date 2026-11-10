@@ -43,6 +43,7 @@ export function renderReveal(app: App, root: HTMLElement): void {
         {
           picks: [...session.state.picks],
           rerolls: [...session.state.rerolls],
+          contract: session.contract,
           record: result.record,
           grade: result.grade,
         },

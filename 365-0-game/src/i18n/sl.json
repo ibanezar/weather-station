@@ -389,5 +389,19 @@
   "chase.rain.rules": "Zmaga: deževen dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: suh popoln ali vroč dan.",
   "chase.storm.rules": "Zmaga: nevihten dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: popoln dan.",
   "chase.heat.rules": "Zmaga: vroč dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: sneg in mraz ali dež.",
-  "draft.scoutHelp": "Gumb »Izvidi« porabi enega od treh izvidov v igri. Pokaže primerjavo z drugimi mesti za zmagovalne in porazne dni (1–5 od 5), ne pa njihovega natančnega števila."
+  "draft.scoutHelp": "Gumb »Izvidi« porabi enega od treh izvidov v igri. Pokaže primerjavo z drugimi mesti za zmagovalne in porazne dni (1–5 od 5), ne pa njihovega natančnega števila.",
+  "contract.title": "Izberi pogodbo",
+  "contract.record.name": "Največ zmagovalnih dni",
+  "contract.record.description": "Dosezi vsaj 90 % najboljših možnih zmagovalnih dni.",
+  "contract.record.progress": "{current} od {target} zmagovalnih dni",
+  "contract.steady.name": "Zanesljivo leto",
+  "contract.steady.description": "Leto končaj z največ 40 porazi več kot najboljše možno leto.",
+  "contract.steady.progress": "{current} porazov · meja {target}",
+  "contract.clean-months.name": "Brez slabega meseca",
+  "contract.clean-months.description": "V vsakem mesecu imej največ 8 poraznih dni več kot najboljša ponujena možnost.",
+  "contract.clean-months.progress": "Najslabši mesec nad najboljšim: {current} porazov · meja {target} · {months}/12 mesecev",
+  "contract.progressLabel": "Napredek pogodbe",
+  "contract.result.pass": "Pogodba izpolnjena: {name}.",
+  "contract.result.miss": "Pogodba ni izpolnjena: {name}.",
+  "contract.selected": "Pogodba: {name}"
 }

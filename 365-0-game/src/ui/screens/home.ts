@@ -7,6 +7,12 @@ import { dailySeed } from '../../engine/run.ts';
 import { CHASE_IDS, type ChaseId } from '../../engine/chase.ts';
 import { CHASE_ICON, chaseKey } from '../../app/chase-text.ts';
 import { dailyKey } from '../../app/storage.ts';
+import {
+  CONTRACT_IDS,
+  DEFAULT_CONTRACT,
+  isContractId,
+  type ContractId,
+} from '../../app/contracts.ts';
 import { icon } from '../icons/index.ts';
 import { button } from '../components/button.ts';
 import { chip } from '../components/chip.ts';
@@ -25,6 +31,7 @@ export async function startRun(
   const { t } = app.i18n;
   const today = localDate();
   const chase = app.store.state.settings.chase;
+  const contract = app.store.state.settings.contract ?? DEFAULT_CONTRACT;
   ui.btn.disabled = true;
   ui.message.textContent = '';
   app.store.update((st) => {
@@ -43,12 +50,18 @@ export async function startRun(
           done.picks,
           done.rerolls ?? [],
           chase,
+          done.contract ?? DEFAULT_CONTRACT,
         );
         app.go('result');
         return;
       }
     }
-    app.session = newSession(mode, data, { date: today, entropy: randomEntropy(), chase });
+    app.session = newSession(mode, data, {
+      date: today,
+      entropy: randomEntropy(),
+      chase,
+      contract,
+    });
     app.count({ ev: 'start', mode, chase });
     app.go('draft');
   } catch {
@@ -70,6 +83,7 @@ export function renderHome(app: App, root: HTMLElement): void {
   const streak = activeStreak(app.store.state.streak, today);
   const message = h('p', { class: 'screen__error', role: 'alert' });
   let chase: ChaseId = app.store.state.settings.chase;
+  let contract: ContractId = app.store.state.settings.contract ?? DEFAULT_CONTRACT;
   const range = app.fmt.range(THRESHOLDS.perfect.tmaxCMin, THRESHOLDS.perfect.tmaxCMax);
 
   const dailyBtn = button({
@@ -158,6 +172,40 @@ export function renderHome(app: App, root: HTMLElement): void {
     bestSlot.textContent = best ? t('home.bestEndless', { record: app.fmt.record(best) }) : '';
     dailyNote.textContent = `${t('home.dailyCaption')}${streak >= 2 ? ` · ${plural('home.streak', streak)}` : ''}`;
   };
+  const contractSummary = h('summary', { class: 'contract-picker__summary' });
+  const contractDescription = h('p', { class: 'contract-picker__description muted' });
+  const contractSelect = h(
+    'select',
+    {
+      class: 'contract-picker__select',
+      'aria-label': t('contract.title'),
+      onChange: (event: Event) => {
+        const selected = (event.currentTarget as HTMLSelectElement).value;
+        if (!isContractId(selected)) return;
+        contract = selected;
+        app.store.update((st) => {
+          st.settings.contract = selected;
+        });
+        contractSummary.textContent = t('contract.selected', {
+          name: t(`contract.${selected}.name` as MessageKey),
+        });
+        contractDescription.textContent = t(`contract.${selected}.description` as MessageKey);
+      },
+    },
+    ...CONTRACT_IDS.map((id) =>
+      h('option', { value: id, selected: id === contract }, t(`contract.${id}.name` as MessageKey)),
+    ),
+  );
+  const currentContractName = t(`contract.${contract}.name` as MessageKey);
+  contractSummary.textContent = t('contract.selected', { name: currentContractName });
+  contractDescription.textContent = t(`contract.${contract}.description` as MessageKey);
+  const contractPicker = h(
+    'section',
+    { class: 'contract-picker', 'aria-label': t('contract.title') },
+    h('details', { class: 'contract-picker__details' }, contractSummary, contractSelect),
+    contractDescription,
+  );
+
   const picker = h(
     'fieldset',
     { class: 'chase-picker' },
@@ -216,6 +264,7 @@ export function renderHome(app: App, root: HTMLElement): void {
         h('p', { class: 'home__pitch' }, t('home.pitch')),
       ),
       picker,
+      contractPicker,
       h('ol', { class: 'home__steps', 'aria-label': t('onboarding.title') }, ...steps),
       h(
         'div',
