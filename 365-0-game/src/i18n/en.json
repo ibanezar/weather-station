@@ -373,5 +373,11 @@
   "mystery.mapLabel": "Map of the three cities: {list}",
   "stats.calendar": "Last twelve weeks",
   "stats.calendarLabel": "{n} of the last {days} days played",
-  "stats.calendarNote": "One square is one day. Filled when you finished the daily draft or the mystery, gold when you finished both."
+  "stats.calendarNote": "One square is one day. Filled when you finished the daily draft or the mystery, gold when you finished both.",
+  "chase.sun.rules": "Win: a perfect day. So-so days count as neither a win nor a loss. Loss: rain, storms, heat, or snow and frost.",
+  "chase.snow.rules": "Win: a day with snow or frost. So-so days count as neither a win nor a loss. Loss: a hot or perfect day.",
+  "chase.rain.rules": "Win: a rainy day. So-so days count as neither a win nor a loss. Loss: a dry perfect or hot day.",
+  "chase.storm.rules": "Win: a stormy day. So-so days count as neither a win nor a loss. Loss: a perfect day.",
+  "chase.heat.rules": "Win: a hot day. So-so days count as neither a win nor a loss. Loss: snow and frost or rain.",
+  "draft.scoutHelp": "Each Scout uses one of your three per run. It compares this city's winning and losing days with other cities (1–5 of 5), not the exact number of days."
 }

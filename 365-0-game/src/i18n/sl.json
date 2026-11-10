@@ -383,5 +383,11 @@
   "mystery.mapLabel": "Zemljevid treh mest: {list}",
   "stats.calendar": "Zadnjih dvanajst tednov",
   "stats.calendarLabel": "{n} od zadnjih {days} dni odigranih",
-  "stats.calendarNote": "En kvadrat je en dan. Zapolnjen, ko dokončaš dnevno igro ali uganko, zlat, ko dokončaš obe."
+  "stats.calendarNote": "En kvadrat je en dan. Zapolnjen, ko dokončaš dnevno igro ali uganko, zlat, ko dokončaš obe.",
+  "chase.sun.rules": "Zmaga: popoln dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: dež, nevihta, vročina ali sneg in mraz.",
+  "chase.snow.rules": "Zmaga: dan s snegom ali mrazom. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: vroč ali popoln dan.",
+  "chase.rain.rules": "Zmaga: deževen dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: suh popoln ali vroč dan.",
+  "chase.storm.rules": "Zmaga: nevihten dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: popoln dan.",
+  "chase.heat.rules": "Zmaga: vroč dan. Srednji dnevi ne štejejo ne za zmago ne za poraz. Poraz: sneg in mraz ali dež.",
+  "draft.scoutHelp": "Gumb »Izvidi« porabi enega od treh izvidov v igri. Pokaže primerjavo z drugimi mesti za zmagovalne in porazne dni (1–5 od 5), ne pa njihovega natančnega števila."
 }

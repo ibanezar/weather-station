@@ -143,6 +143,7 @@ export function renderHome(app: App, root: HTMLElement): void {
 
   // What to chase: sunshine, snow, rain, storms or heat. Native radio buttons, so the keyboard works for free.
   const chaseNote = h('p', { class: 'muted home__chase-note', 'aria-live': 'polite' });
+  const chaseRules = h('p', { class: 'muted home__chase-rules', 'aria-live': 'polite' });
   const bestSlot = h('p', { class: 'muted num home__best' });
   const dailyNote = h('p', { class: 'muted home__daily num' });
   const applyChase = (): void => {
@@ -151,6 +152,7 @@ export function renderHome(app: App, root: HTMLElement): void {
       .querySelector('span')
       ?.replaceChildren(done ? t('home.seeResult') : t('home.playDaily'));
     chaseNote.textContent = t(chaseKey(chase, 'short'), { range });
+    chaseRules.textContent = t(chaseKey(chase, 'rules'));
     step3Title.textContent = t(chaseKey(chase, 'step3'));
     const best = app.store.state.bestEndless[chase];
     bestSlot.textContent = best ? t('home.bestEndless', { record: app.fmt.record(best) }) : '';
@@ -193,6 +195,7 @@ export function renderHome(app: App, root: HTMLElement): void {
       }),
     ),
     chaseNote,
+    chaseRules,
   );
 
   mount(
