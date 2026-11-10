@@ -283,6 +283,7 @@ export function renderResult(app: App, root: HTMLElement): void {
           }),
         ),
       ),
+      daily ? h('p', { class: 'muted result__challenge' }, t('result.challengePrompt')) : null,
       h(
         'div',
         { class: 'screen__actions' },

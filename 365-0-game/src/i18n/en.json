@@ -58,7 +58,7 @@
   "result.copied": "Copied to the clipboard",
   "result.shareFailed": "Could not share. Try copying the text instead.",
   "result.playEndless": "Play endless",
-  "result.countdown": "Next daily in {time}",
+  "result.countdown": "Next shared challenge in {time}",
   "result.home": "Home",
   "result.whatIf": "What if",
   "result.whatIfIntro": "Tap a month to highlight it in the grid.",
@@ -197,7 +197,7 @@
   "home.dayPerfect": "Perfect",
   "home.dayOk": "So-so",
   "home.facts": "{cities} cities, ten years of real weather (2016 to 2025).",
-  "home.dailyCaption": "Today's draft, the same for everyone",
+  "home.dailyCaption": "Shared daily challenge · {date}",
   "event.tornado-outbreak.name": "Tornado outbreak",
   "event.tornado-outbreak.blurb": "Violent storms spin up over the plains.",
   "event.volcanic-ash.name": "Volcanic ash cloud",
@@ -393,5 +393,12 @@
   "contract.progressLabel": "Contract progress",
   "contract.result.pass": "Contract complete: {name}.",
   "contract.result.miss": "Contract missed: {name}.",
-  "contract.selected": "Contract: {name}"
+  "contract.selected": "Contract: {name}",
+  "result.challengePrompt": "Send today's same draft to a friend and compare results.",
+  "share.contractLine": "{name} · {progress} · {status}",
+  "share.contractBadge": "{status}: {name}",
+  "share.contractStatus.pass": "Completed",
+  "share.contractStatus.miss": "Not completed",
+  "share.challenge.daily": "Can you beat this result? Try today's shared draft.",
+  "share.challenge.endless": "Can you draft a better weather year?"
 }

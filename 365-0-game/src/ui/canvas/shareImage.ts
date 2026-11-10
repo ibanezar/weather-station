@@ -18,6 +18,7 @@ export interface ShareImageText {
   subtitle: string;
   gradeTitle: string;
   bestLine: string;
+  contractLine?: string;
   youLine: string;
   /** Three letters per month column. */
   abbreviations: readonly string[];
@@ -108,7 +109,7 @@ export async function renderShareImage(
 ): Promise<HTMLCanvasElement> {
   const L = shareLayout(format);
   await loadFonts(
-    `${text.title} ${text.subtitle} ${formatRecord(model.record)} ${text.gradeTitle} ${text.bestLine}`,
+    `${text.title} ${text.subtitle} ${formatRecord(model.record)} ${text.gradeTitle} ${text.bestLine} ${text.contractLine ?? ''}`,
   );
 
   const canvas = document.createElement('canvas');
@@ -161,6 +162,12 @@ export async function renderShareImage(
   const bestWidth = ctx.measureText(`${text.bestLine}   `).width;
   ctx.fillStyle = palette.outline;
   ctx.fillText(text.youLine, L.margin + bestWidth, L.bestY);
+  if (text.contractLine) {
+    const contractPx = fitFont(ctx, text.contractLine, 600, UI, 32, L.recordMaxWidth);
+    ctx.font = `600 ${String(contractPx)}px ${UI}`;
+    ctx.fillStyle = palette.outline;
+    ctx.fillText(text.contractLine, L.margin, L.bestY + 48);
+  }
 
   // The grid, drawn on its own canvas with the same renderer as the app.
   const columns: GridColumn[] = model.months.map((m) => ({ days: m.days }));

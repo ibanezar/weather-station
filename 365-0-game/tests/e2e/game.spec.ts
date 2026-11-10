@@ -67,7 +67,7 @@ test.describe('a complete daily run', () => {
     expect(record.w + record.d + record.l).toBe(365);
     await expect(page.getByText(/Best possible today: \d+/)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Share result' })).toBeVisible();
-    await expect(page.getByText(/Next daily in \d+ h \d+ min/)).toBeVisible();
+    await expect(page.getByText(/Next shared challenge in \d+ h \d+ min/)).toBeVisible();
     await expect(page.locator('.result__grade h2')).not.toBeEmpty();
 
     // The same record is shown when the player comes back: the daily is locked and deterministic.
@@ -545,11 +545,13 @@ test.describe('sharing', () => {
 
     const text = await page.evaluate(() => navigator.clipboard.readText());
     const lines = text.split('\n');
-    expect(lines).toHaveLength(4);
+    expect(lines).toHaveLength(6);
     expect(lines[0]).toMatch(/^365-0 daily \d{4}-\d{2}-\d{2}$/);
     expect(lines[1]).toMatch(new RegExp(`^Record ${record.text} \\(.+\\)$`));
-    expect(Array.from(lines[2] ?? '')).toHaveLength(12);
-    expect(lines[3]).toBe('https://meteorec.si/365-0/');
+    expect(lines[2]).toMatch(/^.+ · .+ · (Completed|Not completed)$/);
+    expect(Array.from(lines[3] ?? '')).toHaveLength(12);
+    expect(lines[4]).toBe("Can you beat this result? Try today's shared draft.");
+    expect(lines[5]).toBe('https://meteorec.si/365-0/');
   });
 
   test('offers a 1080 x 1920 story image', async ({ page }) => {
@@ -657,7 +659,7 @@ test.describe('the streak', () => {
   test('is hidden after a missed day and shows the invitation instead', async ({ page }) => {
     await openReturning(page, { streak: { count: 7, last: dateDaysAgo(3) } });
     await expect(page.getByText(/day streak/)).toHaveCount(0);
-    await expect(page.locator('.home__daily')).toHaveText("Today's draft, the same for everyone");
+    await expect(page.locator('.home__daily')).toHaveText(/^Shared daily challenge · .+$/);
   });
 
   test('is hidden at one day, and an endless run never changes it', async ({ page }) => {

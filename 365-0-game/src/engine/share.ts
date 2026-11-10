@@ -39,17 +39,23 @@ export interface ShareTextInput {
   gradeTitle: string;
   /** YYYY-MM-DD, shown for the daily run. */
   date?: string;
+  /** Optional social context, kept outside the engine's game state. */
+  contractLine?: string;
+  challengeLine?: string;
   url: string;
 }
 
 export function buildShareText(result: RunResult, input: ShareTextInput): string {
   const header = [input.title, input.modeLabel, input.date].filter(Boolean).join(' ');
-  return [
+  const lines = [
     header,
     `${input.recordLabel} ${formatRecord(result.record)} (${input.gradeTitle})`,
+    input.contractLine,
     monthSquares(result),
+    input.challengeLine,
     input.url,
-  ].join('\n');
+  ];
+  return lines.filter((line): line is string => Boolean(line)).join('\n');
 }
 
 export interface ShareImageModel {
