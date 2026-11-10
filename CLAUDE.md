@@ -3123,3 +3123,14 @@ Ločen projekt (Vite + TypeScript, brez povezave z ostalim delom strani). **Izvo
   za crnivec.si in `/zima/`) — Filip želi spremembe videti takoj, ne šele ob
   naslednjem cronu. Pred tem preveri, da je ponovni tek isti dan varen
   (npr. snežna odeja v `winter_engine.py` se drugič isti dan preskoči).
+
+## Polarni vrtinec novembra (`/blog/polarni-vrtinec-se-je-ustavil-novembra-1110.html`, 10. 11. 2026)
+
+Ročni članek ob članku Scientific American (4. 11. 2026) o rekordno zgodnji motnji polarnega vrtinca. Ni v nobenem workflowu.
+
+- `tools/generate_polarni_vrtinec_post.py` bere `data/stratosfera.json`, `data/stratosfera-klima.json`, `data/polarni-vrtinec-1110.json` in `history.json` (samo zunanja `tempAvg`/`tempLow`, brez ERA5). **Posnetek na dan objave**: assert-i zahtevajo analizo do 8. 11. in napoved GFS z dne 9. 11.; ker `atmos-forecast.yml` `stratosfera.json` prepiše vsak dan, generator po 10. 11. pade. Za popravek besedila uredi committan HTML ali vrni `data/stratosfera.json` iz commita članka; assertov ne zaobidi. Ponovni zagon: `--force` (brez `--wire`, vnos v `blog.json` že obstaja).
+- `tools/build_polarni_vrtinec_data.py` (enkratno, omrežje + `pip install eccodes`): datumi obratov vetra v našem arhivu GFS in zemljevida 10 hPa (`img/blog/<slug>/vrtinec-pred|po.webp`; azimutna projekcija, 15° V navzdol, obala iz kopenske maske GFS). **Datumi obratov so naš izračun iz trenutnih analiz ob 00 UTC, ne uradni seznam** (reanalize, dnevna povprečja); članek to pove in ne trdi, da je »velik SSW« potrjen (–0,5 m/s 6. 11., Met Office: šibek in kratek obrat). Viri se o letnici dosedanjega rekorda (28. 11.) razhajajo (1958/1968/1969/2025); članek jih navede, ne izbere.
+- **Lastna analiza je majhen vzorec in tako piše**: 7 obratov od 2019, odstopanje `tempAvg` od povprečja postaje v dneh 14–42; 6 toplejših, hladnejši samo po 28. 11. 2025. Ni napoved in ni vzrok.
+- Video `polarni-vrtinec-airs-2019.mp4` je animacija NASA/JPL-Caltech AIRS (januar 2019, javna last, navedba vira ob videu); kaže dogodek 2019, ne letošnjega.
+- **Interaktivni grafi v članku** (prvi tak članek): statičen SVG iz Pythona v dveh širinah (360/680, preklop s CSS), JS doda križ, oblaček, preklop veter/temperatura, skrivanje prejšnjih zim in drsnik za primerjavo zemljevidov; brez JS ostanejo grafi in oba zemljevida vidni. Barvi `#3987e5`/`#d95926` sta preverjeni z `validate_palette.js` (temna podlaga). **Atributi v SVG morajo biti v narekovajih** (`stroke-opacity=.55/>` je v HTML požrl preostanek grafa).
+- Lektura prek workflowa ni opravljena (besedilo: `docs/lektura-polarni-vrtinec.txt`); na FB/IG ne gre samodejno (`social-repost.yml` po pregledu). Po mergu: IndexNow.

@@ -5,8 +5,20 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Mon, 09 Nov 2026 19:55:42 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 10 Nov 2026 12:10:33 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Polarni vrtinec se je ustavil že v začetku novembra</title>
+      <link>https://meteorec.si/blog/polarni-vrtinec-se-je-ustavil-novembra-1110.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/polarni-vrtinec-se-je-ustavil-novembra-1110.html</guid>
+      <pubDate>Tue, 10 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Veter 30 km nad Arktiko je v 13 dneh padel z 82 km/h na ničlo, tri tedne pred dosedanjim rekordom. Kaj kažejo podatki in kaj to pomeni za zimo pri nas.</description>
+      <category>polarni vrtinec</category>
+      <category>stratosfera</category>
+      <category>zima</category>
+      <category>napoved</category>
+      <category>podatki</category>
+    </item>
     <item>
       <title>Tla imajo 7 °C: za jurčka še dovolj toplo, za lisičko ne več</title>
       <link>https://meteorec.si/blog/temperature-za-gobe-se-ustrezajo-1109.html</link>
