@@ -225,7 +225,7 @@ export function renderResult(app: App, root: HTMLElement): void {
           chase !== 'sun'
             ? chip({ label: t(chaseKey(chase, 'name')), icon: CHASE_ICON[chase] })
             : null,
-          streak >= 2 ? chip({ label: plural('result.streak', streak), icon: 'streak' }) : null,
+          streak >= 1 ? chip({ label: plural('result.streak', streak), icon: 'streak' }) : null,
         ),
         h(
           'p',
@@ -283,6 +283,7 @@ export function renderResult(app: App, root: HTMLElement): void {
           }),
         ),
       ),
+      daily ? h('p', { class: 'muted result__challenge' }, t('result.challengePrompt')) : null,
       h(
         'div',
         { class: 'screen__actions' },

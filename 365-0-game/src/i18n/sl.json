@@ -62,7 +62,7 @@
   "result.copied": "Kopirano v odložišče",
   "result.shareFailed": "Deljenje ni uspelo. Poskusi kopirati besedilo.",
   "result.playEndless": "Igraj brez konca",
-  "result.countdown": "Naslednja dnevna igra čez {time}",
+  "result.countdown": "Nov skupni izziv čez {time}",
   "result.home": "Domov",
   "result.whatIf": "Kaj če",
   "result.whatIfIntro": "Dotakni se meseca, da ga označiš v mreži.",
@@ -205,7 +205,7 @@
   "home.dayPerfect": "Popoln",
   "home.dayOk": "Srednji",
   "home.facts": "{cities} mest, deset let pravega vremena (od 2016 do 2025).",
-  "home.dailyCaption": "Današnji izbor, enak za vse",
+  "home.dailyCaption": "Skupni dnevni izziv · {date}",
   "event.tornado-outbreak.name": "Izbruh tornadov",
   "event.tornado-outbreak.blurb": "Na ravnicah se razvijejo silovite nevihte.",
   "event.volcanic-ash.name": "Oblak vulkanskega pepela",
@@ -403,5 +403,12 @@
   "contract.progressLabel": "Napredek pogodbe",
   "contract.result.pass": "Pogodba izpolnjena: {name}.",
   "contract.result.miss": "Pogodba ni izpolnjena: {name}.",
-  "contract.selected": "Pogodba: {name}"
+  "contract.selected": "Pogodba: {name}",
+  "result.challengePrompt": "Pošlji današnji enak izbor prijatelju in primerjajta izida.",
+  "share.contractLine": "{name} · {progress} · {status}",
+  "share.contractBadge": "{status}: {name}",
+  "share.contractStatus.pass": "Izpolnjena",
+  "share.contractStatus.miss": "Ni izpolnjena",
+  "share.challenge.daily": "Lahko premagaš ta izid? Poskusi današnji skupni izbor.",
+  "share.challenge.endless": "Lahko sestaviš boljše vremensko leto?"
 }

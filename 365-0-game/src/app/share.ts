@@ -9,6 +9,7 @@ import { isPatternMode } from '../ui/settings.ts';
 import type { App } from './app.ts';
 import { cities } from './data.ts';
 import type { Session } from './session.ts';
+import { contractProgress } from './contracts.ts';
 
 /** Public address of the game. */
 export const GAME_URL = 'https://meteorec.si/365-0/';
@@ -24,16 +25,40 @@ function modeLabel(app: App, session: Session): string {
     : t('mode.chase', { mode, name: t(chaseKey(session.chase, 'name')) });
 }
 
+function contractShareLines(app: App, session: Session): {
+  text: string;
+  badge: string;
+} {
+  const result = session.state.result;
+  if (!result) throw new Error('no result to share');
+  const { t } = app.i18n;
+  const objective = contractProgress(session.contract, result.rounds, result.bestRecord, true);
+  const name = t(`contract.${session.contract}.name` as MessageKey);
+  const progress = t(`contract.${session.contract}.progress` as MessageKey, {
+    current: objective.current,
+    target: objective.target,
+    months: objective.months,
+  });
+  const status = t(objective.passed ? 'share.contractStatus.pass' : 'share.contractStatus.miss');
+  return {
+    text: t('share.contractLine', { name, progress, status }),
+    badge: t('share.contractBadge', { name, status }),
+  };
+}
+
 export function shareText(app: App, session: Session): string {
   const result = session.state.result;
   if (!result) throw new Error('no result to share');
   const { t } = app.i18n;
+  const contract = contractShareLines(app, session);
   return buildShareText(result, {
     title: t('app.title'),
     modeLabel: modeLabel(app, session),
     recordLabel: t('result.recordLabel'),
     gradeTitle: t(gradeKey(session.chase, result.grade)),
     ...(session.mode === 'daily' && session.date !== undefined ? { date: session.date } : {}),
+    contractLine: contract.text,
+    challengeLine: t(session.mode === 'daily' ? 'share.challenge.daily' : 'share.challenge.endless'),
     url: GAME_URL,
   });
 }
@@ -52,6 +77,7 @@ export async function createShareImage(
   const result = session.state.result;
   if (!result) throw new Error('no result to share');
   const { t } = app.i18n;
+  const contract = contractShareLines(app, session);
   const model = shareImageModel(result, {
     mode: session.mode,
     ...(session.date !== undefined ? { date: session.date } : {}),
@@ -66,6 +92,7 @@ export async function createShareImage(
         .join(' '),
       gradeTitle: t(gradeKey(session.chase, result.grade)),
       bestLine: t(daily ? 'share.bestToday' : 'share.bestRun', { n: result.bestRecord.w }),
+      contractLine: contract.badge,
       youLine: t('result.yours', { n: result.record.w }),
       abbreviations: result.rounds.map((r) => {
         const city = cities.find((c) => c.id === r.cityId);
