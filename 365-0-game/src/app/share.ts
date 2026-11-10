@@ -58,7 +58,9 @@ export function shareText(app: App, session: Session): string {
     gradeTitle: t(gradeKey(session.chase, result.grade)),
     ...(session.mode === 'daily' && session.date !== undefined ? { date: session.date } : {}),
     contractLine: contract.text,
-    challengeLine: t(session.mode === 'daily' ? 'share.challenge.daily' : 'share.challenge.endless'),
+    challengeLine: t(
+      session.mode === 'daily' ? 'share.challenge.daily' : 'share.challenge.endless',
+    ),
     url: GAME_URL,
   });
 }
