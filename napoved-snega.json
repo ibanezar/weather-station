@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T13:01:43Z",
+  "generated_at": "2026-11-10T21:58:20Z",
   "model_version": "0.4",
   "trained_at": "2026-11-09T16:16:34Z",
   "in_season": true,
@@ -34,11 +34,11 @@
       "stations": {
         "Gornji Grad": 0.001,
         "Luče": 0.002,
-        "Radegunda": 0.004,
-        "Solčava": 0.002
+        "Radegunda": 0.005,
+        "Solčava": 0.003
       },
-      "tavg": 8.9,
-      "prec_mm": 1.0,
+      "tavg": 9.2,
+      "prec_mm": 2.1,
       "n_models": 4
     },
     {
@@ -54,54 +54,54 @@
         "Solčava": 0.013
       },
       "tavg": 11.2,
-      "prec_mm": 30.6,
+      "prec_mm": 30.3,
       "n_models": 4
     },
     {
       "date": "2026-11-13",
       "lead": 3,
-      "p_snow": 0.029,
+      "p_snow": 0.022,
       "p_proxy": 0.02,
       "basis": "observed",
       "stations": {
-        "Gornji Grad": 0.029,
-        "Luče": 0.052,
-        "Radegunda": 0.081,
-        "Solčava": 0.057
+        "Gornji Grad": 0.022,
+        "Luče": 0.04,
+        "Radegunda": 0.065,
+        "Solčava": 0.045
       },
-      "tavg": 8.9,
-      "prec_mm": 52.8,
+      "tavg": 9.3,
+      "prec_mm": 46.9,
       "n_models": 4
     },
     {
       "date": "2026-11-14",
       "lead": 4,
-      "p_snow": 0.008,
+      "p_snow": 0.009,
       "p_proxy": 0.12,
       "basis": "observed",
       "stations": {
-        "Gornji Grad": 0.008,
-        "Luče": 0.019,
-        "Radegunda": 0.035,
+        "Gornji Grad": 0.009,
+        "Luče": 0.02,
+        "Radegunda": 0.036,
         "Solčava": 0.019
       },
-      "tavg": 3.7,
+      "tavg": 3.5,
       "prec_mm": 0.0,
       "n_models": 4
     },
     {
       "date": "2026-11-15",
       "lead": 5,
-      "p_snow": 0.01,
-      "p_proxy": 0.11,
+      "p_snow": 0.013,
+      "p_proxy": 0.13,
       "basis": "observed",
       "stations": {
-        "Gornji Grad": 0.01,
-        "Luče": 0.02,
-        "Radegunda": 0.037,
-        "Solčava": 0.02
+        "Gornji Grad": 0.013,
+        "Luče": 0.026,
+        "Radegunda": 0.047,
+        "Solčava": 0.026
       },
-      "tavg": 3.2,
+      "tavg": 2.6,
       "prec_mm": 0.1,
       "n_models": 4
     }
