@@ -1,0 +1,160 @@
+Polarni vrtinec se je ustavil že v začetku novembra
+
+META OPIS: Veter 30 km nad Arktiko je v 13 dneh padel z 82 km/h na ničlo, tri tedne pred dosedanjim rekordom. Kaj kažejo podatki in kaj to pomeni za zimo pri nas.
+
+UVOD
+Štiriindvajsetega oktobra je veter 30 km nad Arktiko pihal s hitrostjo 22,9 m/s, kar je 82 km/h. Trinajst dni pozneje se je ustavil. Tako zgodaj se to v zapisih, ki segajo v petdeseta leta, še ni zgodilo.
+
+01 · KAJ SE DOGAJA -- Vrtinec, ki bi moral pospeševati, je obstal
+
+Na kratko
+Polarni vrtinec, pas močnih zahodnih vetrov visoko nad Arktiko, je v začetku novembra skoraj obstal. Običajno je v tem času najmočnejše rasti.
+Dosedanji najzgodnejši obrat vetra je bil 28. novembra. Letos je veter po našem izračunu padel pod ničlo 6. novembra, 22 dni prej.
+Ali bo dogodek uradno obveljal za »veliko« otoplitev stratosfere, še ni potrjeno. Obrat je šibek in kratek.
+Za vreme v Sloveniji to ni napoved mraza. Vpliv, če pride, se pokaže šele po dveh do šestih tednih, letos pa mu nasprotuje še močan El Niño.
+
+O dogodku je 4. novembra pisal Scientific American. Klimatolog Judah Cohen z MIT je za revijo dejal, da je dogodek brez primere in da je meteorološka skupnost zaradi njega vsa na nogah. Andrea Lopez Lang z Univerze Wisconsin–Madison je dodala, da bo do motnje očitno prišlo, kje se bo vse skupaj postavilo, pa je še odprto.
+
+Ker podatke o stratosferi na Meteorcu vsak dan računam sam, sem preveril, kaj kažejo. Spodaj so številke, zemljevida in primerjava s tem, kar je po prejšnjih takih dogodkih izmerila postaja v Rečici ob Savinji.
+
+22,9 m/s
+veter na 10 hPa pri 60° s. š. 24. oktobra, najmočnejši to jesen
+–⁠0,5 m/s
+isti veter 6. novembra: prvič pod ničlo
++7,8 °C
+toliko se je stratosfera nad Arktiko ogrela od 27. 10. do 8. 11.
+22 dni
+pred dosedanjim najzgodnejšim obratom (28. november)
+
+02 · RAZLAGA -- Kaj je polarni vrtinec?
+
+Polarni vrtinec ni nevihta in ni nekaj, kar bi videli z dvorišča. Je velik krog zahodnih vetrov v stratosferi, plasti ozračja od približno 10 do 50 km nad tlemi. Nastane vsako jesen, ko Arktika ostane brez sonca in se zrak nad njo močno ohladi. Decembra in januarja je najmočnejši.
+
+Dokler se vrti hitro, deluje kot ograja: mrzel zrak zadržuje nad tečajem. Cohen ga primerja z vrtavko, ki se vrti mirno, dokler je hitra.
+
+Vrtinec kot vrtavka
+Pogled od zgoraj na severni tečaj (križec). Shema, ne meritev.
+Levo: vrtinec kroži okoli tečaja in mrzel zrak ostaja nad Arktiko. Desno: veliki valovi iz spodnjega ozračja ga odrinejo ali raztegnejo, na drugi strani se stratosfera močno ogreje.
+
+Vrtavko zmotijo veliki valovi v ozračju, ki jim meteorologi pravijo Rossbyjevi valovi. Nastajajo spodaj, kjer je vreme, ob gorovjih in ob razlikah med kopnim in morjem. Kadar so dovolj močni, sežejo v stratosfero in vrtinec zavrejo. Ta se lahko odmakne od tečaja, raztegne, razcepi na dva dela ali celo obrne smer.
+
+Takrat se zrak nad tečajem naglo spušča in segreva. Po opisu britanske meteorološke službe se stratosfera lahko v nekaj dneh ogreje tudi za 50 °C. Od tod ime: nenadna stratosferska otoplitev, v strokovnih besedilih SSW. Na tleh te toplote ne čutimo, ker se dogaja 30 km nad nami.
+
+03 · VIDEO -- Kako je videti, ko vrtinec popusti
+
+Najlaže si to predstavljate ob posnetku. Spodnja animacija je iz januarja 2019, ko se je vrtinec razcepil in je nad Severno Ameriko v več valovih stekel arktični zrak. Vijolična in modra pomenita mraz.
+
+Januar 2019: mrzel zrak zapušča Arktiko
+Temperatura zraka po meritvah satelitskega instrumenta AIRS, 20.–28. januar 2019.
+Vir: NASA/JPL-Caltech, projekt AIRS. Posnetek kaže dogodek iz leta 2019, ne letošnjega. Posnetek istega dogodka je ob svojem članku objavil Scientific American.
+
+Tak izid ni pravilo. Takrat je mraz zajel predvsem Severno Ameriko, drugič steče drugam ali nikamor. Kam gre hladen zrak, je odvisno od tega, kje se pozneje postavijo območja visokega zračnega tlaka.
+
+04 · PODATKI -- V trinajstih dneh z 23 m/s na ničlo
+
+Stanje vrtinca meteorologi merijo z eno številko: s povprečno hitrostjo zahodnega vetra okoli Zemlje na višini 10 hPa (približno 30 km) pri 60. vzporedniku. Pozitivna številka pomeni zahodnik, negativna vzhodnik. Računam jo iz analiz ameriškega modela GFS, vsak dan ob 00 UTC.
+
+Vrtinec bi moral zdaj pospeševati. Letos se je ustavil.
+Povprečni zahodni veter na 10 hPa pri 60° s. š. Preklopite na temperaturo nad Arktiko ali se s prstom pomaknite po grafu.
+Veter
+Temperatura
+Prejšnje zime
+letos (analiza GFS)
+napoved GFS z dne 9. 11.
+zime 2021/22–2025/26
+Letošnja črta je naš izračun iz analiz GFS ob 00 UTC, pikčasti del je napoved istega modela z dne 9. 11. Sive črte so prejšnjih pet zim iz istega vira (vsak tretji dan). Temperatura je povprečje polarne kape od 60° do 90° s. š. na 10 hPa. Vir podatkov: NOAA GFS.
+
+Od 24. oktobra do 6. novembra je veter padel z 22,9 m/s na –⁠0,5 m/s. V prejšnjih petih zimah je bil na isti dan med 21 in 33 m/s. Stratosfera nad Arktiko se je medtem ogrela za 7,8 °C, z –⁠62,3 °C na –⁠54,5 °C, čeprav bi se morala v tem času ohlajati.
+
+Številka je povprečje okoli vsega vzporednika, zato ne pove, kje je vrtinec. To pokažeta zemljevida.
+
+Vrtinec pred motnjo in po njej
+Temperatura (barva) in višina ploskve 10 hPa (črte na 200 m). Povlecite drsnik.
+← 24. oktobra
+6. novembra →
+–⁠80 °C
+–50 °C
+–⁠20 °C
+24. oktobra je hladno jedro ležalo nad tečajem. 6. novembra je odrinjeno proti severnemu Atlantiku in Evropi, nad vzhodno Sibirijo pa je območje, kjer je do –⁠24 °C (prej največ –⁠44 °C). Zemljevida sta narisana iz analiz NOAA GFS; krogi so vzporedniki 40°, 60° in 80°.
+
+Da je hladno jedro stratosfere nad Evropo, ne pomeni, da je pri nas mraz. Gre za zrak 30 km visoko. Vreme nastaja v spodnjih desetih kilometrih.
+
+05 · REKORD -- Je to res najzgodnejši obrat doslej?
+
+Kratek odgovor: zelo verjetno je najzgodnejši, uradno pa še ni potrjen.
+
+Za »veliko« otoplitev stratosfere se mora veter na tej višini obrniti iz zahodnika v vzhodnik, in to med novembrom in marcem. Takih dogodkov je v povprečju šest na desetletje (Charlton in Polvani, 2007). Večina se zgodi januarja in februarja.
+
+Scientific American kot dosedanji najzgodnejši datum navaja 28. november 1968. RTÉ navaja tri novembrske primere, vse na isti dan: 1958, 1968 in 2025. BBC piše o letih 1969 in 2025. Viri se o letnicah torej razhajajo, o datumu pa ne. Lanski primer je tudi v mojem arhivu: veter je pod ničlo padel 28. novembra 2025.
+
+Letos je v mojem izračunu prvič negativen 6. novembra, in to komaj: –⁠0,5 m/s. Naslednja dva dneva je bil spet rahlo pozitiven. Napoved GFS z dne 9. 11. ga 11. novembra postavi na –⁠3 m/s, do 19. novembra pa nazaj na približno 7 m/s.
+
+Zato previdnost. Moj izračun je trenutna vrednost enega modela ob polnoči po svetovnem času. Uradni seznami nastanejo iz dnevnih povprečij in reanaliz, ki zamujajo nekaj dni. Met Office je 4. novembra zapisal, da je pričakovani obrat »razmeroma šibek in kratkotrajen« in da ostaja negotovo, ali bo izpolnil merilo. Cohen je za Scientific American povedal isto bolj po domače: dogodek je lahko manjši in bodo vsi pozabili nanj, lahko pa je velik in gre v knjige rekordov.
+
+Manj sporno je nekaj drugega. Tako šibkega vrtinca v začetku novembra po navedbah Met Officea in BBC v 75 letih opazovanj še ni bilo, ne glede na to, na kateri strani ničle se številka na koncu ustavi.
+
+06 · VREME -- Kaj to pomeni za vreme pri nas?
+
+Motnja v stratosferi se lahko v nekaj tednih spusti navzdol in spremeni pot vetrovnega strženja, pasu močnih vetrov, ki vodi ciklone nad Evropo. Strženj oslabi in se zvije, pogosteje nastanejo obsežna območja visokega tlaka, ki se dolgo ne premaknejo. Po podatkih Met Officea se to zgodi v dveh do šestih tednih po dogodku.
+
+24. oktobra
+Vrtinec je najmočnejši to jesen: 22,9 m/s.
+6. novembra
+Veter v našem izračunu prvič pade pod ničlo.
+Od 20. novembra do 18. decembra
+Okno dveh do šestih tednov, v katerem bi se vpliv lahko pokazal pri tleh. Ni napoved, da se bo.
+December in januar
+Vrtinec se po napovedih znova krepi. Ali bo zdržal, bo odločalo o drugi polovici zime.
+
+Zakaj to ni napoved mraza, ima tri razloge.
+
+Vpliv ni zagotovljen. Met Office izrecno piše, da velika otoplitev stratosfere ne pomeni samodejno snega ali hudega mraza. Odloča, kje se postavi visok tlak.
+Novembra je mrzlega zraka manj. Severna polobla se šele ohlaja, zato je zaloga mraza manjša kot januarja.
+El Niño vleče v drugo smer. Letošnji je zelo močan. Analiza GSDM Weather Services kaže, da podaljšana napoved ECMWF za drugo polovico novembra nad severno Evropo kljub motnji napoveduje toplejše vreme od običajnega.
+
+In Slovenija? Raziskave o Evropi (King in sod., 2019) kažejo, da je po takih dogodkih severna Evropa pogosteje hladnejša in bolj suha, južna pa bolj mokra. Slovenija leži med obema. Zanesljivega pravila za naše kraje iz tega ne znam izpeljati, zato sem pogledal, kaj je izmerila postaja.
+
+07 · LASTNA ANALIZA -- Kaj je po prejšnjih obratih izmerila Rečica
+
+Postaja v Rečici ob Savinji meri od novembra 2019. V tem času se je veter v stratosferi obrnil sedemkrat. Za vsakega od teh obratov sem izračunal, koliko je povprečna dnevna temperatura od 14. do 42. dne po obratu odstopala od povprečja postaje za iste dni v letu.
+
+Po šestih od sedmih obratov je bilo v Rečici topleje kot običajno
+Odstopanje povprečne temperature od 14. do 42. dne po obratu vetra. Dotaknite se stolpca za podrobnosti.
+topleje od povprečja
+hladneje od povprečja
+Temperatura: postaja IREICA1, zunanji senzor. Povprečje je izračunano iz vseh let meritev (2019–2026) v oknu ±7 dni okoli dneva. Datumi obratov: januar 2021 po Lee (2021), ostali naš izračun iz analiz GFS ob 00 UTC.
+
+V šestih primerih je bilo to obdobje toplejše od povprečja, za 0,4 do 3,8 °C. Izjema je en sam primer, in to prav lanski novembrski. Od 12. decembra do 9. januarja je bilo 25 od 29 dni hladnejših od povprečja, 8. januarja pa je postaja izmerila –⁠16,5 °C.
+
+Kaj iz tega sledi? Predvsem to, da obrat vetra v stratosferi v naši dolini ne prinese mraza sam po sebi. Sedem primerov je premalo za kaj več. Trije so iz marca, ko se vrtinec tako ali tako poslavlja. Povprečje postaje je iz sedmih let in vsebuje tudi ta obdobja. In ujemanje ni vzrok: lanski hladni december je lahko imel druge razloge.
+
+Zanimivo je vseeno, da je edini hladni primer edini, ki se je zgodil zgodaj v zimi. Letošnji je še tri tedne zgodnejši. To je opažanje, ne napoved.
+
+08 · KAJ ZDAJ -- Kaj spremljati v naslednjih tednih
+
+Naslednje tri tedne se splača gledati tri stvari.
+
+Ali se vrtinec pobere. Graf vetra in temperature se vsak dan osveži na strani Stratosfera.
+Ali se motnja spusti navzdol. To pokaže indeks arktične oscilacije (AO). Ko je izrazito negativen, hladen zrak laže uhaja proti jugu. Spremljate ga na strani Indeksi.
+Kje se postavi visok tlak. To je vidno na sinoptični karti Evrope za štiri dni naprej.
+
+Za zimo kot celoto ostaja glavni dejavnik El Niño. O njem sem pisal v članku Zima 2026/27 in El Niño. Napoved za dolino za naslednje dni, tudi poskusna ocena možnosti snega, je na naslovni strani, razmere na cestah in v gorah pa na strani Zima.
+
+Če vas kdo vpraša, ali bo zaradi polarnega vrtinca huda zima, je pošten odgovor: ne vemo. Vemo, da se je nad Arktiko zgodilo nekaj, česar tako zgodaj še nismo videli, in da bo zanimivo spremljati, kaj sledi.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Meteorec, Filip Eremita) in povezavo na ta članek. Za prepis ali vdelavo grafov in zemljevidov prej vprašajte. Animacija NASA/JPL-Caltech je v javni lasti.
+
+Viri
+Jackie Flynn Mogensen: The polar vortex is about to go haywire. Scientific American, 4. 11. 2026
+Met Office: Deep dive: Could changes high above the Arctic influence the UK’s weather?, 4. 11. 2026
+Met Office: Sudden Stratospheric Warming (razlaga pojava)
+Simon King: Could the earliest weakening of the polar vortex on record bring UK snow? BBC Weather, 6. 11. 2026
+RTÉ News: Polar vortex weakening, according to data, 9. 11. 2026
+GSDM Weather Services: Understanding a Predicted SSW: November 2026, 29. 10. 2026
+Charlton in Polvani (2007): A New Look at Stratospheric Sudden Warmings. Journal of Climate
+King in sod. (2019): Observed Relationships Between Sudden Stratospheric Warmings and European Climate Extremes. JGR Atmospheres
+Hall in sod. (2021): Tracking the Stratosphere-to-Surface Impact of Sudden Stratospheric Warmings. JGR Atmospheres
+Lee (2021): Spotlight: the January 2021 sudden stratospheric warming. Weather
+
+VIRI
+Podatki: NOAA GFS (analize in napoved, naš izračun vetra na 10 hPa pri 60° s. š. in temperature polarne kape; data/stratosfera.json), postaja IREICA1 (zunanja povprečna in najnižja dnevna temperatura od 7. 11. 2019). Animacija: NASA/JPL-Caltech, projekt AIRS. Članek je posnetek stanja 10. 11. 2026 in se ne osvežuje sam.
