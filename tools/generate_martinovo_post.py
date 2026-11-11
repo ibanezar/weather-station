@@ -18,6 +18,7 @@ Usage:
 """
 import datetime
 import json
+import math
 import os
 import re
 import statistics
@@ -32,7 +33,7 @@ LIVE = os.path.join(ROOT, "napoved-modela-live.json")
 SLUG = "martinovo-vreme-recica-sest-let-1111"
 TEXT_OUT = os.path.join(ROOT, "docs", "lektura-martinovo.txt")
 SNAPSHOT_DATE = "2026-11-11"
-NBSP = " "
+NBSP = "\u00a0"
 GREEN, AMBER, CYAN, GREY = "#34d399", "#fbbf24", "#22d3ee", "#8aa0bd"
 INK, MUTED, GRID = "#e8edf8", "#adc0d8", "rgba(255,255,255,.10)"
 SURFACE = "#0a0f1c"
@@ -92,8 +93,9 @@ def window(H, y, a, b):
 
 # ───────────────────────── grafi (inline SVG) ─────────────────────────
 
-def week_chart(rows, w=360):
-    """rows = [(leto, lo, hi, d11, oznaka)] -- razpon najvišjih dnevnih temperatur 8.–14. 11. (trak), Martinovo (romb), prag 15 °C."""
+def week_chart(rows, pick=2025, w=360):
+    """rows = [(leto, lo, hi, d11, oznaka)] -- razpon najvišjih dnevnih temperatur 8.–14. 11. (trak), Martinovo (romb), prag 15 °C.
+    Vsaka vrstica je gumb (`pick` je privzeto izbrano leto), ki v JS pokaže dan za dnevom."""
     pl, pr, pt, pb = 44, 14, 24, 32
     rh = 30
     h = pt + pb + rh * len(rows)
@@ -111,6 +113,10 @@ def week_chart(rows, w=360):
     for i, (y, lo, hi, d11, tag) in enumerate(rows):
         cy = pt + rh * i + rh / 2
         now = y == LAST
+        # vrstica je gumb (JS pokaže dan za dnevom); brez JS je to samo graf
+        p.append(f'<g class="mv-row" data-y="{y}" tabindex="0" role="button" aria-pressed="{"true" if y == pick else "false"}" '
+                 f'aria-label="{y}{tag}: najvišje dnevne temperature od {n1(lo)} do {n1(hi)} °C. Pokaži dan za dnevom.">'
+                 f'<rect class="mv-hit" x="2" y="{cy - rh / 2:.1f}" width="{w - 4}" height="{rh}" rx="6"/>')
         p.append(f'<text x="{pl - 8}" y="{cy + 4.5:.1f}" text-anchor="end" font-size="13" font-weight="{700 if now else 400}" fill="{INK}">{y}</text>')
         p.append(f'<rect x="{X(lo):.1f}" y="{cy - 6:.1f}" width="{max(X(hi) - X(lo), 3):.1f}" height="12" rx="3" fill="{GREEN if now else GREY}" '
                  f'fill-opacity="{1 if now else .7}"><title>{y}{tag}: najvišje dnevne temperature od {n1(lo)} do {n1(hi)} °C</title></rect>')
@@ -124,6 +130,96 @@ def week_chart(rows, w=360):
             p.append(f'<text x="{X(hi) + 12:.1f}" y="{cy + 4.5:.1f}" font-size="13" fill="{INK}">{lab}</text>')
         else:
             p.append(f'<text x="{X(lo) - 12:.1f}" y="{cy + 4.5:.1f}" text-anchor="end" font-size="13" fill="{INK}">{lab}</text>')
+        p.append("</g>")
+    p.append("</svg>")
+    return "".join(p)
+
+
+def dni(n):
+    return f"{n} " + ("dan" if n == 1 else "dneva" if n == 2 else "dni")
+
+
+def noci(n):
+    return f"{n} " + ("noč" if n == 1 else "noči")
+
+
+def daily_chart(ser, labels, w=360, h=250):
+    """ser = {leto: [najvišja temperatura 1.–19. 11. ali None]} -- ena črta na leto; JS doda križ, pike in oblaček (data-box)."""
+    L, R, Tp, B = 38, 12, 26, 32
+    vals = [v for s in ser.values() for v in s if v is not None]
+    y0, y1 = 0, 5 * math.ceil(max(vals) / 5)
+    assert min(vals) >= y0, min(vals)
+    n = len(labels) - 1
+    X = lambda i: L + (w - L - R) * i / n
+    Y = lambda v: Tp + (h - Tp - B) * (y1 - v) / (y1 - y0)
+    p = [f'<svg id="mv-daily" class="vs-i" viewBox="0 0 {w} {h}" role="img" tabindex="0" data-box="{L},{Tp},{w - R},{h - B},{w},{h},{n},{y0},{y1}" '
+         'aria-label="Najvišja dnevna temperatura od 1. do 19. novembra, ena črta za vsako leto od 2020 do 2026. Puščici levo in desno prikažeta vrednosti po dnevih." '
+         'xmlns="http://www.w3.org/2000/svg">']
+    for v in range(y0, y1 + 1, 5):
+        p.append(f'<line x1="{L}" x2="{w - R}" y1="{Y(v):.1f}" y2="{Y(v):.1f}" stroke="{GRID}" stroke-width="1"/>')
+        p.append(f'<text x="{L - 6}" y="{Y(v) + 4.5:.1f}" text-anchor="end" font-size="13" fill="{MUTED}">{v}</text>')
+    p.append(f'<text x="{L - 6}" y="{Tp - 12}" text-anchor="end" font-size="13" fill="{MUTED}">°C</text>')
+    for i in (0, 4, 10, 14, 18):
+        p.append(f'<text x="{X(i):.1f}" y="{h - 10}" text-anchor="middle" font-size="13" fill="{MUTED}">{i + 1}. 11.</text>')
+    x11 = X(10)
+    p.append(f'<line x1="{x11:.1f}" x2="{x11:.1f}" y1="{Tp}" y2="{h - B}" stroke="{INK}" stroke-opacity=".4" stroke-dasharray="2 3"/>')
+    p.append(f'<text x="{x11:.1f}" y="{Tp - 8}" text-anchor="middle" font-size="13" fill="{INK}">Martinovo</text>')
+    p.append(f'<line x1="{L}" x2="{w - R}" y1="{Y(WARM):.1f}" y2="{Y(WARM):.1f}" stroke="{AMBER}" stroke-width="1.8" stroke-dasharray="5 3"/>')
+    order = [y for y in ser if y != LAST] + [LAST]
+    for y in order:
+        segs, cur = [], []
+        for i, v in enumerate(ser[y]):
+            if v is None:
+                if cur:
+                    segs.append(cur)
+                cur = []
+            else:
+                cur.append((X(i), Y(v)))
+        if cur:
+            segs.append(cur)
+        d = " ".join("M" + " L".join(f"{a:.1f},{b:.1f}" for a, b in s) for s in segs)
+        now = y == LAST
+        p.append(f'<path class="mv-line" data-y="{y}" d="{d}" fill="none" stroke="{GREEN if now else GREY}" stroke-width="{2.6 if now else 1.6}" '
+                 f'stroke-opacity="{1 if now else .55}" stroke-linejoin="round" stroke-linecap="round"/>')
+    last_i = max(i for i, v in enumerate(ser[LAST]) if v is not None)
+    p.append(f'<text x="{X(last_i) + 7:.1f}" y="{Y(ser[LAST][last_i]) + 4.5:.1f}" font-size="13" font-weight="700" fill="{GREEN}" '
+             f'paint-order="stroke" stroke="{SURFACE}" stroke-width="3">{LAST}</text>')
+    p.append(f'<line class="mv-cross" x1="0" x2="0" y1="{Tp}" y2="{h - B}" stroke="{INK}" stroke-opacity=".55" visibility="hidden"/>')
+    p.append('<g class="mv-dots"></g>')
+    p.append("</svg>")
+    return "".join(p)
+
+
+def day_pane(y, rows, w=360, h=224):
+    """Dan za dnevom 8.–14. 11. za eno leto: stolpec = najnižja do najvišja temperatura, pod njim dnevne padavine. rows = [(hi, lo, mm) ali None]."""
+    pl, pr, pt, pb = 38, 8, 26, 48
+    y0, y1 = -5, 20
+    step = (w - pl - pr) / 7
+    bw = step * 0.46
+    Y = lambda v: pt + (h - pt - pb) * (y1 - v) / (y1 - y0)
+    have = [r for r in rows if r]
+    assert min(r[1] for r in have) > -4.5, y
+    p = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="{y}: najvišja in najnižja dnevna temperatura ter padavine od 8. do 14. novembra" xmlns="http://www.w3.org/2000/svg">']
+    for v in range(y0, y1 + 1, 5):
+        zero = v == 0
+        p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{Y(v):.1f}" y2="{Y(v):.1f}" stroke="{INK if zero else GRID}" stroke-opacity="{.45 if zero else 1}" stroke-width="1"/>')
+        p.append(f'<text x="{pl - 6}" y="{Y(v) + 4.5:.1f}" text-anchor="end" font-size="13" fill="{MUTED}">{str(v).replace("-", "–")}</text>')
+    p.append(f'<text x="{pl - 6}" y="{pt - 12}" text-anchor="end" font-size="13" fill="{MUTED}">°C</text>')
+    p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{Y(WARM):.1f}" y2="{Y(WARM):.1f}" stroke="{AMBER}" stroke-width="1.8" stroke-dasharray="5 3"/>')
+    p.append(f'<text x="{pl - 6}" y="{h - 8}" text-anchor="end" font-size="13" fill="{MUTED}">mm</text>')
+    for i, r in enumerate(rows):
+        d = 8 + i
+        cx = pl + step * i + step / 2
+        mart = d == 11
+        p.append(f'<text x="{cx:.1f}" y="{h - 28}" text-anchor="middle" font-size="13" font-weight="{700 if mart else 400}" fill="{INK if r else MUTED}">{d}.</text>')
+        if not r:
+            continue
+        hi, lo, mm = r
+        p.append(f'<rect x="{cx - bw / 2:.1f}" y="{Y(hi):.1f}" width="{bw:.1f}" height="{max(Y(lo) - Y(hi), 2):.1f}" rx="4" '
+                 f'fill="{GREEN if y == LAST else GREY}" fill-opacity=".85"' + (f' stroke="{INK}" stroke-width="2.2"' if mart else "") + "/>")
+        p.append(f'<text x="{cx:.1f}" y="{Y(hi) - 6:.1f}" text-anchor="middle" font-size="13" fill="{INK}">{n1(hi)}</text>')
+        p.append(f'<text x="{cx:.1f}" y="{Y(lo) + 17:.1f}" text-anchor="middle" font-size="13" fill="{MUTED}">{n1(lo)}</text>')
+        p.append(f'<text x="{cx:.1f}" y="{h - 8}" text-anchor="middle" font-size="13" fill="{MUTED}">{num(mm)}</text>')
     p.append("</svg>")
     return "".join(p)
 
@@ -138,7 +234,8 @@ def trend_chart(shares, hi_start=8, w=360):
     step = iw / n
     bw = step * 0.68
     Y = lambda v: pt + ih * (1 - v / 100)
-    p = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="Delež let z vsaj enim dnevom s 15 stopinjami ali več v sedmih dneh, ki se začnejo na dani datum v novembru" '
+    p = [f'<svg id="mv-trend" class="vs-i" viewBox="0 0 {w} {h}" role="img" tabindex="0" data-box="{pl},{pt},{w - pr},{h - pb},{w},{h}" '
+         'aria-label="Delež let z vsaj enim toplim dnevom v sedmih dneh, ki se začnejo na dani datum v novembru. Puščici levo in desno prikažeta vrednosti po tednih." '
          'xmlns="http://www.w3.org/2000/svg">']
     for v in (0, 50, 100):
         p.append(f'<line x1="{pl}" x2="{w - pr}" y1="{Y(v):.1f}" y2="{Y(v):.1f}" stroke="{GRID}" stroke-width="1"/>')
@@ -149,7 +246,7 @@ def trend_chart(shares, hi_start=8, w=360):
         k, m = shares[s]
         v = 100 * k / m
         col = GREEN if s == hi_start else GREY
-        p.append(f'<rect x="{x:.1f}" y="{Y(v):.1f}" width="{bw:.1f}" height="{max(Y(0) - Y(v), 0.5):.1f}" rx="2" fill="{col}" fill-opacity="{1 if s == hi_start else .7}">'
+        p.append(f'<rect class="mv-b" data-s="{s}" x="{x:.1f}" y="{Y(v):.1f}" width="{bw:.1f}" height="{max(Y(0) - Y(v), 0.5):.1f}" rx="2" fill="{col}" fill-opacity="{1 if s == hi_start else .7}">'
                  f'<title>Teden od {s}. 11.: vsaj en dan s 15 °C ali več v {k} od {m} let ({round(v)} %)</title></rect>')
     for s in (1, 8, 15, 22):
         i = starts.index(s)
@@ -194,8 +291,106 @@ STYLE = """<style>
 .vs-card b{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.45rem;line-height:1.15;color:var(--text);font-weight:700;white-space:nowrap}
 .vs-card span{display:block;margin-top:.3rem;font-size:.78rem;line-height:1.35;color:var(--muted)}
 .vs-more{margin:.6rem 0 1.2rem}
-.vs-more summary{cursor:pointer;color:var(--blue);font-size:.9rem}
+.vs-more summary{cursor:pointer;color:var(--blue);font-size:.9rem;min-height:32px}
+.vs-fig{position:relative}
+.vs-fig svg.vs-i{touch-action:pan-y}
+.vs-js[hidden],.vs-pane[hidden]{display:none}
+.vs-ctl{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;margin:.2rem 0 .7rem}
+.vs-ctl[hidden]{display:none}
+.vs-ctl>span{color:var(--muted);font-size:.85rem}
+.vs-seg{display:inline-flex;border:1px solid var(--card-border);border-radius:999px;padding:3px;background:rgba(255,255,255,.04)}
+.vs-seg button,.vs-chip{font:inherit;font-size:.85rem;min-height:38px;padding:.3rem .85rem;border-radius:999px;border:0;background:none;color:var(--muted);cursor:pointer}
+.vs-seg button[aria-pressed="true"]{background:#34d399;color:#04130d;font-weight:600}
+.vs-chip{border:1px solid var(--card-border)}
+.vs-chip[aria-pressed="true"]{color:var(--text);background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
+.vs-seg button:focus-visible,.vs-chip:focus-visible,svg.vs-i:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:6px}
+.mv-row{cursor:pointer;outline:none}
+.mv-row .mv-hit{fill:transparent}
+.mv-row:hover .mv-hit{fill:rgba(255,255,255,.05)}
+.mv-row[aria-pressed="true"] .mv-hit{fill:rgba(255,255,255,.09)}
+.mv-row:focus-visible .mv-hit{stroke:#fff;stroke-width:2}
+.vs-hint{color:var(--muted);font-size:.85rem;margin:.5rem 0 .2rem}
+.vs-hint[hidden]{display:none}
+.vs-pane h4{font-family:'Space Grotesk',sans-serif;font-size:.9rem;margin:.6rem 0 .1rem;color:var(--text)}
+.vs-pane p{color:var(--muted);font-size:.84rem;line-height:1.5;margin:.3rem 0 0}
+.vs-read{font-size:.9rem;line-height:1.5;color:var(--text);margin:.5rem 0 0;min-height:3.1em}
+.vs-tip{position:absolute;z-index:3;pointer-events:none;background:#0d1424;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:.5rem .7rem;font-size:.84rem;line-height:1.5;color:var(--text);box-shadow:0 6px 24px rgba(0,0,0,.5);max-width:230px}
+.vs-tip[hidden]{display:none}
+.vs-tip b{display:block;font-weight:600}
+.vs-tip span{display:block;color:var(--muted);font-variant-numeric:tabular-nums}
+.vs-tip span strong,.vs-tip span.vs-hl{color:var(--text);font-weight:600}
 </style>"""
+
+
+SCRIPT = r"""<script>
+(function(){
+var el=document.getElementById('mv-data');if(!el)return;var D;try{D=JSON.parse(el.textContent);}catch(e){return;}
+var NS='http://www.w3.org/2000/svg',INK='#e8edf8',GREY='#8aa0bd',GREEN='#34d399',SURF='#0a0f1c',NB='\u00a0';
+function each(l,fn){Array.prototype.forEach.call(l,fn);}
+function f(x){return x.toFixed(1).replace('.',',').replace('-','–');}
+function box(s){return s.getAttribute('data-box').split(',').map(Number);}
+function tip(fig){var t=fig.querySelector('.vs-tip');if(!t){t=document.createElement('div');t.className='vs-tip';t.hidden=true;t.setAttribute('aria-hidden','true');fig.appendChild(t);}return t;}
+function place(t,fig,cx,cy){t.hidden=false;var fr=fig.getBoundingClientRect(),w=t.offsetWidth,h=t.offsetHeight,x=cx-fr.left+14;
+if(x+w>fr.width-6)x=cx-fr.left-w-14;if(x<6)x=6;var y=cy-fr.top-h-12;if(y<6)y=cy-fr.top+18;t.style.left=x+'px';t.style.top=y+'px';}
+each(document.querySelectorAll('.vs-js'),function(e){e.hidden=false;});
+/* 1. razpon v Martinovem tednu: izbira leta */
+var rows=document.querySelectorAll('.mv-row'),panes=document.querySelectorAll('.mv-pane');
+function pick(y){each(rows,function(r){r.setAttribute('aria-pressed',r.getAttribute('data-y')===y?'true':'false');});
+each(panes,function(p){p.hidden=p.getAttribute('data-y')!==y;});}
+each(rows,function(r){var y=r.getAttribute('data-y');r.addEventListener('click',function(){pick(y);});
+r.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(y);}
+else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();var l=Array.prototype.slice.call(rows),n=l[l.indexOf(r)+(e.key==='ArrowDown'?1:-1)];if(n){n.focus();pick(n.getAttribute('data-y'));}}});});
+/* 2. dnevne temperature: križ, pike, oblaček, označi leto */
+var ds=document.getElementById('mv-daily');
+if(ds){var b=box(ds),cross=ds.querySelector('.mv-cross'),dots=ds.querySelector('.mv-dots'),fig=ds.closest('.vs-fig'),t=tip(fig),yrs=Object.keys(D.years),hl=null,cur=null,lx=0,ly=0;
+var X=function(i){return b[0]+(b[2]-b[0])*i/b[6];},Y=function(v){return b[1]+(b[3]-b[1])*(b[8]-v)/(b[8]-b[7]);};
+var chips=document.querySelectorAll('.mv-chip');
+function hide(){cur=null;cross.setAttribute('visibility','hidden');while(dots.firstChild)dots.removeChild(dots.firstChild);t.hidden=true;}
+function show(i,cx,cy){cur=i;lx=cx;ly=cy;var x=X(i);cross.setAttribute('x1',x);cross.setAttribute('x2',x);cross.setAttribute('visibility','visible');
+while(dots.firstChild)dots.removeChild(dots.firstChild);var h='<b>'+D.labels[i]+'</b>';
+each(yrs,function(y){var v=D.years[y][i];if(v===null||v===undefined)return;
+var c=document.createElementNS(NS,'circle');c.setAttribute('cx',x);c.setAttribute('cy',Y(v));c.setAttribute('r',y===hl?4.5:3.5);
+c.setAttribute('fill',y===hl?INK:(y==='2026'?GREEN:GREY));c.setAttribute('stroke',SURF);c.setAttribute('stroke-width','1.5');dots.appendChild(c);
+h+='<span'+(y===hl?' class="vs-hl"':'')+'>'+y+': '+(v>=D.warm?'<strong>'+f(v)+'</strong>':f(v))+NB+'°C</span>';});
+h+='<span>krepko: 15'+NB+'°C ali več</span>';t.innerHTML=h;place(t,fig,cx,cy);}
+function paint(){each(ds.querySelectorAll('.mv-line'),function(p){var y=p.getAttribute('data-y');
+if(y===hl){p.setAttribute('stroke',INK);p.setAttribute('stroke-width','2.8');p.setAttribute('stroke-opacity','1');}
+else if(y!=='2026'){p.setAttribute('stroke',GREY);p.setAttribute('stroke-width','1.6');p.setAttribute('stroke-opacity',hl?'.3':'.55');}});
+var p1=ds.querySelector('.mv-line[data-y="'+hl+'"]'),p2=ds.querySelector('.mv-line[data-y="2026"]');if(p1)ds.insertBefore(p1,cross);ds.insertBefore(p2,cross);
+if(cur!==null)show(cur,lx,ly);}
+each(chips,function(c){c.addEventListener('click',function(){var y=c.getAttribute('data-y');hl=hl===y?null:y;
+each(chips,function(x){x.setAttribute('aria-pressed',x.getAttribute('data-y')===hl?'true':'false');});paint();});});
+function ev(e){var r=ds.getBoundingClientRect(),i=Math.round(((e.clientX-r.left)/r.width*b[4]-b[0])/(b[2]-b[0])*b[6]);
+if(i<0||i>b[6]){hide();return;}show(i,e.clientX,r.top+r.height*.3);}
+ds.addEventListener('pointermove',ev);ds.addEventListener('pointerdown',ev);ds.addEventListener('pointerleave',function(e){if(e.pointerType==='mouse')hide();});
+ds.addEventListener('keydown',function(e){var i=cur===null?(e.key==='ArrowLeft'?b[6]+1:-1):cur,r=ds.getBoundingClientRect();
+if(e.key==='ArrowRight')i=Math.min(b[6],i+1);else if(e.key==='ArrowLeft')i=Math.max(0,i-1);else if(e.key==='Home')i=0;else if(e.key==='End')i=b[6];
+else if(e.key==='Escape'){hide();return;}else return;e.preventDefault();show(i,r.left+X(i)/b[4]*r.width,r.top+r.height*.3);});
+ds.addEventListener('blur',hide);}
+/* 3. delež let z toplim dnevom po tednih: izbira praga */
+var ts=document.getElementById('mv-trend'),rd=document.getElementById('mv-read');
+if(ts&&rd){var tb=box(ts),bars=ts.querySelectorAll('.mv-b'),st=D.starts,thr=15,sel=null,fig2=ts.closest('.vs-fig'),t2=tip(fig2),tl=0,tc=0;
+each(ts.querySelectorAll('title'),function(x){x.parentNode.removeChild(x);});
+function res(i){var m=0,k=0;each(D.maxes[String(st[i])],function(v){if(v!==null){m++;if(v>=thr)k++;}});return[k,m];}
+function showT(i,cx,cy){sel=i;tl=cx;tc=cy;var q=res(i),s=st[i];
+t2.innerHTML='<b>'+s+'.–'+(s+6)+'. 11.</b><span>Vsaj en dan s '+thr+NB+'°C ali več:</span><span class="vs-hl">'+q[0]+' od '+q[1]+' let ('+Math.round(100*q[0]/q[1])+NB+'%)</span>';
+each(bars,function(r,j){r.setAttribute('stroke',j===i?INK:'none');r.setAttribute('stroke-width','1.5');});place(t2,fig2,cx,cy);}
+function hideT(){sel=null;t2.hidden=true;each(bars,function(r){r.setAttribute('stroke','none');});}
+function draw(){var H=0,T=0;each(bars,function(r,i){var q=res(i),v=q[1]?100*q[0]/q[1]:0,y=tb[1]+(tb[3]-tb[1])*(1-v/100);
+r.setAttribute('y',y);r.setAttribute('height',Math.max(tb[3]-y,.5));H+=q[0];T+=q[1];});
+var q8=res(st.indexOf(8));rd.textContent='Prag '+thr+NB+'°C: vsa okna skupaj '+H+' od '+T+' ('+Math.round(100*H/T)+NB+'%). Martinov teden (začetek 8. 11.): '+q8[0]+' od '+q8[1]+' let.';
+if(sel!==null)showT(sel,tl,tc);}
+var tbtn=document.querySelectorAll('.mv-thr button');
+each(tbtn,function(x){x.addEventListener('click',function(){thr=Number(x.getAttribute('data-t'));each(tbtn,function(y){y.setAttribute('aria-pressed',y===x?'true':'false');});draw();});});
+function ev2(e){var r=ts.getBoundingClientRect(),n=st.length,i=Math.floor(((e.clientX-r.left)/r.width*tb[4]-tb[0])/(tb[2]-tb[0])*n);
+if(i<0||i>=n){hideT();return;}showT(i,e.clientX,r.top+r.height*.25);}
+ts.addEventListener('pointermove',ev2);ts.addEventListener('pointerdown',ev2);ts.addEventListener('pointerleave',function(e){if(e.pointerType==='mouse')hideT();});
+ts.addEventListener('keydown',function(e){var n=st.length,i=sel===null?(e.key==='ArrowLeft'?n:-1):sel,r=ts.getBoundingClientRect();
+if(e.key==='ArrowRight')i=Math.min(n-1,i+1);else if(e.key==='ArrowLeft')i=Math.max(0,i-1);else if(e.key==='Home')i=0;else if(e.key==='End')i=n-1;
+else if(e.key==='Escape'){hideT();return;}else return;e.preventDefault();var step=(tb[2]-tb[0])/n;showT(i,r.left+(tb[0]+step*(i+.5))/tb[4]*r.width,r.top+r.height*.25);});
+ts.addEventListener('blur',hideT);}
+})();
+</script>"""
 
 
 def fig(title, inner, caption):
@@ -282,10 +477,50 @@ def build_article(H, live):
     ])
     rows = [(y, min(x["tempHigh"] for x in wk[y]), max(x["tempHigh"] for x in wk[y]), d11[y]["tempHigh"], "") for y in YEARS]
     rows.append((LAST, min(t26[d]["tempHigh"] for d in (8, 9, 10)), max(t26[d]["tempHigh"] for d in (8, 9, 10)), None, " (do 10. 11.)"))
+    # dan za dnevom (8.–14. 11.): ploščica za vsako leto, JS pokaže izbrano
+    panes = ""
+    for y in YEARS + [LAST]:
+        dr = []
+        for d in range(8, 15):
+            r = H.get(f"{y}-11-{d:02d}")
+            dr.append((r["tempHigh"], r["tempLow"], r["precipTotal"]) if r else None)
+        have = [r for r in dr if r]
+        assert len(have) == (7 if y != LAST else 3), (y, len(have))
+        w_n, f_n = sum(1 for r in have if r[0] >= WARM), sum(1 for r in have if r[1] <= 0)
+        rain = sum(r[2] for r in have)
+        if y == LAST:
+            assert (w_n, f_n) == (0, 1), (w_n, f_n)
+            head, stat = f"{y}: do 10. 11.", f"Podatki so do 10. 11.: {dni(w_n)} s 15{NBSP}°C ali več, {noci(f_n)} z 0{NBSP}°C ali manj, padavine skupaj {num(rain)} mm."
+        else:
+            assert (w_n, f_n) == (warm_wk[y], frost_wk[y]), (y, w_n, f_n)
+            head, stat = f"{y}: od 8. do 14. 11.", f"V tednu: {dni(w_n)} s 15{NBSP}°C ali več, {noci(f_n)} z 0{NBSP}°C ali manj, padavine skupaj {num(rain)} mm."
+        hid = "" if y == 2025 else " hidden"
+        panes += (f'<div class="vs-pane mv-pane" data-y="{y}"{hid}><h4>{head}</h4>{day_pane(y, dr)}'
+                  f'<p>{stat} Martinovo je obrobljeno, črtkana črta je 15{NBSP}°C, spodnja vrstica so padavine v mm.</p></div>')
     f_week = fig("Najvišje dnevne temperature v Martinovem tednu",
                  legend([("razpon od 8. do 14. 11.", "sq", GREY), ("letos, od 8. do 10. 11.", "sq", GREEN),
-                         ("Martinovo, 11. 11.", "dia", INK), ("15 °C", "dash", AMBER)]) + week_chart(rows),
+                         ("Martinovo, 11. 11.", "dia", INK), ("15 °C", "dash", AMBER)]) + week_chart(rows)
+                 + '<p class="vs-hint vs-js" hidden>Izberite leto v grafu: spodaj se pokaže dan za dnevom.</p>' + panes,
                  "Trak kaže najnižjo in najvišjo dnevno najvišjo temperaturo od 8. do 14. novembra, romb Martinovo. Letošnji trak je krajši, ker se podatki končajo 10. novembra.")
+
+    # dnevne najvišje temperature 1.–19. 11. po letih
+    days19 = list(range(1, 20))
+    for y in YEARS:
+        assert full(H, y, 1, 19), y
+    ser = {y: [H.get(f"{y}-11-{d:02d}", {}).get("tempHigh") for d in days19] for y in YEARS + [LAST]}
+    assert [v is not None for v in ser[LAST]] == [True] * 10 + [False] * 9, ser[LAST]
+    labels = [f"{d}. 11." + (" (Martinovo)" if d == 11 else "") for d in days19]
+    chips = '<div class="vs-ctl vs-js" hidden><span>Označi leto:</span>' + "".join(
+        f'<button type="button" class="vs-chip mv-chip" data-y="{y}" aria-pressed="false">{y}</button>' for y in YEARS) + "</div>"
+    f_daily = fig("Najvišja temperatura dan za dnevom, 1.–19. novembra",
+                  legend([("prejšnja leta", "sq", GREY), ("letos, do 10. 11.", "sq", GREEN), ("15 °C", "dash", AMBER)]) + chips + daily_chart(ser, labels),
+                  "Vsaka črta je eno leto, letošnja je zelena in se konča 10. novembra. Navpična črta je Martinovo. "
+                  '<span class="vs-js" hidden>Premaknite prst ali miško po grafu (ali uporabite puščici levo in desno): oblaček pokaže vse leta za izbrani dan.</span>')
+    t_daily = table(["Dan"] + [str(y) for y in YEARS + [LAST]],
+                    [[f"{d}. 11."] + [n1(ser[y][d - 1]) if ser[y][d - 1] is not None else "—" for y in YEARS + [LAST]] for d in days19],
+                    cap="Najvišja dnevna temperatura od 1. do 19. novembra po letih",
+                    note="Postaja IREICA1, zunanji senzor, najvišja dnevna temperatura v °C. — ni podatka (letošnji podatki se končajo 10. 11.).")
+    t_daily = '<details class="vs-more"><summary>Vrednosti grafa (tabela)</summary>' + t_daily + '</details>'
     p1 = [
         "<strong>Kratek odgovor: Martinovo ni posebej toplo, topli dnevi pa se v novembru res pojavljajo.</strong> "
         f"Martinovo je bilo v šestih letih zelo različno: od mrzlega dne s {temp(d11[2024]['tempHigh'])} (2024) do {temp(d11[2025]['tempHigh'])} (2025).",
@@ -295,12 +530,20 @@ def build_article(H, live):
         "Prag je moja izbira in ne uradna meja.",
     ]
 
+    thr_ctl = ('<div class="vs-ctl vs-js mv-thr" hidden><span>Prag:</span><div class="vs-seg" role="group" aria-label="Prag najvišje temperature">'
+               + "".join(f'<button type="button" data-t="{t}" aria-pressed="{"true" if t == 15 else "false"}">{t}{NBSP}°C</button>' for t in (10, 12, 15, 17))
+               + "</div></div>")
+    read0 = f"Prag 15{NBSP}°C: vsa okna skupaj {hit} od {tot} ({round(100 * hit / tot)}{NBSP}%). Martinov teden (začetek 8. 11.): {shares[8][0]} od {shares[8][1]} let."
     f_trend = fig("Kdaj v novembru je bil vsaj en topel dan?",
                   legend([("teden, ki se začne na ta datum", "sq", GREY), ("Martinov teden, začetek 8. 11.", "sq", GREEN)])
-                  + trend_chart(shares),
+                  + thr_ctl + trend_chart(shares) + f'<p class="vs-read" id="mv-read" aria-live="polite">{read0}</p>',
                   f"Za vsak začetek tedna od 1. do 24. novembra: v kolikšnem deležu let je bil v sedmih dneh vsaj en dan z najvišjo temperaturo 15{NBSP}°C ali več. "
-                  "Tedni, ki se začnejo od 14. do 23. novembra, imajo samo pet let, ker leta 2025 manjkajo dnevi od 20. do 23. 11.")
+                  "Tedni, ki se začnejo od 14. do 23. novembra, imajo samo pet let, ker leta 2025 manjkajo dnevi od 20. do 23. 11. "
+                  '<span class="vs-js" hidden>Prag lahko spremenite z gumbi nad grafom; besedilo članka velja za 15 °C. Dotaknite se stolpca (ali uporabite puščici levo in desno) za podrobnosti.</span>')
     p2 = [
+        "Najprej so dnevi: najvišja temperatura vsakega dne od 1. do 19. novembra, vsako leto posebej.",
+        f_daily,
+        t_daily,
         "Martinov teden sem primerjal z vsemi drugimi tedni novembra. Vprašanje je pri vsakem enako: ali je bil v sedmih zaporednih dneh vsaj en dan s 15 °C ali več? "
         "Za tedne, ki se začnejo 1. ali 2. novembra, je odgovor v vseh šestih letih »da«, za tedne od 22. novembra naprej pa v vseh letih »ne«.",
         f_trend,
@@ -367,6 +610,10 @@ def build_article(H, live):
     lead = nb(lead)
     for sec in sections:
         sec["paragraphs"] = [nb(x) for x in sec["paragraphs"]]
+    data = {"labels": labels, "warm": WARM, "years": {str(y): v for y, v in ser.items()}, "starts": sorted(shares),
+            "maxes": {str(s): [max(x["tempHigh"] for x in window(H, y, s, s + 6)) if full(H, y, s, s + 6) else None for y in YEARS] for s in sorted(shares)}}
+    sections[-1]["paragraphs"].append('<div class="vs-script"><script type="application/json" id="mv-data">'
+                                      + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "</script>" + SCRIPT + "</div>")
     return {
         "title": title, "meta_description": desc,
         "tags": ["martinovo", "temperatura", "november", "podatki"],

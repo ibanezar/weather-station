@@ -35,11 +35,85 @@ Martinovo, 11. 11.
 
 15 °C
 
+Izberite leto v grafu: spodaj se pokaže dan za dnevom.
+
+2020: od 8. do 14. 11.
+V tednu: 1 dan s 15 °C ali več, 2 noči z 0 °C ali manj, padavine skupaj 0,7 mm. Martinovo je obrobljeno, črtkana črta je 15 °C, spodnja vrstica so padavine v mm.
+
+2021: od 8. do 14. 11.
+V tednu: 0 dni s 15 °C ali več, 2 noči z 0 °C ali manj, padavine skupaj 16,5 mm. Martinovo je obrobljeno, črtkana črta je 15 °C, spodnja vrstica so padavine v mm.
+
+2022: od 8. do 14. 11.
+V tednu: 3 dni s 15 °C ali več, 0 noči z 0 °C ali manj, padavine skupaj 7,6 mm. Martinovo je obrobljeno, črtkana črta je 15 °C, spodnja vrstica so padavine v mm.
+
+2023: od 8. do 14. 11.
+V tednu: 1 dan s 15 °C ali več, 2 noči z 0 °C ali manj, padavine skupaj 39,0 mm. Martinovo je obrobljeno, črtkana črta je 15 °C, spodnja vrstica so padavine v mm.
+
+2024: od 8. do 14. 11.
+V tednu: 0 dni s 15 °C ali več, 2 noči z 0 °C ali manj, padavine skupaj 0,2 mm. Martinovo je obrobljeno, črtkana črta je 15 °C, spodnja vrstica so padavine v mm.
+
+2025: od 8. do 14. 11.
+V tednu: 2 dneva s 15 °C ali več, 6 noči z 0 °C ali manj, padavine skupaj 1,2 mm. Martinovo je obrobljeno, črtkana črta je 15 °C, spodnja vrstica so padavine v mm.
+
+2026: do 10. 11.
+Podatki so do 10. 11.: 0 dni s 15 °C ali več, 1 noč z 0 °C ali manj, padavine skupaj 1,0 mm. Martinovo je obrobljeno, črtkana črta je 15 °C, spodnja vrstica so padavine v mm.
+
 Trak kaže najnižjo in najvišjo dnevno najvišjo temperaturo od 8. do 14. novembra, romb Martinovo. Letošnji trak je krajši, ker se podatki končajo 10. novembra.
 
 Za topel čas okoli 11. novembra se včasih uporablja ime »martinovo poletje«. Za ta članek sem ga opredelil po svoje: dan z najvišjo temperaturo 15 °C ali več. Prag je moja izbira in ne uradna meja.
 
 02 — KONTROLA -- Topli dnevi se redčijo skozi ves november
+
+Najprej so dnevi: najvišja temperatura vsakega dne od 1. do 19. novembra, vsako leto posebej.
+
+Najvišja temperatura dan za dnevom, 1.–19. novembra
+
+prejšnja leta
+
+letos, do 10. 11.
+
+15 °C
+
+Označi leto:
+
+2020
+
+2021
+
+2022
+
+2023
+
+2024
+
+2025
+
+Vsaka črta je eno leto, letošnja je zelena in se konča 10. novembra. Navpična črta je Martinovo.
+Premaknite prst ali miško po grafu (ali uporabite puščici levo in desno): oblaček pokaže vse leta za izbrani dan.
+
+Vrednosti grafa (tabela)
+Dan | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+1. 11. | 18,2 | 15,1 | 23,2 | 14,5 | 19,7 | 18,9 | 8,3 |
+2. 11. | 20,1 | 13,2 | 19,7 | 16,2 | 15,1 | 18,1 | 9,8 |
+3. 11. | 21,7 | 9,5 | 14,9 | 14,8 | 10,5 | 16,9 | 7,8 |
+4. 11. | 13,5 | 15,4 | 13,0 | 11,6 | 14,9 | 16,4 | 6,7 |
+5. 11. | 11,9 | 7,1 | 12,7 | 16,9 | 12,1 | 15,0 | 8,0 |
+6. 11. | 13,4 | 9,8 | 11,7 | 17,3 | 14,8 | 13,1 | 7,5 |
+7. 11. | 14,4 | 12,3 | 17,5 | 13,5 | 13,5 | 13,4 | 7,9 |
+8. 11. | 15,5 | 7,5 | 17,1 | 12,8 | 12,0 | 10,1 | 11,0 |
+9. 11. | 6,9 | 10,0 | 17,1 | 13,1 | 10,5 | 14,6 | 12,7 |
+10. 11. | 4,6 | 10,5 | 11,5 | 11,0 | 10,5 | 13,4 | 14,3 |
+11. 11. | 5,8 | 10,5 | 11,7 | 12,8 | 5,0 | 17,0 | — |
+12. 11. | 7,5 | 5,5 | 15,5 | 9,4 | 4,5 | 13,8 | — |
+13. 11. | 10,7 | 11,2 | 12,9 | 13,2 | 2,6 | 16,5 | — |
+14. 11. | 10,9 | 6,5 | 11,5 | 16,2 | 4,7 | 14,8 | — |
+15. 11. | 13,3 | 10,6 | 14,0 | 17,4 | 10,9 | 16,1 | — |
+16. 11. | 10,4 | 8,4 | 9,7 | 13,1 | 10,6 | 17,0 | — |
+17. 11. | 7,7 | 7,2 | 12,2 | 13,5 | 11,5 | 13,9 | — |
+18. 11. | 12,0 | 11,4 | 8,1 | 10,1 | 9,2 | 5,6 | — |
+19. 11. | 8,4 | 13,8 | 5,7 | 11,8 | 11,6 | 3,9 | — |
+
+Postaja IREICA1, zunanji senzor, najvišja dnevna temperatura v °C. — ni podatka (letošnji podatki se končajo 10. 11.).
 
 Martinov teden sem primerjal z vsemi drugimi tedni novembra. Vprašanje je pri vsakem enako: ali je bil v sedmih zaporednih dneh vsaj en dan s 15 °C ali več? Za tedne, ki se začnejo 1. ali 2. novembra, je odgovor v vseh šestih letih »da«, za tedne od 22. novembra naprej pa v vseh letih »ne«.
 
@@ -49,7 +123,20 @@ teden, ki se začne na ta datum
 
 Martinov teden, začetek 8. 11.
 
+Prag:
+
+10 °C
+
+12 °C
+
+15 °C
+
+17 °C
+
+Prag 15 °C: vsa okna skupaj 60 od 134 (45 %). Martinov teden (začetek 8. 11.): 4 od 6 let.
+
 Za vsak začetek tedna od 1. do 24. novembra: v kolikšnem deležu let je bil v sedmih dneh vsaj en dan z najvišjo temperaturo 15 °C ali več. Tedni, ki se začnejo od 14. do 23. novembra, imajo samo pet let, ker leta 2025 manjkajo dnevi od 20. do 23. 11.
+Prag lahko spremenite z gumbi nad grafom; besedilo članka velja za 15 °C. Dotaknite se stolpca (ali uporabite puščici levo in desno) za podrobnosti.
 
 Martinov teden (4 od 6 let) leži na tej padajoči črti. Tedna, ki se začneta 7. in 9. novembra, imata po 3 od 6 let. Razlika je v enem letu, zato Martinovemu tednu ne morem pripisati nič posebnega.
 
@@ -101,6 +188,8 @@ Napoved je modelska. MTR je poskusni lokalni model in se spreminja z vsakim teko
 Praktično sporočilo: za Martinovo se ne zanašajte na topel dan, a tudi ne na zimo. Aktualno napoved za Rečico najdete na strani z vremenom za Rečico ob Savinji.
 
 Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+
 
 VIRI
 Viri: postaja IREICA1 (dnevne najvišje, najnižje in povprečne temperature ter padavine, zunanji senzor, 2020–2026, podatki do 10. 11. 2026); model MTR (napoved za 12.–14. 11. 2026, živa osvežitev 11. 11. 2026). Podatki: history.json.
