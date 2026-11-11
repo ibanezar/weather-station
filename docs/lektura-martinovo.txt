@@ -1,0 +1,106 @@
+Ali je Martinovo res toplo? Šest let podatkov
+
+META OPIS: Martinovo v Rečici: najvišja temperatura od 5,0 do 17,0 °C, povprečno 10,5 °C, kot običajen november. Šest let podatkov.
+
+UVOD
+Na Martinovo je bila v Rečici v zadnjih šestih letih najvišja temperatura med 5,0 °C in 17,0 °C, v povprečju 10,5 °C. To je skoraj natanko povprečje vseh novembrskih dni (10,6 °C). Dan s 15 °C ali več je bil v tednu od 8. do 14. novembra v štirih od šestih let, vendar so bili taki dnevi še pogostejši v prvem tednu novembra.
+
+01 — ODGOVOR -- Martinovo ni toplejše od običajnega novembra
+
+Kratek odgovor: Martinovo ni posebej toplo, topli dnevi pa se v novembru res pojavljajo. Martinovo je bilo v šestih letih zelo različno: od mrzlega dne s 5,0 °C (2024) do 17,0 °C (2025).
+
+10,5 °C
+
+povprečna najvišja temperatura 11. novembra, leta 2020–2025
+
+10,6 °C
+
+povprečna najvišja temperatura vseh novembrskih dni v istih letih
+
+4 od 6
+
+let z vsaj enim dnevom s 15 °C ali več v tednu od 8. do 14. 11.
+
+45 %
+
+vseh sedemdnevnih oken v novembru z vsaj enim takim dnevom (60 od 134)
+
+Najvišje dnevne temperature v Martinovem tednu
+
+razpon od 8. do 14. 11.
+
+letos, od 8. do 10. 11.
+
+Martinovo, 11. 11.
+
+15 °C
+
+Trak kaže najnižjo in najvišjo dnevno najvišjo temperaturo od 8. do 14. novembra, romb Martinovo. Letošnji trak je krajši, ker se podatki končajo 10. novembra.
+
+Za topel čas okoli 11. novembra se včasih uporablja ime »martinovo poletje«. Za ta članek sem ga opredelil po svoje: dan z najvišjo temperaturo 15 °C ali več. Prag je moja izbira in ne uradna meja.
+
+02 — KONTROLA -- Topli dnevi se redčijo skozi ves november
+
+Martinov teden sem primerjal z vsemi drugimi tedni novembra. Vprašanje je pri vsakem enako: ali je bil v sedmih zaporednih dneh vsaj en dan s 15 °C ali več? Za tedne, ki se začnejo 1. ali 2. novembra, je odgovor v vseh šestih letih »da«, za tedne od 22. novembra naprej pa v vseh letih »ne«.
+
+Kdaj v novembru je bil vsaj en topel dan?
+
+teden, ki se začne na ta datum
+
+Martinov teden, začetek 8. 11.
+
+Za vsak začetek tedna od 1. do 24. novembra: v kolikšnem deležu let je bil v sedmih dneh vsaj en dan z najvišjo temperaturo 15 °C ali več. Tedni, ki se začnejo od 14. do 23. novembra, imajo samo pet let, ker leta 2025 manjkajo dnevi od 20. do 23. 11.
+
+Martinov teden (4 od 6 let) leži na tej padajoči črti. Tedna, ki se začneta 7. in 9. novembra, imata po 3 od 6 let. Razlika je v enem letu, zato Martinovemu tednu ne morem pripisati nič posebnega.
+
+Pada tudi povprečna dnevna temperatura: od 8,6 °C v prvem tednu novembra na 5,5 °C v tednu od 8. do 14. novembra. V vseh šestih letih je bil Martinov teden hladnejši od prvega tedna. To je običajno ohlajanje jeseni, ne posebnost Martinovega.
+
+03 — PO LETIH -- Zjutraj mraz, popoldne skoraj poletje
+
+Najbolj izrazit primer je Martinovo 2025: najnižja temperatura –2,1 °C, najvišja 17,0 °C. Razlika znaša 19,1 °C v enem dnevu. V istem tednu je bilo 6 noči z 0 °C ali manj.
+
+Mraz v Martinovem tednu ni redkost: v petih od šestih let je bilo vsaj dve noči z 0 °C ali manj. Izjema je leto 2022, ko je bila najnižja temperatura tega tedna 0,2 °C.
+
+Dež na sam Martinov dan je bil bolj izjema kot pravilo: vsaj 0,2 mm je padlo v treh od šestih let, več kot 1 mm samo leta 2023 (9,2 mm).
+
+Vse številke po letih (tabela)
+Leto | 11. 11. najvišja | 11. 11. najnižja | 11. 11. padavine | 8.–14. 11. najvišja | Dni s 15 °C ali več | Noči z 0 °C ali manj | 8.–14. 11. padavine |
+2020 | 5,8 °C | 3,5 °C | 0,0 mm | 15,5 °C | 1 | 2 | 0,7 mm |
+2021 | 10,5 °C | –0,2 °C | 0,0 mm | 11,2 °C | 0 | 2 | 16,5 mm |
+2022 | 11,7 °C | 4,7 °C | 0,3 mm | 17,1 °C | 3 | 0 | 7,6 mm |
+2023 | 12,8 °C | 0,5 °C | 9,2 mm | 16,2 °C | 1 | 2 | 39,0 mm |
+2024 | 5,0 °C | 2,5 °C | 0,0 mm | 12,0 °C | 0 | 2 | 0,2 mm |
+2025 | 17,0 °C | –2,1 °C | 0,3 mm | 17,0 °C | 2 | 6 | 1,2 mm |
+
+Postaja IREICA1, zunanji senzor, dnevne vrednosti. Padavine: vsota dneva oziroma tedna.
+
+04 — LETOS -- Letos: včeraj 14,3 °C, ob koncu tedna po napovedi mraz
+
+Letos je bila najvišja temperatura od 8. do 10. novembra 11,0 °C, 12,7 °C in 14,3 °C. Prag 15 °C do 10. novembra torej ni bil dosežen. Postaja je 9. novembra izmerila –1,7 °C.
+
+Danes, 11. novembra, dan še teče: najvišjo temperaturo si oglejte na živi kartici.
+
+Model MTR za četrtek in petek napoveduje najvišjo temperaturo 13,0 °C in 14,0 °C ob dežju. V soboto, 14. novembra, naj bi bila najvišja 8,3 °C, najnižja –3,4 °C, verjetnost zmrzali pa 95 %. To je modelska napoved in ne uradno opozorilo. Podrobnosti o možnosti snega ob koncu tedna sem zapisal v članku o snegu v nižinah.
+
+05 — OMEJITVE -- Česa podatki ne povedo
+
+Šest let je malo. Primerjava velja za Rečico in leta od 2020 do 2025. Razlika v enem letu spremeni »4 od 6« v »3 od 6«, zato iz tega ni mogoče sklepati na dolgoročno pravilo.
+
+Merilo je moja izbira. Prag 15 °C in sedemdnevno okno nista uradni opredelitvi »Martinovega poletja«. Z drugim pragom bi bile številke drugačne.
+
+Snega postaja ne meri. Zato se reki o snegu na Martinovo s temi podatki ne dajo preveriti in jih članek ne trdi ne zanika.
+
+Ena postaja na dnu doline. V gozdovih in na višjih legah je lahko drugače.
+
+Manjkajoči dnevi. Leta 2025 v arhivu postaje manjkajo dnevi od 20. do 23. novembra. Martinovega tedna to ne zadeva, tedne od 14. do 23. 11. pa računam samo iz petih let.
+
+Napoved je modelska. MTR je poskusni lokalni model in se spreminja z vsakim tekom.
+
+06 — KAJ NAPREJ -- Kaj to pomeni za Martinovo?
+
+Praktično sporočilo: za Martinovo se ne zanašajte na topel dan, a tudi ne na zimo. Aktualno napoved za Rečico najdete na strani z vremenom za Rečico ob Savinji.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Viri: postaja IREICA1 (dnevne najvišje, najnižje in povprečne temperature ter padavine, zunanji senzor, 2020–2026, podatki do 10. 11. 2026); model MTR (napoved za 12.–14. 11. 2026, živa osvežitev 11. 11. 2026). Podatki: history.json.
