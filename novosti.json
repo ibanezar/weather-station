@@ -1,5 +1,15 @@
 [
   {
+    "type": "rekord-dneva-vrocina",
+    "date": "2026-11-10",
+    "value": 14.3,
+    "prev_value": 13.4,
+    "param": "tempHigh",
+    "label": "Rekord za ta koledarski dan — vročina",
+    "slug": "rekord-dneva-vrocina-2026-11-10",
+    "years_covered": 7
+  },
+  {
     "type": "rekord-dneva-mraz",
     "date": "2026-11-09",
     "value": -1.7,
