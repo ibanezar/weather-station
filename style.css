@@ -2432,21 +2432,56 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-chart{width:100%;height:auto;display:block;touch-action:pan-y}
 
 .mtr-days{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.9rem}
-.mtr-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.75rem .8rem}
-.mtr-day-hd{display:flex;align-items:baseline;gap:.4rem;font-size:.76rem;font-weight:700;color:var(--text);
+.mtr-day{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px;padding:.75rem .8rem;
+  display:flex;flex-direction:column;min-width:0}
+.mtr-day-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem}
+.mtr-day-hd{display:flex;flex-direction:column;gap:.1rem;font-size:.76rem;font-weight:700;color:var(--text);
   text-transform:capitalize}
 .mtr-day-date{font-size:.7rem;font-weight:500;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.mtr-day-val{display:flex;align-items:center;gap:.4rem;margin:.3rem 0 .35rem;color:var(--text);
+.mtr-day-ic{flex:none;margin:-.2rem -.2rem 0 0;line-height:0}
+.mtr-day-ic .wx-icon{display:block}
+.mtr-day-val{display:flex;align-items:center;gap:.4rem;margin:.1rem 0 .2rem;color:var(--text);
   font-family:'JetBrains Mono',monospace;font-size:1.85rem;font-weight:700;line-height:1}
 .mtr-day-unit{font-size:.85rem;font-weight:600;color:var(--muted);margin-left:.1rem}
-.mtr-dot{width:9px;height:9px;border-radius:50%;flex:none}
+.mtr-day-cond{font-size:.76rem;color:var(--muted);margin-bottom:.15rem}
+.mtr-dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--mc,#059669)}
+.mtr-dot.om{background:var(--oc,#a855f7);width:8px;height:8px}
+/* razpon P10–P90 na skupni osi vseh treh dni; Open-Meteo je črtica, MTR krog */
+.mtr-rng{position:relative;height:16px;margin:.7rem 2px .15rem}
+.mtr-rng-track{position:absolute;left:0;right:0;top:7px;height:2px;border-radius:2px;background:var(--fc-border)}
+.mtr-rng-band{position:absolute;top:3px;height:10px;border-radius:5px;
+  background:color-mix(in srgb,var(--mc,#059669) 28%,transparent);
+  border:1px solid color-mix(in srgb,var(--mc,#059669) 55%,transparent);box-sizing:border-box}
+.mtr-rng-om{position:absolute;top:0;width:3px;height:16px;margin-left:-1.5px;border-radius:2px;background:var(--oc,#a855f7)}
+.mtr-rng-mtr{position:absolute;top:2px;width:12px;height:12px;margin-left:-6px;border-radius:50%;
+  background:var(--mc,#059669);box-shadow:0 0 0 2px var(--fc-bg)}
+.mtr-rng-lbl{display:flex;justify-content:space-between;align-items:baseline;gap:.4rem;font-size:.68rem;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;margin-bottom:.45rem}
+.mtr-rng-mid{text-align:center}
 .mtr-day-base{font-size:.74rem;color:var(--muted);display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
 .mtr-chip{font-size:.7rem;font-weight:700;padding:.1rem .4rem;border-radius:999px;white-space:nowrap;
   font-family:'JetBrains Mono',monospace}
 .mtr-chip.up{background:rgba(248,113,113,.16);color:var(--red)}
 .mtr-chip.down{background:rgba(77,159,248,.16);color:var(--c-cool)}
-.mtr-day-meta{margin-top:.3rem;font-size:.7rem;color:var(--muted);opacity:.85;
-  font-family:'JetBrains Mono',monospace}
+.mtr-chip.eq{background:var(--fc-border);color:var(--muted)}
+/* verjetnosti: vodoravni stolpci, tri stopnje prosojnosti = isto merilo z naraščajočim pragom */
+.mtr-bars{display:grid;gap:.4rem;margin-top:auto;padding-top:.7rem}
+.mtr-bar{--bc:var(--rain-col,#4d9ff8);display:grid;grid-template-columns:4.6rem 1fr 3rem;align-items:center;gap:.5rem;
+  font-size:.7rem;color:var(--muted)}
+.mtr-bar-l{display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap}
+.mtr-bar-l .ic{width:.95em;height:.95em;flex:none;color:var(--bc)}
+.mtr-bar-t{position:relative;height:8px;border-radius:4px;background:color-mix(in srgb,var(--bc) 14%,var(--fc-border));overflow:hidden}
+.mtr-bar-t i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--bc)}
+.mtr-bar.r1 .mtr-bar-t i{opacity:.72}
+.mtr-bar.r2 .mtr-bar-t i{opacity:.5}
+.mtr-bar.rf{--bc:#7dd3fc}
+.mtr-bar-v{color:var(--text);font-weight:700;text-align:right;white-space:nowrap}
+/* barvni poudarek dneva: trak zgoraj in sij za ikono po temperaturi */
+.mtr-day{position:relative;overflow:hidden}
+.mtr-day::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--tc,#34d399)}
+.mtr-day::after{content:'';position:absolute;right:-1.2rem;top:-1.4rem;width:7.5rem;height:7.5rem;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,color-mix(in srgb,var(--tc,#34d399) 30%,transparent),transparent 68%)}
+.mtr-day>*{position:relative;z-index:1}
 .mtr-why{margin:.9rem 0 0;padding:.85rem .9rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px}
 .mtr-why[hidden]{display:none}
 .mtr-why-hd{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -4718,7 +4753,9 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #tab-current .mtr-day-unit{font-size:var(--fs-sm)}
 #tab-current .mtr-day-base{font-size:var(--fs-sm)}
 #tab-current .mtr-chip{font-size:var(--fs-xs);padding:.2rem .55rem}
-#tab-current .mtr-day-meta{font-size:var(--fs-xs);line-height:1.45;opacity:1;margin-top:.4rem}
+#tab-current .mtr-day-cond{font-size:var(--fs-sm)}
+#tab-current .mtr-rng-lbl{font-family:Inter,'Inter Fallback',sans-serif;font-size:var(--fs-xs);font-variant-numeric:tabular-nums}
+#tab-current .mtr-bar{font-family:Inter,'Inter Fallback',sans-serif;font-size:var(--fs-xs);font-variant-numeric:tabular-nums}
 #tab-current .mtr-why{background:none;border:0;border-radius:0;padding:0;margin-top:.8rem}
 #tab-current .mtr-why-hd{font-size:var(--fs-xs);letter-spacing:.08em;margin-bottom:.5rem}
 #tab-current .mtr-why-tiles{gap:.6rem;margin:.5rem 0 .7rem}
@@ -4884,3 +4921,6 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 @media (max-width:380px){
   .snow-day-meta{display:none}
 }
+
+/* Ploščice dni MTR: v svetli temi je utišano besedilo temnejše (kontrast ≥ 4,5:1) */
+[data-theme="light"] .mtr-bar,[data-theme="light"] .mtr-rng-lbl,[data-theme="light"] .mtr-day-cond{color:#3f4c42}
