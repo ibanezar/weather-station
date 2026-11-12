@@ -3124,6 +3124,13 @@ Ločen projekt (Vite + TypeScript, brez povezave z ostalim delom strani). **Izvo
   naslednjem cronu. Pred tem preveri, da je ponovni tek isti dan varen
   (npr. snežna odeja v `winter_engine.py` se drugič isti dan preskoči).
 
+## Sneg v dolini in na višinah (`/blog/sneg-dolina-in-gore-petek-sobota-1112.html`, 12. 11. 2026)
+
+Ročni članek, nadaljevanje članka z 9. 11. (ansambli). `tools/generate_sneg_gore_post.py` bere posnetek `data/sneg-gore-1112.json` (`--fetch`: urna napoved Open-Meteo za Rečico **prek workerja `/napoved-om`**, ker je neposredni dostop do Open-Meteo iz peskovnika dnevno omejen, poleg `napoved-modela.json`, `napoved-snega.json` in izvlečka `winter-data.json`). **Ansamblov ni osvežil** in tako piše: je en izračun, ne verjetnost; odstotkov z 9. 11. ne obnavlja.
+
+- Temperatura na višini je standardni gradient iz Rečice (0,65 °C/100 m), sneg po istem pragu kot članek z 9. 11. (0,5–2,5 °C); **ob koncu padavin je količina snega na višinah zelo občutljiva** (Golte 2 cm osnovno, 14 cm pri 2 °C hladnejšem zraku), zato sta v grafu oba scenarija. Raduha je samo opisana (model brez orografije).
+- Assert-i zahtevajo, da je v dolini in na Črnivcu sneg 0 ter da dež preneha pred ohladitvijo; če se napoved obrne, generator pade -- članek je treba prenoviti. Posnetek mora biti današnji. Lektura (`lektura.yml`) je izklopljena; na FB/IG ne gre samodejno.
+
 ## Polarni vrtinec novembra (`/blog/polarni-vrtinec-se-je-ustavil-novembra-1110.html`, 10. 11. 2026)
 
 Ročni članek ob članku Scientific American (4. 11. 2026) o rekordno zgodnji motnji polarnega vrtinca. Ni v nobenem workflowu.

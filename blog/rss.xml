@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 11 Nov 2026 09:21:14 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 12 Nov 2026 10:44:28 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Sneg ta teden: v dolini ne, na višinah nekaj centimetrov</title>
+      <link>https://meteorec.si/blog/sneg-dolina-in-gore-petek-sobota-1112.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/sneg-dolina-in-gore-petek-sobota-1112.html</guid>
+      <pubDate>Thu, 12 Nov 2026 08:00:00 +0000</pubDate>
+      <description>V Rečici bo do petka padlo okoli 55 mm dežja, ohladitev pa pride po koncu padavin. Koliko snega lahko pade na Golteh, Črnivcu in Smrekovcu.</description>
+      <category>sneg</category>
+      <category>nižine</category>
+      <category>Golte</category>
+      <category>Črnivec</category>
+      <category>napoved</category>
+      <category>november</category>
+    </item>
     <item>
       <title>Ali je Martinovo res toplo? Šest let podatkov</title>
       <link>https://meteorec.si/blog/martinovo-vreme-recica-sest-let-1111.html</link>
