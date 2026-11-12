@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12T13:18:40Z",
+  "generated_at": "2026-11-12T22:27:27Z",
   "model_version": "0.4",
   "trained_at": "2026-11-09T16:16:34Z",
   "in_season": true,
@@ -28,17 +28,17 @@
     {
       "date": "2026-11-13",
       "lead": 1,
-      "p_snow": 0.045,
+      "p_snow": 0.033,
       "p_proxy": 0.02,
       "basis": "observed",
       "stations": {
-        "Gornji Grad": 0.045,
-        "Luče": 0.076,
-        "Radegunda": 0.117,
-        "Solčava": 0.082
+        "Gornji Grad": 0.033,
+        "Luče": 0.058,
+        "Radegunda": 0.092,
+        "Solčava": 0.063
       },
-      "tavg": 6.8,
-      "prec_mm": 31.7,
+      "tavg": 7.3,
+      "prec_mm": 30.2,
       "n_models": 4
     },
     {
@@ -50,7 +50,7 @@
       "stations": {
         "Gornji Grad": 0.007,
         "Luče": 0.017,
-        "Radegunda": 0.032,
+        "Radegunda": 0.033,
         "Solčava": 0.017
       },
       "tavg": 3.5,
@@ -60,49 +60,49 @@
     {
       "date": "2026-11-15",
       "lead": 3,
-      "p_snow": 0.007,
-      "p_proxy": 0.12,
+      "p_snow": 0.006,
+      "p_proxy": 0.11,
       "basis": "observed",
       "stations": {
-        "Gornji Grad": 0.007,
-        "Luče": 0.016,
-        "Radegunda": 0.031,
-        "Solčava": 0.016
+        "Gornji Grad": 0.006,
+        "Luče": 0.015,
+        "Radegunda": 0.03,
+        "Solčava": 0.015
       },
-      "tavg": 4.2,
+      "tavg": 4.4,
       "prec_mm": 0.0,
       "n_models": 4
     },
     {
       "date": "2026-11-16",
       "lead": 4,
-      "p_snow": 0.011,
-      "p_proxy": 0.04,
-      "basis": "observed",
-      "stations": {
-        "Gornji Grad": 0.011,
-        "Luče": 0.022,
-        "Radegunda": 0.038,
-        "Solčava": 0.024
-      },
-      "tavg": 7.6,
-      "prec_mm": 11.6,
-      "n_models": 4
-    },
-    {
-      "date": "2026-11-17",
-      "lead": 5,
       "p_snow": 0.005,
       "p_proxy": 0.03,
       "basis": "observed",
       "stations": {
         "Gornji Grad": 0.005,
-        "Luče": 0.01,
-        "Radegunda": 0.018,
-        "Solčava": 0.011
+        "Luče": 0.012,
+        "Radegunda": 0.021,
+        "Solčava": 0.013
       },
-      "tavg": 9.4,
-      "prec_mm": 9.3,
+      "tavg": 8.4,
+      "prec_mm": 7.5,
+      "n_models": 4
+    },
+    {
+      "date": "2026-11-17",
+      "lead": 5,
+      "p_snow": 0.006,
+      "p_proxy": 0.03,
+      "basis": "observed",
+      "stations": {
+        "Gornji Grad": 0.006,
+        "Luče": 0.013,
+        "Radegunda": 0.024,
+        "Solčava": 0.015
+      },
+      "tavg": 8.9,
+      "prec_mm": 10.8,
       "n_models": 4
     }
   ]
