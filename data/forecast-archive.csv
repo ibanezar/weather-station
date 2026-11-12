@@ -6367,6 +6367,7 @@ ecmwf_aifs025_ensemble_mean,1,2026-11-08,2026-11-07,7.2,2.1,0.6
 ecmwf_aifs025_ensemble_mean,1,2026-11-09,2026-11-08,8.5,1.7,0.4
 ecmwf_aifs025_ensemble_mean,1,2026-11-10,2026-11-09,10.8,6.4,4.2
 ecmwf_aifs025_ensemble_mean,1,2026-11-11,2026-11-10,9.5,7.3,3.4
+ecmwf_aifs025_ensemble_mean,1,2026-11-12,2026-11-11,11.6,9.5,24.0
 ecmwf_aifs025_ensemble_mean,2,2026-09-05,2026-09-03,28.6,16.8,1.8
 ecmwf_aifs025_ensemble_mean,2,2026-09-06,2026-09-04,24.6,15.1,1.2
 ecmwf_aifs025_ensemble_mean,2,2026-09-07,2026-09-05,27.2,13.7,0.0
@@ -6435,6 +6436,7 @@ ecmwf_aifs025_ensemble_mean,2,2026-11-08,2026-11-06,6.7,1.3,0.0
 ecmwf_aifs025_ensemble_mean,2,2026-11-09,2026-11-07,8.3,1.1,0.4
 ecmwf_aifs025_ensemble_mean,2,2026-11-10,2026-11-08,10.8,6.4,4.6
 ecmwf_aifs025_ensemble_mean,2,2026-11-11,2026-11-09,9.2,7.4,3.4
+ecmwf_aifs025_ensemble_mean,2,2026-11-12,2026-11-10,11.9,9.3,20.6
 ecmwf_aifs025_ensemble_mean,3,2026-09-05,2026-09-02,29.1,16.7,1.5
 ecmwf_aifs025_ensemble_mean,3,2026-09-06,2026-09-03,24.9,15.8,0.3
 ecmwf_aifs025_ensemble_mean,3,2026-09-07,2026-09-04,26.4,13.1,0.0
@@ -6503,6 +6505,7 @@ ecmwf_aifs025_ensemble_mean,3,2026-11-08,2026-11-05,6.2,-0.7,0.0
 ecmwf_aifs025_ensemble_mean,3,2026-11-09,2026-11-06,7.7,1.7,1.0
 ecmwf_aifs025_ensemble_mean,3,2026-11-10,2026-11-07,10.9,6.1,3.6
 ecmwf_aifs025_ensemble_mean,3,2026-11-11,2026-11-08,9.2,7.9,2.6
+ecmwf_aifs025_ensemble_mean,3,2026-11-12,2026-11-09,12.0,8.8,16.8
 ecmwf_aifs025_ensemble_mean,4,2026-09-05,2026-09-01,31.2,16.4,1.8
 ecmwf_aifs025_ensemble_mean,4,2026-09-06,2026-09-02,24.4,15.6,0.0
 ecmwf_aifs025_ensemble_mean,4,2026-09-07,2026-09-03,26.6,13.6,0.0
@@ -6571,6 +6574,7 @@ ecmwf_aifs025_ensemble_mean,4,2026-11-08,2026-11-04,6.0,1.4,0.0
 ecmwf_aifs025_ensemble_mean,4,2026-11-09,2026-11-05,7.5,0.9,0.4
 ecmwf_aifs025_ensemble_mean,4,2026-11-10,2026-11-06,9.1,5.6,4.8
 ecmwf_aifs025_ensemble_mean,4,2026-11-11,2026-11-07,9.5,7.4,2.8
+ecmwf_aifs025_ensemble_mean,4,2026-11-12,2026-11-08,12.2,9.4,14.2
 ecmwf_aifs025_ensemble_mean,5,2026-09-05,2026-08-31,30.2,15.7,0.9
 ecmwf_aifs025_ensemble_mean,5,2026-09-06,2026-09-01,25.3,16.4,0.9
 ecmwf_aifs025_ensemble_mean,5,2026-09-07,2026-09-02,26.3,14.2,0.0
@@ -6639,6 +6643,7 @@ ecmwf_aifs025_ensemble_mean,5,2026-11-08,2026-11-03,6.9,2.1,0.0
 ecmwf_aifs025_ensemble_mean,5,2026-11-09,2026-11-04,7.6,3.4,1.2
 ecmwf_aifs025_ensemble_mean,5,2026-11-10,2026-11-05,9.6,3.7,3.8
 ecmwf_aifs025_ensemble_mean,5,2026-11-11,2026-11-06,8.1,6.6,2.6
+ecmwf_aifs025_ensemble_mean,5,2026-11-12,2026-11-07,13.3,8.2,12.6
 ecmwf_aifs025_ensemble_mean,6,2026-09-05,2026-08-30,30.8,15.6,0.0
 ecmwf_aifs025_ensemble_mean,6,2026-09-06,2026-08-31,25.4,17.3,0.0
 ecmwf_aifs025_ensemble_mean,6,2026-09-07,2026-09-01,27.3,15.0,0.0
@@ -6707,6 +6712,7 @@ ecmwf_aifs025_ensemble_mean,6,2026-11-08,2026-11-02,6.9,2.2,1.0
 ecmwf_aifs025_ensemble_mean,6,2026-11-09,2026-11-03,9.2,3.4,2.2
 ecmwf_aifs025_ensemble_mean,6,2026-11-10,2026-11-04,9.3,5.5,5.0
 ecmwf_aifs025_ensemble_mean,6,2026-11-11,2026-11-05,9.1,4.8,2.4
+ecmwf_aifs025_ensemble_mean,6,2026-11-12,2026-11-06,10.9,7.4,6.8
 ecmwf_aifs025_ensemble_mean,7,2026-09-05,2026-08-29,30.0,15.8,0.9
 ecmwf_aifs025_ensemble_mean,7,2026-09-06,2026-08-30,29.3,17.0,0.0
 ecmwf_aifs025_ensemble_mean,7,2026-09-07,2026-08-31,27.0,16.8,0.0
@@ -6775,6 +6781,7 @@ ecmwf_aifs025_ensemble_mean,7,2026-11-08,2026-11-01,6.7,2.2,2.6
 ecmwf_aifs025_ensemble_mean,7,2026-11-09,2026-11-02,8.6,3.8,3.2
 ecmwf_aifs025_ensemble_mean,7,2026-11-10,2026-11-03,10.2,6.6,4.4
 ecmwf_aifs025_ensemble_mean,7,2026-11-11,2026-11-04,8.5,6.0,4.2
+ecmwf_aifs025_ensemble_mean,7,2026-11-12,2026-11-05,11.1,5.8,6.8
 ecmwf_aifs025_single,1,2025-02-18,2025-02-17,0.6,-5.6,0.0
 ecmwf_aifs025_single,1,2025-02-19,2025-02-18,1.0,-6.6,0.0
 ecmwf_aifs025_single,1,2025-02-20,2025-02-19,2.6,-7.8,0.0
@@ -7407,6 +7414,7 @@ ecmwf_aifs025_single,1,2026-11-08,2026-11-07,8.0,2.7,0.6
 ecmwf_aifs025_single,1,2026-11-09,2026-11-08,10.2,2.2,0.8
 ecmwf_aifs025_single,1,2026-11-10,2026-11-09,10.7,6.9,5.0
 ecmwf_aifs025_single,1,2026-11-11,2026-11-10,10.1,7.8,4.4
+ecmwf_aifs025_single,1,2026-11-12,2026-11-11,12.1,10.0,27.0
 ecmwf_aifs025_single,2,2025-02-19,2025-02-17,1.0,-6.3,0.0
 ecmwf_aifs025_single,2,2025-02-20,2025-02-18,2.9,-6.9,0.0
 ecmwf_aifs025_single,2,2025-02-21,2025-02-19,5.2,-4.0,0.0
@@ -8038,6 +8046,7 @@ ecmwf_aifs025_single,2,2026-11-08,2026-11-06,7.3,2.8,0.0
 ecmwf_aifs025_single,2,2026-11-09,2026-11-07,9.7,2.1,0.4
 ecmwf_aifs025_single,2,2026-11-10,2026-11-08,11.4,7.1,5.2
 ecmwf_aifs025_single,2,2026-11-11,2026-11-09,10.0,8.1,5.0
+ecmwf_aifs025_single,2,2026-11-12,2026-11-10,13.2,10.1,22.8
 ecmwf_aifs025_single,3,2025-02-20,2025-02-17,2.6,-7.2,0.0
 ecmwf_aifs025_single,3,2025-02-21,2025-02-18,5.1,-5.0,0.0
 ecmwf_aifs025_single,3,2025-02-22,2025-02-19,9.2,-2.5,0.0
@@ -8668,6 +8677,7 @@ ecmwf_aifs025_single,3,2026-11-08,2026-11-05,6.2,2.2,0.6
 ecmwf_aifs025_single,3,2026-11-09,2026-11-06,8.8,2.4,0.4
 ecmwf_aifs025_single,3,2026-11-10,2026-11-07,11.5,6.1,3.6
 ecmwf_aifs025_single,3,2026-11-11,2026-11-08,9.8,7.9,4.6
+ecmwf_aifs025_single,3,2026-11-12,2026-11-09,13.1,9.3,22.8
 ecmwf_aifs025_single,4,2025-02-21,2025-02-17,5.0,-5.7,0.0
 ecmwf_aifs025_single,4,2025-02-22,2025-02-18,9.4,-3.1,0.0
 ecmwf_aifs025_single,4,2025-02-23,2025-02-19,7.9,-0.1,0.0
@@ -9284,6 +9294,7 @@ ecmwf_aifs025_single,4,2026-11-08,2026-11-04,6.0,2.9,0.0
 ecmwf_aifs025_single,4,2026-11-09,2026-11-05,8.1,2.7,0.0
 ecmwf_aifs025_single,4,2026-11-10,2026-11-06,9.8,5.3,4.2
 ecmwf_aifs025_single,4,2026-11-11,2026-11-07,9.1,7.4,3.4
+ecmwf_aifs025_single,4,2026-11-12,2026-11-08,13.6,9.0,12.2
 ecmwf_aifs025_single,5,2025-02-22,2025-02-17,9.3,-2.5,0.0
 ecmwf_aifs025_single,5,2025-02-23,2025-02-18,10.8,-1.0,0.0
 ecmwf_aifs025_single,5,2025-02-24,2025-02-19,8.8,0.8,0.0
@@ -9899,6 +9910,7 @@ ecmwf_aifs025_single,5,2026-11-08,2026-11-03,8.4,1.3,0.0
 ecmwf_aifs025_single,5,2026-11-09,2026-11-04,7.9,3.3,0.0
 ecmwf_aifs025_single,5,2026-11-10,2026-11-05,8.8,3.6,3.6
 ecmwf_aifs025_single,5,2026-11-11,2026-11-06,8.7,7.5,4.2
+ecmwf_aifs025_single,5,2026-11-12,2026-11-07,13.8,8.8,22.8
 ecmwf_aifs025_single,6,2025-02-23,2025-02-17,10.3,-0.2,0.0
 ecmwf_aifs025_single,6,2025-02-24,2025-02-18,12.1,1.5,0.0
 ecmwf_aifs025_single,6,2025-02-25,2025-02-19,8.8,2.4,0.6
@@ -10526,6 +10538,7 @@ ecmwf_aifs025_single,6,2026-11-08,2026-11-02,7.9,2.6,0.0
 ecmwf_aifs025_single,6,2026-11-09,2026-11-03,10.9,2.9,2.2
 ecmwf_aifs025_single,6,2026-11-10,2026-11-04,9.7,8.0,6.0
 ecmwf_aifs025_single,6,2026-11-11,2026-11-05,13.3,7.4,1.2
+ecmwf_aifs025_single,6,2026-11-12,2026-11-06,15.0,8.7,14.8
 ecmwf_aifs025_single,7,2025-02-24,2025-02-17,12.8,0.8,0.0
 ecmwf_aifs025_single,7,2025-02-25,2025-02-18,11.8,1.6,0.6
 ecmwf_aifs025_single,7,2025-02-26,2025-02-19,6.3,4.8,22.5
@@ -11139,6 +11152,7 @@ ecmwf_aifs025_single,7,2026-11-08,2026-11-01,7.7,4.1,5.2
 ecmwf_aifs025_single,7,2026-11-09,2026-11-02,10.2,5.0,1.6
 ecmwf_aifs025_single,7,2026-11-10,2026-11-03,11.0,6.6,13.0
 ecmwf_aifs025_single,7,2026-11-11,2026-11-04,12.7,6.3,7.2
+ecmwf_aifs025_single,7,2026-11-12,2026-11-05,15.2,7.3,14.0
 ecmwf_aifs_europe_ensemble_mean,1,2026-08-08,2026-08-07,27.4,18.9,308.4
 ecmwf_aifs_europe_ensemble_mean,1,2026-08-09,2026-08-08,30.0,17.4,0.0
 ecmwf_aifs_europe_ensemble_mean,1,2026-08-10,2026-08-09,32.6,18.3,0.0
@@ -11235,6 +11249,7 @@ ecmwf_aifs_europe_ensemble_mean,1,2026-11-08,2026-11-07,7.2,2.2,0.6
 ecmwf_aifs_europe_ensemble_mean,1,2026-11-09,2026-11-08,8.6,1.8,0.4
 ecmwf_aifs_europe_ensemble_mean,1,2026-11-10,2026-11-09,10.9,6.4,4.2
 ecmwf_aifs_europe_ensemble_mean,1,2026-11-11,2026-11-10,9.6,7.4,3.4
+ecmwf_aifs_europe_ensemble_mean,1,2026-11-12,2026-11-11,11.7,9.6,24.0
 ecmwf_aifs_europe_ensemble_mean,2,2026-08-08,2026-08-06,27.9,18.9,1020.0
 ecmwf_aifs_europe_ensemble_mean,2,2026-08-09,2026-08-07,30.6,17.9,0.0
 ecmwf_aifs_europe_ensemble_mean,2,2026-08-10,2026-08-08,33.0,18.9,0.0
@@ -11331,6 +11346,7 @@ ecmwf_aifs_europe_ensemble_mean,2,2026-11-08,2026-11-06,6.7,1.4,0.0
 ecmwf_aifs_europe_ensemble_mean,2,2026-11-09,2026-11-07,8.3,1.2,0.4
 ecmwf_aifs_europe_ensemble_mean,2,2026-11-10,2026-11-08,10.9,6.5,4.6
 ecmwf_aifs_europe_ensemble_mean,2,2026-11-11,2026-11-09,9.3,7.4,4.0
+ecmwf_aifs_europe_ensemble_mean,2,2026-11-12,2026-11-10,12.0,9.4,20.6
 ecmwf_aifs_europe_ensemble_mean,3,2026-08-08,2026-08-05,28.5,19.6,1293.0
 ecmwf_aifs_europe_ensemble_mean,3,2026-08-09,2026-08-06,30.8,17.9,28.8
 ecmwf_aifs_europe_ensemble_mean,3,2026-08-10,2026-08-07,33.1,19.4,0.0
@@ -11427,6 +11443,7 @@ ecmwf_aifs_europe_ensemble_mean,3,2026-11-08,2026-11-05,6.3,-0.7,0.0
 ecmwf_aifs_europe_ensemble_mean,3,2026-11-09,2026-11-06,7.7,1.8,1.0
 ecmwf_aifs_europe_ensemble_mean,3,2026-11-10,2026-11-07,11.1,6.2,3.6
 ecmwf_aifs_europe_ensemble_mean,3,2026-11-11,2026-11-08,9.3,8.0,2.6
+ecmwf_aifs_europe_ensemble_mean,3,2026-11-12,2026-11-09,12.1,8.8,16.8
 ecmwf_aifs_europe_ensemble_mean,4,2026-08-08,2026-08-04,28.3,19.2,828.6
 ecmwf_aifs_europe_ensemble_mean,4,2026-08-09,2026-08-05,31.2,18.8,3.9
 ecmwf_aifs_europe_ensemble_mean,4,2026-08-10,2026-08-06,32.3,19.8,741.6
@@ -11523,6 +11540,7 @@ ecmwf_aifs_europe_ensemble_mean,4,2026-11-08,2026-11-04,6.0,1.5,0.0
 ecmwf_aifs_europe_ensemble_mean,4,2026-11-09,2026-11-05,7.5,1.0,0.4
 ecmwf_aifs_europe_ensemble_mean,4,2026-11-10,2026-11-06,9.2,5.7,4.8
 ecmwf_aifs_europe_ensemble_mean,4,2026-11-11,2026-11-07,9.6,7.5,2.8
+ecmwf_aifs_europe_ensemble_mean,4,2026-11-12,2026-11-08,12.3,9.4,14.2
 ecmwf_aifs_europe_ensemble_mean,5,2026-08-08,2026-08-03,27.6,19.2,1838.7
 ecmwf_aifs_europe_ensemble_mean,5,2026-08-09,2026-08-04,31.2,19.3,89.7
 ecmwf_aifs_europe_ensemble_mean,5,2026-08-10,2026-08-05,32.9,20.0,452.7
@@ -11619,6 +11637,7 @@ ecmwf_aifs_europe_ensemble_mean,5,2026-11-08,2026-11-03,7.0,2.1,0.0
 ecmwf_aifs_europe_ensemble_mean,5,2026-11-09,2026-11-04,7.7,3.5,1.2
 ecmwf_aifs_europe_ensemble_mean,5,2026-11-10,2026-11-05,9.7,3.8,3.8
 ecmwf_aifs_europe_ensemble_mean,5,2026-11-11,2026-11-06,8.2,6.7,2.6
+ecmwf_aifs_europe_ensemble_mean,5,2026-11-12,2026-11-07,13.3,8.3,12.6
 ecmwf_aifs_europe_ensemble_mean,6,2026-08-08,2026-08-02,27.7,19.5,2988.9
 ecmwf_aifs_europe_ensemble_mean,6,2026-08-09,2026-08-03,29.8,19.3,875.1
 ecmwf_aifs_europe_ensemble_mean,6,2026-08-10,2026-08-04,31.9,19.8,942.6
@@ -11715,6 +11734,7 @@ ecmwf_aifs_europe_ensemble_mean,6,2026-11-08,2026-11-02,7.0,2.2,1.0
 ecmwf_aifs_europe_ensemble_mean,6,2026-11-09,2026-11-03,9.3,3.5,2.2
 ecmwf_aifs_europe_ensemble_mean,6,2026-11-10,2026-11-04,9.3,5.6,5.0
 ecmwf_aifs_europe_ensemble_mean,6,2026-11-11,2026-11-05,9.1,4.9,2.4
+ecmwf_aifs_europe_ensemble_mean,6,2026-11-12,2026-11-06,11.0,7.5,6.8
 ecmwf_aifs_europe_ensemble_mean,7,2026-08-08,2026-08-01,29.3,20.0,2863.5
 ecmwf_aifs_europe_ensemble_mean,7,2026-08-09,2026-08-02,27.9,18.9,2069.7
 ecmwf_aifs_europe_ensemble_mean,7,2026-08-10,2026-08-03,30.2,19.5,1365.9
@@ -11811,6 +11831,7 @@ ecmwf_aifs_europe_ensemble_mean,7,2026-11-08,2026-11-01,6.7,2.3,2.6
 ecmwf_aifs_europe_ensemble_mean,7,2026-11-09,2026-11-02,8.7,3.9,3.2
 ecmwf_aifs_europe_ensemble_mean,7,2026-11-10,2026-11-03,10.3,6.7,4.4
 ecmwf_aifs_europe_ensemble_mean,7,2026-11-11,2026-11-04,8.5,6.1,4.2
+ecmwf_aifs_europe_ensemble_mean,7,2026-11-12,2026-11-05,11.2,5.9,6.8
 ecmwf_ifs025,1,2024-05-26,2024-05-25,18.3,12.0,4.8
 ecmwf_ifs025,1,2024-05-27,2024-05-26,22.4,11.2,0.9
 ecmwf_ifs025,1,2024-05-28,2024-05-27,20.6,12.8,10.8
@@ -24479,6 +24500,7 @@ google_weathernext2_ensemble_mean,1,2026-11-08,2026-11-07,7.5,0.5,0.0
 google_weathernext2_ensemble_mean,1,2026-11-09,2026-11-08,9.3,0.1,0.4
 google_weathernext2_ensemble_mean,1,2026-11-10,2026-11-09,11.0,6.0,4.6
 google_weathernext2_ensemble_mean,1,2026-11-11,2026-11-10,9.4,6.6,2.6
+google_weathernext2_ensemble_mean,1,2026-11-12,2026-11-11,11.7,8.8,25.6
 google_weathernext2_ensemble_mean,2,2026-09-05,2026-09-03,25.6,17.7,2.7
 google_weathernext2_ensemble_mean,2,2026-09-06,2026-09-04,23.3,15.9,0.3
 google_weathernext2_ensemble_mean,2,2026-09-07,2026-09-05,24.5,14.9,0.0
@@ -24547,6 +24569,7 @@ google_weathernext2_ensemble_mean,2,2026-11-08,2026-11-06,7.0,-0.4,0.0
 google_weathernext2_ensemble_mean,2,2026-11-09,2026-11-07,8.9,-0.2,0.0
 google_weathernext2_ensemble_mean,2,2026-11-10,2026-11-08,11.0,6.1,4.8
 google_weathernext2_ensemble_mean,2,2026-11-11,2026-11-09,9.1,6.8,3.4
+google_weathernext2_ensemble_mean,2,2026-11-12,2026-11-10,11.9,9.0,23.2
 google_weathernext2_ensemble_mean,3,2026-09-05,2026-09-02,25.6,17.7,2.7
 google_weathernext2_ensemble_mean,3,2026-09-06,2026-09-03,22.8,15.9,0.9
 google_weathernext2_ensemble_mean,3,2026-09-07,2026-09-04,24.3,14.4,0.0
@@ -24615,6 +24638,7 @@ google_weathernext2_ensemble_mean,3,2026-11-08,2026-11-05,5.6,-0.7,0.0
 google_weathernext2_ensemble_mean,3,2026-11-09,2026-11-06,8.9,0.1,0.0
 google_weathernext2_ensemble_mean,3,2026-11-10,2026-11-07,11.4,6.0,3.2
 google_weathernext2_ensemble_mean,3,2026-11-11,2026-11-08,10.2,7.1,4.0
+google_weathernext2_ensemble_mean,3,2026-11-12,2026-11-09,11.8,8.7,18.6
 google_weathernext2_ensemble_mean,4,2026-09-05,2026-09-01,28.5,17.8,2.1
 google_weathernext2_ensemble_mean,4,2026-09-06,2026-09-02,22.7,16.0,0.3
 google_weathernext2_ensemble_mean,4,2026-09-07,2026-09-03,24.0,14.2,0.0
@@ -24683,6 +24707,7 @@ google_weathernext2_ensemble_mean,4,2026-11-08,2026-11-04,4.7,-0.7,0.6
 google_weathernext2_ensemble_mean,4,2026-11-09,2026-11-05,8.2,0.5,0.0
 google_weathernext2_ensemble_mean,4,2026-11-10,2026-11-06,10.9,4.5,3.6
 google_weathernext2_ensemble_mean,4,2026-11-11,2026-11-07,10.7,7.0,1.0
+google_weathernext2_ensemble_mean,4,2026-11-12,2026-11-08,12.2,9.2,11.4
 google_weathernext2_ensemble_mean,5,2026-09-05,2026-08-31,28.4,17.1,0.9
 google_weathernext2_ensemble_mean,5,2026-09-06,2026-09-01,23.1,16.9,0.3
 google_weathernext2_ensemble_mean,5,2026-09-07,2026-09-02,24.4,15.2,0.0
@@ -24751,6 +24776,7 @@ google_weathernext2_ensemble_mean,5,2026-11-08,2026-11-03,7.8,0.8,0.0
 google_weathernext2_ensemble_mean,5,2026-11-09,2026-11-04,6.6,0.9,0.4
 google_weathernext2_ensemble_mean,5,2026-11-10,2026-11-05,10.6,4.1,3.0
 google_weathernext2_ensemble_mean,5,2026-11-11,2026-11-06,8.8,5.9,2.0
+google_weathernext2_ensemble_mean,5,2026-11-12,2026-11-07,13.1,9.3,12.6
 google_weathernext2_ensemble_mean,6,2026-09-05,2026-08-30,28.5,16.8,0.0
 google_weathernext2_ensemble_mean,6,2026-09-06,2026-08-31,22.9,17.8,0.0
 google_weathernext2_ensemble_mean,6,2026-09-07,2026-09-01,25.1,16.1,0.6
@@ -24819,6 +24845,7 @@ google_weathernext2_ensemble_mean,6,2026-11-08,2026-11-02,7.7,0.9,0.4
 google_weathernext2_ensemble_mean,6,2026-11-09,2026-11-03,9.8,3.9,2.4
 google_weathernext2_ensemble_mean,6,2026-11-10,2026-11-04,8.7,4.8,3.4
 google_weathernext2_ensemble_mean,6,2026-11-11,2026-11-05,10.4,5.9,1.6
+google_weathernext2_ensemble_mean,6,2026-11-12,2026-11-06,12.4,6.7,10.6
 google_weathernext2_ensemble_mean,7,2026-09-05,2026-08-29,28.6,16.7,0.0
 google_weathernext2_ensemble_mean,7,2026-09-06,2026-08-30,28.0,18.0,0.0
 google_weathernext2_ensemble_mean,7,2026-09-07,2026-08-31,25.4,17.8,0.0
@@ -24887,6 +24914,7 @@ google_weathernext2_ensemble_mean,7,2026-11-08,2026-11-01,7.0,0.8,4.6
 google_weathernext2_ensemble_mean,7,2026-11-09,2026-11-02,9.7,2.9,3.0
 google_weathernext2_ensemble_mean,7,2026-11-10,2026-11-03,10.4,6.7,6.4
 google_weathernext2_ensemble_mean,7,2026-11-11,2026-11-04,9.6,5.4,2.6
+google_weathernext2_ensemble_mean,7,2026-11-12,2026-11-05,12.6,5.8,5.8
 icon_seamless,1,2024-05-26,2024-05-25,18.8,11.8,3.9
 icon_seamless,1,2024-05-27,2024-05-26,23.3,10.2,0.0
 icon_seamless,1,2024-05-28,2024-05-27,20.6,10.7,1.8
