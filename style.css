@@ -2464,15 +2464,24 @@ header{display:flex;flex-direction:column;align-items:center;text-align:center}
 .mtr-chip.up{background:rgba(248,113,113,.16);color:var(--red)}
 .mtr-chip.down{background:rgba(77,159,248,.16);color:var(--c-cool)}
 .mtr-chip.eq{background:var(--fc-border);color:var(--muted)}
-.mtr-day-pills{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto;padding-top:.6rem}
-.mtr-pr{--pc:var(--muted);display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .55rem;border-radius:999px;
-  font-size:.7rem;color:var(--muted);white-space:nowrap;border:1px solid var(--fc-border);
-  background:linear-gradient(90deg,color-mix(in srgb,var(--pc) 22%,transparent) var(--p,0%),transparent var(--p,0%))}
-.mtr-pr b{color:var(--text);font-weight:700}
-.mtr-pr .ic{width:.9em;height:.9em;flex:none;color:var(--pc)}
-.mtr-pr.rain{--pc:var(--rain-col,#4d9ff8)}
-.mtr-pr.thr{--pc:var(--rain-col,#4d9ff8)}
-.mtr-pr.frost{--pc:#7dd3fc}
+/* verjetnosti: vodoravni stolpci, tri stopnje prosojnosti = isto merilo z naraščajočim pragom */
+.mtr-bars{display:grid;gap:.4rem;margin-top:auto;padding-top:.7rem}
+.mtr-bar{--bc:var(--rain-col,#4d9ff8);display:grid;grid-template-columns:4.6rem 1fr 3rem;align-items:center;gap:.5rem;
+  font-size:.7rem;color:var(--muted)}
+.mtr-bar-l{display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap}
+.mtr-bar-l .ic{width:.95em;height:.95em;flex:none;color:var(--bc)}
+.mtr-bar-t{position:relative;height:8px;border-radius:4px;background:color-mix(in srgb,var(--bc) 14%,var(--fc-border));overflow:hidden}
+.mtr-bar-t i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--bc)}
+.mtr-bar.r1 .mtr-bar-t i{opacity:.72}
+.mtr-bar.r2 .mtr-bar-t i{opacity:.5}
+.mtr-bar.rf{--bc:#7dd3fc}
+.mtr-bar-v{color:var(--text);font-weight:700;text-align:right;white-space:nowrap}
+/* barvni poudarek dneva: trak zgoraj in sij za ikono po temperaturi */
+.mtr-day{position:relative;overflow:hidden}
+.mtr-day::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--tc,#34d399)}
+.mtr-day::after{content:'';position:absolute;right:-1.2rem;top:-1.4rem;width:7.5rem;height:7.5rem;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,color-mix(in srgb,var(--tc,#34d399) 30%,transparent),transparent 68%)}
+.mtr-day>*{position:relative;z-index:1}
 .mtr-why{margin:.9rem 0 0;padding:.85rem .9rem;background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:13px}
 .mtr-why[hidden]{display:none}
 .mtr-why-hd{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -4746,7 +4755,7 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #tab-current .mtr-chip{font-size:var(--fs-xs);padding:.2rem .55rem}
 #tab-current .mtr-day-cond{font-size:var(--fs-sm)}
 #tab-current .mtr-rng-lbl{font-family:Inter,'Inter Fallback',sans-serif;font-size:var(--fs-xs);font-variant-numeric:tabular-nums}
-#tab-current .mtr-pr{font-family:Inter,'Inter Fallback',sans-serif;font-size:var(--fs-xs);font-variant-numeric:tabular-nums}
+#tab-current .mtr-bar{font-family:Inter,'Inter Fallback',sans-serif;font-size:var(--fs-xs);font-variant-numeric:tabular-nums}
 #tab-current .mtr-why{background:none;border:0;border-radius:0;padding:0;margin-top:.8rem}
 #tab-current .mtr-why-hd{font-size:var(--fs-xs);letter-spacing:.08em;margin-bottom:.5rem}
 #tab-current .mtr-why-tiles{gap:.6rem;margin:.5rem 0 .7rem}
@@ -4914,4 +4923,4 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 }
 
 /* Ploščice dni MTR: v svetli temi je utišano besedilo temnejše (kontrast ≥ 4,5:1) */
-[data-theme="light"] .mtr-pr,[data-theme="light"] .mtr-rng-lbl,[data-theme="light"] .mtr-day-cond{color:#3f4c42}
+[data-theme="light"] .mtr-bar,[data-theme="light"] .mtr-rng-lbl,[data-theme="light"] .mtr-day-cond{color:#3f4c42}
