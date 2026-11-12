@@ -27,7 +27,15 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_slane_se_ni_post import STYLE as BASE_STYLE, num, fig, tiles  # noqa: E402  (skupni pomočniki, ne podvojeni)
 
 # barve besedila in mreže v SVG sledijo temi strani (svetla/temna)
-STYLE = BASE_STYLE.replace("</style>", ".sg-m{fill:var(--muted)}.sg-i{fill:var(--text)}.sg-g{stroke:var(--card-border)}.sg-z{stroke:var(--text)}</style>")
+STYLE = BASE_STYLE.replace("</style>", ".sg-m{fill:var(--muted)}.sg-i{fill:var(--text)}.sg-g{stroke:var(--card-border)}.sg-z{stroke:var(--text)}"
+    ".sg-ctl{display:flex;flex-wrap:wrap;gap:.8rem 1.4rem;margin:.2rem 0 .8rem}.sg-grp{display:flex;flex-direction:column;gap:.3rem;min-width:0;flex:1 1 220px}"
+    ".sg-lab{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}"
+    ".sg-seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--card-border);border-radius:14px;overflow:hidden}"
+    ".sg-seg button{background:transparent;color:var(--muted);border:0;border-right:1px solid var(--card-border);padding:.5rem .9rem;min-height:44px;min-width:44px;font:inherit;font-size:.9rem;cursor:pointer}"
+    ".sg-seg button:last-child{border-right:0}.sg-seg button[aria-pressed='true']{background:rgba(147,197,253,.16);color:var(--text);font-weight:600}"
+    ".sg-seg button:focus-visible,.sg-range:focus-visible{outline:2px solid var(--blue);outline-offset:2px}"
+    ".sg-range{width:100%;min-height:34px;accent-color:#93c5fd}.sg-read{background:rgba(255,255,255,.04);border:1px solid var(--card-border);border-radius:12px;padding:.7rem .85rem;font-size:.92rem;line-height:1.5;color:var(--text);margin-top:.5rem}"
+    "</style>")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = "https://meteorec.si"
@@ -218,6 +226,54 @@ def fig_bars(S, rows):
     return "".join(out)
 
 
+
+WIDGET_JS = r"""
+(function(){
+var D=__DATA__,E=__ELEVS__,M=__MODEL__,PM=__PM__,PD=__PD__,SC=__SCALE__;
+var root=document.getElementById('sg-wid');if(!root)return;
+var shift=0,lap=0.65;
+function fr(t){return t<=PM?1:(t>=PD?0:(PD-t)/(PD-PM));}
+function snow(e,l,s){var x=0;for(var i=0;i<D.t.length;i++){x+=D.p[i]*fr(D.t[i]-l*(e-M)/100+s);}return x;}
+function fmt(v){return v<0.05?'0':(v<1?'< 1':String(Math.floor(v+0.5)));}
+function sh(){return shift===0?'osnovni izračun':(shift<0?String(-shift).replace('.',',')+'\u00a0°C hladnejši zrak':String(shift).replace('.',',')+'\u00a0°C toplejši zrak');}
+function draw(){
+ var W=460,rh=34,H=18+rh*E.length,lx=172,x0=180,x1=372,o='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pričakovan nov sneg po višinah za izbrane nastavitve" font-family="Inter,sans-serif">';
+ for(var v=0;v<=SC;v+=20){var xx=x0+v/SC*(x1-x0);o+='<line x1="'+xx+'" y1="4" x2="'+xx+'" y2="'+(H-22)+'" class="sg-g" stroke-width="1"/><text x="'+xx+'" y="'+(H-6)+'" text-anchor="middle" font-size="13" class="sg-m">'+v+'</text>';}
+ var rd=[];
+ for(var k=0;k<E.length;k++){var e=E[k][0],n=E[k][1],y=8+k*rh,c=snow(e,lap,shift);rd.push([e,n,c]);
+  var lab=(n?n+' · ':'')+e+'\u00a0m';
+  o+='<text x="'+lx+'" y="'+(y+16)+'" text-anchor="end" font-size="13" class="sg-i">'+lab+'</text>';
+  var w=Math.min(c,SC)/SC*(x1-x0);if(c>=0.05)o+='<rect x="'+x0+'" y="'+(y+2)+'" width="'+Math.max(w,2)+'" height="22" rx="3" fill="#3987e5"/>';
+  o+='<text x="'+(x0+w+6)+'" y="'+(y+17)+'" font-size="13" font-weight="600" class="sg-i">'+fmt(c)+'\u00a0cm</text>';}
+ o+='</svg>';document.getElementById('sg-chart').innerHTML=o;
+ var g=rd.filter(function(r){return r[0]===1400;})[0][2],lo=rd.filter(function(r){return r[0]<=902;}).reduce(function(a,r){return Math.max(a,r[2]);},0);
+ document.getElementById('sg-read').textContent='Nastavitev: '+sh()+', gradient '+String(lap).replace('.',',')+'\u00a0°C na 100\u00a0m. Na Golteh pade okoli '+fmt(g)+'\u00a0cm snega, v Rečici in na Črnivcu '+(lo<1?'manj kot 1\u00a0cm':'okoli '+fmt(lo)+'\u00a0cm')+'.';
+ document.getElementById('sg-val').textContent=sh();
+}
+var r=document.getElementById('sg-shift');r.addEventListener('input',function(){shift=parseFloat(r.value);draw();});
+var bs=root.querySelectorAll('.sg-seg button');
+for(var i=0;i<bs.length;i++){bs[i].addEventListener('click',function(){lap=parseFloat(this.getAttribute('data-lap'));for(var j=0;j<bs.length;j++)bs[j].setAttribute('aria-pressed',bs[j]===this?'true':'false');draw();});}
+draw();
+})();
+"""
+
+
+def widget_html(S):
+    data = {"t": [round(S.t[i], 2) for i in S.win], "p": [round(S.p[i], 3) for i in S.win]}
+    js = (WIDGET_JS.replace("__DATA__", json.dumps(data)).replace("__ELEVS__", json.dumps([[e, n] for e, n in PLACES], ensure_ascii=False))
+          .replace("__MODEL__", str(MODEL_ELEV)).replace("__PM__", str(PRAG_MRAZ)).replace("__PD__", str(PRAG_DEZ)).replace("__SCALE__", "60"))
+    laps = "".join(f'<button type="button" data-lap="{l}" aria-pressed="{"true" if l == LAPSE else "false"}">{str(l).replace(".", ",")}</button>' for l in (0.5, 0.65, 0.8))
+    inner = ('<div id="sg-wid"><div class="sg-ctl">'
+             '<div class="sg-grp"><span class="sg-lab">Temperatura zraka na višinah: <strong id="sg-val">osnovni izračun</strong></span>'
+             '<input id="sg-shift" class="sg-range" type="range" min="-4" max="2" step="0.5" value="0" aria-label="Sprememba temperature zraka glede na osnovni izračun, v stopinjah Celzija">'
+             '<span class="vs-note" style="margin:0">levo hladneje, desno toplejše kot v osnovnem izračunu</span></div>'
+             f'<div class="sg-grp"><span class="sg-lab">Gradient (°C na 100 m)</span><div class="sg-seg" role="group" aria-label="Gradient temperature z višino">{laps}</div></div></div>'
+             '<div id="sg-chart"><noscript>Za ta graf je potreben JavaScript; številke za dva scenarija so v prejšnjem grafu.</noscript></div>'
+             '<div id="sg-read" class="sg-read" aria-live="polite"></div></div>')
+    cap = ("Premaknite drsnik in izberite gradient: sneg se preračuna iz iste urne napovedi za Rečico kot zgornji graf (četrtek opoldne do sobote opoldne). "
+           "Strmejši gradient pomeni hladnejši zrak na višini.")
+    return fig("Poskusite sami: kaj spremeni hladnejši zrak", inner, cap) + "<script>" + js + "</script>"
+
 # ───────────────────────── članek ─────────────────────────
 
 def build_article(S):
@@ -355,6 +411,7 @@ def build_article(S):
     ]
     p3 = [
         f2,
+        widget_html(S),
         f"V osnovnem izračunu ostane sneg pod 900 m pri 0 cm, na 1200 m manj kot 1 cm, na Golteh okoli {rnd(golte_b)} cm, na Menini planini okoli {rnd(byE[1500][2])} cm in na Smrekovcu "
         f"okoli {rnd(byE[1577][2])} cm. Če je zrak za {rnd(COLD_SHIFT)} °C hladnejši, so številke {rnd(golte_c)}, {rnd(byE[1500][3])} in {rnd(smrek_c)} cm. "
         f"Na Črnivcu ostane sneg tudi v tem scenariju pod 1 cm.",
@@ -407,7 +464,7 @@ def build_article(S):
     ]
     lead = nbsp(lead)
     for sec in sections:
-        sec["paragraphs"] = [x if (x.lstrip().startswith("<svg") or "<svg" in x) else nbsp(x) for x in sec["paragraphs"]]
+        sec["paragraphs"] = [x if ("<svg" in x or "<script" in x) else nbsp(x) for x in sec["paragraphs"]]
     return {
         "title": title, "meta_description": desc,
         "tags": ["sneg", "nižine", "Golte", "Črnivec", "napoved", "november"],
