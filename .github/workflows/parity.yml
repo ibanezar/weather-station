@@ -20,6 +20,7 @@ on:
       - 'crnivec-site/**'
       - 'gobarska-napoved/index.html'
       - 'meteogasilec/gasilec.js'
+      - 'vodostaj-savinje/reka.js'
       - 'tools/**'
       - '.github/workflows/parity.yml'
   push:
@@ -33,6 +34,7 @@ on:
       - 'napovej/**'
       - 'crnivec-igra/**'
       - 'meteogasilec/gasilec.js'
+      - 'vodostaj-savinje/reka.js'
       - 'tools/**'
       - '.github/workflows/parity.yml'
   workflow_dispatch: {}

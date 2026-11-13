@@ -15,7 +15,7 @@ renders server-side from two public sources so the page is static/crawlable:
 Usage:
   python3 tools/generate_vodostaj_page.py
 """
-import datetime, json, os, re, sys, unicodedata, urllib.request, urllib.parse, urllib.error
+import datetime, hashlib, json, os, re, sys, unicodedata, urllib.request, urllib.parse, urllib.error
 import xml.etree.ElementTree as ET
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -291,6 +291,47 @@ def flood_bars_html(events):
     return '<div class="vod-floods">' + "".join(out) + '</div>'
 
 
+def reka_ver():
+    """Pečat datoteke reka.js (Cloudflare in brskalnik hranita datoteke dolgo; brez pečata sprememba ni vidna)."""
+    with open(os.path.join(ROOT, "vodostaj-savinje", "reka.js"), "rb") as f:
+        return hashlib.md5(f.read()).hexdigest()[:8]
+
+
+def live_json(stations):
+    """Posnetek postaj za reka.js (isti ključi kot fromWorker() v reka.js)."""
+    out = []
+    for s in stations:
+        out.append({
+            "id": s.get("sifra") or s["name"], "reka": s["reka"], "name": s["name"],
+            "lon": s["lon"], "lat": s["lat"], "vodostaj": s.get("vodostaj"), "pretok": s.get("pretok"),
+            "temp": s.get("temp"), "datum": s.get("datum") or "",
+            "vv1": s.get("vv1"), "vv2": s.get("vv2"), "vv3": s.get("vv3"),
+            "znacilni": s.get("znacilni"), "sav": bool(s.get("is_savinja")),
+        })
+    return json.dumps(out, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+
+
+def live_html(main, tribs, schema_svg):
+    """Živa struga (hero) + merilna lata. Brez JS ostane statična shema (ki jo vidijo tudi iskalniki)."""
+    return f'''  <div class="vod-chart-block" id="vod-live">
+  <div class="vod-chart-title">Živa struga — pretok na postajah (m³/s)</div>
+  <div class="vod-live-bar"><span class="vod-live-pill" id="vod-live-pill" data-state="load">Dnevni posnetek</span>
+    <span class="vod-note">Klikni postajo, da jo izbereš na merilni lati spodaj.</span></div>
+  <div class="vod-live-scroll" tabindex="0"><div class="vod-live-stage" id="vod-live-stage">{schema_svg}</div></div>
+  <p class="vod-note">Animacija je prikaz, ne simulacija: hitrost delcev in širina struge sta ocena iz izmerjenega pretoka ARSO, ne izmerjena hitrost vode.
+  Če je meritev starejša od dveh ur ali živih podatkov ni mogoče prebrati, voda miruje. Postaje so razporejene enakomerno po toku Savinje, pritoki so pripeti približno
+  glede na zemljepisno dolžino (shema, ne zemljevid). Barva kroga je stanje glede na prage ARSO za tisto postajo, siva pomeni, da ARSO pragov ne objavlja.</p>
+  </div>
+  <div class="vod-chart-block vod-lata" id="vod-lata">
+  <div class="vod-chart-title">Merilna lata — kje je voda glede na prage ARSO</div>
+  <p class="vod-lata-ph">Merilna lata potrebuje JavaScript. Vrednosti za vse postaje so v kartici in tabeli spodaj.</p>
+  <div class="vod-lata-chips" id="vod-lata-chips" role="tablist" aria-label="Izberi postajo"></div>
+  <div class="vod-lata-body"><div class="vod-lata-info" id="vod-lata-info"></div><div class="vod-lata-cv" id="vod-lata-cv"></div></div>
+  </div>
+  <script type="application/json" id="vod-data">{live_json(main + tribs)}</script>
+  <script src="/vodostaj-savinje/reka.js?v={reka_ver()}" defer></script>'''
+
+
 CHART_CSS = """<style>
 .vod-hero{display:grid;grid-template-columns:1.25fr 1fr;gap:1rem;margin:1.2rem 0 1.6rem}
 .vod-hero-main{position:relative;overflow:hidden;border-radius:18px;padding:1.3rem 1.4rem;
@@ -356,7 +397,38 @@ CHART_CSS = """<style>
 .vod-fl-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#60a5fa,#2563eb)}
 .vod-fl.rec .vod-fl-bar i{background:linear-gradient(90deg,#fb923c,#ef4444)}
 .vod-fl p{margin:0;font-size:.85rem;color:var(--muted);line-height:1.55}
-@media(max-width:760px){.vod-hero{grid-template-columns:1fr}.vod-cards{grid-template-columns:1fr 1fr}}
+.vod-live-bar{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .9rem;margin:.2rem 0 .6rem}
+.vod-live-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .65rem;border-radius:999px;font-size:.76rem;font-weight:700;
+  color:var(--muted);background:rgba(127,127,127,.14);border:1px solid var(--card-border)}
+.vod-live-pill:before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.vod-live-pill[data-state="ok"]{color:#10b981}
+.vod-live-pill[data-state="ok"]:before{animation:vodpulse 1.8s ease-in-out infinite}
+.vod-live-pill[data-state="warn"]{color:#f59e0b}
+@keyframes vodpulse{50%{opacity:.25}}
+.vod-live-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px}
+.vod-live-stage{position:relative;height:410px;min-width:660px;border-radius:12px;
+  background:linear-gradient(180deg,rgba(56,189,248,.05),rgba(37,99,235,.02))}
+.vod-live-stage>svg{position:absolute;inset:0;width:100%;height:100%}
+.vod-live-stage.is-live>svg{display:none}
+.vod-live-cv{display:block;position:absolute;left:0;top:0}
+.vod-lata{min-height:470px}
+.vod-lata-ph{margin:.4rem 0;font-size:.85rem;color:var(--muted)}
+.vod-lata.is-live .vod-lata-ph{display:none}
+.vod-lata-chips{display:flex;gap:.45rem;overflow-x:auto;padding:.1rem 0 .55rem;margin-bottom:.5rem;min-height:44px;-webkit-overflow-scrolling:touch}
+.vod-lata-chips button{flex:0 0 auto;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;color:var(--text);
+  padding:.4rem .75rem;border-radius:999px;background:var(--card-bg);border:1px solid var(--card-border);border-left:4px solid var(--c,#94a3b8);white-space:nowrap}
+.vod-lata-chips button[aria-selected="true"]{background:color-mix(in srgb,var(--c,#94a3b8) 18%,var(--card-bg));border-color:var(--c,#94a3b8)}
+.vod-lata-chips button:focus-visible{outline:2px solid var(--cyan,#22d3ee);outline-offset:2px}
+.vod-lata-body{display:grid;grid-template-columns:minmax(220px,.8fr) 1.6fr;gap:1rem;align-items:start}
+.vod-lata-info{min-height:340px}
+.vod-lata-info h3{margin:.15rem 0 .2rem;font-size:1.3rem}
+.vod-lata-info .vod-q{font-size:2.6rem}
+.vod-lata-cv{position:relative;min-height:340px;border-radius:12px;overflow:hidden;border:1px solid var(--card-border)}
+.vod-lata-canvas{display:block}
+.vod-stale{color:#f59e0b}
+@media(prefers-reduced-motion:reduce){.vod-live-pill[data-state="ok"]:before{animation:none}}
+@media(max-width:760px){.vod-hero{grid-template-columns:1fr}.vod-cards{grid-template-columns:1fr 1fr}
+  .vod-lata{min-height:720px}.vod-lata-body{grid-template-columns:1fr}.vod-lata-info{min-height:300px}}
 @media(max-width:480px){.vod-cards{grid-template-columns:1fr}.vod-hero-side{grid-template-columns:1fr 1fr}}
 </style>"""
 
@@ -598,14 +670,7 @@ def build_body(flood, main, tribs):
     # ── Postaje: shema, kartice, tabela ─────────────────────────────────────
     if all_st:
         schema_svg = river_schema_svg(main, tribs)
-        schema = (
-            '  <div class="vod-chart-block" id="vod-schema">\n'
-            '  <div class="vod-chart-title">Rečni sistem — pretok na postajah (m³/s)</div>\n'
-            f'  <div class="vod-scroll" tabindex="0">{schema_svg}</div>\n'
-            '  <p class="vod-note">Shema, ne zemljevid: postaje so razporejene enakomerno po toku Savinje, pritoki so '
-            'pripeti približno glede na zemljepisno dolžino. Barva kroga je stanje glede na prage ARSO za tisto '
-            'postajo; siva pomeni, da ARSO za postajo pragov ne objavlja.</p>\n  </div>'
-        ) if schema_svg else ""
+        schema = live_html(main, tribs, schema_svg) if schema_svg else ""
         cards_main = "".join(station_card_html(s) for s in main)
         cards_trib = "".join(station_card_html(s) for s in tribs)
         cards = f'  <h3 class="vod-group-t">Savinja <span class="vod-count">{len(main)} postaj, od izvira proti Celju</span></h3>\n  <div class="vod-cards">{cards_main}</div>\n'

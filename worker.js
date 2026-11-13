@@ -4092,6 +4092,10 @@ async function _modeliKarta2(env, ctx) {
   catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
 }
 
+// Pritoki Savinje, ki jih ARSO utegne meriti (normalizirano, brez šumnikov). Namerna podvojitev
+// s TRIB_RIVERS v tools/generate_vodostaj_page.py (preverja test_parity.vodostaj_pritoki).
+const ARSO_PRITOKI = ["dreta", "lucnica", "bolska", "paka", "loznica", "hudinja", "voglajna", "mozirnica", "ljubnica", "rinka"];
+
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === "30 6-7 * * *") {
@@ -6806,6 +6810,19 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
               return lat > 46.0 && lat < 46.7 && lon > 14.3 && lon < 15.5;
             });
             const savinja = nearby.filter(f => /savinj/i.test(f.properties.reka || ""));
+            // ?pritoki=1: vsa Savinja + znani pritoki (stran /vodostaj-savinje/, živa struga).
+            // Od izvira proti Celju (po zemljepisni dolžini); brez omejitve na 6 postaj.
+            if (url.searchParams.get("pritoki") === "1") {
+              const normR = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+              const basin = nearby
+                .filter(f => /savinj/i.test(f.properties.reka || "") || ARSO_PRITOKI.includes(normR(f.properties.reka)))
+                .sort((a, b) => a.geometry.coordinates[0] - b.geometry.coordinates[0]);
+              if (basin.length) {
+                return new Response(JSON.stringify({ stations: basin, total: features.length, source: "arso-xml", pritoki: true }), {
+                  headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+                });
+              }
+            }
             const out = (savinja.length ? savinja : nearby)
               .sort((a, b) => dist2(a.geometry.coordinates[1], a.geometry.coordinates[0])
                             - dist2(b.geometry.coordinates[1], b.geometry.coordinates[0]))
