@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-13T07:29:56.802066+00:00",
-  "generated_at_local": "13. 11. 2026 ob 08:29",
+  "generated_at": "2026-11-13T07:43:28.811095+00:00",
+  "generated_at_local": "13. 11. 2026 ob 08:43",
   "station": "IREICA1",
   "snow_line": {
     "current_line_m": 2150,
@@ -1991,7 +1991,7 @@
     ]
   },
   "mountains": {
-    "generated_at_local": "13. 11. 2026 ob 08:29",
+    "generated_at_local": "13. 11. 2026 ob 08:43",
     "peaks": [
       {
         "name": "Golte",
@@ -2313,10 +2313,10 @@
         "level": "nizko"
       }
     ],
-    "generated_at_local": "13. 11. 2026 ob 08:29"
+    "generated_at_local": "13. 11. 2026 ob 08:43"
   },
   "warmup": {
-    "generated_at_local": "13. 11. 2026 ob 08:29",
+    "generated_at_local": "13. 11. 2026 ob 08:43",
     "mornings": [
       {
         "date": "2026-11-13",
