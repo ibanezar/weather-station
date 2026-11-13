@@ -87,6 +87,47 @@ cams["b"]["kamere"][0].update({"embed_terms": "https://x.example/t", "checked": 
 check("sg-embed" in g.embed_html(cams), "vdelava z embed_terms/checked se izriše")
 check(len(g.TITLE) <= 60, "naslov ≤ 60 znakov")
 
+
+# ── usklajenost Python ↔ snegofili.js (namerna podvojitev) ──
+import subprocess  # noqa: E402
+
+CASES = [0, 0.4, 0.99, 1, 4.9, 5, 14.9, 15, 29.9, 30, 59.9, 60, 120]
+js = ("const m=require('./snegofili/snegofili.js');const c=" + json.dumps(CASES) +
+      ";console.log(JSON.stringify(c.map(x=>[m.step(x),+m.radius(x).toFixed(3),+m.barPct(x).toFixed(3)])))")
+try:
+    out = json.loads(subprocess.run(["node", "-e", js], cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                    capture_output=True, text=True, timeout=30, check=True).stdout)
+    for x, (st, rad, bp) in zip(CASES, out):
+        check(st == g.step(x) and abs(rad - g.radius(x)) < 1e-3 and abs(bp - g.bar_pct(x)) < 1e-3, f"JS↔Python step/radius/barPct pri {x}")
+    jp = ("const m=require('./snegofili/snegofili.js');console.log(JSON.stringify([[1000,null],[1000,800],[1000,900],[1000,901],[1000,1100],[1000,1101],[1000,1500]]"
+          ".map(a=>m.phase(a[0],a[1]))))")
+    ph = json.loads(subprocess.run(["node", "-e", jp], cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                   capture_output=True, text=True, timeout=30, check=True).stdout)
+    check(ph == [g.phase(a, b) for a, b in [(1000, None), (1000, 800), (1000, 900), (1000, 901), (1000, 1100), (1000, 1101), (1000, 1500)]],
+          "JS↔Python phase (meje ±100 m)")
+except (OSError, subprocess.SubprocessError) as e:
+    check(False, f"node ni dosegljiv: {e}")
+
+# ── urna serija: okno v JS pri »zdaj« = okno v Pythonu ──
+hs = d.hourly_series(cold, 1000, IDX)
+check(len(hs["sn"]) == 144 and len(hs["sl"]) == 144 and len(hs["t"]) == 144, "urna serija ima 144 ur")
+jw = ("const m=require('./snegofili/snegofili.js');const s=" + json.dumps(hs["sn"]) +
+      ";console.log(JSON.stringify(m.windows(s,m.NOW)))")
+w2 = json.loads(subprocess.run(["node", "-e", jw], cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                               capture_output=True, text=True, timeout=30, check=True).stdout)
+pp = d.compute_point(cold, IDX, 1000)
+check(abs(w2["past"] - pp["past24_cm"]) < 1e-6 and abs(w2["next"] - pp["next24_cm"]) < 1e-6, "JS okno pri zdaj = Python past24/next24")
+cw = d.compute_point(edge, IDX, 1000)
+hs2 = d.hourly_series(edge, 1000, IDX)
+w3 = json.loads(subprocess.run(["node", "-e", "const m=require('./snegofili/snegofili.js');console.log(JSON.stringify(m.windows(" + json.dumps(hs2["sn"]) + ",m.NOW)))"],
+                               cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))), capture_output=True, text=True, timeout=30, check=True).stdout)
+check(abs(w3["past"] - cw["past24_cm"]) < 1e-6 and abs(w3["next"] - cw["next24_cm"]) < 1e-6, "JS↔Python okna na mejah (idx, idx+1)")
+
+# ── izris: karta, prerez, kartice ──
+check("sg-map" in body and "sg-prof" in body and 'class="sg-card"' in body, "hero ima karto, prerez in kartice")
+check("sg-line" not in body, "prerez nima več polilinije")
+check(g.ZOOM_VB.count(" ") == 3, "zoom viewBox ima 4 števila")
+
 # ── ARSO: stara meritev se ne prikaže ──
 now = datetime.datetime(2026, 11, 13, 12, 0, tzinfo=datetime.timezone.utc)
 a = d.load_arso(now)
