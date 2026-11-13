@@ -1,0 +1,470 @@
+{
+ "opomba": "Ročno vzdrževan seznam točk. Koordinate so približne (±5 km, za izračun napovedi, ne za navigacijo); višine mora potrditi Filip (potrjeno=false), Open-Meteo Elevation višine gora zravna. Kamere: vdelava samo z embed_terms (URL pogojev ponudnika) in checked (datum preverjanja), sicer povezava.",
+ "potrjeno": false,
+ "tocke": [
+  {
+   "id": "golte",
+   "ime": "Golte",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.37,
+   "lon": 14.92,
+   "elevation_m": 1400,
+   "elev_opis": "smučišče (objavljena višina)",
+   "kamere": []
+  },
+  {
+   "id": "menina-planina",
+   "ime": "Menina planina",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.27,
+   "lon": 14.84,
+   "elevation_m": 1500,
+   "elev_opis": "planota (objavljena višina)",
+   "kamere": []
+  },
+  {
+   "id": "smrekovec",
+   "ime": "Smrekovec",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.43,
+   "lon": 14.94,
+   "elevation_m": 1577,
+   "elev_opis": "vrh",
+   "kamere": []
+  },
+  {
+   "id": "raduha",
+   "ime": "Raduha",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.4,
+   "lon": 14.67,
+   "elevation_m": 2062,
+   "elev_opis": "vrh",
+   "kamere": []
+  },
+  {
+   "id": "logarska-dolina",
+   "ime": "Logarska dolina",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.3936,
+   "lon": 14.6311,
+   "elevation_m": 776,
+   "elev_opis": "postaja ARSO",
+   "arso_id": "LOGAR-DOL_",
+   "arso_cam": "Logarska dolina",
+   "kamere": []
+  },
+  {
+   "id": "pavlicevo-sedlo",
+   "ime": "Pavličevo sedlo",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.4251,
+   "lon": 14.5853,
+   "elevation_m": 1337,
+   "elev_opis": "postaja ARSO",
+   "arso_id": "PAVLI-SED_",
+   "arso_cam": "Pavličevo sedlo",
+   "kamere": []
+  },
+  {
+   "id": "rogla",
+   "ime": "Rogla",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.453,
+   "lon": 15.3315,
+   "elevation_m": 1495,
+   "elev_opis": "postaja ARSO",
+   "arso_id": "ROGLA_",
+   "arso_cam": "Rogla",
+   "kamere": []
+  },
+  {
+   "id": "urslja-gora",
+   "ime": "Uršlja gora",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.4849,
+   "lon": 14.9634,
+   "elevation_m": 1696,
+   "elev_opis": "postaja ARSO",
+   "arso_id": "URSLJ-GOR_",
+   "kamere": []
+  },
+  {
+   "id": "krvavec",
+   "ime": "Krvavec",
+   "drzava": "SI",
+   "regija": "Gorenjska in Julijci",
+   "lat": 46.2973,
+   "lon": 14.5333,
+   "elevation_m": 1740,
+   "elev_opis": "postaja ARSO",
+   "arso_id": "KRVAVEC_",
+   "arso_cam": "Krvavec",
+   "kamere": []
+  },
+  {
+   "id": "vogel",
+   "ime": "Vogel",
+   "drzava": "SI",
+   "regija": "Gorenjska in Julijci",
+   "lat": 46.26,
+   "lon": 13.84,
+   "elevation_m": 1535,
+   "elev_opis": "zgornja postaja žičnice",
+   "kamere": []
+  },
+  {
+   "id": "kranjska-gora",
+   "ime": "Kranjska Gora",
+   "drzava": "SI",
+   "regija": "Gorenjska in Julijci",
+   "lat": 46.4846,
+   "lon": 13.7867,
+   "elevation_m": 810,
+   "elev_opis": "naselje",
+   "arso_cam": "Kranjska Gora",
+   "kamere": []
+  },
+  {
+   "id": "kredarica",
+   "ime": "Kredarica",
+   "drzava": "SI",
+   "regija": "Gorenjska in Julijci",
+   "lat": 46.3787,
+   "lon": 13.8487,
+   "elevation_m": 2514,
+   "elev_opis": "postaja ARSO",
+   "arso_cam": "Kredarica",
+   "kamere": []
+  },
+  {
+   "id": "kanin",
+   "ime": "Kanin",
+   "drzava": "SI",
+   "regija": "Gorenjska in Julijci",
+   "lat": 46.36,
+   "lon": 13.48,
+   "elevation_m": 2200,
+   "elev_opis": "zgornja postaja žičnice",
+   "kamere": []
+  },
+  {
+   "id": "dobratsch",
+   "ime": "Dobratsch (Villacher Alpe)",
+   "drzava": "AT",
+   "regija": "Koroška",
+   "lat": 46.6,
+   "lon": 13.67,
+   "elevation_m": 2166,
+   "elev_opis": "vrh",
+   "kamere": []
+  },
+  {
+   "id": "nassfeld",
+   "ime": "Nassfeld",
+   "drzava": "AT",
+   "regija": "Koroška",
+   "lat": 46.5603,
+   "lon": 13.2711,
+   "elevation_m": 1530,
+   "elev_opis": "prelaz na meji z Italijo",
+   "kamere": []
+  },
+  {
+   "id": "obertauern",
+   "ime": "Obertauern",
+   "drzava": "AT",
+   "regija": "Salzburško",
+   "lat": 47.25,
+   "lon": 13.5667,
+   "elevation_m": 1740,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "kitzbuhel",
+   "ime": "Kitzbühel",
+   "drzava": "AT",
+   "regija": "Tirolska",
+   "lat": 47.4464,
+   "lon": 12.3925,
+   "elevation_m": 762,
+   "elev_opis": "mesto",
+   "kamere": []
+  },
+  {
+   "id": "st-anton",
+   "ime": "St. Anton am Arlberg",
+   "drzava": "AT",
+   "regija": "Tirolska",
+   "lat": 47.1289,
+   "lon": 10.2638,
+   "elevation_m": 1304,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "solden",
+   "ime": "Sölden",
+   "drzava": "AT",
+   "regija": "Tirolska",
+   "lat": 46.9667,
+   "lon": 11.0167,
+   "elevation_m": 1368,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "kitzsteinhorn",
+   "ime": "Kitzsteinhorn",
+   "drzava": "AT",
+   "regija": "Salzburško",
+   "lat": 47.193,
+   "lon": 12.697,
+   "elevation_m": 3029,
+   "elev_opis": "zgornja postaja ledenika",
+   "kamere": []
+  },
+  {
+   "id": "tarvisio",
+   "ime": "Tarvisio",
+   "drzava": "IT",
+   "regija": "Furlanija",
+   "lat": 46.505,
+   "lon": 13.578,
+   "elevation_m": 754,
+   "elev_opis": "mesto",
+   "kamere": []
+  },
+  {
+   "id": "cortina",
+   "ime": "Cortina d'Ampezzo",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.5405,
+   "lon": 12.1357,
+   "elevation_m": 1224,
+   "elev_opis": "mesto",
+   "kamere": []
+  },
+  {
+   "id": "kronplatz",
+   "ime": "Kronplatz",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.7396,
+   "lon": 11.9508,
+   "elevation_m": 2275,
+   "elev_opis": "vrh",
+   "kamere": []
+  },
+  {
+   "id": "pordoi",
+   "ime": "Passo Pordoi",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.4881,
+   "lon": 11.814,
+   "elevation_m": 2239,
+   "elev_opis": "prelaz",
+   "kamere": []
+  },
+  {
+   "id": "livigno",
+   "ime": "Livigno",
+   "drzava": "IT",
+   "regija": "Lombardija",
+   "lat": 46.5381,
+   "lon": 10.1356,
+   "elevation_m": 1816,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "cervinia",
+   "ime": "Breuil-Cervinia",
+   "drzava": "IT",
+   "regija": "Dolina Aosta",
+   "lat": 45.9333,
+   "lon": 7.6333,
+   "elevation_m": 2050,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "sestriere",
+   "ime": "Sestriere",
+   "drzava": "IT",
+   "regija": "Piemont",
+   "lat": 44.9578,
+   "lon": 6.8786,
+   "elevation_m": 2035,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "zermatt",
+   "ime": "Zermatt",
+   "drzava": "CH",
+   "regija": "Valais",
+   "lat": 46.0207,
+   "lon": 7.7491,
+   "elevation_m": 1608,
+   "elev_opis": "naselje",
+   "kamere": [
+    {
+     "naslov": "Kamere Zermatt",
+     "url": "https://www.zermatt.ch/en/webcams",
+     "ponudnik": "Zermatt Tourismus"
+    }
+   ]
+  },
+  {
+   "id": "st-moritz",
+   "ime": "St. Moritz",
+   "drzava": "CH",
+   "regija": "Graubünden",
+   "lat": 46.4908,
+   "lon": 9.8355,
+   "elevation_m": 1822,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "davos",
+   "ime": "Davos",
+   "drzava": "CH",
+   "regija": "Graubünden",
+   "lat": 46.8043,
+   "lon": 9.837,
+   "elevation_m": 1560,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "jungfraujoch",
+   "ime": "Jungfraujoch",
+   "drzava": "CH",
+   "regija": "Bernski Alpi",
+   "lat": 46.5475,
+   "lon": 7.9853,
+   "elevation_m": 3466,
+   "elev_opis": "sedlo",
+   "kamere": [
+    {
+     "naslov": "Kamere Jungfraujoch",
+     "url": "https://www.jungfrau.ch/en-gb/live/webcams/",
+     "ponudnik": "Jungfraubahnen"
+    }
+   ]
+  },
+  {
+   "id": "verbier",
+   "ime": "Verbier",
+   "drzava": "CH",
+   "regija": "Valais",
+   "lat": 46.0964,
+   "lon": 7.2285,
+   "elevation_m": 1500,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "chamonix",
+   "ime": "Chamonix",
+   "drzava": "FR",
+   "regija": "Haute-Savoie",
+   "lat": 45.9237,
+   "lon": 6.8694,
+   "elevation_m": 1035,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "aiguille-du-midi",
+   "ime": "Aiguille du Midi",
+   "drzava": "FR",
+   "regija": "Haute-Savoie",
+   "lat": 45.8786,
+   "lon": 6.8872,
+   "elevation_m": 3842,
+   "elev_opis": "vrh (zgornja postaja žičnice)",
+   "kamere": []
+  },
+  {
+   "id": "tignes",
+   "ime": "Tignes",
+   "drzava": "FR",
+   "regija": "Savoie",
+   "lat": 45.4689,
+   "lon": 6.9064,
+   "elevation_m": 2100,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "val-thorens",
+   "ime": "Val Thorens",
+   "drzava": "FR",
+   "regija": "Savoie",
+   "lat": 45.2979,
+   "lon": 6.5799,
+   "elevation_m": 2300,
+   "elev_opis": "naselje",
+   "kamere": []
+  },
+  {
+   "id": "zugspitze",
+   "ime": "Zugspitze",
+   "drzava": "DE",
+   "regija": "Bavarska",
+   "lat": 47.4211,
+   "lon": 10.9863,
+   "elevation_m": 2962,
+   "elev_opis": "vrh",
+   "kamere": []
+  },
+  {
+   "id": "platak",
+   "ime": "Platak",
+   "drzava": "HR",
+   "regija": "Gorski Kotar",
+   "lat": 45.4267,
+   "lon": 14.5256,
+   "elevation_m": 1100,
+   "elev_opis": "smučišče",
+   "kamere": []
+  },
+  {
+   "id": "sljeme",
+   "ime": "Sljeme",
+   "drzava": "HR",
+   "regija": "Zagreb",
+   "lat": 45.9,
+   "lon": 15.95,
+   "elevation_m": 1033,
+   "elev_opis": "vrh Medvednice",
+   "kamere": []
+  },
+  {
+   "id": "crnivec",
+   "ime": "Črnivec",
+   "drzava": "SI",
+   "regija": "Savinjska in Štajerska",
+   "lat": 46.28,
+   "lon": 14.76,
+   "elevation_m": 902,
+   "elev_opis": "prelaz (postaja DRSI)",
+   "drsi_cam": true,
+   "kamere": []
+  }
+ ]
+}

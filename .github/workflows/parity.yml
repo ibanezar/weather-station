@@ -79,6 +79,9 @@ jobs:
       - name: Test vremena v gorah
         run: python3 tools/test_gore.py
 
+      - name: Test »Snegofili« (točke, okna snega, vdelava kamer)
+        run: python3 tools/test_snegofili.py
+
       - name: Test »Sonce v dolini« in »Jutro v dolini« (obzorje, sončna pot, zamik, zapis 5-minutnih meritev)
         run: python3 tools/test_sonce.py
 

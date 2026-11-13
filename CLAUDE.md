@@ -396,6 +396,17 @@ za `HIGH_POINTS` (Golte, Menina planina, Smrekovec, Raduha) → `winter-data.jso
   ne jemlji iz DEM.
 - Test: `tools/test_gore.py`. Stran je v `CORE`, `llms.txt` in na hubu `/zima/`.
 
+## Snegofili (`/snegofili/`, 13. 11. 2026)
+
+Stran za »lov na sneg« po alpskem loku (Filipova odločitev: širše od Slovenije, s kamerami): lestvica ~40 točk, novi sneg nazaj in naprej (24/72 h), temperatura, meja sneženja, kamere.
+Ne podvaja snežne karte (Slovenija, mreža 0,1°) in `/vreme-v-gorah/` (4 vrhovi brez kamer).
+
+- **Točke so ROČEN seznam** `data/snegofili-tocke.json` (`potrjeno: false`): koordinate so približne (±5 km), višine iz spomina in jih mora **Filip potrditi** (Open-Meteo Elevation gore zravna: Golte 1400 → 705 m). Višino dobi Open-Meteo prek `elevation=`.
+- `tools/snegofili_data.py` → `data/snegofili.json`: en batch klic Open-Meteo, sneg = padavine × `winter_engine.snow_fraction()` × `SNOW_RATIO_CM_PER_MM` (**ista ocena kot `/vreme-v-gorah/`, ne nova formula**). Okna: nazaj (zdaj−N, zdaj], naprej (zdaj, zdaj+N]; ura, ki teče, se ne šteje naprej. Ob izpadu ostane stari posnetek. Korak v `zima-forecast.yml` (`continue-on-error`). `tools/generate_snegofili_page.py` piše stran; brez podatkov zapiše začasno stran brez številk.
+- **Model ni meritev; izmerjeno je ločeno**: stolpec »Izmerjeno« je višina odeje ARSO iz `data/arso-snow-live.csv` (`arso_id`, ≤ 24 h star), vira se ne zlivata. Ni plazovni bilten.
+- **Kamere:** ARSO prek workerja `/arso-cam?format=json&kamera=<ime>` (`arso_cam`; imena še niso preverjena proti `webcam_list`: točka brez kamere se tiho izpusti) in DRSI Črnivec (`CAM_URL`). **Tuje kamere so povezave.** Vdelava (iframe, šele po kliku) samo, če ima vnos `embed` + `embed_terms` + `checked` (test to zahteva). Panomax terja povpraševanje, Windy API ključ in žeton (iskanje 13. 11.): pogojev iz peskovnika nisem mogel prebrati; povezavi Jungfraujoch in Zermatt sta nepreverjeni (`link-check.yml`). Ob prvi vdelavi dopolni `zasebnost.html` (tretje osebe po kliku).
+- **Ni narejeno:** vrstica v `REGISTER` (`check_freshness.py`) za `data/snegofili.json` (test zahteva obstoječo datoteko: dodaj po prvem teku `zima-forecast.yml`), mutacije v `mutation_check.py`, zgodovina sezon, opozorilo na telefon, kamere za večino tujih točk. Živega odgovora Open-Meteo (40 točk v enem klicu, možen 429) ni bilo mogoče preizkusiti (peskovnik): po prvem teku preveri `data/snegofili.json` in stran. Test: `tools/test_snegofili.py` (v `parity.yml`).
+
 ## Sonce v dolini in jutro v dolini (`/sonce-v-dolini/`, `/jutro-v-dolini/`, 3. 11. 2026)
 
 Dve strani, ki ju drugje ni: koliko sonca dolina ZARES dobi (hribi zakrijejo koledarski vzhod) in kdaj se po jasni noči ogreje.
