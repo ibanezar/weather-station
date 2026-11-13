@@ -382,7 +382,8 @@ def build_body(data, cams):
 {seo.stn_badge()}
   <section class="sg-hero" aria-labelledby="sg-h1">
     <canvas id="sg-snow" aria-hidden="true"></canvas>
-    <p class="sg-kicker">Alpski lok · {len(rows)} točk</p>
+    <div class="sg-brand"><img src="/snegofili/brand/mark.svg" width="44" height="44" alt="" decoding="async">
+    <p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div>
     <h1 class="page-title" id="sg-h1">Snegofili: kje je zdaj sneg</h1>
     <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p>
     <p class="sg-lead">{hero_sentence(rows)}</p>
@@ -428,7 +429,9 @@ def build_body(data, cams):
 
 
 def head_extras(schema):
-    return (f'<link rel="stylesheet" href="/snegofili/snegofili.css?v={ver("snegofili/snegofili.css")}">\n'
+    return ('<link rel="icon" type="image/svg+xml" href="/snegofili/brand/favicon.svg">\n'
+            '<link rel="apple-touch-icon" href="/snegofili/brand/apple-touch-icon.png">\n'
+            f'<link rel="stylesheet" href="/snegofili/snegofili.css?v={ver("snegofili/snegofili.css")}">\n'
             f'<script defer src="/snegofili/snegofili.js?v={ver("snegofili/snegofili.js")}"></script>\n{schema}')
 
 
@@ -455,7 +458,8 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)]),
         seo.faq_schema(FAQ),
     ])
-    page = seo.page_shell(TITLE, DESC, URL, head_extras(schema), build_body(data, cams))
+    page = seo.page_shell(TITLE, DESC, URL, head_extras(schema), build_body(data, cams),
+                          og_image=f"{seo.SITE}/snegofili/brand/og.png")
     seo.write_page("snegofili/index.html", page, force=True)
     print("  → snegofili/index.html")
     return 0
