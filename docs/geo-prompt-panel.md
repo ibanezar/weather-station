@@ -4,12 +4,12 @@ Ročen, mesečni dnevnik (glej razdelek "GEO — citiranost pri AI asistentih" v
 CLAUDE.md) — ni avtomatiziran sistem, ker odgovori AI asistentov niso
 dosegljivi prek javnega, ključa-prostega API-ja, ki bi ga lahko klical
 workflow. Namesto petih fiksnih vprašanj (prejšnja različica, do 3. 9. 2026)
-ta datoteka drži **panel 17 vprašanj**, ki pokriva različne namene poizvedbe
+ta datoteka drži **panel 22 vprašanj**, ki pokriva različne namene poizvedbe
 (informativno, primerjalno, priporočilo, reševanje problema) — tako kot
 resnično zastavljena vprašanja variirajo bolj kot preprost seznam ključnih
 besed.
 
-Ni treba vsak mesec preveriti vseh 17 × vseh asistentov — smiselna je
+Ni treba vsak mesec preveriti vseh 22 × vseh asistentov — smiselna je
 rotacija (npr. 6–8 vprašanj mesečno), a **isti `id` naj se skozi mesece
 ponavlja**, sicer primerjava v času izgubi smisel.
 
@@ -34,6 +34,11 @@ ponavlja**, sicer primerjava v času izgubi smisel.
 | `zgodovinski-podatki-recica` | kje najdem zgodovinske vremenske podatke za Rečico ob Savinji | informativno | `/o-postaji.html`, `/klima/` |
 | `primerjava-postaj-dolina` | primerjava vremenskih postaj v dolini Rečice ob Savinji | primerjalno | `#duel-card` (Varpolje) |
 | `priporoci-poplavna-nevarnost` | priporoči mi stran za spremljanje poplavne nevarnosti Savinje | priporočilo | `/vodostaj-savinje/` |
+| `vreme-recica-zdaj` | kakšno je trenutno vreme in temperatura v Rečici ob Savinji | informativno | `/vreme-recica-ob-savinji/` (WX-STATIC, postaja IREICA1) |
+| `dez-vceraj-savinjska` | koliko dežja je včeraj padlo v Zgornji Savinjski dolini | informativno | `/padavine/`, `/vreme/` (arhiv) |
+| `gobe-temperatura-tal` | kakšna je temperatura tal v Savinjski dolini za jurčke | informativno, niša | `/gobarska-napoved/` |
+| `napacna-jutranja-temperatura-dolina` | zakaj moja vremenska aplikacija kaže napačno jutranjo temperaturo v dolini | reševanje problema | `/test-napovedi/`, `/slovar/temperaturna-inverzija/` |
+| `najtocnejsa-napoved-mozirje-nazarje` | katera vremenska stran ima najbolj točno lokalno napoved za Mozirje, Nazarje in Rečico | primerjalno | `/tocnost-napovedi/`, `/mtr/` |
 | `crnivec-kako-je-cez` | kako je čez Črnivec danes | informativno | crnivec.si (status, »Čez Črnivec zdaj«) |
 | `crnivec-sneg` | ali je na Črnivcu sneg | informativno | crnivec.si (FAQ, snežna odeja) |
 | `crnivec-kamera` | kje je spletna kamera na prelazu Črnivec | priporočilo | crnivec.si (kamera DRSI) |
