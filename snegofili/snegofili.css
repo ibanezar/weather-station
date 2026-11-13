@@ -100,3 +100,5 @@
 .sg-zoom button[aria-pressed="true"]{background:#85b9f3;color:#06111f;border-color:transparent}
 #sg-map.zoom .sg-lbl{font-size:16px;stroke-width:4px}
 @media(max-width:640px){#sg-map .sg-lbl{font-size:30px;stroke-width:6px}#sg-map.zoom .sg-lbl{font-size:16px}}
+
+.sg-brand{display:flex;align-items:center;gap:.7rem;margin:0 0 .5rem}.sg-brand img{border-radius:11px;flex:none}.sg-brand .sg-kicker{margin:0}
