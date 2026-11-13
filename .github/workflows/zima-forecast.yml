@@ -52,6 +52,13 @@ jobs:
       - name: Sestavi /vreme-v-gorah/
         run: python3 tools/generate_gore_page.py
 
+      - name: Sestavi /snegofili/ (sneg po alpskem loku, Open-Meteo + ARSO)
+        # Ne sme podreti ostalih strani; ob izpadu Open-Meteo ostane stari posnetek.
+        continue-on-error: true
+        run: |
+          python3 tools/snegofili_data.py
+          python3 tools/generate_snegofili_page.py
+
       - name: Sestavi /jutro-v-dolini/ (zamik od prvega žarka do ogrevanja doline, statistika iz urnih meritev)
         # Ne sme podreti ostalih strani: brez te strani zima/ in crnivec.si delujeta naprej.
         continue-on-error: true
@@ -74,7 +81,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add data/winter-data.json data/zima-ocene.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json data/crnivec-arso.json zima/ vreme-v-gorah/ jutro-v-dolini/ data/jutro-zamik.json data/jutro-napovedi.csv crnivec/ crnivec-site/ og/crnivec/
+          git add data/winter-data.json data/zima-ocene.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json data/crnivec-arso.json zima/ vreme-v-gorah/ snegofili/ data/snegofili.json jutro-v-dolini/ data/jutro-zamik.json data/jutro-napovedi.csv crnivec/ crnivec-site/ og/crnivec/
           if git diff --cached --quiet; then
             echo "Ni sprememb."
             exit 0

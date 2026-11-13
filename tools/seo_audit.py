@@ -85,6 +85,7 @@ CORE = {
     "zima/zled/":                ("daily",   "0.7"),
     "zima/snezna-karta/":        ("daily",   "0.7"),
     "vreme-v-gorah/":            ("daily",   "0.7"),
+    "snegofili/":                ("daily",   "0.7"),
     "sonce-v-dolini/":           ("monthly", "0.7"),
     "jutro-v-dolini/":           ("daily",   "0.7"),
     # /mtr/ »Kako nastaja MTR«: kuhinja modela (tools/generate_mtr_page.py, ročno; vsebina je tam).
