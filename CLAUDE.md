@@ -640,6 +640,8 @@ skok v času (»slika preskoči iz 6:15 na 6:40«). Tri zareze, ki to preprečuj
 
 ## Vodostaj — izmerjeno pred modelom, pragovi po postajah
 
+**Stran `/vodostaj-savinje/` (13. 11. 2026) kaže tudi pritoke.** `fetch_arso_basin()` iz ARSO XML vzame postaje na Savinji + reke iz `TRIB_RIVERS` (Dreta, Lučnica, Bolska, Paka, Ložnica, Hudinja, Voglajna …) v `BASIN_BBOX`; seznam je ugibanje, ker iz peskovnika ARSO ni dosegljiv. **Po prvem teku `vodostaj-forecast.yml` preberi dnevnik**: izpiše tudi postaje v okolici, ki se niso uvrstile — če je med njimi pritok, ga dodaj. Pritok brez pragov ARSO ostane **neocenjen** (siv), enotni približek 80/200/400 velja samo za Savinjo (`card_level()`). `fetch_arso_stations()` ostaja samo Savinja, ker ga uvaža MeteoGasilec. Naslov/h1/opis dobijo ime prvega pritoka samo, če ga ARSO meri.
+
 Zavihek »Vodostaj« (`app.js`, `initVodostaj`), stran `/vodostaj-savinje/` in
 `/meteogasilec/vodotoki/` mešajo dva vira, ki se ne smeta zliti v eno številko:
 
