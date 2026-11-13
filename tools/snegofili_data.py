@@ -36,6 +36,7 @@ import winter_engine as we  # noqa: E402
 ROOT = seo.ROOT
 POINTS_PATH = os.path.join(ROOT, "data", "snegofili-tocke.json")
 OUT_PATH = os.path.join(ROOT, "data", "snegofili.json")
+HOURS_PATH = os.path.join(ROOT, "snegofili", "ure.json")  # urne serije za drsnik (javno, brez notranjih meritev)
 ARSO_CSV = os.path.join(ROOT, "data", "arso-snow-live.csv")
 RETRY_DELAYS_S = (5, 15, 45)
 ARSO_MAX_AGE_H = 24
@@ -112,6 +113,23 @@ def compute_point(hourly, idx_now, elevation_m):
     return out
 
 
+def hourly_series(hourly, elevation_m, idx_now):
+    """144 ur: idx_now-71 … idx_now+72 (zadnja je +72 h). Sneg v desetinkah cm (isti izračun kot okna),
+    meja sneženja v enotah 10 m, temperatura v desetinkah °C. Ura z žigom T velja za T-1h..T."""
+    pr = hourly.get("precipitation") or []
+    fl = hourly.get("freezing_level_height") or []
+    tt = hourly.get("temperature_2m") or []
+    sn, sl, tp = [], [], []
+    for i in range(idx_now - 71, idx_now + 73):
+        p = (pr[i] if 0 <= i < len(pr) else 0) or 0
+        f = fl[i] if 0 <= i < len(fl) else None
+        t = tt[i] if 0 <= i < len(tt) else None
+        sn.append(round(p * we.snow_fraction(elevation_m, f) * we.SNOW_RATIO_CM_PER_MM * 10))
+        sl.append(None if f is None else round((f - we.SNOW_LEVEL_OFFSET_M) / 10))
+        tp.append(None if t is None else round(t * 10))
+    return {"sn": sn, "sl": sl, "t": tp}
+
+
 def load_arso(now_utc):
     """Zadnja vrstica na postajo, samo če ni starejša od ARSO_MAX_AGE_H in ima višino odeje."""
     latest = {}
@@ -133,7 +151,7 @@ def load_arso(now_utc):
     return res
 
 
-def build(points, responses, now_local, arso):
+def build(points, responses, now_local, arso, series=None):
     out = []
     for p, resp in zip(points, responses):
         hourly = resp.get("hourly") or {}
@@ -141,6 +159,8 @@ def build(points, responses, now_local, arso):
         comp = compute_point(hourly, idx, p["elevation_m"])
         if comp is None:
             continue
+        if series is not None:
+            series[p["id"]] = hourly_series(hourly, p["elevation_m"], idx)
         row = {k: p[k] for k in ("id", "ime", "drzava", "regija", "lat", "lon", "elevation_m", "elev_opis")}
         row["km_od_recice"] = round(haversine_km(seo.LAT, seo.LON, p["lat"], p["lon"]))
         row.update(comp)
@@ -161,7 +181,11 @@ def main():
     except Exception as e:  # noqa: BLE001 — raje star posnetek kot prazna stran
         print(f"✗ Open-Meteo: {e} — ostane stari data/snegofili.json", file=sys.stderr)
         return 0
-    rows = build(points, responses, now_local, load_arso(now_utc))
+    series = {}
+    first = (responses[0].get("hourly") or {}).get("time") or []
+    ni = we.nearest_hour_index(first, now_local)
+    now_hour_local = first[ni] if ni is not None else None
+    rows = build(points, responses, now_local, load_arso(now_utc), series)
     if len(rows) < len(points) // 2:
         print(f"✗ le {len(rows)}/{len(points)} točk z veljavno serijo — stari posnetek ostane", file=sys.stderr)
         return 0
@@ -172,6 +196,11 @@ def main():
     }
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
+    os.makedirs(os.path.dirname(HOURS_PATH), exist_ok=True)
+    with open(HOURS_PATH, "w", encoding="utf-8") as f:
+        json.dump({"generated_at": payload["generated_at"], "now_index": 71, "hours": 144,
+                   "now_local": now_hour_local, "tocke": series},
+                  f, ensure_ascii=False, separators=(",", ":"))
     print(f"data/snegofili.json: {len(rows)} točk")
     return 0
 
