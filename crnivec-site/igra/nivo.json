@@ -1,245 +1,245 @@
 {
- "datum": "2026-11-12",
+ "datum": "2026-11-13",
  "svetloba": "dan",
- "padavine_mm": 1.2,
- "termin": "popoldne",
- "termin_txt": "14:00–16:00",
- "ura": "16:00",
- "t_vrh": 8.8,
+ "padavine_mm": 1.5,
+ "termin": "jutro",
+ "termin_txt": "6:00–8:00",
+ "ura": "08:00",
+ "t_vrh": 6.6,
  "vozisce": "mokro vozišče",
  "odeja_cm": 0,
- "megla_do_m": null,
+ "megla_do_m": 1498,
  "sunki_kmh": null,
  "odseki": [
   {
    "od_km": 0,
    "z_od": 532,
    "z_do": 636,
-   "t": 10.9,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 1,
    "z_od": 636,
    "z_do": 654,
-   "t": 10.5,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 2,
    "z_od": 654,
    "z_do": 662,
-   "t": 10.4,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 3,
    "z_od": 662,
    "z_do": 706,
-   "t": 10.2,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 4,
    "z_od": 706,
    "z_do": 787,
-   "t": 9.8,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 5,
    "z_od": 787,
    "z_do": 825,
-   "t": 9.4,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 6,
    "z_od": 825,
    "z_do": 882,
-   "t": 9.1,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 7,
    "z_od": 882,
    "z_do": 886,
-   "t": 8.9,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 8,
    "z_od": 886,
    "z_do": 783,
-   "t": 9.2,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 9,
    "z_od": 783,
    "z_do": 762,
-   "t": 9.6,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 10,
    "z_od": 762,
    "z_do": 688,
-   "t": 10.0,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 11,
    "z_od": 688,
    "z_do": 627,
-   "t": 10.4,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 12,
    "z_od": 627,
    "z_do": 556,
-   "t": 10.8,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 13,
    "z_od": 556,
    "z_do": 503,
-   "t": 11.2,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 14,
    "z_od": 503,
    "z_do": 474,
-   "t": 11.5,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 15,
    "z_od": 474,
    "z_do": 463,
-   "t": 11.6,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 16,
    "z_od": 463,
    "z_do": 446,
-   "t": 11.7,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 17,
    "z_od": 446,
    "z_do": 438,
-   "t": 11.8,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   },
   {
    "od_km": 18,
    "z_od": 438,
    "z_do": 432,
-   "t": 11.8,
+   "t": 6.6,
    "pada": "dez",
    "odeja": false,
    "povrsina": "mokro",
    "led_delez": 0.0,
    "mokro": true,
-   "megla": false
+   "megla": true
   }
  ],
- "opis": "Današnje popoldne (14:00–16:00): na vrhu 9 °C, mokro vozišče (km 0–18,3).",
- "generated_at": "2026-11-12T13:59:52.564002+00:00"
+ "opis": "Današnje jutro (6:00–8:00): na vrhu 7 °C, mokro vozišče (km 0–18,3), v dolini megla do 1498 m.",
+ "generated_at": "2026-11-13T07:29:56.802066+00:00"
 }

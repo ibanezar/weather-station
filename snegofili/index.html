@@ -28,7 +28,15 @@
 <meta name="twitter:title" content="Snegofili: kje je sneg, kamere in napoved">
 <meta name="twitter:description" content="Kje je zdaj sneg po alpskem loku: novi sneg nazaj in naprej, temperatura, meja sneženja in kamere za 40 točk od Golt do Zermatta. Modelska ocena, izmerjeno ločeno.">
 <meta name="twitter:image" content="https://meteorec.si/og-image.jpg">
-
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","@id":"https://meteorec.si/snegofili/","name":"Snegofili: kje je sneg, kamere in napoved","description":"Kje je zdaj sneg po alpskem loku: novi sneg nazaj in naprej, temperatura, meja sne\u017eenja in kamere za 40 to\u010dk od Golt do Zermatta. Modelska ocena, izmerjeno lo\u010deno.","url":"https://meteorec.si/snegofili/","image":"https://meteorec.si/og-image.jpg","inLanguage":"sl","isPartOf":{"@id":"https://meteorec.si/#website"},"about":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326", "https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"datePublished":"2026-11-13"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"MeteoZima","item":"https://meteorec.si/zima/"},{"@type":"ListItem","position":3,"name":"Snegofili"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Je to izmerjen sneg?","acceptedAnswer":{"@type":"Answer","text":"Ne. Novi sneg je modelska ocena: padavine iz celice vremenskega modela (Open-Meteo), pomno\u017eene z dele\u017eem, ki pade kot sneg glede na vi\u0161ino ni\u010dte izoterme. Celica ne razlo\u010di pobo\u010dij in dolin, zato je lahko na terenu ve\u010d ali manj. Izmerjeno vi\u0161ino sne\u017ene odeje imamo samo za nekaj postaj ARSO in je v svojem stolpcu."}},{"@type":"Question","name":"Zakaj je stolpec \u00bbizmerjeno\u00ab ve\u010dinoma prazen?","acceptedAnswer":{"@type":"Answer","text":"Vi\u0161ino sne\u017ene odeje objavljajo le nekatere postaje ARSO (npr. Krvavec, Rogla, Ur\u0161lja gora). Tuje to\u010dke nimajo izmerjene vrednosti na tej strani. Prazno polje pomeni, da meritve nimamo, ne da snega ni."}},{"@type":"Question","name":"Kaj pomenita \u00bbnazaj\u00ab in \u00bbnaprej\u00ab?","acceptedAnswer":{"@type":"Answer","text":"Nazaj je ocena novega snega, ki je padel v zadnjih 24 oziroma 72 urah, naprej pa tisto, kar model napoveduje v naslednjih 24 oziroma 72 urah. Ura, ki te\u010de, se ne \u0161teje naprej."}},{"@type":"Question","name":"Kako izberem kamero?","acceptedAnswer":{"@type":"Answer","text":"Slovenske kamere ARSO in DRSI na prelazu \u010crnivec so prikazane neposredno z navedbo vira. Pri tujih kamerah vas povezava odpelje k lastniku kamere (smu\u010di\u0161\u010de, turisti\u010dna organizacija). Vdelamo jih samo, kadar ponudnik vdelavo uradno dovoljuje."}},{"@type":"Question","name":"Ali stran nadome\u0161\u010da plazovni bilten?","acceptedAnswer":{"@type":"Answer","text":"Ne. Ocena snega ne pove ni\u010d o plazovni nevarnosti. Pred turo preverite uradni plazovni bilten pristojne dr\u017eave in razmere pri oskrbovani ko\u010di ali smu\u010di\u0161\u010du."}}]}
+</script>
 <link rel="stylesheet" href="/fonts/fonts.css?v=c490d62a">
 <link rel="stylesheet" href="/blog/blog.css?v=6352b4f1">
 <link rel="stylesheet" href="/vreme/vreme.css?v=a32fe9ac">
@@ -51,11 +59,124 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a href="/vreme/">Arhiv</a>
     </nav>
   </header>
+
+<style>
+.sg-filter{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
+.sg-filter button{min-height:44px;padding:0 .9rem;border-radius:999px;border:1px solid var(--border,#3a4a66);background:transparent;color:inherit;font:inherit;cursor:pointer}
+.sg-filter button[aria-pressed="true"]{background:var(--accent,#34d399);color:#04130d;border-color:transparent}
+#sg-table th[scope=row]{min-width:9rem}
+.sg-stale{color:#d97706}
+#sg-cams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:.8rem}
+#sg-cams figure{margin:0}#sg-cams img{width:100%;height:auto;aspect-ratio:1023/520;object-fit:cover;border-radius:8px}
+#sg-cams figcaption{font-size:.8rem;opacity:.8}
+.sg-embed button{min-height:44px;padding:0 1rem}
+</style>
+  <nav class="crumbs" aria-label="Drobtine">
+    <a href="/">Meteorec</a> › <a href="/zima/">MeteoZima</a> › <span aria-current="page">Snegofili</span>
+  </nav>
+  <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Snegofili: kje je zdaj sneg</h1>
-  <p class="archive-intro">Prvi izračun za točke po alpskem loku je v pripravi. Medtem glej
-  <a href="/zima/snezna-karta/">snežno karto</a>, <a href="/zima/meja-snezenja/">mejo sneženja</a> in
-  <a href="/vreme-v-gorah/">vreme v gorah</a>.</p>
+  <p class="post-meta" id="sg-gen" data-generated="2026-11-13T07:30:06Z">Modelska ocena · posodobljeno 13. 11. 2026 ob 8.30</p>
+  <p class="archive-intro">Po modelu je v zadnjih 24 urah najbolj zasnežilo na točki <strong>Aiguille du Midi</strong> (31 cm), v zadnjih 72 urah pa na točki <strong>Aiguille du Midi</strong> (55 cm). Od točk do 200 km zračne razdalje od Rečice je v naslednjih 24 urah največ snega napovedanega na točki <strong>Menina planina</strong> (14 cm, 9 km).</p>
+  <p class="archive-intro">Seznam zajema 40 točk od Golt do Zermatta. To je <b>modelska ocena novega snega</b>
+  iz padavin in višine ničte izoterme, ne meritev. Izmerjeno višino odeje imamo samo za nekaj postaj ARSO in je
+  v svojem stolpcu. Za našo dolino glej še <a href="/zima/snezna-karta/">snežno karto</a>,
+  <a href="/zima/meja-snezenja/">mejo sneženja</a> in <a href="/vreme-v-gorah/">vreme v gorah</a>.</p>
+  <div class="sg-filter" id="sg-filter" hidden><button type="button" data-c="*" aria-pressed="true">Vse</button><button type="button" data-c="SI" aria-pressed="false">Slovenija</button><button type="button" data-c="AT" aria-pressed="false">Avstrija</button><button type="button" data-c="IT" aria-pressed="false">Italija</button><button type="button" data-c="CH" aria-pressed="false">Švica</button><button type="button" data-c="FR" aria-pressed="false">Francija</button><button type="button" data-c="DE" aria-pressed="false">Nemčija</button><button type="button" data-c="HR" aria-pressed="false">Hrvaška</button><button type="button" data-f="fresh" aria-pressed="false">Samo s svežim snegom</button></div>
+  <div class="tbl-x" tabindex="0"><table class="stats" id="sg-table">
+    <thead><tr><th scope="col">Točka</th><th scope="col">Zdaj</th><th scope="col">Meja sneženja</th>
+    <th scope="col">Nazaj 24&nbsp;h</th><th scope="col">Nazaj 72&nbsp;h</th><th scope="col">Naprej 24&nbsp;h</th>
+    <th scope="col">Naprej 72&nbsp;h</th><th scope="col">Izmerjeno</th><th scope="col">Kamera</th></tr></thead>
+    <tbody>
+      <tr data-c="FR" data-n24="31.4" data-n72="55.4"><th scope="row">Aiguille du Midi<br><span class="muted-note">Francija · Haute-Savoie · 3842 m</span></th><td>-10,6 °C</td><td>2650 m</td><td>31 cm</td><td>55 cm</td><td>—</td><td>38 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="29.9" data-n72="32.6"><th scope="row">Kredarica<br><span class="muted-note">Slovenija · Gorenjska in Julijci · 2514 m</span></th><td>-2,6 °C</td><td>1930 m</td><td>30 cm</td><td>33 cm</td><td>8,7 cm</td><td>16 cm</td><td>—</td><td><a href="#kamere">kamera</a></td></tr>
+      <tr data-c="CH" data-n24="14.7" data-n72="28.7"><th scope="row">Jungfraujoch<br><span class="muted-note">Švica · Bernski Alpi · 3466 m</span></th><td>-9,8 °C</td><td>2530 m</td><td>15 cm</td><td>29 cm</td><td>—</td><td>8,7 cm</td><td>—</td><td><a href="https://www.jungfrau.ch/en-gb/live/webcams/" target="_blank" rel="noopener">Jungfraubahnen</a></td></tr>
+      <tr data-c="DE" data-n24="10.2" data-n72="14.2"><th scope="row">Zugspitze<br><span class="muted-note">Nemčija · Bavarska · 2962 m</span></th><td>-12,7 °C</td><td>1470 m</td><td>10 cm</td><td>14 cm</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="IT" data-n24="13.3" data-n72="13.5"><th scope="row">Kronplatz<br><span class="muted-note">Italija · Dolomiti · 2275 m</span></th><td>-2,9 °C</td><td>1690 m</td><td>13 cm</td><td>14 cm</td><td>—</td><td>1,4 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="AT" data-n24="10.8" data-n72="11.0"><th scope="row">Kitzsteinhorn<br><span class="muted-note">Avstrija · Salzburško · 3029 m</span></th><td>-11,9 °C</td><td>1720 m</td><td>11 cm</td><td>11 cm</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="IT" data-n24="8.5" data-n72="8.5"><th scope="row">Sestriere<br><span class="muted-note">Italija · Piemont · 2035 m</span></th><td>0,6 °C</td><td>2080 m</td><td>8,5 cm</td><td>8,5 cm</td><td>—</td><td>9,0 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="AT" data-n24="8.0" data-n72="8.0"><th scope="row">Dobratsch (Villacher Alpe)<br><span class="muted-note">Avstrija · Koroška · 2166 m</span></th><td>-1,5 °C</td><td>1630 m</td><td>8,0 cm</td><td>8,0 cm</td><td>—</td><td>1,6 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="7.0" data-n72="7.4"><th scope="row">Kanin<br><span class="muted-note">Slovenija · Gorenjska in Julijci · 2200 m</span></th><td>-1,2 °C</td><td>1830 m</td><td>7,0 cm</td><td>7,4 cm</td><td>5,8 cm</td><td>11 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="5.7" data-n72="5.7"><th scope="row">Raduha<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 2062 m</span></th><td>-0,6 °C</td><td>1670 m</td><td>5,7 cm</td><td>5,7 cm</td><td>5,4 cm</td><td>7,4 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="AT" data-n24="4.5" data-n72="4.5"><th scope="row">Obertauern<br><span class="muted-note">Avstrija · Salzburško · 1740 m</span></th><td>-3,2 °C</td><td>1320 m</td><td>4,5 cm</td><td>4,5 cm</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="IT" data-n24="3.3" data-n72="3.6"><th scope="row">Passo Pordoi<br><span class="muted-note">Italija · Dolomiti · 2239 m</span></th><td>-0,2 °C</td><td>1960 m</td><td>3,3 cm</td><td>3,6 cm</td><td>—</td><td>3,1 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="FR" data-n24="3.5" data-n72="3.5"><th scope="row">Val Thorens<br><span class="muted-note">Francija · Savoie · 2300 m</span></th><td>-0,7 °C</td><td>2050 m</td><td>3,5 cm</td><td>3,5 cm</td><td>—</td><td>19 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="IT" data-n24="2.0" data-n72="2.0"><th scope="row">Breuil-Cervinia<br><span class="muted-note">Italija · Dolina Aosta · 2050 m</span></th><td>1,8 °C</td><td>2270 m</td><td>2,0 cm</td><td>2,0 cm</td><td>—</td><td>3,9 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="CH" data-n24="2.0" data-n72="2.0"><th scope="row">Davos<br><span class="muted-note">Švica · Graubünden · 1560 m</span></th><td>-0,7 °C</td><td>1380 m</td><td>2,0 cm</td><td>2,0 cm</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="FR" data-n24="1.2" data-n72="1.2"><th scope="row">Tignes<br><span class="muted-note">Francija · Savoie · 2100 m</span></th><td>1,2 °C</td><td>2030 m</td><td>1,2 cm</td><td>1,2 cm</td><td>—</td><td>10 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="0.3" data-n72="0.3"><th scope="row">Uršlja gora<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 1696 m</span></th><td>2,4 °C</td><td>1730 m</td><td>—</td><td>—</td><td>5,5 cm</td><td>5,5 cm</td><td>0 cm<br><span class="muted-note">ARSO, pred 18 h</span></td><td>—</td></tr>
+      <tr data-c="AT" data-n24="0.2" data-n72="0.2"><th scope="row">Sölden<br><span class="muted-note">Avstrija · Tirolska · 1368 m</span></th><td>1,1 °C</td><td>1340 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="AT" data-n24="0.2" data-n72="0.2"><th scope="row">St. Anton am Arlberg<br><span class="muted-note">Avstrija · Tirolska · 1304 m</span></th><td>1,3 °C</td><td>1290 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="AT" data-n24="0.1" data-n72="0.1"><th scope="row">Kitzbühel<br><span class="muted-note">Avstrija · Tirolska · 762 m</span></th><td>2,3 °C</td><td>850 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="CH" data-n24="0.0" data-n72="0.0"><th scope="row">St. Moritz<br><span class="muted-note">Švica · Graubünden · 1822 m</span></th><td>1,1 °C</td><td>1760 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="IT" data-n24="0.0" data-n72="0.0"><th scope="row">Livigno<br><span class="muted-note">Italija · Lombardija · 1816 m</span></th><td>1,3 °C</td><td>1830 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Krvavec<br><span class="muted-note">Slovenija · Gorenjska in Julijci · 1740 m</span></th><td>3,1 °C</td><td>2080 m</td><td>—</td><td>—</td><td>9,2 cm</td><td>9,2 cm</td><td>0 cm<br><span class="muted-note">ARSO, pred 18 h</span></td><td><a href="#kamere">kamera</a></td></tr>
+      <tr data-c="CH" data-n24="0.0" data-n72="0.0"><th scope="row">Zermatt<br><span class="muted-note">Švica · Valais · 1608 m</span></th><td>4,3 °C</td><td>2100 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><a href="https://www.zermatt.ch/en/webcams" target="_blank" rel="noopener">Zermatt Tourismus</a></td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Smrekovec<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 1577 m</span></th><td>3,3 °C</td><td>1920 m</td><td>—</td><td>—</td><td>8,6 cm</td><td>8,6 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Vogel<br><span class="muted-note">Slovenija · Gorenjska in Julijci · 1535 m</span></th><td>3,3 °C</td><td>2010 m</td><td>—</td><td>—</td><td>7,1 cm</td><td>7,1 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="AT" data-n24="0.0" data-n72="0.0"><th scope="row">Nassfeld<br><span class="muted-note">Avstrija · Koroška · 1530 m</span></th><td>2,8 °C</td><td>1640 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Menina planina<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 1500 m</span></th><td>4,0 °C</td><td>1830 m</td><td>—</td><td>—</td><td>14 cm</td><td>14 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="CH" data-n24="0.0" data-n72="0.0"><th scope="row">Verbier<br><span class="muted-note">Švica · Valais · 1500 m</span></th><td>2,5 °C</td><td>1640 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Rogla<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 1495 m</span></th><td>2,6 °C</td><td>1910 m</td><td>—</td><td>—</td><td>12 cm</td><td>12 cm</td><td>0 cm<br><span class="muted-note">ARSO, pred 18 h</span></td><td><a href="#kamere">kamera</a></td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Golte<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 1400 m</span></th><td>4,7 °C</td><td>1950 m</td><td>—</td><td>—</td><td>11 cm</td><td>11 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Pavličevo sedlo<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 1337 m</span></th><td>4,1 °C</td><td>1620 m</td><td>—</td><td>—</td><td>3,7 cm</td><td>3,7 cm</td><td>0 cm<br><span class="muted-note">ARSO, pred 18 h</span></td><td><a href="#kamere">kamera</a></td></tr>
+      <tr data-c="IT" data-n24="0.0" data-n72="0.0"><th scope="row">Cortina d&#x27;Ampezzo<br><span class="muted-note">Italija · Dolomiti · 1224 m</span></th><td>6,0 °C</td><td>1920 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="HR" data-n24="0.0" data-n72="0.0"><th scope="row">Platak<br><span class="muted-note">Hrvaška · Gorski Kotar · 1100 m</span></th><td>9,4 °C</td><td>2610 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="FR" data-n24="0.0" data-n72="0.0"><th scope="row">Chamonix<br><span class="muted-note">Francija · Haute-Savoie · 1035 m</span></th><td>6,1 °C</td><td>1890 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr data-c="HR" data-n24="0.0" data-n72="0.0"><th scope="row">Sljeme<br><span class="muted-note">Hrvaška · Zagreb · 1033 m</span></th><td>4,6 °C</td><td>2220 m</td><td>—</td><td>—</td><td>2,8 cm</td><td>2,8 cm</td><td>—</td><td>—</td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Črnivec<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 902 m</span></th><td>7,8 °C</td><td>1890 m</td><td>—</td><td>—</td><td>4,2 cm</td><td>4,2 cm</td><td>—</td><td><a href="#kamere">kamera</a></td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Kranjska Gora<br><span class="muted-note">Slovenija · Gorenjska in Julijci · 810 m</span></th><td>8,0 °C</td><td>1720 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><a href="#kamere">kamera</a></td></tr>
+      <tr data-c="SI" data-n24="0.0" data-n72="0.0"><th scope="row">Logarska dolina<br><span class="muted-note">Slovenija · Savinjska in Štajerska · 776 m</span></th><td>7,9 °C</td><td>1760 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0 cm<br><span class="muted-note">ARSO, pred 18 h</span></td><td><a href="#kamere">kamera</a></td></tr>
+      <tr data-c="IT" data-n24="0.0" data-n72="0.0"><th scope="row">Tarvisio<br><span class="muted-note">Italija · Furlanija · 754 m</span></th><td>7,7 °C</td><td>1720 m</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
+  »—« pri snegu pomeni manj kot centimeter po modelu. Podatki: Open-Meteo, postaje ARSO.</p>
+  <section id="kamere" aria-labelledby="kam-h">
+  <h2 id="kam-h">Kamere</h2>
+  <p class="archive-intro">Slovenske kamere ARSO in DRSI so prikazane tukaj. Pri tujih točkah vas povezava v tabeli odpelje k lastniku kamere.</p>
+  <div id="sg-cams" data-arso='[&quot;Logarska dolina&quot;, &quot;Pavličevo sedlo&quot;, &quot;Rogla&quot;, &quot;Krvavec&quot;, &quot;Kranjska Gora&quot;, &quot;Kredarica&quot;]' data-drsi="https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"></div>
+
+  </section>
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+    <details><summary>Je to izmerjen sneg?</summary><p>Ne. Novi sneg je modelska ocena: padavine iz celice vremenskega modela (Open-Meteo), pomnožene z deležem, ki pade kot sneg glede na višino ničte izoterme. Celica ne razloči pobočij in dolin, zato je lahko na terenu več ali manj. Izmerjeno višino snežne odeje imamo samo za nekaj postaj ARSO in je v svojem stolpcu.</p></details>
+    <details><summary>Zakaj je stolpec »izmerjeno« večinoma prazen?</summary><p>Višino snežne odeje objavljajo le nekatere postaje ARSO (npr. Krvavec, Rogla, Uršlja gora). Tuje točke nimajo izmerjene vrednosti na tej strani. Prazno polje pomeni, da meritve nimamo, ne da snega ni.</p></details>
+    <details><summary>Kaj pomenita »nazaj« in »naprej«?</summary><p>Nazaj je ocena novega snega, ki je padel v zadnjih 24 oziroma 72 urah, naprej pa tisto, kar model napoveduje v naslednjih 24 oziroma 72 urah. Ura, ki teče, se ne šteje naprej.</p></details>
+    <details><summary>Kako izberem kamero?</summary><p>Slovenske kamere ARSO in DRSI na prelazu Črnivec so prikazane neposredno z navedbo vira. Pri tujih kamerah vas povezava odpelje k lastniku kamere (smučišče, turistična organizacija). Vdelamo jih samo, kadar ponudnik vdelavo uradno dovoljuje.</p></details>
+    <details><summary>Ali stran nadomešča plazovni bilten?</summary><p>Ne. Ocena snega ne pove nič o plazovni nevarnosti. Pred turo preverite uradni plazovni bilten pristojne države in razmere pri oskrbovani koči ali smučišču.</p></details>
+  </div>
+  <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten
+  pristojne države, <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a> in razmere pri
+  oskrbovani koči ali smučišču. Slike kamer so last navedenih virov.</p>
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>
+<script>
+(function(){
+  var PROXY="https://weatherireica1.filip-eremita.workers.dev", tb=document.querySelector('#sg-table tbody'); if(!tb) return;
+  var rows=[].slice.call(tb.rows), bar=document.getElementById('sg-filter');
+  function apply(c,fresh){rows.forEach(function(r){var ok=(c==='*'||r.dataset.c===c)&&(!fresh||parseFloat(r.dataset.n72)>=1);r.hidden=!ok});}
+  if(bar){var cur='*',fr=false;bar.hidden=false;bar.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+    if(b.dataset.f==='fresh'){fr=!fr;b.setAttribute('aria-pressed',fr)}else{cur=b.dataset.c;[].forEach.call(bar.querySelectorAll('[data-c]'),function(x){x.setAttribute('aria-pressed',x===b)})}
+    apply(cur,fr)})}
+  var g=document.getElementById('sg-gen'); if(g){var h=(Date.now()-Date.parse(g.dataset.generated))/36e5;
+    if(h>26){g.textContent+=' · podatki niso sveži ('+Math.round(h)+' h)';g.classList.add('sg-stale')}}
+  var grid=document.getElementById('sg-cams'); if(!grid) return;
+  var live=0; function done(){ if(!live) document.getElementById('kamere').hidden=true }
+  function fig(src,cap,alt){var f=document.createElement('figure');var i=document.createElement('img');i.loading='lazy';i.decoding='async';
+    i.width=1023;i.height=520;i.alt=alt;i.src=src;i.addEventListener('error',function(){f.remove();live--;done()},{once:true});
+    var c=document.createElement('figcaption');c.textContent=cap;f.appendChild(i);f.appendChild(c);grid.appendChild(f);live++}
+  (JSON.parse(grid.dataset.arso||'[]')).forEach(function(n){
+    fetch(PROXY+'/arso-cam?format=json&kamera='+encodeURIComponent(n)).then(function(r){return r.ok?r.json():null}).then(function(m){
+      if(!m) return; var d=m.posnet?new Date(m.posnet):null;
+      var t=d&&!isNaN(d)?d.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
+      fig(PROXY+m.slika+(m.posnet?'&t='+encodeURIComponent(m.posnet):''),'Vir: ARSO · '+m.kamera+(t?' · posneto ob '+t:''),'Spletna kamera ARSO: '+m.kamera)
+    }).catch(function(){})});
+  if(grid.dataset.drsi){fig(grid.dataset.drsi+'?t='+Math.floor(Date.now()/3e5),'Vir: DRSI · prelaz Črnivec','Spletna kamera DRSI na prelazu Črnivec')}
+  [].forEach.call(document.querySelectorAll('.sg-embed button'),function(b){b.addEventListener('click',function(){
+    var w=b.parentNode,f=document.createElement('iframe');f.src=w.dataset.src;f.loading='lazy';f.width='100%';f.height='360';
+    f.setAttribute('referrerpolicy','no-referrer');f.setAttribute('title','Spletna kamera');w.replaceChildren(f)})});
+})();
+</script>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>
