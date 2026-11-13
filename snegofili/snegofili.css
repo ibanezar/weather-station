@@ -88,7 +88,8 @@
 .sg-dl dd{margin:0;font-variant-numeric:tabular-nums}
 .sg-foot{display:flex;justify-content:space-between;gap:.5rem;font-size:.76rem;color:var(--muted);margin-top:auto}
 .sg-foot a{color:var(--text)}
-.sg-embed button{min-height:44px;padding:0 1rem}
+.sg-live{min-height:44px;padding:0 1rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text);font:inherit;cursor:pointer;width:100%}
+.sg-attr{margin:.3rem 0 0;font-size:.72rem;color:var(--muted);line-height:1.35}.sg-attr a{color:var(--text)}
 #sg-cams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:.8rem}
 #sg-cams figure{margin:0}#sg-cams img{width:100%;height:auto;aspect-ratio:1023/520;object-fit:cover;border-radius:12px}
 #sg-cams figcaption{font-size:.8rem;opacity:.8}

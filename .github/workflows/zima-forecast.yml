@@ -58,6 +58,7 @@ jobs:
         run: |
           python3 tools/snegofili_data.py
           python3 tools/generate_snegofili_page.py
+          { echo '## Kamere ARSO za /snegofili/'; python3 tools/check_snegofili_cams.py; } >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: Sestavi /jutro-v-dolini/ (zamik od prvega žarka do ogrevanja doline, statistika iz urnih meritev)
         # Ne sme podreti ostalih strani: brez te strani zima/ in crnivec.si delujeta naprej.
