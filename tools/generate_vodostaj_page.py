@@ -173,13 +173,15 @@ def river_schema_svg(main, tribs):
     if len(pts) < 2:
         return ""
     pts = sorted(pts, key=lambda s: s["lon"])
-    W = 720
-    x0, x1 = 54, W - 54
+    W = 840
+    x0, x1 = 54, W - 170
     n = len(pts)
     xs = [x0 + (x1 - x0) * i / (n - 1) for i in range(n)]
     ym = 78
     has_t = bool(tribs)
-    H = 112 + (70 + 52 if has_t else 0)
+    LABEL_W = 135   # širina oznake pritoka desno od vozlišča
+    ROW_H = 46
+    H = 200  # začasno; dokončna višina sledi razporeditvi pritokov
 
     def main_x(lon):
         if lon <= pts[0]["lon"]:
@@ -192,32 +194,40 @@ def river_schema_svg(main, tribs):
 
     parts = [f'<svg viewBox="0 0 {W} {H}" class="vod-svg vod-schema" role="img" '
              f'aria-label="Shema merilnih postaj na Savinji in pritokih" preserveAspectRatio="xMidYMid meet">',
-             '<defs><linearGradient id="vodRiver" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="720" y2="0">'
+             '<defs><linearGradient id="vodRiver" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="840" y2="0">'
              '<stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs>']
     parts.append(f'<path d="M{x0 - 34},{ym} L{x1 + 34},{ym}" stroke="url(#vodRiver)" stroke-width="7" '
                  f'stroke-linecap="round" fill="none" opacity=".9"/>')
     parts.append(f'<path d="M{x1 + 28},{ym - 6} L{x1 + 38},{ym} L{x1 + 28},{ym + 6}" stroke="#2563eb" '
                  f'stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
-    parts.append(f'<text class="vm" x="{x0 - 34}" y="{ym + 58}" font-size="10">← gorvodno</text>')
-    parts.append(f'<text class="vm" x="{x1 + 34}" y="{ym + 58}" font-size="10" text-anchor="end">dolvodno →</text>')
+    parts.append(f'<text class="vm" x="{x0 - 34}" y="{ym - 46}" font-size="10">← gorvodno</text>')
+    parts.append(f'<text class="vm" x="{x1 + 34}" y="{ym - 46}" font-size="10" text-anchor="end">dolvodno →</text>')
 
-    # pritoki (veja navzdol od glavne črte)
-    placed = []
-    for t in sorted(tribs, key=lambda s: main_x(s["lon"])):
-        tx = main_x(t["lon"])
-        row = 0
-        while any(abs(tx - px) < 92 and row == pr for px, pr in placed):
-            row += 1
+    # pritoki (veja navzdol od glavne črte). Razporeditev po vrsticah od desne proti levi:
+    # vsak je za eno vrstico globlje od najglobljega bližnjega soseda desno, zato steblo
+    # nobenega pritoka ne seka oznake drugega.
+    tl = sorted(((main_x(t["lon"]), t) for t in tribs), key=lambda a: -a[0])
+    rows_of, placed = {}, []
+    for tx, t in tl:
+        near = [r for px, r in placed if 0 <= px - tx < LABEL_W + 14]
+        row = (max(near) + 1) if near else 0
         placed.append((tx, row))
-        ty = ym + 92 + row * 52
+        rows_of[id(t)] = (tx, row)
+    nrows = (max(r for _, r in placed) + 1) if placed else 0
+    H = 118 + (nrows * ROW_H + 24 if has_t else 0)
+    parts[0] = (f'<svg viewBox="0 0 {W} {H}" class="vod-svg vod-schema" role="img" '
+                f'aria-label="Shema merilnih postaj na Savinji in pritokih" preserveAspectRatio="xMidYMid meet">')
+    for tx, t in tl:
+        _, row = rows_of[id(t)]
+        ty = ym + 62 + row * ROW_H
         c = card_color(t)
         parts.append(f'<path d="M{tx:.1f},{ty - 10} L{tx:.1f},{ym + 5}" '
-                     f'stroke="#38bdf8" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/>')
-        parts.append(f'<circle cx="{tx:.1f}" cy="{ty}" r="9" fill="{c}" class="vnode"/>')
+                     f'stroke="#38bdf8" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>')
+        parts.append(f'<circle cx="{tx:.1f}" cy="{ty}" r="8" fill="{c}" class="vnode"/>')
         q = t.get("pretok")
         val = f"{seo.num(q, 1)} m³/s" if q is not None else (f"{seo.num(t['vodostaj'], 0)} cm" if t.get("vodostaj") is not None else "—")
-        parts.append(f'<text class="vt" x="{tx + 15:.1f}" y="{ty - 1}" font-size="11.5" font-weight="700">{_svg_esc(short_name(t))}</text>')
-        parts.append(f'<text class="vm" x="{tx + 15:.1f}" y="{ty + 13}" font-size="10.5">{_svg_esc(t["reka"])} · {val}</text>')
+        parts.append(f'<text class="vt" x="{tx + 14:.1f}" y="{ty - 1}" font-size="11.5" font-weight="700">{_svg_esc(short_name(t))}</text>')
+        parts.append(f'<text class="vm" x="{tx + 14:.1f}" y="{ty + 12}" font-size="10.5">{_svg_esc(t["reka"])} · {val}</text>')
 
     for s, sx in zip(pts, xs):
         c = card_color(s)
@@ -647,7 +657,8 @@ def build_body(flood, main, tribs):
 
     # ── Opis in FAQ ─────────────────────────────────────────────────────────
     trib_names = sorted({t["reka"] for t in tribs})
-    trib_gen = [TRIB_RIVERS[trib_key(r)] for r in trib_names if trib_key(r)]
+    present = {trib_key(r) for r in trib_names}
+    trib_gen = [g for k, g in TRIB_RIVERS.items() if k in present]  # Dreta prva, ne abecedno
     where = (f"Savinje in pritokov ({', '.join(trib_names)})" if trib_names else "Savinje")
     qa = [
         ("Kakšen je trenutni pretok Savinje pri Rečici ob Savinji?",
