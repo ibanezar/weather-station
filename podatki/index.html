@@ -35,6 +35,9 @@
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Podatki"}]}
 </script>
 <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Kje dobim zgodovinske vremenske podatke za Re\u010dico ob Savinji?","acceptedAnswer":{"@type":"Answer","text":"Dnevne meritve postaje IREICA1 od 7. novembra 2019 so na tej strani kot CSV (podatki/ireica1-dnevni-podatki.csv) in JSON (history.json), po dnevih pa v vremenskem arhivu na /vreme/."}},{"@type":"Question","name":"Kako citirati podatke postaje IREICA1?","acceptedAnswer":{"@type":"Answer","text":"Navedite \u00bbMeteorec (meteorec.si), postaja IREICA1\u00ab, razli\u010dico (zadnji dan v datoteki) ali datum dostopa; trajni DOI zapisa je 10.5281/zenodo.23979571."}},{"@type":"Question","name":"Katera licenca velja za podatke?","acceptedAnswer":{"@type":"Answer","text":"Creative Commons Attribution 4.0 (CC BY 4.0): podatke smete uporabljati in deliti ob navedbi vira."}},{"@type":"Question","name":"Katere spremenljivke vsebuje CSV?","acceptedAnswer":{"@type":"Answer","text":"Datum, najvi\u0161ja, najni\u017eja in povpre\u010dna dnevna temperatura (\u00b0C), padavine (mm), najvi\u0161ja in povpre\u010dna hitrost vetra (km/h) ter povpre\u010dna relativna vla\u017enost (%). Vsebuje samo zunanje meritve postaje, ne dni, dopolnjenih iz reanalize ERA5."}},{"@type":"Question","name":"Je postaja uradna?","acceptedAnswer":{"@type":"Answer","text":"Ne. IREICA1 je amaterska postaja (senzorji Ecowitt, brez uradne kalibracije in presoje lokacije) in ni del merilne mre\u017ee ARSO. Za uradne podatke glejte ARSO."}}]}
+</script>
+<script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Dataset","@id":"https://meteorec.si/#dataset","name":"Vremenske meritve — Rečica ob Savinji (IREICA1)","alternateName":"Meteorec IREICA1 Weather Dataset","description":"Dnevni arhiv temperature, padavin, relativne vlage in vetra meteorološke postaje IREICA1 v Rečici ob Savinji od 7. novembra 2019.","url":"https://meteorec.si/vreme/","identifier":["IREICA1","https://doi.org/10.5281/zenodo.23979571"],"inLanguage":"sl","license":"https://creativecommons.org/licenses/by/4.0/","isAccessibleForFree":true,"keywords":["vreme Rečica ob Savinji","vreme Zgornja Savinjska dolina","vremenska postaja Savinjska dolina"],"temporalCoverage":"2019-11-07/..","creator":{"@id":"https://meteorec.si/#person"},"publisher":{"@type":"Organization","name":"Meteorec","url":"https://meteorec.si/"},"spatialCoverage":{"@type":"Place","name":"Rečica ob Savinji","sameAs":["https://www.wikidata.org/wiki/Q969326","https://en.wikipedia.org/wiki/Re%C4%8Dica_ob_Savinji"],"geo":{"@type":"GeoCoordinates","latitude":46.325779,"longitude":14.921137,"elevation":366}},"variableMeasured":[{"@type":"PropertyValue","name":"Temperatura zraka","unitText":"°C"},{"@type":"PropertyValue","name":"Padavine","unitText":"mm"},{"@type":"PropertyValue","name":"Relativna vlažnost","unitText":"%"},{"@type":"PropertyValue","name":"Hitrost vetra","unitText":"km/h"}],"distribution":[{"@type":"DataDownload","encodingFormat":"application/json","contentUrl":"https://meteorec.si/history.json"},{"@type":"DataDownload","encodingFormat":"text/csv","contentUrl":"https://meteorec.si/podatki/ireica1-dnevni-podatki.csv"}],"measurementTechnique":"Amaterska vremenska postaja Ecowitt (senzorji na prostem), dnevni povzetek","sameAs":"https://doi.org/10.5281/zenodo.23979571"}
 </script>
 <link rel="stylesheet" href="/fonts/fonts.css?v=c490d62a">
@@ -65,6 +68,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="stn-badge"><span></span> IREICA1 · Rečica ob Savinji</div>
   <h1 class="page-title">Podatki — Rečica ob Savinji (IREICA1)</h1>
   <p class="post-meta">Ena stran, samo HTML tabele — trenutne meritve, rekordi in klimatološke norme · 2026-11-14</p>
+  <p class="archive-intro tnc-answer"><strong>Na kratko:</strong> postaja IREICA1 v Rečici ob Savinji (366 m n. m.) meri vreme od 7. novembra 2019; do 13. novembra 2026 je 2545 dni meritev. Povprečna letna temperatura je 10,9 °C, povprečno pade 1377 mm padavin na leto; najvišja izmerjena temperatura je 37,8 °C (5. avgusta 2026), najnižja −16,5 °C (8. januarja 2026). Podatki so prosto dostopni (CC BY 4.0) kot CSV in JSON, z DOI <a href="https://doi.org/10.5281/zenodo.23979571">10.5281/zenodo.23979571</a>. Postaja je amaterska, brez uradne kalibracije. <span class="muted-note">Posodobljeno: 13. novembra 2026.</span></p>
   <p class="archive-intro">Meteorološka postaja IREICA1 pri Rečici ob Savinji (Zgornja Savinjska dolina, 366 m n. m.,
   46,325779° S, 14,921137° V) neprekinjeno meri vreme od 7. novembra 2019. Ta stran zbira ključne podatke
   brez JavaScripta, za enostavno branje in citiranje. Polni arhiv je na <a href="/vreme/">/vreme/</a>,
@@ -145,6 +149,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <tr><th>Licenca</th><td>CC BY 4.0</td></tr>
     <tr><th>Strojno berljiv indeks</th><td><a href="/llms.txt">/llms.txt</a></td></tr>
   </table></div>
+
+  <h2>Pogosta vprašanja</h2>
+  <div class="faq">
+    <details><summary>Kje dobim zgodovinske vremenske podatke za Rečico ob Savinji?</summary><p>Dnevne meritve postaje IREICA1 od 7. novembra 2019 so na tej strani kot CSV (podatki/ireica1-dnevni-podatki.csv) in JSON (history.json), po dnevih pa v vremenskem arhivu na /vreme/.</p></details>
+    <details><summary>Kako citirati podatke postaje IREICA1?</summary><p>Navedite »Meteorec (meteorec.si), postaja IREICA1«, različico (zadnji dan v datoteki) ali datum dostopa; trajni DOI zapisa je 10.5281/zenodo.23979571.</p></details>
+    <details><summary>Katera licenca velja za podatke?</summary><p>Creative Commons Attribution 4.0 (CC BY 4.0): podatke smete uporabljati in deliti ob navedbi vira.</p></details>
+    <details><summary>Katere spremenljivke vsebuje CSV?</summary><p>Datum, najvišja, najnižja in povprečna dnevna temperatura (°C), padavine (mm), najvišja in povprečna hitrost vetra (km/h) ter povprečna relativna vlažnost (%). Vsebuje samo zunanje meritve postaje, ne dni, dopolnjenih iz reanalize ERA5.</p></details>
+    <details><summary>Je postaja uradna?</summary><p>Ne. IREICA1 je amaterska postaja (senzorji Ecowitt, brez uradne kalibracije in presoje lokacije) in ni del merilne mreže ARSO. Za uradne podatke glejte ARSO.</p></details>
+  </div>
 
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>
   <footer class="site-foot">
