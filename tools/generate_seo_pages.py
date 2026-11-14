@@ -4117,7 +4117,27 @@ def beaufort(kmh):
 SLOVAR_SEE_ALSO = {
     "zled": [("/zima/zled/", "Žled: ali dež zmrzuje in ali ga bo v dolini (modelski pokazatelj)"),
              ("/zima/poledica/", "Poledica: ko zmrzuje vlaga na cesti")],
+    # Razmejitev dvojnika (GSC 14. 11. 2026: »biovreme« se je delilo med /biovreme/ in /slovar/biovreme/):
+    # slovar odgovarja na »kaj je«, /biovreme/ na »biovreme danes«.
+    "biovreme": [("/biovreme/", "Biovreme danes: ocena za Rečico ob Savinji")],
 }
+
+# Naslov slovarske strani po meri, kjer bi splošna oblika tekmovala z drugo stranjo.
+SLOVAR_TITLE = {
+    "biovreme": ("Biovreme: kaj je in kako vpliva na počutje", None),
+}
+
+
+def related_terms_html(terms, current, n=5):
+    """»Sorodni pojmi«: do n drugih pojmov iste kategorije (po vrstnem redu v slovarju, ciklično od
+    trenutnega), za notranje povezovanje med 36 stranmi slovarja."""
+    same = [t for t in terms if t["cat"] == current["cat"]]
+    if len(same) < 2:
+        return ""
+    i = next(k for k, t in enumerate(same) if t["slug"] == current["slug"])
+    pick = [same[(i + k) % len(same)] for k in range(1, len(same))][:n]
+    return ("  <h2>Sorodni pojmi</h2>\n  <ul>\n" + "\n".join(
+        f'    <li><a href="/slovar/{t["slug"]}/">{t["term"]}</a></li>' for t in pick) + "\n  </ul>\n")
 
 
 def gen_slovar_pages(sitemap_urls):
@@ -4133,11 +4153,14 @@ def gen_slovar_pages(sitemap_urls):
         url = f"/slovar/{t['slug']}/"
         rel = f"slovar/{t['slug']}/index.html"
         short_name = re.sub(r"\s*\([^)]*\)\s*$", "", t["term"]).strip() or t["term"]
-        title = f"{short_name} — pomen in razlaga"
+        # GSC (14. 11. 2026): poizvedbe so »kaj je X« in »X«; naslov obljubi prav to.
+        title = f"Kaj je {short_name.lower()}? Razlaga pojma"
         desc = t["def"] if len(t["def"]) <= 155 else t["def"][:152].rsplit(" ", 1)[0] + "…"
         ex = extras.get(t["slug"])
         if ex:
             title, desc = ex["title"], ex["desc"]
+        if t["slug"] in SLOVAR_TITLE:
+            title = SLOVAR_TITLE[t["slug"]][0]
         crumbs = [("Meteorec", "/"), ("Slovar", "/slovar/"), (t["term"], None)]
 
         q0 = f"Kaj je {short_name.lower()}?"
@@ -4184,7 +4207,8 @@ def gen_slovar_pages(sitemap_urls):
         cat_label = GLOSS_CAT_LABELS.get(t["cat"], t["cat"])
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
-  <h1 class="page-title">{t["icon"]} {t["term"]}</h1>
+  <p aria-hidden="true" style="font-size:2rem;line-height:1;margin:0 0 .3rem">{t["icon"]}</p>
+  <h1 class="page-title">{t["term"]}</h1>
   <p class="post-meta">Vremenski slovar · <a href="/slovar/#{t["cat"]}">{cat_label}</a></p>
   <h2>{q0}</h2>
   <p class="archive-intro">{t["def"]}</p>
@@ -4192,7 +4216,7 @@ def gen_slovar_pages(sitemap_urls):
     <div class="clabel">💡 Zanimivost</div>
     <p class="archive-intro" style="margin:.4rem 0 0">{t["fun"]}</p>
   </div>
-{fact_html}{ex_html}{see_html}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
+{fact_html}{ex_html}{see_html}{related_terms_html(terms, t)}  <p class="muted-note">Poglej tudi <a href="/slovar/">celoten vremenski slovar</a> ali
   <a href="/">trenutne meritve v živo</a> iz Rečice ob Savinji.</p>
   <a class="back-link" href="/slovar/">← Vremenski slovar</a>'''
 
