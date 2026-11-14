@@ -179,6 +179,10 @@ def main():
                 check(not b, f"{o} brez None/NaN/undefined v besedilu {b}")
         zima = open(os.path.join(work, "zima/index.html"), encoding="utf-8").read() if os.path.exists(os.path.join(work, "zima/index.html")) else ""
         check("indoor" not in zima.lower(), "zima/: brez notranjih meritev")
+        mj = open(os.path.join(work, "zima/meja-snezenja/index.html"), encoding="utf-8").read() if os.path.exists(os.path.join(work, "zima/meja-snezenja/index.html")) else ""
+        check("Na kratko:" in mj and "m n. m." in mj, "meja sneženja: blok »Na kratko« z višino")
+        mt = re.search(r"<title>([^<]*)</title>", mj)
+        check(bool(mt) and len(mt.group(1)) <= 60, "meja sneženja: naslov ≤ 60 znakov")
         zl = open(os.path.join(work, "zima/zled/index.html"), encoding="utf-8").read() if os.path.exists(os.path.join(work, "zima/zled/index.html")) else ""
         check(bool(re.search(r"(visok|srednj)", zl, re.I)), "stran Žled omeni dvignjeno raven")
     finally:

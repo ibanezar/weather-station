@@ -299,7 +299,7 @@ def build_body():
 
 
 def main():
-    title = "Snežna karta Slovenije: sneženje in meja"
+    title = "Snežna karta Slovenije: sneženje po urah, +48 h"
     desc = ("Snežna karta Slovenije do +48 ur: sneženje po urah, meja sneženja in skupni novi sneg v izbranem obdobju "
             "na eni karti. Model ICON-D2, ne uradna napoved.")
     schema = "\n".join([
