@@ -55,12 +55,19 @@ function bot(sim, { mu, rezerva = 0.8, verige = false } = {}) {
   while (!sim.done && n < 120 * 900) {
     const muR = mu == null ? M.muAt(sim, sim.s) : mu;
     let vCilj = sim.verige ? M.VMAX_VERIGE : M.VMAX;
+    // Zaviranje se zgodi na vsem odseku do ovinka, ne samo pod avtom: če je
+    // pred ovinkom led, suha zaplata pod nami ne pomaga (ugotovljeno 14. 11.
+    // 2026: robot je zaviral z oprijemom suhe zaplate 18 m pred ledom in v
+    // prvo serpentino pripeljal z 8 m/s namesto 4,4 m/s). Zato je za zaviranje
+    // merodajen najslabši oprijem na poti do tja.
+    let muPot = muR;
     for (let a = 0; a < 70; a += 2) {
       const k = M.kAt(sim, sim.s + a);
       const muA = mu == null ? M.muAt(sim, sim.s + a) : mu;
+      if (mu == null) muPot = Math.min(muPot, muA);
       const vk = M.varnaHitrost(muA * rezerva, k);
       // hitrost, s katere lahko do tja še zaviramo
-      const vz = Math.sqrt(vk * vk + 2 * Math.min(M.BRAKE, muR * M.G) * 0.7 * a);
+      const vz = Math.sqrt(vk * vk + 2 * Math.min(M.BRAKE, muPot * M.G) * 0.7 * a);
       vCilj = Math.min(vCilj, vz);
     }
     // Volan mora sam slediti cesti (avto ne zavije brez njega): ukrivljenost

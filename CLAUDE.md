@@ -213,7 +213,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   kartica ni šla ven); okno je bilo zato razširjeno do 15:00.
 - Ker FB/IG sliko poberata prek javnega URL-ja, workflow po push-u počaka, da jo
   GitHub Pages res postreže (do 10 minut), preden objavi.
-- **Dnevna zgodba gre ven samo med 6:00 in 7:00** (19. 10. 2026, Filip): napoved dneva popoldne laže (kartica »danes hladneje« ob 11:44). `story_gate.py` `WINDOW_END = 7`; zamujen cron = danes ni kartice. Ker GitHubov cron zamuja 5–7 ur, bo kartica brez Cloudflare sprožilca večinoma izpadla. **Žeton `GH_DISPATCH_TOKEN` JE nastavljen (ugotovljeno 5. 11. 2026), a worker sproži samo `vodostaj-forecast.yml`: `daily-story.yml` v `_cronDispatchScheduledWorkflows` ni, zato izpad zgodbe ostaja** (glej razdelek »Zakaj cron zamuja«).
+- **Dnevna zgodba gre ven samo med 6:00 in 7:00** (19. 10. 2026, Filip): napoved dneva popoldne laže (kartica »danes hladneje« ob 11:44). `story_gate.py` `WINDOW_END = 7`; zamujen cron = danes ni kartice. Ker GitHubov cron zamuja 5–7 ur, bo kartica brez Cloudflare sprožilca večinoma izpadla. **Žeton `GH_DISPATCH_TOKEN` JE nastavljen (ugotovljeno 5. 11. 2026). Od 14. 11. 2026 worker sproži tudi `daily-story.yml`** (`_cronDispatchScheduledWorkflows`, 4:10/4:40/5:10/5:40 UTC, `force: "false"`: pozimi sta v oknu 5:10 in 5:40, poleti 4:10 in 4:40, ostale zavrne `story_gate.py`, drugi v oknu pa ne objavi znova). **Po deployu workerja preveri, da je zgodba naslednje jutro šla ven; če je, spusti prag svežine v `check_freshness.py` (zdaj 168 h).** (glej razdelek »Zakaj cron zamuja«).
 - **Jutranje teme gredo ven samo zjutraj, večerna kartica pa dan prej** (13. 10. 2026): FROST,
   COLD_MORNING in FOG_MORNING (`MORNING_TOPICS`) so čez dan lagale -- cron zamuja ure in opoldne je
   kartica »Hladno jutro danes« povedala nekaj, kar je že mimo. Zdaj so dovoljene samo pred 10:00
@@ -225,7 +225,7 @@ Poleg objav ob člankih gre vsak dan zjutraj ven še kartica v formatu zgodbe
   svežine jutranje zgodbe ne zmoti). Testi: `tools/test_gates.py`.
 - **Izpad zgodbe je pričakovan** (22. 10. 2026, issue #1224): zadnja zgodba je 19. 10., ker okno 6–7 in zamujanje crona
   brez `GH_DISPATCH_TOKEN` dnevni tek zgrešita. Filip je izpade sprejel; prag svežine zgodbe v `check_freshness.py` je
-  zato 168 h (7 dni). Vrnitev rednosti: dodaj `daily-story.yml` v `_cronDispatchScheduledWorkflows` (žeton obstaja) ali razširi `WINDOW_END`.
+  zato 168 h (7 dni). Vrnitev rednosti: `daily-story.yml` je od 14. 11. 2026 v `_cronDispatchScheduledWorkflows` (izpad naj bi se ustavil po deployu workerja); sicer razširi `WINDOW_END`.
 - **VS_YESTERDAY samo do 7:00** (19. 10. 2026): kartica »Danes bo hladneje kot včeraj« je šla ven ob 11:44, ohladitev pa je bila šele popoldne. Po 7:00 tema odpade (`VS_YESTERDAY_LAST_HOUR`), zgodbo dobi druga tema.
 
 Potrebni GitHub Secrets: `FB_PAGE_ID`, `FB_PAGE_TOKEN` (trajni Page Access
@@ -1428,7 +1428,7 @@ Open-Meteo). Ista oblika, `today` se prepiše iz zamrznjene (junaška ploščica
   strani (`inject_forecast.py` …) še vedno berejo zamrznjeno** — namerno.
 - **Računa se v Pythonu, zato Cloudflare cron ne more nadomestiti GitHubovega** (druga kopija modela v workerju
   bi se razšla, kot opozarja `daily_features`). Cloudflare bi lahko le sprožil workflow, to pa terja
-  `GH_DISPATCH_TOKEN` (nastavljen, a se zdaj uporablja samo za `vodostaj-forecast.yml`; živa osvežitev MTR bi terjala nov vnos v worker). GitHubov cron združuje teke, razmik med osvežitvami je torej neenakomeren.
+  `GH_DISPATCH_TOKEN` (nastavljen, a se zdaj uporablja samo za `vodostaj-forecast.yml` in `daily-story.yml`; živa osvežitev MTR bi terjala nov vnos v worker). GitHubov cron združuje teke, razmik med osvežitvami je torej neenakomeren.
 - Model je naučen na jutranjem zajemu D+1; popoldanski vhodi so svežji, a **točnosti po poznejših osvežitvah ne
   merimo**. Če bi jo želeli, bi bilo treba živo napoved posebej beležiti (ne na semafor).
 - Varuh svežine ima vrstico »Napoved MTR (živa)«, test: `tools/test_mtr_live.py` (v `parity.yml`).
@@ -2620,7 +2620,7 @@ Kar je zdaj narejeno:
   posnetkom** (cron `30 6-7 * * *`: `_cronSnapshotArsoRr24h`, nato dispatch
   `precip-map.yml`, beat `dispatch_precip`), ne skupni dispatch ob 4:10–5:40 UTC.
 - **Cloudflare varovalka** (`_cronDispatchScheduledWorkflows`) kliče `storm-map.yml` in
-  `vodostaj-forecast.yml` (padavinske karte ne več — glej zgoraj). Rabi `GH_DISPATCH_TOKEN`; ta je od ≥ 2. 10. nastavljen (5. 11. 2026 preverjeno), `storm-map.yml` je na pavzi, zato dejansko teče samo `vodostaj-forecast.yml`. Pozni tek ostaja dopolnilo za delovne tokove, ki jih worker ne sproži (npr. `daily-story.yml`).
+  `vodostaj-forecast.yml` (padavinske karte ne več — glej zgoraj). Rabi `GH_DISPATCH_TOKEN`; ta je od ≥ 2. 10. nastavljen (5. 11. 2026 preverjeno), `storm-map.yml` je na pavzi, zato dejansko tečeta `vodostaj-forecast.yml` in od 14. 11. 2026 `daily-story.yml` (`force: "false"`, ker je privzeti `force` pri ročnem zagonu `true`). Pozni tek ostaja dopolnilo za delovne tokove, ki jih worker ne sproži.
 - **Varuh svežine** `tools/check_freshness.py` (`freshness-watch.yml`, 06:40 in 18:40
   UTC): gleda sam izdelek (`REGISTER`: datoteka, polje s časom, največja starost) in
   ob zastarelem odpre issue z oznako `stale-output`, ko je spet vse sveže, ga zapre.
@@ -3138,7 +3138,7 @@ Izvozi (Search Console 6 mesecev, Looker Studio strani × poizvedbe, GA4) so v `
 - **Krajevne strani**: Rečica ima »Na kratko«, graf zadnjih 14 izmerjenih dni proti običajnemu za ta čas (±7 dni, prejšnja leta, samo meritve) in grafa po mesecih; šest krajev ima »Na kratko« in grafa po mesecih (temperatura z višinskim popravkom, padavine so izmerjene v Rečici in so tako označene); Menina in trije kampi imajo živo meritev (`data-loc`, injektor jih najde sam). **Logarska dolina ima napoved (Open-Meteo za koordinate doline), meritve NI** (postaja je ~30 km stran); Logarska mora biti v `git add` v `generate-seo-pages.yml`, v `PATHS` v `prerender-current.yml` in v `TOWNS` v `inject_forecast.py`.
 - **Ne commitaj lokalno generiranih strani z vbrizganimi bloki** (krajevne strani, `/zima/*`): generator jih prepiše z rezervnim besedilom, urni injektorji jih šele nato napolnijo. Commitaj samo generator, strani zgradi delovni tok (po mergu ga poženi ročno). Po `generate-seo-pages.yml` krajevne strani nekaj časa nimajo tabel napovedi, dokler jih `prerender-current.yml` ne napolni.
 - **`indexnow-bot.yml`** (nov): po uspešnem teku »Generate SEO pages«, »Zima«, »Gobarska napoved« in »Biovreme« javi iskalnikom HTML strani, spremenjene v zadnjih 6 urah (največ 300; brez `/i/`, `/pojmi/`, skritih strani). `indexnow.yml` pokrije samo korenske `*.html`, ker imajo commiti botov `[skip ci]`. Iz peskovnika IndexNow ni dosegljiv (proxy 403).
-- **Znana težava (14. 11. 2026)**: `zima-forecast.yml` je padel v koraku igre Črnivec (`test_crnivec_igra.mjs`: »današnji nivo je prevozen — jarki 3«), test pa teče PRED commitom, zato se je zaradi igre ustavil commit vseh zimskih strani. Zapisano kot ločena naloga; dokler ni popravljena, zimske strani ne dobijo novih naslovov in blokov »Na kratko«.
+- **Znana težava (14. 11. 2026)**: `zima-forecast.yml` je padel v koraku igre Črnivec (`test_crnivec_igra.mjs`: »današnji nivo je prevozen — jarki 3«), test pa teče PRED commitom, zato se je zaradi igre ustavil commit vseh zimskih strani. **Popravljeno 14. 11. 2026 (vzrok je bil robot v testu, ne igra):** robot je zaviranje načrtoval z oprijemom zaplate pod seboj (suho, μ 1,0), čeprav je zaviral šele na ledu pred prvo serpentino (μ 0,17), in je vanjo pripeljal z 8 m/s namesto 4,4 m/s. Zdaj je za zaviranje merodajen najslabši oprijem na poti do ovinka. Preverjeno na današnjem nivoju (60 % ledu po vsej cesti) in 240 razporedih zaplat (delež ledu 0,3–1,0, 60 datumov): 0 padcev. Po mergu ročno poženi `zima-forecast.yml`, da zimske strani dobijo nove naslove in bloke »Na kratko«.
 - **Ni narejeno**: skupini D in E iz seznama (orodne strani, »vreme za …«) čakata na podatke o povpraševanju (GSC čez nekaj tednov ali Ahrefs); krajevne strani po vzoru Vodostaja z živo strugo (graf izmerjenih 24 ur) niso narejene; vodostaj po prenovi (13. 11.) izmeri GSC okoli 12. 12.
 
 ## Razvoj

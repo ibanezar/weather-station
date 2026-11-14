@@ -3433,6 +3433,12 @@ async function _cronDispatchScheduledWorkflows(env) {
     // storm-map.yml je na pavzi do aprila 2027 (28. 10. 2026) -- ob vklopu vrni:
     // "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
     "vodostaj-forecast.yml": await _cronDispatchGithubWorkflow(env, "vodostaj-forecast.yml"),
+    // Dnevna zgodba (14. 11. 2026): GitHubov cron zamuja 5–7 ur, okno zgodbe pa je 6:00–7:00 po naši
+    // uri (story_gate.py), zato je kartica brez tega izpadala. Ta cron teče ob 4:10/4:40/5:10/5:40 UTC:
+    // pozimi sta v oknu 5:10 in 5:40, poleti 4:10 in 4:40; ostale tri zavrne vrata, drugi v oknu pa
+    // zgodbe ne objavi znova (stanje v tools/.story_state.json). `force: "false"` je OBVEZEN: pri ročnem
+    // zagonu je privzeto "true", kar bi obšlo okno in objavilo ob vsakem klicu.
+    "daily-story.yml": await _cronDispatchGithubWorkflow(env, "daily-story.yml", { force: "false" }),
   };
   const r2 = env?.PHOTOS_R2;
   if (r2) {
