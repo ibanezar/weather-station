@@ -715,6 +715,121 @@ def detect_droughts(history, lookback_days=30):
 NOVOSTI_CATALOG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "novosti.json")
 
 
+# Prva snežna odeja sezone (14. 11. 2026). Postaja IREICA1 snega ne meri, zato je vir višina odeje
+# ARSO za Gornji Grad (428 m, 9 km od Rečice, glavna postaja snežnega modela MTR). Dva vira, ki
+# se ne zlivata: dnevni arhiv ARSO (zaostaja ~9 dni) in naši odčitki živega vira (od 9. 11. 2026,
+# `tools/log_arso_snow_live.py`). Med njima je lahko luknja; ob njej dogodek ne trdi več, kot ve.
+SNOW_STATION_ID = "GORNJ-GRA_"
+SNOW_ARCHIVE_ID = "1748"
+SNOW_MIN_CM = 1.0
+SNOW_LIVE_CSV = os.path.join(ROOT, "data", "arso-snow-live.csv")
+SNOW_ARCHIVE = os.path.join(ROOT, "data", "arso-sneg-postaje", f"daily-{SNOW_ARCHIVE_ID}.json")
+SNOW_ARCHIVE_META = os.path.join(ROOT, "data", "arso-sneg-postaje", "osvezeno.json")
+
+
+def _snow_clock(t):
+    """Ura po slogovnem vodniku: »ob 7.30«, cela ura »ob 8. uri«."""
+    return f"ob {t.hour}. uri" if t.minute == 0 else f"ob {t.hour}.{t.minute:02d}"
+
+
+def detect_first_snow(lookback_days=30, live_csv=SNOW_LIVE_CSV, archive=SNOW_ARCHIVE,
+                      meta=SNOW_ARCHIVE_META, today=None):
+    """Prva snežna odeja (>= SNOW_MIN_CM) sezone, ki se začne 1. oktobra, na ARSO postaji Gornji Grad.
+
+    Vrne [] ali en dogodek. Dogodek ima `gap` (od, do), če med koncem arhiva in prvim našim
+    odčitkom manjkajo dnevi: takrat sneg morda ni bil prvi in stran to pove. Brez meta zapisa
+    arhiva pri živem odčitku pokritosti ne poznamo, zato dogodka ne trdimo."""
+    import csv
+    from zoneinfo import ZoneInfo
+    today = today or TODAY
+    season = today.year if today.month >= 7 else today.year - 1
+    start = datetime.date(season, 10, 1)
+    cutoff = today - datetime.timedelta(days=lookback_days)
+    tz = ZoneInfo("Europe/Ljubljana")
+
+    def _f(x):
+        try:
+            return float(x)
+        except (TypeError, ValueError):
+            return None
+
+    first = None   # (datum, cm, vir, čas)
+    try:
+        days = json.load(open(archive, encoding="utf-8"))["days"]
+        for row in days:
+            if row[0] >= start.isoformat() and row[1] is not None and row[1] >= SNOW_MIN_CM:
+                first = (row[0], float(row[1]), "arhiv", None)
+                break
+    except (OSError, ValueError, KeyError, IndexError):
+        pass
+
+    live = []
+    try:
+        with open(live_csv, encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f):
+                try:
+                    t = (datetime.datetime.strptime(r["valid_utc"], "%Y-%m-%dT%H:%MZ")
+                         .replace(tzinfo=datetime.timezone.utc).astimezone(tz))
+                except (ValueError, KeyError):
+                    continue
+                if t.date() >= start:
+                    live.append((t, r))
+    except OSError:
+        pass
+    live.sort(key=lambda x: x[0])
+    own = [(t, r) for t, r in live if r.get("id") == SNOW_STATION_ID]
+    live_first = own[0][0].date() if own else None
+    for t, r in own:
+        cm = _f(r.get("snow_cm"))
+        if cm is not None and cm >= SNOW_MIN_CM:
+            if first is None or t.date().isoformat() < first[0]:
+                first = (t.date().isoformat(), cm, "odčitek", t)
+            break
+    if first is None or datetime.date.fromisoformat(first[0]) < cutoff:
+        return []
+
+    gap = None
+    if first[2] == "odčitek":
+        try:
+            last = json.load(open(meta, encoding="utf-8"))["last_value_date"][SNOW_ARCHIVE_ID]
+            arch_end = datetime.date.fromisoformat(last)
+        except (OSError, ValueError, KeyError):
+            return []
+        if (live_first - arch_end).days > 1:
+            gap = [(arch_end + datetime.timedelta(days=1)).isoformat(),
+                   (live_first - datetime.timedelta(days=1)).isoformat()]
+
+    others = {}
+    for t, r in live:
+        if t.date().isoformat() != first[0] or r.get("id") == SNOW_STATION_ID:
+            continue
+        cm = _f(r.get("snow_cm"))
+        alt = _f(r.get("alt_m"))
+        if cm is not None and cm >= SNOW_MIN_CM and alt is not None:
+            name = r.get("name") or r.get("id")
+            if name not in others or cm > others[name][1]:
+                others[name] = (alt, cm)
+    others = [{"name": n, "alt_m": a, "cm": c}
+              for n, (a, c) in sorted(others.items(), key=lambda kv: kv[1][0])][:8]
+
+    t0 = first[3]
+    alt_m = next((_f(r.get("alt_m")) for _, r in own if _f(r.get("alt_m")) is not None), 428.0)
+    return [{
+        "type":   "prvi-sneg",
+        "date":   first[0],
+        "value":  first[1],
+        "param":  "snow",
+        "label":  "Prva snežna odeja sezone",
+        "slug":   f"prvi-sneg-{season}",
+        "where":  "ARSO · Gornji Grad",
+        "source": first[2],
+        "alt_m":  int(alt_m),
+        "clock":  _snow_clock(t0) if t0 else None,
+        "gap":    gap,
+        "others": others,
+    }]
+
+
 def load_novosti_catalog():
     """Naloži shranjeni katalog vseh zaznanih dogodkov."""
     if os.path.exists(NOVOSTI_CATALOG_PATH):
@@ -1401,9 +1516,65 @@ def gen_event_page(event, history, sitemap_urls, force=False):
     ev_type = event["type"]
     label   = event["label"]
     extra_html = ""
+    # Kdo je izmeril: pri vseh tipih naša postaja, pri snegu ARSO (IREICA1 snega ne meri).
+    hero_where  = "IREICA1 · REČICA OB SAVINJI"
+    post_meta   = f"Meteorec · postaja IREICA1 · {fmtd(ds)}"
+    source_para = (f'Podatki so zajeti iz meritev meteorološke postaje IREICA1 v Rečici ob '
+                   f'Savinji ({ELEV} m n. m., Zgornja Savinjska dolina). Vse zgodovinske meritve so dostopne '
+                   f'v <a href="/vreme/">arhivu vremena</a> in na <a href="/klima/">strani klimatoloških norm</a>.')
 
     # Določimo vsebino glede na tip
-    if ev_type == "rekord-vrocina":
+    if ev_type == "prvi-sneg":
+        season     = int(event["slug"].rsplit("-", 1)[1])
+        alt        = event.get("alt_m", 428)
+        cm         = num(val, 0) if float(val).is_integer() else num(val)
+        title      = f"Prva snežna odeja sezone {season}/{season + 1} v Gornjem Gradu"
+        desc       = (f"Postaja ARSO v Gornjem Gradu ({alt} m) je {fmtd(ds)} izmerila {cm} cm snežne odeje: "
+                      f"prva v {'podatkih sezone' if event.get('gap') else 'sezoni'} {season}/{season + 1}. Vir: ARSO.")
+        val_class  = "cold"
+        val_unit   = "cm"
+        hero_where = f"ARSO · GORNJI GRAD · {alt} M"
+        post_meta  = f"Meteorec · vir: ARSO · {fmtd(ds)}"
+        if event.get("source") == "odčitek":
+            intro_text = (f"Merilnik na postaji ARSO Gornji Grad ({alt} m n. m., 9 km od Rečice) je {fmtd(ds)} "
+                          f"{event.get('clock') or ''} pokazal {cm} cm snežne odeje. To je prva snežna odeja (vsaj "
+                          f"{num(SNOW_MIN_CM, 0)} cm) na tej postaji "
+                          + (f"v podatkih, ki jih imamo od 1. oktobra {season} (glej luknjo spodaj)."
+                             if event.get("gap") else f"od 1. oktobra {season}."))
+        else:
+            intro_text = (f"Dnevni arhiv ARSO za postajo Gornji Grad ({alt} m n. m., 9 km od Rečice) kaže za "
+                          f"{fmtd(ds)} {cm} cm snežne odeje. To je prvi dan s snežno odejo (vsaj "
+                          f"{num(SNOW_MIN_CM, 0)} cm) na tej postaji od 1. oktobra {season}.")
+        gap = event.get("gap")
+        gap_html = ""
+        if gap:
+            live_from = (datetime.date.fromisoformat(gap[1]) + datetime.timedelta(days=1)).isoformat()
+            gap_html = (f'    <p class="hub-intro"><b>Luknja v podatkih:</b> za dneve od {fmtd(gap[0])} do {fmtd(gap[1])} '
+                        f'nimamo dnevnih podatkov (arhiv ARSO zaostaja, naši odčitki so šele od {fmtd(live_from)}). '
+                        f'Ne moremo torej izključiti, da je sneg na tej postaji ležal že prej.</p>\n')
+        rows = [(f"Gornji Grad ({alt} m)", f"{cm} cm")]
+        for o in event.get("others") or []:
+            rows.append((f"{o['name']} ({int(o['alt_m'])} m)", f"{num(o['cm'], 0) if float(o['cm']).is_integer() else num(o['cm'])} cm"))
+        extra_html = (
+            '  <div class="hub-section">\n'
+            '    <table class="stats"><thead><tr><th scope="col">Postaja ARSO</th>'
+            '<th scope="col">Višina snežne odeje</th></tr></thead><tbody>\n'
+            + "\n".join(f'      <tr><th scope="row">{k}</th><td>{v}</td></tr>' for k, v in rows)
+            + '\n    </tbody></table>\n'
+            + gap_html +
+            '    <p class="hub-intro">To je višina snežne odeje, ne količina novega snega. Postaja IREICA1 v '
+            'Rečici snega ne meri, zato je podatek ARSO, ne naš. Vir: Agencija Republike Slovenije za okolje '
+            '(<a href="https://meteo.arso.gov.si/" rel="noopener">ARSO</a>), odčitek za dan '
+            f'{fmtd(ds)}. Za razmere glej <a href="/zima/">zimo v dolini</a> in '
+            '<a href="/zima/snezna-karta/">snežno karto</a>; to ni uradno opozorilo.</p>\n'
+            '  </div>')
+        source_para = (f'Višino snežne odeje meri ARSO; postaja IREICA1 ({ELEV} m n. m.) v Rečici ob Savinji snega ne '
+                       f'meri. Meritve naše postaje so v <a href="/vreme/">arhivu vremena</a> in na '
+                       f'<a href="/klima/">strani klimatoloških norm</a>.')
+        link_label = "→ Zima v dolini: sneg, poledica, žled"
+        link_url   = "/zima/"
+
+    elif ev_type == "rekord-vrocina":
         title      = f"Rekordna vročina v Rečici ob Savinji — {num(val)} °C ({fmtd(ds)})"
         desc       = (f"Meteorološka postaja IREICA1 v Rečici ob Savinji je {fmtd(ds)} "
                       f"zabeležila novo rekordno temperaturo: {num(val)} °C.")
@@ -1582,12 +1753,12 @@ def gen_event_page(event, history, sitemap_urls, force=False):
         link_label = "→ Dnevni podatki"
         link_url   = f"/vreme/{ds[:4]}/{ds[5:7]}/{ds[8:]}/".replace("//", "/")
 
-    _val_d = 0 if val_unit in ("dni", "strel") else 1
+    _val_d = 0 if val_unit in ("dni", "strel", "cm") else 1
     _hero_date = (f"{fmtd(ds)} – {fmtd(event.get('end_date', ds))}"
                   if event.get("end_date") and event["end_date"] != ds else fmtd(ds))
     hero_html = (
         '  <div class="event-hero">\n'
-        f'    <div class="ev-label">{label.upper()} · IREICA1 · REČICA OB SAVINJI</div>\n'
+        f'    <div class="ev-label">{label.upper()} · {hero_where}</div>\n'
         f'    <div class="ev-value {val_class}">{num(val, _val_d)} {val_unit}</div>\n'
         f'    <div class="ev-date">{_hero_date}</div>\n'
         '  </div>'
@@ -1602,15 +1773,13 @@ def gen_event_page(event, history, sitemap_urls, force=False):
 
     body = f'''{crumbs_html(novosti_crumbs)}
   <h1 class="page-title">{title}</h1>
-  <p class="post-meta">Meteorec · postaja IREICA1 · {fmtd(ds)}</p>
+  <p class="post-meta">{post_meta}</p>
 
 {hero_html}
 
   <div class="hub-section">
     <p class="hub-intro">{intro_text}</p>
-    <p class="hub-intro">Podatki so zajeti iz meritev meteorološke postaje IREICA1 v Rečici ob
-    Savinji ({ELEV} m n. m., Zgornja Savinjska dolina). Vse zgodovinske meritve so dostopne
-    v <a href="/vreme/">arhivu vremena</a> in na <a href="/klima/">strani klimatoloških norm</a>.</p>
+    <p class="hub-intro">{source_para}</p>
   </div>
 {extra_html}
   <a class="back-link" href="{link_url}">{link_label}</a>
@@ -1639,6 +1808,8 @@ def gen_novosti_index(events_so_far, sitemap_urls):
             return "°C"
         if t == "nevihta":
             return "strel"
+        if t == "prvi-sneg":
+            return "cm"
         if ev["param"] in ("tempHigh", "tempLow"):
             return "°C"
         if ev["param"] == "precipTotal":
@@ -1647,7 +1818,7 @@ def gen_novosti_index(events_so_far, sitemap_urls):
 
     def _ev_val_d(ev):
         unit = _ev_unit(ev)
-        return 0 if unit in ("dni", "strel") else 1
+        return 0 if unit in ("dni", "strel", "cm") else 1
 
     cards = []
     for ev in sorted(events_so_far, key=lambda e: e["date"], reverse=True):
@@ -1661,7 +1832,7 @@ def gen_novosti_index(events_so_far, sitemap_urls):
         cards.append(
             f'  <a class="novosti-card" href="{ev_url}">\n'
             f'    <div class="nc-title">{ev["label"]} — {num(ev["value"], val_d)} {unit}</div>\n'
-            f'    <div class="nc-meta">{date_str} · IREICA1 · Rečica ob Savinji</div>\n'
+            f'    <div class="nc-meta">{date_str} · {ev.get("where") or "IREICA1 · Rečica ob Savinji"}</div>\n'
             f'  </a>'
         )
 
@@ -1784,6 +1955,7 @@ def main():
     detected = detect_events(history, lookback_days=30)
     detected += detect_heat_waves(history, lookback_days=30)
     detected += detect_droughts(history, lookback_days=30)
+    detected += detect_first_snow(lookback_days=30)
     detected += detect_storms(history, fetch_lightning_daily(), lookback_days=int(os.environ.get("STORM_LOOKBACK_DAYS", "14")))
     print(f"  → {len(detected)} zaznanh dogodkov")
 
