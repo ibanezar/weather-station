@@ -55,7 +55,12 @@ jobs:
           for i in 1 2 3 4 5; do
             git push && exit 0
             echo "Push zavrnjen (poskus $i/5) — rebase na origin/main in ponovni poskus …"
+            # Injektorji (meritev, napoved) so pustili nestaged spremembe (index.html idr.), zaradi katerih
+            # »git pull --rebase« pade (14. 11. 2026: tek #152, push zavrnjen po 4,5 min injektiranja).
+            # Te spremembe niso del commita in jih urni prerender-current.yml vedno znova zapiše.
+            git stash push --include-untracked -q || true
             git pull --rebase origin main
+            git stash drop -q || true
             sleep $((i * 3))
           done
           echo "Push ni uspel po 5 poskusih." >&2
