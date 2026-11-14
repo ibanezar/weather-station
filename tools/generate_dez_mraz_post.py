@@ -325,74 +325,84 @@ def build_article():
     assert S["2026-10-23"]["tempLow"] == -0.1
     assert "0,1" in open(os.path.join(ROOT, "blog", "16-noci-pod-5-c-slane-se-ni-1021.html"), encoding="utf-8").read()
 
+    assert sun["tmin"] < coldest, "nedeljska napoved ni več pod letošnjim minimumom -- prenovi stavek o mrazu"
+
     # ---- grafi ----
     f_rain = ifig("rain", "Dnevne padavine v Rečici, 1.–13. novembra",
                  rain_chart(S),
-                 f"Vsak stolpec je en dan; meritev postaje IREICA1 (dežemer). Dva poudarjena stolpca, 12. in 13. 11., skupaj dasta {num(two)} mm, "
-                 f"to je {share} % vsega, kar je letos novembra do 13. 11. padlo ({num(nov)} mm).")
+                 f"Vsak stolpec prikazuje padavine v enem dnevu. Podatki so meritve dežemera postaje IREICA1. Poudarjena stolpca za 12. in 13. november skupaj predstavljata "
+                 f"{num(two)} mm oziroma {share} % vse novembrske količine padavin do vključno 13. novembra ({num(nov)} mm).")
     g12 = ("12. november (napoved z 11. 11.)", [("Izmerjeno", p12, None), ("MTR", mt12, GREEN), ("Open-Meteo", om12, BLUE), ("ECMWF AIFS", ai12, PINK), ("WeatherNext 2", wn12, VIOLET)])
     gsum = ("Oba dneva skupaj", [("Izmerjeno", two, None), ("MTR", mtr_sum, GREEN), ("Open-Meteo", round(sums["Open-Meteo"], 1), BLUE),
                                  ("ECMWF AIFS", round(sums["ECMWF AIFS"], 1), PINK), ("WeatherNext 2", round(sums["WeatherNext 2"], 1), VIOLET)])
     g13 = ("13. november (napoved z 12. 11.)", [("Izmerjeno", p13, None), ("MTR", mt13, GREEN), ("Open-Meteo", om13, BLUE), ("ECMWF AIFS", ai13, PINK), ("WeatherNext 2", wn13, VIOLET)])
-    f_fc = ifig("fc", "Koliko dežja so napovedali dan prej in koliko ga je bilo",
+    f_fc = ifig("fc", "Koliko dežja so modeli napovedali dan prej in koliko ga je dejansko padlo",
                forecast_chart([g12, g13, gsum], hi=90.0, nsw=True),
-               "Napovedi, izdane dan pred posameznim dnevom, v mm; vrednosti veljajo za točko Rečice. MTR kaže grobo pričakovano količino: povprečje petih virov, "
-               "ne naučen popravek (prva osvežitev živega MTR na dan pred dogodkom). ARSO v tej primerjavi količine ne navaja. Izmerjeno je dnevna vsota postaje.", tabs=["12. 11.", "13. 11.", "Skupaj"])
-    f_cold = ifig("cold", "Najnižja temperatura vsake noči",
+               "Napovedane količine padavin, izdane dan pred posameznim dnevom, so prikazane v milimetrih in veljajo za lokacijo Rečice. MTR prikazuje okvirno pričakovano količino, "
+               "izračunano kot povprečje petih virov; ne gre za naučen lokalni popravek. Upoštevana je prva osvežitev živega MTR na dan pred dogodkom. "
+               "ARSO v tej primerjavi količine padavin ne navaja. Izmerjena količina je dnevna vsota postaje.", tabs=["12. 11.", "13. 11.", "Skupaj"])
+    f_cold = ifig("cold", "Najnižje temperature zraka po nočeh",
                  legend([("izmerjeno, nad ničlo", BLUE, "op"), ("izmerjeno, 0 °C ali manj", CYAN, ""),
-                         ("napoved MTR za 14.–17. 11.", AMBER, "dash")]) + nights_chart(ns, fc),
-                 "Izmerjene vrednosti (1.–13. 11.) so najnižja temperatura zraka zunanjega senzorja postaje IREICA1. Črtkani stolpci so napoved modela MTR: "
-                 "14. 11. je napoved z 13. 11., ostalo je z jutra 14. 11. Črtkana modra črta je 0 °C.")
+                         ("napoved MTR za 14.–17. novembra", AMBER, "dash")]) + nights_chart(ns, fc),
+                 "Prikazane so najnižje temperature zraka, izmerjene z zunanjim senzorjem postaje IREICA1 med 1. in 13. novembrom. Črtkani stolpci prikazujejo napoved modela MTR "
+                 "za obdobje od 14. do 17. novembra: napoved za 14. november je bila izdana 13. novembra, preostale pa zjutraj 14. novembra. Črtkana modra črta označuje 0 °C.")
 
     t_rain = tiles([
-        (num(p12), "mm", "padlo 12. novembra: drugi najmočnejši novembrski dan od leta 2019, za 5. 11. 2023 (61,8 mm).", False),
-        (num(p13), "mm", f"padlo 13. novembra; tlak je ta dan zrasel z {num(S[day(D13)]['pressureLow'])} na {num(S[day(D13)]['pressureHigh'])} hPa.", False),
-        (num(pres[2][0]), "hPa", "najnižji dnevni tlak 12. novembra: tretji najnižji med vsemi dnevi, odkar postaja meri.", False),
+        (num(p12), "mm", "toliko dežja je padlo 12. novembra. To je drugi najmočnejši novembrski dan od leta 2019, za 5. novembrom 2023 (61,8 mm).", False),
+        (num(p13), "mm", f"toliko dežja je padlo 13. novembra. Zračni tlak je ta dan narasel z {num(S[day(D13)]['pressureLow'])} na {num(S[day(D13)]['pressureHigh'])} hPa.", False),
+        (num(pres[2][0]), "hPa", "najnižji dnevni tlak 12. novembra in tretji najnižji med vsemi dnevi, odkar postaja meri.", False),
     ])
     t_cold = tiles([
-        (num(sun["tmin"]).replace("-", "–"), "°C", f"napoved MTR za najnižjo temperaturo v nedeljo, 15. 11. Najnižja izmerjena letošnje jeseni je doslej {temp(coldest)}.", True),
-        ("93", "%", "po modelu MTR je to verjetnost, da temperatura zraka pade do 0 °C ali manj.", True),
-        (num(sun["tmax"]), "°C", f"napoved MTR za najvišjo temperaturo v nedeljo. Ob dežju 12. 11. je bilo {temp(S['2026-11-12']['tempHigh'])}.", False),
+        (num(sun["tmin"]).replace("-", "–"), "°C", f"napoved MTR za najnižjo temperaturo v nedeljo, 15. novembra. Najnižja doslej izmerjena temperatura te jeseni je {temp(coldest)}.", True),
+        ("93", "%", "MTR ocenjuje tolikšno verjetnost, da bo temperatura zraka padla na 0 °C ali manj.", True),
+        (num(sun["tmax"]), "°C", f"napoved MTR za najvišjo temperaturo v nedeljo. Med deževnim dogodkom 12. novembra je najvišja temperatura dosegla {temp(S['2026-11-12']['tempHigh'])}.", False),
     ])
 
     lead = (f"V dveh dneh, 12. in 13. novembra, je v Rečici padlo <strong>{num(two)} mm</strong> dežja. "
-            f"Do 13. novembra je letos padlo {num(nov)} mm, torej je ta dogodek {share} % novembrskega dežja. "
-            f"Zdaj sledi nasprotje: model MTR za nedeljsko jutro napoveduje <strong>{temp(sun['tmin'])}</strong> z verjetnostjo zmrzali {round(sun['p_frost'] * 100)} %.")
+            f"To je {share} % vse novembrske količine padavin, izmerjene do 13. novembra ({num(nov)} mm). "
+            f"Po deževnem dogodku sledi občutna ohladitev: model MTR za nedeljsko jutro napoveduje <strong>{temp(sun['tmin'])}</strong>, "
+            f"verjetnost, da bo temperatura zraka padla na 0 °C ali manj, pa ocenjuje na {round(sun['p_frost'] * 100)} %.")
 
     p1 = [
-        f"<strong>Kratek odgovor: bil je izjemen dež, a ne izjemen mraz.</strong> "
-        f"Med vsemi dvodnevnimi seštevki padavin, ki jih ima postaja od novembra 2019, je to <strong>šesti največji dogodek</strong> (dogodke, ki se prekrivajo, štejem samo enkrat). "
-        f"Dva od teh šestih sta letos: prvi je bil septembra, drugi je ta. Prejšnji največji dvodnevni dogodek v novembru je bil v letu 2023 ({num(nov_prev)} mm).",
+        f"<strong>Kratek odgovor: šlo je za zelo izrazit deževni dogodek, nedeljski mraz pa je za zdaj še napoved.</strong> "
+        f"Med vsemi dvodnevnimi seštevki padavin, ki jih je postaja zabeležila od novembra 2019, je ta dogodek <strong>šesti največji</strong>. "
+        f"Dvodnevni seštevek je vsota dveh zaporednih koledarskih dni, seštevke, ki se prekrivajo, pa štejem samo enkrat. "
+        f"Dva od šestih največjih dogodkov sta se zgodila letos: prvi septembra, drugi pa zdaj. Prejšnji največji dvodnevni novembrski seštevek je bil zabeležen leta 2023 ({num(nov_prev)} mm).",
         t_rain,
         f_rain,
-        f"Večina dežja je padla hitro: po urnem zapisu postaje je {core_pct} % dežja padlo med 16. uro 12. in 2. uro 13. novembra. "
-        "Urni seštevek se od dnevne vsote nekoliko razlikuje, zato v članku uporabljam dnevne vsote.",
-        f"Vsi ostali novembrski dnevi do 11. 11. so skupaj prinesli {num(nov - two)} mm, nobeden več kot {num(max(others))} mm.",
+        f"Večina dežja je padla v kratkem času. Po urnih meritvah postaje je {core_pct} % padavin padlo med 16. uro 12. novembra in 2. uro 13. novembra. "
+        "Urni seštevek se nekoliko razlikuje od dnevne vsote, zato v članku uporabljam dnevne vsote.",
+        f"Vsi preostali novembrski dnevi do vključno 11. novembra so skupaj prinesli {num(nov - two)} mm padavin. Nobeden od njih ni presegel {num(max(others))} mm.",
     ]
     p2 = [
-        "Pogledal sem, kaj so viri dan prej napovedali za posamezen dan. Trije tuji viri so za oba dneva skupaj napovedali manj, kot je padlo: "
+        "Pogledal sem, koliko padavin so različni viri napovedali dan pred vsakim od obravnavanih dni. Trije tuji viri so za oba dneva skupaj napovedali manj padavin, kot jih je dejansko padlo: "
         f"Open-Meteo {num(sums['Open-Meteo'])} mm, ECMWF AIFS {num(sums['ECMWF AIFS'])} mm in Google WeatherNext 2 {num(sums['WeatherNext 2'])} mm. "
-        f"Najbliže je bil model MTR z grobo pričakovano količino <strong>{num(mtr_sum)} mm</strong> ({num(mt12)} mm za 12. in {num(mt13)} mm za 13. november); izmerjeno je bilo {num(two)} mm.",
+        f"Izmerjeni količini se je najbolj približala napoved modela MTR, ki je znašala <strong>{num(mtr_sum)} mm</strong> ({num(mt12)} mm za 12. in {num(mt13)} mm za 13. november). Izmerjenih je bilo {num(two)} mm.",
         f_fc,
-        f"Največ so se zmotili pri <strong>prvem dnevu</strong>: za 12. november sta AIFS in WeatherNext 2 napovedala {num(ai12)} in {num(wn12)} mm, a je padlo {num(p12)} mm. "
-        f"Open-Meteo je bil z {num(om12, 1)} mm bližje, MTR z {num(mt12)} mm še bližje. Za 13. november so bili AIFS in WeatherNext 2 nasprotno previsoki ({num(ai13)} in {num(wn13)} mm proti {num(p13)} mm), MTR je napovedal {num(mt13)} mm, Open-Meteo pa skoraj zadel ({num(om13)} mm).",
-        "MTR količine ne popravlja po meritvah postaje: njegova pričakovana količina je povprečje petih virov (Open-Meteo best_match in štirih drugih modelov), zato je blizu skupnega mnenja modelov, ne lokalnega znanja. "
-        "Verjetnost dežja je bila za oba dneva 100 %. Iz enega dogodka ne morem sklepati, kateri vir je boljši; povprečje več modelov je bilo tokrat bližje kot vsak posamezen tuji model, kar je v skladu s pričakovanjem, ne dokaz.",
+        f"Največja odstopanja so bila pri napovedi za <strong>prvi dan</strong>. Za 12. november sta AIFS in WeatherNext 2 napovedala {num(ai12)} oziroma {num(wn12)} mm, padlo pa je {num(p12)} mm. "
+        f"Open-Meteo je bil z napovedjo {num(om12, 1)} mm bliže izmerjeni količini, napoved MTR ({num(mt12)} mm) pa se ji je približala še bolj. "
+        f"Za 13. november sta bila AIFS in WeatherNext 2 nasprotno previsoka ({num(ai13)} oziroma {num(wn13)} mm v primerjavi z izmerjenimi {num(p13)} mm). "
+        f"MTR je napovedal {num(mt13)} mm, Open-Meteo pa je bil z {num(om13)} mm zelo blizu izmerjeni količini.",
+        "MTR napovedanih količin ne prilagaja na podlagi meritev postaje. Njegova pričakovana količina je povprečje petih napovednih virov: Open-Meteo best_match in štirih drugih modelov. "
+        "Zato odraža skupno mnenje modelov, ne pa lokalnega znanja o razmerah v Rečici. Verjetnost dežja je bila za oba dneva 100 %. "
+        "Na podlagi enega dogodka ne morem sklepati, kateri vir je praviloma najboljši. Tokrat se je povprečje več modelov izkazalo za bližje meritvi kot kateri koli od posameznih tujih modelov. "
+        "To je skladno s pričakovanjem, vendar samo po sebi še ni dokaz, da je povprečje vedno boljše.",
     ]
     p3 = [
-        "Po tolikšnem dežju pričakujete visoko Savinjo. Pogledal sem merilne postaje ARSO na spletni strani "
-        '<a href="/vodostaj-savinje/" style="color:var(--blue)">Vodostaj Savinje</a>: ob 12.30 14. novembra so vse tri merilne postaje ob zgornji Savinji kazale običajni pretok.',
+        "Po tolikšni količini dežja bi lahko pričakovali visok vodostaj Savinje. Zato sem pogledal meritve postaj ARSO na spletni strani "
+        '<a href="/vodostaj-savinje/" style="color:var(--blue)">Vodostaj Savinje</a>. Ob 12.30 14. novembra so bili pretoki na vseh treh merilnih postajah ob zgornji Savinji v običajnem območju.',
         "<ul>"
         f"<li><strong>Solčava:</strong> {num(sol['pretok'], 2)} m³/s (prag prve stopnje: {num(sol['vv1'], 0)} m³/s)</li>"
         f"<li><strong>Nazarje:</strong> {num(naz['pretok'], 1)} m³/s (prag prve stopnje: {num(naz['vv1'], 0)} m³/s)</li>"
         f"<li><strong>Letuš:</strong> {num(let['pretok'], 1)} m³/s (prag prve stopnje: {num(let['vv1'], 0)} m³/s)</li>"
         "</ul>",
-        "Vir: ARSO. To je stanje ob 12.30 14. novembra, ne vrh dogodka. Vrha med 12. in 14. novembrom v svojih podatkih nimam, zato ne morem reči, kako visoko je Savinja dosegla; "
-        "zagotovo pa je bila ob zadnjem odčitku že nazaj pri običajnem pretoku. Dež, ki je padel v Rečici, tudi ni nujno enak dežju v zgornjem porečju: postaja meri samo na enem mestu.",
+        "<strong>Vir: ARSO.</strong> To je stanje ob 12.30 14. novembra in ne podatek o največjem pretoku med dogodkom. Podatka o vrhu med 12. in 14. novembrom nimam, "
+        "zato ne morem povedati, kako visoko je Savinja takrat narasla. Ob zadnjem odčitku pa je bil njen pretok že v običajnem območju. "
+        "Količina padavin, izmerjena v Rečici, ni nujno enaka količini padavin v zgornjem porečju, saj postaja meri le na eni lokaciji.",
     ]
     p4 = [
         f"<strong>Nedelja, 15. november.</strong> Model MTR napoveduje najnižjo temperaturo {temp(sun['tmin'])}, "
-        f"verjetnost, da bo temperatura zraka 0 °C ali manj, pa ocenjuje na {round(sun['p_frost'] * 100)} %. Model za noč predvideva oblačnost, ne jasnega neba.",
+        f"verjetnost, da bo temperatura zraka padla na 0 °C ali manj, pa ocenjuje na {round(sun['p_frost'] * 100)} %. V noči na nedeljo model napoveduje oblačnost, ne jasnega neba.",
         t_cold,
         f_cold,
         "<ul>"
@@ -402,35 +412,36 @@ def build_article():
         f"<li><strong>WeatherNext 2</strong>: {temp(sun_p['wn2']['tmin'])}</li>"
         f"<li><strong>ECMWF AIFS</strong>: {temp(sun_p['aifs']['tmin'])}</li>"
         "</ul>",
-        f"Vsi viri so torej pod ničlo, razlika med njimi pa je skoraj tri stopinje ({temp(sun_p['arso']['tmin'], 0)} proti {temp(sun_p['aifs']['tmin'])}). "
-        "Pri ARSO gre za napoved za Ljubno ob Savinji, ne za Rečico.",
-        f"Mraz sam po sebi ni nenavaden. Od 1. septembra do 13. novembra je postaja štirikrat izmerila 0 °C ali manj "
-        f"(23., 27. in 28. oktobra ter 9. novembra), najnižje {temp(coldest)}. Prva ničla je nastopila {dlong(ff[2026])}: pozneje kot v štirih od šestih prejšnjih jeseni, "
-        f"zgodneje kot v letih 2022 in 2024. "
-        'Kdaj pride prva ničla, sem pisal <a href="/blog/16-noci-pod-5-c-slane-se-ni-1021.html" style="color:var(--blue)">21. oktobra</a>: '
-        f"model MTR je za 23. 10. napovedal 0,1 °C, postaja je izmerila {temp(S['2026-10-23']['tempLow'])}. Napoved, ki jo je isti model izdal dan pred tem (22. 10.), je bila 1,4 °C.",
+        f"Vse napovedi kažejo temperature pod ničlo. Razpon med najhladnejšo in najmilejšo napovedjo je {num(sun_p['aifs']['tmin'] - sun_p['arso']['tmin'])} °C "
+        f"(od {num(sun_p['arso']['tmin'], 0).replace('-', '–')} do {num(sun_p['aifs']['tmin']).replace('-', '–')} °C). Napoved ARSO se nanaša na Ljubno ob Savinji, ne na Rečico.",
+        f"Temperature okoli ničle v tem delu jeseni niso nenavadne, nedeljska napoved pa bi lahko prinesla najnižjo temperaturo letošnje jeseni. "
+        f"Od 1. septembra do 13. novembra je postaja štirikrat izmerila temperaturo zraka 0 °C ali manj: 23., 27. in 28. oktobra ter 9. novembra. Najnižja izmerjena temperatura je bila {temp(coldest)}. "
+        f"Prvič je temperatura padla na 0 °C ali manj {dlong(ff[2026])}: pozneje kot v štirih od šestih prejšnjih jeseni, a prej kot v letih 2022 in 2024.",
+        'O prvi ničli sem pisal že <a href="/blog/16-noci-pod-5-c-slane-se-ni-1021.html" style="color:var(--blue)">21. oktobra</a>. '
+        f"Model MTR je za 23. oktober napovedal 0,1 °C, postaja pa je izmerila {temp(S['2026-10-23']['tempLow'])}. Napoved, ki jo je isti model izdal dan prej, 22. oktobra, je bila 1,4 °C.",
     ]
     p5 = [
         "<ul>"
-        "<li><strong>Cesta:</strong> po dvodnevnem dežju so površine mokre, pri temperaturi zraka okoli ničle ali pod njo se mokro cestišče lahko pokrije z ledom. "
-        "Postaja temperature cestišča ne meri, zato ne vem, ali bo do poledice zares prišlo. Več o tem na strani "
-        '<a href="/zima/poledica/" style="color:var(--blue)">Poledica</a>, za Črnivec pa na <a href="https://crnivec.si/" style="color:var(--blue)">crnivec.si</a>.</li>'
-        "<li><strong>Vrt in balkon:</strong> rastline, ki ne prenesejo mraza, pokrijte ali prenesite v zaklon. Na travniku in v mrazišču je lahko hladneje kot pri postaji.</li>"
-        "<li><strong>Zunanje pipe in cevi:</strong> po dežju so polne vode, zato jih pred nočjo z ničlo izpraznite ali zaščitite.</li>"
-        f'<li><strong>Preizkusite sami:</strong> v igri <a href="{SITE}/napovej/" style="color:var(--blue)">Prehiti model</a> napovejte najnižjo temperaturo za jutri in jo primerjajte z modeli.</li>'
+        "<li><strong>Cesta:</strong> po dvodnevnem dežju so cestišča mokra. Če temperatura zraka pade do ničle ali pod njo, lahko na njih nastane poledica. "
+        "Postaja temperature cestišča ne meri, zato ne vem, ali bo do nje dejansko prišlo. Več o tem si lahko preberete na strani "
+        '<a href="/zima/poledica/" style="color:var(--blue)">Poledica</a>, razmere na Črnivcu pa spremljate na <a href="https://crnivec.si/" style="color:var(--blue)">crnivec.si</a>.</li>'
+        "<li><strong>Vrt in balkon:</strong> rastline, ki ne prenesejo mraza, pokrijte ali prenesite v zavetje. Na travnikih in v mraziščih je lahko hladneje kot pri postaji.</li>"
+        "<li><strong>Zunanje pipe in cevi:</strong> v njih lahko ostane voda, zato jih pred nočjo z nizkimi temperaturami izpraznite ali zaščitite.</li>"
+        f'<li><strong>Preizkusite se:</strong> v igri <a href="{SITE}/napovej/" style="color:var(--blue)">Prehiti model</a> napovejte najnižjo temperaturo za jutri in jo primerjajte z napovedmi modelov.</li>'
         "</ul>",
     ]
     omejitve = [
         "<ul>"
-        "<li><strong>En dogodek, ena postaja.</strong> Iz dveh dni dežja ne morem sklepati o točnosti modelov ali o trendu: dež je bil na tem kraju izjemen, drugje v dolini je lahko padlo drugače.</li>"
-        "<li><strong>Napoved ni meritev.</strong> Napovedi za 14.–17. novembra so z 13. in 14. novembra in se lahko do nedelje spremenijo. MTR je poskusni model; Open-Meteo, ECMWF AIFS in WeatherNext 2 so tuji viri. "
-        'Nič od tega ni uradno opozorilo: za opozorila spremljajte <a href="https://vreme.arso.gov.si/napoved" style="color:var(--blue)">ARSO</a>.</li>'
-        "<li><strong>Podatki o reki so posnetek.</strong> Pretok je odčitek ARSO ob 12.30 14. novembra; vrha dogodka nimam.</li>"
-        "<li><strong>Rang dogodka velja za obdobje od novembra 2019</strong>, ko postaja meri, in za dvodnevne seštevke; to ni uradna klimatološka statistika.</li>"
+        "<li><strong>En dogodek, ena postaja.</strong> Iz dvodnevnega deževnega dogodka ne morem sklepati o splošni točnosti modelov ali o trendu. Dež je bil na tej lokaciji izjemen, drugje v dolini pa je lahko padlo drugače.</li>"
+        "<li><strong>Napoved ni meritev.</strong> Napovedi za obdobje od 14. do 17. novembra so bile izdane 13. in 14. novembra, do nedelje pa se lahko še spremenijo. "
+        "MTR je poskusni model, Open-Meteo, ECMWF AIFS in WeatherNext 2 pa so tuji viri. Nobena od teh napovedi ni uradno opozorilo. "
+        'Za uradna opozorila spremljajte <a href="https://vreme.arso.gov.si/napoved" style="color:var(--blue)">ARSO</a>.</li>'
+        "<li><strong>Podatki o reki so posnetek trenutnega stanja.</strong> Navedeni pretoki so odčitki ARSO ob 12.30 14. novembra. Podatka o najvišjem pretoku med dogodkom nimam.</li>"
+        "<li><strong>Uvrstitev dogodka je omejena na obdobje meritev.</strong> Rang velja za obdobje od novembra 2019, ko je postaja začela meriti, in za dvodnevne seštevke. Ne gre za uradno klimatološko statistiko.</li>"
         "<li><strong>Članek je posnetek stanja na dan objave.</strong> Po nedeljskem jutru se besedilo ne posodobi samodejno.</li>"
         "</ul>",
-        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate samo z '
-        'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se '
+        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate le ob navedbi avtorja '
+        '(Filip Eremita, Meteorec) in neposredne povezave na ta članek. Za prepis ali vdelavo grafov in izračunov se '
         'predhodno dogovorite z avtorjem.</p>',
     ]
     title = "82 mm dežja v dveh dneh, v nedeljo pa mraz"
@@ -438,11 +449,11 @@ def build_article():
     desc = ("V Rečici je 12. in 13. novembra padlo 82,5 mm dežja, v nedeljo pa napoved kaže do –2,5 °C. Kaj so napovedali modeli in kaj je izmerila postaja?")
     assert len(desc) <= 160, len(desc)
     sections = [
-        {"label": "01 — dež", "heading": "Šesti največji dvodnevni dež od leta 2019", "id": "dez", "paragraphs": p1},
-        {"label": "02 — napoved", "heading": "Povprečje petih modelov je bilo najbližje", "id": "napoved", "paragraphs": p2},
-        {"label": "03 — Savinja", "heading": "Savinja je bila že spet običajna", "id": "savinja", "paragraphs": p3},
+        {"label": "01 — dež", "heading": "Šesti največji dvodnevni seštevek padavin od leta 2019", "id": "dez", "paragraphs": p1},
+        {"label": "02 — napoved", "heading": "Napoved MTR se je izmerjeni količini najbolj približala", "id": "napoved", "paragraphs": p2},
+        {"label": "03 — Savinja", "heading": "Pretok Savinje je bil ob zadnjem odčitku običajen", "id": "savinja", "paragraphs": p3},
         {"label": "04 — mraz", "heading": "Napoved: v nedeljo zjutraj pod ničlo", "id": "mraz", "paragraphs": p4},
-        {"label": "05 — praktično", "heading": "Kaj naj naredite?", "id": "prakticno", "paragraphs": p5},
+        {"label": "05 — praktično", "heading": "Kaj lahko naredite?", "id": "prakticno", "paragraphs": p5},
         {"label": "06 — omejitve", "heading": "Česa podatki ne povedo", "id": "omejitve", "paragraphs": omejitve},
     ]
 
@@ -457,8 +468,8 @@ def build_article():
         "section_label": "Podatkovna analiza", "og_photo": "misty-valley", "og_accent_hex": "#93c5fd",
         "lead": lead, "sections": sections, "callout": None,
         "sources_note": ("Viri: postaja IREICA1 (dnevne in urne meritve zunanjega senzorja); napovedi Open-Meteo, ECMWF AIFS in Google WeatherNext 2 (prek Open-Meteo) "
-                         "ter model MTR (Meteorec; količina padavin iz dnevnika živih osvežitev data/mtr-live-log.csv), izdane dan pred posameznim dnevom; napoved ARSO za Ljubno ob Savinji; "
-                         "vir pretoka Savinje: Agencija Republike Slovenije za okolje (ARSO), stanje 14. 11. 2026 ob 12.30."),
+                         "ter model MTR (Meteorec; količine padavin so povzete iz dnevnika živih osvežitev data/mtr-live-log.csv), izdane dan pred posameznim dnevom; napoved ARSO za Ljubno ob Savinji; "
+                         "podatki o pretoku Savinje: Agencija Republike Slovenije za okolje (ARSO), stanje 14. 11. 2026 ob 12.30."),
     }
 
 
