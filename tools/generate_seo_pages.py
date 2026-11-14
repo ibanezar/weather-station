@@ -2291,6 +2291,217 @@ def _forecast_markers(name):
     return fch, fc7
 
 
+def monthly_climate(hist):
+    """Mesečno podnebje postaje IREICA1 (samo meritve, brez ERA5): povprečna temperatura in
+    povprečna mesečna vsota padavin. Mesec brez dovolj dni (< 20 na temperaturo; < 25 dni
+    v posameznem mesecu za vsoto padavin) se ne šteje, tekoči mesec zato izpade."""
+    temps, precs = defaultdict(list), defaultdict(float)
+    days = defaultdict(int)
+    for d, v in hist.items():
+        if v.get("src") == "era5":
+            continue
+        m = int(d[5:7])
+        if v.get("tempAvg") is not None:
+            temps[m].append(v["tempAvg"])
+        if v.get("precipTotal") is not None:
+            precs[d[:7]] += v["precipTotal"]
+            days[d[:7]] += 1
+    per_month = defaultdict(list)
+    for ym, tot in precs.items():
+        if days[ym] >= 25:
+            per_month[int(ym[5:7])].append(tot)
+    out = {}
+    for m in range(1, 13):
+        if len(temps[m]) >= 20 and per_month[m]:
+            out[m] = {"t": st.mean(temps[m]), "p": st.mean(per_month[m]), "n_p": len(per_month[m])}
+    return out if len(out) == 12 else {}
+
+
+def _month_bars_svg(vals, fmt, color, label):
+    """Stolpčni graf 12 mesecev (strežniški SVG, številke so v aria-label in nad stolpci)."""
+    W, H = 640, 200
+    pad_l, pad_r, pad_t, pad_b = 12, 12, 22, 36
+    pw, ph = W - pad_l - pad_r, H - pad_t - pad_b
+    lo, hi = min(list(vals.values()) + [0]), max(list(vals.values()) + [0])
+    if hi == lo:
+        hi = lo + 1
+    span = hi - lo
+    lo2, hi2 = lo - (span * 0.04 if lo < 0 else 0), hi + span * 0.12
+
+    def y(v):
+        return pad_t + ph * (1 - (v - lo2) / (hi2 - lo2))
+
+    zero = y(0)
+    bw = pw / 12 * 0.62
+    aria = html.escape(label + ": " + ", ".join(f"{MES_NOM[m]} {fmt(vals[m])}" for m in range(1, 13)))
+    parts = [f'<svg viewBox="0 0 {W} {H}" style="width:100%;height:auto;display:block" '
+             f'role="img" aria-label="{aria}" preserveAspectRatio="xMidYMid meet">']
+    if lo < 0:
+        parts.append(f'<line x1="{pad_l}" y1="{zero:.1f}" x2="{W - pad_r}" y2="{zero:.1f}" '
+                     f'stroke="rgba(148,163,184,.5)"/>')
+    for m in range(1, 13):
+        v = vals[m]
+        gx = pad_l + pw / 12 * (m - 1) + (pw / 12 - bw) / 2
+        top, bh = min(y(v), zero), abs(y(v) - zero)
+        parts.append(f'<rect x="{gx:.1f}" y="{top:.1f}" width="{bw:.1f}" height="{max(bh, 1):.1f}" '
+                     f'fill="{color}" rx="3"/>')
+        ly = y(v) - 5 if v >= 0 else y(v) + 12
+        parts.append(f'<text x="{gx + bw / 2:.1f}" y="{ly:.1f}" text-anchor="middle" font-size="10" '
+                     f'font-weight="700" fill="#cbd5e1">{html.escape(fmt(v))}</text>')
+        parts.append(f'<text x="{gx + bw / 2:.1f}" y="{H - 6}" text-anchor="middle" font-size="10" '
+                     f'fill="#94a3b8">{MES_NOM[m][:3]}</text>')
+    parts.append('</svg>')
+    return "".join(parts)
+
+
+def day_normal(hist, d, half=7):
+    """Običajna povprečna dnevna temperatura za koledarski dan d: povprečje tempAvg istega dne ±half
+    dni v ostalih letih (samo meritve postaje). None, če je primerjalnih dni premalo."""
+    import datetime as _dt
+    base = _dt.date.fromisoformat(d)
+    vals = []
+    for y in range(base.year - 8, base.year):
+        try:
+            c = base.replace(year=y)
+        except ValueError:
+            continue
+        for k in range(-half, half + 1):
+            v = hist.get((c + _dt.timedelta(days=k)).isoformat())
+            if v and v.get("src") != "era5" and v.get("tempAvg") is not None:
+                vals.append(v["tempAvg"])
+    return st.mean(vals) if len(vals) >= 30 else None
+
+
+def recent_days_block(hist, n=14):
+    """Zadnjih n izmerjenih dni postaje: stolpec = najnižja–najvišja, pika = povprečje, črtica = običajno
+    povprečje za ta čas. Vrne (stavek, svg). Osveži ga dnevni tek (history.json zaostaja za dan ali več)."""
+    days = [d for d in sorted(hist) if hist[d].get("src") != "era5"
+            and hist[d].get("tempHigh") is not None and hist[d].get("tempLow") is not None
+            and hist[d].get("tempAvg") is not None][-n:]
+    if len(days) < 7:
+        return "", ""
+    norm = {d: day_normal(hist, d) for d in days}
+    W, H = 640, 230
+    pad_l, pad_r, pad_t, pad_b = 14, 14, 22, 30
+    pw, ph = W - pad_l - pad_r, H - pad_t - pad_b
+    lo = min(hist[d]["tempLow"] for d in days)
+    hi = max(hist[d]["tempHigh"] for d in days)
+    span = (hi - lo) or 1
+    lo2, hi2 = lo - span * 0.1, hi + span * 0.1
+
+    def y(v):
+        return pad_t + ph * (1 - (v - lo2) / (hi2 - lo2))
+
+    mn = lambda v: num(v).replace("-", "−")
+    bw = pw / len(days) * 0.46
+    aria = html.escape("Izmerjena najnižja in najvišja temperatura po dnevih: " + ", ".join(
+        f"{int(d[8:10])}. {int(d[5:7])}. {mn(hist[d]['tempLow'])} do {mn(hist[d]['tempHigh'])} °C" for d in days))
+    parts = [f'<svg viewBox="0 0 {W} {H}" style="width:100%;height:auto;display:block" role="img" '
+             f'aria-label="{aria}" preserveAspectRatio="xMidYMid meet">']
+    if lo < 0 < hi:
+        parts.append(f'<line x1="{pad_l}" y1="{y(0):.1f}" x2="{W - pad_r}" y2="{y(0):.1f}" '
+                     f'stroke="rgba(148,163,184,.45)" stroke-dasharray="3 3"/>')
+    for i, d in enumerate(days):
+        v = hist[d]
+        cx = pad_l + pw / len(days) * (i + .5)
+        top, bot = y(v["tempHigh"]), y(v["tempLow"])
+        parts.append(f'<rect x="{cx - bw / 2:.1f}" y="{top:.1f}" width="{bw:.1f}" '
+                     f'height="{max(bot - top, 2):.1f}" rx="4" fill="#60a5fa" fill-opacity=".55"/>')
+        if norm[d] is not None:
+            parts.append(f'<line x1="{cx - bw / 2 - 3:.1f}" y1="{y(norm[d]):.1f}" x2="{cx + bw / 2 + 3:.1f}" '
+                         f'y2="{y(norm[d]):.1f}" stroke="#94a3b8" stroke-width="2"/>')
+        parts.append(f'<circle cx="{cx:.1f}" cy="{y(v["tempAvg"]):.1f}" r="3.6" fill="#f59e0b"/>')
+        parts.append(f'<text x="{cx:.1f}" y="{top - 4:.1f}" text-anchor="middle" font-size="9" font-weight="700" '
+                     f'fill="#cbd5e1" stroke="#0a0f1c" stroke-width="3" paint-order="stroke">{html.escape(mn(v["tempHigh"]))}</text>')
+        parts.append(f'<text x="{cx:.1f}" y="{bot + 11:.1f}" text-anchor="middle" font-size="9" '
+                     f'fill="#94a3b8" stroke="#0a0f1c" stroke-width="3" paint-order="stroke">{html.escape(mn(v["tempLow"]))}</text>')
+        parts.append(f'<text x="{cx:.1f}" y="{H - 6}" text-anchor="middle" font-size="9" '
+                     f'fill="#94a3b8">{int(d[8:10])}.{int(d[5:7])}.</text>')
+    parts.append('</svg>')
+    dev = [hist[d]["tempAvg"] - norm[d] for d in days if norm[d] is not None]
+    last = days[-1]
+    sent = ""
+    if dev and norm[last] is not None:
+        avg_dev = st.mean(dev)
+        dl_ = hist[last]["tempAvg"] - norm[last]
+
+        def rel(x):
+            return ("toplejši" if x > 0 else "hladnejši")
+        sent = (f'Zadnjih {len(days)} izmerjenih dni je bilo v povprečju {num(abs(avg_dev))} °C '
+                f'{"topleje" if avg_dev > 0 else "hladneje"} kot običajno za ta čas; zadnji izmerjeni dan '
+                f'({int(last[8:10])}. {MES_GEN[int(last[5:7])]}) je bil s povprečjem {mn(hist[last]["tempAvg"])} °C '
+                f'za {num(abs(dl_))} °C {"nad" if dl_ > 0 else "pod"} običajnim '
+                f'({mn(norm[last])} °C, povprečje istega dne ±7 dni v prejšnjih letih).')
+    return sent, "".join(parts)
+
+
+def town_climate_blocks(hist, t, lapse_corr, f, station=False):
+    """Za krajevno stran: odgovor »Na kratko« + grafa temperature in padavin po mesecih.
+    Temperatura je ocena (meritev postaje + višinski popravek, kot drugje na strani);
+    padavine so meritev postaje in niso prilagojene kraju. Vse številke so izračunane."""
+    mc = monthly_climate(hist)
+    if not mc:
+        return "", "", []
+    town, loc = t["town"], t["loc"]
+    tm = {m: mc[m]["t"] + lapse_corr for m in mc}
+    pm = {m: mc[m]["p"] for m in mc}
+    cold, warm = min(tm, key=tm.get), max(tm, key=tm.get)
+    wet, dry = max(pm, key=pm.get), min(pm, key=pm.get)
+    ann = sum(pm.values())
+    def mn(v):
+        return num(v).replace("-", "−")
+
+    if station:
+        kratko = (f'  <p class="archive-intro tnc-answer"><strong>Na kratko:</strong> v {loc} je po meritvah postaje '
+                  f'IREICA1 (od {fmtd(f["first_date"])}) najhladnejši {MES_NOM[cold]} (povprečno {mn(tm[cold])} °C) '
+                  f'in najtoplejši {MES_NOM[warm]} ({mn(tm[warm])} °C). Padavin pade povprečno {num(ann, 0)} mm na '
+                  f'leto: največ v {MES_LOC[wet]} ({num(pm[wet], 0)} mm), najmanj v {MES_LOC[dry]} '
+                  f'({num(pm[dry], 0)} mm). Vse vrednosti so izmerjene na postaji.</p>')
+        chart = (f'  <h2 id="po-mesecih">Temperatura in padavine po mesecih</h2>\n'
+                 f'  <p class="muted-note">Povprečja meritev postaje IREICA1 po koledarskih mesecih '
+                 f'(brez ERA5, brez tekočega meseca).</p>\n'
+                 f'  <h3>Povprečna temperatura (°C)</h3>\n  '
+                 + _month_bars_svg(tm, lambda v: mn(v), "#60a5fa", "Povprečna temperatura po mesecih, postaja IREICA1")
+                 + f'\n  <h3>Povprečne padavine na mesec (mm)</h3>\n  '
+                 + _month_bars_svg(pm, lambda v: num(v, 0), "#34d399", "Povprečne padavine po mesecih, postaja IREICA1")
+                 + '\n')
+        qa = [
+            (f"Kateri mesec je v {loc} najtoplejši in kateri najhladnejši?",
+             f"Po meritvah postaje IREICA1 je najtoplejši {MES_NOM[warm]} (povprečno {mn(tm[warm])} °C), "
+             f"najhladnejši pa {MES_NOM[cold]} ({mn(tm[cold])} °C)."),
+            (f"Kdaj v {loc} pade največ padavin?",
+             f"Največ padavin pade v {MES_LOC[wet]} (povprečno {num(pm[wet], 0)} mm), najmanj v "
+             f"{MES_LOC[dry]} ({num(pm[dry], 0)} mm); letno povprečno {num(ann, 0)} mm."),
+        ]
+        return kratko, chart, qa
+    kratko = (f'  <p class="archive-intro tnc-answer"><strong>Na kratko:</strong> v {loc} je po meritvah postaje '
+              f'IREICA1 (od {fmtd(f["first_date"])}), preračunanih na {t["elev"]} m n. m., najhladnejši '
+              f'{MES_NOM[cold]} (okrog {mn(tm[cold])} °C) in najtoplejši {MES_NOM[warm]} (okrog {mn(tm[warm])} °C). '
+              f'Padavin pade povprečno {num(ann, 0)} mm na leto: največ v {MES_LOC[wet]} ({num(pm[wet], 0)} mm), '
+              f'najmanj v {MES_LOC[dry]} ({num(pm[dry], 0)} mm). Temperatura je ocena, padavine so izmerjene '
+              f'v Rečici ob Savinji.</p>')
+    chart = (f'  <h2 id="po-mesecih">Temperatura in padavine po mesecih, {town}</h2>\n'
+             f'  <p class="muted-note">Povprečja meritev postaje IREICA1 po koledarskih mesecih. Temperatura je '
+             f'prilagojena nadmorski višini {t["gen"]} ({"+" if lapse_corr >= 0 else "−"}{num(abs(lapse_corr), 1)} °C), '
+             f'padavine so izmerjene na postaji in niso prilagojene kraju (v {t["loc"]} jih je lahko več ali manj).</p>\n'
+             f'  <h3>Povprečna temperatura (ocena, °C)</h3>\n  '
+             + _month_bars_svg(tm, lambda v: mn(v), "#60a5fa", f"Ocenjena povprečna temperatura po mesecih, {town}")
+             + f'\n  <h3>Povprečne padavine na mesec (mm, postaja)</h3>\n  '
+             + _month_bars_svg(pm, lambda v: num(v, 0), "#34d399", "Povprečne padavine po mesecih, postaja IREICA1")
+             + '\n')
+    qa = [
+        (f"Kateri mesec je v {loc} najtoplejši in kateri najhladnejši?",
+         f"Po meritvah postaje IREICA1, preračunanih na {t['elev']} m n. m., je najtoplejši {MES_NOM[warm]} "
+         f"(okrog {mn(tm[warm])} °C), najhladnejši pa {MES_NOM[cold]} (okrog {mn(tm[cold])} °C). "
+         f"To je ocena, ne meritev v {loc}."),
+        (f"Kdaj v {loc} pade največ padavin?",
+         f"Na najbližji postaji pade največ padavin v {MES_LOC[wet]} (povprečno {num(pm[wet], 0)} mm), "
+         f"najmanj v {MES_LOC[dry]} ({num(pm[dry], 0)} mm); letno povprečno {num(ann, 0)} mm. "
+         f"Vrednosti so izmerjene v Rečici ob Savinji."),
+    ]
+    return kratko, chart, qa
+
+
 def gen_nearby_town_pages(hist, sitemap_urls):
     """Honest 'nearest station' pages for neighbouring towns without a station —
     each with a real distance/bearing/elevation computed from its own
@@ -2319,6 +2530,7 @@ def gen_nearby_town_pages(hist, sitemap_urls):
 
         url = f"/{t['slug']}/"
         rel = f"{t['slug']}/index.html"
+        kratko, month_charts, month_qa = town_climate_blocks(hist, t, lapse_corr, f)
 
         # Poizvedba je »vreme {kraj}« (+ »po urah«): naslov mora obljubiti prav to, kar
         # stran ima (trenutna meritev, urna napoved, 7 dni). Pojasnilo, da kraj nima
@@ -2456,6 +2668,7 @@ def gen_nearby_town_pages(hist, sitemap_urls):
                 f"Savinji, zaradi {abs(elev_diff):.0f} m višinske razlike. Razlika je največja ob "
                 f"jasnih, mirnih nočeh."
             ))
+        qa += month_qa
         faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
             f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
         ) + "\n  </div>"
@@ -2480,11 +2693,13 @@ def gen_nearby_town_pages(hist, sitemap_urls):
   <p class="post-meta">Najbližja postaja IREICA1 · {num(km,1)} km {dirn_st} · {t["elev"]} m n. m. · Zgornja Savinjska dolina</p>
 {wx_now}
 {disclaimer}
+{kratko}
 {intro}
 {cta}
 {fch}
 {fc7}
 {facts}
+{month_charts}
 {comparison}
 {nearby_links}
 {faq_html}
@@ -2856,6 +3071,12 @@ def gen_camp_menina_page(hist, sitemap_urls):
       <div class="sc-sub">Od 2019</div></a>
   </div>'''
 
+    from inject_current_weather import build_block_history as _bbh, TAIL_TOWN, CLS_RECICA
+    wx_now = _bbh(TAIL_TOWN, CLS_RECICA, (
+        "Kampu Menina", f"{num(km,1)} km {dirn_st} od kampa, na istem dolinskem dnu"))
+    _menina = {"town": "Kamp Menina", "loc": "Kampu Menina", "gen": "Kampa Menina", "elev": ELEV}
+    kratko, month_charts, month_qa = town_climate_blocks(hist, _menina, 0, f, station=True)
+
     qa = [
         ("Ima Kamp Menina svojo vremensko postajo?",
          f"Kamp Menina nima lastne uradne postaje ARSO, a leži le {num(km,1)} km {dirn} od "
@@ -2874,6 +3095,7 @@ def gen_camp_menina_page(hist, sitemap_urls):
          "Na strani /vodostaj-savinje/ Meteorec objavlja vodostaj reke Savinje, uporaben za "
          "presojo primernosti za kopanje, kajak ali SUP v bližini kampa."),
     ]
+    qa += month_qa
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
@@ -2899,11 +3121,14 @@ def gen_camp_menina_page(hist, sitemap_urls):
   <div class="partial-note">Ta stran ni uradna stran kampa, temveč vremenski pregled Meteorec za
   okolico Kampa Menina, izpeljan iz meritev postaje IREICA1 ({num(km,1)} km {dirn_st}). Za rezervacije
   in informacije o kampu se obrni neposredno na Kamp Menina.</div>
+{wx_now}
+{kratko}
 {intro}
 {cta}
 {_forecast_markers("Kamp Menina")[0]}
 {_forecast_markers("Kamp Menina")[1]}
 {camping}
+{month_charts}
   <h2>Podnebje se segreva</h2>
   <p>Iz arhiva postaje je razviden trend naraščanja povprečne letne temperature za približno
   <strong>{trend_txt}</strong> (obdobje {full_years[0]}–{full_years[-1]}), kar velja tudi za okolico
@@ -3065,11 +3290,16 @@ def gen_valley_camp_pages(hist, sitemap_urls):
         ]
         disclaimer = disclaimer_variants[_camp_variant(c["slug"], "disclaimer", len(disclaimer_variants))]
 
+        from inject_current_weather import build_block_history as _bbh, TAIL_TOWN, CLS_RECICA
+        wx_now = _bbh(TAIL_TOWN, CLS_RECICA, (
+            f"okolici {name}", f"{num(km_station,0)} km {dir_station_st} od {name}"))
+
         body = f'''{crumbs_html(crumbs)}
 {stn_badge()}
   <h1 class="page-title">Vreme {name}</h1>
   <p class="post-meta">Postaja IREICA1 · {num(km_station,1)} km {dir_station_st} · {c["addr"]}</p>
   <div class="partial-note">{disclaimer}</div>
+{wx_now}
 {intro}
 {cta}
 {_forecast_markers(name)[0]}
@@ -3202,6 +3432,8 @@ def gen_logarska_dolina_page(hist, sitemap_urls):
 {disclaimer}
 {intro}
 {cta}
+{_forecast_markers('Logarska dolina')[0]}
+{_forecast_markers('Logarska dolina')[1]}
 {nearest}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.). Za gorske
@@ -3524,6 +3756,19 @@ def gen_landing_page(hist, sitemap_urls):
     </a>
   </div>'''
 
+    # »Na kratko«, graf zadnjih 14 izmerjenih dni proti običajnemu in grafa po mesecih (vse iz history.json).
+    _rec = {"town": "Rečica ob Savinji", "loc": "Rečici ob Savinji", "gen": "Rečice ob Savinji", "elev": ELEV}
+    kratko, month_charts, month_qa = town_climate_blocks(hist, _rec, 0, f, station=True)
+    recent_sent, recent_svg = recent_days_block(hist)
+    recent_html = ""
+    if recent_svg:
+        recent_html = (f'  <h2 id="zadnji-dnevi">Zadnjih 14 izmerjenih dni v Rečici</h2>\n'
+                       f'  <p>{recent_sent}</p>\n  {recent_svg}\n'
+                       f'  <p class="muted-note">Stolpec: najnižja do najvišja dnevna temperatura, rumena pika: '
+                       f'povprečje dneva, siva črtica: običajno povprečje za ta čas. Meritve postaje IREICA1; '
+                       f'dnevni arhiv zaostaja za največ nekaj ur, zadnja znana meritev je zgoraj. '
+                       f'Podrobneje po dnevih: <a href="/vreme/">vremenski arhiv</a>.</p>\n')
+
     # ── FAQ (visible + schema) ───────────────────────────────────────────────
     qa = [
         ("Kakšno je trenutno vreme v Rečici ob Savinji?",
@@ -3557,6 +3802,7 @@ def gen_landing_page(hist, sitemap_urls):
          "Meteorec na naslovni strani prikazuje srednjeročno napoved do 16 dni vnaprej, poleg "
          "podrobnejše 7-dnevne napovedi in urne napovedi za bližnje dni."),
     ]
+    qa += month_qa
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
         f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in qa
     ) + "\n  </div>"
@@ -3641,11 +3887,13 @@ def gen_landing_page(hist, sitemap_urls):
   <p class="post-meta">Meritve v živo · postaja IREICA1 · Zgornja Savinjska dolina · {ELEV} m n. m.</p>
   <h2 id="zdaj">Trenutno vreme v Rečici ob Savinji</h2>
 {wx_now}
-{fch}
+{kratko}
+{recent_html}{fch}
 {fc7}
 {cta}
 {intro}
 {micro}
+{month_charts}
 {nearby_html}
 {faq_html}
   <p class="muted-note">Vir: meteorološka postaja IREICA1, Rečica ob Savinji ({ELEV} m n. m.), Zgornja

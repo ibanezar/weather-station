@@ -71,6 +71,9 @@ TOWNS = [
     ("vreme-forest-camping-mozirje", "Forest Camping Mozirje", 46.330360, 14.992459),
     ("vreme-glamping-savinja", "Glamping Savinja", 46.339006, 14.848857),
     ("vreme-herbal-glamping-ljubno", "Herbal Glamping Resort Ljubno", 46.3713, 14.8424),
+    # Logarska dolina: LOGARSKA_LAT/LON v generate_seo_pages.py (podvojitev). Napoved je Open-Meteo za
+    # koordinate doline (modelska), stran sama pove, da postaje tam ni.
+    ("vreme-logarska-dolina", "Logarska dolina", 46.419924, 14.645536),
 ]
 
 FC7_START = "<!-- WX-FC7:START (auto: tools/inject_forecast.py) -->"
