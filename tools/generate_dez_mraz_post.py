@@ -40,10 +40,26 @@ HOURLY = os.path.join(ROOT, "data", "hourly-observations.csv")
 VERIF = os.path.join(ROOT, "forecast_verification.json")
 MODEL = os.path.join(ROOT, "napoved-modela.json")
 PENDING = os.path.join(ROOT, "tools", ".forecast_pending.json")
+MTRLOG = os.path.join(ROOT, "data", "mtr-live-log.csv")
 VODOSTAJ = os.path.join(ROOT, "vodostaj-savinje", "index.html")
 TODAY = datetime.date(2026, 11, 14)
 D12, D13 = datetime.date(2026, 11, 12), datetime.date(2026, 11, 13)
-BLUE, PINK, VIOLET, AMBER, CYAN = "#3987e5", "#d55181", "#9085e9", "#fbbf24", "#22d3ee"   # barve virov: preverjena paleta (/tocnost-napovedi/)
+BLUE, PINK, VIOLET, AMBER, CYAN, GREEN = "#3987e5", "#d55181", "#9085e9", "#fbbf24", "#22d3ee", "#199e70"   # barve virov: preverjena paleta (/tocnost-napovedi/)
+
+
+def mtr_mm_day_before(target):
+    """MTR `mm` (povprečje petih virov): prva osvežitev živega MTR na lokalni dan PRED ciljnim dnevom (iz data/mtr-live-log.csv)."""
+    from zoneinfo import ZoneInfo
+    t = datetime.date.fromisoformat(target)
+    best = None
+    for r in csv.DictReader(open(MTRLOG, encoding="utf-8")):
+        if r["valid_at"] != target or not r["mm"]:
+            continue
+        iss = datetime.datetime.fromisoformat(r["issued_at"].replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/Ljubljana"))
+        if iss.date() == t - datetime.timedelta(days=1) and (best is None or iss < best[0]):
+            best = (iss, float(r["mm"]))
+    assert best, target
+    return best[1]
 
 
 def day(d):
@@ -216,6 +232,10 @@ def build_article():
     assert (om12, ai12, wn12) == (33.13, 8.7, 5.4) and (om13, ai13, wn13) == (32.9, 48.5, 42.9)
     sums = {"Open-Meteo": om12 + om13, "ECMWF AIFS": ai12 + ai13, "WeatherNext 2": wn12 + wn13}
     assert all(v < two for v in sums.values()), sums
+    mt12, mt13 = mtr_mm_day_before(day(D12)), mtr_mm_day_before(day(D13))
+    assert (mt12, mt13) == (39.1, 40.4), (mt12, mt13)
+    mtr_sum = round(mt12 + mt13, 1)
+    assert mtr_sum == 79.5 and abs(mtr_sum - two) < min(abs(v - two) for v in sums.values()), mtr_sum
     assert f12["meteorec"]["pop"] == 1.0 and f13["meteorec"]["pop"] == 1.0
     assert "precip" not in f12["arso"] and "precip" not in f13["arso"]
     assert round(sums["Open-Meteo"], 1) == 66.0 and round(sums["ECMWF AIFS"], 1) == 57.2 and round(sums["WeatherNext 2"], 1) == 48.3
@@ -261,13 +281,12 @@ def build_article():
                  rain_chart(S),
                  f"Vsak stolpec je en dan; meritev postaje IREICA1 (dežemer). Dva poudarjena stolpca, 12. in 13. 11., skupaj dasta {num(two)} mm, "
                  f"to je {share} % vsega, kar je letos novembra do 13. 11. padlo ({num(nov)} mm).")
-    g12 = ("12. november (napoved z 11. 11.)", [("Izmerjeno", p12, None), ("Open-Meteo", om12, BLUE), ("ECMWF AIFS", ai12, PINK), ("WeatherNext 2", wn12, VIOLET)])
-    g13 = ("13. november (napoved z 12. 11.)", [("Izmerjeno", p13, None), ("Open-Meteo", om13, BLUE), ("ECMWF AIFS", ai13, PINK), ("WeatherNext 2", wn13, VIOLET)])
+    g12 = ("12. november (napoved z 11. 11.)", [("Izmerjeno", p12, None), ("MTR", mt12, GREEN), ("Open-Meteo", om12, BLUE), ("ECMWF AIFS", ai12, PINK), ("WeatherNext 2", wn12, VIOLET)])
+    g13 = ("13. november (napoved z 12. 11.)", [("Izmerjeno", p13, None), ("MTR", mt13, GREEN), ("Open-Meteo", om13, BLUE), ("ECMWF AIFS", ai13, PINK), ("WeatherNext 2", wn13, VIOLET)])
     f_fc = fig("Koliko dežja so napovedali dan prej in koliko ga je bilo",
                forecast_chart([g12, g13]),
-               "Napovedi, izdane dan pred posameznim dnevom, v mm. Vir napovedi so modeli prek Open-Meteo, vrednost velja za točko Rečice. "
-               "Model MTR količine padavin ne popravlja, zato je tu ni; ARSO v tej primerjavi količine ne navaja. "
-               "Izmerjeno je dnevna vsota postaje.")
+               "Napovedi, izdane dan pred posameznim dnevom, v mm; vrednosti veljajo za točko Rečice. MTR kaže grobo pričakovano količino: povprečje petih virov, "
+               "ne naučen popravek (prva osvežitev živega MTR na dan pred dogodkom). ARSO v tej primerjavi količine ne navaja. Izmerjeno je dnevna vsota postaje.")
     f_cold = fig("Najnižja temperatura vsake noči",
                  legend([("izmerjeno, nad ničlo", BLUE, "op"), ("izmerjeno, 0 °C ali manj", CYAN, ""),
                          ("napoved MTR za 14.–17. 11.", AMBER, "dash")]) + nights_chart(ns, fc),
@@ -300,13 +319,14 @@ def build_article():
         f"Vsi ostali novembrski dnevi do 11. 11. so skupaj prinesli {num(nov - two)} mm, nobeden več kot {num(max(others))} mm.",
     ]
     p2 = [
-        "Pogledal sem, kaj so modeli dan prej napovedali za posamezen dan. Vsi trije tuji viri so za oba dneva skupaj napovedali manj, kot je padlo: "
-        f"Open-Meteo {num(sums['Open-Meteo'])} mm, ECMWF AIFS {num(sums['ECMWF AIFS'])} mm in Google WeatherNext 2 {num(sums['WeatherNext 2'])} mm, izmerjeno pa je bilo {num(two)} mm.",
+        "Pogledal sem, kaj so viri dan prej napovedali za posamezen dan. Trije tuji viri so za oba dneva skupaj napovedali manj, kot je padlo: "
+        f"Open-Meteo {num(sums['Open-Meteo'])} mm, ECMWF AIFS {num(sums['ECMWF AIFS'])} mm in Google WeatherNext 2 {num(sums['WeatherNext 2'])} mm. "
+        f"Najbliže je bil model MTR z grobo pričakovano količino <strong>{num(mtr_sum)} mm</strong> ({num(mt12)} mm za 12. in {num(mt13)} mm za 13. november); izmerjeno je bilo {num(two)} mm.",
         f_fc,
         f"Največ so se zmotili pri <strong>prvem dnevu</strong>: za 12. november sta AIFS in WeatherNext 2 napovedala {num(ai12)} in {num(wn12)} mm, a je padlo {num(p12)} mm. "
-        f"Open-Meteo je bil z {num(om12, 1)} mm bližje. Za 13. november so bili AIFS in WeatherNext 2 nasprotno previsoki ({num(ai13)} in {num(wn13)} mm proti {num(p13)} mm), Open-Meteo pa skoraj zadel ({num(om13)} mm).",
-        f"Da bo deževalo, je pravilno napovedal tudi model MTR (verjetnost dežja je bila za oba dneva 100 %), a količine ne napoveduje. "
-        "Iz enega dogodka ne morem sklepati, kateri vir je boljši. Zanimivo je predvsem, kako različne količine so za isti dan napovedali viri, ki so vsi napovedali dež.",
+        f"Open-Meteo je bil z {num(om12, 1)} mm bližje, MTR z {num(mt12)} mm še bližje. Za 13. november so bili AIFS in WeatherNext 2 nasprotno previsoki ({num(ai13)} in {num(wn13)} mm proti {num(p13)} mm), MTR je napovedal {num(mt13)} mm, Open-Meteo pa skoraj zadel ({num(om13)} mm).",
+        "MTR količine ne popravlja po meritvah postaje: njegova pričakovana količina je povprečje petih virov (Open-Meteo best_match in štirih drugih modelov), zato je blizu skupnega mnenja modelov, ne lokalnega znanja. "
+        "Verjetnost dežja je bila za oba dneva 100 %. Iz enega dogodka ne morem sklepati, kateri vir je boljši; povprečje več modelov je bilo tokrat bližje kot vsak posamezen tuji model, kar je v skladu s pričakovanjem, ne dokaz.",
     ]
     p3 = [
         "Po tolikšnem dežju pričakujete visoko Savinjo. Pogledal sem merilne postaje ARSO na spletni strani "
@@ -368,7 +388,7 @@ def build_article():
     assert len(desc) <= 160, len(desc)
     sections = [
         {"label": "01 — dež", "heading": "Šesti največji dvodnevni dež od leta 2019", "id": "dez", "paragraphs": p1},
-        {"label": "02 — napoved", "heading": "Dež so napovedali vsi, količine pa nihče", "id": "napoved", "paragraphs": p2},
+        {"label": "02 — napoved", "heading": "Povprečje petih modelov je bilo najbližje", "id": "napoved", "paragraphs": p2},
         {"label": "03 — Savinja", "heading": "Savinja je bila že spet običajna", "id": "savinja", "paragraphs": p3},
         {"label": "04 — mraz", "heading": "Napoved: v nedeljo zjutraj pod ničlo", "id": "mraz", "paragraphs": p4},
         {"label": "05 — praktično", "heading": "Kaj naj naredite?", "id": "prakticno", "paragraphs": p5},
@@ -386,7 +406,7 @@ def build_article():
         "section_label": "Podatkovna analiza", "og_photo": "misty-valley", "og_accent_hex": "#93c5fd",
         "lead": lead, "sections": sections, "callout": None,
         "sources_note": ("Viri: postaja IREICA1 (dnevne in urne meritve zunanjega senzorja); napovedi Open-Meteo, ECMWF AIFS in Google WeatherNext 2 (prek Open-Meteo) "
-                         "ter model MTR (Meteorec), izdane dan pred posameznim dnevom; napoved ARSO za Ljubno ob Savinji; "
+                         "ter model MTR (Meteorec; količina padavin iz dnevnika živih osvežitev data/mtr-live-log.csv), izdane dan pred posameznim dnevom; napoved ARSO za Ljubno ob Savinji; "
                          "vir pretoka Savinje: Agencija Republike Slovenije za okolje (ARSO), stanje 14. 11. 2026 ob 12.30."),
     }
 

@@ -23,17 +23,17 @@ Večina dežja je padla hitro: po urnem zapisu postaje je 85 % dežja padlo med 
 
 Vsi ostali novembrski dnevi do 11. 11. so skupaj prinesli 13,7 mm, nobeden več kot 6,3 mm.
 
-02 — NAPOVED -- Dež so napovedali vsi, količine pa nihče
+02 — NAPOVED -- Povprečje petih modelov je bilo najbližje
 
-Pogledal sem, kaj so modeli dan prej napovedali za posamezen dan. Vsi trije tuji viri so za oba dneva skupaj napovedali manj, kot je padlo: Open-Meteo 66,0 mm, ECMWF AIFS 57,2 mm in Google WeatherNext 2 48,3 mm, izmerjeno pa je bilo 82,5 mm.
+Pogledal sem, kaj so viri dan prej napovedali za posamezen dan. Trije tuji viri so za oba dneva skupaj napovedali manj, kot je padlo: Open-Meteo 66,0 mm, ECMWF AIFS 57,2 mm in Google WeatherNext 2 48,3 mm. Najbliže je bil model MTR z grobo pričakovano količino 79,5 mm (39,1 mm za 12. in 40,4 mm za 13. november); izmerjeno je bilo 82,5 mm.
 
 Koliko dežja so napovedali dan prej in koliko ga je bilo
 
-Napovedi, izdane dan pred posameznim dnevom, v mm. Vir napovedi so modeli prek Open-Meteo, vrednost velja za točko Rečice. Model MTR količine padavin ne popravlja, zato je tu ni; ARSO v tej primerjavi količine ne navaja. Izmerjeno je dnevna vsota postaje.
+Napovedi, izdane dan pred posameznim dnevom, v mm; vrednosti veljajo za točko Rečice. MTR kaže grobo pričakovano količino: povprečje petih virov, ne naučen popravek (prva osvežitev živega MTR na dan pred dogodkom). ARSO v tej primerjavi količine ne navaja. Izmerjeno je dnevna vsota postaje.
 
-Največ so se zmotili pri prvem dnevu: za 12. november sta AIFS in WeatherNext 2 napovedala 8,7 in 5,4 mm, a je padlo 51,8 mm. Open-Meteo je bil z 33,1 mm bližje. Za 13. november so bili AIFS in WeatherNext 2 nasprotno previsoki (48,5 in 42,9 mm proti 30,7 mm), Open-Meteo pa skoraj zadel (32,9 mm).
+Največ so se zmotili pri prvem dnevu: za 12. november sta AIFS in WeatherNext 2 napovedala 8,7 in 5,4 mm, a je padlo 51,8 mm. Open-Meteo je bil z 33,1 mm bližje, MTR z 39,1 mm še bližje. Za 13. november so bili AIFS in WeatherNext 2 nasprotno previsoki (48,5 in 42,9 mm proti 30,7 mm), MTR je napovedal 40,4 mm, Open-Meteo pa skoraj zadel (32,9 mm).
 
-Da bo deževalo, je pravilno napovedal tudi model MTR (verjetnost dežja je bila za oba dneva 100 %), a količine ne napoveduje. Iz enega dogodka ne morem sklepati, kateri vir je boljši. Zanimivo je predvsem, kako različne količine so za isti dan napovedali viri, ki so vsi napovedali dež.
+MTR količine ne popravlja po meritvah postaje: njegova pričakovana količina je povprečje petih virov (Open-Meteo best_match in štirih drugih modelov), zato je blizu skupnega mnenja modelov, ne lokalnega znanja. Verjetnost dežja je bila za oba dneva 100 %. Iz enega dogodka ne morem sklepati, kateri vir je boljši; povprečje več modelov je bilo tokrat bližje kot vsak posamezen tuji model, kar je v skladu s pričakovanjem, ne dokaz.
 
 03 — SAVINJA -- Savinja je bila že spet običajna
 
@@ -102,4 +102,4 @@ Rang dogodka velja za obdobje od novembra 2019, ko postaja meri, in za dvodnevne
 Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate samo z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
 
 VIRI
-Viri: postaja IREICA1 (dnevne in urne meritve zunanjega senzorja); napovedi Open-Meteo, ECMWF AIFS in Google WeatherNext 2 (prek Open-Meteo) ter model MTR (Meteorec), izdane dan pred posameznim dnevom; napoved ARSO za Ljubno ob Savinji; vir pretoka Savinje: Agencija Republike Slovenije za okolje (ARSO), stanje 14. 11. 2026 ob 12.30.
+Viri: postaja IREICA1 (dnevne in urne meritve zunanjega senzorja); napovedi Open-Meteo, ECMWF AIFS in Google WeatherNext 2 (prek Open-Meteo) ter model MTR (Meteorec; količina padavin iz dnevnika živih osvežitev data/mtr-live-log.csv), izdane dan pred posameznim dnevom; napoved ARSO za Ljubno ob Savinji; vir pretoka Savinje: Agencija Republike Slovenije za okolje (ARSO), stanje 14. 11. 2026 ob 12.30.
