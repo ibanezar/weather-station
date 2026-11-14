@@ -200,6 +200,9 @@ jobs:
       - name: Test krajevnih strani (statična meritev, smer postaje, naslov)
         run: python3 tools/test_town_pages.py
 
+      - name: Test bloka »Na kratko« in FAQ na bazi vrst gob
+        run: python3 tools/test_baza_kratko.py
+
       - name: Test vremenskih pojmov (/pojmi/)
         run: python3 tools/test_pojmi.py
 
