@@ -1979,6 +1979,14 @@ te strani zato izpusti iz svojega prepisa sitemap.xml — ne podvajaj vpisov
 med sitemapi. Po teku pošlje IndexNow za vse spremenjene URL-je
 (`--skip-indexnow` za ročni preizkus).
 
+**Prva snežna odeja sezone** (`detect_first_snow()`, `/novosti/prvi-sneg-<leto>/`, 14. 11. 2026): postaja IREICA1 snega ne meri, zato je vir višina odeje
+**ARSO za Gornji Grad** (`GORNJ-GRA_`, arhivski ID 1748, 428 m, 9 km od Rečice), prag 1 cm, sezona od 1. oktobra. Dva vira, ki se ne zlivata: dnevni arhiv
+(`data/arso-sneg-postaje/daily-1748.json`, zaostaja ~9 dni) in naši odčitki (`data/arso-snow-live.csv`, od 9. 11. 2026). **Med njima je lahko luknja** (arhiv do 31. 10., odčitki od 9. 11.):
+takrat dogodek nosi `gap`, stran jo izpiše z datumi in pravi »prva v podatkih, ki jih imamo«; brez `last_value_date` v `osvezeno.json` pokritosti ne poznamo in dogodka ni.
+Datum je **lokalni** (23.30 UTC je že naslednji dan). Višina odeje ni količina novega snega; stran to pove in navede vir ARSO (14. člen ZDMHS). **Nov tip dogodka v `/novosti/`** mora
+paziti na hero (`hero_where`), vir (`source_para`) in enoto v indeksu, sicer mu stran pripiše meritev IREICA1. Na FB/IG ne gre. Preizkus na pravem snegu še ni bil mogoč
+(do 14. 11. so vse vrednosti 0): po prvem snegu preveri `/novosti/prvi-sneg-2026/`. Test: `tools/test_first_snow.py` (v `parity.yml`).
+
 **`novosti.json` je v korenu repozitorija, ne v mapi `novosti/`** — v
 `git add` koraku delavnega toka ju je treba navesti ločeno
 (`novosti/ novosti.json`). 19.–20. 8. 2026 je koraku manjkal `novosti.json`,
