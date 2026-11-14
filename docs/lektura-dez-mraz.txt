@@ -17,6 +17,8 @@ Kratek odgovor: bil je izjemen dež, a ne izjemen mraz. Med vsemi dvodnevnimi se
 
 Dnevne padavine v Rečici, 1.–13. novembra
 
+Dotaknite se stolpca ali ga izberite s tipkovnico: tu se izpiše vrednost.
+
 Vsak stolpec je en dan; meritev postaje IREICA1 (dežemer). Dva poudarjena stolpca, 12. in 13. 11., skupaj dasta 82,5 mm, to je 86 % vsega, kar je letos novembra do 13. 11. padlo (96,2 mm).
 
 Večina dežja je padla hitro: po urnem zapisu postaje je 85 % dežja padlo med 16. uro 12. in 2. uro 13. novembra. Urni seštevek se od dnevne vsote nekoliko razlikuje, zato v članku uporabljam dnevne vsote.
@@ -28,6 +30,10 @@ Vsi ostali novembrski dnevi do 11. 11. so skupaj prinesli 13,7 mm, nobeden več 
 Pogledal sem, kaj so viri dan prej napovedali za posamezen dan. Trije tuji viri so za oba dneva skupaj napovedali manj, kot je padlo: Open-Meteo 66,0 mm, ECMWF AIFS 57,2 mm in Google WeatherNext 2 48,3 mm. Najbliže je bil model MTR z grobo pričakovano količino 79,5 mm (39,1 mm za 12. in 40,4 mm za 13. november); izmerjeno je bilo 82,5 mm.
 
 Koliko dežja so napovedali dan prej in koliko ga je bilo
+
+12. 11.13. 11.Skupaj
+
+Dotaknite se stolpca ali ga izberite s tipkovnico: tu se izpiše vrednost.
 
 Napovedi, izdane dan pred posameznim dnevom, v mm; vrednosti veljajo za točko Rečice. MTR kaže grobo pričakovano količino: povprečje petih virov, ne naučen popravek (prva osvežitev živega MTR na dan pred dogodkom). ARSO v tej primerjavi količine ne navaja. Izmerjeno je dnevna vsota postaje.
 
@@ -60,6 +66,8 @@ Nedelja, 15. november. Model MTR napoveduje najnižjo temperaturo –2,5 °C, ve
 Najnižja temperatura vsake noči
 
 izmerjeno, nad ničlo izmerjeno, 0 °C ali manj napoved MTR za 14.–17. 11.
+
+Dotaknite se stolpca ali ga izberite s tipkovnico: tu se izpiše vrednost.
 
 Izmerjene vrednosti (1.–13. 11.) so najnižja temperatura zraka zunanjega senzorja postaje IREICA1. Črtkani stolpci so napoved modela MTR: 14. 11. je napoved z 13. 11., ostalo je z jutra 14. 11. Črtkana modra črta je 0 °C.
 

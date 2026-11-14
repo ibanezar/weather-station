@@ -28,7 +28,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_slane_se_ni_post import (STYLE as BASE_STYLE, num, temp, fig, tiles, legend, first_freeze, NBSP,  # noqa: E402
                                        dm, dlong)
 
-STYLE = BASE_STYLE.replace("</style>", ".sg-m{fill:var(--muted)}.sg-i{fill:var(--text)}.sg-g{stroke:var(--card-border)}"
+STYLE = BASE_STYLE.replace("</style>", ".sg-pt{cursor:pointer}.sg-pt:hover,.sg-pt:focus,.sg-pt.on{stroke:var(--text);stroke-width:1.6;outline:none}"
+                           ".sg-read{min-height:2.6em;margin:.5rem 0 0;padding:.55rem .8rem;border:1px solid var(--card-border);border-radius:12px;font-size:.9rem;line-height:1.45;color:var(--text);background:rgba(255,255,255,.04)}"
+                           ".sg-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 .6rem}.sg-tabs button{min-height:44px;min-width:44px;padding:.4rem .9rem;border:1px solid var(--card-border);border-radius:12px;background:transparent;color:var(--muted);font:inherit;font-size:.9rem;cursor:pointer}"
+                           ".sg-tabs button[aria-pressed='true']{background:rgba(147,197,253,.16);color:var(--text);font-weight:600}.sg-tabs button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}"
+                           ".sg-m{fill:var(--muted)}.sg-i{fill:var(--text)}.sg-g{stroke:var(--card-border)}"
                            ".sg-h{stroke:var(--card-bg);stroke-width:3;paint-order:stroke}</style>")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -86,8 +90,8 @@ def rain_chart(H, w=460):
         v = H[day(d)]["precipTotal"]
         x = pl + slot * i + (slot - bw) / 2
         big = d in (D12, D13)
-        p.append(f'<rect x="{x:.1f}" y="{Y(v):.1f}" width="{bw:.1f}" height="{max(Y(0) - Y(v), 1):.1f}" rx="2" fill="{BLUE}" fill-opacity="{1 if big else .45}">'
-                 f'<title>{dm(d)}: {num(v)} mm</title></rect>')
+        p.append(f'<rect x="{x:.1f}" y="{Y(v):.1f}" width="{bw:.1f}" height="{max(Y(0) - Y(v), 1):.1f}" rx="2" fill="{BLUE}" fill-opacity="{1 if big else .45}"'
+                 f' data-t="{dm(d)}: {num(v)} mm padavin" tabindex="0" class="sg-pt"><title>{dm(d)}: {num(v)} mm</title></rect>')
         if big:
             p.append(f'<text x="{x + bw / 2:.1f}" y="{Y(v) - 5:.1f}" text-anchor="middle" font-size="11" font-weight="700" class="sg-i sg-h">{num(v)}</text>')
         if i % 2 == 0 or big:
@@ -96,17 +100,18 @@ def rain_chart(H, w=460):
     return "".join(p)
 
 
-def forecast_chart(rows, w=460):
+def forecast_chart(rows, w=460, hi=60.0, nsw=False):
     """rows = [(skupina, [(ime, vrednost, barva|None)])]; vodoravni stolpci, izmerjena vrednost je prva v skupini."""
     pl, pr, pt, rh, gap = 112, 40, 8, 25, 22
     n = sum(len(r[1]) for r in rows)
     h = pt + n * rh + gap * len(rows) + 4
-    hi = 60.0
     X = lambda v: pl + (w - pl - pr) * v / hi
     p = [f'<svg viewBox="0 0 {w} {h}" role="img" aria-label="Napovedana in izmerjena količina padavin 12. in 13. novembra po virih" xmlns="http://www.w3.org/2000/svg">']
     y = pt
-    for gname, items in rows:
-        p.append(f'<text x="2" y="{y + 12}" font-size="11.5" font-weight="700" class="sg-i">{gname}</text>')
+    for gi, (gname, items) in enumerate(rows):
+        ref = items[0][1]
+        errs = " · ".join(f"{n_} {'+' if v - ref > 0 else '–' if v - ref < 0 else ''}{num(abs(v - ref))} mm" for n_, v, c_ in items[1:])
+        p.append(f'<g class="sg-grp" data-g="{gi}" data-y="{y}" data-h="{gap + len(items) * rh}" data-r="{gname}: izmerjeno {num(ref)} mm. Razlika napovedi od izmerjenega: {errs}"><text x="2" y="{y + 12}" font-size="11.5" font-weight="700" class="sg-i">{gname}</text>')
         y += gap - 4
         for name, v, col in items:
             cy = y + rh / 2
@@ -115,10 +120,11 @@ def forecast_chart(rows, w=460):
             fw = ' font-weight="700"' if meas else ""
             p.append(f'<text x="{pl - 8}" y="{cy + 4:.1f}" text-anchor="end" font-size="11" class="{cls}"{fw}>{name}</text>')
             fill = 'class="sg-i"' if meas else f'fill="{col}"'
-            p.append(f'<rect x="{pl}" y="{cy - 8:.1f}" width="{max(X(v) - pl, 1.5):.1f}" height="16" rx="2" {fill} fill-opacity="{1 if meas else .85}">'
-                     f'<title>{gname}, {name}: {num(v)} mm</title></rect>')
+            p.append(f'<rect x="{pl}" y="{cy - 8:.1f}" width="{max(X(v) - pl, 1.5):.1f}" height="16" rx="2" {fill} fill-opacity="{1 if meas else .85}"'
+                     f' data-t="{gname}, {name}: {num(v)} mm" tabindex="0" class="sg-pt"><title>{gname}, {name}: {num(v)} mm</title></rect>')
             p.append(f'<text x="{X(v) + 5:.1f}" y="{cy + 4:.1f}" font-size="11" font-weight="{700 if meas else 400}" class="sg-i">{num(v)}</text>')
             y += rh
+        p.append("</g>")
         y += 4
     p.append("</svg>")
     return "".join(p)
@@ -130,7 +136,7 @@ def nights_chart(ns, fc, w=460):
     ih, iw = h - pt - pb, w - pl - pr
     d0 = ns[0][0]
     slots = (fc[-1][0] - d0).days + 1
-    lo, hi = -4.0, 8.0
+    lo, hi = -4.0, 10.0
     Y = lambda t: pt + ih * (hi - t) / (hi - lo)
     slot = iw / slots
     bw = slot * 0.72
@@ -146,12 +152,12 @@ def nights_chart(ns, fc, w=460):
     for d, t in ns:
         x, y = X(d), Y(t)
         frost = t <= 0
-        p.append(f'<rect x="{x:.1f}" y="{min(y, base):.1f}" width="{bw:.1f}" height="{max(abs(y - base), 1.5):.1f}" rx="2" fill="{CYAN if frost else BLUE}" fill-opacity="{1 if frost else .5}">'
-                 f'<title>{dm(d)}: najnižja {temp(t)}</title></rect>')
+        p.append(f'<rect x="{x:.1f}" y="{min(y, base):.1f}" width="{bw:.1f}" height="{max(abs(y - base), 1.5):.1f}" rx="2" fill="{CYAN if frost else BLUE}" fill-opacity="{1 if frost else .5}"'
+                 f' data-t="{dm(d)}: najnižja izmerjena {temp(t)}" tabindex="0" class="sg-pt"><title>{dm(d)}: najnižja {temp(t)}</title></rect>')
     for d, t in fc:
         x, y = X(d), Y(t)
         p.append(f'<rect x="{x:.1f}" y="{min(y, base):.1f}" width="{bw:.1f}" height="{max(abs(y - base), 1.5):.1f}" rx="2" fill="{AMBER}" fill-opacity=".2" '
-                 f'stroke="{AMBER}" stroke-width="1.4" stroke-dasharray="3 2"><title>{dm(d)}: napoved MTR {temp(t)}</title></rect>')
+                 f'stroke="{AMBER}" stroke-width="1.4" stroke-dasharray="3 2" data-t="{dm(d)}: napoved MTR {temp(t)}" tabindex="0" class="sg-pt"><title>{dm(d)}: napoved MTR {temp(t)}</title></rect>')
     for d, t in [r for r in ns if r[0].day in (1, 9)] + [r for r in fc if r[0].day == 15]:
         cx = X(d) + bw / 2
         yy = Y(t) + (13 if t < 0 else -5)
@@ -162,6 +168,49 @@ def nights_chart(ns, fc, w=460):
         p.append(f'<text x="{X(d) + bw / 2:.1f}" y="{h - 9}" text-anchor="middle" font-size="10" class="sg-m">{d.day}.</text>')
     p.append("</svg>")
     return "".join(p)
+
+
+def ifig(ix, title, inner, caption, tabs=None, hint="Dotaknite se stolpca ali ga izberite s tipkovnico: tu se izpiše vrednost."):
+    """figure z odčitkom (JS ga odkrije) in izbirnimi zavihki (preklop skupin v grafu)."""
+    tb = ""
+    if tabs:
+        tb = '<div class="sg-tabs" role="group" aria-label="Izbira prikaza" hidden>' + "".join(
+            f'<button type="button" data-tab="{i}">{t}</button>' for i, t in enumerate(tabs)) + "</div>"
+    return (f'<figure class="vs-fig" data-ix="{ix}"><h3>{title}</h3>{tb}{inner}'
+            f'<p class="sg-read" aria-live="polite" hidden data-hint="{hint}">{hint}</p><figcaption>{caption}</figcaption></figure>')
+
+
+SCRIPT = """<script>
+(function(){
+  function init(){
+    document.querySelectorAll('figure[data-ix]').forEach(function(fig){
+      var rd=fig.querySelector('.sg-read'); if(rd) rd.hidden=false;
+      fig.querySelectorAll('.sg-pt').forEach(function(el){
+        function show(){
+          fig.querySelectorAll('.sg-pt.on').forEach(function(x){x.classList.remove('on');});
+          el.classList.add('on'); if(rd) rd.textContent=el.getAttribute('data-t');
+        }
+        el.addEventListener('mouseenter',show); el.addEventListener('focus',show); el.addEventListener('click',show);
+      });
+      var tabs=fig.querySelector('.sg-tabs');
+      if(tabs){
+        var svg=fig.querySelector('svg'), vb=svg.getAttribute('viewBox').split(' '), groups=fig.querySelectorAll('.sg-grp'), btns=tabs.querySelectorAll('button');
+        tabs.hidden=false;
+        function pick(i){
+          groups.forEach(function(g,k){
+            var on=(k===i); g.style.display=on?'':'none';
+            if(on){svg.setAttribute('viewBox','0 '+(+g.getAttribute('data-y')-2)+' '+vb[2]+' '+(+g.getAttribute('data-h')+4)); if(rd) rd.textContent=g.getAttribute('data-r');}
+          });
+          btns.forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false');});
+        }
+        btns.forEach(function(b,k){b.addEventListener('click',function(){pick(k);});});
+        pick(groups.length-1);
+      }
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>"""
 
 
 # ───────────────────────── podatki ─────────────────────────
@@ -277,17 +326,19 @@ def build_article():
     assert "0,1" in open(os.path.join(ROOT, "blog", "16-noci-pod-5-c-slane-se-ni-1021.html"), encoding="utf-8").read()
 
     # ---- grafi ----
-    f_rain = fig("Dnevne padavine v Rečici, 1.–13. novembra",
+    f_rain = ifig("rain", "Dnevne padavine v Rečici, 1.–13. novembra",
                  rain_chart(S),
                  f"Vsak stolpec je en dan; meritev postaje IREICA1 (dežemer). Dva poudarjena stolpca, 12. in 13. 11., skupaj dasta {num(two)} mm, "
                  f"to je {share} % vsega, kar je letos novembra do 13. 11. padlo ({num(nov)} mm).")
     g12 = ("12. november (napoved z 11. 11.)", [("Izmerjeno", p12, None), ("MTR", mt12, GREEN), ("Open-Meteo", om12, BLUE), ("ECMWF AIFS", ai12, PINK), ("WeatherNext 2", wn12, VIOLET)])
+    gsum = ("Oba dneva skupaj", [("Izmerjeno", two, None), ("MTR", mtr_sum, GREEN), ("Open-Meteo", round(sums["Open-Meteo"], 1), BLUE),
+                                 ("ECMWF AIFS", round(sums["ECMWF AIFS"], 1), PINK), ("WeatherNext 2", round(sums["WeatherNext 2"], 1), VIOLET)])
     g13 = ("13. november (napoved z 12. 11.)", [("Izmerjeno", p13, None), ("MTR", mt13, GREEN), ("Open-Meteo", om13, BLUE), ("ECMWF AIFS", ai13, PINK), ("WeatherNext 2", wn13, VIOLET)])
-    f_fc = fig("Koliko dežja so napovedali dan prej in koliko ga je bilo",
-               forecast_chart([g12, g13]),
+    f_fc = ifig("fc", "Koliko dežja so napovedali dan prej in koliko ga je bilo",
+               forecast_chart([g12, g13, gsum], hi=90.0, nsw=True),
                "Napovedi, izdane dan pred posameznim dnevom, v mm; vrednosti veljajo za točko Rečice. MTR kaže grobo pričakovano količino: povprečje petih virov, "
-               "ne naučen popravek (prva osvežitev živega MTR na dan pred dogodkom). ARSO v tej primerjavi količine ne navaja. Izmerjeno je dnevna vsota postaje.")
-    f_cold = fig("Najnižja temperatura vsake noči",
+               "ne naučen popravek (prva osvežitev živega MTR na dan pred dogodkom). ARSO v tej primerjavi količine ne navaja. Izmerjeno je dnevna vsota postaje.", tabs=["12. 11.", "13. 11.", "Skupaj"])
+    f_cold = ifig("cold", "Najnižja temperatura vsake noči",
                  legend([("izmerjeno, nad ničlo", BLUE, "op"), ("izmerjeno, 0 °C ali manj", CYAN, ""),
                          ("napoved MTR za 14.–17. 11.", AMBER, "dash")]) + nights_chart(ns, fc),
                  "Izmerjene vrednosti (1.–13. 11.) so najnižja temperatura zraka zunanjega senzorja postaje IREICA1. Črtkani stolpci so napoved modela MTR: "
@@ -453,6 +504,8 @@ def main():
     lead = f'<p class="lead">{article["lead"]}</p>'
     assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"
     html = html.replace(lead, STYLE + "\n" + lead, 1)
+    assert html.count("</body>") == 1
+    html = html.replace("</body>", SCRIPT + "\n</body>", 1)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"✓ zapisano: blog/{slug}.html ({round(len(html) / 1024)} kB)")
