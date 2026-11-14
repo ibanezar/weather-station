@@ -1,0 +1,87 @@
+name: IndexNow — strani, ki jih zgradijo delovni tokovi
+
+# indexnow.yml se sproži samo ob pushu na *.html v korenu, commiti botov pa imajo [skip ci] in so
+# podstrani (/vreme-mozirje/, /slovar/…, /zima/…) ostajale brez obvestila. Ta tok teče po koncu
+# delovnih tokov, ki strani gradijo, in iskalnikom javi strani, spremenjene v zadnjih urah.
+on:
+  workflow_run:
+    workflows: ["Generate SEO pages", "Zima", "Gobarska napoved", "Biovreme"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: "Strani, spremenjene v zadnjih N urah"
+        default: "6"
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    # Samo po uspešnem teku (ročni zagon vedno).
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Zberi spremenjene strani in obvesti IndexNow
+        env:
+          HOURS: ${{ github.event.inputs.hours || '6' }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, subprocess, sys, urllib.request, urllib.error
+
+          SITE = "https://meteorec.si"
+          KEY = "d4e7a1b3c9f2e5d8a0b6c3f7e2d1a4b9"   # javni ključ (datoteka /<ključ>.txt je v korenu)
+          MAX_URLS = 300
+          hours = int(os.environ.get("HOURS") or 6)
+
+          out = subprocess.run(
+              ["git", "log", f"--since={hours} hours ago", "--name-only", "--pretty=format:", "--", "*.html"],
+              capture_output=True, text=True, check=True).stdout.splitlines()
+          paths = sorted({p.strip() for p in out if p.strip().endswith(".html")})
+
+          # Ne obveščamo o izpeljankah brez lastne vrednosti: preusmeritve in skrite strani.
+          SKIP_PREFIX = ("i/", "og/", "img/", "docs/", "365-0/", "365-0-game/", "crnivec-site/", "pojmi/",
+                         "anketa-rezultati/", "gobarska-napoved/orodje-naslovi/", "node_modules/")
+          urls = []
+          for p in paths:
+              if p.startswith(SKIP_PREFIX) or p == "404.html":
+                  continue
+              if p == "index.html":
+                  urls.append(f"{SITE}/")
+              elif p.endswith("/index.html"):
+                  urls.append(f"{SITE}/{p[:-len('index.html')]}")
+              else:
+                  urls.append(f"{SITE}/{p}")
+
+          # Najprej ključne strani, dnevni arhiv (/vreme/YYYY/MM/DD/) zadnji; omejitev števila.
+          def prio(u):
+              return (1 if "/vreme/20" in u else 0, u)
+          urls = sorted(set(urls), key=prio)[:MAX_URLS]
+          if not urls:
+              print("Ni spremenjenih strani — IndexNow preskočen.")
+              sys.exit(0)
+
+          print(f"Pošiljam {len(urls)} URL(jev):")
+          for u in urls[:40]:
+              print("  ", u)
+          if len(urls) > 40:
+              print(f"   … in še {len(urls) - 40}")
+
+          payload = json.dumps({"host": "meteorec.si", "key": KEY,
+                                "keyLocation": f"{SITE}/{KEY}.txt", "urlList": urls}).encode()
+          req = urllib.request.Request("https://api.indexnow.org/indexnow", data=payload,
+                                       headers={"Content-Type": "application/json; charset=utf-8"}, method="POST")
+          try:
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  print(f"IndexNow: {r.status} OK")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")[:300]
+              # 202 = sprejeto, ključ se še preverja; 422/429 niso usodni
+              print(f"IndexNow odgovor {e.code}: {body}", file=sys.stderr)
+              sys.exit(0 if e.code in (202, 422, 429) else 1)
+          PYEOF
