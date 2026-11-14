@@ -4924,3 +4924,19 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 
 /* Ploščice dni MTR: v svetli temi je utišano besedilo temnejše (kontrast ≥ 4,5:1) */
 [data-theme="light"] .mtr-bar,[data-theme="light"] .mtr-rng-lbl,[data-theme="light"] .mtr-day-cond{color:#3f4c42}
+
+/* Kartice meritev: vetrna rozeta, oznaki lestvice vlage, ločitev izmerjenega in napovedi pri dežju, graf tlaka na telefonu (14. 11. 2026).
+   Samo prikaz; id-ji in pravila numOf()/hs-rain-rate ostajajo. Lestvice ostanejo nevtralne (brez barvnega pomena). */
+.hm-scale:not(.hm-scale-rain)>i{left:clamp(5.5px,var(--p,0%),calc(100% - 5.5px))}
+.hm-ticks{display:flex;justify-content:space-between;margin:-.05rem 0 0;font-size:var(--fs-xs);line-height:1.2;color:var(--muted)}
+.hm-rose{display:none}
+html[data-mode="simple"] .hero .hm-ticks,html[data-mode="simple"] .hero .hm-rose{display:none}
+.hero-b .hm-scale-wind{display:none}
+.hero-b .hm-rose{display:flex;align-items:center;justify-content:center;height:72px;margin:.1rem 0;color:var(--text)}
+.hero-b .hm-rose svg{display:block;width:72px;height:72px}
+.hero-b .hm-rose-l{fill:var(--muted);font-size:var(--fs-xs);font-weight:500}
+.hero-b #hs-rain-rate,.hero-b #hs-rain-fc:not([hidden]),.hero-b #hs-rain-mtr:not([hidden]){display:block;position:relative;padding-left:.95rem}
+.hero-b #hs-rain-rate::before,.hero-b #hs-rain-fc::before,.hero-b #hs-rain-mtr::before{content:'';position:absolute;left:.1rem;top:.42em;width:.4rem;height:.4rem;border-radius:50%;box-sizing:border-box;border:1.5px solid var(--muted)}
+.hero-b #hs-rain-rate::before{background:var(--text);border-color:var(--text)}
+.hero-b .hero-metrics:not(.hero-metrics-2) .hm-pres .hm-spark{display:block;height:40px;margin-top:auto;padding-top:.4rem}
+.hero-b .hm-pres .hm-spark[data-on]+.hm-spark-cap{display:block;font-size:var(--fs-xs);line-height:1.2;color:var(--muted);margin-top:.15rem}

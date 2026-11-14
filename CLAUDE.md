@@ -2963,6 +2963,16 @@ Po referencah (komplet kartic, merilniki UV/vetra/tlaka, vremenske kartice Aeris
 - **Pretekle ure v grafu »Danes«** so utišane z barvo in težo (`.hsc-col.past`), **ne z `opacity` celega stolpca** (prej 2,3:1 in 3,5:1 v svetli temi). Gumba »Poslušaj vreme«/»Deli karto« imata v `.hero-b` podlago kartice (v svetli temi je stran živo modra, prosojen gumb je imel 2,0:1). axe na `.hero-b`: 0 kršitev v obeh temah.
 - **Pas nad hero kartico (`buildTicker()`) in `.dfc-icon` v nogi:** ikone iz sklada (`_ico()`, `generate_daily_fact.py` zapiše ime ikone), decimalna vejica (`dc()`), presledek pred `%` in `°C`. Test: `test_parity.hero_pas_brez_emoji`.
 
+### Kartice meritev: rozeta vetra, oznaki vlage, graf tlaka (14. 11. 2026)
+
+Samo prikaz; id-ji, `numOf()` in pravilo `hs-rain-rate` veljajo naprej.
+
+- **Vlaga:** pri ≥ 97 % vrstica pod lestvico pove »zrak skoraj nasičen« (prej je `dewLabel()` ob 99 % pisal »zelo suho«; ta oznaka opisuje občutek ob rosišču, ne vlage). Lestvica ima oznaki 0 in 100, ročica se ob robu ne reže (`clamp`).
+- **Veter:** na ploščici je rozeta (`#hsw-rose`, `renderHeroWindRose()`), puščica kaže, kam veter piha (smer + 180°). Pod 1 km/h puščice ni, krog je črtkan, oznaka pove »mirno« (smer ob brezvetrju ni podatek). Stara lestvica vetra je v Hero B skrita (element ostane za injektor).
+- **Dež:** vrstice imajo marker: polna pika = izmerjeno, prazen krog = napoved (Open-Meteo, MTR). Besedila so nespremenjena.
+- **Tlak:** trend ima besedo (narašča/pada/stabilen, pragovi ±1 hPa/3 h kot puščice), barva je nevtralna (višji tlak ni »dober«), graf 24 h je viden tudi na telefonu (višina rezervirana).
+- Po spremembi: `npm run minify && node tools/critical_css.mjs`.
+
 ### Ploščica »Padlo danes«: ena časovna os (4. 11. 2026, audit točki 2 in 3)
 
 - **Lestvica pod številko je količina danes** (`heroScalePos()` `rain`, polno = 30 mm, koren; Python kopija v `hero_scale_positions()`, test `hero_lestvice`): prazna proga pod »6,3 mm« se je brala kot »skoraj nič«, ker je kodirala intenziteto (0 mm/h). Intenziteta je samo besedilo »trenutno 0,0 mm/h« (modro, ko dežuje). Ključ v `_hsc` je `rt` (`precipTotal`), ne več `rr`.

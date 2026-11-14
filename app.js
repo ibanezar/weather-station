@@ -2369,6 +2369,17 @@ function renderTodayUv(){
   line.hidden=false;
 }
 
+// Vetrna rozeta na ploščici: puščica kaže, KAM veter piha (smer meritve + 180°). Pod 1 km/h smer ne pomeni nič (senzor poroča zadnjo smer):
+// puščice ni, krog je črtkan. Samo prikaz; hitrost in smer ostaneta v številki in oznaki ploščice.
+function renderHeroWindRose(speed,dir){
+  const el=document.getElementById('hsw-rose');if(!el||speed==null)return;
+  const calm=speed<1||dir==null;
+  const arrow=calm?'':'<g transform="rotate('+((dir+180)%360).toFixed(0)+' 36 36)"><path d="M36 18v32M36 18l-6 8M36 18l6 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>';
+  el.innerHTML='<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="24" fill="none" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5"'+(calm?' stroke-dasharray="3 4"':'')+'/>'
+    +'<g class="hm-rose-l" text-anchor="middle"><text x="36" y="10">S</text><text x="36" y="70">J</text><text x="65" y="40">V</text><text x="7" y="40">Z</text></g>'
+    +(calm?'<circle cx="36" cy="36" r="2.5" fill="currentColor" opacity=".5"/>':arrow)+'</svg>';
+  el.setAttribute('data-on','1');
+}
 // ── Trend tlaka na junaški kartici ────────────────────────
 // Trenutni tlak proti meritvi izpred ~3 h iz urne zgodovine. Urni zapis nosi
 // samo `pressureMax`/`pressureMin`, zato gre v primerjavo sredina med njima —
@@ -2385,8 +2396,9 @@ function renderHeroPressureTrend(pNow){
   if(pNow==null||pOld==null){el.hidden=true;return;}
   const d=pNow-pOld;
   const arrow=d>3?'↑↑':d>1?'↑':d>=-1?'→':d>-3?'↓':'↓↓';
-  el.textContent=arrow+' '+(d>=0?'+':'−')+fmt(Math.abs(d),1)+' hPa / 3 h';
-  el.style.color=d>1?'var(--green)':d<-1?'var(--red)':'var(--muted)';
+  const word=d>1?'narašča':d<-1?'pada':'stabilen';
+  el.textContent=arrow+' '+word+' · '+(d>=0?'+':'−')+fmt(Math.abs(d),1)+'\u00A0hPa\u00A0/\u00A03\u00A0h';
+  el.style.color='';
   el.hidden=false;
 }
 
@@ -3063,7 +3075,7 @@ function applyObs(obs){
   countUp('hs-pressure',m.pressure,1,'<span style="font-size:.7rem;color:var(--muted)"> hPa</span>',1200);
   renderHeroPressureTrend(m.pressure??null);
   countUp('hs-wind',m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
-  if(obs.winddir!=null)set('hs-wind-dir',' · '+windDir(obs.winddir));
+  {const calm=m.windSpeed!=null&&m.windSpeed<1;if(obs.winddir!=null)set('hs-wind-dir',' · '+(calm?'mirno':windDir(obs.winddir)));renderHeroWindRose(m.windSpeed,obs.winddir);}
   countUp('hs-gust',m.windGust??m.windSpeed,1,'<span style="font-size:.7rem;color:var(--muted)"> km/h</span>',900);
   noteTodayGust(m.windGust??m.windSpeed,_lastObsTime??new Date());
   renderTodayMaxGust();
@@ -3075,7 +3087,7 @@ function applyObs(obs){
   noteTodayUv(uv,_lastObsTime??new Date());renderTodayUv();}
   Object.assign(_hsc,{hum:obs.humidity,wind:m.windSpeed,gust:m.windGust??m.windSpeed,pres:m.pressure,uv:obs.uv??0,rt:m.precipTotal??0,temp:m.temp});
   renderHeroScales();setHeroWx(m,obs);renderHeroMoon();
-  {const dl=document.getElementById('hs-dew-line');if(dl&&m.dewpt!=null){set('hs-dew',fmt(m.dewpt,1));set('hs-dew-lbl',dewLabel(m.dewpt).toLowerCase());dl.hidden=false;}}
+  {const dl=document.getElementById('hs-dew-line');if(dl&&m.dewpt!=null){set('hs-dew',fmt(m.dewpt,1));set('hs-dew-lbl',(obs.humidity!=null&&obs.humidity>=97)?'zrak skoraj nasičen':dewLabel(m.dewpt).toLowerCase());dl.hidden=false;}}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
   countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit"> km/h</span>',900);
   set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
