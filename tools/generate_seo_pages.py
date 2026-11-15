@@ -2536,9 +2536,11 @@ def gen_nearby_town_pages(hist, sitemap_urls):
         # stran ima (trenutna meritev, urna napoved, 7 dni). Pojasnilo, da kraj nima
         # lastne postaje, je v opisu in v vidnem bloku.
         title = f"Vreme {town} danes, po urah in 7 dni"
-        desc = (f"Vreme {town}: trenutna meritev, napoved po urah in za 7 dni. {town} nima "
-                f"lastne postaje ARSO; najbližja je IREICA1 v Rečici ob Savinji, "
-                f"{num(km,0)} km {dirn_st}, {abs(elev_diff):.0f} m {'niže' if elev_diff > 0 else 'više'}.")
+        # Opis začne s tem, kar bralec dobi (meritev, urna napoved, 7 dni); pojasnilo o postaji
+        # je na koncu: prej je snippet odprl z »nima lastne postaje«.
+        desc = (f"Vreme {town}: izmerjena temperatura, veter in padavine ter napoved po urah in za "
+                f"7 dni. Najbližja meritev: IREICA1 v Rečici, {num(km,0)} km {dirn_st}, "
+                f"{abs(elev_diff):.0f} m {'niže' if elev_diff > 0 else 'više'}.")
 
         crumbs = [("Meteorec", "/"), ("Vreme Zgornja Savinjska dolina", "/vreme-zgornja-savinjska-dolina/"),
                   (f"Vreme {town}", None)]
