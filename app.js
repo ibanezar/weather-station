@@ -7172,7 +7172,15 @@ async function loadNowcast(){
   // Plošča se pokaže samo, kadar je kaj povedati: nekaj že pada nad vasjo ali
   // pa se v obzorju približuje. Ob mirnem vremenu — kar je večina časa —
   // ostane skrita, da stran ne nosi prazne kartice.
-  const nicNaVidiku = !v.toca && v.nevihta==null && v.dez==null && !(v.zdaj>0);
+  // Radar vidi tudi v višini, kjer padavine ne dosežejo tal (virga, suh sloj pod oblakom),
+  // zato šibek odboj (< 2 mm/h) brez potrditve postaje ni »dež nad vasjo«. Ob suhi postaji
+  // plošče ne kažemo; ob mrazu (≤ 1 °C) bi bilo kar pade sneg ali dež s snegom, ne dež.
+  const stM=_lastBriefObs?.metric||null;
+  const stT=stM&&stM.temp!=null?stM.temp:null;
+  const stSuho=!!stM&&stM.precipRate!=null&&stM.precipRate<=0;
+  const mraz=stT!=null&&stT<=1;
+  const sibek=v.zdaj>0&&v.zdaj<6;
+  const nicNaVidiku = !v.toca && v.nevihta==null && v.dez==null && (!(v.zdaj>0) || (sibek&&stSuho));
   if(nicNaVidiku){wrap.hidden=true;return;}
   wrap.hidden=false;
 
@@ -7199,11 +7207,12 @@ async function loadNowcast(){
     _ncSetBadge('storm','cloud-lightning','Nevihta nad vasjo'); zdajMm();
     sub.textContent='Nevihta je nad vasjo (~'+fm(v.zdajMmh)+' mm/h).';
   }else if(v.dez!=null&&!zeDez){
-    _ncSetBadge('rain','cloud-rain','Dež'); eta(v.dez,'do prvih padavin');
+    _ncSetBadge('rain',mraz?'snowflake':'cloud-rain',mraz?'Padavine':'Dež'); eta(v.dez,'do prvih padavin');
     sub.textContent='Padavine se približujejo z radarske slike.'+peakTxt;
   }else{
-    _ncSetBadge('rain','cloud-rain','Dež nad vasjo'); zdajMm();
-    sub.textContent='Nad vasjo dežuje (~'+fm(v.zdajMmh)+' mm/h).'+
+    _ncSetBadge('rain',mraz?'snowflake':'cloud-rain',mraz?'Padavine nad vasjo':'Dež nad vasjo'); zdajMm();
+    sub.textContent=(mraz?'Radar kaže padavine (~'+fm(v.zdajMmh)+' mm/h); pri '+fm(stT.toFixed(1))+' °C je to sneg ali dež s snegom.'
+                         :'Nad vasjo dežuje (~'+fm(v.zdajMmh)+' mm/h).')+
       (endI>=0?' Po radarju poneha čez ~'+potek[endI].t+' min.':' Po radarju v naslednjih 45 minutah ne poneha.');
   }
   _ncRadar(etaMin,d.premik);
