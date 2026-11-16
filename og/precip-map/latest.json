@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-15",
-  "issued": "15.11.2026 7:00 CET",
-  "issued_at": "2026-11-15T07:30:35.973993+01:00",
-  "top_station": "Bilje",
-  "top_mm": 0,
-  "n_stations": 19,
+  "date": "2026-11-16",
+  "issued": "16.11.2026 7:00 CET",
+  "issued_at": "2026-11-16T07:30:37.155784+01:00",
+  "top_station": "Postojna",
+  "top_mm": 3,
+  "n_stations": 20,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-15.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-15-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-11-16.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-16-story.jpg"
 }
