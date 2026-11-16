@@ -95,7 +95,8 @@
    "elevation_m": 1696,
    "elev_opis": "postaja ARSO",
    "arso_id": "URSLJ-GOR_",
-   "kamere": []
+   "kamere": [],
+   "arso_cam": "Uršlja gora"
   },
   {
    "id": "krvavec",
@@ -119,7 +120,8 @@
    "lon": 13.84,
    "elevation_m": 1535,
    "elev_opis": "zgornja postaja žičnice",
-   "kamere": []
+   "kamere": [],
+   "arso_cam": "Vogel"
   },
   {
    "id": "kranjska-gora",
@@ -130,7 +132,6 @@
    "lon": 13.7867,
    "elevation_m": 810,
    "elev_opis": "naselje",
-   "arso_cam": "Kranjska Gora",
    "kamere": []
   },
   {
@@ -154,7 +155,8 @@
    "lon": 13.48,
    "elevation_m": 2200,
    "elev_opis": "zgornja postaja žičnice",
-   "kamere": []
+   "kamere": [],
+   "arso_cam": "Kanin"
   },
   {
    "id": "dobratsch",

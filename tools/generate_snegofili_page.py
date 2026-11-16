@@ -291,6 +291,7 @@ def card_html(r, p):
         f'<div style="grid-column:span 2"><dt>Meja sneženja</dt><dd class="sg-sl">{sl_txt}</dd></div></dl>'
         f'<div class="sg-foot"><span>72 h: {cm_cell(r["past72_cm"])} nazaj · {cm_cell(r["next72_cm"])} naprej</span>'
         f'<span>{cam_links(p)}</span></div>'
+        f'{cam_slot(r["ime"], p)}'
         f'<div class="sg-foot"><span>Izmerjeno: {meas_txt}</span></div></article>')
 
 
@@ -319,18 +320,39 @@ def hero_sentence(rows):
     return " ".join(parts)
 
 
-def embed_html(cams):
-    items = []
-    for p in cams.values():
-        for c in p.get("kamere") or []:
-            e = c.get("embed")
-            if e and str(e).startswith("https://") and c.get("embed_terms") and c.get("checked"):
-                items.append(
-                    f'    <div class="sg-embed" data-src="{_html.escape(e)}"><button type="button">'
-                    f'Naloži kamero: {_html.escape(p["ime"])} ({_html.escape(c["ponudnik"])})</button>'
-                    f'<p class="muted-note">Po kliku se naloži vsebina ponudnika ({_html.escape(c["ponudnik"])}); '
-                    f'ta lahko nastavi svoje piškotke.</p></div>')
-    return "\n".join(items)
+# Vdelava samo pri ponudnikih z uradno možnostjo vdelave in samo na teh gostiteljih. WhatsUpCams (S3MEA) namenoma ni
+# na seznamu: pogoji prepovedujejo framing in javni prikaz brez pisnega dovoljenja. Ob pisnem dovoljenju ga dodaj
+# SKUPAJ z `embed_terms` (povezava ali datum potrdila) in `checked`.
+EMBED_HOSTS = {"windy": ("webcams.windy.com", "embed.windy.com"), "youtube": ("www.youtube-nocookie.com",)}
+WINDY_CREDIT = ('Webcams provided by <a href="https://www.windy.com/" target="_blank" rel="noopener">windy.com</a> — '
+                '<a href="https://www.windy.com/webcams/add" target="_blank" rel="noopener">add a webcam</a>')
+
+
+def valid_embed(c):
+    """(kind, src) če je vdelava dovoljena, sicer None: znan ponudnik, https na dovoljenem gostitelju, pogoji in datum preverjanja."""
+    from urllib.parse import urlparse
+    kind, src = c.get("embed_kind"), str(c.get("embed") or "")
+    if kind not in EMBED_HOSTS or not c.get("embed_terms") or not c.get("checked"):
+        return None
+    u = urlparse(src)
+    if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:
+        return None
+    return kind, src
+
+
+def cam_slot(r_name, p):
+    """Gumb »Kamera v živo« na kartici točke (iframe se naloži šele po kliku); prazno, če ni dovoljene vdelave."""
+    for c in p.get("kamere") or []:
+        ok = valid_embed(c)
+        if ok:
+            kind, src = ok
+            credit = f'<p class="sg-attr">{WINDY_CREDIT}</p>' if kind == "windy" else ""
+            prov = _html.escape(c.get("ponudnik", kind))
+            return (f'<div class="sg-camslot" data-src="{_html.escape(src)}" data-kind="{kind}" '
+                    f'data-title="Spletna kamera: {_html.escape(r_name)}">'
+                    f'<button type="button" class="sg-live">Kamera v živo</button>'
+                    f'<p class="sg-attr">Po kliku se naloži vsebina ponudnika ({prov}), ki lahko nastavi svoje piškotke.</p>{credit}</div>')
+    return ""
 
 
 CAM_JS = r"""
@@ -350,9 +372,14 @@ CAM_JS = r"""
       fig(PROXY+m.slika+(m.posnet?'&t='+encodeURIComponent(m.posnet):''),'Vir: ARSO · '+m.kamera+(t?' · posneto ob '+t:''),'Spletna kamera ARSO: '+m.kamera)
     }).catch(function(){})});
   if(grid.dataset.drsi){fig(grid.dataset.drsi+'?t='+Math.floor(Date.now()/3e5),'Vir: DRSI · prelaz Črnivec','Spletna kamera DRSI na prelazu Črnivec')}
-  [].forEach.call(document.querySelectorAll('.sg-embed button'),function(b){b.addEventListener('click',function(){
-    var w=b.parentNode,f=document.createElement('iframe');f.src=w.dataset.src;f.loading='lazy';f.width='100%%';f.height='360';
-    f.setAttribute('referrerpolicy','no-referrer');f.setAttribute('title','Spletna kamera');w.replaceChildren(f)})});
+  var OK={windy:['webcams.windy.com','embed.windy.com'],youtube:['www.youtube-nocookie.com']};
+  [].forEach.call(document.querySelectorAll('.sg-live'),function(b){b.addEventListener('click',function(){
+    var w=b.parentNode,u;try{u=new URL(w.dataset.src)}catch(e){return}
+    if(u.protocol!=='https:'||(OK[w.dataset.kind]||[]).indexOf(u.hostname)<0)return;
+    var f=document.createElement('iframe');f.src=u.href;f.loading='lazy';f.title=w.dataset.title||'Spletna kamera';
+    f.setAttribute('referrerpolicy','no-referrer');f.setAttribute('allowfullscreen','');
+    f.style.cssText='width:100%%;aspect-ratio:16/9;border:0;border-radius:10px';
+    b.replaceWith(f)})});
 })();
 """ % {"proxy": json.dumps(PROXY)}
 
@@ -377,7 +404,6 @@ def build_body(data, cams):
     drsi = DRSI_CAM if any(p.get("drsi_cam") for p in cams.values()) else ""
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
-    embeds = embed_html(cams)
     return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)])}
 {seo.stn_badge()}
   <section class="sg-hero" aria-labelledby="sg-h1">
@@ -417,7 +443,6 @@ def build_body(data, cams):
   <h2 id="kam-h">Kamere</h2>
   <p class="archive-intro">Slovenske kamere ARSO in DRSI so prikazane tukaj. Pri tujih točkah vas povezava na kartici odpelje k lastniku kamere.</p>
   <div id="sg-cams" data-arso='{_html.escape(json.dumps(arso, ensure_ascii=False), quote=True)}' data-drsi="{drsi}"></div>
-{embeds}
   </section>
 {faq_html}
   <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten

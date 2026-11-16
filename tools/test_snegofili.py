@@ -80,11 +80,20 @@ check("Točka &lt;A&gt;" in hs and "(12 cm)" in hs.replace(" ", " "), "stavek: 
 check("Daleč" not in hs, "stavek: točka čez 200 km ni v dnevnem izletu")
 check("indoor" not in body.lower() and "tempinf" not in body.lower(), "brez notranjih meritev")
 check(g.cm_cell(0.4) == "—" and g.cm_cell(3.26).startswith("3,3"), "oblika centimetrov (vejica, pod 1 cm črtica)")
-check('class="sg-embed"' not in body, "brez embed polj ni vdelave")
-cams["b"]["kamere"][0]["embed"] = "https://x.example/e"
-check("sg-embed" not in g.embed_html(cams), "vdelava brez embed_terms/checked se ne izriše")
-cams["b"]["kamere"][0].update({"embed_terms": "https://x.example/t", "checked": "2026-11-13"})
-check("sg-embed" in g.embed_html(cams), "vdelava z embed_terms/checked se izriše")
+good = {"embed_kind": "windy", "embed": "https://webcams.windy.com/webcams/public/embed/player/1/day", "embed_terms": "https://api.windy.com/webcams/terms", "checked": "2026-11-13", "ponudnik": "Windy"}
+check('class="sg-camslot"' not in body, "brez vdelave ni slota")
+check(g.valid_embed(good) == ("windy", good["embed"]), "windy vdelava z gostiteljem, pogoji in datumom je dovoljena")
+check(g.valid_embed({**good, "checked": None}) is None, "vdelava brez checked ni dovoljena")
+check(g.valid_embed({**good, "embed_terms": ""}) is None, "vdelava brez embed_terms ni dovoljena")
+check(g.valid_embed({**good, "embed": "http://webcams.windy.com/x"}) is None, "http ni dovoljen")
+check(g.valid_embed({**good, "embed": "https://evil.example/x"}) is None, "tuj gostitelj ni dovoljen")
+check(g.valid_embed({**good, "embed_kind": "whatsupcams", "embed": "https://www.whatsupcams.com/en/x"}) is None, "WhatsUpCams ni na seznamu (pogoji prepovedujejo framing)")
+check(g.valid_embed({**good, "embed": "https://webcams.windy.com.evil.example/x"}) is None, "podomena trik ni dovoljen")
+slot = g.cam_slot("Vogel <b>", {"kamere": [good]})
+check("Kamera v živo" in slot and "windy.com" in slot and "add a webcam" in slot, "windy slot ima gumb in navedbo")
+check("<b>" not in slot, "ime v slotu je ubežano")
+yt = {"embed_kind": "youtube", "embed": "https://www.youtube-nocookie.com/embed/abc", "embed_terms": "Share → Embed", "checked": "2026-11-13", "ponudnik": "YT"}
+check(g.valid_embed(yt) is not None and "add a webcam" not in g.cam_slot("X", {"kamere": [yt]}), "youtube slot brez Windy navedbe")
 check(len(g.TITLE) <= 60, "naslov ≤ 60 znakov")
 
 
