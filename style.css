@@ -4409,16 +4409,31 @@ main>.hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
 .hero-b .hm-spark{display:none}
 .hm-spark-cap{display:none}
 
-/* »Več podrobnosti« */
-.hb-more>summary{list-style:none;display:flex;align-items:center;gap:.6rem;min-height:3rem;padding:.7rem 1.1rem;cursor:pointer;
-  background:var(--hb-bg2);border:1px solid var(--hb-bd2);border-radius:var(--r-lg);box-shadow:var(--hb-sh2);font-size:var(--fs-sm);font-weight:600;color:var(--text)}
+/* »Več podrobnosti« (16. 11. 2026): prej gola vrstica z drobnim namigom, obiskovalci niso opazili, da je pod njo še kaj.
+   Zdaj je videti kot gumb: ikona v čipu (kot ploščice meritev), naslov + 2-vrstični namig, desno pilula »Odpri/Zapri« s puščico.
+   Stalna višina (2 vrstici namiga rezervirani), da odpiranje in prihod pisave ne premakneta strani. */
+.hb-more>summary{list-style:none;display:flex;align-items:center;gap:.75rem;min-height:4.4rem;padding:.7rem .8rem .7rem .9rem;cursor:pointer;
+  background:var(--hb-bg2);border:1px solid color-mix(in srgb,var(--green) 38%,var(--hb-bd2));border-radius:var(--r-lg);box-shadow:var(--hb-sh2);font-size:var(--fs-sm);font-weight:600;color:var(--text);
+  -webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s}
 .hb-more>summary::-webkit-details-marker{display:none}
+.hb-more>summary:hover{border-color:var(--green)}
+.hb-more>summary:active{background:color-mix(in srgb,var(--green) 10%,var(--hb-bg2))}
 .hb-more>summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.hb-more-hint{flex:1;min-width:0;font-weight:400;font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
-.hb-more-chev{flex:none;width:.5rem;height:.5rem;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .2s}
-.hb-more[open] .hb-more-chev{transform:rotate(-135deg) translateY(-2px)}
+.hb-more-ic{flex:none;display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:50%;background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green)}
+.hb-more-ic .ic{width:1.2rem;height:1.2rem}
+.hb-more-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:.15rem}
+.hb-more-title{font-size:var(--fs-md);font-weight:700;line-height:1.2}
+.hb-more-hint{font-weight:400;font-size:var(--fs-xs);line-height:1.3;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hb-more-act{flex:none;display:flex;align-items:center;gap:.4rem;min-width:2.4rem;height:2.4rem;padding:0 .35rem 0 .8rem;border-radius:999px;justify-content:center;
+  background:color-mix(in srgb,var(--green) 16%,transparent);border:1px solid color-mix(in srgb,var(--green) 40%,transparent);font-size:var(--fs-xs);font-weight:600;color:var(--text)}
+.hb-more-close,.hb-more[open] .hb-more-open{display:none}
+.hb-more[open] .hb-more-close{display:inline}
+.hb-more-chev{flex:none;width:.5rem;height:.5rem;margin:0 .5rem 0 .1rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.hb-more[open] .hb-more-chev{transform:rotate(-135deg) translateY(1px)}
 .hb-more[open]>summary{margin-bottom:.5rem}
-@media (prefers-reduced-motion:reduce){.hb-more-chev{transition:none}}
+/* Na ozkem zaslonu pilula izgubi besedo in ostane krog s puščico */
+@media (max-width:420px){.hb-more-open,.hb-more-close,.hb-more[open] .hb-more-close{display:none}.hb-more-act{width:2.4rem;padding:0}.hb-more-chev{margin:0}}
+@media (prefers-reduced-motion:reduce){.hb-more-chev,.hb-more>summary{transition:none}}
 
 /* podnožje: rekord dneva + točnost modela */
 .hero-b .hb-foot{padding:.1rem 1.1rem}
@@ -4448,7 +4463,7 @@ main>.hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
 html[data-mode="simple"] .hero-b .hb-more{display:none}
 html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column:1/-1}
 
-@media (max-width:360px){.hero-b .hm,.hero-b .hm.hm-secondary{padding:.7rem .7rem}.hero-b .hero-top{padding:1rem .95rem}.hb-more-hint{display:none}}
+@media (max-width:360px){.hero-b .hm,.hero-b .hm.hm-secondary{padding:.7rem .7rem}.hero-b .hero-top{padding:1rem .95rem}.hb-more>summary{gap:.6rem;padding-left:.7rem}.hb-more-ic{width:2.1rem;height:2.1rem}}
 @media (min-width:760px){
   .hero.hero-b{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:.6rem;
     grid-template-areas:"main met" "day met" "more more" "foot foot" "sc sc" "qa qa"}
@@ -4468,7 +4483,8 @@ html[data-mode="simple"] .hero.hero-b .hero-metrics>.hm:nth-child(3){grid-column
   .hero-b .hm-spark-cap{font-size:var(--fs-xs);line-height:1.2;color:var(--muted);margin-top:.15rem}
   .hero-b .hero-metrics:not(.hero-metrics-2) .hm-spark[data-on]+.hm-spark-cap{display:block}
   .hero-b .hb-more .hero-metrics-2{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .hb-more-hint{text-align:left}
+  .hb-more>summary{min-height:3.8rem}
+  .hb-more-hint{-webkit-line-clamp:1}
 }
 
 /* Dvoboj kot zložen del kartice »Dolina zdaj« (1. 11. 2026). Povzetek ima stalno višino,
