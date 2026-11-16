@@ -56,5 +56,34 @@ check("blok kraj", "Vreme v Mozirju" in b and 'data-loc="Mozirju"' in b)
 b0 = inj.build_block_history(inj.TAIL_RECICA, inj.CLS_RECICA)
 check("blok brez kraja", "data-loc" not in b0 and "Zadnja znana dnevna meritev" in b0)
 
+# 4) »Na kratko« + grafa po mesecih (računano iz history.json, ne vtipkano; HTML se zgradi v delovnem toku).
+hist = g.load_history()
+mc = g.monthly_climate(hist)
+check("mesečno podnebje ima 12 mesecev", len(mc) == 12)
+for t in g.NEARBY_TOWNS:
+    lapse = -g.LAPSE_RATE_C_PER_100M * (t["elev"] - g.ELEV) / 100
+    kratko, chart, qa = g.town_climate_blocks(hist, t, lapse, g.climate_facts(hist))
+    check(f"{t['slug']} Na kratko", "Na kratko:" in kratko and t["loc"] in kratko)
+    check(f"{t['slug']} grafa", chart.count("<svg") == 2 and chart.count('role="img"') == 2)
+    check(f"{t['slug']} FAQ", len(qa) == 2 and all(q.strip() and a.strip() for q, a in qa))
+    check(f"{t['slug']} pravi minus", "okrog -" not in kratko and "okrog -" not in qa[0][1])
+    check(f"{t['slug']} brez notranjih meritev", "indoor" not in (kratko + chart).lower())
+
+# 5) Logarska dolina ima napoved (koordinate doline), »zadnjih 14 dni« računa po meritvah, ne po ERA5.
+check("Logarska v TOWNS", "vreme-logarska-dolina" in tw)
+import datetime as _dt
+syn = {}
+d0 = _dt.date(2024, 1, 1)
+for i in range(900):
+    d = (d0 + _dt.timedelta(days=i)).isoformat()
+    syn[d] = {"tempAvg": 10.0, "tempHigh": 14.0, "tempLow": 6.0, "precipTotal": 0.0, "src": "station"}
+last = max(syn)
+syn[last]["tempAvg"] = 15.0
+syn[(_dt.date.fromisoformat(last) - _dt.timedelta(days=1)).isoformat()]["src"] = "era5"
+sent, svg = g.recent_days_block(syn)
+check("zadnjih dni: stavek in SVG", sent and "<svg" in svg and "nad običajnim" in sent)
+check("zadnjih dni: ERA5 izpuščen", svg.count("<circle") == 14)
+check("običajno ≈ 10", abs(g.day_normal(syn, last) - 10.0) < 0.5)
+
 print(f"{ok} preverjanj, {fail} napak")
 sys.exit(1 if fail else 0)

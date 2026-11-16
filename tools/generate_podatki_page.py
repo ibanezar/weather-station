@@ -160,10 +160,41 @@ def build_body(hist, facts):
         f'    <li>{f}</li>' for f in facts_list
     ) + "\n  </ul>"
 
+    n_station = sum(1 for r in hist.values() if r.get("src") != "era5")
+    doi = doi_url()
+    kratko = (f'  <p class="archive-intro tnc-answer"><strong>Na kratko:</strong> postaja IREICA1 v Rečici ob Savinji '
+              f'({seo.ELEV} m n. m.) meri vreme od {seo.fmtd(first_date)}; do {seo.fmtd(last_date)} je {n_station} dni meritev. '
+              f'Povprečna letna temperatura je {seo.num(facts["mean_t"])} °C, povprečno pade {seo.num(facts["annual_precip"], 0)} mm '
+              f'padavin na leto; najvišja izmerjena temperatura je {seo.num(facts["tmax_v"])} °C ({seo.fmtd(facts["tmax_d"])}), '
+              f'najnižja {seo.num(facts["tmin_v"]).replace("-", "−")} °C ({seo.fmtd(facts["tmin_d"])}). Podatki so prosto dostopni (CC BY 4.0) kot '
+              f'CSV in JSON' + (f', z DOI <a href="{doi}">{doi.replace("https://doi.org/", "")}</a>' if doi else '') +
+              '. Postaja je amaterska, brez uradne kalibracije. <span class="muted-note">Posodobljeno: '
+              f'{seo.fmtd(last_date)}.</span></p>') if (facts.get("mean_t") is not None and facts.get("annual_precip") is not None) else ""
+
+    faq = [
+        ("Kje dobim zgodovinske vremenske podatke za Rečico ob Savinji?",
+         f"Dnevne meritve postaje IREICA1 od {seo.fmtd(first_date)} so na tej strani kot CSV (podatki/ireica1-dnevni-podatki.csv) "
+         f"in JSON (history.json), po dnevih pa v vremenskem arhivu na /vreme/."),
+        ("Kako citirati podatke postaje IREICA1?",
+         ("Navedite »Meteorec (meteorec.si), postaja IREICA1«, različico (zadnji dan v datoteki) ali datum dostopa"
+          + (f"; trajni DOI zapisa je {doi.replace('https://doi.org/', '')}." if doi else "; trajni DOI še ni objavljen."))),
+        ("Katera licenca velja za podatke?",
+         "Creative Commons Attribution 4.0 (CC BY 4.0): podatke smete uporabljati in deliti ob navedbi vira."),
+        ("Katere spremenljivke vsebuje CSV?",
+         "Datum, najvišja, najnižja in povprečna dnevna temperatura (°C), padavine (mm), najvišja in povprečna hitrost vetra "
+         "(km/h) ter povprečna relativna vlažnost (%). Vsebuje samo zunanje meritve postaje, ne dni, dopolnjenih iz reanalize ERA5."),
+        ("Je postaja uradna?",
+         "Ne. IREICA1 je amaterska postaja (senzorji Ecowitt, brez uradne kalibracije in presoje lokacije) in ni del merilne mreže ARSO. "
+         "Za uradne podatke glejte ARSO."),
+    ]
+    faq_html = ("  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq) + "\n  </div>")
+
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Podatki", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Podatki — Rečica ob Savinji (IREICA1)</h1>
   <p class="post-meta">Ena stran, samo HTML tabele — trenutne meritve, rekordi in klimatološke norme · {TODAY.isoformat()}</p>
+{kratko}
   <p class="archive-intro">Meteorološka postaja IREICA1 pri Rečici ob Savinji (Zgornja Savinjska dolina, 366 m n. m.,
   46,325779° S, 14,921137° V) neprekinjeno meri vreme od {seo.fmtd(first_date)}. Ta stran zbira ključne podatke
   brez JavaScripta, za enostavno branje in citiranje. Polni arhiv je na <a href="/vreme/">/vreme/</a>,
@@ -202,9 +233,11 @@ def build_body(hist, facts):
     <tr><th>Strojno berljiv indeks</th><td><a href="/llms.txt">/llms.txt</a></td></tr>
   </table>
 
+{faq_html}
+
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
 
-    return body
+    return body, faq
 
 
 def main():
@@ -214,7 +247,7 @@ def main():
         print("✗ generate_seo_pages.climate_facts ni na voljo", file=sys.stderr)
         sys.exit(1)
 
-    body = build_body(hist, facts)
+    body, faq = build_body(hist, facts)
 
     url = "/podatki/"
     # »Podatki« samo po sebi ni iskalni izraz — »vremenski podatki« je.
@@ -225,6 +258,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-07-14"),
         seo.crumbs_schema([("Meteorec", "/"), ("Podatki", None)]),
+        seo.faq_schema(faq),
         # Ista entiteta (#dataset) kot na naslovni, /o-postaji.html in /vreme/ — stran,
         # ki obstaja zaradi podatkov, jo mora nositi tudi sama.
         seo.archive_dataset_schema(min(hist), max(hist)),

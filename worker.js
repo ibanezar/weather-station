@@ -3433,6 +3433,12 @@ async function _cronDispatchScheduledWorkflows(env) {
     // storm-map.yml je na pavzi do aprila 2027 (28. 10. 2026) -- ob vklopu vrni:
     // "storm-map.yml": await _cronDispatchGithubWorkflow(env, "storm-map.yml", { force: "false" }),
     "vodostaj-forecast.yml": await _cronDispatchGithubWorkflow(env, "vodostaj-forecast.yml"),
+    // Dnevna zgodba (14. 11. 2026): GitHubov cron zamuja 5–7 ur, okno zgodbe pa je 6:00–7:00 po naši
+    // uri (story_gate.py), zato je kartica brez tega izpadala. Ta cron teče ob 4:10/4:40/5:10/5:40 UTC:
+    // pozimi sta v oknu 5:10 in 5:40, poleti 4:10 in 4:40; ostale tri zavrne vrata, drugi v oknu pa
+    // zgodbe ne objavi znova (stanje v tools/.story_state.json). `force: "false"` je OBVEZEN: pri ročnem
+    // zagonu je privzeto "true", kar bi obšlo okno in objavilo ob vsakem klicu.
+    "daily-story.yml": await _cronDispatchGithubWorkflow(env, "daily-story.yml", { force: "false" }),
   };
   const r2 = env?.PHOTOS_R2;
   if (r2) {
@@ -4091,6 +4097,10 @@ async function _modeliKarta2(env, ctx) {
   try { return await _mk2Refresh(env); }
   catch (e) { if (cached) return Object.assign({}, cached, { stale: true }); throw e; }
 }
+
+// Pritoki Savinje, ki jih ARSO utegne meriti (normalizirano, brez šumnikov). Namerna podvojitev
+// s TRIB_RIVERS v tools/generate_vodostaj_page.py (preverja test_parity.vodostaj_pritoki).
+const ARSO_PRITOKI = ["dreta", "lucnica", "bolska", "paka", "loznica", "hudinja", "voglajna", "mozirnica", "ljubnica", "rinka"];
 
 export default {
   async scheduled(event, env, ctx) {
@@ -6806,6 +6816,19 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
               return lat > 46.0 && lat < 46.7 && lon > 14.3 && lon < 15.5;
             });
             const savinja = nearby.filter(f => /savinj/i.test(f.properties.reka || ""));
+            // ?pritoki=1: vsa Savinja + znani pritoki (stran /vodostaj-savinje/, živa struga).
+            // Od izvira proti Celju (po zemljepisni dolžini); brez omejitve na 6 postaj.
+            if (url.searchParams.get("pritoki") === "1") {
+              const normR = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+              const basin = nearby
+                .filter(f => /savinj/i.test(f.properties.reka || "") || ARSO_PRITOKI.includes(normR(f.properties.reka)))
+                .sort((a, b) => a.geometry.coordinates[0] - b.geometry.coordinates[0]);
+              if (basin.length) {
+                return new Response(JSON.stringify({ stations: basin, total: features.length, source: "arso-xml", pritoki: true }), {
+                  headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "max-age=300" }
+                });
+              }
+            }
             const out = (savinja.length ? savinja : nearby)
               .sort((a, b) => dist2(a.geometry.coordinates[1], a.geometry.coordinates[0])
                             - dist2(b.geometry.coordinates[1], b.geometry.coordinates[0]))

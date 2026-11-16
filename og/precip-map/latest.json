@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-13",
-  "issued": "13.11.2026 7:00 CET",
-  "issued_at": "2026-11-13T07:30:37.393915+01:00",
-  "top_station": "Vogel",
-  "top_mm": 128,
+  "date": "2026-11-16",
+  "issued": "16.11.2026 7:00 CET",
+  "issued_at": "2026-11-16T07:30:37.155784+01:00",
+  "top_station": "Postojna",
+  "top_mm": 3,
   "n_stations": 20,
-  "should_post": true,
-  "image": "https://meteorec.si/og/precip-map/2026-11-13.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-13-story.jpg"
+  "should_post": false,
+  "image": "https://meteorec.si/og/precip-map/2026-11-16.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-16-story.jpg"
 }

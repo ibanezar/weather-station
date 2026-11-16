@@ -355,19 +355,25 @@ def build_body(data, n_csv_rows):
 
     winner_html = ""
     if not sample_warning and d1_rows:
-        best = d1_rows[0]
-        worst_tmin = max(
-            ((label, r["tmin"]["bias"]) for m, label in models.items()
-             for r in [(results.get(m) or {}).get("1") or (results.get(m) or {}).get(1)]
-             if r and r["tmin"].get("bias") is not None),
-            key=lambda x: x[1], default=None)
-        winner_html = (
-            f'  <p class="archive-intro"><strong>{best[0]}</strong> ima pri napovedi za jutri (D+1) najmanjšo '
-            f'povprečno napako najvišje temperature: ±{num(best[1])} °C. '
-            + (f'Največjo pristranskost pri jutranjem minimumu ima {worst_tmin[0]} '
-               f'({"precenjuje" if worst_tmin[1] > 0 else "podcenjuje"} za {num(abs(worst_tmin[1]))} °C v povprečju) — '
-               'znak, da model ne ujame nočnega hladnega zraka na dnu doline.'
-               if worst_tmin else '') + '</p>\n')
+        d1 = {}
+        for m, label in models.items():
+            r = (results.get(m) or {}).get("1") or (results.get(m) or {}).get(1)
+            if r and all(r[k].get(f) is not None for k in ("tmax", "tmin") for f in ("mae", "bias")):
+                d1[label] = r
+        best_tx = min(d1, key=lambda k: d1[k]["tmax"]["mae"])
+        best_tn = min(d1, key=lambda k: d1[k]["tmin"]["mae"])
+        txt = (f'<strong>Na kratko:</strong> v vzorcu {n_obs} razrešenih dni ima pri napovedi za jutri (D+1) za Rečico ob '
+               f'Savinji najmanjšo povprečno napako najvišje temperature <strong>{best_tx}</strong> '
+               f'(±{num(d1[best_tx]["tmax"]["mae"])} °C), najnižje pa <strong>{best_tn}</strong> '
+               f'(±{num(d1[best_tn]["tmin"]["mae"])} °C). Za primerjavo: ugibanje po dolgoletnem povprečju za ta '
+               f'koledarski dan zgreši za ±{num(climo["tmax"]["mae"])} °C (Tmax) in ±{num(climo["tmin"]["mae"])} °C (Tmin).')
+        # Stalno pristranskost trdimo samo, če drži za VSE modele (izračunano, ne vtipkano).
+        if all(r["tmax"]["bias"] < 0 and r["tmin"]["bias"] > 0 for r in d1.values()):
+            txt += (' Vsi modeli imajo najvišjo temperaturo v povprečju pod, najnižjo pa nad meritvijo: dnevnega '
+                    'razpona dna doline (jasne noči, hladen zrak) ne ujamejo.')
+        upd = str(data.get("generated_at", ""))[:10]
+        winner_html = (f'  <p class="archive-intro">{txt}'
+                       + (f' <span class="muted-note">Posodobljeno: {seo.fmtd(upd)}.</span>' if upd else '') + '</p>\n')
 
     cards = '  <div class="stat-grid">\n'
     for label, mae_tx, mae_tn in d1_rows:
@@ -505,8 +511,7 @@ def build_body(data, n_csv_rows):
   <p class="archive-intro">V besedilu namenoma ne uporabljamo besede "laže" — modeli se motijo, precenjujejo ali
   podcenjujejo, ne lažejo; napaka izvira iz fizike in ločljivosti, ne iz namena.</p>'''
 
-    faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
-        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in [
+    faq_items = [
             ("Kateri vremenski model je najbolj natančen za Zgornjo Savinjsko dolino?",
              f'Pri napovedi za jutri (D+1) ima v tem vzorcu ({n_obs} dni) najnižjo povprečno napako '
              f'{d1_rows[0][0] if d1_rows else "—"}. Razlike med viri se z vodilnim časom (D+2, D+3, …) spreminjajo — '
@@ -527,8 +532,9 @@ def build_body(data, n_csv_rows):
              '(Open-Meteo Previous Runs API arhivira toliko nazaj); izjema je ECMWF AIFS (AI model), ki ga ECMWF poganja šele od februarja 2025, zato ima krajši vzorec in je zanj število razrešenih dni nižje. '
              'ARSO in Yr/MET Norway nimata arhiva preteklih '
              'napovedi, zato ju beležimo sproti od dneva, ko je ta stran nastala.'),
-        ]
-    ) + "\n  </div>"
+    ]
+    faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
+        f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq_items) + "\n  </div>"
 
     body = f'''{seo.crumbs_html([("Meteorec", "/"), ("Test napovedi", None)])}
 {seo.stn_badge()}
@@ -552,7 +558,7 @@ def build_body(data, n_csv_rows):
   ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no), meritve postaje IREICA1.</p>
 {faq_html}
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
-    return body
+    return body, faq_items
 
 
 def main():
@@ -561,7 +567,8 @@ def main():
         sys.exit("data/test-napovedi.json manjka — najprej poženi compute_forecast_test_metrics.py")
 
     n_csv_rows = write_csv()
-    body = build_body(data, n_csv_rows) + "\n" + CHART_JS
+    body, faq_items = build_body(data, n_csv_rows)
+    body = body + "\n" + CHART_JS
 
     url = "/test-napovedi/"
     title = "Test napovedi — Zgornja Savinjska dolina"
@@ -573,6 +580,7 @@ def main():
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published=TODAY.isoformat()),
         seo.crumbs_schema([("Meteorec", "/"), ("Test napovedi", None)]),
+        seo.faq_schema(faq_items),
         seo.named_dataset_schema(
             url, "Test napovedi — primerjava modelov proti postaji IREICA1",
             "Dnevna primerjava napovedi ECMWF, ECMWF AIFS, ICON, GFS, ARPEGE, best_match, ARSO in Yr/MET Norway z "

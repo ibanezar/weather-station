@@ -49,5 +49,19 @@ check("barometer: delež v [0,1]", f is None or (0 <= f["p_drop"] <= 1 and 0 <= 
 f = g.fact_inverzija(hist)
 check("inverzija: razpon pozitiven", f is None or (f["hi"] > 0 and f["lo"] > 0))
 
+# Sorodni pojmi, naslovi »Kaj je X?« in razmejitev biovremena (GSC 14. 11. 2026).
+import generate_seo_pages as seo  # noqa: E402
+terms = seo.load_glossary_terms()
+cats = {}
+for t in terms:
+    cats.setdefault(t["cat"], []).append(t)
+multi = [ts for ts in cats.values() if len(ts) >= 3]
+check("slovar: kategorija z ≥ 3 pojmi obstaja", bool(multi))
+for ts in multi[:3]:
+    h = seo.related_terms_html(terms, ts[0])
+    check(f"sorodni pojmi {ts[0]['slug']}", h.count("<li>") == min(5, len(ts) - 1) and ts[0]["slug"] not in h)
+check("slovar biovreme: naslov po meri", seo.SLOVAR_TITLE["biovreme"][0].startswith("Biovreme:"))
+check("slovar biovreme vodi na /biovreme/", any(h == "/biovreme/" for h, _ in seo.SLOVAR_SEE_ALSO["biovreme"]))
+
 print(f"{ok} preverjanj, {fail} napak")
 sys.exit(1 if fail else 0)

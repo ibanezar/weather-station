@@ -20,6 +20,7 @@ on:
       - 'crnivec-site/**'
       - 'gobarska-napoved/index.html'
       - 'meteogasilec/gasilec.js'
+      - 'vodostaj-savinje/reka.js'
       - 'tools/**'
       - '.github/workflows/parity.yml'
   push:
@@ -33,6 +34,7 @@ on:
       - 'napovej/**'
       - 'crnivec-igra/**'
       - 'meteogasilec/gasilec.js'
+      - 'vodostaj-savinje/reka.js'
       - 'tools/**'
       - '.github/workflows/parity.yml'
   workflow_dispatch: {}
@@ -75,6 +77,9 @@ jobs:
 
       - name: Test zaznave nevihtnih dogodkov
         run: python3 tools/test_storm_events.py
+
+      - name: Test zaznave prve snežne odeje
+        run: python3 tools/test_first_snow.py
 
       - name: Test vremena v gorah
         run: python3 tools/test_gore.py
@@ -197,6 +202,12 @@ jobs:
 
       - name: Test krajevnih strani (statična meritev, smer postaje, naslov)
         run: python3 tools/test_town_pages.py
+
+      - name: Test ponovitev klica Open-Meteo v inject_forecast.py
+        run: python3 tools/test_inject_forecast_retry.py
+
+      - name: Test bloka »Na kratko« in FAQ na bazi vrst gob
+        run: python3 tools/test_baza_kratko.py
 
       - name: Test vremenskih pojmov (/pojmi/)
         run: python3 tools/test_pojmi.py

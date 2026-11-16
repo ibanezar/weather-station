@@ -145,6 +145,72 @@ def vodostaj():
           "vodostaj približni pragovi", f"js={th} py={gv.THRESHOLDS}")
 
 
+# ── Vodostaj: reka.js (živa struga, lata) ↔ generate_vodostaj_page ───────────
+@test
+def vodostaj_reka():
+    """Ocena stanja v reka.js ↔ Python (card_level/card_label) in seznam pritokov worker ↔ generator."""
+    import generate_vodostaj_page as gv
+    rnd = random.Random(23)
+    stations = [
+        {"vv1": 50, "vv2": 80, "vv3": 100, "znacilni": "mali pretok", "is_savinja": True},
+        {"vv1": 30, "vv2": 60, "vv3": 90, "znacilni": "srednji pretok", "is_savinja": False},   # pritok s pragi
+        {"vv1": None, "vv2": None, "vv3": None, "znacilni": "mali pretok", "is_savinja": False},  # pritok brez pragov
+        {"vv1": None, "vv2": None, "vv3": None, "znacilni": None, "is_savinja": True},            # kot Medlog
+        {"vv1": 30, "vv2": None, "vv3": None, "znacilni": "", "is_savinja": False},
+    ]
+    cases = []
+    for st in stations:
+        for q in [None, 0, 0.5, 29.9, 30, 49.99, 50, 59.9, 60, 79.99, 80, 89.9, 90, 99, 100, 199.99, 200, 399.99, 400, 900] \
+                 + [rnd.uniform(0, 500) for _ in range(15)]:
+            cases.append((q, st))
+    calls = []
+    for q, st in cases:
+        p = {"pretok": q, "vv1": st["vv1"], "vv2": st["vv2"], "vv3": st["vv3"], "znacilni": st["znacilni"], "sav": st["is_savinja"]}
+        calls.append({"fn": "cardLevel", "args": [p]})
+        calls.append({"fn": "cardLabel", "args": [p]})
+    got = js("vodostaj-savinje/reka.js", ["THRESH", "stationLevel", "stationStatus", "cardLevel", "cardLabel"], calls)
+    for i, (q, st) in enumerate(cases):
+        s = {**st, "pretok": q}
+        check(got[2 * i] == gv.card_level(s), "reka.js raven", f"q={q} st={st}: py={gv.card_level(s)} js={got[2 * i]}")
+        check(got[2 * i + 1] == gv.card_label(s), "reka.js oznaka", f"q={q} st={st}: py={gv.card_label(s)!r} js={got[2 * i + 1]!r}")
+    th = js("vodostaj-savinje/reka.js", ["THRESH"], [{"expr": "THRESH"}])[0]
+    check(th == gv.THRESHOLDS, "reka.js približni pragovi", f"js={th} py={gv.THRESHOLDS}")
+    # seznam pritokov: worker (?pritoki=1) ↔ TRIB_RIVERS v generatorju
+    wk = js("worker.js", ["ARSO_PRITOKI"], [{"expr": "ARSO_PRITOKI"}])[0]
+    check(sorted(wk) == sorted(gv.TRIB_RIVERS), "pritoki worker ↔ generator", f"worker={sorted(wk)} py={sorted(gv.TRIB_RIVERS)}")
+
+
+@test
+def vodostaj_reka_stran():
+    """Stran z živo strugo: posnetek je veljaven JSON, ID-ji obstajajo, rezervirana višina je ista v JS in CSS,
+    skript ima pečat vsebine, brez JS ostane statična shema."""
+    import generate_vodostaj_page as gv, generate_seo_pages as seo
+    mk = lambda n, r, lon, sav, q, vv=(None, None, None), i=[0]: (i.__setitem__(0, i[0] + 1) or {
+        "name": n, "reka": r, "sifra": str(i[0]), "datum": "2026-11-13 15:30", "lat": 46.3, "lon": lon, "vodostaj": 100.0,
+        "pretok": q, "temp": 8.0, "vv1": vv[0], "vv2": vv[1], "vv3": vv[2], "znacilni": "mali pretok",
+        "is_savinja": sav, "dist2": (lon - 14.92) ** 2})
+    main = [mk("Savinja - Solčava I", "Savinja", 14.69, True, 7.0, (56, 66, 100)), mk("Savinja - Nazarje", "Savinja", 14.95, True, 105.0, (310, 420, 530))]
+    tribs = [mk("Dreta - Kraše", "Dreta", 14.97, False, 3.1, (40, 60, 80)), mk("Paka - </script>", "Paka", 15.05, False, 2.2)]
+    flood = {"daily": {"time": [f"2026-11-{13 + k}" for k in range(7)], "river_discharge": [20.0] * 7, "river_discharge_mean": [24.0] * 7}}
+    body = gv.build_body(flood, main, tribs)[0]
+    import re as _re, json as _json
+    m = _re.search(r'<script type="application/json" id="vod-data">(.*?)</script>', body, _re.S)
+    check(m is not None, "vod-data obstaja")
+    data = _json.loads(m.group(1).replace("<\\/", "</"))
+    check(len(data) == 4 and len({d["id"] for d in data}) == 4, "vod-data postaje (4, enolični id)", f"{len(data)}")
+    check(all(k in data[0] for k in ("id", "reka", "name", "lon", "lat", "pretok", "vodostaj", "temp", "datum", "vv1", "vv2", "vv3", "znacilni", "sav")), "vod-data ključi")
+    check("</script>" not in m.group(1), "vod-data ne zapre skripta")
+    for i in ("vod-live", "vod-live-stage", "vod-live-pill", "vod-lata", "vod-lata-chips", "vod-lata-info", "vod-lata-cv", "vod-data"):
+        check(f'id="{i}"' in body, "id v strani", i)
+    check(f'reka.js?v={gv.reka_ver()}' in body, "reka.js pečat")
+    check("<svg" in body.split('id="vod-live-stage">')[1].split("</div>")[0], "statična shema brez JS")
+    src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "vodostaj-savinje", "reka.js"), encoding="utf-8").read()
+    h = _re.search(r"const HERO_H = (\d+);", src)
+    check(h and f"height:{h.group(1)}px;min-width:" in gv.CHART_CSS, "višina hero platna JS ↔ CSS", h.group(1) if h else "?")
+    for i in ("vod-data", "vod-live-stage", "vod-lata-cv", "vod-lata-chips", "vod-lata-info", "vod-live-pill", "vod-lata"):
+        check(f"'{i}'" in src or f'"{i}"' in src, "reka.js bere id", i)
+
+
 # ── Črnivec: Python (winter_engine, generate_crnivec_page) ↔ JS na strani ────
 CRN_NAMES = ["LIVE_LAPSE_RATE", "LIVE_SNOW_OFFSET", "snowFractionLive", "groundTempLive", "blackIceLive",
              "cestaVrstica", "merjenoMokro", "NEXT_BIAS_HOURS", "LEVEL_RANK", "tempNivo", "numSlLive", "padavineBesedilo",

@@ -1,8 +1,13 @@
 {
+  "dez-82-mm-v-dveh-dneh-v-nedeljo-mraz-1114": [
+    "16-noci-pod-5-c-slane-se-ni-1021",
+    "tedenska-napoved-11-17-avgust-2026",
+    "indijansko-poletje-suh-soncen-teden-0925"
+  ],
   "sneg-dolina-in-gore-petek-sobota-1112": [
-    "sneg-v-nizinah-cetrtek-dez-sobota-1109",
     "prvi-sneg-golte-solcava-menina-1027",
-    "crnivec-pozimi-sneg-verige-1027"
+    "crnivec-pozimi-sneg-verige-1027",
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
   ],
   "martinovo-vreme-recica-sest-let-1111": [
     "recica-in-svet-segrevanje-v-podatkih",
@@ -37,7 +42,7 @@
   "prvi-sneg-golte-solcava-menina-1027": [
     "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
     "crnivec-pozimi-sneg-verige-1027",
-    "vreme-golte-sneg-razmere"
+    "sneg-dolina-in-gore-petek-sobota-1112"
   ],
   "kdaj-se-dvigne-jutranja-megla-dolina-1027": [
     "zakaj-gobe-rastejo-do-meje-megle",
@@ -85,9 +90,9 @@
     "napoved-avgust-2026-zgornja-savinjska-dolina"
   ],
   "16-noci-pod-5-c-slane-se-ni-1021": [
-    "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004",
+    "dez-82-mm-v-dveh-dneh-v-nedeljo-mraz-1114",
     "kdaj-menjati-zimske-gume-recica-1027",
-    "slana-gobarska-sezona-1018"
+    "slana-pri-1-7-c-zakaj-trava-pobeli-prej-kot-postaja-1004"
   ],
   "slana-gobarska-sezona-1018": [
     "vrh-gobarske-sezone-oktober-1014",
@@ -245,8 +250,8 @@
     "goba-zraste-cez-noc-odlocilo-se-je-pred-tedni"
   ],
   "vremensko-leto-2025-2026": [
-    "vremenski-povzetek-oktober-2026",
     "vremenski-povzetek-september-2026",
+    "vremenski-povzetek-oktober-2026",
     "vremenski-povzetek-avgust-2026"
   ],
   "test-napovedi-2026-09": [
@@ -257,12 +262,12 @@
   "vremenski-povzetek-september-2026": [
     "vremenski-povzetek-julij-2026",
     "vremenski-povzetek-avgust-2026",
-    "vremenski-povzetek-junij-2026"
+    "vremenski-povzetek-oktober-2026"
   ],
   "oktober-2026-v-recici-kaj-kazejo-podatki-postaje-1001": [
     "2-1-c-najhladnejse-jesensko-jutro-kdaj-prva-slana-0923",
-    "vremenski-povzetek-oktober-2026",
-    "temperaturni-trend-ireica1-2020-2025"
+    "temperaturni-trend-ireica1-2020-2025",
+    "vremenski-povzetek-oktober-2026"
   ],
   "invazivka-tedenski-pregled-20260920": [
     "invazivka-tedenski-pregled-20260815",
@@ -281,8 +286,8 @@
   ],
   "vremenski-povzetek-avgust-2026": [
     "vremenski-povzetek-julij-2026",
-    "vremenski-povzetek-september-2026",
-    "vremenski-povzetek-junij-2026"
+    "vremenski-povzetek-oktober-2026",
+    "vremenski-povzetek-september-2026"
   ],
   "pileus-nad-recico-kapa-nad-nevihtnim-stolpom-0831": [
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
@@ -331,8 +336,8 @@
   ],
   "dez-v-cetrtek-ali-petek-viri-se-ne-strinjajo-o-dnevu-0819": [
     "koliko-dezja-bo-danes-modeli-si-niso-enotni-0817",
-    "tedenska-napoved-24-28-avgust-2026",
-    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907"
+    "poslabsanje-vremena-sredi-tedna-v-sredo-zvecer-dez-v-cetrtek-0907",
+    "tedenska-napoved-24-28-avgust-2026"
   ],
   "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819": [
     "cirrocumulus-nad-recico-predznak-jutrisnjega-dezja-0916",
@@ -442,7 +447,7 @@
   "vremenski-povzetek-julij-2026": [
     "vremenski-povzetek-avgust-2026",
     "vremenski-povzetek-september-2026",
-    "vremenski-povzetek-junij-2026"
+    "vremenski-povzetek-oktober-2026"
   ],
   "nov-absolutni-rekord-postaje-37-2-c-0731": [
     "max-temperatura-28-junij-2026",
@@ -621,8 +626,8 @@
   ],
   "vreme-golte-sneg-razmere": [
     "prvi-sneg-golte-solcava-menina-1027",
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027",
-    "crnivec-pozimi-sneg-verige-1027"
+    "sneg-dolina-in-gore-petek-sobota-1112",
+    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
   ],
   "susa-savinjska-dolina-hidrologija": [
     "letosnje-padavine-do-29-julija-v-primerjavi-s-preteklimi-leti-0730",
@@ -640,8 +645,8 @@
     "medtem-ko-istro-pustosi-5-centimetrska-toca-pri-nas-velja-or-0721"
   ],
   "primerjava-krajev-vrocinski-val-julij-2026": [
-    "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725",
     "med-dvema-vrocinskima-valoma-ireica1",
+    "kako-se-vreme-v-recici-ob-savinji-razlikuje-od-sosednjih-kra-0725",
     "podnebna-zgodovina-recica-savinji-1950-2025"
   ],
   "prva-tropska-noc-recica-julij-2026": [

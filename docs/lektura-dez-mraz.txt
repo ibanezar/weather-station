@@ -1,0 +1,115 @@
+82 mm dežja v dveh dneh, v nedeljo pa mraz
+
+META OPIS: V Rečici je 12. in 13. novembra padlo 82,5 mm dežja, v nedeljo pa napoved kaže do –2,5 °C. Kaj so napovedali modeli in kaj je izmerila postaja?
+
+UVOD
+V dveh dneh, 12. in 13. novembra, je v Rečici padlo 82,5 mm dežja. To je 86 % vse novembrske količine padavin, izmerjene do 13. novembra (96,2 mm). Po deževnem dogodku sledi občutna ohladitev: model MTR za nedeljsko jutro napoveduje –2,5 °C, verjetnost, da bo temperatura zraka padla na 0 °C ali manj, pa ocenjuje na 93 %.
+
+01 — DEŽ -- Šesti največji dvodnevni seštevek padavin od leta 2019
+
+Kratek odgovor: šlo je za zelo izrazit deževni dogodek, nedeljski mraz pa je za zdaj še napoved. Med vsemi dvodnevnimi seštevki padavin, ki jih je postaja zabeležila od novembra 2019, je ta dogodek šesti največji. Dvodnevni seštevek je vsota dveh zaporednih koledarskih dni, seštevke, ki se prekrivajo, pa štejem samo enkrat. Dva od šestih največjih dogodkov sta se zgodila letos: prvi septembra, drugi pa zdaj. Prejšnji največji dvodnevni novembrski seštevek je bil zabeležen leta 2023 (62,9 mm).
+
+51,8 mmtoliko dežja je padlo 12. novembra. To je drugi najmočnejši novembrski dan od leta 2019, za 5. novembrom 2023 (61,8 mm).
+
+30,7 mmtoliko dežja je padlo 13. novembra. Zračni tlak je ta dan narasel z 988,9 na 1017,3 hPa.
+
+988,8 hPanajnižji dnevni tlak 12. novembra in tretji najnižji med vsemi dnevi, odkar postaja meri.
+
+Dnevne padavine v Rečici, 1.–13. novembra
+
+Dotaknite se stolpca ali ga izberite s tipkovnico: tu se izpiše vrednost.
+
+Vsak stolpec prikazuje padavine v enem dnevu. Podatki so meritve dežemera postaje IREICA1. Poudarjena stolpca za 12. in 13. november skupaj predstavljata 82,5 mm oziroma 86 % vse novembrske količine padavin do vključno 13. novembra (96,2 mm).
+
+Večina dežja je padla v kratkem času. Po urnih meritvah postaje je 85 % padavin padlo med 16. uro 12. novembra in 2. uro 13. novembra. Urni seštevek se nekoliko razlikuje od dnevne vsote, zato v članku uporabljam dnevne vsote.
+
+Vsi preostali novembrski dnevi do vključno 11. novembra so skupaj prinesli 13,7 mm padavin. Nobeden od njih ni presegel 6,3 mm.
+
+02 — NAPOVED -- Napoved MTR se je izmerjeni količini najbolj približala
+
+Pogledal sem, koliko padavin so različni viri napovedali dan pred vsakim od obravnavanih dni. Trije tuji viri so za oba dneva skupaj napovedali manj padavin, kot jih je dejansko padlo: Open-Meteo 66,0 mm, ECMWF AIFS 57,2 mm in Google WeatherNext 2 48,3 mm. Izmerjeni količini se je najbolj približala napoved modela MTR, ki je znašala 79,5 mm (39,1 mm za 12. in 40,4 mm za 13. november). Izmerjenih je bilo 82,5 mm.
+
+Koliko dežja so modeli napovedali dan prej in koliko ga je dejansko padlo
+
+12. 11.13. 11.Skupaj
+
+Dotaknite se stolpca ali ga izberite s tipkovnico: tu se izpiše vrednost.
+
+Napovedane količine padavin, izdane dan pred posameznim dnevom, so prikazane v milimetrih in veljajo za lokacijo Rečice. MTR prikazuje okvirno pričakovano količino, izračunano kot povprečje petih virov; ne gre za naučen lokalni popravek. Upoštevana je prva osvežitev živega MTR na dan pred dogodkom. ARSO v tej primerjavi količine padavin ne navaja. Izmerjena količina je dnevna vsota postaje.
+
+Največja odstopanja so bila pri napovedi za prvi dan. Za 12. november sta AIFS in WeatherNext 2 napovedala 8,7 oziroma 5,4 mm, padlo pa je 51,8 mm. Open-Meteo je bil z napovedjo 33,1 mm bliže izmerjeni količini, napoved MTR (39,1 mm) pa se ji je približala še bolj. Za 13. november sta bila AIFS in WeatherNext 2 nasprotno previsoka (48,5 oziroma 42,9 mm v primerjavi z izmerjenimi 30,7 mm). MTR je napovedal 40,4 mm, Open-Meteo pa je bil z 32,9 mm zelo blizu izmerjeni količini.
+
+MTR napovedanih količin ne prilagaja na podlagi meritev postaje. Njegova pričakovana količina je povprečje petih napovednih virov: Open-Meteo best_match in štirih drugih modelov. Zato odraža skupno mnenje modelov, ne pa lokalnega znanja o razmerah v Rečici. Verjetnost dežja je bila za oba dneva 100 %. Na podlagi enega dogodka ne morem sklepati, kateri vir je praviloma najboljši. Tokrat se je povprečje več modelov izkazalo za bližje meritvi kot kateri koli od posameznih tujih modelov. To je skladno s pričakovanjem, vendar samo po sebi še ni dokaz, da je povprečje vedno boljše.
+
+03 — SAVINJA -- Pretok Savinje je bil ob zadnjem odčitku običajen
+
+Po tolikšni količini dežja bi lahko pričakovali visok vodostaj Savinje. Zato sem pogledal meritve postaj ARSO na spletni strani Vodostaj Savinje. Ob 12.30 14. novembra so bili pretoki na vseh treh merilnih postajah ob zgornji Savinji v običajnem območju.
+
+Solčava: 3,19 m³/s (prag prve stopnje: 56 m³/s)
+
+Nazarje: 42,0 m³/s (prag prve stopnje: 310 m³/s)
+
+Letuš: 50,3 m³/s (prag prve stopnje: 360 m³/s)
+
+Vir: ARSO. To je stanje ob 12.30 14. novembra in ne podatek o največjem pretoku med dogodkom. Podatka o vrhu med 12. in 14. novembrom nimam, zato ne morem povedati, kako visoko je Savinja takrat narasla. Ob zadnjem odčitku pa je bil njen pretok že v običajnem območju. Količina padavin, izmerjena v Rečici, ni nujno enaka količini padavin v zgornjem porečju, saj postaja meri le na eni lokaciji.
+
+04 — MRAZ -- Napoved: v nedeljo zjutraj pod ničlo
+
+Nedelja, 15. november. Model MTR napoveduje najnižjo temperaturo –2,5 °C, verjetnost, da bo temperatura zraka padla na 0 °C ali manj, pa ocenjuje na 93 %. V noči na nedeljo model napoveduje oblačnost, ne jasnega neba.
+
+–2,5 °Cnapoved MTR za najnižjo temperaturo v nedeljo, 15. novembra. Najnižja doslej izmerjena temperatura te jeseni je –1,7 °C.
+
+93 %MTR ocenjuje tolikšno verjetnost, da bo temperatura zraka padla na 0 °C ali manj.
+
+7,7 °Cnapoved MTR za najvišjo temperaturo v nedeljo. Med deževnim dogodkom 12. novembra je najvišja temperatura dosegla 13,9 °C.
+
+Najnižje temperature zraka po nočeh
+
+izmerjeno, nad ničlo izmerjeno, 0 °C ali manj napoved MTR za 14.–17. novembra
+
+Dotaknite se stolpca ali ga izberite s tipkovnico: tu se izpiše vrednost.
+
+Prikazane so najnižje temperature zraka, izmerjene z zunanjim senzorjem postaje IREICA1 med 1. in 13. novembrom. Črtkani stolpci prikazujejo napoved modela MTR za obdobje od 14. do 17. novembra: napoved za 14. november je bila izdana 13. novembra, preostale pa zjutraj 14. novembra. Črtkana modra črta označuje 0 °C.
+
+ARSO (napoved za Ljubno ob Savinji): –4 °C
+
+Open-Meteo: –3,0 °C
+
+MTR: –2,5 °C
+
+WeatherNext 2: –1,7 °C
+
+ECMWF AIFS: –1,3 °C
+
+Vse napovedi kažejo temperature pod ničlo. Razpon med najhladnejšo in najmilejšo napovedjo je 2,7 °C (od –4 do –1,3 °C). Napoved ARSO se nanaša na Ljubno ob Savinji, ne na Rečico.
+
+Temperature okoli ničle v tem delu jeseni niso nenavadne, nedeljska napoved pa bi lahko prinesla najnižjo temperaturo letošnje jeseni. Od 1. septembra do 13. novembra je postaja štirikrat izmerila temperaturo zraka 0 °C ali manj: 23., 27. in 28. oktobra ter 9. novembra. Najnižja izmerjena temperatura je bila –1,7 °C. Prvič je temperatura padla na 0 °C ali manj 23. oktobra: pozneje kot v štirih od šestih prejšnjih jeseni, a prej kot v letih 2022 in 2024.
+
+O prvi ničli sem pisal že 21. oktobra. Model MTR je za 23. oktober napovedal 0,1 °C, postaja pa je izmerila –0,1 °C. Napoved, ki jo je isti model izdal dan prej, 22. oktobra, je bila 1,4 °C.
+
+05 — PRAKTIČNO -- Kaj lahko naredite?
+
+Cesta: po dvodnevnem dežju so cestišča mokra. Če temperatura zraka pade do ničle ali pod njo, lahko na njih nastane poledica. Postaja temperature cestišča ne meri, zato ne vem, ali bo do nje dejansko prišlo. Več o tem si lahko preberete na strani Poledica, razmere na Črnivcu pa spremljate na crnivec.si.
+
+Vrt in balkon: rastline, ki ne prenesejo mraza, pokrijte ali prenesite v zavetje. Na travnikih in v mraziščih je lahko hladneje kot pri postaji.
+
+Zunanje pipe in cevi: v njih lahko ostane voda, zato jih pred nočjo z nizkimi temperaturami izpraznite ali zaščitite.
+
+Preizkusite se: v igri Prehiti model napovejte najnižjo temperaturo za jutri in jo primerjajte z napovedmi modelov.
+
+06 — OMEJITVE -- Česa podatki ne povedo
+
+En dogodek, ena postaja. Iz dvodnevnega deževnega dogodka ne morem sklepati o splošni točnosti modelov ali o trendu. Dež je bil na tej lokaciji izjemen, drugje v dolini pa je lahko padlo drugače.
+
+Napoved ni meritev. Napovedi za obdobje od 14. do 17. novembra so bile izdane 13. in 14. novembra, do nedelje pa se lahko še spremenijo. MTR je poskusni model, Open-Meteo, ECMWF AIFS in WeatherNext 2 pa so tuji viri. Nobena od teh napovedi ni uradno opozorilo. Za uradna opozorila spremljajte ARSO.
+
+Podatki o reki so posnetek trenutnega stanja. Navedeni pretoki so odčitki ARSO ob 12.30 14. novembra. Podatka o najvišjem pretoku med dogodkom nimam.
+
+Uvrstitev dogodka je omejena na obdobje meritev. Rang velja za obdobje od novembra 2019, ko je postaja začela meriti, in za dvodnevne seštevke. Ne gre za uradno klimatološko statistiko.
+
+Članek je posnetek stanja na dan objave. Po nedeljskem jutru se besedilo ne posodobi samodejno.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le ob navedbi avtorja (Filip Eremita, Meteorec) in neposredne povezave na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Viri: postaja IREICA1 (dnevne in urne meritve zunanjega senzorja); napovedi Open-Meteo, ECMWF AIFS in Google WeatherNext 2 (prek Open-Meteo) ter model MTR (Meteorec; količine padavin so povzete iz dnevnika živih osvežitev data/mtr-live-log.csv), izdane dan pred posameznim dnevom; napoved ARSO za Ljubno ob Savinji; podatki o pretoku Savinje: Agencija Republike Slovenije za okolje (ARSO), stanje 14. 11. 2026 ob 12.30.

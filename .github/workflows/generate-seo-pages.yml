@@ -47,7 +47,7 @@ jobs:
           git add vreme/ rekord/ pojavi/ podatki/ pomlad-* poletje-* jesen-* zima-* sitemap-weather.xml \
                   vreme-recica-ob-savinji/ vreme-mozirje/ vreme-nazarje/ vreme-ljubno-ob-savinji/ \
                   vreme-gornji-grad/ vreme-luce/ vreme-solcava/ vreme-zgornja-savinjska-dolina/ \
-                  vreme-kamp-menina/ vreme-forest-camping-mozirje/ vreme-glamping-savinja/ vreme-herbal-glamping-ljubno/ \
+                  vreme-kamp-menina/ vreme-forest-camping-mozirje/ vreme-glamping-savinja/ vreme-herbal-glamping-ljubno/ vreme-logarska-dolina/ \
                   ekstremno-vreme/ slovar/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi programatske strani $(date -u +%Y-%m-%d) [skip ci]"
@@ -55,7 +55,12 @@ jobs:
           for i in 1 2 3 4 5; do
             git push && exit 0
             echo "Push zavrnjen (poskus $i/5) — rebase na origin/main in ponovni poskus …"
+            # Injektorji (meritev, napoved) so pustili nestaged spremembe (index.html idr.), zaradi katerih
+            # »git pull --rebase« pade (14. 11. 2026: tek #152, push zavrnjen po 4,5 min injektiranja).
+            # Te spremembe niso del commita in jih urni prerender-current.yml vedno znova zapiše.
+            git stash push --include-untracked -q || true
             git pull --rebase origin main
+            git stash drop -q || true
             sleep $((i * 3))
           done
           echo "Push ni uspel po 5 poskusih." >&2

@@ -44,7 +44,7 @@ Wired into:
 Usage:
   python3 tools/inject_forecast.py [--dry-run]
 """
-import json, os, re, sys, urllib.parse, urllib.request
+import json, os, re, sys, time, urllib.parse, urllib.request
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -58,6 +58,10 @@ HUB_NAME = "Zgornja Savinjska dolina"
 LAT, LON = 46.325779, 14.921137  # IREICA1
 
 # (slug, ime kraja v imenovalniku, lat, lon) — glej opombo o podvojitvi zgoraj.
+# Premori po neuspelem poskusu (s): 1. poskus, nato 3 s, nato 10 s, po tretjem brez premora.
+FETCH_RETRY_WAITS_S = (3, 10, 0)
+INTER_TOWN_PAUSE_S = 1.5
+
 TOWNS = [
     ("vreme-mozirje", "Mozirje", 46.338050, 14.957203),
     ("vreme-nazarje", "Nazarje", 46.320208, 14.953128),
@@ -71,6 +75,9 @@ TOWNS = [
     ("vreme-forest-camping-mozirje", "Forest Camping Mozirje", 46.330360, 14.992459),
     ("vreme-glamping-savinja", "Glamping Savinja", 46.339006, 14.848857),
     ("vreme-herbal-glamping-ljubno", "Herbal Glamping Resort Ljubno", 46.3713, 14.8424),
+    # Logarska dolina: LOGARSKA_LAT/LON v generate_seo_pages.py (podvojitev). Napoved je Open-Meteo za
+    # koordinate doline (modelska), stran sama pove, da postaje tam ni.
+    ("vreme-logarska-dolina", "Logarska dolina", 46.419924, 14.645536),
 ]
 
 FC7_START = "<!-- WX-FC7:START (auto: tools/inject_forecast.py) -->"
@@ -105,14 +112,22 @@ def fetch_open_meteo(lat=LAT, lon=LON):
         "forecast_days": 7,
     })
     url = f"https://api.open-meteo.com/v1/forecast?{params}"
-    try:
-        req = urllib.request.Request(url, headers={"Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            return json.load(r)
-    except Exception as e:
-        print(f"Open-Meteo ni dosegljiv za {lat},{lon} ({e}) — napoved ostane nespremenjena.",
-              file=sys.stderr)
-        return None
+    # 14. 11. 2026: en sam poskus je pri prehodni napaki (SSL handshake timeout, 429) pustil 10 krajevnih strani
+    # na rezervnem besedilu »napoved se osveži vsako uro«, ker jih je generate-seo-pages.yml tik prej prepisal.
+    # Zato do 3 poskusov s premorom; po izčrpanih ostane stara napoved (kot prej).
+    err = None
+    for attempt, wait in enumerate(FETCH_RETRY_WAITS_S, start=1):
+        try:
+            req = urllib.request.Request(url, headers={"Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.load(r)
+        except Exception as e:
+            err = e
+            if wait:
+                time.sleep(wait)
+    print(f"Open-Meteo ni dosegljiv za {lat},{lon} ({err}) — napoved ostane nespremenjena.",
+          file=sys.stderr)
+    return None
 
 
 def load_mos():
@@ -402,8 +417,10 @@ def main():
     # Nedosegljiv Open-Meteo za postajo ni napaka — pusti staro napoved (glej docstring).
 
     # ── Vaške strani: Open-Meteo za svoje koordinate, brez MTR stolpca ──
-    for slug, town, lat, lon in TOWNS:
+    for i, (slug, town, lat, lon) in enumerate(TOWNS):
         page_path = os.path.join(ROOT, slug, "index.html")
+        if i:
+            time.sleep(INTER_TOWN_PAUSE_S)   # 11 zaporednih klicev brez premora sproži 429
         om = fetch_open_meteo(lat, lon)
         if om is None:
             continue

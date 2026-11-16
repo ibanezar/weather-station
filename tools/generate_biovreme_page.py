@@ -278,7 +278,7 @@ def main():
     body, composite = build_body(fc_data, aq_data)
 
     url = "/biovreme/"
-    title = "Biovreme — Zgornja Savinjska dolina"
+    title = "Biovreme danes: ocena za Savinjsko dolino"
     desc = (f"Biovreme danes: {composite}. Zračni tlak, toplotna obremenitev, UV indeks in kakovost zraka "
             f"za Rečico ob Savinji — informativna ocena, ne zdravniško priporočilo.")
 
