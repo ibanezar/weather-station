@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-11-15T08:22:54Z",
-  "n_records": 176,
+  "generated_at": "2026-11-16T08:30:52Z",
+  "n_records": 178,
   "date_range": {
     "from": "2026-08-04",
-    "to": "2026-11-14"
+    "to": "2026-11-15"
   },
   "rolling_window_days": 30,
   "leads": {
     "1": {
-      "n": 101,
+      "n": 102,
       "date_range": {
         "from": "2026-08-04",
-        "to": "2026-11-14"
+        "to": "2026-11-15"
       },
       "all_time": {
         "tmax": {
-          "n": 101,
-          "mae_mtr": 1.08,
+          "n": 102,
+          "mae_mtr": 1.09,
           "mae_om": 1.59,
-          "improvement_pct": 32.1
+          "improvement_pct": 31.4
         },
         "tmin": {
-          "n": 101,
-          "mae_mtr": 1.1,
-          "mae_om": 1.52,
-          "improvement_pct": 27.6
+          "n": 102,
+          "mae_mtr": 1.09,
+          "mae_om": 1.51,
+          "improvement_pct": 27.8
         }
       },
       "rolling": {
@@ -707,6 +707,13 @@
             "mae_mtr": 1.21,
             "mae_om": 1.32,
             "improvement_pct": 8.3
+          },
+          {
+            "date": "2026-11-15",
+            "n": 30,
+            "mae_mtr": 1.23,
+            "mae_om": 1.25,
+            "improvement_pct": 1.6
           }
         ],
         "tmin": [
@@ -1388,28 +1395,35 @@
             "mae_mtr": 1.38,
             "mae_om": 1.89,
             "improvement_pct": 27.0
+          },
+          {
+            "date": "2026-11-15",
+            "n": 30,
+            "mae_mtr": 1.38,
+            "mae_om": 1.82,
+            "improvement_pct": 24.2
           }
         ]
       }
     },
     "2": {
-      "n": 75,
+      "n": 76,
       "date_range": {
         "from": "2026-08-31",
-        "to": "2026-11-14"
+        "to": "2026-11-15"
       },
       "all_time": {
         "tmax": {
-          "n": 75,
-          "mae_mtr": 1.37,
-          "mae_om": 1.93,
-          "improvement_pct": 29.0
+          "n": 76,
+          "mae_mtr": 1.4,
+          "mae_om": 1.95,
+          "improvement_pct": 28.2
         },
         "tmin": {
-          "n": 75,
-          "mae_mtr": 1.46,
+          "n": 76,
+          "mae_mtr": 1.44,
           "mae_om": 2.28,
-          "improvement_pct": 36.0
+          "improvement_pct": 36.8
         }
       },
       "rolling": {
@@ -1910,6 +1924,13 @@
             "mae_mtr": 1.42,
             "mae_om": 1.39,
             "improvement_pct": -2.2
+          },
+          {
+            "date": "2026-11-15",
+            "n": 30,
+            "mae_mtr": 1.46,
+            "mae_om": 1.35,
+            "improvement_pct": -8.1
           }
         ],
         "tmin": [
@@ -2409,6 +2430,13 @@
             "mae_mtr": 1.95,
             "mae_om": 1.98,
             "improvement_pct": 1.5
+          },
+          {
+            "date": "2026-11-15",
+            "n": 30,
+            "mae_mtr": 1.89,
+            "mae_om": 2.03,
+            "improvement_pct": 6.9
           }
         ]
       }
@@ -2449,33 +2477,33 @@
     },
     "jesen": {
       "1": {
-        "n": 74,
+        "n": 75,
         "tmax": {
-          "n": 74,
-          "mae_mtr": 1.12,
-          "mae_om": 1.66,
-          "improvement_pct": 32.5
+          "n": 75,
+          "mae_mtr": 1.13,
+          "mae_om": 1.65,
+          "improvement_pct": 31.5
         },
         "tmin": {
-          "n": 74,
-          "mae_mtr": 1.09,
-          "mae_om": 1.66,
-          "improvement_pct": 34.3
+          "n": 75,
+          "mae_mtr": 1.08,
+          "mae_om": 1.64,
+          "improvement_pct": 34.1
         }
       },
       "2": {
-        "n": 74,
+        "n": 75,
         "tmax": {
-          "n": 74,
-          "mae_mtr": 1.35,
-          "mae_om": 1.91,
-          "improvement_pct": 29.3
+          "n": 75,
+          "mae_mtr": 1.38,
+          "mae_om": 1.93,
+          "improvement_pct": 28.5
         },
         "tmin": {
-          "n": 74,
-          "mae_mtr": 1.45,
+          "n": 75,
+          "mae_mtr": 1.43,
           "mae_om": 2.29,
-          "improvement_pct": 36.7
+          "improvement_pct": 37.6
         }
       }
     }
@@ -2515,18 +2543,18 @@
     },
     "vmes": {
       "label": "oblačno ali vetrovno, brez dežja",
-      "n": 28,
+      "n": 29,
       "tmax": {
-        "n": 28,
-        "mae_mtr": 1.56,
-        "mae_om": 1.68,
-        "improvement_pct": 7.1
+        "n": 29,
+        "mae_mtr": 1.58,
+        "mae_om": 1.66,
+        "improvement_pct": 4.8
       },
       "tmin": {
-        "n": 28,
-        "mae_mtr": 1.11,
-        "mae_om": 1.28,
-        "improvement_pct": 13.3
+        "n": 29,
+        "mae_mtr": 1.08,
+        "mae_om": 1.24,
+        "improvement_pct": 12.9
       }
     }
   }
