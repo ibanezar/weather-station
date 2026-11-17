@@ -18471,6 +18471,22 @@ function _revealCards(){
   cards.map(c=>[c,c.getBoundingClientRect()]).forEach(([c,r])=>{if(r.top>innerHeight||r.height===0){c.classList.add('rv-pre');io.observe(c);}});
   setTimeout(()=>document.querySelectorAll('.rv-pre').forEach(c=>c.classList.remove('rv-pre')),8000);
 }
+// Zaprta celica »Pokaži vse meritve« na namizju kaže skrite vrednosti (čipi #pk-*). Zrcali se iz ploščic, nič novega se ne računa ali prenaša.
+function initMorePeek(){
+  const root=document.querySelector('#hb-more .hero-metrics-2');if(!root||!document.getElementById('pk-range'))return;
+  const tx=(id)=>{const e=document.getElementById(id);return e?e.textContent.replace(/\s+/g,' ').trim():'';};
+  const put=(id,v)=>{const e=document.getElementById(id);if(e&&e.textContent!==v)e.textContent=v;};
+  const sync=()=>{
+    const lo=tx('hs-range-min'),hi=tx('hs-range-max');
+    put('pk-range',lo&&hi&&hi!=='—'?lo+'–'+hi+' °C':'—');
+    const uv=tx('hs-uv'),ul=tx('hs-uv-label');
+    put('pk-uv',uv&&uv!=='—'?uv+(ul?' · '+ul.toLowerCase():''):'—');
+    const pm=tx('hs-pm');put('pk-pm',pm||'—');
+    const mn=document.querySelector('#hs-moon span');put('pk-moon',mn?mn.textContent.trim():'—');
+  };
+  sync();
+  try{new MutationObserver(sync).observe(root,{subtree:true,childList:true,characterData:true});}catch(_){}
+}
 function initMoreToggle(){
   const b=document.getElementById('more-toggle'),w=document.getElementById('more-wrap');
   if(!b||!w)return;
@@ -18492,6 +18508,7 @@ async function init(){
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
   try{initModeUI();}catch(_){}
   try{initMoreToggle();}catch(_){}
+  try{initMorePeek();}catch(_){}
   try{_skelWatch();}catch(_){}
   try{_revealCards();}catch(_){}
   try{applyStationOnThisDay();}catch(_){}
