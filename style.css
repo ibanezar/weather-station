@@ -4433,6 +4433,19 @@ main>.hero-station.is-stale{color:var(--c-warm-text);font-weight:600}
 .hb-more[open] .hb-more-chev{transform:rotate(-135deg) translateY(1px)}
 .hb-more[open]>summary{margin-bottom:.5rem}
 @media (prefers-reduced-motion:reduce){.hb-more-chev,.hb-more>summary{transition:none}}
+/* Namizje: sredina gumba je prej zijala prazna. Zaprta celica tu kaže vrednosti, ki jih skriva (zrcalijo se iz ploščic prek initMorePeek()), odprta jih ne podvaja. */
+.hb-more-peek{display:none}
+@media (min-width:760px){
+  .hb-more-txt{flex:0 0 auto;min-width:0}
+  .hb-more-peek{flex:1;min-width:0;display:flex;justify-content:flex-end;gap:.5rem;position:relative;z-index:1}
+  .hb-more[open] .hb-more-peek{display:none}
+  .hb-peek{display:flex;align-items:center;gap:.55rem;min-width:0;padding:.45rem .8rem .45rem .6rem;border-radius:.9rem;background:var(--card-bg);border:1px solid var(--card-border)}
+  .hb-peek .ic{flex:none;width:1.3rem;height:1.3rem;color:var(--pk,var(--green))}
+  .hb-peek-t{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+  .hb-peek-k{font-size:var(--fs-xs);font-weight:400;color:var(--muted);white-space:nowrap}
+  .hb-peek b{font-size:var(--fs-sm);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media (min-width:760px) and (max-width:1050px){.hb-peek-k{display:none}.hb-peek{padding:.55rem .7rem .55rem .55rem}}
 
 /* podnožje: rekord dneva + točnost modela */
 .hero-b .hb-foot{padding:.1rem 1.1rem}
