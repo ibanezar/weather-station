@@ -4945,19 +4945,19 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 @media(prefers-reduced-motion:reduce){.snow-day.snow-click:hover{transform:none}.snow-detail{animation:none}}
 /* Rezervirana višina zaprte kartice (brez CLS): izmerjena naravna višina po širinah (Playwright, 9. 11. 2026, z vrstico namiga), vsaka stopnja malo
    konzervativna. Višina se spreminja stopničasto, ker se besedilo (naslov, ploščice) lomi različno; ob spremembi besedila izmeri znova. */
-.snow-card{min-height:20.4rem}
-@media(max-width:1024px){.snow-card{min-height:21.5rem}}
-@media(max-width:712px){.snow-card{min-height:22.7rem}}
-@media(max-width:595px){.snow-card{min-height:23.6rem}}
-@media(max-width:545px){.snow-card{min-height:24.7rem}}
-@media(max-width:541px){.snow-card{min-height:25.6rem}}
-@media(max-width:458px){.snow-card{min-height:26.7rem}}
-@media(max-width:446px){.snow-card{min-height:28.2rem}}
-@media(max-width:395px){.snow-card{min-height:29.4rem}}
-@media(max-width:380px){.snow-card{min-height:27.2rem}}
-@media(max-width:348px){.snow-card{min-height:28.3rem}}
-@media(max-width:343px){.snow-card{min-height:29.2rem}}
-@media(max-width:327px){.snow-card{min-height:30.8rem}}
+.snow-card{min-height:21.5rem}
+@media(max-width:1024px){.snow-card{min-height:22.6rem}}
+@media(max-width:712px){.snow-card{min-height:23.8rem}}
+@media(max-width:595px){.snow-card{min-height:24.7rem}}
+@media(max-width:545px){.snow-card{min-height:25.8rem}}
+@media(max-width:541px){.snow-card{min-height:28.3rem}}
+@media(max-width:458px){.snow-card{min-height:27.8rem}}
+@media(max-width:446px){.snow-card{min-height:29.3rem}}
+@media(max-width:395px){.snow-card{min-height:30.5rem}}
+@media(max-width:380px){.snow-card{min-height:30.0rem}}
+@media(max-width:348px){.snow-card{min-height:31.1rem}}
+@media(max-width:343px){.snow-card{min-height:32.0rem}}
+@media(max-width:327px){.snow-card{min-height:33.6rem}}
 @media (max-width:560px){
   .snow-d-top{flex-direction:column;align-items:flex-start;gap:.5rem}
   .snow-d-pct{font-size:1.5rem}
@@ -4994,3 +4994,13 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #valley-card .duel-sum-lbl .ic{width:1.3rem;height:1.3rem;padding:.4rem;box-sizing:content-box;border-radius:.7rem;background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
 #valley-card .duel-sum-lbl{flex:1;min-width:0}
 #valley-card .duel-sum-val{flex:none;white-space:nowrap;margin-left:0;font-family:'Inter','Inter Fallback',sans-serif;font-size:var(--fs-sm);font-weight:700;color:var(--text);padding:.3rem .75rem;border-radius:999px;background:color-mix(in srgb,var(--text) 8%,transparent)}
+
+/* Ostale kartice na naslovnici v podobi gumba »Pokaži vse meritve« (16. 11. 2026): rahel zelenomodri preliv in zelen rob, naslov krepek (ne več drobne velike črke),
+   ikona v zaobljenem kvadratu. Preliv je samo `background-image` prek obstoječe podlage, zato kartice s pomensko barvo (ca-*, sc-risk-*) ostanejo, kakršne so. */
+#tab-current .card:not(.hero):not(.weather-art-wrap):not(#valley-card):not(.sc-risk-card):not([class*="ca-"]),#tab-current .insight-card,#tab-current .omx-card{
+  background-image:linear-gradient(120deg,color-mix(in srgb,var(--green) 9%,transparent),color-mix(in srgb,var(--blue) 8%,transparent));
+  border-color:color-mix(in srgb,var(--green) 28%,var(--card-border))}
+#tab-current .clabel,#tab-current .omx-title,#tab-current .insight-card .ic-head>span:first-child{gap:.7rem;font-size:var(--fs-md);font-weight:700;letter-spacing:0;text-transform:none;opacity:1;line-height:1.25;color:var(--text)}
+#tab-current .clabel>.ic:first-child,#tab-current .insight-card .ic-head>span:first-child>.ic,#tab-current .omx-title>.ic{box-sizing:content-box;flex:none;width:1.1rem;height:1.1rem;padding:.5rem;border-radius:.8rem;
+  color:var(--green);background:var(--card-bg);border:1px solid var(--card-border)}
+#tab-current .mtr-jump-card .clabel{font-size:var(--fs-sm)}
