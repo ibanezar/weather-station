@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-16",
-  "issued": "16.11.2026 7:00 CET",
-  "issued_at": "2026-11-16T07:30:37.155784+01:00",
-  "top_station": "Postojna",
-  "top_mm": 3,
+  "date": "2026-11-17",
+  "issued": "17.11.2026 7:00 CET",
+  "issued_at": "2026-11-17T07:30:37.138288+01:00",
+  "top_station": "Črnomelj - Dobliče",
+  "top_mm": 2,
   "n_stations": 20,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-16.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-16-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-11-17.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-17-story.jpg"
 }
