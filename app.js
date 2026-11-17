@@ -2010,7 +2010,7 @@ async function fetchTrustBadge(){
       .filter(v=>v!=null);
     if(!errs.length)return;
     const mae=errs.reduce((a,b)=>a+b,0)/errs.length;
-    el.innerHTML='<a href="/tocnost-napovedi/">'+_ico('target')+' MTR napoved: povp. napaka ±'+fmt(mae,1)+' °C na '+errs.length+' dneh · glej točnost napovedi →</a>';
+    el.innerHTML='<a href="/tocnost-napovedi/"><span class="mtb-ic" aria-hidden="true">'+_ico('target')+'</span><span class="mtb-t"><b>MTR napoved</b><span>povp. napaka na '+errs.length+' dneh · glej točnost napovedi</span></span><span class="mtb-val" title="Povprečna napaka najvišje temperature">±'+fmt(mae,1)+'\u00A0°C</span><span class="mtb-go" aria-hidden="true">→</span></a>';
     el.hidden=false;
   }catch(e){console.warn('TrustBadge:',e);}
 }
@@ -18472,6 +18472,14 @@ function _revealCards(){
   setTimeout(()=>document.querySelectorAll('.rv-pre').forEach(c=>c.classList.remove('rv-pre')),8000);
 }
 // Zaprta celica »Pokaži vse meritve« na namizju kaže skrite vrednosti (čipi #pk-*). Zrcali se iz ploščic, nič novega se ne računa ali prenaša.
+// Dnevno dejstvo: vrednost na koncu stavka v oklepaju (»… (13,5 °C)«) se prestavi v pilulo ob desnem robu kartice. Besedilo generatorja ostane nespremenjeno; če oklepaja ni, ni pilule.
+function initFactPill(){
+  const t=document.querySelector('#daily-fact-card .dfc-text');if(!t||t.querySelector('.dfc-val'))return;
+  const m=t.innerHTML.match(/\s*\(([^()]+)\)\s*$/);if(!m)return;
+  t.innerHTML=t.innerHTML.slice(0,m.index);
+  const v=document.createElement('span');v.className='dfc-val';v.textContent=m[1].replace(/ (?=°C)/,'\u00A0');
+  t.parentNode.appendChild(v);
+}
 function initMorePeek(){
   const root=document.querySelector('#hb-more .hero-metrics-2');if(!root||!document.getElementById('pk-range'))return;
   const tx=(id)=>{const e=document.getElementById(id);return e?e.textContent.replace(/\s+/g,' ').trim():'';};
@@ -18509,6 +18517,7 @@ async function init(){
   try{initModeUI();}catch(_){}
   try{initMoreToggle();}catch(_){}
   try{initMorePeek();}catch(_){}
+  try{initFactPill();}catch(_){}
   try{_skelWatch();}catch(_){}
   try{_revealCards();}catch(_){}
   try{applyStationOnThisDay();}catch(_){}
