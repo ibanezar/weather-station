@@ -11281,6 +11281,7 @@ async function fetchHeroValley(){
         cap.innerHTML=(kindTxt?'<b class="hv-kind hv-k-'+sum.kind+'">'+kindTxt+'</b> ':'')+'<span class="hv-rest"></span><span class="hv-grad"></span>';
         cap.querySelector('.hv-rest').textContent=rest;
         cap.querySelector('.hv-grad').textContent=(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+' °C/100 m';
+        const pl=document.getElementById('vc-pill');if(pl){pl.textContent=(sum.lapse>0?'+':'−')+_duelNum(Math.abs(sum.lapse),2)+'\u00A0°C/100\u00A0m';pl.hidden=false;}
       }else cap.textContent='Višinske postaje trenutno niso dosegljive; kaže se samo Rečica.';
     }
     const lg=document.getElementById('hv-lg-bar');
