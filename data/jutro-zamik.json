@@ -1,11 +1,11 @@
 {
- "generated": "2026-11-16",
- "dni_v_zapisu": 126,
+ "generated": "2026-11-17",
+ "dni_v_zapisu": 127,
  "obdobje": [
   "2026-07-13",
-  "2026-11-15"
+  "2026-11-16"
  ],
- "jasna_mirna_jutra": 89,
+ "jasna_mirna_jutra": 90,
  "dvig_c": 3.0,
  "min_n": 8,
  "meseci": {
@@ -34,10 +34,10 @@
    "mean_h": 1.52
   },
   "11": {
-   "n": 2,
-   "sum": 4.6455128205128196,
-   "sumsq": 11.364079963839576,
-   "mean_h": 2.32
+   "n": 3,
+   "sum": 4.662179487179486,
+   "sumsq": 11.364357741617352,
+   "mean_h": 1.55
   }
  },
  "preverjanje": {
