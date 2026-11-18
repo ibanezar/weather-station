@@ -357,6 +357,17 @@ Postaja IREICA1 snega ne meri, zato MTR sneg (kartica »Sneg v dolini«) nima iz
   predpostavka. Vrednosti so vse vnosna polja, uporabnik jih lahko spremeni. Vnosi so samo v brskalniku (`wx-drva-v1`).
 - Test: `tools/test_drva.mjs` (model + vdelani podatki; v `parity.yml`), 4 mutacije v `mutation_check.py`. **Ni narejeno:** primerjava z dejansko porabo iz več let, ločitev drevesnih vrst, drugi energenti (peleti, olje).
 
+### Vreme za poroko in prireditve (`/vreme-za-prireditev/`, 18. 11. 2026)
+
+Klimatologija po datumih (ne napoved): `tools/generate_prireditev_page.py` (ROČNO, ni v workflowu; po novem letu ali večjem posodabljanju `history.json` ga poženi znova) + ROČNO pisan
+`vreme-za-prireditev/prireditev.js` (model `buildDays/share/exact/best/wilson` izvožen za Node). V stran se vdelajo dnevne vrednosti iz `history.json` (najvišja, najnižja, padavine; ~40 kB,
+brez ERA5, dan z manjkajočim poljem odpade), JS za izbran datum in okno ±3/7/14 dni izračuna **delež »primernih« dni v vseh letih** (padavine strogo pod pragom IN najvišja v obsegu IN neobvezno
+najnižja ≥ meja), pokaže točno ta datum po letih in najboljše datume v ±14 dneh. Merila profilov (poroka 0,2 mm, 18–30 °C; večerna prireditev 0,2 mm, 18–33 °C, najnižja ≥ 9; šport 1 mm, 10–25 °C)
+so MOJA izbira (vidna in spremenljiva na strani); **dnevne padavine so strožje merilo od ur prireditve** (stran to pove). Interval (Wilson) je optimističen, ker so sosednji dnevi soodvisni; razlike
+med sosednjimi datumi so ob 7 letih šum. Toče, neviht in vetra podatki ne vsebujejo, kar stran izrecno pove. Statična tabela po mesecih je rezerva brez JS (iz vseh dni meseca, ne iz okna).
+Podatki so z ene postaje na dnu doline (366 m). Test: `tools/test_prireditev.mjs` (model + enakost vdelanih podatkov s `history.json`; v `parity.yml`), 4 mutacije. **Ni narejeno:** več postaj/višin,
+upoštevanje ur dneva (`hourly-observations.csv` je prekratek), povezava s trenutno napovedjo.
+
 ### Samodejna poročila po nevihti (`/novosti/nevihta-<datum>/`, 7. 10. 2026)
 
 `detect_storms()` v `tools/seo_smart_routine.py` (dnevno, skupaj z ostalimi dogodki) zazna dan,
