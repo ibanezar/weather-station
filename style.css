@@ -4883,6 +4883,10 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
   #tab-current.active{display:contents}
   #tab-current>*{order:4}
   #tab-current>.hero{order:3}
+  /* 18. 11. 2026: z display:contents mreža nima razmika (gap), pravilo zgoraj pa robove izniči (!important),
+     zato so se kartice dotikale. Razmik postavimo kot spodnji rob; zložen #more-wrap (višina 0) in glava
+     »zadnji dnevi« (sta skupaj s svojim drsnim pasom) ga ne dobita. */
+  #tab-current.active>*:not(#more-wrap):not(.past-days-hdr){margin-bottom:var(--sp-4)!important}
 }
 @media (max-width:360px){
   .title-row h1{font-size:1.4rem}
