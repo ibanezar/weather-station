@@ -116,6 +116,7 @@ KNOWN_CLIENTS = {
     "tools/generate_story_card.py": "zareza",
     "tools/calculate_frost_risk.py": "zareza",
     "tools/log_valley_duel.py": "bere samo outdoor.temperature",
+    "tools/generate_juzni_veter_post.py": "zareza (cur.pop('indoor')) in bere samo izbrana zunanja polja",
 }
 
 

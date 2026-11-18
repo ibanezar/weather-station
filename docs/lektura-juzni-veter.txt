@@ -1,0 +1,103 @@
+Južni veter že drugi dan: v dolini noč pri 12 °C
+
+META OPIS: Po povprečno 9,8 km/h vetra v torek je tudi v sredo v Rečici toplo: od polnoči ni bilo pod 12 °C. Zakaj južni veter prepiha dolino in kaj sledi v četrtek?
+
+UVOD
+V torek je v Rečici pihal veter s povprečno hitrostjo 9,8 km/h. Od 7. novembra 2019 je bilo enako vetrovnih ali še vetrovnejših le 21 od 2548 dni, vsi med decembrom in marcem. Novembrsko povprečje znaša le 1,7 km/h. Južni veter piha tudi danes. Ob 7.42 je bilo v dolini 12,2 °C, kar je hkrati najnižja zabeležena vrednost od polnoči.
+
+01 — ODGOVOR -- Južni veter je izpodrinil hladen zrak
+
+Kratek odgovor: južni veter je v dolino prinesel toplejši zrak in izpodrinil hladnega, ki se tu običajno zadržuje pri tleh. Zato je veter hkrati prinesel toploto in preprečil običajno nočno ohlajanje.
+
+Dno doline je sicer večinoma mirno. Novembra povprečna hitrost vetra znaša komaj 1,7 km/h, hladen zrak pa se ponoči nabira pri tleh. V ponedeljek je najnižja temperatura znašala –0,5 °C, v torek pa 1,1 °C, preden je veter prodrl v dolino. Najvišja torkova temperatura je bila 14,4 °C. Povprečna temperatura v torek je znašala 11,1 °C, medtem ko je novembrsko povprečje v naših podatkih 5,4 °C.
+
+9,8 km/h
+povprečna hitrost vetra v torek. Novembrsko povprečje: 1,7 km/h.
+
+12,2 °C
+najnižja zabeležena temperatura od polnoči do 7.42 v sredo.
+
+11,1 °C
+povprečna temperatura v torek. Novembrsko povprečje: 5,4 °C.
+
+994 hPa
+zračni tlak ob 7.42 (trenutna vrednost). Povprečje 14. novembra: 1022 hPa.
+
+02 — V ŠTEVILKAH -- Torek: najbolj vetroven novembrski dan v zgodovini postaje
+
+Najnižja do najvišja temperatura Povprečni veter
+
+Temperatura in veter v Rečici, 10.–18. november
+
+Meritve postaje IREICA1. Zadnji stolpec prikazuje 18. november le do 7.42 in je zato svetlejši. Najnižja temperatura je najnižja vrednost od polnoči, ne pa končna dnevna vrednost.
+
+Konec prejšnjega tedna je bilo hladno. V soboto je najnižja temperatura znašala –1,8 °C, v nedeljo pa –2,7 °C. V ponedeljek je veter še komaj pihal, njegovo povprečje je znašalo 2,0 km/h. Do torka se je obrnil na jug. Najvišja temperatura 14,4 °C je glede na novembrsko povprečje 5,4 °C zelo visoka.
+
+Podoben dogodek smo imeli že lani. 15. in 16. novembra 2025 je povprečna hitrost vetra znašala 8,5 oziroma 7,4 km/h, najnižji temperaturi pa 12,6 °C in 12,9 °C. To sta doslej najtoplejši novembrski noči v našem nizu meritev. Današnjih 12,2 °C je nekoliko manj, vendar je to najnižja zabeležena vrednost do 7.42 in današnji dan še ni končan.
+
+03 — MENINA -- Oblak se preliva čez greben, nad dolino pa je jasno
+
+Zjutraj je bilo ob Menini mogoče opaziti oblak, ki se je raztezal čez greben, medtem ko je bilo nad dolino nebo jasno. Gre za značilen pojav: topel in vlažen zrak se ob južnem pobočju dviga, ob grebenu ohlaja in kondenzira v oblak. Na zavetrni strani se oblak nato razkroji.
+
+Menina z oblakom čez greben, 18. 11. ob 7.25. Nad dolino je nebo jasno.
+
+Pogled čez polje proti Menini, 18. 11. ob 7.22. Rožnata barva na robu oblaka je posledica jutranje svetlobe.
+
+Isti pojav ob sončnem vzhodu, 18. 11. ob 6.55: oblak se preliva čez greben proti dolini.
+
+Meritve DRSI na Črnivcu (902 m) ta pojav dodatno osvetljujejo. Ob 7.36 je bilo tam 6,9 °C, relativna vlažnost zraka pa 98 %. Rosišče je znašalo 6,5 °C, kar pomeni, da je bil zrak skoraj nasičen z vlago. To je skladno z opažanjem, da je bil greben v oblaku. Veter je pihal s hitrostjo 28 km/h, sunki pa so dosegali 40 km/h.
+
+V Gornjem Gradu (428 m) je bilo ob istem času 11,5 °C, v Rečici (IREICA1, 366 m) pa 12,2 °C. Temperaturna razlika med Gornjim Gradom in Črnivcem je tako znašala 4,6 °C na višinski razliki 475 m. Običajna razlika za ta razpon višin je okoli 3 °C (±1,5 °C), današnja vrednost pa je torej na zgornji meji tega razpona. To je odstopanje, ne dokaz fenskega pojava.
+
+To je moja razlaga, ne neposredna meritev: zrak, ki se spušča proti dolini, se pri spuščanju segreva. Tako je lahko v dolini topleje kot na primerljivi nadmorski višini na drugi strani grebena. Za klasični fen danes ne gre, saj zrak v dolini ni suh – relativna vlažnost je okoli 83 %.
+
+04 — VETER -- Vetrovnih razmer v dolini model ni zaznal
+
+Smer vetra v dolini je precej nestanovitna. Postaja IREICA1 je ob 7.42 izmerila smer 200° (južna do jugojugozahodna smer) in hitrost 9 km/h, sunki pa so dosegali 15 km/h.
+
+Za primerjavo: sosednja postaja Varpolje (IREICA7), oddaljena 1,6 km, je ob istem času kazala veter iz smeri 242° (zahodjugozahod) in temperaturo 12,0 °C. Različna podatka o smeri vetra nista nujno protislovna. V ozki dolini se veter ob pobočjih preusmerja in vrtinči, zato se lahko smer že na kratki razdalji precej razlikuje.
+
+Zanimiva je še ena primerjava. Naš napovedni model MTR, ki je umerjen na meritve te postaje, je za današnji dan (napoved, izdana 17. 11. ob 9.41 UTC) napovedal povprečno hitrost vetra 1,5 km/h in sunke do 17 km/h. Do 7.42 je bila izmerjena povprečna hitrost vetra 11,2 km/h. Primerjava je le okvirna, ker napoved velja za cel dan, meritev pa za prvih nekaj ur.
+
+Verjetno je razlog v tem, da je model naučen na razmerah v dolini, kjer je veter večino časa šibek, zato preboja južnega vetra v dolino ni predvidel. To je moja razlaga, ne dokazan vzrok odstopanja.
+
+Krošnje v gozdu v vetru, posnetek 18. 11. ob 7.32 (osem sekund, brez zvoka).
+
+05 — KAJ SLEDI -- Četrtek: dež in ohladitev
+
+Kdaj bo veter popustil, iz razpoložljivih podatkov ne morem napovedati, saj nimamo urne napovedi vetra.
+
+Vremenska sprememba je napovedana za četrtek. Open-Meteo napoveduje začetek dežja okoli 11. ure, do polnoči pa naj bi padlo približno 22 mm padavin. Najvišja temperatura naj bi se spustila na okoli 8 °C. Tudi naš model MTR za četrtek napoveduje 100-odstotno verjetnost padavin in najvišjo temperaturo 9 °C.
+
+Ob večji količini dežja se lahko spremeni tudi pretok Savinje. Trenutno stanje lahko spremljate na strani Vodostaj Savinje.
+
+Za petek obe napovedi znova kažeta okoli 14 °C, vendar je do takrat še precej časa, zato se napoved lahko spremeni.
+
+06 — OMEJITVE -- Česa podatki ne povedo?
+
+Dan še ni končan. Podatki za 18. november segajo do 7.42. Najnižja temperatura je najnižja vrednost od polnoči in se lahko do konca dneva še spremeni, zlasti če se bo zvečer ohladilo.
+
+Najnižja temperatura je zabeležena z dvema odčitkoma. Dnevni povzetek postaje kaže 12,6 °C, trenutna meritev ob 7.42 pa 12,2 °C. Za najnižjo vrednost od polnoči smo vzeli nižjo.
+
+Torkovih podatkov še ni v zgodovinski datoteki. Podatki za torek še niso vključeni v history.json, zato je dnevni povzetek vzet neposredno iz meritev postaje.
+
+Zgodovina meritev je kratka. Postaja meri od 7. novembra 2019, kar pomeni 2548 dni meritev. Gre za primerjavo z našim nizom podatkov, ne za podnebno statistiko.
+
+Razlaga dogajanja ob grebenu ni neposredno izmerjena. Meritve DRSI kažejo, da je bil greben v oblaku, preostala razlaga pa temelji na opazovanju pojava.
+
+Smer vetra je trenutna vrednost. Gre za en sam odčitek, ne za povprečno smer vetra.
+
+Primerjava z modelom MTR je okvirna. Napovedano povprečje velja za cel dan, izmerjeno pa samo do jutra.
+
+Napoved dežja temelji na modelih. Pri ukrepanju ob neurjih in močnem vetru upoštevajte uradna opozorila ARSO in URSZR.
+
+07 — PRAKTIČNO -- Kaj lahko naredite?
+
+Veter je ob grebenih močnejši kot v dolini, v gozdu pa lahko zaradi sunkov padajo veje. Pri hoji po gozdu bodite zato previdni. Opozorila pred nevihtami najdete na strani Nevihte, meritve v živo pa na strani za Rečico ob Savinji.
+
+Če imate fotografije jutranjega oblaka nad Menino ali gozda v vetru, jih pošljite.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le ob navedbi avtorja (Filip Eremita, Meteorec) in neposredne povezave na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Meritve postaje IREICA1 (Ecowitt); sosednja postaja Varpolje (IREICA7), ki jo objavlja prijatelj, uporabljena zgolj za primerjavo; meritve DRSI na Črnivcu in v Gornjem Gradu (vir: Direkcija Republike Slovenije za infrastrukturo, ceste.si); urna napoved Open-Meteo (prenos 18. 11. 2026, CC BY 4.0); model MTR (Meteorec). Fotografije in video: Filip Eremita, 18. 11. 2026. Podatki za članek: data/juzni-veter-1118.json.

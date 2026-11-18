@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sat, 14 Nov 2026 18:55:54 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Nov 2026 06:43:20 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Južni veter že drugi dan: v dolini noč pri 12 °C</title>
+      <link>https://meteorec.si/blog/juzni-veter-ze-drugi-dan-1118.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/juzni-veter-ze-drugi-dan-1118.html</guid>
+      <pubDate>Wed, 18 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Po 9,8 km/h povprečnega vetra v torek je tudi v sredo v Rečici najmanj 12,6 °C. Zakaj jug pometa dolino in kaj sledi v četrtek.</description>
+      <category>veter</category>
+      <category>jug</category>
+      <category>Menina</category>
+      <category>november</category>
+      <category>dolina</category>
+      <category>napoved</category>
+    </item>
     <item>
       <title>82 mm dežja v dveh dneh, v nedeljo pa mraz</title>
       <link>https://meteorec.si/blog/dez-82-mm-v-dveh-dneh-v-nedeljo-mraz-1114.html</link>
