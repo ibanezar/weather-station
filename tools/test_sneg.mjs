@@ -53,9 +53,13 @@ check(r.status === 200 && JSON.parse(store.get('feedback/sneg-porocila.json')).l
 
 // splošna omejitev: 30 poročil na uro z iste naprave (v različna območja), 31. zavrnjeno
 {
-  const REG = ['Savinjska', 'Koroška', 'Gorenjska', 'Osrednjeslovenska', 'Zasavska', 'Posavska', 'Jugovzhodna Slovenija', 'Primorsko-notranjska'];
+  // območja, ki jih spodnji preizkusi sodbe ne uporabljajo (Koroška, Gorenjska, Podravska, Pomurska p0)
+  const REG = ['Osrednjeslovenska', 'Zasavska', 'Posavska', 'Jugovzhodna Slovenija', 'Primorsko-notranjska', 'Goriška', 'Obalno-kraška'];
+  const cells = [];
+  for (const g of REG) for (const p of ['p0', 'p1', 'p2', 'p3']) cells.push([g, p]);        // 28
+  cells.push(['Savinjska', 'p0'], ['Savinjska', 'p3'], ['Savinjska', 'p1']);              // 31
   let last;
-  for (let i = 0; i < 31; i++) last = await call('/sneg/porocilo', 'POST', { stanje: 'brez', pas: 'p' + (i % 4), regija: REG[Math.floor(i / 4)] }, '9.9.9.9');
+  for (const [g, p] of cells) last = await call('/sneg/porocilo', 'POST', { stanje: 'brez', pas: p, regija: g }, '9.9.9.9');
   check(last.status === 429, 'omejitev 30 poročil na uro po IP');
 }
 
