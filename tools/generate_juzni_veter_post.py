@@ -49,7 +49,7 @@ NBSP = " "
 LINK = 'style="color:var(--blue)"'
 TODAY = datetime.date(2026, 11, 18)
 BAR_T, BAR_W = "#d55181", "#3987e5"        # barve iz preverjene palete semaforja
-WIND_HI = 9.8                               # povprečni veter 17. 11. (km/h): prag za primerjavo z zgodovino
+WIND_HI = 9.5                               # povprečni veter 17. 11. (km/h, history.json): prag za primerjavo z zgodovino
 
 
 def a(href, text):
@@ -116,9 +116,10 @@ class Snap:
         self.fetched = datetime.datetime.fromisoformat(S["fetched_at"])
         assert self.fetched.date() == TODAY, f"posnetek je z dne {self.fetched.date()}; poženi z --fetch"
         self.now = S["ireica1_now"]
-        self.d17, self.d18 = S["ireica1_daily"]["2026-11-17"], S["ireica1_daily"]["2026-11-18"]
         self.H = hist_ok()
-        assert "2026-11-17" not in self.H, "17. 11. je že v history.json: primerjavo preveri še enkrat"
+        # torek je končan dan iz history.json (update-history.yml); dnevni povzetek workerja se je od njega rahlo razlikoval (9,8 / 1,1 / 11,1)
+        assert "2026-11-17" in self.H and "windgustHigh" in self.H["2026-11-17"], "17. 11. še ni v history.json: poženi update-history.yml"
+        self.d17, self.d18 = self.H["2026-11-17"], S["ireica1_daily"]["2026-11-18"]
         self.local_now = datetime.datetime.fromtimestamp(self.now["time_unix"], datetime.timezone(datetime.timedelta(hours=1)))
         assert self.local_now.date() == TODAY and self.local_now.hour < 12, self.local_now   # članek je jutranji posnetek
 
@@ -186,7 +187,7 @@ def build_article(S):
     assert drsi_t.date() == TODAY and drsi_t.hour < 12, drsi_t
 
     # ── zgodovina: povprečni veter po dnevih (brez ERA5) ──
-    winds = {k: v["windspeedAvg"] for k, v in H.items() if v.get("windspeedAvg") is not None}
+    winds = {k: v["windspeedAvg"] for k, v in H.items() if v.get("windspeedAvg") is not None and k < "2026-11-17"}   # brez torka: primerjava z zgodovino PRED dogodkom
     n_days = len(winds)
     first_day = min(winds)
     assert first_day == "2019-11-07", first_day
@@ -195,14 +196,14 @@ def build_article(S):
     w17 = round(d17["windspeedAvg"], 1)
     assert w17 == WIND_HI, w17
     higher = {k: w for k, w in winds.items() if w >= w17}
-    assert len(higher) == 21, len(higher)
+    assert len(higher) == 25, len(higher)
     assert not any(k[5:7] == "11" for k in higher), "v novembru je že bil enako vetroven dan: besedilo »prvič v novembru« ne drži"
     assert nov_avg < 2.0, nov_avg
-    tavg_nov = [v["tempAvg"] for k, v in H.items() if k[5:7] == "11" and v.get("tempAvg") is not None]
+    tavg_nov = [v["tempAvg"] for k, v in H.items() if k[5:7] == "11" and v.get("tempAvg") is not None and k < "2026-11-17"]
     tavg_nov_mean = sum(tavg_nov) / len(tavg_nov)
     assert 5.0 < tavg_nov_mean < 5.8, tavg_nov_mean
     t17avg = round(d17["tempAvg"], 1)
-    assert t17avg == 11.1, t17avg
+    assert t17avg == 10.6, t17avg
     # lani 15.-16. 11.: podoben dogodek
     y15, y16 = H["2025-11-15"], H["2025-11-16"]
     assert (round(y15["windspeedAvg"], 1), round(y16["windspeedAvg"], 1)) == (8.5, 7.4) and (y15["tempLow"], y16["tempLow"]) == (12.6, 12.9)
@@ -214,7 +215,16 @@ def build_article(S):
     assert nov_lows[:2] == [12.9, 12.6], nov_lows[:2]   # do zdaj najtoplejša novembrska minimuma: oba lanska
     low17 = round(d17["tempLow"], 1)
     hi17 = round(d17["tempHigh"], 1)
-    assert (low17, hi17) == (1.1, 14.4), (low17, hi17)
+    assert (low17, hi17) == (0.9, 14.4), (low17, hi17)
+    # sunki (merjeni od 17. 3. 2021): torek v primerjavi z vsemi dnevi in z novembri
+    gusts = {k: v["windgustHigh"] for k, v in H.items() if v.get("windgustHigh") is not None and k < "2026-11-17"}
+    g17 = round(d17["windgustHigh"], 1)
+    n_gust = len(gusts)
+    n_stronger = sum(1 for v in gusts.values() if v > g17)
+    nov_g = sorted(((v, k) for k, v in gusts.items() if k[5:7] == "11"), reverse=True)
+    assert g17 == 53.3 and n_stronger == 11 and n_gust == 2063 and nov_g[0] == (55.0, "2024-11-23") and nov_g[1][0] < g17, (g17, n_stronger, n_gust, nov_g[:2])
+    first_gust_day = min(gusts)
+    assert first_gust_day == "2021-03-17", first_gust_day
 
     # ── trenutno stanje ──
     assert 12.0 <= now["temp_c"] <= 13.0 and 980 < now["pressure_hpa"] < 1000, now
@@ -268,6 +278,7 @@ def build_article(S):
         tiles([
             (num(w17), "km/h", f"povprečna hitrost vetra v torek. Novembrsko povprečje: {num(nov_avg)} km/h.", False),
             (num(low18), "°C", f"najnižja zabeležena temperatura od polnoči do {t_now} v sredo.", True),
+            (num(g17), "km/h", f"najmočnejši sunek v torek. Od marca 2021 je bil močnejši le {n_stronger} od {n_gust} dni.", False),
             (num(t17avg), "°C", f"povprečna temperatura v torek. Novembrsko povprečje: {num(tavg_nov_mean)} °C.", False),
             (num(now["pressure_hpa"], 0), "hPa", f"zračni tlak ob {t_now} (trenutna vrednost). Povprečje 14. novembra: {num(H['2026-11-14']['pressureAvg'], 0)} hPa.", False),
         ]),
@@ -279,6 +290,8 @@ def build_article(S):
         f"Konec prejšnjega tedna je bilo hladno. V soboto je najnižja temperatura znašala {temp(H['2026-11-14']['tempLow'])}, v nedeljo pa {temp(H['2026-11-15']['tempLow'])}. "
         f"V ponedeljek je veter še komaj pihal, njegovo povprečje je znašalo {num(H['2026-11-16']['windspeedAvg'])} km/h. Do torka se je obrnil na jug. "
         f"Najvišja temperatura {temp(hi17)} je glede na novembrsko povprečje {temp(tavg_nov_mean)} zelo visoka.",
+        f"Najmočnejši sunek v torek je dosegel {num(g17)} km/h. Postaja sunke beleži od 17. marca 2021 in od takrat je bil močnejši le {n_stronger} od {n_gust} dni. "
+        f"Med novembrskimi dnevi je bil močnejši samo sunek 23. novembra 2024 ({num(nov_g[0][0])} km/h).",
         f"Podoben dogodek smo imeli že lani. 15. in 16. novembra 2025 je povprečna hitrost vetra znašala {num(y15['windspeedAvg'])} oziroma {num(y16['windspeedAvg'])} km/h, najnižji temperaturi pa {temp(y15['tempLow'])} in {temp(y16['tempLow'])}. "
         f"To sta doslej najtoplejši novembrski noči v našem nizu meritev. Današnjih {temp(low18)} je nekoliko manj, vendar je to najnižja zabeležena vrednost do {t_now} in današnji dan še ni končan.",
     ]
@@ -292,7 +305,7 @@ def build_article(S):
         photo("oblak-cez-greben.jpg", "Oranžno nebo ob sončnem vzhodu in oblak, ki se preliva čez gozdnat greben nad strehami", "Isti pojav ob sončnem vzhodu, 18. 11. ob 6.55: oblak se preliva čez greben proti dolini."),
         f"Meritve DRSI na Črnivcu (902 m) ta pojav dodatno osvetljujejo. Ob {hm(drsi_t)} je bilo tam {temp(cr['temp_c'])}, relativna vlažnost zraka pa {cr['vlaga_pct']} %. "
         f"Rosišče je znašalo {temp(cr['rosisce_c'])}, kar pomeni, da je bil zrak skoraj nasičen z vlago. To je skladno z opažanjem, da je bil greben v oblaku. "
-        f"Veter je pihal s hitrostjo {cr['veter_kmh']} km/h, sunki pa so dosegali {cr['sunki_kmh']} km/h.",
+        f"Veter je pihal s hitrostjo {cr['veter_kmh']} km/h, sunki pa so dosegali {cr['sunki_kmh']} km/h. V Gornjem Gradu so sunki ob istem času dosegali {gg['sunki_kmh']} km/h.",
         f"V Gornjem Gradu (428 m) je bilo ob istem času {temp(gg['temp_c'])}, v Rečici (IREICA1, 366 m) pa {temp(now['temp_c'])}. "
         f"Temperaturna razlika med Gornjim Gradom in Črnivcem je tako znašala {num(diff_gg)} °C na višinski razliki 475 m. "
         "Običajna razlika za ta razpon višin je okoli 3 °C (±1,5 °C), današnja vrednost pa je torej na zgornji meji tega razpona. To je odstopanje, ne dokaz fenskega pojava.",
@@ -327,7 +340,7 @@ def build_article(S):
         "<ul>"
         f"<li><strong>Dan še ni končan.</strong> Podatki za 18. november segajo do {t_now}. Najnižja temperatura je najnižja vrednost od polnoči in se lahko do konca dneva še spremeni, zlasti če se bo zvečer ohladilo.</li>"
         f"<li><strong>Najnižja temperatura je zabeležena z dvema odčitkoma.</strong> Dnevni povzetek postaje kaže {temp(low18_summary)}, trenutna meritev ob {t_now} pa {temp(now['temp_c'])}. Za najnižjo vrednost od polnoči smo vzeli nižjo.</li>"
-        "<li><strong>Torkovih podatkov še ni v zgodovinski datoteki.</strong> Podatki za torek še niso vključeni v history.json, zato je dnevni povzetek vzet neposredno iz meritev postaje.</li>"
+        "<li><strong>Največji sunek za 18. november še ni znan.</strong> Dnevni podatek se v zgodovinsko datoteko zapiše šele po koncu dneva; sunki, navedeni za sredo, so odčitki ob izbranem času.</li>"
         f"<li><strong>Zgodovina meritev je kratka.</strong> Postaja meri od 7. novembra 2019, kar pomeni {n_days} dni meritev. Gre za primerjavo z našim nizom podatkov, ne za podnebno statistiko.</li>"
         "<li><strong>Razlaga dogajanja ob grebenu ni neposredno izmerjena.</strong> Meritve DRSI kažejo, da je bil greben v oblaku, preostala razlaga pa temelji na opazovanju pojava.</li>"
         "<li><strong>Smer vetra je trenutna vrednost.</strong> Gre za en sam odčitek, ne za povprečno smer vetra.</li>"
@@ -346,7 +359,7 @@ def build_article(S):
 
     title = "Južni veter že drugi dan: v dolini noč pri 12 °C"
     assert len(title) <= 60, len(title)
-    desc = "Po povprečno 9,8 km/h vetra v torek je tudi v sredo v Rečici toplo: od polnoči ni bilo pod 12 °C. Zakaj južni veter prepiha dolino in kaj sledi v četrtek?"
+    desc = f"Po povprečno {num(w17)} km/h vetra v torek je tudi v sredo v Rečici toplo: od polnoči ni bilo pod 12 °C. Zakaj južni veter prepiha dolino in kaj sledi v četrtek?"
     assert f"{num(w17)}" in desc and low18 >= 12.0
     assert len(desc) <= 160, len(desc)
     sections = [
