@@ -142,7 +142,6 @@ MUTACIJE = [
     ("elektrarna: zgornja meja kWp [18.11.]", "sonce-elektrarna/elektrarna.js", "clamp(num(o.kwp, DEF.kwp), 0.1, 1000)", "clamp(num(o.kwp, DEF.kwp), 0.1, 100000)", "test_elektrarna.mjs"),
     ("zig: padavine pod 0,2 mm so brez [18.11.]", "vreme-na-fotografiji/zig.js", "(d.p >= 0.2 ?", "(d.p > 0 ?", "test_zig.mjs"),
     ("zig: manjkajoč dan brez žiga [18.11.]", "vreme-na-fotografiji/zig.js", "data.t[i] == null || data.n[i] == null || data.p[i] == null) return null;", "data.t[i] == null) return null;", "test_zig.mjs"),
-    ("zig: dan pred nizom [18.11.]", "vreme-na-fotografiji/zig.js", "if (i < 0 || i >= data.t.length", "if (i >= data.t.length", "test_zig.mjs"),
     ("prireditev: izenačenje po bližini [18.11.]", "vreme-za-prireditev/prireditev.js", "b.p - a.p || Math.abs(a.off) - Math.abs(b.off);", "b.p - a.p || Math.abs(b.off) - Math.abs(a.off);", "test_prireditev.mjs"),
     ("tedenski: prag odstopanja temperature [18.11.]", "tools/generate_dolina_v_tednu.py", "elif anom is not None and abs(anom) >= 2:", "elif anom is not None and abs(anom) >= 4:", "test_dolina_v_tednu.py"),
     ("tedenski: prag mokrega tedna [18.11.]", "tools/generate_dolina_v_tednu.py", "rain >= 20 and rain >= 2 * r_norm", "rain >= 30 and rain >= 2 * r_norm", "test_dolina_v_tednu.py"),

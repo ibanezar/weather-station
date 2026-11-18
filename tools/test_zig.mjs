@@ -8,6 +8,7 @@ const eq = (a, b, m) => { if (JSON.stringify(a) !== JSON.stringify(b)) { bad++; 
 const data = { start: '2026-01-30', t: [3.04, 5, null, -1.2], n: [-4.5, 0, 1, -8], p: [0, 2.3, 0, 0.1] };
 eq(M.dayOf(data, '2026-01-30'), { t: 3.04, n: -4.5, p: 0 }, 'prvi dan');
 eq(M.dayOf(data, '2026-02-01'), null, 'manjkajoča polja');
+eq(M.dayOf({ start: '2026-01-01', t: [1], n: [null], p: [0] }, '2026-01-01'), null, 'manjka najnižja'); eq(M.dayOf({ start: '2026-01-01', t: [1], n: [0], p: [null] }, '2026-01-01'), null, 'manjkajo padavine');
 eq(M.dayOf(data, '2026-01-29'), null, 'pred nizom'); eq(M.dayOf(data, '2026-02-03'), null, 'po nizu');
 eq(M.lines(data, '2026-01-30'), ['30. 1. 2026 · Rečica ob Savinji', '−4,5 do 3,0 °C · brez padavin', 'IREICA1 · meteorec.si'], 'vrstice, minus in vejica');
 eq(M.lines(data, '2026-01-31')[1], '0,0 do 5,0 °C · 2,3 mm', 'z dežjem');
