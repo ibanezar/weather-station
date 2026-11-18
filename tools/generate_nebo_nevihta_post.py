@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-tools/generate_nebo_nevihta_post.py -- »Nevihta za gorami, nebo v ognju nad Rečico« (18. 11. 2026).
+tools/generate_nebo_nevihta_post.py -- »Nevihta 30 km stran je naslikala izjemno nebo« (18. 11. 2026).
 
 Ročni podatkovni članek, ne del nobenega workflowa. Številke so izračunane iz posnetka data/nebo-nevihta-1118.json (`--fetch`):
 strele LightningLogger po 10-minutnih oknih in celicah (worker /strele-zgodovina.json?celice=1, Blitzortung, radij 200 km), trenutna meritev
@@ -526,7 +526,7 @@ def build_article(S):
         'Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.</p>',
     ]
 
-    title = "Nevihta za gorami, nebo v ognju nad Rečico"
+    title = "Nevihta 30 km stran je naslikala izjemno nebo"
     assert len(title) <= 60
     desc = (f"Dežemer ni zabeležil ničesar, a nebo je gorelo. Radar, {big(S.total)} strel in pet fotografij: nakovalo, mamatusi in lečast oblak nad Rečico.")
     assert len(desc) <= 160, len(desc)
@@ -596,7 +596,7 @@ def main():
     ftp.TODAY = today.isoformat()
     slug, html, entry, og_meta = ftp.build_html(
         article, today.year, today.month, now_utc, slug=SLUG, back=("/blog/", "← Vsi članki"),
-        og_title="Nevihta za gorami,\nnebo v ognju", meta_note="vremenski dogodek",
+        og_title="Nevihta 30 km stran\nje naslikala izjemno nebo", meta_note="vremenski dogodek",
         nav_label="O postaji", nav_href="/o-postaji.html")
     lead = f'<p class="lead">{article["lead"]}</p>'
     assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"

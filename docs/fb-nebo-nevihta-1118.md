@@ -11,7 +11,7 @@ Priporočilo: kartica 1 danes zvečer, kartica 4 ali 3 jutri zjutraj. Ob četrtk
 
 ---
 
-## Kartica 1 — »Nebo v ognju nad Rečico« (strele)
+## Kartica 1 — »Nevihta 30 km stran je naslikala izjemno nebo« (strele)
 
 🌩️ Danes je nebo nad Rečico ob mraku gorelo, dežemer pa ni zabeležil nič izmerljivega.
 

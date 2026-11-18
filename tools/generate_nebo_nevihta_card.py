@@ -51,7 +51,7 @@ def variants(S):
     rain = S.now["rain_today_mm"]
     assert rain == 0
     return {
-        1: ("mamatus.jpg", "Nebo v ognju nad Rečico", "Nevihta je ostala v gorah, oblak pa je segel v dolino.",
+        1: ("mamatus.jpg", "Nevihta 30 km stran\nje naslikala izjemno nebo", "Oblak je segel nad dolino, dežemer pa ni zabeležil ničesar.",
             [(f"{total} strel", f"v krogu 200 km, od {post.hm(S.bins[0]['t'].replace(minute=50))} do {post.hm(last)}\n(Blitzortung)"),
              (f"{post.num(S.closest, 0)} km", "najbližja strela od postaje\n(dan še ni končan)")]),
         2: ("rdece-nebo.jpg", "Dežemer 0 mm, nebo pa gori", "Padlo je le nekaj kapelj, nič izmerljivega.",
@@ -77,8 +77,11 @@ def render(S, n, spec):
     img.paste(logo, (PAD, ly), logo)
     d.text((PAD + 80, ly + 12), "METEOREC", font=font(B, 34), fill=WHITE)
     T = Y0 + PH
-    d.text((PAD, T + 36), title, font=font(B, 66), fill=WHITE)
-    assert d.textlength(title, font=font(B, 66)) < W - 2 * PAD, title
+    lines = title.split("\n")
+    for k, ln in enumerate(lines):
+        d.text((PAD, T + 28 + k * 66), ln, font=font(B, 60 if len(lines) > 1 else 66), fill=WHITE)
+        assert d.textlength(ln, font=font(B, 60 if len(lines) > 1 else 66)) < W - 2 * PAD, ln
+    T += 66 * (len(lines) - 1)
     d.text((PAD, T + 118), sub, font=font(R, 32), fill=MUTED)
     assert d.textlength(sub, font=font(R, 32)) < W - 2 * PAD, sub
     cw = (W - 2 * PAD - 28) // 2
