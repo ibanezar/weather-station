@@ -28,4 +28,6 @@ m = re.search(r"<title>([^<]*)</title>", html); chk(m and len(m.group(1)) <= 70,
 # isti dan z manjkajočo vrednostjo se ne šteje (pokritost)
 d = {datetime.date(2026, 1, 1): {"tempLow": None}, datetime.date(2026, 1, 2): {"tempLow": -3.0, "tempHigh": 1.0, "precipTotal": 0.0, "windgustHigh": 10}}
 s = W.stats(d, 2026, datetime.date(2026, 1, 2)); chk(s["n_low"] == 1 and s["frost"] == 1, "manjkajoča meritev se ne šteje")
+d0 = {datetime.date(2026, 1, 3): {"tempLow": 0.0, "tempHigh": 3.0, "precipTotal": 0.0, "windgustHigh": 5}, datetime.date(2026, 1, 4): {"tempLow": 0.1, "tempHigh": 3.0, "precipTotal": 0.0, "windgustHigh": 5}}
+chk(W.stats(d0, 2026, datetime.date(2026, 1, 4))["frost"] == 1, "noč z natanko 0,0 °C je zmrzal, 0,1 ni")
 print("wrapped:", "OK" if not bad else f"{bad} napak"); sys.exit(1 if bad else 0)
