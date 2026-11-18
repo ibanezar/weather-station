@@ -1,0 +1,73 @@
+[
+ {
+  "week_start": "2026-11-09",
+  "week_end": "2026-11-15",
+  "n_days": 7,
+  "headline": "Moker teden: 87,1 mm padavin, to je 5,1-krat več kot običajno.",
+  "lines": [
+   "Najvišja temperatura 14,3 °C (10. novembra), najnižja –2,7 °C (15. novembra).",
+   "Povprečna temperatura 6,7 °C (običajno za ta teden 5,9 °C).",
+   "Padavine 87,1 mm v 6 dneh z dežjem ali snegom (vsaj 0,2 mm), najbolj moker dan 12. novembra (51,8 mm); običajno 17,2 mm.",
+   "3 noči z najnižjo temperaturo ≤ 0 °C.",
+   "Najmočnejši sunek vetra 38 km/h (10. novembra)."
+  ],
+  "novosti": [
+   {
+    "title": "Rekord za ta koledarski dan — vročina",
+    "url": "/novosti/rekord-dneva-vrocina-2026-11-10/",
+    "date": "2026-11-10"
+   },
+   {
+    "title": "Rekord za ta koledarski dan — mraz",
+    "url": "/novosti/rekord-dneva-mraz-2026-11-09/",
+    "date": "2026-11-09"
+   }
+  ],
+  "blog": [
+   {
+    "title": "82 mm dežja v dveh dneh, v nedeljo pa mraz",
+    "url": "/blog/dez-82-mm-v-dveh-dneh-v-nedeljo-mraz-1114.html",
+    "date": "2026-11-14"
+   },
+   {
+    "title": "Sneg ta teden: v dolini ne, na višinah nekaj centimetrov",
+    "url": "/blog/sneg-dolina-in-gore-petek-sobota-1112.html",
+    "date": "2026-11-12"
+   },
+   {
+    "title": "Ali je Martinovo res toplo? Šest let podatkov",
+    "url": "/blog/martinovo-vreme-recica-sest-let-1111.html",
+    "date": "2026-11-11"
+   },
+   {
+    "title": "Polarni vrtinec se je ustavil že v začetku novembra",
+    "url": "/blog/polarni-vrtinec-se-je-ustavil-novembra-1110.html",
+    "date": "2026-11-10"
+   },
+   {
+    "title": "Tla imajo 7 °C: za jurčka še dovolj toplo, za lisičko ne več",
+    "url": "/blog/temperature-za-gobe-se-ustrezajo-1109.html",
+    "date": "2026-11-09"
+   },
+   {
+    "title": "Sneg v nižinah: četrtek še dež, odločitev v noči na soboto",
+    "url": "/blog/sneg-v-nizinah-cetrtek-dez-sobota-1109.html",
+    "date": "2026-11-09"
+   }
+  ],
+  "napoved": [
+   "18. novembra: najvišja okoli 16 °C, najnižja okoli 4 °C",
+   "19. novembra: najvišja okoli 9 °C, najnižja okoli 3 °C"
+  ],
+  "subject": "Dolina v tednu 9.–15. 11. 2026: moker teden",
+  "stat": {
+   "tmax": 14.3,
+   "tmin": -2.7,
+   "rain_mm": 87.1,
+   "frost_nights": 3,
+   "t_avg": 6.69,
+   "t_norm": 5.87,
+   "rain_norm_mm": 17.2
+  }
+ }
+]
