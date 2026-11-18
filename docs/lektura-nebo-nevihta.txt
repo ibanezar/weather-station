@@ -1,0 +1,134 @@
+Nevihta za gorami, nebo v ognju nad Rečico
+
+META OPIS: Danes ni padla niti kaplja, a nebo je gorelo. Radar, 1 902 strel in pet fotografij: nakovalo, mamatusi in lečast oblak nad Rečico.
+
+UVOD
+V Rečici danes popoldne ni padla niti kaplja dežja, ob mraku pa je nebo zagorelo v oranžnih, rdečih in škrlatnih odtenkih. Za barvito predstavo je poskrbela nevihta za gorami. Med 14.50 in 17.00 je mreža Blitzortung v krogu 200 km okoli postaje zabeležila 1 902 strel. Najbližja je udarila 28 km od nas.
+
+01 — ODGOVOR -- Nevihta je ostala v gorah, njen oblak pa je segel nad dolino
+
+Kratek odgovor: nevihta je ostala v gorah zahodno od doline, proti večeru pa se je približala na približno 30 km. Njen visoki oblak se je medtem razširil nad Rečico. Sonce, ki je že zašlo za gore, je osvetljevalo samo še spodnjo stran oblaka. Zato je nebo žarelo v toplih barvah, na tleh pa je bilo že temno.
+
+1 902
+toliko strel je bilo zabeleženih v krogu 200 km med 14.50 in 17.00. Za primerjavo: prejšnji teden jih je bilo 13. novembra 529, 16. novembra pa 6.
+
+28 km
+razdalja najbližje strele danes. Ob zajemu podatkov so bile najbližje nevihtne celice zahodno od doline, nad gorami.
+
+714
+toliko strel je bilo zabeleženih v najbolj dejavnem polurnem obdobju (15.30–16.00).
+
+14,9 °C
+današnja najvišja temperatura v Rečici. Novembrsko povprečje najvišjih temperatur znaša 10,6 °C.
+
+0 mm
+toliko dežja je padlo do 17.08. Radarska ocena toče ARSO ob 16.55: na Savinjskem stopnja 0, na Gorenjskem in v Ljubljani z okolico pa stopnja 1 (zaznavna).
+
+02 — RADAR IN STRELE -- Strele v dveh skupinah, Rečica med njima
+
+V tem primeru je radar povedal več kot pogled v nebo. Ob 16.35 sem v avtu odprl posnetek radarskega prikaza v aplikaciji Windy (prikaz za 16.30). Najmočnejše jedro je bilo na barvni lestvici aplikacije označeno z rdečo do škrlatno barvo. Segalo je do zahodne meje prikaza, od njega pa se je proti vzhodu raztezal širok pas šibkejših padavin čez Koroško in Štajersko. Rečica je ležala ob njegovem južnem robu.
+
+Posnetek zaslona aplikacije Windy.com, radarski prikaz za 16.30 (posnetek zaslona je nastal ob 16.35). Modra pika označuje mojo lokacijo, ikone strel pa so del aplikacije. Vir radarskih podatkov je Windy, ne naša postaja.
+
+Podatki o strelah kažejo podobno sliko. Prve strele so bile zabeležene v desetminutnem intervalu, ki se je začel ob 14.50. Dejavnost je dosegla vrhunec med 15.30 in 16.00, ko je bilo zabeleženih 714 strel, nato pa je začela upadati.
+
+Strele so se razporedile v dve skupini. Vzhodna skupina (1 267 strel) je ostala 100–200 km stran, nad Hrvaško in Panonsko nižino. Zahodna skupina (635 strel) je bila nad Koroško in gorami ob meji. Njena najdejavnejša celica, v kateri je bilo zabeleženih približno 138 strel, je ležala približno 93 km stran.
+
+Zahodna skupina se je približevala. Med 15.10 in 17.00 se je najbližja celica z vsaj tremi strelami v desetih minutah pomaknila z oddaljenosti 108 km na 32 km od postaje. To pomeni približno 41 km/h proti vzhodu, vendar gre za grobo oceno. Zbirne celice so velike približno 17–20 km, zato se izračunana razdalja spreminja v skokih. Ob zajemu podatkov so bile zadnje strele zabeležene nad gorami zahodno od doline.
+
+zahod in severozahod (225°–340°; Koroška, Karavanke) vzhod in jug (45°–225°; Hrvaška, Panonska nižina) ostalo
+
+Strele po desetminutnih intervalih in smereh
+
+Zapis LightningLogger (Blitzortung), krog s polmerom 200 km okoli postaje. Smer je izračunana iz središča celice zbirne mreže (približno 20 × 17 km), zato je podatek le groba ocena. Interval 16.50–17.00 je zadnji popolni interval pred zajemom podatkov.
+
+14.00–15.30 15.30–16.30 16.30–17.00
+
+Kje so bile zabeležene strele
+
+Krog predstavlja celico zbirne mreže, njegova velikost pa število strel v obravnavanem obdobju. Meje so iz podatkov Natural Earth (javna last). Položaj ni natančen, saj zbirne celice niso posamezne točke udara.
+
+Za primerjavo: 16. novembra je logger zabeležil 6 strel, 13. novembra pa 529. Danes jih je bilo do 17.00 približno štirikrat toliko kot 13. novembra.
+
+03 — OBLAKI -- Nakovalo, mamatusi in lečast oblak
+
+Spodaj je pet fotografij istega neba, ki sem jih posnel proti zahodu. Pri treh sem poskusil razložiti, kaj vidim in pri čem nisem povsem prepričan. Gre za mojo presojo na podlagi fotografij, ne za uradno določitev vrst oblakov.
+
+Pogled iz avtomobila. Oblak se je kot pahljača razširil od obzorja proti zgornjemu desnemu robu slike.
+
+Nakovalo. Na prvi fotografiji se oblak z oranžno osvetljenim spodnjim robom razprostira v obliki pahljače. Takšna oblika je značilna za nakovalo nevihtnega oblaka (cumulonimbus; latinsko poimenovanje oblačne značilnosti je incus). Ko vzgornik v nevihti doseže tropopavzo, se zrak ne more več dvigati tako kot prej, zato se oblak razširi v vodoravni smeri. Višinski veter ga nato odnese s seboj. Radarski pas proti severovzhodu in višinski zemljevid ECMWF (spodaj), ki kaže zahodni do jugozahodni tok, se s to razlago ujemata. Celotnega nakovala nisem videl, zato gre za verjetno razlago, ne za dokaz.
+
+Mamatusi (vrečasti oblaki) na spodnji strani oblaka, osvetljeni z zadnjo svetlobo. Fotografija je nastala v somraku.
+
+Mamatusi. Na drugi fotografiji so na spodnji strani oblaka vidne zaobljene izbokline, ki visijo navzdol. Imenujemo jih mamatusi (latinsko mamma). Pogosto se pojavijo na spodnji strani nakovala nevihtnega oblaka. Povezani so z zapletenimi procesi v oblaku, med katerimi ima pomembno vlogo tudi spuščanje zraka. Mamatusi sami po sebi ne pomenijo, da bo nevihta zajela tudi nas: pojavijo se lahko daleč od območja, kjer pada dež. Da gre res za mamatuse in ne za valovite oblake, je moja presoja na podlagi njihove oblike.
+
+Levo je vidna lečasta oblika pod pasom rožnatih oblakov. Večerno nebo nad gorami je še modro.
+
+Lečast oblak. Na tretji fotografiji se levo pod oblačno plastjo pokaže gladek oblak v obliki leče. Takšni oblaki so običajno znak valovanja zraka za gorami. Zrak se pri pretoku čez gorsko pregrado dviga in spušča. Na območju dviganja se ohlaja in kondenzira, zato nastane oblak, na območju spuščanja pa se ta razkroji. Oblak je lahko videti skoraj nepremičen, čeprav veter skoznj prehaja. To se ujema z jutranjim jugozahodnikom nad grebeni (spodaj). Ker nimam meritve vetra na tej višini, gre le za razlago na podlagi videza.
+
+Rdeč oblak ob sončnem zahodu, tik pred popolno temo.
+
+Zadnji žar večera: temen oblak z oranžnimi robovi.
+
+Zakaj je nebo gorelo? Geometrijski sončni zahod v Rečici je bil ob 16.25, za zahodnim grebenom pa se je sonce skrilo še nekaj minut prej. Ob 17.00 je bilo po mojem izračunu približno 6° pod obzorjem. Visoki oblaki so lahko osvetljeni še dolgo po sončnem zahodu. Za oblak, ki je neposredno nad nami na višini 9 km, je meja osvetlitve približno 3° pod obzorjem (izračun √(2h/R), brez upoštevanja loma svetlobe). Oblak, ki leži zahodneje od nas in je torej bliže zahajajočemu soncu, ga lahko vidi še dlje: zanj je sonce še nad obzorjem, čeprav je za nas že zašlo.
+
+Zato je nakovalo nad gorami zahodno od doline verjetno še žarelo, ko je bilo pri nas že temno. Svetloba je do oblaka prepotovala dolgo pot skozi ozračje, kjer se modra svetloba bolj razprši, rdeča in oranžna pa lažje dosežeta naše oči. Zato so barve tako tople. Svetlo modro nebo pri dnu fotografij je del neba, kjer je sonce že zašlo.
+
+04 — VETER IN TOPLOTA -- Topel zrak in veter v višinah
+
+Jutranji južni veter, o katerem sem pisal v članku Južni veter že drugi dan, je v dolino prinesel toplejši zrak. Na grebenu je bil veter zjutraj močan. Ob 7.36 je DRSI na Črnivcu (902 m) izmeril hitrost 28 km/h in sunke do 40 km/h iz smeri WSW. Ob 16.58 je bil veter na istem mestu precej šibkejši: 3 km/h, sunki do 7 km/h, smer pa WNW.
+
+Podobno se je dogajalo v dolini. IREICA1 je zjutraj ob 7.42 izmerila hitrost vetra 9,3 km/h (sunki 14,8 km/h, smer 200°), ob 17.08 pa le še 2,1 km/h (sunki 3,5 km/h, smer 195°). Zračni tlak se je od jutra (993,7 hPa) do 17.08 (997,1 hPa) zvišal za 3,4 hPa.
+
+Veter je torej proti večeru popustil, zračni tlak pa se je zvišal. Medtem je v gorah zahodno od nas nastajala nevihta. Iz teh številk ne morem ugotoviti, kdaj natančno je veter popustil, saj za današnji dan nimam urnega poteka vetra in zračnega tlaka.
+
+Zrak je bil ves dan topel in vlažen. Ob 17.08 je bilo v Rečici 12,3 °C, rosišče je znašalo 9,7 °C, relativna vlažnost pa 84 %. Najvišja današnja temperatura je bila 14,9 °C. V našem nizu meritev od novembra 2019 je bilo med 217 novembrskimi dnevi 32 takih, ko je bila najvišja temperatura vsaj tako visoka. Tako toplega 18. novembra v naših podatkih še ni bilo: prej je bila najvišja izmerjena temperatura na ta datum 12,0 °C.
+
+Takšen topel in vlažen zrak je nevihti verjetno zagotovil dodatno energijo. To je moja razlaga, ne neposredna meritev.
+
+Geopotencialna višina 500 hPa (ECMWF IFS, tek 17. 11. ob 00 UTC, veljavno 18. 11. ob 00 UTC; vir: ECMWF open data, CC BY 4.0, izris meteorec.si). Zemljevid prikazuje stanje za polnoč, ne za čas nevihte. Gosto razporejene izohipse kažejo na močnejši višinski tok.
+
+Danes Včeraj Temperatura danes
+
+Sevanje in temperatura čez dan
+
+Podatki s sosednje postaje Varpolje (IREICA7), katere meritve objavlja prijatelj. Ker petminutnega zapisa postaje IREICA1 za današnji dan še nimam, sem uporabil podatke iz Varpolja. Ti so le orientacijski, ne referenčni: primerjam samo potek sevanja in temperature. Črtkana črta prikazuje včerajšnje sevanje.
+
+Dan je bil večinoma oblačen, podobno kot včeraj. Do 17. ure je skupno sevanje v Varpolju znašalo približno 0,61 kWh/m², včeraj pa 0,80 kWh/m². Opoldne se je za kratek čas zjasnilo: ob 12.04 je sevanje doseglo 329 W/m², medtem ko je bil včerajšnji vrh 239 W/m². Popoldne je sevanje padlo pod 100 W/m² že pred sončnim zahodom.
+
+Iz meritev sevanja ne morem ugotoviti, kdaj je visok oblak nevihte prispel nad dolino. To bi lahko pokazal šele satelitski posnetek ali fotografije, posnete v tistem času. Zato graf prikazuje predvsem okvirne razmere, v katerih je nastal večerni prizor. Temperatura v Varpolju se je gibala med 12,0 in 15,0 °C.
+
+05 — KAJ SLEDI -- Četrtek: veter in dež
+
+Prava vremenska sprememba šele prihaja. ARSO je 18. novembra ob 9.01 izdal rumeni opozorili za četrtek, 19. novembra: za veter (19. 11. od 10.00 do 19.59) in za dež (19. 11. od 8.00 do 20.59).
+
+O dežju v četrtek sem pisal že v jutranjem članku. Današnje nakovalo je morda napovednik te vremenske spremembe, vendar je to za zdaj le moja domneva. Vir opozoril: ARSO. Trenutna opozorila najdete na strani Nevihte.
+
+Uradna opozorila ARSO imajo prednost pred vsem, kar je zapisano v tem članku.
+
+06 — OMEJITVE -- Česa podatki ne povedo?
+
+Oblake sem določal po fotografijah. Poimenovanja oblakov so moja presoja, ne uradna določitev. Njihove višine nisem meril.
+
+Podatki o strelah so iz mreže Blitzortung. Mreža ne zazna vseh strel, njihov položaj pa je približen, saj so zbirne celice velike okoli 20 km. Prikaz zajema podatke do 17.00, dan pa takrat še ni bil končan.
+
+Smer in hitrost premikanja nevihte sta grobi oceni. Skupini »zahod« (smeri od 225° do 340°) in »vzhod« (smeri od 45° do 225°, mejni kot 225° spada v zahod) sta določeni z izbranima območjema smeri, ki sem ju izbral za pregled. Hitrost je izračunana iz premika med zbirnimi celicami.
+
+Radarska slika ni iz naše postaje. Gre za posnetek iz aplikacije Windy za 16.30, ne za meritev postaje.
+
+Podatki o sevanju so s sosednje postaje. Referenčna postaja je IREICA1, vendar petminutnega zapisa za današnji dan v repozitoriju še nimam. Varpolje leži 1,6 km stran, na istem dnu doline.
+
+Višinskega vetra danes nisem meril. Zemljevid za 500 hPa je napoved za polnoč, ne meritev v času nevihte.
+
+Ocena toče ni potrditev toče na tleh. Podatek ARSO je radarska ocena, ne dokaz, da je toča dejansko padala.
+
+07 — PRAKTIČNO -- Kaj lahko naredite?
+
+Opozorila o nevihtah in strelah so na strani Nevihte, trenutne meritve pa na strani za Rečico ob Savinji. Ob dežju v četrtek spremljajte vodostaj Savinje.
+
+Če imate fotografije večernega neba, jih pošljite. Zanima me, kako je nebo izgledalo drugod v dolini.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le ob navedbi avtorja (Filip Eremita, Meteorec) in neposredne povezave na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Strele: Blitzortung.org (zapis LightningLogger, Meteorec); meritve postaje IREICA1 (Ecowitt); sosednja postaja Varpolje (IREICA7), katere podatke objavlja prijatelj, uporabljena samo za prikaz poteka sevanja; meritve DRSI na Črnivcu (vir: Direkcija Republike Slovenije za infrastrukturo, ceste.si); radarski posnetek: Windy.com; opozorila in radarska ocena toče: ARSO (Agencija Republike Slovenije za okolje, izdano 18. 11. 2026 ob 9.01); geopotencialna višina: ECMWF IFS open data (CC BY 4.0). Fotografije: Filip Eremita, 18. 11. 2026. Podatki za članek: data/nebo-nevihta-1118.json (prenos 18. 11. 2026 ob 17.08).
