@@ -1,0 +1,158 @@
+Ali pregovori o svetnikih držijo? Deset testov
+
+META OPIS: Deset vremenskih pregovorov iz zbirke 1937–1939 proti sedmim zimam meritev v Rečici: Andrejev mraz se je ujel, Lucija ni boljša od kovanca.
+
+UVOD
+Kratek odgovor: večinoma ne. Deset pregovorov o svetnikih iz zbirke, objavljene v letih 1937–1939, sem primerjal z meritvami postaje IREICA1 iz sedmih zim. Štirih ni bilo mogoče preveriti, štirje ne kažejo nobene zveze, eden se je ujel v 6 od 7 let, eden pa kaže, če kaj, obratno. Lucijin pregovor, po katerem 12 dni pred božičem napove 12 mesecev prihodnjega leta, je od 77 primerov zadel 33 (43 %).
+
+01 — ODGOVOR -- Večina pregovorov ne zdrži preizkusa
+
+Katarina in Andrej sta pred vrati, zato sem pred začetkom zime preveril, kaj pregovori trdijo in kaj kažejo meritve. Pregovori so iz zbirke I. Šašelja iz Št. Lovrenca ob Temenici (Etnolog 10–11, 1937–1939). Izbral sem tiste, ki jih je mogoče primerjati s temperaturo, padavinami ali sevanjem, in to storil, preden sem videl rezultate.
+
+Pregovor | Zadetkov | Sklep |
+»Andreja mraz – zima železna rebra.« (30. 11.) | 6 od 7 | se je ujel, razlika majhna (p = 0,12) |
+»Če pred Martinom zmrzuje, je pred božičem povodenj.« | 1 od 6 | brez zveze, če kaj, obratno |
+»Kakršni so dnevi od Lucije do božiča, taki bodo meseci v prihodnjem letu.« | 33 od 77 | brez zveze (p = 0,25) |
+»Sv. Katarine dan ne laže, če po sebi prosincu vreme kaže.« | 4 od 7 | brez zveze (p = 1,00) |
+»Če Martin sonce ima, pride rada huda zima.« in obratno za oblačen dan | 2 od 5 | brez zveze (p = 1,00) |
+»Topla svečnica sneg in mraz prinese, mrzla pa oba odžene.« | 2 od 6 | brez zveze (p = 0,69) |
+»Ako je na Martinje lepo, bo za tri dni grdo.« | – | ni mogoče preveriti: po lepem dnevu pride dež tako ali tako |
+»Vseh svetnikov mraz – o Martinju topel čas.« | – | ni mogoče preveriti: na vse svete mraza še ni bilo |
+»Če Martinova gos po ledu plazi, o božiču navadno po blatu gazi.« | – | ni mogoče preveriti: led na Martinovo samo dvakrat |
+»Če svečnica jasno zdani, zima še dolgo trpi.« | – | ni mogoče preveriti: samo ena jasna svečnica |
+
+Zadetek pomeni, da se smer napovedi ujema z meritvijo. Verjetnost p pove, kako pogosto bi tako izrazit izid v katero koli smer dal navaden kovanec.
+
+Prvi pregovor je najboljši izid od desetih, ne dokaz. Pri šestih preizkusih, ki jih je bilo mogoče izračunati, bi po naključju vsaj en izid, enako izrazit kot najboljši, dobili v 55 % primerov.
+
+02 — PREIZKUS -- Kako sem preverjal
+
+Vsak pregovor sem pred branjem rezultatov prevedel v preizkus: dan svetnika, merilo (npr. najnižja temperatura ≤ 0 °C) in obdobje, ki ga napoveduje. Zadetek je, če se smer ujema. Odstopanja so od povprečja istih dni v analiziranih letih, ne od uradne norme.
+
+Zimo štejem od 1. decembra do konca februarja. Postaja snega ne meri, zato pregovori o snegu (Katarina »grušta«, Andrej »pokriva«, Barbara in strnišče) niso preverjeni. Lenartov pregovor sem obdelal že prej (članek o Lenartovem), po drugačni definiciji, zato ga tu ne ponavljam.
+
+Besedila pregovorov so prepis iz skeniranega dokumenta; razmaknjene črke sem popravil, pravopis izvirnika pa pustil. Pregovori se po krajih razlikujejo, to je zapis iz ene vasi.
+
+03 — ANDREJ -- Andrejev mraz se je ujel, a malo
+
+»Andreja mraz – zima železna rebra.« Če je 30. novembra mraz, bo zima huda. Mraz (najnižja temperatura ≤ 0 °C) je bil v 5 od 7 let, od –6,9 do –2,1 °C. V 4 od teh petih let je bila zima hladnejša od povprečja, v obeh letih brez mraza (2019 in 2022) toplejša.
+
+Zima | Najnižja 30. 11. (°C) | Andrej | Povprečje dec–feb (°C) | Odstopanje (°C) | Zadetek |
+2019/20 | 1,1 | brez mraza | 3,0 | +0,9 | da |
+2020/21 | –6,3 | mraz | 1,6 | –0,5 | da |
+2021/22 | –6,9 | mraz | 1,0 | –1,0 | da |
+2022/23 | 1,3 | brez mraza | 2,2 | +0,1 | da |
+2023/24 | –2,1 | mraz | 3,1 | +1,0 | ne |
+2024/25 | –2,2 | mraz | 2,0 | –0,1 | da |
+2025/26 | –5,4 | mraz | 1,7 | –0,4 | da |
+
+Zima je od 1. decembra do konca februarja. Odstopanje je od povprečja vseh sedmih zim.
+
+Razlika je majhna: zime po Andrejevem mrazu so imele povprečje 1,9 °C, po toplem Andreju 2,6 °C. Leto 2023 (mraz, a najtoplejša zima, 3,1 °C) kaže, da pregovor ni pravilo. Pri sedmih zimah tega ne moremo ločiti od naključja (p = 0,12).
+
+04 — MARTIN -- Zmrzal pred Martinom: obratno
+
+»Če pred Martinom zmrzuje, je pred božičem povodenj.« Zmrzovalo (najnižja temperatura ≤ 0 °C med 1. in 10. novembrom) je v štirih od šestih let, in v teh letih je bil december suhejši: od 1. do 24. decembra je padlo od 27 do 84 mm. V obeh letih brez zmrzali (2022 in 2023) je padlo 140 in 168 mm.
+
+Leto | Najnižja 1.–10. 11. (°C) | Zmrzal pred Martinom | Padavine 1.–24. 12. (mm) | Nad mediano |
+2020 | –2,9 | da | 84 | da |
+2021 | –0,3 | da | 70 | ne |
+2022 | 0,2 | ne | 140 | da |
+2023 | 0,2 | ne | 168 | da |
+2024 | –1,6 | da | 30 | ne |
+2025 | –1,6 | da | 27 | ne |
+
+Mediana šestih let je 77 mm. Za leto 2019 podatkov za prvih deset dni novembra ni dovolj.
+
+Po merilu »nad mediano« se je pregovor ujel enkrat od šestkrat (p = 0,22). Šest let ne dokazuje obratne zveze, a podpore za pregovor tu ni. Ker je bila v letih 2022 in 2023 najnižja temperatura 0,2 °C, sta tik ob meji: če bi ju šteli med zmrzal, bi imela zmrzal vsa leta in preizkusa ne bi bilo.
+
+05 — LUCIJA -- Lucija ni boljša od kovanca
+
+»Kakršni so dnevi od Lucije do božiča, taki bodo meseci v prihodnjem letu.« Dvanajst dni od 13. do 24. decembra naj bi napovedalo dvanajst mesecev od januarja do decembra. Dan sem primerjal z odgovarjajočim mesecem po smeri odstopanja temperature (13. december – januar, 14. december – februar in tako naprej).
+
+Možnih primerov je 82 (šest let po 12 mesecev in še 10 mesecev letošnjega leta). Pri 5 je bilo odstopanje dneva ali meseca pod 0,05 °C in jih nisem štel. Od preostalih 77 se je smer ujela 33-krat (43 %), kovanec pa bi dal okoli 38 zadetkov. Najbolj znan decembrski pregovor torej ni boljši od meta kovanca (p = 0,25).
+
+06 — BREZ ZVEZE -- Martin, Katarina in svečnica
+
+Martin: sonce in zima
+
+»Če je na sv. Martina dan grdo in oblačno vreme, bo potem lepa zima; če je pa sončno in toplo, se je kmalu hude zime nadejati.« V zbirki je o Martinovem vremenu več zapisov in ne govorijo vsi isto; preizkusil sem ta, ki je najjasnejši.
+
+Leto | Največje sevanje 11. 11. (W/m²) | Martin | Zima, odstopanje (°C) | Zadetek |
+2021 | 295 | sončen | –1,0 | da |
+2022 | 222 | oblačen | +0,1 | da |
+2023 | 361 | sončen | +1,0 | ne |
+2024 | 135 | oblačen | –0,1 | ne |
+2025 | 252 | oblačen | –0,4 | ne |
+
+»Sončen« je dan z največjim sevanjem nad mediano 1.–20. novembra (285 W/m²). Sevanje postaja meri od leta 2021.
+
+Dvakrat od petkrat se je ujelo. Razlike med zimami so majhne in ne kažejo smeri.
+
+Katarina: januar
+
+»Sv. Katarine dan ne laže, če po sebi prosincu vreme kaže.« Prosinec je januar: vreme na Katarino naj bi pokazalo vreme januarja.
+
+Leto | Katarina, odstopanje (°C) | Januar, odstopanje (°C) | Zadetek |
+2019 | +3,7 | –0,1 | ne |
+2020 | –4,6 | –1,2 | da |
+2021 | –3,7 | –1,0 | da |
+2022 | –0,9 | +1,5 | ne |
+2023 | –1,5 | –0,4 | da |
+2024 | +5,0 | +2,5 | da |
+2025 | +2,2 | –1,3 | ne |
+
+Odstopanje dneva je od povprečja istega dne (±3 dni) v vseh letih, odstopanje januarja od povprečja sedmih januarjev.
+
+Štirikrat od sedemkrat, kar ni nič posebnega. Letošnja Katarina je 25. novembra.
+
+Svečnica: mraz po njej
+
+»Topla svečnica sneg in mraz prinese, mrzla pa oba odžene.« Če je 2. februarja toplo, naj bi bilo po njem hladneje, in obratno. Predznak odstopanja se je ujel 2-krat od 6 (leta, ko je bilo odstopanje dneva ali obdobja zanemarljivo, sem izpustil).
+
+07 — NI PREVERLJIVO -- Kar se ne da preveriti
+
+Martinovo lepo, nato grdo
+
+»Ako je na Martinje lepo, bo za tri dni grdo.« V novembru je po lepem dnevu (brez padavin in z nadpovprečnim sevanjem) v naslednjih treh dneh padlo vsaj 0,2 mm v 18 od 20 primerov (90 %). Kdor po lepem dnevu čaka dež, ga skoraj vedno dobi, ne glede na svetnika. Martinov dan je bil lep samo v enem od petih let z meritvijo sevanja.
+
+Vseh svetnikov mraz
+
+»Vseh svetnikov mraz – o Martinju topel čas.« Na vse svete (1. novembra) je bila najnižja temperatura v šestih letih od 3,5 do 9,3 °C. Mraza ni bilo nikoli, zato pregovor nima kaj napovedati.
+
+Martinova gos
+
+»Če Martinova gos po ledu plazi, o božiču navadno po blatu gazi.« Najnižja temperatura na Martinovo je bila ≤ 0 °C v letih 2021 in 2025 in v obeh je bil božič razmočen (nad 0 °C in padavine med 24. in 26. decembrom). A razmočen je bil božič tudi v dveh letih brez ledu: v štirih od sedmih let skupaj. Dva primera ne zadoščata.
+
+Jasna svečnica
+
+»Če svečnica jasno zdani, zima še dolgo trpi.« Jasna svečnica (sevanje nad mediano 1.–20. februarja, 351 W/m²) je bila v petih letih z meritvijo sevanja samo 2024, in obdobje od 3. 2. do 15. 3. je bilo po njej najtoplejše od sedmih (+2,3 °C od povprečja). En primer ne pove ničesar.
+
+08 — LETOS -- Kaj pregovori napovedujejo letos?
+
+Martinovo 2026 je bilo oblačno (največje sevanje 168 W/m², mediana je 285 W/m²): po prvem pregovoru lepa zima. Pred Martinom je zmrzovalo (–1,7 °C 9. 11.): po pregovoru sledi povodenj pred božičem, po moji analizi pa ne vidim podpore. Na vse svete je bila najnižja 4,8 °C, zato pregovor o mrazu ni imel kaj povedati.
+
+Katarina (25. 11.) in Andrej (30. 11.) še prideta. Če bo na Andreja mraz, pregovor napoveduje hudo zimo. Andrejev mraz je edini od desetih pregovorov, ki se je v preizkusu ujel, zato ga bo letos zanimivo spremljati. Rezultat za zimo 2026/27 bo znan spomladi.
+
+09 — OMEJITVE -- Česa podatki ne povedo
+
+Sedem zim je malo. Postaja meri od novembra 2019, sevanje od leta 2021. Pri petih ali šestih primerih eno leto spremeni vse.
+
+Preizkusov je več. Ob več preizkusih se po naključju vedno kaj ujame; zato vsak p navajam in ga ne štejem za dokaz.
+
+Definicije so moje. »Sončno«, »mraz«, »povodenj« in »blato« sem določil vnaprej, a pregovori so dvoumni. Drugačno merilo lahko da drugačen izid.
+
+Postaja je ena točka v dolini. Pregovori so nastali v drugih krajih in časih, ko je bilo podnebje drugačno.
+
+Snega postaja ne meri. Pregovori o snegu so zato izven preizkusa.
+
+Pregovor ni napoved. Služi spominu in pogovoru, ne odločanju o kurjavi ali gumah.
+
+10 — KAJ NAPREJ -- Kaj narediti s pregovori
+
+Za napoved za naslednje dni poglejte zimske strani in natančnost napovedi za Rečico. O vremenu ob Martinovem sem pisal tudi v članku z dne 11. novembra.
+
+Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le z navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
+
+VIRI
+Viri: I. Šašelj, »Svetniki in svetnice v slovenskih pregovorih in vremenskih prislovicah«, Etnolog 10–11 (1937–1939), Etnografski muzej (prepis iz skeniranega dokumenta); postaja IREICA1 (zunanji senzor, od 7. 11. 2019, sevanje od 2021). Podatki do 16. 11. 2026. Izračuni: tools/generate_ljudsko_vreme_post.py.
