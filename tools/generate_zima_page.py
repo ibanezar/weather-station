@@ -805,6 +805,9 @@ def build_hub_body(data):
     <a class="phenom-card zima-phenom" href="/zima/sneg-porocila/" style="{card_style("snowpack", "")}">
       <span class="ph-icon">{icon_html("snowpack", 30)}</span>Ali je pri vas sneg?
       <div class="ph-count">poročila bralcev</div></a>
+    <a class="phenom-card zima-phenom" href="/zima/poraba-drv/" style="{card_style("heating_index", "")}">
+      <span class="ph-icon">{icon_html("heating_index", 30)}</span>Koliko drv?
+      <div class="ph-count">kalkulator po stopinjskih dneh</div></a>
     <a class="phenom-card zima-phenom" href="/zima/sneg-ugibalnik/" style="{card_style("snow_line", "")}">
       <span class="ph-icon">{icon_html("snow_line", 30)}</span>Snežni ugibalnik
       <div class="ph-count">kdaj bo prvi sneg?</div></a>

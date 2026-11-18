@@ -87,6 +87,8 @@ CORE = {
     # Poročila bralcev o snegu in snežni ugibalnik (tools/generate_sneg_{porocila,ugibalnik}_page.py, ročno; podatki na workerju).
     "zima/sneg-porocila/":       ("weekly",  "0.6"),
     "zima/sneg-ugibalnik/":      ("weekly",  "0.6"),
+    # Kalkulator drv po stopinjskih dneh (tools/generate_drva_page.py, dnevno v seo-smart-routine.yml).
+    "zima/poraba-drv/":          ("daily",   "0.6"),
     "vreme-v-gorah/":            ("daily",   "0.7"),
     "snegofili/":                ("daily",   "0.7"),
     "sonce-v-dolini/":           ("monthly", "0.7"),

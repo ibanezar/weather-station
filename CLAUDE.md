@@ -342,6 +342,21 @@ Postaja IREICA1 snega ne meri, zato MTR sneg (kartica »Sneg v dolini«) nima iz
 - **Ni narejeno:** uporaba arhiva v `verify_sneg.py` (poročila MTR snega še ne preverjajo; potrebuje nabor dni z dovolj poročili); vrstica v `REGISTER` (`check_freshness.py`);
   FB/IG objava in zgodba za ugibalnik; ugibalnik za »prvo slano« po istem vzorcu. **Po deployu workerja preveri** `GET /sneg/porocila` in `/sneg/ugibanja` ter oddajo na obeh straneh.
 
+### Kalkulator drv (`/zima/poraba-drv/`, 18. 11. 2026)
+
+`tools/generate_drva_page.py` (dnevno v `seo-smart-routine.yml`, da stran kaže letošnje stopinjske dni do včeraj; commit `zima/poraba-drv/`) + ROČNO pisan `zima/poraba-drv/drva.js`
+(model `remaining/scenarios/modeA/modeB/dayIndex` izvožen za Node, kot pri ugibalniku). V stran se vdela (`#drva-data`) kumulativna krivulja stopinjskih dni po sezonah iz `history.json`
+(samo `tempAvg`, brez ERA5): **ista definicija kot članek »Koliko kuriti?« (`hdd()` v `generate_zima_clanki.py`: dan pod 12 °C prispeva 20 − T, sezona 1. 10.–30. 4.)** in iste številke
+(5 sezon 2020/21–2024/25: 3156, 3281, 2781, 2565, 2817, povprečje 2920; generator pade, če se razlikujejo). Sezona 2025/26 (4 manjkajoči dnevi, 2877) je samo izbira »lanske« zime.
+
+- **Dva načina:** A = lanska poraba (prm) × razmerje stopinjskih dni (z neobveznim od vremena neodvisnim deležem, ki se pri »od danes do 30. 4.« razdeli po deležu sezone); B = iz hiše
+  (m², kWh/m²·leto v povprečni zimi, izkoristek peči, energija v prm). Tri scenarije (najtoplejša, povprečna, najhladnejša zima), »cela sezona« in »od danes do 30. 4.«, rezerva, neobvezna cena.
+- **Orientacijski izračun, ne obračun** (tako piše). Poraba je sorazmerna s stopinjskimi dnevi (poenostavitev: topla voda, sončni dobitki, način ogrevanja). Pet sezon je malo, zima je lahko hladnejša od najhladnejše.
+- **Viri za energijo drv:** 500 kg na prm (predpis, Uradni list RS 14/2017), ~4 kWh/kg pri 20 % vlage, vsakih 10 % vode ~12 % manj (občinski priročnik »Les kot energent za ogrevanje«, Lendava);
+  presetov 2000/1760/1550 kWh/prm. **Drevesnih vrst ne ločimo** (razlike niso preverjene). Potrebe po toploti (35/70/150/220 kWh/m²·leto) so ocene; samo »pod 35« je iz literature; izkoristek 75 % je naša
+  predpostavka. Vrednosti so vse vnosna polja, uporabnik jih lahko spremeni. Vnosi so samo v brskalniku (`wx-drva-v1`).
+- Test: `tools/test_drva.mjs` (model + vdelani podatki; v `parity.yml`), 4 mutacije v `mutation_check.py`. **Ni narejeno:** primerjava z dejansko porabo iz več let, ločitev drevesnih vrst, drugi energenti (peleti, olje).
+
 ### Samodejna poročila po nevihti (`/novosti/nevihta-<datum>/`, 7. 10. 2026)
 
 `detect_storms()` v `tools/seo_smart_routine.py` (dnevno, skupaj z ostalimi dogodki) zazna dan,
