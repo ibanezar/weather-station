@@ -5,8 +5,19 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Wed, 18 Nov 2026 06:43:20 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Nov 2026 06:58:39 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Ali pregovori o svetnikih držijo? Deset testov</title>
+      <link>https://meteorec.si/blog/pregovori-o-svetnikih-test-postaja-1118.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/pregovori-o-svetnikih-test-postaja-1118.html</guid>
+      <pubDate>Wed, 18 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Deset vremenskih pregovorov iz zbirke 1937–1939 proti sedmim zimam meritev v Rečici: Andrejev mraz se je ujel, Lucija ni boljša od kovanca.</description>
+      <category>pregovori</category>
+      <category>zima</category>
+      <category>podatki</category>
+      <category>november</category>
+    </item>
     <item>
       <title>Južni veter že drugi dan: v dolini noč pri 12 °C</title>
       <link>https://meteorec.si/blog/juzni-veter-ze-drugi-dan-1118.html</link>
