@@ -69,7 +69,7 @@
     }
     kp = mx;
   }).catch(function () { kp = null; });
-  var pC = get('https://api.open-meteo.com/v1/forecast?latitude=46.3306&longitude=14.9181&hourly=cloud_cover&timezone=Europe%2FLjubljana&forecast_days=2').then(function (j) {
+  var pC = get('https://api.open-meteo.com/v1/forecast?latitude=46.3258&longitude=14.9211&hourly=cloud_cover&timezone=Europe%2FLjubljana&forecast_days=2').then(function (j) {
     var h = [], now = Date.now();
     for (var i = 0; i < j.hourly.time.length; i++) {
       var t = Date.parse(j.hourly.time[i]); // brez zamika = lokalni čas brskalnika: uporabimo samo uro iz niza

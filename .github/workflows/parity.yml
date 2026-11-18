@@ -165,6 +165,7 @@ jobs:
           python3 tools/test_zgresitve.py
           node tools/test_rojstni.mjs
           node tools/test_nebo.mjs
+          node tools/test_elektrarna.mjs
 
       - name: Test tedenskega povzetka (izračun, e-pošta, pošiljalec)
         run: python3 tools/test_dolina_v_tednu.py

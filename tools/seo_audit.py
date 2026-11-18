@@ -132,6 +132,7 @@ CORE = {
     "zgresitve/":                ("monthly", "0.6"),
     "rojstnodnevno-vreme/":      ("monthly", "0.6"),
     "nebo-nocoj/":               ("monthly", "0.6"),
+    "sonce-elektrarna/":         ("monthly", "0.6"),
     # Vreme in ADHD: pogoji za gibanje, spanje, vročino (tools/generate_adhd_page.py; ne trdi vpliva na simptome).
     "adhd/":                     ("daily",   "0.6"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
