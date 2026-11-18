@@ -501,6 +501,25 @@ def nevihte_porocila():
 
 
 @test
+def sneg_porocila():
+    """SNEG_STANJA/PASOVI/REGIJE in pragova sodbe: worker.js ↔ tools/generate_sneg_porocila_page.py."""
+    import generate_sneg_porocila_page as g
+    st, pas, reg, min_n, share = js("worker.js", ["SNEG_STANJA", "SNEG_PASOVI", "SNEG_REGIJE", "SNEG_MIN_N", "SNEG_MIN_SHARE"],
+                                    [{"expr": "SNEG_STANJA"}, {"expr": "SNEG_PASOVI"}, {"expr": "SNEG_REGIJE"},
+                                     {"expr": "SNEG_MIN_N"}, {"expr": "SNEG_MIN_SHARE"}])
+    check(st == [s for s, _ in g.STANJA], "sneg porocila: SNEG_STANJA", f"worker={st} stran={[s for s, _ in g.STANJA]}")
+    check(pas == [p for p, _ in g.PASOVI], "sneg porocila: SNEG_PASOVI", f"worker={pas} stran={[p for p, _ in g.PASOVI]}")
+    check(reg == g.REGIJE, "sneg porocila: SNEG_REGIJE", f"worker={reg} stran={g.REGIJE}")
+    check(min_n == g.MIN_N and round(share * 100) == g.MIN_SHARE, "sneg porocila: pragova sodbe (3 poročila, 60 %)", f"worker={min_n},{share} stran={g.MIN_N},{g.MIN_SHARE}")
+    body = g.build_body()
+    for s in st:
+        check(f'data-stanje="{s}"' in body, f"sneg porocila: gumb za {s}")
+    for p in pas:
+        check(f'value="{p}"' in body, f"sneg porocila: pas {p}")
+    check("indoor" not in body.lower(), "sneg porocila: brez notranjih meritev")
+
+
+@test
 def detektiv_vreme():
     """_detektivVreme() v worker.js vrne samo tri zunanja polja, zadnjih 7 dni, brez prihodnosti in brez nepopolnih dni."""
     hist = {}

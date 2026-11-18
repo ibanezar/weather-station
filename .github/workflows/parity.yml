@@ -146,6 +146,9 @@ jobs:
       - name: Test končne točke /anketa (pravi worker.js, lažen R2/KV)
         run: node tools/test_anketa.mjs
 
+      - name: Test poročil o snegu in snežnega ugibalnika (pravi worker.js, lažen R2/KV)
+        run: node tools/test_sneg.mjs
+
       - name: Test strani /podjetja/ in končne točke /api/povprasevanje
         run: |
           python3 tools/test_podjetja.py

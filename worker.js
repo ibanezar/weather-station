@@ -7595,6 +7595,126 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Poročila o snegu (/zima/sneg-porocila/) in snežni ugibalnik (/zima/sneg-ugibalnik/), 18. 11. 2026 ──
+      // Postaja IREICA1 snega ne meri, zato nimamo izmerjene resnice za MTR sneg. Obiskovalci pošljejo en dotik:
+      // stanje (sneg leži / sneži / dež s snegom / brez snega), višinski pas in regija. BREZ prostega besedila, GPS,
+      // IP-ja in id-ja v zapisu (zato brez moderacije); javni so samo AGREGATI po celici (regija × pas), sodba šele
+      // od SNEG_MIN_N poročil, od katerih jih vsaj SNEG_MIN_SHARE pove isto. Poročilo bralca ni meritev in ni uradno.
+      //   GET  /sneg/porocila?ur=24        → agregati po celicah
+      //   POST /sneg/porocilo              → { stanje, pas, regija, website? }
+      //   GET  /sneg/ugibanja[?igralec=id] → vsi ugibi sezone (brez id-jev) + moj
+      //   POST /sneg/ugibanje              → { igralec, datum, ime?, website? }; ugibanje je zaklenjeno, ko je prvi sneg padel
+      // STANJA/PASOVI/REGIJE sta namerna podvojitev s tools/generate_sneg_porocila_page.py (tools/test_parity.py).
+      if (path === "/sneg/porocila" || path === "/sneg/porocilo" || path === "/sneg/ugibanja" || path === "/sneg/ugibanje") {
+        const r2 = env?.PHOTOS_R2;
+        const _sj = (obj, status, cache) => new Response(JSON.stringify(obj), { status: status || 200,
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": cache || "no-cache" } });
+        const SNEG_STANJA = ["lezi", "pada", "dez-sneg", "brez"];
+        const SNEG_PASOVI = ["p0", "p1", "p2", "p3"];   // do 400 m, 400–700 m, 700–1000 m, nad 1000 m
+        const SNEG_REGIJE = ["Savinjska", "Koroška", "Gorenjska", "Osrednjeslovenska", "Zasavska", "Posavska",
+          "Jugovzhodna Slovenija", "Primorsko-notranjska", "Goriška", "Obalno-kraška", "Podravska", "Pomurska"];
+        const SNEG_KEY = "feedback/sneg-porocila.json";
+        const SNEG_STORE_CAP = 5000;
+        const SNEG_MAX_UR = 72;
+        const SNEG_MIN_N = 3;
+        const SNEG_MIN_SHARE = 0.6;
+        const UGIB_CAP = 3000;
+        const _sezona = () => { const d = new Date(); return d.getUTCMonth() >= 6 ? d.getUTCFullYear() : d.getUTCFullYear() - 1; };
+        const _danesLj = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+        async function _r2json(key) {
+          if (!r2) return [];
+          try { const o = await r2.get(key); return o ? JSON.parse(await o.text()) : []; } catch (_) { return []; }
+        }
+
+        if (path === "/sneg/porocila" && request.method === "GET") {
+          const ur = Math.min(SNEG_MAX_UR, Math.max(1, parseInt(url.searchParams.get("ur")) || 24));
+          const all = await _r2json(SNEG_KEY);
+          const od = Date.now() - ur * 3600000;
+          const cells = new Map();
+          for (const i of all) {
+            const t = new Date(i.ts).getTime();
+            if (!(t >= od) || !SNEG_STANJA.includes(i.stanje) || !SNEG_PASOVI.includes(i.pas) || !SNEG_REGIJE.includes(i.regija)) continue;
+            const k = i.regija + "|" + i.pas;
+            let c = cells.get(k);
+            if (!c) { c = { regija: i.regija, pas: i.pas, n: 0, stanja: { lezi: 0, pada: 0, "dez-sneg": 0, brez: 0 }, zadnje: i.ts }; cells.set(k, c); }
+            c.n++; c.stanja[i.stanje]++;
+            if (i.ts > c.zadnje) c.zadnje = i.ts;
+          }
+          const out = [...cells.values()].map(c => {
+            let top = null, topN = 0;
+            for (const s of SNEG_STANJA) if (c.stanja[s] > topN) { top = s; topN = c.stanja[s]; }
+            c.sodba = (c.n >= SNEG_MIN_N && topN / c.n >= SNEG_MIN_SHARE) ? top : null;
+            return c;
+          }).sort((a, b) => (b.zadnje < a.zadnje ? -1 : 1));
+          return _sj({ celice: out, skupaj: out.reduce((s, c) => s + c.n, 0), ur, minN: SNEG_MIN_N, updatedAt: new Date().toISOString() }, 200, "public, max-age=60");
+        }
+
+        if (path === "/sneg/porocilo" && request.method === "POST") {
+          if (!r2) return _sj({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _sj({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _sj({ error: "Napačni podatki" }, 400);
+          if (body.website) return _sj({ ok: true }); // honeypot
+          const stanje = SNEG_STANJA.includes(body.stanje) ? body.stanje : null;
+          const pas = SNEG_PASOVI.includes(body.pas) ? body.pas : null;
+          const regija = SNEG_REGIJE.includes(body.regija) ? body.regija : null;
+          if (!stanje || !pas || !regija) return _sj({ error: "Izberi stanje, višinski pas in regijo" }, 400);
+          const kv = env?.COUNTER_KV;
+          if (kv) {
+            // Ista celica (regija × pas) največ enkrat na 2 uri po IP: en dotik ne sme biti glas, ki ga ena naprava ponovi.
+            const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+            const cellKey = "sneg_cell:" + ip + ":" + regija + ":" + pas;
+            if (await kv.get(cellKey)) return _sj({ error: "Za to območje si že poročal. Novo poročilo je mogoče čez 2 uri." }, 429);
+            if (await _ipLimited(env, request, "sneg_porocilo_rl", 30, 3600)) return _sj({ error: "Preveč poročil v kratkem času" }, 429);
+            await kv.put(cellKey, "1", { expirationTtl: 7200 });
+          }
+          const od = Date.now() - SNEG_MAX_UR * 3600000;
+          const all = (await _r2json(SNEG_KEY)).filter(i => new Date(i.ts).getTime() >= od);
+          all.unshift({ ts: new Date().toISOString().slice(0, 16) + ":00Z", regija, pas, stanje });
+          await r2.put(SNEG_KEY, JSON.stringify(all.slice(0, SNEG_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
+          return _sj({ ok: true });
+        }
+
+        const UGIB_KEY = (s) => "feedback/sneg-ugibalnik-" + s + ".json";
+
+        if (path === "/sneg/ugibanja" && request.method === "GET") {
+          const sezona = _sezona();
+          const all = await _r2json(UGIB_KEY(sezona));
+          const igr = (url.searchParams.get("igralec") || "").slice(0, 40);
+          const moj = igr ? (all.find(i => i.id === igr) || null) : null;
+          return _sj({ sezona, n: all.length, ugibi: all.slice(0, 2000).map(i => [i.datum, i.ime || "", i.ts]),
+            moj: moj ? { datum: moj.datum, ts: moj.ts } : null }, 200, "public, max-age=60");
+        }
+
+        if (path === "/sneg/ugibanje" && request.method === "POST") {
+          if (!r2) return _sj({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _sj({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _sj({ error: "Napačni podatki" }, 400);
+          if (body.website) return _sj({ ok: true }); // honeypot
+          const id = typeof body.igralec === "string" && /^[A-Za-z0-9_-]{8,40}$/.test(body.igralec) ? body.igralec : null;
+          const datum = typeof body.datum === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.datum) ? body.datum : null;
+          if (!id || !datum) return _sj({ error: "Napačni podatki" }, 400);
+          const sezona = _sezona();
+          const dt = new Date(datum + "T00:00:00Z");
+          if (isNaN(dt) || dt.toISOString().slice(0, 10) !== datum) return _sj({ error: "Neveljaven datum" }, 400);
+          if (datum < _danesLj() || datum > (sezona + 1) + "-04-30") return _sj({ error: "Datum mora biti od danes do konca aprila" }, 400);
+          const ime = String(body.ime || "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 20);
+          // Če je prvi sneg že padel, ugibanje ni več mogoče (najboljši poskus: statična datoteka se predpomni 5 min).
+          try {
+            const rr = await fetch("https://meteorec.si/data/sneg-ugibalnik.json", { cf: { cacheTtl: 300, cacheEverything: true } });
+            if (rr.ok) { const st = await rr.json(); if (st && st.sezona === sezona && st.prvi_sneg) return _sj({ error: "Prvi sneg je že padel, ugibanje je zaprto." }, 409); }
+          } catch (_) { /* brez vira ne zapiramo; lestvica ugibe po prvem snegu v vsakem primeru izloči */ }
+          if (await _ipLimited(env, request, "sneg_ugib_rl", 10, 86400)) return _sj({ error: "Preveč ugibanj v kratkem času" }, 429);
+          const all = await _r2json(UGIB_KEY(sezona));
+          const ex = all.find(i => i.id === id);
+          if (ex) return _sj({ error: "Že si ugibal.", datum: ex.datum }, 409);
+          all.unshift({ id, ts: new Date().toISOString().slice(0, 19) + "Z", datum, ime: ime || undefined });
+          await r2.put(UGIB_KEY(sezona), JSON.stringify(all.slice(0, UGIB_CAP)), { httpMetadata: { contentType: "application/json" } });
+          return _sj({ ok: true, datum });
+        }
+      }
+
       // ── Gallery / photo endpoints ──────────────────────────
       // Vsi galerijski objekti živijo pod ključem "photos/…" v istem R2
       // bucketu kot radar cache, feedback in subscriber podatki — list()
