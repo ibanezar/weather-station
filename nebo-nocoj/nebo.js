@@ -1,0 +1,100 @@
+// Nebo nocoj: model brez DOM-a (izvožen za Node) + prikaz. Polarni sij (NOAA SWPC Kp) + oblačnost (Open-Meteo) + utrinki (IMO, fiksni datumi vrha).
+(function (root) {
+  'use strict';
+  var SYN = 29.530588853, NEW0 = Date.UTC(2000, 0, 6, 18, 14); // znan mlaj
+  // Osvetljenost lune 0–1 za trenutek (ms). Preprost model sinodičnega meseca (±~1 dan): dovolj za »luna moti / ne moti«.
+  function moonIllum(ms) {
+    var ph = (((ms - NEW0) / 864e5) % SYN + SYN) % SYN / SYN;
+    return (1 - Math.cos(2 * Math.PI * ph)) / 2;
+  }
+  // Polarni sij nad Slovenijo (geomagnetna širina ~ 47°): vidno običajno šele pri močni nevihti (Kp ≥ 7); Kp 6 je mejno.
+  var KP_LIMIT = 7, KP_EDGE = 6;
+  function kpStr(k) { return String(Math.round(k * 10) / 10).replace('.', ','); }
+  function kpVerdict(kp) {
+    var ks = kp == null ? '' : kpStr(kp);
+    if (kp == null || isNaN(kp)) return { lvl: 'none', txt: 'Podatek o Kp ni na voljo.' };
+    if (kp >= KP_LIMIT) return { lvl: 'go', txt: 'Močna geomagnetna nevihta (Kp ' + ks + '): sij je pri nas možen nizko nad severnim obzorjem.' };
+    if (kp >= KP_EDGE) return { lvl: 'edge', txt: 'Kp ' + ks + ' je mejno: sij je pri nas le redko viden, najprej na fotografiji.' };
+    return { lvl: 'no', txt: 'Kp ' + ks + ': sij nad Slovenijo ni pričakovan.' };
+  }
+  // Povprečna oblačnost (0–100) v nočnih urah (ure 20–5 lokalno): hourly = [{h: lokalna ura 0–23, c: oblačnost}].
+  function nightCloud(hourly) {
+    var s = 0, n = 0;
+    for (var i = 0; i < hourly.length; i++) { var h = hourly[i].h; if ((h >= 20 || h <= 5) && hourly[i].c != null) { s += hourly[i].c; n++; } }
+    return n ? s / n : null;
+  }
+  function cloudVerdict(c) {
+    if (c == null) return { lvl: 'none', txt: 'Napoved oblačnosti ni na voljo.' };
+    if (c < 30) return { lvl: 'go', txt: 'Nebo bo v povprečju jasno (oblačnost ' + Math.round(c) + ' %).' };
+    if (c < 70) return { lvl: 'edge', txt: 'Delno oblačno (oblačnost ' + Math.round(c) + ' %): luknje v oblakih so možne.' };
+    return { lvl: 'no', txt: 'Pretežno oblačno (oblačnost ' + Math.round(c) + ' %): neba ne bo videti.' };
+  }
+  // Skupna presoja za polarni sij: oboje mora biti ugodno.
+  function auroraTonight(kp, cloud) {
+    var k = kpVerdict(kp), c = cloudVerdict(cloud);
+    if (k.lvl === 'none' || c.lvl === 'none') return { go: false, why: 'Manjka podatek: ' + (k.lvl === 'none' ? k.txt : c.txt) };
+    var go = (k.lvl === 'go') && c.lvl !== 'no';
+    return { go: go, why: k.txt + ' ' + c.txt };
+  }
+  // Roji (IMO): vrh = [mesec, dan]; ZHR je zenitna urna frekvenca ob idealnih pogojih.
+  var SHOWERS = [
+    { id: 'leonidi', name: 'Leonidi', peak: [11, 17], zhr: 15 },
+    { id: 'geminidi', name: 'Geminidi', peak: [12, 14], zhr: 150 },
+    { id: 'ursidi', name: 'Ursidi', peak: [12, 22], zhr: 10 },
+    { id: 'kvadrantidi', name: 'Kvadrantidi', peak: [1, 3], zhr: 110 }
+  ];
+  function nextShower(now) {
+    var y = new Date(now).getUTCFullYear(), best = null;
+    for (var i = 0; i < SHOWERS.length; i++) for (var dy = 0; dy <= 1; dy++) {
+      var t = Date.UTC(y + dy, SHOWERS[i].peak[0] - 1, SHOWERS[i].peak[1], 22); // vrh ponoči (22 UTC ≈ 23–24 lokalno)
+      if (t >= now - 864e5 * 0.5 && (!best || t < best.t)) best = { s: SHOWERS[i], t: t };
+    }
+    return best;
+  }
+  function showerMoon(t) { var m = moonIllum(t); return { illum: m, bad: m > 0.5 }; }
+  var api = { moonIllum: moonIllum, kpVerdict: kpVerdict, nightCloud: nightCloud, cloudVerdict: cloudVerdict, auroraTonight: auroraTonight, nextShower: nextShower, showerMoon: showerMoon, SHOWERS: SHOWERS, KP_LIMIT: KP_LIMIT };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.NeboModel = api;
+  if (typeof document === 'undefined') return;
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  var out = document.getElementById('nb-out');
+  function get(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  var kp = null, cloud = null;
+  var pK = get('https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json').then(function (j) {
+    // vrstice [time_tag, kp, observed/predicted, noaa_scale]; največji napovedan Kp v naslednjih 24 h
+    var now = Date.now(), mx = null;
+    for (var i = 1; i < j.length; i++) {
+      var t = Date.parse(String(j[i][0]).replace(' ', 'T') + 'Z');
+      if (t >= now - 3 * 3600e3 && t <= now + 24 * 3600e3) { var v = parseFloat(j[i][1]); if (!isNaN(v) && (mx == null || v > mx)) mx = v; }
+    }
+    kp = mx;
+  }).catch(function () { kp = null; });
+  var pC = get('https://api.open-meteo.com/v1/forecast?latitude=46.3306&longitude=14.9181&hourly=cloud_cover&timezone=Europe%2FLjubljana&forecast_days=2').then(function (j) {
+    var h = [], now = Date.now();
+    for (var i = 0; i < j.hourly.time.length; i++) {
+      var t = Date.parse(j.hourly.time[i]); // brez zamika = lokalni čas brskalnika: uporabimo samo uro iz niza
+      var hr = +j.hourly.time[i].slice(11, 13), day = j.hourly.time[i].slice(0, 10);
+      h.push({ h: hr, c: j.hourly.cloud_cover[i], day: day });
+    }
+    // prva noč: ure 20–23 prvega dne in 0–5 drugega dne
+    var d0 = h[0].day, sel = h.filter(function (x) { return (x.day === d0 && x.h >= 20) || (x.day !== d0 && x.h <= 5); });
+    cloud = nightCloud(sel);
+  }).catch(function () { cloud = null; });
+  Promise.all([pK, pC]).then(function () {
+    out.textContent = '';
+    var a = auroraTonight(kp, cloud);
+    var c = el('div', 'card');
+    c.appendChild(el('div', 'clabel', 'Polarni sij nocoj'));
+    c.appendChild(el('div', 'nb-big', a.go ? 'Možen' : 'Ni pričakovan'));
+    c.appendChild(el('p', null, a.why));
+    out.appendChild(c);
+    var n = nextShower(Date.now()), c2 = el('div', 'card');
+    c2.appendChild(el('div', 'clabel', 'Naslednji roj utrinkov'));
+    if (n) {
+      var d = new Date(n.t), mo = showerMoon(n.t);
+      c2.appendChild(el('div', 'nb-big', n.s.name + ', ' + d.getUTCDate() + '. ' + (d.getUTCMonth() + 1) + '.'));
+      c2.appendChild(el('p', null, 'Do ' + n.s.zhr + ' utrinkov na uro ob idealnih pogojih (ZHR, IMO); v resnici bistveno manj. Luna je ' + Math.round(mo.illum * 100) + ' % osvetljena: ' + (mo.bad ? 'moti, vidnih bo manj utrinkov.' : 'ne moti.')));
+    }
+    out.appendChild(c2);
+  });
+})(typeof window !== 'undefined' ? window : globalThis);
