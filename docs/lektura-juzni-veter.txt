@@ -1,23 +1,26 @@
 Južni veter že drugi dan: v dolini noč pri 12 °C
 
-META OPIS: Po povprečno 9,8 km/h vetra v torek je tudi v sredo v Rečici toplo: od polnoči ni bilo pod 12 °C. Zakaj južni veter prepiha dolino in kaj sledi v četrtek?
+META OPIS: Po povprečno 9,5 km/h vetra v torek je tudi v sredo v Rečici toplo: od polnoči ni bilo pod 12 °C. Zakaj južni veter prepiha dolino in kaj sledi v četrtek?
 
 UVOD
-V torek je v Rečici pihal veter s povprečno hitrostjo 9,8 km/h. Od 7. novembra 2019 je bilo enako vetrovnih ali še vetrovnejših le 21 od 2548 dni, vsi med decembrom in marcem. Novembrsko povprečje znaša le 1,7 km/h. Južni veter piha tudi danes. Ob 7.42 je bilo v dolini 12,2 °C, kar je hkrati najnižja zabeležena vrednost od polnoči.
+V torek je v Rečici pihal veter s povprečno hitrostjo 9,5 km/h. Od 7. novembra 2019 je bilo enako vetrovnih ali še vetrovnejših le 25 od 2548 dni, vsi med decembrom in marcem. Novembrsko povprečje znaša le 1,7 km/h. Južni veter piha tudi danes. Ob 7.42 je bilo v dolini 12,2 °C, kar je hkrati najnižja zabeležena vrednost od polnoči.
 
 01 — ODGOVOR -- Južni veter je izpodrinil hladen zrak
 
 Kratek odgovor: južni veter je v dolino prinesel toplejši zrak in izpodrinil hladnega, ki se tu običajno zadržuje pri tleh. Zato je veter hkrati prinesel toploto in preprečil običajno nočno ohlajanje.
 
-Dno doline je sicer večinoma mirno. Novembra povprečna hitrost vetra znaša komaj 1,7 km/h, hladen zrak pa se ponoči nabira pri tleh. V ponedeljek je najnižja temperatura znašala –0,5 °C, v torek pa 1,1 °C, preden je veter prodrl v dolino. Najvišja torkova temperatura je bila 14,4 °C. Povprečna temperatura v torek je znašala 11,1 °C, medtem ko je novembrsko povprečje v naših podatkih 5,4 °C.
+Dno doline je sicer večinoma mirno. Novembra povprečna hitrost vetra znaša komaj 1,7 km/h, hladen zrak pa se ponoči nabira pri tleh. V ponedeljek je najnižja temperatura znašala –0,5 °C, v torek pa 0,9 °C, preden je veter prodrl v dolino. Najvišja torkova temperatura je bila 14,4 °C. Povprečna temperatura v torek je znašala 10,6 °C, medtem ko je novembrsko povprečje v naših podatkih 5,4 °C.
 
-9,8 km/h
+9,5 km/h
 povprečna hitrost vetra v torek. Novembrsko povprečje: 1,7 km/h.
 
 12,2 °C
 najnižja zabeležena temperatura od polnoči do 7.42 v sredo.
 
-11,1 °C
+53,3 km/h
+najmočnejši sunek v torek. Od marca 2021 je bil močnejši le 11 od 2063 dni.
+
+10,6 °C
 povprečna temperatura v torek. Novembrsko povprečje: 5,4 °C.
 
 994 hPa
@@ -33,6 +36,8 @@ Meritve postaje IREICA1. Zadnji stolpec prikazuje 18. november le do 7.42 in je 
 
 Konec prejšnjega tedna je bilo hladno. V soboto je najnižja temperatura znašala –1,8 °C, v nedeljo pa –2,7 °C. V ponedeljek je veter še komaj pihal, njegovo povprečje je znašalo 2,0 km/h. Do torka se je obrnil na jug. Najvišja temperatura 14,4 °C je glede na novembrsko povprečje 5,4 °C zelo visoka.
 
+Najmočnejši sunek v torek je dosegel 53,3 km/h. Postaja sunke beleži od 17. marca 2021 in od takrat je bil močnejši le 11 od 2063 dni. Med novembrskimi dnevi je bil močnejši samo sunek 23. novembra 2024 (55,0 km/h).
+
 Podoben dogodek smo imeli že lani. 15. in 16. novembra 2025 je povprečna hitrost vetra znašala 8,5 oziroma 7,4 km/h, najnižji temperaturi pa 12,6 °C in 12,9 °C. To sta doslej najtoplejši novembrski noči v našem nizu meritev. Današnjih 12,2 °C je nekoliko manj, vendar je to najnižja zabeležena vrednost do 7.42 in današnji dan še ni končan.
 
 03 — MENINA -- Oblak se preliva čez greben, nad dolino pa je jasno
@@ -45,7 +50,7 @@ Pogled čez polje proti Menini, 18. 11. ob 7.22. Rožnata barva na robu oblaka j
 
 Isti pojav ob sončnem vzhodu, 18. 11. ob 6.55: oblak se preliva čez greben proti dolini.
 
-Meritve DRSI na Črnivcu (902 m) ta pojav dodatno osvetljujejo. Ob 7.36 je bilo tam 6,9 °C, relativna vlažnost zraka pa 98 %. Rosišče je znašalo 6,5 °C, kar pomeni, da je bil zrak skoraj nasičen z vlago. To je skladno z opažanjem, da je bil greben v oblaku. Veter je pihal s hitrostjo 28 km/h, sunki pa so dosegali 40 km/h.
+Meritve DRSI na Črnivcu (902 m) ta pojav dodatno osvetljujejo. Ob 7.36 je bilo tam 6,9 °C, relativna vlažnost zraka pa 98 %. Rosišče je znašalo 6,5 °C, kar pomeni, da je bil zrak skoraj nasičen z vlago. To je skladno z opažanjem, da je bil greben v oblaku. Veter je pihal s hitrostjo 28 km/h, sunki pa so dosegali 40 km/h. V Gornjem Gradu so sunki ob istem času dosegali 55 km/h.
 
 V Gornjem Gradu (428 m) je bilo ob istem času 11,5 °C, v Rečici (IREICA1, 366 m) pa 12,2 °C. Temperaturna razlika med Gornjim Gradom in Črnivcem je tako znašala 4,6 °C na višinski razliki 475 m. Običajna razlika za ta razpon višin je okoli 3 °C (±1,5 °C), današnja vrednost pa je torej na zgornji meji tega razpona. To je odstopanje, ne dokaz fenskega pojava.
 
@@ -79,7 +84,7 @@ Dan še ni končan. Podatki za 18. november segajo do 7.42. Najnižja temperatur
 
 Najnižja temperatura je zabeležena z dvema odčitkoma. Dnevni povzetek postaje kaže 12,6 °C, trenutna meritev ob 7.42 pa 12,2 °C. Za najnižjo vrednost od polnoči smo vzeli nižjo.
 
-Torkovih podatkov še ni v zgodovinski datoteki. Podatki za torek še niso vključeni v history.json, zato je dnevni povzetek vzet neposredno iz meritev postaje.
+Največji sunek za 18. november še ni znan. Dnevni podatek se v zgodovinsko datoteko zapiše šele po koncu dneva; sunki, navedeni za sredo, so odčitki ob izbranem času.
 
 Zgodovina meritev je kratka. Postaja meri od 7. novembra 2019, kar pomeni 2548 dni meritev. Gre za primerjavo z našim nizom podatkov, ne za podnebno statistiko.
 
