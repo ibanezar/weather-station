@@ -258,7 +258,7 @@ def build_article(S):
     # ── besedilo (jezikovno in slogovno urejeno, Filip, 18. 11. 2026) ──
     lead = (f"V torek je v Rečici pihal veter s povprečno hitrostjo {num(w17)} km/h. Od 7. novembra 2019 je bilo enako vetrovnih ali še vetrovnejših le {len(higher)} od {n_days} dni, vsi med decembrom in marcem. "
             f"Novembrsko povprečje znaša le {num(nov_avg)} km/h. Južni veter piha tudi danes. Ob {t_now} je bilo v dolini {temp(now['temp_c'])}, "
-            f"najnižja zabeležena temperatura od polnoči pa je {temp(low18)}.")
+            f"kar je hkrati najnižja zabeležena vrednost od polnoči.")
 
     p1 = [
         "<strong>Kratek odgovor:</strong> južni veter je v dolino prinesel toplejši zrak in izpodrinil hladnega, ki se tu običajno zadržuje pri tleh. Zato je veter hkrati prinesel toploto in preprečil običajno nočno ohlajanje.",
