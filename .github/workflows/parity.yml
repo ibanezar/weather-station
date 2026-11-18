@@ -152,6 +152,12 @@ jobs:
       - name: Test arhiva poročil o snegu in razrešitve ugibalnika
         run: python3 tools/test_sneg_porocila_log.py
 
+      - name: Test kalkulatorja drv (model in vdelani podatki)
+        run: node tools/test_drva.mjs
+
+      - name: Test strani za prireditve (model in vdelani podatki)
+        run: node tools/test_prireditev.mjs
+
       - name: Test strani /podjetja/ in končne točke /api/povprasevanje
         run: |
           python3 tools/test_podjetja.py

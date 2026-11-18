@@ -87,6 +87,8 @@ CORE = {
     # Poročila bralcev o snegu in snežni ugibalnik (tools/generate_sneg_{porocila,ugibalnik}_page.py, ročno; podatki na workerju).
     "zima/sneg-porocila/":       ("weekly",  "0.6"),
     "zima/sneg-ugibalnik/":      ("weekly",  "0.6"),
+    # Kalkulator drv po stopinjskih dneh (tools/generate_drva_page.py, dnevno v seo-smart-routine.yml).
+    "zima/poraba-drv/":          ("daily",   "0.6"),
     "vreme-v-gorah/":            ("daily",   "0.7"),
     "snegofili/":                ("daily",   "0.7"),
     "sonce-v-dolini/":           ("monthly", "0.7"),
@@ -120,6 +122,8 @@ CORE = {
     "sklepi/":                   ("daily",   "0.7"),
     # Vreme za vrtnarje: zmrzal (MTR), vročina, suša, veter, toča (tools/generate_vreme_za_vrtnarje_page.py).
     "vreme-za-vrtnarje/":        ("daily",   "0.6"),
+    # Klimatologija po datumih za poroke in prireditve (tools/generate_prireditev_page.py, ročno).
+    "vreme-za-prireditev/":      ("monthly", "0.6"),
     # Vreme in ADHD: pogoji za gibanje, spanje, vročino (tools/generate_adhd_page.py; ne trdi vpliva na simptome).
     "adhd/":                     ("daily",   "0.6"),
     "vreme-za-padalce/":         ("daily",   "0.6"),
