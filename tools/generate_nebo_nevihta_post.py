@@ -396,7 +396,7 @@ def build_article(S):
     wi = datetime.datetime.fromisoformat(warn["issued"]).astimezone(TZ)
 
     tl = f"{hm(first['t'])}–{hm(last_t)}"
-    lead = (f"V Rečici danes popoldne ni padla niti kaplja dežja, ob mraku pa je nebo zagorelo v oranžnih, rdečih in škrlatnih odtenkih. "
+    lead = (f"V Rečici danes popoldne ni bilo izmerljivega dežja (padlo je le nekaj kapelj), ob mraku pa je nebo zagorelo v oranžnih, rdečih in škrlatnih odtenkih. "
             f"Za barvito predstavo je poskrbela nevihta za gorami. Med {hm(first['t'])} in {hm(last_t)} je mreža Blitzortung v krogu 200 km okoli postaje zabeležila {big(S.total)} strel. "
             f"Najbližja je udarila {num(S.closest, 0)} km od nas.")
 
@@ -408,7 +408,7 @@ def build_article(S):
             (num(S.closest, 0), "km", "razdalja najbližje strele danes. Ob zajemu podatkov so bile najbližje nevihtne celice zahodno od doline, nad gorami.", False),
             (num(peak_n, 0), "", f"toliko strel je bilo zabeleženih v najbolj dejavnem polurnem obdobju ({hm(peak_t)}–{hm(peak_end)}).", True),
             (num(hi18), "°C", f"današnja najvišja temperatura v Rečici. Novembrsko povprečje najvišjih temperatur znaša {num(nov_mean_hi)} °C.", False),
-            (num(N["rain_today_mm"], 0), "mm", f"toliko dežja je padlo do {t_now}. Radarska ocena toče ARSO ob {toca['issued'][:16].split(' ')[-1].replace(':', '.')}: na Savinjskem stopnja 0, na Gorenjskem in v Ljubljani z okolico pa stopnja 1 (zaznavna).", False),
+            (num(N["rain_today_mm"], 0), "mm", f"izmerjenega dežja do {t_now} (padlo je le nekaj kapelj, ki jih dežemer ni zabeležil). Radarska ocena toče ARSO ob {toca['issued'][:16].split(' ')[-1].replace(':', '.')}: na Savinjskem stopnja 0, na Gorenjskem in v Ljubljani z okolico pa stopnja 1 (zaznavna).", False),
         ]),
     ]
 
@@ -514,6 +514,7 @@ def build_article(S):
         "<li><strong>Radarska slika ni iz naše postaje.</strong> Gre za posnetek iz aplikacije Windy za 16.30, ne za meritev postaje.</li>"
         "<li><strong>Podatki o sevanju so s sosednje postaje.</strong> Referenčna postaja je IREICA1, vendar petminutnega zapisa za današnji dan v repozitoriju še nimam. Varpolje leži 1,6 km stran, na istem dnu doline.</li>"
         "<li><strong>Višinskega vetra danes nisem meril.</strong> Zemljevid za 500 hPa je napoved za polnoč, ne meritev v času nevihte.</li>"
+        f"<li><strong>Dan še ni končan.</strong> Izmerjenega dežja do {t_now} ni bilo (padlo je le nekaj kapelj, ki jih dežemer ni zabeležil), kasneje pa se lahko to še spremeni.</li>"
         "<li><strong>Ocena toče ni potrditev toče na tleh.</strong> Podatek ARSO je radarska ocena, ne dokaz, da je toča dejansko padala.</li>"
         "</ul>",
     ]
@@ -527,7 +528,7 @@ def build_article(S):
 
     title = "Nevihta za gorami, nebo v ognju nad Rečico"
     assert len(title) <= 60
-    desc = (f"Danes ni padla niti kaplja, a nebo je gorelo. Radar, {big(S.total)} strel in pet fotografij: nakovalo, mamatusi in lečast oblak nad Rečico.")
+    desc = (f"Dežemer ni zabeležil ničesar, a nebo je gorelo. Radar, {big(S.total)} strel in pet fotografij: nakovalo, mamatusi in lečast oblak nad Rečico.")
     assert len(desc) <= 160, len(desc)
     sections = [
         {"label": "01 — odgovor", "heading": "Nevihta je ostala v gorah, njen oblak pa je segel nad dolino", "id": "odgovor", "paragraphs": p1},

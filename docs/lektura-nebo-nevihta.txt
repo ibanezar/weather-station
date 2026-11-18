@@ -1,9 +1,9 @@
 Nevihta za gorami, nebo v ognju nad Rečico
 
-META OPIS: Danes ni padla niti kaplja, a nebo je gorelo. Radar, 1 902 strel in pet fotografij: nakovalo, mamatusi in lečast oblak nad Rečico.
+META OPIS: Dežemer ni zabeležil ničesar, a nebo je gorelo. Radar, 1 902 strel in pet fotografij: nakovalo, mamatusi in lečast oblak nad Rečico.
 
 UVOD
-V Rečici danes popoldne ni padla niti kaplja dežja, ob mraku pa je nebo zagorelo v oranžnih, rdečih in škrlatnih odtenkih. Za barvito predstavo je poskrbela nevihta za gorami. Med 14.50 in 17.00 je mreža Blitzortung v krogu 200 km okoli postaje zabeležila 1 902 strel. Najbližja je udarila 28 km od nas.
+V Rečici danes popoldne ni bilo izmerljivega dežja (padlo je le nekaj kapelj), ob mraku pa je nebo zagorelo v oranžnih, rdečih in škrlatnih odtenkih. Za barvito predstavo je poskrbela nevihta za gorami. Med 14.50 in 17.00 je mreža Blitzortung v krogu 200 km okoli postaje zabeležila 1 902 strel. Najbližja je udarila 28 km od nas.
 
 01 — ODGOVOR -- Nevihta je ostala v gorah, njen oblak pa je segel nad dolino
 
@@ -22,7 +22,7 @@ toliko strel je bilo zabeleženih v najbolj dejavnem polurnem obdobju (15.30–1
 današnja najvišja temperatura v Rečici. Novembrsko povprečje najvišjih temperatur znaša 10,6 °C.
 
 0 mm
-toliko dežja je padlo do 17.08. Radarska ocena toče ARSO ob 16.55: na Savinjskem stopnja 0, na Gorenjskem in v Ljubljani z okolico pa stopnja 1 (zaznavna).
+izmerjenega dežja do 17.08 (padlo je le nekaj kapelj, ki jih dežemer ni zabeležil). Radarska ocena toče ARSO ob 16.55: na Savinjskem stopnja 0, na Gorenjskem in v Ljubljani z okolico pa stopnja 1 (zaznavna).
 
 02 — RADAR IN STRELE -- Strele v dveh skupinah, Rečica med njima
 
@@ -119,6 +119,8 @@ Radarska slika ni iz naše postaje. Gre za posnetek iz aplikacije Windy za 16.30
 Podatki o sevanju so s sosednje postaje. Referenčna postaja je IREICA1, vendar petminutnega zapisa za današnji dan v repozitoriju še nimam. Varpolje leži 1,6 km stran, na istem dnu doline.
 
 Višinskega vetra danes nisem meril. Zemljevid za 500 hPa je napoved za polnoč, ne meritev v času nevihte.
+
+Dan še ni končan. Izmerjenega dežja do 17.08 ni bilo (padlo je le nekaj kapelj, ki jih dežemer ni zabeležil), kasneje pa se lahko to še spremeni.
 
 Ocena toče ni potrditev toče na tleh. Podatek ARSO je radarska ocena, ne dokaz, da je toča dejansko padala.
 
