@@ -639,6 +639,13 @@
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://meteorec.si/blog/pregovori-o-svetnikih-test-postaja-1118.html</loc>
+    <lastmod>2026-11-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/pregovori-o-svetnikih-test-postaja-1118.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://meteorec.si/blog/juzni-veter-ze-drugi-dan-1118.html</loc>
     <lastmod>2026-11-18</lastmod>
     <changefreq>monthly</changefreq>
