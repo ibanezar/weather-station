@@ -1,0 +1,63 @@
+name: Dolina v tednu (tedenski povzetek)
+
+# Vsak ponedeljek: povzetek zadnjega popolnega tedna iz history.json (tools/generate_dolina_v_tednu.py) → data/dolina-v-tednu.json
+# in stran /dolina-v-tednu/. E-pošta potrjenim naročnikom (ločen seznam od naročnine na članke) gre SAMO, če je repozitorijska
+# spremenljivka TEDENSKI_POSLJI = true (privzeto izklopljeno, dokler lastnik ne potrdi pošiljanja in ni nastavljen Resend)
+# ali če je ročni zagon z vhodom poslji = true. Skrivnost: SUBSCRIBE_SECRET (isto kot na workerju). Worker pošlje en teden samo
+# enkrat (KV), ponovni zagon je zato varen. GitHubov cron zamuja ure: povzetek pride v ponedeljek dopoldne.
+on:
+  schedule:
+    - cron: '40 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      poslji:
+        description: 'Pošlji e-pošto naročnikom (true/false)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dolina-v-tednu
+  cancel-in-progress: false
+
+jobs:
+  povzetek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Sestavi povzetek tedna in stran
+        run: python3 tools/generate_dolina_v_tednu.py
+
+      - name: Preizkus izračuna
+        run: python3 tools/test_dolina_v_tednu.py
+
+      - name: Shrani
+        id: commit
+        run: |
+          git config user.name  "meteorec-bot"
+          git config user.email "bot@meteorec.si"
+          git add data/dolina-v-tednu.json dolina-v-tednu/
+          if git diff --cached --quiet; then echo "Ni sprememb."; exit 0; fi
+          git commit -m "dolina v tednu: povzetek $(date -u +%Y-%m-%d) [skip ci]"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            git pull --rebase origin main
+            sleep $((i * 3))
+          done
+          exit 1
+
+      - name: Počakaj, da Pages postrežejo stran
+        if: ${{ github.event.inputs.poslji == 'true' || vars.TEDENSKI_POSLJI == 'true' }}
+        run: sleep 240
+
+      - name: Pošlji naročnikom
+        if: ${{ github.event.inputs.poslji == 'true' || vars.TEDENSKI_POSLJI == 'true' }}
+        env:
+          NOTIFY_SECRET: ${{ secrets.SUBSCRIBE_SECRET }}
+        run: python3 tools/send_dolina_v_tednu.py

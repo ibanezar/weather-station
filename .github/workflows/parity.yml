@@ -158,6 +158,12 @@ jobs:
       - name: Test strani za prireditve (model in vdelani podatki)
         run: node tools/test_prireditev.mjs
 
+      - name: Test tedenskega povzetka (izračun, e-pošta, pošiljalec)
+        run: python3 tools/test_dolina_v_tednu.py
+
+      - name: Test končnih točk /tedenski (pravi worker.js, lažen R2/KV/Resend)
+        run: node tools/test_tedenski.mjs
+
       - name: Test strani /podjetja/ in končne točke /api/povprasevanje
         run: |
           python3 tools/test_podjetja.py

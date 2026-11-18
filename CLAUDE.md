@@ -368,6 +368,23 @@ med sosednjimi datumi so ob 7 letih šum. Toče, neviht in vetra podatki ne vseb
 Podatki so z ene postaje na dnu doline (366 m). Test: `tools/test_prireditev.mjs` (model + enakost vdelanih podatkov s `history.json`; v `parity.yml`), 4 mutacije. **Ni narejeno:** več postaj/višin,
 upoštevanje ur dneva (`hourly-observations.csv` je prekratek), povezava s trenutno napovedjo.
 
+### Dolina v tednu: tedenski povzetek in e-pošta (`/dolina-v-tednu/`, 18. 11. 2026)
+
+`tools/generate_dolina_v_tednu.py` (`dolina-v-tednu.yml`, ponedeljki 04:40 UTC, GitHubov cron zamuja ure) iz `history.json` (samo zunanja polja, brez ERA5) izračuna povzetek zadnjega **popolnega** tedna (pon–ned,
+`last_full_week()`; teden z < 6 dnevi meritev se ne objavi): skrajne vrednosti, povprečje proti »običajnemu« (isti koledarski teden prejšnjih let, ±3 dni, **samo ob ≥ 3 prejšnjih letih**), padavine, zmrzal,
+najmočnejši sunek, novosti iz `novosti.json`, članki iz `blog.json`, napoved MTR **po datumu** (ne po `lead`; samo če ni starejša od 2 dni). Naslov tedna je prvo pravilo, ki velja (moker ≥ 20 mm in ≥ 2× običajno,
+skoraj suh, ±2 °C, ≥ 4 zmrzali, sunek ≥ 50 km/h, sicer običajen); nič ni vtipkano. Zapisi v `data/dolina-v-tednu.json` (en na teden, najnovejši prvi), stran kaže zadnji teden + 11 prejšnjih.
+
+- **E-pošta je LOČEN seznam od naročnine na nove članke** (drug namen, druga privolitev; `/blog-subscribe` ostaja nedotaknjen): `worker.js` `/tedenski/prijava` (dvojni opt-in, 5/uro po IP, honeypot),
+  `/tedenski/potrdi`, `/tedenski/odjava` (en klik, `List-Unsubscribe`), `POST /tedenski/poslji` (`SUBSCRIBE_SECRET || DELETE_SECRET`, `_safeEq`; `html` mora vsebovati `{{ODJAVA}}`, ≤ 100 kB;
+  **en teden se pošlje samo enkrat**: KV `tedenski_poslano:<teden>`, `force` ga obide). R2 `subscribers/tedenski-pending.json` / `tedenski-confirmed.json`: samo e-naslov, žeton, čas.
+  Pošilja Resend (`RESEND_API_KEY`, `SUBSCRIBE_FROM`/`NOTIFY_FROM`), kot pri članih.
+- **Pošiljanje je privzeto IZKLOPLJENO**: korak v `dolina-v-tednu.yml` teče samo ob repozitorijski spremenljivki `TEDENSKI_POSLJI=true` ali ročnem zagonu z `poslji=true`; potrebuje secret `SUBSCRIBE_SECRET`
+  (isti problem kot `morning-digest.yml`: dokler ga ni, pošiljanje pade, stran in arhiv pa se vseeno posodobita). **Pred vklopom:** preveri Resend pošiljatelja/domeno in pošlji `python3 tools/send_dolina_v_tednu.py --dry-run`
+  (izpiše zadevo in HTML). `send_dolina_v_tednu.py` pošlje samo zapis, mlajši od 9 dni.
+- `zasebnost.html` ima razdelek (e-naslov brez združevanja z drugimi seznami, ponudnik kot obdelovalec). Test: `tools/test_dolina_v_tednu.py` (izračun, slovnica, napoved, e-pošta, pošiljalec) in `tools/test_tedenski.mjs`
+  (pravi worker, lažen R2/KV/Resend; obe v `parity.yml`), 9 mutacij. **Ni narejeno:** povezava do prijave z naslovnice/bloga, FB/IG objava povzetka, tedenski povzetek za druge kraje, vrstica v `REGISTER`.
+
 ### Samodejna poročila po nevihti (`/novosti/nevihta-<datum>/`, 7. 10. 2026)
 
 `detect_storms()` v `tools/seo_smart_routine.py` (dnevno, skupaj z ostalimi dogodki) zazna dan,

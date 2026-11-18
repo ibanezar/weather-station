@@ -8272,6 +8272,115 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         return _json({ error: "Nedovoljena metoda ali pot" }, 405);
       }
 
+      // ── /tedenski: e-poštni povzetek »Dolina v tednu« (/dolina-v-tednu/, 18. 11. 2026) ──
+      // LOČEN seznam od naročnine na nove članke (/blog-subscribe): drug namen, druga privolitev. Dvojni opt-in, odjava z enim klikom.
+      //   POST /tedenski/prijava   { email, website? }              → potrditvena e-pošta (5/uro po IP)
+      //   GET  /tedenski/potrdi?token=…                              → potrdi
+      //   GET  /tedenski/odjava?token=…                              → odjava
+      //   POST /tedenski/poslji    { secret, week, subject, html }   → razpošlje potrjenim; html mora vsebovati {{ODJAVA}};
+      //                                                               en teden se pošlje enkrat (KV tedenski_poslano:<week>)
+      // R2: subscribers/tedenski-pending.json, subscribers/tedenski-confirmed.json (e-naslov, žeton, čas; nič drugega).
+      if (path.startsWith("/tedenski/")) {
+        const r2 = env?.PHOTOS_R2;
+        const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        const base = url.origin;
+        const PEND = "subscribers/tedenski-pending.json", CONF = "subscribers/tedenski-confirmed.json";
+        const TD_PEND_CAP = 2000, TD_CONF_CAP = 5000, TD_HTML_MAX = 100000;
+        const _rd = async (key) => { if (!r2) return []; try { const o = await r2.get(key); return o ? JSON.parse(await o.text()) : []; } catch (_) { return []; } };
+        const _wr = async (key, arr) => { if (r2) await r2.put(key, JSON.stringify(arr), { httpMetadata: { contentType: "application/json" } }); };
+        const _e = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const _pg = (title, body, status) => new Response(
+          `<!doctype html><html lang="sl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${_e(title)} · Meteorec</title>` +
+          `<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#04070e;color:#e8edf8;font-family:system-ui,sans-serif;padding:1.5rem}` +
+          `.c{max-width:440px;background:#0a0f1c;border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:2rem;text-align:center}h1{font-size:1.3rem;margin:0 0 .6rem}p{color:#adc0d8;line-height:1.6}a{color:#4d9ff8}</style></head>` +
+          `<body><div class="c">${body}<p><a href="https://meteorec.si/dolina-v-tednu/">← Dolina v tednu</a></p></div></body></html>`,
+          { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "text/html; charset=utf-8" } });
+        const _js = (obj, status) => new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json" } });
+        const _mail = (to, subject, html, headers) => {
+          if (!env?.RESEND_API_KEY) return Promise.resolve(false);
+          const from = env.SUBSCRIBE_FROM || env.NOTIFY_FROM || "Meteorec <onboarding@resend.dev>";
+          return fetch("https://api.resend.com/emails", { method: "POST",
+            headers: { "Authorization": `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ from, to, subject, html, ...(headers ? { headers } : {}) }) }).then(r => r.ok).catch(() => false);
+        };
+
+        if (path === "/tedenski/prijava" && request.method === "POST") {
+          if (!r2) return _js({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _js({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _js({ error: "Napačni podatki" }, 400);
+          if (body.website) return _js({ ok: true }); // honeypot
+          const email = String(body.email || "").trim().toLowerCase();
+          if (!EMAIL_RE.test(email) || email.length > 120) return _js({ error: "Neveljaven e-naslov" }, 400);
+          if (await _ipLimited(env, request, "tedenski_rl", 5, 3600)) return _js({ error: "Preveč prijav v kratkem času, poskusite pozneje." }, 429);
+          const confirmed = await _rd(CONF);
+          if (confirmed.some(s => s.email === email)) return _js({ ok: true, already: true });
+          const pending = await _rd(PEND);
+          let rec = pending.find(s => s.email === email);
+          if (!rec) {
+            rec = { email, token: crypto.randomUUID().replace(/-/g, ""), ts: new Date().toISOString() };
+            pending.unshift(rec);
+            await _wr(PEND, pending.slice(0, TD_PEND_CAP));
+          }
+          const link = `${base}/tedenski/potrdi?token=${rec.token}`;
+          ctx.waitUntil(_mail(email, "Potrdite prijavo na »Dolina v tednu«",
+            `<p>Pozdravljeni!</p><p>Za prejemanje tedenskega povzetka vremena v Rečici ob Savinji (vsak ponedeljek) potrdite e-naslov:</p>` +
+            `<p><a href="${link}" style="display:inline-block;background:#2563eb;color:#fff;padding:.6rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:600">Potrdi prijavo</a></p>` +
+            `<p style="color:#888;font-size:.85rem">Če se niste prijavili, sporočilo prezrite: brez potrditve ne prejmete ničesar.</p>`));
+          return _js({ ok: true });
+        }
+
+        if (path === "/tedenski/potrdi" && request.method === "GET") {
+          const token = url.searchParams.get("token") || "";
+          if (!token) return _pg("Napaka", "<h1>Neveljavna povezava</h1><p>Manjka žeton.</p>", 400);
+          const pending = await _rd(PEND);
+          const i = pending.findIndex(s => s.token === token);
+          if (i === -1) {
+            if ((await _rd(CONF)).some(s => s.token === token)) return _pg("Že potrjeno", "<h1>Prijava je že aktivna</h1><p>Hvala, e-naslov je že potrjen.</p>");
+            return _pg("Napaka", "<h1>Povezava ni veljavna</h1><p>Žeton ne obstaja ali je potekel.</p>", 404);
+          }
+          const rec = pending.splice(i, 1)[0];
+          await _wr(PEND, pending);
+          const confirmed = await _rd(CONF);
+          if (!confirmed.some(s => s.email === rec.email)) { confirmed.unshift({ email: rec.email, token: rec.token, ts: new Date().toISOString() }); await _wr(CONF, confirmed.slice(0, TD_CONF_CAP)); }
+          return _pg("Potrjeno", "<h1>Prijava potrjena</h1><p>Prvi povzetek prejmete v ponedeljek. Odjava je v vsakem sporočilu z enim klikom.</p>");
+        }
+
+        if (path === "/tedenski/odjava" && request.method === "GET") {
+          const token = url.searchParams.get("token") || "";
+          const confirmed = await _rd(CONF);
+          const next = confirmed.filter(s => !token || s.token !== token);
+          if (token && next.length !== confirmed.length) await _wr(CONF, next);
+          const pending = await _rd(PEND);
+          const np = pending.filter(s => s.token !== token);
+          if (token && np.length !== pending.length) await _wr(PEND, np);
+          return _pg("Odjava", "<h1>Odjavljeni</h1><p>Tedenskih povzetkov ne boste več prejemali. Kadarkoli se lahko znova prijavite.</p>");
+        }
+
+        if (path === "/tedenski/poslji" && request.method === "POST") {
+          let body;
+          try { body = await request.json(); } catch (_) { return _js({ error: "Napačni podatki" }, 400); }
+          const secret = env.SUBSCRIBE_SECRET || env.DELETE_SECRET;
+          if (!body || !secret || !_safeEq(body.secret, secret)) return _js({ error: "Nedovoljeno" }, 401);
+          const week = String(body.week || ""), subject = String(body.subject || "").trim(), html = typeof body.html === "string" ? body.html : "";
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(week) || !subject || subject.length > 150 || !html || html.length > TD_HTML_MAX || !html.includes("{{ODJAVA}}"))
+            return _js({ error: "Neveljavna vsebina (teden, zadeva ali html brez {{ODJAVA}})" }, 400);
+          const kv = env?.COUNTER_KV, key = "tedenski_poslano:" + week;
+          if (kv && !body.force && await kv.get(key)) return _js({ ok: true, sent: 0, already: true });
+          const confirmed = await _rd(CONF);
+          if (!confirmed.length) return _js({ ok: true, sent: 0 });
+          if (kv) await kv.put(key, new Date().toISOString(), { expirationTtl: 30 * 86400 });
+          ctx.waitUntil((async () => {
+            for (const s of confirmed) {
+              const unsub = `${base}/tedenski/odjava?token=${s.token}`;
+              await _mail(s.email, subject, html.split("{{ODJAVA}}").join(unsub), { "List-Unsubscribe": `<${unsub}>` });
+            }
+          })());
+          return _js({ ok: true, sent: confirmed.length, week });
+        }
+        return _js({ error: "Nedovoljena metoda ali pot" }, 405);
+      }
+
       // ── /premium (gobarska napoved — plačljivi dostop) ──────
       //   POST /premium/data      Bearer PREMIUM_SYNC_KEY → store forecast JSON (from GitHub Action);
       //                           telo je gzipano (X-Premium-Gzip: 1), ?kind=today shrani dnevni izvleček
