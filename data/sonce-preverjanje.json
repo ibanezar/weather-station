@@ -1,17 +1,17 @@
 {
- "generated": "2026-11-17",
- "dni_v_zapisu": 99,
+ "generated": "2026-11-18",
+ "dni_v_zapisu": 100,
  "jutro": {
-  "n": 72,
-  "mediana_min": 135.0,
-  "mad_min": 35.5,
+  "n": 73,
+  "mediana_min": 135.5,
+  "mad_min": 36.0,
   "min_min": 29.5,
   "max_min": 217.5
  },
  "vecer": {
-  "n": 77,
-  "mediana_min": -56.5,
-  "mad_min": 27.0,
+  "n": 78,
+  "mediana_min": -57.5,
+  "mad_min": 28.0,
   "min_min": -172.5,
   "max_min": -9.5
  },

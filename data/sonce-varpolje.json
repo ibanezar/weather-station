@@ -1,15 +1,19 @@
 {
- "generated": "2026-11-17",
- "dni_z_obema": 12,
+ "generated": "2026-11-18",
+ "dni_z_obema": 13,
  "jutro": {
-  "n": 5,
-  "mediana_min": -10.0,
-  "mad_min": 10.0,
+  "n": 6,
+  "mediana_min": -5.0,
+  "mad_min": 30.0,
   "min_min": -215.0,
-  "max_min": 0.0
+  "max_min": 75.0
  },
  "vecer": {
-  "n": 0
+  "n": 1,
+  "mediana_min": -40.0,
+  "mad_min": 0.0,
+  "min_min": -40.0,
+  "max_min": -40.0
  },
  "min_dni": 15,
  "prag_min": 30.0,
