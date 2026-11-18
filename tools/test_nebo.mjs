@@ -25,4 +25,7 @@ eq(nm([2026, 11, 20, 12]), 'ursidi', '20. 12.: Ursidi');
 eq(nm([2026, 11, 25, 12]), 'kvadrantidi', '25. 12.: Kvadrantidi 3. 1.');
 eq(M.nextShower(Date.UTC(2026, 11, 25, 12)).t, Date.UTC(2027, 0, 3, 22), 'Kvadrantidi so v naslednjem letu');
 eq(M.showerMoon(Date.UTC(2026, 11, 14, 22)).bad, false, 'Geminidi 2026: luna (blizu mlaja) ne moti');
+eq(M.showerMoon(Date.UTC(2000, 0, 15, 22)).bad, true, 'luna 68 % moti');
+eq(M.showerMoon(Date.UTC(2000, 0, 6, 22)).bad, false, 'mlaj ne moti');
+eq(M.auroraTonight(6, 0).go, false, 'Kp 6 je mejno: ne trdi, da je sij možen');
 console.log(bad ? bad + ' napak' : 'nebo: OK'); process.exit(bad ? 1 : 0);
