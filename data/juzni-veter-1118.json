@@ -1,0 +1,143 @@
+{
+ "fetched_at": "2026-11-18T06:43:09+00:00",
+ "ireica1_now": {
+  "time_unix": 1794984151,
+  "temp_c": 12.2,
+  "humidity_pct": 83.0,
+  "dew_c": 9.4,
+  "wind_kmh": 9.3,
+  "gust_kmh": 14.8,
+  "dir_deg": 200.0,
+  "pressure_hpa": 993.7
+ },
+ "ireica1_daily": {
+  "2026-11-17": {
+   "tempHigh": 14.4,
+   "tempLow": 1.1,
+   "tempAvg": 11.097916666666665,
+   "windspeedHigh": 15.5,
+   "windspeedAvg": 9.814583333333335,
+   "humidityAvg": 83,
+   "precipTotal": 0
+  },
+  "2026-11-18": {
+   "tempHigh": 13.1,
+   "tempLow": 12.6,
+   "tempAvg": 12.833333333333334,
+   "windspeedHigh": 14.7,
+   "windspeedAvg": 11.158333333333333,
+   "humidityAvg": 82,
+   "precipTotal": 0
+  }
+ },
+ "varpolje": {
+  "updated_utc": "2026-11-18T06:39:34Z",
+  "temp_c": 12,
+  "humidity_pct": 77,
+  "wind_speed_kmh": 18.7166242,
+  "wind_gust_kmh": 27.7128348,
+  "wind_dir_deg": 242
+ },
+ "drsi": {
+  "crnivec": {
+   "ime": "Črnivec",
+   "ts": "2026-11-18T06:36:17.000Z",
+   "temp_c": 6.9,
+   "vlaga_pct": 98,
+   "rosisce_c": 6.53,
+   "veter_kmh": 28,
+   "sunki_kmh": 40,
+   "smer": "WSW",
+   "padavine_danes_mm": 0,
+   "tmin_c": 6.8,
+   "tmax_c": 7.5
+  },
+  "gornji_grad": {
+   "ime": "Gornji Grad",
+   "ts": "2026-11-18T06:36:57.000Z",
+   "temp_c": 11.5,
+   "vlaga_pct": 77,
+   "rosisce_c": 7.6,
+   "veter_kmh": 15,
+   "sunki_kmh": 55,
+   "smer": "ENE",
+   "padavine_danes_mm": 0,
+   "tmin_c": 11.4,
+   "tmax_c": 12.6
+  }
+ },
+ "om_daily": {
+  "2026-11-18": {
+   "tmax": 14.4,
+   "tmin": 6.1
+  },
+  "2026-11-19": {
+   "tmax": 8,
+   "tmin": 3.6
+  },
+  "2026-11-20": {
+   "tmax": 13.9,
+   "tmin": 3
+  },
+  "2026-11-21": {
+   "tmax": 12.8,
+   "tmin": 2.1
+  },
+  "2026-11-22": {
+   "tmax": 10.8,
+   "tmin": 2.9
+  },
+  "2026-11-23": {
+   "tmax": 7.2,
+   "tmin": -0.2
+  },
+  "2026-11-24": {
+   "tmax": 5.7,
+   "tmin": -1.3
+  },
+  "2026-11-25": {
+   "tmax": 6.3,
+   "tmin": 0.5
+  }
+ },
+ "om_rain_19": {
+  "sum_mm": 21.6,
+  "hours": [
+   "11",
+   "12",
+   "13",
+   "14",
+   "15",
+   "16",
+   "17",
+   "18",
+   "19"
+  ]
+ },
+ "mtr": {
+  "generated_at": "2026-11-17T09:41:42Z",
+  "days": [
+   {
+    "date": "2026-11-18",
+    "tmax": 15.7,
+    "pop": 0.48,
+    "wind": 1.5,
+    "gust": 17.4
+   },
+   {
+    "date": "2026-11-19",
+    "tmax": 9.1,
+    "pop": 1.0,
+    "wind": 1.3,
+    "gust": 14.4
+   },
+   {
+    "date": "2026-11-20",
+    "tmax": 13.9,
+    "pop": 0.49,
+    "wind": 2.2,
+    "gust": 20.8
+   }
+  ]
+ }
+}
