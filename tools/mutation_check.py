@@ -125,7 +125,7 @@ MUTACIJE = [
     ("prireditev: prag padavin strogo pod [18.11.]", "vreme-za-prireditev/prireditev.js", "return d.p < c.rain &&", "return d.p <= c.rain &&", "test_prireditev.mjs"),
     ("prireditev: okno ±w [18.11.]", "vreme-za-prireditev/prireditev.js", "for (var o = -w; o <= w; o++) {", "for (var o = -w; o < w; o++) {", "test_prireditev.mjs"),
     ("prireditev: manjkajoč podatek [18.11.]", "vreme-za-prireditev/prireditev.js", "if (data.t[i] == null || data.n[i]", "if (data.n[i]", "test_prireditev.mjs"),
-    ("prireditev: izenačenje po bližini [18.11.]", "vreme-za-prireditev/prireditev.js", "|| Math.abs(a.off) - Math.abs(b.off));", "|| Math.abs(b.off) - Math.abs(a.off));", "test_prireditev.mjs"),
+    ("prireditev: izenačenje po bližini [18.11.]", "vreme-za-prireditev/prireditev.js", "b.p - a.p || Math.abs(a.off) - Math.abs(b.off);", "b.p - a.p || Math.abs(b.off) - Math.abs(a.off);", "test_prireditev.mjs"),
     ("drva: indeks dneva po novem letu [18.11.]", "zima/poraba-drv/drva.js", "Date.UTC(y - 1, 9, 1)) / 86400000);", "Date.UTC(y, 9, 1)) / 86400000);", "test_drva.mjs"),
     ("napovej: omejitev po IP [29.10.]", "worker.js", '"napovej_vnos_rl", 10, 86400', '"napovej_vnos_rl", 10000, 86400', "test_worker_abuse.mjs"),
     ("igra: omejitev po IP [29.10.]", "worker.js", '"igra_rez_rl", 60, 3600', '"igra_rez_rl", 6000, 3600', "test_worker_abuse.mjs"),
