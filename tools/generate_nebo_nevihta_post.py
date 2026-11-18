@@ -396,119 +396,125 @@ def build_article(S):
     wi = datetime.datetime.fromisoformat(warn["issued"]).astimezone(TZ)
 
     tl = f"{hm(first['t'])}–{hm(last_t)}"
-    lead = (f"V Rečici danes popoldne ni padla niti kaplja, nebo pa je ob mraku zagorelo v oranžni, rdeči in škrlatni barvi. "
-            f"Zaslužna je nevihta za gorami: med {hm(first['t'])} in {hm(last_t)} je mreža Blitzortung v krogu 200 km okoli postaje zabeležila {big(S.total)} strel, "
-            f"najbližja je udarila {num(S.closest, 0)} km od nas.")
+    lead = (f"V Rečici danes popoldne ni padla niti kaplja dežja, ob mraku pa je nebo zagorelo v oranžnih, rdečih in škrlatnih odtenkih. "
+            f"Za barvito predstavo je poskrbela nevihta za gorami. Med {hm(first['t'])} in {hm(last_t)} je mreža Blitzortung v krogu 200 km okoli postaje zabeležila {big(S.total)} strel. "
+            f"Najbližja je udarila {num(S.closest, 0)} km od nas.")
 
     p1 = [
-        "<strong>Kratek odgovor:</strong> nevihta je ostala v gorah zahodno od doline, proti večeru pa se je približala na okoli 30 km, njen visoki oblak pa se je razširil nad Rečico. "
-        "Sonce, ki je že zašlo za gore, je osvetlilo samo še spodnjo stran tega oblaka. Zato je nebo gorelo, na tleh pa je bilo že temno.",
+        "<strong>Kratek odgovor:</strong> nevihta je ostala v gorah zahodno od doline, proti večeru pa se je približala na približno 30 km. Njen visoki oblak se je medtem razširil nad Rečico. "
+        "Sonce, ki je že zašlo za gore, je osvetljevalo samo še spodnjo stran oblaka. Zato je nebo žarelo v toplih barvah, na tleh pa je bilo že temno.",
         tiles([
-            (big(S.total), "", f"strel v krogu 200 km med {hm(first['t'])} in {hm(last_t)}. Prejšnji teden: 13. novembra {prev['2026-11-13']['count']}, 16. novembra {prev['2026-11-16']['count']}.", False),
-            (num(S.closest, 0), "km", "razdalja najbližje strele danes. Ob zajemu podatkov so bile najbližje celice zahodno od doline, nad gorami.", False),
-            (num(peak_n, 0), "", f"strel v najbolj dejavni pol uri ({hm(peak_t)}–{hm(peak_end)}).", True),
-            (num(hi18), "°C", f"današnja najvišja temperatura v Rečici. Novembrsko povprečje najvišjih: {num(nov_mean_hi)} °C.", False),
-            (num(N["rain_today_mm"], 0), "mm", f"dežja danes do {t_now}. Radarska ocena toče ARSO ob {toca['issued'][:16].split(' ')[-1].replace(':', '.')}: v Savinjski stopnja 0, zaznavna (1) v Gorenjski ter Ljubljani z okolico.", False),
+            (big(S.total), "", f"toliko strel je bilo zabeleženih v krogu 200 km med {hm(first['t'])} in {hm(last_t)}. Za primerjavo: prejšnji teden jih je bilo 13. novembra {prev['2026-11-13']['count']}, 16. novembra pa {prev['2026-11-16']['count']}.", False),
+            (num(S.closest, 0), "km", "razdalja najbližje strele danes. Ob zajemu podatkov so bile najbližje nevihtne celice zahodno od doline, nad gorami.", False),
+            (num(peak_n, 0), "", f"toliko strel je bilo zabeleženih v najbolj dejavnem polurnem obdobju ({hm(peak_t)}–{hm(peak_end)}).", True),
+            (num(hi18), "°C", f"današnja najvišja temperatura v Rečici. Novembrsko povprečje najvišjih temperatur znaša {num(nov_mean_hi)} °C.", False),
+            (num(N["rain_today_mm"], 0), "mm", f"toliko dežja je padlo do {t_now}. Radarska ocena toče ARSO ob {toca['issued'][:16].split(' ')[-1].replace(':', '.')}: na Savinjskem stopnja 0, na Gorenjskem in v Ljubljani z okolico pa stopnja 1 (zaznavna).", False),
         ]),
     ]
 
-    leg2 = legend([("zahod in severozahod (Koroška, Karavanke)", C_W, ""), ("vzhod in jugovzhod (Hrvaška, Panonska nižina)", C_E, ""), ("ostalo", "var(--muted)", "op")])
+    leg2 = legend([("zahod in severozahod (225°–340°; Koroška, Karavanke)", C_W, ""), ("vzhod in jug (45°–225°; Hrvaška, Panonska nižina)", C_E, ""), ("ostalo", "var(--muted)", "op")])
     aria1 = (f"Število strel v desetminutnih oknih od {hm(first['t'])} do {t_now}, ločeno po smeri od Rečice. Najbolj dejavna pol ura je {hm(peak_t)}–{hm(peak_end)} z {peak_n} strelami. "
-             f"Skupaj {w_tot} strel na zahodu in severozahodu ter {e_tot} na vzhodu in jugovzhodu.")
-    fig1 = fig("Strele po desetminutnih oknih in smeri", fig_timeline(S).replace("{ARIA}", aria1),
-               f"Zapis LightningLogger (Blitzortung), krog 200 km okoli postaje. Smer je izračunana iz središča celice mreže (približno 20 × 17 km), zato je podatek groba ocena. "
-               f"Okno {hm(S.bins[-1]['t'])}–{hm(last_t)} je zadnje popolno okno pred zajemom.")
+             f"Skupaj {w_tot} strel na zahodu in severozahodu ter {e_tot} na vzhodu in jugu.")
+    fig1 = fig("Strele po desetminutnih intervalih in smereh", fig_timeline(S).replace("{ARIA}", aria1),
+               f"Zapis LightningLogger (Blitzortung), krog s polmerom 200 km okoli postaje. Smer je izračunana iz središča celice zbirne mreže (približno 20 × 17 km), zato je podatek le groba ocena. "
+               f"Interval {hm(S.bins[-1]['t'])}–{hm(last_t)} je zadnji popolni interval pred zajemom podatkov.")
     aria2 = (f"Zemljevid celic strel okoli Rečice v treh obdobjih popoldneva. Zahodna skupina je 40–95 km stran proti Koroški in Karavankam, vzhodna skupina je 100–200 km stran na Hrvaškem. "
              f"Obroči kažejo razdalje 50, 100 in 150 km.")
     leg_map = legend([("14.00–15.30", C_T1, ""), ("15.30–16.30", C_T2, ""), (f"16.30–{hm(last_t)}", C_T3, "")])
-    fig2 = fig("Kje so udarile strele", fig_map(S).replace("{ARIA}", aria2),
-               "Krog je celica zbirne mreže, njegova velikost kaže število strel (v istem obdobju). Meje: Natural Earth (javna last). Razdalja ni natančna, ker zbirne celice niso točke.")
+    fig2 = fig("Kje so bile zabeležene strele", fig_map(S).replace("{ARIA}", aria2),
+               "Krog predstavlja celico zbirne mreže, njegova velikost pa število strel v obravnavanem obdobju. Meje so iz podatkov Natural Earth (javna last). Položaj ni natančen, saj zbirne celice niso posamezne točke udara.")
 
     ratio13 = S.total / prev["2026-11-13"]["count"]
+    NUMW = {2: "dva", 3: "tri", 4: "štiri", 5: "pet"}
+    assert round(ratio13) in NUMW, ratio13
     p2 = [
-        "Radar je v tem primeru povedal več kot nebo. Ob 16.35 sem v avtu pogledal posnetek v aplikaciji Windy (okvir ob 16.30). Najmočnejše jedro, na lestvici aplikacije rdeče do škrlatno, je stalo čisto ob zahodni meji, "
-        "od njega pa se je proti vzhodu raztezal širok pas šibkejših padavin čez Koroško in Štajersko. Rečica je bila ob njegovem južnem robu.",
+        "V tem primeru je radar povedal več kot pogled v nebo. Ob 16.35 sem v avtu odprl posnetek radarskega prikaza v aplikaciji Windy (prikaz za 16.30). Najmočnejše jedro je bilo na barvni lestvici aplikacije označeno z rdečo do škrlatno barvo. "
+        "Segalo je do zahodne meje prikaza, od njega pa se je proti vzhodu raztezal širok pas šibkejših padavin čez Koroško in Štajersko. Rečica je ležala ob njegovem južnem robu.",
         photo("radar.jpg", "Posnetek radarja v aplikaciji Windy ob 16.30: močno jedro ob zahodni meji Slovenije in pas padavin proti severovzhodu",
-              "Posnetek zaslona aplikacije Windy.com, radarski okvir ob 16.30 (posnetek ob 16.35). Modra pika je bila moja lokacija, ikone strel so del aplikacije. Vir radarja je Windy, ne naša postaja.",
+              "Posnetek zaslona aplikacije Windy.com, radarski prikaz za 16.30 (posnetek zaslona je nastal ob 16.35). Modra pika označuje mojo lokacijo, ikone strel pa so del aplikacije. Vir radarskih podatkov je Windy, ne naša postaja.",
               cls=" jv-v", w=900, h=1434),
-        f"Strele radar potrdijo. Prve so udarile v oknu, ki se je začelo ob {hm(first['t'])}. Dejavnost je dosegla vrh med {hm(peak_t)} in {hm(peak_end)} ({peak_n} strel), nato je upadla. "
-        f"Skupini sta bili dve. Vzhodna ({big(e_tot)} strel) je ostala 100–200 km stran, na Hrvaškem in v Panonski nižini. Zahodna ({big(w_tot)} strel) je bila v Koroški in nad gorami ob meji. "
-        f"Njena najgostejša celica (≈ {top_w[0]} strel) je ležala približno {num(top_w_km, 0)} km stran.",
-        f"Zahodna skupina se je približevala. Med {hm(t_a)} in {hm(t_b + datetime.timedelta(minutes=10))} se je najbližja celica z vsaj tremi strelami v desetih minutah pomaknila z {num(d_a, 0)} na {num(d_b, 0)} km od postaje. "
-        f"To je približno {num(speed, 0)} km/h proti vzhodu, vendar je to groba ocena: zbirne celice so velike 17–20 km, zato razdalja skače po stopnicah. Nad gorami zahodno od doline so bile zadnje strele ob zajemu podatkov.",
+        f"Podatki o strelah kažejo podobno sliko. Prve strele so bile zabeležene v desetminutnem intervalu, ki se je začel ob {hm(first['t'])}. Dejavnost je dosegla vrhunec med {hm(peak_t)} in {hm(peak_end)}, ko je bilo zabeleženih {peak_n} strel, nato pa je začela upadati.",
+        f"Strele so se razporedile v dve skupini. Vzhodna skupina ({big(e_tot)} strel) je ostala 100–200 km stran, nad Hrvaško in Panonsko nižino. Zahodna skupina ({big(w_tot)} strel) je bila nad Koroško in gorami ob meji. "
+        f"Njena najdejavnejša celica, v kateri je bilo zabeleženih približno {top_w[0]} strel, je ležala približno {num(top_w_km, 0)} km stran.",
+        f"Zahodna skupina se je približevala. Med {hm(t_a)} in {hm(t_b + datetime.timedelta(minutes=10))} se je najbližja celica z vsaj tremi strelami v desetih minutah pomaknila z oddaljenosti {num(d_a, 0)} km na {num(d_b, 0)} km od postaje. "
+        f"To pomeni približno {num(speed, 0)} km/h proti vzhodu, vendar gre za grobo oceno. Zbirne celice so velike približno 17–20 km, zato se izračunana razdalja spreminja v skokih. Ob zajemu podatkov so bile zadnje strele zabeležene nad gorami zahodno od doline.",
         leg2 + fig1,
         fig2.replace("<figure", leg_map + "<figure", 1),
-        f"Za primerjavo: 16. novembra je logger zabeležil 6 strel, 13. novembra {prev['2026-11-13']['count']}. Danes jih je do {hm(last_t)} približno {num(ratio13, 0)}-krat več kot 13. novembra.",
+        f"Za primerjavo: 16. novembra je logger zabeležil {prev['2026-11-16']['count']} strel, 13. novembra pa {prev['2026-11-13']['count']}. Danes jih je bilo do {hm(last_t)} približno {NUMW[round(ratio13)]}krat toliko kot 13. novembra.",
     ]
 
     clouds = [
-        "Spodaj je pet fotografij istega neba, ki sem jih posnel proti zahodu. Pri treh razložim, kaj vidim in česa nisem prepričan. To je moja razlaga po fotografijah, ne uradna določitev oblakov.",
+        "Spodaj je pet fotografij istega neba, ki sem jih posnel proti zahodu. Pri treh sem poskusil razložiti, kaj vidim in pri čem nisem povsem prepričan. Gre za mojo presojo na podlagi fotografij, ne za uradno določitev vrst oblakov.",
         photo("nakovalo.jpg", "Oranžen in siv oblak, ki se v obliki pahljače razširja po modrem nebu nad hmeljišči, na desni gore",
-              "Pogled z avtomobila. Oblak se je kot pahljača razširil od obzorja proti zgornjemu desnemu robu slike."),
-        "<strong>Nakovalo.</strong> Na prvi fotografiji se oblak z oranžno osvetljenim spodnjim robom razprostira kot pahljača. Takšna oblika je značilna za nakovalo nevihtnega oblaka (<em>cumulonimbus incus</em>): "
-        "ko dvigajoči se zrak v nevihti doseže tropopavzo, se ne more dvigati dalje in se razširi vodoravno, višinski veter pa ga odnese s seboj. "
-        "Radarski pas proti severovzhodu in višinski zemljevid ECMWF (spodaj, zahodni do jugozahodni tok) se s tem ujemata. Celotnega nakovala nisem videl, zato je to verjetna razlaga, ne dokaz.",
+              "Pogled iz avtomobila. Oblak se je kot pahljača razširil od obzorja proti zgornjemu desnemu robu slike."),
+        "<strong>Nakovalo.</strong> Na prvi fotografiji se oblak z oranžno osvetljenim spodnjim robom razprostira v obliki pahljače. Takšna oblika je značilna za nakovalo nevihtnega oblaka (<em>cumulonimbus</em>; latinsko poimenovanje oblačne značilnosti je <em>incus</em>). "
+        "Ko vzgornik v nevihti doseže tropopavzo, se zrak ne more več dvigati tako kot prej, zato se oblak razširi v vodoravni smeri. Višinski veter ga nato odnese s seboj. "
+        "Radarski pas proti severovzhodu in višinski zemljevid ECMWF (spodaj), ki kaže zahodni do jugozahodni tok, se s to razlago ujemata. Celotnega nakovala nisem videl, zato gre za verjetno razlago, ne za dokaz.",
         photo("mamatus.jpg", "Valovite izbokline na spodnji strani oblaka, osvetljene z oranžno in rožnato svetlobo nad gozdom in gorami",
               "Mamatusi (vrečasti oblaki) na spodnji strani oblaka, osvetljeni z zadnjo svetlobo. Fotografija je nastala v somraku."),
-        "<strong>Mamatusi.</strong> Na drugi fotografiji ima spodnja stran oblaka izbokline, ki visijo navzdol. Temu pravimo mamatusi (<em>mamma</em>). Pogosto nastanejo pod nakovalom nevihtnega oblaka, kadar ob njegovem robu zrak z oblačnimi delci počasi tone. "
-        "Mamatusi sami ne pomenijo, da bo zagrmelo nad nami: nastanejo lahko tudi daleč od območja, kjer pada dež. Da gre res za mamatuse in ne za valovite oblake, je moja presoja po obliki.",
+        "<strong>Mamatusi.</strong> Na drugi fotografiji so na spodnji strani oblaka vidne zaobljene izbokline, ki visijo navzdol. Imenujemo jih mamatusi (latinsko <em>mamma</em>). Pogosto se pojavijo na spodnji strani nakovala nevihtnega oblaka. "
+        "Povezani so z zapletenimi procesi v oblaku, med katerimi ima pomembno vlogo tudi spuščanje zraka. Mamatusi sami po sebi ne pomenijo, da bo nevihta zajela tudi nas: pojavijo se lahko daleč od območja, kjer pada dež. "
+        "Da gre res za mamatuse in ne za valovite oblake, je moja presoja na podlagi njihove oblike.",
         photo("lecasti-oblak.jpg", "Lečast oblak nad hišo in cerkvenim zvonikom ter oblaki z rožnatimi robovi proti večernemu nebu",
-              "Lečasta oblika (levo) pod pasom rožnatih oblakov. Večerno nebo nad gorami je še modro.", w=1400, h=826),
-        "<strong>Lečast oblak.</strong> Na tretji fotografiji levo se pod oblačno plastjo pokaže gladek oblak v obliki leče (<em>lenticularis</em>). Takšni oblaki so običajno znak valovanja zraka za gorami: "
-        "zrak se ob pretoku čez pregrado dviguje in spušča, kjer se dviga, se zgosti oblak, kjer se spušča, se razkroji. Oblak zato obstoji skoraj na istem mestu, čeprav piha veter. "
-        "To je skladno z jutranjim jugozahodnikom nad grebeni (spodaj). Ker nimam meritve vetra na tej višini, je to le opis videza.",
+              "Levo je vidna lečasta oblika pod pasom rožnatih oblakov. Večerno nebo nad gorami je še modro.", w=1400, h=826),
+        "<strong>Lečast oblak.</strong> Na tretji fotografiji se levo pod oblačno plastjo pokaže gladek oblak v obliki leče. Takšni oblaki so običajno znak valovanja zraka za gorami. Zrak se pri pretoku čez gorsko pregrado dviga in spušča. "
+        "Na območju dviganja se ohlaja in kondenzira, zato nastane oblak, na območju spuščanja pa se ta razkroji. Oblak je lahko videti skoraj nepremičen, čeprav veter skoznj prehaja. "
+        "To se ujema z jutranjim jugozahodnikom nad grebeni (spodaj). Ker nimam meritve vetra na tej višini, gre le za razlago na podlagi videza.",
         '<div class="jv-pair">'
-        + photo("rdece-nebo.jpg", "Velik rdeč oblak z vijoličnimi pasovi nad črnim gozdom", "Rdeč oblak ob sončnem zahodu, tik pred polno temo.", w=1400, h=1050)
-        + photo("somrak.jpg", "Temen oblak z oranžnim in rožnatim robom, spodaj modro večerno nebo nad gorami", "Zadnji žar večera: temen oblak in oranžni robovi.", w=1400, h=1050)
+        + photo("rdece-nebo.jpg", "Velik rdeč oblak z vijoličnimi pasovi nad črnim gozdom", "Rdeč oblak ob sončnem zahodu, tik pred popolno temo.", w=1400, h=1050)
+        + photo("somrak.jpg", "Temen oblak z oranžnim in rožnatim robom, spodaj modro večerno nebo nad gorami", "Zadnji žar večera: temen oblak z oranžnimi robovi.", w=1400, h=1050)
         + "</div>",
-        f"<strong>Zakaj je nebo gorelo?</strong> Sonce je v Rečici geometrijsko zašlo ob {hm(ss)}, za zahodno grebensko črto pa še nekaj minut prej. Ob 17.00 je bilo po mojem izračunu okoli {num(abs(alt_1700), 0)}° pod obzorjem. "
-        f"Visok oblak je lahko osvetljen še dolgo po zahodu: za oblak, ki je neposredno nad nami na višini 9 km, velja meja približno {num(dep_9km, 0)}° pod obzorjem (izračun √(2h/R), brez loma svetlobe). "
-        "Oblak, ki je od nas oddaljen proti soncu, ga vidi še dlje, zato je nakovalo nad gorami zahodno od doline verjetno gorelo, ko je bilo v dolini že temno. "
-        "Svetloba je do oblaka prepotovala dolgo pot skozi ozračje, kjer se modra svetloba razprši, rdeča in oranžna pa ostaneta. Zato so barve tople. "
-        "Svetlo modro nebo na dnu fotografij je nebo, kjer je sonce komaj zašlo.",
+        f"<strong>Zakaj je nebo gorelo?</strong> Geometrijski sončni zahod v Rečici je bil ob {hm(ss)}, za zahodnim grebenom pa se je sonce skrilo še nekaj minut prej. Ob 17.00 je bilo po mojem izračunu približno {num(abs(alt_1700), 0)}° pod obzorjem. "
+        f"Visoki oblaki so lahko osvetljeni še dolgo po sončnem zahodu. Za oblak, ki je neposredno nad nami na višini 9 km, je meja osvetlitve približno {num(dep_9km, 0)}° pod obzorjem (izračun √(2h/R), brez upoštevanja loma svetlobe). "
+        "Oblak, ki leži zahodneje od nas in je torej bliže zahajajočemu soncu, ga lahko vidi še dlje: zanj je sonce še nad obzorjem, čeprav je za nas že zašlo.",
+        "Zato je nakovalo nad gorami zahodno od doline verjetno še žarelo, ko je bilo pri nas že temno. Svetloba je do oblaka prepotovala dolgo pot skozi ozračje, kjer se modra svetloba bolj razprši, rdeča in oranžna pa lažje dosežeta naše oči. "
+        "Zato so barve tako tople. Svetlo modro nebo pri dnu fotografij je del neba, kjer je sonce že zašlo.",
     ]
 
     p4 = [
-        "Jutranji južni veter, o katerem sem pisal v članku " + a("/blog/juzni-veter-ze-drugi-dan-1118.html", "Južni veter že drugi dan") + ", je v dolino prinesel toplejši zrak. Na grebenu je bil veter zjutraj močan: "
-        f"ob {hm(datetime.datetime.fromisoformat(M['drsi']['crnivec']['ts'].replace('Z', '+00:00')).astimezone(TZ))} je DRSI na Črnivcu (902 m) meril {cm['veter_kmh']} km/h in sunke do {cm['sunki_kmh']} km/h iz smeri WSW, "
-        f"ob {hm(drsi_t)} pa je bil veter na istem mestu šibek: {cr['veter_kmh']} km/h, sunki {cr['sunki_kmh']} km/h, smer {cr['smer']}.",
-        f"V dolini je bilo podobno. IREICA1 je zjutraj ob {hm(datetime.datetime.fromtimestamp(mn['time_unix'], TZ))} merila {num(mn['wind_kmh'])} km/h (sunki {num(mn['gust_kmh'])} km/h, smer {num(mn['dir_deg'], 0)}°), ob {t_now} pa {num(N['wind_kmh'])} km/h (sunki {num(N['gust_kmh'])} km/h, smer {num(N['dir_deg'], 0)}°). "
-        f"Dnevni povzetek postaje kaže najvišjo hitrost vetra danes {num(d18['windspeedHigh'])} km/h. Zračni tlak se je od jutra ({num(mn['pressure_hpa'])} hPa) do {t_now} ({num(N['pressure_hpa'])} hPa) dvignil za {num(dp)} hPa.",
-        "Veter je torej proti večeru popustil in tlak se je dvignil, medtem ko je v gorah zahodno od nas nastajala nevihta. Iz teh številk ne morem razbrati, kdaj točno je veter popustil, ker za današnji dan nimam urnega poteka vetra in tlaka.",
-        f"Zrak je bil ves dan topel in vlažen. Ob {t_now} je bilo v Rečici {temp(N['temp_c'])} z rosiščem {temp(N['dew_c'])} (vlažnost {num(N['humidity_pct'], 0)} %). Največ danes {temp(hi18)}: v naših podatkih od novembra 2019 je bilo višje ali enako toplih novembrskih dni {n_ge} od {len(nov_hi)}, "
-        f"18. novembra pa je to doslej najtoplejši dan (prej največ {temp(max(d18_prev))}). Takšen zrak je nevihti verjetno dal energijo. To je moja razlaga, ne meritev.",
+        "Jutranji južni veter, o katerem sem pisal v članku " + a("/blog/juzni-veter-ze-drugi-dan-1118.html", "Južni veter že drugi dan") + ", je v dolino prinesel toplejši zrak. Na grebenu je bil veter zjutraj močan. "
+        f"Ob {hm(datetime.datetime.fromisoformat(M['drsi']['crnivec']['ts'].replace('Z', '+00:00')).astimezone(TZ))} je DRSI na Črnivcu (902 m) izmeril hitrost {cm['veter_kmh']} km/h in sunke do {cm['sunki_kmh']} km/h iz smeri WSW. "
+        f"Ob {hm(drsi_t)} je bil veter na istem mestu precej šibkejši: {cr['veter_kmh']} km/h, sunki do {cr['sunki_kmh']} km/h, smer pa {cr['smer']}.",
+        f"Podobno se je dogajalo v dolini. IREICA1 je zjutraj ob {hm(datetime.datetime.fromtimestamp(mn['time_unix'], TZ))} izmerila hitrost vetra {num(mn['wind_kmh'])} km/h (sunki {num(mn['gust_kmh'])} km/h, smer {num(mn['dir_deg'], 0)}°), "
+        f"ob {t_now} pa le še {num(N['wind_kmh'])} km/h (sunki {num(N['gust_kmh'])} km/h, smer {num(N['dir_deg'], 0)}°). "
+        f"Zračni tlak se je od jutra ({num(mn['pressure_hpa'])} hPa) do {t_now} ({num(N['pressure_hpa'])} hPa) zvišal za {num(dp)} hPa.",
+        "Veter je torej proti večeru popustil, zračni tlak pa se je zvišal. Medtem je v gorah zahodno od nas nastajala nevihta. Iz teh številk ne morem ugotoviti, kdaj natančno je veter popustil, saj za današnji dan nimam urnega poteka vetra in zračnega tlaka.",
+        f"Zrak je bil ves dan topel in vlažen. Ob {t_now} je bilo v Rečici {temp(N['temp_c'])}, rosišče je znašalo {temp(N['dew_c'])}, relativna vlažnost pa {num(N['humidity_pct'], 0)} %. "
+        f"Najvišja današnja temperatura je bila {temp(hi18)}. V našem nizu meritev od novembra 2019 je bilo med {len(nov_hi)} novembrskimi dnevi {n_ge} takih, ko je bila najvišja temperatura vsaj tako visoka. "
+        f"Tako toplega 18. novembra v naših podatkih še ni bilo: prej je bila najvišja izmerjena temperatura na ta datum {temp(max(d18_prev))}.",
+        "Takšen topel in vlažen zrak je nevihti verjetno zagotovil dodatno energijo. To je moja razlaga, ne neposredna meritev.",
         '<figure class="jv-ph"><img src="/sinopticna/karte/z500-024.webp" alt="Zemljevid geopotencialne višine 500 hPa nad Evropo za polnoč 18. novembra 2026: gosto stisnjene izohipse nad Alpami, tok z zahoda proti vzhodu" width="960" height="740" loading="lazy" decoding="async">'
-        '<figcaption>Geopotencialna višina 500 hPa (ECMWF IFS, tek 17. 11. ob 00 UTC, veljavno 18. 11. ob 00 UTC; vir: ECMWF open data, CC BY 4.0, izris meteorec.si). Zemljevid velja za polnoč, ne za čas nevihte. Gosto stisnjene črte pomenijo močan višinski veter.</figcaption></figure>',
+        '<figcaption>Geopotencialna višina 500 hPa (ECMWF IFS, tek 17. 11. ob 00 UTC, veljavno 18. 11. ob 00 UTC; vir: ECMWF open data, CC BY 4.0, izris meteorec.si). Zemljevid prikazuje stanje za polnoč, ne za čas nevihte. Gosto razporejene izohipse kažejo na močnejši višinski tok.</figcaption></figure>',
     ]
 
     solar_aria = (f"Sončno sevanje sosednje postaje Varpolje in temperatura zraka med 6. in 17.30 danes. Sevanje je doseglo največ {num(pk_t[1], 0)} W/m² ob {hm(ts(pk_t))}, "
                   f"popoldne pa je upadlo; zahod sonca je ob {hm(ss)}. Včerajšnji vrh je {num(pk_y[1], 0)} W/m².")
     fig3 = fig("Sevanje in temperatura čez dan", fig_solar(S, today_rows, yday_rows, ss).replace("{ARIA}", solar_aria),
-               "Sosednja postaja Varpolje (IREICA7, prijatelj), ker 5-minutnega zapisa IREICA1 za današnji dan še nimam. Gost, ne referenca: uporabljen je samo potek sevanja in temperature. "
-               "Črtkana črta je včerajšnje sevanje.")
+               "Podatki s sosednje postaje Varpolje (IREICA7), katere meritve objavlja prijatelj. Ker petminutnega zapisa postaje IREICA1 za današnji dan še nimam, sem uporabil podatke iz Varpolja. "
+               "Ti so le orientacijski, ne referenčni: primerjam samo potek sevanja in temperature. Črtkana črta prikazuje včerajšnje sevanje.")
     p3b = [
         legend([("Danes", C_E, ""), ("Včeraj", "var(--muted)", "dash"), ("Temperatura danes", C_W, "")]) + fig3,
-        f"Dan je bil večinoma oblačen, kot že včeraj. Do 17. ure je skupno sevanje v Varpolju znašalo približno {num(k_t, 2)} kWh/m², včeraj {num(k_y, 2)} kWh/m². "
-        f"Opoldne se je za kratek čas odprlo ({num(pk_t[1], 0)} W/m² ob {hm(ts(pk_t))}, včerajšnji vrh {num(pk_y[1], 0)} W/m²), popoldne pa je sevanje padlo pod 100 W/m² še pred zahodom. "
-        "Iz sevanja ne morem razbrati, kdaj je prišel visok oblak nevihte nad dolino: to bi pokazal šele satelitski posnetek ali fotografije v času. Zato ga prikazujem samo kot okvir, v katerem je nastal večer. "
-        f"Temperatura v Varpolju je bila med {num(tmin_vp)} in {num(tmax_vp)} °C.",
+        f"Dan je bil večinoma oblačen, podobno kot včeraj. Do 17. ure je skupno sevanje v Varpolju znašalo približno {num(k_t, 2)} kWh/m², včeraj pa {num(k_y, 2)} kWh/m². "
+        f"Opoldne se je za kratek čas zjasnilo: ob {hm(ts(pk_t))} je sevanje doseglo {num(pk_t[1], 0)} W/m², medtem ko je bil včerajšnji vrh {num(pk_y[1], 0)} W/m². Popoldne je sevanje padlo pod 100 W/m² že pred sončnim zahodom.",
+        "Iz meritev sevanja ne morem ugotoviti, kdaj je visok oblak nevihte prispel nad dolino. To bi lahko pokazal šele satelitski posnetek ali fotografije, posnete v tistem času. Zato graf prikazuje predvsem okvirne razmere, v katerih je nastal večerni prizor. "
+        f"Temperatura v Varpolju se je gibala med {num(tmin_vp)} in {num(tmax_vp)} °C.",
     ]
 
     p5 = [
-        f"Prave spremembe šele sledijo. ARSO je 18. novembra ob {hm(wi)} izdal rumeni opozorili za četrtek, 19. novembra: za veter ({warn['alerts'][0]['timeStr']}) in za dež ({warn['alerts'][1]['timeStr']}). "
-        "Jutranji članek je že omenil dež v četrtek. Današnje nakovalo je morda predhodnik te spremembe, a to je moja domneva. Vir: ARSO. Trenutna opozorila najdete na strani " + a("/nevihte/", "Nevihte") + ".",
-        "Uradna opozorila ARSO imajo prednost pred vsem, kar je napisano tukaj.",
+        f"Prava vremenska sprememba šele prihaja. ARSO je 18. novembra ob {hm(wi)} izdal rumeni opozorili za četrtek, 19. novembra: za veter (19. 11. od 10.00 do 19.59) in za dež (19. 11. od 8.00 do 20.59).",
+        "O dežju v četrtek sem pisal že v jutranjem članku. Današnje nakovalo je morda napovednik te vremenske spremembe, vendar je to za zdaj le moja domneva. Vir opozoril: ARSO. Trenutna opozorila najdete na strani " + a("/nevihte/", "Nevihte") + ".",
+        "Uradna opozorila ARSO imajo prednost pred vsem, kar je zapisano v tem članku.",
     ]
 
     omej = [
         "<ul>"
-        "<li><strong>Oblake sem presojal po fotografijah.</strong> Vrste oblakov so moja razlaga, ne uradna določitev. Višine oblakov nisem meril.</li>"
-        f"<li><strong>Strele so iz mreže Blitzortung.</strong> Mreža ne zazna vseh strel, položaj je približen (zbirne celice so okoli 20 km). Prikaz sega do {hm(last_t)}, dan pa še ni končan.</li>"
-        "<li><strong>Smer in hitrost nevihte sta groba ocena.</strong> Skupini »zahod« in »vzhod« sta območji smeri (225°–340° in 45°–225°), ki sem ju izbral za pregled. Hitrost je izračunana iz skoka med celicami.</li>"
-        "<li><strong>Radarska slika ni naša.</strong> Je posnetek iz aplikacije Windy ob 16.30, ne podatek postaje.</li>"
-        "<li><strong>Sevanje je s sosednje postaje.</strong> IREICA1 je referenca, a 5-minutnega zapisa za današnji dan v repozitoriju še nimam. Varpolje stoji 1,6 km stran na istem dnu doline.</li>"
-        "<li><strong>Višinskega vetra danes nisem meril.</strong> Zemljevid 500 hPa je napoved za polnoč, ne meritev v času nevihte.</li>"
-        "<li><strong>Toča.</strong> Ocena ARSO je radarska ocena, ne potrditev toče na tleh.</li>"
+        "<li><strong>Oblake sem določal po fotografijah.</strong> Poimenovanja oblakov so moja presoja, ne uradna določitev. Njihove višine nisem meril.</li>"
+        f"<li><strong>Podatki o strelah so iz mreže Blitzortung.</strong> Mreža ne zazna vseh strel, njihov položaj pa je približen, saj so zbirne celice velike okoli 20 km. Prikaz zajema podatke do {hm(last_t)}, dan pa takrat še ni bil končan.</li>"
+        "<li><strong>Smer in hitrost premikanja nevihte sta grobi oceni.</strong> Skupini »zahod« (smeri od 225° do 340°) in »vzhod« (smeri od 45° do 225°, mejni kot 225° spada v zahod) sta določeni z izbranima območjema smeri, ki sem ju izbral za pregled. Hitrost je izračunana iz premika med zbirnimi celicami.</li>"
+        "<li><strong>Radarska slika ni iz naše postaje.</strong> Gre za posnetek iz aplikacije Windy za 16.30, ne za meritev postaje.</li>"
+        "<li><strong>Podatki o sevanju so s sosednje postaje.</strong> Referenčna postaja je IREICA1, vendar petminutnega zapisa za današnji dan v repozitoriju še nimam. Varpolje leži 1,6 km stran, na istem dnu doline.</li>"
+        "<li><strong>Višinskega vetra danes nisem meril.</strong> Zemljevid za 500 hPa je napoved za polnoč, ne meritev v času nevihte.</li>"
+        "<li><strong>Ocena toče ni potrditev toče na tleh.</strong> Podatek ARSO je radarska ocena, ne dokaz, da je toča dejansko padala.</li>"
         "</ul>",
     ]
 
@@ -524,7 +530,7 @@ def build_article(S):
     desc = (f"Danes ni padla niti kaplja, a nebo je gorelo. Radar, {big(S.total)} strel in pet fotografij: nakovalo, mamatusi in lečast oblak nad Rečico.")
     assert len(desc) <= 160, len(desc)
     sections = [
-        {"label": "01 — odgovor", "heading": "Nevihta je ostala v gorah, njen oblak pa je prišel v dolino", "id": "odgovor", "paragraphs": p1},
+        {"label": "01 — odgovor", "heading": "Nevihta je ostala v gorah, njen oblak pa je segel nad dolino", "id": "odgovor", "paragraphs": p1},
         {"label": "02 — radar in strele", "heading": f"Strele v dveh skupinah, Rečica med njima", "id": "radar", "paragraphs": p2},
         {"label": "03 — oblaki", "heading": "Nakovalo, mamatusi in lečast oblak", "id": "oblaki", "paragraphs": clouds},
         {"label": "04 — veter in toplota", "heading": "Topel zrak in veter v višinah", "id": "veter", "paragraphs": p4 + p3b},
@@ -540,9 +546,9 @@ def build_article(S):
         "tags": ["nevihta", "oblaki", "strele", "november", "radar", "veter"],
         "section_label": "Vremenski dogodek", "og_photo": "nebo-po-nevihti-1118", "og_accent_hex": "#fb923c",
         "lead": lead, "sections": sections, "callout": None,
-        "sources_note": ("Strele: Blitzortung.org (zapis LightningLogger, Meteorec); meritve postaje IREICA1 (Ecowitt); sosednja postaja Varpolje (IREICA7), ki jo objavlja prijatelj, samo za potek sevanja; "
-                         "meritve DRSI na Črnivcu (vir: Direkcija Republike Slovenije za infrastrukturo, ceste.si); radarski posnetek: Windy.com; opozorila in toča: ARSO "
-                         f"(vir: Agencija Republike Slovenije za okolje, izdano {wi.day}. {wi.month}. {wi.year} ob {hm(wi)}); geopotencialna višina: ECMWF IFS open data (CC BY 4.0). "
+        "sources_note": ("Strele: Blitzortung.org (zapis LightningLogger, Meteorec); meritve postaje IREICA1 (Ecowitt); sosednja postaja Varpolje (IREICA7), katere podatke objavlja prijatelj, uporabljena samo za prikaz poteka sevanja; "
+                         "meritve DRSI na Črnivcu (vir: Direkcija Republike Slovenije za infrastrukturo, ceste.si); radarski posnetek: Windy.com; opozorila in radarska ocena toče: ARSO "
+                         f"(Agencija Republike Slovenije za okolje, izdano {wi.day}. {wi.month}. {wi.year} ob {hm(wi)}); geopotencialna višina: ECMWF IFS open data (CC BY 4.0). "
                          f"Fotografije: Filip Eremita, 18. 11. 2026. Podatki za članek: data/nebo-nevihta-1118.json (prenos {S.fetched.day}. {S.fetched.month}. {S.fetched.year} ob {t_now})."),
     }
 
