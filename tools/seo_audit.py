@@ -126,6 +126,13 @@ CORE = {
     "vreme-za-prireditev/":      ("monthly", "0.6"),
     # Tedenski povzetek meritev + prijava na e-pošto (tools/generate_dolina_v_tednu.py, dolina-v-tednu.yml, ponedeljki).
     "dolina-v-tednu/":           ("weekly",  "0.6"),
+    # Strani po zamisli 18. 11. 2026 (generatorji tools/generate_{advent,wrapped,zgresitve,rojstni}_page.py).
+    "adventni-koledar/":         ("monthly", "0.6"),
+    "vreme-2026/":               ("monthly", "0.6"),
+    "zgresitve/":                ("monthly", "0.6"),
+    "rojstnodnevno-vreme/":      ("monthly", "0.6"),
+    "nebo-nocoj/":               ("monthly", "0.6"),
+    "sonce-elektrarna/":         ("monthly", "0.6"),
     # Vreme in ADHD: pogoji za gibanje, spanje, vročino (tools/generate_adhd_page.py; ne trdi vpliva na simptome).
     "adhd/":                     ("daily",   "0.6"),
     "vreme-za-padalce/":         ("daily",   "0.6"),

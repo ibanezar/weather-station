@@ -158,6 +158,15 @@ jobs:
       - name: Test strani za prireditve (model in vdelani podatki)
         run: node tools/test_prireditev.mjs
 
+      - name: Test strani adventni koledar, vreme 2026, zgrešitve in rojstnodnevno vreme
+        run: |
+          node tools/test_advent.mjs
+          python3 tools/test_wrapped.py
+          python3 tools/test_zgresitve.py
+          node tools/test_rojstni.mjs
+          node tools/test_nebo.mjs
+          node tools/test_elektrarna.mjs
+
       - name: Test tedenskega povzetka (izračun, e-pošta, pošiljalec)
         run: python3 tools/test_dolina_v_tednu.py
 
