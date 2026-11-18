@@ -51,6 +51,14 @@ const n0 = JSON.parse(store.get('feedback/sneg-porocila.json')).length;
 r = await call('/sneg/porocilo', 'POST', { ...P, website: 'x' });
 check(r.status === 200 && JSON.parse(store.get('feedback/sneg-porocila.json')).length === n0, 'honeypot: ok, a brez zapisa');
 
+// splošna omejitev: 30 poročil na uro z iste naprave (v različna območja), 31. zavrnjeno
+{
+  const REG = ['Savinjska', 'Koroška', 'Gorenjska', 'Osrednjeslovenska', 'Zasavska', 'Posavska', 'Jugovzhodna Slovenija', 'Primorsko-notranjska'];
+  let last;
+  for (let i = 0; i < 31; i++) last = await call('/sneg/porocilo', 'POST', { stanje: 'brez', pas: 'p' + (i % 4), regija: REG[Math.floor(i / 4)] }, '9.9.9.9');
+  check(last.status === 429, 'omejitev 30 poročil na uro po IP');
+}
+
 // sodba šele od 3 poročil in 60 % soglasja
 const cellOf = (d, regija, pas) => d.celice.find(c => c.regija === regija && c.pas === pas);
 for (const [reg, stanja] of [['Koroška', ['lezi', 'lezi', 'brez']], ['Gorenjska', ['lezi', 'brez', 'lezi', 'brez']], ['Podravska', ['pada', 'pada']]]) {
