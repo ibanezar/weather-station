@@ -84,6 +84,9 @@ CORE = {
     "zima/poledica/":            ("daily",   "0.7"),
     "zima/zled/":                ("daily",   "0.7"),
     "zima/snezna-karta/":        ("daily",   "0.7"),
+    # Poročila bralcev o snegu in snežni ugibalnik (tools/generate_sneg_{porocila,ugibalnik}_page.py, ročno; podatki na workerju).
+    "zima/sneg-porocila/":       ("weekly",  "0.6"),
+    "zima/sneg-ugibalnik/":      ("weekly",  "0.6"),
     "vreme-v-gorah/":            ("daily",   "0.7"),
     "snegofili/":                ("daily",   "0.7"),
     "sonce-v-dolini/":           ("monthly", "0.7"),

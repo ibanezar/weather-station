@@ -317,6 +317,31 @@ Ideja po pregledu neurje.si (njihova moderirana poročila o toči, nalivih, vetr
   izriše samo prek `textContent`.
 - Honeypot `website`, omejitev 10 poročil/uro po IP (`nevihte_porocilo_rl:<ip>`).
 
+### Poročila o snegu in snežni ugibalnik (`/zima/sneg-porocila/`, `/zima/sneg-ugibalnik/`, 18. 11. 2026)
+
+Postaja IREICA1 snega ne meri, zato MTR sneg (kartica »Sneg v dolini«) nima izmerjene resnice. Dva poceni vira:
+
+- **Poročila (`tools/generate_sneg_porocila_page.py`, ročno, stran je statična):** en dotik = stanje (`lezi`/`pada`/`dez-sneg`/`brez`) + višinski pas
+  (`p0` do 400 m, `p1` 400–700, `p2` 700–1000, `p3` nad 1000) + regija (12 statističnih regij). `POST /sneg/porocilo`, `GET /sneg/porocila?ur=24|72` v `worker.js`.
+  **Brez prostega besedila, GPS, IP-ja in id-ja v zapisu, zato brez moderacije** (druga pot kot `/nevihte/porocila/`). R2 `feedback/sneg-porocila.json`, zapisi se
+  ob vsakem zapisu režejo na 72 h (cap 5000). Javni so samo agregati po celici (regija × pas); **sodba šele od `SNEG_MIN_N` = 3 poročil, od katerih jih vsaj
+  `SNEG_MIN_SHARE` = 60 % pove isto**, sicer »premalo poročil« ali »poročila se razhajajo«. Zlorabe: ista celica z iste naprave 1× na 2 h (KV `sneg_cell:<ip>:<regija>:<pas>`),
+  30 poročil/uro po IP, honeypot. KV je neatomaren, IP-ji se menjajo: poročilo je **neverificirano opažanje, ne meritev in ne uradna informacija** (tako piše na strani).
+  `STANJA`/`PASOVI`/`REGIJE` in pragova sta namerna podvojitev worker ↔ generator (`test_parity.sneg_porocila`).
+- **Ugibalnik (`tools/generate_sneg_ugibalnik_page.py`, ročno; JS `zima/sneg-ugibalnik/ugibalnik.js` je ROČNO pisan, model izvožen za Node):** ugib datuma prvega snega
+  (≥ 1 cm višine odeje, ARSO Gornji Grad, od 1. oktobra) — **isti dogodek kot `/novosti/prvi-sneg-<sezona>/`** (`detect_first_snow()`), ne nova meritev.
+  `tools/sneg_ugibalnik_resolve.py` (korak v `seo-smart-routine.yml`, `continue-on-error`) prepiše datum iz `novosti.json` v `data/sneg-ugibalnik.json`
+  (prepiše samo ob spremembi); bereta ga stran in worker (`POST /sneg/ugibanje` po prvem snegu vrne 409; če vira ne doseže, ne zapira). Zmagovalca določi brskalnik
+  (`ranking()`): najmanjša razlika v dneh, pri izenačenju prej oddan ugib, **ugibi, oddani na dan snega ali po njem (lokalni datum), se izločijo** — zato je fail-open
+  na workerju neškodljiv. En ugib na naključni id brskalnika (`wx-sneg-ugib-id`), zaklenjen; datum od danes do 30. aprila; 10 ugibov/dan po IP. Dogodek z `gap`
+  je »prvi v podatkih, ki jih imamo«. Klimatologija na strani (prvi dan z ≥ 1 cm po zimah 2019/20–2025/26: 22. 11.–25. 12., mediana 2. 12.) je izračunana iz arhiva
+  ARSO (`daily-1748.json`). Ugibalnik je zabava brez nagrad.
+- Test: `tools/test_sneg.mjs` (pravi `worker.js` z lažnim R2/KV/fetch + model ugibalnika; v `parity.yml`), 8 mutacij v `mutation_check.py`. `zasebnost.html` oba opisuje.
+- **Arhiv:** `tools/log_sneg_porocila.py` (korak v `seo-smart-routine.yml`, dnevno) doda agregate zadnjih 24 h v `data/sneg-porocila-dnevno.csv` (regija × pas, števila po stanjih, sodba);
+  preskoči tek, če je zadnji zapis mlajši od 20 h (okna se ne prekrivajo), in ob nedosegljivem workerju ali brez poročil ne zapiše nič (**praznina ni »ni snega«**). Test: `test_sneg_porocila_log.py` (v `parity.yml`, skupaj z razrešitvijo ugibalnika).
+- **Ni narejeno:** uporaba arhiva v `verify_sneg.py` (poročila MTR snega še ne preverjajo; potrebuje nabor dni z dovolj poročili); vrstica v `REGISTER` (`check_freshness.py`);
+  FB/IG objava in zgodba za ugibalnik; ugibalnik za »prvo slano« po istem vzorcu. **Po deployu workerja preveri** `GET /sneg/porocila` in `/sneg/ugibanja` ter oddajo na obeh straneh.
+
 ### Samodejna poročila po nevihti (`/novosti/nevihta-<datum>/`, 7. 10. 2026)
 
 `detect_storms()` v `tools/seo_smart_routine.py` (dnevno, skupaj z ostalimi dogodki) zazna dan,
