@@ -1,6 +1,6 @@
 # FB objava: »Južni veter že drugi dan: v dolini noč pri 12 °C« (18. 11. 2026)
 
-Kartica 1080×1350: `og/juzni-veter-ze-drugi-dan-1118-kartica.jpg` (izdela jo `python3 tools/generate_juzni_veter_card.py`; ista varovalka kot članek).
+Kartica za feed 1080×1350 in zgodba 1080×1920 (`og/juzni-veter-ze-drugi-dan-1118-zgodba.jpg`, `--story`): `og/juzni-veter-ze-drugi-dan-1118-kartica.jpg` (izdela jo `python3 tools/generate_juzni_veter_card.py`; ista varovalka kot članek).
 Za link objavo na FB se potegne OG slika članka (`og/juzni-veter-ze-drugi-dan-1118.jpg`); kartica je za IG feed ali za objavo s sliko.
 Pisano po `docs/slog-pisanja.md` (razdelek 7): uvod s številko, kratki stavki, vprašanje na koncu, UTM povezava, vikanje.
 
