@@ -103,3 +103,18 @@
 @media(max-width:640px){#sg-map .sg-lbl{font-size:30px;stroke-width:6px}#sg-map.zoom .sg-lbl{font-size:16px}}
 
 .sg-brand{display:flex;align-items:center;gap:.7rem;margin:0 0 .5rem}.sg-brand img{border-radius:11px;flex:none}.sg-brand .sg-kicker{margin:0}
+
+/* Opozorilo na telefon (Web Push): pravila {točka, prag}; vidno šele, ko brskalnik zna push (snegofili.js) */
+.sg-alarm{margin:1.4rem 0;padding:1rem 1.1rem;border-radius:16px;border:1px solid var(--border);background:var(--card-bg,transparent)}
+.sg-alarm[hidden]{display:none}
+.sg-alarm h2{margin:.1rem 0 .4rem;font-size:1.15rem}
+.sg-al-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end;margin:.6rem 0}
+.sg-al-row label{display:flex;flex-direction:column;gap:.2rem;font-size:.85rem;color:var(--muted);min-width:0;flex:1 1 11rem;max-width:100%}
+.sg-al-row label:nth-of-type(2){flex:0 0 auto}
+.sg-al-row select{min-height:44px;padding:0 .6rem;border-radius:10px;border:1px solid var(--border);background:var(--bg,transparent);color:var(--text);font:inherit;width:100%;min-width:0;box-sizing:border-box}
+.sg-al-btn{min-height:44px;padding:.4rem 1rem;border-radius:8px;border:1px solid #2368c8;background:#2368c8;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.sg-al-btn.s{background:transparent;color:var(--text);border-color:var(--border);font-weight:400}
+.sg-al-btn:disabled{opacity:.5;cursor:not-allowed}
+.sg-al-list{list-style:none;padding:0;margin:.4rem 0;display:grid;gap:.4rem}
+.sg-al-list li{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.4rem .7rem;border:1px solid var(--border);border-radius:10px}
+.sg-al-list button{min-height:44px;min-width:44px;border:0;background:transparent;color:var(--text);font:inherit;cursor:pointer;text-decoration:underline}

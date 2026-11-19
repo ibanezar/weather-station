@@ -1162,6 +1162,99 @@ async function _cronCheckOcene(env) {
   return out && out.skipped ? { ok: false, reason: out.skipped } : true;
 }
 
+// ── Snegofili alarm (Web Push, /snegofili/) ────────────────
+// Obiskovalec izbere do SG_MAX_RULES pravil {id točke, prag v cm}: obvestilo, ko model za tisto točko napove vsaj toliko NOVEGA snega v
+// naslednjih 24 h. Ocene piše Python (tools/snegofili_data.py → data/snegofili.json, `next24_cm`); worker jih samo bere, računa ne podvaja.
+// Ločen seznam naročnin (push/snegofili-subs.json, kot migrena, nebo, gobe); odjava ne odjavi brskalnika. Obvestilo gre ob PREHODU čez prag
+// (ponovno šele ko napoved pade pod SG_RESET_FRAC praga in po SG_COOLDOWN_MS), največ eno na napravo na tik (ostala pravila se omenijo).
+// Modelska ocena iz padavin in meje sneženja, ne meritev, ne plazovni bilten in ne nasvet za turo -- besedilo to pove. Podatki starejši od
+// SG_MAX_AGE_H ne sprožijo nič. Ponoči (SG_TIHO_OD–SG_TIHO_DO) se ne pošilja. Prag-izbire ↔ `step()` v snegofili/snegofili.js (5/15/30 cm).
+const SG_PUSH_KEY = "push/snegofili-subs.json";
+const SG_STATE = "push/snegofili_state.json";
+const SG_URL = "https://meteorec.si/data/snegofili.json";
+const SG_PAGE_URL = "https://meteorec.si/snegofili/";
+const SG_MAX_RULES = 3;
+const SG_CM_ALLOWED = [5, 15, 30];
+const SG_MAX_AGE_H = 36;
+const SG_EVERY_MS = 55 * 60 * 1000;
+const SG_COOLDOWN_MS = 12 * 3600 * 1000;
+const SG_RESET_FRAC = 0.5;
+const SG_TIHO_OD = 22, SG_TIHO_DO = 7;
+
+async function _sgData() {
+  try {
+    const r = await fetch(SG_URL, { cf: { cacheTtl: 1800, cacheEverything: true } });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d && Array.isArray(d.tocke) && d.generated_at ? d : null;
+  } catch (_) { return null; }
+}
+
+// Vrne očiščen seznam pravil ali null, če katero ni veljavno (neznana točka ali prag).
+function _sgClean(data, rules) {
+  if (!Array.isArray(rules)) return null;
+  const ids = new Set((data.tocke || []).map(t => t.id)), out = [], seen = new Set();
+  for (const r of rules.slice(0, SG_MAX_RULES)) {
+    if (!r || typeof r !== "object") return null;
+    const id = String(r.id || ""), cm = Number(r.cm);
+    if (!ids.has(id) || SG_CM_ALLOWED.indexOf(cm) < 0) return null;
+    const key = id + "|" + cm;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ id, cm });
+  }
+  return out;
+}
+
+function _sgText(pt, cm) {
+  const n = Math.round(pt.next24_cm), mm = String(Math.round(pt.next24_mm * 10) / 10).replace(".", ",");
+  return pt.ime + " (" + Math.round(pt.elevation_m) + " m): po modelu naslednjih 24 h okoli " + n + " cm novega snega (tvoj prag " + cm + " cm; padavin " + mm + " mm). Modelska ocena iz padavin in meje sneženja, ne meritev; ni plazovni bilten.";
+}
+
+async function _sgNotify(env, data, now) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { checked: 0, sent: 0, skipped: "ni shrambe ali VAPID" };
+  if (!(now - Date.parse(data.generated_at) <= SG_MAX_AGE_H * 3600 * 1000)) return { checked: 0, sent: 0, skipped: "snegofili so stari" };
+  let subs = []; try { const o = await r2.get(SG_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const byId = new Map((data.tocke || []).map(t => [t.id, t]));
+  let sent = 0, changed = false; const dead = [];
+  for (const sub of subs) {
+    const st = sub.st || (sub.st = {}), hits = [];
+    for (const rule of sub.rules || []) {
+      const pt = byId.get(rule.id); if (!pt || typeof pt.next24_cm !== "number") continue;
+      const key = rule.id + "|" + rule.cm, s = st[key] || (st[key] = { over: false, last: 0 });
+      if (pt.next24_cm >= rule.cm) {
+        if (!s.over) { s.over = true; changed = true; if (now - (s.last || 0) > SG_COOLDOWN_MS) hits.push({ rule, pt, s }); }
+      } else if (s.over && pt.next24_cm < rule.cm * SG_RESET_FRAC) { s.over = false; changed = true; }
+    }
+    if (!hits.length) continue;
+    const h = hits[0];
+    const body = _sgText(h.pt, h.rule.cm) + (hits.length > 1 ? " In še " + (hits.length - 1) + (hits.length === 2 ? " tvoje opozorilo." : " tvoji opozorili.") : "");   // največ 3 pravila: 1 ali 2 dodatni
+    try {
+      const code = await _sendPush(env, sub, { title: "Snegofili: sneg", body, url: SG_PAGE_URL, tag: "snegofili-" + h.rule.id, icon: "/icon-192.png" });
+      if (code === 404 || code === 410) dead.push(sub.endpoint);
+      else { sent++; for (const x of hits) x.s.last = now; changed = true; }
+    } catch (_) {}
+  }
+  if (dead.length || changed) await r2.put(SG_PUSH_KEY, JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
+  return { checked: subs.length, sent, pruned: dead.length };
+}
+
+async function _cronCheckSnegofili(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI >= SG_TIHO_OD || hourSI < SG_TIHO_DO) return;
+  let subs = []; try { const o = await r2.get(SG_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  if (!subs.length) return;                                   // brez naročnikov vira ne beremo
+  let state = {}; try { const o = await r2.get(SG_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  if (now - (state._lastRun || 0) < SG_EVERY_MS) return;
+  const data = await _sgData();
+  if (!data) return { ok: false, reason: "snegofili.json ni dosegljiv" };
+  const out = await _sgNotify(env, data, now);
+  await r2.put(SG_STATE, JSON.stringify({ _lastRun: now }), { httpMetadata: { contentType: "application/json" } });
+  return out && out.skipped ? { ok: false, reason: out.skipped } : true;
+}
+
 // ── Nebo alarm (Web Push, /nebo-nocoj/) ────────────────────
 // Izbirna obvestila z LOČENIM seznamom naročnin (push/nebo-subs.json, kot migrena, crnivec in gobe): (1) vrh roja utrinkov, kadar
 // nočna oblačnost ni visoka; (2) možen polarni sij: napovedani Kp ≥ 7 IN nočna oblačnost < 70 %. Splošni alarm za sij
@@ -3450,7 +3543,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 // ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
 // 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
-  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20, nebo: 20, ocene: 20,
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20, nebo: 20, snegofili: 20, ocene: 20,
   lightning: 20, radar_composite: 20, icon_cells: 20, varpolje_solar: 20,
   score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
@@ -4257,6 +4350,7 @@ export default {
     ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
     ctx.waitUntil(_cronBeat(env, "migrena", () => _cronCheckMigrena(env)));
     ctx.waitUntil(_cronBeat(env, "nebo", () => _cronCheckNebo(env)));          // sam se omeji na večer in enkrat na uro
+    ctx.waitUntil(_cronBeat(env, "snegofili", () => _cronCheckSnegofili(env)));   // sam se omeji na dan in enkrat na uro
     ctx.waitUntil(_cronBeat(env, "varpolje_solar", () => _cronVarpoljeSolar(env)));
     ctx.waitUntil(_cronBeat(env, "ocene", () => _cronCheckOcene(env)));        // sam se omeji na enkrat na uro   // sam se omeji na enkrat na uro
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
@@ -9372,6 +9466,30 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
           const next = subs.filter(x => x.endpoint !== ep);
           if (r2 && next.length !== subs.length) await oWrite(next);
+          return pj({ ok: true });
+        }
+
+        // Snegofili alarm: lasten seznam (SG_PUSH_KEY), pravila {id, cm} samo za točke iz data/snegofili.json in prage 5/15/30.
+        // Prazen seznam pravil = odjava s tega seznama; brskalnika NE odjavimo (lahko je naročen tudi na druga opozorila).
+        if (body.site === "snegofili" && path !== "/push/send") {
+          let subs = []; if (r2) { try { const o = await r2.get(SG_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {} }
+          const sWrite = a => r2.put(SG_PUSH_KEY, JSON.stringify(a), { httpMetadata: { contentType: "application/json" } });
+          if (path === "/push/subscribe") {
+            if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+            const s = body.subscription || {};
+            if (!_pushSubOk(s)) return pj({ error: "Neveljavna naročnina" }, 400);
+            const data = await _sgData();
+            if (!data) return pj({ error: "Seznam točk trenutno ni dosegljiv" }, 503);
+            const rules = _sgClean(data, body.rules);
+            if (rules === null) return pj({ error: "Neznana točka ali prag" }, 422);
+            const old = subs.find(x => x.endpoint === s.endpoint), rest = subs.filter(x => x.endpoint !== s.endpoint);
+            if (rules.length) rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, rules, st: old ? old.st || {} : {}, ts: old ? old.ts : new Date().toISOString() });
+            await sWrite(rest.slice(0, 5000));
+            return pj({ ok: true, rules: rules.length });
+          }
+          const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
+          const next = subs.filter(x => x.endpoint !== ep);
+          if (r2 && next.length !== subs.length) await sWrite(next);
           return pj({ ok: true });
         }
 

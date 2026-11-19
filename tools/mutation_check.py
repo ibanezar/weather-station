@@ -232,6 +232,17 @@ MUTACIJE = [
     ("snegofili: vdelava: dovoljen gostitelj", "tools/generate_snegofili_page.py", 'if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:', 'if u.scheme != "https":', "test_snegofili.py"),
     ("snegofili: povzetek: doseg izleta TRIP_KM", "tools/generate_snegofili_page.py", 'r["km_od_recice"] <= TRIP_KM and', 'r["km_od_recice"] >= TRIP_KM and', "test_snegofili.py"),
     ("snegofili: tuja kamera: samo https povezava", "tools/generate_snegofili_page.py", 'if str(c.get("url", "")).startswith("https://"):', 'if str(c.get("url", "")):', "test_snegofili.py"),
+    # ── Snegofili alarm (test_snegofili_alarm.mjs, 19. 11. 2026) ──
+    ("snegofili alarm: prag 15 cm v dovoljenih", "worker.js", 'const SG_CM_ALLOWED = [5, 15, 30];', 'const SG_CM_ALLOWED = [5, 10, 30];', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: največ pravil", "worker.js", 'const SG_MAX_RULES = 3;', 'const SG_MAX_RULES = 30;', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: starost podatkov", "worker.js", 'if (!(now - Date.parse(data.generated_at) <= SG_MAX_AGE_H * 3600 * 1000))', 'if (false)', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: histereza", "worker.js", '} else if (s.over && pt.next24_cm < rule.cm * SG_RESET_FRAC) { s.over = false; changed = true; }', '} else if (s.over) { s.over = false; changed = true; }', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: hladilna doba", "worker.js", 'if (now - (s.last || 0) > SG_COOLDOWN_MS) hits.push', 'if (true) hits.push', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: prehod čez prag, ne vsak tik", "worker.js", 'if (!s.over) { s.over = true; changed = true;', 'if (true) { s.over = true; changed = true;', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: potekla naročnina", "worker.js", 'if (code === 404 || code === 410) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits)', 'if (false) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits)', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: dvojina opozoril", "worker.js", '" tvoje opozorilo." : " tvoji opozorili.")', '" tvoje opozorilo." : " tvoja opozorila.")', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: neznana točka", "worker.js", 'if (!ids.has(id) || SG_CM_ALLOWED.indexOf(cm) < 0) return null;', 'if (SG_CM_ALLOWED.indexOf(cm) < 0) return null;', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: točka brez vrednosti", "worker.js", 'if (!pt || typeof pt.next24_cm !== "number") continue;', 'if (!pt) continue;', "test_snegofili_alarm.mjs"),
     # ── Nebo alarm (test_nebo_alarm.mjs, 19. 11. 2026) ──
     ("nebo alarm: prag oblačnosti 70 %", "worker.js", 'const NEBO_CLOUD_NO = 70;', 'const NEBO_CLOUD_NO = 700;', "test_nebo_alarm.mjs"),
     ("nebo alarm: prag Kp 7", "worker.js", 'const NEBO_KP_LIMIT = 7;', 'const NEBO_KP_LIMIT = 1;', "test_nebo_alarm.mjs"),
