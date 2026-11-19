@@ -83,6 +83,9 @@ MUTACIJE = [
     ("strele: stara vtičnica se ne zapre", "worker.js", "try { this.ws.close(); } catch (_) {}\n      this.ws = null;", "this.ws = null;", "test_lightning_logger.py"),
     ("strele: stari close pobriše novo vtičnico", "worker.js", "const dropped = () => { if (this.ws === ws) {", "const dropped = () => { if (true) {", "test_lightning_logger.py"),
     # ── varuh svežine / zdravje workerja (test_freshness.py) ──────────────────
+    ("svežina: seznam bere prvi zapis", "tools/check_freshness.py", 'end_of_day(data[0][param])', 'end_of_day(data[-1][param])', "test_freshness.py"),
+    ("svežina: csvcol bere zadnjo vrstico", "tools/check_freshness.py", 'v = rows[-1][param].strip()', 'v = rows[0][param].strip()', "test_freshness.py"),
+    ("svežina: csvcol loči datum od ISO časa", "tools/check_freshness.py", 'return end_of_day(v) if len(v) == 10 else parse_ts(v)', 'return end_of_day(v[:10])', "test_freshness.py"),
     ("svežina: prag starosti", "tools/check_freshness.py", '"stale" if age > max_h else "ok"', '"stale" if age > max_h * 100 else "ok"', "test_freshness.py"),
     ("zdravje: čakanje na prvi tek", "worker.js", "const waiting = !rec && since != null && (now - since) / 60000 <= maxMin;", "const waiting = false;", "test_freshness.py"),
     ("zdravje: zapis prvega časa", "worker.js", 'if (!(await kv.get("cron:health:_since"))) await kv.put("cron:health:_since", String(t0));', "", "test_freshness.py"),
@@ -108,7 +111,7 @@ MUTACIJE = [
     ("push: omejitev prijav [29.10.]", "worker.js", '"push_sub_rl", 30, 3600', '"push_sub_rl", 3000, 3600', "test_worker_abuse.mjs"),
     ("push: telo ni objekt [29.10.]", "worker.js", 'if (!body || typeof body !== "object") return pj({ error: "Napačni podatki" }, 400);', "", "test_worker_abuse.mjs"),
     ("365-0 štetje: omejitev po IP [8.11.]", "worker.js", '"g365_rl", 120, 3600', '"g365_rl", 120000, 3600', "test_g365_stat.mjs"),
-    ("365-0 štetje: preverjanje teme [8.11.]", "worker.js", '|| !G365_CHASES.includes(chase)) {', ') {', "test_g365_stat.mjs"),
+    ("365-0 štetje: preverjanje teme [8.11.]", "worker.js", '(!mystery && !G365_CHASES.includes(chase))) {', '(!mystery && false)) {', "test_g365_stat.mjs"),
     ("365-0 štetje: točke uganke [8.11.]", "worker.js", "if (Number.isInteger(pts) && pts >= 0 && pts <= 4)", "if (true)", "test_g365_stat.mjs"),
     ("365-0 štetje: preverjanje ocene [8.11.]", "worker.js", 'if (G365_GRADES.includes(body.grade))', 'if (body.grade)', "test_g365_stat.mjs"),
     ("sneg: omejitev poročil po IP [18.11.]", "worker.js", '"sneg_porocilo_rl", 30, 3600', '"sneg_porocilo_rl", 30000, 3600', "test_sneg.mjs"),
@@ -212,11 +215,23 @@ MUTACIJE = [
     ("izvoz podatkov: dnevi iz reanalize", "tools/export_dataset.py", 'EXCLUDE_SRC = {"era5"}', 'EXCLUDE_SRC = set()', "test_dataset_export.py"),
     ("zenodo: osnutek brez --publish", "tools/zenodo_publish.py", "    if do_publish:\n", "    if True:\n", "test_dataset_export.py"),
     ("čuvaj videza: meja CLS", "tools/visual_watch.mjs", "export const CLS_MAX = 0.10;", "export const CLS_MAX = 0.60;", "test_visual_watch.mjs"),
-    ("čuvaj videza: mediana teh tekov", "tools/visual_watch.mjs", "const m = median(v);", "const m = Math.max(...v);", "test_visual_watch.mjs"),
+    ("čuvaj videza: mediana teh tekov", "tools/visual_watch.mjs", "const m = median(v);\n    if (!(m <= CLS_MAX))", "const m = Math.max(...v);\n    if (!(m <= CLS_MAX))", "test_visual_watch.mjs"),
     ("čuvaj videza: meja INP", "tools/visual_watch.mjs", "export const INP_MAX = 800;", "export const INP_MAX = 5000;", "test_visual_watch.mjs"),
     ("čuvaj videza: dotik šteje največji dogodek", "tools/visual_watch.mjs", "Math.max(by.get(e.id) || 0, e.d)", "e.d", "test_visual_watch.mjs"),
     ("čuvaj videza: dogodki brez interactionId", "tools/visual_watch.mjs", "if (e && e.id) by.set", "if (e) by.set", "test_visual_watch.mjs"),
     ("hero stavek: vrh jutri (24 ur)", "app.js", "const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&", "const tomorrowPeak=false&&"),
+    # ── Snegofili (test_snegofili.py, 19. 11. 2026) ──
+    ("snegofili: zacetek okna naprej ne šteje ure, ki teče", "tools/snegofili_data.py", '("next24", idx_now + 1, idx_now + 24)', '("next24", idx_now, idx_now + 24)', "test_snegofili.py"),
+    ("snegofili: okno nazaj 24 ur", "tools/snegofili_data.py", '("past24", idx_now - 23, idx_now)', '("past24", idx_now - 24, idx_now)', "test_snegofili.py"),
+    ("snegofili: premalo ur nazaj: točka odpade", "tools/snegofili_data.py", 'idx_now < 71 or', 'idx_now < 40 or', "test_snegofili.py"),
+    ("snegofili: izmerjeno ARSO starejše od 24 h ne velja", "tools/snegofili_data.py", 'if 0 <= age_h <= ARSO_MAX_AGE_H:', 'if 0 <= age_h:', "test_snegofili.py"),
+    ("snegofili: meja sneženja: ±100 m do sneg", "tools/generate_snegofili_page.py", '"snow" if d >= 100 else', '"snow" if d >= 0 else', "test_snegofili.py"),
+    ("snegofili: stopnje snega: prag 5 cm", "tools/generate_snegofili_page.py", '0 if cm < 5 else', '0 if cm < 6 else', "test_snegofili.py"),
+    ("snegofili: vdelava: potrdilo pogojev in datum", "tools/generate_snegofili_page.py", 'not c.get("embed_terms") or not c.get("checked")', 'not c.get("checked")', "test_snegofili.py"),
+    ("snegofili: vdelava: samo https", "tools/generate_snegofili_page.py", 'if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:', 'if u.hostname not in EMBED_HOSTS[kind]:', "test_snegofili.py"),
+    ("snegofili: vdelava: dovoljen gostitelj", "tools/generate_snegofili_page.py", 'if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:', 'if u.scheme != "https":', "test_snegofili.py"),
+    ("snegofili: povzetek: doseg izleta TRIP_KM", "tools/generate_snegofili_page.py", 'r["km_od_recice"] <= TRIP_KM and', 'r["km_od_recice"] >= TRIP_KM and', "test_snegofili.py"),
+    ("snegofili: tuja kamera: samo https povezava", "tools/generate_snegofili_page.py", 'if str(c.get("url", "")).startswith("https://"):', 'if str(c.get("url", "")):', "test_snegofili.py"),
 ]
 
 

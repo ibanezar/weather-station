@@ -61,6 +61,8 @@ check(e["past24_cm"] == 7.0, "nazaj (idx-24, idx]: 5+2, brez idx-24 in idx+1")
 check(e["next24_cm"] == 7.0, "naprej začne pri idx+1")
 check(d.compute_point(cold, 10, 1000) is None, "premalo ur nazaj → None")
 check(d.compute_point(cold, N - 5, 1000) is None, "premalo ur naprej → None")
+check(d.compute_point(cold, 60, 1000) is None, "70 ur nazaj ne zadošča za okno 72 h → None")
+check(d.compute_point(cold, 71, 1000) is not None, "točno 72 ur nazaj zadošča")
 
 # ── izris ──
 rows = [{"id": "a", "ime": "Točka <A>", "drzava": "SI", "regija": "R", "lat": 46, "lon": 14, "elevation_m": 1500,
@@ -141,6 +143,26 @@ check(g.ZOOM_VB.count(" ") == 3, "zoom viewBox ima 4 števila")
 now = datetime.datetime(2026, 11, 13, 12, 0, tzinfo=datetime.timezone.utc)
 a = d.load_arso(now)
 check(all(v["age_h"] <= d.ARSO_MAX_AGE_H for v in a.values()), "ARSO meritve ≤ 24 h")
+# sintetični CSV: sveža se prikaže, 30 h stara ne, prihodnja ne, brez višine ne
+import tempfile  # noqa: E402
+with tempfile.TemporaryDirectory() as tmp:
+    old_csv = d.ARSO_CSV
+    d.ARSO_CSV = os.path.join(tmp, "snow.csv")
+    with open(d.ARSO_CSV, "w", encoding="utf-8") as f:
+        f.write("id,valid_utc,snow_cm\nsveza,2026-11-13T06:00Z,12\nstara,2026-11-12T06:00Z,40\n"
+                "prihodnja,2026-11-13T20:00Z,5\nprazna,2026-11-13T06:00Z,\n")
+    try:
+        syn = d.load_arso(now)
+    finally:
+        d.ARSO_CSV = old_csv
+check(set(syn) == {"sveza"} and syn["sveza"]["depth_cm"] == 12 and syn["sveza"]["age_h"] == 6.0,
+      "ARSO: samo sveža meritev z višino (stara, prihodnja in prazna odpadejo)")
+
+# ── povezave kamer: samo https ──
+links = g.cam_links({"kamere": [{"url": "http://x.example/a", "ponudnik": "Nevarna"},
+                                {"url": "https://x.example/b", "ponudnik": "Varna"}]})
+check("Varna" in links and "Nevarna" not in links, "cam_links: http povezava se ne izpiše")
+check(g.cam_links({}) == "—", "cam_links: brez kamer pomišljaj")
 
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

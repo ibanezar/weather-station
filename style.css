@@ -3261,6 +3261,7 @@ html.cookie-need #cookie-banner{display:flex}
 .sub-btn:hover{opacity:.9}
 .sub-btn:disabled{opacity:.55;cursor:default}
 .sub-msg{font-size:.88rem;margin:.7rem 0 0;min-height:1em}
+.sub-more{margin:.6rem 0 0;font-size:.85rem}.sub-more a{color:var(--accent,var(--cyan));text-decoration:underline}
 .sub-msg.ok{color:var(--green)}
 .sub-msg.err{color:#f87171}
 .sm-zoom:hover{border-color:#3b82f6;color:#3b82f6}
@@ -5008,3 +5009,17 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #tab-current .clabel>.ic:first-child,#tab-current .insight-card .ic-head>span:first-child>.ic,#tab-current .omx-title>.ic{box-sizing:content-box;flex:none;width:1.1rem;height:1.1rem;padding:.5rem;border-radius:.8rem;
   color:var(--green);background:var(--card-bg);border:1px solid var(--card-border)}
 #tab-current .mtr-jump-card .clabel{font-size:var(--fs-sm)}
+
+/* Zavihek MTR: bloki pod hero kartico se ne izrišejo, dokler niso blizu zaslona (19. 11. 2026).
+   Izmerjeno (Playwright, CPU 4×): preklop na MTR na telefonu ~270 → ~150 ms, od tega ~90 ms je spodnja meja
+   (brez vsebine). Skoraj vse je risanje (slog, postavitev), ne skripta. `auto` si zapomni pravo višino po prvem izrisu;
+   merjenje širin v JS (clientWidth) prisili izris, zato grafi ostanejo pravilni. Hero je izvzet (nad pregibom). */
+#tab-mtr .chart-card>.mtr-days,
+#tab-mtr .chart-card>.mtr-why,
+#tab-mtr>.mtr-frost,
+#tab-mtr>.card:not(.chart-card),
+#tab-mtr>section:not(.mtr-hero){content-visibility:auto;contain-intrinsic-size:auto 600px}
+/* ocena višine pred prvim izrisom (izmerjeno na 390 px: dnevi ~790, »zakaj« 265–680, mraz ~290), da drsnik in sidra ne skačejo preveč */
+#tab-mtr .chart-card>.mtr-days{contain-intrinsic-size:auto 790px}
+#tab-mtr .chart-card>.mtr-why{contain-intrinsic-size:auto 450px}
+#tab-mtr>.mtr-frost{contain-intrinsic-size:auto 290px}

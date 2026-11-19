@@ -25,6 +25,7 @@ ok(evaluate({ ...good, axe: [{ theme: 'light', id: 'color-contrast', impact: 'se
 // odzivnost (INP)
 ok(worstInteraction([{ id: 1, d: 184 }, { id: 1, d: 120 }, { id: 2, d: 360 }, { id: 0, d: 900 }]) === 360, 'najdaljši dotik; dogodki brez interactionId se ne štejejo');
 ok(worstInteraction([{ id: 7, d: 100 }, { id: 7, d: 328 }]) === 328, 'dogodki istega dotika štejejo kot največji');
+ok(worstInteraction([{ id: 7, d: 328 }, { id: 7, d: 100 }]) === 328, 'največji dogodek dotika šteje tudi, če sledi manjši');
 ok(Number.isNaN(worstInteraction([])) && Number.isNaN(worstInteraction([{ id: 0, d: 500 }])) && Number.isNaN(worstInteraction(undefined)), 'brez interakcij je NaN, ne 0');
 ok(evaluate({ ...good, inp: { mobile: [424, 360, 528], desktop: [576, 568, 640] } }).length === 0, 'današnje stanje (360–640 ms) ni napaka');
 ok(evaluate({ ...good, inp: { mobile: [900, 950, 400], desktop: [500] } }).some(f => /INP mobile/.test(f)), 'mediana INP nad mejo je napaka');
