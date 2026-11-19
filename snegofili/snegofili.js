@@ -366,7 +366,11 @@
   var camState = {}, camIds = [], camTiles = {}, camSeen = {}, CAM_TTL = 3e5;
   var EMBED_OK = { windy: ['webcams.windy.com', 'embed.windy.com'], youtube: ['www.youtube-nocookie.com'] };
   /* mala krožna fotografija kraja (snegofili/img/kraji/<id>.jpg; avtorji so v razdelku »Fotografije krajev«) */
-  function avatar(p, cls) { if (!p || !p.f) return null; var i = el('img', 'sg-av' + (cls ? ' ' + cls : '')); i.src = '/snegofili/img/kraji/' + p.id + '.jpg'; i.alt = ''; i.width = 48; i.height = 48; i.loading = 'lazy'; i.decoding = 'async'; return i; }
+  function avatar(p, cls) {
+    if (!p) return null;
+    if (!p.f) { var b = el('span', 'sg-av ph' + (cls ? ' ' + cls : ''), p.c || ''); b.setAttribute('data-c', p.c || ''); b.setAttribute('aria-hidden', 'true'); return b; }
+    var i = el('img', 'sg-av' + (cls ? ' ' + cls : '')); i.src = '/snegofili/img/kraji/' + p.id + '.jpg'; i.alt = ''; i.width = 48; i.height = 48; i.loading = 'lazy'; i.decoding = 'async'; return i;
+  }
   function camLabel(p) { return (p.ca || p.cd) ? 'Oglej si aktualno sliko' : 'Odpri kamero Windy'; }
   function hasCam(p) { return !!(p && (p.ca || p.cd || p.ce)); }
   function camKind(p) { return p.ca ? 'arso' : p.cd ? 'drsi' : p.ce ? 'embed' : null; }

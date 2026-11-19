@@ -296,7 +296,7 @@ def sl_text(sl, elev):
 
 def card_html(r, p, kcr=None):
     ph = phase(r["elevation_m"], r["snow_line_m"])
-    av = ""
+    av = f'<span class="sg-av ph" data-c="{r["drzava"]}" aria-hidden="true">{r["drzava"]}</span>'
     if kcr and r["id"] in kcr:
         c = kcr[r["id"]]
         av = (f'<img class="sg-av" src="/snegofili/img/kraji/{r["id"]}.jpg" width="48" height="48" alt="" loading="lazy" decoding="async" '

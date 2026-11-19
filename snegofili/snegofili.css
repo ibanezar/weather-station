@@ -408,6 +408,9 @@ body .site-head{display:none}
 
 /* krožne fotografije krajev */
 .sg-av{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;background:#183563;border:2px solid rgba(255,255,255,.4);display:block}
+.sg-av.ph{display:flex;align-items:center;justify-content:center;font:700 .72rem/1 var(--sg-font,inherit);letter-spacing:.04em;color:#e6efff;background:#183563;border-color:#6f8fc4}
+.sg-av.ph.sm{font-size:.62rem}
+.sg-av.ph[data-c=SI]{border-color:#4f9bff}.sg-av.ph[data-c=AT]{border-color:#ff6b6b}.sg-av.ph[data-c=IT]{border-color:#5fd08a}.sg-av.ph[data-c=CH]{border-color:#ff8a8a}.sg-av.ph[data-c=FR]{border-color:#8fb0ff}.sg-av.ph[data-c=HR]{border-color:#ff9a9a}.sg-av.ph[data-c=DE]{border-color:#ffd25a}
 .sg-av.sm{width:34px;height:34px;border-width:1.5px}
 .sg-av.lg{width:52px;height:52px}
 .sg-head{justify-content:flex-start;align-items:center}
