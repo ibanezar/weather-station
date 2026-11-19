@@ -558,9 +558,10 @@ def build_body(data, cams):
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
     return f"""{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)])}
 {seo.stn_badge()}
+  <div class="sg-app">
   <section class="sg-hero" aria-labelledby="sg-h1">
     <canvas id="sg-snow" aria-hidden="true"></canvas>
-    <div class="sg-brand"><img src="/snegofili/brand/mark.svg" width="44" height="44" alt="" decoding="async">
+    <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="222" height="58" alt="" decoding="async">
     <p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div>
     <h1 class="page-title" id="sg-h1">Snegofili: kje je zdaj sneg</h1>
     <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p>
@@ -613,11 +614,14 @@ def build_body(data, cams):
   pristojne države, <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a> in razmere pri
   oskrbovani koči ali smučišču. Slike kamer so last navedenih virov.</p>
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>
+  </div>
 <script type="application/json" id="sg-pts">{pts_json}</script>"""
 
 
 def head_extras(schema):
-    return ('<link rel="icon" type="image/svg+xml" href="/snegofili/brand/favicon.svg">\n'
+    return ('<meta name="theme-color" content="#1b6ef3">\n'
+            '<link rel="preload" href="/snegofili/fonts/Bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
+            '<link rel="icon" type="image/svg+xml" href="/snegofili/brand/favicon.svg">\n'
             '<link rel="apple-touch-icon" href="/snegofili/brand/apple-touch-icon.png">\n'
             f'<link rel="stylesheet" href="/snegofili/snegofili.css?v={ver("snegofili/snegofili.css")}">\n'
             f'<script defer src="/snegofili/snegofili.js?v={ver("snegofili/snegofili.js")}"></script>\n{schema}')

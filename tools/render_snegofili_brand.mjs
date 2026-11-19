@@ -18,7 +18,9 @@ const PNGS = [
   ["mark.svg", "icon-192.png", 192, 192],
   ["mark.svg", "icon-512.png", 512, 512],
   ["mark-maskable.svg", "icon-maskable-512.png", 512, 512],
-  ["logo-snegofili.svg", "logo-snegofili.png", 0, 240],
+  ["logo-snegofili.svg", "logo-snegofili.png", 0, 260],
+  ["logo-snegofili-bela.svg", "logo-snegofili-bela.png", 0, 260],
+  ["logo-hero.svg", "logo-hero.png", 0, 232],
   ["og.svg", "og.png", 1200, 630],
 ];
 
