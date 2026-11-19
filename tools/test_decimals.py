@@ -58,7 +58,25 @@ def main():
         if got != w:
             fails += 1
             print(f"  ✗ ni idempotentno: {w!r} -> {got!r}")
-    print(f"{len(CASES) * 2} preverjanj, {fails} napak")
+    # preslikava emojijev: vsaka ikona mora biti v spritu naslovnice, krogi imajo barvo
+    q = subprocess.run(["node", os.path.join(HERE, "_parity_js.mjs")],
+                       input=json.dumps({"file": "app.js", "names": ["_EMO_NORM", "_EMO_DOT"], "prelude": "",
+                                         "calls": [{"expr": "JSON.stringify([_EMO_NORM,_EMO_DOT])"}]}),
+                       capture_output=True, text=True, cwd=ROOT, timeout=60)
+    norm, dot = json.loads(json.loads(q.stdout)["results"][0])
+    sprite = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+    for emo, name in norm.items():
+        if f'id="i-{name}"' not in sprite:
+            fails += 1
+            print(f"  ✗ ikone {name} ({emo}) ni v spritu: dodaj v EXTRA v tools/emoji_to_icons.py in ga poženi")
+    for emo, col in dot.items():
+        if not (len(col) == 7 and col.startswith("#")):
+            fails += 1
+            print(f"  ✗ barva kroga {emo}: {col!r}")
+    if set(norm) & set(dot):
+        fails += 1
+        print("  ✗ emoji je hkrati ikona in krog")
+    print(f"{len(CASES) * 2 + len(norm) + len(dot)} preverjanj, {fails} napak")
     return 1 if fails else 0
 
 

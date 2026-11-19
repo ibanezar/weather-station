@@ -285,11 +285,41 @@ function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d).replace('
 const _SL_DEC=new RegExp('(?<![\\w.,/#:=])(?<!BY )(\\d{1,6})\\.(\\d{1,2})(?![\\d.])','g');
 function _slDecText(s){return(typeof s==='string'&&s.indexOf('.')>-1)?s.replace(_SL_DEC,'$1,$2'):s;}
 const _SL_DEC_SKIP='script,style,noscript,textarea,input,select,option,code,pre,time,[data-nodec]';
+// Isti prehod zamenja še emojije v prikazu podatkov z ikonami iz sklada (kot na naslovnici: med napravami se razlikujejo in se ne dajo
+// prebarvati). Samo emojiji s preslikavo; taksonomski (žabe, ptiči, žuželke) in neznani ostanejo. Barvni krogi (🔵🟠 …) so barvna
+// oznaka stopnje, zato postanejo CSS pike v isti barvi. Vsaka ikona v preslikavi mora biti v spritu (tools/test_decimals.py).
+const _EMO_NORM={'🌧':'cloud-rain','🌦':'cloud-rain','🌡':'thermometer','💨':'wind','🌬':'wind','🪂':'wind','❄':'snowflake','🌨':'snowflake','🧊':'thermometer-snowflake',
+  '💧':'droplet','💦':'droplets','☀':'sun','🌞':'sun','🔥':'flame','☁':'cloud','🌤':'cloud-sun','⛅':'cloud-sun','🌥':'cloud-sun','🌫':'cloud-fog',
+  '⛈':'cloud-lightning','🌩':'cloud-lightning','🌀':'tornado','🌊':'waves','⚡':'zap','📊':'chart-column','📈':'trending-up','📉':'trending-down',
+  '📍':'map-pin','📷':'camera','📸':'camera','📖':'book-open','📚':'book-open','🕐':'clock','⏱':'timer','📅':'calendar','📆':'calendar','🗺':'map',
+  '📡':'radio-tower','🛰':'satellite','⛰':'mountain','🏔':'mountain-snow','🌍':'globe','🌎':'globe','🌐':'globe','🔭':'telescope','🔬':'microscope',
+  '🌱':'sprout','🍄':'sprout','🌿':'leaf','🍂':'leaf','🍁':'leaf','🌸':'flower','🌺':'flower','🌼':'flower','🌷':'flower','🌲':'tree-pine','🌴':'tree-palm',
+  '🏖':'tree-palm','🏆':'trophy','⚠':'triangle-alert','✅':'circle-check','❌':'circle-x','💡':'lightbulb','ℹ':'info','🧭':'compass','🎯':'target',
+  '📏':'ruler','🌙':'moon','🌌':'moon-star','🌅':'sunrise','🌇':'sunrise','☔':'umbrella','🌾':'wheat','🌵':'droplet-off','🌟':'sparkles','🏃':'footprints',
+  '🫧':'droplets','🚿':'cloud-drizzle','🫚':'cloud-drizzle','💥':'zap','✂':'wind','🤔':'circle-help','🔄':'refresh-cw','🥶':'thermometer-snowflake','🕶':'sun','🏜':'sun','🩺':'heart-pulse',
+  '🛸':'satellite','🥾':'footprints','⚓':'anchor','🚢':'ship','🎿':'mountain-snow','📋':'clipboard-list','☠':'skull','⚖':'scale','🎣':'fish','🤖':'brain','🏞':'mountain'};
+const _EMO_DOT={'🔵':'#3b82f6','🟠':'#f59e0b','🟤':'#a16207','🔴':'#ef4444','🟡':'#eab308','⚪':'#cbd5e1','🩵':'#7dd3fc','🟢':'#22c55e','🟣':'#a855f7'};
+const _SL_EMO_RE=new RegExp('('+Object.keys(_EMO_NORM).concat(Object.keys(_EMO_DOT)).join('|')+')\\uFE0F?','gu');
+function _slEmoNode(n){
+  const v=n.nodeValue,frag=document.createDocumentFragment();let last=0,m;_SL_EMO_RE.lastIndex=0;
+  while((m=_SL_EMO_RE.exec(v))){
+    if(m.index>last)frag.appendChild(document.createTextNode(v.slice(last,m.index)));
+    const sp=document.createElement('span');sp.setAttribute('aria-hidden','true');
+    if(_EMO_DOT[m[1]]){sp.className='emo-dot';sp.style.setProperty('--d',_EMO_DOT[m[1]]);}
+    else{sp.className='emo-i';sp.innerHTML=_ico(_EMO_NORM[m[1]]);}
+    frag.appendChild(sp);last=m.index+m[0].length;if(v[last]===' ')last++;
+  }
+  if(last<v.length)frag.appendChild(document.createTextNode(v.slice(last)));
+  n.parentNode.replaceChild(frag,n);
+}
 function _slDecPane(){
   const pane=document.querySelector('.tab-pane.active');
   if(!pane||pane.id==='tab-current'||pane.id==='tab-gallery'||pane.id==='tab-community')return;
-  const w=document.createTreeWalker(pane,NodeFilter.SHOW_TEXT);let n;
-  while((n=w.nextNode())){const v=n.nodeValue;if(v.indexOf('.')<0)continue;const el=n.parentElement;if(!el||el.closest(_SL_DEC_SKIP))continue;const r=_slDecText(v);if(r!==v)n.nodeValue=r;}
+  const w=document.createTreeWalker(pane,NodeFilter.SHOW_TEXT);let n;const emo=[];
+  while((n=w.nextNode())){const v=n.nodeValue;const el=n.parentElement;if(!el||el.closest(_SL_DEC_SKIP))continue;
+    if(v.indexOf('.')>=0){const r=_slDecText(v);if(r!==v)n.nodeValue=r;}
+    if(el.namespaceURI==='http://www.w3.org/1999/xhtml'&&/[^\x00- ]/.test(n.nodeValue)){_SL_EMO_RE.lastIndex=0;if(_SL_EMO_RE.test(n.nodeValue))emo.push(n);}}
+  emo.forEach(_slEmoNode);
   pane.querySelectorAll('[title],[aria-label]').forEach(el=>{for(const a of['title','aria-label']){const v=el.getAttribute(a);if(v&&v.indexOf('.')>-1){const r=_slDecText(v);if(r!==v)el.setAttribute(a,r);}}});
 }
 let _slDecT=null;

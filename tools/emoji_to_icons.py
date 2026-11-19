@@ -37,7 +37,9 @@ MAP = {
  "🏷":"tag","🗜":"minimize-2","🗑":"trash-2","🔒":"lock","☰":"menu",
 }
 # ikone, ki jih potrebuje JS (app.js), tudi če jih HTML ne uporablja
-EXTRA = ["sun","moon","play","pause","hourglass","cloud-rain","cloud-lightning","thermometer-snowflake","refresh-cw","tag","minimize-2","share-2","clock-alert"]
+EXTRA = ["sun","moon","play","pause","hourglass","cloud-rain","cloud-lightning","thermometer-snowflake","refresh-cw","tag","minimize-2","share-2","clock-alert",
+         # zavihki naslovnice: osrednja zamenjava emojijev (_slDecPane v app.js, 19. 11. 2026)
+         "cloud-drizzle","heart-pulse","anchor","ship","skull","scale","fish","footprints","brain","circle-help","refresh-cw","thermometer-snowflake","moon","moon-star","clipboard-list","lightbulb","circle-check","circle-x","info","droplet-off","trending-down","trending-up","map","calendar","compass","target","ruler","umbrella","wheat","tree-palm","timer","sunrise","tornado","waves","satellite","telescope","microscope","trophy","flower","flower-2","leaf","tree-pine","mountain","mountain-snow","radio-tower","sparkles","globe","wind","zap","camera","book-open","map-pin","chart-column","thermometer","droplet","droplets","snowflake","flame","cloud","cloud-sun","cloud-fog","clock"]
 
 # razredi elementov, katerih VODILNI emoji zamenjamo
 TARGET = ["clabel","an-title","tri-title","nt-title","kf-label","qn-ico","qn-burger","mode-btn-ico","mi-ico",

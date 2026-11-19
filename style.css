@@ -5023,3 +5023,9 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #tab-mtr .chart-card>.mtr-days{contain-intrinsic-size:auto 790px}
 #tab-mtr .chart-card>.mtr-why{contain-intrinsic-size:auto 450px}
 #tab-mtr>.mtr-frost{contain-intrinsic-size:auto 290px}
+
+/* Emojiji v zavihkih zamenjajo ikone iz sklada, barvni krogi pike (_slEmoNode v app.js, 19. 11. 2026). */
+.emo-i{display:inline-flex;align-items:center;vertical-align:-.12em;margin-right:.35em}
+.emo-i .ic{width:1.1em;height:1.1em;vertical-align:baseline}
+.emo-dot{display:inline-block;flex:none;width:.7em;height:.7em;border-radius:50%;background:var(--d,currentColor);margin-right:.4em;vertical-align:.02em}
+.emo-i:last-child,.emo-dot:last-child{margin-right:0}
