@@ -122,7 +122,12 @@ def num(x, d=0):
 
 
 def cm_cell(cm):
-    return "—" if cm < MIN_CM else f"{num(cm, 0 if cm >= 10 else 1)} cm"
+    """Modelski nov sneg: pod centimetrom piše »<1 cm«, ne pomišljaja (pomišljaj pomeni »ni podatka«)."""
+    return "<1 cm" if cm < MIN_CM else f"{num(cm, 0 if cm >= 10 else 1)} cm"
+
+
+def cm_h(cm):
+    return _html.escape(cm_cell(cm))
 
 
 def ver(rel):
@@ -143,9 +148,10 @@ def proj(lon, lat):
     return ((lon - MAP_LON[0]) * math.cos(math.radians(LAT0)) * MAP_K, (MAP_LAT[1] - lat) * MAP_K)
 
 
-_zx0, _zy0 = proj(11.6, 47.4)
-_zx1, _zy1 = proj(17.4, 45.0)
+_zx0, _zy0 = proj(9.6, 48.0)
+_zx1, _zy1 = proj(17.4, 44.9)
 ZOOM_VB = f"{_zx0:.0f} {_zy0:.0f} {_zx1 - _zx0:.0f} {_zy1 - _zy0:.0f}"
+ZOOM_AR = f"{_zx1 - _zx0:.0f} / {_zy1 - _zy0:.0f}"
 
 
 def _inside(lon, lat, m=1.2):
@@ -202,8 +208,8 @@ def map_svg(rows):
         ph = phase(r["elevation_m"], r["snow_line_m"])
         show = step(r["past24_cm"]) >= 0 and ph != "rain"
         cls = (f"s{step(r['past24_cm'])} " if show else "ring ") + f"ph-{ph}"
-        aria = (f'{r["ime"]}, {r["elevation_m"]} m: {PHASE_TXT[ph]}, nazaj 24 h {cm_cell(r["past24_cm"])}, '
-                f'naprej 24 h {cm_cell(r["next24_cm"])}')
+        aria = (f'{r["ime"]}, {r["elevation_m"]} m: {PHASE_TXT[ph]}, zadnjih 24 ur {cm_cell(r["past24_cm"])}, '
+                f'naslednjih 24 ur {cm_cell(r["next24_cm"])}')
         rad = radius(r["past24_cm"] if show else 0)
         circles.append(f'<circle class="sg-c {cls}" data-id="{r["id"]}" cx="{x:.1f}" cy="{y:.1f}" '
                        f'r="{rad:.1f}" tabindex="0" role="button" aria-label="{_html.escape(aria)}"/>')
@@ -211,7 +217,7 @@ def map_svg(rows):
             labels.append(f'<text class="sg-lbl" x="{x + 10 + rad:.1f}" y="{y + 7:.1f}">'
                           f'{_html.escape(short(r["ime"]))}</text>')
     return (
-        f'<div class="sg-mapwrap"><svg id="sg-map" data-w="{MAP_W}" data-h="{MAP_H}" viewBox="0 0 {MAP_W} {MAP_H}" '
+        f'<div class="sg-mapwrap"><svg id="sg-map" class="zoom" data-w="{MAP_W}" data-h="{MAP_H}" data-full="0 0 {MAP_W} {MAP_H}" viewBox="{ZOOM_VB}" style="aspect-ratio:{ZOOM_AR}" '
         f'role="group" aria-label="Karta alpskega loka: novi sneg v zadnjih 24 urah po točkah">'
         f'<path class="land" d="M0 0H{MAP_W}V{MAP_H}H0Z"/><path class="bord" d="{bord}"/><path class="coast" d="{coast}"/>'
         f'<path d="M{rx:.1f} {ry - 9:.1f}l8 9l-8 9l-8 -9z" fill="#fff" stroke="#0a1426" stroke-width="2"/>'
@@ -270,43 +276,50 @@ def cam_links(p):
     links = []
     embeds = [c for c in p.get("kamere") or [] if valid_embed(c)]
     if p.get("arso_cam") or p.get("drsi_cam") or embeds:
-        links.append('<a href="#kamere">kamera</a>')
+        links.append('<a href="#kamere">' + ("aktualna slika" if (p.get("arso_cam") or p.get("drsi_cam")) else "kamera Windy") + '</a>')
     for c in p.get("kamere") or []:
         if valid_embed(c):
             continue  # vdelana kamera je že pod »kamera« (lightbox)
         if str(c.get("url", "")).startswith("https://"):
             links.append(f'<a href="{_html.escape(c["url"])}" target="_blank" rel="noopener">'
                          f'{_html.escape(c["ponudnik"])}</a>')
-    return ", ".join(links) or "—"
+    return ", ".join(links) or "brez kamere"
+
+
+def sl_text(sl, elev):
+    """Meja sneženja kot višina + položaj točke glede nanjo (ne le predznak)."""
+    if sl is None:
+        return "ni podatka"
+    d = elev - sl
+    return f"{round(sl, -1):.0f} m · točka {abs(round(d, -1)):.0f} m {'nad' if d >= 0 else 'pod'} njo"
 
 
 def card_html(r, p):
     ph = phase(r["elevation_m"], r["snow_line_m"])
-    sl = r["snow_line_m"]
-    d = None if sl is None else r["elevation_m"] - sl
-    sl_txt = "—" if d is None else (f"nad mejo +{abs(round(d, -1)):.0f}" if d >= 0 else f"pod mejo −{abs(round(d, -1)):.0f}") + " m"
     meas = r.get("izmerjeno")
-    meas_txt = f'{meas["depth_cm"]} cm (ARSO, pred {num(meas["age_h"], 0)} h)' if meas else "—"
-    aria = f'{r["ime"]}: {PHASE_TXT[ph]}, nazaj 24 h {cm_cell(r["past24_cm"])}, naprej 24 h {cm_cell(r["next24_cm"])}'
+    meas_txt = (f'<b>{meas["depth_cm"]} cm</b> (ARSO, pred {num(meas["age_h"], 0)} h'
+                f'{", izmerjena ničla" if meas["depth_cm"] == 0 else ""})') if meas else "ni merilne postaje ARSO"
+    aria = f'{r["ime"]}: {PHASE_TXT[ph]}, zadnjih 24 ur {cm_cell(r["past24_cm"])}, naslednjih 24 ur {cm_cell(r["next24_cm"])}'
     return (
         f'    <article class="sg-card" id="t-{r["id"]}" data-c="{r["drzava"]}" data-past="{r["past24_cm"]}" '
         f'data-next="{r["next24_cm"]}" data-fresh="{max(r["past24_cm"], r["next24_cm"])}" '
-        f'data-elev="{r["elevation_m"]}" data-km="{r["km_od_recice"]}" aria-label="{_html.escape(aria)}">'
+        f'data-elev="{r["elevation_m"]}" data-km="{r["km_od_recice"]}" data-n="{_html.escape(r["ime"].lower())}" aria-label="{_html.escape(aria)}">'
         f'<div class="sg-head"><div><h3>{_html.escape(r["ime"])}</h3><p class="sg-sub">{COUNTRIES[r["drzava"]]} · '
-        f'{_html.escape(r["regija"])} · {r["elevation_m"]} m · {r["km_od_recice"]} km</p></div>'
+        f'{_html.escape(r["regija"])} · {r["elevation_m"]} m · {r["km_od_recice"]} km</p></div>'
         f'<span class="sg-pill ph-{ph}">{PHASE_TXT[ph]}</span></div>'
         f'<div class="sg-div" role="img" aria-label="{_html.escape(aria)}"><div class="sg-half l">'
         f'<div class="sg-bl" style="width:{bar_pct(r["past24_cm"]) / 2:.1f}%"></div></div><div class="sg-half">'
         f'<div class="sg-br" style="width:{bar_pct(r["next24_cm"]) / 2:.1f}%"></div></div></div>'
-        f'<div class="sg-nums"><span><b class="sg-np">{cm_cell(r["past24_cm"])}</b><small>nazaj 24 h</small></span>'
-        f'<span class="r"><b class="sg-nn">{cm_cell(r["next24_cm"])}</b><small>naprej 24 h</small></span></div>'
+        f'<div class="sg-nums"><span><b class="sg-np">{cm_h(r["past24_cm"])}</b><small>zadnjih 24 ur</small></span>'
+        f'<span class="r"><b class="sg-nn">{cm_h(r["next24_cm"])}</b><small>naslednjih 24 ur</small></span></div>'
+        f'<p class="sg-src"><span class="sg-bdg m">Model</span> nov sneg po modelu</p>'
         f'<div class="sg-spark" aria-hidden="true"></div>'
-        f'<dl class="sg-dl"><div><dt>Zdaj</dt><dd class="sg-tt">{num(r["temp_c"], 1)} °C</dd></div>'
-        f'<div style="grid-column:span 2"><dt>Meja sneženja</dt><dd class="sg-sl">{sl_txt}</dd></div></dl>'
-        f'<div class="sg-foot"><span>72 h: {cm_cell(r["past72_cm"])} nazaj · {cm_cell(r["next72_cm"])} naprej</span>'
+        f'<dl class="sg-dl"><div><dt>Trenutna ura</dt><dd class="sg-tt">{num(r["temp_c"], 1)} °C</dd></div>'
+        f'<div style="grid-column:span 2"><dt>Meja sneženja</dt><dd class="sg-sl">{sl_text(r["snow_line_m"], r["elevation_m"])}</dd></div></dl>'
+        f'<div class="sg-foot"><span>Zadnjih 72 ur: {cm_h(r["past72_cm"])} · naslednjih 72 ur: {cm_h(r["next72_cm"])}</span>'
         f'<span>{cam_links(p)}</span></div>'
         f'{cam_slot(r["ime"], p)}'
-        f'<div class="sg-foot"><span>Izmerjeno: {meas_txt}</span></div></article>')
+        f'<div class="sg-foot"><span><span class="sg-bdg r">Meritev</span> {meas_txt}</span></div></article>')
 
 
 def hero_sentence(rows):
@@ -318,17 +331,17 @@ def hero_sentence(rows):
         parts.append("V zadnjih 72 urah po modelu nikjer v seznamu ni zapadlo več kot centimeter novega snega.")
     else:
         last72 = (f'v zadnjih 72 urah pa na točki <strong>{_html.escape(best72["ime"])}</strong> '
-                  f'({cm_cell(best72["past72_cm"])}).')
+                  f'({cm_h(best72["past72_cm"])}).')
         if best24["past24_cm"] >= MIN_CM:
             parts.append(f'Po modelu je v zadnjih 24 urah najbolj zasnežilo na točki '
-                         f'<strong>{_html.escape(best24["ime"])}</strong> ({cm_cell(best24["past24_cm"])}), {last72}')
+                         f'<strong>{_html.escape(best24["ime"])}</strong> ({cm_h(best24["past24_cm"])}), {last72}')
         else:
             parts.append(f'V zadnjih 24 urah po modelu nikjer ni zapadlo več kot centimeter snega, {last72}')
     if near:
         top = max(near, key=lambda r: r["next24_cm"])
         parts.append(f'Od točk do {TRIP_KM} km zračne razdalje od Rečice je v naslednjih 24 urah največ snega '
                      f'napovedanega na točki <strong>{_html.escape(top["ime"])}</strong> '
-                     f'({cm_cell(top["next24_cm"])}, {top["km_od_recice"]} km).')
+                     f'({cm_h(top["next24_cm"])}, {top["km_od_recice"]} km).')
     else:
         parts.append(f'Od točk do {TRIP_KM} km od Rečice model v naslednjih 24 urah ne napoveduje novega snega.')
     return " ".join(parts)
@@ -364,7 +377,7 @@ def cam_slot(r_name, p):
             prov = _html.escape(c.get("ponudnik", kind))
             return (f'<div class="sg-camslot" data-src="{_html.escape(src)}" data-kind="{kind}" '
                     f'data-title="Spletna kamera: {_html.escape(r_name)}">'
-                    f'<button type="button" class="sg-live">Kamera v živo</button>'
+                    f'<button type="button" class="sg-live">Odpri kamero Windy</button>'
                     f'<p class="sg-attr">Po kliku se naloži vsebina ponudnika ({prov}), ki lahko nastavi svoje piškotke.</p>{credit}</div>')
     return ""
 
@@ -430,9 +443,9 @@ def cam_wall_html(rows, cams):
                 src += " + Windy (časovni zdrs)"
             ime = _html.escape(r["ime"])
             tiles.append(
-                f'    <figure class="sg-cam" data-id="{r["id"]}" data-kind="{kind}">'
+                f'    <figure class="sg-cam" data-id="{r["id"]}" data-kind="{kind}" data-c="{r["drzava"]}">'
                 f'<button type="button" class="sg-cam-b" aria-label="Poglej kamero: {ime}">'
-                f'<span class="sg-cam-img"><span class="sg-cam-msg">Nalagam sličico …</span></span>'
+                f'<span class="sg-cam-img"><span class="sg-cam-msg">Nalagam sliko …</span></span>'
                 f'<span class="sg-cam-st"></span></button>'
                 f'<figcaption><b>{ime}</b> · {r["elevation_m"]} m · {COUNTRIES[r["drzava"]]} <span class="sg-cam-t"></span>'
                 f'<small>Vir: {src}</small></figcaption></figure>')
@@ -451,26 +464,40 @@ def cam_wall_html(rows, cams):
         ln = ('  <h3 class="sg-h3">Kamere pri ponudnikih</h3>\n'
               '  <p class="muted-note">Povezava odpre stran lastnika kamere; slike tu ne prikazujemo.</p>\n'
               f'  <ul class="sg-camlinks">{"".join(links)}</ul>\n')
-    return (f'  <section id="kamere" class="sg-sec" aria-labelledby="kam-h">\n  <h2 id="kam-h">Kamere</h2>\n'
-            '  <p class="archive-intro">Sličice slovenskih kamer ARSO in DRSI se osvežujejo vsakih nekaj minut; klik jo odpre večjo, '
-            'ob njej pa piše, kaj za tisto točko napoveduje model. Pri točkah z oznako Windy lahko po kliku predvajate časovni zdrs '
-            'zadnjega dne (vsebina ponudnika Windy). <b>To niso videoposnetki v živo.</b> '
-            'Kamera in model se lahko razhajata: verjemite sliki.</p>\n' + wall + ln + '  </section>\n')
+    return (f'  <section id="kamere" class="sg-sec" aria-labelledby="kam-h">\n  <h2 id="kam-h">Kamere <span class="sg-bdg c">Slika kamere</span></h2>\n'
+            '  <p class="archive-intro"><b>Aktualna slika</b> (ARSO, DRSI) se osveži vsakih nekaj minut: gumb »Oglej si aktualno sliko« jo odpre večjo. '
+            'Pri točkah z oznako Windy gumb »Odpri kamero Windy« po kliku predvaja <b>časovni zdrs zadnjega dne</b> (vsebina ponudnika). '
+            '<b>Videa v živo tu ni.</b> Ob sliki piše, kaj za tisto točko napoveduje model; kamera in model se lahko razhajata: verjemite sliki.</p>\n'
+            '  <div class="sg-filter sg-camf" id="sg-camf" role="group" aria-label="Filter kamer" hidden>'
+            '<button type="button" data-cf="*" aria-pressed="true">Vse kamere</button>'
+            '<button type="button" data-cf="SI" aria-pressed="false">Samo slovenske</button></div>\n' + wall + ln + '  </section>\n')
 
 
 def stats_html(rows):
-    b24 = max(rows, key=lambda r: r["past24_cm"])
-    bn = max(rows, key=lambda r: r["next24_cm"])
+    """Štiri kartice v herou. Alpe (vse točke) in območje do TRIP_KM od Rečice sta ločena podatka."""
+    near = [r for r in rows if r["km_od_recice"] <= TRIP_KM]
+    b24, bn = max(rows, key=lambda r: r["past24_cm"]), max(rows, key=lambda r: r["next24_cm"])
     fresh = sum(1 for r in rows if r["past24_cm"] >= MIN_CM)
+    meas = sum(1 for r in rows if r.get("izmerjeno"))
 
-    def tile(i, lab, val, sub):
-        return (f'<div class="sg-stat"><small>{lab}</small><b id="sg-st-{i}">{val}</b>'
-                f'<span id="sg-st-{i}-n">{sub}</span></div>')
-    return ('  <div class="sg-stats" id="sg-stats" role="group" aria-label="Povzetek po modelu">'
-            + tile("now", "Zdaj sneži", "—", f"od {len(rows)} točk")
-            + tile("past", "Največ nazaj 24 h", cm_cell(b24["past24_cm"]), _html.escape(b24["ime"]))
-            + tile("next", "Največ naprej 24 h", cm_cell(bn["next24_cm"]), _html.escape(bn["ime"]))
-            + tile("fresh", "Točk s svežim snegom", str(fresh), "≥ 1 cm v 24 h nazaj")
+    def near_line(key):
+        if not near:
+            return ""
+        b = max(near, key=lambda r: r[key])
+        if b[key] < MIN_CM:
+            return f"Do {TRIP_KM} km od Rečice: nikjer ≥ 1 cm"
+        return f'Do {TRIP_KM} km od Rečice: {cm_h(b[key])} · {_html.escape(b["ime"])}'
+
+    def tile(i, lab, bdg, val, sub, extra=""):
+        return (f'<div class="sg-stat"><small>{lab} <span class="sg-bdg {bdg[0]}">{bdg[1]}</span></small><b id="sg-st-{i}">{val}</b>'
+                f'<span id="sg-st-{i}-n">{sub}</span>'
+                + (f'<span class="sg-st-near" id="sg-st-{i}-c">{extra}</span>' if extra else "") + '</div>')
+    mod = ("m", "Model")
+    return ('  <div class="sg-stats" id="sg-stats" role="group" aria-label="Povzetek po modelu in meritvah">'
+            + tile("past", "Največ novega snega, zadnjih 24 ur", mod, cm_h(b24["past24_cm"]), _html.escape(b24["ime"]) if b24["past24_cm"] >= MIN_CM else "nikjer", near_line("past24_cm"))
+            + tile("next", "Napovedano, naslednjih 24 ur", mod, cm_h(bn["next24_cm"]), _html.escape(bn["ime"]) if bn["next24_cm"] >= MIN_CM else "nikjer", near_line("next24_cm"))
+            + tile("fresh", "Lokacij z novim snegom", mod, f"{fresh}", f"od {len(rows)} lokacij · ≥ 1 cm v zadnjih 24 urah")
+            + tile("meas", "Merilnih postaj ARSO", ("r", "Meritev"), f"{meas}", "z izmerjeno višino snežne odeje")
             + '</div>\n')
 
 
@@ -482,10 +509,10 @@ def measured_html(rows):
     li = "".join(
         f'<li><span class="sg-ms-n">{_html.escape(r["ime"])} <small>{r["elevation_m"]} m</small></span>'
         f'<span class="sg-ms-bar" role="img" aria-label="Izmerjeno {r["izmerjeno"]["depth_cm"]} cm"><i style="width:{min(100, r["izmerjeno"]["depth_cm"] / top * 100):.1f}%"></i></span>'
-        f'<span class="sg-ms-v"><b>{r["izmerjeno"]["depth_cm"]} cm</b> <small>pred {num(r["izmerjeno"]["age_h"], 0)} h</small></span>'
-        f'<span class="sg-ms-m"><small>model: nov sneg 72 h nazaj</small> {cm_cell(r["past72_cm"])}</span></li>'
+        f'<span class="sg-ms-v"><b>{r["izmerjeno"]["depth_cm"]} cm</b> <small>{"izmerjena ničla, " if r["izmerjeno"]["depth_cm"] == 0 else ""}pred {num(r["izmerjeno"]["age_h"], 0)} h</small></span>'
+        f'<span class="sg-ms-m"><small>model: nov sneg zadnjih 72 ur</small> {cm_h(r["past72_cm"])}</span></li>'
         for r in sorted(meas, key=lambda r: -r["izmerjeno"]["depth_cm"]))
-    return ('  <section id="izmerjeno" class="sg-sec" aria-labelledby="izm-h">\n  <h2 id="izm-h">Izmerjena snežna odeja</h2>\n'
+    return ('  <section id="izmerjeno" class="sg-sec" aria-labelledby="izm-h">\n  <h2 id="izm-h">Izmerjena snežna odeja <span class="sg-bdg r">Meritev</span></h2>\n'
             '  <p class="archive-intro">To je <b>meritev</b> višine snežne odeje na postajah ARSO, ločena od modelske ocene novega snega: '
             'odeja je ostanek preteklih dni, novi sneg pa tisto, kar je zapadlo v zadnjih urah. Vir: Agencija Republike Slovenije za okolje (ARSO).</p>\n'
             f'  <ul class="sg-ms">{li}</ul>\n  </section>\n')
@@ -549,13 +576,18 @@ def build_body(data, cams):
              '<button type="button" data-f="fresh" aria-pressed="false">Samo s svežim snegom</button>'
              '<button type="button" data-f="fav" aria-pressed="false">★ Moje točke</button>'
              '<span class="sep"></span>'
-             '<button type="button" data-s="past" aria-pressed="true">Nazaj 24 h</button>'
-             '<button type="button" data-s="next" aria-pressed="false">Naprej 24 h</button>'
+             '<button type="button" data-s="past" aria-pressed="true">Zadnjih 24 ur</button>'
+             '<button type="button" data-s="next" aria-pressed="false">Naslednjih 24 ur</button>'
              '<button type="button" data-s="elev" aria-pressed="false">Višina</button>'
              '<button type="button" data-s="km" aria-pressed="false">Razdalja</button>')
     cards_html = "\n".join(card_html(r, cams.get(r["id"], {})) for r in rows)
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
+    cams_sec = cam_wall_html(rows, cams)
+    nav = [("zemljevid", "Zemljevid")] + ([("kamere", "Kamere")] if cams_sec else []) + [
+        ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije"), ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
+    nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
+                "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in nav) + '</ul></nav>\n')
     return f"""{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)])}
 {seo.stn_badge()}
   <div class="sg-app">
@@ -564,50 +596,67 @@ def build_body(data, cams):
     <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="222" height="58" alt="" decoding="async">
     <p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div>
     <h1 class="page-title" id="sg-h1">Snegofili: kje je zdaj sneg</h1>
+    <p class="sg-sub2">Spremljanje snežnih razmer po Alpah: modelska ocena, meritve ARSO in kamere.</p>
     <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p>
-    <p class="sg-lead">{hero_sentence(rows)}</p>
+    <p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
+{stats_html(rows)}    <p class="sg-lead">{hero_sentence(rows)}</p>
+    <a class="sg-cta" id="sg-al-cta" href="#sg-alarm" hidden>Ne zamudite naslednjega sneženja: nastavite opozorilo</a>
+  </section>
+{nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
+  <h2 id="zm-h">Zemljevid snežnih razmer <span class="sg-bdg m">Model</span></h2>
+  <p class="archive-intro">Barva in velikost kroga kažeta novi sneg po modelu; dotik točke odpre povzetek, od tam pa podrobnosti. Privzeti pogled je Slovenija z Avstrijo in severno Italijo.</p>
+  <div class="sg-win sg-mapgrid">
+    <div class="sg-mapcol">
 {map_svg(rows)}
-    <div class="sg-zoom" id="sg-zoom" hidden><button type="button" aria-pressed="false" data-view="{ZOOM_VB}">Približaj: Slovenija in sosedje</button></div>
+    <div class="sg-zoom" id="sg-zoom" hidden><button type="button" aria-pressed="true" data-zoom="{ZOOM_VB}" data-full="0 0 {MAP_W} {MAP_H}">Pokaži ves alpski lok</button></div>
 {legend_html()}
     <div class="sg-ctlwrap">
       <div id="sg-ctl" hidden><button type="button" id="sg-play" aria-pressed="false">Predvajaj</button>
-      <input type="range" id="sg-range" aria-label="Čas od −48 do +48 ur"><button type="button" id="sg-now">Zdaj</button>
-      <span id="sg-time" aria-live="polite">zdaj</span>
-      <span class="sg-seg" role="group" aria-label="Kaj kaže karta"><button type="button" data-m="past" aria-pressed="true">Zadnjih 24 h</button><button type="button" data-m="next" aria-pressed="false">Naslednjih 24 h</button></span></div>
+      <input type="range" id="sg-range" aria-label="Čas od −48 do +48 ur"><button type="button" id="sg-now">Trenutna ura</button>
+      <span id="sg-time" aria-live="polite">trenutna ura</span>
+      <span class="sg-seg" role="group" aria-label="Kaj kaže karta"><button type="button" data-m="past" aria-pressed="true">Zadnjih 24 ur</button><button type="button" data-m="next" aria-pressed="false">Naslednjih 24 ur</button></span></div>
       <p class="sg-readout" id="sg-readout"></p>
     </div>
-    <div class="sg-profwrap">
-      <h2>Višinski prerez Alp</h2>
-      <p>Višine točk od zahoda proti vzhodu. Modri del stolpca je nad mejo sneženja, bela črtica je meja sneženja pri točki ob izbrani uri; kjer lebdi nad stolpcem, je meja višje od točke.</p>
-      <div class="sg-scroll" tabindex="0" role="region" aria-label="Višinski prerez: meja sneženja in točke">{prof}</div>
-      <p class="sg-hint">Povlecite vodoravno za ostale točke.</p>
     </div>
+    <aside class="sg-panel" id="sg-panel" aria-label="Povzetek izbrane točke" hidden></aside>
+  </div>
   </section>
-{stats_html(rows)}  <section id="zdaj-snezi" class="sg-sec sg-nowsec" aria-labelledby="zs-h" hidden>
-  <h2 id="zs-h">Kjer zdaj sneži</h2>
+  <section id="zdaj-snezi" class="sg-sec sg-nowsec" aria-labelledby="zs-h" hidden>
+  <h2 id="zs-h">Kjer zdaj sneži <span class="sg-bdg m">Model</span></h2>
   <p class="archive-intro" id="zs-sub"></p>
   <div class="sg-nowrow" id="sg-now-row" role="list"></div>
   <div class="sg-top" id="sg-top"></div>
   </section>
-{cam_wall_html(rows, cams)}{windy_map_html()}{plan_html()}  <section id="toplotna-karta" class="sg-sec sg-heatsec" aria-labelledby="hm-h" hidden>
-  <h2 id="hm-h">Kdaj in kje sneži: 96 ur</h2>
-  <p class="archive-intro">Vsaka vrstica je ena točka, vsak stolpec ena ura od 48 ur nazaj do 48 ur naprej. Svetlejša in večja količina pomeni več novega snega na uro po modelu. Navpična črta je ura, ki jo kaže drsnik; klik na vrstico odpre podrobnost točke.</p>
-  <div class="sg-heatbar" role="group" aria-label="Razvrstitev toplotne karte"><button type="button" data-hs="snow" aria-pressed="true">Najbolj snežno</button><button type="button" data-hs="elev" aria-pressed="false">Višina</button><button type="button" data-hs="km" aria-pressed="false">Razdalja</button></div>
+  <section id="prerez" class="sg-sec" aria-labelledby="pr-h">
+    <div class="sg-profwrap">
+      <h2 id="pr-h">Višinski prerez Alp <span class="sg-bdg m">Model</span></h2>
+      <p>Višine točk od zahoda proti vzhodu. Modri del stolpca je nad mejo sneženja, bela črtica je meja sneženja pri točki ob izbrani uri; kjer lebdi nad stolpcem, je meja višje od točke. Ura sledi drsniku na zemljevidu.</p>
+      <div class="sg-scroll" tabindex="0" role="region" aria-label="Višinski prerez: meja sneženja in točke">{prof}</div>
+      <p class="sg-hint">Povlecite vodoravno za ostale točke.</p>
+    </div>
+  </section>
+  <section id="toplotna-karta" class="sg-sec sg-heatsec" aria-labelledby="hm-h" hidden>
+  <h2 id="hm-h">Kdaj in kje sneži: 96 ur <span class="sg-bdg m">Model</span></h2>
+  <p class="archive-intro">Vsaka vrstica je ena točka, vsak stolpec ena ura od 48 ur nazaj do 48 ur naprej. Svetlejša in večja količina pomeni več novega snega na uro po modelu. Navpična vijolična črta je ura, ki jo kaže drsnik; klik na vrstico odpre podrobnosti točke.</p>
+  <div class="sg-heatbar" id="sg-hbar" role="group" aria-label="Razvrstitev in izbor toplotne karte"><button type="button" data-hs="snow" aria-pressed="true">Najbolj snežno</button><button type="button" data-hs="elev" aria-pressed="false">Višina</button><button type="button" data-hs="km" aria-pressed="false">Razdalja</button><span class="sep"></span><button type="button" data-hc="*" aria-pressed="true">Vse točke</button><button type="button" data-hc="SI" aria-pressed="false">Samo Slovenija</button></div>
   <div class="sg-heat" id="sg-heat" tabindex="0" role="region" aria-label="Toplotna karta po točkah in urah (drsno vodoravno)"><div class="sg-hm-lab" id="sg-hm-lab"></div>
     <div class="sg-hm-main"><div class="sg-hm-ax" id="sg-hm-ax"></div>
     <div class="sg-hm-cv"><canvas id="sg-hm-cv" role="img" aria-label="Toplotna karta novega snega po točkah in urah. Iste podatke najdete v karticah točk spodaj."></canvas><div class="sg-hm-cur" id="sg-hm-cur"></div></div></div></div>
   <p class="sg-hm-leg" id="sg-hm-leg" aria-hidden="true"></p>
   </section>
+{cams_sec}{plan_html()}{windy_map_html()}  <section id="lokacije" class="sg-sec" aria-labelledby="lok-h">
+  <h2 id="lok-h">Primerjava {len(rows)} lokacij <span class="sg-bdg m">Model</span></h2>
   <p class="archive-intro">Seznam zajema {len(rows)} točk od Golt do Zermatta in Dachsteina. To je <b>modelska ocena novega snega</b>
   iz padavin in višine ničte izoterme, ne meritev. Izmerjeno višino odeje imamo samo za nekaj postaj ARSO in je
-  v svojem polju. Za našo dolino glej še <a href="/zima/snezna-karta/">snežno karto</a>,
+  v svojem razdelku in v vrstici »Meritev« na kartici. Za našo dolino glej še <a href="/zima/snezna-karta/">snežno karto</a>,
   <a href="/zima/meja-snezenja/">mejo sneženja</a> in <a href="/vreme-v-gorah/">vreme v gorah</a>.</p>
-  <div class="sg-filter" id="sg-filter" hidden>{chips}</div>
+  <div class="sg-filter" id="sg-filter" hidden><label class="sg-search"><span class="sg-vh">Poišči lokacijo</span><input type="search" id="sg-q" placeholder="Poišči: Golte, Krvavec, Dachstein …" autocomplete="off"></label>{chips}</div>
   <div id="sg-cards">
 {cards_html}
   </div>
   <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
-  »—« pri snegu pomeni manj kot centimeter po modelu. Podatki: Open-Meteo, postaje ARSO.</p>
+  »&lt;1 cm« pri snegu pomeni manj kot centimeter po modelu, »ni podatka« pa da vrednosti nimamo. Podatki: Open-Meteo, postaje ARSO.</p>
+  </section>
 {measured_html(rows)}{alarm_html(rows)}
 {faq_html}
   <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten
