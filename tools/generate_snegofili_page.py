@@ -607,13 +607,11 @@ def build_body(data, cams):
         ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije"), ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
     nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
                 "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in nav) + '</ul></nav>\n')
-    return f"""{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)])}
-{seo.stn_badge()}
-  <div class="sg-app">
+    return f"""  <div class="sg-app">
   <section class="sg-hero{" has-photo" if hp else ""}" aria-labelledby="sg-h1"{f' style="--sg-hero-img:url(/snegofili/img/{hp[0]}.jpg)"' if hp else ""}>
     <canvas id="sg-snow" aria-hidden="true"></canvas>
     <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="222" height="58" alt="" decoding="async">
-    <p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div>
+    <div class="sg-brand-r"><a class="sg-back" href="/zima/">← MeteoZima</a><p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div></div>
     <h1 class="page-title" id="sg-h1">Snegofili: kje je zdaj sneg</h1>
     <p class="sg-sub2">Spremljanje snežnih razmer po Alpah: modelska ocena, meritve ARSO in kamere.</p>
     <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p>
