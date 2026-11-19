@@ -3575,6 +3575,10 @@ html[data-mode="simple"] .hero .hm-secondary{grid-column:auto}
 #tab-current.active>.card--sm{grid-column:span 1}
 #tab-current.active>.card--tall{grid-row:span 2}
 .wrap{max-width:var(--wrap-max,1160px)}
+/* Naslovnica na računalniku: širok ovoj (do 1800 px) namesto 1160 px. Samo stran z #tab-current;
+   druge strani, ki nalagajo style.css, ostanejo pri 1160 px. Preprosti pogled ostane ozek. */
+@media(min-width:1200px){.wrap:has(#tab-current){max-width:min(1800px,100%)}}
+html[data-mode="simple"] .wrap:has(#tab-current){max-width:860px}
 html[data-mode="simple"] .wrap{max-width:860px}
 @media(max-width:1023px){
   #tab-current.active{grid-template-columns:repeat(2,minmax(0,1fr))}
