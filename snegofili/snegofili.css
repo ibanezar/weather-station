@@ -392,6 +392,9 @@ html:has(.sg-app){scroll-padding-top:5rem}
 }
 
 /* fotografija v ozadju hero dela (Wikimedia Commons, navedba avtorja pod besedilom); temna prekrivna plast ohrani berljivost */
-.sg-hero.has-photo{background:linear-gradient(180deg,rgba(7,16,31,.78) 0%,rgba(11,27,51,.84) 55%,rgba(11,27,51,.94) 100%),var(--sg-hero-img) center 35%/cover no-repeat,#0b1b33}
+.sg-hero.has-photo{background:linear-gradient(90deg,rgba(7,16,31,.9) 0%,rgba(11,27,51,.7) 50%,rgba(11,27,51,.38) 100%),linear-gradient(180deg,rgba(11,27,51,0) 60%,#0b1b33 100%),var(--sg-hero-img) center 40%/cover no-repeat,#0b1b33}
+@media(max-width:700px){.sg-hero.has-photo{background:linear-gradient(180deg,rgba(7,16,31,.8) 0%,rgba(11,27,51,.72) 60%,#0b1b33 100%),var(--sg-hero-img) center/cover no-repeat,#0b1b33}}
 .sg-credit{margin:.9rem 0 0;font-size:.72rem;color:#b2c9e6}
 .sg-credit a{color:#cfe6ff !important;text-decoration:underline;text-underline-offset:2px}
+.sg-hero.has-photo .sg-stat{background:rgba(9,22,43,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.sg-hero.has-photo .sg-lead,.sg-hero.has-photo .sg-sub2,.sg-hero.has-photo .sg-meta,.sg-hero.has-photo .sg-nowline{text-shadow:0 1px 8px rgba(5,12,25,.75)}

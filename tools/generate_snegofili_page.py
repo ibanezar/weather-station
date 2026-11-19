@@ -382,19 +382,17 @@ def cam_slot(r_name, p):
     return ""
 
 
-HERO_PHOTO = None   # slug slike v snegofili/img/ (credits.json nosi avtorja in licenco; navedba je obvezna)
+HERO_PHOTO = "hero-zima"   # slug slike v snegofili/img/; če ima vnos v credits.json (avtor, licenca), se pod herom izpiše navedba
 
 
 def hero_photo():
-    """(slug, credit) za sliko v ozadju hero dela; None, če slike ni ali nima navedbe avtorja."""
-    if not HERO_PHOTO:
+    """(slug, navedba) za sliko v ozadju hero dela; navedba je prazna, kjer slika nima vnosa v credits.json."""
+    if not HERO_PHOTO or not os.path.exists(os.path.join(seo.ROOT, "snegofili", "img", HERO_PHOTO + ".jpg")):
         return None
     path = os.path.join(seo.ROOT, "snegofili", "img", "credits.json")
-    if not os.path.exists(path):
-        return None
-    c = json.load(open(path, encoding="utf-8")).get(HERO_PHOTO)
-    if not c or not os.path.exists(os.path.join(seo.ROOT, "snegofili", "img", HERO_PHOTO + ".jpg")):
-        return None
+    c = (json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}).get(HERO_PHOTO)
+    if not c:
+        return HERO_PHOTO, ""
     lic = (f'<a href="{_html.escape(c["licenca_url"])}" target="_blank" rel="noopener license">{_html.escape(c["licenca"])}</a>'
            if c.get("licenca_url") else _html.escape(c["licenca"]))
     credit = (f'Foto: {_html.escape(c["avtor"])} · {lic} · '
@@ -622,7 +620,7 @@ def build_body(data, cams):
     <p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
 {stats_html(rows)}    <p class="sg-lead">{hero_sentence(rows)}</p>
     <a class="sg-cta" id="sg-al-cta" href="#sg-alarm" hidden>Ne zamudite naslednjega sneženja: nastavite opozorilo</a>
-{f'    <p class="sg-credit">{hp[1]}</p>' if hp else ""}
+{f'    <p class="sg-credit">{hp[1]}</p>' if hp and hp[1] else ""}
   </section>
 {nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
   <h2 id="zm-h">Zemljevid snežnih razmer <span class="sg-bdg m">Model</span></h2>
