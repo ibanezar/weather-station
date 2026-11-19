@@ -97,5 +97,15 @@ jobs:
           ls data/wrf/recica-*.json >/dev/null 2>&1 || { echo "::error::tek ni dal izvlečka"; exit 1; }
           python3 tools/verify_wrf.py || true
           git config user.name github-actions; git config user.email github-actions@users.noreply.github.com
-          git add data/wrf data/wrf-verification.json
-          git commit -m "wrf: tek ${{ inputs.init }} [skip ci]" && git pull --rebase -q origin main && git push || true
+          # verify_wrf.py ima `|| true` in datoteke morda ne zapiše: manjkajoč pathspec bi prekinil ves `git add`
+          for p in data/wrf data/wrf-verification.json; do
+            if [ -e "$p" ]; then git add "$p"; fi
+          done
+          if git diff --cached --quiet; then
+            echo "Ni sprememb."
+          else
+            # `|| true` je prej požrl tudi neuspel push (rezultat teka bi izginil brez opozorila)
+            git commit -m "wrf: tek ${{ inputs.init }} [skip ci]"
+            git pull --rebase -q origin main
+            git push
+          fi
