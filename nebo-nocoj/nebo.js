@@ -52,7 +52,21 @@
     return best;
   }
   function showerMoon(t) { var m = moonIllum(t); return { illum: m, bad: m > 0.5 }; }
-  var api = { moonIllum: moonIllum, kpVerdict: kpVerdict, nightCloud: nightCloud, cloudVerdict: cloudVerdict, auroraTonight: auroraTonight, nextShower: nextShower, showerMoon: showerMoon, SHOWERS: SHOWERS, KP_LIMIT: KP_LIMIT };
+  // Največji napovedani Kp od zdaj −3 h do +24 h. NOAA (noaa-planetary-k-index-forecast.json) vrača SEZNAM OBJEKTOV {time_tag, kp, observed, noaa_scale}
+  // (stara oblika je bil seznam seznamov z glavo); delujeta obe. Kopija _nebKpMax() v worker.js (preverja test_nebo.mjs).
+  function kpMaxFrom(rows, now) {
+    var mx = null;
+    if (!Array.isArray(rows)) return null;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i], t, v;
+      if (Array.isArray(r)) { t = r[0]; v = r[1]; } else if (r && typeof r === 'object') { t = r.time_tag; v = r.kp; } else continue;
+      var s = String(t).replace(' ', 'T'), ts = Date.parse(/Z$/.test(s) ? s : s + 'Z'), k = parseFloat(v);
+      if (isNaN(ts) || isNaN(k)) continue;
+      if (ts >= now - 3 * 3600e3 && ts <= now + 24 * 3600e3 && (mx == null || k > mx)) mx = k;
+    }
+    return mx;
+  }
+  var api = { kpMaxFrom: kpMaxFrom, moonIllum: moonIllum, kpVerdict: kpVerdict, nightCloud: nightCloud, cloudVerdict: cloudVerdict, auroraTonight: auroraTonight, nextShower: nextShower, showerMoon: showerMoon, SHOWERS: SHOWERS, KP_LIMIT: KP_LIMIT };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.NeboModel = api;
   if (typeof document === 'undefined') return;
@@ -61,13 +75,7 @@
   function get(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
   var kp = null, cloud = null;
   var pK = get('https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json').then(function (j) {
-    // vrstice [time_tag, kp, observed/predicted, noaa_scale]; največji napovedan Kp v naslednjih 24 h
-    var now = Date.now(), mx = null;
-    for (var i = 1; i < j.length; i++) {
-      var t = Date.parse(String(j[i][0]).replace(' ', 'T') + 'Z');
-      if (t >= now - 3 * 3600e3 && t <= now + 24 * 3600e3) { var v = parseFloat(j[i][1]); if (!isNaN(v) && (mx == null || v > mx)) mx = v; }
-    }
-    kp = mx;
+    kp = kpMaxFrom(j, Date.now());
   }).catch(function () { kp = null; });
   var pC = get('https://api.open-meteo.com/v1/forecast?latitude=46.3258&longitude=14.9211&hourly=cloud_cover&timezone=Europe%2FLjubljana&forecast_days=2').then(function (j) {
     var h = [], now = Date.now();
