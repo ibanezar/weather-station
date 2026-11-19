@@ -390,3 +390,8 @@ html:has(.sg-app){scroll-padding-top:5rem}
   #sg-map{max-height:76vh}
   #sg-map.zoom .sg-lbl{font-size:12px;stroke-width:3.5px}
 }
+
+/* fotografija v ozadju hero dela (Wikimedia Commons, navedba avtorja pod besedilom); temna prekrivna plast ohrani berljivost */
+.sg-hero.has-photo{background:linear-gradient(180deg,rgba(7,16,31,.78) 0%,rgba(11,27,51,.84) 55%,rgba(11,27,51,.94) 100%),var(--sg-hero-img) center 35%/cover no-repeat,#0b1b33}
+.sg-credit{margin:.9rem 0 0;font-size:.72rem;color:#b2c9e6}
+.sg-credit a{color:#cfe6ff !important;text-decoration:underline;text-underline-offset:2px}
