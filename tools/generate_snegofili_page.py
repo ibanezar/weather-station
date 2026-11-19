@@ -294,8 +294,13 @@ def sl_text(sl, elev):
     return f"{round(sl, -1):.0f} m · točka {abs(round(d, -1)):.0f} m {'nad' if d >= 0 else 'pod'} njo"
 
 
-def card_html(r, p):
+def card_html(r, p, kcr=None):
     ph = phase(r["elevation_m"], r["snow_line_m"])
+    av = ""
+    if kcr and r["id"] in kcr:
+        c = kcr[r["id"]]
+        av = (f'<img class="sg-av" src="/snegofili/img/kraji/{r["id"]}.jpg" width="48" height="48" alt="" loading="lazy" decoding="async" '
+              f'title="Foto: {_html.escape(c["avtor"] or "neznan avtor")}, {_html.escape(c["licenca"])}">')
     meas = r.get("izmerjeno")
     meas_txt = (f'<b>{meas["depth_cm"]} cm</b> (ARSO, pred {num(meas["age_h"], 0)} h'
                 f'{", izmerjena ničla" if meas["depth_cm"] == 0 else ""})') if meas else "ni merilne postaje ARSO"
@@ -304,7 +309,7 @@ def card_html(r, p):
         f'    <article class="sg-card" id="t-{r["id"]}" data-c="{r["drzava"]}" data-past="{r["past24_cm"]}" '
         f'data-next="{r["next24_cm"]}" data-fresh="{max(r["past24_cm"], r["next24_cm"])}" '
         f'data-elev="{r["elevation_m"]}" data-km="{r["km_od_recice"]}" data-n="{_html.escape(r["ime"].lower())}" aria-label="{_html.escape(aria)}">'
-        f'<div class="sg-head"><div><h3>{_html.escape(r["ime"])}</h3><p class="sg-sub">{COUNTRIES[r["drzava"]]} · '
+        f'<div class="sg-head">{av}<div class="sg-hd-t"><h3>{_html.escape(r["ime"])}</h3><p class="sg-sub">{COUNTRIES[r["drzava"]]} · '
         f'{_html.escape(r["regija"])} · {r["elevation_m"]} m · {r["km_od_recice"]} km</p></div>'
         f'<span class="sg-pill ph-{ph}">{PHASE_TXT[ph]}</span></div>'
         f'<div class="sg-div" role="img" aria-label="{_html.escape(aria)}"><div class="sg-half l">'
@@ -380,6 +385,32 @@ def cam_slot(r_name, p):
                     f'<button type="button" class="sg-live">Odpri kamero Windy</button>'
                     f'<p class="sg-attr">Po kliku se naloži vsebina ponudnika ({prov}), ki lahko nastavi svoje piškotke.</p>{credit}</div>')
     return ""
+
+
+KRAJI_DIR = os.path.join(seo.ROOT, "snegofili", "img", "kraji")
+
+
+def kraji_credits():
+    """Vnosi credits.json za točke, ki imajo krožno fotografijo (datoteka obstaja); navedba avtorja je obvezna in se izpiše na strani."""
+    path = os.path.join(KRAJI_DIR, "credits.json")
+    if not os.path.exists(path):
+        return {}
+    c = json.load(open(path, encoding="utf-8"))
+    return {k: v for k, v in c.items() if os.path.exists(os.path.join(KRAJI_DIR, k + ".jpg"))}
+
+
+def kraji_html(rows, cr):
+    if not cr:
+        return ""
+    names = {r["id"]: r["ime"] for r in rows}
+    li = "".join(
+        f'<li><b>{_html.escape(names[k])}</b>: {_html.escape(v["avtor"] or "neznan avtor")} · '
+        + (f'<a href="{_html.escape(v["licenca_url"])}" target="_blank" rel="noopener license">{_html.escape(v["licenca"])}</a>' if v.get("licenca_url") else _html.escape(v["licenca"]))
+        + f' · <a href="{_html.escape(v["stran"])}" target="_blank" rel="noopener">Wikimedia Commons</a></li>'
+        for k, v in sorted(cr.items(), key=lambda kv: names.get(kv[0], kv[0])) if k in names)
+    return ('  <details class="sg-fotocr" id="foto-krajev"><summary>Fotografije krajev: avtorji in licence</summary>\n'
+            '  <p class="muted-note">Majhne krožne fotografije ob krajih so z Wikimedia Commons (zmanjšane in izrezane); avtorji in licence so spodaj.</p>\n'
+            f'  <ul>{li}</ul></details>\n')
 
 
 HERO_PHOTO = "hero-zima"   # slug slike v snegofili/img/; če ima vnos v credits.json (avtor, licenca), se pod herom izpiše navedba
@@ -579,11 +610,14 @@ def build_body(data, cams):
     rows = sorted(data["tocke"], key=lambda r: (-r["past72_cm"], -r["elevation_m"]))
     present = sorted({r["drzava"] for r in rows}, key=list(COUNTRIES).index)
     prof, bx = profile_svg(rows)
+    kcr = kraji_credits()
 
     def pt(r):
         x, y = proj(r["lon"], r["lat"])
         o = {"id": r["id"], "n": r["ime"], "e": r["elevation_m"], "x": round(x, 1), "y": round(y, 1), "bx": bx[r["id"]],
              "k": r["km_od_recice"], "c": r["drzava"]}
+        if r["id"] in kcr:
+            o["f"] = 1
         o.update(cam_info(cams.get(r["id"], {})))
         if r.get("izmerjeno"):
             o["m"] = {"d": r["izmerjeno"]["depth_cm"], "a": r["izmerjeno"]["age_h"]}
@@ -598,7 +632,7 @@ def build_body(data, cams):
              '<button type="button" data-s="next" aria-pressed="false">Naslednjih 24 ur</button>'
              '<button type="button" data-s="elev" aria-pressed="false">Višina</button>'
              '<button type="button" data-s="km" aria-pressed="false">Razdalja</button>')
-    cards_html = "\n".join(card_html(r, cams.get(r["id"], {})) for r in rows)
+    cards_html = "\n".join(card_html(r, cams.get(r["id"], {}), kcr) for r in rows)
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
     cams_sec = cam_wall_html(rows, cams)
@@ -675,7 +709,7 @@ def build_body(data, cams):
   <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
   »&lt;1 cm« pri snegu pomeni manj kot centimeter po modelu, »ni podatka« pa da vrednosti nimamo. Podatki: Open-Meteo, postaje ARSO.</p>
   </section>
-{measured_html(rows)}{alarm_html(rows)}
+{measured_html(rows)}{alarm_html(rows)}{kraji_html(rows, kcr)}
 {faq_html}
   <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten
   pristojne države, <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a> in razmere pri
