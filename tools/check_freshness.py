@@ -28,6 +28,7 @@ import csv
 import datetime
 import json
 import os
+import re
 import sys
 from zoneinfo import ZoneInfo
 
@@ -42,6 +43,7 @@ UTC = datetime.timezone.utc
 #   način "csvdate"   — datum v prvem stolpcu zadnje vrstice CSV
 #   način "csvcol"    — CSV z glavo: stolpec (parameter) zadnje vrstice, datum YYYY-MM-DD ali ISO čas
 #   način "firstdate" — datoteka je seznam, polje z datumom prvega (najnovejšega) zapisa
+#   način "regexdate" — besedilna datoteka (HTML), parameter = regex, ki v prvi skupini zajame datum YYYY-MM-DD
 REGISTER = [
     # Nevihtna karta in njeno preverjanje sta na pavzi do aprila 2027 (28. 10. 2026) -- vrstici vrni ob vklopu:
     #   ("Nevihtna karta Slovenije", "og/storm-map/latest.json", "date", "date", 36,
@@ -91,6 +93,9 @@ REGISTER = [
      "zima-forecast.yml → tools/snegofili_data.py (korak je continue-on-error)"),
     ("Jutro v dolini (zamik prvi žarek → ogrevanje)", "data/jutro-zamik.json", "date", "generated", 60,
      "zima-forecast.yml (korak je continue-on-error)"),
+    # 19. 11. 2026: squash PR-ja je povozil botov commit in kartica »Včeraj rekord za …« je ostala dan za zgodovino; izdelek je v index.html, ne v JSON.
+    ("Dnevno dejstvo na naslovnici", "index.html", "regexdate", r'daily-fact-card" data-date="(\d{4}-\d{2}-\d{2})"', 60,
+     "update-history.yml (generate_daily_fact.py); če zaostaja za history.json, glej commit bota"),
     ("Zgodovina meritev (history.json)", "history.json", "maxkey", None, 60,
      "update-history.yml (Ecowitt)"),
     ("Verifikacija napovedi", "forecast_verification.json", "maxkey", None, 72,
@@ -150,6 +155,10 @@ def read_time(path, mode, param):
     if not os.path.exists(full):
         return None
     try:
+        if mode == "regexdate":
+            with open(full, encoding="utf-8") as f:
+                m = re.search(param, f.read())
+            return end_of_day(m.group(1)) if m else None
         if mode == "csvdate":
             with open(full, encoding="utf-8") as f:
                 rows = [r for r in csv.reader(f) if r]
@@ -184,8 +193,8 @@ def evaluate(now=None, register=None):
             continue
         age = max(0.0, (now - t).total_seconds() / 3600)
         # datumski izdelki merijo od konca dneva, zato jim ura (00:00) nič ne pove
-        stamp = t.astimezone(TZ) - datetime.timedelta(seconds=1) if mode in ("date", "maxkey", "csvdate", "csvcol") else t.astimezone(TZ)
-        label = stamp.strftime("%-d. %-m. %Y") + ("" if mode in ("date", "maxkey", "csvdate", "csvcol") else stamp.strftime(" %H:%M"))
+        stamp = t.astimezone(TZ) - datetime.timedelta(seconds=1) if mode in ("date", "maxkey", "csvdate", "csvcol", "regexdate") else t.astimezone(TZ)
+        label = stamp.strftime("%-d. %-m. %Y") + ("" if mode in ("date", "maxkey", "csvdate", "csvcol", "regexdate") else stamp.strftime(" %H:%M"))
         out.append({"name": name, "path": path, "status": "stale" if age > max_h else "ok",
                     "age_h": round(age, 1), "max_h": max_h, "hint": hint, "updated": label})
     return out

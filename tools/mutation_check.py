@@ -24,6 +24,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # `test` je skripta v tools/ (privzeto test_parity.py)
 MUTACIJE = [
     ("toča: živi prikaz razhajan (nevihte)", "tools/generate_nevihte_page.py", 'id="toca-live" style="margin-bottom:1rem"', 'id="toca-live" style="margin-bottom:2rem"'),
+    ("svežina: regexdate brez zadetka ni več napaka", "tools/check_freshness.py", "return end_of_day(m.group(1)) if m else None", 'return end_of_day(m.group(1)) if m else end_of_day("2099-01-01")', "test_freshness.py"),
+    ("svežina: regexdate bere napačno skupino", "tools/check_freshness.py", "end_of_day(m.group(1)) if m else None", "end_of_day(m.group(0)[-10:]) if m else None", "test_freshness.py"),
     ("FWI razred (app.js)", "app.js", "if(v<5.2)return{label:'Nizka'", "if(v<5.3)return{label:'Nizka'"),
     ("FWI razred (gasilec.js)", "meteogasilec/gasilec.js", "if (v < 11.2) return { label: 'Zmerna'", "if (v < 11.3) return { label: 'Zmerna'"),
     ("FWI razred (Python)", "tools/gasilec_model.py", '("Zelo visoka", "#ef4444", 21.3, 38.0)', '("Zelo visoka", "#ef4444", 21.3, 39.0)'),
