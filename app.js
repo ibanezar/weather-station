@@ -21586,6 +21586,9 @@ function generateWeatherCard() {
     document.getElementById('card-modal-img').src = dataUrl;
     document.getElementById('card-modal').classList.add('open');
     document.body.style.overflow = 'hidden';
+    _cardPrevFocus = document.activeElement;
+    document.addEventListener('keydown', _cardModalKey);
+    const cl = document.querySelector('#card-modal .card-modal-close'); if (cl) cl.focus({preventScroll:true});
   } catch(e) {
     console.error('Weather card error:', e);
   }
@@ -21593,10 +21596,25 @@ function generateWeatherCard() {
 
 let _cardModalDataUrl = '';
 
+let _cardPrevFocus = null;
+function _cardModalKey(e) {
+  if (e.key === 'Escape') { closeCardModal(); return; }
+  if (e.key !== 'Tab') return;
+  const m = document.getElementById('card-modal');
+  const f = [...m.querySelectorAll('button')].filter(n => !n.disabled);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1], act = document.activeElement;
+  if (!m.contains(act)) { e.preventDefault(); first.focus(); }
+  else if (e.shiftKey && act === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && act === last) { e.preventDefault(); first.focus(); }
+}
 function closeCardModal(e) {
   if (e && e.target !== document.getElementById('card-modal')) return;
   document.getElementById('card-modal').classList.remove('open');
   document.body.style.overflow = '';
+  document.removeEventListener('keydown', _cardModalKey);
+  try { if (_cardPrevFocus && document.contains(_cardPrevFocus)) _cardPrevFocus.focus({preventScroll:true}); } catch (_) {}
+  _cardPrevFocus = null;
 }
 
 function downloadWeatherCard() {
@@ -22583,13 +22601,28 @@ function _surveyLs(k,v){
   try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(_){}
   return null;
 }
+let _svPrevFocus=null;
 function _surveyClose(state){
   const el=document.getElementById('survey');
   if(el)el.remove();
   document.removeEventListener('keydown',_surveyKey);
   if(state)_surveyLs(SURVEY_KEY,state);
+  // fokus nazaj tja, kjer je bil (tipkovnica/bralnik zaslona ne ostane na izginulem elementu)
+  try{ if(_svPrevFocus&&document.contains(_svPrevFocus))_svPrevFocus.focus({preventScroll:true}); }catch(_){}
+  _svPrevFocus=null;
 }
-function _surveyKey(e){ if(e.key==='Escape')_surveyClose('dismissed'); }
+function _surveyKey(e){
+  if(e.key==='Escape'){ _surveyClose('dismissed'); return; }
+  if(e.key!=='Tab')return;
+  // aria-modal: Tab ostane v oknu ankete
+  const el=document.getElementById('survey'); if(!el)return;
+  const f=[...el.querySelectorAll('button,input,select,textarea,a[href],[tabindex]:not([tabindex="-1"])')].filter(n=>!n.disabled&&n.offsetParent!==null);
+  if(!f.length)return;
+  const first=f[0], last=f[f.length-1], act=document.activeElement;
+  if(!el.contains(act)){ e.preventDefault(); first.focus(); }
+  else if(e.shiftKey&&act===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey&&act===last){ e.preventDefault(); first.focus(); }
+}
 function _surveySend(ans,box){
   const body=Object.assign({website:''},ans);
   box.querySelector('.sv-send').disabled=true;
@@ -22660,6 +22693,7 @@ function initSurvey(){
     body.append(msg,act);
     box.append(x,h,p,body); el.appendChild(box);
     document.body.appendChild(el);
+    _svPrevFocus=document.activeElement;
     document.addEventListener('keydown',_surveyKey);
     send.focus({preventScroll:true});
   },3000);
