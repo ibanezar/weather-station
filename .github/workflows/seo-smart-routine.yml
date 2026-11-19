@@ -41,6 +41,14 @@ jobs:
         continue-on-error: true
         run: python3 tools/generate_drva_page.py
 
+      # /vreme-za-prireditev/ in /rojstnodnevno-vreme/ vdelata dnevne vrednosti iz history.json; test_prireditev/test_rojstni zahtevata enakost,
+      # zato se osvežujeta dnevno (sicer parity pade ob prvi spremembi tools/** po vsakem novem dnevu meritev).
+      - name: Vreme za prireditev in rojstnodnevno vreme
+        continue-on-error: true
+        run: |
+          python3 tools/generate_prireditev_page.py
+          python3 tools/generate_rojstni_page.py
+
       # Dnevni arhiv agregatov poročil o snegu (worker jih hrani 72 h); okna se ne prekrivajo (preskok < 20 h).
       - name: Arhiv poročil o snegu
         continue-on-error: true
@@ -62,7 +70,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ llms-full.txt data/sneg-ugibalnik.json data/zmrzal-ugibalnik.json data/sneg-porocila-dnevno.csv zima/poraba-drv/ || true
+          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ llms-full.txt data/sneg-ugibalnik.json data/zmrzal-ugibalnik.json data/sneg-porocila-dnevno.csv zima/poraba-drv/ vreme-za-prireditev/ rojstnodnevno-vreme/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi hub strani in novosti $(date -u +%Y-%m-%d) [skip ci]"
           # Ob hkratnem pushu drugega workflowa (npr. takoj po mergu) rebase in ponovi.

@@ -34,7 +34,7 @@ mm, n = p.mean_precip(3.0, None)
 check(mm is None and n == 1, "brez drugih modelov količine ne objavimo")
 
 # fetch_live_multi: dnevna vsota padavin po modelu; model z < 20 urami ne šteje
-def fake_forecast(m):
+def fake_forecast(m, forecast_days=4):
     full = [(h, 0.5) for h in range(24)]
     return {"2026-10-23": {"temperature_2m": [(h, 10.0) for h in range(24)],
                            "precipitation": full if m != "kratek" else full[:5]}}
