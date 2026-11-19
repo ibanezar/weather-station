@@ -218,6 +218,18 @@ MUTACIJE = [
     ("čuvaj videza: dotik šteje največji dogodek", "tools/visual_watch.mjs", "Math.max(by.get(e.id) || 0, e.d)", "e.d", "test_visual_watch.mjs"),
     ("čuvaj videza: dogodki brez interactionId", "tools/visual_watch.mjs", "if (e && e.id) by.set", "if (e) by.set", "test_visual_watch.mjs"),
     ("hero stavek: vrh jutri (24 ur)", "app.js", "const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&", "const tomorrowPeak=false&&"),
+    # ── Snegofili (test_snegofili.py, 19. 11. 2026) ──
+    ("snegofili: zacetek okna naprej ne šteje ure, ki teče", "tools/snegofili_data.py", '("next24", idx_now + 1, idx_now + 24)', '("next24", idx_now, idx_now + 24)', "test_snegofili.py"),
+    ("snegofili: okno nazaj 24 ur", "tools/snegofili_data.py", '("past24", idx_now - 23, idx_now)', '("past24", idx_now - 24, idx_now)', "test_snegofili.py"),
+    ("snegofili: premalo ur nazaj: točka odpade", "tools/snegofili_data.py", 'idx_now < 71 or', 'idx_now < 40 or', "test_snegofili.py"),
+    ("snegofili: izmerjeno ARSO starejše od 24 h ne velja", "tools/snegofili_data.py", 'if 0 <= age_h <= ARSO_MAX_AGE_H:', 'if 0 <= age_h:', "test_snegofili.py"),
+    ("snegofili: meja sneženja: ±100 m do sneg", "tools/generate_snegofili_page.py", '"snow" if d >= 100 else', '"snow" if d >= 0 else', "test_snegofili.py"),
+    ("snegofili: stopnje snega: prag 5 cm", "tools/generate_snegofili_page.py", '0 if cm < 5 else', '0 if cm < 6 else', "test_snegofili.py"),
+    ("snegofili: vdelava: potrdilo pogojev in datum", "tools/generate_snegofili_page.py", 'not c.get("embed_terms") or not c.get("checked")', 'not c.get("checked")', "test_snegofili.py"),
+    ("snegofili: vdelava: samo https", "tools/generate_snegofili_page.py", 'if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:', 'if u.hostname not in EMBED_HOSTS[kind]:', "test_snegofili.py"),
+    ("snegofili: vdelava: dovoljen gostitelj", "tools/generate_snegofili_page.py", 'if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:', 'if u.scheme != "https":', "test_snegofili.py"),
+    ("snegofili: povzetek: doseg izleta TRIP_KM", "tools/generate_snegofili_page.py", 'r["km_od_recice"] <= TRIP_KM and', 'r["km_od_recice"] >= TRIP_KM and', "test_snegofili.py"),
+    ("snegofili: tuja kamera: samo https povezava", "tools/generate_snegofili_page.py", 'if str(c.get("url", "")).startswith("https://"):', 'if str(c.get("url", "")):', "test_snegofili.py"),
 ]
 
 
