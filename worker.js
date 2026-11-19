@@ -3648,6 +3648,10 @@ async function _cronDispatchScheduledWorkflows(env) {
     // zgodbe ne objavi znova (stanje v tools/.story_state.json). `force: "false"` je OBVEZEN: pri ročnem
     // zagonu je privzeto "true", kar bi obšlo okno in objavilo ob vsakem klicu.
     "daily-story.yml": await _cronDispatchGithubWorkflow(env, "daily-story.yml", { force: "false" }),
+    // Termika, nivo igre (19. 11. 2026, issue #1517): padalci-forecast.yml ima cron 3:45/4:45 UTC, GitHub pa ga zažene šele ob 12:00–13:30 UTC,
+    // zunaj okna 5:00–12:00 (igra_gate.py), zato nivo od 14. 11. ni nastal. Okna NE širimo (kdor je igral zjutraj, ne sme zvečer dobiti drugega stropa),
+    // ampak ga sprožimo v oknu, enako kot zgodbo. `force: "false"` je OBVEZEN (privzeto je "true" in obide okno); vrata dovolijo samo en nivo na dan.
+    "padalci-forecast.yml": await _cronDispatchGithubWorkflow(env, "padalci-forecast.yml", { force: "false" }),
   };
   const r2 = env?.PHOTOS_R2;
   if (r2) {

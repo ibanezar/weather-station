@@ -271,6 +271,9 @@ jobs:
       - name: Test poti v `git add` v workflowih (manjkajoč pathspec tiho ustavi commit)
         run: python3 tools/test_workflow_git_add.py
 
+      - name: Test dispatcha workflowov z vrati (force false)
+        run: python3 tools/test_dispatch_force.py
+
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py
 

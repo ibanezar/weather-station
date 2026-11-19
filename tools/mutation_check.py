@@ -29,6 +29,7 @@ MUTACIJE = [
     ("workflow: git add z manjkajočo potjo", ".github/workflows/toca-tracker.yml", "git add toca/ || true", "git add toca/ nic-takega.csv || true", "test_workflow_git_add.py"),
     ("nebo.js: NOAA objekti (time_tag)", "nebo-nocoj/nebo.js", "else if (r && typeof r === 'object') { t = r.time_tag; v = r.kp; }", "else if (r && typeof r === 'object') { t = r.time; v = r.kp; }", "test_nebo.mjs"),
     ("nebo.js: okno Kp +24 h", "nebo-nocoj/nebo.js", "ts <= now + 24 * 3600e3 && (mx == null || k > mx)) mx = k;", "ts <= now + 48 * 3600e3 && (mx == null || k > mx)) mx = k;", "test_nebo.mjs"),
+    ("dispatch: padalci brez force false", "worker.js", '"padalci-forecast.yml", { force: "false" })', '"padalci-forecast.yml")', "test_dispatch_force.py"),
     ("FWI razred (app.js)", "app.js", "if(v<5.2)return{label:'Nizka'", "if(v<5.3)return{label:'Nizka'"),
     ("FWI razred (gasilec.js)", "meteogasilec/gasilec.js", "if (v < 11.2) return { label: 'Zmerna'", "if (v < 11.3) return { label: 'Zmerna'"),
     ("FWI razred (Python)", "tools/gasilec_model.py", '("Zelo visoka", "#ef4444", 21.3, 38.0)', '("Zelo visoka", "#ef4444", 21.3, 39.0)'),
