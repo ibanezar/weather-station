@@ -20,7 +20,7 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
     if (u.includes('slika=1')) return r.fulfill({ body: svg, contentType: 'image/svg+xml' });
     return r.fulfill({ status: 404, body: '{}' });
   });
-  await page.route(/googletagmanager|google-analytics|fonts\.g|drsc\.si/, r => r.abort());
+  await page.route(/googletagmanager|google-analytics|fonts\.g|drsc\.si|embed\.windy\.com/, r => r.abort());
   await page.goto(BASE + '/snegofili/index.html'); await page.waitForSelector('.sg-nowc', { timeout: 8000 });
   const tag = vp.width + ' px: ';
   ok(await page.locator('.sg-spark svg').count() === await page.locator('.sg-card').count(), tag + 'sparkline na vsaki kartici');
@@ -61,6 +61,11 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   ok(await page.evaluate(() => JSON.parse(localStorage.getItem('wx-sg-fav')).length === 1), tag + 'zvezdica shrani priljubljeno');
   await page.locator('#sg-filter [data-f="fav"]').click();
   ok(await page.locator('.sg-card:not([hidden])').count() === 1, tag + 'filter »Moje točke«');
+  /* Windy karta: iframe šele po kliku, plast se menja */
+  ok(await page.locator('#sg-wy iframe').count() === 0, tag + 'Windy: brez iframe pred klikom');
+  await page.locator('#windy .sg-heatbar button[data-ov="wind"]').click();
+  await page.locator('#sg-wy .sg-live').click();
+  ok((await page.locator('#sg-wy iframe').getAttribute('src')).startsWith('https://embed.windy.com/embed2.html') && (await page.locator('#sg-wy iframe').getAttribute('src')).includes('overlay=wind&'), tag + 'Windy: iframe na embed.windy.com z izbrano plastjo');
   /* globoka povezava */
   await page.goto(BASE + '/snegofili/index.html#t-kredarica'); await page.waitForSelector('.sg-dt');
   ok(await page.locator('#sg-dt-t').textContent() === 'Kredarica', tag + 'globoka povezava odpre podrobnost');

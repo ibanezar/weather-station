@@ -236,5 +236,10 @@ check("Izmerjena snežna odeja" in body and "Agencija Republike Slovenije za oko
 check("To niso videoposnetki v živo" in body, "kamere: iskreno pove, da so sličice")
 check(g.measured_html([r for r in rows if "izmerjeno" not in r]) == "", "izmerjeno: brez meritev razdelka ni")
 
+check('id="windy"' in body and "<iframe" not in body, "Windy karta: razdelek je, iframe šele po kliku")
+check(g.WINDY_MAP.startswith("https://embed.windy.com/") and "{overlay}" in g.WINDY_MAP and all("overlay=" + o + "&" in g.WINDY_MAP.replace("{overlay}", o) for o, _ in g.WINDY_OVERLAYS),
+      "Windy karta: gostitelj embed.windy.com, plast je parameter")
+check("windy.com" in body and "ne naša ocena" in body, "Windy karta: navedba ponudnika in pojasnilo, da ni naša ocena")
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

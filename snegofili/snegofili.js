@@ -725,6 +725,26 @@
     if (window.ResizeObserver) { var lw = 0; new ResizeObserver(function () { var w = cv.parentNode.clientWidth; if (w && Math.abs(w - lw) > 2) { lw = w; heatDraw(); } }).observe(cv.parentNode); }
   }
 
+  /* ══ karta Windy: iframe šele po kliku, samo https://embed.windy.com ══ */
+  (function () {
+    var box = $('#sg-wy'); if (!box) return;
+    var base = box.dataset.base, ov = 'snowAccu', frame = null;
+    function url() { try { var u = new URL(base.replace('{overlay}', ov)); return u.protocol === 'https:' && u.hostname === 'embed.windy.com' ? u.href : null; } catch (e) { return null; } }
+    $$('#windy .sg-heatbar button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        ov = b.dataset.ov; $$('#windy .sg-heatbar button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+        if (frame) { var u = url(); if (u) frame.src = u; }
+      });
+    });
+    var btn = $('.sg-live', box); if (!btn) return;
+    btn.addEventListener('click', function () {
+      var u = url(); if (!u) return;
+      frame = document.createElement('iframe'); frame.src = u; frame.loading = 'lazy'; frame.title = 'Windy: karta snega in vetra';
+      frame.setAttribute('referrerpolicy', 'no-referrer'); frame.setAttribute('allowfullscreen', ''); frame.className = 'sg-wy-frame';
+      btn.replaceWith(frame);
+    });
+  })();
+
   /* ══ ščit pred starimi podatki ══ */
   var g = document.getElementById('sg-gen');
   if (g) { var hh = (Date.now() - Date.parse(g.dataset.generated)) / 36e5; if (hh > 26) { g.textContent += ' · podatki niso sveži (' + Math.round(hh) + ' h)'; g.classList.add('sg-stale'); } }

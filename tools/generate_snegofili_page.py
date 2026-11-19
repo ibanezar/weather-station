@@ -480,6 +480,27 @@ def measured_html(rows):
             f'  <ul class="sg-ms">{li}</ul>\n  </section>\n')
 
 
+# Karta Windy (embed.windy.com, brez ključa API). Osnovni URL je vzorec, ki ga generira https://embed.windy.com/config/map;
+# »overlay« je začetna plast, drugo izbere obiskovalec v meniju karte. Iframe se naloži šele po kliku.
+WINDY_MAP = ("https://embed.windy.com/embed2.html?lat=46.4&lon=12.0&detailLat=46.33&detailLon=14.92&width=650&height=450"
+             "&zoom=6&level=surface&overlay={overlay}&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure="
+             "&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1")
+WINDY_OVERLAYS = (("snowAccu", "Nov sneg"), ("wind", "Veter"), ("temp", "Temperatura"), ("clouds", "Oblaki"))
+
+
+def windy_map_html():
+    btns = "".join(f'<button type="button" data-ov="{o}" aria-pressed="{"true" if i == 0 else "false"}">{t}</button>'
+                   for i, (o, t) in enumerate(WINDY_OVERLAYS))
+    return f"""  <section id="windy" class="sg-sec" aria-labelledby="wy-h">
+  <h2 id="wy-h">Sneg in veter na zemljevidu Windy</h2>
+  <p class="archive-intro">Zunanja interaktivna karta Windy (model ECMWF) za pregled gibanja padavin in vetra. To je vsebina ponudnika, ne naša ocena: številke se lahko razlikujejo od tistih zgoraj.</p>
+  <div class="sg-heatbar" role="group" aria-label="Začetna plast karte Windy">{btns}</div>
+  <div class="sg-wy" id="sg-wy" data-base="{_html.escape(WINDY_MAP)}"><button type="button" class="sg-live">Naloži karto Windy</button>
+  <p class="sg-attr">Po kliku se naloži vsebina ponudnika (Windy), ki lahko nastavi svoje piškotke. Map by <a href="https://www.windy.com/" target="_blank" rel="noopener">windy.com</a>.</p></div>
+  </section>
+"""
+
+
 def plan_html():
     km = "".join(f'<option value="{k}"{" selected" if k == TRIP_KM else ""}>{"do " + str(k) + " km" if k else "vse"}</option>'
                  for k in (100, TRIP_KM, 400, 0))
@@ -556,7 +577,7 @@ def build_body(data, cams):
   <div class="sg-nowrow" id="sg-now-row" role="list"></div>
   <div class="sg-top" id="sg-top"></div>
   </section>
-{cam_wall_html(rows, cams)}{plan_html()}  <section id="toplotna-karta" class="sg-sec sg-heatsec" aria-labelledby="hm-h" hidden>
+{cam_wall_html(rows, cams)}{windy_map_html()}{plan_html()}  <section id="toplotna-karta" class="sg-sec sg-heatsec" aria-labelledby="hm-h" hidden>
   <h2 id="hm-h">Kdaj in kje sneži: 96 ur</h2>
   <p class="archive-intro">Vsaka vrstica je ena točka, vsak stolpec ena ura od 48 ur nazaj do 48 ur naprej. Svetlejša in večja količina pomeni več novega snega na uro po modelu. Navpična črta je ura, ki jo kaže drsnik; klik na vrstico odpre podrobnost točke.</p>
   <div class="sg-heatbar" role="group" aria-label="Razvrstitev toplotne karte"><button type="button" data-hs="snow" aria-pressed="true">Najbolj snežno</button><button type="button" data-hs="elev" aria-pressed="false">Višina</button><button type="button" data-hs="km" aria-pressed="false">Razdalja</button></div>

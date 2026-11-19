@@ -264,3 +264,6 @@
 .sg-ms-bar i{display:block;height:100%;background:#85b9f3;min-width:2px}
 @media(max-width:640px){.sg-ms li{grid-template-columns:1fr 1fr}.sg-ms-bar{grid-column:1/-1}}
 .sg-seg{display:inline-flex;gap:.3rem;flex-wrap:wrap}
+
+.sg-wy{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.8rem}
+.sg-wy-frame{display:block;width:100%;height:min(72vh,32rem);min-height:20rem;border:0;border-radius:10px}
