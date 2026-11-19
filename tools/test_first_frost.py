@@ -56,6 +56,8 @@ T3 = datetime.date(2026, 10, 1)
 ev = frost_events(hist(datetime.date(2026, 1, 1), T3, **{"2026-08-31": 3.0, "2026-09-20": -1.0}), T3)
 check(ev and ev[0]["date"] == "2026-09-20", "zmrzal 20. 9. je prva")
 check(frost_events(hist(datetime.date(2026, 1, 1), T3, **{"2026-08-31": -1.0}), T3) == [], "zmrzal 31. 8. ni v sezoni (od 1. septembra)")
+T4 = datetime.date(2026, 9, 10)
+check(frost_events(hist(datetime.date(2026, 1, 1), T4, **{"2026-08-31": -1.0}), T4) == [], "zmrzal 31. 8. v oknu iskanja: sezona se začne 1. 9., dogodka ni")
 # okno iskanja: prva zmrzal pred več kot 30 dnevi (zdaj 19. 11., prva 10. 10.) dogodka ne ustvari
 check(frost_events(hist(**base, **{"2026-10-10": -1.0, "2026-11-05": -2.0}), T) == [], "prva zmrzal starejša od 30 dni: ni dogodka")
 check(len(frost_events(hist(**base, **{"2026-10-20": -1.0}), T)) == 1, "prva zmrzal v oknu 30 dni")
