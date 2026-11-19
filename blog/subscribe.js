@@ -18,7 +18,7 @@
       '<button class="sub-btn" id="sub-btn" type="submit">Prijava</button>' +
     '</form>' +
     '<p class="sub-msg" id="sub-msg" aria-live="polite"></p>' +
-    '<p class="sub-desc sub-more">Vsak ponedeljek tudi <a href="/dolina-v-tednu/">povzetek tedna v dolini</a>: skrajne vrednosti, padavine in primerjava z običajnim.</p>';
+    '<p class="sub-desc sub-more" style="margin:.6rem 0 0;font-size:.85rem">Vsak ponedeljek tudi <a href="/dolina-v-tednu/">povzetek tedna v dolini</a>: skrajne vrednosti, padavine in primerjava z običajnim.</p>';
 
   var foot = document.querySelector(".site-foot");
   if (foot && foot.parentNode) foot.parentNode.insertBefore(box, foot);

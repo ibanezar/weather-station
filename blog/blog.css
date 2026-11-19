@@ -349,7 +349,6 @@ article strong{color:#fff}
 .sub-btn:hover{opacity:.9}
 .sub-btn:disabled{opacity:.55;cursor:default}
 .sub-msg{font-size:.88rem;margin:.7rem 0 0;min-height:1em}
-.sub-more{margin:.6rem 0 0;font-size:.85rem}.sub-more a{color:var(--accent,var(--cyan));text-decoration:underline}
 .sub-msg.ok{color:var(--green)}
 .sub-msg.err{color:#f87171}
 
