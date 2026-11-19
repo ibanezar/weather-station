@@ -425,7 +425,7 @@ def build_body(data, cams):
     <div class="sg-profwrap">
       <h2>Višinski prerez Alp</h2>
       <p>Višine točk od zahoda proti vzhodu. Modri del stolpca je nad mejo sneženja, bela črtica je meja sneženja pri točki ob izbrani uri; kjer lebdi nad stolpcem, je meja višje od točke.</p>
-      <div class="sg-scroll">{prof}</div>
+      <div class="sg-scroll" tabindex="0" role="region" aria-label="Višinski prerez: meja sneženja in točke">{prof}</div>
       <p class="sg-hint">Povlecite vodoravno za ostale točke.</p>
     </div>
   </section>

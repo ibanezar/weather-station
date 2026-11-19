@@ -1547,7 +1547,7 @@ PAGE_JS = """<script>
       '<span><i style="background:#f59e0b"></i>Zmerna (35–54)</span>'+
       '<span><i style="background:#fb923c"></i>Slaba (18–34)</span>'+
       '<span><i style="background:#f87171"></i>Brez (0–17)</span></div>';
-    html+='<div class="gp-scroll"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
+    html+='<div class="gp-scroll" tabindex="0" role="region" aria-label="Matrika vrst in dni"><table class="gp-matrix"><thead><tr><th style="text-align:left">Vrsta</th>';
     loc.days.forEach(function(day,i){html+='<th>'+dayLabel(day,i===0)+'</th>';});
     html+='</tr></thead><tbody>';
     top.forEach(function(id){html+='<tr><td class="nm">'+(meta[id]?meta[id].name_sl:id)+'</td>';
@@ -4106,7 +4106,7 @@ VALOVI_JS = r"""(function(){
       var cell = function(c){ return c ? c.span + '<br><small>' + toneWord(c.tone) + (c.pct !== null ? ' · ' + c.pct + ' %' : '') + '</small>' : '–'; };
       rows += '<tr><th scope="row">' + g.name + '</th><td>' + cell(a) + '</td><td>' + cell(b) + '</td><td>' + (chg.length ? chg.join('; ') : 'brez spremembe') + '</td></tr>';
     });
-    box.innerHTML = '<div class="gp-scroll"><table class="gp-val-cmp"><thead><tr><th></th><th>A: ' + scenA.evs + '</th><th>B (zdaj): ' + B.evs +
+    box.innerHTML = '<div class="gp-scroll" tabindex="0" role="region" aria-label="Primerjava scenarijev"><table class="gp-val-cmp"><thead><tr><th></th><th>A: ' + scenA.evs + '</th><th>B (zdaj): ' + B.evs +
       '</th><th>Kaj se je spremenilo</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="gp-val-sub">Spremeni vnos zgoraj in primerjaj z shranjenim scenarijem A. Ujemanje je najvišje med prikazanimi vrstami skupine.</p>';
   }
@@ -4968,7 +4968,7 @@ def build_strupene_page(species):
     table = ('  <h2 class="gp-h2" id="zamenjave">S čim se strupene gobe najpogosteje zamenjajo</h2>\n'
              '  <p class="archive-intro">Strupena vrsta v prvem stolpcu, užitna, s katero jo zamenjajo, v drugem, '
              'ključna razlika v tretjem. ◌ pomeni, da je vnos iz literature in ni terensko preverjen v dolini.</p>\n'
-             '  <div class="gp-scroll"><table class="gp-sptable"><thead><tr><th>Strupena</th><th>Zamenjajo z užitno</th>'
+             '  <div class="gp-scroll" tabindex="0" role="region" aria-label="Strupene vrste in njihove užitne dvojnice"><table class="gp-sptable"><thead><tr><th>Strupena</th><th>Zamenjajo z užitno</th>'
              '<th>Ključna razlika</th></tr></thead><tbody>\n' + "\n".join(rows) + "\n    </tbody></table></div>\n"
              if rows else "")
 
@@ -4986,7 +4986,7 @@ def build_strupene_page(species):
                 '  <p class="archive-intro">Rod Lactarius združuje cenjene užitne sirovke in vrste, ki jih je v bazi '
                 'vpisanih kot strupene. Spodaj so vse strupene iz baze, z užitno vrsto, s katero jih zamenjajo, '
                 'kadar baza to navaja.</p>\n'
-                '  <div class="gp-scroll"><table class="gp-sptable"><thead><tr><th>Strupena</th><th>Zamenjajo z užitno</th>'
+                '  <div class="gp-scroll" tabindex="0" role="region" aria-label="Strupene vrste in njihove užitne dvojnice"><table class="gp-sptable"><thead><tr><th>Strupena</th><th>Zamenjajo z užitno</th>'
                 '<th>Ključna razlika</th></tr></thead><tbody>\n' + "\n".join(sir_rows) +
                 "\n    </tbody></table></div>\n") if sir_rows else ""
 
@@ -5940,7 +5940,7 @@ def photo_credits_html(img_dir, only=None):
         f'    <summary>Viri fotografij <small>({len(credit_rows)})</small></summary>\n'
         '    <p class="archive-intro">Fotografije so iz Wikimedia Commons, objavljene pod prostimi licencami '
         '(CC BY, CC BY-SA ali javna domena). Hvala vsem fotografinjam in fotografom.</p>\n'
-        '    <div class="gp-scroll" style="max-height:320px"><table class="gp-sptable"><thead><tr>'
+        '    <div class="gp-scroll" style="max-height:320px" tabindex="0" role="region" aria-label="Zamenljive vrste"><table class="gp-sptable"><thead><tr>'
         '<th>Vrsta</th><th>Avtor/ica</th><th>Licenca</th><th>Vir</th></tr></thead><tbody>\n'
         + "\n".join(credit_rows) + "\n    </tbody></table></div>\n"
         '  </details>')

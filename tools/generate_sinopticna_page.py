@@ -186,7 +186,7 @@ def build_body(run_dt, generated_utc):
   0,25°), ne analiza in ne uradna napoved. Rdeča pika je Rečica ob Savinji. Za Slovenijo glej
   <a href="/primerjava-modelov/">primerjavo modelov za Rečico</a> in <a href="/nevihte/">nevihtno karto</a>.</p>
 {age_note}  <div class="sy" id="sy">
-    <div class="sy-bar" role="tablist" aria-label="Vrsta karte">{tabs}</div>
+    <div class="sy-bar" role="group" aria-label="Vrsta karte">{tabs}</div>
     <div class="sy-bar" role="group" aria-label="Čas napovedi">{btns}</div>
     <p class="muted-note" id="sy-valid">Veljavno: {_html.escape(valid[0])}</p>
     <img id="sy-img" src="{first}" width="960" height="740" alt="Sinoptična karta Evrope: tlak na morski gladini
