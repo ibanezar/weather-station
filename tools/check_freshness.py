@@ -96,6 +96,12 @@ REGISTER = [
     # 19. 11. 2026: squash PR-ja je povozil botov commit in kartica »Včeraj rekord za …« je ostala dan za zgodovino; izdelek je v index.html, ne v JSON.
     ("Dnevno dejstvo na naslovnici", "index.html", "regexdate", r'daily-fact-card" data-date="(\d{4}-\d{2}-\d{2})"', 60,
      "update-history.yml (generate_daily_fact.py); če zaostaja za history.json, glej commit bota"),
+    # 19. 11. 2026: seo-smart-routine se je od 18. 11. tiho ni commital (manjkajoč pathspec v git add). Dogodki so redki, zato je prag za katalog 21 dni
+    # (loči izpad od tihega obdobja); občutljivejši znak, da dnevni tek commita, je dateModified hub strani.
+    ("Katalog dogodkov (novosti.json)", "novosti.json", "firstdate", "date", 24 * 21,
+     "seo-smart-routine.yml (detect_events); ob zaostanku preveri korak git add in commit »seo: posodobi hub strani«"),
+    ("Hub /klima/ (dnevni tek SEO rutine)", "klima/index.html", "regexdate", r'"dateModified":"(\d{4}-\d{2}-\d{2})"', 60,
+     "seo-smart-routine.yml: korak »Commit in push« (git add po posameznih poteh)"),
     ("Zgodovina meritev (history.json)", "history.json", "maxkey", None, 60,
      "update-history.yml (Ecowitt)"),
     ("Verifikacija napovedi", "forecast_verification.json", "maxkey", None, 72,
@@ -193,8 +199,8 @@ def evaluate(now=None, register=None):
             continue
         age = max(0.0, (now - t).total_seconds() / 3600)
         # datumski izdelki merijo od konca dneva, zato jim ura (00:00) nič ne pove
-        stamp = t.astimezone(TZ) - datetime.timedelta(seconds=1) if mode in ("date", "maxkey", "csvdate", "csvcol", "regexdate") else t.astimezone(TZ)
-        label = stamp.strftime("%-d. %-m. %Y") + ("" if mode in ("date", "maxkey", "csvdate", "csvcol", "regexdate") else stamp.strftime(" %H:%M"))
+        stamp = t.astimezone(TZ) - datetime.timedelta(seconds=1) if mode in ("date", "maxkey", "csvdate", "csvcol", "regexdate", "firstdate") else t.astimezone(TZ)
+        label = stamp.strftime("%-d. %-m. %Y") + ("" if mode in ("date", "maxkey", "csvdate", "csvcol", "regexdate", "firstdate") else stamp.strftime(" %H:%M"))
         out.append({"name": name, "path": path, "status": "stale" if age > max_h else "ok",
                     "age_h": round(age, 1), "max_h": max_h, "hint": hint, "updated": label})
     return out
