@@ -405,3 +405,23 @@ body .site-head{display:none}
 .sg-brand-r{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 .sg-back{display:inline-flex;align-items:center;min-height:44px;padding:0 1rem;border-radius:999px;border:1.5px solid rgba(255,255,255,.4);color:#fff !important;font:700 .8rem var(--sg-display);text-decoration:none;background:rgba(255,255,255,.1)}
 .sg-back:hover{background:rgba(255,255,255,.2)}
+
+/* krožne fotografije krajev */
+.sg-av{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;background:#183563;border:2px solid rgba(255,255,255,.4);display:block}
+.sg-av.ph{display:flex;align-items:center;justify-content:center;font:700 .72rem/1 var(--sg-font,inherit);letter-spacing:.04em;color:#e6efff;background:#183563;border-color:#6f8fc4}
+.sg-av.ph.sm{font-size:.62rem}
+.sg-av.ph[data-c=SI]{border-color:#4f9bff}.sg-av.ph[data-c=AT]{border-color:#ff6b6b}.sg-av.ph[data-c=IT]{border-color:#5fd08a}.sg-av.ph[data-c=CH]{border-color:#ff8a8a}.sg-av.ph[data-c=FR]{border-color:#8fb0ff}.sg-av.ph[data-c=HR]{border-color:#ff9a9a}.sg-av.ph[data-c=DE]{border-color:#ffd25a}
+.sg-av.sm{width:34px;height:34px;border-width:1.5px}
+.sg-av.lg{width:52px;height:52px}
+.sg-head{justify-content:flex-start;align-items:center}
+.sg-head .sg-hd-t{flex:1 1 auto;min-width:0}
+.sg-head .sg-pill{margin-left:auto}
+.sg-nowc-hd,.sg-pn-h,.sg-dt-hd{align-items:center}
+.sg-pn-h{justify-content:flex-start;gap:.6rem}.sg-pn-h>div{flex:1 1 auto;min-width:0}
+.sg-nowc-hd{display:flex;gap:.5rem}
+.sg-pl-i .sg-av{align-self:center}
+.sg-fotocr{margin:1rem 0;color:var(--sg-muted);font-size:.85rem}
+.sg-fotocr summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--sg-ink)}
+.sg-fotocr ul{columns:2 20rem;margin:.4rem 0 0;padding-left:1.1rem}
+.sg-fotocr li{margin:0 0 .35rem;break-inside:avoid}
+.sg-pn-x{margin-left:auto}

@@ -243,7 +243,7 @@
     if (!panel || !selId) return;
     var p = byId[selId], h = hours && hours[selId]; if (!p) return;
     panel.textContent = '';
-    var hd = el('div', 'sg-pn-h'), tt = el('div'); tt.appendChild(el('h3', null, p.n));
+    var hd = el('div', 'sg-pn-h'), tt = el('div'), av0 = avatar(p); if (av0) hd.appendChild(av0); tt.appendChild(el('h3', null, p.n));
     tt.appendChild(el('p', 'sg-sub', (p.c === 'SI' ? 'Slovenija' : p.c) + ' · ' + p.e + ' m n. m. · ' + p.k + ' km od Rečice'));
     hd.appendChild(tt);
     var x = el('button', 'sg-pn-x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Zapri povzetek točke');
@@ -365,6 +365,12 @@
   var camsEl = $('#sg-cams'), PROXY = (camsEl && camsEl.dataset.proxy) || API, DRSI = camsEl && camsEl.dataset.drsi;
   var camState = {}, camIds = [], camTiles = {}, camSeen = {}, CAM_TTL = 3e5;
   var EMBED_OK = { windy: ['webcams.windy.com', 'embed.windy.com'], youtube: ['www.youtube-nocookie.com'] };
+  /* mala krožna fotografija kraja (snegofili/img/kraji/<id>.jpg; avtorji so v razdelku »Fotografije krajev«) */
+  function avatar(p, cls) {
+    if (!p) return null;
+    if (!p.f) { var b = el('span', 'sg-av ph' + (cls ? ' ' + cls : ''), p.c || ''); b.setAttribute('data-c', p.c || ''); b.setAttribute('aria-hidden', 'true'); return b; }
+    var i = el('img', 'sg-av' + (cls ? ' ' + cls : '')); i.src = '/snegofili/img/kraji/' + p.id + '.jpg'; i.alt = ''; i.width = 48; i.height = 48; i.loading = 'lazy'; i.decoding = 'async'; return i;
+  }
   function camLabel(p) { return (p.ca || p.cd) ? 'Oglej si aktualno sliko' : 'Odpri kamero Windy'; }
   function hasCam(p) { return !!(p && (p.ca || p.cd || p.ce)); }
   function camKind(p) { return p.ca ? 'arso' : p.cd ? 'drsi' : p.ce ? 'embed' : null; }
@@ -519,7 +525,7 @@
     list.slice(0, 12).forEach(function (x) {
       var p = x.p, h = hours[p.id], c = el('article', 'sg-nowc'); c.setAttribute('role', 'listitem');
       var th = el('div', 'sg-nowc-th'); th.dataset.id = p.id; c.appendChild(th);
-      var hd = el('div', 'sg-nowc-hd'); hd.appendChild(el('h3', null, p.n));
+      var hd = el('div', 'sg-nowc-hd'), av1 = avatar(p, 'sm'); if (av1) hd.appendChild(av1); hd.appendChild(el('h3', null, p.n));
       hd.appendChild(el('span', 'sg-pill ph-' + x.ph, PHASE_TXT[x.ph])); c.appendChild(hd);
       var r = el('p', 'sg-nowc-r'); r.appendChild(el('b', null, fmt(x.rate, x.rate >= 10 ? 0 : 1))); r.appendChild(document.createTextNode(' cm/h')); c.appendChild(r);
       var t = h.t[i]; c.appendChild(el('p', 'sg-sub', p.e + ' m · ' + (t == null ? '—' : fmt(t / 10, 1) + ' °C') + ' · ' + p.k + ' km' + (p.m ? ' · izmerjeno ' + p.m.d + ' cm' : '')));
@@ -656,7 +662,7 @@
   function openDetail(id, trigger) {
     var p = byId[id], h = hours && hours[id]; if (!p || !h) return;
     var cmpId = '', wrap = el('div', 'sg-dt');
-    var hd = el('div', 'sg-dt-hd'), tt = el('div'); var h2 = el('h2', null, p.n); h2.id = 'sg-dt-t'; tt.appendChild(h2);
+    var hd = el('div', 'sg-dt-hd'), tt = el('div'), av3 = avatar(p, 'lg'); if (av3) hd.appendChild(av3); var h2 = el('h2', null, p.n); h2.id = 'sg-dt-t'; tt.appendChild(h2);
     tt.appendChild(el('p', 'sg-sub', (p.c === 'SI' ? 'Slovenija' : p.c) + ' · ' + p.e + ' m · ' + p.k + ' km od Rečice'));
     hd.appendChild(tt);
     var star = el('button', 'sg-star', '☆'); star.type = 'button'; star.dataset.id = id; star.addEventListener('click', function () { toggleFav(id); });
@@ -715,7 +721,7 @@
       res.forEach(function (x, k) {
         var p = x.p, li = el('li', 'sg-pl-i'), t = hours[p.id].t[NOW];
         li.appendChild(el('span', 'sg-pl-rank', String(k + 1)));
-        var b = el('div', 'sg-pl-b'); b.appendChild(el('h3', null, p.n));
+        var b = el('div', 'sg-pl-b'), av2 = avatar(p, 'sm'); if (av2) li.appendChild(av2); b.appendChild(el('h3', null, p.n));
         b.appendChild(el('p', 'sg-sub', (p.c === 'SI' ? 'Slovenija' : p.c) + ' · ' + p.e + ' m · ' + p.k + ' km · zdaj ' + (t == null ? '—' : fmt(t / 10, 1) + ' °C')));
         var act = el('div', 'sg-dt-act');
         var d = el('button', 'sg-btn s', 'Podrobnosti'); d.type = 'button'; d.addEventListener('click', function () { openDetail(p.id, d); }); act.appendChild(d);
