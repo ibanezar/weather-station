@@ -360,7 +360,7 @@ Postaja IREICA1 snega ne meri, zato MTR sneg (kartica »Sneg v dolini«) nima iz
 
 ### Vreme za poroko in prireditve (`/vreme-za-prireditev/`, 18. 11. 2026)
 
-Klimatologija po datumih (ne napoved): `tools/generate_prireditev_page.py` (ROČNO, ni v workflowu; po novem letu ali večjem posodabljanju `history.json` ga poženi znova) + ROČNO pisan
+Klimatologija po datumih (ne napoved): `tools/generate_prireditev_page.py` (od 19. 11. 2026 dnevno v `seo-smart-routine.yml`, skupaj z `generate_rojstni_page.py`: testa `test_prireditev.mjs`/`test_rojstni.mjs` zahtevata enakost vdelanih podatkov s `history.json`, ki se dnevno daljša) + ROČNO pisan
 `vreme-za-prireditev/prireditev.js` (model `buildDays/share/exact/best/wilson` izvožen za Node). V stran se vdelajo dnevne vrednosti iz `history.json` (najvišja, najnižja, padavine; ~40 kB,
 brez ERA5, dan z manjkajočim poljem odpade), JS za izbran datum in okno ±3/7/14 dni izračuna **delež »primernih« dni v vseh letih** (padavine strogo pod pragom IN najvišja v obsegu IN neobvezno
 najnižja ≥ meja), pokaže točno ta datum po letih in najboljše datume v ±14 dneh. Merila profilov (poroka 0,2 mm, 18–30 °C; večerna prireditev 0,2 mm, 18–33 °C, najnižja ≥ 9; šport 1 mm, 10–25 °C)
