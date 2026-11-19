@@ -398,3 +398,10 @@ html:has(.sg-app){scroll-padding-top:5rem}
 .sg-credit a{color:#cfe6ff !important;text-decoration:underline;text-underline-offset:2px}
 .sg-hero.has-photo .sg-stat{background:rgba(9,22,43,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .sg-hero.has-photo .sg-lead,.sg-hero.has-photo .sg-sub2,.sg-hero.has-photo .sg-meta,.sg-hero.has-photo .sg-nowline{text-shadow:0 1px 8px rgba(5,12,25,.75)}
+
+/* stran Snegofili je samostojna aplikacija: glava, drobtine in značka postaje Meteorec so skriti (po Filipovi želji); povratek je »← MeteoZima« v herou */
+body .site-head{display:none}
+.sg-app{margin-top:1rem}
+.sg-brand-r{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.sg-back{display:inline-flex;align-items:center;min-height:44px;padding:0 1rem;border-radius:999px;border:1.5px solid rgba(255,255,255,.4);color:#fff !important;font:700 .8rem var(--sg-display);text-decoration:none;background:rgba(255,255,255,.1)}
+.sg-back:hover{background:rgba(255,255,255,.2)}
