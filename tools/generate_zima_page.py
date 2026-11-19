@@ -811,6 +811,12 @@ def build_hub_body(data):
     <a class="phenom-card zima-phenom" href="/zima/sneg-ugibalnik/" style="{card_style("snow_line", "")}">
       <span class="ph-icon">{icon_html("snow_line", 30)}</span>Snežni ugibalnik
       <div class="ph-count">kdaj bo prvi sneg?</div></a>
+    <a class="phenom-card zima-phenom" href="/ugibalnik-zmrzal/" style="{card_style("black_ice", "")}">
+      <span class="ph-icon">{icon_html("black_ice", 30)}</span>Ugibalnik zmrzali
+      <div class="ph-count">kdaj bo prva zmrzal?</div></a>
+    <a class="phenom-card zima-phenom" href="/dolina-v-tednu/" style="{card_style("fog", "")}">
+      <span class="ph-icon">{icon_html("fog", 30)}</span>Dolina v tednu
+      <div class="ph-count">tedenski povzetek in e-pošta</div></a>
     <a class="phenom-card zima-phenom" href="/vreme-v-gorah/" style="{card_style("passes", "")}">
       <span class="ph-icon">{icon_html("passes", 30)}</span>Vreme v gorah
       <div class="ph-count">Golte, Menina, Smrekovec, Raduha</div></a>
