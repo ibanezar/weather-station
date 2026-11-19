@@ -1,8 +1,9 @@
 {
  "sezona": 2026,
- "prva_zmrzal": null,
+ "prva_zmrzal": "2026-10-23",
  "vir": "IREICA1 (Rečica ob Savinji, 366 m), najnižja temperatura dneva ≤ 0 °C, od 1. septembra",
  "novosti": "/novosti/prva-zmrzal-2026/",
  "brez_zmrzali": false,
- "posodobljeno": "2026-11-19T08:58:45Z"
+ "vrednost_c": -0.1,
+ "posodobljeno": "2026-11-19T12:15:21Z"
 }
