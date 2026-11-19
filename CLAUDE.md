@@ -2719,7 +2719,7 @@ Kar je zdaj narejeno:
   ob zastarelem odpre issue z oznako `stale-output`, ko je spet vse sveže, ga zapre.
   **Nov dnevni izdelek = nova vrstica v `REGISTER`**; `tools/test_freshness.py` preveri,
   da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
-  Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve.
+  Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve. **Načini branja** (`REGISTER`): `ts`, `date`, `maxkey`, `csvdate` (prvi stolpec zadnje vrstice), `csvcol` (stolpec po imenu, datum ali ISO čas) in `firstdate` (seznam JSON, prvi zapis). 19. 11. 2026 so dodani tudi dnevniki, ki se nabirajo samo s tekočim zajemom in jih izpad nepovratno prizadene (`profile-/ensemble-/forecast-forward-log.csv`, `hourly-observations.csv`, `solar-5min.csv`, `varpolje-solar-5min.csv`, `mtr-live-log.csv`), odčitki ARSO snega, `sneg-verification.json`, `sonce-preverjanje.json`, `snegofili.json` in `dolina-v-tednu.json`.
 
 ### Zakaj cron zamuja: GitHub dostavi ~6 tekov na dan (meritev 1. 10. 2026)
 
