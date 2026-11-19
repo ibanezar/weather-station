@@ -40,6 +40,7 @@ UTC = datetime.timezone.utc
 #   način "date"      — polje z datumom YYYY-MM-DD (starost od konca tistega dne)
 #   način "maxkey"    — največji datumski ključ v objektu (history.json …)
 #   način "csvdate"   — datum v prvem stolpcu zadnje vrstice CSV
+#   način "firstdate" — datoteka je seznam, polje z datumom prvega (najnovejšega) zapisa
 REGISTER = [
     # Nevihtna karta in njeno preverjanje sta na pavzi do aprila 2027 (28. 10. 2026) -- vrstici vrni ob vklopu:
     #   ("Nevihtna karta Slovenije", "og/storm-map/latest.json", "date", "date", 36,
@@ -90,6 +91,9 @@ REGISTER = [
      "update-history.yml (Ecowitt)"),
     ("Verifikacija napovedi", "forecast_verification.json", "maxkey", None, 72,
      "forecast-verify.yml"),
+    # Tedenski povzetek: ponedeljki 04:40 UTC (cron zamuja ure), zadnji teden se konča v nedeljo -> 9 dni + rezerva za izpad enega teka.
+    ("Dolina v tednu (tedenski povzetek)", "data/dolina-v-tednu.json", "firstdate", "week_end", 24 * 11,
+     "dolina-v-tednu.yml → generate_dolina_v_tednu.py"),
     ("Dolinski dvoboj", "data/valley-duel-log.csv", "csvdate", None, 60,
      "valley-duel-log.yml"),
     ("Model MTR (mesečno učenje)", "model/recica-mos.json", "ts", "trained_at", 24 * 40,
@@ -127,6 +131,8 @@ def read_time(path, mode, param):
             return end_of_day(rows[-1][0])
         with open(full, encoding="utf-8") as f:
             data = json.load(f)
+        if mode == "firstdate":
+            return end_of_day(data[0][param])
         if mode == "ts":
             return parse_ts(data[param])
         if mode == "date":
