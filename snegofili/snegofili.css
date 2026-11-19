@@ -368,3 +368,25 @@
 .sg-camf{margin:.2rem 0 .8rem}
 .sg-card .sg-nums b{color:#cfe6ff}
 html:has(.sg-app){scroll-padding-top:5rem}
+
+/* ── polna širina na računalniku: aplikacija se razširi čez ozko kolono strani (po Filipovi želji 19. 11. 2026) ── */
+@media(min-width:900px){
+  .sg-app{width:min(1800px,calc(100vw - 3rem));margin-left:calc(50% - min(900px,calc(50vw - 1.5rem)))}
+  .sg-app>*:not(.sg-hero){margin-left:2rem;margin-right:2rem}
+  .sg-hero{padding:1.8rem 2rem 1.6rem}
+  .sg-nav ul{padding-left:2rem}
+  .sg-hero h1.page-title{font-size:clamp(2.6rem,4.2vw,4.6rem)}
+  .sg-sub2{font-size:1.15rem}
+  .sg-lead{max-width:60rem}
+}
+@media(min-width:1100px){
+  .sg-mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 22rem;gap:1rem;align-items:start}
+  .sg-mapgrid:has(.sg-panel[hidden]){grid-template-columns:minmax(0,1fr)}
+  .sg-mapcol{display:block}
+  .sg-mapgrid .sg-mapwrap{order:unset}
+  .sg-mapgrid .sg-panel{order:unset;display:flex;flex-direction:column;position:sticky;top:5rem}
+  .sg-mapgrid .sg-panel[hidden]{display:none}
+  #sg-cards{grid-template-columns:repeat(auto-fill,minmax(19rem,1fr))}
+  #sg-map{max-height:76vh}
+  #sg-map.zoom .sg-lbl{font-size:12px;stroke-width:3.5px}
+}

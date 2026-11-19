@@ -25,7 +25,7 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   const tag = vp.width + ' px: ';
   ok(await page.locator('.sg-spark svg').count() === await page.locator('.sg-card').count(), tag + 'sparkline na vsaki kartici');
   ok(await page.locator('.sg-hm-l').count() >= 30, tag + 'toplotna karta ima vrstico za vsako točko');
-  ok(await page.locator('.sg-pl-i').count() === 3, tag + 'Kam peljem: tri točke');
+  { const pn = await page.locator('.sg-pl-i').count(); ok(pn >= 1 && pn <= 3, tag + 'Kam peljem: do tri točke (odvisno od današnjih podatkov)'); }
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), tag + 'brez vodoravnega razliva');
   const nowLine = await page.locator('#sg-nowline').textContent(), nowN = await page.locator('#sg-now-row .sg-nowc').count();
   ok(nowN > 0 ? /sneži na \d+ od/.test(nowLine) : /Trenutno ne sneži/.test(nowLine), tag + 'vrstica »zdaj sneži« se ujema s pasom');
