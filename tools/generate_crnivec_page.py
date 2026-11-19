@@ -455,7 +455,7 @@ def wind_row(speed, gust):
 # izzveni v 6 urah (NEXT_BIAS_HOURS): sicer bi stran zdaj kazala 11 °C
 # izmerjeno in čez uro 12 °C iz modela, kar je skok, ki ga ni. Klientska
 # kopija: napovedUr()/stavekNapovedi() v SHARE_JS_TEMPLATE.
-NEXT_BIAS_HOURS = 5
+NEXT_BIAS_HOURS = 6
 NEXT_SHOW_H = (1, 3, 6)
 LEVEL_RANK = {"na": 0, "ok": 1, "warn": 2, "stop": 3}
 
