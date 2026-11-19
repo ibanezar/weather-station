@@ -2721,7 +2721,7 @@ Kar je zdaj narejeno:
   ob zastarelem odpre issue z oznako `stale-output`, ko je spet vse sveže, ga zapre.
   **Nov dnevni izdelek = nova vrstica v `REGISTER`**; `tools/test_freshness.py` preveri,
   da se vsaka vrstica res razreši (napačna pot bi sicer pomenila, da nikoli ne opozori).
-  Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve. **Načini branja** (`REGISTER`): `ts`, `date`, `maxkey`, `csvdate` (prvi stolpec zadnje vrstice), `csvcol` (stolpec po imenu, datum ali ISO čas) in `firstdate` (seznam JSON, prvi zapis). 19. 11. 2026 so dodani tudi dnevniki, ki se nabirajo samo s tekočim zajemom in jih izpad nepovratno prizadene (`profile-/ensemble-/forecast-forward-log.csv`, `hourly-observations.csv`, `solar-5min.csv`, `varpolje-solar-5min.csv`, `mtr-live-log.csv`), odčitki ARSO snega, `sneg-verification.json`, `sonce-preverjanje.json`, `snegofili.json` in `dolina-v-tednu.json`.
+  Praga sta radodarna (zamude so ure); lovi okvare, ki trajajo dneve. **Načini branja** (`REGISTER`): `ts`, `date`, `maxkey`, `csvdate` (prvi stolpec zadnje vrstice), `csvcol` (stolpec po imenu, datum ali ISO čas) in `firstdate` (seznam JSON, prvi zapis) in `regexdate` (besedilna datoteka, regex zajame datum; uporabljen za kartico dnevnega dejstva v `index.html`, ki je 19. 11. 2026 po povozu bota zaostajala dan za `history.json`). 19. 11. 2026 so dodani tudi dnevniki, ki se nabirajo samo s tekočim zajemom in jih izpad nepovratno prizadene (`profile-/ensemble-/forecast-forward-log.csv`, `hourly-observations.csv`, `solar-5min.csv`, `varpolje-solar-5min.csv`, `mtr-live-log.csv`), odčitki ARSO snega, `sneg-verification.json`, `sonce-preverjanje.json`, `snegofili.json` in `dolina-v-tednu.json`.
 
 ### Zakaj cron zamuja: GitHub dostavi ~6 tekov na dan (meritev 1. 10. 2026)
 
@@ -3241,6 +3241,8 @@ Izvozi (Search Console 6 mesecev, Looker Studio strani × poizvedbe, GA4) so v `
 
 - Razvoj na seji veji, merge v `main` prek PR; `main` je produkcija
   (GitHub Pages + auto-deploy Cloudflare workerja ob spremembi worker.js).
+- **Veja po squash merge-u:** ob naslednjem delu začni z `git checkout -B <veja> origin/main`; remote veja ima še stare commite, zato push zavrne (»fetch first«). Ne force-pushaj: `git fetch origin <veja> && git merge -s ours --no-edit FETCH_HEAD` obdrži trenutno drevo.
+- **Konflikt v datoteki, ki jo pišejo boti (`index.html`, `history.json`, `*.min.*`)** ob združevanju `main` v vejo: vzemi `main` (`git checkout --theirs`/`origin/main`), nato ponovno zgradi svoje spremembe. Z vzetjem veje (`--ours`) squash povozi jutranji commit bota (19. 11. 2026: kartica »Včeraj rekord za …« je ostala na 17. 11.). Po taki združitvi poženi `inject_record_watch.py` in `generate_daily_fact.py` ali počakaj na `update-history.yml`.
 - **Po mergu spremembe generatorja strani vedno takoj ročno poženi workflow,
   ki stran zgradi** (`workflow_dispatch` na `main`, npr. `zima-forecast.yml`
   za crnivec.si in `/zima/`) — Filip želi spremembe videti takoj, ne šele ob

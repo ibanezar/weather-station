@@ -39,7 +39,7 @@ cf.ROOT = tmp
 for fname, content in (("a.json", {"generated_at": "2026-10-01T06:00:00Z"}), ("b.json", {"date": "2026-09-29"}),
                        ("h.json", {"2026-09-30": {}, "2026-09-28": {}, "x": 1}), ("l.json", [{"week_end": "2026-09-27"}, {"week_end": "2026-09-20"}]),
                        ("m.csv", "model,issued_at,x\nicon,2026-09-20,1\nicon,2026-09-30,2\n"), ("i.csv", "issued_at,x\n2026-09-20T01:00:00Z,1\n2026-10-01T06:00:00Z,2\n"),
-                       ("c.csv", None)):
+                       ("r.html", '<div class="daily-fact-card" id="x" data-date="2026-09-29">'), ("c.csv", None)):
     p = os.path.join(tmp, fname)
     with open(p, "w", encoding="utf-8") as f:
         f.write("2026-09-20,a\n2026-09-30,b\n" if content is None else content if isinstance(content, str) else json.dumps(content))
@@ -50,6 +50,9 @@ reg = [("ts sveže", "a.json", "ts", "generated_at", 36, "x"), ("ts zastarelo", 
        ("seznam sveže", "l.json", "firstdate", "week_end", 24 * 6, "x"), ("seznam zastarelo", "l.json", "firstdate", "week_end", 24 * 3, "x"),
        ("csvcol datum", "m.csv", "csvcol", "issued_at", 36, "x"), ("csvcol datum zastarelo", "m.csv", "csvcol", "issued_at", 12, "x"),
        ("csvcol čas", "i.csv", "csvcol", "issued_at", 12, "x"), ("csvcol čas zastarelo", "i.csv", "csvcol", "issued_at", 3, "x"),
+       ("regex sveže", "r.html", "regexdate", r'data-date="(\d{4}-\d{2}-\d{2})"', 72, "x"),
+       ("regex zastarelo", "r.html", "regexdate", r'data-date="(\d{4}-\d{2}-\d{2})"', 36, "x"),
+       ("regex brez zadetka", "r.html", "regexdate", r'nic-takega="(\d+)"', 36, "x"),
        ("manjka", "nikoli.json", "ts", "generated_at", 36, "x")]
 res = {r["name"]: r for r in cf.evaluate(now, reg)}
 check(res["ts sveže"]["status"] == "ok" and res["ts sveže"]["age_h"] == 6.0, "ts: 6 h star", str(res["ts sveže"]))
@@ -64,9 +67,12 @@ check(res["csvcol datum"]["status"] == "ok" and res["csvcol datum zastarelo"]["s
       "csvcol: stolpec po imenu (ne prvi), zadnja vrstica, datum", str(res["csvcol datum"]))
 check(res["csvcol čas"]["status"] == "ok" and res["csvcol čas zastarelo"]["status"] == "stale",
       "csvcol: ISO čas zadnje vrstice", str(res["csvcol čas"]))
+check(res["regex sveže"]["status"] == "ok" and res["regex zastarelo"]["status"] == "stale",
+      "regexdate: datum iz besedilne datoteke (HTML)", str(res["regex sveže"]))
+check(res["regex brez zadetka"]["status"] == "unreadable", "regexdate: brez zadetka je napaka, ne tišina")
 check(res["manjka"]["status"] == "unreadable", "manjkajoča datoteka je napaka, ne tišina")
 text, n = cf.report(list(res.values()))
-check(n == 6 and "zastarelo" in text and "ni berljivo" in text, "poročilo šteje zastarele in neberljive", f"n={n}")
+check(n == 8 and "zastarelo" in text and "ni berljivo" in text, "poročilo šteje zastarele in neberljive", f"n={n}")
 print("cron throughput")
 import measure_cron_throughput as mc  # noqa: E402
 for cron, want in {"*/15 * * * *": 96, "*/20 * * * *": 72, "0 * * * *": 24, "15 1 * * *": 1, "30 6-7 * * *": 2,

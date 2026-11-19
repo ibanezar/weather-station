@@ -5034,3 +5034,12 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 .tp-inp input:focus-visible,.tp-inp-sel select:focus-visible,.gallery-form input:focus-visible,.gallery-form textarea:focus-visible,.gallery-form select:focus-visible,
 #community-comment:focus-visible,#community-author:focus-visible,.sub-input:focus-visible,.fc-slider:focus-visible,.sc-scrub-range:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 :where(button,input,select,textarea,summary,a[href],[tabindex]):focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* Tap-cilji na dotik (19. 11. 2026): površina dotika ≥ 44 px brez spremembe postavitve (nevidni ::after). Samo pointer:coarse.
+   .tab-btn je namenoma izpuščen: .tab-nav ima overflow-x:auto, kar bi pseudo-element spremenilo v navpično drsenje. */
+@media (pointer:coarse){
+  .cookie-btn,.qn-mode-btn,.share-btn,.notif-btn,.radar-btn,.mode-cta-btn,.mtr-seg-btn,.sub-btn,.sskj-toggle{position:relative}
+  .cookie-btn::after,.qn-mode-btn::after,.share-btn::after,.notif-btn::after,.radar-btn::after,.mode-cta-btn::after,.mtr-seg-btn::after,
+  .sub-btn::after,.mode-intro-close::after,.tab-nav-arrow::after,.theme-btn::after{content:"";position:absolute;inset:-9px -3px}
+  .sskj-toggle::after{content:"";position:absolute;inset:-16px}
+}
