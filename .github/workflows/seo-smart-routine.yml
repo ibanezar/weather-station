@@ -31,6 +31,11 @@ jobs:
         continue-on-error: true
         run: python3 tools/sneg_ugibalnik_resolve.py
 
+      # Ugibalnik zmrzali (/ugibalnik-zmrzal/): datum prve zmrzali prepiše iz novosti.json (isti dogodek kot /novosti/prva-zmrzal-*).
+      - name: Ugibalnik zmrzali (razrešitev)
+        continue-on-error: true
+        run: python3 tools/zmrzal_ugibalnik_resolve.py
+
       # /zima/poraba-drv/: kalkulator drv; stran kaže letošnje stopinjske dni do včeraj, zato se osvežuje dnevno (po update-history).
       - name: Kalkulator drv (/zima/poraba-drv/)
         continue-on-error: true
@@ -57,7 +62,7 @@ jobs:
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
-          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ llms-full.txt data/sneg-ugibalnik.json data/sneg-porocila-dnevno.csv zima/poraba-drv/ || true
+          git add klima/ padavine/ temperatura/ teden/ novosti/ novosti.json sitemap-seo.xml sezona/ llms-full.txt data/sneg-ugibalnik.json data/zmrzal-ugibalnik.json data/sneg-porocila-dnevno.csv zima/poraba-drv/ || true
           git diff --cached --quiet && echo "Ni sprememb." && exit 0
           git commit -m "seo: posodobi hub strani in novosti $(date -u +%Y-%m-%d) [skip ci]"
           # Ob hkratnem pushu drugega workflowa (npr. takoj po mergu) rebase in ponovi.

@@ -159,6 +159,11 @@ jobs:
       - name: Test arhiva poročil o snegu in razrešitve ugibalnika
         run: python3 tools/test_sneg_porocila_log.py
 
+      - name: Test ugibalnika zmrzali (pravi worker.js, lažna ura, nastavitve igre) in razreševalnika
+        run: |
+          node tools/test_zmrzal_ugibalnik.mjs
+          python3 tools/test_zmrzal_resolve.py
+
       - name: Test kalkulatorja drv (model in vdelani podatki)
         run: node tools/test_drva.mjs
 

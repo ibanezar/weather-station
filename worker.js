@@ -7806,6 +7806,66 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Ugibalnik zmrzali (/ugibalnik-zmrzal/), 19. 11. 2026 ──
+      // Obiskovalec ugiba datum prve zmrzali sezone (najnižja temperatura dneva <= 0 °C na IREICA1, od 1. septembra); resnica je dogodek
+      // `prva-zmrzal-<sezona>` v novosti.json, ki ga tools/zmrzal_ugibalnik_resolve.py prepiše v data/zmrzal-ugibalnik.json. Isto pravilo
+      // in ista oblika kot snežni ugibalnik (spodaj), samo sezona: odpre se 1. avgusta, datum ugiba je od 1. septembra do 31. decembra.
+      //   GET  /zmrzal/ugibanja[?igralec=id] → vsi ugibi sezone (brez id-jev) + moj
+      //   POST /zmrzal/ugibanje              → { igralec, datum, ime?, website? }; ugibanje je zaklenjeno, ko je prva zmrzal že bila
+      // `_zSezona` ↔ SEASON_MONTH v tools/zmrzal_ugibalnik_resolve.py in data-season-month na strani (tools/test_zmrzal_ugibalnik.mjs).
+      if (path === "/zmrzal/ugibanja" || path === "/zmrzal/ugibanje") {
+        const r2 = env?.PHOTOS_R2;
+        const _zj = (obj, status, cache) => new Response(JSON.stringify(obj), { status: status || 200,
+          headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": cache || "no-cache" } });
+        const ZUGIB_CAP = 3000;
+        const _zSezona = () => { const d = new Date(); return d.getUTCMonth() >= 7 ? d.getUTCFullYear() : d.getUTCFullYear() - 1; };
+        const _zDanes = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Ljubljana" });
+        const ZKEY = s => "feedback/zmrzal-ugibalnik-" + s + ".json";
+        async function _zr2json(key) {
+          if (!r2) return [];
+          try { const o = await r2.get(key); return o ? JSON.parse(await o.text()) : []; } catch (_) { return []; }
+        }
+
+        if (path === "/zmrzal/ugibanja" && request.method === "GET") {
+          const sezona = _zSezona();
+          const all = await _zr2json(ZKEY(sezona));
+          const igr = (url.searchParams.get("igralec") || "").slice(0, 40);
+          const moj = igr ? (all.find(i => i.id === igr) || null) : null;
+          return _zj({ sezona, n: all.length, ugibi: all.slice(0, 2000).map(i => [i.datum, i.ime || "", i.ts]),
+            moj: moj ? { datum: moj.datum, ts: moj.ts } : null }, 200, "public, max-age=60");
+        }
+
+        if (path === "/zmrzal/ugibanje" && request.method === "POST") {
+          if (!r2) return _zj({ error: "Shramba ni dosegljiva" }, 503);
+          let body;
+          try { body = await request.json(); } catch (_) { return _zj({ error: "Napačni podatki" }, 400); }
+          if (!body || typeof body !== "object") return _zj({ error: "Napačni podatki" }, 400);
+          if (body.website) return _zj({ ok: true }); // honeypot
+          const id = typeof body.igralec === "string" && /^[A-Za-z0-9_-]{8,40}$/.test(body.igralec) ? body.igralec : null;
+          const datum = typeof body.datum === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.datum) ? body.datum : null;
+          if (!id || !datum) return _zj({ error: "Napačni podatki" }, 400);
+          const sezona = _zSezona(), danes = _zDanes();
+          const dt = new Date(datum + "T00:00:00Z");
+          if (isNaN(dt) || dt.toISOString().slice(0, 10) !== datum) return _zj({ error: "Neveljaven datum" }, 400);
+          if (danes > sezona + "-12-31") return _zj({ error: "Ugibanje je mimo. Nova igra se začne 1. avgusta." }, 409);
+          const lo = danes > sezona + "-09-01" ? danes : sezona + "-09-01";
+          if (datum < lo || datum > sezona + "-12-31") return _zj({ error: "Datum mora biti od " + lo.slice(8, 10).replace(/^0/, "") + ". " + Number(lo.slice(5, 7)) + ". do 31. decembra" }, 400);
+          const ime = String(body.ime || "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 20);
+          // Če je prva zmrzal že bila, ugibanje ni več mogoče (najboljši poskus: statična datoteka se predpomni 5 min).
+          try {
+            const rr = await fetch("https://meteorec.si/data/zmrzal-ugibalnik.json", { cf: { cacheTtl: 300, cacheEverything: true } });
+            if (rr.ok) { const st = await rr.json(); if (st && st.sezona === sezona && st.prva_zmrzal) return _zj({ error: "Prva zmrzal je že bila, ugibanje je zaprto." }, 409); }
+          } catch (_) { /* brez vira ne zapiramo; lestvica ugibe po zmrzali v vsakem primeru izloči */ }
+          if (await _ipLimited(env, request, "zmrzal_ugib_rl", 10, 86400)) return _zj({ error: "Preveč ugibanj v kratkem času" }, 429);
+          const all = await _zr2json(ZKEY(sezona));
+          const ex = all.find(i => i.id === id);
+          if (ex) return _zj({ error: "Že si ugibal.", datum: ex.datum }, 409);
+          all.unshift({ id, ts: new Date().toISOString().slice(0, 19) + "Z", datum, ime: ime || undefined });
+          await r2.put(ZKEY(sezona), JSON.stringify(all.slice(0, ZUGIB_CAP)), { httpMetadata: { contentType: "application/json" } });
+          return _zj({ ok: true, datum });
+        }
+      }
+
       // ── Poročila o snegu (/zima/sneg-porocila/) in snežni ugibalnik (/zima/sneg-ugibalnik/), 18. 11. 2026 ──
       // Postaja IREICA1 snega ne meri, zato nimamo izmerjene resnice za MTR sneg. Obiskovalci pošljejo en dotik:
       // stanje (sneg leži / sneži / dež s snegom / brez snega), višinski pas in regija. BREZ prostega besedila, GPS,
