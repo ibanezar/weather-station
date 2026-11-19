@@ -178,5 +178,63 @@ check("ni plazovni bilten" in ah and "ne meritev" in ah, "alarm: opozorilo, da j
 check("hidden" in ah.split(">")[0], "alarm: brez JS skrit (nikoli gumb, ki ne dela)")
 check(all(f'value="{c}"' in ah for c in g.ALARM_CM), "alarm: vsi pragovi v izbirniku")
 
+# ── nove komponente (19. 11. 2026): model v JS (snowing, hstep, plan) in struktura strani ──
+CWD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def node_json(code):
+    return json.loads(subprocess.run(["node", "-e", "const m=require('./snegofili/snegofili.js');" + code], cwd=CWD,
+                                     capture_output=True, text=True, timeout=30, check=True).stdout)
+
+
+try:
+    check(node_json("console.log(JSON.stringify([m.snowing({sn:[0,1,0]},1),m.snowing({sn:[0,0,0]},1),m.snowing(null,0),m.snowing({sn:[]},5)]))") == [True, False, False, False],
+          "JS snowing: prag 0,1 cm/h, brez podatka ni snega")
+    check(node_json("console.log(JSON.stringify([0,0.9,1,4.9,5,9.9,10,19.9,20,39.9,40,80].map(m.hstep)))") == [-1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4],
+          "JS hstep: pragovi 0,1 / 0,5 / 1 / 2 / 4 cm/h")
+    plan_js = r"""
+const hs=(f)=>{const a=new Array(144).fill(0);f(a);return {sn:a,t:[],sl:[]}};
+const hours={a:hs(a=>{a[71]=7;for(let i=72;i<=95;i++)a[i]=10}),   // 24 cm v naslednjih 24 h (ura 71 = »zdaj«, šteje samo nazaj)
+             b:hs(a=>{for(let i=72;i<=95;i++)a[i]=5}),             // 12 cm
+             c:hs(a=>{for(let i=96;i<=119;i++)a[i]=30}),           // 72 cm šele 24-48 h
+             d:hs(a=>{for(let i=72;i<=95;i++)a[i]=10}),            // 24 cm, a daleč
+             e:hs(a=>{a[72]=2})};                                  // 0,2 cm: pod pragom
+const pts=[{id:'d',e:2500,k:500},{id:'a',e:1500,k:50},{id:'b',e:900,k:10},{id:'c',e:2000,k:30},{id:'e',e:1800,k:5}];
+const r=(o)=>m.plan(pts,hours,o).map(x=>x.p.id+':'+x.cm);
+console.log(JSON.stringify([r({win:'n24',km:200,minCm:1}), r({win:'n24',km:0,minCm:1}), r({win:'n48',km:0,minCm:1}),
+  r({win:'n24',km:0,minCm:1,minE:1000}), r({win:'n24',km:0,minCm:15}), r({win:'p24',km:0,minCm:1}), r({win:'n24',km:0,minCm:1,top:1}), r({win:'p24',km:0,minCm:0})]))
+"""
+    got = node_json(plan_js)
+    check(got[0] == ["a:24", "b:12"], "plan: razdalja 200 km izloči d, pod 1 cm izloči e")
+    check(got[1] == ["a:24", "d:24", "b:12"], "plan: ob izenačenju prej bližja točka (d je v seznamu prvi)")
+    check(got[2] == ["c:72"], "plan: okno 24–48 h od zdaj")
+    check(got[3] == ["a:24", "d:24"], "plan: najmanjša višina točke")
+    check(got[4] == ["a:24", "d:24"], "plan: prag 15 cm")
+    check(got[5] == [], "plan: okno nazaj brez snega")
+    check(got[6] == ["a:24"], "plan: top")
+    check(got[7] == ["a:0.7"], "plan: ura »zdaj« šteje samo v oknu nazaj")
+except (OSError, subprocess.SubprocessError, ValueError) as e:
+    check(False, f"node (nove komponente): {e}")
+
+check('id="sg-stats"' in body and 'id="zdaj-snezi"' in body and 'id="kam-peljem"' in body and 'id="toplotna-karta"' in body,
+      "stran ima povzetek, pas »Kjer zdaj sneži«, izbirnik in toplotno karto")
+check(body.count('class="sg-spark"') == 2, "vsaka kartica ima rezerviran sparkline")
+check('data-f="fav"' in body, "filter »Moje točke«")
+check("<script>" not in body.replace('<script type="application/json"', ""), "brez inline JS (kamere so v snegofili.js)")
+check('class="sg-cam"' in body and 'data-id="a"' in body and 'data-kind="arso"' in body, "kamerni zid: ploščica za točko s kamero ARSO")
+check(body.count('class="sg-cam"') == 1, "kamerni zid: točka samo s tujo povezavo nima ploščice")
+check('href="https://x.example/cam"' in body and "Kamere pri ponudnikih" in body, "tuja kamera je v seznamu povezav")
+pj = json.loads(body.split('id="sg-pts">')[1].split("</script>")[0])
+pa = next(x for x in pj if x["id"] == "a"); pb = next(x for x in pj if x["id"] == "b")
+check(pa.get("ca") == "Krvavec" and pa["k"] == 20 and pa["c"] == "SI" and pa["m"] == {"d": 5, "a": 3.0}, "sg-pts: kamera, razdalja, država, izmerjeno")
+check(pb.get("cl") == [{"u": "https://x.example/cam", "p": "P"}] and "ca" not in pb and "m" not in pb, "sg-pts: samo https povezave, brez izmišljenih polj")
+emb = g.cam_info({"kamere": [good]})
+check(emb.get("ce", {}).get("k") == "windy" and emb["ce"]["s"] == good["embed"], "cam_info: dovoljena vdelava gre v sg-pts")
+check("ce" not in g.cam_info({"kamere": [{**good, "checked": None}]}), "cam_info: vdelava brez potrdila ne gre v sg-pts")
+check('data-proxy="' in body and "data-drsi" in body, "kamerni zid nosi naslov workerja in DRSI")
+check("Izmerjena snežna odeja" in body and "Agencija Republike Slovenije za okolje" in body, "izmerjeno: razdelek z navedbo vira ARSO")
+check("To niso videoposnetki v živo" in body, "kamere: iskreno pove, da so sličice")
+check(g.measured_html([r for r in rows if "izmerjeno" not in r]) == "", "izmerjeno: brez meritev razdelka ni")
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

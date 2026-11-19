@@ -9,8 +9,10 @@ Stran je izrisana strežniško za »zdaj« (vidna brez JS, za pajke); snegofili/
 Kar stran je in ni:
 - Novi sneg je MODELSKA ocena (padavine × delež snega iz ničte izoterme, kot /vreme-v-gorah/), ne meritev.
 - Izmerjena višina odeje je ločena in samo za postaje ARSO; vira se ne zlivata.
-- Kamere: ARSO prek workerja /arso-cam in DRSI Črnivec (slika). Tuje kamere so povezave; vdelava (iframe,
-  šele po kliku) samo, če ima vnos `embed` + `embed_terms` + `checked` (test to zahteva).
+- Kamere: ARSO prek workerja /arso-cam in DRSI Črnivec (slika, osvežitev na 5 min, lightbox). Tuje kamere so
+  povezave; vdelava (iframe, šele po kliku) samo, če ima vnos `embed` + `embed_terms` + `checked` (test to zahteva).
+- Pas »Kjer zdaj sneži«, podrobnost točke (grafi 96 ur), toplotna karta, »Kam peljem?«, priljubljene točke so JS
+  (podatki v snegofili/ure.json); brez JS ostanejo karta, prerez, kartice in kamere.
 - Ni plazovni bilten in ni nasvet za turo.
 - Model prikaza (step/phase/radius/barPct) je podvojen v snegofili.js; test_snegofili.py ju primerja.
 
@@ -31,8 +33,8 @@ POINTS_PATH = os.path.join(seo.ROOT, "data", "snegofili-tocke.json")
 OUTLINE_PATH = os.path.join(seo.ROOT, "data", "europe-outline.json")
 URL = "/snegofili/"
 TITLE = "Snegofili: kje je sneg, kamere in napoved"
-DESC = ("Kje je zdaj sneg po alpskem loku: karta, višinski prerez z mejo sneženja, drsnik ±48 ur in kamere "
-        "za 40 točk od Golt do Zermatta. Modelska ocena, izmerjeno ločeno.")
+DESC = ("Kje zdaj sneži po alpskem loku: karta, kamere, toplotna karta 96 ur, podrobnost vsake točke in izbirnik "
+        "»kam peljem po sneg« za 40 točk od Golt do Zermatta. Modelska ocena, izmerjeno ločeno.")
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 DRSI_CAM = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
 COUNTRIES = {"SI": "Slovenija", "AT": "Avstrija", "IT": "Italija", "CH": "Švica", "FR": "Francija",
@@ -93,9 +95,17 @@ FAQ = [
      "Višino snežne odeje objavljajo le nekatere postaje ARSO (npr. Krvavec, Rogla, Uršlja gora). Tuje točke "
      "nimajo izmerjene vrednosti na tej strani. Prazno polje pomeni, da meritve nimamo, ne da snega ni."),
     ("Kako izberem kamero?",
-     "Slovenske kamere ARSO in DRSI na prelazu Črnivec so prikazane neposredno z navedbo vira. Pri tujih kamerah "
-     "vas povezava odpelje k lastniku kamere (smučišče, turistična organizacija). Vdelamo jih samo, kadar ponudnik "
-     "vdelavo uradno dovoljuje."),
+     "Slovenske kamere ARSO in DRSI na prelazu Črnivec so prikazane neposredno z navedbo vira; sličica se osveži "
+     "vsakih nekaj minut, klik jo odpre večjo. To so sličice, ne video v živo. Pri tujih kamerah vas povezava odpelje "
+     "k lastniku kamere (smučišče, turistična organizacija). Vdelamo jih samo, kadar ponudnik vdelavo uradno dovoljuje."),
+    ("Kaj pomeni »Kjer zdaj sneži«?",
+     "Pas pokaže točke, kjer model za izbrano uro napoveduje vsaj 0,1 cm novega snega na uro. To je modelska ocena "
+     "iz padavin in meje sneženja, ne opazovanje: kamera ob njej kaže, kar je tam v resnici, in se z oceno lahko "
+     "razlikuje. Ko premaknete drsnik, se pas prilagodi izbrani uri."),
+    ("Kako deluje »Kam peljem po sneg?«",
+     "Izbirnik razvrsti točke po modelski količini novega snega v izbranem oknu (naslednjih 24 ur, 24–48 ur ali "
+     "zadnjih 24 ur), po zračni razdalji od Rečice in po višini. Ni priporočilo za turo: ne upošteva ceste, "
+     "plazov, odprtosti smučišč ali vremena po poti."),
     ("Ali stran nadomešča plazovni bilten?",
      "Ne. Ocena snega ne pove nič o plazovni nevarnosti. Pred turo preverite uradni plazovni bilten pristojne "
      "države in razmere pri oskrbovani koči ali smučišču."),
@@ -287,6 +297,7 @@ def card_html(r, p):
         f'<div class="sg-br" style="width:{bar_pct(r["next24_cm"]) / 2:.1f}%"></div></div></div>'
         f'<div class="sg-nums"><span><b class="sg-np">{cm_cell(r["past24_cm"])}</b><small>nazaj 24 h</small></span>'
         f'<span class="r"><b class="sg-nn">{cm_cell(r["next24_cm"])}</b><small>naprej 24 h</small></span></div>'
+        f'<div class="sg-spark" aria-hidden="true"></div>'
         f'<dl class="sg-dl"><div><dt>Zdaj</dt><dd class="sg-tt">{num(r["temp_c"], 1)} °C</dd></div>'
         f'<div style="grid-column:span 2"><dt>Meja sneženja</dt><dd class="sg-sl">{sl_txt}</dd></div></dl>'
         f'<div class="sg-foot"><span>72 h: {cm_cell(r["past72_cm"])} nazaj · {cm_cell(r["next72_cm"])} naprej</span>'
@@ -355,35 +366,6 @@ def cam_slot(r_name, p):
     return ""
 
 
-CAM_JS = r"""
-(function(){
-  var PROXY=%(proxy)s, g=document.getElementById('sg-gen');
-  if(g){var h=(Date.now()-Date.parse(g.dataset.generated))/36e5;
-    if(h>26){g.textContent+=' · podatki niso sveži ('+Math.round(h)+' h)';g.classList.add('sg-stale')}}
-  var grid=document.getElementById('sg-cams'); if(!grid) return;
-  var live=0; function done(){ if(!live) document.getElementById('kamere').hidden=true }
-  function fig(src,cap,alt){var f=document.createElement('figure');var i=document.createElement('img');i.loading='lazy';i.decoding='async';
-    i.width=1023;i.height=520;i.alt=alt;i.src=src;i.addEventListener('error',function(){f.remove();live--;done()},{once:true});
-    var c=document.createElement('figcaption');c.textContent=cap;f.appendChild(i);f.appendChild(c);grid.appendChild(f);live++}
-  (JSON.parse(grid.dataset.arso||'[]')).forEach(function(n){
-    fetch(PROXY+'/arso-cam?format=json&kamera='+encodeURIComponent(n)).then(function(r){return r.ok?r.json():null}).then(function(m){
-      if(!m) return; var d=m.posnet?new Date(m.posnet):null;
-      var t=d&&!isNaN(d)?d.toLocaleTimeString('sl',{hour:'2-digit',minute:'2-digit'}):'';
-      fig(PROXY+m.slika+(m.posnet?'&t='+encodeURIComponent(m.posnet):''),'Vir: ARSO · '+m.kamera+(t?' · posneto ob '+t:''),'Spletna kamera ARSO: '+m.kamera)
-    }).catch(function(){})});
-  if(grid.dataset.drsi){fig(grid.dataset.drsi+'?t='+Math.floor(Date.now()/3e5),'Vir: DRSI · prelaz Črnivec','Spletna kamera DRSI na prelazu Črnivec')}
-  var OK={windy:['webcams.windy.com','embed.windy.com'],youtube:['www.youtube-nocookie.com']};
-  [].forEach.call(document.querySelectorAll('.sg-live'),function(b){b.addEventListener('click',function(){
-    var w=b.parentNode,u;try{u=new URL(w.dataset.src)}catch(e){return}
-    if(u.protocol!=='https:'||(OK[w.dataset.kind]||[]).indexOf(u.hostname)<0)return;
-    var f=document.createElement('iframe');f.src=u.href;f.loading='lazy';f.title=w.dataset.title||'Spletna kamera';
-    f.setAttribute('referrerpolicy','no-referrer');f.setAttribute('allowfullscreen','');
-    f.style.cssText='width:100%%;aspect-ratio:16/9;border:0;border-radius:10px';
-    b.replaceWith(f)})});
-})();
-""" % {"proxy": json.dumps(PROXY)}
-
-
 ALARM_CM = (5, 15, 30)   # ↔ SG_CM_ALLOWED v worker.js (tools/test_snegofili_alarm.mjs): meje stopenj snega v step()
 ALARM_MAX_RULES = 3      # ↔ SG_MAX_RULES v worker.js
 
@@ -409,27 +391,140 @@ def alarm_html(rows):
   </section>'''
 
 
+def cam_info(p):
+    """Kamera točke za JS: ca = ime kamere ARSO, cd = DRSI, ce = dovoljena vdelava, cl = povezave (samo https)."""
+    c = {}
+    if p.get("arso_cam"):
+        c["ca"] = p["arso_cam"]
+    if p.get("drsi_cam"):
+        c["cd"] = 1
+    for cam in p.get("kamere") or []:
+        ok = valid_embed(cam)
+        if ok:
+            c["ce"] = {"k": ok[0], "s": ok[1], "p": cam.get("ponudnik", ok[0])}
+            break
+    links = [{"u": cam["url"], "p": cam.get("ponudnik", "")} for cam in p.get("kamere") or []
+             if str(cam.get("url", "")).startswith("https://")]
+    if links:
+        c["cl"] = links
+    return c
+
+
+def cam_wall_html(rows, cams):
+    """Kamerni zid: ploščice so v HTML (rezerviran prostor), slike nalaga JS. Točke samo s tujo povezavo so v seznamu."""
+    tiles, links = [], []
+    for r in sorted(rows, key=lambda r: -r["elevation_m"]):
+        info = cam_info(cams.get(r["id"], {}))
+        kind = "arso" if info.get("ca") else "drsi" if info.get("cd") else "embed" if info.get("ce") else None
+        if kind:
+            src = {"arso": "ARSO", "drsi": "DRSI", "embed": _html.escape(info.get("ce", {}).get("p", ""))}[kind]
+            ime = _html.escape(r["ime"])
+            tiles.append(
+                f'    <figure class="sg-cam" data-id="{r["id"]}" data-kind="{kind}">'
+                f'<button type="button" class="sg-cam-b" aria-label="Poglej kamero: {ime}">'
+                f'<span class="sg-cam-img"><span class="sg-cam-msg">Nalagam sličico …</span></span>'
+                f'<span class="sg-cam-st"></span></button>'
+                f'<figcaption><b>{ime}</b> · {r["elevation_m"]} m · {COUNTRIES[r["drzava"]]} <span class="sg-cam-t"></span>'
+                f'<small>Vir: {src}</small></figcaption></figure>')
+        elif info.get("cl"):
+            for c in info["cl"]:
+                links.append(f'<li><a href="{_html.escape(c["u"])}" target="_blank" rel="noopener">{_html.escape(r["ime"])}</a> '
+                             f'<small>({_html.escape(c["p"])}, {COUNTRIES[r["drzava"]]})</small></li>')
+    if not tiles and not links:
+        return ""
+    wall = ""
+    if tiles:
+        wall = (f'  <div id="sg-cams" class="sg-camwall" data-proxy="{PROXY}" data-drsi="{DRSI_CAM}">\n' +
+                "\n".join(tiles) + "\n  </div>\n")
+    ln = ""
+    if links:
+        ln = ('  <h3 class="sg-h3">Kamere pri ponudnikih</h3>\n'
+              '  <p class="muted-note">Povezava odpre stran lastnika kamere; slike tu ne prikazujemo.</p>\n'
+              f'  <ul class="sg-camlinks">{"".join(links)}</ul>\n')
+    return (f'  <section id="kamere" class="sg-sec" aria-labelledby="kam-h">\n  <h2 id="kam-h">Kamere</h2>\n'
+            '  <p class="archive-intro">Sličice slovenskih kamer ARSO in DRSI se osvežujejo vsakih nekaj minut; klik jo odpre večjo, '
+            'ob njej pa piše, kaj za tisto točko napoveduje model. <b>To niso videoposnetki v živo.</b> '
+            'Kamera in model se lahko razhajata: verjemite sliki.</p>\n' + wall + ln + '  </section>\n')
+
+
+def stats_html(rows):
+    b24 = max(rows, key=lambda r: r["past24_cm"])
+    bn = max(rows, key=lambda r: r["next24_cm"])
+    fresh = sum(1 for r in rows if r["past24_cm"] >= MIN_CM)
+
+    def tile(i, lab, val, sub):
+        return (f'<div class="sg-stat"><small>{lab}</small><b id="sg-st-{i}">{val}</b>'
+                f'<span id="sg-st-{i}-n">{sub}</span></div>')
+    return ('  <div class="sg-stats" id="sg-stats" role="group" aria-label="Povzetek po modelu">'
+            + tile("now", "Zdaj sneži", "—", f"od {len(rows)} točk")
+            + tile("past", "Največ nazaj 24 h", cm_cell(b24["past24_cm"]), _html.escape(b24["ime"]))
+            + tile("next", "Največ naprej 24 h", cm_cell(bn["next24_cm"]), _html.escape(bn["ime"]))
+            + tile("fresh", "Točk s svežim snegom", str(fresh), "≥ 1 cm v 24 h nazaj")
+            + '</div>\n')
+
+
+def measured_html(rows):
+    meas = [r for r in rows if r.get("izmerjeno")]
+    if not meas:
+        return ""
+    top = max(40, max(r["izmerjeno"]["depth_cm"] for r in meas))
+    li = "".join(
+        f'<li><span class="sg-ms-n">{_html.escape(r["ime"])} <small>{r["elevation_m"]} m</small></span>'
+        f'<span class="sg-ms-bar" role="img" aria-label="Izmerjeno {r["izmerjeno"]["depth_cm"]} cm"><i style="width:{min(100, r["izmerjeno"]["depth_cm"] / top * 100):.1f}%"></i></span>'
+        f'<span class="sg-ms-v"><b>{r["izmerjeno"]["depth_cm"]} cm</b> <small>pred {num(r["izmerjeno"]["age_h"], 0)} h</small></span>'
+        f'<span class="sg-ms-m"><small>model: nov sneg 72 h nazaj</small> {cm_cell(r["past72_cm"])}</span></li>'
+        for r in sorted(meas, key=lambda r: -r["izmerjeno"]["depth_cm"]))
+    return ('  <section id="izmerjeno" class="sg-sec" aria-labelledby="izm-h">\n  <h2 id="izm-h">Izmerjena snežna odeja</h2>\n'
+            '  <p class="archive-intro">To je <b>meritev</b> višine snežne odeje na postajah ARSO, ločena od modelske ocene novega snega: '
+            'odeja je ostanek preteklih dni, novi sneg pa tisto, kar je zapadlo v zadnjih urah. Vir: Agencija Republike Slovenije za okolje (ARSO).</p>\n'
+            f'  <ul class="sg-ms">{li}</ul>\n  </section>\n')
+
+
+def plan_html():
+    km = "".join(f'<option value="{k}"{" selected" if k == TRIP_KM else ""}>{"do " + str(k) + " km" if k else "vse"}</option>'
+                 for k in (100, TRIP_KM, 400, 0))
+    return f"""  <section id="kam-peljem" class="sg-sec sg-plan" aria-labelledby="kp-h" hidden>
+  <h2 id="kp-h">Kam peljem po sneg?</h2>
+  <p class="archive-intro">Izberite okno, razdaljo in višino: pokažemo tri točke z največ novega snega po modelu.</p>
+  <div class="sg-plan-row">
+    <label>Kdaj<select id="sg-pl-win"><option value="n24">Naslednjih 24 h</option><option value="n48">24–48 h od zdaj</option><option value="p24">Zadnjih 24 h</option></select></label>
+    <label>Razdalja od Rečice<select id="sg-pl-km">{km}</select></label>
+    <label>Višina točke<select id="sg-pl-el"><option value="0">vse</option><option value="1000">nad 1000 m</option><option value="1500">nad 1500 m</option><option value="2000">nad 2000 m</option></select></label>
+    <label>Vsaj<select id="sg-pl-cm"><option value="1">1 cm</option><option value="5">5 cm</option><option value="15">15 cm</option></select></label>
+  </div>
+  <ol class="sg-pl-out" id="sg-pl-out" aria-live="polite"></ol>
+  <p class="muted-note">Zračna razdalja, ne čas vožnje. Modelska ocena novega snega; ne upošteva ceste, plazov, odprtosti smučišč ali vremena po poti.</p>
+  </section>
+"""
+
+
 def build_body(data, cams):
     rows = sorted(data["tocke"], key=lambda r: (-r["past72_cm"], -r["elevation_m"]))
     present = sorted({r["drzava"] for r in rows}, key=list(COUNTRIES).index)
     prof, bx = profile_svg(rows)
-    pts_json = json.dumps([{"id": r["id"], "n": r["ime"], "e": r["elevation_m"],
-                            "x": round(proj(r["lon"], r["lat"])[0], 1), "y": round(proj(r["lon"], r["lat"])[1], 1),
-                            "bx": bx[r["id"]]} for r in rows], ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+
+    def pt(r):
+        x, y = proj(r["lon"], r["lat"])
+        o = {"id": r["id"], "n": r["ime"], "e": r["elevation_m"], "x": round(x, 1), "y": round(y, 1), "bx": bx[r["id"]],
+             "k": r["km_od_recice"], "c": r["drzava"]}
+        o.update(cam_info(cams.get(r["id"], {})))
+        if r.get("izmerjeno"):
+            o["m"] = {"d": r["izmerjeno"]["depth_cm"], "a": r["izmerjeno"]["age_h"]}
+        return o
+    pts_json = json.dumps([pt(r) for r in rows], ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
     chips = ('<button type="button" data-c="*" aria-pressed="true">Vse</button>' +
              "".join(f'<button type="button" data-c="{c}" aria-pressed="false">{COUNTRIES[c]}</button>' for c in present) +
              '<button type="button" data-f="fresh" aria-pressed="false">Samo s svežim snegom</button>'
+             '<button type="button" data-f="fav" aria-pressed="false">★ Moje točke</button>'
              '<span class="sep"></span>'
-             '<button type="button" data-s="past" aria-pressed="true">Nazaj 24 h</button>'
-             '<button type="button" data-s="next" aria-pressed="false">Naprej 24 h</button>'
+             '<button type="button" data-s="past" aria-pressed="true">Nazaj 24 h</button>'
+             '<button type="button" data-s="next" aria-pressed="false">Naprej 24 h</button>'
              '<button type="button" data-s="elev" aria-pressed="false">Višina</button>'
              '<button type="button" data-s="km" aria-pressed="false">Razdalja</button>')
     cards_html = "\n".join(card_html(r, cams.get(r["id"], {})) for r in rows)
-    arso = [p["arso_cam"] for p in cams.values() if p.get("arso_cam")]
-    drsi = DRSI_CAM if any(p.get("drsi_cam") for p in cams.values()) else ""
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
-    return f'''{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)])}
+    return f"""{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)])}
 {seo.stn_badge()}
   <section class="sg-hero" aria-labelledby="sg-h1">
     <canvas id="sg-snow" aria-hidden="true"></canvas>
@@ -444,7 +539,8 @@ def build_body(data, cams):
     <div class="sg-ctlwrap">
       <div id="sg-ctl" hidden><button type="button" id="sg-play" aria-pressed="false">Predvajaj</button>
       <input type="range" id="sg-range" aria-label="Čas od −48 do +48 ur"><button type="button" id="sg-now">Zdaj</button>
-      <span id="sg-time" aria-live="polite">zdaj</span></div>
+      <span id="sg-time" aria-live="polite">zdaj</span>
+      <span class="sg-seg" role="group" aria-label="Kaj kaže karta"><button type="button" data-m="past" aria-pressed="true">Zadnjih 24 h</button><button type="button" data-m="next" aria-pressed="false">Naslednjih 24 h</button></span></div>
       <p class="sg-readout" id="sg-readout"></p>
     </div>
     <div class="sg-profwrap">
@@ -453,6 +549,21 @@ def build_body(data, cams):
       <div class="sg-scroll" tabindex="0" role="region" aria-label="Višinski prerez: meja sneženja in točke">{prof}</div>
       <p class="sg-hint">Povlecite vodoravno za ostale točke.</p>
     </div>
+  </section>
+{stats_html(rows)}  <section id="zdaj-snezi" class="sg-sec sg-nowsec" aria-labelledby="zs-h" hidden>
+  <h2 id="zs-h">Kjer zdaj sneži</h2>
+  <p class="archive-intro" id="zs-sub"></p>
+  <div class="sg-nowrow" id="sg-now-row" role="list"></div>
+  <div class="sg-top" id="sg-top"></div>
+  </section>
+{cam_wall_html(rows, cams)}{plan_html()}  <section id="toplotna-karta" class="sg-sec sg-heatsec" aria-labelledby="hm-h" hidden>
+  <h2 id="hm-h">Kdaj in kje sneži: 96 ur</h2>
+  <p class="archive-intro">Vsaka vrstica je ena točka, vsak stolpec ena ura od 48 ur nazaj do 48 ur naprej. Svetlejša in večja količina pomeni več novega snega na uro po modelu. Navpična črta je ura, ki jo kaže drsnik; klik na vrstico odpre podrobnost točke.</p>
+  <div class="sg-heatbar" role="group" aria-label="Razvrstitev toplotne karte"><button type="button" data-hs="snow" aria-pressed="true">Najbolj snežno</button><button type="button" data-hs="elev" aria-pressed="false">Višina</button><button type="button" data-hs="km" aria-pressed="false">Razdalja</button></div>
+  <div class="sg-heat" id="sg-heat" tabindex="0" role="region" aria-label="Toplotna karta po točkah in urah (drsno vodoravno)"><div class="sg-hm-lab" id="sg-hm-lab"></div>
+    <div class="sg-hm-main"><div class="sg-hm-ax" id="sg-hm-ax"></div>
+    <div class="sg-hm-cv"><canvas id="sg-hm-cv" role="img" aria-label="Toplotna karta novega snega po točkah in urah. Iste podatke najdete v karticah točk spodaj."></canvas><div class="sg-hm-cur" id="sg-hm-cur"></div></div></div></div>
+  <p class="sg-hm-leg" id="sg-hm-leg" aria-hidden="true"></p>
   </section>
   <p class="archive-intro">Seznam zajema {len(rows)} točk od Golt do Zermatta. To je <b>modelska ocena novega snega</b>
   iz padavin in višine ničte izoterme, ne meritev. Izmerjeno višino odeje imamo samo za nekaj postaj ARSO in je
@@ -464,19 +575,13 @@ def build_body(data, cams):
   </div>
   <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
   »—« pri snegu pomeni manj kot centimeter po modelu. Podatki: Open-Meteo, postaje ARSO.</p>
-{alarm_html(rows)}
-  <section id="kamere" aria-labelledby="kam-h">
-  <h2 id="kam-h">Kamere</h2>
-  <p class="archive-intro">Slovenske kamere ARSO in DRSI so prikazane tukaj. Pri tujih točkah vas povezava na kartici odpelje k lastniku kamere.</p>
-  <div id="sg-cams" data-arso='{_html.escape(json.dumps(arso, ensure_ascii=False), quote=True)}' data-drsi="{drsi}"></div>
-  </section>
+{measured_html(rows)}{alarm_html(rows)}
 {faq_html}
   <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten
   pristojne države, <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a> in razmere pri
   oskrbovani koči ali smučišču. Slike kamer so last navedenih virov.</p>
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>
-<script type="application/json" id="sg-pts">{pts_json}</script>
-<script>{CAM_JS}</script>'''
+<script type="application/json" id="sg-pts">{pts_json}</script>"""
 
 
 def head_extras(schema):
