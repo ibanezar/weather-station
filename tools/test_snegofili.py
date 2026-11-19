@@ -81,7 +81,7 @@ hs = g.hero_sentence(rows)
 check("Točka &lt;A&gt;" in hs and "(12 cm)" in hs.replace(" ", " "), "stavek: najbolj zasnežilo")
 check("Daleč" not in hs, "stavek: točka čez 200 km ni v dnevnem izletu")
 check("indoor" not in body.lower() and "tempinf" not in body.lower(), "brez notranjih meritev")
-check(g.cm_cell(0.4) == "—" and g.cm_cell(3.26).startswith("3,3"), "oblika centimetrov (vejica, pod 1 cm črtica)")
+check(g.cm_cell(0.4) == "<1 cm" and g.cm_cell(3.26).startswith("3,3"), "oblika centimetrov (vejica, pod 1 cm »<1 cm«)")
 good = {"embed_kind": "windy", "embed": "https://webcams.windy.com/webcams/public/embed/player/1/day", "embed_terms": "https://api.windy.com/webcams/terms", "checked": "2026-11-13", "ponudnik": "Windy"}
 check('class="sg-camslot"' not in body, "brez vdelave ni slota")
 check(g.valid_embed(good) == ("windy", good["embed"]), "windy vdelava z gostiteljem, pogoji in datumom je dovoljena")
@@ -92,7 +92,7 @@ check(g.valid_embed({**good, "embed": "https://evil.example/x"}) is None, "tuj g
 check(g.valid_embed({**good, "embed_kind": "whatsupcams", "embed": "https://www.whatsupcams.com/en/x"}) is None, "WhatsUpCams ni na seznamu (pogoji prepovedujejo framing)")
 check(g.valid_embed({**good, "embed": "https://webcams.windy.com.evil.example/x"}) is None, "podomena trik ni dovoljen")
 slot = g.cam_slot("Vogel <b>", {"kamere": [good]})
-check("Kamera v živo" in slot and "windy.com" in slot and "add a webcam" in slot, "windy slot ima gumb in navedbo")
+check("Odpri kamero Windy" in slot and "windy.com" in slot and "add a webcam" in slot, "windy slot ima gumb in navedbo")
 check("<b>" not in slot, "ime v slotu je ubežano")
 yt = {"embed_kind": "youtube", "embed": "https://www.youtube-nocookie.com/embed/abc", "embed_terms": "Share → Embed", "checked": "2026-11-13", "ponudnik": "YT"}
 check(g.valid_embed(yt) is not None and "add a webcam" not in g.cam_slot("X", {"kamere": [yt]}), "youtube slot brez Windy navedbe")
@@ -162,7 +162,7 @@ check(set(syn) == {"sveza"} and syn["sveza"]["depth_cm"] == 12 and syn["sveza"][
 links = g.cam_links({"kamere": [{"url": "http://x.example/a", "ponudnik": "Nevarna"},
                                 {"url": "https://x.example/b", "ponudnik": "Varna"}]})
 check("Varna" in links and "Nevarna" not in links, "cam_links: http povezava se ne izpiše")
-check(g.cam_links({}) == "—", "cam_links: brez kamer pomišljaj")
+check(g.cam_links({}) == "brez kamere", "cam_links: brez kamer besedilo")
 
 # ── opozorilo na telefon: konstante gradnika ↔ worker.js (SG_CM_ALLOWED, SG_MAX_RULES), vse točke v izbirniku ──
 import re  # noqa: E402
@@ -234,7 +234,7 @@ check("cl" not in emb, "cam_info: vdelana kamera ni še enkrat med povezavami")
 check("ce" not in g.cam_info({"kamere": [{**good, "checked": None}]}), "cam_info: vdelava brez potrdila ne gre v sg-pts")
 check('data-proxy="' in body and "data-drsi" in body, "kamerni zid nosi naslov workerja in DRSI")
 check("Izmerjena snežna odeja" in body and "Agencija Republike Slovenije za okolje" in body, "izmerjeno: razdelek z navedbo vira ARSO")
-check("To niso videoposnetki v živo" in body, "kamere: iskreno pove, da so sličice")
+check("Videa v živo tu ni" in body and "Oglej si aktualno sliko" in body, "kamere: iskreno pove, da ni videa v živo")
 check(g.measured_html([r for r in rows if "izmerjeno" not in r]) == "", "izmerjeno: brez meritev razdelka ni")
 
 check('id="windy"' in body and "<iframe" not in body, "Windy karta: razdelek je, iframe šele po kliku")

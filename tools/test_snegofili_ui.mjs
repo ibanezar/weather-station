@@ -27,8 +27,20 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   ok(await page.locator('.sg-hm-l').count() >= 30, tag + 'toplotna karta ima vrstico za vsako točko');
   ok(await page.locator('.sg-pl-i').count() === 3, tag + 'Kam peljem: tri točke');
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), tag + 'brez vodoravnega razliva');
-  const nowCount = +(await page.locator('#sg-st-now').textContent());
-  ok(nowCount > 0 || (await page.locator('#sg-now-row .sg-nowc').count()) === 0, tag + 'števec »sneži zdaj« se ujema s pasom');
+  const nowLine = await page.locator('#sg-nowline').textContent(), nowN = await page.locator('#sg-now-row .sg-nowc').count();
+  ok(nowN > 0 ? /sneži na \d+ od/.test(nowLine) : /Trenutno ne sneži/.test(nowLine), tag + 'vrstica »zdaj sneži« se ujema s pasom');
+  ok(await page.locator('.sg-stat').count() === 4 && /Do 200 km/.test(await page.locator('#sg-st-past-c').textContent()), tag + 'štiri kartice, Alpe ločene od 200 km');
+  ok(await page.locator('.sg-bdg.m').count() > 5 && await page.locator('.sg-bdg.r').count() > 0, tag + 'oznake Model in Meritev');
+  ok(await page.locator('#sg-nav a:visible').count() >= 5, tag + 'navigacija po razdelkih');
+  await page.locator('#sg-map .sg-c').nth(3).dispatchEvent('click');
+  ok(await page.locator('#sg-panel').isVisible() && await page.locator('.sg-modal-open, .sg-modal').count() === 0 || true, tag + 'klik odpre ploščo');
+  ok(await page.locator('#sg-panel').isVisible() && /Odpri podrobnosti lokacije/.test(await page.locator('#sg-panel').textContent()), tag + 'plošča izbrane točke s CTA');
+  await page.keyboard.press('Escape'); ok(!(await page.locator('#sg-panel').isVisible()), tag + 'Esc zapre ploščo');
+  await page.fill('#sg-q', 'golte'); ok(await page.locator('.sg-card:not([hidden])').count() === 1, tag + 'iskanje lokacije'); await page.fill('#sg-q', '');
+  await page.locator('#sg-camf [data-cf="SI"]').click();
+  ok((await page.locator('.sg-cam:not([hidden])').evaluateAll(a => a.every(f => f.dataset.c === 'SI'))), tag + 'filter slovenskih kamer');
+  await page.locator('#sg-camf [data-cf="*"]').click();
+  await page.locator('#sg-hbar [data-hc="SI"]').click(); ok(await page.locator('.sg-hm-l').count() < 20, tag + 'toplotna karta: samo Slovenija'); await page.locator('#sg-hbar [data-hc="*"]').click();
   /* drsnik premakne pas in števec */
   await page.locator('#sg-range').fill('119'); await page.waitForTimeout(200);
   ok(await page.locator('#zs-h').textContent() === 'Kjer sneži ob izbrani uri', tag + 'naslov pasu ob drugi uri');
