@@ -806,7 +806,11 @@ def build_intervencija_page(payload, arso_alerts, arso_ok, arso_checked_at):
         Gasilec.fetchElevationGrid(parseFloat(lat),parseFloat(lon)).then(function(grid){{
           var sa=Gasilec.computeSlopeAspect(grid);
           Gasilec.renderTerrainWind(document.getElementById('gf-interv-terrain'),sa.aspectDeg,windToDeg,sa.slopeDeg);
-        }}).catch(function(e){{console.warn('teren:',e);}});
+        }}).catch(function(e){{
+          console.warn('teren:',e);
+          var tn=document.getElementById('gf-interv-terrain');
+          if(tn)tn.innerHTML='<p class="gf-note" style="margin:0 0 .5rem">Terena ni bilo mogoče izračunati (višinski podatki niso dosegljivi).</p>';
+        }});
       }}
     }}
     function load(lat,lon,label){{
@@ -815,6 +819,11 @@ def build_intervencija_page(payload, arso_alerts, arso_ok, arso_checked_at):
         +'&forecast_days=2&timezone=Europe%2FLjubljana';
       fetch(url).then(function(r){{return r.json();}}).then(function(j){{render(j,label,lat,lon);}}).catch(function(e){{
         console.warn('intervencija:',e);
+        // Ob izpadu vira ne sme ostati »Nalaganje…«: pove naj, da vremena ni, in naj ne trdi nič o razmerah.
+        var pre=document.getElementById('gf-briefing-pre');
+        if(pre&&!lastData)pre.textContent='Vremenskih podatkov ni bilo mogoče naložiti (Open-Meteo). Preverite povezavo in poskusite znova; brez podatkov ne sklepajte o vetru in vremenu.';
+        var tn=document.getElementById('gf-interv-terrain');
+        if(tn&&!lastData)tn.innerHTML='<p class="gf-note" style="margin:0 0 .5rem">Teren ni prikazan, ker vremenskih podatkov ni bilo mogoče naložiti.</p>';
       }});
     }}
     document.getElementById('btn-gps').addEventListener('click',function(){{

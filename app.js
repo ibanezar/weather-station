@@ -11319,7 +11319,8 @@ let _hvTries=0;
 async function fetchHeroValley(){
   const el=document.getElementById('hero-valley-body');if(!el)return;
   const obs=_lastBriefObs,homeT=obs&&obs.metric?obs.metric.temp:null;
-  if(homeT==null){if(++_hvTries<=12)setTimeout(fetchHeroValley,5000);return;}
+  const giveUp=()=>{el.removeAttribute('aria-busy');el.innerHTML='<div class="duel-offline">Dolinski prerez trenutno ni na voljo.</div>';};
+  if(homeT==null){if(++_hvTries<=12)setTimeout(fetchHeroValley,5000);else giveUp();return;}
   try{
     const pts=await _vpPoints(homeT),sum=valleyProfileSummary(pts);
     const cap=document.getElementById('hero-valley-cap');
@@ -11337,7 +11338,7 @@ async function fetchHeroValley(){
     const lg=document.getElementById('hv-lg-bar');
     if(lg){lg.style.background='linear-gradient(90deg,'+[-8,-2,3,9,16,24].map(t=>hvColor(t)+' '+Math.round((t+8)/32*100)+'%').join(',')+')';lg.parentNode.classList.add('is-ready');}
     el.removeAttribute('aria-busy');
-  }catch(e){console.warn('Dolinski prerez:',e);}
+  }catch(e){console.warn('Dolinski prerez:',e);giveUp();}
 }
 
 function _duelNum(v,d=1){return(v==null||isNaN(v))?'—':Number(v).toFixed(d).replace('.',',');}
