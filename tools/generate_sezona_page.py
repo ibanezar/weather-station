@@ -49,6 +49,7 @@ LINKS = {
         ("/vreme-za-padalce/", "Vreme za padalce", "mirni jesenski dnevi z inverzijo in meglo v dolini"),
         ("/opozorilo-pred-pozebo/", "Opozorilo pred pozebo", "ob prvi zmrzali: vrt in rože na balkonu"),
         ("/vreme-za-vrtnarje/", "Vreme za vrtnarje", "zmrzal po noči, suša in veter za vrt, 5 dni naprej"),
+        ("/ugibalnik-zmrzal/", "Ugibalnik prve zmrzali", "ugibaj, kdaj bo prva zmrzal; zmaga najbližji datum"),
     ],
     "zima": [
         ("https://crnivec.si/", "Črnivec", "poledica, sneg in kamera na prelazu"),
@@ -56,6 +57,7 @@ LINKS = {
         ("/kakovost-zraka/", "Kakovost zraka", "pozimi inverzija zadrži dim v dolini"),
         ("/biovreme/", "Biovreme", "mraz in hitre spremembe tlaka"),
         ("/vreme/mesec/", "Vreme po mesecih", "koliko mraza je v dolini običajno"),
+        ("/zima/sneg-ugibalnik/", "Snežni ugibalnik", "ugibaj, kdaj bo prvi sneg v dolini"),
     ],
     "pomlad": [
         ("/opozorilo-pred-pozebo/", "Opozorilo pred pozebo", "pozebe po cvetenju so najdražje"),

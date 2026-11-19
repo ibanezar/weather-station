@@ -123,7 +123,7 @@ def build_body(clim, js_ver):
   <p class="post-meta">Igra se odpre 1. avgusta · zabava brez nagrad</p>
   <p class="archive-intro">Izberite datum, ko bo postaja IREICA1 v Rečici ob Savinji od 1. septembra prvič izmerila najnižjo temperaturo dneva 0 °C ali manj.
   Zmaga ugib, ki je najbližje. Šteje zmrzal (zrak), ne slana. Za napoved poglejte <a href="/opozorilo-pred-pozebo/">opozorilo pred pozebo</a>
-  in <a href="/sezona/">sezonski vodič</a>.</p>
+  in <a href="/sezona/">sezonski vodič</a>. Pozimi ugibamo še <a href="/zima/sneg-ugibalnik/">prvi sneg</a>.</p>
   <style>
   .ug-form{{display:grid;gap:.7rem;max-width:26rem}}
   .ug-form label{{display:grid;gap:.25rem;font-weight:600}}

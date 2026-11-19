@@ -13,7 +13,7 @@
     '<h2 class="sub-title">📬 Prijava na novičke</h2>' +
     '<p class="sub-desc">Prijavi se in ob vsakem novem članku (vremenski povzetki, rekordi, analize) dobiš e-obvestilo. Brez spama, odjava z enim klikom.</p>' +
     '<form class="sub-form" id="sub-form" autocomplete="off">' +
-      '<input class="sub-input" id="sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov">' +
+      '<input class="sub-input" id="sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov" autocomplete="email" autocapitalize="off" enterkeyhint="done">' +
       '<input class="sub-hp" type="text" name="website" id="sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
       '<button class="sub-btn" id="sub-btn" type="submit">Prijava</button>' +
     '</form>' +

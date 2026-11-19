@@ -132,7 +132,7 @@
       '<div class="side-block side-actions">' +
         '<div class="side-title">Prijava na novičke</div>' +
         '<form class="side-sub-form" id="side-sub-form" autocomplete="off">' +
-          '<input class="side-sub-input" id="side-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov">' +
+          '<input class="side-sub-input" id="side-sub-email" type="email" required maxlength="120" placeholder="tvoj@email.si" aria-label="E-naslov" autocomplete="email" autocapitalize="off" enterkeyhint="done">' +
           '<input class="sub-hp" type="text" name="website" id="side-sub-hp" tabindex="-1" autocomplete="off" aria-hidden="true">' +
           '<button class="side-sub" id="side-sub-btn" type="submit">📬 Prijava</button>' +
         '</form>' +

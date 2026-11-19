@@ -33,11 +33,11 @@ body{
 /* ── glava ── */
 .site-head{display:flex;align-items:center;justify-content:space-between;
   padding:1.1rem 0;border-bottom:1px solid var(--border);margin-bottom:2.2rem;flex-wrap:wrap;gap:.6rem}
-.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--text)}
+.brand{display:flex;align-items:center;gap:.6rem;min-height:44px;text-decoration:none;color:var(--text)}
 .brand-logo{width:42px;height:42px;flex-shrink:0;filter:drop-shadow(0 0 14px rgba(56,189,248,.35))}
 .brand-name{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:-.025em}
 .brand-name em{font-style:normal;color:var(--cyan)}
-.site-nav a{color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;margin-left:1.1rem}
+.site-nav a{color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;margin-left:.7rem;padding:.8rem .4rem}
 .site-nav a:hover{color:var(--cyan)}
 
 /* drobtine */
@@ -139,7 +139,7 @@ article strong{color:#fff}
 .site-foot{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);
   color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.6rem}
 .site-foot a{color:var(--cyan);text-decoration:none}
-.back-link{display:inline-block;margin-top:2rem;color:var(--cyan);text-decoration:none;font-weight:600}
+.back-link{display:inline-block;margin-top:1.4rem;padding:.7rem 0;color:var(--cyan);text-decoration:none;font-weight:600}
 .back-link:hover{text-decoration:underline}
 
 /* ── Všečki (sončki) na začetku in koncu posta ── */
@@ -521,3 +521,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,su
      they don't end up hidden underneath. */
   .to-top{bottom:calc(4rem + env(safe-area-inset-bottom) + 1.1rem)}
 }
+
+/* Tap-cilji (19. 11. 2026): povzetki FAQ in pojasnil so ~27 px visoki; padding poveča površino dotika, vsebina se ne premakne. */
+details>summary{padding-block:.65rem}

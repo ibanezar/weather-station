@@ -212,7 +212,14 @@
       renderStats(validGuesses(all, resolved));
       if (resolved) renderResult(all, resolved, moj); else $('ug-rang').innerHTML = '';
       $('ug-stanje').textContent = resolved ? fill(T.state, fmtLong(resolved)) : (C.open ? T.none : T.noEvent);
-    }).catch(function () { $('ug-stat').textContent = 'Podatkov ni bilo mogoče naložiti.'; });
+    }).catch(function () {
+      // Napaka vira: nobenega večnega »Nalagam …«; sporočilo in ponoven poskus (19. 11. 2026)
+      $('ug-stanje').textContent = 'Podatkov trenutno ni mogoče naložiti.';
+      var s = $('ug-stat'); s.innerHTML = '';
+      var b = el('button', 'mtn-avk-link', 'Poskusi znova'); b.type = 'button';
+      b.addEventListener('click', function () { $('ug-stanje').textContent = 'Nalagam …'; s.innerHTML = ''; load(); });
+      s.appendChild(el('p', 'archive-intro', 'Podatkov ni bilo mogoče naložiti.')); s.appendChild(b);
+    });
   }
   load();
 })(typeof window !== 'undefined' ? window : this);

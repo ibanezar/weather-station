@@ -14,6 +14,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PW);
 const AXE = process.env.AXE ? fs.readFileSync(process.env.AXE, 'utf8') : null;
 const BASE = process.env.BASE || 'http://localhost:8765';
+const TARGETS = !!process.env.TARGETS;   // TARGETS=1: dodatno preveri tap-cilje (< 44 px) pri 360 px
 
 function corePaths() {
   const out = execFileSync('python3', ['-c',
@@ -51,6 +52,29 @@ for (const path of paths) {
           return { sw, W, els: els.slice(0, 4) };
         });
         if (over) issues.push(`razliv ${over.sw}>${over.W}: ${over.els.join('; ')}`);
+      }
+      if (TARGETS && scheme === 'light') {
+        // Samostojni gumbi, vnosi in povezave (ne povezave sredi besedila: WCAG 2.5.8 jih izvzema). Manjši od 44 px po višini ali širini.
+        const small = await p.evaluate(() => {
+          const out = [];
+          const sel = 'a[href],button,input:not([type=hidden]):not([type=checkbox]):not([type=radio]),select,textarea,[role=button],[role=tab],summary';
+          for (const el of document.querySelectorAll(sel)) {
+            const cs = getComputedStyle(el);
+            if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+            if (el.closest('[hidden],[inert],.sr-only,.skip-link')) continue;
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height) continue;
+            if (el.tagName === 'A' && cs.display === 'inline') {
+              const par = el.parentElement, own = [...par.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 3);
+              if (own) continue;   // povezava v odstavku
+            }
+            if (r.height < 43.5 || r.width < 43.5) out.push(`${el.tagName.toLowerCase()}${el.className ? '.' + String(el.className).split(' ')[0] : ''} ${Math.round(r.width)}x${Math.round(r.height)} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 18)}"`);
+          }
+          return out;
+        });
+        const groups = {};
+        for (const t of small) { const k = t.split(' ')[0]; groups[k] = (groups[k] || 0) + 1; }
+        for (const [k, n] of Object.entries(groups)) issues.push(`cilj <44px ${k} ×${n}: ${small.find(t => t.startsWith(k + ' '))}`);
       }
       if (AXE) {
         await p.evaluate(AXE);
