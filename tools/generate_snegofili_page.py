@@ -34,7 +34,7 @@ OUTLINE_PATH = os.path.join(seo.ROOT, "data", "europe-outline.json")
 URL = "/snegofili/"
 TITLE = "Snegofili: kje je sneg, kamere in napoved"
 DESC = ("Kje zdaj sneži po alpskem loku: karta, kamere, toplotna karta 96 ur, podrobnost vsake točke in izbirnik "
-        "»kam peljem po sneg« za 40 točk od Golt do Zermatta. Modelska ocena, izmerjeno ločeno.")
+        "»kam peljem po sneg« za več kot 50 točk od Golt do Zermatta in Dachsteina. Modelska ocena, izmerjeno ločeno.")
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 DRSI_CAM = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
 COUNTRIES = {"SI": "Slovenija", "AT": "Avstrija", "IT": "Italija", "CH": "Švica", "FR": "Francija",
@@ -597,7 +597,7 @@ def build_body(data, cams):
     <div class="sg-hm-cv"><canvas id="sg-hm-cv" role="img" aria-label="Toplotna karta novega snega po točkah in urah. Iste podatke najdete v karticah točk spodaj."></canvas><div class="sg-hm-cur" id="sg-hm-cur"></div></div></div></div>
   <p class="sg-hm-leg" id="sg-hm-leg" aria-hidden="true"></p>
   </section>
-  <p class="archive-intro">Seznam zajema {len(rows)} točk od Golt do Zermatta. To je <b>modelska ocena novega snega</b>
+  <p class="archive-intro">Seznam zajema {len(rows)} točk od Golt do Zermatta in Dachsteina. To je <b>modelska ocena novega snega</b>
   iz padavin in višine ničte izoterme, ne meritev. Izmerjeno višino odeje imamo samo za nekaj postaj ARSO in je
   v svojem polju. Za našo dolino glej še <a href="/zima/snezna-karta/">snežno karto</a>,
   <a href="/zima/meja-snezenja/">mejo sneženja</a> in <a href="/vreme-v-gorah/">vreme v gorah</a>.</p>

@@ -1,5 +1,5 @@
 {
- "opomba": "Ročno vzdrževan seznam točk. Koordinate so približne (±5 km, za izračun napovedi, ne za navigacijo); višine mora potrditi Filip (potrjeno=false), Open-Meteo Elevation višine gora zravna. Kamere: vdelava samo z embed_terms (URL pogojev ponudnika) in checked (datum preverjanja), sicer povezava.",
+ "opomba": "Ročno vzdrževan seznam točk. Koordinate so približne (±5 km, za izračun napovedi, ne za navigacijo); višine mora potrditi Filip (potrjeno=false), Open-Meteo Elevation višine gora zravna. Kamere: vdelava samo z embed_terms (URL pogojev ponudnika) in checked (datum preverjanja), sicer povezava. Točke od `velika-planina` do `dachstein` (19. 11. 2026, 13 točk) so dodane z objavljenimi višinami in koordinatami iz spomina (±5 km); preverjanje proti Elevation API iz peskovnika ni bilo mogoče (kvota, blokiran dostop), zato jih mora Filip potrditi.",
  "potrjeno": false,
  "tocke": [
   {
@@ -325,6 +325,15 @@
      "embed": "https://webcams.windy.com/webcams/public/embed/player/1521017441/day",
      "embed_terms": "https://api.windy.com/webcams/terms",
      "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Sella Pass",
+     "url": "https://www.windy.com/webcams/1521017306",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1521017306/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
     }
    ]
   },
@@ -572,6 +581,333 @@
    "elev_opis": "prelaz (postaja DRSI)",
    "drsi_cam": true,
    "kamere": []
+  },
+  {
+   "id": "velika-planina",
+   "ime": "Velika planina",
+   "drzava": "SI",
+   "regija": "Kamniško-Savinjske Alpe",
+   "lat": 46.3,
+   "lon": 14.64,
+   "elevation_m": 1500,
+   "elev_opis": "planina s pastirskimi stanovi (približna višina)",
+   "kamere": [
+    {
+     "naslov": "Velika Planina",
+     "url": "https://www.windy.com/webcams/1600352071",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1600352071/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "pokljuka",
+   "ime": "Pokljuka (Rudno polje)",
+   "drzava": "SI",
+   "regija": "Gorenjska in Julijci",
+   "lat": 46.347,
+   "lon": 13.94,
+   "elevation_m": 1350,
+   "elev_opis": "planota (približna višina)",
+   "kamere": [
+    {
+     "naslov": "Pokljuka - Rudno Polje",
+     "url": "https://www.windy.com/webcams/1793869976",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1793869976/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "vrsic",
+   "ime": "Vršič",
+   "drzava": "SI",
+   "regija": "Gorenjska in Julijci",
+   "lat": 46.4333,
+   "lon": 13.7472,
+   "elevation_m": 1611,
+   "elev_opis": "prelaz",
+   "kamere": [
+    {
+     "naslov": "Kranjska Gora - Vrsic",
+     "url": "https://www.windy.com/webcams/1688623370",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1688623370/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "stelvio",
+   "ime": "Passo Stelvio",
+   "drzava": "IT",
+   "regija": "Lombardija",
+   "lat": 46.529,
+   "lon": 10.453,
+   "elevation_m": 2757,
+   "elev_opis": "prelaz",
+   "kamere": [
+    {
+     "naslov": "Passo Stelvio",
+     "url": "https://www.windy.com/webcams/1200420839",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1200420839/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Ghiacciaio del Livrio - Stelvio",
+     "url": "https://www.windy.com/webcams/1793911418",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1793911418/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "madonna-di-campiglio",
+   "ime": "Madonna di Campiglio",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.229,
+   "lon": 10.827,
+   "elevation_m": 1522,
+   "elev_opis": "smučišče (približna višina)",
+   "kamere": [
+    {
+     "naslov": "Madonna di Campiglio - Groste",
+     "url": "https://www.windy.com/webcams/1386069368",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1386069368/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "marmolada-fedaia",
+   "ime": "Marmolada (Passo Fedaia)",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.4614,
+   "lon": 11.8672,
+   "elevation_m": 2057,
+   "elev_opis": "prelaz",
+   "kamere": [
+    {
+     "naslov": "Marmolada - Fedaia Lake",
+     "url": "https://www.windy.com/webcams/1521017745",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1521017745/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "canazei",
+   "ime": "Canazei (Val di Fassa)",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.477,
+   "lon": 11.771,
+   "elevation_m": 1465,
+   "elev_opis": "naselje",
+   "kamere": [
+    {
+     "naslov": "Canazei - Col Rodella",
+     "url": "https://www.windy.com/webcams/1676023092",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1676023092/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Col Rodella Panorama",
+     "url": "https://www.windy.com/webcams/1592498201",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1592498201/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "val-gardena",
+   "ime": "Val Gardena (Ortisei)",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.574,
+   "lon": 11.671,
+   "elevation_m": 1236,
+   "elev_opis": "naselje",
+   "kamere": [
+    {
+     "naslov": "Val Gardena - Col Raiser",
+     "url": "https://www.windy.com/webcams/1554250367",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1554250367/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "alta-badia",
+   "ime": "Alta Badia (Corvara)",
+   "drzava": "IT",
+   "regija": "Dolomiti",
+   "lat": 46.551,
+   "lon": 11.872,
+   "elevation_m": 1568,
+   "elev_opis": "naselje",
+   "kamere": [
+    {
+     "naslov": "Alta Badia - Corvara",
+     "url": "https://www.windy.com/webcams/1523923477",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1523923477/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "ischgl",
+   "ime": "Ischgl",
+   "drzava": "AT",
+   "regija": "Tirolska",
+   "lat": 47.012,
+   "lon": 10.29,
+   "elevation_m": 1377,
+   "elev_opis": "naselje",
+   "kamere": [
+    {
+     "naslov": "Ischgl - Palinkopf",
+     "url": "https://www.windy.com/webcams/1592497817",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1592497817/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Ischgl - Paznaun",
+     "url": "https://www.windy.com/webcams/1345881003",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1345881003/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Ischgl - Paznaun Dorf",
+     "url": "https://www.windy.com/webcams/1376091956",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1376091956/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "hintertux",
+   "ime": "Hintertux",
+   "drzava": "AT",
+   "regija": "Tirolska",
+   "lat": 47.078,
+   "lon": 11.667,
+   "elevation_m": 1500,
+   "elev_opis": "naselje (ledenik nad njim, 3250 m)",
+   "kamere": [
+    {
+     "naslov": "Hintertuxer Gletscher",
+     "url": "https://www.windy.com/webcams/1232544728",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1232544728/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Hintertux - Zillertal",
+     "url": "https://www.windy.com/webcams/1232543015",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1232543015/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "st-christoph",
+   "ime": "St. Christoph am Arlberg",
+   "drzava": "AT",
+   "regija": "Tirolska",
+   "lat": 47.133,
+   "lon": 10.2,
+   "elevation_m": 1800,
+   "elev_opis": "naselje",
+   "kamere": [
+    {
+     "naslov": "St. Christoph am Arlberg",
+     "url": "https://www.windy.com/webcams/1547163610",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1547163610/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "St. Christoph am Arlberg Nord",
+     "url": "https://www.windy.com/webcams/1232544548",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1232544548/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
+  },
+  {
+   "id": "dachstein",
+   "ime": "Dachstein (Hallstätter Gletscher)",
+   "drzava": "AT",
+   "regija": "Salzburško",
+   "lat": 47.478,
+   "lon": 13.623,
+   "elevation_m": 2700,
+   "elev_opis": "zgornja postaja ledenika (približna višina)",
+   "kamere": [
+    {
+     "naslov": "Hallstatter Glacier",
+     "url": "https://www.windy.com/webcams/1793907168",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1793907168/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
   }
  ]
 }
