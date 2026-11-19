@@ -244,7 +244,7 @@ MUTACIJE = [
     ("snegofili: JS Kam peljem: okno naprej začne po uri »zdaj«", "snegofili/snegofili.js", "n24: [NOW + 1, NOW + 24]", "n24: [NOW, NOW + 24]", "test_snegofili.py"),
     ("snegofili: JS Kam peljem: izenačenje po razdalji", "snegofili/snegofili.js", "b.cm - a.cm || a.p.k - b.p.k", "b.cm - a.cm", "test_snegofili.py"),
     ("snegofili: JS Kam peljem: omejitev razdalje", "snegofili/snegofili.js", "if (o.km && p.k > o.km) return;", "if (false) return;", "test_snegofili.py"),
-    ("snegofili: kamera brez potrdila pogojev ne gre v sg-pts", "tools/generate_snegofili_page.py", "ok = valid_embed(cam)\n        if ok:\n            c[\"ce\"]", "ok = (cam.get(\"embed_kind\"), cam.get(\"embed\"))\n        if ok:\n            c[\"ce\"]", "test_snegofili.py"),
+    ("snegofili: kamera brez potrdila pogojev ne gre v sg-pts", "tools/generate_snegofili_page.py", "ok = valid_embed(cam)\n        if ok:\n            e = {", "ok = (cam.get(\"embed_kind\"), cam.get(\"embed\"))\n        if ok:\n            e = {", "test_snegofili.py"),
     # ── ugibalnik zmrzali (test_zmrzal_ugibalnik.mjs, test_zmrzal_resolve.py, 19. 11. 2026) ──
     ("zmrzal ugibalnik: sezona od avgusta (worker)", "worker.js", 'const _zSezona = () => { const d = new Date(); return d.getUTCMonth() >= 7 ?', 'const _zSezona = () => { const d = new Date(); return d.getUTCMonth() >= 6 ?', "test_zmrzal_ugibalnik.mjs"),
     ("zmrzal ugibalnik: najzgodnejši datum 1. 9.", "worker.js", 'const lo = danes > sezona + "-09-01" ? danes : sezona + "-09-01";', 'const lo = danes;', "test_zmrzal_ugibalnik.mjs"),
