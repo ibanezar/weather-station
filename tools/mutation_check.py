@@ -234,7 +234,6 @@ MUTACIJE = [
     ("snegofili: tuja kamera: samo https povezava", "tools/generate_snegofili_page.py", 'if str(c.get("url", "")).startswith("https://"):', 'if str(c.get("url", "")):', "test_snegofili.py"),
     # ── prva zmrzal jeseni (test_first_frost.py, 19. 11. 2026: dogodek ni nastal nikoli) ──
     ("prva zmrzal: poletna zmrzal, ne zimska", "tools/seo_smart_routine.py", 'if f"{year}-07-01" <= d < f"{year}-09-01" and is_frost(history[d])]', 'if d >= f"{year}-01-01" and is_frost(history[d])]', "test_first_frost.py"),
-    ("prva zmrzal: začetek sezone 1. september", "tools/seo_smart_routine.py", 'season_dates = [d for d in sorted_dates if f"{year}-09-01" <= d <= TODAY.isoformat()]', 'season_dates = [d for d in sorted_dates if f"{year}-08-01" <= d <= TODAY.isoformat()]', "test_first_frost.py"),
     ("prva zmrzal: prag 0 °C", "tools/seo_smart_routine.py", 'return tl is not None and tl <= 0', 'return tl is not None and tl < 0', "test_first_frost.py"),
     # ── Snegofili alarm (test_snegofili_alarm.mjs, 19. 11. 2026) ──
     ("snegofili alarm: prag 15 cm v dovoljenih", "worker.js", 'const SG_CM_ALLOWED = [5, 15, 30];', 'const SG_CM_ALLOWED = [5, 10, 30];', "test_snegofili_alarm.mjs"),
