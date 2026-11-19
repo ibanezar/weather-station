@@ -85,6 +85,9 @@ REGISTER = [
      "zima-forecast.yml"),
     ("Zimska opozorila (ocene za push)", "data/zima-ocene.json", "ts", "generated", 36,
      "zima-forecast.yml"),
+    # Snegofili: korak v zima-forecast.yml je continue-on-error (Open-Meteo 429), zato 48 h (en izpadel tek ni napaka).
+    ("Snegofili (sneg po alpskem loku)", "data/snegofili.json", "ts", "generated_at", 48,
+     "zima-forecast.yml → tools/snegofili_data.py (korak je continue-on-error)"),
     ("Jutro v dolini (zamik prvi žarek → ogrevanje)", "data/jutro-zamik.json", "date", "generated", 60,
      "zima-forecast.yml (korak je continue-on-error)"),
     ("Zgodovina meritev (history.json)", "history.json", "maxkey", None, 60,
