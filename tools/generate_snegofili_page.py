@@ -384,6 +384,31 @@ CAM_JS = r"""
 """ % {"proxy": json.dumps(PROXY)}
 
 
+ALARM_CM = (5, 15, 30)   # ↔ SG_CM_ALLOWED v worker.js (tools/test_snegofili_alarm.mjs): meje stopenj snega v step()
+ALARM_MAX_RULES = 3      # ↔ SG_MAX_RULES v worker.js
+
+
+def alarm_html(rows):
+    """Opozorilo na telefon: pravila {točka, prag} do ALARM_MAX_RULES; snegofili.js ga pokaže samo, če brskalnik zna push."""
+    opts = "".join(f'<option value="{_html.escape(r["id"])}">{_html.escape(r["ime"])} ({COUNTRIES.get(r["drzava"], r["drzava"])}, {r["elevation_m"]} m)</option>'
+                   for r in sorted(rows, key=lambda r: (list(COUNTRIES).index(r["drzava"]), r["ime"])))
+    cms = "".join(f'<option value="{c}">{c} cm</option>' for c in ALARM_CM)
+    return f'''  <section class="sg-alarm" id="sg-alarm" data-max="{ALARM_MAX_RULES}" aria-labelledby="sg-al-h" hidden>
+    <h2 id="sg-al-h">Opozorilo na telefon</h2>
+    <p>Obvestilo, ko model za izbrano točko napove vsaj toliko novega snega v naslednjih 24 urah. Do {ALARM_MAX_RULES} pravila; obvestila ne pošiljamo ponoči (22.00–7.00).</p>
+    <div class="sg-al-row">
+      <label>Točka<select id="sg-al-pt">{opts}</select></label>
+      <label>Vsaj<select id="sg-al-cm">{cms}</select></label>
+      <button type="button" class="sg-al-btn s" id="sg-al-add">Dodaj pravilo</button>
+    </div>
+    <ul class="sg-al-list" id="sg-al-list" aria-label="Vaša pravila"></ul>
+    <div class="sg-al-row"><button type="button" class="sg-al-btn" id="sg-al-on">Vklopi opozorilo</button> <button type="button" class="sg-al-btn s" id="sg-al-off" hidden>Izklopi</button></div>
+    <p class="muted-note" id="sg-al-ios" hidden>Na iPhonu obvestila delujejo samo v aplikaciji, dodani na začetni zaslon (Deli, nato Dodaj na začetni zaslon).</p>
+    <p class="muted-note" id="sg-al-msg" aria-live="polite"></p>
+    <p class="muted-note">Modelska ocena novega snega iz padavin in meje sneženja, ne meritev; ni plazovni bilten in ni nasvet za turo. Strežnik shrani samo naslovnico naročnine in vaša pravila; izklop jih izbriše.</p>
+  </section>'''
+
+
 def build_body(data, cams):
     rows = sorted(data["tocke"], key=lambda r: (-r["past72_cm"], -r["elevation_m"]))
     present = sorted({r["drzava"] for r in rows}, key=list(COUNTRIES).index)
@@ -425,7 +450,7 @@ def build_body(data, cams):
     <div class="sg-profwrap">
       <h2>Višinski prerez Alp</h2>
       <p>Višine točk od zahoda proti vzhodu. Modri del stolpca je nad mejo sneženja, bela črtica je meja sneženja pri točki ob izbrani uri; kjer lebdi nad stolpcem, je meja višje od točke.</p>
-      <div class="sg-scroll">{prof}</div>
+      <div class="sg-scroll" tabindex="0" role="region" aria-label="Višinski prerez: meja sneženja in točke">{prof}</div>
       <p class="sg-hint">Povlecite vodoravno za ostale točke.</p>
     </div>
   </section>
@@ -439,6 +464,7 @@ def build_body(data, cams):
   </div>
   <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
   »—« pri snegu pomeni manj kot centimeter po modelu. Podatki: Open-Meteo, postaje ARSO.</p>
+{alarm_html(rows)}
   <section id="kamere" aria-labelledby="kam-h">
   <h2 id="kam-h">Kamere</h2>
   <p class="archive-intro">Slovenske kamere ARSO in DRSI so prikazane tukaj. Pri tujih točkah vas povezava na kartici odpelje k lastniku kamere.</p>

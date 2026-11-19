@@ -519,7 +519,7 @@ def strip_html(cfg, scores, label):
             cells.append(f'<b style="--lc:var(--dv-grid)" title="{hr}.00: ni podatka"></b>')
         else:
             cells.append(f'<b style="--lc:var(--l-{sc})" title="{hr}.00: {esc(cfg["levels"][sc])}" '
-                         f'aria-label="{hr}.00: {esc(cfg["levels"][sc])}"></b>')
+                         f'role="img" aria-label="{hr}.00: {esc(cfg["levels"][sc])}"></b>')
         hrs.append(f"<span>{hr}</span>" if hr % 3 == 0 else "<span></span>")
     win = best_window(scores)
     win_txt = (f'{cfg["window_label"]}: {fmt_hours(*win)}' if win else f'{cfg["window_none"]}')
@@ -663,7 +663,7 @@ ALERT_CSS = """<style>
 .ov-row label{display:flex;flex-direction:column;gap:.25rem;font-size:.85rem}
 .ov-row select{min-height:44px;padding:.4rem .6rem;border-radius:8px;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:inherit}
 .ov-btn{min-height:44px;padding:.5rem 1rem;border-radius:8px;border:1px solid rgba(128,128,128,.5);background:transparent;color:inherit;font:inherit;cursor:pointer}
-.ov-btn-p{background:#2a78d6;border-color:#2a78d6;color:#fff;font-weight:700}
+.ov-btn-p{background:#2368c8;border-color:#2368c8;color:#fff;font-weight:700}
 .ov-btn:disabled{opacity:.45;cursor:not-allowed}
 .ov-msg{font-size:.88rem;margin:.4rem 0}
 </style>"""

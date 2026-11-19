@@ -35,7 +35,7 @@
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Meteorec","item":"https://meteorec.si/"},{"@type":"ListItem","position":2,"name":"Nebo nocoj"}]}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Ali je pri nas mogo\u010de videti polarni sij?","acceptedAnswer":{"@type":"Answer","text":"Redko. Obi\u010dajno ga ob mo\u010dni geomagnetni nevihti (stopnja Kp 7 ali ve\u010d) vidimo nizko nad severnim obzorjem, pogosto \u0161ele na fotografiji. Pogoj sta tudi jasno nebo in temna lokacija."}},{"@type":"Question","name":"Od kod je napoved?","acceptedAnswer":{"@type":"Answer","text":"Kp je napoved ameri\u0161ke slu\u017ebe NOAA SWPC, obla\u010dnost je modelska napoved Open-Meteo za Re\u010dico ob Savinji. Stran ne napoveduje son\u010dne aktivnosti sama."}},{"@type":"Question","name":"Kaj je ZHR pri rojih utrinkov?","acceptedAnswer":{"@type":"Answer","text":"Zenitna urna frekvenca: najve\u010d utrinkov na uro, ki jih opazovalec vidi pri idealnem nebu z radiantom v zenitu. V resnici jih je obi\u010dajno bistveno manj. Vrednosti so po podatkih Mednarodne organizacije za meteore (IMO)."}},{"@type":"Question","name":"Zakaj luna moti?","acceptedAnswer":{"@type":"Answer","text":"Svetla luna zasen\u010di \u0161ibke utrinke. Stran izra\u010duna osvetljenost lune pribli\u017eno (na dan natan\u010dno); nad 50 % so slab\u0161i pogoji."}}]}
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"sl","mainEntity":[{"@type":"Question","name":"Ali je pri nas mogo\u010de videti polarni sij?","acceptedAnswer":{"@type":"Answer","text":"Redko. Obi\u010dajno ga ob mo\u010dni geomagnetni nevihti (stopnja Kp 7 ali ve\u010d) vidimo nizko nad severnim obzorjem, pogosto \u0161ele na fotografiji. Pogoj sta tudi jasno nebo in temna lokacija."}},{"@type":"Question","name":"Od kod je napoved?","acceptedAnswer":{"@type":"Answer","text":"Kp je napoved ameri\u0161ke slu\u017ebe NOAA SWPC, obla\u010dnost je modelska napoved Open-Meteo za Re\u010dico ob Savinji. Stran ne napoveduje son\u010dne aktivnosti sama."}},{"@type":"Question","name":"Kaj je ZHR pri rojih utrinkov?","acceptedAnswer":{"@type":"Answer","text":"Zenitna urna frekvenca: najve\u010d utrinkov na uro, ki jih opazovalec vidi pri idealnem nebu z radiantom v zenitu. V resnici jih je obi\u010dajno bistveno manj. Vrednosti so po podatkih Mednarodne organizacije za meteore (IMO)."}},{"@type":"Question","name":"Ali lahko dobim obvestilo na telefon?","acceptedAnswer":{"@type":"Answer","text":"Da, izbirno. Na tej strani vklopite opozorilo za vrh roja utrinkov in/ali za mo\u017een polarni sij. Obvestilo pride zve\u010der (med 17. in 23. uro) in samo, kadar no\u010dna obla\u010dnost ni visoka (pod 70 %); za sij mora biti napovedan tudi Kp 7 ali ve\u010d. Najve\u010d eno obvestilo na vrsto in ve\u010der. Je modelska ocena, ne obljuba."}},{"@type":"Question","name":"Zakaj luna moti?","acceptedAnswer":{"@type":"Answer","text":"Svetla luna zasen\u010di \u0161ibke utrinke. Stran izra\u010duna osvetljenost lune pribli\u017eno (na dan natan\u010dno); nad 50 % so slab\u0161i pogoji."}}]}
 </script>
 <link rel="stylesheet" href="/fonts/fonts.css?v=c490d62a">
 <link rel="stylesheet" href="/blog/blog.css?v=6352b4f1">
@@ -65,8 +65,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h1 class="page-title">Nebo nocoj: polarni sij in utrinki</h1>
   <p class="post-meta">Napoved Kp (NOAA SWPC) · oblačnost (Open-Meteo) · roji utrinkov (IMO)</p>
   <p class="archive-intro">Polarni sij je pri nas redek in terja močno geomagnetno nevihto in jasno nebo; utrinki so pogostejši. Stran združi napoved za nocoj in pove, kdaj je naslednji roj.</p>
-  <style>.nb-big{font-size:1.7rem;font-weight:700;margin:.3rem 0}#nb-out .card{margin:.8rem 0}</style>
+  <style>.nb-big{font-size:1.7rem;font-weight:700;margin:.3rem 0}#nb-out .card,#nb-alarm{margin:.8rem 0}.nb-al{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;min-height:44px}.nb-al input{margin-top:.25rem;width:1.1rem;height:1.1rem}.nb-row{margin:.6rem 0;display:flex;gap:.6rem;flex-wrap:wrap}.nb-btn{min-height:44px;padding:.5rem 1rem;border-radius:8px;border:1px solid #2368c8;background:#2368c8;color:#fff;font:inherit;font-weight:700;cursor:pointer}.nb-btn-s{background:transparent;color:inherit;border-color:rgba(128,128,128,.6);font-weight:400}.nb-btn:disabled{opacity:.5;cursor:not-allowed}#nb-alarm a{color:#7dd3fc;text-decoration:underline}</style>
   <div id="nb-out" aria-live="polite"><p class="archive-intro">Nalagam podatke …</p></div>
+  <div class="card" id="nb-alarm" hidden>
+    <div class="clabel">Opozorilo na telefon</div>
+    <p>Obvestilo zvečer (med 17. in 23. uro), samo ko nočna oblačnost ni visoka. Izberite, kaj želite:</p>
+    <label class="nb-al"><input type="checkbox" id="nb-al-roji" checked> Vrh roja utrinkov (nočna oblačnost pod 70 %)</label>
+    <label class="nb-al"><input type="checkbox" id="nb-al-sij"> Možen polarni sij (napovedani Kp 7 ali več in nočna oblačnost pod 70 %)</label>
+    <div class="nb-row"><button type="button" class="nb-btn" id="nb-al-on">Vklopi opozorilo</button> <button type="button" class="nb-btn nb-btn-s" id="nb-al-off" hidden>Izklopi</button></div>
+    <p class="vs-note" id="nb-al-ios" hidden>Na iPhonu obvestila delujejo samo v aplikaciji, dodani na začetni zaslon (Deli, nato Dodaj na začetni zaslon).</p>
+    <p class="vs-note" id="nb-al-msg" aria-live="polite"></p>
+    <p class="vs-note">Modelska ocena, ne obljuba. Strežnik shrani samo naslovnico naročnine in vaši dve izbiri; izklop ju izbriše. Splošno obvestilo o močni geomagnetni nevihti (Kp 7 ali več) že prejemajo vsi, ki imajo vklopljena obvestila na <a href="/">naslovni strani</a>.</p>
+  </div>
   <noscript><p class="archive-intro">Stran potrebuje JavaScript.</p></noscript>
   <p class="vs-note">Pravilo Kp ≥ 7 je približek za geomagnetno širino Slovenije, ne garancija. Brez podatka stran ne trdi, da je sij možen. Podatki se berejo neposredno iz brskalnika (NOAA SWPC, Open-Meteo); obiskovalec ne pošilja ničesar.</p>
   <h2>Pogosta vprašanja</h2>
@@ -74,10 +84,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <details><summary>Ali je pri nas mogoče videti polarni sij?</summary><p>Redko. Običajno ga ob močni geomagnetni nevihti (stopnja Kp 7 ali več) vidimo nizko nad severnim obzorjem, pogosto šele na fotografiji. Pogoj sta tudi jasno nebo in temna lokacija.</p></details>
     <details><summary>Od kod je napoved?</summary><p>Kp je napoved ameriške službe NOAA SWPC, oblačnost je modelska napoved Open-Meteo za Rečico ob Savinji. Stran ne napoveduje sončne aktivnosti sama.</p></details>
     <details><summary>Kaj je ZHR pri rojih utrinkov?</summary><p>Zenitna urna frekvenca: največ utrinkov na uro, ki jih opazovalec vidi pri idealnem nebu z radiantom v zenitu. V resnici jih je običajno bistveno manj. Vrednosti so po podatkih Mednarodne organizacije za meteore (IMO).</p></details>
+    <details><summary>Ali lahko dobim obvestilo na telefon?</summary><p>Da, izbirno. Na tej strani vklopite opozorilo za vrh roja utrinkov in/ali za možen polarni sij. Obvestilo pride zvečer (med 17. in 23. uro) in samo, kadar nočna oblačnost ni visoka (pod 70 %); za sij mora biti napovedan tudi Kp 7 ali več. Največ eno obvestilo na vrsto in večer. Je modelska ocena, ne obljuba.</p></details>
     <details><summary>Zakaj luna moti?</summary><p>Svetla luna zasenči šibke utrinke. Stran izračuna osvetljenost lune približno (na dan natančno); nad 50 % so slabši pogoji.</p></details>
   </div>
   <a class="back-link" href="/">← Vreme v Rečici</a>
-<script src="/nebo-nocoj/nebo.js?v=3f8eb0ea" defer></script>
+<script src="/nebo-nocoj/nebo.js?v=0bcf73e3" defer></script>
   <footer class="site-foot">
     <span>© 2026 Meteorec · Rečica ob Savinji</span>
     <span><a href="/">Vreme v živo</a> · <a href="/blog/">Blog</a> · <a href="/vreme/">Arhiv</a> · <a href="/vreme/mesec/">Po mesecih</a> · <a href="/podatki/">Podatki</a> · <a href="/vreme-recica-ob-savinji/">Vreme Rečica ob Savinji</a> · <a href="/vreme-zgornja-savinjska-dolina/">Vreme Zgornja Savinjska dolina</a> · <a href="/tocnost-napovedi/">Točnost napovedi</a></span>

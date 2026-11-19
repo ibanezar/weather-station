@@ -349,7 +349,7 @@ CHART_CSS = """<style>
 .vod-mini b{display:block;font-size:1.55rem;font-weight:800;margin:.15rem 0;font-variant-numeric:tabular-nums}
 .vod-mini em{font-style:normal;font-size:.72rem;color:var(--muted)}
 .vod-pill{display:inline-block;padding:.22rem .7rem;border-radius:999px;font-size:.78rem;font-weight:700;
-  color:var(--c,#94a3b8);background:color-mix(in srgb,var(--c,#94a3b8) 16%,transparent);
+  color:color-mix(in srgb,var(--c,#94a3b8) 65%,#fff);background:color-mix(in srgb,var(--c,#94a3b8) 16%,transparent);
   border:1px solid color-mix(in srgb,var(--c,#94a3b8) 45%,transparent)}
 .vod-h-pill{position:relative;z-index:1}
 .vod-section-t{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}

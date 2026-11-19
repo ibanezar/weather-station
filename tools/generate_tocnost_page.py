@@ -144,7 +144,7 @@ CHART_CSS = """<style>
 .tnc-heat td.best{box-shadow:inset 0 0 0 1.5px #fff}
 .tnc-heat td.na{color:var(--muted);font-weight:400}
 .tnc-heat td.meas{color:var(--text);font-weight:500;background:none}
-.tnc-heat td small{display:block;font-weight:400;font-size:.66rem;color:var(--muted);line-height:1.1;margin-top:.05rem}
+.tnc-heat td small{display:block;font-weight:400;font-size:.66rem;color:var(--text);line-height:1.1;margin-top:.05rem}
 .tnc-heat tr.tot th,.tnc-heat tr.tot td{border-top:0;box-shadow:none}
 .tnc-heat tr.tot th{color:#fff;font-weight:700}
 .tnc-heat-key{display:flex;flex-wrap:wrap;gap:.2rem 1rem;align-items:center;font-size:.74rem;color:var(--muted);margin-top:.6rem}

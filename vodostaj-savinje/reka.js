@@ -363,6 +363,7 @@ function lataTargetFrac(s) {
 function lataInit(box) {
   const cv = document.createElement('canvas');
   cv.className = 'vod-lata-canvas'; cv.setAttribute('role', 'img');
+  cv.setAttribute('aria-label', 'Merilna lata: gladina Savinje glede na pragove ARSO; vrednosti so v besedilu pod njo');
   box.appendChild(cv);
   VS.lata = { cv, ctx: null, W: 0, level: null, trees: [], bub: [] };
   lataResize();

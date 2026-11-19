@@ -23,6 +23,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # (opis, datoteka, staro, novo[, test])  — `staro` se mora v datoteki pojaviti natanko enkrat;
 # `test` je skripta v tools/ (privzeto test_parity.py)
 MUTACIJE = [
+    ("toča: živi prikaz razhajan (nevihte)", "tools/generate_nevihte_page.py", 'id="toca-live" style="margin-bottom:1rem"', 'id="toca-live" style="margin-bottom:2rem"'),
     ("FWI razred (app.js)", "app.js", "if(v<5.2)return{label:'Nizka'", "if(v<5.3)return{label:'Nizka'"),
     ("FWI razred (gasilec.js)", "meteogasilec/gasilec.js", "if (v < 11.2) return { label: 'Zmerna'", "if (v < 11.3) return { label: 'Zmerna'"),
     ("FWI razred (Python)", "tools/gasilec_model.py", '("Zelo visoka", "#ef4444", 21.3, 38.0)', '("Zelo visoka", "#ef4444", 21.3, 39.0)'),
@@ -232,6 +233,47 @@ MUTACIJE = [
     ("snegofili: vdelava: dovoljen gostitelj", "tools/generate_snegofili_page.py", 'if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:', 'if u.scheme != "https":', "test_snegofili.py"),
     ("snegofili: povzetek: doseg izleta TRIP_KM", "tools/generate_snegofili_page.py", 'r["km_od_recice"] <= TRIP_KM and', 'r["km_od_recice"] >= TRIP_KM and', "test_snegofili.py"),
     ("snegofili: tuja kamera: samo https povezava", "tools/generate_snegofili_page.py", 'if str(c.get("url", "")).startswith("https://"):', 'if str(c.get("url", "")):', "test_snegofili.py"),
+    # ── ugibalnik zmrzali (test_zmrzal_ugibalnik.mjs, test_zmrzal_resolve.py, 19. 11. 2026) ──
+    ("zmrzal ugibalnik: sezona od avgusta (worker)", "worker.js", 'const _zSezona = () => { const d = new Date(); return d.getUTCMonth() >= 7 ?', 'const _zSezona = () => { const d = new Date(); return d.getUTCMonth() >= 6 ?', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: najzgodnejši datum 1. 9.", "worker.js", 'const lo = danes > sezona + "-09-01" ? danes : sezona + "-09-01";', 'const lo = danes;', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: zadnji dan 31. 12.", "worker.js", 'datum < lo || datum > sezona + "-12-31")', 'datum < lo || datum > (sezona + 1) + "-12-31")', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: sezona mimo po 31. 12.", "worker.js", 'if (danes > sezona + "-12-31") return _zj(', 'if (false) return _zj(', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: zaprtje po zmrzali", "worker.js", 'if (st && st.sezona === sezona && st.prva_zmrzal) return _zj(', 'if (st && st.prva_zmrzal) return _zj(', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: omejitev po IP", "worker.js", '"zmrzal_ugib_rl", 10, 86400', '"zmrzal_ugib_rl", 10000, 86400', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: en ugib na igralca", "worker.js", 'const ex = all.find(i => i.id === id);\n          if (ex) return _zj(', 'const ex = null;\n          if (ex) return _zj(', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: honeypot", "worker.js", 'if (body.website) return _zj({ ok: true }); // honeypot', '', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: seznam brez id-jev", "worker.js", 'ugibi: all.slice(0, 2000).map(i => [i.datum, i.ime || "", i.ts]),\n            moj: moj ? { datum: moj.datum, ts: moj.ts } : null }, 200, "public, max-age=60");\n        }\n\n        if (path === "/zmrzal/ugibanje"', 'ugibi: all.slice(0, 2000).map(i => [i.datum, i.ime || "", i.ts, i.id]),\n            moj: moj ? { datum: moj.datum, ts: moj.ts } : null }, 200, "public, max-age=60");\n        }\n\n        if (path === "/zmrzal/ugibanje"', "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: maksimalni datum v nastavitvah", "zima/sneg-ugibalnik/ugibalnik.js", "maxDate: (get('data-max-next') === '0' ? sez : sez + 1)", "maxDate: (sez + 1)", "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: sezona iz datuma (JS)", "zima/sneg-ugibalnik/ugibalnik.js", "if (isNaN(sez)) sez = m >= sm ? y : y - 1;", "if (isNaN(sez)) sez = y;", "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: okno ugibanja (JS)", "zima/sneg-ugibalnik/ugibalnik.js", "cfg.open = today <= cfg.maxDate;", "cfg.open = true;", "test_zmrzal_ugibalnik.mjs"),
+    ("zmrzal ugibalnik: razreševalnik, začetek sezone", "tools/zmrzal_ugibalnik_resolve.py", "SEASON_MONTH = 8 ", "SEASON_MONTH = 9 ", "test_zmrzal_resolve.py"),
+    ("zmrzal ugibalnik: razreševalnik, tip dogodka", "tools/zmrzal_ugibalnik_resolve.py", 'e.get("type") == "prva-zmrzal" and e.get("slug")', 'e.get("slug")', "test_zmrzal_resolve.py"),
+    ("zmrzal ugibalnik: razreševalnik, brez zmrzali", "tools/zmrzal_ugibalnik_resolve.py", "elif today > datetime.date(s, *END_MD):", "elif today > datetime.date(s + 1, *END_MD):", "test_zmrzal_resolve.py"),
+    # ── prva zmrzal jeseni (test_first_frost.py, 19. 11. 2026: dogodek ni nastal nikoli) ──
+    ("prva zmrzal: poletna zmrzal, ne zimska", "tools/seo_smart_routine.py", 'if f"{year}-07-01" <= d < f"{year}-09-01" and is_frost(history[d])]', 'if d >= f"{year}-01-01" and is_frost(history[d])]', "test_first_frost.py"),
+    ("prva zmrzal: prag 0 °C", "tools/seo_smart_routine.py", 'return tl is not None and tl <= 0', 'return tl is not None and tl < 0', "test_first_frost.py"),
+    # ── Snegofili alarm (test_snegofili_alarm.mjs, 19. 11. 2026) ──
+    ("snegofili alarm: prag 15 cm v dovoljenih", "worker.js", 'const SG_CM_ALLOWED = [5, 15, 30];', 'const SG_CM_ALLOWED = [5, 10, 30];', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: največ pravil", "worker.js", 'const SG_MAX_RULES = 3;', 'const SG_MAX_RULES = 30;', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: starost podatkov", "worker.js", 'if (!(now - Date.parse(data.generated_at) <= SG_MAX_AGE_H * 3600 * 1000))', 'if (false)', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: histereza", "worker.js", '} else if (s.over && pt.next24_cm < rule.cm * SG_RESET_FRAC) { s.over = false; changed = true; }', '} else if (s.over) { s.over = false; changed = true; }', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: hladilna doba", "worker.js", 'if (now - (s.last || 0) > SG_COOLDOWN_MS) hits.push', 'if (true) hits.push', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: prehod čez prag, ne vsak tik", "worker.js", 'if (!s.over) { s.over = true; changed = true;', 'if (true) { s.over = true; changed = true;', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: potekla naročnina", "worker.js", 'if (code === 404 || code === 410) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits) x.s.last = now;', 'if (false) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits) x.s.last = now;', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: dvojina opozoril", "worker.js", '" tvoje opozorilo." : " tvoji opozorili.")', '" tvoje opozorilo." : " tvoja opozorila.")', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: neznana točka", "worker.js", 'if (!ids.has(id) || SG_CM_ALLOWED.indexOf(cm) < 0) return null;', 'if (SG_CM_ALLOWED.indexOf(cm) < 0) return null;', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: točka brez vrednosti", "worker.js", 'if (!pt || typeof pt.next24_cm !== "number") continue;', 'if (!pt) continue;', "test_snegofili_alarm.mjs"),
+    # ── Nebo alarm (test_nebo_alarm.mjs, 19. 11. 2026) ──
+    ("nebo alarm: prag oblačnosti 70 %", "worker.js", 'const NEBO_CLOUD_NO = 70;', 'const NEBO_CLOUD_NO = 700;', "test_nebo_alarm.mjs"),
+    ("nebo alarm: prag Kp 7", "worker.js", 'const NEBO_KP_LIMIT = 7;', 'const NEBO_KP_LIMIT = 1;', "test_nebo_alarm.mjs"),
+    ("nebo alarm: enkrat na večer", "worker.js", '!sub[key] || !payloads[key] || st[key] === date', '!sub[key] || !payloads[key]', "test_nebo_alarm.mjs"),
+    ("nebo alarm: potekla naročnina (404/410)", "worker.js", 'if (code === 404 || code === 410) { dead.push(sub.endpoint); break; }', 'if (false) { dead.push(sub.endpoint); break; }', "test_nebo_alarm.mjs"),
+    ("nebo alarm: brez oblačnosti ne trdi nič", "worker.js", 'if (cloud == null) return { checked: subs.length, sent: 0, skipped: "ni napovedi oblačnosti" };', 'if (false) return { checked: subs.length, sent: 0, skipped: "ni napovedi oblačnosti" };', "test_nebo_alarm.mjs"),
+    ("nebo alarm: okno Kp +24 h", "worker.js", 'ts <= now + 24 * 3600e3 && (mx == null', 'ts <= now + 240 * 3600e3 && (mx == null', "test_nebo_alarm.mjs"),
+    ("nebo alarm: nočne ure 20–5", "worker.js", '(day === localDate && hr >= 20) || (day === next && hr <= 5)', '(day === localDate && hr >= 12) || (day === next && hr <= 5)', "test_nebo_alarm.mjs"),
+    ("nebo alarm: isti tag kot splošni alarm", "worker.js", 'tag: "wx-aurora", icon: "/icon-192.png" };\n  if (showerGo)', 'tag: "nebo-sij", icon: "/icon-192.png" };\n  if (showerGo)', "test_nebo_alarm.mjs"),
+    ("nebo alarm: dan vrha roja", "worker.js", 's.peak[0] === mo && s.peak[1] === d', 's.peak[1] === d', "test_nebo_alarm.mjs"),
+    ("nebo alarm: NOAA objekti time_tag", "worker.js", 't = r.time_tag; v = r.kp;', 't = r.time; v = r.kp;', "test_nebo_alarm.mjs"),
 ]
 
 

@@ -115,7 +115,7 @@
       [fmt(r.t), fmt(r.n), fmt(r.p), r.ok ? 'da' : 'ne'].forEach(function (x) { tr.appendChild(cell('td', x)); }); tb.appendChild(tr);
     });
     t1.appendChild(tb);
-    var h2 = cell('h3', 'Točno ' + dm(m, d) + ' v prejšnjih letih'); out.appendChild(h2); var wrap = document.createElement('div'); wrap.className = 'pr-tbl'; wrap.appendChild(t1); out.appendChild(wrap);
+    var h2 = cell('h3', 'Točno ' + dm(m, d) + ' v prejšnjih letih'); out.appendChild(h2); var wrap = document.createElement('div'); wrap.className = 'pr-tbl'; wrap.tabIndex = 0; wrap.setAttribute('role', 'region'); wrap.setAttribute('aria-label', 'Izbrani datum v prejšnjih letih'); wrap.appendChild(t1); out.appendChild(wrap);
     // boljši datumi
     var bs = best(MAP, m, d, 14, w, c, 4), ul = document.createElement('ol'); ul.className = 'pr-best';
     bs.forEach(function (x) { var li = document.createElement('li'); li.textContent = dm(x.m, x.d) + ': ' + Math.round(100 * x.p) + ' % primernih dni' + (x.off ? ' (' + (x.off > 0 ? '+' : '\u2013') + Math.abs(x.off) + ' dni)' : ' (izbrani datum)'); ul.appendChild(li); });

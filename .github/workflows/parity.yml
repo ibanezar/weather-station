@@ -16,6 +16,8 @@ on:
       - 'tools/generate_podjetja_page.py'
       - 'igra/**'
       - 'napovej/**'
+      - 'nebo-nocoj/**'
+      - 'snegofili/**'
       - 'crnivec-igra/**'
       - 'crnivec-site/**'
       - 'gobarska-napoved/index.html'
@@ -32,6 +34,8 @@ on:
       - '365-0-game/src/engine/**'
       - 'igra/**'
       - 'napovej/**'
+      - 'nebo-nocoj/**'
+      - 'snegofili/**'
       - 'crnivec-igra/**'
       - 'meteogasilec/gasilec.js'
       - 'vodostaj-savinje/reka.js'
@@ -80,6 +84,9 @@ jobs:
 
       - name: Test zaznave prve snežne odeje
         run: python3 tools/test_first_snow.py
+
+      - name: Test zaznave prve zmrzali jeseni
+        run: python3 tools/test_first_frost.py
 
       - name: Test vremena v gorah
         run: python3 tools/test_gore.py
@@ -152,6 +159,11 @@ jobs:
       - name: Test arhiva poročil o snegu in razrešitve ugibalnika
         run: python3 tools/test_sneg_porocila_log.py
 
+      - name: Test ugibalnika zmrzali (pravi worker.js, lažna ura, nastavitve igre) in razreševalnika
+        run: |
+          node tools/test_zmrzal_ugibalnik.mjs
+          python3 tools/test_zmrzal_resolve.py
+
       - name: Test kalkulatorja drv (model in vdelani podatki)
         run: node tools/test_drva.mjs
 
@@ -165,6 +177,8 @@ jobs:
           python3 tools/test_zgresitve.py
           node tools/test_rojstni.mjs
           node tools/test_nebo.mjs
+          node tools/test_nebo_alarm.mjs
+          node tools/test_snegofili_alarm.mjs
           node tools/test_elektrarna.mjs
           node tools/test_zig.mjs
 
@@ -250,6 +264,9 @@ jobs:
 
       - name: Test napovedi ur, zasidrane na meritev (junaška krivulja)
         run: python3 tools/test_anchor.py
+
+      - name: Test decimalne vejice v besedilu zavihkov (_slDecText)
+        run: python3 tools/test_decimals.py
 
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py

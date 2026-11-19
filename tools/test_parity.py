@@ -545,6 +545,16 @@ def detektiv_vreme():
 
 
 @test
+def toca_live_html():
+    """TOCA_LIVE_HTML (živi prikaz toče) je dobesedna podvojitev v generate_toca_page.py in generate_nevihte_page.py."""
+    import generate_toca_page as a
+    import generate_nevihte_page as b
+    check(a.TOCA_LIVE_HTML == b.TOCA_LIVE_HTML, "toca_live_html: kopiji se razhajata")
+    for k in ("/arso-toca", "toca-live"):
+        check(k in a.TOCA_LIVE_HTML, f"toca_live_html: manjka {k}")
+
+
+@test
 def arso_toca_razclenjevanje():
     """_parseArsoToca() v worker.js razbere stopnjo in čas izdaje iz ARSO RSS (oblika iz 7. 10. 2026)."""
     def rss(t):

@@ -164,5 +164,19 @@ links = g.cam_links({"kamere": [{"url": "http://x.example/a", "ponudnik": "Nevar
 check("Varna" in links and "Nevarna" not in links, "cam_links: http povezava se ne izpiše")
 check(g.cam_links({}) == "—", "cam_links: brez kamer pomišljaj")
 
+# ── opozorilo na telefon: konstante gradnika ↔ worker.js (SG_CM_ALLOWED, SG_MAX_RULES), vse točke v izbirniku ──
+import re  # noqa: E402
+wsrc = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "worker.js"), encoding="utf-8").read()
+m_cm = re.search(r"const SG_CM_ALLOWED = \[([\d, ]+)\];", wsrc)
+m_max = re.search(r"const SG_MAX_RULES = (\d+);", wsrc)
+check(m_cm and tuple(int(x) for x in m_cm.group(1).split(",")) == g.ALARM_CM, "alarm: pragovi gradnika = SG_CM_ALLOWED v workerju")
+check(m_max and int(m_max.group(1)) == g.ALARM_MAX_RULES, "alarm: največ pravil gradnika = SG_MAX_RULES v workerju")
+ah = g.alarm_html([{"id": "a", "ime": "A <b>", "drzava": "SI", "elevation_m": 1500}, {"id": "b", "ime": "B", "drzava": "AT", "elevation_m": 2000}])
+check('value="a"' in ah and 'value="b"' in ah and "A &lt;b&gt;" in ah, "alarm: točke v izbirniku, ime ubežano")
+check(ah.index('value="a"') < ah.index('value="b"'), "alarm: razvrščeno po državi (SI pred AT) in imenu")
+check("ni plazovni bilten" in ah and "ne meritev" in ah, "alarm: opozorilo, da je modelska ocena in ni plazovni bilten")
+check("hidden" in ah.split(">")[0], "alarm: brez JS skrit (nikoli gumb, ki ne dela)")
+check(all(f'value="{c}"' in ah for c in g.ALARM_CM), "alarm: vsi pragovi v izbirniku")
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

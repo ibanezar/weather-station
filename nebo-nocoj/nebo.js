@@ -97,4 +97,47 @@
     }
     out.appendChild(c2);
   });
+  // Opozorilo na telefon (Web Push): strežnik shrani samo naslovnico naročnine, kljukici (roji, sij) in stanje po večerih.
+  (function () {
+    var box = document.getElementById('nb-alarm'); if (!box) return;
+    var API = 'https://weatherireica1.filip-eremita.workers.dev', AK = 'wx-nebo-alarm';
+    var cRoji = document.getElementById('nb-al-roji'), cSij = document.getElementById('nb-al-sij'), onB = document.getElementById('nb-al-on'),
+        offB = document.getElementById('nb-al-off'), msg = document.getElementById('nb-al-msg'), ios = document.getElementById('nb-al-ios');
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+    var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var st = null; try { st = JSON.parse(localStorage.getItem(AK) || 'null'); } catch (e) { st = null; }
+    if (st) { cRoji.checked = !!st.roji; cSij.checked = !!st.sij; }
+    function say(t) { msg.textContent = t || ''; }
+    function show() {
+      offB.hidden = !st; onB.textContent = st ? 'Shrani izbiro' : 'Vklopi opozorilo';
+      say(st ? 'Opozorilo je vklopljeno: ' + [st.roji ? 'roji utrinkov' : '', st.sij ? 'polarni sij' : ''].filter(Boolean).join(', ') + '.' : '');
+    }
+    if (isIOS && !standalone) { box.hidden = false; ios.hidden = false; onB.disabled = true; return; }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
+    box.hidden = false; show();
+    function b64(s) { var p = '='.repeat((4 - s.length % 4) % 4), b = (s + p).replace(/-/g, '+').replace(/_/g, '/'), r = atob(b), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+    function post(path, body) { return fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status)); return j; }); }); }
+    function getSub() { return navigator.serviceWorker.register('/sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) { return reg.pushManager.getSubscription().then(function (sub) { return { reg: reg, sub: sub }; }); }); }
+    onB.addEventListener('click', function () {
+      if (!cRoji.checked && !cSij.checked) { say('Izberite vsaj eno obvestilo.'); return; }
+      if (Notification.permission === 'denied') { say('Obvestila so za to stran v brskalniku blokirana. Dovolite jih v nastavitvah strani.'); return; }
+      Notification.requestPermission().then(function (p) {
+        if (p !== 'granted') { say('Brez dovoljenja za obvestila opozorilo ne more delovati.'); return; }
+        onB.disabled = true;
+        return getSub().then(function (x) {
+          if (x.sub) return x.sub;
+          return fetch(API + '/push/vapid').then(function (r) { return r.json(); }).then(function (v) { return x.reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(v.publicKey) }); });
+        }).then(function (sub) { return post('/push/subscribe', { site: 'nebo', subscription: sub.toJSON(), roji: cRoji.checked, sij: cSij.checked }); })
+          .then(function (r) { st = { roji: r.roji, sij: r.sij }; try { localStorage.setItem(AK, JSON.stringify(st)); } catch (e) {} show(); })
+          .catch(function (e) { say('Ni uspelo: ' + (e && e.message ? e.message : 'poskusite znova čez nekaj minut') + '.'); })
+          .then(function () { onB.disabled = false; });
+      });
+    });
+    offB.addEventListener('click', function () {
+      offB.disabled = true;
+      getSub().then(function (x) { return x.sub ? post('/push/unsubscribe', { site: 'nebo', endpoint: x.sub.endpoint }) : null; })
+        .then(function () { st = null; try { localStorage.removeItem(AK); } catch (e) {} show(); say('Opozorilo je izklopljeno, naslovnica in izbira sta izbrisani s strežnika.'); })
+        .catch(function (e) { say('Ni uspelo: ' + (e && e.message ? e.message : 'poskusite znova') + '.'); }).then(function () { offB.disabled = false; });
+    });
+  })();
 })(typeof window !== 'undefined' ? window : globalThis);
