@@ -232,6 +232,17 @@ MUTACIJE = [
     ("snegofili: vdelava: dovoljen gostitelj", "tools/generate_snegofili_page.py", 'if u.scheme != "https" or u.hostname not in EMBED_HOSTS[kind]:', 'if u.scheme != "https":', "test_snegofili.py"),
     ("snegofili: povzetek: doseg izleta TRIP_KM", "tools/generate_snegofili_page.py", 'r["km_od_recice"] <= TRIP_KM and', 'r["km_od_recice"] >= TRIP_KM and', "test_snegofili.py"),
     ("snegofili: tuja kamera: samo https povezava", "tools/generate_snegofili_page.py", 'if str(c.get("url", "")).startswith("https://"):', 'if str(c.get("url", "")):', "test_snegofili.py"),
+    # ── Nebo alarm (test_nebo_alarm.mjs, 19. 11. 2026) ──
+    ("nebo alarm: prag oblačnosti 70 %", "worker.js", 'const NEBO_CLOUD_NO = 70;', 'const NEBO_CLOUD_NO = 700;', "test_nebo_alarm.mjs"),
+    ("nebo alarm: prag Kp 7", "worker.js", 'const NEBO_KP_LIMIT = 7;', 'const NEBO_KP_LIMIT = 1;', "test_nebo_alarm.mjs"),
+    ("nebo alarm: enkrat na večer", "worker.js", '!sub[key] || !payloads[key] || st[key] === date', '!sub[key] || !payloads[key]', "test_nebo_alarm.mjs"),
+    ("nebo alarm: potekla naročnina (404/410)", "worker.js", 'if (code === 404 || code === 410) { dead.push(sub.endpoint); break; }', 'if (false) { dead.push(sub.endpoint); break; }', "test_nebo_alarm.mjs"),
+    ("nebo alarm: brez oblačnosti ne trdi nič", "worker.js", 'if (cloud == null) return { checked: subs.length, sent: 0, skipped: "ni napovedi oblačnosti" };', 'if (false) return { checked: subs.length, sent: 0, skipped: "ni napovedi oblačnosti" };', "test_nebo_alarm.mjs"),
+    ("nebo alarm: okno Kp +24 h", "worker.js", 'ts <= now + 24 * 3600e3 && (mx == null', 'ts <= now + 240 * 3600e3 && (mx == null', "test_nebo_alarm.mjs"),
+    ("nebo alarm: nočne ure 20–5", "worker.js", '(day === localDate && hr >= 20) || (day === next && hr <= 5)', '(day === localDate && hr >= 12) || (day === next && hr <= 5)', "test_nebo_alarm.mjs"),
+    ("nebo alarm: isti tag kot splošni alarm", "worker.js", 'tag: "wx-aurora", icon: "/icon-192.png" };\n  if (showerGo)', 'tag: "nebo-sij", icon: "/icon-192.png" };\n  if (showerGo)', "test_nebo_alarm.mjs"),
+    ("nebo alarm: dan vrha roja", "worker.js", 's.peak[0] === mo && s.peak[1] === d', 's.peak[1] === d', "test_nebo_alarm.mjs"),
+    ("nebo alarm: NOAA objekti time_tag", "worker.js", 't = r.time_tag; v = r.kp;', 't = r.time; v = r.kp;', "test_nebo_alarm.mjs"),
 ]
 
 

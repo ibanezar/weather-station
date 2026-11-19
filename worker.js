@@ -1162,6 +1162,122 @@ async function _cronCheckOcene(env) {
   return out && out.skipped ? { ok: false, reason: out.skipped } : true;
 }
 
+// ── Nebo alarm (Web Push, /nebo-nocoj/) ────────────────────
+// Izbirna obvestila z LOČENIM seznamom naročnin (push/nebo-subs.json, kot migrena, crnivec in gobe): (1) vrh roja utrinkov, kadar
+// nočna oblačnost ni visoka; (2) možen polarni sij: napovedani Kp ≥ 7 IN nočna oblačnost < 70 %. Splošni alarm za sij
+// (_cronCheckAurora) gre vsem naročnikom, bere samo opazovani Kp in oblačnosti ne pozna; ta gre samo tistim, ki so ga vklopili,
+// ima oblačnost in isti `tag` ("wx-aurora"), da se obvestili na isti napravi ne podvojita. Največ eno obvestilo na vrsto in večer.
+// Pravila in konstante so namerna podvojitev nebo-nocoj/nebo.js (tools/test_nebo_alarm.mjs jih primerja s tisto kodo).
+// Ocena, ne obljuba: brez podatka o oblačnosti se ne pošlje nič. Pošilja se samo zvečer (NEBO_OD–NEBO_DO po lokalnem času).
+const NEBO_PUSH_KEY = "push/nebo-subs.json";
+const NEBO_PUSH_STATE = "push/nebo_state.json";
+const NEBO_PAGE_URL = "https://meteorec.si/nebo-nocoj/";
+const NEBO_KP_LIMIT = 7;
+const NEBO_CLOUD_NO = 70;            // nočna oblačnost (%) od tod naprej: neba ne bo videti
+const NEBO_EVERY_MS = 55 * 60 * 1000;
+const NEBO_OD = 17, NEBO_DO = 23;
+const NEBO_SYN = 29.530588853, NEBO_NEW0 = Date.UTC(2000, 0, 6, 18, 14);
+const NEBO_SHOWERS = [
+  { id: "leonidi", name: "Leonidi", peak: [11, 17], zhr: 15 },
+  { id: "geminidi", name: "Geminidi", peak: [12, 14], zhr: 150 },
+  { id: "ursidi", name: "Ursidi", peak: [12, 22], zhr: 10 },
+  { id: "kvadrantidi", name: "Kvadrantidi", peak: [1, 3], zhr: 110 },
+];
+
+function _nebMoon(ms) {
+  const ph = (((ms - NEBO_NEW0) / 864e5) % NEBO_SYN + NEBO_SYN) % NEBO_SYN / NEBO_SYN;
+  return (1 - Math.cos(2 * Math.PI * ph)) / 2;
+}
+// Največji napovedani Kp od zdaj −3 h do +24 h. NOAA vrstice so lahko seznami [čas, kp, …] z glavo ali objekti {time_tag, kp}.
+function _nebKpMax(rows, now) {
+  let mx = null;
+  for (const r of (Array.isArray(rows) ? rows : [])) {
+    let t, v;
+    if (Array.isArray(r)) { t = r[0]; v = r[1]; } else if (r && typeof r === "object") { t = r.time_tag; v = r.kp; } else continue;
+    const s = String(t).replace(" ", "T"), ts = Date.parse(/Z$/.test(s) ? s : s + "Z"), k = parseFloat(v);
+    if (isNaN(ts) || isNaN(k)) continue;
+    if (ts >= now - 3 * 3600e3 && ts <= now + 24 * 3600e3 && (mx == null || k > mx)) mx = k;
+  }
+  return mx;
+}
+function _nebAddDay(d) { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); }
+function _nebLocalDate(now) { return new Date(now).toLocaleDateString("en-CA", { timeZone: "Europe/Ljubljana" }); }
+// Povprečna oblačnost v nočnih urah (20–5) za večer `localDate`; `h` = hourly Open-Meteo v lokalnem času (timezone=Europe/Ljubljana).
+function _nebCloud(h, localDate) {
+  const t = (h && h.time) || [], c = (h && h.cloud_cover) || [], next = _nebAddDay(localDate);
+  let s = 0, n = 0;
+  for (let i = 0; i < t.length; i++) {
+    if (c[i] == null) continue;
+    const day = String(t[i]).slice(0, 10), hr = Number(String(t[i]).slice(11, 13));
+    if ((day === localDate && hr >= 20) || (day === next && hr <= 5)) { s += c[i]; n++; }
+  }
+  return n ? s / n : null;
+}
+function _nebShowerTonight(localDate) {
+  const mo = Number(localDate.slice(5, 7)), d = Number(localDate.slice(8, 10));
+  return NEBO_SHOWERS.find(s => s.peak[0] === mo && s.peak[1] === d) || null;
+}
+
+// Presodi vsako naročnino in pošlje obvestila. `inp` = { kp, cloud }; kp je lahko null (roji so neodvisni od Kp).
+async function _nebNotify(env, inp, now) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { checked: 0, sent: 0, skipped: "ni shrambe ali VAPID" };
+  let subs = []; try { const o = await r2.get(NEBO_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const { kp, cloud } = inp || {};
+  if (cloud == null) return { checked: subs.length, sent: 0, skipped: "ni napovedi oblačnosti" };
+  const date = _nebLocalDate(now), cl = Math.round(cloud);
+  const sijGo = kp != null && kp >= NEBO_KP_LIMIT && cloud < NEBO_CLOUD_NO;
+  const shower = _nebShowerTonight(date), showerGo = !!shower && cloud < NEBO_CLOUD_NO;
+  let payloads = {};
+  if (sijGo) payloads.sij = { title: "Polarni sij nocoj?", body: "Napovedan Kp " + String(Math.round(kp * 10) / 10).replace(".", ",") + " in nočna oblačnost " + cl + " %: ob jasnem nebu poglej proti severu, nizko nad obzorjem. Modelska napoved, ne obljuba.", url: NEBO_PAGE_URL, tag: "wx-aurora", icon: "/icon-192.png" };
+  if (showerGo) {
+    const mp = _nebMoon(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10)), 22));
+    payloads.roji = { title: "Nocoj vrh roja: " + shower.name, body: "Do " + shower.zhr + " utrinkov na uro ob idealnih pogojih (ZHR, IMO); v resnici bistveno manj. Luna je " + Math.round(mp * 100) + " % osvetljena (" + (mp > 0.5 ? "moti" : "ne moti") + "), nočna oblačnost " + cl + " %.", url: NEBO_PAGE_URL, tag: "nebo-roj", icon: "/icon-192.png" };
+  }
+  let sent = 0, changed = false; const dead = [];
+  for (const sub of subs) {
+    const st = sub.st || (sub.st = {});
+    for (const key of ["sij", "roji"]) {
+      if (!sub[key] || !payloads[key] || st[key] === date) continue;
+      try {
+        const code = await _sendPush(env, sub, payloads[key]);
+        if (code === 404 || code === 410) { dead.push(sub.endpoint); break; }
+        sent++; st[key] = date; changed = true;
+      } catch (_) {}
+    }
+  }
+  if (dead.length || changed) {
+    await r2.put(NEBO_PUSH_KEY, JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
+  }
+  return { checked: subs.length, sent, pruned: dead.length, sijGo, showerGo };
+}
+
+async function _cronCheckNebo(env) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
+  const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
+  if (hourSI < NEBO_OD || hourSI >= NEBO_DO) return;
+  // Brez naročnikov virov ne kličemo.
+  let subs = []; try { const o = await r2.get(NEBO_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  if (!subs.length) return;
+  let state = {}; try { const o = await r2.get(NEBO_PUSH_STATE); state = o ? JSON.parse(await o.text()) : {}; } catch (_) {}
+  const now = Date.now();
+  if (now - (state._lastRun || 0) < NEBO_EVERY_MS) return;   // približno enkrat na uro
+  const get = async url => {
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(url, { signal: ctrl.signal, headers: { "User-Agent": "Meteorec-nebo/1.0" } }).finally(() => clearTimeout(tid));
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  };
+  let kp = null, cloud = null;
+  try { kp = _nebKpMax(await get("https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json"), now); } catch (_) { kp = null; }
+  try {
+    const j = await get("https://api.open-meteo.com/v1/forecast?latitude=46.3258&longitude=14.9211&hourly=cloud_cover&timezone=Europe%2FLjubljana&forecast_days=2");
+    cloud = _nebCloud(j.hourly, _nebLocalDate(now));
+  } catch (e) { return { ok: false, reason: "Open-Meteo: " + String((e && e.message) || e) }; }
+  const out = await _nebNotify(env, { kp, cloud }, now);
+  await r2.put(NEBO_PUSH_STATE, JSON.stringify({ _lastRun: now }), { httpMetadata: { contentType: "application/json" } });
+  return out && out.skipped ? { ok: false, reason: out.skipped } : true;
+}
+
 // ── Migrenski alarm (Web Push, /migrena/) ──────────────────
 // Ločen seznam naročnin (kot crnivec.si in gobe): kdor se naroči na padec tlaka, ne dobi vročine ali dežja
 // v Rečici in obratno. Naročnina nosi samo prag (3, 5 ali 8 hPa v 24 h) in stanje alarma -- nobenega
@@ -3334,7 +3450,7 @@ async function _cronDispatchGithubWorkflow(env, workflowFile, inputs) {
 // ko opravilo zastara ali javi napako. KV zapis le ob spremembi stanja ali vsakih
 // 15 min (ne ob vsakem tiku): ~900 zapisov/dan.
 const CRON_JOBS = {           // ime → največja dovoljena starost zadnjega teka (min)
-  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20, ocene: 20,
+  thresholds: 20, nowcast: 20, rain_start_stop: 20, fc_thresholds: 20, aurora: 20, crnivec: 20, migrena: 20, nebo: 20, ocene: 20,
   lightning: 20, radar_composite: 20, icon_cells: 20, varpolje_solar: 20,
   score_napovej: 30 * 60, dispatch: 30 * 60, rr24h_snapshot: 30 * 60, dispatch_precip: 30 * 60,
 };
@@ -4140,6 +4256,7 @@ export default {
     ctx.waitUntil(_cronBeat(env, "aurora", () => _cronCheckAurora(env)));
     ctx.waitUntil(_cronBeat(env, "crnivec", () => _cronCheckCrnivec(env)));
     ctx.waitUntil(_cronBeat(env, "migrena", () => _cronCheckMigrena(env)));
+    ctx.waitUntil(_cronBeat(env, "nebo", () => _cronCheckNebo(env)));          // sam se omeji na večer in enkrat na uro
     ctx.waitUntil(_cronBeat(env, "varpolje_solar", () => _cronVarpoljeSolar(env)));
     ctx.waitUntil(_cronBeat(env, "ocene", () => _cronCheckOcene(env)));        // sam se omeji na enkrat na uro   // sam se omeji na enkrat na uro
     // Prebujanje LightningLoggerja gre PRED kompozit radarja: je najcenejše od
@@ -9255,6 +9372,27 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
           const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
           const next = subs.filter(x => x.endpoint !== ep);
           if (r2 && next.length !== subs.length) await oWrite(next);
+          return pj({ ok: true });
+        }
+
+        // Nebo alarm: lasten seznam (NEBO_PUSH_KEY), naročnina nosi samo dve kljukici (roji, sij) in stanje po večerih.
+        // Brez obeh kljukic = odjava s tega seznama; brskalnika NE odjavimo (lahko je naročen tudi na druga opozorila).
+        if (body.site === "nebo" && path !== "/push/send") {
+          let subs = []; if (r2) { try { const o = await r2.get(NEBO_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {} }
+          const nWrite = a => r2.put(NEBO_PUSH_KEY, JSON.stringify(a), { httpMetadata: { contentType: "application/json" } });
+          if (path === "/push/subscribe") {
+            if (!r2) return pj({ error: "Shramba ni dosegljiva" }, 503);
+            const s = body.subscription || {};
+            if (!_pushSubOk(s)) return pj({ error: "Neveljavna naročnina" }, 400);
+            const sij = body.sij === true, roji = body.roji === true, old = subs.find(x => x.endpoint === s.endpoint);
+            const rest = subs.filter(x => x.endpoint !== s.endpoint);
+            if (sij || roji) rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, sij, roji, st: old ? old.st || {} : {}, ts: old ? old.ts : new Date().toISOString() });
+            await nWrite(rest.slice(0, 5000));
+            return pj({ ok: true, sij, roji });
+          }
+          const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
+          const next = subs.filter(x => x.endpoint !== ep);
+          if (r2 && next.length !== subs.length) await nWrite(next);
           return pj({ ok: true });
         }
 

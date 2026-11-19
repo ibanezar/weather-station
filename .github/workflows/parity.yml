@@ -16,6 +16,7 @@ on:
       - 'tools/generate_podjetja_page.py'
       - 'igra/**'
       - 'napovej/**'
+      - 'nebo-nocoj/**'
       - 'crnivec-igra/**'
       - 'crnivec-site/**'
       - 'gobarska-napoved/index.html'
@@ -32,6 +33,7 @@ on:
       - '365-0-game/src/engine/**'
       - 'igra/**'
       - 'napovej/**'
+      - 'nebo-nocoj/**'
       - 'crnivec-igra/**'
       - 'meteogasilec/gasilec.js'
       - 'vodostaj-savinje/reka.js'
@@ -165,6 +167,7 @@ jobs:
           python3 tools/test_zgresitve.py
           node tools/test_rojstni.mjs
           node tools/test_nebo.mjs
+          node tools/test_nebo_alarm.mjs
           node tools/test_elektrarna.mjs
           node tools/test_zig.mjs
 
