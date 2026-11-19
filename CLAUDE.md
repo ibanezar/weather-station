@@ -2756,6 +2756,10 @@ zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tab
   karte in branje `/health` — vsi so ob napaki le padli nazaj. Konstanta `WORKER_UA` v
   skriptah; `tools/test_worker_ua.py` (v `parity.yml`) zavrne nov klic brez nje.
 
+### `git add … || true` požre napako, ko pot ne obstaja (19. 11. 2026)
+
+V `seo-smart-routine.yml` je pot `data/sneg-porocila-dnevno.csv` (datoteka nastane šele ob prvih poročilih) prekinila CELOTEN `git add` (»pathspec did not match«), `|| true` je napako požrl in korak je izpisal »Ni sprememb.«: od 18. 11. se dnevni tek ni commital niti hub strani, `novosti.json`, `sitemap-seo.xml` ne ugibalnikov. Zelen tek je zavajal (glej razdelek »Zelena kljukica …«). Zdaj se vsaka pot doda posebej (`if [ -e "$p" ]`). **Nov `git add` s potjo, ki ob prvem teku morda še ne obstaja, naj ima isto obliko.**
+
 ### Zdravje Cloudflare cron opravil (`/health`, 1. 10. 2026)
 
 Vsako opravilo v `scheduled()` teče prek `_cronBeat()`, ki zapiše KV `cron:health:<ime>`
