@@ -5019,3 +5019,7 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 #tab-mtr>.mtr-frost,
 #tab-mtr>.card:not(.chart-card),
 #tab-mtr>section:not(.mtr-hero){content-visibility:auto;contain-intrinsic-size:auto 600px}
+/* ocena višine pred prvim izrisom (izmerjeno na 390 px: dnevi ~790, »zakaj« 265–680, mraz ~290), da drsnik in sidra ne skačejo preveč */
+#tab-mtr .chart-card>.mtr-days{contain-intrinsic-size:auto 790px}
+#tab-mtr .chart-card>.mtr-why{contain-intrinsic-size:auto 450px}
+#tab-mtr>.mtr-frost{contain-intrinsic-size:auto 290px}
