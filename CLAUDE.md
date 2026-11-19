@@ -2540,7 +2540,9 @@ jih ni videti iz kode:
   Nivo mora biti gotov **pred 6:00**, ker ga takrat prebere dnevna zgodba, in
   objavljen do 7:00. Popoldne se ne sme več spremeniti — kdor je igral zjutraj,
   ne sme zvečer dobiti drugačnega stropa; če cron zgreši celo dopoldne, ostane
-  včerajšnji nivo, ki ga stran označi kot nesvežega (🟡/🔴).
+  včerajšnji nivo, ki ga stran označi kot nesvežega (🟡/🔴). **Od 19. 11. 2026 workflow sproži tudi worker** (`_cronDispatchScheduledWorkflows`,
+  `force: "false"`, isti cron 4:10/4:40/5:10/5:40 UTC kot zgodba): GitHubov cron je namreč `padalci-forecast.yml` zaganjal šele ob 12:00–13:30 UTC, zunaj okna,
+  in nivo od 14. 11. ni nastal (issue #1517). Okno ostaja 5:00–12:00; `tools/test_dispatch_force.py` zahteva `force: "false"` za vsak dispatch workflowa z vrati.
 - Če je prejšnji nivo **že današnji** (jutranji tek je uspel, poznejši pa je
   našel Open-Meteo nedosegljiv), `rezervni_level()` tega ne sme označiti za
   zastarelega — glej opombo tam.
