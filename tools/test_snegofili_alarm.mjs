@@ -82,6 +82,11 @@ assert.equal(a1().over, true);
 await _notify(env, data([pt('golte', 3), pt('krvavec', 2)]), NOW + 7 * H);
 await _notify(env, data([pt('golte', 18), pt('krvavec', 2)]), NOW + 13 * H + 1000);
 assert(sent.some(x => x.ep === 'https://p/a'), 'po hladilni dobi pošlje');
+// ostane nad pragom tudi po hladilni dobi: brez novega prehoda ne pošlje drugič (pošiljanje je ob PREHODU, ne vsakih 12 h)
+reset([sub('https://p/h', [{ id: 'golte', cm: 15 }])]);
+await _notify(env, data([pt('golte', 20)]), NOW); assert.equal(sent.length, 1);
+sent.length = 0;
+await _notify(env, data([pt('golte', 22)]), NOW + 14 * H); assert.equal(sent.length, 0, 'še vedno nad pragom po 14 h: ne ponovi');
 // več pravil na napravi: eno obvestilo, ostala omenjena
 reset([sub('https://p/m', [{ id: 'golte', cm: 5 }, { id: 'krvavec', cm: 5 }, { id: 'tignes', cm: 15 }])]);
 await _notify(env, data([pt('golte', 6), pt('krvavec', 7), pt('tignes', 20)]), NOW);
@@ -96,6 +101,8 @@ assert.deepEqual(Object.values(stored()[0].st).map(s => s.last > 0), [true, true
 reset([sub('https://p/x', [{ id: 'izginila', cm: 5 }, { id: 'golte', cm: 5 }])]);
 await _notify(env, data([{ id: 'golte', ime: 'Golte', elevation_m: 1400, next24_cm: null }]), NOW);
 assert.equal(sent.length, 0, 'next24_cm brez vrednosti ne sproži');
+await _notify(env, data([{ id: 'golte', ime: 'Golte', elevation_m: 1400, next24_cm: '20' }]), NOW);
+assert.equal(sent.length, 0, 'neštevilska vrednost (niz) ne sproži: model piše števila');
 // stari podatki
 reset([sub('https://p/s', [{ id: 'golte', cm: 5 }])]);
 let r = await _notify(env, data([pt('golte', 50)], NOW - (C.SG_MAX_AGE_H + 1) * H), NOW);

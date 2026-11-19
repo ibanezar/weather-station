@@ -239,7 +239,7 @@ MUTACIJE = [
     ("snegofili alarm: histereza", "worker.js", '} else if (s.over && pt.next24_cm < rule.cm * SG_RESET_FRAC) { s.over = false; changed = true; }', '} else if (s.over) { s.over = false; changed = true; }', "test_snegofili_alarm.mjs"),
     ("snegofili alarm: hladilna doba", "worker.js", 'if (now - (s.last || 0) > SG_COOLDOWN_MS) hits.push', 'if (true) hits.push', "test_snegofili_alarm.mjs"),
     ("snegofili alarm: prehod čez prag, ne vsak tik", "worker.js", 'if (!s.over) { s.over = true; changed = true;', 'if (true) { s.over = true; changed = true;', "test_snegofili_alarm.mjs"),
-    ("snegofili alarm: potekla naročnina", "worker.js", 'if (code === 404 || code === 410) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits)', 'if (false) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits)', "test_snegofili_alarm.mjs"),
+    ("snegofili alarm: potekla naročnina", "worker.js", 'if (code === 404 || code === 410) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits) x.s.last = now;', 'if (false) dead.push(sub.endpoint);\n      else { sent++; for (const x of hits) x.s.last = now;', "test_snegofili_alarm.mjs"),
     ("snegofili alarm: dvojina opozoril", "worker.js", '" tvoje opozorilo." : " tvoji opozorili.")', '" tvoje opozorilo." : " tvoja opozorila.")', "test_snegofili_alarm.mjs"),
     ("snegofili alarm: neznana točka", "worker.js", 'if (!ids.has(id) || SG_CM_ALLOWED.indexOf(cm) < 0) return null;', 'if (SG_CM_ALLOWED.indexOf(cm) < 0) return null;', "test_snegofili_alarm.mjs"),
     ("snegofili alarm: točka brez vrednosti", "worker.js", 'if (!pt || typeof pt.next24_cm !== "number") continue;', 'if (!pt) continue;', "test_snegofili_alarm.mjs"),
