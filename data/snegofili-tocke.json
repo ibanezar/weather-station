@@ -144,7 +144,17 @@
    "elevation_m": 2514,
    "elev_opis": "postaja ARSO",
    "arso_cam": "Kredarica",
-   "kamere": []
+   "kamere": [
+    {
+     "naslov": "Kredarica",
+     "url": "https://www.windy.com/webcams/1385535601",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1385535601/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
   },
   {
    "id": "kanin",
@@ -211,7 +221,17 @@
    "lon": 10.2638,
    "elevation_m": 1304,
    "elev_opis": "naselje",
-   "kamere": []
+   "kamere": [
+    {
+     "naslov": "St. Anton - Arlberg Rendl",
+     "url": "https://www.windy.com/webcams/1232544687",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1232544687/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
   },
   {
    "id": "solden",
@@ -222,7 +242,26 @@
    "lon": 11.0167,
    "elevation_m": 1368,
    "elev_opis": "naselje",
-   "kamere": []
+   "kamere": [
+    {
+     "naslov": "Solden - Schwarze Schneid",
+     "url": "https://www.windy.com/webcams/1631231356",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1631231356/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Solden - Otztal",
+     "url": "https://www.windy.com/webcams/1602874075",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1602874075/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
   },
   {
    "id": "kitzsteinhorn",
@@ -277,7 +316,17 @@
    "lon": 11.814,
    "elevation_m": 2239,
    "elev_opis": "prelaz",
-   "kamere": []
+   "kamere": [
+    {
+     "naslov": "Sella Pass - Sasso Pordoi",
+     "url": "https://www.windy.com/webcams/1521017441",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1521017441/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
   },
   {
    "id": "livigno",
@@ -326,6 +375,24 @@
      "naslov": "Kamere Zermatt",
      "url": "https://www.zermatt.ch/en/webcams",
      "ponudnik": "Zermatt Tourismus"
+    },
+    {
+     "naslov": "Matterhorn Glacier",
+     "url": "https://www.windy.com/webcams/1237910249",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1237910249/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Gornergrat",
+     "url": "https://www.windy.com/webcams/1653991636",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1653991636/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
     }
    ]
   },
@@ -365,6 +432,24 @@
      "naslov": "Kamere Jungfraujoch",
      "url": "https://www.jungfrau.ch/en-gb/live/webcams/",
      "ponudnik": "Jungfraubahnen"
+    },
+    {
+     "naslov": "Jungfraujoch - Top of Europe",
+     "url": "https://www.windy.com/webcams/1010220186",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1010220186/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    },
+    {
+     "naslov": "Jungfraujoch - Gletscherhorn",
+     "url": "https://www.windy.com/webcams/1437749552",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1437749552/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
     }
    ]
   },
@@ -388,7 +473,17 @@
    "lon": 6.8694,
    "elevation_m": 1035,
    "elev_opis": "naselje",
-   "kamere": []
+   "kamere": [
+    {
+     "naslov": "Le Brevent - Chamonix",
+     "url": "https://www.windy.com/webcams/1277193743",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1277193743/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
   },
   {
    "id": "aiguille-du-midi",
@@ -399,7 +494,17 @@
    "lon": 6.8872,
    "elevation_m": 3842,
    "elev_opis": "vrh (zgornja postaja žičnice)",
-   "kamere": []
+   "kamere": [
+    {
+     "naslov": "Aiguille du Midi",
+     "url": "https://www.windy.com/webcams/1210440892",
+     "ponudnik": "Windy",
+     "embed_kind": "windy",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1210440892/day",
+     "embed_terms": "https://api.windy.com/webcams/terms",
+     "checked": "2026-11-19"
+    }
+   ]
   },
   {
    "id": "tignes",

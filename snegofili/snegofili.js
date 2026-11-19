@@ -314,14 +314,14 @@
   var EMBED_OK = { windy: ['webcams.windy.com', 'embed.windy.com'], youtube: ['www.youtube-nocookie.com'] };
   function hasCam(p) { return !!(p && (p.ca || p.cd || p.ce)); }
   function camKind(p) { return p.ca ? 'arso' : p.cd ? 'drsi' : p.ce ? 'embed' : null; }
-  function embedUrl(ce) { try { var u = new URL(ce.s); return u.protocol === 'https:' && (EMBED_OK[ce.k] || []).indexOf(u.hostname) >= 0 ? u.href : null; } catch (e) { return null; } }
+  function embedUrl(ce) { if (!ce) return null; try { var u = new URL(ce.s); return u.protocol === 'https:' && (EMBED_OK[ce.k] || []).indexOf(u.hostname) >= 0 ? u.href : null; } catch (e) { return null; } }
   function loadCam(id, force) {
     var p = byId[id], st = camState[id] || (camState[id] = {});
     if (!p) return Promise.resolve(st);
     if (st.busy) return st.busy;
     if (!force && (st.src || st.embed) && Date.now() - st.ts < CAM_TTL) return Promise.resolve(st);
     var fin = function (ok) { st.ts = Date.now(); st.err = !ok; st.busy = null; paintCam(id); return st; };
-    if (p.ce && !p.ca && !p.cd) { st.embed = true; st.cap = 'Vir: ' + p.ce.p; return Promise.resolve(fin(true)); }
+    if (p.ce && !p.ca && !p.cd) { st.embed = true; st.cap = ''; return Promise.resolve(fin(true)); }
     if (p.cd && !p.ca) {
       st.src = DRSI + '?t=' + Math.floor(Date.now() / CAM_TTL); st.cap = 'Vir: DRSI · prelaz Črnivec'; st.time = '';
       return Promise.resolve(fin(true));
@@ -347,7 +347,7 @@
       var box = $('.sg-cam-img', tile), t = $('.sg-cam-t', tile);
       if (st.err) { box.textContent = ''; box.appendChild(el('span', 'sg-cam-msg', 'Slika trenutno ni dosegljiva')); }
       else if (st.src) { var im = $('img', box); if (im) im.src = st.src; else { box.textContent = ''; box.appendChild(camImg(st, p, '')); } }
-      else if (st.embed) { box.textContent = ''; box.appendChild(el('span', 'sg-cam-msg', 'Kamera v živo (po kliku)')); }
+      else if (st.embed) { box.textContent = ''; box.appendChild(el('span', 'sg-cam-msg', 'Časovni zdrs dneva (Windy), po kliku')); }
       if (t) t.textContent = st.time ? '· ' + st.time : '';
     }
     if (hours) nowStripThumbs();
@@ -363,26 +363,42 @@
   }
   function camList() { return camIds.filter(function (id) { return camTiles[id]; }); }
   /* lightbox kamere */
-  var lb = { id: null };
+  var lb = { id: null, ci: null, pick: 0 };
   function lbPaint() {
     var wrap = $('.sg-lb'); if (!wrap) return;
-    var p = byId[lb.id], st = camState[lb.id] || {}, h = hours && hours[lb.id];
+    var p = byId[lb.id], st = camState[lb.id] || {}, h = hours && hours[lb.id], ces = p.ce || [];
     var stage = $('.sg-lb-stage', wrap); stage.textContent = '';
-    if (st.err) stage.appendChild(el('p', 'sg-cam-msg', 'Slika trenutno ni dosegljiva. Poskusite znova čez nekaj minut.'));
-    else if (st.src) stage.appendChild(camImg(st, p, 'sg-lb-img'));
-    else if (st.embed || (p.ce && !p.ca && !p.cd)) {
-      var u = embedUrl(p.ce);
-      if (u) {
-        var b = el('button', 'sg-live', 'Kamera v živo'); b.type = 'button';
-        b.addEventListener('click', function () {
-          var f = document.createElement('iframe'); f.src = u; f.loading = 'lazy'; f.title = 'Spletna kamera: ' + p.n;
-          f.setAttribute('referrerpolicy', 'no-referrer'); f.setAttribute('allowfullscreen', ''); f.className = 'sg-lb-frame'; b.replaceWith(f);
-        });
-        stage.appendChild(b);
-        stage.appendChild(el('p', 'sg-attr', 'Po kliku se naloži vsebina ponudnika (' + p.ce.p + '), ki lahko nastavi svoje piškotke.' + (p.ce.k === 'windy' ? ' Webcams provided by windy.com.' : '')));
+    var credit = $('.sg-lb-credit', wrap); credit.textContent = '';
+    var ext = $('.sg-lb-ext', wrap); ext.textContent = '';
+    var shown = lb.ci != null ? ces[lb.ci] : null, u = shown ? embedUrl(shown) : null;
+    if (u) {
+      var f = document.createElement('iframe'); f.src = u; f.loading = 'lazy'; f.title = 'Spletna kamera: ' + p.n + (shown.t ? ' (' + shown.t + ')' : '');
+      f.setAttribute('referrerpolicy', 'no-referrer'); f.setAttribute('allowfullscreen', ''); f.className = 'sg-lb-frame'; stage.appendChild(f);
+      if (shown.k === 'windy') {
+        credit.appendChild(document.createTextNode('Webcams provided by '));
+        var a1 = el('a', null, 'windy.com'); a1.href = 'https://www.windy.com/'; a1.target = '_blank'; a1.rel = 'noopener'; credit.appendChild(a1);
+        if (shown.u) { credit.appendChild(document.createTextNode(' · ')); var a2 = el('a', null, 'stran kamere'); a2.href = shown.u; a2.target = '_blank'; a2.rel = 'noopener'; credit.appendChild(a2); }
       }
-    } else stage.appendChild(el('p', 'sg-cam-msg', 'Nalagam sličico …'));
-    $('.sg-lb-cap', wrap).textContent = st.cap || '';
+    } else if (st.err && !ces.length) stage.appendChild(el('p', 'sg-cam-msg', 'Slika trenutno ni dosegljiva. Poskusite znova čez nekaj minut.'));
+    else if (st.src && !st.err) stage.appendChild(camImg(st, p, 'sg-lb-img'));
+    else if (ces.length && !p.ca && !p.cd) {
+      var b0 = el('button', 'sg-live', 'Naloži časovni zdrs dneva (Windy)'); b0.type = 'button';
+      b0.addEventListener('click', function () { lb.ci = lb.pick || 0; lbPaint(); });
+      stage.appendChild(b0);
+      stage.appendChild(el('p', 'sg-attr', 'Po kliku se naloži vsebina ponudnika (Windy), ki lahko nastavi svoje piškotke.'));
+    } else stage.appendChild(el('p', 'sg-cam-msg', st.err ? 'Slika trenutno ni dosegljiva.' : 'Nalagam sličico …'));
+    /* ostale kamere točke (Windy) in vrnitev na sličico */
+    if (ces.length) {
+      ces.forEach(function (c, i) {
+        if (!embedUrl(c)) return;
+        var b = el('button', 'sg-btn s', (c.t || ('Kamera ' + (i + 1))) + ' (časovni zdrs)'); b.type = 'button';
+        b.setAttribute('aria-pressed', lb.ci === i);
+        b.addEventListener('click', function () { lb.ci = i; lb.pick = i; lbPaint(); });
+        ext.appendChild(b);
+      });
+      if (lb.ci != null && (p.ca || p.cd)) { var bk = el('button', 'sg-btn s', '← Sličica kamere'); bk.type = 'button'; bk.addEventListener('click', function () { lb.ci = null; lbPaint(); }); ext.appendChild(bk); }
+    }
+    $('.sg-lb-cap', wrap).textContent = u ? ('Vir: Windy · ' + (shown.t || '') + ' · časovni zdrs zadnjega dne, ne tok v živo') : (st.cap || '');
     var mod = $('.sg-lb-model', wrap);
     if (h) {
       var on = snowing(h, cur), ph = phase(p.e, slAt(h, cur));
@@ -395,7 +411,7 @@
     var wrap = el('div', 'sg-lb');
     var hd = el('div', 'sg-lb-hd'); var h2 = el('h2', null, p.n); h2.id = 'sg-lb-t';
     hd.appendChild(h2); hd.appendChild(el('p', 'sg-sub', p.e + ' m · ' + (p.c === 'SI' ? 'Slovenija' : p.c) + ' · ' + p.k + ' km od Rečice'));
-    wrap.appendChild(hd); wrap.appendChild(el('div', 'sg-lb-stage')); wrap.appendChild(el('p', 'sg-lb-cap')); wrap.appendChild(el('p', 'sg-lb-model'));
+    wrap.appendChild(hd); wrap.appendChild(el('div', 'sg-lb-stage')); wrap.appendChild(el('p', 'sg-attr sg-lb-credit')); wrap.appendChild(el('div', 'sg-lb-ext')); wrap.appendChild(el('p', 'sg-lb-cap')); wrap.appendChild(el('p', 'sg-lb-model'));
     var nav = el('div', 'sg-lb-nav');
     var prev = el('button', 'sg-btn', '← Prejšnja'), next = el('button', 'sg-btn', 'Naslednja →'), more = el('button', 'sg-btn', 'Podrobnosti točke'), ref = el('button', 'sg-btn s', 'Osveži');
     [prev, next, more, ref].forEach(function (b) { b.type = 'button'; nav.appendChild(b); });
@@ -406,7 +422,7 @@
     more.addEventListener('click', function () { if (hours && hours[id]) openDetail(id); });
     ref.addEventListener('click', function () { loadCam(lb.id, true); });
     modal.open(wrap, 'Kamera: ' + p.n, trigger, function () { lb.id = null; });
-    lb.id = id; // po modal.open: ta pokliče zapiralnik prejšnjega okna (pri menjavi kamere bi sicer pobrisal novo vrednost)
+    lb.id = id; lb.ci = null; lb.pick = 0; // po modal.open: ta pokliče zapiralnik prejšnjega okna (pri menjavi kamere bi sicer pobrisal novo vrednost)
     lbPaint(); loadCam(id, true);
   }
   function bindCams() {

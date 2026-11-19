@@ -267,3 +267,6 @@
 
 .sg-wy{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.8rem}
 .sg-wy-frame{display:block;width:100%;height:min(72vh,32rem);min-height:20rem;border:0;border-radius:10px}
+.sg-lb-ext{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.sg-lb-ext .sg-btn{min-height:44px}
+.sg-lb-ext .sg-btn[aria-pressed="true"]{background:#85b9f3;color:#06111f;border-color:transparent}

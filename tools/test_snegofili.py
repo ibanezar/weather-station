@@ -229,7 +229,8 @@ pa = next(x for x in pj if x["id"] == "a"); pb = next(x for x in pj if x["id"] =
 check(pa.get("ca") == "Krvavec" and pa["k"] == 20 and pa["c"] == "SI" and pa["m"] == {"d": 5, "a": 3.0}, "sg-pts: kamera, razdalja, država, izmerjeno")
 check(pb.get("cl") == [{"u": "https://x.example/cam", "p": "P"}] and "ca" not in pb and "m" not in pb, "sg-pts: samo https povezave, brez izmišljenih polj")
 emb = g.cam_info({"kamere": [good]})
-check(emb.get("ce", {}).get("k") == "windy" and emb["ce"]["s"] == good["embed"], "cam_info: dovoljena vdelava gre v sg-pts")
+check(len(emb.get("ce", [])) == 1 and emb["ce"][0]["k"] == "windy" and emb["ce"][0]["s"] == good["embed"], "cam_info: dovoljena vdelava gre v sg-pts (seznam)")
+check("cl" not in emb, "cam_info: vdelana kamera ni še enkrat med povezavami")
 check("ce" not in g.cam_info({"kamere": [{**good, "checked": None}]}), "cam_info: vdelava brez potrdila ne gre v sg-pts")
 check('data-proxy="' in body and "data-drsi" in body, "kamerni zid nosi naslov workerja in DRSI")
 check("Izmerjena snežna odeja" in body and "Agencija Republike Slovenije za okolje" in body, "izmerjeno: razdelek z navedbo vira ARSO")
@@ -240,6 +241,36 @@ check('id="windy"' in body and "<iframe" not in body, "Windy karta: razdelek je,
 check(g.WINDY_MAP.startswith("https://embed.windy.com/") and "{overlay}" in g.WINDY_MAP and all("overlay=" + o + "&" in g.WINDY_MAP.replace("{overlay}", o) for o, _ in g.WINDY_OVERLAYS),
       "Windy karta: gostitelj embed.windy.com, plast je parameter")
 check("windy.com" in body and "ne naša ocena" in body, "Windy karta: navedba ponudnika in pojasnilo, da ni naša ocena")
+
+# ── add_windy_cam.py: sidra Windy → iframe (skripta player.js se ne izvaja) ──
+import add_windy_cam as aw  # noqa: E402
+A = ('<a name="windy-webcam-timelapse-player" data-id="1385535601" data-play="day" href="https://www.windy.com/webcams/1385535601" target="_blank">Kredarica</a>\n'
+     '<a name="windy-webcam-timelapse-player" data-id="1010220186" data-play="day" href="x" target="_blank">Jungfraujoch &amp; Top</a>\n'
+     '<script async src="https://webcams.windy.com/webcams/public/embed/v2/script/player.js"></script>')
+pa = aw.parse(A)
+check([c["id"] for c in pa] == ["1385535601", "1010220186"], "windy: dve sidri razpoznani, skripta ne šteje")
+check(pa[0]["src"] == "https://webcams.windy.com/webcams/public/embed/player/1385535601/day" and pa[1]["naslov"] == "Jungfraujoch & Top", "windy: src iz id in play, naslov brez entitet")
+check(aw.parse('<iframe src="https://webcams.windy.com/x"></iframe>')[0]["src"] == "https://webcams.windy.com/x", "windy: iframe src")
+chk = {"tocke": [{"id": "t", "ime": "T", "kamere": []}]}
+aw.add(chk, "t", pa[0], today="2026-11-19")
+e0 = chk["tocke"][0]["kamere"][0]
+check(g.valid_embed(e0) == ("windy", pa[0]["src"]) and e0["checked"] == "2026-11-19", "windy: vnos prestane valid_embed")
+aw.add(chk, "t", pa[0], today="2026-11-20")
+check(len(chk["tocke"][0]["kamere"]) == 1, "windy: ponovni vnos iste kamere zamenja, ne podvoji")
+for bad in ({"src": "https://evil.example/x"}, {"src": "http://webcams.windy.com/x"}, {"src": "https://webcams.windy.com.evil.example/x"}):
+    try:
+        aw.add(chk, "t", {**bad, "url": "u"}); check(False, f"windy: {bad['src']} bi moral biti zavrnjen")
+    except ValueError:
+        pass
+try:
+    aw.add(chk, "ni-take", pa[0]); check(False, "windy: neznana točka")
+except ValueError:
+    pass
+check("1010220186" not in json.dumps(aw.parse('<a name="windy-webcam-timelapse-player" data-id="abc" data-play="day">x</a>')), "windy: neveljaven id se ne sprejme")
+# ob več vdelavah na točko gredo vse v sg-pts, ob več kot eni je ena ploščica
+good2 = {**good, "embed": "https://webcams.windy.com/webcams/public/embed/player/2/day", "naslov": "Druga"}
+two = g.cam_info({"kamere": [good, good2]})
+check(len(two["ce"]) == 2 and two["ce"][1]["t"] == "Druga", "cam_info: več vdelav na točko")
 
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

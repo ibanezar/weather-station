@@ -268,9 +268,12 @@ def profile_svg(rows):
 # ── kartice ──
 def cam_links(p):
     links = []
-    if p.get("arso_cam") or p.get("drsi_cam"):
+    embeds = [c for c in p.get("kamere") or [] if valid_embed(c)]
+    if p.get("arso_cam") or p.get("drsi_cam") or embeds:
         links.append('<a href="#kamere">kamera</a>')
     for c in p.get("kamere") or []:
+        if valid_embed(c):
+            continue  # vdelana kamera je že pod »kamera« (lightbox)
         if str(c.get("url", "")).startswith("https://"):
             links.append(f'<a href="{_html.escape(c["url"])}" target="_blank" rel="noopener">'
                          f'{_html.escape(c["ponudnik"])}</a>')
@@ -392,19 +395,24 @@ def alarm_html(rows):
 
 
 def cam_info(p):
-    """Kamera točke za JS: ca = ime kamere ARSO, cd = DRSI, ce = dovoljena vdelava, cl = povezave (samo https)."""
+    """Kamere točke za JS: ca = ime kamere ARSO, cd = DRSI, ce = seznam dovoljenih vdelav {k, s, p, t, u}, cl = povezave (https)."""
     c = {}
     if p.get("arso_cam"):
         c["ca"] = p["arso_cam"]
     if p.get("drsi_cam"):
         c["cd"] = 1
+    ce, links = [], []
     for cam in p.get("kamere") or []:
         ok = valid_embed(cam)
         if ok:
-            c["ce"] = {"k": ok[0], "s": ok[1], "p": cam.get("ponudnik", ok[0])}
-            break
-    links = [{"u": cam["url"], "p": cam.get("ponudnik", "")} for cam in p.get("kamere") or []
-             if str(cam.get("url", "")).startswith("https://")]
+            e = {"k": ok[0], "s": ok[1], "p": cam.get("ponudnik", ok[0]), "t": cam.get("naslov", "")}
+            if str(cam.get("url", "")).startswith("https://"):
+                e["u"] = cam["url"]
+            ce.append(e)
+        elif str(cam.get("url", "")).startswith("https://"):
+            links.append({"u": cam["url"], "p": cam.get("ponudnik", "")})
+    if ce:
+        c["ce"] = ce
     if links:
         c["cl"] = links
     return c
@@ -417,7 +425,9 @@ def cam_wall_html(rows, cams):
         info = cam_info(cams.get(r["id"], {}))
         kind = "arso" if info.get("ca") else "drsi" if info.get("cd") else "embed" if info.get("ce") else None
         if kind:
-            src = {"arso": "ARSO", "drsi": "DRSI", "embed": _html.escape(info.get("ce", {}).get("p", ""))}[kind]
+            src = {"arso": "ARSO", "drsi": "DRSI", "embed": _html.escape(", ".join(sorted({e["p"] for e in info.get("ce", [])})))}[kind]
+            if kind != "embed" and info.get("ce"):
+                src += " + Windy (časovni zdrs)"
             ime = _html.escape(r["ime"])
             tiles.append(
                 f'    <figure class="sg-cam" data-id="{r["id"]}" data-kind="{kind}">'
@@ -443,7 +453,8 @@ def cam_wall_html(rows, cams):
               f'  <ul class="sg-camlinks">{"".join(links)}</ul>\n')
     return (f'  <section id="kamere" class="sg-sec" aria-labelledby="kam-h">\n  <h2 id="kam-h">Kamere</h2>\n'
             '  <p class="archive-intro">Sličice slovenskih kamer ARSO in DRSI se osvežujejo vsakih nekaj minut; klik jo odpre večjo, '
-            'ob njej pa piše, kaj za tisto točko napoveduje model. <b>To niso videoposnetki v živo.</b> '
+            'ob njej pa piše, kaj za tisto točko napoveduje model. Pri točkah z oznako Windy lahko po kliku predvajate časovni zdrs '
+            'zadnjega dne (vsebina ponudnika Windy). <b>To niso videoposnetki v živo.</b> '
             'Kamera in model se lahko razhajata: verjemite sliki.</p>\n' + wall + ln + '  </section>\n')
 
 

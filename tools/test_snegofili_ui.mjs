@@ -20,7 +20,7 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
     if (u.includes('slika=1')) return r.fulfill({ body: svg, contentType: 'image/svg+xml' });
     return r.fulfill({ status: 404, body: '{}' });
   });
-  await page.route(/googletagmanager|google-analytics|fonts\.g|drsc\.si|embed\.windy\.com/, r => r.abort());
+  await page.route(/googletagmanager|google-analytics|fonts\.g|drsc\.si|embed\.windy\.com|webcams\.windy\.com/, r => r.abort());
   await page.goto(BASE + '/snegofili/index.html'); await page.waitForSelector('.sg-nowc', { timeout: 8000 });
   const tag = vp.width + ' px: ';
   ok(await page.locator('.sg-spark svg').count() === await page.locator('.sg-card').count(), tag + 'sparkline na vsaki kartici');
@@ -33,16 +33,31 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   await page.locator('#sg-range').fill('119'); await page.waitForTimeout(200);
   ok(await page.locator('#zs-h').textContent() === 'Kjer sneži ob izbrani uri', tag + 'naslov pasu ob drugi uri');
   await page.locator("#sg-now").click();
-  /* kamera: lightbox, naslednja, Esc vrne fokus */
-  await page.locator('.sg-cam-b').first().scrollIntoViewIfNeeded();
-  const opener = page.locator('.sg-cam-b').first(); await opener.click(); await page.waitForSelector('.sg-lb-img');
+  /* kamera ARSO: lightbox, naslednja, Esc vrne fokus */
+  const opener = page.locator('.sg-cam[data-id="kredarica"] .sg-cam-b'); await opener.scrollIntoViewIfNeeded(); await opener.click(); await page.waitForSelector('.sg-lb-img');
   ok(await page.locator('.sg-lb-model').textContent().then(t => /Model ob izbrani uri/.test(t)), tag + 'lightbox pove, kaj pravi model');
-  const t1 = await page.locator('#sg-lb-t, .sg-lb-hd h2').first().textContent();
+  /* Windy: iframe šele po kliku, navedba, vrnitev na sličico */
+  ok(await page.locator('.sg-lb iframe').count() === 0, tag + 'Windy: brez iframe pred klikom');
+  await page.locator('.sg-lb-ext .sg-btn', { hasText: 'časovni zdrs' }).first().click();
+  ok((await page.locator('.sg-lb iframe').getAttribute('src')) === 'https://webcams.windy.com/webcams/public/embed/player/1385535601/day', tag + 'Windy: iframe na pravem URL-ju');
+  ok(/Webcams provided by windy\.com/.test(await page.locator('.sg-lb-credit').textContent()), tag + 'Windy: navedba ponudnika');
+  ok(/ne tok v živo/.test(await page.locator('.sg-lb-cap').textContent()), tag + 'Windy: pove, da ni tok v živo');
+  await page.getByRole('button', { name: /Sličica kamere/ }).click();
+  ok(await page.locator('.sg-lb iframe').count() === 0 && await page.locator('.sg-lb-img').count() === 1, tag + 'Windy: nazaj na sličico');
+  const t1 = await page.locator('.sg-lb-hd h2').textContent();
   await page.getByRole('button', { name: /Naslednja/ }).click(); await page.waitForTimeout(150);
   ok(await page.locator('.sg-lb-hd h2').textContent() !== t1, tag + 'naslednja kamera');
+  ok(await page.locator('.sg-lb iframe').count() === 0, tag + 'menjava kamere ne naloži tujega iframe');
   await page.keyboard.press('Escape');
   ok(await page.locator('.sg-modal').evaluate(e => e.hidden), tag + 'Esc zapre okno');
   ok(await page.evaluate(() => document.activeElement && document.activeElement.classList.contains('sg-cam-b')), tag + 'fokus se vrne na sprožilec');
+  /* točka samo z Windy: gumb za naložitev, dve kameri */
+  await page.locator('.sg-cam[data-id="jungfraujoch"] .sg-cam-b').click();
+  ok(await page.locator('.sg-lb iframe').count() === 0 && await page.locator('.sg-lb-stage .sg-live').count() === 1, tag + 'Windy brez sličice: čaka na klik');
+  ok(await page.locator('.sg-lb-ext .sg-btn').count() === 2, tag + 'Jungfraujoch ima dve kameri Windy');
+  await page.locator('.sg-lb-ext .sg-btn').nth(1).click();
+  ok((await page.locator('.sg-lb iframe').getAttribute('src')).endsWith('/1437749552/day'), tag + 'izbira druge kamere');
+  await page.keyboard.press('Escape');
   /* podrobnost: grafi, primerjava, povezava */
   await page.locator('.sg-hm-l').first().click(); await page.waitForSelector('.sg-ch');
   ok(/^#t-/.test(await page.evaluate(() => location.hash)), tag + 'povezava #t-id');
