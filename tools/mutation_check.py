@@ -23,6 +23,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # (opis, datoteka, staro, novo[, test])  — `staro` se mora v datoteki pojaviti natanko enkrat;
 # `test` je skripta v tools/ (privzeto test_parity.py)
 MUTACIJE = [
+    ("toča: živi prikaz razhajan (nevihte)", "tools/generate_nevihte_page.py", 'id="toca-live" style="margin-bottom:1rem"', 'id="toca-live" style="margin-bottom:2rem"'),
     ("FWI razred (app.js)", "app.js", "if(v<5.2)return{label:'Nizka'", "if(v<5.3)return{label:'Nizka'"),
     ("FWI razred (gasilec.js)", "meteogasilec/gasilec.js", "if (v < 11.2) return { label: 'Zmerna'", "if (v < 11.3) return { label: 'Zmerna'"),
     ("FWI razred (Python)", "tools/gasilec_model.py", '("Zelo visoka", "#ef4444", 21.3, 38.0)', '("Zelo visoka", "#ef4444", 21.3, 39.0)'),
