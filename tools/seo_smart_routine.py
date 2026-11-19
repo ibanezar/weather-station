@@ -528,9 +528,11 @@ def detect_events(history, lookback_days=14):
         season_dates = [d for d in sorted_dates if f"{year}-09-01" <= d <= TODAY.isoformat()]
         first_frost = next((d for d in season_dates if is_frost(history[d])), None)
         if first_frost and datetime.date.fromisoformat(first_frost) >= cutoff:
-            # Preverimo, da to res ni bila prva zmrzal leta (pred septembrom)
+            # Preverimo, da to res ni bila prva zmrzal sezone: zmrzal poleti (julij, avgust) bi pomenila, da je jesenska »prva« že pozna.
+            # NE od 1. januarja: zimske in zgodnje spomladanske zmrzali istega leta so vedno ob strani sezone, zaradi njih dogodek
+            # ni nastal nikoli (19. 11. 2026: v novosti.json ni bilo nobenega `prva-zmrzal`, čeprav je bila prva zmrzal 23. 10.).
             prev_frosts = [d for d in sorted_dates
-                           if d < first_frost and d >= f"{year}-01-01" and is_frost(history[d])]
+                           if f"{year}-07-01" <= d < f"{year}-09-01" and is_frost(history[d])]
             if not prev_frosts:
                 events.append({
                     "type":  "prva-zmrzal",

@@ -85,6 +85,9 @@ jobs:
       - name: Test zaznave prve snežne odeje
         run: python3 tools/test_first_snow.py
 
+      - name: Test zaznave prve zmrzali jeseni
+        run: python3 tools/test_first_frost.py
+
       - name: Test vremena v gorah
         run: python3 tools/test_gore.py
 
