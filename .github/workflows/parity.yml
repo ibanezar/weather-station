@@ -251,6 +251,9 @@ jobs:
       - name: Test napovedi ur, zasidrane na meritev (junaška krivulja)
         run: python3 tools/test_anchor.py
 
+      - name: Test decimalne vejice v besedilu zavihkov (_slDecText)
+        run: python3 tools/test_decimals.py
+
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py
 

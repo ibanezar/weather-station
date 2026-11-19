@@ -276,6 +276,25 @@ const CC = {
 
 // ── Utilities ─────────────────────────────────────────────
 function fmt(v,d=1){return(v==null||v==='')?'—':Number(v).toFixed(d).replace('.',',');}
+// ── Decimalna vejica v besedilu zavihkov (osrednja normalizacija, 19. 11. 2026) ─────────────────────────────
+// ~750 mest `.toFixed(` v tej datoteki izpiše decimalno piko (grafi, opisi, namigi); koordinate v atributih SVG pa MORAJO
+// ostati s piko, zato popravek ni po klicnih mestih, ampak na izhodu: besedilna vozlišča in atributa title/aria-label aktivnega
+// zavihka (razen naslovnice, ki je urejena pri viru, galerije in skupnosti z uporabniškim besedilom). Isto načelo kot en sam CSS
+// za pisavo osi grafov. Pravilo: 1–2 decimalki (tri bi bila tisočica: »2.541 dni«), ne za datumom (»2.11.«, »12.3.2026«),
+// različico (»v2.1«), potjo/ID (\w, ., /, #, :, = pred številko) in »CC BY 4.0«. Test: tools/test_decimals.mjs.
+const _SL_DEC=new RegExp('(?<![\\w.,/#:=])(?<!BY )(\\d{1,6})\\.(\\d{1,2})(?![\\d.])','g');
+function _slDecText(s){return(typeof s==='string'&&s.indexOf('.')>-1)?s.replace(_SL_DEC,'$1,$2'):s;}
+const _SL_DEC_SKIP='script,style,noscript,textarea,input,select,option,code,pre,time,[data-nodec]';
+function _slDecPane(){
+  const pane=document.querySelector('.tab-pane.active');
+  if(!pane||pane.id==='tab-current'||pane.id==='tab-gallery'||pane.id==='tab-community')return;
+  const w=document.createTreeWalker(pane,NodeFilter.SHOW_TEXT);let n;
+  while((n=w.nextNode())){const v=n.nodeValue;if(v.indexOf('.')<0)continue;const el=n.parentElement;if(!el||el.closest(_SL_DEC_SKIP))continue;const r=_slDecText(v);if(r!==v)n.nodeValue=r;}
+  pane.querySelectorAll('[title],[aria-label]').forEach(el=>{for(const a of['title','aria-label']){const v=el.getAttribute(a);if(v&&v.indexOf('.')>-1){const r=_slDecText(v);if(r!==v)el.setAttribute(a,r);}}});
+}
+let _slDecT=null;
+function _slDecSchedule(){clearTimeout(_slDecT);_slDecT=setTimeout(()=>{try{_slDecPane();}catch(_){}},250);}
+function _slDecInit(){try{new MutationObserver(_slDecSchedule).observe(document.querySelector('main')||document.body,{childList:true,subtree:true,characterData:true});}catch(_){}}
 function set(id,v){const e=document.getElementById(id);if(e){e.textContent=v;e.classList.remove('skel-shimmer');}}
 function windDir(deg){const d=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return d[Math.round(deg/22.5)%16];}
 function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'Visok';if(u<=10)return'Zelo visok';return'Ekstremni';}
@@ -3985,7 +4004,7 @@ function switchTab(tab){
   _syncTabCurrent();
   if(tab==='history'){  showHistory7(); drawHeatmap(); applyYearRecords(); }
   if(tab==='analysis'){
-    const _runAnalysis=()=>{ initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); };
+    const _runAnalysis=()=>{ try{ if(typeof Chart!=='undefined') Chart.defaults.locale='sl-SI'; }catch(_){} initAnalysisCharts(); updateAnalysisKPIs(); buildFingerprint(); fetchARSOComparison(); buildXLSXCharts(); buildClimateStripes(); findWeatherTwin(); buildPhenologyCalendar(); setTimeout(buildCandlestick,200); setTimeout(initDA,300); };
     if(typeof Chart==='undefined') _loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js').then(_runAnalysis).catch(_runAnalysis);
     else _runAnalysis();
   }
@@ -4018,6 +4037,7 @@ function switchTab(tab){
   if(tab==='community'){  initCommunity(); }
   closeTabDDs();
   setTimeout(autoAccentCards, 80);
+  _slDecSchedule();
 }
 function histTabActive(){
   return !!document.getElementById('tab-history')?.classList.contains('active');
@@ -18516,6 +18536,7 @@ async function init(){
   // ── Synchronous setup (no network) — each call guarded so a crash in one
   // widget (e.g. canvas unavailable in Facebook IAB) never blocks fetchCurrent.
   try{initModeUI();}catch(_){}
+  try{_slDecInit();}catch(_){}
   try{initMoreToggle();}catch(_){}
   try{initMorePeek();}catch(_){}
   try{initFactPill();}catch(_){}
