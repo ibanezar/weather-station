@@ -268,6 +268,9 @@ jobs:
       - name: Test decimalne vejice v besedilu zavihkov (_slDecText)
         run: python3 tools/test_decimals.py
 
+      - name: Test poti v `git add` v workflowih (manjkajoč pathspec tiho ustavi commit)
+        run: python3 tools/test_workflow_git_add.py
+
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py
 
