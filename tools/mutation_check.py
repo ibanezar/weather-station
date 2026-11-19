@@ -84,6 +84,8 @@ MUTACIJE = [
     ("strele: stari close pobriše novo vtičnico", "worker.js", "const dropped = () => { if (this.ws === ws) {", "const dropped = () => { if (true) {", "test_lightning_logger.py"),
     # ── varuh svežine / zdravje workerja (test_freshness.py) ──────────────────
     ("svežina: seznam bere prvi zapis", "tools/check_freshness.py", 'end_of_day(data[0][param])', 'end_of_day(data[-1][param])', "test_freshness.py"),
+    ("svežina: csvcol bere zadnjo vrstico", "tools/check_freshness.py", 'v = rows[-1][param].strip()', 'v = rows[0][param].strip()', "test_freshness.py"),
+    ("svežina: csvcol loči datum od ISO časa", "tools/check_freshness.py", 'return end_of_day(v) if len(v) == 10 else parse_ts(v)', 'return end_of_day(v[:10])', "test_freshness.py"),
     ("svežina: prag starosti", "tools/check_freshness.py", '"stale" if age > max_h else "ok"', '"stale" if age > max_h * 100 else "ok"', "test_freshness.py"),
     ("zdravje: čakanje na prvi tek", "worker.js", "const waiting = !rec && since != null && (now - since) / 60000 <= maxMin;", "const waiting = false;", "test_freshness.py"),
     ("zdravje: zapis prvega časa", "worker.js", 'if (!(await kv.get("cron:health:_since"))) await kv.put("cron:health:_since", String(t0));', "", "test_freshness.py"),

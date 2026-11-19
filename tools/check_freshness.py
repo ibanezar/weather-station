@@ -40,6 +40,7 @@ UTC = datetime.timezone.utc
 #   način "date"      — polje z datumom YYYY-MM-DD (starost od konca tistega dne)
 #   način "maxkey"    — največji datumski ključ v objektu (history.json …)
 #   način "csvdate"   — datum v prvem stolpcu zadnje vrstice CSV
+#   način "csvcol"    — CSV z glavo: stolpec (parameter) zadnje vrstice, datum YYYY-MM-DD ali ISO čas
 #   način "firstdate" — datoteka je seznam, polje z datumom prvega (najnovejšega) zapisa
 REGISTER = [
     # Nevihtna karta in njeno preverjanje sta na pavzi do aprila 2027 (28. 10. 2026) -- vrstici vrni ob vklopu:
@@ -97,6 +98,27 @@ REGISTER = [
     # Tedenski povzetek: ponedeljki 04:40 UTC (cron zamuja ure), zadnji teden se konča v nedeljo -> 9 dni + rezerva za izpad enega teka.
     ("Dolina v tednu (tedenski povzetek)", "data/dolina-v-tednu.json", "firstdate", "week_end", 24 * 11,
      "dolina-v-tednu.yml → generate_dolina_v_tednu.py"),
+    # Dnevniki, ki se nabirajo samo s tekočim zajemom (izpad dneva je nepovraten, glej razdelek Test napovedi): zato jih spremljamo.
+    ("Dnevnik: napovedi profila (zajem naprej)", "data/profile-forward-log.csv", "csvcol", "issued_at", 60,
+     "test-napovedi-daily.yml → log_profile_forecasts.py"),
+    ("Dnevnik: ansambli (zajem naprej)", "data/ensemble-forward-log.csv", "csvcol", "issued_at", 60,
+     "test-napovedi-daily.yml → log_ensemble_forecasts.py"),
+    ("Dnevnik: ARSO in Yr (zajem naprej)", "data/forecast-forward-log.csv", "csvcol", "issued_at", 60,
+     "test-napovedi-daily.yml → log_forward_forecasts.py"),
+    ("Dnevnik: urne meritve IREICA1", "data/hourly-observations.csv", "csvcol", "valid_at_local", 60,
+     "test-napovedi-daily.yml → log_hourly_observations.py (Ecowitt podvzorči starejše od ~90 dni)"),
+    ("Dnevnik: 5-min sevanje IREICA1", "data/solar-5min.csv", "csvcol", "date", 60,
+     "test-napovedi-daily.yml → log_solar_5min.py (backfill: hourly-backfill.yml)"),
+    ("Dnevnik: 5-min sevanje Varpolje", "data/varpolje-solar-5min.csv", "csvcol", "date", 60,
+     "test-napovedi-daily.yml → log_varpolje_solar.py (vir: worker cron varpolje_solar, hrani 72 h)"),
+    ("Dnevnik: osvežitve MTR (živa)", "data/mtr-live-log.csv", "csvcol", "issued_at", 36,
+     "mtr-live.yml → predict_recica_mos.py --live"),
+    ("Odčitki snega ARSO (živo)", "data/arso-snow-live.csv", "csvcol", "valid_utc", 48,
+     "arso-snow-live.yml (4×/dan)"),
+    ("Preverjanje MTR snega", "data/sneg-verification.json", "ts", "generated_at", 48,
+     "sneg-forecast.yml → verify_sneg.py"),
+    ("Preverjanje prvega žarka (IREICA1)", "data/sonce-preverjanje.json", "date", "generated", 72,
+     "test-napovedi-daily.yml → eval_sonce.py"),
     ("Dolinski dvoboj", "data/valley-duel-log.csv", "csvdate", None, 60,
      "valley-duel-log.yml"),
     ("Model MTR (mesečno učenje)", "model/recica-mos.json", "ts", "trained_at", 24 * 40,
@@ -132,6 +154,11 @@ def read_time(path, mode, param):
             with open(full, encoding="utf-8") as f:
                 rows = [r for r in csv.reader(f) if r]
             return end_of_day(rows[-1][0])
+        if mode == "csvcol":
+            with open(full, encoding="utf-8") as f:
+                rows = list(csv.DictReader(f))
+            v = rows[-1][param].strip()
+            return end_of_day(v) if len(v) == 10 else parse_ts(v)
         with open(full, encoding="utf-8") as f:
             data = json.load(f)
         if mode == "firstdate":
@@ -157,8 +184,8 @@ def evaluate(now=None, register=None):
             continue
         age = max(0.0, (now - t).total_seconds() / 3600)
         # datumski izdelki merijo od konca dneva, zato jim ura (00:00) nič ne pove
-        stamp = t.astimezone(TZ) - datetime.timedelta(seconds=1) if mode in ("date", "maxkey", "csvdate") else t.astimezone(TZ)
-        label = stamp.strftime("%-d. %-m. %Y") + ("" if mode in ("date", "maxkey", "csvdate") else stamp.strftime(" %H:%M"))
+        stamp = t.astimezone(TZ) - datetime.timedelta(seconds=1) if mode in ("date", "maxkey", "csvdate", "csvcol") else t.astimezone(TZ)
+        label = stamp.strftime("%-d. %-m. %Y") + ("" if mode in ("date", "maxkey", "csvdate", "csvcol") else stamp.strftime(" %H:%M"))
         out.append({"name": name, "path": path, "status": "stale" if age > max_h else "ok",
                     "age_h": round(age, 1), "max_h": max_h, "hint": hint, "updated": label})
     return out
