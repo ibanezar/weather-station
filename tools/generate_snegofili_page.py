@@ -382,6 +382,24 @@ def cam_slot(r_name, p):
     return ""
 
 
+HERO_PHOTO = "hero-zima"   # slug slike v snegofili/img/; če ima vnos v credits.json (avtor, licenca), se pod herom izpiše navedba
+
+
+def hero_photo():
+    """(slug, navedba) za sliko v ozadju hero dela; navedba je prazna, kjer slika nima vnosa v credits.json."""
+    if not HERO_PHOTO or not os.path.exists(os.path.join(seo.ROOT, "snegofili", "img", HERO_PHOTO + ".jpg")):
+        return None
+    path = os.path.join(seo.ROOT, "snegofili", "img", "credits.json")
+    c = (json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}).get(HERO_PHOTO)
+    if not c:
+        return HERO_PHOTO, ""
+    lic = (f'<a href="{_html.escape(c["licenca_url"])}" target="_blank" rel="noopener license">{_html.escape(c["licenca"])}</a>'
+           if c.get("licenca_url") else _html.escape(c["licenca"]))
+    credit = (f'Foto: {_html.escape(c["avtor"])} · {lic} · '
+              f'<a href="{_html.escape(c["stran"])}" target="_blank" rel="noopener">Wikimedia Commons</a>')
+    return HERO_PHOTO, credit
+
+
 ALARM_CM = (5, 15, 30)   # ↔ SG_CM_ALLOWED v worker.js (tools/test_snegofili_alarm.mjs): meje stopenj snega v step()
 ALARM_MAX_RULES = 3      # ↔ SG_MAX_RULES v worker.js
 
@@ -584,6 +602,7 @@ def build_body(data, cams):
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
     cams_sec = cam_wall_html(rows, cams)
+    hp = hero_photo()
     nav = [("zemljevid", "Zemljevid")] + ([("kamere", "Kamere")] if cams_sec else []) + [
         ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije"), ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
     nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
@@ -591,7 +610,7 @@ def build_body(data, cams):
     return f"""{seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)])}
 {seo.stn_badge()}
   <div class="sg-app">
-  <section class="sg-hero" aria-labelledby="sg-h1">
+  <section class="sg-hero{" has-photo" if hp else ""}" aria-labelledby="sg-h1"{f' style="--sg-hero-img:url(/snegofili/img/{hp[0]}.jpg)"' if hp else ""}>
     <canvas id="sg-snow" aria-hidden="true"></canvas>
     <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="222" height="58" alt="" decoding="async">
     <p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div>
@@ -601,6 +620,7 @@ def build_body(data, cams):
     <p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
 {stats_html(rows)}    <p class="sg-lead">{hero_sentence(rows)}</p>
     <a class="sg-cta" id="sg-al-cta" href="#sg-alarm" hidden>Ne zamudite naslednjega sneženja: nastavite opozorilo</a>
+{f'    <p class="sg-credit">{hp[1]}</p>' if hp and hp[1] else ""}
   </section>
 {nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
   <h2 id="zm-h">Zemljevid snežnih razmer <span class="sg-bdg m">Model</span></h2>
@@ -668,7 +688,9 @@ def build_body(data, cams):
 
 
 def head_extras(schema):
-    return ('<meta name="theme-color" content="#1b6ef3">\n'
+    hp = hero_photo()
+    pre = f'<link rel="preload" as="image" href="/snegofili/img/{hp[0]}.jpg" fetchpriority="high">\n' if hp else ""
+    return (pre +'<meta name="theme-color" content="#1b6ef3">\n'
             '<link rel="preload" href="/snegofili/fonts/Bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
             '<link rel="icon" type="image/svg+xml" href="/snegofili/brand/favicon.svg">\n'
             '<link rel="apple-touch-icon" href="/snegofili/brand/apple-touch-icon.png">\n'
