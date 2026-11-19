@@ -58,6 +58,9 @@ assert.equal(_cloud({ time: ['2026-12-31T22:00', '2027-01-01T02:00'], cloud_cove
 // 3. roj nocoj
 assert.equal(_tonight('2026-12-14').id, 'geminidi'); assert.equal(_tonight('2027-01-03').id, 'kvadrantidi');
 assert.equal(_tonight('2026-12-15'), null); assert.equal(_tonight('2026-11-17').id, 'leonidi');
+assert.equal(_tonight('2026-11-14'), null, 'isti dan v mesecu, drug mesec: ni vrha');
+assert.equal(_tonight('2026-12-03'), null, '3. 12. ni vrh Kvadrantidov (3. 1.)');
+assert.equal(_tonight('2026-12-17'), null, '17. 12. ni vrh Leonidov (17. 11.)');
 
 // 4. pravila so enaka kot v nebo-nocoj/nebo.js
 assert.equal(C.NEBO_KP_LIMIT, M.KP_LIMIT, 'prag Kp');
