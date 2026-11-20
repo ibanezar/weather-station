@@ -709,24 +709,30 @@
   }
   addEventListener('hashchange', hashOpen);
 
-  /* ══ »Kam peljem po sneg?« ══ */
+  /* izbira točke iz lestvice: isti povzetek kot klik na krog na zemljevidu */
+  function selectOnMap(id) {
+    var c = $('#sg-map [data-id="' + id + '"]'); if (!c) { openDetail(id); return; }
+    go(c);
+    if (window.matchMedia && !window.matchMedia('(min-width:1100px)').matches && map && map.scrollIntoView) map.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  }
+  /* ══ »Kje bo največ novega snega?« (prej »Kam peljem«) ══ */
   function planUi() {
     var sec = $('#kam-peljem'); if (!sec) return;
     sec.hidden = false;
     var win = $('#sg-pl-win'), km = $('#sg-pl-km'), el2 = $('#sg-pl-el'), cm = $('#sg-pl-cm'), out = $('#sg-pl-out');
     function run() {
-      var res = plan(pts, hours, { win: win.value, km: +km.value, minE: +el2.value, minCm: +cm.value, top: 3 });
+      var res = plan(pts, hours, { win: win.value, km: +km.value, minE: +el2.value, minCm: +cm.value, top: 5 });
       out.textContent = '';
       if (!res.length) { out.appendChild(el('li', 'sg-pl-none', 'Po modelu v izbranem oknu nobena točka ne doseže izbranih meril. Povečajte razdaljo ali znižajte prag.')); return; }
       res.forEach(function (x, k) {
-        var p = x.p, li = el('li', 'sg-pl-i'), t = hours[p.id].t[NOW];
+        var p = x.p, li = el('li', 'sg-pl-i');
         li.appendChild(el('span', 'sg-pl-rank', String(k + 1)));
-        var b = el('div', 'sg-pl-b'), av2 = avatar(p, 'sm'); if (av2) li.appendChild(av2); b.appendChild(el('h3', null, p.n));
-        b.appendChild(el('p', 'sg-sub', (p.c === 'SI' ? 'Slovenija' : p.c) + ' · ' + p.e + ' m · ' + p.k + ' km · zdaj ' + (t == null ? '—' : fmt(t / 10, 1) + ' °C')));
-        var act = el('div', 'sg-dt-act');
-        var d = el('button', 'sg-btn s', 'Podrobnosti'); d.type = 'button'; d.addEventListener('click', function () { openDetail(p.id, d); }); act.appendChild(d);
-        if (hasCam(p)) { var c = el('button', 'sg-btn s', camLabel(p)); c.type = 'button'; c.addEventListener('click', function () { openCam(p.id, c); }); act.appendChild(c); }
-        b.appendChild(act); li.appendChild(b);
+        var av2 = avatar(p, 'sm'); if (av2) li.appendChild(av2);
+        var b = el('div', 'sg-pl-b'), nm = el('button', 'sg-pl-name', p.n); nm.type = 'button';
+        nm.setAttribute('aria-label', p.n + ': pokaži na zemljevidu');
+        nm.addEventListener('click', function () { selectOnMap(p.id); });
+        b.appendChild(nm);
+        b.appendChild(el('p', 'sg-sub', p.e + ' m · ' + p.k + ' km')); li.appendChild(b);
         var v = el('div', 'sg-pl-v'); v.appendChild(el('b', null, cmText(x.cm))); v.appendChild(el('small', null, win.value === 'p24' ? 'v zadnjih 24 h' : win.value === 'n48' ? 'v 24–48 h' : 'v 24 h')); li.appendChild(v);
         out.appendChild(li);
       });
@@ -906,21 +912,27 @@
   })();
   /* ══ navigacija po razdelkih, filter kamer, povezava do opozorila ══ */
   (function () {
-    var nav = document.getElementById('sg-nav');
+    var nav = document.getElementById('sg-nav'), tab = document.getElementById('sg-tabbar');
     function sync() {
-      if (!nav) return;
-      $$('a', nav).forEach(function (a) {
-        var t = document.getElementById(a.getAttribute('href').slice(1));
-        a.parentNode.hidden = !t || t.hidden;
+      [nav, tab].forEach(function (box) {
+        if (!box) return;
+        $$('a', box).forEach(function (a) {
+          var t = document.getElementById(a.getAttribute('href').slice(1));
+          a.parentNode.hidden = !t || t.hidden;
+        });
       });
       var al = document.getElementById('sg-alarm'), cta = document.getElementById('sg-al-cta');
       if (cta) cta.hidden = !al || al.hidden;
     }
     window.addEventListener('load', function () { sync(); setTimeout(sync, 800); setTimeout(sync, 2500); });
-    if (nav && 'IntersectionObserver' in window) {
-      var links = {}; $$('a', nav).forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
+    if ((nav || tab) && 'IntersectionObserver' in window) {
+      var links = {}; [nav, tab].forEach(function (box) { if (box) $$('a', box).forEach(function (a) { var k = a.getAttribute('href').slice(1); (links[k] = links[k] || []).push(a); }); });
       var io = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { if (e.isIntersecting) { Object.keys(links).forEach(function (k) { links[k].removeAttribute('aria-current'); }); var a = links[e.target.id]; if (a) a.setAttribute('aria-current', 'true'); } });
+        es.forEach(function (e) {
+          if (!e.isIntersecting || !links[e.target.id]) return;
+          Object.keys(links).forEach(function (k) { links[k].forEach(function (a) { a.removeAttribute('aria-current'); }); });
+          links[e.target.id].forEach(function (a) { a.setAttribute('aria-current', 'true'); });
+        });
       }, { rootMargin: '-30% 0px -60% 0px' });
       Object.keys(links).forEach(function (k) { var t = document.getElementById(k); if (t) io.observe(t); });
     }

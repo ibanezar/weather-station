@@ -13,7 +13,7 @@ const b = await chromium.launch();
 let n = 0; const ok = (c, m) => { assert(c, m); n++; };
 for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   const ctx = await b.newContext({ viewport: vp }); const page = await ctx.newPage();
-  const errs = []; page.on('pageerror', e => errs.push(e.message));
+  const isMobile = vp.width < 641; const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.route('**/weatherireica1.filip-eremita.workers.dev/**', r => {
     const u = r.request().url();
     if (u.includes('/arso-cam?format=json')) return r.fulfill({ json: { kamera: 'Test', slika: '/arso-cam?slika=1', posnet: new Date().toISOString() }, headers: { 'access-control-allow-origin': '*' } });
@@ -25,13 +25,13 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   const tag = vp.width + ' px: ';
   ok(await page.locator('.sg-spark svg').count() === await page.locator('.sg-card').count(), tag + 'sparkline na vsaki kartici');
   ok(await page.locator('.sg-hm-l').count() >= 30, tag + 'toplotna karta ima vrstico za vsako točko');
-  { const pn = await page.locator('.sg-pl-i').count(); ok(pn >= 1 && pn <= 3, tag + 'Kam peljem: do tri točke (odvisno od današnjih podatkov)'); }
+  { const pn = await page.locator('.sg-pl-i').count(); ok(pn >= 1 && pn <= 5, tag + 'Kje bo največ novega snega: 1–5 točk (odvisno od današnjih podatkov)'); }
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), tag + 'brez vodoravnega razliva');
   const nowLine = await page.locator('#sg-nowline').textContent(), nowN = await page.locator('#sg-now-row .sg-nowc').count();
   ok(nowN > 0 ? /sneži na \d+ od/.test(nowLine) : /Trenutno ne sneži/.test(nowLine), tag + 'vrstica »zdaj sneži« se ujema s pasom');
   ok(await page.locator('.sg-stat').count() === 4 && /Do 200 km/.test(await page.locator('#sg-st-past-c').textContent()), tag + 'štiri kartice, Alpe ločene od 200 km');
   ok(await page.locator('.sg-bdg.m').count() > 5 && await page.locator('.sg-bdg.r').count() > 0, tag + 'oznake Model in Meritev');
-  ok(await page.locator('#sg-nav a:visible').count() >= 5, tag + 'navigacija po razdelkih');
+  ok(await page.locator(isMobile ? '#sg-tabbar a:visible' : '#sg-nav a:visible').count() >= (isMobile ? 4 : 5), tag + 'navigacija po razdelkih');
   await page.locator('#sg-map .sg-c').nth(3).dispatchEvent('click');
   ok(await page.locator('#sg-panel').isVisible() && await page.locator('.sg-modal-open, .sg-modal').count() === 0 || true, tag + 'klik odpre ploščo');
   ok(await page.locator('#sg-panel').isVisible() && /Odpri podrobnosti lokacije/.test(await page.locator('#sg-panel').textContent()), tag + 'plošča izbrane točke s CTA');

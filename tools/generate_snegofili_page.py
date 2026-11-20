@@ -522,6 +522,19 @@ def cam_wall_html(rows, cams):
             '<button type="button" data-cf="SI" aria-pressed="false">Samo slovenske</button></div>\n' + wall + ln + '  </section>\n')
 
 
+ST_ICONS = {
+    "past": '<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/>',
+    "next": '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
+    "fresh": '<path d="m3 19 6-10 4 6 3-4 5 8z"/>',
+    "meas": '<path d="M4 17 17 4l3 3L7 20H4zM13 8l3 3M10 11l2 2M7 14l2 2"/>',
+}
+
+
+def st_icon(i):
+    return (f'<svg class="sg-st-ic" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" '
+            f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ST_ICONS[i]}</svg>')
+
+
 def stats_html(rows):
     """Štiri kartice v herou. Alpe (vse točke) in območje do TRIP_KM od Rečice sta ločena podatka."""
     near = [r for r in rows if r["km_od_recice"] <= TRIP_KM]
@@ -538,15 +551,15 @@ def stats_html(rows):
         return f'Do {TRIP_KM} km od Rečice: {cm_h(b[key])} · {_html.escape(b["ime"])}'
 
     def tile(i, lab, bdg, val, sub, extra=""):
-        return (f'<div class="sg-stat"><small>{lab} <span class="sg-bdg {bdg[0]}">{bdg[1]}</span></small><b id="sg-st-{i}">{val}</b>'
+        return (f'<div class="sg-stat"><small>{st_icon(i)}<span>{lab}</span> <span class="sg-bdg {bdg[0]}">{bdg[1]}</span></small><b id="sg-st-{i}">{val}</b>'
                 f'<span id="sg-st-{i}-n">{sub}</span>'
                 + (f'<span class="sg-st-near" id="sg-st-{i}-c">{extra}</span>' if extra else "") + '</div>')
     mod = ("m", "Model")
     return ('  <div class="sg-stats" id="sg-stats" role="group" aria-label="Povzetek po modelu in meritvah">'
-            + tile("past", "Največ novega snega, zadnjih 24 ur", mod, cm_h(b24["past24_cm"]), _html.escape(b24["ime"]) if b24["past24_cm"] >= MIN_CM else "nikjer", near_line("past24_cm"))
-            + tile("next", "Napovedano, naslednjih 24 ur", mod, cm_h(bn["next24_cm"]), _html.escape(bn["ime"]) if bn["next24_cm"] >= MIN_CM else "nikjer", near_line("next24_cm"))
-            + tile("fresh", "Lokacij z novim snegom", mod, f"{fresh}", f"od {len(rows)} lokacij · ≥ 1 cm v zadnjih 24 urah")
-            + tile("meas", "Merilnih postaj ARSO", ("r", "Meritev"), f"{meas}", "z izmerjeno višino snežne odeje")
+            + tile("past", "Nov sneg, zadnjih 24 ur", mod, cm_h(b24["past24_cm"]), _html.escape(b24["ime"]) if b24["past24_cm"] >= MIN_CM else "nikjer", near_line("past24_cm"))
+            + tile("next", "Nov sneg, naslednjih 24 ur", mod, cm_h(bn["next24_cm"]), _html.escape(bn["ime"]) if bn["next24_cm"] >= MIN_CM else "nikjer", near_line("next24_cm"))
+            + tile("fresh", "Lokacij s snegom", mod, f"{fresh}", f"od {len(rows)} lokacij · ≥ 1 cm v zadnjih 24 urah")
+            + tile("meas", "Postaj ARSO", ("r", "Meritev"), f"{meas}", "z izmerjeno višino snežne odeje")
             + '</div>\n')
 
 
@@ -591,9 +604,8 @@ def windy_map_html():
 def plan_html():
     km = "".join(f'<option value="{k}"{" selected" if k == TRIP_KM else ""}>{"do " + str(k) + " km" if k else "vse"}</option>'
                  for k in (100, TRIP_KM, 400, 0))
-    return f"""  <section id="kam-peljem" class="sg-sec sg-plan" aria-labelledby="kp-h" hidden>
-  <h2 id="kp-h">Kam peljem po sneg?</h2>
-  <p class="archive-intro">Izberite okno, razdaljo in višino: pokažemo tri točke z največ novega snega po modelu.</p>
+    return f"""  <section id="kam-peljem" class="sg-plan sg-rank" aria-labelledby="kp-h" hidden>
+  <h2 id="kp-h">Kje bo največ novega snega?</h2>
   <div class="sg-plan-row">
     <label>Kdaj<select id="sg-pl-win"><option value="n24">Naslednjih 24 h</option><option value="n48">24–48 h od zdaj</option><option value="p24">Zadnjih 24 h</option></select></label>
     <label>Razdalja od Rečice<select id="sg-pl-km">{km}</select></label>
@@ -601,7 +613,7 @@ def plan_html():
     <label>Vsaj<select id="sg-pl-cm"><option value="1">1 cm</option><option value="5">5 cm</option><option value="15">15 cm</option></select></label>
   </div>
   <ol class="sg-pl-out" id="sg-pl-out" aria-live="polite"></ol>
-  <p class="muted-note">Zračna razdalja, ne čas vožnje. Modelska ocena novega snega; ne upošteva ceste, plazov, odprtosti smučišč ali vremena po poti.</p>
+  <p class="muted-note">Zračna razdalja, ne čas vožnje. Modelska ocena; ne upošteva ceste, plazov ali odprtosti smučišč.</p>
   </section>
 """
 
@@ -641,6 +653,19 @@ def build_body(data, cams):
         ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije"), ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
     nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
                 "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in nav) + '</ul></nav>\n')
+    tab_ic = {
+        "zemljevid": '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/>',
+        "kam-peljem": '<path d="m3 19 6-10 4 6 3-4 5 8z"/>',
+        "kamere": '<path d="M4 8h3l2-2h6l2 2h3v11H4zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>',
+        "lokacije": '<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+        "sg-alarm": '<path d="M6 9a6 6 0 1 1 12 0c0 6 2 7 2 7H4s2-1 2-7zM10 20a2 2 0 0 0 4 0"/>',
+    }
+    tabs = [("zemljevid", "Zemljevid"), ("kam-peljem", "Kje sneži")] + ([("kamere", "Kamere")] if cams_sec else []) + [
+        ("lokacije", "Lokacije"), ("sg-alarm", "Opozorila")]
+    tabbar = ('<nav class="sg-tabbar" id="sg-tabbar" aria-label="Glavni razdelki"><ul>' + "".join(
+        f'<li><a href="#{i}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" '
+        f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{tab_ic[i]}</svg><span>{t}</span></a></li>' for i, t in tabs) +
+        '</ul></nav>\n')
     return f"""  <div class="sg-app">
   <section class="sg-hero{" has-photo" if hp else ""}" aria-labelledby="sg-h1"{f' style="--sg-hero-img:url(/snegofili/img/{hp[0]}.jpg)"' if hp else ""}>
     <canvas id="sg-snow" aria-hidden="true"></canvas>
@@ -648,15 +673,15 @@ def build_body(data, cams):
     <div class="sg-brand-r"><a class="sg-back" href="/zima/">← MeteoZima</a><p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div></div>
     <h1 class="page-title" id="sg-h1">Snegofili: kje je zdaj sneg</h1>
     <p class="sg-sub2">Spremljanje snežnih razmer po Alpah: modelska ocena, meritve ARSO in kamere.</p>
-    <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p>
-    <p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
-{stats_html(rows)}    <p class="sg-lead">{hero_sentence(rows)}</p>
-    <a class="sg-cta" id="sg-al-cta" href="#sg-alarm" hidden>Ne zamudite naslednjega sneženja: nastavite opozorilo</a>
+    <div class="sg-hero-row"><p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
+    <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p></div>
+    <div class="sg-hero-cta"><a class="sg-cta p" href="#zemljevid">Trenutne snežne razmere</a>
+    <a class="sg-cta o" id="sg-al-cta" href="#sg-alarm" hidden>Nastavi snežno opozorilo</a></div>
 {f'    <p class="sg-credit">{hp[1]}</p>' if hp and hp[1] else ""}
   </section>
-{nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
+{stats_html(rows)}{nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
   <h2 id="zm-h">Zemljevid snežnih razmer <span class="sg-bdg m">Model</span></h2>
-  <p class="archive-intro">Barva in velikost kroga kažeta novi sneg po modelu; dotik točke odpre povzetek, od tam pa podrobnosti. Privzeti pogled je Slovenija z Avstrijo in severno Italijo.</p>
+  <p class="archive-intro">Barva in velikost kroga kažeta novi sneg po modelu; dotik točke odpre povzetek. Privzeti pogled je Slovenija z Avstrijo in severno Italijo.</p>
   <div class="sg-win sg-mapgrid">
     <div class="sg-mapcol">
 {map_svg(rows)}
@@ -671,14 +696,16 @@ def build_body(data, cams):
     </div>
     </div>
     <aside class="sg-panel" id="sg-panel" aria-label="Povzetek izbrane točke" hidden></aside>
-  </div>
+{plan_html()}  </div>
   </section>
+  <p class="sg-brief">{hero_sentence(rows)}</p>
   <section id="zdaj-snezi" class="sg-sec sg-nowsec" aria-labelledby="zs-h" hidden>
   <h2 id="zs-h">Kjer zdaj sneži <span class="sg-bdg m">Model</span></h2>
   <p class="archive-intro" id="zs-sub"></p>
   <div class="sg-nowrow" id="sg-now-row" role="list"></div>
   <div class="sg-top" id="sg-top"></div>
   </section>
+  <div class="sg-duo">
   <section id="prerez" class="sg-sec" aria-labelledby="pr-h">
     <div class="sg-profwrap">
       <h2 id="pr-h">Višinski prerez Alp <span class="sg-bdg m">Model</span></h2>
@@ -696,7 +723,8 @@ def build_body(data, cams):
     <div class="sg-hm-cv"><canvas id="sg-hm-cv" role="img" aria-label="Toplotna karta novega snega po točkah in urah. Iste podatke najdete v karticah točk spodaj."></canvas><div class="sg-hm-cur" id="sg-hm-cur"></div></div></div></div>
   <p class="sg-hm-leg" id="sg-hm-leg" aria-hidden="true"></p>
   </section>
-{cams_sec}{plan_html()}{windy_map_html()}  <section id="lokacije" class="sg-sec" aria-labelledby="lok-h">
+  </div>
+{cams_sec}{windy_map_html()}  <section id="lokacije" class="sg-sec" aria-labelledby="lok-h">
   <h2 id="lok-h">Primerjava {len(rows)} lokacij <span class="sg-bdg m">Model</span></h2>
   <p class="archive-intro">Seznam zajema {len(rows)} točk od Golt do Zermatta in Dachsteina. To je <b>modelska ocena novega snega</b>
   iz padavin in višine ničte izoterme, ne meritev. Izmerjeno višino odeje imamo samo za nekaj postaj ARSO in je
@@ -716,7 +744,7 @@ def build_body(data, cams):
   oskrbovani koči ali smučišču. Slike kamer so last navedenih virov.</p>
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>
   </div>
-<script type="application/json" id="sg-pts">{pts_json}</script>"""
+{tabbar}<script type="application/json" id="sg-pts">{pts_json}</script>"""
 
 
 def head_extras(schema):
