@@ -20,6 +20,8 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
     if (u.includes('slika=1')) return r.fulfill({ body: svg, contentType: 'image/svg+xml' });
     return r.fulfill({ status: 404, body: '{}' });
   });
+  await page.route('**/data/snegofili-recica.json*', r => r.fulfill({ json: { meritve: [
+    { cas: new Date(Date.now() - 30 * 36e5).toISOString(), cm: 9 }, { cas: new Date(Date.now() - 5 * 36e5).toISOString(), cm: 3, novi: 2 }] } }));
   await page.route(/googletagmanager|google-analytics|fonts\.g|drsc\.si|embed\.windy\.com|webcams\.windy\.com/, r => r.abort());
   await page.goto(BASE + '/snegofili/index.html'); await page.waitForSelector('.sg-nowc', { timeout: 8000 });
   const tag = vp.width + ' px: ';
@@ -27,9 +29,12 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   ok(await page.locator('.sg-hm-l').count() >= 30, tag + 'toplotna karta ima vrstico za vsako točko');
   { const pn = await page.locator('.sg-pl-i').count(); ok(pn >= 1 && pn <= 5, tag + 'Kje bo največ novega snega: 1–5 točk (odvisno od današnjih podatkov)'); }
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), tag + 'brez vodoravnega razliva');
+  await page.waitForSelector('#sg-st-rec-w:not([hidden])', { timeout: 5000 });
+  { const v = await page.locator('#sg-st-rec').textContent(), n = await page.locator('#sg-st-rec-n').textContent(), l = await page.locator('#sg-rec-lbl').textContent();
+    ok(v === '3 cm' && /ročna meritev · pred 5 h · nov sneg 2 cm/.test(n) && l === 'Rečica · 3 cm', tag + 'Rečica: ročna meritev (najnovejša, starost, nov sneg, oznaka na karti)'); }
   const nowLine = await page.locator('#sg-nowline').textContent(), nowN = await page.locator('#sg-now-row .sg-nowc').count();
   ok(nowN > 0 ? /sneži na \d+ od/.test(nowLine) : /Trenutno ne sneži/.test(nowLine), tag + 'vrstica »zdaj sneži« se ujema s pasom');
-  ok(await page.locator('.sg-stat').count() === 4 && /Do 200 km/.test(await page.locator('#sg-st-past-c').textContent()), tag + 'štiri kartice, Alpe ločene od 200 km');
+  ok(await page.locator('.sg-stat:visible').count() === 5 && /Do 200 km/.test(await page.locator('#sg-st-past-c').textContent()), tag + 'štiri kartice + Rečica, Alpe ločene od 200 km');
   ok(await page.locator('.sg-bdg.m').count() > 5 && await page.locator('.sg-bdg.r').count() > 0, tag + 'oznake Model in Meritev');
   ok(await page.locator(isMobile ? '#sg-tabbar a:visible' : '#sg-nav a:visible').count() >= (isMobile ? 4 : 5), tag + 'navigacija po razdelkih');
   await page.locator('#sg-map .sg-c').nth(3).dispatchEvent('click');

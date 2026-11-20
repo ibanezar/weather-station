@@ -534,3 +534,9 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-duo .sg-heatsec>h2{font-size:1.2rem;margin:0 0 .15rem}
 .sg-duo .sg-heatsec>h2:before{display:none}
 .sg-duo .sg-heatsec>.archive-intro{font-size:.82rem;color:#b9cdea;margin:.2rem 0 .6rem}
+
+/* ročna meritev snega v Rečici: peta ploščica, samo če meritev obstaja */
+.sg-stat[hidden]{display:none}
+.sg-st-rec.stale b{opacity:.7}
+@media(min-width:900px){.sg-app>.sg-stats:has(.sg-st-rec:not([hidden])){grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:640px){.sg-st-rec:not([hidden]){grid-column:1/-1}}

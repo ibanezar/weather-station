@@ -272,5 +272,47 @@ good2 = {**good, "embed": "https://webcams.windy.com/webcams/public/embed/player
 two = g.cam_info({"kamere": [good, good2]})
 check(len(two["ce"]) == 2 and two["ce"][1]["t"] == "Druga", "cam_info: več vdelav na točko")
 
+# ── ročna meritev snega v Rečici ──
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import snegofili_recica as rec
+from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+try:
+    now_ms = int(_dt(2026, 11, 20, 12, 0, tzinfo=_tz.utc).timestamp() * 1000)
+    L = [{"cas": "2026-11-20T07:00:00Z", "cm": 3, "novi": 1}, {"cas": "2026-11-19T07:00:00Z", "cm": 8},
+         {"cas": "2026-11-21T07:00:00Z", "cm": 99}, {"cas": "nesmisel", "cm": 5}, {"cas": "2026-11-20T08:00:00Z", "cm": -1},
+         {"cas": "2026-11-20T09:00:00Z", "cm": "5"}]
+    r = node_json(f"console.log(JSON.stringify(m.recicaState({json.dumps(L)},{now_ms})))")
+    check(r and r["cm"] == 3 and r["novi"] == 1 and abs(r["ageH"] - 5) < 0.01 and r["stale"] is False,
+          "Rečica: izbere najnovejšo veljavno meritev (prihodnost, nesmisel, negativna in nizi so zavrnjeni)")
+    check(node_json(f"console.log(JSON.stringify([m.recicaState([],{now_ms}),m.recicaState(null,{now_ms})]))") == [None, None],
+          "Rečica: brez meritev ni ploščice")
+    st = node_json(f"console.log(JSON.stringify([m.recicaState([{{cas:'2026-11-17T11:00:00Z',cm:2}}],{now_ms}),m.recicaState([{{cas:'2026-11-17T13:00:00Z',cm:2}}],{now_ms}),m.recicaState([{{cas:'2026-10-20T11:00:00Z',cm:2}}],{now_ms}),m.recicaState([{{cas:'2026-10-22T11:00:00Z',cm:0}}],{now_ms})]))")
+    check([x is not None and x["stale"] for x in st[:2]] == [True, False] and st[2] is None and st[3] is not None and st[3]["cm"] == 0,
+          "Rečica: starejša od 72 h je označena kot stara, starejša od 30 dni se skrije, ničla je veljavna meritev")
+    check(node_json("console.log(JSON.stringify([m.recicaCm(0),m.recicaCm(3),m.recicaCm(2.5),m.recicaCm(12.4),m.recicaAge(0.4),m.recicaAge(5.2),m.recicaAge(30),m.recicaAge(72)]))")
+          == ["0 cm", "3 cm", "2,5 cm", "12 cm", "pred manj kot uro", "pred 5 h", "pred 30 h", "pred 3 dnevi"],
+          "Rečica: besedila (decimalna vejica, ura/dnevi)")
+except (OSError, subprocess.SubprocessError, ValueError) as e:
+    check(False, f"node (Rečica): {e}")
+
+d0 = {"meritve": []}
+d1 = rec.add(d0, 3, 1, _dt(2026, 11, 19, 8, 30))
+check(d1["meritve"] == [{"cas": "2026-11-19T07:30:00Z", "cm": 3, "novi": 1}], "Rečica CLI: čas po naši uri se zapiše v UTC (zima +1 h)")
+d2 = rec.add(rec.add(d1, 0, None, _dt(2026, 11, 19, 20, 0)), 4, None, _dt(2026, 11, 18, 8, 0))
+check([m["cas"][:10] for m in d2["meritve"]] == ["2026-11-18", "2026-11-19", "2026-11-19"] and d2["meritve"][2]["cm"] == 0,
+      "Rečica CLI: vnosi so urejeni po času, ničla je veljaven vnos")
+check(rec.add(d1, 7, None, _dt(2026, 11, 19, 8, 30))["meritve"] == [{"cas": "2026-11-19T07:30:00Z", "cm": 7}], "Rečica CLI: ista minuta prepiše vnos")
+for bad in ((-1, None, None), (501, None, None), (3, -2, None), (3, None, _dt.now() + _td(days=2))):
+    try:
+        rec.add(d0, *bad)
+        check(False, f"Rečica CLI: zavrne {bad}")
+    except ValueError:
+        check(True, "Rečica CLI: zavrne neveljaven vnos")
+dj = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "snegofili-recica.json"), encoding="utf-8"))
+ts = [m["cas"] for m in dj["meritve"]]
+check(isinstance(dj["meritve"], list) and ts == sorted(ts) and all(isinstance(m["cm"], (int, float)) and 0 <= m["cm"] <= 500 and m["cas"].endswith("Z") for m in dj["meritve"]),
+      "data/snegofili-recica.json: veljavna oblika, urejeno po času")
+check('id="sg-st-rec-w"' in body and 'id="sg-rec-lbl"' in body, "stran ima skrito ploščico Rečica in oznako na zemljevidu")
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

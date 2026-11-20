@@ -221,7 +221,7 @@ def map_svg(rows):
         f'role="group" aria-label="Karta alpskega loka: novi sneg v zadnjih 24 urah po točkah">'
         f'<path class="land" d="M0 0H{MAP_W}V{MAP_H}H0Z"/><path class="bord" d="{bord}"/><path class="coast" d="{coast}"/>'
         f'<path d="M{rx:.1f} {ry - 9:.1f}l8 9l-8 9l-8 -9z" fill="#fff" stroke="#0a1426" stroke-width="2"/>'
-        f'<text class="sg-lbl" x="{rx + 14:.1f}" y="{ry + 7:.1f}">Rečica</text>'
+        f'<text class="sg-lbl" id="sg-rec-lbl" x="{rx + 14:.1f}" y="{ry + 7:.1f}">Rečica</text>'
         f'{"".join(circles)}{"".join(labels)}</svg><div id="sg-tip" hidden></div></div>')
 
 
@@ -527,6 +527,7 @@ ST_ICONS = {
     "next": '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
     "fresh": '<path d="m3 19 6-10 4 6 3-4 5 8z"/>',
     "meas": '<path d="M4 17 17 4l3 3L7 20H4zM13 8l3 3M10 11l2 2M7 14l2 2"/>',
+    "rec": '<path d="M12 21s-6-5.2-6-10a6 6 0 0 1 12 0c0 4.8-6 10-6 10zM12 13a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4z"/>',
 }
 
 
@@ -550,8 +551,9 @@ def stats_html(rows):
             return f"Do {TRIP_KM} km od Rečice: nikjer ≥ 1 cm"
         return f'Do {TRIP_KM} km od Rečice: {cm_h(b[key])} · {_html.escape(b["ime"])}'
 
-    def tile(i, lab, bdg, val, sub, extra=""):
-        return (f'<div class="sg-stat"><small>{st_icon(i)}<span>{lab}</span> <span class="sg-bdg {bdg[0]}">{bdg[1]}</span></small><b id="sg-st-{i}">{val}</b>'
+    def tile(i, lab, bdg, val, sub, extra="", hid=False):
+        cls, attr = ("sg-stat sg-st-rec", ' id="sg-st-rec-w" hidden') if hid else ("sg-stat", "")
+        return (f'<div class="{cls}"{attr}><small>{st_icon(i)}<span>{lab}</span> <span class="sg-bdg {bdg[0]}">{bdg[1]}</span></small><b id="sg-st-{i}">{val}</b>'
                 f'<span id="sg-st-{i}-n">{sub}</span>'
                 + (f'<span class="sg-st-near" id="sg-st-{i}-c">{extra}</span>' if extra else "") + '</div>')
     mod = ("m", "Model")
@@ -560,6 +562,7 @@ def stats_html(rows):
             + tile("next", "Nov sneg, naslednjih 24 ur", mod, cm_h(bn["next24_cm"]), _html.escape(bn["ime"]) if bn["next24_cm"] >= MIN_CM else "nikjer", near_line("next24_cm"))
             + tile("fresh", "Lokacij s snegom", mod, f"{fresh}", f"od {len(rows)} lokacij · ≥ 1 cm v zadnjih 24 urah")
             + tile("meas", "Postaj ARSO", ("r", "Meritev"), f"{meas}", "z izmerjeno višino snežne odeje")
+            + tile("rec", "Rečica, sneg v dolini", ("r", "Meritev"), "—", "", hid=True)
             + '</div>\n')
 
 

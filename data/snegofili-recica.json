@@ -1,0 +1,4 @@
+{
+  "opis": "Ročne meritve višine snežne odeje v Rečici ob Savinji (lastnik postaje; postaja IREICA1 snega ne meri). Dodaj z: python3 tools/snegofili_recica.py <cm> [--novi <cm>] [--cas \"YYYY-MM-DD HH:MM\"]. Čas je shranjen v UTC.",
+  "meritve": []
+}

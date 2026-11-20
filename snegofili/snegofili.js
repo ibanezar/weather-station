@@ -37,7 +37,25 @@
     return out.slice(0, o.top || 3);
   }
 
+  /* ročna meritev snega v Rečici (data/snegofili-recica.json; vnese jo lastnik postaje, postaja snega ne meri) */
+  var RECICA_STALE_H = 72, RECICA_HIDE_D = 30;
+  function recicaState(list, nowMs) {
+    var best = null;
+    (Array.isArray(list) ? list : []).forEach(function (m) {
+      if (!m || typeof m.cm !== 'number' || !isFinite(m.cm) || m.cm < 0 || m.cm > 500) return;
+      var t = Date.parse(m.cas); if (!isFinite(t) || t > nowMs + 36e5) return;
+      if (!best || t > best.t) best = { t: t, cm: m.cm, novi: typeof m.novi === 'number' && isFinite(m.novi) && m.novi >= 0 ? m.novi : null };
+    });
+    if (!best) return null;
+    var ageH = Math.max(0, (nowMs - best.t) / 36e5);
+    if (ageH > RECICA_HIDE_D * 24) return null;
+    return { cm: best.cm, novi: best.novi, t: best.t, ageH: ageH, stale: ageH > RECICA_STALE_H };
+  }
+  function recicaAge(ageH) { return ageH < 1 ? 'pred manj kot uro' : ageH < 48 ? 'pred ' + Math.round(ageH) + ' h' : 'pred ' + Math.round(ageH / 24) + ' dnevi'; }
+  function recicaCm(cm) { return cm === 0 ? '0 cm' : fmt(cm, cm >= 10 || cm === Math.round(cm) ? 0 : 1) + ' cm'; }
+
   var model = {
+    recicaState: recicaState, recicaAge: recicaAge, recicaCm: recicaCm, RECICA_STALE_H: RECICA_STALE_H, RECICA_HIDE_D: RECICA_HIDE_D,
     NOW: NOW, MIN_I: MIN_I, MAX_I: MAX_I, SNOWING_MIN: SNOWING_MIN, step: step, phase: phase, radius: radius, barPct: barPct,
     windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, snowing: snowing, hstep: hstep, plan: plan
   };
@@ -849,6 +867,19 @@
   layout();
   particles();
   bindCams();
+  /* tile in oznaka na karti: ročna meritev v Rečici (ob napaki ali brez meritve ostane skrito, nikoli izmišljena vrednost) */
+  (function recicaUi() {
+    var tile = $('#sg-st-rec-w'); if (!tile) return;
+    fetch('/data/snegofili-recica.json?h=' + Math.floor(Date.now() / 36e5), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var st = recicaState(j && j.meritve, Date.now()); if (!st) return;
+      var d = new Date(st.t).toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric', timeZone: 'Europe/Ljubljana' });
+      $('#sg-st-rec').textContent = recicaCm(st.cm);
+      var n = (st.cm === 0 ? 'izmerjena ničla' : 'ročna meritev') + ' · ' + (st.stale ? 'stara: ' + d : recicaAge(st.ageH)) + (st.novi != null ? ' · nov sneg ' + recicaCm(st.novi) : '');
+      $('#sg-st-rec-n').textContent = n;
+      tile.classList.toggle('stale', st.stale); tile.hidden = false;
+      var lb = $('#sg-rec-lbl'); if (lb && !st.stale) lb.textContent = 'Rečica · ' + recicaCm(st.cm);
+    }).catch(function () { });
+  })();
   fetch('ure.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
     if (!j || !j.tocke) return;
     hours = j.tocke; nowLocal = j.now_local; bindControls(); sparks(); render(NOW); planUi(); heatUi(); hashOpen();
