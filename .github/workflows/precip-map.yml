@@ -51,6 +51,10 @@ jobs:
 
       - name: Sestavi karto in stran
         if: steps.gate.outputs.proceed == 'true'
+        env:
+          EW_APP: ${{ secrets.EW_APP }}
+          EW_API: ${{ secrets.EW_API }}
+          EW_MAC: ${{ secrets.EW_MAC }}
         run: python3 tools/generate_precip_map.py
 
       - name: Objavi na main

@@ -61,6 +61,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from generate_storm_map import SLO_POLY, STATION, font  # noqa: E402
 import generate_seo_pages as seo  # noqa: E402
+import update_history as uh  # noqa: E402  (fetch_ecowitt, _ew_list, _pick, PRECIP_OVERRIDES)
 
 ROOT = seo.ROOT
 SITE = seo.SITE
@@ -90,6 +91,13 @@ BANDS = [
     (100, "EKSTREMNO",   (220, 38, 38)),
 ]
 POST_THRESHOLD_MM = 30  # OBILNO — pod tem se FB/IG objava preskoči
+
+# ARSO rr24h_val v jutranji meritvi je 24-urna količina do 06:00 UTC (7:00 CET /
+# 8:00 CEST). Isto okno uporabimo za našo postajo, sicer bi primerjali dve različni
+# 24 uri. Postajna meritev je ločena od ARSO (IREICA1 ni uradna postaja) in se
+# nikoli ne vrine v lestvico ARSO ali v `should_post`.
+STATION_WINDOW_END_UTC_H = 6
+STATION_TOL_S = 15 * 60  # največ toliko od roba okna sme biti najbližja Ecowitt točka
 
 WHITE, MUTED, DIM = (255, 255, 255), (208, 219, 235), (150, 163, 186)
 BG_TOP, BG_BOT = (10, 8, 24), (5, 5, 12)
@@ -158,12 +166,86 @@ def fetch_stations(date=None):
     return out, issued
 
 
+def _series(data):
+    """Ecowitt `rainfall.daily` (kumulativa od polnoči) -> urejen seznam [(ts, mm)]."""
+    out = []
+    for ts, v in (uh._ew_list(data, "rainfall", "daily") or {}).items():
+        val = uh._pick(v, ["total", "max", "value"])
+        if val is not None:
+            out.append((int(ts), val))
+    return sorted(out)
+
+
+def rain_between(series_prev, series_next, start_ts, end_ts, midnight_ts, tol=STATION_TOL_S):
+    """Padavine med start_ts in end_ts iz dveh dnevnih kumulativ (dan pred robom okna
+    in dan po njem; dnevna kumulativa se ob lokalni polnoči ponastavi).
+
+    mm = (zadnja vrednost prvega dne − vrednost ob začetku okna) + vrednost ob koncu okna.
+    `midnight_ts` je lokalna polnoč med dnevoma: zadnja točka prvega dne mora biti blizu nje,
+    sicer bi večerni dež manjkal.
+    Vrne None, če ob katerem robu ni točke v toleranci `tol` ali če podatki niso
+    skladni (kumulativa ne sme padati): raje brez številke kot napačna številka."""
+    def at(series, t):
+        prev = [(ts, v) for ts, v in series if ts <= t]
+        if not prev or t - prev[-1][0] > tol:
+            return None
+        return prev[-1][1]
+
+    if not series_prev or not series_next:
+        return None
+    a = at(series_prev, start_ts)
+    c = at(series_next, end_ts)
+    if a is None or c is None:
+        return None
+    day_total = series_prev[-1][1]
+    if midnight_ts - series_prev[-1][0] > tol or day_total < a or c < 0:
+        return None
+    return round(day_total - a + c, 1)
+
+
+def station_window(now_utc):
+    """(začetek, konec) 24-urnega okna ARSO v UTC; konec je zadnji 06:00 UTC."""
+    end = now_utc.replace(hour=STATION_WINDOW_END_UTC_H, minute=0, second=0, microsecond=0)
+    if now_utc < end:
+        end -= datetime.timedelta(days=1)
+    return end - datetime.timedelta(days=1), end
+
+
+def fetch_station_rr24h(now_utc=None, fetch=None):
+    """Padavine IREICA1 v istem 24-urnem oknu kot ARSO ali None (brez dosegljive
+    postaje, vrzeli ob robu okna ali dneva z ročnim popravkom dežemera). Samo
+    zunanje polje `rainfall.daily` (notranjih meritev ne beremo nikoli)."""
+    now_utc = now_utc or datetime.datetime.now(datetime.timezone.utc)
+    fetch = fetch or uh.fetch_ecowitt
+    start, end = station_window(now_utc)
+    if now_utc < end + datetime.timedelta(minutes=10):
+        return None  # Ecowitt oblak točke ob robu še ni prejel
+    d0 = start.astimezone(uh.TZ).date().isoformat()
+    d1 = end.astimezone(uh.TZ).date().isoformat()
+    if any(d in uh.PRECIP_OVERRIDES or d in getattr(uh, "PRECIP_TEST_DEDUCTIONS", {}) for d in (d0, d1)):
+        return None  # dežemer je bil ta dan ročno popravljen/testiran -- številke ne moremo trditi
+    try:
+        data0, data1 = fetch(d0, d0), fetch(d1, d1)
+    except Exception as e:  # noqa: BLE001 -- postaja ni nujna za karto
+        print(f"  ⚠ postaja IREICA1: {e}", file=sys.stderr)
+        return None
+    if not data0 or not data1:
+        return None
+    midnight = datetime.datetime.combine(datetime.date.fromisoformat(d1), datetime.time(0), tzinfo=uh.TZ)
+    return rain_between(_series(data0), _series(data1), int(start.timestamp()), int(end.timestamp()),
+                        int(midnight.timestamp()))
+
+
+def fmt_mm(x):
+    return f"{x:.1f}".replace(".", ",")
+
+
 def luminance(rgb):
     r, g, b = rgb
     return 0.299 * r + 0.587 * g + 0.114 * b
 
 
-def draw_map(img, stations, box, bbox):
+def draw_map(img, stations, box, bbox, home_mm=None):
     bx0, by0, bx1, by1 = box
     bw, bh = bx1 - bx0, by1 - by0
     min_lo, max_lo, min_la, max_la = bbox
@@ -178,9 +260,14 @@ def draw_map(img, stations, box, bbox):
     d.line(poly_px, fill=(255, 255, 255, 210), width=3, joint="curve")
 
     sx, sy = to_px(STATION["lo"], STATION["la"])
-    d.ellipse([sx - 7, sy - 7, sx + 7, sy + 7], fill=C_PURPLE, outline=WHITE, width=2)
     f_home = font("LiberationSans-Regular.ttf", 20)
-    d.text((sx + 12, sy - 11), "Rečica ob Savinji", font=f_home, fill=MUTED)
+    if home_mm is None:
+        d.ellipse([sx - 7, sy - 7, sx + 7, sy + 7], fill=C_PURPLE, outline=WHITE, width=2)
+        d.text((sx + 12, sy - 11), "Rečica ob Savinji", font=f_home, fill=MUTED)
+    else:
+        # naša postaja: ista oznaka kot ARSO, a z vijoličnim robom in imenom ob njej
+        # (risana po ARSO oznakah, da je ne prekrijejo)
+        home = {"x": sx, "y": sy, "label": f"{round(home_mm)}"}
 
     # Postajna imena namenoma niso izpisana na sami karti (referenčna slika
     # Neurje.si prav tako nosi samo številke v obročkih) — pri 20 postajah na
@@ -202,8 +289,23 @@ def draw_map(img, stations, box, bbox):
         txt_fill = WHITE if luminance(color) < 150 else (20, 24, 33)
         d.text((x - tw / 2 - tb[0], y - th / 2 - tb[1]), label, font=f_num, fill=txt_fill)
 
+    if home_mm is not None:
+        _, color = band_for(home_mm)
+        tb = d.textbbox((0, 0), home["label"], font=f_num)
+        tw, th = tb[2] - tb[0], tb[3] - tb[1]
+        pw, ph = max(tw + 24, 46), th + 16
+        x, y = home["x"], home["y"]
+        d.rounded_rectangle([x - pw / 2 - 4, y - ph / 2 - 4, x + pw / 2 + 4, y + ph / 2 + 4],
+                            radius=(ph + 8) / 2, fill=C_PURPLE)
+        d.rounded_rectangle([x - pw / 2, y - ph / 2, x + pw / 2, y + ph / 2],
+                            radius=ph / 2, fill=color, outline=WHITE, width=2)
+        d.text((x - tw / 2 - tb[0], y - th / 2 - tb[1]), home["label"], font=f_num,
+               fill=WHITE if luminance(color) < 150 else (20, 24, 33))
+        # ime nad oznako (desno in spodaj so običajno sosednje postaje ARSO)
+        d.text((x, y - ph / 2 - 10), "Rečica ob Savinji", font=f_home, fill=MUTED, anchor="ms")
 
-def render(w, h, top, bottom, stations, summary, now, issued):
+
+def render(w, h, top, bottom, stations, summary, now, issued, home_mm=None):
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     grad = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     gd = ImageDraw.Draw(grad)
@@ -239,7 +341,8 @@ def render(w, h, top, bottom, stations, summary, now, issued):
     y += ls + 46
     d.text((pad, y), "Padavine — zadnjih 24 ur", font=f_title, fill=WHITE)
     y += 62
-    d.text((pad, y), "Izmerjeno na samodejnih postajah ARSO", font=f_sub, fill=MUTED)
+    sub = "Izmerjeno na samodejnih postajah ARSO" + (" in na postaji IREICA1" if home_mm is not None else "")
+    d.text((pad, y), sub, font=f_sub, fill=MUTED)
     y += 52
 
     legend_h = 56
@@ -262,7 +365,7 @@ def render(w, h, top, bottom, stations, summary, now, issued):
     bw, bh = round(geo_w * scale), round(geo_h * scale)
     bx0 = pad + (map_box_w - bw) // 2
     by0 = map_top
-    draw_map(img, stations, (bx0, by0, bx0 + bw, by0 + bh), (min_lo, max_lo, min_la, max_la))
+    draw_map(img, stations, (bx0, by0, bx0 + bw, by0 + bh), (min_lo, max_lo, min_la, max_la), home_mm)
     d = ImageDraw.Draw(img)
 
     # Fiksna vrstična višina (berljiva pisava), ne skrčena glede na prostor —
@@ -308,6 +411,10 @@ def render(w, h, top, bottom, stations, summary, now, issued):
     top_line = f"Največ dežja: {summary['top_name']} — {round(summary['top_mm'])} mm/24h"
     d.text((pad, fy), top_line, font=f_foot_b, fill=WHITE)
     fy += 40
+    if home_mm is not None:
+        d.text((pad, fy), f"Naša postaja IREICA1 v Rečici: {fmt_mm(home_mm)} mm/24h",
+               font=f_foot, fill=MUTED)
+        fy += 34
     d.text((pad, fy), f"Vir: ARSO, samodejne postaje, izdano {issued}. meteorec.si/padavine-karta",
            font=f_foot, fill=DIM)
 
@@ -339,12 +446,15 @@ def esc(s):
     return html.escape(str(s or ""), quote=True)
 
 
-def build_page(stations, summary, meta, now):
+def build_page(stations, summary, meta, now, home_mm=None):
     ranked = sorted(stations, key=lambda s: -s["mm"])
     rows = "\n".join(
         f'      <tr><th>{esc(s["name"])}</th><td>{round(s["mm"])} mm — {band_for(s["mm"])[0].lower()}</td></tr>'
         for s in ranked
     )
+    if home_mm is not None:
+        rows = (f'      <tr><th>Rečica ob Savinji (naša postaja IREICA1)</th><td>{fmt_mm(home_mm)} mm — '
+                f'{band_for(home_mm)[0].lower()}</td></tr>\n' + rows)
     table = '  <table class="stats">\n' + rows + '\n  </table>'
 
     range_labels = ["0 mm", "0,1–9 mm", "10–29 mm", "30–59 mm", "60–99 mm", "100+ mm"]
@@ -361,7 +471,9 @@ def build_page(stations, summary, meta, now):
     answer = (f'  <p class="archive-intro">V zadnjih 24 urah je največ dežja po meritvah ARSO padlo v '
               f'<strong>{esc(summary["top_name"])}</strong> — {round(summary["top_mm"])} mm. Karta prikazuje '
               f'izmerjeno (ne napovedano) 24-urno kumulativo padavin na {len(stations)} samodejnih postajah ARSO '
-              f'po vsej Sloveniji, izdano {esc(meta["issued"])}.</p>')
+              f'po vsej Sloveniji, izdano {esc(meta["issued"])}.'
+              + (f' Dodana je naša postaja IREICA1 v Rečici ob Savinji ({fmt_mm(home_mm)} mm v istem 24-urnem oknu).'
+                 if home_mm is not None else '') + '</p>')
 
     img_html = (f'  <img src="{esc(meta["image"])}" alt="Padavine v zadnjih 24 urah po postajah ARSO, '
                 f'{esc(meta["date"])}" loading="lazy" '
@@ -376,8 +488,9 @@ def build_page(stations, summary, meta, now):
          "<a href=\"/vreme-recica-ob-savinji/\">napoved po urah</a> ali <a href=\"/nevihte/\">nevihtno napoved</a>."),
         ("Zakaj karta prikazuje samo ~20 postaj?",
          "To je javno objavljena nacionalna mreža glavnih samodejnih postaj ARSO. Meteorec meri lastno postajo "
-         "IREICA1 v Rečici ob Savinji, ki v to nacionalno mrežo ni vključena — glej <a href=\"/\">trenutne "
-         "razmere</a>."),
+         "IREICA1 v Rečici ob Savinji, ki v to nacionalno mrežo ni vključena; na karti je dodana ločeno "
+         "(vijolični rob), z isto 24-urno količino v istem oknu kot pri ARSO (do 7:00 po srednjeevropskem času). "
+         "Če podatka postaje ob izdaji karte ni, jo izpustimo. Ni uradna postaja ARSO in ne šteje v lestvico največ dežja — glej <a href=\"/\">trenutne razmere</a>."),
         ("Kako pogosto se karta osvežuje?",
          "Enkrat dnevno, zjutraj do 7:00."),
     ]
@@ -414,6 +527,9 @@ def main():
         print(f"✗ Napaka pri pridobivanju podatkov ARSO: {e}", file=sys.stderr)
         return 1
 
+    home_mm = fetch_station_rr24h()
+    print(f"  → postaja IREICA1: " + (f"{fmt_mm(home_mm)} mm/24h" if home_mm is not None else "ni podatka (karta brez nje)"))
+
     top = max(stations, key=lambda s: s["mm"])
     summary = {"top_name": top["name"], "top_mm": top["mm"]}
     should_post = summary["top_mm"] >= POST_THRESHOLD_MM
@@ -425,8 +541,8 @@ def main():
         return 0
 
     os.makedirs(OUT_DIR, exist_ok=True)
-    feed = render(1080, 1350, 60, 1290, stations, summary, now, issued)
-    story = render(1080, 1920, 200, 1700, stations, summary, now, issued)
+    feed = render(1080, 1350, 60, 1290, stations, summary, now, issued, home_mm)
+    story = render(1080, 1920, 200, 1700, stations, summary, now, issued, home_mm)
 
     name = f"{today.isoformat()}.jpg"
     name_story = f"{today.isoformat()}-story.jpg"
@@ -445,6 +561,7 @@ def main():
         "top_station": summary["top_name"],
         "top_mm": summary["top_mm"],
         "n_stations": len(stations),
+        "station_mm": home_mm,
         "should_post": should_post,
         "image": f"{SITE}/og/precip-map/{name}",
         "image_story": f"{SITE}/og/precip-map/{name_story}",
@@ -453,7 +570,7 @@ def main():
         json.dump(meta, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
-    body = build_page(stations, summary, meta, now)
+    body = build_page(stations, summary, meta, now, home_mm)
     url = "/padavine-karta/"
     title = "Padavinska karta Slovenije — zadnjih 24 ur"
     desc = (f"Izmerjene padavine zadnjih 24 ur na {len(stations)} samodejnih postajah ARSO po vsej Sloveniji — "

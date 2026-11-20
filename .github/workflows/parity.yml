@@ -129,6 +129,9 @@ jobs:
       - name: Test posnetka ARSO rr24h
         run: python3 tools/test_precip_snapshot.py
 
+      - name: Test padavin postaje IREICA1 na padavinski karti
+        run: python3 tools/test_precip_station.py
+
       - name: Test LightningLogger (ponovna vzpostavitev, zombi)
         run: python3 tools/test_lightning_logger.py
 
