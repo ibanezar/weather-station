@@ -55,6 +55,13 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   ok((await page.locator('.sg-cam:not([hidden])').evaluateAll(a => a.every(f => f.dataset.c === 'SI'))), tag + 'filter slovenskih kamer');
   await page.locator('#sg-camf [data-cf="*"]').click();
   await page.locator('#kamere').scrollIntoViewIfNeeded(); await page.waitForSelector('.sg-cam-w', { timeout: 5000 });
+  /* rubrika »Po svetu« obstaja samo, ko je data/snegofili-svet.json (jo naredi zima-forecast.yml): takrat mora imeti kartice, sličice in zastavo */
+  if (await page.locator('#po-svetu').count()) {
+    ok(await page.locator('#po-svetu .sg-wc').count() >= 3 && await page.locator('#po-svetu .sg-ws').count() >= 3, tag + 'Po svetu: kartice in sličice poteka');
+    ok(await page.locator('#po-svetu h3').count() >= 1 && /Japonska/.test(await page.locator('#po-svetu h3').first().textContent()), tag + 'Po svetu: skupina Japonska');
+    ok(await page.locator('#po-svetu .sg-av.ph[data-c=JP]').count() >= 1, tag + 'Po svetu: japonska zastava');
+    if (!isMobile) ok(/Po svetu/.test(await page.locator('#sg-nav').textContent()), tag + 'Po svetu: v navigaciji');
+  }
   ok(await page.locator('.sg-cam-w').first().evaluate(i => i.src.startsWith('https://images-webcams.windy.com/')) && /Sličica · Windy/.test(await page.locator('.sg-cam-wcap').first().textContent()), tag + 'Windy kamere: sličica v ploščici z oznako vira');
   await page.locator('#sg-hbar [data-hc="SI"]').click(); ok(await page.locator('.sg-hm-l').count() < 20, tag + 'toplotna karta: samo Slovenija'); await page.locator('#sg-hbar [data-hc="*"]').click();
   /* drsnik premakne pas in števec */

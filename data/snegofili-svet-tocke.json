@@ -1,0 +1,23 @@
+{
+ "opomba": "Rubrika »Po svetu« na /snegofili/. ROČEN seznam: koordinate so približne (±5 km), višine so izbrane za zgornji del smučišča in IZ SPOMINA (Elevation API in Open-Meteo iz peskovnika nista dosegljiva), zato jih mora Filip potrditi. Modelska ocena padavin iz celice modela, ne meritev. Nova točka = vnos tu (drzava JP/US/CA, ki jo pozna COUNTRIES_WORLD v generatorju).",
+ "potrjeno": false,
+ "tocke": [
+  {"id": "niseko", "ime": "Niseko (Annupuri)", "drzava": "JP", "regija": "Hokkaido", "lat": 42.856, "lon": 140.65, "elevation_m": 1100, "elev_opis": "zgornji del smučišča"},
+  {"id": "kiroro", "ime": "Kiroro", "drzava": "JP", "regija": "Hokkaido", "lat": 43.077, "lon": 140.928, "elevation_m": 1100, "elev_opis": "zgornji del smučišča"},
+  {"id": "furano", "ime": "Furano", "drzava": "JP", "regija": "Hokkaido", "lat": 43.333, "lon": 142.385, "elevation_m": 1000, "elev_opis": "zgornji del smučišča"},
+  {"id": "rusutsu", "ime": "Rusutsu", "drzava": "JP", "regija": "Hokkaido", "lat": 42.749, "lon": 140.9, "elevation_m": 900, "elev_opis": "zgornji del smučišča"},
+  {"id": "hakkoda", "ime": "Hakkoda", "drzava": "JP", "regija": "Tohoku", "lat": 40.659, "lon": 140.859, "elevation_m": 1300, "elev_opis": "zgornja postaja žičnice"},
+  {"id": "zao", "ime": "Zao Onsen", "drzava": "JP", "regija": "Tohoku", "lat": 38.163, "lon": 140.435, "elevation_m": 1500, "elev_opis": "zgornji del smučišča"},
+  {"id": "gassan", "ime": "Gassan", "drzava": "JP", "regija": "Tohoku", "lat": 38.534, "lon": 140.045, "elevation_m": 1500, "elev_opis": "zgornji del smučišča"},
+  {"id": "hakuba", "ime": "Hakuba (Happo-one)", "drzava": "JP", "regija": "Honšu (Nagano)", "lat": 36.698, "lon": 137.831, "elevation_m": 1800, "elev_opis": "zgornja postaja žičnice"},
+  {"id": "nozawa", "ime": "Nozawa Onsen", "drzava": "JP", "regija": "Honšu (Nagano)", "lat": 36.924, "lon": 138.443, "elevation_m": 1600, "elev_opis": "zgornji del smučišča"},
+  {"id": "myoko", "ime": "Myōkō Kōgen", "drzava": "JP", "regija": "Honšu (Niigata)", "lat": 36.885, "lon": 138.17, "elevation_m": 1300, "elev_opis": "zgornji del smučišča"},
+  {"id": "shiga-kogen", "ime": "Shiga Kōgen", "drzava": "JP", "regija": "Honšu (Nagano)", "lat": 36.775, "lon": 138.53, "elevation_m": 1900, "elev_opis": "osrednji del smučišč"},
+  {"id": "whistler", "ime": "Whistler Blackcomb", "drzava": "CA", "regija": "Britanska Kolumbija", "lat": 50.083, "lon": -122.95, "elevation_m": 1500, "elev_opis": "srednji del smučišča"},
+  {"id": "lake-louise", "ime": "Lake Louise", "drzava": "CA", "regija": "Alberta", "lat": 51.44, "lon": -116.16, "elevation_m": 2100, "elev_opis": "srednji del smučišča"},
+  {"id": "mt-baker", "ime": "Mt. Baker", "drzava": "US", "regija": "Washington", "lat": 48.857, "lon": -121.671, "elevation_m": 1300, "elev_opis": "smučišče"},
+  {"id": "jackson-hole", "ime": "Jackson Hole", "drzava": "US", "regija": "Wyoming", "lat": 43.595, "lon": -110.845, "elevation_m": 2500, "elev_opis": "srednji del smučišča"},
+  {"id": "alta", "ime": "Alta", "drzava": "US", "regija": "Utah", "lat": 40.588, "lon": -111.638, "elevation_m": 2900, "elev_opis": "srednji del smučišča"},
+  {"id": "mammoth", "ime": "Mammoth Mountain", "drzava": "US", "regija": "Kalifornija", "lat": 37.63, "lon": -119.032, "elevation_m": 3000, "elev_opis": "zgornji del smučišča"}
+ ]
+}

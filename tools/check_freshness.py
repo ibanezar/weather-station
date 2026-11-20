@@ -91,6 +91,8 @@ REGISTER = [
     # Snegofili: korak v zima-forecast.yml je continue-on-error (Open-Meteo 429), zato 48 h (en izpadel tek ni napaka).
     ("Snegofili (sneg po alpskem loku)", "data/snegofili.json", "ts", "generated_at", 48,
      "zima-forecast.yml → tools/snegofili_data.py (korak je continue-on-error)"),
+    ("Snegofili: Po svetu (Japonska, Severna Amerika)", "data/snegofili-svet.json", "ts", "generated_at", 72,
+     "zima-forecast.yml → tools/snegofili_data.py (ločen klic Open-Meteo, ob izpadu ostane stari posnetek)"),
     ("Jutro v dolini (zamik prvi žarek → ogrevanje)", "data/jutro-zamik.json", "date", "generated", 60,
      "zima-forecast.yml (korak je continue-on-error)"),
     # 19. 11. 2026: squash PR-ja je povozil botov commit in kartica »Včeraj rekord za …« je ostala dan za zgodovino; izdelek je v index.html, ne v JSON.
