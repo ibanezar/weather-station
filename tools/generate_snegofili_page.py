@@ -86,6 +86,22 @@ def phase_text(ph, r=None):
         return "Dež" if r["precip_now_mm"] >= 0.1 else "Brez padavin"
     return PHASE_TXT[ph]
 
+# Powder Tracker: razvrstitev točk po svežini snega. Vse je MODELSKI potencial (padavine × delež snega, temperatura, veter), ne izmerjena kakovost pršiča.
+# Meje so naša izbira, na strani so izpisane (»Kako razvrščamo«) in jih varuje tools/test_snegofili.py.
+PW_POWDER_CM = 15      # Powder alert: vsaj toliko novega snega v zadnjih 24 urah ...
+PW_POWDER_T = 0.0      # ... pri temperaturi zdaj do vključno te vrednosti (°C) ...
+PW_GUST_KMH = 50       # ... in brez močnih sunkov (veter odnaša in zbija sneg); če sunka ne poznamo, ga ne upoštevamo
+PW_FRESH_CM = 5        # Svež sneg: v zadnjih 24 urah vsaj toliko ...
+PW_FRESH72_CM = 20     # ... ali v zadnjih 72 urah vsaj toliko
+PW_WAIT24_CM = 10      # Sneg prihaja: v naslednjih 24 urah vsaj toliko ...
+PW_WAIT72_CM = 20      # ... ali v naslednjih 72 urah vsaj toliko
+PW_SNOWY_CM = 5        # Nekaj snega: v 72 urah nazaj ali naprej vsaj toliko
+PW_CATS = (("powder", "Powder alert"), ("fresh", "Svež sneg"), ("waiting", "Sneg prihaja"), ("snowy", "Nekaj snega"))
+PW_CAT_LABEL = dict(PW_CATS)
+PW_CAT_RANK = {k: i for i, (k, _) in enumerate(PW_CATS)}
+PW_GROUPS = (("*", "Vse"), ("si", "Slovenija"), ("alpe", "Alpe"), ("japonska", "Japonska"), ("amerika", "Severna Amerika"))
+PW_LIMIT = 10          # privzeto prikazanih vrstic (ostale po gumbu); brez JS so vidne vse
+
 FAQ = [
     ("Je to izmerjen sneg?",
      "Ne. Novi sneg je modelska ocena: padavine iz celice vremenskega modela (Open-Meteo), pomnožene z deležem, "
@@ -114,6 +130,12 @@ FAQ = [
      "Izbirnik razvrsti točke po modelski količini novega snega v izbranem oknu (naslednjih 24 ur, 24–48 ur ali "
      "zadnjih 24 ur), po zračni razdalji od Rečice in po višini. Ni priporočilo za turo: ne upošteva ceste, "
      "plazov, odprtosti smučišč ali vremena po poti."),
+    ("Kaj je Powder Tracker?",
+     f"Lestvica točk (Alpe, Japonska, Severna Amerika) po svežini snega. »Powder alert« je vsaj {PW_POWDER_CM} cm novega snega v "
+     f"24 urah pri temperaturi do {PW_POWDER_T:g} °C in brez sunkov nad {PW_GUST_KMH} km/h; »Svež sneg« vsaj {PW_FRESH_CM} cm v 24 urah "
+     f"ali {PW_FRESH72_CM} cm v 72 urah; »Sneg prihaja« vsaj {PW_WAIT24_CM} cm v naslednjih 24 urah ali {PW_WAIT72_CM} cm v 72 urah. "
+     "To je modelski potencial, ne izmerjena kakovost snega: model ne ve, kaj je veter odnesel, kako je sneg zbit in ali je smučišče "
+     "odprto. Za odločitev poglejte kamero in uradno poročilo smučišča."),
     ("Ali stran nadomešča plazovni bilten?",
      "Ne. Ocena snega ne pove nič o plazovni nevarnosti. Pred turo preverite uradni plazovni bilten pristojne "
      "države in razmere pri oskrbovani koči ali smučišču."),
@@ -752,6 +774,116 @@ def plan_html():
 """
 
 
+def powder_category(r):
+    """Kategorija točke (ključ iz PW_CATS) ali None, če ni snega ne nazaj ne naprej. Vrstni red pravil je pomemben (prvo, ki velja)."""
+    p24, p72, n24, n72 = (r.get(k) or 0 for k in ("past24_cm", "past72_cm", "next24_cm", "next72_cm"))
+    t, g = r.get("temp_c"), r.get("gust_kmh")
+    if p24 >= PW_POWDER_CM and t is not None and t <= PW_POWDER_T and not (g is not None and g >= PW_GUST_KMH):
+        return "powder"
+    if p24 >= PW_FRESH_CM or p72 >= PW_FRESH72_CM:
+        return "fresh"
+    if n24 >= PW_WAIT24_CM or n72 >= PW_WAIT72_CM:
+        return "waiting"
+    if max(p72, n72) >= PW_SNOWY_CM:
+        return "snowy"
+    return None
+
+
+def powder_quality(t):
+    """Opis snega po temperaturi zdaj (ne meritev vlage snega)."""
+    if t is None:
+        return ""
+    return "suh, lahek sneg" if t <= -3 else "običajen sneg" if t <= 0 else "moker, težji sneg (nad 0 °C)"
+
+
+def powder_sort_key(r, cat):
+    first = r["next24_cm"] if cat == "waiting" else r["past24_cm"]
+    return (PW_CAT_RANK[cat], -first, -r["past72_cm"], -r["next72_cm"], -r["elevation_m"])
+
+
+def powder_groups(r, world):
+    if world:
+        return "japonska" if r["drzava"] == "JP" else "amerika"
+    return "alpe si" if r["drzava"] == "SI" else "alpe"
+
+
+def powder_wind(r):
+    w, g = r.get("wind_kmh"), r.get("gust_kmh")
+    if w is None and g is None:
+        return ""
+    return f'veter {w if w is not None else "—"} km/h' + (f' (sunki {g})' if g is not None else "")
+
+
+def powder_item(r, cat, world):
+    cc = COUNTRIES_WORLD if world else COUNTRIES
+    where = f'{cc.get(r["drzava"], r["drzava"])} · {r["regija"]} · {r["elevation_m"]} m'
+    href = ("#w-" if world else "#t-") + r["id"]
+    meta = [f'{num(r["temp_c"], 1)} °C' if r.get("temp_c") is not None else "", powder_quality(r.get("temp_c")), powder_wind(r)]
+    sl = r.get("snow_line_m")
+    if sl is not None:
+        meta.append(f'meja sneženja {round(sl / 10) * 10} m')
+    aria = (f'{r["ime"]}: {PW_CAT_LABEL[cat]}, zadnjih 24 ur {cm_cell(r["past24_cm"])}, naslednjih 24 ur {cm_cell(r["next24_cm"])}')
+    return (f'    <li class="sg-pw-i" data-cat="{cat}" data-g="{powder_groups(r, world)}">'
+            f'<a href="{href}" aria-label="{_html.escape(aria)}">'
+            f'<span class="sg-pw-n"><b>{_html.escape(r["ime"])}</b><small>{_html.escape(where)}</small></span>'
+            f'<span class="sg-pill pw-{cat}">{PW_CAT_LABEL[cat]}</span>'
+            f'<span class="sg-pw-v a"><b>{cm_h(r["past24_cm"])}</b><small>zadnjih 24 ur</small></span>'
+            f'<span class="sg-pw-v b"><b>{cm_h(r["next24_cm"])}</b><small>naslednjih 24 ur</small></span>'
+            f'<span class="sg-pw-v c"><b>{cm_h(r["past72_cm"])}</b><small>zadnjih 72 ur</small></span>'
+            f'<span class="sg-pw-m">{_html.escape(" · ".join(m for m in meta if m))}</span>'
+            f'</a></li>')
+
+
+def powder_html(rows, world_rows):
+    """Powder Tracker: strežniško izrisan seznam (vidno brez JS in iskalnikom); JS samo filtrira po območju in kategoriji."""
+    items = []
+    for world, part in ((False, rows), (True, world_rows or [])):
+        for r in part:
+            cat = powder_category(r)
+            if cat:
+                items.append((powder_sort_key(r, cat), cat, r, world))
+    items.sort(key=lambda x: x[0])
+    counts = {k: sum(1 for i in items if i[1] == k) for k, _ in PW_CATS}
+    if items:
+        top = items[0]
+        r = top[2]
+        lead = (f'Po modelu je zdaj najbolj obetavna točka <strong>{_html.escape(r["ime"])}</strong> '
+                f'({_html.escape((COUNTRIES_WORLD if top[3] else COUNTRIES).get(r["drzava"], r["drzava"]))}): '
+                f'{PW_CAT_LABEL[top[1]]}, {cm_h(r["past24_cm"])} novega snega v zadnjih 24 urah'
+                f'{", " + num(r["temp_c"], 1) + " °C" if r.get("temp_c") is not None else ""}.')
+    else:
+        lead = "Po modelu trenutno na nobeni točki ni dovolj novega snega za uvrstitev."
+    cat_chips = ('<button type="button" data-pc="*" aria-pressed="true">Vse (%d)</button>' % len(items) +
+                 "".join(f'<button type="button" data-pc="{k}" aria-pressed="false">{v} ({counts[k]})</button>' for k, v in PW_CATS if counts[k]))
+    present = {g for it in items for g in powder_groups(it[2], it[3]).split()}
+    reg_chips = "".join(f'<button type="button" data-pg="{k}" aria-pressed="{"true" if k == "*" else "false"}">{v}</button>'
+                        for k, v in PW_GROUPS if k == "*" or k in present)
+    lis = "\n".join(powder_item(i[2], i[1], i[3]) for i in items)
+    return f"""  <section id="powder" class="sg-sec sg-pw" aria-labelledby="pw-h" data-limit="{PW_LIMIT}">
+  <h2 id="pw-h">Powder Tracker <span class="sg-bdg m">Model</span></h2>
+  <p class="archive-intro">Kje je zdaj najboljši svež sneg in kje prihaja. {lead} Razvrstitev je <b>modelski potencial</b>
+  (novi sneg, temperatura, veter), ne izmerjena kakovost snega.</p>
+  <div class="sg-filter" id="sg-pw-f" hidden role="group" aria-label="Filter Powder Trackerja">{cat_chips}<span class="sep"></span>{reg_chips}</div>
+  <ol class="sg-pw-list" id="sg-pw-list">
+{lis}
+  </ol>
+  <p class="muted-note" id="sg-pw-empty" hidden>Za ta izbor po modelu ni točk s snegom.</p>
+  <button type="button" class="sg-pw-more" id="sg-pw-more" hidden></button>
+  <details class="sg-fold"><summary>Kako razvrščamo</summary>
+  <ul class="sg-pw-how">
+    <li><b>Powder alert</b>: vsaj {PW_POWDER_CM} cm novega snega v zadnjih 24 urah, temperatura zdaj do {PW_POWDER_T:g} °C in sunki pod {PW_GUST_KMH} km/h.</li>
+    <li><b>Svež sneg</b>: vsaj {PW_FRESH_CM} cm v zadnjih 24 urah ali {PW_FRESH72_CM} cm v zadnjih 72 urah.</li>
+    <li><b>Sneg prihaja</b>: vsaj {PW_WAIT24_CM} cm v naslednjih 24 urah ali {PW_WAIT72_CM} cm v naslednjih 72 urah.</li>
+    <li><b>Nekaj snega</b>: vsaj {PW_SNOWY_CM} cm v 72 urah nazaj ali naprej.</li>
+  </ul>
+  <p>Točka dobi prvo kategorijo, ki ji ustreza; znotraj kategorije so točke po količini snega (pri »Sneg prihaja« po napovedani). Količina je ocena iz padavin in
+  meje sneženja, ista kot drugje na strani. Temperatura in veter sta vrednosti zdaj na višini točke. Model ne vidi, koliko snega je veter odnesel ali zbil,
+  ne pozna priprave prog in ne ve, ali je smučišče odprto; japonski sneg je pogosto suh, zato je tam prava količina lahko večja. Ni plazovni bilten.</p>
+  </details>
+  </section>
+"""
+
+
 def build_body(data, cams):
     rows = sorted(data["tocke"], key=lambda r: (-r["past72_cm"], -r["elevation_m"]))
     present = sorted({r["drzava"] for r in rows}, key=list(COUNTRIES).index)
@@ -785,7 +917,7 @@ def build_body(data, cams):
     world = load_world()
     world_sec = svet_html(world, load_world_cams()) if world else ""
     hp = hero_photo()
-    nav = [("zemljevid", "Zemljevid")] + ([("kamere", "Kamere")] if cams_sec else []) + [
+    nav = [("zemljevid", "Zemljevid"), ("powder", "Powder")] + ([("kamere", "Kamere")] if cams_sec else []) + [
         ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije")] + ([("po-svetu", "Po svetu")] if world_sec else []) + [
         ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
     nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
@@ -842,7 +974,7 @@ def build_body(data, cams):
   <div class="sg-nowrow" id="sg-now-row" role="list"></div>
   <div class="sg-top" id="sg-top"></div>
   </section>
-  <div class="sg-duo">
+{powder_html(rows, world["rows"] if world else None)}  <div class="sg-duo">
   <section id="prerez" class="sg-sec" aria-labelledby="pr-h">
     <div class="sg-profwrap">
       <h2 id="pr-h">Višinski prerez Alp <span class="sg-bdg m">Model</span></h2>

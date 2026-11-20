@@ -391,5 +391,66 @@ check(all(str(c.get("url", "")).startswith("https://") and c.get("ponudnik") for
 _ref = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "snegofili", "snegofili.js"), encoding="utf-8").read()
 check("sg-wc-cam[data-wid]" in _ref and "/windy-thumb?id=" in _ref and "windy\\.com" in _ref, "svet kamere: JS nalaga sličice prek workerja in sprejme samo windy.com")
 
+# ── Powder Tracker: kategorije, vrstni red, veter, izris ──
+def _r(**k):
+    base = {"id": "x", "ime": "X", "drzava": "AT", "regija": "R", "elevation_m": 2000, "temp_c": -5.0, "past24_cm": 0.0, "past72_cm": 0.0,
+            "next24_cm": 0.0, "next72_cm": 0.0, "snow_line_m": 1000}
+    base.update(k)
+    return base
+
+
+pc = g.powder_category
+check(pc(_r(past24_cm=g.PW_POWDER_CM)) == "powder", "powder: točno na meji")
+check(pc(_r(past24_cm=g.PW_POWDER_CM - 0.1)) == "fresh", "powder: tik pod mejo je svež sneg")
+check(pc(_r(past24_cm=30, temp_c=0.1)) == "fresh", "powder: nad 0 °C ni powder alert")
+check(pc(_r(past24_cm=30, temp_c=g.PW_POWDER_T)) == "powder", "powder: temperatura točno 0 °C velja")
+check(pc(_r(past24_cm=30, temp_c=None)) == "fresh", "powder: brez temperature ni powder alert")
+check(pc(_r(past24_cm=30, gust_kmh=g.PW_GUST_KMH)) == "fresh", "powder: močni sunki znižajo na svež sneg")
+check(pc(_r(past24_cm=30, gust_kmh=g.PW_GUST_KMH - 1)) == "powder", "powder: sunek pod mejo ne šteje")
+check(pc(_r(past24_cm=30, gust_kmh=None)) == "powder", "powder: neznan veter ne blokira (stari posnetek brez vetra)")
+check(pc(_r(past24_cm=g.PW_FRESH_CM)) == "fresh" and pc(_r(past72_cm=g.PW_FRESH72_CM)) == "fresh", "svež sneg: meji 24 h in 72 h")
+check(pc(_r(next24_cm=g.PW_WAIT24_CM)) == "waiting" and pc(_r(next72_cm=g.PW_WAIT72_CM)) == "waiting", "sneg prihaja: meji 24 h in 72 h")
+check(pc(_r(past24_cm=g.PW_FRESH_CM, next24_cm=40)) == "fresh", "svež sneg ima prednost pred »sneg prihaja«")
+check(pc(_r(past72_cm=g.PW_SNOWY_CM)) == "snowy" and pc(_r(next72_cm=g.PW_SNOWY_CM)) == "snowy", "nekaj snega: nazaj in naprej")
+check(pc(_r()) is None and pc(_r(past72_cm=g.PW_SNOWY_CM - 0.1)) is None, "brez snega ni kategorije")
+check(pc({"id": "y"}) is None, "manjkajoča polja ne podrejo razvrstitve")
+check(g.powder_quality(-3) == "suh, lahek sneg" and g.powder_quality(-2.9).startswith("običajen") and g.powder_quality(0.1).startswith("moker")
+      and g.powder_quality(None) == "", "kakovost po temperaturi")
+check(g.powder_sort_key(_r(past24_cm=20), "powder") < g.powder_sort_key(_r(past24_cm=40), "fresh"), "razvrstitev: kategorija pred količino")
+check(g.powder_sort_key(_r(past24_cm=40), "powder") < g.powder_sort_key(_r(past24_cm=20), "powder"), "razvrstitev: v kategoriji več snega prej")
+check(g.powder_sort_key(_r(next24_cm=30), "waiting") < g.powder_sort_key(_r(next24_cm=12), "waiting"), "razvrstitev: pri »sneg prihaja« po napovedanem")
+check(g.powder_groups(_r(drzava="SI"), False) == "alpe si" and g.powder_groups(_r(drzava="AT"), False) == "alpe"
+      and g.powder_groups(_r(drzava="JP"), True) == "japonska" and g.powder_groups(_r(drzava="US"), True) == "amerika", "skupine območij")
+check(g.powder_wind(_r(wind_kmh=20, gust_kmh=45)) == "veter 20 km/h (sunki 45)" and g.powder_wind(_r()) == "", "izpis vetra")
+
+_pa = [_r(id="a", ime="Alfa", past24_cm=40), _r(id="b", ime="Beta", past24_cm=6, temp_c=1.0), _r(id="c", ime="Ceta"), _r(id="d", ime="Deta", next24_cm=12, drzava="SI")]
+_pw = [_r(id="w1", ime="Wuno", drzava="JP", past24_cm=60, past72_cm=100)]
+_ph = g.powder_html(_pa, _pw)
+check(_ph.index("Wuno") < _ph.index("Alfa") < _ph.index("Beta") < _ph.index("Deta"), "izris: vrstni red Wuno (60), Alfa (40), Beta (6), Deta (prihaja)")
+check("Ceta" not in _ph, "izris: točka brez snega ni na seznamu")
+check('href="#w-w1"' in _ph and 'href="#t-a"' in _ph, "izris: povezave na kartice (alpske #t-, svetovne #w-)")
+check("Vse (4)" in _ph and "Powder alert (2)" in _ph and "Sneg prihaja (1)" in _ph and 'data-pg="japonska"' in _ph and 'data-pg="si"' in _ph
+      and 'data-pg="amerika"' not in _ph, "izris: števila v filtrih in samo prisotna območja")
+check("modelski potencial" in _ph and "ne izmerjena kakovost" in _ph, "izris: pove, da je modelski potencial")
+check(f"{g.PW_POWDER_CM} cm" in _ph and f"{g.PW_GUST_KMH} km/h" in _ph, "izris: »Kako razvrščamo« navaja meje iz konstant")
+check("ni dovolj novega snega" in g.powder_html([_r()], None), "izris: brez uvrščenih točk je stavek brez trditve o snegu")
+check(g.powder_html([_r()], None).count("<li class=\"sg-pw-i\"") == 0, "izris: brez točk ni vrstic")
+_faq = " ".join(a for q, a in g.FAQ if "Powder Tracker" in q)
+check(f"{g.PW_POWDER_CM} cm" in _faq and f"{g.PW_FRESH72_CM} cm" in _faq and f"{g.PW_WAIT72_CM} cm" in _faq, "FAQ Powder Tracker navaja iste meje kot razvrstitev")
+
+# veter v podatkih (iz Open-Meteo hourly; brez polja ostane None)
+_h = series(1500, {})
+_h["wind_speed_10m"] = [12.4] * N
+_h["wind_gusts_10m"] = [None] * N
+_cp = d.compute_point(_h, IDX, 1400)
+check(_cp["wind_kmh"] == 12 and _cp["gust_kmh"] is None, "podatki: veter se zaokroži, manjkajoč sunek je None")
+check("wind_speed_10m" in d.HOURLY and "wind_gusts_10m" in d.HOURLY, "podatki: veter je v zahtevi Open-Meteo")
+_h2 = series(1500, {})
+_cp2 = d.compute_point(_h2, IDX, 1400)
+check(_cp2["wind_kmh"] is None and _cp2["gust_kmh"] is None, "podatki: brez polj vetra ostane None")
+_gen = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "snegofili", "snegofili.js"), encoding="utf-8").read()
+check("sg-pw-f" in _gen and "sg-pw-list" in _gen, "JS: filter Powder Trackerja")
+
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

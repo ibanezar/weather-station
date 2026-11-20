@@ -40,7 +40,7 @@ HOURS_PATH = os.path.join(ROOT, "snegofili", "ure.json")  # urne serije za drsni
 ARSO_CSV = os.path.join(ROOT, "data", "arso-snow-live.csv")
 RETRY_DELAYS_S = (5, 15, 45)
 ARSO_MAX_AGE_H = 24
-HOURLY = "temperature_2m,precipitation,freezing_level_height"
+HOURLY = "temperature_2m,precipitation,freezing_level_height,wind_speed_10m,wind_gusts_10m"
 UA = "Mozilla/5.0 (compatible; Meteorec-Snegofili/1.0)"
 
 
@@ -102,6 +102,12 @@ def window_snow(hourly, elevation_m, idxs):
     return round(snow, 1), round(precip, 1)
 
 
+def _val(hourly, key, i):
+    a = hourly.get(key) or []
+    v = a[i] if 0 <= i < len(a) else None
+    return None if v is None else round(v)
+
+
 def compute_point(hourly, idx_now, elevation_m):
     """Okna nazaj (idx-N, idx], naprej (idx, idx+N]. Vrne None, če serija nima ur nazaj/naprej."""
     times = hourly.get("time") or []
@@ -117,6 +123,9 @@ def compute_point(hourly, idx_now, elevation_m):
         "temp_c": None if t is None else round(t, 1),
         "snow_line_m": None if f is None else round(f - we.SNOW_LEVEL_OFFSET_M),
         "snow_now_possible": snow_frac(elevation_m, f, t) > 0.5,
+        # veter 10 m in sunki (km/h) za Powder Tracker; brez polja (model ga ne vrne) ostane None in Powder Tracker ga ne upošteva
+        "wind_kmh": _val(hourly, "wind_speed_10m", idx_now),
+        "gust_kmh": _val(hourly, "wind_gusts_10m", idx_now),
     }
     for name, lo, hi in (("past24", idx_now - 23, idx_now), ("past72", idx_now - 71, idx_now),
                          ("next24", idx_now + 1, idx_now + 24), ("next72", idx_now + 1, idx_now + 72)):
