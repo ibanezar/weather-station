@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-11-20T14:24:09Z",
- "generated_at_local": "20. 11. 2026 ob 15.24",
+ "generated_at": "2026-11-20T14:41:01Z",
+ "generated_at_local": "20. 11. 2026 ob 15.41",
  "tocke": [
   {
    "id": "golte",
@@ -119,7 +119,7 @@
    "izmerjeno": {
     "depth_cm": 0,
     "valid_utc": "2026-11-20T14:00Z",
-    "age_h": 0.4
+    "age_h": 0.7
    }
   },
   {
@@ -147,7 +147,7 @@
    "izmerjeno": {
     "depth_cm": 1,
     "valid_utc": "2026-11-20T14:00Z",
-    "age_h": 0.4
+    "age_h": 0.7
    }
   },
   {
@@ -175,7 +175,7 @@
    "izmerjeno": {
     "depth_cm": 1,
     "valid_utc": "2026-11-20T14:00Z",
-    "age_h": 0.4
+    "age_h": 0.7
    }
   },
   {
@@ -203,7 +203,7 @@
    "izmerjeno": {
     "depth_cm": 1,
     "valid_utc": "2026-11-20T14:00Z",
-    "age_h": 0.4
+    "age_h": 0.7
    }
   },
   {
@@ -231,7 +231,7 @@
    "izmerjeno": {
     "depth_cm": 0,
     "valid_utc": "2026-11-20T14:00Z",
-    "age_h": 0.4
+    "age_h": 0.7
    }
   },
   {
