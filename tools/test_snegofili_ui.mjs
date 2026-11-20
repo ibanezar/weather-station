@@ -23,6 +23,9 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   await page.route('**/data/snegofili-recica.json*', r => r.fulfill({ json: { meritve: [
     { cas: new Date(Date.now() - 30 * 36e5).toISOString(), cm: 9 }, { cas: new Date(Date.now() - 5 * 36e5).toISOString(), cm: 3, novi: 2 }] } }));
   await page.route(/googletagmanager|google-analytics|fonts\.g|drsc\.si|embed\.windy\.com|webcams\.windy\.com/, r => r.abort());
+  /* sličice Windy kamer: worker /windy-thumb vrne naslov na images-webcams.windy.com (lažen odgovor, slika je SVG) */
+  await page.route('https://images-webcams.windy.com/**', r => r.fulfill({ body: svg, contentType: 'image/svg+xml' }));
+  await page.route('**/weatherireica1.filip-eremita.workers.dev/windy-thumb*', r => r.fulfill({ json: { id: '1', preview: 'https://images-webcams.windy.com/00/1/current/preview/1.jpg?token=t' }, headers: { 'access-control-allow-origin': '*' } }));
   await page.goto(BASE + '/snegofili/index.html'); await page.waitForSelector('.sg-nowc', { timeout: 8000 });
   const tag = vp.width + ' px: ';
   ok(await page.locator('.sg-spark svg').count() === await page.locator('.sg-card').count(), tag + 'sparkline na vsaki kartici');
@@ -51,6 +54,8 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   await page.locator('#sg-camf [data-cf="SI"]').click();
   ok((await page.locator('.sg-cam:not([hidden])').evaluateAll(a => a.every(f => f.dataset.c === 'SI'))), tag + 'filter slovenskih kamer');
   await page.locator('#sg-camf [data-cf="*"]').click();
+  await page.locator('#kamere').scrollIntoViewIfNeeded(); await page.waitForSelector('.sg-cam-w', { timeout: 5000 });
+  ok(await page.locator('.sg-cam-w').first().evaluate(i => i.src.startsWith('https://images-webcams.windy.com/')) && /Sličica · Windy/.test(await page.locator('.sg-cam-wcap').first().textContent()), tag + 'Windy kamere: sličica v ploščici z oznako vira');
   await page.locator('#sg-hbar [data-hc="SI"]').click(); ok(await page.locator('.sg-hm-l').count() < 20, tag + 'toplotna karta: samo Slovenija'); await page.locator('#sg-hbar [data-hc="*"]').click();
   /* drsnik premakne pas in števec */
   await page.locator('#sg-range').fill('119'); await page.waitForTimeout(200);

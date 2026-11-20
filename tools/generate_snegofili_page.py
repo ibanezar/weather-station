@@ -524,7 +524,8 @@ def cam_wall_html(rows, cams):
               f'  <ul class="sg-camlinks">{"".join(links)}</ul>\n')
     return (f'  <section id="kamere" class="sg-sec" aria-labelledby="kam-h">\n  <h2 id="kam-h">Kamere <span class="sg-bdg c">Slika kamere</span></h2>\n'
             '  <p class="archive-intro"><b>Aktualna slika</b> (ARSO, DRSI) se osveži vsakih nekaj minut: gumb »Oglej si aktualno sliko« jo odpre večjo. '
-            'Pri točkah z oznako Windy gumb »Odpri kamero Windy« po kliku predvaja <b>časovni zdrs zadnjega dne</b> (vsebina ponudnika). '
+            'Pri točkah z oznako Windy gumb »Odpri kamero Windy« po kliku predvaja <b>časovni zdrs zadnjega dne</b> (vsebina ponudnika); ploščica kaže njihovo sličico. '
+            'Sličice kamer: Webcams provided by <a href="https://www.windy.com/" target="_blank" rel="noopener">windy.com</a>. '
             '<b>Videa v živo tu ni.</b> Ob sliki piše, kaj za tisto točko napoveduje model; kamera in model se lahko razhajata: verjemite sliki.</p>\n'
             '  <div class="sg-filter sg-camf" id="sg-camf" role="group" aria-label="Filter kamer" hidden>'
             '<button type="button" data-cf="*" aria-pressed="true">Vse kamere</button>'
