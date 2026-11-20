@@ -375,7 +375,6 @@ html:has(.sg-app){scroll-padding-top:5rem}
   .sg-app>*:not(.sg-hero){margin-left:2rem;margin-right:2rem}
   .sg-hero{padding:1.8rem 2rem 1.6rem}
   .sg-nav ul{padding-left:2rem}
-  .sg-hero h1.page-title{font-size:clamp(2.6rem,4.2vw,4.6rem)}
   .sg-sub2{font-size:1.15rem}
   .sg-lead{max-width:60rem}
 }
@@ -430,8 +429,9 @@ body .site-head{display:none}
 .sg-hero{padding:1.1rem 1.3rem 3.6rem}
 @media(min-width:900px){.sg-hero{padding:1.2rem 2rem 3.8rem}}
 .sg-brand{margin:0 0 .6rem}
-.sg-brand img{height:44px}
-.sg-hero h1.page-title{font-size:clamp(1.8rem,5.5vw,2.7rem);margin:.1rem 0 .3rem}
+.sg-brand img{height:84px}
+.sg-hero h1.page-title{font-size:clamp(1.15rem,3.6vw,1.6rem);letter-spacing:-.02em;margin:.1rem 0 .3rem}
+@media(min-width:900px){.sg-brand img{height:104px}.sg-hero h1.page-title{font-size:1.8rem}}
 .sg-sub2{margin:0 0 .5rem;font-size:.98rem}
 .sg-hero-row{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem 1.2rem;margin:0 0 .8rem}
 .sg-hero-row .sg-nowline,.sg-hero-row .sg-meta{margin:0}
@@ -515,9 +515,9 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 @media(max-width:640px){
   .sg-hero{padding:.9rem .9rem 3.2rem}
   .sg-brand{margin:0 0 .5rem}
-  .sg-brand img{height:38px}
+  .sg-brand img{height:64px}
   .sg-kicker,.sg-sub2{display:none}
-  .sg-hero h1.page-title{font-size:1.7rem;margin:.1rem 0 .4rem}
+  .sg-hero h1.page-title{font-size:1.15rem;margin:.1rem 0 .4rem}
   .sg-hero-row .sg-nowline{font-size:.86rem}
   .sg-hero-cta{flex-wrap:nowrap}
   .sg-hero-cta .sg-cta{flex:1 1 0;justify-content:center;text-align:center;padding:.3rem .5rem;font-size:.84rem;line-height:1.15}
@@ -552,3 +552,21 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-fold[open]>summary{margin-bottom:.8rem}
 .sg-more{display:block;margin:.9rem auto 0;min-height:44px;padding:0 1.4rem}
 .sg-meta-arso{white-space:nowrap}
+
+/* ── zemljevid na telefonu: kompaktnejši (21. 11. 2026): manj praznine okoli zemljevida, krmilniki v dveh vrsticah, legenda in naslov brez nepotrebnih lomov ── */
+@media(max-width:640px){
+  .sg-mapsec>h2{line-height:1.2;display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .6rem;justify-content:flex-start}
+  .sg-mapsec>h2 .sg-bdg{margin-left:0}
+  .sg-mapsec .sg-win{padding:.45rem}
+  .sg-mapsec .sg-zoom{margin:.4rem 0 0}
+  .sg-mapsec #sg-ctl button,.sg-mapsec .sg-zoom button{min-height:40px;padding:0 .9rem;font-size:.84rem}
+  .sg-mapsec .sg-legend{gap:.25rem .8rem;font-size:.72rem;line-height:1.25;margin:.5rem 0 0}
+  .sg-mapsec #sg-ctl{gap:.4rem .6rem;margin:.6rem 0 .2rem}
+  .sg-mapsec #sg-play{order:0;flex:1 1 0}
+  .sg-mapsec #sg-now{order:1;flex:1 1 0}
+  .sg-mapsec #sg-range{flex:1 1 100%;min-width:0;order:2;height:36px}
+  .sg-mapsec #sg-time{order:3;min-width:0;flex:1 1 100%;font-size:.88rem}
+  .sg-mapsec .sg-seg{order:4;flex:1 1 100%}
+  .sg-mapsec .sg-seg button{flex:1 1 0}
+  .sg-mapsec .sg-readout{min-height:0;font-size:.84rem}
+}
