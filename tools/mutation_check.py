@@ -244,6 +244,8 @@ MUTACIJE = [
     ("snegofili: JS Kam peljem: okno naprej začne po uri »zdaj«", "snegofili/snegofili.js", "n24: [NOW + 1, NOW + 24]", "n24: [NOW, NOW + 24]", "test_snegofili.py"),
     ("snegofili: JS Kam peljem: izenačenje po razdalji", "snegofili/snegofili.js", "b.cm - a.cm || a.p.k - b.p.k", "b.cm - a.cm", "test_snegofili.py"),
     ("snegofili: JS Kam peljem: omejitev razdalje", "snegofili/snegofili.js", "if (o.km && p.k > o.km) return;", "if (false) return;", "test_snegofili.py"),
+    ("snegofili: status pod mejo sneženja: prag 0,1 mm/h (Python)", "tools/generate_snegofili_page.py", 'r["precip_now_mm"] >= 0.1', 'r["precip_now_mm"] >= 1.0', "test_snegofili.py"),
+    ("snegofili: status pod mejo sneženja: prag 0,1 mm/h (JS)", "snegofili/snegofili.js", "return h.p[i] >= 1 ? 'Dež' : 'Brez padavin';", "return h.p[i] >= 10 ? 'Dež' : 'Brez padavin';", "test_snegofili.py"),
     ("snegofili: Rečica: meritev je stara po 72 h", "snegofili/snegofili.js", "var RECICA_STALE_H = 72,", "var RECICA_STALE_H = 720,", "test_snegofili.py"),
     ("snegofili: Rečica: po 30 dneh se skrije", "snegofili/snegofili.js", "RECICA_HIDE_D = 30;", "RECICA_HIDE_D = 3000;", "test_snegofili.py"),
     ("snegofili: Rečica: meritev iz prihodnosti se zavrne", "snegofili/snegofili.js", "if (!isFinite(t) || t > nowMs + 36e5) return;", "if (!isFinite(t)) return;", "test_snegofili.py"),
