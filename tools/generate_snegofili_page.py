@@ -336,6 +336,94 @@ def card_html(r, p, kcr=None):
         f'<div class="sg-foot"><span><span class="sg-bdg r">Meritev</span> {meas_txt}</span></div></article>')
 
 
+# ── rubrika »Po svetu« (21. 11. 2026): Japonska in Severna Amerika, ločen seznam in ločena datoteka (ne meša se z alpskim lokom) ──
+WORLD_PATH = os.path.join(seo.ROOT, "data", "snegofili-svet.json")
+COUNTRIES_WORLD = {"JP": "Japonska", "CA": "Kanada", "US": "ZDA"}
+WORLD_GROUPS = (("Japonska", ("JP",)), ("Severna Amerika", ("CA", "US")))
+
+
+def load_world():
+    """Vrstice rubrike »Po svetu« ali None, če datoteke ni (prvi tek po uvedbi) ali nima nobene veljavne točke."""
+    try:
+        with open(WORLD_PATH, encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, ValueError):
+        return None
+    rows = [r for r in (d.get("tocke") or []) if r.get("drzava") in COUNTRIES_WORLD and r.get("past24_cm") is not None
+            and r.get("next24_cm") is not None and r.get("elevation_m") is not None]
+    return {"rows": rows, "when": d.get("generated_at_local", "")} if rows else None
+
+
+def world_phase(r):
+    """Kot phase(), a ob manjkajoči ničti izotermi (nekateri modeli je ne ponujajo) iz temperature na višini točke."""
+    if r.get("snow_line_m") is not None:
+        return phase(r["elevation_m"], r["snow_line_m"])
+    t = r.get("temp_c")
+    return "rain" if t is None else "snow" if t <= 0 else "mix" if t < 2 else "rain"
+
+
+def spark_svg(sn, w=288, h=44):
+    """Sneženje po urah (48 h nazaj in 48 h naprej od »zdaj«, indeksi 24…119 iz 144-urne serije); navpična črta je zdaj.
+    Višina stolpcev je sorazmerna z največjo uro (najmanj 1 cm/h, da šum ne izgleda kot sneg)."""
+    vals = list(sn[24:120]) if sn and len(sn) >= 120 else []
+    if not vals:
+        return ""
+    mx = max(10, max(v or 0 for v in vals))
+    bw = w / len(vals)
+    bars = []
+    for i, v in enumerate(vals):
+        if not v:
+            continue
+        bh = max(1.5, (v / mx) * (h - 5))
+        bars.append(f'<rect class="{"p" if i < 48 else "f"}" x="{i * bw:.1f}" y="{h - bh:.1f}" width="{bw * 0.78:.1f}" height="{bh:.1f}"/>')
+    return (f'<svg class="sg-ws" viewBox="0 0 {w} {h}" preserveAspectRatio="none" role="img" '
+            f'aria-label="Nov sneg po urah po modelu: 48 ur nazaj in 48 ur naprej od zdaj">'
+            f'{"".join(bars)}<line class="n" x1="{w / 2:.1f}" x2="{w / 2:.1f}" y1="0" y2="{h}"/></svg>')
+
+
+def world_card_html(r):
+    ph = world_phase(r)
+    where = f'{COUNTRIES_WORLD[r["drzava"]]} · {r["regija"]} · {r["elevation_m"]} m'
+    aria = (f'{r["ime"]}: zadnjih 24 ur {cm_cell(r["past24_cm"])}, naslednjih 24 ur {cm_cell(r["next24_cm"])}')
+    sl = r.get("snow_line_m")
+    sl_txt = sl_text(sl, r["elevation_m"]) if sl is not None else "ni podatka (sneg po temperaturi)"
+    return (
+        f'    <article class="sg-wc" id="w-{r["id"]}" aria-label="{_html.escape(aria)}">'
+        f'<div class="sg-wc-hd"><span class="sg-av ph" data-c="{r["drzava"]}" aria-hidden="true">{r["drzava"]}</span>'
+        f'<div class="sg-hd-t"><h4>{_html.escape(r["ime"])}</h4><p class="sg-sub">{_html.escape(where)}</p></div>'
+        f'<span class="sg-pill ph-{ph}">{phase_text(ph, r)}</span></div>'
+        f'<div class="sg-wc-nums"><span><b>{cm_h(r["past24_cm"])}</b><small>zadnjih 24 ur</small></span>'
+        f'<span class="r"><b>{cm_h(r["next24_cm"])}</b><small>naslednjih 24 ur</small></span></div>'
+        f'{spark_svg(r.get("sn"))}'
+        f'<dl class="sg-dl"><div><dt>Trenutna ura</dt><dd>{num(r["temp_c"], 1)} °C</dd></div>'
+        f'<div style="grid-column:span 2"><dt>Meja sneženja</dt><dd>{sl_txt}</dd></div></dl>'
+        f'<p class="sg-foot"><span>Zadnjih 72 ur: {cm_h(r["past72_cm"])} · naslednjih 72 ur: {cm_h(r["next72_cm"])}</span></p>'
+        f'</article>')
+
+
+def svet_html(world):
+    rows = world["rows"]
+    best = max(rows, key=lambda r: r["past72_cm"])
+    lead = (f'Po modelu je v zadnjih 72 urah največ snega zapadlo na točki <strong>{_html.escape(best["ime"])}</strong> '
+            f'({_html.escape(COUNTRIES_WORLD[best["drzava"]])}, {cm_h(best["past72_cm"])}).'
+            if best["past72_cm"] >= MIN_CM else "V zadnjih 72 urah po modelu na nobeni od teh točk ni zapadlo več kot centimeter snega.")
+    groups = []
+    for title, codes in WORLD_GROUPS:
+        part = sorted((r for r in rows if r["drzava"] in codes), key=lambda r: -r["past72_cm"])
+        if part:
+            groups.append(f'  <h3 class="sg-h3">{title}</h3>\n  <div class="sg-wgrid">\n' +
+                          "\n".join(world_card_html(r) for r in part) + "\n  </div>\n")
+    return ('  <section id="po-svetu" class="sg-sec" aria-labelledby="sv-h">\n'
+            '  <h2 id="sv-h">Po svetu <span class="sg-bdg m">Model</span></h2>\n'
+            f'  <p class="archive-intro">Izven Alp: smučišča na Japonskem in v Severni Ameriki. {lead} '
+            'Ista ocena kot za Alpe (padavine iz celice vremenskega modela × delež, ki pade kot sneg); merjene višine odeje za te točke nimamo. '
+            '<b>Japonski sneg je pogosto suh in lahek</b>, zato je prava količina lahko večja od modelske (1 mm ≈ 1 cm); poročila objavljajo smučišča sama.</p>\n'
+            + "".join(groups) +
+            '  <p class="muted-note">Okna »zadnjih 24 ur« in »naslednjih 24 ur« štejejo od zdaj, kot drugje na strani. Višine točk so izbrane za zgornji del '
+            'smučišča in še niso preverjene, koordinate so približne. Ni uradna napoved in ni plazovni bilten. Podatki: Open-Meteo.</p>\n'
+            '  </section>\n')
+
+
 def hero_sentence(rows):
     best24 = max(rows, key=lambda r: r["past24_cm"])
     best72 = max(rows, key=lambda r: r["past72_cm"])
@@ -662,9 +750,12 @@ def build_body(data, cams):
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
     cams_sec = cam_wall_html(rows, cams)
+    world = load_world()
+    world_sec = svet_html(world) if world else ""
     hp = hero_photo()
     nav = [("zemljevid", "Zemljevid")] + ([("kamere", "Kamere")] if cams_sec else []) + [
-        ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije"), ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
+        ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije")] + ([("po-svetu", "Po svetu")] if world_sec else []) + [
+        ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
     nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
                 "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in nav) + '</ul></nav>\n')
     tab_ic = {
@@ -751,7 +842,7 @@ def build_body(data, cams):
   <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
   »&lt;1 cm« pri snegu pomeni manj kot centimeter po modelu, »ni podatka« pa da vrednosti nimamo. Podatki: Open-Meteo, postaje ARSO.</p>
   </section>
-{measured_html(rows)}{alarm_html(rows)}{kraji_html(rows, kcr)}
+{world_sec}{measured_html(rows)}{alarm_html(rows)}{kraji_html(rows, kcr)}
 {faq_html}
   <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten
   pristojne države, <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a> in razmere pri

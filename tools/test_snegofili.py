@@ -333,5 +333,42 @@ check(isinstance(dj["meritve"], list) and ts == sorted(ts) and all(isinstance(m[
       "data/snegofili-recica.json: veljavna oblika, urejeno po času")
 check('id="sg-st-rec-w"' in body and 'id="sg-rec-lbl"' in body, "stran ima skrito ploščico Rečica in oznako na zemljevidu")
 
+# ── rubrika »Po svetu« ──
+wpts = json.load(open(d.WORLD_POINTS_PATH, encoding="utf-8"))["tocke"]
+wids = [p["id"] for p in wpts]
+check(len(wids) == len(set(wids)) and not set(wids) & set(ids), "svet: id so enolični in ne trčijo z alpskimi")
+for p in wpts:
+    check(p["drzava"] in g.COUNTRIES_WORLD, f"svet: država {p['id']}")
+    check(-180 <= p["lon"] <= 180 and -60 <= p["lat"] <= 70 and 0 < p["elevation_m"] <= 4500, f"svet: koordinate in višina {p['id']}")
+    check(all(k in p for k in ("ime", "regija", "elev_opis")), f"svet: polja {p['id']}")
+check({p["drzava"] for p in wpts} == {"JP", "CA", "US"}, "svet: Japonska, Kanada in ZDA")
+# nadomestek ob manjkajoči ničti izotermi: ura ne sme šteti za »nič snega«
+check(d.snow_frac(1000, None, -3) == 1.0 and d.snow_frac(1000, None, 1) == 0.5 and d.snow_frac(1000, None, 5) == 0.0, "svet: sneg iz temperature, kadar ni ničte izoterme")
+check(d.snow_frac(1000, None, None) == 0.0 and d.snow_frac(1000, 3000, 5) == d.we.snow_fraction(1000, 3000), "ničta izoterma ima prednost; brez obojega ni snega")
+_tm = [f"2026-11-20T{h:02d}:00" for h in range(24)] * 7
+_n = len(_tm)
+_h = {"time": _tm, "temperature_2m": [-4.0] * _n, "precipitation": [1.0] * _n, "freezing_level_height": [None] * _n}
+check(d.window_snow(_h, 1500, range(10, 34))[0] == 24.0, "svet: 24 ur po 1 mm pri −4 °C brez ničte izoterme = 24 cm")
+_ser = d.hourly_series(_h, 1500, 71)
+check(len(_ser["sn"]) == 144 and _ser["sn"][0] == 10, "svet: urna serija ima 144 vrednosti, 1 cm/h = 10")
+_sp = g.spark_svg(_ser["sn"])
+check(_sp.count("<rect") == 96 and "<line" in _sp and 'role="img"' in _sp, "svet: sličica poteka ima 96 stolpcev in črto »zdaj«")
+check(g.spark_svg(None) == "" and g.spark_svg([0] * 50) == "", "svet: brez serije ni sličice")
+check(g.world_phase({"elevation_m": 1500, "snow_line_m": None, "temp_c": -2}) == "snow" and g.world_phase({"elevation_m": 1500, "snow_line_m": None, "temp_c": 5}) == "rain"
+      and g.world_phase({"elevation_m": 1500, "snow_line_m": None, "temp_c": None}) == "rain", "svet: stanje iz temperature, kadar ni meje sneženja")
+_wr = [dict(id="a", ime="Test A", drzava="JP", regija="Hokkaido", lat=1, lon=1, elevation_m=1100, elev_opis="x", past24_cm=12.0, next24_cm=3.0, past72_cm=30.0,
+            next72_cm=8.0, temp_c=-4.0, snow_line_m=None, precip_now_mm=0.3, sn=_ser["sn"]),
+       dict(id="b", ime="Test B", drzava="US", regija="Utah", lat=1, lon=1, elevation_m=2900, elev_opis="x", past24_cm=0.0, next24_cm=0.0, past72_cm=0.0,
+            next72_cm=0.0, temp_c=1.0, snow_line_m=1500, precip_now_mm=0.0, sn=_ser["sn"])]
+_html_w = g.svet_html({"rows": _wr, "when": ""})
+check('id="po-svetu"' in _html_w and "Japonska</h3>" in _html_w and "Severna Amerika</h3>" in _html_w and _html_w.count('class="sg-wc"') == 2, "svet: razdelek z obema skupinama in karticama")
+check("Test A" in _html_w and "12 cm" in _html_w and "ni podatka" in _html_w and "&lt;1 cm" in _html_w, "svet: številke in »ni podatka« za manjkajočo mejo, <1 cm za ničlo")
+check("suh in lahek" in _html_w and "merjene višine odeje" in _html_w, "svet: opozorilo, da je modelska ocena in da je japonski sneg lahko težji od ocene")
+check(g.load_world.__doc__ and g.world_card_html(_wr[0]).count("<article") == 1, "svet: ena kartica = en članek")
+_old = g.WORLD_PATH
+g.WORLD_PATH = os.path.join(tempfile.mkdtemp(), "ni.json")
+check(g.load_world() is None, "svet: brez datoteke rubrike ni")
+g.WORLD_PATH = _old
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

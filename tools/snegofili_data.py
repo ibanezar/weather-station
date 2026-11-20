@@ -79,8 +79,18 @@ def fetch_batch(points):
     raise last
 
 
+def snow_frac(elevation_m, freezing_level_m, temp_c):
+    """Delež padavin kot sneg: ista ocena kot povsod (winter_engine.snow_fraction iz ničte izoterme). **Samo kadar ničte izoterme model ne
+    vrne** (Open-Meteo best_match jo za nekatere modele, npr. japonske, ne ponuja), se delež oceni iz temperature na višini točke
+    (≤ 0 °C sneg, ≥ 2 °C dež, vmes linearno); brez tega bi taka ura štela za »nič snega«, kar bi bilo napačno, ne previdno."""
+    if freezing_level_m is None and temp_c is not None:
+        return max(0.0, min(1.0, (2.0 - temp_c) / 2.0))
+    return we.snow_fraction(elevation_m, freezing_level_m)
+
+
 def window_snow(hourly, elevation_m, idxs):
     fl = hourly.get("freezing_level_height") or []
+    tt = hourly.get("temperature_2m") or []
     pr = hourly.get("precipitation") or []
     snow = precip = 0.0
     for i in idxs:
@@ -88,7 +98,7 @@ def window_snow(hourly, elevation_m, idxs):
             continue
         p = pr[i] or 0
         precip += p
-        snow += p * we.snow_fraction(elevation_m, fl[i] if i < len(fl) else None) * we.SNOW_RATIO_CM_PER_MM
+        snow += p * snow_frac(elevation_m, fl[i] if i < len(fl) else None, tt[i] if i < len(tt) else None) * we.SNOW_RATIO_CM_PER_MM
     return round(snow, 1), round(precip, 1)
 
 
@@ -106,7 +116,7 @@ def compute_point(hourly, idx_now, elevation_m):
         "precip_now_mm": None if pn is None else round(pn, 1),
         "temp_c": None if t is None else round(t, 1),
         "snow_line_m": None if f is None else round(f - we.SNOW_LEVEL_OFFSET_M),
-        "snow_now_possible": we.snow_fraction(elevation_m, f) > 0.5,
+        "snow_now_possible": snow_frac(elevation_m, f, t) > 0.5,
     }
     for name, lo, hi in (("past24", idx_now - 23, idx_now), ("past72", idx_now - 71, idx_now),
                          ("next24", idx_now + 1, idx_now + 24), ("next72", idx_now + 1, idx_now + 72)):
@@ -127,7 +137,7 @@ def hourly_series(hourly, elevation_m, idx_now):
         p = (pr[i] if 0 <= i < len(pr) else 0) or 0
         f = fl[i] if 0 <= i < len(fl) else None
         t = tt[i] if 0 <= i < len(tt) else None
-        sn.append(round(p * we.snow_fraction(elevation_m, f) * we.SNOW_RATIO_CM_PER_MM * 10))
+        sn.append(round(p * snow_frac(elevation_m, f, t) * we.SNOW_RATIO_CM_PER_MM * 10))
         sl.append(None if f is None else round((f - we.SNOW_LEVEL_OFFSET_M) / 10))
         tp.append(None if t is None else round(t * 10))
         pp.append(round(p * 10))
@@ -174,7 +184,49 @@ def build(points, responses, now_local, arso, series=None):
     return out
 
 
+WORLD_POINTS_PATH = os.path.join(ROOT, "data", "snegofili-svet-tocke.json")
+WORLD_OUT_PATH = os.path.join(ROOT, "data", "snegofili-svet.json")
+
+
+def main_world(now_local, now_utc):
+    """Rubrika »Po svetu« → data/snegofili-svet.json. Ločen klic Open-Meteo in ločena datoteka: izpad ene strani ne podre druge.
+    Ob izpadu ostane stari posnetek. Čas Open-Meteo je v Europe/Ljubljana tudi za Japonsko in Ameriko (ura je absolutna, ujemanje po času zdaj)."""
+    with open(WORLD_POINTS_PATH, encoding="utf-8") as f:
+        points = json.load(f)["tocke"]
+    try:
+        responses = fetch_batch(points)
+        if len(responses) != len(points):
+            raise ValueError(f"Open-Meteo vrnil {len(responses)} odgovorov za {len(points)} točk")
+    except Exception as e:  # noqa: BLE001
+        print(f"✗ Open-Meteo (svet): {e} — ostane stari data/snegofili-svet.json", file=sys.stderr)
+        return
+    series = {}
+    rows = build(points, responses, now_local, {}, series)
+    if len(rows) < len(points) // 2:
+        print(f"✗ svet: le {len(rows)}/{len(points)} točk z veljavno serijo — stari posnetek ostane", file=sys.stderr)
+        return
+    for r in rows:
+        r["sn"] = series[r["id"]]["sn"]   # 144 ur sneženja (desetinke cm) za sličico poteka na kartici
+        r.pop("km_od_recice", None)
+    payload = {"generated_at": now_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+               "generated_at_local": now_local.strftime("%-d. %-m. %Y ob %-H.%M"), "tocke": rows}
+    with open(WORLD_OUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"data/snegofili-svet.json: {len(rows)} točk")
+
+
 def main():
+    now_local0 = datetime.datetime.now(we.LOCAL_TZ)
+    now_utc0 = datetime.datetime.now(datetime.timezone.utc)
+    rc = main_alpine()
+    try:
+        main_world(now_local0, now_utc0)
+    except Exception as e:  # noqa: BLE001 — rubrika je dodatek, alpski del je že zapisan
+        print(f"✗ svet: {e}", file=sys.stderr)
+    return rc
+
+
+def main_alpine():
     points = load_points()
     now_local = datetime.datetime.now(we.LOCAL_TZ)
     now_utc = datetime.datetime.now(datetime.timezone.utc)

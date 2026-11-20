@@ -615,3 +615,24 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
   .sg-hero::after{height:4rem}
   .sg-app>.sg-stats{margin-top:-3.4rem}
 }
+
+/* ── rubrika »Po svetu« (21. 11. 2026): Japonska in Severna Amerika, ločeno od alpskega loka ── */
+.sg-av.ph[data-c=JP]{background:radial-gradient(circle at 50% 50%,#bc002d 0 34%,#fff 36%)}
+.sg-av.ph[data-c=CA]{background:linear-gradient(90deg,#d52b1e 0 27%,#fff 27% 73%,#d52b1e 73%)}
+.sg-av.ph[data-c=US]{background:linear-gradient(#3c3b6e,#3c3b6e) 0 0/52% 54% no-repeat,repeating-linear-gradient(#b22234 0 7.7%,#fff 7.7% 15.4%)}
+.sg-wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(17.5rem,1fr));gap:1rem;margin:.4rem 0 1.2rem}
+.sg-wc{background:var(--sg-surface);border:2px solid var(--sg-line);border-radius:22px;padding:1rem 1.05rem;display:flex;flex-direction:column;gap:.65rem;box-shadow:var(--sg-shadow)}
+.sg-wc-hd{display:flex;align-items:center;gap:.65rem}
+.sg-wc-hd .sg-hd-t{flex:1 1 auto;min-width:0}
+.sg-wc h4{margin:0;font:800 1.08rem/1.15 var(--sg-display)}
+.sg-wc .sg-sub{margin:.1rem 0 0;font-size:.76rem;color:var(--sg-muted)}
+.sg-wc-nums{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.sg-wc-nums b{display:block;font:800 1.7rem/1.05 var(--sg-display);color:#0b3a8a;font-variant-numeric:tabular-nums}
+.sg-wc-nums small{display:block;margin-top:.15rem;color:var(--sg-muted);font-size:.74rem}
+.sg-wc-nums .r{text-align:right}
+.sg-ws{display:block;width:100%;height:44px;background:var(--sg-surface2);border-radius:10px}
+.sg-ws .p{fill:#1257c9}.sg-ws .f{fill:#7fb0ff}.sg-ws .n{stroke:#7b5df5;stroke-width:1.5;vector-effect:non-scaling-stroke}
+.sg-wc .sg-dl{grid-template-columns:1fr 2fr}
+.sg-wc .sg-foot{margin-top:0}
+@media(max-width:640px){.sg-wgrid{grid-template-columns:minmax(0,1fr)}}
+.sg-wc .sg-av.ph{border-color:var(--sg-line)}
