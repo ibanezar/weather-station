@@ -143,6 +143,8 @@
 .sg-cam-img img{display:block;width:100%;height:100%;object-fit:cover}
 .sg-cam-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:.6rem;font-size:.82rem;color:#b9cdea}
 .sg-lb-stage .sg-cam-msg{position:static;min-height:12rem}
+/* sličica Windy kamere v ploščici (21. 11. 2026): oznaka vira zgoraj levo, da je jasno, da je to sličica in ne živa slika */
+.sg-cam-wcap{position:absolute;top:.5rem;left:.5rem;max-width:calc(100% - 1rem);padding:.2rem .55rem;border-radius:999px;background:rgba(4,10,22,.78);color:#eaf4ff;font:600 .68rem/1.2 var(--sg-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sg-cam-st{position:absolute;left:.55rem;bottom:.55rem;font:700 .72rem/1 var(--sg-display);padding:.4rem .65rem;border-radius:999px;background:rgba(7,16,31,.88);color:#e8f1ff;border:1px solid rgba(255,255,255,.2)}
 .sg-cam-st:empty{display:none}
 .sg-cam-st.on{background:var(--sg-beacon);color:#0b1b33;border-color:transparent}

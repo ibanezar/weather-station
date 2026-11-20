@@ -1190,6 +1190,56 @@ async function _sgData() {
   } catch (_) { return null; }
 }
 
+// ── Sličice Windy kamer (/windy-thumb) ─────────────────────────────────────────────────────────────────────────────
+// Windy Webcams API v3 (ključ: secret WINDY_API_KEY) vrne sličico z začasnim žetonom (brezplačni ključ: 10 min), zato
+// naslova sličice ni mogoče zapisati v podatke. Worker jo prebere, rezultat drži 8 min v pomnilniku izolata (brez KV) in
+// jo vrne odjemalcu. Dovoljene so SAMO kamere s seznama točk (`data/snegofili-tocke.json`, vdelava Windy): sicer bi
+// poljuben id porabil kvoto ključa. Windyjev klic gre največ enkrat na 8 min na kamero ne glede na obisk.
+const WINDY_TOCKE_URL = "https://meteorec.si/data/snegofili-tocke.json";
+const WINDY_THUMB_TTL_MS = 8 * 60 * 1000, WINDY_THUMB_ERR_MS = 60 * 1000, WINDY_IDS_TTL_MS = 60 * 60 * 1000;
+const _windyThumbCache = new Map();
+let _windyIds = null;
+
+function _windyEmbedId(s) {
+  const m = /^https:\/\/webcams\.windy\.com\/webcams\/public\/embed\/player\/(\d{1,12})\//.exec(String(s || ""));
+  return m ? m[1] : null;
+}
+async function _windyAllowedIds() {
+  if (_windyIds && Date.now() - _windyIds.ts < WINDY_IDS_TTL_MS) return _windyIds.set;
+  try {
+    const r = await fetch(WINDY_TOCKE_URL, { cf: { cacheTtl: 1800, cacheEverything: true } });
+    if (!r.ok) return _windyIds ? _windyIds.set : null;
+    const d = await r.json();
+    const set = new Set();
+    for (const t of (d && d.tocke) || []) for (const c of (t.kamere || [])) { const id = _windyEmbedId(c && c.embed); if (id) set.add(id); }
+    _windyIds = { ts: Date.now(), set };
+    return set;
+  } catch (_) { return _windyIds ? _windyIds.set : null; }
+}
+// Windy vrne sličice kot https naslove na Windyjevih domenah; vse drugo se zavrže.
+function _windyImgOk(u) {
+  try { const x = new URL(u); return x.protocol === "https:" && /(^|\.)windy\.com$/.test(x.hostname) ? x.href : null; } catch (_) { return null; }
+}
+async function _windyThumb(env, id) {
+  const hit = _windyThumbCache.get(id);
+  if (hit && Date.now() < hit.until) return hit.body;
+  let body;
+  try {
+    const r = await fetch("https://api.windy.com/webcams/api/v3/webcams/" + id + "?lang=en&include=images", {
+      headers: { "x-windy-api-key": env.WINDY_API_KEY, "Accept": "application/json" },
+    });
+    if (!r.ok) body = { error: "windy_" + r.status };
+    else {
+      const d = await r.json(), cur = (d && d.images && d.images.current) || {};
+      const preview = _windyImgOk(cur.preview), thumb = _windyImgOk(cur.thumbnail);
+      body = preview || thumb ? { id, preview, thumbnail: thumb } : { error: "no_image" };
+    }
+  } catch (_) { body = { error: "fetch" }; }
+  _windyThumbCache.set(id, { body, until: Date.now() + (body.error ? WINDY_THUMB_ERR_MS : WINDY_THUMB_TTL_MS) });
+  if (_windyThumbCache.size > 200) _windyThumbCache.delete(_windyThumbCache.keys().next().value);
+  return body;
+}
+
 // Vrne očiščen seznam pravil ali null, če katero ni veljavno (neznana točka ali prag).
 function _sgClean(data, rules) {
   if (!Array.isArray(rules)) return null;
@@ -6561,6 +6611,21 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         return new Response(buf, {
           headers: { ...CORS_ALLOWED, "Content-Type": "image/gif", "Cache-Control": "public, max-age=300" }
         });
+      }
+
+      // ── /windy-thumb ──────────────────────────────────────
+      // ?id=<Windy id kamere> -> {id, preview, thumbnail} (naslovi s časovnim žetonom, ~10 min). Samo kamere s seznama točk.
+      // Brez ključa ali ob napaki vrne 200 z `error` (stran pusti ploščico brez slike), nikoli ne izmisli slike.
+      if (path === "/windy-thumb") {
+        const hdr = { ...CORS_ALLOWED, "Content-Type": "application/json" };
+        const id = String(url.searchParams.get("id") || "");
+        if (!/^\d{1,12}$/.test(id)) return new Response(JSON.stringify({ error: "bad_id" }), { status: 400, headers: hdr });
+        if (!env.WINDY_API_KEY) return new Response(JSON.stringify({ error: "no_key" }), { headers: { ...hdr, "Cache-Control": "public, max-age=60" } });
+        const allowed = await _windyAllowedIds();
+        if (!allowed) return new Response(JSON.stringify({ error: "no_list" }), { headers: { ...hdr, "Cache-Control": "no-store" } });
+        if (!allowed.has(id)) return new Response(JSON.stringify({ error: "unknown_cam" }), { status: 404, headers: hdr });
+        const body = await _windyThumb(env, id);
+        return new Response(JSON.stringify(body), { headers: { ...hdr, "Cache-Control": body.error ? "public, max-age=60" : "public, max-age=240" } });
       }
 
       // ── /arso-cam ─────────────────────────────────────────

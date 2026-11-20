@@ -399,6 +399,16 @@
     if (!p.f) { var b = el('span', 'sg-av ph' + (cls ? ' ' + cls : ''), p.c || ''); b.setAttribute('data-c', p.c || ''); b.setAttribute('aria-hidden', 'true'); return b; }
     var i = el('img', 'sg-av' + (cls ? ' ' + cls : '')); i.src = '/snegofili/img/kraji/' + p.id + '.jpg'; i.alt = ''; i.width = 48; i.height = 48; i.loading = 'lazy'; i.decoding = 'async'; return i;
   }
+  function windyId(p) {
+    var ces = (p && p.ce) || [];
+    for (var i = 0; i < ces.length; i++) {
+      if (ces[i].k !== 'windy') continue;
+      var m = /\/player\/(\d+)\//.exec(ces[i].s || ''); if (m) return m[1];
+    }
+    return null;
+  }
+  /* slika za ploščico: ARSO/DRSI ali sličica Windy (samo če se je naložila) */
+  function camPic(st) { return st.src || (st.thumb && !st.thumbErr ? st.thumb : null); }
   function camLabel(p) { return (p.ca || p.cd) ? 'Oglej si aktualno sliko' : 'Odpri kamero Windy'; }
   function hasCam(p) { return !!(p && (p.ca || p.cd || p.ce)); }
   function camKind(p) { return p.ca ? 'arso' : p.cd ? 'drsi' : p.ce ? 'embed' : null; }
@@ -409,7 +419,18 @@
     if (st.busy) return st.busy;
     if (!force && (st.src || st.embed) && Date.now() - st.ts < CAM_TTL) return Promise.resolve(st);
     var fin = function (ok) { st.ts = Date.now(); st.err = !ok; st.busy = null; paintCam(id); return st; };
-    if (p.ce && !p.ca && !p.cd) { st.embed = true; st.cap = ''; return Promise.resolve(fin(true)); }
+    if (p.ce && !p.ca && !p.cd) {
+      st.embed = true; st.cap = '';
+      var wid = windyId(p);
+      if (!wid) return Promise.resolve(fin(true));
+      /* sličica Windy kamere: worker /windy-thumb vrne naslov z žetonom, ki velja ~10 min (brez ključa ali ob napaki ostane ploščica brez slike) */
+      st.busy = fetch(PROXY + '/windy-thumb?id=' + wid).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
+        var u = m && (m.preview || m.thumbnail);
+        st.thumb = u && /^https:\/\/[^/]*windy\.com\//.test(u) ? u : null; st.thumbErr = false;
+        return fin(true);
+      }).catch(function () { return fin(true); });
+      return st.busy;
+    }
     if (p.cd && !p.ca) {
       st.src = DRSI + '?t=' + Math.floor(Date.now() / CAM_TTL); st.cap = 'Vir: DRSI · prelaz Črnivec'; st.time = '';
       return Promise.resolve(fin(true));
@@ -435,7 +456,18 @@
       var box = $('.sg-cam-img', tile), t = $('.sg-cam-t', tile);
       if (st.err) { box.textContent = ''; box.appendChild(el('span', 'sg-cam-msg', 'Slika trenutno ni dosegljiva')); }
       else if (st.src) { var im = $('img', box); if (im) im.src = st.src; else { box.textContent = ''; box.appendChild(camImg(st, p, '')); } }
-      else if (st.embed) { box.textContent = ''; box.appendChild(el('span', 'sg-cam-msg', 'Časovni zdrs dneva (Windy), po kliku')); }
+      else if (st.embed) {
+        var wi = $('img', box);
+        if (st.thumb && !st.thumbErr) {
+          if (wi) { if (wi.src !== st.thumb) wi.src = st.thumb; }
+          else {
+            box.textContent = '';
+            var ti = el('img', 'sg-cam-w'); ti.loading = 'lazy'; ti.decoding = 'async'; ti.width = 400; ti.height = 224; ti.alt = 'Sličica kamere: ' + p.n; ti.src = st.thumb;
+            ti.addEventListener('error', function () { st.thumbErr = true; paintCam(id); }, { once: true });
+            box.appendChild(ti); box.appendChild(el('span', 'sg-cam-wcap', 'Sličica · Windy, po kliku časovni zdrs'));
+          }
+        } else { box.textContent = ''; box.appendChild(el('span', 'sg-cam-msg', 'Časovni zdrs dneva (Windy), po kliku')); }
+      }
       if (t) t.textContent = st.time ? '· ' + st.time : '';
     }
     if (hours) nowStripThumbs();
@@ -581,8 +613,8 @@
   }
   function nowStripThumbs() {
     $$('.sg-nowc-th').forEach(function (th) {
-      var st = camState[th.dataset.id]; if (!st || !st.src || st.err || th.firstChild) return;
-      var i = el('img'); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async'; i.width = 280; i.height = 142; i.src = st.src;
+      var st = camState[th.dataset.id], pic = st && camPic(st); if (!st || !pic || st.err || th.firstChild) return;
+      var i = el('img'); i.alt = ''; i.loading = 'lazy'; i.decoding = 'async'; i.width = 280; i.height = 142; i.src = pic;
       i.addEventListener('error', function () { i.remove(); th.classList.remove('on'); }, { once: true });
       th.appendChild(i); th.classList.add('on');
     });
