@@ -26,6 +26,12 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   await page.goto(BASE + '/snegofili/index.html'); await page.waitForSelector('.sg-nowc', { timeout: 8000 });
   const tag = vp.width + ' px: ';
   ok(await page.locator('.sg-spark svg').count() === await page.locator('.sg-card').count(), tag + 'sparkline na vsaki kartici');
+  { const shown = await page.locator('.sg-card:visible').count(), total = await page.locator('.sg-card').count();
+    ok(shown === 12 && total > 12 && /Prikaži vseh \d+ lokacij/.test(await page.locator('#sg-more').textContent()), tag + 'seznam: privzeto 12 točk in gumb za vse'); }
+  ok(/Dež ali suho|Dež|Brez padavin|Sneg|Moker sneg/.test(await page.locator('.sg-card .sg-pill').first().textContent()), tag + 'status na kartici');
+  ok(!(await page.locator('#zdaj-snezi').isVisible()) || /0,1 cm/.test(await page.locator('#zs-sub').textContent()), tag + 'razlaga praga 0,1 cm/h pri »Kjer zdaj sneži«');
+  ok(/ARSO: najnovejša meritev pred/.test(await page.locator('#sg-gen').textContent()), tag + 'svežina meritev ARSO ob času izračuna');
+  ok(/96-urni pregled sneženja/.test(await page.locator('#hm-h').textContent()), tag + '96-urni pregled: naslov');
   ok(await page.locator('.sg-hm-l').count() >= 30, tag + 'toplotna karta ima vrstico za vsako točko');
   { const pn = await page.locator('.sg-pl-i').count(); ok(pn >= 1 && pn <= 5, tag + 'Kje bo največ novega snega: 1–5 točk (odvisno od današnjih podatkov)'); }
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), tag + 'brez vodoravnega razliva');
@@ -95,6 +101,8 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   ok(await page.locator('.sg-card:not([hidden])').count() === 1, tag + 'filter »Moje točke«');
   /* Windy karta: iframe šele po kliku, plast se menja */
   ok(await page.locator('#sg-wy iframe').count() === 0, tag + 'Windy: brez iframe pred klikom');
+  ok(!(await page.locator('#windy details').evaluate(d => d.open)), tag + 'Windy: dodatne karte so privzeto zložene');
+  await page.locator('#windy summary').click();
   await page.locator('#windy .sg-heatbar button[data-ov="wind"]').click();
   await page.locator('#sg-wy .sg-live').click();
   ok((await page.locator('#sg-wy iframe').getAttribute('src')).startsWith('https://embed.windy.com/embed2.html') && (await page.locator('#sg-wy iframe').getAttribute('src')).includes('overlay=wind&'), tag + 'Windy: iframe na embed.windy.com z izbrano plastjo');

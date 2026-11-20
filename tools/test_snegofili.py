@@ -122,6 +122,7 @@ except (OSError, subprocess.SubprocessError) as e:
 # ── urna serija: okno v JS pri »zdaj« = okno v Pythonu ──
 hs = d.hourly_series(cold, 1000, IDX)
 check(len(hs["sn"]) == 144 and len(hs["sl"]) == 144 and len(hs["t"]) == 144, "urna serija ima 144 ur")
+check(len(hs["p"]) == 144 and hs["p"][0] == 10 and all(isinstance(x, int) for x in hs["p"]), "urna serija ima padavine v desetinkah mm")
 jw = ("const m=require('./snegofili/snegofili.js');const s=" + json.dumps(hs["sn"]) +
       ";console.log(JSON.stringify(m.windows(s,m.NOW)))")
 w2 = json.loads(subprocess.run(["node", "-e", jw], cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -158,11 +159,23 @@ with tempfile.TemporaryDirectory() as tmp:
 check(set(syn) == {"sveza"} and syn["sveza"]["depth_cm"] == 12 and syn["sveza"]["age_h"] == 6.0,
       "ARSO: samo sveža meritev z višino (stara, prihodnja in prazna odpadejo)")
 
+# ── status pod mejo sneženja: dež, brez padavin ali (brez podatka) splošna oznaka ──
+check([g.phase_text("rain", {"precip_now_mm": 0.3}), g.phase_text("rain", {"precip_now_mm": 0.0}), g.phase_text("rain", {"precip_now_mm": 0.09}),
+       g.phase_text("rain", {}), g.phase_text("rain"), g.phase_text("snow", {"precip_now_mm": 0.0}), g.phase_text("mix", {"precip_now_mm": 2.0})]
+      == ["Dež", "Brez padavin", "Brez padavin", "Dež ali suho", "Dež ali suho", "Sneg", "Moker sneg"],
+      "phase_text: prag 0,1 mm/h, brez podatka splošna oznaka, sneg in moker sneg ostaneta")
+check(w["precip_now_mm"] == 1.0 and c["precip_now_mm"] == 1.0, "compute_point: padavine v tekoči uri")
+
 # ── povezave kamer: samo https ──
 links = g.cam_links({"kamere": [{"url": "http://x.example/a", "ponudnik": "Nevarna"},
                                 {"url": "https://x.example/b", "ponudnik": "Varna"}]})
 check("Varna" in links and "Nevarna" not in links, "cam_links: http povezava se ne izpiše")
-check(g.cam_links({}) == "brez kamere", "cam_links: brez kamer besedilo")
+check(g.cam_links({}) == "ni kamere", "cam_links: brez kamer besedilo")
+both = g.cam_links({"arso_cam": "kredarica", "kamere": [{**good, "ponudnik": "Windy"}]})
+check("ARSO: aktualna slika" in both and "Windy: časovni zdrs" in both and both.count("#kamere") == 1,
+      "cam_links: vsak vir ima svojo oznako (ARSO slika, Windy zdrs), brez podvojene povezave")
+wonly = g.cam_links({"kamere": [{**good, "ponudnik": "Windy"}]})
+check("#kamere" not in wonly and "Windy: časovni zdrs" in wonly, "cam_links: samo Windy ne vodi na razdelek ARSO kamer")
 
 # ── opozorilo na telefon: konstante gradnika ↔ worker.js (SG_CM_ALLOWED, SG_MAX_RULES), vse točke v izbirniku ──
 import re  # noqa: E402
@@ -187,6 +200,12 @@ def node_json(code):
                                      capture_output=True, text=True, timeout=30, check=True).stdout)
 
 
+try:
+    check(node_json("console.log(JSON.stringify([m.ptxt('rain',{p:[0,1,5]},0),m.ptxt('rain',{p:[0,1,5]},1),m.ptxt('rain',{p:[0,1,5]},2),m.ptxt('rain',{},1),m.ptxt('rain',null,0),m.ptxt('snow',{p:[0]},0),m.ptxt('mix',{p:[9]},0)]))")
+          == ["Brez padavin", "Dež", "Dež", "Dež ali suho", "Dež ali suho", "Sneg", "Moker sneg"],
+          "JS ptxt: prag 0,1 mm/h, brez serije padavin splošna oznaka")
+except (OSError, subprocess.SubprocessError, ValueError) as e:
+    check(False, f"node (ptxt): {e}")
 try:
     check(node_json("console.log(JSON.stringify([m.snowing({sn:[0,1,0]},1),m.snowing({sn:[0,0,0]},1),m.snowing(null,0),m.snowing({sn:[]},5)]))") == [True, False, False, False],
           "JS snowing: prag 0,1 cm/h, brez podatka ni snega")

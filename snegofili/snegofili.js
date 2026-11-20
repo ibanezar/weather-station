@@ -16,6 +16,8 @@
   function fmt(x, d) { return (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d).replace('.', ','); }
   function cmText(cm) { return cm < 1 ? '<1 cm' : fmt(cm, cm >= 10 ? 0 : 1) + ' cm'; }
   var PHASE_TXT = { snow: 'Sneg', mix: 'Moker sneg', rain: 'Dež ali suho' };
+  /* pod mejo sneženja pove, ali pada (≥ 0,1 mm/h po modelu) ali ne; brez serije padavin (stari ure.json) ostane splošna oznaka */
+  function ptxt(ph, h, i) { if (ph === 'rain' && h && h.p && h.p[i] != null) return h.p[i] >= 1 ? 'Dež' : 'Brez padavin'; return PHASE_TXT[ph]; }
 
   /* Ali ob uri i sneži (vsaj 0,1 cm/h po modelu). */
   function snowing(h, i) { return !!h && (h.sn[i] || 0) >= SNOWING_MIN; }
@@ -57,7 +59,7 @@
   var model = {
     recicaState: recicaState, recicaAge: recicaAge, recicaCm: recicaCm, RECICA_STALE_H: RECICA_STALE_H, RECICA_HIDE_D: RECICA_HIDE_D,
     NOW: NOW, MIN_I: MIN_I, MAX_I: MAX_I, SNOWING_MIN: SNOWING_MIN, step: step, phase: phase, radius: radius, barPct: barPct,
-    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, snowing: snowing, hstep: hstep, plan: plan
+    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, hstep: hstep, plan: plan
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = model; }
   root.SgModel = model;
@@ -73,7 +75,7 @@
   document.documentElement.classList.add('sg-js');
   try { pts = JSON.parse($('#sg-pts').textContent); } catch (e) { return; }
   var byId = {}; pts.forEach(function (p) { byId[p.id] = p; });
-  var cards = $$('.sg-card'), sortKey = 'past', country = '*', onlyFresh = false, onlyFav = false;
+  var cards = $$('.sg-card'), sortKey = 'past', country = '*', onlyFresh = false, onlyFav = false, showAll = false, LIST_LIMIT = 12;
 
   /* ── priljubljene točke (samo v brskalniku) ── */
   var FAVK = 'wx-sg-fav', favs = [];
@@ -120,6 +122,14 @@
       if (sortKey === 'km') return a.dataset.km - b.dataset.km;
       return parseFloat(b.dataset[sortKey]) - parseFloat(a.dataset[sortKey]);
     }).forEach(function (c) { grid.appendChild(c); });
+    /* brez filtra in iskanja se pokaže prvih 12 točk po izbrani razvrstitvi, ostale po gumbu (vse kartice ostanejo v HTML) */
+    var plain = country === '*' && !query && !onlyFresh && !onlyFav, limited = plain && !showAll && vis.length > LIST_LIMIT;
+    vis.forEach(function (c, k) { c.hidden = limited && k >= LIST_LIMIT; });
+    var mb = $('#sg-more');
+    if (plain && vis.length > LIST_LIMIT) {
+      if (!mb) { mb = el('button', 'sg-btn s sg-more', ''); mb.type = 'button'; mb.id = 'sg-more'; mb.addEventListener('click', function () { showAll = !showAll; layout(); }); grid.parentNode.insertBefore(mb, grid.nextSibling); }
+      mb.textContent = showAll ? 'Pokaži samo prvih ' + LIST_LIMIT : 'Prikaži vseh ' + vis.length + ' lokacij'; mb.setAttribute('aria-expanded', showAll);
+    } else if (mb) mb.remove();
     var emp = $('#sg-fav-empty');
     if (onlyFav && !favs.length) { if (!emp) { emp = el('p', 'muted-note', 'Še nimate mojih točk: na kartici ali v podrobnosti točke pritisnite zvezdico.'); emp.id = 'sg-fav-empty'; grid.parentNode.insertBefore(emp, grid); } }
     else if (emp) emp.remove();
@@ -158,7 +168,7 @@
         var show = sv >= 0 && ph !== 'rain';
         c.setAttribute('r', radius(show ? val : 0).toFixed(1));
         c.setAttribute('class', 'sg-c ' + (show ? 's' + sv + ' ' : 'ring ') + 'ph-' + ph + (isFav(p.id) ? ' fav' : ''));
-        c.setAttribute('aria-label', p.n + ', ' + p.e + ' m: ' + PHASE_TXT[ph] + ', zadnjih 24 ur ' + cmText(w.past) + ', naslednjih 24 ur ' + cmText(w.next));
+        c.setAttribute('aria-label', p.n + ', ' + p.e + ' m: ' + ptxt(ph, h, i) + ', zadnjih 24 ur ' + cmText(w.past) + ', naslednjih 24 ur ' + cmText(w.next));
       }
       /* prerez */
       var tk = $('#sg-prof .sg-sl[data-id="' + p.id + '"]');
@@ -177,10 +187,10 @@
         var l = $('.sg-bl', k2), rr = $('.sg-br', k2);
         l.style.width = barPct(w.past) / 2 + '%'; rr.style.width = barPct(w.next) / 2 + '%';
         $('.sg-np', k2).textContent = cmText(w.past); $('.sg-nn', k2).textContent = cmText(w.next);
-        var pill = $('.sg-pill', k2); pill.textContent = PHASE_TXT[ph]; pill.className = 'sg-pill ph-' + ph;
+        var pill = $('.sg-pill', k2); pill.textContent = ptxt(ph, h, i); pill.className = 'sg-pill ph-' + ph;
         var t = h.t[i]; $('.sg-tt', k2).textContent = t == null ? '—' : fmt(t / 10, 1) + ' °C';
         $('.sg-sl', k2).textContent = slText(sl, p.e);
-        k2.setAttribute('aria-label', p.n + ': ' + PHASE_TXT[ph] + ', zadnjih 24 ur ' + cmText(w.past) + ', naslednjih 24 ur ' + cmText(w.next));
+        k2.setAttribute('aria-label', p.n + ': ' + ptxt(ph, h, i) + ', zadnjih 24 ur ' + cmText(w.past) + ', naslednjih 24 ur ' + cmText(w.next));
         var cu = $('.sg-spark .sg-sc', k2); if (cu) { var xx = (i - MIN_I + 0.5).toFixed(2); cu.setAttribute('x1', xx); cu.setAttribute('x2', xx); }
       }
     });
@@ -271,7 +281,7 @@
       var kv = el('div', 'sg-pn-kv');
       [['Zadnjih 24 ur', cmText(w.past)], ['Naslednjih 24 ur', cmText(w.next)]].forEach(function (a) { var d = el('div'); d.appendChild(el('small', null, a[0])); d.appendChild(el('b', null, a[1])); kv.appendChild(d); });
       panel.appendChild(kv);
-      panel.appendChild(el('p', 'sg-pn-l', PHASE_TXT[phase(p.e, sl)] + ' · ' + (t == null ? 'temperatura: ni podatka' : fmt(t / 10, 1) + ' °C') + ' · meja sneženja: ' + (sl == null ? 'ni podatka' : Math.round(sl / 10) * 10 + ' m')));
+      panel.appendChild(el('p', 'sg-pn-l', ptxt(phase(p.e, sl), h, cur) + ' · ' + (t == null ? 'temperatura: ni podatka' : fmt(t / 10, 1) + ' °C') + ' · meja sneženja: ' + (sl == null ? 'ni podatka' : Math.round(sl / 10) * 10 + ' m')));
     }
     var src = el('p', 'sg-pn-l'); var b1 = el('span', 'sg-bdg m', 'Model'); src.appendChild(b1); src.appendChild(document.createTextNode(' Open-Meteo, ura: ' + offText(cur)));
     panel.appendChild(src);
@@ -535,7 +545,7 @@
     list.sort(function (a, b) { return b.rate - a.rate; });
     var key = i + '|' + list.map(function (x) { return x.p.id; }).join(',') + '|' + favs.join(',');
     var sub = $('#zs-sub');
-    sub.textContent = list.length ? 'Po modelu ' + (i === NOW ? 'v trenutni uri' : 'ob izbrani uri (' + offText(i) + ', ' + timeLabel(i) + ')') + ' sneži na ' + list.length + ' točkah. Kamera pri točki kaže, kar je tam v resnici.' :
+    sub.textContent = list.length ? 'Po modelu ' + (i === NOW ? 'v trenutni uri' : 'ob izbrani uri (' + offText(i) + ', ' + timeLabel(i) + ')') + ' sneži na ' + list.length + ' točkah (vsaj 0,1 cm novega snega na uro). Kamera pri točki kaže, kar je tam v resnici.' :
       'Ob tej uri po modelu nikjer v seznamu ne sneži (manj kot 0,1 cm na uro). Premaknite drsnik ali poglejte napoved v toplotni karti spodaj.';
     $('#zs-h').textContent = i === NOW ? 'Kjer zdaj sneži' : 'Kjer sneži ob izbrani uri';
     if (key === nowKey) return; nowKey = key;
@@ -687,7 +697,7 @@
     hd.appendChild(star); wrap.appendChild(hd);
     var w = windows(h.sn, NOW), n48 = sum(h.sn, NOW + 1, NOW + 48);
     var kv = el('div', 'sg-dt-kv');
-    [['Zadnjih 24 ur', cmText(w.past)], ['Naslednjih 24 ur', cmText(w.next)], ['Naslednjih 48 ur', cmText(n48)], ['Trenutna ura', (h.t[NOW] == null ? '—' : fmt(h.t[NOW] / 10, 1) + ' °C') + ' · ' + PHASE_TXT[phase(p.e, slAt(h, NOW))]]].forEach(function (a) {
+    [['Zadnjih 24 ur', cmText(w.past)], ['Naslednjih 24 ur', cmText(w.next)], ['Naslednjih 48 ur', cmText(n48)], ['Trenutna ura', (h.t[NOW] == null ? '—' : fmt(h.t[NOW] / 10, 1) + ' °C') + ' · ' + ptxt(phase(p.e, slAt(h, NOW)), h, NOW)]].forEach(function (a) {
       var d = el('div'); d.appendChild(el('small', null, a[0])); d.appendChild(el('b', null, a[1])); kv.appendChild(d);
     });
     wrap.appendChild(kv);
@@ -701,7 +711,7 @@
       var c = $('#sg-dc', chartBox); if (c) { var x = xOf(i).toFixed(1); c.setAttribute('x1', x); c.setAttribute('x2', x); }
       var t = h.t[i], s = slAt(h, i), ph = phase(p.e, s);
       rd.textContent = timeLabel(i) + ' (' + offText(i) + '): ' + (snowing(h, i) ? 'sneži ' + fmt(h.sn[i] / 10, 1) + ' cm/h' : 'brez novega snega') + ' · ' + (t == null ? '—' : fmt(t / 10, 1) + ' °C') +
-        ' · meja sneženja ' + (s == null ? '—' : Math.round(s) + ' m') + ' (' + PHASE_TXT[ph].toLowerCase() + ')';
+        ' · meja sneženja ' + (s == null ? '—' : Math.round(s) + ' m') + ' (' + ptxt(ph, h, i).toLowerCase() + ')';
       rg.setAttribute('aria-valuetext', rd.textContent);
     }
     function draw() { CW = Math.max(320, Math.min(720, Math.round(chartBox.clientWidth || 720))); PWID = CW - PL - PR; chartBox.innerHTML = chartSvg(p, h, cmpId ? byId[cmpId] : null); cursor(+rg.value); }
@@ -829,6 +839,14 @@
     if (window.ResizeObserver) { var lw = 0; new ResizeObserver(function () { var w = cv.parentNode.clientWidth; if (w && Math.abs(w - lw) > 2) { lw = w; heatDraw(); } }).observe(cv.parentNode); }
   }
 
+  /* svežina: čas izračuna je v herou; ob njem še starost najnovejše meritve ARSO (starost ob izračunu + čas od izračuna) */
+  (function freshness() {
+    var g = $('#sg-gen'); if (!g) return;
+    var t0 = Date.parse(g.getAttribute('data-generated')), ages = pts.filter(function (p) { return p.m; }).map(function (p) { return p.m.a; });
+    if (!isFinite(t0) || !ages.length) return;
+    var a = Math.min.apply(null, ages) + Math.max(0, (Date.now() - t0) / 36e5);
+    var sp = el('span', 'sg-meta-arso', ' · ARSO: najnovejša meritev pred ' + (a < 1 ? 'manj kot uro' : a < 48 ? Math.round(a) + ' h' : Math.round(a / 24) + ' dnevi')); g.appendChild(sp);
+  })();
   /* ══ karta Windy: iframe šele po kliku, samo https://embed.windy.com ══ */
   (function () {
     var box = $('#sg-wy'); if (!box) return;

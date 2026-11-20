@@ -100,7 +100,10 @@ def compute_point(hourly, idx_now, elevation_m):
     fl = hourly.get("freezing_level_height") or []
     t = (hourly.get("temperature_2m") or [None] * len(times))[idx_now]
     f = fl[idx_now] if idx_now < len(fl) else None
+    pr = hourly.get("precipitation") or []
+    pn = pr[idx_now] if idx_now < len(pr) else None
     out = {
+        "precip_now_mm": None if pn is None else round(pn, 1),
         "temp_c": None if t is None else round(t, 1),
         "snow_line_m": None if f is None else round(f - we.SNOW_LEVEL_OFFSET_M),
         "snow_now_possible": we.snow_fraction(elevation_m, f) > 0.5,
@@ -115,11 +118,11 @@ def compute_point(hourly, idx_now, elevation_m):
 
 def hourly_series(hourly, elevation_m, idx_now):
     """144 ur: idx_now-71 … idx_now+72 (zadnja je +72 h). Sneg v desetinkah cm (isti izračun kot okna),
-    meja sneženja v enotah 10 m, temperatura v desetinkah °C. Ura z žigom T velja za T-1h..T."""
+    meja sneženja v enotah 10 m, temperatura v desetinkah °C, padavine (dež in sneg skupaj) v desetinkah mm. Ura z žigom T velja za T-1h..T."""
     pr = hourly.get("precipitation") or []
     fl = hourly.get("freezing_level_height") or []
     tt = hourly.get("temperature_2m") or []
-    sn, sl, tp = [], [], []
+    sn, sl, tp, pp = [], [], [], []
     for i in range(idx_now - 71, idx_now + 73):
         p = (pr[i] if 0 <= i < len(pr) else 0) or 0
         f = fl[i] if 0 <= i < len(fl) else None
@@ -127,7 +130,8 @@ def hourly_series(hourly, elevation_m, idx_now):
         sn.append(round(p * we.snow_fraction(elevation_m, f) * we.SNOW_RATIO_CM_PER_MM * 10))
         sl.append(None if f is None else round((f - we.SNOW_LEVEL_OFFSET_M) / 10))
         tp.append(None if t is None else round(t * 10))
-    return {"sn": sn, "sl": sl, "t": tp}
+        pp.append(round(p * 10))
+    return {"sn": sn, "sl": sl, "t": tp, "p": pp}
 
 
 def load_arso(now_utc):
