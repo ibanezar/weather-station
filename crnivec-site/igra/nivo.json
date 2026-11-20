@@ -9,7 +9,7 @@
  "vozisce": "suho vozišče",
  "odeja_cm": 0,
  "megla_do_m": null,
- "sunki_kmh": 32,
+ "sunki_kmh": null,
  "odseki": [
   {
    "od_km": 0,
@@ -240,6 +240,6 @@
    "megla": false
   }
  ],
- "opis": "Današnje popoldne (14:00–16:00): na vrhu 5 °C, suho vozišče, na vrhu sunki do 32 km/h.",
- "generated_at": "2026-11-20T09:41:54.199832+00:00"
+ "opis": "Današnje popoldne (14:00–16:00): na vrhu 5 °C, suho vozišče.",
+ "generated_at": "2026-11-20T09:46:19.658068+00:00"
 }
