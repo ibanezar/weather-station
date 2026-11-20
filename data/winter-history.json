@@ -481,10 +481,10 @@
   },
   {
     "date": "2026-11-20",
-    "snow_line_m": 2220,
+    "snow_line_m": 2180,
     "snow_cm_at_station": 0.0,
-    "heating_level": "srednje",
+    "heating_level": "visoko",
     "black_ice_level": "visoko",
-    "fog_top_m": 755
+    "fog_top_m": 764
   }
 ]
