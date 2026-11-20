@@ -2724,6 +2724,12 @@ Kar je zdaj narejeno:
   padli z »ni nobene postaje z rr24h_val«. Karto zdaj sproži **worker takoj za jutranjim
   posnetkom** (cron `30 6-7 * * *`: `_cronSnapshotArsoRr24h`, nato dispatch
   `precip-map.yml`, beat `dispatch_precip`), ne skupni dispatch ob 4:10–5:40 UTC.
+- **Naša postaja na padavinski karti** (20. 11. 2026, Filip): `generate_precip_map.py` doda na karto (`/padavine-karta/`, feed, zgodba) IREICA1 v Rečici kot oznako z vijoličnim robom, barvo po istih pragovih kot ARSO.
+  **Isto 24-urno okno kot ARSO** (06:00 UTC do 06:00 UTC = 7:00 CET): `fetch_station_rr24h()` vzame dnevni kumulativi `rainfall.daily` (samo zunanje polje, Ecowitt `device/history`, en klic na lokalni dan,
+  ker kumulativa pade ob lokalni polnoči) in sešteje (zadnja vrednost prvega dne − vrednost ob začetku okna) + vrednost ob koncu okna. **Brez številke, ne napačna številka:** vrzel ≥ 15 min ob robu okna ali zvečer prvega dne,
+  kumulativa, ki pade, Ecowitt nedosegljiv ali dan z ročnim popravkom dežemera (`PRECIP_OVERRIDES`/`PRECIP_TEST_DEDUCTIONS` v `update_history.py`) → karta je brez postaje kot prej (pika z imenom). Postaja je gost med ARSO:
+  **ne šteje v lestvico »Postaje z največ dežja«, v `top` ali v `should_post`**; v nogi slike in na strani je navedena ločeno. `latest.json` ima `station_mm`. Test: `tools/test_precip_station.py` (v `parity.yml`).
+  Poznejši tek (`late`) uporabi isto okno (do 06:00 UTC tistega dne), ne »zadnjih 24 ur do zdaj«.
 - **Cloudflare varovalka** (`_cronDispatchScheduledWorkflows`) kliče `storm-map.yml` in
   `vodostaj-forecast.yml` (padavinske karte ne več — glej zgoraj). Rabi `GH_DISPATCH_TOKEN`; ta je od ≥ 2. 10. nastavljen (5. 11. 2026 preverjeno), `storm-map.yml` je na pavzi, zato dejansko tečeta `vodostaj-forecast.yml` in od 14. 11. 2026 `daily-story.yml` (`force: "false"`, ker je privzeti `force` pri ročnem zagonu `true`). Pozni tek ostaja dopolnilo za delovne tokove, ki jih worker ne sproži.
 - **Varuh svežine** `tools/check_freshness.py` (`freshness-watch.yml`, 06:40 in 18:40
