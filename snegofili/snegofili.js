@@ -1046,4 +1046,31 @@
       });
     }
   })();
+  /* ── Powder Tracker: seznam je izrisan strežniško, JS samo skriva vrstice po območju in kategoriji ── */
+  (function () {
+    var sec = document.getElementById('powder');
+    var bar = $('#sg-pw-f'), list = $('#sg-pw-list'), more = $('#sg-pw-more'), emp = $('#sg-pw-empty');
+    if (!sec || !bar || !list) return;
+    var reg = '*', cat = '*', all = false, LIM = parseInt(sec.dataset.limit, 10) || 10;
+    var items = $$('.sg-pw-i', list);
+    bar.hidden = false;
+    function apply() {
+      var vis = items.filter(function (li) {
+        return (reg === '*' || (' ' + li.dataset.g + ' ').indexOf(' ' + reg + ' ') >= 0) && (cat === '*' || li.dataset.cat === cat);
+      });
+      var lim = !all && vis.length > LIM;
+      items.forEach(function (li) { li.hidden = true; });
+      vis.forEach(function (li, i) { li.hidden = lim && i >= LIM; });
+      if (emp) emp.hidden = vis.length > 0;
+      if (more) { more.hidden = !lim; more.textContent = 'Pokaži vseh ' + vis.length + ' točk'; }
+    }
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.pc) { cat = b.dataset.pc; $$('[data-pc]', bar).forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); }
+      else if (b.dataset.pg) { reg = b.dataset.pg; $$('[data-pg]', bar).forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); }
+      all = false; apply();
+    });
+    if (more) more.addEventListener('click', function () { all = true; apply(); });
+    apply();
+  })();
 })(typeof window !== 'undefined' ? window : globalThis);
