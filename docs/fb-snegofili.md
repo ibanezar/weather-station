@@ -1,6 +1,6 @@
 # FB objava: nov Snegofili na Meteorcu (20. 11. 2026)
 
-Slike (1080×1350 za feed, 1200×630 za link objavo): `og/snegofili-fb/`.
+Slike (1080×1350 za feed, 1080×1920 za zgodbo 9:16, 1200×630 za link objavo): `og/snegofili-fb/`.
 Pisano po `docs/slog-pisanja.md` (razdelek 7): uvod s konkretnim podatkom, kratki stavki, vprašanje na koncu, UTM povezava, vikanje.
 Številke na slikah so dejstva strani (53 točk v Alpah, 11 na Japonskem, 6 v Severni Ameriki = 70); trenutnih količin snega nista na sliki ne v besedilu, ker se vsako uro spremenijo.
 Napis »Modelska ocena, ne meritev« ostane na vseh slikah. Kamere so sličice in časovni zdrs, ne video v živo: ne obljubljaj »kamer v živo«.
