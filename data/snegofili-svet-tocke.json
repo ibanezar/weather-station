@@ -61,10 +61,10 @@
    "kamere": [
     {
      "naslov": "Windy kamera",
-     "url": "https://www.windy.com/webcams/1459371143",
+     "url": "https://www.windy.com/webcams/1793904961",
      "ponudnik": "Windy",
      "embed_kind": "windy",
-     "embed": "https://webcams.windy.com/webcams/public/embed/player/1459371143/day",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1793904961/day",
      "embed_terms": "https://api.windy.com/webcams/terms",
      "checked": "2026-11-20"
     }
@@ -92,10 +92,10 @@
    "kamere": [
     {
      "naslov": "Windy kamera",
-     "url": "https://www.windy.com/webcams/1350023412",
+     "url": "https://www.windy.com/webcams/1655694610",
      "ponudnik": "Windy",
      "embed_kind": "windy",
-     "embed": "https://webcams.windy.com/webcams/public/embed/player/1350023412/day",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1655694610/day",
      "embed_terms": "https://api.windy.com/webcams/terms",
      "checked": "2026-11-20"
     }
@@ -155,10 +155,10 @@
    "kamere": [
     {
      "naslov": "Windy kamera",
-     "url": "https://www.windy.com/webcams/1670020089",
+     "url": "https://www.windy.com/webcams/1647950232",
      "ponudnik": "Windy",
      "embed_kind": "windy",
-     "embed": "https://webcams.windy.com/webcams/public/embed/player/1670020089/day",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1647950232/day",
      "embed_terms": "https://api.windy.com/webcams/terms",
      "checked": "2026-11-20"
     }
