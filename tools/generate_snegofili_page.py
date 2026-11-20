@@ -682,9 +682,9 @@ def build_body(data, cams):
     return f"""  <div class="sg-app">
   <section class="sg-hero{" has-photo" if hp else ""}" aria-labelledby="sg-h1"{f' style="--sg-hero-img:url(/snegofili/img/{hp[0]}.jpg)"' if hp else ""}>
     <canvas id="sg-snow" aria-hidden="true"></canvas>
-    <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="222" height="58" alt="" decoding="async">
+    <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="332" height="87" alt="Snegofili" decoding="async">
     <div class="sg-brand-r"><a class="sg-back" href="/zima/">← MeteoZima</a><p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div></div>
-    <h1 class="page-title" id="sg-h1">Snegofili: kje je zdaj sneg</h1>
+    <h1 class="page-title" id="sg-h1">Kje zdaj pada sneg?</h1>
     <p class="sg-sub2">Spremljanje snežnih razmer po Alpah: modelska ocena, meritve ARSO in kamere.</p>
     <div class="sg-hero-row"><p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
     <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p></div>
