@@ -14,7 +14,7 @@
   --sg-num:#1257c9;--sg-sbtn:#0b3a8a;--sg-sbtn-b:#1b6ef3;--sg-shadow:0 1px 3px rgba(11,27,51,.08)}
 .sg-hero,.sg-win,.sg-mp,.sg-stat,.sg-tabbar,.sg-profwrap,.sg-heatsec{--sg-bg:#0b1b33;--sg-ink:#eaf4ff;--sg-surface:#12284a;--sg-surface2:#183563;--sg-line:rgba(255,255,255,.14);--sg-muted:#b2c9e6;--sg-link:#8fc2ff;--sg-num:#8fc2ff;--sg-sbtn:#cfe6ff;--sg-sbtn-b:#6aa6ff;--sg-shadow:none;color:var(--sg-ink)}
 .sg-app{background:var(--sg-bg);color:var(--sg-ink);border-radius:26px;overflow:clip;margin:0 0 1.6rem;padding-bottom:1.6rem;
-  border:1px solid var(--sg-line)}
+  border:0}
 .sg-app a,.sg-app .archive-intro a,.sg-app .muted-note a{color:var(--sg-link)}
 .sg-app h2,.sg-app h3{font-family:var(--sg-display);letter-spacing:-.01em}
 .sg-app .archive-intro,.sg-app .muted-note,.sg-app .sg-sub{color:var(--sg-muted)}
@@ -644,3 +644,25 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-wc-cam-cap{position:absolute;left:.4rem;bottom:.3rem;font-size:.66rem;color:#fff;background:rgba(8,20,40,.62);padding:.05rem .35rem;border-radius:4px}
 .sg-wc .sg-camslot{margin-top:.5rem}
 .sg-wc .sg-foot{flex-wrap:wrap;gap:.2rem .6rem}
+
+/* ── telefon, 21. 11. 2026 (Filip: »čudno na fonu«): brez temnega pasu nad herom, gumb »MeteoZima« ob logotipu namesto pod njim ── */
+@media(max-width:640px){
+  body:has(.sg-app) .wrap{padding-top:0}
+  .sg-app{margin-top:0;border:0}
+  .sg-brand{flex-wrap:nowrap;gap:.5rem}
+  .sg-brand img{flex:0 1 auto;min-width:0;max-width:calc(100% - 7rem);width:auto;height:auto;max-height:64px;aspect-ratio:332/87}
+  .sg-brand-r{flex:none}
+  .sg-back{min-height:40px;padding:0 .75rem;font-size:.74rem;white-space:nowrap}
+  #kamere .archive-intro{font-size:.9rem;line-height:1.5}
+  #kamere .sg-cam-note{margin:.2rem 0 .9rem}
+}
+@media(max-width:640px){
+  .sg-camwall{grid-template-columns:1fr 1fr;gap:.55rem}
+  .sg-camwall .sg-cam-b{border-radius:14px;border-width:1.5px}
+  .sg-camwall .sg-cam-img{aspect-ratio:4/3}
+  .sg-camwall .sg-cam-msg{font-size:.7rem;padding:.4rem}
+  .sg-camwall .sg-cam-st{font-size:.62rem;padding:.28rem .5rem;left:.4rem;bottom:.4rem;max-width:calc(100% - .8rem)}
+  .sg-camwall .sg-cam-wcap{font-size:.58rem;top:.35rem;left:.35rem;padding:.15rem .4rem}
+  .sg-camwall .sg-cam figcaption{font-size:.74rem;margin:.3rem .1rem 0}
+  .sg-camwall .sg-cam figcaption small{font-size:.66rem}
+}
