@@ -370,5 +370,25 @@ g.WORLD_PATH = os.path.join(tempfile.mkdtemp(), "ni.json")
 check(g.load_world() is None, "svet: brez datoteke rubrike ni")
 g.WORLD_PATH = _old
 
+# kamere na karticah »Po svetu« (isti zapis kot pri alpskih točkah; vdelava samo prek valid_embed())
+_wcam = {"kamere": [{"naslov": "Hanazono", "url": "https://www.windy.com/webcams/1697599566", "ponudnik": "Windy", "embed_kind": "windy",
+                     "embed": "https://webcams.windy.com/webcams/public/embed/player/1697599566/day", "embed_terms": "https://api.windy.com/webcams/terms", "checked": "2026-11-20"}]}
+_wlink = {"kamere": [{"naslov": "Kamere", "url": "https://www.whistler.com/webcams/", "ponudnik": "Tourism Whistler"}]}
+_wbad = {"kamere": [{"naslov": "x", "url": "https://evil.example/", "ponudnik": "Windy", "embed_kind": "windy", "embed": "https://evil.example/player/12345/day",
+                     "embed_terms": "https://api.windy.com/webcams/terms", "checked": "2026-11-20"}]}
+_c1, _c2, _c3, _c0 = (g.world_card_html(_wr[0], x) for x in (_wcam, _wlink, _wbad, None))
+check('class="sg-wc-cam" data-wid="1697599566"' in _c1 and 'class="sg-camslot"' in _c1 and "Webcams provided by" in _c1 and "Windy: časovni zdrs" in _c1,
+      "svet kamere: Windy vdelava da sličico, gumb s pogoji in navedbo")
+check("sg-wc-cam" not in _c2 and "sg-camslot" not in _c2 and 'href="https://www.whistler.com/webcams/"' in _c2 and "Tourism Whistler: odpri kamero" in _c2,
+      "svet kamere: povezava ponudnika brez vdelave in brez sličice")
+check("sg-wc-cam" not in _c3 and "sg-camslot" not in _c3 and "player/12345" not in _c3, "svet kamere: vdelava z napačne domene se ne prikaže")
+check("ni kamere" in _c0 and "#kamere" not in _c0, "svet kamere: točka brez kamere piše »ni kamere« in ne vodi na razdelek ARSO")
+_wp = g.load_world_cams()
+check({"niseko", "whistler", "alta", "zao"} <= set(_wp) and all(g.valid_embed(c) is None for p in _wp.values() for c in p.get("kamere") or [] if not c.get("embed_kind")),
+      "svet kamere: seznam točk se naloži, povezave brez vdelave niso vdelave")
+check(all(str(c.get("url", "")).startswith("https://") and c.get("ponudnik") for p in _wp.values() for c in p.get("kamere") or []), "svet kamere: vsaka kamera ima https povezavo in ponudnika")
+_ref = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "snegofili", "snegofili.js"), encoding="utf-8").read()
+check("sg-wc-cam[data-wid]" in _ref and "/windy-thumb?id=" in _ref and "windy\\.com" in _ref, "svet kamere: JS nalaga sličice prek workerja in sprejme samo windy.com")
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

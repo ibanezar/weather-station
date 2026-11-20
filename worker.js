@@ -1195,7 +1195,7 @@ async function _sgData() {
 // naslova sličice ni mogoče zapisati v podatke. Worker jo prebere, rezultat drži 8 min v pomnilniku izolata (brez KV) in
 // jo vrne odjemalcu. Dovoljene so SAMO kamere s seznama točk (`data/snegofili-tocke.json`, vdelava Windy): sicer bi
 // poljuben id porabil kvoto ključa. Windyjev klic gre največ enkrat na 8 min na kamero ne glede na obisk.
-const WINDY_TOCKE_URL = "https://meteorec.si/data/snegofili-tocke.json";
+const WINDY_TOCKE_URLS = ["https://meteorec.si/data/snegofili-tocke.json", "https://meteorec.si/data/snegofili-svet-tocke.json"];
 const WINDY_THUMB_TTL_MS = 8 * 60 * 1000, WINDY_THUMB_ERR_MS = 60 * 1000, WINDY_IDS_TTL_MS = 60 * 60 * 1000;
 const _windyThumbCache = new Map();
 let _windyIds = null;
@@ -1207,11 +1207,18 @@ function _windyEmbedId(s) {
 async function _windyAllowedIds() {
   if (_windyIds && Date.now() - _windyIds.ts < WINDY_IDS_TTL_MS) return _windyIds.set;
   try {
-    const r = await fetch(WINDY_TOCKE_URL, { cf: { cacheTtl: 1800, cacheEverything: true } });
-    if (!r.ok) return _windyIds ? _windyIds.set : null;
-    const d = await r.json();
     const set = new Set();
-    for (const t of (d && d.tocke) || []) for (const c of (t.kamere || [])) { const id = _windyEmbedId(c && c.embed); if (id) set.add(id); }
+    let okAny = false;
+    for (const url of WINDY_TOCKE_URLS) {
+      try {
+        const r = await fetch(url, { cf: { cacheTtl: 1800, cacheEverything: true } });
+        if (!r.ok) continue;
+        const d = await r.json();
+        okAny = true;
+        for (const t of (d && d.tocke) || []) for (const c of (t.kamere || [])) { const id = _windyEmbedId(c && c.embed); if (id) set.add(id); }
+      } catch (_) { /* en seznam lahko manjka, drugi velja naprej */ }
+    }
+    if (!okAny) return _windyIds ? _windyIds.set : null;
     _windyIds = { ts: Date.now(), set };
     return set;
   } catch (_) { return _windyIds ? _windyIds.set : null; }

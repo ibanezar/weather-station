@@ -914,6 +914,25 @@
     });
   });
 
+  /* sličice Windy kamer na karticah »Po svetu« (lene, prek workerja; ob napaki ostane besedilo, nikoli izmišljena slika) */
+  (function worldCams() {
+    var els = $$('.sg-wc-cam[data-wid]'); if (!els.length) return;
+    function fail(box) { var m = $('.sg-wc-cam-msg', box); if (m) m.textContent = 'Sličica kamere ni na voljo'; }
+    function load(box) {
+      if (box.dataset.done) return; box.dataset.done = '1';
+      fetch(PROXY + '/windy-thumb?id=' + encodeURIComponent(box.dataset.wid)).then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
+        var u = m && (m.preview || m.thumbnail);
+        if (!u || !/^https:\/\/[^/]*windy\.com\//.test(u)) { fail(box); return; }
+        var im = el('img'); im.src = u; im.alt = 'Sličica spletne kamere'; im.loading = 'lazy'; im.decoding = 'async'; im.referrerPolicy = 'no-referrer';
+        var msg = $('.sg-wc-cam-msg', box); if (msg) msg.remove(); box.insertBefore(im, box.firstChild); box.classList.add('has-img');
+      }).catch(function () { fail(box); });
+    }
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); load(e.target); } }); }, { rootMargin: '300px' });
+      els.forEach(function (b) { io.observe(b); });
+    } else els.forEach(load);
+  })();
+
   layout();
   particles();
   bindCams();

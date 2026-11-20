@@ -23,6 +23,7 @@ import html as _html
 import json
 import math
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -354,6 +355,28 @@ def load_world():
     return {"rows": rows, "when": d.get("generated_at_local", "")} if rows else None
 
 
+WORLD_POINTS_PATH = os.path.join(seo.ROOT, "data", "snegofili-svet-tocke.json")
+def load_world_cams():
+    """Točke »Po svetu« po id-ju (iz ročnega seznama), da kartica dobi kamere iste oblike kot alpske točke (`kamere`, vdelava samo prek valid_embed())."""
+    try:
+        with open(WORLD_POINTS_PATH, encoding="utf-8") as f:
+            return {p["id"]: p for p in json.load(f).get("tocke", [])}
+    except (OSError, ValueError):
+        return {}
+
+
+def world_cam_thumb(p):
+    """Sličica Windy kamere na kartici: lena, prek workerja /windy-thumb; klik odpre časovni zdrs (gumb pod vrstico). Prazno, če ni dovoljene vdelave."""
+    for c in (p or {}).get("kamere") or []:
+        ok = valid_embed(c)
+        if ok and ok[0] == "windy":
+            m = re.search(r"/player/(\d{1,12})/", ok[1])
+            if m:
+                return (f'<div class="sg-wc-cam" data-wid="{m.group(1)}"><span class="sg-wc-cam-msg">Sličica kamere se nalaga …</span>'
+                        f'<span class="sg-wc-cam-cap">Webcams provided by windy.com</span></div>')
+    return ""
+
+
 def world_phase(r):
     """Kot phase(), a ob manjkajoči ničti izotermi (nekateri modeli je ne ponujajo) iz temperature na višini točke."""
     if r.get("snow_line_m") is not None:
@@ -381,7 +404,8 @@ def spark_svg(sn, w=288, h=44):
             f'{"".join(bars)}<line class="n" x1="{w / 2:.1f}" x2="{w / 2:.1f}" y1="0" y2="{h}"/></svg>')
 
 
-def world_card_html(r):
+def world_card_html(r, p=None):
+    p = p or {}
     ph = world_phase(r)
     where = f'{COUNTRIES_WORLD[r["drzava"]]} · {r["regija"]} · {r["elevation_m"]} m'
     aria = (f'{r["ime"]}: zadnjih 24 ur {cm_cell(r["past24_cm"])}, naslednjih 24 ur {cm_cell(r["next24_cm"])}')
@@ -392,16 +416,24 @@ def world_card_html(r):
         f'<div class="sg-wc-hd"><span class="sg-av ph" data-c="{r["drzava"]}" aria-hidden="true">{r["drzava"]}</span>'
         f'<div class="sg-hd-t"><h4>{_html.escape(r["ime"])}</h4><p class="sg-sub">{_html.escape(where)}</p></div>'
         f'<span class="sg-pill ph-{ph}">{phase_text(ph, r)}</span></div>'
+        f'{world_cam_thumb(p)}'
         f'<div class="sg-wc-nums"><span><b>{cm_h(r["past24_cm"])}</b><small>zadnjih 24 ur</small></span>'
         f'<span class="r"><b>{cm_h(r["next24_cm"])}</b><small>naslednjih 24 ur</small></span></div>'
         f'{spark_svg(r.get("sn"))}'
         f'<dl class="sg-dl"><div><dt>Trenutna ura</dt><dd>{num(r["temp_c"], 1)} °C</dd></div>'
         f'<div style="grid-column:span 2"><dt>Meja sneženja</dt><dd>{sl_txt}</dd></div></dl>'
-        f'<p class="sg-foot"><span>Zadnjih 72 ur: {cm_h(r["past72_cm"])} · naslednjih 72 ur: {cm_h(r["next72_cm"])}</span></p>'
+        f'<p class="sg-foot"><span>Zadnjih 72 ur: {cm_h(r["past72_cm"])} · naslednjih 72 ur: {cm_h(r["next72_cm"])}</span>'
+        f'<span>{world_cam_links(p)}</span></p>'
+        f'{cam_slot(r["ime"], p)}'
         f'</article>')
 
 
-def svet_html(world):
+def world_cam_links(p):
+    """Kot cam_links(), a brez sklica na razdelek ARSO kamer (za svet ga ni): »Windy: časovni zdrs«, povezave ponudnikov ali »ni kamere«."""
+    return cam_links({"kamere": (p or {}).get("kamere")})
+
+
+def svet_html(world, wcams=None):
     rows = world["rows"]
     best = max(rows, key=lambda r: r["past72_cm"])
     lead = (f'Po modelu je v zadnjih 72 urah največ snega zapadlo na točki <strong>{_html.escape(best["ime"])}</strong> '
@@ -412,7 +444,7 @@ def svet_html(world):
         part = sorted((r for r in rows if r["drzava"] in codes), key=lambda r: -r["past72_cm"])
         if part:
             groups.append(f'  <h3 class="sg-h3">{title}</h3>\n  <div class="sg-wgrid">\n' +
-                          "\n".join(world_card_html(r) for r in part) + "\n  </div>\n")
+                          "\n".join(world_card_html(r, (wcams or {}).get(r["id"])) for r in part) + "\n  </div>\n")
     return ('  <section id="po-svetu" class="sg-sec" aria-labelledby="sv-h">\n'
             '  <h2 id="sv-h">Po svetu <span class="sg-bdg m">Model</span></h2>\n'
             f'  <p class="archive-intro">Izven Alp: smučišča na Japonskem in v Severni Ameriki. {lead} '
@@ -751,7 +783,7 @@ def build_body(data, cams):
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
     cams_sec = cam_wall_html(rows, cams)
     world = load_world()
-    world_sec = svet_html(world) if world else ""
+    world_sec = svet_html(world, load_world_cams()) if world else ""
     hp = hero_photo()
     nav = [("zemljevid", "Zemljevid")] + ([("kamere", "Kamere")] if cams_sec else []) + [
         ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije")] + ([("po-svetu", "Po svetu")] if world_sec else []) + [

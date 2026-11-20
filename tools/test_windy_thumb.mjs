@@ -30,15 +30,18 @@ const tocke = { tocke: [
   { id: 'c', kamere: [{ embed: 'https://evil.example/webcams/public/embed/player/4444/day' }] },
   { id: 'd', kamere: [] },
 ] };
-const apiCalls = []; let listOk = true;
+const svet = { tocke: [{ id: 'niseko', kamere: [{ embed: 'https://webcams.windy.com/webcams/public/embed/player/7777/day' }] }] };
+const apiCalls = []; let listOk = true, svetOk = true;
 const answers = {
   '1111': { images: { current: { icon: 'https://images-webcams.windy.com/1/i.jpg', thumbnail: 'https://images-webcams.windy.com/1/t.jpg?token=x', preview: 'https://images-webcams.windy.com/1/p.jpg?token=x' } } },
   '2222': { images: { current: { preview: 'https://evil.example/p.jpg', thumbnail: 'http://images-webcams.windy.com/t.jpg' } } },
+  '7777': { images: { current: { preview: 'https://images-webcams.windy.com/7/p.jpg?token=z' } } },
   '3333': { images: { current: { thumbnail: 'https://images-webcams.windy.com/3/t.jpg?token=y' } } },
 };
 globalThis.fetch = async (u, init = {}) => {
   const s = String(u);
   if (s.startsWith('https://meteorec.si/data/snegofili-tocke.json')) return listOk ? new Response(JSON.stringify(tocke), { status: 200 }) : new Response('x', { status: 500 });
+  if (s.startsWith('https://meteorec.si/data/snegofili-svet-tocke.json')) return svetOk ? new Response(JSON.stringify(svet), { status: 200 }) : new Response('x', { status: 500 });
   const m = /^https:\/\/api\.windy\.com\/webcams\/api\/v3\/webcams\/(\d+)\?/.exec(s);
   if (m) {
     apiCalls.push({ id: m[1], key: (init.headers || {})['x-windy-api-key'], url: s });
@@ -67,6 +70,9 @@ check(apiCalls.length === 1 && apiCalls[0].key === KEY && !apiCalls[0].url.inclu
 check(!JSON.stringify(b).includes(KEY), 'ključ ni v odgovoru odjemalcu');
 r = await call('/windy-thumb?id=1111', withKey); await r.json();
 check(apiCalls.length === 1, 'drugi klic znotraj 8 min ne gre na Windy (pomnilnik izolata)');
+
+r = await call('/windy-thumb?id=7777', withKey); b = await r.json();
+check(r.status === 200 && b.preview === 'https://images-webcams.windy.com/7/p.jpg?token=z', 'kamera iz seznama »Po svetu« je dovoljena');
 
 r = await call('/windy-thumb?id=2222', withKey); b = await r.json();
 check(b.error === 'no_image' && !b.preview, 'slika z druge domene in ne-https se zavrneta (no_image)');
