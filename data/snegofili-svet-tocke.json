@@ -134,10 +134,10 @@
    "kamere": [
     {
      "naslov": "Windy kamera",
-     "url": "https://www.windy.com/webcams/1349958001",
+     "url": "https://www.windy.com/webcams/1349985011",
      "ponudnik": "Windy",
      "embed_kind": "windy",
-     "embed": "https://webcams.windy.com/webcams/public/embed/player/1349958001/day",
+     "embed": "https://webcams.windy.com/webcams/public/embed/player/1349985011/day",
      "embed_terms": "https://api.windy.com/webcams/terms",
      "checked": "2026-11-20"
     }
