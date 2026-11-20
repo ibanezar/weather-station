@@ -570,3 +570,10 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
   .sg-mapsec .sg-seg button{flex:1 1 0}
   .sg-mapsec .sg-readout{min-height:0;font-size:.84rem}
 }
+
+/* ── telefon: aplikacija čez vso širino zaslona, manj praznine ob straneh (21. 11. 2026, Filip) ── */
+@media(max-width:640px){
+  .sg-app{width:100vw;max-width:100vw;margin-left:calc(50% - 50vw);margin-right:0;border-radius:0}
+  .sg-app>*:not(.sg-hero){margin-left:.6rem;margin-right:.6rem}
+  .sg-hero{padding-left:.7rem;padding-right:.7rem}
+}
