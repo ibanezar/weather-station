@@ -5,7 +5,8 @@ Windy ponuja dve obliki; obe sta podprti (skripta player.js se NE izvaja, iz pod
   1) <a name="windy-webcam-timelapse-player" data-id="1385535601" data-play="day" href="https://www.windy.com/webcams/...">Kredarica</a>
      → iframe https://webcams.windy.com/webcams/public/embed/player/<id>/<play> (day = časovni zdrs zadnjega dne, NI tok v živo)
   2) <iframe src="https://webcams.windy.com/...">
-Uporaba (en vnos):  python3 tools/add_windy_cam.py <id točke> '<koda>' [--cam-id ID] [--naslov "..."]
+Uporaba (en vnos):  python3 tools/add_windy_cam.py <id točke> '<koda>' [--cam-id ID] [--naslov "..."] [--svet]
+--svet: točka je s seznama »Po svetu« (data/snegofili-svet-tocke.json), npr. niseko, hakuba, whistler.
 Z več sidri v kodi izberi --cam-id. Skript preveri https in dovoljenega gostitelja (kot valid_embed() v generatorju), zapiše embed_kind=windy,
 embed_terms (pogoji Windy), checked = današnji datum in ponudnika Windy. Z datumom potrjuješ, da si pogoje uporabe Windy pogledal ti.
 Brez omrežja. Navedba »Webcams provided by windy.com« je v lightboxu obvezna.
@@ -21,6 +22,7 @@ from urllib.parse import urlparse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATH = os.path.join(ROOT, "data", "snegofili-tocke.json")
+PATH_SVET = os.path.join(ROOT, "data", "snegofili-svet-tocke.json")  # rubrika »Po svetu« (--svet)
 HOSTS = ("webcams.windy.com", "embed.windy.com")
 TERMS = "https://api.windy.com/webcams/terms"
 PLAYER = "https://webcams.windy.com/webcams/public/embed/player/{id}/{play}"
@@ -64,6 +66,7 @@ def main():
     ap.add_argument("koda")
     ap.add_argument("--cam-id", default=None)
     ap.add_argument("--naslov", default=None)
+    ap.add_argument("--svet", action="store_true", help="točka je iz rubrike »Po svetu«")
     a = ap.parse_args()
     cams = parse(a.koda)
     if a.cam_id:
@@ -71,14 +74,15 @@ def main():
     if len(cams) != 1:
         print(f"✗ v kodi je {len(cams)} kamer; izberi eno z --cam-id (id-ji: {', '.join(c['id'] for c in parse(a.koda))})", file=sys.stderr)
         return 1
-    with open(PATH, encoding="utf-8") as f:
+    path = PATH_SVET if a.svet else PATH
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
     try:
         ime = add(data, a.tocka, cams[0], a.naslov)
     except ValueError as e:
         print(f"✗ {e}; veljavne točke: {', '.join(x['id'] for x in data['tocke'])}" if "ni" in str(e) and "točke" in str(e) else f"✗ {e}", file=sys.stderr)
         return 1
-    with open(PATH, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
         f.write("\n")
     print(f"✓ {ime}: dodana kamera Windy ({cams[0]['naslov'] or cams[0]['src'][:50]}). Poženi: python3 tools/generate_snegofili_page.py")

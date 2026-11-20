@@ -636,3 +636,11 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-wc .sg-foot{margin-top:0}
 @media(max-width:640px){.sg-wgrid{grid-template-columns:minmax(0,1fr)}}
 .sg-wc .sg-av.ph{border-color:var(--sg-line)}
+
+/* kamere na karticah »Po svetu« */
+.sg-wc-cam{position:relative;aspect-ratio:16/9;margin:.55rem 0 .15rem;border-radius:10px;overflow:hidden;background:var(--sg-card2,#e9eff8);display:flex;align-items:center;justify-content:center}
+.sg-wc-cam img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sg-wc-cam-msg{font-size:.78rem;color:var(--sg-muted,#5b6b82);padding:0 .6rem;text-align:center}
+.sg-wc-cam-cap{position:absolute;left:.4rem;bottom:.3rem;font-size:.66rem;color:#fff;background:rgba(8,20,40,.62);padding:.05rem .35rem;border-radius:4px}
+.sg-wc .sg-camslot{margin-top:.5rem}
+.sg-wc .sg-foot{flex-wrap:wrap;gap:.2rem .6rem}
