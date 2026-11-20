@@ -1,23 +1,23 @@
 {
- "generated_at": "2026-11-19T23:13:15Z",
+ "generated_at": "2026-11-20T13:34:07Z",
  "live": {
   "target": 20,
   "classes": {
    "0–6 h": 20,
-   "6–12 h": 20,
+   "6–12 h": 21,
    "12–18 h": 6,
-   "18–24 h": 22,
-   "24–36 h": 23,
-   ">36 h": 23
+   "18–24 h": 23,
+   "24–36 h": 24,
+   ">36 h": 24
   },
-  "best": 23,
+  "best": 24,
   "best_class": "24–36 h",
-  "log_rows": 225
+  "log_rows": 228
  },
  "profile": {
   "target": 120,
-  "days": 27,
-  "winter_days": 19,
+  "days": 28,
+  "winter_days": 20,
   "snow_days": 0
  }
 }
