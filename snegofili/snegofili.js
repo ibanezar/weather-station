@@ -37,7 +37,25 @@
     return out.slice(0, o.top || 3);
   }
 
+  /* ročna meritev snega v Rečici (data/snegofili-recica.json; vnese jo lastnik postaje, postaja snega ne meri) */
+  var RECICA_STALE_H = 72, RECICA_HIDE_D = 30;
+  function recicaState(list, nowMs) {
+    var best = null;
+    (Array.isArray(list) ? list : []).forEach(function (m) {
+      if (!m || typeof m.cm !== 'number' || !isFinite(m.cm) || m.cm < 0 || m.cm > 500) return;
+      var t = Date.parse(m.cas); if (!isFinite(t) || t > nowMs + 36e5) return;
+      if (!best || t > best.t) best = { t: t, cm: m.cm, novi: typeof m.novi === 'number' && isFinite(m.novi) && m.novi >= 0 ? m.novi : null };
+    });
+    if (!best) return null;
+    var ageH = Math.max(0, (nowMs - best.t) / 36e5);
+    if (ageH > RECICA_HIDE_D * 24) return null;
+    return { cm: best.cm, novi: best.novi, t: best.t, ageH: ageH, stale: ageH > RECICA_STALE_H };
+  }
+  function recicaAge(ageH) { return ageH < 1 ? 'pred manj kot uro' : ageH < 48 ? 'pred ' + Math.round(ageH) + ' h' : 'pred ' + Math.round(ageH / 24) + ' dnevi'; }
+  function recicaCm(cm) { return cm === 0 ? '0 cm' : fmt(cm, cm >= 10 || cm === Math.round(cm) ? 0 : 1) + ' cm'; }
+
   var model = {
+    recicaState: recicaState, recicaAge: recicaAge, recicaCm: recicaCm, RECICA_STALE_H: RECICA_STALE_H, RECICA_HIDE_D: RECICA_HIDE_D,
     NOW: NOW, MIN_I: MIN_I, MAX_I: MAX_I, SNOWING_MIN: SNOWING_MIN, step: step, phase: phase, radius: radius, barPct: barPct,
     windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, snowing: snowing, hstep: hstep, plan: plan
   };
@@ -709,24 +727,30 @@
   }
   addEventListener('hashchange', hashOpen);
 
-  /* ══ »Kam peljem po sneg?« ══ */
+  /* izbira točke iz lestvice: isti povzetek kot klik na krog na zemljevidu */
+  function selectOnMap(id) {
+    var c = $('#sg-map [data-id="' + id + '"]'); if (!c) { openDetail(id); return; }
+    go(c);
+    if (window.matchMedia && !window.matchMedia('(min-width:1100px)').matches && map && map.scrollIntoView) map.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  }
+  /* ══ »Kje bo največ novega snega?« (prej »Kam peljem«) ══ */
   function planUi() {
     var sec = $('#kam-peljem'); if (!sec) return;
     sec.hidden = false;
     var win = $('#sg-pl-win'), km = $('#sg-pl-km'), el2 = $('#sg-pl-el'), cm = $('#sg-pl-cm'), out = $('#sg-pl-out');
     function run() {
-      var res = plan(pts, hours, { win: win.value, km: +km.value, minE: +el2.value, minCm: +cm.value, top: 3 });
+      var res = plan(pts, hours, { win: win.value, km: +km.value, minE: +el2.value, minCm: +cm.value, top: 5 });
       out.textContent = '';
       if (!res.length) { out.appendChild(el('li', 'sg-pl-none', 'Po modelu v izbranem oknu nobena točka ne doseže izbranih meril. Povečajte razdaljo ali znižajte prag.')); return; }
       res.forEach(function (x, k) {
-        var p = x.p, li = el('li', 'sg-pl-i'), t = hours[p.id].t[NOW];
+        var p = x.p, li = el('li', 'sg-pl-i');
         li.appendChild(el('span', 'sg-pl-rank', String(k + 1)));
-        var b = el('div', 'sg-pl-b'), av2 = avatar(p, 'sm'); if (av2) li.appendChild(av2); b.appendChild(el('h3', null, p.n));
-        b.appendChild(el('p', 'sg-sub', (p.c === 'SI' ? 'Slovenija' : p.c) + ' · ' + p.e + ' m · ' + p.k + ' km · zdaj ' + (t == null ? '—' : fmt(t / 10, 1) + ' °C')));
-        var act = el('div', 'sg-dt-act');
-        var d = el('button', 'sg-btn s', 'Podrobnosti'); d.type = 'button'; d.addEventListener('click', function () { openDetail(p.id, d); }); act.appendChild(d);
-        if (hasCam(p)) { var c = el('button', 'sg-btn s', camLabel(p)); c.type = 'button'; c.addEventListener('click', function () { openCam(p.id, c); }); act.appendChild(c); }
-        b.appendChild(act); li.appendChild(b);
+        var av2 = avatar(p, 'sm'); if (av2) li.appendChild(av2);
+        var b = el('div', 'sg-pl-b'), nm = el('button', 'sg-pl-name', p.n); nm.type = 'button';
+        nm.setAttribute('aria-label', p.n + ': pokaži na zemljevidu');
+        nm.addEventListener('click', function () { selectOnMap(p.id); });
+        b.appendChild(nm);
+        b.appendChild(el('p', 'sg-sub', p.e + ' m · ' + p.k + ' km')); li.appendChild(b);
         var v = el('div', 'sg-pl-v'); v.appendChild(el('b', null, cmText(x.cm))); v.appendChild(el('small', null, win.value === 'p24' ? 'v zadnjih 24 h' : win.value === 'n48' ? 'v 24–48 h' : 'v 24 h')); li.appendChild(v);
         out.appendChild(li);
       });
@@ -843,6 +867,19 @@
   layout();
   particles();
   bindCams();
+  /* tile in oznaka na karti: ročna meritev v Rečici (ob napaki ali brez meritve ostane skrito, nikoli izmišljena vrednost) */
+  (function recicaUi() {
+    var tile = $('#sg-st-rec-w'); if (!tile) return;
+    fetch('/data/snegofili-recica.json?h=' + Math.floor(Date.now() / 36e5), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var st = recicaState(j && j.meritve, Date.now()); if (!st) return;
+      var d = new Date(st.t).toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric', timeZone: 'Europe/Ljubljana' });
+      $('#sg-st-rec').textContent = recicaCm(st.cm);
+      var n = (st.cm === 0 ? 'izmerjena ničla' : 'ročna meritev') + ' · ' + (st.stale ? 'stara: ' + d : recicaAge(st.ageH)) + (st.novi != null ? ' · nov sneg ' + recicaCm(st.novi) : '');
+      $('#sg-st-rec-n').textContent = n;
+      tile.classList.toggle('stale', st.stale); tile.hidden = false;
+      var lb = $('#sg-rec-lbl'); if (lb && !st.stale) lb.textContent = 'Rečica · ' + recicaCm(st.cm);
+    }).catch(function () { });
+  })();
   fetch('ure.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
     if (!j || !j.tocke) return;
     hours = j.tocke; nowLocal = j.now_local; bindControls(); sparks(); render(NOW); planUi(); heatUi(); hashOpen();
@@ -906,21 +943,27 @@
   })();
   /* ══ navigacija po razdelkih, filter kamer, povezava do opozorila ══ */
   (function () {
-    var nav = document.getElementById('sg-nav');
+    var nav = document.getElementById('sg-nav'), tab = document.getElementById('sg-tabbar');
     function sync() {
-      if (!nav) return;
-      $$('a', nav).forEach(function (a) {
-        var t = document.getElementById(a.getAttribute('href').slice(1));
-        a.parentNode.hidden = !t || t.hidden;
+      [nav, tab].forEach(function (box) {
+        if (!box) return;
+        $$('a', box).forEach(function (a) {
+          var t = document.getElementById(a.getAttribute('href').slice(1));
+          a.parentNode.hidden = !t || t.hidden;
+        });
       });
       var al = document.getElementById('sg-alarm'), cta = document.getElementById('sg-al-cta');
       if (cta) cta.hidden = !al || al.hidden;
     }
     window.addEventListener('load', function () { sync(); setTimeout(sync, 800); setTimeout(sync, 2500); });
-    if (nav && 'IntersectionObserver' in window) {
-      var links = {}; $$('a', nav).forEach(function (a) { links[a.getAttribute('href').slice(1)] = a; });
+    if ((nav || tab) && 'IntersectionObserver' in window) {
+      var links = {}; [nav, tab].forEach(function (box) { if (box) $$('a', box).forEach(function (a) { var k = a.getAttribute('href').slice(1); (links[k] = links[k] || []).push(a); }); });
       var io = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { if (e.isIntersecting) { Object.keys(links).forEach(function (k) { links[k].removeAttribute('aria-current'); }); var a = links[e.target.id]; if (a) a.setAttribute('aria-current', 'true'); } });
+        es.forEach(function (e) {
+          if (!e.isIntersecting || !links[e.target.id]) return;
+          Object.keys(links).forEach(function (k) { links[k].forEach(function (a) { a.removeAttribute('aria-current'); }); });
+          links[e.target.id].forEach(function (a) { a.setAttribute('aria-current', 'true'); });
+        });
       }, { rootMargin: '-30% 0px -60% 0px' });
       Object.keys(links).forEach(function (k) { var t = document.getElementById(k); if (t) io.observe(t); });
     }

@@ -410,7 +410,6 @@ body .site-head{display:none}
 .sg-av{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;background:#183563;border:2px solid rgba(255,255,255,.4);display:block}
 .sg-av.ph{display:flex;align-items:center;justify-content:center;font:700 .72rem/1 var(--sg-font,inherit);letter-spacing:.04em;color:#e6efff;background:#183563;border-color:#6f8fc4}
 .sg-av.ph.sm{font-size:.62rem}
-.sg-av.ph[data-c=SI]{border-color:#4f9bff}.sg-av.ph[data-c=AT]{border-color:#ff6b6b}.sg-av.ph[data-c=IT]{border-color:#5fd08a}.sg-av.ph[data-c=CH]{border-color:#ff8a8a}.sg-av.ph[data-c=FR]{border-color:#8fb0ff}.sg-av.ph[data-c=HR]{border-color:#ff9a9a}.sg-av.ph[data-c=DE]{border-color:#ffd25a}
 .sg-av.sm{width:34px;height:34px;border-width:1.5px}
 .sg-av.lg{width:52px;height:52px}
 .sg-head{justify-content:flex-start;align-items:center}
@@ -425,3 +424,119 @@ body .site-head{display:none}
 .sg-fotocr ul{columns:2 20rem;margin:.4rem 0 0;padding-left:1.1rem}
 .sg-fotocr li{margin:0 0 .35rem;break-inside:avoid}
 .sg-pn-x{margin-left:auto}
+
+/* ── prenova postavitve (20. 11. 2026, po mockupu): nizek hero, kazalniki čez rob, zemljevid + lestvica ob strani,
+      zastave namesto črk, navigacija strani spodaj na telefonu ── */
+.sg-hero{padding:1.1rem 1.3rem 3.6rem}
+@media(min-width:900px){.sg-hero{padding:1.2rem 2rem 3.8rem}}
+.sg-brand{margin:0 0 .6rem}
+.sg-brand img{height:44px}
+.sg-hero h1.page-title{font-size:clamp(1.8rem,5.5vw,2.7rem);margin:.1rem 0 .3rem}
+.sg-sub2{margin:0 0 .5rem;font-size:.98rem}
+.sg-hero-row{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem 1.2rem;margin:0 0 .8rem}
+.sg-hero-row .sg-nowline,.sg-hero-row .sg-meta{margin:0}
+.sg-hero-row .sg-nowline{font-size:.92rem;min-height:0}
+.sg-hero-row .sg-meta{font-size:.78rem}
+.sg-hero-cta{display:flex;flex-wrap:wrap;gap:.6rem}
+.sg-cta.p{background:#fff}
+.sg-cta.o{background:rgba(9,22,43,.35);border:2px solid rgba(255,255,255,.7);color:#fff !important}
+.sg-app>.sg-stats{position:relative;z-index:2;margin-top:-2.8rem;margin-bottom:1rem}
+@media(min-width:700px){.sg-app>.sg-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sg-app>.sg-stats .sg-stat{min-height:5.6rem;box-shadow:0 8px 24px rgba(3,10,24,.45)}
+.sg-stat small{display:flex;align-items:center;flex-wrap:wrap;gap:.1rem .4rem}
+.sg-stat small>span:not(.sg-bdg){font:inherit;color:inherit;white-space:normal;overflow:visible}
+.sg-st-ic{flex:none;color:#8fc0ff}
+.sg-app>.sg-stats .sg-stat b{font-size:1.8rem}
+.sg-brief{margin-top:.2rem;margin-bottom:1rem;color:var(--sg-muted);font-size:.95rem;max-width:62rem}
+.sg-brief strong{color:var(--sg-ink)}
+
+/* lestvica »Kje bo največ novega snega?« ob zemljevidu */
+.sg-rank{order:4;background:var(--sg-surface);border:1.5px solid var(--sg-line);border-radius:18px;padding:.9rem}
+.sg-rank[hidden]{display:none}
+.sg-rank>h2{font-size:1.1rem;margin:0 0 .6rem;padding:0;border:0;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.sg-rank>h2:before{display:none}
+.sg-rank .sg-plan-row{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.2rem 0 .7rem}
+.sg-rank .sg-plan-row label{flex:none}
+.sg-rank .sg-plan-row select{min-height:44px;font-size:.85rem;padding:0 .4rem}
+.sg-rank .sg-pl-out{gap:.4rem;margin:.3rem 0}
+.sg-rank .sg-pl-i{position:relative;grid-template-columns:1.4rem auto minmax(0,1fr) auto;gap:.55rem;padding:.5rem .6rem;border-radius:14px;box-shadow:none;background:var(--sg-bg);border-width:1.5px}
+.sg-rank .sg-pl-i:hover{border-color:#6aa6ff}
+.sg-rank .sg-pl-rank{width:auto;height:auto;background:none;color:var(--sg-muted);font:800 1rem var(--sg-display)}
+.sg-rank .sg-pl-b{min-width:0}
+.sg-pl-name{all:unset;box-sizing:border-box;display:block;max-width:100%;cursor:pointer;font:800 .98rem/1.2 var(--sg-display);color:var(--sg-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sg-pl-name:after{content:"";position:absolute;inset:0;border-radius:14px}
+.sg-pl-name:focus-visible:after{outline:3px solid #fff;outline-offset:2px}
+.sg-rank .sg-pl-b .sg-sub{margin:.1rem 0 0;font-size:.78rem;color:var(--sg-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-rank .sg-pl-v b{font:800 .95rem/1 var(--sg-display);background:#1a63ff;color:#fff;border-radius:10px;padding:.35rem .55rem;display:inline-block}
+.sg-rank .sg-pl-v small{display:none}
+.sg-rank .sg-pl-av{display:flex}
+@media(max-width:560px){.sg-rank .sg-pl-i{grid-template-columns:1.4rem auto minmax(0,1fr) auto}.sg-rank .sg-pl-v{grid-column:auto;display:block;text-align:right}}
+.sg-rank .muted-note{font-size:.72rem;margin:.5rem 0 0}
+
+/* zastave namesto črk (CSS, brez datotek) */
+.sg-av.ph{font-size:0;color:transparent;border-color:rgba(255,255,255,.6)}
+.sg-av.ph[data-c=SI]{background:linear-gradient(#fff 0 33.3%,#0059b3 33.3% 66.6%,#e30613 66.6%)}
+.sg-av.ph[data-c=AT]{background:linear-gradient(#ed2939 0 33.3%,#fff 33.3% 66.6%,#ed2939 66.6%)}
+.sg-av.ph[data-c=IT]{background:linear-gradient(90deg,#009246 0 33.3%,#fff 33.3% 66.6%,#ce2b37 66.6%)}
+.sg-av.ph[data-c=FR]{background:linear-gradient(90deg,#0055a4 0 33.3%,#fff 33.3% 66.6%,#ef4135 66.6%)}
+.sg-av.ph[data-c=DE]{background:linear-gradient(#000 0 33.3%,#dd0000 33.3% 66.6%,#ffce00 66.6%)}
+.sg-av.ph[data-c=HR]{background:linear-gradient(#f00 0 33.3%,#fff 33.3% 66.6%,#171796 66.6%)}
+.sg-av.ph[data-c=CH]{background:linear-gradient(#fff,#fff) center/54% 17% no-repeat,linear-gradient(#fff,#fff) center/17% 54% no-repeat,#d52b1e}
+
+/* prerez in toplotna karta drug ob drugem na širokem zaslonu */
+.sg-duo{display:grid;grid-template-columns:minmax(0,1fr);gap:0 1.2rem}
+@media(min-width:1280px){.sg-duo{grid-template-columns:repeat(2,minmax(0,1fr))}.sg-duo:has(>.sg-heatsec[hidden]){grid-template-columns:minmax(0,1fr)}}
+
+@media(min-width:1100px){
+  .sg-mapgrid,.sg-mapgrid:has(.sg-panel[hidden]){grid-template-columns:minmax(0,1fr) 21rem}
+  .sg-mapgrid .sg-mapcol{grid-column:1;grid-row:1}
+  .sg-mapgrid .sg-panel,.sg-mapgrid .sg-rank{grid-column:2;grid-row:1}
+  .sg-mapgrid .sg-rank{position:sticky;top:5rem;order:unset}
+  .sg-mapgrid:has(.sg-panel:not([hidden])) .sg-rank{display:none}
+}
+
+/* navigacija strani spodaj na telefonu (nadomesti skupno navigacijo Meteorec in lepljivo vrstico razdelkov) */
+.sg-tabbar{display:none}
+body:has(.sg-tabbar) .app-bottomnav{display:none !important}
+@media(max-width:640px){
+  .sg-nav{display:none}
+  body:has(.sg-tabbar){padding-bottom:4.2rem}
+  .sg-tabbar{display:block;position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(9,22,43,.97);border-top:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding-bottom:env(safe-area-inset-bottom)}
+  .sg-tabbar ul{display:flex;list-style:none;margin:0;padding:0}
+  .sg-tabbar li{flex:1 1 0;min-width:0}
+  .sg-tabbar li[hidden]{display:none}
+  .sg-tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;min-height:56px;box-sizing:border-box;padding:.35rem .1rem;color:#b9cdea;font:700 .72rem var(--sg-display);text-decoration:none}
+  .sg-tabbar a[aria-current]{color:#fff;box-shadow:inset 0 3px 0 #6aa6ff}
+  .sg-tabbar a:focus-visible{outline:3px solid #fff;outline-offset:-3px}
+}
+
+.sg-mapsec>h2{font-size:1.35rem;margin-bottom:.15rem}
+.sg-mapsec>.archive-intro{margin:.1rem 0 .7rem;font-size:.88rem}
+@media(max-width:640px){
+  .sg-hero{padding:.9rem .9rem 3.2rem}
+  .sg-brand{margin:0 0 .5rem}
+  .sg-brand img{height:38px}
+  .sg-kicker,.sg-sub2{display:none}
+  .sg-hero h1.page-title{font-size:1.7rem;margin:.1rem 0 .4rem}
+  .sg-hero-row .sg-nowline{font-size:.86rem}
+  .sg-hero-cta{flex-wrap:nowrap}
+  .sg-hero-cta .sg-cta{flex:1 1 0;justify-content:center;text-align:center;padding:.3rem .5rem;font-size:.84rem;line-height:1.15}
+  .sg-app>.sg-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:-2.4rem}
+  .sg-app>.sg-stats .sg-stat{min-height:0;padding:.6rem .7rem;border-radius:16px}
+  .sg-app>.sg-stats .sg-stat b{font-size:1.55rem}
+  .sg-stat small{font-size:.62rem}
+  .sg-stat .sg-bdg{display:none}
+  .sg-st-near{display:none}
+  .sg-tabbar a{font-size:.7rem}
+}
+@media(max-width:640px){.sg-mapsec>.archive-intro{display:none}.sg-mapsec>h2{font-size:1.2rem}}
+.sg-duo .sg-heatsec{background:var(--sg-win);border:2px solid rgba(255,255,255,.35);border-radius:18px;padding:1rem;margin-top:1.2rem;align-self:start}
+.sg-duo .sg-heatsec>h2{font-size:1.2rem;margin:0 0 .15rem}
+.sg-duo .sg-heatsec>h2:before{display:none}
+.sg-duo .sg-heatsec>.archive-intro{font-size:.82rem;color:#b9cdea;margin:.2rem 0 .6rem}
+
+/* ročna meritev snega v Rečici: peta ploščica, samo če meritev obstaja */
+.sg-stat[hidden]{display:none}
+.sg-st-rec.stale b{opacity:.7}
+@media(min-width:900px){.sg-app>.sg-stats:has(.sg-st-rec:not([hidden])){grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:640px){.sg-st-rec:not([hidden]){grid-column:1/-1}}
