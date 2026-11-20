@@ -9,7 +9,7 @@
  "vozisce": "suho vozišče",
  "odeja_cm": 0,
  "megla_do_m": 687,
- "sunki_kmh": 34,
+ "sunki_kmh": 39,
  "odseki": [
   {
    "od_km": 0,
@@ -240,6 +240,6 @@
    "megla": true
   }
  ],
- "opis": "Današnje jutro (6:00–8:00): na vrhu 3 °C, ponekod led (km 0–18,3), drugod suho, v dolini megla do 687 m, na vrhu sunki do 34 km/h.",
+ "opis": "Današnje jutro (6:00–8:00): na vrhu 3 °C, ponekod led (km 0–18,3), drugod suho, v dolini megla do 687 m, na vrhu sunki do 39 km/h.",
  "generated_at": "2026-11-19T20:11:45.316759+00:00"
 }
