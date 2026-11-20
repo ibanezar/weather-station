@@ -8,6 +8,11 @@
   --sg-bg:#0b1b33;--sg-surface:#12284a;--sg-surface2:#183563;--sg-line:rgba(255,255,255,.14);--sg-muted:#b2c9e6;--sg-link:#8fc2ff;
   --sg-win:#07101f;--sg-shadow:none;--sg-num:#8fc2ff;--sg-sbtn:#cfe6ff;--sg-sbtn-b:#6aa6ff;
   --sg-display:'Bricolage Grotesque','Inter',system-ui,sans-serif}
+/* svetla tema (21. 11. 2026, Filip): svetla podlaga strani in kartic; hero, okna s podatki (karta, prerez, toplotna karta) in modalno okno ostanejo temna,
+   ker je lestvica snega validirana na temni podlagi (#0b1b33). Temni deli ponovno razglasijo temne žetone. */
+.sg-app{--sg-ink:#0b1b33;--sg-bg:#f2f6fc;--sg-surface:#ffffff;--sg-surface2:#e6eef9;--sg-line:rgba(11,27,51,.14);--sg-muted:#3d5473;--sg-link:#1257c9;
+  --sg-num:#1257c9;--sg-sbtn:#0b3a8a;--sg-sbtn-b:#1b6ef3;--sg-shadow:0 1px 3px rgba(11,27,51,.08)}
+.sg-hero,.sg-win,.sg-mp,.sg-stat,.sg-tabbar,.sg-profwrap,.sg-heatsec{--sg-bg:#0b1b33;--sg-ink:#eaf4ff;--sg-surface:#12284a;--sg-surface2:#183563;--sg-line:rgba(255,255,255,.14);--sg-muted:#b2c9e6;--sg-link:#8fc2ff;--sg-num:#8fc2ff;--sg-sbtn:#cfe6ff;--sg-sbtn-b:#6aa6ff;--sg-shadow:none;color:var(--sg-ink)}
 .sg-app{background:var(--sg-bg);color:var(--sg-ink);border-radius:26px;overflow:clip;margin:0 0 1.6rem;padding-bottom:1.6rem;
   border:1px solid var(--sg-line)}
 .sg-app a,.sg-app .archive-intro a,.sg-app .muted-note a{color:var(--sg-link)}
@@ -577,3 +582,15 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
   .sg-app>*:not(.sg-hero){margin-left:.6rem;margin-right:.6rem}
   .sg-hero{padding-left:.7rem;padding-right:.7rem}
 }
+
+/* svetla tema: deli na svetli podlagi */
+.sg-app .sg-nav{background:rgba(242,246,252,.96)}
+.sg-app .sg-nav a[aria-current="true"]{background:#0b1b33;color:#fff !important;border-color:#0b1b33}
+.sg-app .sg-nav a:focus-visible{outline-color:#1257c9}
+.sg-bdg.m{background:rgba(27,110,243,.1);color:#0b3a8a;border-color:rgba(27,110,243,.45)}
+.sg-bdg.r{background:#0b1b33;color:#fff}
+.sg-bdg.c{background:rgba(11,27,51,.06);color:#0b1b33;border-color:rgba(11,27,51,.3)}
+.sg-profwrap .sg-bdg.m,.sg-heatsec .sg-bdg.m,.sg-hero .sg-bdg.m,.sg-win .sg-bdg.m,.sg-stat .sg-bdg.m,.sg-mp .sg-bdg.m{background:rgba(133,185,243,.18);color:#cfe6ff;border-color:rgba(133,185,243,.55)}
+.sg-hero .sg-bdg.r,.sg-win .sg-bdg.r,.sg-stat .sg-bdg.r,.sg-mp .sg-bdg.r{background:#fff;color:#0b1b33}
+.sg-hero .sg-bdg.c,.sg-win .sg-bdg.c,.sg-stat .sg-bdg.c,.sg-mp .sg-bdg.c{background:rgba(255,255,255,.1);color:#eaf4ff;border-color:rgba(255,255,255,.4)}
+.sg-card .sg-nums b{color:#0b3a8a}
