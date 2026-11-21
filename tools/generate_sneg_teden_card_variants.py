@@ -98,7 +98,7 @@ def v2(S):
     header(img, d, "kdaj začne snežiti", thumb=False)
     badge(d, "NAPOVED, NE MERITEV")
     d.text((PAD, 268), "Prvi sneg v dolini:", font=font(B, 84), fill=WHITE)
-    d.text((PAD, 360), "v sredo popoldne.", font=font(B, 84), fill=ICE)
+    d.text((PAD, 360), f"v sredo {post.part(t_first.hour)}.", font=font(B, 84), fill=ICE)
     d.text((PAD, 480), f"{DAYS[t_first.weekday()]} {t_first.hour}.00", font=font(B, 160), fill=WHITE)
     d.text((PAD, 690), "mediana ure, ko v Rečici prvič zasneži", font=font(R, 34), fill=MUTED)
     d.text((PAD, 736), f"80 % članov: {post.span(first['h10'], first['h90'])}", font=font(R, 34), fill=MUTED)

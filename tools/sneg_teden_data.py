@@ -36,7 +36,7 @@ ELEVS = [366, 700, 1000, 1400]
 DAYS = [(START + datetime.timedelta(days=i)).date().isoformat() for i in range(8)]   # 22.-29. 11.
 
 
-def _get(url, params, tries=4):
+def _get(url, params, tries=4, pause=4):
     q_ = urllib.parse.urlencode(params, safe=",")
     last = None
     for i in range(tries):
@@ -46,7 +46,7 @@ def _get(url, params, tries=4):
                 return json.load(r)
         except Exception as e:  # noqa: BLE001
             last = e
-            time.sleep(4 * (i + 1))
+            time.sleep(pause * (i + 1))
     raise RuntimeError(f"{url}: {last}")
 
 
@@ -101,6 +101,51 @@ def summarize(stats):
             "cm10": pct(sum(1 for s in stats if s[1] >= 10), n), "tmax50": round(q(tx, .5), 1),
             "med": round(q(cms, .5), 1), "p10": round(q(cms, .1), 1), "p90": round(q(cms, .9), 1),
             "mm50": round(q(mms, .5), 1), "tmin50": round(q(tm, .5), 1)}
+
+
+def fetch_det(det, only=None, tries=4, pause=4):
+    """Determinični modeli (Rečica, 366 in 700 m); `det` se dopolni. `only`: samo ti modeli (za ponovni poskus po 429)."""
+    base = {"timezone": "Europe/Ljubljana", "forecast_days": 9}
+    dels = [366, 700]
+    for mid, label in DET_MODELS + [("best_match", "Open-Meteo (osnovni model strani)")]:
+        if only is not None and mid not in only:
+            continue
+        try:
+            r = _get("https://api.open-meteo.com/v1/forecast", dict(
+                base, latitude=",".join([str(LAT)] * 2), longitude=",".join([str(LON)] * 2), elevation=",".join(map(str, dels)),
+                models=mid, hourly="temperature_2m,precipitation"), tries=tries, pause=pause)
+        except Exception as e:  # noqa: BLE001
+            print("  ⚠ det", mid, e)
+            continue
+        r = r if isinstance(r, list) else [r]
+        per = {}
+        for el, loc in zip(dels, r):
+            h = loc["hourly"]
+            idx = _idx(h["time"])
+            t, p = _series(h, "temperature_2m", idx), _series(h, "precipitation", idx)
+            days = {}
+            for k, d in enumerate(DAYS):
+                sl = slice(24 * k, 24 * k + 24)
+                if any(x is None for x in t[sl]) or any(x is None for x in p[sl]):
+                    days[d] = None      # model za ta dan nima podatka (npr. ICON-EU sega manj daleč)
+                    continue
+                s = day_stats(t, p, 24 * k, 24 * k + 24)
+                days[d] = {"cm": round(s[1], 1), "mm": round(s[2], 1), "tmin": round(s[3], 1), "tmax": round(s[4], 1)}
+            per[str(el)] = days
+        det[mid] = {"label": label, "elev": per}
+        print("  det", mid, "ok")
+    return det
+
+
+def retry_det():
+    """Dopolni modele, ki jih je prejšnji prenos zgrešil (npr. HTTP 429), v obstoječem posnetku."""
+    out = json.load(open(OUT, encoding="utf-8"))
+    want = [m for m, _ in DET_MODELS] + ["best_match"]
+    missing = [m for m in want if m not in out["det"]]
+    print("manjkajo:", missing)
+    fetch_det(out["det"], only=missing, tries=6, pause=25)
+    json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("✓ posnetek:", os.path.relpath(OUT, ROOT), "še manjkajo:", [m for m in want if m not in out["det"]])
 
 
 def fetch():
@@ -174,38 +219,13 @@ def fetch():
     out["ens"] = res
     out["members"] = {mid: len(raw[mid]["per"][ELEVS[0]]["t"]) for mid, _ in ENS}
 
-    # 2) determinični modeli (Rečica, 366 in 700 m)
-    det = {}
-    dels = [366, 700]
-    for mid, label in DET_MODELS + [("best_match", "Open-Meteo (osnovni model strani)")]:
-        try:
-            r = _get("https://api.open-meteo.com/v1/forecast", dict(
-                base, latitude=",".join([str(LAT)] * 2), longitude=",".join([str(LON)] * 2), elevation=",".join(map(str, dels)),
-                models=mid, hourly="temperature_2m,precipitation"))
-        except Exception as e:  # noqa: BLE001
-            print("  ⚠ det", mid, e)
-            continue
-        r = r if isinstance(r, list) else [r]
-        per = {}
-        for el, loc in zip(dels, r):
-            h = loc["hourly"]
-            idx = _idx(h["time"])
-            t, p = _series(h, "temperature_2m", idx), _series(h, "precipitation", idx)
-            days = {}
-            for k, d in enumerate(DAYS):
-                sl = slice(24 * k, 24 * k + 24)
-                if any(x is None for x in t[sl]) or any(x is None for x in p[sl]):
-                    days[d] = None      # model za ta dan nima podatka (npr. ICON-EU sega manj daleč)
-                    continue
-                s = day_stats(t, p, 24 * k, 24 * k + 24)
-                days[d] = {"cm": round(s[1], 1), "mm": round(s[2], 1), "tmin": round(s[3], 1), "tmax": round(s[4], 1)}
-            per[str(el)] = days
-        det[mid] = {"label": label, "elev": per}
-        print("  det", mid, "ok")
-    out["det"] = det
+    out["det"] = fetch_det({})
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print("✓ posnetek:", os.path.relpath(OUT, ROOT), round(os.path.getsize(OUT) / 1024), "kB")
 
 
 if __name__ == "__main__":
-    fetch()
+    if "--retry-det" in sys.argv:
+        retry_det()
+    else:
+        fetch()
