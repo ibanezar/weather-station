@@ -16,7 +16,7 @@ sre 15.00mediana ure, ko v Rečici prvič zasneži
 
 V članku z 12. novembra »Sneg ta teden: v dolini ne, na višinah nekaj centimetrov« sem zapisal, da snega v dolini ne bo. Tako je tudi bilo: ARSO v Gornjem Gradu (428 m, 9 km od Rečice) od 9. novembra do 20. 11. v 21 odčitkih ni izmeril nobene snežne odeje. V dolini prve snežne odeje letos torej še ni bilo.
 
-02 — KDAJ -- Dva suha dneva, nato sneg
+02 — KDAJ -- Najprej dva mirna dneva, nato sneg
 
 V nedeljo (22. 11.) v dolini še dežuje; sneg je verjeten šele nad približno 1000 m (na 1000 m vsaj 1 cm napoveduje 76 % članov, v Rečici 1 %). V ponedeljek in torek je padavin malo (vsaj 1 cm snega ima 7 % članov v vsakem od obeh dni), je pa mrzlo: ansambli kažejo v torek zjutraj v Rečici mediano –1,7 °C, poskusni model MTR, ki popravlja za dno doline, pa –6,8 °C. Razlika je običajna za jasne, mirne noči: modeli so takrat v dolini običajno pretopli.
 
@@ -36,6 +36,8 @@ V petek je v Rečici vsaj 1 cm snega še pri 38 % članov, v soboto pri 22 %, v 
 
 Koliko snega med sredo in četrtkom
 Stolpec je mediana, črta razpon od 10. do 90. percentila članov (25.–26. 11., skupaj). Temperatura je izračunana za izbrano višino, ne izmerjena. Nad 700 m je skoraj vsa padavina sneg, zato se višine med seboj malo razlikujejo.
+
+Arhivska fotografija (20. 1. 2019): sneg nad meglenim morjem. Ilustracija, ne prikazuje letošnjega snega. Foto: Filip Eremita.
 
 Na 700 m je mediana 16 cm, na 1000 m 17 cm, na Golteh (1400 m) 18 cm. Razlika med 700 in 1400 m je majhna, ker je že na 700 m skoraj vsa padavina sneg. V Rečici je mediana 12 cm, le nekaj centimetrov nižja, razpon pa širši in pomaknjen navzdol (2–25 cm): odločilno je, ali je temperatura v urah padavin pod ali nad 0,5 °C.
 
@@ -65,6 +67,8 @@ Open-Meteo (osnovni model strani) | 5,0 cm | 3,2 cm | 8,5 mm |
 Pomišljaj (–) pomeni, da napoved modela za ta dan ne seže (ICON-EU seže do srede). Sneg je izračunan enako kot v grafih (1 mm = 1 cm, meja 0,5–2,5 °C).
 
 05 — OBLEŽI -- Sneži, a ali obleži?
+
+Arhivska fotografija (20. 1. 2019), ilustracija: ne prikazuje letošnjega snega. Foto: Filip Eremita.
 
 Sneži ni isto kot obleži. Ansambli povedo, kaj pada, ne, kaj ostane. Za obležanje je ugodno, da je najvišja temperatura v sredo in četrtek po mediani le 2,5 °C in 1,4 °C in da bo po mrzli torkovi noči podlaga hladna. Neugodno je, da je blizu 0 °C: mokri sneg se na cestah hitro stopi, zlasti ob prometu in soli, na travi in strehah pa obleži laže. To je moja ocena, ne izračun.
 

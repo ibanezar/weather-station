@@ -32,7 +32,7 @@ STYLE = BASE_STYLE.replace("</style>", ".sg-m{fill:var(--muted)}.sg-i{fill:var(-
     ".tn-wrap{overflow-x:auto;margin:.2rem 0 .6rem}.tn-tbl{border-collapse:collapse;width:100%;min-width:440px;font-size:.9rem;font-variant-numeric:tabular-nums}"
     ".tn-tbl th,.tn-tbl td{padding:.45rem .6rem;border-bottom:1px solid var(--card-border);text-align:right;color:var(--text)}"
     ".tn-tbl th:first-child,.tn-tbl td:first-child{text-align:left}.tn-tbl th{font-weight:600;color:var(--muted);font-size:.8rem}"
-    ".tn-tbl .tn-na{color:var(--muted)}</style>")
+    ".tn-tbl .tn-na{color:var(--muted)}.tn-photo-v{max-width:440px;margin-left:auto;margin-right:auto}</style>")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data", "sneg-teden-1121.json")
@@ -47,6 +47,22 @@ DAN_V = ["v ponedeljek", "v torek", "v sredo", "v četrtek", "v petek", "v sobot
 MES_R = ["", "januarja", "februarja", "marca", "aprila", "maja", "junija", "julija", "avgusta", "septembra", "oktobra", "novembra", "decembra"]
 START = datetime.datetime(2026, 11, 22, 0)
 D = {n: f"2026-11-{n}" for n in range(22, 30)}   # D[25] = "2026-11-25"
+
+
+# Fotografije so Filipove (Nikon D610, posneto 20. 1. 2019; originali ne gredo v repozitorij, v datotekah ni EXIF). Lokacije v podpisu ne navajam: ni znana.
+# Niso posnete ta teden in to piše v podpisu (sicer bi bralec mislil, da prikazujejo napovedani sneg).
+PHOTOS = {
+    "road": ("foto-1.jpg", 880, 1318, "Cesta, prekrita s snegom, med zasnežennimi smrekami; v daljavi stoji oseba, nizko sonce obarva krošnje oranžno.",
+             "Arhivska fotografija (20. 1. 2019), ilustracija: ne prikazuje letošnjega snega. Foto: Filip Eremita.", "tn-photo-v"),
+    "lift": ("foto-2.jpg", 1400, 935, "Sedežnica in zasnežene smreke nad morjem megle ob sončnem zahodu, v ospredju sled smuči v sveži snežni odeji.",
+             "Arhivska fotografija (20. 1. 2019): sneg nad meglenim morjem. Ilustracija, ne prikazuje letošnjega snega. Foto: Filip Eremita.", ""),
+}
+
+
+def photo(key):
+    f, w, h, alt, cap, cls = PHOTOS[key]
+    return (f'<figure class="post-photo{(" " + cls) if cls else ""}"><img src="/img/blog/{SLUG}/{f}" alt="{alt}" width="{w}" height="{h}" loading="lazy">'
+            f'<figcaption>{cap}</figcaption></figure>')
 
 
 def a(href, text):
@@ -383,6 +399,7 @@ def build_article(S):
 
     p3 = [
         f3,
+        photo("lift"),
         f"Na 700 m je mediana {rnd(w700['med'])} cm, na 1000 m {rnd(w1000['med'])} cm, na Golteh (1400 m) {rnd(w1400['med'])} cm. "
         f"Razlika med 700 in 1400 m je majhna, ker je že na 700 m skoraj vsa padavina sneg. V Rečici je mediana {rnd(w2['med'])} cm, le nekaj centimetrov nižja, razpon pa širši in pomaknjen navzdol "
         f"({rnd(w2['p10'])}–{rnd(w2['p90'])} cm): odločilno je, ali je temperatura v urah padavin pod ali nad 0,5 °C.",
@@ -422,6 +439,7 @@ def build_article(S):
     snow_pct_wed = rnd(wed_sn["p_snow"] * 100)
     rad_pct = rnd(wed_sn["stations"]["Radegunda"] * 100)
     p5 = [
+        photo("road"),
         "<strong>Sneži ni isto kot obleži.</strong> Ansambli povedo, kaj pada, ne, kaj ostane. "
         f"Za obležanje je ugodno, da je najvišja temperatura v sredo in četrtek po mediani le {temp(tmax_wed, 1)} in {temp(tmax_thu, 1)} in da bo po mrzli torkovi noči podlaga hladna. "
         "Neugodno je, da je blizu 0 °C: mokri sneg se na cestah hitro stopi, zlasti ob prometu in soli, na travi in strehah pa obleži laže. "
