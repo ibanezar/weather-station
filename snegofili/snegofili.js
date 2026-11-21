@@ -1073,4 +1073,23 @@
     if (more) more.addEventListener('click', function () { all = true; apply(); });
     apply();
   })();
+  /* ── Namestitev kot aplikacija: Chrome/Android/namizje sprožijo beforeinstallprompt, na iOS je samo »Dodaj na začetni zaslon« (isti vzorec kot crnivec.si) ── */
+  (function () {
+    var btn = document.getElementById('sg-install'), hint = document.getElementById('sg-install-hint');
+    if (!btn) return;
+    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+    var deferred = null;
+    function hide() { btn.hidden = true; if (hint) hint.hidden = true; }
+    if (standalone) return;
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; btn.hidden = false; });
+    window.addEventListener('appinstalled', function () { deferred = null; hide(); });
+    if (ios) btn.hidden = false;
+    btn.addEventListener('click', function () {
+      if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; hide(); }); return; }
+      if (!hint) return;
+      hint.hidden = false;
+      hint.textContent = ios ? 'Tapnite ikono Deli spodaj in izberite »Na začetni zaslon«.' : 'Namestitev v tem brskalniku ni na voljo.';
+    });
+  })();
 })(typeof window !== 'undefined' ? window : globalThis);

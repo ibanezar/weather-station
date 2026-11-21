@@ -712,3 +712,14 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
   .sg-pw-v.c{grid-area:c}
   .sg-pw-v small{display:block}
 }
+
+/* ── Namestitev (gumb v herou, kot na crnivec.si): ikona 44 px, na računalniku z besedo; opomba za iOS pod herom ── */
+.sg-install{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-width:44px;min-height:44px;padding:0;border-radius:999px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;font:700 .8rem var(--sg-display);cursor:pointer}
+.sg-install[hidden]{display:none}
+.sg-install:hover{background:rgba(255,255,255,.2)}
+.sg-install:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.sg-install-t{display:none}
+.sg-install-hint{margin:.2rem 0 .6rem;color:#cfe0f7;font-size:.85rem}
+.sg-install-hint[hidden]{display:none}
+@media(min-width:641px){.sg-install{padding:0 1rem}.sg-install-t{display:inline}}
+@media(max-width:640px){.sg-install{min-width:40px;min-height:40px}}
