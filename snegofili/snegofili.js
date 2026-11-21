@@ -1051,7 +1051,7 @@
     var sec = document.getElementById('powder');
     var bar = $('#sg-pw-f'), list = $('#sg-pw-list'), more = $('#sg-pw-more'), emp = $('#sg-pw-empty');
     if (!sec || !bar || !list) return;
-    var reg = '*', cat = '*', all = false, LIM = parseInt(sec.dataset.limit, 10) || 10;
+    var reg = '*', cat = '*', all = false, LIM = innerWidth < 700 ? 3 : (parseInt(sec.dataset.limit, 10) || 5);
     var items = $$('.sg-pw-i', list);
     bar.hidden = false;
     function apply() {

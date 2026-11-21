@@ -100,7 +100,7 @@ PW_CATS = (("powder", "Powder alert"), ("fresh", "Svež sneg"), ("waiting", "Sne
 PW_CAT_LABEL = dict(PW_CATS)
 PW_CAT_RANK = {k: i for i, (k, _) in enumerate(PW_CATS)}
 PW_GROUPS = (("*", "Vse"), ("si", "Slovenija"), ("alpe", "Alpe"), ("japonska", "Japonska"), ("amerika", "Severna Amerika"))
-PW_LIMIT = 10          # privzeto prikazanih vrstic (ostale po gumbu); brez JS so vidne vse
+PW_LIMIT = 5           # privzeto prikazanih vrstic (ostale po gumbu); brez JS so vidne vse
 
 FAQ = [
     ("Je to izmerjen sneg?",
@@ -815,22 +815,19 @@ def powder_wind(r):
 
 
 def powder_item(r, cat, world):
+    """Kompaktna vrstica: ime, ena drobna vrstica (država · višina · temperatura · sneg po temperaturi · veter), kategorija in tri količine."""
     cc = COUNTRIES_WORLD if world else COUNTRIES
-    where = f'{cc.get(r["drzava"], r["drzava"])} · {r["regija"]} · {r["elevation_m"]} m'
     href = ("#w-" if world else "#t-") + r["id"]
-    meta = [f'{num(r["temp_c"], 1)} °C' if r.get("temp_c") is not None else "", powder_quality(r.get("temp_c")), powder_wind(r)]
-    sl = r.get("snow_line_m")
-    if sl is not None:
-        meta.append(f'meja sneženja {round(sl / 10) * 10} m')
+    sub = [cc.get(r["drzava"], r["drzava"]), f'{r["elevation_m"]} m',
+           f'{num(r["temp_c"], 1)} °C' if r.get("temp_c") is not None else "", powder_quality(r.get("temp_c")), powder_wind(r)]
     aria = (f'{r["ime"]}: {PW_CAT_LABEL[cat]}, zadnjih 24 ur {cm_cell(r["past24_cm"])}, naslednjih 24 ur {cm_cell(r["next24_cm"])}')
     return (f'    <li class="sg-pw-i" data-cat="{cat}" data-g="{powder_groups(r, world)}">'
             f'<a href="{href}" aria-label="{_html.escape(aria)}">'
-            f'<span class="sg-pw-n"><b>{_html.escape(r["ime"])}</b><small>{_html.escape(where)}</small></span>'
+            f'<span class="sg-pw-n"><b>{_html.escape(r["ime"])}</b><small>{_html.escape(" · ".join(x for x in sub if x))}</small></span>'
             f'<span class="sg-pill pw-{cat}">{PW_CAT_LABEL[cat]}</span>'
             f'<span class="sg-pw-v a"><b>{cm_h(r["past24_cm"])}</b><small>zadnjih 24 ur</small></span>'
             f'<span class="sg-pw-v b"><b>{cm_h(r["next24_cm"])}</b><small>naslednjih 24 ur</small></span>'
             f'<span class="sg-pw-v c"><b>{cm_h(r["past72_cm"])}</b><small>zadnjih 72 ur</small></span>'
-            f'<span class="sg-pw-m">{_html.escape(" · ".join(m for m in meta if m))}</span>'
             f'</a></li>')
 
 
@@ -847,9 +844,9 @@ def powder_html(rows, world_rows):
     if items:
         top = items[0]
         r = top[2]
-        lead = (f'Po modelu je zdaj najbolj obetavna točka <strong>{_html.escape(r["ime"])}</strong> '
-                f'({_html.escape((COUNTRIES_WORLD if top[3] else COUNTRIES).get(r["drzava"], r["drzava"]))}): '
-                f'{PW_CAT_LABEL[top[1]]}, {cm_h(r["past24_cm"])} novega snega v zadnjih 24 urah'
+        lead = (f'Najbolj obetavno: <strong>{_html.escape(r["ime"])}</strong> '
+                f'({_html.escape((COUNTRIES_WORLD if top[3] else COUNTRIES).get(r["drzava"], r["drzava"]))}), '
+                f'{cm_h(r["past24_cm"])} v zadnjih 24 urah'
                 f'{", " + num(r["temp_c"], 1) + " °C" if r.get("temp_c") is not None else ""}.')
     else:
         lead = "Po modelu trenutno na nobeni točki ni dovolj novega snega za uvrstitev."
@@ -861,9 +858,9 @@ def powder_html(rows, world_rows):
     lis = "\n".join(powder_item(i[2], i[1], i[3]) for i in items)
     return f"""  <section id="powder" class="sg-sec sg-pw" aria-labelledby="pw-h" data-limit="{PW_LIMIT}">
   <h2 id="pw-h">Powder Tracker <span class="sg-bdg m">Model</span></h2>
-  <p class="archive-intro">Kje je zdaj najboljši svež sneg in kje prihaja. {lead} Razvrstitev je <b>modelski potencial</b>
-  (novi sneg, temperatura, veter), ne izmerjena kakovost snega.</p>
+  <p class="archive-intro">{lead} <b>Modelski potencial</b> (sneg, temperatura, veter), ne izmerjena kakovost snega.</p>
   <div class="sg-filter" id="sg-pw-f" hidden role="group" aria-label="Filter Powder Trackerja">{cat_chips}<span class="sep"></span>{reg_chips}</div>
+  <div class="sg-pw-hd" aria-hidden="true"><span>zadnjih 24 ur</span><span>naslednjih 24 ur</span><span>zadnjih 72 ur</span></div>
   <ol class="sg-pw-list" id="sg-pw-list">
 {lis}
   </ol>
