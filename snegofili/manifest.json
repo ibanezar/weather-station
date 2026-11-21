@@ -1,0 +1,19 @@
+{
+  "name": "Snegofili: kje zdaj pada sneg",
+  "short_name": "Snegofili",
+  "description": "Nov sneg po Alpah, Japonski in Severni Ameriki: karta, kamere, Powder Tracker in opozorila (modelska ocena).",
+  "id": "/snegofili/",
+  "start_url": "/snegofili/?vir=aplikacija",
+  "scope": "/snegofili/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1b33",
+  "theme_color": "#1b6ef3",
+  "lang": "sl",
+  "icons": [
+    { "src": "/snegofili/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/snegofili/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/snegofili/brand/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["weather", "sports"]
+}

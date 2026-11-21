@@ -452,5 +452,24 @@ _gen = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sneg
 check("sg-pw-f" in _gen and "sg-pw-list" in _gen, "JS: filter Powder Trackerja")
 
 
+# ── namestitev kot aplikacija: manifest z obsegom /snegofili/, ikone, gumb, JS ──
+_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+_man = json.load(open(os.path.join(_root, "snegofili", "manifest.json"), encoding="utf-8"))
+check(_man["scope"] == "/snegofili/" and _man["id"] == "/snegofili/" and _man["start_url"].startswith("/snegofili/"),
+      "manifest: obseg in id sta /snegofili/ (namestitev ne sme postati aplikacija Meteorec s korena)")
+check(_man["display"] == "standalone" and _man["short_name"] == "Snegofili", "manifest: standalone in kratko ime")
+_sizes = {(i["sizes"], i["purpose"]) for i in _man["icons"]}
+check({("192x192", "any"), ("512x512", "any"), ("512x512", "maskable")} <= _sizes, "manifest: ikone 192, 512 in maskable")
+check(all(os.path.exists(os.path.join(_root, i["src"].lstrip("/"))) for i in _man["icons"]), "manifest: vse ikone obstajajo")
+_sg_head = g.head_extras("")
+check('<link rel="manifest" href="/snegofili/manifest.json">' in _sg_head and 'apple-mobile-web-app-title" content="Snegofili"' in _sg_head,
+      "glava: povezava na manifest in iOS oznake")
+_gen_src = open(os.path.join(_root, "tools", "generate_snegofili_page.py"), encoding="utf-8").read()
+check('id="sg-install" hidden' in _gen_src and 'id="sg-install-hint"' in _gen_src and "sg-install-t" in _gen_src,
+      "generator: gumb Namesti je privzeto skrit, opomba za iOS obstaja")
+_js2 = open(os.path.join(_root, "snegofili", "snegofili.js"), encoding="utf-8").read()
+check("beforeinstallprompt" in _js2 and "appinstalled" in _js2 and "display-mode: standalone" in _js2, "JS: namestitveni tok (prompt, appinstalled, že nameščeno)")
+
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

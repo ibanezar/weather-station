@@ -936,11 +936,12 @@ def build_body(data, cams):
   <section class="sg-hero{" has-photo" if hp else ""}" aria-labelledby="sg-h1"{f' style="--sg-hero-img:url(/snegofili/img/{hp[0]}.jpg)"' if hp else ""}>
     <canvas id="sg-snow" aria-hidden="true"></canvas>
     <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="332" height="87" alt="Snegofili" decoding="async">
-    <div class="sg-brand-r"><a class="sg-back" href="/zima/">← MeteoZima</a><p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div></div>
+    <div class="sg-brand-r"><button type="button" class="sg-install" id="sg-install" hidden aria-label="Namesti aplikacijo Snegofili" title="Namesti na zaslon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 11 12 15.5 16.5 11M5 20h14"/></svg><span class="sg-install-t">Namesti</span></button><a class="sg-back" href="/zima/">← MeteoZima</a><p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div></div>
     <h1 class="page-title" id="sg-h1">Kje zdaj pada sneg?</h1>
     <p class="sg-sub2">Spremljanje snežnih razmer po Alpah: modelska ocena, meritve ARSO in kamere.</p>
     <div class="sg-hero-row"><p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
     <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p></div>
+    <p class="sg-install-hint" id="sg-install-hint" role="status" aria-live="polite" hidden></p>
     <div class="sg-hero-cta"><a class="sg-cta p" href="#zemljevid">Trenutne snežne razmere</a>
     <a class="sg-cta o" id="sg-al-cta" href="#sg-alarm" hidden>Nastavi snežno opozorilo</a></div>
 {f'    <p class="sg-credit">{hp[1]}</p>' if hp and hp[1] else ""}
@@ -1017,6 +1018,10 @@ def head_extras(schema):
     hp = hero_photo()
     pre = f'<link rel="preload" as="image" href="/snegofili/img/{hp[0]}.jpg" fetchpriority="high">\n' if hp else ""
     return (pre +'<meta name="theme-color" content="#1b6ef3">\n'
+            '<link rel="manifest" href="/snegofili/manifest.json">\n'
+            '<meta name="apple-mobile-web-app-capable" content="yes">\n'
+            '<meta name="apple-mobile-web-app-title" content="Snegofili">\n'
+            '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n'
             '<link rel="preload" href="/snegofili/fonts/Bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
             '<link rel="icon" type="image/svg+xml" href="/snegofili/brand/favicon.svg">\n'
             '<link rel="apple-touch-icon" href="/snegofili/brand/apple-touch-icon.png">\n'
