@@ -431,7 +431,7 @@ check("Ceta" not in _ph, "izris: točka brez snega ni na seznamu")
 check('href="#w-w1"' in _ph and 'href="#t-a"' in _ph, "izris: povezave na kartice (alpske #t-, svetovne #w-)")
 check("Vse (4)" in _ph and "Powder alert (2)" in _ph and "Sneg prihaja (1)" in _ph and 'data-pg="japonska"' in _ph and 'data-pg="si"' in _ph
       and 'data-pg="amerika"' not in _ph, "izris: števila v filtrih in samo prisotna območja")
-check("modelski potencial" in _ph and "ne izmerjena kakovost" in _ph, "izris: pove, da je modelski potencial")
+check("modelski potencial" in _ph.lower() and "ne izmerjena kakovost" in _ph, "izris: pove, da je modelski potencial")
 check(f"{g.PW_POWDER_CM} cm" in _ph and f"{g.PW_GUST_KMH} km/h" in _ph, "izris: »Kako razvrščamo« navaja meje iz konstant")
 check("ni dovolj novega snega" in g.powder_html([_r()], None), "izris: brez uvrščenih točk je stavek brez trditve o snegu")
 check(g.powder_html([_r()], None).count("<li class=\"sg-pw-i\"") == 0, "izris: brez točk ni vrstic")
