@@ -1,11 +1,12 @@
 {
-  "date": "2026-11-20",
-  "issued": "20.11.2026 7:00 CET",
-  "issued_at": "2026-11-20T07:30:48.710702+01:00",
-  "top_station": "Vojsko",
-  "top_mm": 46,
-  "n_stations": 19,
-  "should_post": true,
-  "image": "https://meteorec.si/og/precip-map/2026-11-20.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-20-story.jpg"
+  "date": "2026-11-21",
+  "issued": "21.11.2026 7:00 CET",
+  "issued_at": "2026-11-21T07:30:36.265587+01:00",
+  "top_station": "Bilje",
+  "top_mm": 0,
+  "n_stations": 20,
+  "station_mm": 0.2,
+  "should_post": false,
+  "image": "https://meteorec.si/og/precip-map/2026-11-21.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-21-story.jpg"
 }
