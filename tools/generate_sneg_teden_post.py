@@ -55,7 +55,7 @@ PHOTOS = {
     "road": ("foto-1.jpg", 880, 1318, "Cesta, prekrita s snegom, med zasnežennimi smrekami; v daljavi stoji oseba, nizko sonce obarva krošnje oranžno.",
              "Arhivska fotografija (20. 1. 2019), ilustracija: ne prikazuje letošnjega snega. Foto: Filip Eremita.", "tn-photo-v"),
     "lift": ("foto-2.jpg", 1400, 935, "Sedežnica in zasnežene smreke nad morjem megle ob sončnem zahodu, v ospredju sled smuči v sveži snežni odeji.",
-             "Arhivska fotografija (20. 1. 2019): sneg nad meglenim morjem. Ilustracija, ne prikazuje letošnjega snega. Foto: Filip Eremita.", ""),
+             "Arhivska fotografija (20. 1. 2019): sneg nad meglenim morjem. Fotografija je ilustrativna in ne prikazuje letošnjega sneženja. Foto: Filip Eremita.", ""),
 }
 
 
@@ -89,6 +89,18 @@ def hour_in(h):
     """Ura v posnetku -> "2. uro v sredo" (za »med 2. uro v sredo in 1. uro v četrtek«)."""
     t = START + datetime.timedelta(hours=h)
     return f"{t.hour}. uro {DAN_V[t.weekday()]}"
+
+
+def around(h):
+    """Ura v posnetku -> "v sredo okoli 15. ure"."""
+    t = START + datetime.timedelta(hours=h)
+    return f"{DAN_V[t.weekday()]} okoli {t.hour}. ure"
+
+
+def span(h1, h2):
+    """»od 2. ure v sredo do 1. ure v četrtek«."""
+    t1, t2 = START + datetime.timedelta(hours=h1), START + datetime.timedelta(hours=h2)
+    return f"od {t1.hour}. ure {DAN_V[t1.weekday()]} do {t2.hour}. ure {DAN_V[t2.weekday()]}"
 
 
 def when(h):
@@ -342,69 +354,84 @@ def build_article(S):
     # --- grafi ---
     aria1 = ("Graf: delež članov ansamblov z vsaj 1 cm in vsaj 5 cm novega snega v Rečici po dnevih od ponedeljka do nedelje. "
              + "; ".join(f"{DAYS[datetime.date(2026, 11, n).weekday()]} {n}. 11.: {d[n]['cm1']} % in {d[n]['cm5']} %" for n in range(23, 30)) + ".")
-    f1 = fig("Kateri dan sneži v dolini",
-             '<div class="vs-leg"><span><i style="background:#3987e5;opacity:.45"></i>vsaj 1 cm snega</span><span><i style="background:#3987e5"></i>vsaj 5 cm</span></div>'
+    f1 = fig("Kateri dan bo v dolini snežilo?",
+             '<div class="vs-leg"><span><i style="background:#3987e5;opacity:.45"></i>vsaj 1 cm snega</span><span><i style="background:#3987e5"></i>vsaj 5 cm snega</span></div>'
              + fig_days(S).replace("{ARIA}", aria1),
-             f"Delež od {S.n} članov štirih ansamblov (za nedeljo 29. 11. ICON-EPS nima podatka, zato je tam {d[29]['n']} članov). Pod dnevom je mediana novega snega. "
-             "Nov sneg = padavine pri temperaturi do 0,5 °C v celoti, nad 2,5 °C nič, vmes sorazmerno; 1 mm = 1 cm. To je izračun, ne napoved debeline snežne odeje.")
+             f"Prikazan je delež članov ansamblov, ki napovedujejo navedeno količino snega. Skupaj je upoštevanih {S.n} članov štirih ansamblov; za nedeljo, 29. novembra, ICON-EPS nima podatka, "
+             f"zato je tam upoštevanih {d[29]['n']} članov. Pod posameznim dnevom je prikazana mediana količine novega snega. "
+             "Nov sneg je izračunan tako, da se pri temperaturi do 0,5 °C vse padavine upoštevajo kot sneg, pri temperaturi nad 2,5 °C pa nič. Vmesni delež se izračuna sorazmerno. "
+             "Upoštevana je poenostavitev 1 mm padavin = 1 cm snega. To je izračun količine novega snega, ne napoved debeline snežne odeje.")
 
     hh = S.hourly(366)
     aria2 = (f"Graf: temperatura zraka v Rečici in delež članov po vrsti padavin od torka opoldne do petka opoldne. Mediana temperature je v sredo opoldne "
              f"{temp(hh['t50'][84], 1)}, v četrtek opoldne {temp(hh['t50'][108], 1)}. Prvi sneg se pojavi {when(h50)} (mediana).")
-    f2 = fig("Ura za uro: temperatura ostane blizu ničle",
+    f2 = fig("Ura za uro: temperatura ostaja blizu ničle",
              '<div class="vs-leg"><span><i style="background:#3987e5"></i>sneg</span><span><i style="background:#9085e9"></i>dež s snegom</span><span><i style="background:#199e70"></i>dež</span></div>'
              + fig_hours(S).replace("{ARIA}", aria2),
-             "Rečica, 366 m. Zgoraj mediana temperature članov in razpon med 10. in 90. percentilom, spodaj delež članov, pri katerih v tej uri pada sneg, dež s snegom (delež snega med 0 in 1) ali dež. "
-             "Kjer stolpca ni, je pri večini članov suho.")
+             "Rečica, 366 m. Zgornji graf prikazuje mediano temperature članov ansamblov in razpon med 10. in 90. percentilom. "
+             "Spodnji graf prikazuje delež članov, pri katerih v posamezni uri pada sneg, dež s snegom (delež snega med 0 in 1) ali dež. Kjer stolpca ni, je pri večini članov suho.")
 
     rows = [(366, "Rečica", S.win(366, "sre_cet")), (700, "", w700), (1000, "", w1000), (1400, "Golte", w1400)]
     aria3 = ("Graf: mediana novega snega med sredo in četrtkom po višinah, z razponom od 10. do 90. percentila članov ansamblov. "
              + "; ".join(f"{el} m: {rnd(w['med'])} cm (od {rnd(w['p10'])} do {rnd(w['p90'])} cm)" for el, _, w in rows) + ".")
-    f3 = fig("Koliko snega med sredo in četrtkom",
+    f3 = fig("Koliko snega bi lahko zapadlo med sredo in četrtkom?",
              fig_elev(S, rows).replace("{ARIA}", aria3),
-             "Stolpec je mediana, črta razpon od 10. do 90. percentila članov (25.–26. 11., skupaj). "
-             "Temperatura je izračunana za izbrano višino, ne izmerjena. Nad 700 m je skoraj vsa padavina sneg, zato se višine med seboj malo razlikujejo.")
+             "Stolpec prikazuje mediano količine novega snega, črta pa razpon med 10. in 90. percentilom članov ansamblov za obdobje 25.–26. novembra skupaj. "
+             "Temperatura je preračunana za izbrano nadmorsko višino, ne izmerjena. Nad 700 m je skoraj vsa napovedana količina padavin v obliki snega, "
+             "zato se ocenjene količine med višinami le malo razlikujejo.")
 
     # --- ploščice ---
+    t_first = START + datetime.timedelta(hours=h50)
     tl = tiles([
-        (pc(w2["cm1"]), "", f"članov ansamblov napoveduje v Rečici vsaj 1 cm snega med sredo in četrtkom", False),
-        (f"{rnd(w2['med'])}", "cm", f"mediana novega snega med sredo in četrtkom (razpon 10.–90. percentila: {rnd(w2['p10'])}–{rnd(w2['p90'])} cm)", False),
-        (f"{DAYS[(START + datetime.timedelta(hours=h50)).weekday()]} {(START + datetime.timedelta(hours=h50)).hour}.00", "", "mediana ure, ko v Rečici prvič zasneži", False),
-        (temp(tue["tmin"], 0).replace(NBSP + "°C", ""), "°C", f"najnižja temperatura v torek zjutraj po modelu MTR; zmrzal z verjetnostjo {rnd(tue['p_frost'] * 100)} %", False),
+        (pc(w2["cm1"]), "", "toliko članov ansamblov napoveduje v Rečici vsaj 1 cm novega snega med sredo in četrtkom skupaj", False),
+        (f"{rnd(w2['med'])}", "cm", f"mediana količine novega snega v istem obdobju (razpon med 10. in 90. percentilom: {rnd(w2['p10'])}–{rnd(w2['p90'])} cm)", False),
+        (f"{DAYS[t_first.weekday()]} {t_first.hour}.00", "", "mediana ure, ko naj bi v Rečici prvič začelo snežiti", False),
+        (temp(tue["tmin"], 0).replace(NBSP + "°C", ""), "°C", f"najnižja temperatura v torek zjutraj po modelu MTR; verjetnost zmrzali (najnižja temperatura 0 °C ali manj) je po modelu {rnd(tue['p_frost'] * 100)} %", False),
     ])
 
-    lead = (f"Da: po današnjih izračunih bo v Rečici prihodnji teden snežilo, najverjetneje od srede popoldne do četrtka. "
-            f"Vsaj 1 cm snega med sredo in četrtkom napoveduje {pc(w2['cm1'])} od {S.n} članov ansamblov, mediana je {rnd(w2['med'])} cm. V ponedeljek in torek sneg v dolini ni verjeten.")
+    lead = (f"Da. Po današnjih izračunih bo v Rečici prihodnji teden snežilo, najverjetneje od srede popoldne do četrtka. "
+            f"Vsaj 1 cm novega snega med sredo in četrtkom skupaj napoveduje {pc(w2['cm1'])} od skupno {S.n} članov ansamblov, mediana količine pa znaša {rnd(w2['med'])} cm. "
+            "V ponedeljek in torek snega v dolini ni pričakovati.")
 
     p1 = [
-        f"<strong>Kratek odgovor:</strong> v ponedeljek in torek snega v dolini ne pričakujem, v sredo popoldne začne snežiti, v četrtek pade največ, "
-        f"od petka naprej pa se napoved razide. Na 700 m je sneg med sredo in četrtkom po izračunih skoraj gotov ({pc(w700['cm1'])} članov), v Rečici (366 m) {pc(w2['cm1'])}.",
+        "<strong>Kratek odgovor:</strong> v ponedeljek in torek snega v dolini ne pričakujem. Snežiti naj bi začelo v sredo popoldne, največ snega pa naj bi zapadlo v četrtek. "
+        "Od petka naprej se napovedi med modeli precej razhajajo. "
+        f"Na nadmorski višini 700 m je sneg med sredo in četrtkom po izračunih skoraj gotov: vsaj 1 cm ga napoveduje {pc(w700['cm1'])} članov ansamblov. V Rečici (366 m) je ta delež {pc(w2['cm1'])}.",
         tl,
-        f"V članku z 12. novembra " + a("/blog/sneg-dolina-in-gore-petek-sobota-1112.html", "»Sneg ta teden: v dolini ne, na višinah nekaj centimetrov«") +
-        f" sem zapisal, da snega v dolini ne bo. Tako je tudi bilo: ARSO v Gornjem Gradu (428 m, 9 km od Rečice) od 9. novembra do {int(last_live[8:10])}. {int(last_live[5:7])}. "
-        f"v {n_live} odčitkih ni izmeril nobene snežne odeje. V dolini prve snežne odeje letos torej še ni bilo.",
+        "V članku z dne 12. novembra, " + a("/blog/sneg-dolina-in-gore-petek-sobota-1112.html", "»Sneg ta teden: v dolini ne, na višinah nekaj centimetrov«") +
+        f", sem zapisal, da snega v dolini ne bo. Napoved se je uresničila. ARSO v Gornjem Gradu (428 m, 9 km od Rečice) med 9. in {int(last_live[8:10])}. novembrom "
+        f"v {n_live} odčitkih ni izmeril snežne odeje. V dolini tako v letošnji sezoni še ni bilo prve snežne odeje.",
     ]
 
+    same = d[23]["cm1"] == d[24]["cm1"]
+    mon_tue = pc(d[23]["cm1"]) if same else f"{pc(d[23]['cm1'])} oziroma {pc(d[24]['cm1'])}"
     p2 = [
-        f"V nedeljo (22. 11.) v dolini še dežuje; sneg je verjeten šele nad približno 1000 m (na 1000 m vsaj 1 cm napoveduje {pc(S.day(1000, 22)['cm1'])} članov, v Rečici {pc(d[22]['cm1'])}). "
-        f"V ponedeljek in torek je padavin malo (vsaj 1 cm snega ima {pc(d[23]['cm1']) if d[23]['cm1'] == d[24]['cm1'] else pc(d[23]['cm1']) + ' oziroma ' + pc(d[24]['cm1'])} članov{' v vsakem od obeh dni' if d[23]['cm1'] == d[24]['cm1'] else ''}), je pa mrzlo: ansambli kažejo v torek zjutraj v Rečici mediano {temp(tue_ens, 1)}, "
-        f"poskusni model MTR, ki popravlja za dno doline, pa {temp(tue['tmin'], 1)}. Razlika je običajna za jasne, mirne noči: modeli so takrat v dolini običajno pretopli.",
+        f"V nedeljo (22. 11.) bo v dolini še deževalo. Sneg je verjeten šele nad približno 1000 m: vsaj 1 cm snega na tej višini napoveduje {pc(S.day(1000, 22)['cm1'])} članov ansamblov, "
+        f"v Rečici pa le {pc(d[22]['cm1'])}.",
+        f"V ponedeljek in torek bo padavin malo. Vsaj 1 cm snega v posameznem dnevu napoveduje le {mon_tue} članov. "
+        f"Bo pa mrzlo: ansambli za torek zjutraj v Rečici kažejo mediano {temp(tue_ens, 1)}, poskusni model MTR, ki upošteva temperaturne značilnosti dna doline, pa {temp(tue['tmin'], 1)}. "
+        "Takšna razlika je običajna ob jasnih in mirnih nočeh. Modeli takrat v dolini pogosto napovedujejo previsoke temperature.",
         f1,
-        f"Prvi sneg se v Rečici pojavi po ansamblih {when(h50)} (mediana). Pri {pc(share_first)} članov do četrtka opoldne vsaj enkrat sneži, pri 80 % članov med {hour_in(h10)} in {hour_in(h90)}. "
-        f"V sredo pade po mediani {num(wed_mm, 1)} mm padavin, v četrtek {num(thu_mm, 1)} mm; mediana najvišje dnevne temperature je v sredo {temp(tmax_wed, 1)}, v četrtek {temp(tmax_thu, 1)}.",
+        f"Po ansamblih naj bi prvi sneg v Rečici zapadel {around(h50)} (mediana). Pri {pc(share_first)} članov naj bi vsaj enkrat snežilo do četrtka opoldne, "
+        f"pri 80 % pa v obdobju {span(h10, h90)}.",
+        f"Mediana količine padavin v sredo znaša {num(wed_mm, 1)} mm, v četrtek pa {num(thu_mm, 1)} mm. "
+        f"Mediana najvišje dnevne temperature bo v sredo {temp(tmax_wed, 1)}, v četrtek pa {temp(tmax_thu, 1)}.",
         f2,
-        f"V petek je v Rečici vsaj 1 cm snega še pri {pc(d[27]['cm1'])} članov, v soboto pri {pc(d[28]['cm1'])}, v nedeljo pri {pc(d[29]['cm1'])}. Teh dni zaradi razhajanja med modeli ne bi jemal kot napoved. "
-        f"Osnovna napoved Open-Meteo za soboto sicer kaže {num(det['best_match']['elev']['366'][D[28]]['mm'], 0)} mm padavin, a je mediana ansamblov {num(d[28]['mm50'], 0)} mm: ta dan je nezanesljiv.",
+        f"V petek vsaj 1 cm snega v Rečici napoveduje še {pc(d[27]['cm1'])} članov, v soboto {pc(d[28]['cm1'])}, v nedeljo pa {pc(d[29]['cm1'])}. "
+        "Teh dni zaradi razhajanja med modeli ne bi jemal kot zanesljive napovedi. "
+        f"Osnovni model Open-Meteo za soboto sicer kaže {num(det['best_match']['elev']['366'][D[28]]['mm'], 0)} mm padavin, mediana ansamblov pa je {num(d[28]['mm50'], 0)} mm. "
+        "Napoved za ta dan je zato zelo negotova.",
     ]
 
     p3 = [
         f3,
         photo("lift"),
-        f"Na 700 m je mediana {rnd(w700['med'])} cm, na 1000 m {rnd(w1000['med'])} cm, na Golteh (1400 m) {rnd(w1400['med'])} cm. "
-        f"Razlika med 700 in 1400 m je majhna, ker je že na 700 m skoraj vsa padavina sneg. V Rečici je mediana {rnd(w2['med'])} cm, le nekaj centimetrov nižja, razpon pa širši in pomaknjen navzdol "
-        f"({rnd(w2['p10'])}–{rnd(w2['p90'])} cm): odločilno je, ali je temperatura v urah padavin pod ali nad 0,5 °C.",
-        "Ocena pri 1 mm = 1 cm je za mokri sneg blizu 0 °C lahko previsoka (mokri sneg je gostejši, torej je ob istem številu milimetrov manj centimetrov). "
-        "Številke jemljite kot zgornji del verjetnega območja, ne kot napoved debeline odeje.",
+        f"Na 700 m je mediana količine novega snega {rnd(w700['med'])} cm, na 1000 m {rnd(w1000['med'])} cm, na Golteh (1400 m) pa {rnd(w1400['med'])} cm. "
+        "Razlika med 700 in 1400 m je majhna, ker je že na 700 m skoraj vsa napovedana količina padavin v obliki snega.",
+        f"V Rečici je mediana {rnd(w2['med'])} cm, torej le nekaj centimetrov manj. Razpon pa je širši in pomaknjen navzdol: od {rnd(w2['p10'])} do {rnd(w2['p90'])} cm. "
+        "Odločilno bo, ali bo temperatura v času padavin pod ali nad 0,5 °C.",
+        "Poenostavitev 1 mm padavin = 1 cm snega lahko pri mokrem snegu blizu 0 °C količino snega preceni. Mokri sneg je namreč gostejši, zato iz enake količine padavin nastane manj centimetrov snega. "
+        "Prikazane številke zato jemljite kot zgornji del verjetnega razpona, ne kot napoved dejanske debeline snežne odeje.",
     ]
 
     names = {"ecmwf_ifs025": "ECMWF IFS", "ecmwf_aifs025_single": "ECMWF AIFS", "icon_eu": "ICON-EU", "gfs_seamless": "GFS", "arpege_europe": "ARPEGE",
@@ -420,77 +447,88 @@ def build_article(S):
         f_ = lambda x: dash if x is None else f"{num(x['cm'], 1)}{NBSP}cm"
         tot = dash if (e.get(D[25]) is None or e.get(D[26]) is None) else f"{num(e[D[25]]['mm'] + e[D[26]]['mm'], 1)}{NBSP}mm"
         det_rows.append([names[mid], f_(e.get(D[25])), f_(e.get(D[26])), tot])
-    t1 = table("Ansambli: delež članov z vsaj 1 cm snega v Rečici", ["Ansambel", "Sreda ≥ 1 cm", "Četrtek ≥ 1 cm", "Četrtek, mediana"], ens_rows)
-    t2 = table("Determinični modeli: nov sneg in padavine v Rečici", ["Model", "Sreda, sneg", "Četrtek, sneg", "Padavine sre–čet"], det_rows)
+    t1 = table("Napovedi štirih ansamblov za Rečico", ["Ansambel", "Sreda: ≥ 1 cm", "Četrtek: ≥ 1 cm", "Četrtek: mediana novega snega"], ens_rows)
+    t2 = table("Primerjava determinističnih modelov", ["Model", "Sreda: sneg", "Četrtek: sneg", "Padavine v sredo in četrtek"], det_rows)
     n_det = len(both)
     lo_cm, hi_cm = min(v for k, v in cm2.items() if k != "best_match"), max(cm2.values())
+    thu_lo, thu_hi = min(v["days"][D[26]]["cm1"] for v in sysd.values()), max(v["days"][D[26]]["cm1"] for v in sysd.values())
+    wed_lo, wed_hi = min(v["days"][D[25]]["cm1"] for v in sysd.values()), max(v["days"][D[25]]["cm1"] for v in sysd.values())
     p4 = [
-        f"Vsi štirje ansambli v četrtek soglašajo: vsaj 1 cm snega napoveduje {min(v['days'][D[26]]['cm1'] for v in sysd.values())}–{max(v['days'][D[26]]['cm1'] for v in sysd.values())} % članov. "
-        f"V sredo so razlike večje ({min(v['days'][D[25]]['cm1'] for v in sysd.values())}–{max(v['days'][D[25]]['cm1'] for v in sysd.values())} %): vprašanje je, ali se sneženje začne že popoldne ali šele zvečer. Ansambel je isti model, zagnan 20- do 50-krat z rahlo spremenjenimi začetnimi pogoji; "
-        "če jih večina kaže isto, je izid verjetnejši, ni pa gotov.",
+        f"Vsi štirje ansambli se za četrtek precej dobro ujemajo: vsaj 1 cm snega napoveduje od {thu_lo} do {thu_hi} % članov posameznega ansambla. "
+        f"V sredo so razlike večje, saj je delež članov, ki napovedujejo vsaj 1 cm, med {wed_lo} in {wed_hi} %. Glavno vprašanje je, ali se bo sneženje začelo že v sredo popoldne ali šele zvečer.",
+        "Ansambel je skupina napovedi istega modela, pri katerih so začetni pogoji nekoliko spremenjeni. Običajno vključuje od 20 do 50 članov. "
+        "Če večina napovedi kaže enak razvoj vremena, je takšen izid verjetnejši, ni pa zagotovljen.",
         t1,
-        f"{ {5: 'Pet'}[n_det - 1] } determinističnih modelov (eden zagon, brez razpona), ki segajo do četrtka, daje v Rečici med sredo in četrtkom skupaj {rnd(lo_cm)}–{rnd(hi_cm)} cm snega; razlikujejo se v tem, kateri dan ga pade več. "
-        f"Najbolj zadržan je Open-Meteo osnovni model, na katerem temelji moja stran " + a("/zima/", "Zima") + f" ({rnd(best)} cm). Zato naj vas ne zmede, če ta stran kaže manj snega kot ta članek: "
-        "tu je merilo ansambel, ne ena napoved.",
+        f"{ {5: 'Pet'}[n_det - 1] } determinističnih modelov, katerih napoved sega do četrtka, za Rečico v obdobju od srede do četrtka skupaj napoveduje od {rnd(lo_cm)} do {rnd(hi_cm)} cm snega. "
+        "Razlikujejo se predvsem v tem, kateri dan naj bi zapadlo več snega. "
+        "Najbolj zadržan je osnovni model Open-Meteo, na katerem temelji tudi moja stran " + a("/zima/", "Zima") + f": ta napoveduje {rnd(best)} cm. "
+        "Zato naj vas ne zmede, če stran Zima kaže manj snega kot ta članek. Tukaj je merilo napoved ansamblov, ne en sam model.",
         t2,
-        '<p class="vs-note">Pomišljaj (–) pomeni, da napoved modela za ta dan ne seže (ICON-EU seže do srede). Sneg je izračunan enako kot v grafih (1 mm = 1 cm, meja 0,5–2,5 °C).</p>',
+        '<p class="vs-note">Pomišljaj (–) pomeni, da napoved modela ne sega do tega dne. ICON-EU ima podatke le do srede. '
+        'Količina snega je izračunana enako kot v grafih: 1 mm padavin pomeni 1 cm snega, pri temperaturi do 0,5 °C se padavine v celoti upoštevajo kot sneg, nad 2,5 °C pa ne več.</p>',
     ]
 
     snow_pct_wed = rnd(wed_sn["p_snow"] * 100)
     rad_pct = rnd(wed_sn["stations"]["Radegunda"] * 100)
     p5 = [
+        "Ansambli napovedujejo, kaj bo padalo, ne pa tudi, koliko snega bo na koncu ostalo na tleh.",
+        f"Za obležanje snega je ugodno, da bo mediana najvišje temperature v sredo in četrtek le {temp(tmax_wed, 1)} oziroma {temp(tmax_thu, 1)} in da bo podlaga po mrzli torkovi noči hladna. "
+        "Manj ugodno je, da bodo temperature blizu 0 °C. Mokri sneg se na cestah hitro tali, zlasti ob prometu in posipanju s soljo. Na travi in strehah lahko obleži lažje. "
+        "To je moja ocena, ne rezultat posebnega izračuna.",
+        "Dva vira, ki ju uporabljam, se pri tem ne ujemata, kar je treba pošteno povedati. Poskusni model " + a("/zima/", "MTR sneg") +
+        f" je naučen na opazovanjih ARSO in ocenjuje možnost izmerljive snežne odeje, torej vsaj 1 cm snega ob jutranjem odčitku. "
+        f"Za Gornji Grad v sredo kaže {snow_pct_wed}-odstotno verjetnost, za Radegundo (794 m) pa {rad_pct}-odstotno. Za četrtek ocene še nima, saj njegova napoved sega le do srede.",
+        f"MTR je pri tej oceni strožji: upošteva povprečno dnevno temperaturo (za sredo {num(wed_sn['tavg'], 1)} °C) in snežno odejo, ki ob jutranjem odčitku že leži na tleh. "
+        "Ansambli pa upoštevajo vsako uro, v kateri sneži. Gre torej za različni vprašanji, zato sta različna tudi odgovora. Pravo sliko bodo pokazale šele meritve.",
+        f"Po torkovem jutru s temperaturo okoli {temp(tue['tmin'], 0)} po napovedi MTR bo podlaga hladna, kar lahko pomaga, da sneg ob začetku sneženja hitreje obleži. "
+        "To velja le, če se sneženje v sredo popoldne ali zvečer res začne s snegom, ne z dežjem.",
         photo("road"),
-        "<strong>Sneži ni isto kot obleži.</strong> Ansambli povedo, kaj pada, ne, kaj ostane. "
-        f"Za obležanje je ugodno, da je najvišja temperatura v sredo in četrtek po mediani le {temp(tmax_wed, 1)} in {temp(tmax_thu, 1)} in da bo po mrzli torkovi noči podlaga hladna. "
-        "Neugodno je, da je blizu 0 °C: mokri sneg se na cestah hitro stopi, zlasti ob prometu in soli, na travi in strehah pa obleži laže. "
-        "To je moja ocena, ne izračun.",
-        f"Dva vira, ki ju uporabljam, se pri tem ne ujemata, in to je pošteno povedati. Poskusni model " + a("/zima/", "MTR sneg") + f" je naučen na opazovanjih ARSO in ocenjuje možnost merljivega snega "
-        f"(vsaj 1 cm ob jutranjem odčitku) v Gornjem Gradu: za sredo kaže {snow_pct_wed} %, v Radegundi (794 m) {rad_pct} %. Za četrtek ocene še nima (seže do srede). "
-        f"Je strožji: gleda povprečno dnevno temperaturo (za sredo {num(wed_sn['tavg'], 1)} °C) in sneg, ki ob odčitku že leži; ansambli pa štejejo vsako uro snega. "
-        "Vprašanji sta različni, zato sta različna tudi odgovora; pravilno bo kazalo šele izmerjeno.",
-        f"Po torkovem jutru z okoli {temp(tue['tmin'], 0)} (MTR) bo podlaga hladna, kar ob začetku sneženja pomaga, da sneg hitreje obleži. To velja le, če se sneženje res začne v sredo popoldne ali zvečer in ne kot dež.",
     ]
 
     first_s = ", ".join(f"{f.day}. {f.month}." for f in sorted(firsts, key=lambda x: (x.month < 10, x.month, x.day)))
     p6 = [
-        f"V sedmih zimah (2019/20–2025/26) je v Gornjem Gradu prva snežna odeja vsaj 1 cm (ARSO) nastala na te dni: {first_s} (po datumu). Mediana je 2. 12., najzgodneje 22. 11. (2024). "
-        f"Če bi prvi sneg padel v sredo ali četrtek, bi bil to eden zgodnejših v sedmih zimah: prej kot 26. 11. se je to zgodilo le v eni (22. 11. 2024). "
-        "Za dolino bi bil torej zgoden, a ne rekordno zgodnji.",
-        "Če ste na " + a("/zima/sneg-ugibalnik/", "ugibalniku prvega snega") + " že oddali datum, merilo ostaja isto: višina snežne odeje vsaj 1 cm na ARSO postaji Gornji Grad.",
+        f"V zadnjih sedmih zimah (2019/20–2025/26) je v Gornjem Gradu po podatkih ARSO prva snežna odeja z višino vsaj 1 cm nastala na naslednje datume: {first_s}",
+        "Mediana datuma je 2. december, najzgodnejši prvi sneg pa je bil zabeležen 22. novembra 2024. "
+        "Če bi prvi sneg v tej sezoni zapadel 25. ali 26. novembra, bi bil med zgodnejšimi v zadnjih sedmih zimah. "
+        "Pred 26. novembrom se je prva snežna odeja v tem obdobju pojavila le enkrat, in sicer 22. novembra 2024. Napovedani termin bi bil torej zgoden, vendar ne rekordno zgodnji.",
+        "Če ste v " + a("/zima/sneg-ugibalnik/", "ugibalniku prvega snega") + " že oddali svoj datum, merilo ostaja enako: višina snežne odeje najmanj 1 cm na merilni postaji ARSO v Gornjem Gradu.",
     ]
 
     omej = [
         "<ul>"
-        f"<li><strong>Modeli ne vidijo doline.</strong> Mreža ansamblov (okoli 25 do 50 km) je veliko grobejša od doline, zato lokalne podrobnosti (hladen zrak na dnu doline) izgubijo. "
-        "Temperatura se na izbrano višino preračuna, inverzij pa ta preračun ne pozna.</li>"
-        "<li><strong>Meja dež/sneg je poenostavljena.</strong> Gledam temperaturo zraka na 2 m (ne temperature mokrega termometra); pri 1–3 °C je lahko razlika med dežjem in snegom odvisna od vlage in intenzitete padavin.</li>"
-        f"<li><strong>Posnetek ob {S.fetched.day}. {S.fetched.month}. ob {S.fetched.hour + 1}. uri.</strong> Modeli se osvežujejo večkrat na dan; do srede se bo napoved še premaknila, zlasti čas začetka.</li>"
-        "<li><strong>Postaja IREICA1 snega ne meri.</strong> Za izmerjeno snežno odejo so merodajne ARSO postaje v dolini (Gornji Grad, Luče, Radegunda).</li>"
-        "<li><strong>To ni uradno opozorilo.</strong> Za ukrepanje veljata ARSO in URSZR.</li>"
+        "<li><strong>Modeli ne zaznajo vseh lokalnih značilnosti doline.</strong> Mreža ansamblov z ločljivostjo približno 25–50 km je precej bolj groba od same doline. "
+        "Lokalne podrobnosti, kot je hladen zrak na dnu doline, se zato izgubijo. Temperatura se preračuna na izbrano nadmorsko višino, vendar ta preračun ne zajame lokalnih temperaturnih inverzij.</li>"
+        "<li><strong>Meja med dežjem in snegom je poenostavljena.</strong> Upoštevam temperaturo zraka na 2 m, ne temperature mokrega termometra. "
+        "Pri temperaturah med 1 in 3 °C je lahko razmerje med dežjem in snegom odvisno tudi od vlažnosti zraka in intenzitete padavin.</li>"
+        f"<li><strong>Gre za posnetek napovedi z dne {S.fetched.day}. {S.fetched.month}. ob {S.fetched.hour + 1}. uri.</strong> Modeli se osvežujejo večkrat na dan, zato se lahko napoved do srede še spremeni, zlasti glede časa začetka sneženja.</li>"
+        "<li><strong>Postaja IREICA1 snežne odeje ne meri.</strong> Za izmerjeno višino snežne odeje so merodajne postaje ARSO v dolini in okolici (Gornji Grad, Luče, Radegunda).</li>"
+        "<li><strong>To ni uradno opozorilo.</strong> Za ukrepanje spremljajte uradne informacije ARSO in URSZR.</li>"
         "</ul>",
     ]
     p7 = [
-        "<strong>Če se napoved obdrži, računajte v sredo zvečer in v četrtek zjutraj na sneg in poledico.</strong> Če vozite v dolini, poskrbite za zimsko opremo (pravila preverite pri AMZS; "
-        "o času menjave gum sem pisal v članku " + a("/blog/kdaj-menjati-zimske-gume-recica-1027.html", "»Kdaj menjati zimske gume v Rečici«") + "). Za prelaz Črnivec je merodajna izmerjena postaja DRSI na " + a("https://crnivec.si/", "crnivec.si") +
-        ", za ocene poledice " + a("/zima/poledica/", "stran o poledici") + ", za meje sneženja " + a("/zima/meja-snezenja/", "meja sneženja") + " in " + a("/zima/snezna-karta/", "snežna karta") + ".",
-        "Ko sneg pade, lahko pomagate z opazovanjem: " + a("/zima/sneg-porocila/", "javite stanje v svoji regiji in višinskem pasu") + " (en dotik, brez prostega besedila in brez lokacije). "
-        "Poročilo je neverificirano opažanje, ne meritev, a dopolni ARSO postaje, ki jih je v dolini malo.",
-        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate samo z '
-        'navedbo avtorja (Filip Eremita, Meteorec) in neposredno povezavo na ta članek. Za prepis ali vdelavo grafov in izračunov se '
-        'predhodno dogovorite z avtorjem.</p>',
+        "Če se napoved uresniči, v sredo zvečer in četrtek zjutraj računajte na sneg in možnost poledice. Če se boste vozili po dolini, poskrbite za ustrezno zimsko opremo. "
+        "Pravila preverite pri AMZS; o času menjave pnevmatik sem pisal v članku " + a("/blog/kdaj-menjati-zimske-gume-recica-1027.html", "»Kdaj menjati zimske gume v Rečici«") + ".",
+        "Za prelaz Črnivec spremljajte meritve postaje DRSI na " + a("https://crnivec.si/", "crnivec.si") + ", ocene poledice na strani " + a("/zima/poledica/", "Poledica") +
+        ", za mejo sneženja pa strani " + a("/zima/meja-snezenja/", "Meja sneženja") + " in " + a("/zima/snezna-karta/", "Snežna karta") + ".",
+        "Ko bo sneg zapadel, lahko pomagate tudi z opazovanjem. " + a("/zima/sneg-porocila/", "Sporočite stanje v svoji regiji in višinskem pasu") +
+        ". Oddaja poročila je preprosta: en dotik, brez prostega besedila in brez navajanja lokacije. "
+        "Poročilo bo nepreverjeno opažanje, ne meritev, vendar lahko dopolni podatke redkih merilnih postaj ARSO v dolini.",
+        '<p class="vs-note" style="margin-top:1.5rem"><strong>Uporaba vsebine:</strong> Besedilo, grafe in podatke lahko povzemate le ob navedbi avtorja (Filip Eremita, Meteorec) '
+        'in neposredne povezave na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.</p>',
     ]
 
     title = "Sneg prihodnji teden: v dolini kaže na sredo in četrtek"
     assert len(title) <= 60, len(title)
-    desc = (f"Bo prihodnji teden sneg? Po ansamblih ga v Rečici napoveduje {w2['cm1']} % članov za sredo in četrtek; kdaj, koliko in na katerih višinah.")
+    desc = (f"Bo prihodnji teden sneg? V Rečici ga za sredo in četrtek napoveduje {w2['cm1']} % članov ansamblov, mediana je {rnd(w2['med'])} cm. "
+            "Kdaj, koliko in na katerih višinah?")
     assert len(desc) <= 160, len(desc)
     sections = [
         {"label": "01 — odgovor", "heading": "Da: v sredo popoldne in v četrtek", "id": "odgovor", "paragraphs": p1},
         {"label": "02 — kdaj", "heading": "Najprej dva mirna dneva, nato sneg", "id": "kdaj", "paragraphs": p2},
-        {"label": "03 — višine", "heading": "Koliko snega, kje", "id": "visine", "paragraphs": p3},
+        {"label": "03 — višine", "heading": "Koliko snega in na katerih višinah?", "id": "visine", "paragraphs": p3},
         {"label": "04 — modeli", "heading": "Ali se modeli strinjajo?", "id": "modeli", "paragraphs": p4},
-        {"label": "05 — obleži", "heading": "Sneži, a ali obleži?", "id": "obleze", "paragraphs": p5},
-        {"label": "06 — zgodovina", "heading": "Za dolino bi bil zgoden", "id": "zgodovina", "paragraphs": p6},
+        {"label": "05 — obleži", "heading": "Snežiti še ne pomeni, da bo sneg tudi obležal", "id": "obleze", "paragraphs": p5},
+        {"label": "06 — zgodovina", "heading": "Za dolino bi bil to zgodnji prvi sneg", "id": "zgodovina", "paragraphs": p6},
         {"label": "07 — omejitve", "heading": "Česa izračun ne pove?", "id": "omejitve", "paragraphs": omej},
         {"label": "08 — praktično", "heading": "Kaj lahko naredite?", "id": "prakticno", "paragraphs": p7},
     ]
@@ -502,9 +540,9 @@ def build_article(S):
         "tags": ["sneg", "nižine", "Golte", "napoved", "november", "ansambli"],
         "section_label": "Podatkovna analiza", "og_photo": "misty-valley", "og_accent_hex": "#93c5fd",
         "lead": lead, "sections": sections, "callout": None,
-        "sources_note": (f"Viri: Open-Meteo (ansambli ECMWF ENS, ICON-EPS, GEFS in GEM ENS ter determinični modeli ECMWF IFS, AIFS, ICON-EU, GFS, UKMO, GEM za Rečico, prenos z dne "
-                         f"{S.fetched.day}. {S.fetched.month}. {S.fetched.year}), model MTR in MTR sneg (Meteorec), opazovanja ARSO v Gornjem Gradu (Vir: Agencija Republike Slovenije za okolje). "
-                         "Weather data by Open-Meteo.com (CC BY 4.0). Podatki posnetka: data/sneg-teden-1121.json."),
+        "sources_note": ("Viri: Open-Meteo (ansambli ECMWF ENS, ICON-EPS, GEFS in GEM ENS ter deterministični modeli ECMWF IFS, AIFS, ICON-EU, GFS, UKMO in GEM za Rečico; "
+                         f"prenos z dne {S.fetched.day}. {S.fetched.month}. {S.fetched.year}); model MTR in MTR sneg (Meteorec); opazovanja ARSO v Gornjem Gradu (vir: Agencija Republike Slovenije za okolje). "
+                         "Weather data by Open-Meteo.com (CC BY 4.0). Podatki za članek: data/sneg-teden-1121.json."),
     }
 
 
