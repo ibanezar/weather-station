@@ -1,4 +1,9 @@
 {
+  "sneg-prihodnji-teden-sreda-cetrtek-1121": [
+    "sneg-v-nizinah-cetrtek-dez-sobota-1109",
+    "sneg-dolina-in-gore-petek-sobota-1112",
+    "crnivec-pozimi-sneg-verige-1027"
+  ],
   "nebo-po-nevihti-1118": [
     "juzni-veter-ze-drugi-dan-1118",
     "altocumulus-undulatus-nad-recico-valovi-pred-fronto-0819",
@@ -21,18 +26,18 @@
   ],
   "sneg-dolina-in-gore-petek-sobota-1112": [
     "prvi-sneg-golte-solcava-menina-1027",
-    "crnivec-pozimi-sneg-verige-1027",
-    "kdaj-pade-prvi-sneg-v-dolini-recica-1027"
+    "sneg-prihodnji-teden-sreda-cetrtek-1121",
+    "crnivec-pozimi-sneg-verige-1027"
   ],
   "martinovo-vreme-recica-sest-let-1111": [
+    "pregovori-o-svetnikih-test-postaja-1118",
     "recica-in-svet-segrevanje-v-podatkih",
-    "temperaturni-trend-ireica1-2020-2025",
-    "pregovori-o-svetnikih-test-postaja-1118"
+    "temperaturni-trend-ireica1-2020-2025"
   ],
   "polarni-vrtinec-se-je-ustavil-novembra-1110": [
     "zima-2026-2027-el-nino-napoved",
-    "kdaj-menjati-zimske-gume-recica-1027",
-    "juzni-veter-ze-drugi-dan-1118"
+    "juzni-veter-ze-drugi-dan-1118",
+    "kdaj-menjati-zimske-gume-recica-1027"
   ],
   "temperature-za-gobe-se-ustrezajo-1109": [
     "slana-gobarska-sezona-1018",
@@ -40,9 +45,9 @@
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
   ],
   "sneg-v-nizinah-cetrtek-dez-sobota-1109": [
+    "sneg-prihodnji-teden-sreda-cetrtek-1121",
     "sneg-dolina-in-gore-petek-sobota-1112",
-    "gobe-se-ena-priloznost-modeli-dez-1017",
-    "dez-8-9-oktobra-koliko-ga-bo-padlo-1007"
+    "gobe-se-ena-priloznost-modeli-dez-1017"
   ],
   "zled-ali-poledica-razlika-1027": [
     "prvi-sneg-golte-solcava-menina-1027",
@@ -130,14 +135,14 @@
     "zakaj-po-dezju-gobe-ne-zrastejo-takoj"
   ],
   "zakaj-po-120-mm-dezja-ni-jurckov-0918": [
-    "trije-vali-gob-po-dezju-0911",
     "jurcki-preverba-napovedi-1015",
+    "trije-vali-gob-po-dezju-0911",
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009"
   ],
   "jurcki-preverba-napovedi-1015": [
     "zakaj-po-120-mm-dezja-ni-jurckov-0918",
     "padlo-10-mm-na-suha-tla-zakaj-jurckov-se-ni-1009",
-    "zakaj-sosed-vedno-najde-gobe"
+    "jesenski-vrh-gob-2026-savinjska-dolina-0922"
   ],
   "zime-nekoc-in-zdaj-1012": [
     "zima-2026-2027-el-nino-napoved",
@@ -520,8 +525,8 @@
     "temperaturni-trend-v-savinjski-dolini-od-28-9-c-danes-do-hla-0719"
   ],
   "razmere-za-pohod-v-savinjske-alpe-ta-konec-tedna-kdaj-veter-0724": [
-    "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720",
     "vreme-golte-sneg-razmere",
+    "napoved-za-ta-teden-v-savinjski-dolini-vroca-sobota-dez-se-v-0720",
     "juzni-veter-ze-drugi-dan-1118"
   ],
   "julij-2026-v-zgornji-savinjski-dolini-je-letosnje-vreme-res-0723": [
