@@ -745,3 +745,19 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-al-slo{display:flex;gap:.6rem;align-items:flex-start;margin:.9rem 0 .4rem;padding:.7rem .8rem;border:2px solid var(--sg-line);border-radius:14px;background:var(--sg-surface2);font-size:.9rem;line-height:1.4;cursor:pointer}
 .sg-al-slo input{flex:none;width:22px;height:22px;margin:.1rem 0 0;accent-color:var(--sg-azure-d)}
 .sg-al-slo b{font-weight:800}
+
+/* okno »Sneži v Sloveniji«: zemljevid celic + kraji */
+.sg-slo-body{display:flex;flex-wrap:wrap;gap:.8rem 1.2rem;align-items:flex-start;margin-top:.2rem}
+.sg-slo-map{flex:none;width:26rem;max-width:100%}
+.sg-slo-map svg{display:block;width:100%;height:auto}
+.sg-slo-land{fill:#e8eef8;stroke:none}
+.sg-slo-border{fill:none;stroke:#7d93b8;stroke-width:.9;stroke-linejoin:round}
+.sg-slo-c.l1{fill:#9ccbff;fill-opacity:.95}.sg-slo-c.l2{fill:#2f7cf5;fill-opacity:.95}.sg-slo-c.l3{fill:#0b3d99;fill-opacity:.97}
+.sg-slo-dot{fill:#0b1b33;stroke:#fff;stroke-width:.9}
+@media(max-width:640px){.sg-slo-chip{padding:.3rem .7rem;border-radius:12px}.sg-slo-chip b{font-size:.92rem}.sg-slo-chip span{font-size:.74rem}.sg-slo-l{gap:.4rem}}
+.sg-slo-lbl{font:700 6.4px var(--sg-display);fill:#0b1b33;paint-order:stroke;stroke:#fff;stroke-width:2.2px;stroke-linejoin:round}
+.sg-slo-info{flex:1 1 14rem;min-width:0}
+.sg-slo-h{margin:0 0 .4rem;font:700 .82rem var(--sg-display);color:var(--sg-muted)}
+.sg-slo-leg{margin:.6rem 0 0;font-size:.76rem;color:var(--sg-muted);line-height:1.5}
+.sg-slo-leg i{display:inline-block;width:.8rem;height:.8rem;border-radius:3px;vertical-align:-.1rem;margin:0 .1rem 0 .4rem}
+.sg-slo-leg i.l1{background:#8fc2ff}.sg-slo-leg i.l2{background:#1b6ef3}.sg-slo-leg i.l3{background:#0b3d99}
