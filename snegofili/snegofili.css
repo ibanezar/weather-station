@@ -761,3 +761,15 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-slo-leg{margin:.6rem 0 0;font-size:.76rem;color:var(--sg-muted);line-height:1.5}
 .sg-slo-leg i{display:inline-block;width:.8rem;height:.8rem;border-radius:3px;vertical-align:-.1rem;margin:0 .1rem 0 .4rem}
 .sg-slo-leg i.l1{background:#8fc2ff}.sg-slo-leg i.l2{background:#1b6ef3}.sg-slo-leg i.l3{background:#0b3d99}
+
+/* Slovenija po regijah in arhiv zim: tabele (drsne na ozkem zaslonu) */
+.sg-tblwrap{overflow-x:auto;margin:.7rem 0;border:2px solid var(--sg-line);border-radius:16px;background:var(--sg-surface)}
+.sg-tblwrap:focus-visible{outline:3px solid var(--sg-azure);outline-offset:2px}
+.sg-tbl{border-collapse:collapse;width:100%;min-width:34rem;font-size:.86rem;font-variant-numeric:tabular-nums;color:var(--sg-ink)}
+.sg-tbl caption{caption-side:top;text-align:left;font:700 .95rem var(--sg-display);padding:.6rem .8rem .2rem}
+.sg-tbl caption small,.sg-tbl td small,.sg-tbl th small{color:var(--sg-muted);font-weight:400;font-size:.74rem}
+.sg-tbl th,.sg-tbl td{padding:.5rem .75rem;text-align:left;vertical-align:top;border-bottom:1px solid var(--sg-line)}
+.sg-tbl thead th{font:700 .7rem var(--sg-display);text-transform:uppercase;letter-spacing:.05em;color:var(--sg-muted)}
+.sg-tbl tbody th{font-weight:700}
+.sg-tbl tbody tr:last-child>*{border-bottom:0}
+.sg-sec h3{margin:1.2rem 0 .2rem;font-size:1.05rem}
