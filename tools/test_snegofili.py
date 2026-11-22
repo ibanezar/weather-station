@@ -282,6 +282,21 @@ except (OSError, subprocess.SubprocessError, ValueError) as e:
 check('id="sg-slo"' in body and 'id="sg-slo-l"' in body and 'id="sg-slo-x"' in body and 'id="sg-slo-s"' in body and 'id="sg-slo-t"' in body,
       "stran ima okno »Sneži v Sloveniji« (skrito do JS) z vsemi elementi, ki jih polni sloPaint()")
 check(re.search(r'<aside class="sg-slo"[^>]*\bhidden\b', body) is not None, "okno Slovenija je privzeto skrito (brez JS statičen posnetek ne trdi nič)")
+# ── merila na karticah v herou (22. 11. 2026) ──
+try:
+    vs = [0, 0.4, 1, 3, 10, 32, 59, 60, 120, 400]
+    js = node_json("console.log(JSON.stringify(%s.map(v=>m.gaugePos(v))))" % json.dumps(vs))
+    check(js == [g.gauge_pos(v) for v in vs], "gauge_pos (Python) = gaugePos (JS) na 10 vrednostih, nad 60 cm je lata polna")
+    check(g.gauge_pos(0) == 0 and g.gauge_pos(60) == 100 and 0 < g.gauge_pos(3) < g.gauge_pos(10) < g.gauge_pos(32) < 100, "lata je korenska in monotona")
+    check(node_json("console.log(JSON.stringify([m.GAUGE_MAX,m.GAUGE_SEGS]))") == [g.GAUGE_MAX, g.GAUGE_SEGS], "konstante late in segmentov so v obeh jezikih enake")
+except (OSError, subprocess.SubprocessError, ValueError) as e:
+    check(False, f"node (gauge): {e}")
+check('id="sg-st-past-g"' in body and 'id="sg-st-next-g"' in body and 'id="sg-st-fresh-g"' in body and 'class="sg-sbars"' in body and 'id="sg-st-rec-g"' in body,
+      "kartice v herou imajo merila: lata (nazaj, naprej), segmenti, stolpci postaj in mesto za Rečico")
+check(body.count('class="sg-segs"') == 1 and body.count('<i class=on>') <= g.GAUGE_SEGS, "segmentov je 20, vklopljenih ne več")
+z = g.gauge_rule("x", 0, "0 cm", meas=True)
+check('sg-rule meas zero' in z and 'width:0.0%' in z, "izmerjena ničla je krožec (zero), ne prazna proga")
+check('&amp;lt;' not in g.gauge_rule("x", 0.2, "<1 cm"), "oznaka late ni dvakrat escapirana")
 check('id="sg-stats"' in body and 'id="zdaj-snezi"' in body and 'id="kam-peljem"' in body and 'id="toplotna-karta"' in body,
       "stran ima povzetek, pas »Kjer zdaj sneži«, izbirnik in toplotno karto")
 check(body.count('class="sg-spark"') == 2, "vsaka kartica ima rezerviran sparkline")

@@ -795,3 +795,28 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-sz-t i{display:block;height:100%;min-width:2px;border-radius:4px}
 .sg-sz-b em{font:400 .72rem var(--sg-display);font-style:normal;text-align:right;color:var(--sg-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .sg-sz-b.mx em{font-weight:800;color:var(--sg-ink)}
+
+/* ── merila na karticah v herou (22. 11. 2026): lata 0–60 cm (korenska), segmenti, stolpci postaj, svežina meritve ── */
+.sg-stat .sg-rule{position:relative;height:28px;margin-top:auto;padding-top:0;flex:none}
+.sg-stat>span+.sg-rule,.sg-stat>span+.sg-segs,.sg-stat>span+.sg-sbars,.sg-stat>#sg-st-rec-g{margin-top:.45rem}
+.sg-rl-tr{position:absolute;left:0;right:0;top:4px;height:7px;border-radius:4px;background:rgba(255,255,255,.12)}
+.sg-rl-fl{position:absolute;left:0;top:4px;height:7px;border-radius:4px;background:linear-gradient(90deg,#4f9bff,#8fc2ff 60%,#eaf4ff);min-width:0;transition:width .35s ease}
+.sg-rule.meas .sg-rl-fl{background:#fff}
+.sg-rule.zero .sg-rl-fl{width:0 !important}
+.sg-rule.zero::before{content:"";position:absolute;left:0;top:2px;width:11px;height:11px;border-radius:50%;border:2px solid #fff;background:var(--sg-surface)}
+.sg-rl-tk{position:absolute;top:12px;width:1px;height:3px;background:rgba(255,255,255,.4)}
+.sg-stat .sg-rl-tl{position:absolute;top:15px;transform:translateX(-50%);font:600 .56rem var(--sg-display);color:#8fb0d8 !important;white-space:nowrap;line-height:1}
+.sg-stat .sg-rl-tl.t0{transform:none}.sg-stat .sg-rl-tl.t60{transform:translateX(-100%)}
+.sg-segs{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin-top:auto}
+.sg-segs i{height:8px;border-radius:2px;background:rgba(255,255,255,.14)}
+.sg-segs i.on{background:#8fc2ff}
+.sg-sbars{display:flex;align-items:flex-end;gap:7px;height:34px;margin-top:auto}
+.sg-sbars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%}
+.sg-sbars i{display:block;width:100%;background:#fff;border-radius:3px 3px 0 0}
+.sg-sbars i.z{height:2px !important;border-radius:1px;background:rgba(255,255,255,.75)}
+.sg-sbars em{font:700 .55rem var(--sg-display);font-style:normal;color:#cfe6ff;line-height:1}
+.sg-fresh{display:flex;align-items:center;gap:4px;margin-top:.1rem}
+.sg-fresh i{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:transparent}
+.sg-fresh i.on{background:#fff;border-color:#fff}
+.sg-stat .sg-fresh span{font:600 .62rem var(--sg-display);color:#8fb0d8;margin-left:.3rem}
+@media(prefers-reduced-motion:reduce){.sg-rl-fl{transition:none}}

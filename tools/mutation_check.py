@@ -228,6 +228,9 @@ MUTACIJE = [
     ("čuvaj videza: dogodki brez interactionId", "tools/visual_watch.mjs", "if (e && e.id) by.set", "if (e) by.set", "test_visual_watch.mjs"),
     ("hero stavek: vrh jutri (24 ur)", "app.js", "const tomorrowPeak=Math.round(nMax)>Math.round(tMaxToday)&&", "const tomorrowPeak=false&&"),
     # ── Snegofili (test_snegofili.py, 19. 11. 2026) ──
+    ("snegofili: lata je korenska", "tools/generate_snegofili_page.py", "math.sqrt(max(0.0, float(v)) / GAUGE_MAX)", "max(0.0, float(v)) / GAUGE_MAX", "test_snegofili.py"),
+    ("snegofili: izmerjena ničla je krožec", "tools/generate_snegofili_page.py", 'if meas and v == 0 else ""', 'if meas and v == 99 else ""', "test_snegofili.py"),
+    ("snegofili: JS lata nad 60 cm je polna", "snegofili/snegofili.js", "Math.min(1, Math.sqrt(Math.max(0, +v || 0) / GAUGE_MAX))", "Math.sqrt(Math.max(0, +v || 0) / GAUGE_MAX)", "test_snegofili.py"),
     ("snegofili: zacetek okna naprej ne šteje ure, ki teče", "tools/snegofili_data.py", '("next24", idx_now + 1, idx_now + 24)', '("next24", idx_now, idx_now + 24)', "test_snegofili.py"),
     ("snegofili: okno nazaj 24 ur", "tools/snegofili_data.py", '("past24", idx_now - 23, idx_now)', '("past24", idx_now - 24, idx_now)', "test_snegofili.py"),
     ("snegofili: premalo ur nazaj: točka odpade", "tools/snegofili_data.py", 'idx_now < 71 or', 'idx_now < 40 or', "test_snegofili.py"),

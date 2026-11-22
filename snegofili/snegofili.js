@@ -136,7 +136,12 @@
   function recicaAge(ageH) { return ageH < 1 ? 'pred manj kot uro' : ageH < 48 ? 'pred ' + Math.round(ageH) + ' h' : 'pred ' + Math.round(ageH / 24) + ' dnevi'; }
   function recicaCm(cm) { return cm === 0 ? '0 cm' : fmt(cm, cm >= 10 || cm === Math.round(cm) ? 0 : 1) + ' cm'; }
 
+  /* merila na karticah v herou: korenska lata 0–60 cm (namerna podvojitev gauge_pos() v generatorju; primerja ga test_snegofili.py) */
+  var GAUGE_MAX = 60, GAUGE_SEGS = 20;
+  function gaugePos(v) { return Math.round(Math.min(1, Math.sqrt(Math.max(0, +v || 0) / GAUGE_MAX)) * 1000) / 10; }
+
   var model = {
+    gaugePos: gaugePos, GAUGE_MAX: GAUGE_MAX, GAUGE_SEGS: GAUGE_SEGS,
     recicaState: recicaState, recicaAge: recicaAge, recicaCm: recicaCm, RECICA_STALE_H: RECICA_STALE_H, RECICA_HIDE_D: RECICA_HIDE_D,
     NOW: NOW, MIN_I: MIN_I, MAX_I: MAX_I, SNOWING_MIN: SNOWING_MIN, step: step, phase: phase, radius: radius, barPct: barPct,
     windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, sloSummary: sloSummary, sloHits: sloHits, sloPlaces: sloPlaces, SLO_PLACES: SLO_PLACES, SLO_MASK: SLO_MASK, SLO_MIN_CELLS: SLO_MIN_CELLS, SLO_HOURS: SLO_HOURS, SLO_MAX_AGE_MS: SLO_MAX_AGE_MS, hstep: hstep, plan: plan
@@ -303,6 +308,19 @@
     if (best) { set('sg-st-past', cmText(best.w.past)); set('sg-st-past-n', best.w.past >= 1 ? best.p.n : 'nikjer'); var a = near('past'); if (a) set('sg-st-past-c', a); }
     if (bestN) { set('sg-st-next', cmText(bestN.w.next)); set('sg-st-next-n', bestN.w.next >= 1 ? bestN.p.n : 'nikjer'); var b2 = near('next'); if (b2) set('sg-st-next-c', b2); }
     set('sg-st-fresh', String(fresh)); set('sg-st-fresh-n', 'od ' + tot + ' lokacij · ≥ 1 cm v zadnjih 24 urah');
+    var gr = function (id, v) {
+      var g = document.getElementById(id); if (!g) return; var f = g.querySelector('.sg-rl-fl'); if (!f) return;
+      var w = gaugePos(v) + '%'; if (f.style.width !== w) f.style.width = w;
+      g.setAttribute('aria-label', cmText(v) + ' na lestvici do ' + GAUGE_MAX + ' cm (model)');
+    };
+    if (best) gr('sg-st-past-g', best.w.past);
+    if (bestN) gr('sg-st-next-g', bestN.w.next);
+    var sg = document.getElementById('sg-st-fresh-g');
+    if (sg && tot) {
+      var on = Math.round(fresh / tot * GAUGE_SEGS), segs = sg.children;
+      for (var k = 0; k < segs.length; k++) segs[k].classList.toggle('on', k < on);
+      sg.setAttribute('aria-label', fresh + ' od ' + tot + ' lokacij');
+    }
   }
 
   function bindControls() {
@@ -1094,6 +1112,17 @@
   particles();
   bindCams();
   /* tile in oznaka na karti: ročna meritev v Rečici (ob napaki ali brez meritve ostane skrito, nikoli izmišljena vrednost) */
+  /* lata za ročno meritev in kazalnik svežine (3 pike = 3 dni veljavnosti; po 72 h je meritev označena kot stara) */
+  function recGauge(st) {
+    var host = document.getElementById('sg-st-rec-g'); if (!host) return;
+    var ticks = [0, 10, 30, 60].map(function (t) {
+      return '<i class="sg-rl-tk" style="left:' + gaugePos(t) + '%"></i><span class="sg-rl-tl t' + t + '" style="left:' + gaugePos(t) + '%" aria-hidden="true">' + t + (t === 60 ? '+' : '') + '</span>';
+    }).join('');
+    var left = st.stale ? 0 : Math.max(0, 3 - Math.floor(st.ageH / 24)), dots = '';
+    for (var k = 0; k < 3; k++) dots += '<i class="' + (k < left ? 'on' : '') + '"></i>';
+    host.innerHTML = '<div class="sg-rule meas' + (st.cm === 0 ? ' zero' : '') + '" role="img" aria-label="' + recicaCm(st.cm) + ' na lestvici do ' + GAUGE_MAX + ' cm (meritev)"><i class="sg-rl-tr"></i><i class="sg-rl-fl" style="width:' + gaugePos(st.cm) + '%"></i>' + ticks + '</div>' +
+      '<div class="sg-fresh" role="img" aria-label="' + (st.stale ? 'meritev je stara, veljala je 72 h' : 'meritev je stara ' + recicaAge(st.ageH).replace('pred ', '') + ', velja 72 h') + '">' + dots + '<span>velja 72 h</span></div>';
+  }
   (function recicaUi() {
     var tile = $('#sg-st-rec-w'); if (!tile) return;
     fetch('/data/snegofili-recica.json?h=' + Math.floor(Date.now() / 36e5), { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
@@ -1102,6 +1131,7 @@
       $('#sg-st-rec').textContent = recicaCm(st.cm);
       var n = (st.cm === 0 ? 'izmerjena ničla' : 'ročna meritev') + ' · ' + (st.stale ? 'stara: ' + d : recicaAge(st.ageH)) + (st.novi != null ? ' · nov sneg ' + recicaCm(st.novi) : '');
       $('#sg-st-rec-n').textContent = n;
+      recGauge(st);
       tile.classList.toggle('stale', st.stale); tile.hidden = false;
       var lb = $('#sg-rec-lbl'); if (lb && !st.stale) lb.textContent = 'Rečica · ' + recicaCm(st.cm);
     }).catch(function () { });
