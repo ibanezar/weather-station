@@ -773,3 +773,25 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-tbl tbody th{font-weight:700}
 .sg-tbl tbody tr:last-child>*{border-bottom:0}
 .sg-sec h3{margin:1.2rem 0 .2rem;font-size:1.05rem}
+
+/* izmerjene zime ARSO: primerjalni stolpci po zimah (dolina proti 794 m) */
+.sg-sz-leg{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;margin:.9rem 0 .3rem;font:700 .88rem var(--sg-display);color:var(--sg-ink)}
+.sg-sz-k small{color:var(--sg-muted);font-weight:400}
+.sg-sz-k i,.sg-sz-b.a .sg-sz-t i{background:#3f8cf0}.sg-sz-b.b .sg-sz-t i,.sg-sz-k i.b{background:#0b2f7a}
+.sg-sz-k i.a{background:#3f8cf0}
+.sg-sz-k i{display:inline-block;width:.8rem;height:.8rem;border-radius:3px;margin-right:.35rem;vertical-align:-.1rem}
+.sg-sz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:.9rem;margin:.6rem 0 .5rem}
+.sg-sz-ch{margin:0;padding:.8rem .9rem .9rem;background:var(--sg-surface);border:2px solid var(--sg-line);border-radius:18px}
+.sg-sz-ch figcaption{font:800 1rem var(--sg-display);color:var(--sg-ink);margin-bottom:.55rem}
+.sg-sz-ch figcaption small{color:var(--sg-muted);font-weight:500;font-size:.78rem}
+.sg-sz-ch ol{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
+.sg-sz-ch li{display:grid;grid-template-columns:4.3rem 1fr;gap:.5rem;align-items:center}
+.sg-sz-ch li.cur{opacity:.55}
+.sg-sz-l{font:700 .8rem var(--sg-display);color:var(--sg-ink);font-variant-numeric:tabular-nums;line-height:1.15}
+.sg-sz-l small{display:block;font-weight:400;font-size:.66rem;color:var(--sg-muted)}
+.sg-sz-bs{display:grid;gap:2px;min-width:0}
+.sg-sz-b{display:grid;grid-template-columns:1fr 3.6rem;gap:.35rem;align-items:center}
+.sg-sz-t{display:block;height:.62rem;border-radius:4px;background:var(--sg-surface2);overflow:hidden}
+.sg-sz-t i{display:block;height:100%;min-width:2px;border-radius:4px}
+.sg-sz-b em{font:400 .72rem var(--sg-display);font-style:normal;text-align:right;color:var(--sg-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sg-sz-b.mx em{font-weight:800;color:var(--sg-ink)}
