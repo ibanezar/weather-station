@@ -236,6 +236,36 @@ console.log(JSON.stringify([r({win:'n24',km:200,minCm:1}), r({win:'n24',km:0,min
 except (OSError, subprocess.SubprocessError, ValueError) as e:
     check(False, f"node (nove komponente): {e}")
 
+try:
+    slo_js = r"""
+const H=3600000, NOW=Date.UTC(2026,11,3,8,0), SLO=[290,291,292,293], OUT=[280,281,282,283];
+const K=(fill)=>{const sn=Array.from({length:48},()=>new Array(560).fill(0));const z=new Array(560).fill(null);SLO.concat(OUT).forEach((i,n)=>{z[i]=500+100*n});fill(sn);return {generated:NOW,t0:NOW,nx:35,ny:16,sn,z}};
+const S=(f,now)=>m.sloSummary(K(f),now==null?NOW:now);
+const a=S(sn=>{SLO.forEach(i=>{sn[0][i]=5});sn[0][SLO[0]]=12});
+console.log(JSON.stringify([a.active,a.cells,a.maxCmH,a.lowM,a.hours,
+  S(sn=>{OUT.forEach(i=>{sn[0][i]=30})}).active,
+  S(sn=>{SLO.slice(0,2).forEach(i=>{sn[0][i]=30})}).active,
+  S(sn=>{SLO.slice(0,3).forEach(i=>{sn[0][i]=1})}).active,
+  S(sn=>{SLO.forEach(i=>{sn[5][i]=9})}).active,
+  S(sn=>{SLO.forEach(i=>{sn[2][i]=9})}).active,
+  S(sn=>{SLO.forEach(i=>{sn[0][i]=9})},NOW+2*H).active,
+  m.sloSummary(null,NOW).active,m.sloSummary({sn:'x'},NOW).active,
+  m.SLO_MASK.length,m.SLO_MASK.every(r=>r.length===35)]))
+"""
+    sl = node_json(slo_js)
+    check(sl[:5] == [True, 4, 1.2, 500, 1], "okno Slovenija: povzetek karte (4 celice, največ 1,2 cm/h, najnižja celica 500 m, 1 ura)")
+    check(sl[5] is False, "okno Slovenija: sneženje zunaj Slovenije ne šteje (maska)")
+    check(sl[6] is False and sl[7] is True, "okno Slovenija: 2 celici sta šum, 3 celice po 0,1 cm/h so prag")
+    check(sl[8] is False and sl[9] is True, "okno Slovenija: ura čez okno ne šteje, zadnja ura okna šteje")
+    check(sl[10] is False, "okno Slovenija: ura, ki je že mimo, ne šteje (po žigu, ne po indeksu)")
+    check(sl[11] is False and sl[12] is False, "okno Slovenija: brez karte ali s pokvarjeno karto ni sneženja")
+    check(sl[13] == 16 and sl[14] is True, "okno Slovenija: maska ima 16 vrstic po 35 celic")
+except (OSError, subprocess.SubprocessError, ValueError) as e:
+    check(False, f"node (okno Slovenija): {e}")
+
+check('id="sg-slo"' in body and 'id="sg-slo-l"' in body and 'id="sg-slo-x"' in body and 'id="sg-slo-s"' in body and 'id="sg-slo-t"' in body,
+      "stran ima okno »Sneži v Sloveniji« (skrito do JS) z vsemi elementi, ki jih polni sloPaint()")
+check(re.search(r'<aside class="sg-slo"[^>]*\bhidden\b', body) is not None, "okno Slovenija je privzeto skrito (brez JS statičen posnetek ne trdi nič)")
 check('id="sg-stats"' in body and 'id="zdaj-snezi"' in body and 'id="kam-peljem"' in body and 'id="toplotna-karta"' in body,
       "stran ima povzetek, pas »Kjer zdaj sneži«, izbirnik in toplotno karto")
 check(body.count('class="sg-spark"') == 2, "vsaka kartica ima rezerviran sparkline")

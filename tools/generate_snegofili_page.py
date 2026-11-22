@@ -600,10 +600,11 @@ def alarm_html(rows):
       <button type="button" class="sg-al-btn s" id="sg-al-add">Dodaj pravilo</button>
     </div>
     <ul class="sg-al-list" id="sg-al-list" aria-label="Vaša pravila"></ul>
+    <label class="sg-al-slo"><input type="checkbox" id="sg-al-slo"> <span><b>Sneži kjerkoli v Sloveniji.</b> Obvestilo, ko model ICON-D2 v naslednjih treh urah napove sneženje v Sloveniji (vsaj tri celice mreže 10 × 8 km, vsaj 0,1 cm na uro). Pošljemo ga ob začetku sneženja, ne ob vsaki uri; največ enkrat na 12 ur. Deluje tudi brez pravil zgoraj.</span></label>
     <div class="sg-al-row"><button type="button" class="sg-al-btn" id="sg-al-on">Vklopi opozorilo</button> <button type="button" class="sg-al-btn s" id="sg-al-off" hidden>Izklopi</button></div>
     <p class="muted-note" id="sg-al-ios" hidden>Na iPhonu obvestila delujejo samo v aplikaciji, dodani na začetni zaslon (Deli, nato Dodaj na začetni zaslon).</p>
     <p class="muted-note" id="sg-al-msg" aria-live="polite"></p>
-    <p class="muted-note">Modelska ocena novega snega iz padavin in meje sneženja, ne meritev; ni plazovni bilten in ni nasvet za turo. Strežnik shrani samo naslovnico naročnine in vaša pravila; izklop jih izbriše.</p>
+    <p class="muted-note">Modelska ocena novega snega iz padavin in meje sneženja, ne meritev; ni plazovni bilten in ni nasvet za turo. Strežnik shrani samo naslovnico naročnine, vaša pravila in kljukico »Sneži kjerkoli v Sloveniji«; izklop jih izbriše.</p>
   </section>'''
 
 
@@ -716,6 +717,20 @@ def stats_html(rows):
             + tile("meas", "Postaj ARSO", ("r", "Meritev"), f"{meas}", "z izmerjeno višino snežne odeje")
             + tile("rec", "Rečica, sneg v dolini", ("r", "Meritev"), "ni meritve", "višina snežne odeje (ročna meritev)", hid=True)
             + '</div>\n')
+
+
+def slo_alert_html():
+    """Okno »Sneži v Sloveniji«: skrito, dokler JS (sloLoad()/sloPaint() v snegofili.js) iz /sneg-karta.json (ICON-D2, ista karta kot
+    push »Sneži kjerkoli v Sloveniji« in /zima/snezna-karta/) ne ugotovi, da po modelu v naslednjih treh urah sneži v Sloveniji.
+    Vsebino napolni JS; brez JS ostane skrito, ker bi statičen posnetek hitro zastarel."""
+    return ('  <aside class="sg-slo" id="sg-slo" role="status" aria-live="polite" aria-labelledby="sg-slo-t" hidden>\n'
+            '    <div class="sg-slo-hd"><span class="sg-slo-dot" aria-hidden="true"></span><h2 id="sg-slo-t">Sneži v Sloveniji</h2>'
+            '<span class="sg-bdg m">Model</span>'
+            '<button type="button" class="sg-slo-x" id="sg-slo-x" aria-label="Zapri okno »Sneži v Sloveniji«">×</button></div>\n'
+            '    <p class="sg-slo-s" id="sg-slo-s"></p>\n'
+            '    <ul class="sg-slo-l" id="sg-slo-l"></ul>\n'
+            '    <p class="sg-slo-f"><a href="/zima/snezna-karta/">Poglejte na snežni karti</a></p>\n'
+            '  </aside>\n')
 
 
 def measured_html(rows):
@@ -946,7 +961,7 @@ def build_body(data, cams):
     <a class="sg-cta o" id="sg-al-cta" href="#sg-alarm" hidden>Nastavi snežno opozorilo</a></div>
 {f'    <p class="sg-credit">{hp[1]}</p>' if hp and hp[1] else ""}
   </section>
-{stats_html(rows)}{nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
+{stats_html(rows)}{slo_alert_html()}{nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
   <h2 id="zm-h">Zemljevid snežnih razmer <span class="sg-bdg m">Model</span></h2>
   <p class="archive-intro">Barva in velikost kroga kažeta novi sneg po modelu; dotik točke odpre povzetek. Privzeti pogled je Slovenija z Avstrijo in severno Italijo.</p>
   <div class="sg-win sg-mapgrid">

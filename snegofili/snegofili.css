@@ -723,3 +723,25 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-install-hint[hidden]{display:none}
 @media(min-width:641px){.sg-install{padding:0 1rem}.sg-install-t{display:inline}}
 @media(max-width:640px){.sg-install{min-width:40px;min-height:40px}}
+
+/* okno »Zdaj sneži v Sloveniji«: skrito, dokler po modelu v Sloveniji ne sneži (JS). Oranžna samo za »zdaj sneži«. */
+.sg-slo{margin:1rem 0 0;padding:.85rem 1rem 1rem;background:var(--sg-surface);border:2px solid var(--sg-line);border-left:6px solid var(--sg-beacon);border-radius:18px;box-shadow:var(--sg-shadow);color:var(--sg-ink)}
+.sg-slo[hidden]{display:none}
+.sg-slo-hd{display:flex;align-items:center;gap:.55rem}
+.sg-slo-hd h2{margin:0;font:800 1.15rem/1.2 var(--sg-display);letter-spacing:-.02em}
+.sg-slo-dot{flex:none;width:.7rem;height:.7rem;border-radius:50%;background:var(--sg-beacon);box-shadow:0 0 0 0 rgba(255,90,31,.6);animation:sgp 2s ease-out infinite}
+.sg-slo-x{margin-left:auto;flex:none;width:44px;height:44px;margin-block:-.5rem -.5rem;border:0;background:transparent;color:var(--sg-muted);font:400 1.6rem/1 var(--sg-display);cursor:pointer;border-radius:50%}
+.sg-slo-x:hover{background:var(--sg-surface2)}
+.sg-slo-s{margin:.2rem 0 .6rem;font-size:.88rem;color:var(--sg-muted)}
+.sg-slo-l{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem}
+.sg-slo-chip{display:flex;flex-direction:column;align-items:flex-start;padding:.4rem .85rem;border-radius:14px;border:2px solid var(--sg-line);background:var(--sg-surface2);color:var(--sg-ink);text-align:left;font-family:var(--sg-display)}
+.sg-slo-chip b{font-size:1rem;font-weight:800}
+.sg-slo-chip span{font-size:.8rem;color:var(--sg-muted);font-variant-numeric:tabular-nums}
+.sg-slo-f{margin:.6rem 0 0;font-size:.85rem}
+.sg-slo-f a{color:var(--sg-link)}
+@media(prefers-reduced-motion:reduce){.sg-slo-dot{animation:none}}
+
+/* kljukica »Sneži kjerkoli v Sloveniji« v obrazcu opozorila */
+.sg-al-slo{display:flex;gap:.6rem;align-items:flex-start;margin:.9rem 0 .4rem;padding:.7rem .8rem;border:2px solid var(--sg-line);border-radius:14px;background:var(--sg-surface2);font-size:.9rem;line-height:1.4;cursor:pointer}
+.sg-al-slo input{flex:none;width:22px;height:22px;margin:.1rem 0 0;accent-color:var(--sg-azure-d)}
+.sg-al-slo b{font-weight:800}

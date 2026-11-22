@@ -27,8 +27,8 @@ const ctx = vm.createContext({
   console, JSON, Math, Date, Promise, Set, Array, Object, String, Number, Map, parseInt, isNaN,
   _sendPush: async (_env, sub, payload) => { sent.push({ ep: sub.endpoint, payload }); return code; },
 });
-vm.runInContext(block + '\nthis._clean=_sgClean; this._notify=_sgNotify; this._text=_sgText; this.C={SG_PUSH_KEY, SG_CM_ALLOWED, SG_MAX_RULES, SG_MAX_AGE_H, SG_COOLDOWN_MS, SG_RESET_FRAC, SG_TIHO_OD, SG_TIHO_DO};', ctx);
-const { _clean, _notify, _text, C } = ctx;
+vm.runInContext(block + '\nthis._clean=_sgClean; this._notify=_sgNotify; this._text=_sgText; this._sloSum=_sgSloSummary; this._sloNotify=_sgSloNotify; this._sloText=_sgSloText; this.C={SG_SLO_MASK, SG_SLO_MIN_CELLS, SG_SLO_HOURS, SG_SLO_MAX_AGE_MS, SG_SLO_COOLDOWN_MS, SG_PUSH_KEY, SG_CM_ALLOWED, SG_MAX_RULES, SG_MAX_AGE_H, SG_COOLDOWN_MS, SG_RESET_FRAC, SG_TIHO_OD, SG_TIHO_DO};', ctx);
+const { _clean, _notify, _text, _sloSum, _sloNotify, _sloText, C } = ctx;
 const env = { PHOTOS_R2: r2, VAPID_PRIVATE: 'x' };
 const H = 3600 * 1000, NOW = Date.UTC(2026, 11, 3, 8, 0);
 
@@ -114,6 +114,72 @@ r = await _notify(env, data([pt('golte', 50)]), NOW); assert.equal(r.pruned, 1);
 code = 201;
 // brez VAPID
 assert.equal((await _notify({ PHOTOS_R2: r2 }, data([pt('golte', 50)]), NOW)).skipped, 'ni shrambe ali VAPID');
+// 4b. »sneži kjerkoli v Sloveniji«: maska mreže = obris SLO_POLY iz app.js (namerna podvojitev)
+{
+  const app = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8');
+  const P = JSON.parse(/const SLO_POLY=(\[\[.*?\]\]);/s.exec(app)[1]);
+  const inP = (x, y) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const xi = P[i][0], yi = P[i][1], xj = P[j][0], yj = P[j][1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const m = Array.from(C.SG_SLO_MASK); assert.equal(m.length, 16); assert(m.every(r => r.length === 35));
+  for (let j = 0; j < 16; j++) for (let i = 0; i < 35; i++)
+    assert.equal(m[j][i] === '1', inP(+(13.3 + i * 0.1).toFixed(2), +(45.4 + j * 0.1).toFixed(2)), `maska celice ${j},${i} ni enaka obrisu Slovenije`);
+}
+const SLO = [290, 291, 292, 293], OUT = [280, 281, 282, 283];     // 4 celice v Sloveniji (vrstica 8, stolpci 10–13) in 4 zunaj (stolpci 0–3)
+const T0 = Math.ceil(NOW / H) * H;                                 // karta je zgrajena ob NOW; korak k ima žig T0 + (k+1) h
+const karta = (fill, gen = NOW) => {
+  const sn = Array.from({ length: 48 }, () => new Array(560).fill(0)); const z = new Array(560).fill(null); SLO.concat(OUT).forEach((i, n) => { z[i] = 500 + 100 * n; });
+  fill(sn); return { generated: gen, t0: Math.ceil(gen / H) * H, hours: 48, nx: 35, ny: 16, sn, z };
+};
+let sm = _sloSum(karta(sn => { SLO.forEach(i => { sn[0][i] = 5; }); sn[0][SLO[0]] = 12; }), NOW);
+assert.equal(sm.active, true); assert.equal(sm.cells, 4); assert.equal(sm.maxCmH, 1.2); assert.equal(sm.lowM, 500, 'najnižja višina celic, kjer sneži'); assert.equal(sm.hours, 1);
+assert.equal(_sloSum(karta(sn => { OUT.forEach(i => { sn[0][i] = 30; }); }), NOW).active, false, 'sneženje zunaj Slovenije ne šteje (maska)');
+assert.equal(_sloSum(karta(sn => { SLO.slice(0, C.SG_SLO_MIN_CELLS - 1).forEach(i => { sn[0][i] = 30; }); }), NOW).active, false, 'manj kot SG_SLO_MIN_CELLS celic = šum');
+assert.equal(_sloSum(karta(sn => { SLO.slice(0, C.SG_SLO_MIN_CELLS).forEach(i => { sn[0][i] = 1; }); }), NOW).active, true, 'natanko prag: 3 celice po 0,1 cm/h');
+assert.equal(_sloSum(karta(sn => { SLO.forEach(i => { sn[0][i] = 0; }); }), NOW).active, false, '0 cm/h ne šteje');
+assert.equal(_sloSum(karta(sn => { SLO.forEach(i => { sn[C.SG_SLO_HOURS + 2][i] = 9; }); }), NOW).active, false, 'ura čez okno ne šteje');
+assert.equal(_sloSum(karta(sn => { SLO.forEach(i => { sn[C.SG_SLO_HOURS - 1][i] = 9; }); }), NOW).active, true, 'zadnja ura v oknu šteje');
+assert.equal(_sloSum(karta(sn => { SLO.forEach(i => { sn[0][i] = 9; }); }), T0 + 2 * H).active, false, 'ura, ki je že mimo (žig ≤ zdaj), ne šteje: ure po žigu, ne po indeksu');
+assert.equal(_sloSum(null, NOW).active, false); assert.equal(_sloSum({ sn: 'x' }, NOW).active, false);
+const tx2 = _sloText(sm); assert.match(tx2, /v Sloveniji/); assert.match(tx2, /1,2 cm\/h/); assert.match(tx2, /ne meritev/); assert.match(tx2, /ne uradno opozorilo/); assert.match(tx2, /340 km²/, '4 celice × 85 km² = 340');
+
+// okno na strani (snegofili.js: sloSummary) in push (worker.js: _sgSloSummary) morata dati isto: ista maska, isti pragovi, isti izračun
+assert.deepEqual(Array.from(SG.SLO_MASK), Array.from(C.SG_SLO_MASK), 'maska v snegofili.js = maska v workerju');
+assert.deepEqual([SG.SLO_MIN_CELLS, SG.SLO_HOURS, SG.SLO_MAX_AGE_MS], [C.SG_SLO_MIN_CELLS, C.SG_SLO_HOURS, C.SG_SLO_MAX_AGE_MS], 'pragovi okna = pragovi pusha');
+{
+  const cases = [
+    [sn => { SLO.forEach(i => { sn[0][i] = 5; }); sn[0][SLO[0]] = 12; }, NOW],
+    [sn => { OUT.forEach(i => { sn[0][i] = 30; }); }, NOW],
+    [sn => { SLO.slice(0, 2).forEach(i => { sn[0][i] = 30; }); }, NOW],
+    [sn => { SLO.forEach(i => { sn[1][i] = 7; sn[2][i] = 3; }); sn[2][OUT[0]] = 50; }, NOW],
+    [sn => { SLO.forEach(i => { sn[C.SG_SLO_HOURS][i] = 9; }); }, NOW],
+    [sn => { SLO.forEach(i => { sn[0][i] = 9; }); }, NOW + 2 * H],
+    [sn => { for (let i = 0; i < 560; i++) sn[1][i] = 4; }, NOW],       // vsa mreža: šteje samo notranjost maske
+  ];
+  for (const [f, now] of cases) assert.deepEqual(JSON.parse(JSON.stringify(SG.sloSummary(karta(f), now))), JSON.parse(JSON.stringify(_sloSum(karta(f), now))), 'okno in push dasta isto');
+  assert.equal(_sloSum(karta(sn => { for (let i = 0; i < 560; i++) sn[1][i] = 4; }), NOW).cells, Array.from(C.SG_SLO_MASK).join('').split('1').length - 1, 'cela mreža: šteje natanko celice v maski');
+}
+
+const ssub = (ep, slo, rules = []) => ({ endpoint: ep, keys: { p256dh: 'a', auth: 'b' }, rules, slo, st: {} });
+const snowK = (gen = NOW) => karta(sn => { SLO.forEach(i => { sn[0][i] = 5; }); }, gen), dryK = (gen = NOW) => karta(() => {}, gen);
+reset([ssub('https://p/s1', true), ssub('https://p/s2', false, [{ id: 'golte', cm: 99 }]), ssub('https://p/s3', undefined)]);
+await _sloNotify(env, dryK(), NOW); assert.equal(sent.length, 0, 'brez sneženja ne pošlje');
+r = await _sloNotify(env, snowK(NOW + H), NOW + H); assert.deepEqual(sent.map(x => x.ep), ['https://p/s1'], 'samo naročniki s slo');
+assert.equal(sent[0].payload.tag, 'snegofili-slo'); assert.equal(sent[0].payload.url, 'https://meteorec.si/zima/snezna-karta/'); assert.match(sent[0].payload.title, /Slovenij/);
+sent.length = 0; await _sloNotify(env, snowK(NOW + 2 * H), NOW + 2 * H); assert.equal(sent.length, 0, 'sneži naprej: ne ponavlja');
+await _sloNotify(env, dryK(NOW + 3 * H), NOW + 3 * H); assert.equal(stored()[0].st.slo.over, false, 'ko neha, se stanje ponastavi');
+await _sloNotify(env, snowK(NOW + 4 * H), NOW + 4 * H); assert.equal(sent.length, 0, 'ponoven začetek znotraj hladilne dobe ne pošlje');
+await _sloNotify(env, dryK(NOW + 5 * H), NOW + 5 * H);
+await _sloNotify(env, snowK(NOW + C.SG_SLO_COOLDOWN_MS + 2 * H), NOW + C.SG_SLO_COOLDOWN_MS + 2 * H); assert.equal(sent.length, 1, 'po hladilni dobi spet pošlje');
+// stara karta: nič se ne zgodi in stanje se ne ponastavi (neznano ni »ne sneži«)
+reset([ssub('https://p/old', true)]); await _sloNotify(env, snowK(NOW), NOW);
+sent.length = 0; r = await _sloNotify(env, dryK(NOW - C.SG_SLO_MAX_AGE_MS - H), NOW + H); assert.equal(r.skipped, 'snežna karta je stara'); assert.equal(stored()[0].st.slo.over, true, 'stara karta ne ponastavi stanja');
+r = await _sloNotify(env, snowK(NOW - C.SG_SLO_MAX_AGE_MS - H), NOW + 10 * H); assert.equal(sent.length, 0, 'stara karta ne sproži'); assert.equal((await _sloNotify(env, null, NOW)).skipped, 'snežna karta je stara');
+// neuspel poskus pošiljanja se ponovi ob naslednjem tiku; potekla naročnina se odstrani
+reset([ssub('https://p/f', true)]); code = 410; r = await _sloNotify(env, snowK(NOW), NOW); assert.equal(r.pruned, 1); assert.equal(stored().length, 0); code = 201;
+assert.equal((await _sloNotify({ PHOTOS_R2: r2 }, snowK(), NOW)).skipped, 'ni shrambe ali VAPID');
+// strežnik: slo na naročnini, cron bere karto samo ob naročnikih s slo
+assert(src.includes('const slo = body.slo === true') && src.includes('if (rules.length || slo)'), 'naročnina s slo, lahko brez pravil');
+assert(src.includes('subs.some(x => x && x.slo === true)') && src.includes('_snegKarta(env)'), 'cron bere snežno karto samo, če je kdo vklopil slo');
+
 // 5. strežnik: ločen seznam, cron, tiho
 assert(src.includes('body.site === "snegofili"'), 'endpoint za site:"snegofili"');
 assert(/snegofili: 20/.test(src), 'cron snegofili v CRON_JOBS');
