@@ -998,8 +998,8 @@
         msg = document.getElementById('sg-al-msg'), ios = document.getElementById('sg-al-ios');
     var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
     var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    var rules = [], saved = false;
-    try { var s0 = JSON.parse(localStorage.getItem(AK) || 'null'); if (s0 && Array.isArray(s0.rules)) { rules = s0.rules; saved = true; } } catch (e) { }
+    var rules = [], saved = false, sloB = document.getElementById('sg-al-slo');
+    try { var s0 = JSON.parse(localStorage.getItem(AK) || 'null'); if (s0 && Array.isArray(s0.rules)) { rules = s0.rules; saved = true; if (sloB) sloB.checked = s0.slo === true; } } catch (e) { }
     function say(t) { msg.textContent = t || ''; }
     function nameOf(id) { for (var i = 0; i < selP.options.length; i++) if (selP.options[i].value === id) return selP.options[i].textContent; return id; }
     function draw() {
@@ -1012,7 +1012,8 @@
       });
       offB.hidden = !saved; onB.textContent = saved ? 'Shrani pravila' : 'Vklopi opozorilo';
     }
-    if (isIOS && !standalone) { box.hidden = false; ios.hidden = false; onB.disabled = true; addB.disabled = true; return; }
+    if (sloB) sloB.addEventListener('change', function () { say('Pritisnite »' + onB.textContent + '«, da se shrani.'); });
+    if (isIOS && !standalone) { box.hidden = false; ios.hidden = false; onB.disabled = true; addB.disabled = true; if (sloB) sloB.disabled = true; return; }
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
     box.hidden = false; draw();
     function b64(s) { var p = '='.repeat((4 - s.length % 4) % 4), b = (s + p).replace(/-/g, '+').replace(/_/g, '/'), r = atob(b), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
@@ -1025,7 +1026,8 @@
       rules.push({ id: id, cm: cm }); draw(); say('Pravilo je dodano. Pritisnite »' + onB.textContent + '«, da se shrani.');
     });
     onB.addEventListener('click', function () {
-      if (!rules.length) { say('Dodajte vsaj eno pravilo.'); return; }
+      var slo = !!(sloB && sloB.checked);
+      if (!rules.length && !slo) { say('Dodajte vsaj eno pravilo ali obkljukajte »Sneži kjerkoli v Sloveniji«.'); return; }
       if (Notification.permission === 'denied') { say('Obvestila so za to stran v brskalniku blokirana. Dovolite jih v nastavitvah strani.'); return; }
       Notification.requestPermission().then(function (p) {
         if (p !== 'granted') { say('Brez dovoljenja za obvestila opozorilo ne more delovati.'); return; }
@@ -1033,8 +1035,8 @@
         return getSub().then(function (x) {
           if (x.sub) return x.sub;
           return fetch(API + '/push/vapid').then(function (r) { return r.json(); }).then(function (v) { return x.reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(v.publicKey) }); });
-        }).then(function (sub) { return post('/push/subscribe', { site: 'snegofili', subscription: sub.toJSON(), rules: rules }); })
-          .then(function (r) { saved = true; try { localStorage.setItem(AK, JSON.stringify({ rules: rules })); } catch (e) { } draw(); say('Shranjeno: ' + r.rules + (r.rules === 1 ? ' pravilo.' : ' pravili.')); })
+        }).then(function (sub) { return post('/push/subscribe', { site: 'snegofili', subscription: sub.toJSON(), rules: rules, slo: slo }); })
+          .then(function (r) { saved = true; try { localStorage.setItem(AK, JSON.stringify({ rules: rules, slo: !!r.slo })); } catch (e) { } draw(); say('Shranjeno: ' + r.rules + (r.rules === 1 ? ' pravilo' : ' pravil') + (r.slo ? ' in obvestilo, ko sneži v Sloveniji.' : '.')); })
           .catch(function (e) { say('Ni uspelo: ' + (e && e.message ? e.message : 'poskusite znova čez nekaj minut') + '.'); })
           .then(function () { onB.disabled = false; });
       });
@@ -1042,7 +1044,7 @@
     offB.addEventListener('click', function () {
       offB.disabled = true;
       getSub().then(function (x) { return x.sub ? post('/push/unsubscribe', { site: 'snegofili', endpoint: x.sub.endpoint }) : null; })
-        .then(function () { saved = false; rules = []; try { localStorage.removeItem(AK); } catch (e) { } draw(); say('Opozorilo je izklopljeno, naslovnica in pravila so izbrisana s strežnika.'); })
+        .then(function () { saved = false; rules = []; if (sloB) sloB.checked = false; try { localStorage.removeItem(AK); } catch (e) { } draw(); say('Opozorilo je izklopljeno, naslovnica in pravila so izbrisana s strežnika.'); })
         .catch(function (e) { say('Ni uspelo: ' + (e && e.message ? e.message : 'poskusite znova') + '.'); }).then(function () { offB.disabled = false; });
     });
   })();

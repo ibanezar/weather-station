@@ -1169,6 +1169,11 @@ async function _cronCheckOcene(env) {
 // (ponovno šele ko napoved pade pod SG_RESET_FRAC praga in po SG_COOLDOWN_MS), največ eno na napravo na tik (ostala pravila se omenijo).
 // Modelska ocena iz padavin in meje sneženja, ne meritev, ne plazovni bilten in ne nasvet za turo -- besedilo to pove. Podatki starejši od
 // SG_MAX_AGE_H ne sprožijo nič. Ponoči (SG_TIHO_OD–SG_TIHO_DO) se ne pošilja. Prag-izbire ↔ `step()` v snegofili/snegofili.js (5/15/30 cm).
+// Poleg pravil je izbirna kljukica »sneži kjerkoli v Sloveniji« (`slo: true` na naročnini, lahko brez pravil): obvestilo ob PREHODU iz »nikjer«
+// v »sneži«. Vir je snežna karta ICON-D2 (_snegKarta(), mreža 0,1°, ista kot /zima/snezna-karta/), ne Snegofilov seznam točk: seznam je
+// dnevni posnetek (zima-forecast.yml teče enkrat na dan), karta se obnovi vsakih 30 min. Šteje samo mreža NOTRI v Sloveniji (SG_SLO_MASK) in
+// sneži šele, ko ima vsaj SG_SLO_MIN_CELLS celic vsaj 0,1 cm/h v kateri od naslednjih SG_SLO_HOURS ur (ena celica je lahko šum modela).
+// SG_SLO_MASK je namerna podvojitev obrisa SLO_POLY iz app.js (celice, katerih središče je v obrisu): preverja tools/test_snegofili_alarm.mjs.
 const SG_PUSH_KEY = "push/snegofili-subs.json";
 const SG_STATE = "push/snegofili_state.json";
 const SG_URL = "https://meteorec.si/data/snegofili.json";
@@ -1180,6 +1185,31 @@ const SG_EVERY_MS = 55 * 60 * 1000;
 const SG_COOLDOWN_MS = 12 * 3600 * 1000;
 const SG_RESET_FRAC = 0.5;
 const SG_TIHO_OD = 22, SG_TIHO_DO = 7;
+const SG_SLO_MIN_CELLS = 3;            // celic z ≥ 0,1 cm/h v isti uri
+const SG_SLO_HOURS = 3;                // gleda ure, ki pokrijejo naslednje 3 ure
+const SG_SLO_MAX_AGE_MS = 2 * 3600 * 1000;   // karta starejša od tega ne sproži nič
+const SG_SLO_COOLDOWN_MS = 12 * 3600 * 1000;
+const SG_SLO_CELL_KM2 = 85;            // 0,1° × 0,1° pri 46° N
+const SG_SLO_URL = "https://meteorec.si/zima/snezna-karta/";
+// Mreža 35 × 16 (MK_NX × MK_NY), vrstice od juga proti severu, stolpci od zahoda proti vzhodu; 1 = središče celice je v Sloveniji.
+const SG_SLO_MASK = [
+  "00000000000000000000000000000000000",
+  "00011110111000011111100000000000000",
+  "00000011111110111111000000000000000",
+  "00000011111111111111000000000000000",
+  "00001111111111111111110000000000000",
+  "00001111111111111111111100000000000",
+  "00111111111111111111111110000000000",
+  "00011111111111111111111100000000000",
+  "00011111111111111111111100000000000",
+  "01111111111111111111111111100000000",
+  "00011111111111111111111111111100000",
+  "00000110000000011111111111111100100",
+  "00000000000000001111111111111111000",
+  "00000000000000000000000011101110000",
+  "00000000000000000000000000011110000",
+  "00000000000000000000000000000000000"
+];
 
 async function _sgData() {
   try {
@@ -1296,6 +1326,61 @@ async function _sgNotify(env, data, now) {
   return { checked: subs.length, sent, pruned: dead.length };
 }
 
+// Povzetek karte za naslednje SG_SLO_HOURS ur. Vrednost z žigom T velja za (T−1 h, T]; k-ti korak ima žig t0 + (k+1) h, zato se ure izberejo po
+// žigu in ne po indeksu (karta je lahko stara do SG_SLO_MAX_AGE_MS). Vrne {active, cells, maxCmH, lowM, hours}; active = vsaj ena ura s
+// ≥ SG_SLO_MIN_CELLS celicami, povzetek je samo za take ure.
+function _sgSloSummary(karta, now) {
+  const none = { active: false, cells: 0, maxCmH: 0, lowM: null, hours: 0 };
+  if (!karta || !Array.isArray(karta.sn) || !(karta.nx > 0) || !(karta.ny > 0) || !(karta.t0 > 0)) return none;
+  const inSlo = (idx) => { const row = SG_SLO_MASK[Math.floor(idx / karta.nx)]; return !!row && row[idx % karta.nx] === "1"; };
+  const seen = new Set(); let maxV = 0, low = null, hours = 0;
+  for (let k = 0; k < karta.sn.length; k++) {
+    const stamp = karta.t0 + (k + 1) * 3600000;
+    if (!(stamp > now && stamp < now + (SG_SLO_HOURS + 1) * 3600000)) continue;
+    const row = karta.sn[k] || [], hit = [];
+    for (let i = 0; i < row.length; i++) if (typeof row[i] === "number" && row[i] >= 1 && inSlo(i)) hit.push(i);
+    if (hit.length < SG_SLO_MIN_CELLS) continue;
+    hours++;
+    for (const i of hit) {
+      seen.add(i); if (row[i] > maxV) maxV = row[i];
+      const z = karta.z && karta.z[i]; if (typeof z === "number" && (low === null || z < low)) low = z;
+    }
+  }
+  return { active: hours > 0, cells: seen.size, maxCmH: maxV / 10, lowM: low, hours };
+}
+
+function _sgSloText(sm) {
+  const km2 = Math.round(sm.cells * SG_SLO_CELL_KM2 / 10) * 10, mx = String(Math.round(sm.maxCmH * 10) / 10).replace(".", ",");
+  return "Po modelu ICON-D2 v naslednjih urah sneži v Sloveniji: približno " + km2 + " km², najmočneje okoli " + mx + " cm/h"
+    + (sm.lowM == null ? "" : ", najnižje na višini modelske celice okoli " + Math.round(sm.lowM / 10) * 10 + " m") + ". Modelska ocena, ne meritev in ne uradno opozorilo.";
+}
+
+// Naročnikom s `slo` pošlje obvestilo ob prehodu »nikjer« → »sneži«; stanje je st.slo = {over, last}. Karta starejša od SG_SLO_MAX_AGE_MS ne sproži
+// nič (in ne ponastavi stanja: neznano ni »ne sneži«).
+async function _sgSloNotify(env, karta, now) {
+  const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return { checked: 0, sent: 0, skipped: "ni shrambe ali VAPID" };
+  if (!karta || !(now - karta.generated <= SG_SLO_MAX_AGE_MS)) return { checked: 0, sent: 0, skipped: "snežna karta je stara" };
+  let subs = []; try { const o = await r2.get(SG_PUSH_KEY); subs = o ? JSON.parse(await o.text()) : []; } catch (_) {}
+  const targets = subs.filter(x => x && x.slo === true);
+  if (!targets.length) return { checked: 0, sent: 0 };
+  const sm = _sgSloSummary(karta, now);
+  let sent = 0, changed = false; const dead = [];
+  for (const sub of targets) {
+    const st = sub.st || (sub.st = {}), s = st.slo || (st.slo = { over: false, last: 0 });
+    if (!sm.active) { if (s.over) { s.over = false; changed = true; } continue; }
+    if (s.over) continue;
+    s.over = true; changed = true;
+    if (now - (s.last || 0) <= SG_SLO_COOLDOWN_MS) continue;
+    try {
+      const code = await _sendPush(env, sub, { title: "Snegofili: sneži v Sloveniji", body: _sgSloText(sm), url: SG_SLO_URL, tag: "snegofili-slo", icon: "/icon-192.png" });
+      if (code === 404 || code === 410) dead.push(sub.endpoint);
+      else { sent++; s.last = now; }
+    } catch (_) { s.over = false; }   // neuspel poskus: ob naslednjem tiku znova
+  }
+  if (dead.length || changed) await r2.put(SG_PUSH_KEY, JSON.stringify(subs.filter(x => dead.indexOf(x.endpoint) === -1)), { httpMetadata: { contentType: "application/json" } });
+  return { checked: targets.length, sent, pruned: dead.length, active: sm.active };
+}
+
 async function _cronCheckSnegofili(env) {
   const r2 = env?.PHOTOS_R2; if (!r2 || !env.VAPID_PRIVATE) return;
   const hourSI = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Ljubljana", hour: "2-digit", hour12: false })) % 24;
@@ -1306,10 +1391,16 @@ async function _cronCheckSnegofili(env) {
   const now = Date.now();
   if (now - (state._lastRun || 0) < SG_EVERY_MS) return;
   const data = await _sgData();
-  if (!data) return { ok: false, reason: "snegofili.json ni dosegljiv" };
-  const out = await _sgNotify(env, data, now);
+  let reason = null;
+  if (!data) reason = "snegofili.json ni dosegljiv";
+  else { const out = await _sgNotify(env, data, now); if (out && out.skipped) reason = out.skipped; }
+  if (subs.some(x => x && x.slo === true)) {                  // »sneži kjerkoli v Sloveniji«: karta ICON-D2, neodvisna od posnetka točk
+    let karta = null; try { karta = await _snegKarta(env); } catch (_) {}
+    const o2 = await _sgSloNotify(env, karta, now);
+    if (o2 && o2.skipped && !reason) reason = o2.skipped;
+  }
   await r2.put(SG_STATE, JSON.stringify({ _lastRun: now }), { httpMetadata: { contentType: "application/json" } });
-  return out && out.skipped ? { ok: false, reason: out.skipped } : true;
+  return reason ? { ok: false, reason } : true;
 }
 
 // ── Nebo alarm (Web Push, /nebo-nocoj/) ────────────────────
@@ -9618,10 +9709,11 @@ POMEMBNO: Nikoli ne trdi 100% gotovosti. Vedno spomni uporabnika (v "note"), naj
             if (!data) return pj({ error: "Seznam točk trenutno ni dosegljiv" }, 503);
             const rules = _sgClean(data, body.rules);
             if (rules === null) return pj({ error: "Neznana točka ali prag" }, 422);
+            const slo = body.slo === true;   // »sneži kjerkoli v Sloveniji«: lahko brez pravil
             const old = subs.find(x => x.endpoint === s.endpoint), rest = subs.filter(x => x.endpoint !== s.endpoint);
-            if (rules.length) rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, rules, st: old ? old.st || {} : {}, ts: old ? old.ts : new Date().toISOString() });
+            if (rules.length || slo) rest.push({ endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth }, rules, slo, st: old ? old.st || {} : {}, ts: old ? old.ts : new Date().toISOString() });
             await sWrite(rest.slice(0, 5000));
-            return pj({ ok: true, rules: rules.length });
+            return pj({ ok: true, rules: rules.length, slo });
           }
           const ep = body.endpoint || (body.subscription && body.subscription.endpoint);
           const next = subs.filter(x => x.endpoint !== ep);

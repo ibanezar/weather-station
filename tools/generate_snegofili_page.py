@@ -600,10 +600,11 @@ def alarm_html(rows):
       <button type="button" class="sg-al-btn s" id="sg-al-add">Dodaj pravilo</button>
     </div>
     <ul class="sg-al-list" id="sg-al-list" aria-label="Vaša pravila"></ul>
+    <label class="sg-al-slo"><input type="checkbox" id="sg-al-slo"> <span><b>Sneži kjerkoli v Sloveniji.</b> Obvestilo, ko model ICON-D2 v naslednjih treh urah napove sneženje v Sloveniji (vsaj tri celice mreže 10 × 8 km, vsaj 0,1 cm na uro). Pošljemo ga ob začetku sneženja, ne ob vsaki uri; največ enkrat na 12 ur. Deluje tudi brez pravil zgoraj.</span></label>
     <div class="sg-al-row"><button type="button" class="sg-al-btn" id="sg-al-on">Vklopi opozorilo</button> <button type="button" class="sg-al-btn s" id="sg-al-off" hidden>Izklopi</button></div>
     <p class="muted-note" id="sg-al-ios" hidden>Na iPhonu obvestila delujejo samo v aplikaciji, dodani na začetni zaslon (Deli, nato Dodaj na začetni zaslon).</p>
     <p class="muted-note" id="sg-al-msg" aria-live="polite"></p>
-    <p class="muted-note">Modelska ocena novega snega iz padavin in meje sneženja, ne meritev; ni plazovni bilten in ni nasvet za turo. Strežnik shrani samo naslovnico naročnine in vaša pravila; izklop jih izbriše.</p>
+    <p class="muted-note">Modelska ocena novega snega iz padavin in meje sneženja, ne meritev; ni plazovni bilten in ni nasvet za turo. Strežnik shrani samo naslovnico naročnine, vaša pravila in kljukico »Sneži kjerkoli v Sloveniji«; izklop jih izbriše.</p>
   </section>'''
 
 
