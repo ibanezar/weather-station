@@ -107,6 +107,20 @@ FAQ = [
      "Ne. Novi sneg je modelska ocena: padavine iz celice vremenskega modela (Open-Meteo), pomnožene z deležem, "
      "ki pade kot sneg glede na višino ničte izoterme. Celica ne razloči pobočij in dolin, zato je lahko na terenu "
      "več ali manj. Izmerjeno višino snežne odeje imamo samo za nekaj postaj ARSO in je v svojem polju."),
+    ("Zakaj 1 mm padavin ni vedno 1 cm snega?",
+     "Ocena novega snega uporablja povsod enako razmerje: 1 mm padavin ≈ 1 cm snega. To je poenostavitev. Suh, pršičast sneg pri mrazu je redkejši, zato lahko 1 mm "
+     "da več kot 1 cm; moker sneg blizu 0 °C je gostejši in da manj. Pravo razmerje je odvisno od temperature, vetra in gostote, česar model na tej strani ne pozna. "
+     "Poleg tega nov sneg ni višina odeje: ta je ostanek preteklih dni. Za dejansko stanje glejte meritve, kamere in uradna poročila."),
+    ("Kako ste izbrali lokacije?",
+     "Točke so naš ročni izbor smučišč, prelazov, vrhov in krajev s postajo ARSO ali kamero, ne uradni seznam smučišč. Vrsta točke je napisana pri vsaki kartici. "
+     "Model dobi višino točke, padavine pa so iz celice modela, ki ne razloči pobočij. Višine in koordinate so pri delu točk še približne. "
+     "Točka, ki je ni na seznamu, ne pomeni, da tam ni snega."),
+    ("Kaj kaže »Slovenija po regijah«?",
+     "Za slovenske točke iz seznama, združene po regijah, največ novega snega med točkami regije (24 ur nazaj, 24 in 48 ur naprej po modelu), število točk, kjer zdaj sneži, "
+     "mediano meje sneženja in največjo izmerjeno odejo ARSO. To ni povprečje regije in ne pokriva vsega ozemlja: pove, kje na seznamu točk je sneg najbolj izrazit."),
+    ("Kaj kaže »Snežna sezona in arhiv«?",
+     "Dva ločena dela. Modelski seštevek novega snega po polnih dneh beležimo od uvedbe rubrike, zato starejši sneg ni všet in dan brez zapisa ostane prazen. "
+     "Izmerjene zime so meritve postaj ARSO v dolini (višina odeje in novi sneg od 1. oktobra do 30. aprila); arhiv zaostaja, zato tekoča zima ni popolna."),
     ("Kaj kažeta karta in prerez?",
      "Krog na karti je velik toliko, kolikor snega po modelu pade v 24 urah do izbrane ure. Poln krog pomeni, da je "
      "točka nad mejo sneženja, črtkan rob mokri sneg, prazen krog pa, da novega snega ni ali da dežuje. "
@@ -907,6 +921,230 @@ def powder_html(rows, world_rows):
 """
 
 
+# ── Slovenija po regijah, snežna sezona (modelski dnevnik + izmerjene zime ARSO) ──
+HOURS_PATH = os.path.join(seo.ROOT, "snegofili", "ure.json")
+SEASON_LOG_PATH = os.path.join(seo.ROOT, "data", "snegofili-sezona.csv")
+ARSO_ARCHIVE_DIR = os.path.join(seo.ROOT, "data", "arso-sneg-postaje")
+# Postaje ARSO z dolgim nizom (višini sta preverjeni v ARSO viru; višine Luč in Solčave ne navajamo): ID arhiva, ime, višina
+ARSO_SEASON_STATIONS = (("1748", "Gornji Grad", 428), ("1747", "Radegunda", 794))
+REGION_ORDER = ("Gorenjska in Julijci", "Kamniško-Savinjske Alpe", "Savinjska in Štajerska")
+SEASON_TOP = 10   # privzeto prikazanih lokacij v sezonskem seštevku (ostale v zloženem delu)
+
+
+def dm(date):
+    """2026-11-20 → »20. 11.«"""
+    y, m, d = date.split("-")
+    return f"{int(d)}. {int(m)}."
+
+
+def next_hours_cm(series, n, now_index=71):
+    """Modelski nov sneg v naslednjih n urah iz urne serije (desetinke cm); ura, ki teče, se ne šteje. None, če serije ni."""
+    sn = (series or {}).get("sn") or []
+    seg = sn[now_index + 1: now_index + 1 + n]
+    if len(seg) != n or any(v is None for v in seg):
+        return None
+    return round(sum(seg) / 10, 1)
+
+
+def load_hours():
+    try:
+        with open(HOURS_PATH, encoding="utf-8") as f:
+            return (json.load(f).get("tocke")) or {}
+    except (OSError, ValueError):
+        return {}
+
+
+def region_summary(rows, hours):
+    """Po regijah (samo Slovenija): največ novega snega med točkami regije, sneženje zdaj, meja sneženja, izmerjena odeja."""
+    by = {}
+    for r in rows:
+        if r["drzava"] == "SI":
+            by.setdefault(r["regija"], []).append(r)
+    out = []
+    for name in sorted(by, key=lambda n: (REGION_ORDER.index(n) if n in REGION_ORDER else len(REGION_ORDER), n)):
+        pts = by[name]
+
+        def best(vals):
+            vals = [(v, r["ime"]) for r, v in vals if v is not None]
+            return max(vals, key=lambda x: x[0]) if vals else None
+        n48 = [(r, next_hours_cm(hours.get(r["id"]), 48)) for r in pts]
+        lines = sorted(r["snow_line_m"] for r in pts if r.get("snow_line_m") is not None)
+        meas = [(r["izmerjeno"]["depth_cm"], r["ime"]) for r in pts if r.get("izmerjeno")]
+        out.append({
+            "regija": name, "n": len(pts), "pts": pts,
+            "snowing": [r["ime"] for r in pts if (r.get("precip_now_mm") or 0) >= 0.1 and r.get("snow_now_possible")],
+            "past24": best([(r, r["past24_cm"]) for r in pts]),
+            "next24": best([(r, r["next24_cm"]) for r in pts]),
+            "next48": best(n48),
+            "line": (lines[len(lines) // 2] if lines else None),
+            "measured": max(meas) if meas else None,
+        })
+    return out
+
+
+def _best_cell(b):
+    return "—" if not b else f'<b>{cm_h(b[0])}</b> <small>{_html.escape(b[1])}</small>'
+
+
+def slovenija_html(rows):
+    regs = region_summary(rows, load_hours())
+    if not regs:
+        return ""
+    body = ""
+    for g in regs:
+        sn = (f'{len(g["snowing"])} od {g["n"]}: ' + _html.escape(", ".join(g["snowing"]))) if g["snowing"] else "nikjer"
+        line = f'{num(g["line"], 0)} m' if g["line"] is not None else "—"
+        meas = (f'<b>{g["measured"][0]} cm</b> <small>{_html.escape(g["measured"][1])}</small>') if g["measured"] else "ni meritve"
+        body += (f'<tr><th scope="row">{_html.escape(g["regija"])} <small>{g["n"]} {"točka" if g["n"] == 1 else "točk"}</small></th>'
+                 f'<td>{sn}</td><td>{_best_cell(g["past24"])}</td><td>{_best_cell(g["next24"])}</td><td>{_best_cell(g["next48"])}</td>'
+                 f'<td>{line}</td><td>{meas}</td></tr>')
+    return f"""  <section id="slovenija" class="sg-sec" aria-labelledby="slo-h">
+  <h2 id="slo-h">Slovenija po regijah <span class="sg-bdg m">Model</span> <span class="sg-bdg r">Meritev</span></h2>
+  <p class="archive-intro">Pregled slovenskih točk iz seznama, združenih po regijah. Pri vsaki regiji je <b>največ novega snega med njenimi točkami</b> (ne povprečje in ne površina regije)
+  in ime točke, kjer je to največ. Sneženje, količine in meja sneženja so modelska ocena; zadnji stolpec je izmerjena odeja postaj ARSO, kjer jo imamo. Za Karavanke in Pohorje
+  zaenkrat ni ločenih skupin: točke so v regijah iz tabele, drugih ne dodajamo, dokler njihovih koordinat in višin ne potrdimo.</p>
+  <div class="sg-tblwrap" tabindex="0" role="region" aria-label="Slovenija po regijah: sneg po modelu in izmerjena odeja (drsno vodoravno)">
+  <table class="sg-tbl"><thead><tr><th scope="col">Regija</th><th scope="col">Sneži zdaj</th><th scope="col">Nazaj 24 ur</th><th scope="col">Naprej 24 ur</th><th scope="col">Naprej 48 ur</th><th scope="col">Meja sneženja</th><th scope="col">Izmerjena odeja</th></tr></thead>
+  <tbody>{body}</tbody></table></div>
+  <p class="muted-note">Meja sneženja je mediana točk regije (višina, kjer model sneg še napoveduje); »naprej 48 ur« je vsota modelskih ur od zdaj, ura, ki teče, se ne šteje.
+  Točke so v seznamu spodaj in na zemljevidu. Ni plazovni bilten.</p>
+  </section>
+"""
+
+
+def read_season_log(path=SEASON_LOG_PATH):
+    res = {}
+    if not os.path.exists(path):
+        return res
+    with open(path, encoding="utf-8") as f:
+        for ln in f.read().splitlines()[1:]:
+            try:
+                d, i, c = ln.split(",")
+                res[(d, i)] = float(c)
+            except ValueError:
+                continue
+    return res
+
+
+def season_start_year(last_date):
+    y, m, _ = (int(x) for x in last_date.split("-"))
+    return y if m >= 10 else y - 1
+
+
+def season_totals(log):
+    """Sezonski seštevek iz dnevnika za zadnjo sezono v njem: {first, last, days, rows[{id, total, days_snow, best_cm, best_date}]}."""
+    if not log:
+        return None
+    last = max(d for d, _ in log)
+    y = season_start_year(last)
+    lo = f"{y}-10-01"
+    mine = {k: v for k, v in log.items() if k[0] >= lo}
+    dates = sorted({d for d, _ in mine})
+    per = {}
+    for (d, i), cm in sorted(mine.items()):
+        p = per.setdefault(i, {"id": i, "total": 0.0, "days_snow": 0, "best_cm": 0.0, "best_date": None})
+        p["total"] += cm
+        if cm >= MIN_CM:
+            p["days_snow"] += 1
+        if cm > p["best_cm"]:
+            p["best_cm"], p["best_date"] = cm, d
+    return {"season": f"{y}/{str(y + 1)[2:]}", "first": dates[0], "last": dates[-1], "days": len(dates), "rows": list(per.values())}
+
+
+def arso_seasons(days):
+    """Zime iz dnevnih serij ARSO (1. 10.–30. 4.): največja odeja z datumom, dni z odejo ≥ 1 cm, novi sneg skupaj; samo dnevi z meritvijo.
+    Sezona brez ene same meritve ne nastopa; zadnja (tekoča) ima last (zadnji dan z meritvijo)."""
+    seasons = {}
+    for d, depth, new, _pr in days:
+        if depth is None:
+            continue
+        y = int(d[:4])
+        sy = y if int(d[5:7]) >= 10 else y - 1
+        if not (d >= f"{sy}-10-01" and d <= f"{sy + 1}-04-30"):
+            continue
+        s = seasons.setdefault(sy, {"sy": sy, "n": 0, "max": 0.0, "max_d": None, "cover": 0, "new": 0.0, "new_n": 0, "last": d})
+        s["n"] += 1
+        s["last"] = max(s["last"], d)
+        if depth > s["max"]:
+            s["max"], s["max_d"] = depth, d
+        if depth >= MIN_CM:
+            s["cover"] += 1
+        if new is not None:
+            s["new"] += new
+            s["new_n"] += 1
+    return [seasons[k] for k in sorted(seasons, reverse=True)]
+
+
+def sezona_html(rows):
+    names = {r["id"]: r for r in rows}
+    log = season_totals(read_season_log())
+    parts = []
+    if log:
+        tot = sorted((p for p in log["rows"] if p["id"] in names), key=lambda p: (-p["total"], names[p["id"]]["ime"]))
+        top = max([p["total"] for p in tot] + [1])
+
+        def li(p):
+            r = names[p["id"]]
+            best = f'najmočnejši dan {cm_h(p["best_cm"])} ({dm(p["best_date"])})' if p["best_date"] else "brez dneva s snegom"
+            return (f'<li><span class="sg-ms-n">{_html.escape(r["ime"])} <small>{r["elevation_m"]} m</small></span>'
+                    f'<span class="sg-ms-bar" role="img" aria-label="Skupaj {num(p["total"], 0)} cm"><i style="width:{min(100, p["total"] / top * 100):.1f}%"></i></span>'
+                    f'<span class="sg-ms-v"><b>{num(p["total"], 0 if p["total"] >= 10 else 1)} cm</b> <small>skupaj</small></span>'
+                    f'<span class="sg-ms-m"><small>{p["days_snow"]} {"dan" if p["days_snow"] == 1 else "dni"} ≥ 1 cm · {best}</small></span></li>')
+        shown, rest = tot[:SEASON_TOP], tot[SEASON_TOP:]
+        rest = [p for p in rest if p["total"] >= MIN_CM]
+        parts.append(
+            f'  <h3>Nov sneg v sezoni {log["season"]} po modelu <span class="sg-bdg m">Model</span></h3>\n'
+            f'  <p class="archive-intro">Seštevek modelskega novega snega po <b>polnih lokalnih dneh</b> od <b>{dm(log["first"])}</b> do <b>{dm(log["last"])}</b> '
+            f'({log["days"]} {"dan" if log["days"] == 1 else "dni"} beleženja). Beležimo od uvedbe te rubrike: <b>sneg, ki je zapadel prej, ni všet</b>, '
+            f'dan, ki ga nismo zabeležili, ostane prazen in ga ne ocenjujemo za nazaj. Seštevek sledi modelu in ni višina snežne odeje.</p>\n'
+            f'  <ul class="sg-ms">{"".join(li(p) for p in shown)}</ul>\n'
+            + (f'  <details class="sg-fold"><summary>Še {len(rest)} lokacij s snegom v sezoni</summary><ul class="sg-ms">{"".join(li(p) for p in rest)}</ul></details>\n' if rest else ""))
+    arch = ""
+    for sid, name, elev in ARSO_SEASON_STATIONS:
+        try:
+            with open(os.path.join(ARSO_ARCHIVE_DIR, f"daily-{sid}.json"), encoding="utf-8") as f:
+                seas = arso_seasons(json.load(f)["days"])
+        except (OSError, ValueError, KeyError):
+            continue
+        if not seas:
+            continue
+        trs = ""
+        for s in seas:
+            cur = s is seas[0] and s["last"] < f"{s['sy'] + 1}-04-30"
+            mx = f'<b>{num(s["max"], 0)} cm</b> <small>{dm(s["max_d"])}</small>' if s["max_d"] else "0 cm"
+            new = f'{num(s["new"], 0)} cm' if s["new_n"] else "—"
+            lab = f'{s["sy"]}/{str(s["sy"] + 1)[2:]}' + (f' <small>do {dm(s["last"])}</small>' if cur else "")
+            trs += f'<tr><th scope="row">{lab}</th><td>{mx}</td><td>{s["cover"]}</td><td>{new}</td><td>{s["n"]}</td></tr>'
+        arch += (f'  <div class="sg-tblwrap" tabindex="0" role="region" aria-label="Izmerjene zime na postaji {name} (drsno vodoravno)">'
+                 f'<table class="sg-tbl"><caption>{_html.escape(name)} <small>{elev} m</small></caption><thead><tr><th scope="col">Sezona</th>'
+                 f'<th scope="col">Največja odeja</th><th scope="col">Dni z odejo ≥ 1 cm</th><th scope="col">Novi sneg skupaj</th><th scope="col">Dni z meritvijo</th></tr></thead>'
+                 f'<tbody>{trs}</tbody></table></div>\n')
+    if arch:
+        parts.append(
+            '  <h3>Izmerjene zime na postajah ARSO <span class="sg-bdg r">Meritev</span></h3>\n'
+            '  <p class="archive-intro">Višina snežne odeje in novi sneg, ki ju meri ARSO, po zimah od 1. oktobra do 30. aprila. To je <b>meritev v dolini</b> (ne v gorah, kamor sodijo ostale točke), '
+            'ločena od modelske ocene zgoraj. Arhiv ARSO zaostaja za več dni do nekaj tednov, zato zadnja vrstica ne zajema celotne tekoče zime; šteje se samo dan, ki ima meritev. '
+            'Vir: Agencija Republike Slovenije za okolje (ARSO).</p>\n' + arch)
+    if not parts:
+        return ""
+    return ('  <section id="sezona" class="sg-sec" aria-labelledby="sz-h">\n  <h2 id="sz-h">Snežna sezona in arhiv</h2>\n' + "".join(parts) + '  </section>\n')
+
+
+METHOD_FOLD = """  <details class="sg-fold"><summary>Kako računamo nov sneg in zakaj je lahko drugačen</summary>
+  <ul class="sg-pw-how">
+    <li><b>Račun.</b> Za vsako uro vzamemo padavine iz modela (Open-Meteo) in jih pomnožimo z deležem, ki po višini ničte izoterme pade kot sneg, in z razmerjem 1 mm padavin ≈ 1 cm snega.</li>
+    <li><b>Razmerje je poenostavitev.</b> Suh, pršičast sneg pri mrazu je lahko redkejši (1 mm je potem več kot 1 cm), moker sneg blizu 0 °C pa gostejši (manj kot 1 cm). Odvisno je od temperature, vetra in gostote, česar ta ocena ne zajame: razmerje je povsod enako.</li>
+    <li><b>Nov sneg ni višina odeje.</b> Odeja je ostanek preteklih dni: se sesede, taja ali ga odnese veter. Zato imamo izmerjeno višino v svojem razdelku in ločeno od modela.</li>
+    <li><b>Za dejansko stanje</b> poglejte meritve, kamero in uradno poročilo smučišča ali koče.</li>
+  </ul></details>
+  <details class="sg-fold"><summary>Kako so izbrane lokacije</summary>
+  <p>Točke so naš ročni izbor, ne uradni seznam smučišč: smučišča, prelazi, vrhovi in kraji s postajo ARSO ali kamero, od Golt do Zermatta. Vrsta točke je napisana pri vsaki kartici
+  (npr. »zgornja postaja žičnice«, »prelaz«, »vrh«). Model dobi višino točke in izračuna temperaturo ter mejo sneženja zanjo, a padavine so iz celice modela, ki ne razloči pobočij in grebenov:
+  na terenu je lahko več ali manj. Višine in koordinate so pri delu točk še približne in jih potrjujemo. Točka, ki je ni na seznamu, ne pomeni, da tam ni snega.</p>
+  </details>
+"""
+
+
 def build_body(data, cams):
     rows = sorted(data["tocke"], key=lambda r: (-r["past72_cm"], -r["elevation_m"]))
     present = sorted({r["drzava"] for r in rows}, key=list(COUNTRIES).index)
@@ -940,9 +1178,12 @@ def build_body(data, cams):
     world = load_world()
     world_sec = svet_html(world, load_world_cams()) if world else ""
     hp = hero_photo()
-    nav = [("zemljevid", "Zemljevid"), ("powder", "Powder")] + ([("kamere", "Kamere")] if cams_sec else []) + [
+    slo_sec = slovenija_html(rows)
+    sez_sec = sezona_html(rows)
+    nav = [("zemljevid", "Zemljevid"), ("powder", "Powder")] + ([("slovenija", "Slovenija")] if slo_sec else []) + (
+        [("kamere", "Kamere")] if cams_sec else []) + [
         ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije")] + ([("po-svetu", "Po svetu")] if world_sec else []) + [
-        ("izmerjeno", "Meritve"), ("sg-alarm", "Opozorila")]
+        ("izmerjeno", "Meritve")] + ([("sezona", "Sezona")] if sez_sec else []) + [("sg-alarm", "Opozorila")]
     nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
                 "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in nav) + '</ul></nav>\n')
     tab_ic = {
@@ -998,7 +1239,7 @@ def build_body(data, cams):
   <div class="sg-nowrow" id="sg-now-row" role="list"></div>
   <div class="sg-top" id="sg-top"></div>
   </section>
-{powder_html(rows, world["rows"] if world else None)}  <div class="sg-duo">
+{powder_html(rows, world["rows"] if world else None)}{slo_sec}  <div class="sg-duo">
   <section id="prerez" class="sg-sec" aria-labelledby="pr-h">
     <div class="sg-profwrap">
       <h2 id="pr-h">Višinski prerez Alp <span class="sg-bdg m">Model</span></h2>
@@ -1023,14 +1264,14 @@ def build_body(data, cams):
   iz padavin in višine ničte izoterme, ne meritev. Izmerjeno višino odeje imamo samo za nekaj postaj ARSO in je
   v svojem razdelku in v vrstici »Meritev« na kartici. Za našo dolino glej še <a href="/zima/snezna-karta/">snežno karto</a>,
   <a href="/zima/meja-snezenja/">mejo sneženja</a> in <a href="/vreme-v-gorah/">vreme v gorah</a>.</p>
-  <div class="sg-filter" id="sg-filter" hidden><label class="sg-search"><span class="sg-vh">Poišči lokacijo</span><input type="search" id="sg-q" placeholder="Poišči: Golte, Krvavec, Dachstein …" autocomplete="off"></label>{chips}</div>
+{METHOD_FOLD}  <div class="sg-filter" id="sg-filter" hidden><label class="sg-search"><span class="sg-vh">Poišči lokacijo</span><input type="search" id="sg-q" placeholder="Poišči: Golte, Krvavec, Dachstein …" autocomplete="off"></label>{chips}</div>
   <div id="sg-cards">
 {cards_html}
   </div>
   <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
   »&lt;1 cm« pri snegu pomeni manj kot centimeter po modelu, »ni podatka« pa da vrednosti nimamo. Podatki: Open-Meteo, postaje ARSO.</p>
   </section>
-{world_sec}{measured_html(rows)}{alarm_html(rows)}{kraji_html(rows, kcr)}
+{world_sec}{measured_html(rows)}{sez_sec}{alarm_html(rows)}{kraji_html(rows, kcr)}
 {faq_html}
   <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten
   pristojne države, <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a> in razmere pri

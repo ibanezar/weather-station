@@ -517,5 +517,76 @@ _js2 = open(os.path.join(_root, "snegofili", "snegofili.js"), encoding="utf-8").
 check("beforeinstallprompt" in _js2 and "appinstalled" in _js2 and "display-mode: standalone" in _js2, "JS: namestitveni tok (prompt, appinstalled, že nameščeno)")
 
 
+
+# ── Slovenija po regijah, snežna sezona, dnevnik (22. 11. 2026) ──
+import tempfile  # noqa: E402
+import log_snegofili_sezona as lg  # noqa: E402
+import winter_engine as _we  # noqa: E402
+
+check(_we.SNOW_RATIO_CM_PER_MM == 1.0, "razmerje 1 mm ≈ 1 cm: besedilo na strani ('1 mm padavin ≈ 1 cm') zahteva razmerje 1,0")
+_days = lg.complete_days("2026-11-22T14:00")
+check([x[0] for x in _days] == ["2026-11-20", "2026-11-21"], f"dnevnik: polna dneva sta 20. in 21. 11. ({[x[0] for x in _days]})")
+check(_days[0][1:] == (10, 33) and _days[1][1:] == (34, 57), f"dnevnik: indeksi žigov dneva (01:00 … 00:00) ({[x[1:] for x in _days]})")
+check(lg.complete_days("2026-07-22T14:00") == [], "dnevnik: julij ni v sezoni")
+_late = lg.complete_days("2026-11-22T01:00")   # žig 22. 11. 00:00 je ura nazaj: 21. 11. je poln
+check(any(x[0] == "2026-11-21" for x in _late), "dnevnik: dan, ki se je iztekel pred več kot uro, je poln")
+_early = lg.complete_days("2026-11-22T00:00")  # zadnji žig dneva je zdaj, ura še teče
+check(all(x[0] != "2026-11-21" for x in _early), "dnevnik: dan, katerega zadnji žig je prav zdaj, še ni poln")
+_sn = [0] * 144
+_sn[20] = 5     # 20. 11. (indeksi 10..33): 0,5 cm
+_sn[40] = 12    # 21. 11. (34..57): 1,2 cm
+_sn[71] = 99    # ura, ki teče: ne sme v nobeden dan
+_tot = lg.day_totals({"x": {"sn": _sn}, "y": {"sn": [None] * 144}}, _days)
+check(_tot == {("2026-11-20", "x"): 0.5, ("2026-11-21", "x"): 1.2}, f"dnevnik: seštevek po dnevih, vrzel v seriji ni nič ({_tot})")
+with tempfile.TemporaryDirectory() as _td:
+    _pth = os.path.join(_td, "s.csv")
+    lg.write_log({("2026-11-21", "b"): 1.2, ("2026-11-20", "a"): 0.0}, _pth)
+    _rl = lg.read_log(_pth)
+    check(_rl == {("2026-11-21", "b"): 1.2, ("2026-11-20", "a"): 0.0}, "dnevnik: zapis in branje CSV")
+    _rl.update({("2026-11-21", "b"): 2.0})
+    lg.write_log(_rl, _pth)
+    check(lg.read_log(_pth)[("2026-11-21", "b")] == 2.0 and len(lg.read_log(_pth)) == 2, "dnevnik: poznejši tek prepiše vrednost dneva")
+check(lg.read_log("/nonexistent/x.csv") == {}, "dnevnik: brez datoteke je prazen")
+
+_st = g.season_totals({("2026-11-20", "a"): 0.5, ("2026-11-21", "a"): 3.0, ("2026-11-21", "b"): 0.0, ("2026-04-10", "a"): 9.0})
+check(_st["season"] == "2026/27" and _st["first"] == "2026-11-20" and _st["days"] == 2, "sezona: zadnja sezona, aprilski dan stare sezone ne šteje")
+_ra = {p["id"]: p for p in _st["rows"]}
+check(abs(_ra["a"]["total"] - 3.5) < 1e-9 and _ra["a"]["days_snow"] == 1 and _ra["a"]["best_date"] == "2026-11-21", "sezona: skupaj, dnevi ≥ 1 cm, najmočnejši dan")
+check(_ra["b"]["best_date"] is None and _ra["b"]["days_snow"] == 0, "sezona: brez snega ni najmočnejšega dne")
+check(g.season_totals({}) is None, "sezona: brez dnevnika ni seštevka")
+check(g.season_start_year("2027-02-01") == 2026 and g.season_start_year("2026-10-01") == 2026 and g.season_start_year("2026-09-30") == 2025,
+      "sezona: začne se 1. oktobra")
+_ar = g.arso_seasons([["2025-09-30", 50.0, 0.0, 0], ["2025-10-05", 0.0, 0.0, 0], ["2025-12-01", 4.0, 4.0, 1], ["2025-12-02", None, None, None],
+                      ["2025-12-03", 10.0, None, 2], ["2026-05-01", 30.0, 0.0, 0], ["2026-11-02", 1.0, 1.0, 0]])
+check([s["sy"] for s in _ar] == [2026, 2025], "ARSO zime: sezone od najnovejše, dnevi zunaj 1. 10.–30. 4. ne štejejo")
+_s25 = _ar[1]
+check(_s25["n"] == 3 and _s25["max"] == 10.0 and _s25["max_d"] == "2025-12-03" and _s25["cover"] == 2 and _s25["new"] == 4.0 and _s25["new_n"] == 2,
+      f"ARSO zime: samo dnevi z meritvijo, ničla je meritev ({_s25})")
+
+check(g.next_hours_cm({"sn": [0] * 71 + [90] + [10] * 48 + [0] * 24}, 48) == 48.0, "regije: ura, ki teče, se ne šteje v 48 ur naprej")
+check(g.next_hours_cm({"sn": [0] * 100}, 48) is None and g.next_hours_cm(None, 48) is None, "regije: kratka ali manjkajoča serija ni nič")
+_rows = [
+    {"id": "p1", "ime": "Prva", "drzava": "SI", "regija": "Savinjska in Štajerska", "past24_cm": 2.0, "next24_cm": 0.0, "snow_line_m": 1000, "precip_now_mm": 0.4, "snow_now_possible": True},
+    {"id": "p2", "ime": "Druga", "drzava": "SI", "regija": "Savinjska in Štajerska", "past24_cm": 5.0, "next24_cm": 1.0, "snow_line_m": 1200, "precip_now_mm": 0.0, "snow_now_possible": True,
+     "izmerjeno": {"depth_cm": 7}},
+    {"id": "p3", "ime": "Tuja", "drzava": "AT", "regija": "Tirolska", "past24_cm": 50.0, "next24_cm": 9.0, "snow_line_m": 800, "precip_now_mm": 1.0, "snow_now_possible": True},
+]
+_rs = g.region_summary(_rows, {"p1": {"sn": [0] * 72 + [10] * 48}, "p2": {"sn": [0] * 144}})
+check(len(_rs) == 1 and _rs[0]["regija"] == "Savinjska in Štajerska" and _rs[0]["n"] == 2, "regije: samo Slovenija")
+check(_rs[0]["past24"] == (5.0, "Druga") and _rs[0]["next48"] == (48.0, "Prva") and _rs[0]["snowing"] == ["Prva"] and _rs[0]["measured"] == (7, "Druga"),
+      f"regije: največ po točkah, sneženje zdaj samo ob padavinah in snegu, meritev ({_rs[0]})")
+check(_rs[0]["line"] == 1200, "regije: mediana meje sneženja (višji srednji pri sodem številu)")
+_sl = g.slovenija_html(_rows)
+check("Slovenija po regijah" in _sl and "Tuja" not in _sl and "Karavanke in Pohorje" in _sl, "regije: razdelek, brez tujih točk, razlaga o Karavankah in Pohorju")
+check(g.slovenija_html([{"drzava": "AT"}]) == "", "regije: brez slovenskih točk ni razdelka")
+_page = open(os.path.join(_root, "snegofili", "index.html"), encoding="utf-8").read()
+for _id in ("slovenija", "sezona"):
+    check(f'<section id="{_id}"' in _page and f'href="#{_id}"' in _page, f"stran: razdelek #{_id} in povezava v navigaciji")
+check("Kako računamo nov sneg" in _page and "Kako so izbrane lokacije" in _page and "Zakaj 1 mm padavin ni vedno 1 cm snega?" in _page,
+      "stran: razlaga razmerja 1 mm ≈ 1 cm in izbire lokacij")
+check("indoor" not in _page.lower() and "tempinf" not in _page.lower(), "stran: brez notranjih meritev")
+_wf = open(os.path.join(_root, ".github", "workflows", "zima-forecast.yml"), encoding="utf-8").read()
+check("log_snegofili_sezona.py" in _wf and "data/snegofili-sezona.csv" in _wf, "workflow: dnevnik sezone se zapiše in commita")
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)
