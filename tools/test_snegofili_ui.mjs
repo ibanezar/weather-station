@@ -44,6 +44,8 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   const nowLine = await page.locator('#sg-nowline').textContent(), nowN = await page.locator('#sg-now-row .sg-nowc').count();
   ok(nowN > 0 ? /sneži na \d+ od/.test(nowLine) : /Trenutno ne sneži/.test(nowLine), tag + 'vrstica »zdaj sneži« se ujema s pasom');
   ok(await page.locator('.sg-stat:visible').count() === 5 && /Do 200 km/.test(await page.locator('#sg-st-past-c').textContent()), tag + 'štiri kartice + Rečica, Alpe ločene od 200 km');
+  { const g = await page.evaluate(() => ({ past: document.querySelector('#sg-st-past-g .sg-rl-fl')?.style.width, segs: document.querySelectorAll('#sg-st-fresh-g i').length, on: document.querySelectorAll('#sg-st-fresh-g i.on').length, rec: !!document.querySelector('#sg-st-rec-g .sg-rule.meas'), dots: document.querySelectorAll('#sg-st-rec-g .sg-fresh i').length }));
+    ok(parseFloat(g.past) > 0 && g.segs === 20 && g.on > 0 && g.rec && g.dots === 3, tag + 'merila na karticah: lata snega, 20 segmentov, lata in svežina Rečice (' + JSON.stringify(g) + ')'); }
   ok(await page.locator('.sg-bdg.m').count() > 5 && await page.locator('.sg-bdg.r').count() > 0, tag + 'oznake Model in Meritev');
   ok(await page.locator(isMobile ? '#sg-tabbar a:visible' : '#sg-nav a:visible').count() >= (isMobile ? 4 : 5), tag + 'navigacija po razdelkih');
   await page.locator('#sg-map .sg-c').nth(3).dispatchEvent('click');

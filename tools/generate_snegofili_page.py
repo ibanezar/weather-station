@@ -703,6 +703,46 @@ def st_icon(i):
             f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ST_ICONS[i]}</svg>')
 
 
+# ── merila na karticah v herou (22. 11. 2026): lata, segmenti, stolpci postaj ──
+GAUGE_MAX = 60            # cm; lestvica late je korenska (kot polnilo padavin na naslovnici), nad 60 cm je polna
+GAUGE_TICKS = (0, 10, 30, 60)
+GAUGE_SEGS = 20
+GAUGE_BARS_MAX = 6        # največ stolpcev postaj ARSO
+GAUGE_BARS_MIN_TOP = 20   # cm; stolpci se merijo vsaj do te višine
+
+
+def gauge_pos(v):
+    """Položaj na lati v % (namerna podvojitev gaugePos() v snegofili.js; primerja ga test_snegofili.py)."""
+    return round(min(1.0, math.sqrt(max(0.0, float(v)) / GAUGE_MAX)) * 100, 1)
+
+
+def gauge_rule(gid, v, label, meas=False):
+    """Vodoravna lata 0–60 cm za izbrano vrednost; pri izmerjeni ničli krožec namesto prazne proge."""
+    ticks = "".join(
+        f'<i class="sg-rl-tk" style="left:{gauge_pos(t)}%"></i><span class="sg-rl-tl t{t}" style="left:{gauge_pos(t)}%" aria-hidden="true">{t}{"+" if t == GAUGE_MAX else ""}</span>'
+        for t in GAUGE_TICKS)
+    return (f'<div class="sg-rule{" meas" if meas else ""}{" zero" if meas and v == 0 else ""}" id="{gid}" role="img" '
+            f'aria-label="{_html.escape(label)}"><i class="sg-rl-tr"></i><i class="sg-rl-fl" style="width:{gauge_pos(v)}%"></i>{ticks}</div>')
+
+
+def gauge_segs(gid, n, tot):
+    on = round(n / tot * GAUGE_SEGS) if tot else 0
+    return (f'<div class="sg-segs" id="{gid}" role="img" aria-label="{n} od {tot} lokacij">'
+            + "".join(f'<i{" class=on" if k < on else ""}></i>' for k in range(GAUGE_SEGS)) + '</div>')
+
+
+def gauge_bars(rows):
+    """Višine odeje ARSO po postajah (meritev, najvišja prva). Izmerjena ničla je črtica, ne prazen stolpec."""
+    vals = sorted((r["izmerjeno"]["depth_cm"] for r in rows if r.get("izmerjeno")), reverse=True)[:GAUGE_BARS_MAX]
+    if not vals:
+        return ""
+    top = max(vals + [GAUGE_BARS_MIN_TOP])  # 1 cm ob 1 cm ostalih ne sme izgledati kot polna odeja
+    cols = "".join(
+        f'<div><em>{num(v, 0)}</em>' + (f'<i class="z"></i>' if v == 0 else f'<i style="height:{max(4.0, math.sqrt(v / top) * 22):.0f}px"></i>') + '</div>'
+        for v in vals)
+    return f'<div class="sg-sbars" role="img" aria-label="Višina snežne odeje po postajah ARSO v cm: {", ".join(num(v, 0) for v in vals)}">{cols}</div>'
+
+
 def stats_html(rows):
     """Štiri kartice v herou. Alpe (vse točke) in območje do TRIP_KM od Rečice sta ločena podatka."""
     near = [r for r in rows if r["km_od_recice"] <= TRIP_KM]
@@ -718,18 +758,21 @@ def stats_html(rows):
             return f"Do {TRIP_KM} km od Rečice: nikjer ≥ 1 cm"
         return f'Do {TRIP_KM} km od Rečice: {cm_h(b[key])} · {_html.escape(b["ime"])}'
 
-    def tile(i, lab, bdg, val, sub, extra="", hid=False):
+    def tile(i, lab, bdg, val, sub, extra="", hid=False, gauge=""):
         cls, attr = ("sg-stat sg-st-rec", ' id="sg-st-rec-w" hidden') if hid else ("sg-stat", "")
         return (f'<div class="{cls}"{attr}><small>{st_icon(i)}<span>{lab}</span> <span class="sg-bdg {bdg[0]}">{bdg[1]}</span></small><b id="sg-st-{i}">{val}</b>'
-                f'<span id="sg-st-{i}-n">{sub}</span>'
+                f'<span id="sg-st-{i}-n">{sub}</span>' + gauge
                 + (f'<span class="sg-st-near" id="sg-st-{i}-c">{extra}</span>' if extra else "") + '</div>')
     mod = ("m", "Model")
     return ('  <div class="sg-stats" id="sg-stats" role="group" aria-label="Povzetek po modelu in meritvah">'
-            + tile("past", "Nov sneg, zadnjih 24 ur", mod, cm_h(b24["past24_cm"]), _html.escape(b24["ime"]) if b24["past24_cm"] >= MIN_CM else "nikjer", near_line("past24_cm"))
-            + tile("next", "Nov sneg, naslednjih 24 ur", mod, cm_h(bn["next24_cm"]), _html.escape(bn["ime"]) if bn["next24_cm"] >= MIN_CM else "nikjer", near_line("next24_cm"))
-            + tile("fresh", "Lokacij s snegom", mod, f"{fresh}", f"od {len(rows)} lokacij · ≥ 1 cm v zadnjih 24 urah")
-            + tile("meas", "Postaj ARSO", ("r", "Meritev"), f"{meas}", "z izmerjeno višino snežne odeje")
-            + tile("rec", "Rečica, sneg v dolini", ("r", "Meritev"), "ni meritve", "višina snežne odeje (ročna meritev)", hid=True)
+            + tile("past", "Nov sneg, zadnjih 24 ur", mod, cm_h(b24["past24_cm"]), _html.escape(b24["ime"]) if b24["past24_cm"] >= MIN_CM else "nikjer", near_line("past24_cm"),
+                   gauge=gauge_rule("sg-st-past-g", b24["past24_cm"], f'{cm_cell(b24["past24_cm"])} na lestvici do {GAUGE_MAX} cm (model)'))
+            + tile("next", "Nov sneg, naslednjih 24 ur", mod, cm_h(bn["next24_cm"]), _html.escape(bn["ime"]) if bn["next24_cm"] >= MIN_CM else "nikjer", near_line("next24_cm"),
+                   gauge=gauge_rule("sg-st-next-g", bn["next24_cm"], f'{cm_cell(bn["next24_cm"])} na lestvici do {GAUGE_MAX} cm (model)'))
+            + tile("fresh", "Lokacij s snegom", mod, f"{fresh}", f"od {len(rows)} lokacij · ≥ 1 cm v zadnjih 24 urah", gauge=gauge_segs("sg-st-fresh-g", fresh, len(rows)))
+            + tile("meas", "Postaj ARSO", ("r", "Meritev"), f"{meas}", "z izmerjeno višino snežne odeje", gauge=gauge_bars(rows))
+            + tile("rec", "Rečica, sneg v dolini", ("r", "Meritev"), "ni meritve", "višina snežne odeje (ročna meritev)", hid=True,
+                   gauge='<div id="sg-st-rec-g"></div>')
             + '</div>\n')
 
 
