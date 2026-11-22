@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-22T02:40:25Z",
+  "generated_at": "2026-11-22T12:53:34Z",
   "model_version": "0.4",
   "target": {
     "name": "snežni dan (proksi)",
@@ -10,17 +10,17 @@
   "note": "leads: proksi (mokri hladni dan, resnica IREICA1). snow: p_snow proti novemu snegu na ARSO postaji Gornji Grad. Pod min_events dogodki na vodilni čas je rezultat zgoden in se ne tolmači.",
   "leads": {
     "1": {
-      "n": 11,
+      "n": 12,
       "events": 1,
       "preliminary": true,
-      "brier": 0.0738,
-      "brier_clim": 0.0827,
-      "skill": 0.108,
+      "brier": 0.0676,
+      "brier_clim": 0.0764,
+      "skill": 0.115,
       "bins": [
         {
           "from": 0,
           "to": 0.05,
-          "n": 8,
+          "n": 9,
           "forecast": 0.014,
           "observed": 0.0
         },
@@ -34,18 +34,18 @@
       ]
     },
     "2": {
-      "n": 10,
+      "n": 11,
       "events": 1,
       "preliminary": true,
-      "brier": 0.081,
-      "brier_clim": 0.0902,
-      "skill": 0.102,
+      "brier": 0.0737,
+      "brier_clim": 0.0827,
+      "skill": 0.109,
       "bins": [
         {
           "from": 0,
           "to": 0.05,
-          "n": 8,
-          "forecast": 0.009,
+          "n": 9,
+          "forecast": 0.008,
           "observed": 0.0
         },
         {
@@ -58,18 +58,18 @@
       ]
     },
     "3": {
-      "n": 9,
+      "n": 10,
       "events": 1,
       "preliminary": true,
-      "brier": 0.0924,
-      "brier_clim": 0.0994,
-      "skill": 0.071,
+      "brier": 0.0833,
+      "brier_clim": 0.0902,
+      "skill": 0.077,
       "bins": [
         {
           "from": 0,
           "to": 0.05,
-          "n": 6,
-          "forecast": 0.015,
+          "n": 7,
+          "forecast": 0.019,
           "observed": 0.0
         },
         {
@@ -82,18 +82,18 @@
       ]
     },
     "4": {
-      "n": 8,
+      "n": 9,
       "events": 1,
       "preliminary": true,
-      "brier": 0.1034,
-      "brier_clim": 0.111,
-      "skill": 0.069,
+      "brier": 0.092,
+      "brier_clim": 0.0994,
+      "skill": 0.074,
       "bins": [
         {
           "from": 0,
           "to": 0.05,
-          "n": 6,
-          "forecast": 0.033,
+          "n": 7,
+          "forecast": 0.034,
           "observed": 0.0
         },
         {
@@ -106,12 +106,12 @@
       ]
     },
     "5": {
-      "n": 7,
+      "n": 8,
       "events": 1,
       "preliminary": true,
-      "brier": 0.1107,
-      "brier_clim": 0.1258,
-      "skill": 0.12,
+      "brier": 0.0973,
+      "brier_clim": 0.111,
+      "skill": 0.123,
       "bins": [
         {
           "from": 0,
@@ -123,9 +123,9 @@
         {
           "from": 0.05,
           "to": 0.15,
-          "n": 3,
-          "forecast": 0.1,
-          "observed": 0.333
+          "n": 4,
+          "forecast": 0.09,
+          "observed": 0.25
         }
       ]
     }
