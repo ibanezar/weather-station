@@ -719,6 +719,15 @@ def stats_html(rows):
             + '</div>\n')
 
 
+def slo_outline_json():
+    """Obris Slovenije [lon, lat] iz app.js (SLO_POLY, en vir; GISCO/Eurostat, poenostavljen). Pade, če ga ni: okno rabi obris za zemljevid."""
+    m = re.search(r"const SLO_POLY=(\[\[.*?\]\]);", open(os.path.join(seo.ROOT, "app.js"), encoding="utf-8").read(), re.S)
+    if not m:
+        sys.exit("SLO_POLY ni v app.js — okno »Sneži v Sloveniji« potrebuje obris Slovenije")
+    pts = json.loads(m.group(1))
+    return json.dumps([[round(x, 3), round(y, 3)] for x, y in pts], separators=(",", ":"))
+
+
 def slo_alert_html():
     """Okno »Sneži v Sloveniji«: skrito, dokler JS (sloLoad()/sloPaint() v snegofili.js) iz /sneg-karta.json (ICON-D2, ista karta kot
     push »Sneži kjerkoli v Sloveniji« in /zima/snezna-karta/) ne ugotovi, da po modelu v naslednjih treh urah sneži v Sloveniji.
@@ -728,7 +737,7 @@ def slo_alert_html():
             '<span class="sg-bdg m">Model</span>'
             '<button type="button" class="sg-slo-x" id="sg-slo-x" aria-label="Zapri okno »Sneži v Sloveniji«">×</button></div>\n'
             '    <p class="sg-slo-s" id="sg-slo-s"></p>\n'
-            '    <div class="sg-slo-body"><div class="sg-slo-map" id="sg-slo-map"></div>\n'
+            f'    <div class="sg-slo-body"><div class="sg-slo-map" id="sg-slo-map" data-poly="{_html.escape(slo_outline_json(), quote=True)}"></div>\n'
             '    <div class="sg-slo-info"><p class="sg-slo-h">V okolici (najmočnejše sneženje prvo)</p><ul class="sg-slo-l" id="sg-slo-l"></ul>\n'
             '    <p class="sg-slo-leg" aria-hidden="true"><i class="l1"></i> od 0,1 <i class="l2"></i> od 0,5 <i class="l3"></i> od 1 cm/h · celica 10 × 8 km, kraj je najbližje naselje ali smučišče</p></div></div>\n'
             '    <p class="sg-slo-f"><a href="/zima/snezna-karta/">Poglejte na snežni karti</a></p>\n'
