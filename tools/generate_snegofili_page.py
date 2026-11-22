@@ -1075,6 +1075,53 @@ def arso_seasons(days):
     return [seasons[k] for k in sorted(seasons, reverse=True)]
 
 
+SEASON_METRICS = (
+    ("Največja snežna odeja", "cm", lambda s: s["max"]),
+    ("Dni z odejo ≥ 1 cm", "dni", lambda s: s["cover"]),
+    ("Novi sneg skupaj", "cm", lambda s: s["new"] if s["new_n"] else None),
+)
+
+
+def season_charts_html(stations):
+    """Izmerjene zime ARSO kot primerjalni vodoravni stolpci: trije grafi (odeja, dni z odejo, novi sneg), vrstica = zima (najnovejša zgoraj),
+    v vrstici en stolpec na postajo. Lestvica je v vsakem grafu SKUPNA obema postajama (da je viden razmik med dolino in 794 m).
+    Tekoča zima je še nepopolna (arhiv zaostaja): vrstica je bleda in nosi datum zadnje meritve. Brez meritve: »—« in brez stolpca."""
+    if not stations:
+        return ""
+    years = sorted({sy for _n, _e, d in stations for sy in d}, reverse=True)
+    cur = years[0]
+    cls = "abcd"
+    legend = " ".join(f'<span class="sg-sz-k"><i class="{cls[i]}"></i>{_html.escape(n)} <small>{e} m</small></span>' for i, (n, e, _d) in enumerate(stations))
+    out = [f'  <p class="sg-sz-leg" aria-hidden="true">{legend}</p>\n  <div class="sg-sz-grid">\n']
+    for title, unit, get in SEASON_METRICS:
+        top = max([get(s) or 0 for _n, _e, d in stations for s in d.values()] + [1])
+        best = {n: max([get(s) or 0 for s in d.values()] + [0]) for n, _e, d in stations}
+        rows = []
+        for sy in years:
+            lab = f"{sy}/{str(sy + 1)[2:]}"
+            part, spoken = [], []
+            for i, (n, _e, d) in enumerate(stations):
+                s = d.get(sy)
+                v = get(s) if s else None
+                if v is None:
+                    part.append(f'<span class="sg-sz-b {cls[i]}"><span class="sg-sz-t"></span><em>—</em></span>')
+                    spoken.append(f"{n}: ni podatka")
+                    continue
+                txt = f'{num(v, 0)} {unit}'
+                mx = ' mx' if v == best[n] and v > 0 else ""
+                part.append(f'<span class="sg-sz-b {cls[i]}{mx}"><span class="sg-sz-t"><i style="width:{v / top * 100:.1f}%"></i></span><em>{txt}</em></span>')
+                spoken.append(f"{n}: {txt}")
+            partial = sy == cur and any(sy in d and d[sy]["last"] < f"{sy + 1}-04-30" for _n, _e, d in stations)
+            last = max((d[sy]["last"] for _n, _e, d in stations if sy in d), default=None)
+            lab_html = lab + (f' <small>do {dm(last)}</small>' if partial and last else "")
+            rows.append(f'<li class="{"cur" if partial else ""}" aria-label="{lab}{", še nepopolna" if partial else ""}: {_html.escape("; ".join(spoken))}">'
+                        f'<span class="sg-sz-l">{lab_html}</span><span class="sg-sz-bs">{"".join(part)}</span></li>')
+        out.append(f'  <figure class="sg-sz-ch"><figcaption>{title} <small>{unit}</small></figcaption><ol>{"".join(rows)}</ol></figure>\n')
+    out.append('  </div>\n  <p class="muted-note">Lestvica je v vsakem grafu skupna obema postajama. Najmočnejša zima vsake postaje ima krepko številko. '
+               'Bleda vrstica je tekoča zima: arhiv ARSO zaostaja, zato ne zajema vseh dni.</p>\n')
+    return "".join(out)
+
+
 def sezona_html(rows):
     names = {r["id"]: r for r in rows}
     log = season_totals(read_season_log())
@@ -1100,6 +1147,7 @@ def sezona_html(rows):
             f'  <ul class="sg-ms">{"".join(li(p) for p in shown)}</ul>\n'
             + (f'  <details class="sg-fold"><summary>Še {len(rest)} lokacij s snegom v sezoni</summary><ul class="sg-ms">{"".join(li(p) for p in rest)}</ul></details>\n' if rest else ""))
     arch = ""
+    by_station = []   # [(ime, višina, {začetno leto sezone: sezona})] za grafe
     for sid, name, elev in ARSO_SEASON_STATIONS:
         try:
             with open(os.path.join(ARSO_ARCHIVE_DIR, f"daily-{sid}.json"), encoding="utf-8") as f:
@@ -1108,6 +1156,7 @@ def sezona_html(rows):
             continue
         if not seas:
             continue
+        by_station.append((name, elev, {s["sy"]: s for s in seas}))
         trs = ""
         for s in seas:
             cur = s is seas[0] and s["last"] < f"{s['sy'] + 1}-04-30"
@@ -1124,7 +1173,8 @@ def sezona_html(rows):
             '  <h3>Izmerjene zime na postajah ARSO <span class="sg-bdg r">Meritev</span></h3>\n'
             '  <p class="archive-intro">Višina snežne odeje in novi sneg, ki ju meri ARSO, po zimah od 1. oktobra do 30. aprila. To je <b>meritev v dolini</b> (ne v gorah, kamor sodijo ostale točke), '
             'ločena od modelske ocene zgoraj. Arhiv ARSO zaostaja za več dni do nekaj tednov, zato zadnja vrstica ne zajema celotne tekoče zime; šteje se samo dan, ki ima meritev. '
-            'Vir: Agencija Republike Slovenije za okolje (ARSO).</p>\n' + arch)
+            'Vir: Agencija Republike Slovenije za okolje (ARSO).</p>\n' + season_charts_html(by_station)
+            + '  <details class="sg-fold"><summary>Isti podatki v tabeli (z datumom največje odeje)</summary>\n' + arch + '  </details>\n')
     if not parts:
         return ""
     return ('  <section id="sezona" class="sg-sec" aria-labelledby="sz-h">\n  <h2 id="sz-h">Snežna sezona in arhiv</h2>\n' + "".join(parts) + '  </section>\n')
