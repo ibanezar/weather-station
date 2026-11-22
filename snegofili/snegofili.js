@@ -21,16 +21,51 @@
 
   /* Ali ob uri i sneži (vsaj 0,1 cm/h po modelu). */
   function snowing(h, i) { return !!h && (h.sn[i] || 0) >= SNOWING_MIN; }
-  /* Točke države c (p.c, npr. 'SI'), kjer ob uri i sneži; najmočnejše sneženje prvo. Za okno »Zdaj sneži v Sloveniji«. */
-  function snowingIn(pts, hours, c, i) {
-    var out = [];
-    (pts || []).forEach(function (p) {
-      if (p.c !== c) return;
-      var h = hours && hours[p.id]; if (!snowing(h, i)) return;
-      out.push({ p: p, rate: h.sn[i] / 10, t: h.t && h.t[i] != null ? h.t[i] / 10 : null });
-    });
-    out.sort(function (a, b) { return b.rate - a.rate || a.p.n.localeCompare(b.p.n, 'sl'); });
-    return out;
+  /* Okno »Sneži v Sloveniji« in push »Sneži kjerkoli v Sloveniji« (worker.js: _sgSloSummary) gledata ISTO karto: ICON-D2 iz /sneg-karta.json
+     (mreža 0,1°, ista kot na /zima/snezna-karta/). Izračun in konstante so namerna podvojitev worker.js ↔ tu; preverja jo tools/test_snegofili_alarm.mjs.
+     SLO_MASK: 1 = središče celice je v obrisu Slovenije (vrstice od juga proti severu, stolpci od zahoda proti vzhodu). */
+  var SLO_MIN_CELLS = 3, SLO_HOURS = 3, SLO_MAX_AGE_MS = 2 * 3600 * 1000, SLO_CELL_KM2 = 85;
+  var SLO_MASK = [
+    "00000000000000000000000000000000000",
+    "00011110111000011111100000000000000",
+    "00000011111110111111000000000000000",
+    "00000011111111111111000000000000000",
+    "00001111111111111111110000000000000",
+    "00001111111111111111111100000000000",
+    "00111111111111111111111110000000000",
+    "00011111111111111111111100000000000",
+    "00011111111111111111111100000000000",
+    "01111111111111111111111111100000000",
+    "00011111111111111111111111111100000",
+    "00000110000000011111111111111100100",
+    "00000000000000001111111111111111000",
+    "00000000000000000000000011101110000",
+    "00000000000000000000000000011110000",
+    "00000000000000000000000000000000000"
+  ];
+  /* Karta: {generated, t0, nx, ny, sn[k][i] v 0,1 cm, z[i]}; korak k ima žig t0 + (k+1) h in velja za (žig − 1 h, žig]. Šteje ure z žigom v (now, now + 4 h);
+     ura je »snežna«, če ima vsaj SLO_MIN_CELLS celic znotraj Slovenije z ≥ 0,1 cm/h. Vrne {active, cells, maxCmH, lowM, hours}. */
+  function sloSummary(karta, now) {
+    var none = { active: false, cells: 0, maxCmH: 0, lowM: null, hours: 0 };
+    if (!karta || !Array.isArray(karta.sn) || !(karta.nx > 0) || !(karta.ny > 0) || !(karta.t0 > 0)) return none;
+    var seen = {}, nSeen = 0, maxV = 0, low = null, hours = 0;
+    for (var k = 0; k < karta.sn.length; k++) {
+      var stamp = karta.t0 + (k + 1) * 3600000;
+      if (!(stamp > now && stamp < now + (SLO_HOURS + 1) * 3600000)) continue;
+      var row = karta.sn[k] || [], hit = [];
+      for (var i = 0; i < row.length; i++) {
+        var mr = SLO_MASK[Math.floor(i / karta.nx)];
+        if (typeof row[i] === 'number' && row[i] >= 1 && mr && mr.charAt(i % karta.nx) === '1') hit.push(i);
+      }
+      if (hit.length < SLO_MIN_CELLS) continue;
+      hours++;
+      hit.forEach(function (i) {
+        if (!seen[i]) { seen[i] = 1; nSeen++; }
+        if (row[i] > maxV) maxV = row[i];
+        var z = karta.z && karta.z[i]; if (typeof z === 'number' && (low === null || z < low)) low = z;
+      });
+    }
+    return { active: hours > 0, cells: nSeen, maxCmH: maxV / 10, lowM: low, hours: hours };
   }
   /* Stopnja toplotne karte po urni količini (desetinke cm/h): −1 ni snega, 0…4 pragovi 0,1 / 0,5 / 1 / 2 / 4 cm/h. */
   function hstep(v) { var c = (v || 0) / 10; return c < 0.1 ? -1 : c < 0.5 ? 0 : c < 1 ? 1 : c < 2 ? 2 : c < 4 ? 3 : 4; }
@@ -70,7 +105,7 @@
   var model = {
     recicaState: recicaState, recicaAge: recicaAge, recicaCm: recicaCm, RECICA_STALE_H: RECICA_STALE_H, RECICA_HIDE_D: RECICA_HIDE_D,
     NOW: NOW, MIN_I: MIN_I, MAX_I: MAX_I, SNOWING_MIN: SNOWING_MIN, step: step, phase: phase, radius: radius, barPct: barPct,
-    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, snowingIn: snowingIn, hstep: hstep, plan: plan
+    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, sloSummary: sloSummary, SLO_MASK: SLO_MASK, SLO_MIN_CELLS: SLO_MIN_CELLS, SLO_HOURS: SLO_HOURS, SLO_MAX_AGE_MS: SLO_MAX_AGE_MS, hstep: hstep, plan: plan
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = model; }
   root.SgModel = model;
@@ -213,7 +248,6 @@
     intensity = tot ? active / tot : 0;
     stats(active, tot, best, bestN, fresh);
     nowStrip(list, i);
-    sloAlert();
     camBadges(i);
     heatCursor(i);
     panelPaint();
@@ -581,30 +615,37 @@
     });
   }
 
-  /* ══ okno »Zdaj sneži v Sloveniji« ══
-     Vedno trenutna ura (NOW), ne ura drsnika: pove, kaj je zdaj; ob drugi uri je podrobnost v pasu spodaj.
-     Skrito, dokler v Sloveniji po modelu ne sneži; zapre se z ×, do prve spremembe seznama točk (ne trajno). */
-  var sloKey = '', sloClosedKey = null;
-  function sloAlert() {
+  /* ══ okno »Sneži v Sloveniji« ══
+     Vir: /sneg-karta.json (ICON-D2, enak kot push in snežna karta), ne seznam točk Snegofilov. Skrito, dokler po modelu ne sneži; × ga zapre,
+     dokler se stanje ne spremeni (neha in spet začne). Klic ob nalaganju in nato največ na 10 min, samo ko je zavihek viden (worker karto drži 30 min). */
+  var sloClosed = false;
+  function sloPaint(sm) {
     var box = $('#sg-slo'); if (!box) return;
-    var cl = $('#sg-slo-x'); if (cl && !cl.dataset.on) { cl.dataset.on = '1'; cl.addEventListener('click', function () { sloClosedKey = sloKey; box.hidden = true; }); }
-    var list = snowingIn(pts, hours, 'SI', NOW);
-    var key = list.map(function (x) { return x.p.id; }).join(',');
-    if (!list.length || key === sloClosedKey) { box.hidden = true; sloKey = ''; return; }
+    if (!sm.active) { box.hidden = true; sloClosed = false; return; }
+    if (sloClosed) return;
     box.hidden = false;
-    if (key === sloKey) return; sloKey = key;
-    var n = list.length;
-    $('#sg-slo-t').textContent = 'Zdaj sneži v Sloveniji';
-    $('#sg-slo-s').textContent = 'Po modelu v trenutni uri na ' + n + (n === 1 ? ' lokaciji' : ' lokacijah') + ' (vsaj 0,1 cm novega snega na uro). Ni meritev.';
+    $('#sg-slo-t').textContent = 'Sneži v Sloveniji';
+    $('#sg-slo-s').textContent = 'Po modelu ICON-D2 sneži v Sloveniji v naslednjih treh urah (vsaj 0,1 cm na uro na vsaj treh celicah mreže 10 × 8 km). Modelska ocena, ni meritev.';
     var ul = $('#sg-slo-l'); ul.textContent = '';
-    list.forEach(function (x) {
-      var li = el('li'), b = el('button', 'sg-slo-chip'); b.type = 'button';
-      b.appendChild(el('b', null, x.p.n));
-      b.appendChild(el('span', null, fmt(x.rate, x.rate >= 10 ? 0 : 1) + ' cm/h · ' + x.p.e + ' m' + (x.t == null ? '' : ' · ' + fmt(x.t, 1) + ' °C')));
-      b.addEventListener('click', function () { openDetail(x.p.id, b); });
-      li.appendChild(b); ul.appendChild(li);
+    [['Območje', 'okoli ' + fmt(Math.round(sm.cells * SLO_CELL_KM2 / 10) * 10, 0) + ' km²'],
+     ['Najmočneje', fmt(sm.maxCmH, sm.maxCmH >= 10 ? 0 : 1) + ' cm/h'],
+     sm.lowM == null ? null : ['Najnižje', 'okoli ' + Math.round(sm.lowM / 10) * 10 + ' m (višina modelske celice)']].forEach(function (x) {
+      if (!x) return; var li = el('li', 'sg-slo-chip'); li.appendChild(el('b', null, x[0])); li.appendChild(el('span', null, x[1])); ul.appendChild(li);
     });
   }
+  function sloLoad() {
+    var cl = $('#sg-slo-x'); if (cl && !cl.dataset.on) { cl.dataset.on = '1'; cl.addEventListener('click', function () { sloClosed = true; var b = $('#sg-slo'); if (b) b.hidden = true; }); }
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
+    fetch(API + '/sneg-karta.json', ctl ? { signal: ctl.signal } : {}).then(function (r) { return r.ok ? r.json() : null; }).then(function (k) {
+      clearTimeout(to);
+      /* neveljaven ali star odgovor ne pove, da ne sneži: okno ostane, kakršno je (skrito ali prikazano) */
+      if (!k || !(Date.now() - k.generated <= SLO_MAX_AGE_MS)) return;
+      sloPaint(sloSummary(k, Date.now()));
+    }).catch(function () { clearTimeout(to); });
+  }
+  sloLoad();
+  setInterval(function () { if (!document.hidden) sloLoad(); }, 10 * 60 * 1000);
+
   /* ══ pas »Kjer zdaj sneži« ══ */
   var nowKey = '';
   function nowStrip(list, i) {

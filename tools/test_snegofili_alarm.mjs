@@ -141,6 +141,23 @@ assert.equal(_sloSum(karta(sn => { SLO.forEach(i => { sn[0][i] = 9; }); }), T0 +
 assert.equal(_sloSum(null, NOW).active, false); assert.equal(_sloSum({ sn: 'x' }, NOW).active, false);
 const tx2 = _sloText(sm); assert.match(tx2, /v Sloveniji/); assert.match(tx2, /1,2 cm\/h/); assert.match(tx2, /ne meritev/); assert.match(tx2, /ne uradno opozorilo/); assert.match(tx2, /340 km²/, '4 celice × 85 km² = 340');
 
+// okno na strani (snegofili.js: sloSummary) in push (worker.js: _sgSloSummary) morata dati isto: ista maska, isti pragovi, isti izračun
+assert.deepEqual(Array.from(SG.SLO_MASK), Array.from(C.SG_SLO_MASK), 'maska v snegofili.js = maska v workerju');
+assert.deepEqual([SG.SLO_MIN_CELLS, SG.SLO_HOURS, SG.SLO_MAX_AGE_MS], [C.SG_SLO_MIN_CELLS, C.SG_SLO_HOURS, C.SG_SLO_MAX_AGE_MS], 'pragovi okna = pragovi pusha');
+{
+  const cases = [
+    [sn => { SLO.forEach(i => { sn[0][i] = 5; }); sn[0][SLO[0]] = 12; }, NOW],
+    [sn => { OUT.forEach(i => { sn[0][i] = 30; }); }, NOW],
+    [sn => { SLO.slice(0, 2).forEach(i => { sn[0][i] = 30; }); }, NOW],
+    [sn => { SLO.forEach(i => { sn[1][i] = 7; sn[2][i] = 3; }); sn[2][OUT[0]] = 50; }, NOW],
+    [sn => { SLO.forEach(i => { sn[C.SG_SLO_HOURS][i] = 9; }); }, NOW],
+    [sn => { SLO.forEach(i => { sn[0][i] = 9; }); }, NOW + 2 * H],
+    [sn => { for (let i = 0; i < 560; i++) sn[1][i] = 4; }, NOW],       // vsa mreža: šteje samo notranjost maske
+  ];
+  for (const [f, now] of cases) assert.deepEqual(JSON.parse(JSON.stringify(SG.sloSummary(karta(f), now))), JSON.parse(JSON.stringify(_sloSum(karta(f), now))), 'okno in push dasta isto');
+  assert.equal(_sloSum(karta(sn => { for (let i = 0; i < 560; i++) sn[1][i] = 4; }), NOW).cells, Array.from(C.SG_SLO_MASK).join('').split('1').length - 1, 'cela mreža: šteje natanko celice v maski');
+}
+
 const ssub = (ep, slo, rules = []) => ({ endpoint: ep, keys: { p256dh: 'a', auth: 'b' }, rules, slo, st: {} });
 const snowK = (gen = NOW) => karta(sn => { SLO.forEach(i => { sn[0][i] = 5; }); }, gen), dryK = (gen = NOW) => karta(() => {}, gen);
 reset([ssub('https://p/s1', true), ssub('https://p/s2', false, [{ id: 'golte', cm: 99 }]), ssub('https://p/s3', undefined)]);

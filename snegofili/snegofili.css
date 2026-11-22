@@ -734,8 +734,7 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-slo-x:hover{background:var(--sg-surface2)}
 .sg-slo-s{margin:.2rem 0 .6rem;font-size:.88rem;color:var(--sg-muted)}
 .sg-slo-l{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem}
-.sg-slo-chip{display:flex;flex-direction:column;align-items:flex-start;min-height:44px;padding:.4rem .85rem;border-radius:14px;border:2px solid var(--sg-line);background:var(--sg-surface2);color:var(--sg-ink);cursor:pointer;text-align:left;font-family:var(--sg-display)}
-.sg-slo-chip:hover{border-color:var(--sg-azure)}
+.sg-slo-chip{display:flex;flex-direction:column;align-items:flex-start;padding:.4rem .85rem;border-radius:14px;border:2px solid var(--sg-line);background:var(--sg-surface2);color:var(--sg-ink);text-align:left;font-family:var(--sg-display)}
 .sg-slo-chip b{font-size:1rem;font-weight:800}
 .sg-slo-chip span{font-size:.8rem;color:var(--sg-muted);font-variant-numeric:tabular-nums}
 .sg-slo-f{margin:.6rem 0 0;font-size:.85rem}

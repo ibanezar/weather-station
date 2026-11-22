@@ -720,15 +720,16 @@ def stats_html(rows):
 
 
 def slo_alert_html():
-    """Okno »Zdaj sneži v Sloveniji«: skrito, dokler JS (sloAlert() v snegofili.js) ne najde slovenske točke, kjer po modelu
-    ob trenutni uri sneži. Vsebino (seznam točk) napolni JS; brez JS ostane skrito, ker bi statičen posnetek hitro zastarel."""
+    """Okno »Sneži v Sloveniji«: skrito, dokler JS (sloLoad()/sloPaint() v snegofili.js) iz /sneg-karta.json (ICON-D2, ista karta kot
+    push »Sneži kjerkoli v Sloveniji« in /zima/snezna-karta/) ne ugotovi, da po modelu v naslednjih treh urah sneži v Sloveniji.
+    Vsebino napolni JS; brez JS ostane skrito, ker bi statičen posnetek hitro zastarel."""
     return ('  <aside class="sg-slo" id="sg-slo" role="status" aria-live="polite" aria-labelledby="sg-slo-t" hidden>\n'
-            '    <div class="sg-slo-hd"><span class="sg-slo-dot" aria-hidden="true"></span><h2 id="sg-slo-t">Zdaj sneži v Sloveniji</h2>'
+            '    <div class="sg-slo-hd"><span class="sg-slo-dot" aria-hidden="true"></span><h2 id="sg-slo-t">Sneži v Sloveniji</h2>'
             '<span class="sg-bdg m">Model</span>'
-            '<button type="button" class="sg-slo-x" id="sg-slo-x" aria-label="Zapri okno »Zdaj sneži v Sloveniji«">×</button></div>\n'
+            '<button type="button" class="sg-slo-x" id="sg-slo-x" aria-label="Zapri okno »Sneži v Sloveniji«">×</button></div>\n'
             '    <p class="sg-slo-s" id="sg-slo-s"></p>\n'
             '    <ul class="sg-slo-l" id="sg-slo-l"></ul>\n'
-            '    <p class="sg-slo-f"><a href="#zdaj-snezi">Vse točke, kjer sneži</a></p>\n'
+            '    <p class="sg-slo-f"><a href="/zima/snezna-karta/">Poglejte na snežni karti</a></p>\n'
             '  </aside>\n')
 
 
