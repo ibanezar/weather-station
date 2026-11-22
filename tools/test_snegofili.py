@@ -236,6 +236,28 @@ console.log(JSON.stringify([r({win:'n24',km:200,minCm:1}), r({win:'n24',km:0,min
 except (OSError, subprocess.SubprocessError, ValueError) as e:
     check(False, f"node (nove komponente): {e}")
 
+try:
+    slo_js = r"""
+const hs=(i,v,t)=>{const a=new Array(144).fill(0);a[i]=v;return {sn:a,t:new Array(144).fill(t==null?-20:t)}};
+const hours={a:hs(71,3),b:hs(71,12,-35),c:hs(71,5),d:hs(70,9),e:hs(71,0)};
+const pts=[{id:'a',n:'Krvavec',c:'SI',e:1700},{id:'b',n:'Kanin',c:'SI',e:2200},{id:'c',n:'Hintertux',c:'AT',e:2500},
+           {id:'d',n:'Golte',c:'SI',e:1400},{id:'e',n:'Vogel',c:'SI',e:1500},{id:'z',n:'Brez',c:'SI',e:900}];
+const r=(c,i)=>m.snowingIn(pts,hours,c,i).map(x=>x.p.id+':'+x.rate);
+console.log(JSON.stringify([r('SI',71),r('AT',71),r('SI',70),r('IT',71),m.snowingIn(null,null,'SI',71).length,
+  m.snowingIn(pts,hours,'SI',71)[0].t]))
+"""
+    sl = node_json(slo_js)
+    check(sl[0] == ["b:1.2", "a:0.3"], "okno Slovenija: samo SI, najmočnejše prvo, pod 0,1 cm/h in točka brez serije izpadeta")
+    check(sl[1] == ["c:0.5"], "okno Slovenija: država se filtrira po p.c (AT ne pride v SI)")
+    check(sl[2] == ["d:0.9"], "okno Slovenija: ura je parameter (druga ura, drugi seznam)")
+    check(sl[3] == [] and sl[4] == 0, "okno Slovenija: nikjer ne sneži ali ni podatkov = prazen seznam")
+    check(sl[5] == -3.5, "okno Slovenija: temperatura v °C iz desetink")
+except (OSError, subprocess.SubprocessError, ValueError) as e:
+    check(False, f"node (okno Slovenija): {e}")
+
+check('id="sg-slo"' in body and 'id="sg-slo-l"' in body and 'id="sg-slo-x"' in body and 'id="sg-slo-s"' in body and 'id="sg-slo-t"' in body,
+      "stran ima okno »Zdaj sneži v Sloveniji« (skrito do JS) z vsemi elementi, ki jih polni sloAlert()")
+check(re.search(r'<aside class="sg-slo"[^>]*\bhidden\b', body) is not None, "okno Slovenija je privzeto skrito (brez JS statičen posnetek ne trdi nič)")
 check('id="sg-stats"' in body and 'id="zdaj-snezi"' in body and 'id="kam-peljem"' in body and 'id="toplotna-karta"' in body,
       "stran ima povzetek, pas »Kjer zdaj sneži«, izbirnik in toplotno karto")
 check(body.count('class="sg-spark"') == 2, "vsaka kartica ima rezerviran sparkline")

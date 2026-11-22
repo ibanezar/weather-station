@@ -718,6 +718,19 @@ def stats_html(rows):
             + '</div>\n')
 
 
+def slo_alert_html():
+    """Okno »Zdaj sneži v Sloveniji«: skrito, dokler JS (sloAlert() v snegofili.js) ne najde slovenske točke, kjer po modelu
+    ob trenutni uri sneži. Vsebino (seznam točk) napolni JS; brez JS ostane skrito, ker bi statičen posnetek hitro zastarel."""
+    return ('  <aside class="sg-slo" id="sg-slo" role="status" aria-live="polite" aria-labelledby="sg-slo-t" hidden>\n'
+            '    <div class="sg-slo-hd"><span class="sg-slo-dot" aria-hidden="true"></span><h2 id="sg-slo-t">Zdaj sneži v Sloveniji</h2>'
+            '<span class="sg-bdg m">Model</span>'
+            '<button type="button" class="sg-slo-x" id="sg-slo-x" aria-label="Zapri okno »Zdaj sneži v Sloveniji«">×</button></div>\n'
+            '    <p class="sg-slo-s" id="sg-slo-s"></p>\n'
+            '    <ul class="sg-slo-l" id="sg-slo-l"></ul>\n'
+            '    <p class="sg-slo-f"><a href="#zdaj-snezi">Vse točke, kjer sneži</a></p>\n'
+            '  </aside>\n')
+
+
 def measured_html(rows):
     meas = [r for r in rows if r.get("izmerjeno")]
     if not meas:
@@ -946,7 +959,7 @@ def build_body(data, cams):
     <a class="sg-cta o" id="sg-al-cta" href="#sg-alarm" hidden>Nastavi snežno opozorilo</a></div>
 {f'    <p class="sg-credit">{hp[1]}</p>' if hp and hp[1] else ""}
   </section>
-{stats_html(rows)}{nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
+{stats_html(rows)}{slo_alert_html()}{nav_html}  <section id="zemljevid" class="sg-sec sg-mapsec" aria-labelledby="zm-h">
   <h2 id="zm-h">Zemljevid snežnih razmer <span class="sg-bdg m">Model</span></h2>
   <p class="archive-intro">Barva in velikost kroga kažeta novi sneg po modelu; dotik točke odpre povzetek. Privzeti pogled je Slovenija z Avstrijo in severno Italijo.</p>
   <div class="sg-win sg-mapgrid">

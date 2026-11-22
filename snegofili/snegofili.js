@@ -21,6 +21,17 @@
 
   /* Ali ob uri i sneži (vsaj 0,1 cm/h po modelu). */
   function snowing(h, i) { return !!h && (h.sn[i] || 0) >= SNOWING_MIN; }
+  /* Točke države c (p.c, npr. 'SI'), kjer ob uri i sneži; najmočnejše sneženje prvo. Za okno »Zdaj sneži v Sloveniji«. */
+  function snowingIn(pts, hours, c, i) {
+    var out = [];
+    (pts || []).forEach(function (p) {
+      if (p.c !== c) return;
+      var h = hours && hours[p.id]; if (!snowing(h, i)) return;
+      out.push({ p: p, rate: h.sn[i] / 10, t: h.t && h.t[i] != null ? h.t[i] / 10 : null });
+    });
+    out.sort(function (a, b) { return b.rate - a.rate || a.p.n.localeCompare(b.p.n, 'sl'); });
+    return out;
+  }
   /* Stopnja toplotne karte po urni količini (desetinke cm/h): −1 ni snega, 0…4 pragovi 0,1 / 0,5 / 1 / 2 / 4 cm/h. */
   function hstep(v) { var c = (v || 0) / 10; return c < 0.1 ? -1 : c < 0.5 ? 0 : c < 1 ? 1 : c < 2 ? 2 : c < 4 ? 3 : 4; }
   /* »Kam peljem?«: tri točke z največ snega v oknu (n24 = naslednjih 24 h, n48 = 24–48 h od zdaj, p24 = zadnjih 24 h). */
@@ -59,7 +70,7 @@
   var model = {
     recicaState: recicaState, recicaAge: recicaAge, recicaCm: recicaCm, RECICA_STALE_H: RECICA_STALE_H, RECICA_HIDE_D: RECICA_HIDE_D,
     NOW: NOW, MIN_I: MIN_I, MAX_I: MAX_I, SNOWING_MIN: SNOWING_MIN, step: step, phase: phase, radius: radius, barPct: barPct,
-    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, hstep: hstep, plan: plan
+    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, snowingIn: snowingIn, hstep: hstep, plan: plan
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = model; }
   root.SgModel = model;
@@ -202,6 +213,7 @@
     intensity = tot ? active / tot : 0;
     stats(active, tot, best, bestN, fresh);
     nowStrip(list, i);
+    sloAlert();
     camBadges(i);
     heatCursor(i);
     panelPaint();
@@ -569,6 +581,30 @@
     });
   }
 
+  /* ══ okno »Zdaj sneži v Sloveniji« ══
+     Vedno trenutna ura (NOW), ne ura drsnika: pove, kaj je zdaj; ob drugi uri je podrobnost v pasu spodaj.
+     Skrito, dokler v Sloveniji po modelu ne sneži; zapre se z ×, do prve spremembe seznama točk (ne trajno). */
+  var sloKey = '', sloClosedKey = null;
+  function sloAlert() {
+    var box = $('#sg-slo'); if (!box) return;
+    var cl = $('#sg-slo-x'); if (cl && !cl.dataset.on) { cl.dataset.on = '1'; cl.addEventListener('click', function () { sloClosedKey = sloKey; box.hidden = true; }); }
+    var list = snowingIn(pts, hours, 'SI', NOW);
+    var key = list.map(function (x) { return x.p.id; }).join(',');
+    if (!list.length || key === sloClosedKey) { box.hidden = true; sloKey = ''; return; }
+    box.hidden = false;
+    if (key === sloKey) return; sloKey = key;
+    var n = list.length;
+    $('#sg-slo-t').textContent = 'Zdaj sneži v Sloveniji';
+    $('#sg-slo-s').textContent = 'Po modelu v trenutni uri na ' + n + (n === 1 ? ' lokaciji' : ' lokacijah') + ' (vsaj 0,1 cm novega snega na uro). Ni meritev.';
+    var ul = $('#sg-slo-l'); ul.textContent = '';
+    list.forEach(function (x) {
+      var li = el('li'), b = el('button', 'sg-slo-chip'); b.type = 'button';
+      b.appendChild(el('b', null, x.p.n));
+      b.appendChild(el('span', null, fmt(x.rate, x.rate >= 10 ? 0 : 1) + ' cm/h · ' + x.p.e + ' m' + (x.t == null ? '' : ' · ' + fmt(x.t, 1) + ' °C')));
+      b.addEventListener('click', function () { openDetail(x.p.id, b); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+  }
   /* ══ pas »Kjer zdaj sneži« ══ */
   var nowKey = '';
   function nowStrip(list, i) {
