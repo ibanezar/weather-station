@@ -260,6 +260,22 @@ console.log(JSON.stringify([a.active,a.cells,a.maxCmH,a.lowM,a.hours,
     check(sl[10] is False, "okno Slovenija: ura, ki je že mimo, ne šteje (po žigu, ne po indeksu)")
     check(sl[11] is False and sl[12] is False, "okno Slovenija: brez karte ali s pokvarjeno karto ni sneženja")
     check(sl[13] == 16 and sl[14] is True, "okno Slovenija: maska ima 16 vrstic po 35 celic")
+    pl_js = r"""
+const H=3600000, NOW=Date.UTC(2026,11,3,8,0);
+const K=(cells,lat0,lon0)=>{const sn=Array.from({length:48},()=>new Array(560).fill(0));Object.keys(cells).forEach(i=>{sn[0][i]=cells[i];sn[1][i]=Math.round(cells[i]/2)});return {generated:NOW,t0:NOW,nx:35,ny:16,sn,z:new Array(560).fill(900),lat0,lon0,d:0.1}};
+// 390 = vrstica 11, stolpec 5 (46,5 N, 13,8 E: Kranjska Gora); 291.. = vrstica 8, stolpci 11-13 (46,2 N, 14,4-14,6 E: Kamnik); 560-vrstica 15 je zunaj maske
+const k1=K({390:18,391:6,392:3,291:7,292:7,293:7});
+const p=m.sloPlaces(k1,NOW), h=m.sloHits(k1,NOW), s=m.sloSummary(k1,NOW);
+const p0=m.sloPlaces(K({0:30,1:30,2:30}),NOW), p1=m.sloPlaces(null,NOW), p2=m.sloPlaces(K({}),NOW);
+const dflt=m.sloPlaces({generated:NOW,t0:NOW,nx:35,ny:16,sn:k1.sn,z:k1.z},NOW);
+console.log(JSON.stringify([p.map(x=>x.name+':'+x.cmH+':'+x.n), h.hours, Object.keys(h.cells).length, s.cells, s.maxCmH, p0.length, p1.length, p2.length, dflt.length, m.SLO_PLACES.length>=40]))
+"""
+    pl = node_json(pl_js)
+    check(pl[0][0].startswith("Kranjska Gora:1.8:") and len(pl[0]) >= 2, "kraji: najmočnejše sneženje prvo, celica pri Kranjski Gori da Kranjsko Goro (največ 1,8 cm/h)")
+    check(pl[1] == 2 and pl[2] == 5 and pl[3] == 5 and pl[4] == 1.8, "kraji: sloHits in sloSummary štejeta iste celice (celica 392 je zunaj maske, 5 znotraj)")
+    check(pl[5] == 0 and pl[6] == 0 and pl[7] == 0, "kraji: celice zunaj Slovenije, brez karte in brez snega ne dajo krajev")
+    check(pl[8] >= 1, "kraji: brez lat0/lon0/d v karti veljajo konstante snežne karte")
+    check(pl[9] is True, "kraji: seznam ima vsaj 40 krajev")
 except (OSError, subprocess.SubprocessError, ValueError) as e:
     check(False, f"node (okno Slovenija): {e}")
 

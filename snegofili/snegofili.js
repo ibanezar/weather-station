@@ -45,10 +45,10 @@
   ];
   /* Karta: {generated, t0, nx, ny, sn[k][i] v 0,1 cm, z[i]}; korak k ima žig t0 + (k+1) h in velja za (žig − 1 h, žig]. Šteje ure z žigom v (now, now + 4 h);
      ura je »snežna«, če ima vsaj SLO_MIN_CELLS celic znotraj Slovenije z ≥ 0,1 cm/h. Vrne {active, cells, maxCmH, lowM, hours}. */
-  function sloSummary(karta, now) {
-    var none = { active: false, cells: 0, maxCmH: 0, lowM: null, hours: 0 };
-    if (!karta || !Array.isArray(karta.sn) || !(karta.nx > 0) || !(karta.ny > 0) || !(karta.t0 > 0)) return none;
-    var seen = {}, nSeen = 0, maxV = 0, low = null, hours = 0;
+  /* Celice znotraj Slovenije, kjer sneži (v urah, ki štejejo): {hours, cells: {indeks: največja vrednost v 0,1 cm/h}}. Skupna osnova za povzetek in zemljevid. */
+  function sloHits(karta, now) {
+    var out = { hours: 0, cells: {} };
+    if (!karta || !Array.isArray(karta.sn) || !(karta.nx > 0) || !(karta.ny > 0) || !(karta.t0 > 0)) return out;
     for (var k = 0; k < karta.sn.length; k++) {
       var stamp = karta.t0 + (k + 1) * 3600000;
       if (!(stamp > now && stamp < now + (SLO_HOURS + 1) * 3600000)) continue;
@@ -58,14 +58,48 @@
         if (typeof row[i] === 'number' && row[i] >= 1 && mr && mr.charAt(i % karta.nx) === '1') hit.push(i);
       }
       if (hit.length < SLO_MIN_CELLS) continue;
-      hours++;
-      hit.forEach(function (i) {
-        if (!seen[i]) { seen[i] = 1; nSeen++; }
-        if (row[i] > maxV) maxV = row[i];
-        var z = karta.z && karta.z[i]; if (typeof z === 'number' && (low === null || z < low)) low = z;
-      });
+      out.hours++;
+      hit.forEach(function (i) { if (!(out.cells[i] >= row[i])) out.cells[i] = row[i]; });
     }
-    return { active: hours > 0, cells: nSeen, maxCmH: maxV / 10, lowM: low, hours: hours };
+    return out;
+  }
+  function sloSummary(karta, now) {
+    var h = sloHits(karta, now), maxV = 0, low = null, n = 0;
+    Object.keys(h.cells).forEach(function (i) {
+      n++; if (h.cells[i] > maxV) maxV = h.cells[i];
+      var z = karta.z && karta.z[i]; if (typeof z === 'number' && (low === null || z < low)) low = z;
+    });
+    return { active: h.hours > 0, cells: n, maxCmH: maxV / 10, lowM: low, hours: h.hours };
+  }
+  /* Kraji za poimenovanje celic: [ime, širina, dolžina]. Koordinate so približne (±5 km, iz spomina; celica je 10 × 8 km), zato stran piše »v okolici«;
+     vsaka celica dobi najbližji kraj. Samo prikaz: na izračun, ali sneži, ne vpliva. */
+  var SLO_PLACES = [
+    ['Kranjska Gora', 46.485, 13.786], ['Triglav', 46.378, 13.836], ['Bovec', 46.337, 13.553], ['Tolmin', 46.183, 13.732], ['Cerkno', 46.128, 13.967],
+    ['Bohinj', 46.272, 13.943], ['Pokljuka', 46.340, 13.950], ['Bled', 46.369, 14.114], ['Jesenice', 46.437, 14.060], ['Radovljica', 46.344, 14.172],
+    ['Tržič', 46.364, 14.302], ['Kranj', 46.239, 14.356], ['Škofja Loka', 46.166, 14.307], ['Krvavec', 46.298, 14.541], ['Kamnik', 46.222, 14.612],
+    ['Jezersko', 46.398, 14.500], ['Logarska dolina', 46.395, 14.630], ['Solčava', 46.396, 14.690], ['Ljubno ob Savinji', 46.349, 14.834], ['Gornji Grad', 46.299, 14.810],
+    ['Mozirje', 46.341, 14.963], ['Golte', 46.372, 14.920], ['Velenje', 46.359, 15.111], ['Celje', 46.231, 15.267], ['Trbovlje', 46.155, 15.054],
+    ['Črna na Koroškem', 46.466, 14.847], ['Ravne na Koroškem', 46.545, 14.941], ['Slovenj Gradec', 46.510, 15.080], ['Rogla', 46.452, 15.330], ['Pohorje', 46.500, 15.550],
+    ['Maribor', 46.554, 15.646], ['Slovenska Bistrica', 46.392, 15.574], ['Ptuj', 46.420, 15.870], ['Murska Sobota', 46.662, 16.164], ['Lendava', 46.564, 16.451],
+    ['Ljubljana', 46.056, 14.506], ['Idrija', 46.003, 14.030], ['Vipava', 45.846, 13.962], ['Nova Gorica', 45.956, 13.650], ['Sežana', 45.707, 13.873],
+    ['Koper', 45.548, 13.730], ['Postojna', 45.775, 14.214], ['Cerknica', 45.797, 14.363], ['Ilirska Bistrica', 45.565, 14.240], ['Kočevje', 45.643, 14.861],
+    ['Ribnica', 45.740, 14.727], ['Novo mesto', 45.804, 15.168], ['Sevnica', 46.008, 15.300], ['Krško', 45.959, 15.492], ['Brežice', 45.905, 15.595]
+  ];
+  /* Po krajih: za vsako celico najbližji kraj, po kraju največja vrednost in število celic. Vrne [{name, cmH, n}], najmočnejše sneženje prvo.
+     Geometrija mreže je iz karte (lat0, lon0, d), sicer iz konstant sneg-karte (45,4 / 13,3 / 0,1). */
+  function sloPlaces(karta, now) {
+    var h = sloHits(karta, now), lat0 = karta && karta.lat0 != null ? karta.lat0 : 45.4, lon0 = karta && karta.lon0 != null ? karta.lon0 : 13.3, d = karta && karta.d > 0 ? karta.d : 0.1;
+    var by = {};
+    Object.keys(h.cells).forEach(function (key) {
+      var i = +key, lat = lat0 + Math.floor(i / karta.nx) * d, lon = lon0 + (i % karta.nx) * d, best = null, bd = 1e9;
+      SLO_PLACES.forEach(function (p) {
+        var dy = (p[1] - lat) * 111, dx = (p[2] - lon) * 111 * Math.cos(lat * Math.PI / 180), dist = dx * dx + dy * dy;
+        if (dist < bd) { bd = dist; best = p[0]; }
+      });
+      var o = by[best] || (by[best] = { name: best, cmH: 0, n: 0 });
+      o.n++; if (h.cells[i] / 10 > o.cmH) o.cmH = h.cells[i] / 10;
+    });
+    return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b.cmH - a.cmH || b.n - a.n || a.name.localeCompare(b.name, 'sl'); });
   }
   /* Stopnja toplotne karte po urni količini (desetinke cm/h): −1 ni snega, 0…4 pragovi 0,1 / 0,5 / 1 / 2 / 4 cm/h. */
   function hstep(v) { var c = (v || 0) / 10; return c < 0.1 ? -1 : c < 0.5 ? 0 : c < 1 ? 1 : c < 2 ? 2 : c < 4 ? 3 : 4; }
@@ -105,7 +139,7 @@
   var model = {
     recicaState: recicaState, recicaAge: recicaAge, recicaCm: recicaCm, RECICA_STALE_H: RECICA_STALE_H, RECICA_HIDE_D: RECICA_HIDE_D,
     NOW: NOW, MIN_I: MIN_I, MAX_I: MAX_I, SNOWING_MIN: SNOWING_MIN, step: step, phase: phase, radius: radius, barPct: barPct,
-    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, sloSummary: sloSummary, SLO_MASK: SLO_MASK, SLO_MIN_CELLS: SLO_MIN_CELLS, SLO_HOURS: SLO_HOURS, SLO_MAX_AGE_MS: SLO_MAX_AGE_MS, hstep: hstep, plan: plan
+    windows: windows, cmText: cmText, PHASE_TXT: PHASE_TXT, ptxt: ptxt, snowing: snowing, sloSummary: sloSummary, sloHits: sloHits, sloPlaces: sloPlaces, SLO_PLACES: SLO_PLACES, SLO_MASK: SLO_MASK, SLO_MIN_CELLS: SLO_MIN_CELLS, SLO_HOURS: SLO_HOURS, SLO_MAX_AGE_MS: SLO_MAX_AGE_MS, hstep: hstep, plan: plan
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = model; }
   root.SgModel = model;
@@ -619,18 +653,41 @@
      Vir: /sneg-karta.json (ICON-D2, enak kot push in snežna karta), ne seznam točk Snegofilov. Skrito, dokler po modelu ne sneži; × ga zapre,
      dokler se stanje ne spremeni (neha in spet začne). Klic ob nalaganju in nato največ na 10 min, samo ko je zavihek viden (worker karto drži 30 min). */
   var sloClosed = false;
-  function sloPaint(sm) {
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  /* Zemljevid celic: Slovenija iz SLO_MASK (bleda polja), celice, kjer sneži, so obarvane po jakosti (0,1 / 0,5 / 1 cm/h); sever je zgoraj. */
+  function sloMap(karta, now) {
+    var box = $('#sg-slo-map'); if (!box) return;
+    var h = sloHits(karta, now), r0 = 99, r1 = -1, c0 = 99, c1 = -1;
+    SLO_MASK.forEach(function (row, j) { for (var i = 0; i < row.length; i++) if (row.charAt(i) === '1') { r0 = Math.min(r0, j); r1 = Math.max(r1, j); c0 = Math.min(c0, i); c1 = Math.max(c1, i); } });
+    var W = c1 - c0 + 1, H = r1 - r0 + 1, svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('role', 'img'); svg.setAttribute('focusable', 'false');
+    svg.setAttribute('aria-label', 'Zemljevid Slovenije: obarvane so celice mreže, kjer po modelu sneži v naslednjih treh urah');
+    SLO_MASK.forEach(function (row, j) {
+      if (j < r0 || j > r1) return;
+      for (var i = c0; i <= c1; i++) {
+        if (row.charAt(i) !== '1') continue;
+        var v = h.cells[j * karta.nx + i], rect = document.createElementNS(SVGNS, 'rect');
+        rect.setAttribute('x', i - c0); rect.setAttribute('y', r1 - j); rect.setAttribute('width', 1); rect.setAttribute('height', 1);
+        rect.setAttribute('class', 'sg-slo-c' + (v >= 10 ? ' l3' : v >= 5 ? ' l2' : v >= 1 ? ' l1' : ''));
+        svg.appendChild(rect);
+      }
+    });
+    box.textContent = ''; box.appendChild(svg);
+  }
+  function sloPaint(sm, karta, now) {
     var box = $('#sg-slo'); if (!box) return;
     if (!sm.active) { box.hidden = true; sloClosed = false; return; }
     if (sloClosed) return;
     box.hidden = false;
     $('#sg-slo-t').textContent = 'Sneži v Sloveniji';
-    $('#sg-slo-s').textContent = 'Po modelu ICON-D2 sneži v Sloveniji v naslednjih treh urah (vsaj 0,1 cm na uro na vsaj treh celicah mreže 10 × 8 km). Modelska ocena, ni meritev.';
+    var km2 = fmt(Math.round(sm.cells * SLO_CELL_KM2 / 10) * 10, 0), mx = fmt(sm.maxCmH, sm.maxCmH >= 10 ? 0 : 1);
+    $('#sg-slo-s').textContent = 'Po modelu ICON-D2 v naslednjih treh urah: približno ' + km2 + ' km², najmočneje okoli ' + mx + ' cm/h' +
+      (sm.lowM == null ? '' : ', najnižje na višini modelske celice okoli ' + Math.round(sm.lowM / 10) * 10 + ' m') + '. Modelska ocena, ni meritev.';
+    sloMap(karta, now);
     var ul = $('#sg-slo-l'); ul.textContent = '';
-    [['Območje', 'okoli ' + fmt(Math.round(sm.cells * SLO_CELL_KM2 / 10) * 10, 0) + ' km²'],
-     ['Najmočneje', fmt(sm.maxCmH, sm.maxCmH >= 10 ? 0 : 1) + ' cm/h'],
-     sm.lowM == null ? null : ['Najnižje', 'okoli ' + Math.round(sm.lowM / 10) * 10 + ' m (višina modelske celice)']].forEach(function (x) {
-      if (!x) return; var li = el('li', 'sg-slo-chip'); li.appendChild(el('b', null, x[0])); li.appendChild(el('span', null, x[1])); ul.appendChild(li);
+    sloPlaces(karta, now).slice(0, 8).forEach(function (p) {
+      var li = el('li', 'sg-slo-chip'); li.appendChild(el('b', null, p.name)); li.appendChild(el('span', null, 'do ' + fmt(p.cmH, p.cmH >= 10 ? 0 : 1) + ' cm/h'));
+      ul.appendChild(li);
     });
   }
   function sloLoad() {
@@ -640,7 +697,8 @@
       clearTimeout(to);
       /* neveljaven ali star odgovor ne pove, da ne sneži: okno ostane, kakršno je (skrito ali prikazano) */
       if (!k || !(Date.now() - k.generated <= SLO_MAX_AGE_MS)) return;
-      sloPaint(sloSummary(k, Date.now()));
+      var now = Date.now();
+      sloPaint(sloSummary(k, now), k, now);
     }).catch(function () { clearTimeout(to); });
   }
   sloLoad();

@@ -728,7 +728,9 @@ def slo_alert_html():
             '<span class="sg-bdg m">Model</span>'
             '<button type="button" class="sg-slo-x" id="sg-slo-x" aria-label="Zapri okno »Sneži v Sloveniji«">×</button></div>\n'
             '    <p class="sg-slo-s" id="sg-slo-s"></p>\n'
-            '    <ul class="sg-slo-l" id="sg-slo-l"></ul>\n'
+            '    <div class="sg-slo-body"><div class="sg-slo-map" id="sg-slo-map"></div>\n'
+            '    <div class="sg-slo-info"><p class="sg-slo-h">V okolici (najmočnejše sneženje prvo)</p><ul class="sg-slo-l" id="sg-slo-l"></ul>\n'
+            '    <p class="sg-slo-leg" aria-hidden="true"><i class="l1"></i> od 0,1 <i class="l2"></i> od 0,5 <i class="l3"></i> od 1 cm/h · celica 10 × 8 km, kraj je najbližje naselje ali smučišče</p></div></div>\n'
             '    <p class="sg-slo-f"><a href="/zima/snezna-karta/">Poglejte na snežni karti</a></p>\n'
             '  </aside>\n')
 
