@@ -1,42 +1,42 @@
 Sneg prihodnji teden: v dolini kaže na sredo in četrtek
 
-META OPIS: Bo prihodnji teden sneg? V Rečici ga za sredo in četrtek napoveduje 96 % članov ansamblov, mediana je 16 cm. Kdaj, koliko in na katerih višinah?
+META OPIS: Bo prihodnji teden sneg? V Rečici ga za sredo in četrtek napoveduje 98 % članov ansamblov, mediana je 17 cm. Kdaj, koliko in na katerih višinah?
 
 UVOD
-Da. Po današnjih izračunih bo v Rečici prihodnji teden snežilo, najverjetneje od srede dopoldne do četrtka. Vsaj 1 cm novega snega med sredo in četrtkom skupaj napoveduje 96 % od skupno 143 članov ansamblov, mediana količine pa znaša 16 cm. V ponedeljek in torek snega v dolini ni pričakovati.
+Da. Po današnjih izračunih bo v Rečici prihodnji teden snežilo, najverjetneje od srede dopoldne do četrtka. Vsaj 1 cm novega snega med sredo in četrtkom skupaj napoveduje 98 % od skupno 143 članov ansamblov, mediana količine pa znaša 17 cm. V ponedeljek in torek snega v dolini ni pričakovati.
 
 01 — ODGOVOR -- Da: v sredo in v četrtek
 
-Posodobljeno 21. 11. ob 23. uri z novimi zagoni modelov. Prva različica članka (ob 9. uri) je napovedovala vsaj 1 cm novega snega pri 91 % članov, mediano 12 cm in prvi sneg v sredo okoli 15. ure. Nov izračun kaže 96 %, mediano 16 cm in prvi sneg v sredo okoli 11. ure: napoved se je premaknila v smer več snega in zgodnejšega začetka. Vse številke in grafi v članku so zdaj iz novega izračuna.
+Posodobljeno v nedeljo, 22. 11., ob 10. uri z novimi zagoni modelov. Prva različica članka (v soboto ob 9. uri) je napovedovala vsaj 1 cm novega snega pri 91 % članov, mediano 12 cm in prvi sneg v sredo okoli 15. ure. Naslednja različica članka (v soboto ob 23. uri) je napovedovala vsaj 1 cm novega snega pri 96 % članov, mediano 16 cm in prvi sneg v sredo okoli 11. ure. Zdaj izračun kaže 98 %, mediano 17 cm in prvi sneg v sredo okoli 11. ure: napoved se je v primerjavi z zadnjo različico premaknila v smer več snega. Vse številke in grafi v članku so iz zadnjega izračuna.
 
-Kratek odgovor: v ponedeljek in torek snega v dolini ne pričakujem. Snežiti naj bi začelo v sredo dopoldne, največ snega pa naj bi zapadlo v četrtek. Od petka naprej se napovedi med modeli precej razhajajo. Na nadmorski višini 700 m je sneg med sredo in četrtkom po izračunih skoraj gotov: vsaj 1 cm ga napoveduje 99 % članov ansamblov. V Rečici (366 m) je ta delež 96 %.
+Kratek odgovor: v ponedeljek in torek snega v dolini ne pričakujem. Snežiti naj bi začelo v sredo dopoldne, največ snega pa naj bi zapadlo v četrtek. Od petka naprej se napovedi med modeli precej razhajajo. Na nadmorski višini 700 m je sneg med sredo in četrtkom po izračunih skoraj gotov: vsaj 1 cm ga napoveduje 99 % članov ansamblov. V Rečici (366 m) je ta delež 98 %.
 
-96 %toliko članov ansamblov napoveduje v Rečici vsaj 1 cm novega snega med sredo in četrtkom skupaj
-16 cmmediana količine novega snega v istem obdobju (razpon med 10. in 90. percentilom: 4–28 cm)
+98 %toliko članov ansamblov napoveduje v Rečici vsaj 1 cm novega snega med sredo in četrtkom skupaj
+17 cmmediana količine novega snega v istem obdobju (razpon med 10. in 90. percentilom: 6–27 cm)
 sre 11.00mediana ure, ko naj bi v Rečici prvič začelo snežiti
-–7 °Cnajnižja temperatura v torek zjutraj po modelu MTR; verjetnost zmrzali (najnižja temperatura 0 °C ali manj) je po modelu 100 %
+–3 °Cnajnižja temperatura v torek zjutraj po modelu MTR; verjetnost zmrzali (najnižja temperatura 0 °C ali manj) je po modelu 94 %
 
-V članku z dne 12. novembra, »Sneg ta teden: v dolini ne, na višinah nekaj centimetrov«, sem zapisal, da snega v dolini ne bo. Napoved se je uresničila. ARSO v Gornjem Gradu (428 m, 9 km od Rečice) med 9. in 21. novembrom v 23 odčitkih ni izmeril snežne odeje. V dolini tako v letošnji sezoni še ni bilo prve snežne odeje.
+V članku z dne 12. novembra, »Sneg ta teden: v dolini ne, na višinah nekaj centimetrov«, sem zapisal, da snega v dolini ne bo. Napoved se je uresničila. ARSO v Gornjem Gradu (428 m, 9 km od Rečice) med 9. in 22. novembrom v 24 odčitkih ni izmeril snežne odeje. V dolini tako v letošnji sezoni še ni bilo prve snežne odeje.
 
 02 — KDAJ -- Najprej dva mirna dneva, nato sneg
 
-V nedeljo (22. 11.) bo v dolini še deževalo. Sneg je verjeten šele nad približno 1000 m: vsaj 1 cm snega na tej višini napoveduje 80 % članov ansamblov, v Rečici pa le 1 %.
+Danes, v nedeljo (22. 11.), v dolini še dežuje. Sneg je verjeten šele nad približno 1000 m: vsaj 1 cm snega na tej višini napoveduje 83 % članov ansamblov, v Rečici pa le 1 %.
 
-V ponedeljek in torek bo padavin malo. Vsaj 1 cm snega v posameznem dnevu napoveduje le 3 % oziroma 5 % članov. Bo pa mrzlo: ansambli za torek zjutraj v Rečici kažejo mediano –1,9 °C, poskusni model MTR, ki upošteva temperaturne značilnosti dna doline, pa –6,8 °C. Takšna razlika je običajna ob jasnih in mirnih nočeh. Modeli takrat v dolini pogosto napovedujejo previsoke temperature.
+V ponedeljek in torek bo padavin malo. Vsaj 1 cm snega v posameznem dnevu napoveduje le 4 % oziroma 5 % članov. Bo pa mrzlo: ansambli za torek zjutraj v Rečici kažejo mediano –2,0 °C, poskusni model MTR, ki upošteva temperaturne značilnosti dna doline, pa –2,9 °C. Razlika med njima je tokrat majhna.
 
 Kateri dan bo v dolini snežilo?
 vsaj 1 cm snegavsaj 5 cm snega
 Prikazan je delež članov ansamblov, ki napovedujejo navedeno količino snega. Skupaj je upoštevanih 143 članov štirih ansamblov. Pod posameznim dnevom je prikazana mediana količine novega snega. Nov sneg je izračunan tako, da se pri temperaturi do 0,5 °C vse padavine upoštevajo kot sneg, pri temperaturi nad 2,5 °C pa nič. Vmesni delež se izračuna sorazmerno. Upoštevana je poenostavitev 1 mm padavin = 1 cm snega. To je izračun količine novega snega, ne napoved debeline snežne odeje.
 
-Po ansamblih naj bi prvi sneg v Rečici zapadel v sredo okoli 11. ure (mediana). Pri 96 % članov naj bi vsaj enkrat snežilo do četrtka opoldne, pri 80 % pa v obdobju od 2. do 21. ure v sredo.
+Po ansamblih naj bi prvi sneg v Rečici zapadel v sredo okoli 11. ure (mediana). Pri 99 % članov naj bi vsaj enkrat snežilo do četrtka opoldne, pri 80 % pa v obdobju od 2. do 23. ure v sredo.
 
-Mediana količine padavin v sredo znaša 5,1 mm, v četrtek pa 13,6 mm. Mediana najvišje dnevne temperature bo v sredo 2,5 °C, v četrtek pa 1,0 °C.
+Mediana količine padavin v sredo znaša 6,7 mm, v četrtek pa 12,6 mm. Mediana najvišje dnevne temperature bo v sredo 2,7 °C, v četrtek pa 1,2 °C.
 
 Ura za uro: temperatura ostaja blizu ničle
 snegdež s snegomdež
 Rečica, 366 m. Zgornji graf prikazuje mediano temperature članov ansamblov in razpon med 10. in 90. percentilom. Spodnji graf prikazuje delež članov, pri katerih v posamezni uri pada sneg, dež s snegom (delež snega med 0 in 1) ali dež. Kjer stolpca ni, je pri večini članov suho.
 
-V petek vsaj 1 cm snega v Rečici napoveduje še 44 % članov, v soboto 21 %, v nedeljo pa 18 %. Teh dni zaradi razhajanja med modeli ne bi jemal kot zanesljive napovedi. Mediana ansamblov za soboto je 0 mm padavin, osnovni model Open-Meteo pa 0 mm. Večina napovedi je torej suhih, a nekaj članov še vedno napoveduje sneg.
+V petek vsaj 1 cm snega v Rečici napoveduje še 38 % članov, v soboto 22 %, v nedeljo pa 13 %. Teh dni zaradi razhajanja med modeli ne bi jemal kot zanesljive napovedi. Mediana ansamblov za soboto je 0 mm padavin, osnovni model Open-Meteo pa 0 mm. Večina napovedi je torej suhih, a nekaj članov še vedno napoveduje sneg.
 
 03 — VIŠINE -- Koliko snega in na katerih višinah?
 
@@ -45,47 +45,48 @@ Stolpec prikazuje mediano količine novega snega, črta pa razpon med 10. in 90.
 
 Arhivska fotografija (20. 1. 2019): sneg nad meglenim morjem. Fotografija je ilustrativna in ne prikazuje letošnjega sneženja. Foto: Filip Eremita.
 
-Na 700 m je mediana količine novega snega 20 cm, na 1000 m 21 cm, na Golteh (1400 m) pa 21 cm. Razlika med 700 in 1400 m je majhna, ker je že na 700 m skoraj vsa napovedana količina padavin v obliki snega.
+Na 700 m je mediana količine novega snega 21 cm, na 1000 m 22 cm, na Golteh (1400 m) pa 22 cm. Razlika med 700 in 1400 m je majhna, ker je že na 700 m skoraj vsa napovedana količina padavin v obliki snega.
 
-V Rečici je mediana 16 cm, torej le nekaj centimetrov manj. Razpon pa je širši in pomaknjen navzdol: od 4 do 28 cm. Odločilno bo, ali bo temperatura v času padavin pod ali nad 0,5 °C.
+V Rečici je mediana 17 cm, torej le nekaj centimetrov manj. Razpon pa je širši in pomaknjen navzdol: od 6 do 27 cm. Odločilno bo, ali bo temperatura v času padavin pod ali nad 0,5 °C.
 
 Poenostavitev 1 mm padavin = 1 cm snega lahko pri mokrem snegu blizu 0 °C količino snega preceni. Mokri sneg je namreč gostejši, zato iz enake količine padavin nastane manj centimetrov snega. Prikazane številke zato jemljite kot zgornji del verjetnega razpona, ne kot napoved dejanske debeline snežne odeje.
 
 04 — MODELI -- Ali se modeli strinjajo?
 
-Vsi štirje ansambli se za četrtek precej dobro ujemajo: vsaj 1 cm snega napoveduje od 87 do 95 % članov posameznega ansambla. V sredo so razlike večje, saj je delež članov, ki napovedujejo vsaj 1 cm, med 58 in 92 %. Glavno vprašanje je, kako zgodaj v sredo se bo sneženje začelo.
+Vsi štirje ansambli se za četrtek precej dobro ujemajo: vsaj 1 cm snega napoveduje od 90 do 100 % članov posameznega ansambla. V sredo so razlike večje, saj je delež članov, ki napovedujejo vsaj 1 cm, med 71 in 86 %. Glavno vprašanje je, kako zgodaj v sredo se bo sneženje začelo.
 
 Ansambel je skupina napovedi istega modela, pri katerih so začetni pogoji nekoliko spremenjeni. Običajno vključuje od 20 do 50 članov. Če večina napovedi kaže enak razvoj vremena, je takšen izid verjetnejši, ni pa zagotovljen.
 
 Ansambel | Sreda: ≥ 1 cm | Četrtek: ≥ 1 cm | Četrtek: mediana novega snega |
-ECMWF ENS (51 članov) | 67 % | 94 % | 11 cm |
-ICON-EPS (40 članov) | 92 % | 95 % | 12 cm |
-GEFS (31 članov) | 58 % | 87 % | 10 cm |
-GEM ENS (21 članov) | 90 % | 95 % | 13 cm |
+ECMWF ENS (51 članov) | 86 % | 98 % | 10 cm |
+ICON-EPS (40 članov) | 82 % | 95 % | 12 cm |
+GEFS (31 članov) | 71 % | 90 % | 12 cm |
+GEM ENS (21 članov) | 81 % | 100 % | 13 cm |
 
-Štirje deterministični modeli, katerih napoved sega do četrtka, za Rečico v obdobju od srede do četrtka skupaj napovedujejo od 14 do 27 cm snega. Razlikujejo se predvsem v tem, kateri dan naj bi zapadlo več snega. Osnovni model Open-Meteo, na katerem temelji tudi moja stran Zima, napoveduje 21 cm, kar je znotraj tega razpona. Stran Zima se osvežuje po svojem urniku, zato se lahko številke razlikujejo. Tukaj je merilo napoved ansamblov, ne en sam model.
+Šest determinističnih modelov, katerih napoved sega do četrtka, za Rečico v obdobju od srede do četrtka skupaj napoveduje od 6 do 29 cm snega. Razlikujejo se tako v količini kot v tem, kateri dan naj bi zapadlo več snega. Osnovni model Open-Meteo, na katerem temelji tudi moja stran Zima, napoveduje 31 cm, kar je nad vsemi drugimi modeli. Stran Zima se osvežuje po svojem urniku, zato se lahko številke razlikujejo. Tukaj je merilo napoved ansamblov, ne en sam model.
 
 Model | Sreda: sneg | Četrtek: sneg | Padavine v sredo in četrtek |
-ECMWF IFS | 4,1 cm | 9,7 cm | 14,1 mm |
-ICON-EU | 2,7 cm | – | – |
-GFS | 10,1 cm | 13,3 cm | 31,4 mm |
+ECMWF IFS | 2,8 cm | 3,3 cm | 12,0 mm |
+ECMWF AIFS | 4,4 cm | 6,0 cm | 22,8 mm |
+ICON-EU | 3,4 cm | 25,5 cm | 34,9 mm |
+GFS | 5,4 cm | 15,4 cm | 33,7 mm |
 UKMO | 14,4 cm | 4,9 cm | 21,6 mm |
-GEM | 7,8 cm | 19,2 cm | 30,6 mm |
-Open-Meteo (osnovni model strani) | 2,9 cm | 18,5 cm | 22,2 mm |
+GEM | 5,8 cm | 20,3 cm | 30,2 mm |
+Open-Meteo (osnovni model strani) | 3,8 cm | 26,7 cm | 34,1 mm |
 
-Pomišljaj (–) pomeni, da napoved modela ne sega do tega dne. ICON-EU ima podatke le do srede. Količina snega je izračunana enako kot v grafih: 1 mm padavin pomeni 1 cm snega, pri temperaturi do 0,5 °C se padavine v celoti upoštevajo kot sneg, nad 2,5 °C pa ne več. ECMWF AIFS ob zadnjem osveževanju zaradi omejitve dostopa ni bil dosegljiv, zato ga v tabeli ni.
+Količina snega je izračunana enako kot v grafih: 1 mm padavin pomeni 1 cm snega, pri temperaturi do 0,5 °C se padavine v celoti upoštevajo kot sneg, nad 2,5 °C pa ne več.
 
 05 — OBLEŽI -- Snežiti še ne pomeni, da bo sneg tudi obležal
 
 Ansambli napovedujejo, kaj bo padalo, ne pa tudi, koliko snega bo na koncu ostalo na tleh.
 
-Za obležanje snega je ugodno, da bo mediana najvišje temperature v sredo in četrtek le 2,5 °C oziroma 1,0 °C in da bo podlaga po mrzli torkovi noči hladna. Manj ugodno je, da bodo temperature blizu 0 °C. Mokri sneg se na cestah hitro tali, zlasti ob prometu in posipanju s soljo. Na travi in strehah lahko obleži lažje. To je moja ocena, ne rezultat posebnega izračuna.
+Za obležanje snega je ugodno, da bo mediana najvišje temperature v sredo in četrtek le 2,7 °C oziroma 1,2 °C in da bo podlaga po mrzli torkovi noči hladna. Manj ugodno je, da bodo temperature blizu 0 °C. Mokri sneg se na cestah hitro tali, zlasti ob prometu in posipanju s soljo. Na travi in strehah lahko obleži lažje. To je moja ocena, ne rezultat posebnega izračuna.
 
-Dva vira, ki ju uporabljam, se pri tem ne ujemata, kar je treba pošteno povedati. Poskusni model MTR sneg je naučen na opazovanjih ARSO in ocenjuje možnost izmerljive snežne odeje, torej vsaj 1 cm snega ob jutranjem odčitku. Za Gornji Grad v sredo kaže 10-odstotno verjetnost, v četrtek 26-odstotno; za Radegundo (794 m) 21-odstotno oziroma 40-odstotno.
+Dva vira, ki ju uporabljam, se pri tem ne ujemata, kar je treba pošteno povedati. Poskusni model MTR sneg je naučen na opazovanjih ARSO in ocenjuje možnost izmerljive snežne odeje, torej vsaj 1 cm snega ob jutranjem odčitku. Za Gornji Grad v sredo kaže 10-odstotno verjetnost, v četrtek 33-odstotno; za Radegundo (794 m) 21-odstotno oziroma 47-odstotno.
 
-MTR je pri tej oceni strožji: upošteva povprečno dnevno temperaturo (za sredo 1,0 °C, za četrtek 0,6 °C) in snežno odejo, ki ob jutranjem odčitku že leži na tleh. Ansambli pa upoštevajo vsako uro, v kateri sneži. Gre torej za različni vprašanji, zato sta različna tudi odgovora. Pravo sliko bodo pokazale šele meritve.
+MTR je pri tej oceni strožji: upošteva povprečno dnevno temperaturo (za sredo 1,0 °C, za četrtek -0,6 °C) in snežno odejo, ki ob jutranjem odčitku že leži na tleh. Ansambli pa upoštevajo vsako uro, v kateri sneži. Gre torej za različni vprašanji, zato sta različna tudi odgovora. Pravo sliko bodo pokazale šele meritve.
 
-Po torkovem jutru s temperaturo okoli –7 °C po napovedi MTR bo podlaga hladna, kar lahko pomaga, da sneg ob začetku sneženja hitreje obleži. To velja le, če se sneženje v sredo res začne s snegom, ne z dežjem.
+Po torkovem jutru s temperaturo okoli –3 °C po napovedi MTR bo podlaga hladna, kar lahko pomaga, da sneg ob začetku sneženja hitreje obleži. To velja le, če se sneženje v sredo res začne s snegom, ne z dežjem.
 
 Arhivska fotografija (20. 1. 2019), ilustracija: ne prikazuje letošnjega snega. Foto: Filip Eremita.
 
@@ -101,7 +102,7 @@ Mediana datuma je 2. december, najzgodnejši prvi sneg pa je bil zabeležen 22. 
 
 Modeli ne zaznajo vseh lokalnih značilnosti doline. Mreža ansamblov z ločljivostjo približno 25–50 km je precej bolj groba od same doline. Lokalne podrobnosti, kot je hladen zrak na dnu doline, se zato izgubijo. Temperatura se preračuna na izbrano nadmorsko višino, vendar ta preračun ne zajame lokalnih temperaturnih inverzij.
 Meja med dežjem in snegom je poenostavljena. Upoštevam temperaturo zraka na 2 m, ne temperature mokrega termometra. Pri temperaturah med 1 in 3 °C je lahko razmerje med dežjem in snegom odvisno tudi od vlažnosti zraka in intenzitete padavin.
-Gre za posnetek napovedi z dne 21. 11. ob 23. uri. Modeli se osvežujejo večkrat na dan, zato se lahko napoved do srede še spremeni, zlasti glede časa začetka sneženja.
+Gre za posnetek napovedi z dne 22. 11. ob 10. uri. Modeli se osvežujejo večkrat na dan, zato se lahko napoved do srede še spremeni, zlasti glede časa začetka sneženja.
 Postaja IREICA1 snežne odeje ne meri. Za izmerjeno višino snežne odeje so merodajne postaje ARSO v dolini in okolici (Gornji Grad, Luče, Radegunda).
 To ni uradno opozorilo. Za ukrepanje spremljajte uradne informacije ARSO in URSZR.
 
@@ -116,4 +117,4 @@ Ko bo sneg zapadel, lahko pomagate tudi z opazovanjem. Sporočite stanje v svoji
 Uporaba vsebine: Besedilo, grafe in podatke lahko povzemate le ob navedbi avtorja (Filip Eremita, Meteorec) in neposredne povezave na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.
 
 VIRI
-Viri: Open-Meteo (ansambli ECMWF ENS, ICON-EPS, GEFS in GEM ENS ter deterministični modeli ECMWF IFS, AIFS, ICON-EU, GFS, UKMO in GEM za Rečico; prenos z dne 21. 11. 2026); model MTR in MTR sneg (Meteorec); opazovanja ARSO v Gornjem Gradu (vir: Agencija Republike Slovenije za okolje). Weather data by Open-Meteo.com (CC BY 4.0). Podatki za članek: data/sneg-teden-1121.json.
+Viri: Open-Meteo (ansambli ECMWF ENS, ICON-EPS, GEFS in GEM ENS ter deterministični modeli ECMWF IFS, AIFS, ICON-EU, GFS, UKMO in GEM za Rečico; prenos z dne 22. 11. 2026); model MTR in MTR sneg (Meteorec); opazovanja ARSO v Gornjem Gradu (vir: Agencija Republike Slovenije za okolje). Weather data by Open-Meteo.com (CC BY 4.0). Podatki za članek: data/sneg-teden-1121.json.

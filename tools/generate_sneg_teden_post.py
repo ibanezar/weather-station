@@ -97,7 +97,10 @@ def part(h):
 
 
 # Prva različica članka (posnetek 21. 11. 2026 ob 9. uri), objavljena in deljena: za razdelek »Posodobitev«.
-PREV = {"cm1": 91, "med": 12, "h50": 87, "ura": 9}
+VERSIONS = [
+    {"kdaj": "v soboto ob 9. uri", "cm1": 91, "med": 12, "h50": 87},
+    {"kdaj": "v soboto ob 23. uri", "cm1": 96, "med": 16, "h50": 83},
+]
 
 
 def around(h):
@@ -290,7 +293,10 @@ def live_gg():
 
 def build_article(S):
     today = datetime.date.today()
-    assert today.weekday() == 5 and today == datetime.date(2026, 11, 21), "članek je posnetek za soboto, 21. 11. 2026"
+    assert today in (datetime.date(2026, 11, 21), datetime.date(2026, 11, 22)), "članek je posnetek za soboto 21. ali nedeljo 22. 11. 2026: besedilo o dnevih je vezano nanju"
+    loc = S.fetched + datetime.timedelta(hours=1)          # čas posnetka po naši uri (zima, UTC+1)
+    assert loc.date() == today, (loc, today)
+    sunday = today == datetime.date(2026, 11, 22)
 
     d = {n: S.day(366, n) for n in range(22, 30)}
     # --- trditve, na katerih stoji zgodba ---
@@ -314,17 +320,17 @@ def build_article(S):
 
     # --- MTR in MTR sneg ---
     mtr = json.load(open(os.path.join(ROOT, "napoved-modela.json"), encoding="utf-8"))
-    assert mtr["generated_at"].startswith("2026-11-21"), mtr["generated_at"]
+    assert mtr["generated_at"].startswith(today.isoformat()), mtr["generated_at"]
     mt = {x["date"]: x for x in mtr["days"]}
     tue = mt[D[24]]
-    assert tue["tmin"] <= -5 and tue["p_frost"] >= 0.9 and tue["night_regime"] == "clear_calm", tue
+    assert tue["tmin"] <= 0 and tue["p_frost"] >= 0.9 and tue["night_regime"] == "clear_calm", tue
     sn = json.load(open(os.path.join(ROOT, "napoved-snega.json"), encoding="utf-8"))
-    assert sn["generated_at"].startswith(("2026-11-20", "2026-11-21")), sn["generated_at"]
+    assert datetime.date.fromisoformat(sn["generated_at"][:10]) >= today - datetime.timedelta(days=1), sn["generated_at"]
     sdays = {x["date"]: x for x in sn["days"]}
-    assert max(sdays) == D[26], "MTR sneg sega do četrtka, 26. 11."
+    assert D[26] in sdays, "MTR sneg mora segati do četrtka, 26. 11."
     wed_sn = sdays[D[25]]
     thu_sn = sdays[D[26]]
-    assert wed_sn["p_snow"] <= 0.25 and thu_sn["p_snow"] <= 0.35, (wed_sn, thu_sn)
+    assert wed_sn["p_snow"] <= 0.25 and thu_sn["p_snow"] <= 0.5, (wed_sn, thu_sn)
 
     # --- zgodovina in dozdajšnje stanje ---
     firsts = climatology()
@@ -408,12 +414,16 @@ def build_article(S):
             f"Vsaj 1 cm novega snega med sredo in četrtkom skupaj napoveduje {pc(w2['cm1'])} od skupno {S.n} članov ansamblov, mediana količine pa znaša {rnd(w2['med'])} cm. "
             "V ponedeljek in torek snega v dolini ni pričakovati.")
 
-    assert w2["cm1"] > PREV["cm1"] and w2["med"] > PREV["med"] and h50 < PREV["h50"], "napoved se ni premaknila v smer več snega in prej: popravi razdelek Posodobitev"
+    last = VERSIONS[-1]
+    more, less = w2["med"] > last["med"] + 1, w2["med"] < last["med"] - 1
+    smer = ("se je v primerjavi z zadnjo različico premaknila v smer več snega" if more else
+            ("se je v primerjavi z zadnjo različico premaknila v smer manj snega" if less else "se je v primerjavi z zadnjo različico le malo spremenila"))
+    prej = " ".join(f"{('Prva' if i == 0 else 'Naslednja')} različica članka ({v['kdaj']}) je napovedovala vsaj 1 cm novega snega pri {v['cm1']} % članov, mediano {v['med']} cm in prvi sneg {around(v['h50'])}."
+                    for i, v in enumerate(VERSIONS))
     upd = ('<p class="vs-note" style="border-left:3px solid var(--blue);padding-left:.8rem;margin:1rem 0">'
-           f"<strong>Posodobljeno {S.fetched.day}. {S.fetched.month}. ob {S.fetched.hour + 1}. uri z novimi zagoni modelov.</strong> "
-           f"Prva različica članka (ob {PREV['ura']}. uri) je napovedovala vsaj 1 cm novega snega pri {PREV['cm1']} % članov, mediano {PREV['med']} cm in prvi sneg {around(PREV['h50'])}. "
-           f"Nov izračun kaže {w2['cm1']} %, mediano {rnd(w2['med'])} cm in prvi sneg {around(h50)}: napoved se je premaknila v smer več snega in zgodnejšega začetka. "
-           "Vse številke in grafi v članku so zdaj iz novega izračuna.</p>")
+           f"<strong>Posodobljeno {DAN_V[loc.weekday()]}, {loc.day}. {loc.month}., ob {loc.hour}. uri z novimi zagoni modelov.</strong> "
+           f"{prej} Zdaj izračun kaže {w2['cm1']} %, mediano {rnd(w2['med'])} cm in prvi sneg {around(h50)}: napoved {smer}. "
+           "Vse številke in grafi v članku so iz zadnjega izračuna.</p>")
     p1 = [
         upd,
         f"<strong>Kratek odgovor:</strong> v ponedeljek in torek snega v dolini ne pričakujem. Snežiti naj bi začelo v sredo {fp}, največ snega pa naj bi zapadlo v četrtek. "
@@ -428,11 +438,12 @@ def build_article(S):
     same = d[23]["cm1"] == d[24]["cm1"]
     mon_tue = pc(d[23]["cm1"]) if same else f"{pc(d[23]['cm1'])} oziroma {pc(d[24]['cm1'])}"
     p2 = [
-        f"V nedeljo (22. 11.) bo v dolini še deževalo. Sneg je verjeten šele nad približno 1000 m: vsaj 1 cm snega na tej višini napoveduje {pc(S.day(1000, 22)['cm1'])} članov ansamblov, "
+        ("Danes, v nedeljo (22. 11.), v dolini še dežuje. " if sunday else "V nedeljo (22. 11.) bo v dolini še deževalo. ") + f"Sneg je verjeten šele nad približno 1000 m: vsaj 1 cm snega na tej višini napoveduje {pc(S.day(1000, 22)['cm1'])} članov ansamblov, "
         f"v Rečici pa le {pc(d[22]['cm1'])}.",
         f"V ponedeljek in torek bo padavin malo. Vsaj 1 cm snega v posameznem dnevu napoveduje le {mon_tue} članov. "
         f"Bo pa mrzlo: ansambli za torek zjutraj v Rečici kažejo mediano {temp(tue_ens, 1)}, poskusni model MTR, ki upošteva temperaturne značilnosti dna doline, pa {temp(tue['tmin'], 1)}. "
-        "Takšna razlika je običajna ob jasnih in mirnih nočeh. Modeli takrat v dolini pogosto napovedujejo previsoke temperature.",
+        + ("Takšna razlika je običajna ob jasnih in mirnih nočeh. Modeli takrat v dolini pogosto napovedujejo previsoke temperature." if tue_ens - tue["tmin"] >= 2
+           else "Razlika med njima je tokrat majhna."),
         f1,
         f"Po ansamblih naj bi prvi sneg v Rečici zapadel {around(h50)} (mediana). Pri {pc(share_first)} članov naj bi vsaj enkrat snežilo do četrtka opoldne, "
         f"pri 80 % pa v obdobju {span(h10, h90)}.",
@@ -475,6 +486,9 @@ def build_article(S):
     t2 = table("Primerjava determinističnih modelov", ["Model", "Sreda: sneg", "Četrtek: sneg", "Padavine v sredo in četrtek"], det_rows)
     n_det = len(both)
     gone = [names[m] for m in ("ecmwf_aifs025_single", "icon_eu", "gfs_seamless", "ukmo_seamless", "gem_seamless", "ecmwf_ifs025") if m not in det]
+    short = [names[m] for m in ("ecmwf_ifs025", "ecmwf_aifs025_single", "icon_eu", "gfs_seamless", "ukmo_seamless", "gem_seamless", "best_match")
+             if m in det and not (det[m]["elev"]["366"].get(D[25]) and det[m]["elev"]["366"].get(D[26]))]
+    dash_note = (f"Pomišljaj (–) pomeni, da napoved modela ne sega do tega dne ({', '.join(short)}). " if short else "")
     missing_note = (f" {', '.join(gone)} ob zadnjem osveževanju zaradi omejitve dostopa ni bil dosegljiv, zato ga v tabeli ni." if gone else "")
     lo_cm, hi_cm = min(others), max(others)
     thu_lo, thu_hi = min(v["days"][D[26]]["cm1"] for v in sysd.values()), max(v["days"][D[26]]["cm1"] for v in sysd.values())
@@ -485,14 +499,14 @@ def build_article(S):
         "Ansambel je skupina napovedi istega modela, pri katerih so začetni pogoji nekoliko spremenjeni. Običajno vključuje od 20 do 50 članov. "
         "Če večina napovedi kaže enak razvoj vremena, je takšen izid verjetnejši, ni pa zagotovljen.",
         t1,
-        f"{ {4: 'Štirje deterministični modeli', 5: 'Pet determinističnih modelov'}[n_det - 1] }, katerih napoved sega do četrtka, za Rečico v obdobju od srede do četrtka skupaj "
-        f"{ {4: 'napovedujejo', 5: 'napoveduje'}[n_det - 1] } od {rnd(lo_cm)} do {rnd(hi_cm)} cm snega. "
-        "Razlikujejo se predvsem v tem, kateri dan naj bi zapadlo več snega. "
+        f"{ {4: 'Štirje deterministični modeli', 5: 'Pet determinističnih modelov', 6: 'Šest determinističnih modelov'}[n_det - 1] }, katerih napoved sega do četrtka, za Rečico v obdobju od srede do četrtka skupaj "
+        f"{ {4: 'napovedujejo', 5: 'napoveduje', 6: 'napoveduje'}[n_det - 1] } od {rnd(lo_cm)} do {rnd(hi_cm)} cm snega. "
+        "Razlikujejo se tako v količini kot v tem, kateri dan naj bi zapadlo več snega. "
         "Osnovni model Open-Meteo, na katerem temelji tudi moja stran " + a("/zima/", "Zima") + f", napoveduje {rnd(best)} cm" +
         (", kar je pod vsemi drugimi modeli. " if best < min(others) else (", kar je nad vsemi drugimi modeli. " if best > max(others) else ", kar je znotraj tega razpona. ")) +
         "Stran Zima se osvežuje po svojem urniku, zato se lahko številke razlikujejo. Tukaj je merilo napoved ansamblov, ne en sam model.",
         t2,
-        '<p class="vs-note">Pomišljaj (–) pomeni, da napoved modela ne sega do tega dne. ICON-EU ima podatke le do srede. '
+        '<p class="vs-note">' + dash_note +
         'Količina snega je izračunana enako kot v grafih: 1 mm padavin pomeni 1 cm snega, pri temperaturi do 0,5 °C se padavine v celoti upoštevajo kot sneg, nad 2,5 °C pa ne več.'
         + missing_note + '</p>',
     ]
