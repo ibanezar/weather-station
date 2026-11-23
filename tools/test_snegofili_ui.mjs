@@ -36,7 +36,8 @@ for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   ok(/ARSO: najnovejša meritev pred/.test(await page.locator('#sg-gen').textContent()), tag + 'svežina meritev ARSO ob času izračuna');
   ok(/96-urni pregled sneženja/.test(await page.locator('#hm-h').textContent()), tag + '96-urni pregled: naslov');
   ok(await page.locator('.sg-hm-l').count() >= 30, tag + 'toplotna karta ima vrstico za vsako točko');
-  { const pn = await page.locator('.sg-pl-i').count(); ok(pn >= 1 && pn <= 5, tag + 'Kje bo največ novega snega: 1–5 točk (odvisno od današnjih podatkov)'); }
+  { const pn = await page.locator('.sg-pl-i').count(); const none = await page.locator('.sg-pl-none').count();
+    ok((pn >= 1 && pn <= 5) || (pn === 0 && none === 1), tag + 'Kje bo največ novega snega: 1–5 točk ali pojasnilo, da jih ni (odvisno od današnjih podatkov)'); }
   ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), tag + 'brez vodoravnega razliva');
   await page.waitForSelector('#sg-st-rec-w:not([hidden])', { timeout: 5000 });
   { const v = await page.locator('#sg-st-rec').textContent(), n = await page.locator('#sg-st-rec-n').textContent(), l = await page.locator('#sg-rec-lbl').textContent();

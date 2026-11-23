@@ -989,7 +989,7 @@ SEASON_TOP = 10   # privzeto prikazanih lokacij v sezonskem seštevku (ostale v 
 def dm(date):
     """2026-11-20 → »20. 11.«"""
     y, m, d = date.split("-")
-    return f"{int(d)}. {int(m)}."
+    return f"{int(d)}.\u00a0{int(m)}."   # nelomljiv presledek: datum se ne razdeli čez dve vrstici
 
 
 def next_hours_cm(series, n, now_index=71):
@@ -1037,32 +1037,68 @@ def region_summary(rows, hours):
     return out
 
 
-def _best_cell(b):
-    return "—" if not b else f'<b>{cm_h(b[0])}</b> <small>{_html.escape(b[1])}</small>'
+SL_MAX_M = 2600   # m; lestvica meje sneženja v kartici regije (najvišja točka seznama je Kredarica, 2514 m)
+
+
+def _rg_row(label, v, name, pct, cls=""):
+    """Ena vrstica grafa regije: oznaka, proga s polnilom, vrednost in (pod njo) ime točke."""
+    sub = f'<small>{_html.escape(name)}</small>' if name else ""
+    return (f'<li class="{cls}"><span class="sg-rg-l">{label}</span><span class="sg-rg-t"><i style="width:{pct}%"></i></span>'
+            f'<span class="sg-rg-v"><b>{v}</b>{sub}</span></li>')
+
+
+def region_card_html(g):
+    """Kartica regije: tri vodoravni stolpci količin (skupna korenska lestvica 0–60 cm kot lata v herou), meja sneženja na lestvici višin in izmerjena odeja."""
+    rows = []
+    spoken = []
+    for label, key in (("Nazaj 24 ur", "past24"), ("Naprej 24 ur", "next24"), ("Naprej 48 ur", "next48")):
+        b = g[key]
+        if b is None:
+            rows.append(f'<li><span class="sg-rg-l">{label}</span><span class="sg-rg-t"></span><span class="sg-rg-v"><b>—</b></span></li>')
+            spoken.append(f"{label}: ni podatka")
+            continue
+        rows.append(_rg_row(label, cm_h(b[0]), b[1], gauge_pos(b[0])))
+        spoken.append(f"{label}: {cm_cell(b[0])}, {b[1]}")
+    if g["line"] is not None:
+        pos = round(max(0.0, min(1.0, g["line"] / SL_MAX_M)) * 100, 1)
+        rows.append(f'<li class="ln"><span class="sg-rg-l">Meja sneženja</span><span class="sg-rg-t ln"><i style="left:{pos}%"></i></span>'
+                    f'<span class="sg-rg-v"><b>{num(g["line"], 0)} m</b></span></li>')
+        spoken.append(f'meja sneženja {num(g["line"], 0)} m')
+    if g["measured"]:
+        cm, name = g["measured"]
+        rows.append(_rg_row("Izmerjena odeja", f"{cm} cm", name, gauge_pos(cm), "ms"))
+        spoken.append(f"izmerjena odeja {cm} cm, {name}")
+    else:
+        rows.append('<li class="ms"><span class="sg-rg-l">Izmerjena odeja</span><span class="sg-rg-t"></span><span class="sg-rg-v"><b>—</b><small>ni meritve</small></span></li>')
+        spoken.append("izmerjene odeje ni")
+    n_s = len(g["snowing"])
+    if n_s:
+        now = (f'<span class="sg-rg-now on"><i></i>Sneži na {n_s} od {g["n"]} točk</span>'
+               f'<small>{_html.escape(", ".join(g["snowing"]))}</small>')
+        spoken.insert(0, f"sneži na {n_s} od {g['n']} točk")
+    else:
+        now = '<span class="sg-rg-now"><i></i>Zdaj ne sneži</span>'
+        spoken.insert(0, "zdaj ne sneži")
+    cap = f'{_html.escape(g["regija"])} <small>{g["n"]} {"točka" if g["n"] == 1 else "točk"}</small>'
+    return (f'<figure class="sg-rg" aria-label="{_html.escape(g["regija"])}: {_html.escape("; ".join(spoken))}">'
+            f'<figcaption>{cap}<span class="sg-rg-s">{now}</span></figcaption><ul class="sg-rg-rows">{"".join(rows)}</ul></figure>')
 
 
 def slovenija_html(rows):
     regs = region_summary(rows, load_hours())
     if not regs:
         return ""
-    body = ""
-    for g in regs:
-        sn = (f'{len(g["snowing"])} od {g["n"]}: ' + _html.escape(", ".join(g["snowing"]))) if g["snowing"] else "nikjer"
-        line = f'{num(g["line"], 0)} m' if g["line"] is not None else "—"
-        meas = (f'<b>{g["measured"][0]} cm</b> <small>{_html.escape(g["measured"][1])}</small>') if g["measured"] else "ni meritve"
-        body += (f'<tr><th scope="row">{_html.escape(g["regija"])} <small>{g["n"]} {"točka" if g["n"] == 1 else "točk"}</small></th>'
-                 f'<td>{sn}</td><td>{_best_cell(g["past24"])}</td><td>{_best_cell(g["next24"])}</td><td>{_best_cell(g["next48"])}</td>'
-                 f'<td>{line}</td><td>{meas}</td></tr>')
+    cards = "\n".join("    " + region_card_html(g) for g in regs)
     return f"""  <section id="slovenija" class="sg-sec" aria-labelledby="slo-h">
   <h2 id="slo-h">Slovenija po regijah <span class="sg-bdg m">Model</span> <span class="sg-bdg r">Meritev</span></h2>
-  <p class="archive-intro">Pregled slovenskih točk iz seznama, združenih po regijah. Pri vsaki regiji je <b>največ novega snega med njenimi točkami</b> (ne povprečje in ne površina regije)
-  in ime točke, kjer je to največ. Sneženje, količine in meja sneženja so modelska ocena; zadnji stolpec je izmerjena odeja postaj ARSO, kjer jo imamo. Za Karavanke in Pohorje
-  zaenkrat ni ločenih skupin: točke so v regijah iz tabele, drugih ne dodajamo, dokler njihovih koordinat in višin ne potrdimo.</p>
-  <div class="sg-tblwrap" tabindex="0" role="region" aria-label="Slovenija po regijah: sneg po modelu in izmerjena odeja (drsno vodoravno)">
-  <table class="sg-tbl"><thead><tr><th scope="col">Regija</th><th scope="col">Sneži zdaj</th><th scope="col">Nazaj 24 ur</th><th scope="col">Naprej 24 ur</th><th scope="col">Naprej 48 ur</th><th scope="col">Meja sneženja</th><th scope="col">Izmerjena odeja</th></tr></thead>
-  <tbody>{body}</tbody></table></div>
-  <p class="muted-note">Meja sneženja je mediana točk regije (višina, kjer model sneg še napoveduje); »naprej 48 ur« je vsota modelskih ur od zdaj, ura, ki teče, se ne šteje.
-  Točke so v seznamu spodaj in na zemljevidu. Ni plazovni bilten.</p>
+  <p class="archive-intro">Slovenske točke iz seznama, združene po regijah. Stolpec pokaže <b>največ novega snega med točkami regije</b> (ne povprečje in ne površina regije), pod številko je ime točke, kjer je to največ.
+  Količine, sneženje in meja sneženja so modelska ocena, <b>izmerjena odeja</b> (temnejši stolpec) pa meritev postaj ARSO, kjer jo imamo. Za Karavanke in Pohorje
+  zaenkrat ni ločenih skupin: točke so v regijah s teh kartic, drugih ne dodajamo, dokler njihovih koordinat in višin ne potrdimo.</p>
+  <div class="sg-rg-grid">
+{cards}
+  </div>
+  <p class="muted-note">Dolžina stolpca sledi korenski lestvici 0–60 cm (kot lata na vrhu strani; polna proga je 60 cm ali več), meja sneženja je mediana točk regije na lestvici 0–{SL_MAX_M} m, »naprej 48 ur« je vsota
+  modelskih ur od zdaj (ura, ki teče, se ne šteje). Točke so v seznamu spodaj in na zemljevidu. Ni plazovni bilten.</p>
   </section>
 """
 
@@ -1163,6 +1199,8 @@ def season_charts_html(stations):
                     spoken.append(f"{n}: ni podatka")
                     continue
                 txt = f'{num(v, 0)} {unit}'
+                if title.startswith("Največja") and s.get("max_d"):
+                    txt += f' · {dm(s["max_d"])}'   # datum največje odeje (prej samo v tabeli)
                 mx = ' mx' if v == best[n] and v > 0 else ""
                 part.append(f'<span class="sg-sz-b {cls[i]}{mx}"><span class="sg-sz-t"><i style="width:{v / top * 100:.1f}%"></i></span><em>{txt}</em></span>')
                 spoken.append(f"{n}: {txt}")
@@ -1171,9 +1209,9 @@ def season_charts_html(stations):
             lab_html = lab + (f' <small>do {dm(last)}</small>' if partial and last else "")
             rows.append(f'<li class="{"cur" if partial else ""}" aria-label="{lab}{", še nepopolna" if partial else ""}: {_html.escape("; ".join(spoken))}">'
                         f'<span class="sg-sz-l">{lab_html}</span><span class="sg-sz-bs">{"".join(part)}</span></li>')
-        out.append(f'  <figure class="sg-sz-ch"><figcaption>{title} <small>{unit}</small></figcaption><ol>{"".join(rows)}</ol></figure>\n')
+        out.append(f'  <figure class="sg-sz-ch{" wide" if title.startswith("Največja") else ""}"><figcaption>{title} <small>{unit}</small></figcaption><ol>{"".join(rows)}</ol></figure>\n')
     out.append('  </div>\n  <p class="muted-note">Lestvica je v vsakem grafu skupna obema postajama. Najmočnejša zima vsake postaje ima krepko številko. '
-               'Bleda vrstica je tekoča zima: arhiv ARSO zaostaja, zato ne zajema vseh dni.</p>\n')
+               'V prvem grafu je ob višini datum največje odeje. Bleda vrstica je tekoča zima: arhiv ARSO zaostaja, zato ne zajema vseh dni.</p>\n')
     return "".join(out)
 
 
@@ -1281,7 +1319,6 @@ def sezona_html(rows):
             f'dan, ki ga nismo zabeležili, ostane prazen in ga ne ocenjujemo za nazaj. Seštevek sledi modelu in ni višina snežne odeje.</p>\n'
             f'  <ul class="sg-ms">{"".join(li(p) for p in shown)}</ul>\n'
             + (f'  <details class="sg-fold"><summary>Še {len(rest)} lokacij s snegom v sezoni</summary><ul class="sg-ms">{"".join(li(p) for p in rest)}</ul></details>\n' if rest else ""))
-    arch = ""
     by_station = []   # [(ime, višina, {začetno leto sezone: sezona})] za grafe
     for sid, name, elev in ARSO_SEASON_STATIONS:
         try:
@@ -1292,24 +1329,12 @@ def sezona_html(rows):
         if not seas:
             continue
         by_station.append((name, elev, {s["sy"]: s for s in seas}))
-        trs = ""
-        for s in seas:
-            cur = s is seas[0] and s["last"] < f"{s['sy'] + 1}-04-30"
-            mx = f'<b>{num(s["max"], 0)} cm</b> <small>{dm(s["max_d"])}</small>' if s["max_d"] else "0 cm"
-            new = f'{num(s["new"], 0)} cm' if s["new_n"] else "—"
-            lab = f'{s["sy"]}/{str(s["sy"] + 1)[2:]}' + (f' <small>do {dm(s["last"])}</small>' if cur else "")
-            trs += f'<tr><th scope="row">{lab}</th><td>{mx}</td><td>{s["cover"]}</td><td>{new}</td><td>{s["n"]}</td></tr>'
-        arch += (f'  <div class="sg-tblwrap" tabindex="0" role="region" aria-label="Izmerjene zime na postaji {name} (drsno vodoravno)">'
-                 f'<table class="sg-tbl"><caption>{_html.escape(name)} <small>{elev} m</small></caption><thead><tr><th scope="col">Sezona</th>'
-                 f'<th scope="col">Največja odeja</th><th scope="col">Dni z odejo ≥ 1 cm</th><th scope="col">Novi sneg skupaj</th><th scope="col">Dni z meritvijo</th></tr></thead>'
-                 f'<tbody>{trs}</tbody></table></div>\n')
-    if arch:
+    if by_station:
         parts.append(
             '  <h3>Izmerjene zime na postajah ARSO <span class="sg-bdg r">Meritev</span></h3>\n'
             '  <p class="archive-intro">Višina snežne odeje in novi sneg, ki ju meri ARSO, po zimah od 1. oktobra do 30. aprila. To je <b>meritev v dolini</b> (ne v gorah, kamor sodijo ostale točke), '
             'ločena od modelske ocene zgoraj. Arhiv ARSO zaostaja za več dni do nekaj tednov, zato zadnja vrstica ne zajema celotne tekoče zime; šteje se samo dan, ki ima meritev. '
-            'Vir: Agencija Republike Slovenije za okolje (ARSO).</p>\n' + season_charts_html(by_station)
-            + '  <details class="sg-fold"><summary>Isti podatki v tabeli (z datumom največje odeje)</summary>\n' + arch + '  </details>\n')
+            'Vir: Agencija Republike Slovenije za okolje (ARSO).</p>\n' + season_charts_html(by_station))
     if not parts:
         return ""
     return ('  <section id="sezona" class="sg-sec" aria-labelledby="sz-h">\n  <h2 id="sz-h">Snežna sezona in arhiv</h2>\n' + "".join(parts) + '  </section>\n')

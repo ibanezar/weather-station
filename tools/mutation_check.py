@@ -242,6 +242,8 @@ MUTACIJE = [
     ("snegofili sezona: sezona se začne 1. oktobra", "tools/generate_snegofili_page.py", 'return y if m >= 10 else y - 1', 'return y if m >= 11 else y - 1', "test_snegofili.py"),
     ("snegofili ARSO zime: dan brez meritve ni ničla", "tools/generate_snegofili_page.py", '        if depth is None:\n            continue\n        y = int(d[:4])', '        y = int(d[:4])\n        depth = depth or 0.0', "test_snegofili.py"),
     ("snegofili dogodki: vrzel v dnevniku prekine dogodek", "tools/generate_snegofili_page.py", '_days_between(prev, d) == 1', '_days_between(prev, d) <= 2', "test_snegofili.py"),
+    ("snegofili regije: stolpec količine na korenski lestvici late", "tools/generate_snegofili_page.py", 'rows.append(_rg_row(label, cm_h(b[0]), b[1], gauge_pos(b[0])))', 'rows.append(_rg_row(label, cm_h(b[0]), b[1], min(100, b[0])))', "test_snegofili.py"),
+    ("snegofili regije: meja sneženja na lestvici višin", "tools/generate_snegofili_page.py", 'SL_MAX_M = 2600', 'SL_MAX_M = 2000', "test_snegofili.py"),
     ("snegofili dogodki: prag točk na dan", "tools/generate_snegofili_page.py", 'ok = len(hit) >= min_pts', 'ok = len(hit) >= 1', "test_snegofili.py"),
     ("snegofili južna polobla: skupina območja", "tools/generate_snegofili_page.py", '("juzna" if r["drzava"] in SOUTH_CODES else "amerika")', '"amerika"', "test_snegofili.py"),
     ("snegofili južna polobla: opomba o sezoni samo zunaj junija–septembra", "tools/generate_snegofili_page.py", 'SOUTH_OFF_MONTHS = (10, 11, 12, 1, 2, 3, 4, 5)', 'SOUTH_OFF_MONTHS = (10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9)', "test_snegofili.py"),

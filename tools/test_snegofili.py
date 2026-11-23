@@ -632,5 +632,18 @@ check(len(_sl) == 1 and _sl[0]["start"] == "2026-11-21" and _sl[0]["points"] == 
 check(g.snow_events({}, _cb) == [], "dogodki: brez dnevnika ni dogodkov")
 check("Snežni dogodki sezone" in _page and 'href="#dogodki"' in _page, "stran: razdelek Snežni dogodki in povezava v navigaciji")
 
+
+# ── grafi namesto tabel (23. 11. 2026, Filip: »grde tabele«) ──
+check("<table" not in _page, "stran /snegofili/ nima nobene tabele (grafi namesto tabel)")
+_g = {"regija": "Savinjska in Štajerska", "n": 2, "snowing": ["Prva"], "past24": (60.0, "Prva"), "next24": (0.0, "Prva"), "next48": None,
+      "line": 1300, "measured": (30, "Druga")}
+_cd = g.region_card_html(_g)
+check(f'style="width:{g.gauge_pos(60.0)}%"' in _cd and 'style="width:100.0%"' in _cd, "regija: stolpec količine sledi isti korenski lestvici kot lata (60 cm = polna proga)")
+check(f'style="left:{round(1300 / g.SL_MAX_M * 100, 1)}%"' in _cd, "regija: meja sneženja je na lestvici višin")
+check(f'style="width:{g.gauge_pos(30)}%"' in _cd and "ms" in _cd and "Izmerjena odeja" in _cd, "regija: izmerjena odeja je ločen (temnejši) stolpec")
+check("Sneži na 1 od 2 točk" in _cd and "Naprej 48 ur" in _cd and "ni podatka" in _cd, "regija: sneženje zdaj in manjkajoče okno (brez izmišljenega stolpca)")
+check("Zdaj ne sneži" in g.region_card_html(dict(_g, snowing=[])) and "ni meritve" in g.region_card_html(dict(_g, measured=None)), "regija: brez sneženja in brez meritve")
+check("\u00a0" in g.dm("2026-11-20") and g.dm("2026-11-20").startswith("20."), "datum se ne lomi čez vrstico (nelomljiv presledek)")
+
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

@@ -766,16 +766,6 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-slo-leg i{display:inline-block;width:.8rem;height:.8rem;border-radius:3px;vertical-align:-.1rem;margin:0 .1rem 0 .4rem}
 .sg-slo-leg i.l1{background:#8fc2ff}.sg-slo-leg i.l2{background:#1b6ef3}.sg-slo-leg i.l3{background:#0b3d99}
 
-/* Slovenija po regijah in arhiv zim: tabele (drsne na ozkem zaslonu) */
-.sg-tblwrap{overflow-x:auto;margin:.7rem 0;border:2px solid var(--sg-line);border-radius:16px;background:var(--sg-surface)}
-.sg-tblwrap:focus-visible{outline:3px solid var(--sg-azure);outline-offset:2px}
-.sg-tbl{border-collapse:collapse;width:100%;min-width:34rem;font-size:.86rem;font-variant-numeric:tabular-nums;color:var(--sg-ink)}
-.sg-tbl caption{caption-side:top;text-align:left;font:700 .95rem var(--sg-display);padding:.6rem .8rem .2rem}
-.sg-tbl caption small,.sg-tbl td small,.sg-tbl th small{color:var(--sg-muted);font-weight:400;font-size:.74rem}
-.sg-tbl th,.sg-tbl td{padding:.5rem .75rem;text-align:left;vertical-align:top;border-bottom:1px solid var(--sg-line)}
-.sg-tbl thead th{font:700 .7rem var(--sg-display);text-transform:uppercase;letter-spacing:.05em;color:var(--sg-muted)}
-.sg-tbl tbody th{font-weight:700}
-.sg-tbl tbody tr:last-child>*{border-bottom:0}
 .sg-sec h3{margin:1.2rem 0 .2rem;font-size:1.05rem}
 
 /* izmerjene zime ARSO: primerjalni stolpci po zimah (dolina proti 794 m) */
@@ -829,3 +819,28 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-evs{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.6rem}
 .sg-evs li{display:grid;gap:.2rem;background:var(--sg-surface);border:2px solid var(--sg-line);border-radius:16px;padding:.7rem .9rem;font-size:.9rem}
 .sg-evs small{color:var(--sg-muted);font-size:.76rem}
+
+/* Slovenija po regijah: kartice z vodoravnimi stolpci (lestvica količin je skupna in korenska, kot lata v herou) */
+.sg-rg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr));gap:.9rem;margin:.7rem 0 .5rem}
+.sg-rg{margin:0;padding:.85rem .95rem .95rem;background:var(--sg-surface);border:2px solid var(--sg-line);border-radius:18px;display:flex;flex-direction:column;gap:.6rem}
+.sg-rg figcaption{font:800 1.02rem var(--sg-display);color:var(--sg-ink);display:grid;gap:.25rem}
+.sg-rg figcaption>small{color:var(--sg-muted);font-weight:500;font-size:.78rem}
+.sg-rg-s{display:grid;gap:.1rem;font:600 .8rem var(--sg-display);color:var(--sg-ink)}
+.sg-rg-s small{color:var(--sg-muted);font-weight:400;font-size:.72rem}
+.sg-rg-now{display:inline-flex;align-items:center;gap:.4rem}
+.sg-rg-now i{width:.6rem;height:.6rem;border-radius:50%;background:var(--sg-line);flex:none}
+.sg-rg-now.on i{background:var(--sg-beacon);box-shadow:0 0 0 3px rgba(255,90,31,.2)}
+.sg-rg-rows{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.sg-rg-rows li{display:grid;grid-template-columns:6.4rem 1fr 5.4rem;gap:.55rem;align-items:center}
+.sg-rg-l{font:600 .76rem var(--sg-display);color:var(--sg-muted);line-height:1.15}
+.sg-rg-t{position:relative;display:block;height:.7rem;border-radius:4px;background:var(--sg-surface2);overflow:hidden}
+.sg-rg-t i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:#3f8cf0;min-width:0}
+.sg-rg-rows li.ms .sg-rg-t i{background:#0b2f7a}
+.sg-rg-t.ln{overflow:visible;background:linear-gradient(90deg,var(--sg-surface2),var(--sg-surface2))}
+.sg-rg-t.ln i{left:auto;top:-.15rem;bottom:-.15rem;width:.55rem;margin-left:-.27rem;border-radius:3px;background:var(--sg-ink)}
+.sg-rg-v{display:grid;line-height:1.15;text-align:right}
+.sg-rg-v b{font:800 .88rem var(--sg-display);color:var(--sg-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sg-rg-v small{color:var(--sg-muted);font-size:.68rem;font-weight:400}
+@media(max-width:420px){.sg-rg-rows li{grid-template-columns:5.2rem 1fr 4.8rem}}
+/* primerjalni grafi zim: v prvem grafu je ob višini še datum, zato širši stolpec z vrednostjo */
+.sg-sz-ch.wide .sg-sz-b{grid-template-columns:1fr 5.4rem}
