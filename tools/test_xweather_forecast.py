@@ -127,7 +127,24 @@ finally:
         os.remove(L.FORWARD_LOG_PATH)
 out = buf.getvalue()
 check("dummy-secret-123" not in out and "dummy-id" not in out, "ključ ni v izpisu")
-check("XWeather napoved nedosegljiva" in out and "401" in out, "izpis napake z kodo")
+check("XWeather" in out and "HTTP 401" in out, "izpis napake z kodo")
+
+# 10) HTTP 401 s telesom: izpiše se koda razloga, ne pa opis in ne ključ
+def unauthorized(req, timeout=0):
+    body = json.dumps({"success": False, "error": {"code": "invalid_client",
+                                                   "description": "dummy-secret-123"}}).encode()
+    raise L.urllib.error.HTTPError(req.full_url, 401, "Unauthorized", {}, io.BytesIO(body))
+
+
+L.urllib.request.urlopen = unauthorized
+try:
+    L.fetch_xweather(today)
+    check(False, "401 mora vreči XWeatherError")
+except L.XWeatherError as e:
+    check(str(e) == "HTTP 401: invalid_client", f"koda iz telesa: {e}")
+    check("dummy-secret-123" not in str(e), "opis napake ne uide")
+finally:
+    L.urllib.request.urlopen = orig
 
 print("OK" if not fails else f"{len(fails)} FAIL")
 sys.exit(1 if fails else 0)

@@ -200,8 +200,18 @@ def fetch_xweather(today):
                                 "client_id": cred[0], "client_secret": cred[1]})
     url = XWEATHER_URL.format(lat=LAT, lon=LON) + "?" + q
     req = urllib.request.Request(url, headers=UA_ARSO)
-    with urllib.request.urlopen(req, timeout=30) as r:
-        data = json.load(r)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.load(r)
+    except urllib.error.HTTPError as e:
+        # Telo napake nosi kodo razloga (npr. invalid_client); ključa ne vsebuje, izpišemo samo kodo.
+        code = "unknown"
+        try:
+            body = json.loads(e.read().decode("utf-8", "replace"))
+            code = str((body.get("error") or {}).get("code") or "unknown")
+        except Exception:
+            pass
+        raise XWeatherError(f"HTTP {e.code}: {code}")
     return parse_xweather(data, today)
 
 
