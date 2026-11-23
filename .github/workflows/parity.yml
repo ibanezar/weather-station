@@ -181,6 +181,7 @@ jobs:
           node tools/test_advent.mjs
           python3 tools/test_wrapped.py
           python3 tools/test_zgresitve.py
+          python3 tools/test_svet_snega.py
           node tools/test_rojstni.mjs
           node tools/test_nebo.mjs
           node tools/test_nebo_alarm.mjs

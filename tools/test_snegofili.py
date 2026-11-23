@@ -403,7 +403,8 @@ for p in wpts:
     check(p["drzava"] in g.COUNTRIES_WORLD, f"svet: država {p['id']}")
     check(-180 <= p["lon"] <= 180 and -60 <= p["lat"] <= 70 and 0 < p["elevation_m"] <= 4500, f"svet: koordinate in višina {p['id']}")
     check(all(k in p for k in ("ime", "regija", "elev_opis")), f"svet: polja {p['id']}")
-check({p["drzava"] for p in wpts} == {"JP", "CA", "US"}, "svet: Japonska, Kanada in ZDA")
+check({p["drzava"] for p in wpts} == {"JP", "CA", "US", "CL", "AR", "NZ", "AU"}, "svet: Japonska, Severna Amerika in južna polobla")
+check(all(p["lat"] < 0 for p in wpts if p["drzava"] in g.SOUTH_CODES) and all(p["lat"] > 0 for p in wpts if p["drzava"] not in g.SOUTH_CODES), "svet: južna polobla ima negativno širino")
 # nadomestek ob manjkajoči ničti izotermi: ura ne sme šteti za »nič snega«
 check(d.snow_frac(1000, None, -3) == 1.0 and d.snow_frac(1000, None, 1) == 0.5 and d.snow_frac(1000, None, 5) == 0.0, "svet: sneg iz temperature, kadar ni ničte izoterme")
 check(d.snow_frac(1000, None, None) == 0.0 and d.snow_frac(1000, 3000, 5) == d.we.snow_fraction(1000, 3000), "ničta izoterma ima prednost; brez obojega ni snega")
@@ -602,6 +603,33 @@ check("Kako računamo nov sneg" in _page and "Kako so izbrane lokacije" in _page
 check("indoor" not in _page.lower() and "tempinf" not in _page.lower(), "stran: brez notranjih meritev")
 _wf = open(os.path.join(_root, ".github", "workflows", "zima-forecast.yml"), encoding="utf-8").read()
 check("log_snegofili_sezona.py" in _wf and "data/snegofili-sezona.csv" in _wf, "workflow: dnevnik sezone se zapiše in commita")
+
+
+# ── južna polobla (23. 11. 2026) ──
+_css = open(os.path.join(_root, "snegofili", "snegofili.css"), encoding="utf-8").read()
+check(all(f"[data-c={c}]" in _css for c in g.COUNTRIES_WORLD), "južna polobla: vsaka država iz Po svetu ima zastavico v CSS")
+check({c for _, cs in g.WORLD_GROUPS for c in cs} == set(g.COUNTRIES_WORLD), "južna polobla: vsaka država je v natanko eni skupini Po svetu")
+_sr = [dict(drzava="NZ"), dict(drzava="JP")]
+check(g.south_note(_sr, month=11) != "" and g.south_note(_sr, month=7) == "" and g.south_note([dict(drzava="JP")], month=11) == "",
+      "južna polobla: opomba o sezoni samo zunaj junija–septembra in samo ob točkah juga")
+check(g.powder_groups(_r(drzava="NZ"), True) == "juzna" and g.powder_groups(_r(drzava="CL"), True) == "juzna", "južna polobla: skupina območja v Powder Trackerju")
+
+
+# ── snežni dogodki iz dnevnika (23. 11. 2026) ──
+_cb = {"a": "AT", "b": "AT", "c": "AT", "d": "SI", "e": "SI"}
+_lg = {("2026-11-20", "a"): 12, ("2026-11-20", "b"): 15, ("2026-11-20", "c"): 11, ("2026-11-20", "d"): 1,
+       ("2026-11-21", "a"): 20, ("2026-11-21", "b"): 10, ("2026-11-21", "c"): 10.5, ("2026-11-21", "d"): 6, ("2026-11-21", "e"): 5,
+       ("2026-11-22", "a"): 12, ("2026-11-22", "b"): 12,                                  # samo 2 točki: prag 3 ni dosežen
+       ("2026-11-24", "a"): 14, ("2026-11-24", "b"): 14, ("2026-11-24", "c"): 14}          # dan 23. ni zabeležen: vrzel prekine, nov dogodek
+_ev = g.snow_events(_lg, _cb)
+_al = [e for e in _ev if e["scope"] == "alpe"]
+check([(e["start"], e["end"]) for e in _al] == [("2026-11-24", "2026-11-24"), ("2026-11-20", "2026-11-21")], f"dogodki: Alpe, vrzel v dnevniku prekine dogodek ({[(e['start'], e['end']) for e in _al]})")
+check(_al[1]["days"] == 2 and _al[1]["points"] == 3 and _al[1]["peak"] == (20, "a", "2026-11-21"), f"dogodki: dnevi, točke, najmočnejši dan ({_al[1]})")
+check(abs(_al[1]["totals"]["a"] - 32) < 1e-9, "dogodki: skupaj v dogodku po točki")
+_sl = [e for e in _ev if e["scope"] == "slovenija"]
+check(len(_sl) == 1 and _sl[0]["start"] == "2026-11-21" and _sl[0]["points"] == 2, f"dogodki: Slovenija ima nižji prag (5 cm na 2 točkah) ({_sl})")
+check(g.snow_events({}, _cb) == [], "dogodki: brez dnevnika ni dogodkov")
+check("Snežni dogodki sezone" in _page and 'href="#dogodki"' in _page, "stran: razdelek Snežni dogodki in povezava v navigaciji")
 
 print("OK" if not fails else f"{fails} napak")
 sys.exit(1 if fails else 0)

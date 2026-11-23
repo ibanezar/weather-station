@@ -99,7 +99,7 @@ PW_SNOWY_CM = 5        # Nekaj snega: v 72 urah nazaj ali naprej vsaj toliko
 PW_CATS = (("powder", "Powder alert"), ("fresh", "Svež sneg"), ("waiting", "Sneg prihaja"), ("snowy", "Nekaj snega"))
 PW_CAT_LABEL = dict(PW_CATS)
 PW_CAT_RANK = {k: i for i, (k, _) in enumerate(PW_CATS)}
-PW_GROUPS = (("*", "Vse"), ("si", "Slovenija"), ("alpe", "Alpe"), ("japonska", "Japonska"), ("amerika", "Severna Amerika"))
+PW_GROUPS = (("*", "Vse"), ("si", "Slovenija"), ("alpe", "Alpe"), ("japonska", "Japonska"), ("amerika", "Severna Amerika"), ("juzna", "Južna polobla"))
 PW_LIMIT = 5           # privzeto prikazanih vrstic (ostale po gumbu); brez JS so vidne vse
 
 FAQ = [
@@ -375,8 +375,10 @@ def card_html(r, p, kcr=None):
 
 # ── rubrika »Po svetu« (21. 11. 2026): Japonska in Severna Amerika, ločen seznam in ločena datoteka (ne meša se z alpskim lokom) ──
 WORLD_PATH = os.path.join(seo.ROOT, "data", "snegofili-svet.json")
-COUNTRIES_WORLD = {"JP": "Japonska", "CA": "Kanada", "US": "ZDA"}
-WORLD_GROUPS = (("Japonska", ("JP",)), ("Severna Amerika", ("CA", "US")))
+COUNTRIES_WORLD = {"JP": "Japonska", "CA": "Kanada", "US": "ZDA", "CL": "Čile", "AR": "Argentina", "NZ": "Nova Zelandija", "AU": "Avstralija"}
+WORLD_GROUPS = (("Japonska", ("JP",)), ("Severna Amerika", ("CA", "US")), ("Južna polobla", ("CL", "AR", "NZ", "AU")))
+SOUTH_CODES = ("CL", "AR", "NZ", "AU")
+SOUTH_OFF_MONTHS = (10, 11, 12, 1, 2, 3, 4, 5)   # smučarska sezona juga je približno junij–september: v teh mesecih je tam običajno brez snega na smučiščih
 
 
 def load_world():
@@ -469,6 +471,16 @@ def world_cam_links(p):
     return cam_links({"kamere": (p or {}).get("kamere")})
 
 
+def south_note(rows, month=None):
+    """Opomba o južni polobli, samo ko točke so v podatkih in ni njihova sezona (junij–september): številke so tam tedaj pretežno ničle in to ni napaka."""
+    import datetime
+    m = month or datetime.datetime.now().month
+    if not any(r["drzava"] in SOUTH_CODES for r in rows) or m not in SOUTH_OFF_MONTHS:
+        return ""
+    return ('  <p class="muted-note"><b>Južna polobla:</b> tam je zdaj poletje ali prehod vanj. Smučarska sezona v Andih, Novi Zelandiji in Avstraliji poteka približno od junija do septembra, '
+            'zato je pri teh točkah zdaj pričakovati malo ali nič snega; ničla ni napaka podatkov.</p>\n')
+
+
 def svet_html(world, wcams=None):
     rows = world["rows"]
     best = max(rows, key=lambda r: r["past72_cm"])
@@ -483,10 +495,10 @@ def svet_html(world, wcams=None):
                           "\n".join(world_card_html(r, (wcams or {}).get(r["id"])) for r in part) + "\n  </div>\n")
     return ('  <section id="po-svetu" class="sg-sec" aria-labelledby="sv-h">\n'
             '  <h2 id="sv-h">Po svetu <span class="sg-bdg m">Model</span></h2>\n'
-            f'  <p class="archive-intro">Izven Alp: smučišča na Japonskem in v Severni Ameriki. {lead} '
+            f'  <p class="archive-intro">Izven Alp: smučišča na Japonskem, v Severni Ameriki in na južni polobli. {lead} '
             'Ista ocena kot za Alpe (padavine iz celice vremenskega modela × delež, ki pade kot sneg); merjene višine odeje za te točke nimamo. '
             '<b>Japonski sneg je pogosto suh in lahek</b>, zato je prava količina lahko večja od modelske (1 mm ≈ 1 cm); poročila objavljajo smučišča sama.</p>\n'
-            + "".join(groups) +
+            + south_note(rows) + "".join(groups) +
             '  <p class="muted-note">Okna »zadnjih 24 ur« in »naslednjih 24 ur« štejejo od zdaj, kot drugje na strani. Višine točk so izbrane za zgornji del '
             'smučišča in še niso preverjene, koordinate so približne. Ni uradna napoved in ni plazovni bilten. Podatki: Open-Meteo.</p>\n'
             '  </section>\n')
@@ -886,7 +898,7 @@ def powder_sort_key(r, cat):
 
 def powder_groups(r, world):
     if world:
-        return "japonska" if r["drzava"] == "JP" else "amerika"
+        return "japonska" if r["drzava"] == "JP" else ("juzna" if r["drzava"] in SOUTH_CODES else "amerika")
     return "alpe si" if r["drzava"] == "SI" else "alpe"
 
 
@@ -1165,6 +1177,86 @@ def season_charts_html(stations):
     return "".join(out)
 
 
+# Snežni dogodki iz dnevnika sezone: zaporedje dni, ko je po modelu zadosti točk dobilo zadosti snega v enem polnem dnevu.
+# Meje so naša izbira (izpisane na strani); dogodek je modelski, ne uradno ugotovljen.
+EV_SCOPES = (("alpe", "Alpe", None, 10.0, 3), ("slovenija", "Slovenija", "SI", 5.0, 2))   # (ključ, ime, država, cm na dan, najmanj točk)
+EV_SHOW = 8
+
+
+def _days_between(a, b):
+    import datetime
+    return (datetime.date.fromisoformat(b) - datetime.date.fromisoformat(a)).days
+
+
+def snow_events(log, country_by_id):
+    """[dogodek] najnovejši prvi: {scope, label, start, end, days, points, peak:(cm, id, date), totals:{id: cm}}.
+    Dogodek je zaporedje ZAPOREDNIH zabeleženih dni, ko ima vsaj `min_pts` točk območja vsaj `day_cm` cm novega snega; vrzel v dnevniku ga prekine."""
+    dates = sorted({d for d, _ in log})
+    out = []
+    for key, label, country, day_cm, min_pts in EV_SCOPES:
+        ids = [i for i, c in country_by_id.items() if country is None or c == country]
+        cur = None
+        prev = None
+
+        def close():
+            nonlocal cur
+            if cur:
+                out.append(cur)
+            cur = None
+        for d in dates:
+            hit = [i for i in ids if log.get((d, i), 0) >= day_cm]
+            ok = len(hit) >= min_pts
+            contiguous = prev is not None and _days_between(prev, d) == 1
+            if ok and cur is not None and contiguous:
+                cur["end"] = d
+                cur["days"] += 1
+                cur["points"] = max(cur["points"], len(hit))
+            else:
+                close()
+                if ok:
+                    cur = {"scope": key, "label": label, "start": d, "end": d, "days": 1, "points": len(hit), "peak": (0.0, None, None), "totals": {}, "_ids": ids}
+            if cur is not None and ok:
+                for i in ids:
+                    cm = log.get((d, i), 0)
+                    cur["totals"][i] = cur["totals"].get(i, 0.0) + cm
+                    if cm > cur["peak"][0]:
+                        cur["peak"] = (cm, i, d)
+            prev = d
+        close()
+    for e in out:
+        e.pop("_ids", None)
+    return sorted(out, key=lambda e: (e["end"], e["start"]), reverse=True)
+
+
+def dogodki_html(rows):
+    log = read_season_log()
+    if not log:
+        return ""
+    names = {r["id"]: r for r in rows}
+    ev = snow_events(log, {i: r["drzava"] for i, r in names.items()})[:EV_SHOW]
+    first, last = min(d for d, _ in log), max(d for d, _ in log)
+    thr = " in ".join(f'{label}: vsaj {num(cm, 0)} cm v enem dnevu na vsaj {n} točkah' for _k, label, _c, cm, n in EV_SCOPES)
+    if ev:
+        items = ""
+        for e in ev:
+            top = sorted(((t, i) for i, t in e["totals"].items() if i in names), reverse=True)[:3]
+            top_txt = ", ".join(f'{_html.escape(names[i]["ime"])} {cm_h(t)}' for t, i in top if t >= MIN_CM)
+            pk = e["peak"]
+            when = dm(e["start"]) if e["start"] == e["end"] else f'{dm(e["start"])}–{dm(e["end"])}'
+            items += (f'<li><b>{when} · {e["label"]}</b> <small>{e["days"]} {"dan" if e["days"] == 1 else "dni"} · največ {e["points"]} {"točka" if e["points"] == 1 else "točk"} '
+                      f'nad mejo v enem dnevu</small>'
+                      f'<span>Najmočnejši dan: <b>{_html.escape(names[pk[1]]["ime"])} {cm_h(pk[0])}</b> ({dm(pk[2])}). Največ v dogodku: {top_txt}.</span></li>')
+        body = f'  <ul class="sg-evs">{items}</ul>\n'
+    else:
+        body = '  <p class="archive-intro">V zabeleženem obdobju po modelu še ni bilo dogodka, ki bi dosegel te meje.</p>\n'
+    return ('  <section id="dogodki" class="sg-sec" aria-labelledby="dg-h">\n  <h2 id="dg-h">Snežni dogodki sezone <span class="sg-bdg m">Model</span></h2>\n'
+            f'  <p class="archive-intro">Večja sneženja, ki jih zazna dnevnik modelskega novega snega (od <b>{dm(first)}</b> do <b>{dm(last)}</b>). Dogodek je zaporedje dni, ko je dovolj točk dobilo dovolj snega: {thr}. '
+            'Meje so naša izbira in jih lahko spremenimo. To so <b>modelske ocene</b>, ne uradno ugotovljeni dogodki.</p>\n'
+            + body +
+            '  <p class="muted-note">Ne beležimo meje sneženja po dnevih in ne primerjamo več modelov, zato razpona možnih količin tu ni. Dogodek, ki je zunaj zabeleženih dni, ni naštet; dan, ki se še ni iztekel, ne šteje.</p>\n'
+            '  </section>\n')
+
+
 def sezona_html(rows):
     names = {r["id"]: r for r in rows}
     log = season_totals(read_season_log())
@@ -1273,10 +1365,11 @@ def build_body(data, cams):
     hp = hero_photo()
     slo_sec = slovenija_html(rows)
     sez_sec = sezona_html(rows)
+    ev_sec = dogodki_html(rows)
     nav = [("zemljevid", "Zemljevid"), ("powder", "Powder")] + ([("slovenija", "Slovenija")] if slo_sec else []) + (
         [("kamere", "Kamere")] if cams_sec else []) + [
         ("toplotna-karta", "96 ur"), ("lokacije", "Lokacije")] + ([("po-svetu", "Po svetu")] if world_sec else []) + [
-        ("izmerjeno", "Meritve")] + ([("sezona", "Sezona")] if sez_sec else []) + [("sg-alarm", "Opozorila")]
+        ("izmerjeno", "Meritve")] + ([("dogodki", "Dogodki")] if ev_sec else []) + ([("sezona", "Sezona")] if sez_sec else []) + [("sg-alarm", "Opozorila")]
     nav_html = ('  <nav class="sg-nav" id="sg-nav" aria-label="Razdelki strani"><ul>' +
                 "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in nav) + '</ul></nav>\n')
     tab_ic = {
@@ -1364,11 +1457,12 @@ def build_body(data, cams):
   <p class="muted-note">Zračna razdalja od Rečice, ne čas vožnje. Temperatura je preračunana na višino točke.
   »&lt;1 cm« pri snegu pomeni manj kot centimeter po modelu, »ni podatka« pa da vrednosti nimamo. Podatki: Open-Meteo, postaje ARSO.</p>
   </section>
-{world_sec}{measured_html(rows)}{sez_sec}{alarm_html(rows)}{kraji_html(rows, kcr)}
+{world_sec}{measured_html(rows)}{ev_sec}{sez_sec}{alarm_html(rows)}{kraji_html(rows, kcr)}
 {faq_html}
   <p class="muted-note">Ni plazovni bilten in ni nasvet za turo. Pred odhodom preverite uradni plazovni bilten
   pristojne države, <a href="https://meteo.arso.gov.si/" target="_blank" rel="noopener">ARSO</a> in razmere pri
   oskrbovani koči ali smučišču. Slike kamer so last navedenih virov.</p>
+  <p class="muted-note">Več o snegu (nastanek, snežinke, vrste snega, satelitski posnetki): <a href="/snegofili/svet-snega/">Svet snega</a>.</p>
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>
   </div>
 {tabbar}<script type="application/json" id="sg-pts">{pts_json}</script>"""

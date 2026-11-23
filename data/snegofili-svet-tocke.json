@@ -1,5 +1,5 @@
 {
- "opomba": "Rubrika »Po svetu« na /snegofili/. ROČEN seznam: koordinate so približne (±5 km), višine so izbrane za zgornji del smučišča in IZ SPOMINA (Elevation API in Open-Meteo iz peskovnika nista dosegljiva), zato jih mora Filip potrditi. Modelska ocena padavin iz celice modela, ne meritev. Nova točka = vnos tu (drzava JP/US/CA, ki jo pozna COUNTRIES_WORLD v generatorju). Kamere: polje `kamere` ima isto obliko kot v snegofili-tocke.json; povezava (url + ponudnik) vodi na stran ponudnika, vdelava samo prek tools/add_windy_cam.py --svet (Windy, embed_terms + checked).",
+ "opomba": "Rubrika »Po svetu« na /snegofili/. ROČEN seznam: koordinate so približne (±5 km), višine so izbrane za zgornji del smučišča in IZ SPOMINA (Elevation API in Open-Meteo iz peskovnika nista dosegljiva), zato jih mora Filip potrditi. Modelska ocena padavin iz celice modela, ne meritev. Južna polobla (CL, AR, NZ, AU; dodano 23. 11. 2026): koordinate so preverjene samo z Open-Meteo Elevation (celica modela leži med vznožjem in vrhom smučišča), višine vrhov so iz spomina. Nova točka = vnos tu (drzava JP/US/CA/CL/AR/NZ/AU, ki jo pozna COUNTRIES_WORLD v generatorju). Kamere: polje `kamere` ima isto obliko kot v snegofili-tocke.json; povezava (url + ponudnik) vodi na stran ponudnika, vdelava samo prek tools/add_windy_cam.py --svet (Windy, embed_terms + checked).",
  "potrjeno": false,
  "tocke": [
   {
@@ -362,6 +362,105 @@
      "checked": "2026-11-20"
     }
    ]
+  },
+  {
+   "id": "valle-nevado",
+   "ime": "Valle Nevado",
+   "drzava": "CL",
+   "regija": "Región Metropolitana (Ande)",
+   "lat": -33.357,
+   "lon": -70.25,
+   "elevation_m": 3670,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "portillo",
+   "ime": "Portillo",
+   "drzava": "CL",
+   "regija": "Valparaíso (Ande)",
+   "lat": -32.835,
+   "lon": -70.129,
+   "elevation_m": 3310,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "las-lenas",
+   "ime": "Las Leñas",
+   "drzava": "AR",
+   "regija": "Mendoza (Ande)",
+   "lat": -35.15,
+   "lon": -70.08,
+   "elevation_m": 3430,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "cerro-catedral",
+   "ime": "Cerro Catedral",
+   "drzava": "AR",
+   "regija": "Río Negro (Bariloche)",
+   "lat": -41.17,
+   "lon": -71.44,
+   "elevation_m": 2000,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "mt-hutt",
+   "ime": "Mt Hutt",
+   "drzava": "NZ",
+   "regija": "Canterbury",
+   "lat": -43.51,
+   "lon": 171.55,
+   "elevation_m": 2086,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "coronet-peak",
+   "ime": "Coronet Peak",
+   "drzava": "NZ",
+   "regija": "Otago (Queenstown)",
+   "lat": -44.92,
+   "lon": 168.73,
+   "elevation_m": 1649,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "remarkables",
+   "ime": "The Remarkables",
+   "drzava": "NZ",
+   "regija": "Otago (Queenstown)",
+   "lat": -45.05,
+   "lon": 168.81,
+   "elevation_m": 1943,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "perisher",
+   "ime": "Perisher",
+   "drzava": "AU",
+   "regija": "Snowy Mountains",
+   "lat": -36.4,
+   "lon": 148.41,
+   "elevation_m": 2054,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
+  },
+  {
+   "id": "thredbo",
+   "ime": "Thredbo",
+   "drzava": "AU",
+   "regija": "Snowy Mountains",
+   "lat": -36.5,
+   "lon": 148.3,
+   "elevation_m": 2037,
+   "elev_opis": "zgornji del smučišča (približna višina)",
+   "kamere": []
   }
  ]
 }
