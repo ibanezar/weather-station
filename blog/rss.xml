@@ -5,8 +5,21 @@
     <link>https://meteorec.si/blog/</link>
     <description>Vremenski povzetki, rekordi in analize iz Rečice ob Savinji (postaja IREICA1).</description>
     <language>sl</language>
-    <lastBuildDate>Sun, 22 Nov 2026 11:53:13 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 23 Nov 2026 05:31:21 +0000</lastBuildDate>
     <atom:link href="https://meteorec.si/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Sneg prihodnji teden: v dolini kaže na sredo in četrtek</title>
+      <link>https://meteorec.si/blog/sneg-prihodnji-teden-sreda-cetrtek-1121.html</link>
+      <guid isPermaLink="true">https://meteorec.si/blog/sneg-prihodnji-teden-sreda-cetrtek-1121.html</guid>
+      <pubDate>Mon, 23 Nov 2026 08:00:00 +0000</pubDate>
+      <description>Bo prihodnji teden sneg? V Rečici ga za sredo in četrtek napoveduje 98 % članov ansamblov, mediana je 14 cm. Kdaj, koliko in na katerih višinah?</description>
+      <category>sneg</category>
+      <category>nižine</category>
+      <category>Golte</category>
+      <category>napoved</category>
+      <category>november</category>
+      <category>ansambli</category>
+    </item>
     <item>
       <title>Nevihtni opazovalec, 22. novembra 2026 ob 12:44: hiter padec zračnega tlaka</title>
       <link>https://meteorec.si/blog/nevihtni-opazovalec-2026-11-22-1153.html</link>
@@ -17,19 +30,6 @@
       <category>samodejno</category>
       <category>pritisk</category>
       <category>2026</category>
-    </item>
-    <item>
-      <title>Sneg prihodnji teden: v dolini kaže na sredo in četrtek</title>
-      <link>https://meteorec.si/blog/sneg-prihodnji-teden-sreda-cetrtek-1121.html</link>
-      <guid isPermaLink="true">https://meteorec.si/blog/sneg-prihodnji-teden-sreda-cetrtek-1121.html</guid>
-      <pubDate>Sun, 22 Nov 2026 08:00:00 +0000</pubDate>
-      <description>Bo prihodnji teden sneg? V Rečici ga za sredo in četrtek napoveduje 98 % članov ansamblov, mediana je 17 cm. Kdaj, koliko in na katerih višinah?</description>
-      <category>sneg</category>
-      <category>nižine</category>
-      <category>Golte</category>
-      <category>napoved</category>
-      <category>november</category>
-      <category>ansambli</category>
     </item>
     <item>
       <title>Nevihta 30 km stran je naslikala izjemno nebo</title>
