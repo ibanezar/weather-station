@@ -37,6 +37,12 @@ STYLE = BASE_STYLE.replace("</style>", ".sg-m{fill:var(--muted)}.sg-i{fill:var(-
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data", "sneg-teden-1121.json")
 SLUG = "sneg-prihodnji-teden-sreda-cetrtek-1121"
+
+
+def teden_word():
+    """Od ponedeljka 23. 11. je sreda/četrtek že »ta teden« (članek je nastal v soboto, ko je bil »prihodnji«)."""
+    return "ta teden" if datetime.date.today() >= datetime.date(2026, 11, 23) else "prihodnji teden"
+
 TEXT_OUT = os.path.join(ROOT, "docs", "lektura-sneg-teden.txt")
 NBSP = " "
 LINK = 'style="color:var(--blue)"'
@@ -414,7 +420,7 @@ def build_article(S):
         (temp(tue["tmin"], 0).replace(NBSP + "°C", ""), "°C", f"najnižja temperatura v torek zjutraj po modelu MTR; verjetnost zmrzali (najnižja temperatura 0 °C ali manj) je po modelu {rnd(tue['p_frost'] * 100)} %", False),
     ])
 
-    lead = (f"Da. Po današnjih izračunih bo v Rečici prihodnji teden snežilo, najverjetneje od srede {fp} do četrtka. "
+    lead = (f"Da. Po današnjih izračunih bo v Rečici {teden_word()} snežilo, najverjetneje od srede {fp} do četrtka. "
             f"Vsaj 1 cm novega snega med sredo in četrtkom skupaj napoveduje {pc(w2['cm1'])} od skupno {S.n} članov ansamblov, mediana količine pa znaša {rnd(w2['med'])} cm. "
             f"{dva_dni.capitalize()} snega v dolini ni pričakovati.")
 
@@ -578,9 +584,9 @@ def build_article(S):
         'in neposredne povezave na ta članek. Za prepis ali vdelavo grafov in izračunov se predhodno dogovorite z avtorjem.</p>',
     ]
 
-    title = "Sneg prihodnji teden: v dolini kaže na sredo in četrtek"
+    title = f"Sneg {teden_word()}: v dolini kaže na sredo in četrtek"
     assert len(title) <= 60, len(title)
-    desc = (f"Bo prihodnji teden sneg? V Rečici ga za sredo in četrtek napoveduje {w2['cm1']} % članov ansamblov, mediana je {rnd(w2['med'])} cm. "
+    desc = (f"Bo {teden_word()} sneg? V Rečici ga za sredo in četrtek napoveduje {w2['cm1']} % članov ansamblov, mediana je {rnd(w2['med'])} cm. "
             "Kdaj, koliko in na katerih višinah?")
     assert len(desc) <= 160, len(desc)
     sections = [
@@ -654,7 +660,7 @@ def main():
     ftp.TODAY = prev_entry["date"] if prev_entry else today.isoformat()
     slug, html, entry, og_meta = ftp.build_html(
         article, today.year, today.month, now_utc, slug=SLUG, back=("/blog/", "← Vsi članki"),
-        og_title="Sneg prihodnji teden:\nsreda in četrtek", meta_note="podatkovna analiza",
+        og_title=f"Sneg {teden_word()}:\nsreda in četrtek", meta_note="podatkovna analiza",
         nav_label="O postaji", nav_href="/o-postaji.html")
     lead = f'<p class="lead">{article["lead"]}</p>'
     assert html.count(lead) == 1, "uvoda ni mogoče najti za vstavitev sloga"
@@ -678,6 +684,7 @@ def main():
         from generate_monthly_post import wire_all, touch_existing
         if prev_entry and prev_entry["date"] != today.isoformat():     # posodobitev kasnejši dan: `updated`, izvirni datum ostane
             prev_entry["summary"] = entry["summary"]
+            prev_entry["title"] = entry["title"]
             json.dump(posts, open(os.path.join(ROOT, "blog.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
             touch_existing(SLUG, wire=True)
         else:                                                          # isti dan kot objava: vnos se osveži (povzetek)

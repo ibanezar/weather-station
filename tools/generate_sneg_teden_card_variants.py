@@ -60,7 +60,7 @@ def v1(S):
     img, d = canvas()
     header(img, d, "napoved za Rečico", thumb=False)
     badge(d, "NAPOVED, NE MERITEV")
-    d.text((PAD, 268), "Sneg prihodnji teden:", font=font(B, 76), fill=WHITE)
+    d.text((PAD, 268), f"Sneg {post.teden_word()}:", font=font(B, 76), fill=WHITE)
     d.text((PAD, 360), "sreda in četrtek.", font=font(B, 76), fill=ICE)
     d.text((PAD, 470), f"{w2['cm1']} %", font=font(B, 190), fill=WHITE)
     d.text((PAD, 690), "članov ansamblov napoveduje v Rečici vsaj 1 cm", font=font(R, 34), fill=MUTED)

@@ -1,4 +1,4 @@
-# FB/IG objave: »Sneg prihodnji teden: v dolini kaže na sredo in četrtek« (21. 11. 2026)
+# FB/IG objave: »Sneg ta teden: v dolini kaže na sredo in četrtek« (21. 11. 2026)
 
 Štiri kartice 1080×1350 (`og/sneg-prihodnji-teden-sreda-cetrtek-1121-kartica-N.jpg`, izdela jih
 `python3 tools/generate_sneg_teden_card_variants.py`) in besedilo za vsako. Pisano po `docs/slog-pisanja.md`
@@ -23,9 +23,9 @@ Za arhivske fotografije v članku (ne na karticah) velja podpis »ilustracija«.
 
 ---
 
-## Kartica 1 — »Sneg prihodnji teden: sreda in četrtek« (94 %)
+## Kartica 1 — »Sneg ta teden: sreda in četrtek« (94 %)
 
-❄️ Bo prihodnji teden sneg? Po današnjih izračunih v dolini da.
+❄️ Bo ta teden sneg? Po današnjih izračunih v dolini da.
 
 Vsaj 1 cm novega snega v Rečici med sredo in četrtkom napoveduje 94 % od 143 članov ansamblov, mediana je 13 cm. Danes in jutri snega v dolini ni pričakovati.
 
