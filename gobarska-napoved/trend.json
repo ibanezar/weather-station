@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-16T13:50:30+00:00",
+ "generated": "2026-11-23T16:14:03+00:00",
  "location": "Rečica ob Savinji",
  "years": {
   "2022": {
@@ -83,14 +83,14 @@
     "08": 65.2,
     "09": 84.8,
     "10": 81.7,
-    "11": 79.9
+    "11": 86.2
    },
    "best_day": {
     "date": "2026-06-11",
     "overall": 100,
     "top": "Bezgova uhljevka"
    },
-   "days_count": 229
+   "days_count": 236
   }
  }
 }
