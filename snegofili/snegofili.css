@@ -620,6 +620,10 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-av.ph[data-c=JP]{background:radial-gradient(circle at 50% 50%,#bc002d 0 34%,#fff 36%)}
 .sg-av.ph[data-c=CA]{background:linear-gradient(90deg,#d52b1e 0 27%,#fff 27% 73%,#d52b1e 73%)}
 .sg-av.ph[data-c=US]{background:linear-gradient(#3c3b6e,#3c3b6e) 0 0/52% 54% no-repeat,repeating-linear-gradient(#b22234 0 7.7%,#fff 7.7% 15.4%)}
+.sg-av.ph[data-c=CL]{background:linear-gradient(#0039a6,#0039a6) 0 0/40% 50% no-repeat,linear-gradient(#fff 50%,#d52b1e 50%)}
+.sg-av.ph[data-c=AR]{background:linear-gradient(#74acdf 0 33%,#fff 33% 67%,#74acdf 67%)}
+.sg-av.ph[data-c=NZ]{background:radial-gradient(circle at 70% 45%,#cc142b 0 13%,transparent 14%),#00247d}
+.sg-av.ph[data-c=AU]{background:radial-gradient(circle at 30% 30%,#fff 0 13%,transparent 14%),radial-gradient(circle at 72% 62%,#fff 0 9%,transparent 10%),#00008b}
 .sg-wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(17.5rem,1fr));gap:1rem;margin:.4rem 0 1.2rem}
 .sg-wc{background:var(--sg-surface);border:2px solid var(--sg-line);border-radius:22px;padding:1rem 1.05rem;display:flex;flex-direction:column;gap:.65rem;box-shadow:var(--sg-shadow)}
 .sg-wc-hd{display:flex;align-items:center;gap:.65rem}
@@ -786,7 +790,7 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-sz-ch figcaption small{color:var(--sg-muted);font-weight:500;font-size:.78rem}
 .sg-sz-ch ol{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
 .sg-sz-ch li{display:grid;grid-template-columns:4.3rem 1fr;gap:.5rem;align-items:center}
-.sg-sz-ch li.cur{opacity:.55}
+.sg-sz-ch li.cur .sg-sz-t{opacity:.55}
 .sg-sz-l{font:700 .8rem var(--sg-display);color:var(--sg-ink);font-variant-numeric:tabular-nums;line-height:1.15}
 .sg-sz-l small{display:block;font-weight:400;font-size:.66rem;color:var(--sg-muted)}
 .sg-sz-bs{display:grid;gap:2px;min-width:0}
@@ -820,3 +824,8 @@ body:has(.sg-tabbar) .app-bottomnav{display:none !important}
 .sg-fresh i.on{background:#fff;border-color:#fff}
 .sg-stat .sg-fresh span{font:600 .62rem var(--sg-display);color:#8fb0d8;margin-left:.3rem}
 @media(prefers-reduced-motion:reduce){.sg-rl-fl{transition:none}}
+
+/* Snežni dogodki sezone */
+.sg-evs{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.6rem}
+.sg-evs li{display:grid;gap:.2rem;background:var(--sg-surface);border:2px solid var(--sg-line);border-radius:16px;padding:.7rem .9rem;font-size:.9rem}
+.sg-evs small{color:var(--sg-muted);font-size:.76rem}

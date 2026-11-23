@@ -176,6 +176,9 @@ jobs:
       - name: Test strani za prireditve (model in vdelani podatki)
         run: node tools/test_prireditev.mjs
 
+      - name: Test strani »Svet snega« (naslov, FAQ, povezave, satelit samo povezave)
+        run: python3 tools/test_svet_snega.py
+
       - name: Test strani adventni koledar, vreme 2026, zgrešitve in rojstnodnevno vreme
         run: |
           node tools/test_advent.mjs
