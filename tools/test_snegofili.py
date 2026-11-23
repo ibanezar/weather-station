@@ -639,7 +639,7 @@ _g = {"regija": "Savinjska in Štajerska", "n": 2, "snowing": ["Prva"], "past24"
       "line": 1300, "measured": (30, "Druga")}
 _cd = g.region_card_html(_g)
 check(f'style="width:{g.gauge_pos(60.0)}%"' in _cd and 'style="width:100.0%"' in _cd, "regija: stolpec količine sledi isti korenski lestvici kot lata (60 cm = polna proga)")
-check(f'style="left:{round(1300 / g.SL_MAX_M * 100, 1)}%"' in _cd, "regija: meja sneženja je na lestvici višin")
+check('style="left:50.0%"' in _cd, "regija: meja sneženja 1300 m je na polovici lestvice 0–2600 m")
 check(f'style="width:{g.gauge_pos(30)}%"' in _cd and "ms" in _cd and "Izmerjena odeja" in _cd, "regija: izmerjena odeja je ločen (temnejši) stolpec")
 check("Sneži na 1 od 2 točk" in _cd and "Naprej 48 ur" in _cd and "ni podatka" in _cd, "regija: sneženje zdaj in manjkajoče okno (brez izmišljenega stolpca)")
 check("Zdaj ne sneži" in g.region_card_html(dict(_g, snowing=[])) and "ni meritve" in g.region_card_html(dict(_g, measured=None)), "regija: brez sneženja in brez meritve")
