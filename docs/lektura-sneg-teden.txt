@@ -1,11 +1,20 @@
-Sneg prihodnji teden: v dolini kaže na sredo in četrtek
+✓ besedilo za lekturo: docs/lektura-sneg-teden.txt
+✓ zapisano: blog/sneg-prihodnji-teden-sreda-cetrtek-1121.html (53 kB)
+  ✓ /home/user/weather-station/tools/../og/sneg-prihodnji-teden-sreda-cetrtek-1121.jpg
+✓ OG slika: og/sneg-prihodnji-teden-sreda-cetrtek-1121.jpg
+✓ 'sneg-prihodnji-teden-sreda-cetrtek-1121' označen kot posodobljen (2026-11-23); blog.json, blog/index.html in sitemap.xml osveženi.
+✓ blog.json, blog/index.html, sitemap.xml, blog/rss.xml, teme in sorodni članki osveženi.
+� ODGOVOR -- Da: v sredo in v četrtek
 
 META OPIS: Bo prihodnji teden sneg? V Rečici ga za sredo in četrtek napoveduje 94 % članov ansamblov, mediana je 13 cm. Kdaj, koliko in na katerih višinah?
 
 UVOD
 Da. Po današnjih izračunih bo v Rečici prihodnji teden snežilo, najverjetneje od srede dopoldne do četrtka. Vsaj 1 cm novega snega med sredo in četrtkom skupaj napoveduje 94 % od skupno 143 članov ansamblov, mediana količine pa znaša 13 cm. Danes in jutri snega v dolini ni pričakovati.
 
-01 — ODGOVOR -- Da: v sredo in v četrtek
+94 %toliko članov ansamblov napoveduje v Rečici vsaj 1 cm novega snega med sredo in četrtkom skupaj
+13 cmmediana količine novega snega v istem obdobju (razpon med 10. in 90. percentilom: 3–22 cm)
+sre 8.00mediana ure, ko naj bi v Rečici prvič začelo snežiti
+–3 °Cnajnižja temperatura v torek zjutraj po modelu MTR; verjetnost zmrzali (najnižja temperatura 0 °C ali manj) je po modelu 95 %
 
 Posodobljeno v ponedeljek, 23. 11., ob 18. uri z novimi zagoni modelov. Razvoj izračuna (delež članov z vsaj 1 cm novega snega, mediana količine, prvi sneg): v soboto ob 9. uri 91 %, 12 cm, v sredo okoli 15. ure; v soboto ob 23. uri 96 %, 16 cm, v sredo okoli 11. ure; v nedeljo ob 10. uri 98 %, 17 cm, v sredo okoli 11. ure; v ponedeljek ob 6. uri 98 %, 14 cm, v sredo okoli 12. ure. Zdaj izračun kaže 94 %, mediano 13 cm in prvi sneg v sredo okoli 8. ure: napoved se je v primerjavi z zadnjo različico premaknila v smer manj snega. Vse številke in grafi v članku so iz zadnjega izračuna.
 
