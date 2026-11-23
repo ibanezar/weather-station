@@ -619,13 +619,13 @@ check(g.powder_groups(_r(drzava="NZ"), True) == "juzna" and g.powder_groups(_r(d
 _cb = {"a": "AT", "b": "AT", "c": "AT", "d": "SI", "e": "SI"}
 _lg = {("2026-11-20", "a"): 12, ("2026-11-20", "b"): 15, ("2026-11-20", "c"): 11, ("2026-11-20", "d"): 1,
        ("2026-11-21", "a"): 20, ("2026-11-21", "b"): 10, ("2026-11-21", "c"): 10.5, ("2026-11-21", "d"): 6, ("2026-11-21", "e"): 5,
-       ("2026-11-22", "a"): 12, ("2026-11-22", "b"): 12,                                  # samo 2 točki: prag 3 ni dosežen
+       ("2026-11-22", "a"): 12, ("2026-11-22", "b"): 12, ("2026-11-22", "c"): 12, ("2026-11-22", "e"): 0,
        ("2026-11-24", "a"): 14, ("2026-11-24", "b"): 14, ("2026-11-24", "c"): 14}          # dan 23. ni zabeležen: vrzel prekine, nov dogodek
 _ev = g.snow_events(_lg, _cb)
 _al = [e for e in _ev if e["scope"] == "alpe"]
-check([(e["start"], e["end"]) for e in _al] == [("2026-11-24", "2026-11-24"), ("2026-11-20", "2026-11-21")], f"dogodki: Alpe, vrzel v dnevniku prekine dogodek ({[(e['start'], e['end']) for e in _al]})")
-check(_al[1]["days"] == 2 and _al[1]["points"] == 3 and _al[1]["peak"] == (20, "a", "2026-11-21"), f"dogodki: dnevi, točke, najmočnejši dan ({_al[1]})")
-check(abs(_al[1]["totals"]["a"] - 32) < 1e-9, "dogodki: skupaj v dogodku po točki")
+check([(e["start"], e["end"]) for e in _al] == [("2026-11-24", "2026-11-24"), ("2026-11-20", "2026-11-22")], f"dogodki: Alpe, vrzel v dnevniku prekine dogodek ({[(e['start'], e['end']) for e in _al]})")
+check(_al[1]["days"] == 3 and _al[1]["points"] == 3 and _al[1]["peak"] == (20, "a", "2026-11-21"), f"dogodki: dnevi, točke, najmočnejši dan ({_al[1]})")
+check(abs(_al[1]["totals"]["a"] - 44) < 1e-9, "dogodki: skupaj v dogodku po točki")
 _sl = [e for e in _ev if e["scope"] == "slovenija"]
 check(len(_sl) == 1 and _sl[0]["start"] == "2026-11-21" and _sl[0]["points"] == 2, f"dogodki: Slovenija ima nižji prag (5 cm na 2 točkah) ({_sl})")
 check(g.snow_events({}, _cb) == [], "dogodki: brez dnevnika ni dogodkov")
