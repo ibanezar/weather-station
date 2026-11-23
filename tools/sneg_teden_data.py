@@ -224,8 +224,58 @@ def fetch():
     print("✓ posnetek:", os.path.relpath(OUT, ROOT), round(os.path.getsize(OUT) / 1024), "kB")
 
 
+
+
+# ───────────── rezerva, kadar Open-Meteo zavrne dostop (dnevna kvota, HTTP 429) ─────────────
+
+WORKER = "https://weatherireica1.filip-eremita.workers.dev"
+
+
+def best_match_from_worker():
+    """Osnovni model strani (Open-Meteo best_match) prek workerja /napoved-om (ima lasten predpomnilnik in kvoto): samo 366 m (celica 374 m)."""
+    req = urllib.request.Request(WORKER + "/napoved-om", headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        o = json.load(r)
+    h = o["hourly"]
+    # worker vrne 8 dni od danes; ure pred začetkom posnetka so None
+    pos = {t: i for i, t in enumerate(h["time"])}
+    idx = [pos.get(t) for t in hours()]
+    t, p = _series(h, "temperature_2m", idx), _series(h, "precipitation", idx)
+    days = {}
+    for k, d in enumerate(DAYS):
+        sl = slice(24 * k, 24 * k + 24)
+        if any(x is None for x in t[sl]) or any(x is None for x in p[sl]):
+            days[d] = None
+            continue
+        s = day_stats(t, p, 24 * k, 24 * k + 24)
+        days[d] = {"cm": round(s[1], 1), "mm": round(s[2], 1), "tmin": round(s[3], 1), "tmax": round(s[4], 1)}
+    return {"label": "Open-Meteo (osnovni model strani)", "elev": {"366": days}, "via": "worker"}
+
+
+def keep_stale(old_path):
+    """Modeli, ki jih ta prenos ni dobil, se prevzamejo iz starejšega posnetka in dobijo `stale_from` (generator jih označi)."""
+    out = json.load(open(OUT, encoding="utf-8"))
+    old = json.load(open(old_path, encoding="utf-8"))
+    if "best_match" not in out["det"]:
+        try:
+            out["det"]["best_match"] = best_match_from_worker()
+            print("  best_match prek workerja ok")
+        except Exception as e:  # noqa: BLE001
+            print("  ⚠ best_match prek workerja:", e)
+    for mid, v in old["det"].items():
+        if mid not in out["det"]:
+            v = dict(v)
+            v["stale_from"] = old["fetched_at"]
+            out["det"][mid] = v
+            print("  prevzeto iz starejšega posnetka:", mid, old["fetched_at"])
+    json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print("✓ posnetek:", os.path.relpath(OUT, ROOT))
+
+
 if __name__ == "__main__":
     if "--retry-det" in sys.argv:
         retry_det()
+    elif "--keep-stale" in sys.argv:
+        keep_stale(sys.argv[sys.argv.index("--keep-stale") + 1])
     else:
         fetch()

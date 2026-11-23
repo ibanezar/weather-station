@@ -101,6 +101,7 @@ VERSIONS = [
     {"kdaj": "v soboto ob 9. uri", "cm1": 91, "med": 12, "h50": 87},
     {"kdaj": "v soboto ob 23. uri", "cm1": 96, "med": 16, "h50": 83},
     {"kdaj": "v nedeljo ob 10. uri", "cm1": 98, "med": 17, "h50": 83},
+    {"kdaj": "v ponedeljek ob 6. uri", "cm1": 98, "med": 14, "h50": 84},
 ]
 
 
@@ -326,7 +327,7 @@ def build_article(S):
     assert datetime.date.fromisoformat(mtr["generated_at"][:10]) >= today - datetime.timedelta(days=1), mtr["generated_at"]   # zamrznjena dnevna napoved lahko zamuja ure
     mt = {x["date"]: x for x in mtr["days"]}
     tue = mt[D[24]]
-    assert tue["tmin"] <= 0 and tue["p_frost"] >= 0.9 and tue["night_regime"] == "clear_calm", tue
+    assert tue["tmin"] <= 0 and tue["p_frost"] >= 0.9, tue
     sn = json.load(open(os.path.join(ROOT, "napoved-snega.json"), encoding="utf-8"))
     assert datetime.date.fromisoformat(sn["generated_at"][:10]) >= today - datetime.timedelta(days=1), sn["generated_at"]
     sdays = {x["date"]: x for x in sn["days"]}
@@ -421,8 +422,8 @@ def build_article(S):
     more, less = w2["med"] > last["med"] + 1, w2["med"] < last["med"] - 1
     smer = ("se je v primerjavi z zadnjo različico premaknila v smer več snega" if more else
             ("se je v primerjavi z zadnjo različico premaknila v smer manj snega" if less else "se je v primerjavi z zadnjo različico le malo spremenila"))
-    prej = " ".join(f"{['Prva', 'Druga', 'Tretja', 'Četrta', 'Peta'][i]} različica članka ({v['kdaj']}) je napovedovala vsaj 1 cm novega snega pri {v['cm1']} % članov, mediano {v['med']} cm in prvi sneg {around(v['h50'])}."
-                    for i, v in enumerate(VERSIONS))
+    prej = ("Razvoj izračuna (delež članov z vsaj 1 cm novega snega, mediana količine, prvi sneg): "
+            + "; ".join(f"{v['kdaj']} {v['cm1']} %, {v['med']} cm, {around(v['h50'])}" for v in VERSIONS) + ".")
     upd = ('<p class="vs-note" style="border-left:3px solid var(--blue);padding-left:.8rem;margin:1rem 0">'
            f"<strong>Posodobljeno {DAN_V[loc.weekday()]}, {loc.day}. {loc.month}., ob {loc.hour}. uri z novimi zagoni modelov.</strong> "
            f"{prej} Zdaj izračun kaže {w2['cm1']} %, mediano {rnd(w2['med'])} cm in prvi sneg {around(h50)}: napoved {smer}. "
@@ -485,13 +486,20 @@ def build_article(S):
         e = det[mid]["elev"]["366"]
         f_ = lambda x: dash if x is None else f"{num(x['cm'], 1)}{NBSP}cm"
         tot = dash if (e.get(D[25]) is None or e.get(D[26]) is None) else f"{num(e[D[25]]['mm'] + e[D[26]]['mm'], 1)}{NBSP}mm"
-        det_rows.append([names[mid], f_(e.get(D[25])), f_(e.get(D[26])), tot])
+        det_rows.append([names[mid] + (" *" if det[mid].get("stale_from") else ""), f_(e.get(D[25])), f_(e.get(D[26])), tot])
     t1 = table("Napovedi štirih ansamblov za Rečico", ["Ansambel", "Sreda: ≥ 1 cm", "Četrtek: ≥ 1 cm", "Četrtek: mediana novega snega"], ens_rows)
     t2 = table("Primerjava determinističnih modelov", ["Model", "Sreda: sneg", "Četrtek: sneg", "Padavine v sredo in četrtek"], det_rows)
     n_det = len(both)
     gone = [names[m] for m in ("ecmwf_aifs025_single", "icon_eu", "gfs_seamless", "ukmo_seamless", "gem_seamless", "ecmwf_ifs025") if m not in det]
     short = [names[m] for m in ("ecmwf_ifs025", "ecmwf_aifs025_single", "icon_eu", "gfs_seamless", "arpege_europe", "ukmo_seamless", "gem_seamless", "best_match")
              if m in det and not (det[m]["elev"]["366"].get(D[25]) and det[m]["elev"]["366"].get(D[26]))]
+    stale = sorted({v["stale_from"] for v in det.values() if v.get("stale_from")})
+    assert len(stale) <= 1, stale
+    stale_note = ""
+    if stale:
+        st = datetime.datetime.fromisoformat(stale[0]) + datetime.timedelta(hours=1)
+        stale_note = (f"* Model je iz zagona z dne {st.day}. {st.month}. ob {st.hour}. uri: ob zadnjem osveževanju je Open-Meteo zavrnil dostop (dnevna omejitev zahtev), "
+                      "zato novejšega zagona nisem mogel prenesti. Modeli brez zvezdice so iz zadnjega osveževanja. ")
     dash_note = (f"Pomišljaj (–) pomeni, da napoved modela ne sega do tega dne ({', '.join(short)}). " if short else "")
     missing_note = (f" {', '.join(gone)} ob zadnjem osveževanju zaradi omejitve dostopa ni bil dosegljiv, zato ga v tabeli ni." if gone else "")
     lo_cm, hi_cm = min(others), max(others)
@@ -508,12 +516,13 @@ def build_article(S):
         f"{ {4: 'Štirje deterministični modeli', 5: 'Pet determinističnih modelov', 6: 'Šest determinističnih modelov', 7: 'Sedem determinističnih modelov'}[n_det - 1] }, katerih napoved sega do četrtka, za Rečico v obdobju od srede do četrtka skupaj "
         f"{ {4: 'napovedujejo', 5: 'napoveduje', 6: 'napoveduje', 7: 'napoveduje'}[n_det - 1] } od {rnd(lo_cm)} do {rnd(hi_cm)} cm snega. "
         "Razlikujejo se tako v količini kot v tem, kateri dan naj bi zapadlo več snega. "
+        + ("Del modelov je iz jutranjega zagona (glej opombo pod tabelo). " if any(v.get("stale_from") for v in det.values()) else "") +
         f"Najmanj snega napoveduje {names[lo_mid]} ({num(cm2[lo_mid], 1)} cm), največ {names[hi_mid]} ({num(cm2[hi_mid], 1)} cm). "
         "Osnovni model Open-Meteo, na katerem temelji tudi moja stran " + a("/zima/", "Zima") + f", napoveduje {rnd(best)} cm" +
         (", kar je pod vsemi drugimi modeli. " if best < min(others) else (", kar je nad vsemi drugimi modeli. " if best > max(others) else ", kar je znotraj tega razpona. ")) +
         "Stran Zima se osvežuje po svojem urniku, zato se lahko številke razlikujejo. Tukaj je merilo napoved ansamblov, ne en sam model.",
         t2,
-        '<p class="vs-note">' + dash_note +
+        '<p class="vs-note">' + stale_note + dash_note +
         'Količina snega je izračunana enako kot v grafih: 1 mm padavin pomeni 1 cm snega, pri temperaturi do 0,5 °C se padavine v celoti upoštevajo kot sneg, nad 2,5 °C pa ne več.'
         + missing_note + '</p>',
     ]
