@@ -23,7 +23,7 @@ Za arhivske fotografije v članku (ne na karticah) velja podpis »ilustracija«.
 
 ---
 
-## Kartica 1 — »Sneg ta teden: sreda in četrtek« (94 %)
+## Kartica 1 — »Sneg prihodnji teden: sreda in četrtek« (94 %)
 
 ❄️ Bo ta teden sneg? Po današnjih izračunih v dolini da.
 
