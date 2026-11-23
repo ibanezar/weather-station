@@ -55,7 +55,12 @@ MODEL_LABELS = {
 FORWARD_LABELS = {
     "arso": "ARSO",
     "yr": "Yr (MET Norway)",
+    # XWeather (Vaisala) je izbiren vir: log_forward_forecasts.py ga zapiše samo, če sta nastavljena
+    # secreta XWEATHER_CLIENT_ID/XWEATHER_CLIENT_SECRET. Brez zapisov ga stran ne prikaže
+    # (glej `logged` v main: ne reklamiramo vira, ki se ne zbira).
+    "xweather": "XWeather",
 }
+OPTIONAL_FORWARD = {"xweather"}
 # AI ansambli (ensemble API Open-Meteo) — arhiv napovedi le od septembra 2026,
 # zato ne gredo v glavno primerjavo, ki teče od junija 2024: tam bi bila MAE iz
 # dveh jesenskih mesecev ob MAE iz dveh let, kar je drugo merilo. Merijo se
@@ -306,10 +311,13 @@ def main():
     # arhiva nazaj (Faza 1b). Vseeno gresta skozi isto merilo, samo n_total
     # pove strani, ali je smiselno prikazati številke ali samo "zbiranje se
     # je začelo" (isto besedilo kot tocnost-napovedi ob n_days==0).
-    print("\nSprotno beleženi viri (ARSO, Yr) -- brez arhiva za nazaj:")
+    print("\nSprotno beleženi viri (ARSO, Yr, XWeather) -- brez arhiva za nazaj:")
     forward_results = {}
     forward_n = {}
-    for model in FORWARD_LABELS:
+    logged = {m for (m, _lead) in fc_by_key}
+    active_forward = {m: lbl for m, lbl in FORWARD_LABELS.items()
+                      if m not in OPTIONAL_FORWARD or m in logged}
+    for model in active_forward:
         per_lead, _, n_total = score_source(model)
         forward_results[model] = per_lead
         forward_n[model] = n_total
@@ -351,7 +359,7 @@ def main():
         "models": MODEL_LABELS,
         "results": results,
         "zero_crossing_lead_days": zero_crossing,
-        "forward_models": FORWARD_LABELS,
+        "forward_models": active_forward,
         "forward_results": forward_results,
         "forward_n": forward_n,
         "ai_models": AI_ENSEMBLE_LABELS,

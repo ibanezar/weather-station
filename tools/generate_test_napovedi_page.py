@@ -37,6 +37,11 @@ CSV_OUT = os.path.join(PAGE_DIR, "podatki.csv")
 
 MIN_SAMPLE_DAYS = 60  # brief: pod tem se ne razglaša zmagovalec
 
+# podatki.csv je javen pod CC BY 4.0. Surovih napovedi komercialnega ponudnika (XWeather) v njem
+# ne razdeljujemo: objavljamo samo izračunane metrike (MAE ipd.) na strani. Pogoji XWeather niso
+# prebrani do konca, zato raje ne ponovno razdeljujemo njihovih vrednosti.
+NOT_IN_PUBLIC_CSV = {"xweather"}
+
 
 def load_data():
     try:
@@ -56,6 +61,8 @@ def write_csv():
             continue
         with open(path, encoding="utf-8", newline="") as f:
             for r in csv.DictReader(f):
+                if r["model"] in NOT_IN_PUBLIC_CSV:
+                    continue
                 actual = hist.get(r["valid_at"])
                 if not actual or actual.get("src") not in ("station", "wu"):
                     continue  # samo razrešeni dnevi z veljavno postajno meritvijo
@@ -337,6 +344,11 @@ def build_body(data, n_csv_rows):
     n_obs = data.get("n_compared_days") or data["n_obs_days"]
     zero_crossing = data.get("zero_crossing_lead_days") or {}
     forward_labels = data.get("forward_models") or {}
+    # XWeather: navedba vira samo, ko je vir res v podatkih; surove vrednosti niso v podatki.csv
+    xw_on = "xweather" in forward_labels
+    xw_src = ", XWeather (xweather.com)" if xw_on else ""
+    xw_note = (" Napovedi XWeather (Vaisala) so tu samo v povzetku (MAE ipd.); njihovih surovih "
+               "vrednosti v podatki.csv ne objavljamo. Powered by XWeather." if xw_on else "")
     forward_n = data.get("forward_n") or {}
 
     # D+1 lestvica
@@ -555,7 +567,7 @@ def build_body(data, n_csv_rows):
   <p class="archive-intro">Celoten podatkovni niz (napoved vsakega vira, dejanska meritev, napaka) je javno na
   voljo za prenos: <a href="/test-napovedi/podatki.csv" style="color:var(--blue)">podatki.csv</a>
   ({n_csv_rows} vrstic, licenca CC BY 4.0 — pri uporabi navedi vir). Viri: Open-Meteo (previous-runs-api.open-meteo.com),
-  ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no), meritve postaje IREICA1.</p>
+  ARSO (vreme.arso.gov.si), Yr/MET Norway (api.met.no){xw_src}, meritve postaje IREICA1.{xw_note}</p>
 {faq_html}
   <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'''
     return body, faq_items

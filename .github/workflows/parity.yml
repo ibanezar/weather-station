@@ -265,6 +265,7 @@ jobs:
           python3 tools/test_mtr_extras.py
           python3 tools/test_hourly_log.py
           python3 tools/test_ensemble_log.py
+          python3 tools/test_xweather_forecast.py
           python3 tools/test_profile_log.py
           python3 tools/test_mtr_wind.py
 

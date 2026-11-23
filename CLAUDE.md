@@ -2218,6 +2218,16 @@ je bilo možno enkraten backfill namesto čakanja na sprotno beleženje.
   `pressure_hpa`, `solar_wm2` (priprava na urni popravek napovedi; notranjih blokov ne
   bere). Zgodovina za nazaj ne obstaja — `--backfill 85` (ročno, z Ecowitt secreti) dopolni
   prazna polja za zadnjih ~85 dni, preden jih Ecowitt podvzorči. Test: `tools/test_hourly_log.py`.
+- **XWeather (Vaisala, 23. 11. 2026) kot sprotno beležen vir** v `tools/log_forward_forecasts.py` (model `xweather` v `data/forecast-forward-log.csv`): komercialna napoved, ki zlije več modelov,
+  kot referenca ob ARSO in Yr. **Izbiren**: brez secretov `XWEATHER_CLIENT_ID`/`XWEATHER_CLIENT_SECRET` (korak v `test-napovedi-daily.yml`) se tiho preskoči, stran ga ne omenja, dokler v dnevniku ni vrstic
+  (`OPTIONAL_FORWARD` v `compute_forecast_test_metrics.py`). Urna napoved (`filter=1hr`), dnevni Tmax/Tmin/padavine sestavljeni po lokalnem dnevu kot pri Yr (dan z < 20 urami se ne zapiše); en klic na dan
+  (~30 od 15.000 mesečnih dostopov). **Pogoji: XWeatherjev brezplačni nivo je po prijavni strani »za preizkušanje, ne za komercialno rabo« in pogojev nisem prebral do konca**; Filip je 23. 11. 2026 povedal, da stran
+  zaenkrat ni komercialna (podjetje ni registrirano). **Preden registriraš podjetje ali vklopiš oglase na `/podjetja/`, preveri pogoje (komercialna raba, ponovna razdelitev, navedba) ali preidi na plačljivi načrt.**
+  Surove vrednosti XWeather **niso v javnem `test-napovedi/podatki.csv`** (`NOT_IN_PUBLIC_CSV`); `data/forecast-forward-log.csv` v repozitoriju pa jih vsebuje in je javen prek Pages: če pogoji ponovne razdelitve
+  prepovedujejo, loči zapis v zasebno shrambo. Pri vključenem viru stran navede »Powered by XWeather«. **Živo nepreizkušeno** (api.xweather.com iz peskovnika ni dosegljiv; oblika odgovora po dokumentaciji, test je na
+  lažnem odgovoru, `tools/test_xweather_forecast.py`): po prvem teku preveri 7 dni tmax/tmin/padavin v dnevniku in da ključ ni v dnevniku teka. **Ni narejeno:** vrstica v `REGISTER` (`check_freshness.py` bere dnevnik skupaj,
+  izpad samo XWeather ne bi bil viden), vključitev na semafor `/tocnost-napovedi/` (zahteva novo barvo in zagon `validate_palette.js`), `/roads` (pokritost Slovenije ni preverjena), PWS contributor (zasebnost: Ecowitt
+  prenos bi moral dokazano izpuščati notranje meritve).
 - `tools/log_ensemble_forecasts.py` (od 6. 10. 2026, korak v `test-napovedi-daily.yml`) —
   dnevni zajem ansamblov ECMWF ENS, ICON-EPS in GEFS v `data/ensemble-forward-log.csv`
   (razpon članov Tmax/Tmin, `p_wet`, `p_frost`). Ansambli nimajo arhiva nazaj, zato se

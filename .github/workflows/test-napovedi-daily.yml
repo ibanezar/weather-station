@@ -27,7 +27,11 @@ jobs:
       - name: Dopolni arhiv napovedi (Open-Meteo Previous Runs)
         run: python3 tools/build_forecast_archive.py --past-days 10
 
-      - name: Zabeleži napoved ARSO in Yr (MET Norway)
+      # XWeather (izbiren vir): brez secretov XWEATHER_CLIENT_ID/XWEATHER_CLIENT_SECRET se korak zanj tiho preskoči.
+      - name: Zabeleži napoved ARSO, Yr (MET Norway) in XWeather
+        env:
+          XWEATHER_CLIENT_ID: ${{ secrets.XWEATHER_CLIENT_ID }}
+          XWEATHER_CLIENT_SECRET: ${{ secrets.XWEATHER_CLIENT_SECRET }}
         run: python3 tools/log_forward_forecasts.py
 
       # Ansambli nimajo arhiva nazaj — zgodovina se nabira samo s tekočim zajemom.
