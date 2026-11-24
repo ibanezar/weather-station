@@ -65,7 +65,8 @@ async function open(payload, mode = 'ok') {
   await p.waitForTimeout(700);
   return { p, ctx, errors };
 }
-const painted = p => p.evaluate(() => { const cv = document.getElementById('sk-cv'); if (!cv) return -1; const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 100) n++; return n; });
+// število vidno pobarvanih točk PREKRIVNEGA sloja (JS ga zapiše v data-px; podlaga z reliefom je pobarvana povsod, zato piksli kanala ne povedo nič)
+const painted = p => p.evaluate(() => { const cv = document.getElementById('sk-cv'); return cv ? +cv.dataset.px : -1; });
 const empty = p => p.evaluate(() => { const e = document.getElementById('sk-empty'); return e && !e.hidden ? e.textContent : null; });
 
 // 1) navaden snežni scenarij
@@ -73,16 +74,26 @@ const empty = p => p.evaluate(() => { const e = document.getElementById('sk-empt
   const { p, ctx, errors } = await open(data({ snow: true }));
   check(await p.$('#sk-cv') !== null, 'karta se zgradi');
   await p.click('button[data-v="h"]'); await p.click('#sk-slider'); await p.fill('#sk-slider', '12'); await p.dispatchEvent('#sk-slider', 'input');
-  check(await painted(p) > 2000, 'sneženje po urah ob uri 13: karta je pobarvana');
+  check(await painted(p) > 500, 'sneženje po urah ob uri 13: karta je pobarvana');
   await p.click('button[data-v="s"]'); await p.click('button[data-h="24"]');
-  check(await painted(p) > 2000, 'skupno do +24 h: karta je pobarvana');
+  check(await painted(p) > 500, 'skupno do +24 h: karta je pobarvana');
   check(await empty(p) === null, 'sneg je napovedan: opozorilo o praznem polju je skrito');
   await p.click('button[data-v="l"]'); await p.click('button[data-h="6"]');
-  check(await painted(p) > 2000, 'meja sneženja: karta je pobarvana');
+  check(await painted(p) > 500, 'meja sneženja: karta je pobarvana');
   await p.click('#sk-cv', { position: { x: 100, y: 60 } });
   const read = await p.textContent('#sk-read');
   check(/meja sneženja/.test(read) && !/NaN|undefined/.test(read), 'dotik karte izpiše vrednosti brez NaN (' + read.slice(0, 60) + '…)');
   await p.click('#sk-days button:nth-child(2)'); await p.click('#sk-next'); await p.click('#sk-prev'); await p.click('#sk-now');
+  check(await p.evaluate(() => document.getElementById('sk-cv').dataset.rel) === '1', 'relief se naloži kot podlaga');
+  await p.click('button[data-v="h"]'); await p.click('#sk-now');
+  await p.click('#sk-speed'); await p.click('#sk-speed');                 // ×4
+  await p.click('#sk-play'); await p.waitForTimeout(1600);
+  const k1 = +await p.inputValue('#sk-slider');
+  check(k1 >= 3 && /Premor/.test(await p.getAttribute('#sk-play', 'aria-label')), 'predvajanje napreduje (ura ' + k1 + ') in gumb pokaže Premor');
+  await p.click('#sk-play'); const k2 = +await p.inputValue('#sk-slider'); await p.waitForTimeout(500);
+  check(k2 === +await p.inputValue('#sk-slider') && /Predvajaj/.test(await p.getAttribute('#sk-play', 'aria-label')), 'premor ustavi napredovanje');
+  await p.click('#sk-play'); await p.waitForTimeout(300); await p.click('#sk-next');
+  check(/Predvajaj/.test(await p.getAttribute('#sk-play', 'aria-label')), 'ročna izbira ure ustavi predvajanje');
   check(errors.length === 0, 'brez napak v konzoli ' + JSON.stringify(errors));
   await ctx.close();
 }
@@ -92,6 +103,7 @@ const empty = p => p.evaluate(() => { const e = document.getElementById('sk-empt
   await p.click('button[data-v="s"]'); await p.click('button[data-h="24"]');
   const msg = await empty(p);
   check(msg && /ne napoveduje sneženja/.test(msg) && /sneženja ni/.test(msg), 'brez snega: karta to pove (' + msg + ')');
+  check(await painted(p) === 0, 'brez snega prekrivni sloj ni pobarvan');
   await ctx.close();
 }
 // 3) ICON-D2 zadnjih ur nima podatkov: to NI »ni sneženja«
