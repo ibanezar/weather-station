@@ -1,12 +1,12 @@
 {
-  "date": "2026-11-23",
-  "issued": "23.11.2026 7:00 CET",
-  "issued_at": "2026-11-23T07:30:36.906711+01:00",
-  "top_station": "Kočevje",
-  "top_mm": 48,
+  "date": "2026-11-24",
+  "issued": "24.11.2026 7:00 CET",
+  "issued_at": "2026-11-24T07:30:40.123026+01:00",
+  "top_station": "Bilje",
+  "top_mm": 0,
   "n_stations": 19,
-  "station_mm": 9.6,
-  "should_post": true,
-  "image": "https://meteorec.si/og/precip-map/2026-11-23.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-23-story.jpg"
+  "station_mm": 0.0,
+  "should_post": false,
+  "image": "https://meteorec.si/og/precip-map/2026-11-24.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-24-story.jpg"
 }
