@@ -133,7 +133,7 @@ def v2(S):
         d.text((lx + 32, y0 + 22), nm, font=font(R, 24), fill=MUTED)
         lx += 32 + text_w(d, nm, font(R, 24)) + 36
     d.text((gx0, y0 + 58), "delež članov po vrsti padavin, ura za uro", font=font(R, 22), fill=DIM)
-    footer(d, "Rečica 366 m, torek opoldne do petek opoldne", "Najzanesljivejši je četrtek; za petek in vikend se modeli razidejo.")
+    footer(d, "Rečica 366 m, torek opoldne do petek opoldne", "Največ snega naj bi bilo v četrtek; za petek in vikend se modeli razidejo.")
     return img
 
 
