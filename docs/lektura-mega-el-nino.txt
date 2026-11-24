@@ -1,0 +1,339 @@
+Mega El Niño: 10 °C je konica, rekordi pa so resnični
+
+META OPIS: »Mega El Niño« ni uradna stopnja, +10 °C pa velja za ozko območje. Kaj kažejo NOAA, Copernicus, BoM in WMO ter kaj to pomeni za 2027 in našo zimo.
+
+UVOD
+»Mega El Niño« je vzdevek, ne uradna stopnja, »+10 °C« pa ni temperatura Tihega oceana. Ryan Maue je 22. novembra na omrežju X objavil dnevni zemljevid ECMWF, na katerem ima ozek pas vode ob obali Peruja in pri Galápagosu do 10 °C nad povprečjem. Uradni kazalniki za osrednji Pacifik kažejo glede na lestvico in obdobje od +2,0 do +3,3 °C, nekateri med njimi pa so res rekordni.
+
+01 · NASLOV -- Od kod je prišlo »+10 °C«
+
+Na kratko
+Beseda »mega« ni uradna.
+ NOAA ima stanje »El Niño Advisory«, moč dogodka pa označuje kot »zelo močan«.
++10 °C je lokalna konica
+ ene dnevne analize. Mesečna konica po Copernicusu je 6–7 °C, kazalnik Niño 3.4 pa glede na lestvico in obdobje 2,0–3,3 °C.
+Rekordi so resnični, a ne vsi:
+ mesečno odstopanje v Niño 3.4 po ERA5 je oktobra znašalo +3,21 °C, ONI za avg–okt je najvišji za to sezono. RONI, po katerem NOAA presoja »zgodovinski« dogodek, pa je bil leta 1997 ob istem času višji.
+Vrh še ni mimo:
+ modeli ga pričakujejo decembra ali januarja; NOAA daje okoli 60 % verjetnosti, da bo okt–dec presegel vse od leta 1950.
+Za Slovenijo
+ je toplejša in bolj namočena zima verjetnejša, ni pa zagotovljena. Globalno bo najverjetneje najtoplejše leto 2027.
+
++3,21 °C
+Niño 3.4, oktober po ERA5 (Copernicus): rekord vseh mesecev; prej 2,99 °C (september)
++2,46 °C
+ONI za avg–okt: najvišji za to sezono; 1997: +2,04, 2015: +2,02
++1,97 °C
+RONI za avg–okt: merilo NOAA za »zgodovinski« dogodek; 1997: +2,07
+≈60 %
+verjetnost zgodovinskega dogodka (RONI ≥ +2,5 °C) za okt–dec; oktobra 83 %
+
+Izvirnik je objava Ryana Maueja na omrežju X z dne 22. novembra: »+10°C sea surface temperature anomaly near Galapagos and off coast of Peru. This is now a Mega El Niño.« Priložil je zemljevid odstopanj temperature morske površine, narejen iz podatkov ECMWF. New York Post ga je 23. novembra povzel z naslovom o 18 °F nad povprečjem, Daily Mail in drugi mediji so sledili.
+
+Besede »mega« ni uvedla nobena meteorološka služba. Geo.tv pravi, da to ni uradna znanstvena razvrstitev, in večina člankov, ki ponavljajo »10 °C«, v nadaljevanju prizna, da gre za lokalno konico, ne za ves ocean (tako tudi India Today).
+
+Dve opombi. Prvič, 10 °C je odstopanje, ne temperatura, zato je pravilna pretvorba 18 °F in ne 50 °F, kot je zapisal Daily Mail. Drugič, zemljevida same analize iz svojega okolja nisem mogel preveriti, zato številko povzemam po medijih.
+
+02 · ŠTEVILKE -- Isti ocean, deset različnih ravnil
+
+Spodnji graf postavi vse številke, ki so ta teden krožile, na isto lestvico. Razlikujejo se po območju (velika ali majhna regija), po času (dan, teden, mesec, tri mesece) in po tem, kaj imajo za »običajno« (večinoma obdobje 1991–2020). Zato jih ni mogoče neposredno primerjati, a vsaka je na svojem mestu poštena.
+
+Deset številk za isti El Niño
+Odstopanje od povprečja, °C. Dotaknite se vrstice za opis.
+kazalnik Niño 3.4
+širši vzhodni Pacifik
+lokalna konica
+RONI, avg–okt (3 mesece, relativni)
+1,97 °C
+ONI, avg–okt (3 mesece)
+2,46 °C
+Niño 3.4, oktober (CPC, relativni)
+2,5 °C
+Niño 3.4, teden do 22. 11. (BoM, relativni)
+2,67 °C
+Niño 3.4, oktober (ERA5, Copernicus)
+3,21 °C
+Niño 3.4, teden 15.–21. 11. (OISST)
+3,3 °C
+Niño 3, teden 15.–21. 11. (OISST)
+4,7 °C
+Niño 1+2, teden 15.–21. 11. (OISST)
+5,7 °C
+Obala Peruja in zahodno od Galápagosa, oktober (ERA5)
+6–7 °C
+Dnevni zemljevid ECMWF, 22. 11. (Maue)
+≈ 10 °C
+0
+2
+4
+6
+8
+10
+°C nad povprečjem
+Zadnja vrstica je več kot trikrat višja od uradnega kazalnika, a opisuje ozko območje in en dan. Viri: NOAA CPC, ONI, RONI, BoM, Copernicus C3S, FloodRadar (tedenske vrednosti OISST), New York Post.
+
+Moč El Niña se meri s povprečjem čez veliko območje: Niño 3.4 je pas 5° severno in južno od ekvatorja med 170° in 120° zahodno. Konica ob obali pove, kje bo učinek najbolj otipljiv (Peru), ne pa, kako močan je El Niño kot celota.
+
+Še bolj izrazito je pod površjem. Razprava CPC z 12. novembra omenja odstopanja nad +10 °C v globini vzhodnega Pacifika. »10 °C« torej res obstaja, a pod vodo in ne kot temperatura površine.
+
+03 · ZEMLJEVID -- Segrevanje narašča proti vzhodu
+
+El Niño nastane, ko oslabijo pasati, ki običajno potiskajo toplo površinsko vodo proti zahodu. Topla plast se razlije proti vzhodu, hladno dvigovanje ob obali Južne Amerike pojenja, padavinsko jedro pa se iz Indonezije preseli proti središču Pacifika (CPC letos opaža okrepljeno konvekcijo od datumske črte do vzhodnega Pacifika in zatrto nad Indonezijo).
+
+Shema: običajno stanje in El Niño
+Shematski prerez ekvatorialnega Pacifika, ni v merilu. Oranžna plast je topla voda, črtkana črta je termoklina.
+
+Letos se segrevanje stopnjuje proti vzhodu: v regiji Niño 4 je tedensko odstopanje +1,4 °C, v Niño 3.4 +3,3 °C, v Niño 3 +4,7 °C in v obalni regiji Niño 1+2 +5,7 °C. Na zadnjem zemljevidu lahko preklopite med tremi lestvicami.
+
+Odstopanje po regijah Niño
+Tedensko, 15.–21. 11. 2026 (preklopite lestvico)
+Tradicionalno (teden)
+Relativno (teden)
+Mesec oktober (CPC)
+0
+2
+4
+6 °C
+Pikčast zemljevid kaže kopno; črtkani pravokotniki so regije Niño (Niño 3.4 leži znotraj Niño 3 in deloma Niño 4). Relativne tedenske vrednosti so iz predstavitve CPC z 23. 11., tradicionalne po sledilnikih, ki berejo datoteke NOAA (FloodRadar, ElNinoLive), mesečne za oktober iz razprave CPC; za Niño 4 mesečne vrednosti v razpravi ni. Najnovejših vrstic datoteke NOAA nisem mogel prebrati sam.
+
+Razlika med lestvicama je pomembna. Tradicionalni indeks meri samo odstopanje v regiji, relativni (RONI) pa od njega odšteje odstopanje povprečja vseh tropov (20° S–20° J). Tropi se zaradi podnebnih sprememb segrevajo povsod, zato tradicionalni indeks sam po sebi raste; relativni natančneje pokaže, koliko je ekvatorialni Pacifik toplejši od svoje okolice. NOAA zdaj verjetnosti preverja z RONI, BoM pa je na relativne indekse prešel septembra 2025.
+
+04 · ČASOVNICA -- Kako smo prišli do tu
+
+Kako je do tega prišlo, v devetih postankih:
+
+Marec 2026
+Po ENFEN se začne obalni El Niño (Niño 1+2). Od sredine aprila se segrevanje širi proti središču Pacifika (CPC).
+Junij 2026
+NOAA razglasi stanje El Niño Advisory (naš prvi članek).
+3. september
+WMO: skoraj 100 % verjetnost, da bo El Niño trajal do februarja 2027 (WMO).
+September
+Dnevno odstopanje v Niño 3.4 preseže rekord iz novembra 2015 in od takrat ostane nad njim (Carbon Brief). Mesečno: 2,99 °C.
+Oktober
+Mesečno odstopanje v Niño 3.4 doseže +3,21 °C; peruanska obala je do 6–7 °C nad povprečjem (Copernicus).
+26. oktober
+WMO: temperatura v tropskem Pacifiku lahko do januarja naraste na 3,8 °C nad povprečjem (WMO).
+12. november
+NOAA zniža verjetnost »zgodovinskega« dogodka z 83 na okoli 60 % (CPC).
+22.–23. november
+Maue objavi zemljevid, New York Post pa naslov o »mega El Niñu« (NY Post).
+24. november
+BoM: relativni Niño 3.4 je +2,67 °C, vrh dogodka doslej +2,88 °C (BoM).
+
+05 · REKORDI -- Kateri rekord je resničen
+
+Odgovor je: več rekordov je resničnih, a ne vsi. Po virih:
+
+Copernicus (ERA5).
+ Oktobrska povprečna temperatura morja v Niño 3.4 je bila 29,94 °C, odstopanje 3,21 °C. Obe vrednosti presegata vrhove El Niñov 1982/83, 1997/98 in 2015/16; prejšnji rekord meseca je bil september z 2,99 °C (C3S).
+Dnevno (Carbon Brief).
+ Od septembra je odstopanje nad rekordom iz novembra 2015; 18. oktobra je bilo okoli 3,5 °C, približno 0,4 °C nad vrhom iz leta 2015 (osnova 1996–2025, Carbon Brief).
+Tedensko, vzhod (NOAA).
+ Niño 1+2 (+5,7 °C) in Niño 3 (+4,7 °C) sta najvišji tedenski vrednosti v nizu od leta 1981. Niño 3.4 je 0,1 °C pod vrhom dogodka (+3,4 °C konec oktobra) (po FloodRadar).
+BoM.
+ Relativni Niño 3.4 je dosegel +2,88 °C, zdaj je +2,67 °C; najvišje mesečne vrednosti od leta 1900, ki je iz let 1982/83, še ni presegel (BoM).
+ONI (tri mesece).
+ +2,46 °C za avg–okt je najvišja vrednost za to sezono doslej (1997: +2,04, 2015: +2,02).
+
+Česa ni: RONI, po katerem NOAA presoja »zgodovinski« dogodek, je za avg–okt +1,97 °C, leta 1997 pa je bil ob istem času +2,07 °C. Tudi na tedenski relativni lestvici je Niño 3.4 (+2,4 °C) še pod rekordom iz konca leta 1982 (+2,9 °C). Verjetnost zgodovinskega dogodka (RONI ≥ +2,5 °C v okt–dec) je 12. novembra padla z 83 na okoli 60 %.
+
+Tri velikani in letošnje leto
+Tromesečno odstopanje v Niño 3.4 po sezonah. Preklopite med ONI in RONI, izklopite dogodke v legendi.
+ONI (tradicionalni)
+RONI (relativni)
+1982/83
+1997/98
+2015/16
+2023/24
+2026/27
+Od decembra–februarja v letu začetka do novembra–januarja naslednje leto; 2026 se konča z avg–okt, ker novejših sezon še ni. Črtkana črta: prag, ki ga NOAA šteje za »zgodovinski« dogodek. Viri: ONI in RONI (NOAA CPC, prebrano 24. 11. 2026).
+
+Pogled na vrhove: ONI je letos že nad vrhom 1997/98 (+2,37) in 1982/83 (+2,14); samo vrh 2015/16 (+2,59) je višji. RONI jih še ne dosega: vrhovi so +2,40 (1982/83), +2,28 (1997/98) in +2,25 (2015/16), letošnja vrednost je +1,97. Največja vrednost v celotnih datotekah od leta 1950 je +2,59 pri ONI (NDJ 2015) in +2,40 pri RONI (DJF 1983).
+
+06 · NAPOVED -- Ali je vrh že mimo?
+
+Kratek odgovor: v osrednjem Pacifiku se rast zadnje tedne ustavlja, na vzhodu še narašča, modeli pa vrh pričakujejo decembra ali januarja.
+
+Zadnjih 12 tednov v štirih regijah
+Tedensko odstopanje, °C (preklopite lestvico)
+Tradicionalno
+Relativno
+Niño 1+2
+Niño 3
+Niño 3.4
+Niño 4
+Niño 3.4 in Niño 4 se od začetka oktobra komaj spreminjata, Niño 3 in Niño 1+2 pa sta v zadnjem tednu poskočila. Podatki: OISST v2.1, NOAA CPC, osnova 1991–2020, povzeto po FloodRadar; zadnji teden potrjen v predstavitvi CPC.
+
+CPC dodaja, da so podpovršinska odstopanja od sredine oktobra manjša in da se hladna voda na zahodu širi proti datumski črti. To je znak, da se je dotok toplote upočasnil, ne da bi bil vrh nujno mimo.
+
+Uradna verjetnost po razredih moči
+NOAA CPC, napoved z 12. 11. 2026; razredi RONI
+La Niña
+nevtralno
+šibek
+zmeren
+močan
+zelo močan
+OND
+okt–dec 2026
+100 %
+NDJ
+nov 2026–jan 2027
+96 %
+DJF
+dec 2026–feb 2027
+19 %
+79 %
+JFM
+jan–mar 2027
+18 %
+44 %
+35 %
+FMA
+feb–apr 2027
+21 %
+49 %
+25 %
+MAM
+mar–maj 2027
+20 %
+53 %
+25 %
+AMJ
+apr–jun 2027
+61 %
+34 %
+MJJ
+maj–jul 2027
+13 %
+75 %
+11 %
+JJA
+jun–avg 2027
+33 %
+61 %
+Odstotki po razredih RONI; seštevek vsake vrstice je 100 %. Razred »zelo močan« je vse nad +2,0 °C, zato ne pove, koliko nad. Vir: NOAA CPC. Naslednja razprava je 10. decembra.
+
+Modeli. Carbon Brief je analiziral 656 napovedi 14 modelov: povprečni vrh je okoli 4 °C, deset modelov ga postavlja v december, štirje v november. WMO je 26. oktobra zapisal, da lahko temperatura v tropskem Pacifiku do januarja naraste na 3,8 °C (WMO). BoM pričakuje vrh decembra ali januarja in relativni Niño 3.4 nad vsem od leta 1950; NOAA oslabitev v začetku 2027. Pridržek, ki ga omenja Carbon Brief: napovedani vrh je zunaj niza, na katerem so se modeli učili.
+
+07 · SVET -- Kaj to pomeni po svetu
+
+Moč El Niña ne pove, kje in kako hude bodo posledice. WMO poudarja, da učinek določajo tudi Indijski ocean in Atlantik, in da je »zelo močan« El Niño lahko tudi z blagimi posledicami v posamezni državi (WMO). Zemljevid prikazuje, kje so po napovedih in dosedanjih meritvah običajno bolj suho ali bolj namočeno.
+
+Kje El Niño običajno prinese več ali manj padavin
+Dotaknite se pravokotnika ali gumba za podrobnosti in vir
+bolj namočeno
+bolj suho
+šibek ali mešan signal
+Izberite območje
+Dotaknite se okvirja na zemljevidu ali gumba spodaj.
+Obala Peruja in Ekvadorja
+Jugovzhodna Južna Amerika
+Zahod in jugozahod ZDA
+Vzhodna Afrika
+Vzhodna Azija
+Južna Afrika
+Indonezija in Jugovzhodna Azija
+Amazonija in sever Južne Amerike
+Srednja Amerika in južna Karibi
+Indija
+Vzhodna Avstralija
+Pacifiški otoki
+Evropa
+Shematsko: pravokotniki so grobe meje območij, ne meje držav in ne natančna območja padavin. Napovedi (WMO, Copernicus, FEWS NET) so sezonske verjetnosti, ne napovedi posameznih dni; Indija je že izmerjena.
+
+Peru.
+ ENFEN pričakuje obalni El Niño »izredne« jakosti do februarja 2027 in šibitev do julija; padavine nad normalo, rekordna temperatura zraka (ENFEN). V drugi dekadi oktobra je bila povprečna najvišja temperatura na osrednji obali 6,8 °C nad običajno; leta 1997 2,9 °C, leta 2023 2,6 °C (SENAMHI).
+Južna Afrika.
+ Pozen začetek deževja in tveganje suše; največ pomoči bo potrebne v sušni sezoni 2027/28 (FEWS NET).
+Indija.
+ Monsun je bil 13 % pod normalo, najslabši od 2015; prehranska inflacija je oktobra 8,9 % (Mint).
+Svetovni pridelki.
+ V močnih El Niñih od leta 1980 se je svetovna proizvodnja pšenice, koruze in riža v povprečju malo spremenila, trpijo pa posamezni izvozniki, npr. Južna Afrika (koruza) in Avstralija (pšenica); USDA letos napoveduje v Avstraliji 14 % manj pšenice (FEWS NET).
+Zdravje.
+ Svetovna zdravstvena organizacija je prvič razglasila pričakovane učinke za zdravstveni izredni dogodek (WMO).
+
+08 · PODNEBJE -- Leto 2027 bo verjetno rekordno
+
+Globalne temperature za Pacifikom zaostajajo za približno tri mesece, zato je učinek največji v letu po vrhu. WMO navaja, da El Niño običajno prispeva 0,1–0,2 °C k letni globalni temperaturi (WMO). Copernicus je oktober 2026 označil za najtoplejši oktober doslej, 1,75 °C nad predindustrijsko ravnjo; leto 2026 je skoraj gotovo nad 1,5 °C, z 80 % verjetnostjo drugo najtoplejše in 20 % verjetnostjo rekorda ali izenačenja (C3S).
+
+Kje bo 2027
+Globalna temperatura, °C nad predindustrijsko ravnjo; povprečje šestih naborov
+2024
+ · rekord doslej
+1,52 °C
+2026
+ · projekcija
+1,52 °C
+2027
+ · projekcija
+1,74 °C
+1,4
+1,6
+1,8
+2,0
+°C nad predindustrijsko ravnjo
+Carbon Brief: 2027 bo s 96 % verjetnostjo toplejše od vseh doslej; za 2026 je verjetnost rekorda 67 %. Projekcija predpostavlja, da odnos iz preteklih dogodkov velja tudi za tako močnega; če učinek ne bo večji od najmočnejših doslej, bi bila verjetnost rekorda za 2026 blizu 50 %. Met Office je že avgusta ocenil, da bo 2027 »zelo verjetno« najtoplejše leto (BBC). Vir: Carbon Brief.
+
+09 · SLOVENIJA -- Kaj to pomeni za našo zimo
+
+Kratek odgovor: verjetnejša je toplejša in bolj namočena zima, zagotovljena ni. Copernicus je 10. novembra zapisal, da je v večini Evrope verjetna bolj namočena zima (razen skrajnega severa in juga), vzorec zračnega tlaka pa spominja na negativno arktično oscilacijo; toplo je zelo verjetno na jugozahodu, drugod verjetneje, na severovzhodu manj zanesljivo.
+
+ARSO opozarja, da tudi nadpovprečno topla zima ne izključuje mraza: v njej se lahko pojavijo krajša hladna obdobja, izraziti prodori in obilnejše sneženje, uporabnost sezonskih napovedi pa je pri nas omejena (Siol.net po pojasnilih ARSO).
+
+Zgodovina daje podoben, a šibak signal. Neodvisna analiza ERA5 za sedem zim z ONI ≥ +1,5 °C od leta 1950 (weatherlinguist, ni recenzirana) kaže za srednjo in vzhodno Evropo okoli +1,1 do +1,4 °C nad trendom, na severu nekaj več padavin (+5–7 %) in na jugu manj (okoli −17 % v Iberiji, Italiji in na Balkanu); a je bil NAO v petih od sedmih zim pozitiven. Slovenija leži na meji med tema vzorcema, zato je tak signal tu težko razbrati (moja razlaga).
+
+Zime v Rečici in faza ENSO
+Povprečna temperatura od decembra do februarja, IREICA1
+El Niño (ONI ≥ +0,5 °C), EN
+nevtralno
+La Niña (ONI ≤ −0,5 °C), LN
+Povprečje dec–feb na postaji (samo zunanja meritev), pod stolpci ONI za isto obdobje. Najtoplejši zimi sta bili zimi z El Niñom (2023/24: 3,1 °C, 2019/20: 3,0 °C), najhladnejši pa zimi z La Niño (2021/22: 1,0 °C, 2020/21: 1,6 °C). Sedem zim je premalo za sklep, trend segrevanja pa dviguje novejše zime.
+
+Za sneg to pomeni: toplejša in vlažnejša zima pogosteje prinese dež namesto snega v nižinah, posamezni hladni vdori pa ostajajo mogoči. Podrobnosti so v člankih o zimi 2026/27 in El Niñu, o polarnem vrtincu in snegu ta teden; za konkretne dni gledajte kratkoročne napovedi.
+
+10 · KAJ ZDAJ -- Kaj spremljati v naslednjih tednih
+
+30. novembra:
+ novo sporočilo ENFEN (Peru).
+10. decembra:
+ mesečna razprava NOAA. Ali verjetnost zgodovinskega dogodka ostane okoli 60 %?
+Tedensko:
+ BoM in CPC objavljata nove tedenske vrednosti; ključno je, ali se Niño 3.4 spet dvigne nad +3,4 °C (tradicionalno).
+Januarja:
+ ko bo december končan, bo znan RONI za okt–dec, merilo za »zgodovinski« dogodek.
+
+ONI in Niño 3.4 sproti spremljamo na strani Indeksi AO, NAO in ENSO. Članek je posnetek stanja 24. novembra 2026 in se ne osvežuje sam. Ne verjemite naslovom, ki ne povedo, katero območje, obdobje in osnovo imajo v mislih: pri El Niñu je to polovica odgovora.
+
+Viri
+Ben Cost: ‘Mega El Niño’ sees Pacific region hit 18 degrees F above average. New York Post, 23. 11. 2026
+Xantha Leatham: Super El Niño has morphed into a MEGA El Niño. Daily Mail, 23. 11. 2026
+India Today Science Desk: El Niño pushed Pacific Ocean temperatures 10°C past normal, 24. 11. 2026
+Geo.tv: Scientists warn of ‘Mega El Niño’ as ocean temperatures jump 10°C, 23. 11. 2026
+NOAA CPC: ENSO Diagnostic Discussion, 12. 11. 2026
+NOAA CPC: ENSO: Recent Evolution, Current Status and Predictions, 23. 11. 2026
+NOAA CPC: ONI, datoteka oni.ascii.txt (prebrano 24. 11. 2026)
+NOAA CPC: RONI, datoteka RONI.ascii.txt (prebrano 24. 11. 2026)
+NOAA CPC: Official ENSO Strength Probabilities, november 2026
+Bureau of Meteorology: Southern hemisphere monitoring, 24. 11. 2026
+Copernicus C3S: Surface air temperature for October 2026 (bilten, 5. 11. 2026)
+Copernicus C3S: Seasonal forecasts, 10. 11. 2026
+WMO: El Niño set to become very strong, raising risks of extreme weather into 2027, 3. 9. 2026
+WMO: Global Seasonal Climate Outlook informs humanitarian action, 26. 10. 2026
+WMO: State of the climate in 2026 gives new meaning to phrase ‘off the charts’, november 2026
+WMO: Western Pacific faces drier months as El Niño strengthens, 5. 11. 2026
+Carbon Brief: State of the climate: 2026 likely to tie with 2024 as the warmest year on record, oktober 2026
+BBC Weather: El Niño set to be ‘strongest in living memory’, says Met Office, 21. 8. 2026
+ENFEN (Peru): Comunicado Oficial N° 20-2026, 13. 11. 2026
+SENAMHI (Peru): El Niño Costero, temperature do 9,5 °C nad normalo, 24. 10. 2026
+SENAMHI (Peru): Altas temperaturas y lluvias intensas marcarán las próximas semanas, 18. 11. 2026
+FEWS NET: 2026–2027 El Niño food security impacts, oktober 2026
+Mint: The El Niño polycrisis, 22. 11. 2026
+FloodRadar: El Niño live tracker (tedenske vrednosti iz datotek NOAA CPC), 24. 11. 2026
+ElNinoLive: Current El Niño status, 24. 11. 2026
+weatherlinguist: Winter 2026/27 in Europe: what a record El Niño can and cannot tell us, 27. 10. 2026 (analiza ERA5, ni recenzirana)
+Siol.net: Podnebne spremembe v Sloveniji: več vročine, manj snega (pojasnila ARSO), 11. 10. 2026
+
+VIRI
+Podatki: NOAA CPC (ONI, RONI, tedenske vrednosti, verjetnosti), BoM, Copernicus C3S, WMO, Carbon Brief, ENFEN in SENAMHI (Peru), FEWS NET; postaja IREICA1 (zunanja povprečna dnevna temperatura od 7. 11. 2019). Zemljevid kopnega: Natural Earth (javna domena). Članek je posnetek stanja 24. 11. 2026 in se ne osvežuje sam.
