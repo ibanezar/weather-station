@@ -18349,6 +18349,24 @@ function _qaStrip(hrs,test,aria){
   return `<svg class="qa-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${aria}">${cells}${_qaTicks(hrs,x,H-6)}</svg>`;
 }
 
+// Prvi padavinski odsek (verjetnost >= 50 %, razširi se, dokler je verjetnost >= 40 % ali padavine >= 0,1 mm) in vrsta padavin v njem.
+// Vrsta je ocena: koda vremena za sneg, sicer delež snega po temperaturi (do 0,5 °C sneg, nad 2,5 °C dež, vmes sorazmerno; ista meja kot na snežni karti).
+// Pri meji (1 do 3 °C) je to samo približek: zato »dež s snegom« in opomba, da sneženje ni isto kot obležanje.
+function _qaRainRun(hrs){
+  const i0=hrs.findIndex(h=>h.prob>=50);
+  if(i0<0)return null;
+  let i1=i0;
+  while(i1+1<hrs.length&&(hrs[i1+1].prob>=40||hrs[i1+1].mm>=0.1))i1++;
+  let w=0,sn=0;
+  for(let i=i0;i<=i1;i++){
+    const h=hrs[i],wt=Math.max(h.mm,0.05);
+    const f=_QA_SNOW.includes(h.wmo)?1:Math.max(0,Math.min(1,(2.5-h.temp)/2));
+    w+=wt;sn+=wt*f;
+  }
+  const share=w>0?sn/w:0;
+  return{i0,i1,kind:share>=0.6?'snow':share>=0.2?'mix':'rain'};
+}
+
 /* Vsak odgovor vrne model ploščice: stanje (hit|near|none), kratek odgovor in vsebino podrobnosti. */
 const _QA={
   frost(hrs){
@@ -18373,18 +18391,27 @@ const _QA={
   },
   rain(hrs){
     const maxP=Math.max(...hrs.map(h=>h.prob));
-    const i0=hrs.findIndex(h=>h.prob>=50);
+    const rr=_qaRainRun(hrs),i0=rr?rr.i0:-1;
     if(i0<0)return{id:'rain',label:'Dež',icon:'i-cloud-rain',state:'none',pill:'Ne',val:'Ne kaže',sub:'v 24 h',meta:'verjetnost '+maxP+'\u00A0%',
       head:'Naslednjih 24 ur <em>ostane suho</em>',chart:_qaRainChart(hrs),facts:[['Največja verjetnost',maxP+'\u00A0%'],['Naslednji dež','čez 24 h ali več']],
       src:'Modelska napoved Open-Meteo, ne radarska meritev. Pod 50 % verjetnosti ne štejemo za dež.'};
-    let i1=i0;
-    while(i1+1<hrs.length&&(hrs[i1+1].prob>=40||hrs[i1+1].mm>=0.1))i1++;
+    const i1=rr.i1;
     const run=hrs.slice(i0,i1+1),mm=run.reduce((a,h)=>a+h.mm,0),p=Math.max(...run.map(h=>h.prob));
     const wet=run.reduce((a,h)=>h.mm>a.mm?h:a,run[0]);
     const when=_qaWhen(hrs[i0].t),end=_qaH(hrs[i1].t);
     const sameDay=_qaKey(hrs[i0].t)===_qaKey(hrs[i1].t);
     const start=i0===0?'Zdaj':_qaH(hrs[i0].t,-1);
     const mmTxt=mm<1?'pod 1 mm':'~'+Math.round(mm)+' mm';
+    if(rr.kind!=='rain'){                       // sneg ali dež s snegom: ploščica pove to, ne »dež«
+      const sn=rr.kind==='snow',lab=sn?'Sneg':'Dež s snegom';
+      return{id:'snow',label:lab,icon:'i-snowflake',state:'hit',pill:'Da',val:start,
+        sub:(when==='danes'?'':'jutri ')+'do '+(sameDay?'':'jutri ')+end,meta:mm>=0.1?mmTxt+' padavin':'verjetnost '+p+'\u00A0%',
+        head:(sn?(i0===0?`Sneženje je verjetno že zdaj, do <em>${end}</em>`:`Sneženje od <em>${start} do ${end}</em>`)
+                :(i0===0?`Dež s snegom je verjeten že zdaj, do <em>${end}</em>`:`Dež s snegom od <em>${start} do ${end}</em>`))+(mm>=0.1?`, skupaj ${mmTxt} padavin`:''),
+        chart:_qaRainChart(hrs),
+        facts:[['Najmočneje',wet.mm>0?'okoli '+_qaH(wet.t,-1):'—'],['Verjetnost',p+'\u00A0%'],['Trajanje',(i1-i0+1)+' h'],['Vrsta padavin',sn?'večinoma sneg':'sneg in dež']],
+        src:'Modelska napoved Open-Meteo. Vrsta padavin je ocena iz kode vremena in temperature; sneženje ni isto kot obležanje, postaja snega ne meri in višina snežne odeje ni napovedana.'};
+    }
     return{id:'rain',label:'Dež',icon:'i-cloud-rain',state:'hit',pill:'Da',val:start,
       sub:(when==='danes'?'':'jutri ')+'do '+(sameDay?'':'jutri ')+end,meta:mm>=0.1?mmTxt:'verjetnost '+p+'\u00A0%',
       head:(i0===0?`Dež je verjeten že zdaj, do <em>${end}</em>`:`Dež od <em>${start} do ${end}</em>`)+(mm>=0.1?`, skupaj ${mmTxt}`:''),
@@ -18425,7 +18452,7 @@ function _qaPlan(hrs){
   const a=(mo>=6&&mo<=9)?'heat':'frost';
   let c;
   if(mo>=5&&mo<=9)c='storm';
-  else if(mo>=11||mo<=2)c=hrs.some(h=>_QA_SNOW.includes(h.wmo))?'snow':'fog';
+  else if(mo>=11||mo<=2){ const rr=_qaRainRun(hrs); c=(hrs.some(h=>_QA_SNOW.includes(h.wmo))&&!(rr&&rr.kind!=='rain'))?'snow':'fog'; }   // sneg že pove ploščica padavin
   else c='fog';
   return[a,'rain',c];
 }
