@@ -2,14 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://meteorec.si/</loc>
-    <lastmod>2026-11-22</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
     <image:image><image:loc>https://meteorec.si/og-image.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/</loc>
-    <lastmod>2026-11-22</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -721,6 +721,13 @@
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
     <image:image><image:loc>https://meteorec.si/og/poplave-2023.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://meteorec.si/blog/mega-el-nino-10-c-je-konica-rekordi-so-resnicni-1124.html</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image><image:loc>https://meteorec.si/og/mega-el-nino-10-c-je-konica-rekordi-so-resnicni-1124.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://meteorec.si/blog/sneg-prihodnji-teden-sreda-cetrtek-1121.html</loc>
