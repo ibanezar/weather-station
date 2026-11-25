@@ -41,7 +41,7 @@ MODEL_PATH = os.path.join(ROOT, "model", "sneg-mos.json")
 ARCHIVE_PATH = os.path.join(ROOT, "data", "forecast-archive.csv")
 HISTORY_PATH = os.path.join(ROOT, "history.json")
 
-MODEL_VERSION = "0.4"
+MODEL_VERSION = "0.5"   # 0.5 (25. 11. 2026): krčenje iz preslikave na sneg, ne iz proksija (D+1/D+2 brez krčenja)
 MODELS = ["best_match", "ecmwf_ifs025", "gfs_seamless", "icon_seamless"]
 MIN_MODELS = 3
 LEADS = (1, 2, 3, 4, 5)   # D+4/D+5: skill +0,12/+0,10, surov prag pod klimatologijo (eval_sneg.py)
@@ -289,6 +289,30 @@ def obs_pp_cv(series, truth, lead_rows, shrink=1.0):
             "mean_pred": round(float(np.mean(P)), 4), "mean_obs": round(float(np.mean(Y)), 4)}
 
 
+SHRINK_GRID = (1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4)   # od 1,0 navzdol: ob izenačenju zmaga manj krčenja
+
+
+def fit_obs_shrink(observed, truth, lead_rows, grid=SHRINK_GRID):
+    """Krčenje za en vodilni čas: tisti `shrink` iz mreže, pri katerem je skupni Brier (vse postaje doline, zima izpuščena,
+    NAPOVEDANI vhodi) najmanjši. Prej je bil shrink naklon kalibracije osnovnega modela (proksi z ostro mejo T <= 1 °C, 0,64..0,77);
+    ta naklon je kaznoval tudi D+1..D+4, kjer je preslikava že kalibrirana: srednja napoved je bila enaka dejanski pogostosti,
+    krčenje pa je pri vsakem od štirih vodilnih časov D+1..D+4 slabšalo Brier in tihotapilo jasne scenarije (hladno, 20+ mm,
+    vsi modeli enotni) pod polovico. En parameter na vodilni čas, mreža 7 vrednosti: optimizem je majhen."""
+    best_s, best_b = 1.0, None
+    for s in grid:
+        tot = n = 0
+        for sid, series in observed.items():
+            if sid not in VALLEY_STATIONS:
+                continue
+            c = obs_pp_cv(series, truth, lead_rows, s)
+            if c:
+                tot += c["brier"] * c["n"]
+                n += c["n"]
+        if n and (best_b is None or tot / n < best_b - 1e-9):
+            best_s, best_b = s, tot / n
+    return best_s
+
+
 def auc(p, y):
     p, y = np.asarray(p), np.asarray(y)
     pos, neg = p[y == 1], p[y == 0]
@@ -372,7 +396,7 @@ def train(truth=None, by=None, observed=None):
             "cv": cv,
         }
         if obs_models:
-            shrink = round(min(1.0, max(0.3, b)), 4)      # b = naklon kalibracije osnovnega modela za ta vodilni čas
+            shrink = fit_obs_shrink({sid: observed[sid] for sid in obs_models}, truth, rows)
             leads[str(lead)]["obs_pp"] = {
                 sid: dict(m, name=VALLEY_STATIONS[sid]["name"], shrink=shrink, cv=obs_pp_cv(observed[sid], truth, rows, shrink))
                 for sid, m in obs_models.items()}

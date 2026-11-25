@@ -128,6 +128,7 @@ MUTACIJE = [
     ("ugibalnik: en ugib na igralca [18.11.]", "worker.js", 'if (ex) return _sj({ error: "Že si ugibal.", datum: ex.datum }, 409);', "", "test_sneg.mjs"),
     ("ugibalnik: obseg datuma [18.11.]", "worker.js", "if (datum < _danesLj() || datum >", "if (false || datum >", "test_sneg.mjs"),
     ("ugibalnik: ugib na dan snega se ne šteje [18.11.]", "zima/sneg-ugibalnik/ugibalnik.js", "return ljDate(g[2]) < resolved;", "return ljDate(g[2]) <= resolved;", "test_sneg.mjs"),
+    ("MTR sneg: shrink po Brierju preslikave na sneg [25.11.]", "tools/train_sneg_mos.py", "tot / n < best_b - 1e-9", "tot / n > best_b - 1e-9", "test_sneg_mos.py"),
     ("ugibalnik: izenačenje po času oddaje [18.11.]", "zima/sneg-ugibalnik/ugibalnik.js", "a.razlika - b.razlika || (a.ts", "b.razlika - a.razlika || (a.ts", "test_sneg.mjs"),
     ("drva: način B (energija v prm) [18.11.]", "zima/poraba-drv/drva.js", "return area * q / eff * (hdd / refTotal) / kwhPrm;", "return area * q * eff * (hdd / refTotal) / kwhPrm;", "test_drva.mjs"),
     ("drva: način A (stalni del) [18.11.]", "zima/poraba-drv/drva.js", "return lastPrm * (fixed * (frac == null ? 1 : frac) + (1 - fixed) * hdd / baseTotal);", "return lastPrm * (fixed + (1 - fixed) * hdd / baseTotal);", "test_drva.mjs"),

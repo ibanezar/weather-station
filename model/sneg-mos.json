@@ -1,9 +1,9 @@
 {
-  "model_version": "0.4",
-  "trained_at": "2026-11-09T16:16:34Z",
+  "model_version": "0.5",
+  "trained_at": "2026-11-25T09:18:01Z",
   "train_range": {
     "from": "2024-10-01",
-    "to": "2026-11-08"
+    "to": "2026-11-23"
   },
   "target": {
     "name": "snežni dan (proksi)",
@@ -61,26 +61,26 @@
         "tavg_x_delez_mokrih_modelov"
       ],
       "coefficients": [
-        -1.06658,
-        -0.3054,
-        0.71815,
-        -0.55276
+        -1.03665,
+        -0.30468,
+        0.68987,
+        -0.54426
       ],
       "calibration": {
-        "a": -0.4557,
-        "b": 0.742
+        "a": -0.4151,
+        "b": 0.7768
       },
-      "n": 459,
-      "events": 39,
-      "prevalence": 0.085,
+      "n": 474,
+      "events": 40,
+      "prevalence": 0.0844,
       "cv": {
-        "n": 459,
-        "events": 39,
-        "brier_clim": 0.0777,
-        "brier_raw": 0.0631,
-        "brier_cal": 0.062,
-        "skill_cal": 0.202,
-        "auc": 0.875,
+        "n": 474,
+        "events": 40,
+        "brier_clim": 0.0773,
+        "brier_raw": 0.063,
+        "brier_cal": 0.0619,
+        "skill_cal": 0.199,
+        "auc": 0.877,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
       "obs_pp": {
@@ -105,15 +105,15 @@
             2026
           ],
           "name": "Gornji Grad",
-          "shrink": 0.742,
+          "shrink": 1.0,
           "cv": {
             "n": 451,
             "events": 10,
-            "brier": 0.016,
+            "brier": 0.015,
             "brier_clim": 0.0219,
-            "skill": 0.272,
+            "skill": 0.314,
             "auc": 0.976,
-            "mean_pred": 0.0174,
+            "mean_pred": 0.0201,
             "mean_obs": 0.0222
           }
         },
@@ -138,15 +138,15 @@
             2026
           ],
           "name": "Luče",
-          "shrink": 0.742,
+          "shrink": 1.0,
           "cv": {
             "n": 451,
             "events": 14,
-            "brier": 0.0235,
+            "brier": 0.0229,
             "brier_clim": 0.0306,
-            "skill": 0.232,
+            "skill": 0.249,
             "auc": 0.95,
-            "mean_pred": 0.0276,
+            "mean_pred": 0.0303,
             "mean_obs": 0.031
           }
         },
@@ -171,15 +171,15 @@
             2026
           ],
           "name": "Radegunda",
-          "shrink": 0.742,
+          "shrink": 1.0,
           "cv": {
             "n": 451,
             "events": 21,
-            "brier": 0.034,
+            "brier": 0.0326,
             "brier_clim": 0.0451,
-            "skill": 0.247,
-            "auc": 0.945,
-            "mean_pred": 0.0432,
+            "skill": 0.277,
+            "auc": 0.946,
+            "mean_pred": 0.0457,
             "mean_obs": 0.0466
           }
         },
@@ -203,15 +203,15 @@
             2025
           ],
           "name": "Solčava",
-          "shrink": 0.742,
+          "shrink": 1.0,
           "cv": {
             "n": 420,
             "events": 13,
-            "brier": 0.0237,
+            "brier": 0.0233,
             "brier_clim": 0.0304,
-            "skill": 0.222,
+            "skill": 0.235,
             "auc": 0.938,
-            "mean_pred": 0.0288,
+            "mean_pred": 0.0316,
             "mean_obs": 0.031
           }
         }
@@ -225,26 +225,26 @@
         "tavg_x_delez_mokrih_modelov"
       ],
       "coefficients": [
-        -0.96483,
-        -0.27881,
-        0.74583,
-        -0.48768
+        -0.94055,
+        -0.27521,
+        0.73903,
+        -0.50739
       ],
       "calibration": {
-        "a": -0.4059,
-        "b": 0.7694
+        "a": -0.3873,
+        "b": 0.7913
       },
-      "n": 459,
-      "events": 39,
-      "prevalence": 0.085,
+      "n": 474,
+      "events": 40,
+      "prevalence": 0.0844,
       "cv": {
-        "n": 459,
-        "events": 39,
-        "brier_clim": 0.0777,
-        "brier_raw": 0.0656,
-        "brier_cal": 0.0646,
-        "skill_cal": 0.169,
-        "auc": 0.856,
+        "n": 474,
+        "events": 40,
+        "brier_clim": 0.0773,
+        "brier_raw": 0.0652,
+        "brier_cal": 0.0642,
+        "skill_cal": 0.17,
+        "auc": 0.862,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
       "obs_pp": {
@@ -269,15 +269,15 @@
             2026
           ],
           "name": "Gornji Grad",
-          "shrink": 0.7694,
+          "shrink": 1.0,
           "cv": {
             "n": 451,
             "events": 10,
-            "brier": 0.016,
+            "brier": 0.0143,
             "brier_clim": 0.0219,
-            "skill": 0.271,
+            "skill": 0.35,
             "auc": 0.975,
-            "mean_pred": 0.0142,
+            "mean_pred": 0.016,
             "mean_obs": 0.0222
           }
         },
@@ -302,15 +302,15 @@
             2026
           ],
           "name": "Luče",
-          "shrink": 0.7694,
+          "shrink": 1.0,
           "cv": {
             "n": 451,
             "events": 14,
-            "brier": 0.0225,
+            "brier": 0.0208,
             "brier_clim": 0.0306,
-            "skill": 0.263,
+            "skill": 0.321,
             "auc": 0.961,
-            "mean_pred": 0.0237,
+            "mean_pred": 0.0255,
             "mean_obs": 0.031
           }
         },
@@ -335,15 +335,15 @@
             2026
           ],
           "name": "Radegunda",
-          "shrink": 0.7694,
+          "shrink": 1.0,
           "cv": {
             "n": 451,
             "events": 21,
-            "brier": 0.0333,
+            "brier": 0.0313,
             "brier_clim": 0.0451,
-            "skill": 0.262,
+            "skill": 0.305,
             "auc": 0.955,
-            "mean_pred": 0.0383,
+            "mean_pred": 0.0398,
             "mean_obs": 0.0466
           }
         },
@@ -367,15 +367,15 @@
             2025
           ],
           "name": "Solčava",
-          "shrink": 0.7694,
+          "shrink": 1.0,
           "cv": {
             "n": 420,
             "events": 13,
-            "brier": 0.0227,
+            "brier": 0.021,
             "brier_clim": 0.0304,
-            "skill": 0.254,
-            "auc": 0.949,
-            "mean_pred": 0.0248,
+            "skill": 0.31,
+            "auc": 0.948,
+            "mean_pred": 0.0266,
             "mean_obs": 0.031
           }
         }
@@ -389,26 +389,26 @@
         "tavg_x_delez_mokrih_modelov"
       ],
       "coefficients": [
-        -0.96369,
-        -0.29015,
-        0.51282,
-        -0.34999
+        -0.93956,
+        -0.28613,
+        0.50515,
+        -0.36732
       ],
       "calibration": {
-        "a": -0.5143,
-        "b": 0.6937
+        "a": -0.5082,
+        "b": 0.7056
       },
-      "n": 459,
-      "events": 39,
-      "prevalence": 0.085,
+      "n": 474,
+      "events": 40,
+      "prevalence": 0.0844,
       "cv": {
-        "n": 459,
-        "events": 39,
-        "brier_clim": 0.0777,
-        "brier_raw": 0.0676,
-        "brier_cal": 0.066,
-        "skill_cal": 0.151,
-        "auc": 0.846,
+        "n": 474,
+        "events": 40,
+        "brier_clim": 0.0773,
+        "brier_raw": 0.0672,
+        "brier_cal": 0.0656,
+        "skill_cal": 0.15,
+        "auc": 0.848,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
       "obs_pp": {
@@ -433,15 +433,15 @@
             2026
           ],
           "name": "Gornji Grad",
-          "shrink": 0.6937,
+          "shrink": 0.9,
           "cv": {
             "n": 451,
             "events": 10,
-            "brier": 0.0173,
+            "brier": 0.017,
             "brier_clim": 0.0219,
-            "skill": 0.212,
+            "skill": 0.226,
             "auc": 0.969,
-            "mean_pred": 0.0158,
+            "mean_pred": 0.0173,
             "mean_obs": 0.0222
           }
         },
@@ -466,15 +466,15 @@
             2026
           ],
           "name": "Luče",
-          "shrink": 0.6937,
+          "shrink": 0.9,
           "cv": {
             "n": 451,
             "events": 14,
-            "brier": 0.0245,
+            "brier": 0.0243,
             "brier_clim": 0.0306,
-            "skill": 0.197,
+            "skill": 0.205,
             "auc": 0.95,
-            "mean_pred": 0.0257,
+            "mean_pred": 0.0271,
             "mean_obs": 0.031
           }
         },
@@ -499,15 +499,15 @@
             2026
           ],
           "name": "Radegunda",
-          "shrink": 0.6937,
+          "shrink": 0.9,
           "cv": {
             "n": 451,
             "events": 21,
-            "brier": 0.036,
+            "brier": 0.0355,
             "brier_clim": 0.0451,
-            "skill": 0.201,
+            "skill": 0.214,
             "auc": 0.942,
-            "mean_pred": 0.0408,
+            "mean_pred": 0.0418,
             "mean_obs": 0.0466
           }
         },
@@ -531,15 +531,15 @@
             2025
           ],
           "name": "Solčava",
-          "shrink": 0.6937,
+          "shrink": 0.9,
           "cv": {
             "n": 420,
             "events": 13,
-            "brier": 0.0247,
+            "brier": 0.0246,
             "brier_clim": 0.0304,
-            "skill": 0.186,
-            "auc": 0.937,
-            "mean_pred": 0.0267,
+            "skill": 0.19,
+            "auc": 0.938,
+            "mean_pred": 0.0281,
             "mean_obs": 0.031
           }
         }
@@ -553,26 +553,26 @@
         "tavg_x_delez_mokrih_modelov"
       ],
       "coefficients": [
-        -1.07023,
-        -0.293,
-        0.42516,
-        -0.19914
+        -1.03638,
+        -0.29182,
+        0.40125,
+        -0.20509
       ],
       "calibration": {
-        "a": -0.6112,
-        "b": 0.6649
+        "a": -0.574,
+        "b": 0.6957
       },
-      "n": 459,
-      "events": 39,
-      "prevalence": 0.085,
+      "n": 474,
+      "events": 40,
+      "prevalence": 0.0844,
       "cv": {
-        "n": 459,
-        "events": 39,
-        "brier_clim": 0.0777,
-        "brier_raw": 0.0701,
-        "brier_cal": 0.0682,
-        "skill_cal": 0.122,
-        "auc": 0.829,
+        "n": 474,
+        "events": 40,
+        "brier_clim": 0.0773,
+        "brier_raw": 0.0697,
+        "brier_cal": 0.0678,
+        "skill_cal": 0.123,
+        "auc": 0.834,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
       "obs_pp": {
@@ -597,15 +597,15 @@
             2026
           ],
           "name": "Gornji Grad",
-          "shrink": 0.6649,
+          "shrink": 0.9,
           "cv": {
             "n": 451,
             "events": 10,
-            "brier": 0.0166,
+            "brier": 0.0165,
             "brier_clim": 0.0219,
-            "skill": 0.243,
+            "skill": 0.25,
             "auc": 0.961,
-            "mean_pred": 0.0176,
+            "mean_pred": 0.0202,
             "mean_obs": 0.0222
           }
         },
@@ -630,15 +630,15 @@
             2026
           ],
           "name": "Luče",
-          "shrink": 0.6649,
+          "shrink": 0.9,
           "cv": {
             "n": 451,
             "events": 14,
-            "brier": 0.0221,
+            "brier": 0.0209,
             "brier_clim": 0.0306,
-            "skill": 0.278,
+            "skill": 0.317,
             "auc": 0.965,
-            "mean_pred": 0.0276,
+            "mean_pred": 0.0301,
             "mean_obs": 0.031
           }
         },
@@ -663,15 +663,15 @@
             2026
           ],
           "name": "Radegunda",
-          "shrink": 0.6649,
+          "shrink": 0.9,
           "cv": {
             "n": 451,
             "events": 21,
-            "brier": 0.0331,
+            "brier": 0.0314,
             "brier_clim": 0.0451,
-            "skill": 0.267,
-            "auc": 0.957,
-            "mean_pred": 0.0429,
+            "skill": 0.303,
+            "auc": 0.956,
+            "mean_pred": 0.0449,
             "mean_obs": 0.0466
           }
         },
@@ -695,15 +695,15 @@
             2025
           ],
           "name": "Solčava",
-          "shrink": 0.6649,
+          "shrink": 0.9,
           "cv": {
             "n": 420,
             "events": 13,
             "brier": 0.0236,
             "brier_clim": 0.0304,
-            "skill": 0.222,
+            "skill": 0.225,
             "auc": 0.953,
-            "mean_pred": 0.0288,
+            "mean_pred": 0.0313,
             "mean_obs": 0.031
           }
         }
@@ -717,26 +717,26 @@
         "tavg_x_delez_mokrih_modelov"
       ],
       "coefficients": [
-        -1.18824,
-        -0.27295,
-        0.248,
-        -0.14283
+        -1.15526,
+        -0.26927,
+        0.23109,
+        -0.16095
       ],
       "calibration": {
-        "a": -0.6834,
-        "b": 0.6394
+        "a": -0.6357,
+        "b": 0.674
       },
-      "n": 459,
-      "events": 39,
-      "prevalence": 0.085,
+      "n": 474,
+      "events": 40,
+      "prevalence": 0.0844,
       "cv": {
-        "n": 459,
-        "events": 39,
-        "brier_clim": 0.0777,
-        "brier_raw": 0.0719,
-        "brier_cal": 0.0692,
-        "skill_cal": 0.11,
-        "auc": 0.796,
+        "n": 474,
+        "events": 40,
+        "brier_clim": 0.0773,
+        "brier_raw": 0.0711,
+        "brier_cal": 0.0685,
+        "skill_cal": 0.113,
+        "auc": 0.808,
         "note": "kalibracija je prilagojena na istih OOF napovedih, zato je brier_cal rahlo optimističen"
       },
       "obs_pp": {
@@ -761,15 +761,15 @@
             2026
           ],
           "name": "Gornji Grad",
-          "shrink": 0.6394,
+          "shrink": 0.7,
           "cv": {
             "n": 451,
             "events": 10,
-            "brier": 0.0173,
+            "brier": 0.0175,
             "brier_clim": 0.0219,
-            "skill": 0.211,
+            "skill": 0.202,
             "auc": 0.959,
-            "mean_pred": 0.0207,
+            "mean_pred": 0.0217,
             "mean_obs": 0.0222
           }
         },
@@ -794,15 +794,15 @@
             2026
           ],
           "name": "Luče",
-          "shrink": 0.6394,
+          "shrink": 0.7,
           "cv": {
             "n": 451,
             "events": 14,
-            "brier": 0.0227,
+            "brier": 0.0226,
             "brier_clim": 0.0306,
-            "skill": 0.259,
+            "skill": 0.262,
             "auc": 0.946,
-            "mean_pred": 0.031,
+            "mean_pred": 0.0318,
             "mean_obs": 0.031
           }
         },
@@ -827,15 +827,15 @@
             2026
           ],
           "name": "Radegunda",
-          "shrink": 0.6394,
+          "shrink": 0.7,
           "cv": {
             "n": 451,
             "events": 21,
-            "brier": 0.034,
+            "brier": 0.0338,
             "brier_clim": 0.0451,
-            "skill": 0.246,
+            "skill": 0.251,
             "auc": 0.943,
-            "mean_pred": 0.0468,
+            "mean_pred": 0.0473,
             "mean_obs": 0.0466
           }
         },
@@ -859,15 +859,15 @@
             2025
           ],
           "name": "Solčava",
-          "shrink": 0.6394,
+          "shrink": 0.7,
           "cv": {
             "n": 420,
             "events": 13,
-            "brier": 0.0248,
+            "brier": 0.025,
             "brier_clim": 0.0304,
-            "skill": 0.183,
+            "skill": 0.176,
             "auc": 0.924,
-            "mean_pred": 0.0324,
+            "mean_pred": 0.0332,
             "mean_obs": 0.031
           }
         }
