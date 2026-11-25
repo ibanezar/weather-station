@@ -114,8 +114,16 @@ check("postaje: glavna je Gornji Grad, višini sta samo preverjeni", tsm.VALLEY_
 check("shrink_logit: shrink 1 ohrani logit, shrink 0 da klimatologijo", abs(tsm.shrink_logit(1.3, 1.0, 0.05) - 1.3) < 1e-12
       and abs(tsm.shrink_logit(1.3, 0.0, 0.05) - np.log(0.05 / 0.95)) < 1e-12)
 check("shrink_logit: shrink 0,5 je med logitom in klimatologijo", np.log(0.05 / 0.95) < tsm.shrink_logit(1.3, 0.5, 0.05) < 1.3)
-check("train: krčenje je naklon kalibracije osnovnega modela, omejen na (0,3 .. 1)",
-      all(0.3 <= v["obs_pp"]["1748"]["shrink"] <= 1.0 for v in mod_obs["leads"].values()))
+check("train: krčenje je iz mreže SHRINK_GRID (izbrano po Brierju preslikave na sneg, ne po proksiju)",
+      all(v["obs_pp"]["1748"]["shrink"] in tsm.SHRINK_GRID for v in mod_obs["leads"].values()))
+_rows1 = tsm.samples_for(1, truth, by)
+_s1 = tsm.fit_obs_shrink(observed, truth, _rows1)
+def _pooled(s):
+    c = [tsm.obs_pp_cv(ser, truth, _rows1, s) for sid, ser in observed.items() if sid in tsm.VALLEY_STATIONS]
+    return sum(x["brier"] * x["n"] for x in c if x) / max(1, sum(x["n"] for x in c if x))
+check("fit_obs_shrink: izbrani shrink ni slabši od 1,0 (brez krčenja) in ob izenačenju zmaga 1,0",
+      _s1 in tsm.SHRINK_GRID and _pooled(_s1) <= _pooled(1.0) + 1e-9 and (_s1 == 1.0 or _pooled(_s1) < _pooled(1.0)))
+check("fit_obs_shrink: brez postaj doline vrne 1,0", tsm.fit_obs_shrink({}, truth, _rows1) == 1.0)
 a_fit, b_fit = tsm.fit_obs_calibration(np.array([0.0] * 100), np.array([1.0] * 5 + [0.0] * 95))
 check("legacy: fit_obs_calibration (eval_snowfall) deluje še naprej", abs(a_fit - np.log(0.05 / 0.95)) < 1e-3 and b_fit == 1.0)
 
@@ -141,8 +149,10 @@ today = dt.date(2026, 11, 10)
 per_day = {(today + dt.timedelta(days=l)).isoformat(): {m: (-1.0, -5.0, 5.0) for m in tsm.MODELS} for l in (1, 2, 3, 4, 5)}
 days = ps.predict_days(real, per_day, today)
 check("predict_days: pet dni v sezoni", [d["lead"] for d in days] == [1, 2, 3, 4, 5])
-check("predict_days: ob mrazu in padavinah je p_proxy visok, p_snow (merljiv sneg) manjši a nad 5 %",
-      all(d["p_proxy"] > 0.3 and 0.05 < d["p_snow"] < d["p_proxy"] for d in days))
+check("predict_days: ob mrazu in padavinah sta p_proxy in p_snow (merljiv sneg) visoka, a ne gotova",
+      all(d["p_proxy"] > 0.3 and 0.2 < d["p_snow"] < 0.95 for d in days))
+check("predict_days: jasen snežni scenarij (hladno, mokro, vsi modeli enotni) pri D+1 ni pod polovico",
+      ps.predict_days(real, {(today + dt.timedelta(days=1)).isoformat(): {m: (3.0, 0.5, 21.0) for m in tsm.MODELS}}, today)[0]["p_snow"] >= 0.4)
 check("predict_days: osnova je opazovanje (preslikava je v modelu)", all(d["basis"] == "observed" for d in days))
 check("predict_days: p_snow se z vodilnim časom krči proti klimatologiji (D+1 > D+5 pri enakih vhodih)", days[0]["p_snow"] > days[4]["p_snow"])
 check("predict_days: višja Radegunda ima ob mrazu in dežju večjo možnost snega kot Gornji Grad", all(d["stations"]["Radegunda"] > d["stations"]["Gornji Grad"] for d in days))
