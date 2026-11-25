@@ -1860,7 +1860,7 @@ async function _fetchComingUpOnce(){
             '<span class="cu-dtl">'+Math.round(tLo)+'°</span></div>'+
           '<div class="cu-range" aria-hidden="true"><i style="left:'+l0.toFixed(1)+'%;width:'+(l1-l0).toFixed(1)+'%;background:linear-gradient(90deg,'+tempColor(tLo)+','+tempColor(tHi)+')"></i></div>'+
           (rain>0.3
-            ?'<span class="cu-drain">'+_ico('cloud-rain')+' '+fmt(rain,1)+'\u00A0mm'+(prob?' · '+prob+'\u00A0%':'')+'</span>'
+            ?'<span class="cu-drain">'+_ico(_wmoCat(code)==='snow'?'snowflake':'cloud-rain')+' '+fmt(rain,1)+'\u00A0mm'+(prob?' · '+prob+'\u00A0%':'')+'</span>'
             :'<span class="cu-drain cu-dry">'+_ico('sun')+' suho</span>')+
           '<div class="cu-prob-bar"><div class="cu-prob-fill" style="width:'+prob+'%"></div></div>';
         daysEl.appendChild(div);
@@ -2960,7 +2960,7 @@ const HERO_WET_MM=0.2;
 // času (»je napovedal«), da ne trdi nasprotja z napovedjo za preostanek dneva in je vidno, kaj je napovedal proti izmerjenemu.
 function _heroMtrText(t,measuredMm){
   const r5=v=>Math.round(v*20)*5,mm=_mtrMm(t.mm),padlo=Number.isFinite(measuredMm)&&measuredMm>=HERO_WET_MM;
-  let txt=(padlo?'MTR je napovedal: dež ':'MTR za cel dan: dež ')+r5(t.pop)+'\u00A0%'+(mm?' · '+mm:'');
+  let txt=(padlo?'MTR je napovedal: ':'MTR za cel dan: ')+(_mtrPhase(t)||'dež')+' '+r5(t.pop)+'\u00A0%'+(mm?' · '+mm:'');
   if(!padlo&&Number.isFinite(t.pop5)&&t.pop5>=0.05)txt+=' · ≥\u00A05\u00A0mm\u00A0'+r5(t.pop5)+'\u00A0%';
   return txt;
 }
@@ -7978,10 +7978,18 @@ const MTR_MOUNT_IDS=['mos-','hmos-'];
 /* Grobo pričakovana dnevna količina (mm): povprečje petih modelov, računa jo predict_recica_mos.mean_precip.
    NI naučen popravek MTR in je bolj negotova od temperature (na dnevih z dežjem je napaka več mm), zato
    vedno »~« in opis v namigu. Pod 0,2 mm = suho. null, če polja ni (premalo virov ali stara datoteka). */
-const MTR_MM_HINT='Grobo pričakovana količina: povprečje petih modelov (Open-Meteo, IFS, GFS, ICON, ARPEGE). Ni naučen popravek MTR; pri dežju je napaka lahko več mm in z dnevi narašča.';
+const MTR_MM_HINT='Grobo pričakovana količina: povprečje petih modelov (Open-Meteo, IFS, GFS, ICON, ARPEGE). Ni naučen popravek MTR; pri dežju je napaka lahko več mm in z dnevi narašča. Količina je vodni ekvivalent: ob sneženju je debelina snega večja od mm.';
 function _mtrMm(v){
   if(!Number.isFinite(v))return null;
   return v<0.2?'< 0,2\u00A0mm':'~'+v.toFixed(1).replace('.',',')+'\u00A0mm';
+}
+// Vrsta padavin po MTR: model napoveduje koli\u010Dino (mm vodnega ekvivalenta), ne vrste padavin, zato besedo izpeljemo iz
+// povpre\u010Dja napovedane tmax/tmin. Pragova sta na\u0161a izbira, ne meritev: \u2264 0 \u00B0C sneg, \u2265 3 \u00B0C de\u017E, vmes \u00BBde\u017E ali sneg\u00AB.
+// Brez temperatur vrne null (klicatelj ostane pri splo\u0161ni besedi). De\u017E 23 mm ob 1 \u00B0C je namre\u010D lahko 20 cm snega.
+function _mtrPhase(d){
+  if(!d||!Number.isFinite(d.tmax)||!Number.isFinite(d.tmin))return null;
+  const a=(d.tmax+d.tmin)/2;
+  return a<=0?'sneg':a>=3?'de\u017E':'de\u017E ali sneg';
 }
 
 /* Ime dne po DATUMU (ne po `lead`): datoteka napoved-modela.json nastane enkrat na dan, do jutranjega teka pa je
@@ -8018,7 +8026,8 @@ function rainDayHTML(d){
       +(h?'<rect x="3" y="'+(68-h)+'" width="12" height="'+h+'" class="rain-g-fill" clip-path="url(#'+id+')"/>':'')
       +[10,20].map(m=>'<line x1="3" x2="7" y1="'+(68-Math.round(m/RAIN_GAUGE_MAX*62))+'" y2="'+(68-Math.round(m/RAIN_GAUGE_MAX*62))+'" class="rain-g-tick"/>').join('')
       +'</svg>';
-    amt='<div class="rain-amt"><b>'+mmTxt+'</b><i>grobo</i></div>';
+    const ph=_mtrPhase(d);
+    amt='<div class="rain-amt"><b>'+mmTxt+'</b><i>grobo'+(ph&&ph!=='dež'?' · '+(ph==='sneg'?'sneg':'dež/sneg'):'')+'</i></div>';
   }
   const aria=name+' '+dt.getDate()+'. '+(dt.getMonth()+1)+'.: '
     +rows.map(x=>'verjetnost '+x[0]+' '+x[1]+'\u00A0%').join(', ')+(mmTxt?', količina '+mmTxt+' (grobo)':'');
@@ -8378,7 +8387,7 @@ function drawMtrChart(idp){
     .map(r=>({date:r.date,v:r.actual?r.actual[M.key]:null}))
     .filter(p=>Number.isFinite(p.v));
   const fut=st.days
-    .map(d=>({date:d.date,lead:d.lead,mtr:d[M.key],om:d[M.om],sd:d[M.sd],pop:d.pop}))
+    .map(d=>({date:d.date,lead:d.lead,mtr:d[M.key],om:d[M.om],sd:d[M.sd],pop:d.pop,ph:_mtrPhase(d)}))
     .filter(f=>Number.isFinite(f.mtr));
   if(!fut.length)return;
 
@@ -8539,7 +8548,7 @@ function drawMtrChart(idp){
       html='<b>'+dateTxt+'</b>&ensp;MTR <b style="color:'+MTR_CC.mtr+'">'+fmt(f.mtr,1)+' °C</b>'
         +(Number.isFinite(f.om)?'&ensp;·&ensp;Open-Meteo <b style="color:'+MTR_CC.om+'">'+fmt(f.om,1)+' °C</b>':'')
         +(Number.isFinite(f.sd)?'<br>razpon '+fmt(f.mtr-MTR_Z80*f.sd,1)+' – '+fmt(f.mtr+MTR_Z80*f.sd,1)+' °C':'')
-        +(Number.isFinite(f.pop)?'&ensp;·&ensp;dež '+Math.round(f.pop*100)+'\u00A0%':'');
+        +(Number.isFinite(f.pop)?'&ensp;·&ensp;'+(f.ph||'dež')+' '+Math.round(f.pop*100)+'\u00A0%':'');
     }
     vline.setAttribute('x1',best.x.toFixed(1));vline.setAttribute('x2',best.x.toFixed(1));
     vline.setAttribute('opacity','1');
@@ -8603,7 +8612,7 @@ function renderMtrDays(idp){
     const bar=(cls,lbl,q,title)=>'<div class="mtr-bar '+cls+'"'+(title?' title="'+title+'"':'')+'><span class="mtr-bar-l">'+lbl+'</span>'
       +'<span class="mtr-bar-t"><i style="width:'+q+'%"></i></span><b class="mtr-bar-v">'+(q<5?'< 5':q)+'\u00A0%</b></div>';
     const q5=v=>Math.round(v*20)*5;
-    const bars=(Number.isFinite(d.pop)?bar('r0',_ico('droplet')+'dež',q5(d.pop),'Verjetnost, da bo dnevna vsota padavin vsaj 0,2 mm.'):'')
+    const bars=(Number.isFinite(d.pop)?bar('r0',_ico('droplet')+(_mtrPhase(d)||'dež'),q5(d.pop),'Verjetnost, da bo dnevna vsota padavin vsaj 0,2 mm.'):'')
       +(Number.isFinite(d.pop1)?bar('r1','≥\u00A01\u00A0mm',q5(d.pop1),thrTitle):'')
       +(Number.isFinite(d.pop5)?bar('r2','≥\u00A05\u00A0mm',q5(d.pop5),thrTitle):'');
     const fz=st.metric==='tmin'?mtrFrostPct(d.p_frost):null;
@@ -8719,7 +8728,7 @@ function renderMtrHero(idp){
     const tile=(cls,icon,val,lbl,extra)=>'<div class="mtr-st '+cls+'"><div class="mtr-st-ic">'+icon+'</div><b>'+val+'</b><em>'+lbl+'</em>'+(extra||'')+'</div>';
     const parts=[];
     const popP=Number.isFinite(d.pop)?Math.round(d.pop*20)*5:null,mmT=_mtrMm(d.mm);
-    if(popP!==null||mmT)parts.push(tile('st-rain',I.drop,mmT||(popP+'\u00A0%'),'dež'+(mmT&&popP!==null?' · verjetnost '+popP+'\u00A0%':''),
+    if(popP!==null||mmT)parts.push(tile('st-rain',I.drop,mmT||(popP+'\u00A0%'),(_mtrPhase(d)||'dež')+(mmT&&popP!==null?' · verjetnost '+popP+'\u00A0%':''),
       popP!==null?'<span class="mtr-st-bar"><u style="width:'+popP+'%"></u></span>':''));
     if(half!==null)parts.push(tile('st-range',I.range,fmt(d.tmax-half,1)+' – '+fmt(d.tmax+half,1)+' °C','razpon P10–P90'));
     if(Number.isFinite(d.tmin))parts.push(tile('st-night',I.moon,fmt(d.tmin,1)+' °C','najnižja noč'));

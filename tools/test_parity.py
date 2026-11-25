@@ -774,11 +774,14 @@ def hero_ikona_noc_in_megla():
 @test
 def hero_mtr_vrstica():
     """Ploščica »Padlo danes«: MTR vrstica ima časovno okno (cel dan / je napovedal), da ne nasprotuje napovedi za preostanek dneva."""
-    names = ["_mtrMm", "HERO_WET_MM", "_heroMtrText"]
+    names = ["_mtrMm", "_mtrPhase", "HERO_WET_MM", "_heroMtrText"]
     t = {"pop": 0.85, "mm": 2.04, "pop5": 0.05}
     calls = [{"fn": "_heroMtrText", "args": [t, 0]}, {"fn": "_heroMtrText", "args": [t, 0.1]},
              {"fn": "_heroMtrText", "args": [t, 0.2]}, {"fn": "_heroMtrText", "args": [t, 6.3]},
-             {"fn": "_heroMtrText", "args": [t, None]}, {"fn": "_heroMtrText", "args": [{"pop": 0.2, "mm": 0.05}, 0]}]
+             {"fn": "_heroMtrText", "args": [t, None]}, {"fn": "_heroMtrText", "args": [{"pop": 0.2, "mm": 0.05}, 0]},
+             {"fn": "_heroMtrText", "args": [dict(t, tmax=2.4, tmin=0.4), 0]},
+             {"fn": "_heroMtrText", "args": [dict(t, tmax=-1.0, tmin=-4.0), 0]},
+             {"fn": "_heroMtrText", "args": [dict(t, tmax=8.0, tmin=3.0), 0]}]
     r = js("app.js", names, calls)
     nb = "\u00a0"
     check(r[0] == f"MTR za cel dan: dež 85{nb}% · ~2,0{nb}mm · ≥{nb}5{nb}mm{nb}5{nb}%", "MTR vrstica: dokler ni padlo, cel dan", r[0])
@@ -787,6 +790,9 @@ def hero_mtr_vrstica():
     check(r[3] == r[2], "MTR vrstica: ob 6,3 mm preteklik", r[3])
     check(r[4] == r[0], "MTR vrstica: brez meritve = cel dan", r[4])
     check(r[5] == f"MTR za cel dan: dež 20{nb}% · < 0,2{nb}mm", "MTR vrstica: majhna količina", r[5])
+    check(r[6].startswith("MTR za cel dan: dež ali sneg 85"), "MTR vrstica: ob 1,4 °C ni samo »dež«", r[6])
+    check(r[7].startswith("MTR za cel dan: sneg 85"), "MTR vrstica: pod ničlo je sneg", r[7])
+    check(r[8].startswith("MTR za cel dan: dež 85"), "MTR vrstica: ob 5,5 °C je dež", r[8])
 
 
 @test
