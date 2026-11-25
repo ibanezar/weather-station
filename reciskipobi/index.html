@@ -56,6 +56,9 @@ button.primary:hover{background:#5ee89b}
 button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px 12px;font-size:.9rem}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 #err{color:var(--bad);min-height:1.4em;margin-top:8px}
+#namesti{display:inline-flex;align-items:center;gap:6px;flex:none;color:var(--ac);border-color:var(--bd2);min-width:44px;justify-content:center}
+#namesti .t{display:none}
+@media(min-width:520px){#namesti .t{display:inline}}
 .check{display:flex;gap:10px;align-items:center;font-weight:400;margin:12px 0 0;cursor:pointer}
 .check input{width:20px;height:20px;accent-color:var(--ac);flex:none}
 
@@ -169,6 +172,10 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
     <h1>Zamudometer</h1>
     <p class="sub">Rečiški pobi · dnevnik zamud</p>
   </div>
+  <button id="namesti" type="button" class="ghost" hidden aria-label="Namesti aplikacijo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+    <span class="t">Namesti</span>
+  </button>
   <button id="odjava" type="button" class="ghost" hidden>Odjava</button>
 </header>
 <p class="tagline" id="tagline"></p>
@@ -421,7 +428,7 @@ function dateLabel(s){var d=parse(s);return ["ned.","pon.","tor.","sre.","čet."
 function pick(a,avoid){var x,i=0;do{x=a[Math.floor(Math.random()*a.length)];}while(x===avoid&&a.length>1&&++i<10);return x;}
 function naziv(p){var r=NAZIVI[0][1];NAZIVI.forEach(function(x){if(p>=x[0])r=x[1];});return r;}
 var toastT;
-function toast(msg,bad){var t=$("toast");t.textContent=msg;t.className="show"+(bad?" bad":"");clearTimeout(toastT);toastT=setTimeout(function(){t.className="";},3800);}
+function toast(msg,bad,ms){var t=$("toast");t.textContent=msg;t.className="show"+(bad?" bad":"");clearTimeout(toastT);toastT=setTimeout(function(){t.className="";},ms||3800);}
 function store(v,rem){
   try{
     if(v===undefined)return localStorage.getItem(SK)||sessionStorage.getItem(SK);
@@ -754,6 +761,25 @@ function narisi(){
   // verdikti v dnevniku potrebujejo vreme; naloži ga šele, če kak izgovor omenja vreme
   if(!hist&&zapisi.some(function(z){return matched(z.zakaj).length;}))loadHist().then(renderLog);
 }
+
+/* ───────── namestitev kot aplikacija ───────── */
+// Chrome/Android: gumb se pokaže ob dogodku beforeinstallprompt in sproži pravo namestitveno okno.
+// iPhone/iPad: dogodka ni, zato gumb takoj pokaže navodilo. V že nameščeni aplikaciji gumba ni.
+var namestiEv=null;
+var IOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+function jeNamescena(){return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;}
+function pokaziNamesti(){$("namesti").hidden=jeNamescena()||(!namestiEv&&!IOS);}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();namestiEv=e;pokaziNamesti();});
+window.addEventListener("appinstalled",function(){namestiEv=null;pokaziNamesti();toast("Nameščeno. Zamudometer je na začetnem zaslonu.");});
+$("namesti").addEventListener("click",function(){
+  if(namestiEv){
+    namestiEv.prompt();
+    namestiEv.userChoice.then(function(){namestiEv=null;pokaziNamesti();}).catch(function(){});
+  }else{
+    toast("V Safariju tapni gumb Deli in izberi »Dodaj na začetni zaslon«.",false,8000);
+  }
+});
+pokaziNamesti();
 
 /* ───────── zagon ───────── */
 $("tagline").textContent=pick(TAGLINES);
