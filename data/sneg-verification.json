@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-25T01:06:48Z",
-  "model_version": "0.4",
+  "generated_at": "2026-11-25T09:20:17Z",
+  "model_version": "0.5",
   "target": {
     "name": "snežni dan (proksi)",
     "definition": "padavine >= 0.2 mm IN povprečna temperatura zraka <= 1.0 °C",
@@ -15,7 +15,7 @@
       "preliminary": true,
       "brier": 0.0586,
       "brier_clim": 0.0665,
-      "skill": 0.119,
+      "skill": 0.118,
       "bins": [
         {
           "from": 0,
