@@ -46,7 +46,7 @@ MUTACIJE = [
     ("FNV-1a: praštevilo (JS na strani)", "crnivec-site/index.html", "0x01000193", "0x01000194"),
     ("zbor: zaklep po IP (10 poskusov)", "worker.js", "const ZB_FAIL_MAX = 10;", "const ZB_FAIL_MAX = 11;", "test_zbor.mjs"),
     ("zbor: brez skrivnosti ni več zaprto", "worker.js", 'if (!zbGeslo) return _json({ error: "Geslo zbora še ni nastavljeno na strežniku" }, 503);', 'if (false) return _json({ error: "Geslo zbora še ni nastavljeno na strežniku" }, 503);', "test_zbor.mjs"),
-    ("zbor: preverjanje gesla ne primerja", "worker.js", '_safeEq(zbAuth, "Bearer " + zbGeslo)', 'zbAuth.startsWith("Bearer ")', "test_zbor.mjs"),
+    ("zbor: preverjanje gesla ne primerja", "worker.js", 'if (_safeEq(zbAuth, "Bearer " + zbGeslo)) { if (fails)', 'if (zbAuth.startsWith("Bearer ")) { if (fails)', "test_zbor.mjs"),
     ("zbor: zgornja meja minut", "worker.js", "minute >= 1 && minute <= 240", "minute >= 1 && minute <= 241", "test_zbor.mjs"),
     ("zbor: brisanje odstrani zapis", "worker.js", "all.filter(i => i.id !== id)", "all.filter(i => i.id === id)", "test_zbor.mjs"),
     ("napovej: toleranca (worker)", "worker.js", "const NAPOVEJ_TOL_T = 5;", "const NAPOVEJ_TOL_T = 6;"),
