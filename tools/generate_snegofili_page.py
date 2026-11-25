@@ -33,9 +33,9 @@ DATA_PATH = os.path.join(seo.ROOT, "data", "snegofili.json")
 POINTS_PATH = os.path.join(seo.ROOT, "data", "snegofili-tocke.json")
 OUTLINE_PATH = os.path.join(seo.ROOT, "data", "europe-outline.json")
 URL = "/snegofili/"
-TITLE = "Snegofili: kje je sneg, kamere in napoved"
-DESC = ("Kje zdaj sneži po alpskem loku: karta, kamere, toplotna karta 96 ur, podrobnost vsake točke in izbirnik "
-        "»kam peljem po sneg« za več kot 50 točk od Golt do Zermatta in Dachsteina. Modelska ocena, izmerjeno ločeno.")
+TITLE = "Snegofili: sneg v Sloveniji, kamere in napoved"
+DESC = ("Sneg v Sloveniji in Alpah: kje zdaj sneži, koliko novega snega bo zapadlo, izmerjena višina odeje ARSO in "
+        "kamere. Modelska ocena, meritve ločeno.")
 PROXY = "https://weatherireica1.filip-eremita.workers.dev"
 DRSI_CAM = "https://www.drsc.si/kamere/Crnivec/Crn1_0001.jpg"
 COUNTRIES = {"SI": "Slovenija", "AT": "Avstrija", "IT": "Italija", "CH": "Švica", "FR": "Francija",
@@ -102,7 +102,22 @@ PW_CAT_RANK = {k: i for i, (k, _) in enumerate(PW_CATS)}
 PW_GROUPS = (("*", "Vse"), ("si", "Slovenija"), ("alpe", "Alpe"), ("japonska", "Japonska"), ("amerika", "Severna Amerika"), ("juzna", "Južna polobla"))
 PW_LIMIT = 5           # privzeto prikazanih vrstic (ostale po gumbu); brez JS so vidne vse
 
+# Odgovori so v kodi napisani nizi in smejo vsebovati lastne povezave (<a>); izrišejo se brez ubeganja, zato v njih ne uporabljaj »<« in »&«.
 FAQ = [
+    ("Koliko snega je zdaj v Sloveniji?",
+     "Izmerjeno višino snežne odeje imamo za nekaj postaj ARSO (razdelek <a href=\"#izmerjeno\">Izmerjena snežna odeja</a>), "
+     "nov sneg po modelu pa za slovenske točke, med njimi Golte, Roglo, Krvavec, Vogel, Kranjsko Goro, Kredarico, Kanin, "
+     "Veliko planino, Pokljuko in Vršič (razdelek <a href=\"#slovenija\">Slovenija po regijah</a>). Meritev in model sta ločena "
+     "in se ne seštevata. Za našo dolino glej tudi <a href=\"/zima/meja-snezenja/\">Mejo sneženja</a>."),
+    ("Kje trenutno sneži v Sloveniji?",
+     "Okno »Sneži v Sloveniji« in pas <a href=\"#zdaj-snezi\">Kjer zdaj sneži</a> pokažeta točke, kjer model za izbrano uro "
+     "napoveduje vsaj 0,1 cm novega snega na uro. Sneženje po vsej državi, po urah in do 48 ur naprej, kaže "
+     "<a href=\"/zima/snezna-karta/\">snežna karta</a>. Kamera ob točki pokaže, kaj je tam v resnici."),
+    ("Kje bo največ novega snega?",
+     "Razdelek <a href=\"#kam-peljem\">Kam peljem po sneg</a> razvrsti točke po modelski količini novega snega v naslednjih "
+     "24 urah, 24–48 urah ali v zadnjih 24 urah; <a href=\"#toplotna-karta\">toplotna karta</a> pokaže potek za 96 ur. "
+     "Za Golte, Menino planino, Smrekovec in Raduho so tam še ocene temperature in vetra na vrhu, na strani "
+     "<a href=\"/vreme-v-gorah/\">Vreme v gorah</a>."),
     ("Je to izmerjen sneg?",
      "Ne. Novi sneg je modelska ocena: padavine iz celice vremenskega modela (Open-Meteo), pomnožene z deležem, "
      "ki pade kot sneg glede na višino ničte izoterme. Celica ne razloči pobočij in dolin, zato je lahko na terenu "
@@ -1358,7 +1373,7 @@ def build_body(data, cams):
              '<button type="button" data-s="km" aria-pressed="false">Razdalja</button>')
     cards_html = "\n".join(card_html(r, cams.get(r["id"], {}), kcr) for r in rows)
     faq_html = '  <h2>Pogosta vprašanja</h2>\n  <div class="faq">\n' + "\n".join(
-        f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ) + "\n  </div>"
+        f'    <details><summary>{_html.escape(q)}</summary><p>{a}</p></details>' for q, a in FAQ) + "\n  </div>"
     cams_sec = cam_wall_html(rows, cams)
     world = load_world()
     world_sec = svet_html(world, load_world_cams()) if world else ""
@@ -1391,7 +1406,7 @@ def build_body(data, cams):
     <div class="sg-brand"><img src="/snegofili/brand/logo-hero.svg" width="332" height="87" alt="Snegofili" decoding="async">
     <div class="sg-brand-r"><button type="button" class="sg-install" id="sg-install" hidden aria-label="Namesti aplikacijo Snegofili" title="Namesti na zaslon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 11 12 15.5 16.5 11M5 20h14"/></svg><span class="sg-install-t">Namesti</span></button><a class="sg-back" href="/zima/">← MeteoZima</a><p class="sg-kicker">Alpski lok · {len(rows)} točk</p></div></div>
     <h1 class="page-title" id="sg-h1">Kje zdaj pada sneg?</h1>
-    <p class="sg-sub2">Spremljanje snežnih razmer po Alpah: modelska ocena, meritve ARSO in kamere.</p>
+    <p class="sg-sub2">Sneg v Sloveniji in Alpah: kje sneži, koliko ga je zapadlo, modelska ocena, meritve ARSO in kamere.</p>
     <div class="sg-hero-row"><p class="sg-nowline" id="sg-nowline" aria-live="polite"></p>
     <p class="sg-meta" id="sg-gen" data-generated="{data["generated_at"]}">Modelska ocena · posodobljeno {_html.escape(data["generated_at_local"])}</p></div>
     <p class="sg-install-hint" id="sg-install-hint" role="status" aria-live="polite" hidden></p>

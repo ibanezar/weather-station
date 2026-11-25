@@ -92,6 +92,9 @@ jobs:
       - name: Test vremena v gorah
         run: python3 tools/test_gore.py
 
+      - name: Test zimskih strani po SEO raziskavi (meja sneženja = izoterma − 250 m, naslovi, razmejitev, sneg na Golteh)
+        run: python3 tools/test_zima_seo.py
+
       - name: Test »Snegofili« (točke, okna snega, vdelava kamer)
         run: python3 tools/test_snegofili.py
 

@@ -16,6 +16,7 @@ Kar stran je in ni:
 Usage:
   python3 tools/generate_gore_page.py
 """
+import datetime
 import html as _html
 import json
 import os
@@ -25,9 +26,21 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generate_seo_pages as seo  # noqa: E402
 
 DATA_PATH = os.path.join(seo.ROOT, "data", "winter-data.json")
+SNEGOFILI_PATH = os.path.join(seo.ROOT, "data", "snegofili.json")   # piše ga tools/snegofili_data.py (modelski nov sneg po točkah)
+SNEG_MAX_AGE_H = 36      # starejši posnetek snega na Golteh se ne prikaže (stara številka bi lagala)
+TITLE = "Vreme Golte, Menina, Smrekovec in Raduha: veter, sneg"
+DESC = ("Vreme Golte in vrhovi nad Zgornjo Savinjsko dolino: temperatura, občutena temperatura, veter, ničta izoterma "
+        "in nov sneg. Modelska ocena, ne uradna napoved.")
 DAN_KRATKO = ["pon", "tor", "sre", "čet", "pet", "sob", "ned"]
 
 FAQ = [
+    ("Kakšno je vreme na Golteh?",
+     "Na vrhu strani so temperatura, občutena temperatura, veter in padavine za Golte (1400 m) po dnevih. Gre za modelsko "
+     "oceno iz napovedi za Rečico, ne za meritev na smučišču. Kadar imamo svež podatek, je pod uvodom še nov sneg na Golteh po modelu."),
+    ("Ali je na Golteh sneg?",
+     "Postaje, ki bi na Golteh merila višino snega, na tej strani ne uporabljamo. Po modelu pokažemo, koliko novega snega je "
+     "zapadlo v zadnjih 24 urah in koliko ga bo v naslednjih 24 in 72 urah; to ni višina podlage in ne pove, ali je smučišče odprto. "
+     "Za odprtost, podlago in obratovanje glej stran smučišča."),
     ("Je to uradna napoved za gore?",
      "Ne. To je ocena na višini vrha, izračunana iz javne napovedi Open-Meteo za Rečico ob Savinji. "
      "Za uradne napovedi in opozorila glej ARSO. Pred turo preveri tudi razmere pri oskrbovani koči."),
@@ -87,6 +100,37 @@ def peak_html(pk):
         '    <tbody>\n' + "\n".join(rows) + '\n    </tbody>\n  </table>')
 
 
+def golte_snow_html():
+    """Nov sneg na Golteh po modelu (isti podatki kot na /snegofili/, točka »golte«). Brez svežega posnetka bloka ni:
+    stara številka bi bila lažna. Višina podlage in odprtost smučišča nista podatka te strani."""
+    try:
+        with open(SNEGOFILI_PATH, encoding="utf-8") as f:
+            sg = json.load(f)
+        gen = datetime.datetime.strptime(sg["generated_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+    except Exception:
+        return ""
+    age_h = (datetime.datetime.now(datetime.timezone.utc) - gen).total_seconds() / 3600
+    pt = next((t for t in sg.get("tocke") or [] if t.get("id") == "golte"), None)
+    if pt is None or age_h > SNEG_MAX_AGE_H or age_h < -1:
+        return ""
+    need = ("past24_cm", "next24_cm", "next72_cm")
+    if any(pt.get(k) is None for k in need):
+        return ""
+    line = pt.get("snow_line_m")
+    line_txt = (f' Meja sneženja ob tej točki je po modelu pri {num(line)} m.' if line is not None else "")
+    return (
+        '  <h2>Sneg na Golteh</h2>\n'
+        f'  <p class="archive-intro">Po modelu je na Golteh ({pt["elevation_m"]} m) v zadnjih 24 urah zapadlo '
+        f'<strong>{_cm(pt["past24_cm"])}</strong> novega snega, v naslednjih 24 urah ga bo '
+        f'<strong>{_cm(pt["next24_cm"])}</strong>, v naslednjih 72 urah pa <strong>{_cm(pt["next72_cm"])}</strong>.{line_txt} '
+        'To je modelska ocena iz padavin, ne meritev; ne pove višine podlage in ne tega, ali je smučišče odprto. '
+        'Več točk, kamere in izmerjeno odejo ARSO najdeš na <a href="/snegofili/#t-golte">Snegofilih</a>.</p>')
+
+
+def _cm(v):
+    return "manj kot 1 cm" if v < 1 else f"{num(v, 0 if v >= 10 else 1)} cm"
+
+
 def build_body(m):
     peaks = m["peaks"]
     faq_html = "  <h2>Pogosta vprašanja</h2>\n  <div class=\"faq\">\n" + "\n".join(
@@ -94,16 +138,18 @@ def build_body(m):
     ) + "\n  </div>"
     return f'''{seo.crumbs_html([("Meteorec", "/"), ("Vreme v gorah", None)])}
 {seo.stn_badge()}
-  <h1 class="page-title">Vreme v gorah — Golte, Menina planina, Smrekovec, Raduha</h1>
+  <h1 class="page-title">Vreme Golte, Menina planina, Smrekovec, Raduha</h1>
   <p class="post-meta">Ocena na višini vrha · posodobljeno {_html.escape(m.get("generated_at_local", "—"))}</p>
   <p class="archive-intro">Temperatura, občutena temperatura, veter in ničta izoterma na višini štirih vrhov nad
   Zgornjo Savinjsko dolino. To je <b>modelska ocena</b> iz napovedi za Rečico, ne meritev in ne uradna gorska
   napoved — grebeni so navadno vetrovnejši od prikazanega, padavine pa so dolinske. Za ture glej tudi
-  <a href="/zima/">MeteoZimo</a> (meja sneženja, snežna odeja) in <a href="/nevihte/">nevihtno napoved</a>.</p>
+  <a href="/zima/">MeteoZimo</a> (<a href="/zima/meja-snezenja/">meja sneženja</a>, snežna odeja) in
+  <a href="/nevihte/">nevihtno napoved</a>.</p>
+{golte_snow_html()}
 {chr(10).join(peak_html(pk) for pk in peaks)}
   <h2>Kako beremo tabelo</h2>
-  <p class="archive-intro"><strong>Ničta izoterma</strong> je višina, kjer je temperatura 0 °C — nad njo je sneg,
-  pod njo dež. <strong>Občutena temperatura</strong> upošteva veter. <strong>Sneg</strong> je ocena novega snega
+  <p class="archive-intro"><strong>Ničta izoterma</strong> je višina, kjer je temperatura 0 °C — nad njo je zrak
+  hladnejši od 0 °C. Meja sneženja je navadno okoli 250 m pod njo (glej <a href="/zima/meja-snezenja/">Mejo sneženja</a>). <strong>Občutena temperatura</strong> upošteva veter. <strong>Sneg</strong> je ocena novega snega
   iz padavin in višine ničte izoterme (približno 1 cm na 1 mm padavin).</p>
 {faq_html}
   <p class="muted-note">Ni uradna napoved. Pred turo preveri
@@ -121,9 +167,7 @@ def main():
               file=sys.stderr)
         return 1
     url = "/vreme-v-gorah/"
-    title = "Vreme v gorah — Golte, Menina, Smrekovec, Raduha"
-    desc = ("Temperatura, občutena temperatura, veter in ničta izoterma na višini vrhov nad Zgornjo Savinjsko "
-            "dolino: Golte, Menina planina, Smrekovec, Raduha. Modelska ocena, ne uradna napoved.")
+    title, desc = TITLE, DESC
     schema = "\n".join([
         seo.webpage_schema(url, title, desc, date_published="2026-10-07"),
         seo.crumbs_schema([("Meteorec", "/"), ("Vreme v gorah", None)]),

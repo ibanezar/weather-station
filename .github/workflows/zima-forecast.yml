@@ -49,9 +49,6 @@ jobs:
         # tam) — isti vzorec kot v padalci-forecast.yml/daily-story.yml.
         run: pip install Pillow numpy --quiet
 
-      - name: Sestavi /vreme-v-gorah/
-        run: python3 tools/generate_gore_page.py
-
       - name: Sestavi /snegofili/ (sneg po alpskem loku, Open-Meteo + ARSO)
         # Ne sme podreti ostalih strani; ob izpadu Open-Meteo ostane stari posnetek.
         continue-on-error: true
@@ -60,6 +57,10 @@ jobs:
           python3 tools/log_snegofili_sezona.py
           python3 tools/generate_snegofili_page.py
           { echo '## Kamere ARSO za /snegofili/'; python3 tools/check_snegofili_cams.py; } >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Sestavi /vreme-v-gorah/
+        # Po Snegofilih: stran kaže nov sneg na Golteh iz data/snegofili.json (starejši od 36 h se ne prikaže).
+        run: python3 tools/generate_gore_page.py
 
       - name: Sestavi /jutro-v-dolini/ (zamik od prvega žarka do ogrevanja doline, statistika iz urnih meritev)
         # Ne sme podreti ostalih strani: brez te strani zima/ in crnivec.si delujeta naprej.

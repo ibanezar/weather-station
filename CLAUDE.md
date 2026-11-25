@@ -428,6 +428,16 @@ Obiskovalec si sam izbere raven in dan (danes/jutri), worker pa obvestilo pošlj
 - **Nova zimska ocena** = vnos v `ZIMA_ALERTS` + izračun v `zima_ocene()` + `with_alert()` v `main()`. Test: `tools/test_zima_alarm.py` (pragovi, razlogi, možnosti obrazca ↔ ravni, veljaven JS), `tools/test_ocene.mjs` (združitev datotek in svežina po strani); mutacije v `mutation_check.py`; vrstica v `REGISTER` (`check_freshness.py`).
 - **Ni narejeno:** zgodba/FB kartica za »nad meglo« (jutranje teme zgodbe imajo stroga časovna okna, glej dnevno zgodbo), napoved po urah za poledico (ocena je dnevna).
 
+## Zimske strani po SEO raziskavi (25. 11. 2026)
+
+Povzetek in stanje po prioritetah: `docs/seo-zima-sneg-2026-27.md` (obsegi iskanj so OpenRush ocene, ne GSC). Test: `tools/test_zima_seo.py` (v `parity.yml`, 3 mutacije).
+
+- **»Meja sneženja« je ničta izoterma − 250 m** (`winter_engine.snow_line_from_freezing_level()`, ne pod 0 m). Do 25. 11. 2026 je `current_line_m`/`forecast_24h_m`/`daily.line_m` nosil surovo izotermo, čeprav so stran, FAQ in snežna karta trdili 250 m nižje (Snegofili so odmik že imeli). Zanesljivost (`confidence`) se še računa iz premika surove izoterme (`CONF_SWING_*`). Konstante `SNOW_OFFSET_M`, `SNOW_MIX_HALF_M`, `CONF_SWING_*` v `generate_zima_page.py` so namerna podvojitev (test). Po deployu poženi `zima-forecast.yml`; pred tem so strani še na starih številkah.
+- **Razmejitev namenov (kanibalizacija 14. 11.):** `/zima/meja-snezenja/` = do katere višine sneži v dolini; `/zima/snezna-karta/` = kje po Sloveniji in koliko novega snega (opis ne vsebuje »meja sneženja«); `/snegofili/` = sneg v Alpah, kamere, izmerjena odeja; `/vreme-v-gorah/` = vreme Golte in vrhovi; hub `/zima/` ima usmerjevalnik »kaj iščete?«. Nova zimska stran z istim namenom = najprej razmejitev.
+- **Snegofili FAQ** se izriše brez ubeganja (odgovori smejo vsebovati `<a>`); v njih ne uporabljaj `<` in `&`.
+- **`/vreme-v-gorah/` blok »Sneg na Golteh«** je iz `data/snegofili.json` samo, če je posnetek mlajši od 36 h; korak v `zima-forecast.yml` je zato PO Snegofilih. Golte nimajo kamere v naših podatkih: strani »Golte kamera« ne delaj brez vira.
+- **Ni narejeno:** strani smučišč (ni podatkov o podlagi in odprtosti), stran z kamerami, samostojna stran »višina snega« (odločitev v docs).
+
 ## Žled (`/zima/zled/`, 7. 10. 2026)
 
 Ideja po neurje.si (njihova stran o žledenju in sondaži). Naša je ločena od `/zima/poledica/`:
