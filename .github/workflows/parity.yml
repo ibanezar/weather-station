@@ -13,6 +13,7 @@ on:
       - 'worker.js'
       - '365-0-game/src/engine/**'
       - 'podjetja/**'
+      - 'recicki-pobi/**'
       - 'tools/generate_podjetja_page.py'
       - 'igra/**'
       - 'napovej/**'
@@ -155,6 +156,9 @@ jobs:
 
       - name: Test končne točke /anketa (pravi worker.js, lažen R2/KV)
         run: node tools/test_anketa.mjs
+
+      - name: Test zasebnega Zamudometra zbora (/zbor/*, geslo, zaklep, pravi worker.js)
+        run: node tools/test_zbor.mjs
 
       - name: Test končne točke /windy-thumb (pravi worker.js, lažen Windy API)
         run: node tools/test_windy_thumb.mjs
