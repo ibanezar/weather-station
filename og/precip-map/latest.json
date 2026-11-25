@@ -1,12 +1,12 @@
 {
-  "date": "2026-11-24",
-  "issued": "24.11.2026 7:00 CET",
-  "issued_at": "2026-11-24T07:30:40.123026+01:00",
-  "top_station": "Bilje",
-  "top_mm": 0,
+  "date": "2026-11-25",
+  "issued": "25.11.2026 7:00 CET",
+  "issued_at": "2026-11-25T07:30:36.557429+01:00",
+  "top_station": "Portorož - Letališče",
+  "top_mm": 26,
   "n_stations": 19,
-  "station_mm": 0.0,
+  "station_mm": null,
   "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-24.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-24-story.jpg"
+  "image": "https://meteorec.si/og/precip-map/2026-11-25.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-25-story.jpg"
 }
