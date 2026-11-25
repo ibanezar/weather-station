@@ -131,7 +131,7 @@ for (let i = 0; i < 70; i++) zadnji = await call(env, '/zbor/zamuda', 'POST', { 
 check(zadnji.status === 429, 'omejitev vnosov po IP (429)');
 
 // ── Izbirnik dogodka na strani ↔ seznam v workerju ──
-const html = fs.readFileSync(path.join(ROOT, 'recicki-pobi', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(ROOT, 'reciskipobi', 'index.html'), 'utf8');
 const workerList = /const ZBOR_DOGODKI = \[([^\]]*)\]/.exec(src)[1].match(/"([^"]+)"/g).map(s => s.slice(1, -1));
 const pageList = [...html.matchAll(/name="dogodek" value="([^"]+)"/g)].map(m => m[1]);
 check(JSON.stringify(workerList) === JSON.stringify(pageList), 'dogodki na strani = dogodki v workerju (' + pageList.join(', ') + ')');

@@ -3272,7 +3272,7 @@ Izvozi (Search Console 6 mesecev, Looker Studio strani × poizvedbe, GA4) so v `
 - **Znana težava (14. 11. 2026)**: `zima-forecast.yml` je padel v koraku igre Črnivec (`test_crnivec_igra.mjs`: »današnji nivo je prevozen — jarki 3«), test pa teče PRED commitom, zato se je zaradi igre ustavil commit vseh zimskih strani. **Popravljeno 14. 11. 2026 (vzrok je bil robot v testu, ne igra):** robot je zaviranje načrtoval z oprijemom zaplate pod seboj (suho, μ 1,0), čeprav je zaviral šele na ledu pred prvo serpentino (μ 0,17), in je vanjo pripeljal z 8 m/s namesto 4,4 m/s. Zdaj je za zaviranje merodajen najslabši oprijem na poti do ovinka. Preverjeno na današnjem nivoju (60 % ledu po vsej cesti) in 240 razporedih zaplat (delež ledu 0,3–1,0, 60 datumov): 0 padcev. Po mergu ročno poženi `zima-forecast.yml`, da zimske strani dobijo nove naslove in bloke »Na kratko«.
 - **Ni narejeno**: skupini D in E iz seznama (orodne strani, »vreme za …«) čakata na podatke o povpraševanju (GSC čez nekaj tednov ali Ahrefs); krajevne strani po vzoru Vodostaja z živo strugo (graf izmerjenih 24 ur) niso narejene; vodostaj po prenovi (13. 11.) izmeri GSC okoli 12. 12.
 
-## Zamudometer zbora Rečiški pobi (`/recicki-pobi/`, 25. 11. 2026)
+## Zamudometer zbora Rečiški pobi (`/reciskipobi/`, 25. 11. 2026)
 
 Zasebna šaljiva aplikacija zbora: vnos, kdo je zamudil, za koliko in zakaj, s predlogi izgovorov in kazni, »sramotnim zidom« in dnevnikom. **Ni povezana z vremenskim delom strani**: noindex, ni v `CORE`, sitemapu in `llms.txt`, ni povezana od nikoder, v `indexnow-bot.yml` je med izvzetimi (isti vzorec kot `/anketa-rezultati/`).
 

@@ -46,7 +46,7 @@ jobs:
 
           # Ne obveščamo o izpeljankah brez lastne vrednosti: preusmeritve in skrite strani.
           SKIP_PREFIX = ("i/", "og/", "img/", "docs/", "365-0/", "365-0-game/", "crnivec-site/", "pojmi/",
-                         "anketa-rezultati/", "recicki-pobi/","gobarska-napoved/orodje-naslovi/", "node_modules/")
+                         "anketa-rezultati/", "reciskipobi/", "gobarska-napoved/orodje-naslovi/", "node_modules/")
           urls = []
           for p in paths:
               if p.startswith(SKIP_PREFIX) or p == "404.html":

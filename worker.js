@@ -7659,14 +7659,14 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
-      // ── Zbor Rečiški pobi: dnevnik zamud (Zamudometer, /recicki-pobi/, 25. 11. 2026) ──
+      // ── Zbor Rečiški pobi: dnevnik zamud (Zamudometer, /reciskipobi/, 25. 11. 2026) ──
       // Zasebno orodje zbora: VSI klici zahtevajo geslo zbora (Bearer ZBOR_GESLO). Brez nastavljene skrivnosti je
       // vse zaprto (503), nikoli odprto. Stran je javna datoteka, podatki so samo za strežnikom. IP in user-agent se
       // ne shranita (IP je samo v KV števcu zaklepa/omejitve). Zaklep po IP: 10 napačnih gesel → 15 min.
       //   GET  /zbor/zamude    → { zapisi: [...] }  (najnovejši prvi)
       //   POST /zbor/zamuda    { kdo, zakaj, datum, dogodek, minute, izostal?, kazen?, website? }
       //   POST /zbor/izbrisi   { id }
-      // ZBOR_DOGODKI je namerna podvojitev z izbirnikom dogodka v recicki-pobi/index.html (preverja tools/test_zbor.mjs).
+      // ZBOR_DOGODKI je namerna podvojitev z izbirnikom dogodka v reciskipobi/index.html (preverja tools/test_zbor.mjs).
       if (path === "/zbor/zamude" || path === "/zbor/zamuda" || path === "/zbor/izbrisi") {
         const r2 = env?.PHOTOS_R2;
         function _json(obj, status) {
