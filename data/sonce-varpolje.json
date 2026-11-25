@@ -1,9 +1,9 @@
 {
- "generated": "2026-11-24",
- "dni_z_obema": 19,
+ "generated": "2026-11-25",
+ "dni_z_obema": 20,
  "jutro": {
-  "n": 8,
-  "mediana_min": -30.0,
+  "n": 9,
+  "mediana_min": -20.0,
   "mad_min": 30.0,
   "min_min": -215.0,
   "max_min": 75.0
