@@ -105,7 +105,7 @@ def summarize(stats):
 
 def fetch_det(det, only=None, tries=4, pause=4):
     """Determinični modeli (Rečica, 366 in 700 m); `det` se dopolni. `only`: samo ti modeli (za ponovni poskus po 429)."""
-    base = {"timezone": "Europe/Ljubljana", "forecast_days": 9, "past_days": 2}
+    base = {"timezone": "Europe/Ljubljana", "forecast_days": 9, "past_days": 3}
     dels = [366, 700]
     for mid, label in DET_MODELS + [("best_match", "Open-Meteo (osnovni model strani)")]:
         if only is not None and mid not in only:
@@ -151,7 +151,7 @@ def retry_det():
 def fetch():
     out = {"fetched_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
            "start": START.isoformat(timespec="minutes"), "n_hours": N_HOURS, "elevs": ELEVS, "days": DAYS}
-    base = {"timezone": "Europe/Ljubljana", "forecast_days": 9, "past_days": 2}
+    base = {"timezone": "Europe/Ljubljana", "forecast_days": 9, "past_days": 3}
     lats = ",".join([str(LAT)] * len(ELEVS))
     lons = ",".join([str(LON)] * len(ELEVS))
     els = ",".join(map(str, ELEVS))
