@@ -151,7 +151,7 @@ button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px
 .e-foot{display:flex;justify-content:flex-end;margin-top:6px}
 .empty{text-align:center;color:var(--mut);padding:26px 8px}
 
-/* grde zvezdice */
+/* črne pike (narisane kot zvezdice) */
 .gz{display:inline-flex;align-items:center;gap:1px;vertical-align:middle}
 .gz svg{width:19px;height:19px;flex:none;overflow:visible}
 .gz-tot{display:inline-flex;align-items:center;gap:5px;color:var(--mut);font-size:.88rem}
@@ -175,7 +175,7 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
 </style>
 </head>
 <body>
-<!-- Grda zvezdica: nesimetrična, z razpoko in plesnijo. Narisana enkrat, uporabljena z <use>. -->
+<!-- Črna pika v obliki grde zvezdice: nesimetrična, z razpoko in plesnijo. Narisana enkrat, uporabljena z <use>. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <symbol id="gz" viewBox="0 0 24 24">
     <path d="M12 1.5 L14.6 8.4 L22.5 9.2 L16.4 13.9 L18.6 22.2 L11.6 17.6 L4.4 22.6 L7.4 14.2 L1.2 8.9 L9.2 8.2 Z" fill="#8f9a2e" stroke="#1f2508" stroke-width="1.2" stroke-linejoin="round"/>
@@ -426,7 +426,7 @@ var KAZNI=[
 ];
 var NAZIVI=[[0,"Začetnik v zamujanju"],[31,"Gost zadnje vrste"],[91,"Mojster zamude"],[181,"Lord zamud"],[361,"Cesar zadnjega akorda"]];
 
-// Grde zvezdice: samo slabe, od 1 do 5, lepih ni. Izpeljane iz minut, zato veljajo tudi za stare zapise.
+// Črne pike (narisane kot grde zvezdice): samo slabe, od 1 do 5, belih ni. Izpeljane iz minut, zato veljajo tudi za stare zapise.
 // Mejo spreminjaj samo tu (test_zbor.mjs jo preverja).
 function zvezdice(min,izostal){
   if(izostal||min>60)return 5;
@@ -436,7 +436,7 @@ function zvezdice(min,izostal){
   return 1;
 }
 var ZVEZDE_IME=["Še gre","Neprijetno","Sramotno","Katastrofalno","Zgodovinsko"];
-var GZ_PL=["grda zvezdica","grdi zvezdici","grde zvezdice","grdih zvezdic"];
+var GZ_PL=["črna pika","črni piki","črne pike","črnih pik"];
 var QUIPS=[
   "Do pet minut? To je akademski četrt. Zapisano, a le s pol obsojanja.",
   "Četrt ure. Zborovodja je že dvakrat pogledal na uro in enkrat na vrata.",
@@ -467,7 +467,7 @@ function gzSvg(i){
   s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");s.style.transform="rotate("+TILT[i%TILT.length]+"deg)";
   u.setAttribute("href","#gz");s.appendChild(u);return s;
 }
-// n grdih zvezdic v vrsti (vsaka malo drugače nagnjena)
+// n črnih pik (zvezdic) v vrsti (vsaka malo drugače nagnjena)
 function gzEl(n){
   var w=el("span","gz");w.setAttribute("role","img");w.setAttribute("aria-label",pl(n,GZ_PL));
   for(var i=0;i<n;i++)w.appendChild(gzSvg(i));
@@ -744,7 +744,7 @@ function renderZid(){
     (s.cur===0?"Danes je že kdo zamudil. ":"")+"Rekord: "+pl(s.rec,["dan","dneva","dnevi","dni"])+".",true));
   var zvSkupaj=vrsta.reduce(function(s,a){return s+a.zv;},0);
   var zvNaj=vrsta.slice().sort(function(a,b){return b.zv-a.zv||a.ime.localeCompare(b.ime,"sl");})[0];
-  tiles.appendChild(tile("Grde zvezdice",String(zvSkupaj),"Največ jih ima "+zvNaj.ime+" ("+zvNaj.zv+"). Lepih ni.",true));
+  tiles.appendChild(tile("Črne pike",String(zvSkupaj),"Največ jih ima "+zvNaj.ime+" ("+zvNaj.zv+"). Belih ni.",true));
   var naj=list.reduce(function(a,z){return(!a||(z.minute||0)>(a.minute||0))?z:a;},null);
   if(naj&&naj.minute)tiles.appendChild(tile("Najdaljša zamuda",naj.kdo+", "+fmtMin(naj.minute),"»"+naj.zakaj+"«",true));
   root.appendChild(tiles);
@@ -770,7 +770,7 @@ function renderZid(){
     });
     c.appendChild(ol);root.appendChild(c);
   }
-  root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje. Grde zvezdice: do 5 min 1, do 15 min 2, do 30 min 3, do 60 min 4, čez 60 min ali duh vaje 5. Lepih zvezdic ne delimo."));
+  root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje. Črne pike (v obliki zvezdic): do 5 min 1, do 15 min 2, do 30 min 3, do 60 min 4, čez 60 min ali duh vaje 5. Belih pik ne delimo."));
 }
 document.querySelectorAll(".seg2 button").forEach(function(b){
   b.addEventListener("click",function(){
