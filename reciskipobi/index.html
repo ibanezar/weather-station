@@ -151,6 +151,16 @@ button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px
 .e-foot{display:flex;justify-content:flex-end;margin-top:6px}
 .empty{text-align:center;color:var(--mut);padding:26px 8px}
 
+/* grde zvezdice */
+.gz{display:inline-flex;align-items:center;gap:1px;vertical-align:middle}
+.gz svg{width:19px;height:19px;flex:none;overflow:visible}
+.gz-tot{display:inline-flex;align-items:center;gap:5px;color:var(--mut);font-size:.88rem}
+.gz-tot svg{width:16px;height:16px;transform:rotate(-8deg);flex:none}
+.e-gz{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:.88rem;color:var(--mut)}
+.rez-gz{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.rez-gz .gz svg{width:26px;height:26px}
+.rez-gz b{color:var(--warn);font-weight:600}
+
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,30px);opacity:0;
   background:var(--ac);color:var(--acfg);font-weight:600;padding:11px 18px;border-radius:12px;max-width:min(92vw,520px);
   text-align:center;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10}
@@ -165,6 +175,15 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
 </style>
 </head>
 <body>
+<!-- Grda zvezdica: nesimetrična, z razpoko in plesnijo. Narisana enkrat, uporabljena z <use>. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="gz" viewBox="0 0 24 24">
+    <path d="M12 1.5 L14.6 8.4 L22.5 9.2 L16.4 13.9 L18.6 22.2 L11.6 17.6 L4.4 22.6 L7.4 14.2 L1.2 8.9 L9.2 8.2 Z" fill="#8f9a2e" stroke="#1f2508" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M12 5 L11 11 L13.2 14.4" fill="none" stroke="#1f2508" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="15.4" cy="14.4" r="1.7" fill="#5d6a1c"/>
+    <circle cx="8.6" cy="11.2" r="1" fill="#5d6a1c"/>
+  </symbol>
+</svg>
 <div class="staff" aria-hidden="true"></div>
 <header class="top">
   <img src="icon.svg" width="56" height="56" alt="">
@@ -208,6 +227,7 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
   <div id="p-vpisi" role="tabpanel" aria-labelledby="t-vpisi">
     <div id="rezultat" class="card" hidden tabindex="-1">
       <h2>Zapisano!</h2>
+      <div class="rez-gz" id="rez-gz"></div>
       <p id="rez-quip"></p>
       <div class="pen"><b>Predlog kazni:</b> <span id="rez-kazen"></span></div>
       <button type="button" id="rez-se" class="primary">Vpiši še eno zamudo</button>
@@ -406,13 +426,27 @@ var KAZNI=[
 ];
 var NAZIVI=[[0,"Začetnik v zamujanju"],[31,"Gost zadnje vrste"],[91,"Mojster zamude"],[181,"Lord zamud"],[361,"Cesar zadnjega akorda"]];
 
+// Grde zvezdice: samo slabe, od 1 do 5, lepih ni. Izpeljane iz minut, zato veljajo tudi za stare zapise.
+// Mejo spreminjaj samo tu (test_zbor.mjs jo preverja).
+function zvezdice(min,izostal){
+  if(izostal||min>60)return 5;
+  if(min>30)return 4;
+  if(min>15)return 3;
+  if(min>5)return 2;
+  return 1;
+}
+var ZVEZDE_IME=["Še gre","Neprijetno","Sramotno","Katastrofalno","Zgodovinsko"];
+var GZ_PL=["grda zvezdica","grdi zvezdici","grde zvezdice","grdih zvezdic"];
+var QUIPS=[
+  "Do pet minut? To je akademski četrt. Zapisano, a le s pol obsojanja.",
+  "Četrt ure. Zborovodja je že dvakrat pogledal na uro in enkrat na vrata.",
+  "Pol ure! Vaja je že pri drugi pesmi, ti si šele pri prvem izgovoru.",
+  "Prišel si ravno za pavzo. Kava je bila izvrstna.",
+  "Si prišel na zadnji akord? Čestitke za dramaturgijo."
+];
 function quip(min,izostal){
   if(izostal)return "Ni ga bilo. Zapisujemo: duh vaje. Stol je ostal prazen, poznalo se je tudi akustično.";
-  if(min<=5)return "Do pet minut? To je akademski četrt. Zapisano, a le s pol obsojanja.";
-  if(min<=15)return "Četrt ure. Zborovodja je že dvakrat pogledal na uro in enkrat na vrata.";
-  if(min<=30)return "Pol ure! Vaja je že pri drugi pesmi, ti si šele pri prvem izgovoru.";
-  if(min<=60)return "Prišel si ravno za pavzo. Kava je bila izvrstna.";
-  return "Si prišel na zadnji akord? Čestitke za dramaturgijo.";
+  return QUIPS[zvezdice(min,izostal)-1];
 }
 
 /* ───────── pomočniki ───────── */
@@ -427,6 +461,23 @@ function dec(x,d){return x.toFixed(d).replace(".",",");}
 function dateLabel(s){var d=parse(s);return ["ned.","pon.","tor.","sre.","čet.","pet.","sob."][d.getDay()]+" "+d.getDate()+". "+(d.getMonth()+1)+".";}
 function pick(a,avoid){var x,i=0;do{x=a[Math.floor(Math.random()*a.length)];}while(x===avoid&&a.length>1&&++i<10);return x;}
 function naziv(p){var r=NAZIVI[0][1];NAZIVI.forEach(function(x){if(p>=x[0])r=x[1];});return r;}
+var SVGNS="http://www.w3.org/2000/svg", TILT=[-12,9,-5,14,-9];
+function gzSvg(i){
+  var s=document.createElementNS(SVGNS,"svg"),u=document.createElementNS(SVGNS,"use");
+  s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");s.style.transform="rotate("+TILT[i%TILT.length]+"deg)";
+  u.setAttribute("href","#gz");s.appendChild(u);return s;
+}
+// n grdih zvezdic v vrsti (vsaka malo drugače nagnjena)
+function gzEl(n){
+  var w=el("span","gz");w.setAttribute("role","img");w.setAttribute("aria-label",pl(n,GZ_PL));
+  for(var i=0;i<n;i++)w.appendChild(gzSvg(i));
+  return w;
+}
+// ena zvezdica + skupno število (za seštevek pri pevcu)
+function gzTotal(n){
+  var w=el("span","gz-tot");w.appendChild(gzSvg(1));w.appendChild(document.createTextNode(pl(n,GZ_PL)));
+  return w;
+}
 var toastT;
 function toast(msg,bad,ms){var t=$("toast");t.textContent=msg;t.className="show"+(bad?" bad":"");clearTimeout(toastT);toastT=setTimeout(function(){t.className="";},ms||3800);}
 function store(v,rem){
@@ -632,6 +683,8 @@ $("forma").addEventListener("submit",function(e){
   var btn=$("oddaj");btn.disabled=true;btn.textContent="Zapisujem …";
   api("/zbor/zamuda","POST",{kdo:kdo,zakaj:zakaj,datum:datum,dogodek:izbranDogodek(),minute:mm,izostal:izostal,kazen:kazen,website:$("website").value})
   .then(function(){
+    var zv=zvezdice(mm,izostal),rg=$("rez-gz");rg.textContent="";
+    rg.appendChild(gzEl(zv));var lb=el("span");lb.appendChild(el("b","",ZVEZDE_IME[zv-1]));lb.appendChild(document.createTextNode(" · "+pl(zv,GZ_PL)));rg.appendChild(lb);
     $("rez-quip").textContent=kdo+": "+quip(mm,izostal);
     $("rez-kazen").textContent=kazen;
     $("rezultat").hidden=false;$("forma").hidden=true;
@@ -675,8 +728,9 @@ function renderZid(){
   }
   var m={};
   list.forEach(function(z){
-    var k=z.kdo.toLowerCase(),a=m[k]||(m[k]={ime:z.kdo,n:0,min:0,duh:0});
+    var k=z.kdo.toLowerCase(),a=m[k]||(m[k]={ime:z.kdo,n:0,min:0,duh:0,zv:0});
     a.n++;a.min+=z.minute||0;if(z.izostal)a.duh++;
+    a.zv+=zvezdice(z.minute||0,z.izostal);
   });
   var vrsta=Object.keys(m).map(function(k){var a=m[k];a.tocke=a.min+60*a.duh;return a;});
   vrsta.sort(function(a,b){return b.tocke-a.tocke||b.n-a.n||a.ime.localeCompare(b.ime,"sl");});
@@ -688,6 +742,9 @@ function renderZid(){
   tiles.appendChild(tile("Zamujeno skupaj",fmtMin(skupaj),pesmi?"Toliko, da bi zapeli "+pl(pesmi,["pesem","pesmi","pesmi","pesmi"])+".":"Premalo za eno pesem. Še."));
   if(s)tiles.appendChild(tile("Od zadnje zamude",pl(s.cur,["dan","dneva","dnevi","dni"]),
     (s.cur===0?"Danes je že kdo zamudil. ":"")+"Rekord: "+pl(s.rec,["dan","dneva","dnevi","dni"])+".",true));
+  var zvSkupaj=vrsta.reduce(function(s,a){return s+a.zv;},0);
+  var zvNaj=vrsta.slice().sort(function(a,b){return b.zv-a.zv||a.ime.localeCompare(b.ime,"sl");})[0];
+  tiles.appendChild(tile("Grde zvezdice",String(zvSkupaj),"Največ jih ima "+zvNaj.ime+" ("+zvNaj.zv+"). Lepih ni.",true));
   var naj=list.reduce(function(a,z){return(!a||(z.minute||0)>(a.minute||0))?z:a;},null);
   if(naj&&naj.minute)tiles.appendChild(tile("Najdaljša zamuda",naj.kdo+", "+fmtMin(naj.minute),"»"+naj.zakaj+"«",true));
   root.appendChild(tiles);
@@ -695,7 +752,7 @@ function renderZid(){
   var podij=el("div","podij");
   vrsta.slice(0,3).forEach(function(a,i){
     var p=el("div","pod");p.appendChild(el("div","no",String(i+1)));
-    var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));p.appendChild(mid);
+    var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));mid.appendChild(gzTotal(a.zv));p.appendChild(mid);
     var pt=el("div","pt",fmtMin(a.min));
     pt.appendChild(el("small","",pl(a.n,["zamuda","zamudi","zamude","zamud"])+(a.duh?" · duh ×"+a.duh:"")));
     p.appendChild(pt);podij.appendChild(p);
@@ -706,14 +763,14 @@ function renderZid(){
     var c=el("div","card"),ol=el("ol","rank");ol.start=4;
     vrsta.slice(3).forEach(function(a,i){
       var li=el("li");li.appendChild(el("span","n",(i+4)+"."));
-      var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));li.appendChild(mid);
+      var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));mid.appendChild(gzTotal(a.zv));li.appendChild(mid);
       var pt=el("div","pt",fmtMin(a.min));
       pt.appendChild(el("small","muted",pl(a.n,["zamuda","zamudi","zamude","zamud"])+(a.duh?" · duh ×"+a.duh:"")));
       li.appendChild(pt);ol.appendChild(li);
     });
     c.appendChild(ol);root.appendChild(c);
   }
-  root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje."));
+  root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje. Grde zvezdice: do 5 min 1, do 15 min 2, do 30 min 3, do 60 min 4, čez 60 min ali duh vaje 5. Lepih zvezdic ne delimo."));
 }
 document.querySelectorAll(".seg2 button").forEach(function(b){
   b.addEventListener("click",function(){
@@ -730,6 +787,8 @@ function entryEl(z){
   head.appendChild(z.izostal?el("span","pill duh","duh vaje"):el("span","pill",fmtMin(z.minute)));
   li.appendChild(head);
   li.appendChild(el("p","e-meta",dateLabel(z.datum)+" · "+(DOGODKI[z.dogodek]||z.dogodek)));
+  var zv=zvezdice(z.minute||0,z.izostal),gz=el("div","e-gz");
+  gz.appendChild(gzEl(zv));gz.appendChild(el("span","",ZVEZDE_IME[zv-1]));li.appendChild(gz);
   li.appendChild(el("p","e-why","»"+z.zakaj+"«"));
   verdicts(z.zakaj,z.datum).forEach(function(v){li.appendChild(verdictEl(v));});
   if(z.kazen){var p=el("p","e-pen");p.appendChild(el("b","","Predlog kazni: "));p.appendChild(document.createTextNode(z.kazen));li.appendChild(p);}
