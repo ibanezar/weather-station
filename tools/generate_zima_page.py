@@ -70,6 +70,14 @@ RISK_LABEL = {"nizko": "Nizko tveganje", "srednje": "Srednje tveganje", "visoko"
 RISK_ICON = {"nizko": "🟢", "srednje": "🟡", "visoko": "🔴"}
 RISK_CLASS = {"nizko": "badge-risk-nizko", "srednje": "badge-risk-srednje", "visoko": "badge-risk-visoko"}
 CONF_LABEL = {"visoka": "visoka zanesljivost", "srednja": "srednja zanesljivost", "nizka": "nizka zanesljivost"}
+SNOW_LINE_TITLE = "Meja sneženja danes in jutri: do katere višine bo snežilo"
+HUB_TITLE = "MeteoZima: zimske razmere, meja sneženja, poledica"
+HUB_DESC = ("Zimske razmere na enem mestu: meja sneženja, snežna karta, sneg po Alpah in kamere, poledica, žled in "
+            "prelazi. Zgornja Savinjska dolina, posodobljeno dnevno.")
+# Namerna podvojitev winter_engine.py (SNOW_LEVEL_OFFSET_M, SNOW_BAND_HALFWIDTH_M, CONF_SWING_*): ta datoteka motorja ne
+# uvaža, besedilo na strani pa te številke navaja. Usklajenost preverja tools/test_zima_seo.py.
+SNOW_OFFSET_M, SNOW_MIX_HALF_M = 250, 100
+CONF_SWING_HIGH_M, CONF_SWING_MID_M = 150, 400
 
 # Ročno narisane ikone namesto emoji na kartah/heroj-kartah — isti vizualni
 # jezik kot seo.IC_METEOZIMA in app_bottomnav()-jevi ic_* (24×24, obris
@@ -292,6 +300,9 @@ ZIMA_CSS = '''
   text-decoration:none;font-size:.87rem;font-weight:650;transition:border-color .18s,color .18s}
 .zh-cta a:hover{border-color:var(--cyan);color:var(--cyan)}
 .zima-section-title{display:flex;align-items:center;gap:.5rem}
+.zima-finder{list-style:none;margin:0 0 1.2rem;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.6rem}
+.zima-finder li{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.7rem .9rem;font-size:.92rem;color:var(--muted)}
+.zima-finder a{font-weight:650}
 /* Mreža 5 stanj namesto prejšnjega enega stolpca -- glej card_style() klice v
    build_hub_body(), ki za to mrežo pošljejo prazen extra="" (brez privzetega
    margin-bottom, ker razmik zdaj dela grid gap). zima-card-wide (kurilni
@@ -670,7 +681,7 @@ def build_hub_body(data):
 {ZIMA_AMBIENT_BG}
     <div class="zh-content">
     <h1 class="page-title">❄️ Zimski nadzorni center</h1>
-    <p class="zh-sub">Zgornja Savinjska dolina · MeteoZima</p>
+    <p class="zh-sub">Zimske razmere v Zgornji Savinjski dolini · MeteoZima</p>
     <p class="zh-verdict"><span class="zh-status zh-status-{status_cls}"><span class="zh-dot"></span>{hero_icon} <strong>{hero_label}</strong></span><br>{hero_verdict}</p>
     <div class="zh-stats">
       <div class="zh-stat"><div class="zh-stat-label">Sneg zdaj</div>
@@ -772,6 +783,15 @@ def build_hub_body(data):
   preveri tudi promet.si, AMZS ali DARS.</p>
   <a class="mtn-avk-link" href="/zima/prevoznost-prelazov/">Vse podrobnosti o prelazih →</a>'''
 
+    finder_html = '''  <h2 class="zima-section-title">Zimske razmere: kaj iščete?</h2>
+  <ul class="zima-finder">
+    <li><a href="/zima/meja-snezenja/">Do katere višine bo snežilo?</a> Meja sneženja in napoved za dolino.</li>
+    <li><a href="/zima/snezna-karta/">Kje sneži po Sloveniji?</a> Snežna karta po urah, do 48 ur naprej.</li>
+    <li><a href="/snegofili/">Koliko snega je zapadlo in kje je največ?</a> Snegofili: Alpe, kamere, izmerjena odeja ARSO.</li>
+    <li><a href="/vreme-v-gorah/">Kakšno je vreme na Golteh?</a> Golte, Menina planina, Smrekovec, Raduha.</li>
+    <li><a href="/zima/poledica/">Je cesta spolzka?</a> Poledica, žled in <a href="/zima/prevoznost-prelazov/">prevoznost prelazov</a>.</li>
+  </ul>'''
+
     snow_map_html = '''  <h2 class="zima-section-title">❄️ Snežna karta Slovenije</h2>
   <p class="muted-note">Sneženje, meja sneženja in skupni novi sneg do +48 ur (model ICON-D2, ne uradna napoved).</p>
   <div id="sk-app" data-compact="1" data-view="s" data-hours="24" aria-live="polite">Nalagam snežno karto …</div>'''
@@ -864,6 +884,13 @@ def build_hub_body(data):
     faq = [
         ("Katere kraje pokriva MeteoZima?", "Rečico ob Savinji (postaja IREICA1), Mozirje, Nazarje, Ljubno ob "
          "Savinji, Gornji Grad, Luče in Solčavo — ista naselja kot na straneh »Vreme po krajih v dolini«."),
+        ("Kje vidim, kje trenutno sneži v Sloveniji?", "Na <a href=\"/zima/snezna-karta/\">snežni karti</a>: sneženje po urah "
+         "do 48 ur naprej, po modelu ICON-D2. Sneg po Alpah z izmerjeno višino odeje ARSO in kamerami kaže "
+         "<a href=\"/snegofili/\">Snegofili</a>."),
+        ("Kaj je razlika med mejo sneženja, snežno karto in Snegofili?", "<a href=\"/zima/meja-snezenja/\">Meja sneženja</a> pove, "
+         "do katere višine bo snežilo v naši dolini. <a href=\"/zima/snezna-karta/\">Snežna karta</a> kaže, kje po Sloveniji "
+         "in kdaj sneži. <a href=\"/snegofili/\">Snegofili</a> primerjajo smučišča in gorske točke od Golt do Alp: "
+         "nov sneg, izmerjena odeja in kamere. Vse tri strani so modelska ocena, razen izmerjene odeje ARSO."),
         ("Ali je to uradno opozorilo?", "Ne. Vsi indeksi so ocena Meteoreca iz javnih napovednih virov "
          "(Open-Meteo), ne uradno opozorilo ARSO. Za uradna opozorila glej "
          "<a href=\"/nevihte/\">stran opozoril</a>, za dejansko kakovost zraka pa "
@@ -874,6 +901,7 @@ def build_hub_body(data):
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", None)])}
 {seo.stn_badge()}
 {hero_html}
+{finder_html}
 {snow_map_html}
 {chart_html}
 {conditions_html}
@@ -1022,10 +1050,12 @@ def snow_line_kratko(data):
     parts = [f'meja sneženja je zdaj pri <strong>{line_m} m n. m.</strong>']
     if fc_m is not None and abs(fc_m - line_m) >= 100:
         parts[0] += f', v naslednjih 24 h {"naraste" if fc_m > line_m else "se spusti"} na {fc_m} m'
-    if line_m > st_elev:
+    if st_elev <= line_m - SNOW_MIX_HALF_M:
         parts.append(f'v Rečici ob Savinji ({st_elev} m) zato pada dež, ne sneg')
-    else:
+    elif st_elev >= line_m + SNOW_MIX_HALF_M:
         parts.append(f'sneži tudi v Rečici ob Savinji ({st_elev} m)')
+    else:
+        parts.append(f'v Rečici ob Savinji ({st_elev} m) pada dež s snegom')
     by = {b["elevation_m"]: b["cm"] for b in snow.get("expected_cm_by_elevation", [])}
     snowy = [(e, c) for e, c in sorted(by.items()) if c and c >= 0.5]
     if snowy:
@@ -1035,6 +1065,46 @@ def snow_line_kratko(data):
         parts.append('v nobenem od spremljanih višinskih pasov ni pričakovanega novega snega (≥ 0,5 cm v 24 h)')
     return ('  <p class="archive-intro tnc-answer"><strong>Na kratko:</strong> ' + '; '.join(parts) +
             '. Modelska ocena iz napovedi Open-Meteo, ne uradno opozorilo ARSO.</p>')
+
+
+def snow_line_days_html(snow):
+    """Tabela za naslednje 3 dni (besedilo, ki ga vidijo tudi iskalniki; graf je samo SVG). Najnižja meja dneva je
+    tista, ki odloča, ali sneži v dolini; nov sneg je modelska ocena za postajo."""
+    days = [d for d in (snow.get("daily") or []) if d.get("line_m") is not None][:3]
+    if len(days) < 2:
+        return ""
+    rows = "\n".join(
+        f'      <tr><th>{fmt_day(d["date"])}</th><td>najnižja meja {d["line_m"]} m · nov sneg v Rečici '
+        f'({seo.ELEV} m) {num(d["cm_at_station"], 1)} cm</td></tr>' for d in days)
+    return f'''  <h2>Napoved meje sneženja za naslednje dni</h2>
+  <table class="stats">
+{rows}
+  </table>
+  <p class="muted-note">Najnižja meja sneženja tistega dne (ura z najhladnejšim zrakom na višini). Nov sneg je
+  modelska ocena za postajo; brez padavin ga ni, ne glede na mejo.</p>'''
+
+
+def snow_line_places_html(data):
+    """Kje v dolini bi ob trenutni meji padal sneg in kje dež (samo, če padavine so)."""
+    line_m = data["snow_line"].get("current_line_m")
+    locs = [l for l in (data.get("locations") or []) if l.get("elevation_m") is not None]
+    if line_m is None or not locs:
+        return ""
+
+    def what(e):
+        if e >= line_m + SNOW_MIX_HALF_M:
+            return "sneg"
+        if e <= line_m - SNOW_MIX_HALF_M:
+            return "dež"
+        return "dež s snegom"
+
+    rows = "\n".join(f'      <tr><th>{l["name"]} ({l["elevation_m"]} m)</th><td>{what(l["elevation_m"])}</td></tr>'
+                     for l in sorted(locs, key=lambda l: l["elevation_m"]))
+    return f'''  <h2>Kje v dolini sneži in kje dežuje</h2>
+  <p class="archive-intro">Ob trenutni meji sneženja ({line_m} m), če bi padavine bile zdaj:</p>
+  <table class="stats">
+{rows}
+  </table>'''
 
 
 def build_snow_line_body(data):
@@ -1071,35 +1141,76 @@ def build_snow_line_body(data):
 
     st_elev = seo.ELEV
     faq = [
+        ("Do katere višine bo snežilo?",
+         "Meja sneženja za Zgornjo Savinjsko dolino je na vrhu te strani, napoved za naslednje dni pa v tabeli. "
+         f"Nad mejo padavine padajo kot sneg, pod njo kot dež, v pasu približno {SNOW_MIX_HALF_M} m okoli "
+         "nje pa kot dež s snegom. Sneg pa pade samo, če so padavine: meja sama po sebi ni napoved sneženja."),
         ("Kdaj sneži tudi v dolini, v Rečici ob Savinji?",
-         f"Takrat, ko meja sneženja pade na višino dna doline ({st_elev} m) ali pod njo. Dokler je meja "
-         f"nad dolino, pada v Rečici dež, nad mejo pa sneg; ob meji, približno v pasu nekaj deset metrov, "
+         f"Takrat, ko meja sneženja pade na višino dna doline ({st_elev} m) ali pod njo in so padavine. Dokler je meja "
+         f"nad dolino, pada v Rečici dež, nad mejo pa sneg; v pasu približno {SNOW_MIX_HALF_M} m okoli meje "
          f"pada mešano. To je modelska ocena in ne uradna napoved."),
-        ("Kaj pomeni »meja sneženja«?", "To je nadmorska višina, nad katero padavine padajo kot sneg — "
-         "izpeljana iz ničte izoterme (Open-Meteo), znižane za približno 200–300 m, ker se padavina ob "
-         "padanju skozi zrak dodatno ohlaja. Pod to mejo pada dež, tik ob njej pa mešano."),
-        ("Zakaj ni številke za konkretno goro (Golte, Menina …)?", "Ker bi bila trdna povezava številka-vrh "
-         "ugibana — vrhovi v okolici se med seboj razlikujejo za stotine metrov nadmorske višine. Namesto "
-         "tega tabela pokaže pričakovan sneg po višinskih pasovih; za goro nad določeno višino preberi "
-         "ustrezno vrstico."),
-        ("Kako natančna je ocena?", "Uporablja splošno znan sinoptičen približek (~10:1 razmerje padavine/sneg, "
-         "meja sneženja ~200–300 m pod ničto izotermo), ne uradne mikrofizike padavin. Za odločitve z visokim "
-         "tveganjem (gorske ture, prevoznost) preveri tudi uradno napoved ARSO."),
+        ("Kaj pomeni »meja sneženja«?", "To je nadmorska višina, nad katero padavine padajo kot sneg. "
+         "Izračunamo jo iz ničte izoterme (višina, kjer je zrak 0 °C; Open-Meteo), znižane za "
+         f"{SNOW_OFFSET_M} m. Pod to mejo pada dež, tik ob njej pa mešano."),
+        ("Zakaj meja sneženja ni enaka višini, kjer je 0 °C?",
+         "Snežinke se ob padanju skozi zrak nad 0 °C topijo, pri tem pa zrak okoli sebe ohladijo, zato lahko "
+         "sneg pade tudi nekaj sto metrov pod višino ničte izoterme. Koliko natanko, je odvisno od vlage in "
+         f"jakosti padavin. Mi uporabljamo poenostavitev, stalnih {SNOW_OFFSET_M} m; v resnici je razlika lahko "
+         "manjša ali večja."),
+        ("Kako se meja sneženja spreminja čez dan?",
+         "Spreminja se z zračno maso: ob prehodu hladne fronte se lahko spusti, ob dotoku toplega zraka dvigne, "
+         "v nekaj urah tudi za več sto metrov. Zato tabela po dnevih kaže najnižjo mejo tistega dne, ta pa je "
+         "za sneg v dolini odločilna."),
+        ("Kako zanesljiva je napoved meje sneženja?",
+         "Uporabljamo en model (Open-Meteo) in poenostavljen približek (razmerje padavine : sneg približno 1 mm : 1 cm, "
+         f"meja {SNOW_OFFSET_M} m pod ničto izotermo), ne uradne mikrofizike padavin. Oznaka zanesljivosti na vrhu "
+         "pove samo, kako se meja v 24 urah spremeni; podrobnosti so v razdelku »Kako zanesljiva je ocena meje sneženja«. "
+         "Za odločitve z visokim tveganjem (gorske ture, prevoznost) preveri tudi uradno napoved ARSO."),
+        ("Kje lahko vidim, kje trenutno sneži?",
+         "Sneženje po vsej Sloveniji, po urah in do 48 ur naprej, kaže <a href=\"/zima/snezna-karta/\">snežna karta</a>. "
+         "Sneg po Alpah, kamere in izmerjeno višino odeje ARSO kaže <a href=\"/snegofili/\">Snegofili</a>, "
+         "opažanja bralcev pa <a href=\"/zima/sneg-porocila/\">Ali je pri vas sneg?</a>."),
+        ("Kakšna je meja sneženja na Golteh ali Menini planini?",
+         "Meja sneženja je ena vrednost za vso dolino: če je pod višino gore, na vrhu sneži. Tabela pokaže pričakovan "
+         "sneg po višinskih pasovih (pasova 1200 m in 1600 m obkrožata Golte in Menino planino). Temperaturo, veter in "
+         "ničto izotermo na višini vrha pokaže stran <a href=\"/vreme-v-gorah/\">Vreme v gorah</a>, "
+         "novi sneg na smučiščih pa <a href=\"/snegofili/\">Snegofili</a>."),
     ]
+    if conf:
+        conf_note = (f"Oznaka zanesljivosti ({CONF_LABEL.get(conf, 'ocena')}) je naša preprosta ocena: koliko se meja "
+                     f"v naslednjih 24 urah spremeni. Premik do {CONF_SWING_HIGH_M} m pomeni visoko zanesljivost, do "
+                     f"{CONF_SWING_MID_M} m srednjo, več kot to nizko. Hiter premik pomeni, da se razmere spreminjajo in je "
+                     "čas prehoda iz dežja v sneg manj gotov. To ni statistična verjetnost.")
+    else:
+        conf_note = "Oznake zanesljivosti trenutno ni, ker napoved meje za naslednjih 24 ur ni na voljo."
+    days_html = snow_line_days_html(snow)
+    places_html = snow_line_places_html(data)
 
     return f'''{BRAND_SWAP}{ZIMA_CSS}
 {seo.crumbs_html([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)])}
 {seo.stn_badge()}
-  <h1 class="page-title">Meja sneženja — Zgornja Savinjska dolina</h1>
+  <h1 class="page-title">Meja sneženja danes in jutri — Zgornja Savinjska dolina</h1>
   <p class="post-meta">Posodobljeno {data.get("generated_at_local", "—")}</p>
   <div class="card zima-card" style="{card_style("snow_line")}">
     <div class="clabel">{icon_html("snow_line")}Trenutna meja sneženja</div>
     <p class="fh-sub">{hero_sub}</p>
   </div>
 {kratko}
+  <p class="archive-intro">Do katere višine bo snežilo in kdaj sneži tudi v dolini: meja sneženja za Zgornjo Savinjsko
+  dolino, napoved za naslednje dni in pričakovan sneg po višinskih pasovih. Za sneženje po vsej Sloveniji po urah je
+  <a href="/zima/snezna-karta/">snežna karta</a>, za sneg po Alpah, kamere in izmerjeno odejo
+  <a href="/snegofili/">Snegofili</a>, za vrhove nad dolino pa <a href="/vreme-v-gorah/">Vreme v gorah</a>
+  (Golte, Menina planina, Smrekovec, Raduha).</p>
+{days_html}
+{places_html}
   <h2>Pričakovan sneg po višinskih pasovih (naslednjih 24 h)</h2>
 {table}
 {chart_html}
+  <h2>Kako zanesljiva je ocena meje sneženja</h2>
+  <p class="archive-intro">{conf_note} Meja je izpeljana iz enega modela, zato je napoved toliko zanesljiva kot ta model.
+  Kako se modeli razlikujejo pri temperaturi in padavinah, pokaže stran
+  <a href="/primerjava-modelov/">Primerjava modelov</a>; uradna opozorila so na strani
+  <a href="/nevihte/">Opozorila ARSO</a>.</p>
   <h2>Pogosta vprašanja</h2>
   <div class="faq">
 {chr(10).join(f'    <details><summary>{q}</summary><p>{a}</p></details>' for q, a in faq)}
@@ -1107,8 +1218,6 @@ def build_snow_line_body(data):
   <p class="muted-note">Ocena Meteoreca iz javne napovedi Open-Meteo, ne uradno opozorilo ARSO. Meja
   sneženja je regionalna vrednost in se znotraj dolinskega dna Zgornje Savinjske doline ne razlikuje
   pomembno med kraji — razlika je v nadmorski višini, ne v legi.</p>
-  <p class="muted-note">Za celotno Slovenijo, po urah in do +48 ur: <a href="/zima/snezna-karta/">snežna karta Slovenije</a>.
-  Ta stran velja za Zgornjo Savinjsko dolino.</p>
   <a class="back-link" href="/zima/">← Nazaj na Zimski nadzorni center</a>''', faq
 
 
@@ -1546,9 +1655,7 @@ def main():
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", None)]),
         seo.faq_schema(faq),
     ])
-    html = seo.page_shell("MeteoZima — Zgornja Savinjska dolina",
-                           "MeteoZima: meja sneženja in tveganje poledice za Zgornjo Savinjsko dolino, "
-                           "posodobljeno dnevno.",
+    html = seo.page_shell(HUB_TITLE, HUB_DESC,
                            "/zima/", schema + "\n" + snow_map_assets(), body)
     seo.write_page("zima/index.html", html, force=True)
     print("  → zima/index.html")
@@ -1556,23 +1663,18 @@ def main():
     # ── meja-snezenja ──
     body, faq = build_snow_line_body(data)
     body = with_alert(body, "zima-sneg")
+    _sl = data["snow_line"]
+    _desc = ("Do katere višine bo snežilo? Meja sneženja za Zgornjo Savinjsko dolino: napoved za naslednje dni, "
+             "sneg po višinskih pasovih in kje v dolini sneži. Modelska ocena.")
+    if _sl.get("current_line_m") is not None:
+        _desc = (f"Meja sneženja je zdaj pri {_sl['current_line_m']} m. Do katere višine bo snežilo: napoved za "
+                 f"naslednje dni, sneg po višinskih pasovih in kje v dolini sneži. Modelska ocena.")
     schema = "\n".join([
-        seo.webpage_schema("/zima/meja-snezenja/", "Meja sneženja — Zgornja Savinjska dolina",
-                            "Trenutna in 24-urna napoved meje sneženja po višinskih pasovih za Zgornjo "
-                            "Savinjsko dolino.",
-                            date_published="2026-09-20"),
+        seo.webpage_schema("/zima/meja-snezenja/", SNOW_LINE_TITLE, _desc, date_published="2026-09-20"),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)]),
         seo.faq_schema(faq),
     ])
-    _sl = data["snow_line"]
-    _desc = ("Meja sneženja v Zgornji Savinjski dolini: sneg po višinskih pasovih (366–1600 m), napoved za 24 ur "
-             "in 7-dnevni trend. Kdaj sneži v dolini? Modelska ocena, posodobljeno dnevno.")
-    if _sl.get("current_line_m") is not None:
-        _desc = (f"Meja sneženja je zdaj pri {_sl['current_line_m']} m. Sneg po višinskih pasovih (366–1600 m), "
-                 f"napoved za 24 ur in 7-dnevni trend za Zgornjo Savinjsko dolino. Modelska ocena.")
-    html = seo.page_shell("Meja sneženja danes in jutri — Savinjska dolina",
-                           _desc,
-                           "/zima/meja-snezenja/", schema, body)
+    html = seo.page_shell(SNOW_LINE_TITLE, _desc, "/zima/meja-snezenja/", schema, body)
     seo.write_page("zima/meja-snezenja/index.html", html, force=True)
     print("  → zima/meja-snezenja/index.html")
 

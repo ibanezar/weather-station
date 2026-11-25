@@ -442,6 +442,8 @@ ELEVATION_BANDS_M = [ELEV, 600, 900, 1200, 1600]
 
 SNOW_LEVEL_OFFSET_M = 250    # meja sneženja je navadno toliko pod ničto izotermo
 SNOW_BAND_HALFWIDTH_M = 100  # prehodni pas (dež/sneg mešano) okoli te meje
+CONF_SWING_HIGH_M = 150      # zanesljivost meje sneženja: premik v 24 h pod to mejo = visoka ...
+CONF_SWING_MID_M = 400       # ... pod to = srednja, sicer nizka (↔ generate_zima_page.py, tools/test_zima_seo.py)
 SNOW_RATIO_CM_PER_MM = 1.0   # ~10:1 približek (1 mm padavin ≈ 1 cm svežega snega)
 
 GROUND_OFFSET_MAX_C = 3.0    # največji sevalni primanjkljaj cestišča pod zrakom (jasno, mirno)
@@ -580,6 +582,15 @@ def snow_fraction(elevation_m, freezing_level_m):
     return clamp(interp(elevation_m, lo, 0.0, hi, 1.0), 0.0, 1.0)
 
 
+def snow_line_from_freezing_level(freezing_level_m):
+    """Meja sneženja = ničta izoterma − SNOW_LEVEL_OFFSET_M (isti približek kot snow_fraction() in
+    tools/snegofili_data.py), ne pod 0 m. Do 25. 11. 2026 je stran kazala surovo ničto izotermo kot »mejo
+    sneženja«, čeprav je besedilo na strani in na snežni karti trdilo, da je meja 250 m nižje."""
+    if freezing_level_m is None:
+        return None
+    return max(0.0, freezing_level_m - SNOW_LEVEL_OFFSET_M)
+
+
 def compute_snow_line(hourly, idx_now):
     times = hourly.get("time") or []
     fl = hourly.get("freezing_level_height") or []
@@ -587,8 +598,10 @@ def compute_snow_line(hourly, idx_now):
     n = len(times)
     idx_24h = min(idx_now + 24, n - 1) if idx_now is not None else None
 
-    current_line_m = fl[idx_now] if idx_now is not None and idx_now < len(fl) else None
-    forecast_24h_m = fl[idx_24h] if idx_24h is not None and idx_24h < len(fl) else None
+    current_fl_m = fl[idx_now] if idx_now is not None and idx_now < len(fl) else None
+    forecast_fl_m = fl[idx_24h] if idx_24h is not None and idx_24h < len(fl) else None
+    current_line_m = snow_line_from_freezing_level(current_fl_m)
+    forecast_24h_m = snow_line_from_freezing_level(forecast_fl_m)
 
     window = range(idx_now, min(idx_now + 24, n)) if idx_now is not None else range(0)
     by_elevation = []
@@ -603,11 +616,11 @@ def compute_snow_line(hourly, idx_now):
 
     expected_cm_at_station = next((b["cm"] for b in by_elevation if b["elevation_m"] == ELEV), None)
 
-    if current_line_m is None or forecast_24h_m is None:
+    if current_fl_m is None or forecast_fl_m is None:
         confidence = None
     else:
-        swing = abs(forecast_24h_m - current_line_m)
-        confidence = "visoka" if swing < 150 else ("srednja" if swing < 400 else "nizka")
+        swing = abs(forecast_fl_m - current_fl_m)   # surovi izotermi: odmik ob 0 m ne sme skrčiti premika
+        confidence = "visoka" if swing < CONF_SWING_HIGH_M else ("srednja" if swing < CONF_SWING_MID_M else "nizka")
 
     return {
         "current_line_m": round(current_line_m) if current_line_m is not None else None,
@@ -621,7 +634,7 @@ def compute_snow_line(hourly, idx_now):
 
 def compute_snow_daily(hourly, times, idx_now):
     """Dnevni pregled meje sneženja za DAILY_FORECAST_DAYS dni — najnižja
-    (najbolj snežna) meja tisti dan + pričakovan sneg na postaji, isti
+    (najbolj snežna) meja tisti dan (ničta izoterma − SNOW_LEVEL_OFFSET_M) + pričakovan sneg na postaji, isti
     snow_fraction()/SNOW_RATIO_CM_PER_MM kot compute_snow_line zgoraj."""
     fl = hourly.get("freezing_level_height") or []
     precip = hourly.get("precipitation") or []
@@ -632,7 +645,7 @@ def compute_snow_daily(hourly, times, idx_now):
                   for i in idxs if i < len(precip))
         out.append({
             "date": date,
-            "line_m": round(min(day_fl)) if day_fl else None,
+            "line_m": round(snow_line_from_freezing_level(min(day_fl))) if day_fl else None,
             "cm_at_station": round(cm, 1),
         })
     return out

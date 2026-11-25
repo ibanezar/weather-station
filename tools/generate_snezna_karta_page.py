@@ -32,7 +32,23 @@ def slo_poly_js():
     return m.group(1)
 
 
+TITLE = "Snežna karta Slovenije: kje sneži in koliko snega bo zapadlo"
+DESC = ("Snežna karta Slovenije: kje bo snežilo in koliko novega snega bo zapadlo, ura za uro do 48 ur naprej. "
+        "Model ICON-D2, ne uradna napoved.")
+
 FAQ = [
+    ("Kje bo danes in jutri snežilo?",
+     "Izberi prikaz »Sneženje po urah«, pritisni ▶ ali povleci drsnik. Obarvana območja so tam, kjer model v izbrani uri "
+     "napoveduje sneženje; brez barve ni sneženja. Karta seže do 48 ur naprej od zadnjega teka modela."),
+    ("Koliko snega bo zapadlo?",
+     "Izberi »Skupaj novega snega« in rok (6, 12, 24 ali 48 ur): karta sešteje modelsko sneženje od zdaj do izbrane ure. "
+     "To je količina svežega snega, ne višina odeje; ta je odvisna tudi od tega, koliko se je že posedlo in staljilo."),
+    ("Koliko snega je zdaj v Sloveniji?",
+     "Karta kaže nov sneg po modelu, ne snega, ki že leži. Izmerjeno višino odeje nekaterih postaj ARSO, nov sneg po "
+     "alpskih točkah in kamere najdeš na <a href=\"/snegofili/\">Snegofilih</a>."),
+    ("Kakšna je razlika med snežno karto in mejo sneženja?",
+     "Snežna karta kaže, kje po Sloveniji in kdaj sneži. Stran <a href=\"/zima/meja-snezenja/\">Meja sneženja</a> pove, do "
+     "katere višine bo snežilo v Zgornji Savinjski dolini, s tabelo po dnevih in po višinskih pasovih."),
     ("Od kod so podatki na snežni karti?",
      "Iz modela ICON-D2 (DWD, ločljivost ~2 km), ki ga prek Open-Meteo prebere naš strežnik na mreži 0,1° "
      "(okoli 8 × 11 km) nad Slovenijo. Karta kaže zadnji razpoložljivi tek, osvežuje se vsake pol ure."),
@@ -423,6 +439,11 @@ def build_body():
   na kateri višini dež preide v sneg in koliko novega snega se nabere do izbrane ure. Gre za neposredni izhod modela
   ICON-D2, ne za uradno napoved.</p>
   <div id="sk-app" aria-live="polite">Nalagam snežno karto …</div>
+  <h2>Kje bo snežilo in koliko snega bo zapadlo?</h2>
+  <p class="archive-intro">Kje sneži, pokaže prikaz »Sneženje po urah«: ura za uro do 48 ur naprej. Koliko novega snega bo
+  zapadlo do izbranega roka, pokaže »Skupaj novega snega«. Višina snežne odeje ni na tej karti: za izmerjene vrednosti ARSO in
+  kamere glej <a href="/snegofili/">Snegofile</a>, za mejo sneženja po višinah v naši dolini pa stran
+  <a href="/zima/meja-snezenja/">Meja sneženja</a>.</p>
   <h2>Kako brati karto</h2>
   <ul>
     <li><b>Sneženje po urah</b> — modelsko sneženje v izbrani uri (cm svežega snega). Brez barve pomeni brez sneženja.</li>
@@ -439,9 +460,8 @@ def build_body():
 
 
 def main():
-    title = "Snežna karta Slovenije: sneženje po urah, +48 h"
-    desc = ("Snežna karta Slovenije do +48 ur: sneženje po urah, meja sneženja in skupni novi sneg v izbranem obdobju "
-            "na eni karti. Model ICON-D2, ne uradna napoved.")
+    title = TITLE
+    desc = DESC
     schema = "\n".join([
         seo.webpage_schema(URL, title, desc, date_published=TODAY.isoformat()),
         seo.crumbs_schema([("Meteorec", "/"), ("Zima", "/zima/"), ("Snežna karta", None)]),
