@@ -7659,6 +7659,105 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         }
       }
 
+      // ── Zbor Rečiški pobi: dnevnik zamud (Zamudometer, /reciskipobi/, 25. 11. 2026) ──
+      // Zasebno orodje zbora: VSI klici zahtevajo geslo zbora (Bearer ZBOR_GESLO). Brez nastavljene skrivnosti je
+      // vse zaprto (503), nikoli odprto. Stran je javna datoteka, podatki so samo za strežnikom. IP in user-agent se
+      // ne shranita (IP je samo v KV števcu zaklepa/omejitve). Zaklep po IP: 10 napačnih gesel → 15 min.
+      //   GET  /zbor/zamude    → { zapisi: [...] }  (najnovejši prvi)
+      //   POST /zbor/zamuda    { kdo, zakaj, datum, dogodek, minute, izostal?, kazen?, website? }
+      //   POST /zbor/izbrisi   { id }
+      // ZBOR_DOGODKI je namerna podvojitev z izbirnikom dogodka v reciskipobi/index.html (preverja tools/test_zbor.mjs).
+      if (path === "/zbor/zamude" || path === "/zbor/zamuda" || path === "/zbor/izbrisi") {
+        const r2 = env?.PHOTOS_R2;
+        function _json(obj, status) {
+          return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
+        }
+        const ZB_KEY = "feedback/zbor-zamude.json";
+        const ZB_STORE_CAP = 3000;
+        const ZB_FAIL_MAX = 10;
+        const ZBOR_DOGODKI = ["vaja", "nastop", "gostovanje", "druzenje"];
+
+        const zbGeslo = env.ZBOR_GESLO;
+        if (!zbGeslo) return _json({ error: "Geslo zbora še ni nastavljeno na strežniku" }, 503);
+        const zbKv = env.COUNTER_KV;
+        const zbAuth = request.headers.get("Authorization") || "";
+        let zbOk = false;
+        if (zbKv) {
+          const zbLock = "zbor_fail:" + (request.headers.get("CF-Connecting-IP") || "unknown");
+          const fails = parseInt((await zbKv.get(zbLock)) || "0") || 0;
+          if (fails < ZB_FAIL_MAX) {
+            if (_safeEq(zbAuth, "Bearer " + zbGeslo)) { if (fails) await zbKv.delete(zbLock); zbOk = true; }
+            else await zbKv.put(zbLock, String(fails + 1), { expirationTtl: 900 });
+          }
+        } else zbOk = _safeEq(zbAuth, "Bearer " + zbGeslo);
+        if (!zbOk) return _json({ error: "Napačno geslo (po preveč poskusih počakaj 15 minut)" }, 401);
+        if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
+
+        // null = shramba obstaja, a ni berljiva: nikoli je ne prepišemo z praznim seznamom.
+        async function _zbRead() {
+          try {
+            const obj = await r2.get(ZB_KEY);
+            if (!obj) return [];
+            const v = JSON.parse(await obj.text());
+            return Array.isArray(v) ? v : null;
+          } catch (_) { return null; }
+        }
+        async function _zbWrite(all) {
+          await r2.put(ZB_KEY, JSON.stringify(all.slice(0, ZB_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
+        }
+        const expected = { "/zbor/zamude": "GET", "/zbor/zamuda": "POST", "/zbor/izbrisi": "POST" }[path];
+        if (request.method !== expected) return _json({ error: "Metoda ni dovoljena" }, 405);
+
+        if (path === "/zbor/zamude") {
+          const all = await _zbRead();
+          if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
+          return _json({ zapisi: all });
+        }
+
+        let body;
+        try { body = await request.json(); } catch (_) { return _json({ error: "Napačni podatki" }, 400); }
+        if (!body || typeof body !== "object") return _json({ error: "Napačni podatki" }, 400);
+
+        if (path === "/zbor/izbrisi") {
+          const id = typeof body.id === "string" ? body.id : "";
+          const all = await _zbRead();
+          if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
+          const rest = all.filter(i => i.id !== id);
+          if (!id || rest.length === all.length) return _json({ error: "Zapisa ni" }, 404);
+          await _zbWrite(rest);
+          return _json({ ok: true, ostalo: rest.length });
+        }
+
+        // POST /zbor/zamuda
+        if (body.website) return _json({ ok: true }); // honeypot
+        const clean = (s, max) => (typeof s === "string" ? s.replace(/\s+/g, " ").trim().slice(0, max) : "");
+        const kdo = clean(body.kdo, 40), zakaj = clean(body.zakaj, 200), kazen = clean(body.kazen, 140);
+        if (!kdo) return _json({ error: "Vpiši, kdo je zamudil" }, 400);
+        if (!zakaj) return _json({ error: "Brez izgovora ni zapisa" }, 400);
+        const datum = typeof body.datum === "string" ? body.datum : "";
+        const dObj = /^\d{4}-\d{2}-\d{2}$/.test(datum) ? new Date(datum + "T00:00:00Z") : null;
+        const najpozneje = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);   // rezerva za časovni pas
+        if (!dObj || isNaN(dObj) || dObj.toISOString().slice(0, 10) !== datum || datum < "2020-01-01" || datum > najpozneje)
+          return _json({ error: "Datum ni veljaven" }, 400);
+        if (!ZBOR_DOGODKI.includes(body.dogodek)) return _json({ error: "Neznan dogodek" }, 400);
+        const izostal = body.izostal === true;
+        const minute = izostal ? 0 : Math.round(Number(body.minute));
+        if (!izostal && !(minute >= 1 && minute <= 240)) return _json({ error: "Zamuda mora biti od 1 do 240 minut" }, 400);
+
+        if (await _ipLimited(env, request, "zbor_rl", 60, 3600)) return _json({ error: "Preveč vnosov v kratkem času — poskusi kasneje" }, 429);
+        const all = await _zbRead();
+        if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
+        const now = Date.now();
+        const dup = all.some(i => i.kdo.toLowerCase() === kdo.toLowerCase() && i.datum === datum && i.dogodek === body.dogodek
+          && i.zakaj === zakaj && i.minute === minute && (now - new Date(i.ts).getTime()) < 60000);
+        if (dup) return _json({ ok: true });
+        const entry = { id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(), kdo, datum, dogodek: body.dogodek, minute, izostal, zakaj };
+        if (kazen) entry.kazen = kazen;
+        all.unshift(entry);
+        await _zbWrite(all);
+        return _json({ ok: true, zapis: entry });
+      }
+
       // ── Anonimno štetje iger 365-0 (/365-0/, 8. 11. 2026) ──
       // Igra ob začetku in koncu igre pove, katera tema je bila, ali je dnevna ali poljubna in (ob koncu) ocena.
       // Brez oznake igralca, brez IP (ta je samo v KV števcu omejitve, TTL 1 h), strežnik hrani samo vsote za mesec.

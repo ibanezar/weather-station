@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Zamudometer">
+  <rect width="512" height="512" fill="#050805"/>
+  <circle cx="256" cy="256" r="168" fill="#0e1710" stroke="#3ddc84" stroke-width="20"/>
+  <g stroke="#2a6b45" stroke-width="12" stroke-linecap="round">
+    <line x1="256" y1="110" x2="256" y2="132"/>
+    <line x1="402" y1="256" x2="380" y2="256"/>
+    <line x1="256" y1="402" x2="256" y2="380"/>
+    <line x1="110" y1="256" x2="132" y2="256"/>
+  </g>
+  <!-- osminka: njena zastavica je minutni kazalec, glava je zamujena pika -->
+  <line x1="286" y1="296" x2="286" y2="150" stroke="#3ddc84" stroke-width="16" stroke-linecap="round"/>
+  <path d="M286 150 C 286 196, 344 206, 344 256 C 344 228, 322 214, 286 200 Z" fill="#3ddc84"/>
+  <ellipse cx="258" cy="306" rx="42" ry="30" transform="rotate(-22 258 306)" fill="#3ddc84"/>
+  <circle cx="256" cy="256" r="0" fill="#3ddc84"/>
+</svg>

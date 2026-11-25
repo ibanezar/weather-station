@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050805">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Zamudometer">
+<title>Zamudometer · Rečiški pobi</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --bg:#050805;--card:#0d1610;--card2:#122019;--bd:#1f3324;--bd2:#2b4a35;
+  --fg:#e4f4e8;--mut:#93ad9a;--ac:#3ddc84;--ac2:#27b86a;--acfg:#03130a;
+  --warn:#f4c95d;--bad:#ff8a80;--r:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(900px 420px at 50% -140px,rgba(61,220,132,.17),transparent 70%),var(--bg);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 80px env(safe-area-inset-left)}
+.staff{height:33px;margin:14px 0 0;opacity:.55;
+  background:repeating-linear-gradient(to bottom,var(--bd2) 0 1px,transparent 1px 8px)}
+header.top{display:flex;align-items:center;gap:14px;max-width:640px;margin:0 auto;padding:14px 16px 4px}
+header.top img{border-radius:14px;flex:none}
+header.top div{flex:1;min-width:0}
+h1{margin:0;font-size:1.65rem;line-height:1.15;letter-spacing:.01em;color:var(--ac)}
+.sub{margin:2px 0 0;color:var(--mut);font-size:.95rem}
+.tagline{max-width:640px;margin:0 auto;padding:4px 16px 10px;color:var(--mut);font-size:.95rem;font-style:italic}
+main{max-width:640px;margin:0 auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin:12px 0}
+.card h2{margin:0 0 6px;font-size:1.1rem;color:var(--ac)}
+.muted{color:var(--mut)}
+small,.hint{color:var(--mut);font-size:.88rem}
+label,legend{display:block;font-weight:600;margin:0 0 6px;padding:0}
+label small,legend small{font-weight:400}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.field{margin:0 0 16px}
+input[type=text],input[type=password],input[type=date],input[type=number],select,textarea{
+  width:100%;padding:11px 12px;font:inherit;font-size:16px;color:var(--fg);background:#08100b;
+  border:1px solid var(--bd2);border-radius:10px}
+textarea{resize:vertical;min-height:84px}
+input::placeholder,textarea::placeholder{color:#6f8a77}
+input[type=date]{color-scheme:dark}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button{font:inherit;cursor:pointer;min-height:44px;border-radius:10px;border:1px solid var(--bd2);
+  background:var(--card2);color:var(--fg);padding:9px 14px}
+button:hover{border-color:var(--ac)}
+button:disabled{opacity:.5;cursor:default}
+button.primary{width:100%;background:var(--ac);border-color:var(--ac);color:var(--acfg);font-weight:700;font-size:1.05rem}
+button.primary:hover{background:#5ee89b}
+button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px 12px;font-size:.9rem}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+#err{color:var(--bad);min-height:1.4em;margin-top:8px}
+.check{display:flex;gap:10px;align-items:center;font-weight:400;margin:12px 0 0;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--ac);flex:none}
+
+/* zavihki */
+[role=tablist]{display:flex;gap:6px;margin:6px 0 4px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:4px}
+[role=tab]{flex:1;border:0;background:transparent;color:var(--mut);padding:8px 4px;font-weight:600;font-size:.95rem;min-height:44px;border-radius:9px}
+[role=tab][aria-selected=true]{background:var(--ac);color:var(--acfg)}
+[role=tab]:hover{color:var(--fg)}
+[role=tab][aria-selected=true]:hover{color:var(--acfg)}
+
+/* čipi in izbira */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{min-height:40px;padding:6px 13px;border-radius:999px;background:#08100b;color:var(--fg);font-size:.95rem}
+.chip[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:var(--acfg);font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.seg label{margin:0;font-weight:500;position:relative}
+.seg input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.seg span{display:block;text-align:center;padding:9px 6px;border:1px solid var(--bd2);border-radius:10px;background:#08100b;min-height:44px;line-height:1.6}
+.seg input:checked+span{background:var(--ac);border-color:var(--ac);color:var(--acfg);font-weight:700}
+.seg input:focus-visible+span{outline:2px solid var(--ac);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:520px){.row2{grid-template-columns:1fr 1fr;gap:14px}}
+.minrow{display:flex;gap:10px;align-items:center;margin-top:10px}
+.minrow input{max-width:120px}
+.off{opacity:.45;pointer-events:none}
+.count{text-align:right;margin-top:2px}
+
+/* generator izgovorov */
+.gen{background:var(--card2);border:1px dashed var(--bd2);border-radius:12px;padding:12px;margin:0 0 16px}
+.gen .line{display:flex;gap:8px;flex-wrap:wrap}
+.gen select{flex:1;min-width:140px}
+.gen button.roll{flex:none}
+#predlog{margin-top:12px;border-left:3px solid var(--ac);padding:2px 0 2px 12px}
+#predlog p{margin:0 0 10px;font-size:1.02rem}
+#predlog .btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* verdikt postaje */
+.verdict{margin-top:10px;padding:9px 12px;border-radius:10px;font-size:.93rem;border:1px solid var(--bd2);background:#08100b}
+.verdict.ok{border-color:var(--ac2)}
+.verdict.bad{border-color:var(--warn);color:#fbe3a2}
+.verdict.wait{color:var(--mut)}
+.verdict b{display:block;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.verdict.ok b{color:var(--ac)}
+.verdict.bad b{color:var(--warn)}
+
+/* rezultat po vnosu */
+#rezultat{border-color:var(--ac)}
+#rezultat .pen{margin:10px 0 14px;padding:10px 12px;background:var(--card2);border-radius:10px}
+#rezultat .pen b{color:var(--warn)}
+
+/* sramotni zid */
+.seg2{display:flex;gap:6px;margin:0 0 12px}
+.seg2 button{flex:1}
+.seg2 button[aria-pressed=true]{background:var(--ac);border-color:var(--ac);color:var(--acfg);font-weight:700}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.tile{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.tile.wide{grid-column:1/-1}
+.tile .k{font-size:.8rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.tile .v{font-size:1.5rem;font-weight:700;color:var(--ac);line-height:1.2;margin:2px 0}
+.tile .s{font-size:.88rem;color:var(--mut)}
+.podij{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 12px}
+.pod{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.pod .no{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:var(--acfg);background:var(--ac)}
+.pod:nth-child(2) .no{background:#9bd8b4}
+.pod:nth-child(3) .no{background:#6ea285}
+.pod .nm{font-weight:700;font-size:1.05rem}
+.pod .tt{font-size:.88rem;color:var(--mut)}
+.pod .pt{margin-left:auto;text-align:right;font-weight:700;color:var(--ac);white-space:nowrap}
+.pod .pt small{display:block;font-weight:400}
+.rank{list-style:none;margin:0;padding:0}
+.rank li{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--bd)}
+.rank li:first-child{border-top:0}
+.rank .n{flex:none;width:26px;color:var(--mut);text-align:right}
+.rank .nm{font-weight:600}
+.rank .tt{font-size:.85rem;color:var(--mut)}
+.rank .pt{margin-left:auto;text-align:right;white-space:nowrap}
+.rank .pt small{display:block}
+
+/* dnevnik */
+.log{list-style:none;margin:0;padding:0}
+.entry{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:13px;margin:0 0 10px}
+.e-head{display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+.e-head strong{font-size:1.05rem}
+.pill{flex:none;background:var(--card2);border:1px solid var(--bd2);border-radius:999px;padding:1px 10px;font-size:.88rem;color:var(--ac);white-space:nowrap}
+.pill.duh{color:var(--warn)}
+.e-meta{color:var(--mut);font-size:.88rem;margin:0 0 6px}
+.e-why{margin:0 0 4px;font-style:italic}
+.e-pen{margin:8px 0 0;font-size:.9rem;color:var(--mut)}
+.e-pen b{color:var(--warn);font-weight:600}
+.e-foot{display:flex;justify-content:flex-end;margin-top:6px}
+.empty{text-align:center;color:var(--mut);padding:26px 8px}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,30px);opacity:0;
+  background:var(--ac);color:var(--acfg);font-weight:600;padding:11px 18px;border-radius:12px;max-width:min(92vw,520px);
+  text-align:center;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.bad{background:#3a1511;color:#ffd5cf;border:1px solid var(--bad)}
+footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-size:.82rem;text-align:center}
+
+@keyframes tik{to{transform:rotate(360deg)}}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--bd2);border-top-color:var(--ac);border-radius:50%;animation:tik .8s linear infinite;vertical-align:-2px;margin-right:8px}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}#toast{transition:none}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="staff" aria-hidden="true"></div>
+<header class="top">
+  <img src="icon.svg" width="56" height="56" alt="">
+  <div>
+    <h1>Zamudometer</h1>
+    <p class="sub">Rečiški pobi · dnevnik zamud</p>
+  </div>
+  <button id="odjava" type="button" class="ghost" hidden>Odjava</button>
+</header>
+<p class="tagline" id="tagline"></p>
+
+<main>
+<noscript><div class="card">Brez JavaScripta se zamude ne dajo zapisati. Tenorji, žal.</div></noscript>
+
+<section id="login" class="card" aria-labelledby="loginH">
+  <h2 id="loginH">Samo za pevce</h2>
+  <p class="muted">Geslo ti je povedal zborovodja, ali pa si ga ujel pri pavzi.</p>
+  <form id="loginForm" novalidate>
+    <div class="field">
+      <label for="pw">Geslo zbora</label>
+      <input id="pw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false">
+    </div>
+    <label class="check"><input type="checkbox" id="zapomni" checked> Ostani prijavljen na tej napravi</label>
+    <div id="err" role="alert"></div>
+    <button class="primary" id="vstopi" type="submit">Vstopi</button>
+  </form>
+</section>
+
+<section id="app" hidden>
+  <div role="tablist" aria-label="Razdelki">
+    <button role="tab" id="t-vpisi" aria-controls="p-vpisi" aria-selected="true" type="button" data-tab="vpisi">Vpiši</button>
+    <button role="tab" id="t-zid" aria-controls="p-zid" aria-selected="false" type="button" data-tab="zid">Sramotni zid</button>
+    <button role="tab" id="t-dnevnik" aria-controls="p-dnevnik" aria-selected="false" type="button" data-tab="dnevnik">Dnevnik</button>
+  </div>
+
+  <!-- VPIŠI -->
+  <div id="p-vpisi" role="tabpanel" aria-labelledby="t-vpisi">
+    <div id="rezultat" class="card" hidden tabindex="-1">
+      <h2>Zapisano!</h2>
+      <p id="rez-quip"></p>
+      <div class="pen"><b>Predlog kazni:</b> <span id="rez-kazen"></span></div>
+      <button type="button" id="rez-se" class="primary">Vpiši še eno zamudo</button>
+    </div>
+
+    <form id="forma" class="card" novalidate autocomplete="off">
+      <div class="field">
+        <label for="kdo">Kdo je zamudil?</label>
+        <input id="kdo" type="text" maxlength="40" placeholder="Ime pevca" autocomplete="off" autocapitalize="words">
+        <div class="chips" id="imena" role="group" aria-label="Znani zamudniki"></div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="datum">Kdaj?</label>
+          <input id="datum" type="date">
+        </div>
+        <fieldset class="field">
+          <legend>Kaj je bilo?</legend>
+          <div class="seg" id="dogodek">
+            <label><input type="radio" name="dogodek" value="vaja" checked><span>Vaja</span></label>
+            <label><input type="radio" name="dogodek" value="nastop"><span>Nastop</span></label>
+            <label><input type="radio" name="dogodek" value="gostovanje"><span>Gostovanje</span></label>
+            <label><input type="radio" name="dogodek" value="druzenje"><span>Druženje</span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <fieldset class="field" id="minBox">
+        <legend>Za koliko minut?</legend>
+        <div class="chips" id="minChips" role="group" aria-label="Hitra izbira minut">
+          <button type="button" class="chip" data-m="5" aria-pressed="false">5</button>
+          <button type="button" class="chip" data-m="10" aria-pressed="false">10</button>
+          <button type="button" class="chip" data-m="15" aria-pressed="false">15</button>
+          <button type="button" class="chip" data-m="30" aria-pressed="false">30</button>
+          <button type="button" class="chip" data-m="45" aria-pressed="false">45</button>
+          <button type="button" class="chip" data-m="60" aria-pressed="false">60</button>
+        </div>
+        <div class="minrow">
+          <input id="minute" type="number" inputmode="numeric" min="1" max="240" placeholder="točno" aria-label="Minute zamude">
+          <span class="muted">minut</span>
+        </div>
+      </fieldset>
+      <label class="check" style="margin:-4px 0 16px"><input type="checkbox" id="izostal"> Sploh ga ni bilo (duh vaje, šteje kot 60 minut)</label>
+
+      <div class="field">
+        <label for="zakaj">Zakaj? <small>Resnica ni obvezna, izvirnost je.</small></label>
+        <textarea id="zakaj" maxlength="200" rows="3" placeholder="Krava je prečkala cesto …"></textarea>
+        <div class="count hint"><span id="stevec">0</span>/200</div>
+        <div id="verdictLive" hidden></div>
+      </div>
+
+      <div class="gen">
+        <label for="kat" style="font-weight:600">Zmanjkalo idej? Pomagamo.</label>
+        <div class="line">
+          <select id="kat" aria-label="Vrsta izgovora"></select>
+          <button type="button" id="predlagaj" class="roll">🎲 Predlagaj izgovor</button>
+        </div>
+        <div id="predlog" hidden>
+          <p id="predlogTekst"></p>
+          <div class="btns">
+            <button type="button" id="uporabi" class="chip" style="background:var(--ac);color:var(--acfg);border-color:var(--ac);font-weight:700">Uporabi</button>
+            <button type="button" id="se" class="chip">Še en</button>
+          </div>
+        </div>
+      </div>
+
+      <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="primary" id="oddaj" type="submit">Zapiši v kroniko sramote</button>
+    </form>
+  </div>
+
+  <!-- SRAMOTNI ZID -->
+  <div id="p-zid" role="tabpanel" aria-labelledby="t-zid" hidden>
+    <div class="seg2" role="group" aria-label="Obdobje">
+      <button type="button" data-p="month" aria-pressed="true">Ta mesec</button>
+      <button type="button" data-p="all" aria-pressed="false">Vse skupaj</button>
+    </div>
+    <div id="zid"></div>
+  </div>
+
+  <!-- DNEVNIK -->
+  <div id="p-dnevnik" role="tabpanel" aria-labelledby="t-dnevnik" hidden>
+    <div class="field">
+      <label for="filter">Pokaži</label>
+      <select id="filter"><option value="">Vse zamudnike</option></select>
+    </div>
+    <ul class="log" id="seznam"></ul>
+    <button type="button" id="vec" style="width:100%" hidden>Pokaži starejše</button>
+  </div>
+</section>
+</main>
+
+<footer>Zamudometer je šala, zapisi pa so resnični. Pogled imajo samo tisti z geslom. Vreme je s postaje IREICA1.</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var PROXY="https://weatherireica1.filip-eremita.workers.dev";
+var SK="zbor-geslo", NBSP=" ", PAGE=25;
+var DOGODKI={vaja:"Vaja",nastop:"Nastop",gostovanje:"Gostovanje",druzenje:"Druženje"};
+
+/* ───────── besedila ───────── */
+var TAGLINES=[
+  "Pesem se začne ob osmih. Ti si se začel ob pol devetih.",
+  "Točnost je vrlina tistih, ki jim zmanjka izgovorov.",
+  "Vsaka zamuda je pavza, ki je nihče ni naročil.",
+  "Tenor zamudi, bas počaka. Tako je v naravi.",
+  "Pet minut je akademski četrt. Pol ure je že solo.",
+  "Čas je denar. Zbor je čas. Ti si dolžan oboje."
+];
+var IZGOVORI={
+ "Vsakdanji":[
+  "Iskal sem ključe. Našel sem jih v roki.",
+  "Mislil sem, da je poletni čas še vedno v veljavi.",
+  "Pri sosedu sem »samo za minuto« pogledal žar. Žar je šel naprej brez mene.",
+  "Na poti sem srečal znanca. Kratek pozdrav, štirideset minut.",
+  "Zadnjo žemljo v štacuni sem moral rešiti pred neznanci.",
+  "Preoblačil sem se trikrat. Vsakič sem bil manj pripravljen.",
+  "Doma so rekli, da imam še čas. Imeli so napačno uro.",
+  "Mačka je zaspala na moji jakni in nisem imel srca, da bi jo zbudil."],
+ "Promet":[
+  "Za traktorjem od Mozirja do Rečice. Dvajset na uro in nobenega ovinka za prehitevanje.",
+  "Krava je prečkala cesto. Ne njej ne njeni družini se ni mudilo.",
+  "Navigacija me je peljala čez Črnivec. Ne vem, zakaj. Ni bila moja ideja.",
+  "Pred mano je vozil nekdo, ki ima rad prvo prestavo.",
+  "Zapora na cesti. Obvoz je bil daljši od same poti. Obvoza obvoza sploh ne bi omenjal.",
+  "Parkirnega mesta nisem našel. Našel sem pa travnik, potem pa še lastnika.",
+  "Čakal sem, da mine čreda ovac. Ovce so imele prednost in so to vedele.",
+  "Kolo je imelo drugačne načrte kot jaz. Predvsem pa zračnica."],
+ "Vreme":[
+  "Dež. Ne takšen, ki moči, ampak takšen, ki vzame voljo.",
+  "Megla do kolen, pa še malo više.",
+  "Poledica. Pol ure sem se samo spuščal po klančini, nazaj navzgor.",
+  "Sneg na avtu. Čiščenje je trajalo dlje kot vožnja.",
+  "Vročina. Glasilke so se mi stalile.",
+  "Veter mi je odnesel klobuk. Tekel sem za njim do Nazarij.",
+  "Nevihta. Pevci nismo strelovodi, zato sem počakal.",
+  "Veter je pihal naravnost proti vaji. Tri korake naprej, dva nazaj."],
+ "Doma":[
+  "Pes je pojedel note. Zdaj laja v tenorju.",
+  "Mama je spekla potico. Zadržali so me z ljubeznijo.",
+  "Pralni stroj je zahteval pozornost in jo je dobil.",
+  "Otrok je rekel, da gre z mano. Potem je rekel, da ne gre. Potem je rekel, da gre.",
+  "Kuhal sem kosilo. Kosilo je kuhalo mene.",
+  "Sosed je rekel »samo hiter nasvet za traktor«. Hitrega nasveta ni.",
+  "Ugasnila je elektrika in z njo moja volja do hitenja.",
+  "Ura na štedilniku je prestavljena, ura v avtu je prestavljena, moja tudi. Samo cerkvena ne."],
+ "Služba":[
+  "Šef je rekel »samo še ena stvar«. Imela je dvanajst točk.",
+  "Sestanek, ki bi lahko bil e-pošta, je bil sestanek o e-pošti.",
+  "Naročnik je rekel »samo hiter klic«. Klic je trajal celo vajo.",
+  "Delo me ni izpustilo. Poskušal sem, ni šlo.",
+  "Stroj v službi se je ustavil. Ostal sem ob njem, iz solidarnosti.",
+  "Zadnji dan roka je bil včeraj. Danes je novi zadnji dan."],
+ "Tehnika":[
+  "Telefon me je opomnil ob pravem času. Na napačnem telefonu.",
+  "Posodobitev telefona. Zataknila se je pri devetindevetdesetih odstotkih.",
+  "Navigacija je rekla »prispeli ste«. Nisem bil nikjer.",
+  "Budilka je zazvonila. Slišal sem jo, a ji nisem verjel.",
+  "Avto je zahteval, da mu najprej povem, kako se počutim.",
+  "Zvonec na vratih je ostal v roki, vrata pa zaprta."],
+ "Zborovski":[
+  "Doma sem preizkušal, ali je bas v kopalnici res tako dober. Je.",
+  "Iskal sem prvi ton. Ni ga bilo ne zadaj ne spredaj.",
+  "Ogrevanje glasu je trajalo dlje, kot sem računal. Samo glas, brez nog.",
+  "Preverjal sem, ali je tenor res tako visok. Je.",
+  "Čakal sem na pavzo. Pavza ni prišla, jaz pa tudi ne.",
+  "Intonacija: čakal sem, da se vsi ubrišemo. Še zdaj iščemo.",
+  "Zborovodja nas je prosil, naj bomo »čisti in na čas«. Odločil sem se samo za prvo.",
+  "Nisem hotel priti pred ostalimi, da ne bi moral peti solo."],
+ "Višja sila":[
+  "Merkur je v retrogradnem gibanju. To ni izgovor, to je astronomija.",
+  "Zemlja se je danes vrtela malo hitreje, kot sem računal.",
+  "Čas mi je zdrsnil iz rok. Našel sem ga šele po vaji.",
+  "Imel sem občutek, da je ura šele pol. Je bila že tričetrt.",
+  "Zbudil sem se v napačnem koledarju.",
+  "Izgovor, ki sem ga pripravljal, je bil končan šele, ko je bila vaja že mimo."]
+};
+var KAZNI=[
+  "Prinese pijačo za celotno basovsko sekcijo.",
+  "Zapoje prvo kitico a cappella, ostali ga poslušajo z zelo strogimi obrazi.",
+  "Pet minut stoji pri vratih in vsakemu, ki pride, pokaže na uro.",
+  "Vodi ogrevanje glasu. S svojimi vajami in brez milosti.",
+  "Pospravi vse stole. Sam. Brez aplavza.",
+  "Naslednjič pride pol ure prej in odpre vrata ostalim.",
+  "Skuha kavo za vse. Filter, brez pritožb.",
+  "Svoj izgovor prebere naglas, kot da je besedilo nove pesmi.",
+  "Sedi v prvo vrsto, tik pod zborovodjevim pogledom.",
+  "Naslednji solo je njegov. Brez priprave.",
+  "Pet minut dela za zborovodjo: obrača liste, nosi note, drži taktirko.",
+  "Svoj izgovor zapoje na melodijo katere koli pesmi iz repertoarja.",
+  "Prinese domače pecivo. Kupljeno se ne šteje.",
+  "Za vsakih pet minut zamude opravi en počep. Med petjem."
+];
+var NAZIVI=[[0,"Začetnik v zamujanju"],[31,"Gost zadnje vrste"],[91,"Mojster zamude"],[181,"Lord zamud"],[361,"Cesar zadnjega akorda"]];
+
+function quip(min,izostal){
+  if(izostal)return "Ni ga bilo. Zapisujemo: duh vaje. Stol je ostal prazen, poznalo se je tudi akustično.";
+  if(min<=5)return "Do pet minut? To je akademski četrt. Zapisano, a le s pol obsojanja.";
+  if(min<=15)return "Četrt ure. Zborovodja je že dvakrat pogledal na uro in enkrat na vrata.";
+  if(min<=30)return "Pol ure! Vaja je že pri drugi pesmi, ti si šele pri prvem izgovoru.";
+  if(min<=60)return "Prišel si ravno za pavzo. Kava je bila izvrstna.";
+  return "Si prišel na zadnji akord? Čestitke za dramaturgijo.";
+}
+
+/* ───────── pomočniki ───────── */
+var $=function(i){return document.getElementById(i);};
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined&&x!==null)e.textContent=x;return e;}
+function p2(n){return (n<10?"0":"")+n;}
+function ymd(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());}
+function parse(s){var a=s.split("-");return new Date(+a[0],+a[1]-1,+a[2]);}
+function pl(n,f){var m=n%100;return n+NBSP+(m===1?f[0]:m===2?f[1]:(m===3||m===4)?f[2]:f[3]);}
+function fmtMin(n){if(n<60)return n+NBSP+"min";var h=Math.floor(n/60),m=n%60;return h+NBSP+"h"+(m?" "+m+NBSP+"min":"");}
+function dec(x,d){return x.toFixed(d).replace(".",",");}
+function dateLabel(s){var d=parse(s);return ["ned.","pon.","tor.","sre.","čet.","pet.","sob."][d.getDay()]+" "+d.getDate()+". "+(d.getMonth()+1)+".";}
+function pick(a,avoid){var x,i=0;do{x=a[Math.floor(Math.random()*a.length)];}while(x===avoid&&a.length>1&&++i<10);return x;}
+function naziv(p){var r=NAZIVI[0][1];NAZIVI.forEach(function(x){if(p>=x[0])r=x[1];});return r;}
+var toastT;
+function toast(msg,bad){var t=$("toast");t.textContent=msg;t.className="show"+(bad?" bad":"");clearTimeout(toastT);toastT=setTimeout(function(){t.className="";},3800);}
+function store(v,rem){
+  try{
+    if(v===undefined)return localStorage.getItem(SK)||sessionStorage.getItem(SK);
+    localStorage.removeItem(SK);sessionStorage.removeItem(SK);
+    if(v)(rem?localStorage:sessionStorage).setItem(SK,v);
+  }catch(_){}
+  return null;
+}
+
+/* ───────── strežnik ───────── */
+var pw="", zapisi=[], period="month", shown=PAGE, hist=null, histP=null;
+function api(path,method,body){
+  return fetch(PROXY+path,{method:method||"GET",
+    headers:{"Authorization":"Bearer "+pw,"Content-Type":"application/json"},
+    body:body?JSON.stringify(body):undefined}).then(function(r){
+    return r.json().catch(function(){return {};}).then(function(d){
+      if(r.ok)return d;
+      var e=new Error(d.error||("Napaka "+r.status));e.status=r.status;throw e;
+    });
+  });
+}
+function osvezi(){
+  return api("/zbor/zamude").then(function(d){zapisi=d.zapisi||[];narisi();return zapisi;});
+}
+
+/* ───────── prijava ───────── */
+function pokaziApp(){$("login").hidden=true;$("app").hidden=false;$("odjava").hidden=false;}
+function pokaziLogin(msg){
+  pw="";zapisi=[];$("app").hidden=true;$("odjava").hidden=true;$("login").hidden=false;
+  $("err").textContent=msg||"";$("vstopi").disabled=false;$("vstopi").textContent="Vstopi";
+}
+function vstopi(geslo,zapomni,samodejno){
+  pw=geslo;
+  $("vstopi").disabled=true;$("vstopi").textContent="Preverjam …";$("err").textContent="";
+  return osvezi().then(function(){
+    if(!samodejno)store(geslo,zapomni);
+    $("pw").value="";pokaziApp();
+  }).catch(function(e){
+    store("");
+    var msg=e.status===401?"Napačno geslo. (Po desetih poskusih te za 15 minut zaklenemo.)"
+      :e.status===503?"Strežnik še nima nastavljenega gesla zbora."
+      :e.status?e.message:"Ni povezave. Poskusi znova.";
+    pokaziLogin(msg);
+  });
+}
+$("loginForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var g=$("pw").value;
+  if(!g){$("err").textContent="Vpiši geslo.";return;}
+  vstopi(g,$("zapomni").checked,false);
+});
+$("odjava").addEventListener("click",function(){store("");pokaziLogin("Odjavljen. Brez izgovorov nasvidenje.");});
+
+/* ───────── zavihki ───────── */
+function zavihek(ime){
+  ["vpisi","zid","dnevnik"].forEach(function(t){
+    var sel=t===ime;
+    $("t-"+t).setAttribute("aria-selected",sel?"true":"false");
+    $("t-"+t).tabIndex=sel?0:-1;
+    $("p-"+t).hidden=!sel;
+  });
+}
+document.querySelectorAll("[role=tab]").forEach(function(b){
+  b.addEventListener("click",function(){zavihek(b.dataset.tab);});
+  b.addEventListener("keydown",function(e){
+    var ids=["vpisi","zid","dnevnik"],i=ids.indexOf(b.dataset.tab);
+    if(e.key==="ArrowRight"||e.key==="ArrowLeft"){
+      var n=ids[(i+(e.key==="ArrowRight"?1:2))%3];zavihek(n);$("t-"+n).focus();e.preventDefault();
+    }
+  });
+});
+
+/* ───────── postaja IREICA1: ali izgovor drži vode ───────── */
+function W(s){return new RegExp("(^|[^a-zčšžćđ])(?:"+s+")","i");}
+function nm(v){return typeof v==="number"&&isFinite(v)?v:null;}
+// Samo zunanje dnevne vrednosti. Pravila so groba: preverjajo dan, ne ure.
+var PRAVILA=[
+ {re:W("dež|dez|ploh|naliv|mokr"),f:function(d){var p=nm(d.precipTotal);if(p===null)return null;
+   return p>=0.2?{ok:1,t:"Dež je potrjen: "+dec(p,1)+NBSP+"mm padavin."}
+                :{ok:0,t:"Dež? Postaja je izmerila "+dec(p,1)+NBSP+"mm. Izgovor ne drži vode."};}},
+ {re:W("sneg|snež|snez"),f:function(d){var p=nm(d.precipTotal),t=nm(d.tempLow);if(p===null||t===null)return null;
+   return(p>=0.2&&t<=1.5)?{ok:1,t:"Sneg je mogoč: padavine "+dec(p,1)+NBSP+"mm, najnižja "+dec(t,1)+NBSP+"°C."}
+                :{ok:0,t:"Sneg? Padavine "+dec(p,1)+NBSP+"mm, najnižja "+dec(t,1)+NBSP+"°C. Izgovor se je stopil."};}},
+ {re:W("poledic|žled|zled|zmrz|slan[ae]|led\\b|ledu|ledeni|ledena"),f:function(d){var t=nm(d.tempLow);if(t===null)return null;
+   return t<=0.5?{ok:1,t:"Mraz je potrjen: najnižja "+dec(t,1)+NBSP+"°C."}
+                :{ok:0,t:"Poledica? Najnižja je bila "+dec(t,1)+NBSP+"°C. Izgovor je kopnel."};}},
+ {re:W("vroč|vroc|pripek|sopar"),f:function(d){var t=nm(d.tempHigh);if(t===null)return null;
+   return t>=28?{ok:1,t:"Vročina je potrjena: najvišja "+dec(t,1)+NBSP+"°C."}
+                :{ok:0,t:"Vročina? Najvišja je bila "+dec(t,1)+NBSP+"°C. Izgovor se je ohladil."};}},
+ {re:W("veter|vetr|burj|vihar|piha|sunek|sunki"),f:function(d){var g=nm(d.windgustHigh);if(g===null)return null;
+   return g>=40?{ok:1,t:"Veter je potrjen: sunek do "+Math.round(g)+NBSP+"km/h."}
+                :{ok:0,t:"Veter? Najmočnejši sunek je bil "+Math.round(g)+NBSP+"km/h. Še svečo bi težko upihnil."};}},
+ {re:W("neviht|neurj|strel|grom\\b|gromi|toča|toče"),f:function(d){var p=nm(d.precipTotal),g=nm(d.windgustHigh);if(p===null||g===null)return null;
+   return(p>=5||g>=50)?{ok:1,t:"Nevihta je verjetna: "+dec(p,1)+NBSP+"mm, sunek "+Math.round(g)+NBSP+"km/h."}
+                :{ok:0,t:"Nevihta? Padlo je "+dec(p,1)+NBSP+"mm, sunki do "+Math.round(g)+NBSP+"km/h. Mirno kot v cerkvi."};}},
+ {re:W("megl"),f:function(d){var h=nm(d.humidityAvg);if(h===null)return null;
+   return h>=93?{ok:1,t:"Megla je možna: povprečna vlaga "+Math.round(h)+NBSP+"%. Vidljivosti postaja ne meri."}
+                :{ok:0,t:"Megla? Povprečna vlaga je bila le "+Math.round(h)+NBSP+"%. Težko."};}}
+];
+function matched(text){var t=(text||"").toLowerCase();return PRAVILA.filter(function(r){return r.re.test(t);});}
+function verdicts(text,datum){
+  var day=hist&&hist[datum];
+  if(!day||day.src==="era5")return [];            // reanaliza ni meritev postaje
+  var out=[];
+  matched(text).forEach(function(r){var v=r.f(day);if(v&&out.length<2)out.push(v);});
+  return out;
+}
+function loadHist(){
+  if(hist)return Promise.resolve(hist);
+  if(!histP)histP=fetch("/history.json").then(function(r){return r.ok?r.json():{};}).catch(function(){return {};})
+    .then(function(j){hist=j||{};return hist;});
+  return histP;
+}
+function verdictEl(v){
+  var d=el("div","verdict "+(v.ok?"ok":"bad"));
+  d.appendChild(el("b","",v.ok?"Postaja IREICA1 potrjuje":"Postaja IREICA1 ugovarja"));
+  d.appendChild(document.createTextNode(v.t));
+  return d;
+}
+var liveT;
+function liveHint(){
+  clearTimeout(liveT);
+  liveT=setTimeout(function(){
+    var box=$("verdictLive"),text=$("zakaj").value,datum=$("datum").value;
+    if(!datum||!matched(text).length){box.hidden=true;box.textContent="";return;}
+    loadHist().then(function(){
+      if(text!==$("zakaj").value||datum!==$("datum").value)return;      // medtem se je spremenilo
+      var v=verdicts(text,datum);
+      box.textContent="";box.hidden=false;
+      if(v.length){v.forEach(function(x){box.appendChild(verdictEl(x));});}
+      else{var w=el("div","verdict wait","Postaja za ta dan še nima podatkov. Verdikt o izgovoru se pokaže v dnevniku, ko se dan zaključi.");box.appendChild(w);}
+    });
+  },350);
+}
+
+/* ───────── obrazec ───────── */
+function izbranDogodek(){var r=document.querySelector("input[name=dogodek]:checked");return r?r.value:"vaja";}
+function izprazniMinute(){document.querySelectorAll("#minChips .chip").forEach(function(c){c.setAttribute("aria-pressed","false");});}
+document.querySelectorAll("#minChips .chip").forEach(function(c){
+  c.addEventListener("click",function(){$("minute").value=c.dataset.m;izprazniMinute();c.setAttribute("aria-pressed","true");});
+});
+$("minute").addEventListener("input",function(){
+  var v=$("minute").value;
+  document.querySelectorAll("#minChips .chip").forEach(function(c){c.setAttribute("aria-pressed",c.dataset.m===v?"true":"false");});
+});
+$("izostal").addEventListener("change",function(){
+  var off=$("izostal").checked;
+  $("minBox").classList.toggle("off",off);
+  $("minBox").disabled=off;
+});
+$("zakaj").addEventListener("input",function(){$("stevec").textContent=$("zakaj").value.length;liveHint();});
+$("datum").addEventListener("change",liveHint);
+
+// generator izgovorov
+(function(){
+  var sel=$("kat"),o=document.createElement("option");o.value="";o.textContent="Vsi izgovori";sel.appendChild(o);
+  Object.keys(IZGOVORI).forEach(function(k){var x=document.createElement("option");x.value=k;x.textContent=k;sel.appendChild(x);});
+})();
+var zadnji="";
+function predlagaj(){
+  var kat=$("kat").value,vsi=[];
+  Object.keys(IZGOVORI).forEach(function(k){if(!kat||k===kat)vsi=vsi.concat(IZGOVORI[k]);});
+  zadnji=pick(vsi,zadnji);
+  $("predlogTekst").textContent=zadnji;$("predlog").hidden=false;
+}
+$("predlagaj").addEventListener("click",predlagaj);
+$("se").addEventListener("click",predlagaj);
+$("uporabi").addEventListener("click",function(){
+  $("zakaj").value=zadnji.slice(0,200);$("stevec").textContent=$("zakaj").value.length;
+  $("predlog").hidden=true;liveHint();$("zakaj").focus();
+});
+
+function imenaChips(){
+  var cnt={},ime={};
+  zapisi.forEach(function(z){var k=z.kdo.toLowerCase();cnt[k]=(cnt[k]||0)+1;if(!ime[k])ime[k]=z.kdo;});
+  var keys=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]||ime[a].localeCompare(ime[b],"sl");}).slice(0,10);
+  var box=$("imena");box.textContent="";
+  keys.forEach(function(k){
+    var b=el("button","chip",ime[k]);b.type="button";
+    b.addEventListener("click",function(){$("kdo").value=ime[k];$("kdo").focus();});
+    box.appendChild(b);
+  });
+  // filter v dnevniku
+  var f=$("filter"),cur=f.value;f.textContent="";
+  var o=el("option","","Vse zamudnike");o.value="";f.appendChild(o);
+  Object.keys(cnt).sort(function(a,b){return ime[a].localeCompare(ime[b],"sl");}).forEach(function(k){
+    var x=el("option","",ime[k]);x.value=k;f.appendChild(x);
+  });
+  f.value=cur;
+}
+
+$("forma").addEventListener("submit",function(e){
+  e.preventDefault();
+  var kdo=$("kdo").value.trim(),zakaj=$("zakaj").value.trim(),izostal=$("izostal").checked,
+      minute=parseInt($("minute").value,10),datum=$("datum").value;
+  if(!kdo){toast("Vpiši, kdo je zamudil.",true);$("kdo").focus();return;}
+  if(!datum){toast("Izberi datum.",true);$("datum").focus();return;}
+  if(!izostal&&!(minute>=1&&minute<=240)){toast("Zamuda mora biti od 1 do 240 minut.",true);$("minute").focus();return;}
+  if(!zakaj){toast("Brez izgovora ni zapisa. Pritisni »Predlagaj izgovor«.",true);$("zakaj").focus();return;}
+  var kazen=pick(KAZNI),mm=izostal?0:minute;
+  var btn=$("oddaj");btn.disabled=true;btn.textContent="Zapisujem …";
+  api("/zbor/zamuda","POST",{kdo:kdo,zakaj:zakaj,datum:datum,dogodek:izbranDogodek(),minute:mm,izostal:izostal,kazen:kazen,website:$("website").value})
+  .then(function(){
+    $("rez-quip").textContent=kdo+": "+quip(mm,izostal);
+    $("rez-kazen").textContent=kazen;
+    $("rezultat").hidden=false;$("forma").hidden=true;
+    $("rezultat").focus();window.scrollTo({top:0,behavior:"smooth"});
+    return osvezi().catch(function(){});            // zapis je shranjen, tudi če osvežitev seznama spodleti
+  }).catch(function(err){
+    if(err.status===401){pokaziLogin("Geslo ni več veljavno. Vpiši ga znova.");return;}
+    toast(err.status?err.message:"Ni povezave. Zapis ni bil shranjen.",true);
+  }).then(function(){btn.disabled=false;btn.textContent="Zapiši v kroniko sramote";});
+});
+$("rez-se").addEventListener("click",function(){
+  $("rezultat").hidden=true;$("forma").hidden=false;
+  $("kdo").value="";$("zakaj").value="";$("stevec").textContent="0";$("minute").value="";$("izostal").checked=false;
+  $("minBox").classList.remove("off");$("minBox").disabled=false;izprazniMinute();
+  $("predlog").hidden=true;$("verdictLive").hidden=true;$("verdictLive").textContent="";
+  $("kdo").focus();
+});
+
+/* ───────── sramotni zid ───────── */
+function serija(){
+  var set={},today=ymd(new Date());
+  zapisi.forEach(function(z){if(z.datum<=today)set[z.datum]=1;});
+  var ds=Object.keys(set).sort();
+  if(!ds.length)return null;
+  var day=864e5,cur=Math.max(0,Math.round((parse(today)-parse(ds[ds.length-1]))/day)),rec=cur;
+  for(var i=1;i<ds.length;i++)rec=Math.max(rec,Math.round((parse(ds[i])-parse(ds[i-1]))/day));
+  return {cur:cur,rec:rec};
+}
+function tile(k,v,s,wide){
+  var t=el("div","tile"+(wide?" wide":""));
+  t.appendChild(el("div","k",k));t.appendChild(el("div","v",v));if(s)t.appendChild(el("div","s",s));
+  return t;
+}
+function renderZid(){
+  var root=$("zid");root.textContent="";
+  var mesec=ymd(new Date()).slice(0,7);
+  var list=zapisi.filter(function(z){return period==="all"||z.datum.slice(0,7)===mesec;});
+  if(!list.length){
+    root.appendChild(el("div","empty card",period==="all"?"Še nihče ni zamudil. Sumljivo.":"Ta mesec še nihče ni zamudil. Sumljivo."));
+    return;
+  }
+  var m={};
+  list.forEach(function(z){
+    var k=z.kdo.toLowerCase(),a=m[k]||(m[k]={ime:z.kdo,n:0,min:0,duh:0});
+    a.n++;a.min+=z.minute||0;if(z.izostal)a.duh++;
+  });
+  var vrsta=Object.keys(m).map(function(k){var a=m[k];a.tocke=a.min+60*a.duh;return a;});
+  vrsta.sort(function(a,b){return b.tocke-a.tocke||b.n-a.n||a.ime.localeCompare(b.ime,"sl");});
+
+  var skupaj=0;list.forEach(function(z){skupaj+=z.minute||0;});
+  var pesmi=Math.floor(skupaj/3.5),s=serija();
+  var tiles=el("div","tiles");
+  tiles.appendChild(tile("Zapisov",String(list.length),pl(vrsta.length,["zamudnik","zamudnika","zamudniki","zamudnikov"])));
+  tiles.appendChild(tile("Zamujeno skupaj",fmtMin(skupaj),pesmi?"Toliko, da bi zapeli "+pl(pesmi,["pesem","pesmi","pesmi","pesmi"])+".":"Premalo za eno pesem. Še."));
+  if(s)tiles.appendChild(tile("Od zadnje zamude",pl(s.cur,["dan","dneva","dnevi","dni"]),
+    (s.cur===0?"Danes je že kdo zamudil. ":"")+"Rekord: "+pl(s.rec,["dan","dneva","dnevi","dni"])+".",true));
+  var naj=list.reduce(function(a,z){return(!a||(z.minute||0)>(a.minute||0))?z:a;},null);
+  if(naj&&naj.minute)tiles.appendChild(tile("Najdaljša zamuda",naj.kdo+", "+fmtMin(naj.minute),"»"+naj.zakaj+"«",true));
+  root.appendChild(tiles);
+
+  var podij=el("div","podij");
+  vrsta.slice(0,3).forEach(function(a,i){
+    var p=el("div","pod");p.appendChild(el("div","no",String(i+1)));
+    var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));p.appendChild(mid);
+    var pt=el("div","pt",fmtMin(a.min));
+    pt.appendChild(el("small","",pl(a.n,["zamuda","zamudi","zamude","zamud"])+(a.duh?" · duh ×"+a.duh:"")));
+    p.appendChild(pt);podij.appendChild(p);
+  });
+  root.appendChild(podij);
+
+  if(vrsta.length>3){
+    var c=el("div","card"),ol=el("ol","rank");ol.start=4;
+    vrsta.slice(3).forEach(function(a,i){
+      var li=el("li");li.appendChild(el("span","n",(i+4)+"."));
+      var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));li.appendChild(mid);
+      var pt=el("div","pt",fmtMin(a.min));
+      pt.appendChild(el("small","muted",pl(a.n,["zamuda","zamudi","zamude","zamud"])+(a.duh?" · duh ×"+a.duh:"")));
+      li.appendChild(pt);ol.appendChild(li);
+    });
+    c.appendChild(ol);root.appendChild(c);
+  }
+  root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje."));
+}
+document.querySelectorAll(".seg2 button").forEach(function(b){
+  b.addEventListener("click",function(){
+    period=b.dataset.p;
+    document.querySelectorAll(".seg2 button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});
+    renderZid();
+  });
+});
+
+/* ───────── dnevnik ───────── */
+function entryEl(z){
+  var li=el("li","entry");
+  var head=el("div","e-head");head.appendChild(el("strong","",z.kdo));
+  head.appendChild(z.izostal?el("span","pill duh","duh vaje"):el("span","pill",fmtMin(z.minute)));
+  li.appendChild(head);
+  li.appendChild(el("p","e-meta",dateLabel(z.datum)+" · "+(DOGODKI[z.dogodek]||z.dogodek)));
+  li.appendChild(el("p","e-why","»"+z.zakaj+"«"));
+  verdicts(z.zakaj,z.datum).forEach(function(v){li.appendChild(verdictEl(v));});
+  if(z.kazen){var p=el("p","e-pen");p.appendChild(el("b","","Predlog kazni: "));p.appendChild(document.createTextNode(z.kazen));li.appendChild(p);}
+  var foot=el("div","e-foot"),del=el("button","ghost","Izbriši");del.type="button";
+  del.addEventListener("click",function(){
+    if(!del.dataset.sure){
+      del.dataset.sure="1";del.textContent="Res izbrišem?";
+      setTimeout(function(){delete del.dataset.sure;del.textContent="Izbriši";},4000);return;
+    }
+    del.disabled=true;
+    api("/zbor/izbrisi","POST",{id:z.id}).then(function(){toast("Izbrisano. Sramota je odpuščena.");return osvezi();})
+      .catch(function(e){del.disabled=false;toast(e.message,true);});
+  });
+  foot.appendChild(del);li.appendChild(foot);
+  return li;
+}
+function renderLog(){
+  var f=$("filter").value,ul=$("seznam");ul.textContent="";
+  var list=zapisi.filter(function(z){return!f||z.kdo.toLowerCase()===f;});
+  if(!list.length){ul.appendChild(el("li","empty",zapisi.length?"Tega zamudnika ni v kroniki.":"Kronika je prazna. Zbor je točen ali pa nihče ne piše."));$("vec").hidden=true;return;}
+  list.slice(0,shown).forEach(function(z){ul.appendChild(entryEl(z));});
+  $("vec").hidden=list.length<=shown;
+}
+$("filter").addEventListener("change",function(){shown=PAGE;renderLog();});
+$("vec").addEventListener("click",function(){shown+=PAGE;renderLog();});
+
+function narisi(){
+  imenaChips();renderZid();renderLog();
+  // verdikti v dnevniku potrebujejo vreme; naloži ga šele, če kak izgovor omenja vreme
+  if(!hist&&zapisi.some(function(z){return matched(z.zakaj).length;}))loadHist().then(renderLog);
+}
+
+/* ───────── zagon ───────── */
+$("tagline").textContent=pick(TAGLINES);
+(function(){
+  var d=new Date();$("datum").value=ymd(d);$("datum").max=ymd(d);
+  var s=store();
+  if(s)vstopi(s,true,true);
+})();
+})();
+</script>
+</body>
+</html>
