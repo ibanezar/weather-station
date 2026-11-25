@@ -137,6 +137,17 @@ const pageList = [...html.matchAll(/name="dogodek" value="([^"]+)"/g)].map(m => 
 check(JSON.stringify(workerList) === JSON.stringify(pageList), 'dogodki na strani = dogodki v workerju (' + pageList.join(', ') + ')');
 check(/<meta name="robots" content="noindex,nofollow">/.test(html), 'stran je noindex');
 check(!/indoor|tempinf|notranji senzor/i.test(html), 'stran ne omenja notranjih meritev');
+// Grde zvezdice: lestvica iz minut (ista funkcija določa komentar po vnosu, zvezdice v dnevniku in seštevek na zidu)
+const zvSrc = /function zvezdice\(min,izostal\)\{[\s\S]*?\n\}/.exec(html);
+const zvezdice = zvSrc && new Function(zvSrc[0] + '; return zvezdice;')();
+check(!!zvezdice, 'funkcija zvezdice je na strani');
+if (zvezdice) {
+  const tabela = [[1, 1], [5, 1], [6, 2], [15, 2], [16, 3], [30, 3], [31, 4], [60, 4], [61, 5], [240, 5]];
+  check(tabela.every(([m, z]) => zvezdice(m, false) === z), 'zvezdice po minutah: 1–5→1, 6–15→2, 16–30→3, 31–60→4, nad 60→5');
+  check(zvezdice(0, true) === 5, 'duh vaje dobi 5 grdih zvezdic');
+  const maxZv = Math.max(...[1, 10, 20, 45, 90].map(m => zvezdice(m, false)));
+  check(maxZv === 5 && /ZVEZDE_IME=\[("[^"]+",?){5}\]/.test(html), 'pet imen stopenj, nobene lepe zvezdice');
+}
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'reciskipobi', 'manifest.json'), 'utf8'));
 check(manifest.scope === '/reciskipobi/' && manifest.start_url === '/reciskipobi/' && manifest.display === 'standalone', 'manifest ima lasten obseg /reciskipobi/');
 check(manifest.icons.every(i => i.src === 'icon.svg' || fs.existsSync(path.join(ROOT, 'reciskipobi', i.src))), 'ikone iz manifesta obstajajo');
