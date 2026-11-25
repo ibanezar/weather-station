@@ -137,6 +137,10 @@ const pageList = [...html.matchAll(/name="dogodek" value="([^"]+)"/g)].map(m => 
 check(JSON.stringify(workerList) === JSON.stringify(pageList), 'dogodki na strani = dogodki v workerju (' + pageList.join(', ') + ')');
 check(/<meta name="robots" content="noindex,nofollow">/.test(html), 'stran je noindex');
 check(!/indoor|tempinf|notranji senzor/i.test(html), 'stran ne omenja notranjih meritev');
+const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'reciskipobi', 'manifest.json'), 'utf8'));
+check(manifest.scope === '/reciskipobi/' && manifest.start_url === '/reciskipobi/' && manifest.display === 'standalone', 'manifest ima lasten obseg /reciskipobi/');
+check(manifest.icons.every(i => i.src === 'icon.svg' || fs.existsSync(path.join(ROOT, 'reciskipobi', i.src))), 'ikone iz manifesta obstajajo');
+check(/id="namesti"/.test(html) && /beforeinstallprompt/.test(html) && /rel="manifest"/.test(html), 'gumb za namestitev in povezava na manifest');
 
 fs.rmSync(dir, { recursive: true, force: true });
 process.exit(fails ? 1 : 0);
