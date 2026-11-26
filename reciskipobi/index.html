@@ -156,6 +156,15 @@ button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px
 .gz svg{width:19px;height:19px;flex:none;overflow:visible}
 .gz-tot{display:inline-flex;align-items:center;gap:5px;color:var(--mut);font-size:.88rem}
 .gz-tot svg{width:16px;height:16px;transform:rotate(-8deg);flex:none}
+.gz-tot{flex-wrap:wrap;row-gap:3px}
+.gz-mix{display:flex;flex-wrap:wrap;gap:2px 10px;flex-basis:100%}
+.gz-c{display:inline-flex;align-items:center;gap:1px;font-size:.8rem}
+.gz-c svg{width:17px;height:17px;flex:none;overflow:visible}
+.gz-dist{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px;text-align:center}
+.gz-dist>div{min-width:0}
+.gz-dist svg{width:100%;max-width:46px;height:auto;display:block;margin:0 auto}
+.gz-dist b{display:block;font-size:1.15rem;color:var(--ac);line-height:1.2}
+.gz-dist small{display:block;font-size:.7rem;line-height:1.2;color:var(--mut)}
 .e-gz{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:.88rem;color:var(--mut)}
 .rez-gz{display:flex;align-items:center;gap:10px;margin:0 0 10px}
 .rez-gz .gz svg{width:26px;height:26px}
@@ -478,6 +487,7 @@ function zvezdice(min,izostal){
   return 1;
 }
 var ZVEZDE_IME=["Še gre","Neprijetno","Sramotno","Katastrofalno","Zgodovinsko"];
+var GZ_RAZPON=["do 5 min","do 15 min","do 30 min","do 60 min","čez 60 min ali duh"];
 var GZ_PL=["polž","polža","polži","polžev"];
 var QUIPS=[
   "Do pet minut? To je akademski četrt. Zapisano, a le s pol obsojanja.",
@@ -516,9 +526,26 @@ function gzEl(n){
   return w;
 }
 // en polž + skupno število (za seštevek pri pevcu)
-function gzTotal(n){
+// lv = število polžev po stopnjah [1..5]; če je podan, se doda razčlenitev (vsak polž svoje stopnje ×število)
+function gzTotal(n,lv){
   var w=el("span","gz-tot");w.appendChild(gzSvg(1));w.appendChild(document.createTextNode(pl(n,GZ_PL)));
+  if(lv){
+    var mix=el("span","gz-mix");
+    lv.forEach(function(c,i){
+      if(!c)return;
+      var x=el("span","gz-c");x.title=ZVEZDE_IME[i]+": "+c+"×";x.appendChild(gzSvg(i));x.appendChild(document.createTextNode("×"+c));mix.appendChild(x);
+    });
+    w.appendChild(mix);
+  }
   return w;
+}
+// porazdelitev vseh zapisov po stopnjah (ploščica na zidu)
+function gzDist(lv){
+  var g=el("div","gz-dist");g.setAttribute("role","list");
+  lv.forEach(function(c,i){
+    var d=el("div");d.setAttribute("role","listitem");d.appendChild(gzSvg(i));d.appendChild(el("b","",String(c)));d.title=ZVEZDE_IME[i];d.appendChild(el("small","",GZ_RAZPON[i]));g.appendChild(d);
+  });
+  return g;
 }
 var toastT;
 function toast(msg,bad,ms){var t=$("toast");t.textContent=msg;t.className="show"+(bad?" bad":"");clearTimeout(toastT);toastT=setTimeout(function(){t.className="";},ms||3800);}
@@ -757,7 +784,7 @@ function serija(){
 }
 function tile(k,v,s,wide){
   var t=el("div","tile"+(wide?" wide":""));
-  t.appendChild(el("div","k",k));t.appendChild(el("div","v",v));if(s)t.appendChild(el("div","s",s));
+  t.appendChild(el("div","k",k));if(v!==null)t.appendChild(el("div","v",v));if(s)t.appendChild(el("div","s",s));
   return t;
 }
 function renderZid(){
@@ -768,11 +795,11 @@ function renderZid(){
     root.appendChild(el("div","empty card",period==="all"?"Še nihče ni zamudil. Sumljivo.":"Ta mesec še nihče ni zamudil. Sumljivo."));
     return;
   }
-  var m={};
+  var m={},lvVse=[0,0,0,0,0];
   list.forEach(function(z){
-    var k=z.kdo.toLowerCase(),a=m[k]||(m[k]={ime:z.kdo,n:0,min:0,duh:0,zv:0});
+    var k=z.kdo.toLowerCase(),a=m[k]||(m[k]={ime:z.kdo,n:0,min:0,duh:0,zv:0,lv:[0,0,0,0,0]});
     a.n++;a.min+=z.minute||0;if(z.izostal)a.duh++;
-    a.zv+=zvezdice(z.minute||0,z.izostal);
+    var zz=zvezdice(z.minute||0,z.izostal);a.zv+=zz;a.lv[zz-1]++;lvVse[zz-1]++;
   });
   var vrsta=Object.keys(m).map(function(k){var a=m[k];a.tocke=a.min+60*a.duh;return a;});
   vrsta.sort(function(a,b){return b.tocke-a.tocke||b.n-a.n||a.ime.localeCompare(b.ime,"sl");});
@@ -787,6 +814,8 @@ function renderZid(){
   var zvSkupaj=vrsta.reduce(function(s,a){return s+a.zv;},0);
   var zvNaj=vrsta.slice().sort(function(a,b){return b.zv-a.zv||a.ime.localeCompare(b.ime,"sl");})[0];
   tiles.appendChild(tile("Polži",String(zvSkupaj),"Največ jih ima "+zvNaj.ime+" ("+zvNaj.zv+"). Zajcev ni.",true));
+  var zt=tile("Polži po stopnjah",null,"Od sprinta do duha: koliko zapisov je dobilo katerega polža.",true);
+  zt.insertBefore(gzDist(lvVse),zt.lastChild);tiles.appendChild(zt);
   var naj=list.reduce(function(a,z){return(!a||(z.minute||0)>(a.minute||0))?z:a;},null);
   if(naj&&naj.minute)tiles.appendChild(tile("Najdaljša zamuda",naj.kdo+", "+fmtMin(naj.minute),"»"+naj.zakaj+"«",true));
   root.appendChild(tiles);
@@ -794,7 +823,7 @@ function renderZid(){
   var podij=el("div","podij");
   vrsta.slice(0,3).forEach(function(a,i){
     var p=el("div","pod");p.appendChild(el("div","no",String(i+1)));
-    var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));mid.appendChild(gzTotal(a.zv));p.appendChild(mid);
+    var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));mid.appendChild(gzTotal(a.zv,a.lv));p.appendChild(mid);
     var pt=el("div","pt",fmtMin(a.min));
     pt.appendChild(el("small","",pl(a.n,["zamuda","zamudi","zamude","zamud"])+(a.duh?" · duh ×"+a.duh:"")));
     p.appendChild(pt);podij.appendChild(p);
@@ -805,7 +834,7 @@ function renderZid(){
     var c=el("div","card"),ol=el("ol","rank");ol.start=4;
     vrsta.slice(3).forEach(function(a,i){
       var li=el("li");li.appendChild(el("span","n",(i+4)+"."));
-      var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));mid.appendChild(gzTotal(a.zv));li.appendChild(mid);
+      var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));mid.appendChild(gzTotal(a.zv,a.lv));li.appendChild(mid);
       var pt=el("div","pt",fmtMin(a.min));
       pt.appendChild(el("small","muted",pl(a.n,["zamuda","zamudi","zamude","zamud"])+(a.duh?" · duh ×"+a.duh:"")));
       li.appendChild(pt);ol.appendChild(li);
