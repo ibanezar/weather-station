@@ -1,12 +1,12 @@
 {
-  "date": "2026-11-25",
-  "issued": "25.11.2026 7:00 CET",
-  "issued_at": "2026-11-25T07:30:36.557429+01:00",
+  "date": "2026-11-26",
+  "issued": "26.11.2026 7:00 CET",
+  "issued_at": "2026-11-26T07:30:38.347838+01:00",
   "top_station": "Portorož - Letališče",
-  "top_mm": 26,
-  "n_stations": 19,
-  "station_mm": null,
-  "should_post": false,
-  "image": "https://meteorec.si/og/precip-map/2026-11-25.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-25-story.jpg"
+  "top_mm": 79,
+  "n_stations": 20,
+  "station_mm": 13.2,
+  "should_post": true,
+  "image": "https://meteorec.si/og/precip-map/2026-11-26.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-26-story.jpg"
 }
