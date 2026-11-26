@@ -792,6 +792,64 @@ def precip_vrsta():
 
 
 @test
+def hero_sneg_cip():
+    """Čip »Sneg na tleh« (ročna meritev lastnika) v glavni ploščici: heroSnowChipHtml() v app.js ↔ hero_snow_chip_html() v
+    inject_current_weather.py (statični izris, da čipa ne odkrije šele JS: CLS). Pogoj: zadnja veljavna meritev, mlajša od 72 h, > 0;
+    ura po Ljubljani (poletni/zimski čas), »danes/včeraj/datum«. 72 h = RECICA_STALE_H v snegofili.js."""
+    import inject_current_weather as ic
+    from datetime import datetime, timezone, timedelta
+    def M(cas, cm, novi=None):
+        e = {"cas": cas, "cm": cm}
+        if novi is not None:
+            e["novi"] = novi
+        return e
+    base = datetime(2026, 11, 26, 8, 0, tzinfo=timezone.utc)   # 9.00 po Ljubljani
+    cases = [
+        ("danes", [M("2026-11-26T06:40:00Z", 9, 9)], base),
+        ("včeraj", [M("2026-11-26T06:40:00Z", 9, 9)], base + timedelta(hours=24)),
+        ("datum", [M("2026-11-26T06:40:00Z", 9)], base + timedelta(hours=60)),
+        ("tik pod 72 h", [M("2026-11-26T06:40:00Z", 9)], datetime(2026, 11, 29, 6, 39, tzinfo=timezone.utc)),
+        ("čez 72 h", [M("2026-11-26T06:40:00Z", 9)], datetime(2026, 11, 29, 6, 41, tzinfo=timezone.utc)),
+        ("ničla", [M("2026-11-26T06:40:00Z", 0)], base),
+        ("ničla po snegu", [M("2026-11-26T06:40:00Z", 9), M("2026-11-26T07:30:00Z", 0)], base),
+        ("zadnja šteje", [M("2026-11-26T07:30:00Z", 4.5, 1.5), M("2026-11-26T06:40:00Z", 9, 9)], base),
+        ("nov sneg drugačen", [M("2026-11-26T06:40:00Z", 12, 3)], base),
+        ("decimalka", [M("2026-11-26T06:40:00Z", 0.5)], base),
+        ("pozimi/poleti ura", [M("2026-07-01T04:05:00Z", 7)], datetime(2026, 7, 1, 8, 0, tzinfo=timezone.utc)),
+        ("po polnoči lokalno", [M("2026-11-26T23:10:00Z", 5)], datetime(2026, 11, 27, 8, 0, tzinfo=timezone.utc)),
+        ("prihodnost +30 min", [M("2026-11-26T08:30:00Z", 9)], base),
+        ("prihodnost +2 h", [M("2026-11-26T10:00:00Z", 9)], base),
+        ("neveljavno", [{"cas": "2026-11-26T06:40:00Z", "cm": -1}, {"cas": "x", "cm": 5}, {"cm": 5}, {"cas": "2026-11-26T06:40:00Z", "cm": 501}], base),
+        ("prazno", [], base),
+    ]
+    names = ["heroSnowChipHtml", "_ljParts", "HERO_SNOW_MAX_H"]
+    fmt_line = re.search(r"^const _fmtN=.*$", js_src("app.js"), re.M).group(0)   # puščična funkcija: izrezovalnik je ne zna, vrstica je prava iz app.js
+    calls = [{"expr": "heroSnowChipHtml(%s,%d)" % (json.dumps(lst), int(now.timestamp() * 1000))} for _, lst, now in cases]
+    res = js("app.js", names, calls, prelude=fmt_line)
+    for (name, lst, now), r in zip(cases, res):
+        py = ic.hero_snow_chip_html(lst, now)
+        check(py == r, "sneg čip: Python = JS", f"{name}: py={py!r} js={r!r}")
+    by = {c[0]: r for c, r in zip(cases, res)}
+    check(by["danes"] is not None and "danes ob\u00A07:40" in by["danes"] and "9 cm" in by["danes"], "sneg čip: danes ob\u00A07:40", str(by["danes"]))
+    check("nov sneg" not in (by["danes"] or ""), "sneg čip: enak nov sneg se ne ponovi", str(by["danes"]))
+    check("včeraj ob\u00A07:40" in (by["včeraj"] or ""), "sneg čip: včeraj", str(by["včeraj"]))
+    check("26. 11. ob\u00A07:40" in (by["datum"] or ""), "sneg čip: datum", str(by["datum"]))
+    check(by["tik pod 72 h"] is not None and by["čez 72 h"] is None, "sneg čip: meja 72 h", "")
+    check(by["ničla"] is None and by["ničla po snegu"] is None, "sneg čip: ničla (tudi po snegu) čipa ne pokaže", "")
+    check("4,5 cm" in (by["zadnja šteje"] or "") and "nov sneg 1,5 cm" in by["zadnja šteje"], "sneg čip: zadnja meritev, nov sneg z vejico", str(by["zadnja šteje"]))
+    check("nov sneg 3 cm" in (by["nov sneg drugačen"] or ""), "sneg čip: nov sneg, ki se razlikuje", str(by["nov sneg drugačen"]))
+    check("0,5 cm" in (by["decimalka"] or ""), "sneg čip: decimalna vejica", str(by["decimalka"]))
+    check("ob\u00A06:05" in (by["pozimi/poleti ura"] or ""), "sneg čip: poletni čas (UTC+2)", str(by["pozimi/poleti ura"]))
+    check("danes ob\u00A00:10" in (by["po polnoči lokalno"] or ""), "sneg čip: dan po lokalnem času (po UTC bi bil včeraj)", str(by["po polnoči lokalno"]))
+    check(by["prihodnost +30 min"] is not None and by["prihodnost +2 h"] is None, "sneg čip: prihodnost do 1 h dovoljena", "")
+    check(by["neveljavno"] is None and by["prazno"] is None, "sneg čip: neveljavni vnosi", "")
+    src = js_src("snegofili/snegofili.js")
+    m = re.search(r"RECICA_STALE_H\s*=\s*(\d+)", src)
+    check(m is not None and int(m.group(1)) == ic.HERO_SNOW_MAX_H, "sneg čip: 72 h = RECICA_STALE_H v snegofili.js", str(m.group(0) if m else None))
+    check(js("app.js", ["HERO_SNOW_MAX_H"], [{"expr": "HERO_SNOW_MAX_H"}])[0] == ic.HERO_SNOW_MAX_H, "sneg čip: 72 h v app.js", "")
+
+
+@test
 def hero_rosisce_in_dez_s_snegom():
     """»Zelo suho« pri 99 % vlage (26. 11. 2026, 0,1 °C, sneži): lestvica rosišča je poletna, pod 5 °C rosišča odloča relativna vlaga.
     Dež s snegom ima svojo ikono, ne glede na stanje ozadja (noč, dež, megla)."""

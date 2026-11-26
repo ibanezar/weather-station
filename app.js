@@ -3109,6 +3109,46 @@ function renderLivePill(force){
   set('status-text',st==='ok'?'V živo':st==='stale'?'Zamuda '+mins+' min':'Meritev stara '+(mins>=120?Math.floor(mins/60)+' h':mins+' min'));
 }
 
+// ── Sneg na tleh: ročna meritev lastnika (čip v glavni ploščici, 26. 11. 2026) ──────────────────────────────
+// Postaja IREICA1 snega ne meri; lastnik višino odeje izmeri ročno (tools/snegofili_recica.py → data/snegofili-recica.json, isti vir kot
+// /snegofili/). Čip je viden samo, kadar je ZADNJA meritev mlajša od 72 h in je večja od 0 (izmerjena ničla na naslovnici je hrup).
+// Označen je kot ročna meritev z uro, ne zlit z modelom (MTR sneg) ali dežemerom. Čisto funkcijo kopira inject_current_weather.hero_snow_chip_html()
+// (statični izris, da čipa ob prihodu JS ne odkrije šele po nalaganju: CLS); preverja jo test_parity.hero_sneg_cip.
+const HERO_SNOW_MAX_H=72;   // = RECICA_STALE_H v snegofili.js (test_parity.hero_sneg_cip)
+function _ljParts(ms){
+  const p={};new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Ljubljana',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hourCycle:'h23'})
+    .formatToParts(new Date(ms)).forEach(x=>{if(x.type!=='literal')p[x.type]=+x.value;});
+  return p;
+}
+function heroSnowChipHtml(list,nowMs){
+  let best=null;
+  (Array.isArray(list)?list:[]).forEach(m=>{
+    if(!m||typeof m.cm!=='number'||!isFinite(m.cm)||m.cm<0||m.cm>500)return;
+    const t=Date.parse(m.cas);if(!isFinite(t)||t>nowMs+36e5)return;
+    if(!best||t>best.t)best={t,cm:m.cm,novi:(typeof m.novi==='number'&&isFinite(m.novi)&&m.novi>=0)?m.novi:null};
+  });
+  if(!best||(nowMs-best.t)/36e5>HERO_SNOW_MAX_H||!(best.cm>0))return null;
+  const cmTxt=v=>_fmtN(v,v===Math.round(v)?0:1)+' cm';   // meritve imajo največ 1 decimalko (orodje zaokroži): brez razlike v zaokroževanju JS ↔ Python
+  const k=p=>p.year*10000+p.month*100+p.day,pt=_ljParts(best.t),pn=_ljParts(nowMs),pv=_ljParts(nowMs-864e5);
+  const dan=k(pt)===k(pn)?'danes':k(pt)===k(pv)?'včeraj':pt.day+'. '+pt.month+'.';
+  const ura=pt.hour+':'+String(pt.minute).padStart(2,'0');
+  const nov=(best.novi!=null&&best.novi!==best.cm)?' · nov sneg '+cmTxt(best.novi):'';
+  return '<svg class="ic" aria-hidden="true"><use href="#i-snowflake"/></svg><span class="hs-txt">Sneg na tleh <strong>'+cmTxt(best.cm)+'</strong>'
+    +'<span class="hs-meta"> · ročna meritev, '+dan+' ob\u00A0'+ura+nov+'</span></span>';
+}
+let _heroSnowAt=0,_heroSnowList=null;
+async function renderHeroSnow(){
+  const el=document.getElementById('hero-snow');if(!el)return;
+  const now=Date.now();
+  if(now-_heroSnowAt>10*60*1000){   // datoteka se spreminja ob ročnem vnosu: največ en klic na 10 min, statična datoteka (brez workerja)
+    _heroSnowAt=now;
+    try{const r=await fetch('data/snegofili-recica.json?_='+Math.floor(now/6e5));if(r.ok){const j=await r.json();_heroSnowList=Array.isArray(j.meritve)?j.meritve:[];}}catch(_){}
+  }
+  if(_heroSnowList===null)return;   // brez podatka ostane statični izris, kot je
+  const h=heroSnowChipHtml(_heroSnowList,Date.now());
+  if(h===null){el.hidden=true;el.innerHTML='';}else{el.innerHTML=h;el.hidden=false;}
+}
+
 function applyObs(obs){
   const m=obs.metric,cond=getCondition(obs,undefined,_ncPrecipNow);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
@@ -3194,6 +3234,7 @@ function applyObs(obs){
   // Refresh astro moon phase
   try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
+  renderHeroSnow().catch(()=>{});
   try{_ncRender();}catch(e){}   // vrsta padavin na kartici »Naslednjih 45 minut« je odvisna od temperature, ki je zdaj znana
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
   triggerLivePulse();

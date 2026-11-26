@@ -429,6 +429,64 @@ def patch_yesterday_delta(html, obs, hourly):
     return new
 
 
+HERO_SNOW_MAX_H = 72  # = HERO_SNOW_MAX_H v app.js = RECICA_STALE_H v snegofili.js (test_parity.hero_sneg_cip)
+SNEG_RECICA = os.path.join(ROOT, "data", "snegofili-recica.json")
+
+
+def hero_snow_chip_html(meritve, now_utc):
+    """Čip »Sneg na tleh« v glavni ploščici -- Python kopija heroSnowChipHtml() v app.js. Vrne notranji HTML ali None (čip skrit).
+    Zadnja veljavna ročna meritev (data/snegofili-recica.json), mlajša od 72 h in > 0; izmerjena ničla na naslovnici ni prikazana.
+    Preverja jo tools/test_parity.py (hero_sneg_cip)."""
+    best = None
+    for m in meritve if isinstance(meritve, list) else []:
+        cm = m.get("cm") if isinstance(m, dict) else None
+        if isinstance(cm, bool) or not isinstance(cm, (int, float)) or not 0 <= cm <= 500:
+            continue
+        try:
+            t = datetime.strptime(m.get("cas", ""), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        if t > now_utc + timedelta(hours=1):
+            continue
+        if best is None or t > best[0]:
+            novi = m.get("novi")
+            novi = novi if (isinstance(novi, (int, float)) and not isinstance(novi, bool) and novi >= 0) else None
+            best = (t, cm, novi)
+    if best is None or (now_utc - best[0]).total_seconds() / 3600 > HERO_SNOW_MAX_H or not best[1] > 0:
+        return None
+    t, cm, novi = best
+
+    def cm_txt(v):
+        return num(v, 0 if v == round(v) else 1) + "\u00A0cm"
+    lt, ln = t.astimezone(TZ_LJ), now_utc.astimezone(TZ_LJ)
+    if lt.date() == ln.date():
+        dan = "danes"
+    elif lt.date() == (ln - timedelta(days=1)).date():
+        dan = "včeraj"
+    else:
+        dan = f"{lt.day}. {lt.month}."
+    nov = f" · nov sneg {cm_txt(novi)}" if novi is not None and novi != cm else ""
+    return ('<svg class="ic" aria-hidden="true"><use href="#i-snowflake"/></svg>'
+            f'<span class="hs-txt">Sneg na tleh <strong>{cm_txt(cm)}</strong>'
+            f'<span class="hs-meta"> · ročna meritev, {dan} ob\u00A0{lt.hour}:{lt.minute:02d}{nov}</span></span>')
+
+
+def patch_hero_snow(html, now_utc=None):
+    """Zapiše čip meritve snega v statični HTML (ali ga skrije), da ga JS ne odkrije šele po nalaganju (CLS)."""
+    try:
+        with open(SNEG_RECICA, encoding="utf-8") as f:
+            meritve = json.load(f).get("meritve", [])
+    except (OSError, ValueError):
+        return html  # brez datoteke ostane stanje, kot je
+    inner = hero_snow_chip_html(meritve, now_utc or datetime.now(timezone.utc))
+    attrs = ' hidden' if inner is None else ''
+    new, n = re.subn(r'(<div class="hero-snow" id="hero-snow" title="[^"]*")(?: hidden)?>.*?(</div>)',
+                     lambda mo: mo.group(1) + attrs + ">" + (inner or "") + mo.group(2), html, count=1, flags=re.S)
+    if n == 0:
+        print("OPOZORILO: #hero-snow ni najden — preskočeno.", file=sys.stderr)
+    return new
+
+
 def hero_scale_positions(obs, tmin=None, tmax=None):
     """Položaji oznak na lestvicah hero ploščic v % — Python kopija heroScalePos() v app.js.
     Vrne {id: (p, p2|None)}; ključ manjka, če vrednosti ni. Preverja ga tools/test_parity.py (hero_lestvice)."""
@@ -663,6 +721,7 @@ def main():
         new = re.sub(re.escape(START) + r".*?" + re.escape(END), block, html, flags=re.S)
 
         if path == INDEX:
+            new = patch_hero_snow(new)
             stats = build_day_stats(hourly) if hourly else None
             if obs:
                 new = patch_hero(new, obs)
