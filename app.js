@@ -329,7 +329,14 @@ function set(id,v){const e=document.getElementById(id);if(e){e.textContent=v;e.c
 function windDir(deg){const d=['S','SSV','SV','VSV','V','VJV','JV','JJV','J','JJZ','JZ','ZJZ','Z','ZSZ','SZ','SSZ'];return d[Math.round(deg/22.5)%16];}
 function uvLabel(u){if(u<=2)return'Nizek';if(u<=5)return'Zmeren';if(u<=7)return'Visok';if(u<=10)return'Zelo visok';return'Ekstremni';}
 function solarLabel(w){if(!w&&w!==0)return'—';if(w<20)return'Noč/temno';if(w<100)return'Oblačno';if(w<300)return'Delno oblačno';if(w<600)return'Pretežno sončno';return'Jasno sončno';}
-function dewLabel(d){if(d<5)return'Zelo suho';if(d<10)return'Suho';if(d<15)return'Prijetno';if(d<20)return'Rahlo vlažno';return'Soparno';}
+// Lestvica rosišča je poletna (soparnost): pod 5 °C rosišča je zrak »suh« samo, če je tudi relativno suh. Pri nasičenem zraku (26. 11. 2026:
+// 0,1 °C, 99 %, sneži) je stran pisala »zelo suho«. `hum` je relativna vlaga v %; brez nje velja stara lestvica.
+function dewLabel(d,hum){if(d<5&&hum!=null&&hum>=90)return hum>=97?'Zelo vlažno':'Vlažno';if(d<5)return'Zelo suho';if(d<10)return'Suho';if(d<15)return'Prijetno';if(d<20)return'Rahlo vlažno';return'Soparno';}
+// Vrsta padavin po temperaturi zraka, isto pravilo kot hitro vprašanje »Dež/Sneg« (_qaRainRun) in snežna karta: do 0,5 °C sneg, od 2,5 °C dež,
+// vmes dež s snegom. Radar in dežemer vrste ne ločita, postaja meri zrak: to je ocena, ne meritev vrste padavin.
+const PRECIP_SNOW_MAX_C=0.5;
+const PRECIP_RAIN_MIN_C=2.5;
+function precipKind(t){if(t==null||!isFinite(t))return'rain';return t<=PRECIP_SNOW_MAX_C?'snow':t<PRECIP_RAIN_MIN_C?'sleet':'rain';}
 
 // Temperaturna skala je PODATKOVNA barva: nobena stopnja ne sme biti blizu znamčnemu cianu (logotip »rec«, --cyan), sicer ista barva
 // hkrati pomeni »znamka« in »hladno« (4. 11. 2026: #67e8f9 je bil 10 ΔE od #22d3ee). Preverja tools/test_temp_barve.py.
@@ -397,9 +404,13 @@ function countUp(id,target,dec,unitHTML,dur){
 // ── Condition & icons ─────────────────────────────────────
 // `when` samo za teste (privzeto zdaj). Noč = pod sončnim zahodom/vzhodom na postaji (_isNightAt), ne ura 23-5:
 // novembra je ob 17. uri že tema, a je oznaka rekla »Oblačno« in ikona oblak (4. 11. 2026, avdit; pregled kode).
-function getCondition(obs,when){
+// `radarWet`: radar ARSO nad postajo kaže padavine (nowcast). Dežemer snega slabo zazna (26. 11. 2026: sneži, trenutno 0,0 mm/h, stran je pisala
+// »Možna megla«), zato sneženje ob ledišču lahko potrdi tudi radar. Vrsta padavin je ocena iz temperature zraka (precipKind), ne meritev vrste.
+function getCondition(obs,when,radarWet){
   const pr=obs.metric.precipRate||0,sr=obs.metric.solarRadiation||obs.solarRadiation||0;
   const night=_isNightAt(when,obs);
+  const pk=precipKind(obs.metric.temp);
+  if(pk!=='rain'&&(pr>0||radarWet))return pk==='snow'?{icon:'🌨',label:'Sneženje'}:{icon:'🌨',label:'Dež s snegom'};
   if(pr>7)   return{icon:'⛈',label:'Močan dež'};if(pr>2.5)return{icon:'🌧',label:'Dež'};
   if(pr>0)   return{icon:'🌦',label:'Rahel dež'};if(night&&sr<10)return{icon:'🌙',label:'Jasna noč'};
   if(night)  return{icon:'☁',label:'Oblačna noč'};if(sr>700)return{icon:'☀',label:'Jasno sončno'};
@@ -497,6 +508,8 @@ let _climAnomalyT=null,_climAnomalyYears=null,_climRain=null;
 let _lastObsTime=null,_livePillTimer=null;
 let _sliderActive=false,_liveTemp=null,_liveTempColor='',_liveIconHtml='';
 let _lastComfortLabel=null,_lastDewLabel=null,_lastDeltaPhrase=null;
+// Radar ARSO nad postajo kaže padavine (iz nowcasta; samo za Rečico). Dežemer snega slabo zazna, zato to potrdi sneženje v oznaki in ikoni (getCondition).
+let _ncPrecipNow=false;
 function drawTempChart(data){
   const svg=document.getElementById('temp-svg');if(!svg||!data.length)return;
   svg.innerHTML='';_tempData=data;
@@ -1543,7 +1556,9 @@ function renderLiveTimeline(){
 }
 // Kratek povzetek dejanskih meritev za vsebinske vnose na časovnici
 function _liveEventSummary(m,gust,rr){
-  return m.temp.toFixed(1)+'°C · veter '+(m.windSpeed??0).toFixed(0)+' km/h (sunki '+gust.toFixed(0)+') · dež '+rr.toFixed(1)+' mm/h';
+  // Ob ledišču beseda »dež« ne drži (26. 11. 2026: sneži); dežemer vrste ne loči, zato »padavine«. Decimalna vejica kot drugod na naslovnici.
+  const pad=precipKind(m.temp)==='rain'?'dež':'padavine';
+  return _fmtN(m.temp,1)+' °C · veter '+(m.windSpeed??0).toFixed(0)+' km/h (sunki '+gust.toFixed(0)+') · '+pad+' '+_fmtN(rr,1)+' mm/h';
 }
 // Zazna začetek/potek/konec vremenskega dogodka iz DEJANSKIH meritev postaje.
 // Aktivno ARSO opozorilo samo zniža prag (isti dogodek je bolj verjeten), ne sproži pa
@@ -1574,21 +1589,21 @@ function evaluateLiveEvent(obs){
     }else if(!alertLevel&&_liveEventState.alertLevel){
       _liveEventState.alertLevel=null;
     }
-    if(rainNow&&!_liveEventState.rainStreak){pushLiveEntry('🌧','Začetek intenzivnejših padavin — '+rr.toFixed(1)+' mm/h.');_liveEventState.rainStreak=true;}
+    if(rainNow&&!_liveEventState.rainStreak){pushLiveEntry('🌧','Začetek intenzivnejših padavin — '+_fmtN(rr,1)+' mm/h.');_liveEventState.rainStreak=true;}
     else if(!rainNow&&_liveEventState.rainStreak){pushLiveEntry('🌤','Padavine so pojenjale.');_liveEventState.rainStreak=false;}
     if(gust>_liveEventState.maxGust+5){pushLiveEntry('💨','Nov sunek vetra — '+gust.toFixed(0)+' km/h.');_liveEventState.maxGust=gust;}
-    if(heatNow&&!_liveEventState.heat){pushLiveEntry('🌡️','Temperatura je presegla '+m.temp.toFixed(1)+'°C.');_liveEventState.heat=true;}
-    if(frostNow&&!_liveEventState.frost){pushLiveEntry('🧊','Temperatura je padla na '+m.temp.toFixed(1)+'°C — zmrzal.');_liveEventState.frost=true;}
+    if(heatNow&&!_liveEventState.heat){pushLiveEntry('🌡️','Temperatura je presegla '+_fmtN(m.temp,1)+' °C.');_liveEventState.heat=true;}
+    if(frostNow&&!_liveEventState.frost){pushLiveEntry('🧊','Temperatura je padla na '+_fmtN(m.temp,1)+' °C — zmrzal.');_liveEventState.frost=true;}
     // Periodičen "utrip" z dejanskimi vrednostmi, da časovnica ostane vsebinska tudi brez pragovnih preskokov
     if(Date.now()-(_liveEventState.lastSnapshot||0)>14*60*1000){
       const rainSince=Math.max(0,(m.precipTotal??0)-(_liveEventState.rainStart??0));
-      pushLiveEntry('📍',_liveEventSummary(m,gust,rr)+(rainSince>0.1?' · od začetka '+rainSince.toFixed(1)+' mm':'')+'.');
+      pushLiveEntry('📍',_liveEventSummary(m,gust,rr)+(rainSince>0.1?' · od začetka '+_fmtN(rainSince,1)+' mm':'')+'.');
       _liveEventState.lastSnapshot=Date.now();
     }
   }else if(wasActive){
     _liveEventState.active=false;
     const rainSince=Math.max(0,(m.precipTotal??0)-(_liveEventState.rainStart??0));
-    pushLiveEntry('🏁','Dogodek se je zaključil — najvišji sunek '+_liveEventState.maxGust.toFixed(0)+' km/h'+(rainSince>0.1?', skupaj '+rainSince.toFixed(1)+' mm dežja':'')+'.');
+    pushLiveEntry('🏁','Dogodek se je zaključil — najvišji sunek '+_liveEventState.maxGust.toFixed(0)+' km/h'+(rainSince>0.1?', skupaj '+_fmtN(rainSince,1)+' mm padavin':'')+'.');
   }
   _saveLiveTimeline();
   renderLiveTimeline();
@@ -2590,6 +2605,7 @@ function _histObsAtHoursAgo(hoursAgo){
 function _getConditionLabelFromObs(obs){
   const pr=obs.metric?.precipRate||0,sr=obs.metric?.solarRadiation||obs.solarRadiation||0;
   const night=_isNightAt(new Date(obs.obsTimeLocal.replace(' ','T')),obs);
+  if(pr>0){const pk=precipKind(obs.metric?.temp);if(pk==='snow')return'Sneženje';if(pk==='sleet')return'Dež s snegom';}
   if(pr>7)return'Močan dež';if(pr>2.5)return'Dež';if(pr>0)return'Rahel dež';
   if(night&&sr<10)return'Jasna noč';if(night)return'Oblačna noč';
   if(sr>700)return'Jasno sončno';if(sr>300)return'Pretežno sončno';
@@ -2935,7 +2951,10 @@ function forecastPhrase(){
   if(rainHour){
     const hh=rainHour.t.getHours();
     const dw=rainHour.t.toDateString()===todayStr?'':'jutri ';
-    s+=', '+dw+(hh>=18?'zvečer':hh>=12?'popoldne':hh>=6?'dopoldne':'ponoči')+' možnost dežja.';
+    // Vrsta padavin kot pri hitrem vprašanju (_qaRainRun): koda vremena za sneg, sicer temperatura ure. Pri ledišču je »dež« napačna beseda
+    // (26. 11. 2026: stavek je pisal »možnost dežja«, ploščica ob njem »Sneg«).
+    const pk=(_QA_SNOW.includes(rainHour.wmo))?'snow':precipKind(rainHour.temp);
+    s+=', '+dw+(hh>=18?'zvečer':hh>=12?'popoldne':hh>=6?'dopoldne':'ponoči')+' možnost '+(pk==='snow'?'snega':pk==='sleet'?'dežja s snegom':'dežja')+'.';
   }else s+='.';
   return s;
 }
@@ -3091,7 +3110,7 @@ function renderLivePill(force){
 }
 
 function applyObs(obs){
-  const m=obs.metric,cond=getCondition(obs);
+  const m=obs.metric,cond=getCondition(obs,undefined,_ncPrecipNow);
   set('cond-icon',cond.icon);set('cond-label',cond.label);
   if(obs.obsTimeLocal){const t=new Date(obs.obsTimeLocal.replace(' ','T'));if(!isNaN(t)){_lastObsTime=t;updateHeroStationTime();}}
   const tempEl=document.getElementById('temp-val');
@@ -3104,7 +3123,7 @@ function applyObs(obs){
   if(pill){pill.textContent=fs.label;pill.style.color=fs.c;pill.style.background=fs.bg;pill.style.borderColor=fs.b;}
   // Hero B: »Občutek« je čip samo, kadar se od izmerjene temperature razlikuje za vsaj 1 °C (sicer ponavlja številko nad njim).
   {const fb=document.querySelector('.hero .feels');if(fb)fb.hidden=!(m.temp!=null&&feelsVal!=null&&Math.abs(feelsVal-m.temp)>=1);}
-  if(m.dewpt!=null){const dl=dewLabel(m.dewpt);_lastDewLabel=dl;set('dew-desc',' · '+dl.toLowerCase());}
+  if(m.dewpt!=null){const dl=dewLabel(m.dewpt,obs.humidity);_lastDewLabel=dl;set('dew-desc',' · '+dl.toLowerCase());}
   _lastComfortLabel=fs.label;renderHeroBriefing();
   countUp('hs-humidity',obs.humidity,0,'<span style="font-size:.7rem;color:var(--muted)"> %</span>',1000);
   noteTodayHumidity(obs.humidity,obs.humidity,_lastObsTime??new Date());
@@ -3124,7 +3143,7 @@ function applyObs(obs){
   noteTodayUv(uv,_lastObsTime??new Date());renderTodayUv();}
   Object.assign(_hsc,{hum:obs.humidity,wind:m.windSpeed,gust:m.windGust??m.windSpeed,pres:m.pressure,uv:obs.uv??0,rt:m.precipTotal??0,temp:m.temp});
   renderHeroScales();setHeroWx(m,obs);renderHeroMoon();
-  {const dl=document.getElementById('hs-dew-line');if(dl&&m.dewpt!=null){set('hs-dew',fmt(m.dewpt,1));set('hs-dew-lbl',dewLabel(m.dewpt).toLowerCase());dl.hidden=false;}}
+  {const dl=document.getElementById('hs-dew-line');if(dl&&m.dewpt!=null){set('hs-dew',fmt(m.dewpt,1));set('hs-dew-lbl',dewLabel(m.dewpt,obs.humidity).toLowerCase());dl.hidden=false;}}
   countUp('hs-rain-today',m.precipTotal??0,1,'<span style="font-size:.7rem;color:var(--muted)"> mm</span>',900);
   countUp('wind-speed',m.windSpeed,1,'<span class="ws-unit"> km/h</span>',900);
   set('wind-gust',fmt(m.windGust,1));set('wind-dir-lbl',windDir(obs.winddir)+' · '+obs.winddir+'°');
@@ -3175,6 +3194,7 @@ function applyObs(obs){
   // Refresh astro moon phase
   try{renderAstro();}catch(e){}
   setFavicon(cond.icon);
+  try{_ncRender();}catch(e){}   // vrsta padavin na kartici »Naslednjih 45 minut« je odvisna od temperature, ki je zdaj znana
   _nextRefresh=Date.now()+5*60*1000;updateCountdown();
   triggerLivePulse();
   refreshLife();
@@ -7196,11 +7216,10 @@ function _ncChart(potek){
     potek.map((s,k)=>'<rect class="nc-hit" x="'+(x(k)-hw/2).toFixed(1)+'" y="0" width="'+hw.toFixed(1)+'" height="'+H+'"><title>'+opis(s)+'</title></rect>').join('')+
     '</svg>';
 }
+let _ncData=null;   // zadnji odgovor /nowcast in izbrana vas: izris se ponovi, ko prispe meritev temperature (vrsta padavin)
 async function loadNowcast(){
   const wrap=document.getElementById('nowcast-wrap');
   const hero=document.getElementById('nowcast-hero'),sub=document.getElementById('nowcast-sub');
-  const foot=document.getElementById('nowcast-foot'),fig=document.getElementById('nowcast-fig');
-  const strip=document.getElementById('nowcast-strip');
   if(!wrap||!hero||!sub)return;
   wrap.classList.add('is-refreshing');           // zadrži prejšnji izris, brez preskoka
   const vas=getNowcastVas();
@@ -7213,11 +7232,46 @@ async function loadNowcast(){
     // Brez radarja ni kaj povedati — plošče ne kažemo prazne.
     wrap.classList.remove('is-refreshing');
     wrap.hidden=true;
+    _ncData=null;_ncSetRadarWet(false);
     return;
   }
-  const v=(d.vasi||[])[0];
+  _ncData={d,vas};
+  _ncRender();
+}
+// Radar nad postajo (samo Rečica) potrdi sneženje v heroju; ob spremembi se oznaka, ikona in ozadje osvežijo takoj, ne šele ob naslednji meritvi.
+function _ncSetRadarWet(on){if(on===_ncPrecipNow)return;_ncPrecipNow=on;_heroRefreshCond();}
+function _heroRefreshCond(){
+  const obs=_lastBriefObs;if(!obs||!obs.metric)return;
+  const cond=getCondition(obs,undefined,_ncPrecipNow);
+  updateBgFromObs(obs);
+  _liveIconHtml=_condImg(cond.label,108);
+  const iconEl=document.getElementById('hero-icon');if(iconEl&&!_sliderActive)_setHeroIcon(iconEl,_liveIconHtml);
+  set('cond-label',_condLabelShown(cond.label));
+  setFavicon(cond.icon);
+}
+function _ncRender(){
+  if(!_ncData)return;
+  const d=_ncData.d,vas=_ncData.vas;
+  const wrap=document.getElementById('nowcast-wrap');
+  const hero=document.getElementById('nowcast-hero'),sub=document.getElementById('nowcast-sub');
+  const foot=document.getElementById('nowcast-foot'),fig=document.getElementById('nowcast-fig');
+  const strip=document.getElementById('nowcast-strip');
+  if(!wrap||!hero||!sub)return;
   wrap.classList.remove('is-refreshing');
-  if(!v){wrap.hidden=true;return;}
+  const v0=(d.vasi||[])[0];
+  if(!v0){wrap.hidden=true;_ncSetRadarWet(false);return;}
+  const v=Object.assign({},v0);   // kopija: ob ledišču spodaj odstranimo nevihto in točo, predpomnjenega odgovora ne spreminjamo
+  // Radar kaže ≥ 0,5 mm/h nad Rečico in je zrak skoraj nasičen (sneg pada iz nasičenega zraka): to potrdi sneženje v heroju.
+  const vlaga=_lastBriefObs&&_lastBriefObs.humidity;
+  _ncSetRadarWet(vas==='recica'&&v.zdaj>=2&&(vlaga==null||vlaga>=80));
+
+  // Vrsta padavin: radar odbojnosti dežja in snega ne loči. Za Rečico odloča izmerjena temperatura postaje, drugje (in pred prvo meritvijo)
+  // temperatura zraka v dolini iz workerja (okolje.t). Ob ledišču nevihte in toče ne razglašamo: ozračje je stabilno, močna odbojnost je moker sneg.
+  const tZrak=(vas==='recica'&&_liveTemp!=null)?_liveTemp:(d.okolje&&d.okolje.t!=null?d.okolje.t:null);
+  const kind=precipKind(tZrak),zaled=kind!=='rain',sneg=kind==='snow';
+  const vrstaIme=sneg?'Sneg':'Dež s snegom';
+  const tVir=(vas==='recica'&&_liveTemp!=null)?'postaja IREICA1':'modelska napoved za dolino';
+  if(zaled){v.toca=false;v.nevihta=null;v.jedro=null;}
 
   // Plošča se pokaže samo, kadar je kaj povedati: nekaj že pada nad vasjo ali
   // pa se v obzorju približuje. Ob mirnem vremenu — kar je večina časa —
@@ -7235,10 +7289,21 @@ async function loadNowcast(){
   const eta=(min,cap)=>{etaMin=min;hero.innerHTML=min+'<span class="nc-unit">min</span>';if(capEl)capEl.textContent=cap;};
   const zdajMm=()=>{hero.innerHTML=fm(v.zdajMmh)+'<span class="nc-unit">mm/h</span>';if(capEl)capEl.textContent='zdaj nad vasjo';};
   const mmh=potek.map(s=>parseFloat(s.mmh)||0),peak=Math.max(0,...mmh);
-  const peakTxt=peak>0?' Višek ~'+fm(peak)+' mm/h čez ~'+potek[mmh.indexOf(peak)].t+' min.':'';
+  const peakTxt=peak>0?' Višek ~'+fm(peak)+' mm/h'+(zaled?' (pri snegu je radarska ocena jakosti zelo groba)':'')+' čez ~'+potek[mmh.indexOf(peak)].t+' min.':'';
   const endI=potek.findIndex(s=>!s.l);
   const zeDez=v.zdaj>=6, zeNevihta=v.zdaj>=10, zeJedro=v.zdaj>=12;
-  if(v.toca&&!zeJedro){
+  const tTxt=tZrak!=null?fm(tZrak.toFixed(1))+' °C':'';
+  if(zaled){
+    // Ob ledišču je padavina sneg ali dež s snegom (ocena iz temperature zraka, radar vrste ne loči); nevihte in toče ne razglašamo.
+    if(v.dez!=null&&!zeDez){
+      _ncSetBadge('rain','snowflake',vrstaIme); eta(v.dez,'do prvih padavin');
+      sub.textContent='Padavine se približujejo z radarske slike; pri '+tTxt+' gre najverjetneje za '+(sneg?'sneg':'dež s snegom')+'.'+peakTxt;
+    }else{
+      _ncSetBadge('rain','snowflake',vrstaIme+' nad vasjo'); zdajMm();
+      sub.textContent=(sneg?'Nad vasjo sneži':'Nad vasjo dežuje in sneži')+' (radar ~'+fm(v.zdajMmh)+' mm/h).'+
+        (endI>=0?' Po radarju poneha čez ~'+potek[endI].t+' min.':' Po radarju v naslednjih 45 minutah ne poneha.');
+    }
+  }else if(v.toca&&!zeJedro){
     _ncSetBadge('hail','thermometer-snowflake','Možnost toče'); eta(v.jedro,'do močnega jedra');
     sub.textContent='Radar kaže močno jedro na poti proti vasi. Toče od močnega naliva ne loči zanesljivo — pripravi se, a ne paniči.';
   }else if(v.nevihta!=null&&!zeNevihta){
@@ -7267,7 +7332,8 @@ async function loadNowcast(){
     const p=d.premik||{};
     foot.textContent='Radar ARSO, star '+(d.starost_min??'?')+' min · celice se premikajo '+
       (p.kmh!=null?p.kmh+' km/h':'—')+' proti '+_smerIme(p.smer)+
-      ' · nowcast iz radarske slike, ne napoved — po ~30 minutah zanesljivost opazno pade (zasenčeno na grafu).';
+      ' · nowcast iz radarske slike, ne napoved — po ~30 minutah zanesljivost opazno pade (zasenčeno na grafu).'+
+      (zaled?' Vrsta padavin je ocena iz temperature zraka ('+tTxt+', '+tVir+'): radar snega in dežja ne loči.':'');
   }
 }
 function _smerIme(deg){
@@ -7481,7 +7547,7 @@ const _WIND_DIR_SL=['S','SV','V','JV','J','JZ','Z','SZ'];
 // ── Meteocons static SVG icon mapping ─────────────────────
 const _WMO_ICON_DAY={0:'clear-day',1:'partly-cloudy-day',2:'partly-cloudy-day',3:'overcast',45:'fog-day',48:'fog-day',51:'drizzle',53:'drizzle',55:'overcast-drizzle',56:'sleet',57:'sleet',61:'rain',63:'overcast-rain',65:'overcast-rain',66:'sleet',67:'sleet',71:'overcast-day-snow',73:'overcast-snow',75:'overcast-snow',77:'snow',80:'partly-cloudy-day-rain',81:'partly-cloudy-day-rain',82:'overcast-rain',85:'partly-cloudy-day-snow',86:'overcast-snow',95:'thunderstorms-day-rain',96:'thunderstorms-day-hail',99:'thunderstorms-day-hail'};
 const _WMO_ICON_NIGHT={0:'clear-night',1:'partly-cloudy-night',2:'partly-cloudy-night',3:'overcast',45:'fog-night',48:'fog-night',71:'overcast-night-snow',80:'partly-cloudy-night-rain',81:'partly-cloudy-night-rain',85:'partly-cloudy-night-snow',95:'thunderstorms-night-rain',96:'thunderstorms-night-hail',99:'thunderstorms-night-hail'};
-const _COND_ICON={'Jasno sončno':'clear-day','Pretežno sončno':'partly-cloudy-day','Delno oblačno':'partly-cloudy-day','Pretežno oblačno':'overcast-day','Oblačno':'overcast','Jasna noč':'clear-night','Oblačna noč':'overcast-night','Rahel dež':'drizzle','Dež':'rain','Močan dež':'overcast-rain'};
+const _COND_ICON={'Jasno sončno':'clear-day','Pretežno sončno':'partly-cloudy-day','Delno oblačno':'partly-cloudy-day','Pretežno oblačno':'overcast-day','Oblačno':'overcast','Jasna noč':'clear-night','Oblačna noč':'overcast-night','Rahel dež':'drizzle','Dež':'rain','Močan dež':'overcast-rain','Sneženje':'snow','Dež s snegom':'sleet'};
 const _WXCOND_ICON={snow:'snow',fog:'fog-day','fog-night':'fog-night',hot:'clear-day',storm:'thunderstorms-day-rain',rain:'overcast-rain',night:'clear-night'};
 const _YR_ICON={clearsky:'clear-day',clearsky_night:'clear-night',fair:'partly-cloudy-day',fair_night:'partly-cloudy-night',partlycloudy:'partly-cloudy-day',partlycloudy_night:'partly-cloudy-night',cloudy:'overcast',fog:'fog-day',lightrain:'drizzle',rain:'rain',heavyrain:'overcast-rain',lightrainshowers:'partly-cloudy-day-rain',rainshowers:'partly-cloudy-day-rain',heavyrainshowers:'overcast-rain',lightsnow:'snow',snow:'snow',heavysnow:'overcast-snow',lightsnowshowers:'partly-cloudy-day-snow',snowshowers:'partly-cloudy-day-snow',sleet:'sleet',lightsleet:'sleet',lightsleetshowers:'sleet',sleetshowers:'sleet',thunderstorm:'thunderstorms-day-rain',thunderstormlightrain:'thunderstorms-day-rain',lightrainandthunder:'thunderstorms-day-rain',rainandthunder:'thunderstorms-day-rain',snowandthunder:'thunderstorms-day-rain',thunder:'thunderstorms-day-rain'};
 function _wmoIconName(c,isDay=true){const map=isDay?_WMO_ICON_DAY:_WMO_ICON_NIGHT;return map[c]||_WMO_ICON_DAY[c]||_WMO_ICON_DAY[Math.floor((c||0)/10)*10]||'partly-cloudy-day';}
@@ -7501,7 +7567,8 @@ const _WXCOND_ICON_NIGHT={fog:'fog-night',storm:'thunderstorms-night-rain'};
 // Oznaka pod ikono: megla je sklep iz vlage in vetra (vidljivosti nihče ne meri), zato »možna«; ikona in oznaka sta tako ista odločitev.
 function _condLabelShown(label){return(_wxCond==='fog'&&!/dež/i.test(label))?'Možna megla':label;}
 // Ime ikone iz oznake, stanja (_wxCond) in dneva/noči. Čista funkcija (test_parity.hero_ikona_noc_in_megla).
-function _condIconName(label,wc,night){let n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';if(night&&_WXCOND_ICON_NIGHT[wc])n=_WXCOND_ICON_NIGHT[wc];return n;}
+function _condIconName(label,wc,night){if(label==='Dež s snegom')return'sleet';   // vrsta padavin ima prednost pred stanjem ozadja (dež, noč, megla)
+  let n=_WXCOND_ICON[wc]||_COND_ICON[label]||'partly-cloudy-day';if(night&&_WXCOND_ICON_NIGHT[wc])n=_WXCOND_ICON_NIGHT[wc];return n;}
 // `past`: ikona pretekle ure na drsniku. _wxCond (megla, nevihta, sneg ...) opisuje ZDAJ, ne tiste ure, zato se tam ne uporabi:
 // sicer bi ob oznaki »Jasno sončno« za −6 h stala ikona megle, če je megla zdaj.
 function _condImg(label,size=100,past){
@@ -11933,11 +12000,13 @@ function updateBgFromObs(obs){
   const uv=obs?.uv??0,solar=obs?.solarRadiation??obs?.metric?.solarRadiation??0;
   const hour=new Date().getHours();
   let cond='cloudy';
-  if(hour<5||hour>22)             cond='night';
+  // Sneg ima prednost pred nočjo, dežjem in meglo: ob ledišču je padavina sneg (precipKind), dežemer pa ga slabo zazna, zato šteje tudi radar nad postajo.
+  const snowNow=precipKind(obs?.metric?.temp)==='snow'&&(rain>0.05||_ncPrecipNow);
+  if(snowNow)                     cond='snow';
+  else if(hour<5||hour>22)        cond='night';
   else if(rain>5)                 cond='heavy_rain';
   else if(rain>0.3)               cond='rain';
   else if(wind>45)                cond='storm';
-  else if(temp<0&&rain>0.05)      cond='snow';
   else if(hum>91&&wind<5&&uv<1)  cond='fog';
   else if(temp>27&&uv>3&&rain<.1) cond='hot';
   else{const s=Math.sin(Math.max(0,(hour-6)/12*Math.PI));cond=s>0.1&&solar/s/880<0.35?'cloudy':'sunny';}

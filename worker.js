@@ -2388,16 +2388,25 @@ function _radVillage(levels, w, h, motion, vas) {
 // praktično enaka. Radarsko jedro samo po sebi ne loči toče od močnega
 // naliva, zato ga pogojujemo s CAPE in indeksom dviga.
 const HAIL_CAPE_MIN = 700, HAIL_LI_MAX = -3;
+// Vrsta padavin po temperaturi zraka: do 0,5 °C sneg, od 2,5 °C dež, vmes dež s snegom. Ista meja kot precipKind() v app.js
+// (preverja test_parity.precip_vrsta). Radar odbojnosti dežja in snega ne loči: 26. 11. 2026 je ob 0,1 °C in sneženju kazal »nevihto«.
+const NC_SNOW_MAX_C = 0.5;
+const NC_RAIN_MIN_C = 2.5;
+function _radVrsta(t) {
+  if (t == null || !isFinite(t)) return "dez";
+  return t <= NC_SNOW_MAX_C ? "sneg" : t < NC_RAIN_MIN_C ? "dez-sneg" : "dez";
+}
 async function _radOkolje() {
   try {
     const url = "https://api.open-meteo.com/v1/forecast?latitude=46.3258&longitude=14.9211"
-      + "&minutely_15=cape,lifted_index&forecast_minutely_15=4&timezone=UTC";
+      + "&minutely_15=cape,lifted_index,temperature_2m&forecast_minutely_15=4&timezone=UTC";
     const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 8000);
     const d = await (await fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(tid))).json();
     const cape = Math.max(...(d?.minutely_15?.cape || [0]).filter(v => v != null));
     const li = Math.min(...(d?.minutely_15?.lifted_index || [99]).filter(v => v != null));
-    return { cape, li, ugodno: cape >= HAIL_CAPE_MIN && li <= HAIL_LI_MAX };
-  } catch (_) { return { cape: null, li: null, ugodno: false }; }
+    const t = (d?.minutely_15?.temperature_2m || []).find(v => v != null);   // zdajšnja četrturna vrednost (modelska temperatura zraka v dolini)
+    return { cape, li, t: t ?? null, ugodno: cape >= HAIL_CAPE_MIN && li <= HAIL_LI_MAX };
+  } catch (_) { return { cape: null, li: null, t: null, ugodno: false }; }
 }
 
 // Prenesi in razčleni radar; vrne null, če je slika prestara ali nedosegljiva.
@@ -2428,9 +2437,15 @@ async function _radNowcastAll(env) {
   const rad = await _radFetch();
   if (!rad) return null;
   const okolje = await _radOkolje();
+  const vrsta = _radVrsta(okolje.t);
   const vasi = NOWCAST_VASI.map(v => {
     const n = _radVillage(rad.levels, rad.w, rad.h, rad.motion, v);
-    n.toca = n.jedro != null && okolje.ugodno;     // jedro + ugodno okolje
+    n.vrsta = vrsta;
+    if (vrsta !== "dez") {                         // ob ledišču je močna odbojnost moker sneg, ne nevihta ali toča
+      n.nevihta = null; n.jedro = null; n.toca = false;
+    } else {
+      n.toca = n.jedro != null && okolje.ugodno;   // jedro + ugodno okolje
+    }
     return n;
   });
   const out = {
@@ -2480,7 +2495,9 @@ async function _cronCheckRadarNowcast(env) {
       body = "⛈️ Nevihta " + vas.loc + " čez ~" + v.nevihta + " min.";
     } else if (v.dez != null && v.zdaj < RADAR_L_RAIN) {
       key = "dez";
-      body = "🌧️ Dež " + vas.loc + " čez ~" + v.dez + " min.";
+      body = v.vrsta === "sneg" ? "🌨️ Sneg " + vas.loc + " čez ~" + v.dez + " min."
+        : v.vrsta === "dez-sneg" ? "🌨️ Dež s snegom " + vas.loc + " čez ~" + v.dez + " min."
+        : "🌧️ Dež " + vas.loc + " čez ~" + v.dez + " min.";
     }
     if (!key) continue;
     const sKey = v.id + ":" + key;

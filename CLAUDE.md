@@ -755,6 +755,17 @@ skok v času (»slika preskoči iz 6:15 na 6:40«). Tri zareze, ki to preprečuj
   animacija sega uro nazaj od zadnjega posnetka, torej je najstarejši potrebni
   žig lahko star 75 minut in je tik po prehodu polne ure padel iz seznama.
 
+## Vrsta padavin ob ledišču: sneg ni dež (26. 11. 2026)
+
+Ob sneženju (0,1 °C, vlaga 99 %) je stran hkrati pisala »Možna megla« (hero), »Nevihta … Nad vasjo dežuje, višek ~15 mm/h« (nowcast), »zelo suho« (rosišče) in »možnost dežja« (stavek), čeprav je hitro vprašanje ob njej že kazalo »Sneg«.
+Vzrok: radar odbojnosti dežja in snega ne loči (moker sneg da visoko odbojnost → worker je razglasil »nevihto«, čeprav je CAPE 0), dežemer snega slabo zazna (trenutno 0,0 mm/h), lestvica rosišča je poletna.
+
+- **Vrsta padavin je ocena iz temperature zraka**, na treh mestih z isto mejo (do 0,5 °C sneg, od 2,5 °C dež, vmes dež s snegom; ista kot `_qaRainRun()`): `precipKind()` v `app.js`, `precip_kind()` v `tools/inject_current_weather.py` in `_radVrsta()` v `worker.js`. Preverja `test_parity.precip_vrsta`. Postaja vrste padavin ne meri: stran piše »ocena«, ne »meritev«.
+- **Hero**: `getCondition(obs, when, radarWet)` vrne »Sneženje« / »Dež s snegom«, ko je ob ledišču `precipRate > 0` ALI radar nad Rečico kaže ≥ 0,5 mm/h in je vlaga ≥ 80 % (`_ncPrecipNow`, nastavi ga nowcast). `updateBgFromObs()` ima sneg pred nočjo, dežjem in meglo. Dež s snegom ima ikono `sleet` ne glede na ozadje (`_condIconName`).
+- **Nowcast** (`_ncRender()`): ob ledišču značka »Sneg« / »Dež s snegom«, nevihte in toče ne razglaša (ozračje je stabilno), jakost je označena kot groba (radar mm/h je za dež). Za Rečico odloča temperatura postaje, drugje `okolje.t` iz workerja (modelska temperatura doline, **ne višine kraja**: Solčava in Logarska sta hladnejši). Worker ob ledišču postavi `nevihta/jedro = null`, `toca = false` in push obvestilo pove »Sneg« namesto »Nevihta«/»Dež«.
+- **Ni narejeno:** količina snega iz radarja (Z–R za dež precenjuje/podcenjuje, ne trdi nič), temperatura po višini kraja za druge vasi, urna napoved »Padlo danes« za sneg (kumulativa dežemera je za sneg nezanesljiva), ikona dežja ponoči (`night` v `_WXCOND_ICON` ima prednost pred oznako »Dež«, zato je ob nočnem dežju ikona luna; opazka ob pregledu, zunaj te naloge).
+- **Po deployu workerja preveri** `/nowcast` (polji `vrsta` in `okolje.t`); do takrat stran uporablja temperaturo postaje (za Rečico enako) in je za druge vasi brez vrste (privzeto dež).
+
 ## Vodostaj — izmerjeno pred modelom, pragovi po postajah
 
 **Stran `/vodostaj-savinje/` (13. 11. 2026) kaže tudi pritoke.** `fetch_arso_basin()` iz ARSO XML vzame postaje na Savinji + reke iz `TRIB_RIVERS` (Dreta, Lučnica, Bolska, Paka, Ložnica, Hudinja, Voglajna …) v `BASIN_BBOX`; seznam je ugibanje, ker iz peskovnika ARSO ni dosegljiv. **Po prvem teku `vodostaj-forecast.yml` preberi dnevnik**: izpiše tudi postaje v okolici, ki se niso uvrstile — če je med njimi pritok, ga dodaj. Pritok brez pragov ARSO ostane **neocenjen** (siv), enotni približek 80/200/400 velja samo za Savinjo (`card_level()`). `fetch_arso_stations()` ostaja samo Savinja, ker ga uvaža MeteoGasilec. Naslov/h1/opis dobijo ime prvega pritoka samo, če ga ARSO meri.
