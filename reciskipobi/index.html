@@ -64,7 +64,7 @@ button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px
 
 /* zavihki */
 [role=tablist]{display:flex;gap:6px;margin:6px 0 4px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:4px}
-[role=tab]{flex:1;border:0;background:transparent;color:var(--mut);padding:8px 4px;font-weight:600;font-size:.95rem;min-height:44px;border-radius:9px}
+[role=tab]{flex:1;border:0;background:transparent;color:var(--mut);padding:8px 2px;font-weight:600;font-size:.88rem;min-height:44px;border-radius:9px}
 [role=tab][aria-selected=true]{background:var(--ac);color:var(--acfg)}
 [role=tab]:hover{color:var(--fg)}
 [role=tab][aria-selected=true]:hover{color:var(--acfg)}
@@ -170,6 +170,100 @@ button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px
 .rez-gz .gz svg{width:26px;height:26px}
 .rez-gz b{color:var(--warn);font-weight:600}
 
+/* animirani polži (samo kjer je razred .anim; brez gibanja pri prefers-reduced-motion) */
+@media (prefers-reduced-motion:no-preference){
+  .anim .gz-l1{animation:sp1 .8s ease-in-out infinite alternate}
+  .anim .gz-l2{animation:sp2 1.8s ease-in-out infinite alternate}
+  .anim .gz-l3{animation:sp3 3s ease-in-out infinite alternate}
+  .anim .gz-l4{animation:sp4 3.4s ease-in-out infinite alternate}
+  .anim .gz-l5{animation:sp5 3s ease-in-out infinite alternate}
+  .hero .crawl svg.gz-l2{animation:crawl 80s linear infinite}
+  .cf{animation:cf 2.1s ease-in forwards}
+  .shake{animation:shake .55s}
+}
+@keyframes sp1{from{translate:-1px 0}to{translate:3px 0}}
+@keyframes sp2{from{translate:0 0}to{translate:0 -2px}}
+@keyframes sp3{from{rotate:-3deg}to{rotate:3deg}}
+@keyframes sp4{from{scale:1}to{scale:1.09}}
+@keyframes sp5{from{translate:0 0;opacity:.72}to{translate:0 -3px;opacity:1}}
+@keyframes crawl{to{transform:translateX(calc(-100cqw - 60px))}}
+@keyframes cf{to{transform:translateY(560px) rotate(560deg);opacity:0}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-5px) rotate(-.4deg)}40%{transform:translateX(5px) rotate(.4deg)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+#rezultat{position:relative;overflow:hidden}
+.cf{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;pointer-events:none}
+
+/* naslovnica (hero) */
+.hero{position:relative;overflow:hidden;background:linear-gradient(160deg,#143823,#0d1610 62%);border:1px solid var(--bd2);border-radius:var(--r);padding:14px 14px 34px;margin:10px 0 6px}
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hs{min-width:0}
+.hs .k{font-size:.68rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.hs .v{font-size:clamp(1.05rem,5.2vw,1.4rem);font-weight:800;color:var(--ac);line-height:1.15;overflow-wrap:anywhere}
+.hs .v.nm{font-size:1.08rem}
+.hs .s{font-size:.76rem;color:var(--mut);line-height:1.25}
+.hero-last{margin:10px 0 0;font-size:.86rem;color:var(--mut)}
+.crawl{position:absolute;left:0;right:0;bottom:2px;height:24px;pointer-events:none;overflow:hidden;container-type:inline-size}
+.crawl svg{position:absolute;left:100%;bottom:0;width:22px;height:22px;overflow:visible;opacity:.8}
+
+/* podij */
+.podium{display:grid;grid-template-columns:repeat(var(--n,3),1fr);gap:8px;align-items:end;margin:0 0 12px;padding-top:4px}
+.pc{display:flex;flex-direction:column;align-items:center;min-width:0;text-align:center}
+.pc.p1{order:2}.pc.p2{order:1}.pc.p3{order:3}
+.pc .crown{width:26px;height:22px;color:#f4c95d;margin-bottom:-2px}
+.pc svg.big{width:44px;height:44px;overflow:visible}
+.pc .nm{font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc .tt{font-size:.72rem;color:var(--mut);line-height:1.2}
+.pc .pts{font-size:.84rem;color:var(--ac);font-weight:700}
+.pc .gz-tot{justify-content:center;font-size:.8rem}
+.pc .blk{width:100%;margin-top:8px;border-radius:12px 12px 0 0;display:grid;place-items:start center;padding-top:8px;font-weight:900;font-size:1.9rem;color:#03130a;line-height:1}
+.pc.p1 .blk{height:108px;background:linear-gradient(#ffe08a,#e6b93f)}
+.pc.p2 .blk{height:78px;background:linear-gradient(#e6efe9,#a9bdb0)}
+.pc.p3 .blk{height:58px;background:linear-gradient(#e8bf96,#b57d4c)}
+
+/* naslovi */
+.titles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.ttl{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;min-width:0}
+.ttl.gold{border-color:#7a6a2a;background:linear-gradient(160deg,rgba(244,201,93,.10),var(--card))}
+.ttl .ic{width:30px;height:30px;color:var(--warn);display:block;margin-bottom:4px}
+.ttl svg.ic{overflow:visible}
+.ttl .k{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.ttl .n{font-weight:800;font-size:1.1rem;overflow-wrap:anywhere}
+.ttl .d{font-size:.8rem;color:var(--mut);line-height:1.3}
+
+/* grafi */
+.chart-card h2{font-size:1rem}
+.chart svg.ch{display:block;width:100%;height:auto}
+.ax{fill:#93ad9a;font-size:9px;font-family:inherit}
+.axv{fill:#e4f4e8;font-size:10px;font-weight:700;font-family:inherit}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin:8px 0 0;font-size:.76rem;color:var(--mut)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none;border:1px solid rgba(255,255,255,.08)}
+.lv1{background:#6b5a22}.lv2{background:#97772a}.lv3{background:#c29a30}.lv4{background:#e6b93f}.lv5{background:#ffe08a}
+.pv{display:grid;grid-template-columns:minmax(52px,26%) 1fr auto;gap:8px;align-items:center;margin:0 0 7px;font-size:.88rem}
+.pv .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.pv .bar{display:flex;gap:2px;height:16px}
+.pv .bar i{display:block;height:100%;border-radius:3px;min-width:4px}
+.pv .tot{color:var(--mut);font-size:.8rem;white-space:nowrap}
+
+/* blagajna */
+.cenik{list-style:none;margin:6px 0 0;padding:0}
+.cenik li{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--bd)}
+.cenik li:first-child{border-top:0}
+.cenik svg{width:26px;height:26px;flex:none;overflow:visible}
+.cenik .pr{margin-left:auto;font-weight:700;color:var(--ac);white-space:nowrap}
+.dolg{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--bd)}
+.dolg:first-child{border-top:0}
+.dolg .nm{font-weight:700}
+.dolg .eur{margin-left:auto;text-align:right;font-weight:800;color:var(--warn);white-space:nowrap}
+.dolg .eur small{display:block;font-weight:400}
+.dolg button{flex:none;min-height:40px;padding:6px 12px;font-size:.9rem}
+.placilo{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--bd);font-size:.9rem}
+.placilo:first-child{border-top:0}
+.e-fine{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 0;font-size:.9rem}
+.e-fine b{color:var(--warn);font-weight:700}
+.e-fine.paid b{color:var(--ac)}
+.e-fine button{min-height:36px;padding:4px 10px;font-size:.85rem}
+.pill.ok{color:var(--ac);border-color:var(--ac2)}
+
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,30px);opacity:0;
   background:var(--ac);color:var(--acfg);font-weight:600;padding:11px 18px;border-radius:12px;max-width:min(92vw,520px);
   text-align:center;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10}
@@ -234,6 +328,12 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
     <path d="M4.3 11 L3 7 M5.6 11 L7 7" fill="none" stroke="#cfd6a0" stroke-width="1" stroke-linecap="round" stroke-dasharray="1.4 1"/><circle cx="3" cy="6.6" r="1" fill="none" stroke="#eef2c0" stroke-width=".8"/><circle cx="7" cy="6.6" r="1" fill="none" stroke="#eef2c0" stroke-width=".8"/>
     <ellipse cx="14.5" cy="2.2" rx="4" ry="1.2" fill="none" stroke="#c3cc55" stroke-width="1"/>
   </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-liar" viewBox="0 0 24 24"><path d="M4 5h16v11H11l-4 4v-4H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 8v3M12 13.2v.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-door" viewBox="0 0 24 24"><path d="M6 21V4h10v17M4 21h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13.2" cy="13" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ghost" viewBox="0 0 24 24"><path d="M5 21V11a7 7 0 0 1 14 0v10l-2.3-2-2.4 2-2.3-2-2.3 2-2.4-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="9.3" cy="11" r="1.2" fill="currentColor"/><circle cx="14.7" cy="11" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 20"><path d="M2 17 1 5l6 5 5-8 5 8 6-5-1 12z" fill="currentColor"/></symbol>
 </svg>
 <div class="staff" aria-hidden="true"></div>
 <header class="top">
@@ -268,25 +368,31 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
 </section>
 
 <section id="app" hidden>
+  <section class="hero anim" id="hero" aria-label="Stanje zbora"></section>
   <div role="tablist" aria-label="Razdelki">
     <button role="tab" id="t-vpisi" aria-controls="p-vpisi" aria-selected="true" type="button" data-tab="vpisi">Vpiši</button>
-    <button role="tab" id="t-zid" aria-controls="p-zid" aria-selected="false" type="button" data-tab="zid">Sramotni zid</button>
+    <button role="tab" id="t-zid" aria-controls="p-zid" aria-selected="false" type="button" data-tab="zid">Zid sramote</button>
+    <button role="tab" id="t-blagajna" aria-controls="p-blagajna" aria-selected="false" type="button" data-tab="blagajna">Blagajna</button>
     <button role="tab" id="t-dnevnik" aria-controls="p-dnevnik" aria-selected="false" type="button" data-tab="dnevnik">Dnevnik</button>
   </div>
 
   <!-- VPIŠI -->
   <div id="p-vpisi" role="tabpanel" aria-labelledby="t-vpisi">
-    <div id="rezultat" class="card" hidden tabindex="-1">
+    <div class="seg2" role="group" aria-label="Vrsta vnosa" id="vnosTip">
+      <button type="button" data-tip="zamuda" aria-pressed="true">Zamuda</button>
+      <button type="button" data-tip="pravocasen" aria-pressed="false">Pravočasen</button>
+    </div>
+    <div id="rezultat" class="card anim" hidden tabindex="-1">
       <h2>Zapisano!</h2>
       <div class="rez-gz" id="rez-gz"></div>
       <p id="rez-quip"></p>
-      <div class="pen"><b>Predlog kazni:</b> <span id="rez-kazen"></span></div>
+      <div class="pen"><b>Predlog kazni:</b> <span id="rez-kazen"></span><br><b>V kazensko blagajno:</b> <span id="rez-cena"></span></div>
       <button type="button" id="rez-se" class="primary">Vpiši še eno zamudo</button>
     </div>
 
     <form id="forma" class="card" novalidate autocomplete="off">
       <div class="field">
-        <label for="kdo">Kdo je zamudil?</label>
+        <label for="kdo" id="kdoLbl">Kdo je zamudil?</label>
         <input id="kdo" type="text" maxlength="40" placeholder="Ime pevca" autocomplete="off" autocapitalize="words">
         <div class="chips" id="imena" role="group" aria-label="Znani zamudniki"></div>
       </div>
@@ -307,6 +413,8 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
         </fieldset>
       </div>
 
+      <p class="hint" id="pohvalaHint" hidden>Tapni vse, ki so prišli na čas. Vsak dobi pohvalo, serija pravočasnih vaj pa šteje za »Železno točnost« na zidu sramote.</p>
+      <div id="zamudaPolja">
       <fieldset class="field" id="minBox">
         <legend>Za koliko minut?</legend>
         <div class="chips" id="minChips" role="group" aria-label="Hitra izbira minut">
@@ -346,6 +454,7 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
         </div>
       </div>
 
+      </div>
       <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button class="primary" id="oddaj" type="submit">Zapiši v kroniko sramote</button>
     </form>
@@ -353,11 +462,17 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
 
   <!-- SRAMOTNI ZID -->
   <div id="p-zid" role="tabpanel" aria-labelledby="t-zid" hidden>
-    <div class="seg2" role="group" aria-label="Obdobje">
+    <div class="seg2" role="group" aria-label="Obdobje" id="obdobje">
       <button type="button" data-p="month" aria-pressed="true">Ta mesec</button>
+      <button type="button" data-p="prev" aria-pressed="false">Prejšnji</button>
       <button type="button" data-p="all" aria-pressed="false">Vse skupaj</button>
     </div>
     <div id="zid"></div>
+  </div>
+
+  <!-- BLAGAJNA -->
+  <div id="p-blagajna" role="tabpanel" aria-labelledby="t-blagajna" hidden>
+    <div id="blagajna"></div>
   </div>
 
   <!-- DNEVNIK -->
@@ -477,15 +592,6 @@ var KAZNI=[
 ];
 var NAZIVI=[[0,"Začetnik v zamujanju"],[31,"Gost zadnje vrste"],[91,"Mojster zamude"],[181,"Lord zamud"],[361,"Cesar zadnjega akorda"]];
 
-// Polži (ocena zamude): samo počasni, od 1 do 5, zajcev ni. Izpeljane iz minut, zato veljajo tudi za stare zapise.
-// Mejo spreminjaj samo tu (test_zbor.mjs jo preverja).
-function zvezdice(min,izostal){
-  if(izostal||min>60)return 5;
-  if(min>30)return 4;
-  if(min>15)return 3;
-  if(min>5)return 2;
-  return 1;
-}
 var ZVEZDE_IME=["Še gre","Neprijetno","Sramotno","Katastrofalno","Zgodovinsko"];
 var GZ_RAZPON=["do 5 min","do 15 min","do 30 min","do 60 min","čez 60 min ali duh"];
 var GZ_PL=["polž","polža","polži","polžev"];
@@ -513,10 +619,63 @@ function dec(x,d){return x.toFixed(d).replace(".",",");}
 function dateLabel(s){var d=parse(s);return ["ned.","pon.","tor.","sre.","čet.","pet.","sob."][d.getDay()]+" "+d.getDate()+". "+(d.getMonth()+1)+".";}
 function pick(a,avoid){var x,i=0;do{x=a[Math.floor(Math.random()*a.length)];}while(x===avoid&&a.length>1&&++i<10);return x;}
 function naziv(p){var r=NAZIVI[0][1];NAZIVI.forEach(function(x){if(p>=x[0])r=x[1];});return r;}
+/*MODEL:START*/
+// Polži (ocena zamude): samo počasni, od 1 do 5, zajcev ni. Izpeljane iz minut, zato veljajo tudi za stare zapise.
+// Mejo spreminjaj samo tu (test_zbor.mjs jo preverja).
+function zvezdice(min,izostal){
+  if(izostal||min>60)return 5;
+  if(min>30)return 4;
+  if(min>15)return 3;
+  if(min>5)return 2;
+  return 1;
+}
+// Kazenska blagajna: cena zamude je odvisna od polža (v centih). Zapis hrani samo, ali je plačan; cena se izračuna.
+var CENIK_C=[50,100,200,300,500];
+function cenaC(min,izostal){return CENIK_C[zvezdice(min,izostal)-1];}
+function fmtE(c){return (c/100).toFixed(2).replace(".",",")+NBSP+"€";}
+function jeZ(z){return z.tip!=="pravocasen";}                         // zapis je zamuda (ne pohvala za pravočasnost)
+function dolgC(z){return jeZ(z)&&!z.placano?cenaC(z.minute||0,z.izostal):0;}
+// Serija pravočasnih vaj po osebi: od najnovejše vaje nazaj, dokler ni zamude. Vaje brez zapisa osebe se ne štejejo.
+function serijaTocnosti(zap){
+  var by={};
+  zap.forEach(function(z){
+    if(z.dogodek!=="vaja")return;
+    var k=z.kdo.toLowerCase(),a=by[k]||(by[k]={ime:z.kdo,d:{}});
+    if(jeZ(z))a.d[z.datum]="z";else if(a.d[z.datum]!=="z")a.d[z.datum]="p";
+  });
+  return Object.keys(by).map(function(k){
+    var a=by[k],ds=Object.keys(a.d).sort().reverse(),n=0;
+    for(var i=0;i<ds.length&&a.d[ds[i]]==="p";i++)n++;
+    return {ime:a.ime,serija:n};
+  });
+}
+function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
+// Zadnjih n tednov (pon–ned, zadnji je tekoči): točke sramote = minute + 60 za duha
+function tedni(zap,danes,n){
+  var m0=mondayOf(danes),out=[],idx={};
+  for(var i=n-1;i>=0;i--){var k=ymd(new Date(m0.getFullYear(),m0.getMonth(),m0.getDate()-7*i));idx[k]=out.length;out.push({start:k,tocke:0,n:0});}
+  zap.forEach(function(z){
+    if(!jeZ(z))return;
+    var j=idx[ymd(mondayOf(parse(z.datum)))];
+    if(j!==undefined){out[j].tocke+=(z.minute||0)+(z.izostal?60:0);out[j].n++;}
+  });
+  return out;
+}
+// Datum → {lvl: najhujši polž dneva (0 = brez zamude), n: zamud, p: pohval}
+function dnevi(zap){
+  var m={};
+  zap.forEach(function(z){
+    var a=m[z.datum]||(m[z.datum]={lvl:0,n:0,p:0});
+    if(jeZ(z)){a.n++;a.lvl=Math.max(a.lvl,zvezdice(z.minute||0,z.izostal));}else a.p++;
+  });
+  return m;
+}
+/*MODEL:END*/
 var SVGNS="http://www.w3.org/2000/svg", TILT=[-4,3,-2,5,-3];
 function gzSvg(i){
   var s=document.createElementNS(SVGNS,"svg"),u=document.createElementNS(SVGNS,"use");
-  s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");s.style.transform="rotate("+TILT[i%TILT.length]+"deg)";
+  s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");s.setAttribute("class","gz-l"+(i%5+1));
+  s.style.transform="rotate("+TILT[i%TILT.length]+"deg)";s.style.animationDelay=(-(i*0.37)).toFixed(2)+"s";
   u.setAttribute("href","#gz"+(i%5+1));s.appendChild(u);return s;
 }
 // n polžev v vrsti: i-ti je i-ta stopnja (1 sprint, 2 znoj, 3 utrujen, 4 speč, 5 duh), da se vidi, kako zamuda narašča
@@ -559,7 +718,7 @@ function store(v,rem){
 }
 
 /* ───────── strežnik ───────── */
-var pw="", zapisi=[], period="month", shown=PAGE, hist=null, histP=null;
+var pw="", zapisi=[], period="month", shown=PAGE, hist=null, histP=null, vnosTip="zamuda";
 function api(path,method,body){
   return fetch(PROXY+path,{method:method||"GET",
     headers:{"Authorization":"Bearer "+pw,"Content-Type":"application/json"},
@@ -577,7 +736,7 @@ function osvezi(){
 /* ───────── prijava ───────── */
 function pokaziApp(){$("login").hidden=true;$("app").hidden=false;$("odjava").hidden=false;}
 function pokaziLogin(msg){
-  pw="";zapisi=[];$("app").hidden=true;$("odjava").hidden=true;$("login").hidden=false;
+  pw="";zapisi=[];$("hero").textContent="";$("app").hidden=true;$("odjava").hidden=true;$("login").hidden=false;
   $("err").textContent=msg||"";$("vstopi").disabled=false;$("vstopi").textContent="Vstopi";
 }
 function vstopi(geslo,zapomni,samodejno){
@@ -604,7 +763,7 @@ $("odjava").addEventListener("click",function(){store("");pokaziLogin("Odjavljen
 
 /* ───────── zavihki ───────── */
 function zavihek(ime){
-  ["vpisi","zid","dnevnik"].forEach(function(t){
+  ["vpisi","zid","blagajna","dnevnik"].forEach(function(t){
     var sel=t===ime;
     $("t-"+t).setAttribute("aria-selected",sel?"true":"false");
     $("t-"+t).tabIndex=sel?0:-1;
@@ -614,9 +773,9 @@ function zavihek(ime){
 document.querySelectorAll("[role=tab]").forEach(function(b){
   b.addEventListener("click",function(){zavihek(b.dataset.tab);});
   b.addEventListener("keydown",function(e){
-    var ids=["vpisi","zid","dnevnik"],i=ids.indexOf(b.dataset.tab);
+    var ids=["vpisi","zid","blagajna","dnevnik"],i=ids.indexOf(b.dataset.tab);
     if(e.key==="ArrowRight"||e.key==="ArrowLeft"){
-      var n=ids[(i+(e.key==="ArrowRight"?1:2))%3];zavihek(n);$("t-"+n).focus();e.preventDefault();
+      var n=ids[(i+(e.key==="ArrowRight"?1:ids.length-1))%ids.length];zavihek(n);$("t-"+n).focus();e.preventDefault();
     }
   });
 });
@@ -724,11 +883,17 @@ $("uporabi").addEventListener("click",function(){
 function imenaChips(){
   var cnt={},ime={};
   zapisi.forEach(function(z){var k=z.kdo.toLowerCase();cnt[k]=(cnt[k]||0)+1;if(!ime[k])ime[k]=z.kdo;});
-  var keys=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]||ime[a].localeCompare(ime[b],"sl");}).slice(0,10);
-  var box=$("imena");box.textContent="";
+  var keys=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]||ime[a].localeCompare(ime[b],"sl");}).slice(0,vnosTip==="pravocasen"?30:10);
+  var box=$("imena");
+  var izbrani={};
+  box.querySelectorAll(".chip[aria-pressed=true]").forEach(function(c){izbrani[c.textContent.toLowerCase()]=1;});
+  box.textContent="";
   keys.forEach(function(k){
     var b=el("button","chip",ime[k]);b.type="button";
-    b.addEventListener("click",function(){$("kdo").value=ime[k];$("kdo").focus();});
+    if(vnosTip==="pravocasen"){
+      b.setAttribute("aria-pressed",izbrani[k]?"true":"false");
+      b.addEventListener("click",function(){b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")==="true"?"false":"true");});
+    }else b.addEventListener("click",function(){$("kdo").value=ime[k];$("kdo").focus();});
     box.appendChild(b);
   });
   // filter v dnevniku
@@ -740,8 +905,58 @@ function imenaChips(){
   f.value=cur;
 }
 
+function nastaviTip(t){
+  vnosTip=t;
+  document.querySelectorAll("#vnosTip button").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.tip===t?"true":"false");});
+  var pr=t==="pravocasen";
+  $("zamudaPolja").hidden=pr;$("pohvalaHint").hidden=!pr;
+  $("kdoLbl").textContent=pr?"Kdo je bil pravočasen?":"Kdo je zamudil?";
+  $("kdo").placeholder=pr?"Drugo ime (če ga ni med čipi)":"Ime pevca";
+  $("oddaj").textContent=pr?"Zapiši pohvalo za pravočasnost":"Zapiši v kroniko sramote";
+  $("imena").setAttribute("aria-label",pr?"Pravočasni pevci (izberi vse)":"Znani zamudniki");
+  imenaChips();
+}
+document.querySelectorAll("#vnosTip button").forEach(function(b){b.addEventListener("click",function(){nastaviTip(b.dataset.tip);});});
+
+function konfeti(box){
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  var cols=["#3ddc84","#f4c95d","#ffe08a","#c3cc55","#9bd8b4"];
+  for(var i=0;i<28;i++){
+    var c=el("span","cf");c.setAttribute("aria-hidden","true");
+    c.style.left=(Math.random()*96+1)+"%";c.style.background=cols[i%cols.length];
+    c.style.animationDelay=(Math.random()*0.5).toFixed(2)+"s";c.style.width=(5+Math.random()*6)+"px";
+    box.appendChild(c);
+  }
+  setTimeout(function(){box.querySelectorAll(".cf").forEach(function(c){c.remove();});},3200);
+}
+
+function oddajPohvale(){
+  var imena=[];
+  document.querySelectorAll("#imena .chip[aria-pressed=true]").forEach(function(c){imena.push(c.textContent);});
+  var extra=$("kdo").value.trim();
+  if(extra&&!imena.some(function(x){return x.toLowerCase()===extra.toLowerCase();}))imena.push(extra);
+  var datum=$("datum").value;
+  if(!imena.length){toast("Izberi vsaj enega pravočasnega pevca.",true);return;}
+  if(!datum){toast("Izberi datum.",true);$("datum").focus();return;}
+  var btn=$("oddaj");btn.disabled=true;btn.textContent="Zapisujem …";
+  var ok=[],dogodek=izbranDogodek();
+  imena.reduce(function(pr,ime){
+    return pr.then(function(){return api("/zbor/zamuda","POST",{tip:"pravocasen",kdo:ime,datum:datum,dogodek:dogodek,website:$("website").value}).then(function(){ok.push(ime);});});
+  },Promise.resolve()).then(function(){
+    toast("Pohvaljeno: "+ok.join(", ")+". Točnost je vrlina, zapisana v kroniko.",false,5000);
+    $("kdo").value="";
+    document.querySelectorAll("#imena .chip").forEach(function(c){c.setAttribute("aria-pressed","false");});
+    return osvezi().catch(function(){});
+  }).catch(function(err){
+    if(err.status===401){pokaziLogin("Geslo ni več veljavno. Vpiši ga znova.");return;}
+    toast((ok.length?"Zapisano za: "+ok.join(", ")+". ":"")+(err.status?err.message:"Ni povezave."),true);
+    osvezi().catch(function(){});
+  }).then(function(){btn.disabled=false;nastaviTip(vnosTip);});
+}
+
 $("forma").addEventListener("submit",function(e){
   e.preventDefault();
+  if(vnosTip==="pravocasen"){oddajPohvale();return;}
   var kdo=$("kdo").value.trim(),zakaj=$("zakaj").value.trim(),izostal=$("izostal").checked,
       minute=parseInt($("minute").value,10),datum=$("datum").value;
   if(!kdo){toast("Vpiši, kdo je zamudil.",true);$("kdo").focus();return;}
@@ -756,7 +971,10 @@ $("forma").addEventListener("submit",function(e){
     rg.appendChild(gzEl(zv));var lb=el("span");lb.appendChild(el("b","",ZVEZDE_IME[zv-1]));lb.appendChild(document.createTextNode(" · "+pl(zv,GZ_PL)));rg.appendChild(lb);
     $("rez-quip").textContent=kdo+": "+quip(mm,izostal);
     $("rez-kazen").textContent=kazen;
-    $("rezultat").hidden=false;$("forma").hidden=true;
+    $("rezultat").hidden=false;$("forma").hidden=true;$("vnosTip").hidden=true;
+    $("rezultat").classList.remove("shake");
+    if(zv===5){void $("rezultat").offsetWidth;$("rezultat").classList.add("shake");konfeti($("rezultat"));}
+    $("rez-cena").textContent=fmtE(cenaC(mm,izostal));
     $("rezultat").focus();window.scrollTo({top:0,behavior:"smooth"});
     return osvezi().catch(function(){});            // zapis je shranjen, tudi če osvežitev seznama spodleti
   }).catch(function(err){
@@ -765,7 +983,7 @@ $("forma").addEventListener("submit",function(e){
   }).then(function(){btn.disabled=false;btn.textContent="Zapiši v kroniko sramote";});
 });
 $("rez-se").addEventListener("click",function(){
-  $("rezultat").hidden=true;$("forma").hidden=false;
+  $("rezultat").hidden=true;$("forma").hidden=false;$("vnosTip").hidden=false;
   $("kdo").value="";$("zakaj").value="";$("stevec").textContent="0";$("minute").value="";$("izostal").checked=false;
   $("minBox").classList.remove("off");$("minBox").disabled=false;izprazniMinute();
   $("predlog").hidden=true;$("verdictLive").hidden=true;$("verdictLive").textContent="";
@@ -775,7 +993,7 @@ $("rez-se").addEventListener("click",function(){
 /* ───────── sramotni zid ───────── */
 function serija(){
   var set={},today=ymd(new Date());
-  zapisi.forEach(function(z){if(z.datum<=today)set[z.datum]=1;});
+  zapisi.forEach(function(z){if(jeZ(z)&&z.datum<=today)set[z.datum]=1;});
   var ds=Object.keys(set).sort();
   if(!ds.length)return null;
   var day=864e5,cur=Math.max(0,Math.round((parse(today)-parse(ds[ds.length-1]))/day)),rec=cur;
@@ -787,12 +1005,150 @@ function tile(k,v,s,wide){
   t.appendChild(el("div","k",k));if(v!==null)t.appendChild(el("div","v",v));if(s)t.appendChild(el("div","s",s));
   return t;
 }
+function svgEl(t,attrs,txt){var e=document.createElementNS(SVGNS,t);Object.keys(attrs).forEach(function(k){e.setAttribute(k,attrs[k]);});if(txt!==undefined)e.textContent=txt;return e;}
+function iconSvg(id,cls){var s=svgEl("svg",{viewBox:id==="i-crown"?"0 0 24 20":"0 0 24 24","aria-hidden":"true","class":cls||"ic"}),u=svgEl("use",{href:"#"+id});s.appendChild(u);return s;}
+var LVC=["#6b5a22","#97772a","#c29a30","#e6b93f","#ffe08a"];   // stopnje 1–5: en odtenek, svetlejše = hujše (preverjeno z validate_palette --ordinal)
+var DNEVI_KR=["pon","sre","pet"];
+function legendaLv(extra){
+  var g=el("div","legend");g.setAttribute("aria-hidden","true");
+  (extra||[]).forEach(function(x){var sp=el("span");var sw=el("i","sw");sw.style.background=x[0];sp.appendChild(sw);sp.appendChild(document.createTextNode(x[1]));g.appendChild(sp);});
+  GZ_RAZPON.forEach(function(t,i){var sp=el("span");sp.appendChild(el("i","sw lv"+(i+1)));sp.appendChild(document.createTextNode(t));g.appendChild(sp);});
+  return g;
+}
+function kartica(naslov,hint){var c=el("div","card chart-card");c.appendChild(el("h2","",naslov));if(hint)c.appendChild(el("p","hint",hint));return c;}
+
+// 1) Točke sramote po tednih (zadnjih 12 tednov, ne glede na izbrano obdobje)
+function grafTedni(zap){
+  var N=12,d=tedni(zap,new Date(),N),W=320,H=150,L=30,B=22,T=16,mx=0;
+  d.forEach(function(x){mx=Math.max(mx,x.tocke);});
+  var top=Math.max(30,Math.ceil(mx/30)*30),ph=H-B-T,step=(W-L-4)/N,bw=step-6;
+  var c=kartica("Točke sramote po tednih","Zadnjih 12 tednov: minute zamude + 60 za vsak duh vaje.");
+  var box=el("div","chart"),sv=svgEl("svg",{viewBox:"0 0 "+W+" "+H,"class":"ch",role:"img",
+    "aria-label":"Točke sramote po tednih. "+d.map(function(x){return dateLabel(x.start)+": "+x.tocke;}).join("; ")});
+  [0,.5,1].forEach(function(f){
+    var y=T+ph-ph*f;
+    sv.appendChild(svgEl("line",{x1:L,x2:W,y1:y,y2:y,stroke:"#1f3324","stroke-width":f?"1":"1.5"}));
+    sv.appendChild(svgEl("text",{x:L-4,y:y+3,"text-anchor":"end","class":"ax"},String(Math.round(top*f))));
+  });
+  var iMax=-1;d.forEach(function(x,i){if(x.tocke>0&&(iMax<0||x.tocke>d[iMax].tocke))iMax=i;});
+  d.forEach(function(x,i){
+    var bx=L+3+i*step,h=ph*x.tocke/top,y=T+ph-h,r=Math.min(4,h/2);
+    var g=svgEl("g",{});
+    if(x.tocke>0){
+      g.appendChild(svgEl("path",{d:"M"+bx+","+(T+ph)+"V"+(y+r)+"Q"+bx+","+y+" "+(bx+r)+","+y+"H"+(bx+bw-r)+"Q"+(bx+bw)+","+y+" "+(bx+bw)+","+(y+r)+"V"+(T+ph)+"Z",fill:"#3ddc84"}));
+      if(i===iMax||i===N-1)g.appendChild(svgEl("text",{x:bx+bw/2,y:y-3,"text-anchor":"middle","class":"axv"},String(x.tocke)));
+    }
+    g.appendChild(svgEl("rect",{x:bx-3,y:T,width:step,height:ph+B,fill:"transparent"}));
+    var tt=svgEl("title",{},"Teden od "+dateLabel(x.start)+": "+x.tocke+" točk, "+pl(x.n,["zamuda","zamudi","zamude","zamud"]));g.appendChild(tt);
+    sv.appendChild(g);
+    if(i%3===0||i===N-1){var dd=parse(x.start);sv.appendChild(svgEl("text",{x:i===N-1?bx+bw:bx+bw/2,y:H-6,"text-anchor":i===N-1?"end":"middle","class":"ax"},i===N-1?"ta teden":dd.getDate()+". "+(dd.getMonth()+1)+"."));}
+  });
+  box.appendChild(sv);c.appendChild(box);return c;
+}
+
+// 2) Koledar zadnjih 14 tednov: vsak dan eno polje, barva = najhujši polž dneva
+function grafKoledar(zap){
+  var N=14,cell=17,gap=3,L=24,T=14,W=L+N*(cell+gap),H=T+7*(cell+gap)+2,m=dnevi(zap),today=new Date();
+  today=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  var m0=mondayOf(today),st=new Date(m0.getFullYear(),m0.getMonth(),m0.getDate()-7*(N-1)),tk=ymd(today);
+  var c=kartica("Koledar zamud","Vsako polje je en dan, barva je najhujši polž tistega dne. Zeleno: samo pravočasni.");
+  var box=el("div","chart"),sv=svgEl("svg",{viewBox:"0 0 "+W+" "+H,"class":"ch",role:"img","aria-label":"Koledar zamud za zadnjih 14 tednov, polje na dan. Podrobnosti so v dnevniku."});
+  DNEVI_KR.forEach(function(t,i){sv.appendChild(svgEl("text",{x:0,y:T+i*2*(cell+gap)+cell-4,"class":"ax"},t));});
+  for(var col=0;col<N;col++){
+    var mon=new Date(st.getFullYear(),st.getMonth(),st.getDate()+7*col);
+    if(col===0||mon.getDate()<=7)sv.appendChild(svgEl("text",{x:L+col*(cell+gap),y:9,"class":"ax"},["jan","feb","mar","apr","maj","jun","jul","avg","sep","okt","nov","dec"][mon.getMonth()]));
+    for(var r=0;r<7;r++){
+      var dt=new Date(st.getFullYear(),st.getMonth(),st.getDate()+7*col+r);
+      if(dt>today)continue;
+      var k=ymd(dt),info=m[k],fill="#122019",txt="ni vpisa";
+      if(info&&info.lvl){fill=LVC[info.lvl-1];txt=ZVEZDE_IME[info.lvl-1]+", "+pl(info.n,["zamuda","zamudi","zamude","zamud"]);}
+      else if(info&&info.p){fill="#2c7a50";txt="pravočasen";}
+      var rc=svgEl("rect",{x:L+col*(cell+gap),y:T+r*(cell+gap),width:cell,height:cell,rx:4,fill:fill,stroke:k===tk?"#3ddc84":"#1f3324","stroke-width":k===tk?"2":"1"});
+      rc.appendChild(svgEl("title",{},dateLabel(k)+": "+txt));
+      sv.appendChild(rc);
+    }
+  }
+  box.appendChild(sv);c.appendChild(box);
+  c.appendChild(legendaLv([["#122019","brez vpisa"],["#2c7a50","pravočasno"]]));
+  return c;
+}
+
+// 3) Pevci: koliko zamud katere stopnje (zloženi stolpci, najdaljši = največ zamud)
+function grafPevci(vrsta){
+  var c=kartica("Zamude po pevcih","Število zamud, razdeljeno po polžih. Razvrščeno po točkah sramote.");
+  var mx=0;vrsta.slice(0,8).forEach(function(a){mx=Math.max(mx,a.n);});
+  vrsta.slice(0,8).forEach(function(a){
+    var row=el("div","pv");row.setAttribute("role","img");
+    row.setAttribute("aria-label",a.ime+": "+pl(a.n,["zamuda","zamudi","zamude","zamud"])+" ("+a.lv.map(function(n,i){return n?ZVEZDE_IME[i]+" ×"+n:"";}).filter(Boolean).join(", ")+")");
+    row.appendChild(el("span","nm",a.ime));
+    var bar=el("span","bar");bar.style.width=Math.max(8,a.n/mx*100)+"%";
+    a.lv.forEach(function(n,i){if(!n)return;var seg=el("i");seg.style.flex=n+" 1 0";seg.style.background=LVC[i];seg.title=ZVEZDE_IME[i]+": "+n+"×";bar.appendChild(seg);});
+    var wrap=el("span");wrap.appendChild(bar);row.appendChild(wrap);
+    row.appendChild(el("span","tot",String(a.n)));
+    c.appendChild(row);
+  });
+  c.appendChild(legendaLv());
+  return c;
+}
+
+// Podij (prvi trije)
+function podij(vrsta){
+  var top=vrsta.slice(0,3),box=el("div","podium anim");box.style.setProperty("--n",String(top.length));
+  var gzI=[4,3,2];   // zlati = duh, srebrni = speč, bronasti = utrujen
+  top.forEach(function(a,i){
+    var c=el("div","pc p"+(i+1));
+    if(i===0)c.appendChild(iconSvg("i-crown","crown"));
+    var sv=gzSvg(gzI[i]);sv.setAttribute("class",sv.getAttribute("class")+" big");c.appendChild(sv);
+    c.appendChild(el("div","nm",a.ime));
+    c.appendChild(el("div","tt",naziv(a.tocke)));
+    c.appendChild(el("div","pts",fmtMin(a.min)+(a.duh?" + "+pl(a.duh,["duh","duha","duhovi","duhov"]):"")));
+    c.appendChild(gzTotal(a.zv));
+    c.appendChild(el("div","blk",String(i+1)));
+    box.appendChild(c);
+  });
+  return box;
+}
+
+function mesecKljuc(d){return d.getFullYear()+"-"+p2(d.getMonth()+1);}
+function naslovCard(ikona,k,ime,opis,gold){
+  var t=el("div","ttl"+(gold?" gold":""));
+  if(ikona.charAt(0)==="#")t.appendChild(iconSvg(ikona.slice(1)));
+  else{var w=el("span","ic");w.style.display="block";w.style.height="30px";w.appendChild(gzSvg(+ikona));t.appendChild(w);var sv=w.firstChild;sv.style.width="30px";sv.style.height="30px";}
+  t.appendChild(el("div","k",k));t.appendChild(el("div","n",ime));t.appendChild(el("div","d",opis));
+  return t;
+}
+function naslovi(list,vrsta,pohvale,vseCas){
+  var kdaj=vseCas?"vseh časov":"meseca",out=[];
+  if(vrsta.length){
+    var a=vrsta[0];
+    out.push(naslovCard("1","Polž "+kdaj,a.ime,fmtMin(a.min)+" zamude, "+pl(a.zv,GZ_PL),true));
+    var duh=vrsta.filter(function(x){return x.duh>0;}).sort(function(x,y){return y.duh-x.duh||y.tocke-x.tocke;})[0];
+    if(duh)out.push(naslovCard("4","Duh "+kdaj,duh.ime,pl(duh.duh,["duh vaje","duha vaje","duhovi vaj","duhov vaj"])+". Stol je ostal prazen."));
+    var gost=vrsta.slice().sort(function(x,y){return y.n-x.n||y.tocke-x.tocke;})[0];
+    if(gost.n>=2)out.push(naslovCard("#i-door","Stalni gost zadnje vrste",gost.ime,pl(gost.n,["zamuda","zamudi","zamude","zamud"])+"."));
+  }
+  if(hist){
+    var lazi={};
+    list.forEach(function(z){if(!jeZ(z))return;var v=verdicts(z.zakaj,z.datum);if(v.some(function(x){return!x.ok;})){var k=z.kdo.toLowerCase();(lazi[k]||(lazi[k]={ime:z.kdo,n:0})).n++;}});
+    var l=Object.keys(lazi).map(function(k){return lazi[k];}).sort(function(x,y){return y.n-x.n||x.ime.localeCompare(y.ime,"sl");})[0];
+    if(l)out.push(naslovCard("#i-liar","Lažnivec "+kdaj,l.ime,"Postaja je ovrgla "+pl(l.n,["izgovor","izgovora","izgovore","izgovorov"])+"."));
+  }
+  var pr={};pohvale.forEach(function(z){var k=z.kdo.toLowerCase();(pr[k]||(pr[k]={ime:z.kdo,n:0})).n++;});
+  var zp=Object.keys(pr).map(function(k){return pr[k];}).sort(function(x,y){return y.n-x.n||x.ime.localeCompare(y.ime,"sl");})[0];
+  if(zp)out.push(naslovCard("#i-clock","Zlati pravočasnež",zp.ime,pl(zp.n,["pravočasen vpis","pravočasna vpisa","pravočasni vpisi","pravočasnih vpisov"])+".",true));
+  var ser=serijaTocnosti(zapisi).filter(function(x){return x.serija>=2;}).sort(function(x,y){return y.serija-x.serija||x.ime.localeCompare(y.ime,"sl");})[0];
+  if(ser)out.push(naslovCard("#i-shield","Železna točnost",ser.ime,pl(ser.serija,["vaja","vaji","vaje","vaj"])+" zapored brez zamude."));
+  if(!out.length)return null;
+  var box=el("div","titles");out.forEach(function(x){box.appendChild(x);});return box;
+}
+
 function renderZid(){
   var root=$("zid");root.textContent="";
-  var mesec=ymd(new Date()).slice(0,7);
-  var list=zapisi.filter(function(z){return period==="all"||z.datum.slice(0,7)===mesec;});
-  if(!list.length){
-    root.appendChild(el("div","empty card",period==="all"?"Še nihče ni zamudil. Sumljivo.":"Ta mesec še nihče ni zamudil. Sumljivo."));
+  var d0=new Date(),mesec=mesecKljuc(d0),prej=mesecKljuc(new Date(d0.getFullYear(),d0.getMonth()-1,1));
+  var inP=function(z){return period==="all"||z.datum.slice(0,7)===(period==="prev"?prej:mesec);};
+  var vsi=zapisi.filter(inP),list=vsi.filter(jeZ),pohvale=vsi.filter(function(z){return!jeZ(z);});
+  if(!list.length&&!pohvale.length){
+    root.appendChild(el("div","empty card",period==="all"?"Še nihče ni zamudil. Sumljivo.":period==="prev"?"Prejšnji mesec ni zapisov. Sumljivo.":"Ta mesec še nihče ni zamudil. Sumljivo."));
     return;
   }
   var m={},lvVse=[0,0,0,0,0];
@@ -803,6 +1159,10 @@ function renderZid(){
   });
   var vrsta=Object.keys(m).map(function(k){var a=m[k];a.tocke=a.min+60*a.duh;return a;});
   vrsta.sort(function(a,b){return b.tocke-a.tocke||b.n-a.n||a.ime.localeCompare(b.ime,"sl");});
+
+  if(vrsta.length)root.appendChild(podij(vrsta));
+  var nas=naslovi(list,vrsta,pohvale,period==="all");if(nas)root.appendChild(nas);
+  if(!list.length){root.appendChild(el("div","empty card","V tem obdobju ni zamud, samo pohvale. Redek prizor."));return;}
 
   var skupaj=0;list.forEach(function(z){skupaj+=z.minute||0;});
   var pesmi=Math.floor(skupaj/3.5),s=serija();
@@ -815,20 +1175,15 @@ function renderZid(){
   var zvNaj=vrsta.slice().sort(function(a,b){return b.zv-a.zv||a.ime.localeCompare(b.ime,"sl");})[0];
   tiles.appendChild(tile("Polži",String(zvSkupaj),"Največ jih ima "+zvNaj.ime+" ("+zvNaj.zv+"). Zajcev ni.",true));
   var zt=tile("Polži po stopnjah",null,"Od sprinta do duha: koliko zapisov je dobilo katerega polža.",true);
-  zt.insertBefore(gzDist(lvVse),zt.lastChild);tiles.appendChild(zt);
+  zt.classList.add("anim");zt.insertBefore(gzDist(lvVse),zt.lastChild);tiles.appendChild(zt);
   var naj=list.reduce(function(a,z){return(!a||(z.minute||0)>(a.minute||0))?z:a;},null);
   if(naj&&naj.minute)tiles.appendChild(tile("Najdaljša zamuda",naj.kdo+", "+fmtMin(naj.minute),"»"+naj.zakaj+"«",true));
   root.appendChild(tiles);
 
-  var podij=el("div","podij");
-  vrsta.slice(0,3).forEach(function(a,i){
-    var p=el("div","pod");p.appendChild(el("div","no",String(i+1)));
-    var mid=el("div");mid.appendChild(el("div","nm",a.ime));mid.appendChild(el("div","tt",naziv(a.tocke)));mid.appendChild(gzTotal(a.zv,a.lv));p.appendChild(mid);
-    var pt=el("div","pt",fmtMin(a.min));
-    pt.appendChild(el("small","",pl(a.n,["zamuda","zamudi","zamude","zamud"])+(a.duh?" · duh ×"+a.duh:"")));
-    p.appendChild(pt);podij.appendChild(p);
-  });
-  root.appendChild(podij);
+  // grafi: tedni in koledar gledata vse zapise (zadnje tedne), pevci izbrano obdobje
+  root.appendChild(grafTedni(zapisi));
+  root.appendChild(grafKoledar(zapisi));
+  root.appendChild(grafPevci(vrsta));
 
   if(vrsta.length>3){
     var c=el("div","card"),ol=el("ol","rank");ol.start=4;
@@ -843,26 +1198,120 @@ function renderZid(){
   }
   root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje. Polži: do 5 min 1, do 15 min 2, do 30 min 3, do 60 min 4, čez 60 min ali duh vaje 5. Zajcev ne delimo."));
 }
-document.querySelectorAll(".seg2 button").forEach(function(b){
+document.querySelectorAll("#obdobje button").forEach(function(b){
   b.addEventListener("click",function(){
     period=b.dataset.p;
-    document.querySelectorAll(".seg2 button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});
+    document.querySelectorAll("#obdobje button").forEach(function(x){x.setAttribute("aria-pressed",x===b?"true":"false");});
     renderZid();
   });
 });
+
+/* ───────── kazenska blagajna ───────── */
+function placaj(ids,val){
+  var kosi=[];for(var i=0;i<ids.length;i+=50)kosi.push(ids.slice(i,i+50));
+  return kosi.reduce(function(pr,k){return pr.then(function(){return api("/zbor/placilo","POST",{ids:k,placano:val});});},Promise.resolve())
+    .then(osvezi);
+}
+function renderBlagajna(){
+  var root=$("blagajna");root.textContent="";
+  var zam=zapisi.filter(jeZ),odprto=0,v=0,nOdp=0,by={};
+  zam.forEach(function(z){
+    var c=cenaC(z.minute||0,z.izostal);
+    if(z.placano)v+=c;else{odprto+=c;nOdp++;}
+    if(!z.placano){var k=z.kdo.toLowerCase(),a=by[k]||(by[k]={ime:z.kdo,c:0,ids:[]});a.c+=c;a.ids.push(z.id);}
+  });
+  var tiles=el("div","tiles");
+  tiles.appendChild(tile("V blagajni",fmtE(v),"Že poravnane kazni."));
+  tiles.appendChild(tile("Neporavnano",fmtE(odprto),pl(nOdp,["odprta kazen","odprti kazni","odprte kazni","odprtih kazni"])+"."));
+  root.appendChild(tiles);
+
+  var c1=el("div","card");c1.appendChild(el("h2","","Kdo je dolžan"));
+  var dolzniki=Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){return b.c-a.c||a.ime.localeCompare(b.ime,"sl");});
+  if(!dolzniki.length)c1.appendChild(el("p","muted",zam.length?"Vsi so poravnali. Čudež, vreden zapisa.":"Še ni kazni. Zbor je točen ali pa nihče ne piše."));
+  dolzniki.forEach(function(a){
+    var row=el("div","dolg");row.appendChild(el("span","nm",a.ime));
+    var e=el("span","eur",fmtE(a.c));e.appendChild(el("small","muted",pl(a.ids.length,["kazen","kazni","kazni","kazni"])));row.appendChild(e);
+    var b=el("button","","Poravnano");b.type="button";
+    b.addEventListener("click",function(){
+      if(!b.dataset.sure){b.dataset.sure="1";b.textContent="Res "+fmtE(a.c)+"?";setTimeout(function(){delete b.dataset.sure;b.textContent="Poravnano";},4000);return;}
+      b.disabled=true;
+      placaj(a.ids,true).then(function(){toast(a.ime+" je poravnal "+fmtE(a.c)+". Blagajna je bogatejša.");}).catch(function(err){b.disabled=false;toast(err.message,true);});
+    });
+    row.appendChild(b);c1.appendChild(row);
+  });
+  root.appendChild(c1);
+
+  var plac=zam.filter(function(z){return z.placano;}).sort(function(a,b){return(b.placanoTs||"").localeCompare(a.placanoTs||"");}).slice(0,6);
+  if(plac.length){
+    var c2=el("div","card");c2.appendChild(el("h2","","Zadnja plačila"));
+    plac.forEach(function(z){
+      var r=el("div","placilo");r.appendChild(el("span","",z.kdo+" · "+dateLabel(z.datum)));r.appendChild(el("b","",fmtE(cenaC(z.minute||0,z.izostal))));c2.appendChild(r);
+    });
+    root.appendChild(c2);
+  }
+
+  var c3=el("div","card anim");c3.appendChild(el("h2","","Cenik"));
+  c3.appendChild(el("p","hint","Cena zamude je odvisna od polža. Plača se v kazensko blagajno zbora; kaj se z njo kupi, odloči zbor."));
+  var ul=el("ul","cenik");
+  CENIK_C.forEach(function(c,i){
+    var li=el("li");li.appendChild(gzSvg(i));
+    var t=el("span");t.appendChild(el("b","",ZVEZDE_IME[i]));t.appendChild(document.createTextNode(" · "+GZ_RAZPON[i]));li.appendChild(t);
+    li.appendChild(el("span","pr",fmtE(c)));ul.appendChild(li);
+  });
+  c3.appendChild(ul);root.appendChild(c3);
+}
+
+/* ───────── naslovnica ───────── */
+function danovPred(datum){
+  var d=Math.round((parse(ymd(new Date()))-parse(datum))/864e5);
+  return d<=0?"danes":d===1?"včeraj":"pred "+pl(d,["dnevom","dnevoma","dnevi","dnevi"]);
+}
+function renderHero(){
+  var h=$("hero");h.textContent="";
+  var zam=zapisi.filter(jeZ),s=serija(),odprto=0;
+  zam.forEach(function(z){odprto+=dolgC(z);});
+  var mes=mesecKljuc(new Date()),m={};
+  zam.filter(function(z){return z.datum.slice(0,7)===mes;}).forEach(function(z){
+    var a=m[z.kdo.toLowerCase()]||(m[z.kdo.toLowerCase()]={ime:z.kdo,t:0});a.t+=(z.minute||0)+(z.izostal?60:0);});
+  var polz=Object.keys(m).map(function(k){return m[k];}).sort(function(a,b){return b.t-a.t;})[0];
+  var g=el("div","hero-grid");
+  function stat(k,v,sub,cls){var x=el("div","hs");x.appendChild(el("div","k",k));x.appendChild(el("div","v"+(cls?" "+cls:""),v));if(sub)x.appendChild(el("div","s",sub));return x;}
+  g.appendChild(stat("Dni brez zamude",s?String(s.cur):"–",s?(s.cur===0?"Danes je že kdo zamudil.":"Rekord: "+s.rec):"Še brez zapisov."));
+  g.appendChild(stat("Dolg v blagajni",fmtE(odprto),odprto?"Še neporavnano.":"Vse poravnano."));
+  g.appendChild(stat("Polž meseca",polz?polz.ime:"–",polz?fmtMin(polz.t):"Ta mesec še nihče.","nm"));
+  h.appendChild(g);
+  var z0=zapisi[0];
+  if(z0){
+    var t=jeZ(z0)?z0.kdo+": "+(z0.izostal?"duh vaje":fmtMin(z0.minute))+" · "+danovPred(z0.datum):z0.kdo+" je bil pravočasen · "+danovPred(z0.datum);
+    h.appendChild(el("p","hero-last","Zadnji vpis: "+t));
+  }
+  var cr=el("div","crawl");cr.setAttribute("aria-hidden","true");cr.appendChild(gzSvg(1));h.appendChild(cr);
+}
 
 /* ───────── dnevnik ───────── */
 function entryEl(z){
   var li=el("li","entry");
   var head=el("div","e-head");head.appendChild(el("strong","",z.kdo));
-  head.appendChild(z.izostal?el("span","pill duh","duh vaje"):el("span","pill",fmtMin(z.minute)));
+  if(!jeZ(z))head.appendChild(el("span","pill ok","pravočasen"));
+  else head.appendChild(z.izostal?el("span","pill duh","duh vaje"):el("span","pill",fmtMin(z.minute)));
   li.appendChild(head);
   li.appendChild(el("p","e-meta",dateLabel(z.datum)+" · "+(DOGODKI[z.dogodek]||z.dogodek)));
-  var zv=zvezdice(z.minute||0,z.izostal),gz=el("div","e-gz");
-  gz.appendChild(gzEl(zv));gz.appendChild(el("span","",ZVEZDE_IME[zv-1]));li.appendChild(gz);
-  li.appendChild(el("p","e-why","»"+z.zakaj+"«"));
-  verdicts(z.zakaj,z.datum).forEach(function(v){li.appendChild(verdictEl(v));});
-  if(z.kazen){var p=el("p","e-pen");p.appendChild(el("b","","Predlog kazni: "));p.appendChild(document.createTextNode(z.kazen));li.appendChild(p);}
+  if(jeZ(z)){
+    var zv=zvezdice(z.minute||0,z.izostal),gz=el("div","e-gz");
+    gz.appendChild(gzEl(zv));gz.appendChild(el("span","",ZVEZDE_IME[zv-1]));li.appendChild(gz);
+    li.appendChild(el("p","e-why","»"+z.zakaj+"«"));
+    verdicts(z.zakaj,z.datum).forEach(function(v){li.appendChild(verdictEl(v));});
+    if(z.kazen){var p=el("p","e-pen");p.appendChild(el("b","","Predlog kazni: "));p.appendChild(document.createTextNode(z.kazen));li.appendChild(p);}
+    var c=cenaC(z.minute||0,z.izostal),fine=el("div","e-fine"+(z.placano?" paid":""));
+    var fl=el("span");fl.appendChild(document.createTextNode("Blagajna: "));fl.appendChild(el("b","",fmtE(c)));fl.appendChild(document.createTextNode(z.placano?" · poravnano":" · neporavnano"));
+    fine.appendChild(fl);
+    var pb=el("button","ghost",z.placano?"Razveljavi":"Poravnano");pb.type="button";
+    pb.addEventListener("click",function(){
+      pb.disabled=true;
+      placaj([z.id],!z.placano).then(function(){toast(z.placano?"Kazen je spet odprta.":"Kazen je poravnana.");}).catch(function(e){pb.disabled=false;toast(e.message,true);});
+    });
+    fine.appendChild(pb);li.appendChild(fine);
+  }
   var foot=el("div","e-foot"),del=el("button","ghost","Izbriši");del.type="button";
   del.addEventListener("click",function(){
     if(!del.dataset.sure){
@@ -887,9 +1336,9 @@ $("filter").addEventListener("change",function(){shown=PAGE;renderLog();});
 $("vec").addEventListener("click",function(){shown+=PAGE;renderLog();});
 
 function narisi(){
-  imenaChips();renderZid();renderLog();
-  // verdikti v dnevniku potrebujejo vreme; naloži ga šele, če kak izgovor omenja vreme
-  if(!hist&&zapisi.some(function(z){return matched(z.zakaj).length;}))loadHist().then(renderLog);
+  renderHero();imenaChips();renderZid();renderBlagajna();renderLog();
+  // verdikti v dnevniku in naslov »Lažnivec« potrebujejo vreme; naloži ga šele, če kak izgovor omenja vreme
+  if(!hist&&zapisi.some(function(z){return jeZ(z)&&matched(z.zakaj).length;}))loadHist().then(function(){renderLog();renderZid();});
 }
 
 /* ───────── namestitev kot aplikacija ───────── */

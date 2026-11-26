@@ -7687,9 +7687,11 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       // ne shranita (IP je samo v KV števcu zaklepa/omejitve). Zaklep po IP: 10 napačnih gesel → 15 min.
       //   GET  /zbor/zamude    → { zapisi: [...] }  (najnovejši prvi)
       //   POST /zbor/zamuda    { kdo, zakaj, datum, dogodek, minute, izostal?, kazen?, website? }
+      //                        ali { tip:"pravocasen", kdo, datum, dogodek } (pohvala: brez minut in izgovora, en zapis na osebo/dan/dogodek)
       //   POST /zbor/izbrisi   { id }
+      //   POST /zbor/placilo   { ids:[id,…] (največ 50), placano:true|false }  (kazenska blagajna: kazen poravnana ali spet odprta)
       // ZBOR_DOGODKI je namerna podvojitev z izbirnikom dogodka v reciskipobi/index.html (preverja tools/test_zbor.mjs).
-      if (path === "/zbor/zamude" || path === "/zbor/zamuda" || path === "/zbor/izbrisi") {
+      if (path === "/zbor/zamude" || path === "/zbor/zamuda" || path === "/zbor/izbrisi" || path === "/zbor/placilo") {
         const r2 = env?.PHOTOS_R2;
         function _json(obj, status) {
           return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
@@ -7727,7 +7729,7 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         async function _zbWrite(all) {
           await r2.put(ZB_KEY, JSON.stringify(all.slice(0, ZB_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
         }
-        const expected = { "/zbor/zamude": "GET", "/zbor/zamuda": "POST", "/zbor/izbrisi": "POST" }[path];
+        const expected = { "/zbor/zamude": "GET", "/zbor/zamuda": "POST", "/zbor/izbrisi": "POST", "/zbor/placilo": "POST" }[path];
         if (request.method !== expected) return _json({ error: "Metoda ni dovoljena" }, 405);
 
         if (path === "/zbor/zamude") {
@@ -7750,31 +7752,54 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           return _json({ ok: true, ostalo: rest.length });
         }
 
+        if (path === "/zbor/placilo") {
+          const ids = Array.isArray(body.ids) ? body.ids.filter(x => typeof x === "string" && x) : [];
+          if (!ids.length || ids.length > 50 || typeof body.placano !== "boolean") return _json({ error: "Napačni podatki" }, 400);
+          if (await _ipLimited(env, request, "zbor_rl", 60, 3600)) return _json({ error: "Preveč vnosov v kratkem času — poskusi kasneje" }, 429);
+          const all = await _zbRead();
+          if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
+          const set = new Set(ids), ts = new Date().toISOString();
+          let n = 0;
+          for (const i of all) {
+            if (!set.has(i.id) || i.tip === "pravocasen") continue;   // pohvala nima kazni
+            if (body.placano) { i.placano = true; i.placanoTs = ts; } else { delete i.placano; delete i.placanoTs; }
+            n++;
+          }
+          if (!n) return _json({ error: "Zapisa ni" }, 404);
+          await _zbWrite(all);
+          return _json({ ok: true, spremenjenih: n });
+        }
+
         // POST /zbor/zamuda
         if (body.website) return _json({ ok: true }); // honeypot
         const clean = (s, max) => (typeof s === "string" ? s.replace(/\s+/g, " ").trim().slice(0, max) : "");
         const kdo = clean(body.kdo, 40), zakaj = clean(body.zakaj, 200), kazen = clean(body.kazen, 140);
-        if (!kdo) return _json({ error: "Vpiši, kdo je zamudil" }, 400);
-        if (!zakaj) return _json({ error: "Brez izgovora ni zapisa" }, 400);
+        const pravocasen = body.tip === "pravocasen";
+        if (!kdo) return _json({ error: pravocasen ? "Vpiši, kdo je bil pravočasen" : "Vpiši, kdo je zamudil" }, 400);
+        if (!pravocasen && !zakaj) return _json({ error: "Brez izgovora ni zapisa" }, 400);
         const datum = typeof body.datum === "string" ? body.datum : "";
         const dObj = /^\d{4}-\d{2}-\d{2}$/.test(datum) ? new Date(datum + "T00:00:00Z") : null;
         const najpozneje = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);   // rezerva za časovni pas
         if (!dObj || isNaN(dObj) || dObj.toISOString().slice(0, 10) !== datum || datum < "2020-01-01" || datum > najpozneje)
           return _json({ error: "Datum ni veljaven" }, 400);
         if (!ZBOR_DOGODKI.includes(body.dogodek)) return _json({ error: "Neznan dogodek" }, 400);
-        const izostal = body.izostal === true;
-        const minute = izostal ? 0 : Math.round(Number(body.minute));
-        if (!izostal && !(minute >= 1 && minute <= 240)) return _json({ error: "Zamuda mora biti od 1 do 240 minut" }, 400);
+        const izostal = !pravocasen && body.izostal === true;
+        const minute = (izostal || pravocasen) ? 0 : Math.round(Number(body.minute));
+        if (!izostal && !pravocasen && !(minute >= 1 && minute <= 240)) return _json({ error: "Zamuda mora biti od 1 do 240 minut" }, 400);
 
         if (await _ipLimited(env, request, "zbor_rl", 60, 3600)) return _json({ error: "Preveč vnosov v kratkem času — poskusi kasneje" }, 429);
         const all = await _zbRead();
         if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
         const now = Date.now();
-        const dup = all.some(i => i.kdo.toLowerCase() === kdo.toLowerCase() && i.datum === datum && i.dogodek === body.dogodek
-          && i.zakaj === zakaj && i.minute === minute && (now - new Date(i.ts).getTime()) < 60000);
+        const dup = pravocasen
+          // pohvala: ena na osebo, dan in dogodek (brez časovnega okna: dvakrat pravočasen na isti vaji ni mogoč)
+          ? all.some(i => i.tip === "pravocasen" && i.kdo.toLowerCase() === kdo.toLowerCase() && i.datum === datum && i.dogodek === body.dogodek)
+          : all.some(i => i.tip !== "pravocasen" && i.kdo.toLowerCase() === kdo.toLowerCase() && i.datum === datum && i.dogodek === body.dogodek
+            && i.zakaj === zakaj && i.minute === minute && (now - new Date(i.ts).getTime()) < 60000);
         if (dup) return _json({ ok: true });
         const entry = { id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(), kdo, datum, dogodek: body.dogodek, minute, izostal, zakaj };
-        if (kazen) entry.kazen = kazen;
+        if (pravocasen) { entry.tip = "pravocasen"; entry.zakaj = ""; }
+        else if (kazen) entry.kazen = kazen;
         all.unshift(entry);
         await _zbWrite(all);
         return _json({ ok: true, zapis: entry });
