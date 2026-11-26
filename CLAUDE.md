@@ -2800,7 +2800,7 @@ crnivec.si je bil 26. 11. dopoldne star dva dni: `zima-forecast.yml` ima en GitH
   pozni GitHubov cron isti dan ne naredi nič. Ročni zagon ima `force` privzeto `true` (obide vrata, kot pri dnevni zgodbi); dispatch brez `force: "false"` bi obšel vrata (preverja `test_dispatch_force.py`).
 - **Zadnji korak `require-fresh 30`** pobarva tek rdeče, če je `winter-data.json` starejši od 30 h (en zamujen dan še ni napaka, dva sta). Strani so do takrat že objavljene, s starimi podatki, označenimi z datumom.
 - Pri izpadu en tek ne obnovi `data/winter-data.json`, a vseeno sestavi in objavi strani (z datumom zadnje osvežitve); `/snegofili/` ima ločen klic Open-Meteo in deluje naprej.
-- Test: `tools/test_zima_gate.py` (v `parity.yml`, 6 mutacij v `mutation_check.py`). **Po deployu workerja preveri** `/health` → `dispatch` (zima je zdaj med dispatchi) in da je crnivec.si naslednje jutro osvežen pred 7:00 po naši uri.
+- Test: `tools/test_zima_gate.py` (v `parity.yml`, 7 mutacij v `mutation_check.py`). **Po deployu workerja preveri** `/health` → `dispatch` (zima je zdaj med dispatchi) in da je crnivec.si naslednje jutro osvežen pred 7:00 po naši uri.
 
 ### Dimni test in mrtve povezave (1. 10. 2026)
 
