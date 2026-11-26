@@ -2789,6 +2789,19 @@ potrebuje boljšo ločljivost (opozorila, jutranje karte), mora teči na Cloudfl
 to meri vsak dan; vzroka (obremenitev repozitorija ali politika GitHuba) ni mogoče ločiti,
 zato redčenje urnikov ni bilo izvedeno brez dokaza, da pomaga — primerjaj tabelo čez čas.
 
+### Zima in crnivec.si: vrata, ponovni poskus in rdeč tek ob starih podatkih (26. 11. 2026)
+
+crnivec.si je bil 26. 11. dopoldne star dva dni: `zima-forecast.yml` ima en GitHubov cron (`50 5 * * *`), ki je zamujal 8–11 ur (tek 24. 11. ob 16:29, 25. 11. ob 16:08 UTC), in 25. 11. je Open-Meteo odpovedal
+(»handshake operation timed out«). `winter_engine.py` je obdržal stari `data/winter-data.json` in vrnil 0, tek je bil zelen, stran pa je pisala »Posodobljeno 24. 11. ob 17:29«. Zdaj:
+
+- **Ponovni poskusi:** `fetch_open_meteo_retry()` (4 poskusi, zamiki 5/15/45 s, isti vzorec kot `gobe_model.fetch_forecast`); `main()` jo kliče namesto `fetch_open_meteo()`. Po zadnjem izpadu ostane stari zapis (kot prej).
+- **Worker sproži zimo** (`_cronDispatchScheduledWorkflows`, 4:10/4:40/5:10/5:40 UTC, `force: "false"`). Štirikratni klic je varen zaradi **vrat**: posel `gate` v `zima-forecast.yml` (`tools/zima_gate.py check`) spusti skozi samo tek,
+  ki `generated_at` v `data/winter-data.json` danes (po lokalnem datumu) še ni premaknil. Ker se `generated_at` zapiše samo ob uspešnem klicu Open-Meteo, je naslednji termin (30 min pozneje) **hkrati ponovni poskus**;
+  pozni GitHubov cron isti dan ne naredi nič. Ročni zagon ima `force` privzeto `true` (obide vrata, kot pri dnevni zgodbi); dispatch brez `force: "false"` bi obšel vrata (preverja `test_dispatch_force.py`).
+- **Zadnji korak `require-fresh 30`** pobarva tek rdeče, če je `winter-data.json` starejši od 30 h (en zamujen dan še ni napaka, dva sta). Strani so do takrat že objavljene, s starimi podatki, označenimi z datumom.
+- Pri izpadu en tek ne obnovi `data/winter-data.json`, a vseeno sestavi in objavi strani (z datumom zadnje osvežitve); `/snegofili/` ima ločen klic Open-Meteo in deluje naprej.
+- Test: `tools/test_zima_gate.py` (v `parity.yml`, 6 mutacij v `mutation_check.py`). **Po deployu workerja preveri** `/health` → `dispatch` (zima je zdaj med dispatchi) in da je crnivec.si naslednje jutro osvežen pred 7:00 po naši uri.
+
 ### Dimni test in mrtve povezave (1. 10. 2026)
 
 - **`smoke-test.yml`** (po vsaki objavi Pages + dnevno): `tools/smoke_test.py` na ŽIVI strani

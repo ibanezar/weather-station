@@ -290,6 +290,9 @@ jobs:
       - name: Test dispatcha workflowov z vrati (force false)
         run: python3 tools/test_dispatch_force.py
 
+      - name: Test vrat zime, ponovnih poskusov Open-Meteo in svežine (zima_gate)
+        run: python3 tools/test_zima_gate.py
+
       - name: Test User-Agenta pri klicih workerja
         run: python3 tools/test_worker_ua.py
 
