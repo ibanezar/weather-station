@@ -107,6 +107,52 @@ check(r.status === 404, 'ponovno brisanje istega: 404');
 r = await call(env, '/zbor/izbrisi', 'POST', {}, OK);
 check(r.status === 404 && JSON.parse(store.get(KEY)).length === po.length, 'brisanje brez id ne izbriše ničesar');
 
+// ── Pohvala za pravočasnost (tip: "pravocasen"): brez minut, izgovora in kazni; ena na osebo, dan in dogodek ──
+const pohv = { tip: 'pravocasen', kdo: ' Miha  Tenor ', datum: danes, dogodek: 'vaja', minute: 99, zakaj: 'ne shrani', kazen: 'ne shrani', izostal: true };
+r = await call(env, '/zbor/zamuda', 'POST', pohv);
+check(r.status === 401, 'pohvala brez gesla: 401');
+const nP0 = JSON.parse(store.get(KEY)).length;
+r = await call(env, '/zbor/zamuda', 'POST', pohv, OK);
+let pz = JSON.parse(store.get(KEY));
+check(r.status === 200 && pz.length === nP0 + 1 && pz[0].tip === 'pravocasen' && pz[0].kdo === 'Miha Tenor' && pz[0].minute === 0
+  && pz[0].izostal === false && pz[0].zakaj === '' && !('kazen' in pz[0]), 'pohvala: minute 0, brez izgovora in kazni (ne verjame odjemalcu)');
+r = await call(env, '/zbor/zamuda', 'POST', { ...pohv, kdo: 'MIHA TENOR' }, OK);
+check(r.status === 200 && JSON.parse(store.get(KEY)).length === nP0 + 1, 'pohvala: dvojnik (osebe, dan, dogodek) se ne zapiše');
+r = await call(env, '/zbor/zamuda', 'POST', { ...pohv, dogodek: 'nastop' }, OK);
+check(JSON.parse(store.get(KEY)).length === nP0 + 2, 'pohvala: drug dogodek istega dne se zapiše');
+r = await call(env, '/zbor/zamuda', 'POST', { tip: 'pravocasen', kdo: ' ', datum: danes, dogodek: 'vaja' }, OK);
+check(r.status === 400, 'pohvala brez imena: 400');
+r = await call(env, '/zbor/zamuda', 'POST', { tip: 'pravocasen', kdo: 'X', datum: '2026-13-40', dogodek: 'vaja' }, OK);
+check(r.status === 400, 'pohvala z neveljavnim datumom: 400');
+r = await call(env, '/zbor/zamuda', 'POST', { tip: 'pravocasen', kdo: 'X', datum: danes, dogodek: 'pijanka' }, OK);
+check(r.status === 400, 'pohvala z neznanim dogodkom: 400');
+
+// ── Kazenska blagajna: POST /zbor/placilo ──
+const vsi = JSON.parse(store.get(KEY));
+const zam = vsi.find(i => i.tip !== 'pravocasen'), poh = vsi.find(i => i.tip === 'pravocasen');
+r = await call(env, '/zbor/placilo', 'POST', { ids: [zam.id], placano: true });
+check(r.status === 401 && !JSON.parse(store.get(KEY)).some(i => i.placano), 'plačilo brez gesla: 401, nič spremenjeno');
+r = await call(env, '/zbor/placilo', 'GET', undefined, OK);
+check(r.status === 405, 'plačilo z GET: 405');
+r = await call(env, '/zbor/placilo', 'POST', { ids: [zam.id], placano: 'da' }, OK);
+check(r.status === 400, 'plačilo: placano mora biti boolean');
+r = await call(env, '/zbor/placilo', 'POST', { ids: [], placano: true }, OK);
+check(r.status === 400, 'plačilo: prazen seznam ids: 400');
+r = await call(env, '/zbor/placilo', 'POST', { ids: Array.from({ length: 51 }, (_, i) => 'id' + i), placano: true }, OK);
+check(r.status === 400, 'plačilo: več kot 50 id-jev: 400');
+r = await call(env, '/zbor/placilo', 'POST', { ids: ['nepoznan'], placano: true }, OK);
+check(r.status === 404, 'plačilo neznanega zapisa: 404');
+r = await call(env, '/zbor/placilo', 'POST', { ids: [poh.id], placano: true }, OK);
+check(r.status === 404 && !JSON.parse(store.get(KEY)).find(i => i.id === poh.id).placano, 'pohvala ne more biti plačana');
+r = await call(env, '/zbor/placilo', 'POST', { ids: [zam.id, poh.id], placano: true }, OK);
+let po1 = JSON.parse(store.get(KEY)).find(i => i.id === zam.id);
+check(r.status === 200 && (await r.json()).spremenjenih === 1 && po1.placano === true && /^\d{4}-/.test(po1.placanoTs), 'plačilo: zapis označen, čas plačila zapisan');
+r = await call(env, '/zbor/placilo', 'POST', { ids: [zam.id], placano: false }, OK);
+po1 = JSON.parse(store.get(KEY)).find(i => i.id === zam.id);
+check(r.status === 200 && !('placano' in po1) && !('placanoTs' in po1), 'plačilo: preklic spet odpre kazen');
+r = await call(env, '/zbor/zamuda', 'POST', { ...veljaven, zakaj: 'odjemalec ne sme sam plačati', placano: true }, OK);
+check(!('placano' in JSON.parse(store.get(KEY))[0]), 'novi zapis ne more priti kot že plačan');
+
 // ── Poškodovana shramba se ne prepiše ──
 const dobra = store.get(KEY);
 store.set(KEY, '{pokvarjeno');
@@ -150,6 +196,37 @@ if (zvezdice) {
   check([1, 2, 3, 4, 5].every((i) => html.includes('<symbol id="gz' + i + '"')) && html.includes('"#gz"+(i%5+1)'), 'pet različnih polžev, i-ti v vrsti je i-ta stopnja');
   check(html.includes('gzDist(lvVse)') && html.includes('gzTotal(a.zv,a.lv)') && html.includes('GZ_RAZPON'), 'zid sramote: polži po stopnjah (skupno in pri vsakem pevcu)');
 }
+// ── Model na strani (blok MODEL): cenik, serije, tedni, dnevi. Izrezano iz prave strani, brez DOM-a ──
+const modelSrc = /\/\*MODEL:START\*\/([\s\S]*?)\/\*MODEL:END\*\//.exec(html);
+check(!!modelSrc, 'stran ima blok MODEL (čiste funkcije za cenik, serije in grafe)');
+if (modelSrc) {
+  const help = ['p2', 'ymd', 'parse'].map(n => new RegExp('function ' + n + '\\([^)]*\\)\\{[^\\n]*\\}').exec(html)?.[0] ?? '').join('\n');
+  const M = new Function('NBSP', help + modelSrc[1] + '; return {zvezdice,CENIK_C,cenaC,fmtE,jeZ,dolgC,serijaTocnosti,mondayOf,tedni,dnevi,ymd,parse};')(' ');
+  check(JSON.stringify(M.CENIK_C) === '[50,100,200,300,500]', 'cenik: 0,50 / 1 / 2 / 3 / 5 €');
+  check(M.cenaC(3, false) === 50 && M.cenaC(12, false) === 100 && M.cenaC(20, false) === 200 && M.cenaC(45, false) === 300 && M.cenaC(0, true) === 500 && M.cenaC(120, false) === 500, 'cena sledi polžu (duh vaje in čez 60 min = 5 €)');
+  check(M.fmtE(150) === '1,50 €' && M.fmtE(500) === '5,00 €' && M.fmtE(50) === '0,50 €', 'denar: decimalna vejica, nelomljiv presledek pred €');
+  check(M.dolgC({ minute: 20, placano: true }) === 0 && M.dolgC({ minute: 20 }) === 200 && M.dolgC({ tip: 'pravocasen', minute: 0 }) === 0, 'dolg: plačana kazen in pohvala ne štejeta');
+  // serije pravočasnosti: od zadnje vaje nazaj do prve zamude; druge vrste dogodkov ne štejejo
+  const Z = (kdo, datum, extra = {}) => ({ kdo, datum, dogodek: 'vaja', minute: 5, ...extra }), P = (kdo, datum, extra = {}) => ({ kdo, datum, dogodek: 'vaja', minute: 0, tip: 'pravocasen', ...extra });
+  const ser = Object.fromEntries(M.serijaTocnosti([
+    P('Anže', '2026-11-03'), P('Anže', '2026-11-10'), Z('Anže', '2026-10-27'), P('Anže', '2026-10-20'),
+    Z('Miha', '2026-11-10'), P('Miha', '2026-11-03'),
+    P('Tone', '2026-11-10', { dogodek: 'nastop' }), P('Tone', '2026-11-03'),
+    P('Peter', '2026-11-10'), Z('Peter', '2026-11-10'),
+  ]).map(x => [x.ime, x.serija]));
+  check(ser['Anže'] === 2 && ser['Miha'] === 0 && ser['Tone'] === 1 && ser['Peter'] === 0, 'serija pravočasnosti: zamuda jo prekine, nastop se ne šteje, zamuda istega dne zmaga');
+  // tedni: pon–ned, 12 tednov, tekoči zadnji; točke = minute + 60 za duha; pohvale ne štejejo
+  const danesD = new Date(2026, 10, 26);   // četrtek 26. 11. 2026
+  const t = M.tedni([Z('A', '2026-11-23', { minute: 20 }), Z('A', '2026-11-29', { minute: 10 }), Z('B', '2026-11-22', { minute: 7 }), Z('C', '2026-11-25', { minute: 0, izostal: true }), P('D', '2026-11-24')], danesD, 12);
+  check(t.length === 12 && t[11].start === '2026-11-23' && t[10].start === '2026-11-16' && t[0].start === '2026-09-07', 'tedni: 12 tednov, začetek ob ponedeljkih, tekoči zadnji');
+  check(t[11].tocke === 90 && t[11].n === 3 && t[10].tocke === 7 && t[10].n === 1, 'tedni: nedelja spada v prejšnji teden, duh šteje 60, pohvala ne šteje');
+  const dn = M.dnevi([Z('A', '2026-11-20', { minute: 3 }), Z('B', '2026-11-20', { minute: 50 }), P('C', '2026-11-20'), P('C', '2026-11-21')]);
+  check(dn['2026-11-20'].lvl === 4 && dn['2026-11-20'].n === 2 && dn['2026-11-20'].p === 1 && dn['2026-11-21'].lvl === 0 && dn['2026-11-21'].p === 1, 'koledar: najhujši polž dneva, pohvale posebej');
+}
+check(/data-tip="pravocasen"/.test(html) && /tip:"pravocasen"/.test(html), 'stran ima vnos pravočasnosti');
+check(/api\("\/zbor\/placilo"/.test(html) && /id="p-blagajna"/.test(html), 'stran ima kazensko blagajno');
+check(/prefers-reduced-motion:no-preference/.test(html) && !/\.anim [^{]*\{animation:[^}]*infinite[^}]*\}[^@]*@media/.test(html), 'animacije polžev so samo ob dovoljenem gibanju');
+check(['grafTedni', 'grafKoledar', 'grafPevci', 'podij', 'naslovi'].every(f => new RegExp('function ' + f + '\\(').test(html)), 'zid: grafi, podij in naslovi');
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'reciskipobi', 'manifest.json'), 'utf8'));
 check(manifest.scope === '/reciskipobi/' && manifest.start_url === '/reciskipobi/' && manifest.display === 'standalone', 'manifest ima lasten obseg /reciskipobi/');
 check(manifest.icons.every(i => i.src === 'icon.svg' || fs.existsSync(path.join(ROOT, 'reciskipobi', i.src))), 'ikone iz manifesta obstajajo');
