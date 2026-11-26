@@ -147,6 +147,7 @@ if (zvezdice) {
   check(zvezdice(0, true) === 5, 'duh vaje dobi 5 polžev');
   const maxZv = Math.max(...[1, 10, 20, 45, 90].map(m => zvezdice(m, false)));
   check(maxZv === 5 && /ZVEZDE_IME=\[("[^"]+",?){5}\]/.test(html), 'pet imen stopenj, nobenih zajcev');
+  check([1, 2, 3, 4, 5].every((i) => html.includes('<symbol id="gz' + i + '"')) && html.includes('"#gz"+(i%5+1)'), 'pet različnih polžev, i-ti v vrsti je i-ta stopnja');
 }
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'reciskipobi', 'manifest.json'), 'utf8'));
 check(manifest.scope === '/reciskipobi/' && manifest.start_url === '/reciskipobi/' && manifest.display === 'standalone', 'manifest ima lasten obseg /reciskipobi/');
