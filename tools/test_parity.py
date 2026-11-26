@@ -699,7 +699,8 @@ def hero_ikona():
         if coords:
             return {"expr": "getCondition({lat:46.326,lon:14.921,metric:{precipRate:%s,solarRadiation:%s}},new Date(Date.UTC(2026,9,29,%d,0,0))).label" % (pr, sr, h - 1)}
         return {"expr": "getCondition({metric:{precipRate:%s,solarRadiation:%s}},new Date(2026,9,29,%d,0,0)).label" % (pr, sr, h)}
-    labels = js("app.js", ["getCondition", "_isNightAt", "sunTimes"], [call(*c) for c in cases], prelude="var _lastBriefObs=null;")
+    labels = js("app.js", ["getCondition", "_isNightAt", "sunTimes", "precipKind", "PRECIP_SNOW_MAX_C", "PRECIP_RAIN_MIN_C"],
+                [call(*c) for c in cases], prelude="var _lastBriefObs=null;")
     icons = js("app.js", ["_COND_ICON"], [{"expr": "_COND_ICON"}])[0]
     for (pr, sr, h, coords), lab in zip(cases, labels):
         obs = {"obsTimeLocal": "2026-10-29 %02d:00:00" % h, "metric": {"precipRate": pr, "solarRadiation": sr}}
@@ -711,25 +712,97 @@ def hero_ikona():
     i19 = cases.index((0, 0, 19, True)); i19n = cases.index((0, 0, 19, False))
     check(labels[i19] == "Jasna noč" and labels[i19n] == "Oblačno", "hero ikona: 19. ura s koordinatami je noč", f"{labels[i19]} / {labels[i19n]}")
 
+    # Padavine ob ledišču so sneg ali dež s snegom, ne dež (26. 11. 2026: sneži, stran je pisala »Dež« in »Možna megla«).
+    # Statična oznaka (Python) in JS morata dati isto, tudi na mejah 0,5 in 2,5 °C ter brez temperature.
+    tc = [(pr, t) for pr in (0, 0.4, 3, 8) for t in (None, -3, 0, 0.5, 0.6, 1.5, 2.4, 2.5, 6)]
+    jl = js("app.js", ["getCondition", "_isNightAt", "sunTimes", "precipKind", "PRECIP_SNOW_MAX_C", "PRECIP_RAIN_MIN_C"],
+            [{"expr": "getCondition({metric:{precipRate:%s,temp:%s,solarRadiation:500}},new Date(2026,10,26,12,0,0)).label" % (pr, "undefined" if t is None else t)}
+             for pr, t in tc], prelude="var _lastBriefObs=null;")
+    for (pr, t), lab in zip(tc, jl):
+        obs = {"obsTimeLocal": "2026-11-26 12:00:00", "metric": {"precipRate": pr, "solarRadiation": 500}}
+        if t is not None:
+            obs["metric"]["temp"] = t
+        check(ic.hero_condition_label(obs) == lab, "hero ikona: vrsta padavin po temperaturi", f"pr={pr} t={t}: py={ic.hero_condition_label(obs)} js={lab}")
+    want = {(0.4, 0): "Sneženje", (0.4, 0.5): "Sneženje", (0.4, 0.6): "Dež s snegom", (0.4, 2.4): "Dež s snegom", (0.4, 2.5): "Rahel dež", (0.4, None): "Rahel dež"}
+    for k, w in want.items():
+        got = jl[tc.index(k)]
+        check(got == w, "hero ikona: mejne temperature padavin", f"{k}: {got} != {w}")
+    # brez padavin se oznaka od temperature ne spremeni
+    check(jl[tc.index((0, 0))] == "Pretežno sončno", "hero ikona: brez padavin ni snega", jl[tc.index((0, 0))])
+    # radar nad postajo (radarWet) potrdi sneženje, ko dežemer ne zazna ničesar; brez ledišča radar ne spremeni ničesar
+    rw = js("app.js", ["getCondition", "_isNightAt", "sunTimes", "precipKind", "PRECIP_SNOW_MAX_C", "PRECIP_RAIN_MIN_C"],
+            [{"expr": "getCondition({metric:{precipRate:0,temp:0.1,solarRadiation:0}},new Date(2026,10,26,12,0,0),true).label"},
+             {"expr": "getCondition({metric:{precipRate:0,temp:1.5,solarRadiation:0}},new Date(2026,10,26,12,0,0),true).label"},
+             {"expr": "getCondition({metric:{precipRate:0,temp:6,solarRadiation:0}},new Date(2026,10,26,12,0,0),true).label"},
+             {"expr": "getCondition({metric:{precipRate:0,temp:0.1,solarRadiation:0}},new Date(2026,10,26,12,0,0),false).label"}],
+            prelude="var _lastBriefObs=null;")
+    check(rw == ["Sneženje", "Dež s snegom", "Oblačno", "Oblačno"], "hero ikona: radar potrdi sneženje samo ob ledišču", str(rw))
+
 
 @test
 def hero_stavek_danes_ali_24_ur():
     """Stavek pod »Danes«: zvečer je najtoplejša ura že jutri (oznaka na grafu »jutri 13:00«), zato stavek ne sme trditi »Danes do 6 °C«
     ob oznaki 8,1 °C (4. 11. 2026, audit točka 10). Ura teče od danes 20:00 naprej, vrednost je prob (%) in temp."""
-    pre = ("var _forecastHours=[];function mk(day,h,temp,prob){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+day);"
-           "d.setHours(h);return {t:d,temp:temp,prob:prob||0};}")
+    pre = ("var _forecastHours=[];function mk(day,h,temp,prob,wmo){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+day);"
+           "d.setHours(h);return {t:d,temp:temp,prob:prob||0,wmo:wmo};}")
     def run(rows):
-        body = ";".join("_forecastHours.push(mk(%d,%d,%s,%s))" % r for r in rows)
+        # vrstica: (dan, ura, temperatura, verjetnost[, koda vremena])
+        body = ";".join("_forecastHours.push(mk(%d,%d,%s,%s,%s))" % (r[0], r[1], r[2], r[3], r[4] if len(r) > 4 else "undefined") for r in rows)
         return {"expr": "(function(){_forecastHours=[];%s;return forecastPhrase();})()" % body}
     eve = [(0, h, 6, 0) for h in (20, 21, 22, 23)] + [(1, h, 3 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(0, 24)]
     eve_rain = [(0, 20, 6, 0), (0, 21, 6, 0), (1, 1, 5, 0), (1, 9, 7, 60), (1, 13, 8.1, 60)]
     morning = [(0, h, 4 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(8, 24)] + [(1, h, 3, 0) for h in range(0, 8)]
     late = [(1, h, 3 + (h if h < 13 else 26 - h) * 0.4, 0) for h in range(0, 24)]  # po 23:00 današnjih ur ni več
-    r = js("app.js", ["forecastPhrase"], [run(eve), run(eve_rain), run(morning), run(late)], prelude=pre)
+    # padavine ob ledišču: beseda je »sneg« ali »dež s snegom«, ne »dež« (26. 11. 2026); koda vremena za sneg ima prednost pred temperaturo
+    snow_t = [(0, 5, 0.2, 0), (0, 9, 0.4, 70)]
+    sleet_t = [(0, 5, 1.0, 0), (0, 9, 1.5, 70)]
+    snow_wmo = [(0, 5, 3.0, 0), (0, 9, 3.0, 70, 73)]
+    rain_t = [(0, 5, 3.0, 0), (0, 9, 3.0, 70, 61)]
+    r = js("app.js", ["forecastPhrase", "_QA_SNOW", "precipKind", "PRECIP_SNOW_MAX_C", "PRECIP_RAIN_MIN_C"],
+           [run(eve), run(eve_rain), run(morning), run(late), run(snow_t), run(sleet_t), run(snow_wmo), run(rain_t)], prelude=pre)
+    check("dopoldne možnost snega." in r[4], "stavek: ob ledišču sneg", r[4])
+    check("dopoldne možnost dežja s snegom." in r[5], "stavek: dež s snegom", r[5])
+    check("dopoldne možnost snega." in r[6], "stavek: koda vremena za sneg ima prednost", r[6])
+    check("dopoldne možnost dežja." in r[7], "stavek: pri 3 °C ostane dež", r[7])
     check(r[0].startswith("V naslednjih 24 urah do približno 8 °C"), "zvečer vrh jutri: stavek govori o 24 urah", r[0])
     check("jutri dopoldne možnost dežja" in r[1], "dež jutri ima besedo »jutri«", r[1])
     check(r[2].startswith("Danes do približno 9 °C"), "zjutraj vrh danes: stavek ostane »Danes«", r[2])
     check(r[3].startswith("V naslednjih 24 urah do približno 8 °C"), "brez današnjih ur (po 23:00) stavek ne izgine", r[3])
+
+
+@test
+def precip_vrsta():
+    """Vrsta padavin po temperaturi zraka je na treh mestih: precipKind() v app.js (hero, nowcast, stavek), precip_kind() v
+    inject_current_weather.py (statični izris) in _radVrsta() v worker.js (nowcast, push). Radar ne loči snega od dežja; 26. 11. 2026
+    je ob 0,1 °C in sneženju kartica pisala »Nevihta« in »Nad vasjo dežuje«. Ista meja kot hitro vprašanje (_qaRainRun): 0,5 in 2,5 °C."""
+    import inject_current_weather as ic
+    temps = [None, -10, -0.1, 0, 0.1, 0.4, 0.5, 0.51, 1, 2, 2.4, 2.49, 2.5, 2.51, 3, 10, float("nan")]
+    jl = ", ".join("undefined" if t is None else ("NaN" if t != t else repr(t)) for t in temps)
+    app = js("app.js", ["precipKind", "PRECIP_SNOW_MAX_C", "PRECIP_RAIN_MIN_C"], [{"expr": "[%s].map(precipKind)" % jl}])[0]
+    wk = js("worker.js", ["_radVrsta", "NC_SNOW_MAX_C", "NC_RAIN_MIN_C"], [{"expr": "[%s].map(_radVrsta)" % jl}])[0]
+    to_app = {"dez": "rain", "dez-sneg": "sleet", "sneg": "snow"}
+    for t, a, w in zip(temps, app, wk):
+        check(to_app[w] == a, "vrsta padavin: worker = app.js", f"t={t}: worker={w} app={a}")
+        check(ic.precip_kind(None if t != t else t) == a, "vrsta padavin: Python = app.js", f"t={t}: py={ic.precip_kind(t)} app={a}")
+    exp = {0: "snow", 0.5: "snow", 0.51: "sleet", 2.49: "sleet", 2.5: "rain", None: "rain"}
+    for t, w in exp.items():
+        check(app[temps.index(t)] == w, "vrsta padavin: meje", f"t={t}: {app[temps.index(t)]} != {w}")
+    # skladnost z deležem snega pri hitrem vprašanju: (2,5 − T) / 2, 0,5 °C je zadnja stopnja polnega snega, 2,5 °C prva čistega dežja
+    check(abs((2.5 - 0.5) / 2 - 1.0) < 1e-12 and abs((2.5 - 2.5) / 2) < 1e-12, "vrsta padavin: meja = _qaRainRun")
+
+
+@test
+def hero_rosisce_in_dez_s_snegom():
+    """»Zelo suho« pri 99 % vlage (26. 11. 2026, 0,1 °C, sneži): lestvica rosišča je poletna, pod 5 °C rosišča odloča relativna vlaga.
+    Dež s snegom ima svojo ikono, ne glede na stanje ozadja (noč, dež, megla)."""
+    d = js("app.js", ["dewLabel"], [{"expr": "[dewLabel(-0.1,99),dewLabel(-0.1,95),dewLabel(-0.1,90),dewLabel(-0.1,89),dewLabel(-0.1),dewLabel(-6,45),"
+                                      "dewLabel(3,92),dewLabel(8,99),dewLabel(12,50),dewLabel(22,80)]"}])[0]
+    check(d == ["Zelo vlažno", "Vlažno", "Vlažno", "Zelo suho", "Zelo suho", "Zelo suho", "Vlažno", "Suho", "Prijetno", "Soparno"],
+          "rosišče: oznaka ob visoki vlagi", str(d))
+    names = ["sunTimes", "_isNightAt", "_WXCOND_ICON", "_WXCOND_ICON_NIGHT", "_COND_ICON", "_condIconName"]
+    r = js("app.js", names, [{"expr": "[_condIconName('Dež s snegom','night',true),_condIconName('Dež s snegom','rain',false),_condIconName('Dež s snegom','fog',false),"
+                                     "_condIconName('Sneženje','snow',false),_condIconName('Dež','rain',false)]"}], prelude="var _lastBriefObs=null;")[0]
+    check(r == ["sleet", "sleet", "sleet", "snow", "overcast-rain"], "ikona: dež s snegom ima prednost pred ozadjem", str(r))
 
 
 @test

@@ -250,7 +250,15 @@ HERO_ICON_BY_LABEL = {
     "Oblačno": "overcast", "Jasna noč": "clear-night",
     "Oblačna noč": "overcast-night", "Rahel dež": "drizzle", "Dež": "rain",
     "Močan dež": "overcast-rain",
+    "Sneženje": "snow", "Dež s snegom": "sleet",
 }
+
+
+def precip_kind(t):
+    """Vrsta padavin po temperaturi zraka: do 0,5 °C sneg, od 2,5 °C dež, vmes dež s snegom (kopija precipKind() v app.js)."""
+    if t is None:
+        return "rain"
+    return "snow" if t <= 0.5 else "sleet" if t < 2.5 else "rain"
 
 
 def sun_times_utc(lat, lon, d):
@@ -291,6 +299,9 @@ def hero_condition_label(obs):
     pr = m.get("precipRate") or 0
     sr = m.get("solarRadiation") or obs.get("solarRadiation") or 0
     night = hero_is_night(obs)
+    pk = precip_kind(m.get("temp"))
+    if pk != "rain" and pr > 0:   # radar nad postajo (radarWet) tu ni znan: JS po nalaganju oznako po potrebi popravi
+        return "Sneženje" if pk == "snow" else "Dež s snegom"
     if pr > 7: return "Močan dež"
     if pr > 2.5: return "Dež"
     if pr > 0: return "Rahel dež"
