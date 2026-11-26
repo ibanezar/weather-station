@@ -510,6 +510,28 @@ def compute_hourly_48h(hourly, times, idx_now):
     }
 
 
+OM_RETRY_DELAYS_S = (5, 15, 45)   # 4 poskusi skupaj; en sam timeout ne sme pustiti strani na starih podatkih
+
+
+def fetch_open_meteo_retry(sleep=None):
+    """fetch_open_meteo() s ponovnimi poskusi (isti vzorec kot gobe_model.fetch_forecast). 25. 11. 2026 je en sam
+    »handshake operation timed out« pustil crnivec.si in /zima/ en dan na podatkih z 24. 11. Po zadnjem poskusu
+    vrže zadnjo napako naprej (main() jo ujame in obdrži stari winter-data.json)."""
+    import time
+    sleep = sleep or time.sleep
+    last = None
+    for i in range(len(OM_RETRY_DELAYS_S) + 1):
+        try:
+            return fetch_open_meteo()
+        except Exception as e:  # URLError, TimeoutError, JSONDecodeError, …
+            last = e
+            if i < len(OM_RETRY_DELAYS_S):
+                d = OM_RETRY_DELAYS_S[i]
+                log(f"Open-Meteo: poskus {i + 1}/{len(OM_RETRY_DELAYS_S) + 1} ni uspel ({e}) -- čakam {d} s")
+                sleep(d)
+    raise last
+
+
 def fetch_open_meteo():
     hourly_vars = ["temperature_2m", "dew_point_2m", "cloud_cover", "wind_speed_10m",
                    "precipitation", "freezing_level_height", "precipitation_probability"]
@@ -1276,8 +1298,10 @@ def main():
     today_iso = now_local.date().isoformat()
 
     try:
-        om = fetch_open_meteo()
+        om = fetch_open_meteo_retry()
     except Exception as e:
+        log(f"::warning title=Open-Meteo ni odgovoril::{e} -- puščam star data/winter-data.json (naslednji termin poskusi znova, "
+            f"zadnji korak workflowa javi napako, če so podatki starejši od 30 h)")
         log(f"✗ Open-Meteo ni uspel: {e} -- puščam star data/winter-data.json.")
         return 0 if not dry else 1
 

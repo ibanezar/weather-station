@@ -20,13 +20,40 @@ name: Zima
 # objavi na Cloudflare (wrangler-crnivec.toml). Objava je tu in ne samo v
 # deploy-crnivec.yml, ker push z GITHUB_TOKEN ne sproži drugih workflowov.
 
+# Termin (26. 11. 2026): GitHubov cron zamuja 8–11 ur, zato crnivec.si dopoldne ni bil svež. Zimo sproži tudi Cloudflarov cron
+# (worker.js, _cronDispatchScheduledWorkflows: 4:10/4:40/5:10/5:40 UTC, `force: "false"`). Posel `gate` (tools/zima_gate.py)
+# spusti skozi samo tek, ki podatkov danes še ni osvežil; ker se `generated_at` v data/winter-data.json zapiše samo ob uspešnem
+# klicu Open-Meteo, je naslednji termin hkrati ponovni poskus. Ročni zagon ima privzeto force=true (obide vrata).
+# Zadnji korak (`require-fresh`) tek pobarva rdeče, če so podatki kljub temu starejši od 30 h: zelen tek s starimi podatki je
+# 25. 11. 2026 skril izpad (»handshake operation timed out«).
+
 on:
   schedule:
     - cron: '50 5 * * *'   # 5:50 UTC daily, po agrometeo-forecast.yml
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'true = sestavi in objavi tudi, če so zimski podatki danes že osveženi'
+        required: false
+        default: 'true'
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Ali so zimski podatki danes že osveženi?
+        id: gate
+        run: |
+          python3 tools/zima_gate.py check \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.force == 'true') && '--force' || '' }}
+
   zima:
+    needs: gate
+    if: needs.gate.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -134,3 +161,7 @@ jobs:
               print(f"IndexNow napaka {e.code}: {e.read().decode('utf-8', 'replace')[:300]}", file=sys.stderr)
               sys.exit(1)
           PYEOF
+
+      - name: Preveri svežino zimskih podatkov (rdeč tek, če je Open-Meteo izpadel za več kot dan)
+        # Zadnji korak: strani so že objavljene (tudi s starimi podatki, označenimi z datumom), tek pa naj ne izgleda zdrav.
+        run: python3 tools/zima_gate.py require-fresh 30

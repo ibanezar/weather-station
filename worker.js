@@ -3817,6 +3817,11 @@ async function _cronDispatchScheduledWorkflows(env) {
     // zunaj okna 5:00–12:00 (igra_gate.py), zato nivo od 14. 11. ni nastal. Okna NE širimo (kdor je igral zjutraj, ne sme zvečer dobiti drugega stropa),
     // ampak ga sprožimo v oknu, enako kot zgodbo. `force: "false"` je OBVEZEN (privzeto je "true" in obide okno); vrata dovolijo samo en nivo na dan.
     "padalci-forecast.yml": await _cronDispatchGithubWorkflow(env, "padalci-forecast.yml", { force: "false" }),
+    // Zima + crnivec.si (26. 11. 2026): zima-forecast.yml ima en GitHubov cron (5:50 UTC), ki zamuja 8–11 ur, zato je bil crnivec.si
+    // dopoldne star do 24 ur; ko je 25. 11. Open-Meteo izpadel, je ostal dva dni na podatkih z 24. 11. Posel `gate` (tools/zima_gate.py)
+    // spusti skozi samo tek, ki podatkov danes še ni osvežil, zato je štirikratni klic varen in hkrati ponovni poskus.
+    // `force: "false"` je OBVEZEN (privzeto je "true" in obide vrata).
+    "zima-forecast.yml": await _cronDispatchGithubWorkflow(env, "zima-forecast.yml", { force: "false" }),
   };
   const r2 = env?.PHOTOS_R2;
   if (r2) {
