@@ -151,7 +151,7 @@ button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px
 .e-foot{display:flex;justify-content:flex-end;margin-top:6px}
 .empty{text-align:center;color:var(--mut);padding:26px 8px}
 
-/* črne pike (narisane kot zvezdice) */
+/* polži (ocena zamude) */
 .gz{display:inline-flex;align-items:center;gap:1px;vertical-align:middle}
 .gz svg{width:19px;height:19px;flex:none;overflow:visible}
 .gz-tot{display:inline-flex;align-items:center;gap:5px;color:var(--mut);font-size:.88rem}
@@ -175,13 +175,16 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
 </style>
 </head>
 <body>
-<!-- Črna pika v obliki grde zvezdice: nesimetrična, z razpoko in plesnijo. Narisana enkrat, uporabljena z <use>. -->
+<!-- Polž (ocena zamude): počasen, gleda v levo. Narisan enkrat, uporabljen z <use>. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <symbol id="gz" viewBox="0 0 24 24">
-    <path d="M12 1.5 L14.6 8.4 L22.5 9.2 L16.4 13.9 L18.6 22.2 L11.6 17.6 L4.4 22.6 L7.4 14.2 L1.2 8.9 L9.2 8.2 Z" fill="#8f9a2e" stroke="#1f2508" stroke-width="1.2" stroke-linejoin="round"/>
-    <path d="M12 5 L11 11 L13.2 14.4" fill="none" stroke="#1f2508" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="15.4" cy="14.4" r="1.7" fill="#5d6a1c"/>
-    <circle cx="8.6" cy="11.2" r="1" fill="#5d6a1c"/>
+    <rect x="1.5" y="17" width="21" height="4.2" rx="2.1" fill="#8f9a2e" stroke="#1f2508" stroke-width="1"/>
+    <rect x="3.5" y="10.4" width="2.8" height="8" rx="1.4" fill="#8f9a2e" stroke="#1f2508" stroke-width="1"/>
+    <path d="M4.3 11 L3 7 M5.6 11 L7 7" fill="none" stroke="#1f2508" stroke-width="1.1" stroke-linecap="round"/>
+    <circle cx="3" cy="6.6" r="1" fill="#c3cc55" stroke="#1f2508" stroke-width=".6"/>
+    <circle cx="7" cy="6.6" r="1" fill="#c3cc55" stroke="#1f2508" stroke-width=".6"/>
+    <circle cx="14.5" cy="11" r="6.8" fill="#5d6a1c" stroke="#1f2508" stroke-width="1"/>
+    <path d="M14.5 11 a1 1 0 0 1 2 0 a2.6 2.6 0 0 1 -5.2 0 a3.6 3.6 0 0 1 7.2 0 a4.6 4.6 0 0 1 -9.2 0" fill="none" stroke="#c3cc55" stroke-width="1.1" stroke-linecap="round"/>
   </symbol>
 </svg>
 <div class="staff" aria-hidden="true"></div>
@@ -426,7 +429,7 @@ var KAZNI=[
 ];
 var NAZIVI=[[0,"Začetnik v zamujanju"],[31,"Gost zadnje vrste"],[91,"Mojster zamude"],[181,"Lord zamud"],[361,"Cesar zadnjega akorda"]];
 
-// Črne pike (narisane kot grde zvezdice): samo slabe, od 1 do 5, belih ni. Izpeljane iz minut, zato veljajo tudi za stare zapise.
+// Polži (ocena zamude): samo počasni, od 1 do 5, zajcev ni. Izpeljane iz minut, zato veljajo tudi za stare zapise.
 // Mejo spreminjaj samo tu (test_zbor.mjs jo preverja).
 function zvezdice(min,izostal){
   if(izostal||min>60)return 5;
@@ -436,7 +439,7 @@ function zvezdice(min,izostal){
   return 1;
 }
 var ZVEZDE_IME=["Še gre","Neprijetno","Sramotno","Katastrofalno","Zgodovinsko"];
-var GZ_PL=["črna pika","črni piki","črne pike","črnih pik"];
+var GZ_PL=["polž","polža","polži","polžev"];
 var QUIPS=[
   "Do pet minut? To je akademski četrt. Zapisano, a le s pol obsojanja.",
   "Četrt ure. Zborovodja je že dvakrat pogledal na uro in enkrat na vrata.",
@@ -461,19 +464,19 @@ function dec(x,d){return x.toFixed(d).replace(".",",");}
 function dateLabel(s){var d=parse(s);return ["ned.","pon.","tor.","sre.","čet.","pet.","sob."][d.getDay()]+" "+d.getDate()+". "+(d.getMonth()+1)+".";}
 function pick(a,avoid){var x,i=0;do{x=a[Math.floor(Math.random()*a.length)];}while(x===avoid&&a.length>1&&++i<10);return x;}
 function naziv(p){var r=NAZIVI[0][1];NAZIVI.forEach(function(x){if(p>=x[0])r=x[1];});return r;}
-var SVGNS="http://www.w3.org/2000/svg", TILT=[-12,9,-5,14,-9];
+var SVGNS="http://www.w3.org/2000/svg", TILT=[-4,3,-2,5,-3];
 function gzSvg(i){
   var s=document.createElementNS(SVGNS,"svg"),u=document.createElementNS(SVGNS,"use");
   s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");s.style.transform="rotate("+TILT[i%TILT.length]+"deg)";
   u.setAttribute("href","#gz");s.appendChild(u);return s;
 }
-// n črnih pik (zvezdic) v vrsti (vsaka malo drugače nagnjena)
+// n polžev v vrsti (vsak malo drugače nagnjen)
 function gzEl(n){
   var w=el("span","gz");w.setAttribute("role","img");w.setAttribute("aria-label",pl(n,GZ_PL));
   for(var i=0;i<n;i++)w.appendChild(gzSvg(i));
   return w;
 }
-// ena zvezdica + skupno število (za seštevek pri pevcu)
+// en polž + skupno število (za seštevek pri pevcu)
 function gzTotal(n){
   var w=el("span","gz-tot");w.appendChild(gzSvg(1));w.appendChild(document.createTextNode(pl(n,GZ_PL)));
   return w;
@@ -744,7 +747,7 @@ function renderZid(){
     (s.cur===0?"Danes je že kdo zamudil. ":"")+"Rekord: "+pl(s.rec,["dan","dneva","dnevi","dni"])+".",true));
   var zvSkupaj=vrsta.reduce(function(s,a){return s+a.zv;},0);
   var zvNaj=vrsta.slice().sort(function(a,b){return b.zv-a.zv||a.ime.localeCompare(b.ime,"sl");})[0];
-  tiles.appendChild(tile("Črne pike",String(zvSkupaj),"Največ jih ima "+zvNaj.ime+" ("+zvNaj.zv+"). Belih ni.",true));
+  tiles.appendChild(tile("Polži",String(zvSkupaj),"Največ jih ima "+zvNaj.ime+" ("+zvNaj.zv+"). Zajcev ni.",true));
   var naj=list.reduce(function(a,z){return(!a||(z.minute||0)>(a.minute||0))?z:a;},null);
   if(naj&&naj.minute)tiles.appendChild(tile("Najdaljša zamuda",naj.kdo+", "+fmtMin(naj.minute),"»"+naj.zakaj+"«",true));
   root.appendChild(tiles);
@@ -770,7 +773,7 @@ function renderZid(){
     });
     c.appendChild(ol);root.appendChild(c);
   }
-  root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje. Črne pike (v obliki zvezdic): do 5 min 1, do 15 min 2, do 30 min 3, do 60 min 4, čez 60 min ali duh vaje 5. Belih pik ne delimo."));
+  root.appendChild(el("p","hint","Razvrstitev po točkah sramote: minute zamude + 60 za vsak duh vaje. Polži: do 5 min 1, do 15 min 2, do 30 min 3, do 60 min 4, čez 60 min ali duh vaje 5. Zajcev ne delimo."));
 }
 document.querySelectorAll(".seg2 button").forEach(function(b){
   b.addEventListener("click",function(){
