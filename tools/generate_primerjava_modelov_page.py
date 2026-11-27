@@ -3,9 +3,11 @@
 tools/generate_primerjava_modelov_page.py — /primerjava-modelov/
 
 Napoved več modelov za Rečico ob Savinji drugo nad drugo: ICON-D2, ICON-EU,
-ECMWF IFS (Open-Meteo) in AROME Avstrija z ansamblom (GeoSphere, 2,5 km).
+ECMWF IFS (Open-Meteo) in C-LAEF AlpeAdria z ansamblom (GeoSphere, 1 km).
 Zamisel je Neurje.si-jeva primerjava modelov (ICON-D2, ICON-EU, ALADIN/SI,
 C-LAEF), le da je tu ena točka — naša dolina — in ne karta Slovenije.
+Od 4. 11. 2026 je GeoSphere ugasnil AROME 2,5 km (`nwp-v1-1h-2500m`); nadomešča ga
+C-LAEF AlpeAdria 1 km (`nwp-v2-1h-1km`, `ensemble-v2-1h-1km`).
 
 Podatki se nalagajo **v brskalniku** (oba vira imata CORS), ker se modelski
 teki menjajo čez dan: statičen posnetek ob 7:00 bi do popoldneva kazal stari
@@ -42,7 +44,7 @@ def slo_poly_js():
 URL = "/primerjava-modelov/"
 
 # Modeli, ki jih stran kaže, in njihov razločljiv par v arhivu /test-napovedi/
-# (ICON-D2 in AROME tam nista: arhiv za njiju ne obstaja, zato sta brez ocene).
+# (ICON-D2 in C-LAEF tam nista: arhiv za njiju ne obstaja, zato sta brez ocene).
 VERIFIED = [("ecmwf_ifs025", "ECMWF IFS"), ("icon_seamless", "ICON (best_match na ICON)")]
 
 
@@ -64,7 +66,7 @@ def verified_table():
     n = d.get("n_compared_days") or d.get("n_obs_days", 0)
     return f'''  <h2 id="kdo-drzi">Kateri model je doslej držal v dolini?</h2>
   <p class="archive-intro">Povprečna napaka napovedi za jutri (D+1) proti meritvi postaje IREICA1,
-  {n} razrešenih dni. ICON-D2 in AROME v tem arhivu še nista, zato za njiju ocene ni, dokler je ne naberemo sproti.
+  {n} razrešenih dni. ICON-D2 in C-LAEF v tem arhivu še nista, zato za njiju ocene ni, dokler je ne naberemo sproti.
   Celotna lestvica: <a href="/test-napovedi/" style="color:var(--blue)">test napovedi</a>.</p>
   <div class="table-scroll" tabindex="0"><table class="stats">
     <tr><th>Model</th><th>Tmax</th><th>Tmin</th></tr>
@@ -77,12 +79,14 @@ FAQ = [
      "Karta pokaže, kje bo kaj padlo, ne pove pa, kateremu modelu verjeti v naši ozki dolini. Zato tu "
      "primerjamo modele za eno točko — Rečico ob Savinji — po urah. Kjer se modeli razhajajo, je napoved "
      "negotova; kjer se ujemajo, je zaupanje večje."),
-    ("Kaj je AROME in zakaj ne C-LAEF 1 km?",
-     "AROME je model avstrijske službe GeoSphere Austria z mrežo 2,5 km, ki pokriva tudi Slovenijo. Njihov "
-     "ansambel na isti mreži rišemo kot pas negotovosti (10.–90. percentil). Različica C-LAEF z mrežo 1 km, "
-     "ki jo kaže Neurje.si, ni javno dostopna kot točkovna napoved, zato je tu ni."),
+    ("Kaj je C-LAEF AlpeAdria?",
+     "C-LAEF AlpeAdria je model avstrijske službe GeoSphere Austria, ki ga skupaj upravljajo še ARSO in "
+     "hrvaški DHMZ. Ima mrežo 1 km, deluje od junija 2026 in pokriva tudi Slovenijo. Prikazujemo njegov "
+     "kontrolni tek; ansambel (16 članov) rišemo kot pas negotovosti (10.–90. percentil). Prej smo kazali "
+     "AROME z mrežo 2,5 km, ki ga je GeoSphere 4. 11. 2026 ugasnil. Ocene v arhivu naših preverjanj "
+     "še nima, zato ne trdimo, da je v dolini boljši od drugih: ocena sledi, ko naberemo dovolj razrešenih dni."),
     ("Zakaj se modeli razlikujejo?",
-     "Imajo različno ločljivost mreže (ECMWF ~25 km, ICON-EU ~6,5 km, ICON-D2 ~2 km, AROME 2,5 km), različne "
+     "Imajo različno ločljivost mreže (ECMWF ~25 km, ICON-EU ~6,5 km, ICON-D2 ~2 km, C-LAEF 1 km), različne "
      "začetne pogoje in različne fizikalne parametrizacije. Dno ozke doline je pod mrežno celico skoraj "
      "neviden detajl, zato je razlika največja pri nočni temperaturi in pri padavinah."),
     ("Je to uradna napoved?",
@@ -90,7 +94,7 @@ FAQ = [
      "opozorila URSZR."),
     ("Kako pogosto se podatki osvežijo?",
      "Ob vsakem nalaganju strani se prenese zadnji dostopni tek vsakega modela. Modeli se osvežujejo "
-     "na nekaj ur (AROME in ICON-D2 pogosteje, ICON-EU in ECMWF redkeje). Ura teka AROME je izpisana pod grafom."),
+     "na nekaj ur (C-LAEF na 3 ure, ICON-D2 pogosteje, ICON-EU in ECMWF redkeje). Ura teka C-LAEF je izpisana pod grafom."),
 ]
 
 CSS = """<style>
@@ -132,7 +136,7 @@ JS = r"""<script>
     {id:"icon_eu",label:"ICON-EU",col:"#f59e0b"},
     {id:"ecmwf_ifs",label:"ECMWF IFS 9 km",col:"#e879f9"},
     {id:"ecmwf_ifs025",label:"ECMWF IFS 25 km",col:"#a78bfa"},
-    {id:"arome",label:"AROME (GeoSphere)",col:"#34d399"}
+    {id:"claef",label:"C-LAEF 1 km (GeoSphere)",col:"#34d399"}
   ];
   var VARS={
     temp:{label:"Temperatura",unit:"°C",d:1},
@@ -168,24 +172,23 @@ JS = r"""<script>
       return out;
     });
   }
-  function loadArome(){
+  // C-LAEF AlpeAdria 1 km (GeoSphere). Parametri v2: tp = padavine v zadnji uri (mm, ne kumulativa),
+  // 2t, 10fg = sunek v m/s, tcc v %. Ansambel: 2t_p10/2t_p90. Prva ura teka je pri tp NaN (null).
+  function loadClaef(){
     var base="https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/";
     var ll="?lat_lon="+LAT+","+LON+"&output_format=geojson&parameters=";
     function par(j){ return j.features[0].properties.parameters; }
     var res={};
-    return get(base+"nwp-v1-1h-2500m"+ll+"t2m,rr_acc,ugust,vgust,tcc").then(function(j){
+    return get(base+"nwp-v2-1h-1km"+ll+"2t,tp,10fg,tcc").then(function(j){
       var P=par(j), t=j.timestamps.map(Date.parse);
-      var acc=P.rr_acc.data, rain=acc.map(function(v,i){
-        return i===0||v==null||acc[i-1]==null?null:Math.max(0,v-acc[i-1]); });
-      var gust=P.ugust.data.map(function(u,i){
-        var v=P.vgust.data[i]; return u==null||v==null?null:Math.sqrt(u*u+v*v)*3.6; });
-      res={t:t,temp:P.t2m.data,rain:rain,gust:gust,
-           cloud:P.tcc.data.map(function(c){ return c==null?null:c*100; })};
-      state.info.aromeRun=Date.parse(j.reference_time);
+      var rain=P.tp.data.map(function(v){ return v==null?null:Math.max(0,v); });
+      var gust=P["10fg"].data.map(function(v){ return v==null?null:v*3.6; });
+      res={t:t,temp:P["2t"].data,rain:rain,gust:gust,cloud:P.tcc.data};
+      state.info.claefRun=Date.parse(j.reference_time);
       // ansambel: pas negotovosti za temperaturo (drugi, zaporedni klic)
-      return get(base+"ensemble-v1-1h-2500m"+ll+"t2m_p10,t2m_p90").then(function(e){
+      return get(base+"ensemble-v2-1h-1km"+ll+"2t_p10,2t_p90").then(function(e){
         var Q=par(e), m={};
-        e.timestamps.forEach(function(s,i){ m[Date.parse(s)]=[Q.t2m_p10.data[i],Q.t2m_p90.data[i]]; });
+        e.timestamps.forEach(function(s,i){ m[Date.parse(s)]=[Q["2t_p10"].data[i],Q["2t_p90"].data[i]]; });
         res.lo=res.t.map(function(x){ return m[x]?m[x][0]:null; });
         res.hi=res.t.map(function(x){ return m[x]?m[x][1]:null; });
         return res;
@@ -227,7 +230,7 @@ JS = r"""<script>
     MODELS.forEach(function(m){
       var p=series(m.id,v); if(!p) return;
       all.push({m:m,p:p});
-      if(v==="temp"&&m.id==="arome"&&p[0].lo!=null) hasBand=true;
+      if(v==="temp"&&m.id==="claef"&&p[0].lo!=null) hasBand=true;
     });
     if(!all.length) return '<p class="pm-note">Ni podatkov za izbrano okno.</p>';
     var W=680,H=290,L=40,R=12,T=12,B=34, pw=W-L-R, ph=H-T-B;
@@ -235,7 +238,7 @@ JS = r"""<script>
     all.forEach(function(a){ a.p.forEach(function(q){
       t0=Math.min(t0,q.t); t1=Math.max(t1,q.t);
       lo=Math.min(lo,q.y); hi=Math.max(hi,q.y);
-      if(hasBand&&a.m.id==="arome"&&q.lo!=null){ lo=Math.min(lo,q.lo); hi=Math.max(hi,q.hi); }
+      if(hasBand&&a.m.id==="claef"&&q.lo!=null){ lo=Math.min(lo,q.lo); hi=Math.max(hi,q.hi); }
     }); });
     if(v==="rain"||v==="gust") lo=0;
     if(v==="cloud"){ lo=0; hi=100; }
@@ -262,7 +265,7 @@ JS = r"""<script>
       if(h===0) svg+='<text x="'+X(tt)+'" y="'+(H-5)+'" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity=".8">'+dayLbl(tt)+'</text>';
     }
     all.forEach(function(a){
-      if(hasBand&&a.m.id==="arome"){
+      if(hasBand&&a.m.id==="claef"){
         var up=[],dn=[];
         a.p.forEach(function(q){ if(q.lo!=null){ up.push(X(q.t)+","+Y(q.hi)); dn.unshift(X(q.t)+","+Y(q.lo)); } });
         if(up.length>1) svg+='<polygon points="'+up.concat(dn).join(" ")+'" fill="'+a.m.col+'" fill-opacity=".16"/>';
@@ -273,7 +276,7 @@ JS = r"""<script>
     svg+='<line id="pm-cur" x1="0" y1="'+T+'" x2="0" y2="'+(T+ph)+'" stroke="currentColor" stroke-opacity=".5" visibility="hidden"/></svg>';
     var leg='<div class="pm-legend">'+all.map(function(a){
       return '<span><i style="background:'+a.m.col+'"></i>'+a.m.label+'</span>'; }).join("")+
-      (hasBand?'<span><i class="band" style="background:#34d399"></i>pas AROME ansambla (10.–90. percentil)</span>':'')+'</div>';
+      (hasBand?'<span><i class="band" style="background:#34d399"></i>pas C-LAEF ansambla (10.–90. percentil)</span>':'')+'</div>';
     root._geo={all:all,X:X,t0:t0,t1:t1,L:L,pw:pw,W:W};
     return svg+leg+'<div class="pm-read" id="pm-read">Pokaži s kazalcem na grafu vrednosti po modelih.</div>';
   }
@@ -328,7 +331,7 @@ JS = r"""<script>
       '<span class="pm-sep"></span>'+
       [24,48].map(function(h){ return '<button type="button" data-h="'+h+'" aria-pressed="'+(state.h===h)+'">'+h+' ur</button>'; }).join("")+'</div>';
     var inf=[], fails=state.info.fail||[];
-    if(state.info.aromeRun) inf.push("Tek AROME: "+dayLbl(state.info.aromeRun)+" "+hhmm(state.info.aromeRun)+".");
+    if(state.info.claefRun) inf.push("Tek C-LAEF: "+dayLbl(state.info.claefRun)+" "+hhmm(state.info.claefRun)+".");
     inf.push("Ure so po lokalnem času (Rečica).");
     if(fails.length) inf.push("Ni dosegljivo: "+fails.join(", ")+".");
     root.innerHTML=tabs+chart()+'<p class="pm-note">'+inf.join(" ")+'</p>'+table();
@@ -345,8 +348,8 @@ JS = r"""<script>
   var jobs=[
     loadOpenMeteo().then(function(o){ Object.keys(o).forEach(function(k){ state.data[k]=o[k]; }); })
       .catch(function(){ state.info.fail.push("ICON-D2, ICON-EU, ECMWF (Open-Meteo)"); }),
-    loadArome().then(function(o){ state.data.arome=o; })
-      .catch(function(){ state.info.fail.push("AROME (GeoSphere)"); })
+    loadClaef().then(function(o){ state.data.claef=o; })
+      .catch(function(){ state.info.fail.push("C-LAEF (GeoSphere)"); })
   ];
   Promise.all(jobs).then(function(){
     if(!Object.keys(state.data).length){ root.textContent="Napovedi modelov trenutno niso dosegljive. Poskusi znova čez nekaj minut."; return; }
@@ -361,7 +364,7 @@ MAP_JS = r"""<script>
   var root=document.getElementById("pm-maps"); if(!root) return;
   var SLO=%SLO%;
   var PROXY="%PROXY%", TZ="Europe/Ljubljana";
-  var ORDER=["icon_d2","icon_eu","ecmwf_ifs025","arome"];
+  var ORDER=["icon_d2","icon_eu","ecmwf_ifs025","claef"];
   var CITIES=[["Ljubljana",14.506,46.056],["Maribor",15.646,46.554],["Celje",15.26,46.231],["Koper",13.73,45.548],
               ["Murska Sobota",16.166,46.658],["Rečica",14.921,46.326]];
   // Lestvice: ColorBrewer YlGnBu (padavine), RdYlBu obrnjen (temperatura), YlOrRd (sunki).
@@ -461,7 +464,7 @@ MAP_JS = r"""<script>
   }
   function build(){
     var D=S.data;
-    var run=D.models.arome&&D.models.arome.run?" Tek AROME: "+new Date(D.models.arome.run).toLocaleString("sl-SI",{timeZone:TZ,hour:"2-digit",minute:"2-digit"})+".":"";
+    var run=D.models.claef&&D.models.claef.run?" Tek C-LAEF: "+new Date(D.models.claef.run).toLocaleString("sl-SI",{timeZone:TZ,hour:"2-digit",minute:"2-digit"})+".":"";
     var fail=(D.failed&&D.failed.length)?" Ni dosegljivo: "+D.failed.join(", ")+".":"";
     root.innerHTML=
       '<div class="pm-tabs" role="group" aria-label="Spremenljivka na karti">'+
@@ -473,7 +476,7 @@ MAP_JS = r"""<script>
         return '<div class="pm-map"><p class="pm-map-t">'+D.models[id].label+'</p><canvas id="pm-cv-'+id+'" role="img"></canvas></div>'; }).join("")+'</div>'+
       '<div id="pm-map-scale"></div>'+
       '<div class="pm-read" id="pm-map-read">Dotakni se karte: vrednosti vseh modelov na isti točki.</div>'+
-      '<p class="pm-note">Mreža 0,1° (okoli 8 × 11 km), korak 3 ure. Prikaz je pregled vzorca, ne zamenjava za modele v polni ločljivosti (ICON-D2 2 km, AROME 2,5 km).'+run+fail+' Nastalo '+
+      '<p class="pm-note">Mreža 0,1° (okoli 8 × 11 km), korak 3 ure. Prikaz je pregled vzorca, ne zamenjava za modele v polni ločljivosti (ICON-D2 2 km, C-LAEF 1 km).'+run+fail+' Nastalo '+
       new Date(D.generated).toLocaleString("sl-SI",{timeZone:TZ,hour:"2-digit",minute:"2-digit"})+'.</p>';
     ORDER.forEach(function(id){
       var cv=document.getElementById("pm-cv-"+id); if(!cv) return; S.cv[id]=cv;
@@ -509,7 +512,7 @@ def build_body():
     return f'''{seo.crumbs_html([("Meteorec", "/"), ("Primerjava modelov", None)])}
 {seo.stn_badge()}
   <h1 class="page-title">Primerjava vremenskih modelov za Rečico ob Savinji</h1>
-  <p class="post-meta">ICON-D2 · ICON-EU · ECMWF IFS (9 in 25 km) · AROME (GeoSphere) — zadnji tek vsakega modela, v živo</p>
+  <p class="post-meta">ICON-D2 · ICON-EU · ECMWF IFS (9 in 25 km) · C-LAEF 1 km (GeoSphere) — zadnji tek vsakega modela, v živo</p>
   <p class="archive-intro">Isti kraj, isti čas, pet izhodov modelov. Kjer se črte ujemajo, je napoved zanesljiva;
   kjer se razhajajo, je negotova — in prav takrat se splača pogledati, kateri model je doslej v naši dolini
   držal bolje (spodaj). Gre za neposredne izhode modelov, ne za uradno napoved.</p>
@@ -526,10 +529,10 @@ def build_body():
     <tr><th>ICON-EU</th><th>DWD (Nemčija)</th><td>~6,5 km</td><td>120 ur, Evropa</td></tr>
     <tr><th>ECMWF IFS 9 km</th><th>ECMWF</th><td>~9 km</td><td>10 dni, svet; prosti podatki z 2-urnim zamikom (od 20. 10. 2026)</td></tr>
     <tr><th>ECMWF IFS 25 km</th><th>ECMWF</th><td>~25 km</td><td>10 dni, svet</td></tr>
-    <tr><th>AROME + ansambel</th><th>GeoSphere Austria</th><td>2,5 km</td><td>60 ur, Alpe in okolica</td></tr>
+    <tr><th>C-LAEF AlpeAdria + ansambel</th><th>GeoSphere Austria, ARSO, DHMZ</th><td>1 km</td><td>60 ur, Alpe in okolica; nov tek vsake 3 ure</td></tr>
   </table></div>
   <p class="archive-intro">Vrednosti so za najbližjo mrežno celico točke postaje IREICA1 (Open-Meteo) oziroma
-  za celico AROME, ki ji leži najbliže. Nobena celica ne razloči dna ozke doline, zato modelska temperatura ponoči
+  za celico C-LAEF (1 km), ki ji leži najbliže. Nobena celica ne razloči dna ozke doline, zato modelska temperatura ponoči
   praviloma ni enaka izmerjeni — to meri <a href="/test-napovedi/" style="color:var(--blue)">test napovedi</a>.
   Viri: Open-Meteo (open-meteo.com), ECMWF (podatke je treba navesti: ECMWF), GeoSphere Austria (data.hub.geosphere.at, licenca CC BY 4.0).</p>
 {faq}
@@ -538,7 +541,7 @@ def build_body():
 
 def main():
     title = "Primerjava vremenskih modelov za Rečico"
-    desc = ("Napoved ICON-D2, ICON-EU, ECMWF in AROME (GeoSphere) za Rečico ob Savinji drugo nad drugo: "
+    desc = ("Napoved ICON-D2, ICON-EU, ECMWF in C-LAEF 1 km (GeoSphere) za Rečico ob Savinji drugo nad drugo: "
             "temperatura, padavine, sunki in oblačnost po urah, razpon med modeli in ocena, kateri model "
             "je v dolini doslej držal bolje.")
     schema = "\n".join([

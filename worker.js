@@ -4135,8 +4135,8 @@ async function _cronScoreNapovej(env) {
 }
 
 // ── Karte modelov (/modeli-karta.json) ─────────────────────────────────────
-// Mreža 0,1° nad Slovenijo za ICON-D2, ICON-EU, ECMWF IFS (Open-Meteo) in AROME
-// (GeoSphere Avstrija), vsake 3 ure do +48 h: skupne padavine od t0, temperatura
+// Mreža 0,1° nad Slovenijo za ICON-D2, ICON-EU, ECMWF IFS (Open-Meteo) in C-LAEF
+// AlpeAdria 1 km (GeoSphere Avstrija), vsake 3 ure do +48 h: skupne padavine od t0, temperatura
 // in sunki. Brskalnik ne sme sam klicati 560 točk × 4 modelov (omejitve API-jev),
 // zato jo sestavi worker enkrat na MK_TTL_MS in jo drži v KV. Endpoint, ki ga
 // kliče brskalnik, tako nikoli ne dela zapisa ob vsakem klicu.
@@ -4144,9 +4144,10 @@ async function _cronScoreNapovej(env) {
 const MK_LAT0 = 45.4, MK_LON0 = 13.3, MK_D = 0.1, MK_NY = 16, MK_NX = 35;
 const MK_STEPS = 16, MK_STEP_H = 3;
 const MK_TTL_MS = 30 * 60 * 1000;
-const MK_KEY = "modeli_karta_v1";
+// v2: ključ modela je `claef` (do 4. 11. 2026 `arome`); stari predpomnjeni odgovori ga nimajo.
+const MK_KEY = "modeli_karta_v2";
 // Izdelava, pri kateri je kak vir odpovedal (`failed`), ne sme obstati ves TTL: nepopolna karta
-// (npr. samo AROME ob 429 pri Open-Meteo) bi se sicer pol ure postregla vsem.
+// (npr. samo C-LAEF ob 429 pri Open-Meteo) bi se sicer pol ure postregla vsem.
 const MK_PARTIAL_TTL_MS = 5 * 60 * 1000;
 function _mkFresh(d, ttl) { return !!d && Date.now() - d.generated < ((d.failed && d.failed.length) ? MK_PARTIAL_TTL_MS : ttl); }
 let _mkInflight = null;
@@ -4220,14 +4221,39 @@ async function _mkOpenMeteo(t0, pts) {
   return res;
 }
 
-async function _mkArome(t0, pts) {
+// C-LAEF AlpeAdria 1 km (GeoSphere Austria, kontrolni tek, `nwp-v2-1h-1km`). Od 4. 11. 2026 je edini
+// vir GeoSphere: AROME 2,5 km (`nwp-v1-1h-2500m`) je ugasnjen. Imena in enote iz `…/metadata`:
+// `tp`/`rain`/`sf` so količine v zadnjem intervalu (kg/m² = mm, NE kumulativa kot `rr_acc` pri AROME),
+// `2t` °C, `10fg` sunek v m/s (že skalar, ne komponenti), `10u`/`10v` m/s, `msl` Pa, `tcc` v %
+// (AROME je imel delež 0–1), `cape` J/kg. Prva ura teka je pri intervalnih spremenljivkah NaN → null.
+const CLAEF_URL = "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v2-1h-1km";
+function _claefP1(P) {
+  return {
+    p: P.tp.data.map(v => v == null ? null : Math.max(0, v)),
+    t: P["2t"].data,
+    g: P["10fg"].data.map(v => v == null ? null : v * 3.6),
+  };
+}
+function _claefP2(P) {
+  const U = P["10u"].data, V = P["10v"].data;
+  return {
+    w: U.map((u2, i) => { const v2 = V[i]; return u2 == null || v2 == null ? null : Math.sqrt(u2 * u2 + v2 * v2) * 3.6; }),
+    // meteorološka smer: od kod piha (0° = sever, 90° = vzhod)
+    d: U.map((u2, i) => { const v2 = V[i]; return u2 == null || v2 == null ? null : (Math.atan2(-u2, -v2) * 180 / Math.PI + 360) % 360; }),
+    c: P.tcc.data,
+    m: P.msl.data.map(v => v == null ? null : v / 100),
+    e: P.cape.data,
+  };
+}
+// Skupni prenos: točke po kosih (URL do ~2 KB, 5 zahtevkov/s in 240/uro pri GeoSphere), `conv` pretvori
+// parametre ene točke, `reduce` jih zloži v korake karte.
+async function _claefFetch(pts, params, t0, conv, reduce) {
   const res = new Array(pts.length).fill(null);
   let runIso = null;
   const chunks = _mkChunks(pts.map((p, i) => [p, i]), 100);
   for (let c = 0; c < chunks.length; c += 3) {
     await Promise.all(chunks.slice(c, c + 3).map(async ch => {
-      const u = "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m"
-        + "?parameters=rr_acc,t2m,ugust,vgust&output_format=geojson&"
+      const u = CLAEF_URL + "?parameters=" + params + "&output_format=geojson&"
         + ch.map(x => "lat_lon=" + x[0][0] + "," + x[0][1]).join("&");
       const r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } });
       if (!r.ok) throw new Error("geosphere " + r.status);
@@ -4235,23 +4261,19 @@ async function _mkArome(t0, pts) {
       runIso = j.reference_time;
       if (!j.timestamps || !j.timestamps.length) throw new Error("geosphere: prazen tek " + runIso);
       const ts = j.timestamps.map(Date.parse);
-      j.features.forEach((f, n) => {
-        const P = f.properties.parameters, acc = P.rr_acc.data;
-        const p = acc.map((v, i) => (i === 0 || v == null || acc[i - 1] == null) ? null : Math.max(0, v - acc[i - 1]));
-        const g = P.ugust.data.map((u2, i) => { const v2 = P.vgust.data[i]; return u2 == null || v2 == null ? null : Math.sqrt(u2 * u2 + v2 * v2) * 3.6; });
-        res[ch[n][1]] = _mkReduce(ts, { p, t: P.t2m.data, g }, t0);
-      });
+      j.features.forEach((f, n) => { res[ch[n][1]] = reduce(ts, conv(f.properties.parameters), t0); });
     }));
   }
   return { cells: res, run: runIso };
 }
+function _mkClaef(t0, pts) { return _claefFetch(pts, "tp,2t,10fg", t0, _claefP1, _mkReduce); }
 
 async function _mkBuild() {
   const t0 = Math.ceil(Date.now() / 3600000) * 3600000;
   const pts = _mkPoints();
   const out = { generated: Date.now(), t0, steps: MK_STEPS, stepH: MK_STEP_H, lat0: MK_LAT0, lon0: MK_LON0, d: MK_D, nx: MK_NX, ny: MK_NY, models: {} };
-  const labels = { icon_d2: "ICON-D2", icon_eu: "ICON-EU", ecmwf_ifs025: "ECMWF IFS", arome: "AROME" };
-  const [om, ar] = await Promise.allSettled([_mkOpenMeteo(t0, pts), _mkArome(t0, pts)]);
+  const labels = { icon_d2: "ICON-D2", icon_eu: "ICON-EU", ecmwf_ifs025: "ECMWF IFS", claef: "C-LAEF 1 km" };
+  const [om, ar] = await Promise.allSettled([_mkOpenMeteo(t0, pts), _mkClaef(t0, pts)]);
   function pack(label, cells, run) {
     const m = { label, run: run || null, p: [], t: [], g: [] };
     for (let k = 0; k < MK_STEPS; k++) {
@@ -4262,7 +4284,7 @@ async function _mkBuild() {
     return m;
   }
   if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { const m = pack(labels[k], om.value[k]); if (_mkHasData(m, ["p", "t", "g"])) out.models[k] = m; });
-  if (ar.status === "fulfilled") { const m = pack(labels.arome, ar.value.cells, ar.value.run); if (_mkHasData(m, ["p", "t", "g"])) out.models.arome = m; }
+  if (ar.status === "fulfilled") { const m = pack(labels.claef, ar.value.cells, ar.value.run); if (_mkHasData(m, ["p", "t", "g"])) out.models.claef = m; }
   out.failed = [om.status === "rejected" ? "open-meteo" : null, ar.status === "rejected" ? "geosphere" : null].filter(Boolean);
   out.errors = [om.reason, ar.reason].filter(Boolean).map(e => String(e.message || e));
   if (!Object.keys(out.models).length) throw new Error("noben model ni dosegljiv: " + (om.reason || "") + " " + (ar.reason || ""));
@@ -4347,11 +4369,11 @@ async function _snegKarta(env) {
 // na drugo: veter 10 m (km/h + smer, od kod piha), oblačnost (%), tlak na morski gladini (hPa),
 // CAPE (J/kg, največ v 3-urnem koraku, ker nevihtni potencial ne sme izpasti med urami) in ničta
 // izoterma (m). Vse ostalo je trenutna vrednost ob koncu koraka. Model, ki spremenljivke nima
-// (AROME nima tlaka na morski gladini in ničte izoterme, IFS nima ničte izoterme), vrne null v
+// (C-LAEF nima ničte izoterme, IFS je nima), vrne null v
 // polju — odjemalec ga za to spremenljivko izklopi in ne izmišlja vrednosti.
 // Ločen KV ključ in daljši rok (MK2_TTL_MS) kot pri osnovni karti: teki modelov se menjajo na 1–3 ure.
 const MK2_TTL_MS = 60 * 60 * 1000;
-const MK2_KEY = "modeli_karta2_v1";
+const MK2_KEY = "modeli_karta2_v2";
 const MK2_VARS = ["w", "d", "c", "m", "e", "z"];
 let _mk2Inflight = null;
 
@@ -4397,40 +4419,15 @@ async function _mk2OpenMeteo(t0, pts) {
   return res;
 }
 
-async function _mk2Arome(t0, pts) {
-  const res = new Array(pts.length).fill(null);
-  let runIso = null;
-  const chunks = _mkChunks(pts.map((p, i) => [p, i]), 100);
-  for (let c = 0; c < chunks.length; c += 3) {
-    await Promise.all(chunks.slice(c, c + 3).map(async ch => {
-      const u = "https://dataset.api.hub.geosphere.at/v1/timeseries/forecast/nwp-v1-1h-2500m"
-        + "?parameters=u10m,v10m,tcc,cape&output_format=geojson&"
-        + ch.map(x => "lat_lon=" + x[0][0] + "," + x[0][1]).join("&");
-      const r = await fetch(u, { headers: { "User-Agent": "meteorec-modeli-karta" } });
-      if (!r.ok) throw new Error("geosphere " + r.status);
-      const j = await r.json();
-      runIso = j.reference_time;
-      if (!j.timestamps || !j.timestamps.length) throw new Error("geosphere: prazen tek " + runIso);
-      const ts = j.timestamps.map(Date.parse);
-      j.features.forEach((f, n) => {
-        const P = f.properties.parameters, U = P.u10m.data, V = P.v10m.data;
-        const w = U.map((u2, i) => { const v2 = V[i]; return u2 == null || v2 == null ? null : Math.sqrt(u2 * u2 + v2 * v2) * 3.6; });
-        // meteorološka smer: od kod piha (0° = sever, 90° = vzhod)
-        const d = U.map((u2, i) => { const v2 = V[i]; return u2 == null || v2 == null ? null : (Math.atan2(-u2, -v2) * 180 / Math.PI + 360) % 360; });
-        const cc = P.tcc.data.map(v => v == null ? null : v * 100);
-        res[ch[n][1]] = _mk2Reduce(ts, { w, d, c: cc, e: P.cape.data }, t0);
-      });
-    }));
-  }
-  return { cells: res, run: runIso };
-}
+// Ničte izoterme C-LAEF nima (`snowlmt` je meja sneženja, druga količina): `z` ostane null.
+function _mk2Claef(t0, pts) { return _claefFetch(pts, "10u,10v,tcc,cape,msl", t0, _claefP2, _mk2Reduce); }
 
 async function _mk2Build(t0Hint) {
   const t0 = t0Hint || Math.ceil(Date.now() / 3600000) * 3600000;
   const pts = _mkPoints();
   const out = { generated: Date.now(), t0, steps: MK_STEPS, stepH: MK_STEP_H, lat0: MK_LAT0, lon0: MK_LON0, d: MK_D, nx: MK_NX, ny: MK_NY, models: {} };
-  const labels = { icon_d2: "ICON-D2", icon_eu: "ICON-EU", ecmwf_ifs025: "ECMWF IFS", arome: "AROME" };
-  const [om, ar] = await Promise.allSettled([_mk2OpenMeteo(t0, pts), _mk2Arome(t0, pts)]);
+  const labels = { icon_d2: "ICON-D2", icon_eu: "ICON-EU", ecmwf_ifs025: "ECMWF IFS", claef: "C-LAEF 1 km" };
+  const [om, ar] = await Promise.allSettled([_mk2OpenMeteo(t0, pts), _mk2Claef(t0, pts)]);
   function pack(label, cells, run) {
     const m = { label, run: run || null };
     MK2_VARS.forEach(v => {
@@ -4442,7 +4439,7 @@ async function _mk2Build(t0Hint) {
     return m;
   }
   if (om.status === "fulfilled") Object.keys(om.value).forEach(k => { const m = pack(labels[k], om.value[k]); if (_mkHasData(m, MK2_VARS)) out.models[k] = m; });
-  if (ar.status === "fulfilled") { const m = pack(labels.arome, ar.value.cells, ar.value.run); if (_mkHasData(m, MK2_VARS)) out.models.arome = m; }
+  if (ar.status === "fulfilled") { const m = pack(labels.claef, ar.value.cells, ar.value.run); if (_mkHasData(m, MK2_VARS)) out.models.claef = m; }
   out.failed = [om.status === "rejected" ? "open-meteo" : null, ar.status === "rejected" ? "geosphere" : null].filter(Boolean);
   out.errors = [om.reason, ar.reason].filter(Boolean).map(e => String(e.message || e));
   if (!Object.keys(out.models).length) throw new Error("noben model ni dosegljiv: " + (om.reason || "") + " " + (ar.reason || ""));
