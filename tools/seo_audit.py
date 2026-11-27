@@ -154,7 +154,7 @@ CORE = {
     # sitemapu — natanko primer, pred katerim svari CLAUDE.md. Dodano 20. 8. 2026.
     "tocnost-napovedi/":         ("daily",   "0.8"),
     "test-napovedi/":            ("daily",   "0.8"),
-    # Napoved ICON-D2/ICON-EU/ECMWF/AROME za Rečico drugo nad drugo; podatki v brskalniku,
+    # Napoved ICON-D2/ICON-EU/ECMWF/C-LAEF za Rečico drugo nad drugo; podatki v brskalniku,
     # tabela »kdo je držal« se osveži z test-napovedi-daily.yml.
     "primerjava-modelov/":       ("weekly",  "0.7"),
     "klima/":                    ("weekly",  "0.8"),

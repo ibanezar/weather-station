@@ -276,6 +276,7 @@ jobs:
           python3 tools/test_hourly_log.py
           python3 tools/test_ensemble_log.py
           python3 tools/test_profile_log.py
+          python3 tools/test_claef_snow_log.py
           python3 tools/test_mtr_wind.py
 
       - name: Test napovedi ur, zasidrane na meritev (junaška krivulja)

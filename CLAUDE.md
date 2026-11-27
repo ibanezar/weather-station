@@ -1030,8 +1030,8 @@ drug ob drugem ali razlika A − B (diverging lestvica); dotik karte pokaže vre
   osnovne karte (če ni starejša od 5 h), da se koraki ujemajo.
 - **Vsaka spremenljivka ima svojo časovno os**: `_mmIdx()` poišče korak vira, najbližji skupnemu drsniku (največ 1,5 h razlike),
   sicer ni podatka. Sneg se sešteva po urah od `t0` skupne karte; če snežni podatek okna ne pokriva, je `null`, ne ugibanje.
-- **Model, ki spremenljivke nima, je izklopljen, vrednosti se ne izmišlja**: AROME nima tlaka na morski gladini in ničte izoterme,
-  IFS nima ničte izoterme (v workerju so to `null` polja; `_mmHas()`). CAPE je v 3-urnem koraku **največ**, ostalo trenutna vrednost.
+- **Model, ki spremenljivke nima, je izklopljen, vrednosti se ne izmišlja**: C-LAEF nima ničte izoterme (ima tlak `msl`; `snowlmt` je meja
+  sneženja, druga količina), IFS nima ničte izoterme (v workerju so to `null` polja; `_mmHas()`). CAPE je v 3-urnem koraku **največ**, ostalo trenutna vrednost.
 - **CAPE ni napoved neviht** in tako piše (potrebna sta sprožilec in CIN). Mreža 0,1° ne razloči dolin — pove se pod karto.
 - Izris je canvas (brez Leafleta, kot snežna karta); maska Slovenije je obris `SLO_POLY`, narisan na skrito platno.
 - **Namerna podvojitev**: lestvice in polja v `MM_VARS` ↔ `MK2_VARS` v workerju; preverja ju `test_parity.modelske_karte`
@@ -1047,6 +1047,13 @@ drug ob drugem ali razlika A − B (diverging lestvica); dotik karte pokaže vre
 - **7. 11. 2026: zavihek je kazal prazne karte, ker je GeoSphere (AROME) vrnil `timestamps: []` (`reference_time` star 3 dni, vir zastal).** Worker je to sprejel kot veljaven model s samimi `null`, `/modeli-karta.json` je imel samo ta prazen AROME (`failed:["open-meteo"]`), odjemalec ga je štel za vir in zgradil prazno ogrodje; `/modeli-karta2.json` je medtem visel >120 s (429 + čakanje). Popravek: prazen tek GeoSphere je napaka, model brez ene vrednosti se ne vrne (`_mkHasData`), prvi klic Open-Meteo ima ponovitve kot karta2 (`_mkFetchOM`), odgovor nosi `errors` z razlogom, odjemalec zavrže modele brez vrednosti in ima rok 70 s. Razlog napake Open-Meteo pri `/modeli-karta.json` (verjetno 429: vse tri karte delijo kvoto) se vidi šele v `errors` po deployu.
 - Živega Open-Meteo odgovora za celotno mrežo ob pisanju ni bilo mogoče preizkusiti do konca (429 iz skupnega izhoda peskovnika):
   oblika odgovora je preverjena na 140 točkah in AROME na vseh. Po deployu workerja preveri `/modeli-karta2.json`.
+- **AROME je zamenjan s C-LAEF AlpeAdria 1 km (27. 11. 2026).** GeoSphere je `nwp-v1-1h-2500m` in `ensemble-v1-1h-2500m` **ugasnil 4. 11. 2026**; zato je
+  bil zavihek od tedaj brez GeoSphere vira (zgoraj opisani »prazen tek« 7. 11. je skoraj gotovo ta ugasnitev, ne začasna težava). Zdaj `_mkClaef()` / `_mk2Claef()`
+  (`worker.js`, skupni `_claefFetch()`, pretvorbo parametrov delata čisti `_claefP1()` in `_claefP2()`) berejo `nwp-v2-1h-1km`: `tp` je količina v uri (NE kumulativa kot `rr_acc`),
+  `2t`, `10fg` m/s (skalar), `10u`/`10v`, `msl` Pa, `tcc` že v % (AROME je imel delež), `cape`. Ključ modela je `claef` (do 4. 11. `arome`), KV ključa sta `modeli_karta_v2` in
+  `modeli_karta2_v2`. Test: `test_parity.claef_pretvorba` (enote). **Odgovora GeoSphere v2 (`reference_time`, oblika geojson) iz razvojnega okolja ni bilo mogoče preizkusiti**
+  (proxy 403, imena parametrov so iz `…/metadata`): **po deployu preveri `/modeli-karta.json` in `/modeli-karta2.json` (model `claef`, `failed` prazen; oblačnost med 0 in 100,
+  tlak okoli 1000 hPa, sunki smiselni) in zavihek Modelske karte**.
 
 ## Primerjava modelov (`/primerjava-modelov/`, 7. 10. 2026)
 
@@ -1055,18 +1062,23 @@ možnostim. `tools/generate_primerjava_modelov_page.py` piše samo besedilo, FAQ
 (D+1 MAE iz `data/test-napovedi.json`, osvežuje jo `test-napovedi-daily.yml`); **vse številke se nalagajo v
 brskalniku**, ker se modelski teki menjajo čez dan, GitHubov cron pa zamuja ure.
 
-- **Točka (Rečica)**: ICON-D2, ICON-EU, ECMWF IFS iz Open-Meteo, AROME 2,5 km + pas ansambla (10.–90. percentil)
-  iz GeoSphere Austria (`dataset.api.hub.geosphere.at`, CC BY 4.0, CORS odprt). `rr_acc` je akumulacija od
-  začetka teka — urne padavine so razlika; sunek je `sqrt(ugust² + vgust²)` v m/s × 3,6.
+- **Točka (Rečica)**: ICON-D2, ICON-EU, ECMWF IFS iz Open-Meteo, C-LAEF AlpeAdria 1 km + pas ansambla (10.–90. percentil)
+  iz GeoSphere Austria (`nwp-v2-1h-1km` in `ensemble-v2-1h-1km`, `dataset.api.hub.geosphere.at`, CC BY 4.0, CORS odprt). Do 4. 11. 2026 je bil tu AROME 2,5 km (ugasnjen).
+  `tp` je količina v zadnji uri, sunek `10fg` v m/s × 3,6, ansambel `2t_p10`/`2t_p90`.
 - **Karte (Slovenija)**: `worker.js` `/modeli-karta.json` (`_modeliKarta()`) sestavi mrežo 0,1° (35 × 16 točk) za
-  vse štiri modele, korak 3 h do +48 h, in jo drži 30 min v `COUNTER_KV` (`modeli_karta_v1`) — brskalnik ne
+  vse štiri modele, korak 3 h do +48 h, in jo drži 30 min v `COUNTER_KV` (`modeli_karta_v2`) — brskalnik ne
   sme sam klicati 560 točk (omejitve API-jev), zapis KV pa se naredi največ enkrat na 30 min, ne ob vsakem klicu.
   GeoSphere ima omejitev **5 zahtevkov/s in 240/uro** ter URL do ~2 KB, zato točke gredo v kosih po 100.
   Podatek nosi svojo geometrijo (`lat0/lon0/d/nx/ny`), zato je stran ne podvaja. Obris Slovenije generator
   prebere iz `app.js` (`SLO_POLY`) in pade, če ga ne najde.
-- **Poštenost**: C-LAEF 1 km ni javno dostopen; stran tega ne trdi. 0,1° je pregled vzorca, ne zamenjava za
-  polno ločljivost — to piše pod kartami. ICON-D2 sega 48 h od svojega teka, zato je zadnji korak zanj prazen
-  (karta to napiše). ICON-D2 in AROME nimata arhiva v `/test-napovedi/`, zato tam nimata ocene.
+- **Poštenost**: C-LAEF AlpeAdria 1 km je od septembra 2026 javen (operativen od 18. 6. 2026), a **nima arhiva napovedi, zato na `/test-napovedi/` nima ocene in stran ne trdi, da je v dolini boljši**.
+  0,1° je pregled vzorca, ne zamenjava za polno ločljivost — to piše pod kartami. ICON-D2 sega 48 h od svojega teka, zato je zadnji korak zanj prazen
+  (karta to napiše). ICON-D2 in C-LAEF nimata arhiva v `/test-napovedi/`, zato tam nimata ocene. LACE (september 2026) poroča o **pozitivnem odklonu padavin v Alpah, pozimi na 1 km močnejšem kot na 2,5 km**.
+- **Sneg C-LAEF (27. 11. 2026): višine snega NI.** Open-Meteo `snow_depth` za `geosphere_claef_austria` je prazen (enota »undefined«), v GeoSphere API v2 parametra `sd` ni (samo `sf`, `rain`, `tp`, `snowlmt`). Mogoče je
+  samo novi sneg (`snowfall`, Open-Meteo pretvori vodni ekvivalent z 0,7 cm/mm; `sf` iz GeoSphere je kg/m²). Trditev »C-LAEF je najnatančnejši pri višini snega« s temi viri ni preverljiva.
+  **Beleženje:** `tools/log_claef_snow.py` (korak v `test-napovedi-daily.yml`, `continue-on-error`) zapiše dnevno napovedi snega C-LAEF, ICON-D2 in IFS za 8 ARSO postaj (`data/claef-snow-log.csv`: novi sneg po dnevih,
+  višina ob 7:00 samo kjer jo model ima, višina modelske celice in postaje); ocena `python3 tools/ai/eval_claef_snow.py` proti `data/arso-snow-live.csv` (višina odeje; novi sneg = pozitiven prirastek odeje, to je približek).
+  **Pod 15 dni sklepa ni**; prvi zajem 27. 11. 2026. Vrstica v `REGISTER`, test `tools/test_claef_snow_log.py`. **Ni narejeno:** C-LAEF v snežni karti (`/sneg-karta.json`) in v Snegofilih; sprememba ni smiselna, dokler ocena ne pokaže koristi.
 - Stran **ne bere postaje**, notranjih meritev torej ni.
 
 ## Kalkulator rasti po dežju (`/gobarska-napoved/valovi/`, 9. 10. 2026)

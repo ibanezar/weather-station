@@ -114,6 +114,8 @@ REGISTER = [
     # Dnevniki, ki se nabirajo samo s tekočim zajemom (izpad dneva je nepovraten, glej razdelek Test napovedi): zato jih spremljamo.
     ("Dnevnik: napovedi profila (zajem naprej)", "data/profile-forward-log.csv", "csvcol", "issued_at", 60,
      "test-napovedi-daily.yml → log_profile_forecasts.py"),
+    ("Dnevnik: sneg C-LAEF/ICON-D2 (zajem naprej)", "data/claef-snow-log.csv", "csvcol", "issued_at", 60,
+     "test-napovedi-daily.yml → log_claef_snow.py"),
     ("Dnevnik: ansambli (zajem naprej)", "data/ensemble-forward-log.csv", "csvcol", "issued_at", 60,
      "test-napovedi-daily.yml → log_ensemble_forecasts.py"),
     ("Dnevnik: ARSO in Yr (zajem naprej)", "data/forecast-forward-log.csv", "csvcol", "issued_at", 60,

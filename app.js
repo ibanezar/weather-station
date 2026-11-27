@@ -22844,10 +22844,10 @@ function initSurvey(){
 // sneženje ICON-D2 iz /sneg-karta.json (naloži se šele ob izbiri). Vsi trije vrnejo isto mrežo
 // 0,1° (lat0/lon0/d/nx/ny), zato se zlagajo na eno platno. Vsaka spremenljivka ima SVOJO časovno
 // os (vir): _mmIdx() poišče korak, ki je najbližje skupnemu drsniku (največ 1,5 h razlike).
-// Model, ki spremenljivke nima (AROME: tlak, ničta izoterma; IFS: ničta izoterma), je izklopljen —
+// Model, ki spremenljivke nima (C-LAEF in IFS: ničta izoterma), je izklopljen —
 // vrednosti se ne izmišlja. Barvne lestvice so lastne (ColorBrewer), ne iz tuje karte.
 const MM_TZ='Europe/Ljubljana', MM_H=3600000, MM_W=640;
-const MM_MODELS=[['icon_d2','ICON-D2'],['icon_eu','ICON-EU'],['ecmwf_ifs025','ECMWF IFS'],['arome','AROME']];
+const MM_MODELS=[['icon_d2','ICON-D2'],['icon_eu','ICON-EU'],['ecmwf_ifs025','ECMWF IFS'],['claef','C-LAEF 1 km']];
 const MM_CITIES=[['Ljubljana',14.506,46.056],['Maribor',15.646,46.554],['Celje',15.26,46.231],['Koper',13.73,45.548],
   ['Kranj',14.356,46.239],['Nova Gorica',13.644,45.956],['Novo mesto',15.169,45.804],['Rečica',14.921,46.326]];
 const MM_DIVERGE=['#2166ac','#92c5de','#f7f7f7','#f4a582','#b2182b'];
@@ -22865,7 +22865,7 @@ const MM_VARS=[
    note:'Temperatura ob izbrani uri, povprečje modelske celice. V kotlinah je ponoči pogosto precej hladneje, podnevi pa topleje od karte.'},
   {k:'z',grp:'Temperatura',lbl:'Ničta izoterma',title:'Višina ničte izoterme',unit:'m',d:0,f:'z',diff:600,
    st:[[0,'#08306b'],[1000,'#2171b5'],[2000,'#9ecae1'],[3000,'#fee391'],[4000,'#fe9929'],[5000,'#cc4c02']],
-   note:'Višina nad morjem, kjer je zrak 0 °C. Meja sneženja je običajno okoli 200–300 m pod njo. IFS te spremenljivke prek našega vira ne ponuja, AROME tudi ne.'},
+   note:'Višina nad morjem, kjer je zrak 0 °C. Meja sneženja je običajno okoli 200–300 m pod njo. IFS te spremenljivke prek našega vira ne ponuja, C-LAEF tudi ne.'},
   {k:'w',grp:'Veter',lbl:'Veter 10 m',title:'Veter na 10 m (puščice: kam piha)',unit:'km/h',d:0,f:'w',arrows:true,diff:20,
    st:[[0,'#f7fcf0'],[10,'#ccebc5'],[20,'#7bccc4'],[30,'#43a2ca'],[45,'#0868ac'],[60,'#fe9929'],[80,'#d7301f'],[110,'#7f0000']],
    note:'Povprečni veter ob izbrani uri; puščica kaže, kam piha. Sunki so posebej (Sunki).'},
@@ -22880,7 +22880,7 @@ const MM_VARS=[
    note:'Delež neba, pokritega z oblaki: temno = jasno, svetlo = oblačno.'},
   {k:'m',grp:'Tlak',lbl:'Tlak',title:'Tlak na morski gladini',unit:'hPa',d:0,f:'m',iso:true,diff:5,
    st:[[985,'#542788'],[995,'#8073ac'],[1005,'#b2abd2'],[1013,'#f7f7f7'],[1020,'#fdb863'],[1030,'#e08214'],[1040,'#b35806']],
-   note:'Tlak, preračunan na morsko gladino; črte (izobare) so na vsakih 2 hPa, številke na vsakih 4. AROME te spremenljivke ne ponuja.'},
+   note:'Tlak, preračunan na morsko gladino; črte (izobare) so na vsakih 2 hPa, številke na vsakih 4.'},
 ];
 let _mm=null;
 
@@ -23158,12 +23158,12 @@ function _mmNote(V){
   const a=_mm.a, b=_mm.b, bits=[];
   const srcs=[a,b].filter(Boolean);
   if(srcs.some(s=>s.stale)) bits.push('Podatki so nekoliko stari: vir trenutno ne odgovarja.');
-  const ar=(b&&b.models.arome&&b.models.arome.run)||(a&&a.models.arome&&a.models.arome.run);
+  const ar=(b&&b.models.claef&&b.models.claef.run)||(a&&a.models.claef&&a.models.claef.run);
   const gen=Math.max.apply(null,srcs.map(s=>s.generated));
   const off=[a,b].filter(Boolean).some(s=>s.t0!==_mm.M.t0);
   const miss=!a||!b||srcs.some(s=>s.failed&&s.failed.length);
   return '<p>'+V.note+'</p><p class="mm-sub">Mreža 0,1° (okoli 8 × 11 km): ne razloči dolin, posameznih pobočij in nevihtnih celic, zato je to pregled vzorca, ne napoved za kraj. '+
-    'ICON-D2 sega 48 h od svojega teka, ostali modeli dlje (karta do +48 h). Karta izdelana ob '+_mmFmtT(gen)+(ar?', AROME tek '+_mmFmtT(Date.parse(ar))+' (po naši uri)':'')+'.'+
+    'ICON-D2 sega 48 h od svojega teka, ostali modeli dlje (karta do +48 h). Karta izdelana ob '+_mmFmtT(gen)+(ar?', C-LAEF tek '+_mmFmtT(Date.parse(ar))+' (po naši uri)':'')+'.'+
     (off?' Spremenljivke iz različnih izdelav so poravnane na najbližji korak (do 1,5 h razlike).':'')+
     (miss?' Del modelov ali spremenljivk trenutno ni na voljo (vir ne odgovarja ali se še nalaga); osveži zavihek čez nekaj minut.':'')+
     ' Ni uradna napoved &mdash; opozorila izdaja ARSO. Več: <a href="/primerjava-modelov/">primerjava modelov za Rečico</a>, <a href="/zima/snezna-karta/">snežna karta</a>.</p>';
@@ -23248,7 +23248,7 @@ async function initModelMaps(){
   const wait=document.createElement('p'); wait.className='mm-wait';
   wait.textContent='Nalagam modelske karte … prva izdelava lahko traja do minute.';
   root.appendChild(wait);
-  // Model brez ene same vrednosti (npr. AROME ob praznem teku GeoSphere) ni vir: sicer bi se zavihek
+  // Model brez ene same vrednosti (npr. C-LAEF ob praznem teku GeoSphere) ni vir: sicer bi se zavihek
   // zgradil iz samih null in bi izgledal, kot da nič ne dela. Rok 70 s: prva izdelava karte2 traja do minute.
   const hasVals=m=>Object.keys(m).some(f=>Array.isArray(m[f])&&Array.isArray(m[f][0])&&m[f].some(row=>row.some(v=>v!=null)));
   const get=(u,kind)=>fetch(PROXY+u,{signal:AbortSignal.timeout?AbortSignal.timeout(70000):undefined}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })

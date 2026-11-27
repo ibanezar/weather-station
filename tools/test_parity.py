@@ -1201,6 +1201,40 @@ def crnivec_opozorila_in_oznake():
         check(want == g, "oznaka dneva", f"{d}: py={want!r} js={g!r}")
 
 
+# ── C-LAEF AlpeAdria 1 km: pretvorba parametrov GeoSphere v2 (worker) ─────────
+@test
+def claef_pretvorba():
+    """Imena in enote iz `nwp-v2-1h-1km/metadata`: tp je količina v uri (ne kumulativa), 10fg v m/s, msl v Pa,
+    tcc v %. Napačna enota bi tiho pokvarila karte (sunki 3,6-krat, tlak 100-krat, oblačnost 100-krat)."""
+    P1 = {"tp": {"data": [None, 0.4, -0.01, 2.0]}, "2t": {"data": [None, 1.5, -2.0, 0.0]},
+          "10fg": {"data": [None, 10, 5, None]}}
+    r = js("worker.js", ["_claefP1"], [{"expr": "_claefP1(%s)" % json.dumps(P1)}])[0]
+    check(r["p"] == [None, 0.4, 0, 2.0], "C-LAEF: padavine so količina v uri, negativno se odreže", r["p"])
+    check(r["t"] == [None, 1.5, -2.0, 0.0], "C-LAEF: temperatura nespremenjena (°C)", r["t"])
+    check(r["g"][0] is None and abs(r["g"][1] - 36) < 1e-9 and abs(r["g"][2] - 18) < 1e-9 and r["g"][3] is None,
+          "C-LAEF: sunek m/s → km/h", r["g"])
+    # veter: (u, v) = (3, 4) → 5 m/s = 18 km/h; piha proti jugu → smer 0° (od severa); proti zahodu → 90° (od vzhoda)
+    P2 = {"10u": {"data": [3, 0, -5, None]}, "10v": {"data": [4, -5, 0, 1]}, "tcc": {"data": [80, None, 5, 100]},
+          "msl": {"data": [101325, None, 99000, 102000]}, "cape": {"data": [0, 150, None, 20]}}
+    r = js("worker.js", ["_claefP2"], [{"expr": "_claefP2(%s)" % json.dumps(P2)}])[0]
+    check(abs(r["w"][0] - 18) < 1e-9 and abs(r["w"][1] - 18) < 1e-9 and r["w"][3] is None, "C-LAEF: hitrost vetra km/h", r["w"])
+    check(abs(r["d"][1] - 0) < 1e-9 or abs(r["d"][1] - 360) < 1e-9, "C-LAEF: veter proti jugu piha od severa", r["d"][1])
+    check(abs(r["d"][2] - 90) < 1e-9, "C-LAEF: veter proti zahodu piha od vzhoda", r["d"][2])
+    check(r["c"] == [80, None, 5, 100], "C-LAEF: oblačnost je že v % (ne × 100)", r["c"])
+    check(abs(r["m"][0] - 1013.25) < 1e-9 and r["m"][1] is None and abs(r["m"][2] - 990) < 1e-9, "C-LAEF: tlak Pa → hPa", r["m"])
+    check(r["e"] == [0, 150, None, 20], "C-LAEF: CAPE nespremenjen", r["e"])
+    # skupaj z zlaganjem v korake: korak 1 = (t0, t0+3 h], padavine skupaj, sunek največji
+    H = 3600000
+    t0 = 1_000_000 * H
+    ts = [t0 + h * H for h in range(0, 49)]
+    tp = [None] + [0.5] * 48
+    Pbig = {"tp": {"data": tp}, "2t": {"data": [h * 0.1 for h in range(49)]}, "10fg": {"data": [None] + [h * 1.0 for h in range(1, 49)]}}
+    got = js("worker.js", ["_claefP1", "_mkReduce", "MK_STEPS"],
+             [{"expr": "_mkReduce(%s, _claefP1(%s), %d)" % (json.dumps(ts), json.dumps(Pbig), t0)}])[0]
+    check(len(got) == 16 and abs(got[0]["p"] - 1.5) < 1e-9 and abs(got[15]["p"] - 24) < 1e-9, "C-LAEF: skupne padavine po korakih", got[0])
+    check(abs(got[0]["g"] - 3 * 3.6) < 1e-9, "C-LAEF: največji sunek v koraku", got[0]["g"])
+
+
 # ── Modelske karte (worker /modeli-karta2.json ↔ zavihek v app.js) ───────────
 @test
 def modelske_karte():
