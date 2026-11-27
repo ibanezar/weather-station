@@ -849,6 +849,11 @@ def gen_daily_pages(hist, force, sitemap_urls):
         if v.get("tempLow") is not None and v["tempLow"] != v.get("tempAvg"):
             rows.append(("Najnižja temperatura", f"{num(v['tempLow'])} °C"))
         rows.append(("Padavine", f"{num(v.get('precipTotal', 0))} mm"))
+        # Neogrevan dežemer: sneg/ivje, ki je obležalo v lijaku, se stali pozneje in je zapisano kot dež
+        # (tools/melt_precip.py, ocena). Polje manjka za dneve brez izračuna; 0 ne prikažemo.
+        if (v.get("precipMelt") or 0) >= 0.1:
+            rows.append(("od tega taljenje snega v dežemeru",
+                         f"{num(v['precipMelt'])} mm (ocena: sneg ali ivje iz lijaka, ne novih padavin)"))
         # Isti popravek kot na /rekord/: "windgustHigh" (sunek) je pravi vir za
         # oznako "sunek vetra"; "windspeedHigh" (najvišja sprotna hitrost) je
         # samo nadomestek za dneve pred uvedbo tega polja.

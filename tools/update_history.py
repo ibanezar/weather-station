@@ -16,6 +16,9 @@ nastavljene, se uporabijo javne konstante iz Worker-ja (worker.js).
 import json, os, sys, re, time, calendar, urllib.request, urllib.parse, urllib.error
 from datetime import date as _date, datetime, timezone, timedelta
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import melt_precip  # noqa: E402  (ločevanje taljenja snega v dežemeru od padavin)
+
 try:
     from zoneinfo import ZoneInfo
     TZ = ZoneInfo("Europe/Berlin")
@@ -243,6 +246,61 @@ def normalize_ecowitt(data):
     return out
 
 
+def hours_from_ecowitt(data):
+    """Surov Ecowitt odgovor -> {lokalna polna ura (naiven datetime): {t, p, s}} za melt_precip.
+
+    Padavine so vsota prirastkov kumulative `rainfall.daily` med zaporednimi 5-min točkami
+    (pripisana uri konca intervala), zato se prirastek čez mejo ure ne izgubi; pad kumulative
+    (polnočna ponastavitev) šteje za novo vrednost. Samo zunanja polja (pravilo z vrha CLAUDE.md)."""
+    if not data:
+        return {}
+    acc = {}
+
+    def hour(ts):
+        return datetime.fromtimestamp(int(ts), TZ).replace(minute=0, second=0, microsecond=0, tzinfo=None)
+
+    def slot(h):
+        return acc.setdefault(h, {"t": [], "s": [], "p": 0.0})
+
+    for ts, v in (_ew_list(data, "outdoor", "temperature") or {}).items():
+        val = _pick(v, ["avg", "value", "max"])
+        if val is not None:
+            slot(hour(ts))["t"].append(val)
+    for ts, v in (_ew_list(data, "solar_and_uvi", "solar") or {}).items():
+        val = _pick(v, ["avg", "value", "max"])
+        if val is not None and val <= SOLAR_MAX_WM2:
+            slot(hour(ts))["s"].append(val)
+    rain = {}
+    for ts, v in (_ew_list(data, "rainfall", "daily") or {}).items():
+        val = _pick(v, ["total", "max", "value"])
+        if val is not None:
+            rain[int(ts)] = val
+    prev = None
+    for ts in sorted(rain):
+        cum = rain[ts]
+        inc = cum if prev is None or cum < prev else cum - prev
+        prev = cum
+        slot(hour(ts))["p"] += inc
+    return {h: {"t": round(sum(x["t"]) / len(x["t"]), 1) if x["t"] else None,
+                "p": round(x["p"], 2),
+                "s": round(sum(x["s"]) / len(x["s"]), 1) if x["s"] else None}
+            for h, x in acc.items() if x["t"]}
+
+
+# Najmanj toliko ur z meritvijo, da dnevu zapišemo precipMelt (sicer taljenje lahko manjka: polje izpustimo).
+MELT_MIN_HOURS = 20
+
+
+def melt_by_day(hours):
+    """{datum: mm taljenja} za dneve s pokritostjo >= MELT_MIN_HOURS (ostali dnevi niso izračunani)."""
+    mm = melt_precip.melt_mm_by_day(hours)
+    n = {}
+    for ts in hours:
+        d = ts.date().isoformat()
+        n[d] = n.get(d, 0) + 1
+    return {d: mm.get(d, 0.0) for d, c in n.items() if c >= MELT_MIN_HOURS}
+
+
 # ── REZERVNI VIR: Open-Meteo Archive (ERA5) ────────────────────────────────
 def fetch_openmeteo(start, end):
     params = urllib.parse.urlencode({
@@ -321,9 +379,12 @@ def _apply_precip_corrections(date, rec):
     (odštevek od izmerjenega) za dani dan, če je vpisan katerikoli od obeh."""
     if date in PRECIP_OVERRIDES:
         rec["precipTotal"] = PRECIP_OVERRIDES[date]["precipTotal"]
+        rec.pop("precipMelt", None)   # ročno postavljen seštevek ni razčlenjiv po urah
     elif date in PRECIP_TEST_DEDUCTIONS and rec.get("precipTotal") is not None:
         rec["precipTotal"] = round(
             max(0.0, rec["precipTotal"] - PRECIP_TEST_DEDUCTIONS[date]["mm"]), 1)
+    if rec.get("precipMelt") is not None and rec.get("precipTotal") is not None:
+        rec["precipMelt"] = round(min(rec["precipMelt"], rec["precipTotal"]), 1)   # taljenje je del seštevka
 
 def main():
     if len(sys.argv) < 2:
@@ -348,12 +409,19 @@ def main():
     # Dnevni MIN/MAX morajo izhajati iz finih meritev, sicer se konica zgladi.
     station = {}
     d0, d1 = _date.fromisoformat(start), _date.fromisoformat(end)
+    # Urni niz za ločevanje taljenja (melt_precip); en dan pred mesecem je samo kontekst
+    # (hladna noč pred 1. v mesecu, serija čez polnoč), v history.json ne gre.
+    hours = {}
+    prev_day = (d0 - timedelta(days=1)).isoformat()
+    hours.update(hours_from_ecowitt(fetch_ecowitt(prev_day, prev_day)))
+    time.sleep(1)
     cur = d0
     while cur <= d1:
         day = cur.isoformat()
         data = fetch_ecowitt(day, day)
         if data:
             station.update(normalize_ecowitt(data))
+            hours.update(hours_from_ecowitt(data))
         cur += timedelta(days=1)
         if cur <= d1:
             time.sleep(1)   # blag zamik — Ecowitt omejuje pogostost klicev
@@ -366,6 +434,7 @@ def main():
     hp   = os.path.join(ROOT, "history.json")
     hist = json.load(open(hp, encoding="utf-8"))
 
+    melt = melt_by_day(hours)
     n_station = n_era5 = 0
     for date in sorted(set(station) | set(era5)):
         if not date.startswith(ym):
@@ -381,6 +450,8 @@ def main():
                         s[f] = e[f]
             if _complete(s):
                 hist[date] = {**s, "src": "station"}
+                if date in melt:
+                    hist[date]["precipMelt"] = melt[date]
                 _apply_precip_corrections(date, hist[date])
                 n_station += 1
                 continue

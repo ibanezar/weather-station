@@ -274,6 +274,7 @@ jobs:
         run: |
           python3 tools/test_mtr_extras.py
           python3 tools/test_hourly_log.py
+          python3 tools/test_melt_precip.py
           python3 tools/test_ensemble_log.py
           python3 tools/test_profile_log.py
           python3 tools/test_claef_snow_log.py
