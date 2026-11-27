@@ -12,9 +12,14 @@ Razredi (na ravni UR, odločitev je na ravni »serije« zaporednih ur s padavina
   melt      = verjetno taljenje snega/ivja, ki je obležalo v lijaku (ne nove padavine)
   uncertain = osamljen drobec (≤ 0,5 mm, ena ura) ponoči pri ledišču: lahko rosa/sneg, lahko ivje
 
-NI umerjeno in NI preverjeno z ničemer, kar bi bilo neodvisno od dežemera (pravih padavin
-v tisti uri ne vemo). Pragovi so presoja iz nekaj dogodkov (glej spodaj), zato je izhod
-»ocena«, ne meritev. Notranjih meritev ne bere (samo data/hourly-observations.csv).
+Pragovi so presoja iz nekaj dogodkov (glej spodaj), zato je izhod »ocena«, ne meritev;
+pravih padavin v tisti uri ne vemo (edino preverjanje: 26. 11. 2026 ob 14–17 h je bilo suho,
+potrdil lastnik postaje). Notranjih meritev ne bere.
+
+V history.json gre od 27. 11. 2026 `precipMelt` (mm taljenja v dnevu, samo razred 'melt'):
+piše ga update_history.py iz 5-minutnih podatkov Ecowitt (`hours_from_ecowitt()`), `precipTotal`
+ostane nespremenjen. Ta datoteka je tudi CLI za raziskovanje po urnem zapisu
+data/hourly-observations.csv (tam je urna vsota malo nižja: prirastek čez mejo ure se izgubi).
 
 Uporaba:
   python3 tools/melt_precip.py                    # zadnjih 60 dni, ure z deležem taljenja
@@ -90,6 +95,17 @@ def classify(hours):
         for t in run:
             kinds[t] = kind
     return kinds
+
+
+def melt_mm_by_day(hours, kinds=None):
+    """{datum: mm taljenja}. Šteje SAMO razred 'melt'; 'uncertain' ostane v padavinah (previdno)."""
+    kinds = kinds if kinds is not None else classify(hours)
+    out = {}
+    for ts, k in kinds.items():
+        if k == "melt":
+            d = ts.date().isoformat()
+            out[d] = out.get(d, 0.0) + hours[ts]["p"]
+    return {d: round(v, 1) for d, v in out.items()}
 
 
 def daily(hours, kinds):

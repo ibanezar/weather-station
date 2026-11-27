@@ -54,4 +54,61 @@ check(M.classify(night)[d(2026, 11, 9, 3)] == "uncertain", "nočni drobec ob led
 check(M.classify(series("2026-01-01T00:00", [(0.0, 0.0, 0)] * 5)) == {}, "brez padavin ni razredov")
 check(M.classify(series("2026-01-01T00:00", [(None, 0.4, None)])) == {d(2026, 1, 1): "precip"}, "brez temperature = padavine")
 
+
+# --- update_history: surov Ecowitt (5-min) -> urni niz -> precipMelt v zapisu dneva
+import update_history as UH  # noqa: E402
+from datetime import datetime as _dtm  # noqa: E402
+
+def ts(day, hh, mm):  # lokalni čas -> unix
+    return str(int(_dtm.fromisoformat(f"{day}T{hh:02d}:{mm:02d}:00").replace(tzinfo=UH.TZ).timestamp()))
+
+def raw(day, temp, sol, cum):
+    """temp/sol/cum: {(hh, mm): vrednost}."""
+    f = lambda m: {"list": {ts(day, h, mi): v for (h, mi), v in m.items()}}
+    return {"outdoor": {"temperature": f(temp)}, "solar_and_uvi": {"solar": f(sol)},
+            "rainfall": {"daily": f(cum)}, "indoor": {"temperature": f({(h, 0): 23.4 for h in range(24)})}}
+
+# prirastek čez mejo ure se ne izgubi: 0,3 mm ob 13:55 -> 0,5 ob 14:00 in 14:05 se pripiše uram 14 (0,2 + 0,0)
+r = raw("2026-11-26", {(h, 0): 0.7 for h in range(24)}, {(h, 0): 0.0 for h in range(24)},
+        {(13, 55): 0.3, (14, 0): 0.5, (14, 5): 0.5, (15, 0): 0.5})
+H = UH.hours_from_ecowitt(r)
+check(H[_dtm(2026, 11, 26, 14)]["p"] == 0.2 and H[_dtm(2026, 11, 26, 13)]["p"] == 0.3, "prirastek kumulative po urah")
+check("23.4" not in repr(H), "notranje meritve se ne preberejo")
+# polnočna ponastavitev kumulative: pad = nova vrednost, ne negativen prirastek
+r2 = raw("2026-11-26", {(23, 55): 0.1, (0, 0): 0.1}, {}, {(23, 55): 4.0, (0, 0): 0.2})
+H2 = UH.hours_from_ecowitt(r2)
+check(all(v["p"] >= 0 for v in H2.values()), "ponastavitev kumulative ni negativna")
+
+# cel dan iz 5-min podatkov: ponoči sneg ob 0,5–1,8 °C, čez dan 7 ur 0,0 mm, popoldne taljenje ob soncu
+T = {}; S = {}; C = {}
+temps = [-0.1] * 8 + [0.4, 0.5, 1.1, 0.7, 0.7, 0.7, 0.6, 0.3, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+sols = [0] * 8 + [1.6, 16.4, 27.3, 28.3, 73.2, 112.9, 69.4, 20.8, 1.1, 0, 0, 0, 0, 0, 0, 0]
+for h in range(24):
+    for m in range(0, 60, 5):
+        T[(h, m)] = temps[h]; S[(h, m)] = sols[h]
+cum = 0.0
+for h in range(24):
+    for m in range(0, 60, 5):
+        if h in (14, 15) and m == 30:
+            cum += 0.5
+        C[(h, m)] = round(cum, 1)
+day = UH.hours_from_ecowitt(raw("2026-11-27", T, S, C))
+check(UH.melt_by_day(day) == {"2026-11-27": 1.0}, "dnevno taljenje iz 5-min podatkov")
+check(UH.melt_by_day({k: v for k, v in list(day.items())[:10]}) == {}, "pokritost < 20 ur: dan ni izračunan")
+# serija čez polnoč: hladna noč prejšnjega dne je kontekst
+prev = UH.hours_from_ecowitt(raw("2026-11-26", {(h, 0): -2.0 for h in range(24)}, {(h, 0): 0.0 for h in range(24)}, {(0, 0): 0.0}))
+cur = UH.hours_from_ecowitt(raw("2026-11-27", {(h, 0): (1.0 if h < 10 else 0.2) for h in range(24)},
+                               {(h, 0): (50.0 if h == 10 else 0.0) for h in range(24)},
+                               {(h, 0): (0.3 if h >= 10 else 0.0) for h in range(24)}))
+check(UH.melt_by_day({**prev, **cur}).get("2026-11-27") == 0.3, "kontekst prejšnjega dne")
+check(UH.melt_by_day(cur).get("2026-11-27") == 0.0, "brez konteksta (topla noč) ni taljenja")
+
+# korekcije: taljenje ne presega seštevka, pri ročnem seštevku ga ni
+rec = {"precipTotal": 1.0, "precipMelt": 1.7}
+UH._apply_precip_corrections("2026-11-26", rec)
+check(rec["precipMelt"] == 1.0, "precipMelt <= precipTotal")
+rec = {"precipTotal": 9.7, "precipMelt": 0.5}
+UH._apply_precip_corrections("2026-09-05", rec)
+check("precipMelt" not in rec, "ročni seštevek: brez precipMelt")
+
 print("OK" if not FAILS else f"{len(FAILS)} FAIL"); sys.exit(1 if FAILS else 0)

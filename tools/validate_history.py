@@ -36,6 +36,7 @@ OPTIONAL_RANGES = {
     'windgustHigh': (0, 400),
     'solarHigh':    (0, 1500),
     'uviHigh':      (0, 20),
+    'precipMelt':   (0, 600),   # mm taljenja snega v dežemeru (del precipTotal), glej melt_precip.py
 }
 
 # Meje verjetnosti (NE napake). Zgornji `OPTIONAL_RANGES` lovijo očitne smeti;
@@ -103,6 +104,10 @@ def main():
             if field in entry and entry[field] is not None:
                 if not (lo <= float(entry[field]) <= hi):
                     errors.append(f"{key}.{field}: {entry[field]} izven [{lo}, {hi}]")
+        # Taljenje je del dnevnega seštevka, ne more biti večje (toleranca zaokroževanja)
+        if entry.get('precipMelt') is not None and entry.get('precipTotal') is not None:
+            if float(entry['precipMelt']) > float(entry['precipTotal']) + 0.05:
+                errors.append(f"{key}: precipMelt ({entry['precipMelt']}) > precipTotal ({entry['precipTotal']})")
         # Fizikalno neverjetne, a ne smetne vrednosti — samo opozorilo
         for field, cap in PLAUSIBLE_MAX.items():
             if field in entry and entry[field] is not None:
