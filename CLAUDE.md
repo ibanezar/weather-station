@@ -777,7 +777,8 @@ Dežemer IREICA1 je prekucni in **neogrevan** (Filip): sneg ob ≤ 0 °C obleži
 - **`precipMelt` v `history.json`** (mm, del `precipTotal`, ne dodatek) piše `update_history.py` iz 5-min podatkov (`hours_from_ecowitt()`: prirastki kumulative `rainfall.daily`, ne max−min po uri; en dan pred mesecem je samo kontekst). `precipTotal` se ne spreminja (rekordi, arhiv, članki).
   **Polje manjka = ni izračunano** (dnevi pred uvedbo, ERA5, dnevi z < 20 urami meritev, ročno postavljen seštevek); 0 = izračunano, brez taljenja. Zapis dneva se pri vsakem teku povozi, zato polja ne piši ločeno od `update_history.py`.
   Ecowitt ima 5-min ločljivost samo ~90 dni nazaj: za backfill poženi `update-history.yml` z mesecem (`month=2026-10`, `2026-11`).
-- **Ni narejeno:** prikaz (ploščica »Padlo danes«, `/vreme/` arhiv, FB/IG, `export_dataset.py`/Zenodo CSV nimajo stolpca), zgrešene padavine (sneg, ki nikoli ni prišel v dežemer: odeja 9 → 17 cm, dežemer 1,7 mm), obravnava ob ledišču v MTR/`/tocnost-napovedi/` (padavine postaje so tam še vedno surove).
+- **Prikaz:** dnevna stran arhiva (`gen_daily_pages()`) ima vrstico »od tega taljenje snega v dežemeru« (samo ≥ 0,1 mm). **Stran starega meseca se ne prepiše brez `force`** (`gen_daily_pages` preskoči obstoječe), zato po backfillu za oktober poženi `generate-seo-pages.yml` s `force`.
+- **Ni narejeno:** ploščica »Padlo danes« in mesečna tabela, FB/IG, `export_dataset.py`/Zenodo CSV (nimajo stolpca), zgrešene padavine (sneg, ki nikoli ni prišel v dežemer: odeja 9 → 17 cm, dežemer 1,7 mm), obravnava ob ledišču v MTR/`/tocnost-napovedi/` (padavine postaje so tam še vedno surove).
   Test: `tools/test_melt_precip.py` (v `parity.yml`), `validate_history.py` preveri `precipMelt ≤ precipTotal`.
 
 ## Vodostaj — izmerjeno pred modelom, pragovi po postajah
