@@ -1,9 +1,13 @@
 {
  "sezona": 2026,
- "prvi_sneg": null,
+ "prvi_sneg": "2026-11-26",
  "vir": "ARSO · Gornji Grad (428 m), višina snežne odeje ≥ 1 cm",
  "novosti": "/novosti/prvi-sneg-2026/",
- "gap": null,
+ "gap": [
+  "2026-11-01",
+  "2026-11-08"
+ ],
  "brez_snega": false,
- "posodobljeno": "2026-11-19T12:15:21Z"
+ "vrednost_cm": 11.0,
+ "posodobljeno": "2026-11-27T10:08:22Z"
 }

@@ -1,5 +1,63 @@
 [
   {
+    "type": "prvi-sneg",
+    "date": "2026-11-26",
+    "value": 11.0,
+    "param": "snow",
+    "label": "Prva snežna odeja sezone",
+    "slug": "prvi-sneg-2026",
+    "where": "ARSO · Gornji Grad",
+    "source": "odčitek",
+    "alt_m": 428,
+    "clock": "ob 16.20",
+    "gap": [
+      "2026-11-01",
+      "2026-11-08"
+    ],
+    "others": [
+      {
+        "name": "Litija",
+        "alt_m": 272.0,
+        "cm": 1.0
+      },
+      {
+        "name": "Šmartno pri Slovenj Gradcu",
+        "alt_m": 455.0,
+        "cm": 6.0
+      },
+      {
+        "name": "Mežica",
+        "alt_m": 469.0,
+        "cm": 9.0
+      },
+      {
+        "name": "Kamniška Bistrica",
+        "alt_m": 549.0,
+        "cm": 8.0
+      },
+      {
+        "name": "Trojane - Limovce",
+        "alt_m": 673.0,
+        "cm": 9.0
+      },
+      {
+        "name": "Logarska dolina",
+        "alt_m": 776.0,
+        "cm": 17.0
+      },
+      {
+        "name": "Radegunda",
+        "alt_m": 794.0,
+        "cm": 16.0
+      },
+      {
+        "name": "Jezersko",
+        "alt_m": 894.0,
+        "cm": 10.0
+      }
+    ]
+  },
+  {
     "type": "rekord-dneva-vrocina",
     "date": "2026-11-18",
     "value": 15.1,
