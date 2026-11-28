@@ -120,11 +120,58 @@ def probe_previous(model, past_days):
     return out, None
 
 
+def hourly_previous_day1(model, past_days):
+    """{ura: temperature_2m_previous_day1} za model; None ob napaki."""
+    data, err = get(PREVIOUS, {
+        "latitude": LAT, "longitude": LON, "models": model, "timezone": "UTC",
+        "past_days": past_days, "forecast_days": 1, "hourly": "temperature_2m_previous_day1",
+    }, timeout=180)
+    if err:
+        return None, err
+    h = (data or {}).get("hourly") or {}
+    return dict(zip(h.get("time") or [], h.get("temperature_2m_previous_day1") or [])), None
+
+
+def run_diff(pair, past_days):
+    """Ali model A pri D+1 doda kaj k modelu B? Primerja urno previous_day1 temperaturo (npr. icon_d2 proti
+    icon_seamless: seamless pri D+1 verjetno že vzame ICON-D2, zato bi bila samostojna vrstica na semaforju odveč)."""
+    a_id, b_id = pair
+    print("\nPrimerjava previous_day1 temperature_2m: %s proti %s (zadnjih %d dni)" % (a_id, b_id, past_days))
+    a, ea = hourly_previous_day1(a_id, past_days)
+    time.sleep(2)
+    b, eb = hourly_previous_day1(b_id, past_days)
+    if a is None or b is None:
+        print("  ni odgovora: %s / %s" % (ea, eb))
+        return
+    common = [t for t in a if a[t] is not None and b.get(t) is not None]
+    if not common:
+        print("  ni skupnih ur z vrednostjo")
+        return
+    d = [abs(a[t] - b[t]) for t in common]
+    same = sum(1 for x in d if x < 0.05)
+    print("  skupnih ur: %d" % len(d))
+    print("  povprečna |razlika|: %.3f °C, največja: %.2f °C" % (sum(d) / len(d), max(d)))
+    print("  ur z razliko < 0,05 °C: %d (%.1f %%)" % (same, 100.0 * same / len(d)))
+    verdict = ("praktično isti podatek: samostojna vrstica na semaforju ne doda ničesar"
+               if same / len(d) > 0.9 else "podatka se razlikujeta: vrstica bi lahko kaj dodala")
+    print("  zaključek: " + verdict)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--past-days", type=int, default=400)
     ap.add_argument("--models", default="")
+    ap.add_argument("--diff", default="", help="A,B: primerjaj previous_day1 temperaturo dveh modelov")
     a = ap.parse_args()
+    if a.diff:
+        pair = [m.strip() for m in a.diff.split(",") if m.strip()]
+        if len(pair) != 2:
+            print("--diff zahteva natanko dva ID-ja (A,B)", file=sys.stderr)
+            return 2
+        print("Diff probe, Rečica (%.4f, %.4f)" % (LAT, LON))
+        run_diff(pair, a.past_days)
+        if not a.models:
+            return 0
     wanted = [m.strip() for m in a.models.split(",") if m.strip()]
     cands = [c for c in CANDIDATES if not wanted or c[0] in wanted]
     for m in wanted:
