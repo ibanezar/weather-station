@@ -398,6 +398,7 @@ def core_sitemap_entries():
     """
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import seo_audit
+    import sitemap_lastmod
 
     covered = set()
     for name in ("sitemap-seo.xml", "sitemap-weather.xml"):
@@ -421,6 +422,10 @@ def core_sitemap_entries():
             continue
         fresh = cf in ("hourly", "daily") or page in ("", "blog/")
         lastmod = TODAY if fresh else prev.get(url, TODAY)
+        # stran, ki sama pove, kdaj se je vsebina res spremenila (dateModified), ima prednost pred ugibanjem
+        dm = sitemap_lastmod.page_date_modified(seo_audit.local_path(page))
+        if dm and dm <= str(TODAY) and (page not in ("", "blog/")):
+            lastmod = dm
         img = f"{SITE}/og-image.jpg" if page == "" else None
         entries.append((url, cf, prio, lastmod, img))
     return entries

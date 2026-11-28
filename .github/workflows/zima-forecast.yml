@@ -107,10 +107,16 @@ jobs:
           python3 tools/generate_crnivec_igra.py
           node tools/test_crnivec_igra.mjs
 
+      - name: Sitemap lastmod iz dateModified zimskih strani
+        # sitemap.xml piše sicer samo wire_all() ob objavi članka, zato je lastmod zimskih strani zaostajal za dneve
+        # (28. 11. 2026: 25. 11. pri strani, osveženi vsak dan). Samo naprej, samo strani z dateModified.
+        run: python3 tools/sitemap_lastmod.py
+
       - name: Commit & push (samo če se je stanje spremenilo)
         run: |
           git config user.name  "meteorec-bot"
           git config user.email "bot@meteorec.si"
+          git add sitemap.xml
           git add data/winter-data.json data/zima-ocene.json data/winter-snowpack.json data/winter-history.json data/crnivec-history.json data/crnivec-arso.json zima/ vreme-v-gorah/ snegofili/ data/snegofili.json jutro-v-dolini/ data/jutro-zamik.json data/jutro-napovedi.csv crnivec/ crnivec-site/ og/crnivec/
           # rubrika »Po svetu«: datoteka nastane šele ob prvem uspelem klicu; manjkajoča pot ne sme podreti celotnega git add
           if [ -e data/snegofili-svet.json ]; then git add data/snegofili-svet.json; fi

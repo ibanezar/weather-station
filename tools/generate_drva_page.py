@@ -246,7 +246,8 @@ def main():
             "po meritvah stopinjskih dni v Rečici.")
     assert len(title) <= 60 and len(desc) <= 160, (len(title), len(desc))
     schema = "\n".join([
-        seo.webpage_schema(URL, title, desc, date_published="2026-11-18"),
+        seo.webpage_schema(URL, title, desc, date_published="2026-11-18",
+                           date_modified=max(days).isoformat() if days else None),  # zadnji dan z meritvijo, ki je v izračunu
         seo.crumbs_schema([("Meteorec", "/"), ("Zima", "/zima/"), ("Poraba drv", None)]),
         seo.faq_schema(faq()),
     ])
