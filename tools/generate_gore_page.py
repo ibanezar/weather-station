@@ -169,7 +169,8 @@ def main():
     url = "/vreme-v-gorah/"
     title, desc = TITLE, DESC
     schema = "\n".join([
-        seo.webpage_schema(url, title, desc, date_published="2026-10-07"),
+        seo.webpage_schema(url, title, desc, date_published="2026-10-07",
+                           date_modified=seo.local_date_from_iso(data.get("generated_at"))),
         seo.crumbs_schema([("Meteorec", "/"), ("Vreme v gorah", None)]),
         seo.faq_schema(FAQ),
     ])

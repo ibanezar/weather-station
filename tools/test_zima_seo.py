@@ -172,6 +172,21 @@ gq = [q for q, _ in g.FAQ]
 check("Kakšno je vreme na Golteh?" in gq and "Ali je na Golteh sneg?" in gq, "vreme v gorah: FAQ o Golteh")
 check("vreme golte" in g.TITLE.lower(), "vreme v gorah: naslov vodi z »Vreme Golte«")
 
+# ── 8b. 0 m = »v nižinah«, ne »pri 0 m«; dateModified iz časa podatkov (28. 11. 2026) ──
+check(z.line_phrase(0) == "v nižinah (0 m n. m. ali nižje)", "meja 0 m: »v nižinah«, ne »pri 0 m«")
+check(z.line_phrase(-5).startswith("v nižinah"), "meja pod 0 m: »v nižinah«")
+check(z.line_phrase(760) == "pri 760 m" and z.line_phrase(760, html=True) == "pri <strong>760 m n. m.</strong>",
+      "meja nad 0 m: »pri N m«")
+data0 = {"snow_line": {"current_line_m": 0, "forecast_24h_m": 228, "confidence": "srednja",
+                       "expected_cm_by_elevation": [], "daily": []}}
+check("pri <strong>0 m" not in z.snow_line_kratko(data0) and "v nižinah" in z.snow_line_kratko(data0),
+      "»Na kratko« ob meji 0 m ne pravi »pri 0 m«")
+check(z._dm({"generated_at": "2026-11-27T23:30:00+00:00"}) == "2026-11-28", "dateModified: lokalni datum nastanka podatkov")
+check(z._dm({}) is None and z._dm(None) is None, "dateModified: brez podatka ga ni (ne ugibamo)")
+src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "generate_zima_page.py"), encoding="utf-8").read()
+check(src.count("seo.webpage_schema(") == src.count("date_modified=_dm(data)"),
+      "vsaka zimska stran iz generate_zima_page.py nosi dateModified")
+
 # ── 9. notranjih meritev ni nikjer ────────────────────────────────────────
 for name, html in (("meja sneženja", body), ("snežna karta", kbody)):
     check("indoor" not in html.lower() and "tempinf" not in html.lower(), f"{name}: brez notranjih meritev")

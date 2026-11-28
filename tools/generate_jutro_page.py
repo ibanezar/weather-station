@@ -251,7 +251,8 @@ def main():
         f'    <details><summary>{_html.escape(q)}</summary><p>{_html.escape(a)}</p></details>' for q, a in FAQ
     ) + "\n  </div>"
     body = build_body(recs, stats, generated) + "\n" + faq_html + '\n  <a class="back-link" href="/">← Nazaj na trenutno vreme</a>'
-    schema = "\n".join([seo.webpage_schema(URL, title, desc, date_published=PUBLISHED),
+    schema = "\n".join([seo.webpage_schema(URL, title, desc, date_published=PUBLISHED,
+                                              date_modified=seo.local_date_from_iso(data.get("generated_at"))),
                         seo.crumbs_schema([("Meteorec", "/"), ("Jutro v dolini", None)]), seo.faq_schema(FAQ)])
     page = seo.page_shell(title, desc, URL, schema + "\n" + CSS, body)
     seo.write_page("jutro-v-dolini/index.html", page, force=True)
