@@ -201,6 +201,13 @@ FRESHNESS_PAGES = {
     "tocnost-napovedi/index.html": 2, "gobarska-napoved/index.html": 2,
     "meteogasilec/index.html": 2, "nevihte/index.html": 1,
     "agrometeo/index.html": 2, "test-napovedi/index.html": 32,
+    # zima (zima-forecast.yml, dnevno; Open-Meteo izpad ali zamujen cron pustita stare številke, 26. 11. 2026 sta bili
+    # strani 2 dni stari brez opozorila): prag 2 dni, kot pri drugih dnevnih straneh
+    "zima/index.html": 2, "zima/meja-snezenja/index.html": 2, "zima/poledica/index.html": 2,
+    "zima/zled/index.html": 2, "zima/kurilni-semafor/index.html": 2, "zima/nad-meglo/index.html": 2,
+    "zima/snezna-odeja/index.html": 2, "zima/prevoznost-prelazov/index.html": 2,
+    "snegofili/index.html": 2, "vreme-v-gorah/index.html": 2, "jutro-v-dolini/index.html": 2,
+    "zima/poraba-drv/index.html": 3,
 }
 DATE_MOD_RE = re.compile(r'"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})')
 

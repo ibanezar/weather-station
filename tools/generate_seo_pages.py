@@ -209,8 +209,24 @@ def crumbs_schema(crumbs):
             f'{{"@context":"https://schema.org","@type":"BreadcrumbList",'
             f'"itemListElement":[{",".join(items)}]}}\n</script>')
 
-def webpage_schema(url, title, desc, date_published=None, image=None, speakable=None):
-    """speakable: seznam CSS selektorjev na strani, ki so kratke, samostojne
+def local_date_from_iso(iso):
+    """ISO čas (UTC, »…Z« ali »+00:00«) -> lokalni datum (Europe/Ljubljana) kot »YYYY-MM-DD«, sicer None.
+    Za `dateModified` strani, ki jo generira cron iz podatkov z lastnim časom nastanka."""
+    if not iso:
+        return None
+    try:
+        from zoneinfo import ZoneInfo
+        d = datetime.datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=datetime.timezone.utc)
+        return d.astimezone(ZoneInfo("Europe/Ljubljana")).date().isoformat()
+    except Exception:
+        return None
+
+def webpage_schema(url, title, desc, date_published=None, image=None, speakable=None, date_modified=None):
+    """date_modified: datum zadnje vsebinske spremembe (YYYY-MM-DD); samo za strani, kjer je to res znano
+    (podatki z lastnim časom nastanka), ne ugibaj ga.
+    speakable: seznam CSS selektorjev na strani, ki so kratke, samostojne
     povedi (ne mreža številk/značk) -- glasovni asistent/izvleček jih prebere
     dobesedno. Ne dodajaj je na vsako stran, samo tja, kjer res obstaja tak
     odsek besedila (glej klicna mesta)."""
@@ -225,6 +241,8 @@ def webpage_schema(url, title, desc, date_published=None, image=None, speakable=
          f'"geo":{{"@type":"GeoCoordinates","latitude":{LAT},"longitude":{LON},"elevation":{ELEV}}}}}')
     if date_published:
         s += f',"datePublished":{json.dumps(date_published)}'
+    if date_modified:
+        s += f',"dateModified":{json.dumps(date_modified)}'
     if speakable:
         s += (f',"speakable":{{"@type":"SpeakableSpecification",'
               f'"cssSelector":{json.dumps(speakable)}}}')

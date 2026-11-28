@@ -1517,7 +1517,8 @@ def main():
         print("  → snegofili/index.html (začasna stran brez podatkov)")
         return 0
     schema = "\n".join([
-        seo.webpage_schema(URL, TITLE, DESC, date_published="2026-11-13"),
+        seo.webpage_schema(URL, TITLE, DESC, date_published="2026-11-13",
+                           date_modified=seo.local_date_from_iso(data.get("generated_at"))),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snegofili", None)]),
         seo.faq_schema(FAQ),
     ])

@@ -584,6 +584,21 @@ def snow_line_meter_svg(line_m, station_elev=None, scale_max=2500):
 
 # ── /zima/ hub ────────────────────────────────────────────────────────────
 
+def _dm(data):
+    """dateModified strani: lokalni datum nastanka podatkov (winter-data.json), ne datum zagona generatorja."""
+    return seo.local_date_from_iso((data or {}).get("generated_at"))
+
+
+def line_phrase(line_m, html=False):
+    """Besedilo o meji sneženja. `current_line_m` je omejen navzdol pri 0 m (ničta izoterma − 250 m, ne pod 0 m),
+    zato »pri 0 m« bralcu in iskalniku pove napačno (kot da je meja na morski gladini): 0 pomeni, da sneži
+    do dna doline in nižje."""
+    if line_m is not None and line_m <= 0:
+        return "v nižinah (0 m n. m. ali nižje)"
+    v = f"<strong>{line_m} m n. m.</strong>" if html else f"{line_m} m"
+    return f"pri {v}"
+
+
 def build_hub_body(data):
     snow = data["snow_line"]
     locations = data["locations"]
@@ -594,14 +609,14 @@ def build_hub_body(data):
     if line_m is None:
         snow_verdict = "Meja sneženja trenutno ni na voljo."
     elif line_m > 1700:
-        snow_verdict = f"Meja sneženja je danes pri {line_m} m — nad vsemi spremljanimi višinami v dolini, sneg ni pričakovan."
+        snow_verdict = f"Meja sneženja je danes {line_phrase(line_m)} — nad vsemi spremljanimi višinami v dolini, sneg ni pričakovan."
     else:
         below = [b for b in snow["expected_cm_by_elevation"] if b["cm"] > 0]
         if below:
-            snow_verdict = (f"Meja sneženja je pri {line_m} m — nad {below[0]['elevation_m']} m n. m. "
+            snow_verdict = (f"Meja sneženja je {line_phrase(line_m)} — nad {below[0]['elevation_m']} m n. m. "
                              f"je v naslednjih 24 h pričakovanih do {num(max(b['cm'] for b in below), 1)} cm snega.")
         else:
-            snow_verdict = f"Meja sneženja je pri {line_m} m, a v naslednjih 24 h ni pričakovanih pomembnejših padavin."
+            snow_verdict = f"Meja sneženja je {line_phrase(line_m)}, a v naslednjih 24 h ni pričakovanih pomembnejših padavin."
 
     ice_verdict = (f"V naslednjih 36 h ni povečanega tveganja poledice v dolini."
                    if worst_level == "nizko" else
@@ -1047,7 +1062,7 @@ def snow_line_kratko(data):
     if line_m is None:
         return ""
     st_elev = seo.ELEV
-    parts = [f'meja sneženja je zdaj pri <strong>{line_m} m n. m.</strong>']
+    parts = [f'meja sneženja je zdaj {line_phrase(line_m, html=True)}']
     if fc_m is not None and abs(fc_m - line_m) >= 100:
         parts[0] += f', v naslednjih 24 h {"naraste" if fc_m > line_m else "se spusti"} na {fc_m} m'
     if st_elev <= line_m - SNOW_MIX_HALF_M:
@@ -1101,7 +1116,7 @@ def snow_line_places_html(data):
     rows = "\n".join(f'      <tr><th>{l["name"]} ({l["elevation_m"]} m)</th><td>{what(l["elevation_m"])}</td></tr>'
                      for l in sorted(locs, key=lambda l: l["elevation_m"]))
     return f'''  <h2>Kje v dolini sneži in kje dežuje</h2>
-  <p class="archive-intro">Ob trenutni meji sneženja ({line_m} m), če bi padavine bile zdaj:</p>
+  <p class="archive-intro">Ob trenutni meji sneženja ({line_m} m{' = do dna doline in nižje' if line_m is not None and line_m <= 0 else ''}), če bi padavine bile zdaj:</p>
   <table class="stats">
 {rows}
   </table>'''
@@ -1125,7 +1140,9 @@ def build_snow_line_body(data):
         # relevantna za spremljane pasove (do 1600 m) — nad tem je "nizka
         # zanesljivost" pri 4000+ m samo zmedla bi bralca brez razloga.
         conf_txt = f" ({CONF_LABEL.get(conf, 'ocena')})" if conf and line_m <= 2000 else ""
-        hero_sub = f'Trenutna meja sneženja je pri <strong>{line_m} m n. m.</strong>{conf_txt}.{trend}'
+        if conf_txt and line_m <= 0:
+            conf_txt = f", {CONF_LABEL.get(conf, 'ocena')}"  # fraza za 0 m je že v oklepaju
+        hero_sub = f'Trenutna meja sneženja je {line_phrase(line_m, html=True)}{conf_txt}.{trend}'
 
     kratko = snow_line_kratko(data)
     rows = []
@@ -1651,7 +1668,7 @@ def main():
         seo.webpage_schema("/zima/", "MeteoZima — Zgornja Savinjska dolina",
                             "MeteoZima — zimski nadzorni center: meja sneženja in tveganje poledice za "
                             "Zgornjo Savinjsko dolino, iz meritev IREICA1 in javne napovedi.",
-                            date_published="2026-09-20"),
+                            date_published="2026-09-20", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", None)]),
         seo.faq_schema(faq),
     ])
@@ -1667,10 +1684,17 @@ def main():
     _desc = ("Do katere višine bo snežilo? Meja sneženja za Zgornjo Savinjsko dolino: napoved za naslednje dni, "
              "sneg po višinskih pasovih in kje v dolini sneži. Modelska ocena.")
     if _sl.get("current_line_m") is not None:
-        _desc = (f"Meja sneženja je zdaj pri {_sl['current_line_m']} m. Do katere višine bo snežilo: napoved za "
-                 f"naslednje dni, sneg po višinskih pasovih in kje v dolini sneži. Modelska ocena.")
+        _lm = _sl["current_line_m"]
+        if _lm <= 0:
+            # 0 = spodnja omejitev (glej line_phrase): sneži do dna doline, ne »pri 0 m«
+            _desc = ("Meja sneženja je zdaj v nižinah (do dna doline). Napoved po dneh in krajih, sneg po višinskih "
+                     "pasovih: do katere višine bo snežilo. Modelska ocena.")
+        else:
+            _desc = (f"Meja sneženja je zdaj pri {_lm} m. Do katere višine bo snežilo: napoved za "
+                     f"naslednje dni, sneg po višinskih pasovih in kje v dolini sneži. Modelska ocena.")
+    assert len(_desc) <= 160, (len(_desc), _desc)
     schema = "\n".join([
-        seo.webpage_schema("/zima/meja-snezenja/", SNOW_LINE_TITLE, _desc, date_published="2026-09-20"),
+        seo.webpage_schema("/zima/meja-snezenja/", SNOW_LINE_TITLE, _desc, date_published="2026-09-20", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Meja sneženja", None)]),
         seo.faq_schema(faq),
     ])
@@ -1685,7 +1709,7 @@ def main():
         seo.webpage_schema("/zima/poledica/", "Tveganje poledice — Zgornja Savinjska dolina",
                             "Ocena tveganja poledice po krajih Zgornje Savinjske doline, iz meritev "
                             "IREICA1 in javne napovedi.",
-                            date_published="2026-09-20"),
+                            date_published="2026-09-20", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Poledica", None)]),
         seo.faq_schema(faq),
     ])
@@ -1703,7 +1727,7 @@ def main():
         seo.webpage_schema("/zima/zled/", "Žled: kdaj dež zmrzuje in ali ga bo v dolini",
                             "Modelski pokazatelj žleda za Rečico ob Savinji, vertikalna sondaža Ljubljana "
                             "(ARSO) in razlaga, kako nastane žled.",
-                            date_published="2026-10-07"),
+                            date_published="2026-10-07", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Žled", None)]),
         seo.faq_schema(faq),
     ])
@@ -1720,7 +1744,7 @@ def main():
         seo.webpage_schema("/zima/kurilni-semafor/", "Kurilni semafor — Zgornja Savinjska dolina",
                             "Ocena prevetrenosti za kurjenje na podlagi temperaturne inverzije v Zgornji "
                             "Savinjski dolini.",
-                            date_published="2026-09-20"),
+                            date_published="2026-09-20", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Kurilni semafor", None)]),
         seo.faq_schema(faq),
     ])
@@ -1738,7 +1762,7 @@ def main():
         seo.webpage_schema("/zima/nad-meglo/", "Nad meglo — Zgornja Savinjska dolina",
                             "Kateri kraji v Zgornji Savinjski dolini bodo jutri zjutraj po oceni nad "
                             "pričakovano meglo/nizko oblačnostjo.",
-                            date_published="2026-09-20"),
+                            date_published="2026-09-20", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Nad meglo", None)]),
         seo.faq_schema(faq),
     ])
@@ -1755,7 +1779,7 @@ def main():
         seo.webpage_schema("/zima/snezna-odeja/", "Snežna odeja — Zgornja Savinjska dolina",
                             "Tekoča modelirana ocena snežne odeje po višinskih pasovih za Zgornjo Savinjsko "
                             "dolino.",
-                            date_published="2026-09-20"),
+                            date_published="2026-09-20", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Snežna odeja", None)]),
         seo.faq_schema(faq),
     ])
@@ -1772,7 +1796,7 @@ def main():
         seo.webpage_schema("/zima/prevoznost-prelazov/", "Prevoznost prelazov — Zgornja Savinjska dolina",
                             "Vreme na višini gorskih prelazov (Črnivec, Pavličevo sedlo) okoli Zgornje "
                             "Savinjske doline.",
-                            date_published="2026-09-20"),
+                            date_published="2026-09-20", date_modified=_dm(data)),
         seo.crumbs_schema([("Meteorec", "/"), ("MeteoZima", "/zima/"), ("Prevoznost prelazov", None)]),
         seo.faq_schema(faq),
     ])
