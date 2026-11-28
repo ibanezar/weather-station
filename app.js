@@ -4431,9 +4431,9 @@ async function autoLoadHistoryFile(){
       Object.keys(_histCache).forEach(k=>delete _histCache[k]);
       renderMonthCard();applyYearRecords();applyStationOnThisDay();applyPheno();refreshInsights();refreshClimate();refreshLife();renderPastDays();
       if(histTabActive())switchPeriod(_currentPeriod);
-      const t=document.getElementById('toast');
+      // Brez obvestila obiskovalcu (28. 11. 2026, design audit): sporočilo »uvoženih 2558 novih dni« je bilo razvijalsko, ob prvem obisku ga je videl vsak in je na telefonu prekrilo spodnjo navigacijo.
       const msg=[added?'uvoženih '+added+' novih dni':'',fixed?'usklajenih '+fixed+' dni z arhivom':''].filter(Boolean).join(', ');
-      if(t){t.textContent='📂 history.json: '+msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
+      console.info('[history.json]',msg);
     }
   }catch(e){console.warn('[history.json]',e.message);}
 }
