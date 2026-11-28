@@ -1,12 +1,12 @@
 {
-  "date": "2026-11-27",
-  "issued": "27.11.2026 7:00 CET",
-  "issued_at": "2026-11-27T07:30:35.978383+01:00",
-  "top_station": "Vogel",
-  "top_mm": 32,
+  "date": "2026-11-28",
+  "issued": "28.11.2026 7:00 CET",
+  "issued_at": "2026-11-28T07:30:36.507345+01:00",
+  "top_station": "Črnomelj - Dobliče",
+  "top_mm": 2,
   "n_stations": 20,
-  "station_mm": 2.3,
-  "should_post": true,
-  "image": "https://meteorec.si/og/precip-map/2026-11-27.jpg",
-  "image_story": "https://meteorec.si/og/precip-map/2026-11-27-story.jpg"
+  "station_mm": 7.1,
+  "should_post": false,
+  "image": "https://meteorec.si/og/precip-map/2026-11-28.jpg",
+  "image_story": "https://meteorec.si/og/precip-map/2026-11-28-story.jpg"
 }
