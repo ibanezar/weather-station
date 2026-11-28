@@ -5064,3 +5064,24 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
 @media (pointer:coarse){
   .qn-drop-menu a{min-height:44px}
 }
+
+/* Svetla tema: kontrast (28. 11. 2026, design audit).
+   Izmerjeno iz posnetka z skritim besedilom (barva besedila proti pravemu ozadju, ne proti body): --muted (#5B6B60) je na barvnih ozadjih kartic dal 3,5-4,2:1,
+   več pomožnih napisov ima povrhu še opacity .65-.85 (2,5-3,3:1), rumena oznaka ARSO (#d97706 na bledo rumeni) 2,8:1. Temna tema ni spremenjena. */
+[data-theme="light"]{--c-ink-soft:#475A4F}
+[data-theme="light"] .sub-loc,
+[data-theme="light"] .txfc-source,
+[data-theme="light"] .cu-card .txfc-source,
+[data-theme="light"] .cu-hint,
+[data-theme="light"] .hm-sub-inline,
+[data-theme="light"] .mode-btn:not([aria-pressed="true"]) .mode-btn-txt small{opacity:1}
+[data-theme="light"] .qa-tile[disabled]{opacity:.92}
+/* Oznaka ARSO je v JS obarvana z vgrajeno barvo ravni (rumena/oranžna/rdeča); filter jo potemni in obdrži odtenek (besedilo in trikotnik skupaj). */
+[data-theme="light"] .ticker-label>span,[data-theme="light"] .ticker-label>svg{filter:brightness(.62)}
+[data-theme="light"] .notif-btn.labeled{color:#3F5A4C}
+[data-theme="light"] .a-level-yellow,[data-theme="light"] .a-ma-yellow{color:#92400e}
+
+/* Temna tema: bel napis na prehodu modre (aktivni zavihek, preklop pogleda) je imel na svetlem začetku prehoda 3,4:1; začetek je temnejši (bel napis 4,7:1). */
+[data-theme="dark"] .tab-btn.active,[data-theme="dark"] .mode-btn[aria-pressed="true"],[data-theme="dark"] .qn-mode-btn[aria-pressed="true"]{background:linear-gradient(135deg,#2b6ad8,#2563eb)}
+/* Oznaka ARSO: v temni temi posvetli (rumena #d97706 na temno rumeni podlagi je imela 3,2:1). */
+[data-theme="dark"] .ticker-label>span,[data-theme="dark"] .ticker-label>svg{filter:brightness(1.35)}
