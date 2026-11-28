@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-27T14:18:13Z",
+ "generated_at": "2026-11-28T00:17:11Z",
  "live": {
   "target": 20,
   "classes": {
@@ -12,7 +12,7 @@
   },
   "best": 31,
   "best_class": "24–36 h",
-  "log_rows": 267
+  "log_rows": 270
  },
  "profile": {
   "target": 120,
