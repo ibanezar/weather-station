@@ -5050,3 +5050,17 @@ main .subscribe-box .sub-desc{font-size:var(--fs-sm);line-height:1.5}
   .sub-btn::after,.mode-intro-close::after,.tab-nav-arrow::after,.theme-btn::after{content:"";position:absolute;inset:-9px -3px}
   .sskj-toggle::after{content:"";position:absolute;inset:-16px}
 }
+
+/* Design audit (28. 11. 2026): najmanjše pisave v obetih na telefonu in tap-cilj v meniju.
+   Prej so bile pisave kartic obetov (ure, opisi dni, zanesljivost, MTR vrstice) med 9 in 11,8 px; zdaj ≥ 11 px za velike črke in ≥ 12 px za besedilo.
+   Od 900 px naprej že veljajo večja pravila `.cu-card …` zgoraj, zato samo pod to širino. Hero ima lastno lestvico (--fs-*) in ni tu. */
+@media (max-width:899px){
+  .cu-dlbl,.cu-ddesc,.cu-ht,.cu-drain{font-size:.75rem}
+  .cu-confidence,.cu-section-lbl,.cu-time{font-size:.72rem}
+  .cu-mtr .rain-row{grid-template-columns:2.1rem 1fr 1.8rem;gap:.3rem;font-size:.7rem}
+  .mtr-pill{font-size:.7rem}
+  .cu-hprob,.cu-card .txfc-source{font-size:.72rem}
+}
+@media (pointer:coarse){
+  .qn-drop-menu a{min-height:44px}
+}
