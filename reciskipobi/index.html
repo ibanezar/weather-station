@@ -151,6 +151,26 @@ button.ghost{background:transparent;color:var(--mut);min-height:40px;padding:6px
 .e-foot{display:flex;justify-content:flex-end;margin-top:6px}
 .empty{text-align:center;color:var(--mut);padding:26px 8px}
 
+/* prihajajoči termini */
+.dog{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--bd)}
+.dog:first-child{border-top:0}
+.dog-day{flex:none;min-width:78px;text-align:center;background:var(--card2);border:1px solid var(--bd2);border-radius:10px;padding:6px 8px}
+.dog-day b{display:block;font-size:1.05rem;color:var(--ac);line-height:1.15}
+.dog-day small{display:block;font-size:.76rem;line-height:1.2}
+.dog.danes .dog-day{background:var(--ac);border-color:var(--ac)}
+.dog.danes .dog-day b,.dog.danes .dog-day small{color:var(--acfg)}
+.dog-what{flex:1;min-width:0}
+.dog-what strong{font-size:1.05rem}
+.dog-what .pill{margin-left:6px}
+.dog-meta{margin:2px 0 0;color:var(--mut);font-size:.88rem;overflow-wrap:anywhere}
+.dog-acts{display:flex;flex-direction:column;gap:4px;flex:none}
+.dog-acts button{min-height:36px;padding:4px 10px;font-size:.85rem}
+.dg-nov{margin-top:10px;border-top:1px solid var(--bd);padding-top:10px}
+.dg-nov summary{cursor:pointer;color:var(--ac);font-weight:600;min-height:44px;display:flex;align-items:center}
+.dg-nov[open] summary{margin-bottom:8px}
+.hero-next{margin:10px 0 0;font-size:.95rem}
+.hero-next b{color:var(--ac)}
+
 /* polži (ocena zamude) */
 .gz{display:inline-flex;align-items:center;gap:1px;vertical-align:middle}
 .gz svg{width:19px;height:19px;flex:none;overflow:visible}
@@ -378,6 +398,46 @@ footer{max-width:640px;margin:26px auto 0;padding:0 16px;color:var(--mut);font-s
 
   <!-- VPIŠI -->
   <div id="p-vpisi" role="tabpanel" aria-labelledby="t-vpisi">
+    <section class="card" id="prihaja" aria-labelledby="prihajaH">
+      <h2 id="prihajaH">Prihajajoče</h2>
+      <div id="prihajaList"></div>
+      <details id="dgNov" class="dg-nov">
+        <summary>Dodaj termin</summary>
+        <form id="dgForma" novalidate autocomplete="off">
+          <div class="row2">
+            <div class="field">
+              <label for="dgTip">Kaj bo?</label>
+              <select id="dgTip">
+                <option value="vaja">Vaja</option>
+                <option value="nastop">Nastop</option>
+                <option value="gostovanje">Gostovanje</option>
+                <option value="druzenje">Druženje</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="dgDatum">Kdaj?</label>
+              <input id="dgDatum" type="date">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label for="dgUra">Zbor ob <small>(ura, ko se dobimo)</small></label>
+              <input id="dgUra" type="time">
+            </div>
+            <div class="field">
+              <label for="dgKje">Kje? <small>(neobvezno)</small></label>
+              <input id="dgKje" type="text" maxlength="60" placeholder="Dvorana, cerkev …">
+            </div>
+          </div>
+          <div class="field">
+            <label for="dgOpomba">Opomba <small>(neobvezno)</small></label>
+            <input id="dgOpomba" type="text" maxlength="140" placeholder="Obleka, note, kdo pripelje ozvočenje …">
+          </div>
+          <input class="hp" type="text" id="dgWebsite" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="primary" id="dgOddaj" type="submit">Dodaj v seznam</button>
+        </form>
+      </details>
+    </section>
     <div class="seg2" role="group" aria-label="Vrsta vnosa" id="vnosTip">
       <button type="button" data-tip="zamuda" aria-pressed="true">Zamuda</button>
       <button type="button" data-tip="pravocasen" aria-pressed="false">Pravočasen</button>
@@ -670,6 +730,18 @@ function dnevi(zap){
   });
   return m;
 }
+// Prihajajoči termini: od danes naprej (današnji še šteje), najbližji prvi
+function prihajajoci(dog,danes){
+  return dog.filter(function(d){return d.datum>=danes;}).sort(function(a,b){return (a.datum+a.ura).localeCompare(b.datum+b.ura);});
+}
+function dniDo(datum,danes){return Math.round((parse(datum)-parse(danes))/864e5);}
+function kdajBes(datum,danes){var n=dniDo(datum,danes);return n<=0?"danes":n===1?"jutri":"čez "+n+" dni";}
+// Strežniški seznam + začetni vnosi, ki jih strežnik še nima (isti datum, dogodek in ura)
+function zlij(strezn,seme){
+  return strezn.concat(seme.filter(function(s){
+    return !strezn.some(function(d){return d.datum===s.datum&&d.dogodek===s.dogodek&&d.ura===s.ura;});
+  }));
+}
 /*MODEL:END*/
 var SVGNS="http://www.w3.org/2000/svg", TILT=[-4,3,-2,5,-3];
 function gzSvg(i){
@@ -718,7 +790,10 @@ function store(v,rem){
 }
 
 /* ───────── strežnik ───────── */
-var pw="", zapisi=[], period="month", shown=PAGE, hist=null, histP=null, vnosTip="zamuda";
+var pw="", zapisi=[], dogodki=[], period="month", shown=PAGE, hist=null, histP=null, vnosTip="zamuda";
+// Enkratni začetni vnos (28. 11. 2026): nastop v nedeljo, zbor ob 15:00. Strežnik ga še nima; ko ga doda (isti datum, dogodek in ura),
+// ga zamenja. Po datumu sam izgine iz seznama, brisati ga ni treba.
+var SEED=[{id:"zacetni-nastop-1129",zacetni:true,dogodek:"nastop",datum:"2026-11-29",ura:"15:00"}];
 function api(path,method,body){
   return fetch(PROXY+path,{method:method||"GET",
     headers:{"Authorization":"Bearer "+pw,"Content-Type":"application/json"},
@@ -730,7 +805,11 @@ function api(path,method,body){
   });
 }
 function osvezi(){
-  return api("/zbor/zamude").then(function(d){zapisi=d.zapisi||[];narisi();return zapisi;});
+  // termini se berejo šele, ko je geslo že preverjeno (dva vzporedna klica bi napačno geslo šteli dvakrat v zaklepu)
+  return api("/zbor/zamude").then(function(d){
+    zapisi=d.zapisi||[];
+    return api("/zbor/dogodki").then(function(x){dogodki=x.dogodki||[];},function(e){if(e.status===401)throw e;});   // brez seznama terminov zapisi vseeno delujejo
+  }).then(function(){narisi();return zapisi;});
 }
 
 /* ───────── prijava ───────── */
@@ -1280,6 +1359,12 @@ function renderHero(){
   g.appendChild(stat("Dolg v blagajni",fmtE(odprto),odprto?"Še neporavnano.":"Vse poravnano."));
   g.appendChild(stat("Polž meseca",polz?polz.ime:"–",polz?fmtMin(polz.t):"Ta mesec še nihče.","nm"));
   h.appendChild(g);
+  var nx=prihajajoci(zlij(dogodki,SEED),ymd(new Date()))[0];
+  if(nx){
+    var pn=el("p","hero-next");pn.appendChild(el("b","","Naslednji: "));
+    pn.appendChild(document.createTextNode((DOGODKI[nx.dogodek]||nx.dogodek)+" · "+kdajBes(nx.datum,ymd(new Date()))+", "+dateLabel(nx.datum)+" · zbor ob "+nx.ura));
+    h.appendChild(pn);
+  }
   var z0=zapisi[0];
   if(z0){
     var t=jeZ(z0)?z0.kdo+": "+(z0.izostal?"duh vaje":fmtMin(z0.minute))+" · "+danovPred(z0.datum):z0.kdo+" je bil pravočasen · "+danovPred(z0.datum);
@@ -1287,6 +1372,68 @@ function renderHero(){
   }
   var cr=el("div","crawl");cr.setAttribute("aria-hidden","true");cr.appendChild(gzSvg(1));h.appendChild(cr);
 }
+
+/* ───────── prihajajoči termini ───────── */
+function dogEl(d,danes){
+  var row=el("div","dog"+(d.datum===danes?" danes":""));
+  var day=el("div","dog-day");day.appendChild(el("b","",kdajBes(d.datum,danes)));day.appendChild(el("small","",dateLabel(d.datum)));row.appendChild(day);
+  var w=el("div","dog-what"),t=el("div");
+  t.appendChild(el("strong","",DOGODKI[d.dogodek]||d.dogodek));t.appendChild(el("span","pill","zbor ob "+d.ura));w.appendChild(t);
+  var meta=[d.kje,d.opomba].filter(Boolean).join(" · ");
+  if(meta)w.appendChild(el("p","dog-meta",meta));
+  row.appendChild(w);
+  var acts=el("div","dog-acts");
+  if(d.datum===danes){                      // današnji termin: bližnjica do vnosa zamud zanj
+    var vp=el("button","ghost","Vpiši zamude");vp.type="button";
+    vp.addEventListener("click",function(){
+      if($("forma").hidden)$("rez-se").click();                // po vnosu je obrazec skrit: najprej ga odpri
+      nastaviTip("zamuda");
+      $("datum").value=d.datum;
+      var r=document.querySelector("input[name=dogodek][value="+d.dogodek+"]");if(r)r.checked=true;
+      liveHint();$("forma").scrollIntoView({behavior:"smooth",block:"start"});$("kdo").focus({preventScroll:true});
+    });
+    acts.appendChild(vp);
+  }
+  if(!d.zacetni){
+    var del=el("button","ghost","Izbriši");del.type="button";
+    del.addEventListener("click",function(){
+      if(!del.dataset.sure){
+        del.dataset.sure="1";del.textContent="Res izbrišem?";
+        setTimeout(function(){delete del.dataset.sure;del.textContent="Izbriši";},4000);return;
+      }
+      del.disabled=true;
+      api("/zbor/dogodek-izbrisi","POST",{id:d.id}).then(function(){toast("Termin je izbrisan.");return osvezi();})
+        .catch(function(e){del.disabled=false;toast(e.message,true);});
+    });
+    acts.appendChild(del);
+  }
+  if(acts.childNodes.length)row.appendChild(acts);
+  return row;
+}
+function renderPrihaja(){
+  var box=$("prihajaList"),danes=ymd(new Date());box.textContent="";
+  var list=prihajajoci(zlij(dogodki,SEED),danes);
+  if(!list.length){box.appendChild(el("p","muted","Za zdaj ni dogovorjenega nobenega termina. Dodaj naslednjo vajo ali nastop."));return;}
+  list.slice(0,6).forEach(function(d){box.appendChild(dogEl(d,danes));});
+  if(list.length>6)box.appendChild(el("p","hint","In še "+(list.length-6)+" kasnejših."));
+}
+$("dgDatum").min=ymd(new Date());
+$("dgForma").addEventListener("submit",function(e){
+  e.preventDefault();
+  var datum=$("dgDatum").value,ura=$("dgUra").value;
+  if(!datum||datum<ymd(new Date())){toast("Izberi datum, ki še ni mimo.",true);$("dgDatum").focus();return;}
+  if(!ura){toast("Vpiši uro, ob kateri se dobimo.",true);$("dgUra").focus();return;}
+  var btn=$("dgOddaj");btn.disabled=true;btn.textContent="Zapisujem …";
+  api("/zbor/dogodek","POST",{dogodek:$("dgTip").value,datum:datum,ura:ura,kje:$("dgKje").value,opomba:$("dgOpomba").value,website:$("dgWebsite").value})
+  .then(function(){
+    toast("Dodano: "+DOGODKI[$("dgTip").value]+", "+dateLabel(datum)+" ob "+ura+".");
+    $("dgKje").value="";$("dgOpomba").value="";$("dgDatum").value="";$("dgUra").value="";$("dgNov").open=false;
+    return osvezi().catch(function(){});
+  }).catch(function(err){
+    if(err.status===401){pokaziLogin("Geslo ni več veljavno. Vpiši ga znova.");return;}
+    toast(err.status?err.message:"Ni povezave. Termin ni bil shranjen.",true);
+  }).then(function(){btn.disabled=false;btn.textContent="Dodaj v seznam";});
+});
 
 /* ───────── dnevnik ───────── */
 function entryEl(z){
@@ -1336,7 +1483,7 @@ $("filter").addEventListener("change",function(){shown=PAGE;renderLog();});
 $("vec").addEventListener("click",function(){shown+=PAGE;renderLog();});
 
 function narisi(){
-  renderHero();imenaChips();renderZid();renderBlagajna();renderLog();
+  renderHero();renderPrihaja();imenaChips();renderZid();renderBlagajna();renderLog();
   // verdikti v dnevniku in naslov »Lažnivec« potrebujejo vreme; naloži ga šele, če kak izgovor omenja vreme
   if(!hist&&zapisi.some(function(z){return jeZ(z)&&matched(z.zakaj).length;}))loadHist().then(function(){renderLog();renderZid();});
 }

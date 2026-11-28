@@ -7687,14 +7687,20 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
       //                        ali { tip:"pravocasen", kdo, datum, dogodek } (pohvala: brez minut in izgovora, en zapis na osebo/dan/dogodek)
       //   POST /zbor/izbrisi   { id }
       //   POST /zbor/placilo   { ids:[id,…] (največ 50), placano:true|false }  (kazenska blagajna: kazen poravnana ali spet odprta)
+//   GET  /zbor/dogodki   → { dogodki: [...] }  (prihajajoči termini: najbližji prvi; 28. 11. 2026)
+//   POST /zbor/dogodek   { dogodek, datum, ura:"HH:MM", kje?, opomba?, website? }  (en termin na datum + dogodek + uro; datum ni v preteklosti)
+//   POST /zbor/dogodek-izbrisi { id }
       // ZBOR_DOGODKI je namerna podvojitev z izbirnikom dogodka v reciskipobi/index.html (preverja tools/test_zbor.mjs).
-      if (path === "/zbor/zamude" || path === "/zbor/zamuda" || path === "/zbor/izbrisi" || path === "/zbor/placilo") {
+      if (path === "/zbor/zamude" || path === "/zbor/zamuda" || path === "/zbor/izbrisi" || path === "/zbor/placilo"
+          || path === "/zbor/dogodki" || path === "/zbor/dogodek" || path === "/zbor/dogodek-izbrisi") {
         const r2 = env?.PHOTOS_R2;
         function _json(obj, status) {
           return new Response(JSON.stringify(obj), { status: status || 200, headers: { ...CORS_ALLOWED, "Content-Type": "application/json", "Cache-Control": "no-store" } });
         }
         const ZB_KEY = "feedback/zbor-zamude.json";
         const ZB_STORE_CAP = 3000;
+        const ZB_DOG_KEY = "feedback/zbor-dogodki.json";   // prihajajoči termini (vaje, nastopi …), ločeno od dnevnika zamud
+        const ZB_DOG_CAP = 200;
         const ZB_FAIL_MAX = 10;
         const ZBOR_DOGODKI = ["vaja", "nastop", "gostovanje", "druzenje"];
 
@@ -7715,24 +7721,31 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
         if (!r2) return _json({ error: "Shramba ni dosegljiva" }, 503);
 
         // null = shramba obstaja, a ni berljiva: nikoli je ne prepišemo z praznim seznamom.
-        async function _zbRead() {
+        async function _zbRead(key) {
           try {
-            const obj = await r2.get(ZB_KEY);
+            const obj = await r2.get(key || ZB_KEY);
             if (!obj) return [];
             const v = JSON.parse(await obj.text());
             return Array.isArray(v) ? v : null;
           } catch (_) { return null; }
         }
-        async function _zbWrite(all) {
-          await r2.put(ZB_KEY, JSON.stringify(all.slice(0, ZB_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
+        async function _zbWrite(all, key, cap) {
+          await r2.put(key || ZB_KEY, JSON.stringify(all.slice(0, cap || ZB_STORE_CAP)), { httpMetadata: { contentType: "application/json" } });
         }
-        const expected = { "/zbor/zamude": "GET", "/zbor/zamuda": "POST", "/zbor/izbrisi": "POST", "/zbor/placilo": "POST" }[path];
+        const expected = { "/zbor/zamude": "GET", "/zbor/zamuda": "POST", "/zbor/izbrisi": "POST", "/zbor/placilo": "POST",
+          "/zbor/dogodki": "GET", "/zbor/dogodek": "POST", "/zbor/dogodek-izbrisi": "POST" }[path];
         if (request.method !== expected) return _json({ error: "Metoda ni dovoljena" }, 405);
 
         if (path === "/zbor/zamude") {
           const all = await _zbRead();
           if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
           return _json({ zapisi: all });
+        }
+
+        if (path === "/zbor/dogodki") {
+          const all = await _zbRead(ZB_DOG_KEY);
+          if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
+          return _json({ dogodki: all.slice().sort((a, b) => (a.datum + a.ura).localeCompare(b.datum + b.ura)) });
         }
 
         let body;
@@ -7747,6 +7760,43 @@ Ton: navdušujoč, konkreten, praktičen. Max 4 stavki skupaj.`;
           if (!id || rest.length === all.length) return _json({ error: "Zapisa ni" }, 404);
           await _zbWrite(rest);
           return _json({ ok: true, ostalo: rest.length });
+        }
+
+        if (path === "/zbor/dogodek-izbrisi") {
+          const id = typeof body.id === "string" ? body.id : "";
+          const all = await _zbRead(ZB_DOG_KEY);
+          if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
+          const rest = all.filter(i => i.id !== id);
+          if (!id || rest.length === all.length) return _json({ error: "Termina ni" }, 404);
+          await _zbWrite(rest, ZB_DOG_KEY, ZB_DOG_CAP);
+          return _json({ ok: true, ostalo: rest.length });
+        }
+
+        if (path === "/zbor/dogodek") {
+          if (body.website) return _json({ ok: true }); // honeypot
+          const cl = (s, max) => (typeof s === "string" ? s.replace(/\s+/g, " ").trim().slice(0, max) : "");
+          const datum = typeof body.datum === "string" ? body.datum : "";
+          const dObj = /^\d{4}-\d{2}-\d{2}$/.test(datum) ? new Date(datum + "T00:00:00Z") : null;
+          if (!dObj || isNaN(dObj) || dObj.toISOString().slice(0, 10) !== datum) return _json({ error: "Datum ni veljaven" }, 400);
+          if (datum < _ljDatum()) return _json({ error: "Ta datum je že mimo" }, 400);
+          if (datum > new Date(Date.now() + 730 * 86400000).toISOString().slice(0, 10)) return _json({ error: "Datum je predaleč" }, 400);
+          if (!ZBOR_DOGODKI.includes(body.dogodek)) return _json({ error: "Neznan dogodek" }, 400);
+          const ura = typeof body.ura === "string" ? body.ura : "";
+          if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(ura)) return _json({ error: "Ura mora biti oblike 15:00" }, 400);
+          if (await _ipLimited(env, request, "zbor_rl", 60, 3600)) return _json({ error: "Preveč vnosov v kratkem času — poskusi kasneje" }, 429);
+          const all = await _zbRead(ZB_DOG_KEY);
+          if (!all) return _json({ error: "Shramba je poškodovana" }, 500);
+          if (all.some(i => i.datum === datum && i.dogodek === body.dogodek && i.ura === ura)) return _json({ ok: true });
+          const entry = { id: crypto.randomUUID().split("-")[0], ts: new Date().toISOString(), dogodek: body.dogodek, datum, ura };
+          const kje = cl(body.kje, 60), opomba = cl(body.opomba, 140);
+          if (kje) entry.kje = kje;
+          if (opomba) entry.opomba = opomba;
+          // pretekle termine (starejše od 14 dni) ob vsakem zapisu odrežemo; zapisi zamud so ločeni in se ne brišejo
+          const meja = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
+          const ostali = all.filter(i => i.datum >= meja);
+          ostali.push(entry);
+          await _zbWrite(ostali, ZB_DOG_KEY, ZB_DOG_CAP);
+          return _json({ ok: true, dogodek: entry });
         }
 
         if (path === "/zbor/placilo") {

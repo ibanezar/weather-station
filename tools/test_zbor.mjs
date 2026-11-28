@@ -160,6 +160,74 @@ r = await call(env, '/zbor/zamuda', 'POST', { ...veljaven, zakaj: 'po okvari' },
 check(r.status === 500 && store.get(KEY) === '{pokvarjeno', 'poškodovana shramba: 500 in ni prepisana');
 store.set(KEY, dobra);
 
+// ── Prihajajoči termini: /zbor/dogodki, /zbor/dogodek, /zbor/dogodek-izbrisi (ločena shramba od zamud) ──
+const DKEY = 'feedback/zbor-dogodki.json';
+const dan = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
+const IPD = '5.5.5.5';
+const zamudeSkupaj = store.get(KEY);
+r = await call(env, '/zbor/dogodki', 'GET', undefined, undefined, IPD);
+check(r.status === 401, 'termini: branje brez gesla 401');
+r = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'nastop', datum: dan(1), ura: '15:00' }, {}, IPD);
+check(r.status === 401 && !store.has(DKEY), 'termini: zapis brez gesla 401, nič shranjeno');
+r = await call(env, '/zbor/dogodek-izbrisi', 'POST', { id: 'x' }, {}, IPD);
+check(r.status === 401, 'termini: brisanje brez gesla 401');
+r = await call(mkEnv(null), '/zbor/dogodki', 'GET', undefined, { Authorization: 'Bearer undefined' }, IPD);
+check(r.status === 503, 'termini: brez skrivnosti na strežniku je zaprto (503)');
+r = await call(env, '/zbor/dogodki', 'GET', undefined, OK, IPD);
+check(r.status === 200 && (await r.json()).dogodki.length === 0, 'termini: prazen seznam');
+r = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'vaja', datum: dan(5), ura: '19:30', kje: ' Dvorana  ', opomba: 'Prinesi note' }, OK, IPD);
+check(r.status === 200, 'termini: veljaven vnos sprejet');
+r = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'nastop', datum: dan(1), ura: '15:00' }, OK, IPD);
+check(r.status === 200, 'termini: drug vnos sprejet');
+let dg = JSON.parse(store.get(DKEY));
+check(dg.length === 2 && dg.find(d => d.ura === '19:30').kje === 'Dvorana' && !('ip' in dg[0]) && dg[0].id && !('kje' in dg.find(d => d.ura === '15:00')), 'termini: shranjeno obrezano, neobvezno polje samo če je vpisano, brez IP');
+r = await call(env, '/zbor/dogodki', 'GET', undefined, OK, IPD);
+let dl = (await r.json()).dogodki;
+check(dl.length === 2 && dl[0].datum === dan(1) && dl[1].datum === dan(5), 'termini: GET vrne najbližjega prvega');
+r = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'nastop', datum: dan(1), ura: '15:00' }, OK, IPD);
+check(r.status === 200 && JSON.parse(store.get(DKEY)).length === 2, 'termini: isti datum, dogodek in ura se ne podvoji');
+const badD = async (patch, msg) => {
+  const rr = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'vaja', datum: dan(3), ura: '18:00', ...patch }, OK, IPD);
+  check(rr.status === 400, msg);
+};
+await badD({ datum: dan(-2) }, 'termini: datum v preteklosti zavrnjen');
+await badD({ datum: '2026-13-40' }, 'termini: neobstoječ datum zavrnjen');
+await badD({ datum: '1. 12. 2026' }, 'termini: napačna oblika datuma zavrnjena');
+await badD({ datum: dan(900) }, 'termini: datum čez dve leti zavrnjen');
+await badD({ dogodek: 'pijanka' }, 'termini: neznan dogodek zavrnjen');
+for (const u of ['', '7:00', '24:00', '15:60', '15.00', 1500]) await badD({ ura: u }, 'termini: ura "' + u + '" zavrnjena');
+r = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'vaja', datum: dan(9), ura: '20:15', kje: 'k'.repeat(200), opomba: 'o'.repeat(500) }, OK, IPD);
+dg = JSON.parse(store.get(DKEY));
+const dolgi = dg.find(d => d.datum === dan(9));
+check(r.status === 200 && dolgi.kje.length === 60 && dolgi.opomba.length === 140, 'termini: predolgo besedilo obrezano (60 / 140)');
+const nD = dg.length;
+r = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'vaja', datum: dan(11), ura: '19:00', website: 'spam' }, OK, IPD);
+check(r.status === 200 && JSON.parse(store.get(DKEY)).length === nD, 'termini: honeypot ok, a brez zapisa');
+r = await call(env, '/zbor/dogodki', 'POST', {}, OK, IPD);
+check(r.status === 405, 'termini: napačna metoda 405');
+r = await call(env, '/zbor/dogodek', 'GET', undefined, OK, IPD);
+check(r.status === 405, 'termini: GET na /zbor/dogodek 405');
+// starih terminov (> 14 dni) ob zapisu ne hranimo; mlajši (včeraj) ostanejo
+store.set(DKEY, JSON.stringify([
+  { id: 'star', ts: '2026-01-01T00:00:00Z', dogodek: 'vaja', datum: dan(-30), ura: '19:00' },
+  { id: 'vceraj', ts: '2026-01-01T00:00:00Z', dogodek: 'vaja', datum: dan(-1), ura: '19:00' }]));
+await call(env, '/zbor/dogodek', 'POST', { dogodek: 'vaja', datum: dan(2), ura: '19:00' }, OK, IPD);
+const ids = JSON.parse(store.get(DKEY)).map(d => d.id);
+check(!ids.includes('star') && ids.includes('vceraj') && ids.length === 2, 'termini: pretekli (nad 14 dni) odrezani, včerajšnji ostane');
+const idD = JSON.parse(store.get(DKEY)).find(d => d.id !== 'vceraj').id;
+r = await call(env, '/zbor/dogodek-izbrisi', 'POST', { id: idD }, OK, IPD);
+check(r.status === 200 && !JSON.parse(store.get(DKEY)).some(d => d.id === idD), 'termini: brisanje odstrani natanko en termin');
+r = await call(env, '/zbor/dogodek-izbrisi', 'POST', { id: idD }, OK, IPD);
+check(r.status === 404, 'termini: ponovno brisanje 404');
+r = await call(env, '/zbor/dogodek-izbrisi', 'POST', {}, OK, IPD);
+check(r.status === 404 && JSON.parse(store.get(DKEY)).length === 1, 'termini: brisanje brez id ne izbriše ničesar');
+const dobriD = store.get(DKEY);
+store.set(DKEY, '{pokvarjeno');
+r = await call(env, '/zbor/dogodek', 'POST', { dogodek: 'vaja', datum: dan(4), ura: '19:00' }, OK, IPD);
+check(r.status === 500 && store.get(DKEY) === '{pokvarjeno', 'termini: poškodovana shramba 500 in ni prepisana');
+store.set(DKEY, dobriD);
+check(store.get(KEY) === zamudeSkupaj, 'termini ne dotaknejo dnevnika zamud');
+
 // ── Zaklep po IP: 10 napačnih, nato niti pravo geslo ne pomaga (drug IP ni prizadet) ──
 for (let i = 0; i < 10; i++) await call(env, '/zbor/zamude', 'GET', undefined, { Authorization: 'Bearer ugibam' + i }, '9.9.9.9');
 r = await call(env, '/zbor/zamude', 'GET', undefined, OK, '9.9.9.9');
@@ -181,6 +249,12 @@ const html = fs.readFileSync(path.join(ROOT, 'reciskipobi', 'index.html'), 'utf8
 const workerList = /const ZBOR_DOGODKI = \[([^\]]*)\]/.exec(src)[1].match(/"([^"]+)"/g).map(s => s.slice(1, -1));
 const pageList = [...html.matchAll(/name="dogodek" value="([^"]+)"/g)].map(m => m[1]);
 check(JSON.stringify(workerList) === JSON.stringify(pageList), 'dogodki na strani = dogodki v workerju (' + pageList.join(', ') + ')');
+const dgSel = /<select id="dgTip">([\s\S]*?)<\/select>/.exec(html);
+const dgList = dgSel ? [...dgSel[1].matchAll(/<option value="([^"]+)"/g)].map(m => m[1]) : [];
+check(JSON.stringify(workerList) === JSON.stringify(dgList), 'izbirnik terminov na strani = dogodki v workerju');
+check(/api\("\/zbor\/dogodki"/.test(html) && /api\("\/zbor\/dogodek","POST"/.test(html) && /api\("\/zbor\/dogodek-izbrisi","POST"/.test(html), 'stran kliče vse tri končne točke terminov');
+const seedM = /var SEED=\[(\{[^\]]*\})\];/.exec(html);
+check(!!seedM && /dogodek:"nastop"/.test(seedM[1]) && /datum:"2026-11-29"/.test(seedM[1]) && /ura:"15:00"/.test(seedM[1]) && /zacetni:true/.test(seedM[1]), 'začetni vnos: nastop 29. 11. 2026, zbor ob 15:00 (ne more se izbrisati)');
 check(/<meta name="robots" content="noindex,nofollow">/.test(html), 'stran je noindex');
 check(!/indoor|tempinf|notranji senzor/i.test(html), 'stran ne omenja notranjih meritev');
 // Polži: lestvica iz minut (ista funkcija določa komentar po vnosu, polže v dnevniku in seštevek na zidu)
@@ -201,7 +275,7 @@ const modelSrc = /\/\*MODEL:START\*\/([\s\S]*?)\/\*MODEL:END\*\//.exec(html);
 check(!!modelSrc, 'stran ima blok MODEL (čiste funkcije za cenik, serije in grafe)');
 if (modelSrc) {
   const help = ['p2', 'ymd', 'parse'].map(n => new RegExp('function ' + n + '\\([^)]*\\)\\{[^\\n]*\\}').exec(html)?.[0] ?? '').join('\n');
-  const M = new Function('NBSP', help + modelSrc[1] + '; return {zvezdice,CENIK_C,cenaC,fmtE,jeZ,dolgC,serijaTocnosti,mondayOf,tedni,dnevi,ymd,parse};')(' ');
+  const M = new Function('NBSP', help + modelSrc[1] + '; return {zvezdice,CENIK_C,cenaC,fmtE,jeZ,dolgC,serijaTocnosti,mondayOf,tedni,dnevi,ymd,parse,prihajajoci,dniDo,kdajBes,zlij};')(' ');
   check(JSON.stringify(M.CENIK_C) === '[50,100,200,300,500]', 'cenik: 0,50 / 1 / 2 / 3 / 5 €');
   check(M.cenaC(3, false) === 50 && M.cenaC(12, false) === 100 && M.cenaC(20, false) === 200 && M.cenaC(45, false) === 300 && M.cenaC(0, true) === 500 && M.cenaC(120, false) === 500, 'cena sledi polžu (duh vaje in čez 60 min = 5 €)');
   check(M.fmtE(150) === '1,50 €' && M.fmtE(500) === '5,00 €' && M.fmtE(50) === '0,50 €', 'denar: decimalna vejica, nelomljiv presledek pred €');
@@ -222,6 +296,14 @@ if (modelSrc) {
   check(t[11].tocke === 90 && t[11].n === 3 && t[10].tocke === 7 && t[10].n === 1, 'tedni: nedelja spada v prejšnji teden, duh šteje 60, pohvala ne šteje');
   const dn = M.dnevi([Z('A', '2026-11-20', { minute: 3 }), Z('B', '2026-11-20', { minute: 50 }), P('C', '2026-11-20'), P('C', '2026-11-21')]);
   check(dn['2026-11-20'].lvl === 4 && dn['2026-11-20'].n === 2 && dn['2026-11-20'].p === 1 && dn['2026-11-21'].lvl === 0 && dn['2026-11-21'].p === 1, 'koledar: najhujši polž dneva, pohvale posebej');
+  // prihajajoči termini: današnji še šteje, pretekli ne, najbližji prvi (najprej po datumu, nato po uri)
+  const T = (datum, ura, dogodek = 'vaja') => ({ datum, ura, dogodek });
+  const pr = M.prihajajoci([T('2026-11-27', '19:00'), T('2026-12-03', '19:00'), T('2026-11-29', '15:00', 'nastop'), T('2026-11-26', '19:00'), T('2026-11-29', '10:00'), T('2026-11-28', '09:00')], '2026-11-28');
+  check(pr.length === 4 && pr[0].datum === '2026-11-28' && pr[1].ura === '10:00' && pr[2].dogodek === 'nastop' && pr[3].datum === '2026-12-03', 'termini: današnji šteje, pretekli ne, urejeno po datumu in uri');
+  check(M.kdajBes('2026-11-28', '2026-11-28') === 'danes' && M.kdajBes('2026-11-29', '2026-11-28') === 'jutri' && M.kdajBes('2026-12-03', '2026-11-28') === 'čez 5 dni' && M.kdajBes('2026-12-01', '2026-11-28') === 'čez 3 dni', 'termini: danes, jutri, čez N dni (tudi čez mejo meseca)');
+  check(M.dniDo('2027-01-02', '2026-12-30') === 3, 'termini: dnevi do termina čez novo leto');
+  const zl = M.zlij([T('2026-11-29', '15:00', 'nastop')], [T('2026-11-29', '15:00', 'nastop'), T('2026-11-29', '15:00', 'vaja')]);
+  check(zl.length === 2 && zl.filter(d => d.dogodek === 'nastop').length === 1, 'termini: začetni vnos zamenja strežniški (isti datum, dogodek, ura), drugačen ostane');
 }
 check(/data-tip="pravocasen"/.test(html) && /tip:"pravocasen"/.test(html), 'stran ima vnos pravočasnosti');
 check(/api\("\/zbor\/placilo"/.test(html) && /id="p-blagajna"/.test(html), 'stran ima kazensko blagajno');
