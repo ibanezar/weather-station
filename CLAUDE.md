@@ -1088,7 +1088,10 @@ brskalniku**, ker se modelski teki menjajo čez dan, GitHubov cron pa zamuja ure
   prebere iz `app.js` (`SLO_POLY`) in pade, če ga ne najde.
 - **Poštenost**: C-LAEF AlpeAdria 1 km je od septembra 2026 javen (operativen od 18. 6. 2026), a **nima arhiva napovedi, zato na `/test-napovedi/` nima ocene in stran ne trdi, da je v dolini boljši**.
   0,1° je pregled vzorca, ne zamenjava za polno ločljivost — to piše pod kartami. ICON-D2 sega 48 h od svojega teka, zato je zadnji korak zanj prazen
-  (karta to napiše). ICON-D2 in C-LAEF nimata arhiva v `/test-napovedi/`, zato tam nimata ocene. LACE (september 2026) poroča o **pozitivnem odklonu padavin v Alpah, pozimi na 1 km močnejšem kot na 2,5 km**.
+  (karta to napiše). C-LAEF nima arhiva v `/test-napovedi/`, zato tam nima ocene. **ICON-D2 arhiv IMA** (probe `om-models-probe.yml`, 28. 11. 2026): `icon_d2` / `dwd_icon_d2` imata
+  `previous_day1` od 3. 3. 2024 (100 % ur), `previous_day2+` ne (model sega 48 h). Ni pa zagotovo nov podatek: `icon_seamless` (»ICON« na semaforju) pri D+1 verjetno že vzame ICON-D2, zato
+  samostojna vrstica morda ne doda ničesar (preveri z `--diff icon_d2,icon_seamless` v probe skriptu). `dwd_icon_d2_native` ima arhiv samo od 22. 9. 2026, `dwd_icon_d2_ruc_native` ga nima,
+  AICON je `dwd_aicon_global_native` (arhiv od 21. 10. 2026), `ncep_aigfs025` od 22. 1. 2026 z luknjami (~76 % ur). LACE (september 2026) poroča o **pozitivnem odklonu padavin v Alpah, pozimi na 1 km močnejšem kot na 2,5 km**.
 - **Sneg C-LAEF (27. 11. 2026): višine snega NI.** Open-Meteo `snow_depth` za `geosphere_claef_austria` je prazen (enota »undefined«), v GeoSphere API v2 parametra `sd` ni (samo `sf`, `rain`, `tp`, `snowlmt`). Mogoče je
   samo novi sneg (`snowfall`, Open-Meteo pretvori vodni ekvivalent z 0,7 cm/mm; `sf` iz GeoSphere je kg/m²). Trditev »C-LAEF je najnatančnejši pri višini snega« s temi viri ni preverljiva.
   **Beleženje:** `tools/log_claef_snow.py` (korak v `test-napovedi-daily.yml`, `continue-on-error`) zapiše dnevno napovedi snega C-LAEF, ICON-D2 in IFS za 8 ARSO postaj (`data/claef-snow-log.csv`: novi sneg po dnevih,
@@ -1746,8 +1749,14 @@ Pravila, ki jih ne obračaj:
   izgubljeno. Starejši datumi na ensemble API-ju so zlepljeni najsvežejši teki,
   ne napoved dan prej — **ne polni semaforja z njimi**. Isti skript
   (`backfill_aifs_verification.py`, `SOURCES`) polni oba AI modela.
-  WeatherNext 3 (5 km, učen na postajah) prek Open-Meteo ni; Googlov dostop
-  (Earth Engine/BigQuery) čaka na odobritev obrazca WeatherNext Data Request.
+  WeatherNext 3 (3. 9. 2026; urno, 5 km temperatura in rosišče, 10 km ostalo, učen tudi na postajnih meritvah) prek Open-Meteo ni.
+  **Filip ima dostop odobren (28. 11. 2026)** prek obrazca WeatherNext Data Request (Cloud Storage Zarr, Earth Engine, BigQuery) in je po lastnem poročilu od Googla dobil
+  odgovor, da raba velja tudi za delno komercialno stran in da smemo vse, kar smo vprašali; **besedila odgovora v repozitoriju ni** (pred javno objavo napovedi ali primerjav ga
+  priloži v `docs/`). Pogoji: realni podatki (čas < 1 h nazaj in prihodnost) = GDM Real-Time Weather Forecasting Experimental Data Terms, starejši CC BY 4.0 (disclaimer pravi mejo 1 h,
+  PDF s pogoji 48 h; navedba iz Googlovega vira: »eksperimentalno, ni validirano za rabo v praksi« — to mora ostati vidno ob vsakem prikazu). **Za nas: statistična zbirka**
+  `gs://weathernext3_statistics_spatial/weathernext_3_0_0_statistics/zarr/` (mean, p10…p90, urni koraki, brez `Requester Pays`); surov ansambel `gs://weathernext3_spatial/…` ima `Requester Pays`
+  (prenos plača projekt, strežnik `us-east1`). Arhiv od 2024 (do konca 2025 osem tekov na dan, od 2026 24), 15 dni naprej pri tekih 00/06/12/18, 48 h pri vmesnih. Dostop do Actions bo potreboval
+  servisni račun na seznamu in secret `GCP_SA_KEY` (ključ nikoli v klepet ali repozitorij). **Ni narejeno:** zajem (`tools/log_*`), primerjava na semaforju, prikaz na strani.
   Googlov Maps **Weather API ne uporabljaj**: pogoji (21.1) prepovedujejo rabo v
   vremenski aplikaciji, napoved pa sme ostati shranjena največ 24 ur.
 - Na `/test-napovedi/` so AI ansambli (WN2, AIFS ENS, AIFS Europe) **ločena
