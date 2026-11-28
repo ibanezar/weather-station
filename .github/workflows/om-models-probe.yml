@@ -1,0 +1,67 @@
+name: Open-Meteo — ali imajo novi modeli arhiv napovedi (probe)
+
+# Ročni zagon, brez zapisa v repozitorij. Open-Meteo 1.8.0 (3. 11. 2026) je dodal DWD AICON, ICON-D2-RUC in NOAA RRFS,
+# v izbirniku Previous Runs API pa so samo nekateri modeli. Arhiv previous_dayN je pogoj, da model ocenimo na semaforju
+# (/test-napovedi/) po istem merilu kot ostale. tools/probe_om_models.py za vsakega kandidata pove, ali ID v forecast
+# API-ju velja in koliko ur previous_day1..3 ima vrednost. Potrebuje omrežje: iz razvojne seje z deljenim IP-jem je
+# dnevna kvota Open-Meteo skoraj stalno porabljena, zato tekač. Rezultat je v povzetku teka in kot artefakt.
+on:
+  workflow_dispatch:
+    inputs:
+      past_days:
+        description: 'Okno za previous runs (dni nazaj, 30–1000)'
+        required: false
+        default: '400'
+      models:
+        description: 'Neobvezno: vejica loči ID-je modelov (prazno = vsi kandidati iz skripte)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Poženi probe
+        env:
+          # Vhodi gredo prek okolja, ne v ukazno vrstico (brez vrivanja ukazov), in so preverjeni.
+          PAST_DAYS: ${{ github.event.inputs.past_days || '400' }}
+          MODELS: ${{ github.event.inputs.models || '' }}
+        run: |
+          set -euo pipefail
+          [[ "$PAST_DAYS" =~ ^[0-9]{2,4}$ ]] || { echo "::error::past_days mora biti število"; exit 1; }
+          (( PAST_DAYS >= 30 && PAST_DAYS <= 1000 )) || { echo "::error::past_days mora biti med 30 in 1000"; exit 1; }
+          [[ -z "$MODELS" || "$MODELS" =~ ^[a-z0-9_,]+$ ]] || { echo "::error::models: samo a-z, 0-9, _ in vejice"; exit 1; }
+          out="$RUNNER_TEMP/probe_om_models.txt"
+          args=(--past-days "$PAST_DAYS")
+          [[ -n "$MODELS" ]] && args+=(--models "$MODELS")
+          python3 -I tools/probe_om_models.py "${args[@]}" 2>&1 | tee "$out"
+          {
+            echo '## Open-Meteo: arhiv napovedi (previous_dayN) za nove modele'
+            echo
+            echo "Okno: zadnjih \`$PAST_DAYS\` dni, točka Rečica, previous_day1..3."
+            echo
+            echo '```'
+            sed -n '/^Povzetek/,$p' "$out"
+            echo '```'
+            echo
+            echo '**Branje:** »ID ne velja« pomeni, da forecast API modela s tem imenom ne pozna (poskusi drug ID iz dokumentacije). '
+            echo '»ni odgovora« je kvota ali izpad Open-Meteo, ne dokaz o modelu: tek ponovi pozneje. '
+            echo '»ID velja, a brez arhiva« pomeni, da model ni uporaben na semaforju. Če arhiv je, preveri še, od kdaj (stolpec »prvi dan«) '
+            echo 'in koliko ur v oknu je pokritih: kratek arhiv pomeni nekaj tednov podatkov, ne ocene. To je samo poizvedba, ne ocena kakovosti.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: om-models-probe
+          path: ${{ runner.temp }}/probe_om_models.txt
+          retention-days: 30
